@@ -31,7 +31,6 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/framebuffer.h"
-#include "android/globals.h"
 #include "android/main-common.h"
 #include "android/resource.h"
 #include "android/skin/charmap.h"
@@ -72,7 +71,7 @@ bool user_config_init(void) {
     AUserConfig* userConfig = NULL;
     SkinRect mmmRect;
     skin_winsys_get_monitor_rect(&mmmRect);
-    if (min_config_qemu_mode) {
+    if (getConsoleAgents()->settings->min_config_qemu_mode()) {
         emulator_initMinimalSkinConfig(
             getConsoleAgents()->settings->hw()->hw_lcd_width,
             getConsoleAgents()->settings->hw()->hw_lcd_height,

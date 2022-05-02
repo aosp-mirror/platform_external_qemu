@@ -31,7 +31,7 @@
 #include "android/base/Log.h"                   // for LOG, LogMessage
 #include "android/base/memory/MemoryTracker.h"  // for MemoryTracker, Memory...
 #include "android/base/system/System.h"         // for System, System::MemUsage
-#include "android/globals.h"                    // for android_hw
+#include "android/console.h"                    // for android_hw
 #include "android/skin/qt/gl-common.h"          // for createShader, CHECK_G...
 #include "android/skin/qt/logging-category.h"   // for emu
 #include "android/skin/qt/vector-text-font.h"   // for kVectorFontGlyphs

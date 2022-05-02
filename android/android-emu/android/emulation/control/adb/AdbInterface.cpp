@@ -46,7 +46,7 @@
 #include "android/emulation/ConfigDirs.h"                  // for ConfigDirs
 #include "android/emulation/control/adb/AdbConnection.h"   // for AdbConnection
 #include "android/emulation/control/adb/AdbShellStream.h"  // for AdbShellSt...
-#include "android/globals.h"                               // for android_av...
+#include "android/console.h"                               // for android_av...
 #include "android/utils/debug.h"                           // for VERBOSE_CHECK
 #include "android/utils/path.h"                            // for path_delet...
 
@@ -351,7 +351,7 @@ class AdbLocatorImpl : public AdbLocator {
 // Gets the reported adb protocol version from the given executable
 // This is the last digit in the adb version string.
 static Optional<int> extractProtocolVersion(StringView adbPath) {
-    if (!android_qemu_mode) {
+    if (!getConsoleAgents()->settings->android_qemu_mode()) {
         return {};
     }
     const std::vector<std::string> adbVersion = {adbPath, "version"};
@@ -491,7 +491,7 @@ AdbInterfaceImpl::AdbInterfaceImpl(Looper* looper,
                                    AdbLocator* locator,
                                    AdbDaemon* daemon)
     : mLooper(looper), mLocator(locator), mDaemon(daemon) {
-    if (!android_qemu_mode) {
+    if (!getConsoleAgents()->settings->android_qemu_mode()) {
         return;
     }
     discoverAdbInstalls();
@@ -503,7 +503,7 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         ResultCallback result_callback,
         System::Duration timeout_ms,
         bool want_output) {
-    if (!android_qemu_mode) {
+    if (!getConsoleAgents()->settings->android_qemu_mode()) {
         return {};
     }
 

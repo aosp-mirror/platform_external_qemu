@@ -36,7 +36,7 @@
 #include "android/base/Version.h"                // for Version
 #include "android/base/system/System.h"          // for System
 #include "android/cmdline-option.h"              // for android_cmdLineOptions
-#include "android/globals.h"                     // for getConsoleAgents()->settings->avdInfo()
+#include "android/console.h"                     // for getConsoleAgents()->settings->avdInfo()
 #include "android/metrics/StudioConfig.h"        // for UpdateChannel
 #include "android/metrics/UiEventTracker.h"      // for UiEventTr...
 #include "android/skin/qt/shortcut-key-store.h"  // for ShortcutKeyStore

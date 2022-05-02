@@ -56,7 +56,7 @@
 #include "sysemu/numa.h"
 
 #ifdef CONFIG_ANDROID
-#include "android/globals.h"
+#include "android/console.h"
 #include "hw/acpi/goldfish_defs.h"
 #endif
 
@@ -251,7 +251,7 @@ static void pc_q35_init(MachineState *machine)
      * the former one has an IRQ conflict with PCI devices using legacy IRQ
      * handling.
      */
-    if (!android_qemu_mode) {
+    if (!getConsoleAgents()->settings->android_qemu_mode()) {
         goldfish_sync_irq = GOLDFISH_EVENTS_IRQ;
         goldfish_events_irq = GOLDFISH_SYNC_IRQ;
     }

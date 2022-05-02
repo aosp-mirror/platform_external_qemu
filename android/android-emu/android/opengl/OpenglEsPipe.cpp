@@ -16,7 +16,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/threads/FunctorThread.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/loadpng.h"
 #include "android/opengl/GLProcessPipe.h"
 #include "android/opengles-pipe.h"

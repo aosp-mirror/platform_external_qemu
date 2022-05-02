@@ -15,11 +15,11 @@
 // limitations under the License.
 #include "android/emulation/control/ServiceUtils.h"
 
-#include <istream>                                           // for basic_is...
-#include <iterator>                                          // for istreamb...
-#include <memory>                                            // for shared_ptr
-#include <string>                                            // for string
-#include <unordered_map>                                     // for unordere...
+#include <istream>        // for basic_is...
+#include <iterator>       // for istreamb...
+#include <memory>         // for shared_ptr
+#include <string>         // for string
+#include <unordered_map>  // for unordere...
 
 #include "android/avd/hw-config.h"                           // for AndroidH...
 #include "android/avd/info.h"                                // for avdInfo_...
@@ -29,7 +29,6 @@
 #include "android/console.h"                                 // for getConso...
 #include "android/emulation/control/adb/AdbInterface.h"      // for Optional...
 #include "android/emulation/control/globals_agent.h"         // for QAndroid...
-#include "android/globals.h"                                 // for guest_bo...
 #include "android/user-config.h"                             // for auserCon...
 
 using android::base::AutoLock;
@@ -95,7 +94,8 @@ bool bootCompleted(std::chrono::milliseconds maxWaitTime) {
     // to us about boot completion, so we will resort to
     // calling adb in those cases..
     int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
-    if (!guest_boot_completed && apiLevel < 28) {
+    if (!getConsoleAgents()->settings->guest_boot_completed() &&
+        apiLevel < 28) {
         adbInterface->enqueueCommand(
                 {"shell", "getprop", "dev.bootcomplete"},
                 [state](const OptionalAdbCommandResult& result) {
@@ -104,9 +104,12 @@ bool bootCompleted(std::chrono::milliseconds maxWaitTime) {
                         std::string output(
                                 std::istreambuf_iterator<char>(*result->output),
                                 {});
-                        guest_boot_completed =
-                                guest_boot_completed ||
+                        auto booted =
+                                getConsoleAgents()
+                                        ->settings->guest_boot_completed() ||
                                 output.find("1") != std::string::npos;
+                        getConsoleAgents()->settings->set_guest_boot_completed(
+                                booted);
                     }
                     state->results = true;
                     state->cv.signal();
@@ -117,7 +120,7 @@ bool bootCompleted(std::chrono::milliseconds maxWaitTime) {
                     base::System::get()->getUnixTimeUs() + maxWaitTime.count());
         }
     }
-    return guest_boot_completed;
+    return getConsoleAgents()->settings->guest_boot_completed();
 }
 
 }  // namespace control

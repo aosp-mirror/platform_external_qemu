@@ -14,7 +14,7 @@
 #include "android/avd/info.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
-#include "android/globals.h"
+#include "android/console.h"
 
 using android::base::System;
 

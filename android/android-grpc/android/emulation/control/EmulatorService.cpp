@@ -81,7 +81,6 @@
 #include "android/emulation/resizable_display_config.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"
-#include "android/globals.h"
 #include "android/gpu_frame.h"
 #include "android/hw-sensors.h"
 #include "android/metrics/MetricsReporter.h"

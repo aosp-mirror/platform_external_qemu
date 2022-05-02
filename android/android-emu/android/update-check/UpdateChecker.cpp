@@ -20,7 +20,7 @@
 #include "android/base/Uri.h"
 #include "android/curl-support.h"
 #include "android/emulation/ConfigDirs.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/update-check/update_check.h"
 #include "android/update-check/VersionExtractor.h"

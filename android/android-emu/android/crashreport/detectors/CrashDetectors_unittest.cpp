@@ -16,6 +16,7 @@
 
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/console.h"
 
 #include <gtest/gtest.h>
 
@@ -38,11 +39,11 @@ TEST(CrashDetectorsTest, timeoutProperly) {
 TEST(CrashDetectorsTest, heartBeatDetector_nobeatIsFine) {
     // Some images will never send a heart beat.
     TestSystem testSys("foo", 64);
-    int booted = 0;
+    getConsoleAgents()->settings->set_guest_boot_completed(false);
     int beatCount = 0;
-    HeartBeatDetector hb([&beatCount]{return beatCount;}, &booted);
+    HeartBeatDetector hb([&beatCount]{return beatCount;});
     EXPECT_FALSE(hb.check());
-    booted = 1;
+    getConsoleAgents()->settings->set_guest_boot_completed(true);
 
     // First time boot so should be ok
     EXPECT_FALSE(hb.check());
@@ -53,11 +54,11 @@ TEST(CrashDetectorsTest, heartBeatDetector_nobeatIsFine) {
 
 TEST(CrashDetectorsTest, heartBeatDetector_detectsBootFailure) {
     TestSystem testSys("foo", 64);
-    int booted = 0;
+    getConsoleAgents()->settings->set_guest_boot_completed(false);
     int beatCount = 1;
-    HeartBeatDetector hb([&beatCount]{return beatCount;}, &booted);
+    HeartBeatDetector hb([&beatCount]{return beatCount;});
     EXPECT_FALSE(hb.check());
-    booted = 1;
+    getConsoleAgents()->settings->set_guest_boot_completed(true);
 
     // First time boot so should be ok
     EXPECT_FALSE(hb.check());

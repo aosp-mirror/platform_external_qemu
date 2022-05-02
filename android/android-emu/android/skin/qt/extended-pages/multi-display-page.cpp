@@ -28,7 +28,6 @@
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
-#include "android/globals.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/UiEventTracker.h"
 #include "android/skin/qt/emulator-qt-window.h"

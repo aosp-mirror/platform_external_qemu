@@ -17,7 +17,7 @@
 #include "android/base/threads/Thread.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/emulator-window.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/hw-sensors.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/winsys.h"

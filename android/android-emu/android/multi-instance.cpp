@@ -15,7 +15,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/utils/debug.h"
 
 namespace {

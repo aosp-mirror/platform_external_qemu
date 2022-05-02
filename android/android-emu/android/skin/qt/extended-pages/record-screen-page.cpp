@@ -34,7 +34,7 @@
 #include "android/avd/info.h"
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/recording/GifConverter.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"

@@ -78,7 +78,7 @@
 #include "android/emulator-window.h"                 // for emulator_window_get
 #include "android/featurecontrol/FeatureControl.h"   // for isEnabled
 #include "android/featurecontrol/Features.h"         // for QuickbootFileBacked
-#include "android/globals.h"                         // for getConsoleAgents()->settings->avdParams()
+#include "android/console.h"                         // for getConsoleAgents()->settings->avdParams()
 #include "android/metrics/MetricsReporter.h"         // for MetricsReporter
 #include "android/metrics/MetricsWriter.h"           // for android_studio
 #include "android/metrics/UiEventTracker.h"          // for UiEventTracker

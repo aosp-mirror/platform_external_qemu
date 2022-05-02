@@ -2,7 +2,7 @@
 
 #include "android/avd/info.h"  // for avdInfo_getAvdFlavor
 #include "android/avd/util.h"  // for AVD_WEAR
-#include "android/globals.h"   // for getConsoleAgents()->settings->avdInfo()
+#include "android/console.h"   // for getConsoleAgents()->settings->avdInfo()
 
 // TODO: Other things might come up, put them here
 bool FramelessDetector::isFramelessOk() {

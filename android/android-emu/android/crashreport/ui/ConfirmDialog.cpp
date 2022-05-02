@@ -16,7 +16,7 @@
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/crashreport/CrashReporter.h"
-#include "android/globals.h"
+#include "android/console.h"
 
 #include "ui_ConfirmDialog.h"
 

@@ -17,19 +17,18 @@
 #include "android/base/memory/OnDemand.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
+#include "android/console.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/HostmemIdMapping.h"
+#include "android/emulation/MultiDisplay.h"
 #include "android/emulation/address_space_device.hpp"
 #include "android/emulation/control/AndroidAgentFactory.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
-#include "android/emulation/MultiDisplay.h"
-#include "android/emulation/HostmemIdMapping.h"
 #include "android/emulation/hostdevices/HostAddressSpace.h"
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/console.h"
-#include "android/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengles-pipe.h"
 #include "android/opengles.h"
@@ -39,17 +38,17 @@
 #include "AndroidWindow.h"
 #include "AndroidWindowBuffer.h"
 #include "ClientComposer.h"
-#include "GrallocDispatch.h"
 #include "Display.h"
+#include "GrallocDispatch.h"
 #include "SurfaceFlinger.h"
 #include "Vsync.h"
 #include "VulkanDispatch.h"
 
-#include <cutils/properties.h>
-#include <hardware/gralloc.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
+#include <cutils/properties.h>
+#include <hardware/gralloc.h>
 
 #include <map>
 #include <string>
@@ -65,14 +64,14 @@ using aemu::SurfaceFlinger;
 using aemu::Vsync;
 
 using android::AndroidPipe;
+using android::HostAddressSpaceDevice;
+using android::HostGoldfishPipeDevice;
 using android::base::AutoLock;
 using android::base::Lock;
 using android::base::makeOnDemand;
 using android::base::OnDemandT;
 using android::base::pj;
 using android::base::System;
-using android::HostGoldfishPipeDevice;
-using android::HostAddressSpaceDevice;
 
 static const SnapshotCallbacks* sSnapshotCallbacks = nullptr;
 
@@ -214,9 +213,7 @@ static int32_t sDisplayH = 0;
 static int32_t sDisplayDpi = 0;
 
 static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
-        .notifyDisplayChanges = []() {
-            return true;
-        },
+        .notifyDisplayChanges = []() { return true; },
         .setMultiDisplay = [](uint32_t id,
                               int32_t x,
                               int32_t y,
@@ -374,8 +371,7 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
             mMultiDisplay[displayId].cb = colorBuffer;
             return 0;
         },
-        .isMultiDisplayWindow = [](){ return false; }
-};
+        .isMultiDisplayWindow = []() { return false; }};
 
 static bool sIsFolded = false;
 
@@ -425,13 +421,11 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                             ".showMessageWithDismissCallback %s\n",
                             message);
                 },
-        .fold =
-                [](bool is_fold) -> bool {
-                    fprintf(stderr, "window-agent-GfxStream-impl: .fold %d\n",
-                            is_fold);
-                    sIsFolded = is_fold;
-                    return true;
-                },
+        .fold = [](bool is_fold) -> bool {
+            fprintf(stderr, "window-agent-GfxStream-impl: .fold %d\n", is_fold);
+            sIsFolded = is_fold;
+            return true;
+        },
         .isFolded = [](void) -> bool {
             fprintf(stderr, "window-agent-GfxStream-impl: .isFolded ? %d\n",
                     sIsFolded);
@@ -441,11 +435,18 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
             fprintf(stderr, "window-agent-GfxStream-impl: .getFoldedArea\n");
             return true;
         },
-        .updateFoldablePostureIndicator = [](bool) {
-            fprintf(stderr, "window-agent-GfxStream-impl: updateFoldablePostureIndicator\n");
-        },
+        .updateFoldablePostureIndicator =
+                [](bool) {
+                    fprintf(stderr,
+                            "window-agent-GfxStream-impl: "
+                            "updateFoldablePostureIndicator\n");
+                },
         .setUIDisplayRegion =
-                [](int x_offset, int y_offset, int w, int h, bool ignoreOrientation) {
+                [](int x_offset,
+                   int y_offset,
+                   int w,
+                   int h,
+                   bool ignoreOrientation) {
                     fprintf(stderr,
                             "window-agent-GfxStream-impl: .setUIDisplayRegion "
                             "%d %d %dx%d\n",
@@ -459,38 +460,37 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     fprintf(stderr, "updateMultiDisplayPage\n");
                 },
         .addMultiDisplayWindow =
-                [](uint32_t id, bool add, uint32_t w, uint32_t h) { return true; },
-        .paintMultiDisplayWindow = [](uint32_t id, uint32_t texture) { return true; },
-        .getMonitorRect =
-                [](uint32_t* w, uint32_t* h) -> bool {
-                    if (w)
-                        *w = 2500;
-                    if (h)
-                        *h = 1600;
+                [](uint32_t id, bool add, uint32_t w, uint32_t h) {
                     return true;
                 },
-        .changeResizableDisplay =
-                [](int presetSize) { return false; },
+        .paintMultiDisplayWindow = [](uint32_t id,
+                                      uint32_t texture) { return true; },
+        .getMonitorRect = [](uint32_t* w, uint32_t* h) -> bool {
+            if (w)
+                *w = 2500;
+            if (h)
+                *h = 1600;
+            return true;
+        },
+        .changeResizableDisplay = [](int presetSize) { return false; },
 };
 
 class ToplevelConsoleFactory
-: public android::emulation::AndroidConsoleFactory {
+    : public android::emulation::AndroidConsoleFactory {
     const QAndroidVmOperations* const android_get_QAndroidVmOperations()
-        const override {
-            return &sQAndroidVmOperations;
-        }
+            const override {
+        return &sQAndroidVmOperations;
+    }
 
     const QAndroidMultiDisplayAgent* const
-        android_get_QAndroidMultiDisplayAgent() const {
-            return &sMultiDisplayAgent;
-        }
+    android_get_QAndroidMultiDisplayAgent() const {
+        return &sMultiDisplayAgent;
+    }
 
     const QAndroidEmulatorWindowAgent* const
-        android_get_QAndroidEmulatorWindowAgent()
-        const {
-            return &sQAndroidEmulatorWindowAgent;
-        }
-
+    android_get_QAndroidEmulatorWindowAgent() const {
+        return &sQAndroidEmulatorWindowAgent;
+    }
 };
 
 namespace aemu {
@@ -519,7 +519,8 @@ public:
 
     AndroidWindow* createAppWindowAndSetCurrent(int width, int height) {
         AutoLock lock(mLock);
-        if (!mSf) startDisplay();
+        if (!mSf)
+            startDisplay();
 
         AndroidWindow* window = new AndroidWindow(width, height);
 
@@ -532,8 +533,10 @@ public:
     void destroyAppWindow(AndroidWindow* window) {
         AutoLock lock(mLock);
 
-        if (!window) return;
-        if (mWindows.find(window) == mWindows.end()) return;
+        if (!window)
+            return;
+        if (mWindows.find(window) == mWindows.end())
+            return;
 
         if (mSf) {
             mSf->connectWindow(nullptr);
@@ -545,7 +548,8 @@ public:
     }
 
     void teardownDisplay() {
-        if (!mSf) return;
+        if (!mSf)
+            return;
         mSf->join();
 
         AutoLock lock(mLock);
@@ -560,60 +564,61 @@ public:
         }
     }
 
-    void loop() {
-        mDisplay.loop();
-    }
+    void loop() { mDisplay.loop(); }
 
 private:
-
     void setupAndroidEmugl() {
         fprintf(stderr, "%s: inject\n", __func__);
         android::emulation::injectConsoleAgents(ToplevelConsoleFactory());
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::GLESDynamicVersion, true);
-    android::featurecontrol::setEnabledOverride(android::featurecontrol::GLDMA,
-                                                false);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::GLAsyncSwap, false);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::RefCountPipe, true);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::GLDirectMem, true);
-    android::featurecontrol::setEnabledOverride(android::featurecontrol::Vulkan,
-                                                true);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::VulkanSnapshots, true);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::VulkanNullOptionalStrings, true);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::VulkanIgnoredHandles, true);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::VirtioGpuNext, false);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::VirtioGpuNativeSync, false);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::VulkanShaderFloat16Int8, true);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::GuestUsesAngle, false);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::VulkanQueueSubmitWithCommands, true);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::VulkanBatchedDescriptorSetUpdate, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLESDynamicVersion, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLDMA, false);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLAsyncSwap, false);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::RefCountPipe, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLDirectMem, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::Vulkan, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::VulkanSnapshots, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::VulkanNullOptionalStrings, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::VulkanIgnoredHandles, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::VirtioGpuNext, false);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::VirtioGpuNativeSync, false);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::VulkanShaderFloat16Int8, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GuestUsesAngle, false);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::VulkanQueueSubmitWithCommands, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::VulkanBatchedDescriptorSetUpdate,
+                true);
 
-        getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeBufferSize = 262144;
-        getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize = 8192;
-        getConsoleAgents()->settings->hw()->hw_gltransport_asg_dataRingSize = 131072;
-        getConsoleAgents()->settings->hw()->hw_gltransport_drawFlushInterval = 800;
+        getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeBufferSize =
+                262144;
+        getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize =
+                8192;
+        getConsoleAgents()->settings->hw()->hw_gltransport_asg_dataRingSize =
+                131072;
+        getConsoleAgents()->settings->hw()->hw_gltransport_drawFlushInterval =
+                800;
 
         EmuglConfig config;
 
         emuglConfig_init(
                 &config, true /* gpu enabled */, "auto",
-                mUseHostGpu ? "host"
-                            : "swiftshader_indirect", /* gpu option */
-                64,                                   /* bitness */
-                mUseWindow, false,                    /* blacklisted */
-                false,                                /* has guest renderer */
+                mUseHostGpu ? "host" : "swiftshader_indirect", /* gpu option */
+                64,                                            /* bitness */
+                mUseWindow, false,                             /* blacklisted */
+                false, /* has guest renderer */
                 WINSYS_GLESBACKEND_PREFERENCE_AUTO, false);
 
         emugl::vkDispatch(false /* not for test only */);
@@ -631,11 +636,10 @@ private:
         int maj;
         int min;
 
-        android_startOpenglesRenderer(kWindowSize, kWindowSize, 1, 28,
-                                      getConsoleAgents()->vm,
-                                      getConsoleAgents()->emu,
-                                      getConsoleAgents()->multi_display,
-                                      &maj, &min);
+        android_startOpenglesRenderer(
+                kWindowSize, kWindowSize, 1, 28, getConsoleAgents()->vm,
+                getConsoleAgents()->emu, getConsoleAgents()->multi_display,
+                &maj, &min);
 
         char* vendor = nullptr;
         char* renderer = nullptr;
@@ -654,7 +658,8 @@ private:
             mDisplay.loop();
         }
 
-        android::emulation::goldfish_address_space_set_vm_operations(getConsoleAgents()->vm);
+        android::emulation::goldfish_address_space_set_vm_operations(
+                getConsoleAgents()->vm);
 
         HostAddressSpaceDevice::get();
         HostGoldfishPipeDevice::get();
@@ -681,19 +686,18 @@ private:
 
     void teardownGralloc() { unload_gralloc_module(&mGralloc); }
 
-    buffer_handle_t createGrallocBuffer(
-            int usage = GRALLOC_USAGE_HW_RENDER,
-            int format = HAL_PIXEL_FORMAT_RGBA_8888,
-            int width = kWindowSize,
-            int height = kWindowSize) {
+    buffer_handle_t createGrallocBuffer(int usage = GRALLOC_USAGE_HW_RENDER,
+                                        int format = HAL_PIXEL_FORMAT_RGBA_8888,
+                                        int width = kWindowSize,
+                                        int height = kWindowSize) {
         buffer_handle_t buffer;
         int stride;
         int res;
 
         res = mGralloc.alloc(width, height, format, usage, &buffer, &stride);
         if (res) {
-            fprintf(stderr, "%s: alloc() failed with %s (%d)\n",
-                    __func__, strerror(-res), -res);
+            fprintf(stderr, "%s: alloc() failed with %s (%d)\n", __func__,
+                    strerror(-res), -res);
             return nullptr;
         }
         res = mGralloc.registerBuffer(buffer);
@@ -718,12 +722,13 @@ private:
         }
         res = mGralloc.free(buffer);
         if (res) {
-            fprintf(stderr, "%s: free() failed with %s (%d)\n",
-                    __func__, strerror(-res), -res);
+            fprintf(stderr, "%s: free() failed with %s (%d)\n", __func__,
+                    strerror(-res), -res);
         }
     }
 
-    std::vector<AndroidWindowBuffer> allocBuffersForQueue(int usage = GRALLOC_USAGE_HW_RENDER) {
+    std::vector<AndroidWindowBuffer> allocBuffersForQueue(
+            int usage = GRALLOC_USAGE_HW_RENDER) {
         std::vector<AndroidWindowBuffer> buffers;
         for (int i = 0; i < AndroidBufferQueue::kCapacity; i++) {
             buffers.push_back(AndroidWindowBuffer(kWindowSize, kWindowSize,
@@ -754,16 +759,15 @@ private:
         }
 
         mSf.reset(new SurfaceFlinger(
-            mRefreshRate,
-            &mComposeWindow,
-            buffersToNativePtrs(mAppBuffers),
-            [](AndroidWindow* composeWindow, AndroidBufferQueue* fromApp,
-               AndroidBufferQueue* toApp) {
-
-                return new ClientComposer(composeWindow, fromApp, toApp);
-
-            },
-            [this]() { mSf->advanceFrame(); this->clientPost(); }));
+                mRefreshRate, &mComposeWindow, buffersToNativePtrs(mAppBuffers),
+                [](AndroidWindow* composeWindow, AndroidBufferQueue* fromApp,
+                   AndroidBufferQueue* toApp) {
+                    return new ClientComposer(composeWindow, fromApp, toApp);
+                },
+                [this]() {
+                    mSf->advanceFrame();
+                    this->clientPost();
+                }));
 
         mSf->start();
     }
@@ -803,15 +807,16 @@ Toplevel::Toplevel(int refreshRate) : mImpl(new Toplevel::Impl(refreshRate)) {}
 Toplevel::~Toplevel() = default;
 
 ANativeWindow* Toplevel::createWindow(int width, int height) {
-    return static_cast<ANativeWindow*>(mImpl->createAppWindowAndSetCurrent(width, height));
+    return static_cast<ANativeWindow*>(
+            mImpl->createAppWindowAndSetCurrent(width, height));
 }
 
 void Toplevel::destroyWindow(ANativeWindow* window) {
-    mImpl->destroyAppWindow((AndroidWindow*) window);
+    mImpl->destroyAppWindow((AndroidWindow*)window);
 }
 
 void Toplevel::destroyWindow(void* window) {
-    mImpl->destroyAppWindow((AndroidWindow*) window);
+    mImpl->destroyAppWindow((AndroidWindow*)window);
 }
 
 void Toplevel::teardownDisplay() {
@@ -821,4 +826,4 @@ void Toplevel::teardownDisplay() {
 void Toplevel::loop() {
     mImpl->loop();
 }
-} // namespace aemu
+}  // namespace aemu

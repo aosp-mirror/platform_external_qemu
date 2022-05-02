@@ -41,13 +41,11 @@ private:
 // heartbeats. This should be more than enough :-)
 class HeartBeatDetector : public StatefulHangdetector {
 public:
-    HeartBeatDetector(std::function<int()> getHeartbeat,
-                      volatile int* bootComplete);
+    HeartBeatDetector(std::function<int()> getHeartbeat);
     bool check() override;
 
 private:
     std::function<int()> mGetHeartbeat;
-    volatile int* mBootComplete;
     int64_t mBeatCount = 0;
 };
 

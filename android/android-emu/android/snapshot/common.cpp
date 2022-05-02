@@ -11,7 +11,7 @@
 
 #include "android/snapshot/common.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/opengles.h"
 
@@ -95,7 +95,7 @@ bool isSnapshotAlive() {
     // bug: 116315668
     return true;
     // return metrics::AdbLivenessChecker::isEmulatorBooted() ||
-    //        guest_boot_completed ||
+    //        getConsoleAgents()->settings->guest_boot_completed() ||
     //        android_hasGuestPostedAFrame() ||
     //        android::featurecontrol::isEnabled(
     //             android::featurecontrol::AllowSnapshotMigration);

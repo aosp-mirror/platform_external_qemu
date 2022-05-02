@@ -22,6 +22,7 @@ extern "C" {
 #endif
 
 #include <nlohmann/json.hpp>                          // for basic_json, bas...
+#include "android/console.h"
 #include "android/base/Log.h"                         // for LOG, LogMessage
 #include "android/base/Optional.h"                    // for Optional
 #include "android/base/StringFormat.h"                // for StringFormatWit...
@@ -68,8 +69,6 @@ extern "C" {
 #include "sysemu/sysemu.h"                            // for vm_start, vm_stop
 #include "sysemu/whpx.h"                              // for whpx_gpa2hva
 #include "ui/console.h"
-
-extern   int guest_boot_completed;
 }
 
 // Qemu includes can redefine some windows behavior..
@@ -511,7 +510,7 @@ static bool qemu_snapshot_load(const char* name,
         sLastLoadedSnapshot = "";
     } else {
         sLastLoadedSnapshot = name;
-        guest_boot_completed = 1;
+        getConsoleAgents()->settings->set_guest_boot_completed(true);
     }
 
     return !failed;

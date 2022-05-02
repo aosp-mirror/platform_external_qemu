@@ -20,7 +20,7 @@
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/feature_control.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/hw-sensors.h"
 #include "android/multitouch-screen.h"    // for multitouch_create_but...
 #include "android/skin/event.h"           // for SkinEvent, (anonymous...

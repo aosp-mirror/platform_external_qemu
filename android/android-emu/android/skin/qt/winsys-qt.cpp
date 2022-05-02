@@ -49,7 +49,7 @@
 #include "android/cmdline-option.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/emulation/control/multi_display_agent.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/location/MapsKey.h"
 #include "android/qt/qt_path.h"
 #include "android/skin/qt/QtLogger.h"

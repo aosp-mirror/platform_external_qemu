@@ -22,7 +22,7 @@
 #include "android/base/SubAllocator.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/crashreport/crash-handler.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/utils/GfxstreamFatalError.h"
 
 #include <memory>

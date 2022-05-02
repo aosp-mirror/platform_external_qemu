@@ -25,7 +25,7 @@
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/CpuAccelerator.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/update-check/VersionExtractor.h"

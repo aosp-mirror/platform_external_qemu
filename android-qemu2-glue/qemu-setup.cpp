@@ -94,7 +94,7 @@ extern "C" {
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/virtio_vsock_device.h"
 #include "android/featurecontrol/feature_control.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/gpu_frame.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot/interface.h"
@@ -513,7 +513,7 @@ bool qemu_android_emulation_setup() {
         return false;
     }
 
-    bool isRunningFuchsia = !android_qemu_mode;
+    bool isRunningFuchsia = !getConsoleAgents()->settings->android_qemu_mode();
     if (isRunningFuchsia) {
         // For fuchsia we only enable thr gRPC port if it is explicitly
         // requested.
@@ -549,7 +549,7 @@ bool qemu_android_emulation_setup() {
         }
     }
 
-    if (!android_qemu_mode)
+    if (!getConsoleAgents()->settings->android_qemu_mode())
         return true;
 
     android::base::ScopedCPtr<const char> arch(
@@ -578,8 +578,7 @@ bool qemu_android_emulation_setup() {
                         new android::crashreport::TimedHangDetector(
                                 60 * 1000,
                                 new android::crashreport::HeartBeatDetector(
-                                        get_guest_heart_beat_count,
-                                        &guest_boot_completed)),
+                                        get_guest_heart_beat_count)),
                         "The guest is not sending heartbeat update, "
                         "probably "
                         "stalled.")

@@ -64,8 +64,9 @@ if(NOT BUILDING_FOR_AARCH64)
     DARWIN android/crashreport/CrashService_darwin.cpp
     MSVC android/crashreport/CrashService_windows.cpp)
   target_link_libraries(
-    emulator_crashreport_unittests PRIVATE android-emu libqemu2-glue curl
-                                           breakpad_server gtest_main)
+    emulator_crashreport_unittests
+    PRIVATE android-emu libqemu2-glue curl breakpad_server
+            android-emu-test-launcher gtest)
   target_include_directories(emulator_crashreport_unittests PRIVATE .)
   # Windows-msvc specific dependencies. Need these for posix support.
   android_target_link_libraries(emulator_crashreport_unittests

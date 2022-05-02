@@ -18,7 +18,7 @@
 #include "android/base/CpuUsage.h"
 #include "android/base/files/StdioStream.h"
 #include "android/cmdline-option.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/metrics/MetricsWriter.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/TextMetricsWriter.h"

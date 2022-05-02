@@ -21,7 +21,6 @@
 #include "android/constants.h"
 #include "android/user-config.h"
 #include "android/utils/compiler.h"
-#include <stdbool.h>
 
 /** TODO:(jansene): These are the set of global variables that are used
  *throughout the system. Most of these are not yet available and commented out.
@@ -57,25 +56,25 @@ typedef struct QAndroidGlobalVarsAgent {
     AndroidHwConfig* (*hw)(void);
 
     // /* this indicates that guest has mounted data partition */
-    // int (*guest_data_partition_mounted)(void);
+    int (*guest_data_partition_mounted)(void);
 
     // /* this indicates that guest has boot completed */
-    // int (*guest_boot_completed)(void);
+    bool (*guest_boot_completed)(void);
 
-    // int (*arm_snapshot_save_completed)(void);
+    bool (*arm_snapshot_save_completed)(void);
 
-    // int (*host_emulator_is_headless)(void);
+    bool (*host_emulator_is_headless)(void);
 
     // /* are we using the emulator in the android mode or plain qemu? */
-    // int (*android_qemu_mode)(void);
+    bool (*android_qemu_mode)(void);
 
     // /* are we using android-emu libraries for a minimal configuration? */
-    // int (*min_config_qemu_mode)(void);
+    bool (*min_config_qemu_mode)(void);
 
     // /* is android-emu running Fuchsia? */
-    // int (*is_fuchsia)(void);
+    bool (*is_fuchsia)(void);
 
-    // int (*android_snapshot_update_timer)(void);
+    int (*android_snapshot_update_timer)(void);
 
     LanguageSettings* (*language)(void);
 
@@ -85,7 +84,7 @@ typedef struct QAndroidGlobalVarsAgent {
     // /* on emulator host. */
     bool (*use_keycode_forwarding)(void);
 
-     AUserConfig* (*userConfig)(void);
+    AUserConfig* (*userConfig)(void);
 
     // The parsed command line options.
     AndroidOptions* (*android_cmdLineOptions)(void);
@@ -105,12 +104,36 @@ typedef struct QAndroidGlobalVarsAgent {
     // You **SHOULD** not really need to call this.
     void (*inject_android_cmdLine)(const char*);
 
-    // Injects the language settings, this will set the changing_language_country_locale
-    // variable if any of the parameters are not null.
-    void (*inject_language)(char* /*language*/, char* /*country*/, char* /*locale*/);
+    // Injects the language settings, this will set the
+    // changing_language_country_locale variable if any of the parameters are
+    // not null.
+    void (*inject_language)(char* /*language*/,
+                            char* /*country*/,
+                            char* /*locale*/);
 
     void (*inject_userConfig)(AUserConfig* /*config*/);
     void (*set_keycode_forwading)(bool /*enabled */);
     void (*inject_AvdInfo)(AvdInfo*);
+
+    // /* this indicates that guest has mounted data partition */
+    void (*set_guest_data_partition_mounted)(int);
+
+    // /* this indicates that guest has boot completed */
+    void (*set_guest_boot_completed)(bool);
+
+    void (*set_arm_snapshot_save_completed)(bool);
+
+    void (*set_host_emulator_is_headless)(bool);
+
+    // /* are we using the emulator in the android mode or plain qemu? */
+    void (*set_android_qemu_mode)(bool);
+
+    // /* are we using android-emu libraries for a minimal configuration? */
+    void (*set_min_config_qemu_mode)(bool);
+
+    // /* is android-emu running Fuchsia? */
+    void (*set_is_fuchsia)(bool);
+
+    void (*set_android_snapshot_update_timer)(int);
 } QAndroidGlobalVarsAgent;
 ANDROID_END_HEADER

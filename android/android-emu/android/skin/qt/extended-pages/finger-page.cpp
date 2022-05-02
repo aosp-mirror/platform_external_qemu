@@ -19,7 +19,7 @@
 #include "android/avd/info.h"                        // for avdInfo_getApiDe...
 #include "android/emulation/VmLock.h"                // for RecursiveScopedV...
 #include "android/emulation/control/finger_agent.h"  // for QAndroidFingerAgent
-#include "android/globals.h"                         // for getConsoleAgents()->settings->avdInfo()
+#include "android/console.h"                         // for getConsoleAgents()->settings->avdInfo()
 #include "android/metrics/UiEventTracker.h"          // for UiEventTracker
 #include "studio_stats.pb.h"                         // for EmulatorUiEvent
 

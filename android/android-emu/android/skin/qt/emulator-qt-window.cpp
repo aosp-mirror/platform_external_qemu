@@ -31,7 +31,7 @@
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/hw-sensors.h"
 #include "android/metrics/DependentMetrics.h"
 #include "android/metrics/PeriodicReporter.h"
@@ -892,7 +892,7 @@ void EmulatorQtWindow::slot_startupTick() {
                 ->qt_hide_window) {
         return;
     }
-    if (is_fuchsia) {
+    if (getConsoleAgents()->settings->is_fuchsia()) {
         mStartupDialog->setWindowTitle(tr("Fuchsia Emulator"));
     } else {
         mStartupDialog->setWindowTitle(tr("Android Emulator"));
@@ -3300,7 +3300,7 @@ void EmulatorQtWindow::wheelScrollTimeout() {
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {
     // Do not check for ADB in Fuchsia mode.
-    if (is_fuchsia)
+    if (getConsoleAgents()->settings->is_fuchsia())
         return;
 
     QSettings settings;

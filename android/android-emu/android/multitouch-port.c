@@ -16,7 +16,7 @@
 
 #include "android/multitouch-port.h"
 
-#include "android/globals.h"  /* for android_hw */
+#include "android/console.h"  /* for android_hw */
 #include "android/hw-events.h"
 #include "android/jpeg-compress.h"
 #include "android/multitouch-screen.h"

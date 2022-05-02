@@ -13,7 +13,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/emulation/AndroidPipe.h"
-#include "android/globals.h"
+#include "android/console.h"
 
 #include <algorithm>
 #include <array>
