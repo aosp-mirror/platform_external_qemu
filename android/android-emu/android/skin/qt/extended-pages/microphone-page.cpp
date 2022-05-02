@@ -100,11 +100,11 @@ void MicrophonePage::on_mic_allowRealAudio_toggled(bool checked) {
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_pressed() {
-    forwardKeyToEmulator(KEY_SEND, true);
+    forwardKeyToEmulator(KEY_VOICECOMMAND, true);
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_released() {
-    forwardKeyToEmulator(KEY_SEND, false);
+    forwardKeyToEmulator(KEY_VOICECOMMAND, false);
 }
 
 void MicrophonePage::setEmulatorWindow(EmulatorQtWindow* eW) {
