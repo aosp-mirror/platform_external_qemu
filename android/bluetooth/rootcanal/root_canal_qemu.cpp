@@ -96,48 +96,12 @@ RootcanalBuilder::Builder() {
     mLooper = base::ThreadLooper::get();
 }
 
-RootcanalBuilder& RootcanalBuilder::withHciPort(int port) {
-    mHci = port;
-    return *this;
-}
-
 static int getPortNumber(const char* value) {
     int port = -1;
     if (value && sscanf(value, "%d", &port) == 1) {
         return port;
     }
     return -1;
-}
-
-RootcanalBuilder& RootcanalBuilder::withHciPort(const char* portStr) {
-    return withHciPort(getPortNumber(portStr));
-}
-
-RootcanalBuilder& RootcanalBuilder::withTestPort(int port) {
-    mTest = port;
-    return *this;
-}
-
-RootcanalBuilder& RootcanalBuilder::withTestPort(const char* portStr) {
-    return withTestPort(getPortNumber(portStr));
-}
-
-RootcanalBuilder& RootcanalBuilder::withLinkPort(int port) {
-    mLink = port;
-    return *this;
-}
-
-RootcanalBuilder& RootcanalBuilder::withLinkPort(const char* portStr) {
-    return withLinkPort(getPortNumber(portStr));
-}
-
-RootcanalBuilder& RootcanalBuilder::withLinkBlePort(int port) {
-    mLinkBle = port;
-    return *this;
-}
-
-RootcanalBuilder& RootcanalBuilder::withLinkBlePort(const char* portStr) {
-    return withLinkBlePort(getPortNumber(portStr));
 }
 
 RootcanalBuilder& RootcanalBuilder::withControllerProperties(
@@ -179,21 +143,16 @@ std::shared_ptr<Rootcanal> RootcanalBuilder::getInstance() {
 void RootcanalBuilder::buildSingleton() {
     auto asyncManager = std::make_unique<AsyncManager>();
 
+    auto nullChannel = std::make_shared<net::NullDataChannelServer>();
     auto qemuHciServer = std::make_shared<net::HciDataChannelServer>(mLooper);
     net::DataChannelServerList hciServers;
     hciServers.push_back(qemuHciServer);
-
-    if (mHci > 0) {
-        hciServers.push_back(std::make_shared<net::LoopbackAsyncSocketServer>(
-                mHci, asyncManager.get()));
-    }
-
     auto hciServer = std::make_shared<net::MultiDataChannelServer>(hciServers);
-    auto testServer = getChannelServer(mTest, asyncManager.get());
-    auto linkServer = std::make_shared<net::MultiDataChannelServer>(
-            getChannelServer(mLink, asyncManager.get()));
-    auto linkBleServer = std::make_shared<net::MultiDataChannelServer>(
-            getChannelServer(mLinkBle, asyncManager.get()));
+    auto testServer = nullChannel;
+    auto linkServer =
+            std::make_shared<net::MultiDataChannelServer>(nullChannel);
+    auto linkBleServer =
+            std::make_shared<net::MultiDataChannelServer>(nullChannel);
     auto localConnector = std::make_shared<net::LoopbackAsyncSocketConnector>(
             asyncManager.get());
 

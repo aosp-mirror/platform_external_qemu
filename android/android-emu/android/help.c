@@ -1353,63 +1353,6 @@ help_rtcfps(stralloc_t*  out)
 }
 
 static void
-help_rootcanal_hci_port(stralloc_t*  out)
-{
-    PRINTF(
-    "  Enables the (unsecure) rootcanal HCI chip on the given port. \n\n"
-    "   <port> The port where devices can find a virtual HCI chip.\n\n"
-    "  WARNING. This is an open local port and should only be used for testing. \n"
-    "  Connected devices will participate in the local bluetooth network of this \n"
-    "  emulator.\n\n"
-    "  WARNING. This is an experimental flag, and might be removed in the future. \n\n"
-    "  For example:\n\n"
-    "  -rootcanal-hci-port 6402\n\n"
-    );
-}
-
-static void
-help_rootcanal_test_port(stralloc_t*  out)
-{
-    PRINTF(
-    "  Enables the (unsecure) rootcanal test environment on the given port. \n\n"
-    "   <port> The port where the test environment lives.\n\n"
-    "  WARNING. This is an open local port and should only be used for testing. \n\n"
-    "  WARNING. This is an experimental flag, and might be removed in the future. \n\n"
-    "  For example:\n\n"
-    "  -rootcanal-test-port 6401\n\n"
-    );
-}
-
-
-static void
-help_rootcanal_link_port(stralloc_t*  out)
-{
-    PRINTF(
-    "  Enables the (unsecure) rootcanal link layer on the given port. \n\n"
-    "   <port> The port where the link layer can be accessed.\n\n"
-    "  WARNING. This is an open local port and should only be used for linking. \n\n"
-    "  WARNING. This is an experimental flag, and might be removed in the future. \n\n"
-    "  For example:\n\n"
-    "  -rootcanal-link-port 6403\n\n"
-    "  This should not be needed, as the emulator creates a local bluetooth mesh\n\n"
-    );
-}
-
-static void
-help_rootcanal_link_ble_port(stralloc_t*  out)
-{
-    PRINTF(
-    "  Enables the (unsecure) rootcanal ble link layer on the given port. \n\n"
-    "   <port> The port where the ble link layer can be accessed.\n\n"
-    "  WARNING. This is an open local port and should only be used for linking. \n\n"
-    "  WARNING. This is an experimental flag, and might be removed in the future. \n\n"
-    "  For example:\n\n"
-    "  -rootcanal-link-ble-port 6404\n\n"
-    "  This should not be needed, as the emulator creates a local bluetooth mesh\n\n"
-    );
-}
-
-static void
 help_rootcanal_controller_properties_file(stralloc_t*  out)
 {
     PRINTF(

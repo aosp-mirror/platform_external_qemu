@@ -56,14 +56,6 @@ static std::unique_ptr<Rootcanal> sRootcanal;
 class Rootcanal::Builder {
 public:
     Builder();
-    Builder& withHciPort(int port);
-    Builder& withHciPort(const char* portStr);
-    Builder& withTestPort(int port);
-    Builder& withTestPort(const char* portStr);
-    Builder& withLinkPort(int port);
-    Builder& withLinkPort(const char* portStr);
-    Builder& withLinkBlePort(int port);
-    Builder& withLinkBlePort(const char* portStr);
     Builder& withControllerProperties(const char* props);
     Builder& withCommandFile(const char* cmdFile);
     Builder& withLooper(android::base::Looper* looper);
@@ -72,10 +64,6 @@ public:
     static std::shared_ptr<Rootcanal> getInstance();
 
 private:
-    int mHci = -1;
-    int mTest = -1;
-    int mLink = -1;
-    int mLinkBle = -1;
     std::string mDefaultControllerProperties;
     std::string mCmdFile;
     android::base::Looper* mLooper;

@@ -218,11 +218,7 @@ bool qemu_android_emulation_early_setup() {
     // Activate the virtual bluetooth chip.
     auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
     android::bluetooth::Rootcanal::Builder builder;
-    builder.withHciPort(opts->rootcanal_hci_port)
-            .withTestPort(opts->rootcanal_test_port)
-            .withLinkPort(opts->rootcanal_link_port)
-            .withLinkBlePort(opts->rootcanal_link_ble_port)
-            .withControllerProperties(
+    builder.withControllerProperties(
                     opts->rootcanal_controller_properties_file)
             .withCommandFile(opts->rootcanal_default_commands_file);
     builder.buildSingleton();
