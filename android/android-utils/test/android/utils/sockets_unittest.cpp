@@ -17,6 +17,7 @@
 TEST(SockAddress, ResolveIp4AndToString) {
     SockAddress s[1];
     char tmp[256];
+    android_socket_init();
 
     EXPECT_EQ(0 ,sock_address_init_resolve(s, "216.58.194.164", 53, 0));
 
@@ -31,6 +32,7 @@ TEST(SockAddress, ResolveIp4AndToString) {
 TEST(SockAddress, ResolveIp6AndToString) {
     SockAddress s[1];
     char tmp[256];
+    android_socket_init();
 
     // An ip6 address *ALWAYS* resolves to an ip6 socket address and hence an ip6 string.
     EXPECT_EQ(0 ,sock_address_init_resolve(s, "2001:4860:f802::9b", 53, 0));

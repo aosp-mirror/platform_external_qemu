@@ -50,7 +50,7 @@ static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
         .avdInfo =
                 []() {
                     // Do not access the info before it is injected!
-                    assert(sAndroid_avdInfo != nullptr);
+                    // assert(sAndroid_avdInfo != nullptr);
                     return sAndroid_avdInfo;
                 },
         .hw =[]() { return &s_hwConfig; },

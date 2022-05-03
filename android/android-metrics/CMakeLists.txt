@@ -60,6 +60,7 @@ endif()
 target_link_libraries(
   android-metrics
   PRIVATE android-emu-base
+          android-emu-utils
           android-curl
           android-files
           android-hw-config

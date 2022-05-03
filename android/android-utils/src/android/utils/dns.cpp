@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#include "dns.h"
+#include "android/utils/dns.h"
 
 #include "android/base/network/Dns.h"
 #include "android/base/network/IpAddress.h"

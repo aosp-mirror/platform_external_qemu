@@ -28,17 +28,13 @@ android_add_library(
       android/hw-lcd.c
       android/main-help.cpp
       android/network/constants.c
-      android/utils/exec.cpp
-      android/utils/host_bitness.cpp
-      android/utils/system_wrapper.cpp
   WINDOWS android/camera/camera-capture-windows.cpp
           android/emulation/USBAssist.cpp
   LINUX android/camera/camera-capture-linux.c
-  DARWIN android/camera/camera-capture-mac.m)
+  DARWIN android/camera/camera-capture-mac.m
+  DEPS android-emu-base android-emu-utils android-files android-hw-config
+       emulator-libyuv gtest)
 target_include_directories(android-emu-launch PRIVATE .)
-target_link_libraries(
-  android-emu-launch PRIVATE android-emu-base android-files emulator-libyuv
-                             android-hw-config gtest)
 target_compile_options(android-emu-launch PRIVATE -Wno-extern-c-compat)
 target_compile_definitions(android-emu-launch PRIVATE AEMU_MIN AEMU_LAUNCHER)
 target_include_directories(
@@ -281,26 +277,6 @@ set(android-emu-common
     android/update-check/VersionExtractor.cpp
     android/user-config.cpp
     android/userspace-boot-properties.cpp
-    android/utils/assert.c
-    android/utils/async.cpp
-    android/utils/cbuffer.c
-    android/utils/dns.cpp
-    android/utils/exec.cpp
-    android/utils/format.cpp
-    android/utils/host_bitness.cpp
-    android/utils/http_utils.cpp
-    android/utils/intmap.c
-    android/utils/iolooper.cpp
-    android/utils/ipaddr.cpp
-    android/utils/lineinput.c
-    android/utils/Random.cpp
-    android/utils/reflist.c
-    android/utils/refset.c
-    android/utils/system_wrapper.cpp
-    android/utils/timezone.cpp
-    android/utils/uri.cpp
-    android/utils/utf8_utils.cpp
-    android/utils/vector.c
     android/verified-boot/load_config.cpp
     android/wear-agent/android_wear_agent.cpp
     android/wear-agent/PairUpWearPhone.cpp
@@ -461,6 +437,7 @@ target_link_libraries(
          zlib
          android-hw-config
          android-emu-agents
+         android-emu-utils
          absl::strings)
 
 target_link_libraries(android-emu PRIVATE hostapd)
@@ -482,11 +459,7 @@ android_target_link_libraries(
          # For CoTaskMemFree used in camera-capture-windows.cpp
          ole32::ole32
          # For GetPerformanceInfo in CrashService_windows.cpp
-         psapi::psapi
-         # Winsock functions
-         ws2_32::ws2_32
-         # GetNetworkParams() for android/utils/dns.c
-         iphlpapi::iphlpapi)
+         psapi::psapi)
 
 # These are the libs needed for android-emu on linux.
 android_target_link_libraries(android-emu linux-x86_64 PUBLIC -lrt -lc++)
@@ -495,20 +468,7 @@ android_target_link_libraries(android-emu linux-x86_64 PUBLIC -lrt -lc++)
 # propagate onwards to others that depend on android-emu. You should really only
 # add things that are crucial for this library to link
 android_target_link_libraries(
-  android-emu darwin-x86_64
-  PUBLIC "-framework AppKit"
-         "-framework AVFoundation" # For camera-capture-mac.m
-         "-framework Accelerate" # Of course, our camera needs it!
-         "-framework CoreMedia" # Also for the camera.
-         "-framework CoreVideo" # Also for the camera.
-         "-framework IOKit"
-         "-framework VideoToolbox" # For HW codec acceleration on mac
-         "-framework VideoDecodeAcceleration" # For HW codec acceleration on mac
-         "-weak_framework Hypervisor"
-         "-framework OpenGL")
-
-android_target_link_libraries(
-  android-emu darwin-aarch64
+  android-emu darwin
   PUBLIC "-framework AppKit"
          "-framework AVFoundation" # For camera-capture-mac.m
          "-framework Accelerate" # Of course, our camera needs it!
@@ -677,7 +637,6 @@ android_add_library(
       android/snapshot/TextureLoader.cpp
       android/snapshot/TextureSaver.cpp
       android/user-config.cpp
-      android/utils/Random.cpp
       stubs/gfxstream-stubs.cpp
       stubs/stubs.cpp
   WINDOWS # cmake-format: sortable
@@ -702,6 +661,7 @@ target_link_libraries(
   android-emu-shared
   PUBLIC android-emu-base
          android-emu-agents
+         android-emu-utils
          emulator-murmurhash
          android-files
          android-metrics
@@ -727,11 +687,7 @@ android_target_link_libraries(
           # For CoTaskMemFree used in camera-capture-windows.cpp
           ole32::ole32
           # For GetPerformanceInfo in CrashService_windows.cpp
-          psapi::psapi
-          # Winsock functions
-          ws2_32::ws2_32
-          # GetNetworkParams() for android/utils/dns.c
-          iphlpapi::iphlpapi)
+          psapi::psapi)
 # These are the libs needed for android-emu-shared on linux.
 android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)
 # Here are the darwin library and link dependencies. They are public and will
@@ -782,7 +738,7 @@ target_include_directories(
     ${CMAKE_CURRENT_BINARY_DIR})
 android_target_compile_options(
   android-emu-shared Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr
-                                   -fvisibility=default)
+                                   -fvisibility=hidden)
 android_target_compile_options(
   android-emu-shared Clang PUBLIC -Wno-return-type-c-linkage) # android_getOp
 # enG lesRenderer
@@ -940,12 +896,6 @@ if(NOT LINUX_AARCH64)
       android/update-check/UpdateChecker_unittest.cpp
       android/update-check/VersionExtractor_unittest.cpp
       android/userspace-boot-properties_unittest.cpp
-      android/utils/dns_unittest.cpp
-      android/utils/format_unittest.cpp
-      android/utils/host_bitness_unittest.cpp
-      android/utils/path_unittest.cpp
-      android/utils/Random_unittest.cpp
-      android/utils/sockets_unittest.cpp
       android/verified-boot/load_config_unittest.cpp
       android/videoinjection/VideoInjectionController_unittest.cpp
       android/virtualscene/TextureUtils_unittest.cpp
@@ -959,7 +909,6 @@ if(NOT LINUX_AARCH64)
     SRC # cmake-format: sortable
         ${android-emu_unittests_common}
     WINDOWS # cmake-format: sortable
-            android/utils/win32_cmdline_quote_unittest.cpp
             android/windows_installer_unittest.cpp
     DARWIN # cmake-format: sortable
            android/emulation/control/adb/AdbShellStream_unittest.cpp

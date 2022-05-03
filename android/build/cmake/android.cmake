@@ -500,6 +500,7 @@ function(_register_target)
       SOURCE_DIR)
   set(multiValueArgs
       INCLUDES
+      DEPS
       SRC
       LINUX
       MSVC
@@ -631,11 +632,12 @@ endfunction()
 # ``REPO``    Internal location where the, where the notice can be found.
 # ``LICENSE`` SPDX License identifier.
 # ``NOTICE``  Location where the NOTICE can be found
+# ``DEPS``    Set of private dependencies
 # ~~~
 function(android_add_library)
   set(options SHARED)
   set(oneValueArgs TARGET ALIAS)
-  set(multiValueArgs "")
+  set(multiValueArgs DEPS)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
   if(${build_SHARED})
@@ -652,6 +654,7 @@ function(android_add_library)
   _register_target(${ARGN})
 
   target_sources(${build_TARGET} PRIVATE ${REGISTERED_SRC})
+  target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
   if(WINDOWS_MSVC_X86_64 AND NOT ${build_TARGET} STREQUAL "msvc-posix-compat")
     target_link_libraries(${build_TARGET} PRIVATE msvc-posix-compat)
   endif()
@@ -896,11 +899,12 @@ endfunction()
 # ``DARWIN``  List of source files to be compiled if the current target is DARWIN_X86_64
 # ``WINDOWS`` List of source files to be compiled if the current target is WINDOWS_MSVC_X86_64
 # ``TEST_PARAMS``  Additional parameters for the test executable
+# ``DEPS``    List of private dependencies.
 # ~~~
 function(android_add_test)
   set(options "")
   set(oneValueArgs TARGET SOURCE_DIR)
-  set(multiValueArgs TEST_PARAMS SRC LINUX DARWIN WINDOWS)
+  set(multiValueArgs TEST_PARAMS SRC LINUX DARWIN WINDOWS DEPS)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
 
@@ -920,6 +924,7 @@ function(android_add_test)
 
   # Let's not optimize our tests.
   target_compile_options(${build_TARGET} PRIVATE -O0)
+  target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
 
   android_add_default_test_properties(${build_TARGET})
 endfunction()
@@ -962,11 +967,12 @@ function(android_add_executable)
   _register_target(${ARGN})
   set(options "")
   set(oneValueArgs TARGET INSTALL)
-  set(multiValueArgs "")
+  set(multiValueArgs DEPS)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
 
   add_executable(${build_TARGET} ${REGISTERED_SRC})
+  target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
   # Clang on mac os does not get properly recognized by cmake
   if(NOT DARWIN_X86_64 AND NOT DARWIN_AARCH64)
     target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
