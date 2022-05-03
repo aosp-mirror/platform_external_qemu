@@ -14,7 +14,8 @@
 #endif
 
 #include "android/skin/qt/extended-pages/location-page.h"
-
+#include "android/emulation/ConfigDirs.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/cmdline-option.h"
 #include "android/emulation/control/location_agent.h"
@@ -62,6 +63,7 @@
 using android::base::AutoLock;
 using android::base::LazyInstance;
 
+static constexpr char kMapsFileName[] = "maps.key";
 static constexpr double kGplexLon = -122.084;
 static constexpr double kGplexLat = 37.422;
 static constexpr double kGplexAlt = 5.0;  // Meters
@@ -161,8 +163,14 @@ LocationPage::LocationPage(QWidget* parent)
         QObject::connect(this, &LocationPage::onMapsKeyUpdated, this,
                          &LocationPage::setUpWebEngine, Qt::QueuedConnection);
         // Always prefer user-provided maps key
+
         if (strlen(mapsKeyHolder->userMapsKey()) == 0) {
+            std::string mapsFile = android::base::PathUtils::join(
+                    android::ConfigDirs::getUserDirectory(),
+                    kMapsFileName);
+
             auto studioMapsKey = android::location::StudioMapsKey::create(
+                mapsFile,
                     [](android::base::StringView mapsFile, void* opaque) {
                         auto s = reinterpret_cast<LocationPage*>(opaque);
                         if (!mapsFile.empty()) {
@@ -980,7 +988,8 @@ void LocationPage::sendMostRecentUiLocation() {
 // static
 void LocationPage::writeLocationPlaybackFilePathToSettings(
         const QString& file) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -996,7 +1005,8 @@ void LocationPage::writeLocationPlaybackFilePathToSettings(
 
 // static
 QString LocationPage::getLocationPlaybackFilePathFromSettings() {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -1014,7 +1024,8 @@ QString LocationPage::getLocationPlaybackFilePathFromSettings() {
 
 // static
 void LocationPage::writeLocationPlaybackSpeedToSettings(int speed) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -1030,7 +1041,8 @@ void LocationPage::writeLocationPlaybackSpeedToSettings(int speed) {
 
 // static
 int LocationPage::getLocationPlaybackSpeedFromSettings() {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -1050,7 +1062,8 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutAltitude,
                                           double* pOutVelocity,
                                           double* pOutHeading) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -1100,7 +1113,8 @@ void LocationPage::writeDeviceLocationToSettings(double lat,
                                                  double alt,
                                                  double velocity,
                                                  double heading) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);

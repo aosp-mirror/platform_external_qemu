@@ -11,11 +11,16 @@
 
 #pragma once
 
+#include <functional>
+#include <iosfwd>                   // for string
+
 #include "android/base/StringView.h"
 
-#include <functional>
-
 namespace android {
+namespace base {
+class StringView;
+}  // namespace base
+
 namespace location {
 
 class StudioMapsKey {
@@ -28,7 +33,7 @@ public:
     // Creating an instance will run a query in a background thread to
     // fetch the maps key. |cb| will be called once the query is complete.
     // Use getFilePath() once the query completes to get the path to the file.
-    static StudioMapsKey* create(UpdateCallback cb, void* opaque);
+    static StudioMapsKey* create(std::string mapsFile, UpdateCallback cb, void* opaque);
 
 protected:
     StudioMapsKey() = default;

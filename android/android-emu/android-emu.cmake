@@ -188,11 +188,6 @@ set(android-emu-common
     android/jpeg-compress.c
     android/kernel/kernel_utils.cpp
     android/loadpng.c
-    android/location/MapsKey.cpp
-    android/location/MapsKeyFileParser.cpp
-    android/location/Point.cpp
-    android/location/Route.cpp
-    android/location/StudioMapsKey.cpp
     android/main-emugl.cpp
     android/main-help.cpp
     android/main-kernel-parameters.cpp
@@ -223,8 +218,6 @@ set(android-emu-common
     android/opengl/OpenglEsPipe.cpp
     android/opengles.cpp
     android/process_setup.cpp
-    android/protobuf/LoadSave.cpp
-    android/protobuf/ProtobufLogging.cpp
     android/proxy/proxy_common.c
     android/proxy/proxy_http.c
     android/proxy/proxy_http_connector.c
@@ -438,7 +431,8 @@ target_link_libraries(
          android-hw-config
          android-emu-agents
          android-emu-utils
-         absl::strings)
+         absl::strings
+  PRIVATE android-emu-protobuf)
 
 target_link_libraries(android-emu PRIVATE hostapd)
 
@@ -614,7 +608,6 @@ android_add_library(
       android/opengl/logger.cpp
       android/opengl/OpenglEsPipe.cpp
       android/opengles.cpp
-      android/protobuf/LoadSave.cpp
       android/snaphost-android.c
       android/snapshot.c
       android/snapshot/common.cpp
@@ -673,7 +666,8 @@ target_link_libraries(
          lz4
          zlib
          android-hw-config
-         absl::strings)
+         absl::strings
+  PRIVATE android-emu-protobuf)
 # Here are the windows library and link dependencies. They are public and will
 # propagate onwards to others that depend on android-emu-shared
 android_target_link_libraries(
@@ -861,10 +855,6 @@ if(NOT LINUX_AARCH64)
       android/jdwp/Jdwp_unittest.cpp
       android/jdwp/JdwpProxy_unittest.cpp
       android/kernel/kernel_utils_unittest.cpp
-      android/location/MapsKey_unittest.cpp
-      android/location/MapsKeyFileParser_unittest.cpp
-      android/location/Point_unittest.cpp
-      android/location/Route_unittest.cpp
       android/network/constants_unittest.cpp
       android/network/control_unittest.cpp
       android/network/GenericNetlinkMessage_unittest.cpp
@@ -939,8 +929,9 @@ if(NOT LINUX_AARCH64)
                                  PRIVATE "-Wno-deprecated-declarations")
 
   # Dependecies are exported from android-emu.
-  target_link_libraries(android-emu_unittests PRIVATE android-emu
-                                                      android-emu-test-launcher)
+  target_link_libraries(
+    android-emu_unittests PRIVATE android-emu android-emu-protobuf
+                                  android-emu-test-launcher)
 
   android_add_executable(
     NODISTRIBUTE TARGET studio_discovery_tester
