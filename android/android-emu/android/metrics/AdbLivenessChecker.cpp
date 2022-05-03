@@ -19,7 +19,7 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
 #include "android/emulation/ConfigDirs.h"
-#include "android/globals.h"
+#include "android/console.h"
 
 #include "studio_stats.pb.h"
 

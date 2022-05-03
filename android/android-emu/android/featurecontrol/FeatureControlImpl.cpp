@@ -20,7 +20,7 @@
 #include "android/cmdline-option.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/emulation/ConfigDirs.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"

@@ -29,7 +29,6 @@
 #include "android/emulation/control/multi_display_agent.h"  // for QAndroidM...
 #include "android/emulation/control/vm_operations.h"        // for QAndroidV...
 #include "android/featurecontrol/feature_control.h"         // for feature_i...
-#include "android/globals.h"                                // for android_a...
 #include "android/kernel/kernel_utils.h"                    // for KERNEL_VE...
 #include "android/main-emugl.h"                             // for androidEm...
 #include "android/main-help.h"                              // for emulator_...
@@ -84,14 +83,6 @@ static const int DEFAULT_PARTITION_SIZE_IN_MB = 800;
 // which is overkill, given this plan.
 bool android_op_wipe_data = false;
 bool android_op_writable_system = false;
-int guest_data_partition_mounted = 0;
-int guest_boot_completed = 0;
-int arm_snapshot_save_completed = 0;
-int host_emulator_is_headless = 0;
-int android_qemu_mode = 1;
-int min_config_qemu_mode = 0;
-int is_fuchsia = 0;
-
 bool emulator_has_network_option = false;
 
 #define ONE_MB (1024 * 1024)
@@ -384,7 +375,7 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
         do {
             char* out = getenv("ANDROID_PRODUCT_OUT");
 
-            if (!android_qemu_mode)
+            if (!getConsoleAgents()->settings->android_qemu_mode())
                 out = NULL;
 
             if (out == NULL || out[0] == 0)
@@ -400,7 +391,7 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
 
             android_build_root = getenv("ANDROID_BUILD_TOP");
 
-            if (!android_qemu_mode)
+            if (!getConsoleAgents()->settings->android_qemu_mode())
                 android_build_root = NULL;
 
             if (android_build_root == NULL || android_build_root[0] == 0)
@@ -1393,7 +1384,7 @@ bool handleCpuAcceleration(AndroidOptions* opts,
                     androidCpuAcceleration_isAcceleratorSupported(
                             ANDROID_CPU_ACCELERATOR_HVF);
 
-            if (android_qemu_mode && !hvf_is_ok && !accel_ok &&
+            if (getConsoleAgents()->settings->android_qemu_mode() && !hvf_is_ok && !accel_ok &&
                 *accel_mode != ACCEL_OFF) {
                 derror("%s emulation currently requires hardware "
                        "acceleration!\n"
@@ -1420,8 +1411,8 @@ bool handleCpuAcceleration(AndroidOptions* opts,
                        abi, *accel_status);
                 exit(1);
             } else if (*accel_mode == ACCEL_OFF ||
-                       (*accel_mode == ACCEL_OFF && !android_qemu_mode)) {
-                if (!android_qemu_mode) {
+                       (*accel_mode == ACCEL_OFF && !getConsoleAgents()->settings->android_qemu_mode())) {
+                if (!getConsoleAgents()->settings->android_qemu_mode()) {
                     *accel_mode = ACCEL_OFF;
                 }
                 // '-no-accel' of '-accel off' was used explicitly. Warn about
@@ -1567,7 +1558,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     opts->no_window = false;
 
     if (opts->fuchsia) {
-        android_qemu_mode = 0;
+        getConsoleAgents()->settings->set_android_qemu_mode(false);
         *exit_status = EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER;
         return false;
     }
@@ -2159,7 +2150,7 @@ bool configAndStartRenderer(
 
     if (!androidEmuglConfigInit(&config, opts->avd, api_arch, api_level,
                                 isGoogle, opts->gpu, &hw->hw_gpu_mode, 0,
-                                host_emulator_is_headless, uiPreferredBackend,
+                                getConsoleAgents()->settings->host_emulator_is_headless(), uiPreferredBackend,
                                 &hostGpuVulkanBlacklisted,
                                 opts->use_host_vulkan)) {
         derror("%s", config.status);
@@ -2178,7 +2169,7 @@ bool configAndStartRenderer(
 
     // Determine whether to enable Vulkan (if in android qemu mode)
 
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         // Always enable GLDirectMem for API >= 29
         bool shouldEnableGLDirectMem = api_level >= 29;
         bool shouldEnableVulkan = true;

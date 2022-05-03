@@ -41,7 +41,7 @@
 #include "android/base/files/PathUtils.h"              // for PathUtils
 #include "android/base/system/System.h"                // for System, System...
 #include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
-#include "android/globals.h"                           // for getConsoleAgents()->settings->avdInfo()
+#include "android/console.h"                           // for getConsoleAgents()->settings->avdInfo()
 #include "android/metrics/AdbLivenessChecker.h"        // for AdbLivenessChecker
 #include "android/metrics/UiEventTracker.h"            // for UiEventTracker
 #include "android/skin/qt/emulator-qt-window.h"        // for EmulatorQtWindow
@@ -94,7 +94,7 @@ BugreportPage::BugreportPage(QWidget* parent)
               ThreadLooper::get(),
               [this]() {
                   if (AdbLivenessChecker::isEmulatorBooted() ||
-                      guest_boot_completed) {
+                      getConsoleAgents()->settings->guest_boot_completed()) {
                       refreshContents();
                       return false;
                   } else {

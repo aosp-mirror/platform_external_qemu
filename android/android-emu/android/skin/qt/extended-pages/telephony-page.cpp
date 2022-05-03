@@ -26,7 +26,7 @@
 #include "android/avd/util.h"                           // for AVD_ANDROID_AUTO
 #include "android/emulation/VmLock.h"                   // for RecursiveScop...
 #include "android/emulation/control/telephony_agent.h"  // for QAndroidTelep...
-#include "android/globals.h"                            // for getConsoleAgents()->settings->avdInfo()
+#include "android/console.h"                            // for getConsoleAgents()->settings->avdInfo()
 #include "android/metrics/UiEventTracker.h"
 #include "android/settings-agent.h"                  // for SettingsTheme
 #include "android/skin/qt/error-dialog.h"            // for showErrorDialog

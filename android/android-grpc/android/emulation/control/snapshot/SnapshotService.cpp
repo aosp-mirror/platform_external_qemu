@@ -42,7 +42,6 @@
 #include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
 #include "android/emulation/control/vm_operations.h"
-#include "android/globals.h"
 #include "android/snapshot/Icebox.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"

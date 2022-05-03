@@ -22,7 +22,7 @@
 #include <string>
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/synchronization/MessageChannel.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/telephony/modem.h"
 #include "android/utils/system.h"
 #include "android/utils/timezone.h"
@@ -289,7 +289,7 @@ void process_msgs() {
         if (s_stop_requested) {
             break;
         }
-        if (!guest_boot_completed) {
+        if (!getConsoleAgents()->settings->guest_boot_completed()) {
             sleep_ms(100);
             continue;
         }

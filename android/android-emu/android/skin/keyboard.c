@@ -11,14 +11,13 @@
 */
 #include "android/skin/keyboard.h"
 
-#include <stdbool.h>                                 // for bool, true, false
-#include <stdint.h>                                  // for uint8_t, uint32_t
-#include <stdio.h>                                   // for fprintf, NULL
+#include <stdbool.h>  // for bool, true, false
+#include <stdint.h>   // for uint8_t, uint32_t
+#include <stdio.h>    // for fprintf, NULL
 #include <string.h>
 
-#include "android/console.h"
+#include "android/console.h"                         // for android_hw
 #include "android/featurecontrol/feature_control.h"  // for feature_is_enabled
-#include "android/globals.h"                         // for android_hw
 #include "android/skin/android_keycodes.h"           // for KEY_APPSWITCH
 #include "android/skin/charmap.h"                    // for skin_charmap_get...
 #include "android/skin/keycode-buffer.h"             // for skin_keycode_buf...
@@ -29,47 +28,41 @@
 #include "android/utils/system.h"      // for AFREE, ANEW0
 #include "android/utils/utf8_utils.h"  // for android_utf8_decode
 
-#define  DEBUG  1
+#define DEBUG 1
 
 #if DEBUG
 #define D(...) VERBOSE_PRINT(keys, __VA_ARGS__)
 #else
-#  define  D(...)  ((void)0)
+#define D(...) ((void)0)
 #endif
 
 struct SkinKeyboard {
-    const SkinCharmap*  charmap;
+    const SkinCharmap* charmap;
 
-    SkinRotation        rotation;
+    SkinRotation rotation;
 
-    SkinKeycodeBuffer   keycodes[1];
+    SkinKeycodeBuffer keycodes[1];
 };
 
-#define DEFAULT_ANDROID_CHARMAP  "qwerty2"
+#define DEFAULT_ANDROID_CHARMAP "qwerty2"
 
 static bool skin_key_code_is_arrow(int code) {
-    return code == kKeyCodeDpadLeft ||
-           code == kKeyCodeDpadRight ||
-           code == kKeyCodeDpadUp ||
-           code == kKeyCodeDpadDown;
+    return code == kKeyCodeDpadLeft || code == kKeyCodeDpadRight ||
+           code == kKeyCodeDpadUp || code == kKeyCodeDpadDown;
 }
 
-static SkinKeyCode
-skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
-                          int            code,
-                          int            mod,
-                          int            down)
-{
-    D("key code=%d mod=%d str=%s",
-      code,
-      mod,
+static SkinKeyCode skin_keyboard_key_to_code(SkinKeyboard* keyboard,
+                                             int code,
+                                             int mod,
+                                             int down) {
+    D("key code=%d mod=%d str=%s", code, mod,
       skin_key_pair_to_string(code, mod));
 
     /* first, handle the arrow keys directly */
     if (skin_key_code_is_arrow(code)) {
         code = skin_keycode_rotate(code, -keyboard->rotation);
         D("handling arrow (code=%d mod=%d)", code, mod);
-        int  doCapL, doCapR, doAltL, doAltR;
+        int doCapL, doCapR, doAltL, doAltR;
 
         doCapL = mod & kKeyModLShift;
         doCapR = mod & kKeyModRShift;
@@ -77,18 +70,26 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
         doAltR = mod & kKeyModRAlt;
 
         if (down) {
-            if (doAltL) skin_keyboard_add_key_event(keyboard, kKeyCodeAltLeft, 1);
-            if (doAltR) skin_keyboard_add_key_event(keyboard, kKeyCodeAltRight, 1);
-            if (doCapL) skin_keyboard_add_key_event(keyboard, kKeyCodeCapLeft, 1);
-            if (doCapR) skin_keyboard_add_key_event(keyboard, kKeyCodeCapRight, 1);
+            if (doAltL)
+                skin_keyboard_add_key_event(keyboard, kKeyCodeAltLeft, 1);
+            if (doAltR)
+                skin_keyboard_add_key_event(keyboard, kKeyCodeAltRight, 1);
+            if (doCapL)
+                skin_keyboard_add_key_event(keyboard, kKeyCodeCapLeft, 1);
+            if (doCapR)
+                skin_keyboard_add_key_event(keyboard, kKeyCodeCapRight, 1);
         }
         skin_keyboard_add_key_event(keyboard, code, down);
 
         if (!down) {
-            if (doAltR) skin_keyboard_add_key_event(keyboard, kKeyCodeAltRight, 0);
-            if (doAltL) skin_keyboard_add_key_event(keyboard, kKeyCodeAltLeft, 0);
-            if (doCapR) skin_keyboard_add_key_event(keyboard, kKeyCodeCapRight, 0);
-            if (doCapL) skin_keyboard_add_key_event(keyboard, kKeyCodeCapLeft, 0);
+            if (doAltR)
+                skin_keyboard_add_key_event(keyboard, kKeyCodeAltRight, 0);
+            if (doAltL)
+                skin_keyboard_add_key_event(keyboard, kKeyCodeAltLeft, 0);
+            if (doCapR)
+                skin_keyboard_add_key_event(keyboard, kKeyCodeCapRight, 0);
+            if (doCapL)
+                skin_keyboard_add_key_event(keyboard, kKeyCodeCapLeft, 0);
         }
         code = 0;
         return code;
@@ -115,26 +116,25 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
             case LINUX_KEY_KPDOT:
             case LINUX_KEY_KPENTER:
                 return 0;
-            default:
-                ;
+            default:;
         }
     }
 
     D("could not handle (code=%d, mod=%d, str=%s)", code, mod,
-      skin_key_pair_to_string(code,mod));
+      skin_key_pair_to_string(code, mod));
     return -1;
 }
 
 static SkinKeyMod keycode_to_mod(int key) {
     switch (key) {
-    case LINUX_KEY_LEFTALT:
-        return kKeyModLAlt;
-    case LINUX_KEY_LEFTCTRL:
-        return kKeyModLCtrl;
-    case LINUX_KEY_LEFTSHIFT:
-        return kKeyModLShift;
-    case LINUX_KEY_LEFTMETA:
-        return kKeyModLMeta;
+        case LINUX_KEY_LEFTALT:
+            return kKeyModLAlt;
+        case LINUX_KEY_LEFTCTRL:
+            return kKeyModLCtrl;
+        case LINUX_KEY_LEFTSHIFT:
+            return kKeyModLShift;
+        case LINUX_KEY_LEFTMETA:
+            return kKeyModLMeta;
     }
     return 0;
 }
@@ -157,28 +157,25 @@ static int map_cros_key(int* code) {
      * qcode_to_number in ui/input-keymap.c maps qcode to "number"
      */
     if ((*code >= LINUX_KEY_F1 && *code <= LINUX_KEY_F10) ||
-        *code ==  LINUX_KEY_ESC ||
-        *code ==  LINUX_KEY_TAB ||
-        *code ==  LINUX_KEY_UP ||
-        *code == LINUX_KEY_DOWN ||
-        *code == LINUX_KEY_LEFT ||
-        *code == LINUX_KEY_RIGHT ||
-        *code == LINUX_KEY_VOLUMEUP ||
-        *code == LINUX_KEY_VOLUMEDOWN) return 0;
+        *code == LINUX_KEY_ESC || *code == LINUX_KEY_TAB ||
+        *code == LINUX_KEY_UP || *code == LINUX_KEY_DOWN ||
+        *code == LINUX_KEY_LEFT || *code == LINUX_KEY_RIGHT ||
+        *code == LINUX_KEY_VOLUMEUP || *code == LINUX_KEY_VOLUMEDOWN)
+        return 0;
 
     switch (*code) {
-    case LINUX_KEY_BACK:
-        *code = LINUX_KEY_F1;
-        return 0;
-    case LINUX_KEY_HOME:
-        *code = LINUX_KEY_LEFTMETA;
-        return 0;
-    case KEY_APPSWITCH:
-        *code = LINUX_KEY_F5;
-        return 0;
-    case LINUX_KEY_GREEN:
-        *code = LINUX_KEY_GRAVE;
-        return 0;
+        case LINUX_KEY_BACK:
+            *code = LINUX_KEY_F1;
+            return 0;
+        case LINUX_KEY_HOME:
+            *code = LINUX_KEY_LEFTMETA;
+            return 0;
+        case KEY_APPSWITCH:
+            *code = LINUX_KEY_F5;
+            return 0;
+        case LINUX_KEY_GREEN:
+            *code = LINUX_KEY_GRAVE;
+            return 0;
     }
     return -1;
 }
@@ -186,8 +183,11 @@ static int map_cros_key(int* code) {
 /* This funcion is used to track the modifier key status and keep it sync
  * between guest and host. It returns the old status for the modifier_key
  */
-static SkinKeyMod sync_modifier_key(int modifier_key, SkinKeyboard* kb,
-                                    int keycode, int mod, int down) {
+static SkinKeyMod sync_modifier_key(int modifier_key,
+                                    SkinKeyboard* kb,
+                                    int keycode,
+                                    int mod,
+                                    int down) {
     static SkinKeyMod tracked = 0;
     SkinKeyMod mask = keycode_to_mod(modifier_key);
     SkinKeyMod old = tracked & mask;
@@ -210,14 +210,13 @@ static SkinKeyMod sync_modifier_key(int modifier_key, SkinKeyboard* kb,
     return old;
 }
 
-static bool has_modifier_key(int keycode, int mod)
-{
+static bool has_modifier_key(int keycode, int mod) {
     if (keycode_to_mod(keycode)) {
         return true;
     }
     /* Don't consider shift here since it will be
      * handeled on kEventTextInput */
-    if (mod &(kKeyModLCtrl|kKeyModLAlt)) {
+    if (mod & (kKeyModLCtrl | kKeyModLAlt)) {
         return true;
     }
     return false;
@@ -258,9 +257,7 @@ static void process_modifier_key(SkinKeyboard* kb, SkinEvent* ev, int down) {
     }
 }
 
-void
-skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
-{
+void skin_keyboard_process_event(SkinKeyboard* kb, SkinEvent* ev, int down) {
     if (ev->type == kEventTextInput) {
         SkinKeyMod mod = 0;
         if (getConsoleAgents()->settings->hw()->hw_arc) {
@@ -310,8 +307,8 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
              * telling sync_modifier_key there is a shift pressed event.
              * Also send out shift pressed event to guest.
              */
-            sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb,
-                              LINUX_KEY_LEFTSHIFT, 0, 1);
+            sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, LINUX_KEY_LEFTSHIFT, 0,
+                              1);
             skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 1);
         }
 
@@ -344,8 +341,8 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
 
         code = keycode;
 
-        if (code == kKeyCodeAltLeft  || code == kKeyCodeAltRight ||
-            code == kKeyCodeCapLeft  || code == kKeyCodeCapRight ||
+        if (code == kKeyCodeAltLeft || code == kKeyCodeAltRight ||
+            code == kKeyCodeCapLeft || code == kKeyCodeCapRight ||
             code == kKeyCodeSym) {
             skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
@@ -370,32 +367,23 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
     }
 }
 
-void
-skin_keyboard_set_rotation( SkinKeyboard*     keyboard,
-                            SkinRotation      rotation )
-{
+void skin_keyboard_set_rotation(SkinKeyboard* keyboard, SkinRotation rotation) {
     keyboard->rotation = (rotation & 3);
 }
 
-void
-skin_keyboard_add_key_event( SkinKeyboard*  kb,
-                             unsigned       code,
-                             unsigned       down )
-{
+void skin_keyboard_add_key_event(SkinKeyboard* kb,
+                                 unsigned code,
+                                 unsigned down) {
     skin_keycode_buffer_add(kb->keycodes, code, down);
 }
 
-
-void
-skin_keyboard_flush( SkinKeyboard*  kb )
-{
+void skin_keyboard_flush(SkinKeyboard* kb) {
     skin_keycode_buffer_flush(kb->keycodes);
 }
 
-
-int
-skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  unsigned int  unicode, int  down )
-{
+int skin_keyboard_process_unicode_event(SkinKeyboard* kb,
+                                        unsigned int unicode,
+                                        int down) {
     return skin_charmap_reverse_map_unicode(kb->charmap, unicode, down,
                                             kb->keycodes);
 }
@@ -404,7 +392,7 @@ static SkinKeyboard* skin_keyboard_create_from_charmap_name(
         const char* charmap_name,
         SkinRotation dpad_rotation,
         SkinKeyCodeFlushFunc keycode_flush) {
-    SkinKeyboard*  kb;
+    SkinKeyboard* kb;
 
     ANEW0(kb);
 
@@ -412,7 +400,8 @@ static SkinKeyboard* skin_keyboard_create_from_charmap_name(
     if (!kb->charmap) {
         // Charmap name was not found. Default to "qwerty2" */
         kb->charmap = skin_charmap_get_by_name(DEFAULT_ANDROID_CHARMAP);
-        dwarning("skin requires unknown '%s' charmap, reverting to "
+        dwarning(
+                "skin requires unknown '%s' charmap, reverting to "
                 "'%s'",
                 charmap_name, kb->charmap->name);
     }
@@ -425,7 +414,7 @@ SkinKeyboard* skin_keyboard_create(const char* kcm_file_path,
                                    SkinRotation dpad_rotation,
                                    SkinKeyCodeFlushFunc keycode_flush) {
     const char* charmap_name = DEFAULT_ANDROID_CHARMAP;
-    char        cmap_buff[SKIN_CHARMAP_NAME_SIZE];
+    char cmap_buff[SKIN_CHARMAP_NAME_SIZE];
 
     if (kcm_file_path != NULL) {
         kcm_extract_charmap_name(kcm_file_path, cmap_buff, sizeof cmap_buff);
@@ -435,9 +424,7 @@ SkinKeyboard* skin_keyboard_create(const char* kcm_file_path,
                                                   keycode_flush);
 }
 
-void
-skin_keyboard_free( SkinKeyboard*  keyboard )
-{
+void skin_keyboard_free(SkinKeyboard* keyboard) {
     if (keyboard) {
         AFREE(keyboard);
     }

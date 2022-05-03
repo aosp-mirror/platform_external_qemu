@@ -23,7 +23,7 @@
 #include "android/avd/info.h"
 #include "android/avd/hw-config.h"
 
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"

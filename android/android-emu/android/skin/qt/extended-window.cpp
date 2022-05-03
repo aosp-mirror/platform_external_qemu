@@ -43,7 +43,7 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/battery-page.h"
 #include "android/skin/qt/extended-pages/bug-report-page.h"
@@ -121,7 +121,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
 
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         mExtendedUi->bugreportPage->setAdbInterface(
                 mEmulatorWindow->getAdbInterface());
     }
@@ -129,7 +129,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO &&
         android::featurecontrol::isEnabled(
                 android::featurecontrol::CarRotary) &&
-        android_qemu_mode) {
+        getConsoleAgents()->settings->android_qemu_mode()) {
         mExtendedUi->carRotaryPage->setAdbInterface(
                 mEmulatorWindow->getAdbInterface());
     }

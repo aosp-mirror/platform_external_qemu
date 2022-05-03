@@ -65,12 +65,11 @@
 #include "hw/acpi/ipmi.h"
 
 #ifdef CONFIG_ANDROID
-#include "android/globals.h"
+#include "android/console.h"
 #include "hw/acpi/goldfish_defs.h"
 #include "android/utils/debug.h"
 #else
 // Default qemu != fuchsia
-bool is_fuchsia = false;
 #endif
 
 /* These are used to size the ACPI tables for -M pc-i440fx-1.7 and
@@ -1166,7 +1165,7 @@ static void build_goldfish_aml(Aml *table)
      * handling. This is just a workaround and may fail at any time. These IRQ
      * lines needs to be swapped back once the issue is fixed.
      */
-    if (!android_qemu_mode) {
+    if (!getConsoleAgents()->settings->android_qemu_mode()) {
         goldfish_sync_irq = GOLDFISH_EVENTS_IRQ;
         goldfish_events_irq = GOLDFISH_SYNC_IRQ;
     }
@@ -1211,7 +1210,7 @@ static void build_goldfish_aml(Aml *table)
                               GOLDFISH_ROTARY_IOMEM_SIZE,
                               GOLDFISH_ROTARY_IRQ);
 
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         build_android_dt_aml(scope, "ANDT", "ANDR0001", "android device tree");
     }
     aml_append(table, scope);
@@ -1750,8 +1749,11 @@ static void build_q35_pci0_int(Aml *table)
     /* Fuchsia needs dedicated IRQ pins for ACPI devices like goldfish-pipe */
     /* and goldfish-sync, thus we reserve GSIA-GSID (16-19) dedicatedly     */
     /* for these ACPI devices.                                              */
-    bool use_inta_d = !is_fuchsia;
+    bool use_inta_d = true;
 
+#ifdef CONFIG_ANDROID
+    use_inta_d = !getConsoleAgents()->settings->is_fuchsia();
+#endif
     aml_append(pci0_scope, aml_name_decl("PRTP", build_q35_routing_table(
                                                          "LNK", use_inta_d)));
     aml_append(pci0_scope, aml_name_decl("PRTA", build_q35_routing_table(
@@ -2043,7 +2045,8 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
         build_q35_pci0_int(dsdt);
     }
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode || min_config_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode() ||
+        getConsoleAgents()->settings->min_config_qemu_mode()) {
         build_goldfish_aml(dsdt);
     }
 #endif

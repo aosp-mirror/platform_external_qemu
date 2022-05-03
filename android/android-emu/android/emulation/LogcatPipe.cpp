@@ -16,7 +16,7 @@
 #include <memory>
 
 #include "android/base/files/PathUtils.h"      // for PathUtils
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/logcat-pipe.h"
 #include "android/utils/debug.h"
 

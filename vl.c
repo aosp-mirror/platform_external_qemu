@@ -167,7 +167,6 @@ int main(int argc, char **argv)
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/feature_control.h"
-#include "android/globals.h"
 #include "android/gps.h"
 #include "android/help.h"
 #include "android/hw-control.h"
@@ -2133,13 +2132,12 @@ static bool main_loop_should_exit(void)
     request = qemu_shutdown_requested();
     if (request) {
 #ifdef CONFIG_ANDROID
-        if (android_qemu_mode) {
+        if (getConsoleAgents()->settings->android_qemu_mode()) {
             if (invalidate_exit_snapshot) {
                 androidSnapshot_quickbootInvalidate(NULL);
             } else {
                 androidSnapshot_quickbootSave(NULL);
-                extern int arm_snapshot_save_completed;
-                arm_snapshot_save_completed = 1;
+                getConsoleAgents()->settings->set_arm_snapshot_save_completed(true);
             }
         }
 #endif
@@ -2767,7 +2765,7 @@ static int serial_parse(const char *devname)
         return -1;
     }
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         // Restore the terminal input echo in case it was disabled: it won't get
         // undone on crash, and Mac's default terminal is dumb enough to never
         // restore it by itself.
@@ -3448,7 +3446,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #endif
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
     }
     char* android_op_dns_server = NULL;
@@ -3548,7 +3546,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     }
 
 #ifdef CONFIG_HEADLESS
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         set_audio_drv(getenv("QEMU_AUDIO_DRV"));
     } else {
         // Disable audio driver in headless mode when Android is not running.
@@ -4634,7 +4632,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     replay_configure(icount_opts);
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
     }
 #endif
@@ -4662,7 +4660,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     }
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode || min_config_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode() || getConsoleAgents()->settings->min_config_qemu_mode()) {
         // setup device-tree callback
 #if defined(TARGET_AARCH64) || defined(TARGET_ARM) || defined(TARGET_MIPS)
         if (!feature_is_enabled(kFeature_DynamicPartition)) {
@@ -4685,11 +4683,11 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         android_registerMainLooper(looper_getForThread());
     }
 
-    if (min_config_qemu_mode) {
+    if (getConsoleAgents()->settings->min_config_qemu_mode()) {
         mts_port_create(NULL, getConsoleAgents()->user_event, getConsoleAgents()->display);
     }
 
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         if (!android_hw_file) {
             error_report("Missing -android-hw <file> option!");
             return 1;
@@ -4817,7 +4815,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         }
     }
 
-    if (min_config_qemu_mode) {
+    if (getConsoleAgents()->settings->min_config_qemu_mode()) {
         goldfish_fb_set_display_depth(32);
         goldfish_fb_set_use_host_gpu(1);
     }
@@ -5234,7 +5232,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     }
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         int dns_count = 0;
         if (android_op_dns_server) {
             if (!qemu_android_emulation_setup_dns_servers(
@@ -5308,7 +5306,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     }
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         if (android_drive_share_init(
                 android_op_wipe_data,
                 read_only,
@@ -5399,14 +5397,14 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     migration_object_init();
 
 #if defined(CONFIG_ANDROID)
-    if (android_qemu_mode || is_fuchsia) {
+    if (getConsoleAgents()->settings->android_qemu_mode() || getConsoleAgents()->settings->is_fuchsia()) {
         if (!qemu_android_ports_setup()) {
             // Errors have already been reported inside this function
             return 1;
         }
     }
 
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
 
         /* Configure goldfish events device */
         {
@@ -5545,7 +5543,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     }
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode || min_config_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode() || getConsoleAgents()->settings->min_config_qemu_mode()) {
         if (!qemu_android_emulation_setup()) {
             return 1;
         }
@@ -5658,7 +5656,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     bool tryDefaultVmLoad = true;
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode || is_fuchsia) {
+    if (getConsoleAgents()->settings->android_qemu_mode() || getConsoleAgents()->settings->is_fuchsia()) {
         // Initialize reporting right before starting the real VM work (load/boot
         // and the main loop). We want to track performance of a running emulator,
         // ignoring any too early exits as a result of incorrect setup.
@@ -5667,7 +5665,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         }
     }
 
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
 
 #if SNAPSHOT_PROFILE > 1
         printf("Starting VM at uptime %lld ms\n", (long long)get_uptime_ms());
@@ -5718,7 +5716,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     main_loop();
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         android_report_session_phase(ANDROID_SESSION_PHASE_EXIT);
         crashhandler_exitmode("after main_loop");
         socket_drainer_stop();
@@ -5742,7 +5740,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     qemu_android_emulation_teardown();
     android_wear_agent_stop();
-    if (android_qemu_mode || is_fuchsia) {
+    if (getConsoleAgents()->settings->android_qemu_mode() || getConsoleAgents()->settings->is_fuchsia()) {
         android_reporting_teardown();
     }
     android_devices_teardown();
@@ -5777,7 +5775,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     fflush(stderr);
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         handle_emulator_restart();
     }
 #endif

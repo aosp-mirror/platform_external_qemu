@@ -22,7 +22,7 @@
 #include "android/base/files/PathUtils.h"            // for PathUtils
 #include "android/base/memory/LazyInstance.h"        // for LazyInstance
 #include "android/emulator-window.h"                 // for emulator_window_...
-#include "android/globals.h"                         // for getConsoleAgents()->settings->avdInfo()
+#include "android/console.h"                         // for getConsoleAgents()->settings->avdInfo()
 #include "android/utils/aconfig-file.h"              // for aconfig_str, aco...
 
 using android::base::LazyInstance;

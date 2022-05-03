@@ -47,7 +47,7 @@
 #include "android/emulation/control/window_agent.h"   // for QAndroidEmulato...
 #include "android/featurecontrol/FeatureControl.h"    // for getEnabled, isE...
 #include "android/featurecontrol/Features.h"          // for Feature, AllowS...
-#include "android/globals.h"                          // for getConsoleAgents()->settings->avdInfo()
+#include "android/console.h"                          // for getConsoleAgents()->settings->avdInfo()
 #include "android/opengl/emugl_config.h"              // for emuglConfig_get...
 #include "android/opengl/gpuinfo.h"                   // for GpuInfo, global...
 #include "android/protobuf/LoadSave.h"                // for ProtobufSaveResult
@@ -500,7 +500,8 @@ bool Snapshot::save() {
         fillImageInfo(image.type, path.get(), mSnapshotPb.add_images());
     }
 
-    mSnapshotPb.set_guest_data_partition_mounted(guest_data_partition_mounted);
+    mSnapshotPb.set_guest_data_partition_mounted(
+        getConsoleAgents()->settings->guest_data_partition_mounted());
     mSnapshotPb.set_rotation(
             int(Snapshotter::get().windowAgent().getRotation()));
 
@@ -859,8 +860,8 @@ bool Snapshot::load() {
     }
 
     if (mSnapshotPb.has_guest_data_partition_mounted()) {
-        guest_data_partition_mounted =
-                mSnapshotPb.guest_data_partition_mounted();
+        getConsoleAgents()->settings->set_guest_data_partition_mounted(
+                mSnapshotPb.guest_data_partition_mounted());
     }
 
     if (mSnapshotPb.has_rotation() &&

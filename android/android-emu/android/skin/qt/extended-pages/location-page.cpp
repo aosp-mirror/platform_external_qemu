@@ -20,7 +20,7 @@
 #include "android/cmdline-option.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/featurecontrol/feature_control.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/location/MapsKey.h"

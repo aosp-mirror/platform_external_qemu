@@ -25,7 +25,6 @@
 #include "android/console.h"                            // for getConsoleAgents
 #include "android/emulation/AndroidAsyncMessagePipe.h"  // for AsyncMessageP...
 #include "android/emulation/control/vm_operations.h"    // for QAndroidVmOpe...
-#include "android/globals.h"                            // for android_snaps...
 #include "android/multi-instance.h"                     // for updateInstanc...
 #include "android/offworld/OffworldPipe.h"              // for sendResponse
 #include "android/opengl/emugl_config.h"                // for emuglConfig_c...
@@ -136,7 +135,7 @@ void createCheckpoint(AsyncMessagePipeHandle pipe,
 
     getConsoleAgents()->vm->vmStop();
     android::base::ThreadLooper::runOnMainLooper([pipe, snapshotName]() {
-        android_snapshot_update_timer = 0;
+        getConsoleAgents()->settings->set_android_snapshot_update_timer(0);
         const AndroidSnapshotStatus result =
                 androidSnapshot_save(snapshotName.c_str());
         getConsoleAgents()->vm->vmStart();
@@ -162,7 +161,7 @@ void gotoCheckpoint(
     getConsoleAgents()->vm->vmStop();
     android::base::ThreadLooper::runOnMainLooper([pipe, snapshotName,
                                                   shareMode]() {
-        android_snapshot_update_timer = 0;
+        getConsoleAgents()->settings->set_android_snapshot_update_timer(0);
         if (shareMode) {
             bool res = android::multiinstance::updateInstanceShareMode(
                     snapshotName.c_str(), *shareMode);
@@ -205,7 +204,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
     android::base::ThreadLooper::runOnMainLooper([pipe]() {
         // snapshotRemap triggers a snapshot save.
         // It must happen before changing disk backend
-        android_snapshot_update_timer = 0;
+        getConsoleAgents()->settings->set_android_snapshot_update_timer(0);
         bool res =
                 getConsoleAgents()->vm->snapshotRemap(false, nullptr, nullptr);
         LOG_IF(WARNING, !res) << "RAM share mode update failure";
@@ -245,7 +244,7 @@ void doneInstance(android::AsyncMessagePipeHandle pipe,
                         ? android::base::FileShare::Read
                         : android::base::FileShare::Write;
         android::base::ThreadLooper::runOnMainLooper([mode]() {
-            android_snapshot_update_timer = 0;
+            getConsoleAgents()->settings->set_android_snapshot_update_timer(0);
             bool res = android::multiinstance::updateInstanceShareMode(
                     android::snapshot::kDefaultBootSnapshot, mode);
             LOG_IF(WARNING, !res) << "Share mode update failure";

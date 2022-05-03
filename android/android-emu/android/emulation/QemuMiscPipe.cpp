@@ -38,7 +38,6 @@
 #include "android/emulation/control/vm_operations.h"     // for QAndroidVmOp...
 #include "android/featurecontrol/FeatureControl.h"       // for isEnabled
 #include "android/featurecontrol/Features.h"             // for MultiDisplay
-#include "android/globals.h"                             // for to_set_language
 #include "android/hw-sensors.h"                          // for FoldableHing...
 #include "android/utils/aconfig-file.h"                  // for aconfig_find
 #include "android/utils/path.h"                          // for path_exists
@@ -295,7 +294,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 #endif
         fflush(stdout);
 
-        guest_boot_completed = 1;
+        getConsoleAgents()->settings->set_guest_boot_completed(true);
 
         if (getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut > 0) {
             getConsoleAgents()->vm->vmShutdown();

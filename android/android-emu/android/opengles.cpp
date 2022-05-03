@@ -25,7 +25,7 @@
 #include "android/emulation/GoldfishDma.h"
 #include "android/emulation/RefcountPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/logger.h"
 #include "android/opengl/GLProcessPipe.h"
@@ -70,7 +70,7 @@ using android::emulation::asg::ConsumerCallbacks;
 /* Name of the GLES rendering library we're going to use */
 #define RENDERER_LIB_NAME "libOpenglRender"
 
-/* Declared in "android/globals.h" */
+/* Declared in "android/console.h" */
 int  android_gles_fast_pipes = 1;
 
 // Define the Render API function pointers.
@@ -242,7 +242,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     sRenderLib->setGrallocImplementation(
             android::featurecontrol::isEnabled(
                     android::featurecontrol::Minigbm) ||
-                            is_fuchsia
+                            getConsoleAgents()->settings->is_fuchsia()
                     ? MINIGBM
                     : GOLDFISH_GRALLOC);
 #endif

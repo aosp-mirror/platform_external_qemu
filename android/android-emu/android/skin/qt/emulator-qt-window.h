@@ -19,7 +19,7 @@
 #include "android/emulation/control/ApkInstaller.h"
 #include "android/emulation/control/FilePusher.h"
 #include "android/emulation/control/ScreenCapturer.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/settings-agent.h"
 #include "android/skin/event.h"

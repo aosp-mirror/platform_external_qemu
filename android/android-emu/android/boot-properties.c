@@ -13,7 +13,7 @@
 #include "android/boot-properties.h"
 
 #include "android/emulation/android_qemud.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/utils/debug.h"
 #include "android/utils/stream.h"
 #include "android/utils/system.h"
@@ -356,8 +356,8 @@ boot_property_client_recv( void*         opaque,
 
         /* when qemu-props starts in the guest, it will issue "list",
            reset boot complete/data partition mounted */
-        guest_boot_completed = 0;
-        guest_data_partition_mounted = 0;
+        getConsoleAgents()->settings->set_guest_boot_completed(false);
+        getConsoleAgents()->settings->set_guest_data_partition_mounted(false);
         return;
     }
 

@@ -16,7 +16,7 @@
 
 #include "android/base/Optional.h"
 #include "android/base/StringFormat.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/utils/debug.h"
 
 #include <utility>

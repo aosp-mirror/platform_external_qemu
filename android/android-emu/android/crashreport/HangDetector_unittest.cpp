@@ -35,37 +35,6 @@ struct AvdInfo;
 using namespace android::base;
 using namespace android::crashreport;
 
-
-AndroidOptions emptyOptions{};
-AndroidOptions* sAndroid_cmdLineOptions = &emptyOptions;
-std::string sCmdlLine;
-
-AvdInfo* sAndroid_avdInfo = nullptr;
-AvdInfoParams sAndroid_avdInfoParams = {0};
-
-static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
-        .avdParams = []() { return &sAndroid_avdInfoParams; },
-        .avdInfo =
-                []() {
-                    // Do not access the info before it is injected!
-                    assert(sAndroid_avdInfo != nullptr);
-                    return sAndroid_avdInfo;
-                },
-        .inject_AvdInfo =
-                [](AvdInfo* avd) {
-                    dinfo("Injecting avd info..");
-                    sAndroid_avdInfo = avd;
-                }};
-
-
-class HangDetectorMockConsoleFactory
-    : public android::emulation::AndroidConsoleFactory {
-    const QAndroidGlobalVarsAgent* const android_get_QAndroidGlobalVarsAgent()
-            const {
-        return &gMockAndroidGlobalVarsAgent;
-    }
-};
-
 class HangDetectorTest : public ::testing::Test {
 public:
     HangDetectorTest()
@@ -80,9 +49,6 @@ public:
                           .taskProcessingTimeoutMs = 10,
                           .hangCheckTimeoutMs = 10,
                   }) {
-
-        android::emulation::injectConsoleAgents(HangDetectorMockConsoleFactory());
-        getConsoleAgents()->settings->inject_AvdInfo(nullptr);
     }
 
     void TearDown() override { mHangDetector.stop(); }

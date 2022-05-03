@@ -17,7 +17,6 @@
 #include "android/skin/qt/mac-native-event-filter.h"
 
 #include "android/console.h"
-#include "android/globals.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/native-keyboard-event-handler.h"

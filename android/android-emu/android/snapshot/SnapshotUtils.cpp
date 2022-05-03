@@ -32,7 +32,6 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
-#include "android/globals.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
 #include "android/snapshot/interface.h"
@@ -101,7 +100,8 @@ bool pullSnapshot(const char* snapshotName,
                         << "Exported snapshot in " << sw.restartUs() << " us";
                 // iniFile_saveToFile returns 0 on succeed.
                 succeed = !iniFile_saveToFile(
-                        avdInfo_getConfigIni(getConsoleAgents()->settings->avdInfo()),
+                        avdInfo_getConfigIni(
+                                getConsoleAgents()->settings->avdInfo()),
                         base::PathUtils::join(snapshot->dataDir(),
                                               CORE_CONFIG_INI)
                                 .c_str());
@@ -114,11 +114,15 @@ bool pullSnapshot(const char* snapshotName,
                 std::string exportdIniPath = base::PathUtils::join(
                         snapshot->dataDir(), "exported.ini");
                 base::IniFile exportedIni(exportdIniPath);
-                exportedIni.setString("avdId",
-                                      avdInfo_getName(getConsoleAgents()->settings->avdInfo()));
+                exportedIni.setString(
+                        "avdId",
+                        avdInfo_getName(
+                                getConsoleAgents()->settings->avdInfo()));
                 exportedIni.setString("snasphotName", snapshot->name());
-                exportedIni.setString("target",
-                                      avdInfo_getTarget(getConsoleAgents()->settings->avdInfo()));
+                exportedIni.setString(
+                        "target",
+                        avdInfo_getTarget(
+                                getConsoleAgents()->settings->avdInfo()));
                 succeed = exportedIni.write();
                 if (!succeed) {
                     logError("Failed to save snapshot meta data", opaque,
@@ -182,7 +186,8 @@ bool pullSnapshot(const char* snapshotName,
                     // Use of  a 64 KB  buffer gives good performance (see
                     // performance tests.)
                     std::ifstream ifs(
-                            PathUtils::asUnicodePath(fname).c_str(), std::ios_base::in | std::ios_base::binary);
+                            PathUtils::asUnicodePath(fname).c_str(),
+                            std::ios_base::in | std::ios_base::binary);
                     ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
                     LOG(VERBOSE) << "Zipping " << name;
                     if (android_stat(fname.c_str(), &sb) != 0 ||

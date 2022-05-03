@@ -19,7 +19,7 @@
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
+#include "android/console.h"
 
 #define D(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)

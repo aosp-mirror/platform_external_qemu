@@ -17,7 +17,7 @@
 #include <memory>      // for static_pointer...
 
 #include "android/cmdline-option.h"
-#include "android/globals.h"                           // for android_hw
+#include "android/console.h"                           // for android_hw
 #include "android/skin/qt/emulator-no-qt-no-window.h"  // for EmulatorNoQtNo...
 #include "android/skin/rect.h"                         // for SkinRect, SkinPos
 #include "android/skin/winsys.h"                       // for WinsysPreferre...
@@ -301,13 +301,13 @@ extern void skin_winsys_quit_request() {
 #endif
     if (needRequestClose) {
         printf("saving arm snapshot.... !!!\n\n");
-        arm_snapshot_save_completed = 0;
+        getConsoleAgents()->settings->set_arm_snapshot_save_completed(false);
         EmulatorNoQtNoWindow* guiless_window =
                 EmulatorNoQtNoWindow::getInstance();
         guiless_window->requestClose();
         for (int i = 0; i < 60; ++i) {
             System::get()->sleepMs(1 * 1000);
-            if (arm_snapshot_save_completed)
+            if (getConsoleAgents()->settings->arm_snapshot_save_completed())
                 break;
         }
         printf("saving done.... !!!\n\n");

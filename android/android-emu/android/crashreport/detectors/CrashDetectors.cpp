@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/crashreport/detectors/CrashDetectors.h"
+#include "android/console.h"
 
 namespace android {
 namespace crashreport {
@@ -33,12 +34,11 @@ bool TimedHangDetector::check() {
     return mFailedOnce;
 }
 
-HeartBeatDetector::HeartBeatDetector(std::function<int()> getHeartbeat,
-                                     volatile int* bootComplete)
-    : mGetHeartbeat(getHeartbeat), mBootComplete(bootComplete) {}
+HeartBeatDetector::HeartBeatDetector(std::function<int()> getHeartbeat)
+    : mGetHeartbeat(getHeartbeat) {}
 
 bool HeartBeatDetector::check() {
-    if (!*mBootComplete) {
+    if (!getConsoleAgents()->settings->guest_boot_completed()) {
         return false;
     }
     int now = mGetHeartbeat();

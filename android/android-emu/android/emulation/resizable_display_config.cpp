@@ -21,7 +21,7 @@
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/metrics/MetricsReporter.h"
 #include "android/featurecontrol/feature_control.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/opengles.h"
 #include "studio_stats.pb.h"
 

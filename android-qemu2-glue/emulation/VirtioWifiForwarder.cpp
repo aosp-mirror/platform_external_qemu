@@ -20,7 +20,7 @@ extern "C" {
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/sockets/SocketUtils.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/network/Endian.h"
 #include "android/network/WifiForwardClient.h"
 #include "android/network/WifiForwardPeer.h"

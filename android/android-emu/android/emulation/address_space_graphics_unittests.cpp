@@ -29,8 +29,7 @@
 #include "android/emulation/address_space_device.hpp"        // for goldfish...
 #include "android/emulation/address_space_graphics.h"        // for AddressS...
 #include "android/emulation/address_space_graphics_types.h"  // for asg_context
-#include "android/emulation/hostdevices/HostAddressSpace.h"  // for HostAddr...
-#include "android/globals.h"                                 // for android_hw
+#include "android/emulation/hostdevices/HostAddressSpace.h"  // for HostAddr..
 
 namespace android {
 namespace base {

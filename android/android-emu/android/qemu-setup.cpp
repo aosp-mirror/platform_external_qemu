@@ -51,7 +51,6 @@
 #include "android/emulation/control/window_agent.h"           // for gQAndro...
 #include "android/featurecontrol/FeatureControl.h"            // for isEnabled
 #include "android/featurecontrol/Features.h"                  // for MultiDi...
-#include "android/globals.h"                                  // for android...
 #include "android/hw-fingerprint.h"                           // for android...
 #include "android/hw-sensors.h"                               // for android...
 #include "android/logcat-pipe.h"                              // for android...
@@ -431,7 +430,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_unix_pipes_init();
     android_init_opengles_pipe();
 
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         android_opengles_pipe_set_recv_mode(0 /* android */);
     } else {
         android_opengles_pipe_set_recv_mode(1 /* fuchsia */);
@@ -469,7 +468,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
         android_ports_setup(agents, isQemu2);
     }
 
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         /* send a simple message to the ADB host server to tell it we just
          * started. it should be listening on port 5037. if we can't reach it,
          * don't bother
@@ -500,7 +499,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android::offworld::registerOffworldPipeService();
     android_host_memory_service_init();
 
-    if (android_qemu_mode) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
         AvdFlavor flavor = avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo());
         /* initialize the car data emulation if the system image is a Android
          * Auto build */

@@ -14,7 +14,7 @@
 #include "android/base/files/ScopedFd.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/protobuf/LoadSave.h"
 #include "android/snapshot/common.h"
 #include "snapshot.pb.h"

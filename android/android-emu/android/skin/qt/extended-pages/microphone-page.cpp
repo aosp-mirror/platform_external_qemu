@@ -17,7 +17,6 @@
 #include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
 #include "android/console.h"                          // for getConsoleAgents
 #include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
-#include "android/globals.h"                          // for getConsoleAgents()->settings->avdInfo()
 #include "android/hw-events.h"                        // for EV_KEY, EV_SW
 #include "android/metrics/UiEventTracker.h"           // for UiEventTracker
 #include "android/skin/event.h"                       // for SkinEvent, Skin...

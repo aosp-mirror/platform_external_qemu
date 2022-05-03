@@ -20,7 +20,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/cmdline-option.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 #include "android/virtualscene/PosterInfo.h"

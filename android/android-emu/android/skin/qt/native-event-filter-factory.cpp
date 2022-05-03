@@ -17,7 +17,6 @@
 #include "android/skin/qt/native-event-filter-factory.h"
 
 #include "android/base/memory/LazyInstance.h"         // for LazyInstance
-#include "android/console.h"
 
 class QAbstractNativeEventFilter;
 
@@ -38,7 +37,7 @@ class QAbstractNativeEventFilter;
 #elif defined(__linux__)
 #include <cstdio>
 
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/native-keyboard-event-handler.h"

@@ -19,4 +19,3 @@ double android_net_download_speed = 0.;
 int android_net_min_latency = 0;
 int android_net_max_latency = 0;
 int android_net_disable = 0;
-int android_snapshot_update_timer = 1;

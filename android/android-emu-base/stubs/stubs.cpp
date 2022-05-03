@@ -14,9 +14,4 @@
 
 // Need to include this header in case the compiler decides to mangle the
 // symbol.
-#include "android/globals.h"
-
-int guest_data_partition_mounted = 0;
-int guest_boot_completed = 0;
-
-int is_fuchsia = 0;
+#include "android/console.h"

@@ -49,7 +49,6 @@
 #include "android/featurecontrol/feature_control.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
-#include "android/globals.h"
 #include "android/help.h"
 #include "android/hw-sensors.h"
 #include "android/kernel/kernel_utils.h"
@@ -972,9 +971,10 @@ static int startEmulatorWithMinConfig(int argc,
                                       AndroidOptions* optsToOverride,
                                       AndroidHwConfig* hwConfigToOverride,
                                       AvdInfo** avdInfoToOverride) {
-    android_qemu_mode = 0;
-    // Min config mode and fuchsia mode are equivalent, at least for now.
-    min_config_qemu_mode = is_fuchsia = 1;
+     getConsoleAgents()->settings->set_android_qemu_mode(false);
+     // Min config mode and fuchsia mode are equivalent, at least for now.
+     getConsoleAgents()->settings->set_min_config_qemu_mode(true);
+     getConsoleAgents()->settings->set_is_fuchsia(true);
 
     auto opts = optsToOverride;
     auto hw = hwConfigToOverride;
@@ -1262,14 +1262,6 @@ extern "C" int main(int argc, char** argv) {
         }
     }
 #endif
-
-#ifdef CONFIG_HEADLESS
-    host_emulator_is_headless = 1;
-    D("emulator running in headless mode");
-#else
-    host_emulator_is_headless = 0;
-    D("emulator running in qt mode");
-#endif
     process_early_setup(argc, argv);
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
 
@@ -1288,6 +1280,14 @@ extern "C" int main(int argc, char** argv) {
 
     // Make the console agents available.
     injectQemuConsoleAgents("");
+
+#ifdef CONFIG_HEADLESS
+    getConsoleAgents()->settings->set_host_emulator_is_headless(true);
+    D("emulator running in headless mode");
+#else
+    getConsoleAgents()->settings->set_host_emulator_is_headless(false);
+    D("emulator running in qt mode");
+#endif
 
     // ParameterList params(argc, argv);
     getConsoleAgents()->settings->inject_android_cmdLine(

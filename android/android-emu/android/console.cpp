@@ -39,7 +39,6 @@
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
 #include "android/network/constants.h"
@@ -2737,7 +2736,7 @@ static int do_avd_id(ControlClient client, char* args) {
 
 static int do_avd_windowtype(ControlClient client, char* args) {
     control_write(client, "windowtype=%s\r\n",
-                  host_emulator_is_headless == 1 ? "headless" : "qtwindow");
+                  getConsoleAgents()->settings->host_emulator_is_headless() == 1 ? "headless" : "qtwindow");
     return 0;
 }
 
@@ -4176,7 +4175,7 @@ static int do_kill(ControlClient client, char* args) {
     fflush(stdout);
     bool needRequestClose = false;
 
-    if (host_emulator_is_headless && getConsoleAgents()->settings->avdInfo()) {
+    if (getConsoleAgents()->settings->host_emulator_is_headless() && getConsoleAgents()->settings->avdInfo()) {
         auto arch = (avdInfo_getTargetCpuArch(getConsoleAgents()->settings->avdInfo()));
         if (!strcmp(arch, "x86") || !strcmp(arch, "x86_64")) {
         } else if (!getConsoleAgents()

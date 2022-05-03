@@ -12,7 +12,7 @@
 #include "android/car.h"
 
 #include "android/emulation/android_qemud.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/utils/debug.h"
 #include "android/utils/stream.h"
 #include "android/utils/system.h"

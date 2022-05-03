@@ -13,7 +13,7 @@
 #include "android/hw-fingerprint.h"
 
 #include "android/emulation/android_qemud.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/stream.h"
@@ -177,7 +177,7 @@ _hwFingerprintClient_recv(void* opaque, uint8_t* msg, int msglen,
 {
     /* HwFingerprintClient*       fp_client = opaque; */
     D("got message from guest system fingerprint HAL");
-    guest_data_partition_mounted = 1;
+    getConsoleAgents()->settings->set_guest_data_partition_mounted(true);
 }
 
 static HwFingerprintClient*

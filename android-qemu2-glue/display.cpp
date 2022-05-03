@@ -17,7 +17,7 @@
 #include "android-qemu2-glue/display.h"
 
 #include "android/emulator-window.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/utils/debug.h"
 
 extern "C" {

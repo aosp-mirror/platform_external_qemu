@@ -25,7 +25,7 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/emulation/VmLock.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
+#include "android/console.h"
 #include "android/utils/debug.h"
 
 #include <algorithm>
@@ -505,9 +505,9 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
             }
         }
         return count;
-    } else if (guest_boot_completed == 0 && getConsoleAgents()->settings->hw()->test_delayAdbTillBootComplete == 1) {
+    } else if (getConsoleAgents()->settings->guest_boot_completed() == 0 && getConsoleAgents()->settings->hw()->test_delayAdbTillBootComplete == 1) {
         return PIPE_ERROR_AGAIN;
-    } else if (guest_data_partition_mounted == 0 && mPlayStoreImage) {
+    } else if (getConsoleAgents()->settings->guest_data_partition_mounted() == 0 && mPlayStoreImage) {
         return PIPE_ERROR_AGAIN;
     } else if (mState == State::SendingAcceptReplyOk) {
         // The guest is receiving the 'ok' reply.
