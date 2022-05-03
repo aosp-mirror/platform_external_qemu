@@ -165,8 +165,11 @@ bool MediaCudaVideoHelper::init() {
            "mode %s",
            mCudaVideoCodecType == cudaVideoCodec_H264
                    ? "H264"
-                   : (mCudaVideoCodecType == cudaVideoCodec_VP8 ? "VP8"
-                                                                : "VP9"),
+                   : (mCudaVideoCodecType == cudaVideoCodec_HEVC
+                              ? "HEVC"
+                              : (mCudaVideoCodecType == cudaVideoCodec_VP8
+                                         ? "VP8"
+                                         : "VP9")),
            mUseGpuTexture ? "on" : "off");
 
     return true;

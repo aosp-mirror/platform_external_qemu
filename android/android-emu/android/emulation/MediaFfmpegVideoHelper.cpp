@@ -69,6 +69,10 @@ bool MediaFfmpegVideoHelper::init() {
             codecType = AV_CODEC_ID_H264;
             MEDIA_DPRINT("create h264 ffmpeg decoder%d", (int)mType);
             break;
+        case 265:
+            codecType = AV_CODEC_ID_HEVC;
+            MEDIA_DPRINT("create hevc ffmpeg decoder%d", (int)mType);
+            break;
         default:
             MEDIA_DPRINT("invalid codec %d", (int)mType);
             return false;
@@ -97,11 +101,11 @@ bool MediaFfmpegVideoHelper::init() {
     avcodec_open2(mCodecCtx, mCodec, 0);
     mFrame = av_frame_alloc();
 
-    MEDIA_DPRINT("Successfully created software h264 decoder context %p",
-                 mCodecCtx);
+    MEDIA_DPRINT(
+            "Successfully created software ffmpeg software decoder context %p",
+            mCodecCtx);
 
-    dprint("successfully created ffmpeg video decoder for %s",
-           mType == 264 ? "H264" : (mType == 8 ? "VP8" : "VP9"));
+    dprint("successfully created ffmpeg video decoder for %d", mType);
 
     return true;
 }

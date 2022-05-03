@@ -30,6 +30,7 @@ namespace emulation {
 enum class DecoderType : uint8_t {
     Vpx = 0,
     H264 = 1,
+    Hevc = 2,
 };
 
 AddressSpaceHostMediaContext::AddressSpaceHostMediaContext(uint64_t phys_addr, const address_space_device_control_ops* ops,
@@ -75,6 +76,11 @@ void AddressSpaceHostMediaContext::save(base::Stream* stream) const {
         stream->putBe32((uint32_t)DecoderType::H264);
         mH264Decoder->save(stream);
     }
+    if (mHevcDecoder != nullptr) {
+        AS_DEVICE_DPRINT("Saving HevcDecoder snapshot");
+        stream->putBe32((uint32_t)DecoderType::Hevc);
+        mHevcDecoder->save(stream);
+    }
 }
 
 bool AddressSpaceHostMediaContext::load(base::Stream* stream) {
@@ -96,6 +102,11 @@ bool AddressSpaceHostMediaContext::load(base::Stream* stream) {
             AS_DEVICE_DPRINT("Loading H264Decoder snapshot");
             mH264Decoder.reset(MediaH264Decoder::create());
             mH264Decoder->load(stream);
+            break;
+        case DecoderType::Hevc:
+            AS_DEVICE_DPRINT("Loading HevcDecoder snapshot");
+            mHevcDecoder.reset(MediaHevcDecoder::create());
+            mHevcDecoder->load(stream);
             break;
         default:
             break;
@@ -186,6 +197,15 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
                 mH264Decoder.reset(MediaH264Decoder::create());
             }
             mH264Decoder->handlePing(
+                    codecType, op,
+                    (uint8_t*)(mControlOps->get_host_ptr(info->phys_addr)) +
+                            offSetAddr);
+            break;
+        case MediaCodecType::HevcCodec:
+            if (!mHevcDecoder) {
+                mHevcDecoder.reset(MediaHevcDecoder::create());
+            }
+            mHevcDecoder->handlePing(
                     codecType, op,
                     (uint8_t*)(mControlOps->get_host_ptr(info->phys_addr)) +
                             offSetAddr);
