@@ -732,7 +732,7 @@ target_include_directories(
     ${CMAKE_CURRENT_BINARY_DIR})
 android_target_compile_options(
   android-emu-shared Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr
-                                   -fvisibility=hidden)
+                                   -fvisibility=default)
 android_target_compile_options(
   android-emu-shared Clang PUBLIC -Wno-return-type-c-linkage) # android_getOp
 # enG lesRenderer
