@@ -8,4 +8,4 @@ prebuilt(UUID)
 
 # Grab the other libraries.
 include(android-emu)
-include(android-libui)
+# include(android-libui)

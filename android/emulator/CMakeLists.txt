@@ -16,7 +16,10 @@ android_add_executable(
        android-emu-launch
        android-emu-utils
        android-hw-config
-       qemu-host-common-headers)
+       qemu-host-common-headers
+       ui::window
+       ui::common
+       aemu-gl-init)
 target_include_directories(
   emulator # This is not right!, an implicit dependency..
   PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
@@ -113,7 +116,7 @@ android_target_dependency(emulator windows_msvc-x86_64 MSVC_DEPENDENCIES)
 # "android_install_dependency_force_exec()" calls.
 android_install_dependency_force_exec(all QT5_SHARED_DEPENDENCIES)
 if(QTWEBENGINE)
-    android_install_dependency_force_exec(all QT5_WEBENGINE_SHARED_DEPENDENCIES)
+  android_install_dependency_force_exec(all QT5_WEBENGINE_SHARED_DEPENDENCIES)
 endif()
 if(NOT OPTION_MINBUILD)
   android_install_dependency(all MESA_DEPENDENCIES)

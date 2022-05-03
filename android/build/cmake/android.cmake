@@ -1539,7 +1539,6 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
     LIBRARIES libqemu2-glue
               libqemu2-glue-vm-operations
               libqemu2-util
-              emulator-libui
               android-emu
               android-emu-base-headers
               android-qemu-deps
@@ -1548,7 +1547,11 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
               ${WINDOWS_LAUNCHER}
               android-emu-wear # vl.c directly refers to wear!
               android-emu-crash-initializer
-              android-emu-crashreport-consent-ui)
+              android-emu-crashreport-consent-ui
+              aemu-ui-qt
+              aemu-ui-common
+              aemu-ui-qt)
+
 endfunction()
 
 # Constructs the qemu headless executable.
@@ -1570,13 +1573,15 @@ function(android_add_qemu_headless_executable ANDROID_AARCH STUBS)
               libqemu2-util
               android-emu
               android-emu-base-headers
-              emulator-libui-headless
               android-qemu-deps
               android-qemu-deps-headless
               emulator-libusb
               android-emu-wear # vl.c directly refers to wear!
               android-emu-crash-initializer
-              android-emu-crashreport-consent-no-ui)
+              android-emu-crashreport-consent-no-ui
+              aemu-ui-window
+              aemu-ui-common
+              aemu-ui-headless)
 endfunction()
 
 # Constructs the qemu upstream executable.

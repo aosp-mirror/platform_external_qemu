@@ -16,7 +16,7 @@
 #include "android/base/system/System.h"
 #include "host-common/H264PingInfoParser.h"
 #include "host-common/MediaFfmpegVideoHelper.h"
-#include "android/main-emugl.h"
+#include "host-common/opengl/emugl_config.h"
 
 #ifndef __APPLE__
 // for Linux and Window, Cuvid is available

@@ -9,6 +9,8 @@ add_subdirectory(android-emu-base)
 add_subdirectory(android-emu)
 add_subdirectory(android-emugl)
 add_subdirectory(coverage-poc)
+add_subdirectory(android-ui)
+
 if(NOT OPTION_AEMU_LIBS_ONLY)
   add_subdirectory(emulator)
   add_subdirectory(emulator-check)

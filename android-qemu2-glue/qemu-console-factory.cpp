@@ -100,6 +100,9 @@ extern "C" const QAndroidHwControlAgent* const gQAndroidHwControlAgent;
 // Defined in android-qemu2-glue/qemu-globals-agent-impl.cpp
 extern "C" const QAndroidGlobalVarsAgent* const gQAndroidGlobalVarsAgent;
 
+// Defined in either surface-headless, or surface-qt
+extern "C" const QAndroidSurfaceAgent* const gQAndroidSurfaceAgent;
+
 
 #define ANDROID_DEFINE_CONSOLE_GETTER_IMPL(typ) \
     const typ* const android_get_##typ() const override { return g##typ; };
@@ -128,7 +131,8 @@ const QAndroidLibuiAgent* const getQAndroidLibuiAgent();
     X(QCarDataAgent)             \
     X(QGrpcAgent)                \
     X(QAndroidHwControlAgent)    \
-    X(QAndroidGlobalVarsAgent)
+    X(QAndroidGlobalVarsAgent)   \
+    X(QAndroidSurfaceAgent)
 
 class QemuAndroidConsoleAgentFactory
     : public android::emulation::AndroidConsoleFactory {
