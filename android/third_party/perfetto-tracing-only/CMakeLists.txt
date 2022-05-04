@@ -103,8 +103,6 @@ function(android_add_pbzero_library directory name)
         set(EXE_SUFFIX "")
     endif()
 
-    message(STATUS "Adding pbzero for ${name}. Tracing protobuf src absdir: ${android_add_pbzero_library_protosrc_absdir}")
-
     android_add_protobuf_with_plugin(
       pbzero-${name}
       .pbzero.h
