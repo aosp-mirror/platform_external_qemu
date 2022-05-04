@@ -34,6 +34,17 @@
       return YES;
   }
 
+@end
+
+@interface EmuGLViewWithMetal : NSView {
+} @end
+
+@implementation EmuGLViewWithMetal
+
+  - (BOOL)isOpaque {
+      return YES;
+  }
+
   + (Class) layerClass {
     return [CAMetalLayer class];
   }
@@ -64,7 +75,13 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
     int cocoa_y = (int)content_rect.size.height - (y + height);
     NSRect contentRect = NSMakeRect(x, cocoa_y, width, height);
 
-    NSView *glView = [[EmuGLView alloc] initWithFrame:contentRect];
+    NSView *glView = NULL;
+    const char* angle_default_platform = getenv("ANGLE_DEFAULT_PLATFORM");
+    if (angle_default_platform && 0 == strcmp("metal", angle_default_platform)) {
+        glView = [[EmuGLViewWithMetal alloc] initWithFrame:contentRect];
+    } else {
+        glView = [[EmuGLView alloc] initWithFrame:contentRect];
+    }
     if (!glView) {
         return NULL;
     }
