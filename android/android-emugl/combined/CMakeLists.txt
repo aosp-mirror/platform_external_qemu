@@ -13,6 +13,7 @@ function(add_opengl_dependencies TGT)
 endfunction()
 
 if(OPTION_GFXSTREAM_BACKEND)
+    set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
     if (WIN32)
         add_definitions("-DUNICODE -D_UNICODE -DNOMINMAX -DEMUGL_BUILD -DVK_USE_PLATFORM_WIN32_KHR -DBUILDING_EMUGL_COMMON_SHARED")
 
@@ -66,7 +67,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     # Macro to easily set the TEST_INCLUDE_FILES properties to point to `test_properties.cmake`
     # This macro should be called at the end of any CMakeLists.txt file that defines test targets.
     macro("set_test_include_files")
-    set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES ${CMAKE_SOURCE_DIR}/test_properties.cmake)
+    set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES ${GFXSTREAM_REPO_ROOT}/test_properties.cmake)
     endmacro()
 
     # Uncomment for ASAN support
@@ -91,7 +92,6 @@ if(OPTION_GFXSTREAM_BACKEND)
         endif()
     endif()
 
-    set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
     set(GFXSTREAM_PREFIX "gfxstream")
 
     # Third party dependencies
