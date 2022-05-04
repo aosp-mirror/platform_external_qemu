@@ -17,63 +17,123 @@
 #include "qom/object.h"
 #include "trace.h"
 
+
+#define NPCM_SAL            BIT(0)
+#define NPCM_SAH            BIT(1)
+#define NPCM_TAL            BIT(2)
+#define NPCM_TAH            BIT(3)
+#define NPCM_PARAMS         BIT(4)
+#define NPCM_BITFIELDS_ALL  0x1f
+
+
+static bool npcm_pcierc_valid_window_addr(hwaddr addr, uint32_t size)
+{
+    if ((addr + size) > NPCM_PCIE_HOLE_END) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "%s: window mapping @0x%lx, size: %d is invalid.\n",
+                      __func__, addr, size);
+        return false;
+    } else if (addr < NPCM_PCIE_HOLE) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "%s: window mapping @0x%lx, is invalid.\n",
+                      __func__, addr);
+        return false;
+    } else {
+        return true;
+    }
+};
+
+static bool npcm_pcierc_valid_window_size(hwaddr src, hwaddr dst, uint32_t size)
+{
+    if (size > 2 * GiB || size < 4 * KiB) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "%s: Invalid PCI window size %d bytes\n",
+                      __func__, size);
+        return false;
+    }
+
+    return true;
+}
+
 /* Map enabled windows to a memory subregion */
 static void npcm_pcierc_map_enabled(NPCMPCIERCState *s, NPCMPCIEWindow *w)
 {
     MemoryRegion *system = get_system_memory();
     uint32_t size = NPCM_PCIERC_SAL_SIZE(w->sal);
-    hwaddr bar = ((uint64_t)w->sah) << 32 | (w->sal & 0xFFFFF000);
+    hwaddr src_ba = ((uint64_t)w->sah) << 32 | (w->sal & 0xFFFFF000);
+    hwaddr dest_ba = ((uint64_t)w->tah) << 32 | w->tal;
     char name[26];
 
-    /* check if window is enabled */
-    if (!(w->sal & NPCM_PCIERC_SAL_EN)) {
+    if (!(w->sal & NPCM_PCIERC_SAL_EN) || /* ignore disabled windows */
+        !npcm_pcierc_valid_window_size(src_ba, dest_ba, size) ||
+        memory_region_is_mapped(&w->mem) /* ignore existing windows */) {
         return;
     }
 
-    if (size > 2 * GiB || size < 4 * KiB) {
-        qemu_log_mask(LOG_GUEST_ERROR,
-                      "%s: Invalid PCI window size %d bytes\n",
-                      __func__, size);
+    /* bitfield for all 5 registers required to create a PCIe window */
+    if (w->set_fields != NPCM_BITFIELDS_ALL) {
         return;
     }
+    w->set_fields = 0;
 
+    /*
+     * This implementation of the Nuvoton root complex uses memory region
+     * aliasing to emulate the behaviour of the windowing system on hardware.
+     * AXI to PCIe windows in QEMU are system_memory subregions aliased to PCI
+     * memory at the respective source and translation addresses
+     * PCIe to AXI windows are done as PCI memory subregions aliased to system
+     * memory. PCIe to AXI windows have no address restrictions.
+     */
     if (w->type == AXI2PCIE) {
+        if (!npcm_pcierc_valid_window_addr(src_ba, size)) {
+            return;
+        };
         snprintf(name, sizeof(name), "npcm-axi2pcie-window-%d", w->id);
+        if (w->params &
+            (NPCM_PCIERC_TRSF_PARAM_CONFIG | NPCM_PCIERC_TRSL_ID_CONFIG)) {
+            memory_region_init_alias(&w->mem, OBJECT(s), name,
+                                     &s->rp_config, 0, size);
+        } else {
+            memory_region_init_alias(&w->mem, OBJECT(s), name,
+                                     &s->pcie_memory, dest_ba, size);
+        }
+        memory_region_add_subregion(system, src_ba, &w->mem);
     } else if (w->type == PCIE2AXI) {
         snprintf(name, sizeof(name), "npcm-pcie2axi-window-%d", w->id);
+        memory_region_init_alias(&w->mem, OBJECT(s), name,
+                                 system, src_ba, size);
+        memory_region_add_subregion(&s->pcie_memory, dest_ba, &w->mem);
     } else {
         qemu_log_mask(LOG_GUEST_ERROR,
                       "%s: unable to map uninitialized PCIe window",
                       __func__);
         return;
     }
-
-    /* TODO: set subregion to target translation address */
-    /* add subregion starting at the window source address */
-    if (!memory_region_is_mapped(&w->mem)) {
-        memory_region_init(&w->mem, OBJECT(s), name, size);
-        memory_region_add_subregion(system, bar, &w->mem);
-    }
 }
 
 /* unmap windows marked as disabled */
-static void npcm_pcierc_unmap_disabled(NPCMPCIEWindow *w)
+static void npcm_pcierc_unmap_disabled(NPCMPCIERCState *s, NPCMPCIEWindow *w)
 {
     MemoryRegion *system = get_system_memory();
+
     /* Bit 0 in the Source address enables the window */
     if (memory_region_is_mapped(&w->mem) && !(w->sal & NPCM_PCIERC_SAL_EN)) {
-        memory_region_del_subregion(system, &w->mem);
+        if (w->type == AXI2PCIE) {
+            memory_region_del_subregion(system, &w->mem);
+        } else {
+            memory_region_del_subregion(&s->pcie_memory, &w->mem);
+        }
     }
 }
 
 static void npcm_pcie_update_window_maps(NPCMPCIERCState *s)
 {
     for (int i = 0; i < NPCM_PCIERC_NUM_PA_WINDOWS; i++) {
-        npcm_pcierc_unmap_disabled(&s->pcie2axi[i]);
+        npcm_pcierc_unmap_disabled(s, &s->pcie2axi[i]);
     }
 
     for (int i = 0; i < NPCM_PCIERC_NUM_AP_WINDOWS; i++) {
-        npcm_pcierc_unmap_disabled(&s->axi2pcie[i]);
+        npcm_pcierc_unmap_disabled(s, &s->axi2pcie[i]);
     }
 
     for (int i = 0; i < NPCM_PCIERC_NUM_AP_WINDOWS; i++) {
@@ -177,22 +237,27 @@ static void npcm_pcierc_write_window(NPCMPCIERCState *s, hwaddr addr,
     switch (offset) {
     case NPCM_PCIERC_SAL_OFFSET:
         window->sal = data;
+        window->set_fields |= NPCM_SAL;
         break;
 
     case NPCM_PCIERC_SAH_OFFSET:
         window->sah = data;
+        window->set_fields |= NPCM_SAH;
         break;
 
     case NPCM_PCIERC_TAL_OFFSET:
         window->tal = data;
+        window->set_fields |= NPCM_TAL;
         break;
 
     case NPCM_PCIERC_TAH_OFFSET:
         window->tah = data;
+        window->set_fields |= NPCM_TAH;
         break;
 
     case NPCM_PCIERC_PARAM_OFFSET:
         window->params = data;
+        window->set_fields |= NPCM_PARAMS;
         break;
 
     default:
@@ -305,7 +370,7 @@ static uint64_t npcm_pcie_host_config_read(void *opaque, hwaddr addr,
     PCIDevice *pcid = pci_find_device(pcih->bus, bus, devfn);
 
     if (pcid) {
-        return pci_host_config_read_common(pcid, addr,
+        return pci_host_config_read_common(pcid, (addr & 0x7FF),
                                            pci_config_size(pcid),
                                            size);
     }
@@ -323,7 +388,7 @@ static void npcm_pcie_host_config_write(void *opaque, hwaddr addr,
     PCIDevice *pcid = pci_find_device(pcih->bus, bus, devfn);
 
     if (pcid) {
-        pci_host_config_write_common(pcid, addr,
+        pci_host_config_write_common(pcid, (addr & 0x7FF),
                                      pci_config_size(pcid),
                                      data,
                                      size);
@@ -413,40 +478,43 @@ static void npcm_pcie_set_irq(void *opaque, int irq_num, int level)
 static void npcm_pcierc_realize(DeviceState *dev, Error **errp)
 {
     NPCMPCIERCState *s = NPCM_PCIERC(dev);
+    PCIHostState *phs = PCI_HOST_BRIDGE(dev);
     SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
-    PCIHostState *pci = PCI_HOST_BRIDGE(dev);
     PCIDevice *root = pci_new(PCI_DEVFN(0, 0), TYPE_NPCM_PCIE_ROOT_PORT);
 
-    memory_region_init_io(&s->mmio, OBJECT(s), &npcm_pcierc_cfg_ops,
-                          s, TYPE_NPCM_PCIERC, 4 * KiB);
-    sysbus_init_mmio(sbd, &s->mmio);
-    sysbus_init_irq(sbd, &s->irq);
+    /* init the underlying memory region for all PCI address space */
+    memory_region_init(&s->pcie_memory, OBJECT(s), "npcm-pcie-mem", UINT64_MAX);
 
-    /* IO memory region is needed to create a PCI bus, but is unused on ARM */
+    /* I/O memory region is needed to create a PCI bus, but is unused on ARM */
     memory_region_init(&s->pcie_io, OBJECT(s), "npcm-pcie-io", 16);
 
-    /*
-     * pcie_root is a 128 MiB memory region in the BMC physical address space
-     * in which all PCIe windows must have their programmable source or
-     * destination address
-     */
-    memory_region_init_io(&s->pcie_root, OBJECT(s), &npcm_pcie_cfg_space_ops,
-                          s, "npcm-pcie-config", 128 * MiB);
-    sysbus_init_mmio(sbd, &s->pcie_root);
-
-    pci->bus = pci_register_root_bus(dev, "pcie",
+    phs->bus = pci_register_root_bus(dev, "pcie",
                                      npcm_pcie_set_irq,
                                      pci_swizzle_map_irq_fn,
-                                     s, &s->pcie_root, &s->pcie_io,
+                                     s, &s->pcie_memory, &s->pcie_io,
                                      0, 4, TYPE_PCIE_BUS);
 
-    address_space_init(&s->pcie_space, &s->pcie_root, "pcie-address-space");
-    pci_realize_and_unref(root, pci->bus, &error_fatal);
-    pci_setup_iommu(pci->bus, &npcm_pcierc_iommu_ops, s);
+    address_space_init(&s->pcie_space, &s->pcie_memory, "pcie-address-space");
+    pci_setup_iommu(phs->bus, &npcm_pcierc_iommu_ops, s);
+    /* init region for root complex registers (not config space) */
+    memory_region_init_io(&s->rc_regs, OBJECT(s), &npcm_pcierc_cfg_ops,
+                          s, TYPE_NPCM_PCIERC, 4 * KiB);
+    sysbus_init_mmio(sbd, &s->rc_regs);
+    sysbus_init_irq(sbd, &s->irq);
 
+    /* create and add region for the root port in config space */
+    memory_region_init_io(&s->rp_config, OBJECT(s),
+                          &npcm_pcie_cfg_space_ops, s, "npcm-pcie-config",
+                          4 * KiB);
+
+    /* realize the root port */
+    pci_realize_and_unref(root, phs->bus, &error_fatal);
+    /* enable MSI (non-X) in root port config space */
     msi_nonbroken = true;
     msi_init(root, NPCM_PCIERC_MSI_OFFSET, NPCM_PCIERC_MSI_NR,
              true, true, errp);
+
+    npcm_pcierc_reset_pcie_windows(s);
 }
 
 static void npcm_pcie_root_port_realize(DeviceState *dev, Error **errp)
@@ -459,13 +527,6 @@ static void npcm_pcie_root_port_realize(DeviceState *dev, Error **errp)
         error_propagate(errp, local_err);
         return;
     }
-}
-
-static void npcm_pcierc_instance_init(Object *obj)
-{
-    NPCMPCIERCState *s = NPCM_PCIERC(obj);
-
-    npcm_pcierc_reset_pcie_windows(s);
 }
 
 static void npcm_pcierc_class_init(ObjectClass *klass, void *data)
@@ -507,7 +568,6 @@ static const TypeInfo npcm_pcierc_type_info = {
     .name = TYPE_NPCM_PCIERC,
     .parent = TYPE_PCIE_HOST_BRIDGE,
     .instance_size = sizeof(NPCMPCIERCState),
-    .instance_init = npcm_pcierc_instance_init,
     .class_init = npcm_pcierc_class_init,
 };
 

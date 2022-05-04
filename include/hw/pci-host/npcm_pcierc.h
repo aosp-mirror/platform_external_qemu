@@ -96,6 +96,9 @@
 #define TYPE_NPCM_PCIERC "npcm-pcie-root-complex"
 OBJECT_DECLARE_SIMPLE_TYPE(NPCMPCIERCState, NPCM_PCIERC)
 
+#define NPCM_PCIE_HOLE       (0xe8000000)
+#define NPCM_PCIE_HOLE_END   (0xe8000000 + (128 * MiB))
+
 typedef enum {
     AXI2PCIE = 1,
     PCIE2AXI
@@ -111,6 +114,7 @@ typedef struct NPCMPCIEWindow {
 
     MemoryRegion mem;        /* QEMU memory subregion per window */
     NPCMPCIEWindowType type; /* translation direction */
+    uint8_t set_fields;
     uint8_t id;
 } NPCMPCIEWindow;
 
@@ -127,7 +131,7 @@ struct NPCMPCIERCState {
     qemu_irq irq;
 
     /* PCIe RC registers */
-    MemoryRegion mmio;
+    MemoryRegion rc_regs;
     uint32_t rccfgnum;
     uint32_t rcinten;
     uint32_t rcintstat;
@@ -137,8 +141,9 @@ struct NPCMPCIERCState {
 
     /* Address translation state */
     AddressSpace pcie_space;
-    MemoryRegion pcie_root;
+    MemoryRegion pcie_memory;
     MemoryRegion pcie_io; /* unused - but required for IO space PCI */
+    MemoryRegion rp_config;
     NPCMPCIERootPort port;
     /* PCIe to AXI Windows */
     NPCMPCIEWindow pcie2axi[NPCM_PCIERC_NUM_PA_WINDOWS];

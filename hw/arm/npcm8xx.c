@@ -754,7 +754,6 @@ static void npcm8xx_realize(DeviceState *dev, Error **errp)
     /* PCIe RC */
     sysbus_realize(SYS_BUS_DEVICE(&s->pcierc), &error_abort);
     sysbus_mmio_map(SYS_BUS_DEVICE(&s->pcierc), 0, NPCM8XX_PCIERC_BA);
-    sysbus_mmio_map(SYS_BUS_DEVICE(&s->pcierc), 1, NPCM8XX_PCIE_ROOT_BA);
     sysbus_connect_irq(SYS_BUS_DEVICE(&s->pcierc), 0,
                        npcm8xx_irq(s, NPCM8XX_PCIE_RC_IRQ));
 
