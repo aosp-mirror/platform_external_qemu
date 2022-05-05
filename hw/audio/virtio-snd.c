@@ -282,6 +282,17 @@ static size_t el_send_pcm_status(VirtQueueElement *e, unsigned status, unsigned 
     return el_send_data(e, &data, sizeof(data));
 }
 
+static unsigned el_send_pcm_rx_status(VirtQueueElement *e, unsigned period_bytes,
+                                      unsigned status, unsigned latency_bytes) {
+    const struct virtio_snd_pcm_status data = {
+        .status = status,
+        .latency_bytes = latency_bytes,
+    };
+
+    iov_from_buf(e->in_sg, e->in_num, period_bytes, &data, sizeof(data));
+    return period_bytes + sizeof(data);
+}
+
 static void ring_buffer_init(VirtIOSoundRingBuffer *rb) {
     rb->buf = NULL;
     rb->capacity = 0;
@@ -1281,7 +1292,6 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     const int aud_fs = stream->aud_frame_size;
     const int driver_fs = stream->driver_frame_size;
     const int period_bytes = stream->period_bytes;
-    const int item_size_bytes = period_bytes + sizeof(struct virtio_snd_pcm_status);
     VirtIOSoundRingBuffer *const pcm_buf = &stream->pcm_buf;
     VirtIOSound *const snd = stream->snd;
     VirtQueue *const rx_vq = snd->rx_vq;
@@ -1296,7 +1306,7 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
 
             while (true) {
                 const int nf = MIN(avail / aud_fs,
-                                   MIN((item_size_bytes - item->pos) / driver_fs,
+                                   MIN((period_bytes - item->pos) / driver_fs,
                                        max_scratch_frames));
                 if (!nf) {
                     break;
@@ -1315,9 +1325,10 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
                 item->pos += driver_read_nb;
                 stream->frames_sent += (driver_read_nb / driver_fs);
 
-                if (item->pos >= item_size_bytes) {
-                    el_send_pcm_status(e, VIRTIO_SND_S_OK, item->pos);
-                    vq_consume_element(rx_vq, e, item->pos);
+                if (item->pos >= period_bytes) {
+                    const size_t size = el_send_pcm_rx_status(
+                        e, period_bytes, VIRTIO_SND_S_OK, avail);
+                    vq_consume_element(rx_vq, e, size);
                     ring_buffer_pop(pcm_buf);
                     notify_vq = true;
                 }
@@ -1345,16 +1356,17 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
             VirtQueueElement *const e = item->el;
             const int nf = MIN(insert_bytes,
                                MIN(sizeof(scratch),
-                                   item_size_bytes - item->pos)) / driver_fs;
+                                   period_bytes - item->pos)) / driver_fs;
             const int nb = nf * driver_fs;
             iov_from_buf(e->in_sg, e->in_num, item->pos, scratch, nb);
             insert_bytes -= nb;
             item->pos += nb;
             stream->frames_skipped += nf;
 
-            if (item->pos >= item_size_bytes) {
-                el_send_pcm_status(e, VIRTIO_SND_S_OK, item->pos);
-                vq_consume_element(rx_vq, e, item->pos);
+            if (item->pos >= period_bytes) {
+                const size_t size = el_send_pcm_rx_status(
+                    e, period_bytes, VIRTIO_SND_S_OK, 0);
+                vq_consume_element(rx_vq, e, size);
                 ring_buffer_pop(pcm_buf);
                 notify_vq = true;
             }
@@ -1397,7 +1409,7 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     stream = &snd->streams[xfer.stream_id];
 
     item.el = e;
-    item.pos = sizeof(xfer);
+    item.pos = 0;
     item.size = req_size;  /* not used in RX but convinient for snapshots */
 
     qemu_mutex_lock(&stream->mtx);
