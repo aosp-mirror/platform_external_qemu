@@ -135,5 +135,21 @@ typedef struct QAndroidGlobalVarsAgent {
     void (*set_is_fuchsia)(bool);
 
     void (*set_android_snapshot_update_timer)(int);
+
+      /* this is the port used for the control console in this emulator instance.
+     * starts at 5554, with increments of 2 */
+    int (*android_base_port)(void);
+    void (*set_android_base_port)(int);
+
+    /* this is the port used to connect ADB (Android Debug Bridge)
+     * default is 5037 */
+    int (*android_adb_port)(void);
+    void (*set_android_adb_port)(int);
+
+    /* This number is used to form the "serial number" of
+     * the AVD. The default is 5554, so the default serial
+     * number is "emulator-5554". */
+    int (*android_serial_number_port)(void);
+    void (*set_android_serial_number_port)(int);
 } QAndroidGlobalVarsAgent;
 ANDROID_END_HEADER
