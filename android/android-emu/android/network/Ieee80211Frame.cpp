@@ -365,7 +365,7 @@ bool Ieee80211Frame::isValid() const {
         LOG(VERBOSE) << "Frame length is less than " << IEEE80211_HDRLEN;
         isValid = false;
     }
-    if (isData() && !isProtected()) {
+    if (isData() && !isProtected() && !isDataNull()) {
         isValid = validEtherType(getEtherType());
         if (!isValid) {
             LOG(VERBOSE) << "Data frame has invalid ether type "
