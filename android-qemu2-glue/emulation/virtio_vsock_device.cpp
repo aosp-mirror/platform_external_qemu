@@ -48,6 +48,7 @@ using android::emulation::AdbVsockPipe;
 using android::emulation::SocketBuffer;
 using android::emulation::IVsockNewTransport;
 using android::emulation::vsock_create_transport_connector;
+using android::emulation::vsock_load_transport;
 
 constexpr uint32_t VMADDR_CID_HOST = 2;
 constexpr uint32_t kHostBufAlloc = 1024 * 1024;
@@ -269,7 +270,7 @@ struct VSockStream {
             break;
 
         case 3:
-            // TODO
+            mNewTransport = vsock_load_transport(stream);
             break;
 
         default:

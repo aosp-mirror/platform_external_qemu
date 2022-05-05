@@ -217,6 +217,10 @@ std::shared_ptr<IVsockNewTransport> vsock_create_transport_connector(uint64_t ke
     return std::make_shared<NewTransportConnector>(key);
 }
 
+std::shared_ptr<IVsockNewTransport> vsock_load_transport(android::base::Stream *stream) {
+    return nullptr;
+}
+
 void virtio_vsock_new_transport_init() {
     g_looper = looper_getForThread();
 }
