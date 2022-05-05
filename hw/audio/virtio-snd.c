@@ -1150,12 +1150,13 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     while (avail >= aud_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
+            int item_size = item->size - item->pos;
             VirtQueueElement *const e = item->el;
             uint32_t latency_bytes = 0;
 
             while (true) {
                 const int nf = MIN(avail / aud_fs,
-                                   MIN(item->size / driver_fs,
+                                   MIN(item_size / driver_fs,
                                        max_scratch_frames));
                 if (!nf) {
                     break;
@@ -1173,13 +1174,13 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
                 const int driver_sent_nb = sent_fn * driver_fs;
 
                 item->pos += driver_sent_nb;
-                item->size -= driver_sent_nb;
+                item_size -= driver_sent_nb;
                 avail -= aud_sent_nb;
                 latency_bytes = update_output_latency_bytes(stream, -driver_sent_nb);
                 stream->frames_sent += sent_fn;
             }
 
-            if (item->size < driver_fs) {
+            if (item_size < driver_fs) {
                 vq_consume_element(
                     tx_vq, e,
                     el_send_pcm_status(e, VIRTIO_SND_S_OK, latency_bytes));
@@ -1204,16 +1205,17 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     while (drop_bytes >= driver_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
-            const int nf = MIN(drop_bytes, item->size) / driver_fs;
+            int item_size = item->size - item->pos;
+            const int nf = MIN(drop_bytes, item_size) / driver_fs;
             const int nb = nf * driver_fs;
             uint32_t latency_bytes;
             drop_bytes -= nb;
             item->pos += nb;
-            item->size -= nb;
+            item_size -= nb;
             latency_bytes = update_output_latency_bytes(stream, -nb);
             stream->frames_skipped += nf;
 
-            if (item->size < driver_fs) {
+            if (item_size < driver_fs) {
                 VirtQueueElement *const e = item->el;
                 vq_consume_element(
                     tx_vq, e,
@@ -1261,7 +1263,7 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
     item.el = e;
     item.pos = sizeof(xfer);
-    item.size = req_size - sizeof(xfer);
+    item.size = req_size;
 
     qemu_mutex_lock(&stream->mtx);
 
@@ -1396,7 +1398,7 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
     item.el = e;
     item.pos = sizeof(xfer);
-    item.size = sizeof(xfer);  /* not used in RX but convinient for snapshots */
+    item.size = req_size;  /* not used in RX but convinient for snapshots */
 
     qemu_mutex_lock(&stream->mtx);
 
