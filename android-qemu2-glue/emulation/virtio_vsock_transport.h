@@ -14,6 +14,7 @@
 
 #pragma once
 #include <memory>
+#include <android-qemu2-glue/base/files/QemuFileStream.h>
 
 namespace android {
 namespace emulation {
@@ -27,6 +28,8 @@ struct IVsockNewTransport : std::enable_shared_from_this<IVsockNewTransport> {
 };
 
 std::shared_ptr<IVsockNewTransport> vsock_create_transport_connector(uint64_t key);
+
+std::shared_ptr<IVsockNewTransport> vsock_load_transport(android::base::Stream *stream);
 
 void virtio_vsock_new_transport_init();
 
