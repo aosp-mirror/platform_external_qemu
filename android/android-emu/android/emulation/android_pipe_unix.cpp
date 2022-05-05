@@ -73,7 +73,7 @@ struct GlobalState {
 
 static android::base::LazyInstance<GlobalState> sGlobal = LAZY_INSTANCE_INIT;
 
-static bool android_unix_pipe_check_path(const char* path) {
+bool android_unix_pipe_check_path(const char* path) {
     if (path) {
         D("%s: Checking for [%s]", __FUNCTION__, path);
         GlobalState* global = sGlobal.ptr();
