@@ -1145,6 +1145,7 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     bool notify_vq = false;
     int drop_bytes;
     int16_t scratch[1024];
+    const int max_scratch_frames = sizeof(scratch) / MAX(aud_fs, driver_fs);
 
     while (avail >= aud_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
@@ -1154,7 +1155,8 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
 
             while (true) {
                 const int nf = MIN(avail / aud_fs,
-                                   MIN(item->size, sizeof(scratch)) / driver_fs);
+                                   MIN(item->size / driver_fs,
+                                       max_scratch_frames));
                 if (!nf) {
                     break;
                 }
@@ -1283,6 +1285,7 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     VirtQueue *const rx_vq = snd->rx_vq;
     bool notify_vq = false;
     int16_t scratch[1024];
+    const int max_scratch_frames = sizeof(scratch) / MAX(aud_fs, driver_fs);
 
     while (avail >= aud_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
@@ -1291,8 +1294,8 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
 
             while (true) {
                 const int nf = MIN(avail / aud_fs,
-                                   MIN(item_size_bytes - item->pos,
-                                       sizeof(scratch)) / driver_fs);
+                                   MIN((item_size_bytes - item->pos) / driver_fs,
+                                       max_scratch_frames));
                 if (!nf) {
                     break;
                 }
@@ -1338,7 +1341,9 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
             VirtQueueElement *const e = item->el;
-            const int nf = MIN(insert_bytes, item_size_bytes - item->pos) / driver_fs;
+            const int nf = MIN(insert_bytes,
+                               MIN(sizeof(scratch),
+                                   item_size_bytes - item->pos)) / driver_fs;
             const int nb = nf * driver_fs;
             iov_from_buf(e->in_sg, e->in_num, item->pos, scratch, nb);
             insert_bytes -= nb;
