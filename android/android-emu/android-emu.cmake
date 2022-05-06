@@ -154,7 +154,6 @@ set(android-emu-common
     android/emulation/MediaVpxVideoHelper.cpp
     android/emulation/MultiDisplay.cpp
     android/emulation/MultiDisplayPipe.cpp
-    android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp
     android/emulation/qemud/android_qemud_client.cpp
     android/emulation/qemud/android_qemud_multiplexer.cpp
@@ -585,7 +584,6 @@ android_add_library(
       android/emulation/hostdevices/HostGoldfishPipe.cpp
       android/emulation/HostmemIdMapping.cpp
       android/emulation/LogcatPipe.cpp
-      android/emulation/nand_limits.c
       android/emulation/ParameterList.cpp
       android/emulation/RefcountPipe.cpp
       android/emulation/serial_line.cpp
@@ -908,10 +906,8 @@ if(NOT LINUX_AARCH64)
             android/windows_installer_unittest.cpp
     DARWIN # cmake-format: sortable
            android/emulation/control/adb/AdbShellStream_unittest.cpp
-           android/emulation/nand_limits_unittest.cpp
     LINUX # cmake-format: sortable
-          android/emulation/control/adb/AdbShellStream_unittest.cpp
-          android/emulation/nand_limits_unittest.cpp)
+          android/emulation/control/adb/AdbShellStream_unittest.cpp)
   # Setup the targets compile config etc..
   android_target_compile_options(
     android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr
