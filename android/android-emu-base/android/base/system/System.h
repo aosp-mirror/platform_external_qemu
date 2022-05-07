@@ -472,6 +472,12 @@ public:
     static void killProcess(Pid);
     static void stopAllEmulatorProcesses();
 
+    static constexpr int DEFAULT_WAIT_TIME_BEFORE_KILL_IN_SECONDS = 20;
+    // wait for some seconds, and kill self;
+    // this is a fall back when emulator hang
+    static void waitAndKillSelf(int numSeconds = DEFAULT_WAIT_TIME_BEFORE_KILL_IN_SECONDS);
+    static bool isPidAlive(System::Pid pid);
+
     // bug: 117641628
     // Newer Linux systems might have slow CoW filesystems
     // like btrfs that interfere with emulator performance.
