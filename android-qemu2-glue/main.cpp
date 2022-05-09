@@ -1173,6 +1173,13 @@ static std::string getWriteableFilename(const char* disk_dataPartition_path,
     }
 }
 
+static bool isEmulatorCircular(const char* param, const char* val) {
+    return strcmp(param, "ro.emulator.circular") == 0 &&
+            (strncmp(val, "1", 1) == 0 || strncmp(val, "y", 1) == 0 ||
+             strncmp(val, "on", 2) == 0 || strncmp(val, "yes", 3) == 0 ||
+             strncmp(val, "true", 4) == 0);
+}
+
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
 constexpr bool targetIsX86 = true;
 #else
@@ -1689,6 +1696,8 @@ extern "C" int main(int argc, char** argv) {
         while (propertyFileIterator_next(iter)) {
             args.add("-boot-property");
             args.addFormat("%s=%s", iter->name, iter->value);
+            hw->hw_lcd_circular =
+              isEmulatorCircular(iter->name, iter->value);
         }
     }
 

@@ -174,6 +174,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
     const char* avdNameProp;
     const char* deviceStateProp;
     const char* qemuCpuVulkanVersionProp;
+    const char* emulatorCircularProp;
 
     namespace fc = android::featurecontrol;
     if (fc::isEnabled(fc::AndroidbootProps) ||
@@ -209,6 +210,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         avdNameProp = "androidboot.qemu.avd_name";
         deviceStateProp = "androidboot.qemu.device_state";
         qemuCpuVulkanVersionProp = "androidboot.qemu.cpuvulkan.version";
+        emulatorCircularProp = "androidboot.emulator.circular";
     } else {
         androidbootVerityMode = nullptr;
         checkjniProp = "android.checkjni";
@@ -239,6 +241,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         avdNameProp = "qemu.avd_name";
         deviceStateProp = "qemu.device_state";
         qemuCpuVulkanVersionProp = nullptr;
+        emulatorCircularProp = "ro.emulator.circular";
     }
 
     std::vector<std::pair<std::string, std::string>> params;
@@ -541,5 +544,10 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
             params.push_back({val, ""});
         }
     }
+
+    if (hw->hw_lcd_circular) {
+      params.push_back({emulatorCircularProp, "1"});
+    }
+
     return params;
 }
