@@ -60,6 +60,34 @@ ANDROID_BEGIN_HEADER
 extern void  qemu_polling_enable(void);
 extern void  qemu_polling_disable(void);
 
+/**in hw/android/goldfish/fb.c */
+
+/* framebuffer dimensions in pixels, note these can change dynamically */
+extern int  android_framebuffer_w;
+extern int  android_framebuffer_h;
+/* framebuffer dimensions in mm */
+extern int  android_framebuffer_phys_w;
+extern int  android_framebuffer_phys_h;
+
+/**  in android_main.c */
+
+/* this is the port used for the control console in this emulator instance.
+ * starts at 5554, with increments of 2 */
+extern int   android_base_port;
+
+/* this is the port used to connect ADB (Android Debug Bridge)
+ * default is 5037 */
+extern int   android_adb_port;
+
+/* Use external ADB executable vs. the internal adb connection.
+*/
+extern bool   android_use_external_adb;
+
+/* This number is used to form the "serial number" of
+ * the AVD. The default is 5554, so the default serial
+ * number is "emulator-5554". */
+extern int   android_serial_number_port;
+
 /* parses a network speed parameter and sets android_net_upload_speed and
  * android_net_download_speed accordingly. returns -1 on failure, 0 on success */
 extern int   android_parse_network_speed(const char*  speed);

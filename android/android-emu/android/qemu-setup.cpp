@@ -92,6 +92,12 @@ int android_op_port_number = -1;
 char* android_op_report_console = NULL;
 /* Contains arguments for -http-proxy option. */
 char* op_http_proxy = NULL;
+/* Base port for the emulated system. */
+int android_base_port;
+/* ADB port */
+int android_adb_port = 5037;  // Default
+/* The device "serial number" is "emulator-<this number>" */
+int android_serial_number_port;
 /* The port to use for WiFi forwarding as a server */
 uint16_t android_wifi_server_port = 0;
 /* The port to use for WiFi forwarding as a client */
@@ -404,10 +410,10 @@ bool android_ports_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     }
 
     /* Save base port and ADB port. */
-    getConsoleAgents()->settings->set_android_base_port(base_port);
-    getConsoleAgents()->settings->set_android_adb_port(adb_port);
-    getConsoleAgents()->settings->set_android_serial_number_port(adb_port - 1);
-    android::emulation::AdbConnection::setAdbPort(adb_port);
+    android_base_port = base_port;
+    android_adb_port = adb_port;
+    android_serial_number_port = adb_port - 1;
+    android::emulation::AdbConnection::setAdbPort(android_adb_port);
     return true;
 }
 
@@ -467,18 +473,18 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
          * started. it should be listening on port 5037. if we can't reach it,
          * don't bother
          */
-        android_adb_server_notify(getConsoleAgents()->settings->android_adb_port());
+        android_adb_server_notify(android_adb_port);
 
-        android_validate_ports(getConsoleAgents()->settings->android_base_port(), getConsoleAgents()->settings->android_adb_port());
+        android_validate_ports(android_base_port, android_adb_port);
     }
 
     if (android_op_report_console) {
-        if (report_console(android_op_report_console, getConsoleAgents()->settings->android_base_port()) < 0) {
+        if (report_console(android_op_report_console, android_base_port) < 0) {
             return false;
         }
     }
 
-    agents->telephony->initModem(getConsoleAgents()->settings->android_base_port());
+    agents->telephony->initModem(android_base_port);
 
     /* setup the http proxy, if any */
     if (!op_http_proxy) {

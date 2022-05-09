@@ -302,7 +302,7 @@ static void emulator_window_setup(EmulatorWindow* emulator) {
             .keyboard_charmap = emulator->opts->charmap};
 
     write_window_name(my_ui_params.window_name,
-                      sizeof(my_ui_params.window_name), getConsoleAgents()->settings->android_base_port(),
+                      sizeof(my_ui_params.window_name), android_base_port,
                       avdInfo_getName(getConsoleAgents()->settings->avdInfo()));
 
     static const SkinUIFuncs my_ui_funcs = {
@@ -543,7 +543,7 @@ void android_emulator_set_base_port(int port) {
     if (qemulator->ui) {
         /* Base port is already set in the emulator's core. */
         char buff[256];
-        write_window_name(buff, sizeof(buff), getConsoleAgents()->settings->android_base_port(),
+        write_window_name(buff, sizeof(buff), android_base_port,
                           avdInfo_getName(getConsoleAgents()->settings->avdInfo()));
 
         skin_ui_set_name(qemulator->ui, buff);

@@ -477,7 +477,7 @@ const char* start_shared_memory_module(int fps) {
     // 2. If we accidentally leak a region on posix, we can reclaim an clean up
     // on 2nd run.
     globals.sharedMemoryHandle = std::string("videmulator") +
-                                 std::to_string(getConsoleAgents()->settings->android_serial_number_port());
+                                 std::to_string(android_serial_number_port);
     if (!globals.webrtc_module) {
         globals.webrtc_module.reset(
                 new VideoFrameSharer(globals.fbWidth, globals.fbHeight,

@@ -313,14 +313,14 @@ int qemu_setup_grpc() {
     auto contentPath = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
 
     EmulatorProperties props{
-            {"port.serial", std::to_string(getConsoleAgents()->settings->android_serial_number_port())},
-            {"port.adb", std::to_string(getConsoleAgents()->settings->android_adb_port())},
+            {"port.serial", std::to_string(android_serial_number_port)},
+            {"port.adb", std::to_string(android_adb_port)},
             {"avd.name", avdInfo_getName(getConsoleAgents()->settings->avdInfo())},
             {"avd.id", avdInfo_getId(getConsoleAgents()->settings->avdInfo())},
             {"avd.dir", contentPath ? contentPath : ""},
             {"cmdline", getConsoleAgents()->settings->android_cmdLine()}};
 
-    int grpc_start = getConsoleAgents()->settings->android_serial_number_port() + 3000;
+    int grpc_start = android_serial_number_port + 3000;
     int grpc_end = grpc_start + 1000;
     std::string address = "[::1]";
 
@@ -424,7 +424,7 @@ int qemu_setup_grpc() {
         exit(1);
     }
     builder.withService(android::emulation::control::getRtcService(
-            getConsoleAgents(), getConsoleAgents()->settings->android_adb_port(),
+            getConsoleAgents(), android_adb_port,
             getConsoleAgents()->settings->android_cmdLineOptions()->turncfg));
 #endif
     int port = -1;
@@ -592,7 +592,7 @@ bool qemu_android_emulation_setup() {
                         "is no longer responding.");
     }
     if (feature_is_enabled(kFeature_VirtioWifi)) {
-        virtio_wifi_set_mac_prefix(getConsoleAgents()->settings->android_serial_number_port());
+        virtio_wifi_set_mac_prefix(android_serial_number_port);
     }
     return true;
 }
