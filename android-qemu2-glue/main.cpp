@@ -26,7 +26,6 @@
 #include "android/bootconfig.h"
 #include "android/camera/camera-virtualscene.h"
 #include "android/cmdline-option.h"
-#include "android/config/BluetoothConfig.h"
 #include "android/console.h"
 #include "android/constants.h"
 #include "android/cpu_accelerator.h"
@@ -1511,15 +1510,6 @@ extern "C" int main(int argc, char** argv) {
         boot_property_add_shared_net_ip(shared_net_id);
     }
 
-    // Add bluetooth parameters if applicable.
-    char* bluetooth_opts = NULL;
-#ifdef __linux__
-    bluetooth_opts = opts->bluetooth;
-
-#endif
-    android::BluetoothConfig bluetooth(bluetooth_opts);
-    args.add(bluetooth.getParameters());
-
 #ifdef CONFIG_NAND_LIMITS
     args.add2If("-nand-limits", opts->nand_limits);
 #endif
@@ -2698,8 +2688,6 @@ extern "C" int main(int argc, char** argv) {
             if (!isGuestMode)
                 args.add2("-display", "sdl,gl=on");
         }
-
-        args.add(bluetooth.getQemuParameters());
 
         args.add("-append");
         args.add(append_arg);
