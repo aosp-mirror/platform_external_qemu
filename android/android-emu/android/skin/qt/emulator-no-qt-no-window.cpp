@@ -279,6 +279,8 @@ void EmulatorNoQtNoWindow::requestClose() {
         }
     }
 
+    android::base::System::get()->waitAndKillSelf();
+
     if (fastSnapshotV1) {
         qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI);
     } else {

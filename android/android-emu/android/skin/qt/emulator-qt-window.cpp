@@ -2056,6 +2056,7 @@ void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,
 void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
     mToolWindow->shouldClose();
+    System::get()->waitAndKillSelf();
     if (isMainThreadRunning()) {
         queueQuitEvent();
     }
