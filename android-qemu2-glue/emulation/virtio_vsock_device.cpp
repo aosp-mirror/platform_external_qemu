@@ -256,6 +256,7 @@ struct VSockStream {
                 char force_close_unused = 0;
                 mPipe = android_pipe_guest_load(asCStream(stream), this, &force_close_unused);
                 if (!mPipe) {
+                    sendOp(VIRTIO_VSOCK_OP_RST);
                     return LoadResult::Closed;
                 }
             }
