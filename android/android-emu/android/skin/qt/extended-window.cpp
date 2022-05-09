@@ -210,7 +210,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
     } else {
         setWindowTitle(QString("Extended Controls - ") + getConsoleAgents()->settings->hw()->avd_name +
-                       ":" + QString::number(android_serial_number_port));
+                       ":" + QString::number(getConsoleAgents()->settings->android_serial_number_port()));
     }
     if (getConsoleAgents()->settings->has_cmdLineOptions() &&
         getConsoleAgents()

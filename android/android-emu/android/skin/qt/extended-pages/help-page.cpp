@@ -81,7 +81,7 @@ HelpPage::HelpPage(QWidget* parent)
     avdInfo_getFullApiName(apiLevel, versionString, 128);
     mUi->help_androidVersionBox->setPlainText(versionString);
     mUi->help_adbSerialNumberBox->setPlainText(
-            "emulator-" + QString::number(android_serial_number_port));
+            "emulator-" + QString::number(getConsoleAgents()->settings->android_serial_number_port()));
 
     // launch the latest version loader in a separate thread
     auto latestVersionThread = new QThread();

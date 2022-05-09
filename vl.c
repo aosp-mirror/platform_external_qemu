@@ -3310,7 +3310,7 @@ static void android_devices_teardown()
 static void android_init_metrics()
 {
     android_metrics_start(EMULATOR_VERSION_STRING, EMULATOR_FULL_VERSION_STRING,
-                        QEMU_VERSION, android_base_port);
+                        QEMU_VERSION, getConsoleAgents()->settings->android_base_port());
     android_metrics_report_common_info(is_opengl_alive);
 }
 
@@ -5487,8 +5487,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         // so they take precedence
         process_cmd_properties();
 
+        //TODO(jansene): This needs to be moved around..
         extern void android_emulator_set_base_port(int);
-        android_emulator_set_base_port(android_base_port);
+        android_emulator_set_base_port(getConsoleAgents()->settings->android_base_port());
 
         {
             char* combined;
@@ -5502,7 +5503,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 combined = g_strdup_printf("%s mac80211_hwsim.radios=0",
                                            current_machine->kernel_cmdline);
 
-                boot_property_add_wifi_mac_prefix(android_serial_number_port);
+                boot_property_add_wifi_mac_prefix(getConsoleAgents()->settings->android_serial_number_port());
             } else {
                 // Now that we know the serial number we can set it as the MAC prefix
                 // for wifi. This keeps the MAC addresses unique across several
@@ -5510,7 +5511,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
                 combined = g_strdup_printf("%s mac80211_hwsim.mac_prefix=%d",
                                            current_machine->kernel_cmdline,
-                                           android_serial_number_port);
+                                           getConsoleAgents()->settings->android_serial_number_port());
             }
 
             g_free(current_machine->kernel_cmdline);
