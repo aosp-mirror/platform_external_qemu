@@ -19,6 +19,7 @@
 
 ANDROID_BEGIN_HEADER
 
+
 /* a structure used to model the user-configuration settings
  *
  * At the moment, this is only used to store the last position

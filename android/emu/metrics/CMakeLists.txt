@@ -49,6 +49,7 @@ endif()
 target_link_libraries(
   android-emu-metrics
   PRIVATE android-emu-base
+          android-emu-avd
           android-emu-utils
           android-emu-cmdline
           android-emu-curl

@@ -11,14 +11,14 @@
 */
 #include "android/avd/info.h"
 
-#include "android/android.h"
+#include "android/constants.h"
+#include "android/console.h"
 #include "android/avd/keys.h"
 #include "android/avd/util.h"
 #include "android/base/ArraySize.h"
-#include "android/base/export.h"
-#include "android/cmdline-option.h"
+#include "android/avd/avd-export.h"
+#include "android/cmdline-definitions.h"
 #include "android/emulation/bufprint_config_dirs.h"
-#include "android/featurecontrol/feature_control.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
@@ -28,7 +28,6 @@
 #include "android/utils/property_file.h"
 #include "android/utils/string.h"
 #include "android/utils/tempfile.h"
-#include "android/console.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -158,6 +157,7 @@ struct AvdInfo {
 
     /* skip checks */
     bool noChecks;
+    const char* sysdir;
 };
 
 void avdInfo_free(AvdInfo* i) {
@@ -733,22 +733,17 @@ static bool _avdInfo_getSearchPaths(AvdInfo* i) {
     if (i->configIni == NULL)
         return true;
 
-#ifndef AEMU_LAUNCHER
     // This code is unused in the early launcher, but causes linking
     // all the agents from a shared library.
     // We do a check very early on boot..
-    if (agentsAvailable() &&
-        getConsoleAgents()->settings->android_cmdLineOptions() &&
-        getConsoleAgents()->settings->android_cmdLineOptions()->sysdir) {
+    if (i->sysdir) {
         // The user specified a path on the command line.
         // Use only that.
         i->numSearchPaths = 1;
-        i->searchPaths[0] =
-                getConsoleAgents()->settings->android_cmdLineOptions()->sysdir;
+        i->searchPaths[0] = (char*) i->sysdir;
         DD("using one search path from the command line for this AVD");
         return true;
     }
-#endif
 
     i->numSearchPaths = _getSearchPaths(i->configIni, i->sdkRootPath,
                                         MAX_SEARCH_PATHS, i->searchPaths);
@@ -920,7 +915,7 @@ static void _avdInfo_getPropertyFile(AvdInfo* i,
     free(filePath);
 }
 
-AvdInfo* avdInfo_new(const char* name, AvdInfoParams* __unused_params) {
+AvdInfo* avdInfo_new(const char* name, AvdInfoParams* __unused_params, const char* sysdir) {
     AvdInfo* i;
 
     if (name == NULL)
@@ -936,6 +931,7 @@ AvdInfo* avdInfo_new(const char* name, AvdInfoParams* __unused_params) {
     str_reset(&i->deviceId, name);
     i->noChecks = false;
     i->target = NULL;
+    i->sysdir = sysdir;
 
     if (_avdInfo_getSdkRoot(i) < 0 || _avdInfo_getRootIni(i) < 0 ||
         _avdInfo_getContentPath(i) < 0 || _avdInfo_getConfigIni(i) < 0 ||
@@ -1040,11 +1036,13 @@ int avdInfo_getSkinHardwareIni(AvdInfo* i, char* skinName, char* skinDirPath) {
 
 AvdInfo* avdInfo_newForAndroidBuild(const char* androidBuildRoot,
                                     const char* androidOut,
-                                    AvdInfoParams* __unused_params) {
+                                    AvdInfoParams* __unused_params,
+                                    const char*     sysdir) {
     AvdInfo* i;
 
     ANEW0(i);
 
+    i->sysdir = sysdir;
     i->inAndroidBuild = 1;
     str_reset(&i->androidBuildRoot, androidBuildRoot);
     str_reset(&i->androidOut, androidOut);
@@ -1463,12 +1461,6 @@ char* avdInfo_getDynamicPartitionBootDevice(const AvdInfo* i) {
 }
 
 char* avdInfo_getSystemImageDevicePathInGuest(const AvdInfo* i) {
-    // This brings in the feature dependencies, which are large.
-#ifndef AEMU_LAUNCHER
-    if (feature_is_enabled(kFeature_SystemAsRoot)) {
-        return NULL;
-    }
-#endif
     if (is_x86ish(i)) {
         return strdup("/dev/block/pci/pci0000:00/0000:00:03.0/by-name/system");
     } else {
@@ -1933,9 +1925,11 @@ AvdInfo* avdInfo_newCustom(const char* name,
                            const char* abi,
                            const char* arch,
                            bool isGoogleApis,
-                           AvdFlavor flavor) {
+                           AvdFlavor flavor,
+                           const char*     sysdir) {
     AvdInfo* i;
     ANEW0(i);
+    i->sysdir = sysdir;
     str_reset(&i->deviceName, name);
     str_reset(&i->deviceId, name);
     i->noChecks = true;

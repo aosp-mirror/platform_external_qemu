@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/avd/hw-config.h"
-#include "android/base/export.h"
+#include "android/avd/avd-export.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/avd/util.h"
 #include "android/utils/path.h"

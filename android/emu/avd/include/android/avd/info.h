@@ -14,7 +14,7 @@
 
 #include "android/avd/hw-config.h"
 #include "android/avd/util.h"
-#include "android/base/export.h"
+#include "android/avd/avd-export.h"
 #include "android/utils/compiler.h"
 #include "android/utils/file_data.h"
 #include "android/utils/ini.h"
@@ -121,7 +121,7 @@ typedef struct AvdInfoParams {
  * or contains characters that are not part of the following list:
  * letters, digits, underscores, dashes and periods
  */
-AvdInfo*  avdInfo_new( const char*  name, AvdInfoParams*  params );
+AvdInfo*  avdInfo_new( const char*  name, AvdInfoParams*  params, const char* sysdir);
 
 /* Sets a custom ID for this AVD. */
 void avdInfo_setAvdId( AvdInfo* i, const char* id );
@@ -142,7 +142,8 @@ int avdInfo_getSkinHardwareIni( AvdInfo* i, char* skinName, char* skinDirPath);
  */
 AvdInfo*  avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
                                       const char*     androidOut,
-                                      AvdInfoParams*  params );
+                                      AvdInfoParams*  params,
+                                      const char*     sysdir);
 
 /* Frees an AvdInfo object and the corresponding strings that may be
  * returned by its getXXX() methods
@@ -443,13 +444,14 @@ void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes);
 
 bool avdInfo_isMarshmallowOrHigher(AvdInfo* i);
 
-AEMU_EXPORT AvdInfo* avdInfo_newCustom(
+AEMU_AVD_API AvdInfo* avdInfo_newCustom(
     const char* name,
     int apiLevel,
     const char* abi,
     const char* arch,
     bool isGoogleApis,
-    AvdFlavor flavor);
+    AvdFlavor flavor,
+    const char* sysdir);
 
 /* Set a custom content path. Useful for testing. */
 void avdInfo_setCustomContentPath(AvdInfo* info, const char* path);

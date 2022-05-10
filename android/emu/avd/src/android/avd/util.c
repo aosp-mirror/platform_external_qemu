@@ -12,7 +12,7 @@
 #include "android/avd/keys.h"
 #include "android/avd/util.h"
 
-#include "android/android.h"
+#include "android/constants.h"
 #include "android/base/ArraySize.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/bufprint.h"
@@ -23,6 +23,7 @@
 #include "android/utils/property_file.h"
 #include "android/utils/string.h"
 #include "android/utils/system.h"
+#include "android/utils/debug.h"
 
 #include <assert.h>
 #include <limits.h>
@@ -394,11 +395,10 @@ char* path_getAvdSystemPath(const char* avdName,
     char* result = NULL;
     char* avdPath = path_getAvdContentPath(avdName);
     if (verbose) {
-        printf("emulator: INFO: %s: AVD %s has path %s\n", __func__,
+        dinfo("AVD %s has path %s",
                avdName ? avdName : "empty", avdPath ? avdPath : "empty");
-        printf("emulator: INFO: %s: trying to check whether %s is a valid sdk "
-               "root\n",
-               __func__, sdkRoot ? sdkRoot : "empty");
+        dinfo("trying to check whether %s is a valid sdk "
+               "root", sdkRoot ? sdkRoot : "empty");
     }
     int nn;
     for (nn = 0; nn < MAX_SEARCH_PATHS; ++nn) {
@@ -420,8 +420,7 @@ char* path_getAvdSystemPath(const char* avdName,
         if (p >= end || !path_is_dir(temp)) {
             D(" Not a directory: %s", temp);
             if (verbose) {
-                printf("emulator: WARN: %s: %s is not a valid directory.\n",
-                       __func__, temp);
+                dwarning("%s is not a valid directory.", temp);
             }
             continue;
         }
@@ -430,9 +429,8 @@ char* path_getAvdSystemPath(const char* avdName,
         break;
     }
     if (verbose && !result) {
-        printf("emulator: WARN: %s: emulator has searched the above paths but "
-               "found no valid sdk root directory.\n",
-               __func__);
+        dwarning("emulator has searched the above paths but "
+               "found no valid sdk root directory.");
     }
     AFREE(avdPath);
     return result;

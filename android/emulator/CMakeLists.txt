@@ -8,8 +8,13 @@ android_add_executable(
   TARGET emulator INSTALL .
   LICENSE Apache-2.0
   SRC ../images/emulator_icon.rc main-emulator.cpp
-  DEPS android-emu-agents-headers android-emu-base android-emu-files
-       android-emu-launch android-emu-utils android-hw-config)
+  DEPS android-emu-agents-headers
+       android-emu-avd
+       android-emu-base
+       android-emu-files
+       android-emu-launch
+       android-emu-utils
+       android-hw-config)
 target_include_directories(
   emulator # This is not right!, an implicit dependency..
   PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
@@ -72,9 +77,7 @@ set(EMULATOR_KEYMAP_DEPENDENCIES
     "${ANDROID_QEMU2_TOP_DIR}/pc-bios/keymaps/*>>lib/pc-bios/keymaps")
 set(CERT_DEPEPENDENCIES
     "${ANDROID_QEMU2_TOP_DIR}/android/data/ca-bundle.pem>lib/ca-bundle.pem")
-set(EMULATOR_HW_DEPENDENCIES
-    "${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini>lib/hardware-properties.ini"
-)
+set(EMULATOR_HW_DEPENDENCIES "${HW_PROPERTIES_INI}>lib/hardware-properties.ini")
 
 # Install all the depencies in the right place during build
 android_target_dependency(emulator all QT5_SHARED_DEPENDENCIES)

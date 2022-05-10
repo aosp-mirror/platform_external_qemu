@@ -12,25 +12,26 @@ prebuilt(FFMPEG)
 android_add_library(
   TARGET android-emu-launch
   LICENSE Apache-2.0
-  SRC android/avd/hw-config.c
-      android/avd/info.c
-      android/avd/scanner.c
-      android/avd/util.c
-      android/avd/util_wrapper.cpp
-      android/camera/camera-common.cpp
+  SRC android/camera/camera-common.cpp
       android/camera/camera-format-converters.c
       android/camera/camera-list.cpp
       android/emulation/CpuAccelerator.cpp
       android/emulation/launcher/launcher_stub.cpp
       android/HostHwInfo.cpp
-      android/hw-lcd.c
       android/main-help.cpp
   WINDOWS android/camera/camera-capture-windows.cpp
           android/emulation/USBAssist.cpp
   LINUX android/camera/camera-capture-linux.c
   DARWIN android/camera/camera-capture-mac.m
-  DEPS android-emu-base android-emu-utils android-emu-files android-hw-config android-emu-cmdline android-emu-agents-headers
-       emulator-libyuv gtest)
+  DEPS android-emu-agents-headers
+       android-emu-base
+       android-emu-cmdline
+       android-emu-files
+       android-emu-min-avd
+       android-emu-utils
+       android-hw-config
+       emulator-libyuv
+       gtest)
 target_include_directories(android-emu-launch PRIVATE .)
 target_compile_options(android-emu-launch PRIVATE -Wno-extern-c-compat)
 target_compile_definitions(android-emu-launch PRIVATE AEMU_MIN AEMU_LAUNCHER)
@@ -53,18 +54,14 @@ android_target_link_libraries(
 # variables/functions that are implemented in other libraries.
 set(android-emu-common
     # cmake-format: sortable
+    ../emu/avd/src/android/avd/BugreportInfo.cpp # TODO(jansene) Move once the
+                                                 # dependency has been truly
+                                                 # resolved.
     android/adb-server.cpp
     android/async-console.c
     android/async-socket-connector.c
     android/async-socket.c
     android/async-utils.c
-    android/avd/BugreportInfo.cpp
-    android/avd/generate.cpp
-    android/avd/hw-config.c
-    android/avd/info.c
-    android/avd/scanner.c
-    android/avd/util.c
-    android/avd/util_wrapper.cpp
     android/base/async/AsyncSocket.cpp
     android/base/async/CallbackRegistry.cpp
     android/base/LayoutResolver.cpp
@@ -122,8 +119,8 @@ set(android-emu-common
     android/emulation/GoldfishDma.cpp
     android/emulation/GoldfishSyncCommandQueue.cpp
     android/emulation/H264NaluParser.cpp
-    android/emulation/HevcNaluParser.cpp
     android/emulation/H264PingInfoParser.cpp
+    android/emulation/HevcNaluParser.cpp
     android/emulation/HevcPingInfoParser.cpp
     android/emulation/HostapdController.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
@@ -177,7 +174,6 @@ set(android-emu-common
     android/hw-events.c
     android/hw-fingerprint.c
     android/hw-kmsg.c
-    android/hw-lcd.c
     android/hw-qemud.cpp
     android/jdwp/JdwpProxy.cpp
     android/jpeg-compress.c
@@ -188,7 +184,6 @@ set(android-emu-common
     android/main-kernel-parameters.cpp
     android/metrics/DependentMetrics.cpp
     android/metrics/PerfStatReporter.cpp
-    android/multi-instance.cpp
     android/multitouch-port.c
     android/multitouch-screen.c
     android/network/control.cpp
@@ -261,7 +256,6 @@ set(android-emu-common
     android/telephony/TagLengthValue.cpp
     android/update-check/UpdateChecker.cpp
     android/update-check/VersionExtractor.cpp
-    android/user-config.cpp
     android/userspace-boot-properties.cpp
     android/verified-boot/load_config.cpp
     android/wear-agent/android_wear_agent.cpp
@@ -320,7 +314,6 @@ set(android_emu_dependent_src
     android/virtualscene/VirtualSceneManager.cpp
     android/virtualscene/WASDInputHandler.cpp)
 
-
 # The standard archive has all the sources, including those that have external
 # dependencies that we have not properly declared yet.
 # TODO(jansene): Properly clean up the mutual dependencies and make sure they
@@ -356,9 +349,9 @@ android_add_library(
          android/camera/camera-capture-mac.m
          android/crashreport/CrashReporter_darwin.cpp
          android/emulation/MediaH264DecoderVideoToolBox.cpp
+         android/emulation/MediaVideoToolBoxHevcVideoHelper.cpp
          android/emulation/MediaVideoToolBoxUtils.cpp
          android/emulation/MediaVideoToolBoxVideoHelper.cpp
-	 android/emulation/MediaVideoToolBoxHevcVideoHelper.cpp
          android/opengl/macTouchOpenGL.m
          android/opengl/NativeGpuInfo_darwin.cpp
          android/snapshot/MacSegvHandler.cpp
@@ -373,6 +366,7 @@ target_link_libraries(
   PUBLIC FFMPEG::FFMPEG
          VPX::VPX
          emulator-libext4_utils
+         android-emu-avd
          android-emu-files
          android-emu-metrics
          android-emu-cmdline
@@ -522,10 +516,6 @@ android_add_library(
   SHARED
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
-      android/avd/hw-config.c
-      android/avd/info.c
-      android/avd/util.c
-      android/avd/util_wrapper.cpp
       android/base/async/CallbackRegistry.cpp
       android/emulation/address_space_device.cpp
       android/emulation/address_space_graphics.cpp
@@ -564,7 +554,6 @@ android_add_library(
       android/gpu_frame.cpp
       android/hw-events.c
       android/hw-kmsg.c
-      android/hw-lcd.c
       android/kernel/kernel_utils.cpp
       android/loadpng.c
       android/opengl/emugl_config.cpp
@@ -597,7 +586,6 @@ android_add_library(
       android/snapshot/Snapshotter.cpp
       android/snapshot/TextureLoader.cpp
       android/snapshot/TextureSaver.cpp
-      android/user-config.cpp
       stubs/gfxstream-stubs.cpp
       stubs/stubs.cpp
   WINDOWS # cmake-format: sortable
@@ -621,6 +609,7 @@ android_add_library(
 target_link_libraries(
   android-emu-shared
   PUBLIC android-emu-base
+         android-emu-avd
          android-emu-agents
          android-emu-cmdline
          android-emu-utils
@@ -763,9 +752,6 @@ if(NOT LINUX_AARCH64)
       # cmake-format: sortable
       android/automation/AutomationController_unittest.cpp
       android/automation/AutomationEventSink_unittest.cpp
-      android/avd/util_unittest.cpp
-      android/avd/util_wrapper_unittest.cpp
-      # bug: 153381599: disabled until flakiness is addressed
       android/base/async/CallbackRegistry_unittest.cpp
       android/base/IOVector_unittest.cpp
       android/base/LayoutResolver_unittest.cpp
@@ -816,7 +802,6 @@ if(NOT LINUX_AARCH64)
       android/featurecontrol/testing/FeatureControlTest.cpp
       android/gps/GpxParser_unittest.cpp
       android/gps/KmlParser_unittest.cpp
-      android/hw-lcd_unittest.cpp
       android/jdwp/Jdwp_unittest.cpp
       android/jdwp/JdwpProxy_unittest.cpp
       android/kernel/kernel_utils_unittest.cpp

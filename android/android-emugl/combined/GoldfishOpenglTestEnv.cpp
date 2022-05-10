@@ -385,7 +385,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     getConsoleAgents()->settings->inject_AvdInfo(
             avdInfo_newCustom("goldfish_opengl_test", 28, "x86_64", "x86_64",
-                              true /* is google APIs */, AVD_PHONE));
+                              true /* is google APIs */, AVD_PHONE, nullptr));
 
     avdInfo_setCustomContentPath(getConsoleAgents()->settings->avdInfo(),
                                  sTestContentDir->path());

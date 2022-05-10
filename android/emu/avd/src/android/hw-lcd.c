@@ -10,7 +10,6 @@
 ** GNU General Public License for more details.
 */
 #include "android/hw-lcd.h"
-#include "android/boot-properties.h"
 #include <math.h>
 #include <stdio.h>
 

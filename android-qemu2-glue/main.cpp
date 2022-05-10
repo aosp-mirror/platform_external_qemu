@@ -983,8 +983,7 @@ static int startEmulatorWithMinConfig(int argc,
     opts->no_window = noWindow;
 
     *avdInfoToOverride = avdInfo_newCustom(avdName, apiLevel, abi, arch,
-                                           isGoogleApis, flavor);
-
+                                           isGoogleApis, flavor, opts->sysdir);
     AvdInfo* avd = *avdInfoToOverride;
 
     getConsoleAgents()->settings->inject_AvdInfo(avd);

@@ -245,7 +245,8 @@ int main(int argc, char* argv[]) {
             android::emulation::MockAndroidConsoleFactory());
     // Initialize the avd
     getConsoleAgents()->settings->inject_AvdInfo(avdInfo_new(
-            FLAG_avd.c_str(), getConsoleAgents()->settings->avdParams()));
+            FLAG_avd.c_str(), getConsoleAgents()->settings->avdParams(),
+            getConsoleAgents()->settings->android_cmdLineOptions()->sysdir));
     if (getConsoleAgents()->settings->avdInfo() == NULL) {
         std::cerr << "Could not find virtual device named: " << FLAG_avd
                   << std::endl;

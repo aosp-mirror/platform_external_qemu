@@ -932,7 +932,7 @@ int main(int argc, char** argv) {
 
     if (avdName) {
         AvdInfoParams myparams;
-        AvdInfo* myavdinfo = avdInfo_new(avdName, &myparams);
+        AvdInfo* myavdinfo = avdInfo_new(avdName, &myparams, sysDir);
         if (avdInfo_getAvdFlavor(myavdinfo) == AVD_ANDROID_AUTO) {
             const char* forge = getenv("TEST_UNDECLARED_OUTPUTS_DIR");
             if (forge != NULL && *forge && *forge != '0') {

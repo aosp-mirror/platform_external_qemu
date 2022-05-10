@@ -1275,7 +1275,7 @@ function(android_add_big_protobuf name protofiles)
 endfunction()
 
 # This function generates the hw config file. It translates android-
-# emu/androd/avd/hardware-properties.ini -> android/avd/hw-config-defs.h
+# emu/android/avd/hardware-properties.ini -> android/avd/hw-config-defs.h
 #
 # This file will be placed on the current binary dir, so it can be included if
 # this directory is on the include path.
@@ -1287,10 +1287,9 @@ function(android_generate_hw_config)
     COMMAND
       ${Python_EXECUTABLE}
       ${ANDROID_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
-      ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
+      ${HW_PROPERTIES_INI}
       ${ANDROID_HW_CONFIG_H}
-    DEPENDS
-      ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
+    DEPENDS ${HW_PROPERTIES_INI}
     VERBATIM)
   android_add_library(TARGET android-hw-config LICENSE Apache-2.0
                       SRC ${ANDROID_HW_CONFIG_H} dummy.c)

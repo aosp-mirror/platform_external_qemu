@@ -147,7 +147,10 @@ extern "C" void ranchu_device_tree_setup(void* fdt) {
                             "android,fstab");
 
     char* system_path =
-            avdInfo_getSystemImageDevicePathInGuest(getConsoleAgents()->settings->avdInfo());
+            feature_is_enabled(kFeature_SystemAsRoot)
+                    ? nullptr
+                    : avdInfo_getSystemImageDevicePathInGuest(
+                              getConsoleAgents()->settings->avdInfo());
     if (system_path) {
         qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/system");
         qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system",
