@@ -12,13 +12,9 @@ prebuilt(FFMPEG)
 android_add_library(
   TARGET android-emu-launch
   LICENSE Apache-2.0
-  SRC android/camera/camera-common.cpp
-      android/camera/camera-format-converters.c
+  SRC android/camera/camera-common.cpp android/camera/camera-format-converters.c
       android/camera/camera-list.cpp
-      android/emulation/CpuAccelerator.cpp
-      android/emulation/launcher/launcher_stub.cpp
-      android/HostHwInfo.cpp
-      android/main-help.cpp
+      android/emulation/launcher/launcher_stub.cpp android/main-help.cpp
   WINDOWS android/camera/camera-capture-windows.cpp
           android/emulation/USBAssist.cpp
   LINUX android/camera/camera-capture-linux.c
@@ -53,7 +49,6 @@ android_target_link_libraries(
 # archive. We currently have to split them up due to dependencies on external
 # variables/functions that are implemented in other libraries.
 set(android-emu-common
-    # cmake-format: sortable
     ../emu/avd/src/android/avd/BugreportInfo.cpp # TODO(jansene) Move once the
                                                  # dependency has been truly
                                                  # resolved.
@@ -71,7 +66,6 @@ set(android-emu-common
     android/car.cpp
     android/CommonReportedInfo.cpp
     android/console_auth.cpp
-    android/cpu_accelerator.cpp
     android/crashreport/CrashReporter_common.cpp
     android/crashreport/CrashSystem.cpp
     android/crashreport/detectors/CrashDetectors.cpp
@@ -112,7 +106,6 @@ set(android-emu-common
     android/emulation/control/GooglePlayServices.cpp
     android/emulation/control/NopRtcBridge.cpp
     android/emulation/control/ServiceUtils.cpp
-    android/emulation/CpuAccelerator.cpp
     android/emulation/CrossSessionSocket.cpp
     android/emulation/DmaMap.cpp
     android/emulation/goldfish_sync.cpp
@@ -159,17 +152,12 @@ set(android-emu-common
     android/emulation/VpxFrameParser.cpp
     android/emulation/VpxPingInfoParser.cpp
     android/error-messages.cpp
-    android/featurecontrol/feature_control.cpp
-    android/featurecontrol/FeatureControl.cpp
-    android/featurecontrol/FeatureControlImpl.cpp
-    android/featurecontrol/HWMatching.cpp
     android/framebuffer.c
     android/gps.c
     android/gps/GpxParser.cpp
     android/gps/KmlParser.cpp
     android/gps/PassiveGpsUpdater.cpp
     android/gpu_frame.cpp
-    android/HostHwInfo.cpp
     android/hw-control.cpp
     android/hw-events.c
     android/hw-fingerprint.c
@@ -201,7 +189,6 @@ set(android-emu-common
     android/opengl/EmuglBackendScanner.cpp
     android/opengl/GLProcessPipe.cpp
     android/opengl/GpuFrameBridge.cpp
-    android/opengl/gpuinfo.cpp
     android/opengl/logger.cpp
     android/opengl/OpenglEsPipe.cpp
     android/opengles.cpp
@@ -265,7 +252,6 @@ set(android-emu-common
 # These are the set of sources for which we know we have dependencies. You can
 # use this as a starting point to figure out what can move to a seperate library
 set(android_emu_dependent_src
-    # cmake-format: sortable
     android/automation/AutomationController.cpp
     android/automation/AutomationEventSink.cpp
     android/camera/camera-common.cpp
@@ -324,36 +310,28 @@ android_add_library(
   TARGET android-emu
   LICENSE Apache-2.0
   SRC ${android-emu_src}
-  WINDOWS # cmake-format: sortable
-          android/camera/camera-capture-windows.cpp
+  WINDOWS android/camera/camera-capture-windows.cpp
           android/crashreport/CrashReporter_windows.cpp
           android/emulation/dynlink_cuda.cpp
           android/emulation/dynlink_nvcuvid.cpp
           android/emulation/MediaCudaDriverHelper.cpp
           android/emulation/MediaCudaUtils.cpp
           android/emulation/MediaCudaVideoHelper.cpp
-          android/opengl/NativeGpuInfo_windows.cpp
           android/snapshot/MemoryWatch_windows.cpp
-          android/windows_installer.cpp
-  LINUX # cmake-format: sortable
-        android/camera/camera-capture-linux.c
+  LINUX android/camera/camera-capture-linux.c
         android/crashreport/CrashReporter_linux.cpp
         android/emulation/dynlink_cuda.cpp
         android/emulation/dynlink_nvcuvid.cpp
         android/emulation/MediaCudaDriverHelper.cpp
         android/emulation/MediaCudaUtils.cpp
         android/emulation/MediaCudaVideoHelper.cpp
-        android/opengl/NativeGpuInfo_linux.cpp
         android/snapshot/MemoryWatch_linux.cpp
-  DARWIN # cmake-format: sortable
-         android/camera/camera-capture-mac.m
+  DARWIN android/camera/camera-capture-mac.m
          android/crashreport/CrashReporter_darwin.cpp
          android/emulation/MediaH264DecoderVideoToolBox.cpp
          android/emulation/MediaVideoToolBoxHevcVideoHelper.cpp
          android/emulation/MediaVideoToolBoxUtils.cpp
          android/emulation/MediaVideoToolBoxVideoHelper.cpp
-         android/opengl/macTouchOpenGL.m
-         android/opengl/NativeGpuInfo_darwin.cpp
          android/snapshot/MacSegvHandler.cpp
          android/snapshot/MemoryWatch_darwin.cpp)
 
@@ -368,6 +346,7 @@ target_link_libraries(
          emulator-libext4_utils
          android-emu-avd
          android-emu-files
+         android-emu-feature
          android-emu-metrics
          android-emu-cmdline
          android-emu-base
@@ -515,8 +494,7 @@ android_add_library(
   TARGET android-emu-shared
   SHARED
   LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      android/base/async/CallbackRegistry.cpp
+  SRC android/base/async/CallbackRegistry.cpp
       android/emulation/address_space_device.cpp
       android/emulation/address_space_graphics.cpp
       android/emulation/address_space_host_memory_allocator.cpp
@@ -546,9 +524,6 @@ android_add_library(
       android/emulation/testing/TestVmLock.cpp
       android/emulation/VmLock.cpp
       android/error-messages.cpp
-      android/featurecontrol/feature_control.cpp
-      android/featurecontrol/FeatureControl.cpp
-      android/featurecontrol/FeatureControlImpl.cpp
       android/framebuffer.c
       android/gps.c
       android/gpu_frame.cpp
@@ -561,7 +536,6 @@ android_add_library(
       android/opengl/EmuglBackendScanner.cpp
       android/opengl/GLProcessPipe.cpp
       android/opengl/GpuFrameBridge.cpp
-      android/opengl/gpuinfo.cpp
       android/opengl/logger.cpp
       android/opengl/OpenglEsPipe.cpp
       android/opengles.cpp
@@ -588,20 +562,12 @@ android_add_library(
       android/snapshot/TextureSaver.cpp
       stubs/gfxstream-stubs.cpp
       stubs/stubs.cpp
-  WINDOWS # cmake-format: sortable
-          android/emulation/dynlink_cuda.cpp
+  WINDOWS android/emulation/dynlink_cuda.cpp
           android/emulation/dynlink_nvcuvid.cpp
-          android/opengl/NativeGpuInfo_windows.cpp
           android/snapshot/MemoryWatch_windows.cpp
-          android/windows_installer.cpp
-  LINUX # cmake-format: sortable
-        android/emulation/dynlink_cuda.cpp android/emulation/dynlink_nvcuvid.cpp
-        android/opengl/NativeGpuInfo_linux.cpp
+  LINUX android/emulation/dynlink_cuda.cpp android/emulation/dynlink_nvcuvid.cpp
         android/snapshot/MemoryWatch_linux.cpp
-  DARWIN # cmake-format: sortable
-         android/opengl/macTouchOpenGL.m
-         android/opengl/NativeGpuInfo_darwin.cpp
-         android/snapshot/MacSegvHandler.cpp
+  DARWIN android/snapshot/MacSegvHandler.cpp
          android/snapshot/MemoryWatch_darwin.cpp)
 
 # Note that these are basically the same as android-emu-shared. We should clean
@@ -614,6 +580,7 @@ target_link_libraries(
          android-emu-cmdline
          android-emu-utils
          emulator-murmurhash
+         android-emu-feature
          android-emu-files
          android-emu-metrics
          # Protobuf dependencies
@@ -737,19 +704,18 @@ endif()
 android_add_library(
   TARGET android-emu-test-launcher
   LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      android/emulation/testing/MockAndroidAgentFactory.cpp
+  SRC android/emulation/testing/MockAndroidAgentFactory.cpp
       android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
       android/emulation/testing/MockAndroidMultiDisplayAgent.cpp
       android/emulation/testing/MockAndroidVmOperations.cpp)
 android_target_compile_options(android-emu-test-launcher Clang
                                PRIVATE -O0 -Wno-invalid-constexpr)
-target_link_libraries(android-emu-test-launcher PRIVATE android-emu
-                      PUBLIC gmock android-emu-cmdline-testing)
+target_link_libraries(
+  android-emu-test-launcher PRIVATE android-emu
+  PUBLIC gmock android-emu-cmdline-testing android-emu-feature-test)
 
 if(NOT LINUX_AARCH64)
   set(android-emu_unittests_common
-      # cmake-format: sortable
       android/automation/AutomationController_unittest.cpp
       android/automation/AutomationEventSink_unittest.cpp
       android/base/async/CallbackRegistry_unittest.cpp
@@ -781,7 +747,6 @@ if(NOT LINUX_AARCH64)
       android/emulation/control/FilePusher_unittest.cpp
       android/emulation/control/GooglePlayServices_unittest.cpp
       android/emulation/control/ScreenCapturer_unittest.cpp
-      android/emulation/CpuAccelerator_unittest.cpp
       android/emulation/CrossSessionSocket_unittest.cpp
       android/emulation/DeviceContextRunner_unittest.cpp
       android/emulation/DmaMap_unittest.cpp
@@ -797,9 +762,6 @@ if(NOT LINUX_AARCH64)
       android/emulation/testing/TestAndroidPipeDevice.cpp
       android/emulation/VmLock_unittest.cpp
       android/error-messages_unittest.cpp
-      android/featurecontrol/FeatureControl_unittest.cpp
-      android/featurecontrol/HWMatching_unittest.cpp
-      android/featurecontrol/testing/FeatureControlTest.cpp
       android/gps/GpxParser_unittest.cpp
       android/gps/KmlParser_unittest.cpp
       android/jdwp/Jdwp_unittest.cpp
@@ -815,7 +777,6 @@ if(NOT LINUX_AARCH64)
       android/opengl/EmuglBackendList_unittest.cpp
       android/opengl/EmuglBackendScanner_unittest.cpp
       android/opengl/GpuFrameBridge_unittest.cpp
-      android/opengl/gpuinfo_unittest.cpp
       android/physics/AmbientEnvironment_unittest.cpp
       android/physics/BodyModel_unittest.cpp
       android/physics/InertialModel_unittest.cpp
@@ -844,15 +805,9 @@ if(NOT LINUX_AARCH64)
 
   # And declare the test
   android_add_test(
-    TARGET android-emu_unittests
-    SRC # cmake-format: sortable
-        ${android-emu_unittests_common}
-    WINDOWS # cmake-format: sortable
-            android/windows_installer_unittest.cpp
-    DARWIN # cmake-format: sortable
-           android/emulation/control/adb/AdbShellStream_unittest.cpp
-    LINUX # cmake-format: sortable
-          android/emulation/control/adb/AdbShellStream_unittest.cpp)
+    TARGET android-emu_unittests SRC ${android-emu_unittests_common}
+    DARWIN android/emulation/control/adb/AdbShellStream_unittest.cpp
+    LINUX android/emulation/control/adb/AdbShellStream_unittest.cpp)
   # Setup the targets compile config etc..
   android_target_compile_options(
     android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr
@@ -877,12 +832,12 @@ if(NOT LINUX_AARCH64)
 
   # Dependecies are exported from android-emu.
   target_link_libraries(
-    android-emu_unittests PRIVATE android-emu android-emu-protobuf android-emu-cmdline-testing
-                                  android-emu-test-launcher)
+    android-emu_unittests
+    PRIVATE android-emu android-emu-protobuf android-emu-cmdline-testing
+            android-emu-test-launcher)
 
   list(
     APPEND
-    # cmake-format: sortable
     android-emu-testdata
     testdata/snapshots/random-ram-100.bin
     testdata/textureutils/gray_alpha_golden.bmp
@@ -914,14 +869,4 @@ if(NOT LINUX_AARCH64)
   android_target_dependency(android-emu_unittests all
                             VIRTUAL_SCENE_DEPENDENCIES)
   android_copy_test_dir(android-emu_unittests test-sdk test-sdk)
-  android_copy_file(
-    android-emu_unittests
-    "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat"
-    "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat"
-  )
-  android_copy_file(
-    android-emu_unittests
-    "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat2"
-    "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat2"
-  )
 endif()

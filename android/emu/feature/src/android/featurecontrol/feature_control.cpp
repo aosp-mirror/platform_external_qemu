@@ -9,8 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "feature_control.h"
-#include "FeatureControl.h"
+#include "android/featurecontrol/feature_control.h"
+#include "android/featurecontrol/FeatureControl.h"
 
 void feature_initialize() {
     android::featurecontrol::initialize();
@@ -36,7 +36,8 @@ void feature_set_if_not_overridden(Feature feature, bool enable) {
     android::featurecontrol::setIfNotOverriden(value, enable);
 }
 
-void feature_set_if_not_overridden_or_guest_disabled(Feature feature, bool enable) {
+void feature_set_if_not_overridden_or_guest_disabled(Feature feature,
+                                                     bool enable) {
     auto value = static_cast<android::featurecontrol::Feature>(feature);
     android::featurecontrol::setIfNotOverridenOrGuestDisabled(value, enable);
 }

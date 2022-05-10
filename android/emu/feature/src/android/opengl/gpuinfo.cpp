@@ -11,20 +11,21 @@
 
 #include "android/opengl/gpuinfo.h"
 
+#include "absl/strings/match.h"
 #include "android/base/ArraySize.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
-#include "android/opengl/gpuinfo.h"
 #include "android/opengl/NativeGpuInfo.h"
+#include "android/opengl/gpuinfo.h"
 
 #include <assert.h>
 #include <inttypes.h>
-#include <sstream>
-#include <utility>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sstream>
+#include <utility>
 
 using android::base::arraySize;
 using android::base::FunctorThread;
@@ -33,14 +34,15 @@ using android::base::System;
 
 // Try to switch to NVIDIA on Optimus systems,
 // and AMD GPU on AmdPowerXpress.
-// See http://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
+// See
+// http://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
 // and https://community.amd.com/thread/169965
 // These variables need to be visible from the final emulator executable
 // as exported symbols.
 #ifdef _WIN32
 #define FLAG_EXPORT __declspec(dllexport)
 #else
-#define FLAG_EXPORT __attribute__ ((visibility ("default")))
+#define FLAG_EXPORT __attribute__((visibility("default")))
 #endif
 
 extern "C" {
@@ -63,7 +65,9 @@ void GpuInfoList::addGpu() {
     infos.push_back(GpuInfo());
 }
 GpuInfo& GpuInfoList::currGpu() {
-    if (infos.empty()) { addGpu(); }
+    if (infos.empty()) {
+        addGpu();
+    }
     return infos.back();
 }
 
@@ -103,9 +107,9 @@ void GpuInfoList::clear() {
 }
 
 static bool gpuinfo_query_list(GpuInfoList* gpulist,
-                             const BlacklistEntry* list,
-                             int size) {
-    for (auto gpuinfo : gpulist->infos) {
+                               const BlacklistEntry* list,
+                               int size) {
+    for (const auto& gpuinfo : gpulist->infos) {
         for (int i = 0; i < size; i++) {
             auto bl_entry = list[i];
             const char* bl_make = bl_entry.make;
@@ -116,21 +120,28 @@ static bool gpuinfo_query_list(GpuInfoList* gpulist,
             const char* bl_renderer = bl_entry.renderer;
             const char* bl_os = bl_entry.os;
 
-            if (bl_make && (gpuinfo.make != bl_make))
+            if (bl_make && (gpuinfo.make != bl_make)) {
                 continue;
-            if (bl_model && (gpuinfo.model != bl_model))
+            }
+            if (bl_model && (gpuinfo.model != bl_model)) {
                 continue;
-            if (bl_device_id && (gpuinfo.device_id != bl_device_id))
+            }
+            if (bl_device_id && (gpuinfo.device_id != bl_device_id)) {
                 continue;
-            if (bl_revision_id && (gpuinfo.revision_id != bl_revision_id))
+            }
+            if (bl_revision_id && (gpuinfo.revision_id != bl_revision_id)) {
                 continue;
-            if (bl_version && (gpuinfo.revision_id != bl_version))
+            }
+            if (bl_version && (gpuinfo.revision_id != bl_version)) {
                 continue;
-            if (bl_renderer && (gpuinfo.renderer.find(bl_renderer) ==
-                                std::string::npos))
+            }
+            if (bl_renderer &&
+                (!absl::StrContains(gpuinfo.renderer, bl_renderer))) {
                 continue;
-            if (bl_os && (gpuinfo.os != bl_os))
+            }
+            if (bl_os && (gpuinfo.os != bl_os)) {
                 continue;
+            }
             return true;
         }
     }
@@ -143,44 +154,41 @@ static const BlacklistEntry sGpuBlacklist[] = {
 
         // Make | Model | DeviceID | RevisionID | DriverVersion | Renderer |
         // OS
-        {nullptr, nullptr, "0x7249", nullptr, nullptr,
-         nullptr, "M"},  // ATI Radeon X1900 on Mac
-        {"8086", nullptr, nullptr, nullptr, nullptr,
-         "Mesa", "L"},  // Linux, Intel, Mesa
-        {"8086", nullptr, nullptr, nullptr, nullptr,
-         "mesa", "L"},  // Linux, Intel, Mesa
+        {nullptr, nullptr, "0x7249", nullptr, nullptr, nullptr,
+         "M"},  // ATI Radeon X1900 on Mac
+        {"8086", nullptr, nullptr, nullptr, nullptr, "Mesa",
+         "L"},  // Linux, Intel, Mesa
+        {"8086", nullptr, nullptr, nullptr, nullptr, "mesa",
+         "L"},  // Linux, Intel, Mesa
 
-        {"8086", nullptr, "27ae", nullptr, nullptr,
-         nullptr, nullptr},  // Intel 945 Chipset
+        {"8086", nullptr, "27ae", nullptr, nullptr, nullptr,
+         nullptr},  // Intel 945 Chipset
         {"1002", nullptr, nullptr, nullptr, nullptr, nullptr,
-          "L"},  // Linux, ATI
+         "L"},  // Linux, ATI
 
-        {nullptr, nullptr, "0x9583", nullptr, nullptr,
-         nullptr, "M"},  // ATI Radeon HD2600 on Mac
-        {nullptr, nullptr, "0x94c8", nullptr, nullptr,
-         nullptr, "M"},  // ATI Radeon HD2400 on Mac
+        {nullptr, nullptr, "0x9583", nullptr, nullptr, nullptr,
+         "M"},  // ATI Radeon HD2600 on Mac
+        {nullptr, nullptr, "0x94c8", nullptr, nullptr, nullptr,
+         "M"},  // ATI Radeon HD2400 on Mac
 
-        {"NVIDIA (0x10de)", nullptr, "0x0324", nullptr, nullptr,
-         nullptr, "M"},  // NVIDIA GeForce FX Go5200 (Mac)
-        {"10DE", "NVIDIA GeForce FX Go5200", nullptr, nullptr, nullptr,
-         nullptr, "W"},  // NVIDIA GeForce FX Go5200 (Win)
-        {"10de", nullptr, "0324", nullptr, nullptr,
-         nullptr, "L"},  // NVIDIA GeForce FX Go5200 (Linux)
+        {"NVIDIA (0x10de)", nullptr, "0x0324", nullptr, nullptr, nullptr,
+         "M"},  // NVIDIA GeForce FX Go5200 (Mac)
+        {"10DE", "NVIDIA GeForce FX Go5200", nullptr, nullptr, nullptr, nullptr,
+         "W"},  // NVIDIA GeForce FX Go5200 (Win)
+        {"10de", nullptr, "0324", nullptr, nullptr, nullptr,
+         "L"},  // NVIDIA GeForce FX Go5200 (Linux)
 
-        {"10de", nullptr, "029e", nullptr, nullptr,
-         nullptr, "L"},  // NVIDIA Quadro FX 1500 (Linux)
+        {"10de", nullptr, "029e", nullptr, nullptr, nullptr,
+         "L"},  // NVIDIA Quadro FX 1500 (Linux)
 
         // Various Quadro FX cards on Linux
-        {"10de", nullptr, "00cd", nullptr, "195.36.24",
-          nullptr, "L"},
-        {"10de", nullptr, "00ce", nullptr, "195.36.24",
-         nullptr, "L"},
+        {"10de", nullptr, "00cd", nullptr, "195.36.24", nullptr, "L"},
+        {"10de", nullptr, "00ce", nullptr, "195.36.24", nullptr, "L"},
         // Driver version 260.19.6 on Linux
-        {"10de", nullptr, nullptr, nullptr, "260.19.6",
-         nullptr, "L"},
+        {"10de", nullptr, nullptr, nullptr, "260.19.6", nullptr, "L"},
 
-        {"NVIDIA (0x10de)", nullptr, "0x0393", nullptr, nullptr,
-         nullptr, "M"},  // NVIDIA GeForce 7300 GT (Mac)
+        {"NVIDIA (0x10de)", nullptr, "0x0393", nullptr, nullptr, nullptr,
+         "M"},  // NVIDIA GeForce 7300 GT (Mac)
 
         // GPUs with < OpenGL 2.1 support
 
@@ -295,49 +303,63 @@ static const WhitelistEntry sAngleWhitelist[] = {
         // Make | Model | DeviceID | RevisionID | DriverVersion | Renderer |
         // OS
         // HD 3000 on Windows
-        {"8086", nullptr, "0116", nullptr, nullptr,
-         nullptr, "W"},
-        {"8086", nullptr, "0126", nullptr, nullptr,
-         nullptr, "W"},
-        {"8086", nullptr, "0102", nullptr, nullptr,
-         nullptr, "W"},
+        {"8086", nullptr, "0116", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "0126", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "0102", nullptr, nullptr, nullptr, "W"},
 };
 
-static bool gpuinfo_query_whitelist(GpuInfoList *gpulist,
-                             const WhitelistEntry *list,
-                             int size) {
+static bool gpuinfo_query_whitelist(GpuInfoList* gpulist,
+                                    const WhitelistEntry* list,
+                                    int size) {
     return gpuinfo_query_list(gpulist, list, size);
 }
 
 #endif
 
 static const BlacklistEntry sSyncBlacklist[] = {
-    // Make | Model | DeviceID | RevisionID | DriverVersion | Renderer |
-    // OS
-    // All NVIDIA Quadro NVS and NVIDIA NVS GPUs on Windows
-    {"10de", nullptr, "06fd", nullptr, nullptr, nullptr, "W"}, // NVS 295
-    {"10de", nullptr, "0a6a", nullptr, nullptr, nullptr, "W"}, // NVS 2100M
-    {"10de", nullptr, "0a6c", nullptr, nullptr, nullptr, "W"}, // NVS 5100M
-    {"10de", nullptr, "0ffd", nullptr, nullptr, nullptr, "W"}, // NVS 510
-    {"10de", nullptr, "1056", nullptr, nullptr, nullptr, "W"}, // NVS 4200M
-    {"10de", nullptr, "10d8", nullptr, nullptr, nullptr, "W"}, // NVS 300
-    {"10de", nullptr, "014a", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 440
-    {"10de", nullptr, "0165", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 285
-    {"10de", nullptr, "017a", nullptr, nullptr, nullptr, "W"}, // Quadro NVS (generic)
-    {"10de", nullptr, "018a", nullptr, nullptr, nullptr, "W"}, // Quadro NVS AGP8X (generic)
-    {"10de", nullptr, "018c", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 50 PCI (generic)
-    {"10de", nullptr, "01db", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 120M
-    {"10de", nullptr, "0245", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 210S / NVIDIA GeForce 6150LE
-    {"10de", nullptr, "032a", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 55/280 PCI
-    {"10de", nullptr, "040c", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 570M / Mobile Quadro FX/NVS video card
-    {"10de", nullptr, "0429", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 135M or Quadro NVS 140M
-    {"10de", nullptr, "042b", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 135M
-    {"10de", nullptr, "042f", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 290
-    {"10de", nullptr, "06ea", nullptr, nullptr, nullptr, "W"}, // quadro nvs 150m
-    {"10de", nullptr, "06eb", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 160M
-    {"10de", nullptr, "06f8", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 420
-    {"10de", nullptr, "06fa", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 450
-    {"10de", nullptr, "0a2c", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 5100M
+        // Make | Model | DeviceID | RevisionID | DriverVersion | Renderer |
+        // OS
+        // All NVIDIA Quadro NVS and NVIDIA NVS GPUs on Windows
+        {"10de", nullptr, "06fd", nullptr, nullptr, nullptr, "W"},  // NVS 295
+        {"10de", nullptr, "0a6a", nullptr, nullptr, nullptr, "W"},  // NVS 2100M
+        {"10de", nullptr, "0a6c", nullptr, nullptr, nullptr, "W"},  // NVS 5100M
+        {"10de", nullptr, "0ffd", nullptr, nullptr, nullptr, "W"},  // NVS 510
+        {"10de", nullptr, "1056", nullptr, nullptr, nullptr, "W"},  // NVS 4200M
+        {"10de", nullptr, "10d8", nullptr, nullptr, nullptr, "W"},  // NVS 300
+        {"10de", nullptr, "014a", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 440
+        {"10de", nullptr, "0165", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 285
+        {"10de", nullptr, "017a", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS (generic)
+        {"10de", nullptr, "018a", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS AGP8X (generic)
+        {"10de", nullptr, "018c", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 50 PCI (generic)
+        {"10de", nullptr, "01db", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 120M
+        {"10de", nullptr, "0245", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 210S / NVIDIA GeForce 6150LE
+        {"10de", nullptr, "032a", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 55/280 PCI
+        {"10de", nullptr, "040c", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 570M / Mobile Quadro FX/NVS video card
+        {"10de", nullptr, "0429", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 135M or Quadro NVS 140M
+        {"10de", nullptr, "042b", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 135M
+        {"10de", nullptr, "042f", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 290
+        {"10de", nullptr, "06ea", nullptr, nullptr, nullptr,
+         "W"},  // quadro nvs 150m
+        {"10de", nullptr, "06eb", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 160M
+        {"10de", nullptr, "06f8", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 420
+        {"10de", nullptr, "06fa", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 450
+        {"10de", nullptr, "0a2c", nullptr, nullptr, nullptr,
+         "W"},  // Quadro NVS 5100M
 };
 
 namespace {
@@ -364,9 +386,7 @@ public:
               mGpuInfoList.SyncBlacklist_status = gpuinfo_query_blacklist(
                       &mGpuInfoList, sSyncBlacklist, arraySize(sSyncBlacklist));
 
-              mGpuInfoList.VulkanBlacklist_status =
-                !isVulkanSafeToUseNative();
-
+              mGpuInfoList.VulkanBlacklist_status = !isVulkanSafeToUseNative();
           }) {
         mAsyncLoadThread.start();
     }

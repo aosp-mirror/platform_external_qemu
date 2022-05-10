@@ -15,6 +15,7 @@
 #include "android/featurecontrol/Features.h"
 
 #include <vector>
+#include <ostream>
 
 namespace android {
 
@@ -86,6 +87,7 @@ public:
     std::vector<Feature> getEnabledOverride() const;
     std::vector<Feature> getDisabledOverride() const;
     std::vector<Feature> getEnabled() const;
+    void writeFeaturesToStream(std::ostream& os) const;
 
     void init(android::base::StringView defaultIniHostPath,
               android::base::StringView defaultIniGuestPath,
@@ -96,13 +98,14 @@ public:
     static void create();
     static FeatureControlImpl& get();
     FeatureControlImpl();
-private:
+
     struct FeatureOption {
         Feature name = static_cast<Feature>(0);
         bool defaultVal = false;
         bool currentVal = false;
         bool isOverridden = false;
     };
+private:
     FeatureOption mFeatures[Feature_n_items] = {};
     FeatureOption mGuestTriedEnabledFeatures[Feature_n_items] = {};
     void initEnabledDefault(Feature feature, bool isEnabled);
@@ -123,7 +126,7 @@ private:
         Feature featureName,
         const char* featureNameStr);
     void loadUserOverrideFeature(
-        android::base::IniFile& defaultIni,
+        android::base::IniFile& userIni,
         Feature featureName,
         const char* featureNameStr);
 };

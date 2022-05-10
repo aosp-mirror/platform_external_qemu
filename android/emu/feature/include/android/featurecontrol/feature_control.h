@@ -17,7 +17,7 @@
 
 ANDROID_BEGIN_HEADER
 
-#include "features_c.h"
+#include "android/featurecontrol/features_c.h"
 
 // Call this function first to initialize the feature control.
 void feature_initialize();

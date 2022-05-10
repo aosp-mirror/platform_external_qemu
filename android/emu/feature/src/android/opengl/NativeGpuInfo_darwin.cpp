@@ -17,9 +17,9 @@
 #include "android/opengl/macTouchOpenGL.h"
 
 #include <CoreGraphics/CGDirectDisplay.h>
-#include <IOKit/graphics/IOGraphicsLib.h>
-#include <IOKit/IOTypes.h>
 #include <IOKit/IOKitLib.h>
+#include <IOKit/IOTypes.h>
+#include <IOKit/graphics/IOGraphicsLib.h>
 
 #include <string>
 #include <vector>
@@ -36,52 +36,51 @@ typedef std::vector<GpuVendorDeviceId> GpuVendorDeviceIdList;
 // GetEntryProperty():
 // Return 0 if we couldn't find the property.
 // The property values we use should not be 0, so it's OK to use 0 as failure.
-uint32_t GetEntryProperty(io_registry_entry_t entry, CFStringRef property_name) {
-    CFDataRef ref(
-        static_cast<CFDataRef>(IORegistryEntrySearchCFProperty(
-            entry,
-            kIOServicePlane,
-            property_name,
-            kCFAllocatorDefault,
+uint32_t GetEntryProperty(io_registry_entry_t entry,
+                          CFStringRef property_name) {
+    CFDataRef ref(static_cast<CFDataRef>(IORegistryEntrySearchCFProperty(
+            entry, kIOServicePlane, property_name, kCFAllocatorDefault,
             kIORegistryIterateRecursively | kIORegistryIterateParents)));
 
-    if (!ref)
+    if (!ref) {
         return 0;
+    }
 
     uint32_t value = 0;
     const uint32_t* value_pointer =
-        reinterpret_cast<const uint32_t*>(CFDataGetBytePtr(ref));
+            reinterpret_cast<const uint32_t*>(CFDataGetBytePtr(ref));
 
-    if (value_pointer != NULL)
+    if (value_pointer != nullptr) {
         value = *value_pointer;
+    }
 
     CFRelease(ref);
     return value;
 }
 
 static auto GetGPUInfoMac() {
-
     GpuVendorDeviceIdList res;
 
     io_iterator_t iter;
     io_service_t serv = 0;
 
     CFMutableDictionaryRef matching = IOServiceMatching("IODisplayConnect");
-    kern_return_t err = IOServiceGetMatchingServices(kIOMasterPortDefault,
-                             matching,
-                             &iter);
+    kern_return_t err =
+            IOServiceGetMatchingServices(kIOMasterPortDefault, matching, &iter);
 
-    if (err) return res;
+    if (err) {
+        return res;
+    }
 
     while ((serv = IOIteratorNext(iter)) != 0) {
-         uint32_t vendor_id = GetEntryProperty(serv, CFSTR("vendor-id"));
-         if (vendor_id) {
-             uint32_t device_id = GetEntryProperty(serv, CFSTR("device-id"));
-             if (device_id) {
+        uint32_t vendor_id = GetEntryProperty(serv, CFSTR("vendor-id"));
+        if (vendor_id) {
+            uint32_t device_id = GetEntryProperty(serv, CFSTR("device-id"));
+            if (device_id) {
                 res.push_back(std::make_pair(vendor_id, device_id));
-             }
-         }
-     }
+            }
+        }
+    }
 
     return res;
 }
@@ -102,11 +101,11 @@ void getGpuInfoListNative(GpuInfoList* out) {
         snprintf(vendoridbuf, sizeof(vendoridbuf), "%04x", elt.first);
         snprintf(deviceidbuf, sizeof(deviceidbuf), "%04x", elt.second);
         out->infos.emplace_back(
-                std::string(vendoridbuf), // make -> vendorid
-                std::string(deviceidbuf), // model -> deviceid
-                std::string(deviceidbuf), // device_id -> deviceid
-                "", "", "" // revision, version, renderer blank
-                );
+                std::string(vendoridbuf),  // make -> vendorid
+                std::string(deviceidbuf),  // model -> deviceid
+                std::string(deviceidbuf),  // device_id -> deviceid
+                "", "", ""                 // revision, version, renderer blank
+        );
     }
 }
 

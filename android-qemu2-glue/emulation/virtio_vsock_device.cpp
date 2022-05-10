@@ -38,7 +38,7 @@ extern "C" {
 #include <android/android-emu/android/emulation/virtio_vsock_device.h>
 #include <android/android-emu/android/emulation/SocketBuffer.h>
 #include <android/android-emu/android/emulation/VmLock.h>
-#include <android/android-emu/android/featurecontrol/feature_control.h>
+#include "android/featurecontrol/feature_control.h"
 #include <android/crashreport/crash-handler.h>
 #include <android-qemu2-glue/base/files/QemuFileStream.h>
 #include <android-qemu2-glue/emulation/virtio_vsock_transport.h>

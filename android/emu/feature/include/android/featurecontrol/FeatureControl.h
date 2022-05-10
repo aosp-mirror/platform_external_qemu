@@ -11,12 +11,13 @@
 
 #pragma once
 
-#include "android/base/export.h"
+#include "android/featurecontrol/feature-export.h"
 #include "android/featurecontrol/Features.h"
 #include "android/featurecontrol/HWMatching.h"
 
 #include <string>
 #include <vector>
+#include <ostream>
 
 namespace android {
 namespace featurecontrol {
@@ -42,7 +43,7 @@ void initialize();
 
 bool isEnabled(Feature feature);
 bool isEnabledByGuest(Feature feature);
-AEMU_EXPORT void setEnabledOverride(Feature feature, bool isEnabled);
+AEMU_FEATURE_API void setEnabledOverride(Feature feature, bool isEnabled);
 void resetEnabledToDefault(Feature feature);
 
 // Queries whether this feature is tied to the guest.
@@ -88,6 +89,6 @@ std::vector<Feature> getEnabledNonOverride();
 std::vector<Feature> getEnabledOverride();
 std::vector<Feature> getDisabledOverride();
 std::vector<Feature> getEnabled();
-
+void writeFeaturesToStream(std::ostream& os);
 } // namespace android
 } // namespace featurecontrol

@@ -32,7 +32,9 @@
 #include <fstream>
 #include <streambuf>
 
+#ifndef _WIN32
 #include "android/HostHwInfo.h"
+#endif
 #include "android/avd/info.h"
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"

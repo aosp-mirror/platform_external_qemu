@@ -28,8 +28,8 @@
 
 #include "android/utils/path.h"
 
-#include <windows.h>
 #include <d3d9.h>
+#include <windows.h>
 
 #include <ctype.h>
 
@@ -281,10 +281,12 @@ static bool queryGpuInfoD3D(GpuInfoList* gpus) {
     // don't allocate on stack.
     std::vector<char> descriptionBuf(MAX_DEVICE_IDENTIFIER_STRING + 1, '\0');
 
-    if (numAdapters == 0) return false;
+    if (numAdapters == 0)
+        return false;
 
-    // The adapter that is equal to D3DADAPTER_DEFAULT is the primary display adapter.
-    // D3DADAPTER_DEFAULT is currently defined to be 0, btw---but this is more future proof
+    // The adapter that is equal to D3DADAPTER_DEFAULT is the primary display
+    // adapter. D3DADAPTER_DEFAULT is currently defined to be 0, btw---but this
+    // is more future proof
     for (UINT i = 0; i < numAdapters; i++) {
         if (i == D3DADAPTER_DEFAULT) {
             gpus->addGpu();
@@ -293,16 +295,18 @@ static bool queryGpuInfoD3D(GpuInfoList* gpus) {
 
             D3DADAPTER_IDENTIFIER9 id;
             pD3D->GetAdapterIdentifier(0, 0, &id);
-            snprintf(vendoridBuf, sizeof(vendoridBuf), "%04x", (unsigned int)id.VendorId);
-            snprintf(deviceidBuf, sizeof(deviceidBuf), "%04x", (unsigned int)id.DeviceId);
-            snprintf(&descriptionBuf[0], MAX_DEVICE_IDENTIFIER_STRING, "%s", id.Description);
+            snprintf(vendoridBuf, sizeof(vendoridBuf), "%04x",
+                     (unsigned int)id.VendorId);
+            snprintf(deviceidBuf, sizeof(deviceidBuf), "%04x",
+                     (unsigned int)id.DeviceId);
+            snprintf(&descriptionBuf[0], MAX_DEVICE_IDENTIFIER_STRING, "%s",
+                     id.Description);
             gpu.make = vendoridBuf;
             gpu.device_id = deviceidBuf;
             gpu.model = &descriptionBuf[0];
             crashhandler_append_message_format(
-                "gpu found. vendor id %04x device id 0x%04x\n",
-                (unsigned int)(id.VendorId),
-                (unsigned int)(id.DeviceId));
+                    "gpu found. vendor id %04x device id 0x%04x\n",
+                    (unsigned int)(id.VendorId), (unsigned int)(id.DeviceId));
             return true;
         }
     }
@@ -311,12 +315,12 @@ static bool queryGpuInfoD3D(GpuInfoList* gpus) {
 }
 
 void getGpuInfoListNative(GpuInfoList* gpus) {
-    if (queryGpuInfoD3D(gpus)) return;
+    if (queryGpuInfoD3D(gpus))
+        return;
 
-    crashhandler_append_message_format(
-        "d3d gpu query failed.\n");
+    crashhandler_append_message_format("d3d gpu query failed.\n");
 
-    DISPLAY_DEVICEW device = { sizeof(device) };
+    DISPLAY_DEVICEW device = {sizeof(device)};
 
     for (int i = 0; EnumDisplayDevicesW(nullptr, i, &device, 0); ++i) {
         gpus->addGpu();
@@ -351,31 +355,34 @@ bool badAmdVulkanDriverVersion() {
     int major, minor, build_1, build_2;
 
     crashhandler_append_message_format(
-        "checking for bad AMD Vulkan driver version...\n");
+            "checking for bad AMD Vulkan driver version...\n");
 
-    if (!System::queryFileVersionInfo("amdvlk64.dll", &major, &minor, &build_1, &build_2)) {
+    if (!System::queryFileVersionInfo("amdvlk64.dll", &major, &minor, &build_1,
+                                      &build_2)) {
         crashhandler_append_message_format(
-            "amdvlk64.dll not found. Checking for amdvlk32...\n");
-        if (!System::queryFileVersionInfo("amdvlk32.dll", &major, &minor, &build_1, &build_2)) {
+                "amdvlk64.dll not found. Checking for amdvlk32...\n");
+        if (!System::queryFileVersionInfo("amdvlk32.dll", &major, &minor,
+                                          &build_1, &build_2)) {
             crashhandler_append_message_format(
-                "amdvlk32.dll not found. No bad AMD Vulkan driver versions found.\n");
+                    "amdvlk32.dll not found. No bad AMD Vulkan driver versions "
+                    "found.\n");
             // Information about amdvlk64 not availble; not blacklisted
             return false;
         }
     }
 
     crashhandler_append_message_format(
-        "AMD driver info found. Version: %d.%d.%d.%d\n",
-        major, minor, build_1, build_2);
+            "AMD driver info found. Version: %d.%d.%d.%d\n", major, minor,
+            build_1, build_2);
 
     bool isBad = (major == 1 && minor == 0 && build_1 <= 54);
 
     if (isBad) {
         crashhandler_append_message_format(
-            "Is bad AMD driver version; blacklisting.\n");
+                "Is bad AMD driver version; blacklisting.\n");
     } else {
         crashhandler_append_message_format(
-            "Not known bad AMD driver version; passing.\n");
+                "Not known bad AMD driver version; passing.\n");
     }
 
     return isBad;
@@ -384,46 +391,43 @@ bool badAmdVulkanDriverVersion() {
 using WindowsDllVersion = std::tuple<int, int, int, int>;
 
 static WindowsDllVersion sBadVulkanDllVersions[] = {
-    std::make_tuple(0, 0, 0, 0),
-    std::make_tuple(1, 0, 26, 0),
-    std::make_tuple(1, 0, 33, 0),
-    std::make_tuple(1, 0, 42, 0),
-    std::make_tuple(1, 0, 42, 1),
-    std::make_tuple(1, 0, 51, 0),
+        std::make_tuple(0, 0, 0, 0),  std::make_tuple(1, 0, 26, 0),
+        std::make_tuple(1, 0, 33, 0), std::make_tuple(1, 0, 42, 0),
+        std::make_tuple(1, 0, 42, 1), std::make_tuple(1, 0, 51, 0),
 };
 
 bool badVulkanDllVersion() {
     int major, minor, build_1, build_2;
 
     crashhandler_append_message_format(
-        "checking for bad vulkan-1.dll version...\n");
+            "checking for bad vulkan-1.dll version...\n");
 
-    if (!System::queryFileVersionInfo("vulkan-1.dll", &major, &minor, &build_1, &build_2)) {
+    if (!System::queryFileVersionInfo("vulkan-1.dll", &major, &minor, &build_1,
+                                      &build_2)) {
         crashhandler_append_message_format(
-            "info on vulkan-1.dll cannot be found, continue.\n");
+                "info on vulkan-1.dll cannot be found, continue.\n");
         // Information about vulkan-1.dll not available; not blacklisted
         return false;
     }
 
-    crashhandler_append_message_format(
-        "vulkan-1.dll version: %d.%d.%d.%d\n",
-        major, minor, build_1, build_2);
+    crashhandler_append_message_format("vulkan-1.dll version: %d.%d.%d.%d\n",
+                                       major, minor, build_1, build_2);
 
     // Ban all Windows Vulkan drivers < 1.1;
     // they sometimes advertise vkEnumerateInstanceVersion
     // and then running that function pointer causes a segfault.
     // In any case, properly updated GPU drivers for Windows
     // should all be 1.1 now for the major manufacturers
-    // (even Intel; see https://www.intel.com/content/www/us/en/support/articles/000005524/graphics-drivers.html)
-    bool isBad =
-        major == 1 && minor == 0;
+    // (even Intel; see
+    // https://www.intel.com/content/www/us/en/support/articles/000005524/graphics-drivers.html)
+    bool isBad = major == 1 && minor == 0;
 
     if (isBad) {
         crashhandler_append_message_format(
-            "Is bad vulkan-1.dll version; blacklisting.\n");
+                "Is bad vulkan-1.dll version; blacklisting.\n");
     } else {
         crashhandler_append_message_format(
-            "Not known bad vulkan-1.dll version; continue.\n");
+                "Not known bad vulkan-1.dll version; continue.\n");
     }
 
     return isBad;

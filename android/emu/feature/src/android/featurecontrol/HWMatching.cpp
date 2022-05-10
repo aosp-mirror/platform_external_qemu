@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "HWMatching.h"
+#include "android/featurecontrol/HWMatching.h"
 
-#include "android/version.h"
+#include "android/base/StringView.h"
+#include "android/base/Version.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/misc/FileUtils.h"
-#include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
-#include "android/base/Version.h"
 #include "android/curl-support.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/filelock.h"
+#include "android/version.h"
 
 #include "emulator_feature_patterns.pb.h"
 #include "google/protobuf/io/zero_copy_stream.h"
@@ -40,9 +40,10 @@
 
 #if DEBUG
 
-#define D(fmt,...) do { \
-    fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__); \
-} while(0) \
+#define D(fmt, ...)                                                \
+    do {                                                           \
+        fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__); \
+    } while (0)
 
 #else
 
@@ -52,8 +53,6 @@
 
 using android::base::LazyInstance;
 using android::base::PathUtils;
-using android::base::OsType;
-using android::base::StringView;
 using android::base::System;
 using android::base::Version;
 
@@ -66,28 +65,28 @@ static const int kQueryFeaturePatternTimeoutMs = 5000;
 
 class FeaturePatternQueryThread {
 public:
-    FeaturePatternQueryThread() :
-        mThread([]() { queryFeaturePatternFn(); }) {
+    FeaturePatternQueryThread() : mThread([]() { queryFeaturePatternFn(); }) {
         mThread.start();
     }
+
 private:
     android::base::FunctorThread mThread;
     DISALLOW_COPY_AND_ASSIGN(FeaturePatternQueryThread);
 };
 
 static LazyInstance<FeaturePatternQueryThread> sFeaturePatternQueryThread =
-    LAZY_INSTANCE_INIT;
+        LAZY_INSTANCE_INIT;
 
-static const char kCachedPatternsFilename[] =
-    "emu-last-feature-flags.protobuf";
+static const char kCachedPatternsFilename[] = "emu-last-feature-flags.protobuf";
 
 static const char kBackupPatternsFilename[] =
-    "emu-original-feature-flags.protobuf";
+        "emu-original-feature-flags.protobuf";
 
 static bool tryParseFeaturePatternsProtobuf(
         const std::string& filename,
         emulator_features::EmulatorFeaturePatterns* out_patterns) {
-    std::ifstream in(PathUtils::asUnicodePath(filename).c_str(), std::ios::binary);
+    std::ifstream in(PathUtils::asUnicodePath(filename).c_str(),
+                     std::ios::binary);
 
     if (out_patterns->ParseFromIstream(&in)) {
         D("successfully parsed as binary.");
@@ -123,40 +122,44 @@ static bool tryParseFeaturePatternsProtobuf(
 // accessors of the file, if concurrent access happens.
 class PatternsFileAccessor {
 public:
-    PatternsFileAccessor() :
-        mFilename(
-            android::base::PathUtils::join(
-                android::ConfigDirs::getUserDirectory(),
-                kCachedPatternsFilename)),
-        mOriginalFileName(
-            android::base::PathUtils::join(
-               System::get()->getLauncherDirectory(), "lib",
-               kBackupPatternsFilename)) { }
+    PatternsFileAccessor()
+        : mFilename(android::base::PathUtils::join(
+                  android::ConfigDirs::getUserDirectory(),
+                  kCachedPatternsFilename)),
+          mOriginalFileName(android::base::PathUtils::join(
+                  System::get()->getLauncherDirectory(),
+                  "lib",
+                  kBackupPatternsFilename)) {}
 
     ~PatternsFileAccessor() {
-        if (mFileLock)
+        if (mFileLock) {
             filelock_release(mFileLock);
+        }
     }
 
     bool read(emulator_features::EmulatorFeaturePatterns* patterns) {
-        if (!acquire()) return false;
+        if (!acquire()) {
+            return false;
+        }
 
         if (tryParseFeaturePatternsProtobuf(mFilename, patterns)) {
             D("Found downloaded feature flags\n");
             return true;
         }
 
-        D("Could not find downloaded feature flags, trying origin %s\n", mOriginalFileName.c_str());
+        D("Could not find downloaded feature flags, trying origin %s\n",
+          mOriginalFileName.c_str());
         return tryParseFeaturePatternsProtobuf(mOriginalFileName, patterns);
     }
 
     bool write(emulator_features::EmulatorFeaturePatterns& patterns) {
-        if (!acquire()) return false;
+        if (!acquire()) {
+            return false;
+        }
 
         {
-            std::ofstream outFile(
-                    PathUtils::asUnicodePath(mFilename).c_str(),
-                    std::ios_base::binary | std::ios_base::trunc);
+            std::ofstream outFile(PathUtils::asUnicodePath(mFilename).c_str(),
+                                  std::ios_base::binary | std::ios_base::trunc);
 
             if (!outFile) {
                 D("not valid file: %s\n", mFilename.c_str());
@@ -177,8 +180,8 @@ public:
 
         return true;
     }
-private:
 
+private:
     bool acquire() {
         if (mFileLock) {
             D("acquire() called twice by same process.");
@@ -208,20 +211,17 @@ void asyncUpdateServerFeaturePatterns() {
 }
 
 bool matchFeaturePattern(
-        const HostHwInfo::Info& hwinfo,
+        const HostHwInfo::Info& hostinfo,
         const emulator_features::EmulatorFeaturePattern* pattern) {
-
     bool res = false;
 
     for (const auto& patternHwConfig : pattern->hwconfig()) {
-
         bool thisConfigMatches = true;
 
         if (patternHwConfig.has_hostinfo()) {
-
-#define MATCH_FIELD(n) \
-        if (patternHwConfig.hostinfo().has_##n()) \
-            thisConfigMatches &= hwinfo.n == patternHwConfig.hostinfo().n(); \
+#define MATCH_FIELD(n)                        \
+    if (patternHwConfig.hostinfo().has_##n()) \
+        thisConfigMatches &= hostinfo.n == patternHwConfig.hostinfo().n();
 
             MATCH_FIELD(cpu_manufacturer)
             MATCH_FIELD(virt_support)
@@ -229,14 +229,12 @@ bool matchFeaturePattern(
             MATCH_FIELD(os_bit_count)
             MATCH_FIELD(cpu_model_name)
             MATCH_FIELD(os_platform)
-
         }
 
         // If the pattern contains GPU info, the system must
         // have GPU info that matches, or the pattern doesn't match.
         for (const auto& patternGpuInfo : patternHwConfig.hostgpuinfo()) {
-
-            if (!hwinfo.gpuinfolist) {
+            if (!hostinfo.gpuinfolist) {
                 // If no gpu info list, fail match.
                 thisConfigMatches = false;
                 break;
@@ -244,13 +242,12 @@ bool matchFeaturePattern(
 
             bool matchesPatternGpu = false;
 
-            for (const auto& hostgpuinfo : hwinfo.gpuinfolist->infos) {
-
+            for (const auto& hostgpuinfo : hostinfo.gpuinfolist->infos) {
                 bool thisHostGpuMatches = true;
 
-#define MATCH_GPU_FIELD(n) \
+#define MATCH_GPU_FIELD(n)        \
     if (patternGpuInfo.has_##n()) \
-        thisHostGpuMatches &= hostgpuinfo.n == patternGpuInfo.n(); \
+        thisHostGpuMatches &= hostgpuinfo.n == patternGpuInfo.n();
 
                 MATCH_GPU_FIELD(make)
                 MATCH_GPU_FIELD(model)
@@ -300,30 +297,26 @@ static bool featureActionAppliesToEmulatorVersion(
             action.has_max_version()
                     ? versionFromProto<Version::kNone>(action.max_version())
                     : Version::invalid();
-    if (currentVersion > maxVersion) {
-        return false;
-    }
-    return true;
+    return  !(currentVersion > maxVersion);
 }
 
 std::vector<FeatureAction> matchFeaturePatterns(
-        const HostHwInfo::Info& hwinfo,
+        const HostHwInfo::Info& hostinfo,
         const emulator_features::EmulatorFeaturePatterns* input) {
     std::vector<FeatureAction> res;
 
     D("Num patterns: %d", input->pattern_size());
 
     for (const auto& pattern : input->pattern()) {
-
-        bool thisHostMatches =
-            matchFeaturePattern(hwinfo, &pattern);
+        bool thisHostMatches = matchFeaturePattern(hostinfo, &pattern);
 
         D("host match pattern? %d", thisHostMatches);
 
-        if (!thisHostMatches) continue;
+        if (!thisHostMatches) {
+            continue;
+        }
 
-        for (const auto action : pattern.featureaction()) {
-
+        for (const auto& action : pattern.featureaction()) {
             if (!action.has_feature() || !action.has_enable()) {
                 D("Not enough info about this feature. Skip");
                 continue;
@@ -345,7 +338,6 @@ std::vector<FeatureAction> matchFeaturePatterns(
 }
 
 static void doFeatureAction(const FeatureAction& action) {
-
     Feature feature = stringToFeature(action.name);
 
     if (stringToFeature(action.name) == Feature::Feature_n_items) {
@@ -366,13 +358,16 @@ static void doFeatureAction(const FeatureAction& action) {
 }
 
 static const char kFeaturePatternsUrl[] =
-    "https://dl.google.com/dl/android/studio/metadata/emulator-feature-flags.protobuf.bin";
+        "https://dl.google.com/dl/android/studio/metadata/"
+        "emulator-feature-flags.protobuf.bin";
 static const char kFeaturePatternsUrlText[] =
-    "https://dl.google.com/dl/android/studio/metadata/emulator-feature-flags.protobuf";
+        "https://dl.google.com/dl/android/studio/metadata/"
+        "emulator-feature-flags.protobuf";
 
-static size_t curlDownloadFeaturePatternsCallback(
-        char* contents, size_t size, size_t nmemb, void* userp) {
-
+static size_t curlDownloadFeaturePatternsCallback(char* contents,
+                                                  size_t size,
+                                                  size_t nmemb,
+                                                  void* userp) {
     size_t total = size * nmemb;
 
     auto& res = *static_cast<std::string*>(userp);
@@ -381,15 +376,15 @@ static size_t curlDownloadFeaturePatternsCallback(
     return total;
 }
 
-bool downloadFeaturePatternsText(emulator_features::EmulatorFeaturePatterns* patternsOut) {
+bool downloadFeaturePatternsText(
+        emulator_features::EmulatorFeaturePatterns* patternsOut) {
     D("load: %s\n", kFeaturePatternsUrlText);
 
     char* curlError = nullptr;
     std::string res;
-    if (!curl_download(
-            kFeaturePatternsUrlText, nullptr,
-            &curlDownloadFeaturePatternsCallback,
-            &res, &curlError)) {
+    if (!curl_download(kFeaturePatternsUrlText, nullptr,
+                       &curlDownloadFeaturePatternsCallback, &res,
+                       &curlError)) {
         D("failed to download feature flags from server: %s.\n", curlError);
         free(curlError);
         return false;
@@ -404,15 +399,15 @@ bool downloadFeaturePatternsText(emulator_features::EmulatorFeaturePatterns* pat
     return true;
 }
 
-bool downloadFeaturePatternsBinary(emulator_features::EmulatorFeaturePatterns* patternsOut) {
+bool downloadFeaturePatternsBinary(
+        emulator_features::EmulatorFeaturePatterns* patternsOut) {
     D("load: %s\n", kFeaturePatternsUrl);
 
     char* curlError = nullptr;
     std::string res;
-    if (!curl_download(
-            kFeaturePatternsUrl, nullptr,
-            &curlDownloadFeaturePatternsCallback,
-            &res, &curlError)) {
+    if (!curl_download(kFeaturePatternsUrl, nullptr,
+                       &curlDownloadFeaturePatternsCallback, &res,
+                       &curlError)) {
         D("failed to download feature flags from server: %s.\n", curlError);
         free(curlError);
         return false;
@@ -434,17 +429,18 @@ static void outputCachedFeaturePatterns(
     access.write(patterns);
 }
 
-static LazyInstance<emulator_features::EmulatorFeaturePatterns> sCachedFeaturePatterns =
-    LAZY_INSTANCE_INIT;
+static LazyInstance<emulator_features::EmulatorFeaturePatterns>
+        sCachedFeaturePatterns = LAZY_INSTANCE_INIT;
 
 void applyCachedServerFeaturePatterns() {
     PatternsFileAccessor access;
 
-    if (!access.read(sCachedFeaturePatterns.ptr()))
+    if (!access.read(sCachedFeaturePatterns.ptr())) {
         return;
+    }
 
-    std::vector<FeatureAction> todo =
-        matchFeaturePatterns(HostHwInfo::query(), sCachedFeaturePatterns.ptr());
+    std::vector<FeatureAction> todo = matchFeaturePatterns(
+            HostHwInfo::query(), sCachedFeaturePatterns.ptr());
 
     for (const auto& elt : todo) {
         doFeatureAction(elt);
@@ -454,14 +450,12 @@ void applyCachedServerFeaturePatterns() {
 static const uint32_t kFeaturePatternDownloadIntervalSeconds = 24 * 60 * 60;
 
 static void queryFeaturePatternFn() {
-
     uint32_t currTime = System::get()->getUnixTime();
 
     if (currTime - sCachedFeaturePatterns->last_download_time() <
         kFeaturePatternDownloadIntervalSeconds) {
         D("Not downloading; last download time %u current time %u",
-          sCachedFeaturePatterns->last_download_time(),
-          currTime);
+          sCachedFeaturePatterns->last_download_time(), currTime);
         return;
     } else {
         D("Downloading new feature patterns.");
@@ -479,6 +473,5 @@ static void queryFeaturePatternFn() {
     outputCachedFeaturePatterns(patterns);
 }
 
-
-} // namespace hwinfo
-} // namespace android
+}  // namespace featurecontrol
+}  // namespace android

@@ -100,7 +100,7 @@ void getGpuInfoListNative(GpuInfoList* gpulist) {
     // when it comes to the else. See the bug for details
     load_gpu_info();
 #else
-    (void)load_gpu_info; // Make Werror happy
+    (void)load_gpu_info;  // Make Werror happy
 #endif
     // std::string gpu_info = load_gpu_info();
     // parse_gpu_info_list_linux(gpu_info, gpulist);

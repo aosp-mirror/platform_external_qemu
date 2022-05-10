@@ -18,8 +18,8 @@ namespace android {
 namespace featurecontrol {
 enum Feature {
 #define FEATURE_CONTROL_ITEM(item) item,
-#include "FeatureControlDefHost.h"
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
     Feature_n_items
 };

@@ -20,6 +20,7 @@
 #include "android/console.h"
 #include "android/emulation/testing/TemporaryCommandLineOptions.h"
 
+#include <sstream>
 #include <gtest/gtest.h>
 
 namespace android {
@@ -108,12 +109,12 @@ TEST_F(FeatureControlTest, readDefaultSettingsHostGuestDifferent) {
                                    mDefaultIniGuestFilePath, "", "");
 
 #define FEATURE_CONTROL_ITEM(item) EXPECT_TRUE(isEnabled(item));
-#include "FeatureControlDefHost.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
 #define FEATURE_CONTROL_ITEM(item) EXPECT_FALSE(isEnabled(item));
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
@@ -152,8 +153,8 @@ TEST_F(FeatureControlTest, stringConversion) {
 #define FEATURE_CONTROL_ITEM(item)           \
     EXPECT_EQ(item, stringToFeature(#item)); \
     EXPECT_STREQ(#item, FeatureControlImpl::toString(item).data());
-#include "FeatureControlDefGuest.h"
-#include "FeatureControlDefHost.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
     EXPECT_EQ(Feature_n_items,
@@ -264,6 +265,112 @@ TEST_F(FeatureControlTest, parseEnvironment) {
     EXPECT_TRUE(isOverridden(Feature::EncryptUserData));
     EXPECT_FALSE(isEnabled(Feature::GLPipeChecksum));
     EXPECT_TRUE(isOverridden(Feature::GLPipeChecksum));
+}
+
+
+TEST_F(FeatureControlTest, writesFeatureToStream) {
+    android::base::TestSystem system("/usr", 64, "/");
+    system.envSet(
+            "ANDROID_EMULATOR_FEATURES",
+            android::base::StringFormat(
+                    "%s,%s,-%s", FeatureControlImpl::toString(Feature::Wifi),
+                    FeatureControlImpl::toString(Feature::EncryptUserData),
+                    FeatureControlImpl::toString(Feature::GLPipeChecksum)));
+    writeDefaultIniHost(mAllOffIni);
+    writeDefaultIniGuest(mAllOffIniGuestOnly);
+    loadAllIni();
+    std::stringstream ss;
+    writeFeaturesToStream(ss);
+
+    // Make sure we write the expected list that would go to crash report.
+    std::string feature_list=R"#(Feature: 'GLPipeChecksum' (0), value: 0, default: 0, is overridden: 1
+Feature: 'ForceANGLE' (1), value: 0, default: 0, is overridden: 0
+Feature: 'ForceSwiftshader' (2), value: 0, default: 0, is overridden: 0
+Feature: 'HYPERV' (3), value: 0, default: 0, is overridden: 0
+Feature: 'HVF' (4), value: 0, default: 0, is overridden: 0
+Feature: 'KVM' (5), value: 0, default: 0, is overridden: 0
+Feature: 'HAXM' (6), value: 0, default: 0, is overridden: 0
+Feature: 'FastSnapshotV1' (7), value: 0, default: 0, is overridden: 0
+Feature: 'ScreenRecording' (8), value: 0, default: 0, is overridden: 0
+Feature: 'VirtualScene' (9), value: 0, default: 0, is overridden: 0
+Feature: 'VideoPlayback' (10), value: 0, default: 0, is overridden: 0
+Feature: 'IgnoreHostOpenGLErrors' (11), value: 0, default: 0, is overridden: 0
+Feature: 'GenericSnapshotsUI' (12), value: 0, default: 0, is overridden: 0
+Feature: 'AllowSnapshotMigration' (13), value: 0, default: 0, is overridden: 0
+Feature: 'WindowsOnDemandSnapshotLoad' (14), value: 0, default: 0, is overridden: 0
+Feature: 'WindowsHypervisorPlatform' (15), value: 0, default: 0, is overridden: 0
+Feature: 'LocationUiV2' (16), value: 0, default: 0, is overridden: 0
+Feature: 'SnapshotAdb' (17), value: 0, default: 0, is overridden: 0
+Feature: 'QuickbootFileBacked' (18), value: 0, default: 0, is overridden: 0
+Feature: 'Offworld' (19), value: 0, default: 0, is overridden: 0
+Feature: 'OffworldDisableSecurity' (20), value: 0, default: 0, is overridden: 0
+Feature: 'OnDemandSnapshotLoad' (21), value: 0, default: 0, is overridden: 0
+Feature: 'Vulkan' (22), value: 0, default: 0, is overridden: 0
+Feature: 'MacroUi' (23), value: 0, default: 0, is overridden: 0
+Feature: 'IpDisconnectOnLoad' (24), value: 0, default: 0, is overridden: 0
+Feature: 'HasSharedSlotsHostMemoryAllocator' (25), value: 0, default: 0, is overridden: 0
+Feature: 'CarVHalTable' (26), value: 0, default: 0, is overridden: 0
+Feature: 'VulkanSnapshots' (27), value: 0, default: 0, is overridden: 0
+Feature: 'DynamicMediaProfile' (28), value: 0, default: 0, is overridden: 0
+Feature: 'CarVhalReplay' (29), value: 0, default: 0, is overridden: 0
+Feature: 'NoDelayCloseColorBuffer' (30), value: 0, default: 0, is overridden: 0
+Feature: 'NoDeviceFrame' (31), value: 0, default: 0, is overridden: 0
+Feature: 'VirtioGpuNativeSync' (32), value: 0, default: 0, is overridden: 0
+Feature: 'VulkanShaderFloat16Int8' (33), value: 0, default: 0, is overridden: 0
+Feature: 'CarRotary' (34), value: 0, default: 0, is overridden: 0
+Feature: 'TvRemote' (35), value: 0, default: 0, is overridden: 0
+Feature: 'NativeTextureDecompression' (36), value: 0, default: 0, is overridden: 0
+Feature: 'BptcTextureSupport' (37), value: 0, default: 0, is overridden: 0
+Feature: 'GuestUsesAngle' (38), value: 0, default: 0, is overridden: 0
+Feature: 'S3tcTextureSupport' (39), value: 0, default: 0, is overridden: 0
+Feature: 'AsyncComposeSupport' (40), value: 0, default: 0, is overridden: 0
+Feature: 'NoDraw' (41), value: 0, default: 0, is overridden: 0
+Feature: 'MigratableSnapshotSave' (42), value: 0, default: 0, is overridden: 0
+Feature: 'GrallocSync' (43), value: 0, default: 0, is overridden: 0
+Feature: 'EncryptUserData' (44), value: 1, default: 0, is overridden: 1
+Feature: 'IntelPerformanceMonitoringUnit' (45), value: 0, default: 0, is overridden: 0
+Feature: 'GLAsyncSwap' (46), value: 0, default: 0, is overridden: 0
+Feature: 'GLDMA' (47), value: 0, default: 0, is overridden: 0
+Feature: 'GLDMA2' (48), value: 0, default: 0, is overridden: 0
+Feature: 'GLDirectMem' (49), value: 0, default: 0, is overridden: 0
+Feature: 'GLESDynamicVersion' (50), value: 0, default: 0, is overridden: 0
+Feature: 'Wifi' (51), value: 1, default: 0, is overridden: 1
+Feature: 'PlayStoreImage' (52), value: 0, default: 0, is overridden: 0
+Feature: 'LogcatPipe' (53), value: 0, default: 0, is overridden: 0
+Feature: 'SystemAsRoot' (54), value: 0, default: 0, is overridden: 0
+Feature: 'KernelDeviceTreeBlobSupport' (55), value: 0, default: 0, is overridden: 0
+Feature: 'DynamicPartition' (56), value: 0, default: 0, is overridden: 0
+Feature: 'RefCountPipe' (57), value: 0, default: 0, is overridden: 0
+Feature: 'HostComposition' (58), value: 0, default: 0, is overridden: 0
+Feature: 'WifiConfigurable' (59), value: 0, default: 0, is overridden: 0
+Feature: 'VirtioInput' (60), value: 0, default: 0, is overridden: 0
+Feature: 'MultiDisplay' (61), value: 0, default: 0, is overridden: 0
+Feature: 'VulkanNullOptionalStrings' (62), value: 0, default: 0, is overridden: 0
+Feature: 'YUV420888toNV21' (63), value: 0, default: 0, is overridden: 0
+Feature: 'YUVCache' (64), value: 0, default: 0, is overridden: 0
+Feature: 'KeycodeForwarding' (65), value: 0, default: 0, is overridden: 0
+Feature: 'VulkanIgnoredHandles' (66), value: 0, default: 0, is overridden: 0
+Feature: 'VirtioGpuNext' (67), value: 0, default: 0, is overridden: 0
+Feature: 'Mac80211hwsimUserspaceManaged' (68), value: 0, default: 0, is overridden: 0
+Feature: 'HardwareDecoder' (69), value: 0, default: 0, is overridden: 0
+Feature: 'VirtioWifi' (70), value: 0, default: 0, is overridden: 0
+Feature: 'ModemSimulator' (71), value: 0, default: 0, is overridden: 0
+Feature: 'VirtioMouse' (72), value: 0, default: 0, is overridden: 0
+Feature: 'VirtconsoleLogcat' (73), value: 0, default: 0, is overridden: 0
+Feature: 'VirtioVsockPipe' (74), value: 0, default: 0, is overridden: 0
+Feature: 'VulkanQueueSubmitWithCommands' (75), value: 0, default: 0, is overridden: 0
+Feature: 'VulkanBatchedDescriptorSetUpdate' (76), value: 0, default: 0, is overridden: 0
+Feature: 'Minigbm' (77), value: 0, default: 0, is overridden: 0
+Feature: 'GnssGrpcV1' (78), value: 0, default: 0, is overridden: 0
+Feature: 'AndroidbootProps' (79), value: 0, default: 0, is overridden: 0
+Feature: 'AndroidbootProps2' (80), value: 0, default: 0, is overridden: 0
+Feature: 'DeviceSkinOverlay' (81), value: 0, default: 0, is overridden: 0
+Feature: 'BluetoothEmulation' (82), value: 0, default: 0, is overridden: 0
+Feature: 'DeviceStateOnBoot' (83), value: 0, default: 0, is overridden: 0
+Feature: 'HWCMultiConfigs' (84), value: 0, default: 0, is overridden: 0
+Feature: 'VirtioSndCard' (85), value: 0, default: 0, is overridden: 0
+)#";
+    EXPECT_EQ(feature_list, ss.str());
 }
 
 }  // namespace featurecontrol

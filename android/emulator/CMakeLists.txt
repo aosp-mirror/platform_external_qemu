@@ -23,7 +23,9 @@ target_compile_definitions(
   PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
-
+if(NOT WINDOWS)
+  target_link_libraries(emulator PRIVATE android-emu-feature)
+endif()
 # Make sure we have the qemu dependencies available
 if(BUILDING_FOR_AARCH64)
   add_dependencies(emulator qemu-system-aarch64 qemu-system-aarch64-headless)

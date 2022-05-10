@@ -54,6 +54,7 @@ target_link_libraries(
           android-emu-cmdline
           android-emu-curl
           android-emu-files
+          android-emu-feature
           android-hw-config
           picosha2
           LibXml2::LibXml2

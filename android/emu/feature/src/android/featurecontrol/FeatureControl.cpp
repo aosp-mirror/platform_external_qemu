@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "FeatureControl.h"
+#include "android/featurecontrol/FeatureControl.h"
 
 #include "android/featurecontrol/FeatureControlImpl.h"
 
@@ -45,7 +45,8 @@ void setIfNotOverriden(Feature feature, bool isEnabled) {
 }
 
 void setIfNotOverridenOrGuestDisabled(Feature feature, bool isEnabled) {
-    FeatureControlImpl::get().setIfNotOverridenOrGuestDisabled(feature, isEnabled);
+    FeatureControlImpl::get().setIfNotOverridenOrGuestDisabled(feature,
+                                                               isEnabled);
 }
 
 Feature stringToFeature(const std::string& str) {
@@ -66,6 +67,10 @@ std::vector<Feature> getDisabledOverride() {
 
 std::vector<Feature> getEnabled() {
     return FeatureControlImpl::get().getEnabled();
+}
+
+void writeFeaturesToStream(std::ostream& os) {
+    return FeatureControlImpl::get().writeFeaturesToStream(os);
 }
 
 void initialize() {

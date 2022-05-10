@@ -9,8 +9,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "FeatureControlImpl.h"
+#include "android/featurecontrol/FeatureControlImpl.h"
 
+#include "absl/strings/str_format.h"
+#include "absl/strings/str_join.h"
+#include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/base/Log.h"
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
@@ -18,23 +22,24 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
-#include "android/crashreport/CrashReporter.h"
-#include "android/emulation/ConfigDirs.h"
 #include "android/console.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/system.h"
-#include "absl/strings/str_join.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <algorithm>
 #include <memory>
+#include <ostream>
 #include <set>
+#include <string_view>
 #include <unordered_set>
 
 using android::base::ScopedCPtr;
+using android::base::StringView;
 
 enum IniSetting { ON, OFF, DEFAULT, NULLVAL, ERR };
 static constexpr char kIniSettingNull[] = "null";
@@ -45,7 +50,7 @@ static android::base::LazyInstance<android::featurecontrol::FeatureControlImpl>
 
 #define FEATURE_CONTROL_ITEM(item) #item,
 static const std::unordered_set<std::string> kExpectedGuestFeatures = {
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
 };
 #undef FEATURE_CONTROL_ITEM
 
@@ -147,10 +152,10 @@ void FeatureControlImpl::loadUserOverrideFeature(
     }
 }
 
-void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
-                              android::base::StringView defaultIniGuestPath,
-                              android::base::StringView userIniHostPath,
-                              android::base::StringView userIniGuestPath) {
+void FeatureControlImpl::init(StringView defaultIniHostPath,
+                              StringView defaultIniGuestPath,
+                              StringView userIniHostPath,
+                              StringView userIniGuestPath) {
     memset(mGuestTriedEnabledFeatures, 0,
            sizeof(FeatureOption) * Feature_n_items);
     base::IniFile defaultIniHost(defaultIniHostPath);
@@ -158,7 +163,7 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
         // Initialize host only features
 #define FEATURE_CONTROL_ITEM(item) \
     initHostFeatureAndParseDefault(defaultIniHost, item, #item);
-#include "FeatureControlDefHost.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
         // Initialize guest features
@@ -173,24 +178,28 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
                     }
                 }
                 if (!unexpectedGuestFeatures.empty()) {
-                    std::string missing = absl::StrJoin(unexpectedGuestFeatures, ", ");
-                    dwarning("Please update the emulator to one that supports the feature(s): %s", missing.c_str());
+                    std::string missing =
+                            absl::StrJoin(unexpectedGuestFeatures, ", ");
+                    dwarning(
+                            "Please update the emulator to one that supports "
+                            "the feature(s): %s",
+                            missing.c_str());
                 }
 #define FEATURE_CONTROL_ITEM(item)                                         \
     initGuestFeatureAndParseDefault(defaultIniHost, defaultIniGuest, item, \
                                     #item);
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
             }
         } else {
 #define FEATURE_CONTROL_ITEM(item) initEnabledDefault(item, false);
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
         }
     } else {
 #define FEATURE_CONTROL_ITEM(item) initEnabledDefault(item, false);
-#include "FeatureControlDefGuest.h"
-#include "FeatureControlDefHost.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
         LOG(WARNING) << "Failed to load advanced feature default setting:"
                      << defaultIniHostPath;
@@ -200,8 +209,8 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
         if (userIni.read()) {
 #define FEATURE_CONTROL_ITEM(item) \
     loadUserOverrideFeature(userIni, item, #item);
-#include "FeatureControlDefGuest.h"
-#include "FeatureControlDefHost.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
         }
     }
@@ -210,14 +219,15 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
         if (userIni.read()) {
 #define FEATURE_CONTROL_ITEM(item) \
     loadUserOverrideFeature(userIni, item, #item);
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
         }
     }
 
     // Apply overrides from the hw config.
     if (getConsoleAgents()->settings->hw()->hw_featureflags) {
-        parseAndApplyOverrides(getConsoleAgents()->settings->hw()->hw_featureflags);
+        parseAndApplyOverrides(
+                getConsoleAgents()->settings->hw()->hw_featureflags);
     }
 
     // Enumerate the command line and environment variables to add overrides.
@@ -245,7 +255,8 @@ void FeatureControlImpl::initNoFiles() {
 
     // Apply overrides from the hw config.
     if (getConsoleAgents()->settings->hw()->hw_featureflags) {
-        parseAndApplyOverrides(getConsoleAgents()->settings->hw()->hw_featureflags);
+        parseAndApplyOverrides(
+                getConsoleAgents()->settings->hw()->hw_featureflags);
     }
 
     // Enumerate the command line and environment variables to add overrides.
@@ -290,7 +301,7 @@ FeatureControlImpl::FeatureControlImpl() {
                 base::System::get()->getLauncherDirectory(), "lib",
                 "advancedFeatures.ini");
     } else {
-        // TODO: If we ever use beta/dev channels, disambiguate them
+        // TODO(jansene): If we ever use beta/dev channels, disambiguate them
         // with separate files here.
         defaultIniHostName = base::PathUtils::join(
                 base::System::get()->getLauncherDirectory(), "lib",
@@ -299,8 +310,8 @@ FeatureControlImpl::FeatureControlImpl() {
 
     ScopedCPtr<char> defaultIniGuestName;
     if (getConsoleAgents()->settings->avdInfo()) {
-        defaultIniGuestName.reset(
-                avdInfo_getDefaultSystemFeatureControlPath(getConsoleAgents()->settings->avdInfo()));
+        defaultIniGuestName.reset(avdInfo_getDefaultSystemFeatureControlPath(
+                getConsoleAgents()->settings->avdInfo()));
     }
     std::string userIniHostName = base::PathUtils::join(
             ConfigDirs::getUserDirectory(), "advancedFeatures.ini");
@@ -309,26 +320,23 @@ FeatureControlImpl::FeatureControlImpl() {
     std::string userIniGuestName;
     init(defaultIniHostName, defaultIniGuestName.get(), userIniHostName,
          userIniGuestName);
+}
 
-#ifndef AEMU_MIN
-    using android::crashreport::CrashReporter;
-    CrashReporter::get()->addCrashCallback([this]() {
-        base::ScopedFd file = CrashReporter::get()->openDataAttachFile(
-                "feature_control_state.txt");
-        for (const FeatureOption& feature : mFeatures) {
-            static constexpr char format[] =
-                    "Feature: '%s' (%d), value: %d, default: %d, is "
-                    "overridden: %d\n";
-            char buffer[sizeof(format) + 100 + 3 + 1 + 1 + 1] = {};
-            int count = snprintf(buffer, sizeof(buffer), format,
-                                 base::c_str(toString(feature.name)).get(),
-                                 (int)feature.name, feature.currentVal,
-                                 feature.defaultVal, feature.isOverridden);
-            HANDLE_EINTR(write(file.get(), buffer,
-                               std::min<int>(count, sizeof(buffer))));
-        }
-    });
-#endif
+std::ostream& operator<<(std::ostream& os,
+                         const FeatureControlImpl::FeatureOption& feature) {
+    os << absl::StrFormat(
+            "Feature: '%s' (%d), value: %d, default: %d, is "
+            "overridden: %d",
+            FeatureControlImpl::toString(feature.name),
+            static_cast<int>(feature.name), feature.currentVal,
+            feature.defaultVal, feature.isOverridden);
+    return os;
+}
+
+void FeatureControlImpl::writeFeaturesToStream(std::ostream& os) const {
+    for (const FeatureOption& opt : mFeatures) {
+        os << opt << std::endl;
+    }
 }
 
 FeatureControlImpl& FeatureControlImpl::get() {
@@ -360,7 +368,7 @@ bool FeatureControlImpl::isGuestFeature(Feature feature) const {
 #define FEATURE_CONTROL_ITEM(item) \
     if (feature == Feature::item)  \
         return true;
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
     return false;
 }
@@ -371,39 +379,42 @@ bool FeatureControlImpl::isEnabledByGuest(Feature feature) const {
 
 void FeatureControlImpl::setIfNotOverriden(Feature feature, bool isEnabled) {
     FeatureOption& currFeature = mFeatures[feature];
-    if (currFeature.isOverridden)
+    if (currFeature.isOverridden) {
         return;
+    }
     currFeature.currentVal = isEnabled;
 }
 
 void FeatureControlImpl::setIfNotOverridenOrGuestDisabled(Feature feature,
                                                           bool isEnabled) {
     FeatureOption& currFeature = mFeatures[feature];
-    if (currFeature.isOverridden)
+    if (currFeature.isOverridden) {
         return;
-    if (isGuestFeature(feature) && !isEnabledByGuest(feature))
+    }
+    if (isGuestFeature(feature) && !isEnabledByGuest(feature)) {
         return;
+    }
 
     currFeature.currentVal = isEnabled;
 }
 
-Feature FeatureControlImpl::fromString(base::StringView str) {
+Feature FeatureControlImpl::fromString(StringView str) {
 #define FEATURE_CONTROL_ITEM(item) \
     if (str == #item)              \
         return item;
-#include "FeatureControlDefGuest.h"
-#include "FeatureControlDefHost.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
     return Feature::Feature_n_items;
 }
 
-base::StringView FeatureControlImpl::toString(Feature feature) {
+StringView FeatureControlImpl::toString(Feature feature) {
 #define FEATURE_CONTROL_ITEM(item) \
     if (feature == Feature::item)  \
         return #item;
-#include "FeatureControlDefGuest.h"
-#include "FeatureControlDefHost.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
     return "UnknownFeature";
@@ -425,14 +436,14 @@ void FeatureControlImpl::setGuestTriedEnable(Feature feature) {
     opt.isOverridden = false;
 }
 
-void FeatureControlImpl::parseAndApplyOverrides(base::StringView csv) {
-    for (auto it = csv.begin(); it < csv.end();) {
+void FeatureControlImpl::parseAndApplyOverrides(StringView overrides) {
+    for (auto it = overrides.begin(); it < overrides.end();) {
         bool enable = true;
         if (*it == '-') {
             enable = false;
             ++it;
         }
-        auto itEnd = std::find(it, csv.end(), ',');
+        auto itEnd = std::find(it, overrides.end(), ',');
         if (it != itEnd) {
             auto feature = fromString({it, itEnd});
             if (feature == Feature::Feature_n_items) {
@@ -458,8 +469,8 @@ std::vector<Feature> FeatureControlImpl::getEnabledNonOverride() const {
     if (mFeatures[feature].defaultVal) \
         res.push_back(feature);
 
-#include "FeatureControlDefHost.h"
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
     return res;
@@ -472,8 +483,8 @@ std::vector<Feature> FeatureControlImpl::getEnabledOverride() const {
     if (mFeatures[feature].isOverridden && mFeatures[feature].currentVal) \
         res.push_back(feature);
 
-#include "FeatureControlDefHost.h"
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
     return res;
@@ -486,8 +497,8 @@ std::vector<Feature> FeatureControlImpl::getDisabledOverride() const {
     if (mFeatures[feature].isOverridden && !mFeatures[feature].currentVal) \
         res.push_back(feature);
 
-#include "FeatureControlDefHost.h"
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
     return res;
@@ -500,12 +511,11 @@ std::vector<Feature> FeatureControlImpl::getEnabled() const {
     if (mFeatures[feature].currentVal) \
         res.push_back(feature);
 
-#include "FeatureControlDefHost.h"
-#include "FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "android/featurecontrol/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
     return res;
 }
-
 }  // namespace featurecontrol
 }  // namespace android

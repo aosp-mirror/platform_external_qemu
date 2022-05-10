@@ -15,8 +15,8 @@
 // and android-qemu1-glue/main.c
 
 #include "android/base/misc/StringUtils.h"
-#include "android/emulation/CpuAccelerator.h"
 #include "android/cpu_accelerator.h"
+#include "android/emulation/CpuAccelerator.h"
 
 #include "android/utils/system.h"
 
@@ -26,9 +26,9 @@ bool androidCpuAcceleration_hasModernX86VirtualizationFeatures() {
     return android::hasModernX86VirtualizationFeatures();
 }
 
-AndroidCpuAcceleration androidCpuAcceleration_getStatus(
-        char** status_p) {
-    AndroidCpuAcceleration result = android::GetCurrentCpuAcceleratorStatusCode();
+AndroidCpuAcceleration androidCpuAcceleration_getStatus(char** status_p) {
+    AndroidCpuAcceleration result =
+            android::GetCurrentCpuAcceleratorStatusCode();
 
     if (status_p) {
         *status_p = android::base::strDup(
@@ -50,4 +50,4 @@ void androidCpuAcceleration_resetCpuAccelerator(AndroidCpuAccelerator type) {
     android::ResetCurrentCpuAccelerator((android::CpuAccelerator)type);
 }
 
-} // extern "C"
+}  // extern "C"
