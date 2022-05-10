@@ -13,13 +13,8 @@
 
 #include "android/console.h"
 #include "android/telephony/modem_driver.h"
-#include "android-qemu2-glue/utils/stream.h"
-
-#ifdef AEMU_GFXSTREAM_BACKEND
-#include "android/android_modem_v2_stubs.h"
-#else
 #include "android_modem_v2.h"
-#endif
+#include "android-qemu2-glue/utils/stream.h"
 
 #include "qemu/osdep.h"
 #include "hw/hw.h"

@@ -11,7 +11,7 @@ add_subdirectory(protos)
 
 # Grab the other libraries.
 include(android-emu)
+include(android-libui)
 if(NOT OPTION_GFXSTREAM_BACKEND)
-  include(android-libui)
   include(crash-service)
 endif()

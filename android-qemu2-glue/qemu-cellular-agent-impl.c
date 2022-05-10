@@ -15,11 +15,7 @@
 #include "android/network/globals.h"
 #include "android/shaper.h"
 #include "android/telephony/modem_driver.h"
-#ifdef AEMU_GFXSTREAM_BACKEND
-#include "android/android_modem_v2_stubs.h"
-#else
 #include "android_modem_v2.h"
-#endif
 
 static void cellular_setSimPresent(bool isPresent)
 {
