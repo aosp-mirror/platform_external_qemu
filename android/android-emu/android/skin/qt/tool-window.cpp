@@ -1617,6 +1617,10 @@ void ToolWindow::touchExtendedWindow() {
     mExtendedWindow.get();
 }
 
+void ToolWindow::enableCloseButton() {
+    mToolsUi->close_button->setVisible(true);
+}
+
 void ToolWindow::hideRotationButton(bool hide) {
     if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV ||
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO ||

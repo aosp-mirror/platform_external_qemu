@@ -735,6 +735,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             });
         }
     });
+
+    // Enable the close button on the tool window as the last step.
+    mToolWindow->enableCloseButton();
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
