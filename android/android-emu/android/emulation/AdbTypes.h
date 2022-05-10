@@ -21,6 +21,7 @@ namespace emulation {
 enum AdbPortType {
     RegularAdb,
     Jdwp,
+    AdbPortTypeIncorrect = 255,
 };
 
 // Interfaces used to implement the communication channel between the

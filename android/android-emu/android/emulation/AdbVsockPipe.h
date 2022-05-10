@@ -99,7 +99,6 @@ public:
         virtual AdbPortType portType() const = 0;
         virtual EventBits onHostSocketEvent(int fd, uint64_t guestKey, unsigned events) = 0;
         virtual EventBits onGuestSend(const void *data, size_t size) = 0;
-        virtual bool canSave() const { return false; }
         virtual void onSave(base::Stream* stream) const {}
     };
 
@@ -116,10 +115,6 @@ private:
 
         void onClose() override {
             pipe->onGuestClose();
-        }
-
-        bool canSave() const override {
-            return pipe->canSave();
         }
 
         bool isValid() const {
@@ -145,10 +140,10 @@ private:
     void processProxyEventBits(Proxy::EventBits bits);
     void setSocket(android::base::ScopedSocket socket);
 
-    bool canSave() const;
     void save(base::Stream* stream) const;
     bool loadImpl(base::Stream* stream);
     static std::unique_ptr<AdbVsockPipe> load(Service* service, base::Stream* stream);
+    bool isLoaded() const { return !!mProxy; }
 
     Service *const mService;
     android::base::ScopedSocket mSocket;

@@ -21,7 +21,6 @@ namespace emulation {
 
 struct IVsockNewTransport : std::enable_shared_from_this<IVsockNewTransport> {
     virtual ~IVsockNewTransport() {}
-    virtual bool canSave() const { return false; }
     virtual void save() const {}
     virtual int writeGuestToHost(const void *data, size_t size,
                                  std::shared_ptr<IVsockNewTransport> *nextStage) = 0;

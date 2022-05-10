@@ -18,7 +18,6 @@ struct IVsockHostCallbacks {
     virtual void onConnect() = 0;
     virtual void onReceive(const void *data, size_t size) = 0;
     virtual void onClose() = 0;
-    virtual bool canSave() const { return false; }
 };
 
 typedef uint64_t(*virtio_vsock_device_stream_open_t)(uint32_t guest_port,
