@@ -28,6 +28,7 @@
 #include "android/utils/property_file.h"
 #include "android/utils/string.h"
 #include "android/utils/tempfile.h"
+#include "android/console.h"
 
 #include <assert.h>
 #include <ctype.h>

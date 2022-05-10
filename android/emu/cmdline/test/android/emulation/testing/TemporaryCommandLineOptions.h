@@ -20,6 +20,7 @@
 // always in a proper state.
 #pragma once
 #include "android/console.h"
+#include "android/cmdline-definitions.h"
 
 class TemporaryCommandLineOptions {
 public:

@@ -14,12 +14,6 @@
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
-#include "android/avd/hw-config.h"
-#include "android/avd/info.h"
-#include "android/base/export.h"
-#include "android/cmdline-definitions.h"
-#include "android/constants.h"
-#include "android/user-config.h"
 #include "android/utils/compiler.h"
 
 /** TODO:(jansene): These are the set of global variables that are used
@@ -35,6 +29,12 @@ typedef struct LanguageSettings {
     char* country;
     char* locale;
 } LanguageSettings;
+
+typedef struct AvdInfoParams AvdInfoParams;
+typedef struct AvdInfo AvdInfo;
+typedef struct AndroidHwConfig AndroidHwConfig;
+typedef struct AUserConfig AUserConfig;
+typedef struct AndroidOptions AndroidOptions;
 
 typedef struct QAndroidGlobalVarsAgent {
     /* this structure is setup when loading the virtual device
@@ -135,5 +135,23 @@ typedef struct QAndroidGlobalVarsAgent {
     void (*set_is_fuchsia)(bool);
 
     void (*set_android_snapshot_update_timer)(int);
+
+    /* this is the port used for the control console in this emulator instance.
+     * starts at 5554, with increments of 2 */
+    int (*android_base_port)(void);
+    void (*set_android_base_port)(int);
+
+    /* this is the port used to connect ADB (Android Debug Bridge)
+     * default is 5037 */
+    int (*android_adb_port)(void);
+    void (*set_android_adb_port)(int);
+
+    /* This number is used to form the "serial number" of
+     * the AVD. The default is 5554, so the default serial
+     * number is "emulator-5554". */
+    int (*android_serial_number_port)(void);
+    void (*set_android_serial_number_port)(int);
+
+    bool (*has_network_option)(void);
 } QAndroidGlobalVarsAgent;
 ANDROID_END_HEADER

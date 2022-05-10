@@ -8,8 +8,8 @@ android_add_executable(
   TARGET emulator INSTALL .
   LICENSE Apache-2.0
   SRC ../images/emulator_icon.rc main-emulator.cpp
-  DEPS android-emu-base android-emu-launch android-emu-utils android-emu-files
-       android-hw-config)
+  DEPS android-emu-agents-headers android-emu-base android-emu-files
+       android-emu-launch android-emu-utils android-hw-config)
 target_include_directories(
   emulator # This is not right!, an implicit dependency..
   PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)

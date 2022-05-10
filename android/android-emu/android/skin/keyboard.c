@@ -16,6 +16,7 @@
 #include <stdio.h>    // for fprintf, NULL
 #include <string.h>
 
+#include "android/avd/hw-config.h"
 #include "android/console.h"                         // for android_hw
 #include "android/featurecontrol/feature_control.h"  // for feature_is_enabled
 #include "android/skin/android_keycodes.h"           // for KEY_APPSWITCH

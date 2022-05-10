@@ -30,6 +30,8 @@
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/android_qemud.h"
 #include "android/featurecontrol/feature_control.h"
+#include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/console.h" /* for android_hw */
 #include "android/hw-sensors.h"
 #include "android/utils/debug.h"

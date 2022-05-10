@@ -66,6 +66,7 @@
 
 #ifdef CONFIG_ANDROID
 #include "android/console.h"
+#include "android/avd/info.h"
 #include "hw/acpi/goldfish_defs.h"
 #include "android/utils/debug.h"
 #else

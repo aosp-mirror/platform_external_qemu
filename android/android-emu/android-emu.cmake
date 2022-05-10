@@ -29,7 +29,7 @@ android_add_library(
           android/emulation/USBAssist.cpp
   LINUX android/camera/camera-capture-linux.c
   DARWIN android/camera/camera-capture-mac.m
-  DEPS android-emu-base android-emu-utils android-emu-files android-hw-config android-emu-cmdline
+  DEPS android-emu-base android-emu-utils android-emu-files android-hw-config android-emu-cmdline android-emu-agents-headers
        emulator-libyuv gtest)
 target_include_directories(android-emu-launch PRIVATE .)
 target_compile_options(android-emu-launch PRIVATE -Wno-extern-c-compat)
@@ -114,7 +114,6 @@ set(android-emu-common
     android/emulation/control/EmulatorAdvertisement.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
-    android/emulation/control/LineConsumer.cpp
     android/emulation/control/NopRtcBridge.cpp
     android/emulation/control/ServiceUtils.cpp
     android/emulation/CpuAccelerator.cpp
@@ -322,27 +321,6 @@ set(android_emu_dependent_src
     android/virtualscene/VirtualSceneManager.cpp
     android/virtualscene/WASDInputHandler.cpp)
 
-android_add_library(TARGET android-emu-agents SHARED LICENSE Apache-2.0
-                    SRC android/emulation/control/AndroidAgentFactory.cpp)
-
-android_target_properties(android-emu-agents darwin
-                          "INSTALL_RPATH>=@loader_path/gles_swiftshader")
-target_include_directories(
-  android-emu-agents
-  PUBLIC .
-  PRIVATE
-    # TODO(jansene): We actually have a hard dependency on qemu-glue as there
-    # are a lot of externs that are actually defined in qemu2-glue. this has to
-    # be sorted out,
-    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG})
-target_link_libraries(android-emu-agents PRIVATE android-emu-base android-emu-files android-emu-cmdline
-                                                 android-hw-config)
-target_compile_options(android-emu-agents PRIVATE "-Wno-extern-c-compat")
-target_compile_definitions(android-emu-agents PRIVATE "CONSOLE_EXPORTS")
-android_install_shared(android-emu-agents)
-if(WINDOWS_MSVC_X86_64)
-  install(TARGETS android-emu-agents DESTINATION .)
-endif()
 
 # The standard archive has all the sources, including those that have external
 # dependencies that we have not properly declared yet.
@@ -562,7 +540,6 @@ android_add_library(
       android/emulation/ClipboardPipe.cpp
       android/emulation/ComponentVersion.cpp
       android/emulation/control/FilePusher.cpp
-      android/emulation/control/LineConsumer.cpp
       android/emulation/control/NopRtcBridge.cpp
       android/emulation/DmaMap.cpp
       android/emulation/goldfish_sync.cpp
@@ -818,7 +795,6 @@ if(NOT LINUX_AARCH64)
       android/emulation/control/EmulatorAdvertisement_unittest.cpp
       android/emulation/control/FilePusher_unittest.cpp
       android/emulation/control/GooglePlayServices_unittest.cpp
-      android/emulation/control/LineConsumer_unittest.cpp
       android/emulation/control/ScreenCapturer_unittest.cpp
       android/emulation/CpuAccelerator_unittest.cpp
       android/emulation/CrossSessionSocket_unittest.cpp

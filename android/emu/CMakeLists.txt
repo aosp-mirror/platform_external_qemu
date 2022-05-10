@@ -1,3 +1,4 @@
+add_subdirectory(agents)
 add_subdirectory(cmdline)
 add_subdirectory(curl)
 add_subdirectory(files)

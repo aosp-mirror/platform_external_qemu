@@ -12,10 +12,12 @@
 
 #pragma once
 
-#include "android/telephony/modem.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
+
+typedef struct AModemRec_* AModem;
+typedef void (ModemCallback)(void* user_data, int numActiveCalls);
 
 typedef enum {
     Tel_Op_Init_Call,

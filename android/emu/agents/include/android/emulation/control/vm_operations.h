@@ -14,9 +14,8 @@
 
 #pragma once
 
-#include "android/emulation/control/callbacks.h"
-#include "android/emulation/control/structs.h"
 #include "android/utils/compiler.h"
+#include "android/emulation/control/callbacks.h"
 
 #include <stdbool.h>
 #include <stdint.h>

@@ -19,6 +19,7 @@
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/avd/hw-config.h"
 #include "android/console.h"
 
 #define D(...) VERBOSE_PRINT(sensors, __VA_ARGS__)

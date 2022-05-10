@@ -15,12 +15,11 @@
 #pragma once
 
 #include "android/utils/compiler.h"
-#include "android/framebuffer.h"
 
 #include <stdint.h>
 
 ANDROID_BEGIN_HEADER
-
+typedef struct QFrameBuffer   QFrameBuffer;
 // This is an interface for Qemu display interaction
 
 // Called when display is updated

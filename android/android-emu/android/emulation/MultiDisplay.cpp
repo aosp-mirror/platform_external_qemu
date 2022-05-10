@@ -37,6 +37,8 @@
 #include "android/emulator-window.h"                // for emulator_win...
 #include "android/featurecontrol/FeatureControl.h"  // for isEnabled
 #include "android/featurecontrol/Features.h"        // for MultiDisplay
+#include "android/avd/info.h"
+#include "android/avd/hw-config.h"
 #include "android/console.h"                        // for android_hw
 #include "android/hw-sensors.h"                     // for android_fold...
 #include "android/recording/screen-recorder.h"      // for RecorderStates

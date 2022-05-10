@@ -27,6 +27,7 @@
 #include <google/protobuf/text_format.h>  // for TextFormat
 
 #include "android-qemu2-glue/qemu-console-factory.h"
+#include "android/cmdline-definitions.h"
 #include "android/avd/info.h"         // for avdInfo_new
 #include "android/base/StringView.h"  // for StringView
 #include "android/emulation/control/AndroidAgentFactory.h"

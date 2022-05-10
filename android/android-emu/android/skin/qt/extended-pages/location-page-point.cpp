@@ -22,6 +22,7 @@
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/logging-category.h"
 #include "android/utils/path.h"
+#include "android/emulation/ConfigDirs.h"
 
 #include <QDateTime>
 #include <QDialog>

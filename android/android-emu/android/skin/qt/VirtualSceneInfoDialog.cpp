@@ -31,6 +31,7 @@
 #include <algorithm>   // for min
 
 #include "android/cmdline-option.h"              // for android_cmdLineOptions
+#include "android/console.h"
 #include "android/settings-agent.h"              // for SETTINGS_THEME_DARK
 #include "android/skin/qt/emulator-container.h"  // for EmulatorContainer
 #include "android/skin/qt/qt-settings.h"         // for SHOW_VIRTUALSCEN...

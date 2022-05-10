@@ -17,6 +17,8 @@
 #include <memory>      // for static_pointer...
 
 #include "android/cmdline-option.h"
+#include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/console.h"                           // for android_hw
 #include "android/skin/qt/emulator-no-qt-no-window.h"  // for EmulatorNoQtNo...
 #include "android/skin/rect.h"                         // for SkinRect, SkinPos

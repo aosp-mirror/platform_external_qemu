@@ -40,6 +40,7 @@
 #include "android/base/files/IniFile.h"
 #include "android/cmdline-option.h"
 #include "android/emulation/control/multi_display_agent.h"
+#include "android/user-config.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"

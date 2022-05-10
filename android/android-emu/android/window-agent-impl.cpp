@@ -14,13 +14,15 @@
 
 #include "android/emulation/control/window_agent.h"
 
+#include "android/avd/hw-config.h"
 #include "android/base/threads/Thread.h"
+#include "android/console.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/emulator-window.h"
-#include "android/console.h"
 #include "android/hw-sensors.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/winsys.h"
+#include "android/user-config.h"
 #include "android/utils/debug.h"
 
 // Set this to true if you wish to enable debugging of the window position.
@@ -224,7 +226,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                    HorizontalAnchor horizontal,
                    VerticalAnchor vertical) {
                     int unused;
-                    auto userConfig = getConsoleAgents()->settings->userConfig();
+                    auto userConfig =
+                            getConsoleAgents()->settings->userConfig();
                     if (auserConfig_getExtendedControlsPos(userConfig, &unused,
                                                            &unused, &unused,
                                                            &unused) == 0 ||

@@ -33,6 +33,8 @@
 #include <QSize>                                    // for QSize
 #include <QVariant>                                 // for QVariant
 
+
+#include "android/avd/hw-config.h"
 #include "android/console.h"                        // for android_hw
 #include "android/settings-agent.h"                 // for SettingsTheme
 #include "android/skin/event.h"                     // for SkinEvent, (anony...

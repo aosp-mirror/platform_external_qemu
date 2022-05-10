@@ -15,6 +15,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/avd/hw-config.h"
 #include "android/console.h"
 #include "android/opengl/EmuglBackendList.h"
 #include "android/skin/winsys.h"

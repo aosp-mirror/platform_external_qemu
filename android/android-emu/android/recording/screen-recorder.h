@@ -17,11 +17,14 @@
 #include <stdint.h>                                   // for uint32_t
 #include <stdbool.h>
 
-#include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...
-#include "android/emulation/control/multi_display_agent.h"
+#include "android/console.h"
 #include "android/utils/compiler.h"                   // for ANDROID_BEGIN_H...
 
 ANDROID_BEGIN_HEADER
+typedef QAndroidDisplayAgent QAndroidDisplayAgent;
+typedef QAndroidMultiDisplayAgent QAndroidMultiDisplayAgent;
+typedef RecordingInfo RecordingInfo;
+
 // This callback will be called in the following scenarios:
 //
 //    1) The encoding has been stopped
@@ -33,41 +36,6 @@ ANDROID_BEGIN_HEADER
 // recording and when the encoding is actually finished, so we'll get a second
 // call to the callback once the encoding is finished, with success set to 1. If
 // any errors occur while stopping the recording, success will be set to -1.
-typedef enum {
-    RECORD_START_INITIATED,
-    RECORD_STARTED,
-    RECORD_START_FAILED,
-    RECORD_STOP_INITIATED,
-    RECORD_STOPPED,
-    RECORD_STOP_FAILED,
-} RecordingStatus;
-
-typedef enum {
-    RECORDER_STARTING,
-    RECORDER_RECORDING,
-    RECORDER_STOPPING,
-    RECORDER_STOPPED,
-} RecorderState;
-
-typedef struct {
-    RecorderState state;
-    uint32_t displayId;
-} RecorderStates;
-
-typedef void (*RecordingCallback)(void* opaque, RecordingStatus status);
-
-typedef struct RecordingInfo {
-    const char* fileName;
-    uint32_t width;
-    uint32_t height;
-    uint32_t videoBitrate;
-    uint32_t timeLimit;
-    uint32_t fps;
-    uint32_t displayId;
-    RecordingCallback cb;
-    void* opaque;
-} RecordingInfo;
-
 // Initializes internal global structure. Call this before doing any recording
 // operations. |w| and |h| are the FrameBuffer width and height. |dpy_agent| is
 // the display agent for recording in guest mode. If |dpy_agent| is NULL, then

@@ -19,6 +19,8 @@
 #include "android/telephony/TagLengthValue.h"
 #include "android/utils/debug.h"
 #include "sim_access_rules.pb.h"
+#include "android/avd/hw-config.h"
+#include "android/console.h"
 
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/text_format.h"

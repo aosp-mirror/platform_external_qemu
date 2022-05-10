@@ -14,32 +14,56 @@
 #endif
 
 #include "android/skin/qt/extended-pages/location-page.h"
-#include "android/emulation/ConfigDirs.h"
+
+#include <QAbstractItemView>  // for QAbst...
+#include <QCheckBox>          // for QChec...
+#include <QColor>             // for QColor
+#include <QComboBox>          // for QComb...
+#include <QFileDialog>        // for QFile...
+#include <QFileInfo>          // for QFile...
+#include <QFlags>             // for QFlags
+#include <QHeaderView>        // for QHead...
+#include <QLineEdit>          // for QLine...
+#include <QSettings>          // for QSett...
+#include <QSignalBlocker>     // for QSign...
+#include <QTabWidget>         // for QTabW...
+#include <QTableWidget>       // for QTabl...
+#include <QTableWidgetItem>   // for QTabl...
+#include <QTextBrowser>       // for QText...
+#include <QVariant>           // for QVariant
+#include <QtGui>              // for QBrush
+
+#include "android/avd/hw-config.h"
+#include "android/avd/util.h"  // for path_...
+#include "android/base/Log.h"  // for LOG
 #include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/cmdline-option.h"
-#include "android/emulation/control/location_agent.h"
+#include "android/base/memory/LazyInstance.h"                // for LazyI...
+#include "android/base/synchronization/ConditionVariable.h"  // for Condi...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/base/system/System.h"                      // for System
+#include "android/base/threads/FunctorThread.h"              // for Funct...
+#include "android/cmdline-definitions.h"
+#include "android/console.h"  // for getCo...
+#include "android/emulation/ConfigDirs.h"
+#include "android/emulation/control/globals_agent.h"   // for QAndr...
+#include "android/emulation/control/location_agent.h"  // for QAndr...
 #include "android/featurecontrol/feature_control.h"
-#include "android/console.h"
-#include "android/gps/GpxParser.h"
-#include "android/gps/KmlParser.h"
+#include "android/gps/GpxParser.h"  // for GpxPa...
+#include "android/gps/KmlParser.h"  // for KmlPa...
 #include "android/location/MapsKey.h"
 #include "android/location/MapsKeyFileParser.h"
 #include "android/location/StudioMapsKey.h"
-#include "android/metrics/MetricsReporter.h"
-#include "android/settings-agent.h"
-#include "android/skin/qt/error-dialog.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/logging-category.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/skin/qt/stylesheet.h"
-#include "android/utils/path.h"
-#include "studio_stats.pb.h"
+#include "android/metrics/UiEventTracker.h"                     // for UiEve...
+#include "android/settings-agent.h"                             // for Setti...
+#include "android/skin/qt/angle-input-widget.h"                 // for Angle...
+#include "android/skin/qt/error-dialog.h"                       // for showE...
+#include "android/skin/qt/extended-pages/common.h"              // for setBu...
+#include "android/skin/qt/qt-settings.h"                        // for PER_A...
+#include "android/skin/qt/raised-material-button.h"             // for Raise...
+#include "android/skin/qt/websockets/websocketclientwrapper.h"  // for WebSo...
+#include "android/utils/log_severity.h"                         // for EMULA...
+#include "studio_stats.pb.h"                                    // for Emula...
 
-#include <QFileDialog>
-#include <QItemDelegate>
-#include <QMovie>
-#include <QSettings>
 #ifdef USE_WEBENGINE
 #if QT_VERSION >= 0x060000
 #include <QtWebEngineCore/QWebEngineProfile>
@@ -48,16 +72,13 @@
 #endif  // QT_VERSION
 #endif  // USE_WEBENGINE
 
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <utility>
+#include <math.h>     // for cos, s
+#include <algorithm>  // for min, max
+#include <string>     // for string
+#include <utility>    // for move
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
-#include <math.h>
-
 #define DEBUG_PLAYBACK 0
 
 using android::base::AutoLock;
@@ -166,11 +187,10 @@ LocationPage::LocationPage(QWidget* parent)
 
         if (strlen(mapsKeyHolder->userMapsKey()) == 0) {
             std::string mapsFile = android::base::PathUtils::join(
-                    android::ConfigDirs::getUserDirectory(),
-                    kMapsFileName);
+                    android::ConfigDirs::getUserDirectory(), kMapsFileName);
 
             auto studioMapsKey = android::location::StudioMapsKey::create(
-                mapsFile,
+                    mapsFile,
                     [](android::base::StringView mapsFile, void* opaque) {
                         auto s = reinterpret_cast<LocationPage*>(opaque);
                         if (!mapsFile.empty()) {

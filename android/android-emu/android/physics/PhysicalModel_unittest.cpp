@@ -19,6 +19,7 @@
 #include "android/base/files/MemStream.h"
 #include "android/base/testing/GlmTestHelpers.h"
 #include "android/base/testing/ProtobufMatchers.h"
+#include "android/avd/hw-config.h"
 #include "android/console.h"
 #include "android/physics/InertialModel.h"
 #include "android/physics/physical_state_agent.h"

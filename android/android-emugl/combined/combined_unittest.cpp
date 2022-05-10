@@ -21,6 +21,7 @@
 #include "android/base/Tracing.h"
 #include "android/opengles.h"
 #include "android/emulation/testing/TestDmaMap.h"
+#include "android/console.h"
 
 #include "AndroidBufferQueue.h"
 #include "AndroidWindow.h"
@@ -1034,33 +1035,33 @@ TEST_P(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
 // TEST_P(CombinedGoldfishOpenglTest, GetSyncAttrib) {
 //     EGLSyncKHR sync = eglCreateSyncKHR(mEGL.display, EGL_SYNC_FENCE_KHR, nullptr);
 //     EXPECT_NE(nullptr, sync);
-// 
+//
 //     EGLint value;
-// 
+//
 //     EXPECT_EQ(
 //         EGL_TRUE,
 //         eglGetSyncAttribKHR(
 //             mEGL.display, sync, EGL_SYNC_STATUS_KHR, &value));
-// 
+//
 //     EXPECT_TRUE(
 //         EGL_SIGNALED_KHR == value ||
 //         EGL_UNSIGNALED_KHR == value
 //     );
-// 
+//
 //     if (EGL_UNSIGNALED_KHR == value) {
 //         printf("%s: Note: Nontrivial case; not signaled in the beginning\n", __func__);
 //     }
-// 
+//
 //     glFinish();
-// 
+//
 //     EXPECT_EQ(
 //         EGL_TRUE,
 //         eglGetSyncAttribKHR(
 //             mEGL.display, sync, EGL_SYNC_STATUS_KHR, &value));
-// 
+//
 //     EXPECT_TRUE(
 //         EGL_SIGNALED_KHR == value);
-// 
+//
 //     eglDestroySyncKHR(mEGL.display, sync);
 // }
 

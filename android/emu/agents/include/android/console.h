@@ -13,16 +13,15 @@
 // limitations under the License.
 
 #pragma once
+#include "android/console_exports.h"
 
-#ifdef _WIN32
-#ifdef CONSOLE_EXPORTS
-#define CONSOLE_API __declspec(dllexport)
-#else
-#define CONSOLE_API __declspec(dllimport)
-#endif
-#else
-#define CONSOLE_API
-#endif
+/* TO BE DEPRECATED  DO NOT USE */
+/* are we using the emulator in the android mode or plain qemu? */
+extern int android_qemu_mode;
+
+/* are we using android-emu libraries for a minimal configuration? */
+extern int min_config_qemu_mode;
+/* TO BE DEPRECATED  DO NOT USE */
 
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/car_data_agent.h"
@@ -65,6 +64,7 @@ typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
     X(QAndroidEmulatorWindowAgent, emu)         \
     X(QAndroidFingerAgent, finger)              \
     X(QAndroidHttpProxyAgent, proxy)            \
+    X(AndroidProxyCB, proxy_cb)                 \
     X(QAndroidLibuiAgent, libui)                \
     X(QAndroidLocationAgent, location)          \
     X(QAndroidMultiDisplayAgent, multi_display) \

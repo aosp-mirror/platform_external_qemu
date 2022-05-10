@@ -13,15 +13,13 @@
 // limitations under the License.
 
 #pragma once
-
-#include "android/skin/event.h"
-#include "android/skin/generic-event-buffer.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
 
 ANDROID_BEGIN_HEADER
-
+typedef struct SkinEvent SkinEvent;
+typedef struct SkinGenericEventCode SkinGenericEventCode;
 // C interface to expose Qemu implementation of user event piping to the VM.
 typedef struct QAndroidUserEventAgent {
     // Send various input user events to the VM.

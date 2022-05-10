@@ -35,7 +35,7 @@ typedef double    hw_double_t;
 #define   HWCFG_DOUBLE(n,s,d,a,t)     hw_double_t    n;
 #define   HWCFG_DISKSIZE(n,s,d,a,t)   hw_disksize_t  n;
 
-typedef struct {
+typedef struct AndroidHwConfig {
 #include "android/avd/hw-config-defs.h"
 } AndroidHwConfig;
 
