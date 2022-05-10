@@ -134,9 +134,6 @@ def configure(args, target):
     if args.gfxstream:
         cmake_cmd += ["-DGFXSTREAM=%s" % args.gfxstream]
 
-    if args.crosvm:
-        cmake_cmd += ["-DCROSVM=%s" % args.crosvm]
-
     if args.gfxstream_only:
         cmake_cmd += ["-DGFXSTREAM_ONLY=%s" % args.gfxstream_only]
 
@@ -185,7 +182,7 @@ def main(args):
         cross_compile = platform.system().lower() != args.target
         if not cross_compile or target == "darwin_aarch64":
             run_tests_opts = []
-            if args.gfxstream or args.crosvm or args.gfxstream_only:
+            if args.gfxstream or args.gfxstream_only:
                 run_tests_opts.append("--skip-emulator-check")
             if args.gfxstream or args.gfxstream_only:
                 run_tests_opts.append("--gfxstream")
@@ -341,10 +338,7 @@ def launch():
         "--gfxstream",
         action="store_true",
         dest="gfxstream",
-        help="Build gfxstream libs/tests and crosvm",
-    )
-    parser.add_argument(
-        "--crosvm", dest="crosvm", action="store_true", help="Build crosvm"
+        help="Build gfxstream libs/tests",
     )
     parser.add_argument(
         "--gfxstream_only",

@@ -120,9 +120,6 @@ set(BLUETOOTH_EMULATION TRUE CACHE BOOL "True if you wish to build the emulated 
 set(OPTION_AEMU_LIBS_ONLY FALSE
     CACHE BOOL "True if we should build only AEMU libraries and their tests.")
 
-set(CROSVM FALSE CACHE BOOL
-                       "True if we should build crosvm (also builds gfxstream)")
-
 set(GFXSTREAM_ONLY FALSE CACHE BOOL "True if we should build only gfxstream")
 
 if(WINDOWS_MSVC_X86_64)
@@ -135,7 +132,6 @@ else()
 endif()
 
 if(GFXSTREAM_ONLY)
-  set(CROSVM FALSE)
   set(GFXSTREAM TRUE)
 endif()
 
@@ -147,7 +143,7 @@ if (DARWIN_AARCH64)
     set(OPTION_TCMALLOC FALSE)
 endif()
 
-if(CROSVM OR GFXSTREAM)
+if(GFXSTREAM)
   set(OPTION_AEMU_LIBS_ONLY TRUE)
   set(OPTION_GFXSTREAM_BACKEND TRUE)
   set(OPTION_TCMALLOC FALSE)
