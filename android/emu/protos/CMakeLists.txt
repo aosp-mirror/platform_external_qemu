@@ -5,11 +5,11 @@
 # a protobuf can only be registered once.
 # Since we compile protobuf as a shared library we cannot use protobufs
 # as a static library that occurs in multiple shared libs.
-android_add_library(TARGET emulator-protos SHARED LICENSE Apache-2.0)
+android_add_library(TARGET android-emu-protos SHARED LICENSE Apache-2.0)
 
 if(WINDOWS_MSVC_X86_64)
   protobuf_generate_with_plugin(
-    TARGET emulator-protos
+    TARGET android-emu-protos
     PROTOS automation.proto
            crash_info.proto
            emulator_feature_patterns.proto
@@ -30,11 +30,11 @@ if(WINDOWS_MSVC_X86_64)
     ${AEMU_PROTOS_SRC} PROPERTIES COMPILE_DEFINITIONS
                                   AEMU_PROTOS=__declspec\(dllexport\))
   # Make sure our dependents are using dll import on all the properties.
-  target_compile_definitions(emulator-protos
+  target_compile_definitions(android-emu-protos
                              PUBLIC AEMU_PROTOS=__declspec\(dllimport\))
 else()
   protobuf_generate_with_plugin(
-    TARGET emulator-protos
+    TARGET android-emu-protos
     PROTOS automation.proto
            crash_info.proto
            emulator_feature_patterns.proto
@@ -50,6 +50,6 @@ else()
            VehicleHalProto.proto
            verified_boot_config.proto)
 endif()
-target_link_libraries(emulator-protos PRIVATE protobuf::libprotobuf)
-target_include_directories(emulator-protos PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-android_install_shared(emulator-protos)
+target_link_libraries(android-emu-protos PRIVATE protobuf::libprotobuf)
+target_include_directories(android-emu-protos PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+android_install_shared(android-emu-protos)

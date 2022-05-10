@@ -6,8 +6,8 @@ android_add_library(
   SRC android/location/MapsKey.cpp android/location/MapsKeyFileParser.cpp
       android/location/Point.cpp android/location/Route.cpp
       android/location/StudioMapsKey.cpp
-  DEPS android-curl android-emu-base android-emu-protobuf protobuf::libprotobuf)
-target_link_libraries(android-emu-location PUBLIC emulator-protos)
+  DEPS android-emu-curl android-emu-base android-emu-protobuf protobuf::libprotobuf)
+target_link_libraries(android-emu-location PUBLIC android-emu-protos)
 target_include_directories(android-emu-location PRIVATE src PUBLIC include)
 
 android_add_test(
