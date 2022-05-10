@@ -275,6 +275,54 @@ static void setupCpuAffinity(
 
 static void doLauncherTest(const char* launcherTestArg);
 
+bool handle_kill_command(int argc, char** argv) {
+    if (argc < 3) return false;
+    bool hasKill = false;
+    bool hasSleep = false;
+    bool hasLockFile = false;
+    int killPid = 0;
+    int sleepSecond = 0;
+    const char* lockfilename=NULL;
+    for (int nn = 1; nn < argc; nn++) {
+        const char* opt = argv[nn];
+        if (!strcmp(opt, "-kill")) {
+            hasKill = true;
+            if (nn + 1 < argc) {
+                killPid = atoi(argv[nn + 1]);
+                nn++;
+            }
+            continue;
+        }
+
+        if (!strcmp(opt, "-sleep")) {
+            hasSleep = true;
+            if (nn + 1 < argc) {
+                sleepSecond = atoi(argv[nn + 1]);
+                nn++;
+            }
+            continue;
+        }
+
+    }
+
+    if (hasKill) {
+        if (hasSleep) {
+            for(int i=0; i < sleepSecond; ++i) {
+                const bool isAlive = System::get()->isPidAlive(killPid);
+                if (isAlive) {
+                    System::get()->sleepMs(1000);
+                } else {
+                    // process already dead, no need to kill
+                    return hasKill;
+                }
+            }
+        }
+        // after waiting, the process seems hanging, kill it;
+        System::get()->killProcess(killPid);
+    }
+    return hasKill;
+}
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -301,6 +349,9 @@ int main(int argc, char** argv)
     bool use_virtio_console = false;
     LoggingFlags logFlags = kLogEnableDuplicateFilter;
 
+    if (handle_kill_command(argc, argv)) {
+        return 0;
+    }
     const char* qemu_top_dir = nullptr;
     for (int nn = 1; nn < argc; nn++) {
         const char* opt = argv[nn];
