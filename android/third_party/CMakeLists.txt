@@ -96,9 +96,7 @@ if(NOT DISABLE_CRASHPAD)
   add_subdirectory(crashpad)
 endif()
 
-if(NOT OPTION_GFXSTREAM_BACKEND)
-  add_subdirectory(modem-simulator)
-endif()
+add_subdirectory(modem-simulator)
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
 
