@@ -192,6 +192,7 @@ if(NOT OPTION_GFXSTREAM_BACKEND AND NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
            EGL_emulation
            GLESv2_emulation
            emugl_base
+           android-emu-cmdline-testing
            OpenglRender_standalone_common)
   android_target_link_libraries(
     aemugraphics darwin-x86_64 PUBLIC "-framework CoreFoundation"

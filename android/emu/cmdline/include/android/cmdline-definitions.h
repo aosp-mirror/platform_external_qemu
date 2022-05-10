@@ -27,7 +27,7 @@ typedef struct ParamList {
 
 /* define a structure that will hold all option variables
  */
-typedef struct {
+typedef struct AndroidOptions {
 #define OPT_LIST(n, t, d) ParamList* n;
 #define OPT_PARAM(n, t, d) char* n;
 #define OPT_FLAG(n, d) int n;

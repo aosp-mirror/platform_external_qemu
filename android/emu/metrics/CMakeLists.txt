@@ -55,6 +55,7 @@ target_link_libraries(
   android-emu-metrics
   PRIVATE android-emu-base
           android-emu-utils
+          android-emu-cmdline
           android-emu-curl
           android-emu-files
           android-hw-config

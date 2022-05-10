@@ -23,3 +23,30 @@
 #define MAX_ANDROID_EMULATORS  16
 
 #define ANDROID_CONSOLE_BASEPORT 5554
+
+/* The name of the .ini file that contains the initial hardware
+ * properties for the AVD. This file is specific to the AVD and
+ * is in the AVD's directory.
+ */
+#define CORE_CONFIG_INI "config.ini"
+
+/* The name of the .ini file that contains the complete hardware
+ * properties for the AVD. This file is specific to the AVD and
+ * is in the AVD's directory. This will be used to launch the
+ * corresponding core from the UI.
+ */
+#define CORE_HARDWARE_INI "hardware-qemu.ini"
+
+/* The name of the snapshot lock file that is used to serialize
+ * snapshot operations on the same AVD across multiple emulator
+ * instances.
+ */
+#define SNAPSHOT_LOCK "snapshot.lock"
+
+#define MULTIINSTANCE_LOCK "multiinstance.lock"
+
+/* The file where the crash reporter holds a copy of
+ * the hardware properties. This file is in a temporary
+ * directory set up by the crash reporter.
+ */
+#define CRASH_AVD_HARDWARE_INFO "avd_info.txt"
