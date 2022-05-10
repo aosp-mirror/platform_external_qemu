@@ -2951,6 +2951,53 @@ void System::deleteTempDir() {
 #endif // !__linux__
 }
 
+//static
+void System::waitAndKillSelf(int numSeconds) {
+    // start a process that sleeps and kill forcefully
+    const auto progDirSystem =
+            android::base::System::get()->getLauncherDirectory();
+    const std::string emuname = progDirSystem + "/emulator";
+
+    std::string waitEnv = System::get()->getEnvironmentVariable("ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL");
+    if (!waitEnv.empty()) {
+        int envTime = atoi(waitEnv.c_str());
+        if (envTime > 0) {
+            numSeconds = envTime;
+        }
+    }
+
+    std::vector<std::string> mycmds;
+    char buf[32];
+    mycmds.push_back(emuname);
+    mycmds.push_back("-kill");
+    snprintf(buf, sizeof(buf), "%d", getpid());
+    mycmds.push_back(buf);
+    mycmds.push_back("-sleep");
+    snprintf(buf, sizeof(buf), "%d", numSeconds);
+    mycmds.push_back(buf);
+
+    dinfo("Wait for emulator (pid %d) %d seconds to shutdown gracefully before kill;"
+    "you can set environment variable ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL(in seconds) to change the default value (%d seconds)\n",
+            getpid(), numSeconds, DEFAULT_WAIT_TIME_BEFORE_KILL_IN_SECONDS);
+    System::get()->runCommand(mycmds, android::base::RunOptions::DontWait);
+}
+
+// static
+bool System::isPidAlive(System::Pid pid) {
+#ifdef _WIN32
+    ScopedFileHandle forKilling(OpenProcess(PROCESS_TERMINATE, false, pid));
+    if (forKilling.valid()) {
+        return true;
+    }
+#else
+    auto ret = kill(pid, 0);
+    if (ret == 0) {
+        return true;
+    }
+#endif
+    return false;
+}
+
 // static
 void System::killProcess(System::Pid pid) {
 #ifdef _WIN32
