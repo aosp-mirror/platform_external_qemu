@@ -15,7 +15,7 @@
 #pragma once
 
 #include "android/base/Version.h"
-#include "android/metrics/export.h"
+#include "android/studio-config/export.h"
 
 #include <functional>
 #include <type_traits>
@@ -34,41 +34,41 @@ enum class UpdateChannel { Stable, Beta, Dev, Canary, Unknown };
 // preferences/configuration directory name pattern, an invalid
 // Version will be returned.
 //
-AEMU_METRICS_API android::base::Version extractAndroidStudioVersion(
+AEMU_STUDIO_CONFIG_API android::base::Version extractAndroidStudioVersion(
         const char* const dirName);
 
 // Scan path |scanPath| for AndroidStudio preferences/configuration
 // directries and return the path to the latest one, or NULL
 // if none can be found. Returned value is a String
 //
-AEMU_METRICS_API std::string latestAndroidStudioDir(
+AEMU_STUDIO_CONFIG_API std::string latestAndroidStudioDir(
         const std::string& scanPath);
 
 // Construct and return the complete path to Android Studio XML
 // preferences |filename| under path |studioPath|.
 // Returned value is a String
-AEMU_METRICS_API std::string pathToStudioXML(const std::string& studioPath,
+AEMU_STUDIO_CONFIG_API std::string pathToStudioXML(const std::string& studioPath,
                                              const std::string& filename);
 
 // Returns the latest installed Android Studio version.
-AEMU_METRICS_API android::base::Version lastestAndroidStudioVersion();
+AEMU_STUDIO_CONFIG_API android::base::Version lastestAndroidStudioVersion();
 
 // Returns the currently selected update channel for the latest version
 // of Android Studio
-AEMU_METRICS_API UpdateChannel updateChannel();
+AEMU_STUDIO_CONFIG_API UpdateChannel updateChannel();
 
 // Checks if the user has opted in for metrics reporting.
-AEMU_METRICS_API bool getUserMetricsOptIn();
+AEMU_STUDIO_CONFIG_API bool getUserMetricsOptIn();
 
 // Returns the Android Studio-generated salt value for strings anonymization.
-AEMU_METRICS_API std::string getAnonymizationSalt();
+AEMU_STUDIO_CONFIG_API std::string getAnonymizationSalt();
 
 // This function returns a string that describes the Android
 // Studio installation ID. If this installation ID cannot be
 // retrieved, a random string following the Android Studio
 // pattern of installation IDs
 // (00000000-0000-0000-0000-000000000000) will be returned.
-AEMU_METRICS_API const std::string& getInstallationId();
+AEMU_STUDIO_CONFIG_API const std::string& getInstallationId();
 
 }  // namespace studio
 }  // namespace android

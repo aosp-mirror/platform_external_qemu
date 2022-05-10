@@ -111,7 +111,6 @@ set(android-emu-common
     android/emulation/control/adb/AdbShellStream.cpp
     android/emulation/control/AgentLogger.cpp
     android/emulation/control/ApkInstaller.cpp
-    android/emulation/control/EmulatorAdvertisement.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
     android/emulation/control/NopRtcBridge.cpp
@@ -378,6 +377,7 @@ target_link_libraries(
          android-emu-metrics
          android-emu-cmdline
          android-emu-base
+         android-emu-studio-config
          emulator-libsparse
          emulator-libselinux
          emulator-libjpeg
@@ -792,7 +792,6 @@ if(NOT LINUX_AARCH64)
       android/emulation/control/adb/AdbInterface_unittest.cpp
       android/emulation/control/adb/adbkey_unittest.cpp
       android/emulation/control/ApkInstaller_unittest.cpp
-      android/emulation/control/EmulatorAdvertisement_unittest.cpp
       android/emulation/control/FilePusher_unittest.cpp
       android/emulation/control/GooglePlayServices_unittest.cpp
       android/emulation/control/ScreenCapturer_unittest.cpp
@@ -895,14 +894,6 @@ if(NOT LINUX_AARCH64)
   target_link_libraries(
     android-emu_unittests PRIVATE android-emu android-emu-protobuf android-emu-cmdline-testing
                                   android-emu-test-launcher)
-
-  android_add_executable(
-    NODISTRIBUTE TARGET studio_discovery_tester
-    SRC # cmake-format: sortable
-        android/emulation/control/StudioDiscoveryTester.cpp)
-  target_link_libraries(studio_discovery_tester PRIVATE android-grpc
-                                                        android-emu)
-  add_dependencies(android-emu_unittests studio_discovery_tester)
 
   list(
     APPEND

@@ -156,7 +156,7 @@ TEST_F(EmulatorAdvertisementTest, delete_removes_file) {
 }
 
 TEST_F(EmulatorAdvertisementTest, system_wide_share_file_exists) {
-    EmulatorAdvertisement testCfg({{"hello", "world"}});
+    EmulatorAdvertisement testCfg({{"hello", "world"}}, mTempDir.path());
     testCfg.write();
     EXPECT_TRUE(System::get()->pathExists(testCfg.location()));
 

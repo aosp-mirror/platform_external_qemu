@@ -16,7 +16,6 @@ android_add_library(
       android/metrics/CrashMetricsReporting.cpp
       android/metrics/FileMetricsWriter.cpp
       android/metrics/metrics.cpp
-      android/metrics/MetricsPaths.cpp
       android/metrics/MetricsReporter.cpp
       android/metrics/MetricsWriter.cpp
       android/metrics/NullMetricsReporter.cpp
@@ -24,7 +23,6 @@ android_add_library(
       android/metrics/Percentiles.cpp
       android/metrics/PeriodicReporter.cpp
       android/metrics/PlaystoreMetricsWriter.cpp
-      android/metrics/StudioConfig.cpp
       android/metrics/SyncMetricsReporter.cpp
       android/metrics/TextMetricsWriter.cpp
       android/metrics/UiEventTracker.cpp
@@ -33,11 +31,9 @@ android_add_library(
 if(WINDOWS_MSVC_X86_64)
 
   protobuf_generate_with_plugin(
-    TARGET android-emu-metrics
-    PROTOS protos/google_logs_publishing.proto
-           protos/studio_stats.proto
-    OUT_VAR AEMU_METRICS_SRC
-    EXPORT_MACRO "AEMU_METRICS_PROTO")
+    TARGET android-emu-metrics PROTOS protos/google_logs_publishing.proto
+                                      protos/studio_stats.proto
+    OUT_VAR AEMU_METRICS_SRC EXPORT_MACRO "AEMU_METRICS_PROTO")
   set_source_files_properties(
     ${AEMU_METRICS_SRC} PROPERTIES COMPILE_DEFINITIONS
                                    AEMU_METRICS_PROTO=__declspec\(dllexport\))
@@ -46,9 +42,8 @@ if(WINDOWS_MSVC_X86_64)
                              PUBLIC AEMU_METRICS_PROTO=__declspec\(dllimport\))
 else()
   protobuf_generate_with_plugin(
-    TARGET android-emu-metrics
-    PROTOS protos/google_logs_publishing.proto
-           protos/studio_stats.proto)
+    TARGET android-emu-metrics PROTOS protos/google_logs_publishing.proto
+                                      protos/studio_stats.proto)
 endif()
 
 target_link_libraries(
@@ -63,11 +58,11 @@ target_link_libraries(
           LibXml2::LibXml2
           android-emu-agents
           protobuf::libprotobuf
-  PUBLIC android-emu-files)
+  PUBLIC android-emu-files android-emu-studio-config)
 
 target_compile_definitions(android-emu-metrics PRIVATE AEMU_METRICS_EXPORTS=1)
 target_compile_options(android-emu-metrics PRIVATE -Wno-extern-c-compat
-                                               -Wno-return-type-c-linkage)
+                                                   -Wno-return-type-c-linkage)
 target_include_directories(
   android-emu-metrics
   PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/protos/
@@ -80,8 +75,7 @@ android_install_shared(android-emu-metrics)
 if(NOT LINUX_AARCH64)
   android_add_test(
     TARGET android-emu-metrics_unittests
-    SRC test/android/metrics/StudioConfig_unittest.cpp
-        test/android/metrics/tests/AsyncMetricsReporter_unittest.cpp
+    SRC test/android/metrics/tests/AsyncMetricsReporter_unittest.cpp
         test/android/metrics/tests/FileMetricsWriter_unittest.cpp
         test/android/metrics/tests/MetricsReporter_unittest.cpp
         test/android/metrics/tests/MockMetricsReporter.cpp
