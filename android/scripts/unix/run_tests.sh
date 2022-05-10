@@ -151,17 +151,16 @@ export CTEST_OUTPUT_ON_FAILURE=1
 export CTEST_PROGRESS_OUTPUT=1
 OLD_DIR=$PWD
 cd $OPT_OUT
+
 # gfxstream relies on VK_ICD_FILENAMES to switch between different vulkan
 # libraries. We want to use swiftshader_vk in unittests.
 if [ "$OPT_GFXSTREAM" ] ; then
     export VK_ICD_FILENAMES=$PWD/lib64/vulkan/vk_swiftshader_icd.json
-    # TODO(joshuaduong): This is only temporary to get builds green. Remove this
-    # once these tests pass.
-    DISABLED_TESTS="(VulkanTest.*|VulkanFrameBufferTest.*|CompositorVkTest.*)"
-    ${CTEST} -j ${NUM_JOBS} --output-on-failure --exclude-regex ${DISABLED_TESTS} || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
-else
-    ${CTEST} -j ${NUM_JOBS} --output-on-failure ${DISABLED_TESTS} || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
+    # Path to the vulkan ICD loader used for testing, libvulkan.so
+    export LD_LIBRARY_PATH=$PWD/lib64/vulkan
 fi
+
+${CTEST} -j ${NUM_JOBS} --output-on-failure ${DISABLED_TESTS} || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
 cd $OLD_DIR
 
 if [ "$OPT_SKIP_EMULATOR_CHECK" ] ; then
