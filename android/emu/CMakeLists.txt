@@ -1,0 +1,8 @@
+add_subdirectory(curl)
+add_subdirectory(files)
+add_subdirectory(location)
+add_subdirectory(metrics)
+add_subdirectory(protobuf)
+add_subdirectory(protos)
+add_subdirectory(tracing)
+add_subdirectory(utils)

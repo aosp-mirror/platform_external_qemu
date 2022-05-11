@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/metrics/export.h"
+#include "android/curl/export.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
@@ -31,10 +31,10 @@ ANDROID_BEGIN_HEADER
 
 // Initialize CURL library. |ca_info| is an option SSL Certificate Authority
 // bundle. Return true on success, false otherwise. NOTE: not thread-safe.
-AEMU_METRICS_API extern bool curl_init(const char* ca_info);
+AEMU_CURL_API extern bool curl_init(const char* ca_info);
 
 // De-initialize CURL library. Not thread-safe either.
-AEMU_METRICS_API extern void curl_cleanup();
+AEMU_CURL_API extern void curl_cleanup();
 
 // Call this function instead of curl_easy_init(), because it will add the
 // |ca_info| parameter that was passed to curl_init() to the returned CURL
@@ -44,7 +44,7 @@ AEMU_METRICS_API extern void curl_cleanup();
 // into any client code that includes it, most of them don't need it.
 // (note that this requires client code to use $(LIBCURL_CFLAGS) too to
 // properly compile on Windows).
-AEMU_METRICS_API extern void* curl_easy_default_init(char** error);
+AEMU_CURL_API extern void* curl_easy_default_init(char** error);
 
 // A CURL-style write callback. Receives the data downloaded from the URL
 // inside a curl_download() call. Must return the number of bytes that were
@@ -66,7 +66,7 @@ typedef size_t (*CurlWriteCallback)(char* ptr,
 // On failure, return false and sets |*error| to a heap-allocated error message
 // string that must be free()-ed by the caller. On success, return true and
 // do not touch |*error|.
-AEMU_METRICS_API extern bool curl_download(const char* url,
+AEMU_CURL_API extern bool curl_download(const char* url,
                                            const char* post_fields,
                                            CurlWriteCallback callback_func,
                                            void* callback_userdata,
@@ -82,7 +82,7 @@ AEMU_METRICS_API extern bool curl_download(const char* url,
 // On failure, return false and sets |*error| to a heap-allocated error message
 // string that must be free()-ed by the caller. On success, return true and
 // do not touch |*error|.
-AEMU_METRICS_API extern bool curl_post(const char* url,
+AEMU_CURL_API extern bool curl_post(const char* url,
                                        const char* data,
                                        const size_t cData,
                                        const char** headers,

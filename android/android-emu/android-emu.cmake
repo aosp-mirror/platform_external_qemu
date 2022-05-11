@@ -32,7 +32,7 @@ android_add_library(
           android/emulation/USBAssist.cpp
   LINUX android/camera/camera-capture-linux.c
   DARWIN android/camera/camera-capture-mac.m
-  DEPS android-emu-base android-emu-utils android-files android-hw-config
+  DEPS android-emu-base android-emu-utils android-emu-files android-hw-config
        emulator-libyuv gtest)
 target_include_directories(android-emu-launch PRIVATE .)
 target_compile_options(android-emu-launch PRIVATE -Wno-extern-c-compat)
@@ -344,7 +344,7 @@ target_include_directories(
     # are a lot of externs that are actually defined in qemu2-glue. this has to
     # be sorted out,
     ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG})
-target_link_libraries(android-emu-agents PRIVATE android-emu-base android-files
+target_link_libraries(android-emu-agents PRIVATE android-emu-base android-emu-files
                                                  android-hw-config)
 target_compile_options(android-emu-agents PRIVATE "-Wno-extern-c-compat")
 target_compile_definitions(android-emu-agents PRIVATE "CONSOLE_EXPORTS")
@@ -405,8 +405,8 @@ target_link_libraries(
   PUBLIC FFMPEG::FFMPEG
          VPX::VPX
          emulator-libext4_utils
-         android-files
-         android-metrics
+         android-emu-files
+         android-emu-metrics
          android-emu-base
          emulator-libsparse
          emulator-libselinux
@@ -418,10 +418,10 @@ target_link_libraries(
          emulator-murmurhash
          emulator-tinyepoxy
          emulator-libyuv
-         android-curl
+         android-emu-curl
          picosha2
          # Protobuf dependencies
-         emulator-protos
+         android-emu-protos
          protobuf::libprotobuf
          # Prebuilt libraries
          android-net
@@ -658,10 +658,10 @@ target_link_libraries(
          android-emu-agents
          android-emu-utils
          emulator-murmurhash
-         android-files
-         android-metrics
+         android-emu-files
+         android-emu-metrics
          # Protobuf dependencies
-         emulator-protos
+         android-emu-protos
          protobuf::libprotobuf
          # Prebuilt libraries
          png

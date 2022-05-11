@@ -1,9 +1,3 @@
-android_add_library(TARGET android-curl SHARED LICENSE Apache-2.0 SOURCE_DIR src
-                    SRC android/curl-support.c android/openssl-support.cpp)
-target_include_directories(android-curl PUBLIC include PRIVATE src)
-target_link_libraries(android-curl PRIVATE android-emu-base curl ssl crypto)
-target_compile_definitions(android-curl PRIVATE AEMU_METRICS_EXPORTS=1)
-android_install_shared(android-curl)
 # In order for these to be a proper shared library you must:
 #
 # * Figure out which functions in ./include/... need to be made public
@@ -13,7 +7,7 @@ android_install_shared(android-curl)
 # The library should already be self contained and can be made shared on linux
 # with no changes.
 android_add_library(
-  TARGET android-metrics
+  TARGET android-emu-metrics
   SHARED
   LICENSE Apache-2.0
   SOURCE_DIR
@@ -39,7 +33,7 @@ android_add_library(
 if(WINDOWS_MSVC_X86_64)
 
   protobuf_generate_with_plugin(
-    TARGET android-metrics
+    TARGET android-emu-metrics
     PROTOS protos/google_logs_publishing.proto
            protos/studio_stats.proto
     OUT_VAR AEMU_METRICS_SRC
@@ -48,43 +42,43 @@ if(WINDOWS_MSVC_X86_64)
     ${AEMU_METRICS_SRC} PROPERTIES COMPILE_DEFINITIONS
                                    AEMU_METRICS_PROTO=__declspec\(dllexport\))
   # Make sure our dependents are using dll import on all the properties.
-  target_compile_definitions(android-metrics
+  target_compile_definitions(android-emu-metrics
                              PUBLIC AEMU_METRICS_PROTO=__declspec\(dllimport\))
 else()
   protobuf_generate_with_plugin(
-    TARGET android-metrics
+    TARGET android-emu-metrics
     PROTOS protos/google_logs_publishing.proto
            protos/studio_stats.proto)
 endif()
 
 target_link_libraries(
-  android-metrics
+  android-emu-metrics
   PRIVATE android-emu-base
           android-emu-utils
-          android-curl
-          android-files
+          android-emu-curl
+          android-emu-files
           android-hw-config
           picosha2
           LibXml2::LibXml2
           android-emu-agents
           protobuf::libprotobuf
-  PUBLIC android-files)
+  PUBLIC android-emu-files)
 
-target_compile_definitions(android-metrics PRIVATE AEMU_METRICS_EXPORTS=1)
-target_compile_options(android-metrics PRIVATE -Wno-extern-c-compat
+target_compile_definitions(android-emu-metrics PRIVATE AEMU_METRICS_EXPORTS=1)
+target_compile_options(android-emu-metrics PRIVATE -Wno-extern-c-compat
                                                -Wno-return-type-c-linkage)
 target_include_directories(
-  android-metrics
+  android-emu-metrics
   PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/protos/
   PRIVATE
     src ${ANDROID_QEMU2_TOP_DIR}/android/android-emu
     ${CMAKE_CURRENT_BINARY_DIR}
     ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG})
-android_install_shared(android-metrics)
+android_install_shared(android-emu-metrics)
 
 if(NOT LINUX_AARCH64)
   android_add_test(
-    TARGET android-metrics_unittests
+    TARGET android-emu-metrics_unittests
     SRC test/android/metrics/StudioConfig_unittest.cpp
         test/android/metrics/tests/AsyncMetricsReporter_unittest.cpp
         test/android/metrics/tests/FileMetricsWriter_unittest.cpp
@@ -103,9 +97,9 @@ if(NOT LINUX_AARCH64)
             src/android/metrics/NullMetricsReporter.cpp
             src/android/metrics/NullMetricsWriter.cpp)
 
-  target_compile_options(android-metrics_unittests PRIVATE -O0)
-  target_include_directories(android-metrics_unittests PRIVATE src test)
-  target_link_libraries(android-metrics_unittests
-                        PRIVATE gmock_main android-emu android-metrics)
+  target_compile_options(android-emu-metrics_unittests PRIVATE -O0)
+  target_include_directories(android-emu-metrics_unittests PRIVATE src test)
+  target_link_libraries(android-emu-metrics_unittests
+                        PRIVATE gmock_main android-emu android-emu-metrics)
 
 endif()

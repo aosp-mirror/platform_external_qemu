@@ -2,13 +2,13 @@ prebuilt(E2FSPROGS)
 
 # In order for this to be a proper shared library you must:
 #
-# - Figure out which functions in ./include/... need to be made public
-# - Setup an export/import header
+# * Figure out which functions in ./include/... need to be made public
+# * Setup an export/import header
 #
-# The library should already be self contained and can be made shared
-# on linux with no changes.
+# The library should already be self contained and can be made shared on linux
+# with no changes.
 android_add_library(
-  TARGET android-files
+  TARGET android-emu-files
   LICENSE Apache-2.0
   SOURCE_DIR src
   SRC android/emulation/ConfigDirs.cpp
@@ -28,20 +28,18 @@ android_add_library(
       android/utils/filelock.cpp
       android/utils/ini.cpp
       android/utils/lock.cpp
-      android/utils/property_file.c)
-target_link_libraries(
-  android-files PRIVATE android-emu-base emulator-libext4_utils
-                        android-hw-config)
-target_include_directories(android-files PUBLIC include
-                           PRIVATE src ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
+      android/utils/property_file.c
+  DEPS android-emu-base android-hw-config emulator-libext4_utils)
+target_include_directories(
+  android-emu-files PUBLIC include
+  PRIVATE src ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
 
 # Boo, we need the make_ext4fs executable
-add_dependencies(android-files emulator_make_ext4fs)
+add_dependencies(android-emu-files emulator_make_ext4fs)
 android_add_test(
-  TARGET android-files_unittests
+  TARGET android-emu-files_unittests
   SOURCE_DIR test
-  SRC # cmake-format: sortable
-      android/emulation/ConfigDirs_unittest.cpp
+  SRC android/emulation/ConfigDirs_unittest.cpp
       android/filesystems/ext4_resize_unittest.cpp
       android/filesystems/ext4_utils_unittest.cpp
       android/filesystems/fstab_parser_unittest.cpp
@@ -56,17 +54,18 @@ android_add_test(
       android/utils/filelock_unittest.cpp
       android/utils/property_file_unittest.cpp)
 
-target_compile_options(android-files_unittests PRIVATE -O0)
-target_include_directories(android-files_unittests PRIVATE src)
+target_compile_options(android-emu-files_unittests PRIVATE -O0)
+target_include_directories(android-emu-files_unittests PRIVATE src)
 target_link_libraries(
-  android-files_unittests
-  PRIVATE gmock_main android-emu android-emu-test-launcher android-files
+  android-emu-files_unittests
+  PRIVATE gmock_main android-emu android-emu-test-launcher android-emu-files
           android-hw-config)
 
 # Boo! We depend on makeext
 add_custom_command(
-  TARGET android-files_unittests POST_BUILD
+  TARGET android-emu-files_unittests POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:emulator_make_ext4fs>
           ${CMAKE_CURRENT_BINARY_DIR})
 
-android_target_dependency(android-files_unittests all E2FSPROGS_DEPENDENCIES)
+android_target_dependency(android-emu-files_unittests all
+                          E2FSPROGS_DEPENDENCIES)

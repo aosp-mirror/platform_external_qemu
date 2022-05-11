@@ -6,9 +6,6 @@ list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 prebuilt(LIBXML2)
 prebuilt(UUID)
 
-# Add the protobuf dependencies
-add_subdirectory(protos)
-
 # Grab the other libraries.
 include(android-emu)
 include(android-libui)
