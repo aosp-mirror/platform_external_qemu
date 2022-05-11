@@ -70,6 +70,17 @@ if(WIN32)
   set(CMAKE_C_FLAGS_RELEASE "/MD /Zi /GL")
   set(CMAKE_CXX_FLAGS_RELEASE "/MD /Zi /GL")
 
+  # cmd has a limit of 8192 characters, we can easily hit this if we are unlucky.
+  # so let's use response files which will help us around that.
+  SET(CMAKE_C_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+  SET(CMAKE_C_USE_RESPONSE_FILE_FOR_INCLUDES 1)
+  SET(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES 1)
+  SET(CMAKE_CXX_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+
+  SET(CMAKE_C_RESPONSE_FILE_LINK_FLAG "@")
+  SET(CMAKE_CXX_RESPONSE_FILE_LINK_FLAG "@")
+  SET(CMAKE_NINJA_FORCE_RESPONSE_FILE 1 CACHE INTERNAL "")
+
   # Add compiler definition for Win7
   add_definitions("-D_WIN32_WINNT=0x0601")
   # When configuring cmake on windows, it will do a series of compiler checks we
