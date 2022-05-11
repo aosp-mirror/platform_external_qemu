@@ -610,11 +610,7 @@ bool AdbVsockPipe::loadImpl(base::Stream* stream) {
         return false;
     }
 
-    if (!mVsockCallbacks.isValid() || !mProxy) {
-        return false;
-    }
-
-    return true;
+    return mVsockCallbacks.isValid();
 }
 
 std::unique_ptr<AdbVsockPipe> AdbVsockPipe::load(AdbVsockPipe::Service* service,
