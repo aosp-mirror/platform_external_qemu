@@ -97,6 +97,7 @@ public:
     bool isExtendedWindowFocused();
     bool isExtendedWindowVisible();
     void closeExtendedWindow();
+    void enableCloseButton();
 
     // Observed only on Windows:
     // Whenever we set the window flags for the EmulatorContainer,
