@@ -308,23 +308,16 @@ gen_wrapper_program ()
 # Environment setup
 $EXTRA_ENV_SETUP
 # Tool invocation: our super cool custom wrapper on libtool presenting enough of an ar interface to work.
-
 AR_OPTIONS=\$1
 OTHER_OPTIONS=\${@:2}
-
-echo "ar-libtool-wrapper: ar options: \$AR_OPTIONS other options: \$OTHER_OPTIONS (assuming rcs)"
-
 case \$AR_OPTIONS in
     *c*)
-        echo "ar-libtool-wrapper: is a create operation"
         libtool -static -o \$OTHER_OPTIONS
         ;;
     *v*)
-        echo "ar-libtool-wrapper: is a create operation (v)"
         libtool -static -o \$OTHER_OPTIONS
         ;;
     *)
-        echo "Just use regular ar"
         /usr/bin/ar \$AR_OPTIONS \$OTHER_OPTIONS
         ;;
 esac
