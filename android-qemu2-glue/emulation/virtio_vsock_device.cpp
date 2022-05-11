@@ -476,7 +476,9 @@ struct VirtIOVSockDev {
                 break;
 
             case VSockStream::LoadResult::Closed:
-                vstream->sendOp(VIRTIO_VSOCK_OP_RST);
+                // TODO(b/231345789): We need to put this line back once
+                // we figure out why it breaks tests (b/232284244).
+                //vstream->sendOp(VIRTIO_VSOCK_OP_RST);
                 break;
 
             default:
