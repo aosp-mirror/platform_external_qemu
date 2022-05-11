@@ -15,10 +15,10 @@
 
 #include "android/base/Compiler.h"
 
-#include "android/base/system/System.h"
-#include "android/session_phase_reporter.h"
-
 #include <iosfwd>
+#include "android/base/system/System.h"
+#include "android/metrics/export.h"
+#include "android/session_phase_reporter.h"
 
 // Forward declarations for protobufs
 namespace android_studio {
@@ -27,7 +27,7 @@ class EmulatorHost;
 class EmulatorDetails;
 class EmulatorPerformanceStats;
 
-}
+}  // namespace android_studio
 
 namespace android {
 namespace CommonReportedInfo {
@@ -59,5 +59,5 @@ void readDetails(std::istream* in);
 void readPerformanceStats(const std::string& res);
 void readPerformanceStats(std::istream* in);
 
-} // namespace CommonReportedInfo
-} // namespace android
+}  // namespace CommonReportedInfo
+}  // namespace android

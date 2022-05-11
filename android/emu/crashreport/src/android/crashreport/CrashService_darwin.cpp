@@ -20,10 +20,10 @@
 #include "android/crashreport/CrashSystem.h"
 #include "android/utils/debug.h"
 
-#include <mach/vm_statistics.h>
-#include <mach/mach_types.h>
-#include <mach/mach_init.h>
 #include <mach/mach_host.h>
+#include <mach/mach_init.h>
+#include <mach/mach_types.h>
+#include <mach/vm_statistics.h>
 #include <sys/mount.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
@@ -138,7 +138,7 @@ bool HostCrashService::getHWInfo() {
 }
 
 // Convenience function to convert a value to a value in kilobytes
-template<typename T>
+template <typename T>
 static T toKB(T value) {
     return value / 1024;
 }
@@ -224,7 +224,6 @@ bool HostCrashService::getMemInfo() {
 
     return fout.good();
 }
-
 
 }  // namespace crashreport
 }  // namespace android

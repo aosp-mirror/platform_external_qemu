@@ -20,9 +20,9 @@
 
 #include "android/crashreport/CrashService_windows.h"
 
-#include "android/base/files/PathUtils.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 
@@ -73,8 +73,7 @@ void HostCrashService::OnClientDumpRequest(
     if (static_cast<CrashService::DumpRequestContext*>(context)
                 ->file_path.empty()) {
         ::std::string file_path_string =
-                Win32UnicodeString::convertToUtf8(
-                        file_path->c_str());
+                Win32UnicodeString::convertToUtf8(file_path->c_str());
         D("Client Requesting dump %s\n", file_path_string.c_str());
         static_cast<CrashService::DumpRequestContext*>(context)
                 ->file_path.assign(file_path_string.c_str());
@@ -158,12 +157,13 @@ bool HostCrashService::getHWInfo() {
         PVOID oldValue;
         ::Wow64DisableWow64FsRedirection(&oldValue);
         const auto redirectionRestore = android::base::makeCustomScopedPtr(
-                oldValue,
-                [](PVOID oldValue) { ::Wow64RevertWow64FsRedirection(oldValue); });
+                oldValue, [](PVOID oldValue) {
+                    ::Wow64RevertWow64FsRedirection(oldValue);
+                });
 #endif
         if (!System::get()->runCommand(
                     {"dxdiag", "/dontskip", "/whql:off", "/t", utf8Path},
-                    System::RunOptions::WaitForCompletion, System::kInfinite)){
+                    System::RunOptions::WaitForCompletion, System::kInfinite)) {
             E("dxdiag command failed to run");
             std::ofstream out(PathUtils::asUnicodePath(utf8Path).c_str());
             out << "dxdiag command failed to run\n";
@@ -218,7 +218,7 @@ bool HostCrashService::getMemInfo() {
     }
 
     MEMORYSTATUSEX mem;
-    mem.dwLength  = sizeof(mem);
+    mem.dwLength = sizeof(mem);
     if (!GlobalMemoryStatusEx(&mem)) {
         DWORD error = GetLastError();
         E("Failed to get global memory status: %lu", error);
@@ -226,7 +226,7 @@ bool HostCrashService::getMemInfo() {
         return false;
     }
 
-    PERFORMANCE_INFORMATION pi = { sizeof(pi) };
+    PERFORMANCE_INFORMATION pi = {sizeof(pi)};
     if (!GetPerformanceInfo(&pi, sizeof(pi))) {
         DWORD error = GetLastError();
         E("Failed to get performance info: %lu", error);
@@ -255,24 +255,21 @@ bool HostCrashService::getMemInfo() {
     return fout.good();
 }
 
-void HostCrashService::collectProcessList()
-{
+void HostCrashService::collectProcessList() {
     if (mDataDirectory.empty()) {
         return;
     }
 
-    auto command = android::base::StringFormat(
-                       "tasklist /V >%s\\%s",
-                       mDataDirectory,
-                       CrashReporter::kProcessListFileName);
+    auto command =
+            android::base::StringFormat("tasklist /V >%s\\%s", mDataDirectory,
+                                        CrashReporter::kProcessListFileName);
 
     if (system(command.c_str()) != 0) {
         // try to call the "query process *" command, which used to exist
         // before the taskkill
         command = android::base::StringFormat(
-                    "query process * >%s\\%s",
-                    mDataDirectory,
-                    CrashReporter::kProcessListFileName);
+                "query process * >%s\\%s", mDataDirectory,
+                CrashReporter::kProcessListFileName);
         system(command.c_str());
     }
 }

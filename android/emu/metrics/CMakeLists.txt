@@ -12,7 +12,8 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR
   src
-  SRC android/metrics/AsyncMetricsReporter.cpp
+  SRC android/CommonReportedInfo.cpp
+      android/metrics/AsyncMetricsReporter.cpp
       android/metrics/CrashMetricsReporting.cpp
       android/metrics/FileMetricsWriter.cpp
       android/metrics/metrics.cpp
@@ -26,7 +27,8 @@ android_add_library(
       android/metrics/SyncMetricsReporter.cpp
       android/metrics/TextMetricsWriter.cpp
       android/metrics/UiEventTracker.cpp
-      android/protobuf/DelimitedSerialization.cpp)
+      android/protobuf/DelimitedSerialization.cpp
+      android/session_phase_reporter.cpp)
 
 if(WINDOWS_MSVC_X86_64)
 
@@ -77,7 +79,8 @@ android_install_shared(android-emu-metrics)
 if(NOT LINUX_AARCH64)
   android_add_test(
     TARGET android-emu-metrics_unittests
-    SRC test/android/metrics/tests/AsyncMetricsReporter_unittest.cpp
+    SRC test/android/CommonReportedInfo_unittest.cpp
+        test/android/metrics/tests/AsyncMetricsReporter_unittest.cpp
         test/android/metrics/tests/FileMetricsWriter_unittest.cpp
         test/android/metrics/tests/MetricsReporter_unittest.cpp
         test/android/metrics/tests/MockMetricsReporter.cpp

@@ -25,22 +25,22 @@
 #include "android/crashreport/CrashService.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
-#include "android/qt/qt_path.h"
-#include "android/skin/qt/init-qt.h"
 #include "android/metrics/CrashMetricsReporting.h"
 #include "android/metrics/FileMetricsWriter.h"
 #include "android/metrics/SyncMetricsReporter.h"
+#include "android/qt/qt_path.h"
+#include "android/skin/qt/init-qt.h"
 #include "android/utils/debug.h"
 #include "android/version.h"
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <QApplication>
 #include <QCoreApplication>
 #include <QProgressDialog>
 #include <QSettings>
-#include <QTimer>
 #include <QThread>
-#include <stdio.h>
-#include <stdlib.h>
+#include <QTimer>
 #include <memory>
 
 #define E(...) derror(__VA_ARGS__)
@@ -62,7 +62,8 @@ static bool displayConfirmDialog(
         msgBox.show();
         int ret = msgBox.exec();
         return ret == ConfirmDialog::Accepted;
-    } else if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS) {
+    } else if (reportPreference ==
+               Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS) {
         msgBox.sendReport();
         return true;
     }
@@ -158,12 +159,11 @@ int main(int argc, char** argv) {
 
     QSettings settings;
     auto reportPreference =
-        static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
-            settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0).toInt());
+            static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
+                    settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0)
+                            .toInt());
 
-    if (!displayConfirmDialog(crashservice.get(),
-                              reportPreference,
-                              data_dir)          ) {
+    if (!displayConfirmDialog(crashservice.get(), reportPreference, data_dir)) {
         return 1;
     }
 

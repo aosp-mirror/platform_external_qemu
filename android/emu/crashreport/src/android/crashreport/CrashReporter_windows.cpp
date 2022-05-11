@@ -48,12 +48,12 @@ public:
                                                     getDumpDir().length());
         std::wstring dumpDir_wstr(dumpDir.c_str());
 
-        ::android::base::Win32UnicodeString crashPipe(crashpipe.mClient.c_str(),
-                                                    crashpipe.mClient.length());
+        ::android::base::Win32UnicodeString crashPipe(
+                crashpipe.mClient.c_str(), crashpipe.mClient.length());
 
         // google_breakpad::ExceptionHandler makes a local copy of dumpDir arg.
-        // crashPipe arg is copied locally during ExceptionHandler's construction
-        // of CrashGenerationClient.
+        // crashPipe arg is copied locally during ExceptionHandler's
+        // construction of CrashGenerationClient.
         mHandler.reset(new google_breakpad::ExceptionHandler(
                 dumpDir_wstr, &HostCrashReporter::exceptionFilterCallback,
                 nullptr, nullptr,
@@ -62,13 +62,12 @@ public:
         return mHandler != nullptr;
     }
 
-    bool attachSimpleCrashHandler() override {
-        return false;
-    }
+    bool attachSimpleCrashHandler() override { return false; }
 
     bool waitServicePipeReady(const std::string& pipename,
                               int timeout_ms) override {
-        static_assert(kWaitIntervalMS > 0, "kWaitIntervalMS must be greater than 0");
+        static_assert(kWaitIntervalMS > 0,
+                      "kWaitIntervalMS must be greater than 0");
         ::android::base::Win32UnicodeString pipename_unicode(pipename.c_str(),
                                                              pipename.length());
         for (; timeout_ms > 0; timeout_ms -= kWaitIntervalMS) {
@@ -83,7 +82,6 @@ public:
                 // Pipe does not exist yet, sleep and try again
                 ::android::base::System::get()->sleepMs(kWaitIntervalMS);
             }
-
         }
         return false;
     }
@@ -93,10 +91,9 @@ public:
     void writeDump() override { mHandler->WriteMinidump(); }
 
 private:
-    static bool exceptionFilterCallback(
-        void*,
-        EXCEPTION_POINTERS*,
-        MDRawAssertionInfo*);
+    static bool exceptionFilterCallback(void*,
+                                        EXCEPTION_POINTERS*,
+                                        MDRawAssertionInfo*);
 
     bool onCrashPlatformSpecific() override;
 
@@ -106,10 +103,9 @@ private:
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
         LAZY_INSTANCE_INIT;
 
-bool HostCrashReporter::exceptionFilterCallback(
-    void*,
-    EXCEPTION_POINTERS*,
-    MDRawAssertionInfo*) {
+bool HostCrashReporter::exceptionFilterCallback(void*,
+                                                EXCEPTION_POINTERS*,
+                                                MDRawAssertionInfo*) {
     return CrashReporter::get()->onCrash();
 }
 
@@ -117,37 +113,45 @@ static uint64_t toKB(uint64_t value) {
     return value / 1024;
 }
 
-static void attachMemoryInfo()
-{
+static void attachMemoryInfo() {
     CommonReportedInfo::appendMemoryUsage();
 
     PROCESS_MEMORY_COUNTERS_EX memCounters = {sizeof(memCounters)};
     char buf[1024] = {};
     char* bufptr = buf;
-    if (::GetProcessMemoryInfo(::GetCurrentProcess(),
+    if (::GetProcessMemoryInfo(
+                ::GetCurrentProcess(),
                 reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memCounters),
                 sizeof(memCounters))) {
-        bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
-            "PageFaultCount: %" PRIu64 "\n"
-            "PeakWorkingSetSize: %" PRIu64 " kB\n"
-            "WorkingSetSize: %" PRIu64 " kB\n"
-            "QuotaPeakPagedPoolUsage: %" PRIu64 " kB\n"
-            "QuotaPagedPoolUsage: %" PRIu64 " kB\n"
-            "QuotaPeakNonPagedPoolUsage: %" PRIu64 " kB\n"
-            "QuotaNonPagedPoolUsage: %" PRIu64 " kB\n"
-            "PagefileUsage (commit): %" PRIu64 " kB\n"
-            "PeakPagefileUsage: %" PRIu64 " kB\n",
-            uint64_t(memCounters.PageFaultCount),
-            toKB(memCounters.PeakWorkingSetSize),
-            toKB(memCounters.WorkingSetSize),
-            toKB(memCounters.QuotaPeakPagedPoolUsage),
-            toKB(memCounters.QuotaPagedPoolUsage),
-            toKB(memCounters.QuotaPeakNonPagedPoolUsage),
-            toKB(memCounters.QuotaNonPagedPoolUsage),
-            toKB(memCounters.PagefileUsage
-                ? memCounters.PagefileUsage
-                : memCounters.PrivateUsage),
-            toKB(memCounters.PeakPagefileUsage));
+        bufptr += snprintf(
+                bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
+                "PageFaultCount: %" PRIu64
+                "\n"
+                "PeakWorkingSetSize: %" PRIu64
+                " kB\n"
+                "WorkingSetSize: %" PRIu64
+                " kB\n"
+                "QuotaPeakPagedPoolUsage: %" PRIu64
+                " kB\n"
+                "QuotaPagedPoolUsage: %" PRIu64
+                " kB\n"
+                "QuotaPeakNonPagedPoolUsage: %" PRIu64
+                " kB\n"
+                "QuotaNonPagedPoolUsage: %" PRIu64
+                " kB\n"
+                "PagefileUsage (commit): %" PRIu64
+                " kB\n"
+                "PeakPagefileUsage: %" PRIu64 " kB\n",
+                uint64_t(memCounters.PageFaultCount),
+                toKB(memCounters.PeakWorkingSetSize),
+                toKB(memCounters.WorkingSetSize),
+                toKB(memCounters.QuotaPeakPagedPoolUsage),
+                toKB(memCounters.QuotaPagedPoolUsage),
+                toKB(memCounters.QuotaPeakNonPagedPoolUsage),
+                toKB(memCounters.QuotaNonPagedPoolUsage),
+                toKB(memCounters.PagefileUsage ? memCounters.PagefileUsage
+                                               : memCounters.PrivateUsage),
+                toKB(memCounters.PeakPagefileUsage));
     } else {
         bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
                            "\nGetProcessMemoryInfo() failed with error %u\n",
@@ -156,20 +160,23 @@ static void attachMemoryInfo()
 
     MEMORYSTATUSEX mem = {sizeof(mem)};
     if (::GlobalMemoryStatusEx(&mem)) {
-        bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
-          "\n"
-          "TotalPhys: %" PRIu64 " kB\n"
-          "AvailPhys: %" PRIu64 " kB\n"
-          "TotalPageFile: %" PRIu64 " kB\n"
-          "AvailPageFile: %" PRIu64 " kB\n"
-          "TotalVirtual: %" PRIu64 " kB\n"
-          "AvailVirtual: %" PRIu64 " kB\n",
-          toKB(mem.ullTotalPhys),
-          toKB(mem.ullAvailPhys),
-          toKB(mem.ullTotalPageFile),
-          toKB(mem.ullAvailPageFile),
-          toKB(mem.ullTotalVirtual),
-          toKB(mem.ullAvailVirtual));
+        bufptr +=
+                snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
+                         "\n"
+                         "TotalPhys: %" PRIu64
+                         " kB\n"
+                         "AvailPhys: %" PRIu64
+                         " kB\n"
+                         "TotalPageFile: %" PRIu64
+                         " kB\n"
+                         "AvailPageFile: %" PRIu64
+                         " kB\n"
+                         "TotalVirtual: %" PRIu64
+                         " kB\n"
+                         "AvailVirtual: %" PRIu64 " kB\n",
+                         toKB(mem.ullTotalPhys), toKB(mem.ullAvailPhys),
+                         toKB(mem.ullTotalPageFile), toKB(mem.ullAvailPageFile),
+                         toKB(mem.ullTotalVirtual), toKB(mem.ullAvailVirtual));
     } else {
         bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
                            "\nGlobalMemoryStatusEx() failed with error %u\n",
@@ -178,7 +185,7 @@ static void attachMemoryInfo()
 
     if (bufptr > buf) {
         CrashReporter::get()->attachData(
-                    CrashReporter::kProcessMemoryInfoFileName, buf);
+                CrashReporter::kProcessMemoryInfoFileName, buf);
     }
 }
 
@@ -188,7 +195,7 @@ bool HostCrashReporter::onCrashPlatformSpecific() {
     return true;
 }
 
-}  // namespace anonymous
+}  // namespace
 
 CrashReporter* CrashReporter::get() {
     return sCrashReporter.ptr();

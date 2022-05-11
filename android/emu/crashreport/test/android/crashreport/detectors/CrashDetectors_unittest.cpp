@@ -41,7 +41,7 @@ TEST(CrashDetectorsTest, heartBeatDetector_nobeatIsFine) {
     TestSystem testSys("foo", 64);
     getConsoleAgents()->settings->set_guest_boot_completed(false);
     int beatCount = 0;
-    HeartBeatDetector hb([&beatCount]{return beatCount;});
+    HeartBeatDetector hb([&beatCount] { return beatCount; });
     EXPECT_FALSE(hb.check());
     getConsoleAgents()->settings->set_guest_boot_completed(true);
 
@@ -56,7 +56,7 @@ TEST(CrashDetectorsTest, heartBeatDetector_detectsBootFailure) {
     TestSystem testSys("foo", 64);
     getConsoleAgents()->settings->set_guest_boot_completed(false);
     int beatCount = 1;
-    HeartBeatDetector hb([&beatCount]{return beatCount;});
+    HeartBeatDetector hb([&beatCount] { return beatCount; });
     EXPECT_FALSE(hb.check());
     getConsoleAgents()->settings->set_guest_boot_completed(true);
 

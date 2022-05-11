@@ -48,7 +48,8 @@ public:
             return false;
         }
 
-        mHandler = CreateExceptionHandler(std::stoi(crashpipe.mClient), getDumpDir());
+        mHandler = CreateExceptionHandler(std::stoi(crashpipe.mClient),
+                                          getDumpDir());
 
         return mHandler != nullptr;
     }
@@ -79,15 +80,12 @@ public:
     static bool exceptionFilterCallback(void* context);
 
 private:
-    static std::unique_ptr<google_breakpad::ExceptionHandler> CreateExceptionHandler(
-            const int server_fd, const std::string& dumpDir) {
+    static std::unique_ptr<google_breakpad::ExceptionHandler>
+    CreateExceptionHandler(const int server_fd, const std::string& dumpDir) {
         return std::make_unique<google_breakpad::ExceptionHandler>(
                 google_breakpad::MinidumpDescriptor(dumpDir),
-                &HostCrashReporter::exceptionFilterCallback,
-                nullptr,
-                nullptr,
-                true,
-                server_fd);
+                &HostCrashReporter::exceptionFilterCallback, nullptr, nullptr,
+                true, server_fd);
     }
 
     bool onCrashPlatformSpecific() override;
@@ -105,12 +103,12 @@ bool HostCrashReporter::exceptionFilterCallback(void*) {
 bool HostCrashReporter::onCrashPlatformSpecific() {
     CommonReportedInfo::appendMemoryUsage();
     // collect the memory usage at the time of the crash
-    crashhandler_copy_attachment(
-                CrashReporter::kProcessMemoryInfoFileName, "/proc/self/status");
+    crashhandler_copy_attachment(CrashReporter::kProcessMemoryInfoFileName,
+                                 "/proc/self/status");
     return true;
 }
 
-}  // namespace anonymous
+}  // namespace
 
 CrashReporter* CrashReporter::get() {
     return sCrashReporter.ptr();

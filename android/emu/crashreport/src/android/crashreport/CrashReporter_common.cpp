@@ -14,17 +14,17 @@
 
 #include "android/crashreport/CrashReporter.h"
 
-#include "android/crashreport/crash-handler.h"
+#include "android/base/Uuid.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
-#include "android/base/Uuid.h"
-#include "android/metrics/metrics.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/metrics/MetricsReporter.h"
-#include "studio_stats.pb.h"
+#include "android/metrics/metrics.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
+#include "studio_stats.pb.h"
 
 #include <fstream>
 
@@ -64,18 +64,15 @@ const char* const CrashReporter::kDumpMessageFileName =
         "internal-error-msg.txt";
 const char* const CrashReporter::kProcessMemoryInfoFileName =
         "process-memory-info.txt";
-const char* const CrashReporter::kCrashOnExitFileName =
-        "crash-on-exit.txt";
+const char* const CrashReporter::kCrashOnExitFileName = "crash-on-exit.txt";
 const char* const CrashReporter::kProcessListFileName =
         "system-process-list.txt";
-const char* const CrashReporter::kEmulatorHostFileName =
-        "emulator-host.proto";
+const char* const CrashReporter::kEmulatorHostFileName = "emulator-host.proto";
 const char* const CrashReporter::kEmulatorDetailsFileName =
         "emulator-details.proto";
 const char* const CrashReporter::kEmulatorPerformanceStatsFileName =
         "emulator-performance-stats.proto";
-const char* const CrashReporter::kCrashOnExitPattern =
-        "Crash on exit";
+const char* const CrashReporter::kCrashOnExitPattern = "Crash on exit";
 
 const char* const CrashReporter::kProcessCrashesQuietlyKey =
         "set/processCrashesQuietly";
@@ -84,7 +81,7 @@ const int CrashReporter::kCrashInfoProtobufStrInitialSize = 4096;
 
 CrashReporter::CrashReporter()
     : mDumpDir(System::get()->getTempDir()),
-      // TODO: add a function that can create a directory or error-out
+      // TODO(jansene): add a function that can create a directory or error-out
       // if it exists atomically. For now let's just allow UUIDs to do their
       // job to keep these unique
       mDataExchangeDir(
@@ -128,7 +125,8 @@ void CrashReporter::GenerateDump(const char* message) {
 }
 
 void CrashReporter::GenerateDumpAndDie(const char* message) {
-    android_metrics_stop(METRICS_STOP_CRASH);
+    // TODO(jansene): We need to refactor the dependent metrics.
+    // android_metrics_stop(METRICS_STOP_CRASH);
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
     // any other I know about has its flaws:
@@ -142,7 +140,7 @@ void CrashReporter::GenerateDumpAndDie(const char* message) {
     abort();      // make compiler believe it doesn't return
 }
 
-void CrashReporter::SetExitMode(const char* msg) {
+void CrashReporter::SetExitMode(const char* message) {
     if (!mIsInExitMode.exchange(true)) {
         android::metrics::MetricsReporter::get().report(
                 [](android_studio::AndroidStudioEvent* event) {
@@ -156,7 +154,7 @@ void CrashReporter::SetExitMode(const char* msg) {
 
         mHangDetector.stop();
     }
-    attachData(kCrashOnExitFileName, msg);
+    attachData(kCrashOnExitFileName, message);
 }
 
 void CrashReporter::passDumpMessage(const char* message) {
@@ -185,7 +183,9 @@ void CrashReporter::attachData(StringView name, StringView data, bool replace) {
     HANDLE_EINTR(write(fd.get(), "\n", 1));
 }
 
-void CrashReporter::attachBinaryData(StringView name, StringView data, bool replace) {
+void CrashReporter::attachBinaryData(StringView name,
+                                     StringView data,
+                                     bool replace) {
     AutoLock lock(mLock);
     auto fd = openDataAttachFile(name, replace, true);
     HANDLE_EINTR(write(fd.get(), data.data(), data.size()));
@@ -199,7 +199,9 @@ bool CrashReporter::attachFile(StringView sourceFullName,
     return path_copy_file_safe(fullName, c_str(sourceFullName)) >= 0;
 }
 
-ScopedFd CrashReporter::openDataAttachFile(StringView name, bool replace, bool binary) {
+ScopedFd CrashReporter::openDataAttachFile(StringView name,
+                                           bool replace,
+                                           bool binary) {
     const int bufferLength = PATH_MAX + 1;
     char fullName[bufferLength];
     formatDataFileName(fullName, name);
@@ -210,17 +212,17 @@ ScopedFd CrashReporter::openDataAttachFile(StringView name, bool replace, bool b
 #ifdef _WIN32
     wchar_t wideFullPath[bufferLength] = {};
     android::base::Win32UnicodeString::convertFromUtf8(wideFullPath,
-                                                       bufferLength,
-                                                       fullName);
+                                                       bufferLength, fullName);
     int fd = _wopen(wideFullPath,
                     _O_WRONLY | _O_CREAT | _O_NOINHERIT |
-                    (binary ? _O_BINARY : _O_TEXT) |
-                    (replace ? _O_TRUNC : _O_APPEND),
+                            (binary ? _O_BINARY : _O_TEXT) |
+                            (replace ? _O_TRUNC : _O_APPEND),
                     _S_IREAD | _S_IWRITE);
 #else
-    int fd = HANDLE_EINTR(open(fullName,
-                  O_WRONLY | O_CREAT | O_CLOEXEC
-                  | (replace ? O_TRUNC : O_APPEND), 0644));
+    int fd = HANDLE_EINTR(open(
+            fullName,
+            O_WRONLY | O_CREAT | O_CLOEXEC | (replace ? O_TRUNC : O_APPEND),
+            0644));
 #endif
     if (fd < 0) {
         W("Failed to open a temp file '%s' for writing", fullName);
@@ -229,7 +231,7 @@ ScopedFd CrashReporter::openDataAttachFile(StringView name, bool replace, bool b
 }
 
 static void attachUptime() {
-    const uint64_t wallClockTime= System::get()->getProcessTimes().wallClockMs;
+    const uint64_t wallClockTime = System::get()->getProcessTimes().wallClockMs;
     CommonReportedInfo::setUptime(wallClockTime);
 
     // format the time into a string buffer (no allocations, we've just crashed)
@@ -253,7 +255,7 @@ bool CrashReporter::onCrash() {
     }
 
     bool platform_specific_res =
-        CrashReporter::get()->onCrashPlatformSpecific();
+            CrashReporter::get()->onCrashPlatformSpecific();
 
     // By now, we assumed that structured info has collected every
     // possible piece of information. Record it here.
@@ -269,9 +271,9 @@ bool CrashReporter::onCrash() {
         mProtobufData.clear();
 
         CommonReportedInfo::writePerformanceStats(&mProtobufData);
-        attachBinaryData(kEmulatorPerformanceStatsFileName, mProtobufData, true);
+        attachBinaryData(kEmulatorPerformanceStatsFileName, mProtobufData,
+                         true);
         mProtobufData.clear();
-
     }
 
     return platform_specific_res;
@@ -361,13 +363,14 @@ void crashhandler_die(const char* message) {
     if (const auto reporter = CrashReporter::get()) {
         derror("%s: fatal: %s", __func__, message);
         reporter->GenerateDumpAndDie(message);
-        } else {
+    } else {
         I("Emulator: exiting becase of the internal error '%s'\n", message);
         _exit(1);
     }
 }
 
-void __attribute__((noreturn)) crashhandler_die_format_v(const char* format, va_list args) {
+void __attribute__((noreturn))
+crashhandler_die_format_v(const char* format, va_list args) {
     char message[2048] = {};
     vsnprintf(message, sizeof(message) - 1, format, args);
     crashhandler_die(message);

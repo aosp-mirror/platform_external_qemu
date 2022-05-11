@@ -19,10 +19,10 @@
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
+#include <inttypes.h>
 #include <memory>
 #include <string>
 #include <vector>
-#include <inttypes.h>
 
 using namespace android::base;
 using namespace android::crashreport;
@@ -85,7 +85,8 @@ static std::vector<std::string> getTestCrasherCmdLine(std::string pipe) {
 // invalidURLUpload hangs on wine, but passes on windows host
 TEST(CrashService, invalidURLUpload) {
     TestTempDir crashdir("crashdir");
-    TestCrashSystem crashsystem(crashdir.path(), "non-existent-domain-name-for-crash-reports.com");
+    TestCrashSystem crashsystem(
+            crashdir.path(), "non-existent-domain-name-for-crash-reports.com");
     crashdir.makeSubFile("bar.dmp");
     std::unique_ptr<CrashService> crash(
             CrashService::makeCrashService("foo", "bar", nullptr));
@@ -155,7 +156,7 @@ TEST(CrashService, startWaitNoAttach) {
 // Test fails regularly on one of the linux build machines
 // failure happens when waitForDumpFile times out instead of
 // finding a crash
-//TEST(CrashService, startAttachWaitTimeout) {
+// TEST(CrashService, startAttachWaitTimeout) {
 //    TestTempDir crashdir("crashdir");
 //    TestCrashSystem crashsystem(crashdir.path(), "localhost");
 //    std::unique_ptr<CrashService> crash(
@@ -163,7 +164,8 @@ TEST(CrashService, startWaitNoAttach) {
 //    CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
 //    EXPECT_TRUE(crashpipe.isValid());
 //    crash->startCrashServer(crashpipe.mServer);
-//    std::vector<std::string> cmdline = getTestCrasherCmdLine(crashpipe.mClient);
+//    std::vector<std::string> cmdline =
+//    getTestCrasherCmdLine(crashpipe.mClient);
 //    cmdline.push_back(StringView("-delay_ms"));
 //    cmdline.push_back(StringView("100"));
 //    int pid = CrashSystem::spawnService(cmdline);

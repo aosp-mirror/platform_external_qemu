@@ -14,9 +14,9 @@
 
 #include "android/crashreport/CrashSystem.h"
 
+#include "android/base/StringFormat.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
-#include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #ifdef _WIN32
 #include "android/base/system/Win32UnicodeString.h"
@@ -61,16 +61,17 @@ using ::android::base::System;
 namespace {
 
 struct PROD {
-  static constexpr const char* CrashURL = "https://clients2.google.com/cr/report";
+    static constexpr const char* CrashURL =
+            "https://clients2.google.com/cr/report";
 };
 
 struct STAGING {
-   static constexpr const char* CrashURL = "https://clients2.google.com/cr/staging_report";
+    static constexpr const char* CrashURL =
+            "https://clients2.google.com/cr/staging_report";
 };
 
 struct NONE {
-   static constexpr const char* CrashURL = "";
-
+    static constexpr const char* CrashURL = "";
 };
 
 #if defined(_WIN32)
@@ -81,14 +82,14 @@ const char kPipeName[] = "com.google.AndroidEmulator.CrashService";
 
 const char kCrashSubDir[] = "breakpad";
 
-template<typename URL>
+template <typename URL>
 class HostCrashSystem : public CrashSystem {
 public:
-    HostCrashSystem() : mCrashURL(URL::CrashURL) { };
+    HostCrashSystem() : mCrashURL(URL::CrashURL){};
 
-    virtual ~HostCrashSystem() = default;
+    ~HostCrashSystem() override = default;
 
-    virtual const std::string& getCrashDirectory() override {
+    const std::string& getCrashDirectory() override {
         if (mCrashDir.empty()) {
             mCrashDir =
                     PathUtils::join(::android::ConfigDirs::getUserDirectory(),
@@ -98,11 +99,9 @@ public:
         return mCrashDir;
     }
 
-    virtual const std::string& getCrashURL() override {
-        return mCrashURL;
-    }
+    const std::string& getCrashURL() override { return mCrashURL; }
 
-    virtual bool validatePaths() override {
+    bool validatePaths() override {
         bool valid = CrashSystem::validatePaths();
         std::string crashDir = getCrashDirectory();
         if (!System::get()->pathExists(crashDir)) {
@@ -121,7 +120,6 @@ private:
     std::string mCrashDir;
     std::string mCrashURL;
 };
-
 
 // Note CRASHUPLOAD is a #define that is passed in by the make system, clearly
 // if this is not defined, or points to a wrong type we will fail to compile

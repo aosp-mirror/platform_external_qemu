@@ -15,8 +15,8 @@
 #include "android/android.h"
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
-#include "android/crashreport/CrashReporter.h"
 #include "android/console.h"
+#include "android/crashreport/CrashReporter.h"
 
 #include "ui_ConfirmDialog.h"
 
@@ -57,10 +57,10 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
       mReportPreference(reportPreference) {
     mUi->setupUi(this);
 
-    mUi->yesNoButtonBox->button(QDialogButtonBox::Ok)->setText(
-                tr("Send report"));
-    mUi->yesNoButtonBox->button(QDialogButtonBox::Cancel)->setText(
-                tr("Don't send"));
+    mUi->yesNoButtonBox->button(QDialogButtonBox::Ok)
+            ->setText(tr("Send report"));
+    mUi->yesNoButtonBox->button(QDialogButtonBox::Cancel)
+            ->setText(tr("Don't send"));
 
     mUi->label->setText(constructDumpMessage());
 
@@ -84,14 +84,14 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     crashservice->processCrash();
 
     const auto& suggestions = crashservice->getSuggestions().suggestions;
-    const auto& stringSuggestions = crashservice->getSuggestions().stringSuggestions;
+    const auto& stringSuggestions =
+            crashservice->getSuggestions().stringSuggestions;
 
     bool haveGfxFailure = false;
 
     if (suggestions.empty() && stringSuggestions.empty()) {
         mUi->suggestions->hide();
     } else {
-
         for (const auto suggestString : stringSuggestions) {
             addSuggestion(tr(suggestString));
         }
@@ -113,8 +113,7 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
                        "To enable software rendering, go to:\n\n"
                        "Extended Controls > Settings > Advanced tab\n\n"
                        "and change \"OpenGL ES renderer (requires restart)\""
-                       "to \"Swiftshader.\""
-                       ));
+                       "to \"Swiftshader.\""));
         }
     }
 
@@ -155,8 +154,8 @@ void ConfirmDialog::getDetails() {
         connect(&watcher, SIGNAL(finished()), &eventloop, SLOT(quit()));
 
         // Start the computation.
-        QFuture<bool> future = QtConcurrent::run(
-                mCrashService, &CrashService::collectSysInfo);
+        QFuture<bool> future =
+                QtConcurrent::run(mCrashService, &CrashService::collectSysInfo);
         watcher.setFuture(future);
 
         eventloop.exec();
@@ -211,8 +210,8 @@ bool ConfirmDialog::uploadCrash() {
     connect(&watcher, SIGNAL(finished()), &eventloop, SLOT(quit()));
 
     // Start the computation.
-    QFuture<bool> future = QtConcurrent::run(
-            mCrashService, &CrashService::uploadCrash);
+    QFuture<bool> future =
+            QtConcurrent::run(mCrashService, &CrashService::uploadCrash);
     watcher.setFuture(future);
 
     eventloop.exec();
@@ -225,7 +224,7 @@ bool ConfirmDialog::uploadCrash() {
 static void savePref(bool checked, CRASHREPORT_PREFERENCE_VALUE v) {
     QSettings settings;
     settings.setValue(Ui::Settings::CRASHREPORT_PREFERENCE,
-            checked ? v : Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
+                      checked ? v : Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
     settings.setValue(Ui::Settings::CRASHREPORT_SAVEPREFERENCE_CHECKED,
                       checked);
 }
@@ -233,7 +232,7 @@ static void savePref(bool checked, CRASHREPORT_PREFERENCE_VALUE v) {
 void ConfirmDialog::sendReport() {
     getDetails();
     mCrashService->addUserComments(
-                mUi->commentsText->toPlainText().toStdString());
+            mUi->commentsText->toPlainText().toStdString());
     bool upload_success = uploadCrash();
 
     if (upload_success &&
@@ -281,7 +280,7 @@ void ConfirmDialog::setSwGpu() {
 
     // Get the path to config.ini
     std::string diskPartDir = iniF.getString("disk.dataPartition.path", "");
-    if ( !diskPartDir.empty() ) {
+    if (!diskPartDir.empty()) {
         // Keep the path; discard the file name
         android::base::StringView outputDir;
         bool isOK = PathUtils::split(diskPartDir, &outputDir, nullptr);

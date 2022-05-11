@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "absl/memory/memory.h"
 #include "android/crashreport/CrashReporter.h"
 
 #include "android/base/memory/LazyInstance.h"
@@ -40,30 +41,29 @@ class HostCrashReporter : public CrashReporter {
 public:
     HostCrashReporter() : CrashReporter(), mHandler() {}
 
-    virtual ~HostCrashReporter() {}
+    ~HostCrashReporter() override {}
 
     bool attachCrashHandler(const CrashSystem::CrashPipe& crashpipe) override {
         if (mHandler) {
             return false;
         }
 
-        mHandler.reset(new google_breakpad::ExceptionHandler(
+        mHandler = absl::make_unique<google_breakpad::ExceptionHandler>(
                 getDumpDir(), &HostCrashReporter::exceptionFilterCallback,
                 nullptr,  // no minidump callback
                 nullptr,  // no callback context
                 true,     // install signal handlers
-                crashpipe.mClient.c_str()));
+                crashpipe.mClient.c_str());
 
         return mHandler != nullptr;
     }
 
-    bool attachSimpleCrashHandler() override {
-        return false;
-    }
+    bool attachSimpleCrashHandler() override { return false; }
 
     bool waitServicePipeReady(const std::string& pipename,
                               int timeout_ms) override {
-        static_assert(kWaitIntervalMS > 0, "kWaitIntervalMS must be greater than 0");
+        static_assert(kWaitIntervalMS > 0,
+                      "kWaitIntervalMS must be greater than 0");
         mach_port_t task_bootstrap_port = 0;
         mach_port_t port;
         task_get_bootstrap_port(mach_task_self(), &task_bootstrap_port);
@@ -81,7 +81,7 @@ public:
 
     void writeDump() override { mHandler->WriteMinidump(); }
 
-   static bool exceptionFilterCallback(void* context);
+    static bool exceptionFilterCallback(void* context);
 
 private:
     bool onCrashPlatformSpecific() override;
@@ -96,8 +96,7 @@ bool HostCrashReporter::exceptionFilterCallback(void*) {
     return CrashReporter::get()->onCrash();
 }
 
-static void attachMemoryInfo()
-{
+void attachMemoryInfo() {
     CommonReportedInfo::appendMemoryUsage();
 
     rusage usage = {};
@@ -106,36 +105,42 @@ static void attachMemoryInfo()
     mach_task_basic_info info = {};
     mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
     task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
-            reinterpret_cast<task_info_t>(&info), &infoCount);
+              reinterpret_cast<task_info_t>(&info), &infoCount);
 
     char buf[1024] = {};
     snprintf(buf, sizeof(buf) - 1,
-            "==== Process memory usage ====\n"
-            "max resident size = %" PRIu64 " kB\n"
-            "virtual size = %" PRIu64 " kB\n"
-            "resident size = %" PRIu64 " kB\n"
-            "messages sent = %" PRIu64 "\n"
-            "messages received = %" PRIu64 "\n"
-            "voluntary context switches = %" PRIu64 "\n"
-            "involuntary context switches = %" PRIu64 "\n",
-             uint64_t(info.resident_size_max / 1024),
-             uint64_t(info.virtual_size / 1024),
-             uint64_t(info.resident_size / 1024),
-             uint64_t(usage.ru_msgsnd),
-             uint64_t(usage.ru_msgrcv),
-             uint64_t(usage.ru_nvcsw),
-             uint64_t(usage.ru_nivcsw));
+             "==== Process memory usage ====\n"
+             "max resident size = %" PRIu64
+             " kB\n"
+             "virtual size = %" PRIu64
+             " kB\n"
+             "resident size = %" PRIu64
+             " kB\n"
+             "messages sent = %" PRIu64
+             "\n"
+             "messages received = %" PRIu64
+             "\n"
+             "voluntary context switches = %" PRIu64
+             "\n"
+             "involuntary context switches = %" PRIu64 "\n",
+             static_cast<uint64_t>(info.resident_size_max / 1024),
+             static_cast<uint64_t>(info.virtual_size / 1024),
+             static_cast<uint64_t>(info.resident_size / 1024),
+             static_cast<uint64_t>(usage.ru_msgsnd),
+             static_cast<uint64_t>(usage.ru_msgrcv),
+             static_cast<uint64_t>(usage.ru_nvcsw),
+             static_cast<uint64_t>(usage.ru_nivcsw));
 
-    CrashReporter::get()->attachData(
-                CrashReporter::kProcessMemoryInfoFileName, buf);
+    CrashReporter::get()->attachData(CrashReporter::kProcessMemoryInfoFileName,
+                                     buf);
 }
 
 bool HostCrashReporter::onCrashPlatformSpecific() {
     attachMemoryInfo();
-    return true;    // proceed with handling the crash
+    return true;  // proceed with handling the crash
 }
 
-}  // namespace anonymous
+}  // namespace
 
 CrashReporter* CrashReporter::get() {
     return sCrashReporter.ptr();

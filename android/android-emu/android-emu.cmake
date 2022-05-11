@@ -64,12 +64,7 @@ set(android-emu-common
     android/bootconfig.cpp
     android/car-cluster.cpp
     android/car.cpp
-    android/CommonReportedInfo.cpp
     android/console_auth.cpp
-    android/crashreport/CrashReporter_common.cpp
-    android/crashreport/CrashSystem.cpp
-    android/crashreport/detectors/CrashDetectors.cpp
-    android/crashreport/HangDetector.cpp
     android/cros.c
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
@@ -204,7 +199,6 @@ set(android-emu-common
     android/sdk-controller-socket.c
     android/sensor_mock/SensorMockUtils.cpp
     android/sensor_replay/sensor_session_playback.cpp
-    android/session_phase_reporter.cpp
     android/shaper.c
     android/skin/charmap.c
     android/snaphost-android.c
@@ -311,7 +305,6 @@ android_add_library(
   LICENSE Apache-2.0
   SRC ${android-emu_src}
   WINDOWS android/camera/camera-capture-windows.cpp
-          android/crashreport/CrashReporter_windows.cpp
           android/emulation/dynlink_cuda.cpp
           android/emulation/dynlink_nvcuvid.cpp
           android/emulation/MediaCudaDriverHelper.cpp
@@ -319,7 +312,6 @@ android_add_library(
           android/emulation/MediaCudaVideoHelper.cpp
           android/snapshot/MemoryWatch_windows.cpp
   LINUX android/camera/camera-capture-linux.c
-        android/crashreport/CrashReporter_linux.cpp
         android/emulation/dynlink_cuda.cpp
         android/emulation/dynlink_nvcuvid.cpp
         android/emulation/MediaCudaDriverHelper.cpp
@@ -327,7 +319,6 @@ android_add_library(
         android/emulation/MediaCudaVideoHelper.cpp
         android/snapshot/MemoryWatch_linux.cpp
   DARWIN android/camera/camera-capture-mac.m
-         android/crashreport/CrashReporter_darwin.cpp
          android/emulation/MediaH264DecoderVideoToolBox.cpp
          android/emulation/MediaVideoToolBoxHevcVideoHelper.cpp
          android/emulation/MediaVideoToolBoxUtils.cpp
@@ -351,6 +342,7 @@ target_link_libraries(
          android-emu-cmdline
          android-emu-base
          android-emu-studio-config
+         android-emu-crashreport
          emulator-libsparse
          emulator-libselinux
          emulator-libjpeg
@@ -583,6 +575,7 @@ target_link_libraries(
          android-emu-feature
          android-emu-files
          android-emu-metrics
+         android-emu-crashreport
          # Protobuf dependencies
          android-emu-protos
          protobuf::libprotobuf
@@ -724,7 +717,6 @@ if(NOT LINUX_AARCH64)
       android/base/testing/ProtobufMatchers.cpp
       android/bootconfig_unittest.cpp
       android/camera/CameraFormatConverters_unittest.cpp
-      android/CommonReportedInfo_unittest.cpp
       android/console_auth_unittest.cpp
       android/console_unittest.cpp
       android/emulation/AdbDebugPipe_unittest.cpp

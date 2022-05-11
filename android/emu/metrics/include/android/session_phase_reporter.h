@@ -13,9 +13,9 @@
 // limitations under the License.
 #pragma once
 
-#include "android/utils/compiler.h"
-
 #include "android/avd/info.h"
+#include "android/metrics/export.h"
+#include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
 
@@ -31,7 +31,7 @@ typedef enum {
     ANDROID_SESSION_PHASE_MAX = 8,
 } AndroidSessionPhase;
 
-void android_report_session_phase(AndroidSessionPhase phase);
-AndroidSessionPhase android_get_session_phase();
+AEMU_METRICS_API void android_report_session_phase(AndroidSessionPhase phase);
+AEMU_METRICS_API AndroidSessionPhase android_get_session_phase();
 
 ANDROID_END_HEADER

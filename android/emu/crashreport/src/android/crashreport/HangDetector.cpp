@@ -14,10 +14,10 @@
 
 #include "android/crashreport/HangDetector.h"
 
+#include "android/avd/info.h"
 #include "android/base/Optional.h"
 #include "android/base/StringFormat.h"
 #include "android/console.h"
-#include "android/avd/info.h"
 #include "android/utils/debug.h"
 
 #include <utility>
@@ -95,21 +95,26 @@ void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
         // Heuristic: If the looper watcher itself took much longer than
         // mTimeoutMs to fire again, it's possible there was a system-wide
         // sleep. In this case, don't count that as hanging.
-        const auto timeSystemLiveAndHanging = *mLastCheckTimeUs + mTimeoutMs * 1000;
-        const auto timeSystemSleepedPastHangTimeout = *mLastCheckTimeUs + 2 * mTimeoutMs * 1000;
+        const auto timeSystemLiveAndHanging =
+                *mLastCheckTimeUs + mTimeoutMs * 1000;
+        const auto timeSystemSleepedPastHangTimeout =
+                *mLastCheckTimeUs + 2 * mTimeoutMs * 1000;
         if (now > timeSystemLiveAndHanging &&
             now < timeSystemSleepedPastHangTimeout) {
             const auto message = base::StringFormat(
                     "detected a hanging thread '%s'. No response for %d ms",
-                    mLooper->name(), (int)((now - *mLastCheckTimeUs) / 1000));
+                    mLooper->name(),
+                    static_cast<int>((now - *mLastCheckTimeUs) / 1000));
             ++mHangCount;
             l.unlock();
 
             derror("%s%s", message.c_str(),
-                  android::base::IsDebuggerAttached() ? ", ignored (debugger attached)" : "");
+                   android::base::IsDebuggerAttached()
+                           ? ", ignored (debugger attached)"
+                           : "");
 
-            if (mHangCount >= kMaxHangCount &&
-                hangCallback && !android::base::IsDebuggerAttached()) {
+            if (mHangCount >= kMaxHangCount && hangCallback &&
+                !android::base::IsDebuggerAttached()) {
                 hangCallback(message);
             } else {
                 // Start another hang check in case something happened to
@@ -160,11 +165,12 @@ void HangDetector::addWatchedLooper(base::Looper* looper) {
 void HangDetector::pause(bool paused) {
     base::AutoLock lock(mLock);
     if (paused) {
-        mPaused ++;
+        mPaused++;
     } else {
-        mPaused --;
+        mPaused--;
     }
-    // Only the first pause and last resume will actually trigger the pause/resume.
+    // Only the first pause and last resume will actually trigger the
+    // pause/resume.
     if (paused && mPaused == 1) {
         for (auto&& lw : mLoopers) {
             lw->cancelHangCheck();
@@ -201,9 +207,8 @@ void HangDetector::workerThread() {
             mWorkerThreadCv.timedWait(&mLock, waitUntilUs);
             auto nowUs = base::System::get()->getUnixTimeUs();
             const int64_t waitedTooLongUs =
-                waitUntilUs + mTiming.hangLoopIterationTimeoutMs * 1000;
-            if (mPaused ||
-                nowUs >= waitedTooLongUs) {
+                    waitUntilUs + mTiming.hangLoopIterationTimeoutMs * 1000;
+            if (mPaused || nowUs >= waitedTooLongUs) {
                 // If paused, or the condition variable wait
                 // took much longer than the hang loop iteration
                 // timeout, avoid spinning.
@@ -228,7 +233,9 @@ void HangDetector::workerThread() {
                         predicate.second);
 
                 derror("%s%s", message.c_str(),
-                  android::base::IsDebuggerAttached() ? ", ignored (debugger attached)" : "");
+                       android::base::IsDebuggerAttached()
+                               ? ", ignored (debugger attached)"
+                               : "");
                 if (mHangCallback && !android::base::IsDebuggerAttached()) {
                     mHangCallback(message);
                 }
@@ -237,27 +244,31 @@ void HangDetector::workerThread() {
     }
 }
 HangDetector& HangDetector::addPredicateCheck(HangPredicate&& predicate,
-                                     std::string&& msg) {
+                                              std::string&& msg) {
     base::AutoLock lock(mLock);
     mPredicates.emplace_back(
             std::make_pair(std::move(predicate), std::move(msg)));
     return *this;
 }
 
- HangDetector& HangDetector::addPredicateCheck(StatefulHangdetector* detector, std::string&& msg) {
-     {
+HangDetector& HangDetector::addPredicateCheck(StatefulHangdetector* detector,
+                                              std::string&& msg) {
+    {
         base::AutoLock lock(mLock);
         mRegistered.push_back(std::unique_ptr<StatefulHangdetector>(detector));
-     }
-     HangPredicate pred = [detector] { return detector->check();};
-     return addPredicateCheck([detector] { return detector->check();}, std::move(msg));
- }
+    }
+    HangPredicate pred = [detector] { return detector->check(); };
+    return addPredicateCheck([detector] { return detector->check(); },
+                             std::move(msg));
+}
 
 base::System::Duration HangDetector::hangTimeoutMs() {
     // x86 and x64 run pretty fast, but other types of images could be really
     // slow - so let's have a longer timeout for those.
-    // Note that getConsoleAgents()->settings->avdInfo() is not set in unit tests.
-    if (getConsoleAgents()->settings->avdInfo() && avdInfo_is_x86ish(getConsoleAgents()->settings->avdInfo())) {
+    // Note that getConsoleAgents()->settings->avdInfo() is not set in unit
+    // tests.
+    if (getConsoleAgents()->settings->avdInfo() &&
+        avdInfo_is_x86ish(getConsoleAgents()->settings->avdInfo())) {
         return mTiming.taskProcessingTimeoutMs;
     }
     // something around 100 seconds should be fine.

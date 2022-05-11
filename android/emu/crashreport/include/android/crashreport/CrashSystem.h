@@ -95,7 +95,7 @@ public:
 
     // Returns true if path is a valid dump file
     // Takes path to crash dump as argument
-    static bool isDump(const std::string& str);
+    static bool isDump(const std::string& path);
 
     static int spawnService(const std::vector<std::string>& commandLine);
 

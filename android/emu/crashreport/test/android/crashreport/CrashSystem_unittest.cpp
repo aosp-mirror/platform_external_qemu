@@ -25,12 +25,15 @@ using namespace android::crashreport;
 // TODO fix validatePaths_nonWritableHomeDir
 // TODO windows tests
 
-class CrashSystemTest: public ::testing::Test {
+class CrashSystemTest : public ::testing::Test {
 public:
-    CrashSystemTest() : mTestSystem("/progdir", System::kProgramBitness,
-                                     "/homedir", "/appdir"),
-                        mTestDir(mTestSystem.getTempRoot()),
-                        mCrashServiceName() {
+    CrashSystemTest()
+        : mTestSystem("/progdir",
+                      System::kProgramBitness,
+                      "/homedir",
+                      "/appdir"),
+          mTestDir(mTestSystem.getTempRoot()),
+          mCrashServiceName() {
         EXPECT_TRUE(mTestDir->makeSubDir("progdir"));
         EXPECT_TRUE(mTestDir->makeSubDir("homedir"));
         EXPECT_TRUE(mTestDir->makeSubDir("appdir"));
@@ -40,7 +43,7 @@ public:
             mCrashServiceName = "emulator64-crash-service";
         }
 #ifdef _WIN32
-        mCrashServiceName+=".exe";
+        mCrashServiceName += ".exe";
 #endif
     }
 
@@ -53,20 +56,21 @@ public:
     }
 
     std::string getCrashServiceTestDirPath() {
-        std::string crashpath ("progdir");
+        std::string crashpath("progdir");
         crashpath += System::kDirSeparator;
         crashpath += mCrashServiceName;
         return crashpath;
     }
 
     std::string getCrashServicePath() {
-        std::string crashpath ("/");
+        std::string crashpath("/");
         crashpath += getCrashServiceTestDirPath();
         return crashpath;
     }
 
     void makeCrashService() {
-        EXPECT_TRUE(mTestDir->makeSubFile(getCrashServiceTestDirPath().c_str()));
+        EXPECT_TRUE(
+                mTestDir->makeSubFile(getCrashServiceTestDirPath().c_str()));
     }
 
     void makeAndroidHome() {
@@ -83,7 +87,6 @@ private:
     TestTempDir* mTestDir;
     std::string mCrashServiceName;
 };
-
 
 TEST_F(CrashSystemTest, getCrashDirectory) {
     std::string tmp1 = CrashSystem::get()->getCrashDirectory();

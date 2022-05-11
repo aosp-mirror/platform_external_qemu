@@ -32,31 +32,31 @@
 #error "Unsupported platform"
 #endif
 
-#include "android/base/files/PathUtils.h"
 #include "android/base/StringFormat.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/curl-support.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
-#include "google_breakpad/processor/fast_source_line_resolver.h"
 #include "google_breakpad/processor/call_stack.h"
 #include "google_breakpad/processor/code_module.h"
 #include "google_breakpad/processor/code_modules.h"
+#include "google_breakpad/processor/fast_source_line_resolver.h"
 #include "google_breakpad/processor/minidump.h"
 #include "google_breakpad/processor/minidump_processor.h"
 #include "google_breakpad/processor/stack_frame_cpu.h"
-#include "processor/stackwalk_common.h"
 #include "processor/pathname_stripper.h"
+#include "processor/stackwalk_common.h"
 
 #include <curl/curl.h>
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <stdio.h>
-#include <stdlib.h>
 #ifndef _MSC_VER
 #include <strings.h>
 #endif
@@ -200,7 +200,8 @@ void CrashService::addUserComments(const std::string& comments) {
 
 bool CrashService::uploadCrash() {
     curl_init(::android::crashreport::CrashSystem::get()
-                      ->getCaBundlePath().c_str());
+                      ->getCaBundlePath()
+                      .c_str());
     char* error = nullptr;
     CURL* const curl = curl_easy_default_init(&error);
     if (!curl) {
@@ -399,16 +400,14 @@ bool CrashService::setClient(int clientpid) {
     return true;
 }
 
-void CrashService::collectProcessList()
-{
+void CrashService::collectProcessList() {
     if (mDataDirectory.empty()) {
         return;
     }
 
-    const auto command = StringFormat(
-                             "ps aux >%s" PATH_SEP "%s",
-                             mDataDirectory,
-                             CrashReporter::kProcessListFileName);
+    const auto command =
+            StringFormat("ps aux >%s" PATH_SEP "%s", mDataDirectory,
+                         CrashReporter::kProcessListFileName);
     system(command.c_str());
 }
 
@@ -447,65 +446,66 @@ void CrashService::collectDataFiles() {
 // trace to lowe case before doing the comparisons
 
 static const char* const gfx_drivers_lcase[] = {
-    // NVIDIA
-    "nvcpl", // Control Panel
-    "nvshell", // Desktop Explorer
-    "nvinit", // initializer
-    "nv4_disp", // Windows 2000 (!) display driver
-    "nvcod", // CoInstaller
-    "nvcuda", // Cuda
-    "nvopencl", // OpenCL
-    "nvcuvid", // Video decode
-    "nvogl", // OpenGL (modern)
-    "ig4icd", // OpenGL (icd?)
-    "geforcegldriver", // OpenGL (old)
-    "nvd3d", // Direct3D
-    "nvwgf2", // D3D10
-    "nvdx", // D3D shim drivers
-    "nvml", // management library
-    "nvfbc", // front buffer capture library
-    "nvapi", // NVAPI Library
-    "libnvidia", // NVIDIA Linux
+        // NVIDIA
+        "nvcpl",            // Control Panel
+        "nvshell",          // Desktop Explorer
+        "nvinit",           // initializer
+        "nv4_disp",         // Windows 2000 (!) display driver
+        "nvcod",            // CoInstaller
+        "nvcuda",           // Cuda
+        "nvopencl",         // OpenCL
+        "nvcuvid",          // Video decode
+        "nvogl",            // OpenGL (modern)
+        "ig4icd",           // OpenGL (icd?)
+        "geforcegldriver",  // OpenGL (old)
+        "nvd3d",            // Direct3D
+        "nvwgf2",           // D3D10
+        "nvdx",             // D3D shim drivers
+        "nvml",             // management library
+        "nvfbc",            // front buffer capture library
+        "nvapi",            // NVAPI Library
+        "libnvidia",        // NVIDIA Linux
 
-    // ATI
-    "atioglxx", // OpenGL
-    "atig6txx", // OpenGL
-    "r600", // Radeon r600 series
-    "aticfx", // DX11
-    "atiumd", // D3D
-    "atidxx", // "TMM Com Clone Control Module" (???)
-    "atimpenc", // video encoder
-    "atigl", // another ATI OpenGL driver
-    "amdvlk", // AMD Vulkan
+        // ATI
+        "atioglxx",  // OpenGL
+        "atig6txx",  // OpenGL
+        "r600",      // Radeon r600 series
+        "aticfx",    // DX11
+        "atiumd",    // D3D
+        "atidxx",    // "TMM Com Clone Control Module" (???)
+        "atimpenc",  // video encoder
+        "atigl",     // another ATI OpenGL driver
+        "amdvlk",    // AMD Vulkan
 
-    // Intel
-    "i915", // Intel i915 gpu
-    "igd", // 'igd' series of Intel GPU's
-    "igl", // ?
-    "igfx", // ?
-    "ig75icd", // Intel icd
-    "intelocl", // Intel OpenCL
+        // Intel
+        "i915",      // Intel i915 gpu
+        "igd",       // 'igd' series of Intel GPU's
+        "igl",       // ?
+        "igfx",      // ?
+        "ig75icd",   // Intel icd
+        "intelocl",  // Intel OpenCL
 
-    // Others
-    "libgl.", // Low-level Linux OpenGL
-    "opengl32.dll", // Low-level Windows OpenGL
+        // Others
+        "libgl.",        // Low-level Linux OpenGL
+        "opengl32.dll",  // Low-level Windows OpenGL
 };
 
 // List of gfx driver hooks that are known to crash
 static const char* const gfx_hooks_lcase[] = {
-    "bdcamvk", // Bandicam Vulkan hook
-    "fpsmonvk", // FPS monitor hook
+        "bdcamvk",   // Bandicam Vulkan hook
+        "fpsmonvk",  // FPS monitor hook
 };
 
 // Suggestions for each gfx driver hook, by index in |gfx_hooks_lcase|
 static const char* const gfx_hooks_suggestions[] = {
-    // Bandicam
-    "It appears Bandicam Vulkan hooks are installed on your system, "
-    "which can be causing the crash. Try uninstalling Bandicam / removing the hooks.",
-    // FPS monitor
-    "It appears FPS Monitor Vulkan hooks are installed, "
-    "which can be causing the crash. "
-    "Try running without the monitor or uninstalling FPS Monitor. ",
+        // Bandicam
+        "It appears Bandicam Vulkan hooks are installed on your system, "
+        "which can be causing the crash. Try uninstalling Bandicam / removing "
+        "the hooks.",
+        // FPS monitor
+        "It appears FPS Monitor Vulkan hooks are installed, "
+        "which can be causing the crash. "
+        "Try running without the monitor or uninstalling FPS Monitor. ",
 };
 
 static_assert(sizeof(gfx_hooks_lcase) == sizeof(gfx_hooks_suggestions),

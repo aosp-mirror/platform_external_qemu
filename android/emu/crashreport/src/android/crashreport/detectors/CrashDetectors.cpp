@@ -13,7 +13,6 @@
 // limitations under the License.
 #include "android/crashreport/detectors/CrashDetectors.h"
 #include "android/console.h"
-
 namespace android {
 namespace crashreport {
 
@@ -22,8 +21,6 @@ TimedHangDetector::TimedHangDetector(System::Duration intervalMs,
     : mInner(check), mIntervalMs(intervalMs) {
     mNextCheck = System::get()->getUnixTimeUs() + (mIntervalMs * 1000);
 }
-
-
 
 bool TimedHangDetector::check() {
     if (System::get()->getUnixTimeUs() < mNextCheck) {

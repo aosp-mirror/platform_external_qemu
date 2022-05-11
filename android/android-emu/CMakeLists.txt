@@ -9,6 +9,3 @@ prebuilt(UUID)
 # Grab the other libraries.
 include(android-emu)
 include(android-libui)
-if(NOT OPTION_GFXSTREAM_BACKEND)
-  include(crash-service)
-endif()

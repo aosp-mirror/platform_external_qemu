@@ -14,9 +14,9 @@
 
 #include "android/crashreport/HangDetector.h"
 
-#include <assert.h>                                         // for assert
-#include <gtest/gtest.h>                                    // for SuiteApiR...
-#include <stdio.h>                                          // for printf
+#include <assert.h>       // for assert
+#include <gtest/gtest.h>  // for SuiteApiR...
+#include <stdio.h>        // for printf
 
 #include "android/avd/info.h"                               // for AvdInfo
 #include "android/base/Debug.h"                             // for IsDebugge...
@@ -48,8 +48,7 @@ public:
                           .hangLoopIterationTimeoutMs = 100,
                           .taskProcessingTimeoutMs = 10,
                           .hangCheckTimeoutMs = 10,
-                  }) {
-    }
+                  }) {}
 
     void TearDown() override { mHangDetector.stop(); }
 
@@ -72,8 +71,8 @@ protected:
 
 TEST_F(HangDetectorTest, PredicateTriggersHang) {
     if (android::base::IsDebuggerAttached()) {
-       printf("This test cannot be run under a debugger.");
-       return;
+        printf("This test cannot be run under a debugger.");
+        return;
     }
     mHangDetector.addPredicateCheck([] { return true; }, "Always dead");
     waitUntilUnlocked();
