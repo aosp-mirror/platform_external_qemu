@@ -220,8 +220,6 @@ struct VsockJdwpProxy : public AdbVsockPipe::Proxy {
             ? EventBits::WantWrite : EventBits::DontWantWrite;
     }
 
-    bool canSave() const override { return true; }
-
     void onSave(base::Stream* stream) const override {
         mAdbHub.onSave(stream);
     }
@@ -437,19 +435,9 @@ void AdbVsockPipe::Service::resetActiveGuestPipeConnection() {
 void AdbVsockPipe::Service::saveImpl(base::Stream* stream) const {
     std::lock_guard<std::mutex> guard(mPipesMtx);
 
-    const size_t n = std::accumulate(
-        mPipes.begin(), mPipes.end(), 0,
-        [](size_t n, const std::unique_ptr<AdbVsockPipe>& p){
-            return n + (p->canSave() ? 1 : 0);
-        });
-
-    stream->putBe32(n);
-    if (n > 0) {
-        for (const auto& p : mPipes) {
-            if (p->canSave()) {
-                p->save(stream);
-            }
-        }
+    stream->putBe32(mPipes.size());
+    for (const auto& p : mPipes) {
+        p->save(stream);
     }
 }
 
@@ -460,7 +448,12 @@ bool AdbVsockPipe::Service::loadImpl(base::Stream* stream) {
     for (uint32_t n = stream->getBe32(); n > 0; --n) {
         auto p = AdbVsockPipe::load(this, stream);
         if (p) {
+            AdbVsockPipe* raw = p.get();
             mPipes.push_back(std::move(p));
+            if (!raw->isLoaded()) {
+                // destroying a pipe requires the BQL which we can't aquire while holding mPipesMtx
+                destroyPipe(raw);
+            }
         }
     }
     return true;
@@ -591,14 +584,14 @@ void AdbVsockPipe::setSocket(android::base::ScopedSocket socket) {
     mSocketWatcher->wantRead();
 }
 
-bool AdbVsockPipe::canSave() const {
-    return mProxy && mProxy->canSave() && mVsockCallbacks.isValid();
-}
-
 void AdbVsockPipe::save(base::Stream* stream) const {
     stream->putBe64(mVsockCallbacks.streamKey);
-    stream->putByte(static_cast<uint8_t>(mProxy->portType()));
-    mProxy->onSave(stream);
+    if (mProxy) {
+        stream->putByte(static_cast<uint8_t>(mProxy->portType()));
+        mProxy->onSave(stream);
+    } else {
+        stream->putByte(static_cast<uint8_t>(AdbPortTypeIncorrect));
+    }
 }
 
 bool AdbVsockPipe::loadImpl(base::Stream* stream) {

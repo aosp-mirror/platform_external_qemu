@@ -200,11 +200,6 @@ struct VSockStream {
     void sendOp(enum virtio_vsock_op op);
     void signalWake(bool write);
 
-    bool canSave() const {
-        return mPipe || (mHostCallbacks && mHostCallbacks->canSave())
-                     || (mNewTransport && mNewTransport->canSave());
-    }
-
     void save(android::base::Stream *stream) const {
         stream->putBe64(mGuestCid);
         stream->putBe64(mHostCid);
@@ -256,7 +251,6 @@ struct VSockStream {
                 char force_close_unused = 0;
                 mPipe = android_pipe_guest_load(asCStream(stream), this, &force_close_unused);
                 if (!mPipe) {
-                    sendOp(VIRTIO_VSOCK_OP_RST);
                     return LoadResult::Closed;
                 }
             }
@@ -272,6 +266,9 @@ struct VSockStream {
 
         case 3:
             mNewTransport = vsock_load_transport(stream);
+            if (!mNewTransport) {
+                return LoadResult::Closed;
+            }
             break;
 
         default:
@@ -446,17 +443,9 @@ struct VirtIOVSockDev {
     void save(android::base::Stream *stream) const {
         android::RecursiveScopedVmLock lock;
 
-        const size_t nStreams = std::accumulate(
-            mStreams.begin(), mStreams.end(), 0,
-            [](size_t n, const auto& kv){
-                return n + (kv.second->canSave() ? 1 : 0);
-            });
-
-        stream->putBe32(nStreams);
+        stream->putBe32(mStreams.size());
         for (const auto &kv : mStreams) {
-            if (kv.second->canSave()) {
-                kv.second->save(stream);
-            }
+            kv.second->save(stream);
         }
 
         saveVector(mVqGuestToHostBuf, stream);
@@ -487,7 +476,7 @@ struct VirtIOVSockDev {
                 break;
 
             case VSockStream::LoadResult::Closed:
-                // do nothing
+                vstream->sendOp(VIRTIO_VSOCK_OP_RST);
                 break;
 
             default:
