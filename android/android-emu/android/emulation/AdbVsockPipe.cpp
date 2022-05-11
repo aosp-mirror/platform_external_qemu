@@ -587,27 +587,30 @@ void AdbVsockPipe::setSocket(android::base::ScopedSocket socket) {
 void AdbVsockPipe::save(base::Stream* stream) const {
     stream->putBe64(mVsockCallbacks.streamKey);
     if (mProxy) {
+        stream->putByte(1);
         stream->putByte(static_cast<uint8_t>(mProxy->portType()));
         mProxy->onSave(stream);
     } else {
-        stream->putByte(static_cast<uint8_t>(AdbPortTypeIncorrect));
+        stream->putByte(0);
     }
 }
 
 bool AdbVsockPipe::loadImpl(base::Stream* stream) {
     mVsockCallbacks.streamKey = stream->getBe64();
 
-    switch (static_cast<AdbPortType>(stream->getByte())) {
-    case AdbPortType::RegularAdb:
-        mProxy = VsockAdbProxy::load(stream);
-        break;
+    if (1 == stream->getByte()) {
+        switch (static_cast<AdbPortType>(stream->getByte())) {
+        case AdbPortType::RegularAdb:
+            mProxy = VsockAdbProxy::load(stream);
+            break;
 
-    case AdbPortType::Jdwp:
-        mProxy = VsockJdwpProxy::load(stream);
-        break;
+        case AdbPortType::Jdwp:
+            mProxy = VsockJdwpProxy::load(stream);
+            break;
 
-    default:
-        return false;
+        default:
+            return false;
+        }
     }
 
     return mVsockCallbacks.isValid();
