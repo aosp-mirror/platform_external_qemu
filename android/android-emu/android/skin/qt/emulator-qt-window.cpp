@@ -2263,8 +2263,6 @@ void EmulatorQtWindow::showEvent(QShowEvent* event) {
         return;
     }
     if (mFirstShowEvent) {
-        // moved from android_metrics_start() in metrics.cpp
-        android_metrics_start_adb_liveness_checker((*mAdbInterface));
         if (getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut > 0) {
             android_test_start_boot_complete_timer(
                     getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut);

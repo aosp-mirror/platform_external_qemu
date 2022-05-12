@@ -61,7 +61,6 @@ EmulatorNoQtNoWindow::EmulatorNoQtNoWindow()
     : mLooper(android::base::Looper::create()),
       mAdbInterface(android::emulation::AdbInterface::createGlobalOwnThread()) {
     android::base::ThreadLooper::setLooper(mLooper, true);
-    android_metrics_start_adb_liveness_checker(mAdbInterface);
     if (getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut > 0) {
         android_test_start_boot_complete_timer(
                 getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut);

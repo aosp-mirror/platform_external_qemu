@@ -195,7 +195,6 @@ set(android-emu-common
     android/main-emugl.cpp
     android/main-help.cpp
     android/main-kernel-parameters.cpp
-    android/metrics/AdbLivenessChecker.cpp
     android/metrics/DependentMetrics.cpp
     android/metrics/PerfStatReporter.cpp
     android/multi-instance.cpp

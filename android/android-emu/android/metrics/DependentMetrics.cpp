@@ -42,7 +42,6 @@
 #include "android/emulation/control/globals_agent.h"     // for QAndroidGlob...
 #include "android/featurecontrol/FeatureControl.h"       // for getDisabledO...
 #include "android/featurecontrol/Features.h"             // for Feature, Pla...
-#include "android/metrics/AdbLivenessChecker.h"          // for AdbLivenessC...
 #include "android/metrics/MetricsEngine.h"               // for MetricsEngine
 #include "android/metrics/MetricsReporter.h"             // for MetricsReporter
 #include "android/metrics/PerfStatReporter.h"            // for PerfStatRepo...
@@ -660,18 +659,4 @@ void android_metrics_stop(MetricsStopReason reason) {
     MetricsEngine::get()->stop();
     PeriodicReporter::stop();
     MetricsReporter::stop(reason);
-}
-
-// Start the ADB liveness monitor. call this when GUI starts
-bool android_metrics_start_adb_liveness_checker(
-        android::emulation::AdbInterface* adb) {
-    const std::string& emulatorName =
-            adb->serialString().empty() ? MetricsEngine::get()->emulatorName()
-                                        : adb->serialString();
-    auto livenessChecker = android::metrics::AdbLivenessChecker::create(
-            adb, android::base::ThreadLooper::get(), &MetricsReporter::get(),
-            emulatorName, 20 * 1000);
-    livenessChecker->start();
-    MetricsEngine::get()->registerReporter(livenessChecker);
-    return true;
 }

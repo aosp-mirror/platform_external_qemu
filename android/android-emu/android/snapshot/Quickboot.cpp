@@ -20,7 +20,6 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/console.h"
-#include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
 
 #if SNAPSHOT_METRICS
