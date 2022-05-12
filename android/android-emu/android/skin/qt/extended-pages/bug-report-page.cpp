@@ -42,7 +42,6 @@
 #include "android/base/system/System.h"                // for System, System...
 #include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
 #include "android/console.h"                           // for getConsoleAgents()->settings->avdInfo()
-#include "android/metrics/AdbLivenessChecker.h"        // for AdbLivenessChecker
 #include "android/metrics/UiEventTracker.h"            // for UiEventTracker
 #include "android/skin/qt/emulator-qt-window.h"        // for EmulatorQtWindow
 #include "android/skin/qt/error-dialog.h"              // for showErrorDialog
@@ -66,7 +65,6 @@ using android::base::Uri;
 using android::base::Uuid;
 using android::emulation::AdbInterface;
 using android::emulation::OptionalAdbCommandResult;
-using android::metrics::AdbLivenessChecker;
 
 static const int kDefaultUnknownAPILevel = 1000;
 static const int kReproStepsCharacterLimit = 2000;
@@ -93,8 +91,7 @@ BugreportPage::BugreportPage(QWidget* parent)
       mTask(
               ThreadLooper::get(),
               [this]() {
-                  if (AdbLivenessChecker::isEmulatorBooted() ||
-                      getConsoleAgents()->settings->guest_boot_completed()) {
+                  if (getConsoleAgents()->settings->guest_boot_completed()) {
                       refreshContents();
                       return false;
                   } else {

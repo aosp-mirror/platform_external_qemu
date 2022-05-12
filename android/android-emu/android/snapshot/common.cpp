@@ -12,7 +12,6 @@
 #include "android/snapshot/common.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/console.h"
-#include "android/metrics/AdbLivenessChecker.h"
 #include "android/opengles.h"
 
 #include <errno.h>

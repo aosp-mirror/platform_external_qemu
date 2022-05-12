@@ -26,7 +26,6 @@
 #include "android/emulation/CpuAccelerator.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/console.h"
-#include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/PerfStatReporter.h"
 #include "android/metrics/PeriodicReporter.h"

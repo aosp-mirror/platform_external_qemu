@@ -19,7 +19,6 @@
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/emulation/VmLock.h"
 #include "android/console.h"
-#include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/metrics.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/DependentMetrics.h"
