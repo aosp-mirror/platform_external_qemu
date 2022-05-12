@@ -400,6 +400,7 @@ int stop_android_modem_simulator() {
         if (monitor_sock->IsOpen()) {
             LOG(VERBOSE) << "sending STOP to modem simulator host server";
             monitor_sock->Write(msg.data(), msg.size());
+            s_stop_requested = true;
             return 0;
         } else {
             DD("cannot connect to host server at port %d", s_host_server_port);
@@ -410,17 +411,15 @@ int stop_android_modem_simulator() {
 
 struct MyThread {
     std::thread mT1;
-    std::thread mT2;
     ~MyThread() {
         ModemMessage msg;
-        s_stop_requested = true;
         msg.type = MODEM_MSG_QUIT;
         queue_modem_message(msg);
         if (mT1.joinable()) {
             mT1.join();
         }
 
-        if (s_host_server_port > 0 && !modem_host_servers.empty()) {
+        if (s_host_server_port > 0 && !modem_host_servers.empty() && !s_stop_requested) {
             // send STOP to it
             auto monitor_sock =
                     cuttlefish::SharedFD::SocketLocalClient(s_host_server_port);
@@ -428,16 +427,10 @@ struct MyThread {
             if (monitor_sock->IsOpen()) {
                 DD("sending STOP to main host server");
                 monitor_sock->Write(msg.data(), msg.size());
-                if (mT2.joinable()) {
-                    mT2.join();
-                }
+                s_stop_requested = true;
             } else {
                 DD("cannot connect to host server at port %d",
                    s_host_server_port);
-            }
-        } else {
-            if (mT2.joinable()) {
-                mT2.join();
             }
         }
     }
@@ -482,7 +475,7 @@ int start_android_modem_simulator_detached(int modem_simulator_port, bool& isIpv
 
     s_host_server_port = start_android_modem_host_server("0");
     std::thread t2(&main_host_thread);
-    s_mythread.mT2 = std::move(t2);
+    t2.detach();
 
     DD("starring modem simulator ready at guest port %d host port %d",
        actual_guest_server_port, s_host_server_port);
@@ -516,6 +509,7 @@ void main_host_thread() {
             }
             if (buf == "STOP") {  // Exit request from parent process
                 LOG(VERBOSE) << "received exit request from parent process";
+                s_stop_requested = true;
                 break;
             } else if (buf.compare(0, 3, "REM") ==
                        0) {  // REMO for modem id 0 ...
