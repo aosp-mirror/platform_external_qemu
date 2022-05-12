@@ -11,37 +11,46 @@
 
 #include "android/emulation/QemuMiscPipe.h"
 
-#include <stdio.h>                                       // for printf, fflush
+#include <stdio.h>                                       // for fflush, stdout
+#include <stdlib.h>                                      // for free
 #include <string.h>                                      // for strcmp, strlen
 #include <time.h>                                        // for ctime, time
-#include <algorithm>                                     // for uniform_int_...
+#include <algorithm>                                     // for max
 #include <atomic>                                        // for atomic, __at...
 #include <cstdint>                                       // for uint8_t, int...
-#include <fstream>                                       // for file read
-#include <functional>                                    // for __base
+#include <fstream>                                       // for basic_istream
+#include <memory>                                        // for make_unique
 #include <random>                                        // for mt19937, ran...
-#include <string>                                        // for string, to_s...
+#include <string>                                        // for allocator
 #include <thread>                                        // for thread
 #include <vector>                                        // for vector
 
-#include "android/avd/info.h"                            // for avdInfo_getS...
+#include "android/avd/hw-config.h"                       // for AndroidHwConfig
+#include "android/avd/info.h"                            // for avdInfo_getA...
 #include "android/base/ProcessControl.h"                 // for restartEmulator
+#include "android/base/StringView.h"                     // for CStrWrapper
 #include "android/base/files/MemStream.h"                // for MemStream
 #include "android/base/files/PathUtils.h"                // for PathUtils
-#include "android/base/misc/StringUtils.h"               // for split strings
+#include "android/base/misc/StringUtils.h"               // for Split
+#include "android/base/system/System.h"                  // for System
 #include "android/base/threads/Thread.h"                 // for Thread
 #include "android/console.h"                             // for getConsoleAg...
 #include "android/emulation/AndroidMessagePipe.h"        // for AndroidMessa...
-#include "android/emulation/AndroidPipe.h"               // for AndroidPipe
-#include "android/emulation/resizable_display_config.h"
+#include "android/emulation/AndroidPipe.h"               // for AndroidPipe:...
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
+#include "android/emulation/control/globals_agent.h"     // for LanguageSett...
 #include "android/emulation/control/vm_operations.h"     // for QAndroidVmOp...
+#include "android/emulation/control/window_agent.h"      // for QAndroidEmul...
+#include "android/emulation/resizable_display_config.h"  // for getResizable...
 #include "android/featurecontrol/FeatureControl.h"       // for isEnabled
-#include "android/featurecontrol/Features.h"             // for MultiDisplay
+#include "android/featurecontrol/Features.h"             // for DeviceSkinOv...
 #include "android/hw-sensors.h"                          // for FoldableHing...
+#include "android/metrics/MetricsReporter.h"             // for MetricsReporter
 #include "android/utils/aconfig-file.h"                  // for aconfig_find
+#include "android/utils/debug.h"                         // for dinfo
 #include "android/utils/path.h"                          // for path_exists
 #include "android/utils/system.h"                        // for get_uptime_ms
+#include "studio_stats.pb.h"                             // for EmulatorBoot...
 
 // This indicates the number of heartbeats from guest
 static std::atomic<int> guest_heart_beat_count {};
@@ -286,12 +295,20 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
     } else if (beginWith(input, "bootcomplete")) {
         fillWithOK(output);
         // bug: 152636877
+        auto bootTimeInMs = (long long)(get_uptime_ms() - s_reset_request_uptime_ms);
 #ifdef _WIN32
         dinfo("Boot completed");
 #else
-        dinfo("Boot completed in %lld ms",
-            (long long)(get_uptime_ms() - s_reset_request_uptime_ms));
+        dinfo("Boot completed in %lld ms",  bootTimeInMs);
 #endif
+        android::metrics::MetricsReporter::get().report(
+                [=](android_studio::AndroidStudioEvent* event) {
+                    auto boot_info = event->mutable_emulator_details()
+                                             ->mutable_boot_info();
+                    boot_info->set_boot_status(
+                            android_studio::EmulatorBootInfo::BOOT_COMPLETED);
+                    boot_info->set_duration_ms(bootTimeInMs);
+                });
         fflush(stdout);
 
         getConsoleAgents()->settings->set_guest_boot_completed(true);
