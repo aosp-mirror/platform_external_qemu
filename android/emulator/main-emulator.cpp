@@ -32,7 +32,9 @@
 #include <fstream>
 #include <streambuf>
 
+#ifndef _WIN32
 #include "android/HostHwInfo.h"
+#endif
 #include "android/avd/info.h"
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
@@ -932,7 +934,7 @@ int main(int argc, char** argv) {
 
     if (avdName) {
         AvdInfoParams myparams;
-        AvdInfo* myavdinfo = avdInfo_new(avdName, &myparams);
+        AvdInfo* myavdinfo = avdInfo_new(avdName, &myparams, sysDir);
         if (avdInfo_getAvdFlavor(myavdinfo) == AVD_ANDROID_AUTO) {
             const char* forge = getenv("TEST_UNDECLARED_OUTPUTS_DIR");
             if (forge != NULL && *forge && *forge != '0') {

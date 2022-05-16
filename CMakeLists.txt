@@ -555,6 +555,7 @@ configure_file(qemu-version.h.in qemu-version.h @ONLY)
 # We need the auto generated header for some components, so let's set the
 # ANDROID_HW_CONFIG_H variable to point to the generated header. Those that need
 # it can add it to their sources list, and it will be there.
+set(HW_PROPERTIES_INI ${ANDROID_QEMU2_TOP_DIR}/android/emu/avd/src/android/avd/hardware-properties.ini)
 android_generate_hw_config()
 
 # Lets set up a qemu dependency that we all can rely on

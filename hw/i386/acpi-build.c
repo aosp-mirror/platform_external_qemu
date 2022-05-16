@@ -67,6 +67,7 @@
 #ifdef CONFIG_ANDROID
 #include "android/console.h"
 #include "android/avd/info.h"
+#include "android/featurecontrol/feature_control.h"
 #include "hw/acpi/goldfish_defs.h"
 #include "android/utils/debug.h"
 #else
@@ -1101,7 +1102,11 @@ static void build_android_dt_aml(Aml *scope,
         /* 5 properties per partition, plus 2 more "compatible" nodes */
         int nproperties = 2;
         /* All AVDs have a system.img. Some also have a vendor.img. */
-        system_device_in_guest = avdInfo_getSystemImageDevicePathInGuest(getConsoleAgents()->settings->avdInfo());
+        system_device_in_guest =
+                feature_is_enabled(kFeature_SystemAsRoot)
+                ? NULL
+                : avdInfo_getSystemImageDevicePathInGuest(
+                        getConsoleAgents()->settings->avdInfo());
         vendor_device_in_guest = avdInfo_getVendorImageDevicePathInGuest( getConsoleAgents()->settings->avdInfo());
         if (system_device_in_guest) {
             nproperties += 5;

@@ -501,7 +501,8 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
      * we are in the Android build system or not
      */
     if (opts->avd != NULL) {
-        ret = avdInfo_new(opts->avd, getConsoleAgents()->settings->avdParams());
+        ret = avdInfo_new(opts->avd, getConsoleAgents()->settings->avdParams(),
+                          getConsoleAgents()->settings->android_cmdLineOptions()->sysdir);
         if (ret == NULL) {
             /* an error message has already been printed */
             dprint("could not find virtual device named '%s'", opts->avd);
@@ -516,8 +517,10 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
         if (!android_build_out) {
             android_build_out = android_build_root = opts->sysdir;
         }
-        ret = avdInfo_newForAndroidBuild(android_build_root, android_build_out,
-                                         getConsoleAgents()->settings->avdParams());
+        ret = avdInfo_newForAndroidBuild(
+                android_build_root, android_build_out,
+                getConsoleAgents()->settings->avdParams(),
+                getConsoleAgents()->settings->android_cmdLineOptions()->sysdir);
 
         if (ret == NULL) {
             D("could not start virtual device\n");
@@ -1727,7 +1730,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
-    // Make the parsed avd globally available, 
+    // Make the parsed avd globally available,
     // The features below sneakily rely on avd info being availalbe)
     getConsoleAgents()->settings->inject_AvdInfo(avd);
     // Update server-based hw config / feature flags.
