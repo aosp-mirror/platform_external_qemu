@@ -20,19 +20,16 @@ android_add_library(
       android/camera/camera-common.cpp
       android/camera/camera-format-converters.c
       android/camera/camera-list.cpp
-      android/emulation/bufprint_config_dirs.cpp
       android/emulation/CpuAccelerator.cpp
       android/emulation/launcher/launcher_stub.cpp
-      android/help.c
       android/HostHwInfo.cpp
       android/hw-lcd.c
       android/main-help.cpp
-      android/network/constants.c
   WINDOWS android/camera/camera-capture-windows.cpp
           android/emulation/USBAssist.cpp
   LINUX android/camera/camera-capture-linux.c
   DARWIN android/camera/camera-capture-mac.m
-  DEPS android-emu-base android-emu-utils android-emu-files android-hw-config
+  DEPS android-emu-base android-emu-utils android-emu-files android-hw-config android-emu-cmdline
        emulator-libyuv gtest)
 target_include_directories(android-emu-launch PRIVATE .)
 target_compile_options(android-emu-launch PRIVATE -Wno-extern-c-compat)
@@ -75,7 +72,6 @@ set(android-emu-common
     android/bootconfig.cpp
     android/car-cluster.cpp
     android/car.cpp
-    android/cmdline-option.cpp
     android/CommonReportedInfo.cpp
     android/console_auth.cpp
     android/cpu_accelerator.cpp
@@ -107,7 +103,6 @@ set(android-emu-common
     android/emulation/AndroidPipe.cpp
     android/emulation/AudioCaptureEngine.cpp
     android/emulation/AudioOutputEngine.cpp
-    android/emulation/bufprint_config_dirs.cpp
     android/emulation/ClipboardPipe.cpp
     android/emulation/ComponentVersion.cpp
     android/emulation/control/adb/AdbConnection.cpp
@@ -154,7 +149,6 @@ set(android-emu-common
     android/emulation/MediaVpxVideoHelper.cpp
     android/emulation/MultiDisplay.cpp
     android/emulation/MultiDisplayPipe.cpp
-    android/emulation/ParameterList.cpp
     android/emulation/qemud/android_qemud_client.cpp
     android/emulation/qemud/android_qemud_multiplexer.cpp
     android/emulation/qemud/android_qemud_serial.cpp
@@ -180,7 +174,6 @@ set(android-emu-common
     android/gps/KmlParser.cpp
     android/gps/PassiveGpsUpdater.cpp
     android/gpu_frame.cpp
-    android/help.c
     android/HostHwInfo.cpp
     android/hw-control.cpp
     android/hw-events.c
@@ -200,7 +193,6 @@ set(android-emu-common
     android/multi-instance.cpp
     android/multitouch-port.c
     android/multitouch-screen.c
-    android/network/constants.c
     android/network/control.cpp
     android/network/GenericNetlinkMessage.cpp
     android/network/globals.c
@@ -343,7 +335,7 @@ target_include_directories(
     # are a lot of externs that are actually defined in qemu2-glue. this has to
     # be sorted out,
     ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG})
-target_link_libraries(android-emu-agents PRIVATE android-emu-base android-emu-files
+target_link_libraries(android-emu-agents PRIVATE android-emu-base android-emu-files android-emu-cmdline
                                                  android-hw-config)
 target_compile_options(android-emu-agents PRIVATE "-Wno-extern-c-compat")
 target_compile_definitions(android-emu-agents PRIVATE "CONSOLE_EXPORTS")
@@ -406,6 +398,7 @@ target_link_libraries(
          emulator-libext4_utils
          android-emu-files
          android-emu-metrics
+         android-emu-cmdline
          android-emu-base
          emulator-libsparse
          emulator-libselinux
@@ -556,7 +549,6 @@ android_add_library(
       android/avd/util.c
       android/avd/util_wrapper.cpp
       android/base/async/CallbackRegistry.cpp
-      android/cmdline-option.cpp
       android/emulation/address_space_device.cpp
       android/emulation/address_space_graphics.cpp
       android/emulation/address_space_host_memory_allocator.cpp
@@ -567,7 +559,6 @@ android_add_library(
       android/emulation/AndroidPipe.cpp
       android/emulation/AudioCaptureEngine.cpp
       android/emulation/AudioOutputEngine.cpp
-      android/emulation/bufprint_config_dirs.cpp
       android/emulation/ClipboardPipe.cpp
       android/emulation/ComponentVersion.cpp
       android/emulation/control/FilePusher.cpp
@@ -581,7 +572,6 @@ android_add_library(
       android/emulation/hostdevices/HostGoldfishPipe.cpp
       android/emulation/HostmemIdMapping.cpp
       android/emulation/LogcatPipe.cpp
-      android/emulation/ParameterList.cpp
       android/emulation/RefcountPipe.cpp
       android/emulation/serial_line.cpp
       android/emulation/SerialLine.cpp
@@ -655,6 +645,7 @@ target_link_libraries(
   android-emu-shared
   PUBLIC android-emu-base
          android-emu-agents
+         android-emu-cmdline
          android-emu-utils
          emulator-murmurhash
          android-emu-files
@@ -788,7 +779,7 @@ android_add_library(
 android_target_compile_options(android-emu-test-launcher Clang
                                PRIVATE -O0 -Wno-invalid-constexpr)
 target_link_libraries(android-emu-test-launcher PRIVATE android-emu
-                      PUBLIC gmock)
+                      PUBLIC gmock android-emu-cmdline-testing)
 
 if(NOT LINUX_AARCH64)
   set(android-emu_unittests_common
@@ -804,7 +795,6 @@ if(NOT LINUX_AARCH64)
       android/base/testing/ProtobufMatchers.cpp
       android/bootconfig_unittest.cpp
       android/camera/CameraFormatConverters_unittest.cpp
-      android/cmdline-option_unittest.cpp
       android/CommonReportedInfo_unittest.cpp
       android/console_auth_unittest.cpp
       android/console_unittest.cpp
@@ -820,7 +810,6 @@ if(NOT LINUX_AARCH64)
       android/emulation/android_pipe_pingpong_unittest.cpp
       android/emulation/android_pipe_zero_unittest.cpp
       android/emulation/AndroidAsyncMessagePipe_unittest.cpp
-      android/emulation/bufprint_config_dirs_unittest.cpp
       android/emulation/ComponentVersion_unittest.cpp
       android/emulation/control/adb/AdbConnection_unittest.cpp
       android/emulation/control/adb/AdbInterface_unittest.cpp
@@ -856,7 +845,6 @@ if(NOT LINUX_AARCH64)
       android/jdwp/Jdwp_unittest.cpp
       android/jdwp/JdwpProxy_unittest.cpp
       android/kernel/kernel_utils_unittest.cpp
-      android/network/constants_unittest.cpp
       android/network/control_unittest.cpp
       android/network/GenericNetlinkMessage_unittest.cpp
       android/network/Ieee80211Frame_unittest.cpp
@@ -929,7 +917,7 @@ if(NOT LINUX_AARCH64)
 
   # Dependecies are exported from android-emu.
   target_link_libraries(
-    android-emu_unittests PRIVATE android-emu android-emu-protobuf
+    android-emu_unittests PRIVATE android-emu android-emu-protobuf android-emu-cmdline-testing
                                   android-emu-test-launcher)
 
   android_add_executable(

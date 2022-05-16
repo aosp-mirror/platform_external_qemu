@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "config/config.h"
+#include "android/config/config.h"
 
 /* Prints a table with information on the snapshot stored in the file
  * 'snapstorage'.
