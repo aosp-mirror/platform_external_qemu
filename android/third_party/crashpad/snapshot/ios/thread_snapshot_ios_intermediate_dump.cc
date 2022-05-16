@@ -68,6 +68,11 @@ using Key = IntermediateDumpKey;
 
 ThreadSnapshotIOSIntermediateDump::ThreadSnapshotIOSIntermediateDump()
     : ThreadSnapshot(),
+#if defined(ARCH_CPU_X86_64)
+      context_x86_64_(),
+#elif defined(ARCH_CPU_ARM64)
+      context_arm64_(),
+#endif
       context_(),
       stack_(),
       thread_id_(0),
@@ -135,10 +140,11 @@ bool ThreadSnapshotIOSIntermediateDump::Initialize(
     size_t frame_count = bytes.size() / sizeof(uint64_t);
     exception_stack_memory_ =
         GenerateStackMemoryFromFrames(frames, frame_count);
-    stack_.Initialize(
-        0,
-        reinterpret_cast<vm_address_t>(&exception_stack_memory_[0]),
-        exception_stack_memory_.size());
+    vm_address_t stack_memory_addr =
+        !exception_stack_memory_.empty()
+            ? reinterpret_cast<vm_address_t>(&exception_stack_memory_[0])
+            : 0;
+    stack_.Initialize(0, stack_memory_addr, exception_stack_memory_.size());
   } else {
     stack_.Initialize(0, 0, 0);
   }
