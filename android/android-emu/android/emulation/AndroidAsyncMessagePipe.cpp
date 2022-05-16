@@ -14,7 +14,15 @@
 
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 
-#include <cassert>
+#include <algorithm>    // for min
+#include <cassert>      // for assert
+#include <cstring>      // for size_t, memcpy
+#include <mutex>        // for lock_guard
+#include <ostream>      // for operator<<, basic_ostream
+#include <type_traits>  // for remove_extent_t
+
+#include "android/base/Log.h"            // for LogMessage, DLOG, CHECK, DLO...
+#include "android/utils/log_severity.h"  // for EMULATOR_LOG_VERBOSE, EMULAT...
 
 namespace android {
 

@@ -107,6 +107,7 @@ class Libcurl {
                "libcurl-gnutls.so.4",
                "libcurl-nss.so.4",
                "libcurl.so.4",
+               "libandroid-emu-curl.dylib",
            }) {
         void* libcurl = dlopen(lib, RTLD_LAZY | RTLD_LOCAL);
         if (libcurl) {
@@ -385,6 +386,7 @@ bool HTTPTransportLibcurl::ExecuteSynchronously(std::string* response_body) {
     }                                      \
   } while (false)
 
+  TRY_CURL_EASY_SETOPT(curl.get(), CURLOPT_VERBOSE, 1);
   TRY_CURL_EASY_SETOPT(curl.get(), CURLOPT_USERAGENT, UserAgent().c_str());
 
   // Accept and automatically decode any encoding that libcurl understands.

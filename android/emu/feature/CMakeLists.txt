@@ -19,6 +19,7 @@ android_add_library(
        android-emu-avd
        android-emu-base
        android-emu-cmdline
+       android-emu-crashreport
        android-emu-curl
        android-emu-files
        android-emu-protos
@@ -56,8 +57,7 @@ android_add_test(
       android/featurecontrol/FeatureControl_unittest.cpp
       android/featurecontrol/HWMatching_unittest.cpp
       android/opengl/gpuinfo_unittest.cpp
-  WINDOWS
-      android/windows_installer_unittest.cpp
+  WINDOWS android/windows_installer_unittest.cpp
   DEPS android-emu-agents
        android-emu-base
        android-emu-cmdline

@@ -9,24 +9,30 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/skin/qt/qt-settings.h"
-#include "android/crashreport/CrashService.h"
+#include <QDialog>  // for QDialog
+#include <QString>  // for QString
+#include <memory>   // for unique_ptr
+#include <string>   // for string
 
-#include <memory>
+#include "android/crashreport/ui/UserSuggestions.h"  // for UserSuggestions
+#include "android/skin/qt/qt-settings.h"             // for CRASHREPORT_PREF...
 
-#include <QDialog>
+class QWidget;
 
-namespace Ui { class ConfirmDialog; }
+namespace Ui {
+class ConfirmDialog;
+}
 
+using android::crashreport::UserSuggestions;
 // QT Component that displays the send crash dump confirmation
 class ConfirmDialog : public QDialog {
     Q_OBJECT
 
 public:
     ConfirmDialog(QWidget* parent,
-                  android::crashreport::CrashService* crashservice,
-                  Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference,
-                  const char* reportingDir);
+                  const UserSuggestions& suggestions,
+                  const std::string& report,
+                  const std::string& hwIni);
     ~ConfirmDialog();
 
 public slots:
@@ -38,7 +44,6 @@ private:
     void enableInput(bool enable);
     void showProgressBar(const QString& msg);
     void hideProgressBar();
-    void getDetails();
     bool uploadCrash();
     void addSuggestion(const QString& str);
     void hideDetails(bool firstTime = false);
@@ -47,10 +52,9 @@ private:
     QString constructDumpMessage() const;
 
     std::unique_ptr<Ui::ConfirmDialog> mUi;
-    android::crashreport::CrashService* mCrashService;
-    const char* mReportingDir;  // Directory containing the temporary files
+    UserSuggestions mSuggestions;
+    std::string mHwIni;
+    std::string mReport;
     int mHeightWithDetails = 0;
     Ui::Settings::CRASHREPORT_PREFERENCE_VALUE mReportPreference;
-    bool mDidGetSysInfo = false;
-    bool mDidUpdateDetails = false;
 };

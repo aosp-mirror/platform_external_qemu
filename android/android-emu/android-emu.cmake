@@ -361,7 +361,7 @@ target_link_libraries(
          # Prebuilt libraries
          android-net
          android-emu-base
-         breakpad_client
+         crashpad_client
          ssl
          crypto
          LibXml2::LibXml2
@@ -705,7 +705,8 @@ android_target_compile_options(android-emu-test-launcher Clang
                                PRIVATE -O0 -Wno-invalid-constexpr)
 target_link_libraries(
   android-emu-test-launcher PRIVATE android-emu
-  PUBLIC gmock android-emu-cmdline-testing android-emu-feature-test)
+  PUBLIC gmock android-emu-cmdline-testing android-emu-feature-test
+         android-emu-crashreport-consent-never)
 
 if(NOT LINUX_AARCH64)
   set(android-emu_unittests_common

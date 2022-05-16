@@ -11,6 +11,8 @@
 
 #include "android/snapshot/Snapshotter.h"
 
+#include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/Stopwatch.h"

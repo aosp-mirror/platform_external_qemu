@@ -35,6 +35,7 @@ target_link_libraries(
          android-emu
          android-grpc
          android-webrtc
+         android-emu-crashreport-consent-never
          nlohmann_json::nlohmann_json
          ssl)
 target_include_directories(goldfish-webrtc PUBLIC . ${CMAKE_CURRENT_BINARY_DIR})

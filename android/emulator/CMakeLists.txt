@@ -45,7 +45,7 @@ else()
     qemu-system-armel-headless
     qemu-system-x86_64-headless
     qemu-system-aarch64-headless
-    emulator-crash-service)
+    crashpad_handler)
 endif()
 
 if(WEBRTC)

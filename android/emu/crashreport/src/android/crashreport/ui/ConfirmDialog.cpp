@@ -9,23 +9,24 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-
 #include "android/crashreport/ui/ConfirmDialog.h"
 
-#include "android/android.h"
-#include "android/base/files/IniFile.h"
-#include "android/base/files/PathUtils.h"
-#include "android/console.h"
-#include "android/crashreport/CrashReporter.h"
-
-#include "ui_ConfirmDialog.h"
-
-#include <QEventLoop>
-#include <QFutureWatcher>
-#include <QMessageBox>
+#include <stddef.h>  // for size_t
+#include <QDialog>   // for QVBoxLayout
 #include <QScrollBar>
-#include <QSettings>
-#include <QtConcurrent/QtConcurrentRun>
+#include <QSettings>  // for QSettings
+#include <QWidget>    // for QWidget
+#include <set>        // for set, set<>::const_iterator
+
+#include "android/base/StringView.h"     // for StringView
+#include "android/base/files/IniFile.h"  // for IniFile
+#include "ui_ConfirmDialog.h"            // for ConfirmDialog
+
+namespace android {
+namespace base {
+class PathUtils;
+}  // namespace base
+}  // namespace android
 
 static const char kIconFile[] = "emulator_icon_128.png";
 
@@ -33,8 +34,6 @@ extern "C" const unsigned char* android_emulator_icon_find(const char* name,
                                                            size_t* psize);
 
 using android::base::IniFile;
-using android::base::PathUtils;
-using android::crashreport::CrashService;
 using Ui::Settings::CRASHREPORT_PREFERENCE_VALUE;
 
 // Layout doesn't have show()/hide() methods, one has to manually enumerate all
@@ -47,14 +46,15 @@ static void makeVisible(QLayout* layout, bool visible = true) {
 }
 
 ConfirmDialog::ConfirmDialog(QWidget* parent,
-                             CrashService* crashservice,
-                             CRASHREPORT_PREFERENCE_VALUE reportPreference,
-                             const char* reportingDir)
+                             const UserSuggestions& userSuggestions,
+                             const std::string& report,
+                             const std::string& hwIni)
     : QDialog(parent),
       mUi(new Ui::ConfirmDialog()),
-      mCrashService(crashservice),
-      mReportingDir(reportingDir),
-      mReportPreference(reportPreference) {
+      mSuggestions(userSuggestions),
+      mReportPreference(Ui::Settings::CRASHREPORT_PREFERENCE_ASK),
+      mReport(report),
+      mHwIni(hwIni) {
     mUi->setupUi(this);
 
     mUi->yesNoButtonBox->button(QDialogButtonBox::Ok)
@@ -81,11 +81,8 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
 
     mUi->icon->setPixmap(icon);
 
-    crashservice->processCrash();
-
-    const auto& suggestions = crashservice->getSuggestions().suggestions;
-    const auto& stringSuggestions =
-            crashservice->getSuggestions().stringSuggestions;
+    const auto& suggestions = mSuggestions.suggestions;
+    const auto& stringSuggestions = mSuggestions.stringSuggestions;
 
     bool haveGfxFailure = false;
 
@@ -117,7 +114,8 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
         }
     }
 
-    if (!haveGfxFailure) {
+    // We can only fix it up if we know which hw ini to change.
+    if (!haveGfxFailure || hwIni.empty()) {
         mUi->softwareGpu->hide();
     }
 
@@ -143,39 +141,9 @@ void ConfirmDialog::hideDetails(bool firstTime) {
     }
 }
 
-void ConfirmDialog::getDetails() {
-    if (!mDidGetSysInfo) {
-        enableInput(false);
-
-        showProgressBar(tr("Collecting crash info... this may take a minute."));
-        QEventLoop eventloop;
-
-        QFutureWatcher<bool> watcher;
-        connect(&watcher, SIGNAL(finished()), &eventloop, SLOT(quit()));
-
-        // Start the computation.
-        QFuture<bool> future =
-                QtConcurrent::run(mCrashService, &CrashService::collectSysInfo);
-        watcher.setFuture(future);
-
-        eventloop.exec();
-
-        hideProgressBar();
-        enableInput(true);
-    }
-    mDidGetSysInfo = true;
-}
-
 void ConfirmDialog::showDetails() {
-    getDetails();
-    if (!mDidUpdateDetails) {
-        QString details = QString::fromStdString(mCrashService->getReport());
-        details += QString::fromStdString(mCrashService->getSysInfo());
-
-        mUi->detailsText->document()->setPlainText(details);
-        mDidUpdateDetails = true;
-    }
-
+    QString details = QString::fromStdString(mReport);
+    mUi->detailsText->document()->setPlainText(details);
     mUi->detailsButton->setText(tr("Hide details"));
     makeVisible(mUi->detailsLayout);
     mUi->detailsText->verticalScrollBar()->setValue(
@@ -201,26 +169,6 @@ void ConfirmDialog::hideProgressBar() {
     makeVisible(mUi->progressLayout, false);
 }
 
-bool ConfirmDialog::uploadCrash() {
-    enableInput(false);
-    showProgressBar(tr("Sending crash report..."));
-    QEventLoop eventloop;
-
-    QFutureWatcher<bool> watcher;
-    connect(&watcher, SIGNAL(finished()), &eventloop, SLOT(quit()));
-
-    // Start the computation.
-    QFuture<bool> future =
-            QtConcurrent::run(mCrashService, &CrashService::uploadCrash);
-    watcher.setFuture(future);
-
-    eventloop.exec();
-
-    hideProgressBar();
-
-    return watcher.result();
-}
-
 static void savePref(bool checked, CRASHREPORT_PREFERENCE_VALUE v) {
     QSettings settings;
     settings.setValue(Ui::Settings::CRASHREPORT_PREFERENCE,
@@ -230,28 +178,6 @@ static void savePref(bool checked, CRASHREPORT_PREFERENCE_VALUE v) {
 }
 
 void ConfirmDialog::sendReport() {
-    getDetails();
-    mCrashService->addUserComments(
-            mUi->commentsText->toPlainText().toStdString());
-    bool upload_success = uploadCrash();
-
-    if (upload_success &&
-        (mReportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_ASK)) {
-        QMessageBox msgbox(this);
-        msgbox.setWindowTitle(tr("Crash Report Submitted"));
-        msgbox.setText(tr("<p>Thank you for submitting a crash report!</p>"
-                          "<p>If you would like to contact us for further "
-                          "information, "
-                          "use the following Crash Report ID:</p>"
-                          "<p></p>"
-                          "<p>%1</p>")
-                               .arg(QString::fromStdString(
-                                       mCrashService->getReportId())));
-        msgbox.setTextInteractionFlags(Qt::TextSelectableByMouse |
-                                       Qt::TextSelectableByKeyboard);
-        msgbox.exec();
-    }
-
     setSwGpu();
 
     savePref(mUi->savePreference->isChecked(),
@@ -267,39 +193,22 @@ void ConfirmDialog::dontSendReport() {
 // If the user requests a switch to software GPU, modify
 // config.ini
 void ConfirmDialog::setSwGpu() {
-    if (!mUi->softwareGpu->isChecked() || !mReportingDir) {
+    if (!mUi->softwareGpu->isChecked() || mHwIni.empty()) {
         return;
     }
 
-    // The user wants the switch and we have the path to the avd_info.txt file
-    std::string avdInfoPath =
-            PathUtils::join(mReportingDir, CRASH_AVD_HARDWARE_INFO);
-
-    IniFile iniF(avdInfoPath);
-    iniF.read();
-
-    // Get the path to config.ini
-    std::string diskPartDir = iniF.getString("disk.dataPartition.path", "");
-    if (!diskPartDir.empty()) {
-        // Keep the path; discard the file name
-        android::base::StringView outputDir;
-        bool isOK = PathUtils::split(diskPartDir, &outputDir, nullptr);
-        if (isOK) {
-            std::string hwQemuPath =
-                    PathUtils::join(outputDir, CORE_CONFIG_INI);
-            // We have the path to config.ini
-            // Read that
-            IniFile hwQemuIniF(hwQemuPath);
-            hwQemuIniF.read();
-
-            // Set hw.gpu.enabled=no and hw.gpu.mode=guest
-            hwQemuIniF.setString("hw.gpu.enabled", "no");
-            hwQemuIniF.setString("hw.gpu.mode", "guest");
-
-            // Write the modified configuration back
-            hwQemuIniF.write();
-        }
+    // Modify the hw ini./.
+    IniFile hwQemuIniF(mHwIni);
+    if (!hwQemuIniF.read()) {
+        return;
     }
+
+    // Set hw.gpu.enabled=no and hw.gpu.mode=guest
+    hwQemuIniF.setString("hw.gpu.enabled", "no");
+    hwQemuIniF.setString("hw.gpu.mode", "guest");
+
+    // Write the modified configuration back
+    hwQemuIniF.write();
 }
 
 void ConfirmDialog::toggleDetails() {
@@ -311,15 +220,7 @@ void ConfirmDialog::toggleDetails() {
 }
 
 QString ConfirmDialog::constructDumpMessage() const {
-    QString dumpMessage =
-            QString::fromStdString(mCrashService->getCustomDumpMessage());
-    if (dumpMessage.isEmpty()) {
-        dumpMessage = tr("<p>Android Emulator closed unexpectedly.</p>");
-    } else {
-        dumpMessage = tr("<p>Android Emulator closed because of an internal "
-                         "error:</p>") +
-                      "<p>" + dumpMessage.replace("\n", "<br/>") + "</p>";
-    }
+    QString dumpMessage = tr("<p>Android Emulator closed unexpectedly.</p>");
     dumpMessage +=
             tr("<p>Do you want to send a crash report about the problem?</p>");
     return dumpMessage;

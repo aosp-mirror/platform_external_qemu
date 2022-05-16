@@ -87,8 +87,6 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/car-cluster-window.cpp
     android/skin/qt/common-controls/cc-list-item.cpp
     android/skin/qt/device-3d-widget.cpp
-    android/skin/qt/multi-display-widget.cpp
-    android/skin/qt/mouse-event-handler.cpp
     android/skin/qt/editable-slider-widget.cpp
     android/skin/qt/emulator-container.cpp
     android/skin/qt/emulator-no-qt-no-window.cpp
@@ -136,9 +134,9 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/record-settings-page.cpp
     android/skin/qt/extended-pages/rotary-input-dial.cpp
     android/skin/qt/extended-pages/rotary-input-page.cpp
-    android/skin/qt/extended-pages/settings-page-proxy.cpp
     android/skin/qt/extended-pages/sensor-replay-item.cpp
     android/skin/qt/extended-pages/sensor-replay-page.cpp
+    android/skin/qt/extended-pages/settings-page-proxy.cpp
     android/skin/qt/extended-pages/settings-page.cpp
     android/skin/qt/extended-pages/snapshot-page.cpp
     android/skin/qt/extended-pages/telephony-page.cpp
@@ -152,6 +150,8 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/gl-widget.cpp
     android/skin/qt/init-qt.cpp
     android/skin/qt/ModalOverlay.cpp
+    android/skin/qt/mouse-event-handler.cpp
+    android/skin/qt/multi-display-widget.cpp
     android/skin/qt/native-event-filter-factory.cpp
     android/skin/qt/native-keyboard-event-handler.cpp
     android/skin/qt/OverlayMessageCenter.cpp
@@ -209,8 +209,8 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/record-screen-page.ui
     android/skin/qt/extended-pages/record-settings-page.ui
     android/skin/qt/extended-pages/rotary-input-page.ui
-    android/skin/qt/extended-pages/settings-page.ui
     android/skin/qt/extended-pages/sensor-replay-page.ui
+    android/skin/qt/extended-pages/settings-page.ui
     android/skin/qt/extended-pages/snapshot-page.ui
     android/skin/qt/extended-pages/telephony-page.ui
     android/skin/qt/extended-pages/tv-remote-page.ui
@@ -229,7 +229,6 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/angle-input-widget.h
     android/skin/qt/common-controls/cc-list-item.h
     android/skin/qt/device-3d-widget.h
-    android/skin/qt/multi-display-widget.h
     android/skin/qt/editable-slider-widget.h
     android/skin/qt/emulator-container.h
     android/skin/qt/emulator-no-qt-no-window.h
@@ -274,6 +273,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-window.h
     android/skin/qt/gl-widget.h
     android/skin/qt/ModalOverlay.h
+    android/skin/qt/multi-display-widget.h
     android/skin/qt/OverlayMessageCenter.h
     android/skin/qt/poster-image-well.h
     android/skin/qt/posture-selection-dialog.h
@@ -351,7 +351,7 @@ android_add_library(
   LINUX ${emulator-libui_linux-x86_64_src}
   MSVC ${emulator-libui_windows_msvc-x86_64_src})
 
-if (DARWIN_AARCH64 AND QTWEBENGINE)
+if(DARWIN_AARCH64 AND QTWEBENGINE)
   set(QT_MAJOR_VERSION 6)
 else()
   set(QT_MAJOR_VERSION 5)
@@ -362,10 +362,13 @@ endif()
 if(QTWEBENGINE)
   target_compile_definitions(emulator-libui PRIVATE "-DUSE_WEBENGINE")
   target_link_libraries(
-    emulator-libui PRIVATE Qt${QT_MAJOR_VERSION}::Network Qt${QT_MAJOR_VERSION}::WebEngineWidgets Qt${QT_MAJOR_VERSION}::WebChannel
-                           Qt${QT_MAJOR_VERSION}::WebSockets)
+    emulator-libui
+    PRIVATE Qt${QT_MAJOR_VERSION}::Network
+            Qt${QT_MAJOR_VERSION}::WebEngineWidgets
+            Qt${QT_MAJOR_VERSION}::WebChannel Qt${QT_MAJOR_VERSION}::WebSockets)
   if(QT_MAJOR_VERSION EQUAL 6)
-    target_link_libraries(emulator-libui PRIVATE Qt${QT_MAJOR_VERSION}::WebEngineCore)
+    target_link_libraries(emulator-libui
+                          PRIVATE Qt${QT_MAJOR_VERSION}::WebEngineCore)
   endif()
 endif()
 
@@ -408,18 +411,16 @@ target_link_libraries(
           android-emu-location
           android-hw-config)
 
-if (QT_MAJOR_VERSION EQUAL 6)
-  target_link_libraries(
-    emulator-libui
-    PRIVATE Qt${QT_MAJOR_VERSION}::SvgWidgets)
+if(QT_MAJOR_VERSION EQUAL 6)
+  target_link_libraries(emulator-libui
+                        PRIVATE Qt${QT_MAJOR_VERSION}::SvgWidgets)
 endif()
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug.
 # This implies a direct dependency to libX11.so
 android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
-android_target_link_libraries(emulator-libui linux-aarch64 PRIVATE -lpulse -lX11 -lxcb
-                                                                   -lXau)
-android_target_link_libraries(emulator-libui darwin
-                              PRIVATE "-framework Carbon")
+android_target_link_libraries(emulator-libui linux-aarch64
+                              PRIVATE -lpulse -lX11 -lxcb -lXau)
+android_target_link_libraries(emulator-libui darwin PRIVATE "-framework Carbon")
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(emulator-libui windows_msvc-x86_64
                               PUBLIC dirent-win32)
@@ -443,7 +444,7 @@ if(NOT LINUX_AARCH64)
         android/skin/qt/native-keyboard-event-handler_unittest.cpp
         android/skin/qt/qtmain_dummy_test.cpp
         # android/skin/rect_unittest.cpp
-        )
+  )
 
   android_copy_test_files(emulator-libui_unittests "${android-libui-testdata}"
                           testdata)
@@ -470,8 +471,9 @@ if(NOT LINUX_AARCH64)
                             "${QT5_SHARED_PROPERTIES}")
 
   target_link_libraries(
-    emulator-libui_unittests PRIVATE emulator-libui android-emu FFMPEG::FFMPEG
-                                     gmock_main)
+    emulator-libui_unittests
+    PRIVATE emulator-libui android-emu FFMPEG::FFMPEG
+            android-emu-crashreport-consent-never gmock_main)
 
   android_target_link_libraries(emulator-libui_unittests windows_msvc-x86_64
                                 PUBLIC dirent-win32)

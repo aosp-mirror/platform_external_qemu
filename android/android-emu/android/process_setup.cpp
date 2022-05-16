@@ -63,38 +63,13 @@ void process_early_setup(int argc, char** argv) {
 
     filelock_init();
 
-    // Catch crashes in everything.
-    // This promises to not launch any threads...
-    if (crashhandler_init()) {
-        std::string arguments = "===== Command-line arguments =====\n";
-        for (int i = 0; i < argc; ++i) {
-            arguments += argv[i];
-            arguments += '\n';
-        }
-
-        arguments += "\n===== Environment =====\n";
-        const auto allEnv = System::get()->envGetAll();
-        for (const std::string& env : allEnv) {
-            arguments += env;
-            arguments += '\n';
-        }
-
-        android::crashreport::CrashReporter::get()->attachData(
-                "command-line-and-environment.txt", arguments);
-    } else {
-        LOG(VERBOSE) << "Crash handling not initialized";
-    }
-    // Make sure we don't report any hangs until all related loopers
-    // actually get started.
-    android::crashreport::CrashReporter::get()->hangDetector().pause(true);
-
     // libcurl initialization is thread-unsafe, so let's call it first
     // to make sure no other thread could be doing the same
     std::string launcherDir = System::get()->getLauncherDirectory();
     std::string caBundleFile =
             PathUtils::join(launcherDir, "lib", "ca-bundle.pem");
     if (!System::get()->pathCanRead(caBundleFile)) {
-        LOG(VERBOSE) << "Can not read ca-bundle. Curl init skipped.";
+        dprint("Can not read ca-bundle. Curl init skipped.");
     } else {
         curl_init(caBundleFile.c_str());
     }
@@ -109,5 +84,4 @@ void process_early_setup(int argc, char** argv) {
 
 void process_late_teardown() {
     curl_cleanup();
-    crashhandler_cleanup();
 }

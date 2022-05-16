@@ -37,11 +37,11 @@ android_add_library(
 android_target_compile_definitions(crashpad_test windows PRIVATE UNICODE)
 target_link_libraries(crashpad_test PUBLIC crashpad_util crashpad_handler_handler
                                            mini_chromium gtest)
-android_target_link_libraries(crashpad_test darwin-aarch64
-                              PRIVATE "-framework Security" bsm)
-android_target_link_libraries(crashpad_test darwin-x86_64
+android_target_link_libraries(crashpad_test darwin
                               PRIVATE "-framework Security" bsm)
 
+# Internal darwin library, no need to add a license.
+android_license(TARGET "bsm" LIBNAME None SPDX None LICENSE None LOCAL None)
 android_add_library(TARGET crashpad_googlemock_main NODISTRIBUTE SRC gtest_main.cc)
 target_link_libraries(crashpad_googlemock_main PRIVATE gmock crashpad_util crashpad_test)
 target_compile_definitions(crashpad_googlemock_main PUBLIC CRASHPAD_TEST_LAUNCHER_GOOGLEMOCK)

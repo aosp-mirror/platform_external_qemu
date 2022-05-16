@@ -13,19 +13,24 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/Log.h"
-#include "android/base/Optional.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/emulation/AndroidPipe.h"
-
+#include <stddef.h>  // for size_t
 #include <array>
-#include <functional>
-#include <list>
-#include <memory>
-#include <mutex>
+#include <cstdint>     // for uint8_t, uint32_t
+#include <functional>  // for function
+#include <list>        // for list
+#include <memory>      // for unique_ptr
+#include <mutex>       // for recursive_mutex
 #include <string>
-#include <unordered_map>
-#include <vector>
+#include <unordered_map>  // for operator!=, unord...
+#include <utility>        // for move
+#include <vector>         // for vector
+
+#include "android/base/Optional.h"                  // for Optional
+#include "android/base/files/Stream.h"              // for Stream
+#include "android/base/synchronization/Lock.h"      // for AutoLock, Lock
+#include "android/emulation/AndroidPipe.h"          // for AndroidPipe, Andr...
+#include "android/emulation/android_pipe_common.h"  // for AndroidPipeBuffer
+#include "android/utils/debug.h"                    // for dprint
 
 // This is a utility class that can help implement message-based remote calls
 // between the host and guest, with optional out-of-band responses.
@@ -145,7 +150,7 @@ public:
             base::AutoLock lock(mLock);
             const auto it = mPipes.find(handle.id);
             if (it == mPipes.end()) {
-                LOG(VERBOSE) << "getPipe could not find pipe id " << handle.id;
+                dprint("getPipe could not find pipe id %d", handle.id);
                 return {};
             }
 
@@ -180,8 +185,7 @@ public:
                     pipe = std::move(it->second);
                     mPipes.erase(it);
                 } else {
-                    DLOG(INFO) << "Could not find pipe id " << handle.id
-                               << ", pipe already destroyed?";
+                    dprint("Could not find pipe id  %d, pipe already destroyed?",  handle.id);
                 }
             }
         }
