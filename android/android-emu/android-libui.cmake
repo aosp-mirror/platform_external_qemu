@@ -39,7 +39,7 @@ set(ANDROID_LIBUI_HEADLESS_SRC_FILES
     android/skin/keycode.c
     android/skin/LibuiAgent.cpp
     android/skin/qt/emulator-no-qt-no-window.cpp
-    android/skin/rect.c
+    # android/skin/rect.c
     android/skin/resource.c
     android/skin/surface-headless.cpp
     android/skin/trackball.c
@@ -176,7 +176,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/VirtualSceneInfoDialog.cpp
     android/skin/qt/wavefront-obj-parser.cpp
     android/skin/qt/winsys-qt.cpp
-    android/skin/rect.c
+    # android/skin/rect.c
     android/skin/resource.c
     android/skin/trackball.c
     android/skin/ui.c
@@ -442,7 +442,8 @@ if(NOT LINUX_AARCH64)
         android/skin/keycode_unittest.cpp
         android/skin/qt/native-keyboard-event-handler_unittest.cpp
         android/skin/qt/qtmain_dummy_test.cpp
-        android/skin/rect_unittest.cpp)
+        # android/skin/rect_unittest.cpp
+        )
 
   android_copy_test_files(emulator-libui_unittests "${android-libui-testdata}"
                           testdata)

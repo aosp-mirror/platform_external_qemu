@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include "android/cmdline-definitions.h"
-#include "android/console.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER

@@ -14,6 +14,7 @@
 #include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbVsockPipe.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/avd/hw-config.h"
 #include "android/console.h"
 
 #include <algorithm>

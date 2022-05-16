@@ -110,7 +110,7 @@ typedef enum {
     AVDINFO_SNAPSHOT_INVALIDATE = (1 << 7),
 } AvdFlags;
 
-typedef struct {
+typedef struct AvdInfoParams {
     unsigned     flags;
     const char*  skinName;
     const char*  skinRootPath;

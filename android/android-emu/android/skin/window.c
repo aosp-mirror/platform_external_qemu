@@ -20,6 +20,7 @@
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/feature_control.h"
+#include "android/avd/hw-config.h"
 #include "android/console.h"
 #include "android/hw-sensors.h"
 #include "android/multitouch-screen.h"    // for multitouch_create_but...

@@ -16,6 +16,8 @@
 
 #include "android/multitouch-screen.h"
 
+
+#include "android/skin/generic-event-buffer.h"
 #include "android/console.h"  /* for android_hw */
 #include "android/hw-events.h"
 #include "android/skin/charmap.h"

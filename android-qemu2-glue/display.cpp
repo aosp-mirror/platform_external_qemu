@@ -17,6 +17,7 @@
 #include "android-qemu2-glue/display.h"
 
 #include "android/emulator-window.h"
+#include "android/avd/hw-config.h"
 #include "android/console.h"
 #include "android/utils/debug.h"
 

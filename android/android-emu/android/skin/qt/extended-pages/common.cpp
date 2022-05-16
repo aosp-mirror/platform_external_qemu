@@ -31,6 +31,8 @@
 #include <QWidget>           // for QWidget
 #include <QWidgetList>       // for QWidgetList
 
+#include "android/avd/hw-config.h"
+#include "android/console.h"
 #include "android/cmdline-option.h"       // for android_cmdLineOptions
 #include "android/skin/qt/qt-settings.h"  // for SAVE_PATH, SCREE...
 #include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...

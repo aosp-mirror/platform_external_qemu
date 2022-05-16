@@ -36,6 +36,7 @@
 #include "google_logs_publishing.pb.h"               // for LogEvent
 #include "picosha2.h"                                // for hash256_one_by...
 #include "studio_stats.pb.h"                         // for AndroidStudioE...
+#include "android/console.h"
 
 using android::base::System;
 

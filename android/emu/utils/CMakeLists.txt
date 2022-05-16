@@ -23,6 +23,7 @@ android_add_library(
       android/utils/uri.cpp
       android/utils/utf8_utils.cpp
       android/utils/vector.c
+      android/skin/rect.c
   DEPS android-emu-base)
 target_include_directories(android-emu-utils PRIVATE src PUBLIC include)
 
@@ -36,7 +37,7 @@ android_add_test(
   SOURCE_DIR test
   SRC android/utils/dns_unittest.cpp android/utils/format_unittest.cpp
       android/utils/host_bitness_unittest.cpp android/utils/path_unittest.cpp
-      android/utils/Random_unittest.cpp android/utils/sockets_unittest.cpp
+      android/utils/Random_unittest.cpp android/utils/sockets_unittest.cpp android/skin/rect_unittest.cpp
   WINDOWS android/utils/win32_cmdline_quote_unittest.cpp
   DEPS android-emu-base android-emu-utils gtest gtest_main)
 target_include_directories(android-emu-utils_unittests PRIVATE src)

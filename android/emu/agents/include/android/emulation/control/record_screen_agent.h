@@ -12,12 +12,60 @@
 
 #pragma once
 
-#include "android/recording/screen-recorder.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
 ANDROID_BEGIN_HEADER
+
+typedef enum {
+    RECORD_START_INITIATED,
+    RECORD_STARTED,
+    RECORD_START_FAILED,
+    RECORD_STOP_INITIATED,
+    RECORD_STOPPED,
+    RECORD_STOP_FAILED,
+} RecordingStatus;
+
+// This callback will be called in the following scenarios:
+//
+//    1) The encoding has been stopped
+//    2) The encoding is finished
+//    3) An error has occurred while encoding was trying to finish.
+//
+// When screen_recorder_stop_async() is called, this callback will get called,
+// with success set to 0. There is some time elapsed when we want to stop
+// recording and when the encoding is actually finished, so we'll get a second
+// call to the callback once the encoding is finished, with success set to 1. If
+// any errors occur while stopping the recording, success will be set to -1.
+typedef void (*RecordingCallback)(void* opaque, RecordingStatus status);
+typedef enum {
+    RECORDER_STARTING,
+    RECORDER_RECORDING,
+    RECORDER_STOPPING,
+    RECORDER_STOPPED,
+} RecorderState;
+
+
+typedef struct {
+    RecorderState state;
+    uint32_t displayId;
+} RecorderStates;
+
+
+typedef struct RecordingInfo {
+    const char* fileName;
+    uint32_t width;
+    uint32_t height;
+    uint32_t videoBitrate;
+    uint32_t timeLimit;
+    uint32_t fps;
+    uint32_t displayId;
+    RecordingCallback cb;
+    void* opaque;
+} RecordingInfo;
+
 
 typedef struct QAndroidRecordScreenAgent {
     // Start recording. Returns false if already recording.

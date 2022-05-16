@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "Toplevel.h"
 
+#include "android/avd/hw-config.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/OnDemand.h"
 #include "android/base/synchronization/Lock.h"

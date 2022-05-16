@@ -13,10 +13,10 @@
 #pragma once
 
 #include "android/utils/compiler.h"
-#include "android/car.h"
 
 ANDROID_BEGIN_HEADER
 
+typedef void (*car_callback_t)(const char*, int, void* context);
 typedef struct QCarDataAgent {
     /* called by host UI for registering a callback when Vehicle Hal on guest
        side sends data. */

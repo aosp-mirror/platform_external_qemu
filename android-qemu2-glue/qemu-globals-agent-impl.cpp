@@ -11,6 +11,8 @@
 
 #include <cassert>
 #include <string>
+#include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/cmdline-definitions.h"
 #include "android/emulation/control/globals_agent.h"
 #include "android/utils/debug.h"
@@ -134,7 +136,8 @@ static const QAndroidGlobalVarsAgent globalVarsAgent = {
                 },
 
         // /* is android-emu running Fuchsia? */
-        .set_is_fuchsia = [](bool is_fuchsia) { s_min_config_qemu_mode = is_fuchsia; },
+        .set_is_fuchsia =
+                [](bool is_fuchsia) { s_min_config_qemu_mode = is_fuchsia; },
 
         .set_android_snapshot_update_timer =
                 [](int android_snapshot_update_timer) {

@@ -19,6 +19,8 @@
 #include "android/base/StringFormat.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/cmdline-option.h"
+#include "android/avd/hw-config.h"
+#include "android/console.h"
 #include "android/utils/debug.h"
 
 namespace android {

@@ -11,13 +11,42 @@
  */
 
 #pragma once
-
+#include <stdbool.h>
 #include <stdint.h>
+
 #include "android/settings-agent.h"
-#include "android/skin/qt/extended-window-styles.h"
-#include "android/skin/rect.h"
 #include "android/utils/compiler.h"
+#include "android/skin/rect.h"
+
 ANDROID_BEGIN_HEADER
+
+// This gives the order of the tabbed panes on the extended window.
+// This must correspond to the ordering that is set from within
+// QtDesigner and written to extended.ui.
+typedef enum {
+    PANE_IDX_UNKNOWN = -1,
+    PANE_IDX_LOCATION = 0,
+    PANE_IDX_MULTIDISPLAY,
+    PANE_IDX_CELLULAR,
+    PANE_IDX_BATTERY,
+    PANE_IDX_CAMERA,
+    PANE_IDX_TELEPHONE,
+    PANE_IDX_DPAD,
+    PANE_IDX_TV_REMOTE,
+    PANE_IDX_ROTARY,
+    PANE_IDX_MICROPHONE,
+    PANE_IDX_FINGER,
+    PANE_IDX_VIRT_SENSORS,
+    PANE_IDX_SNAPSHOT,
+    PANE_IDX_BUGREPORT,
+    PANE_IDX_RECORD,
+    PANE_IDX_GOOGLE_PLAY,
+    PANE_IDX_SETTINGS,
+    PANE_IDX_HELP,
+    PANE_IDX_CAR,
+    PANE_IDX_CAR_ROTARY,
+    PANE_IDX_SENSOR_REPLAY,
+} ExtendedWindowPane;
 
 // Window agent's possible message types
 typedef enum {
@@ -47,11 +76,14 @@ static const int kWindowMessageTimeoutInfinite = -1;
 
 typedef struct EmulatorWindow EmulatorWindow;
 
+typedef struct SkinLayout SkinLayout;
+typedef struct QFrame QFrame;
+typedef struct SkinEvent SkinEvent;
 typedef void (*UiUpdateFunc)(void* data);
 
 typedef struct QAndroidEmulatorWindowAgent {
     // Get a pointer to the emulator window structure.
-    EmulatorWindow* (*getEmulatorWindow)();
+    EmulatorWindow* (*getEmulatorWindow)(void);
 
     // Rotate the screen clockwise by 90 degrees.
     // Returns true on success, false otherwise.
@@ -128,6 +160,11 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*runOnUiThread)(UiUpdateFunc f, void* data, bool wait);
     bool (*isRunningInUiThread)(void);
     bool (*changeResizableDisplay)(int presetSize);
+    SkinLayout* (*getLayout)(void);
+    bool (*resizableEnabled)(void);
+    void (*show_virtual_scene_controls)(bool);
+    void (*quit_request)(void);
+    void (*getWindowPosition)(int*, int*);
 } QAndroidEmulatorWindowAgent;
 
 ANDROID_END_HEADER

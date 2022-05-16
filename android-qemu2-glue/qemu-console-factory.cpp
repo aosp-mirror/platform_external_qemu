@@ -59,6 +59,7 @@ extern "C" const QAndroidLocationAgent* const gQAndroidLocationAgent;
 
 // Defined in android/qemu-http-proxy-agent-impl.c
 extern "C" const QAndroidHttpProxyAgent* const gQAndroidHttpProxyAgent;
+extern "C" const AndroidProxyCB* const gAndroidProxyCB;
 
 // Defined in android/qemu-record-screen-agent.c
 extern "C" const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent;
@@ -106,6 +107,7 @@ extern "C" const QAndroidHwControlAgent* const gQAndroidHwControlAgent;
 
 // Defined in android-qemu2-glue/qemu-globals-agent-impl.cpp
 extern "C" const QAndroidGlobalVarsAgent* const gQAndroidGlobalVarsAgent;
+
 
 #define ANDROID_DEFINE_CONSOLE_GETTER_IMPL(typ, name) \
     const typ* const android_get_##typ() const override { return g##typ; };

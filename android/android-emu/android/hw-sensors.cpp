@@ -27,6 +27,7 @@
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/android_qemud.h"
 #include "android/emulation/control/adb/AdbInterface.h"
+#include "android/avd/info.h"
 #include "android/console.h"
 #include "android/physics/PhysicalModel.h"
 #include "android/sensors-port.h"

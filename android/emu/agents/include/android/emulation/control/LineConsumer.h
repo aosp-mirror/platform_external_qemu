@@ -11,9 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#pragma once
 #include "android/emulation/control/callbacks.h"
 
+#include "android/console_exports.h"
 #include "android/base/Compiler.h"
 
 #include <string>
@@ -34,7 +35,7 @@ namespace emulation {
 //         // process each line of output.
 //     }
 //
-class LineConsumer {
+class CONSOLE_API LineConsumer {
 public:
     LineConsumer() = default;
     // Get an object to be passed as the |opaque| argument for the

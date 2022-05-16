@@ -14,18 +14,19 @@
 
 #include "android/skin/qt/perf-stats-3d-widget.h"
 
-#include <ctype.h>                              // for toupper
-#include <qloggingcategory.h>                   // for qCWarning
-#include <qnamespace.h>                         // for ClickFocus
-#include <stdint.h>                             // for uint32_t
-#include <string.h>                             // for memmove, size_t
-#include <QTimer>                               // for QTimer
-#include <algorithm>                            // for transform
-#include <atomic>                               // for atomic
-#include <memory>                               // for unique_ptr
-#include <sstream>                              // for operator<<, stringstream
+#include <ctype.h>             // for toupper
+#include <qloggingcategory.h>  // for qCWarning
+#include <qnamespace.h>        // for ClickFocus
+#include <stdint.h>            // for uint32_t
+#include <string.h>            // for memmove, size_t
+#include <QTimer>              // for QTimer
+#include <algorithm>           // for transform
+#include <atomic>              // for atomic
+#include <memory>              // for unique_ptr
+#include <sstream>             // for operator<<, stringstream
 
-#include "OpenGLESDispatch/GLESv2Dispatch.h"    // for GLESv2Dispatch
+#include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
+#include "android/avd/hw-config.h"
 #include "android/base/ArraySize.h"             // for base
 #include "android/base/CpuUsage.h"              // for CpuUsage, CpuUsage::U...
 #include "android/base/Log.h"                   // for LOG, LogMessage
@@ -52,12 +53,10 @@ static void cpuUsage_onEndCollection() {
             CpuUsage::kDefaultMeasurementIntervalUs);
 }
 
-PerfStats3DWidget::PerfStats3DWidget(QWidget* parent)
-    : GLWidget(parent) {
+PerfStats3DWidget::PerfStats3DWidget(QWidget* parent) : GLWidget(parent) {
     setFocusPolicy(Qt::ClickFocus);
 
-    connect(&mCollectionTimer, SIGNAL(timeout()),
-            this, SLOT(getData()));
+    connect(&mCollectionTimer, SIGNAL(timeout()), this, SLOT(getData()));
 
     mCollectionTimer.setInterval(kCollectionIntervalMs);
 
@@ -71,55 +70,50 @@ PerfStats3DWidget::PerfStats3DWidget(QWidget* parent)
     int currentGraphIndex = 0;
 
     mDataSources.emplace_back((DataSource){
-        currentGraphIndex,
-        {0.9f, 0.2f, 0.1f, 1.0f},
-        "Total main loop + vCPUs",
-        "%",
-        0.0f,
-        maxCpuPercentScale,
-        [maxCpuPercentScale]() {
-            DataSourcePoint res;
-            res.val = 100.0f * CpuUsage::get()->getTotalMainLoopAndVcpuUsage();
-            res.min = 0.0f;
-            res.max = maxCpuPercentScale;
-            return res;
-        },
-        cpuUsage_onBeginCollection,
-        cpuUsage_onEndCollection,
+            currentGraphIndex,
+            {0.9f, 0.2f, 0.1f, 1.0f},
+            "Total main loop + vCPUs",
+            "%",
+            0.0f,
+            maxCpuPercentScale,
+            [maxCpuPercentScale]() {
+                DataSourcePoint res;
+                res.val = 100.0f *
+                          CpuUsage::get()->getTotalMainLoopAndVcpuUsage();
+                res.min = 0.0f;
+                res.max = maxCpuPercentScale;
+                return res;
+            },
+            cpuUsage_onBeginCollection,
+            cpuUsage_onEndCollection,
     });
 
     mDataSources.emplace_back((DataSource){
-        currentGraphIndex,
-        {0.7f, 0.2f, 0.9f, 1.0f},
-        "Main Loop",
-        "%",
-        0.0f,
-        maxCpuPercentScale,
-        [maxCpuPercentScale]() {
-            DataSourcePoint res;
-            res.val = 100.0f * CpuUsage::get()->getSingleAreaUsage(
-                                       CpuUsage::UsageArea::MainLoop);
-            res.min = 0.0f;
-            res.max = maxCpuPercentScale;
-            return res;
-        },
-        cpuUsage_onBeginCollection,
-        cpuUsage_onEndCollection,
+            currentGraphIndex,
+            {0.7f, 0.2f, 0.9f, 1.0f},
+            "Main Loop",
+            "%",
+            0.0f,
+            maxCpuPercentScale,
+            [maxCpuPercentScale]() {
+                DataSourcePoint res;
+                res.val = 100.0f * CpuUsage::get()->getSingleAreaUsage(
+                                           CpuUsage::UsageArea::MainLoop);
+                res.min = 0.0f;
+                res.max = maxCpuPercentScale;
+                return res;
+            },
+            cpuUsage_onBeginCollection,
+            cpuUsage_onEndCollection,
     });
 
     std::vector<Color> vCpuColors = {
-        { 0.1f, 0.8f, 0.2f, 1.0f },
-        { 0.1f, 0.6f, 0.8f, 1.0f },
-        { 0.8f, 0.4f, 0.1f, 1.0f },
-        { 0.8f, 0.1f, 0.4f, 1.0f },
-        { 0.2f, 0.8f, 0.1f, 1.0f },
-        { 0.2f, 0.4f, 0.8f, 1.0f },
-        { 0.4f, 0.7f, 0.2f, 1.0f },
-        { 0.7f, 0.2f, 0.5f, 1.0f },
-        { 0.7f, 0.2f, 0.4f, 1.0f },
-        { 0.5f, 0.7f, 0.2f, 1.0f },
-        { 0.2f, 0.7f, 0.5f, 1.0f },
-        { 0.0f, 0.7f, 0.4f, 1.0f },
+            {0.1f, 0.8f, 0.2f, 1.0f}, {0.1f, 0.6f, 0.8f, 1.0f},
+            {0.8f, 0.4f, 0.1f, 1.0f}, {0.8f, 0.1f, 0.4f, 1.0f},
+            {0.2f, 0.8f, 0.1f, 1.0f}, {0.2f, 0.4f, 0.8f, 1.0f},
+            {0.4f, 0.7f, 0.2f, 1.0f}, {0.7f, 0.2f, 0.5f, 1.0f},
+            {0.7f, 0.2f, 0.4f, 1.0f}, {0.5f, 0.7f, 0.2f, 1.0f},
+            {0.2f, 0.7f, 0.5f, 1.0f}, {0.0f, 0.7f, 0.4f, 1.0f},
     };
 
     for (int i = 0; i < numGuestCores; ++i) {
@@ -129,19 +123,22 @@ PerfStats3DWidget::PerfStats3DWidget(QWidget* parent)
         auto color = vCpuColors[i % vCpuColors.size()];
 
         mDataSources.emplace_back((DataSource){
-            currentGraphIndex, vCpuColors[i % vCpuColors.size()], ss.str(),
-            "%", 0.0f, maxCpuPercentScale,
-            [i, maxCpuPercentScale]() {
-                DataSourcePoint res;
-                res.val = 100.0f *
-                    CpuUsage::get()->getSingleAreaUsage(
-                        CpuUsage::UsageArea::Vcpu + i);
-                res.min = 0.0f;
-                res.max = maxCpuPercentScale;
-                return res;
-            },
-            cpuUsage_onBeginCollection,
-            cpuUsage_onEndCollection,
+                currentGraphIndex,
+                vCpuColors[i % vCpuColors.size()],
+                ss.str(),
+                "%",
+                0.0f,
+                maxCpuPercentScale,
+                [i, maxCpuPercentScale]() {
+                    DataSourcePoint res;
+                    res.val = 100.0f * CpuUsage::get()->getSingleAreaUsage(
+                                               CpuUsage::UsageArea::Vcpu + i);
+                    res.min = 0.0f;
+                    res.max = maxCpuPercentScale;
+                    return res;
+                },
+                cpuUsage_onBeginCollection,
+                cpuUsage_onEndCollection,
         });
     }
 
@@ -199,7 +196,7 @@ PerfStats3DWidget::~PerfStats3DWidget() {
         return;
     }
     if (readyForRendering()) {
-        if(makeContextCurrent()) {
+        if (makeContextCurrent()) {
             mGLES2->glUseProgram(0);
             mGLES2->glDeleteProgram(mProgram);
             mGLES2->glDeleteBuffers(1, &mXAxisBuffer);
@@ -229,9 +226,10 @@ void PerfStats3DWidget::onCollectionDisabled() {
 }
 
 void PerfStats3DWidget::getData() {
-    if (!mInitialized || !mGLES2) return;
+    if (!mInitialized || !mGLES2)
+        return;
 
-    for (auto& dataSource: mDataSources) {
+    for (auto& dataSource : mDataSources) {
         if (dataSource.values.size() < kCollectionHistory) {
             dataSource.values.resize(kCollectionHistory);
         }
@@ -241,8 +239,7 @@ void PerfStats3DWidget::getData() {
         dataSource.min = pt.min;
         dataSource.max = pt.max;
 
-        memmove(dataSource.values.data(),
-                dataSource.values.data() + 1,
+        memmove(dataSource.values.data(), dataSource.values.data() + 1,
                 sizeof(float) * (kCollectionHistory - 1));
 
         dataSource.values[kCollectionHistory - 1] = pt.val;
@@ -292,7 +289,7 @@ bool PerfStats3DWidget::initGL() {
         LOG(ERROR) << "Could not initialize font buffer";
     }
 
-    for (auto& dataSource: mDataSources) {
+    for (auto& dataSource : mDataSources) {
         initDataSourceBuffer(&dataSource.valBuffer);
     }
 
@@ -329,10 +326,8 @@ void main() {
     gl_FragColor = color;
 })";
 
-    GLuint vertex_shader =
-        createShader(gl, GL_VERTEX_SHADER, vShaderSrc);
-    GLuint fragment_shader =
-        createShader(gl, GL_FRAGMENT_SHADER, fShaderSrc);
+    GLuint vertex_shader = createShader(gl, GL_VERTEX_SHADER, vShaderSrc);
+    GLuint fragment_shader = createShader(gl, GL_FRAGMENT_SHADER, fShaderSrc);
 
     if (vertex_shader == 0 || fragment_shader == 0) {
         LOG(ERROR) << "Could not initialize graph shaders";
@@ -416,7 +411,8 @@ void PerfStats3DWidget::drawText(const std::string& string,
                                  float height,
                                  const float color[4]) {
     std::string stringUpper(string);
-    std::transform(string.begin(), string.end(), stringUpper.begin(), ::toupper);
+    std::transform(string.begin(), string.end(), stringUpper.begin(),
+                   ::toupper);
 
     const char* chars = stringUpper.c_str();
 
@@ -425,10 +421,10 @@ void PerfStats3DWidget::drawText(const std::string& string,
     gl->glBindBuffer(GL_ARRAY_BUFFER, mFontBuffer);
     gl->glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
     gl->glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
-                             (const GLvoid*)(sizeof(float)));
+                              (const GLvoid*)(sizeof(float)));
 
-    float scaleY = height * 0.5f; // each glyph is really 2 units wide
-    float scaleX = scaleY * 0.5f; // 1:2 aspect
+    float scaleY = height * 0.5f;  // each glyph is really 2 units wide
+    float scaleX = scaleY * 0.5f;  // 1:2 aspect
     float currX = x + scaleX;
     float yOff = y + height * 0.5f;
     float dx = scaleY + scaleX * 0.3;
@@ -436,17 +432,14 @@ void PerfStats3DWidget::drawText(const std::string& string,
     constexpr GLint vertsPerStroke = 2;
     constexpr GLint vertsPerGlyph = STROKES_PER_GLYPH * vertsPerStroke;
 
-    for (size_t i = 0 ; i < string.size(); ++i) {
+    for (size_t i = 0; i < string.size(); ++i) {
         gl->glUniform1f(mXScaleUniformLoc, scaleX);
         gl->glUniform1f(mYScaleUniformLoc, scaleY);
         gl->glUniform1f(mXOffsetUniformLoc, currX);
         gl->glUniform1f(mYOffsetUniformLoc, yOff);
         gl->glUniform4fv(mColorUniformLoc, 1, color);
         GLint charVal = chars[i];
-        gl->glDrawArrays(
-            GL_LINES,
-            vertsPerGlyph * charVal,
-            vertsPerGlyph);
+        gl->glDrawArrays(GL_LINES, vertsPerGlyph * charVal, vertsPerGlyph);
         currX += dx;
     }
 
@@ -491,7 +484,7 @@ void PerfStats3DWidget::repaintGL() {
     gl->glEnableVertexAttribArray(1);
 
     int totalAxes = 0;
-    for (const auto& dataSource: mDataSources) {
+    for (const auto& dataSource : mDataSources) {
         if (dataSource.axisIndex + 1 > totalAxes) {
             totalAxes = dataSource.axisIndex + 1;
         }
@@ -529,7 +522,8 @@ void PerfStats3DWidget::repaintGL() {
 
         float scale = 2.0f;
         float range = dataSource.max - dataSource.min;
-        if (range) scale = scale / range;
+        if (range)
+            scale = scale / range;
 
         float graphHeight = 1.0f / numGraphs;
 
@@ -543,7 +537,8 @@ void PerfStats3DWidget::repaintGL() {
         gl->glUniform1f(mXOffsetUniformLoc, 0.0f);
         gl->glUniform1f(mYScaleUniformLoc, scale);
         gl->glUniform1f(mYOffsetUniformLoc, offset);
-        gl->glUniform4fv(mColorUniformLoc, 1, (const GLfloat*)(&dataSource.color));
+        gl->glUniform4fv(mColorUniformLoc, 1,
+                         (const GLfloat*)(&dataSource.color));
         gl->glDrawArrays(GL_LINE_STRIP, 0, kCollectionHistory);
 
         if (dataSource.values.size() >= kCollectionHistory) {
@@ -561,8 +556,9 @@ void PerfStats3DWidget::repaintGL() {
             ss << " " << dataSource.values[kCollectionHistory - 1] << " "
                << dataSource.unit;
             drawText(ss.str(),
-                     -1.0f, // left edge,
-                     // vertical offset from graph top according to subplot offset
+                     -1.0f,  // left edge,
+                     // vertical offset from graph top according to subplot
+                     // offset
                      offset + 2.0f * graphHeight -
                              textHeight * (1.0f + subPlotOffset),
                      textHeight, (const float*)(&dataSource.color));
@@ -575,14 +571,10 @@ void PerfStats3DWidget::repaintGL() {
 }
 
 // TODO: Scrolling
-void PerfStats3DWidget::mouseMoveEvent(QMouseEvent* event) {
-}
+void PerfStats3DWidget::mouseMoveEvent(QMouseEvent* event) {}
 
-void PerfStats3DWidget::wheelEvent(QWheelEvent* event) {
-}
+void PerfStats3DWidget::wheelEvent(QWheelEvent* event) {}
 
-void PerfStats3DWidget::mousePressEvent(QMouseEvent* event) {
-}
+void PerfStats3DWidget::mousePressEvent(QMouseEvent* event) {}
 
-void PerfStats3DWidget::mouseReleaseEvent(QMouseEvent* event) {
-}
+void PerfStats3DWidget::mouseReleaseEvent(QMouseEvent* event) {}

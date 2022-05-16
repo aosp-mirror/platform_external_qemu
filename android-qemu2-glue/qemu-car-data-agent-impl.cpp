@@ -9,6 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 #include "android/emulation/control/car_data_agent.h"
+#include "android/car.h"
 
 void send_car_data(const char* msg, int length) {
     android_send_car_data(msg, length);

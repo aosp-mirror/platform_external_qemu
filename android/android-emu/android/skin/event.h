@@ -187,7 +187,7 @@ typedef struct {
     uint32_t id;
 } SkinEventRemoveDisplay;
 
-typedef struct {
+typedef struct SkinEvent {
     SkinEventType type;
     union {
         SkinEventKeyData key;
