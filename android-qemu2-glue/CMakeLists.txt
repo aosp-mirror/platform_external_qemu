@@ -1,4 +1,19 @@
 cmake_minimum_required(VERSION 3.5)
+
+# Generate the VirtioGpuTimelines flatbuffers header
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/VirtioGpuTimelines_generated.h
+    COMMAND
+    flatc
+    ARGS
+    --cpp --gen-object-api --scoped-enums
+    -o ${CMAKE_CURRENT_BINARY_DIR} emulation/VirtioGpuTimelines.fbs
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS flatc emulation/VirtioGpuTimelines.fbs)
+add_custom_target(
+    virtio_gpu_timelines_fbs_header ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/VirtioGpuTimelines_generated.h)
+
 set(android-qemu2-glue_src
     android_qemud.cpp
     audio-capturer.cpp
@@ -63,7 +78,8 @@ target_include_directories(
   libqemu2-glue
   PRIVATE .. ../include ${ANDROID_AUTOGEN} ../slirp
           ${VIRGLRENDERER_INCLUDE_DIR}
-          ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
+          ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/
+          ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(libqemu2-glue PRIVATE android-grpc android-ui-controller)
 if(WEBRTC)
@@ -76,7 +92,9 @@ endif()
 
 target_link_libraries(
   libqemu2-glue PRIVATE android-emu GLIB2::GLIB2 PIXMAN::PIXMAN emulator-libdtb
-                        ssl hostapd)
+                        ssl hostapd flatbuffers)
+
+add_dependencies(libqemu2-glue virtio_gpu_timelines_fbs_header)
 
 target_compile_definitions(libqemu2-glue INTERFACE "-DCONFIG_VIRGL")
 android_add_library(

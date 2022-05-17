@@ -240,7 +240,38 @@ TEST(VirtioGpuTimelinesTest, TasksAndFencesOnMultipleRingsWithAsyncCallback) {
     virtioGpuTimelines->notifyTaskCompletion(taskId3);
 }
 
-int main(int argc, char** argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+TEST(VirtioGpuTimelinesTest, RecoverFromSnapshot) {
+    std::unique_ptr<VirtioGpuTimelines> virtioGpuTimelines = VirtioGpuTimelines::create(false);
+    using namespace testing;
+    MockFunction<void(VirtioGpuRing, VirtioGpuTimelines::FenceId)> fenceCallback;
+    MockFunction<void()> check;
+    {
+        InSequence s;
+
+        EXPECT_CALL(check, Call());
+        EXPECT_CALL(fenceCallback, Call(VirtioGpuRing{RingGlobal{}}, 1));
+        EXPECT_CALL(fenceCallback, Call(VirtioGpuRing{RingGlobal{}}, 2));
+        EXPECT_CALL(fenceCallback, Call(VirtioGpuRing{RingContextSpecific{
+                                            .mCtxId = 1,
+                                            .mRingIdx = 3,
+                                        }},
+                                        3));
+    }
+    virtioGpuTimelines->enqueueFence(RingGlobal{}, 1, [] {});
+    virtioGpuTimelines->enqueueFence(RingGlobal{}, 2, [] {});
+    virtioGpuTimelines->enqueueFence(
+        RingContextSpecific{
+            .mCtxId = 1,
+            .mRingIdx = 3,
+        },
+        3, [] {});
+    std::vector<uint8_t> snapshot = virtioGpuTimelines->saveSnapshot();
+    virtioGpuTimelines = VirtioGpuTimelines::recreateFromSnapshot(
+        std::move(virtioGpuTimelines), snapshot.data(),
+        [fenceCallback = fenceCallback.AsStdFunction()](const VirtioGpuRing& ring,
+                                                        VirtioGpuTimelines::FenceId fenceId) {
+            return [fenceCallback, ring, fenceId] { fenceCallback(ring, fenceId); };
+        });
+    check.Call();
+    virtioGpuTimelines->poll();
 }

@@ -22,6 +22,7 @@
 #include <string>
 #include <unordered_map>
 #include <variant>
+#include <vector>
 
 #include "android/base/synchronization/Lock.h"
 #include "hw/virtio/virtio-goldfish-pipe.h"
@@ -81,15 +82,22 @@ class VirtioGpuTimelines {
     void enqueueFence(const Ring&, FenceId, FenceCompletionCallback);
     void notifyTaskCompletion(TaskId);
     void poll();
+    std::vector<uint8_t> saveSnapshot();
     static std::unique_ptr<VirtioGpuTimelines> create(bool withAsyncCallback);
+    using FenceCompletionCallbackGenerator =
+        std::function<FenceCompletionCallback(const Ring&, FenceId)>;
+    static std::unique_ptr<VirtioGpuTimelines> recreateFromSnapshot(
+        std::unique_ptr<VirtioGpuTimelines> oldTimelines, const void* buffer,
+        const FenceCompletionCallbackGenerator&);
 
    private:
     VirtioGpuTimelines(bool withAsyncCallback);
     struct Fence {
+        FenceId mId;
         std::unique_ptr<FenceCompletionCallback> mCompletionCallback;
-        Fence(FenceCompletionCallback completionCallback)
-            : mCompletionCallback(std::make_unique<FenceCompletionCallback>(
-                  completionCallback)) {}
+        Fence(FenceId id, FenceCompletionCallback completionCallback)
+            : mId(id),
+              mCompletionCallback(std::make_unique<FenceCompletionCallback>(completionCallback)) {}
     };
     struct Task {
         TaskId mId;

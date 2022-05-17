@@ -138,3 +138,42 @@ endif()
 if(LINUX_X86_64 OR LINUX_AARCH64)
   add_subdirectory(libevent)
 endif()
+
+if(NOT TARGET flatc)
+  include(ExternalProject)
+  set(FLATC_BINARY_DIR)
+  cmake_path(APPEND CMAKE_CURRENT_BINARY_DIR flatbuffers-flatc OUTPUT_VARIABLE FLATC_BINARY_DIR)
+  set(FLATC_BINARY_PATH)
+  cmake_path(APPEND FLATC_BINARY_DIR flatc OUTPUT_VARIABLE FLATC_BINARY_PATH)
+  ExternalProject_add(
+    flatbuffers-flatc
+    SOURCE_DIR ${AOSP_ROOT}/external/flatbuffers BINARY_DIR ${FLATC_BINARY_DIR}
+    CMAKE_ARGS
+    -DFLATBUFFERS_BUILD_TESTS=OFF
+    -DFLATBUFFERS_BUILD_CPP17=ON
+    -DFLATBUFFERS_BUILD_FLAT_LIB=OFF
+    -DFLATBUFFERS_BUILD_FLATC=ON
+    -DFLATBUFFERS_STATIC_FLATC=ON
+    -DFLATBUFFERS_BUILD_FLATHASH=OFF
+    INSTALL_COMMAND ""
+    BUILD_BYPRODUCTS ${FLATC_BINARY_PATH})
+  add_executable(flatc IMPORTED GLOBAL)
+  set_property(TARGET flatc PROPERTY IMPORTED_LOCATION ${FLATC_BINARY_PATH})
+  add_dependencies(flatc flatbuffers-flatc)
+endif()
+
+if(NOT TARGET flatbuffers)
+  option(FLATBUFFERS_BUILD_TESTS "" OFF)
+  option(FLATBUFFERS_BUILD_CPP17 "" ON)
+  option(FLATBUFFERS_BUILD_FLAT_LIB "" ON)
+  option(FLATBUFFERS_BUILD_FLATC "" OFF)
+  option(FLATBUFFERS_STATIC_FLATC "" OFF)
+  option(FLATBUFFERS_BUILD_FLATHASH "" OFF)
+  add_subdirectory(${AOSP_ROOT}/external/flatbuffers flatbuffers-flatlib)
+endif()
+
+android_license(
+  LIBNAME flatbuffers URL "https://github.com/google/flatbuffers"
+  TARGET flatc flatbuffers SPDX Apache-2.0
+  LOCAL ${AOSP_ROOT}/external/flatbuffers/LICENSE.txt
+  LICENSE Apache-2.0)

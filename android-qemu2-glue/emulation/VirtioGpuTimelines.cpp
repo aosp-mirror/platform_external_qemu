@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "VirtioGpuTimelines.h"
+#include "VirtioGpuTimelines_generated.h"
 #include "android/utils/GfxstreamFatalError.h"
 
 #include <cinttypes>
 #include <cstdio>
+#include <type_traits>
 
 using TaskId = VirtioGpuTimelines::TaskId;
 using Ring = VirtioGpuTimelines::Ring;
@@ -24,6 +26,29 @@ using AutoLock = android::base::AutoLock;
 
 std::unique_ptr<VirtioGpuTimelines> VirtioGpuTimelines::create(bool withAsyncCallback) {
     return std::unique_ptr<VirtioGpuTimelines>(new VirtioGpuTimelines(withAsyncCallback));
+}
+
+std::unique_ptr<VirtioGpuTimelines> VirtioGpuTimelines::recreateFromSnapshot(
+    std::unique_ptr<VirtioGpuTimelines> oldTimelines, const void* buffer,
+    const FenceCompletionCallbackGenerator& callbackGenerator) {
+    std::unique_ptr<VirtioGpuTimelines> res = create(oldTimelines->mWithAsyncCallback);
+    std::unique_ptr<virtio_gpu::TimelinesT> timelines =
+        virtio_gpu::UnPackSizePrefixedTimelines(buffer);
+    for (const std::unique_ptr<virtio_gpu::TimelineT>& timeline : timelines->timelines) {
+        Ring ring = VirtioGpuRingGlobal{};
+        if (timeline->ring.type == virtio_gpu::Ring::RingContextSpecific) {
+            auto ringContextSpecific = *timeline->ring.AsRingContextSpecific();
+            ring = VirtioGpuRingContextSpecific{
+                .mCtxId = ringContextSpecific.ctx_id(),
+                .mRingIdx = ringContextSpecific.ring_idx(),
+            };
+        }
+        for (const virtio_gpu::Fence& fence : timeline->fences) {
+            auto callback = callbackGenerator(ring, fence.id());
+            res->enqueueFence(ring, fence.id(), std::move(callback));
+        }
+    }
+    return res;
 }
 
 VirtioGpuTimelines::VirtioGpuTimelines(bool withAsyncCallback)
@@ -42,11 +67,11 @@ TaskId VirtioGpuTimelines::enqueueTask(const Ring& ring) {
     return id;
 }
 
-void VirtioGpuTimelines::enqueueFence(const Ring& ring, FenceId,
+void VirtioGpuTimelines::enqueueFence(const Ring& ring, FenceId id,
                                       FenceCompletionCallback fenceCompletionCallback) {
     AutoLock lock(mLock);
 
-    auto fence = std::make_unique<Fence>(fenceCompletionCallback);
+    auto fence = std::make_unique<Fence>(id, fenceCompletionCallback);
     mTimelineQueues[ring].emplace_back(std::move(fence));
     if (mWithAsyncCallback) {
         poll_locked(ring);
@@ -115,4 +140,44 @@ void VirtioGpuTimelines::poll_locked(const Ring& ring) {
         }
     }
     timelineQueue.erase(timelineQueue.begin(), i);
+}
+
+std::vector<uint8_t> VirtioGpuTimelines::saveSnapshot() {
+    flatbuffers::FlatBufferBuilder builder;
+    std::vector<flatbuffers::Offset<virtio_gpu::Timeline>> timelines;
+    for (const auto& [ring, timeline] : mTimelineQueues) {
+        std::vector<virtio_gpu::Fence> fences;
+        for (const auto& timelineItem : timeline) {
+            std::visit(
+                [&fences](const auto& item) -> void {
+                    using ItemType = std::decay_t<decltype(item)>;
+                    if constexpr (std::is_same_v<
+                                      typename std::pointer_traits<ItemType>::element_type,
+                                      Fence>) {
+                        fences.emplace_back(virtio_gpu::Fence(item->mId));
+                    }
+                },
+                timelineItem);
+        }
+        auto [resultRingType, resultRing] = std::visit(
+            [&builder](const auto& ring) {
+                using RingType = std::decay_t<decltype(ring)>;
+                if constexpr (std::is_same_v<RingType, VirtioGpuRingGlobal>) {
+                    return std::make_tuple(virtio_gpu::Ring::RingGlobal,
+                                           virtio_gpu::CreateRingGlobal(builder).Union());
+                } else if constexpr (std::is_same_v<RingType, VirtioGpuRingContextSpecific>) {
+                    auto resultRing = builder.CreateStruct(
+                        virtio_gpu::RingContextSpecific(ring.mCtxId, ring.mRingIdx));
+                    return std::make_tuple(virtio_gpu::Ring::RingContextSpecific,
+                                           resultRing.Union());
+                }
+            },
+            ring);
+        auto resultFences = builder.CreateVectorOfStructs(fences);
+        auto resultTimeline = CreateTimeline(builder, resultRingType, resultRing, resultFences);
+        timelines.emplace_back(resultTimeline);
+    }
+    auto resultTimelines = builder.CreateVector(timelines);
+    builder.FinishSizePrefixed(CreateTimelines(builder, resultTimelines));
+    return std::vector(builder.GetBufferPointer(), builder.GetBufferPointer() + builder.GetSize());
 }
