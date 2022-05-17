@@ -25,7 +25,6 @@ static_library("base") {
     "format_macros.h",
     "logging.cc",
     "logging.h",
-    "macros.h",
     "memory/free_deleter.h",
     "memory/page_size.h",
     "memory/scoped_policy.h",

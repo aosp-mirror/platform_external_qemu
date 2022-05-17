@@ -2,8 +2,7 @@ enable_language(ASM)
 android_add_library(
   TARGET crashpad_snapshot
   LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      annotation_snapshot.cc
+  SRC annotation_snapshot.cc
       capture_memory.cc
       crashpad_info_client_options.cc
       handle_snapshot.cc
@@ -20,13 +19,13 @@ android_add_library(
       minidump/system_snapshot_minidump.cc
       minidump/thread_snapshot_minidump.cc
       unloaded_module_snapshot.cc
-  LINUX # cmake-format: sortable
-        crashpad_types/crashpad_info_reader.cc
+  LINUX crashpad_types/crashpad_info_reader.cc
         crashpad_types/image_annotation_reader.cc
         elf/elf_dynamic_array_reader.cc
         elf/elf_image_reader.cc
         elf/elf_symbol_table_reader.cc
         elf/module_snapshot_elf.cc
+        linux/capture_memory_delegate_linux.cc
         linux/cpu_context_linux.cc
         linux/debug_rendezvous.cc
         linux/exception_snapshot_linux.cc
@@ -40,8 +39,7 @@ android_add_library(
         sanitized/process_snapshot_sanitized.cc
         sanitized/sanitization_information.cc
         sanitized/thread_snapshot_sanitized.cc
-  DARWIN # cmake-format: sortable
-         mac/cpu_context_mac.cc
+  DARWIN mac/cpu_context_mac.cc
          mac/exception_snapshot_mac.cc
          mac/mach_o_image_annotations_reader.cc
          mac/mach_o_image_reader.cc
@@ -55,8 +53,7 @@ android_add_library(
          mac/system_snapshot_mac.cc
          mac/thread_snapshot_mac.cc
          posix/timezone.cc
-  WINDOWS # cmake-format: sortable
-          crashpad_types/crashpad_info_reader.cc
+  WINDOWS crashpad_types/crashpad_info_reader.cc
           win/capture_memory_delegate_win.cc
           win/cpu_context_win.cc
           win/exception_snapshot_win.cc
@@ -80,17 +77,15 @@ android_target_link_libraries(crashpad_snapshot windows
 target_link_libraries(crashpad_snapshot PUBLIC mini_chromium crashpad_compat
                                                crashpad_util crashpad_context)
 
-android_add_library(
-  TARGET crashpad_context LICENSE Apache-2.0 SRC # cmake-format: sortable
-                                                 cpu_context.cc)
+android_add_library(TARGET crashpad_context LICENSE Apache-2.0
+                    SRC cpu_context.cc)
 
 target_link_libraries(crashpad_context PUBLIC crashpad_util)
 
 android_add_library(
   TARGET crashpad_snapshot_test_support
   LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      test/test_cpu_context.cc
+  SRC test/test_cpu_context.cc
       test/test_exception_snapshot.cc
       test/test_memory_map_region_snapshot.cc
       test/test_memory_snapshot.cc
@@ -116,11 +111,9 @@ if(OPTION_ASAN)
 else()
   android_add_test(
     TARGET crashpad_snapshot_test
-    SRC # cmake-format: sortable
-        cpu_context_test.cc memory_snapshot_test.cc
+    SRC cpu_context_test.cc memory_snapshot_test.cc
         minidump/process_snapshot_minidump_test.cc
-    LINUX # cmake-format: sortable
-          crashpad_types/crashpad_info_reader_test.cc
+    LINUX crashpad_types/crashpad_info_reader_test.cc
           crashpad_types/image_annotation_reader_test.cc
           elf/elf_image_reader_test.cc
           elf/elf_image_reader_test_note.S
@@ -132,8 +125,7 @@ else()
           posix/timezone_test.cc
           sanitized/process_snapshot_sanitized_test.cc
           sanitized/sanitization_information_test.cc
-    DARWIN # cmake-format: sortable
-           mac/cpu_context_mac_test.cc
+    DARWIN mac/cpu_context_mac_test.cc
            mac/mach_o_image_annotations_reader_test.cc
            mac/mach_o_image_reader_test.cc
            mac/mach_o_image_segment_reader_test.cc
@@ -141,8 +133,7 @@ else()
            mac/process_types_test.cc
            mac/system_snapshot_mac_test.cc
            posix/timezone_test.cc
-    WINDOWS # cmake-format: sortable
-            crashpad_types/crashpad_info_reader_test.cc
+    WINDOWS crashpad_types/crashpad_info_reader_test.cc
             win/cpu_context_win_test.cc
             win/exception_snapshot_win_test.cc
             win/extra_memory_ranges_test.cc
@@ -193,15 +184,8 @@ if(TARGET crashpad_snapshot_test AND (DARWIN_X86_64 OR DARWIN_AARCH64))
 endif()
 
 android_add_library(
-  TARGET crashpad_snapshot_test_module
-  LICENSE Apache-2.0
-  SHARED
-  SRC # cmake-format: sortable
-      crashpad_info_client_options_test_module.cc
-  LINUX # cmake-format: sortable
-  DARWIN # cmake-format: sortable
-  WINDOWS # cmake-format: sortable
-)
+  TARGET crashpad_snapshot_test_module LICENSE Apache-2.0 SHARED
+  SRC crashpad_info_client_options_test_module.cc LINUX DARWIN WINDOWS)
 
 target_link_libraries(crashpad_snapshot_test_module PRIVATE mini_chromium
                                                             crashpad_client)
@@ -211,16 +195,9 @@ set_target_properties(
                                     "${CMAKE_BINARY_DIR}")
 
 android_add_library(
-  TARGET crashpad_snapshot_test_module_large
-  LICENSE Apache-2.0
-  SHARED
-  SRC # cmake-format: sortable
-      crashpad_info_size_test_module.cc
-  LINUX # cmake-format: sortable
-        crashpad_info_size_test_note.S
-  DARWIN # cmake-format: sortable
-  WINDOWS # cmake-format: sortable
-)
+  TARGET crashpad_snapshot_test_module_large LICENSE Apache-2.0 SHARED
+  SRC crashpad_info_size_test_module.cc LINUX crashpad_info_size_test_note.S
+  DARWIN WINDOWS)
 
 target_compile_definitions(crashpad_snapshot_test_module_large
                            PRIVATE CRASHPAD_INFO_SIZE_TEST_MODULE_LARGE)
@@ -232,16 +209,9 @@ set_target_properties(
                                     "${CMAKE_BINARY_DIR}")
 
 android_add_library(
-  TARGET crashpad_snapshot_test_module_small
-  LICENSE Apache-2.0
-  SHARED
-  SRC # cmake-format: sortable
-      crashpad_info_size_test_module.cc
-  LINUX # cmake-format: sortable
-        crashpad_info_size_test_note.S
-  DARWIN # cmake-format: sortable
-  WINDOWS # cmake-format: sortable
-)
+  TARGET crashpad_snapshot_test_module_small LICENSE Apache-2.0 SHARED
+  SRC crashpad_info_size_test_module.cc LINUX crashpad_info_size_test_note.S
+  DARWIN WINDOWS)
 
 target_compile_definitions(crashpad_snapshot_test_module_small
                            PRIVATE CRASHPAD_INFO_SIZE_TEST_MODULE_SMALL)
@@ -253,10 +223,8 @@ set_target_properties(
                                     "${CMAKE_BINARY_DIR}")
 if(LINUX_X86_64 OR LINUX_AARCH64)
 
-  android_add_library(
-    TARGET crashpad_snapshot_test_both_dt_hash_styles LICENSE Apache-2.0 SHARED
-    SRC # cmake-format: sortable
-        hash_types_test.cc)
+  android_add_library(TARGET crashpad_snapshot_test_both_dt_hash_styles
+                      LICENSE Apache-2.0 SHARED SRC hash_types_test.cc)
 
   target_link_libraries(
     crashpad_snapshot_test_both_dt_hash_styles

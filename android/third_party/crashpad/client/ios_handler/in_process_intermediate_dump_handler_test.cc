@@ -16,7 +16,8 @@
 
 #include <sys/utsname.h>
 
-#include "base/cxx17_backports.h"
+#include <iterator>
+
 #include "base/files/file_path.h"
 #include "build/build_config.h"
 #include "client/annotation.h"
@@ -74,7 +75,7 @@ class InProcessIntermediateDumpHandlerTest : public testing::Test {
         mach_thread_self(),
         kSimulatedException,
         code,
-        base::size(code),
+        std::size(code),
         MACHINE_THREAD_STATE,
         reinterpret_cast<ConstThreadState>(&cpu_context),
         MACHINE_THREAD_STATE_COUNT);
@@ -93,7 +94,7 @@ class InProcessIntermediateDumpHandlerTest : public testing::Test {
 TEST_F(InProcessIntermediateDumpHandlerTest, TestSystem) {
   WriteReport();
   internal::ProcessSnapshotIOSIntermediateDump process_snapshot;
-  ASSERT_TRUE(process_snapshot.Initialize(path(), {}));
+  ASSERT_TRUE(process_snapshot.InitializeWithFilePath(path(), {}));
 
   // Snpahot
   const SystemSnapshot* system = process_snapshot.System();
@@ -103,12 +104,18 @@ TEST_F(InProcessIntermediateDumpHandlerTest, TestSystem) {
   EXPECT_STREQ(system->CPUVendor().c_str(), "GenuineIntel");
 #elif defined(ARCH_CPU_ARM64)
   EXPECT_EQ(system->GetCPUArchitecture(), kCPUArchitectureARM64);
-  utsname uts;
-  ASSERT_EQ(uname(&uts), 0);
-  EXPECT_STREQ(system->MachineDescription().c_str(), uts.machine);
 #else
 #error Port to your CPU architecture
 #endif
+#if TARGET_OS_SIMULATOR
+  EXPECT_EQ(system->MachineDescription().substr(0, 13),
+            std::string("iOS Simulator"));
+#elif TARGET_OS_IPHONE
+  utsname uts;
+  ASSERT_EQ(uname(&uts), 0);
+  EXPECT_STREQ(system->MachineDescription().c_str(), uts.machine);
+#endif
+
   EXPECT_EQ(system->GetOperatingSystem(), SystemSnapshot::kOperatingSystemIOS);
 }
 
@@ -145,7 +152,8 @@ TEST_F(InProcessIntermediateDumpHandlerTest, TestAnnotations) {
 
   WriteReport();
   internal::ProcessSnapshotIOSIntermediateDump process_snapshot;
-  ASSERT_TRUE(process_snapshot.Initialize(path(), {{"after_dump", "post"}}));
+  ASSERT_TRUE(process_snapshot.InitializeWithFilePath(
+      path(), {{"after_dump", "post"}}));
 
   auto process_map = process_snapshot.AnnotationsSimpleMap();
   EXPECT_EQ(process_map.size(), 2u);
@@ -199,7 +207,7 @@ TEST_F(InProcessIntermediateDumpHandlerTest, TestAnnotations) {
 TEST_F(InProcessIntermediateDumpHandlerTest, TestThreads) {
   WriteReport();
   internal::ProcessSnapshotIOSIntermediateDump process_snapshot;
-  ASSERT_TRUE(process_snapshot.Initialize(path(), {}));
+  ASSERT_TRUE(process_snapshot.InitializeWithFilePath(path(), {}));
 
   const auto& threads = process_snapshot.Threads();
   ASSERT_GT(threads.size(), 0u);
@@ -217,26 +225,26 @@ TEST_F(InProcessIntermediateDumpHandlerTest, TestThreads) {
 TEST_F(InProcessIntermediateDumpHandlerTest, TestProcess) {
   WriteReport();
   internal::ProcessSnapshotIOSIntermediateDump process_snapshot;
-  ASSERT_TRUE(process_snapshot.Initialize(path(), {}));
+  ASSERT_TRUE(process_snapshot.InitializeWithFilePath(path(), {}));
   EXPECT_EQ(process_snapshot.ProcessID(), getpid());
 }
 
 TEST_F(InProcessIntermediateDumpHandlerTest, TestMachException) {
   WriteReport();
   internal::ProcessSnapshotIOSIntermediateDump process_snapshot;
-  ASSERT_TRUE(process_snapshot.Initialize(path(), {}));
+  ASSERT_TRUE(process_snapshot.InitializeWithFilePath(path(), {}));
 }
 
 TEST_F(InProcessIntermediateDumpHandlerTest, TestSignalException) {
   WriteReport();
   internal::ProcessSnapshotIOSIntermediateDump process_snapshot;
-  ASSERT_TRUE(process_snapshot.Initialize(path(), {}));
+  ASSERT_TRUE(process_snapshot.InitializeWithFilePath(path(), {}));
 }
 
 TEST_F(InProcessIntermediateDumpHandlerTest, TestNSException) {
   WriteReport();
   internal::ProcessSnapshotIOSIntermediateDump process_snapshot;
-  ASSERT_TRUE(process_snapshot.Initialize(path(), {}));
+  ASSERT_TRUE(process_snapshot.InitializeWithFilePath(path(), {}));
 }
 
 }  // namespace
