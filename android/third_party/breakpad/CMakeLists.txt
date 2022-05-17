@@ -153,7 +153,6 @@ android_add_library(
         ${BREAKPAD_SRC}/common/dwarf/dwarf2diehandler.cc
         ${BREAKPAD_SRC}/common/dwarf/dwarf2reader.cc
         ${BREAKPAD_SRC}/common/dwarf/elf_reader.cc
-        ${BREAKPAD_SRC}/common/dwarf/functioninfo.cc
         ${BREAKPAD_SRC}/common/dwarf_cfi_to_module.cc
         ${BREAKPAD_SRC}/common/dwarf_cu_to_module.cc
         ${BREAKPAD_SRC}/common/dwarf_line_to_module.cc
@@ -181,7 +180,6 @@ android_add_library(
          ${BREAKPAD_SRC}/common/dwarf/dwarf2diehandler.cc
          ${BREAKPAD_SRC}/common/dwarf/dwarf2reader.cc
          ${BREAKPAD_SRC}/common/dwarf/elf_reader.cc
-         ${BREAKPAD_SRC}/common/dwarf/functioninfo.cc
          ${BREAKPAD_SRC}/common/dwarf_cfi_to_module.cc
          ${BREAKPAD_SRC}/common/dwarf_cu_to_module.cc
          ${BREAKPAD_SRC}/common/dwarf_line_to_module.cc
@@ -451,6 +449,7 @@ android_add_library(
         ${BREAKPAD_SRC}/client/linux/dump_writer_common/thread_info.cc
         ${BREAKPAD_SRC}/client/linux/dump_writer_common/ucontext_reader.cc
         ${BREAKPAD_SRC}/client/linux/handler/exception_handler.cc
+        ${BREAKPAD_SRC}/common/linux/breakpad_getcontext.S
         ${BREAKPAD_SRC}/client/linux/handler/minidump_descriptor.cc
         ${BREAKPAD_SRC}/client/linux/log/log.cc
         ${BREAKPAD_SRC}/client/linux/microdump_writer/microdump_writer.cc
@@ -476,6 +475,11 @@ android_add_library(
     ${BREAKPAD_SRC}/client/windows/crash_generation/crash_generation_server.cc
     ${BREAKPAD_SRC}/client/windows/crash_generation/minidump_generator.cc
     ${BREAKPAD_SRC}/client/windows/handler/exception_handler.cc)
+
+if (LINUX_X86_64 OR LINUX_AARCH64)
+    enable_language(ASM)
+    set_property(SOURCE ${BREAKPAD_SRC}/common/linux/breakpad_getcontext.S PROPERTY LANGUAGE ASM)
+endif()
 set_property(TARGET breakpad_client PROPERTY CXX_STANDARD 17)
 target_include_directories(breakpad_client PUBLIC ${BREAKPAD_SRC})
 android_target_include_directories(
@@ -535,6 +539,7 @@ if(NOT BUILDING_FOR_AARCH64)
     TARGET sym_upload
     NODISTRIBUTE
     LINUX ${BREAKPAD_SRC}/common/linux/http_upload.cc
+          ${BREAKPAD_SRC}/common/linux/symbol_collector_client.cc
           ${BREAKPAD_SRC}/common/linux/symbol_upload.cc
           ${BREAKPAD_SRC}/tools/linux/symupload/sym_upload.cc
     DARWIN ${BREAKPAD_SRC}/tools/mac/symupload/symupload.m
