@@ -1,5 +1,11 @@
+# TODO(joshuaduong, b/231626582): Move/consolidate this file to vulkan-cereal.
 prebuilt(ANGLE)
 prebuilt(VULKAN)
+
+# TODO(joshuaduong): Remove this when we inject our own implementations of vkcereal host-common/base
+# APIs.
+set(BUILD_STANDALONE ON)
+set(ENABLE_VKCEREAL_TESTS ON)
 
 function(add_opengl_dependencies TGT)
     android_target_dependency(${TGT} all SWIFTSHADER_DEPENDENCIES)
@@ -14,6 +20,8 @@ endfunction()
 
 if(OPTION_GFXSTREAM_BACKEND)
     set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+    set(GFXSTREAM_BASE_LIB gfxstream-base)
+    set(GFXSTREAM_HOST_COMMON_LIB gfxstream-host-common)
     if (WIN32)
         add_definitions("-DUNICODE -D_UNICODE -DNOMINMAX -DEMUGL_BUILD -DVK_USE_PLATFORM_WIN32_KHR -DBUILDING_EMUGL_COMMON_SHARED")
 
@@ -133,8 +141,10 @@ if(OPTION_GFXSTREAM_BACKEND)
         apigen-codec-common
         EGL_translator_static
         gfxstream-base
+        gfxstream-base.headers
         gfxstream-compressedTextures
         gfxstream-host-common
+        gfxstream-host-common.headers
         gfxstream-snapshot
         gfxstream-vulkan-server
         gfxstream_backend
