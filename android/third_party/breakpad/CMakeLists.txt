@@ -114,8 +114,8 @@ android_add_library(
       ${BREAKPAD_SRC}/third_party/libdisasm/x86_misc.c
       ${BREAKPAD_SRC}/third_party/libdisasm/x86_operand_list.c)
 set_property(TARGET breakpad_disasm PROPERTY CXX_STANDARD 17)
-android_target_compile_definitions(breakpad_disasm windows PRIVATE
-                                   ${ANDROID_BREAKPAD_WINDOWS_DEFS})
+android_target_compile_definitions(breakpad_disasm windows
+                                   PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
 
 android_target_compile_options(breakpad_disasm windows
                                PRIVATE -Wno-int-to-void-pointer-cast)
@@ -202,22 +202,14 @@ android_add_library(
          ${BREAKPAD_SRC}/common/stabs_to_module.cc)
 set_property(TARGET breakpad_common PROPERTY CXX_STANDARD 17)
 target_include_directories(breakpad_common PUBLIC ${BREAKPAD_SRC})
-android_target_include_directories(breakpad_common linux-x86_64 PUBLIC
+android_target_include_directories(breakpad_common linux PUBLIC
                                    ${ANDROID_QEMU2_TOP_DIR}/android)
-android_target_include_directories(breakpad_common linux-aarch64 PUBLIC
-                                   ${ANDROID_QEMU2_TOP_DIR}/android)
-android_target_compile_definitions(breakpad_common linux-x86_64 PUBLIC
-                                   -DHAVE_A_OUT_H)
-android_target_compile_definitions(breakpad_common linux-aarch64 PUBLIC
-                                   -DHAVE_A_OUT_H)
-android_target_compile_definitions(breakpad_common darwin-x86_64 PUBLIC
-                                   -DHAVE_MACH_O_NLIST_H)
-android_target_compile_definitions(breakpad_common darwin-aarch64 PUBLIC
-                                   -DHAVE_MACH_O_NLIST_H)
-android_target_compile_definitions(breakpad_common windows PRIVATE
-                                   ${ANDROID_BREAKPAD_WINDOWS_DEFS})
-android_target_link_libraries(breakpad_common linux-x86_64 PRIVATE dl)
-android_target_link_libraries(breakpad_common linux-aarch64 PRIVATE dl)
+android_target_compile_definitions(breakpad_common linux PUBLIC -DHAVE_A_OUT_H)
+android_target_compile_definitions(breakpad_common darwin
+                                   PUBLIC -DHAVE_MACH_O_NLIST_H)
+android_target_compile_definitions(breakpad_common windows
+                                   PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
+android_target_link_libraries(breakpad_common linux PRIVATE dl)
 android_target_link_libraries(breakpad_common windows_msvc-x86_64
                               PRIVATE atls::atls)
 android_target_link_libraries(
@@ -268,15 +260,11 @@ if(NOT OPTION_ASAN)
                                                           gmock_main)
   android_target_link_libraries(breakpad_common_unittests windows
                                 PRIVATE diaguids::diaguids)
-  android_target_compile_definitions(breakpad_common_unittests windows PRIVATE
-                                     -DUNICODE -D_UNICODE)
-  android_target_compile_definitions(breakpad_common_unittests linux-x86_64
+  android_target_compile_definitions(breakpad_common_unittests windows
+                                     PRIVATE -DUNICODE -D_UNICODE)
+  android_target_compile_definitions(breakpad_common_unittests linux
                                      PUBLIC -DHAVE_A_OUT_H)
-  android_target_compile_definitions(breakpad_common_unittests linux-aarch64
-                                     PUBLIC -DHAVE_A_OUT_H)
-  android_target_compile_definitions(breakpad_common_unittests darwin-x86_64
-                                     PUBLIC -DHAVE_MACH_O_NLIST_H)
-  android_target_compile_definitions(breakpad_common_unittests darwin-aarch64
+  android_target_compile_definitions(breakpad_common_unittests darwin
                                      PUBLIC -DHAVE_MACH_O_NLIST_H)
 endif()
 #
@@ -336,14 +324,10 @@ set_property(TARGET breakpad_processor PROPERTY CXX_STANDARD 17)
 target_include_directories(breakpad_processor PUBLIC ${BREAKPAD_SRC})
 target_link_libraries(breakpad_processor PRIVATE breakpad_disasm
                                                  breakpad_common)
-android_target_compile_definitions(breakpad_processor linux-x86_64 PUBLIC
-                                   -DHAVE_A_OUT_H)
-android_target_compile_definitions(breakpad_processor linux-aarch64 PUBLIC
-                                   -DHAVE_A_OUT_H)
-android_target_compile_definitions(breakpad_processor darwin-x86_64 PUBLIC
-                                   -DHAVE_MACH_O_NLIST_H)
-android_target_compile_definitions(breakpad_processor darwin-aarch64 PUBLIC
-                                   -DHAVE_MACH_O_NLIST_H)
+android_target_compile_definitions(breakpad_processor linux
+                                   PUBLIC -DHAVE_A_OUT_H)
+android_target_compile_definitions(breakpad_processor darwin
+                                   PUBLIC -DHAVE_MACH_O_NLIST_H)
 
 function(add_proc_test name)
   if(CROSSCOMPILE)
@@ -353,7 +337,7 @@ function(add_proc_test name)
                                       ${BREAKPAD_SRC}/processor/${name}.cc)
   target_link_libraries(${name} PRIVATE breakpad_processor gmock_main)
   android_target_compile_definitions(${name} windows PRIVATE -DUNICODE
-                                     -D_UNICODE)
+                                                             -D_UNICODE)
   set_property(TEST ${name} PROPERTY WORKING_DIRECTORY "${BREAKPAD_SRC}/..")
 endfunction()
 
@@ -417,20 +401,13 @@ android_add_library(
   LINUX ${BREAKPAD_SRC}/client/linux/crash_generation/crash_generation_server.cc
   DARWIN ${BREAKPAD_SRC}/client/mac/crash_generation/crash_generation_server.cc)
 set_property(TARGET breakpad_server PROPERTY CXX_STANDARD 17)
-android_target_include_directories(breakpad_server linux-x86_64 PUBLIC
+android_target_include_directories(breakpad_server linux PUBLIC
                                    ${ANDROID_QEMU2_TOP_DIR}/android)
-android_target_include_directories(breakpad_server linux-aarch64 PUBLIC
-                                   ${ANDROID_QEMU2_TOP_DIR}/android)
-android_target_compile_definitions(breakpad_server windows PRIVATE
-                                   ${ANDROID_BREAKPAD_WINDOWS_DEFS})
-android_target_compile_definitions(breakpad_server linux-x86_64 PUBLIC
-                                   -DHAVE_A_OUT_H)
-android_target_compile_definitions(breakpad_server linux-aarch64 PUBLIC
-                                   -DHAVE_A_OUT_H)
-android_target_compile_definitions(breakpad_server darwin-x86_64 PUBLIC
-                                   -DHAVE_MACH_O_NLIST_H)
-android_target_compile_definitions(breakpad_server darwin-aarch64 PUBLIC
-                                   -DHAVE_MACH_O_NLIST_H)
+android_target_compile_definitions(breakpad_server windows
+                                   PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
+android_target_compile_definitions(breakpad_server linux PUBLIC -DHAVE_A_OUT_H)
+android_target_compile_definitions(breakpad_server darwin
+                                   PUBLIC -DHAVE_MACH_O_NLIST_H)
 target_link_libraries(breakpad_server PUBLIC breakpad_common breakpad_processor)
 
 #
@@ -449,7 +426,6 @@ android_add_library(
         ${BREAKPAD_SRC}/client/linux/dump_writer_common/thread_info.cc
         ${BREAKPAD_SRC}/client/linux/dump_writer_common/ucontext_reader.cc
         ${BREAKPAD_SRC}/client/linux/handler/exception_handler.cc
-        ${BREAKPAD_SRC}/common/linux/breakpad_getcontext.S
         ${BREAKPAD_SRC}/client/linux/handler/minidump_descriptor.cc
         ${BREAKPAD_SRC}/client/linux/log/log.cc
         ${BREAKPAD_SRC}/client/linux/microdump_writer/microdump_writer.cc
@@ -458,6 +434,7 @@ android_add_library(
         ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_ptrace_dumper.cc
         ${BREAKPAD_SRC}/client/linux/minidump_writer/minidump_writer.cc
         ${BREAKPAD_SRC}/client/minidump_file_writer.cc
+        ${BREAKPAD_SRC}/common/linux/breakpad_getcontext.S
   DARWIN ${BREAKPAD_SRC}/client/mac/crash_generation/ConfigFile.mm
          ${BREAKPAD_SRC}/client/mac/crash_generation/crash_generation_client.cc
          ${BREAKPAD_SRC}/client/mac/crash_generation/crash_generation_server.cc
@@ -476,9 +453,10 @@ android_add_library(
     ${BREAKPAD_SRC}/client/windows/crash_generation/minidump_generator.cc
     ${BREAKPAD_SRC}/client/windows/handler/exception_handler.cc)
 
-if (LINUX_X86_64 OR LINUX_AARCH64)
-    enable_language(ASM)
-    set_property(SOURCE ${BREAKPAD_SRC}/common/linux/breakpad_getcontext.S PROPERTY LANGUAGE ASM)
+if(LINUX_X86_64 OR LINUX_AARCH64)
+  enable_language(ASM)
+  set_property(SOURCE ${BREAKPAD_SRC}/common/linux/breakpad_getcontext.S
+               PROPERTY LANGUAGE ASM)
 endif()
 set_property(TARGET breakpad_client PROPERTY CXX_STANDARD 17)
 target_include_directories(breakpad_client PUBLIC ${BREAKPAD_SRC})
@@ -486,31 +464,23 @@ android_target_include_directories(
   breakpad_client darwin-x86_64 PRIVATE ${BREAKPAD_SRC}/client/apple/Framework/
   ${BREAKPAD_SRC}/common/mac)
 android_target_include_directories(
-  breakpad_client darwin-aarch64 PRIVATE ${BREAKPAD_SRC}/client/apple/Framework/
-  ${BREAKPAD_SRC}/common/mac)
-android_target_include_directories(breakpad_client linux-x86_64 PUBLIC
+  breakpad_client darwin-aarch64 PRIVATE
+  ${BREAKPAD_SRC}/client/apple/Framework/ ${BREAKPAD_SRC}/common/mac)
+android_target_include_directories(breakpad_client linux PUBLIC
                                    ${ANDROID_QEMU2_TOP_DIR}/android)
-android_target_include_directories(breakpad_client linux-aarch64 PUBLIC
-                                   ${ANDROID_QEMU2_TOP_DIR}/android)
-android_target_compile_definitions(breakpad_client windows PRIVATE
-                                   ${ANDROID_BREAKPAD_WINDOWS_DEFS})
-android_target_compile_definitions(breakpad_client linux-x86_64 PUBLIC
-                                   -DHAVE_A_OUT_H)
-android_target_compile_definitions(breakpad_client linux-aarch64 PUBLIC
-                                   -DHAVE_A_OUT_H)
+android_target_compile_definitions(breakpad_client windows
+                                   PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
+android_target_compile_definitions(breakpad_client linux PUBLIC -DHAVE_A_OUT_H)
 android_target_compile_definitions(
-  breakpad_client darwin-x86_64 PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0
-  -DHAVE_MACH_O_NLIST_H)
-android_target_compile_definitions(
-  breakpad_client darwin-aarch64 PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0
-  -DHAVE_MACH_O_NLIST_H)
+  breakpad_client darwin PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0
+                                 -DHAVE_MACH_O_NLIST_H)
 
 target_link_libraries(breakpad_client PRIVATE breakpad_common
                                               breakpad_processor)
 
 #
 # dump_syms
-if(NOT BUILDING_FOR_AARCH64)
+if(NOT LINUX_AARCH64)
   android_add_executable(
     TARGET dump_syms
     NODISTRIBUTE
@@ -527,12 +497,12 @@ if(NOT BUILDING_FOR_AARCH64)
     android_target_link_libraries(dump_syms windows_msvc-x86_64
                                   PRIVATE atls::atls)
   endif()
-  android_target_compile_definitions(dump_syms linux-x86_64 PUBLIC
-                                     -DHAVE_A_OUT_H)
-  android_target_compile_definitions(dump_syms linux-aarch64 PUBLIC
-                                     -DHAVE_A_OUT_H)
-  android_target_compile_definitions(dump_syms darwin-x86_64 PUBLIC
-                                     -DHAVE_MACH_O_NLIST_H)
+  android_target_compile_definitions(dump_syms linux-x86_64
+                                     PUBLIC -DHAVE_A_OUT_H)
+  android_target_compile_definitions(dump_syms linux-aarch64
+                                     PUBLIC -DHAVE_A_OUT_H)
+  android_target_compile_definitions(dump_syms darwin-x86_64
+                                     PUBLIC -DHAVE_MACH_O_NLIST_H)
   #
   # Symupload
   android_add_executable(
@@ -542,10 +512,17 @@ if(NOT BUILDING_FOR_AARCH64)
           ${BREAKPAD_SRC}/common/linux/symbol_collector_client.cc
           ${BREAKPAD_SRC}/common/linux/symbol_upload.cc
           ${BREAKPAD_SRC}/tools/linux/symupload/sym_upload.cc
-    DARWIN ${BREAKPAD_SRC}/tools/mac/symupload/symupload.m
+    DARWIN ${BREAKPAD_SRC}/common/mac/encoding_util.m
+           ${BREAKPAD_SRC}/common/mac/HTTPGetRequest.m
+           ${BREAKPAD_SRC}/common/mac/HTTPMultipartUpload.m;
+           ${BREAKPAD_SRC}/common/mac/HTTPPutRequest.m
+           ${BREAKPAD_SRC}/common/mac/HTTPRequest.m
+           ${BREAKPAD_SRC}/common/mac/HTTPSimplePostRequest.m
+           ${BREAKPAD_SRC}/common/mac/SymbolCollectorClient.m
+           ${BREAKPAD_SRC}/tools/mac/symupload/symupload.m
     WINDOWS ${BREAKPAD_SRC}/tools/windows/symupload/symupload.cc)
   set_property(TARGET sym_upload PROPERTY CXX_STANDARD 17)
-  android_target_include_directories(sym_upload darwin-x86_64 PRIVATE
+  android_target_include_directories(sym_upload darwin PRIVATE
                                      ${BREAKPAD_SRC}/common/mac/)
   target_link_libraries(sym_upload PRIVATE breakpad_common)
   # Note, sym_upload.exe will likely only work on the machine you are building
@@ -555,16 +532,14 @@ if(NOT BUILDING_FOR_AARCH64)
   android_target_link_libraries(
     sym_upload windows PRIVATE dbghelp::dbghelp diaguids::diaguids
                                mincore::mincore)
-  android_target_link_libraries(sym_upload darwin-x86_64
-                                PRIVATE "-framework Foundation")
-  android_target_compile_definitions(sym_upload linux-x86_64 PUBLIC
-                                     -DHAVE_A_OUT_H)
-  android_target_compile_definitions(sym_upload linux-aarch64 PUBLIC
-                                     -DHAVE_A_OUT_H)
-  android_target_compile_definitions(sym_upload darwin-x86_64 PRIVATE
-                                     -DOBJC_OLD_DISPATCH_PROTOTYPES=0)
+  android_target_link_libraries(
+    sym_upload darwin PRIVATE "-framework Foundation"
+                              "-framework CoreFoundation")
+  android_target_compile_definitions(sym_upload linux PUBLIC -DHAVE_A_OUT_H)
+  android_target_compile_definitions(sym_upload darwin
+                                     PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0)
   android_target_compile_definitions(sym_upload windows PRIVATE -DUNICODE
-                                     -D_UNICODE)
+                                                                -D_UNICODE)
   android_install_as_debug_info(sym_upload)
   if(LINUX_X86_64)
     android_add_executable(
@@ -633,7 +608,7 @@ if(NOT BUILDING_FOR_AARCH64)
           ${BREAKPAD_SRC}/client/windows/unittests/minidump_test.cc)
     target_link_libraries(windows_client_unittests
                           PRIVATE breakpad_client mincore::mincore gmock_main)
-    android_target_compile_definitions(windows_client_unittests windows PRIVATE
-                                       ${ANDROID_BREAKPAD_WINDOWS_DEFS})
+    android_target_compile_definitions(windows_client_unittests windows
+                                       PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
   endif()
 endif()
