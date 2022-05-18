@@ -1414,13 +1414,6 @@ public:
 
     void saveSnapshot(void* opaque) {
         QEMUFile* file = (QEMUFile*)opaque;
-        uint32_t cookie;
-        if (!mCookie) {
-            cookie = 0;
-        } else {
-            memcpy(&cookie, mCookie, sizeof(uint32_t));
-        }
-        qemu_put_be32(file, cookie);
         qemu_put_be32(file, mFlags);
 
         qemu_put_be32(file, mContexts.size());
@@ -1456,28 +1449,40 @@ public:
         ops->guest_post_save(file);
     }
 
+    void cleanStates() {
+        auto itContext = mContexts.begin();
+        while (itContext != mContexts.end()) {
+            destroyContext(itContext->first);
+            itContext = mContexts.begin();
+        }
+        auto itResource = mResources.begin();
+        while (itResource != mResources.end()) {
+            unrefResource(itResource->first);
+            itResource = mResources.begin();
+        }
+        mContextResources.clear();
+        mResourceContexts.clear();
+        mFenceDeque.clear();
+    }
+
     void loadSnapshot(void* opaque) {
         QEMUFile* file = (QEMUFile*)opaque;
 
-        uint32_t cookie = qemu_get_be32(file);
-        if (mCookie) memcpy(mCookie, &cookie, sizeof(uint32_t));
+        cleanStates();
 
         mFlags = qemu_get_be32(file);
 
         uint32_t contextCount = qemu_get_be32(file);
-
         for (uint32_t i = 0; i < contextCount; ++i) {
             loadContext(file);
         }
 
         uint32_t resourceCount = qemu_get_be32(file);
-
         for (uint32_t i = 0; i < resourceCount; ++i) {
             loadResource(file);
         }
 
         uint32_t contextResourceListCount = qemu_get_be32(file);
-
         for (uint32_t i = 0; i < contextResourceListCount; ++i) {
             uint32_t ctxId;
             auto ids = loadContextResourceList(file, &ctxId);
@@ -1485,7 +1490,6 @@ public:
         }
 
         uint32_t resourceContextListCount = qemu_get_be32(file);
-
         for (uint32_t i = 0; i < resourceContextListCount; ++i) {
             uint32_t resId;
             auto ids = loadResourceContextList(file, &resId);
@@ -1683,7 +1687,6 @@ private:
     }
 
     void loadContext(QEMUFile* file) {
-
         auto ops = ensureAndGetServiceOps();
 
         PipeCtxEntry pipeCtxEntry;
