@@ -2301,6 +2301,13 @@ GL_APICALL void  GL_APIENTRY glGetBooleanv(GLenum pname, GLboolean* params){
 #define TO_GLBOOL(params, x) \
     *params = x ? GL_TRUE : GL_FALSE; \
 
+#ifdef __APPLE__
+    if (!isGles2Gles() && pname == GL_PRIMITIVE_RESTART_FIXED_INDEX) {
+        TO_GLBOOL(params, ctx->primitiveRestartEnabled());
+        return;
+    }
+#endif
+
     GLint i;
     switch (pname) {
     case GL_CURRENT_PROGRAM:
