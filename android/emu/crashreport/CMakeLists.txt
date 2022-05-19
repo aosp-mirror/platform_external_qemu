@@ -21,32 +21,30 @@ target_link_libraries(android-emu-crashreport PUBLIC crashpad_client)
 target_compile_options(android-emu-crashreport PRIVATE -Wno-extern-c-compat PUBLIC -Wno-macro-redefined)
 
 # This file defines emulator crash service
-if(NOT OPTION_GFXSTREAM_BACKEND)
-  android_add_library(
-    TARGET android-emu-crashreport-consent-ui
-    # SHARED # Used to test if you can compile this stand alone.
-    LICENSE Apache-2.0
-    SOURCE_DIR
-    src
-    SRC android/crashreport/ui/ConfirmDialog.cpp
-        android/crashreport/ui/CrashConsentUi.cpp
-        android/crashreport/ui/UserSuggestions.cpp
-    DEPS android-emu
-         android-emu-agents
-         android-emu-base
-         android-emu-cmdline
-         android-emu-utils
-         breakpad_processor
-         crashpad_client
-         emulator-libui
-         Qt${QT_VERSION_MAJOR}::Widgets)
-  target_compile_definitions(
-    android-emu-crashreport-consent-ui PRIVATE AEMU_CRASH_EXPORTS
-    PUBLIC AEMU_CRASH_SHARED)
-  target_include_directories(android-emu-crashreport-consent-ui PRIVATE src
-                             PUBLIC include)
-  target_compile_options(android-emu-crashreport-consent-ui PRIVATE -Wno-extern-c-compat)
-endif()
+android_add_library(
+  TARGET android-emu-crashreport-consent-ui
+  # SHARED # Used to test if you can compile this stand alone.
+  LICENSE Apache-2.0
+  SOURCE_DIR
+  src
+  SRC android/crashreport/ui/ConfirmDialog.cpp
+      android/crashreport/ui/CrashConsentUi.cpp
+      android/crashreport/ui/UserSuggestions.cpp
+  DEPS android-emu
+       android-emu-agents
+       android-emu-base
+       android-emu-cmdline
+       android-emu-utils
+       breakpad_processor
+       crashpad_client
+       emulator-libui
+       Qt${QT_VERSION_MAJOR}::Widgets)
+target_compile_definitions(
+  android-emu-crashreport-consent-ui PRIVATE AEMU_CRASH_EXPORTS
+  PUBLIC AEMU_CRASH_SHARED)
+target_include_directories(android-emu-crashreport-consent-ui PRIVATE src
+                           PUBLIC include)
+target_compile_options(android-emu-crashreport-consent-ui PRIVATE -Wno-extern-c-compat)
 
 android_add_library(
   TARGET android-emu-crashreport-consent-no-ui

@@ -13,8 +13,11 @@
 // limitations under the License.
 #pragma once
 
+#include "android/utils/compiler.h"
+
 #include <inttypes.h>
 
+ANDROID_BEGIN_HEADER
 // This file defines common structs used by the interfaces defined for
 // AndroidEmu <--> QEMU interaction.
 
@@ -35,3 +38,4 @@ struct MemEntry {
     uint64_t fixed_id;
     uint32_t caching;
 };
+ANDROID_END_HEADER
