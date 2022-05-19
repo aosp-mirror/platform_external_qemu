@@ -2891,7 +2891,9 @@ public:
             if (srcBarrier.oldLayout == 0 ||
                     (srcBarrier.newLayout != VK_IMAGE_LAYOUT_GENERAL &&
                      srcBarrier.newLayout !=
-                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)) {
+                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL /* for samplers */ &&
+                     srcBarrier.newLayout !=
+                     VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL /* for blit */)) {
                 // TODO: might only need to push one of them?
                 persistentImageBarriers.push_back(decompBarrier);
                 persistentImageBarriers.insert(persistentImageBarriers.end(),
