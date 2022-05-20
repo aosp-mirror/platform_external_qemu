@@ -213,8 +213,8 @@ int ApiGen::genContext(const std::string & filename, SideType side)
 
     //client site set error virtual func
     if (side == CLIENT_SIDE) {
-        fprintf(fp, "\tvirtual void setError(unsigned int  error){ (void)error; };\n");
-        fprintf(fp, "\tvirtual unsigned int getError(){ return 0; };\n");
+        fprintf(fp, "\tvirtual void setError(unsigned int  error){ (void)error; }\n");
+        fprintf(fp, "\tvirtual unsigned int getError(){ return 0; }\n");
     }
 
     fprintf(fp, "};\n");
