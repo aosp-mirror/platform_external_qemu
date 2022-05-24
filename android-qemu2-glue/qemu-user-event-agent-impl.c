@@ -108,7 +108,8 @@ static void user_event_mouse(int dx,
     if (VERBOSE_CHECK(keys))
         dprint(">> MOUSE [%d %d %d : 0x%04x]", dx, dy, dz, buttonsState);
     if (feature_is_enabled(kFeature_VirtioInput) &&
-        !feature_is_enabled(kFeature_VirtioMouse))
+        !feature_is_enabled(kFeature_VirtioMouse) &&
+        !feature_is_enabled(kFeature_VirtioTablet))
         android_virtio_kbd_mouse_event(dx, dy, dz, buttonsState, displayId);
     else
         kbd_mouse_event(dx, dy, dz, buttonsState);
