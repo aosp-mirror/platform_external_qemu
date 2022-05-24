@@ -176,8 +176,8 @@ public:
         return contextDesc.device_context.get();
     }
 
-    uint64_t hostmemRegister(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id) {
-        return sVmOps->hostmemRegister(hva, size, register_fixed, fixed_id);
+    uint64_t hostmemRegister(const struct MemEntry* entry) {
+        return sVmOps->hostmemRegister(entry);
     }
 
     void hostmemUnregister(uint64_t id) {
@@ -473,8 +473,8 @@ static void sAddressSpaceDeviceClear() {
     sAddressSpaceDeviceState->clear();
 }
 
-static uint64_t sAddressSpaceDeviceHostmemRegister(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id) {
-    return sAddressSpaceDeviceState->hostmemRegister(hva, size, register_fixed, fixed_id);
+static uint64_t sAddressSpaceDeviceHostmemRegister(const struct MemEntry* entry) {
+    return sAddressSpaceDeviceState->hostmemRegister(entry);
 }
 
 static void sAddressSpaceDeviceHostmemUnregister(uint64_t id) {

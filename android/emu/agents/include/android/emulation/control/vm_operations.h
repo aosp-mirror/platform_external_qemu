@@ -16,9 +16,17 @@
 
 #include "android/utils/compiler.h"
 #include "android/emulation/control/callbacks.h"
+#include "android/emulation/control/structs.h"
 
 #include <stdbool.h>
 #include <stdint.h>
+
+// Caching types
+#define MAP_CACHE_MASK      0x0f
+#define MAP_CACHE_NONE      0x00
+#define MAP_CACHE_CACHED    0x01
+#define MAP_CACHE_UNCACHED  0x02
+#define MAP_CACHE_WC        0x03
 
 ANDROID_BEGIN_HEADER
 
@@ -206,7 +214,7 @@ typedef struct QAndroidVmOperations {
     bool (*isSnapshotSaveSkipped)(void);
 
     // Create/register/getinfo for host memory Id's
-    uint64_t (*hostmemRegister)(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id);
+    uint64_t (*hostmemRegister)(const struct MemEntry* entry);
     void (*hostmemUnregister)(uint64_t id);
     struct HostmemEntry (*hostmemGetInfo)(uint64_t id);
     EmuRunState (*getRunState)();
