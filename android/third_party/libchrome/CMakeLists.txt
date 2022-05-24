@@ -596,7 +596,7 @@ android_target_compile_options(libchrome linux-aarch64
 # needed.
 android_target_compile_definitions(
   libchrome windows
-  PUBLIC
+  PRIVATE
     -DOS_WIN=1
     -DUNICODE=1
     -D_UNICODE=1

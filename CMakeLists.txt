@@ -357,6 +357,7 @@ if(WINDOWS_MSVC_X86_64)
     add_c_flag("-GS-")
     add_c_flag("-GR")
   endif()
+  add_c_flag("-w")
 endif()
 
 # Copy the source properties and add the build number to it, this will enable

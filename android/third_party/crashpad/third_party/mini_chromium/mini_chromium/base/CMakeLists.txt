@@ -41,7 +41,7 @@ android_add_library(
           strings/string_util_win.cc synchronization/lock_impl_win.cc
           threading/thread_local_storage_win.cc)
 
-android_target_compile_definitions(mini_chromium windows PUBLIC UNICODE)
+android_target_compile_definitions(mini_chromium windows PRIVATE UNICODE)
 android_target_link_libraries(
   mini_chromium darwin-x86_64
   PUBLIC "-framework ApplicationServices" "-framework CoreFoundation"

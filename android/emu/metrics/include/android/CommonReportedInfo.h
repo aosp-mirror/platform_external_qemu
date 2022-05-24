@@ -33,28 +33,28 @@ namespace android {
 namespace CommonReportedInfo {
 
 // Covers host hw info, AVD info
-void setHostInfo(const android_studio::EmulatorHost* hostinfo);
-void setDetails(const android_studio::EmulatorDetails* details);
-void setPerformanceStats(const android_studio::EmulatorPerformanceStats* stats);
+AEMU_METRICS_API void setHostInfo(const android_studio::EmulatorHost* hostinfo);
+AEMU_METRICS_API void setDetails(const android_studio::EmulatorDetails* details);
+AEMU_METRICS_API void setPerformanceStats(const android_studio::EmulatorPerformanceStats* stats);
 void setUptime(base::System::Duration uptime);
 void setSessionPhase(AndroidSessionPhase phase);
 void appendMemoryUsage();
 
 // For testing and crash reporter integration
-void writeHostInfo(std::string* res);
-void writeHostInfo(std::ostream* out);
+AEMU_METRICS_API void writeHostInfo(std::string* res);
+AEMU_METRICS_API void writeHostInfo(std::ostream* out);
 
-void writeDetails(std::string* res);
-void writeDetails(std::ostream* out);
+AEMU_METRICS_API void writeDetails(std::string* res);
+AEMU_METRICS_API void writeDetails(std::ostream* out);
 
 void writePerformanceStats(std::string* res);
 void writePerformanceStats(std::ostream* out);
 
-void readHostInfo(const std::string& res);
-void readHostInfo(std::istream* in);
+AEMU_METRICS_API void readHostInfo(const std::string& res);
+AEMU_METRICS_API void readHostInfo(std::istream* in);
 
-void readDetails(const std::string& res);
-void readDetails(std::istream* in);
+AEMU_METRICS_API void readDetails(const std::string& res);
+AEMU_METRICS_API void readDetails(std::istream* in);
 
 void readPerformanceStats(const std::string& res);
 void readPerformanceStats(std::istream* in);

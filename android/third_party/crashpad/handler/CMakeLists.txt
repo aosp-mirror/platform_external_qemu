@@ -92,6 +92,8 @@ if(WINDOWS_MSVC_X86_64)
 
   android_add_executable(TARGET crashy_program NODISTRIBUTE
                          SRC win/crashy_test_program.cc)
+                         
+  target_compile_definitions(crashy_program PRIVATE UNICODE)
   target_link_libraries(crashy_program PRIVATE crashpad_client crashpad_util
                                                crashpad_test gtest)
 
@@ -106,5 +108,5 @@ if(WINDOWS_MSVC_X86_64)
   android_add_executable(TARGET hanging_program NODISTRIBUTE
                          SRC win/hanging_program.cc)
   target_link_libraries(hanging_program PRIVATE crashpad_client crashpad_util)
-
+  target_compile_definitions(hanging_program PRIVATE UNICODE)
 endif()

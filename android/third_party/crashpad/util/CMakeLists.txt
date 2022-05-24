@@ -231,7 +231,7 @@ android_add_library(
 
 target_include_directories(crashpad_util PUBLIC ..)
 target_link_libraries(crashpad_util PUBLIC mini_chromium crashpad_compat)
-
+android_target_compile_definitions(crashpad_util windows PRIVATE UNICODE)
 if(WINDOWS_MSVC_X86_64)
 
   # We have setup git to covert \n -> \r\n causing these tests to fail, these will succeed if you
@@ -395,6 +395,7 @@ android_add_test(
           win/scoped_process_suspend_test.cc
           win/session_end_watcher_test.cc
   TEST_PARAMS "${CRASHPAD_UTIL_TEST_FILTER}")
+
 target_link_libraries(
   crashpad_util_test PRIVATE crashpad_util mini_chromium crashpad_test gmock
                              crashpad_googlemock_main UUID::UUID)
@@ -403,7 +404,7 @@ android_target_link_libraries(crashpad_util_test windows_msvc-x86_64
                               PRIVATE dbghelp::dbghelp)
 
 if(WINDOWS_MSVC_X86_64)
-
+  target_compile_definitions(crashpad_util_test PUBLIC UNICODE)
   android_add_executable(TARGET crashpad_util_test_process_info_test_child
                          NODISTRIBUTE SRC win/process_info_test_child.cc)
   target_compile_definitions(crashpad_util_test_process_info_test_child

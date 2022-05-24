@@ -34,6 +34,7 @@ android_add_library(
           win/win_multiprocess.cc
           win/win_multiprocess_with_temp_dir.cc)
 
+android_target_compile_definitions(crashpad_test windows PRIVATE UNICODE)
 target_link_libraries(crashpad_test PUBLIC crashpad_util crashpad_handler_handler
                                            mini_chromium gtest)
 android_target_link_libraries(crashpad_test darwin-aarch64
