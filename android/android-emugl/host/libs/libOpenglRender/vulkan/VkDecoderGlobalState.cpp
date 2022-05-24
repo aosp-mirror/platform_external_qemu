@@ -434,12 +434,15 @@ public:
                     ->apiVersion = apiVersion;
         }
 
-        // remove VkDebugReportCallbackCreateInfoEXT from the chain.
+        // remove VkDebugReportCallbackCreateInfoEXT and
+        // VkDebugUtilsMessengerCreateInfoEXT from the chain.
         auto* curr = reinterpret_cast<vk_struct_common*>(&createInfoFiltered);
         while (curr != nullptr) {
             if (curr->pNext != nullptr &&
-                curr->pNext->sType ==
-                        VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT) {
+                (curr->pNext->sType ==
+                         VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT ||
+                 curr->pNext->sType ==
+                         VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT)) {
                 curr->pNext = curr->pNext->pNext;
             }
             curr = curr->pNext;
