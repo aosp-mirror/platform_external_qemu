@@ -109,8 +109,26 @@ int ReadExact(SharedFD fd, std::string* buffer) {
 }
 
 int SharedFD::ReadExact(std::string& buffer) {
-    bool success = android::base::socketRecvAll(value_->fd_, buffer.data(),
-                                                buffer.size());
+    int socket = value_->fd_;
+    auto buf = static_cast<char*>(buffer.data());
+    size_t bufferLen = buffer.size();
+
+    bool success = true;
+    while (bufferLen > 0) {
+        ssize_t ret = android::base::socketRecv(socket, buf, bufferLen);
+        // Bug: 232971796
+        // socketRecv returns -1 sometimes because the operation would block.
+        // In this case, continue to read from the socket.
+        if (ret < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
+            continue;
+        } else if (ret <= 0) {
+            success = false;
+            break;
+        } else {
+            buf += ret;
+            bufferLen -= ret;
+        }
+    }
     if (success) {
         return buffer.size();
     } else {
