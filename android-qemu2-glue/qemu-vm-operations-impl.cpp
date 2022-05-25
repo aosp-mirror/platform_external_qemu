@@ -253,7 +253,7 @@ static bool rebase_on_top_of(std::string src,
     // TODO(jansene): replace with internal functions, vs calling qemu-img.
     // See qemu-img.c: static int img_rebase(int argc, char **argv)
     auto res = System::get()->runCommandWithResult(
-            {qemu_img, "rebase", "-f", "qcow2", "-b", dst_img, src});
+            {qemu_img, "rebase", "-u", "-f", "qcow2", "-b", dst_img, src});
 
     return res;
 }
