@@ -3286,7 +3286,9 @@ static int is_opengl_alive = 1;
 
 static void android_check_for_updates()
 {
-    android_checkForUpdates(QEMU_CORE_VERSION);
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
+        android_checkForUpdates(QEMU_CORE_VERSION);
+    }
 }
 
 static int android_unrealize_goldfish_device(Object *obj, void *opaque)
