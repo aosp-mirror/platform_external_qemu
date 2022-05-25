@@ -36,13 +36,16 @@ def _reader(pipe, logfn):
     finally:
         pass
 
-NINJA_PREFIX="[ninja] "
+
+NINJA_PREFIX = "[ninja] "
+
 
 def ninja_filter(line):
     if not line.startswith(NINJA_PREFIX):
         logging.error(line)
     else:
-        logging.info(line[len(NINJA_PREFIX):])
+        logging.info(line[len(NINJA_PREFIX) :])
+
 
 def _log_proc(proc):
     """Logs the output of the given process."""
@@ -60,7 +63,9 @@ def expect_in(lst, table):
     ok = True
     for l in lst:
         if not l in table:
-            logging.warning("variable '%s' is not set, but was required to be available.", l)
+            logging.warning(
+                "variable '%s' is not set, but was required to be available.", l
+            )
             ok = False
 
     return ok
