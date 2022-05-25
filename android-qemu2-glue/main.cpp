@@ -12,7 +12,6 @@
 #include "android-qemu2-glue/qemu-console-factory.h"
 #include "android/android.h"
 #include "android/avd/hw-config.h"
-#include "android/base/Log.h"
 #include "android/base/ProcessControl.h"
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
@@ -402,13 +401,15 @@ static bool creatUserDataExt4Img(AndroidHwConfig* hw,
             PathUtils::join(dataDirectory, "empty_data_disk");
     const bool shouldUseEmptyDataImg = path_exists(empty_data_path.c_str());
     if (shouldUseEmptyDataImg) {
-        android_createEmptyExt4Image(hw->disk_dataPartition_path,
-                                     getConsoleAgents()->settings->hw()->disk_dataPartition_size,
-                                     "data");
+        android_createEmptyExt4Image(
+                hw->disk_dataPartition_path,
+                getConsoleAgents()->settings->hw()->disk_dataPartition_size,
+                "data");
     } else {
         android_createExt4ImageFromDir(
                 hw->disk_dataPartition_path, dataDirectory,
-                getConsoleAgents()->settings->hw()->disk_dataPartition_size, "data");
+                getConsoleAgents()->settings->hw()->disk_dataPartition_size,
+                "data");
     }
     // Check if creating user data img succeed
     System::FileSize diskSize;
@@ -448,8 +449,12 @@ static int createUserData(AvdInfo* avd,
             }
 
             if (!hw->hw_arc) {
-                resizeExt4Partition(getConsoleAgents()->settings->hw()->disk_dataPartition_path,
-                                    getConsoleAgents()->settings->hw()->disk_dataPartition_size);
+                resizeExt4Partition(getConsoleAgents()
+                                            ->settings->hw()
+                                            ->disk_dataPartition_path,
+                                    getConsoleAgents()
+                                            ->settings->hw()
+                                            ->disk_dataPartition_size);
             }
         }
     }
@@ -678,7 +683,8 @@ static void initialize_virtio_input_devs(android::ParameterList& args,
 
         if (hw->hw_rotaryInput ||
             (getConsoleAgents()->settings->avdInfo() &&
-             avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR)) {
+             avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                     AVD_WEAR)) {
             args.add("-device");
             args.add("virtio_input_rotary_pci");
         }
@@ -970,10 +976,10 @@ static int startEmulatorWithMinConfig(int argc,
                                       AndroidOptions* optsToOverride,
                                       AndroidHwConfig* hwConfigToOverride,
                                       AvdInfo** avdInfoToOverride) {
-     getConsoleAgents()->settings->set_android_qemu_mode(false);
-     // Min config mode and fuchsia mode are equivalent, at least for now.
-     getConsoleAgents()->settings->set_min_config_qemu_mode(true);
-     getConsoleAgents()->settings->set_is_fuchsia(true);
+    getConsoleAgents()->settings->set_android_qemu_mode(false);
+    // Min config mode and fuchsia mode are equivalent, at least for now.
+    getConsoleAgents()->settings->set_min_config_qemu_mode(true);
+    getConsoleAgents()->settings->set_is_fuchsia(true);
 
     auto opts = optsToOverride;
     auto hw = hwConfigToOverride;
@@ -1174,9 +1180,9 @@ static std::string getWriteableFilename(const char* disk_dataPartition_path,
 
 static bool isEmulatorCircular(const char* param, const char* val) {
     return strcmp(param, "ro.emulator.circular") == 0 &&
-            (strncmp(val, "1", 1) == 0 || strncmp(val, "y", 1) == 0 ||
-             strncmp(val, "on", 2) == 0 || strncmp(val, "yes", 3) == 0 ||
-             strncmp(val, "true", 4) == 0);
+           (strncmp(val, "1", 1) == 0 || strncmp(val, "y", 1) == 0 ||
+            strncmp(val, "on", 2) == 0 || strncmp(val, "yes", 3) == 0 ||
+            strncmp(val, "true", 4) == 0);
 }
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
@@ -1185,7 +1191,8 @@ constexpr bool targetIsX86 = true;
 constexpr bool targetIsX86 = false;
 #endif
 
-static std::string buildSoundhwParam(const int apiLevel, const AndroidHwConfig* hw) {
+static std::string buildSoundhwParam(const int apiLevel,
+                                     const AndroidHwConfig* hw) {
     std::string param;
     std::string props;
 
@@ -1224,6 +1231,8 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
+    // Initialize crash handler
+    crashhandler_init(argc, argv);
 #ifdef __APPLE__
     {
         int ret;
@@ -1298,12 +1307,11 @@ extern "C" int main(int argc, char** argv) {
     getConsoleAgents()->settings->inject_android_cmdLine(
             android::base::createEscapedLaunchString(argc, argv).c_str());
 
-
     AndroidHwConfig* hw = getConsoleAgents()->settings->hw();
-    if (!emulator_parseCommonCommandLineOptions(
-                &argc, &argv, kTarget.androidArch,
-                true,  // is_qemu2
-                opts, hw, &avd, &exitStatus)) {
+    if (!emulator_parseCommonCommandLineOptions(&argc, &argv,
+                                                kTarget.androidArch,
+                                                true,  // is_qemu2
+                                                opts, hw, &avd, &exitStatus)) {
         // Special case for QEMU positional parameters (or Fuchsia path)
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
@@ -1315,7 +1323,8 @@ extern "C" int main(int argc, char** argv) {
             // If running Fuchsia, the kernel argument needs to be passed
             // through as when opts->fuchsia is true, since it is not a Linux
             // kernel, we do not run it through the usual parsing scheme that
-            // writes the kernel path to getConsoleAgents()->settings->hw()->kernel_path (android_hw is
+            // writes the kernel path to
+            // getConsoleAgents()->settings->hw()->kernel_path (android_hw is
             // currently not used in the Fuchsia path).
             if (opts->fuchsia) {
                 if (opts->kernel) {
@@ -1605,8 +1614,9 @@ extern "C" int main(int argc, char** argv) {
         // snapshot.
         if (opts->change_language || opts->change_country ||
             opts->change_locale) {
-                getConsoleAgents()->settings->inject_language(
-                    opts->change_language, opts->change_country, opts->change_locale);
+            getConsoleAgents()->settings->inject_language(opts->change_language,
+                                                          opts->change_country,
+                                                          opts->change_locale);
 
             opts->no_snapshot_load = true;
         }
@@ -1695,8 +1705,7 @@ extern "C" int main(int argc, char** argv) {
         while (propertyFileIterator_next(iter)) {
             args.add("-boot-property");
             args.addFormat("%s=%s", iter->name, iter->value);
-            hw->hw_lcd_circular =
-              isEmulatorCircular(iter->name, iter->value);
+            hw->hw_lcd_circular = isEmulatorCircular(iter->name, iter->value);
         }
     }
 
@@ -1813,12 +1822,15 @@ extern "C" int main(int argc, char** argv) {
     constexpr auto kMinPlaystoreImageSize = 6LL * 1024 * 1024 * 1024;
     if (fc::isEnabled(fc::PlayStoreImage)) {
         if (firstTimeSetup &&
-            getConsoleAgents()->settings->hw()->disk_dataPartition_size < kMinPlaystoreImageSize) {
-            getConsoleAgents()->settings->hw()->disk_dataPartition_size = kMinPlaystoreImageSize;
+            getConsoleAgents()->settings->hw()->disk_dataPartition_size <
+                    kMinPlaystoreImageSize) {
+            getConsoleAgents()->settings->hw()->disk_dataPartition_size =
+                    kMinPlaystoreImageSize;
             // Write it to config.ini as well, or we get all sorts of problems.
             if (getConsoleAgents()->settings->avdInfo()) {
                 avdInfo_replaceDataPartitionSizeInConfigIni(
-                        getConsoleAgents()->settings->avdInfo(), kMinPlaystoreImageSize);
+                        getConsoleAgents()->settings->avdInfo(),
+                        kMinPlaystoreImageSize);
             }
         }
     }
@@ -1838,7 +1850,9 @@ extern "C" int main(int argc, char** argv) {
                 constexpr double kDataPartitionSafetyFactor = 1.2;
 
                 double needed = kDataPartitionSafetyFactor *
-                                getConsoleAgents()->settings->hw()->disk_dataPartition_size /
+                                getConsoleAgents()
+                                        ->settings->hw()
+                                        ->disk_dataPartition_size /
                                 (1024.0 * 1024.0);
 
                 double available = (double)availableSpace / (1024.0 * 1024.0);
@@ -1870,19 +1884,28 @@ extern "C" int main(int argc, char** argv) {
         if (System::get()->pathFileSize(hw->disk_dataPartition_path,
                                         &current_data_size)) {
             System::FileSize partition_size = static_cast<System::FileSize>(
-                    getConsoleAgents()->settings->hw()->disk_dataPartition_size);
-            if (getConsoleAgents()->settings->hw()->disk_dataPartition_size > 0 &&
+                    getConsoleAgents()
+                            ->settings->hw()
+                            ->disk_dataPartition_size);
+            if (getConsoleAgents()->settings->hw()->disk_dataPartition_size >
+                        0 &&
                 current_data_size < partition_size) {
                 dwarning(
                         "userdata partition is resized from %d M to %d "
                         "M",
                         (int)(current_data_size / (1024 * 1024)),
                         (int)(partition_size / (1024 * 1024)));
-                if (!resizeExt4Partition(getConsoleAgents()->settings->hw()->disk_dataPartition_path,
-                                         getConsoleAgents()->settings->hw()->disk_dataPartition_size)) {
+                if (!resizeExt4Partition(getConsoleAgents()
+                                                 ->settings->hw()
+                                                 ->disk_dataPartition_path,
+                                         getConsoleAgents()
+                                                 ->settings->hw()
+                                                 ->disk_dataPartition_size)) {
                     path_delete_file(
                             StringFormat("%s.qcow2",
-                                         getConsoleAgents()->settings->hw()->disk_dataPartition_path)
+                                         getConsoleAgents()
+                                                 ->settings->hw()
+                                                 ->disk_dataPartition_path)
                                     .c_str());
                 }
             }
@@ -2244,10 +2267,9 @@ extern "C" int main(int argc, char** argv) {
          feature_is_enabled_by_guest(kFeature_BluetoothEmulation)) &&
         !bluetooth_explicitly_disabled) {
         // Register the rootcanal device, this will activate rootcanal
-        LOG(VERBOSE) << "Bluetooth requested by "
-                     << (feature_is_enabled(kFeature_BluetoothEmulation)
-                                 ? "user"
-                                 : "guest");
+        dprint("Bluetooth requested by %s",
+               feature_is_enabled(kFeature_BluetoothEmulation) ? "user"
+                                                               : "guest");
         args.add("-chardev");
         args.addFormat("rootcanal,id=rootcanal");
         args.add2("-device", "virtserialport,chardev=rootcanal,name=bluetooth");
@@ -2486,6 +2508,10 @@ extern "C" int main(int argc, char** argv) {
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
         }
+
+        // We have a UI, so we can ask for consent for existing crashreports
+        upload_crashes();
+
         if (opts->ui_only) {
             // UI only. emulator_initUserInterface() is done, so we're done.
             return 0;
@@ -2710,7 +2736,7 @@ extern "C" int main(int argc, char** argv) {
 
     args.add2("-android-hw", coreHwIniPath);
     crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
-
+    crashhandler_add_string(CRASH_AVD_INI, coreHwIniPath);
     if (VERBOSE_CHECK(init)) {
         dinfo("QEMU options list:");
         for (int i = 0; i < args.size(); i++) {

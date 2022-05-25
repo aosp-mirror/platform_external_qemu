@@ -50,3 +50,4 @@
  * directory set up by the crash reporter.
  */
 #define CRASH_AVD_HARDWARE_INFO "avd_info.txt"
+#define CRASH_AVD_INI "avd_ini_path"

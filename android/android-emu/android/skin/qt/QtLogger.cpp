@@ -13,18 +13,14 @@
 // limitations under the License.
 #include "android/skin/qt/QtLogger.h"
 
-#include <stdarg.h>                             // for va_end, va_list, va_s...
-#include <stdio.h>                              // for vsnprintf
+#include <stdarg.h>                            // for va_end, va_list, va_start
+#include <stdio.h>                             // for vsnprintf
 
-#include "android/base/Log.h"                   // for LOG, LogMessage, LogS...
-#include "android/base/files/PathUtils.h"       // for pj
-#include "android/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
-#include "android/crashreport/CrashReporter.h"  // for CrashReporter
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance, LAZY_INS...
+#include "android/utils/debug.h"               // for dinfo
+
 
 using android::base::LazyInstance;
-using android::crashreport::CrashReporter;
-using android::base::pj;
-
 static LazyInstance<QtLogger> sLogger = LAZY_INSTANCE_INIT;
 
 static const int kBufferLen = 2048;
@@ -34,29 +30,6 @@ QtLogger* QtLogger::get() {
     return sLogger.ptr();
 }
 
-// static
-void QtLogger::stop() {
-    if (sLogger.hasInstance()) {
-        sLogger->closeLog();
-    }
-}
-
-QtLogger::QtLogger() :
-    mLogFilePath(CrashReporter::get()->getDataExchangeDir()) {
-
-    mFileHandle.open(pj(mLogFilePath, "qt_log.txt"),
-                     std::ios::app);
-}
-
-QtLogger::~QtLogger() {
-    stop();
-}
-
-void QtLogger::closeLog() {
-    if (mFileHandle) {
-        mFileHandle.close();
-    }
-}
 
 void QtLogger::write(const char* fmt, ...) {
     char buf[kBufferLen] = {};
@@ -65,9 +38,6 @@ void QtLogger::write(const char* fmt, ...) {
     vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
     va_end(ap);
 
-    LOG(INFO) << buf;
-
-    if (!mFileHandle) return;
-
+    dinfo("%s", buf);
     mFileHandle << buf << std::endl;
 }

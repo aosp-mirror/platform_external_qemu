@@ -42,4 +42,4 @@ if(NOT CROSSCOMPILE)
            /d2Zi+
            -Wno-error)
 endif()
-android_target_compile_definitions(crashpad_compat windows PUBLIC _UNICODE)
+android_target_compile_definitions(crashpad_compat windows PRIVATE _UNICODE)

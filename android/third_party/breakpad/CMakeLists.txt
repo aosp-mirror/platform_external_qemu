@@ -324,10 +324,11 @@ set_property(TARGET breakpad_processor PROPERTY CXX_STANDARD 17)
 target_include_directories(breakpad_processor PUBLIC ${BREAKPAD_SRC})
 target_link_libraries(breakpad_processor PRIVATE breakpad_disasm
                                                  breakpad_common)
-android_target_compile_definitions(breakpad_processor linux
-                                   PUBLIC -DHAVE_A_OUT_H)
+target_compile_definitions(breakpad_processor
+                           PRIVATE BPLOG_MINIMUM_SEVERITY=SEVERITY_CRITICAL)
+android_target_compile_definitions(breakpad_processor linux PUBLIC HAVE_A_OUT_H)
 android_target_compile_definitions(breakpad_processor darwin
-                                   PUBLIC -DHAVE_MACH_O_NLIST_H)
+                                   PUBLIC HAVE_MACH_O_NLIST_H)
 
 function(add_proc_test name)
   if(CROSSCOMPILE)

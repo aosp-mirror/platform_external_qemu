@@ -14,6 +14,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
 #include "android/crashreport/CrashReporter.h"
 
 #include <algorithm>
@@ -89,8 +90,10 @@ OpenGLLogger::OpenGLLogger() {
 #ifdef AEMU_MIN
     return;
 #else
-    const std::string& data_dir =
-        CrashReporter::get()->getDataExchangeDir();
+    // These are no longer being posted to a crash report.
+    // see b/233665598
+    const std::string data_dir =
+        android::base::System::get()->getTempDir();
     mFileName = PathUtils::join(data_dir,
                                 "opengl_log.txt");
     mFileHandle.open(PathUtils::asUnicodePath(mFileName).c_str(), std::ios::app);

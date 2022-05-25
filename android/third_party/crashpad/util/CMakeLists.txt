@@ -41,7 +41,8 @@ function(android_mig_lib)
              "${mig_OUTPUT_DIR}/${FIL_WE}.h"
              "${mig_OUTPUT_DIR}/${FIL_WE}Server.h"
       COMMAND
-        ${Python_EXECUTABLE} mach/mig.py "${ABS_FIL}" "${mig_OUTPUT_DIR}/${FIL_WE}User.c"
+        ${Python_EXECUTABLE} mach/mig.py "${ABS_FIL}"
+        "${mig_OUTPUT_DIR}/${FIL_WE}User.c"
         "${mig_OUTPUT_DIR}/${FIL_WE}Server.c" "${mig_OUTPUT_DIR}/${FIL_WE}.h"
         "${mig_OUTPUT_DIR}/${FIL_WE}Server.h" --sdk ${CMAKE_OSX_SYSROOT}
         --include ../.. --include ../../compat/mac --arch ${mig_AARCH}
@@ -231,26 +232,34 @@ android_add_library(
 
 target_include_directories(crashpad_util PUBLIC ..)
 target_link_libraries(crashpad_util PUBLIC mini_chromium crashpad_compat)
-
+android_target_compile_definitions(crashpad_util windows PRIVATE UNICODE)
 if(WINDOWS_MSVC_X86_64)
 
-  # We have setup git to covert \n -> \r\n causing these tests to fail, these will succeed if you
-  # have configued git properly.
+  # We have setup git to covert \n -> \r\n causing these tests to fail, these
+  # will succeed if you have configued git properly.
   set(CRASHPAD_UTIL_TEST_FILTER
       "--gtest_filter=-FileReaderHTTPBodyStream.ReadASCIIFile:HTTPMultipartBuilder.ThreeFileAttachments:HTTPMultipartBuilder.OverwriteFileAttachment:VariableBufferSize*"
   )
   if(CROSSCOMPILE)
     android_nasm_compile(
-      TARGET crashpad_util_asm_lib LICENSE APACHE-2.0 FLAGS "-t"
-      SRC # cmake-format: sortable misc/capture_context_win.asm
-          win/safe_terminate_process.asm)
+      TARGET crashpad_util_asm_lib FLAGS "-t"
+      SRC misc/capture_context_win.asm win/safe_terminate_process.asm)
     target_sources(crashpad_util
                    PRIVATE misc/capture_context_win_emu_cross_hack.cc)
+    android_license(
+      TARGET "crashpad_util_asm_lib" LIBNAME "crashpad" SPDX Apache-2.0
+      LICENSE Apache-2.0
+      LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2")
+
   else()
     # We are going to use ML64.exe to compile these.
     enable_language(ASM_MASM)
     add_library(crashpad_util_asm_lib misc/capture_context_win.asm
                                       win/safe_terminate_process.asm)
+    android_license(
+      TARGET "crashpad_util_asm_lib" LIBNAME "crashpad" SPDX Apache-2.0
+      LICENSE Apache-2.0
+      LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2")
 
     set_target_properties(crashpad_util_asm_lib PROPERTIES LINKER_LANGUAGE CXX)
   endif()
@@ -395,6 +404,7 @@ android_add_test(
           win/scoped_process_suspend_test.cc
           win/session_end_watcher_test.cc
   TEST_PARAMS "${CRASHPAD_UTIL_TEST_FILTER}")
+
 target_link_libraries(
   crashpad_util_test PRIVATE crashpad_util mini_chromium crashpad_test gmock
                              crashpad_googlemock_main UUID::UUID)
@@ -403,7 +413,7 @@ android_target_link_libraries(crashpad_util_test windows_msvc-x86_64
                               PRIVATE dbghelp::dbghelp)
 
 if(WINDOWS_MSVC_X86_64)
-
+  target_compile_definitions(crashpad_util_test PUBLIC UNICODE)
   android_add_executable(TARGET crashpad_util_test_process_info_test_child
                          NODISTRIBUTE SRC win/process_info_test_child.cc)
   target_compile_definitions(crashpad_util_test_process_info_test_child

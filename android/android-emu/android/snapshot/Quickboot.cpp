@@ -8,18 +8,19 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
 #include "android/snapshot/Quickboot.h"
 
 #include "android/adb-server.h"
+#include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/base/Stopwatch.h"
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/IniFile.h"
 #include "android/cmdline-option.h"
+#include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/console.h"
 #include "android/metrics/MetricsReporter.h"
 
 #if SNAPSHOT_METRICS
@@ -299,18 +300,8 @@ bool Quickboot::load(StringView name) {
                                  EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED,
                          FailureReason::Empty);
     } else {
-        // Invalidate quickboot snapshot if the crash reporter trips.
-        // It's possible the crash was not due to snapshot load,
-        // but it's better than crashing over and over in
-        // the same load.
-        // Don't try to delete it completely as that is a heavyweight
-        // operation and we are in the middle of crashing.
-#ifndef AEMU_MIN
-        CrashReporter::get()->addCrashCallback([this, nameStr = name.str()]() {
-            Snapshotter::get().onCrashedSnapshot(nameStr.c_str());
-        });
-#endif
-
+        // TODO: Figure out how we can detect that this snapshot caused a crash?
+        // See b/233665745
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
         auto& snapshotter = Snapshotter::get();
         auto res = snapshotter.load(true /* isQuickboot */, c_str(name));

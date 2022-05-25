@@ -13,21 +13,22 @@
 // limitations under the License.
 #pragma once
 
-#include <fstream>
+#include <ostream>                                    // for ostream
 #include <string>
 
+#include "android/base/Compiler.h"                    // for DISALLOW_COPY_A...
+#include "android/crashreport/AnnotationStreambuf.h"  // for DefaultAnnotati...
+
+using android::crashreport::DefaultAnnotationStreambuf;
 class QtLogger {
 public:
     static QtLogger* get();
-    static void stop();
-
-    QtLogger();
-    ~QtLogger();
-
-    void closeLog();
     void write(const char* fmt, ...);
-
+    QtLogger() = default;
+    ~QtLogger() = default;
 private:
-    std::string mLogFilePath;
-    std::ofstream mFileHandle;
+
+    DefaultAnnotationStreambuf mLogBuf{"qt_log.txt"};
+    std::ostream mFileHandle{&mLogBuf};
+    DISALLOW_COPY_ASSIGN_AND_MOVE(QtLogger);
 };

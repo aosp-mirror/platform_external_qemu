@@ -1931,7 +1931,7 @@ help_metrics_collection(stralloc_t* out)
 {
     PRINTF(
     "  Help make the emulator better by sending usage statistics\n"
-    "  to Google upon (graceful) emulator exit.\n"
+    "  and crash reports to Google upon (graceful) emulator exit.\n"
     "  Mutually exclusive with \"-metrics-to-file <file>\" and \"-metrics-to-console\"\n\n"
     );
 }

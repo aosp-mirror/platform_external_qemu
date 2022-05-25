@@ -143,6 +143,9 @@ else()
             win/process_snapshot_win_test.cc
             win/system_snapshot_win_test.cc
     TEST_PARAMS "${SNAPSHOT_TEST_FILTER}")
+
+  android_target_compile_definitions(crashpad_snapshot_test windows
+                                     PRIVATE UNICODE)
   target_link_libraries(
     crashpad_snapshot_test
     PRIVATE crashpad_test
@@ -240,6 +243,7 @@ if(WINDOWS_MSVC_X86_64)
 
   android_add_executable(TARGET crashpad_snapshot_test_annotations NODISTRIBUTE
                          SRC win/crashpad_snapshot_test_annotations.cc)
+  target_compile_definitions(crashpad_snapshot_test_annotations PRIVATE UNICODE)
   target_link_libraries(crashpad_snapshot_test_annotations
                         PRIVATE mini_chromium crashpad_client crashpad_compat)
 
@@ -249,6 +253,8 @@ if(WINDOWS_MSVC_X86_64)
   target_link_libraries(
     crashpad_snapshot_test_crashing_child PRIVATE mini_chromium crashpad_client
                                                   crashpad_compat crashpad_util)
+  target_compile_definitions(crashpad_snapshot_test_crashing_child
+                             PRIVATE UNICODE)
 
   android_add_executable(
     TARGET crashpad_snapshot_test_dump_without_crashing NODISTRIBUTE
@@ -257,11 +263,17 @@ if(WINDOWS_MSVC_X86_64)
     crashpad_snapshot_test_dump_without_crashing
     PRIVATE mini_chromium crashpad_client crashpad_compat crashpad_util)
 
+  target_compile_definitions(crashpad_snapshot_test_dump_without_crashing
+                             PRIVATE UNICODE)
+
   android_add_executable(
     TARGET crashpad_snapshot_test_extra_memory_ranges NODISTRIBUTE
     SRC win/crashpad_snapshot_test_extra_memory_ranges.cc)
   target_link_libraries(crashpad_snapshot_test_extra_memory_ranges
                         PRIVATE mini_chromium crashpad_client crashpad_compat)
+
+  target_compile_definitions(crashpad_snapshot_test_extra_memory_ranges
+                             PRIVATE UNICODE)
 
   android_add_executable(TARGET crashpad_snapshot_test_image_reader NODISTRIBUTE
                          SRC win/crashpad_snapshot_test_image_reader.cc)
@@ -269,10 +281,17 @@ if(WINDOWS_MSVC_X86_64)
     crashpad_snapshot_test_image_reader PRIVATE mini_chromium crashpad_client
                                                 crashpad_compat crashpad_util)
 
+  target_compile_definitions(crashpad_snapshot_test_image_reader
+                             PRIVATE UNICODE)
+
   add_library(crashpad_snapshot_test_image_reader_module SHARED
               win/crashpad_snapshot_test_image_reader_module.cc)
   target_link_libraries(crashpad_snapshot_test_image_reader_module
                         PRIVATE mini_chromium crashpad_client)
+
+  target_compile_definitions(crashpad_snapshot_test_image_reader_module
+                             PRIVATE UNICODE)
+
   set_target_properties(
     crashpad_snapshot_test_image_reader_module
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}" PREFIX "")

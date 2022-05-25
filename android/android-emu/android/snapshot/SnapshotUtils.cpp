@@ -96,8 +96,7 @@ bool pullSnapshot(const char* snapshotName,
                 if (!succeed) {
                     return;
                 }
-                LOG(VERBOSE)
-                        << "Exported snapshot in " << sw.restartUs() << " us";
+                dprint("Exported snapshot in %" PRIu64 " us", sw.restartUs());
                 // iniFile_saveToFile returns 0 on succeed.
                 succeed = !iniFile_saveToFile(
                         avdInfo_getConfigIni(
@@ -169,8 +168,7 @@ bool pullSnapshot(const char* snapshotName,
                     succeed = false;
                     return;
                 }
-                LOG(VERBOSE)
-                        << "Completed writing in " << sw.restartUs() << " us";
+                dprint("Completed writing in %" PRIu64 " us", sw.restartUs());
                 // Now add in the metadata.
                 auto entries = base::System::get()->scanDirEntries(
                         snapshot->dataDir(), true);
@@ -189,7 +187,7 @@ bool pullSnapshot(const char* snapshotName,
                             PathUtils::asUnicodePath(fname).c_str(),
                             std::ios_base::in | std::ios_base::binary);
                     ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
-                    LOG(VERBOSE) << "Zipping " << name;
+                    dprint("Zipping %s", c_str(name).c_str());
                     if (android_stat(fname.c_str(), &sb) != 0 ||
                         !tw.addFileEntryFromStream(ifs, name, sb)) {
                         logError("Unable to tar " + fname, opaque, errConsumer);
@@ -197,7 +195,7 @@ bool pullSnapshot(const char* snapshotName,
                         break;
                     }
                 }
-                LOG(VERBOSE) << "Wrote metadata in " << sw.restartUs() << " us";
+                dprint("Wrote metadata in %" PRIu64 " us", sw.restartUs());
 
                 tw.close();
                 if (tw.fail()) {

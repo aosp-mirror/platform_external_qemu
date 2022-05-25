@@ -609,37 +609,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mUserActionsCounter->startCountingForMainWindow(this);
     mUserActionsCounter->startCountingForToolWindow(mToolWindow);
     mUserActionsCounter->startCountingForOverlayWindow(&mOverlay);
-
-    // The crash reporter will dump the last X UI events.
-    // mEventLogger is a shared pointer, capturing its copy inside a lambda
-    // ensures that it lives on as long as CrashReporter needs it, even if
-    // EmulatorQtWindow is destroyed.
-    auto eventLogger = mEventLogger;
-    CrashReporter::get()->addCrashCallback([eventLogger]() {
-        eventLogger->stop();
-        auto fd = CrashReporter::get()->openDataAttachFile(
-                "recent-ui-actions.txt");
-        if (fd.valid()) {
-            const auto& events = eventLogger->container();
-            for (int i = 0; i < events.size(); ++i) {
-                HANDLE_EINTR(
-                        write(fd.get(), events[i].data(), events[i].size()));
-                HANDLE_EINTR(write(fd.get(), "\n", 1));
-            }
-        }
-    });
-
-    auto userActions = mUserActionsCounter;
-    CrashReporter::get()->addCrashCallback([userActions]() {
-        char actions[16] = {};
-        snprintf(actions, sizeof(actions) - 1, "%" PRIu64,
-                 userActions->count());
-        char filename[32 + sizeof(actions)] = {};
-        snprintf(filename, sizeof(filename) - 1, "num-user-actions-%s.txt",
-                 actions);
-        CrashReporter::get()->attachData(filename, actions);
-    });
-
     std::weak_ptr<android::qt::UserActionsCounter> userActionsWeak(
             mUserActionsCounter);
     using android::metrics::PeriodicReporter;
@@ -2615,7 +2584,7 @@ void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
 void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     QRect windowGeo = this->geometry();
     if (!mBackingSurface) {
-        VLOG(foldable) << "backing surface not ready, cancel window adjustment";
+        VERBOSE_INFO(foldable, "backing surface not ready, cancel window adjustment");
         return;
     }
     QSize backingSize = mBackingSurface->bitmap->size();

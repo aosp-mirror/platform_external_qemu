@@ -222,18 +222,18 @@ android_target_dependency(android-grpc_unittest linux-x86_64
 set_property(TARGET android-grpc_unittest PROPERTY CXX_STANDARD 17)
 # Lets distribute the proto file
 install(
-  FILES
-    emulator_controller.proto
-    snapshot_service.proto
-    ui_controller_service.proto
-    ${ANDROID_QEMU2_TOP_DIR}/android/emu/protos/snapshot.proto
+  FILES emulator_controller.proto snapshot_service.proto
+        ui_controller_service.proto
+        ${ANDROID_QEMU2_TOP_DIR}/android/emu/protos/snapshot.proto
   DESTINATION lib)
 
 android_add_executable(
   TARGET qsn INSTALL . LICENSE Apache-2.0
   SRC # cmake-format: sortable
       android/emulation/control/QueryEmulator.cpp)
-target_link_libraries(qsn PRIVATE android-emu android-grpc libqemu2-glue)
+target_link_libraries(qsn PRIVATE android-emu android-grpc libqemu2-glue
+                                  android-emu-crashreport
+                                  android-emu-crashreport-consent-never)
 
 # Add the benchmark
 android_add_executable(

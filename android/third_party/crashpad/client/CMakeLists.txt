@@ -13,6 +13,7 @@ android_add_library(
   WINDOWS # cmake-format: sortable
           crash_report_database_win.cc)
 
+android_target_compile_definitions(crashpad_client_common windows PRIVATE UNICODE)
 target_link_libraries(crashpad_client_common PUBLIC crashpad_util)
 android_add_library(
   TARGET crashpad_client
@@ -27,6 +28,7 @@ android_add_library(
           crashpad_client_win.cc)
 
 target_link_libraries(crashpad_client PUBLIC crashpad_client_common)
+android_target_compile_definitions(crashpad_client windows PRIVATE UNICODE)
 android_target_link_libraries(crashpad_client_common linux-aarch64 PRIVATE crashpad_client)
 android_add_test(
   TARGET crashpad_client_test

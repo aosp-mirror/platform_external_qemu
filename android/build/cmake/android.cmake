@@ -1470,7 +1470,6 @@ function(android_build_qemu_variant)
                              PRIVATE ${qemu_build_DEFINITIONS})
   target_link_libraries(${qemu_build_EXE} PRIVATE ${QEMU_COMPLETE_LIB}
                                                   ${qemu_build_LIBRARIES})
-
   # Make the common dependency explicit, as some generators might not detect it
   # properly (Xcode/MSVC native)
   add_dependencies(${qemu_build_EXE} qemu2-common)
@@ -1515,7 +1514,9 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
               android-qemu-deps
               android-qemu-deps-headful
               emulator-libusb
-              ${WINDOWS_LAUNCHER})
+              ${WINDOWS_LAUNCHER}
+              android-emu-crashreport
+              android-emu-crashreport-consent-ui)
 endfunction()
 
 # Constructs the qemu headless executable.
@@ -1539,7 +1540,9 @@ function(android_add_qemu_headless_executable ANDROID_AARCH STUBS)
               emulator-libui-headless
               android-qemu-deps
               android-qemu-deps-headless
-              emulator-libusb)
+              emulator-libusb
+              android-emu-crashreport
+              android-emu-crashreport-consent-no-ui)
 endfunction()
 
 # Constructs the qemu upstream executable.
