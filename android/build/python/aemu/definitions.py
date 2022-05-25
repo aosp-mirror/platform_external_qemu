@@ -20,11 +20,9 @@ import platform
 import re
 import subprocess
 
-
 EXE_POSTFIX = ""
 if platform.system() == "Windows":
     EXE_POSTFIX = ".exe"
-
 
 AOSP_ROOT = ""
 
@@ -165,20 +163,35 @@ def infer_target(target):
             if aarch == "arm64":
                 aarch = "aarch64"
             if aarch != "aarch64":
-              aarch = "x86_64"
+                aarch = "x86_64"
 
             if host != target:
-                logging.warning("\n\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-                logging.warning("--- WARNNG ---  You are cross compiling on %s with target %s and did not specify a machine architecture. Assuming: %s", host, target, aarch)
-                logging.warning("--- WARNNG ---  If this does not work you should really specify the desired machine architecture")
-                logging.warning("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n")
+                logging.warning(
+                    "\n\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+                )
+                logging.warning(
+                    "--- WARNNG ---  You are cross compiling on %s with target %s and did not specify a machine architecture. Assuming: %s",
+                    host,
+                    target,
+                    aarch,
+                )
+                logging.warning(
+                    "--- WARNNG ---  If this does not work you should really specify the desired machine architecture"
+                )
+                logging.warning(
+                    "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n"
+                )
 
             target = target + "-" + aarch
         else:
             target = match.group(1) + "-" + match.group(3)
 
     if target not in ENUMS["Toolchain"]:
-        raise Exception("Target {} does not exist, we only support: {}.".format(target, ", ".join(ENUMS["Toolchain"].keys())))
+        raise Exception(
+            "Target {} does not exist, we only support: {}.".format(
+                target, ", ".join(list(ENUMS["Toolchain"].keys()))
+            )
+        )
 
     return target
 
