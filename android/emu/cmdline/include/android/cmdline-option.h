@@ -86,4 +86,6 @@ bool android_parse_debug_tags_option(const char* opt, bool parse_as_suffix);
  */
 #define DEFAULT_DEVICE_DPI 165
 
+bool android_validate_user_mode_networking_option(const char* opt);
+
 ANDROID_END_HEADER

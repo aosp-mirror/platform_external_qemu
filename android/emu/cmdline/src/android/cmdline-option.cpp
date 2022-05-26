@@ -1,14 +1,21 @@
 #include "android/cmdline-option.h"
+
+#include <android/utils/x86_cpuid.h>
+#include "android/base/ArraySize.h"
 #include "android/constants.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
-#include <android/utils/x86_cpuid.h>
+
+#include <algorithm>
 #include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
+#include <cstring>
+#include <sstream>
+#include <string>
+
 
 const AndroidOptions* android_cmdLineOptions = NULL;
 const char* android_cmdLine = NULL;
@@ -420,5 +427,35 @@ bool modem_simulator_parse_port_option(const char* port_string,
 
     *modem_simulator_port = port;
     dprint("Requested modem simulator port %d.", *modem_simulator_port);
+    return true;
+}
+
+static const char* kUserModeNetworkingOpts[] = {
+        "ipv4",     "ipv6",      "dhcpstart", "host",     "net",
+        "restrict", "ipv6-host", "ipv6-net",  "hostname", "tftp",
+        "bootfile", "hostfwd",   "guestfwd"};
+
+// Check if the option is defined in kUserModeNetworkingOpts.
+bool android_validate_user_mode_networking_option(const char* opt) {
+    std::stringstream ss(opt);
+    std::string line;
+    while (std::getline(ss, line, ',')) {
+        std::string::size_type n = line.find("=");
+        if (n == std::string::npos || n == line.size() - 1) {
+            dwarning("user mode networking option %s is invalid.", opt);
+            return false;
+        }
+        std::string config = line.substr(0, n);
+        auto end =
+                kUserModeNetworkingOpts + ARRAY_SIZE(kUserModeNetworkingOpts);
+        if (!std::any_of(kUserModeNetworkingOpts, end,
+                         [&config](const char* opt) {
+                             return strcmp(config.c_str(), opt) == 0;
+                         })) {
+            dwarning("user mode networking option %s is not allowed.",
+                     config.c_str());
+            return false;
+        }
+    }
     return true;
 }

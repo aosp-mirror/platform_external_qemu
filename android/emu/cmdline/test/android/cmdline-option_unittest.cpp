@@ -187,3 +187,20 @@ TEST(CmdLineOptions, parseModemSimulatorPort) {
     }
 }
 
+TEST(CmdLineOptions, validateUserModeNetworkingOption) {
+    struct {
+        const char* input;
+        bool expectSuccess;
+    } kData[] = {
+            {"ipv6=off,host=10.4.4.7,dhcpstart=10.4.4.4", true},
+            {"ipv6=off,host=10.4.4.7,dns=10.0.2.3", false},
+            {"", true},
+            {"ipv6=", false},
+            {",,", false},
+    };
+    for (const auto& data : kData) {
+        bool result = android_validate_user_mode_networking_option(data.input);
+        EXPECT_EQ(data.expectSuccess, result)
+                << "Failed on test case: (" << data.input << ")";
+    }
+}

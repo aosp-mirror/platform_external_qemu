@@ -2196,7 +2196,13 @@ extern "C" int main(int argc, char** argv) {
         if (opts->net_tap_script_down) {
             dwarning("-net-tap-script-down ignored without -net-tap option");
         }
-        args.add("user,id=mynet");
+        if (opts->network_user_mode_options &&
+            android_validate_user_mode_networking_option(
+                    opts->network_user_mode_options)) {
+            args.addFormat("user,id=mynet,%s", opts->network_user_mode_options);
+        } else {
+            args.add("user,id=mynet");
+        }
     }
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
@@ -2386,7 +2392,14 @@ extern "C" int main(int argc, char** argv) {
                         "-wifi-tap-script-down ignored without -wifi-tap "
                         "option");
             }
-            args.add("user,id=virtio-wifi,dhcpstart=10.0.2.16");
+            if (opts->wifi_user_mode_options &&
+                android_validate_user_mode_networking_option(
+                        opts->wifi_user_mode_options)) {
+                args.addFormat("user,id=virtio-wifi,%s",
+                               opts->wifi_user_mode_options);
+            } else {
+                args.add("user,id=virtio-wifi,dhcpstart=10.0.2.16");
+            }
         }
 
         args.add("-device");
