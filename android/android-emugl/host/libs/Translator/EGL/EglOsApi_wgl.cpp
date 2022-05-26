@@ -344,83 +344,65 @@ public:
         // Find the list of extensions.
         typedef const char* (GL_APIENTRY* GetExtensionsStringFunc)(HDC hdc);
 
+        const char* kWglGetExtensionsStringFuncNames[] = {
+            "wglGetExtensionsString",
+            "wglGetExtensionsStringARB",
+            "wglGetExtensionsStringEXT"
+        };
         const char* extensionList = nullptr;
-        GetExtensionsStringFunc wglGetExtensionsString =
+        for (const char* wglGetExtensionsStringFuncName :
+                kWglGetExtensionsStringFuncNames) {
+            GetExtensionsStringFunc wglGetExtensionsString =
                 reinterpret_cast<GetExtensionsStringFunc>(
-                        this->findFunction("wglGetExtensionsStringARB"));
+                    findFunction(wglGetExtensionsStringFuncName));
 
-        bool foundArb = wglGetExtensionsString != nullptr;
-
-        if (wglGetExtensionsString) {
-            extensionList = wglGetExtensionsString(hdc);
-        }
-
-        bool extensionListArbNull = extensionList == nullptr;
-        bool extensionListArbEmpty = !extensionListArbNull && !strcmp(extensionList, "");
-
-        bool foundExt = false;
-        bool extensionListExtNull = false;
-        bool extensionListExtEmpty = false;
-
-        // wglGetExtensionsStringARB failed, try wglGetExtensionsStringEXT.
-        if (!extensionList || !strcmp(extensionList, "")) {
-            wglGetExtensionsString =
-                reinterpret_cast<GetExtensionsStringFunc>(
-                        this->findFunction("wglGetExtensionsStringEXT"));
-
-            foundExt = wglGetExtensionsString != nullptr;
 
             if (wglGetExtensionsString) {
                 extensionList = wglGetExtensionsString(hdc);
             }
+
+            bool extensionListNull = extensionList == nullptr;
+            bool extensionListEmpty = !extensionListNull
+                    && 0 == strcmp(extensionList, "");
+
+            GL_LOG("%s found %d listNull/empty %d %d\n",
+                wglGetExtensionsStringFuncName,
+                wglGetExtensionsString != nullptr,
+                extensionListNull, extensionListEmpty);
+            if (!extensionListNull && !extensionListEmpty) {
+                break;
+            }
         }
-
-        extensionListExtNull = extensionList == nullptr;
-        extensionListExtEmpty = !extensionListExtNull && !strcmp(extensionList, "");
-
-        // Both failed, suicide.
-        if (!extensionList || !strcmp(extensionList, "")) {
+        if (extensionList == nullptr || 0 == strcmp(extensionList, "")) {
             bool isRemoteSession = GetSystemMetrics(SM_REMOTESESSION);
 
             WGL_ERR(
-                "%s: Could not find wglGetExtensionsString! "
-                "arbFound %d listarbNull/empty %d %d "
-                "extFound %d extNull/empty %d %d remote %d\n",
+                "%s: Could not find wglGetExtensionsString! remote %d\n"
+                "Maybe try updating graphics card driver, or disconnect "
+                "external displays?",
                 __FUNCTION__,
-                foundArb,
-                extensionListArbNull,
-                extensionListArbEmpty,
-                foundExt,
-                extensionListExtNull,
-                extensionListExtEmpty,
                 isRemoteSession);
-
-            return false;
         }
 
         // Load each extension individually.
 #define LOAD_WGL_EXTENSION_FUNCTION(return_type, function_name, signature) \
-    this->function_name = reinterpret_cast< \
-            return_type (GL_APIENTRY*) signature>( \
-                    this->findFunction(#function_name "ARB")); \
-    if (!this->function_name) { \
         this->function_name = reinterpret_cast< \
                 return_type (GL_APIENTRY*) signature>( \
-                        this->findFunction(#function_name "EXT")); \
-    } \
-    if (!this->function_name) { \
-        WGL_ERR("ERROR: %s: Missing extension function %s\n", __FUNCTION__, \
-            #function_name); \
-        result = false; \
-    }
+                        this->findFunction(#function_name "ARB")); \
+        if (!this->function_name) { \
+            this->function_name = reinterpret_cast< \
+                    return_type (GL_APIENTRY*) signature>( \
+                            this->findFunction(#function_name "EXT")); \
+        } \
+        if (!this->function_name) { \
+            WGL_ERR("ERROR: %s: Missing extension function %s\n", __FUNCTION__, \
+                #function_name); \
+            result = false; \
+        }
 
+        // Try our best to load
 #define LOAD_WGL_EXTENSION(extension) \
-    if (supportsExtension("WGL_ARB_" #extension, extensionList) || \
-        supportsExtension("WGL_EXT_" #extension, extensionList)) { \
-        LIST_##extension##_FUNCTIONS(LOAD_WGL_EXTENSION_FUNCTION) \
-    } else { \
-        WGL_ERR("WARNING: %s: Missing WGL extension %s\n", __FUNCTION__, #extension); \
-    }
+            LIST_##extension##_FUNCTIONS(LOAD_WGL_EXTENSION_FUNCTION)
 
         LOAD_WGL_EXTENSION(pixel_format)
         LOAD_WGL_EXTENSION(make_current_read)
