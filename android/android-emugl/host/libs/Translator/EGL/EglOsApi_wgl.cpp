@@ -382,7 +382,6 @@ public:
                 "external displays?",
                 __FUNCTION__,
                 isRemoteSession);
-            return false;
         }
 
         // Load each extension individually.
@@ -401,13 +400,9 @@ public:
             result = false; \
         }
 
+        // Try our best to load
 #define LOAD_WGL_EXTENSION(extension) \
-        if (supportsExtension("WGL_ARB_" #extension, extensionList) || \
-            supportsExtension("WGL_EXT_" #extension, extensionList)) { \
-            LIST_##extension##_FUNCTIONS(LOAD_WGL_EXTENSION_FUNCTION) \
-        } else { \
-            WGL_ERR("WARNING: %s: Missing WGL extension %s\n", __FUNCTION__, #extension); \
-        }
+            LIST_##extension##_FUNCTIONS(LOAD_WGL_EXTENSION_FUNCTION)
 
         LOAD_WGL_EXTENSION(pixel_format)
         LOAD_WGL_EXTENSION(make_current_read)
