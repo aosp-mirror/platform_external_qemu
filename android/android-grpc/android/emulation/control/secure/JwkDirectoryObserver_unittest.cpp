@@ -189,6 +189,9 @@ TEST_F(JwkDirectoryObserverTest, create_and_validate) {
 }
 
 TEST_F(JwkDirectoryObserverTest, create_multi_and_validate) {
+    #ifdef __APPLE__
+    GTEST_SKIP() << "This test is flaky on the build bots: b/233946633";
+    #endif
     // Let's generate a series of json keys
     writeEs512("valid1.jwk");
     writeEs512("valid2.jwk");
@@ -208,6 +211,9 @@ TEST_F(JwkDirectoryObserverTest, create_multi_and_validate) {
 }
 
 TEST_F(JwkDirectoryObserverTest, create_validate_and_delete) {
+    #ifdef __APPLE__
+    GTEST_SKIP() << "This test is flaky on the build bots: b/233946633";
+    #endif
     // Let's generate a series of json keys
     writeEs512("valid1.jwk");
     writeEs512("valid2.jwk");
