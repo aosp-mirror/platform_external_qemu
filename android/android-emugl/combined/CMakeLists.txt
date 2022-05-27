@@ -97,6 +97,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     # Third party dependencies
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/angle ${GFXSTREAM_PREFIX}-third-party-angle)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/renderdoc ${GFXSTREAM_PREFIX}-third-party-renderdoc)
+    add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/stb ${GFXSTREAM_PREFIX}-third-party-stb)
 
     # Common base libraries for host################################################
 
