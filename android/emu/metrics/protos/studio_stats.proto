@@ -1505,7 +1505,8 @@ message EmulatorFeatureFlagState {
         HWC_MULTI_CONFIGS = 87;
         ASYNC_COMPOSE_SUPPORT = 88;
         VIRTIO_SND_CARD = 89;
-        // Next tag: 90
+        VIRTIO_TABLET = 90;
+        // Next tag: 91
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

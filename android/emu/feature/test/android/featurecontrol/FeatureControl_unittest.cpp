@@ -369,6 +369,7 @@ Feature: 'BluetoothEmulation' (82), value: 0, default: 0, is overridden: 0
 Feature: 'DeviceStateOnBoot' (83), value: 0, default: 0, is overridden: 0
 Feature: 'HWCMultiConfigs' (84), value: 0, default: 0, is overridden: 0
 Feature: 'VirtioSndCard' (85), value: 0, default: 0, is overridden: 0
+Feature: 'VirtioTablet' (86), value: 0, default: 0, is overridden: 0
 )#";
     EXPECT_EQ(feature_list, ss.str());
 }
