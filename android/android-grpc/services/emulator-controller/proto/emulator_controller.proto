@@ -73,8 +73,9 @@ service EmulatorController {
     rpc getBattery(google.protobuf.Empty) returns (BatteryState) {}
 
     // Set the state of the gps.
-    // Note: Setting the gps position will not be reflected in the user interface.
-    // Keep in mind that android usually only samples the gps at 1 hz.
+    // Note: Setting the gps position will not be reflected in the user
+    // interface. Keep in mind that android usually only samples the gps at 1
+    // hz.
     rpc setGps(GpsState) returns (google.protobuf.Empty) {}
 
     // Gets the latest gps state as delivered by the setGps call, or location ui
@@ -668,19 +669,19 @@ message MouseEvent {
 }
 
 message WheelEvent {
-  // The value indicating how much the mouse wheel is rotated. Scaled so that
-  // 120 equals to 1 wheel click. (120 is chosen as a multiplier often used to
-  // represent wheel movements less than 1 wheel click. e.g.
-  // https://doc.qt.io/qt-5/qwheelevent.html#angleDelta) Positive delta value
-  // is assigned to dx when the top of wheel is moved to left. Similarly
-  // positive delta value is assigned to dy when the top of wheel is moved
-  // away from the user.
-  int32 dx = 1;
-  int32 dy = 2;
+    // The value indicating how much the mouse wheel is rotated. Scaled so that
+    // 120 equals to 1 wheel click. (120 is chosen as a multiplier often used to
+    // represent wheel movements less than 1 wheel click. e.g.
+    // https://doc.qt.io/qt-5/qwheelevent.html#angleDelta) Positive delta value
+    // is assigned to dx when the top of wheel is moved to left. Similarly
+    // positive delta value is assigned to dy when the top of wheel is moved
+    // away from the user.
+    int32 dx = 1;
+    int32 dy = 2;
 
-  // The display device where the mouse event occurred.
-  // Omitting or using the value 0 indicates the main display.
-  int32 display = 3;
+    // The display device where the mouse event occurred.
+    // Omitting or using the value 0 indicates the main display.
+    int32 display = 3;
 }
 
 // KeyboardEvent objects describe a user interaction with the keyboard; each
@@ -1234,7 +1235,32 @@ message Notification {
         // Keep adding more for other event types
     }
 
-    EventType event = 1;
+    // Deprecated, use the type below to get detailed information
+    // regarding the event.
+    EventType event = 1 [deprecated = true];
+
+    // Detailed notification information.
+    oneof type {
+        CameraNotification cameraNotification = 2;
+        DisplayConfigurationsChangedNotification
+                displayConfigurationsChangedNotification = 3;
+    }
+}
+
+// Fired when the virtual scene camera is activated or deactivated and also in
+// response to the streamNotification call.
+message CameraNotification {
+    // Indicates whether the camera app was activated or deactivated.
+    bool active = 1;
+    // The display the camera app is associated with.
+    int32 display = 2;
+}
+
+// Fired when an update to a display event has been fired through the extended
+// ui. This does not fire events when the display is changed through the console
+// or the gRPC endpoint.
+message DisplayConfigurationsChangedNotification {
+    DisplayConfigurations displayConfigurations = 1;
 }
 
 message RotationRadian {
