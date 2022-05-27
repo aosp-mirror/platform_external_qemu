@@ -2148,6 +2148,25 @@ help_vmnet(stralloc_t*  out)
            "virtual NIC is connected to. \n\n");
 }
 
+static void help_wifi_user_mode_options(stralloc_t* out) {
+    PRINTF("Override default user mode networking option for wifi network in \n"
+           "Android Emulator for API 31 and above. It has no effect on wifi "
+           "network\n"
+           "for API 30 and below"
+           " Example: -wifi-user-mode-options "
+           "ipv6=off,host=10.4.4.7,dhcpstart=10.4.4.4\n\n");
+}
+
+static void help_network_user_mode_options(stralloc_t* out) {
+    PRINTF("Override default user mode networking option for both radio and "
+           "wifi network in "
+           "Android Emulator for API 30 and below. Override default user mode "
+           "networking option"
+           "for radio network for API 31 and above."
+           " Example: -radio-user-mode-options "
+           "ipv6=off,host=10.4.4.7,dhcpstart=10.4.4.4\n\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

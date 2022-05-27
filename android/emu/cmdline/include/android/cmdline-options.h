@@ -313,6 +313,18 @@ OPT_PARAM(vmnet,
           " Use this network <interface> and enable vmnet framework as the "
           "backend of tap netdev on MacOS.")
 
+OPT_PARAM(wifi_user_mode_options,
+          "<option list>",
+          "Override default user mode networking option for wifi network in "
+          "Android Emulator for API 31 and above.")
+
+OPT_PARAM(network_user_mode_options,
+          "<option list>",
+          "Override default user mode networking option for both radio and "
+          "wifi network in "
+          "Android Emulator for API 30 and below. Override default user mode "
+          "networking option"
+          "for radio network for API 31 and above.")
 
 #undef CFG_FLAG
 #undef CFG_PARAM

@@ -186,4 +186,3 @@ TEST(CmdLineOptions, parseModemSimulatorPort) {
                 << "Failed on test case: (" << data.input << ")";
     }
 }
-
