@@ -31,10 +31,15 @@
 
 #include <functional>
 #include <optional>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <vector>
 
-#include "common/vk_struct_id.h"
 #include "VkCommonOperations.h"
 #include "android/utils/GfxstreamFatalError.h"
+#include "common/vk_struct_id.h"
+#include "vk_fn_info.h"
 
 struct vk_struct_common {
     VkStructureType sType;
@@ -355,6 +360,34 @@ class RecordImageLayoutTransformCommands : public U {
                                        nullptr, 0, nullptr, 1, &imageBarrier);
     }
 };
+
+template <class T>
+typename vk_fn_info::GetVkFnInfo<T>::type getVkInstanceProcAddrWithFallback(
+    const std::vector<std::function<std::remove_pointer_t<PFN_vkGetInstanceProcAddr>>>
+        &vkGetInstanceProcAddrs,
+    VkInstance instance) {
+    for (const auto &vkGetInstanceProcAddr : vkGetInstanceProcAddrs) {
+        if (!vkGetInstanceProcAddr) {
+            continue;
+        }
+        PFN_vkVoidFunction resWithCurrentVkGetInstanceProcAddr = std::apply(
+            [&vkGetInstanceProcAddr, instance](auto &&...names) -> PFN_vkVoidFunction {
+                for (const char *name : {names...}) {
+                    if (PFN_vkVoidFunction resWithCurrentName =
+                            vkGetInstanceProcAddr(instance, name)) {
+                        return resWithCurrentName;
+                    }
+                }
+                return nullptr;
+            },
+            vk_fn_info::GetVkFnInfo<T>::names);
+        if (resWithCurrentVkGetInstanceProcAddr) {
+            return reinterpret_cast<typename vk_fn_info::GetVkFnInfo<T>::type>(
+                resWithCurrentVkGetInstanceProcAddr);
+        }
+    }
+    return nullptr;
+}
 }  // namespace vk_util
 
 #endif /* VK_UTIL_H */
