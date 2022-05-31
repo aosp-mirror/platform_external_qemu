@@ -72,11 +72,7 @@ aosp_dir_parse_option () {
     fi
 
     AOSP_DIR=$(cd "$AOSP_DIR" && pwd -P 2>/dev/null)
-    AOSP_PREBUILTS_GCC_DIR=$AOSP_DIR/prebuilts/gcc
     AOSP_PREBUILTS_CLANG_DIR=$AOSP_DIR/prebuilts/clang
-    if [ ! -d "$AOSP_PREBUILTS_GCC_DIR" ]; then
-        panic "Not a valid AOSP tree: missing directory: $AOSP_PREBUILTS_GCC_DIR"
-    fi
     if [ ! -d "$AOSP_PREBUILTS_CLANG_DIR" ]; then
         panic "Not a valid AOSP tree: missing directory: $AOSP_PREBUILTS_CLANG_DIR"
     fi
