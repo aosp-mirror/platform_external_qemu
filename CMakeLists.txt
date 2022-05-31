@@ -4,6 +4,12 @@ cmake_minimum_required(VERSION 3.12)
 find_package(Python2 COMPONENTS Interpreter)
 find_package(Python3 COMPONENTS Interpreter)
 
+# Let's setup a compiler cache.
+if (NOT WINDOWS_MSVC_X86_64 AND OPTION_CCACHE)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${OPTION_CCACHE}")
+    message(STATUS "Using ${OPTION_CCACHE} as a compiler cache.")
+endif()
+
 set(Python_EXECUTABLE ${Python2_EXECUTABLE})
 if (NOT Python2_FOUND)
     if (NOT Python3_FOUND)
@@ -184,7 +190,11 @@ set(protobuf_BUILD_SHARED_LIBS TRUE)
 
 # Enable C++17 in C++ (Note, cmake does not set the proper flags when using
 # CXX_STANDARD) with our custom clang.
-add_cxx_flag("-std=c++17")
+if(WINDOWS_MSVC_X86_64)
+  add_cxx_flag("-std:c++17")
+else()
+  add_cxx_flag("-std=c++17")
+endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -264,7 +274,11 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions("-DANDROID_DEBUG")
-  add_c_flag("-O0 -g3")
+  if (NOT WINDOWS_MSVC_X86_64)
+    add_c_flag("-O0 -g3")
+  else()
+    add_c_flag("-Zi -Od")
+  endif()
 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CROSSCOMPILE)
     if(NOT OPTION_ASAN AND OPTION_ASAN_IN_DEBUG)
@@ -326,7 +340,7 @@ else()
 endif()
 
 # Note that clang in windows act as a drop in replacement for cl
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if(NOT WINDOWS_MSVC_X86_64 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_definitions("-D__STDC_CONSTANT_MACROS" "-D_LIBCPP_VERSION=__GLIBCPP__")
 
   # If macro expansion goes wrong, we like to see why
@@ -379,7 +393,9 @@ if(OPTION_CLANG_TIDY)
   set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "${DO_FIX}")
 endif()
 
-add_c_flag("-g")
+if (NOT WINDOWS_MSVC_X86_64)
+  add_c_flag("-g")
+endif()
 
 
 # Compiling with -fno-exceptions disables exceptions support and uses the
@@ -390,7 +406,9 @@ add_c_flag("-g")
 # being linked contain exceptions. If an exception propagates into a function
 # that has been compiled without exceptions support, then the program
 # terminates.
-add_cxx_flag("-fno-exceptions")
+if (NOT WINDOWS_MSVC_X86_64)
+  add_cxx_flag("-fno-exceptions")
+endif()
 add_cxx_flag("-Wno-invalid-offsetof")
 add_cxx_flag("-Wno-implicit-int-float-conversion")
 
@@ -609,7 +627,12 @@ target_compile_options(
   INTERFACE "-Werror=implicit-function-declaration"
             "-Wno-unused-function"
             "-Wno-address-of-packed-member"
-            "-Wno-shift-negative-value"
+            "-Wno-shift-negative-value")
+
+if (NOT WINDOWS_MSVC_X86_64)
+  target_compile_options(
+    android-qemu-deps
+    INTERFACE
             # Do not allow the compiler to assume the strictest aliasing rules
             # applicable to the language being compiled. For C (and C++), this
             # activates optimizations based on the type of expressions. In
@@ -618,23 +641,24 @@ target_compile_options(
             # types are almost the same. Supposedly this can introduce weird
             # failures esp. on older gcc versions (MINGW) (See
             # http://thiemonagel.de/2010/01/no-strict-aliasing/)
-            "-fno-strict-aliasing")
+            "-fno-strict-aliasing"
 
-# This option instructs the compiler to assume that signed arithmetic overflow
-# of addition, subtraction and multiplication wraps around using twos-complement
-# representation. This flag enables some optimizations and disables others. The
-# options -ftrapv and -fwrapv override each other, so using -ftrapv -fwrapv on
-# the command-line results in -fwrapv being effective. Qemu is using this, so we
-# use it as well. "-fwrapv" The -fno- common option specifies that the compiler
-# should instead place uninitialized global variables in the data section of the
-# object file.  This inhibits the merging of tentative definitions by the linker
-# so you get a multiple- definition error if the same variable is defined in
-# more than one compilation unit.  Compiling with -fno- common is useful on
-# targets for which it provides better performance, or if you wish to verify
-# that the program will work on other systems that always treat uninitialized
-# variable definitions this way.  Remove this and you'll get all sorts of fun
-# linker issues.
-target_compile_options(android-qemu-deps INTERFACE "-fno-common")
+            # This option instructs the compiler to assume that signed arithmetic overflow
+            # of addition, subtraction and multiplication wraps around using twos-complement
+            # representation. This flag enables some optimizations and disables others. The
+            # options -ftrapv and -fwrapv override each other, so using -ftrapv -fwrapv on
+            # the command-line results in -fwrapv being effective. Qemu is using this, so we
+            # use it as well. "-fwrapv" The -fno- common option specifies that the compiler
+            # should instead place uninitialized global variables in the data section of the
+            # object file.  This inhibits the merging of tentative definitions by the linker
+            # so you get a multiple- definition error if the same variable is defined in
+            # more than one compilation unit.  Compiling with -fno- common is useful on
+            # targets for which it provides better performance, or if you wish to verify
+            # that the program will work on other systems that always treat uninitialized
+            # variable definitions this way.  Remove this and you'll get all sorts of fun
+            # linker issues. 
+            "-fno-common")
+endif()
 
 # Make sure we make our dependent libraries available.
 target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN
@@ -714,7 +738,7 @@ android_target_compile_options(
   "-Wno-address-of-packed-member"
   "-Wno-address-of"
   "-Wno-gnu-variable-sized-type-not-at-end"
-  "-mms-bitfields"
+  # "-mms-bitfields" # We are using clang-cl so this is not needed
   "-mcx16"
   "-Wno-implicit-int-float-conversion"
   "-Wno-reorder-init-list")

@@ -22,17 +22,12 @@ import os
 import platform
 import shutil
 import sys
+import time
+from distutils.spawn import find_executable
 
-from aemu.definitions import (
-    ENUMS,
-    find_aosp_root,
-    get_aosp_root,
-    get_cmake,
-    get_qemu_root,
-    infer_target,
-    read_simple_properties,
-    set_aosp_root,
-)
+from aemu.definitions import (ENUMS, find_aosp_root, get_aosp_root, get_cmake,
+                              get_qemu_root, infer_target,
+                              read_simple_properties, set_aosp_root)
 from aemu.distribution import create_distribution
 from aemu.process import run
 from aemu.run_tests import run_tests
@@ -137,6 +132,10 @@ def configure(args, target):
     if args.gfxstream_only:
         cmake_cmd += ["-DGFXSTREAM_ONLY=%s" % args.gfxstream_only]
 
+    ccache = find_ccache(args.ccache, platform.system().lower())  
+    if ccache:
+        cmake_cmd += ["-DOPTION_CCACHE=%s" % ccache]
+
     cmake_cmd += ENUMS["Generator"][args.generator]
     cmake_cmd += [get_qemu_root()]
 
@@ -160,7 +159,34 @@ def get_build_cmd(args):
     return [get_cmake(), "--build", args.out, "--target", target]
 
 
+def find_ccache(cache, host):
+    """Locates the cache executable as a posix path"""
+    if cache == "none" or cache == None:
+        return None
+    if cache != "auto":
+        return cache.replace('\\', '/')
+
+    if host != "windows":
+        # prefer ccache for local builds, it is slightly faster
+        # but does not work on windows.
+        ccache = find_executable("ccache")
+        if ccache:
+            return ccache
+
+    # Our build bots use sccache, so we will def. have it
+    search_dir = os.path.join(
+            get_aosp_root(),
+            "prebuilts",
+            "android-emulator-build",
+            "common",
+            "sccache",
+            "{}-x86_64".format(host),
+    )
+    return find_executable("sccache", search_dir).replace('\\', '/')
+    
+
 def main(args):
+    start_time = time.time()
     version = sys.version_info
     target = infer_target(args.target)
     logging.info(
@@ -176,7 +202,8 @@ def main(args):
 
     # Build
     run(get_build_cmd(args), None, {"NINJA_STATUS": "[ninja] "})
-
+    logging.info("Completed build in %d seconds", time.time()-start_time)
+    
     # Test.
     if args.tests:
         cross_compile = platform.system().lower() != args.target
@@ -202,6 +229,7 @@ def main(args):
         logging.info("Creating distribution.")
         create_distribution(args.dist, args.out, data)
 
+    
     if platform.system() != "Windows" and args.config == "debug":
         overrides = open(
             os.path.join(get_qemu_root(), "android", "asan_overrides")
@@ -358,6 +386,11 @@ def launch():
         dest="aosp",
         default=find_aosp_root(),
         help="AOSP directory ({})".format(find_aosp_root()),
+    )
+
+    parser.add_argument(
+        "--ccache",
+        help="Use a compiler cache, set to auto to infer on, or none if omitted.",
     )
 
     args, leftover = parser.parse_known_args()

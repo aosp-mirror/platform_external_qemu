@@ -25,4 +25,4 @@ if ! exists $PYTHON; then
     echo "This mmight not work with QEMU dependencies (b/229251286)!" 
 fi
 
-$PYTHON $PROGDIR/build/python/cmake.py   $*
+$PYTHON $PROGDIR/build/python/cmake.py --ccache auto $*

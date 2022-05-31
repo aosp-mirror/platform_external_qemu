@@ -110,7 +110,6 @@ if [ "$OPT_CCACHE" ]; then
         panic "Missing ccache program: $OPT_CCACHE"
     fi
 elif [ -z "$OPT_NO_CCACHE" ]; then
-    CCACHE=$(find_program ccache)
     if [ "$CCACHE" ]; then
         log2 "Auto-config: --ccache=$CCACHE"
     fi
