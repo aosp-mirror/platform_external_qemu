@@ -28,6 +28,14 @@ static inline void qemu_put_be64(QEMUFile*, uint64_t) { }
 static inline void qemu_put_be32(QEMUFile*, uint32_t) { }
 
 static inline void qemu_put_buffer(QEMUFile*, const uint8_t*, int) { }
-static inline void qemu_get_buffer(QEMUFile*, uint8_t*, int) { }
+static inline size_t qemu_get_buffer(QEMUFile*, uint8_t*, int) {
+    return 0;
+}
+static inline size_t qemu_peek_buffer(QEMUFile* f,
+                                      uint8_t** buf,
+                                      size_t size,
+                                      size_t offset) {
+    return 0;
+}
 
 static inline void* cpu_physical_memory_map(hwaddr, size_t*, int) { return 0; }

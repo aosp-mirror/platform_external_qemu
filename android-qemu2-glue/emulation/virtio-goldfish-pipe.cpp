@@ -27,7 +27,9 @@ extern "C" {
 #include "android/utils/GfxstreamFatalError.h"
 
 #include <deque>
+#include <type_traits>
 #include <unordered_map>
+#include "flatbuffers/flatbuffers.h"
 
 #include "VirtioGpuTimelines.h"
 
@@ -1493,8 +1495,10 @@ public:
             saveResourceContextList(file, it.first, it.second);
         }
 
-        // TODO(kaiyili): save mVirtioGpuTimelines to the snapshot.
-
+        std::vector<uint8_t> timelinesSnapshot =
+                mVirtioGpuTimelines->saveSnapshot();
+        qemu_put_buffer(file, timelinesSnapshot.data(),
+                        timelinesSnapshot.size());
         auto ops = ensureAndGetServiceOps();
         ops->guest_post_save(file);
     }
@@ -1545,7 +1549,7 @@ public:
             mResourceContexts[resId] = ids;
         }
 
-        // TODO(kaiyili): load mVirtioGpuTimelines from the snapshot.
+        loadVirtioGpuTimelines(file);
         auto ops = ensureAndGetServiceOps();
         ops->guest_post_load(file);
     }
@@ -1839,6 +1843,27 @@ private:
         }
 
         return res;
+    }
+
+    void loadVirtioGpuTimelines(QEMUFile* file) {
+        using flatbuffers::uoffset_t;
+        uint8_t* prefixedSizeBuf = nullptr;
+        if (qemu_peek_buffer(file, &prefixedSizeBuf, sizeof(uoffset_t), 0) !=
+            sizeof(uoffset_t)) {
+            VGP_FATAL()
+                    << "Failed to read the virtio-gpu timeline prefixed size.";
+        }
+        uoffset_t size = flatbuffers::GetPrefixedSize(prefixedSizeBuf) +
+                         sizeof(uoffset_t);
+        std::unique_ptr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(size);
+        size_t bytesRead = qemu_get_buffer(file, buffer.get(), size);
+        if (bytesRead != size) {
+            VGP_FATAL() << "Failed to read the virtio-gpu timeline buffer. "
+                           "Expected "
+                        << size << " bytes read, actual " << bytesRead
+                        << " read.";
+        }
+        mVirtioGpuTimelinesSnapshot = std::move(buffer);
     }
 
     FenceCompletionCallback generateFenceCompletionCallback(
