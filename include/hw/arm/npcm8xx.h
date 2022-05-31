@@ -31,7 +31,8 @@
 #include "hw/misc/npcm7xx_pci_mbox.h"
 #include "hw/misc/npcm7xx_pwm.h"
 #include "hw/misc/npcm7xx_rng.h"
-#include "hw/net/npcm7xx_emc.h"
+#include "hw/net/npcm_gmac.h"
+#include "hw/net/npcm_pcs.h"
 #include "hw/nvram/npcm7xx_otp.h"
 #include "hw/peci/npcm7xx_peci.h"
 #include "hw/pci-host/npcm_pcierc.h"
@@ -83,6 +84,8 @@ typedef struct NPCM8xxState {
     EHCISysBusState     ehci[2];
     OHCISysBusState     ohci[2];
     NPCM7xxFIUState     fiu[3];
+    NPCMGMACState       gmac[4];
+    NPCMPCSState        pcs;
     NPCM7xxPCIMBoxState pci_mbox[2];
     NPCM7xxSDHCIState   mmc;
     NPCM7xxPECIState    peci;

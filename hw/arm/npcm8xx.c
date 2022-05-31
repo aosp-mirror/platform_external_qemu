@@ -74,6 +74,9 @@
 /* SDHCI Modules */
 #define NPCM8XX_MMC_BA          (0xf0842000)
 
+/* PCS Module */
+#define NPCM8XX_PCS_BA          (0xf0780000)
+
 /* Run PLL1 at 1600 MHz */
 #define NPCM8XX_PLLCON1_FIXUP_VAL   (0x00402101)
 /* Run the CPU from PLL1 and UART from PLL2 */
@@ -89,6 +92,10 @@ enum NPCM8xxInterrupt {
     NPCM8XX_ADC_IRQ             = 0,
     NPCM8XX_PECI_IRQ            = 6,
     NPCM8XX_KCS_HIB_IRQ         = 9,
+    NPCM8XX_GMAC1_IRQ           = 14,
+    NPCM8XX_GMAC2_IRQ,
+    NPCM8XX_GMAC3_IRQ,
+    NPCM8XX_GMAC4_IRQ,
     NPCM8XX_MMC_IRQ             = 26,
     NPCM8XX_TIMER0_IRQ          = 32,   /* Timer Module 0 */
     NPCM8XX_TIMER1_IRQ,
@@ -261,6 +268,14 @@ static const hwaddr npcm8xx_smbus_addr[] = {
     0xfff08000,
     0xfff09000,
     0xfff0a000,
+};
+
+/* Register base address for each GMAC Module */
+static const hwaddr npcm8xx_gmac_addr[] = {
+    0xf0802000,
+    0xf0804000,
+    0xf0806000,
+    0xf0808000,
 };
 
 /* Register base address for each USB host EHCI registers */
@@ -454,6 +469,11 @@ static void npcm8xx_init(Object *obj)
     for (i = 0; i < ARRAY_SIZE(s->mft); i++) {
         object_initialize_child(obj, "mft[*]", &s->mft[i], TYPE_NPCM7XX_MFT);
     }
+
+    for (i = 0; i < ARRAY_SIZE(s->gmac); i++) {
+        object_initialize_child(obj, "gmac[*]", &s->gmac[i], TYPE_NPCM_GMAC);
+    }
+    object_initialize_child(obj, "pcs", &s->pcs, TYPE_NPCM_PCS);
 
     for (i = 0; i < ARRAY_SIZE(s->pci_mbox); i++) {
         object_initialize_child(obj, "pci-mbox[*]", &s->pci_mbox[i],
@@ -694,6 +714,33 @@ static void npcm8xx_realize(DeviceState *dev, Error **errp)
     }
 
     /*
+     * GMAC Modules. Cannot fail.
+     */
+    QEMU_BUILD_BUG_ON(ARRAY_SIZE(npcm8xx_gmac_addr) != ARRAY_SIZE(s->gmac));
+    for (i = 0; i < ARRAY_SIZE(s->gmac); i++) {
+        SysBusDevice *sbd = SYS_BUS_DEVICE(&s->gmac[i]);
+
+        /*
+         * The device exists regardless of whether it's connected to a QEMU
+         * netdev backend. So always instantiate it even if there is no
+         * backend.
+         */
+        sysbus_realize(sbd, &error_abort);
+        sysbus_mmio_map(sbd, 0, npcm8xx_gmac_addr[i]);
+        /*
+         * N.B. The values for the second argument sysbus_connect_irq are
+         * chosen to match the registration order in npcm7xx_emc_realize.
+         */
+        sysbus_connect_irq(sbd, 0, npcm8xx_irq(s, NPCM8XX_GMAC1_IRQ + i));
+    }
+    /*
+     * GMAC Physical Coding Sublayer(PCS) Module. Cannot fail.
+     */
+    sysbus_realize(SYS_BUS_DEVICE(&s->pcs), &error_abort);
+    sysbus_mmio_map(SYS_BUS_DEVICE(&s->pcs), 0, NPCM8XX_PCS_BA);
+    s->gmac[0].pcs = &s->pcs;
+
+    /*
      * Flash Interface Unit (FIU). Can fail if incorrect number of chip selects
      * specified, but this is a programming error.
      */
@@ -780,12 +827,7 @@ static void npcm8xx_realize(DeviceState *dev, Error **errp)
     create_unimplemented_device("npcm8xx.ahbpci",       0xf0400000,   1 * MiB);
     create_unimplemented_device("npcm8xx.dap",          0xf0500000, 960 * KiB);
     create_unimplemented_device("npcm8xx.mcphy",        0xf05f0000,  64 * KiB);
-    create_unimplemented_device("npcm8xx.pcs",          0xf0780000, 256 * KiB);
     create_unimplemented_device("npcm8xx.tsgen",        0xf07fc000,   8 * KiB);
-    create_unimplemented_device("npcm8xx.gmac1",        0xf0802000,   8 * KiB);
-    create_unimplemented_device("npcm8xx.gmac2",        0xf0804000,   8 * KiB);
-    create_unimplemented_device("npcm8xx.gmac3",        0xf0806000,   8 * KiB);
-    create_unimplemented_device("npcm8xx.gmac4",        0xf0808000,   8 * KiB);
     create_unimplemented_device("npcm8xx.copctl",       0xf080c000,   4 * KiB);
     create_unimplemented_device("npcm8xx.tipctl",       0xf080d000,   4 * KiB);
     create_unimplemented_device("npcm8xx.rst",          0xf080e000,   4 * KiB);
