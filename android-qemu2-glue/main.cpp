@@ -665,6 +665,9 @@ static void initialize_virtio_input_devs(android::ParameterList& args, AndroidHw
         if (fc::isEnabled(fc::VirtioMouse)) {
             args.add("-device");
             args.add("virtio-mouse-pci");
+        } else if (fc::isEnabled(fc::VirtioTablet)) {
+            args.add("-device");
+            args.add("virtio-tablet-pci");
         } else if (androidHwConfig_isScreenMultiTouch(hw)) {
             for (int id = 1; id <= VIRTIO_INPUT_MAX_NUM; id++) {
                 args.add("-device");
