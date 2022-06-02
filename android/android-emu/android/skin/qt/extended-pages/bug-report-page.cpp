@@ -81,6 +81,18 @@ static const char BUG_REPORT_TEMPLATE[] =
 Expected Behavior:
 
 Observed Behavior:)";
+
+class DeviceDetailPage : public QMessageBox {
+public:
+    explicit DeviceDetailPage(QMessageBox* parent = nullptr)
+        : QMessageBox(parent) {}
+    ~DeviceDetailPage() {}
+    void closeEvent(QCloseEvent* event) override {
+        hide();
+        event->ignore();
+    }
+};
+
 BugreportPage::BugreportPage(QWidget* parent)
     : QWidget(parent),
       mUi(new Ui::BugreportPage),
@@ -113,13 +125,12 @@ BugreportPage::BugreportPage(QWidget* parent)
     mUi->bug_deviceLabel->setText(elidedText);
     mUi->bug_hostMachineLabel->setText(
             QString::fromStdString(mReportingFields.hostOsName));
-    mDeviceDetailsDialog = new QMessageBox(
-            QMessageBox::NoIcon,
-            QString::fromStdString(StringFormat("Details for %s",
-                                                mReportingFields.deviceName)),
-            "", QMessageBox::Close, this);
-    mDeviceDetailsDialog->setModal(false);
-    mDeviceDetailsDialog->setInformativeText(
+    mDeviceDetail.reset(new DeviceDetailPage(nullptr));
+    mDeviceDetail->setStandardButtons(QMessageBox::NoButton);
+    mDeviceDetail->setWindowTitle(QString::fromStdString(
+            StringFormat("Details for %s", mReportingFields.deviceName)));
+    mDeviceDetail->setModal(false);
+    mDeviceDetail->setInformativeText(
             QString::fromStdString(mReportingFields.avdDetails));
     mUi->bug_sendToGoogle->setIcon(getIconForCurrentTheme("open_in_browser"));
 }
@@ -510,11 +521,13 @@ bool BugreportPage::saveToFile(StringView filePath,
 }
 
 bool BugreportPage::eventFilter(QObject* object, QEvent* event) {
-    if (event->type() != QEvent::MouseButtonPress) {
+    if (event->type() == QEvent::MouseButtonPress) {
+        if (mDeviceDetail.get())
+            mDeviceDetail->show();
+        return true;
+    } else {
         return false;
     }
-    mDeviceDetailsDialog->show();
-    return true;
 }
 
 std::string BugreportPage::generateUniqueBugreportName() {
