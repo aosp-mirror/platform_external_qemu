@@ -501,6 +501,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::HWC_MULTI_CONFIGS;
         case android::featurecontrol::AsyncComposeSupport:
             return android_studio::EmulatorFeatureFlagState::ASYNC_COMPOSE_SUPPORT;
+        case android::featurecontrol::VirtioTablet:
+            return android_studio::EmulatorFeatureFlagState::VIRTIO_TABLET;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
