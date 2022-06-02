@@ -254,6 +254,8 @@ toClearcutLogAvdProperty(AvdFlavor flavor) {
     switch (flavor) {
     case AVD_PHONE:
         return android_studio::EmulatorAvdInfo::PHONE_AVD;
+    case AVD_DESKTOP:
+        return android_studio::EmulatorAvdInfo::DESKTOP_AVD;
     case AVD_TV:
         return android_studio::EmulatorAvdInfo::TV_AVD;
     case AVD_WEAR:
@@ -261,9 +263,6 @@ toClearcutLogAvdProperty(AvdFlavor flavor) {
     case AVD_ANDROID_AUTO:
         return android_studio::EmulatorAvdInfo::ANDROIDAUTO_AVD;
     case AVD_OTHER:
-        return android_studio::EmulatorAvdInfo::UNKNOWN_EMULATOR_AVD_FLAG;
-    case AVD_DESKTOP:
-        // TODO(b/183995987): Add corresponding clearcut enum.
         return android_studio::EmulatorAvdInfo::UNKNOWN_EMULATOR_AVD_FLAG;
     }
     return android_studio::EmulatorAvdInfo::UNKNOWN_EMULATOR_AVD_FLAG;
