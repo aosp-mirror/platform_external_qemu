@@ -107,9 +107,9 @@ android_add_executable(
 target_include_directories(bluetooth_packetgen PRIVATE ${PACKET_GEN_ROOT})
 target_link_libraries(bluetooth_packetgen PRIVATE bluetooth_packetgen_parser)
 target_compile_options(bluetooth_packetgen
-                       PRIVATE "-std=c++17" -Wno-inconsistent-missing-override)
+                       PRIVATE -Wno-inconsistent-missing-override)
 
 # The packet generator uses std::filesystem which is only available in Sdk10.15.
 # Note that the packet_generator is only used on the host, and is not shipped.
 android_target_compile_options(bluetooth_packetgen darwin-x86_64
-                               PRIVATE "-mmacosx-version-min=10.15")
+                               PRIVATE "-std=c++17" "-mmacosx-version-min=10.15")

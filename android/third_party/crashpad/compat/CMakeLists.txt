@@ -39,7 +39,7 @@ if(NOT CROSSCOMPILE)
            /Ob2
            /Oy-
            /Zc:inline
-           /d2Zi+
+           /Zo # Note /d2Zi+ == /Zo, sccache accepts /Zo not /d2Zi+
            -Wno-error)
 endif()
 android_target_compile_definitions(crashpad_compat windows PRIVATE _UNICODE)
