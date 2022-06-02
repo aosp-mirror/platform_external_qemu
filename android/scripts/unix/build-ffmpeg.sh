@@ -185,6 +185,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --enable-decoder=gif  \
                 --enable-decoder=libvpx_vp9 \
                 --enable-decoder=vorbis \
+                --enable-decoder=hevc \
                 --enable-decoder=h264
 
         # Copy binaries necessary for the build itself as well as static
