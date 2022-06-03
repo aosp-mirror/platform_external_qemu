@@ -32,7 +32,7 @@ class UiEventTracker;
 
 using android::metrics::UiEventTracker;
 class QEvent;
-class QMessageBox;
+class DeviceDetailPage;
 class QObject;
 class QShowEvent;
 
@@ -81,7 +81,7 @@ private:
                     size_t length);
     std::string generateUniqueBugreportName();
     android::emulation::AdbInterface* mAdb = nullptr;
-    QMessageBox* mDeviceDetailsDialog;
+    std::unique_ptr<DeviceDetailPage> mDeviceDetail;
     std::unique_ptr<Ui::BugreportPage> mUi;
     std::shared_ptr<UiEventTracker> mBugTracker;
     SavingStates mSavingStates;
