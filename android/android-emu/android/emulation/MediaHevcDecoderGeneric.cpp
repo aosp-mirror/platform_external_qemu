@@ -167,9 +167,14 @@ void MediaHevcDecoderGeneric::initHevcContextInternal(unsigned int width,
         mHwVideoHelper->init();
     }
 #else
-    if (canUseCudaDecoder() && mParser.version() >= 200) {
+    if (canUseCudaDecoder()) {
         MediaCudaVideoHelper::OutputTreatmentMode oMode =
                 MediaCudaVideoHelper::OutputTreatmentMode::SAVE_RESULT;
+
+        if (mParser.version() < 200) {
+            // when decoding into bytebuffer, do not use gpu texture mode
+            mUseGpuTexture = false;
+        }
 
         MediaCudaVideoHelper::FrameStorageMode fMode =
                 mUseGpuTexture ? MediaCudaVideoHelper::FrameStorageMode::
@@ -359,7 +364,7 @@ void MediaHevcDecoderGeneric::getImage(void* ptr) {
     }
 
     bool needToCopyToGuest = true;
-    if (mParser.version() == 200) {
+    if (mParser.version() >= 200) {
         if (mUseGpuTexture && pFrame->texture[0] > 0 &&
             pFrame->texture[1] > 0) {
             HEVC_DPRINT(
