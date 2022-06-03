@@ -247,7 +247,9 @@ int MediaCudaVideoHelper::HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat) {
     mChromaHeight = mLumaHeight * 0.5;  // NV12
     mBPP = pVideoFormat->bit_depth_luma_minus8 > 0 ? 2 : 1;
 
-    if (mCudaVideoCodecType == cudaVideoCodec_H264) {
+    if (mCudaVideoCodecType == cudaVideoCodec_H264
+        || mCudaVideoCodecType == cudaVideoCodec_HEVC
+        ) {
         if (pVideoFormat->video_signal_description.video_full_range_flag)
             mColorRange = 2;
         else
