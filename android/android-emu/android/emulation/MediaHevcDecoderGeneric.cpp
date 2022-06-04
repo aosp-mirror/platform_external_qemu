@@ -167,7 +167,17 @@ void MediaHevcDecoderGeneric::initHevcContextInternal(unsigned int width,
         mHwVideoHelper->init();
     }
 #else
-    if (canUseCudaDecoder()) {
+    bool sizeBigEnough = true;
+    if (width <= 128 || height <= 128) {
+        // when it is small size, just fall back to ffmpeg
+        mUseGpuTexture = false;
+        sizeBigEnough = false;
+        HEVC_DPRINT("nvidia: decoder is turned off for w %" PRIu32
+                    " h %" PRIu32,
+                    width, height);
+    }
+
+    if (sizeBigEnough && canUseCudaDecoder()) {
         MediaCudaVideoHelper::OutputTreatmentMode oMode =
                 MediaCudaVideoHelper::OutputTreatmentMode::SAVE_RESULT;
 
@@ -196,6 +206,10 @@ void MediaHevcDecoderGeneric::initHevcContextInternal(unsigned int width,
         } else {
             HEVC_DPRINT("succeeded to init cuda decoder");
         }
+    } else {
+        mTrialPeriod = false;
+        createAndInitSoftVideoHelper();
+        mVideoHelper = std::move(mSwVideoHelper);
     }
 #endif
 
