@@ -1343,15 +1343,21 @@ static const TypeInfo hda_codec_device_type_info = {
  * create intel hda controller with codec attached to it,
  * so '-soundhw hda' works.
  */
-static int intel_hda_and_codec_init(PCIBus *bus)
+static int intel_hda_and_codec_init(PCIBus *bus, const char *props)
 {
     DeviceState *controller;
     BusState *hdabus;
     DeviceState *codec;
+    Error *errp = NULL;
 
     controller = DEVICE(pci_create_simple(bus, -1, "intel-hda"));
     hdabus = QLIST_FIRST(&controller->child_bus);
     codec = qdev_create(hdabus, "hda-duplex");
+    object_properties_parse(OBJECT(codec), props, &errp);
+    if (errp) {
+        error_free(errp);
+        abort();
+    }
     qdev_init_nofail(codec);
     return 0;
 }

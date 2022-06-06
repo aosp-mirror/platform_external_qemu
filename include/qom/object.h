@@ -1243,6 +1243,8 @@ void object_property_set(Object *obj, Visitor *v, const char *name,
 void object_property_parse(Object *obj, const char *string,
                            const char *name, Error **errp);
 
+void object_properties_parse(Object *obj, const char *props, Error **errp);
+
 /**
  * object_property_print:
  * @obj: the object
