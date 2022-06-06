@@ -38,31 +38,33 @@ if(WIN32)
     CLANG_DIR
     "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/clang/host/windows-x86/${CLANG_VER}"
     REALPATH)
-  set(CLANG_CL ${CLANG_DIR}/bin/clang.exe)
-  find_program(CLCACHE clcache)
-  # cl cache only works reasonable in debug builds due to usage of /Zi flag in
-  # release builds.
-  if(CLCACHE AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(
-      WARNING "Enabling clcache with ${CLANG_CL}, with $ENV{CLCACHE_DIR}. "
-              "Make sure to set CLCACHE_DIR to point outside of your user env. "
-              "For example CLCACHE_DIR=C:\\clcache")
 
-    # Create a clcache wrapper.
-    file(WRITE ${CMAKE_BINARY_DIR}/clang_cl.cmd "@echo off\r\n")
-    file(APPEND ${CMAKE_BINARY_DIR}/clang_cl.cmd
-         "${CLCACHE} ${CLANG_CL} --driver-mode=cl %*")
+  # clang-cl acts as a cl.exe drop replacement.
+  set(CLANG_CL ${CLANG_DIR}/bin/clang-cl.exe)
+  if(OPTION_CCACHE)
+    message(STATUS "Enabling ${OPTION_CCACHE} with ${CLANG_CL}")
+    # Compile the wrapper..
+    internal_get_env_cache(CC_EXE)
+
+    if (NOT CC_EXE)
+      message(STATUS "Building flattener to handle @rsp files.")
+      execute_process(
+        COMMAND
+          "${CLANG_CL}"
+          "${ANDROID_QEMU2_TOP_DIR}/android/build/win/flattenrsp.cpp"
+          "/DCLANG_CL=${CLANG_CL}" "/DCCACHE=${OPTION_CCACHE}" "/DUNICODE" "/O2"
+          "/std:c++17" "/Fe:${CMAKE_BINARY_DIR}/cc.exe" OUTPUT_VARIABLE STD_OUT ERROR_VARIABLE STD_ERR)
+          internal_set_env_cache(CC_EXE "${CMAKE_BINARY_DIR}/cc.exe")
+   endif()
+    set(CMAKE_C_COMPILER "${CC_EXE}")
+    set(CMAKE_CXX_COMPILER "${CC_EXE}")
   else()
     # Create a clang/cl wrapper.
-    file(WRITE ${CMAKE_BINARY_DIR}/clang_cl.cmd "@echo off\r\n")
-    file(APPEND ${CMAKE_BINARY_DIR}/clang_cl.cmd
-         "${CLANG_CL} --driver-mode=cl %*")
+    set(CMAKE_C_COMPILER "${CLANG_CL}")
+    set(CMAKE_CXX_COMPILER "${CLANG_CL}")
   endif()
   set(ANDROID_LLVM_SYMBOLIZER "${CLANG_DIR}/bin/llvm-symbolizer.exe")
-
-  set(CMAKE_C_COMPILER "${CMAKE_BINARY_DIR}/clang_cl.cmd")
-  set(CMAKE_CXX_COMPILER "${CMAKE_BINARY_DIR}/clang_cl.cmd")
-  # Set the debug flags, erasing whatever cmake stuffs in there. We are going to
+# Set the debug flags, erasing whatever cmake stuffs in there. We are going to
   # produce "fat" binaries with all debug information in there.
   set(CMAKE_CXX_FLAGS_DEBUG "/MD /Z7")
   set(CMAKE_C_FLAGS_DEBUG "/MD /Z7")
@@ -70,16 +72,16 @@ if(WIN32)
   set(CMAKE_C_FLAGS_RELEASE "/MD /Zi /GL")
   set(CMAKE_CXX_FLAGS_RELEASE "/MD /Zi /GL")
 
-  # cmd has a limit of 8192 characters, we can easily hit this if we are unlucky.
-  # so let's use response files which will help us around that.
-  SET(CMAKE_C_USE_RESPONSE_FILE_FOR_OBJECTS 1)
-  SET(CMAKE_C_USE_RESPONSE_FILE_FOR_INCLUDES 1)
-  SET(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES 1)
-  SET(CMAKE_CXX_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+  # cmd has a limit of 8192 characters, we can easily hit this if we are
+  # unlucky. so let's use response files which will help us around that.
+  set(CMAKE_C_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+  set(CMAKE_C_USE_RESPONSE_FILE_FOR_INCLUDES 1)
+  set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES 1)
+  set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_OBJECTS 1)
 
-  SET(CMAKE_C_RESPONSE_FILE_LINK_FLAG "@")
-  SET(CMAKE_CXX_RESPONSE_FILE_LINK_FLAG "@")
-  SET(CMAKE_NINJA_FORCE_RESPONSE_FILE 1 CACHE INTERNAL "")
+  set(CMAKE_C_RESPONSE_FILE_LINK_FLAG "@")
+  set(CMAKE_CXX_RESPONSE_FILE_LINK_FLAG "@")
+  set(CMAKE_NINJA_FORCE_RESPONSE_FILE 1 CACHE INTERNAL "")
 
   # Add compiler definition for Win7
   add_definitions("-D_WIN32_WINNT=0x0601")
@@ -88,7 +90,8 @@ if(WIN32)
   # call the linker directly, v.s. through clang when cross building.
   set(CMAKE_LINKER "${CLANG_DIR}/bin/lld-link.exe" CACHE STRING "" FORCE)
 
-  # See https://www.wintellect.com/correctly-creating-native-c-release-build-pdbs/
+  # See
+  # https://www.wintellect.com/correctly-creating-native-c-release-build-pdbs/
   set(CMAKE_SHARED_LINKER_FLAGS_RELEASE
       "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT /OPT:REF /OPT:ICF"
       CACHE STRING "" FORCE)

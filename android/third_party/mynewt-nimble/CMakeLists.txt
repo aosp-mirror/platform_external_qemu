@@ -34,7 +34,7 @@ if(NOT ANDROID_QEMU_VERSION)
                    gtest)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/android-emu-base
                    android-emu-base)
-  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  if(CMAKE_BUILD_TYPE MATCHES DEBUG AND NOT WINDOWS_MSVC_X86_64)
     # This will help you find issues.
     set(CMAKE_C_FLAGS "-fsanitize=address -fno-omit-frame-pointer -g3 -O0")
     set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=address")
