@@ -1185,6 +1185,40 @@ static std::string getWriteableFilename(const char* disk_dataPartition_path,
     }
 }
 
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
+constexpr bool targetIsX86 = true;
+#else
+constexpr bool targetIsX86 = false;
+#endif
+
+static std::string buildSoundhwParam(const int apiLevel, const AndroidHwConfig* hw) {
+    std::string param;
+    std::string props;
+
+    if (apiLevel >= 26 || targetIsX86) {
+        /* for those system images that don't have the virtio-snd driver yet. */
+        param = "hda";
+    }
+
+    if (!hw->hw_audioInput) {
+        props += "input=off";
+    }
+
+    if (!hw->hw_audioOutput) {
+        if (!props.empty()) {
+            props += ",";
+        }
+        props += "output=off";
+    }
+
+    if (!param.empty() && !props.empty()) {
+        param += ":";
+        param += props;
+    }
+
+    return param;
+}
+
 extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
 
@@ -2347,16 +2381,11 @@ extern "C" int main(int argc, char** argv) {
     }
     args.add(dataDir);
 
-    // Audio enable hda by default for x86 and x64 platforms
-    // (Or all targets incl. ARM if api level >= 30)
-#if defined(TARGET_X86_64) || defined(TARGET_I386)
-    bool targetIsX86 = true;
-#else
-    bool targetIsX86 = false;
-#endif
-
-    if (apiLevel >= 26 || targetIsX86) {
-        args.add2("-soundhw", "hda");
+    {
+        const std::string soundhw = buildSoundhwParam(apiLevel, hw);
+        if (!soundhw.empty()) {
+            args.add2("-soundhw", soundhw.c_str());
+        }
     }
 
     // USB
