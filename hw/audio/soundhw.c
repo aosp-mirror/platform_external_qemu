@@ -37,7 +37,7 @@ struct soundhw {
     int isa;
     union {
         int (*init_isa) (ISABus *bus);
-        int (*init_pci) (PCIBus *bus);
+        int (*init_pci) (PCIBus *bus, const char *arg);
     } init;
 };
 
@@ -56,7 +56,7 @@ void isa_register_soundhw(const char *name, const char *descr,
 }
 
 void pci_register_soundhw(const char *name, const char *descr,
-                          int (*init_pci)(PCIBus *bus))
+                          int (*init_pci)(PCIBus *bus, const char *arg))
 {
     assert(soundhw_count < ARRAY_SIZE(soundhw) - 1);
     soundhw[soundhw_count].name = name;
@@ -66,7 +66,7 @@ void pci_register_soundhw(const char *name, const char *descr,
     soundhw_count++;
 }
 
-void select_soundhw(const char *optarg)
+void select_soundhw(const char *optarg, const int len)
 {
     struct soundhw *c;
 
@@ -86,50 +86,26 @@ void select_soundhw(const char *optarg)
         exit(!is_help_option(optarg));
     }
     else {
-        size_t l;
-        const char *p;
-        char *e;
-        int bad_card = 0;
-
-        if (!strcmp(optarg, "all")) {
-            for (c = soundhw; c->name; ++c) {
+        for (c = soundhw; c->name; ++c) {
+            if (!strncmp(c->name, optarg, len) && !c->name[len]) {
                 c->enabled = 1;
+                break;
             }
-            return;
         }
 
-        p = optarg;
-        while (*p) {
-            e = strchr(p, ',');
-            l = !e ? strlen(p) : (size_t) (e - p);
-
-            for (c = soundhw; c->name; ++c) {
-                if (!strncmp(c->name, p, l) && !c->name[l]) {
-                    c->enabled = 1;
-                    break;
-                }
+        if (!c->name) {
+            if (len > 80) {
+                error_report("Unknown sound card name (too big to show)");
             }
-
-            if (!c->name) {
-                if (l > 80) {
-                    error_report("Unknown sound card name (too big to show)");
-                }
-                else {
-                    error_report("Unknown sound card name `%.*s'",
-                                 (int) l, p);
-                }
-                bad_card = 1;
+            else {
+                error_report("Unknown sound card name `%.*s'", len, optarg);
             }
-            p += l + (e != NULL);
-        }
-
-        if (bad_card) {
             goto show_valid_cards;
         }
     }
 }
 
-bool soundhw_init(void)
+bool soundhw_init(const char *arg)
 {
     struct soundhw *c;
     ISABus *isa_bus = (ISABus *) object_resolve_path_type("", TYPE_ISA_BUS, NULL);
@@ -148,7 +124,7 @@ bool soundhw_init(void)
                     error_report("PCI bus not available for %s", c->name);
                     return false;
                 }
-                c->init.init_pci(pci_bus);
+                c->init.init_pci(pci_bus, arg);
             }
         }
     }

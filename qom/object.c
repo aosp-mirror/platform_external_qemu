@@ -1349,6 +1349,34 @@ void object_property_parse(Object *obj, const char *string,
     visit_free(v);
 }
 
+void object_properties_parse(Object *obj, const char *props, Error **errp)
+{
+    while (props) {
+        char name[64];
+        char value[64];
+        const char *eq = strchr(props, '=');
+        if (!eq) {
+            break;
+        }
+        const char *v = eq + 1;
+        const char *e = strchr(v, ',');
+        const char *next;
+        if (e) {
+            next = e + 1;
+        } else {
+            e = strchr(v, 0);
+            next = NULL;
+        }
+        memcpy(name, props, eq - props);
+        name[eq - props] = 0;
+        memcpy(value, v, e - v);
+        value[e - v] = 0;
+
+        object_property_parse(obj, value, name, errp);
+        props = next;
+    }
+}
+
 char *object_property_print(Object *obj, const char *name, bool human,
                             Error **errp)
 {
