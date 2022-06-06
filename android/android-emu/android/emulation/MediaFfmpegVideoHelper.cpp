@@ -136,27 +136,54 @@ void MediaFfmpegVideoHelper::copyFrame() {
     mDecodedFrame.resize(w * h * 3 / 2);
     MEDIA_DPRINT("w %d h %d Y line size %d U line size %d V line size %d", w, h,
                  mFrame->linesize[0], mFrame->linesize[1], mFrame->linesize[2]);
-    for (int i = 0; i < h; ++i) {
-        memcpy(mDecodedFrame.data() + i * w,
-               mFrame->data[0] + i * mFrame->linesize[0], w);
-    }
-    MEDIA_DPRINT("format is %d and NV21 is %d  NV12 is %d", mFrame->format,
-                 (int)AV_PIX_FMT_NV21, (int)AV_PIX_FMT_NV12);
-    if (mFrame->format == AV_PIX_FMT_NV12) {
-        for (int i = 0; i < h / 2; ++i) {
-            memcpy(w * h + mDecodedFrame.data() + i * w,
-                   mFrame->data[1] + i * mFrame->linesize[1], w);
+    MEDIA_DPRINT(
+            "format is %d and NV21 is %d  NV12 is %d 10bit format "
+            "AV_PIX_FMT_YUV444P10LE is %d AV_PIX_FMT_YUV420P10LE is %d",
+            mFrame->format, (int)AV_PIX_FMT_NV21, (int)AV_PIX_FMT_NV12,
+            (int)AV_PIX_FMT_YUV444P10LE, (int)AV_PIX_FMT_YUV420P10LE);
+    if (mFrame->format == AV_PIX_FMT_YUV420P10LE) {
+        uint8_t* dstY = mDecodedFrame.data();
+        uint8_t* dstU = mDecodedFrame.data() + w * h;
+        uint8_t* dstV = mDecodedFrame.data() + w * h + w * h / 4;
+        uint16_t* srcY = (uint16_t*)(mFrame->data[0]);
+        uint16_t* srcU = (uint16_t*)(mFrame->data[1]);
+        uint16_t* srcV = (uint16_t*)(mFrame->data[2]);
+        for (int j = 0; j < h; ++j) {
+            for (int i = 0; i < w; ++i) {
+                dstY[i + j * w] = (srcY[i + j * w]) >> 2;
+            }
         }
-        YuvConverter<uint8_t> convert8(w, h);
-        convert8.UVInterleavedToPlanar(mDecodedFrame.data());
+        for (int j = 0; j < h / 2; ++j) {
+            for (int i = 0; i < w / 2; ++i) {
+                dstU[i + j * w / 2] = (srcU[i + j * w / 2]) >> 2;
+            }
+        }
+        for (int j = 0; j < h / 2; ++j) {
+            for (int i = 0; i < w / 2; ++i) {
+                dstV[i + j * w / 2] = (srcV[i + j * w / 2]) >> 2;
+            }
+        }
     } else {
-        for (int i = 0; i < h / 2; ++i) {
-            memcpy(w * h + mDecodedFrame.data() + i * w / 2,
-                   mFrame->data[1] + i * mFrame->linesize[1], w / 2);
+        for (int i = 0; i < h; ++i) {
+            memcpy(mDecodedFrame.data() + i * w,
+                   mFrame->data[0] + i * mFrame->linesize[0], w);
         }
-        for (int i = 0; i < h / 2; ++i) {
-            memcpy(w * h + w * h / 4 + mDecodedFrame.data() + i * w / 2,
-                   mFrame->data[2] + i * mFrame->linesize[2], w / 2);
+        if (mFrame->format == AV_PIX_FMT_NV12) {
+            for (int i = 0; i < h / 2; ++i) {
+                memcpy(w * h + mDecodedFrame.data() + i * w,
+                       mFrame->data[1] + i * mFrame->linesize[1], w);
+            }
+            YuvConverter<uint8_t> convert8(w, h);
+            convert8.UVInterleavedToPlanar(mDecodedFrame.data());
+        } else {
+            for (int i = 0; i < h / 2; ++i) {
+                memcpy(w * h + mDecodedFrame.data() + i * w / 2,
+                       mFrame->data[1] + i * mFrame->linesize[1], w / 2);
+            }
+            for (int i = 0; i < h / 2; ++i) {
+                memcpy(w * h + w * h / 4 + mDecodedFrame.data() + i * w / 2,
+                       mFrame->data[2] + i * mFrame->linesize[2], w / 2);
+            }
         }
     }
     MEDIA_DPRINT("copied Frame and it has presentation time at %lld",
