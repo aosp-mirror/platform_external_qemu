@@ -363,13 +363,11 @@ static inline size_t virgl_format_to_total_xfer_len(
     uint32_t totalWidth, uint32_t totalHeight,
     uint32_t w, uint32_t h) {
     if (virgl_format_is_yuv(format)) {
-        uint32_t yAlign = (format == VIRGL_FORMAT_YV12) ?  32 : 16;
         uint32_t yWidth = totalWidth;
         uint32_t yHeight = totalHeight;
-        uint32_t yStride = align_up_power_of_2(yWidth, yAlign);
+        uint32_t yStride = yWidth;
         uint32_t ySize = yStride * yHeight;
 
-        uint32_t uvAlign = 16;
         uint32_t uvWidth;
         uint32_t uvPlaneCount;
 
@@ -384,7 +382,7 @@ static inline size_t virgl_format_to_total_xfer_len(
         }
 
         uint32_t uvHeight = totalHeight / 2;
-        uint32_t uvStride = align_up_power_of_2(uvWidth, uvAlign);
+        uint32_t uvStride = uvWidth;
         uint32_t uvSize = uvStride * uvHeight * uvPlaneCount;
 
         uint32_t dataSize = ySize + uvSize;
@@ -1156,7 +1154,6 @@ public:
         }
 
         VGPLOG("Linear first word: %d", *(int*)(entry.linear));
-
         auto syncRes = sync_iov(&entry, offset, box, LINEAR_TO_IOV);
         mLastSubmitCmdCtxExists = true;
         mLastSubmitCmdCtx = entry.ctxId;
