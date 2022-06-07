@@ -329,7 +329,7 @@ static inline uint32_t gl_format_to_natural_type(uint32_t format) {
 static inline size_t virgl_format_to_linear_base(
     uint32_t format,
     uint32_t totalWidth, uint32_t totalHeight,
-    uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    uint32_t x, uint32_t y) {
     if (virgl_format_is_yuv(format)) {
         return 0;
     } else {
@@ -361,15 +361,13 @@ static inline size_t virgl_format_to_linear_base(
 static inline size_t virgl_format_to_total_xfer_len(
     uint32_t format,
     uint32_t totalWidth, uint32_t totalHeight,
-    uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    uint32_t w, uint32_t h) {
     if (virgl_format_is_yuv(format)) {
-        uint32_t yAlign = (format == VIRGL_FORMAT_YV12) ?  32 : 16;
         uint32_t yWidth = totalWidth;
         uint32_t yHeight = totalHeight;
-        uint32_t yStride = align_up_power_of_2(yWidth, yAlign);
+        uint32_t yStride = yWidth;
         uint32_t ySize = yStride * yHeight;
 
-        uint32_t uvAlign = 16;
         uint32_t uvWidth;
         uint32_t uvPlaneCount;
 
@@ -384,7 +382,7 @@ static inline size_t virgl_format_to_total_xfer_len(
         }
 
         uint32_t uvHeight = totalHeight / 2;
-        uint32_t uvStride = align_up_power_of_2(uvWidth, uvAlign);
+        uint32_t uvStride = uvWidth;
         uint32_t uvSize = uvStride * uvHeight * uvPlaneCount;
 
         uint32_t dataSize = ySize + uvSize;
@@ -443,7 +441,8 @@ static int sync_iov(PipeResEntry* res, uint64_t offset, const virgl_box* box, Io
         res->args.format,
         res->args.width,
         res->args.height,
-        box->x, box->y, box->w, box->h);
+        box->x,
+        box->y);
     size_t start = linearBase;
     // height - 1 in order to treat the (w * bpp) row specially
     // (i.e., the last row does not occupy the full stride)
@@ -451,7 +450,8 @@ static int sync_iov(PipeResEntry* res, uint64_t offset, const virgl_box* box, Io
         res->args.format,
         res->args.width,
         res->args.height,
-        box->x, box->y, box->w, box->h);
+        box->w,
+        box->h);
     size_t end = start + length;
 
     if (end > res->linearSize) {
@@ -1154,7 +1154,6 @@ public:
         }
 
         VGPLOG("Linear first word: %d", *(int*)(entry.linear));
-
         auto syncRes = sync_iov(&entry, offset, box, LINEAR_TO_IOV);
         mLastSubmitCmdCtxExists = true;
         mLastSubmitCmdCtx = entry.ctxId;
@@ -1253,8 +1252,8 @@ public:
         // Associate the host pipe of the resource entry with the host pipe of
         // the context entry.  That is, the last context to call attachResource
         // wins if there is any conflict.
-        auto ctxEntryIt = mContexts.find(ctxId); auto resEntryIt =
-            mResources.find(resId);
+        auto ctxEntryIt = mContexts.find(ctxId);
+        auto resEntryIt = mResources.find(resId);
 
         if (ctxEntryIt == mContexts.end() ||
             resEntryIt == mResources.end()) return;
@@ -1412,13 +1411,6 @@ public:
 
     void saveSnapshot(void* opaque) {
         QEMUFile* file = (QEMUFile*)opaque;
-        uint32_t cookie;
-        if (!mCookie) {
-            cookie = 0;
-        } else {
-            memcpy(&cookie, mCookie, sizeof(uint32_t));
-        }
-        qemu_put_be32(file, cookie);
         qemu_put_be32(file, mFlags);
 
         qemu_put_be32(file, mContexts.size());
@@ -1449,30 +1441,45 @@ public:
         qemu_put_be32(file, mLastSubmitCmdCtx);
 
         saveFenceDeque(file, mFenceDeque);
+
+        auto ops = ensureAndGetServiceOps();
+        ops->guest_post_save(file);
+    }
+
+    void cleanStates() {
+        auto itContext = mContexts.begin();
+        while (itContext != mContexts.end()) {
+            destroyContext(itContext->first);
+            itContext = mContexts.begin();
+        }
+        auto itResource = mResources.begin();
+        while (itResource != mResources.end()) {
+            unrefResource(itResource->first);
+            itResource = mResources.begin();
+        }
+        mContextResources.clear();
+        mResourceContexts.clear();
+        mFenceDeque.clear();
     }
 
     void loadSnapshot(void* opaque) {
         QEMUFile* file = (QEMUFile*)opaque;
 
-        uint32_t cookie = qemu_get_be32(file);
-        if (mCookie) memcpy(mCookie, &cookie, sizeof(uint32_t));
+        cleanStates();
 
         mFlags = qemu_get_be32(file);
 
         uint32_t contextCount = qemu_get_be32(file);
-
         for (uint32_t i = 0; i < contextCount; ++i) {
             loadContext(file);
         }
 
         uint32_t resourceCount = qemu_get_be32(file);
-
         for (uint32_t i = 0; i < resourceCount; ++i) {
             loadResource(file);
         }
 
         uint32_t contextResourceListCount = qemu_get_be32(file);
-
         for (uint32_t i = 0; i < contextResourceListCount; ++i) {
             uint32_t ctxId;
             auto ids = loadContextResourceList(file, &ctxId);
@@ -1480,7 +1487,6 @@ public:
         }
 
         uint32_t resourceContextListCount = qemu_get_be32(file);
-
         for (uint32_t i = 0; i < resourceContextListCount; ++i) {
             uint32_t resId;
             auto ids = loadResourceContextList(file, &resId);
@@ -1491,6 +1497,8 @@ public:
         mLastSubmitCmdCtx = qemu_get_be32(file);
 
         loadFenceDeque(file);
+        auto ops = ensureAndGetServiceOps();
+        ops->guest_post_load(file);
     }
 
     void setResourceHvSlot(uint32_t res_handle, uint32_t slot) {
@@ -1560,12 +1568,6 @@ private:
         entry.linear = linear;
         entry.linearSize = linearSize;
         entry.addrs = nullptr;
-
-        virgl_box initbox;
-        initbox.x = 0;
-        initbox.y = 0;
-        initbox.w = (uint32_t)linearSize;
-        initbox.h = 1;
 
         if (addrs) {
             entry.addrs = (uint64_t*)malloc(sizeof(uint64_t) * num_iovs);
@@ -1682,7 +1684,6 @@ private:
     }
 
     void loadContext(QEMUFile* file) {
-
         auto ops = ensureAndGetServiceOps();
 
         PipeCtxEntry pipeCtxEntry;
@@ -1693,8 +1694,9 @@ private:
         pipeCtxEntry.hasAddressSpaceHandle = qemu_get_be32(file);
 
         char force_close = 1;
-        void* hwpipe = malloc(sizeof(uint64_t));
-        pipeCtxEntry.hostPipe = ops->guest_load(file, (GoldfishHwPipe*)hwpipe, &force_close);
+        pipeCtxEntry.hostPipe = ops->guest_load(file,
+                                                (GoldfishHwPipe*)(uintptr_t)(pipeCtxEntry.ctxId),
+                                                &force_close);
 
         mContexts[pipeCtxEntry.ctxId] = pipeCtxEntry;
     }
@@ -1747,6 +1749,10 @@ private:
         // No need to save hva itself or its contents, as that should be
         // managed by address space device
         pipeResEntry.ctxId = qemu_get_be32(file);
+        auto context = mContexts.find(pipeResEntry.ctxId);
+        if (context != mContexts.end()) {
+            pipeResEntry.hostPipe = context->second.hostPipe;
+        }
         pipeResEntry.hvaSize = qemu_get_be64(file);
         pipeResEntry.hvaId = qemu_get_be64(file);
         pipeResEntry.hvSlot = qemu_get_be32(file);

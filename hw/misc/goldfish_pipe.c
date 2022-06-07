@@ -1442,12 +1442,22 @@ enum {
     GOLDFISH_PIPE_SAVE_VERSION = 1,
 };
 
+#ifdef CONFIG_ANDROID
+extern bool virtio_gpu_use_virgl_as_proxy();
+#endif
+
 static void goldfish_pipe_save(QEMUFile* f, void* opaque) {
     GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
     service_ops->guest_pre_save(f);
     dev->ops->save(f, dev);
+#ifdef CONFIG_ANDROID
+    if (!virtio_gpu_use_virgl_as_proxy()) {
+        service_ops->guest_post_save(f);
+    }
+#else
     service_ops->guest_post_save(f);
+#endif
 }
 
 static void goldfish_pipe_save_v1(QEMUFile* file, PipeDevice* dev) {
@@ -1821,7 +1831,13 @@ static int goldfish_pipe_load(QEMUFile* f, void* opaque, int version_id) {
 
     service_ops->guest_pre_load(f);
     int res = goldfish_pipe_load_v2(f, dev);
+#ifdef CONFIG_ANDROID
+    if (!virtio_gpu_use_virgl_as_proxy()) {
+        service_ops->guest_post_load(f);
+    }
+#else
     service_ops->guest_post_load(f);
+#endif
     return res;
 }
 
