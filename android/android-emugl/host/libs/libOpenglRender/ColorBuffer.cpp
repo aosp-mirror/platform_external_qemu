@@ -490,7 +490,6 @@ void ColorBuffer::readPixelsYUVCached(int x,
     assert(m_yuv_converter.get());
 #endif
 
-
     m_yuv_converter->readPixels((uint8_t*)pixels, pixels_size);
 
     return;
@@ -1020,12 +1019,9 @@ void ColorBuffer::restore() {
     switch (m_frameworkFormat) {
         case FRAMEWORK_FORMAT_GL_COMPATIBLE:
             break;
-        case FRAMEWORK_FORMAT_YV12:
-        case FRAMEWORK_FORMAT_YUV_420_888:
+        default: // any YUV format
             m_yuv_converter.reset(
                     new YUVConverter(m_width, m_height, m_frameworkFormat));
-            break;
-        default:
             break;
     }
 }
