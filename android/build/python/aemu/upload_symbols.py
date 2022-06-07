@@ -190,6 +190,8 @@ def main(args):
     logging.debug("-----------------------------------------------------------")
     logging.debug("- WARNING!! You are likely going to leak your api key    --")
     logging.debug("-----------------------------------------------------------")
+    logging.warning("DEPRECATED!! Please use sym_upload for uploading symbols.")
+    logging.warning("DEPRECATED!! This file might be removed in the future.")
 
     api_key = args.api_key
     available = False

@@ -27,7 +27,8 @@ from distutils.spawn import find_executable
 
 from aemu.definitions import (ENUMS, find_aosp_root, get_aosp_root, get_cmake,
                               get_qemu_root, infer_target,
-                              read_simple_properties, set_aosp_root)
+                              load_breakpad_api_key, read_simple_properties,
+                              set_aosp_root)
 from aemu.distribution import create_distribution
 from aemu.process import run
 from aemu.run_tests import run_tests
@@ -132,7 +133,7 @@ def configure(args, target):
     if args.gfxstream_only:
         cmake_cmd += ["-DGFXSTREAM_ONLY=%s" % args.gfxstream_only]
 
-    ccache = find_ccache(args.ccache, platform.system().lower())  
+    ccache = find_ccache(args.ccache, platform.system().lower())
     if ccache:
         cmake_cmd += ["-DOPTION_CCACHE=%s" % ccache]
 
@@ -164,7 +165,7 @@ def find_ccache(cache, host):
     if cache == "none" or cache == None:
         return None
     if cache != "auto":
-        return cache.replace('\\', '/')
+        return cache.replace("\\", "/")
 
     if host != "windows":
         # prefer ccache for local builds, it is slightly faster
@@ -175,15 +176,15 @@ def find_ccache(cache, host):
 
     # Our build bots use sccache, so we will def. have it
     search_dir = os.path.join(
-            get_aosp_root(),
-            "prebuilts",
-            "android-emulator-build",
-            "common",
-            "sccache",
-            "{}-x86_64".format(host),
+        get_aosp_root(),
+        "prebuilts",
+        "android-emulator-build",
+        "common",
+        "sccache",
+        "{}-x86_64".format(host),
     )
-    return find_executable("sccache", search_dir).replace('\\', '/')
-    
+    return find_executable("sccache", search_dir).replace("\\", "/")
+
 
 def main(args):
     start_time = time.time()
@@ -202,8 +203,8 @@ def main(args):
 
     # Build
     run(get_build_cmd(args), None, {"NINJA_STATUS": "[ninja] "})
-    logging.info("Completed build in %d seconds", time.time()-start_time)
-    
+    logging.info("Completed build in %d seconds", time.time() - start_time)
+
     # Test.
     if args.tests:
         cross_compile = platform.system().lower() != args.target
@@ -213,7 +214,7 @@ def main(args):
                 run_tests_opts.append("--skip-emulator-check")
             if args.gfxstream or args.gfxstream_only:
                 run_tests_opts.append("--gfxstream")
-            run_tests(args.out, args.test_jobs, args.crash != "none", run_tests_opts)
+            run_tests(args.out, args.test_jobs, run_tests_opts)
             logging.info("Completed testing.")
         else:
             logging.info("Not running tests for cross compile or darwin aarch64.")
@@ -229,7 +230,6 @@ def main(args):
         logging.info("Creating distribution.")
         create_distribution(args.dist, args.out, data)
 
-    
     if platform.system() != "Windows" and args.config == "debug":
         overrides = open(
             os.path.join(get_qemu_root(), "android", "asan_overrides")

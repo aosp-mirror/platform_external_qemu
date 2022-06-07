@@ -593,8 +593,9 @@ function(android_sign)
   cmake_parse_arguments(sign "${options}" "${oneValueArgs}" "${multiValueArgs}"
                         ${ARGN})
   if(sign_INSTALL)
-    install(
-      CODE "message(STATUS \"Signing   : ${sign_INSTALL}\")\nexecute_process(COMMAND codesign --deep -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${sign_INSTALL})"
+    install(CODE
+      "message(STATUS \"Signing   : ${sign_INSTALL}\")
+      execute_process(COMMAND codesign --deep -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${sign_INSTALL})"
     )
   else()
     # Code signing cannot be done when cross compiling, unless we port something
@@ -1145,8 +1146,8 @@ function(protobuf_generate_with_plugin)
     set(_generated_srcs)
     foreach(_ext ${protobuf_generate_with_plugin_GENERATE_EXTENSIONS})
       if(IDX EQUAL "0")
-        # The protobuf is in a subdirectory under the current source dir we are processing
-        # Construct a complete path.
+        # The protobuf is in a subdirectory under the current source dir we are
+        # processing Construct a complete path.
         list(
           APPEND
           _generated_srcs
@@ -1287,8 +1288,7 @@ function(android_generate_hw_config)
     COMMAND
       ${Python_EXECUTABLE}
       ${ANDROID_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
-      ${HW_PROPERTIES_INI}
-      ${ANDROID_HW_CONFIG_H}
+      ${HW_PROPERTIES_INI} ${ANDROID_HW_CONFIG_H}
     DEPENDS ${HW_PROPERTIES_INI}
     VERBATIM)
   android_add_library(TARGET android-hw-config LICENSE Apache-2.0
@@ -1626,27 +1626,29 @@ endfunction()
 
 # Uploads the symbols to the breakpad crash server
 function(android_upload_symbols TGT)
-  find_package(PythonInterp)
   if(NOT ANDROID_EXTRACT_SYMBOLS)
     return()
   endif()
-  set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
-  set(LOG "${ANDROID_SYMBOL_DIR}/${TGT}.log")
-  install(
-    CODE # Upload the symbols, with warnings/error logging only.
-         "execute_process(COMMAND \"${PYTHON_EXECUTABLE}\"
-                             \"${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/upload_symbols.py\"
-                             \"--symbol_file\" \"${DEST}\"
-                             \"--environment\" \"${OPTION_CRASHUPLOAD}\"
-                             OUTPUT_FILE ${LOG}
-                             ERROR_FILE ${LOG})\n
-    if (EXISTS ${LOG})
-      FILE(READ ${LOG} contents)
-      STRING(STRIP \"\$\{contents\}\" contents)
-    else()
-        SET(contents \"No logfile in ${LOG} for ${DEST} was created\")
-    endif()
-    MESSAGE(STATUS \$\{contents\})")
+  if(WIN32)
+    add_custom_command(
+      TARGET ${TGT}
+      POST_BUILD
+      COMMAND sym_upload -p "$<TARGET_FILE:${TGT}>" "${BREAKPAD_API_URL}"
+              "${BREAKPAD_API_KEY}" DEPENDS sym_upload
+      COMMENT "Uploading symbols for ${TGT}")
+  else()
+    set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
+    add_custom_command(
+      TARGET ${TGT} POST_BUILD COMMAND dump_syms "$<TARGET_FILE:${TGT}>" >
+                                       ${DEST} DEPENDS dump_syms
+      COMMENT "Extracting symbols for ${TGT}" VERBATIM)
+    add_custom_command(
+      TARGET ${TGT}
+      POST_BUILD
+      COMMAND sym_upload -p sym-upload-v2 -k "${BREAKPAD_API_KEY}" ${DEST}
+              "${BREAKPAD_API_URL}" DEPENDS sym_upload
+      COMMENT "Uploading symbols for ${TGT}")
+  endif()
 endfunction()
 
 # Installs the given target executable into the given destinations. Symbols will
@@ -1655,7 +1657,6 @@ function(android_install_exe TGT DST)
   install(TARGETS ${TGT} RUNTIME DESTINATION ${DST})
 
   # Make it available on the build server
-  android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
   android_sign(
@@ -1667,7 +1668,6 @@ endfunction()
 function(android_install_shared TGT)
   # We don't want windows to binplace dlls in the exe dir
   install(TARGETS ${TGT} RUNTIME DESTINATION lib64 LIBRARY DESTINATION lib64)
-  android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
   # Account for lib prefix when signing
@@ -1689,50 +1689,10 @@ function(android_strip_prebuilt FNAME)
   # MSVC stores debug info in seperate file, so no need to strip
   if(NOT WINDOWS_MSVC_X86_64)
     install(
-      CODE "if(CMAKE_INSTALL_DO_STRIP) \n
-                        execute_process(COMMAND ${CMAKE_STRIP} \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${FNAME}\")\n
-                      endif()\n
-                     ")
+      CODE "if(CMAKE_INSTALL_DO_STRIP)
+              execute_process(COMMAND ${CMAKE_STRIP} \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${FNAME}\")
+            endif()")
   endif()
-endfunction()
-
-# Extracts symbols from a file that is not built. This is mainly here if we wish
-# to extract symbols for a prebuilt file.
-function(android_extract_symbols_file FNAME)
-  get_filename_component(BASENAME ${FNAME} NAME)
-  set(DEST "${ANDROID_SYMBOL_DIR}/${BASENAME}.sym")
-
-  if(WINDOWS_MSVC_X86_64)
-    # In msvc we need the pdb to generate the symbols, pdbs are not yet
-    # available for The prebuilts. b/122728651
-    message(
-      WARNING
-        "Extracting symbols requires access to the pdb for ${FNAME}, ignoring for now."
-    )
-    return()
-  endif()
-  install(
-    CODE "execute_process(COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dump_syms -g ${FNAME} OUTPUT_FILE ${DEST} RESULT_VARIABLE RES ERROR_QUIET) \n
-                 message(STATUS \"Extracted symbols for ${FNAME} ${RES}\")")
-  install(
-    CODE "execute_process(COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sym_upload ${DEST} ${ANDROID_SYMBOL_URL}  OUTPUT_VARIABLE RES ERROR_QUIET) \n
-                 message(STATUS \"Uploaded symbols for ${FNAME} --> ${ANDROID_SYMBOL_URL} ${RES}\")"
-  )
-endfunction()
-
-# Extracts the symbols from the given target if extraction is requested. TODO:
-# We need generator expressions to move this to the install phase. Which are
-# available in cmake 3.13
-function(android_extract_symbols TGT)
-  if(NOT ANDROID_EXTRACT_SYMBOLS)
-    # Note: we do not need to extract symbols on windows for uploading.
-    return()
-  endif()
-  set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
-  add_custom_command(
-    TARGET ${TGT} POST_BUILD COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
-                                     DEPENDS dump_syms
-    COMMENT "Extracting symbols for ${TGT}" VERBATIM)
 endfunction()
 
 # Make the compatibility layer available for every target

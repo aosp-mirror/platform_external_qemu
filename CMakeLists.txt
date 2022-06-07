@@ -168,10 +168,15 @@ set(AOSP_ROOT ${ANDROID_QEMU2_TOP_DIR}/../..)
 if(OPTION_CRASHUPLOAD STREQUAL "NONE")
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 else()
+  if (WIN32)
+    file (STRINGS "$ENV{USERPROFILE}/.emulator_symbol_server_key" BREAKPAD_API_KEY)
+  else()
+    file (STRINGS "$ENV{HOME}/.emulator_symbol_server_key" BREAKPAD_API_KEY)
+  endif()
   set(ANDROID_EXTRACT_SYMBOLS TRUE)
   set(ANDROID_SYMBOL_DIR ${DBG_INFO})
   file(MAKE_DIRECTORY ${ANDROID_SYMBOL_DIR})
-  message(STATUS "Uploading symbols to ${OPTION_CRASHUPLOAD}")
+  message(STATUS "Uploading symbols to ${BREAKPAD_API_URL}")
 endif()
 
 if(ANDROID_EXTRACT_SYMBOLS AND CROSSCOMPILE)
@@ -656,7 +661,7 @@ if (NOT WINDOWS_MSVC_X86_64)
             # targets for which it provides better performance, or if you wish to verify
             # that the program will work on other systems that always treat uninitialized
             # variable definitions this way.  Remove this and you'll get all sorts of fun
-            # linker issues. 
+            # linker issues.
             "-fno-common")
 endif()
 
