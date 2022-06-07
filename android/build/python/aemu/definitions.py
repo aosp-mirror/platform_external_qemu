@@ -25,6 +25,9 @@ if platform.system() == "Windows":
     EXE_POSTFIX = ".exe"
 
 AOSP_ROOT = ""
+BREAKPAD_API_KEY_FILE = os.path.join(
+    os.path.expanduser("~"), ".emulator_symbol_server_key"
+)
 
 
 def find_aosp_root():
@@ -192,10 +195,29 @@ def infer_target(target):
     return target
 
 
+def load_breakpad_api_key():
+    try:
+        with open(BREAKPAD_API_KEY_FILE) as f:
+            return f.read()
+    except IOError as e:
+        logging.error(
+            "Unable to read api key due to: %s.",
+            e,
+        )
+        logging.error("Please provide a valid api key.")
+        raise e
+
+
 ENUMS = {
     "Crash": {
-        "prod": ["-DOPTION_CRASHUPLOAD=PROD"],
-        "staging": ["-DOPTION_CRASHUPLOAD=STAGING"],
+        "prod": [
+            "-DOPTION_CRASHUPLOAD=PROD",
+            "-DBREAKPAD_API_URL=https://prod-crashsymbolcollector-pa.googleapis.com",
+        ],
+        "staging": [
+            "-DOPTION_CRASHUPLOAD=STAGING",
+            "-DBREAKPAD_API_URL=https://staging-crashsymbolcollector-pa.googleapis.com",
+        ],
         "none": ["-DOPTION_CRASHUPLOAD=NONE"],
     },
     "BuildConfig": {
