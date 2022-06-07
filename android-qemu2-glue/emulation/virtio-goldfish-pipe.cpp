@@ -543,6 +543,22 @@ public:
         }
         mVirtioGpuTimelines =
             VirtioGpuTimelines::create(flags & GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB);
+        if (mVirtioGpuTimelinesSnapshot) {
+            std::unique_ptr<uint8_t[]> buffer =
+                    std::move(mVirtioGpuTimelinesSnapshot);
+            mVirtioGpuTimelines = VirtioGpuTimelines::recreateFromSnapshot(
+                    std::move(mVirtioGpuTimelines), buffer.get(),
+                    [this](const VirtioGpuRing& ring,
+                           VirtioGpuTimelines::FenceId fenceId) {
+                        FenceCompletionCallback callback =
+                                generateFenceCompletionCallback(ring, fenceId);
+                        if (!callback) {
+                            VGP_FATAL() << "Invalid fence completion callback "
+                                           "created.";
+                        }
+                        return callback;
+                    });
+        }
         VGPLOG("done");
         return 0;
     }
@@ -856,7 +872,8 @@ public:
                 uint64_t image_handle_lo = dwords[1];
                 uint64_t image_handle_hi = dwords[2];
                 uint64_t image_handle = convert32to64(image_handle_lo, image_handle_hi);
-                VGPLOG("wait for gpu vk qsri ring %u image 0x%llx", to_string(ring).c_str(),
+                VGPLOG("wait for gpu vk qsri ring %s image 0x%llx",
+                       to_string(ring).c_str(),
                        (unsigned long long)image_handle);
                 auto taskId = mVirtioGpuTimelines->enqueueTask(ring);
                 mVirtioGpuOps->async_wait_for_gpu_vulkan_qsri_with_cb(image_handle, [this, taskId] {
@@ -874,31 +891,8 @@ public:
     int createFence(uint64_t fence_id, const VirtioGpuRing& ring) {
         VGPLOG("fenceid: %llu ring: %s", (unsigned long long)fence_id, to_string(ring).c_str());
 
-        struct {
-            FenceCompletionCallback operator()(const VirtioGpuRingGlobal&) {
-                return [renderer = mRenderer, fenceId = mFenceId] {
-                    renderer->mVirglRendererCallbacks.write_fence(renderer->mCookie, fenceId);
-                };
-            }
-            FenceCompletionCallback operator()(const VirtioGpuRingContextSpecific& ring) {
-#ifdef VIRGL_RENDERER_UNSTABLE_APIS
-                return [renderer = mRenderer, fenceId = mFenceId, ring] {
-                    renderer->mVirglRendererCallbacks.write_context_fence(
-                        renderer->mCookie, fenceId, ring.mCtxId, ring.mRingIdx);
-                };
-#else
-                VGPLOG("enable unstable apis for the context specific fence feature");
-                return {};
-#endif
-            }
-
-            PipeVirglRenderer* mRenderer;
-            VirtioGpuTimelines::FenceId mFenceId;
-        } visitor{
-            .mRenderer = this,
-            .mFenceId = fence_id,
-        };
-        FenceCompletionCallback callback = std::visit(visitor, ring);
+        FenceCompletionCallback callback =
+                generateFenceCompletionCallback(ring, fence_id);
         if (!callback) {
             // A context specific ring passed in, but the project is compiled without
             // VIRGL_RENDERER_UNSTABLE_APIS defined.
@@ -1847,6 +1841,40 @@ private:
         return res;
     }
 
+    FenceCompletionCallback generateFenceCompletionCallback(
+            const VirtioGpuRing& ring,
+            VirtioGpuTimelines::FenceId fenceId) {
+        struct {
+            FenceCompletionCallback operator()(const VirtioGpuRingGlobal&) {
+                return [renderer = mRenderer, fenceId = mFenceId] {
+                    renderer->mVirglRendererCallbacks.write_fence(
+                            renderer->mCookie, fenceId);
+                };
+            }
+            FenceCompletionCallback operator()(
+                    const VirtioGpuRingContextSpecific& ring) {
+#ifdef VIRGL_RENDERER_UNSTABLE_APIS
+                return [renderer = mRenderer, fenceId = mFenceId, ring] {
+                    renderer->mVirglRendererCallbacks.write_context_fence(
+                            renderer->mCookie, fenceId, ring.mCtxId,
+                            ring.mRingIdx);
+                };
+#else
+                VGPLOG("enable unstable apis for the context specific fence "
+                       "feature");
+                return {};
+#endif
+            }
+
+            PipeVirglRenderer* mRenderer;
+            VirtioGpuTimelines::FenceId mFenceId;
+        } visitor{
+                .mRenderer = this,
+                .mFenceId = fenceId,
+        };
+        return std::visit(visitor, ring);
+    }
+
     Lock mLock;
 
     void* mCookie = nullptr;
@@ -1868,6 +1896,9 @@ private:
     // fences created for that context should not be signaled immediately.
     // Rather, they should get in line.
     std::unique_ptr<VirtioGpuTimelines> mVirtioGpuTimelines = nullptr;
+    // loadSnapshot is called before init, save the binary format snapshot data
+    // in loadSnapshot and restore mVirtioGpuTimelines later in init.
+    std::unique_ptr<uint8_t[]> mVirtioGpuTimelinesSnapshot = nullptr;
 };
 
 static LazyInstance<PipeVirglRenderer> sRenderer = LAZY_INSTANCE_INIT;
