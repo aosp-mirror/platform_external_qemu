@@ -329,7 +329,7 @@ static inline uint32_t gl_format_to_natural_type(uint32_t format) {
 static inline size_t virgl_format_to_linear_base(
     uint32_t format,
     uint32_t totalWidth, uint32_t totalHeight,
-    uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    uint32_t x, uint32_t y) {
     if (virgl_format_is_yuv(format)) {
         return 0;
     } else {
@@ -361,7 +361,7 @@ static inline size_t virgl_format_to_linear_base(
 static inline size_t virgl_format_to_total_xfer_len(
     uint32_t format,
     uint32_t totalWidth, uint32_t totalHeight,
-    uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    uint32_t w, uint32_t h) {
     if (virgl_format_is_yuv(format)) {
         uint32_t yAlign = (format == VIRGL_FORMAT_YV12) ?  32 : 16;
         uint32_t yWidth = totalWidth;
@@ -443,7 +443,8 @@ static int sync_iov(PipeResEntry* res, uint64_t offset, const virgl_box* box, Io
         res->args.format,
         res->args.width,
         res->args.height,
-        box->x, box->y, box->w, box->h);
+        box->x,
+        box->y);
     size_t start = linearBase;
     // height - 1 in order to treat the (w * bpp) row specially
     // (i.e., the last row does not occupy the full stride)
@@ -451,7 +452,8 @@ static int sync_iov(PipeResEntry* res, uint64_t offset, const virgl_box* box, Io
         res->args.format,
         res->args.width,
         res->args.height,
-        box->x, box->y, box->w, box->h);
+        box->w,
+        box->h);
     size_t end = start + length;
 
     if (end > res->linearSize) {
@@ -1253,8 +1255,8 @@ public:
         // Associate the host pipe of the resource entry with the host pipe of
         // the context entry.  That is, the last context to call attachResource
         // wins if there is any conflict.
-        auto ctxEntryIt = mContexts.find(ctxId); auto resEntryIt =
-            mResources.find(resId);
+        auto ctxEntryIt = mContexts.find(ctxId);
+        auto resEntryIt = mResources.find(resId);
 
         if (ctxEntryIt == mContexts.end() ||
             resEntryIt == mResources.end()) return;
@@ -1565,12 +1567,6 @@ private:
         entry.linear = linear;
         entry.linearSize = linearSize;
         entry.addrs = nullptr;
-
-        virgl_box initbox;
-        initbox.x = 0;
-        initbox.y = 0;
-        initbox.w = (uint32_t)linearSize;
-        initbox.h = 1;
 
         if (addrs) {
             entry.addrs = (uint64_t*)malloc(sizeof(uint64_t) * num_iovs);
