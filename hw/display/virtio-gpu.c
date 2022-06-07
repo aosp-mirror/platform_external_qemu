@@ -29,6 +29,13 @@
 
 #define VIRTIO_GPU_VM_VERSION 1
 
+#ifdef CONFIG_ANDROID
+static bool virgl_as_proxy = false;
+bool virtio_gpu_use_virgl_as_proxy() {
+    return virgl_as_proxy;
+}
+#endif
+
 static struct virtio_gpu_simple_resource*
 virtio_gpu_find_resource(VirtIOGPU *g, uint32_t resource_id);
 
@@ -1323,6 +1330,7 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
     g->virgl_as_proxy = true;
     g->virgl = get_goldfish_pipe_virgl_renderer_virtio_interface();
     g->gpu_3d_cbs = &proxy_3d_cbs;
+    virgl_as_proxy = true;
 #else
     g->use_virgl_renderer = false;
 #endif
