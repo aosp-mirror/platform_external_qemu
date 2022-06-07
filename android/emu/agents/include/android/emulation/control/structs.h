@@ -24,4 +24,14 @@ struct HostmemEntry {
     uint64_t id;
     uint64_t hva;
     uint64_t size;
+    uint32_t caching;
+};
+
+// Called by hostmemRegister(..)
+struct MemEntry {
+    uint64_t hva;
+    uint64_t size;
+    uint32_t register_fixed;
+    uint64_t fixed_id;
+    uint32_t caching;
 };

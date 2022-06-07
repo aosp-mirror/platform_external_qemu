@@ -31,7 +31,7 @@ typedef void* (*address_space_device_get_host_ptr_t)(uint64_t gpa);
 typedef void* (*address_space_device_handle_to_context_t)(uint32_t handle);
 typedef void (*address_space_device_clear_t)(void);
 // virtio-gpu-next
-typedef uint64_t (*address_space_device_hostmem_register_t)(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id);
+typedef uint64_t (*address_space_device_hostmem_register_t)(const struct MemEntry* entry);
 typedef void (*address_space_device_hostmem_unregister_t)(uint64_t id);
 typedef void (*address_space_device_ping_at_hva_t)(uint32_t handle, void* hva);
 // deallocation callbacks
