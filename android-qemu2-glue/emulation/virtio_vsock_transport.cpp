@@ -154,7 +154,7 @@ struct NewTransportConnector : public IVsockNewTransport {
     NewTransportConnector(uint64_t key) : mKey(key) {}
 
     int writeGuestToHost(const void *data, size_t size,
-                            std::shared_ptr<IVsockNewTransport> *nextStage) override {
+                            std::shared_ptr<IVsockNewTransport> *pNextStage) override {
         size_t n = 0;
         bool complete = false;
         const char *i = static_cast<const char *>(data);
@@ -171,15 +171,22 @@ struct NewTransportConnector : public IVsockNewTransport {
         }
 
         if (complete) {
-            *nextStage = createNextStage(mBuf.data());
+            auto nextStage = createNextStage(mBuf.data());
+            if (nextStage) {
+                *pNextStage = std::move(nextStage);
+                return n;
+            } else {
+                *pNextStage = std::make_shared<BrokenTransport>();
+                return -1;
+            }
+        } else {
+            return n;
         }
-
-        return n;
     }
 
     std::shared_ptr<IVsockNewTransport> createNextStage(char *str) const {
         if (strncmp(str, "pipe:", 5)) {
-            return std::make_shared<BrokenTransport>();
+            return nullptr;
         }
         str += 5;
         char *i = strchr(str, ':');
@@ -193,19 +200,13 @@ struct NewTransportConnector : public IVsockNewTransport {
 
     std::shared_ptr<IVsockNewTransport> createNextStageImpl(const char *service,
                                                             const char *arg) const {
-        std::shared_ptr<IVsockNewTransport> result;
-
 #ifndef _WIN32
         if (!strcmp(service, "unix")) {
-            result = VsockUnixSocketTransport::create(mKey, arg);
+            return VsockUnixSocketTransport::create(mKey, arg);
         }
 #endif
 
-        if (result) {
-            return result;
-        } else {
-            return std::make_shared<BrokenTransport>();
-        }
+        return nullptr;
     }
 
     const uint64_t mKey;

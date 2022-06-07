@@ -155,16 +155,15 @@ struct VSockStream {
             while (to_send > 0) {
                 std::shared_ptr<IVsockNewTransport> nextStage;
                 const int n = mNewTransport->writeGuestToHost(buf8, to_send, &nextStage);
+                if (nextStage) {
+                    mNewTransport = std::move(nextStage);
+                }
                 if (n < 0) {
                     return false;
                 }
 
                 buf8 += n;
                 to_send -= n;
-
-                if (nextStage) {
-                    mNewTransport = std::move(nextStage);
-                }
             }
         } else {
             ::crashhandler_die("%s:%s:%d: No data sink",
