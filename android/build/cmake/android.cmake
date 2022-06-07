@@ -593,8 +593,8 @@ function(android_sign)
   cmake_parse_arguments(sign "${options}" "${oneValueArgs}" "${multiValueArgs}"
                         ${ARGN})
   if(sign_INSTALL)
-    install(CODE
-      "message(STATUS \"Signing   : ${sign_INSTALL}\")
+    install(
+      CODE "message(STATUS \"Signing   : ${sign_INSTALL}\")
       execute_process(COMMAND codesign --deep -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${sign_INSTALL})"
     )
   else()
@@ -1639,15 +1639,12 @@ function(android_upload_symbols TGT)
   else()
     set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
     add_custom_command(
-      TARGET ${TGT} POST_BUILD COMMAND dump_syms "$<TARGET_FILE:${TGT}>" >
-                                       ${DEST} DEPENDS dump_syms
-      COMMENT "Extracting symbols for ${TGT}" VERBATIM)
-    add_custom_command(
       TARGET ${TGT}
       POST_BUILD
+      COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST} DEPENDS dump_syms
       COMMAND sym_upload -p sym-upload-v2 -k "${BREAKPAD_API_KEY}" ${DEST}
-              "${BREAKPAD_API_URL}" DEPENDS sym_upload
-      COMMENT "Uploading symbols for ${TGT}")
+              "${BREAKPAD_API_URL}" || exit 0
+      COMMENT "Extracting symbols for ${TGT}" DEPENDS sym_upload dump_syms)
   endif()
 endfunction()
 
