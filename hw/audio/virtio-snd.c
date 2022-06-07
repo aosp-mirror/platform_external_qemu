@@ -1619,7 +1619,7 @@ static void virtio_snd_class_init(ObjectClass *klass, void *data) {
     vdc->set_status = &virtio_snd_set_status;
 }
 
-static int virtio_snd_and_codec_init(PCIBus *bus) {
+static int virtio_snd_and_codec_init(PCIBus *bus, const char *unused) {
     return 0;
 }
 
