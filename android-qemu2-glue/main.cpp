@@ -1372,6 +1372,7 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::VulkanQueueSubmitWithCommands, true);
                 fc::setIfNotOverriden(fc::VulkanBatchedDescriptorSetUpdate,
                                       true);
+                fc::setIfNotOverriden(fc::VirtioGpuFenceContexts, false);
                 fc::setIfNotOverriden(fc::HostComposition, true);
                 fc::setIfNotOverriden(fc::AsyncComposeSupport, true);
 

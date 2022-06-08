@@ -370,7 +370,8 @@ static bool shouldEnableBatchedDescriptorSetUpdate() {
 static bool shouldEnableVulkanAsyncQsri() {
     return shouldEnableVulkan() &&
         (emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) ||
-         emugl_feature_is_enabled(android::featurecontrol::VirtioGpuNativeSync));
+         (emugl_feature_is_enabled(android::featurecontrol::VirtioGpuNativeSync) &&
+          emugl_feature_is_enabled(android::featurecontrol::VirtioGpuFenceContexts)));
 }
 
 static bool shouldEnableVsyncGatedSyncFences() {
@@ -635,12 +636,10 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         glStr += " ";
     }
 
-    // Bug: 193809913
-    // Only switch on after everything else about this is merged / works.
-    // if (vulkanAsyncQsri) {
-    //     glStr += kVulkanAsyncQsri;
-    //     glStr += " ";
-    // }
+    if (vulkanAsyncQsri && name == GL_EXTENSIONS) {
+        glStr += kVulkanAsyncQsri;
+        glStr += " ";
+    }
 
     if (readColorBufferDma && name == GL_EXTENSIONS) {
         glStr += kReadColorBufferDma;

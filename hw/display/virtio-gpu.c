@@ -1303,6 +1303,9 @@ static struct virgl_renderer_callbacks proxy_3d_cbs = {
     .create_gl_context   = proxy_virgl_create_context,
     .destroy_gl_context  = proxy_virgl_destroy_context,
     .make_current        = proxy_virgl_make_context_current,
+#ifdef VIRGL_RENDERER_UNSTABLE_APIS
+    .write_context_fence = NULL,
+#endif
 };
 #endif
 

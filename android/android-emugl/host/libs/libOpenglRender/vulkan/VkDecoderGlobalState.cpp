@@ -1627,7 +1627,7 @@ public:
         }
         cmpInfo.device = device;
 
-        AndroidNativeBufferInfo anbInfo;
+        AndroidNativeBufferInfo* anbInfo = new AndroidNativeBufferInfo;
         const VkNativeBufferANDROID* nativeBufferANDROID =
             vk_find_struct<VkNativeBufferANDROID>(pCreateInfo);
 
@@ -1640,9 +1640,9 @@ public:
             createRes =
                 prepareAndroidNativeBufferImage(
                         vk, device, pCreateInfo, nativeBufferANDROID, pAllocator,
-                        memProps, &anbInfo);
+                        memProps, anbInfo);
             if (createRes == VK_SUCCESS) {
-                *pImage = anbInfo.image;
+                *pImage = anbInfo->image;
             }
         } else {
             createRes =
@@ -1657,7 +1657,9 @@ public:
         }
 
         auto& imageInfo = mImageInfo[*pImage];
-        imageInfo.anbInfo = anbInfo;
+
+        if (anbInfo) imageInfo.anbInfo.reset(anbInfo);
+
         imageInfo.cmpInfo = cmpInfo;
 
         *pImage = new_boxed_non_dispatchable_VkImage(*pImage);
@@ -1681,9 +1683,7 @@ public:
 
         auto info = it->second;
 
-        if (info.anbInfo.image) {
-            teardownAndroidNativeBufferImage(vk, &info.anbInfo);
-        } else {
+        if (!info.anbInfo) {
             if (info.cmpInfo.isCompressed) {
                 CompressedImageInfo& cmpInfo = info.cmpInfo;
                 if (image != cmpInfo.decompImg) {
@@ -1812,9 +1812,10 @@ public:
                 pCreateInfo = &createInfo;
             }
         }
-        if (imageInfoIt->second.anbInfo.externallyBacked) {
+        if (imageInfoIt->second.anbInfo &&
+            imageInfoIt->second.anbInfo->externallyBacked) {
             createInfo = *pCreateInfo;
-            createInfo.format = imageInfoIt->second.anbInfo.vkFormat;
+            createInfo.format = imageInfoIt->second.anbInfo->vkFormat;
             pCreateInfo = &createInfo;
         }
 
@@ -3622,7 +3623,7 @@ public:
             return VK_ERROR_INITIALIZATION_FAILED;
         }
 
-        AndroidNativeBufferInfo* anbInfo = &imageInfo->anbInfo;
+        AndroidNativeBufferInfo* anbInfo = imageInfo->anbInfo.get();
 
         return
             setAndroidNativeImageSemaphoreSignaled(
@@ -3651,7 +3652,7 @@ public:
         }
 
         auto imageInfo = android::base::find(mImageInfo, image);
-        AndroidNativeBufferInfo* anbInfo = &imageInfo->anbInfo;
+        auto anbInfo = imageInfo->anbInfo;
 
         return
             syncImageToColorBuffer(
@@ -4911,6 +4912,59 @@ public:
         lock.unlock();
 
         return vk->vkGetFenceStatus(device, fence);
+    }
+
+    VkResult waitQsri(VkImage boxed_image, uint64_t timeout) {
+        (void)timeout; // TODO
+
+        AutoLock lock(mLock);
+
+        VkImage image = unbox_VkImage(boxed_image);
+
+        if (mLogging) {
+            fprintf(stderr, "%s: for boxed image 0x%llx image %p\n",
+                             __func__, (unsigned long long)boxed_image, image);
+        }
+
+        if (image == VK_NULL_HANDLE || mImageInfo.find(image) == mImageInfo.end()) {
+            // No image
+            return VK_SUCCESS;
+        }
+
+        auto anbInfo = mImageInfo[image].anbInfo; // shared ptr, take ref
+        lock.unlock();
+
+        if (!anbInfo) {
+            fprintf(stderr, "%s: warning: image %p doesn't ahve anb info\n", __func__, image);
+            return VK_SUCCESS;
+        }
+        if (!anbInfo->vk) {
+            fprintf(stderr, "%s:%p warning: image %p anb info not initialized\n", __func__, anbInfo.get(), image);
+            return VK_SUCCESS;
+        }
+        // Could be null or mismatched image, check later
+        if (image != anbInfo->image) {
+            fprintf(stderr, "%s:%p warning: image %p anb info has wrong image: %p\n", __func__, anbInfo.get(), image, anbInfo->image);
+            return VK_SUCCESS;
+        }
+
+        AutoLock qsriLock(anbInfo->qsriWaitInfo.lock);
+        ++anbInfo->qsriWaitInfo.requestedPresentCount;
+        uint64_t targetPresentCount = anbInfo->qsriWaitInfo.requestedPresentCount;
+
+        if (mLogging) {
+            fprintf(stderr, "%s:%p New target present count %llu\n",
+                    __func__, anbInfo.get(), (unsigned long long)targetPresentCount);
+        }
+
+        anbInfo->qsriWaitInfo.cv.wait(&anbInfo->qsriWaitInfo.lock, [anbInfo, targetPresentCount] {
+            return targetPresentCount <= anbInfo->qsriWaitInfo.presentCount;
+        });
+
+        if (mLogging) {
+            fprintf(stderr, "%s:%p Done waiting\n", __func__, anbInfo.get());
+        }
+        return VK_SUCCESS;
     }
 
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES                                \
@@ -6653,7 +6707,7 @@ private:
     };
 
     struct ImageInfo {
-        AndroidNativeBufferInfo anbInfo;
+        std::shared_ptr<AndroidNativeBufferInfo> anbInfo;
         CompressedImageInfo cmpInfo;
     };
 
@@ -8007,6 +8061,10 @@ VkResult VkDecoderGlobalState::waitForFence(VkFence boxed_fence,
 
 VkResult VkDecoderGlobalState::getFenceStatus(VkFence boxed_fence) {
     return mImpl->getFenceStatus(boxed_fence);
+}
+
+VkResult VkDecoderGlobalState::waitQsri(VkImage image, uint64_t timeout) {
+    return mImpl->waitQsri(image, timeout);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(

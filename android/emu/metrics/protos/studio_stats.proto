@@ -1506,7 +1506,8 @@ message EmulatorFeatureFlagState {
         ASYNC_COMPOSE_SUPPORT = 88;
         VIRTIO_SND_CARD = 89;
         VIRTIO_TABLET = 90;
-        // Next tag: 91
+        VIRTIO_GPU_FENCE_CONTEXTS = 91;
+        // Next tag: 92
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

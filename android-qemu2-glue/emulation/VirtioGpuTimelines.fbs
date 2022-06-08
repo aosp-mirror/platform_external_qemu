@@ -1,0 +1,25 @@
+namespace virtio_gpu;
+
+table RingGlobal {}
+
+struct RingContextSpecific {
+  ctx_id:uint32;
+  ring_idx:uint8;
+}
+
+union Ring { RingGlobal, RingContextSpecific }
+
+struct Fence {
+  id:uint64;
+}
+
+table Timeline {
+  ring:Ring;
+  fences:[Fence];
+}
+
+table Timelines {
+  timelines:[Timeline];
+}
+
+root_type Timelines;

@@ -477,6 +477,9 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
                     DEVICESTATE_ON_BOOT;
         case android::featurecontrol::HWCMultiConfigs:
             return android_studio::EmulatorFeatureFlagState::HWC_MULTI_CONFIGS;
+        case android::featurecontrol::VirtioGpuFenceContexts:
+            return android_studio::EmulatorFeatureFlagState::
+                    VIRTIO_GPU_FENCE_CONTEXTS;
         case android::featurecontrol::AsyncComposeSupport:
             return android_studio::EmulatorFeatureFlagState::
                     ASYNC_COMPOSE_SUPPORT;

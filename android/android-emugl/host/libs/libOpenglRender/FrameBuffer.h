@@ -22,6 +22,7 @@
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/snapshot/common.h"
 #include "android/base/EventNotificationSupport.h"
+#include "android/opengl/virtio_gpu_ops.h"
 
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
@@ -642,6 +643,10 @@ public:
     HandleType getLastPostedColorBuffer() { return m_lastPostedColorBuffer; }
     void waitForGpu(uint64_t eglsync);
     void waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle);
+    void asyncWaitForGpuWithCb(uint64_t eglsync, FenceCompletionCallback cb);
+    void asyncWaitForGpuVulkanWithCb(uint64_t deviceHandle, uint64_t fenceHandle, FenceCompletionCallback cb);
+    void asyncWaitForGpuVulkanQsriWithCb(uint64_t image, FenceCompletionCallback cb);
+    void waitForGpuVulkanQsri(uint64_t image);
 
     bool platformImportResource(uint32_t handle, uint32_t type, void* resource);
     void* platformCreateSharedEglContext(void);
