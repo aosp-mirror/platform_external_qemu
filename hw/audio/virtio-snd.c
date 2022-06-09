@@ -328,6 +328,10 @@ static void ring_buffer_free(VirtIOSoundRingBuffer *rb) {
         ABORT("rb->size");
     }
 
+    if (rb->r != rb->w) {
+        ABORT("rb->r != rb->w");
+    }
+
     g_free(rb->buf);
     ring_buffer_init(rb);
 };
@@ -362,16 +366,14 @@ static VirtIOSoundRingBufferItem *ring_buffer_top(VirtIOSoundRingBuffer *rb) {
     return item;
 }
 
-static bool ring_buffer_pop(VirtIOSoundRingBuffer *rb) {
+static void ring_buffer_pop(VirtIOSoundRingBuffer *rb) {
     const int size = rb->size;
-    if (!size) {
-        return false;
+    if (size <= 0) {
+        ABORT("size <= 0");
     }
 
     rb->r = (rb->r + 1) % rb->capacity;
     rb->size = size - 1;
-
-    return true;
 }
 
 static uint32_t update_output_latency_bytes(VirtIOSoundPCMStream *stream, int x) {
