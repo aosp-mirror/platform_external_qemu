@@ -1409,7 +1409,7 @@ static bool virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
     iov_to_buf(e->out_sg, e->out_num, 0, &xfer, sizeof(xfer));
     if (xfer.stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
-        vq_consume_element(vq, e, el_send_pcm_status(e, VIRTIO_SND_S_IO_ERR, 0));
+        vq_consume_element(vq, e, el_send_pcm_rx_status(e, 0, VIRTIO_SND_S_IO_ERR, 0));
         return false;
     }
 
