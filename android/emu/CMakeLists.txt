@@ -1,5 +1,6 @@
 add_subdirectory(agents)
 add_subdirectory(avd)
+add_subdirectory(base)
 add_subdirectory(cmdline)
 add_subdirectory(crashreport)
 add_subdirectory(curl)

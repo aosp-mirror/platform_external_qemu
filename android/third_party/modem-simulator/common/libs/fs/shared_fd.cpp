@@ -272,7 +272,7 @@ int Select(SharedFDSet* read_set,
            struct timeval* timeout) {
     if (write_set || error_set) {
         // just ignore them
-        dwarning("%s ignore write and error", __func__);
+        dwarning("ignoring write and error");
     }
 
     if (!read_set) {

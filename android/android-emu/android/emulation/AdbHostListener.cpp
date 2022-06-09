@@ -13,6 +13,7 @@
 
 #include "android/base/async/AsyncSocketServer.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/logging/CLog.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/emulation/AdbHostServer.h"

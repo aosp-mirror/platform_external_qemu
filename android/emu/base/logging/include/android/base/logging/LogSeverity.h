@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include "android/utils/compiler.h"
-#include "android/utils/log_severity.h"
 
-ANDROID_BEGIN_HEADER
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+#define LOG_SEVERITY
 // Defines the available log severities.
-
 typedef enum LogSeverity {
     EMULATOR_LOG_DEBUG = -2,
     EMULATOR_LOG_VERBOSE = -1,
@@ -37,6 +37,8 @@ typedef enum LogSeverity {
 } LogSeverity;
 
 extern LogSeverity android_log_severity;
-// #endif
 
-ANDROID_END_HEADER
+#ifdef __cplusplus
+}
+#endif
+

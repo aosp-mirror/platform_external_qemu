@@ -13,8 +13,9 @@
 // limitations under the License.
 #include "android/base/perflogger/Metric.h"
 
-#include "android/base/files/PathUtils.h"
 #include "android/base/JsonWriter.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/logging/CLog.h"
 #include "android/base/perflogger/Benchmark.h"
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
@@ -25,7 +26,8 @@ using namespace android::perflogger;
 // static
 std::string Metric::getPreferredOutputDirectory() {
     auto distDirEnv = System::getEnvironmentVariable("DIST_DIR");
-    if (distDirEnv != "") return distDirEnv;
+    if (distDirEnv != "")
+        return distDirEnv;
     return pj(System::getProgramDirectoryFromPlatform(), "perfgate");
 }
 
@@ -51,7 +53,7 @@ void Metric::addSamples(Benchmark* benchmark,
 }
 
 void Metric::setAnalyzers(Benchmark* benchmark,
-                          const std::vector<Analyzer> &analyzers) {
+                          const std::vector<Analyzer>& analyzers) {
     mAnalyzers[benchmark] = analyzers;
 }
 
@@ -79,16 +81,15 @@ void Metric::commit() {
                 continue;
             }
             writer.beginObject()
-                   .name("benchmark")
-                   .value(benchmark->getName())
-                   .name("project")
-                   .value(benchmark->getProjectName())
-                   .name("data");
+                    .name("benchmark")
+                    .value(benchmark->getName())
+                    .name("project")
+                    .value(benchmark->getProjectName())
+                    .name("data");
             {
                 writer.beginObject();
                 for (MetricSample sample : samples) {
-                    writer.nameAsStr(sample.timestampMs)
-                          .value(sample.data);
+                    writer.nameAsStr(sample.timestampMs).value(sample.data);
                 }
                 writer.endObject();
             }

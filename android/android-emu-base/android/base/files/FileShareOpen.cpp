@@ -18,6 +18,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/threads/Thread.h"
 #include "android/utils/file_io.h"
+#include "android/utils/debug.h"
 
 void android::base::createFileForShare(const char* filename) {
     void* handle = internal::openFileForShare(filename);

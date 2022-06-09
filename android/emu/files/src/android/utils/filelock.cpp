@@ -12,20 +12,20 @@
 
 #include "android/utils/filelock.h"
 
+#include <fcntl.h>
+#include <cassert>
+#include <cerrno>
+#include "android/base/logging/CLog.h"
 #include "android/base/system/System.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/file_io.h"
 #include "android/utils/lock.h"
 #include "android/utils/path.h"
 
-#include <cassert>
-#include <cerrno>
-#include <fcntl.h>
-
+#include <sys/stat.h>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-#include <sys/stat.h>
 #ifdef _WIN32
 #include "android/base/files/ScopedFileHandle.h"
 #include "android/base/memory/ScopedPtr.h"
@@ -36,9 +36,9 @@
 #include <windows.h>
 using android::base::ScopedFileHandle;
 #else
-#include <csignal>
 #include <sys/types.h>
 #include <unistd.h>
+#include <csignal>
 #endif
 
 using android::base::System;
@@ -199,10 +199,10 @@ static int filelock_lock(FileLock* lock, int timeout) {
                                                // flag needs to be there to fit
                                                // with the original process, or
                                                // this call fails)
-                    nullptr,                // default security
-                    OPEN_EXISTING,          // existing file only
-                    FILE_ATTRIBUTE_NORMAL,  // normal file
-                    nullptr));              // no template file
+                    nullptr,                   // default security
+                    OPEN_EXISTING,             // existing file only
+                    FILE_ATTRIBUTE_NORMAL,     // normal file
+                    nullptr));                 // no template file
 
             if (getpidHandle.valid()) {
                 // Read the pid of the locking process.

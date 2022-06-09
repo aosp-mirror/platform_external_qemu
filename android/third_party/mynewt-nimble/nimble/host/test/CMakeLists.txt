@@ -1,4 +1,3 @@
-
 # These tests require rootcanal HCI on port 6402
 # The test currently fail.
 android_add_executable(
@@ -34,7 +33,15 @@ android_add_executable(
       src/ble_sm_test_util.c
       src/ble_store_test.c
       src/ble_uuid_test.c)
-target_link_libraries(nimble_e2e_tests PRIVATE _nimble_test_util _nimble_host_layer _nimble_store_config _nimble_service_layer _nimble_transport_test _nimble_os_sysinit)
+target_link_libraries(
+  nimble_e2e_tests
+  PRIVATE _nimble_test_util
+          _nimble_host_layer
+          _nimble_store_config
+          _nimble_service_layer
+          _nimble_transport_test
+          _nimble_os_sysinit
+          android-emu-base-logging)
 target_include_directories(nimble_e2e_tests PRIVATE src ../src)
 target_compile_options(
   nimble_e2e_tests

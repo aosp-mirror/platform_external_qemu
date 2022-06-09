@@ -15,6 +15,7 @@
 #include "android/filesystems/ext4_resize.h"
 
 #include "android/base/StringView.h"
+#include "android/base/logging/CLog.h"
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
 

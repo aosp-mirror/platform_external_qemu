@@ -46,6 +46,7 @@
 #include "openssl/base.h"                // for RSA
 #include "openssl/nid.h"                 // for NID_sha1
 #include "studio_stats.pb.h"
+#include "android/base/logging/CLog.h"
 
 #define DEBUG 0
 

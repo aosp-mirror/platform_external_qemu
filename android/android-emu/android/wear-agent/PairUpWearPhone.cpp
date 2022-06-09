@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define  DPRINT(...)  do {  if (VERBOSE_CHECK(adb)) dprintn(__VA_ARGS__); } while (0)
+#define  DPRINT(...)  do {  if (VERBOSE_CHECK(adb)) dprint(__VA_ARGS__); } while (0)
 
 namespace android {
 namespace wear {

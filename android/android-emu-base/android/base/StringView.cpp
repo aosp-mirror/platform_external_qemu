@@ -33,5 +33,13 @@ bool operator==(const StringView& x, const StringView& y) {
     return memcmp(x.data(), y.data(), x.size()) == 0;
 }
 
+std::ostream& operator<<(std::ostream& stream,
+                         const StringView& str) {
+    if (!str.empty()) {
+        stream.write(str.data(), str.size());
+    }
+    return stream;
+}
+
 }  // namespace base
 }  // namespace android

@@ -9,24 +9,28 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/LogFormatter.h"
+#include "android/base/logging/LogFormatter.h"
 
-#include <stdarg.h>  // for va_list, va_end, va_start
-#include <stdio.h>   // for snprintf, vsnprintf, size_t
-#include <string.h>  // for strncmp, strncpy
-#include <string>    // for string, basic_string
+#include <stdarg.h>     // for va_list, va_end, va_start
+#include <stdint.h>     // for uint32_t
+#include <stdio.h>      // for vsnprintf, snprintf
+#include <string.h>     // for strncmp, strncpy
+#include <string>       // for basic_string
+#include <string_view>  // for string_view
+#include <thread>       // for thread, thread::id
+#include <type_traits>  // for remove_extent_t
 
-#include "absl/strings/str_format.h"       // for StrFormat, ParsedFormat
-#include "android/base/StringView.h"       // for StringView, c_str, CStrWra...
-#include "android/base/files/PathUtils.h"  // for PathUtils
-#include "android/base/threads/Thread.h"   // for getCurrentThreadId
-#include "android/utils/log_severity.h"    // for LogSeverity
+#include "absl/strings/str_format.h"           // for StrFormat, ParsedFormat
+#include "android/base/logging/LogSeverity.h"  // for LogSeverity
 #ifdef _MSC_VER
 #include "msvc-posix.h"
+#include <windows.h>
 #else
 #include <sys/time.h>  // for gettimeofday, timeval
 #include <time.h>      // for localtime, tm, time_t
+#include <pthread.h>
 #endif
+
 
 namespace android {
 namespace base {
@@ -115,7 +119,7 @@ std::string SimpleLogWithTimeFormatter::format(const LogParams& params,
     int w = 0;
 
     struct timeval tv;
-    gettimeofday(&tv, 0);
+    gettimeofday(&tv, nullptr);
     time_t now = tv.tv_sec;
     struct tm* time = localtime(&now);
     w = snprintf(log, cLog, "%02d:%02d:%02d.%06ld %s | ", time->tm_hour,
@@ -131,6 +135,23 @@ std::string SimpleLogWithTimeFormatter::format(const LogParams& params,
     return logline;
 };
 
+#ifndef _WIN32
+constexpr char PATH_SEP = '/';
+uint64_t getThreadId() {
+    pthread_t tid = pthread_self();
+    // POSIX doesn't require pthread_t to be a numeric type.
+    // Instead, just pick up the first sizeof(long) bytes as the "id".
+    static_assert(sizeof(tid) >= sizeof(uint64_t),
+                  "Expected pthread_t to be at least sizeof(long) wide");
+    return *reinterpret_cast<uint64_t*>(&tid);
+}
+#else
+constexpr char PATH_SEP = '\\';
+uint64_t getThreadId() {
+        return static_cast<uint64_t>(GetCurrentThreadId());
+}
+#endif
+
 std::string VerboseLogFormatter::format(const LogParams& params,
                                         const char* fmt,
                                         va_list args) {
@@ -140,26 +161,24 @@ std::string VerboseLogFormatter::format(const LogParams& params,
     int w = 0;
 
     struct timeval tv;
-    gettimeofday(&tv, 0);
+    gettimeofday(&tv, nullptr);
     time_t now = tv.tv_sec;
     struct tm* time = localtime(&now);
 
-    StringView path = params.file;
-    StringView filename;
-    if (!PathUtils::split(path, nullptr, &filename)) {
-        filename = path;
-    }
+    // Get the basename of the file.
+    std::string_view path = params.file;
+    auto loc = path.rfind(PATH_SEP);
+    auto filename = path.substr(loc + 1);
 
-    static const auto location_format_string =
-            absl::ParsedFormat<'s', 'd'>("%s:%d");
-    auto location = absl::StrFormat(location_format_string,
-                                    c_str(filename).get(), params.lineno);
+    char readable_location[35];
+    snprintf(readable_location, sizeof(readable_location), "%s:%d",
+             filename.data(), params.lineno);
 
+    auto thread = getThreadId();
     w = snprintf(log, cLog, "%02d:%02d:%02d.%06d %-15lu %s %-34s | ",
                  time->tm_hour, time->tm_min, time->tm_sec,
-                 static_cast<uint32_t>(tv.tv_usec),
-                 android::base::getCurrentThreadId(),
-                 translate_sev(params.severity), location.c_str());
+                 static_cast<uint32_t>(tv.tv_usec), thread,
+                 translate_sev(params.severity), readable_location);
     if (w > 0 && w < cLog) {
         log += w;
         cLog -= w;

@@ -14,8 +14,6 @@
 * limitations under the License.
 */
 #include "ApiGen.h"
-#include "android/base/EnumFlags.h"
-#include "android/utils/file_io.h"
 #include "EntryPoint.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -400,12 +398,12 @@ static int getVarEncodingSizeExpression(
         return 0;
     }
 
-    if ((flags & EncodingSizeFlags::DmaPtrOnly) != 0) {
+    if (((int) flags & (int) EncodingSizeFlags::DmaPtrOnly) != 0) {
         snprintf(buff, bufflen, "8");
-    } else if ((flags & EncodingSizeFlags::ExcludeOut) != 0 &&
+    } else if (((int) flags & (int) EncodingSizeFlags::ExcludeOut) != 0 &&
             !(var.pointerDir() & Var::POINTER_IN)) {
         snprintf(buff, bufflen, "0");
-    } else if ((flags & EncodingSizeFlags::UseExistingVar) != 0) {
+    } else if (((int) flags & (int) EncodingSizeFlags::UseExistingVar) != 0) {
         snprintf(buff, bufflen, "__size_%s", var.name().c_str());
     } else {
         const char* lenExpr = var.lenExpression().c_str();

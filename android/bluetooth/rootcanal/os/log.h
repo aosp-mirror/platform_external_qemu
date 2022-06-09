@@ -4,8 +4,8 @@
 #include <ostream>      // for ostream
 #include <string_view>  // for string_view
 
-#include "android/utils/debug.h"         // for __emu_log_print, VERBOSE_CHECK
-#include "android/utils/log_severity.h"  // for EMULATOR_LOG_INFO, EMULATOR_...
+#include "android/base/logging/LogSeverity.h"  // for EMULATOR_LOG_INFO, EMULATOR_...
+#include "android/utils/debug.h"  // for __emu_log_print, VERBOSE_CHECK
 
 extern "C" void __blue_write_to_file(LogSeverity prio,
                                      const char* file,
@@ -19,7 +19,6 @@ namespace android::bluetooth {
 // already been used it will be prefixed by %d_ and a number.
 std::shared_ptr<std::ostream> getLogstream(std::string_view id);
 }  // namespace android::bluetooth
-
 
 // Note that we log both to a file as well as the emulator log system.
 #define LOGWRAPPER(level, fmt, args...)                                      \

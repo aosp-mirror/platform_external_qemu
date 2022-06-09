@@ -14,7 +14,7 @@
 
 #include "android/base/async/Looper.h"
 #include "android/base/async/ThreadLooper.h"
-#include "android/base/Log.h"
+#include "android/base/logging/CLog.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/Optional.h"
 #include "android/base/StringFormat.h"

@@ -47,8 +47,6 @@ android_add_library(
       android/base/GLObjectCounter.cpp
       android/base/IOVector.cpp
       android/base/JsonWriter.cpp
-      android/base/Log.cpp
-      android/base/LogFormatter.cpp
       android/base/memory/LazyInstance.cpp
       android/base/memory/MemoryHints.cpp
       android/base/memory/MemoryTracker.cpp
@@ -86,8 +84,6 @@ android_add_library(
       android/base/Version.cpp
       android/utils/bufprint.c
       android/utils/bufprint_system.cpp
-      android/utils/debug.c
-      android/utils/debug_wrapper.cpp
       android/utils/dirscanner.cpp
       android/utils/eintr_wrapper.c
       android/utils/fd.cpp
@@ -133,7 +129,7 @@ target_include_directories(android-emu-base
 # Library dependencies, these are public so they will propagate, if you link
 # against the base you will link against LZ4 & UUID
 target_link_libraries(android-emu-base PRIVATE lz4 UUID::UUID
-                      PUBLIC Threads::Threads absl::str_format zlib)
+                      PUBLIC Threads::Threads android-emu-base-logging zlib)
 
 if(OPTION_TCMALLOC)
   android_target_link_libraries(
@@ -220,8 +216,6 @@ android_add_test(
       android/base/files/TarStream_unittest.cpp
       android/base/FunctionView_unittest.cpp
       android/base/JsonWriter_unittest.cpp
-      android/base/Log_unittest.cpp
-      android/base/LogFormatter_unittest.cpp
       android/base/memory/LazyInstance_unittest.cpp
       android/base/memory/MallocUsableSize_unittest.cpp
       android/base/memory/MemoryHints_unittest.cpp
@@ -291,7 +285,6 @@ android_add_executable(
   TARGET android-emu_benchmark
   NODISTRIBUTE
   SRC # cmake-format: sortable
-      android/base/Log_benchmark.cpp
       android/base/synchronization/Lock_benchmark.cpp
       android/base/TranslateBenchmark.cpp)
 target_link_libraries(

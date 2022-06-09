@@ -29,6 +29,7 @@ if(NOT TARGET gmock_main)
   enable_testing()
 endif()
 
+
 # Emugen executable (note not unicode safe!)
 android_add_executable(
   TARGET emugen
@@ -36,8 +37,6 @@ android_add_executable(
   SRC # cmake-format: sortable
       ApiGen.cpp EntryPoint.cpp main.cpp Parser.cpp strUtils.cpp
       TypeFactory.cpp)
-target_include_directories(
-  emugen PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu-base)
 
 # The unit tests
 android_add_test(TARGET emugen_unittests SRC # cmake-format: sortable

@@ -87,9 +87,10 @@ void FeatureControlImpl::initHostFeatureAndParseDefault(
         case NULLVAL:
             break;
         default:
-            LOG(WARNING) << "Loading advanced feature host default setting: "
-                         << featureNameStr
-                         << ", expect on/off, get: " << strHost;
+            dwarning(
+                    "Loading advanced feature host default setting: %s, expect "
+                    "on/off, get: %s",
+                    featureNameStr, strHost.c_str());
             break;
     }
 }
@@ -119,9 +120,10 @@ void FeatureControlImpl::initGuestFeatureAndParseDefault(
         case NULLVAL:
             break;
         default:
-            LOG(WARNING) << "Loading advanced feature host default setting: "
-                         << featureNameStr
-                         << ", expect on/off, get: " << strHost;
+            dwarning(
+                    "Loading advanced feature host default setting: %s, expect "
+                    "on/off, get: %s",
+                    featureNameStr, strHost.c_str());
             break;
     }
 }
@@ -281,7 +283,7 @@ void FeatureControlImpl::initNoFiles() {
 
 void FeatureControlImpl::create() {
     if (s_featureControl.hasInstance()) {
-        LOG(ERROR) << "Feature control already exists in create() call";
+        derror("Feature control already exists in create() call");
     }
     (void)s_featureControl.get();
 }

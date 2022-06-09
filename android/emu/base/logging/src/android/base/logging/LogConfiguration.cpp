@@ -8,12 +8,13 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
+#include <stdint.h>  // for uint64_t
+#include <memory>    // for make_unique, unique_ptr
 
-#include "android/utils/debug.h"
-
-#include <memory>
-#include "android/base/Log.h"
-#include "android/base/LogFormatter.h"
+#include "android/base/logging/CLog.h"          // for LoggingFlags, base_co...
+#include "android/base/logging/Log.h"           // for setMinLogLevel, setLo...
+#include "android/base/logging/LogFormatter.h"  // for NoDuplicateLinesForma...
+#include "android/base/logging/LogSeverity.h"   // for EMULATOR_LOG_INFO
 
 using android::base::LogFormatter;
 using android::base::NoDuplicateLinesFormatter;
@@ -21,14 +22,14 @@ using android::base::SimpleLogFormatter;
 using android::base::SimpleLogWithTimeFormatter;
 using android::base::VerboseLogFormatter;
 
+extern "C" uint64_t android_verbose = 0;
+extern "C" LogSeverity android_log_severity = EMULATOR_LOG_INFO;
 void base_enable_verbose_logs() {
-    VERBOSE_ENABLE(init);
     android::base::setMinLogLevel(EMULATOR_LOG_VERBOSE);
     android_log_severity = EMULATOR_LOG_VERBOSE;
 }
 
 void base_disable_verbose_logs() {
-    VERBOSE_DISABLE(init);
     android::base::setMinLogLevel(EMULATOR_LOG_INFO);
     android_log_severity = EMULATOR_LOG_INFO;
 }
@@ -37,9 +38,9 @@ void base_configure_logs(LoggingFlags flags) {
     // Arguments have been parsed.. Time to fully initialize the log config.
     std::unique_ptr<LogFormatter> formatter =
             std::make_unique<SimpleLogFormatter>();
-    if (VERBOSE_CHECK(log)) {
+    if (flags & kLogEnableVerbose) {
         formatter = std::make_unique<VerboseLogFormatter>();
-    } else if (VERBOSE_CHECK(time)) {
+    } else if (flags & kLogEnableTime) {
         formatter = std::make_unique<SimpleLogWithTimeFormatter>();
     }
     if (flags & kLogEnableDuplicateFilter) {

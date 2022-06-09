@@ -35,6 +35,7 @@
 #ifndef SNAPSHOT_CONTROLS  // TODO:jameskaye Remove when Snapshot controls are
                            // fully enabled
 #include "android/base/async/ThreadLooper.h"        // for ThreadLooper
+#include "android/base/logging/CLog.h"
 #include "android/featurecontrol/FeatureControl.h"  // for isEnabled
 #include "android/metrics/MetricsReporter.h"        // for MetricsRe...
 #include "android/skin/qt/error-dialog.h"           // for showError...

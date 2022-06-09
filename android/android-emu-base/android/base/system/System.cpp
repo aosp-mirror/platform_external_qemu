@@ -15,20 +15,20 @@
 #include "android/base/system/System.h"
 
 #include <inttypes.h>
+
 #include "android/base/EintrWrapper.h"
-#include "android/base/Log.h"
-#include "android/base/StringFormat.h"
-#include "android/base/StringParse.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedFd.h"
+#include "android/base/logging/CLog.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/base/misc/StringUtils.h"
+#include "android/base/StringFormat.h"
+#include "android/base/StringParse.h"
 #include "android/base/threads/Thread.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
-#include "android/utils/tempfile.h"
 #include "android/utils/tempfile.h"
 
 #ifdef _WIN32
@@ -2104,7 +2104,7 @@ bool System::deleteFileInternal(StringView path) {
 #endif
 
     if (remove_res != 0) {
-        LOG(VERBOSE) << "Failed to delete file [" << path << "].";
+        dprint("Failed to delete file [%s]", path.data());
     }
 
     return remove_res == 0;

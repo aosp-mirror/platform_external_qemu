@@ -18,8 +18,8 @@
 #include <string>
 #include <thread>
 #include <type_traits>
-#include "android/base/Log.h"
-#include "android/base/LogFormatter.h"
+#include "android/base/logging/Log.h"
+#include "android/base/logging/LogFormatter.h"
 #include "android/base/StringView.h"
 #include "android/base/async/Looper.h"
 #include "android/base/files/PathUtils.h"

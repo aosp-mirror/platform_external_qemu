@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Log.h"
+#include "android/base/logging/Log.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -65,8 +65,7 @@ protected:
     bool mFatal;
 };
 
-class CheckTest : public LogTest {
-};
+class CheckTest : public LogTest {};
 
 #if ENABLE_DCHECK != 0
 class DCheckEnabledTest : public LogTest {
@@ -76,9 +75,8 @@ public:
         mSavedLevel = setDcheckLevel(true);
     }
 
-    ~DCheckEnabledTest() {
-        setDcheckLevel(mSavedLevel);
-    }
+    ~DCheckEnabledTest() { setDcheckLevel(mSavedLevel); }
+
 private:
     bool mSavedLevel;
 };
@@ -87,13 +85,10 @@ private:
 #if ENABLE_DCHECK != 2
 class DCheckDisabledTest : public LogTest {
 public:
-    DCheckDisabledTest() : LogTest() {
-        mSavedLevel = setDcheckLevel(false);
-    }
+    DCheckDisabledTest() : LogTest() { mSavedLevel = setDcheckLevel(false); }
 
-    ~DCheckDisabledTest() {
-        setDcheckLevel(mSavedLevel);
-    }
+    ~DCheckDisabledTest() { setDcheckLevel(mSavedLevel); }
+
 private:
     bool mSavedLevel;
 };
@@ -103,9 +98,7 @@ class PLogTest : public LogTest {
 public:
     PLogTest() : LogTest(), mForcedErrno(-1000) {}
 
-    void setForcedErrno(int errnoCode) {
-        mForcedErrno = errnoCode;
-    }
+    void setForcedErrno(int errnoCode) { mForcedErrno = errnoCode; }
 
     void setExpectedErrno(LogSeverity severity,
                           int line,
@@ -114,10 +107,7 @@ public:
         mExpectedParams.file = __FILE__;
         mExpectedParams.lineno = line;
         mExpectedParams.severity = severity;
-        snprintf(mExpected,
-                 sizeof(mExpected),
-                 "%sError message: %s",
-                 suffix,
+        snprintf(mExpected, sizeof(mExpected), "%sError message: %s", suffix,
                  strerror(errnoCode));
     }
 
@@ -138,11 +128,11 @@ protected:
 #define STRINGIFY_(x) #x
 
 #define EXPECTED_STRING_PREFIX(prefix, line) \
-  prefix ":" __FILE__ ":" STRINGIFY(line) ": "
+    prefix ":" __FILE__ ":" STRINGIFY(line) ": "
 
-#define CHECK_EXPECTATIONS() \
-    EXPECT_STREQ(mExpectedParams.file, mParams.file); \
-    EXPECT_EQ(mExpectedParams.lineno, mParams.lineno); \
+#define CHECK_EXPECTATIONS()                               \
+    EXPECT_STREQ(mExpectedParams.file, mParams.file);      \
+    EXPECT_EQ(mExpectedParams.lineno, mParams.lineno);     \
     EXPECT_EQ(mExpectedParams.severity, mParams.severity); \
     EXPECT_STREQ(mExpected, mBuffer)
 
@@ -158,9 +148,13 @@ TEST(LogString, EmptyString) {
 }
 
 TEST(LogString, LongString) {
-    std::string longString = "hello this is a really long string, one that should result in a buffer overflow as it has so many "
-                 "characters that it will not fit in the default buffer. This means that we should allocate some additional "
-                 "memory to make sure the characters fit. This used to cause issues in the past.";
+    std::string longString =
+            "hello this is a really long string, one that should result in a "
+            "buffer overflow as it has so many "
+            "characters that it will not fit in the default buffer. This means "
+            "that we should allocate some additional "
+            "memory to make sure the characters fit. This used to cause issues "
+            "in the past.";
 
     LogString ls("%s", longString.c_str());
     EXPECT_EQ(longString, ls.string());
@@ -191,20 +185,20 @@ TEST_F(LogTest, LogInfoWithString) {
 
 TEST_F(LogTest, LogInfoWithTwoStrings) {
     setExpected(EMULATOR_LOG_INFO, __LINE__ + 1, "Hello Globe!");
-    LOG(INFO) << "Hello " << "Globe!";
+    LOG(INFO) << "Hello "
+              << "Globe!";
     CHECK_EXPECTATIONS();
 }
 
 TEST_F(LogTest, LogAReallyLongString) {
     std::string longString = "Hello World!";
-    for(int i = 0; i < 8;  i++) {
+    for (int i = 0; i < 8; i++) {
         longString += longString;
     }
     setExpected(EMULATOR_LOG_INFO, __LINE__ + 1, longString.c_str());
     LOG(INFO) << longString;
     CHECK_EXPECTATIONS();
 }
-
 
 TEST_F(LogTest, LogInfoWithLogString) {
     LogString ls("Hello You!");
@@ -252,7 +246,6 @@ TEST_F(LogTest, LogOnlyEvaluatesArgumentsIfNeeded) {
     EXPECT_FALSE(flag);
 }
 
-
 // TODO(digit): Convert this to a real death test when this is supported
 // by our version of GTest.
 TEST_F(CheckTest, CheckFalse) {
@@ -263,7 +256,8 @@ TEST_F(CheckTest, CheckFalse) {
 
 TEST_F(CheckTest, CheckFalseEvaluatesArguments) {
     bool flag = false;
-    setExpected(EMULATOR_LOG_FATAL, __LINE__ + 1, "Check failed: false. Flag was set!");
+    setExpected(EMULATOR_LOG_FATAL, __LINE__ + 2,
+                "Check failed: false. Flag was set!");
     CHECK(false) << setFlag(&flag, "Flag was set!");
     EXPECT_TRUE(flag);
     CHECK_EXPECTATIONS();
@@ -288,7 +282,8 @@ TEST_F(DCheckEnabledTest, DCheckIsOnReturnsTrue) {
 
 TEST_F(DCheckEnabledTest, DCheckFalse) {
     bool flag = false;
-    setExpected(EMULATOR_LOG_FATAL, __LINE__ + 1, "Check failed: false. Flag was set!");
+    setExpected(EMULATOR_LOG_FATAL, __LINE__ + 2,
+                "Check failed: false. Flag was set!");
     DCHECK(false) << setFlag(&flag, "Flag was set!");
     CHECK_EXPECTATIONS();
 }

@@ -19,7 +19,7 @@
 #include "android/base/StringView.h"        // for StringView
 #include "android/base/files/IniFile.h"     // for IniFile, IniFile::const_i...
 #include "android/base/misc/StringUtils.h"  // for strDup
-#include "android/utils/log_severity.h"     // for EMULATOR_LOG_VERBOSE
+#include "android/base/logging/LogSeverity.h"     // for EMULATOR_LOG_VERBOSE
 
 using CIniFile = ::CIniFile;
 using BaseIniFile = android::base::IniFile;

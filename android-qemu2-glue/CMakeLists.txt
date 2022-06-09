@@ -2,17 +2,14 @@ cmake_minimum_required(VERSION 3.5)
 
 # Generate the VirtioGpuTimelines flatbuffers header
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/VirtioGpuTimelines_generated.h
-    COMMAND
-    flatc
-    ARGS
-    --cpp --gen-object-api --scoped-enums
-    -o ${CMAKE_CURRENT_BINARY_DIR} emulation/VirtioGpuTimelines.fbs
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS flatc emulation/VirtioGpuTimelines.fbs)
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/VirtioGpuTimelines_generated.h
+  COMMAND flatc ARGS --cpp --gen-object-api --scoped-enums -o
+          ${CMAKE_CURRENT_BINARY_DIR} emulation/VirtioGpuTimelines.fbs
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DEPENDS flatc emulation/VirtioGpuTimelines.fbs)
 add_custom_target(
-    virtio_gpu_timelines_fbs_header ALL
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/VirtioGpuTimelines_generated.h)
+  virtio_gpu_timelines_fbs_header ALL
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/VirtioGpuTimelines_generated.h)
 
 set(android-qemu2-glue_src
     android_qemud.cpp
@@ -76,7 +73,10 @@ android_add_library(
 
 target_include_directories(
   libqemu2-glue
-  PRIVATE .. ../include ${ANDROID_AUTOGEN} ../slirp
+  PRIVATE ..
+          ../include
+          ${ANDROID_AUTOGEN}
+          ../slirp
           ${VIRGLRENDERER_INCLUDE_DIR}
           ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/
           ${CMAKE_CURRENT_BINARY_DIR})
@@ -91,8 +91,14 @@ if(BLUETOOTH_EMULATION)
 endif()
 
 target_link_libraries(
-  libqemu2-glue PRIVATE android-emu GLIB2::GLIB2 PIXMAN::PIXMAN emulator-libdtb
-                        ssl hostapd flatbuffers)
+  libqemu2-glue
+  PRIVATE android-emu
+          GLIB2::GLIB2
+          PIXMAN::PIXMAN
+          emulator-libdtb
+          ssl
+          hostapd
+          flatbuffers)
 
 add_dependencies(libqemu2-glue virtio_gpu_timelines_fbs_header)
 
@@ -108,15 +114,14 @@ target_link_libraries(
   PRIVATE android-emu GLIB2::GLIB2 android-hw-config
           nlohmann_json::nlohmann_json PIXMAN::PIXMAN)
 
-android_add_test(
-  TARGET libqemu2-glue_unittests SRC tests/VirtioGpuTimelines_unittest.cpp)
+android_add_test(TARGET libqemu2-glue_unittests
+                 SRC tests/VirtioGpuTimelines_unittest.cpp)
 
 target_link_libraries(
-  libqemu2-glue_unittests
-  PRIVATE libqemu2-glue gmock gtest gmock_main)
+  libqemu2-glue_unittests PRIVATE libqemu2-glue android-emu-base gmock gtest
+                                  gmock_main)
 
 target_include_directories(
   libqemu2-glue_unittests
-          
-  PRIVATE . ../include ../android/android-emu-base ../android/android-emu 
+  PRIVATE . ../include ../android/android-emu-base ../android/android-emu
           ${VIRGLRENDERER_INCLUDE_DIR})
