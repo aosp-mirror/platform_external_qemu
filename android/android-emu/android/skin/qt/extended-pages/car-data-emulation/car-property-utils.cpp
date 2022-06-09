@@ -50,6 +50,7 @@ using emulator::VehicleUnit;
 using emulator::VehicleOilLevel;
 using emulator::FuelType;
 using emulator::EvConnectorType;
+using emulator::GsrComplianceRequirementType;
 using emulator::PortLocationType;
 using emulator::VehicleApPowerStateReq;
 using emulator::VehicleApPowerStateShutdownParam;
@@ -250,6 +251,13 @@ map<int32_t, PropertyDescription> areaMap = {
     { (int32_t) VehicleArea::WHEEL, { QObject::tr("Wheel"), &wheelMap } }
 };
 
+map<int32_t, QString> gsrComplianceReqMap = {
+    { (int32_t) GsrComplianceRequirementType::GSR_COMPLIANCE_NOT_REQUIRED,
+      QObject::tr("GSR compliance not required") },
+    { (int32_t) GsrComplianceRequirementType::GSR_COMPLIANCE_REQUIRED_THROUGH_SYSTEM_IMAGE,
+      QObject::tr("GSR compliance required through system image") }
+};
+
 map<int32_t, PropertyDescription> carpropertyutils::propMap = {
     { 0,         { QObject::tr("INVALID") } },
     { 286261504, { QObject::tr("VIN") } },
@@ -368,7 +376,8 @@ map<int32_t, PropertyDescription> carpropertyutils::propMap = {
     { 289410576, { QObject::tr("Headlights switch"), &lightSwitchMap } },
     { 289410577, { QObject::tr("High beam lights switch"), &lightSwitchMap } },
     { 289410578, { QObject::tr("Fog lights switch"), &lightSwitchMap } },
-    { 289410579, { QObject::tr("Hazard lights switch"), &lightSwitchMap } }
+    { 289410579, { QObject::tr("Hazard lights switch"), &lightSwitchMap } },
+    { 289410887, { QObject::tr("EU General Safety Regulation (GSR) Compliance Requirement"), &gsrComplianceReqMap } },
 };
 
 QString carpropertyutils::getValueString(VehiclePropValue val) {
