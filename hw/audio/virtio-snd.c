@@ -585,13 +585,17 @@ static void virtio_snd_stream_unprepare_in_locked(VirtIOSoundPCMStream *stream) 
     VirtIOSoundRingBuffer *pcm_buf = &stream->pcm_buf;
     VirtIOSound *snd = stream->snd;
     VirtQueue *rx_vq = snd->rx_vq;
+    const int period_bytes = stream->period_bytes;
 
     while (true) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
             VirtQueueElement *e = item->el;
-            el_send_pcm_status(e, VIRTIO_SND_S_OK, 0);
-            vq_consume_element(rx_vq, e, item->pos);
+
+            const size_t size = el_send_pcm_rx_status(
+                e, period_bytes, VIRTIO_SND_S_OK, 0);
+            vq_consume_element(rx_vq, e, size);
+
             ring_buffer_pop(pcm_buf);
         } else {
             break;
