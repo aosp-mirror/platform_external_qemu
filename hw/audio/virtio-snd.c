@@ -1421,8 +1421,7 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     qemu_mutex_unlock(&stream->mtx);
 }
 
-static bool virtio_snd_stream_prepare_vars(VirtIOSoundPCMStream *stream,
-                                           const size_t pcm_buf_capacity) {
+static bool virtio_snd_stream_prepare_vars(VirtIOSoundPCMStream *stream) {
     if (!ring_buffer_alloc(&stream->pcm_buf,
                            2 * stream->buffer_bytes / stream->period_bytes)) {
         return false;
@@ -1460,8 +1459,7 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
 
     switch (stream->state) {
     case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
-        if (!virtio_snd_stream_prepare_vars(stream,
-                                            2 * stream->buffer_bytes / stream->period_bytes)) {
+        if (!virtio_snd_stream_prepare_vars(stream)) {
             r = VIRTIO_SND_S_BAD_MSG;
             goto done;
         }
@@ -1849,8 +1847,7 @@ static int vmstate_VirtIOSound_post_xyz(void *opaque) {
         VirtIOSoundPCMStream *stream = &snd->streams[i];
 
         if (stream->state >= VIRTIO_PCM_STREAM_STATE_PREPARED) {
-            if (!virtio_snd_stream_prepare_vars(stream,
-                                                stream->pcm_buf.capacity)) {
+            if (!virtio_snd_stream_prepare_vars(stream)) {
                 ABORT("virtio_snd_stream_prepare_vars");
             }
 
