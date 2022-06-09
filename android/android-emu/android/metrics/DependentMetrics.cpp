@@ -477,9 +477,6 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
                     DEVICESTATE_ON_BOOT;
         case android::featurecontrol::HWCMultiConfigs:
             return android_studio::EmulatorFeatureFlagState::HWC_MULTI_CONFIGS;
-        case android::featurecontrol::VirtioGpuFenceContexts:
-            return android_studio::EmulatorFeatureFlagState::
-                    VIRTIO_GPU_FENCE_CONTEXTS;
         case android::featurecontrol::AsyncComposeSupport:
             return android_studio::EmulatorFeatureFlagState::
                     ASYNC_COMPOSE_SUPPORT;
@@ -487,6 +484,12 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::VIRTIO_SND_CARD;
         case android::featurecontrol::VirtioTablet:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_TABLET;
+        case android::featurecontrol::RgtcTextureSupport:
+            return android_studio::EmulatorFeatureFlagState::RGTC_TEXTURE_SUPPORT;
+        case android::featurecontrol::VulkanNativeSwapchain:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_NATIVE_SWAPCHAIN;
+        case android::featurecontrol::VirtioGpuFenceContexts:
+            return android_studio::EmulatorFeatureFlagState::VIRTIO_GPU_FENCE_CONTEXTS;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
