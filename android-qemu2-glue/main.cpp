@@ -2000,8 +2000,8 @@ extern "C" int main(int argc, char** argv) {
             handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
     if (accel_ok) {
 #ifdef __APPLE__
-        if (avd && avdInfo_getApiLevel(avd) >= 24
-            && !strcmp(avdInfo_getTargetAbi(avd), "arm64-v8a")) {
+        if (avd && avdInfo_getApiLevel(avd) >= 21 &&
+            !strcmp(avdInfo_getTargetAbi(avd), "arm64-v8a")) {
             args.add("-enable-hvf");
         } else {
             dwarning("hvf is not enabled on this aarch64 host.");
