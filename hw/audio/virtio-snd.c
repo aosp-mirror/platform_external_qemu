@@ -1153,7 +1153,7 @@ static int calc_insert_bytes_in(VirtIOSoundPCMStream *stream) {
                                                                 &stream->start_timestamp));
 }
 
-static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
+static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     SWVoiceOut *const voice = stream->voice.out;
     VirtIOSoundRingBuffer *const pcm_buf = &stream->pcm_buf;
     VirtIOSound *const snd = stream->snd;
@@ -1247,17 +1247,19 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     }
 
 done:
-    if (notify_vq) {
-        virtio_notify(&snd->parent, tx_vq);
-    }
+    return notify_vq ? tx_vq : NULL;
 }
 
 static void stream_out_cb(void *opaque, int avail) {
     VirtIOSoundPCMStream *const stream = (VirtIOSoundPCMStream *)opaque;
 
     qemu_mutex_lock(&stream->mtx);
-    stream_out_cb_locked(stream, avail);
+    VirtQueue *vq_to_notify = stream_out_cb_locked(stream, avail);
     qemu_mutex_unlock(&stream->mtx);
+
+    if (vq_to_notify) {
+        virtio_notify(&stream->snd->parent, vq_to_notify);
+    }
 }
 
 static bool virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
@@ -1295,7 +1297,7 @@ static bool virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     return true;
 }
 
-static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
+static VirtQueue *stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     SWVoiceIn *const voice = stream->voice.in;
     const int aud_fs = stream->aud_frame_size;
     const int driver_fs = stream->driver_frame_size;
@@ -1384,17 +1386,19 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     }
 
 done:
-    if (notify_vq) {
-        virtio_notify(&snd->parent, rx_vq);
-    }
+    return notify_vq ? rx_vq : NULL;
 }
 
 static void stream_in_cb(void *opaque, int avail) {
     VirtIOSoundPCMStream *const stream = (VirtIOSoundPCMStream *)opaque;
 
     qemu_mutex_lock(&stream->mtx);
-    stream_in_cb_locked(stream, avail);
+    VirtQueue *vq_to_notify = stream_in_cb_locked(stream, avail);
     qemu_mutex_unlock(&stream->mtx);
+
+    if (vq_to_notify) {
+        virtio_notify(&stream->snd->parent, vq_to_notify);
+    }
 }
 
 static bool virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
