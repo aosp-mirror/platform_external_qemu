@@ -1259,7 +1259,7 @@ static void stream_out_cb(void *opaque, int avail) {
     qemu_mutex_unlock(&stream->mtx);
 }
 
-static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
+static bool virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
     VirtIOSoundRingBufferItem item;
     struct virtio_snd_pcm_xfer xfer;
     VirtIOSoundPCMStream *stream;
@@ -1267,13 +1267,13 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
     if (req_size < sizeof(xfer)) {
         vq_consume_element(vq, e, 0);
-        return;
+        return false;
     }
 
     iov_to_buf(e->out_sg, e->out_num, 0, &xfer, sizeof(xfer));
     if (xfer.stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         vq_consume_element(vq, e, el_send_pcm_status(e, VIRTIO_SND_S_IO_ERR, 0));
-        return;
+        return false;
     }
 
     stream = &snd->streams[xfer.stream_id];
@@ -1291,6 +1291,7 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     }
 
     qemu_mutex_unlock(&stream->mtx);
+    return true;
 }
 
 static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
@@ -1395,7 +1396,7 @@ static void stream_in_cb(void *opaque, int avail) {
     qemu_mutex_unlock(&stream->mtx);
 }
 
-static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
+static bool virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
     VirtIOSoundRingBufferItem item;
     struct virtio_snd_pcm_xfer xfer;
     VirtIOSoundPCMStream *stream;
@@ -1403,13 +1404,13 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
     if (req_size < sizeof(xfer)) {
         vq_consume_element(vq, e, 0);
-        return;
+        return false;
     }
 
     iov_to_buf(e->out_sg, e->out_num, 0, &xfer, sizeof(xfer));
     if (xfer.stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         vq_consume_element(vq, e, el_send_pcm_status(e, VIRTIO_SND_S_IO_ERR, 0));
-        return;
+        return false;
     }
 
     stream = &snd->streams[xfer.stream_id];
@@ -1425,6 +1426,7 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     }
 
     qemu_mutex_unlock(&stream->mtx);
+    return true;
 }
 
 static bool virtio_snd_stream_prepare_vars(VirtIOSoundPCMStream *stream) {
@@ -1681,35 +1683,47 @@ static void virtio_snd_handle_event(VirtIODevice *vdev, VirtQueue *vq) {
 }
 
 /* device <- driver */
-static void virtio_snd_handle_tx_impl(VirtIOSound *snd, VirtQueue *vq) {
+static bool virtio_snd_handle_tx_impl(VirtIOSound *snd, VirtQueue *vq) {
+    bool need_notify = false;
+
     while (virtio_queue_ready(vq)) {
         VirtQueueElement *e = (VirtQueueElement *)virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (e) {
-            virtio_snd_process_tx(vq, e, snd);
+            need_notify = !virtio_snd_process_tx(vq, e, snd) || need_notify;
         } else {
             break;
         }
     }
+
+    return need_notify;
 }
 
 static void virtio_snd_handle_tx(VirtIODevice *vdev, VirtQueue *vq) {
-    virtio_snd_handle_tx_impl(VIRTIO_SND(vdev), vq);
+    if (virtio_snd_handle_tx_impl(VIRTIO_SND(vdev), vq)) {
+        virtio_notify(vdev, vq);
+    }
 }
 
 /* device -> driver */
-static void virtio_snd_handle_rx_impl(VirtIOSound *snd, VirtQueue *vq) {
+static bool virtio_snd_handle_rx_impl(VirtIOSound *snd, VirtQueue *vq) {
+    bool need_notify = false;
+
     while (virtio_queue_ready(vq)) {
         VirtQueueElement *e = (VirtQueueElement *)virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (e) {
-            virtio_snd_process_rx(vq, e, snd);
+            need_notify = !virtio_snd_process_rx(vq, e, snd) || need_notify;
         } else {
             break;
         }
     }
+
+    return need_notify;
 }
 
 static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
-    virtio_snd_handle_rx_impl(VIRTIO_SND(vdev), vq);
+    if (virtio_snd_handle_rx_impl(VIRTIO_SND(vdev), vq)) {
+        virtio_notify(vdev, vq);
+    }
 }
 
 static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
