@@ -47,6 +47,7 @@
 #define GLUE(A, B) A##B
 #define GLUE2(A, B) GLUE(A, B)
 #define ABORT(why) abort();
+#define FAILURE(X) (X)
 
 union VirtIOSoundCtlRequest {
     struct virtio_snd_hdr hdr;
@@ -86,7 +87,7 @@ static unsigned format16_get_freq_hz(uint16_t format16) {
     case VIRTIO_SND_PCM_RATE_32000: return 32000;
     case VIRTIO_SND_PCM_RATE_44100: return 44100;
     case VIRTIO_SND_PCM_RATE_48000: return 48000;
-    default:                        return -1;
+    default:                        return FAILURE(-1);
     }
 }
 
@@ -105,7 +106,7 @@ struct audsettings virtio_snd_unpack_format(uint16_t format16) {
         break;
 
     default:
-        as.fmt = -1;
+        as.fmt = FAILURE(-1);
         break;
     }
 
@@ -312,7 +313,7 @@ static bool ring_buffer_alloc(VirtIOSoundRingBuffer *rb, const size_t capacity) 
 
     rb->buf = g_new0(VirtIOSoundRingBufferItem, capacity);
     if (!rb->buf) {
-        return false;
+        return FAILURE(false);
     }
 
     rb->capacity = capacity;
@@ -343,7 +344,7 @@ static bool ring_buffer_push(VirtIOSoundRingBuffer *rb,
     int w;
 
     if (size >= capacity) {
-        return false;
+        return FAILURE(false);
     }
 
     w = rb->w;
@@ -496,7 +497,7 @@ static uint16_t virtio_snd_voice_reopen(VirtIOSound *snd,
         }
     }
 
-    return VIRTIO_SND_FORMAT16_BAD;
+    return FAILURE(VIRTIO_SND_FORMAT16_BAD);
 }
 
 static void virtio_snd_voice_close(VirtIOSound *snd, VirtIOSoundPCMStream *stream) {
@@ -528,7 +529,7 @@ static void virtio_snd_stream_init(const unsigned stream_id,
 
 static bool virtio_snd_stream_start_locked(VirtIOSoundPCMStream *stream) {
     if (!stream->voice.raw) {
-        return false;
+        return FAILURE(false);
     }
 
     if (is_output_stream(stream)) {
@@ -672,14 +673,14 @@ virtio_snd_process_ctl_jack_info(VirtQueueElement *e,
         }
     }
 
-    return el_send_status(e, VIRTIO_SND_S_BAD_MSG);
+    return el_send_status(e, FAILURE(VIRTIO_SND_S_BAD_MSG));
 }
 
 static size_t
 virtio_snd_process_ctl_jack_remap(VirtQueueElement *e,
                                   const struct virtio_snd_jack_remap* req,
                                   VirtIOSound* snd) {
-    return el_send_status(e, VIRTIO_SND_S_NOT_SUPP);
+    return el_send_status(e, FAILURE(VIRTIO_SND_S_NOT_SUPP));
 }
 
 static size_t
@@ -696,7 +697,7 @@ virtio_snd_process_ctl_pcm_info(VirtQueueElement *e,
         }
     }
 
-    return el_send_status(e, VIRTIO_SND_S_BAD_MSG);
+    return el_send_status(e, FAILURE(VIRTIO_SND_S_BAD_MSG));
 }
 
 static uint32_t
@@ -708,29 +709,29 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
     struct audsettings as;
 
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
     pcm_info = &g_pcm_infos[stream_id];
 
     if (!(pcm_info->rates & (1u << req->rate))) {
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
     if (!(pcm_info->formats & (1u << req->format))) {
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
     if ((req->channels < pcm_info->channels_min) || (req->channels > pcm_info->channels_max)) {
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
     if (!req->buffer_bytes) {
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
     if (!req->period_bytes) {
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
     stream = &snd->streams[stream_id];
@@ -741,7 +742,7 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
     case VIRTIO_PCM_STREAM_STATE_PREPARED:
     case VIRTIO_PCM_STREAM_STATE_DISABLED:
         qemu_mutex_unlock(&stream->mtx);
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
 
     case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
     case VIRTIO_PCM_STREAM_STATE_ENABLED:
@@ -1267,13 +1268,13 @@ static bool virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
     if (req_size < sizeof(xfer)) {
         vq_consume_element(vq, e, 0);
-        return false;
+        return FAILURE(false);
     }
 
     iov_to_buf(e->out_sg, e->out_num, 0, &xfer, sizeof(xfer));
     if (xfer.stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         vq_consume_element(vq, e, el_send_pcm_status(e, VIRTIO_SND_S_IO_ERR, 0));
-        return false;
+        return FAILURE(false);
     }
 
     stream = &snd->streams[xfer.stream_id];
@@ -1404,13 +1405,13 @@ static bool virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
     if (req_size < sizeof(xfer)) {
         vq_consume_element(vq, e, 0);
-        return false;
+        return FAILURE(false);
     }
 
     iov_to_buf(e->out_sg, e->out_num, 0, &xfer, sizeof(xfer));
     if (xfer.stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         vq_consume_element(vq, e, el_send_pcm_rx_status(e, 0, VIRTIO_SND_S_IO_ERR, 0));
-        return false;
+        return FAILURE(false);
     }
 
     stream = &snd->streams[xfer.stream_id];
@@ -1432,7 +1433,7 @@ static bool virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 static bool virtio_snd_stream_prepare_vars(VirtIOSoundPCMStream *stream) {
     if (!ring_buffer_alloc(&stream->pcm_buf,
                            2 * stream->buffer_bytes / stream->period_bytes)) {
-        return false;
+        return FAILURE(false);
     }
 
     stream->freq_hz = format16_get_freq_hz(stream->guest_format);
@@ -1448,7 +1449,7 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
     uint32_t r;
 
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
     stream = &snd->streams[stream_id];
@@ -1456,19 +1457,19 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
     qemu_mutex_lock(&stream->mtx);
 
     if (!stream->voice.raw) {
-        r = VIRTIO_SND_S_IO_ERR;
+        r = FAILURE(VIRTIO_SND_S_IO_ERR);
         goto done;
     }
 
     if (!stream->buffer_bytes) {
-        r = VIRTIO_SND_S_BAD_MSG;
+        r = FAILURE(VIRTIO_SND_S_BAD_MSG);
         goto done;
     }
 
     switch (stream->state) {
     case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
         if (!virtio_snd_stream_prepare_vars(stream)) {
-            r = VIRTIO_SND_S_BAD_MSG;
+            r = FAILURE(VIRTIO_SND_S_BAD_MSG);
             goto done;
         }
 
@@ -1484,7 +1485,7 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
         goto done;
 
     default:
-        r = VIRTIO_SND_S_BAD_MSG;
+        r = FAILURE(VIRTIO_SND_S_BAD_MSG);
         goto done;
     }
 
@@ -1498,7 +1499,7 @@ virtio_snd_process_ctl_pcm_release_impl(unsigned stream_id, VirtIOSound* snd) {
     VirtIOSoundPCMStream *stream;
 
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
     stream = &snd->streams[stream_id];
@@ -1506,7 +1507,7 @@ virtio_snd_process_ctl_pcm_release_impl(unsigned stream_id, VirtIOSound* snd) {
     qemu_mutex_lock(&stream->mtx);
     if (stream->state != VIRTIO_PCM_STREAM_STATE_PREPARED) {
         qemu_mutex_unlock(&stream->mtx);
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
     virtio_snd_stream_unprepare_locked(stream);
     stream->state = VIRTIO_PCM_STREAM_STATE_PARAMS_SET;
@@ -1521,7 +1522,7 @@ virtio_snd_process_ctl_pcm_start_impl(unsigned stream_id, VirtIOSound* snd) {
     uint32_t r;
 
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
 
@@ -1530,12 +1531,12 @@ virtio_snd_process_ctl_pcm_start_impl(unsigned stream_id, VirtIOSound* snd) {
     qemu_mutex_lock(&stream->mtx);
 
     if (stream->state != VIRTIO_PCM_STREAM_STATE_PREPARED) {
-        r = VIRTIO_SND_S_BAD_MSG;
+        r = FAILURE(VIRTIO_SND_S_BAD_MSG);
         goto done;
     }
 
     if (!virtio_snd_stream_start_locked(stream)) {
-        r = VIRTIO_SND_S_IO_ERR;
+        r = FAILURE(VIRTIO_SND_S_IO_ERR);
         goto done;
     }
 
@@ -1552,7 +1553,7 @@ virtio_snd_process_ctl_pcm_stop_impl(unsigned stream_id, VirtIOSound* snd) {
     VirtIOSoundPCMStream *stream;
 
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
     stream = &snd->streams[stream_id];
@@ -1561,7 +1562,7 @@ virtio_snd_process_ctl_pcm_stop_impl(unsigned stream_id, VirtIOSound* snd) {
 
     if (stream->state != VIRTIO_PCM_STREAM_STATE_RUNNING) {
         qemu_mutex_unlock(&stream->mtx);
-        return VIRTIO_SND_S_BAD_MSG;
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
 
     virtio_snd_stream_stop_locked(stream);
@@ -1621,7 +1622,7 @@ virtio_snd_process_ctl_chmap_info(VirtQueueElement *e,
         }
     }
 
-    return el_send_status(e, VIRTIO_SND_S_BAD_MSG);
+    return el_send_status(e, FAILURE(VIRTIO_SND_S_BAD_MSG));
 }
 
 static size_t virtio_snd_process_ctl(VirtQueueElement *e, VirtIOSound *snd) {
@@ -1654,11 +1655,11 @@ static size_t virtio_snd_process_ctl(VirtQueueElement *e, VirtIOSound *snd) {
     HANDLE_CTL(CHMAP_INFO, virtio_snd_query_info, virtio_snd_process_ctl_chmap_info)
 #undef HANDLE_CTL
     default:
-        return el_send_status(e, VIRTIO_SND_S_NOT_SUPP);
+        return el_send_status(e, FAILURE(VIRTIO_SND_S_NOT_SUPP));
     }
 
 incomplete_request:
-    return el_send_status(e, VIRTIO_SND_S_BAD_MSG);
+    return el_send_status(e, FAILURE(VIRTIO_SND_S_BAD_MSG));
 }
 
 /* device <- driver */
