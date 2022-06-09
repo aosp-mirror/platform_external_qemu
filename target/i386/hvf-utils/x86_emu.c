@@ -132,6 +132,16 @@ void hvf_handle_io(uint16_t port, void *data, int direction, int size, uint32_t 
         FLAGS_FUNC##_32(v1, v2, diff);              \
         break;                                      \
     }                                               \
+    case 8:                                        \
+    {                                               \
+        uint64_t v1 = (uint32_t)decode->op[0].val;  \
+        uint64_t v2 = (uint32_t)decode->op[1].val;  \
+        uint64_t diff = v1 cmd v2;                  \
+        if (save_res)                               \
+            write_val_ext(cpu, decode->op[0].ptr, diff, 8); \
+        FLAGS_FUNC##_64(v1, v2, diff);              \
+        break;                                      \
+    }                                               \
     default:                                        \
         VM_PANIC("bad size\n");                    \
     }                                                   \
@@ -352,13 +362,16 @@ static void exec_xor(struct CPUState *cpu, struct x86_decode *decode)
 static void exec_neg(struct CPUState *cpu, struct x86_decode *decode)
 {
     //EXEC_2OP_ARITH_CMD(cpu, decode, -, SET_FLAGS_OSZAPC_SUB, false);
-    int32_t val;
+    int64_t val;
     fetch_operands(cpu, decode, 2, true, true, false);
 
     val = 0 - sign(decode->op[1].val, decode->operand_size);
     write_val_ext(cpu, decode->op[1].ptr, val, decode->operand_size);
 
-    if (4 == decode->operand_size) {
+    if (8 == decode->operand_size) {
+        SET_FLAGS_OSZAPC_SUB_64(0, 0 - val, val);
+    }
+    else if (4 == decode->operand_size) {
         SET_FLAGS_OSZAPC_SUB_32(0, 0 - val, val);
     }
     else if (2 == decode->operand_size) {
@@ -951,7 +964,7 @@ static void exec_bts(struct CPUState *cpu, struct x86_decode *decode)
 void exec_shl(struct CPUState *cpu, struct x86_decode *decode)
 {
     uint8_t count;
-    int of = 0, cf = 0;
+    int64_t of = 0, cf = 0;
 
     fetch_operands(cpu, decode, 2, true, true, false);
 
@@ -999,6 +1012,17 @@ void exec_shl(struct CPUState *cpu, struct x86_decode *decode)
             SET_FLAGS_OSZAPC_LOGIC_32(res);
             cf = (decode->op[0].val >> (32 - count)) & 0x1;
             of = cf ^ (res >> 31); // of = cf ^ result31
+            SET_FLAGS_OxxxxC(cpu, of, cf);
+            break;
+        }
+        case 8:
+        {
+            uint32_t res = decode->op[0].val << count;
+            
+            write_val_ext(cpu, decode->op[0].ptr, res, 8);
+            SET_FLAGS_OSZAPC_LOGIC_64(res);
+            cf = (decode->op[0].val >> (64 - count)) & 0x1;
+            of = cf ^ (res >> 63); // of = cf ^ result63
             SET_FLAGS_OxxxxC(cpu, of, cf);
             break;
         }
@@ -1103,6 +1127,27 @@ void exec_ror(struct CPUState *cpu, struct x86_decode *decode)
             }
             break;
         }
+        case 8:
+        {
+            uint64_t bit63, bit62;
+            uint64_t res;
+
+            count &= 0x3f;
+            if (count) {
+                res = ((uint64_t)decode->op[0].val >> count) | ((uint64_t)decode->op[0].val << (64 - count));
+                write_val_ext(cpu, decode->op[0].ptr, res, 8);
+
+                bit63 = (res >> 63) & 1;
+                bit62 = (res >> 30) & 1;
+                // of = result62 ^ result63
+                SET_FLAGS_OxxxxC(cpu, bit62 ^ bit63, bit63);
+            }
+            break;
+        }
+        default:
+        {
+            abort();
+        }
     }
     RIP(cpu) += decode->len;
 }
@@ -1181,6 +1226,27 @@ void exec_rol(struct CPUState *cpu, struct x86_decode *decode)
             }
             break;
         }
+        case 8:
+        {
+            uint64_t bit0, bit63;
+            uint64_t res;
+
+            count &= 0x3f;
+            if (count) {
+                res = ((uint64_t)decode->op[0].val << count) | ((uint64_t)decode->op[0].val >> (64 - count));
+
+                write_val_ext(cpu, decode->op[0].ptr, res, 8);
+                bit0  = (res & 0x1);
+                bit63 = (res >> 63);
+                // of = cf ^ result63
+                SET_FLAGS_OxxxxC(cpu, bit0 ^ bit63, bit0);
+            }
+            break;
+        }
+        default:
+        {
+            abort();
+        }
     }
     RIP(cpu) += decode->len;
 }
@@ -1258,6 +1324,30 @@ void exec_rcl(struct CPUState *cpu, struct x86_decode *decode)
             SET_FLAGS_OxxxxC(cpu, of, cf);
             break;
         }
+        case 8:
+        {
+            uint64_t res;
+            uint64_t op1_64 = decode->op[0].val;
+
+            if (!count)
+                break;
+
+            if (1 == count)
+                res = (op1_64 << 1) | get_CF(cpu);
+            else
+                res = (op1_64 << count) | (get_CF(cpu) << (count - 1)) | (op1_64 >> (65 - count));
+
+            write_val_ext(cpu, decode->op[0].ptr, res, 8);
+
+            cf = (op1_64 >> (64 - count)) & 0x1;
+            of = cf ^ (res >> 63); // of = cf ^ result63
+            SET_FLAGS_OxxxxC(cpu, of, cf);
+            break;
+        }
+        default:
+        {
+            abort();
+        }
     }
     RIP(cpu) += decode->len;
 }
@@ -1324,6 +1414,30 @@ void exec_rcr(struct CPUState *cpu, struct x86_decode *decode)
             of = ((res << 1) ^ res) >> 31; // of = result30 ^ result31
             SET_FLAGS_OxxxxC(cpu, of, cf);
             break;
+        }
+        case 8:
+        {
+            uint64_t res;
+            uint64_t op1_64 = decode->op[0].val;
+
+            if (!count)
+                break;
+ 
+            if (1 == count)
+                res = (op1_64 >> 1) | (get_CF(cpu) << 63);
+            else
+                res = (op1_64 >> count) | (get_CF(cpu) << (64 - count)) | (op1_64 << (65 - count));
+
+            write_val_ext(cpu, decode->op[0].ptr, res, 8);
+
+            cf = (op1_64 >> (count - 1)) & 0x1;
+            of = ((res << 1) ^ res) >> 63; // of = result62 ^ result63
+            SET_FLAGS_OxxxxC(cpu, of, cf);
+            break;
+        }
+        default:
+        {
+            abort();
         }
     }
     RIP(cpu) += decode->len;

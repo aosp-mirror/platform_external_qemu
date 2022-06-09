@@ -28,9 +28,9 @@
 #include "x86_flags.h"
 #include "x86.h"
 
-void SET_FLAGS_OxxxxC(struct CPUState *cpu, uint32_t new_of, uint32_t new_cf)
+void SET_FLAGS_OxxxxC(struct CPUState *cpu, uint64_t new_of, uint64_t new_cf)
 {
-    uint32_t temp_po = new_of ^ new_cf;
+    uint64_t temp_po = new_of ^ new_cf;
     cpu->hvf_x86->lflags.auxbits &= ~(LF_MASK_PO | LF_MASK_CF);
     cpu->hvf_x86->lflags.auxbits |= (temp_po << LF_BIT_PO) | (new_cf << LF_BIT_CF);
 }

@@ -106,6 +106,8 @@ typedef struct lazy_flags {
     SET_FLAGS_OSZAPC_16(ADD_COUT_VEC((op1_16), (op2_16), (sum_16)), (sum_16))
 #define SET_FLAGS_OSZAPC_ADD_32(op1_32, op2_32, sum_32) \
     SET_FLAGS_OSZAPC_32(ADD_COUT_VEC((op1_32), (op2_32), (sum_32)), (sum_32))
+#define SET_FLAGS_OSZAPC_ADD_64(op1_64, op2_64, sum_64) \
+    SET_FLAGS_OSZAPC_64(ADD_COUT_VEC((op1_64), (op2_64), (sum_64)), (sum_64))
 
 /* op1, op2, result */
 #define SET_FLAGS_OSZAPC_SUB_8(op1_8, op2_8, diff_8) \
@@ -114,6 +116,8 @@ typedef struct lazy_flags {
     SET_FLAGS_OSZAPC_16(SUB_COUT_VEC((op1_16), (op2_16), (diff_16)), (diff_16))
 #define SET_FLAGS_OSZAPC_SUB_32(op1_32, op2_32, diff_32) \
     SET_FLAGS_OSZAPC_32(SUB_COUT_VEC((op1_32), (op2_32), (diff_32)), (diff_32))
+#define SET_FLAGS_OSZAPC_SUB_64(op1_64, op2_64, diff_64) \
+    SET_FLAGS_OSZAPC_64(SUB_COUT_VEC((op1_64), (op2_64), (diff_64)), (diff_64))
 
 // *******************
 // OSZAP
@@ -122,7 +126,8 @@ typedef struct lazy_flags {
 #define SET_FLAGS_OSZAP_SIZE(size, lf_carries, lf_result) { \
     addr_t temp = ((lf_carries) & (LF_MASK_AF)) | \
     (((lf_carries) >> (size - 2)) << LF_BIT_PO); \
-    if ((size) == 32) temp = ((lf_carries) & ~(LF_MASK_PDB | LF_MASK_SD)); \
+    if ((size) == 64) temp = ((lf_carries) & ~(LF_MASK_PDB | LF_MASK_SD)); \
+    else if ((size) == 32) temp = ((lf_carries) & ~(LF_MASK_PDB | LF_MASK_SD)); \
     else if ((size) == 16) temp = ((lf_carries) & (LF_MASK_AF)) | ((lf_carries) << 16); \
     else if ((size) == 8)  temp = ((lf_carries) & (LF_MASK_AF)) | ((lf_carries) << 24); \
     else VM_PANIC("unimplemented");                                                    \
@@ -139,6 +144,8 @@ typedef struct lazy_flags {
     SET_FLAGS_OSZAP_SIZE(16, carries, result)
 #define SET_FLAGS_OSZAP_32(carries, result) \
     SET_FLAGS_OSZAP_SIZE(32, carries, result)
+#define SET_FLAGS_OSZAP_64(carries, result) \
+    SET_FLAGS_OSZAP_SIZE(64, carries, result)
 
 /* op1, op2, result */
 #define SET_FLAGS_OSZAP_ADD_8(op1_8, op2_8, sum_8) \
@@ -147,6 +154,8 @@ typedef struct lazy_flags {
     SET_FLAGS_OSZAP_16(ADD_COUT_VEC((op1_16), (op2_16), (sum_16)), (sum_16))
 #define SET_FLAGS_OSZAP_ADD_32(op1_32, op2_32, sum_32) \
     SET_FLAGS_OSZAP_32(ADD_COUT_VEC((op1_32), (op2_32), (sum_32)), (sum_32))
+#define SET_FLAGS_OSZAP_ADD_64(op1_64, op2_64, sum_64) \
+    SET_FLAGS_OSZAP_64(ADD_COUT_VEC((op1_64), (op2_64), (sum_64)), (sum_64))
 
 /* op1, op2, result */
 #define SET_FLAGS_OSZAP_SUB_8(op1_8, op2_8, diff_8) \
@@ -155,6 +164,8 @@ typedef struct lazy_flags {
     SET_FLAGS_OSZAP_16(SUB_COUT_VEC((op1_16), (op2_16), (diff_16)), (diff_16))
 #define SET_FLAGS_OSZAP_SUB_32(op1_32, op2_32, diff_32) \
     SET_FLAGS_OSZAP_32(SUB_COUT_VEC((op1_32), (op2_32), (diff_32)), (diff_32))
+#define SET_FLAGS_OSZAP_SUB_64(op1_64, op2_64, diff_64) \
+    SET_FLAGS_OSZAP_64(SUB_COUT_VEC((op1_64), (op2_64), (diff_64)), (diff_64))
 
 // *******************
 // OSZAxC
@@ -187,7 +198,7 @@ bool get_OF(struct CPUState *cpu);
 void set_OF(struct CPUState *cpu, bool val);
 void set_OSZAPC(struct CPUState *cpu, uint32_t flags32);
 
-void SET_FLAGS_OxxxxC(struct CPUState *cpu, uint32_t new_of, uint32_t new_cf);
+void SET_FLAGS_OxxxxC(struct CPUState *cpu, uint64_t new_of, uint64_t new_cf);
 
 void SET_FLAGS_OSZAPC_SUB32(struct CPUState *cpu, uint32_t v1, uint32_t v2, uint32_t diff);
 void SET_FLAGS_OSZAPC_SUB16(struct CPUState *cpu, uint16_t v1, uint16_t v2, uint16_t diff);
