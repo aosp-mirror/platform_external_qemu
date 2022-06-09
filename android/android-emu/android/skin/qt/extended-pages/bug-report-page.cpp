@@ -82,10 +82,15 @@ Expected Behavior:
 
 Observed Behavior:)";
 
-class DeviceDetailPage : public QMessageBox {
+class DeviceDetailPage : public QFrame {
 public:
-    explicit DeviceDetailPage(QMessageBox* parent = nullptr)
-        : QMessageBox(parent) {}
+    explicit DeviceDetailPage(const QString& text, QWidget* parent = nullptr)
+        : QFrame(parent) {
+        setWindowFlags(Qt::Tool | Qt::WindowCloseButtonHint);
+        auto layout = new QVBoxLayout(this);
+        auto label = new QLabel(text);
+        layout->addWidget(label);
+    }
     ~DeviceDetailPage() {}
     void closeEvent(QCloseEvent* event) override {
         hide();
@@ -125,13 +130,8 @@ BugreportPage::BugreportPage(QWidget* parent)
     mUi->bug_deviceLabel->setText(elidedText);
     mUi->bug_hostMachineLabel->setText(
             QString::fromStdString(mReportingFields.hostOsName));
-    mDeviceDetail.reset(new DeviceDetailPage(nullptr));
-    mDeviceDetail->setStandardButtons(QMessageBox::NoButton);
-    mDeviceDetail->setWindowTitle(QString::fromStdString(
-            StringFormat("Details for %s", mReportingFields.deviceName)));
-    mDeviceDetail->setModal(false);
-    mDeviceDetail->setInformativeText(
-            QString::fromStdString(mReportingFields.avdDetails));
+    mDeviceDetail.reset(new DeviceDetailPage(
+            QString::fromStdString(mReportingFields.avdDetails), this));
     mUi->bug_sendToGoogle->setIcon(getIconForCurrentTheme("open_in_browser"));
 }
 
@@ -522,8 +522,10 @@ bool BugreportPage::saveToFile(StringView filePath,
 
 bool BugreportPage::eventFilter(QObject* object, QEvent* event) {
     if (event->type() == QEvent::MouseButtonPress) {
-        if (mDeviceDetail.get())
+        if (mDeviceDetail.get()) {
             mDeviceDetail->show();
+            setFrameOnTop(mDeviceDetail.get(), true);
+        }
         return true;
     } else {
         return false;
