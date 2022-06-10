@@ -9,12 +9,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/ContiguousRangeMapper.h"
+#include "android/base/memory/ContiguousRangeMapper.h"
 
 namespace android {
 namespace base {
 
-void ContiguousRangeMapper::add(uintptr_t start, uintptr_t length) {
+void ContiguousRangeMapper::add(uintptr_t start, uintptr_t size) {
     if (mHasRange &&
         (mEnd != start ||
          (mBatchSize && (mEnd - mStart >= mBatchSize)))) {
@@ -22,11 +22,11 @@ void ContiguousRangeMapper::add(uintptr_t start, uintptr_t length) {
     }
 
     if (mHasRange) {
-        mEnd = start + length;
+        mEnd = start + size;
     } else {
         mHasRange = true;
         mStart = start;
-        mEnd = start + length;
+        mEnd = start + size;
     }
 }
 

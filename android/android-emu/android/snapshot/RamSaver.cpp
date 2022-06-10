@@ -11,7 +11,7 @@
 
 #include "android/snapshot/RamSaver.h"
 
-#include "android/base/ContiguousRangeMapper.h"
+#include "android/base/memory/ContiguousRangeMapper.h"
 #include "android/base/Profiler.h"
 #include "android/base/Stopwatch.h"
 #include "android/base/EintrWrapper.h"

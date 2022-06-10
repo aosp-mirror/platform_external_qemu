@@ -14,9 +14,9 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
+#include <inttypes.h>  // for uint64_t
 
-#include <inttypes.h>
+#include "android/base/Compiler.h"
 
 namespace android {
 namespace base {

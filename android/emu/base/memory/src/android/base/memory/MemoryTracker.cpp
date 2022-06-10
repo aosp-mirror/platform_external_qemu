@@ -29,7 +29,7 @@
 #include <vector>
 #endif
 
-#include "android/utils/debug.h"
+#include "android/base/logging/CLog.h"
 
 using android::base::LazyInstance;
 

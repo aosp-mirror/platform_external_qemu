@@ -11,9 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "android/base/memory/LazyInstance.h"
-#include "android/base/threads/Thread.h"
+#include <thread>
 
 namespace android {
 namespace base {
@@ -40,7 +39,7 @@ static bool checkAndTranformState(
         }
 
         while (current != end && current != start) {
-            Thread::yield();
+            std::this_thread::yield();
             current = state->load(std::memory_order_acquire);
         }
 

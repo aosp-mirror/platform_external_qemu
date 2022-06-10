@@ -14,10 +14,12 @@
 
 #include "android/base/memory/LazyInstance.h"
 
-#include "android/base/synchronization/Lock.h"
-#include "android/base/testing/TestThread.h"
+// #include "android/base/synchronization/Lock.h"
+// #include "android/base/testing/TestThread.h"
 
 #include <gtest/gtest.h>
+#include <mutex>
+#include <thread>
 
 namespace android {
 namespace base {
@@ -37,29 +39,29 @@ private:
 class StaticCounter {
 public:
     StaticCounter() {
-        AutoLock lock(mLock);
+        std::lock_guard lock(mLock);
         mCounter++;
     }
 
     int getValue() const {
-        AutoLock lock(mLock);
+        std::lock_guard lock(mLock);
         return mCounter;
     }
 
     static void reset() {
-        AutoLock lock(mLock);
+        std::lock_guard lock(mLock);
         mCounter = 0;
     }
 
 private:
-    static Lock mLock;
+    static std::mutex mLock;
     static int mCounter;
 };
 
 // NOTE: This introduces a static C++ constructor for this object file,
 //       but that's ok because a LazyInstance<Lock> should not be used to
 //       test the behaviour of LazyInstance :-)
-Lock StaticCounter::mLock;
+std::mutex StaticCounter::mLock;
 int StaticCounter::mCounter = 0;
 
 }  // namespace
@@ -103,23 +105,23 @@ namespace {
 // The following is the shared structure between all threads.
 struct MultiState {
     MultiState(LazyInstance<StaticCounter>* staticCounter) :
-            mLock(), mStaticCounter(staticCounter), mCount(0) {}
+            mStaticCounter(staticCounter), mCount(0) {}
 
     enum {
         kMaxThreads = 1000,
     };
 
-    Lock  mLock;
+    std::mutex  mLock;
     LazyInstance<StaticCounter>* mStaticCounter;
     size_t mCount;
     void* mValues[kMaxThreads];
-    TestThread* mThreads[kMaxThreads];
+    std::thread* mThreads[kMaxThreads];
 };
 
 // The thread function for the test below.
 static void* threadFunc(void* param) {
     MultiState* state = static_cast<MultiState*>(param);
-    AutoLock lock(state->mLock);
+    std::lock_guard lock(state->mLock);
     if (state->mCount < MultiState::kMaxThreads) {
         state->mValues[state->mCount++] = state->mStaticCounter->ptr();
     }
@@ -137,7 +139,7 @@ TEST(LazyInstance, MultipleThreads) {
 
     // Create all threads.
     for (size_t n = 0; n < kNumThreads; ++n) {
-        state.mThreads[n] = new TestThread(threadFunc, &state);
+        state.mThreads[n] = new std::thread([this, &state]{threadFunc(&state);});
     }
 
     // Wait for their completion.

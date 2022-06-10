@@ -12,10 +12,10 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <cassert>
 
 #include "android/base/EintrWrapper.h"
 #include "android/base/memory/SharedMemory.h"
-#include "android/base/files/PathUtils.h"
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
@@ -23,15 +23,14 @@
 namespace android {
 namespace base {
 
-SharedMemory::SharedMemory(StringView name, size_t size) : mSize(size) {
-    constexpr StringView kFileUri = "file://";
-    if (name.find(kFileUri, 0) == 0) {
+SharedMemory::SharedMemory(std::string_view uriOrHandle, size_t size) : mSize(size) {
+    constexpr std::string_view kFileUri = "file://";
+    if (uriOrHandle.find(kFileUri, 0) == 0) {
         mShareType = ShareType::FILE_BACKED;
-        auto path = name.substr(kFileUri.size());
-        mName = PathUtils::recompose(PathUtils::decompose(path));
+        mName = uriOrHandle.substr(kFileUri.size());
     } else {
         mShareType = ShareType::SHARED_MEMORY;
-        mName = name;
+        mName = uriOrHandle;
     }
 }
 
