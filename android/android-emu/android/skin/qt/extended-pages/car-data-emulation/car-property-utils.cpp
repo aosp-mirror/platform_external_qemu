@@ -207,30 +207,38 @@ map<int32_t, QString> portLocationMap = {
 };
 
 map<int32_t, QString> apPowerStateReqMap = {
-    { (int32_t) VehicleApPowerStateReq::OFF, QObject::tr("Off") },
-    { (int32_t) VehicleApPowerStateReq::DEEP_SLEEP, QObject::tr("Deep sleep") },
-    { (int32_t) VehicleApPowerStateReq::ON_DISP_OFF, QObject::tr("AP on, disp. off") },
-    { (int32_t) VehicleApPowerStateReq::ON_FULL, QObject::tr("Fully on") },
-    { (int32_t) VehicleApPowerStateReq::SHUTDOWN_PREPARE, QObject::tr("Shutdown requested") }
+    { (int32_t) VehicleApPowerStateReq::ON, QObject::tr("Fully on") },
+    { (int32_t) VehicleApPowerStateReq::SHUTDOWN_PREPARE, QObject::tr("Shutdown requested") },
+    { (int32_t) VehicleApPowerStateReq::CANCEL_SHUTDOWN, QObject::tr("Shutdown canceled") },
+    { (int32_t) VehicleApPowerStateReq::FINISHED, QObject::tr("VHAL is ready for shutdown") },
 };
 
 map<int32_t, QString> apPowerStateShutdownMap = {
     { (int32_t) VehicleApPowerStateShutdownParam::SHUTDOWN_IMMEDIATELY,
             QObject::tr("Must shutdown immediately") },
     { (int32_t) VehicleApPowerStateShutdownParam::CAN_SLEEP,
-            QObject::tr("Can enter deep sleep instead of shut down") },
+            QObject::tr("Enter deep sleep after Garage Mode") },
     { (int32_t) VehicleApPowerStateShutdownParam::SHUTDOWN_ONLY,
-            QObject::tr("Can only shutdown with postponing") }
+            QObject::tr("Shutdown after Garage Mode") },
+    { (int32_t) VehicleApPowerStateShutdownParam::SLEEP_IMMEDIATELY,
+            QObject::tr("Enter deep sleep immediately") },
+    { (int32_t) VehicleApPowerStateShutdownParam::HIBERNATE_IMMEDIATELY,
+            QObject::tr("Enter hibernation immediately") },
+    { (int32_t) VehicleApPowerStateShutdownParam::CAN_HIBERNATE,
+            QObject::tr("Enter hibernation after Garage Mode") }
 };
 
 map<int32_t, QString> apPowerStateReportMap = {
-    { (int32_t) VehicleApPowerStateReport::BOOT_COMPLETE, QObject::tr("Finished booting") },
+    { (int32_t) VehicleApPowerStateReport::WAIT_FOR_VHAL, QObject::tr("Waiting for VHAL") },
     { (int32_t) VehicleApPowerStateReport::DEEP_SLEEP_ENTRY, QObject::tr("Entering deep sleep") },
     { (int32_t) VehicleApPowerStateReport::DEEP_SLEEP_EXIT, QObject::tr("Exiting deep sleep") },
     { (int32_t) VehicleApPowerStateReport::SHUTDOWN_POSTPONE, QObject::tr("Shutdown postponed") },
     { (int32_t) VehicleApPowerStateReport::SHUTDOWN_START, QObject::tr("Starting shut down") },
-    { (int32_t) VehicleApPowerStateReport::DISPLAY_OFF, QObject::tr("Requested disp. off") },
-    { (int32_t) VehicleApPowerStateReport::DISPLAY_ON, QObject::tr("Requested disp. on") }
+    { (int32_t) VehicleApPowerStateReport::ON, QObject::tr("Device on") },
+    { (int32_t) VehicleApPowerStateReport::SHUTDOWN_PREPARE, QObject::tr("Shutdown request received") },
+    { (int32_t) VehicleApPowerStateReport::SHUTDOWN_CANCELLED, QObject::tr("Shutdown cancel received") },
+    { (int32_t) VehicleApPowerStateReport::HIBERNATION_ENTRY, QObject::tr("Entering hibernation") },
+    { (int32_t) VehicleApPowerStateReport::HIBERNATION_EXIT, QObject::tr("Exiting hibernation") }
 };
 
 map<int32_t, PropertyDescription> areaMap = {

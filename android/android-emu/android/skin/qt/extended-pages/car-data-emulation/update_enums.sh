@@ -1,22 +1,19 @@
 #!/bin/bash
 
 # This script extract all the vehicle enums from the header files generated
-# by hidl.
+# by aidl.
 
-# TODO: Add the hidl hearder file to the artifacts on build server. so we can
-# update to a certain build number.
-
-VHAL_VERSION=2.0
+VHAL_VERSION=V2
 MASTER_PATH=
 OUTPUT=vehicle_constants_generated.h
 
 usage() {
-  echo "Extract all vehicle enums from generated hidl header file.\
+  echo "Extract all vehicle enums from generated AIDL header file.\
         You need to first build your local android branch."
   echo "Usage: $0 [OPTIONS]"
-  echo "    -v vehicle_hal_version : default value $VHAL_VERSION"
+  echo "    -v vehicle_hal_version : default value ${VHAL_VERSION}"
   echo "    -m path_to_local_master"
-  echo "    -o output file name : default value $OUTPUT"
+  echo "    -o output file name : default value ${OUTPUT}"
   echo "    -h print help"
 }
 
@@ -37,20 +34,21 @@ do
   shift
 done
 
-if [[ $MASTER_PATH == ""  ]]
+if [[ ${MASTER_PATH} == ""  ]]
   then usage
   exit 1
 fi
 
-input_file=$MASTER_PATH/out/soong/.intermediates\
-/hardware/interfaces/automotive/vehicle/$VHAL_VERSION\
-/android.hardware.automotive.vehicle@$VHAL_VERSION\_genc++_headers\
-/gen/android/hardware/automotive/vehicle/$VHAL_VERSION/types.h
+input_dir=${MASTER_PATH}/out/soong/.intermediates\
+/hardware/interfaces/automotive/vehicle/aidl/android.hardware.automotive.vehicle-${VHAL_VERSION}\
+-ndk-source/gen/include/aidl/android/hardware/automotive/vehicle
 
-if [ ! -f "$input_file" ]
-  then echo "types.h file not found at $input_file"
+if [ ! -d "${input_dir}" ]
+  then echo "The given AIDL generated header directory not found at ${input_dir}"
   exit 1
 fi
+
+
 
 START_PATTERN="enum class"
 END_PATTERN="};"
@@ -58,7 +56,7 @@ END_PATTERN="};"
 
 YEAR=$(date +'%Y')
 
-cat > $OUTPUT << EOF
+cat > ${OUTPUT} << EOF
 // Copyright (C) $YEAR The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
@@ -77,26 +75,33 @@ cat > $OUTPUT << EOF
 namespace emulator {
 EOF
 
-in_enum=0
-IFS=''
-while read line
+for input_file in $(ls "${input_dir}"/*.h)
 do
-  if [[ $line == $START_PATTERN* ]]
-    then echo $line >> $OUTPUT
-    let in_enum=1
-    continue
-  fi
-
-  if [[ $in_enum == 1 ]]
-    then
-    if [[ $line == $END_PATTERN  ]]
-      then let in_enum=0
-      echo $line$'\n' >> $OUTPUT
+  in_enum=0
+  # Keep the space from the input.
+  IFS=''
+  while read line
+  do
+    # While compiling on Windows, TRY_AGAIN as variable name would conflict with the macro
+    # definition at winsock2.h, so rename it to TRYAGAIN.
+    line=${line//TRY_AGAIN/TRYAGAIN}
+    if [[ ${line} == ${START_PATTERN}* ]]
+      then echo ${line} >> ${OUTPUT}
+      let in_enum=1
       continue
     fi
-    echo "$line" >> $OUTPUT
-  fi
-done <"$input_file"
+
+    if [[ ${in_enum} == 1 ]]
+      then
+      if [[ ${line} == ${END_PATTERN}  ]]
+        then let in_enum=0
+        echo ${line}$'\n' >> ${OUTPUT}
+        continue
+      fi
+      echo "${line}" >> ${OUTPUT}
+    fi
+  done <"${input_file}"
+done
 
 FILE_END="} // namespace emulator"
-echo -e $FILE_END >> $OUTPUT
+echo -e ${FILE_END} >> ${OUTPUT}
