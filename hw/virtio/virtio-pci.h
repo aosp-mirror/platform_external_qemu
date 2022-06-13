@@ -456,7 +456,6 @@ struct VirtIOWifiPCI {
  * virtio-snd-pci
  */
 
-#define TYPE_VIRTIO_SND_PCI "virtio-snd-pci"
 #define VIRTIO_SND_PCI(obj) \
         OBJECT_CHECK(VirtIOSoundPCI, (obj), TYPE_VIRTIO_SND_PCI)
 
