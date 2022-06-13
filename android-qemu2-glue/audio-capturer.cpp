@@ -187,13 +187,13 @@ int QemuAudioInputEngine::start(android::emulation::AudioCapturer* capturer)
     ops.capture = my_microphone;
     ops.destroy = my_destroy;
 
-    return enable_forwarder(&as, &ops, my_microphone_avail, capturer);
+    return audio_forwarder_enable(&as, &ops, my_microphone_avail, capturer);
 }
 
 
 int QemuAudioInputEngine::stop(android::emulation::AudioCapturer* capturer)
 {
-   disable_forwarder();
+   audio_forwarder_disable();
    mRunning = false;
    return 0;
 }
