@@ -23,6 +23,9 @@
 #include "qemu/log.h"
 #include "trace.h"
 
+#define PECI_FCS_OK         0
+#define PECI_FCS_ERR        1
+
 static void peci_rd_pkg_cfg(PECIClientDevice *client, PECICmd *pcmd)
 {
     PECIPkgCfg *resp = (PECIPkgCfg *)pcmd->tx;
@@ -83,7 +86,7 @@ int peci_handle_cmd(PECIBus *bus, PECICmd *pcmd)
         qemu_log_mask(LOG_GUEST_ERROR,
                       "%s: no peci client at address: 0x%02x\n",
                       __func__, pcmd->addr);
-        return 0;
+        return PECI_FCS_ERR;
     }
 
     /* clear output buffer before handling command */
@@ -94,9 +97,6 @@ int peci_handle_cmd(PECIBus *bus, PECICmd *pcmd)
     switch (pcmd->cmd) {
     case PECI_CMD_PING:
         trace_peci_handle_cmd("PING!");
-        if ((pcmd->addr - PECI_BASE_ADDR) > bus->num_clients - 1) {
-            return 0;
-        }
         break;
 
     case PECI_CMD_GET_DIB: /* Device Info Byte */
@@ -148,7 +148,7 @@ int peci_handle_cmd(PECIBus *bus, PECICmd *pcmd)
         break;
     }
 
-    return 1;
+    return PECI_FCS_OK;
 }
 
 PECIBus *peci_bus_create(DeviceState *parent)
