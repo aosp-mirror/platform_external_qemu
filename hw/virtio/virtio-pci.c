@@ -2848,7 +2848,7 @@ static void virtio_pci_register_types(void)
         type_register_static(&virtio_vsock_pci_info);
     }
 #endif
-    /*type_register_static(&virtio_snd_pci_info);*/
+    type_register_static(&virtio_snd_pci_info);
     type_register_static(&virtio_wifi_pci_info);
 }
 

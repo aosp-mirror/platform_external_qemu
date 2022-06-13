@@ -57,17 +57,33 @@ SWVoiceIn *g_active_sw = NULL;
 struct audsettings g_active_settings;
 struct audio_capture_ops g_active_capture;
 void *g_active_opaque;
-read_available g_active_avail;
+audio_forwarder_read_available g_active_avail;
 
 void qemu_allow_real_audio(bool allow);
 bool qemu_is_real_audio_allowed(void);
 void disable_fixed_input_conf();
 void enabled_fixed_input_conf();
 
+static SWVoiceIn *audio_forwarder_set_voice_empty(SWVoiceIn *voice) { return voice; }
+static SWVoiceIn *audio_forwarder_get_voice_empty() { return NULL; }
+static audio_forwarder_set_voice_cb g_set_voice_cb = &audio_forwarder_set_voice_empty;
+static audio_forwarder_get_voice_cb g_get_voice_cb = &audio_forwarder_get_voice_empty;
 
-int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops,
-                     read_available available_fn,
-                     void *opaque)
+void audio_forwarder_register_card(audio_forwarder_set_voice_cb set,
+                                   audio_forwarder_get_voice_cb get) {
+    if (set && get) {
+        g_set_voice_cb = set;
+        g_get_voice_cb = get;
+    } else {
+        g_set_voice_cb = &audio_forwarder_set_voice_empty;
+        g_get_voice_cb = &audio_forwarder_get_voice_empty;
+    }
+}
+
+int audio_forwarder_enable(const struct audsettings *as,
+                          struct audio_capture_ops *ops,
+                          audio_forwarder_read_available available_fn,
+                          void *opaque)
 {
     if (!g_deactivation_mutex.initialized) {
         qemu_mutex_init(&g_deactivation_mutex);
@@ -80,7 +96,7 @@ int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops,
     // Store previous state, and disable current microphone.
     g_prev_drv = s->drv;
     g_prev_drv_opaque = s->drv_opaque;
-    g_prev_sw = get_hda_voice_in();
+    g_prev_sw = (*g_get_voice_cb)();
     g_prev_hw = g_prev_sw->hw;
     g_prev_info = g_prev_hw->info;
 
@@ -105,7 +121,7 @@ int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops,
     g_active_opaque = opaque;
     g_active_settings = *as;
 
-    g_active_sw = set_hda_voice_in(NULL);
+    g_active_sw = (*g_set_voice_cb)(NULL);
 
     // gRPC means we will allow audio for now..
     qemu_allow_real_audio(true);
@@ -113,7 +129,7 @@ int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops,
     return 0;
 }
 
-void disable_forwarder()
+void audio_forwarder_disable()
 {
     qemu_mutex_lock(&g_deactivation_mutex);
     enabled_fixed_input_conf();
@@ -121,7 +137,7 @@ void disable_forwarder()
 
     // Disable us if we were active.
 
-    SWVoiceIn* active = get_hda_voice_in();
+    SWVoiceIn* active = (*g_get_voice_cb)();
     if (active && active != g_prev_sw)
     {
         if (active != g_active_sw) {
@@ -137,7 +153,7 @@ void disable_forwarder()
     AudioState *s = &glob_audio_state;
     s->drv = g_prev_drv;
     s->drv_opaque = g_prev_drv_opaque;
-    set_hda_voice_in(g_prev_sw);
+    (*g_set_voice_cb)(g_prev_sw);
     AUD_set_active_in(g_prev_sw, 1);
 
 
