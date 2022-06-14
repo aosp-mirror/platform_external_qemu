@@ -428,7 +428,7 @@ static void npcm8xx_init(Object *obj)
 
     for (i = 0; i < ARRAY_SIZE(s->smbus); i++) {
         object_initialize_child(obj, "smbus[*]", &s->smbus[i],
-                                TYPE_NPCM7XX_SMBUS);
+                                TYPE_NPCM8XX_SMBUS);
         DEVICE(&s->smbus[i])->id = g_strdup_printf("smbus[%d]", i);
     }
 

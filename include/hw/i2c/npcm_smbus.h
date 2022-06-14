@@ -1,5 +1,5 @@
 /*
- * Nuvoton NPCM7xx SMBus Module.
+ * Nuvoton NPCM7xx/NPCM8xx SMBus Module.
  *
  * Copyright 2020 Google LLC
  *
@@ -25,22 +25,23 @@
  * Number of addresses this module contains. Do not change this without
  * incrementing the version_id in the vmstate.
  */
-#define NPCM7XX_SMBUS_NR_ADDRS 10
+#define NPCM_SMBUS_NR_ADDRS 10
 
 /* Size of the FIFO buffer. */
 #define NPCM7XX_SMBUS_FIFO_SIZE 16
+#define NPCM8XX_SMBUS_FIFO_SIZE 32
 
-typedef enum NPCM7xxSMBusStatus {
-    NPCM7XX_SMBUS_STATUS_IDLE,
-    NPCM7XX_SMBUS_STATUS_SENDING,
-    NPCM7XX_SMBUS_STATUS_RECEIVING,
-    NPCM7XX_SMBUS_STATUS_NEGACK,
-    NPCM7XX_SMBUS_STATUS_STOPPING_LAST_RECEIVE,
-    NPCM7XX_SMBUS_STATUS_STOPPING_NEGACK,
-} NPCM7xxSMBusStatus;
+typedef enum NPCMSMBusStatus {
+    NPCM_SMBUS_STATUS_IDLE,
+    NPCM_SMBUS_STATUS_SENDING,
+    NPCM_SMBUS_STATUS_RECEIVING,
+    NPCM_SMBUS_STATUS_NEGACK,
+    NPCM_SMBUS_STATUS_STOPPING_LAST_RECEIVE,
+    NPCM_SMBUS_STATUS_STOPPING_NEGACK,
+} NPCMSMBusStatus;
 
 /*
- * struct NPCM7xxSMBusState - System Management Bus device state.
+ * struct NPCMSMBusState - System Management Bus device state.
  * @bus: The underlying I2C Bus.
  * @irq: GIC interrupt line to fire on events (if enabled).
  * @sda: The serial data register.
@@ -72,7 +73,7 @@ typedef enum NPCM7xxSMBusStatus {
  * @target_device_send_bytes: Remaining bytes to send to the target device.
  * @lock: Used to sync between iomem actions and target device actions.
  */
-struct NPCM7xxSMBusState {
+typedef struct NPCMSMBusState {
     SysBusDevice parent;
 
     MemoryRegion iomem;
@@ -90,7 +91,7 @@ struct NPCM7xxSMBusState {
     uint8_t      ctl3;
     uint8_t      ctl4;
     uint8_t      ctl5;
-    uint8_t      addr[NPCM7XX_SMBUS_NR_ADDRS];
+    uint8_t      addr[NPCM_SMBUS_NR_ADDRS];
 
     uint8_t      scllt;
     uint8_t      sclht;
@@ -99,12 +100,13 @@ struct NPCM7xxSMBusState {
     uint8_t      fif_cts;
     uint8_t      fair_per;
     uint8_t      txf_ctl;
+    uint8_t      frto;
     uint8_t      t_out;
     uint8_t      txf_sts;
     uint8_t      rxf_sts;
     uint8_t      rxf_ctl;
 
-    uint8_t      rx_fifo[NPCM7XX_SMBUS_FIFO_SIZE];
+    uint8_t      rx_fifo[NPCM8XX_SMBUS_FIFO_SIZE];
     uint8_t      rx_cur;
 
     bool         target_device_mode_initiated;
@@ -114,22 +116,31 @@ struct NPCM7xxSMBusState {
 
     QemuMutex lock;
 
-    NPCM7xxSMBusStatus status;
-};
+    NPCMSMBusStatus status;
+} NPCMSMBusState;
 
+typedef struct NPCMSMBusClass {
+    SysBusDeviceClass parent;
+
+    bool has_lvl_we;
+    uint8_t fifo_size;
+    uint8_t rxf_ctl_last;
+} NPCMSMBusClass;
+
+#define TYPE_NPCM_SMBUS "npcm-smbus"
+OBJECT_DECLARE_TYPE(NPCMSMBusState, NPCMSMBusClass, NPCM_SMBUS)
 #define TYPE_NPCM7XX_SMBUS "npcm7xx-smbus"
-OBJECT_DECLARE_SIMPLE_TYPE(NPCM7xxSMBusState, NPCM7XX_SMBUS)
+#define TYPE_NPCM8XX_SMBUS "npcm8xx-smbus"
 
-/**
- * NPCM7xxI2CBus is needed to override device_initiated_transfer in the
+/*
+ * NPCMI2CBus is needed to override device_initiated_transfer in the
  * I2CBusClass.
  */
-typedef struct NPCM7xxI2CBus {
+typedef struct NPCMI2CBus {
     I2CBus parent;
-} NPCM7xxI2CBus;
+} NPCMI2CBus;
 
-#define TYPE_NPCM7XX_I2C_BUS "npcm7xx-i2c-bus"
-#define NPCM7XX_I2C_BUS(obj) OBJECT_CHECK(NPCM7xxI2CBus, (obj), \
-                                        TYPE_NPCM7XX_I2C_BUS)
+#define TYPE_NPCM_I2C_BUS "npcm-i2c-bus"
+OBJECT_DECLARE_SIMPLE_TYPE(NPCMI2CBus, NPCM_I2C_BUS)
 
 #endif /* NPCM7XX_SMBUS_H */
