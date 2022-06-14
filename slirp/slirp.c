@@ -36,6 +36,37 @@
 #include <net/if.h>
 #endif
 
+#if defined(_WIN32)
+
+#define INITIAL_DNS_ADDR_BUF_SIZE 32 * 1024
+#define REALLOC_RETRIES 5
+
+// Broadcast site local DNS resolvers. We do not use these because they are
+// highly unlikely to be valid.
+// https://www.ietf.org/proceedings/52/I-D/draft-ietf-ipngwg-dns-discovery-03.txt
+static const struct in6_addr SITE_LOCAL_DNS_BROADCAST_ADDRS[] = {
+    {
+        {{
+            0xfe, 0xc0, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
+        }}
+    },
+    {
+        {{
+            0xfe, 0xc0, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02
+        }}
+    },
+    {
+        {{
+            0xfe, 0xc0, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03,
+        }}
+    },
+};
+
+#endif
+
 /* host loopback address */
 struct in_addr loopback_addr;
 /* host loopback network mask */
@@ -52,13 +83,10 @@ static QTAILQ_HEAD(slirp_instances, Slirp) slirp_instances =
     QTAILQ_HEAD_INITIALIZER(slirp_instances);
 
 static struct in_addr dns_addr;
-#ifndef _WIN32
 static struct in6_addr dns6_addr;
-#endif
-static u_int dns_addr_time;
-#ifndef _WIN32
-static u_int dns6_addr_time;
-#endif
+static uint32_t dns6_scope_id;
+static unsigned dns_addr_time;
+static unsigned dns6_addr_time;
 
 static int enable_cleanup_ip_on_load = 0;
 
@@ -100,7 +128,7 @@ static int get_dns_addr(struct in_addr *pdns_addr)
     }
 
     if ((ret = GetNetworkParams(FixedInfo, &BufLen)) != ERROR_SUCCESS) {
-        printf("GetNetworkParams failed. ret = %08x\n", (u_int)ret );
+        DEBUG_ERROR((dfd,"GetNetworkParams failed. ret = %08x\n", (u_int)ret ));
         if (FixedInfo) {
             GlobalFree(FixedInfo);
             FixedInfo = NULL;
@@ -120,8 +148,108 @@ static int get_dns_addr(struct in_addr *pdns_addr)
     return 0;
 }
 
+static int is_site_local_dns_broadcast(struct in6_addr *address)
+{
+    int i;
+    for (i = 0; i < G_N_ELEMENTS(SITE_LOCAL_DNS_BROADCAST_ADDRS); i++) {
+        if (in6_equal(address, &SITE_LOCAL_DNS_BROADCAST_ADDRS[i])) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static void print_dns_v6_address(struct in6_addr address)
+{
+    char address_str[INET6_ADDRSTRLEN] = "";
+    if (inet_ntop(AF_INET6, &address, address_str, INET6_ADDRSTRLEN)
+        == NULL) {
+        DEBUG_ERROR((dfd, "Failed to stringify IPv6 address for logging."));
+        return;
+    }
+    DEBUG_ARGS((dfd, "IPv6 DNS server found: %s", address_str));
+}
+
+// Gets the first valid DNS resolver with an IPv6 address.
+// Ignores any site local broadcast DNS servers, as these
+// are on deprecated addresses and not generally expected
+// to work. Further details at:
+// https://www.ietf.org/proceedings/52/I-D/draft-ietf-ipngwg-dns-discovery-03.txt
+static int get_ipv6_dns_server(struct in6_addr *dns_server_address, uint32_t *scope_id)
+{
+    PIP_ADAPTER_ADDRESSES addresses = NULL;
+    PIP_ADAPTER_ADDRESSES address = NULL;
+    IP_ADAPTER_DNS_SERVER_ADDRESS *dns_server = NULL;
+    struct sockaddr_in6 *dns_v6_addr = NULL;
+
+    ULONG buf_size = INITIAL_DNS_ADDR_BUF_SIZE;
+    DWORD res = ERROR_BUFFER_OVERFLOW;
+    int i;
+
+    for (i = 0; i < REALLOC_RETRIES; i++) {
+        // If non null, we hit buffer overflow, free it so we can try again.
+        if (addresses != NULL) {
+            g_free(addresses);
+        }
+
+        addresses = g_malloc(buf_size);
+        res = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL,
+                                   addresses, &buf_size);
+
+        if (res != ERROR_BUFFER_OVERFLOW) {
+            break;
+        }
+    }
+
+    if (res != NO_ERROR) {
+        DEBUG_ERROR((dfd, "Failed to get IPv6 DNS addresses due to error %lX", res));
+        goto failure;
+    }
+
+    address = addresses;
+    for (address = addresses; address != NULL; address = address->Next) {
+        for (dns_server = address->FirstDnsServerAddress;
+             dns_server != NULL;
+             dns_server = dns_server->Next) {
+
+            if (dns_server->Address.lpSockaddr->sa_family != AF_INET6) {
+                continue;
+            }
+
+            dns_v6_addr = (struct sockaddr_in6 *)dns_server->Address.lpSockaddr;
+            if (is_site_local_dns_broadcast(&dns_v6_addr->sin6_addr) == 0) {
+                print_dns_v6_address(dns_v6_addr->sin6_addr);
+                *dns_server_address = dns_v6_addr->sin6_addr;
+                *scope_id = dns_v6_addr->sin6_scope_id;
+
+                g_free(addresses);
+                return 0;
+            }
+        }
+    }
+
+    DEBUG_ERROR((dfd, "No IPv6 DNS servers found.\n"));
+
+failure:
+    g_free(addresses);
+    return -1;
+}
+
 int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
 {
+    if (!in6_zero(&dns6_addr) && (curtime - dns6_addr_time) < TIMEOUT_DEFAULT) {
+        *pdns6_addr = dns6_addr;
+        *scope_id = dns6_scope_id;
+        return 0;
+    }
+
+    if (get_ipv6_dns_server(pdns6_addr, scope_id) == 0) {
+        dns6_addr = *pdns6_addr;
+        dns6_addr_time = curtime;
+        dns6_scope_id = *scope_id;
+        return 0;
+    }
+
     return -1;
 }
 
