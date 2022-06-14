@@ -153,7 +153,9 @@ android_license(TARGET "EMULATOR_FEATURE_DEPENDENCIES" LIBNAME None SPDX None
 # DARWINN_DEPENDENCIES) android_install_dependency(linux-x86_64
 # DARWINN_DEPENDENCIES) These are usually nops, but some code generators will
 # not automatically binplace these (Xcode!)
-android_copy_shared_lib(emulator OpenglRender OpenglRender)
+if(NOT OPTION_GFXSTREAM_BACKEND)
+  android_copy_shared_lib(emulator OpenglRender OpenglRender)
+endif()
 
 # And set the os specific properties
 android_target_properties(emulator all "${RUNTIME_OS_PROPERTIES}")
