@@ -40,7 +40,6 @@
 #include "emulated_bluetooth.pb.h"
 #include "gtest/gtest_pred_impl.h"
 #include "net/async_data_channel.h"
-#include "net/hci_datachannel_server.h"
 #include "net/multi_datachannel_server.h"
 #define DEBUG 2
 /* set  for very verbose debugging */
@@ -74,17 +73,19 @@ public:
     using Servers = std::vector<std::shared_ptr<AsyncDataChannelServer>>;
     FakeRootCanal()
         : mLinkBleServer(new net::MultiDataChannelServer(Servers())),
-          mLinkClassicServer(new net::MultiDataChannelServer(Servers())),
-          mHciServer(new net::MultiDataChannelServer(Servers())) {}
+          mLinkClassicServer(new net::MultiDataChannelServer(Servers())) {}
     // Starts the root canal service.
     bool start() override { return true; };
 
     // Closes the root canal service
     void close() override {}
 
-    net::HciDataChannelServer* qemuHciServer() override {
-        return mQemuHciServer.get();
-    }
+    bool connectQemu() override { return true; }
+
+    bool disconnectQemu() override { return true; }
+
+    void addHciConnection(
+            std::shared_ptr<rootcanal::HciTransport> transport) override {}
 
     net::MultiDataChannelServer* linkBleServer() override {
         return mLinkBleServer.get();
@@ -94,15 +95,9 @@ public:
         return mLinkClassicServer.get();
     }
 
-    net::MultiDataChannelServer* hciServer() override {
-        return mHciServer.get();
-    }
-
 private:
-    std::shared_ptr<net::HciDataChannelServer> mQemuHciServer;
     std::shared_ptr<net::MultiDataChannelServer> mLinkBleServer;
     std::shared_ptr<net::MultiDataChannelServer> mLinkClassicServer;
-    std::shared_ptr<net::MultiDataChannelServer> mHciServer;
 };
 
 android::base::VerboseLogFormatter s_log;

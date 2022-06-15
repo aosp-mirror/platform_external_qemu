@@ -116,13 +116,16 @@ public:
     using W = typename T::write_type;
     using is_adapter = std::is_base_of<SyncToAsyncBidiAdapter<R,W>, T>;
 
-    template <typename... Args>
-    BidiRunner(::grpc::ServerReaderWriter<R, W>* stream, Args&&... args) {
+    BidiRunner(::grpc::ServerReaderWriter<R, W>* stream, T* t) {
         static_assert(is_adapter::value);
-        handler = new T(std::forward<Args>(args)...);
+        handler = t;
         handler->start(stream);
         handler->await();
     }
+
+    template <typename... Args>
+    BidiRunner(::grpc::ServerReaderWriter<R, W>* stream, Args&&... args)
+        : BidiRunner(stream, new T(std::forward<Args>(args)...)) {}
 
     auto status() { return handler->status(); }
 
