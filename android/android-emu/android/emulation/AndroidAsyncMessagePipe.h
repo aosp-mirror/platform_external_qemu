@@ -119,7 +119,8 @@ public:
             return createPipeUnderLock(handle, hwPipe, args, stream);
         }
 
-        virtual AndroidPipe* create(void* hwPipe, const char* args) final {
+        virtual AndroidPipe* create(void* hwPipe, const char* args,
+                                    enum AndroidPipeFlags flags) final {
             base::AutoLock lock(mLock);
             AsyncMessagePipeHandle handle = nextPipeHandle();
             return createPipeUnderLock(handle, hwPipe, args, nullptr);

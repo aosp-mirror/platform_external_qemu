@@ -190,7 +190,8 @@ void ClipboardPipe::setGuestClipboardContents(const uint8_t* buf, size_t len) {
 
 ClipboardPipe::Service::Service() : AndroidPipe::Service("clipboard") {}
 
-AndroidPipe* ClipboardPipe::Service::create(void* hwPipe, const char* args) {
+AndroidPipe* ClipboardPipe::Service::create(void* hwPipe, const char* args,
+                                            enum AndroidPipeFlags flags) {
     const auto pipe = new ClipboardPipe(hwPipe, this);
     {
         android::base::AutoLock lock(sInstance->pipeLock);

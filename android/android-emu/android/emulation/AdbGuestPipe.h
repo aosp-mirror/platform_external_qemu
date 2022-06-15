@@ -90,7 +90,8 @@ public:
             : AndroidPipe::Service("qemud:adb"), mHostAgent(hostAgent) {}
 
         // Create a new AdbGuestPipe instance.
-        virtual AndroidPipe* create(void* mHwPipe, const char* args) override;
+        virtual AndroidPipe* create(void* mHwPipe, const char* args,
+                                    enum AndroidPipeFlags flags) override;
         bool canLoad() const override;
         AndroidPipe* load(void* hwPipe,
                           const char* args,

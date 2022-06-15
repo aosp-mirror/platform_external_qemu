@@ -34,7 +34,7 @@ public:
     class Service final : public AndroidPipe::Service {
     public:
         Service();
-        AndroidPipe* create(void* hwPipe, const char* args) override;
+        AndroidPipe* create(void* hwPipe, const char* args, enum AndroidPipeFlags flags) override;
 
         static ClipboardPipe::Ptr getPipe();
         static void closePipe();

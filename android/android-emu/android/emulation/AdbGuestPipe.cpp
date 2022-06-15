@@ -174,7 +174,8 @@ using android::base::Lock;
 using android::base::ScopedSocketWatch;
 using android::base::StringView;
 
-AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
+AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args,
+                                           enum AndroidPipeFlags flags) {
     auto pipe = new AdbGuestPipe(mHwPipe, this, mHostAgent, nullptr);
     onPipeOpen(pipe);
     D("%s: [%p] created, %d pipes", __func__, pipe, (int)mPipes.size());

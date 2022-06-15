@@ -59,13 +59,13 @@ public:
 
         bool canLoad() const override { return true; }
 
-        AndroidPipe* create(void* hwPipe, const char* args) override {
-            return new GLProcessPipe(hwPipe, this);
+        AndroidPipe* create(void* hwPipe, const char* args, enum AndroidPipeFlags flags) override {
+            return new GLProcessPipe(hwPipe, this, flags);
         }
 
         AndroidPipe* load(void* hwPipe, const char* args,
                          base::Stream* stream) override {
-            return new GLProcessPipe(hwPipe, this, stream);
+            return new GLProcessPipe(hwPipe, this, (AndroidPipeFlags)0, stream);
         }
 
         void preLoad(base::Stream* stream) override {
@@ -77,7 +77,7 @@ public:
         }
     };
 
-    GLProcessPipe(void* hwPipe, Service* service,
+    GLProcessPipe(void* hwPipe, Service* service, enum AndroidPipeFlags flags,
                   base::Stream* loadStream = nullptr)
         : AndroidPipe(hwPipe, service) {
         if (loadStream) {

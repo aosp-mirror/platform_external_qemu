@@ -30,7 +30,8 @@ public:
         Service() : android::AndroidPipe::Service(kNetworkPipeName) {
         }
 
-        AndroidPipe* create(void* hwPipe, const char* /*args*/) override {
+        AndroidPipe* create(void* hwPipe, const char* /*args*/,
+                            enum AndroidPipeFlags flags) override {
             auto pipe = new NetworkPipe(hwPipe, this);
             onPipeOpen(pipe);
             return pipe;

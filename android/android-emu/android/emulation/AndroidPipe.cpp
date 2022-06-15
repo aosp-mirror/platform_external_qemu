@@ -253,7 +253,7 @@ public:
             return PIPE_ERROR_INVAL;
         }
 
-        AndroidPipe* newPipe = svc->create(mHwPipe, pipeArgs);
+        AndroidPipe* newPipe = svc->create(mHwPipe, pipeArgs, mFlags);
         if (!newPipe) {
             D("%s: Initialization failed for %s pipe!", __FUNCTION__, pipeName);
             return PIPE_ERROR_INVAL;
@@ -310,7 +310,8 @@ class ConnectorService : public Service {
 public:
     ConnectorService() : Service("<connector>") {}
 
-    virtual AndroidPipe* create(void* hwPipe, const char* args) override {
+    virtual AndroidPipe* create(void* hwPipe, const char* args,
+                                enum AndroidPipeFlags flags) override {
         return new ConnectorPipe(hwPipe, this);
     }
 
@@ -616,13 +617,13 @@ void android_pipe_reset_services() {
 void* android_pipe_guest_open(void* hwpipe) {
     CHECK_VM_STATE_LOCK();
     DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
-    return android::sGlobals->connectorService.create(hwpipe, nullptr);
+    return android::sGlobals->connectorService.create(hwpipe, nullptr, (AndroidPipeFlags)0);
 }
 
 void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags) {
     CHECK_VM_STATE_LOCK();
     DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
-    auto pipe = android::sGlobals->connectorService.create(hwpipe, nullptr);
+    auto pipe = android::sGlobals->connectorService.create(hwpipe, nullptr, (AndroidPipeFlags)0);
     pipe->setFlags((AndroidPipeFlags)flags);
     return pipe;
 }

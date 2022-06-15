@@ -16,7 +16,8 @@
 namespace android {
 namespace emulation {
 
-AndroidPipe* AdbDebugPipe::Service::create(void* hwPipe, const char* args) {
+AndroidPipe* AdbDebugPipe::Service::create(void* hwPipe, const char* args,
+                                           enum AndroidPipeFlags flags) {
     return new AdbDebugPipe(hwPipe, this, mOutput.get());
 }
 
@@ -30,7 +31,7 @@ AndroidPipe* AdbDebugPipe::Service::load(void* hwPipe,
                                          const char* args,
                                          android::base::Stream* stream) {
     // No state to load, just create new instance.
-    return create(hwPipe, args);
+    return create(hwPipe, args, (AndroidPipeFlags)0);
 }
 
 void AdbDebugPipe::onGuestClose(PipeCloseReason reason) {
