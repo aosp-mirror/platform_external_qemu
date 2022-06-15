@@ -82,6 +82,7 @@ public:
 
     // Write a 0-terminated C string |str| into the stream. Ignore error.
     void putString(const char* str);
+    void putString(const std::string& str);
 
     // Write a string |str| of |strlen| bytes into the stream.
     // Ignore errors.

@@ -88,8 +88,9 @@ endif()
 if(NOT OPTION_GFXSTREAM_BACKEND)
   add_subdirectory(host/libs/libOpenglRender/vulkan/cereal)
   add_subdirectory(shared/OpenglCodecCommon)
-  add_subdirectory(shared/emugl/common)
 endif()
+
+add_subdirectory(shared/emugl/common)
 
 if(NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
   if (NOT OPTION_GFXSTREAM_BACKEND)

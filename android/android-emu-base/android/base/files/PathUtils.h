@@ -108,11 +108,15 @@ public:
     // Add a trailing separator if needed.
     static std::string addTrailingDirSeparator(StringView path,
                                                HostType hostType);
+    static std::string addTrailingDirSeparator(const std::string& path, HostType hostType);
+    static std::string addTrailingDirSeparator(const char* path, HostType hostType);
+
 
     // Add a trailing separator if needed.
     static std::string addTrailingDirSeparator(StringView path) {
         return addTrailingDirSeparator(path, HOST_TYPE);
     }
+    static std::string addTrailingDirSeparator(const std::string& path);
 
     // If |path| starts with a root prefix, return its size in bytes, or
     // 0 otherwise. The definition of valid root prefixes depends on the
@@ -212,6 +216,8 @@ public:
                                              HostType hostType) {
         return decompose(StringView(path), hostType);
     }
+    static std::vector<std::string> decompose(const std::string& path,
+                                              HostType hostType);
 
     template <class String>
     static std::vector<String> decompose(const String& path,

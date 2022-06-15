@@ -2,11 +2,6 @@
 prebuilt(ANGLE)
 prebuilt(VULKAN)
 
-# TODO(joshuaduong): Remove this when we inject our own implementations of vkcereal host-common/base
-# APIs.
-set(BUILD_STANDALONE ON)
-set(ENABLE_VKCEREAL_TESTS ON)
-
 function(add_opengl_dependencies TGT)
     android_target_dependency(${TGT} all SWIFTSHADER_DEPENDENCIES)
     android_target_dependency(${TGT} all ANGLE_DEPENDENCIES)
@@ -20,8 +15,45 @@ endfunction()
 
 if(OPTION_GFXSTREAM_BACKEND)
     set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
-    set(GFXSTREAM_BASE_LIB gfxstream-base)
-    set(GFXSTREAM_HOST_COMMON_LIB gfxstream-host-common)
+
+    set(BUILD_STANDALONE OFF)
+    set(ENABLE_VKCEREAL_TESTS ON)
+
+    android_add_library(
+        TARGET aemu-vkcereal-base
+        LICENSE Apache-2.0
+        SRC impl/base/System.cpp
+            impl/base/SharedLibrary.cpp)
+    target_link_libraries(
+        aemu-vkcereal-base
+        PUBLIC
+        gfxstream-base.headers
+        android-emu
+        android-emu-crashreport
+        android-emu-crashreport-consent-no-ui
+        android-emu-tracing)
+    set(GFXSTREAM_BASE_LIB aemu-vkcereal-base)
+
+    android_add_library(
+        TARGET aemu-vkcereal-host-common
+        LICENSE Apache-2.0
+        SRC impl/host-common/globals.cpp
+            impl/host-common/crash_reporter.cpp
+            impl/host-common/AemuGraphicsAgents.cpp)
+    target_link_libraries(
+        aemu-vkcereal-host-common
+        PUBLIC
+        emugl_common
+        android-emu
+        android-emu-agents
+        PRIVATE
+        aemu-vkcereal-base
+        logging-base # TODO(joshuaduong): Replace the logging impl with our own
+        )
+    # We define some of vkcereal's base API in android-emu (e.g. resolveLayout), so we can't simply
+    # link to android-emu-base.
+    set(GFXSTREAM_HOST_COMMON_LIB aemu-vkcereal-host-common)
+
     if (WIN32)
         add_definitions("-DUNICODE -D_UNICODE -DNOMINMAX -DEMUGL_BUILD -DVK_USE_PLATFORM_WIN32_KHR -DBUILDING_EMUGL_COMMON_SHARED")
 
@@ -81,6 +113,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     # Uncomment for ASAN support
     # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
     # set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-extern-c-compat")
 
     # For empty struct size warning in C vs C++
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-extern-c-compat")

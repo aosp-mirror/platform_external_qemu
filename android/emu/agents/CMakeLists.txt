@@ -1,5 +1,8 @@
 add_library(android-emu-agents-headers INTERFACE)
 target_include_directories(android-emu-agents-headers INTERFACE include)
+if(OPTION_GFXSTREAM_BACKEND)
+  target_link_libraries(android-emu-agents-headers INTERFACE gfxstream-host-common.headers)
+endif()
 android_license(TARGET "android-emu-agents-headers" LIBNAME None SPDX None LICENSE Apache-2.0 LOCAL None)
 
 android_add_library(
@@ -23,6 +26,11 @@ target_include_directories(
     # are a lot of externs that are actually defined in qemu2-glue. this has to
     # be sorted out,
     ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG})
+target_link_libraries(
+  android-emu-agents
+  PUBLIC
+    android-emu-agents-headers)
+
 target_compile_options(android-emu-agents PRIVATE "-Wno-extern-c-compat")
 target_compile_definitions(android-emu-agents PRIVATE "CONSOLE_EXPORTS")
 android_install_shared(android-emu-agents)

@@ -138,6 +138,21 @@ std::string PathUtils::addTrailingDirSeparator(StringView path,
 }
 
 // static
+std::string PathUtils::addTrailingDirSeparator(const std::string& path, HostType hostType) {
+    return addTrailingDirSeparator(StringView(path), hostType);
+}
+
+// static
+std::string PathUtils::addTrailingDirSeparator(const char* path, HostType hostType) {
+    return addTrailingDirSeparator(StringView(path), hostType);
+}
+
+// static
+std::string PathUtils::addTrailingDirSeparator(const std::string& path) {
+    return addTrailingDirSeparator(StringView(path), HOST_TYPE);
+}
+
+// static
 bool PathUtils::split(StringView path,
                       HostType hostType,
                       StringView* dirName,
@@ -244,6 +259,12 @@ std::vector<std::string> PathUtils::decompose(std::string&& path,
 std::vector<StringView> PathUtils::decompose(StringView path,
                                              HostType hostType) {
     return decompose<StringView>(path, hostType);
+}
+
+// static
+std::vector<std::string> PathUtils::decompose(const std::string& path,
+                                              HostType hostType) {
+    return decompose<std::string>(path, hostType);
 }
 
 template <class String>

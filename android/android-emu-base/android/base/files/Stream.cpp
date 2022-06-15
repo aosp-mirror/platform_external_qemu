@@ -109,6 +109,10 @@ void Stream::putString(const char* str) {
     putString(StringView(str));
 }
 
+void Stream::putString(const std::string& str) {
+    putString(StringView(str));
+}
+
 void Stream::putString(const char* str, size_t len) {
     putString(StringView(str, len));
 }

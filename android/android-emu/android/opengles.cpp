@@ -68,7 +68,11 @@ using android::emulation::asg::ConsumerInterface;
 using android::emulation::asg::ConsumerCallbacks;
 
 /* Name of the GLES rendering library we're going to use */
+#ifdef AEMU_GFXSTREAM_BACKEND
+#define RENDERER_LIB_NAME "libgfxstream_backend"
+#else
 #define RENDERER_LIB_NAME "libOpenglRender"
+#endif  // AEMU_GFXSTREAM_BACKEND
 
 /* Declared in "android/console.h" */
 int  android_gles_fast_pipes = 1;
@@ -109,6 +113,16 @@ static emugl::RendererPtr sRenderer = nullptr;
 
 static const EGLDispatch* sEgl = nullptr;
 static const GLESv2Dispatch* sGlesv2 = nullptr;
+
+#ifdef AEMU_GFXSTREAM_BACKEND
+int android_prepareOpenglesEmulation(void) {
+    return android_initOpenglesEmulation();
+}
+
+int android_setOpenglesEmulation(void* renderLib, void* eglDispatch, void* glesv2Dispatch) {
+    return 0;
+}
+#endif  // AEMU_GFXSTREAM_BACKEND
 
 int android_initOpenglesEmulation() {
     android_init_opengl_logger();

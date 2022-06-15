@@ -27,6 +27,13 @@
 
 ANDROID_BEGIN_HEADER
 
+#ifdef AEMU_GFXSTREAM_BACKEND
+/* A version of android_initOpenglesEmulation this is called from a library
+ * that has static access to libOpenglRender. */
+AEMU_EXPORT int android_prepareOpenglesEmulation(void);
+AEMU_EXPORT int android_setOpenglesEmulation(void* renderLib, void* eglDispatch, void* glesv2Dispatch);
+#endif  // AEMU_GFXSTREAM_BACKEND
+
 /* Call this function to initialize the hardware opengles emulation.
  * This function will abort if we can't find the corresponding host
  * libraries through dlopen() or equivalent.
