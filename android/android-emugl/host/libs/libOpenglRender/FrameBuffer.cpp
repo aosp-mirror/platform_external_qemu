@@ -788,7 +788,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_refCountPipeEnabled(emugl::emugl_feature_is_enabled(
               android::featurecontrol::RefCountPipe)),
       m_noDelayCloseColorBufferEnabled(emugl::emugl_feature_is_enabled(
-              android::featurecontrol::NoDelayCloseColorBuffer)),
+              android::featurecontrol::NoDelayCloseColorBuffer) ||
+              emugl::emugl_feature_is_enabled(android::featurecontrol::Minigbm)),
       m_readbackThread([this](FrameBuffer::Readback&& readback) {
           return sendReadbackWorkerCmd(readback);
       }),
