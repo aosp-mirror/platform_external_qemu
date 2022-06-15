@@ -43,7 +43,8 @@ public:
         Service(Stream* output)
             : AndroidPipe::Service("qemud:adb-debug"), mOutput(output) {}
 
-        virtual AndroidPipe* create(void* hwPipe, const char* args) override;
+        virtual AndroidPipe* create(void* hwPipe, const char* args,
+                                    enum AndroidPipeFlags flags) override;
 
         virtual bool canLoad() const override;
 

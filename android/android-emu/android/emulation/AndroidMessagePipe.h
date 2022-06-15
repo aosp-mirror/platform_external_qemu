@@ -80,7 +80,8 @@ public:
             return new AndroidMessagePipe(hwPipe, this, m_cb, stream);
         }
 
-        virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
+        virtual AndroidPipe* create(void* mHwPipe, const char* args,
+                                    enum AndroidPipeFlags flags) override {
             return new AndroidMessagePipe(mHwPipe, this, m_cb, nullptr);
         }
 

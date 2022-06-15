@@ -79,7 +79,8 @@ public:
                       const AndroidPipeFuncs* funcs)
         : Service(name), mOpaque(opaque), mFuncs(funcs) {}
 
-    virtual AndroidPipe* create(void* hwPipe, const char* args) override {
+    virtual AndroidPipe* create(void* hwPipe, const char* args,
+                                enum AndroidPipeFlags flags) override {
         void* hostPipe = mFuncs->init(hwPipe, mOpaque, args);
         if (!hostPipe) {
             return nullptr;

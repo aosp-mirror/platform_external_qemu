@@ -96,7 +96,8 @@ void registerLogcatPipeService() {
 
 LogcatPipe::Service::Service() : AndroidPipe::Service("logcat") {}
 
-AndroidPipe* LogcatPipe::Service::create(void* hwPipe, const char* args) {
+AndroidPipe* LogcatPipe::Service::create(void* hwPipe, const char* args,
+                                         enum AndroidPipeFlags flags) {
     return new LogcatPipe(hwPipe, this);
 }
 

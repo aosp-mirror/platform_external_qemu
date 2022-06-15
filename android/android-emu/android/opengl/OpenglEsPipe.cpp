@@ -81,7 +81,7 @@ public:
         Service() : AndroidPipe::Service("opengles") {}
 
         // Create a new EmuglPipe instance.
-        AndroidPipe* create(void* hwPipe, const char* args) override {
+        AndroidPipe* create(void* hwPipe, const char* args, AndroidPipeFlags flags) override {
             return createPipe(hwPipe, this, args);
         }
 

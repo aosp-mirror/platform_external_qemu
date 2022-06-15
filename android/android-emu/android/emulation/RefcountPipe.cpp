@@ -86,7 +86,8 @@ void registerRefcountPipeService() {
 
 RefcountPipe::Service::Service() : AndroidPipe::Service("refcount") {}
 
-AndroidPipe* RefcountPipe::Service::create(void* hwPipe, const char* args) {
+AndroidPipe* RefcountPipe::Service::create(void* hwPipe, const char* args,
+                                           enum AndroidPipeFlags flags) {
     return new RefcountPipe(hwPipe, this);
 }
 

@@ -72,7 +72,8 @@ public:
             }
         }
 
-        AndroidPipe* create(void* hwPipe, const char* /*args*/) override {
+        AndroidPipe* create(void* hwPipe, const char* /*args*/,
+                            enum AndroidPipeFlags flags) override {
             if (mPipe) {
                 // Only one pipe can exist at a time, otherwise different pipes
                 // will compete for reading data from another emulator and will
