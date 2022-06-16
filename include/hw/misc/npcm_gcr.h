@@ -54,8 +54,39 @@
 #define     CKFRQ_DEFAULT       0x111
 
 /*
- * Number of registers in our device state structure. Don't change this without
- * incrementing the version_id in the vmstate.
+ * NPCM8XX PWRON STRAP bit fields
+ * 13: nSPILOAD or BMCRIND signal is selected.
+ * 12: Reserved.
+ * 11: SPI1 powered by VSBV4 at 1.8V.
+ * 10: JTAG3 enabled.
+ * 9: General purpose 1.
+ * 8: Flash UART command route enabled.
+ * 7: Security enabled.
+ * 6: HI-Z state control.
+ * 5: ECC disabled.
+ * 4: BSP uses alternative pins.
+ * 3: JTAG2 enabled.
+ * 2: SPI0 powered by VSBV3 at 1.8V
+ * 1:0: CPU and DRAM clock frequency.
+ */
+#define NPCM8XX_PWRON_STRAP_RISEL                   BIT(13)
+#define NPCM8XX_PWRON_STRAP_RESERVE1                BIT(12)
+#define NPCM8XX_PWRON_STRAP_SPI1V18                 BIT(11)
+#define NPCM8XX_PWRON_STRAP_J3EN                    BIT(10)
+#define NPCM8XX_PWRON_STRAP_GP1                     BIT(9)
+#define NPCM8XX_PWRON_STRAP_FUP                     BIT(8)
+#define NPCM8XX_PWRON_STRAP_SECEN                   BIT(7)
+#define NPCM8XX_PWRON_STRAP_HIZ                     BIT(6)
+#define NPCM8XX_PWRON_STRAP_ECC                     BIT(5)
+#define NPCM8XX_PWRON_STRAP_BSPA                    BIT(4)
+#define NPCM8XX_PWRON_STRAP_J2EN                    BIT(3)
+#define NPCM8XX_PWRON_STRAP_SPIF18                  BIT(2)
+#define NPCM8XX_PWRON_STRAP_CKFRQ(x)                (x)
+#define     NPCM8XX_CKFRQ_DEFAULT       0x11
+
+/*
+ * Number of maximum registers in NPCM device state structure. Don't change
+ * this without incrementing the version_id in the vmstate.
  */
 #define NPCM_GCR_MAX_NR_REGS NPCM8XX_GCR_NR_REGS
 

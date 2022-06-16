@@ -28,7 +28,21 @@
 #include "qemu/units.h"
 #include "sysemu/block-backend.h"
 
-#define NPCM845_EVB_POWER_ON_STRAPS 0x000017ff
+#define NPCM8XX_POWER_ON_STRAPS_DEFAULT (               \
+        NPCM8XX_PWRON_STRAP_RISEL |                     \
+        NPCM8XX_PWRON_STRAP_RESERVE1 |                  \
+        NPCM8XX_PWRON_STRAP_SPI1V18 |                   \
+        NPCM8XX_PWRON_STRAP_J3EN |                      \
+        NPCM8XX_PWRON_STRAP_GP1 |                       \
+        NPCM8XX_PWRON_STRAP_FUP |                       \
+        NPCM8XX_PWRON_STRAP_SECEN |                     \
+        NPCM8XX_PWRON_STRAP_HIZ |                       \
+        NPCM8XX_PWRON_STRAP_ECC |                       \
+        NPCM8XX_PWRON_STRAP_BSPA |                      \
+        NPCM8XX_PWRON_STRAP_J2EN |                      \
+        NPCM8XX_PWRON_STRAP_SPIF18 |                    \
+        NPCM8XX_PWRON_STRAP_CKFRQ(NPCM8XX_CKFRQ_DEFAULT))
+#define NPCM845_EVB_POWER_ON_STRAPS NPCM8XX_POWER_ON_STRAPS_DEFAULT
 
 static const char npcm8xx_default_bootrom[] = "npcm8xx_bootrom.bin";
 
