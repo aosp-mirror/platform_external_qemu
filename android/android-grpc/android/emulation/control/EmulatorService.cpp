@@ -79,6 +79,7 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/emulation/resizable_display_config.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"
 #include "android/gpu_frame.h"
@@ -511,8 +512,19 @@ public:
         auto agent = mAgents->user_event;
 
         android::base::ThreadLooper::runOnMainLooper([agent, request]() {
+            int buttonsState = request.buttons();
+            // Keep sync the condition with |user_event_mouse| in
+            // qemu-user-event-agent-impl.c
+            if (feature_is_enabled(kFeature_VirtioInput) &&
+                !feature_is_enabled(kFeature_VirtioMouse) &&
+                !feature_is_enabled(kFeature_VirtioTablet)) {
+                // Mask bits except for the first bit, because they are not
+                // indicating mouse buttons for touch operations. (Instead
+                // they are used for control flag like pause touch synching.)
+                buttonsState &= 1;
+            }
             agent->sendMouseEvent(request.x(), request.y(), 0,
-                                  request.buttons(), request.display());
+                                  buttonsState, request.display());
         });
 
         return Status::OK;
