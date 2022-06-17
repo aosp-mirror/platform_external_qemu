@@ -390,7 +390,7 @@ static void virgl_cmd_get_capset(VirtIOGPU *g,
 {
     struct virtio_gpu_get_capset gc;
     struct virtio_gpu_resp_capset *resp;
-    uint32_t max_ver, max_size;
+    uint32_t max_ver = 0, max_size = 0;
     VIRTIO_GPU_FILL_CMD(gc);
 
     g->virgl->virgl_renderer_get_cap_set(gc.capset_id, &max_ver,
