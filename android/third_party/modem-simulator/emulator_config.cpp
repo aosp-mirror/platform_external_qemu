@@ -24,6 +24,7 @@
 #include "android/avd/hw-config.h"
 
 #include "android/console.h"
+#include "android/utils/dns.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"
@@ -74,17 +75,29 @@ std::string DeviceConfig::DefaultHostArtifactsPath(const std::string& file) {
 
 std::string DeviceConfig::ril_address_and_prefix() {
     // hardcoded one in goldfish
-    return "10.0.2.15/24";
+    if (is_host_network_ipv6_only()) {
+        return DEFAULT_IPV6_ADDRESS_AND_PREFIX;
+    } else {
+        return DEFAULT_IPV4_ADDRESS_AND_PREFIX;
+    }
 }
 
 std::string DeviceConfig::ril_gateway() {
     // hardcoded one in goldfish
-    return "10.0.2.2";
+    if (is_host_network_ipv6_only()) {
+        return DEFAULT_IPV6_GATEWAY;
+    } else {
+        return DEFAULT_IPV4_GATEWAY;
+    }
 }
 
 std::string DeviceConfig::ril_dns() {
     // the slirp default dns address used in guest.
-    return "10.0.2.3";
+    if (is_host_network_ipv6_only()) {
+        return DEFAULT_IPV6_DNS;
+    } else {
+        return DEFAULT_IPV4_DNS;
+    }
 }
 
 std::ifstream DeviceConfig::open_ifstream_crossplat(const char* filename) {
