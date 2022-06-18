@@ -16,8 +16,15 @@
 namespace android {
 namespace featurecontrol {
 
+static std::function<bool(Feature)> sFeatureEnabledCb;
+
+void setFeatureEnabledCallback(std::function<bool(Feature)> cb) {
+    sFeatureEnabledCb = cb;
+}
+
 bool isEnabled(Feature feature) {
-    return FeatureControlImpl::get().isEnabled(feature);
+    return sFeatureEnabledCb ? sFeatureEnabledCb(feature)
+        : FeatureControlImpl::get().isEnabled(feature);
 }
 
 bool isEnabledByGuest(Feature feature) {
