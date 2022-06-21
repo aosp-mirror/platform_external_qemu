@@ -210,6 +210,7 @@ const uint32_t kGlBgra = 0x80e1;
 const uint32_t kGlRgba = 0x1908;
 const uint32_t kGlRgba16f = 0x881A;
 const uint32_t kGlRgb565 = 0x8d62;
+const uint32_t kGlRgba1010102 = 0x8059;
 const uint32_t kGlR8 = 0x8229;
 const uint32_t kGlR16 = 0x822A;
 const uint32_t kGlRg8 = 0x822b;
@@ -232,6 +233,7 @@ static inline bool virgl_format_is_yuv(uint32_t format) {
         case VIRGL_FORMAT_B5G6R5_UNORM:
         case VIRGL_FORMAT_R8_UNORM:
         case VIRGL_FORMAT_R8G8_UNORM:
+        case VIRGL_FORMAT_R10G10B10A2_UNORM:
             return false;
         case VIRGL_FORMAT_NV12:
         case VIRGL_FORMAT_YV12:
@@ -287,6 +289,8 @@ static inline uint32_t virgl_format_to_gl(uint32_t virgl_format) {
         case VIRGL_FORMAT_YV12:
             // emulated as RGBA8888
             return kGlRgba;
+        case VIRGL_FORMAT_R10G10B10A2_UNORM:
+            return kGlRgba1010102;
         default:
             return kGlRgba;
     }
@@ -307,6 +311,7 @@ static inline uint32_t virgl_format_to_fwk_format(uint32_t virgl_format) {
         case VIRGL_FORMAT_R8G8B8X8_UNORM:
         case VIRGL_FORMAT_R8G8B8A8_UNORM:
         case VIRGL_FORMAT_B5G6R5_UNORM:
+        case VIRGL_FORMAT_R10G10B10A2_UNORM:
         default: // kFwkFormatGlCompat: No extra conversions needed
             return kFwkFormatGlCompat;
     }
@@ -342,6 +347,7 @@ static inline size_t virgl_format_to_linear_base(
             case VIRGL_FORMAT_B8G8R8A8_UNORM:
             case VIRGL_FORMAT_R8G8B8X8_UNORM:
             case VIRGL_FORMAT_R8G8B8A8_UNORM:
+            case VIRGL_FORMAT_R10G10B10A2_UNORM:
                 bpp = 4;
                 break;
             case VIRGL_FORMAT_B5G6R5_UNORM:
@@ -401,6 +407,7 @@ static inline size_t virgl_format_to_total_xfer_len(
             case VIRGL_FORMAT_B8G8R8A8_UNORM:
             case VIRGL_FORMAT_R8G8B8X8_UNORM:
             case VIRGL_FORMAT_R8G8B8A8_UNORM:
+            case VIRGL_FORMAT_R10G10B10A2_UNORM:
                 bpp = 4;
                 break;
             case VIRGL_FORMAT_B5G6R5_UNORM:
