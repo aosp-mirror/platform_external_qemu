@@ -16,7 +16,9 @@
 #include <grpcpp/grpcpp.h>
 #include <cstdint>
 #include <fstream>
+#include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -26,16 +28,16 @@
 #include "android/base/files/ScopedFd.h"
 #include "android/base/system/System.h"
 #include "android/bluetooth/rootcanal/net/multi_datachannel_server.h"
-#include "android/bluetooth/rootcanal/root_canal_qemu.h"
 #include "android/emulation/ConfigDirs.h"
-#include "android/emulation/bluetooth/BufferedAsyncDataChannelAdapter.h"
 #include "android/emulation/bluetooth/GrpcLinkChannelServer.h"
+#include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "emulated_bluetooth.pb.h"
 #include "emulated_bluetooth_device.pb.h"
 #include "emulated_bluetooth_packets.pb.h"
 #include "model/hci/hci_sniffer.h"
 #include "model/hci/hci_transport.h"
+#include "os/log.h"
 #include "root_canal_qemu.h"
 
 #ifdef DISABLE_ASYNC_GRPC
@@ -137,6 +139,12 @@ public:
         auto pointer = std::shared_ptr<HCIForwarder>(new HCIForwarder());
         pointer->mSelf = pointer;
         std::shared_ptr<rootcanal::HciTransport> transport = pointer;
+
+        if (VERBOSE_CHECK(bluetooth)) {
+            auto stream =
+                    android::bluetooth::getLogstream(context->peer() + ".pcap");
+            transport = rootcanal::HciSniffer::Create(transport, stream);
+        }
         rootcanal->addHciConnection(transport);
 
         // It's safe to let the smart pointer be destructed here as we hold

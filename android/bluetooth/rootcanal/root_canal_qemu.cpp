@@ -22,11 +22,15 @@
 #include <vector>      // for vector
 
 // These must be included first due to some windows header issues.
+#include "model/hci/hci_sniffer.h"
 #include "model/setup/test_model.h"  // for TestModel
 #include "root_canal_qemu.h"         // for Rootcanal::...
 
-#include "android/base/async/ThreadLooper.h"         // for ThreadLooper
-#include "android/utils/debug.h"                     // for derror
+#include "android/base/async/ThreadLooper.h"  // for ThreadLooper
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
+#include "android/utils/debug.h"  // for derror
+#include "android/utils/path.h"
 #include "model/devices/link_layer_socket_device.h"  // for LinkLayerSo...
 #include "model/hci/hci_socket_transport.h"          // for HciSocketTr...
 #include "model/setup/async_manager.h"               // for AsyncManager
@@ -49,8 +53,9 @@ using rootcanal::LinkLayerSocketDevice;
 using rootcanal::TestCommandHandler;
 using rootcanal::TestModel;
 using RootcanalBuilder = Rootcanal::Builder;
-
+using android::base::System;
 using namespace std::placeholders;
+
 
 class RootcanalImpl : public Rootcanal {
 public:
@@ -113,6 +118,11 @@ public:
                     getConsoleAgents()->rootcanal, mLooper);
 
             auto transport = HciSocketTransport::Create(channel);
+            if (VERBOSE_CHECK(bluetooth)) {
+                auto stream = android::bluetooth::getLogstream("qemu.pcap");
+                transport = rootcanal::HciSniffer::Create(transport, stream);
+            }
+
             mQemuHciDevice =
                     HciDevice::Create(transport, mControllerProperties);
             mRootcanal.AddHciConnection(mQemuHciDevice);
