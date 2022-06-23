@@ -835,7 +835,7 @@ static void npcm7xx_kcs_class_init(ObjectClass *klass, void *data)
     ResettableClass *rc = RESETTABLE_CLASS(klass);
     DeviceClass *dc = DEVICE_CLASS(klass);
 
-    dc->desc = "NPCM7xx Timer Controller";
+    dc->desc = "NPCM7xx KCS";
     dc->vmsd = &vmstate_npcm7xx_kcs;
     dc->realize = npcm7xx_kcs_realize;
     rc->phases.enter = npcm7xx_kcs_enter_reset;
