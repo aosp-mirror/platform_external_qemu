@@ -338,7 +338,7 @@ static int net_slirp_init(NetClientState *peer, const char *model,
     ip6_prefix.s6_addr[3] = 0x02;
 #else
     if (!vprefix6) {
-        vprefix6 = "2001:02::";
+        vprefix6 = "fec0::";
     }
     if (!inet_pton(AF_INET6, vprefix6, &ip6_prefix)) {
         error_setg(errp, "Failed to parse IPv6 prefix");
