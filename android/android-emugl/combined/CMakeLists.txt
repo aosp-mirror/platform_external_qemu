@@ -145,6 +145,16 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     # Common base libraries for host################################################
 
+    # The following definitions are copied from ${GFXSTREAM_REPO_ROOT}, because we cannot directly
+    # add its CMakeLists.txt here.
+    option(BUILD_STANDALONE "Build with standalone implementations of base/host-common libraries" ON)
+    if (BUILD_STANDALONE)
+        # These libraries may be changed in non-standalone builds to inject another implementation
+        # of these APIs.
+        set(GFXSTREAM_BASE_LIB gfxstream-base)
+        set(GFXSTREAM_HOST_COMMON_LIB gfxstream-host-common)
+    endif()
+
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/base ${GFXSTREAM_PREFIX}-base)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/snapshot ${GFXSTREAM_PREFIX}-snapshot)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/host-common ${GFXSTREAM_PREFIX}-host-common)
