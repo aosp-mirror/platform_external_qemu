@@ -232,6 +232,8 @@ static inline bool virgl_format_is_yuv(uint32_t format) {
         case VIRGL_FORMAT_R8G8B8A8_UNORM:
         case VIRGL_FORMAT_B5G6R5_UNORM:
         case VIRGL_FORMAT_R8_UNORM:
+        case VIRGL_FORMAT_R16_UNORM:
+        case VIRGL_FORMAT_R16G16B16A16_FLOAT:
         case VIRGL_FORMAT_R8G8_UNORM:
         case VIRGL_FORMAT_R10G10B10A2_UNORM:
             return false;
