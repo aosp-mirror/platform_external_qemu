@@ -775,6 +775,11 @@ static void npcm7xx_kcs_enter_reset(Object *obj, ResetType type)
         c->ctl = 0xc0;
         c->ic = 0x41;
         c->ie = 0x00;
+        c->inpos = 0x00;
+        c->inlen = 0x00;
+        c->outpos = 0x00;
+        c->outlen = 0x00;
+        c->last_byte_not_ready = false;
     }
     npcm7xx_bpc_reset(&s->bpc);
 }
