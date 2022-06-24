@@ -14,7 +14,12 @@
 // limitations under the License.
 //
 #pragma once
+#include <memory>
 #include <string>
+
+namespace rootcanal {
+class HciTransport;
+}  // namespace rootcanal
 
 // Connects and activates the root canal module, returns true if
 // the activation succeeded.
@@ -24,8 +29,6 @@ namespace base {
 class Looper;
 }
 namespace net {
-
-class HciDataChannelServer;
 class MultiDataChannelServer;
 }  // namespace net
 
@@ -41,14 +44,18 @@ public:
     // Closes the root canal service
     virtual void close() = 0;
 
-    // Access to the /dev/vhci through qemu.
-    virtual net::HciDataChannelServer* qemuHciServer() = 0;
+    // Connect RootCanal to qemu /dev/vhci
+    virtual bool connectQemu() = 0;
+
+    // Disconnect RootCanal to qemu /dev/vhci
+    virtual bool disconnectQemu() = 0;
+
+    virtual void addHciConnection(
+            std::shared_ptr<rootcanal::HciTransport> transport) = 0;
 
     virtual net::MultiDataChannelServer* linkClassicServer() = 0;
 
     virtual net::MultiDataChannelServer* linkBleServer() = 0;
-
-    virtual net::MultiDataChannelServer* hciServer() = 0;
 };
 
 static std::unique_ptr<Rootcanal> sRootcanal;

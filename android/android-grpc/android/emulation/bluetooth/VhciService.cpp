@@ -22,11 +22,13 @@
 #include <type_traits>  // for remove_...
 #include <vector>       // for vector
 
+#include "android/base/async/ThreadLooper.h"  // for ThreadLooper
+#include "android/console.h"  // for getConsoleAgents, AndroidCons...
 #include "android/emulation/bluetooth/HciAsyncDataChannelAdapter.h"
-#include "android/utils/debug.h"         // for dwarning
-#include "grpc/support/time.h"           // for gpr_now
-#include "net/hci_datachannel_server.h"  // for HciData...
-#include "root_canal_qemu.h"             // for Rootcanal
+#include "android/utils/debug.h"   // for dwarning
+#include "grpc/support/time.h"     // for gpr_now
+#include "net/qemu_datachannel.h"  // for QemuDataChannel
+#include "root_canal_qemu.h"       // for Rootcanal
 
 #ifndef DISABLE_ASYNC_GRPC
 #include "android/emulation/control/utils/SimpleAsyncGrpc.h"
@@ -61,19 +63,14 @@ public:
                                   ""));
         }
 
-        auto qemuHciServer =
-                android::bluetooth::Rootcanal::Builder::getInstance()
-                        ->qemuHciServer();
-
-        // Let's not fire any new events to anyone, we are hijacking
-        // this connection.
-        qemuHciServer->StopListening();
+        auto rootcanal = android::bluetooth::Rootcanal::Builder::getInstance();
 
         // Close down the HCI connection to rootcanal.
-        qemuHciServer->qemuChannel()->Close();
+        rootcanal->disconnectQemu();
 
         // Create a new transport.
-        mQemuChannel = qemuHciServer->injectQemuChannel();
+        mQemuChannel = std::make_shared<net::QemuDataChannel>(
+                getConsoleAgents()->rootcanal, base::ThreadLooper::get());
 
         mHciChannel = std::make_unique<HciAsyncDataChannelAdapter>(
                 mQemuChannel, [this](auto packet) { this->Write(packet); },
@@ -95,11 +92,9 @@ public:
 
     void OnDone() override {
         if (hijacked) {
-            auto qemuHciServer =
-                    android::bluetooth::Rootcanal::Builder::getInstance()
-                            ->qemuHciServer();
-            qemuHciServer->StartListening();
-            qemuHciServer->injectQemuChannel();
+            auto rootcanal =
+                    android::bluetooth::Rootcanal::Builder::getInstance();
+            rootcanal->connectQemu();
             sHijacked = false;
         }
         delete this;

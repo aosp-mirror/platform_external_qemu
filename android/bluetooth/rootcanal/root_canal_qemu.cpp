@@ -13,23 +13,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#include <stdio.h>  // for sscanf
-#include <future>   // for promise
-#include <memory>   // for shared_ptr
-#include <string>   // for string
-#include <utility>  // for move
-#include <vector>   // for vector
+#include <stdio.h>     // for sscanf
+#include <functional>  // for bind, placeholders
+#include <future>      // for promise
+#include <memory>      // for shared_ptr
+#include <string>      // for string
+#include <utility>     // for move
+#include <vector>      // for vector
 
 // These must be included first due to some windows header issues.
-#include "root_canal_qemu.h"   // for Rootcanal::...
-#include "test_environment.h"  // for TestEnviron...
+#include "model/setup/test_model.h"  // for TestModel
+#include "root_canal_qemu.h"         // for Rootcanal::...
 
-#include "android/base/async/ThreadLooper.h"              // for ThreadLooper
-#include "android/utils/debug.h"                          // for derror
-#include "model/setup/async_manager.h"                    // for AsyncManager
-#include "net/hci_datachannel_server.h"                   // for HciDataChan...
-#include "net/multi_datachannel_server.h"                 // for MultiDataCh...
-#include "net/null_datachannel_server.h"                  // for NullDataCha...
+#include "android/base/async/ThreadLooper.h"         // for ThreadLooper
+#include "android/utils/debug.h"                     // for derror
+#include "model/devices/link_layer_socket_device.h"  // for LinkLayerSo...
+#include "model/hci/hci_socket_transport.h"          // for HciSocketTr...
+#include "model/setup/async_manager.h"               // for AsyncManager
+#include "model/setup/test_command_handler.h"        // for TestCommand...
+
+#include "android/console.h"  // for getConsoleAgents, AndroidCons...
+#include "net/multi_datachannel_server.h"  // for MultiDataCh...
+#include "net/null_datachannel_server.h"   // for NullDataCha...
+#include "net/qemu_datachannel.h"          // for QemuDataChannel, Looper
 #include "net/sockets/loopback_async_socket_connector.h"  // for LoopbackAsy...
 #include "net/sockets/loopback_async_socket_server.h"     // for LoopbackAsy...
 
@@ -37,38 +43,99 @@ namespace android {
 
 namespace bluetooth {
 
-using root_canal::TestEnvironment;
+using rootcanal::HciDevice;
+using rootcanal::HciSocketTransport;
+using rootcanal::LinkLayerSocketDevice;
+using rootcanal::TestCommandHandler;
+using rootcanal::TestModel;
 using RootcanalBuilder = Rootcanal::Builder;
+
+using namespace std::placeholders;
 
 class RootcanalImpl : public Rootcanal {
 public:
     RootcanalImpl(
-            std::unique_ptr<TestEnvironment> rootcanal,
-            std::unique_ptr<AsyncManager> am,
-            std::shared_ptr<net::HciDataChannelServer> qemuHciServer,
+            base::Looper* looper,
+            std::string controllerProperties,
+            std::string cmdFile,
             std::shared_ptr<net::MultiDataChannelServer> linkBleServer,
-            std::shared_ptr<net::MultiDataChannelServer> linkClassicServer,
-            std::shared_ptr<net::MultiDataChannelServer> hciServer)
-        : mRootcanal(std::move(rootcanal)),
-          mAsyncManager(std::move(am)),
-          mQemuHciServer(std::move(qemuHciServer)),
+            std::shared_ptr<net::MultiDataChannelServer> linkClassicServer)
+        : mLooper(looper),
+          mControllerProperties(controllerProperties),
+          mCmdFile(cmdFile),
           mLinkBleServer(linkBleServer),
-          mLinkClassicServer(linkClassicServer),
-          mHciServer(hciServer) {}
+          mLinkClassicServer(linkClassicServer) {}
     ~RootcanalImpl() {}
 
     // Starts the root canal service.
     bool start() override {
-        std::promise<void> barrier;
-        mRootcanal->initialize(std::move(barrier));
-        return true;
+        auto testCommands = TestCommandHandler(mRootcanal);
+
+        testCommands.RegisterSendResponse([](const std::string&) {});
+
+        testCommands.AddPhy({"BR_EDR"});
+        testCommands.AddPhy({"LOW_ENERGY"});
+        testCommands.SetTimerPeriod({"5"});
+        testCommands.StartTimer({});
+        testCommands.FromFile(mCmdFile);
+
+        mLinkBleServer->SetOnConnectCallback(
+                [this](std::shared_ptr<net::AsyncDataChannel> socket,
+                       net::AsyncDataChannelServer* srv) {
+                    auto phy_type = rootcanal::Phy::Type::LOW_ENERGY;
+                    mRootcanal.AddLinkLayerConnection(
+                            LinkLayerSocketDevice::Create(socket, phy_type),
+                            phy_type);
+                    srv->StartListening();
+                });
+        mLinkBleServer->StartListening();
+
+        mLinkClassicServer->SetOnConnectCallback(
+                [this](std::shared_ptr<net::AsyncDataChannel> socket,
+                       net::AsyncDataChannelServer* srv) {
+                    auto phy_type = rootcanal::Phy::Type::BR_EDR;
+                    mRootcanal.AddLinkLayerConnection(
+                            LinkLayerSocketDevice::Create(socket, phy_type),
+                            phy_type);
+                    srv->StartListening();
+                });
+        mLinkClassicServer->StartListening();
+
+        return connectQemu();
     };
 
     // Closes the root canal service
-    void close() override { mRootcanal.reset(nullptr); }
+    void close() override { mRootcanal.Reset(); }
 
-    net::HciDataChannelServer* qemuHciServer() override {
-        return mQemuHciServer.get();
+    bool connectQemu() override {
+        if (!mQemuHciDevice) {
+            auto channel = std::make_shared<net::QemuDataChannel>(
+                    getConsoleAgents()->rootcanal, mLooper);
+
+            auto transport = HciSocketTransport::Create(channel);
+            mQemuHciDevice =
+                    HciDevice::Create(transport, mControllerProperties);
+            mRootcanal.AddHciConnection(mQemuHciDevice);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    bool disconnectQemu() override {
+        if (mQemuHciDevice) {
+            mQemuHciDevice->Close();
+            mQemuHciDevice.reset();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    void addHciConnection(
+            std::shared_ptr<rootcanal::HciTransport> transport) override {
+        auto device = HciDevice::Create(transport, mControllerProperties);
+        mRootcanal.AddHciConnection(device);
     }
 
     net::MultiDataChannelServer* linkBleServer() override {
@@ -79,17 +146,32 @@ public:
         return mLinkClassicServer.get();
     }
 
-    net::MultiDataChannelServer* hciServer() override {
-        return mHciServer.get();
-    }
-
 private:
-    std::unique_ptr<AsyncManager> mAsyncManager;
-    std::shared_ptr<net::HciDataChannelServer> mQemuHciServer;
+    AsyncManager mAsyncManager;
+
+    TestModel mRootcanal{
+            std::bind(&AsyncManager::GetNextUserId, &mAsyncManager),
+            std::bind(&AsyncManager::ExecAsync, &mAsyncManager, _1, _2, _3),
+            std::bind(&AsyncManager::ExecAsyncPeriodically,
+                      &mAsyncManager,
+                      _1,
+                      _2,
+                      _3,
+                      _4),
+            std::bind(&AsyncManager::CancelAsyncTasksFromUser,
+                      &mAsyncManager,
+                      _1),
+            std::bind(&AsyncManager::CancelAsyncTask, &mAsyncManager, _1),
+            [this](const std::string& /* server */,
+                   int /* port */,
+                   rootcanal::Phy::Type /* phy_type */) { return nullptr; }};
+
+    base::Looper* mLooper;
+    std::string mControllerProperties;
+    std::string mCmdFile;
+    std::shared_ptr<rootcanal::HciDevice> mQemuHciDevice;
     std::shared_ptr<net::MultiDataChannelServer> mLinkBleServer;
     std::shared_ptr<net::MultiDataChannelServer> mLinkClassicServer;
-    std::shared_ptr<net::MultiDataChannelServer> mHciServer;
-    std::unique_ptr<TestEnvironment> mRootcanal;
 };
 
 RootcanalBuilder::Builder() {
@@ -141,29 +223,15 @@ std::shared_ptr<Rootcanal> RootcanalBuilder::getInstance() {
 }
 
 void RootcanalBuilder::buildSingleton() {
-    auto asyncManager = std::make_unique<AsyncManager>();
-
     auto nullChannel = std::make_shared<net::NullDataChannelServer>();
-    auto qemuHciServer = std::make_shared<net::HciDataChannelServer>(mLooper);
-    net::DataChannelServerList hciServers;
-    hciServers.push_back(qemuHciServer);
-    auto hciServer = std::make_shared<net::MultiDataChannelServer>(hciServers);
-    auto testServer = nullChannel;
     auto linkServer =
             std::make_shared<net::MultiDataChannelServer>(nullChannel);
     auto linkBleServer =
             std::make_shared<net::MultiDataChannelServer>(nullChannel);
-    auto localConnector = std::make_shared<net::LoopbackAsyncSocketConnector>(
-            asyncManager.get());
-
-    auto testEnv = std::make_unique<TestEnvironment>(
-            testServer, hciServer, linkServer, linkBleServer, localConnector,
-            mDefaultControllerProperties, mCmdFile);
 
     sRootcanalImpl = std::make_shared<RootcanalImpl>(
-            std::move(testEnv), std::move(asyncManager), qemuHciServer,
-            std::move(linkBleServer), std::move(linkServer),
-            std::move(hciServer));
+            mLooper, mDefaultControllerProperties, mCmdFile,
+            std::move(linkBleServer), std::move(linkServer));
 }
 }  // namespace bluetooth
 }  // namespace android

@@ -78,7 +78,6 @@ android_add_library(
       ${BT_ROOT}/gd/hci/address.cc
       ${BT_ROOT}/gd/hci/class_of_device.cc
       ${RootCanalGeneratedPackets_h}
-      desktop/test_environment.cc
       model/controller/acl_connection.cc
       model/controller/acl_connection_handler.cc
       model/controller/dual_mode_controller.cc
@@ -137,7 +136,6 @@ android_add_library(
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       async_manager.cc
-      net/hci_datachannel_server.cpp
       net/mutli_datachannel_server.cpp
       net/qemu_datachannel.cpp
       net/sockets/async_socket.cc
