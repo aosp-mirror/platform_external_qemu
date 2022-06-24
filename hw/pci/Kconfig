@@ -16,3 +16,8 @@ config MSI_NONBROKEN
     # or support it and have a good implementation. See commit
     # 47d2b0f33c664533b8dbd5cb17faa8e6a01afe1f.
     bool
+
+config GUEST_ONLY_PCI
+    bool
+    default y if PCI_DEVICES
+    select PCI_EXPRESS
