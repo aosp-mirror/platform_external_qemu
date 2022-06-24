@@ -1,13 +1,33 @@
 #pragma once
-// #include_next "os/log.h"
-#include "android/utils/debug.h"
-#include <cstdlib>
+#include <cstdlib>      // for abort
+#include <memory>       // for shared_ptr
+#include <ostream>      // for ostream
+#include <string_view>  // for string_view
 
-#define LOGWRAPPER(level, fmt, args...)                                 \
-    do {                                                                \
-        if (VERBOSE_CHECK(bluetooth)) {                                 \
-            __emu_log_print(level, __FILE__, __LINE__, fmt "", ##args); \
-        }                                                               \
+#include "android/utils/debug.h"         // for __emu_log_print, VERBOSE_CHECK
+#include "android/utils/log_severity.h"  // for EMULATOR_LOG_INFO, EMULATOR_...
+
+extern "C" void __blue_write_to_file(LogSeverity prio,
+                                     const char* file,
+                                     int line,
+                                     const char* fmt,
+                                     ...);
+
+namespace android::bluetooth {
+// Gets a log stream that can be used to write logging information.
+// The id can be used to uniquely identify the stream. If the id has
+// already been used it will be prefixed by %d_ and a number.
+std::shared_ptr<std::ostream> getLogstream(std::string_view id);
+}  // namespace android::bluetooth
+
+
+// Note that we log both to a file as well as the emulator log system.
+#define LOGWRAPPER(level, fmt, args...)                                      \
+    do {                                                                     \
+        if (VERBOSE_CHECK(bluetooth)) {                                      \
+            __blue_write_to_file(level, __FILE__, __LINE__, fmt "", ##args); \
+            __emu_log_print(level, __FILE__, __LINE__, fmt "", ##args);      \
+        }                                                                    \
     } while (false)
 
 #define LOG_VERBOSE(fmt, args...) LOGWRAPPER(EMULATOR_LOG_VERBOSE, fmt, ##args);
