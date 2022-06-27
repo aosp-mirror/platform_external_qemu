@@ -29,6 +29,7 @@
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 #include "android/utils/timezone.h"
+#include "android/utils/dns.h"
 #include "android/utils/debug.h"
 
 #ifdef _WIN32
@@ -2483,14 +2484,68 @@ BadCommand:
     return "ERROR: BAD COMMAND";
 }
 
+/**
+ * AT+CGCONTRDP
+ *   The execution command returns the relevant information for an active non
+ * secondary PDP context with the context identifier <cid>.
+ *
+ * Command                            Possible response(s)
+ * +CGCONTRDP[=<cid>]                 [+CGCONTRDP: <cid>,<bearer_id>,<apn>
+ *                                    [,<local_addr and subnet_mask>[,<gw_addr>
+ *                                    [,<DNS_prim_addr>[<DNS_sec_addr>[...]]]]]]
+ *                                    [<CR><LF>+CGCONTRDP: <cid>,<bearer_id>,<apn>
+ *                                    [,<local_addr and subnet_mask>[,<gw_addr>
+ *                                    [,<DNS_prim_addr>[<DNS_sec_addr>[...]]]]]]
+ *
+ * <cid>: see AT+CGACT
+ * <bearer_id>: integer type; identifies the bearer, i.e. the EPS bearer and
+ *              the NSAPI.
+ * <local_addr and subnet_mask>: string type; shows the IP address and subnet
+ *                               mask of the MT.
+ * <gw_addr>: string type; shows the Gateway Address of the MT. The string is
+ *            given as dot-separated numeric (0-255) parameters.
+ * <DNS_prim_addr>: string type; shows the IP address of the primary DNS server.
+ * <DNS_sec_addr>: string type; shows the IP address of the secondary DNS server.
+ *
+ *
+ * see RIL_REQUEST_SETUP_DATA_CALL in RIL
+ */
+static const char*
+handleReadDynamicParam( const char* cmd, AModem modem )
+{
+    assert( !memcmp( cmd, "+CGCONTRDP=", 11 ) );
+    cmd += 11;
+    int cid = cmd[0] - '0';
+    int nn;
+    amodem_begin_line(modem);
+    int is_ipv6_only = is_host_network_ipv6_only();
+    for (nn = 0; nn < MAX_DATA_CONTEXTS; nn++) {
+        ADataContext  data = modem->data_contexts + nn;
+        if (data->active && cid == data->id) {
+            amodem_add_line( modem, "+CGCONTRDP: %d,5,%s,%s,%s,%s\r\n", cid, data->apn,
+                is_ipv6_only ? DEFAULT_IPV6_ADDRESS_AND_PREFIX :
+                               DEFAULT_IPV4_ADDRESS_AND_PREFIX,
+                is_ipv6_only ? DEFAULT_IPV6_GATEWAY : DEFAULT_IPV4_GATEWAY,
+                is_ipv6_only ? DEFAULT_IPV6_DNS : DEFAULT_IPV4_DNS);
+        }
+    }
+    return amodem_end_line(modem);
+
+}
+
 static const char*
 handleQueryPDPContext( const char* cmd, AModem modem )
 {
     /* WiFi uses a different gateway because there is NAT involved to get
      * both WiFi and radio networks to coexist on the single ethernet connection
      * connecting the guest to the outside world */
-    const char* gateway = feature_is_enabled(kFeature_Wifi) ? "192.168.200.2/24"
-                                                            : "10.0.2.15/24";
+    const char* gateway = NULL;
+    if (is_host_network_ipv6_only()) {
+        gateway = DEFAULT_IPV6_GATEWAY;
+    } else {
+        gateway = feature_is_enabled(kFeature_Wifi) ? "192.168.200.2/24"
+                                                        : "10.0.2.15/24";
+    }
     int  nn;
 
     amodem_begin_line(modem);
@@ -2950,7 +3005,7 @@ static const struct {
 
     { "!+CGDCONT=", NULL, handleDefinePDPContext },
     { "+CGDCONT?", NULL, handleQueryPDPContext },
-
+    { "!+CGCONTRDP=", NULL, handleReadDynamicParam },
     { "+CGQREQ=1", NULL, NULL },
     { "+CGQMIN=1", NULL, NULL },
     { "+CGEREP=1,0", NULL, NULL },
