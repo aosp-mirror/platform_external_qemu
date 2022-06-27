@@ -160,6 +160,7 @@ enum {
     FAM6_SKYLAKE_X = 0x50650,
     FAM6_SKYLAKE_XD = 0x50660,
     FAM6_ICELAKE_X = 0x606A0,
+    FAM6_SAPPHIRE_RAPIDS_X = 0x806F3,
 };
 
 typedef struct PECIClientProperties {

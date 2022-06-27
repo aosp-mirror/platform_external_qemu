@@ -115,11 +115,12 @@ PECIClientDevice *peci_add_client(PECIBus *bus,
         break;
 
     case FAM6_ICELAKE_X:
+    case FAM6_SAPPHIRE_RAPIDS_X:
         client->revision = 0x40;
         break;
 
     default:
-        qemu_log_mask(LOG_UNIMP, "%s: unsupported cpu: 0x%x",
+        qemu_log_mask(LOG_UNIMP, "%s: unsupported cpu: 0x%x\n",
                       __func__, props->cpu_family);
         client->revision = 0x31;
         break;
