@@ -332,11 +332,13 @@ static int net_slirp_init(NetClientState *peer, const char *model,
         return -1;
     }
     memset(&ip6_prefix, 0, sizeof(ip6_prefix));
-    ip6_prefix.s6_addr[0] = 0xfe;
-    ip6_prefix.s6_addr[1] = 0xc0;
+    ip6_prefix.s6_addr[0] = 0x20;
+    ip6_prefix.s6_addr[1] = 0x01;
+    ip6_prefix.s6_addr[2] = 0x00;
+    ip6_prefix.s6_addr[3] = 0x02;
 #else
     if (!vprefix6) {
-        vprefix6 = "fec0::";
+        vprefix6 = "2001:02::";
     }
     if (!inet_pton(AF_INET6, vprefix6, &ip6_prefix)) {
         error_setg(errp, "Failed to parse IPv6 prefix");

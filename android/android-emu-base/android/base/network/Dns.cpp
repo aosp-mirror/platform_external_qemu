@@ -20,17 +20,26 @@
 #include <unordered_set>
 
 #ifdef _WIN32
+#include "android/base/ArraySize.h"
 #include "android/base/sockets/Winsock.h"
 #include "android/base/sockets/SocketErrors.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
 #include "wincrypt.h"
 #include "iphlpapi.h"
+# include <windows.h>
+# include <winsock2.h>
+# include <ws2tcpip.h>
+# include <sys/timeb.h>
+# include <wincrypt.h>
+# include <iphlpapi.h>
 #else
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #endif
+
+#include "android/utils/system.h"
 
 #include <fstream>
 
@@ -46,6 +55,59 @@ namespace base {
 namespace {
 
 using AddressList = android::base::Dns::AddressList;
+
+#ifdef _WIN32
+#define INITIAL_DNS_ADDR_BUF_SIZE 32 * 1024
+#define REALLOC_RETRIES 5
+
+// Broadcast site local DNS resolvers. We do not use these because they are
+// highly unlikely to be valid.
+// https://www.ietf.org/proceedings/52/I-D/draft-ietf-ipngwg-dns-discovery-03.txt
+static const struct in6_addr SITE_LOCAL_DNS_BROADCAST_ADDRS[] = {
+    {
+        {{
+            0xfe, 0xc0, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
+        }}
+    },
+    {
+        {{
+            0xfe, 0xc0, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02
+        }}
+    },
+    {
+        {{
+            0xfe, 0xc0, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03,
+        }}
+    },
+};
+
+static inline bool in6_equal(const struct in6_addr* a,
+                             const struct in6_addr* b) {
+    return memcmp(a, b, sizeof(*a)) == 0;
+}
+
+static int is_site_local_dns_broadcast(struct in6_addr* address) {
+    int i;
+    for (i = 0; i < ARRAY_SIZE(SITE_LOCAL_DNS_BROADCAST_ADDRS); i++) {
+        if (in6_equal(address, &SITE_LOCAL_DNS_BROADCAST_ADDRS[i])) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static void print_dns_v6_address(struct in6_addr address) {
+    char address_str[INET6_ADDRSTRLEN] = "";
+    if (inet_ntop(AF_INET6, &address, address_str, INET6_ADDRSTRLEN) == NULL) {
+        LOG(ERROR) << "Failed to stringify IPv6 address for logging.";
+        return;
+    }
+    LOG(INFO) << "IPv6 DNS server found: " << address_str;
+}
+#endif
 
 #if DEBUG
 #ifdef _WIN32
@@ -130,134 +192,111 @@ public:
 
     virtual int getSystemServerList(AddressList* out) override {
 #ifdef _WIN32
+        FIXED_INFO* FixedInfo = NULL;
+        ULONG BufLen;
+        DWORD ret;
+        IP_ADDR_STRING* pIPAddr;
+        struct in_addr tmp_addr;
         // The set of DNS server addresses already in the output list,
         // used to remove duplicates.
         std::unordered_set<IpAddress> present;
 
-        //Get preferred DNS server IP from GetNetworkParams,
-        //which returns IPV4 DNS only
-        std::string dnsBuffer;
-        ULONG outBufLen = sizeof (FIXED_INFO);
-        dnsBuffer.resize(static_cast<size_t>(outBufLen));
-        DWORD retVal = GetNetworkParams(
-            reinterpret_cast<FIXED_INFO*>(&dnsBuffer[0]), &outBufLen);
-        if (retVal == ERROR_BUFFER_OVERFLOW) {
-            dnsBuffer.resize(static_cast<size_t>(outBufLen));
-            retVal = GetNetworkParams(
-                       reinterpret_cast<FIXED_INFO*>(&dnsBuffer[0]),
-                       &outBufLen);
+        // Retrieve IPv4 address.
+        FixedInfo = (FIXED_INFO*)GlobalAlloc(GPTR, sizeof(FIXED_INFO));
+        BufLen = sizeof(FIXED_INFO);
+
+        if (ERROR_BUFFER_OVERFLOW == GetNetworkParams(FixedInfo, &BufLen)) {
+            if (FixedInfo) {
+                GlobalFree(FixedInfo);
+                FixedInfo = NULL;
+            }
+            FixedInfo = (FIXED_INFO*)GlobalAlloc(GPTR, BufLen);
         }
-        if (retVal == ERROR_SUCCESS)
-        {
-            IP_ADDR_STRING *ipAddr;
-            ipAddr =
-                &(reinterpret_cast<FIXED_INFO*>(&dnsBuffer[0])->DnsServerList);
-            while (ipAddr) {
-                IpAddress ip(ipAddr->IpAddress.String);
-                if (ip.valid()) {
-                    auto ret = present.insert(ip);
-                    if (ret.second) {
-                        out->emplace_back(std::move(ip));
-                    }
+
+        if ((ret = GetNetworkParams(FixedInfo, &BufLen)) != ERROR_SUCCESS) {
+            LOG(ERROR) << "GetNetworkParams failed. ret = " << ((u_int)ret);
+            if (FixedInfo) {
+                GlobalFree(FixedInfo);
+                FixedInfo = NULL;
+            }
+        } else {
+            pIPAddr = &(FixedInfo->DnsServerList);
+            IpAddress ip(pIPAddr->IpAddress.String);
+            if (ip.valid()) {
+                auto ret = present.insert(ip);
+                if (ret.second) {
+                    LOG(INFO) << "IPv4 server found: " << ip.toString();
+                    out->emplace_back(std::move(ip));
                 }
-                ipAddr = ipAddr->Next;
+            }
+            if (FixedInfo) {
+                GlobalFree(FixedInfo);
+                FixedInfo = NULL;
             }
         }
 
-        std::string buffer;
-        ULONG bufferLen = 0;
-        DWORD ret = GetAdaptersAddresses(AF_UNSPEC, 0, nullptr, nullptr,
-                                         &bufferLen);
-        if (ret == ERROR_BUFFER_OVERFLOW) {
-            buffer.resize(static_cast<size_t>(bufferLen));
-            ret = GetAdaptersAddresses(
-                    AF_UNSPEC, 0, nullptr,
-                    reinterpret_cast<IP_ADAPTER_ADDRESSES*>(&buffer[0]),
-                    &bufferLen);
-        }
-        if (ret != ERROR_SUCCESS) {
-            DLOG(ERROR) << "GetAdaptersAddresses() returned error: "
-                        << Win32Utils::getErrorString(ret);
-            return -ENOENT;
+        // Gets the first valid DNS resolver with an IPv6 address.
+        // Ignores any site local broadcast DNS servers, as these
+        // are on deprecated addresses and not generally expected
+        // to work. Further details at:
+        // https://www.ietf.org/proceedings/52/I-D/draft-ietf-ipngwg-dns-discovery-03.txt
+
+        PIP_ADAPTER_ADDRESSES addresses = NULL;
+        PIP_ADAPTER_ADDRESSES address = NULL;
+        IP_ADAPTER_DNS_SERVER_ADDRESS* dns_server = NULL;
+        struct sockaddr_in6* dns_v6_addr = NULL;
+
+        ULONG buf_size = INITIAL_DNS_ADDR_BUF_SIZE;
+        DWORD res = ERROR_BUFFER_OVERFLOW;
+        int i;
+
+        for (i = 0; i < REALLOC_RETRIES; i++) {
+            // If non null, we hit buffer overflow, free it so we can try again.
+            if (addresses != NULL) {
+                android_free(addresses);
+            }
+
+            addresses = static_cast<PIP_ADAPTER_ADDRESSES>(android_alloc0(buf_size));
+            res = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL,
+                                       addresses, &buf_size);
+
+            if (res != ERROR_BUFFER_OVERFLOW) {
+                break;
+            }
         }
 
-        // Technical note: Windows DNS resolution with multiple adapters
-        // is tricky and detailed in the following document:
-        //
-        //   https://technet.microsoft.com/en-us/library/dd197552(WS.10).aspx
-        //
-        // In a nutshell, there is a "preferred network adapter" and its list
-        // of DNS servers will be considered first. If there is no response
-        // after some time from them, the DNS server list from other adapters
-        // will be considered.
-        //
-        // The tricky part is that there doesn't seem to be a reliable way
-        // to determine the preferred network adapter, or the order of
-        // alternative ones that are used in case of fallback.
-        //
-        // Here, the code will simply call GetAdaptersAddresses() to list
-        // the DNS server list for all interfaces. It then makes the following
-        // assumptions:
-        //
-        // - The adapters are listed in order of preference, i.e. the DNS
-        //   servers from the first adapter should appear in the result
-        //   before those found in adapters that appear later in the list.
-        //
-        // - DNS servers can appear multiple times (i.e. associated with
-        //   multiple network adapters), and it's useless to return duplicate
-        //   entries in the result.
-        //
+        if (res != NO_ERROR) {
+            LOG(ERROR) << "Failed to get IPv6 DNS addresses due to error "
+                       << res;
+        } else {
+            address = addresses;
+            for (address = addresses; address != NULL;
+                 address = address->Next) {
+                for (dns_server = address->FirstDnsServerAddress;
+                     dns_server != NULL; dns_server = dns_server->Next) {
+                    if (dns_server->Address.lpSockaddr->sa_family != AF_INET6) {
+                        continue;
+                    }
 
-        // Windows automatic use of three well know site local DNS name server entries
-        // if no IPv6 name server is provided to an interface
-        const IpAddress siteLocalDns1("fec0:0:0:0:ffff::1");
-        const IpAddress siteLocalDns2("fec0:0:0:0:ffff::2");
-        const IpAddress siteLocalDns3("fec0:0:0:0:ffff::3");
-        for (auto adapter = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(&buffer[0]);
-             adapter != nullptr; adapter = adapter->Next) {
-#if DEBUG
-            LOG(INFO) << "Network Adapter " << adapter->AdapterName;
-            LOG(INFO) << "  Friendly name: " << toUtf8(adapter->FriendlyName);
-            LOG(INFO) << "  Description  : " << toUtf8(adapter->Description);
-            LOG(INFO) << "  DNS suffix   : " << toUtf8(adapter->DnsSuffix);
-            LOG(INFO) << "  DNS servers  :";
-#endif  // DEBUG
-            for (auto dnsServer = adapter->FirstDnsServerAddress;
-                 dnsServer != nullptr; dnsServer = dnsServer->Next) {
-                auto address = dnsServer->Address.lpSockaddr;
-                IpAddress ip;
-                switch (address->sa_family) {
-                    case AF_INET: {
-                        auto sin = reinterpret_cast<sockaddr_in*>(address);
-                        ip = IpAddress(ntohl(sin->sin_addr.s_addr));
-                        break;
-                    }
-                    case AF_INET6: {
-                        auto sin6 = reinterpret_cast<sockaddr_in6*>(address);
-                        ip = IpAddress(sin6->sin6_addr.s6_addr);
-                        break;
-                    }
-                }
-                if (ip == siteLocalDns1 || ip == siteLocalDns2 || ip == siteLocalDns3) {
-#if DEBUG
-                    LOG(INFO) << "    Site Local DNS found, ignore: " << ip.toString();
-#endif
-                    continue;
-                }
-#if DEBUG
-                LOG(INFO) << "    " << ip.toString();
-#endif
-                if (ip.valid()) {
-                    auto ret = present.insert(ip);
-                    if (ret.second) {
-                        // A new item was inserted into the set, so save it
-                        // into the result.
-                        out->emplace_back(std::move(ip));
+                    dns_v6_addr = (struct sockaddr_in6*)
+                                          dns_server->Address.lpSockaddr;
+                    if (is_site_local_dns_broadcast(&dns_v6_addr->sin6_addr) ==
+                        0) {
+                        print_dns_v6_address(dns_v6_addr->sin6_addr);
+                        IpAddress ip = IpAddress(dns_v6_addr->sin6_addr.s6_addr);
+                        if (ip.valid()) {
+                            auto ret = present.insert(ip);
+                            if (ret.second) {
+                                out->emplace_back(std::move(ip));
+                            }
+                        }
                     }
                 }
             }
         }
-
+        if (addresses != NULL) {
+            android_free(addresses);
+        }
         if (present.empty()) {
             return -ENOENT;
         }
