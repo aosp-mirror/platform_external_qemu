@@ -22,7 +22,8 @@ if(OPTION_GFXSTREAM_BACKEND)
     android_add_library(
         TARGET aemu-vkcereal-base
         LICENSE Apache-2.0
-        SRC impl/base/System.cpp
+        SRC impl/base/HealthMonitor.cpp
+            impl/base/System.cpp
             impl/base/SharedLibrary.cpp)
     target_link_libraries(
         aemu-vkcereal-base
@@ -113,7 +114,6 @@ if(OPTION_GFXSTREAM_BACKEND)
     # Uncomment for ASAN support
     # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
     # set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-extern-c-compat")
 
     # For empty struct size warning in C vs C++
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-extern-c-compat")
@@ -144,16 +144,6 @@ if(OPTION_GFXSTREAM_BACKEND)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/stb ${GFXSTREAM_PREFIX}-third-party-stb)
 
     # Common base libraries for host################################################
-
-    # The following definitions are copied from ${GFXSTREAM_REPO_ROOT}, because we cannot directly
-    # add its CMakeLists.txt here.
-    option(BUILD_STANDALONE "Build with standalone implementations of base/host-common libraries" ON)
-    if (BUILD_STANDALONE)
-        # These libraries may be changed in non-standalone builds to inject another implementation
-        # of these APIs.
-        set(GFXSTREAM_BASE_LIB gfxstream-base)
-        set(GFXSTREAM_HOST_COMMON_LIB gfxstream-host-common)
-    endif()
 
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/base ${GFXSTREAM_PREFIX}-base)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/snapshot ${GFXSTREAM_PREFIX}-snapshot)
