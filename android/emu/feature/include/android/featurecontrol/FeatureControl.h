@@ -15,6 +15,7 @@
 #include "android/featurecontrol/Features.h"
 #include "android/featurecontrol/HWMatching.h"
 
+#include <functional>
 #include <string>
 #include <vector>
 #include <ostream>
@@ -90,5 +91,9 @@ std::vector<Feature> getEnabledOverride();
 std::vector<Feature> getDisabledOverride();
 std::vector<Feature> getEnabled();
 void writeFeaturesToStream(std::ostream& os);
+
+// Overrides feature_is_enabled/isEnabled function above to use a user-provided
+// callback instead.
+void setFeatureEnabledCallback(std::function<bool(Feature)> cb);
 } // namespace android
 } // namespace featurecontrol
