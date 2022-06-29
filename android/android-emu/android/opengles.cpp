@@ -115,11 +115,16 @@ static const EGLDispatch* sEgl = nullptr;
 static const GLESv2Dispatch* sGlesv2 = nullptr;
 
 #ifdef AEMU_GFXSTREAM_BACKEND
+static bool sRunningInGfxstreamBackend = false;
+// The two functions below only are called in gfxstream backend, which assumes
+// RenderLib is a static library.
 int android_prepareOpenglesEmulation(void) {
+    sRunningInGfxstreamBackend = true;
     return android_initOpenglesEmulation();
 }
 
 int android_setOpenglesEmulation(void* renderLib, void* eglDispatch, void* glesv2Dispatch) {
+    sRunningInGfxstreamBackend = true;
     return 0;
 }
 #endif  // AEMU_GFXSTREAM_BACKEND
@@ -243,7 +248,15 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     sRenderLib->setRenderer(emuglConfig_get_current_renderer());
     sRenderLib->setAvdInfo(guestPhoneApi, guestApiLevel);
     sRenderLib->setCrashReporter(&crashhandler_die_format);
+#if defined(AEMU_GFXSTREAM_BACKEND)
+    // Don't override the feature controller when running under
+    // gfxstream_backend_unittests
+    if (!sRunningInGfxstreamBackend) {
+        sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);
+    }
+#else
     sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);
+#endif
     sRenderLib->setSyncDevice(goldfish_sync_create_timeline,
             goldfish_sync_create_fence,
             goldfish_sync_timeline_inc,
