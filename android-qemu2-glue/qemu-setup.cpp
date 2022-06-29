@@ -20,7 +20,7 @@ extern "C" {
 
 #include "android-qemu2-glue/qemu-setup.h"
 #include "android/base/system/System.h"
-#include "android/utils/log_severity.h"
+#include "android/base/logging/LogSeverity.h"
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"

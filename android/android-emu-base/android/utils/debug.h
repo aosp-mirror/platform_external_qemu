@@ -11,14 +11,7 @@
 */
 
 #pragma once
-
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-
 #include "android/utils/compiler.h"
-#include "android/utils/log_severity.h"
 
 ANDROID_BEGIN_HEADER
 
@@ -81,109 +74,11 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(log, "Include timestamp, thread and location in logs")        \
     _VERBOSE_TAG(grpc, "Log grpc calls.")
 
-#define _VERBOSE_TAG(x, y) VERBOSE_##x,
-typedef enum {
-    VERBOSE_TAG_LIST VERBOSE_MAX /* do not remove */
-} VerboseTag;
-#undef _VERBOSE_TAG
-
-extern uint64_t android_verbose;
-
-#ifdef __cplusplus
-// Make sure we don't accidentally add in to many tags..
-static_assert(VERBOSE_MAX <= (sizeof(android_verbose) * 8));
-#endif
-
-typedef enum {
-    kLogDefaultOptions = 0,
-    kLogEnableDuplicateFilter = 1
-} LoggingFlags;
-
-
-// Enable/disable verbose logs from the base/* family.
-extern void base_enable_verbose_logs();
-extern void base_disable_verbose_logs();
-// Configure the logging framework.
-extern void base_configure_logs(LoggingFlags flags);
-
-#define VERBOSE_ENABLE(tag) android_verbose |= (1ULL << VERBOSE_##tag)
-
-#define VERBOSE_DISABLE(tag) android_verbose &= (1ULL << VERBOSE_##tag)
-
-#define VERBOSE_CHECK(tag) ((android_verbose & (1ULL << VERBOSE_##tag)) != 0)
-
-#define VERBOSE_CHECK_ANY() (android_verbose != 0)
-
-extern void __emu_log_print(LogSeverity prio,
-                            const char* file,
-                            int line,
-                            const char* fmt,
-                            ...);
-
-#ifndef EMULOG
-#define EMULOG(priority, fmt, ...) \
-    __emu_log_print(priority, __FILE__, __LINE__, fmt, ##__VA_ARGS__);
-#endif
-
-#define VERBOSE_PRINT(tag, ...)                      \
-    if (VERBOSE_CHECK(tag)) {                        \
-        EMULOG(EMULATOR_LOG_VERBOSE, ##__VA_ARGS__); \
-    }
-
-#define VERBOSE_INFO(tag, ...)                    \
-    if (VERBOSE_CHECK(tag)) {                     \
-        EMULOG(EMULATOR_LOG_INFO, ##__VA_ARGS__); \
-    }
-
-#define VERBOSE_DPRINT(tag, ...) VERBOSE_PRINT(tag, __VA_ARGS__)
-
-extern void dprintn(const char* format, ...);
-
-extern void fdprintfnv(FILE* fp,
-                       const char* level,
-                       const char* format,
-                       va_list args);
-
-// Logging support.
-
-#define dprint(fmt, ...)                                 \
-    if (EMULATOR_LOG_VERBOSE >= android_log_severity) {  \
-        EMULOG(EMULATOR_LOG_VERBOSE, fmt, ##__VA_ARGS__) \
-    }
-
-#define dinfo(fmt, ...)                               \
-    if (EMULATOR_LOG_INFO >= android_log_severity) {  \
-        EMULOG(EMULATOR_LOG_INFO, fmt, ##__VA_ARGS__) \
-    }
-#define dwarning(fmt, ...)                               \
-    if (EMULATOR_LOG_WARNING >= android_log_severity) {  \
-        EMULOG(EMULATOR_LOG_WARNING, fmt, ##__VA_ARGS__) \
-    }
-#define derror(fmt, ...)                               \
-    if (EMULATOR_LOG_ERROR >= android_log_severity) {  \
-        EMULOG(EMULATOR_LOG_ERROR, fmt, ##__VA_ARGS__) \
-    }
-#define dfatal(fmt, ...) EMULOG(EMULATOR_LOG_FATAL, fmt, ##__VA_ARGS__)
-
-/** MULTITHREADED DEBUG TRACING
- **
- ** 'android_tid_function_print' is for tracing in multi-threaded situations.
- ** It prints "emulator: " or not (depending on |use_emulator_prefix|),
- ** the thread id, a function name (|function|), the message, and finally '\n'.
- */
-extern void android_tid_function_print(bool use_emulator_prefix,
-                                       const char* function,
-                                       const char* format,
-                                       ...);
-
-/** STDOUT/STDERR REDIRECTION
- **
- ** allows you to shut temporarily shutdown stdout/stderr
- ** this is useful to get rid of debug messages from ALSA and esd
- ** on Linux.
- **/
-
-extern void stdio_disable(void);
-extern void stdio_enable(void);
+#include "android/base/logging/CLog.h"
+#include "android/base/logging/LogTags.h"
 
 ANDROID_END_HEADER
+
+#ifdef __cplusplus
+  #include "android/base/logging/Log.h"
+#endif

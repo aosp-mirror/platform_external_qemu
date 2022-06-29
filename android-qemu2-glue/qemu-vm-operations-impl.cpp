@@ -40,6 +40,7 @@ extern "C" {
 #include "android/snapshot/common.h"                  // for SnapshotRamBlock
 #include "android/snapshot/interface.h"               // for androidSnapshot...
 #include "android/utils/path.h"                       // for path_copy_file
+#include "android/utils/debug.h"
 
 extern "C" {
 

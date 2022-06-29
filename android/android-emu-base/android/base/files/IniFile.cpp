@@ -11,7 +11,8 @@
 
 #include "android/base/files/IniFile.h"
 
-#include "android/base/Log.h"
+#include "android/base/logging/Log.h"
+#include "android/utils/debug.h"
 #include "android/base/system/System.h"
 #ifdef _MSC_VER
 #include "android/base/system/Win32UnicodeString.h"

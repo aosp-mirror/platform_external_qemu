@@ -20,6 +20,7 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/utils/debug.h"
 
 #include <windows.h>
 

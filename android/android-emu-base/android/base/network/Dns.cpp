@@ -14,7 +14,7 @@
 
 #include "android/base/network/Dns.h"
 
-#include "android/base/Log.h"
+#include "android/base/logging/CLog.h"
 
 #include <string>
 #include <unordered_set>
@@ -135,8 +135,7 @@ public:
 #endif
         int ret = ::getaddrinfo(hostname.c_str(), nullptr, pHints, &res);
         if (ret != 0) {
-            DLOG(ERROR) << "getaddrinfo('" << dns_server_name << "') returned "
-                        << ret;
+            derror("getaddrinfo('%s') returned %d", dns_server_name.data(), ret);
             switch (ret) {
                 case EAI_AGAIN:  // server is down.
                 case EAI_FAIL:   // server is sick.

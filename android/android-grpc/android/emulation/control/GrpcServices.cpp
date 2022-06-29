@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "android/base/files/PathUtils.h"
-#include "android/base/Log.h"
+#include "android/base/logging/CLog.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/console.h"

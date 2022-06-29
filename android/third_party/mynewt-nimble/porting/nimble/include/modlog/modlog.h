@@ -24,56 +24,41 @@
 
 #include "log_common/log_common.h"
 #include "log/log.h"
-
-#ifndef dprint
-extern void   dprint( const char*  format, ... );
-#endif
-
-#ifndef dinfo
-extern void   dinfo( const char*  format, ... );
-#endif
-
-#ifndef dwarning
-extern void   dwarning( const char*  format, ... );
-#endif
-
-#ifndef derror
-extern void   derror( const char*  format, ... );
-#endif
+#include "android/base/logging/CLog.h"
 
 #define MODLOG_MODULE_DFLT 255
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_DEBUG || defined __DOXYGEN__
 #define MODLOG_DEBUG(ml_mod_, ml_msg_, ...) \
-    printf((ml_msg_), ##__VA_ARGS__)
+    EMULOG(EMULATOR_LOG_VERBOSE, (ml_msg_), ##__VA_ARGS__) 
 #else
-#define MODLOG_DEBUG(ml_mod_, format, ...) dprint("%s: " format ,  __func__, ##__VA_ARGS__);
+#define MODLOG_DEBUG(ml_mod_, ml_msg_, ...) EMULOG(EMULATOR_LOG_VERBOSE, (ml_msg_), ##__VA_ARGS__) 
 #endif
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_INFO || defined __DOXYGEN__
 #define MODLOG_INFO(ml_mod_, ml_msg_, ...) \
-    printf((ml_msg_), ##__VA_ARGS__)
+    EMULOG(EMULATOR_LOG_INFO, (ml_msg_), ##__VA_ARGS__)
 #else
-#define MODLOG_INFO(ml_mod_, format, ...) dinfo("%s: " format ,  __func__, ##__VA_ARGS__);
+#define MODLOG_INFO(ml_mod_, ml_msg_, ...) EMULOG(EMULATOR_LOG_INFO, (ml_msg_), ##__VA_ARGS__)
 #endif
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_WARN || defined __DOXYGEN__
 #define MODLOG_WARN(ml_mod_, ml_msg_, ...) \
-    printf((ml_msg_), ##__VA_ARGS__)
+   EMULOG(EMULATOR_LOG_WARNING, (ml_msg_), ##__VA_ARGS__)
 #else
-#define MODLOG_WARN(ml_mod_, format, ...)  dwarning("%s: " format ,  __func__, ##__VA_ARGS__);
+#define MODLOG_WARN(ml_mod_, ml_msg_, ...)  EMULOG(EMULATOR_LOG_WARNING, (ml_msg_), ##__VA_ARGS__)
 #endif
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_ERROR || defined __DOXYGEN__
 #define MODLOG_ERROR(ml_mod_, ml_msg_, ...) \
-    printf((ml_msg_), ##__VA_ARGS__)
+    EMULOG(EMULATOR_LOG_ERROR, (ml_msg_), ##__VA_ARGS__)
 #else
-#define MODLOG_ERROR(ml_mod_, format, ...) derror("%s: " format ,  __func__, ##__VA_ARGS__);
+#define MODLOG_ERROR(ml_mod_, ml_msg_, ...) EMULOG(EMULATOR_LOG_ERROR, (ml_msg_), ##__VA_ARGS__)
 #endif
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_CRITICAL || defined __DOXYGEN__
 #define MODLOG_CRITICAL(ml_mod_, ml_msg_, ...) \
-    printf((ml_msg_), ##__VA_ARGS__)
+    EMULOG(EMULATOR_LOG_FATAL, (ml_msg_), ##__VA_ARGS__)
 #else
 #define MODLOG_CRITICAL(ml_mod_, ...) IGNORE(__VA_ARGS__)
 #endif

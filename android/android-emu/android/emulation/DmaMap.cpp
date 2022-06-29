@@ -11,33 +11,35 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "android/emulation/DmaMap.h"
+
+#include <inttypes.h>
+#include <stdio.h>
+#include <type_traits>
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/logging/CLog.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/android_pipe_device.h"
-
-#include <type_traits>
-#include <inttypes.h>
-#include <stdio.h>
 
 #define DEBUG 0
 
 #if DEBUG >= 1
-#define D(fmt,...) fprintf(stderr, "DmaMap: %s: " fmt "\n", __func__, ##__VA_ARGS__);
+#define D(fmt, ...) \
+    fprintf(stderr, "DmaMap: %s: " fmt "\n", __func__, ##__VA_ARGS__);
 #else
 #define D(...) (void)0
 #endif
 
 #if DEBUG >= 2
-#define DD(fmt,...) fprintf(stderr, "DmaMap: %s: " fmt "\n", __func__, ##__VA_ARGS__);
+#define DD(fmt, ...) \
+    fprintf(stderr, "DmaMap: %s: " fmt "\n", __func__, ##__VA_ARGS__);
 #else
 #define DD(...) (void)0
 #endif
 
-#define E(fmt,...) derror("DmaMap error %s: " fmt , __func__, ##__VA_ARGS__);
+#define E(fmt, ...) derror("DmaMap error %s: " fmt, __func__, ##__VA_ARGS__);
 
 namespace android {
 
@@ -56,14 +58,13 @@ DmaMap* DmaMap::set(DmaMap* dmaMap) {
 void DmaMap::addBuffer(void* hwpipe,
                        uint64_t guest_paddr,
                        uint64_t bufferSize) {
-    D("guest paddr 0x%llx bufferSize %llu",
-      (unsigned long long)guest_paddr,
+    D("guest paddr 0x%llx bufferSize %llu", (unsigned long long)guest_paddr,
       (unsigned long long)bufferSize);
     DmaBufferInfo info;
     info.hwpipe = hwpipe;
-    info.guestAddr = guest_paddr; // guest address
-    info.bufferSize = bufferSize; // size of buffer
-    info.currHostAddr = kNullopt; // no current host address
+    info.guestAddr = guest_paddr;  // guest address
+    info.bufferSize = bufferSize;  // size of buffer
+    info.currHostAddr = kNullopt;  // no current host address
     android::base::AutoWriteLock lock(mLock);
     createMappingLocked(&info);
     mDmaBuffers[guest_paddr] = info;
@@ -76,8 +77,7 @@ void DmaMap::removeBuffer(uint64_t guest_paddr) {
         removeMappingLocked(info);
         mDmaBuffers.erase(guest_paddr);
     } else {
-        E("guest addr 0x%llx not alloced!",
-          (unsigned long long)guest_paddr);
+        E("guest addr 0x%llx not alloced!", (unsigned long long)guest_paddr);
     }
 }
 
@@ -87,8 +87,8 @@ void* DmaMap::getHostAddr(uint64_t guest_paddr) {
     if (auto info = android::base::find(mDmaBuffers, guest_paddr)) {
         if (info->currHostAddr) {
             DD("guest paddr 0x%llx -> host 0x%llx valid",
-              (unsigned long long)guest_paddr,
-              (unsigned long long)(*info->currHostAddr));
+               (unsigned long long)guest_paddr,
+               (unsigned long long)(*info->currHostAddr));
             return *(info->currHostAddr);
         } else {
             rlock.unlockRead();
@@ -100,8 +100,7 @@ void* DmaMap::getHostAddr(uint64_t guest_paddr) {
             return *(info->currHostAddr);
         }
     } else {
-        E("guest paddr 0x%llx not alloced!",
-          (unsigned long long)guest_paddr);
+        E("guest paddr 0x%llx not alloced!", (unsigned long long)guest_paddr);
         return 0;
     }
 }
@@ -134,7 +133,7 @@ void DmaMap::createMappingLocked(DmaBufferInfo* info) {
     info->currHostAddr = doMap(info->guestAddr, info->bufferSize);
 }
 
-void DmaMap::removeMappingLocked(DmaBufferInfo* info ) {
+void DmaMap::removeMappingLocked(DmaBufferInfo* info) {
     if (info->currHostAddr) {
         doUnmap(*(info->currHostAddr), info->bufferSize);
         info->currHostAddr = kNullopt;
@@ -151,29 +150,25 @@ void DmaMap::save(android::base::Stream* stream) const {
     saveCollection(stream, mDmaBuffers,
                    [](android::base::Stream* stream,
                       const DmaBufferMap::value_type& v) {
-        stream->putBe64(v.first); // guest paddr
-        stream->putBe32(android_pipe_get_id(v.second.hwpipe));
-        stream->putBe64(v.second.guestAddr); // guest addr
-        stream->putBe64(v.second.bufferSize); // buffer size
-        // don't save current host addr as it is invalidated.
-    });
+                       stream->putBe64(v.first);  // guest paddr
+                       stream->putBe32(android_pipe_get_id(v.second.hwpipe));
+                       stream->putBe64(v.second.guestAddr);   // guest addr
+                       stream->putBe64(v.second.bufferSize);  // buffer size
+                       // don't save current host addr as it is invalidated.
+                   });
 }
 
 void DmaMap::load(android::base::Stream* stream) {
     mDmaBuffers.clear();
-    loadCollection(stream, &mDmaBuffers,
-                   [](android::base::Stream* stream) {
+    loadCollection(stream, &mDmaBuffers, [](android::base::Stream* stream) {
         uint64_t gpa = stream->getBe64();
 
         DmaBufferInfo info;
         info.hwpipe = android_pipe_lookup_by_id(stream->getBe32()),
-        info.guestAddr = stream->getBe64(),
-        info.bufferSize = stream->getBe64(),
+        info.guestAddr = stream->getBe64(), info.bufferSize = stream->getBe64(),
         info.currHostAddr = kNullopt;
         return std::make_pair(gpa, info);
     });
 }
 
 }  // namespace android
-
-

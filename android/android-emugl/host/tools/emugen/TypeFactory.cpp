@@ -14,7 +14,6 @@
 * limitations under the License.
 */
 #include "TypeFactory.h"
-#include "android/utils/file_io.h"
 #include "Parser.h"
 #include "VarType.h"
 #include "strUtils.h"

@@ -15,6 +15,7 @@
 
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/logging/CLog.h"
 #include "android/utils/path.h"
 
 #include <string>

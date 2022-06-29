@@ -30,7 +30,7 @@
 #include "android/base/sockets/SocketUtils.h"   // for socketTcp4LoopbackClient
 #include "android/base/system/System.h"         // for System, System::Pid
 #include "android/emulation/ConfigDirs.h"       // for ConfigDirs
-#include "android/utils/log_severity.h"         // for EMULATOR_LOG_INFO
+#include "android/base/logging/LogSeverity.h"
 
 namespace android {
 namespace emulation {

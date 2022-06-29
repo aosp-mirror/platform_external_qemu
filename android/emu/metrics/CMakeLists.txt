@@ -50,7 +50,8 @@ endif()
 
 target_link_libraries(
   android-emu-metrics
-  PRIVATE android-emu-base
+  PRIVATE absl::memory
+          android-emu-base
           android-emu-avd
           android-emu-utils
           android-emu-cmdline

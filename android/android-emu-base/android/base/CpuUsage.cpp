@@ -13,18 +13,18 @@
 // limitations under the License.
 #include "android/base/CpuUsage.h"
 
+#include <stdio.h>
+#include <array>
+#include <iomanip>
+#include <sstream>
+
 #include "android/base/async/Looper.h"
+#include "android/base/logging/CLog.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
-
-#include <array>
-#include <iomanip>
-#include <sstream>
-
-#include <stdio.h>
 
 namespace android {
 namespace base {
@@ -56,17 +56,15 @@ public:
         mWorkerThread.wait();
     }
 
-    ~Impl() {
-        stop();
-    }
+    ~Impl() { stop(); }
 
     void addLooper(int usageArea, Looper* looper) {
-        if (usageArea >= mMeasurements.size()) return;
+        if (usageArea >= mMeasurements.size())
+            return;
 
         AutoLock lock(mLock);
         mMeasurements[usageArea].looper = looper;
-        mMeasurements[usageArea].task =
-            looper->createTask(
+        mMeasurements[usageArea].task = looper->createTask(
                 [this, usageArea] { doMeasurement(usageArea); });
     }
 
@@ -83,22 +81,23 @@ public:
     void forEachMeasurement(int start, int end, CpuUsage::CpuTimeReader func) {
         AutoLock lock(mLock);
         for (int i = start; i < end; ++i) {
-            if (!mMeasurements[i].looper) return;
+            if (!mMeasurements[i].looper)
+                return;
             func(mMeasurements[i].lastMeasurement);
         }
     }
 
     float getSingleAreaUsage(int usageArea) {
-
-        if (usageArea < 0 || usageArea >= CpuUsage::UsageArea::Max) return 0.0f;
+        if (usageArea < 0 || usageArea >= CpuUsage::UsageArea::Max)
+            return 0.0f;
 
         AutoLock lock(mLock);
-        if (!mMeasurements[usageArea].looper) return 0.0f;
+        if (!mMeasurements[usageArea].looper)
+            return 0.0f;
         return mMeasurements[usageArea].lastMeasurement.usage();
     }
 
 private:
-
     void doMeasurement(int usageArea) {
         auto& prevTime = mMeasurements[usageArea].cpuTime;
         auto& lastMeasurement = mMeasurements[usageArea].lastMeasurement;
@@ -127,7 +126,8 @@ private:
                 continue;
 
             for (auto& m : mMeasurements) {
-                if (!m.looper) continue;
+                if (!m.looper)
+                    continue;
                 m.task->schedule();
             }
         }
@@ -141,7 +141,7 @@ private:
     Lock mLock;
 };
 
-CpuUsage::CpuUsage() : mImpl(new CpuUsage::Impl()) { }
+CpuUsage::CpuUsage() : mImpl(new CpuUsage::Impl()) {}
 
 void CpuUsage::addLooper(int usageArea, Looper* looper) {
     mImpl->addLooper(usageArea, looper);
@@ -159,13 +159,17 @@ void CpuUsage::forEachUsage(UsageArea area, CpuTimeReader readerFunc) {
     int start;
 
     if (area >= UsageArea::MainLoop && area < UsageArea::Vcpu) {
-        mImpl->forEachMeasurement(UsageArea::MainLoop, UsageArea::Vcpu, readerFunc);
+        mImpl->forEachMeasurement(UsageArea::MainLoop, UsageArea::Vcpu,
+                                  readerFunc);
     } else if (area >= UsageArea::Vcpu && area < UsageArea::RenderThreads) {
-        mImpl->forEachMeasurement(UsageArea::Vcpu, UsageArea::RenderThreads, readerFunc);
+        mImpl->forEachMeasurement(UsageArea::Vcpu, UsageArea::RenderThreads,
+                                  readerFunc);
     } else if (area >= UsageArea::RenderThreads && area < UsageArea::Max) {
-        mImpl->forEachMeasurement(UsageArea::RenderThreads, UsageArea::Max, readerFunc);
+        mImpl->forEachMeasurement(UsageArea::RenderThreads, UsageArea::Max,
+                                  readerFunc);
     } else {
-        dwarning("%s: warning: invalid usage area %d detected.", __func__, area);
+        dwarning("%s: warning: invalid usage area %d detected.", __func__,
+                 area);
     }
 }
 
@@ -175,17 +179,13 @@ float CpuUsage::getSingleAreaUsage(int area) {
 
 float CpuUsage::getTotalMainLoopAndVcpuUsage() {
     float total = 0.0f;
-    forEachUsage(
-        UsageArea::MainLoop,
-        [&total](const CpuTime& cpuTime) {
-            total += cpuTime.usage();
-        });
+    forEachUsage(UsageArea::MainLoop, [&total](const CpuTime& cpuTime) {
+        total += cpuTime.usage();
+    });
 
-    forEachUsage(
-        UsageArea::Vcpu,
-        [&total](const CpuTime& cpuTime) {
-            total += cpuTime.usage();
-        });
+    forEachUsage(UsageArea::Vcpu, [&total](const CpuTime& cpuTime) {
+        total += cpuTime.usage();
+    });
 
     return total;
 }
@@ -195,20 +195,18 @@ std::string CpuUsage::printUsage() {
     std::vector<float> vcpuUsages;
     float total = 0.0f;
 
-    forEachUsage(
-        CpuUsage::UsageArea::MainLoop,
-        [&total, &mainLoopUsage](const CpuTime& cputime) {
-        mainLoopUsage = cputime.usage();
-        total += mainLoopUsage;
-    });
+    forEachUsage(CpuUsage::UsageArea::MainLoop,
+                 [&total, &mainLoopUsage](const CpuTime& cputime) {
+                     mainLoopUsage = cputime.usage();
+                     total += mainLoopUsage;
+                 });
 
-    forEachUsage(
-        CpuUsage::UsageArea::Vcpu,
-        [&total, &vcpuUsages](const CpuTime& cputime) {
-        auto usage = cputime.usage();
-        vcpuUsages.push_back(usage);
-        total += usage;
-    });
+    forEachUsage(CpuUsage::UsageArea::Vcpu,
+                 [&total, &vcpuUsages](const CpuTime& cputime) {
+                     auto usage = cputime.usage();
+                     vcpuUsages.push_back(usage);
+                     total += usage;
+                 });
 
     std::stringstream ss;
     ss << "cpu: ";
@@ -218,7 +216,8 @@ std::string CpuUsage::printUsage() {
     for (auto usage : vcpuUsages) {
         ss << std::fixed << std::setprecision(2) << usage * 100.0f << "% ";
     }
-    ss << "total: " << std::fixed << std::setprecision(2) << total * 100.0f << "%";
+    ss << "total: " << std::fixed << std::setprecision(2) << total * 100.0f
+       << "%";
 
     return ss.str();
 }
@@ -234,5 +233,5 @@ CpuUsage* CpuUsage::get() {
     return sCpuUsage.ptr();
 }
 
-} // namespace android
-} // namespace base
+}  // namespace base
+}  // namespace android

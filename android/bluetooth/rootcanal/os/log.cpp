@@ -18,10 +18,10 @@
 #include <memory>                          // for allocator
 #include <string>                          // for operator+, to_string, basi...
 
-#include "android/base/LogFormatter.h"     // for VerboseLogFormatter
-#include "android/base/files/PathUtils.h"  // for pj
-#include "android/base/system/System.h"    // for System
-#include "android/utils/path.h"            // for path_mkdir_if_needed
+#include "android/base/logging/LogFormatter.h" // for VerboseLogFormatter
+#include "android/base/files/PathUtils.h"      // for pj
+#include "android/base/system/System.h"        // for System
+#include "android/utils/path.h"                // for path_mkdir_if_needed
 
 static constexpr std::string_view BLUETOOTH_LOG{"bluetooth"};
 using android::base::System;

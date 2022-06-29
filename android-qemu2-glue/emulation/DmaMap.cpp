@@ -17,7 +17,7 @@ extern "C" {
 }
 #endif
 #include "android/base/containers/Lookup.h"
-
+#include "android/base/logging/CLog.h"
 #include "android-qemu2-glue/emulation/DmaMap.h"
 
 #include <type_traits>

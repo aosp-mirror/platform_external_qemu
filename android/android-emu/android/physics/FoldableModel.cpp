@@ -20,7 +20,9 @@
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/avd/hw-config.h"
+#include "android/base/logging/CLog.h"
 #include "android/console.h"
+#include "android/utils/debug.h"
 
 #define D(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)

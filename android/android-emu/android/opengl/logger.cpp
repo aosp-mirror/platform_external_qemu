@@ -11,6 +11,7 @@
 
 #include "android/opengl/logger.h"
 
+#include "android/base/logging/CLog.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"

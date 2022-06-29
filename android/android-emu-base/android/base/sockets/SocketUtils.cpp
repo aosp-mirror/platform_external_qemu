@@ -17,6 +17,7 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketErrors.h"
 #include "android/base/system/System.h"
+#include "android/utils/debug.h"
 #include "android/utils/sockets.h"
 #include "android/utils/system.h"
 

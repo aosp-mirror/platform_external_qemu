@@ -15,7 +15,8 @@ android_add_library(
   WINDOWS android/opengl/NativeGpuInfo_windows.cpp android/windows_installer.cpp
   LINUX android/opengl/NativeGpuInfo_linux.cpp
   DARWIN android/opengl/macTouchOpenGL.m android/opengl/NativeGpuInfo_darwin.cpp
-  DEPS android-emu-agents
+  DEPS absl::strings
+       android-emu-agents
        android-emu-avd
        android-emu-base
        android-emu-cmdline

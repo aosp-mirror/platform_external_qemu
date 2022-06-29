@@ -15,7 +15,7 @@
 #include "VulkanDispatch.h"
 
 #include "android/base/files/PathUtils.h"
-#include "android/base/Log.h"
+#include "android/base/logging/CLog.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/base/synchronization/Lock.h"

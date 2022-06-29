@@ -8,15 +8,13 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/LogFormatter.h"
+#include "android/base/logging/LogFormatter.h"
 
-#include <gtest/gtest.h>  // for Message, TestPartResult, Sui...
-#include <regex>          // for regex_match, match_results
-#include <string>         // for string
-#include <memory>
+#include <regex>                               // for regex_match, match_res...
 
-#include "android/utils/log_severity.h"  // for EMULATOR_LOG_INFO, EMULATOR_...
-
+#include "android/base/logging/LogSeverity.h"  // for LogSeverity, EMULATOR_...
+#include "gtest/gtest.h"                       // for Message
+  
 namespace android {
 namespace base {
 
@@ -165,7 +163,6 @@ TEST(LogFormatter, DuplicatTripleWithDiffLocationLogsALine) {
             "INFO    | x",
             ndlf.LogFormatter::format(lg2, "x"));
 }
-
 
 }  // namespace base
 }  // namespace android

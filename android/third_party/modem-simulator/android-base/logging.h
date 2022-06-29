@@ -21,4 +21,5 @@
 // confused the compiler to deduce LOG_ERROR to LOG_0 and fail
 #undef ERROR
 #endif
-#include "android/base/Log.h"
+#include "android/base/logging/CLog.h"
+#include "android/base/logging/Log.h"

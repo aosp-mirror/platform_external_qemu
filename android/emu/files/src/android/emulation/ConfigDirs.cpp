@@ -14,22 +14,20 @@
 
 #include "android/emulation/ConfigDirs.h"
 
+#include <unistd.h>   // for getuid
 #include <algorithm>  // for max
 #include <cassert>    // for assert
 #include <cerrno>     // for errno
 #include <cstdio>     // for printf
 #include <cstring>    // for strerror
 #include <ostream>    // for operator<<, basic_ost...
-#include <unistd.h>   // for getuid
 #include <vector>     // for vector
 
-#include "android/base/Log.h"                   // for LOG, LogMessage
 #include "android/base/files/PathUtils.h"       // for PathUtils, pj
+#include "android/base/logging/CLog.h"          // for LOG, LogMessage
 #include "android/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
 #include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
 #include "android/base/system/System.h"         // for System
-#include "android/utils/debug.h"                // for dwarning
-#include "android/utils/log_severity.h"         // for EMULATOR_LOG_ERROR
 #include "android/utils/path.h"                 // for path_mkdir_if_needed
 
 namespace android {
@@ -148,7 +146,7 @@ auto ConfigDirs::getSdkRootDirectoryByEnv(bool verbose) -> std::string {
     auto* system = System::get();
 
     if (verbose) {
-        printf("emulator: INFO: checking ANDROID_HOME for valid sdk root...\n");
+        dinfo("checking ANDROID_HOME for valid sdk root.");
     }
     std::string sdkRoot = system->envGet("ANDROID_HOME");
     if ((static_cast<unsigned int>(!sdkRoot.empty()) != 0U) &&
@@ -157,8 +155,7 @@ auto ConfigDirs::getSdkRootDirectoryByEnv(bool verbose) -> std::string {
     }
 
     if (verbose) {
-        printf("emulator: INFO: checking ANDROID_SDK_ROOT for valid sdk "
-               "root...\n");
+        dinfo("checking ANDROID_SDK_ROOT for valid sdk root.");
     }
     // ANDROID_HOME is not good. Try ANDROID_SDK_ROOT.
     sdkRoot = system->envGet("ANDROID_SDK_ROOT");
@@ -173,7 +170,7 @@ auto ConfigDirs::getSdkRootDirectoryByEnv(bool verbose) -> std::string {
             return sdkRoot;
         }
     } else if (verbose) {
-        printf("emulator: WARN: ANDROID_SDK_ROOT is missing.\n");
+        dwarning("ANDROID_SDK_ROOT is missing.");
     }
 
     return {};
@@ -242,18 +239,20 @@ auto ConfigDirs::isValidSdkRoot(const std::string& rootPath, bool verbose)
     std::string platformsPath = PathUtils::join(rootPath, "platforms");
     if (!system->pathIsDir(platformsPath)) {
         if (verbose) {
-            printf("emulator: WARN: platforms subdirectory is missing under "
-                   "%s, please install it\n",
-                   rootPath.c_str());
+            dwarning(
+                    "platforms subdirectory is missing under "
+                    "%s, please install it",
+                    rootPath.c_str());
         }
         return false;
     }
     std::string platformToolsPath = PathUtils::join(rootPath, "platform-tools");
     if (!system->pathIsDir(platformToolsPath)) {
         if (verbose) {
-            printf("emulator: WARN: platform-tools subdirectory is missing "
-                   "under %s, please install it\n",
-                   rootPath.c_str());
+            dwarning(
+                    "platform-tools subdirectory is missing "
+                    "under %s, please install it",
+                    rootPath.c_str());
         }
         return false;
     }
@@ -343,8 +342,8 @@ auto ConfigDirs::getDiscoveryDirectory() -> std::string {
     auto recomposed = PathUtils::recompose(path);
     if (!System::get()->pathExists(recomposed)) {
         if (path_mkdir_if_needed(recomposed.c_str(), 0700) == -1) {
-            LOG(ERROR) << "Unable to create " << recomposed << " due to "
-                       << errno << ": " << strerror(errno);
+            dinfo("Unable to create %s due to %d: %s", recomposed.c_str(),
+                  errno, strerror(errno));
         }
     }
     return recomposed;

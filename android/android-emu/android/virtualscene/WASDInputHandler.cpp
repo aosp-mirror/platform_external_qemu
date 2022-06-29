@@ -14,6 +14,7 @@
 
 #include "android/virtualscene/WASDInputHandler.h"
 #include "android/base/Log.h"
+#include "android/utils/debug.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/physics/PhysicalModel.h"
 

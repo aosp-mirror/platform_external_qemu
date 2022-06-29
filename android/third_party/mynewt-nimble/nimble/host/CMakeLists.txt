@@ -89,10 +89,10 @@ android_add_library(
       src/ble_uuid.c
       # src/ble_gatts_lcl.c # needs console
 )
-target_link_libraries(_nimble_host_layer PRIVATE _nimble_os_abstraction_headers
-                                                 _nimble_os_abstraction
-                                                 _nimble_os_impl
-                                                 _nimble_tinycrypt)
+target_link_libraries(
+  _nimble_host_layer
+  PRIVATE _nimble_os_abstraction_headers _nimble_os_abstraction _nimble_os_impl
+          _nimble_tinycrypt PUBLIC android-emu-base-logging)
 target_include_directories(_nimble_host_layer PUBLIC include PRIVATE .)
 target_compile_options(
   _nimble_host_layer PRIVATE -Wno-implicit-function-declaration
@@ -101,4 +101,3 @@ target_compile_options(
 add_subdirectory(util)
 add_subdirectory(store)
 add_subdirectory(services)
-

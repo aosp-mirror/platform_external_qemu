@@ -9,6 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/utils/debug.h"
 #include "android/utils/file_io.h"
 #include "android/base/files/Fd.h"
 #include "android/base/memory/ScopedPtr.h"

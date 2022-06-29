@@ -9,20 +9,17 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Log.h"
+#include "android/base/logging/Log.h"
 
-#include <stdarg.h>  // for va_end, va_list, va_start
-#include <stdio.h>   // for size_t, fflush, vsnprintf
-#include <stdlib.h>  // for abort
-#include <string.h>  // for memcpy, strerror
-#include <memory>    // for make_unique, unique_ptr
+#include <stdarg.h>                             // for va_end, va_start
+#include <stdio.h>                              // for size_t, fflush, vsnpr...
+#include <string.h>                             // for memcpy, strerror
+#include <cstdlib>                              // for abort
+#include <string_view>                          // for string_view
 
-#include "absl/strings/str_format.h"    // for FPrintF
-#include "android/base/ArraySize.h"     // for arraySize
-#include "android/base/Debug.h"         // for DebugBreak, IsDebuggerAttached
-#include "android/base/LogFormatter.h"  // for SimpleLogFormatter, LogFormatter
-#include "android/base/StringView.h"    // for StringView
-#include "android/utils/debug.h"        // for __emu_log_print
+#include "absl/strings/str_format.h"            // for FPrintF
+#include "android/base/logging/CLog.h"          // for __emu_log_print
+#include "android/base/logging/LogFormatter.h"  // for SimpleLogFormatter
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
@@ -36,7 +33,7 @@ namespace base {
 namespace {
 
 // The current log output.
-testing::LogOutput* gLogOutput = NULL;
+testing::LogOutput* gLogOutput = nullptr;
 
 bool gDcheckLevel = false;
 LogSeverity gMinLogLevel = EMULATOR_LOG_INFO;
@@ -66,9 +63,6 @@ extern "C" void __emu_log_print(LogSeverity prio,
 
     if (prio >= LOG_SEVERITY_FROM(FATAL)) {
         fflush(stderr);
-        if (android::base::IsDebuggerAttached()) {
-            android::base::DebugBreak();
-        }
         std::abort();
     }
 }
@@ -122,8 +116,9 @@ LogString::LogString(const char* fmt, ...) {
         va_start(args, fmt);
         int ret = vsnprintf(mString.data(), capacity, fmt, args);
         va_end(args);
-        if (ret >= 0 && size_t(ret) < capacity)
+        if (ret >= 0 && static_cast<size_t>(ret) < capacity) {
             break;
+}
         capacity *= 2;
     }
 }
@@ -143,7 +138,7 @@ std::ostream& operator<<(std::ostream& stream,
 }
 
 std::ostream& operator<<(std::ostream& stream,
-                         const android::base::StringView& str) {
+                         const std::string_view& str) {
     if (!str.empty()) {
         stream.write(str.data(), str.size());
     }
@@ -151,7 +146,7 @@ std::ostream& operator<<(std::ostream& stream,
 }
 
 LogstreamBuf::LogstreamBuf() {
-    setp(mStr, mStr + arraySize(mStr));
+    setp(mStr, mStr + sizeof(mStr));
 }
 
 size_t LogstreamBuf::size() {
@@ -164,8 +159,8 @@ int LogstreamBuf::overflow(int c) {
         // a really long line. We now transfer ownership of the buffer to a
         // std::vector that will manage allocation. We resize to 2x size of our
         // current size.
-        mLongString.resize(arraySize(mStr) * 2);
-        memcpy(&mLongString[0], &mStr[0], arraySize(mStr));
+        mLongString.resize(sizeof(mStr) * 2);
+        memcpy(&mLongString[0], &mStr[0], sizeof(mStr));
     } else {
         // Case 2: The std::vector is already managing the buffer, but the
         // current log line no longer fits. We are going to resize the vector.
