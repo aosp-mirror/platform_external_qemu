@@ -25,7 +25,6 @@ android_add_library(
       android/base/async/ScopedSocketWatch.cpp
       android/base/async/ThreadLooper.cpp
       android/base/Backtrace.cpp
-      android/base/ContiguousRangeMapper.cpp
       android/base/CpuTime.cpp
       android/base/CpuUsage.cpp
       android/base/Debug.cpp
@@ -47,9 +46,6 @@ android_add_library(
       android/base/GLObjectCounter.cpp
       android/base/IOVector.cpp
       android/base/JsonWriter.cpp
-      android/base/memory/LazyInstance.cpp
-      android/base/memory/MemoryHints.cpp
-      android/base/memory/MemoryTracker.cpp
       android/base/misc/FileUtils.cpp
       android/base/misc/HttpUtils.cpp
       android/base/misc/IpcPipe.cpp
@@ -102,15 +98,12 @@ android_add_library(
       android/utils/tempfile.c
       android/utils/x86_cpuid.cpp
   LINUX android/base/files/FileSystemWatcherPosix.cpp
-        android/base/memory/SharedMemory_posix.cpp
         android/base/threads/Thread_pthread.cpp
   DARWIN android/base/files/FileSystemWatcherDarwin.cpp
-         android/base/memory/SharedMemory_posix.cpp
          android/base/system/system-native-mac.mm
          android/base/threads/Thread_pthread.cpp
   WINDOWS android/base/files/FileSystemWatcherWindows.cpp
           android/base/files/preadwrite.cpp
-          android/base/memory/SharedMemory_win32.cpp
           android/base/system/Win32UnicodeString.cpp
           android/base/system/Win32Utils.cpp
           android/base/threads/Thread_win32.cpp
@@ -128,8 +121,10 @@ target_include_directories(android-emu-base
 
 # Library dependencies, these are public so they will propagate, if you link
 # against the base you will link against LZ4 & UUID
-target_link_libraries(android-emu-base PRIVATE lz4 UUID::UUID
-                      PUBLIC Threads::Threads android-emu-base-logging zlib)
+target_link_libraries(
+  android-emu-base PRIVATE lz4 UUID::UUID
+  PUBLIC Threads::Threads android-emu-base-logging zlib android-emu-general-headers
+         android-emu-base-memory)
 
 if(OPTION_TCMALLOC)
   android_target_link_libraries(
@@ -199,7 +194,6 @@ android_add_test(
       android/base/containers/Lookup_unittest.cpp
       android/base/containers/SmallVector_unittest.cpp
       android/base/containers/StaticMap_unittest.cpp
-      android/base/ContiguousRangeMapper_unittest.cpp
       android/base/EintrWrapper_unittest.cpp
       android/base/EventNotificationSupport_unittest.cpp
       android/base/files/FileShareOpen_unittest.cpp
@@ -216,12 +210,6 @@ android_add_test(
       android/base/files/TarStream_unittest.cpp
       android/base/FunctionView_unittest.cpp
       android/base/JsonWriter_unittest.cpp
-      android/base/memory/LazyInstance_unittest.cpp
-      android/base/memory/MallocUsableSize_unittest.cpp
-      android/base/memory/MemoryHints_unittest.cpp
-      android/base/memory/OnDemand_unittest.cpp
-      android/base/memory/ScopedPtr_unittest.cpp
-      android/base/memory/SharedMemory_unittest.cpp
       android/base/misc/FileUtils_unittest.cpp
       android/base/misc/HttpUtils_unittest.cpp
       android/base/misc/IpcPipe_unittest.cpp

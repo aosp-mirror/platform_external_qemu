@@ -13,7 +13,7 @@
 
 #include "android/avd/info.h"
 #include "android/base/ArraySize.h"
-#include "android/base/ContiguousRangeMapper.h"
+#include "android/base/memory/ContiguousRangeMapper.h"
 #include "android/base/EintrWrapper.h"
 #include "android/base/Profiler.h"
 #include "android/base/Stopwatch.h"

@@ -12,16 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/Compiler.h"
-#include "android/base/ContiguousRangeMapper.h"
-#include "android/base/memory/LazyInstance.h"
+#include <string.h>    // for memset
+#include <algorithm>   // for min
+#include <cstdint>     // for uint8_t
+#include <functional>  // for __base
+#include <vector>      // for vector
+
+#include "android/base/memory/ContiguousRangeMapper.h"  // for ContiguousRan...
+#include "android/base/memory/LazyInstance.h"           // for LazyInstance
 #include "android/base/memory/MemoryHints.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
 
 #ifndef _WIN32
-#include <sys/mman.h>
-#include <sys/types.h>
+#include <sys/mman.h>  // for mprotect, mad...
+#else
+#include <windows.h>
 #endif
 
 #if defined(__APPLE__) && defined(__arm64__)
@@ -31,7 +35,6 @@
 #define DISABLE_DONTNEED 0
 #endif
 
-using android::base::ContiguousRangeMapper;
 using android::base::LazyInstance;
 
 namespace android {
@@ -49,10 +52,7 @@ static constexpr size_t kPageSize = 4096;
 
 class MemoryTouchBuffer {
 public:
-
-    MemoryTouchBuffer() {
-        mBuffer.resize(1);
-    }
+    MemoryTouchBuffer() { mBuffer.resize(1); }
 
     uint8_t* ptr() { return mBuffer.data(); }
 
@@ -66,60 +66,60 @@ static LazyInstance<MemoryTouchBuffer> sTouchBuffer = LAZY_INSTANCE_INIT;
 // The method is to explicity copy the memory to a staging buffer.
 //
 // It might be slow, but it has advantages for being portable
-// across different platforms, and it doesn't rely as much on implementation specific details
-// of memmove / memcpy / rep movsb;
+// across different platforms, and it doesn't rely as much on implementation
+// specific details of memmove / memcpy / rep movsb;
 //
 // Even if we go with asm and rep movsb to/from the same address, it could get
 // skipped as a no-op as far as paging is concerned.
 static void rewriteMemory(void* toRewrite, uint64_t length) {
+    ContiguousRangeMapper rewriter(
+            [](uintptr_t start, uintptr_t size) {
+                volatile uint8_t* staging = sTouchBuffer->ptr();
+                *staging = *(uint8_t*)start;
+            },
+            kPageSize);
 
-    ContiguousRangeMapper rewriter([](uintptr_t start, uintptr_t size) {
-        volatile uint8_t* staging = sTouchBuffer->ptr();
-        *staging = *(uint8_t*)start;
-    }, kPageSize);
-
-    uint8_t* start = (uint8_t*)toRewrite;
+    uint8_t* start = static_cast<uint8_t*>(toRewrite);
 
     for (uint64_t i = 0; i < length; i += kPageSize) {
-        rewriter.add(
-            (uintptr_t)start + i,
-            std::min(length - i, (uint64_t)kPageSize));
+        rewriter.add((uintptr_t)start + i,
+                     std::min(length - i, static_cast<uint64_t>(kPageSize)));
     }
 }
 
 bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
 #ifdef _WIN32
     switch (hint) {
-    case MemoryHint::DontNeed:
-    case MemoryHint::PageOut:
-        // https://blogs.msdn.microsoft.com/oldnewthing/20170113-00/?p=95185
-        // "Around the Windows NT 4 era, a new trick arrived on the scene: You
-        // could VirtualUnlock memory that was already unlocked in order to
-        // remove it from your working set. This was a trick, because it took
-        // what used to be a programming error and gave it additional meaning,
-        // but in a way that didn't break backward compatibility because the
-        // contractual behavior of the memory did not change: The contents of
-        // the memory remain valid and the program is still free to access it
-        // at any time. The new behavior is that unlocking unlocked memory also
-        // takes it out of the process's working set, so that it becomes a
-        // prime candidate for being paged out and used to satisfy another
-        // memory allocation."
-        VirtualUnlock(start, length);
-        VirtualUnlock(start, length);
-        return true;
-    case MemoryHint::Touch:
-        rewriteMemory(start, length);
-        return true;
-    case MemoryHint::Normal:
-        return true;
-    // TODO: Find some way to implement those on Windows
-    case MemoryHint::Random:
-    case MemoryHint::Sequential:
-        return true;
-    default:
-        return true;
+        case MemoryHint::DontNeed:
+        case MemoryHint::PageOut:
+            // https://blogs.msdn.microsoft.com/oldnewthing/20170113-00/?p=95185
+            // "Around the Windows NT 4 era, a new trick arrived on the scene:
+            // You could VirtualUnlock memory that was already unlocked in order
+            // to remove it from your working set. This was a trick, because it
+            // took what used to be a programming error and gave it additional
+            // meaning, but in a way that didn't break backward compatibility
+            // because the contractual behavior of the memory did not change:
+            // The contents of the memory remain valid and the program is still
+            // free to access it at any time. The new behavior is that unlocking
+            // unlocked memory also takes it out of the process's working set,
+            // so that it becomes a prime candidate for being paged out and used
+            // to satisfy another memory allocation."
+            VirtualUnlock(start, length);
+            VirtualUnlock(start, length);
+            return true;
+        case MemoryHint::Touch:
+            rewriteMemory(start, length);
+            return true;
+        case MemoryHint::Normal:
+            return true;
+        // TODO: Find some way to implement those on Windows
+        case MemoryHint::Random:
+        case MemoryHint::Sequential:
+            return true;
+        default:
+            return true;
     }
-#else // macOS and Linux
+#else  // macOS and Linux
 
     int asAdviseFlag = MADV_NORMAL;
     bool reprotect = false;
@@ -134,14 +134,15 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
             reprotect = false;
 #else
             asAdviseFlag = MADV_FREE;
-            // On Mac, an explicit mprotect() needs to happen to kick the page out.
+            // On Mac, an explicit mprotect() needs to happen to kick the page
+            // out.
             reprotect = true;
-#endif // __APPLE__
-#else // Linux
-            // MADV_FREE would be best, but it is not necessarily
-            // supported on all Linux systems.
+#endif  // __APPLE__
+#else   // Linux
+        // MADV_FREE would be best, but it is not necessarily
+        // supported on all Linux systems.
             asAdviseFlag = MADV_DONTNEED;
-#endif // __APPLE__
+#endif  // __APPLE__
             break;
         case MemoryHint::PageOut:
             // MADV_DONTNEED / MADV_FREE change the semantics of the memory,
@@ -179,7 +180,7 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
     }
 
     return res == 0;
-#endif // _WIN32
+#endif  // _WIN32
 }
 
 bool zeroOutMemory(void* start, uint64_t length) {
@@ -188,5 +189,5 @@ bool zeroOutMemory(void* start, uint64_t length) {
            memoryHint(start, length, MemoryHint::Normal);
 }
 
-} // namespace base
-} // namespace android
+}  // namespace base
+}  // namespace android

@@ -11,7 +11,7 @@
 
 #include "android/snapshot/MemoryWatch.h"
 
-#include "android/base/ContiguousRangeMapper.h"
+#include "android/base/memory/ContiguousRangeMapper.h"
 #include "android/base/memory/MemoryHints.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"

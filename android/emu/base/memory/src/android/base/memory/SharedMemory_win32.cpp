@@ -20,8 +20,8 @@
 namespace android {
 namespace base {
 
-SharedMemory::SharedMemory(StringView name, size_t size) : mSize(size) {
-    constexpr StringView kFileUri = "file://";
+SharedMemory::SharedMemory(std::string_view name, size_t size) : mSize(size) {
+    constexpr std::string_view kFileUri = "file://";
     if (name.find(kFileUri, 0) == 0) {
         // Convert URI to path using win32 api.
         const Win32UnicodeString srcUri(name);
@@ -34,7 +34,7 @@ SharedMemory::SharedMemory(StringView name, size_t size) : mSize(size) {
         mShareType = ShareType::FILE_BACKED;
     } else {
         mShareType = ShareType::SHARED_MEMORY;
-        mName = "SHM_" + name.str();
+        mName = std::string("SHM_") + std::string(name);
     }
 }
 

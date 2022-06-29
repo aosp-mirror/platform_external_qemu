@@ -18,14 +18,14 @@ if(NOT TARGET gmock_main)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest googletest)
   # Okay, google test is not happy under msvc
   android_target_compile_definitions(
-    gmock_main windows_msvc-x86_64 PUBLIC
-    -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+    gmock_main windows_msvc-x86_64
+    PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
   android_target_compile_definitions(
-    gmock windows_msvc-x86_64 PUBLIC
-    -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+    gmock windows_msvc-x86_64
+    PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
   android_target_compile_definitions(
-    gtest windows_msvc-x86_64 PUBLIC
-    -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+    gtest windows_msvc-x86_64
+    PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
   enable_testing()
 endif()
 

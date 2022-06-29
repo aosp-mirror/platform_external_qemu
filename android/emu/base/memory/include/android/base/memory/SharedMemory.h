@@ -10,8 +10,8 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "android/base/StringView.h"
-
+#include <string_view>
+#include <string>
 #ifdef _WIN32
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -20,7 +20,6 @@
 #endif  // _MSC_VER
 #endif  // _WIN32
 
-using android::base::StringView;
 
 namespace android {
 
@@ -38,7 +37,7 @@ namespace base {
 //
 // Usage examples:
 // Proc1: The owner
-//    StringView message = "Hello world!";
+//    std::string_view message = "Hello world!";
 //    SharedMemory writer("foo", 4096);
 //    writer.create(0600);
 //    memcpy(*writer, message.c_str(), message.size());
@@ -46,12 +45,12 @@ namespace base {
 // Proc2: The observer
 //    SharedMemory reader("foo", 4096);
 //    reader.open(SharedMemory::AccessMode::READ_ONLY);
-//    StringView read((const char*) *reader));
+//    std::string_view read((const char*) *reader));
 //
 // Using file backed ram:
 //
 // Proc1: The owner
-//    StringView message = "Hello world!";
+//    std::string_view message = "Hello world!";
 //    SharedMemory writer("file:///abs/path/to/a/file", 4096);
 //    writer.create(0600);
 //    memcpy(*writer, message.c_str(), message.size());
@@ -59,7 +58,7 @@ namespace base {
 // Proc2: The observer
 //    SharedMemory reader("file::///abs/path/to/a/file", 4096);
 //    reader.open(SharedMemory::AccessMode::READ_ONLY);
-//    StringView read((const char*) *reader));
+//    std::string_view read((const char*) *reader));
 //
 //   It is not possible to find out the size of an in memory shared region on
 //   Win32 (boo!), there are undocumented workaround (See:
@@ -156,7 +155,7 @@ public:
     // |uriHandle| A file:// uri or handle
     // |size| Size of the desired shared memory region. Cannot change after
     // creation.
-    SharedMemory(const StringView uriOrHandle, size_t size);
+    SharedMemory(const std::string_view uriOrHandle, size_t size);
     ~SharedMemory() { close(); }
 
     SharedMemory(SharedMemory&& other) {
@@ -202,7 +201,7 @@ public:
     void close(bool forceDestroy = false);
 
     size_t size() const { return mSize; }
-    StringView name() const { return mName; }
+    std::string_view name() const { return mName; }
     memory_type get() const { return mAddr; }
     memory_type operator*() const { return get(); }
     ShareType type() const { return mShareType; }
