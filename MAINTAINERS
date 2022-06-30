@@ -2444,6 +2444,12 @@ S: Maintained
 F: hw/i2c/i2c_mux_pca954x.c
 F: include/hw/i2c/i2c_mux_pca954x.h
 
+cmis
+M: Hao Wu <wuhaotsh@google.com>
+S: Maintained
+F: hw/i2c/cmis.c
+F: include/hw/i2c/cmis.h
+
 DesignWare I2C
 M: Chris Rauer <crauer@google.com>
 S: Maintained

@@ -53,3 +53,7 @@ config PCA_I2C_GPIO
 config PMBUS
     bool
     select SMBUS
+
+config CMIS
+    bool
+    select I2C
