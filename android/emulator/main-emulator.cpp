@@ -397,6 +397,9 @@ int main(int argc, char** argv) {
             }
         }
     }
+    System::get()->envSet(
+            "ANDROID_EMULATOR_WRAPPER_PID",
+            std::to_string(System::get()->getCurrentProcessId()).c_str());
 
     if (qemu_top_dir) {
         char mybuf[1024];

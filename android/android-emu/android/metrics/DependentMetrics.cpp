@@ -624,6 +624,13 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
                 ->mutable_used_features()
                 ->set_launch_type(android_studio::EmulatorFeatures::FUCHSIA);
     }
+
+    // Set the emulator.exe pid as well as the qemu-*.pid.
+    // They are usually the same on Linux, but different on Windows.
+    event->mutable_emulator_details()->set_emu_pid(atoi(
+            System::get()->envGet("ANDROID_EMULATOR_WRAPPER_PID").c_str()));
+    event->mutable_emulator_details()->set_qemu_pid(
+            System::get()->getCurrentProcessId());
 }
 
 void android_metrics_report_common_info(bool openglAlive) {

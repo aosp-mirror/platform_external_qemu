@@ -2051,7 +2051,11 @@ message EmulatorDetails {
     repeated EmulatorIcebox icebox = 35;
     // Metrics for resizable display
     optional EmulatorResizableDisplay resizable_display = 36;
-    // Next tag: 37
+    // Process ID of the emulator wrapper process.
+    optional int32 emu_pid = 37;
+    // Process ID of the child qemu process that does the real job.
+    optional int32 qemu_pid = 38;
+    // Next tag: 39
 
     // Emulator instance liveness as determined via adb connectivity.
     enum EmulatorAdbLiveness {
