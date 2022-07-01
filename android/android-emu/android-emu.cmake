@@ -64,7 +64,6 @@ set(android-emu-common
     android/bootconfig.cpp
     android/car-cluster.cpp
     android/car.cpp
-    android/console_auth.cpp
     android/cros.c
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
@@ -336,6 +335,7 @@ target_link_libraries(
          android-emu-cmdline
          android-emu-base
          android-emu-studio-config
+         android-emu-telnet-console-auth
          android-emu-crashreport
          emulator-libsparse
          emulator-libselinux
@@ -712,7 +712,6 @@ if(NOT LINUX_AARCH64)
       android/base/testing/ProtobufMatchers.cpp
       android/bootconfig_unittest.cpp
       android/camera/CameraFormatConverters_unittest.cpp
-      android/console_auth_unittest.cpp
       android/console_unittest.cpp
       android/emulation/AdbDebugPipe_unittest.cpp
       android/emulation/AdbGuestPipe_unittest.cpp
