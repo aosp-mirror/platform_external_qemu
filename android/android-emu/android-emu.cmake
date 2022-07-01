@@ -188,12 +188,6 @@ set(android-emu-common
     android/opengl/OpenglEsPipe.cpp
     android/opengles.cpp
     android/process_setup.cpp
-    android/proxy/proxy_common.c
-    android/proxy/proxy_http.c
-    android/proxy/proxy_http_connector.c
-    android/proxy/proxy_http_rewriter.c
-    android/proxy/proxy_setup.cpp
-    android/proxy/ProxyUtils.cpp
     android/qemu-tcpdump.c
     android/resource.c
     android/sdk-controller-socket.c
@@ -265,7 +259,6 @@ set(android_emu_dependent_src
     android/emulation/HostMemoryService.cpp
     android/emulation/QemuMiscPipe.cpp
     android/emulation/resizable_display_config.cpp
-    android/http_proxy.c
     android/hw-sensors.cpp
     android/main-common.c
     android/main-qemu-parameters.cpp
@@ -339,6 +332,7 @@ target_link_libraries(
          android-emu-files
          android-emu-feature
          android-emu-metrics
+         android-emu-proxy
          android-emu-cmdline
          android-emu-base
          android-emu-studio-config
@@ -774,8 +768,6 @@ if(NOT LINUX_AARCH64)
       android/physics/BodyModel_unittest.cpp
       android/physics/InertialModel_unittest.cpp
       android/physics/PhysicalModel_unittest.cpp
-      android/proxy/proxy_common_unittest.cpp
-      android/proxy/ProxyUtils_unittest.cpp
       android/sensor_replay/sensor_session_playback_unittest.cpp
       android/snapshot/RamLoader_unittest.cpp
       android/snapshot/RamSaver_unittest.cpp
