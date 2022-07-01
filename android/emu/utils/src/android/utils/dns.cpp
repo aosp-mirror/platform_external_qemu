@@ -18,7 +18,6 @@
 #include "android/utils/debug.h"
 
 #include <algorithm>
-#include <mutex>
 #include <string>
 
 using android::base::Dns;
@@ -120,21 +119,4 @@ int android_dns_get_servers(const char* dnsServerOption,
     }
 
     return dnsCount;
-}
-
-// Following the constants defined in net/slipr.c
-int is_host_network_ipv6_only() {
-    static std::once_flag just_once;
-    static int result;
-    std::call_once(just_once, []() {
-        Dns::AddressList list = Dns::getSystemServerList();
-        if (list.empty()) {
-            result = 0;
-        } else {
-            result = std::none_of(
-                    list.begin(), list.end(),
-                    [](const IpAddress& addr) { return addr.isIpv4(); });
-        }
-    });
-    return result;
 }
