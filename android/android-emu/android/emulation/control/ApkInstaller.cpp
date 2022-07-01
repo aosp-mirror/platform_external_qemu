@@ -20,9 +20,10 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
 
-#include <istream>
 #include <iostream>
+#include <istream>
 #include <sstream>
+#include <string_view>
 
 namespace android {
 namespace emulation {
@@ -30,7 +31,6 @@ namespace emulation {
 using android::base::Looper;
 using android::base::ParallelTask;
 using android::base::PathUtils;
-using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;
 using std::string;
@@ -107,13 +107,13 @@ bool ApkInstaller::parseOutputForFailure(std::istream& stream,
 }
 
 AdbCommandPtr ApkInstaller::install(
-        android::base::StringView apkFilePath,
+        std::string_view apkFilePath,
         ApkInstaller::ResultCallback resultCallback) {
     if (!base::System::get()->pathCanRead(apkFilePath)) {
         resultCallback(Result::kApkPermissionsError, "");
         return nullptr;
     }
-    std::vector<std::string> installCommand{"install", "-r", "-t", apkFilePath};
+    std::vector<std::string> installCommand{"install", "-r", "-t", apkFilePath.data()};
     mInstallCommand = mAdb->runAdbCommand(
             installCommand,
             [resultCallback, this](const OptionalAdbCommandResult& result) {

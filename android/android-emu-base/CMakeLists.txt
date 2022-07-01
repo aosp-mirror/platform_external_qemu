@@ -67,7 +67,6 @@ android_add_library(
       android/base/Stopwatch.cpp
       android/base/StringFormat.cpp
       android/base/StringParse.cpp
-      android/base/StringView.cpp
       android/base/SubAllocator.cpp
       android/base/synchronization/MessageChannel.cpp
       android/base/system/System.cpp
@@ -230,7 +229,6 @@ android_add_test(
       android/base/sockets/SocketWaiter_unittest.cpp
       android/base/StringFormat_unittest.cpp
       android/base/StringParse_unittest.cpp
-      android/base/StringView_unittest.cpp
       android/base/SubAllocator_unittest.cpp
       android/base/synchronization/ConditionVariable_unittest.cpp
       android/base/synchronization/Lock_unittest.cpp

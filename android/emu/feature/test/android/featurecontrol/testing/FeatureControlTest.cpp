@@ -5,6 +5,7 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace featurecontrol {
@@ -61,19 +62,19 @@ void FeatureControlTest::SetUp() {
 #undef FEATURE_CONTROL_ITEM
 }
 
-void FeatureControlTest::writeDefaultIniHost(android::base::StringView data) {
+void FeatureControlTest::writeDefaultIniHost(std::string_view data) {
     writeIni(mDefaultIniHostFilePath, data);
 }
 
-void FeatureControlTest::writeDefaultIniGuest(android::base::StringView data) {
+void FeatureControlTest::writeDefaultIniGuest(std::string_view data) {
     writeIni(mDefaultIniGuestFilePath, data);
 }
 
-void FeatureControlTest::writeUserIniHost(android::base::StringView data) {
+void FeatureControlTest::writeUserIniHost(std::string_view data) {
     writeIni(mUserIniHostFilePath, data);
 }
 
-void FeatureControlTest::writeUserIniGuest(android::base::StringView data) {
+void FeatureControlTest::writeUserIniGuest(std::string_view data) {
     writeIni(mUserIniGuestFilePath, data);
 }
 
@@ -83,9 +84,9 @@ void FeatureControlTest::loadAllIni() {
             mUserIniHostFilePath, mUserIniGuestFilePath);
 }
 
-void FeatureControlTest::writeIni(android::base::StringView filename,
-              android::base::StringView data) {
-    std::ofstream outFile(filename,
+void FeatureControlTest::writeIni(std::string_view filename,
+                                  std::string_view data) {
+    std::ofstream outFile(std::string(filename),
                           std::ios_base::out | std::ios_base::trunc);
     ASSERT_TRUE(outFile.good());
     outFile.write(data.data(), data.size());

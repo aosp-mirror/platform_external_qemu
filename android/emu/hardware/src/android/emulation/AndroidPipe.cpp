@@ -31,8 +31,9 @@
 #include <algorithm>
 #include <memory>
 #include <string>
-#include <vector>
+#include <string_view>
 #include <unordered_set>
+#include <vector>
 
 #include <assert.h>
 
@@ -86,7 +87,7 @@ namespace android {
 
 namespace {
 
-static bool isPipeOptional(android::base::StringView name) {
+static bool isPipeOptional(std::string_view name) {
     return name == "OffworldPipe";
 }
 

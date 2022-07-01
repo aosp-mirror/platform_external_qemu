@@ -44,7 +44,7 @@ static void setIcdPath(const std::string& path) {
 static std::string icdJsonNameToProgramAndLauncherPaths(
         const std::string& icdFilename) {
 
-    std::string suffix = pj("lib64", "vulkan", icdFilename);
+    std::string suffix = pj({"lib64", "vulkan", icdFilename});
 
     return pj(System::get()->getProgramDirectory(), suffix) + ":" +
            pj(System::get()->getLauncherDirectory(), suffix);
@@ -69,17 +69,17 @@ static void initIcdPaths(bool forTesting) {
         return;
     } else {
         if (forTesting || androidIcd == "swiftshader") {
-            auto res = pj(System::get()->getProgramDirectory(), "lib64", "vulkan");
+            auto res = pj({System::get()->getProgramDirectory(), "lib64", "vulkan"});
             LOG(VERBOSE) << "In test environment or ICD set to swiftshader, using "
                          << "Swiftshader ICD " << getTestIcdFilename();
-            auto libPath = pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
-                              getTestIcdFilename());
+            auto libPath = pj({System::get()->getProgramDirectory(), "lib64", "vulkan",
+                              getTestIcdFilename()});
             if (path_exists(libPath.c_str())) {
                 LOG(VERBOSE) << "Swiftshader library exists";
             } else {
                 LOG(VERBOSE) << "Swiftshader library doesn't exist, trying launcher path";
-                libPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
-                             getTestIcdFilename());
+                libPath = pj({System::get()->getLauncherDirectory(), "lib64", "vulkan",
+                             getTestIcdFilename()});
                 if (path_exists(libPath.c_str())) {
                     LOG(VERBOSE) << "Swiftshader library found in launcher path";
                 } else {
@@ -131,7 +131,7 @@ static std::string getLoaderPath(const std::string& directory, bool forTesting) 
     }
     auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
     if (forTesting || androidIcd == "mock") {
-        auto path = pj(directory, "testlib64", VULKAN_LOADER_FILENAME);
+        auto path = pj({directory, "testlib64", VULKAN_LOADER_FILENAME});
         LOG(VERBOSE) << "In test environment or using Swiftshader. Using loader: " << path;
         return path;
     } else {
@@ -139,7 +139,7 @@ static std::string getLoaderPath(const std::string& directory, bool forTesting) 
         LOG(VERBOSE) << "Not in test environment. Using loader: " << VULKAN_LOADER_FILENAME;
         return VULKAN_LOADER_FILENAME;
 #else
-        auto path = pj(directory, "lib64", "vulkan", VULKAN_LOADER_FILENAME);
+        auto path = pj({directory, "lib64", "vulkan", VULKAN_LOADER_FILENAME});
         LOG(VERBOSE) << "Not in test environment. Using loader: " << path;
         return path;
 #endif
@@ -157,7 +157,7 @@ static std::string getMoltenVkPath(const std::string& directory, bool forTesting
     // Skip loader when using MoltenVK as this gives us access to
     // VK_MVK_moltenvk, which is required for external memory support.
     if (!forTesting && androidIcd == "moltenvk") {
-        auto path = pj(directory, "lib64", "vulkan", "libMoltenVK.dylib");
+        auto path = pj({directory, "lib64", "vulkan", "libMoltenVK.dylib"});
         LOG(VERBOSE) << "Skipping loader and using ICD directly: " << path;
         return path;
     }
@@ -248,9 +248,9 @@ public:
                 // On Linux, it might not be called libvulkan.so.
                 // Try libvulkan.so.1 if that doesn't work.
 #ifdef __linux__
-                    loaderPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "libvulkan.so.1");
+                    loaderPath = pj({System::get()->getLauncherDirectory(), "lib64", "vulkan", "libvulkan.so.1"});
 #elif defined _WIN32
-                    loaderPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "vulkan-1.dll");
+                    loaderPath = pj({System::get()->getLauncherDirectory(), "lib64", "vulkan", "vulkan-1.dll"});
 #endif // __linux__
                     success = mVulkanLibs.addLibrary(loaderPath);
                 }

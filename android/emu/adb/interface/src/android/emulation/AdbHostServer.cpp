@@ -15,11 +15,12 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/StringFormat.h"
-#include "android/base/StringView.h"
+
 #include "android/base/system/System.h"
 
-#include <string>
 #include <stdlib.h>
+#include <string>
+#include <string_view>
 
 namespace android {
 namespace emulation {
@@ -147,7 +148,7 @@ bool AdbHostServer::notify(int adbEmulatorPort, int adbClientPort) {
 
 int AdbHostServer::getClientPort() {
     int clientPort = kDefaultAdbClientPort;
-    const android::base::StringView kVarName = "ANDROID_ADB_SERVER_PORT";
+    const std::string_view kVarName = "ANDROID_ADB_SERVER_PORT";
     std::string env = System::get()->envGet(kVarName);
     if (!env.empty()) {
         long port = strtol(env.c_str(), NULL, 0);

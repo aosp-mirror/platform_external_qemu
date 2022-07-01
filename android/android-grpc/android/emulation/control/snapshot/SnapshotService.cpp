@@ -28,7 +28,7 @@
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/Stopwatch.h"
-#include "android/base/StringView.h"
+
 #include "android/base/Uuid.h"  // for Uuid
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/GzipStreambuf.h"
@@ -228,7 +228,7 @@ public:
                     request->statusfilter() == SnapshotFilter::All;
             if (protobuf && keep) {
                 auto details = reply->add_snapshots();
-                details->set_snapshot_id(snapshot.name());
+                details->set_snapshot_id(snapshot.name().data());
                 details->set_size(snapshot.folderSize());
                 if (snapshot.isLoaded()) {
                     // Invariant: SnapshotDetails::Loaded -> SnapshotDetails::Compatible

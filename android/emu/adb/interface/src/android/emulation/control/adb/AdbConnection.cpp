@@ -582,8 +582,8 @@ public:
         if (privkey.empty()) {
             LOG(WARNING) << "No private key exists, we will have to "
                             "generate one.";
-            privkey = base::pj(System::get()->getHomeDirectory(), ".android",
-                               "adbkey");
+            privkey = base::pj({System::get()->getHomeDirectory(), ".android",
+                               "adbkey"});
             if (!adb_auth_keygen(privkey.c_str())) {
                 LOG(ERROR) << "Cannot create private key: " << privkey;
                 return;

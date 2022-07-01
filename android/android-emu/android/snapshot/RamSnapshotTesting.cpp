@@ -11,11 +11,13 @@
 
 #include "android/snapshot/RamSnapshotTesting.h"
 
+#include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/utils/file_io.h"
 
 #include <cstdlib>
 #include <random>
+#include <string_view>
 
 using android::base::c_str;
 using android::base::StdioStream;
@@ -44,11 +46,9 @@ static void mockQemuPageSave(RamSaver& saver, const RamBlock& block) {
     }
 }
 
-RamBlock makeRam(android::base::StringView name,
-                 uint8_t* data,
-                 int64_t size) {
+RamBlock makeRam(const std::string& name, uint8_t* data, int64_t size) {
     return {
-        c_str(name),
+        name,
         0x0,
         data,
         size,
@@ -61,8 +61,8 @@ RamBlock makeRam(android::base::StringView name,
 
 void saveRamSingleBlock(const RamSaver::Flags flags,
                         const RamBlock& block,
-                        android::base::StringView filename) {
-    RamSaver s(filename, flags, nullptr, true);
+                        std::string_view filename) {
+    RamSaver s(filename.data(), flags, nullptr, true);
 
     s.registerBlock(block);
 
@@ -71,8 +71,7 @@ void saveRamSingleBlock(const RamSaver::Flags flags,
     s.join();
 }
 
-void loadRamSingleBlock(const RamBlock& block,
-                        android::base::StringView filename) {
+void loadRamSingleBlock(const RamBlock& block, std::string_view filename) {
     auto ram = android_fopen(c_str(filename), "rb");
 
     RamLoader::RamBlockStructure emptyRamBlockStructure = {};
@@ -90,7 +89,7 @@ void loadRamSingleBlock(const RamBlock& block,
 void incrementalSaveSingleBlock(const RamSaver::Flags flags,
                                 const RamBlock& blockToLoad,
                                 const RamBlock& blockToSave,
-                                android::base::StringView filename) {
+                                std::string_view filename) {
     auto ram = android_fopen(c_str(filename), "rb");
 
     RamLoader::RamBlockStructure emptyRamBlockStructure = {};
@@ -103,7 +102,7 @@ void incrementalSaveSingleBlock(const RamSaver::Flags flags,
 
     ramLoader.start(false);
 
-    RamSaver s(filename, flags, &ramLoader, true);
+    RamSaver s(filename.data(), flags, &ramLoader, true);
 
     s.registerBlock(blockToSave);
 

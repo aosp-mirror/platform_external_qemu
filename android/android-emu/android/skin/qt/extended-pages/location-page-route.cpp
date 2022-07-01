@@ -13,7 +13,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
-#include "android/base/StringView.h"
+
 #include "android/emulation/ConfigDirs.h"
 #include "android/location/Route.h"
 #include "android/skin/qt/error-dialog.h"
@@ -37,6 +37,7 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 #include <fstream>
+#include <string_view>
 
 using android::base::PathUtils;
 
@@ -365,12 +366,12 @@ void LocationPage::deleteSelectedRoutes() {
 void LocationPage::deleteRoute(RouteWidgetItem* item) {
     auto& routeElement = item->routeElement();
     std::string protobufName = routeElement.protoFilePath.toStdString();
-    android::base::StringView dirName;
+    std::string_view dirName;
     bool haveDirName = android::base::PathUtils::split(protobufName,
                                                        &dirName,
                                                        nullptr /* base name */);
     if (haveDirName) {
-        path_delete_dir(dirName.str().c_str());
+        path_delete_dir(dirName.data());
     }
     mUi->loc_routeList->setCurrentItem(nullptr);
     item->removeFromListWidget();

@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
+#include <string_view>
 
 #include <stdint.h>
 
@@ -34,8 +34,8 @@ public:
     //             to reduce the file size.
     // returns:
     //   true if successfully converted to animated gif, false otherwise.
-    static bool toAnimatedGif(android::base::StringView inFilename,
-                              android::base::StringView outFilename,
+    static bool toAnimatedGif(std::string_view inFilename,
+                              std::string_view outFilename,
                               uint32_t bitRate);
 };
 

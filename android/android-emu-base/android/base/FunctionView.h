@@ -13,6 +13,7 @@
 
 #include "android/base/TypeTraits.h"
 
+#include <string_view>
 #include <utility>
 
 namespace android {
@@ -20,7 +21,7 @@ namespace base {
 
 //
 // FunctionView<> - a class that stores a view of a callable object, similar
-//      to StringView for strings.
+//      to std::string_view for strings.
 //
 // Emulator needs to pass around lots of callbacks. The standard way of doing it
 // is via std::function<> class, and it usually works OK. But there are some
@@ -34,9 +35,10 @@ namespace base {
 //     means it can't work with non-copyable functors.
 //
 // FunctionView is an alternative way of passing functors around. Instead of
-// storing a copy of the functor inside, it follows the path of StringView and
-// merely captures a pointer to the object to call. This allows for a simple,
-// fast and lightweight wrapper design; it also dictates the limitations:
+// storing a copy of the functor inside, it follows the path of std::string_view
+// and merely captures a pointer to the object to call. This allows for a
+// simple, fast and lightweight wrapper design; it also dictates the
+// limitations:
 //
 //  1. FunctionView<> stores a pointer to outside functor. That functor _must_
 //     outlive the view.

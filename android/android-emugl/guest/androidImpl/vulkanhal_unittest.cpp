@@ -76,8 +76,8 @@ protected:
         const char* libFilename = "libvulkan_android.so";
 #endif
         auto path =
-            pj(System::get()->getProgramDirectory(),
-                "lib64", libFilename);
+            pj({System::get()->getProgramDirectory(),
+                "lib64", libFilename});
         vk = load_android_vulkan_dispatch(path.c_str());
     }
 
@@ -130,8 +130,8 @@ protected:
     }
 
     void setupGralloc() {
-        auto grallocPath = pj(System::get()->getProgramDirectory(), "lib64",
-                              "gralloc.ranchu" LIBSUFFIX);
+        auto grallocPath = pj({System::get()->getProgramDirectory(), "lib64",
+                              "gralloc.ranchu" LIBSUFFIX});
 
         load_gralloc_module(grallocPath.c_str(), &mGralloc);
         set_global_gralloc_module(&mGralloc);

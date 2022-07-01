@@ -29,7 +29,7 @@
 #include "android-qemu2-glue/qemu-console-factory.h"
 #include "android/cmdline-definitions.h"
 #include "android/avd/info.h"         // for avdInfo_new
-#include "android/base/StringView.h"  // for StringView
+
 #include "android/emulation/control/AndroidAgentFactory.h"
 #include "android/console.h"  // for getConsoleAgents()->settings->avdInfo(), android_av...
 #include "android/snapshot/Snapshot.h"  // for Snapshot
@@ -263,7 +263,7 @@ int main(int argc, char* argv[]) {
                     (!FLAG_valid_only && !FLAG_invalid_only);
         if (protobuf && keep) {
             auto details = list.add_snapshots();
-            details->set_snapshot_id(snapshot.name());
+            details->set_snapshot_id(snapshot.name().data());
             if (FLAG_size)
                 details->set_size(snapshot.folderSize());
             // We only need to check for snapshot validity once.

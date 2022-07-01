@@ -11,12 +11,13 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
+#include <string>
+#include <string_view>
 
 namespace android {
 namespace location {
 
-std::string parseMapsKeyFromFile(const base::StringView& file);
+std::string parseMapsKeyFromFile(const std::string_view& file);
 
 }  // namespace location
 }  // namespace android

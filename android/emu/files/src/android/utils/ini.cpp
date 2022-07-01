@@ -16,7 +16,7 @@
 #include <string>    // for allocator
 
 #include "android/base/Log.h"               // for LOG, LogMessage
-#include "android/base/StringView.h"        // for StringView
+
 #include "android/base/files/IniFile.h"     // for IniFile, IniFile::const_i...
 #include "android/base/misc/StringUtils.h"  // for strDup
 #include "android/base/logging/LogSeverity.h"     // for EMULATOR_LOG_VERBOSE
@@ -53,13 +53,13 @@ auto iniFile_newFromFile(const char* filepath) -> CIniFile* {
 
 // NB: Returns 0 on success.
 auto iniFile_saveToFile(CIniFile* f, const char* filepath) -> int {
-    asBaseIniFile(f)->setBackingFile(filepath);
+    asBaseIniFile(f)->setBackingFile(filepath ? filepath : "");
     return static_cast<int>(!asBaseIniFile(f)->write());
 }
 
 // NB: Returns 0 on success.
 auto iniFile_saveToFileClean(CIniFile* f, const char* filepath) -> int {
-    asBaseIniFile(f)->setBackingFile(filepath);
+    asBaseIniFile(f)->setBackingFile(filepath ? filepath : "");
     return static_cast<int>(!asBaseIniFile(f)->writeDiscardingEmpty());
 }
 

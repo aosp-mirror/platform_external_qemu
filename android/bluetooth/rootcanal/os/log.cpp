@@ -30,15 +30,15 @@ using android::base::VerboseLogFormatter;
 
 namespace android::bluetooth {
 std::shared_ptr<std::ostream> getLogstream(std::string_view id) {
-    auto basedir = android::base::pj(
-            System::get()->getTempDir(), BLUETOOTH_LOG,
-            std::to_string(System::get()->getCurrentProcessId()));
+    auto basedir = android::base::pj({
+            System::get()->getTempDir(), BLUETOOTH_LOG.data(),
+            std::to_string(System::get()->getCurrentProcessId())});
 
     if (path_mkdir_if_needed(basedir.c_str(), 0700) != 0) {
         dfatal("Unable to create bluetooth logging directory: %s",
                          basedir.c_str());
     }
-    std::string filename = android::base::pj(basedir, id);
+    std::string filename = android::base::pj(basedir, id.data());
     for (int i = 0; System::get()->pathExists(filename); i++) {
         filename = android::base::pj(basedir,
                                      std::to_string(i) + "_" + std::string(id));

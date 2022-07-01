@@ -34,6 +34,7 @@
 #include <atomic>
 #include <cassert>
 #include <memory>
+#include <string_view>
 
 using android::base::ContiguousRangeMapper;
 using android::base::MemoryHint;
@@ -236,7 +237,7 @@ const RamLoader::Page* RamLoader::findPage(int blockIndex,
         return nullptr;
     }
     const auto& block = mIndex.blocks[blockIndex];
-    assert(block.ramBlock.id == base::StringView(id));
+    assert(block.ramBlock.id == std::string_view(id));
     if (pageIndex < 0 || pageIndex > block.pagesEnd - block.pagesBegin) {
         return nullptr;
     }
@@ -296,7 +297,7 @@ bool RamLoader::readIndex() {
         name[nameLength] = 0;
         auto blockIt = std::find_if(mIndex.blocks.begin(), mIndex.blocks.end(),
                                     [&name](const FileIndex::Block& b) {
-                                        return strcmp(b.ramBlock.id, name) == 0;
+                                        return (b.ramBlock.id == name);
                                     });
         if (blockIt == mIndex.blocks.end()) {
             return false;

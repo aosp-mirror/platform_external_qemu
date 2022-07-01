@@ -15,7 +15,7 @@
 #include "android/metrics/FileMetricsWriter.h"
 
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
+
 #include "android/base/Uuid.h"
 #include "android/base/testing/TestLooper.h"
 #include "android/base/testing/TestSystem.h"

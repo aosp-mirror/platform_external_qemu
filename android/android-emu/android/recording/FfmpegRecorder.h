@@ -37,9 +37,9 @@
 
 #pragma once
 
-#include "android/base/StringView.h"   // for StringView
 #include <stdint.h>                    // for uint16_t
 #include <memory>                      // for unique_ptr
+#include <string_view>
 
 namespace android {
 namespace recording {
@@ -117,8 +117,8 @@ public:
     static std::unique_ptr<FfmpegRecorder> create(
             uint16_t fbWidth,
             uint16_t fbHeight,
-            android::base::StringView filename,
-            android::base::StringView containerFormat);
+            std::string_view filename,
+            std::string_view containerFormat);
 
 protected:
     FfmpegRecorder() = default;

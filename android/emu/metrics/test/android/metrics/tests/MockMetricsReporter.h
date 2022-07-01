@@ -14,6 +14,7 @@
 #include "android/metrics/MetricsReporter.h"
 
 #include <functional>
+#include <string_view>
 
 namespace android {
 namespace metrics {
@@ -26,9 +27,9 @@ public:
     MockMetricsReporter();
     MockMetricsReporter(bool enabled,
                         MetricsWriter::Ptr writer,
-                        base::StringView emulatorVersion,
-                        base::StringView emulatorFullVersion,
-                        base::StringView qemuVersion);
+                        std::string_view emulatorVersion,
+                        std::string_view emulatorFullVersion,
+                        std::string_view qemuVersion);
 
     void reportConditional(ConditionalCallback callback) override;
     void finishPendingReports() override;

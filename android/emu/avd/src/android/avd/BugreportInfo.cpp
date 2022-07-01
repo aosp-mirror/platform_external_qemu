@@ -15,10 +15,12 @@
  */
 #include "android/avd/BugreportInfo.h"
 
+#include <string_view>
+
 #include "android/avd/info.h"
 #include "android/avd/keys.h"
 #include "android/base/StringFormat.h"
-#include "android/base/StringView.h"
+
 #include "android/base/files/IniFile.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
@@ -34,11 +36,11 @@
 using android::base::IniFile;
 using android::base::StringAppendFormat;
 using android::base::StringFormat;
-using android::base::StringView;
 using android::base::System;
 using android::base::trim;
 using android::base::Version;
 using android::update_check::VersionExtractor;
+
 
 namespace android {
 namespace avd {
@@ -63,7 +65,8 @@ BugreportInfo::BugreportInfo() {
     Version studioVersion = android::studio::lastestAndroidStudioVersion();
     androidStduioVer =
             studioVersion.isValid() ? studioVersion.toString() : "Unknown";
-    deviceName = StringView(avdInfo_getName(getConsoleAgents()->settings->avdInfo()));
+    deviceName = std::string_view(
+            avdInfo_getName(getConsoleAgents()->settings->avdInfo()));
     hostOsName = System::get()->getOsName();
     sdkToolsVer = android::getCurrentSdkVersion(
                           android::ConfigDirs::getSdkRootDirectory(),
@@ -78,7 +81,7 @@ BugreportInfo::BugreportInfo() {
 
     gpuListInfo = globalGpuInfoList().dump();
 
-    static constexpr StringView kAvdDetailsNoDisplayKeys[] = {
+    static constexpr std::string_view kAvdDetailsNoDisplayKeys[] = {
             ABI_TYPE,    CPU_ARCH,    SKIN_NAME, SKIN_PATH,
             SDCARD_SIZE, SDCARD_PATH, IMAGES_2};
 
@@ -125,7 +128,7 @@ BugreportInfo::BugreportInfo() {
             // check if the key is already displayed
             if (std::find_if(std::begin(kAvdDetailsNoDisplayKeys),
                              std::end(kAvdDetailsNoDisplayKeys),
-                             [&key](StringView noDisplayKey) {
+                             [&key](std::string_view noDisplayKey) {
                                  return noDisplayKey == key;
                              }) == std::end(kAvdDetailsNoDisplayKeys)) {
                 StringAppendFormat(&avdDetails, "%s: %s\n", key, value);

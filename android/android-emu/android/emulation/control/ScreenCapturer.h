@@ -18,11 +18,11 @@
 #include <cstdint>                    // for uint8_t, uint16_t, uint32_t
 #include <functional>                 // for function
 #include <string>                     // for string
+#include <string_view>
 #include <utility>                    // for move
 #include <vector>                     // for vector
 
 #include "android/base/export.h"
-#include "android/base/StringView.h"  // for StringView
 #include "android/skin/rect.h"        // for SkinRotation
 
 namespace emugl {
@@ -84,7 +84,7 @@ AEMU_EXPORT Image takeScreenshot(
         int desiredHeight = 0,
         SkinRect rect = {{0, 0}, {0, 0}});
 
-AEMU_EXPORT bool captureScreenshot(android::base::StringView outputDirectoryPath,
+AEMU_EXPORT bool captureScreenshot(std::string_view outputDirectoryPath,
                        std::string* outputFilepath = NULL,
                        uint32_t displayId = 0);
 // The following one is for testing only
@@ -99,7 +99,7 @@ AEMU_EXPORT bool captureScreenshot(
                            int* bytesPerPixel,
                            uint8_t** frameBufferData)> getFrameBuffer,
         SkinRotation rotation,
-        android::base::StringView outputDirectoryPath,
+        std::string_view outputDirectoryPath,
         std::string* outputFilepath = nullptr,
         int displayId = 0);
 

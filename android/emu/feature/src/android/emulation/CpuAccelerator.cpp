@@ -31,7 +31,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
-#include "android/base/StringView.h"
+
 #include "android/base/files/ScopedFd.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/FileUtils.h"
@@ -59,6 +59,7 @@
 #endif
 
 #include <array>
+#include <string_view>
 
 // NOTE: This source file must be independent of the rest of QEMU, as such
 //       it should not include / reuse any QEMU source file or function
@@ -94,8 +95,8 @@ namespace android {
 
 using base::ScopedFd;
 using base::StringAppendFormat;
-using base::StringView;
 using base::Version;
+
 
 // For detecting that the cpu can run with fast virtualization
 // without requiring workarounds such as resetting SMP=1.
@@ -272,11 +273,10 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
         const auto fileContents = android::readFileIntoString(kEtcGroupsPath);
 
         if (fileContents) {
-            split(*fileContents, StringView("\n"),
-                  [&etcGroupsKvmLine](StringView line) {
-                      auto lineStr = line.str();
-                      if (!strncmp("kvm:", lineStr.c_str(), 4)) {
-                          etcGroupsKvmLine = lineStr;
+            base::split(*fileContents, std::string_view("\n"),
+                  [&etcGroupsKvmLine](std::string_view line) {
+                      if (!strncmp("kvm:", line.data(), 4)) {
+                          etcGroupsKvmLine = line.data();
                       }
                   });
         }
@@ -1330,7 +1330,8 @@ Version parseMacOSVersionString(const std::string& str, std::string* status) {
         return Version(0, 0, 0);
     }
 
-    auto ver = Version(StringView(str.c_str() + pos + 1, str.size() - pos - 1));
+    auto ver = Version(
+            std::string(str.c_str() + pos + 1, str.size() - pos - 1));
     if (!ver.isValid()) {
         StringAppendFormat(
                 status, "Internal error: failed to parse OS version '%s'", str);

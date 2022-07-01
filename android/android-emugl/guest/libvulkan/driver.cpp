@@ -162,7 +162,7 @@ void* LoadLibrary(const android_dlextinfo& dlextinfo,
     sprintf(name, kLibFormat, subname_len, subname);
 
     auto progDir = System::get()->getProgramDirectory();
-    auto expectedLibPath = pj(progDir, "lib64", name);
+    auto expectedLibPath = pj({progDir, "lib64", name});
 
     auto res = android_dlopen_ext(expectedLibPath.c_str(), RTLD_LOCAL | RTLD_NOW,
                                   &dlextinfo);

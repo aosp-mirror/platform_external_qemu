@@ -16,7 +16,7 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/StringFormat.h"
-#include "android/base/StringView.h"
+
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Thread.h"
 #include "android/base/testing/TestInputBufferSocketServerThread.h"

@@ -29,6 +29,7 @@
 #include "android/virtualscene/Scene.h"
 
 #include <deque>
+#include <string_view>
 #include <unordered_map>
 
 using namespace android::base;
@@ -60,7 +61,7 @@ public:
 
     Settings() { mPosterLocations = parsePostersFile(kPosterFile); }
 
-    void parseCmdlineParameter(StringView param) {
+    void parseCmdlineParameter(std::string_view param) {
         auto it = std::find(param.begin(), param.end(), '=');
         if (it == param.end()) {
             E("%s: Invalid command line parameter '%s', should be "
@@ -69,13 +70,13 @@ public:
             return;
         }
 
-        std::string name(param.begin(), it);
-        StringView filename(++it, param.end());
+        std::string name(param.begin(), it++);
+        std::string_view filename(&*it, param.end() - it);
 
         std::string absFilename;
-        if (!PathUtils::isAbsolute(filename)) {
+        if (!PathUtils::isAbsolute(filename.data())) {
             absFilename = PathUtils::join(System::get()->getCurrentDirectory(),
-                                          filename);
+                                          filename.data());
         } else {
             absFilename = filename;
         }

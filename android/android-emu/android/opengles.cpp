@@ -162,7 +162,7 @@ int android_initOpenglesEmulation() {
         auto progDir = System::get()->getProgramDirectory();
 
         auto retryLibPath =
-            pj(progDir, "lib64", RENDERER_LIB_NAME);
+            pj({progDir, "lib64", RENDERER_LIB_NAME});
 
         rendererSo = adynamicLibrary_open(retryLibPath.c_str(), &error);
 

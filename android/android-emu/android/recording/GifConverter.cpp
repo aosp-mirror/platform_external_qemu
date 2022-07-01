@@ -37,6 +37,7 @@
 #include <errno.h>                          // for ENOMEM
 
 #include "android/base/Log.h"               // for LOG, LogMessage, LogStream
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"  // for FuncDelete
 #include "android/recording/AVScopedPtr.h"  // for makeAVScopedPtr
 
@@ -56,6 +57,7 @@ struct SwsContext;
 }
 
 #include <memory>                           // for unique_ptr
+#include <string_view>
 
 static constexpr int SCALE_FLAGS = SWS_BICUBIC;
 
@@ -66,19 +68,18 @@ namespace {
 
 class GifConverterImpl {
 public:
-    explicit GifConverterImpl(android::base::StringView inFilename,
-                              android::base::StringView outFilename,
+    explicit GifConverterImpl(std::string_view inFilename,
+                              std::string_view outFilename,
                               uint32_t bitrate);
     bool run();
 
 private:
-    bool initialize(android::base::StringView inFilename,
-                    android::base::StringView outFilename,
+    bool initialize(std::string_view inFilename,
+                    std::string_view outFilename,
                     uint32_t bitrate);
 
-    bool initInputContext(android::base::StringView inFilename);
-    bool initOutputContext(android::base::StringView outFilename,
-                           uint32_t bitrate);
+    bool initInputContext(std::string_view inFilename);
+    bool initOutputContext(std::string_view outFilename, uint32_t bitrate);
     bool initConversionContext();
 
     bool getNextVideoPacket(AVPacket* pkt);
@@ -97,14 +98,14 @@ private:
     int mVideoStreamIndex = -1;
 };
 
-GifConverterImpl::GifConverterImpl(android::base::StringView inFilename,
-                                   android::base::StringView outFilename,
+GifConverterImpl::GifConverterImpl(std::string_view inFilename,
+                                   std::string_view outFilename,
                                    uint32_t bitrate) {
     mIsValid = initialize(inFilename, outFilename, bitrate);
 }
 
-bool GifConverterImpl::initialize(android::base::StringView inFilename,
-                                  android::base::StringView outFilename,
+bool GifConverterImpl::initialize(std::string_view inFilename,
+                                  std::string_view outFilename,
                                   uint32_t bitrate) {
     // Initialize libavcodec, and register all codecs and formats. does not hurt
     // to register multiple times
@@ -113,7 +114,7 @@ bool GifConverterImpl::initialize(android::base::StringView inFilename,
            initOutputContext(outFilename, bitrate);
 }
 
-bool GifConverterImpl::initInputContext(android::base::StringView inFilename) {
+bool GifConverterImpl::initInputContext(std::string_view inFilename) {
     auto inFilenameValidated = android::base::c_str(inFilename);
     int ret;
 
@@ -161,7 +162,7 @@ bool GifConverterImpl::initInputContext(android::base::StringView inFilename) {
     return true;
 }
 
-bool GifConverterImpl::initOutputContext(android::base::StringView outFilename,
+bool GifConverterImpl::initOutputContext(std::string_view outFilename,
                                          uint32_t bitrate) {
     auto outFilenameValidated = android::base::c_str(outFilename);
 
@@ -437,8 +438,8 @@ int GifConverterImpl::flushEncoder() {
 }
 }  // namespace
 
-bool GifConverter::toAnimatedGif(android::base::StringView inFilename,
-                                 android::base::StringView outFilename,
+bool GifConverter::toAnimatedGif(std::string_view inFilename,
+                                 std::string_view outFilename,
                                  uint32_t bitrate) {
     GifConverterImpl converter(inFilename, outFilename, bitrate);
     return converter.run();

@@ -39,7 +39,7 @@
 #include <unordered_set>
 
 using android::base::ScopedCPtr;
-using android::base::StringView;
+
 
 enum IniSetting { ON, OFF, DEFAULT, NULLVAL, ERR };
 static constexpr char kIniSettingNull[] = "null";
@@ -154,10 +154,10 @@ void FeatureControlImpl::loadUserOverrideFeature(
     }
 }
 
-void FeatureControlImpl::init(StringView defaultIniHostPath,
-                              StringView defaultIniGuestPath,
-                              StringView userIniHostPath,
-                              StringView userIniGuestPath) {
+void FeatureControlImpl::init(const std::string& defaultIniHostPath,
+                              const std::string& defaultIniGuestPath,
+                              const std::string& userIniHostPath,
+                              const std::string& userIniGuestPath) {
     memset(mGuestTriedEnabledFeatures, 0,
            sizeof(FeatureOption) * Feature_n_items);
     base::IniFile defaultIniHost(defaultIniHostPath);
@@ -310,17 +310,20 @@ FeatureControlImpl::FeatureControlImpl() {
                 "advancedFeaturesCanary.ini");
     }
 
-    ScopedCPtr<char> defaultIniGuestName;
+    std::string defaultIniGuestName;
     if (getConsoleAgents()->settings->avdInfo()) {
-        defaultIniGuestName.reset(avdInfo_getDefaultSystemFeatureControlPath(
-                getConsoleAgents()->settings->avdInfo()));
+        const char* gname = avdInfo_getDefaultSystemFeatureControlPath(
+                getConsoleAgents()->settings->avdInfo());
+        if (gname) {
+            defaultIniGuestName = gname;
+        }
     }
     std::string userIniHostName = base::PathUtils::join(
             ConfigDirs::getUserDirectory(), "advancedFeatures.ini");
 
     // We don't allow for user guest override until we find a use case for it
     std::string userIniGuestName;
-    init(defaultIniHostName, defaultIniGuestName.get(), userIniHostName,
+    init(defaultIniHostName, defaultIniGuestName, userIniHostName,
          userIniGuestName);
 }
 
@@ -400,7 +403,7 @@ void FeatureControlImpl::setIfNotOverridenOrGuestDisabled(Feature feature,
     currFeature.currentVal = isEnabled;
 }
 
-Feature FeatureControlImpl::fromString(StringView str) {
+Feature FeatureControlImpl::fromString(std::string_view str) {
 #define FEATURE_CONTROL_ITEM(item) \
     if (str == #item)              \
         return item;
@@ -411,7 +414,7 @@ Feature FeatureControlImpl::fromString(StringView str) {
     return Feature::Feature_n_items;
 }
 
-StringView FeatureControlImpl::toString(Feature feature) {
+std::string_view FeatureControlImpl::toString(Feature feature) {
 #define FEATURE_CONTROL_ITEM(item) \
     if (feature == Feature::item)  \
         return #item;
@@ -438,7 +441,7 @@ void FeatureControlImpl::setGuestTriedEnable(Feature feature) {
     opt.isOverridden = false;
 }
 
-void FeatureControlImpl::parseAndApplyOverrides(StringView overrides) {
+void FeatureControlImpl::parseAndApplyOverrides(std::string_view overrides) {
     for (auto it = overrides.begin(); it < overrides.end();) {
         bool enable = true;
         if (*it == '-') {
@@ -447,7 +450,7 @@ void FeatureControlImpl::parseAndApplyOverrides(StringView overrides) {
         }
         auto itEnd = std::find(it, overrides.end(), ',');
         if (it != itEnd) {
-            auto feature = fromString({it, itEnd});
+            auto feature = fromString(std::string_view(&*it, (itEnd - it)));
             if (feature == Feature::Feature_n_items) {
                 dwarning("[FeatureControl] Bad feature name: '%s'",
                          std::string(it, itEnd).c_str());

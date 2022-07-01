@@ -16,7 +16,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
+
 #include "android/base/Version.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iterator>
+#include <string_view>
 
 #include <stdlib.h>
 #include <string.h>
@@ -79,10 +80,10 @@ struct StudioXml {
 using android::base::c_str;
 using android::base::PathUtils;
 using android::base::stringLiteralLength;
-using android::base::StringView;
 using android::base::System;
 using android::base::Version;
 using android::studio::UpdateChannel;
+
 
 namespace android {
 namespace studio {
@@ -220,7 +221,7 @@ base::Version lastestAndroidStudioVersion() {
     if (studio.empty()) {
         return {};
     }
-    StringView basename;
+    std::string_view basename;
     PathUtils::split(studio, nullptr, &basename);
     return extractAndroidStudioVersion(c_str(basename));
 }
@@ -250,7 +251,7 @@ UpdateChannel updateChannel() {
         }
 
         static const struct NamedChannel {
-            StringView name;
+            std::string_view name;
             UpdateChannel channel;
         } channelNames[] = {
                 {"", UpdateChannel::Canary},  // this is the current default
@@ -365,7 +366,7 @@ static Optional<string> parseStudioXML(const StudioXml* const match) {
 //
 template <class ValueType, class ValueExtractor>
 static Optional<ValueType> getStudioConfigJsonValue(
-        StringView name,
+        std::string_view name,
         ValueExtractor extractValue) {
     const std::string configPath = android::metrics::getSettingsFilePath();
     std::ifstream in(PathUtils::asUnicodePath(configPath).c_str());
@@ -412,7 +413,8 @@ static Optional<ValueType> getStudioConfigJsonValue(
             }
             // The value has to be somewhere in the remaining part of the line,
             // pass it to someone who knows how to extract it.
-            auto val = extractValue(StringView(&*itNext, line.end() - itNext));
+            auto val = extractValue(
+                    std::string_view(&*itNext, line.end() - itNext));
             return val;
         }
     }
@@ -422,8 +424,9 @@ static Optional<ValueType> getStudioConfigJsonValue(
 bool getUserMetricsOptIn() {
     return getStudioConfigJsonValue<bool>(
                    "hasOptedIn",
-                   [](StringView linePart) -> bool {
-                       static constexpr StringView trueValues[] = {"true", "1"};
+                   [](std::string_view linePart) -> bool {
+                       static constexpr std::string_view trueValues[] = {"true",
+                                                                         "1"};
                        auto it = linePart.begin();
                        for (const auto& trueVal : trueValues) {
                            if (strncmp(trueVal.data(), &*it, trueVal.size()) !=
@@ -448,7 +451,7 @@ bool getUserMetricsOptIn() {
 std::string getAnonymizationSalt() {
     return getStudioConfigJsonValue<std::string>(
                    "saltValue",
-                   [](StringView linePart) -> std::string {
+                   [](std::string_view linePart) -> std::string {
                        if (linePart.empty()) {
                            return {};
                        }
@@ -498,7 +501,7 @@ LazyInstance<StaticValues> sStaticValues = {};
 // LazyInstance<> code.
 std::string extractInstallationId() {
     auto optionalId = getStudioConfigJsonValue<std::string>(
-            "userId", [](StringView linePart) -> std::string {
+            "userId", [](std::string_view linePart) -> std::string {
                 if (linePart.empty()) {
                     return {};
                 }

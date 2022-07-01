@@ -23,6 +23,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace android {
@@ -50,7 +51,7 @@ public:
     // and invokes |resultCallback| on the calling thread when done.
     // Returns a shared pointer to the AdbCommand that handles the install
     // process.
-    AdbCommandPtr install(android::base::StringView apkFilePath,
+    AdbCommandPtr install(std::string_view apkFilePath,
                           ApkInstaller::ResultCallback resultCallback);
 
     // Parses the contents of |output| stream as if it was the output from

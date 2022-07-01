@@ -14,9 +14,8 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
-
 #include <string>
+#include <string_view>
 
 namespace android {
 
@@ -86,13 +85,13 @@ struct ConfigDirs {
     //   - %LOCALAPPDATA%/Temp
     //   - %USERPROFILE%/.android
     static std::string getDiscoveryDirectory();
-    static void setCurrentDiscoveryPath(const android::base::StringView& path);
+    static void setCurrentDiscoveryPath(const std::string_view& path);
     static std::string getCurrentDiscoveryPath();
 
 private:
     // Check if the specified path is a valid AVD root path.
     // It is considered valid if it has an 'avd' subdirectory
-    static bool isValidAvdRoot(const android::base::StringView& avdPath);
+    static bool isValidAvdRoot(const std::string_view& avdPath);
 
     // Check if the specified path is a valid SDK root path.
     // It is considered valid if it has a 'platforms' subdirectory

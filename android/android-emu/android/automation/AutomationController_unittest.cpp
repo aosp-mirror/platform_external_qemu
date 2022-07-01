@@ -137,7 +137,7 @@ TEST_F(AutomationControllerTest, InvalidInput) {
     EXPECT_THAT(mController->startRecording(""),
                 IsErr(StartError::InvalidFilename));
     EXPECT_THAT(mController->startRecording("\0"),
-                IsErr(StartError::FileOpenError));
+                IsErr(StartError::InvalidFilename));
 
     EXPECT_THAT(mController->startPlayback(nullptr),
                 IsErr(StartError::InvalidFilename));

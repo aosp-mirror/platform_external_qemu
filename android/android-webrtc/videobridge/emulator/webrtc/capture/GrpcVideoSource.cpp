@@ -23,11 +23,11 @@
 
 #include <memory>  // for unique_ptr, operator==
 #include <string>  // for string, operator==, stoi
+#include <string_view>
 #include <thread>  // for thread
 #include <tuple>   // for make_tuple, tuple_elem...
 
-#include "android/base/StringView.h"           // for StringView
-#include "android/base/memory/SharedMemory.h"  // for SharedMemory, StringView
+#include "android/base/memory/SharedMemory.h"  // for SharedMemory, std::string_view
 #include "android/utils/tempfile.h"            // for tempfile_close, tempfi...
 #include "api/video/i420_buffer.h"             // for I420Buffer
 #include "emulator_controller.grpc.pb.h"       // for EmulatorController::Stub

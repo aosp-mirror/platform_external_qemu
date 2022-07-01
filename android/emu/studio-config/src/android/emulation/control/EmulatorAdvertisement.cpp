@@ -23,7 +23,7 @@
 
 #include "android/base/Log.h"                   // for LOG, LogMessage
 #include "android/base/StringFormat.h"          // for StringFormat
-#include "android/base/StringView.h"            // for StringView, CStrWrapper
+
 #include "android/base/files/IniFile.h"         // for IniFile
 #include "android/base/files/PathUtils.h"       // for pj, PathUtils
 #include "android/base/sockets/ScopedSocket.h"  // for ScopedSocket
@@ -52,7 +52,7 @@ using android::base::System;
 static const char* location_format = "pid_%d.ini";
 
 static bool isMe(std::string discoveryFile) {
-    std::string entry = PathUtils::decompose(discoveryFile).back();
+    std::string entry(PathUtils::decompose(discoveryFile).back());
     int pid = 0;
     if (sscanf(entry.c_str(), location_format, &pid) != 1) {
         // Not a discovery file..

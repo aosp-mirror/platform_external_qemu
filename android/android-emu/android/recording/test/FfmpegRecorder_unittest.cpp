@@ -19,9 +19,9 @@
 #include <functional>                                     // for __base
 #include <iostream>                                       // for operator<<
 #include <string>                                         // for string, ope...
+#include <string_view>
 #include <utility>                                        // for move
 
-#include "android/base/StringView.h"                      // for StringView
 #include "android/base/memory/ScopedPtr.h"                // for FuncDelete
 #include "android/base/system/System.h"                   // for System, Sys...
 #include "android/base/testing/TestSystem.h"              // for TestSystem
@@ -45,7 +45,6 @@ extern "C" {
 }
 
 using android::base::c_str;
-using android::base::StringView;
 using android::base::System;
 using android::base::TestSystem;
 using android::base::TestTempDir;
@@ -57,7 +56,7 @@ static constexpr uint32_t kFbHeight = 1920;
 // Keep the recordings short or the unit-tests will take too long
 static constexpr uint8_t kDurationSecs = 3;
 
-static void checkMediaFile(StringView file,
+static void checkMediaFile(std::string_view file,
                            uint8_t expDuration,
                            uint32_t expWidth,
                            uint32_t expHeight,
@@ -93,7 +92,7 @@ static std::string setupRecordingTest(VideoFormat videoFmt,
                                       AudioFormat audioFmt,
                                       uint32_t outputWidth,
                                       uint32_t outputHeight,
-                                      StringView outputFile) {
+                                      std::string_view outputFile) {
     auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
                                            kContainerFormat);
     EXPECT_TRUE(recorder->isValid());
@@ -152,7 +151,7 @@ static std::string setupRecordingTest(VideoFormat videoFmt,
     checkMediaFile(outputFile, kDurationSecs, outputWidth, outputHeight,
                    videoCodec.getCodecId(), audioCodec.getCodecId());
 
-    return outputFile;
+    return outputFile.data();
 }
 
 TEST(FfmpegRecorder, RecorderCreation) {

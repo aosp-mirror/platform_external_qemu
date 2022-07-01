@@ -14,7 +14,7 @@
 #include "android/CommonReportedInfo.h"
 #include "android/base/Optional.h"
 #include "android/base/StringFormat.h"
-#include "android/base/StringView.h"
+
 #include "android/base/Uuid.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/IniFile.h"

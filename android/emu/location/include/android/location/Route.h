@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "route.pb.h"
 
 namespace android {
@@ -21,7 +20,7 @@ class Route final {
 public:
     Route(const char* name);
 
-    base::StringView name() const { return mName; }
+    std::string_view name() const { return mName; }
     const emulator_location::RouteMetadata* getProtoInfo();
 
 private:

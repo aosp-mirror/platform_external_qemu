@@ -13,9 +13,9 @@
 
 #include "android/base/network/IpAddress.h"
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
 
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace proxy {
@@ -47,7 +47,10 @@ struct ParseResult {
 // rest of the structure is valid and can be used.
 //
 // NOTE: This doesn't support a <username> or <password> that contain a @ or :
-ParseResult parseConfigurationString(android::base::StringView str);
+ParseResult parseConfigurationString(const std::string& str);
+inline ParseResult parseConfigurationString(const char* str) {
+    return parseConfigurationString(str ? std::string(str) : std::string(""));
+}
 
 }  // namespace proxy
 }  // namespace android

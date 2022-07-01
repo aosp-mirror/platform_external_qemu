@@ -11,6 +11,8 @@
 
 #include "android/emulation/control/automation_agent.h"
 
+#include <string_view>
+
 namespace android {
 namespace automation {
 
@@ -18,40 +20,38 @@ static void reset() {
     return AutomationController::get().reset();
 }
 
-static StartResult start_recording(android::base::StringView filename) {
-    return AutomationController::get().startRecording(filename);
+static StartResult start_recording(std::string_view filename) {
+    return AutomationController::get().startRecording(filename.data());
 }
 
 static StopResult stop_recording() {
     return AutomationController::get().stopRecording();
 }
 
-static StartResult start_playback(android::base::StringView filename) {
-    return AutomationController::get().startPlayback(filename);
+static StartResult start_playback(std::string_view filename) {
+    return AutomationController::get().startPlayback(filename.data());
 }
 
 static StopResult stop_playback() {
     return AutomationController::get().stopPlayback();
 }
 
-static StartResult start_playback_with_callback(
-        android::base::StringView filename,
-        void (*onStopCallback)()) {
+static StartResult start_playback_with_callback(std::string_view filename,
+                                                void (*onStopCallback)()) {
     return AutomationController::get().startPlaybackWithCallback(
-            filename, onStopCallback);
+            filename.data(), onStopCallback);
 }
 
-static void set_macro_name(android::base::StringView macroName,
-                           android::base::StringView filename) {
+static void set_macro_name(std::string_view macroName,
+                           std::string_view filename) {
     AutomationController::get().setMacroName(macroName, filename);
 }
 
-static std::string get_macro_name(android::base::StringView filename) {
+static std::string get_macro_name(std::string_view filename) {
     return AutomationController::get().getMacroName(filename);
 }
 
-static std::pair<uint64_t, uint64_t> get_metadata(
-        android::base::StringView filename) {
+static std::pair<uint64_t, uint64_t> get_metadata(std::string_view filename) {
     return AutomationController::get().getMetadata(filename);
 }
 

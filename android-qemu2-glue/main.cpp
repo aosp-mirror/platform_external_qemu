@@ -119,6 +119,7 @@ extern "C" {
 #endif
 #include <algorithm>
 #include <string>
+#include <string_view>
 #include <thread>
 
 #ifdef __APPLE__
@@ -509,7 +510,7 @@ private:
         std::string bufferString;
         const char* qcow2Path;
         ScopedCPtr<const char> allocatedPath;
-        StringView filePath;
+        std::string_view filePath;
         std::string sysImagePath, vendorImagePath;
         bool qCow2Format = true;
         bool needClone = false;
@@ -533,14 +534,14 @@ private:
                     filePath = allocatedPath.get();
                     driveParam +=
                             StringFormat("index=%d,id=system,if=none,file=%s",
-                                         m_driveIndex++, filePath);
+                                         m_driveIndex++, filePath.data());
                 } else {
                     qCow2Format = false;
                     filePath = sysImagePath.c_str();
                     driveParam += StringFormat(
                             "index=%d,id=system,if=none,file=%s"
                             ",read-only",
-                            m_driveIndex++, filePath);
+                            m_driveIndex++, filePath.data());
                 }
                 deviceParam = StringFormat("%s,drive=system",
                                            kTarget.storageDeviceType);
@@ -562,21 +563,21 @@ private:
                     filePath = allocatedPath.get();
                     driveParam +=
                             StringFormat("index=%d,id=vendor,if=none,file=%s",
-                                         m_driveIndex++, filePath);
+                                         m_driveIndex++, filePath.data());
                 } else {
                     qCow2Format = false;
                     filePath = vendorImagePath.c_str();
                     driveParam += StringFormat(
                             "index=%d,id=vendor,if=none,file=%s"
                             ",read-only",
-                            m_driveIndex++, filePath);
+                            m_driveIndex++, filePath.data());
                 }
                 deviceParam = StringFormat("%s,drive=vendor",
                                            kTarget.storageDeviceType);
                 break;
             case IMAGE_TYPE_CACHE:
                 filePath = m_hw->disk_cachePartition_path;
-                bufferString = StringFormat("%s.qcow2", filePath);
+                bufferString = StringFormat("%s.qcow2", filePath.data());
                 driveParam +=
                         StringFormat("index=%d,id=cache,if=none,file=%s",
                                      m_driveIndex++, bufferString.c_str());
@@ -585,7 +586,7 @@ private:
                 break;
             case IMAGE_TYPE_USER_DATA:
                 filePath = m_hw->disk_dataPartition_path;
-                bufferString = StringFormat("%s.qcow2", filePath);
+                bufferString = StringFormat("%s.qcow2", filePath.data());
                 driveParam +=
                         StringFormat("index=%d,id=userdata,if=none,file=%s",
                                      m_driveIndex++, bufferString.c_str());
@@ -596,7 +597,7 @@ private:
                 if (m_hw->hw_sdCard_path != NULL &&
                     strcmp(m_hw->hw_sdCard_path, "")) {
                     filePath = m_hw->hw_sdCard_path;
-                    bufferString = StringFormat("%s.qcow2", filePath);
+                    bufferString = StringFormat("%s.qcow2", filePath.data());
                     driveParam +=
                             StringFormat("index=%d,id=sdcard,if=none,file=%s",
                                          m_driveIndex++, bufferString.c_str());
@@ -612,7 +613,7 @@ private:
                     m_hw->disk_encryptionKeyPartition_path != NULL &&
                     strcmp(m_hw->disk_encryptionKeyPartition_path, "")) {
                     filePath = m_hw->disk_encryptionKeyPartition_path;
-                    bufferString = StringFormat("%s.qcow2", filePath);
+                    bufferString = StringFormat("%s.qcow2", filePath.data());
                     driveParam +=
                             StringFormat("index=%d,id=encrypt,if=none,file=%s",
                                          m_driveIndex++, bufferString.c_str());

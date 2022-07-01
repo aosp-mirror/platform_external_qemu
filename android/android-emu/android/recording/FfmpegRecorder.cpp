@@ -34,6 +34,7 @@
 #include "android/recording/FfmpegRecorder.h"
 
 #include "android/base/Log.h"                   // for LogStream, LogMessage
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"      // for FuncDelete
 #include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
 #include "android/base/system/System.h"         // for System
@@ -76,6 +77,7 @@ struct SwsContext;
 #include <cstdint>                              // for uint8_t
 #include <functional>                           // for __base
 #include <string>                               // for string, basic_string
+#include <string_view>
 #include <utility>                              // for move
 #include <vector>                               // for vector
 
@@ -125,8 +127,8 @@ public:
     // Ctor
     FfmpegRecorderImpl(uint16_t fbWidth,
                        uint16_t fbHeight,
-                       android::base::StringView filename,
-                       android::base::StringView containerFormat);
+                       std::string_view filename,
+                       std::string_view containerFormat);
 
     virtual ~FfmpegRecorderImpl();
 
@@ -144,8 +146,8 @@ public:
 private:
     // Initalizes the output context for the muxer. This call is required for
     // adding video/audio contexts and starting the recording.
-    bool initOutputContext(android::base::StringView filename,
-                           android::base::StringView containerFormat);
+    bool initOutputContext(std::string_view filename,
+                           std::string_view containerFormat);
 
     void attachAudioProducer(std::unique_ptr<Producer> producer);
     void attachVideoProducer(std::unique_ptr<Producer> producer);
@@ -228,11 +230,10 @@ private:
     std::unique_ptr<Producer> mVideoProducer;
 };
 
-FfmpegRecorderImpl::FfmpegRecorderImpl(
-        uint16_t fbWidth,
-        uint16_t fbHeight,
-        android::base::StringView filename,
-        android::base::StringView containerFormat)
+FfmpegRecorderImpl::FfmpegRecorderImpl(uint16_t fbWidth,
+                                       uint16_t fbHeight,
+                                       std::string_view filename,
+                                       std::string_view containerFormat)
     : mFbWidth(fbWidth), mFbHeight(fbHeight) {
     assert(mFbWidth > 0 && mFbHeight > 0);
     mValid = initOutputContext(filename, containerFormat);
@@ -248,9 +249,8 @@ bool FfmpegRecorderImpl::isValid() {
     return mValid;
 }
 
-bool FfmpegRecorderImpl::initOutputContext(
-        android::base::StringView filename,
-        android::base::StringView containerFormat) {
+bool FfmpegRecorderImpl::initOutputContext(std::string_view filename,
+                                           std::string_view containerFormat) {
     if (mStarted) {
         LOG(ERROR) << ": Recording already started";
         return false;
@@ -1043,8 +1043,8 @@ void FfmpegRecorderImpl::avLoggingCallback(void* ptr, int level, const char* fmt
 std::unique_ptr<FfmpegRecorder> FfmpegRecorder::create(
         uint16_t fbWidth,
         uint16_t fbHeight,
-        android::base::StringView filename,
-        android::base::StringView containerFormat) {
+        std::string_view filename,
+        std::string_view containerFormat) {
     return std::unique_ptr<FfmpegRecorder>(new FfmpegRecorderImpl(
             fbWidth, fbHeight, filename, containerFormat));
 }

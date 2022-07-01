@@ -75,6 +75,7 @@
 #include <math.h>     // for cos, s
 #include <algorithm>  // for min, max
 #include <string>     // for string
+#include <string_view>
 #include <utility>    // for move
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -191,7 +192,7 @@ LocationPage::LocationPage(QWidget* parent)
 
             auto studioMapsKey = android::location::StudioMapsKey::create(
                     mapsFile,
-                    [](android::base::StringView mapsFile, void* opaque) {
+                    [](std::string_view mapsFile, void* opaque) {
                         auto s = reinterpret_cast<LocationPage*>(opaque);
                         if (!mapsFile.empty()) {
                             auto mapsKeyHolder =

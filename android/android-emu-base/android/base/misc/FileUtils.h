@@ -12,9 +12,9 @@
 #pragma once
 
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
 
 #include <string>
+#include <string_view>
 
 namespace android {
 
@@ -23,7 +23,7 @@ namespace android {
 bool readFileIntoString(int fd, std::string* file_contents);
 
 // Reads |name| file
-base::Optional<std::string> readFileIntoString(base::StringView name);
+base::Optional<std::string> readFileIntoString(std::string_view name);
 
 // Writes |file_contents| to |fd|
 // Returns false if something went wrong

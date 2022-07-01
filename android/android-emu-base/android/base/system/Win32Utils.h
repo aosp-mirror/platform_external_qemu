@@ -19,12 +19,12 @@
 #else  // _WIN32
 
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
 
 #include <memory>
 #include <windows.h>
 
 #include <string>
+#include <string_view>
 
 typedef enum {
     SVC_ERROR_OPENSCMANAGER = -3,
@@ -65,7 +65,7 @@ public:
     // backslashes. The function returns a new string that contains a version
     // of |commandLine| that can be decoded properly by CommandLineToArgv().
     // |commandLine| must be null-terminated.
-    static std::string quoteCommandLine(StringView commandLine);
+    static std::string quoteCommandLine(std::string_view commandLine);
 
     // Creates a UTF-8 encoded error message string from a Windows System Error
     // Code.  String returned depends on current language id.  See

@@ -16,6 +16,7 @@
 
 #include "android/virtualscene/TextureUtils.h"
 #include <string>
+#include <string_view>
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
@@ -76,7 +77,7 @@ TextureUtils::Result TextureUtils::createPlaceholder() {
 
 Optional<TextureUtils::Result> TextureUtils::load(const char* filename,
                                                   Orientation orientation) {
-    const base::StringView extension = PathUtils::extension(filename);
+    const std::string_view extension = PathUtils::extension(filename);
 
     if (strncasecmp(extension.data(), ".png", extension.size()) == 0) {
         return loadPNG(filename, orientation);

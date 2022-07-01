@@ -11,6 +11,8 @@
 
 #include "android/base/files/Stream.h"
 
+#include <string_view>
+
 #include <assert.h>
 #include <string.h>
 
@@ -100,21 +102,23 @@ float Stream::getFloat() {
     return u.f;
 }
 
-void Stream::putString(StringView str) {
-    this->putBe32(str.size());
-    this->write(str.data(), str.size());
-}
-
 void Stream::putString(const char* str) {
-    putString(StringView(str));
+    if (str) {
+        putString(str, strlen(str));
+    } else {
+        putString("", 0);
+    }
 }
 
 void Stream::putString(const std::string& str) {
-    putString(StringView(str));
+    putString(str.data(), str.size());
 }
 
 void Stream::putString(const char* str, size_t len) {
-    putString(StringView(str, len));
+    if (str) {
+        this->putBe32(len);
+        this->write(str, len);
+    }
 }
 
 std::string Stream::getString() {

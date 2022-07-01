@@ -18,7 +18,6 @@
 #include <QWidget>    // for QWidget
 #include <set>        // for set, set<>::const_iterator
 
-#include "android/base/StringView.h"     // for StringView
 #include "android/base/files/IniFile.h"  // for IniFile
 #include "ui_ConfirmDialog.h"            // for ConfirmDialog
 

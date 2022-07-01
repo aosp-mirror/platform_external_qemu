@@ -12,18 +12,18 @@
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulation/internal/CpuAccelerator.h"
 
-#include "android/base/StringView.h"
 #include "android/base/system/System.h"
 
 #include <gtest/gtest.h>
 
 #include <string>
+#include <string_view>
 
 #include <stdio.h>
 
-using android::base::StringView;
 using android::base::System;
 using android::base::Version;
+
 
 namespace android {
 

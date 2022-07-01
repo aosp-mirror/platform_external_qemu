@@ -253,9 +253,9 @@ TEST_F(FeatureControlTest, parseEnvironment) {
     system.envSet(
             "ANDROID_EMULATOR_FEATURES",
             android::base::StringFormat(
-                    "%s,%s,-%s", FeatureControlImpl::toString(Feature::Wifi),
-                    FeatureControlImpl::toString(Feature::EncryptUserData),
-                    FeatureControlImpl::toString(Feature::GLPipeChecksum)));
+                    "%s,%s,-%s", FeatureControlImpl::toString(Feature::Wifi).data(),
+                    FeatureControlImpl::toString(Feature::EncryptUserData).data(),
+                    FeatureControlImpl::toString(Feature::GLPipeChecksum).data()));
     writeDefaultIniHost(mAllOffIni);
     writeDefaultIniGuest(mAllOffIniGuestOnly);
     loadAllIni();
@@ -273,9 +273,9 @@ TEST_F(FeatureControlTest, writesFeatureToStream) {
     system.envSet(
             "ANDROID_EMULATOR_FEATURES",
             android::base::StringFormat(
-                    "%s,%s,-%s", FeatureControlImpl::toString(Feature::Wifi),
-                    FeatureControlImpl::toString(Feature::EncryptUserData),
-                    FeatureControlImpl::toString(Feature::GLPipeChecksum)));
+                    "%s,%s,-%s", FeatureControlImpl::toString(Feature::Wifi).data(),
+                    FeatureControlImpl::toString(Feature::EncryptUserData).data(),
+                    FeatureControlImpl::toString(Feature::GLPipeChecksum).data()));
     writeDefaultIniHost(mAllOffIni);
     writeDefaultIniGuest(mAllOffIniGuestOnly);
     loadAllIni();

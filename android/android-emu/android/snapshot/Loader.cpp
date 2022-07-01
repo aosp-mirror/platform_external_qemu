@@ -46,7 +46,7 @@ Loader::Loader(const Snapshot& snapshot, int error)
 
     {
         const auto ram = android::base::fsopen(
-                PathUtils::join(mSnapshot.dataDir(), kRamFileName).c_str(),
+                PathUtils::join(mSnapshot.dataDir().data(), kRamFileName).c_str(),
                 "rb", android::base::FileShare::Read);
         if (!ram) {
             mSnapshot.saveFailure(FailureReason::NoRamFile);
@@ -65,7 +65,7 @@ Loader::Loader(const Snapshot& snapshot, int error)
     }
     {
         const auto textures = android::base::fsopen(
-                PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
+                PathUtils::join(mSnapshot.dataDir().data(), "textures.bin").c_str(),
                 "rb", android::base::FileShare::Read);
         if (!textures) {
             mSnapshot.saveFailure(FailureReason::NoTexturesFile);
@@ -205,7 +205,7 @@ void Loader::synchronize(bool isOnExit) {
 
         if (!mRamLoader->hasGaps()) {
             const auto ram = ::android_fopen(
-                    PathUtils::join(mSnapshot.dataDir(), kRamFileName).c_str(), "rb");
+                    PathUtils::join(mSnapshot.dataDir().data(), kRamFileName).c_str(), "rb");
 
             if (!ram) return;
 

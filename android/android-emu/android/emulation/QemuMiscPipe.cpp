@@ -28,7 +28,7 @@
 #include "android/avd/hw-config.h"                       // for AndroidHwConfig
 #include "android/avd/info.h"                            // for avdInfo_getA...
 #include "android/base/ProcessControl.h"                 // for restartEmulator
-#include "android/base/StringView.h"                     // for CStrWrapper
+
 #include "android/base/files/MemStream.h"                // for MemStream
 #include "android/base/files/PathUtils.h"                // for PathUtils
 #include "android/base/misc/StringUtils.h"               // for Split
@@ -166,7 +166,8 @@ static AConfig* miscPipeGetForegroundConfig() {
     char* skinDir;
 
     avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
-    std::string layoutPath = android::base::PathUtils::join(skinDir, skinName, "layout");
+    std::string layoutPath = android::base::PathUtils::join(
+            skinDir ? skinDir : "", skinName ? skinName : "", "layout");
     AConfig* rootConfig = aconfig_node("", "");
     aconfig_load_file(rootConfig, layoutPath.c_str());
 

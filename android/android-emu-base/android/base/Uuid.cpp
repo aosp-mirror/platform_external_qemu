@@ -11,6 +11,10 @@
 
 #include "android/base/Uuid.h"
 
+#include "android/base/files/PathUtils.h"
+
+#include <string_view>
+
 #ifdef _WIN32
 #include <rpc.h>
 #else
@@ -40,7 +44,7 @@ void* Uuid::dataPtr() {
 //
 //   Rpc strings are unsigned chars. Bummer #2.
 
-Uuid::Uuid(StringView asString) {
+Uuid::Uuid(std::string_view asString) {
     static_assert(sizeof(Uuid::data_t) >= sizeof(UUID),
                   "Uuid::data_t is too small on Windows");
 
@@ -90,7 +94,7 @@ using asSystem = typename std::conditional<
         T*  // when casting a struct cast to a pointer
         >::type;
 
-Uuid::Uuid(StringView asString) {
+Uuid::Uuid(std::string_view asString) {
     static_assert(sizeof(Uuid::data_t) >= sizeof(uuid_t),
                   "Uuid::data_t is too small on Posix");
 

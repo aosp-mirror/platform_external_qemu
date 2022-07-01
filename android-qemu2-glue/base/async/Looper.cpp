@@ -30,6 +30,7 @@ extern "C" {
 }  // extern "C"
 
 #include <list>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 
@@ -79,7 +80,7 @@ public:
         DCHECK(mPendingFdWatches.empty());
     }
 
-    base::StringView name() const override { return "QEMU2 main loop"; }
+    std::string_view name() const override { return "QEMU2 main loop"; }
 
     static QEMUClockType toQemuClockType(ClockType clock) {
         static_assert((int) QEMU_CLOCK_HOST == (int) BaseLooper::ClockType::kHost &&

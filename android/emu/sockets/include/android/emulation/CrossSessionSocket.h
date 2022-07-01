@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/base/async/Looper.h"
 #include "android/base/async/ScopedSocketWatch.h"
 #include "android/base/sockets/ScopedSocket.h"

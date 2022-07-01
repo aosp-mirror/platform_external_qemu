@@ -12,12 +12,13 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/StringView.h"
+
 #include "android/base/async/Looper.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/common.h"
 
+#include <string_view>
 namespace android {
 namespace snapshot {
 
@@ -34,18 +35,19 @@ public:
 
     static constexpr const char* kDefaultBootSnapshot = "default_boot";
 
-    bool load(base::StringView name);
-    bool save(base::StringView name);
-    void invalidate(base::StringView name);
+    bool load(const char* name);
+    bool save(std::string_view name);
+    void invalidate(std::string_view name);
 
     void setShortRunCheck(bool enable);
 
 private:
-    void decideFailureReport(base::StringView name,
-                             const base::Optional<FailureReason>& failureReason);
-    void reportSuccessfulLoad(base::StringView name,
+    void decideFailureReport(
+            std::string_view name,
+            const base::Optional<FailureReason>& failureReason);
+    void reportSuccessfulLoad(std::string_view name,
                               base::System::WallDuration startTimeMs);
-    void reportSuccessfulSave(base::StringView name,
+    void reportSuccessfulSave(std::string_view name,
                               base::System::WallDuration durationMs,
                               base::System::WallDuration sessionUptimeMs);
 

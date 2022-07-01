@@ -15,7 +15,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/StringView.h"
+
 #include "android/base/async/Looper.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
@@ -24,6 +24,7 @@
 
 #include <functional>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 namespace android {
@@ -61,7 +62,7 @@ public:
         const base::System::Duration hangCheckTimeoutMs;
     };
 
-    using HangCallback = std::function<void(base::StringView message)>;
+    using HangCallback = std::function<void(std::string_view message)>;
     using HangPredicate = std::function<bool()>;
 
     HangDetector(HangCallback&& hangCallback, Timing timing = defaultTiming());

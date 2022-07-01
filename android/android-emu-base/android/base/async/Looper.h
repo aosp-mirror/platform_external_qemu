@@ -16,6 +16,7 @@
 
 #include <functional>
 #include <memory>
+#include <string_view>
 #include <utility>
 
 #include <inttypes.h>
@@ -59,7 +60,7 @@ public:
     virtual ~Looper();
 
     // Return the current looper's name - useful for logging.
-    virtual StringView name() const = 0;
+    virtual std::string_view name() const = 0;
 
     // Return the current time as seen by this looper instance in
     // milliseconds and nanoseconds.

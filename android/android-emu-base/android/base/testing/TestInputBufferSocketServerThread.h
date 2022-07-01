@@ -12,10 +12,11 @@
 #include "android/base/Log.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
-#include "android/base/StringView.h"
+
 #include "android/base/threads/Thread.h"
 
 #include <string>
+#include <string_view>
 
 #include <stddef.h>
 
@@ -57,8 +58,8 @@ public:
     // Return bound server port.
     int port() const { return android::base::socketGetPort(mSocket.get()); }
 
-    // Return buffer content as a StringView.
-    StringView view() const { return mString; }
+    // Return buffer content as a std::string_view.
+    std::string_view view() const { return mString; }
 
     // Main function simply receives everything and stores it in a string.
     virtual intptr_t main() override {

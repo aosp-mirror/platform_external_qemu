@@ -20,12 +20,13 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 
-using android::base::StringView;
 using android::base::System;
 using android::base::TestSystem;
 using android::base::TestTempDir;
 using std::string;
+
 using std::unique_ptr;
 
 // Initial image size needs to be > 200MB
@@ -43,8 +44,8 @@ public:
                      System::kProgramBitness) {}
 
     // Make sure we use real path resolution vs, test system one.
-    virtual bool pathIsFile(StringView path) const override {
-       return hostSystem()->pathIsFile(path);
+    virtual bool pathIsFile(std::string_view path) const override {
+        return hostSystem()->pathIsFile(path);
     }
 
     // Run commands using original system, vs. test system

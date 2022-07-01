@@ -394,11 +394,11 @@ int qemu_setup_grpc() {
         props["grpc.token"] = token;
     }
     if (getConsoleAgents()->settings->android_cmdLineOptions()->grpc_use_jwt) {
-        auto jwkDir = android::base::pj(
+        auto jwkDir = android::base::pj({
                 android::ConfigDirs::getDiscoveryDirectory(),
                 std::to_string(
                         android::base::System::get()->getCurrentProcessId()),
-                "jwks", android::base::Uuid::generate().toString());
+                "jwks", android::base::Uuid::generate().toString()});
         auto jwkLoadedFile = android::base::pj(jwkDir, "active.jwk");
         if (path_mkdir_if_needed(jwkDir.c_str(), 0700) != 0) {
             dfatal("Failed to create jwk directory %s", jwkDir.c_str());

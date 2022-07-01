@@ -12,13 +12,14 @@
 #pragma once
 
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
+
 #include "android/base/threads/Thread.h"
 #include "android/base/Version.h"
 #include "android/update-check/IVersionExtractor.h"
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include <time.h>
@@ -26,7 +27,7 @@
 namespace android {
 namespace update_check {
 
-using android::base::StringView;
+
 
 // Set of interfaces for the operations UpdateChecker performs:
 //  IDataLoader - download the xml manifest from the Web site

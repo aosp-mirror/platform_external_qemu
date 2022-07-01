@@ -18,11 +18,11 @@
 #include "android/base/CpuTime.h"
 #include "android/base/EnumFlags.h"
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
 
 #include <algorithm>
 #include <mutex>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <limits.h>
@@ -179,9 +179,10 @@ public:
     static bool isUnderMemoryPressure(int* freeRamMb = nullptr);
 
     static constexpr System::FileSize kDiskPressureLimitBytes = 2147483648ULL;
-    static bool isUnderDiskPressure(StringView path, System::FileSize* freeDisk = nullptr);
+    static bool isUnderDiskPressure(std::string_view path,
+                                    System::FileSize* freeDisk = nullptr);
 
-    static System::FileSize getFilePageSizeForPath(StringView path);
+    static System::FileSize getFilePageSizeForPath(std::string_view path);
     static System::FileSize getAlignedFileSize(System::FileSize align, System::FileSize size);
 
     // Return the program bitness as an integer, either 32 or 64.
@@ -234,15 +235,22 @@ public:
     // If the variable is not defined, return an empty string.
     // NOTE: On Windows, this uses _wgetenv() and returns the corresponding
     // UTF-8 text string.
-    virtual std::string envGet(StringView varname) const = 0;
+    virtual std::string envGet(std::string_view varname) const = 0;
 
     // Set the value of a given environment variable.
     // If |varvalue| is NULL or empty, this unsets the variable.
     // Equivalent to setenv().
-    virtual void envSet(StringView varname, StringView varvalue) = 0;
+    virtual void envSet(const std::string& varname,
+                        const std::string& varvalue) = 0;
 
+    virtual void envSet(const char* varname, const char* varvalue) final {
+        if (!varname) {
+            return;
+        }
+        envSet(std::string(varname), varvalue ? std::string(varvalue) : "");
+    }
     // Returns true if environment variable |varname| is set and non-empty.
-    virtual bool envTest(StringView varname) const = 0;
+    virtual bool envTest(std::string_view varname) const = 0;
 
     // Returns all environment variables from the current process in a
     // "name=value" form
@@ -252,7 +260,7 @@ public:
     // only alters an environment variable like PATH or LD_LIBRARY_PATH,
     // and thus typically takes effect only after spawning/executing a new
     // process.
-    static void addLibrarySearchDir(StringView dirPath);
+    static void addLibrarySearchDir(std::string_view dirPath);
 
     // /////////////////////////////////////////////////////////////////////////
     // Path functions that interact with the file system.
@@ -260,27 +268,27 @@ public:
     // /////////////////////////////////////////////////////////////////////////
 
     // Return true iff |path| exists on the file system.
-    virtual bool pathExists(StringView path) const = 0;
+    virtual bool pathExists(std::string_view path) const = 0;
 
     // Return true iff |path| exists and is a regular file on the file system.
-    virtual bool pathIsFile(StringView path) const = 0;
+    virtual bool pathIsFile(std::string_view path) const = 0;
 
     // Return true iff |path| exists and is a directory on the file system.
-    virtual bool pathIsDir(StringView path) const = 0;
+    virtual bool pathIsDir(std::string_view path) const = 0;
 
     // Return true iff |path| exists and is a symbolic link the file system.
-    virtual bool pathIsLink(StringView path) const = 0;
+    virtual bool pathIsLink(std::string_view path) const = 0;
 
     // Return true iff |path| exists and can be read by the current user.
-    virtual bool pathCanRead(StringView path) const = 0;
+    virtual bool pathCanRead(std::string_view path) const = 0;
 
     // Return true iff |path| exists and can be written to by the current
     // user.
-    virtual bool pathCanWrite(StringView path) const = 0;
+    virtual bool pathCanWrite(std::string_view path) const = 0;
 
     // Return true iff |path| exists and can be executed to by the current
     // user.
-    virtual bool pathCanExec(StringView path) const = 0;
+    virtual bool pathCanExec(std::string_view path) const = 0;
 
     // A wrapper for int open(filename, oflag, pmode) to support unicode paths
     // on Windows.
@@ -288,13 +296,14 @@ public:
 
     // Function for deleting files. Return true iff
     // (|path| is a file and we have successfully deleted it)
-    virtual bool deleteFile(StringView path) const = 0;
+    virtual bool deleteFile(std::string_view path) const = 0;
 
     // Get the size of file at |path|.
     // Fails if path is not a file or not readable, and in case of other errors.
-    virtual bool pathFileSize(StringView path, FileSize* outFileSize) const = 0;
+    virtual bool pathFileSize(std::string_view path,
+                              FileSize* outFileSize) const = 0;
     virtual bool fileSize(int fd, FileSize* outFileSize) const = 0;
-    Optional<FileSize> pathFileSize(StringView path) {
+    Optional<FileSize> pathFileSize(std::string_view path) {
         FileSize res;
         return pathFileSize(path, &res) ? makeOptional(res) : kNullopt;
     }
@@ -306,46 +315,49 @@ public:
     // Get the size of the directory at |path|. Include all files
     // and subdirectories, recursively.
     // If |path| is a regular file, return the size of that file.
-    virtual FileSize recursiveSize(StringView path) const = 0;
+    virtual FileSize recursiveSize(std::string_view path) const = 0;
 
     // Get the amount of free disk space, in bytes, at |path|.
     // Returns 'false' on error.
-    virtual bool pathFreeSpace(StringView path, FileSize* spaceInBytes) const = 0;
+    virtual bool pathFreeSpace(std::string_view path,
+                               FileSize* spaceInBytes) const = 0;
 
     // Locate a command if it is not an absolute path, note that on win32 the
     // current directory is included in the search!
-    virtual Optional<std::string> which(StringView executable) const = 0;
+    virtual Optional<std::string> which(std::string_view executable) const = 0;
 
     // Gets the file creation timestamp as a Unix epoch time with microsecond
     // resolution. Returns an empty optional for systems that don't support
     // creation times (Linux) or if the operation failed.
-    virtual Optional<Duration> pathCreationTime(StringView path) const = 0;
+    virtual Optional<Duration> pathCreationTime(
+            std::string_view path) const = 0;
 
     // Gets the file modification timestamp as a Unix epoch time with
     // microsecond resolution. Returns an empty optional for systems that don't
     // support modification times or if the operation failed.
-    virtual Optional<Duration> pathModificationTime(StringView path) const = 0;
+    virtual Optional<Duration> pathModificationTime(
+            std::string_view path) const = 0;
 
     // Known distinct kinds of disks.
     enum class DiskKind {
         Hdd,
         Ssd
     };
-    virtual Optional<DiskKind> pathDiskKind(StringView path) = 0;
+    virtual Optional<DiskKind> pathDiskKind(std::string_view path) = 0;
     virtual Optional<DiskKind> diskKind(int fd) = 0;
 
     // Scan directory |dirPath| for entries, and return them as a sorted
     // vector or entries. If |fullPath| is true, then each item of the
     // result vector contains a full path.
     virtual std::vector<std::string> scanDirEntries(
-            StringView dirPath,
+            std::string_view dirPath,
             bool fullPath = false) const = 0;
 
     // Find a bundled executable named |programName|, it must appear in the
     // kBinSubDir of getLauncherDirectory(). The name should not include the
     // executable extension (.exe) on Windows.
     // Return an empty string if the file doesn't exist.
-    static std::string findBundledExecutable(StringView programName);
+    static std::string findBundledExecutable(std::string_view programName);
 
     // Return the path of the current program's directory.
     virtual const std::string& getProgramDirectory() const = 0;
@@ -369,7 +381,7 @@ public:
 
     // Set the current directory path. Returns true if the directory was
     // successfully changed.
-    virtual bool setCurrentDirectory(StringView directory) = 0;
+    virtual bool setCurrentDirectory(std::string_view directory) = 0;
 
     // Return the path of a temporary directory appropriate for the system.
     virtual std::string getTempDir() const = 0;
@@ -465,7 +477,8 @@ public:
                             System::ProcessExitCode* outExitCode = nullptr) = 0;
 
     static std::vector<Pid> queryRunningProcessPids(
-        const std::vector<StringView>& targets, bool approxMatch = true);
+            const std::vector<std::string_view>& targets,
+            bool approxMatch = true);
 
     static void deleteTempDir();
 
@@ -483,7 +496,7 @@ public:
     // like btrfs that interfere with emulator performance.
     // This is a function to attempt to disable them in performance-
     // critical directories.
-    static void disableCopyOnWriteForPath(StringView path);
+    static void disableCopyOnWriteForPath(std::string_view path);
 
     // bug: 117923532
     // macOS will make the emulator nap, which will mess up timers
@@ -500,13 +513,18 @@ public:
 
     // Static version that sets or queries host environment variables
     // regardless of being TestSystem.
-    static void setEnvironmentVariable(StringView varname, StringView varvalue);
-    static std::string getEnvironmentVariable(StringView varname);
+    static void setEnvironmentVariable(std::string_view varname,
+                                       std::string_view varvalue);
+    static std::string getEnvironmentVariable(std::string_view varname);
     static std::string getProgramDirectoryFromPlatform();
     static WallDuration getSystemTimeUs();
 
     // Windows driver file querying functions
-    static bool queryFileVersionInfo(StringView path, int* major, int* minor, int* build_1, int* build_2);
+    static bool queryFileVersionInfo(std::string_view path,
+                                     int* major,
+                                     int* minor,
+                                     int* build_1,
+                                     int* build_2);
 
 protected:
     size_t mMemorySize = 0;
@@ -517,24 +535,27 @@ protected:
     // Internal implementation of scanDirEntries() that can be used by
     // mock implementation using a fake file system rooted into a temporary
     // directory or something like that. Always returns short paths.
-    static std::vector<std::string> scanDirInternal(StringView dirPath);
+    static std::vector<std::string> scanDirInternal(std::string_view dirPath);
 
-    static bool pathExistsInternal(StringView path);
-    static bool pathIsFileInternal(StringView path);
-    static bool pathIsDirInternal(StringView path);
-    static bool pathIsLinkInternal(StringView path);
-    static bool pathCanReadInternal(StringView path);
-    static bool pathCanWriteInternal(StringView path);
-    static bool pathCanExecInternal(StringView path);
+    static bool pathExistsInternal(std::string_view path);
+    static bool pathIsFileInternal(std::string_view path);
+    static bool pathIsDirInternal(std::string_view path);
+    static bool pathIsLinkInternal(std::string_view path);
+    static bool pathCanReadInternal(std::string_view path);
+    static bool pathCanWriteInternal(std::string_view path);
+    static bool pathCanExecInternal(std::string_view path);
     static int pathOpenInternal(const char *filename, int oflag, int pmode);
-    static bool deleteFileInternal(StringView path);
-    static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
+    static bool deleteFileInternal(std::string_view path);
+    static bool pathFileSizeInternal(std::string_view path,
+                                     FileSize* outFileSize);
     static bool fileSizeInternal(int fd, FileSize* outFileSize);
-    static bool pathFreeSpaceInternal(StringView path, FileSize* spaceInBytes);
-    static FileSize recursiveSizeInternal(StringView path);
-    static Optional<Duration> pathCreationTimeInternal(StringView path);
-    static Optional<Duration> pathModificationTimeInternal(StringView path);
-    static Optional<DiskKind> diskKindInternal(StringView path);
+    static bool pathFreeSpaceInternal(std::string_view path,
+                                      FileSize* spaceInBytes);
+    static FileSize recursiveSizeInternal(std::string_view path);
+    static Optional<Duration> pathCreationTimeInternal(std::string_view path);
+    static Optional<Duration> pathModificationTimeInternal(
+            std::string_view path);
+    static Optional<DiskKind> diskKindInternal(std::string_view path);
     static Optional<DiskKind> diskKindInternal(int fd);
 
 private:

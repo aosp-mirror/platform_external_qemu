@@ -98,19 +98,19 @@ public:
         std::vector<std::string> todo = {};
 
         for (const auto& s : mInfos) {
-            mValidParents.insert(s.name());
+            mValidParents.insert(s.name().data());
         }
 
         for (auto& s : mInfos) {
             if (!s.parent()) {
-                roots.push_back(s.name());
+                roots.emplace_back(s.name());
                 D("root: %s", s.name().c_str());
             } else {
                 const auto p = *(s.parent());
                 if (mValidParents.find(p) != mValidParents.end()) {
-                    mNextParentMap[s.name()] = p;
+                    mNextParentMap[s.name().data()] = p;
                     auto& children = deps[p];
-                    children.push_back(s.name());
+                    children.push_back(s.name().data());
                     D("edge: %s -- parent of --> %s",
                       p.c_str(), s.name().c_str());
                 } else {
@@ -131,15 +131,15 @@ public:
                           s.name().c_str());
                         // Could not recover a suitable new parent.
                         // This snapshot is now a new root.
-                        roots.push_back(s.name());
+                        roots.push_back(s.name().data());
                     } else {
                         // We can patch the hole in the tree.
                         // Set a new parent for that snapshot.
                         auto& children = deps[parentIt->second];
-                        children.push_back(s.name());
+                        children.push_back(s.name().data());
                         D("recovered edge: %s -- parent of --> %s",
                           parentIt->second.c_str(), s.name().c_str());
-                        mNextParentMap[s.name()] = parentIt->second;
+                        mNextParentMap[s.name().data()] = parentIt->second;
                     }
                 }
             }

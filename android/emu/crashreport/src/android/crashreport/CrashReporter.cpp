@@ -23,7 +23,6 @@
 #include <utility>   // for move
 #include <vector>    // for vector<>::it...
 
-#include "android/base/StringView.h"                     // for CStrWrapper
 #include "android/base/files/PathUtils.h"                // for pj, PathUtils
 #include "android/base/memory/LazyInstance.h"            // for LazyInstance
 #include "android/base/system/System.h"                  // for System

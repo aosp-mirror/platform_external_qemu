@@ -14,7 +14,7 @@
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
-#include "android/base/StringView.h"
+
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
 #include "android/base/Uri.h"
@@ -34,6 +34,7 @@
 #include <iterator>
 #include <new>
 #include <string>
+#include <string_view>
 
 #include <assert.h>
 #include <errno.h>
@@ -44,16 +45,16 @@ using android::base::async;
 using android::base::Optional;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
-using android::base::StringView;
 using android::base::System;
 using android::base::Uri;
 using android::base::Version;
 using android::update_check::UpdateChecker;
 
+
 static const char kDataFileName[] = "emu-update-last-check.ini";
 // TODO: kVersionUrl should not be fixed; XY in repository-XY.xml
 //       might change with studio updates irrelevant to the emulator
-static constexpr StringView kVersionUrl =
+static constexpr std::string_view kVersionUrl =
         "https://dl.google.com/android/repository/repository2-1.xml";
 
 static const char kNewerVersionMessage[] =
@@ -91,7 +92,7 @@ static size_t curlWriteCallback(char* contents,
     return total;
 }
 
-static StringView toOsArchString(int bitness) {
+static std::string_view toOsArchString(int bitness) {
     switch (bitness) {
     case 32:
         return "x86";
@@ -105,11 +106,11 @@ static StringView toOsArchString(int bitness) {
 
 class DataLoader final : public IDataLoader {
 public:
-    DataLoader(StringView coreVersion) : mCoreVersion(coreVersion) {}
+    DataLoader(const char* coreVersion) { if (coreVersion) mCoreVersion = coreVersion; }
 
     virtual std::string load() override {
         std::string xml;
-        std::string url = kVersionUrl;
+        std::string url(kVersionUrl);
         if (!mCoreVersion.empty()) {
             const auto& id = android::studio::getInstallationId();
             url += Uri::FormatEncodeArguments(

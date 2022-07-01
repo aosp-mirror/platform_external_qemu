@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <regex>
 #include <string>
+#include <string_view>
 
 #include "android/base/testing/ProtobufMatchers.h"
 
@@ -75,11 +76,11 @@ bool ProtoComparable(const google::protobuf::Message& p,
 
 template <typename Container>
 std::string JoinStringPieces(const Container& strings,
-                             base::StringView separator) {
+                             std::string_view separator) {
     std::stringstream stream;
-    base::StringView sep = "";
-    for (const base::StringView str : strings) {
-        stream << sep.str() << str.str();
+    std::string_view sep = "";
+    for (const std::string_view str : strings) {
+        stream << sep << str;
         sep = separator;
     }
     return stream.str();
@@ -90,7 +91,7 @@ std::vector<const google::protobuf::FieldDescriptor*> GetFieldDescriptors(
         const google::protobuf::Descriptor* proto_descriptor,
         const std::vector<std::string>& ignore_fields) {
     std::vector<const google::protobuf::FieldDescriptor*> ignore_descriptors;
-    std::vector<base::StringView> remaining_descriptors;
+    std::vector<std::string_view> remaining_descriptors;
 
     const google::protobuf::DescriptorPool* pool =
             proto_descriptor->file()->pool();

@@ -21,7 +21,9 @@
 #include "android/avd/info.h"                               // for AvdInfo
 #include "android/base/Debug.h"                             // for IsDebugge...
 #include "android/base/Log.h"                               // for base
-#include "android/base/StringView.h"                        // for StringView
+
+#include <string_view>
+
 #include "android/base/async/ThreadLooper.h"                // for ThreadLooper
 #include "android/cmdline-definitions.h"                    // for AndroidOp...
 #include "android/console.h"                                // for getConsol...
@@ -39,7 +41,7 @@ class HangDetectorTest : public ::testing::Test {
 public:
     HangDetectorTest()
         : mHangDetector(
-                  [this](StringView msg) {
+                  [this](std::string_view msg) {
                       android::base::AutoLock lock(mLock);
                       mHangDetected = true;
                       mHangCondition.signalAndUnlock(&lock);

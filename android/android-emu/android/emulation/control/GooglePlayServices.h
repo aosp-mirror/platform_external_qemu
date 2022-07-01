@@ -18,9 +18,10 @@
 #include "android/base/system/System.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 
-#include <iosfwd>
 #include <functional>
+#include <iosfwd>
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace emulation {
@@ -36,8 +37,7 @@ public:
 
     using ResultCallback = std::function<void(Result result)>;
     using ResultOutputCallback =
-            std::function<void(Result result,
-                               android::base::StringView outString)>;
+            std::function<void(Result result, std::string_view outString)>;
 
     explicit GooglePlayServices(AdbInterface* adb) : mAdb(adb) {}
     ~GooglePlayServices();
@@ -47,7 +47,7 @@ public:
     // Get a string of the latest version number of play services.
     void getPlayServicesVersion(ResultOutputCallback resultCallback);
     // Get a system property.
-    void getSystemProperty(android::base::StringView sysProp,
+    void getSystemProperty(std::string_view sysProp,
                            ResultOutputCallback resultCallback);
 
     // Parses the contents of |output| stream as if it was the output from
@@ -60,7 +60,7 @@ public:
 
 private:
     static const android::base::System::Duration kAdbCommandTimeoutMs;
-    static constexpr android::base::StringView kPlayServicesPkgName =
+    static constexpr std::string_view kPlayServicesPkgName =
             "com.google.android.gms";
 
     AdbInterface* mAdb;

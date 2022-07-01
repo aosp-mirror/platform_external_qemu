@@ -14,7 +14,7 @@
 #ifdef USE_WEBENGINE // This entire file is stubbed out if we don't have WebEngine
 
 #include "android/base/files/PathUtils.h"
-#include "android/base/StringView.h"
+
 #include "android/emulation/ConfigDirs.h"
 #include "android/location/Point.h"
 #include "android/metrics/MetricsReporter.h"
@@ -42,6 +42,7 @@
 #endif  // QT_VERSION
 
 #include <fstream>
+#include <string_view>
 
 static const char PROTO_FILE_NAME[] = "point_metadata.pb";
 
@@ -462,12 +463,12 @@ bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) {
 void LocationPage::deletePoint(PointWidgetItem* item) {
     auto& pointElement = item->pointElement();
     std::string protobufName = pointElement.protoFilePath.toStdString();
-    android::base::StringView dirName;
+    std::string_view dirName;
     bool haveDirName = android::base::PathUtils::split(protobufName,
                                                        &dirName,
                                                        nullptr /* base name */);
     if (haveDirName) {
-        path_delete_dir(dirName.str().c_str());
+        path_delete_dir(dirName.data());
     }
 
     mUi->loc_pointList->setCurrentItem(nullptr);

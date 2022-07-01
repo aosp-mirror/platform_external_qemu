@@ -15,9 +15,9 @@
 // launch process with given cwd and args.
 #pragma once
 #include <string>                     // for string
+#include <string_view>
 #include <vector>                     // for vector
 
-#include "android/base/StringView.h"    // for StringView
 #include "android/base/FunctionView.h"  // for FunctionView
 
 namespace android {
@@ -41,12 +41,12 @@ ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc, const 
 std::string createEscapedLaunchString(int argc, const char* const* argv);
 std::vector<std::string> parseEscapedLaunchString(std::string launch);
 
-void saveLaunchParameters(const ProcessLaunchParameters& launchParams, StringView filename);
-
+void saveLaunchParameters(const ProcessLaunchParameters& launchParams,
+                          std::string_view filename);
 
 void finalizeEmulatorRestartParameters(const char* dir);
 
-ProcessLaunchParameters loadLaunchParameters(StringView filename);
+ProcessLaunchParameters loadLaunchParameters(std::string_view filename);
 void launchProcessFromParameters(const ProcessLaunchParameters& launchParams, bool useArgv0 = false);
 
 

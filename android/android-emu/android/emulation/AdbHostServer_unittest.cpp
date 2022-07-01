@@ -11,7 +11,6 @@
 
 #include "android/emulation/AdbHostServer.h"
 
-#include "android/base/StringView.h"
 #include "android/base/threads/Thread.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
@@ -20,13 +19,14 @@
 
 #include <gtest/gtest.h>
 
+#include <string_view>
+
 #include <stdint.h>
 
 namespace android {
 namespace emulation {
 
 using android::base::ScopedSocket;
-using android::base::StringView;
 using android::base::TestSystem;
 
 
@@ -46,7 +46,7 @@ TEST(AdbHostServer, notify) {
     EXPECT_TRUE(serverThread.wait(&bufferSize));
 
     // Verify message content.
-    constexpr StringView kExpected = "0012host:emulator:7648";
+    constexpr std::string_view kExpected = "0012host:emulator:7648";
     EXPECT_EQ(kExpected.size(), static_cast<size_t>(bufferSize));
     EXPECT_EQ(kExpected.size(), serverThread.view().size());
     EXPECT_STREQ(kExpected.data(), serverThread.view().data());

@@ -19,7 +19,7 @@
 #include <fstream>        // for ostream
 
 #include "android/base/Optional.h"             // for Optional
-#include "android/base/StringView.h"           // for String...
+
 #include "android/base/files/GzipStreambuf.h"  // for GzipIn...
 #include "android/base/files/PathUtils.h"      // for pj
 #include "android/base/system/System.h"        // for System

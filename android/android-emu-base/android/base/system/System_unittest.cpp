@@ -26,6 +26,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <string_view>
 
 #include <fcntl.h>
 #ifndef _MSC_VER
@@ -584,8 +585,8 @@ TEST(System, DISABLED_runCommandWithOutput) {
     std::vector<std::string> cmd = {"echo", "hello"};
     System::Pid pid = 666;
     System::ProcessExitCode exitCode = 0;
-    std::string outputFile = PathUtils::recompose(
-            std::vector<StringView>{System::get()->getTempDir(), "test.txt"});
+    std::string outputFile = PathUtils::recompose(std::vector<std::string_view>{
+            System::get()->getTempDir(), "test.txt"});
 
     EXPECT_TRUE(System::get()->runCommand(
             cmd, RunOptions::WaitForCompletion | RunOptions::DumpOutputToFile,

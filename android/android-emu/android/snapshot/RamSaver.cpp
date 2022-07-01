@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iterator>
+#include <string_view>
 #include <utility>
 
 #ifdef __APPLE__
@@ -309,7 +310,7 @@ void RamSaver::savePage(int64_t blockOffset,
                         auto& page = block.pages[size_t(i)];
                         // Find all corresponding loader pages
                         page.loaderPage =
-                            mLoader->findPage(mLastBlockIndex, block.ramBlock.id, i);
+                            mLoader->findPage(mLastBlockIndex, block.ramBlock.id.data(), i);
                         auto loaderPage = page.loaderPage;
                         if (loaderPage &&
                             loaderPage->state.load(std::memory_order_relaxed) <
@@ -332,7 +333,7 @@ void RamSaver::savePage(int64_t blockOffset,
                     for (int32_t i = 0; i < numPages; ++i) {
                         auto& page = block.pages[size_t(i)];
                         page.loaderPage =
-                            mLoader->findPage(mLastBlockIndex, block.ramBlock.id, i);
+                            mLoader->findPage(mLastBlockIndex, block.ramBlock.id.data(), i);
                     }
                 }
             }
@@ -549,7 +550,7 @@ void RamSaver::writeIndex() {
 
     mIncStats.measure(StatTime::DiskIndexWrite, [&] {
         for (const FileIndex::Block& b : mIndex.blocks) {
-            auto id = base::StringView(b.ramBlock.id);
+            auto id = std::string_view(b.ramBlock.id);
             stream.putByte(uint8_t(id.size()));
             stream.write(id.data(), id.size());
             stream.putBe32(uint32_t(b.pages.size()));

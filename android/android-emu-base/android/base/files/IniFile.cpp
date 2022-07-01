@@ -13,6 +13,7 @@
 
 #include "android/base/logging/Log.h"
 #include "android/utils/debug.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #ifdef _MSC_VER
 #include "android/base/system/Win32UnicodeString.h"
@@ -22,12 +23,13 @@
 #include "msvc-posix.h"
 #endif
 
+#include <fstream>
 #include <iomanip>
 #include <istream>
-#include <fstream>
 #include <sstream>
 #include <streambuf>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include <assert.h>
@@ -44,10 +46,10 @@ using std::to_string;
 using std::vector;
 
 IniFile::IniFile(const char* data, int size) {
-    readFromMemory(StringView(data, size));
+    readFromMemory(std::string_view(data, size));
 }
 
-void IniFile::setBackingFile(StringView filePath) {
+void IniFile::setBackingFile(std::string_view filePath) {
     // We have no idea what the new backing file contains.
     mDirty = true;
     mBackingFilePath = filePath;
@@ -207,8 +209,7 @@ bool IniFile::read(bool keepComments) {
     return true;
 }
 
-bool IniFile::readFromMemory(StringView data)
-{
+bool IniFile::readFromMemory(std::string_view data) {
     mDirty = false;
     mData.clear();
     mOrderList.clear();
@@ -217,7 +218,7 @@ bool IniFile::readFromMemory(StringView data)
     // Create a streambuf that's able to do a single pass over an array only.
     class OnePassIBuf : public std::streambuf {
     public:
-        OnePassIBuf(StringView data) {
+        OnePassIBuf(std::string_view data) {
             setg(const_cast<char*>(data.data()), const_cast<char*>(data.data()),
                  const_cast<char*>(data.data()) + data.size());
         }
@@ -293,11 +294,11 @@ int IniFile::size() const {
     return static_cast<int>(mData.size());
 }
 
-bool IniFile::hasKey(StringView key) const {
-    return mData.find(key) != std::end(mData);
+bool IniFile::hasKey(std::string_view key) const {
+    return mData.find(key.data()) != std::end(mData);
 }
 
-std::string IniFile::makeValidKey(StringView str) {
+std::string IniFile::makeValidKey(std::string_view str) {
     std::ostringstream res;
     res << std::hex << std::uppercase;
     res << '_'; // mark all keys passed through this function with a leading
@@ -312,9 +313,9 @@ std::string IniFile::makeValidKey(StringView str) {
     return res.str();
 }
 
-string IniFile::makeValidValue(StringView str) {
+string IniFile::makeValidValue(std::string_view str) {
     std::ostringstream res;
-    for (const char* ch = str.begin(); ch != str.end() && *ch != '\0'; ch++) {
+    for (auto ch = str.begin(); ch != str.end() && *ch != '\0'; ch++) {
         if (*ch == '%')
             res << *ch;
         res << *ch;
@@ -334,7 +335,7 @@ string IniFile::makeValidValue(StringView str) {
 // "%FOO" => "%FOO" (Not terminated)
 // "%%HI%%" => "%HI%" (Escaped)
 // Note that: %%%USER%%% is parsed as %(USER)% and not %(USER%)%
-static string envSubst(const StringView fix) {
+static string envSubst(const std::string_view fix) {
     size_t len = fix.size();
 
     string res;
@@ -385,9 +386,12 @@ static string envSubst(const StringView fix) {
     return res;
 }
 
-string IniFile::getString(const string& key, StringView defaultValue) const {
+string IniFile::getString(const string& key,
+                          std::string_view defaultValue) const {
     auto citer = mData.find(key);
-    return envSubst((citer == std::end(mData)) ? defaultValue : StringView(citer->second));
+    return envSubst((citer == std::end(mData))
+                            ? defaultValue
+                            : std::string_view(citer->second));
 }
 
 int IniFile::getInt(const string& key, int defaultValue) const {
@@ -441,7 +445,7 @@ double IniFile::getDouble(const string& key, double defaultValue) const {
     return result;
 }
 
-static bool isBoolTrue(StringView value) {
+static bool isBoolTrue(std::string_view value) {
     const char* cstr = value.data();
     const size_t size = value.size();
 
@@ -450,7 +454,7 @@ static bool isBoolTrue(StringView value) {
            strncasecmp("1", cstr, size) == 0;
 }
 
-static bool isBoolFalse(StringView value) {
+static bool isBoolFalse(std::string_view value) {
     const char* cstr = value.data();
     const size_t size = value.size();
     return strncasecmp("no", cstr, size) == 0 ||
@@ -475,12 +479,12 @@ bool IniFile::getBool(const string& key, bool defaultValue) const {
     }
 }
 
-bool IniFile::getBool(const string& key, StringView defaultValue) const {
+bool IniFile::getBool(const string& key, std::string_view defaultValue) const {
     return getBool(key, isBoolTrue(defaultValue));
 }
 
 // If not nullptr, |*outMalformed| is set to true if |valueStr| is malformed.
-static IniFile::DiskSize parseDiskSize(StringView valueStr,
+static IniFile::DiskSize parseDiskSize(std::string_view valueStr,
                                        IniFile::DiskSize defaultValue,
                                        bool* outMalformed) {
     if(outMalformed) {
@@ -536,7 +540,7 @@ IniFile::DiskSize IniFile::getDiskSize(const string& key,
 }
 
 IniFile::DiskSize IniFile::getDiskSize(const string& key,
-                                       StringView defaultValue) const {
+                                       std::string_view defaultValue) const {
     return getDiskSize(key, parseDiskSize(defaultValue, 0, nullptr));
 }
 
@@ -552,8 +556,8 @@ void IniFile::updateData(const string& key, string&& value) {
     }
 }
 
-void IniFile::setString(const string& key, StringView value) {
-    updateData(key, value);
+void IniFile::setString(const string& key, std::string_view value) {
+    updateData(key, value.data());
 }
 
 void IniFile::setInt(const string& key, int value) {
@@ -570,7 +574,7 @@ void IniFile::setDouble(const string& key, double value) {
 }
 
 void IniFile::setBool(const string& key, bool value) {
-    updateData(key, value ? StringView("true") : "false");
+    updateData(key, value ? "true" : "false");
 }
 
 void IniFile::setDiskSize(const string& key, DiskSize value) {

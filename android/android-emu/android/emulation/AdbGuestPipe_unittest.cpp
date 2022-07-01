@@ -28,6 +28,7 @@
 #endif
 
 #include <memory>
+#include <string_view>
 #include <vector>
 
 namespace android {
@@ -35,7 +36,7 @@ namespace emulation {
 
 using android::base::ScopedSocket;
 using android::base::StringFormat;
-using android::base::StringView;
+
 
 using TestGuest = TestAndroidPipeDevice::Guest;
 
@@ -75,7 +76,7 @@ public:
     // Create a socket pair and a thread that will push |data| into it
     // before trying to read a single byte from one end of the pair.
     // The other end is passed to a new active guest.
-    void createFakeConnection(StringView data) {
+    void createFakeConnection(std::string_view data) {
         CHECK(mListening);
         if (mThread.get()) {
             mThread->wait(nullptr);
@@ -93,7 +94,7 @@ private:
     // before exiting.
     class ConnectorThread : public android::base::Thread {
     public:
-        ConnectorThread(StringView data) : Thread(), mData(data) {
+        ConnectorThread(std::string_view data) : Thread(), mData(data) {
             int inSocket, outSocket;
             if (android::base::socketCreatePair(&inSocket, &outSocket) < 0) {
                 PLOG(ERROR) << "Could not create socket pair";
@@ -183,7 +184,7 @@ TEST(AdbGuestPipe, DISABLED_createOneGuest) {
     EXPECT_EQ(0, guest->connect("qemud:adb"));
     EXPECT_EQ(6, guest->write("accept", 6));
 
-    static constexpr StringView kMessage = "Hello World!";
+    static constexpr std::string_view kMessage = "Hello World!";
     adbHost.createFakeConnection(kMessage);
 
     char reply[3] = {};
@@ -258,7 +259,7 @@ TEST(AdbGuestPipe, DISABLED_createGuestWithCloseOnReply) {
 
     EXPECT_EQ(6, guest->write("accept", 6));
 
-    static constexpr StringView kMessage = "Hello World!";
+    static constexpr std::string_view kMessage = "Hello World!";
     adbHost.createFakeConnection(kMessage);
 
     // Force-close the connection.
@@ -277,7 +278,7 @@ TEST(AdbGuestPipe, DISABLED_createGuestWithBadStartCommand) {
 
     EXPECT_EQ(6, guest->write("accept", 6));
 
-    static constexpr StringView kMessage = "Hello World!";
+    static constexpr std::string_view kMessage = "Hello World!";
     adbHost.createFakeConnection(kMessage);
 
     char reply[3] = {};
@@ -302,7 +303,7 @@ TEST(AdbGuestPipe, DISABLED_createGuestWithCloseOnStart) {
 
     EXPECT_EQ(6, guest->write("accept", 6));
 
-    static constexpr StringView kMessage = "Hello World!";
+    static constexpr std::string_view kMessage = "Hello World!";
     adbHost.createFakeConnection(kMessage);
 
     char reply[3] = {};
@@ -325,7 +326,7 @@ TEST(AdbGuestPipe, DISABLED_createGuestWhichClosesTheConnection) {
     EXPECT_EQ(0, guest->connect("qemud:adb"));
     EXPECT_EQ(6, guest->write("accept", 6));
 
-    static constexpr StringView kMessage = "Hello World!";
+    static constexpr std::string_view kMessage = "Hello World!";
     adbHost.createFakeConnection(kMessage);
 
     char reply[3] = {};

@@ -11,11 +11,11 @@
 */
 #include "android/proxy/ProxyUtils.h"
 
-#include "android/base/StringView.h"
 #include "android/base/network/Dns.h"
 #include "android/base/network/IpAddress.h"
 
 #include <algorithm>
+#include <string_view>
 
 #include <errno.h>
 #include <stdlib.h>
@@ -27,14 +27,14 @@ namespace proxy {
 using android::base::IpAddress;
 using android::base::Dns;
 
-ParseResult parseConfigurationString(android::base::StringView str) {
+ParseResult parseConfigurationString(const std::string& str) {
     ParseResult result{};
 
-    const char* pos = str.begin();
-    const char* end = str.end();
+    const char* pos = &*str.begin();
+    const char* end = &*str.end();
 
     // Skip optional http:// prefix.
-    static constexpr android::base::StringView kHttpPrefix = "http://";
+    static constexpr std::string_view kHttpPrefix = "http://";
     if (static_cast<size_t>(end - pos) >= kHttpPrefix.size() &&
         !memcmp(pos, kHttpPrefix.data(), kHttpPrefix.size())) {
         pos += kHttpPrefix.size();

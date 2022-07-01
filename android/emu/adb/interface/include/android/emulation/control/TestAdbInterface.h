@@ -14,8 +14,9 @@
 
 #pragma once
 
-#include "android/emulation/control/adb/AdbInterface.h"
 #include <map>
+#include <string_view>
+#include "android/emulation/control/adb/AdbInterface.h"
 
 namespace android {
 namespace emulation {
@@ -32,10 +33,11 @@ public:
     }
     std::vector<std::string> availableAdb() override { return mAvailable; }
 
-    base::Optional<int> getAdbProtocolVersion(StringView adbPath) override {
-        if (mAdb.find(adbPath) == mAdb.end())
+    base::Optional<int> getAdbProtocolVersion(
+            std::string_view adbPath) override {
+        if (mAdb.find(adbPath.data()) == mAdb.end())
             return {};
-        return base::makeOptional(mAdb[adbPath]);
+        return base::makeOptional(mAdb[adbPath.data()]);
     }
 
     std::map<std::string, int> mAdb;

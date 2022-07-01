@@ -12,10 +12,11 @@
 #pragma once
 
 #include "android/base/AlignedBuf.h"
-#include "android/base/StringView.h"
+
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/RamSaver.h"
 
+#include <string_view>
 #include <vector>
 
 namespace android {
@@ -25,21 +26,18 @@ constexpr int kTestingPageSize = 4096;
 
 using TestRamBuffer = AlignedBuf<uint8_t, kTestingPageSize>;
 
-RamBlock makeRam(android::base::StringView name,
-                 uint8_t* hostPtr,
-                 int64_t size);
+RamBlock makeRam(const std::string& name, uint8_t* hostPtr, int64_t size);
 
 void saveRamSingleBlock(const RamSaver::Flags flags,
                         const RamBlock& block,
-                        android::base::StringView filename);
+                        std::string_view filename);
 
-void loadRamSingleBlock(const RamBlock& block,
-                        android::base::StringView filename);
+void loadRamSingleBlock(const RamBlock& block, std::string_view filename);
 
 void incrementalSaveSingleBlock(const RamSaver::Flags flags,
                                 const RamBlock& blockToLoad,
                                 const RamBlock& blockToSave,
-                                android::base::StringView filename);
+                                std::string_view filename);
 
 TestRamBuffer generateRandomRam(size_t numPages, float zeroPageChance, int seed = 0);
 

@@ -17,6 +17,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/IniFile.h"
+#include "android/base/files/PathUtils.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
@@ -38,11 +39,11 @@
 #include "android/utils/debug.h"
 
 #include <cassert>
+#include <string_view>
 
 using android::base::c_str;
 using android::base::Stopwatch;
 using android::base::StringFormat;
-using android::base::StringView;
 using android::base::System;
 using android::crashreport::CrashReporter;
 using android::metrics::MetricsReporter;
@@ -122,7 +123,7 @@ void Quickboot::finalize() {
 
 Quickboot::~Quickboot() {}
 
-void Quickboot::reportSuccessfulLoad(StringView name,
+void Quickboot::reportSuccessfulLoad(std::string_view name,
                                      System::WallDuration startTimeMs) {
 #if SNAPSHOT_METRICS
     auto& loader = Snapshotter::get().loader();
@@ -141,7 +142,7 @@ void Quickboot::reportSuccessfulLoad(StringView name,
 #endif
 }
 
-void Quickboot::reportSuccessfulSave(StringView name,
+void Quickboot::reportSuccessfulSave(std::string_view name,
                                      System::WallDuration durationMs,
                                      System::WallDuration sessionUptimeMs) {
 #if SNAPSHOT_METRICS
@@ -261,7 +262,7 @@ Quickboot::Quickboot(const QAndroidVmOperations& vmOps,
               },
               this)) {}
 
-bool Quickboot::load(StringView name) {
+bool Quickboot::load(const char* name) {
     if (!isEnabled(featurecontrol::FastSnapshotV1)) {
         reportFailedLoad(
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_FEATURE,
@@ -269,8 +270,9 @@ bool Quickboot::load(StringView name) {
         return false;
     }
 
-    if (name.empty()) {
-        name = kDefaultBootSnapshot;
+    std::string namestr(name ? name : "");
+    if (namestr.empty()) {
+        namestr = kDefaultBootSnapshot;
     }
 
     if (getConsoleAgents()
@@ -304,14 +306,14 @@ bool Quickboot::load(StringView name) {
         // See b/233665745
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
         auto& snapshotter = Snapshotter::get();
-        auto res = snapshotter.load(true /* isQuickboot */, c_str(name));
+        auto res = snapshotter.load(true /* isQuickboot */, namestr.data());
         mLoaded = false;
         mLoadStatus = res;
         mLoadTimeMs = System::get()->getHighResTimeUs() / 1000;
         if (res == OperationStatus::Ok) {
             mLoaded = true;
-            mLoadedSnapshotName = name;
-            reportSuccessfulLoad(name, startTimeMs);
+            mLoadedSnapshotName = namestr;
+            reportSuccessfulLoad(namestr, startTimeMs);
             startLivenessMonitor();
         } else if (snapshotter.hasLoader() &&
                    (snapshotter.loader().snapshot().failureReason())) {
@@ -337,7 +339,7 @@ bool Quickboot::load(StringView name) {
 }
 
 void Quickboot::decideFailureReport(
-        StringView name,
+        std::string_view name,
         const base::Optional<FailureReason>& failureReason) {
     if (*failureReason == FailureReason::Empty ||
         *failureReason >= FailureReason::ValidationErrorLimit) {
@@ -383,7 +385,7 @@ void Quickboot::decideFailureReport(
     }
 }
 
-bool Quickboot::save(StringView name) {
+bool Quickboot::save(std::string_view name) {
     // TODO: detect if emulator was restarted since loading.
     const bool shouldTrySaving = mLoaded || isSnapshotAlive();
 
@@ -514,7 +516,7 @@ bool Quickboot::save(StringView name) {
     return true;
 }
 
-void Quickboot::invalidate(StringView name) {
+void Quickboot::invalidate(std::string_view name) {
     if (name.empty()) {
         name = kDefaultBootSnapshot;
     }

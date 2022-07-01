@@ -13,19 +13,25 @@
 #include "android/base/StringFormat.h"
 
 #include <sstream>
+#include <string_view>
+
 #include <assert.h>
 
 namespace android {
 namespace base {
 
-static constexpr StringView kInvalidVersion = "invalid";
+static constexpr std::string_view kInvalidVersion = "invalid";
 
 static bool isEof(std::istream& in) {
     return in.peek() == std::char_traits<char>::eof();
 }
 
-Version::Version(StringView ver) : mData() {
-    std::istringstream in(ver.str());
+Version::Version(const char* ver) : mData() {
+    if (!ver) {
+        *this = invalid();
+        return;
+    }
+    std::istringstream in(ver);
     in >> std::noskipws;
 
     // read the main part, major.minor.micro
@@ -53,7 +59,7 @@ Version::Version(StringView ver) : mData() {
 
 std::string Version::toString() const {
     if (!isValid()) {
-        return kInvalidVersion;
+        return kInvalidVersion.data();
     }
 
     std::string res = StringFormat("%u.%u.%u", component<kMajor>(),

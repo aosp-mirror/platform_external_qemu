@@ -14,10 +14,10 @@
 #include <list>                         // for list<>::iterator, list
 #include <memory>                       // for unique_ptr
 #include <mutex>                        // for mutex
+#include <string_view>
 #include <unordered_map>                // for unordered_map
 #include <unordered_set>                // for unordered_set
 
-#include "android/base/StringView.h"    // for StringView
 #include "android/base/async/Looper.h"  // for Looper::ClockType, Looper
 
 namespace android {
@@ -33,7 +33,7 @@ public:
 
     ~DefaultLooper() override;
 
-    StringView name() const override { return "Generic"; }
+    std::string_view name() const override { return "Generic"; }
 
     Duration nowMs(ClockType clockType = ClockType::kHost) override;
 

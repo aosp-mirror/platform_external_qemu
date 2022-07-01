@@ -18,11 +18,12 @@
 #include <iosfwd>                        // for istream
 #include <memory>                        // for unique_ptr, enable_shared_fr...
 #include <string>                        // for string
+#include <string_view>
 #include <vector>                        // for vector
 
 #include "android/base/Compiler.h"       // for DISALLOW_COPY_ASSIGN_AND_MOVE
 #include "android/base/Optional.h"       // for Optional
-#include "android/base/StringView.h"     // for StringView
+
 #include "android/base/system/System.h"  // for System, System::ProcessExitCode
 
 namespace android {
@@ -33,7 +34,6 @@ class Looper;
 namespace emulation {
 
 using base::Optional;
-using base::StringView;
 
 class AdbCommand;
 
@@ -71,7 +71,8 @@ public:
     virtual ~AdbLocator() = default;
     virtual std::vector<std::string> availableAdb() = 0;
 
-    virtual base::Optional<int> getAdbProtocolVersion(StringView adbPath) = 0;
+    virtual base::Optional<int> getAdbProtocolVersion(
+            std::string_view adbPath) = 0;
 };
 
 class AdbDaemon {

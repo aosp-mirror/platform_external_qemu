@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
-
+#include <cstring>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 #include <stdint.h>
@@ -31,7 +31,7 @@ public:
 
     // Parse a string into Uuid instance. If the string isn't parsable the
     // object is zero-initialized instead
-    explicit Uuid(StringView asString);
+    explicit Uuid(std::string_view asString);
 
     // These two functions generate a new random Uuid. generateFast() may
     // be slightly faster because of the higher possibility of

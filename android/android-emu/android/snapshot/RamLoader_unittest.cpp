@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/base/AlignedBuf.h"
-#include "android/base/StringView.h"
+
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/misc/FileUtils.h"
@@ -22,12 +22,12 @@
 
 #include <memory>
 #include <random>
+#include <string_view>
 #include <vector>
 
 using android::AlignedBuf;
 using android::base::PathUtils;
 using android::base::StdioStream;
-using android::base::StringView;
 using android::base::System;
 using android::base::TestTempDir;
 

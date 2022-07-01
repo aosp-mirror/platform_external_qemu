@@ -13,6 +13,8 @@
 #include "android/automation/AutomationController.h"
 #include "android/utils/compiler.h"
 
+#include <string_view>
+
 ANDROID_BEGIN_HEADER
 
 using namespace android::base;
@@ -23,30 +25,32 @@ typedef struct QAndroidAutomationAgent {
     void (*reset)();
 
     // Start a recording to a file.
-    android::automation::StartResult (*startRecording)(StringView filename);
+    android::automation::StartResult (*startRecording)(
+            std::string_view filename);
 
     // Stops a recording to a file.
     android::automation::StopResult (*stopRecording)();
 
     // Start a playback from a file.
-    android::automation::StartResult (*startPlayback)(StringView filename);
+    android::automation::StartResult (*startPlayback)(
+            std::string_view filename);
 
     // Stop playback from a file.
     android::automation::StopResult (*stopPlayback)();
 
     // Start playback with stop callback.
     android::automation::StartResult (*startPlaybackWithCallback)(
-            StringView filename,
+            std::string_view filename,
             void (*onStopCallback)());
 
     // Set the macro name in the header of a file.
-    void (*setMacroName)(StringView macroName, StringView filename);
+    void (*setMacroName)(std::string_view macroName, std::string_view filename);
 
     // Get the macro name from the header of a file.
-    std::string (*getMacroName)(StringView filename);
+    std::string (*getMacroName)(std::string_view filename);
 
     // Get the duration in ns and datetime in ms from a file.
-    std::pair<uint64_t, uint64_t> (*getMetadata)(StringView filename);
+    std::pair<uint64_t, uint64_t> (*getMetadata)(std::string_view filename);
 } QAndroidAutomationAgent;
 
 ANDROID_END_HEADER

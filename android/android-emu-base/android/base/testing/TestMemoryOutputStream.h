@@ -12,10 +12,10 @@
 #pragma once
 
 #include "android/base/files/Stream.h"
-#include "android/base/StringView.h"
 
-#include <vector>
 #include <errno.h>
+#include <string_view>
+#include <vector>
 
 namespace android {
 namespace base {
@@ -37,7 +37,9 @@ public:
         return static_cast<ssize_t>(len);
     }
 
-    StringView view() const { return StringView(mData.data(), mData.size()); }
+    std::string_view view() const {
+        return std::string_view(mData.data(), mData.size());
+    }
 
     void reset() { mData.clear(); }
 

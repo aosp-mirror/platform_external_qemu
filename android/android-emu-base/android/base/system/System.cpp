@@ -72,8 +72,9 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include <array>
 #include <chrono>
 #include <memory>
-#include <vector>
+#include <string_view>
 #include <unordered_set>
+#include <vector>
 
 #ifndef _WIN32
 #include <dirent.h>
@@ -312,7 +313,7 @@ public:
 #endif  // !_WIN32
     }
 
-    bool setCurrentDirectory(StringView directory) override {
+    bool setCurrentDirectory(std::string_view directory) override {
 #if defined(_WIN32)
         Win32UnicodeString directory_unicode(directory);
         return SetCurrentDirectoryW(directory_unicode.c_str());
@@ -348,7 +349,7 @@ public:
                 }
             }
 
-            std::vector<StringView> pathList = {programDir, launcherName};
+            std::vector<std::string_view> pathList = {programDir, launcherName};
             std::string launcherPath = PathUtils::recompose(pathList);
             if (pathIsFile(launcherPath)) {
                 mLauncherDir = programDir;
@@ -906,7 +907,7 @@ public:
         return res;
     }
 
-    Optional<DiskKind> pathDiskKind(StringView path) override {
+    Optional<DiskKind> pathDiskKind(std::string_view path) override {
         return diskKindInternal(path);
     }
     Optional<DiskKind> diskKind(int fd) override {
@@ -914,7 +915,7 @@ public:
     }
 
     std::vector<std::string> scanDirEntries(
-            StringView dirPath,
+            std::string_view dirPath,
             bool fullPath = false) const override {
         std::vector<std::string> result = scanDirInternal(dirPath);
         if (fullPath) {
@@ -927,15 +928,15 @@ public:
         return result;
     }
 
-    std::string envGet(StringView varname) const override {
+    std::string envGet(std::string_view varname) const override {
         return getEnvironmentVariable(varname);
     }
 
-    void envSet(StringView varname, StringView varvalue) override {
+    void envSet(const std::string& varname, const std::string& varvalue) override {
         setEnvironmentVariable(varname, varvalue);
     }
 
-    bool envTest(StringView varname) const override {
+    bool envTest(std::string_view varname) const override {
 #ifdef _WIN32
         Win32UnicodeString varname_unicode(varname);
         const wchar_t* value = _wgetenv(varname_unicode.c_str());
@@ -1045,31 +1046,31 @@ public:
         return false;
     }
 
-    bool pathExists(StringView path) const override {
+    bool pathExists(std::string_view path) const override {
         return pathExistsInternal(path);
     }
 
-    bool pathIsFile(StringView path) const override {
+    bool pathIsFile(std::string_view path) const override {
         return pathIsFileInternal(path);
     }
 
-    bool pathIsDir(StringView path) const override {
+    bool pathIsDir(std::string_view path) const override {
         return pathIsDirInternal(path);
     }
 
-    bool pathIsLink(StringView path) const override {
+    bool pathIsLink(std::string_view path) const override {
         return pathIsLinkInternal(path);
     }
 
-    bool pathCanRead(StringView path) const override {
+    bool pathCanRead(std::string_view path) const override {
         return pathCanReadInternal(path);
     }
 
-    bool pathCanWrite(StringView path) const override {
+    bool pathCanWrite(std::string_view path) const override {
         return pathCanWriteInternal(path);
     }
 
-    bool pathCanExec(StringView path) const override {
+    bool pathCanExec(std::string_view path) const override {
         return pathCanExecInternal(path);
     }
 
@@ -1077,20 +1078,21 @@ public:
         return pathOpenInternal(filename, oflag, pmode);
     }
 
-    bool deleteFile(StringView path) const override {
+    bool deleteFile(std::string_view path) const override {
         return deleteFileInternal(path);
     }
 
-    bool pathFileSize(StringView path,
-            FileSize* outFileSize) const override {
+    bool pathFileSize(std::string_view path,
+                      FileSize* outFileSize) const override {
         return pathFileSizeInternal(path, outFileSize);
     }
 
-    FileSize recursiveSize(StringView path) const override {
+    FileSize recursiveSize(std::string_view path) const override {
         return recursiveSizeInternal(path);
     }
 
-    bool pathFreeSpace(StringView path, FileSize* spaceInBytes) const override {
+    bool pathFreeSpace(std::string_view path,
+                       FileSize* spaceInBytes) const override {
         return pathFreeSpaceInternal(path, spaceInBytes);
     }
 
@@ -1098,19 +1100,19 @@ public:
         return fileSizeInternal(fd, outFileSize);
     }
 
-    Optional<std::string> which(StringView command) const override {
+    Optional<std::string> which(std::string_view command) const override {
 #ifdef WIN32
-      std::string cmd = command ;
+      std::string cmd(command);
       if (!extractFullPath(&cmd)) {
         return {};
       }
       return cmd;
 #else
-      if (PathUtils::isAbsolute(command)) {
+      if (PathUtils::isAbsolute(command.data())) {
         if (!pathCanExec(command))
           return {};
 
-        return Optional<std::string>(command);
+        return Optional<std::string>(command.data());
       }
 
       ScopedCPtr<char> exe(::path_search_exec(c_str(command)));
@@ -1121,11 +1123,12 @@ public:
 #endif
     }
 
-    Optional<Duration> pathCreationTime(StringView path) const override {
+    Optional<Duration> pathCreationTime(std::string_view path) const override {
         return pathCreationTimeInternal(path);
     }
 
-    Optional<Duration> pathModificationTime(StringView path) const override {
+    Optional<Duration> pathModificationTime(
+            std::string_view path) const override {
         return pathModificationTimeInternal(path);
     }
 
@@ -1324,9 +1327,9 @@ public:
         std::string tmp_dir = getTempDir();
 
         // Get temporary file path
-        constexpr base::StringView temp_filename_pattern = "runCommand_XXXXXX";
+        constexpr std::string_view temp_filename_pattern = "runCommand_XXXXXX";
         std::string temp_file_path =
-                PathUtils::join(tmp_dir, temp_filename_pattern);
+                PathUtils::join(tmp_dir, temp_filename_pattern.data());
 
         auto tmpfd =
                 android::base::ScopedFd(mkstemp((char*)temp_file_path.data()));
@@ -1842,7 +1845,7 @@ void HostSystem::atexit_HostSystem() {
 
 #ifdef _WIN32
 // Return |path| as a Unicode string, while discarding trailing separators.
-Win32UnicodeString win32Path(StringView path) {
+Win32UnicodeString win32Path(std::string_view path) {
     Win32UnicodeString wpath(path);
     // Get rid of trailing directory separators, Windows doesn't like them.
     size_t size = wpath.size();
@@ -1864,7 +1867,7 @@ using PathStat = struct stat;
 
 #endif  // _WIN32
 
-int pathStat(StringView path, PathStat* st) {
+int pathStat(std::string_view path, PathStat* st) {
 #ifdef _WIN32
     return _wstat64(win32Path(path).c_str(), st);
 #else   // !_WIN32
@@ -1896,7 +1899,7 @@ static int GetWin32Mode(int mode) {
 }
 #endif
 
-int pathAccess(StringView path, int mode) {
+int pathAccess(std::string_view path, int mode) {
 #ifdef _WIN32
     return _waccess(win32Path(path).c_str(), GetWin32Mode(mode));
 #else   // !_WIN32
@@ -1956,7 +1959,7 @@ System* System::hostSystem() {
 }
 
 // static
-std::vector<std::string> System::scanDirInternal(StringView dirPath) {
+std::vector<std::string> System::scanDirInternal(std::string_view dirPath) {
     std::vector<std::string> result;
 
     if (dirPath.empty()) {
@@ -1998,7 +2001,7 @@ std::vector<std::string> System::scanDirInternal(StringView dirPath) {
 }
 
 // static
-bool System::pathIsLinkInternal(StringView path) {
+bool System::pathIsLinkInternal(std::string_view path) {
 #ifdef _WIN32
     // Supposedly GetFileAttributes() and FindFirstFile()
     // can be used to detect symbolic links. In my tests,
@@ -2014,7 +2017,7 @@ bool System::pathIsLinkInternal(StringView path) {
 }
 
 // static
-bool System::pathExistsInternal(StringView path) {
+bool System::pathExistsInternal(std::string_view path) {
     if (path.empty()) {
         return false;
     }
@@ -2023,7 +2026,7 @@ bool System::pathExistsInternal(StringView path) {
 }
 
 // static
-bool System::pathIsFileInternal(StringView path) {
+bool System::pathIsFileInternal(std::string_view path) {
     if (path.empty()) {
         return false;
     }
@@ -2036,7 +2039,7 @@ bool System::pathIsFileInternal(StringView path) {
 }
 
 // static
-bool System::pathIsDirInternal(StringView path) {
+bool System::pathIsDirInternal(std::string_view path) {
     if (path.empty()) {
         return false;
     }
@@ -2049,7 +2052,7 @@ bool System::pathIsDirInternal(StringView path) {
 }
 
 // static
-bool System::pathCanReadInternal(StringView path) {
+bool System::pathCanReadInternal(std::string_view path) {
     if (path.empty()) {
         return false;
     }
@@ -2057,7 +2060,7 @@ bool System::pathCanReadInternal(StringView path) {
 }
 
 // static
-bool System::pathCanWriteInternal(StringView path) {
+bool System::pathCanWriteInternal(std::string_view path) {
     if (path.empty()) {
         return false;
     }
@@ -2065,7 +2068,7 @@ bool System::pathCanWriteInternal(StringView path) {
 }
 
 // static
-bool System::pathCanExecInternal(StringView path) {
+bool System::pathCanExecInternal(std::string_view path) {
     if (path.empty()) {
         return false;
     }
@@ -2081,7 +2084,7 @@ int System::pathOpenInternal(const char *filename, int oflag, int perm) {
 #endif  // !_WIN32
 }
 
-bool System::deleteFileInternal(StringView path) {
+bool System::deleteFileInternal(std::string_view path) {
     if (!pathIsFileInternal(path)) {
         return false;
     }
@@ -2110,7 +2113,8 @@ bool System::deleteFileInternal(StringView path) {
     return remove_res == 0;
 }
 
-bool System::pathFreeSpaceInternal(StringView path, FileSize* spaceInBytes) {
+bool System::pathFreeSpaceInternal(std::string_view path,
+                                   FileSize* spaceInBytes) {
 #ifdef _WIN32
     ULARGE_INTEGER freeBytesAvailableToUser;
     bool result = GetDiskFreeSpaceEx(c_str(path), &freeBytesAvailableToUser,
@@ -2133,7 +2137,8 @@ bool System::pathFreeSpaceInternal(StringView path, FileSize* spaceInBytes) {
 }
 
 // static
-bool System::pathFileSizeInternal(StringView path, FileSize* outFileSize) {
+bool System::pathFileSizeInternal(std::string_view path,
+                                  FileSize* outFileSize) {
     if (path.empty() || !outFileSize) {
         return false;
     }
@@ -2150,10 +2155,9 @@ bool System::pathFileSizeInternal(StringView path, FileSize* outFileSize) {
 }
 
 // static
-System::FileSize System::recursiveSizeInternal(StringView path) {
-
+System::FileSize System::recursiveSizeInternal(std::string_view path) {
     std::vector<std::string> fileList;
-    fileList.push_back(path);
+    fileList.push_back(path.data());
 
     FileSize totalSize = 0;
 
@@ -2194,7 +2198,8 @@ bool System::fileSizeInternal(int fd, System::FileSize* outFileSize) {
 }
 
 // static
-Optional<System::Duration> System::pathCreationTimeInternal(StringView path) {
+Optional<System::Duration> System::pathCreationTimeInternal(
+        std::string_view path) {
 #if defined(__linux__) || (defined(__APPLE__) && !defined(_DARWIN_FEATURE_64_BIT_INODE))
     // TODO(zyy@): read the creation time directly from the ext4 attribute
     // on Linux.
@@ -2214,7 +2219,8 @@ Optional<System::Duration> System::pathCreationTimeInternal(StringView path) {
 }
 
 // static
-Optional<System::Duration> System::pathModificationTimeInternal(StringView path) {
+Optional<System::Duration> System::pathModificationTimeInternal(
+        std::string_view path) {
     PathStat st;
     if (pathStat(path, &st)) {
         return {};
@@ -2407,7 +2413,7 @@ static Optional<System::DiskKind> diskKind(const PathStat& st) {
     return {};
 }
 
-Optional<System::DiskKind> System::diskKindInternal(StringView path) {
+Optional<System::DiskKind> System::diskKindInternal(std::string_view path) {
     PathStat stat;
     if (pathStat(path, &stat)) {
         return {};
@@ -2424,14 +2430,14 @@ Optional<System::DiskKind> System::diskKindInternal(int fd) {
 }
 
 // static
-void System::addLibrarySearchDir(StringView path) {
+void System::addLibrarySearchDir(std::string_view path) {
     System* system = System::get();
     const char* varName = kLibrarySearchListEnvVarName;
 
     std::string libSearchPath = system->envGet(varName);
     if (libSearchPath.size()) {
         libSearchPath =
-                StringFormat("%s%c%s", path, kPathSeparator, libSearchPath);
+                StringFormat("%s%c%s", path.data(), kPathSeparator, libSearchPath);
     } else {
         libSearchPath = path;
     }
@@ -2439,7 +2445,7 @@ void System::addLibrarySearchDir(StringView path) {
 }
 
 // static
-std::string System::findBundledExecutable(StringView programName) {
+std::string System::findBundledExecutable(std::string_view programName) {
     System* const system = System::get();
     const std::string executableName = PathUtils::toExecutableName(programName);
 
@@ -2494,7 +2500,8 @@ bool System::isUnderMemoryPressure(int* freeRamMb_out) {
 }
 
 // static
-bool System::isUnderDiskPressure(StringView path, System::FileSize* freeDisk) {
+bool System::isUnderDiskPressure(std::string_view path,
+                                 System::FileSize* freeDisk) {
     System::FileSize availableSpace;
     bool success = System::get()->pathFreeSpace(path,
                                                 &availableSpace);
@@ -2507,7 +2514,7 @@ bool System::isUnderDiskPressure(StringView path, System::FileSize* freeDisk) {
 }
 
 // static
-System::FileSize System::getFilePageSizeForPath(StringView path) {
+System::FileSize System::getFilePageSizeForPath(std::string_view path) {
     System::FileSize pageSize;
 
 #ifdef _WIN32
@@ -2563,10 +2570,11 @@ System::FileSize System::getAlignedFileSize(System::FileSize align, System::File
 }
 
 // static
-void System::setEnvironmentVariable(StringView varname, StringView varvalue) {
+void System::setEnvironmentVariable(std::string_view varname,
+                                    std::string_view varvalue) {
 #ifdef _WIN32
     std::string envStr =
-        StringFormat("%s=%s", varname, varvalue);
+        StringFormat("%s=%s", varname.data(), varvalue.data());
     // Note: this leaks the result of release().
     _wputenv(Win32UnicodeString(envStr).release());
 #else
@@ -2579,7 +2587,7 @@ void System::setEnvironmentVariable(StringView varname, StringView varvalue) {
 }
 
 // static
-std::string System::getEnvironmentVariable(StringView varname) {
+std::string System::getEnvironmentVariable(std::string_view varname) {
 #ifdef _WIN32
     Win32UnicodeString varname_unicode(varname);
     const wchar_t* value = _wgetenv(varname_unicode.c_str());
@@ -2779,8 +2787,8 @@ Optional<std::string> getPathOfProcessByPid(pid_t pid) {
 
 #endif
 
-static bool sMultiStringMatch(StringView haystack,
-                              const std::vector<StringView>& needles,
+static bool sMultiStringMatch(std::string_view haystack,
+                              const std::vector<std::string_view>& needles,
                               bool approxMatch) {
     bool found = false;
 
@@ -2797,9 +2805,8 @@ static bool sMultiStringMatch(StringView haystack,
 
 // static
 std::vector<System::Pid> System::queryRunningProcessPids(
-    const std::vector<StringView>& targets,
-    bool approxMatch) {
-
+        const std::vector<std::string_view>& targets,
+        bool approxMatch) {
     std::vector<System::Pid> pids;
 
 // From https://stackoverflow.com/questions/20874381/get-a-process-id-in-c-by-name
@@ -2859,7 +2866,7 @@ std::vector<System::Pid> System::queryRunningProcessPids(
     return pids;
 }
 
-static bool looksLikeTempDir(StringView tempDir) {
+static bool looksLikeTempDir(std::string_view tempDir) {
     auto pathComponents = PathUtils::decompose(tempDir);
 
     if (pathComponents.empty()) return false;
@@ -2873,11 +2880,15 @@ static bool looksLikeTempDir(StringView tempDir) {
         }
     }
 
-    std::vector<StringView> neededPathComponents = {
+    std::vector<std::string_view> neededPathComponents = {
 #ifdef _WIN32
-        "Users", "AppData", "Local", "Temp",
+            "Users",
+            "AppData",
+            "Local",
+            "Temp",
 #else
-        "tmp", "android-",
+            "tmp",
+            "android-",
 #endif
     };
 
@@ -2887,7 +2898,7 @@ static bool looksLikeTempDir(StringView tempDir) {
         size_t index = 0;
         for (auto neededPathComponent : neededPathComponents) {
             if (pathComponent.find(
-                    neededPathComponent.str()) !=
+                    neededPathComponent.data()) !=
                 std::string::npos) {
                 foundPathComponentIndices.push_back(index);
                 break;
@@ -2911,9 +2922,9 @@ static bool looksLikeTempDir(StringView tempDir) {
 void System::deleteTempDir() {
     std::string tempDir = System::get()->getTempDir();
 
-    std::vector<StringView> emulatorExePatterns = {
-        "emulator",
-        "qemu-system",
+    std::vector<std::string_view> emulatorExePatterns = {
+            "emulator",
+            "qemu-system",
     };
 
 #ifdef __linux__
@@ -3014,9 +3025,9 @@ void System::killProcess(System::Pid pid) {
 void System::stopAllEmulatorProcesses() {
 // TODO: Implement process grepping for Linux.
 #ifndef __linux__
-    std::vector<StringView> emulatorExePatterns = {
-        "emulator",
-        "qemu-system",
+    std::vector<std::string_view> emulatorExePatterns = {
+            "emulator",
+            "qemu-system",
     };
 
     std::vector<System::Pid> emuPids =
@@ -3029,10 +3040,10 @@ void System::stopAllEmulatorProcesses() {
 }
 
 // static
-void System::disableCopyOnWriteForPath(StringView path) {
+void System::disableCopyOnWriteForPath(std::string_view path) {
 #ifdef __linux__
     std::vector<std::string> args = {
-        "chattr", "+C", path.str(),
+        "chattr", "+C", path.data(),
     };
     System::get()->runCommand(args,
                    RunOptions::WaitForCompletion |
@@ -3200,8 +3211,11 @@ bool initFileVersionInfoFuncs() {
     return true;
 }
 
-bool System::queryFileVersionInfo(StringView path, int* major, int* minor, int* build_1, int* build_2) {
-
+bool System::queryFileVersionInfo(std::string_view path,
+                                  int* major,
+                                  int* minor,
+                                  int* build_1,
+                                  int* build_2) {
     if (!initFileVersionInfoFuncs()) return false;
     if (!canQueryFileVersion) return false;
 
@@ -3217,7 +3231,7 @@ bool System::queryFileVersionInfo(StringView path, int* major, int* minor, int* 
     }
 
     if (length == 0) {
-        LOG(VERBOSE) << "queryFileVersionInfo: path not found: " << path.str().c_str();
+        LOG(VERBOSE) << "queryFileVersionInfo: path not found: " << path.data();
         return false;
     }
 
@@ -3257,8 +3271,7 @@ bool System::queryFileVersionInfo(StringView path, int* major, int* minor, int* 
 
 #else
 
-
-bool System::queryFileVersionInfo(StringView, int*, int*, int*, int*) {
+bool System::queryFileVersionInfo(std::string_view, int*, int*, int*, int*) {
     return false;
 }
 

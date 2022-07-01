@@ -29,7 +29,7 @@
 #include "android/avd/BugreportInfo.h"
 #include "android/avd/info.h"
 #include "android/base/ProcessControl.h"
-#include "android/base/StringView.h"
+
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/cmdline-option.h"
@@ -71,6 +71,7 @@
 #include <fstream>
 #include <memory>
 #include <sstream>
+#include <string_view>
 #include <vector>
 
 #include <assert.h>
@@ -3621,9 +3622,9 @@ static int do_screenrecord_start(ControlClient client, char* args) {
     // Need to get it into a format for getopt_long().
     std::vector<std::string> splitArgs;
     splitArgs.push_back("screenrecord");
-    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+    android::base::split(args, " ", [&splitArgs](std::string_view s) {
         if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
-            splitArgs.push_back(s);
+            splitArgs.emplace_back(s);
     });
 
     // Need char** for getopt()
@@ -3779,9 +3780,9 @@ static int do_screenrecord_screenshot(ControlClient client, char* args) {
     // Need to get it into a format for getopt_long().
     std::vector<std::string> splitArgs;
     splitArgs.push_back("screenshot");
-    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+    android::base::split(args, " ", [&splitArgs](std::string_view s) {
         if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
-            splitArgs.push_back(s);
+            splitArgs.emplace_back(s);
     });
 
     // Need char** for getopt()
@@ -3840,9 +3841,9 @@ static int do_screenrecord_webrtc(ControlClient client, char* args) {
 
     // Count number of arguments
     std::vector<std::string> splitArgs;
-    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+    android::base::split(args, " ", [&splitArgs](std::string_view s) {
         if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
-            splitArgs.push_back(s);
+            splitArgs.emplace_back(s);
     });
 
     if (splitArgs.size() == 0) {
@@ -4021,9 +4022,9 @@ static int do_multi_display_add(ControlClient client, char* args) {
 
     // Count number of arguments
     std::vector<std::string> splitArgs;
-    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+    android::base::split(args, " ", [&splitArgs](std::string_view s) {
         if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
-            splitArgs.push_back(s);
+            splitArgs.emplace_back(s);
     });
 
     if (splitArgs.size() < kMaxArgs) {
@@ -4057,9 +4058,9 @@ static int do_multi_display_del(ControlClient client, char* args) {
 
     // Count number of arguments
     std::vector<std::string> splitArgs;
-    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+    android::base::split(args, " ", [&splitArgs](std::string_view s) {
         if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
-            splitArgs.push_back(s);
+            splitArgs.emplace_back(s);
     });
 
     if (splitArgs.size() < kMaxArgs) {

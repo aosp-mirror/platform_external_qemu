@@ -23,6 +23,7 @@
 #include <queue>       // for queue
 #include <sstream>     // for basic_stri...
 #include <string>      // for string
+#include <string_view>
 #include <thread>      // for thread
 #include <tuple>       // for tie, tuple
 #include <utility>     // for pair, move
@@ -32,7 +33,7 @@
 #include "android/base/EnumFlags.h"                        // for operator|
 #include "android/base/Log.h"                              // for LogStream
 #include "android/base/Optional.h"                         // for Optional
-#include "android/base/StringView.h"                       // for StringView
+
 #include "android/base/Uuid.h"                             // for Uuid
 #include "android/base/files/PathUtils.h"                  // for PathUtils
 #include "android/base/memory/LazyInstance.h"              // for LazyInstance
@@ -345,16 +346,16 @@ static void adbResultHandler(const OptionalAdbCommandResult& result) {
 class AdbLocatorImpl : public AdbLocator {
     std::vector<std::string> availableAdb() override;
 
-    Optional<int> getAdbProtocolVersion(StringView adbPath) override;
+    Optional<int> getAdbProtocolVersion(std::string_view adbPath) override;
 };
 
 // Gets the reported adb protocol version from the given executable
 // This is the last digit in the adb version string.
-static Optional<int> extractProtocolVersion(StringView adbPath) {
+static Optional<int> extractProtocolVersion(std::string_view adbPath) {
     if (!getConsoleAgents()->settings->android_qemu_mode()) {
         return {};
     }
-    const std::vector<std::string> adbVersion = {adbPath, "version"};
+    const std::vector<std::string> adbVersion = {adbPath.data(), "version"};
     int protocol = 0;
     // Retrieve the adb version.
     const int maxAdbRetrievalTimeMs = 500;
@@ -375,13 +376,13 @@ static Optional<int> extractProtocolVersion(StringView adbPath) {
 // - if the path does not exist.
 // - if the path is not executable.
 // - if the executable does not produce a version string.
-static Optional<std::string> platformPath(base::StringView root) {
+static Optional<std::string> platformPath(std::string_view root) {
     if (root.empty()) {
         LOG(VERBOSE) << " no root specified: ";
         return Optional<std::string>();
     }
 
-    auto path = PathUtils::join(root, "platform-tools",
+    auto path = PathUtils::join(root.data(), "platform-tools",
                                 PathUtils::toExecutableName("adb"));
     return System::get()->pathCanExec(path) ? base::makeOptional(path)
                                             : base::kNullopt;
@@ -417,7 +418,7 @@ std::vector<std::string> AdbLocatorImpl::availableAdb() {
 
 // Gets the reported adb protocol version from the given executable
 // This is the last digit in the adb version string.
-Optional<int> AdbLocatorImpl::getAdbProtocolVersion(StringView adbPath) {
+Optional<int> AdbLocatorImpl::getAdbProtocolVersion(std::string_view adbPath) {
     return extractProtocolVersion(adbPath);
 }
 

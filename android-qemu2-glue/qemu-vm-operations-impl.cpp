@@ -26,7 +26,7 @@ extern "C" {
 #include "android/base/Log.h"                         // for LOG, LogMessage
 #include "android/base/Optional.h"                    // for Optional
 #include "android/base/StringFormat.h"                // for StringFormatWit...
-#include "android/base/StringView.h"                  // for StringView
+
 #include "android/base/files/PathUtils.h"             // for pj, PathUtils
 #include "android/base/system/System.h"               // for System
 #include "android/emulation/CpuAccelerator.h"         // for GetCurrentCpuAc...
@@ -86,6 +86,7 @@ extern "C" {
 #include <algorithm>                                  // for find_if
 #include <cstdio>                                     // for NULL, rename
 #include <string>                                     // for string, operator+
+#include <string_view>
 #include <vector>                                     // for vector
 
 #define  DD(...)    VERBOSE_PRINT(snapshot,__VA_ARGS__)
@@ -94,9 +95,9 @@ using android::base::PathUtils;
 using android::base::pj;
 using android::base::StringAppendFormatWithArgs;
 using android::base::StringFormatWithArgs;
-using android::base::StringView;
 using android::base::System;
 using android::snapshot::Snapshot;
+
 using json = nlohmann::json;
 
 static const char* kImportSuffix = "_import.qcow2";
@@ -169,7 +170,7 @@ private:
                 va_end(ap);
             }
             if (err) {
-                msg += StringView(error_get_pretty(err));
+                msg += std::string_view(error_get_pretty(err));
                 error_free(err);
             }
             msg += '\n';  // QEMU's error printing always appends this.
@@ -396,7 +397,7 @@ static bool import_snapshot(const char* name,
     // Copy and replace the avds from the snapshot directory..
     auto avd = android::snapshot::getAvdDir();
     auto datadir = snapshot->dataDir();
-    for (auto qcow2 : android::snapshot::getQcow2Files(datadir)) {
+    for (auto qcow2 : android::snapshot::getQcow2Files(datadir.data())) {
         // Check if we have a device mapping this qcow.
         auto it = std::find_if(
                 drives.begin(), drives.end(), [qcow2](const json object) {
@@ -412,7 +413,7 @@ static bool import_snapshot(const char* name,
 
         DD("Copying %s", qcow2.c_str());
         auto dest = pj(avd, qcow2) + kImportSuffix;
-        auto src = pj(datadir, qcow2);
+        auto src = pj(datadir.data(), qcow2);
         // There is a corner case if we are on an imported snapshot, we might
         // not be able to delete dest. path_delete_file returns 0 on success
         for (int i = 0;
@@ -660,7 +661,7 @@ static const QEMUFileHooks sSaveHooks = {
                            const char* path, bool readonly, void* opaque) {
                             auto relativePath = PathUtils::relativeTo(
                                     android::snapshot::getSnapshotBaseDir(),
-                                    path);
+                                    path ? path : "");
 
                             SnapshotRamBlock block = {
                                     block_name,
@@ -730,14 +731,14 @@ static const QEMUFileHooks sLoadHooks = {
                                void* opaque) {
                                 auto block =
                                         static_cast<SnapshotRamBlock*>(opaque);
-                                if (strcmp(block->id, block_name) != 0) {
+                                if (block->id != block_name) {
                                     return 0;
                                 }
 
                                 // Rebase path as relative to support migration
                                 auto relativePath = PathUtils::relativeTo(
                                         android::snapshot::getSnapshotBaseDir(),
-                                        path);
+                                        path ? path : "");
 
                                 block->startOffset = offset;
                                 block->hostPtr = (uint8_t*)host_addr;
@@ -751,7 +752,7 @@ static const QEMUFileHooks sLoadHooks = {
                             &block);
 
                     RAMBlock* const qemuBlock =
-                            qemu_ram_block_by_name(block.id);
+                            qemu_ram_block_by_name(block.id.data());
                     block.pageSize = (int32_t)qemu_ram_pagesize(qemuBlock);
                     sSnapshotCallbacks.ramOps.registerBlock(
                             sSnapshotCallbacksOpaque, SNAPSHOT_LOAD, &block);
@@ -967,14 +968,14 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
 
     for (auto drive : drives) {
         auto overlay = drive["file"]["filename"].get<std::string>();
-        StringView qcow;
+        std::string_view qcow;
         if (!PathUtils::split(overlay, nullptr, &qcow)) {
             success = false;
             std::string err = "Failed to extract basename from " + overlay;
             errConsumer(opaque, err.c_str(), err.size());
             break;
         }
-        auto final_overlay = pj(dest, qcow);
+        auto final_overlay = pj(dest, qcow.data());
 
         // Remove the suffix if there is any.
         // This would happen if you import then export.
@@ -1048,7 +1049,7 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
         } else {
             // For cache image, we use fallback path to extract all contents.
             auto tmp_overlay =
-                    pj(android::snapshot::getAvdDir(), "tmp_" + qcow.str());
+                    pj(android::snapshot::getAvdDir(), "tmp_" + std::string(qcow));
 
             // Copy and rebase on an empty image...
             if (path_copy_file(tmp_overlay.c_str(), overlay.c_str()) != 0) {

@@ -31,6 +31,7 @@
 
 #include <fstream>
 #include <streambuf>
+#include <string_view>
 
 #ifndef _WIN32
 #include "android/HostHwInfo.h"
@@ -40,7 +41,7 @@
 #include "android/avd/util.h"
 #include "android/base/ArraySize.h"
 #include "android/base/ProcessControl.h"
-#include "android/base/StringView.h"
+
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -85,8 +86,8 @@ using android::ConfigDirs;
 using android::base::PathUtils;
 using android::base::RunOptions;
 using android::base::ScopedCPtr;
-using android::base::StringView;
 using android::base::System;
+
 
 #define DEBUG 1
 
@@ -173,11 +174,11 @@ static std::string emulator_dirname(const std::string& launcherDir) {
     return cppstr;
 }
 
-static void delete_files(const StringView file_dir,
-                         const StringView files_to_delete[],
+static void delete_files(const std::string_view file_dir,
+                         const std::string_view files_to_delete[],
                          unsigned int num_files) {
     for (unsigned int i = 0; i < num_files; ++i) {
-        std::string file = PathUtils::join(file_dir, files_to_delete[i]);
+        std::string file = PathUtils::join(file_dir.data(), files_to_delete[i].data());
         APosixStatus ret = path_delete_file(file.c_str());
         if (ret == 0) {
             D("Deleting file %s done", file.c_str());
@@ -191,7 +192,7 @@ static void clean_up_avd_contents_except_config_ini(const char* avd_folder) {
     // sdcard.img should not be deleted, because it is created by sdk manager
     // and we dont know how to re-create it from emulator yet
     // TODO: fixit
-    static constexpr StringView files_to_delete[] = {
+    static constexpr std::string_view files_to_delete[] = {
             "system.img.qcow2",  "vendor.img.qcow2",
             "userdata-qemu.img", "userdata-qemu.img.qcow2",
             "userdata.img",      "userdata.img.qcow2",
@@ -207,7 +208,7 @@ static void clean_up_android_out(const char* android_out) {
     // note: we should not delete 'userdata.img' otherwise, we will have to run
     // make again to create it; in avd/ folder, it can be copied from
     // system-images/.../<arch>/ directory.
-    static constexpr StringView files_to_delete[] = {
+    static constexpr std::string_view files_to_delete[] = {
             "system.img.qcow2",   "vendor.img.qcow2",
             "userdata-qemu.img",  "userdata-qemu.img.qcow2",
             "userdata.img.qcow2", "cache.img.qcow2",
@@ -969,9 +970,10 @@ int main(int argc, char** argv) {
 
     bool force64bitTarget = is32bitImageOn64bitRanchuKernel(avdName, avdArch,
                                                             sysDir, androidOut);
-    const StringView candidates[] = {progDirSystem, emuDirName, argv0DirName};
+    const std::string_view candidates[] = {progDirSystem, emuDirName,
+                                           argv0DirName};
     char* emulatorPath = nullptr;
-    StringView progDir;
+    std::string_view progDir;
     for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
         D("try dir %s", candidates[i].data());
         progDir = candidates[i];
@@ -1009,7 +1011,7 @@ int main(int argc, char** argv) {
     argv[0] = emulatorPath;
 
     /* setup launcher dir */
-    System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", progDir);
+    System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", progDir.data());
 
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator

@@ -17,6 +17,7 @@
 #include "android/base/logging/CLog.h"
 
 #include <string>
+#include <string_view>
 #include <unordered_set>
 
 #ifdef _WIN32
@@ -121,9 +122,9 @@ static std::string toUtf8(const wchar_t* str) {
 // Implementation of Dns::Resolver interface based on ::getaddrinfo().
 class SystemResolver : public Dns::Resolver {
 public:
-    virtual int resolveName(StringView dns_server_name,
+    virtual int resolveName(std::string_view dns_server_name,
                             AddressList* out) override {
-        std::string hostname = dns_server_name;
+        std::string hostname(dns_server_name);
         struct addrinfo* res;
         struct addrinfo* pHints = nullptr;
 #ifdef _WIN32
@@ -349,7 +350,7 @@ Dns::Resolver* sResolver = nullptr;
 }  // namespace
 
 // static
-AddressList Dns::resolveName(StringView serverName) {
+AddressList Dns::resolveName(std::string_view serverName) {
     AddressList result;
     int err = Dns::Resolver::get()->resolveName(serverName, &result);
     if (err != 0) {

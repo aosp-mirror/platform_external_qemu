@@ -11,6 +11,8 @@
 
 #include "android/emulation/SetupParameters.h"
 
+#include <cstring>
+
 namespace android {
 
 // static

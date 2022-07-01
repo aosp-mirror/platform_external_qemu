@@ -20,14 +20,14 @@
 #include <gtest/gtest.h>
 
 #include <fstream>
+#include <string_view>
 
+using android::SdkComponentType;
 using android::base::PathUtils;
-using android::base::StringView;
 using android::base::System;
 using android::base::TestSystem;
 using android::base::TestTempDir;
 using android::base::Version;
-using android::SdkComponentType;
 
 TEST(ComponentVersion, ProperPlatformToolsVersion) {
     TestSystem system("/progdir", System::kProgramBitness, "/homedir",

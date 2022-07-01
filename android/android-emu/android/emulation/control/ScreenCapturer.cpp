@@ -21,6 +21,7 @@
 
 #include <fstream>  // for ofstream, basic...
 #include <memory>   // for shared_ptr
+#include <string_view>
 #include <vector>   // for vector
 
 #include "OpenglRender/Renderer.h"                    // for Renderer
@@ -42,7 +43,7 @@ using android::base::PathUtils;
 namespace android {
 namespace emulation {
 
-bool captureScreenshot(android::base::StringView outputDirectoryPath,
+bool captureScreenshot(std::string_view outputDirectoryPath,
                        std::string* pOutputFilepath,
                        uint32_t displayId) {
     const auto& renderer = android_getOpenglesRenderer();
@@ -214,7 +215,7 @@ bool captureScreenshot(
                            int* bytesPerPixel,
                            uint8_t** frameBufferData)> getFrameBuffer,
         SkinRotation rotation,
-        android::base::StringView outputDirectoryPath,
+        std::string_view outputDirectoryPath,
         std::string* pOutputFilepath,
         int displayId) {
     if (!renderer && !getFrameBuffer) {
@@ -265,7 +266,7 @@ bool captureScreenshot(
         (void)fileNameSize;
 
         outputFilePath =
-                android::base::PathUtils::join(outputDirectoryPath, fileName);
+                android::base::PathUtils::join(outputDirectoryPath.data(), fileName);
     }
     if (pOutputFilepath) {
         *pOutputFilepath = outputFilePath;

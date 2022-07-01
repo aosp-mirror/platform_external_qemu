@@ -13,6 +13,7 @@
 
 #include <gtest/gtest.h>                      // for Message, Test, TestPart...
 #include <fstream>
+#include <string_view>
 
 #include "android/base/system/System.h"       // for System, System::kProgra...
 #include "android/base/testing/TestSystem.h"  // for TestSystem
@@ -215,7 +216,7 @@ TEST(PathUtils, split) {
             {"C:/foo", {{true, "C:/", "foo"}, {true, "C:/", "foo"}}},
     };
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
-        StringView dirname, basename;
+        std::string_view dirname, basename;
 
         EXPECT_EQ(kData[n].expected[kHostPosix].result,
                   PathUtils::split(kData[n].path, kHostPosix, &dirname,
@@ -291,7 +292,7 @@ static const int kMaxComponents = 10;
 typedef const char* ComponentList[kMaxComponents];
 
 static void checkComponents(const ComponentList& expected,
-                            const std::vector<StringView>& components,
+                            const std::vector<std::string_view>& components,
                             const char* hostType,
                             const char* path) {
     size_t m;
@@ -523,11 +524,11 @@ TEST(PathUtils, substitute_envs) {
     test.envSet("foo", "bar");
     test.envSet("bar", "foo");
     EXPECT_EQ("bar", System::get()->envGet("foo"));
-    EXPECT_EQ(kNullopt,  PathUtils::pathWithEnvSubstituted(pj("a", "${NopeUnknown}", "b")));
-    EXPECT_EQ(kNullopt,  PathUtils::pathWithEnvSubstituted(pj("a", "${foo}", "${NopeUnknown}")));
-    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "bar", "c"}), PathUtils::pathWithEnvSubstituted(pj("a", "${foo}", "c")));
-    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "bar", "c", "foo"}), PathUtils::pathWithEnvSubstituted(pj("a", "${foo}", "c", "${bar}")));
-    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "b", "c"}), PathUtils::pathWithEnvSubstituted(pj("a", "b", "c")));
+    EXPECT_EQ(kNullopt,  PathUtils::pathWithEnvSubstituted(pj({"a", "${NopeUnknown}", "b"})));
+    EXPECT_EQ(kNullopt,  PathUtils::pathWithEnvSubstituted(pj({"a", "${foo}", "${NopeUnknown}"})));
+    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "bar", "c"}), PathUtils::pathWithEnvSubstituted(pj({"a", "${foo}", "c"})));
+    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "bar", "c", "foo"}), PathUtils::pathWithEnvSubstituted(pj({"a", "${foo}", "c", "${bar}"})));
+    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "b", "c"}), PathUtils::pathWithEnvSubstituted(pj({"a", "b", "c"})));
 
     // Make sure we properly observe win32 decomposition on /
     EXPECT_EQ(PathUtils::decompose("a/b/c", kHostWin32), PathUtils::decompose("a/b/c", kHostPosix));

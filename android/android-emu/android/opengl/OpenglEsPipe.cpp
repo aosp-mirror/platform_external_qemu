@@ -212,8 +212,7 @@ public:
                    (long long)(sw.elapsedUs() / 1000));
 #endif
             if (width > 0 && height > 0) {
-                std::string dataDir =
-                        Snapshotter::get().saver().snapshot().dataDir();
+                std::string dataDir(Snapshotter::get().saver().snapshot().dataDir());
                 mScreenshotSaver.emplace([nChannels, width, height,
                                           dataDir = std::move(dataDir),
                                           pixels = std::move(pixels)] {

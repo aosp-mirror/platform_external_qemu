@@ -19,10 +19,11 @@
 #include <functional>  // for __base, function
 #include <map>         // for map
 #include <string>      // for string, basic...
+#include <string_view>
 #include <utility>     // for pair
 
 #include "android/base/Log.h"                           // for base
-#include "android/base/StringView.h"                    // for StringView
+
 #include "android/metrics/MetricsReporter.h"            // for MetricsReporter
 #include "android/metrics/metrics.h"                    // for MetricsStopRe...
 #include "android/metrics/tests/MockMetricsReporter.h"  // for MockMetricsRe...
@@ -54,9 +55,9 @@ public:
     MockMetricsReporter* mReporter;
 
     void createReporter(bool enabled = true,
-                        StringView ver = kVersion,
-                        StringView fullVer = kFullVersion,
-                        StringView qemuVer = kQemuVersion) {
+                        std::string_view ver = kVersion,
+                        std::string_view fullVer = kFullVersion,
+                        std::string_view qemuVer = kQemuVersion) {
         android::metrics::set_unittest_Reporter(
                 std::make_unique<MockMetricsReporter>(enabled, mWriter, ver,
                                                       fullVer, qemuVer));

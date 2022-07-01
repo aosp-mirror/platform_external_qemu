@@ -14,7 +14,7 @@
 
 #include "android/filesystems/ext4_resize.h"
 
-#include "android/base/StringView.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/logging/CLog.h"
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
@@ -24,6 +24,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
+#include <string_view>
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
@@ -40,8 +41,8 @@ using android::base::Win32Utils;
 
 using android::base::c_str;
 using android::base::RunOptions;
-using android::base::StringView;
 using android::base::System;
+
 
 static auto convertBytesToMB(uint64_t size) -> unsigned {
     if (size == 0) {
@@ -70,8 +71,8 @@ void explainSystemErrors(const char* msg) {
 #endif
 }
 
-static auto runExt4Program(const StringView& program,
-                          std::initializer_list<std::string> params) -> int {
+static auto runExt4Program(const std::string_view& program,
+                           std::initializer_list<std::string> params) -> int {
     std::string executable = System::get()->findBundledExecutable(program);
     if (executable.empty()) {
         derror("couldn't get path to %s binary",

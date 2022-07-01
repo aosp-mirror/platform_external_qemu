@@ -14,7 +14,6 @@
 
 #include "android/HostHwInfo.h"
 
-#include "android/base/StringView.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/cpu_accelerator.h"
@@ -22,6 +21,7 @@
 #include "android/utils/x86_cpuid.h"
 
 #include <fstream>
+#include <string_view>
 
 #define DEBUG 0
 
@@ -39,8 +39,8 @@
 #endif
 
 using android::base::LazyInstance;
-using android::base::StringView;
 using android::base::System;
+
 
 namespace android {
 
@@ -51,7 +51,7 @@ HostHwInfo::HostHwInfo() {
 
     AndroidCpuInfoFlags cpuFlags = android::GetCpuInfo().first;
 
-    StringView cpu_manufacturer_str = "Unknown";
+    std::string_view cpu_manufacturer_str = "Unknown";
     if (cpuFlags | ANDROID_CPU_INFO_AMD) {
         cpu_manufacturer_str = "AMD";
     }

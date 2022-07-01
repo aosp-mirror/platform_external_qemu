@@ -15,6 +15,7 @@
 #include "android/base/system/Win32UnicodeString.h"
 
 #include <algorithm>
+#include <string_view>
 
 #include <windows.h>
 
@@ -27,10 +28,10 @@ Win32UnicodeString::Win32UnicodeString() : mStr(nullptr), mSize(0u) {}
 
 Win32UnicodeString::Win32UnicodeString(const char* str, size_t len)
     : mStr(nullptr), mSize(0u) {
-    reset(StringView(str, len));
+    reset(std::string_view(str, len));
 }
 
-Win32UnicodeString::Win32UnicodeString(StringView str)
+Win32UnicodeString::Win32UnicodeString(std::string_view str)
     : mStr(nullptr), mSize(0u) {
     reset(str);
 }
@@ -95,7 +96,7 @@ void Win32UnicodeString::reset(const char* str, size_t len) {
     mStr[mSize] = L'\0';
 }
 
-void Win32UnicodeString::reset(StringView str) {
+void Win32UnicodeString::reset(std::string_view str) {
     reset(str.data(), str.size());
 }
 

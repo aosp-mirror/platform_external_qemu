@@ -59,7 +59,7 @@ pb::RecordedEvent ReceiveTextEvent(TestMemoryOutputStream& stream) {
 
     pb::RecordedEvent receivedEvent;
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
-            str.str(), &receivedEvent));
+            std::string(str), &receivedEvent));
     stream.reset();
     return receivedEvent;
 }

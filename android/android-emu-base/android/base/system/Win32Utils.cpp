@@ -16,18 +16,20 @@
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
 
+#include <string_view>
+
 namespace android {
 namespace base {
 
 // static
-std::string Win32Utils::quoteCommandLine(StringView commandLine) {
+std::string Win32Utils::quoteCommandLine(std::string_view commandLine) {
     assert(commandLine.isNullTerminated());
 
     // If |commandLine| doesn't contain any problematic character, just return
     // it as-is.
     size_t n = strcspn(commandLine.data(), " \t\v\n\"");
     if (commandLine[n] == '\0') {
-        return commandLine;
+        return std::string(commandLine);
     }
 
     // Otherwise, we need to quote some of the characters.

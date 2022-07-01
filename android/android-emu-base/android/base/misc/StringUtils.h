@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
-
 #include <functional>
 #include <iterator>
 #include <sstream>
@@ -39,10 +37,10 @@ namespace base {
 
 // Copy the content of |view| into a new heap-allocated zero-terminated
 // C string. Caller must free() the result.
-char* strDup(StringView str);
+char* strDup(std::string_view str);
 
 // Returns true iff |haystack| contains |needle|.
-bool strContains(StringView haystack, const char* needle);
+bool strContains(std::string_view haystack, const char* needle);
 
 // Joins all elements from the |range| into a single string, using |delim|
 // as a delimiter
@@ -74,17 +72,17 @@ std::string join(const Range& range) {
 // Returns a version of |in| with whitespace trimmed from the front/end
 std::string trim(const std::string& in);
 
-bool startsWith(StringView string, StringView prefix);
-bool endsWith(StringView string, StringView suffix);
+bool startsWith(std::string_view string, std::string_view prefix);
+bool endsWith(std::string_view string, std::string_view suffix);
 
 // Iterates over a string's parts using |splitBy| as a delimiter.
 // |splitBy| must be a nonempty string well, or it's a no-op.
 // Otherwise, |func| is called on each of the splits, excluding the
 // characters that are part of |splitBy|.  If two |splitBy|'s occur in a row,
-// |func| will be called on a StringView("") in between. See
+// |func| will be called on a std::string_view("") in between. See
 // StringUtils_unittest.cpp for the full story.
 template <class Func>
-void split(StringView str, StringView splitBy, Func func) {
+void split(std::string_view str, std::string_view splitBy, Func func) {
     if (splitBy.empty()) return;
 
     size_t splitSize = splitBy.size();
@@ -92,7 +90,7 @@ void split(StringView str, StringView splitBy, Func func) {
     size_t end = str.find(splitBy);
 
     while (true) {
-        func(str.substrAbs(begin, end));
+        func(str.substr(begin, end - begin));
         if (end == std::string::npos) return;
         begin = end + splitSize;
         end = str.find(splitBy, begin);
@@ -106,7 +104,7 @@ void split(StringView str, StringView splitBy, Func func) {
 // before store the result tokens
 void splitTokens(const std::string& input,
                  std::vector<std::string>* out,
-                 StringView splitBy);
+                 std::string_view splitBy);
 
 // Splits a string into a vector of strings.
 //

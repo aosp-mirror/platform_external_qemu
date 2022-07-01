@@ -26,6 +26,7 @@
 #include <GLES3/gl3.h>
 #include <GLES3/gl31.h>
 
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/base/synchronization/Lock.h"

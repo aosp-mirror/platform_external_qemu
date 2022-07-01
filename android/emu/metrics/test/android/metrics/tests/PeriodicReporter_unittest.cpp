@@ -16,7 +16,7 @@
 
 #include "android/base/Debug.h"
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
+
 #include "android/base/Uuid.h"
 #include "android/base/testing/TestLooper.h"
 #include "android/base/testing/TestSystem.h"
@@ -28,11 +28,12 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <string_view>
 
 using namespace android::base;
 using namespace android::metrics;
 
-static constexpr StringView kSpoolDir = ".android/metrics/spool";
+static constexpr std::string_view kSpoolDir = ".android/metrics/spool";
 
 namespace {
 

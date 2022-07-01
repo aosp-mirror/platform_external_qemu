@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "android/emulation/bluetooth/GrpcLinkChannelServer.h"
 
+#include <cassert>
 #include <functional>
 
 #include "android/base/async/Looper.h"
