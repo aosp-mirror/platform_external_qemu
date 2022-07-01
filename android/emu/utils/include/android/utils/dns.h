@@ -23,14 +23,6 @@ ANDROID_BEGIN_HEADER
 // Maximum number of DNS servers supported by the Android emulator.
 #define ANDROID_MAX_DNS_SERVERS 4
 
-#define DEFAULT_IPV4_ADDRESS_AND_PREFIX "10.0.2.15/24"
-#define DEFAULT_IPV4_GATEWAY "10.0.2.2"
-#define DEFAULT_IPV4_DNS "10.0.2.3"
-
-#define DEFAULT_IPV6_ADDRESS_AND_PREFIX "2001:02::/24"
-#define DEFAULT_IPV6_GATEWAY "2001:02::2"
-#define DEFAULT_IPV6_DNS "2001:02::3"
-
 // List of values returned by android_dns_get_servers() to indicate an
 // error:
 //
@@ -81,5 +73,4 @@ int android_dns_parse_servers(const char* servers,
                               SockAddress* buffer,
                               size_t bufferSize);
 
-int is_host_network_ipv6_only();
 ANDROID_END_HEADER
