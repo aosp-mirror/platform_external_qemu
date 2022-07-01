@@ -13,6 +13,7 @@
 #include "emulator/net/AsyncSocketAdapter.h"
 
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
 #include <queue>
 #include <regex>

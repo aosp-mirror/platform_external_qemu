@@ -14,6 +14,7 @@
 
 #include <gmock/gmock.h>  // for GMOCK_PP_INTERNAL_IF_0, GMOCK_PP_INTERNAL_...
 #include <gtest/gtest.h>  // for Test, AssertionResult, Message, TestPartRe...
+#include <ios>
 
 #include "android/base/testing/TestSystem.h"
 #include "android/emulation/control/adb/AdbConnection.h"
@@ -47,7 +48,7 @@ public:
 class MockAdbStream : public AdbStream {
 public:
     MockAdbStream(std::streambuf* bf) : AdbStream(bf) {}
-    void close() override { setstate(std::ios::eof()); }
+    void close() override { setstate(std::ios::eofbit); }
 
     void setWriteTimeout(uint64_t timeoutMs) override {};
 };
