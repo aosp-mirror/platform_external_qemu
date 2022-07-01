@@ -35,7 +35,8 @@ protected:
 
 TEST_F(HostGoldfishPipeTest, Basic) { }
 
-TEST_F(HostGoldfishPipeTest, MessagePipe) {
+// b/243039753 this relies on another test installing a re-entrant lock.
+TEST_F(HostGoldfishPipeTest, DISABLED_MessagePipe) {
    const char kPayload[] = "Hello World";
    const char kResponse[] = "response";
 

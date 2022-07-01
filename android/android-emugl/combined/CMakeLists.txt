@@ -262,7 +262,7 @@ if(NOT OPTION_GFXSTREAM_BACKEND AND NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
   android_add_test(TARGET emugl_combined_unittests SRC # cmake-format: sortable
                                                        combined_unittest.cpp)
   target_link_libraries(emugl_combined_unittests
-                        PUBLIC aemugraphics OSWindow android-emu-test-launcher)
+                        PUBLIC aemugraphics OSWindow android-emu-test-launcher android-emu-hardware)
   target_compile_definitions(emugl_combined_unittests
                              PRIVATE -D__ANDROID_API__=28)
   target_include_directories(

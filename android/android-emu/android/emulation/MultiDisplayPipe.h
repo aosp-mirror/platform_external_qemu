@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "AndroidAsyncMessagePipe.h"
+#include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/emulation/control/window_agent.h"
 
 namespace android {
