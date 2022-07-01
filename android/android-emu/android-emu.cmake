@@ -53,11 +53,6 @@ set(android-emu-common
                                                  # dependency has been truly
                                                  # resolved.
     android/adb-server.cpp
-    android/async-console.c
-    android/async-socket-connector.c
-    android/async-socket.c
-    android/async-utils.c
-    android/base/async/AsyncSocket.cpp
     android/base/async/CallbackRegistry.cpp
     android/base/LayoutResolver.cpp
     android/boot-properties.c
@@ -68,7 +63,6 @@ set(android-emu-common
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
     android/emulation/AdbHostListener.cpp
-    android/emulation/AdbHostServer.cpp
     android/emulation/AdbHub.cpp
     android/emulation/AdbMessageSniffer.cpp
     android/emulation/AdbVsockPipe.cpp
@@ -90,17 +84,12 @@ set(android-emu-common
     android/emulation/AudioOutputEngine.cpp
     android/emulation/ClipboardPipe.cpp
     android/emulation/ComponentVersion.cpp
-    android/emulation/control/adb/AdbConnection.cpp
-    android/emulation/control/adb/AdbInterface.cpp
-    android/emulation/control/adb/adbkey.cpp
-    android/emulation/control/adb/AdbShellStream.cpp
     android/emulation/control/AgentLogger.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
     android/emulation/control/NopRtcBridge.cpp
     android/emulation/control/ServiceUtils.cpp
-    android/emulation/CrossSessionSocket.cpp
     android/emulation/DmaMap.cpp
     android/emulation/goldfish_sync.cpp
     android/emulation/GoldfishDma.cpp
@@ -189,7 +178,6 @@ set(android-emu-common
     android/process_setup.cpp
     android/qemu-tcpdump.c
     android/resource.c
-    android/sdk-controller-socket.c
     android/sensor_mock/SensorMockUtils.cpp
     android/sensor_replay/sensor_session_playback.cpp
     android/shaper.c
@@ -336,6 +324,8 @@ target_link_libraries(
          android-emu-base
          android-emu-studio-config
          android-emu-telnet-console-auth
+         android-emu-sockets
+         android-emu-adb-interface
          android-emu-crashreport
          emulator-libsparse
          emulator-libselinux
@@ -570,6 +560,8 @@ target_link_libraries(
          android-emu-files
          android-emu-metrics
          android-emu-crashreport
+         android-emu-adb-interface
+         android-emu-sockets
          # Protobuf dependencies
          android-emu-protos
          protobuf::libprotobuf
@@ -726,14 +718,10 @@ if(NOT LINUX_AARCH64)
       android/emulation/android_pipe_zero_unittest.cpp
       android/emulation/AndroidAsyncMessagePipe_unittest.cpp
       android/emulation/ComponentVersion_unittest.cpp
-      android/emulation/control/adb/AdbConnection_unittest.cpp
-      android/emulation/control/adb/AdbInterface_unittest.cpp
-      android/emulation/control/adb/adbkey_unittest.cpp
       android/emulation/control/ApkInstaller_unittest.cpp
       android/emulation/control/FilePusher_unittest.cpp
       android/emulation/control/GooglePlayServices_unittest.cpp
       android/emulation/control/ScreenCapturer_unittest.cpp
-      android/emulation/CrossSessionSocket_unittest.cpp
       android/emulation/DeviceContextRunner_unittest.cpp
       android/emulation/DmaMap_unittest.cpp
       android/emulation/hostdevices/HostAddressSpace_unittest.cpp
@@ -788,10 +776,9 @@ if(NOT LINUX_AARCH64)
       android/wear-agent/WearAgent_unittest.cpp)
 
   # And declare the test
-  android_add_test(
-    TARGET android-emu_unittests SRC ${android-emu_unittests_common}
-    DARWIN android/emulation/control/adb/AdbShellStream_unittest.cpp
-    LINUX android/emulation/control/adb/AdbShellStream_unittest.cpp)
+  android_add_test(TARGET android-emu_unittests
+                   SRC ${android-emu_unittests_common})
+
   # Setup the targets compile config etc..
   android_target_compile_options(
     android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr
