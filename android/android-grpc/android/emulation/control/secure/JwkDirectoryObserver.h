@@ -76,7 +76,7 @@ public:
                          KeysetUpdatedCallback callback,
                          PathFilterPredicate filter = JwkDirectoryObserver::acceptJwkExtOnly,
                          bool startImmediately = true);
-    ~JwkDirectoryObserver() = default;
+    ~JwkDirectoryObserver();
 
     // Start observing the directory structure.
     // This will invoke the callback if any files are present in the

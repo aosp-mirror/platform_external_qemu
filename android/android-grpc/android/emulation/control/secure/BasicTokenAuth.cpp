@@ -37,7 +37,7 @@ grpc::Status BasicTokenAuth::Process(const InputMetadata& auth_metadata,
     auto path = auth_metadata.find(PATH);
     if (path == auth_metadata.end()) {
         return grpc::Status(grpc::StatusCode::INTERNAL,
-                            "The metadata does not contain a path!");
+                            "The metadata does not contain a path");
     }
 
     auto header = auth_metadata.find(mHeader);
