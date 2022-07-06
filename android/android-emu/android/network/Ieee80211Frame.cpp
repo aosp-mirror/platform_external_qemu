@@ -48,6 +48,7 @@ static bool validEtherType(uint16_t ethertype) {
         case ETH_P_IP:
         case ETH_P_ARP:
         case ETH_P_NCSI:
+        case ETH_P_EAPOL:
             return true;
         default:
             return false;
@@ -356,6 +357,22 @@ std::string Ieee80211Frame::toStr() {
             ss << std::hex << mData[i] << std::setw(2) << ' ';
     }
     return ss.str();
+}
+
+bool Ieee80211Frame::isValid() const {
+    bool isValid = true;
+    if (size() < IEEE80211_HDRLEN) {
+        LOG(VERBOSE) << "Frame length is less than " << IEEE80211_HDRLEN;
+        isValid = false;
+    }
+    if (isData() && !isProtected()) {
+        isValid = validEtherType(getEtherType());
+        if (!isValid) {
+            LOG(VERBOSE) << "Data frame has invalid ether type "
+                         << getEtherType();
+        }
+    }
+    return isValid;
 }
 
 bool Ieee80211Frame::isData() const {
@@ -691,8 +708,8 @@ const IOVector Ieee80211Frame::toEthernet() {
     IOVector ret;
     uint16_t ethertype = getEtherType();
     if (!validEtherType(ethertype)) {
-        LOG(VERBOSE) << "Unexpected ether type. Dump frame: "
-                     << toStr().c_str();
+        LOG(VERBOSE) << "Unexpected ether type: " << ethertype
+                     << ". Dump frame: " << toStr().c_str();
         return ret;
     }
 
