@@ -105,7 +105,7 @@ static void print_dns_v6_address(struct in6_addr address) {
         LOG(ERROR) << "Failed to stringify IPv6 address for logging.";
         return;
     }
-    LOG(INFO) << "IPv6 DNS server found: " << address_str;
+    LOG(VERBOSE) << "IPv6 DNS server found: " << address_str;
 }
 #endif
 
