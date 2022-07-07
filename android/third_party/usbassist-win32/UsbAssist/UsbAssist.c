@@ -52,6 +52,9 @@ typedef struct __USB_PNP_COMPLETION_CONTEXT {
 	PDEVICE_OBJECT pDevObj;
 	PIRP pIrp;
 	IO_STACK_LOCATION  Isl;
+	PIO_COMPLETION_ROUTINE OldCompletionRoutine;
+	PVOID OldContext;
+	UCHAR OldControl;
 } USB_PNP_COMPLETION_CONTEXT, * PUSB_PNP_COMPLETION_CONTEXT;
 
 #define USB_DEVICE_CREATED           0x1
@@ -71,6 +74,7 @@ typedef struct __USB_DEVICE_ENTRY {
 	USHORT vid;
 	USHORT pid;
 	ULONG bus;
+	UCHAR port[8];
 	LONG status;
 	USB_TOPOLOGY_ADDRESS topo;
 } USB_DEVICE_ENTRY, * PUSB_DEVICE_ENTRY;
@@ -344,15 +348,33 @@ static PDRIVER_DISPATCH usbHubDriverOldDispatch(PDRIVER_OBJECT pDrvObj)
 	return NULL;
 }
 
+static void usbAssistPdoRemoval(PDEVICE_OBJECT pDevObj)
+{
+	PLIST_ENTRY entry;
+	PUSB_DEVICE_ENTRY udev;
+
+	for (entry = devListHead.Flink; entry != &devListHead; entry = entry->Flink) {
+		udev = CONTAINING_RECORD(entry, USB_DEVICE_ENTRY, entry);
+		if (udev->pdo == pDevObj) {
+			udev->pdo = NULL;
+			udev->status = USB_DEVICE_REMOVED;
+			return;
+		}
+	}
+
+	return;
+}
+
 NTSTATUS usbAssistPnpCompletion(PDEVICE_OBJECT pDevObj, PIRP pIrp, void* pContext)
 {
-	UNREFERENCED_PARAMETER(pDevObj);
-	UNREFERENCED_PARAMETER(pIrp);
-
 	PUSB_PNP_COMPLETION_CONTEXT pUsbPnpContext = pContext;
 	PDEVICE_OBJECT pDevObjOrig = pUsbPnpContext->pDevObj;
 	PIRP pIrpOrig = pUsbPnpContext->pIrp;
 	PIO_STACK_LOCATION pIslOrig = &pUsbPnpContext->Isl;
+	PIO_COMPLETION_ROUTINE OldCompletionRoutine = pUsbPnpContext->OldCompletionRoutine;
+	PVOID OldContext = pUsbPnpContext->OldContext;
+	UCHAR OldControl = pUsbPnpContext->OldControl;
+	NTSTATUS status = STATUS_SUCCESS;
 
 	if (pIslOrig->MinorFunction == IRP_MN_QUERY_ID) {
 		if (pIrpOrig->IoStatus.Status == STATUS_SUCCESS) {
@@ -421,7 +443,22 @@ NTSTATUS usbAssistPnpCompletion(PDEVICE_OBJECT pDevObj, PIRP pIrp, void* pContex
 		}
 	}
 
-	return STATUS_SUCCESS;
+	if (pIslOrig->MinorFunction == IRP_MN_SURPRISE_REMOVAL ||
+	    pIslOrig->MinorFunction == IRP_MN_REMOVE_DEVICE) {
+		if (pIrpOrig->IoStatus.Status == STATUS_SUCCESS) {
+			usbAssistPdoRemoval(pDevObjOrig);
+		}
+	}
+
+	if (OldCompletionRoutine && OldControl) {
+		status = OldCompletionRoutine(pDevObj, pIrp, OldContext);
+		if (status != STATUS_MORE_PROCESSING_REQUIRED)
+			IoCompleteRequest(pIrp, IO_NO_INCREMENT);
+	}
+
+	ExFreePool((PVOID)pContext);
+
+	return status;
 }
 
 NTSTATUS usbAssistSetCompletionRoutine(PDEVICE_OBJECT pDevObj, PIRP pIrp, PIO_STACK_LOCATION pIsl)
@@ -434,6 +471,9 @@ NTSTATUS usbAssistSetCompletionRoutine(PDEVICE_OBJECT pDevObj, PIRP pIrp, PIO_ST
 	pUsbCompletionContext->Isl = *pIsl;
 	pUsbCompletionContext->pDevObj = pDevObj;
 	pUsbCompletionContext->pIrp = pIrp;
+	pUsbCompletionContext->OldCompletionRoutine = pIsl->CompletionRoutine;
+	pUsbCompletionContext->OldContext = pIsl->Context;
+	pUsbCompletionContext->OldControl = pIsl->Control;
 
 	pIsl->CompletionRoutine = usbAssistPnpCompletion;
 	pIsl->Context = pUsbCompletionContext;
@@ -451,10 +491,9 @@ NTSTATUS usbAssistPnpHook(PDEVICE_OBJECT pDevObj, PIRP pIrp)
 		KeBugCheck(0x20001);
 
 	pIsl = IoGetCurrentIrpStackLocation(pIrp);
-	if (pIsl->MinorFunction == IRP_MN_QUERY_ID || pIsl->MinorFunction == IRP_MN_QUERY_DEVICE_TEXT) {
+	if (pIsl->MinorFunction == IRP_MN_QUERY_ID || pIsl->MinorFunction == IRP_MN_QUERY_DEVICE_TEXT ||
+	    pIsl->MinorFunction == IRP_MN_SURPRISE_REMOVAL || pIsl->MinorFunction == IRP_MN_REMOVE_DEVICE) {
 		usbAssistSetCompletionRoutine(pDevObj, pIrp, pIsl);
-
-		DbgPrint("Hello");
 	}
 
 	return oldPnpDispatch(pDevObj, pIrp);
@@ -881,9 +920,7 @@ GetRootHubNameOut:
 	return status;
 }
 
-
-
-static NTSTATUS usbAssistCreateDev(PUSB_PASSTHROUGH_TARGET targetDev, PUSB_DEVICE_ENTRY *udev)
+static NTSTATUS usbAssistCaptureDev(PUSB_DEVICE_ENTRY udev)
 {
 	NTSTATUS status = STATUS_NO_SUCH_DEVICE;
 	HANDLE hubHandle[7] = { 0 };
@@ -906,15 +943,14 @@ static NTSTATUS usbAssistCreateDev(PUSB_PASSTHROUGH_TARGET targetDev, PUSB_DEVIC
 	IO_STATUS_BLOCK ioStatusBlock;
 	PUSB_NODE_CONNECTION_INFORMATION connectionInfo = NULL;
 	ULONG nBytes = 0;
-	PUSB_DEVICE_ENTRY devEntry = NULL;
 
 	// Get roothub name
-	status = usbAssistGetRootHubName(targetDev->bus, &hubName[0]);
+	status = usbAssistGetRootHubName(udev->bus, &hubName[0]);
 	if (!NT_SUCCESS(status) || hubName[0] == NULL)
 		return STATUS_NO_SUCH_DEVICE;
 
-	for (i = 0; targetDev->port[i]; i++) {
-		status = usbAssistGetHubHandleAndName(hubName[i], (UCHAR)targetDev->port[i], &hubHandle[i], &hubName[i + 1]);
+	for (i = 0; udev->port[i]; i++) {
+		status = usbAssistGetHubHandleAndName(hubName[i], (UCHAR)udev->port[i], &hubHandle[i], &hubName[i + 1]);
 		if (!NT_SUCCESS(status))
 			goto Out;
 		if (hubHandle[i] == NULL || hubName[i + 1] == NULL)
@@ -922,7 +958,7 @@ static NTSTATUS usbAssistCreateDev(PUSB_PASSTHROUGH_TARGET targetDev, PUSB_DEVIC
 	}
 
 	targetHubHandle = hubHandle[i];
-	targetHubPort = targetDev->port[i];
+	targetHubPort = udev->port[i];
 	if (!targetHubHandle || !targetHubPort) {
 		status = STATUS_NO_SUCH_DEVICE;
 		goto Out;
@@ -995,8 +1031,8 @@ static NTSTATUS usbAssistCreateDev(PUSB_PASSTHROUGH_TARGET targetDev, PUSB_DEVIC
 			ZwClose(event);
 			if (!NT_SUCCESS(status))
 				goto Out;
-			if (connectionInfo->DeviceDescriptor.idVendor == targetDev->vid &&
-				connectionInfo->DeviceDescriptor.idProduct == targetDev->pid) {
+			if (connectionInfo->DeviceDescriptor.idVendor == udev->vid &&
+				connectionInfo->DeviceDescriptor.idProduct == udev->pid) {
 				targetPDO = devRel->Objects[j];
 				break;
 			}
@@ -1007,35 +1043,15 @@ static NTSTATUS usbAssistCreateDev(PUSB_PASSTHROUGH_TARGET targetDev, PUSB_DEVIC
 		goto Out;
 	}
 
-	status = ZwCreateEvent(&event, GENERIC_ALL, 0, NotificationEvent, FALSE);
+	udev->topo = topo;
+
+	status = usbAssistCyclePort(targetPDO);
 	if (!NT_SUCCESS(status))
 		goto Out;
 
-	devEntry = ExAllocatePoolZero(NonPagedPool, sizeof(USB_DEVICE_ENTRY), USBASSIST_POOL_TAG);
-	if (!devEntry) {
-		status = STATUS_INSUFFICIENT_RESOURCES;
-		goto Out;
-	}
-
-	InitializeListHead(&devEntry->entry);
-	devEntry->bus = targetDev->bus;
-	devEntry->vid = targetDev->vid;
-	devEntry->pid = targetDev->pid;
-	devEntry->process = IoGetCurrentProcess();
-	devEntry->pdo = targetPDO;
-	devEntry->topo = topo;
-	devEntry->status = USB_DEVICE_CREATED;
-	devEntry->evt = event;
-	ExInterlockedInsertTailList(&devListHead, &devEntry->entry, &devListLock);
-
-	*udev = devEntry;
 	status = STATUS_SUCCESS;
 	
 Out:
-	if (!devEntry && event) {
-		ZwClose(event);
-	}
-
 	if (connectionInfo) {
 		ExFreePool(connectionInfo);
 		connectionInfo = NULL;
@@ -1067,6 +1083,43 @@ Out:
 	return status;
 }
 
+static NTSTATUS usbAssistCreateDev(PUSB_PASSTHROUGH_TARGET targetDev, PUSB_DEVICE_ENTRY *udev)
+{
+	KIRQL irql;
+	NTSTATUS status = STATUS_INSUFFICIENT_RESOURCES;
+	HANDLE event = NULL;
+	PUSB_DEVICE_ENTRY devEntry = NULL;
+
+	devEntry = ExAllocatePoolZero(NonPagedPool, sizeof(USB_DEVICE_ENTRY), USBASSIST_POOL_TAG);
+	if (!devEntry)
+		goto Out;
+
+	status = ZwCreateEvent(&event, GENERIC_ALL, 0, NotificationEvent, FALSE);
+	if (!NT_SUCCESS(status))
+		goto Out;
+
+	InitializeListHead(&devEntry->entry);
+	devEntry->bus = targetDev->bus;
+	memcpy_s(devEntry->port, 8, targetDev->port, 8);
+	devEntry->vid = targetDev->vid;
+	devEntry->pid = targetDev->pid;
+	devEntry->process = IoGetCurrentProcess();
+	devEntry->status = USB_DEVICE_CREATED;
+	devEntry->evt = event;
+
+	KeAcquireSpinLock(&devListLock, &irql);
+	InsertTailList(&devListHead, &devEntry->entry);
+	KeReleaseSpinLock(&devListLock, irql);
+
+	*udev = devEntry;
+	return STATUS_SUCCESS;
+
+Out:
+    if (devEntry)
+        ExFreePool(devEntry);
+	return status;
+}
+
 static NTSTATUS __usbAssistRemoveDev(PUSB_DEVICE_ENTRY dev)
 {
 	KIRQL irql;
@@ -1076,7 +1129,9 @@ static NTSTATUS __usbAssistRemoveDev(PUSB_DEVICE_ENTRY dev)
 	RemoveEntryList(&dev->entry);
 	KeReleaseSpinLock(&devListLock, irql);
 
-	status = usbAssistCyclePort(dev->pdo);
+	if (dev->status == USB_DEVICE_CAPTURED) {
+		status = usbAssistCyclePort(dev->pdo);
+	}
 
 	if (dev->evt)
 		ZwClose(dev->evt);
@@ -1174,7 +1229,7 @@ static NTSTATUS usbAssistDeviceOps(PUSB_PASSTHROUGH_TARGET target)
 			break;
 
 		udev->status = USB_DEVICE_CAPTURING;
-		rc = usbAssistCyclePort(udev->pdo);
+		rc = usbAssistCaptureDev(udev);
 		if (!NT_SUCCESS(rc)) {
 			__usbAssistRemoveDev(udev);
 			break;
