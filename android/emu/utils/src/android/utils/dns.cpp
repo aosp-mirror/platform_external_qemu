@@ -120,3 +120,15 @@ int android_dns_get_servers(const char* dnsServerOption,
 
     return dnsCount;
 }
+
+// Following the constants defined in net/slipr.c
+int is_host_network_ipv6_only() {
+    int result = 0;
+    Dns::AddressList list = Dns::getSystemServerList();
+    if (!list.empty()) {
+        result = std::none_of(
+                list.begin(), list.end(),
+                [](const IpAddress& addr) { return addr.isIpv4(); });
+    }
+    return result;
+}
