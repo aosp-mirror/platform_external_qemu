@@ -450,11 +450,8 @@ NTSTATUS usbAssistPnpCompletion(PDEVICE_OBJECT pDevObj, PIRP pIrp, void* pContex
 		}
 	}
 
-	if (OldCompletionRoutine && OldControl) {
+	if (OldCompletionRoutine && OldControl)
 		status = OldCompletionRoutine(pDevObj, pIrp, OldContext);
-		if (status != STATUS_MORE_PROCESSING_REQUIRED)
-			IoCompleteRequest(pIrp, IO_NO_INCREMENT);
-	}
 
 	ExFreePool((PVOID)pContext);
 
