@@ -14,7 +14,10 @@
 
 #include "android/emulation/MediaSnapshotHelper.h"
 #include "android/emulation/H264NaluParser.h"
+#include "android/emulation/HevcNaluParser.h"
 #include "android/emulation/VpxFrameParser.h"
+
+#include "android/utils/debug.h"
 
 #define MEDIA_SNAPSHOT_DEBUG 0
 
@@ -35,10 +38,14 @@ using ColorAspects = MediaSnapshotState::ColorAspects;
 void MediaSnapshotHelper::savePacket(const uint8_t* frame,
                                      size_t szBytes,
                                      uint64_t inputPts) {
-    if (mType == CodecType::H264) {
+    if (mType == CodecType::HEVC) {
+        return saveHEVCPacket(frame, szBytes, inputPts);
+    } else if (mType == CodecType::H264) {
         return saveH264Packet(frame, szBytes, inputPts);
-    } else {
+    } else if (mType == CodecType::VP8 || mType == CodecType::VP9) {
         return saveVPXPacket(frame, szBytes, inputPts);
+    } else {
+        derror("Unknown codec type %d, cannot save packet", (int)mType);
     }
 }
 
@@ -103,10 +110,37 @@ void MediaSnapshotHelper::saveH264Packet(const uint8_t* frame,
         }
     }
 }
+
+void MediaSnapshotHelper::saveHEVCPacket(const uint8_t* frame,
+                                         size_t szBytes,
+                                         uint64_t inputPts) {
+    const bool enableSnapshot = true;
+    if (enableSnapshot) {
+        std::vector<uint8_t> v;
+        v.assign(frame, frame + szBytes);
+        bool hasVps = HevcNaluParser::checkVpsFrame(frame, szBytes);
+        if (hasVps) {
+            SNAPSHOT_DPRINT("create new snapshot state");
+            MediaSnapshotState newSnapshotState{};
+            // we need to keep the frames, the guest might not have retrieved
+            // them yet; otherwise, we might loose some frames
+            std::swap(newSnapshotState.savedFrames, mSnapshotState.savedFrames);
+            std::swap(newSnapshotState, mSnapshotState);
+            mSnapshotState.savedPackets.clear();
+        }
+
+        mSnapshotState.savePacket(std::move(v), inputPts);
+        SNAPSHOT_DPRINT("saving packet; total is %d",
+                        (int)(mSnapshotState.savedPackets.size()));
+    }
+}
+
 void MediaSnapshotHelper::save(base::Stream* stream) const {
     SNAPSHOT_DPRINT("saving packets now %d",
                     (int)(mSnapshotState.savedPackets.size()));
-    if (mType == CodecType::H264) {
+    if (mType == CodecType::HEVC) {
+        stream->putBe32(265);
+    } else if (mType == CodecType::H264) {
         stream->putBe32(264);
     } else if (mType == CodecType::VP8) {
         stream->putBe32(8);
@@ -132,6 +166,14 @@ void MediaSnapshotHelper::replay(
                 oneShotDecode(pkt.data.data(), pkt.data.size(), pkt.pts);
             }
         }
+    } else {  // hevc, vpx, they dont have sps pps separated out
+        for (int i = 0; i < mSnapshotState.savedPackets.size(); ++i) {
+            MediaSnapshotState::PacketInfo& pkt =
+                    mSnapshotState.savedPackets[i];
+            SNAPSHOT_DPRINT("reloading frame %d size %d", i,
+                            (int)pkt.data.size());
+            oneShotDecode(pkt.data.data(), pkt.data.size(), pkt.pts);
+        }
     }
 }
 
@@ -140,7 +182,9 @@ void MediaSnapshotHelper::load(
         std::function<void(uint8_t* data, size_t len, uint64_t pts)>
                 oneShotDecode) {
     int type = stream->getBe32();
-    if (type == 264) {
+    if (type == 265) {
+        mType = CodecType::HEVC;
+    } else if (type == 264) {
         mType = CodecType::H264;
     } else if (type == 8) {
         mType = CodecType::VP8;
