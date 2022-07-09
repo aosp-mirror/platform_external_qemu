@@ -490,6 +490,9 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::VULKAN_NATIVE_SWAPCHAIN;
         case android::featurecontrol::VirtioGpuFenceContexts:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_GPU_FENCE_CONTEXTS;
+        case android::featurecontrol::VsockSnapshotLoadFixed_b231345789:
+            return android_studio::EmulatorFeatureFlagState::
+                    VSOCK_SNAPSHOT_LOAD_FIXED_B231345789;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
