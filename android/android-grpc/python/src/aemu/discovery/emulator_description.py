@@ -153,4 +153,4 @@ class EmulatorDescription(dict):
         return self._description.get(prop, default_value)
 
     def __hash__(self):
-        return hash(frozenset(self._description))
+        return hash(frozenset(self._description.items()))
