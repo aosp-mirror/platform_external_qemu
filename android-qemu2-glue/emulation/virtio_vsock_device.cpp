@@ -355,7 +355,9 @@ struct virtio_vsock_hdr prepareFrameHeader(const VSockStream* stream,
 }
 
 struct VirtIOVSockDev {
-    VirtIOVSockDev(VirtIOVSock* s) : mS(s) {}
+    VirtIOVSockDev(VirtIOVSock* s) : mS(s)
+    , mSnaphotLoadFixed_b231345789(fc::isEnabled(fc::VsockSnapshotLoadFixed_b231345789))
+    {}
 
     void closeStreamFromHostLocked(VSockStream* streamWeak) {
         closeStreamLocked(streamWeak->mGuestPort, streamWeak->mHostPort);
@@ -486,9 +488,9 @@ struct VirtIOVSockDev {
                 } break;
 
                 case VSockStream::LoadResult::Closed:
-                    // TODO(b/231345789): We need to put this line back once
-                    // we figure out why it breaks tests (b/232284244).
-                    // vstream->sendOp(VIRTIO_VSOCK_OP_RST);
+                    if (mSnaphotLoadFixed_b231345789) {
+                        vstream->sendOp(VIRTIO_VSOCK_OP_RST);
+                    }
                     break;
 
                 default:
@@ -937,6 +939,7 @@ private:
     std::vector<uint8_t> mVqGuestToHostBuf;
     std::deque<struct virtio_vsock_hdr> mHostToGuestOrphanFrames;
     uint32_t mSrcHostPortI = kSrcHostPortMin;
+    const bool mSnaphotLoadFixed_b231345789;
 };
 
 void VSockStream::sendOp(enum virtio_vsock_op op) {

@@ -373,6 +373,7 @@ Feature: 'DeviceStateOnBoot' (86), value: 0, default: 0, is overridden: 0
 Feature: 'HWCMultiConfigs' (87), value: 0, default: 0, is overridden: 0
 Feature: 'VirtioSndCard' (88), value: 0, default: 0, is overridden: 0
 Feature: 'VirtioTablet' (89), value: 0, default: 0, is overridden: 0
+Feature: 'VsockSnapshotLoadFixed_b231345789' (90), value: 0, default: 0, is overridden: 0
 )#";
     EXPECT_EQ(feature_list, ss.str());
 }
