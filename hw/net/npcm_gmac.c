@@ -149,11 +149,20 @@ static void npcm_gmac_mdio_access(NPCMGMACState *s, uint16_t v)
         g_assert(pa < NPCM_GMAC_MAX_PHYS);
         g_assert(gr < NPCM_GMAC_MAX_PHY_REGS);
 
+
         if (v & NPCM_GMAC_MII_ADDR_WRITE) {
             data = s->regs[R_NPCM_GMAC_MII_DATA];
             /* Clear reset bit for BMCR register */
-            if (gr == MII_BMCR) {
+            switch (gr) {
+            case MII_BMCR:
                 data &= ~MII_BMCR_RESET;
+                /* Complete auto-negotiation immediately and set as complete */
+                if (data & MII_BMCR_AUTOEN) {
+                    /* Tells autonegotiation to not restart again */
+                    data &= ~MII_BMCR_ANRESTART;
+                    /* sets autonegotiation as complete */
+                    s->phy_regs[pa][MII_BMSR] |= MII_BMSR_AN_COMP;
+                }
             }
             s->phy_regs[pa][gr] = data;
         } else {
@@ -262,7 +271,12 @@ static void npcm_gmac_reset(DeviceState *dev)
     npcm_gmac_soft_reset(s);
     if (s->pcs != NULL) {
         memcpy(s->phy_regs[0], s->pcs->sr_mii, sizeof(s->pcs->sr_mii));
+        /* Kernel thinks that we need a 0x6600 to work */
+        s->phy_regs[0][1] |= MII_BMCR_LOOPBACK | MII_BMCR_SPEED100 |
+                             MII_BMCR_ANRESTART;
     }
+
+    trace_npcm_gmac_reset(DEVICE(s)->canonical_path, s->phy_regs[0][MII_BMSR]);
 }
 
 static NetClientInfo net_npcm_gmac_info = {
@@ -296,9 +310,16 @@ static void npcm_gmac_realize(DeviceState *dev, Error **errp)
     sysbus_init_irq(sbd, &gmac->irq);
 
     qemu_macaddr_default_if_unset(&gmac->conf.macaddr);
+
     gmac->nic = qemu_new_nic(&net_npcm_gmac_info, &gmac->conf, TYPE_NPCM_GMAC,
                              dev->id, &dev->mem_reentrancy_guard, gmac);
     qemu_format_nic_info_str(qemu_get_queue(gmac->nic), gmac->conf.macaddr.a);
+    gmac->regs[R_NPCM_GMAC_MAC0_ADDR_HI] = (gmac->conf.macaddr.a[0] << 8) + \
+                                            gmac->conf.macaddr.a[1];
+    gmac->regs[R_NPCM_GMAC_MAC0_ADDR_LO] = (gmac->conf.macaddr.a[2] << 24) + \
+                                           (gmac->conf.macaddr.a[3] << 16) + \
+                                           (gmac->conf.macaddr.a[4] << 8) + \
+                                            gmac->conf.macaddr.a[5];
 }
 
 static void npcm_gmac_unrealize(DeviceState *dev)
