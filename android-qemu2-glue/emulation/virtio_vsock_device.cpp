@@ -42,7 +42,11 @@ extern "C" {
 #include "android/emulation/android_pipe_common.h"
 #include "android/emulation/android_pipe_device.h"
 #include "android/emulation/virtio_vsock_device.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/feature_control.h"
+
+namespace fc = android::featurecontrol;
+
 namespace {
 using android::emulation::AdbVsockPipe;
 using android::emulation::IVsockNewTransport;
@@ -1036,7 +1040,7 @@ int virtio_vsock_impl_load(QEMUFile* f, void* impl) {
 }
 
 int virtio_vsock_is_enabled() {
-    return feature_is_enabled(kFeature_VirtioVsockPipe);
+    return fc::isEnabled(fc::VirtioVsockPipe);
 }
 
 uint64_t virtio_vsock_host_to_guest_open(uint32_t guest_port,
