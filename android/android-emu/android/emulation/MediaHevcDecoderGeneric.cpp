@@ -59,7 +59,7 @@ bool canUseCudaDecoder() {
     // enable cuda by default, unless it is explicitly disallowed
     const bool is_cuda_disabled =
             (android::base::System::getEnvironmentVariable(
-                     "ANDROID_EMU_MEDIA_DECODER_CUDA") == "0");
+                     "ANDROID_EMU_MEDIA_DECODER_CUDA_HEVC") == "0");
     if (is_cuda_disabled)
         return false;
 

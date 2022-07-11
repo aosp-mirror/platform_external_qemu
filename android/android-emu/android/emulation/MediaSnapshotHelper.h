@@ -97,6 +97,9 @@ private:
     void saveH264Packet(const uint8_t* compressedFrame,
                         size_t len,
                         uint64_t pts);
+    void saveHEVCPacket(const uint8_t* compressedFrame,
+                        size_t len,
+                        uint64_t pts);
 
 private:
     unsigned int mOutputHeight = 0;
