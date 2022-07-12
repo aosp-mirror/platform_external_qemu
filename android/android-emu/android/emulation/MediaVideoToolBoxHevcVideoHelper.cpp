@@ -152,6 +152,7 @@ void MediaVideoToolBoxHevcVideoHelper::decode(const uint8_t* frame,
                 VTB_DPRINT("this is SEI frame");
                 break;
             case HevcNaluType::IDR_W_RADL:
+            case HevcNaluType::CRA_NUT:
                 VTB_DPRINT("this is an IDR frame");
                 if (mFfmpegVideoHelper) {
                     mFfmpegVideoHelper->decode(frame, szBytes, inputPts);
