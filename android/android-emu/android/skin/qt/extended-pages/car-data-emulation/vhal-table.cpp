@@ -15,6 +15,7 @@
 #include <qnamespace.h>
 #include <qobject.h>
 #include <qstring.h>
+#include <QDir>
 #include <QDialog>
 #include <QFontMetrics>
 #include <QInputDialog>
@@ -36,6 +37,11 @@
 #include "android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h"
 #include "android/skin/qt/extended-pages/car-data-emulation/vehicle_constants_generated.h"
 #include "android/skin/qt/raised-material-button.h"
+#include "android/base/Log.h"                               // for LogStream...
+#include "android/avd/info.h"
+#include "android/base/files/PathUtils.h"
+#include "android/console.h"  // for getConsoleAgents, AndroidCons...
+
 #include "ui_vhal-table.h"
 #include "vhal-item.h"
 
@@ -59,6 +65,7 @@ using emulator::VehiclePropValue;
 using carpropertyutils::PropertyDescription;
 using carpropertyutils::propMap;
 using carpropertyutils::changeModeToString;
+using carpropertyutils::loadDescriptionsFromJson;
 
 static constexpr int REFRESH_START = 1;
 static constexpr int REFRESH_STOP = 2;
@@ -72,6 +79,20 @@ VhalTable::VhalTable(QWidget* parent)
       mVhalPropertyTableRefreshThread([this] {
           initVhalPropertyTableRefreshThread();
       }) {
+
+    // Extend VHAL properties dictionaries with json descriptions
+    auto avdPath = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
+    if (avdPath) {
+        // Search for *.vhal.json files in avd path
+        QDir avdDir(avdPath);
+        QStringList metaFiles = avdDir.entryList(QStringList() << "*types-meta.json", QDir::Files);
+        foreach(QString filename, metaFiles) {
+            loadDescriptionsFromJson(filename.prepend("/").prepend(avdPath).toStdString().c_str());
+        }
+    } else {
+        LOG(ERROR) << "Error reading vhal json: Cannot find avd path!" << std::endl;
+    }
+
     mUi->setupUi(this);
 
     connect(this, SIGNAL(updateData(QString, QString, QString, QString)), this,
@@ -403,17 +424,24 @@ int32_t VhalTable::getUserBoolValue(PropertyDescription propDesc, QString oldVal
     return (item == "True") ? 1 : 0;
 }
 
-int32_t VhalTable::getUserInt32Value(PropertyDescription propDesc, QString oldValueString, 
+int32_t VhalTable::getUserInt32Value(PropertyDescription propDesc, QString oldValueString,
                                             QString tip, bool* pressedOk) {
     int32_t value;
-    if (propDesc.lookupTable != nullptr) {
+    if (propDesc.lookupTableName != nullptr) {
+        auto lookupTable = carpropertyutils::lookupTablesMap.find(propDesc.lookupTableName);
+        if (lookupTable == carpropertyutils::lookupTablesMap.end()) {
+            int32_t oldValue = oldValueString.toInt();
+            value = QInputDialog::getInt(this, propDesc.label, nullptr, oldValue,
+                                      INT_MIN, INT_MAX, 1, pressedOk);
+        }
+
         QStringList items;
-        for (const auto &detail : *(propDesc.lookupTable)) {
+        for (const auto &detail : *(lookupTable->second)) {
             items << detail.second;
         }
         QString item = QInputDialog::getItem(this, propDesc.label, tip, items,
                                               items.indexOf(oldValueString), false, pressedOk);
-        for (const auto &detail : *(propDesc.lookupTable)) {
+        for (const auto &detail : *(lookupTable->second)) {
             if (item == detail.second) {
                 value = detail.first;
                 break;
@@ -439,8 +467,13 @@ const std::vector<int32_t>* VhalTable::getUserInt32VecValue(
     QSet<QString> oldStringSet = QSet<QString>::fromList(valueStringList);
 #endif
 
-    if (propDesc.lookupTable != nullptr) {
-        CheckboxDialog checkboxDialog(this, propDesc.lookupTable, &oldStringSet,
+    if (propDesc.lookupTableName != nullptr) {
+        auto lookupTable = carpropertyutils::lookupTablesMap.find(propDesc.lookupTableName);
+        if (lookupTable == carpropertyutils::lookupTablesMap.end()) {
+            *pressedOk = false;
+            return nullptr;
+        }
+        CheckboxDialog checkboxDialog(this, lookupTable->second, &oldStringSet,
                                             propDesc.label, tip);
         if(checkboxDialog.exec() == QDialog::Accepted) {
             *pressedOk = true;

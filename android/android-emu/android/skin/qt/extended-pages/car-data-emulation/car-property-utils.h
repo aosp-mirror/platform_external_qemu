@@ -35,13 +35,14 @@ using android::base::FunctorThread;
 namespace carpropertyutils {
     struct PropertyDescription {
         QString label;
-        std::map<int32_t, QString>* lookupTable;
+        QString lookupTableName;
         QString (*int32ToString)(int32_t val);
         QString (*int32VecToString)(std::vector<int32_t> vals);
     };
 
     // Map from property ids to description for conversion to human readable form.
     extern std::map<int32_t, PropertyDescription> propMap;
+    extern std::map<QString, std::map<int32_t, QString>*> lookupTablesMap;
 
     QString booleanToString(PropertyDescription prop, int32_t val);
     QString int32ToString(PropertyDescription prop, int32_t val);
@@ -63,5 +64,6 @@ namespace carpropertyutils {
     QString vendorIdToString(int32_t val);
     QString changeModeToString(int32_t val);
     bool isVendor(int32_t val);
+    void loadDescriptionsFromJson(const char *filename);
 
 }  // namespace carpropertyutils
