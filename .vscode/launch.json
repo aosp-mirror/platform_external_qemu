@@ -102,7 +102,7 @@
       "name": "Attach process (requires root)",
       "type": "lldb",
       "request": "attach",
-      "processId": "${command:pickProcess}",
+      "pid": "${command:pickProcess}",
       "windows": {
         "type": "cppvsdbg",
       },

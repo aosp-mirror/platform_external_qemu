@@ -79,9 +79,9 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/emulation/resizable_display_config.h"
-#include "android/featurecontrol/feature_control.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/gpu_frame.h"
 #include "android/hw-sensors.h"
 #include "android/metrics/MetricsReporter.h"
@@ -523,8 +523,8 @@ public:
                 // they are used for control flag like pause touch synching.)
                 buttonsState &= 1;
             }
-            agent->sendMouseEvent(request.x(), request.y(), 0,
-                                  buttonsState, request.display());
+            agent->sendMouseEvent(request.x(), request.y(), 0, buttonsState,
+                                  request.display());
         });
 
         return Status::OK;
@@ -582,7 +582,8 @@ public:
                 &mInjectAudioCount, [](auto counter) {
                     assert(*counter == 1);
                     counter->fetch_sub(1);
-                    assert(*counter == 0); });
+                    assert(*counter == 0);
+                });
 
         AudioPacket pkt;
         if (!reader->Read(&pkt)) {
@@ -798,8 +799,8 @@ public:
                         int bpp = ScreenshotUtils::getBytesPerPixel(*request);
                         auto screenshot = event->mutable_emulator_details()
                                                   ->mutable_screenshot();
-                        screenshot->set_size(request->width() *
-                                             request->height() * bpp);
+                        screenshot->set_size(reply.format().width() *
+                                             reply.format().height() * bpp);
                         screenshot->set_frames(frame);
                         // We care about median, 95%, and 100%.
                         // (max enables us to calculate # of dropped frames.)
@@ -866,7 +867,7 @@ public:
                                                out.begin(), out.size(),
                                                PARAMETER_VALUE_TYPE_CURRENT);
         auto rotation = ScreenshotUtils::deriveRotation(mAgents->sensors);
-        // Calculate the desired rotation and width we should use..
+
         int desiredWidth = request->width();
         int desiredHeight = request->height();
 
@@ -891,6 +892,11 @@ public:
                 std::swap(rect.size.w, rect.size.h);
             }
         }
+
+
+        // Note that we will never scale above the device width and height.
+        desiredWidth = std::min<int>(desiredWidth, width);
+        desiredHeight = std::min<int>(desiredHeight, height);
 
         // Calculate width and height, keeping aspect ratio in mind.
         int newWidth, newHeight;
@@ -1424,7 +1430,7 @@ private:
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
-    std::atomic_int8_t mInjectAudioCount{0}; // # of active inject audio.
+    std::atomic_int8_t mInjectAudioCount{0};  // # of active inject audio.
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
     static constexpr std::chrono::milliseconds k5SecondsWait = 5s;
     const std::chrono::milliseconds kNoWait = 0ms;
