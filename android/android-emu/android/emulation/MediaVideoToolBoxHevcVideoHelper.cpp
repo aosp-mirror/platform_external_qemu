@@ -153,6 +153,7 @@ void MediaVideoToolBoxHevcVideoHelper::decode(const uint8_t* frame,
                 break;
             case HevcNaluType::IDR_W_RADL:
             case HevcNaluType::CRA_NUT:
+            case HevcNaluType::IDR_N_LP:
                 VTB_DPRINT("this is an IDR frame");
                 if (mFfmpegVideoHelper) {
                     mFfmpegVideoHelper->decode(frame, szBytes, inputPts);
