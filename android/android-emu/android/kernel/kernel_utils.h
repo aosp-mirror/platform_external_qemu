@@ -21,8 +21,8 @@ ANDROID_BEGIN_HEADER
 // An enum used to list of the types of Linux kernel images we need to
 // handle. Unfortunately, this affects how we setup the kernel command-line
 // when launching the system.
-#define MAKE_KERNEL_VERSION(version, patchlevel, sublevel) \
-    (((version) << 16) | ((patchlevel) << 8) | (sublevel))
+#define MAKE_KERNEL_VERSION(major, minor, patch) \
+    (((major) << 19) | ((minor) << 11) | (patch))
 typedef enum {
     KERNEL_VERSION_0 = 0,
     KERNEL_VERSION_2_6_29 = MAKE_KERNEL_VERSION(2, 6, 29),
@@ -34,6 +34,7 @@ typedef enum {
     KERNEL_VERSION_4_14_150 = MAKE_KERNEL_VERSION(4, 14, 150),
     KERNEL_VERSION_5_4_0 = MAKE_KERNEL_VERSION(5, 4, 0),
     KERNEL_VERSION_5_10_103 = MAKE_KERNEL_VERSION(5, 10, 103),
+    KERNEL_VERSION_42_255_2047_TEST = MAKE_KERNEL_VERSION(42, 255, 2047),
 } KernelVersion;
 #undef MAKE_KERNEL_VERSION
 
