@@ -85,6 +85,9 @@ private:
 }  // namespace
 
 TEST_F(SharedLibraryTest, Open) {
+#if defined(__arm__) && defined(__APPLE__)
+    GTEST_SKIP();
+#endif
     ScopedSharedLibrary lib(SharedLibrary::open(library_path()));
     EXPECT_TRUE(lib.get());
 }
@@ -102,6 +105,9 @@ TEST_F(SharedLibraryTest, OpenFailureWithError) {
 }
 
 TEST_F(SharedLibraryTest, OpenLibraryWithExtension) {
+#if defined(__arm__) && defined(__APPLE__)
+    GTEST_SKIP();
+#endif
     std::string path = library_path();
 
     // test extension append
@@ -133,6 +139,9 @@ TEST_F(SharedLibraryTest, OpenLibraryWithoutExtension) {
 #endif
 
 TEST_F(SharedLibraryTest, FindSymbol) {
+#if defined(__arm__) && defined (__APPLE__)
+    GTEST_SKIP();
+#endif
     ScopedSharedLibrary lib(SharedLibrary::open(library_path()));
     EXPECT_TRUE(lib.get());
 
