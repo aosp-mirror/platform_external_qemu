@@ -85,8 +85,8 @@ private:
 }  // namespace
 
 TEST_F(SharedLibraryTest, Open) {
-#if defined(__arm__) && defined(__APPLE__)
-    GTEST_SKIP();
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
 #endif
     ScopedSharedLibrary lib(SharedLibrary::open(library_path()));
     EXPECT_TRUE(lib.get());
@@ -105,8 +105,8 @@ TEST_F(SharedLibraryTest, OpenFailureWithError) {
 }
 
 TEST_F(SharedLibraryTest, OpenLibraryWithExtension) {
-#if defined(__arm__) && defined(__APPLE__)
-    GTEST_SKIP();
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
 #endif
     std::string path = library_path();
 
@@ -139,8 +139,8 @@ TEST_F(SharedLibraryTest, OpenLibraryWithoutExtension) {
 #endif
 
 TEST_F(SharedLibraryTest, FindSymbol) {
-#if defined(__arm__) && defined (__APPLE__)
-    GTEST_SKIP();
+#if defined(__aarch64__) && defined (__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
 #endif
     ScopedSharedLibrary lib(SharedLibrary::open(library_path()));
     EXPECT_TRUE(lib.get());
