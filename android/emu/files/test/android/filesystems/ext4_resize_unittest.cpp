@@ -92,6 +92,9 @@ protected:
 
 // This test crashes deep in a wine's kernel stack.
 TEST_F(Ext4ResizeTest, enlarge) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
     SKIP_TEST_ON_WINE();
     static const int64_t kLargerSize = 1024 * 1024 * 1024;
     EXPECT_EQ(0, resizeExt4Partition(mFilePath.c_str(), kLargerSize));
@@ -100,6 +103,9 @@ TEST_F(Ext4ResizeTest, enlarge) {
 
 // This test crashes deep in a wine's kernel stack.
 TEST_F(Ext4ResizeTest, contract) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
     SKIP_TEST_ON_WINE();
     static const int64_t kSmallerSize = 201 * 1024 * 1024;
     EXPECT_EQ(0, resizeExt4Partition(mFilePath.c_str(), kSmallerSize));

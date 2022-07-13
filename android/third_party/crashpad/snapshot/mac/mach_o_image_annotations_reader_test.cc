@@ -467,12 +467,18 @@ TEST(MachOImageAnnotationsReader, CrashAbort) {
 #define MAYBE_CrashModuleInitialization CrashModuleInitialization
 #endif
 TEST(MachOImageAnnotationsReader, MAYBE_CrashModuleInitialization) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
   TestMachOImageAnnotationsReader test_mach_o_image_annotations_reader(
       TestMachOImageAnnotationsReader::kCrashModuleInitialization);
   test_mach_o_image_annotations_reader.Run();
 }
 
 TEST(MachOImageAnnotationsReader, CrashDyld) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
   TestMachOImageAnnotationsReader test_mach_o_image_annotations_reader(
       TestMachOImageAnnotationsReader::kCrashDyld);
   test_mach_o_image_annotations_reader.Run();

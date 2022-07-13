@@ -51,6 +51,9 @@ static void checkFileEqualToBuffer(const uint8_t* buffer,
 
 // Save 10 pages that are all zero with no compression.
 TEST_F(RamSaverTest, Simple) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
     std::string ramSaverTestPath = mTempDir->makeSubPath("ram.bin");
 
     const int numPages = 10;
