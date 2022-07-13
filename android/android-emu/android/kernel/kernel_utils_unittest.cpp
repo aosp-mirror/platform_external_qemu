@@ -47,10 +47,23 @@ TEST(KernelUtils, getKernelVersionOffset) {
                                                   kernelBits.size(),
                                                   &version));
 
-    strcpy(&kernelBits[kVersionOffset], "3.4.280-something");
-    EXPECT_EQ(false, android_getKernelVersionImpl(kernelBits.data(),
+    strcpy(&kernelBits[kVersionOffset], "42.255.2047-something");
+    EXPECT_EQ(true, android_getKernelVersionImpl(kernelBits.data(),
                                                   kernelBits.size(),
                                                   &version));
+    EXPECT_EQ(version, KERNEL_VERSION_42_255_2047_TEST);
+
+    strcpy(&kernelBits[kVersionOffset], "42.260.2047-something");
+    EXPECT_EQ(true, android_getKernelVersionImpl(kernelBits.data(),
+                                                  kernelBits.size(),
+                                                  &version));
+    EXPECT_EQ(version, KERNEL_VERSION_42_255_2047_TEST);
+
+    strcpy(&kernelBits[kVersionOffset], "42.255.3000-something");
+    EXPECT_EQ(true, android_getKernelVersionImpl(kernelBits.data(),
+                                                  kernelBits.size(),
+                                                  &version));
+    EXPECT_EQ(version, KERNEL_VERSION_42_255_2047_TEST);
 
     strcpy(&kernelBits[kVersionOffset], "4.14.150-something");
     EXPECT_EQ(true, android_getKernelVersionImpl(kernelBits.data(),

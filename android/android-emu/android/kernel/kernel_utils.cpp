@@ -40,17 +40,15 @@ bool android_parseKernelVersion(const char* str, KernelVersion* kernelVersion) {
         return false;
     }
 
-    if (major < 0 || major > 255) {
-        return false;
-    }
-    if (minor < 0 || minor > 255) {
-        return false;
-    }
-    if (patch < 0 || patch > 255) {
+    if ((major < 0) || (minor < 0) || (patch < 0)) {
         return false;
     }
 
-    *kernelVersion = static_cast<KernelVersion>((major) << 16 | (minor << 8) | patch);
+    major = std::min(major, 8191);
+    minor = std::min(minor, 255);
+    patch = std::min(patch, 2047);
+
+    *kernelVersion = static_cast<KernelVersion>((major << 19) | (minor << 11) | patch);
     return true;
 }
 
