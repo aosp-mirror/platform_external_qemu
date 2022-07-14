@@ -737,6 +737,9 @@ bool ExpectCLKernels() {
 }
 
 TEST(ProcessReaderMac, SelfModules) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
   ScopedOpenCLNoOpKernel ensure_cl_kernels;
   ASSERT_NO_FATAL_FAILURE(ensure_cl_kernels.SetUp());
 
@@ -936,6 +939,9 @@ class ProcessReaderModulesChild final : public MachMultiprocess {
 };
 
 TEST(ProcessReaderMac, ChildModules) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
   ScopedOpenCLNoOpKernel ensure_cl_kernels;
   ASSERT_NO_FATAL_FAILURE(ensure_cl_kernels.SetUp());
 

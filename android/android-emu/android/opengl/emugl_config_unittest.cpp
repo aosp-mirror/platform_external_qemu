@@ -387,6 +387,9 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutSwiftshader) {
 }
 
 TEST(EmuglConfig, initNoWindowWithSwiftshader) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
@@ -442,6 +445,9 @@ TEST(EmuglConfig, initWithSwiftshaderCheckVulkanEnvVar) {
 }
 
 TEST(EmuglConfig, initNoWindowWithoutSwiftshader) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
