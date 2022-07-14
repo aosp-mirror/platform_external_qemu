@@ -43,6 +43,7 @@ static uint64_t npcm7xx_peci_read(void *opaque, hwaddr offset, unsigned size)
     switch (offset) {
     case PECI_CTL_STS:
         ret = ps->status;
+        ps->status &= ~PECI_CTL_STS_CRC_ERR;
         break;
 
     case PECI_RD_LENGTH:
