@@ -59,6 +59,9 @@
       <property name="sortingEnabled">
         <bool>false</bool>
       </property>
+       <property name="uniformItemSizes">
+        <bool>true</bool>
+      </property>
       <property name="verticalScrollBarPolicy">
         <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>

@@ -73,6 +73,10 @@ static constexpr int REFRESH_PAUSE = 3;
 
 static constexpr int64_t REFRESH_INTERVAL_USECONDS = 1000000LL;
 
+#include "android/utils/debug.h"
+
+#define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
+
 VhalTable::VhalTable(QWidget* parent)
     : QWidget(parent),
       mUi(new Ui::VhalTable),
@@ -94,9 +98,9 @@ VhalTable::VhalTable(QWidget* parent)
     }
 
     mUi->setupUi(this);
-
-    connect(this, SIGNAL(updateData(QString, QString, QString, QString)), this,
-            SLOT(updateTable(QString, QString, QString, QString)),
+ 
+    connect(this, SIGNAL(updateData(QStringList)), this,
+            SLOT(updateTable(QStringList)),
             Qt::QueuedConnection);
     connect(mUi->property_search, SIGNAL(textEdited(QString)), this,
             SLOT(refresh_filter(QString)));
@@ -215,17 +219,30 @@ void VhalTable::hideEvent(QHideEvent*) {
     pauseVhalPropertyTableRefreshThread();
 }
 
-void VhalTable::updateTable(QString label,
-                            QString propertyId,
-                            QString areaId,
-                            QString key) {
-    QListWidgetItem* item = new QListWidgetItem();
-    mUi->property_list->addItem(item);
-    VhalItem* ci = new VhalItem(nullptr, label,
-                                QString::fromStdString("ID : ") + propertyId);
-    ci->setValues(propertyId.toInt(), areaId.toInt(), key);
-    item->setSizeHint(ci->size());
-    mUi->property_list->setItemWidget(item, ci);
+void VhalTable::updateTable(QStringList sl) {
+
+    D("updateTable() count %d on thread %d",sl.size(),std::this_thread::get_id());
+
+    int current_size = mUi->property_list->count();
+
+    mUi->property_list->addItems(sl);
+
+    for (int i = 0; i < sl.size(); i++) {
+        QString key = sl.at(i);
+        VehiclePropValue currVal = mVHalPropValuesMap[key];
+        PropertyDescription currPropDesc = propMap[currVal.prop()];
+        QString label = currPropDesc.label;
+        QString id = QString::number(currVal.prop());
+        QString areaId = QString::number(currVal.area_id());
+        QListWidgetItem* item = mUi->property_list->item(current_size+i);
+        item->setText(nullptr);
+        VhalItem* ci = new VhalItem(nullptr, label,
+                                QString::fromStdString("ID : ") + id);
+        ci->setValues(id.toInt(), areaId.toInt(), key);
+        item->setSizeHint(ci->size());
+        mUi->property_list->setItemWidget(item, ci);
+  }
+  D("updateTable() complete");
 }
 
 void VhalTable::processMsg(EmulatorMessage emulatorMsg) {
@@ -233,6 +250,7 @@ void VhalTable::processMsg(EmulatorMessage emulatorMsg) {
         case (int32_t)MsgType::GET_PROPERTY_RESP:
         case (int32_t)MsgType::GET_PROPERTY_ALL_RESP:
             if (emulatorMsg.value_size() > 0) {
+                D("received GET_PROPERTY_RESP/ALL_RESP on thread %d",std::this_thread::get_id());
                 QStringList sl;
                 for (int valIndex = 0; valIndex < emulatorMsg.value_size();
                     valIndex++) {
@@ -253,18 +271,11 @@ void VhalTable::processMsg(EmulatorMessage emulatorMsg) {
                     }
                 }
 
-                // Sort the keys and emit the output based on keys
-                // only delta property will be rendered here
-                sl.sort();
-                for (int i = 0; i < sl.size(); i++) {
-                    QString key = sl.at(i);
-                    VehiclePropValue currVal = mVHalPropValuesMap[key];
-                    PropertyDescription currPropDesc = propMap[currVal.prop()];
-                    QString label = currPropDesc.label;
-                    QString id = QString::number(currVal.prop());
-                    QString areaId = QString::number(currVal.area_id());
-
-                    emit updateData(label, id, areaId, key);
+                if(sl.size()>0) {
+                    // Sort the keys and emit the output based on keys
+                    // only delta properties will be emitted
+                    sl.sort();
+                    emit updateData(sl);
                 }
 
                 // set mSelectedKey to the first key if mSelectedKey is empty
