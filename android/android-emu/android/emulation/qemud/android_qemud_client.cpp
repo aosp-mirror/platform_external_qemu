@@ -23,6 +23,12 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#ifdef _WIN32
+#  include "android/base/sockets/Winsock.h"
+#else
+#  include <netinet/in.h>
+#endif
+
 using android::base::LazyInstance;
 using android::base::StaticMap;
 
@@ -182,6 +188,19 @@ void qemud_client_prepend(QemudClient* c, QemudClient** plist) {
         c->next->pref = &c->next;
 }
 
+/* parse the FRAME_HEADER to obtain the frame length */
+static int qemud_framelen(const uint8_t *msg) {
+    if((msg[0] & 0x80) == 0x80) { // highbit set so binary encoding
+        uint32_t framelen;
+        memcpy(&framelen, msg, FRAME_HEADER_SIZE);
+        framelen = ntohl(framelen) & 0x7FFFFFFF;
+        TRACE("received binary frame header %u",framelen);
+        return framelen;
+    } else {
+        return hex2int(msg, FRAME_HEADER_SIZE);
+    }
+}
+
 /* receive a new message from a client, and dispatch it to
  * the real service implementation.
  */
@@ -205,7 +224,7 @@ void qemud_client_recv(void* opaque, uint8_t* msg, int msglen) {
     if (msglen > FRAME_HEADER_SIZE &&
         c->need_header == 1 &&
         qemud_sink_needed(c->header) == 0) {
-        int len = hex2int(msg, FRAME_HEADER_SIZE);
+        int len = qemud_framelen(msg);
 
         if (len >= 0 && msglen == len + FRAME_HEADER_SIZE) {
             if (c->clie_recv)
@@ -228,14 +247,14 @@ void qemud_client_recv(void* opaque, uint8_t* msg, int msglen) {
             if (!qemud_sink_fill(c->header, (const uint8_t**) &msg, &msglen))
                 break;
 
-            frame_size = hex2int(c->header0, 4);
+            frame_size = qemud_framelen(c->header0);
             if (frame_size == 0) {
                 D("%s: ignoring empty frame", __FUNCTION__);
                 continue;
             }
             if (frame_size < 0) {
-                D("%s: ignoring corrupted frame header '%.*s'",
-                  __FUNCTION__, FRAME_HEADER_SIZE, c->header0);
+                D("%s: ignoring corrupted frame header '%.*s', %02x %02x %02x %02x",
+                  __FUNCTION__, FRAME_HEADER_SIZE, c->header0, c->header0[0],c->header0[1],c->header0[2],c->header0[3]);
                 continue;
             }
 
