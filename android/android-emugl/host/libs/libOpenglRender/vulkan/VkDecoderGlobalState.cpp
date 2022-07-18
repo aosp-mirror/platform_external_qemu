@@ -4463,6 +4463,28 @@ public:
         return res;
     }
 
+    void on_vkCmdCopyQueryPoolResults(android::base::BumpPool* pool,
+                                      VkCommandBuffer boxed_commandBuffer,
+                                      VkQueryPool queryPool,
+                                      uint32_t firstQuery,
+                                      uint32_t queryCount,
+                                      VkBuffer dstBuffer,
+                                      VkDeviceSize dstOffset,
+                                      VkDeviceSize stride,
+                                      VkQueryResultFlags flags) {
+        auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
+        auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
+        if (queryCount == 1 && stride == 0) {
+            // Some drivers don't seem to handle stride==0 very well.
+            // In fact, the spec does not say what should happen with stride==0.
+            // So we just use the largest stride possible.
+            stride = mBufferInfo[dstBuffer].size - dstOffset;
+        }
+        vk->vkCmdCopyQueryPoolResults(commandBuffer, queryPool, firstQuery,
+                                      queryCount, dstBuffer, dstOffset, stride,
+                                      flags);
+    }
+
     VkResult on_vkQueueBindSparse(
         android::base::BumpPool* pool,
         VkQueue boxed_queue,
@@ -7948,6 +7970,21 @@ VkResult VkDecoderGlobalState::on_vkCreateRenderPass(
         VkRenderPass* pRenderPass) {
     return mImpl->on_vkCreateRenderPass(pool, boxed_device, pCreateInfo,
                                         pAllocator, pRenderPass);
+}
+
+void VkDecoderGlobalState::on_vkCmdCopyQueryPoolResults(
+        android::base::BumpPool* pool,
+        VkCommandBuffer commandBuffer,
+        VkQueryPool queryPool,
+        uint32_t firstQuery,
+        uint32_t queryCount,
+        VkBuffer dstBuffer,
+        VkDeviceSize dstOffset,
+        VkDeviceSize stride,
+        VkQueryResultFlags flags) {
+    mImpl->on_vkCmdCopyQueryPoolResults(pool, commandBuffer, queryPool,
+                                        firstQuery, queryCount, dstBuffer,
+                                        dstOffset, stride, flags);
 }
 
 void VkDecoderGlobalState::on_vkQueueHostSyncGOOGLE(
