@@ -66,20 +66,14 @@ public:
     void setSendEmulatorMsgCallback(CarSensorData::EmulatorMsgCallback&&);
 
 signals:
-    void updateData(QString label,
-                    QString propertyId,
-                    QString areaId,
-                    QString key);
+    void updateData(QStringList keys);
 
 private slots:
     void on_property_list_itemClicked(QListWidgetItem* item);
     void on_property_list_currentItemChanged(QListWidgetItem* current,
                                              QListWidgetItem* previous);
     void on_editButton_clicked();
-    void updateTable(QString label,
-                     QString propertyId,
-                     QString areaId,
-                     QString key);
+    void updateTable(QStringList keys);
     void refresh_filter(QString patern);
 
 private:
