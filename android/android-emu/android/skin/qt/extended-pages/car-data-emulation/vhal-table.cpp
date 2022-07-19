@@ -99,9 +99,10 @@ VhalTable::VhalTable(QWidget* parent)
 
     mUi->setupUi(this);
  
+    connect(this, SIGNAL(updateNewData(QStringList)), this,
+            SLOT(updateTable(QStringList)), Qt::QueuedConnection);
     connect(this, SIGNAL(updateData(QStringList)), this,
-            SLOT(updateTable(QStringList)),
-            Qt::QueuedConnection);
+            SLOT(updateProperties(QStringList)), Qt::QueuedConnection);
     connect(mUi->property_search, SIGNAL(textEdited(QString)), this,
             SLOT(refresh_filter(QString)));
 
@@ -126,7 +127,7 @@ void VhalTable::initVhalPropertyTableRefreshThread() {
         switch (msg) {
             case REFRESH_START:
                 if (mSendEmulatorMsg != nullptr) {
-                    sendGetAllPropertiesRequest();
+                    sendGetSelectedPropertyRequest();
                 }
                 mVhalPropertyTableRefreshCV.timedWait(
                         &mVhalPropertyTableRefreshLock,
@@ -140,18 +141,20 @@ void VhalTable::initVhalPropertyTableRefreshThread() {
     }
 }
 
-// Check data for selected item
-void VhalTable::on_property_list_itemClicked(QListWidgetItem* item) {
-    VhalItem* vhalItem = getItemWidget(item);
-    int prop = vhalItem->getPropertyId();
-    int areaId = vhalItem->getAreaId();
-    QString key = vhalItem->getKey();
+void VhalTable::sendGetSelectedPropertyRequest() {
+    if (mSelectedKey.isEmpty()) {
+        return;
+    }
 
-    mSelectedKey = key;
+    if (!mVHalPropValuesMap.count(mSelectedKey)) {
+        return;
+    }
 
-    EmulatorMessage getMsg = makeGetPropMsg(prop, areaId);
-    string getLog =
-            "Sending get request for " + QString::number(prop).toStdString();
+    VehiclePropValue currVal = mVHalPropValuesMap[mSelectedKey];
+
+    EmulatorMessage getMsg = makeGetPropMsg(currVal.prop(), currVal.area_id());
+    string getLog = "Sending get request for " +
+                    QString::number(currVal.prop()).toStdString();
     mSendEmulatorMsg(getMsg, getLog);
 }
 
@@ -168,11 +171,19 @@ void VhalTable::on_property_list_currentItemChanged(QListWidgetItem* current,
     if (current) {
         VhalItem* vhalItem = getItemWidget(current);
         vhalItem->vhalItemSelected(true);
+        mSelectedKey = vhalItem->getKey();
+        sendGetSelectedPropertyRequest();
+    } else {
+        mSelectedKey = QString();
+        clearPropertyDescription();
     }
 }
 
 void VhalTable::on_editButton_clicked() {
-    if(mVHalPropValuesMap.count(mSelectedKey)){
+    if (mSelectedKey.isEmpty()) {
+        return;
+    }
+    if (mVHalPropValuesMap.count(mSelectedKey)) {
         showEditableArea(mVHalPropValuesMap[mSelectedKey]);
     }
 }
@@ -210,6 +221,7 @@ void VhalTable::showEvent(QShowEvent* event) {
     mUi->property_list->clear();
     mVHalPropValuesMap.clear();
     mSelectedKey = QString();
+    clearPropertyDescription();
     sendGetAllPropertiesRequest();
     setVhalPropertyTableRefreshThread();
 }
@@ -242,7 +254,21 @@ void VhalTable::updateTable(QStringList sl) {
         item->setSizeHint(ci->size());
         mUi->property_list->setItemWidget(item, ci);
   }
+
+    // select first item if mSelectedKey is empty
+    // This should only happen at the first time table is opened
+    if (mSelectedKey.isEmpty() && sl.size() > 0) {
+        mUi->property_list->setCurrentRow(0);
+    }
+
   D("updateTable() complete");
+}
+
+void VhalTable::updateProperties(QStringList sl) {
+    if (sl.contains(mSelectedKey)) {
+        VehiclePropValue currVal = mVHalPropValuesMap[mSelectedKey];
+        showPropertyDescription(currVal);
+    }
 }
 
 void VhalTable::processMsg(EmulatorMessage emulatorMsg) {
@@ -251,38 +277,29 @@ void VhalTable::processMsg(EmulatorMessage emulatorMsg) {
         case (int32_t)MsgType::GET_PROPERTY_ALL_RESP:
             if (emulatorMsg.value_size() > 0) {
                 D("received GET_PROPERTY_RESP/ALL_RESP on thread %d",std::this_thread::get_id());
-                QStringList sl;
+                QStringList newKeys;
+                QStringList updatedKeys;
                 for (int valIndex = 0; valIndex < emulatorMsg.value_size();
                     valIndex++) {
                     VehiclePropValue val = emulatorMsg.value(valIndex);
-
                     QString key = getPropKey(val);
-
                     // if the return value contains new property
                     // like new sensors start during runtime
                     if (!mVHalPropValuesMap.count(key)) {
-                        sl << key;
+                        newKeys << key;
                     }
                     mVHalPropValuesMap[key] = val;
-                    // if the return val is the selected property
-                    // update the description board
-                    if (QString::compare(key, mSelectedKey, Qt::CaseSensitive) == 0) {
-                        showPropertyDescription(val);
-                    }
+                    updatedKeys << key;
                 }
 
-                if(sl.size()>0) {
+                if (newKeys.size() > 0) {
                     // Sort the keys and emit the output based on keys
                     // only delta properties will be emitted
-                    sl.sort();
-                    emit updateData(sl);
+                    newKeys.sort();
+                    emit updateNewData(newKeys);
                 }
-
-                // set mSelectedKey to the first key if mSelectedKey is empty
-                // This should only happen at the first time table is opened
-                if (mSelectedKey.isEmpty() && sl.size() > 0) {
-                    mSelectedKey = sl.at(0);
-                    showPropertyDescription(mVHalPropValuesMap[mSelectedKey]);
+                if (updatedKeys.size() > 0) {
+                    emit updateData(updatedKeys);
                 }
             }
             break;
@@ -337,6 +354,14 @@ void VhalTable::showPropertyDescription(VehiclePropValue val) {
                    changeModeToString(propConfig.change_mode()));
     setPropertyText(mUi->value_value, value);
     mUi->editButton->setEnabled(propConfig.access() != emulator::VehiclePropertyAccess::WRITE);
+}
+
+void VhalTable::clearPropertyDescription() {
+    setPropertyText(mUi->property_name_value, QString());
+    setPropertyText(mUi->area_value, QString());
+    setPropertyText(mUi->property_id_value, QString());
+    setPropertyText(mUi->change_mode_value,QString());
+    setPropertyText(mUi->value_value, QString());
 }
 
 void VhalTable::setPropertyText(QLabel* label, QString text) {
