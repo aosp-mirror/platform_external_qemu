@@ -1276,7 +1276,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((VkQueryResultFlags*)&flags, *readStreamPtrPtr, sizeof(VkQueryResultFlags));
                 *readStreamPtrPtr += sizeof(VkQueryResultFlags);
-                vk->vkCmdCopyQueryPoolResults((VkCommandBuffer)dispatchHandle, queryPool, firstQuery, queryCount, dstBuffer, dstOffset, stride, flags);
+                this->on_vkCmdCopyQueryPoolResults(pool, (VkCommandBuffer)(boxed_dispatchHandle), queryPool, firstQuery, queryCount, dstBuffer, dstOffset, stride, flags);
                 android::base::endTrace();
                 break;
             }
