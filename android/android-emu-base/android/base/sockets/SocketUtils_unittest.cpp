@@ -155,6 +155,9 @@ int SigPipeSignalHandler::sSignal = 0;
 }  // namespace
 
 TEST(SocketUtils, socketSendDoesNotGenerateSigPipe) {
+#if defined(__aarch64__) && defined(__APPLE__)
+  GTEST_SKIP() << "Skipping test for mac_arm_x64 bots.";
+#endif
     // Check that writing to a broken pipe does not generate a SIGPIPE
     // signal on non-Windows platforms.
 
