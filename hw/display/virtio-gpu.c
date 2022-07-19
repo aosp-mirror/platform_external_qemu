@@ -1463,8 +1463,8 @@ static Property virtio_gpu_properties[] = {
 #endif
     DEFINE_PROP_BIT("edid", VirtIOGPU, conf.flags,
                     VIRTIO_GPU_FLAG_EDID_ENABLED, true),
-    DEFINE_PROP_UINT32("xres", VirtIOGPU, conf.xres, 800),
-    DEFINE_PROP_UINT32("yres", VirtIOGPU, conf.yres, 600),
+    DEFINE_PROP_UINT32("xres", VirtIOGPU, conf.xres, 280),
+    DEFINE_PROP_UINT32("yres", VirtIOGPU, conf.yres, 280),
     DEFINE_PROP_END_OF_LIST(),
 };
 
