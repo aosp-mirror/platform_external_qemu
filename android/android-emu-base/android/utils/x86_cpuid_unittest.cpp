@@ -80,6 +80,9 @@ TEST(x86_cpuid, android_get_x86_cpuid_vendor_id_is_vmhost) {
 }
 
 TEST(x86_cpuid, android_get_x86_cpuid_vmx_support) {
+#if defined(__aarch64__) && defined(__APPLE__)
+  GTEST_SKIP() << "Skipping test for mac_arm_x64 bots.";
+#endif
     EXPECT_LE(0x80000001, android_get_x86_cpuid_extended_function_max());
     // We can't really expect anything here: e.g. some buildbots have the
     // virtualization support disabled. So just call these to make sure they
