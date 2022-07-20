@@ -1635,6 +1635,14 @@ static int rcGetFBDisplayActiveConfig() {
     return fb->getDisplayActiveConfig();
 }
 
+static void rcSetProcessMetadata(char* key, RenderControlByte* valuePtr, uint32_t valueSize) {
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    if (strcmp(key, "process_name") == 0) {
+        // We know this is a c formatted string
+        tInfo->m_processName = std::string((char*) valuePtr);
+    }
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1705,4 +1713,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcGetFBDisplayConfigsCount = rcGetFBDisplayConfigsCount;
     dec->rcGetFBDisplayConfigsParam = rcGetFBDisplayConfigsParam;
     dec->rcGetFBDisplayActiveConfig = rcGetFBDisplayActiveConfig;
+    dec->rcSetProcessMetadata = rcSetProcessMetadata;
 }
