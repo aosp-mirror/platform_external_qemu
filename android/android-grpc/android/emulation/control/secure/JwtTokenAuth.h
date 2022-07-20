@@ -60,7 +60,7 @@ private:
     std::mutex mKeyhandleAccess;
     absl::Status mTinkInitialized;
     std::unique_ptr<crypto::tink::KeysetHandle> mActiveKeyset;
-    JwkDirectoryObserver mDirectoryObserver;
+    std::unique_ptr<JwkDirectoryObserver> mDirectoryObserver;
 };
 }  // namespace control
 }  // namespace emulation

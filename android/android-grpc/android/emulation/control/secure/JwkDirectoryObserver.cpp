@@ -13,13 +13,13 @@
 // limitations under the License.
 #include "android/emulation/control/secure/JwkDirectoryObserver.h"
 
-#include <stdint.h>                         // for uint8_t
-#include <fstream>                          // for basic_istream, basic_stre...
-#include <initializer_list>                 // for initializer_list
-#include <iterator>                         // for istreambuf_iterator
-#include <tuple>                            // for tuple_element<>::type
-#include <utility>                          // for move
-#include <vector>                           // for vector
+#include <stdint.h>          // for uint8_t
+#include <fstream>           // for basic_istream, basic_stre...
+#include <initializer_list>  // for initializer_list
+#include <iterator>          // for istreambuf_iterator
+#include <tuple>             // for tuple_element<>::type
+#include <utility>           // for move
+#include <vector>            // for vector
 
 #include "absl/status/status.h"             // for Status, InternalError
 #include "absl/strings/str_format.h"        // for StrFormat
@@ -46,8 +46,8 @@ namespace emulation {
 namespace control {
 
 using json = nlohmann::json;
-using base::System;
 using base::PathUtils;
+using base::System;
 
 JwkDirectoryObserver::JwkDirectoryObserver(Path jwksDir,
                                            KeysetUpdatedCallback callback,
@@ -60,12 +60,15 @@ JwkDirectoryObserver::JwkDirectoryObserver(Path jwksDir,
 
     if (startImmediately) {
         if (!start()) {
-            dwarning(
-                    "Unable to start observing %s, jwks will not be updated. "
-                    "%d were keysets loaded.",
-                    jwksDir.c_str(), mPublicKeys.size());
+            dfatal("Unable to start observing %s, jwks will not be updated. "
+                   "%d were keysets loaded.",
+                   jwksDir.c_str(), mPublicKeys.size());
         }
     }
+}
+
+JwkDirectoryObserver::~JwkDirectoryObserver() {
+    stop();
 }
 
 bool JwkDirectoryObserver::start() {
@@ -87,7 +90,10 @@ bool JwkDirectoryObserver::start() {
 }
 
 void JwkDirectoryObserver::stop() {
-    mWatcher->stop();
+    bool expected = true;
+    if (!mRunning.compare_exchange_strong(expected, false)) {
+        mWatcher->stop();
+    }
 }
 
 void JwkDirectoryObserver::fileChangeHandler(
@@ -104,7 +110,7 @@ void JwkDirectoryObserver::fileChangeHandler(
         case FileSystemWatcher::WatcherChangeType::Created:
             [[fallthrough]];
         case FileSystemWatcher::WatcherChangeType::Changed: {
-            DD("Change/Created event for: %s", path.c_str());
+            DD("Changed/Created event for: %s", path.c_str());
             auto maybeJson = extractKeys(path);
             if (!maybeJson.ok()) {
                 derror("Failed to extract keys: %s",
@@ -125,6 +131,7 @@ void JwkDirectoryObserver::fileChangeHandler(
 
     constructHandleAndNotify();
 }
+
 void JwkDirectoryObserver::constructHandleAndNotify() {
     DD("Have %lu keys.", mPublicKeys.size());
     if (mPublicKeys.empty()) {
@@ -155,7 +162,8 @@ std::string JwkDirectoryObserver::mergeKeys() {
     }
 
     json combinedJwk = {{"keys", keys}};
-    return combinedJwk.dump(2);
+    constexpr int indentation = 2;
+    return combinedJwk.dump(indentation);
 }
 
 // Reads a file into a string.
@@ -163,6 +171,11 @@ static std::string readFile(Path fname) {
     std::ifstream fstream(PathUtils::asUnicodePath(fname).c_str());
     std::string contents((std::istreambuf_iterator<char>(fstream)),
                          std::istreambuf_iterator<char>());
+
+    if (!fstream) {
+        derror("Failure reading %s due to: %s", fname.c_str(),
+               std::strerror(errno));
+    }
     return contents;
 }
 
@@ -185,10 +198,10 @@ absl::StatusOr<json> JwkDirectoryObserver::extractKeys(Path fname) {
     if (!jsonSnippet.ok()) {
         return absl::InternalError(absl::StrFormat(
                 "Unable to convert key handle to json for file: %s ",
-                jsonFile));
+                fname.c_str()));
     }
 
-    VERBOSE_INFO(grpc, "Loaded  JSON Web Key Sets from %s", fname.c_str());
+    VERBOSE_INFO(grpc, "Loaded JSON Web Key Sets from %s", fname.c_str());
 
     // We should have a "keys" array (see:
     // https://datatracker.ietf.org/doc/html/rfc7517)

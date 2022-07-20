@@ -17,7 +17,7 @@
 #include <functional>  // for __base
 #include <utility>     // for move
 
-#include "absl/strings/string_view.h"       // for string_view
+#include "absl/strings/string_view.h"  // for string_view
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"  // for EndsWith
 #include "android/utils/debug.h"            // for derror
@@ -32,9 +32,8 @@
 #define DEBUG 0
 
 #if DEBUG >= 1
-#define DD(fmt, ...)                                                     \
-    printf("JwkDirectoryObserver: %s:%d| " fmt "\n", __func__, __LINE__, \
-           ##__VA_ARGS__)
+#define DD(fmt, ...) \
+    printf("JwtTokenAuth: %s:%d| " fmt "\n", __func__, __LINE__, ##__VA_ARGS__)
 #else
 #define DD(...) (void)0
 #endif
@@ -48,15 +47,7 @@ namespace tink = crypto::tink;
 
 JwtTokenAuth::JwtTokenAuth(Path jwksPath, Path jwksLoadedPath)
     : BasicTokenAuth(DEFAULT_HEADER, DEFAULT_BEARER),
-      mJwksLoadedPath(jwksLoadedPath),
-      mDirectoryObserver(
-              jwksPath,
-              [&](auto handle) { updateKeysetHandle(std::move(handle)); },
-              [&](auto fname) {
-                  DD("Check %s  != %s", fname.c_str(), mJwksLoadedPath.c_str());
-                  return android::base::EndsWith(fname, kJwkExt) &&
-                         fname != mJwksLoadedPath;
-              }) {
+      mJwksLoadedPath(jwksLoadedPath) {
     mTinkInitialized = tink::TinkConfig::Register();
     if (mTinkInitialized.ok()) {
         mTinkInitialized = tink::JwtSignatureRegister();
@@ -68,8 +59,17 @@ JwtTokenAuth::JwtTokenAuth(Path jwksPath, Path jwksLoadedPath)
     }
 
     if (!mTinkInitialized.ok()) {
-        dfatal("Unable to initalize tink library. %s", mTinkInitialized.ToString().c_str());
+        dfatal("Unable to initalize tink library. %s",
+               mTinkInitialized.ToString().c_str());
     }
+    mDirectoryObserver = std::make_unique<JwkDirectoryObserver>(
+            jwksPath,
+            [&](auto handle) { updateKeysetHandle(std::move(handle)); },
+            [&](auto fname) {
+                DD("Check %s  != %s", fname.c_str(), mJwksLoadedPath.c_str());
+                return android::base::EndsWith(fname, kJwkExt) &&
+                       fname != mJwksLoadedPath;
+            });
 }
 
 void JwtTokenAuth::updateKeysetHandle(
@@ -92,7 +92,8 @@ void JwtTokenAuth::updateKeysetHandle(
             }
         }
 
-        std::ofstream out(PathUtils::asUnicodePath(mJwksLoadedPath).c_str(), std::ios::trunc);
+        std::ofstream out(PathUtils::asUnicodePath(mJwksLoadedPath).c_str(),
+                          std::ios::trunc);
         out << jsonSnippet;
         out.close();
         DD("Updated %s with latest loaded keys to: %s", mJwksLoadedPath.c_str(),
@@ -117,7 +118,7 @@ absl::Status JwtTokenAuth::isTokenValid(grpc::string_ref path,
     }
 
     absl::string_view method(path.data(), path.size());
-    DD("Validating aud: %s", method.data());
+    DD("Validating aud: %s", std::string(method).c_str());
     auto validator = tink::JwtValidatorBuilder()
                              .ExpectAudience(method)
                              .ExpectIssuedInThePast()

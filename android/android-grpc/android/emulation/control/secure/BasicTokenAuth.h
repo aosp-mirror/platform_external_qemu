@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <grpcpp/grpcpp.h>                                 // for string_ref
-#include <memory>                                          // for unique_ptr
-#include <string>                                          // for string
-#include <vector>                                          // for vector
+#include <grpcpp/grpcpp.h>  // for string_ref
+#include <memory>           // for unique_ptr
+#include <string>           // for string
+#include <vector>           // for vector
 
-#include "absl/status/status.h"                            // for Status
+#include "absl/status/status.h"  // for Status
 
 namespace android {
 namespace emulation {
@@ -60,8 +60,8 @@ public:
                          OutputMetadata* consumed_auth_metadata,
                          OutputMetadata* response_metadata) override;
 
-    // This method should return true if the given token is valid for the
-    // provided path.
+    // This method should return `absl::OkStatus()` in case of success, or
+    // provide a more detailed explanation of the validation faluire.
     virtual absl::Status isTokenValid(grpc::string_ref path,
                                       grpc::string_ref token) = 0;
 
@@ -76,7 +76,7 @@ public:
     // prior to their encoding in HTTP/2.
     const static inline std::string DEFAULT_HEADER{"authorization"};
 
-    // The metada that contains the path of the method that is being invoked.
+    // The metadata that contains the path of the method that is being invoked.
     const static inline std::string PATH{":path"};
 
 private:
@@ -103,7 +103,7 @@ private:
     std::string mStaticToken;
 };
 
-// A class that will validate that any of the provided validatores
+// A class that will validate that any of the provided validators
 // can validate the header:
 //
 // authorization: Bearer <token>
