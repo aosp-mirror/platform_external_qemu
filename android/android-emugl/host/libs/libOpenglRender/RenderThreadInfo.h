@@ -80,6 +80,7 @@ struct RenderThreadInfo {
 
     // The unique id of owner guest process of this render thread
     uint64_t                        m_puid = 0;
+    std::optional<std::string>      m_processName;
 
     // Whether this thread was used to perform composition.
     bool m_isCompositionThread = false;

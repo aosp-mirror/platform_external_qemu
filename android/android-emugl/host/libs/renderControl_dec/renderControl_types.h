@@ -26,3 +26,5 @@
 #define FB_FPS      5
 #define FB_MIN_SWAP_INTERVAL 6
 #define FB_MAX_SWAP_INTERVAL 7
+
+using RenderControlByte = char;
