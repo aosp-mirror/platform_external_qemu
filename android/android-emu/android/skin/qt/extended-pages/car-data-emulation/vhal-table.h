@@ -66,15 +66,16 @@ public:
     void setSendEmulatorMsgCallback(CarSensorData::EmulatorMsgCallback&&);
 
 signals:
-    void updateData(QStringList keys);
+    void updateNewData(QStringList keys); // called when new property configs are received
+    void updateData(QStringList keys); // called when existing property values are received
 
 private slots:
-    void on_property_list_itemClicked(QListWidgetItem* item);
     void on_property_list_currentItemChanged(QListWidgetItem* current,
                                              QListWidgetItem* previous);
     void on_editButton_clicked();
     void updateTable(QStringList keys);
-    void refresh_filter(QString patern);
+    void updateProperties(QStringList keys);
+    void refresh_filter(QString pattern);
 
 private:
     std::unique_ptr<Ui::VhalTable> mUi;
@@ -95,12 +96,15 @@ private:
     void setPropertyText(QLabel* label, QString text);
 
     void sendGetAllPropertiesRequest();
+    void sendGetSelectedPropertyRequest();
+    
     CarSensorData::EmulatorMsgCallback mSendEmulatorMsg;
     emulator::EmulatorMessage makeGetPropMsg(int32_t prop, int areaId);
 
     void showEvent(QShowEvent* event);
     void hideEvent(QHideEvent*);
     void showPropertyDescription(emulator::VehiclePropValue val);
+    void clearPropertyDescription();
     void showEditableArea(emulator::VehiclePropValue val);
     void hide_all();
     QString getPropKey(emulator::VehiclePropValue val);
