@@ -186,6 +186,27 @@ propertyFile_getInt(const FileData* data, const char* key, int _default,
     return (int)val;
 }
 
+bool propertyFile_getBool(const FileData* data, const char* key, bool _default,
+                        SearchResult* searchResult) {
+    char* prop = propertyFile_getValue((const char*)data->data,
+                                       data->size,
+                                       key);
+    if (!prop) {
+        if (searchResult) {
+            *searchResult = RESULT_NOT_FOUND;
+        }
+        return _default;
+    }
+
+    bool val = strcmp(prop, "true") == 0;
+    AFREE(prop);
+
+    if (searchResult) {
+        *searchResult = RESULT_FOUND;
+    }
+    return val;
+}
+
 int
 propertyFile_getApiLevel(const FileData* data) {
     const int kMinLevel = 3;

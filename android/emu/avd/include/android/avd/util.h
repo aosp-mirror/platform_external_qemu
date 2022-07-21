@@ -85,6 +85,17 @@ typedef enum {
 int propertyFile_getInt(const FileData* data, const char* key, int _default,
                         SearchResult* searchResult);
 
+/* Retrieves an boolean value associated with the key parameter
+ *
+ * |data| is a FileData instance
+ * |key| name of key to search for
+ * |searchResult| if non-null, this is set to RESULT_INVALID, RESULT_FOUND,
+ *                or RESULT_NOT_FOUND
+ * Returns true if the parsed value is "true", |default| otherwise
+ */
+bool propertyFile_getBool(const FileData* data, const char* key, bool _default,
+                        SearchResult* searchResult);
+
 /* Retrieves a string corresponding to the target architecture
  * extracted from a build properties file.
  *

@@ -32,6 +32,7 @@
 #include "android/base/files/StreamSerializing.h"        // for loadCollection
 #include "android/cmdline-option.h"                      // for android_cmdL...
 #include "android/emulation/MultiDisplayPipe.h"          // for MultiDisplay...
+#include "android/emulation/AutoDisplays.h"              // For AutoDisplays...
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/emulation/resizable_display_config.h"
 #include "android/emulator-window.h"                // for emulator_win...
@@ -99,6 +100,12 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
     }
     if (add && !multiDisplayParamValidate(id, w, h, dpi, flag)) {
         return -1;
+    }
+    if (flag == 0 &&
+        avdInfo_getAvdFlavor(
+            getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
+        flag = automotive::getDefaultFlagsForDisplay(id);
+        LOG(VERBOSE) << "Setting flags " << flag << " for display id " << id;
     }
 
     // fetch rotation from EmulatorWindow

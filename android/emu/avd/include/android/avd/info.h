@@ -475,4 +475,7 @@ bool avdInfo_skinHasOverlay(const char* skinName);
  */
 const char* avdInfo_screen_off_timeout(int apiLevel);
 
+/* Returns the boolean value for the given build property key. */
+bool avdInfo_getBuildPropertyBool(const AvdInfo* info, const char* property, bool defValue);
+
 ANDROID_END_HEADER

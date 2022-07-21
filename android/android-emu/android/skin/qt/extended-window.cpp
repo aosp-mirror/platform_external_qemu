@@ -39,6 +39,7 @@
 #include "android/avd/util.h"
 #include "android/base/files/IniFile.h"
 #include "android/cmdline-option.h"
+#include "android/emulation/AutoDisplays.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/user-config.h"
 #include "android/emulator-window.h"
@@ -229,7 +230,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
         !android_foldable_rollable_configured() && !resizableEnabled() &&
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_TV &&
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_WEAR &&
-        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_ANDROID_AUTO) {
+        (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_ANDROID_AUTO 
+                || android::automotive::isMultiDisplaySupported(
+                    getConsoleAgents()->settings->avdInfo()))) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);
         mExtendedUi->displaysButton->setVisible(true);
     } else {
