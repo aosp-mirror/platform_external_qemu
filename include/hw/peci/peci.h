@@ -148,6 +148,7 @@ typedef struct PECIClientDevice {
     /* CPU */
     uint32_t cpu_id;
     uint8_t cpus;
+    uint32_t ucode;
     uint8_t tjmax;
     int8_t tcontrol;
     int8_t core_temp_max; /* absolute temp - tjmax */

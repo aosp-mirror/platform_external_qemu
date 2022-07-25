@@ -179,6 +179,7 @@ PECIClientDevice *peci_add_client(PECIBus *bus,
         client->endpt_conf = spr_config;
         client->num_entries = sizeof(spr_config) / sizeof(spr_config[0]);
         client->revision = 0x40;
+        client->ucode = 0x8c0004a0;
         break;
 
     default:

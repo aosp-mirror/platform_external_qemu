@@ -76,7 +76,19 @@ static void peci_rd_pkg_cfg(PECIClientDevice *client, PECICmd *pcmd)
     switch (index) {
     case PECI_MBX_CPU_ID: /* CPU Family ID*/
         trace_peci_rd_pkg_cfg("CPU ID");
-        resp->data = client->cpu_id;
+        switch (param) {
+        case PECI_PKG_ID_CPU_ID:
+            resp->data = client->cpu_id;
+            break;
+
+        case PECI_PKG_ID_MICROCODE_REV:
+            resp->data = client->ucode;
+            break;
+
+        default:
+            qemu_log_mask(LOG_UNIMP, "%s: CPU ID param %u\n", __func__, param);
+            break;
+        }
         break;
 
     case PECI_MBX_DTS_MARGIN:
