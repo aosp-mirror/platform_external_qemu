@@ -512,6 +512,7 @@ config NPCM7XX
     select PCA954X
     select MAX20730
     select PECI
+    select NPCM_PCIERC
 
 config NPCM8XX
     bool
