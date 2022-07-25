@@ -70,9 +70,16 @@ static void peci_rd_pkg_cfg(PECIClientDevice *client, PECICmd *pcmd)
         memcpy(&resp->data, &target, sizeof(target));
         break;
 
+    case PECI_MBX_PPIN:
+        trace_peci_rd_pkg_cfg("PPIN");
+        resp->data = 0xdeadbeef;
+        break;
+
     default:
         qemu_log_mask(LOG_UNIMP, "%s: unimplemented PkgCfg Index: %u\n",
                       __func__, index);
+        resp->cc = PECI_DEV_CC_INVALID_REQ;
+        return;
     }
 
     resp->cc = PECI_DEV_CC_SUCCESS;
@@ -96,11 +103,11 @@ int peci_handle_cmd(PECIBus *bus, PECICmd *pcmd)
 
     switch (pcmd->cmd) {
     case PECI_CMD_PING:
-        trace_peci_handle_cmd("PING!");
+        trace_peci_handle_cmd("PING!", pcmd->addr);
         break;
 
     case PECI_CMD_GET_DIB: /* Device Info Byte */
-        trace_peci_handle_cmd("GetDIB");
+        trace_peci_handle_cmd("GetDIB", pcmd->addr);
         PECIDIB dib = {
             .device_info = client->device_info,
             .revision = client->revision,
@@ -109,7 +116,7 @@ int peci_handle_cmd(PECIBus *bus, PECICmd *pcmd)
         break;
 
     case PECI_CMD_GET_TEMP: /* maximum die temp in socket */
-        trace_peci_handle_cmd("GetTemp");
+        trace_peci_handle_cmd("GetTemp", pcmd->addr);
         /*
          * The data is returned as a negative value representing the number of
          * degrees centigrade below the maximum processor junction temperature
@@ -118,22 +125,22 @@ int peci_handle_cmd(PECIBus *bus, PECICmd *pcmd)
         break;
 
     case PECI_CMD_RD_PKG_CFG:
-        trace_peci_handle_cmd("RdPkgConfig");
+        trace_peci_handle_cmd("RdPkgConfig", pcmd->addr);
         peci_rd_pkg_cfg(client, pcmd);
         break;
 
     case PECI_CMD_RD_IA_MSR:
-        trace_peci_handle_cmd("RdIAMSR");
+        trace_peci_handle_cmd("RdIAMSR", pcmd->addr);
         qemu_log_mask(LOG_UNIMP, "%s: unimplemented RD_IA_MSR\n", __func__);
         break;
 
     case PECI_CMD_RD_PCI_CFG:
-        trace_peci_handle_cmd("RdPCIConfig");
+        trace_peci_handle_cmd("RdPCIConfig", pcmd->addr);
         qemu_log_mask(LOG_UNIMP, "%s: unimplemented PCI_CFG\n", __func__);
         break;
 
     case PECI_CMD_RD_PCI_CFG_LOCAL:
-        trace_peci_handle_cmd("RdPCIConfigLocal");
+        trace_peci_handle_cmd("RdPCIConfigLocal", pcmd->addr);
         qemu_log_mask(LOG_UNIMP, "%s: unimplemented PCI_CFG_LOCAL\n", __func__);
         break;
 

@@ -40,6 +40,7 @@
 #define   PECI_MBX_CFG_ICCMAX        15 /* Configurable ICCMAX */
 #define   PECI_MBX_TEMP_TARGET       16 /* Temperature Target Read */
 #define   PECI_MBX_CURR_CFG_LIMIT    17 /* Current Config Limit */
+#define   PECI_MBX_PPIN              19 /* Processor Inventory Number */
 #define   PECI_MBX_DIMM_TEMP_READ    20 /* Package Thermal Status Read */
 #define   PECI_MBX_DRAM_IMC_TMP_READ 22 /* DRAM IMC Temperature Read */
 #define   PECI_MBX_DDR_CH_THERM_STAT 23 /* DDR Channel Thermal Status */

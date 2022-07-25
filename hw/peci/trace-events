@@ -1,7 +1,7 @@
 # See docs/devel/tracing.rst for syntax documentation.
 
 # peci-core.c
-peci_handle_cmd(const char* s) "%s"
+peci_handle_cmd(const char* s, uint8_t addr) "%s @ 0x%02" PRIx8
 peci_rd_pkg_cfg(const char* s) "%s"
 
 # npcm7xx_peci.c
