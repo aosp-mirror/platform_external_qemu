@@ -112,6 +112,26 @@ typedef struct PECITempTarget {
     uint8_t tjmax;
 } PECITempTarget;
 
+typedef enum PECIEndPtType {
+    LOCAL_PCI_CFG = 3,
+    PCI_CFG,
+    MMIO_BDF,
+} PECIEndPtType;
+
+typedef struct __attribute__ ((__packed__)) {
+    PECIEndPtType msg_type;
+    uint8_t addr_type;
+    uint8_t bus;
+    uint8_t dev;
+    uint8_t func;
+    uint16_t reg;
+} PECIEndPtHeader;
+
+typedef struct {
+    PECIEndPtHeader hdr;
+    uint32_t data;
+} PECIEndPtConfig;
+
 #define PECI_BASE_ADDR              0x30
 #define PECI_BUFFER_SIZE            0x100
 #define PECI_NUM_CPUS_MAX           56
@@ -139,6 +159,9 @@ typedef struct PECIClientDevice {
     uint8_t dimm_temp_max;
     uint8_t dimm_temp[PECI_NUM_DIMMS_MAX];
 
+    /* EndPtConfig info */
+    PECIEndPtConfig const *endpt_conf;
+    size_t num_entries;
 } PECIClientDevice;
 
 #define TYPE_PECI_CLIENT "peci-client"

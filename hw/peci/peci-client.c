@@ -23,6 +23,63 @@
 
 #define PECI_CLIENT_DEFAULT_TEMP 30
 
+static const PECIEndPtConfig spr_config[] = {
+    {
+        .hdr.msg_type = LOCAL_PCI_CFG,
+        .hdr.addr_type = 0x4,
+        .hdr.bus = 31,
+        .hdr.dev = 0,
+        .hdr.func = 2,
+        .hdr.reg = 0xD4,
+        .data = BIT(31)
+    },
+    {
+        .hdr.msg_type = LOCAL_PCI_CFG,
+        .hdr.addr_type = 0x4,
+        .hdr.bus = 31,
+        .hdr.dev = 0,
+        .hdr.func = 2,
+        .hdr.reg = 0xD0,
+        .data = BIT(31) | BIT(30)
+    },
+    {
+        .hdr.msg_type = LOCAL_PCI_CFG,
+        .hdr.addr_type = 0x4,
+        .hdr.bus = 31,
+        .hdr.dev = 30,
+        .hdr.func = 6,
+        .hdr.reg = 0x84,
+        .data = 0x03FFFFFF
+    },
+    {
+        .hdr.msg_type = LOCAL_PCI_CFG,
+        .hdr.addr_type = 0x4,
+        .hdr.bus = 31,
+        .hdr.dev = 30,
+        .hdr.func = 6,
+        .hdr.reg = 0x80,
+        .data = 0xFFFFFFFF
+    },
+    {
+        .hdr.msg_type = LOCAL_PCI_CFG,
+        .hdr.addr_type = 0x4,
+        .hdr.bus = 31,
+        .hdr.dev = 30,
+        .hdr.func = 6,
+        .hdr.reg = 0x84,
+        .data = 0x03FFFFFF
+    },
+    {
+        .hdr.msg_type = LOCAL_PCI_CFG,
+        .hdr.addr_type = 0x4,
+        .hdr.bus = 31,
+        .hdr.dev = 30,
+        .hdr.func = 6,
+        .hdr.reg = 0x80,
+        .data = 0xFFFFFFFF
+    },
+};
+
 static void peci_client_update_temps(PECIClientDevice *client)
 {
     uint8_t temp_cpu = 0;
@@ -115,7 +172,12 @@ PECIClientDevice *peci_add_client(PECIBus *bus,
         break;
 
     case FAM6_ICELAKE_X:
+        client->revision = 0x40;
+        break;
+
     case FAM6_SAPPHIRE_RAPIDS_X:
+        client->endpt_conf = spr_config;
+        client->num_entries = sizeof(spr_config) / sizeof(spr_config[0]);
         client->revision = 0x40;
         break;
 

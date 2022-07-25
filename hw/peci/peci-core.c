@@ -26,6 +26,47 @@
 #define PECI_FCS_OK         0
 #define PECI_FCS_ERR        1
 
+static PECIEndPtHeader peci_fmt_end_pt_header(PECICmd *pcmd)
+{
+    uint32_t val = pcmd->rx[7] | (pcmd->rx[8] << 8) | (pcmd->rx[9] << 16) |
+                  (pcmd->rx[10] << 24);
+
+    PECIEndPtHeader header = {
+        .msg_type = pcmd->rx[1],
+        .addr_type = pcmd->rx[5],
+        .bus = (val >> 20) & 0xFF,
+        .dev = (val >> 15) & 0x1F,
+        .func = (val >> 12) & 0x7,
+        .reg = val & 0xFFF,
+    };
+
+    return header;
+}
+
+static void peci_rd_endpt_cfg(PECIClientDevice *client, PECICmd *pcmd)
+{
+    PECIPkgCfg *resp = (PECIPkgCfg *)pcmd->tx;
+    PECIEndPtHeader req = peci_fmt_end_pt_header(pcmd);
+    PECIEndPtConfig const *c;
+
+    if (client->endpt_conf) {
+        for (size_t i = 0; i < client->num_entries; i++) {
+            c = &client->endpt_conf[i];
+
+            if (!memcmp(&req, &c->hdr, sizeof(PECIEndPtHeader))) {
+                    resp->data = c->data;
+                    resp->cc = PECI_DEV_CC_SUCCESS;
+                    return;
+            }
+        }
+    }
+
+    qemu_log_mask(LOG_UNIMP,
+                  "%s: msg_type: 0x%x bus: %u, dev: %u, func: %u, reg: 0x%x\n",
+                  __func__, req.msg_type, req.bus, req.dev, req.func, req.reg);
+
+}
+
 static void peci_rd_pkg_cfg(PECIClientDevice *client, PECICmd *pcmd)
 {
     PECIPkgCfg *resp = (PECIPkgCfg *)pcmd->tx;
@@ -145,8 +186,7 @@ int peci_handle_cmd(PECIBus *bus, PECICmd *pcmd)
         break;
 
     case PECI_CMD_RD_END_PT_CFG:
-        qemu_log_mask(LOG_UNIMP, "%s: unimplemented CMD_RD_END_PT_CFG\n",
-                      __func__);
+        peci_rd_endpt_cfg(client, pcmd);
         break;
 
     default:
