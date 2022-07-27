@@ -185,10 +185,10 @@ intptr_t HealthMonitor<Clock>::main() {
                        *event);
         }
 
-        // Sort by what times out first
-        std::map<Timestamp, uint64_t> sortedTasks;
+        // Sort by what times out first. Identical timestamps are possible
+        std::multimap<Timestamp, uint64_t> sortedTasks;
         for (auto& [_, task] : mMonitoredTasks) {
-            sortedTasks[task.timeoutTimestamp] = task.id;
+            sortedTasks.insert(std::pair<Timestamp, uint64_t>(task.timeoutTimestamp, task.id));
         }
 
         for (auto& [_, task_id] : sortedTasks) {
