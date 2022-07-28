@@ -268,14 +268,13 @@ void main(void) {
     cutoffCoordsY.y = outCoord.y;
     cutoffCoordsC.x = outCoord.x * cWidthCutoff;
     cutoffCoordsC.y = outCoord.y;
-    highp float xscale = 219.0/ 224.0;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = xscale* (texture2D(usampler, cutoffCoordsC).r - 0.5);
-    yuv[2] = xscale* (texture2D(vsampler, cutoffCoordsC).r - 0.5);
-    highp float yscale = 255.0/224.0;
+    yuv[1] = 0.96*(texture2D(usampler, cutoffCoordsC).r - 0.5);
+    yuv[2] = texture2D(vsampler, cutoffCoordsC).r - 0.5;
+    highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
-               0,                  -0.34414 * yscale, 1.772 * yscale,
-               yscale*1.402, -0.71414 * yscale,                  0) * yuv;
+               0,                  -0.39176229009491365, 2.017232142857143,
+               1.5960267857142856, -0.8129676472377708,                  0) * yuv;
     gl_FragColor = vec4(rgb, 1);
 }
     )";
@@ -363,14 +362,13 @@ void main(void) {
     cutoffCoordsY.y = outCoord.y;
     cutoffCoordsC.x = outCoord.x * cWidthCutoff;
     cutoffCoordsC.y = outCoord.y;
-    highp float xscale = 219.0/ 224.0;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = xscale * (texture2D(vusampler, cutoffCoordsC).a - 0.5);
-    yuv[2] = xscale * texture2D(vusampler, cutoffCoordsC).r - 0.5;
-    highp float yscale = 255.0/224.0;
+    yuv[1] = 0.96 * (texture2D(vusampler, cutoffCoordsC).a - 0.5);
+    yuv[2] = texture2D(vusampler, cutoffCoordsC).r - 0.5;
+    highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
-               0,                  -0.34414 * yscale, 1.772 * yscale,
-               yscale*1.402, -0.71414 * yscale,                  0) * yuv;
+               0,                  -0.39176229009491365, 2.017232142857143,
+               1.5960267857142856, -0.8129676472377708,                  0) * yuv;
     gl_FragColor = vec4(rgb, 1);
 }
     )";
@@ -391,14 +389,13 @@ void main(void) {
     cutoffCoordsY.y = outCoord.y;
     cutoffCoordsC.x = outCoord.x * cWidthCutoff;
     cutoffCoordsC.y = outCoord.y;
-    highp float xscale = 219.0/ 224.0;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = xscale * (texture2D(uvsampler, cutoffCoordsC).r - 0.5);
-    yuv[2] = xscale * (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
-    highp float yscale = 255.0/224.0;
+    yuv[1] = 0.96 * (texture2D(uvsampler, cutoffCoordsC).r - 0.5);
+    yuv[2] = (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
+    highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
-               0,                  -0.34414 * yscale, 1.772 * yscale,
-               yscale*1.402, -0.71414 * yscale,                  0) * yuv;
+               0,                  -0.39176229009491365, 2.017232142857143,
+               1.5960267857142856, -0.8129676472377708,                  0) * yuv;
     gl_FragColor = vec4(rgb, 1);
 }
     )";
