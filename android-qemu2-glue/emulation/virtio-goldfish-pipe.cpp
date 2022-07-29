@@ -1411,9 +1411,18 @@ public:
         (void)y;
         (void)width;
         (void)height;
+        if (mVirtioGpuOps->async_post_color_buffer) {
+            auto taskId = mVirtioGpuTimelines->enqueueTask(VirtioGpuRingGlobal{});
+            mVirtioGpuOps->async_post_color_buffer(
+                res_handle, [this, taskId](std::shared_future<void> waitForGpu) {
+                    waitForGpu.wait();
+                    mVirtioGpuTimelines->notifyTaskCompletion(taskId);
+                });
+        } else {
+            mVirtioGpuOps->post_color_buffer(res_handle);
+        }
         //TODO: displayId > 0 ?
         uint32_t displayId = 0;
-        mVirtioGpuOps->post_color_buffer(res_handle);
         if (pixels) {
             mReadPixelsFunc(pixels, max_bytes, displayId);
         }
