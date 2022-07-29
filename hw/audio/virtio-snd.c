@@ -1133,24 +1133,31 @@ static int convert_channels(int16_t *buffer, const int in_sz,
     }
 }
 
-static int calc_stream_adjustment_bytes(const VirtIOSoundPCMStream *stream,
-                                        uint64_t elapsed_usec) {
-    const uint64_t elapsed_nf = elapsed_usec * (uint64_t)stream->freq_hz / 1000000ul;
-    const uint64_t consumed_nf = stream->frames_sent + stream->frames_skipped;
-
-    return (consumed_nf < elapsed_nf) ? (stream->driver_frame_size * (elapsed_nf - consumed_nf)) : 0;
+static int calc_stream_adjustment_bytes(const uint64_t elapsed_nf,
+                                        const uint64_t consumed_nf,
+                                        const int driver_frame_size) {
+    return (consumed_nf < elapsed_nf) ? (driver_frame_size * (elapsed_nf - consumed_nf)) : 0;
 }
 
 static int calc_drop_bytes_out(VirtIOSoundPCMStream *stream) {
-    return calc_stream_adjustment_bytes(stream,
-                                        AUD_get_elapsed_usec_out(stream->voice.out,
-                                                                 &stream->start_timestamp));
+    const uint64_t elapsed_usec = AUD_get_elapsed_usec_out(stream->voice.out, &stream->start_timestamp);
+    const uint64_t elapsed_nf = elapsed_usec * (uint64_t)stream->freq_hz / 1000000ul;
+    // We have to feed the soundcard ahead of the real time.
+    const uint64_t to_be_consumed_nf = elapsed_nf + stream->period_frames;
+    const uint64_t consumed_nf = stream->frames_sent + stream->frames_skipped;
+
+    return calc_stream_adjustment_bytes(to_be_consumed_nf, consumed_nf,
+                                        stream->driver_frame_size);
 }
 
 static int calc_insert_bytes_in(VirtIOSoundPCMStream *stream) {
-    return calc_stream_adjustment_bytes(stream,
-                                        AUD_get_elapsed_usec_in(stream->voice.in,
-                                                                &stream->start_timestamp));
+    const uint64_t elapsed_usec = AUD_get_elapsed_usec_in(stream->voice.in, &stream->start_timestamp);
+    const uint64_t elapsed_nf = elapsed_usec * (uint64_t)stream->freq_hz / 1000000ul;
+    // The consumed position could be delayed up to a period.
+    const uint64_t consumed_nf = stream->frames_sent + stream->frames_skipped + stream->period_frames;
+
+    return calc_stream_adjustment_bytes(elapsed_nf, consumed_nf,
+                                        stream->driver_frame_size);
 }
 
 static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
@@ -1443,7 +1450,9 @@ static bool virtio_snd_stream_prepare_vars(VirtIOSoundPCMStream *stream) {
     stream->freq_hz = format16_get_freq_hz(stream->guest_format);
     stream->driver_frame_size = format16_get_frame_size(stream->guest_format);
     stream->buffer_frames = stream->buffer_bytes / stream->driver_frame_size;
+    stream->period_frames = stream->period_bytes / stream->driver_frame_size;
     stream->latency_bytes = 0;
+
     return true;
 }
 
