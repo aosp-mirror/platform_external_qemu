@@ -544,7 +544,6 @@ static bool virtio_snd_stream_start_locked(VirtIOSoundPCMStream *stream) {
 
     stream->frames_sent = 0;
     stream->frames_skipped = 0;
-    stream->frames_wasted = 0;
     return true;
 }
 
@@ -1220,7 +1219,6 @@ static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) 
                 const int32_t sent_bytes = AUD_write(voice, scratch, nb);
 
                 avail -= sent_bytes;
-                stream->frames_wasted += (sent_bytes / aud_fs);
             }
             goto done;
         }
@@ -1359,7 +1357,6 @@ static VirtQueue *stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
                     goto done;
                 }
                 avail -= read_bytes;
-                stream->frames_wasted += (read_bytes / aud_fs);
             }
             goto done;
         }
@@ -1449,7 +1446,6 @@ static bool virtio_snd_stream_prepare_vars(VirtIOSoundPCMStream *stream) {
 
     stream->freq_hz = format16_get_freq_hz(stream->guest_format);
     stream->driver_frame_size = format16_get_frame_size(stream->guest_format);
-    stream->buffer_frames = stream->buffer_bytes / stream->driver_frame_size;
     stream->period_frames = stream->period_bytes / stream->driver_frame_size;
     stream->latency_bytes = 0;
 
@@ -1932,7 +1928,6 @@ static const VMStateDescription vmstate_VirtIOSoundPCMStream = {
          */
         VMSTATE_UINT32(buffer_bytes, VirtIOSoundPCMStream),
         VMSTATE_UINT32(period_bytes, VirtIOSoundPCMStream),
-        VMSTATE_UINT32(buffer_frames, VirtIOSoundPCMStream),
         VMSTATE_UINT16(guest_format, VirtIOSoundPCMStream),
         VMSTATE_UINT8(state, VirtIOSoundPCMStream),
         VMSTATE_END_OF_LIST()
