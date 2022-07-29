@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <api/scoped_refptr.h>                             // for scoped_refptr
-#include <stdint.h>                                        // for uint16_t
-#include <map>                                             // for map
-#include <memory>                                          // for shared_ptr
-#include <string>                                          // for string
-#include <unordered_map>                                   // for unordered_map
-#include <vector>                                          // for vector
+#include <api/scoped_refptr.h>  // for scoped_refptr
+#include <stdint.h>             // for uint16_t
+#include <map>                  // for map
+#include <memory>               // for shared_ptr
+#include <string>               // for string
+#include <unordered_map>        // for unordered_map
+#include <vector>               // for vector
 
+#include "emulator/webrtc/export.h"
 #include "android/base/containers/BufferQueue.h"           // for BufferQueue
 #include "android/base/synchronization/Lock.h"             // for Lock (ptr ...
 #include "android/base/system/System.h"                    // for System
 #include "android/emulation/control/RtcBridge.h"           // for RtcBridge:...
-#include "emulator/webrtc/RtcConnection.h"                 // for RtcConnection
 #include "android/emulation/control/TurnConfig.h"          // for TurnConfig
-#include "emulator/webrtc/capture/VideoCapturerFactory.h"  // for VideoCaptu...
+#include "emulator/webrtc/RtcConnection.h"                 // for RtcConnection
 
 namespace emulator {
 namespace webrtc {
@@ -47,55 +47,43 @@ using android::emulation::control::TurnConfig;
 // 4. Participants that are no longer streaming need to be finalized.
 class Switchboard : public RtcBridge, public RtcConnection {
 public:
-    Switchboard(EmulatorGrpcClient* client,
-                const std::string& shmPath,
-                TurnConfig turnconfig,
-                int adbPort,
-                const std::string& audioDumpFile="");
-    ~Switchboard();
+    ANDROID_WEBRTC_EXPORT Switchboard(TurnConfig turnconfig, const std::string& audioDumpFile = "");
+    ANDROID_WEBRTC_EXPORT ~Switchboard();
 
     // Connect will initiate the RTC stream if not yet in progress.
-    bool connect(std::string identity) override;
+    ANDROID_WEBRTC_EXPORT bool connect(std::string identity) override;
 
     // Disconnects the RTC stream in progress.
-    void disconnect(std::string identity) override;
+    ANDROID_WEBRTC_EXPORT void disconnect(std::string identity) override;
 
     // Accept the incoming jsep message from the given identity
-    bool acceptJsepMessage(std::string identity, std::string msg) override;
+    ANDROID_WEBRTC_EXPORT bool acceptJsepMessage(std::string identity, std::string msg) override;
 
     // Blocks and waits until a message becomes available for the given
     // identity. Returns the next message if one is available. Returns false and
     // a by message if the identity does not exist.
-    bool nextMessage(std::string identity,
+    ANDROID_WEBRTC_EXPORT bool nextMessage(std::string identity,
                      std::string* nextMessage,
                      System::Duration blockAtMostMs) override;
 
     // Disconnect and stop the rtc bridge.
-    void terminate() override{};
+    ANDROID_WEBRTC_EXPORT void terminate() override{};
 
     // Asynchronously starts the rtc bridge..
-    bool start() override { return true; };
+    ANDROID_WEBRTC_EXPORT bool start() override { return true; };
 
-    BridgeState state() override { return BridgeState::Connected; };
+    ANDROID_WEBRTC_EXPORT BridgeState state() override { return BridgeState::Connected; };
 
-    void send(std::string to, json msg) override;
+    ANDROID_WEBRTC_EXPORT void send(std::string to, json msg) override;
 
     // Called when a participant is unable to continue the rtc stream.
     // The participant will no longer be in use and close can be called.
-    void rtcConnectionClosed(const std::string participant) override;
+    ANDROID_WEBRTC_EXPORT void rtcConnectionClosed(const std::string participant) override;
 
-    VideoCapturerFactory* getVideoCaptureFactory() { return &mCaptureFactory; }
-
-    static std::string BRIDGE_RECEIVER;
+    ANDROID_WEBRTC_EXPORT static std::string BRIDGE_RECEIVER;
 
 private:
-    std::unordered_map<std::string, std::shared_ptr<Participant>>
-            mConnections;
-
-    VideoCapturerFactory mCaptureFactory;
-
-    const std::string mShmPath = "/tmp";
-    int mAdbPort{0};
+    std::unordered_map<std::string, std::shared_ptr<Participant>> mConnections;
 
     // Turn configuration object.
     TurnConfig mTurnConfig;

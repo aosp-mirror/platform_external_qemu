@@ -16,7 +16,8 @@
 #include <api/peer_connection_interface.h>  // for PeerConnectionInterface
 #include <string>                           // for string
 
-#include "nlohmann/json.hpp"                // for json
+#include "emulator/webrtc/export.h"
+#include "nlohmann/json.hpp"  // for json
 
 namespace emulator {
 namespace webrtc {
@@ -26,9 +27,9 @@ using ::webrtc::PeerConnectionInterface;
 
 class RtcConfig {
 public:
-    static PeerConnectionInterface::RTCConfiguration parse(
+    ANDROID_WEBRTC_EXPORT static PeerConnectionInterface::RTCConfiguration parse(
             json rtcConfiguration);
-    static PeerConnectionInterface::RTCConfiguration parse(
+    ANDROID_WEBRTC_EXPORT static PeerConnectionInterface::RTCConfiguration parse(
             std::string rtcConfiguration);
 };
 }  // namespace webrtc

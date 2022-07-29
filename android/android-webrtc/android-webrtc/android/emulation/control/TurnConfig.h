@@ -15,6 +15,7 @@
 #include <string>             // for string
 #include <vector>             // for vector
 
+#include "emulator/webrtc/export.h"
 #include "nlohmann/json.hpp"  // for json
 
 namespace android {
@@ -25,13 +26,13 @@ using nlohmann::json;
 
 class TurnConfig {
 public:
-    explicit TurnConfig(std::string cmd);
-    ~TurnConfig() = default;
+    ANDROID_WEBRTC_EXPORT explicit TurnConfig(std::string cmd);
+    ANDROID_WEBRTC_EXPORT ~TurnConfig() = default;
 
-    json getConfig();
-    bool validCommand();
+    ANDROID_WEBRTC_EXPORT json getConfig();
+    ANDROID_WEBRTC_EXPORT bool validCommand();
 
-    static bool producesValidTurn(std::string cmd);
+    ANDROID_WEBRTC_EXPORT static bool producesValidTurn(std::string cmd);
 private:
     std::vector<std::string> mTurnCmd;
 

@@ -13,8 +13,8 @@
 // limitations under the License.
 #pragma once
 
-#include <stdio.h>                       // for size_t
-#include <mutex>                         // for mutex, lock_guard
+#include <stdio.h>  // for size_t
+#include <mutex>    // for mutex, lock_guard
 #include <set>
 
 #include "api/media_stream_interface.h"  // for MediaSourceInterface::Source...

@@ -78,21 +78,12 @@ set(OPTION_CLANG_TIDY
 set(OPTION_CLANG_TIDY_FIX FALSE
     CACHE BOOL "True if you wish clang-tidy to auto fix issues it encounters.")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
-if(LINUX_X86_64 OR LINUX_AARCH64)
-  set(WEBRTC
+set(WEBRTC
       TRUE
       CACHE
         BOOL
-        "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
-  )
-else()
-  set(WEBRTC
-      FALSE
-      CACHE
-        BOOL
-        "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
-  )
-endif()
+        "Set to true by default. True if the emulator should be build with WEBRTC support."
+)
 set(ANDROIDSTUDIO FALSE
     CACHE BOOL
           "Deprecated. Android studio is using the gRPC interface directly.")
@@ -152,7 +143,6 @@ endif()
 if(GFXSTREAM)
   set(OPTION_GFXSTREAM_BACKEND TRUE)
   set(OPTION_TCMALLOC FALSE)
-  set(WEBRTC FALSE)
   set(ANDROIDSTUDIO FALSE)
 endif()
 

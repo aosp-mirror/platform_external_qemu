@@ -40,12 +40,11 @@ using namespace android::base;
 namespace emulator {
 namespace webrtc {
 
-RtcConnection::RtcConnection(EmulatorGrpcClient* client)
+RtcConnection::RtcConnection()
     : mTaskFactory(::webrtc::CreateDefaultTaskQueueFactory()),
       mNetwork(rtc::Thread::CreateWithSocketServer()),
       mWorker(rtc::Thread::Create()),
       mSignaling(rtc::Thread::Create()),
-      mClient(client),
       mKeepAlive(
               &mLooper,
               [this]() { return mLooperActive; },
@@ -64,8 +63,7 @@ RtcConnection::RtcConnection(EmulatorGrpcClient* client)
             ::webrtc::CreateBuiltinVideoDecoderFactory(),
             nullptr /* audio_mixer */, nullptr /* audio_processing */);
 
-    mLibrary = std::make_unique<MediaSourceLibrary>(mClient,
-                                                    mConnectionFactory.get());
+    mLibrary = std::make_unique<MediaSourceLibrary>(mConnectionFactory.get());
     mKeepAlive.start();
     mLooperThread = std::make_unique<std::thread>([this]() {
         mLooper.runWithDeadlineMs(Looper::Timeout::kDurationInfinite);
