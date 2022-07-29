@@ -21,6 +21,7 @@
 #include <utility>                    // for move
 #include <vector>                     // for vector
 
+#include "android/base/export.h"
 #include "android/base/StringView.h"  // for StringView
 #include "android/skin/rect.h"        // for SkinRotation
 
@@ -35,7 +36,7 @@ enum class ImageFormat { PNG, RAW, RGB888, RGBA8888 };
 
 class Image {
 public:
-    Image(uint16_t w,
+    AEMU_EXPORT Image(uint16_t w,
           uint16_t h,
           uint8_t channels,
           ImageFormat format,
@@ -46,15 +47,15 @@ public:
           m_Format(format),
           m_Pixels(std::move(pixels)) {}
 
-    uint8_t* getPixelBuf() { return m_Pixels.data(); }
-    uint64_t getPixelCount() { return m_Pixels.size(); }
-    uint16_t getWidth() { return m_Width; }
-    uint16_t getHeight() { return m_Height; }
-    uint8_t getChannels() { return m_NChannels; }
-    ImageFormat getImageFormat() { return m_Format; }
+    AEMU_EXPORT uint8_t* getPixelBuf() { return m_Pixels.data(); }
+    AEMU_EXPORT uint64_t getPixelCount() { return m_Pixels.size(); }
+    AEMU_EXPORT uint16_t getWidth() { return m_Width; }
+    AEMU_EXPORT uint16_t getHeight() { return m_Height; }
+    AEMU_EXPORT uint8_t getChannels() { return m_NChannels; }
+    AEMU_EXPORT ImageFormat getImageFormat() { return m_Format; }
 
     // Converts Image from RGBA8888 -> RGB888 if needed and possible.
-    Image& asRGB888();
+    AEMU_EXPORT Image& asRGB888();
 
 private:
     void convertPerByte();
@@ -69,7 +70,7 @@ private:
 // Capture a screenshot using the Render (if set) or framebuffer callback.
 // if desiredWidth and desiredHeight are 0, the wide and height of the
 // screen colorbuffer will be used.
-Image takeScreenshot(
+AEMU_EXPORT Image takeScreenshot(
         ImageFormat desiredFormat,
         SkinRotation rotation,
         emugl::Renderer* renderer,
@@ -83,14 +84,14 @@ Image takeScreenshot(
         int desiredHeight = 0,
         SkinRect rect = {{0, 0}, {0, 0}});
 
-bool captureScreenshot(android::base::StringView outputDirectoryPath,
+AEMU_EXPORT bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL,
                        uint32_t displayId = 0);
 // The following one is for testing only
 // It loads texture from renderer if renderer is not null.
 // (-gpu host, swiftshader_indirect, angle_indirect)
 // Otherwise loads texture from getFrameBuffer function. (-gpu guest)
-bool captureScreenshot(
+AEMU_EXPORT bool captureScreenshot(
         emugl::Renderer* renderer,
         std::function<void(int* w,
                            int* h,

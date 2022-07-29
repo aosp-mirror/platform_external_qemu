@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/base/export.h"
 #include "android/base/Compiler.h"
 #include "android/base/Log.h"
 
@@ -58,17 +59,17 @@ protected:
 
 public:
      // start the capturer to capture audio, subclass should implement this method
-     virtual int start(AudioCapturer *capturer) = 0;
+     AEMU_EXPORT virtual int start(AudioCapturer *capturer) = 0;
 
      // stop the capturer, subclass should implement this method
-     virtual int stop(AudioCapturer *capturer) = 0;
+     AEMU_EXPORT virtual int stop(AudioCapturer *capturer) = 0;
 
      // set the audio capture engine
      // The set() needs to be called at the point where no races are possible
      // for example, during the period where vm setups
-     static void set(AudioCaptureEngine* engine, AudioMode type = AudioMode::AUDIO_OUTPUT);
+     AEMU_EXPORT static void set(AudioCaptureEngine* engine, AudioMode type = AudioMode::AUDIO_OUTPUT);
 
-     static AudioCaptureEngine* get(AudioMode mode = AudioMode::AUDIO_OUTPUT);
+     AEMU_EXPORT static AudioCaptureEngine* get(AudioMode mode = AudioMode::AUDIO_OUTPUT);
 
 private:
     static AudioCaptureEngine *mOutputInstance;
