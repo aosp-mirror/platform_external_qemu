@@ -195,7 +195,8 @@ if(OPTION_GFXSTREAM_BACKEND)
         OpenGLESDispatch
         OpenglRender_vulkan_cereal
         renderControl_dec
-        renderdoc)
+        renderdoc
+        gfxstream-host-common.product-feature-override)
    android_license(TARGET "${GFXSTREAM_DEPENDENCIES}"
                    LIBNAME gfxstream
                    URL "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master"
