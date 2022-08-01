@@ -70,6 +70,10 @@ struct VkEmulation {
     // Whether to fuse memory requirements getting with resource creation.
     bool useCreateResourcesWithRequirements = false;
 
+    // Whether to use ASTC emulation. Our current ASTC decoder implementation may lead to device
+    // lost on certain device on Windows.
+    bool enableAstcLdrEmulation = false;
+
     // Instance and device for creating the system-wide shareable objects.
     VkInstance instance = VK_NULL_HANDLE;
     VkPhysicalDevice physdev = VK_NULL_HANDLE;
@@ -324,6 +328,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk);
 void setGlInteropSupported(bool supported);
 void setUseDeferredCommands(VkEmulation* emu, bool useDeferred);
 void setUseCreateResourcesWithRequirements(VkEmulation* emu, bool useCreateResourcesWithRequirements);
+void setEnableAstcLdrEmulation(VkEmulation*, bool enableAstcLdrEmulation);
 
 VkEmulation* getGlobalVkEmulation();
 void teardownGlobalVkEmulation();
