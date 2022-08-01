@@ -88,9 +88,7 @@
 #include "android/metrics/Percentiles.h"
 #include "android/opengles.h"
 #include "android/physics/Physics.h"
-#include "android/recording/Frame.h"
-#include "android/recording/Producer.h"
-#include "android/recording/audio/AudioProducer.h"
+#include "android/recording/AvFormat.h"
 #include "android/skin/rect.h"
 #include "android/skin/winsys.h"
 #include "android/telephony/gsm.h"
@@ -654,7 +652,6 @@ public:
         constexpr int kSrcNumSamples = 512;
 
         // Translate external settings to internal qemu settings.
-        auto sampleFormat = AudioUtils::getSampleFormat(*request);
         int channels = AudioUtils::getChannels(*request);
         int sampleRate = request->samplingrate();
 
