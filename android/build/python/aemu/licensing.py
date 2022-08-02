@@ -16,6 +16,7 @@
 import argparse
 import os
 import codecs
+import re
 from collections import defaultdict
 
 
@@ -189,7 +190,19 @@ class Licensing(object):
         dependencies = {}
         for line in self._read_cmake_file(deps):
             dep, _, liblist = line
-            dependencies[dep] = set(liblist.split(";"))
+            dependencies[dep] = set()
+
+            # The entry may be wrapped in a form of ::@(directory-id);...;::@. See
+            # https://cmake.org/cmake/help/latest/prop_tgt/INTERFACE_LINK_LIBRARIES.html for
+            # details.
+            parent_dep_begin_regex = re.compile(r'^::@\(.+\)$')
+            for segment in liblist.split(";"):
+                if parent_dep_begin_regex.match(segment) is not None:
+                    continue
+                if segment == '::@':
+                    continue
+                dependencies[dep].add(segment)
+
         return dependencies
 
     def _parse_installed_targets(self, targetfile):
