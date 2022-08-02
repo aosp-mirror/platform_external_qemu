@@ -240,6 +240,17 @@ void MediaVpxDecoderGeneric::fetchAllFrames() {
     }
 }
 
+void MediaVpxDecoderGeneric::sendMetadata(void* ptr) {
+    VPX_DPRINT("vpx %s %d sendMetadata %p\n", __func__, __LINE__, ptr);
+    MetadataParam param{};
+    mParser.parseMetadataParams(ptr, param);
+
+    std::swap(mMetadata, param);
+    VPX_DPRINT("vpx %s %d range %d primaries %d transfer %d\n", __func__,
+               __LINE__, (int)(mMetadata.range), (int)(mMetadata.primaries),
+               (int)(mMetadata.transfer));
+}
+
 void MediaVpxDecoderGeneric::getImage(void* ptr) {
     VPX_DPRINT("calling getImage");
     GetImageParam param{};
@@ -266,6 +277,25 @@ void MediaVpxDecoderGeneric::getImage(void* ptr) {
             (void*)(*(param.p_user_priv)), param.hostColorBufferId,
             (int)param.bpp);
 
+    // update color aspects
+    if (pFrame->color.range != 0) {
+        if (3 - pFrame->color.range != mMetadata.range) {
+            mMetadata.range = 3 - pFrame->color.range;
+            VPX_DPRINT(
+                    "vpx 1 updated %s %d range %d primaries %d transfer %d\n",
+                    __func__, __LINE__, (int)(mMetadata.range),
+                    (int)(mMetadata.primaries), (int)(mMetadata.transfer));
+        }
+    }
+
+    if (pFrame->color.primaries != 2 &&
+        pFrame->color.primaries != mMetadata.primaries) {
+        mMetadata.primaries = pFrame->color.primaries;
+        VPX_DPRINT("vpx 2 updated %s %d range %d primaries %d transfer %d\n",
+                   __func__, __LINE__, (int)(mMetadata.range),
+                   (int)(mMetadata.primaries), (int)(mMetadata.transfer));
+    }
+
     if (mParser.version() == 200) {
         VPX_DPRINT("calling rendering to host side color buffer with id %d",
                    param.hostColorBufferId);
@@ -285,7 +315,7 @@ void MediaVpxDecoderGeneric::getImage(void* ptr) {
                     param.hostColorBufferId);
             mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
                                               pFrame->width, pFrame->height,
-                                              pFrame->data.data());
+                                              pFrame->data.data(), &mMetadata);
         }
     } else {
         memcpy(param.p_dst, pFrame->data.data(),

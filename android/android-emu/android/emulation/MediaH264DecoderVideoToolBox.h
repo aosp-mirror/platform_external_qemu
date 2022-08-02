@@ -49,6 +49,7 @@ public:
     virtual void decodeFrame(void* ptr) override;
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
+    virtual void sendMetadata(void* ptr) override;
 
     virtual void save(base::Stream* stream) const override;
     virtual bool load(base::Stream* stream) override;

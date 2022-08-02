@@ -218,17 +218,41 @@ static void subUpdateYUVGLTex(GLenum texture_unit,
     s_gles2.glActiveTexture(GL_TEXTURE0);
 }
 
+bool YUVConverter::checkAndUpdateColorAspectsChanged(void* metadata) {
+    bool needToUpdateConversionShader = false;
+    // TODO: re-enable this check
+    // Intentionally disable this for now
+    if (metadata && false) {
+        uint64_t type = *(uint64_t*)(metadata);
+        uint8_t* pmetadata = (uint8_t*)(metadata);
+        if (type == 1) {
+            uint64_t primaries = *(uint64_t*)(pmetadata + 8);
+            uint64_t range = *(uint64_t*)(pmetadata + 16);
+            uint64_t transfer = *(uint64_t*)(pmetadata + 24);
+            if (primaries != mColorPrimaries || range != mColorRange ||
+                transfer != mColorTransfer) {
+            mColorPrimaries = primaries;
+            mColorRange = range;
+            mColorTransfer = transfer;
+            needToUpdateConversionShader = true;
+            }
+        }
+    }
+
+    return needToUpdateConversionShader;
+}
+
 // createYUVGLShader() defines the vertex/fragment
 // shader that does the actual work of converting
 // YUV to RGB. The resulting program is stored in |program_out|.
-static void createYUVGLShader(GLuint* program_out,
-                              GLint* ywidthcutoffloc_out,
-                              GLint* cwidthcutoffloc_out,
-                              GLint* ysamplerloc_out,
-                              GLint* usamplerloc_out,
-                              GLint* vsamplerloc_out,
-                              GLint* incoordloc_out,
-                              GLint* posloc_out) {
+void YUVConverter::createYUVGLShader(GLuint* program_out,
+                                     GLint* ywidthcutoffloc_out,
+                                     GLint* cwidthcutoffloc_out,
+                                     GLint* ysamplerloc_out,
+                                     GLint* usamplerloc_out,
+                                     GLint* vsamplerloc_out,
+                                     GLint* incoordloc_out,
+                                     GLint* posloc_out) {
     assert(program_out);
 
     static const char kVShader[] = R"(
@@ -279,8 +303,108 @@ void main(void) {
 }
     )";
 
-    const GLchar* const kFShaders =
-        static_cast<const GLchar*>(kFShader);
+    // full range (1) 601 (4) sRGB transfer (3)
+    static const char kFShader_1_4_3[] = R"(
+precision highp float;
+varying highp vec2 outCoord;
+uniform highp float yWidthCutoff;
+uniform highp float cWidthCutoff;
+uniform sampler2D ysampler;
+uniform sampler2D usampler;
+uniform sampler2D vsampler;
+void main(void) {
+    highp vec2 cutoffCoordsY;
+    highp vec2 cutoffCoordsC;
+    highp vec3 yuv;
+    highp vec3 rgb;
+    cutoffCoordsY.x = outCoord.x * yWidthCutoff;
+    cutoffCoordsY.y = outCoord.y;
+    cutoffCoordsC.x = outCoord.x * cWidthCutoff;
+    cutoffCoordsC.y = outCoord.y;
+    highp float xscale = 1.0;
+    yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0;
+    yuv[1] = xscale* (texture2D(usampler, cutoffCoordsC).r - 0.5);
+    yuv[2] = xscale* (texture2D(vsampler, cutoffCoordsC).r - 0.5);
+    highp float yscale = 1.0;
+    rgb = mat3(yscale,                           yscale,            yscale,
+               0,                  -0.344136* yscale, 1.772* yscale,
+               yscale*1.402, -0.714136* yscale,                  0) * yuv;
+    gl_FragColor = vec4(rgb, 1);
+}
+    )";
+
+    // limited range (2) 601 (4) sRGB transfer (3)
+    static const char kFShader_2_4_3[] = R"(
+precision highp float;
+varying highp vec2 outCoord;
+uniform highp float yWidthCutoff;
+uniform highp float cWidthCutoff;
+uniform sampler2D ysampler;
+uniform sampler2D usampler;
+uniform sampler2D vsampler;
+void main(void) {
+    highp vec2 cutoffCoordsY;
+    highp vec2 cutoffCoordsC;
+    highp vec3 yuv;
+    highp vec3 rgb;
+    cutoffCoordsY.x = outCoord.x * yWidthCutoff;
+    cutoffCoordsY.y = outCoord.y;
+    cutoffCoordsC.x = outCoord.x * cWidthCutoff;
+    cutoffCoordsC.y = outCoord.y;
+    highp float xscale = 219.0/ 224.0;
+    yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
+    yuv[1] = 0.96*xscale* (texture2D(usampler, cutoffCoordsC).r - 0.5);
+    yuv[2] = xscale* (texture2D(vsampler, cutoffCoordsC).r - 0.5);
+    highp float yscale = 255.0/224.0;
+    rgb = mat3(yscale,                           yscale,            yscale,
+               0,                  -0.344136* yscale, 1.772* yscale,
+               yscale*1.402, -0.714136* yscale,                  0) * yuv;
+    gl_FragColor = vec4(rgb, 1);
+}
+    )";
+
+    // limited range (2) 709 (1) sRGB transfer (3)
+    static const char kFShader_2_1_3[] = R"(
+precision highp float;
+varying highp vec2 outCoord;
+uniform highp float yWidthCutoff;
+uniform highp float cWidthCutoff;
+uniform sampler2D ysampler;
+uniform sampler2D usampler;
+uniform sampler2D vsampler;
+void main(void) {
+    highp vec2 cutoffCoordsY;
+    highp vec2 cutoffCoordsC;
+    highp vec3 yuv;
+    highp vec3 rgb;
+    cutoffCoordsY.x = outCoord.x * yWidthCutoff;
+    cutoffCoordsY.y = outCoord.y;
+    cutoffCoordsC.x = outCoord.x * cWidthCutoff;
+    cutoffCoordsC.y = outCoord.y;
+    highp float xscale = 219.0/ 224.0;
+    yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
+    yuv[1] = xscale* (texture2D(usampler, cutoffCoordsC).r - 0.5);
+    yuv[2] = xscale* (texture2D(vsampler, cutoffCoordsC).r - 0.5);
+    highp float yscale = 255.0/224.0;
+    rgb = mat3(yscale,                           yscale,            yscale,
+               0,                  -0.1873* yscale, 1.8556* yscale,
+               yscale*1.5748, -0.4681* yscale,                  0) * yuv;
+    gl_FragColor = vec4(rgb, 1);
+}
+    )";
+
+    const char* yuvFShader = kFShader_2_4_3;  // default
+    if (mColorRange == 1 && mColorPrimaries == 4) {
+        yuvFShader = kFShader_1_4_3;
+    } else if (mColorRange == 2 && mColorPrimaries == 1) {
+        yuvFShader = kFShader_2_1_3;
+    }
+
+    // TODO: remove the following once all media cts
+    // are passing
+    yuvFShader = kFShader;  // default
+
+    const GLchar* const kFShaders = static_cast<const GLchar*>(yuvFShader);
 
     GLuint vshader = s_gles2.glCreateShader(GL_VERTEX_SHADER);
     GLuint fshader = s_gles2.glCreateShader(GL_FRAGMENT_SHADER);
@@ -309,14 +433,14 @@ void main(void) {
     s_gles2.glDeleteShader(fshader);
 }
 
-static void createYUVInterleavedGLShader(GLuint* program_out,
-                                         GLint* ywidthcutoffloc_out,
-                                         GLint* cwidthcutoffloc_out,
-                                         GLint* ysamplerloc_out,
-                                         GLint* vusamplerloc_out,
-                                         GLint* incoordloc_out,
-                                         GLint* posloc_out,
-                                         YUVInterleaveDirection interleaveDir) {
+void YUVConverter::createYUVInterleavedGLShader(GLuint* program_out,
+                                                GLint* ywidthcutoffloc_out,
+                                                GLint* cwidthcutoffloc_out,
+                                                GLint* ysamplerloc_out,
+                                                GLint* vusamplerloc_out,
+                                                GLint* incoordloc_out,
+                                                GLint* posloc_out,
+                                                int interleaveDir) {
     assert(program_out);
 
     static const char kVShader[] = R"(
@@ -400,8 +524,106 @@ void main(void) {
 }
     )";
 
+    // full range (1) 601 (4) sRGB transfer (3)
+    static const char kFShaderUv_1_4_3[] = R"(
+precision highp float;
+varying highp vec2 outCoord;
+uniform highp float yWidthCutoff;
+uniform highp float cWidthCutoff;
+uniform sampler2D ysampler;
+uniform sampler2D uvsampler;
+void main(void) {
+    highp vec2 cutoffCoordsY;
+    highp vec2 cutoffCoordsC;
+    highp vec3 yuv;
+    highp vec3 rgb;
+    cutoffCoordsY.x = outCoord.x * yWidthCutoff;
+    cutoffCoordsY.y = outCoord.y;
+    cutoffCoordsC.x = outCoord.x * cWidthCutoff;
+    cutoffCoordsC.y = outCoord.y;
+    highp float xscale = 1.0;
+    yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0;
+    yuv[1] = xscale* (texture2D(uvsampler, cutoffCoordsC).r - 0.5);
+    yuv[2] = xscale* (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
+    highp float yscale = 1.0;
+    rgb = mat3(yscale,                           yscale,            yscale,
+               0,                  -0.344136* yscale, 1.772* yscale,
+               yscale*1.402, -0.714136* yscale,                  0) * yuv;
+    gl_FragColor = vec4(rgb, 1);
+}
+    )";
+
+    // limited range (2) 601 (4) sRGB transfer (3)
+    static const char kFShaderUv_2_4_3[] = R"(
+precision highp float;
+varying highp vec2 outCoord;
+uniform highp float yWidthCutoff;
+uniform highp float cWidthCutoff;
+uniform sampler2D ysampler;
+uniform sampler2D uvsampler;
+void main(void) {
+    highp vec2 cutoffCoordsY;
+    highp vec2 cutoffCoordsC;
+    highp vec3 yuv;
+    highp vec3 rgb;
+    cutoffCoordsY.x = outCoord.x * yWidthCutoff;
+    cutoffCoordsY.y = outCoord.y;
+    cutoffCoordsC.x = outCoord.x * cWidthCutoff;
+    cutoffCoordsC.y = outCoord.y;
+    highp float xscale = 219.0/ 224.0;
+    yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
+    yuv[1] = xscale* (texture2D(uvsampler, cutoffCoordsC).r - 0.5);
+    yuv[2] = xscale* (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
+    highp float yscale = 255.0/224.0;
+    rgb = mat3(yscale,                           yscale,            yscale,
+               0,                  -0.344136* yscale, 1.772* yscale,
+               yscale*1.402, -0.714136* yscale,                  0) * yuv;
+    gl_FragColor = vec4(rgb, 1);
+}
+    )";
+
+    // limited range (2) 709 (1) sRGB transfer (3)
+    static const char kFShaderUv_2_1_3[] = R"(
+precision highp float;
+varying highp vec2 outCoord;
+uniform highp float yWidthCutoff;
+uniform highp float cWidthCutoff;
+uniform sampler2D ysampler;
+uniform sampler2D uvsampler;
+void main(void) {
+    highp vec2 cutoffCoordsY;
+    highp vec2 cutoffCoordsC;
+    highp vec3 yuv;
+    highp vec3 rgb;
+    cutoffCoordsY.x = outCoord.x * yWidthCutoff;
+    cutoffCoordsY.y = outCoord.y;
+    cutoffCoordsC.x = outCoord.x * cWidthCutoff;
+    cutoffCoordsC.y = outCoord.y;
+    highp float xscale = 219.0/ 224.0;
+    yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
+    yuv[1] = xscale* (texture2D(uvsampler, cutoffCoordsC).r - 0.5);
+    yuv[2] = xscale* (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
+    highp float yscale = 255.0/224.0;
+    rgb = mat3(yscale,                           yscale,            yscale,
+               0,                  -0.1873* yscale, 1.8556* yscale,
+               yscale*1.5748, -0.4681* yscale,                  0) * yuv;
+    gl_FragColor = vec4(rgb, 1);
+}
+    )";
+
+    const char* yuvFShader = kFShaderUv_2_4_3;  // default
+    if (mColorRange == 1 && mColorPrimaries == 4) {
+        yuvFShader = kFShaderUv_1_4_3;
+    } else if (mColorRange == 2 && mColorPrimaries == 1) {
+        yuvFShader = kFShaderUv_2_1_3;
+    }
+
+    // TODO: remove the following once all the cts
+    // media tests are passing
+    yuvFShader = kFShaderUv;  // default
+
     const GLchar* const kFShaders =
-        interleaveDir == YUVInterleaveDirectionVU ? kFShaderVu : kFShaderUv;
+            interleaveDir == YUVInterleaveDirectionVU ? kFShaderVu : yuvFShader;
 
     GLuint vshader = s_gles2.glCreateShader(GL_VERTEX_SHADER);
     GLuint fshader = s_gles2.glCreateShader(GL_FRAGMENT_SHADER);
@@ -694,7 +916,9 @@ void YUVConverter::readPixels(uint8_t* pixels, uint32_t pixels_size) {
     DDD("done");
 }
 
-void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
+void YUVConverter::swapTextures(uint32_t type,
+                                uint32_t* textures,
+                                void* metadata) {
     if (type == FRAMEWORK_FORMAT_NV12) {
         mFormat = FRAMEWORK_FORMAT_NV12;
         std::swap(textures[0], mYtex);
@@ -707,6 +931,15 @@ void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
     } else {
         FATAL("Unknown format: 0x%x", type);
     }
+
+    const bool needToUpdateConversionShader =
+            checkAndUpdateColorAspectsChanged(metadata);
+    if (needToUpdateConversionShader) {
+        saveGLState();
+        reset();
+        init(mWidth, mHeight, mFormat);
+    }
+
     mTexturesSwapped = true;
 }
 
@@ -720,15 +953,27 @@ void YUVConverter::drawConvert(int x, int y,
     drawConvertFromFormat(mFormat, x, y, width, height, pixels);
 }
 
-void YUVConverter::drawConvertFromFormat(FrameworkFormat format, int x, int y, int width, int height, char* pixels) {
-
+// TODO: check whether we need to re-init the converter based on the
+// metadata information.
+void YUVConverter::drawConvertFromFormat(FrameworkFormat format,
+                                         int x,
+                                         int y,
+                                         int width,
+                                         int height,
+                                         char* pixels,
+                                         void* metadata) {
     saveGLState();
+
+    const bool needToUpdateConversionShader =
+            checkAndUpdateColorAspectsChanged(metadata);
+
     if (pixels && (width != mWidth || height != mHeight)) {
         reset();
     }
 
     bool uploadFormatChanged = !mTexturesSwapped && pixels && (format != mFormat);
-    bool initNeeded = (mProgram == 0) || uploadFormatChanged;
+    bool initNeeded = (mProgram == 0) || uploadFormatChanged ||
+                      needToUpdateConversionShader;
 
     if (initNeeded) {
         if (uploadFormatChanged) {

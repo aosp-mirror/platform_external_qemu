@@ -65,7 +65,8 @@ typedef void (*swap_textures_and_update_color_buffer_t)(
         uint32_t format,
         uint32_t type,
         uint32_t texture_type,
-        uint32_t* textures);
+        uint32_t* textures,
+        void* metadata);
 
 typedef void (*open_color_buffer_t)(uint32_t handle);
 typedef void (*close_color_buffer_t)(uint32_t handle);
@@ -86,9 +87,16 @@ typedef void* (*get_global_egl_context_t)(void);
 typedef void (*wait_for_gpu_t)(uint64_t eglsync);
 typedef void (*wait_for_gpu_vulkan_t)(uint64_t device, uint64_t fence);
 typedef void (*set_guest_managed_color_buffer_lifetime_t)(bool guest_managed);
-typedef void (*update_color_buffer_from_framework_format_t)(
-    uint32_t handle, int x, int y, int width, int height,
-    uint32_t fwkFormat, uint32_t format, uint32_t type, void* pixels);
+typedef void (*update_color_buffer_from_framework_format_t)(uint32_t handle,
+                                                            int x,
+                                                            int y,
+                                                            int width,
+                                                            int height,
+                                                            uint32_t fwkFormat,
+                                                            uint32_t format,
+                                                            uint32_t type,
+                                                            void* pixels,
+                                                            void* metadata);
 
 // Platform resources and contexts support
 #define RESOURCE_TYPE_EGL_NATIVE_PIXMAP 0x01

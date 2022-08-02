@@ -43,6 +43,7 @@ public:
     virtual void getImage(void* ptr) override;
     virtual void flush(void* ptr) override;
     virtual void destroyVpxContext(void* ptr) override;
+    virtual void sendMetadata(void* ptr) override;
 
     explicit MediaVpxDecoderGeneric(VpxPingInfoParser parser,
                                     MediaCodecType type);
@@ -77,6 +78,11 @@ private:
 
     void fetchAllFrames();
     void createAndInitSoftVideoHelper();
+
+    // color aspects related
+private:
+    // default is limited range, 601, sRGB
+    MetadataParam mMetadata = {1, 2, 4, 3};
 
 private:
     void decode_internal(const uint8_t* data, size_t len, uint64_t pts);

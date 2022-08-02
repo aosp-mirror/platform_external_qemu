@@ -149,6 +149,14 @@ void MediaVpxDecoder::handlePing(MediaCodecType type,
             mydecoder->getImage(ptr);
             break;
         }
+        case MediaOperation::SendMetadata: {
+            VPX_DPRINT("handle SendMetadata request from guest %p", ptr);
+            MediaVpxDecoderPlugin* mydecoder = getDecoder(readId(ptr));
+            if (nullptr == mydecoder)
+                return;
+            mydecoder->sendMetadata(ptr);
+            break;
+        }
         case MediaOperation::Reset: {
             VPX_DPRINT("Reset is not supported %u\n", (unsigned int)op);
         }

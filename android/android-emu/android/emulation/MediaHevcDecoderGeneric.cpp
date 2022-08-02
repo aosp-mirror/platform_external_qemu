@@ -351,6 +351,17 @@ void MediaHevcDecoderGeneric::flush(void* ptr) {
     HEVC_DPRINT("Flushing done");
 }
 
+void MediaHevcDecoderGeneric::sendMetadata(void* ptr) {
+    HEVC_DPRINT("hevc %s %d sendMetadata %p\n", __func__, __LINE__, ptr);
+    MetadataParam param{};
+    mParser.parseMetadataParams(ptr, param);
+
+    std::swap(mMetadata, param);
+    HEVC_DPRINT("hevc %s %d range %d primaries %d transfer %d\n", __func__,
+                __LINE__, (int)(mMetadata.range), (int)(mMetadata.primaries),
+                (int)(mMetadata.transfer));
+}
+
 void MediaHevcDecoderGeneric::getImage(void* ptr) {
     HEVC_DPRINT("getImage %p", ptr);
     GetImageParam param{};
@@ -377,6 +388,25 @@ void MediaHevcDecoderGeneric::getImage(void* ptr) {
         return;
     }
 
+    // update color aspects
+    if (pFrame->color.range != 0) {
+        if (3 - pFrame->color.range != mMetadata.range) {
+            mMetadata.range = 3 - pFrame->color.range;
+            HEVC_DPRINT(
+                    "hevc updated %s %d range %d primaries %d transfer %d\n",
+                    __func__, __LINE__, (int)(mMetadata.range),
+                    (int)(mMetadata.primaries), (int)(mMetadata.transfer));
+        }
+    }
+
+    if (pFrame->color.primaries != 2 &&
+        pFrame->color.primaries != mMetadata.primaries) {
+        mMetadata.primaries = pFrame->color.primaries;
+        HEVC_DPRINT("hevc updated %s %d range %d primaries %d transfer %d\n",
+                    __func__, __LINE__, (int)(mMetadata.range),
+                    (int)(mMetadata.primaries), (int)(mMetadata.transfer));
+    }
+
     bool needToCopyToGuest = true;
     if (mParser.version() >= 200) {
         if (mUseGpuTexture && pFrame->texture[0] > 0 &&
@@ -388,14 +418,15 @@ void MediaHevcDecoderGeneric::getImage(void* ptr) {
                     pFrame->texture[1]);
             mRenderer.renderToHostColorBufferWithTextures(
                     param.hostColorBufferId, pFrame->width, pFrame->height,
-                    TextureFrame{pFrame->texture[0], pFrame->texture[1]});
+                    TextureFrame{pFrame->texture[0], pFrame->texture[1]},
+                    &mMetadata);
         } else {
             HEVC_DPRINT(
                     "calling rendering to host side color buffer with id %d",
                     param.hostColorBufferId);
             mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
                                               pFrame->width, pFrame->height,
-                                              pFrame->data.data());
+                                              pFrame->data.data(), &mMetadata);
         }
         needToCopyToGuest = false;
     }

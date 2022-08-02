@@ -90,6 +90,7 @@ public:
     void parseDecodeFrameParams(void* ptr, DecodeFrameParam& param);
     void parseGetImageParams(void* ptr, GetImageParam& param);
     void parseResetParams(void* ptr, ResetParam& param);
+    void parseMetadataParams(void* ptr, MetadataParam& param);
 
 public:
     explicit H264PingInfoParser(void* ptr);

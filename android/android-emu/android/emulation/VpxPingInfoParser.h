@@ -78,6 +78,7 @@ public:
     void parseGetImageParams(void* ptr, GetImageParam& param);
     void parseDestroyParams(void* ptr, DestroyParam& param);
     void parseFlushParams(void* ptr, FlushParam& param);
+    void parseMetadataParams(void* ptr, MetadataParam& param);
 
 public:
     explicit VpxPingInfoParser(void* ptr);

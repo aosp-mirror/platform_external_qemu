@@ -171,6 +171,14 @@ void MediaHevcDecoderDefault::handlePing(MediaCodecType type,
             mydecoder->getImage(ptr);
             break;
         }
+        case MediaOperation::SendMetadata: {
+            HEVC_DPRINT("handle send metadata request from guest %p", ptr);
+            MediaHevcDecoderPlugin* mydecoder = getDecoder(readId(ptr));
+            if (nullptr == mydecoder)
+                return;
+            mydecoder->sendMetadata(ptr);
+            break;
+        }
         case MediaOperation::Reset: {
             HEVC_DPRINT("handle reset request from guest %p", ptr);
             uint64_t oldId = readId(ptr);

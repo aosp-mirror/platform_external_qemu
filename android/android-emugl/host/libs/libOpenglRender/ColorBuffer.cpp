@@ -557,9 +557,11 @@ void ColorBuffer::reformat(GLint internalformat, GLenum type) {
     m_numBytes = bpp * m_width * m_height;
 }
 
-void ColorBuffer::swapYUVTextures(uint32_t type, uint32_t* textures) {
+void ColorBuffer::swapYUVTextures(uint32_t type,
+                                  uint32_t* textures,
+                                  void* metadata) {
     if (type == FRAMEWORK_FORMAT_NV12) {
-        m_yuv_converter->swapTextures(type, textures);
+        m_yuv_converter->swapTextures(type, textures, metadata);
     } else {
         fprintf(stderr,
                 "%s: ERROR: format other than NV12 is not supported: 0x%x\n",
@@ -584,7 +586,8 @@ void ColorBuffer::subUpdateFromFrameworkFormat(int x,
                                                FrameworkFormat fwkFormat,
                                                GLenum p_format,
                                                GLenum p_type,
-                                               void* pixels) {
+                                               void* pixels,
+                                               void* metadata) {
     const GLenum p_unsizedFormat = sGetUnsizedColorBufferFormat(p_format);
     RecursiveScopedHelperContext context(m_helper);
 
@@ -608,7 +611,8 @@ void ColorBuffer::subUpdateFromFrameworkFormat(int x,
         // This FBO will convert the YUV frame to RGB
         // and render it to |m_tex|.
         bindFbo(&m_yuv_conversion_fbo, m_tex);
-        m_yuv_converter->drawConvertFromFormat(fwkFormat, x, y, width, height, (char*)pixels);
+        m_yuv_converter->drawConvertFromFormat(fwkFormat, x, y, width, height,
+                                               (char*)pixels, metadata);
         unbindFbo();
 
         // |m_tex| still needs to be bound afterwards

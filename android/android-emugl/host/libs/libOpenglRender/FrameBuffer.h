@@ -384,26 +384,38 @@ public:
                                           uint32_t format,
                                           uint32_t type,
                                           uint32_t texture_type,
-                                          uint32_t* textures);
+                                          uint32_t* textures,
+                                          void* metadata = nullptr);
 
     // Update the content of a given ColorBuffer from client data.
     // |p_colorbuffer| is the ColorBuffer's handle value. Similar
     // to glReadPixels(), this can be a slow operation.
     // |x|, |y|, |width| and |height| are the position and dimensions of
     // a rectangle whose pixel values will be transfered to the GPU
-    // |format| indicates the format of the OpenGL buffer, e.g. GL_RGB or GL_RGBA.
-    // |frameworkFormat| indicates the format of the pixel data; if
+    // |format| indicates the format of the OpenGL buffer, e.g. GL_RGB or
+    // GL_RGBA. |frameworkFormat| indicates the format of the pixel data; if
     // FRAMEWORK_FORMAT_GL_COMPATIBLE, |format| (OpenGL format) is used.
     // Otherwise, explicit conversion to |format| is needed.
     // |type| is the type of pixel data, e.g. GL_UNSIGNED_BYTE.
     // |pixels| is the address of a buffer containing the new pixel data.
     // Returns true on success, false otherwise.
+    // |metadata| is the address of a structure contains the metadata associated
+    // with this frame of pixel data. metadata carries info such as color
+    // standard, range etc. the first 4 bytes indicates the type of metadata.
+    // Returns true on success, false otherwise.
     bool updateColorBuffer(HandleType p_colorbuffer,
                            int x, int y, int width, int height,
                            GLenum format, GLenum type, void *pixels);
     bool updateColorBufferFromFrameworkFormat(HandleType p_colorbuffer,
-                           int x, int y, int width, int height,
-                           FrameworkFormat fwkFormat, GLenum format, GLenum type, void *pixels);
+                                              int x,
+                                              int y,
+                                              int width,
+                                              int height,
+                                              FrameworkFormat fwkFormat,
+                                              GLenum format,
+                                              GLenum type,
+                                              void* pixels,
+                                              void* metadata = nullptr);
     // Replaces contents completely using the color buffer's current format,
     // with row length equal to width of a row in bytes.
     // The number of bytes is passed as a check.
