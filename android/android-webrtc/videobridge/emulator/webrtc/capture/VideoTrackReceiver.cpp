@@ -11,33 +11,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#pragma once
-#include <string>             // for string
-#include <vector>             // for vector
+#include "VideoTrackReceiver.h"
 
-#include "nlohmann/json.hpp"  // for json
+#include <api/video/video_frame.h>         // for VideoFrame
+#include <api/video/video_frame_buffer.h>  // for VideoFrameBuffer
+#include <rtc_base/logging.h>              // for RTC_LOG
 
-namespace android {
-namespace emulation {
-namespace control {
-
-using nlohmann::json;
-
-class TurnConfig {
-public:
-    explicit TurnConfig(std::string cmd);
-    ~TurnConfig() = default;
-
-    json getConfig();
-    bool validCommand();
-
-    static bool producesValidTurn(std::string cmd);
-private:
-    std::vector<std::string> mTurnCmd;
-
-    // We want the turn config delivered in under a second.
-    const int kMaxTurnConfigTime = 1000;
-};
+namespace emulator {
+namespace webrtc {
+void VideoTrackReceiver::OnFrame(const VideoFrame& frame) {
+    mCurrentFrame = frame.video_frame_buffer();
+    frameWaiter.newEvent();
 }
+
+void VideoTrackReceiver::OnDiscardedFrame() {
+    RTC_LOG(LERROR) << "Dropped frame.";
 }
-}
+
+}  // namespace webrtc
+}  // namespace emulator

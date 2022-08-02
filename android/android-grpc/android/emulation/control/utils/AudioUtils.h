@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "android/recording/AvFormat.h"   // for AudioFormat
+#include "android/recording/Frame.h"  // for AudioFormat
 
 namespace android {
 namespace emulation {
@@ -24,8 +24,8 @@ class AudioFormat;
 class AudioUtils {
 public:
     // Translates our external format to the internal format.
-    static android::recording::AudioFormat getSampleFormat(
-            const AudioFormat& fmt);
+    static android::recording::AudioFormat getSampleFormat(const AudioFormat& fmt);
+
     // Extracts the number of channels from the enum for usage with qemu.
     static int getChannels(const AudioFormat& fmt);
 

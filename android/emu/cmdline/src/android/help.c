@@ -2207,7 +2207,6 @@ static void help_network_user_mode_options(stralloc_t* out) {
 #define help_append_userspace_opt NULL
 #define help_no_nested_warnings NULL
 #define help_wifi_vmnet NULL
-#define help_dump_audio NULL
 
 typedef struct {
     const char*  name;

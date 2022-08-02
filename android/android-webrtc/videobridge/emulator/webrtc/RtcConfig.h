@@ -12,32 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <string>             // for string
-#include <vector>             // for vector
 
-#include "nlohmann/json.hpp"  // for json
+#include <api/peer_connection_interface.h>  // for PeerConnectionInterface
+#include <string>                           // for string
 
-namespace android {
-namespace emulation {
-namespace control {
+#include "nlohmann/json.hpp"                // for json
+
+namespace emulator {
+namespace webrtc {
 
 using nlohmann::json;
+using ::webrtc::PeerConnectionInterface;
 
-class TurnConfig {
+class RtcConfig {
 public:
-    explicit TurnConfig(std::string cmd);
-    ~TurnConfig() = default;
-
-    json getConfig();
-    bool validCommand();
-
-    static bool producesValidTurn(std::string cmd);
-private:
-    std::vector<std::string> mTurnCmd;
-
-    // We want the turn config delivered in under a second.
-    const int kMaxTurnConfigTime = 1000;
+    static PeerConnectionInterface::RTCConfiguration parse(
+            json rtcConfiguration);
+    static PeerConnectionInterface::RTCConfiguration parse(
+            std::string rtcConfiguration);
 };
-}
-}
-}
+}  // namespace webrtc
+}  // namespace emulator

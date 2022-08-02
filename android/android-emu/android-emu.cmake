@@ -485,7 +485,6 @@ android_add_library(
       android/emulation/ComponentVersion.cpp
       android/emulation/control/FilePusher.cpp
       android/emulation/control/NopRtcBridge.cpp
-      android/emulation/control/ScreenCapturer.cpp
       android/emulation/DmaMap.cpp
       android/emulation/goldfish_sync.cpp
       android/emulation/GoldfishDma.cpp
@@ -572,10 +571,7 @@ target_link_libraries(
          zlib
          android-hw-config
          absl::strings
-         ssl
-         android-net
   PRIVATE android-emu-protobuf)
-
 # Here are the windows library and link dependencies. They are public and will
 # propagate onwards to others that depend on android-emu-shared
 android_target_link_libraries(
@@ -669,7 +665,6 @@ target_compile_definitions(
   PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
-
 if(WEBRTC)
   target_compile_definitions(android-emu-shared PUBLIC -DANDROID_WEBRTC)
 endif()
@@ -679,9 +674,9 @@ target_compile_definitions(android-emu-shared PUBLIC -DAEMU_MIN=1)
 if(OPTION_GFXSTREAM_BACKEND)
   target_compile_definitions(android-emu-shared
                              PUBLIC -DAEMU_GFXSTREAM_BACKEND=1)
+  android_install_shared(android-emu-shared)
 endif()
 
-android_install_shared(android-emu-shared)
 # This library contains a main entry point that injects fake console agents into
 # your unit tests. you usually want to link against this library if you need to
 # make any calls to getConsoleAgents()

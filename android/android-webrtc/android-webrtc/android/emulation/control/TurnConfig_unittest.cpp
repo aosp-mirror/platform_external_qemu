@@ -14,7 +14,7 @@
 
 using android::emulation::control::TurnConfig;
 using nlohmann::json;
-static std::string VALID_TURN_CFG = R"#(
+std::string VALID_TURN_CFG = R"#(
 {
    "iceServers":[
       {
