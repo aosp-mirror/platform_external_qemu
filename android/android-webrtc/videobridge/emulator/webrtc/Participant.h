@@ -23,15 +23,19 @@
 #include <string>                           // for string
 #include <unordered_map>                    // for unordered_map
 
-#include "emulator/webrtc/export.h"
-#include "android/console.h"
-#include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
-#include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "emulator/webrtc/RtcConnection.h"  // for json, RtcConnection (ptr ...
 #include "emulator_controller.grpc.pb.h"    // for EmulatorController
 #include "nlohmann/json.hpp"                // for json
 
+namespace android {
+namespace base {
+class AsyncSocket;
+}  // namespace base
+}  // namespace android
 namespace emulator {
+namespace net {
+class SocketForwarder;
+}  // namespace net
 namespace webrtc {
 class VideoCapturer;
 class VideoTrackReceiver;
@@ -45,6 +49,7 @@ class VideoTrackInterface;
 }  // namespace webrtc
 
 using json = nlohmann::json;
+using emulator::net::SocketForwarder;
 using rtc::scoped_refptr;
 using webrtc::PeerConnectionInterface;
 using webrtc::VideoTrackInterface;
@@ -59,13 +64,13 @@ enum class DataChannelLabel { mouse, keyboard, touch, adb };
 // A default peer connection observer that does nothing
 class EmptyConnectionObserver : public ::webrtc::PeerConnectionObserver {
 public:
-    ANDROID_WEBRTC_EXPORT void OnSignalingChange(::webrtc::PeerConnectionInterface::SignalingState
+    void OnSignalingChange(::webrtc::PeerConnectionInterface::SignalingState
                                    new_state) override {}
-    ANDROID_WEBRTC_EXPORT void OnRenegotiationNeeded() override {}
-    ANDROID_WEBRTC_EXPORT void OnIceGatheringChange(
+    void OnRenegotiationNeeded() override {}
+    void OnIceGatheringChange(
             ::webrtc::PeerConnectionInterface::IceGatheringState new_state)
             override {}
-    ANDROID_WEBRTC_EXPORT void OnIceCandidate(
+    void OnIceCandidate(
             const ::webrtc::IceCandidateInterface* candidate) override {}
 };
 
@@ -73,21 +78,20 @@ public:
 
 class EventForwarder : public ::webrtc::DataChannelObserver {
 public:
-    ANDROID_WEBRTC_EXPORT EventForwarder(const AndroidConsoleAgents* agents,
+    EventForwarder(EmulatorGrpcClient* client,
                    scoped_refptr<::webrtc::DataChannelInterface> channel,
                    DataChannelLabel label);
-    ANDROID_WEBRTC_EXPORT ~EventForwarder();
+    ~EventForwarder();
     // The data channel state have changed.
-    ANDROID_WEBRTC_EXPORT void OnStateChange() override;
+    void OnStateChange() override;
     //  A data buffer was successfully received.
-    ANDROID_WEBRTC_EXPORT void OnMessage(const ::webrtc::DataBuffer& buffer) override;
+    void OnMessage(const ::webrtc::DataBuffer& buffer) override;
 
 private:
-    const AndroidConsoleAgents* mAgents;
-    android::emulation::control::keyboard::EmulatorKeyEventSender
-            mKeyEventSender;
-    android::emulation::control::TouchEventSender mTouchEventSender;
+    EmulatorGrpcClient* mClient;
     scoped_refptr<::webrtc::DataChannelInterface> mChannel;
+    std::unique_ptr<android::emulation::control::EmulatorController::Stub>
+            mEmulatorGrpc;
     DataChannelLabel mLabel;
 };
 
@@ -101,42 +105,44 @@ private:
 // It talks with the rtc connection to send/receive messages.
 class Participant : public EmptyConnectionObserver {
 public:
-    ANDROID_WEBRTC_EXPORT Participant(RtcConnection* board,
+    Participant(RtcConnection* board,
                 std::string id,
                 json rtcConfig,
                 VideoTrackReceiver* videoReceiver);
-    ANDROID_WEBRTC_EXPORT ~Participant() override;
+    ~Participant() override;
 
     // PeerConnectionObserver implementation.
-    ANDROID_WEBRTC_EXPORT void OnIceCandidate(
+    void OnIceCandidate(
             const ::webrtc::IceCandidateInterface* candidate) override;
-    ANDROID_WEBRTC_EXPORT void OnConnectionChange(
-            ::webrtc::PeerConnectionInterface::PeerConnectionState new_state)
-            override;
+    void OnConnectionChange(
+            ::webrtc::PeerConnectionInterface::PeerConnectionState new_state) override;
 
-    ANDROID_WEBRTC_EXPORT void OnIceConnectionChange(
+    void OnIceConnectionChange(
             ::webrtc::PeerConnectionInterface::IceConnectionState new_state)
             override;
 
-    ANDROID_WEBRTC_EXPORT void OnAddStream(
+    void OnAddStream(
             rtc::scoped_refptr<::webrtc::MediaStreamInterface> stream) override;
-    ANDROID_WEBRTC_EXPORT void OnDataChannel(rtc::scoped_refptr<::webrtc::DataChannelInterface>
+    void OnDataChannel(rtc::scoped_refptr<::webrtc::DataChannelInterface>
                                channel) override;
-    ANDROID_WEBRTC_EXPORT void ReceivedSessionDescription(
+    void ReceivedSessionDescription(
             ::webrtc::SessionDescriptionInterface* desc);
-    ANDROID_WEBRTC_EXPORT void IncomingMessage(json msg);
-    ANDROID_WEBRTC_EXPORT bool AddVideoTrack(int displayId);
-    ANDROID_WEBRTC_EXPORT bool AddAudioTrack(const std::string& audioDumpFile = "");
+    void IncomingMessage(json msg);
+    bool AddVideoTrack(int displayId);
+    bool AddAudioTrack(const std::string & audioDumpFile="");
 
-    ANDROID_WEBRTC_EXPORT bool Initialize();
-    ANDROID_WEBRTC_EXPORT void SendToDataChannel(DataChannelLabel label, std::string data);
-    ANDROID_WEBRTC_EXPORT void CreateOffer();
-    ANDROID_WEBRTC_EXPORT void Close();
-    ANDROID_WEBRTC_EXPORT void WaitForClose();
+    bool Initialize();
+    void SendToDataChannel(DataChannelLabel label, std::string data);
+    void CreateOffer();
+    void Close();
+    void WaitForClose();
 
-    ANDROID_WEBRTC_EXPORT rtc::scoped_refptr<::webrtc::DataChannelInterface> GetDataChannel(
+    rtc::scoped_refptr<::webrtc::DataChannelInterface> GetDataChannel(
             DataChannelLabel label);
-    ANDROID_WEBRTC_EXPORT inline const std::string GetPeerId() const { return mPeerId; };
+    inline const std::string GetPeerId() const { return mPeerId; };
+    // Register Adb Forwarder to the local running emulator.
+    bool RegisterLocalAdbForwarder(
+            std::shared_ptr<android::base::AsyncSocket> adbSocket);
 
 private:
     void DoClose();
@@ -157,9 +163,11 @@ private:
     std::unordered_map<std::string, scoped_refptr<::webrtc::RtpSenderInterface>>
             mActiveTracks;
 
-    InprocessRefAudioSource mAudioSource;
-    std::vector<InprocessRefVideoSource> mVideoSources;
+    GrpcRefAudioSource mAudioSource;
+    std::vector<GrpcRefVideoSource> mVideoSources;
+    std::shared_ptr<android::base::AsyncSocket> mLocalAdbSocket;
 
+    std::unique_ptr<SocketForwarder> mSocketForwarder;
     RtcConnection* mRtcConnection;
     VideoTrackReceiver* mVideoReceiver;
     json mRtcConfig;

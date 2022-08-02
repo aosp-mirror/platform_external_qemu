@@ -90,31 +90,6 @@ target_include_directories(
 target_link_libraries(android-grpc-services PUBLIC protobuf::libprotobuf grpc++
                                                    android-emu)
 
-android_add_library(
-  TARGET android-grpc-utils
-  LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      android/emulation/control/audio/AudioStream.cpp
-      android/emulation/control/logcat/RingStreambuf.cpp
-      android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
-      android/emulation/control/keyboard/TouchEventSender.cpp
-      android/emulation/control/utils/AudioUtils.cpp
-      android/emulation/control/utils/EmulatorGrpcClient.cpp
-      android/emulation/control/utils/EventWaiter.cpp
-      android/emulation/control/utils/GrpcAndroidLogAdapter.cpp
-      android/emulation/control/utils/ScreenshotUtils.cpp
-      android/emulation/control/utils/SharedMemoryLibrary.cpp
-      ${EMULATOR_GRPC_SRC}
-  )
-
-target_link_libraries(android-grpc-utils PUBLIC protobuf::libprotobuf grpc++ android-emu-tracing
-                                                android-emu-shared)
-
-target_include_directories(android-grpc-utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
-                                               ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_compile_options(android-grpc-utils PUBLIC -Wno-extern-c-compat)
-
 # Let's add in the library
 android_add_library(
   TARGET android-grpc

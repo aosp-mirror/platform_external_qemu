@@ -14,7 +14,6 @@
 
 #pragma once
 #include <nlohmann/json.hpp>
-#include "emulator/webrtc/export.h"
 #include "android/console.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "android/emulation/control/keyboard/TouchEventSender.h"
@@ -30,8 +29,8 @@ namespace control {
 // The protocol buffers are defined in emulator_controller.proto.
 class EventDispatcher {
 public:
-    ANDROID_WEBRTC_EXPORT EventDispatcher(const AndroidConsoleAgents* const agents);
-    ANDROID_WEBRTC_EXPORT void dispatchEvent(const json msg);
+    EventDispatcher(const AndroidConsoleAgents* const agents);
+    void dispatchEvent(const json msg);
 
 private:
     const AndroidConsoleAgents* const mAgents;

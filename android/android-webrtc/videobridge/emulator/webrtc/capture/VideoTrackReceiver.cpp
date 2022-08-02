@@ -1,4 +1,4 @@
-// Copyright (C) 2020 The Android Open Source Project
+// Copyright (C) 2021 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,22 +11,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "emulator/webrtc/capture/AudioSource.h"
+#include "VideoTrackReceiver.h"
 
-#include <api/media_stream_interface.h>  // for AudioTrackSinkInterface
+#include "android/base/Log.h"
+#include <api/video/video_frame.h>         // for VideoFrame
+#include <api/video/video_frame_buffer.h>  // for VideoFrameBuffer
+#include <rtc_base/logging.h>              // for RTC_LOG
 
 namespace emulator {
 namespace webrtc {
-void AudioSource::OnData(const void* audio_data,
-                         int bits_per_sample,
-                         int sample_rate,
-                         size_t number_of_channels,
-                         size_t number_of_frames) {
-    const std::lock_guard<std::mutex> lock(mMutex);
-    for (auto sink : mSinks) {
-        sink->OnData(audio_data, bits_per_sample, sample_rate,
-                     number_of_channels, number_of_frames);
-    }
+void VideoTrackReceiver::OnFrame(const VideoFrame& frame) {
+    mCurrentFrame = frame.video_frame_buffer();
+    frameWaiter.newEvent();
 }
+
+void VideoTrackReceiver::OnDiscardedFrame() {
+    LOG(ERROR) << "Dropped frame.";
+}
+
 }  // namespace webrtc
 }  // namespace emulator

@@ -32,7 +32,7 @@ VideoTrackSource::VideoTrackSource(VideoCapturer* videoCapturer)
 
     mActive = true;
     mCaptureThread = rtc::PlatformThread::SpawnJoinable(
-            [this]() { captureFrames(); }, "VideoTrackSourceThread");
+            [this](){ captureFrames(); }, "VideoTrackSourceThread");
 }
 
 VideoTrackSource::~VideoTrackSource() {
