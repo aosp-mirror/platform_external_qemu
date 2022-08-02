@@ -21,7 +21,6 @@
 #include <stddef.h>                        // for size_t
 #include <string.h>                        // for memcpy
 
-#include "android/base/Log.h"
 #include "android/base/StringView.h"           // for StringView
 #include "android/base/memory/SharedMemory.h"  // for SharedMemory, StringView
 #include "api/video/i420_buffer.h"             // for I420Buffer
@@ -40,7 +39,7 @@ static bool openSharedMemory(SharedMemory& shm, std::string handle) {
     if (!shm.isOpen()) {
         int err = shm.open(SharedMemory::AccessMode::READ_ONLY);
         if (err != 0) {
-            LOG(INFO) << "Unable to open memory mapped handle: ["
+            RTC_LOG(LERROR) << "Unable to open memory mapped handle: ["
                             << handle << "] due to " << err;
             return false;
         }
@@ -112,7 +111,7 @@ absl::optional<::webrtc::VideoFrame> VideoShareCapturer::getVideoFrame() {
             /*crop_y=*/0, mVideoInfo.width, mVideoInfo.height, mVideoInfo.width,
             mVideoInfo.height, libyuv::kRotate0, libyuv::FourCC::FOURCC_ARGB);
     if (converted != 0) {
-        LOG(INFO) << "Bad conversion frame." << frameNumber() << " "
+        RTC_LOG(INFO) << "Bad conversion frame." << frameNumber() << " "
                       << mVideoInfo.width << "x" << mVideoInfo.height;
         return {};
     }

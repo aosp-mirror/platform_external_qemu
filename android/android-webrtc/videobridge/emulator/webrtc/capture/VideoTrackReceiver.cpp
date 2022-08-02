@@ -13,7 +13,6 @@
 // limitations under the License.
 #include "VideoTrackReceiver.h"
 
-#include "android/base/Log.h"
 #include <api/video/video_frame.h>         // for VideoFrame
 #include <api/video/video_frame_buffer.h>  // for VideoFrameBuffer
 #include <rtc_base/logging.h>              // for RTC_LOG
@@ -26,7 +25,7 @@ void VideoTrackReceiver::OnFrame(const VideoFrame& frame) {
 }
 
 void VideoTrackReceiver::OnDiscardedFrame() {
-    LOG(ERROR) << "Dropped frame.";
+    RTC_LOG(LERROR) << "Dropped frame.";
 }
 
 }  // namespace webrtc
