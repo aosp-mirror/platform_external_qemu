@@ -43,6 +43,7 @@ public:
     virtual void decodeFrame(void* ptr) override;
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
+    virtual void sendMetadata(void* ptr) override;
 
     virtual void save(base::Stream* stream) const override;
     virtual bool load(base::Stream* stream) override;
@@ -76,6 +77,11 @@ private:
     uint64_t mOutputPts = 0;
     uint64_t mInputPts = 0;
     PixelFormat mOutPixFmt;
+
+    // color aspects related
+private:
+    // default is limited range, 601, sRGB
+    MetadataParam mMetadata = {1, 2, 4, 3};
 
 private:
     std::unique_ptr<MediaSnapshotHelper> mSnapshotHelper;

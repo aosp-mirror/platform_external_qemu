@@ -589,66 +589,94 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
                    uint32_t format,
                    uint32_t type,
                    uint32_t texture_type,
-                   uint32_t* textures) {
+                   uint32_t* textures,
+                   void* metadata) {
                     FrameBuffer::getFB()->swapTexturesAndUpdateColorBuffer(
                             colorbufferhandle, x, y, width, height, format,
-                            type, texture_type, textures);
+                            type, texture_type, textures, metadata);
                 },
-        .get_last_posted_color_buffer = []() {
-            return FrameBuffer::getFB()->getLastPostedColorBuffer();
-        },
-        .bind_color_buffer_to_texture = [](uint32_t handle) {
-            FrameBuffer::getFB()->bindColorBufferToTexture2(handle);
-        },
-        .get_global_egl_context = []() {
-            return FrameBuffer::getFB()->getGlobalEGLContext();
-        },
-        .wait_for_gpu = [](uint64_t eglsync) {
-            FrameBuffer::getFB()->waitForGpu(eglsync);
-        },
-        .wait_for_gpu_vulkan = [](uint64_t device, uint64_t fence) {
-            FrameBuffer::getFB()->waitForGpuVulkan(device, fence);
-        },
-        .set_guest_managed_color_buffer_lifetime = [](bool guestManaged) {
-            FrameBuffer::getFB()->setGuestManagedColorBufferLifetime(guestManaged);
-        },
-        .async_wait_for_gpu_with_cb = [](uint64_t eglsync, FenceCompletionCallback cb) {
-            FrameBuffer::getFB()->asyncWaitForGpuWithCb(eglsync, cb);
-        },
-        .async_wait_for_gpu_vulkan_with_cb = [](uint64_t device, uint64_t fence, FenceCompletionCallback cb) {
-            FrameBuffer::getFB()->asyncWaitForGpuVulkanWithCb(device, fence, cb);
-        },
-        .async_wait_for_gpu_vulkan_qsri_with_cb = [](uint64_t image, FenceCompletionCallback cb) {
-            FrameBuffer::getFB()->asyncWaitForGpuVulkanQsriWithCb(image, cb);
-        },
-        .wait_for_gpu_vulkan_qsri = [](uint64_t image) {
-            FrameBuffer::getFB()->waitForGpuVulkanQsri(image);
-        },
+        .get_last_posted_color_buffer =
+                []() {
+                    return FrameBuffer::getFB()->getLastPostedColorBuffer();
+                },
+        .bind_color_buffer_to_texture =
+                [](uint32_t handle) {
+                    FrameBuffer::getFB()->bindColorBufferToTexture2(handle);
+                },
+        .get_global_egl_context =
+                []() { return FrameBuffer::getFB()->getGlobalEGLContext(); },
+        .wait_for_gpu =
+                [](uint64_t eglsync) {
+                    FrameBuffer::getFB()->waitForGpu(eglsync);
+                },
+        .wait_for_gpu_vulkan =
+                [](uint64_t device, uint64_t fence) {
+                    FrameBuffer::getFB()->waitForGpuVulkan(device, fence);
+                },
+        .set_guest_managed_color_buffer_lifetime =
+                [](bool guestManaged) {
+                    FrameBuffer::getFB()->setGuestManagedColorBufferLifetime(
+                            guestManaged);
+                },
+        .async_wait_for_gpu_with_cb =
+                [](uint64_t eglsync, FenceCompletionCallback cb) {
+                    FrameBuffer::getFB()->asyncWaitForGpuWithCb(eglsync, cb);
+                },
+        .async_wait_for_gpu_vulkan_with_cb =
+                [](uint64_t device,
+                   uint64_t fence,
+                   FenceCompletionCallback cb) {
+                    FrameBuffer::getFB()->asyncWaitForGpuVulkanWithCb(
+                            device, fence, cb);
+                },
+        .async_wait_for_gpu_vulkan_qsri_with_cb =
+                [](uint64_t image, FenceCompletionCallback cb) {
+                    FrameBuffer::getFB()->asyncWaitForGpuVulkanQsriWithCb(image,
+                                                                          cb);
+                },
+        .wait_for_gpu_vulkan_qsri =
+                [](uint64_t image) {
+                    FrameBuffer::getFB()->waitForGpuVulkanQsri(image);
+                },
         .update_color_buffer_from_framework_format =
-            [](uint32_t handle,
-               int x,
-               int y,
-               int width,
-               int height,
-               uint32_t fwkFormat,
-               uint32_t format,
-               uint32_t type,
-               void* pixels) {
-                FrameBuffer::getFB()->updateColorBufferFromFrameworkFormat(
-                        handle, x, y, width, height, (FrameworkFormat)fwkFormat, format, type, pixels);
-        },
-        .platform_import_resource = [](uint32_t handle, uint32_t type, void* resource) {
-            return FrameBuffer::getFB()->platformImportResource(handle, type, resource);
-        },
-        .platform_resource_info = [](uint32_t handle, int32_t* width, int32_t* height, int32_t* internal_format) {
-            return FrameBuffer::getFB()->getColorBufferInfo(handle, width, height, internal_format);
-        },
-        .platform_create_shared_egl_context = []() {
-            return FrameBuffer::getFB()->platformCreateSharedEglContext();
-        },
-        .platform_destroy_shared_egl_context = [](void* context) {
-            return FrameBuffer::getFB()->platformDestroySharedEglContext(context);
-        },
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t fwkFormat,
+                   uint32_t format,
+                   uint32_t type,
+                   void* pixels,
+                   void* metadata) {
+                    FrameBuffer::getFB()->updateColorBufferFromFrameworkFormat(
+                            handle, x, y, width, height,
+                            (FrameworkFormat)fwkFormat, format, type, pixels,
+                            metadata);
+                },
+        .platform_import_resource =
+                [](uint32_t handle, uint32_t type, void* resource) {
+                    return FrameBuffer::getFB()->platformImportResource(
+                            handle, type, resource);
+                },
+        .platform_resource_info =
+                [](uint32_t handle,
+                   int32_t* width,
+                   int32_t* height,
+                   int32_t* internal_format) {
+                    return FrameBuffer::getFB()->getColorBufferInfo(
+                            handle, width, height, internal_format);
+                },
+        .platform_create_shared_egl_context =
+                []() {
+                    return FrameBuffer::getFB()
+                            ->platformCreateSharedEglContext();
+                },
+        .platform_destroy_shared_egl_context =
+                [](void* context) {
+                    return FrameBuffer::getFB()
+                            ->platformDestroySharedEglContext(context);
+                },
 };
 
 struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {

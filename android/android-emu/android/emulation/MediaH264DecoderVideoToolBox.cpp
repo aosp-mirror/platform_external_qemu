@@ -553,6 +553,12 @@ void MediaH264DecoderVideoToolBox::copyFrame() {
     CVPixelBufferUnlockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
 }
 
+void MediaH264DecoderVideoToolBox::sendMetadata(void* ptr) {
+    // TODO: implement this, if necessary
+    fprintf(stderr, "%s %d is not implemented\n", __func__, __LINE__);
+    exit(1);
+}
+
 void MediaH264DecoderVideoToolBox::getImage(void* ptr) {
     // return parameters:
     // 1) either size of the image (> 0) or error code (<= 0).

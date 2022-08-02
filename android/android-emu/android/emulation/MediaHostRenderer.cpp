@@ -70,11 +70,14 @@ void MediaHostRenderer::cleanUpTextures() {
     mTexturePool.cleanUpTextures();
 }
 
-// Host byte buffer upload is always I420, so kFrameworkFormatYuv420888 is used.
+// TODO: add metadata ptr default nullptr
+//  Host byte buffer upload is always I420, so kFrameworkFormatYuv420888 is
+//  used.
 void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
                                                 unsigned int outputWidth,
                                                 unsigned int outputHeight,
-                                                uint8_t* decodedFrame) {
+                                                uint8_t* decodedFrame,
+                                                void* metadata) {
     H264_DPRINT("Calling %s at %d buffer id %d", __func__, __LINE__,
                 hostColorBufferId);
     if (hostColorBufferId < 0) {
@@ -83,19 +86,23 @@ void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
     }
     if (mVirtioGpuOps) {
         mVirtioGpuOps->update_color_buffer_from_framework_format(
-            hostColorBufferId, 0, 0, outputWidth, outputHeight,
-            kFrameworkFormatYuv420888, kGL_RGBA, kGlUnsignedByte, decodedFrame); } else {
+                hostColorBufferId, 0, 0, outputWidth, outputHeight,
+                kFrameworkFormatYuv420888, kGL_RGBA, kGlUnsignedByte,
+                decodedFrame, metadata);
+    } else {
         H264_DPRINT("ERROR: there is no virtio Gpu Ops is not setup");
     }
 }
 
-// NV12 implicitly. YOLO, doesn't consider target color buffer's actual format if differs,
-// but we don't expect it to differ (crosses fingers, knocks on wood, famous last words)
+//  NV12 implicitly. YOLO, doesn't consider target color buffer's actual format
+//  if differs, but we don't expect it to differ (crosses fingers, knocks on
+//  wood, famous last words)
 void MediaHostRenderer::renderToHostColorBufferWithTextures(
         int hostColorBufferId,
         unsigned int outputWidth,
         unsigned int outputHeight,
-        TextureFrame frame) {
+        TextureFrame frame,
+        void* metadata) {
     H264_DPRINT("Calling %s at %d buffer id %d", __func__, __LINE__,
                 hostColorBufferId);
     if (hostColorBufferId < 0) {
@@ -113,7 +120,7 @@ void MediaHostRenderer::renderToHostColorBufferWithTextures(
         uint32_t textures[2] = {frame.Ytex, frame.UVtex};
         mVirtioGpuOps->swap_textures_and_update_color_buffer(
                 hostColorBufferId, 0, 0, outputWidth, outputHeight, kGL_RGBA,
-                kGlUnsignedByte, kFRAMEWORK_FORMAT_NV12, textures);
+                kGlUnsignedByte, kFRAMEWORK_FORMAT_NV12, textures, metadata);
         if (textures[0] > 0 && textures[1] > 0) {
             frame.Ytex = textures[0];
             frame.UVtex = textures[1];

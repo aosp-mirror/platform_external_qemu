@@ -55,7 +55,8 @@ public:
     void renderToHostColorBuffer(int hostColorBufferId,
                                  unsigned int outputWidth,
                                  unsigned int outputHeight,
-                                 uint8_t* decodedFrame);
+                                 uint8_t* decodedFrame,
+                                 void* metadata = nullptr);
 
     // render decoded frame stored in GPU texture; recycle the swapped
     // out texture from colorbuffer into framepool
@@ -63,7 +64,8 @@ public:
             int hostColorBufferId,
             unsigned int outputWidth,
             unsigned int outputHeight,
-            MediaTexturePool::TextureFrame frame);
+            MediaTexturePool::TextureFrame frame,
+            void* metadata = nullptr);
 
     MediaHostRenderer();
     ~MediaHostRenderer();

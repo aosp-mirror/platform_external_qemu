@@ -212,9 +212,37 @@ void MediaVpxVideoHelper::fetchAllFrames() {
         std::vector<uint8_t> byteBuffer;
         copyImgToGuest(mImg, byteBuffer);
         MEDIA_DPRINT("save frame");
+
+        //  include/vpx/vpx_image.h
+        unsigned int color_primaries = 2;  // default unspecified
+        if (mImg->cs == VPX_CS_BT_601) {
+            color_primaries = 4;
+        } else if (mImg->cs == VPX_CS_BT_709) {
+            color_primaries = 1;
+        }
+        // Note: the color primary and range from bitstream seems not trustable
+        color_primaries = 2;  // default unspecified
+
+        MEDIA_DPRINT("vpx fetch primary as %d orgcs %d\n", (int)color_primaries,
+                     mImg->cs);
+
+        unsigned int color_range = 0;  // default unspecified
+        if (mImg->range == VPX_CR_FULL_RANGE) {
+            color_range = 1;  // full range
+        } else if (mImg->range == VPX_CR_STUDIO_RANGE) {
+            color_range = 2;  // limited range
+        }
+        color_range = 0;  // default unspecified
+        MEDIA_DPRINT("vpx fetch color range as %d orgrange %d\n",
+                     (int)color_range, mImg->range);
+        const unsigned int color_trc = 3;   // default 3; don't care for now
+        const unsigned int colorspace = 2;  // unspecified, dont care for now
+
         mSavedDecodedFrames.push_back(MediaSnapshotState::FrameInfo{
                 std::move(byteBuffer), std::vector<uint32_t>{}, (int)mImg->d_w,
-                (int)mImg->d_h, (uint64_t)(mImg->user_priv), ColorAspects{}});
+                (int)mImg->d_h, (uint64_t)(mImg->user_priv),
+                ColorAspects{color_primaries, color_range, color_trc,
+                             colorspace}});
     }
 }
 

@@ -33,5 +33,14 @@ enum class MediaOperation : uint8_t {
     GetImage = 3,
     Flush = 4,
     Reset = 5,
-    Max = 6,
+    SendMetadata = 6,
+    Max = 7,
+};
+
+struct MetadataParam {
+    // input
+    uint64_t type;
+    uint64_t primaries;
+    uint64_t range;
+    uint64_t transfer;
 };

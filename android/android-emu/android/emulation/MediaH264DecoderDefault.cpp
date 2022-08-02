@@ -185,6 +185,14 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
             updateDecoder(oldId, mydecoder);
             break;
         }
+        case MediaOperation::SendMetadata: {
+            H264_DPRINT("handle SendMetadata request from guest %p", ptr);
+            MediaH264DecoderPlugin* mydecoder = getDecoder(readId(ptr));
+            if (nullptr == mydecoder)
+                return;
+            mydecoder->sendMetadata(ptr);
+            break;
+        }
         default:
             H264_DPRINT("Unknown command %u\n", (unsigned int)op);
             break;

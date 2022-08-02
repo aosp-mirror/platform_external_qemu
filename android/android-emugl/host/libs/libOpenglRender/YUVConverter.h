@@ -55,14 +55,22 @@ public:
     // the host color buffer
     // (rcUpdateColorBuffer)
     void drawConvert(int x, int y, int width, int height, char* pixels);
-    void drawConvertFromFormat(FrameworkFormat format, int x, int y, int width, int height, char* pixels);
+    void drawConvertFromFormat(FrameworkFormat format,
+                               int x,
+                               int y,
+                               int width,
+                               int height,
+                               char* pixels,
+                               void* metadata = nullptr);
 
     uint32_t getDataSize();
     // read YUV data into pixels, exactly pixels_size bytes;
     // if size mismatches, will read nothing.
     void readPixels(uint8_t* pixels, uint32_t pixels_size);
 
-    void swapTextures(uint32_t type, uint32_t* textures);
+    void swapTextures(uint32_t type,
+                      uint32_t* textures,
+                      void* metadata = nullptr);
 
     // NV12 and YUV420 are all packed
     static void NV12ToYUV420PlanarInPlaceConvert(int nWidth,
@@ -153,4 +161,29 @@ private:
     GLint mCurrTexBind = 0;
     GLint mCurrVbo = 0;
     GLint mCurrIbo = 0;
+
+    // color aspects related information
+    uint64_t mColorPrimaries = 4;  // this is 601, the default
+    uint64_t mColorRange = 2;      // this is limited range, the default
+    uint64_t mColorTransfer = 3;   // this is the default
+
+    bool checkAndUpdateColorAspectsChanged(void* metadata);
+
+    void createYUVGLShader(GLuint* program_out,
+                           GLint* ywidthcutoffloc_out,
+                           GLint* cwidthcutoffloc_out,
+                           GLint* ysamplerloc_out,
+                           GLint* usamplerloc_out,
+                           GLint* vsamplerloc_out,
+                           GLint* incoordloc_out,
+                           GLint* posloc_out);
+
+    void createYUVInterleavedGLShader(GLuint* program_out,
+                                      GLint* ywidthcutoffloc_out,
+                                      GLint* cwidthcutoffloc_out,
+                                      GLint* ysamplerloc_out,
+                                      GLint* vusamplerloc_out,
+                                      GLint* incoordloc_out,
+                                      GLint* posloc_out,
+                                      int interleaveDir);
 };

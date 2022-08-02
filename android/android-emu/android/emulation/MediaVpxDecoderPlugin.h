@@ -36,6 +36,7 @@ public:
     virtual void decodeFrame(void* ptr) = 0;
     virtual void flush(void* ptr) = 0;
     virtual void getImage(void* ptr) = 0;
+    virtual void sendMetadata(void* ptr) = 0;
 
     virtual void save(base::Stream* stream) const {};
     virtual bool load(base::Stream* stream) { return true; };

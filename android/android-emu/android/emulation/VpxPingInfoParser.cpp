@@ -115,5 +115,13 @@ VpxPingInfoParser::VpxPingInfoParser(uint32_t version) {
     mVersion = version;
 }
 
+void VpxPingInfoParser::parseMetadataParams(void* ptr, MetadataParam& param) {
+    uint8_t* xptr = (uint8_t*)ptr;
+    param.type = *(uint64_t*)(xptr + 8);
+    param.primaries = *(uint64_t*)(xptr + 16);
+    param.range = *(uint64_t*)(xptr + 24);
+    param.transfer = *(uint64_t*)(xptr + 32);
+}
+
 }  // namespace emulation
 }  // namespace android

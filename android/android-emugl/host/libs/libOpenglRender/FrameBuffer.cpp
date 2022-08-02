@@ -2029,7 +2029,8 @@ void FrameBuffer::swapTexturesAndUpdateColorBuffer(uint32_t p_colorbuffer,
                                                    uint32_t format,
                                                    uint32_t type,
                                                    uint32_t texture_type,
-                                                   uint32_t* textures) {
+                                                   uint32_t* textures,
+                                                   void* metadata) {
     {
         AutoLock mutex(m_lock);
         ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
@@ -2037,7 +2038,7 @@ void FrameBuffer::swapTexturesAndUpdateColorBuffer(uint32_t p_colorbuffer,
             // bad colorbuffer handle
             return;
         }
-        (*c).second.cb->swapYUVTextures(texture_type, textures);
+        (*c).second.cb->swapYUVTextures(texture_type, textures, metadata);
     }
 
     updateColorBuffer(p_colorbuffer, x, y, width, height, format, type,
@@ -2070,15 +2071,16 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
 }
 
 bool FrameBuffer::updateColorBufferFromFrameworkFormat(
-    HandleType p_colorbuffer,
-    int x,
-    int y,
-    int width,
-    int height,
-    FrameworkFormat fwkFormat,
-    GLenum format,
-    GLenum type,
-    void* pixels) {
+        HandleType p_colorbuffer,
+        int x,
+        int y,
+        int width,
+        int height,
+        FrameworkFormat fwkFormat,
+        GLenum format,
+        GLenum type,
+        void* pixels,
+        void* metadata) {
     if (width == 0 || height == 0) {
         return false;
     }
@@ -2091,7 +2093,8 @@ bool FrameBuffer::updateColorBufferFromFrameworkFormat(
         return false;
     }
 
-    (*c).second.cb->subUpdateFromFrameworkFormat(x, y, width, height, fwkFormat, format, type, pixels);
+    (*c).second.cb->subUpdateFromFrameworkFormat(
+            x, y, width, height, fwkFormat, format, type, pixels, metadata);
 
     return true;
 }
