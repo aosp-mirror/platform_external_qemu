@@ -703,7 +703,7 @@ public:
 
         vk->vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
         pFeatures->textureCompressionETC2 = true;
-        pFeatures->textureCompressionASTC_LDR |= kEmulateAstc;
+        pFeatures->textureCompressionASTC_LDR |= m_emu->enableAstcLdrEmulation;
 
 #ifdef __APPLE__
         // MoltenVK does not support geometryShader, and dEQP expects it to be
@@ -751,7 +751,7 @@ public:
         }
 
         pFeatures->features.textureCompressionETC2 = true;
-        pFeatures->features.textureCompressionASTC_LDR |= kEmulateAstc;
+        pFeatures->features.textureCompressionASTC_LDR |= m_emu->enableAstcLdrEmulation;
 
 #ifdef __APPLE__
         // MoltenVK does not support geometryShader, and dEQP expects it to be
@@ -5159,7 +5159,6 @@ public:
         VkDecoderSnapshot* snapshot() { return &mSnapshot; }
 
 private:
-    static const bool kEmulateAstc = true;
     bool isEmulatedExtension(const char* name) const {
         for (auto emulatedExt : kEmulatedExtensions) {
             if (!strcmp(emulatedExt, name)) return true;
@@ -5881,9 +5880,8 @@ private:
         return !feature.textureCompressionETC2;
     }
 
-    static bool needEmulatedAstc(VkPhysicalDevice physicalDevice,
-                                 goldfish_vk::VulkanDispatch* vk) {
-        if (!kEmulateAstc) {
+    bool needEmulatedAstc(VkPhysicalDevice physicalDevice, goldfish_vk::VulkanDispatch* vk) {
+        if (!m_emu->enableAstcLdrEmulation) {
             return false;
         }
         VkPhysicalDeviceFeatures feature;

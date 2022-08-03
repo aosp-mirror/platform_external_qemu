@@ -19,6 +19,35 @@ if(OPTION_GFXSTREAM_BACKEND)
     set(BUILD_STANDALONE OFF)
     set(ENABLE_VKCEREAL_TESTS ON)
 
+    function(discover_gfxstream_internal_targets result subdir)
+        if(CMAKE_VERSION VERSION_LESS "3.7.0")
+            message(
+                FATAL_ERROR
+                "This function cannot be used by older cmake versions (${CMAKE_VERSION}<3.7.0)"
+            )
+        endif()
+        get_filename_component(abs_subdir ${subdir} ABSOLUTE)
+        set(GFXSTREAM_THIRD_PARTY_ROOT ${GFXSTREAM_REPO_ROOT})
+        cmake_path(APPEND GFXSTREAM_THIRD_PARTY_ROOT "third-party")
+        cmake_path(IS_PREFIX GFXSTREAM_THIRD_PARTY_ROOT ${abs_subdir} NORMALIZE IS_THIRD_PARTY)
+        if(IS_THIRD_PARTY)
+            return()
+        endif()
+        cmake_path(IS_PREFIX GFXSTREAM_REPO_ROOT ${abs_subdir} NORMALIZE IS_GFXSTREAM_SUBDIR)
+        if(NOT IS_GFXSTREAM_SUBDIR)
+            return()
+        endif()
+
+        get_directory_property(subdirs DIRECTORY "${abs_subdir}" SUBDIRECTORIES)
+        foreach(subdir IN LISTS subdirs)
+            discover_gfxstream_internal_targets(${result} "${subdir}")
+        endforeach()
+
+        get_property(targets_in_dir DIRECTORY "${subdir}"
+                     PROPERTY BUILDSYSTEM_TARGETS)
+        set(${result} ${${result}} ${targets_in_dir} PARENT_SCOPE)
+    endfunction()
+
     android_add_library(
         TARGET aemu-vkcereal-base
         LICENSE Apache-2.0
@@ -171,32 +200,15 @@ if(OPTION_GFXSTREAM_BACKEND)
     add_opengl_dependencies(OpenglRender_unittests)
     add_opengl_dependencies(OpenglRender_snapshot_unittests)
 
+    get_directory_property(GFXSTREAM_SUBDIRS SUBDIRECTORIES)
+    foreach(GFXSTREAM_SUBDIR IN LISTS GFXSTREAM_SUBDIRS)
+        discover_gfxstream_internal_targets(GFXSTREAM_INTERNAL_TARGETS ${GFXSTREAM_SUBDIR})
+    endforeach()
     set(GFXSTREAM_DEPENDENCIES
+        ${GFXSTREAM_INTERNAL_TARGETS}
         angle_common
         angle_shader_translator
-        apigen-codec-common
-        EGL_translator_static
-        gfxstream-base
-        gfxstream-base.headers
-        gfxstream-compressedTextures
-        gfxstream-host-common
-        gfxstream-host-common.headers
-        gfxstream-snapshot
-        gfxstream-vulkan-server
-        gfxstream_backend
-        gfxstream_backend_static
-        gles1_dec
-        gles2_dec
-        GLcommon
-        GLSnapshot
-        GLES_CM_translator_static
-        GLES_V2_translator_static
-        logging-base
-        OpenGLESDispatch
-        OpenglRender_vulkan_cereal
-        renderControl_dec
-        renderdoc
-        gfxstream-host-common.product-feature-override)
+        renderdoc)
    android_license(TARGET "${GFXSTREAM_DEPENDENCIES}"
                    LIBNAME gfxstream
                    URL "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master"

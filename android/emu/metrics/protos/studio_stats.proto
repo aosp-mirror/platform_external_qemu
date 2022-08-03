@@ -1510,7 +1510,8 @@ message EmulatorFeatureFlagState {
         VULKAN_NATIVE_SWAPCHAIN = 92;
         VIRTIO_GPU_FENCE_CONTEXTS = 93;
         VSOCK_SNAPSHOT_LOAD_FIXED_B231345789 = 94;
-        // Next tag: 95
+        VULKAN_ASTC_LDR_EMULATION = 95;
+        // Next tag: 96
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

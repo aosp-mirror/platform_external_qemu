@@ -371,6 +371,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             } else {
                 GL_LOG("Doesn't support id properties, no vulkan device UUID");
             }
+            bool enableAstcLdrEmulation = emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanAstcLdrEmulation);
+            goldfish_vk::setEnableAstcLdrEmulation(vkEmu, enableAstcLdrEmulation);
         }
         fb->m_glRenderer = std::string(vkEmu->deviceInfo.physdevProps.deviceName);
     }

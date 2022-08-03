@@ -1375,6 +1375,7 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::VirtioGpuFenceContexts, false);
                 fc::setIfNotOverriden(fc::HostComposition, true);
                 fc::setIfNotOverriden(fc::AsyncComposeSupport, true);
+                fc::setIfNotOverriden(fc::VulkanAstcLdrEmulation, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;

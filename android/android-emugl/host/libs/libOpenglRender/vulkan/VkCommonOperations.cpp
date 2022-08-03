@@ -1031,6 +1031,15 @@ void setUseCreateResourcesWithRequirements(VkEmulation* emu, bool useCreateResou
     emu->useCreateResourcesWithRequirements = useCreateResourcesWithRequirements;
 }
 
+
+void setEnableAstcLdrEmulation(VkEmulation* emu, bool enableAstcLdrEmulation) {
+    if (!emu) return;
+    if (!emu->live) return;
+
+    LOG(VERBOSE) << "Enable ASTC LDR emulation: " << enableAstcLdrEmulation;
+    emu->enableAstcLdrEmulation = enableAstcLdrEmulation;
+}
+
 VkEmulation* getGlobalVkEmulation() {
     if (sVkEmulation && !sVkEmulation->live) return nullptr;
     return sVkEmulation;

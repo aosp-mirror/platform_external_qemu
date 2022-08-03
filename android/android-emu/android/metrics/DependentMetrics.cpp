@@ -493,6 +493,8 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
         case android::featurecontrol::VsockSnapshotLoadFixed_b231345789:
             return android_studio::EmulatorFeatureFlagState::
                     VSOCK_SNAPSHOT_LOAD_FIXED_B231345789;
+        case android::featurecontrol::VulkanAstcLdrEmulation:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_ASTC_LDR_EMULATION;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
