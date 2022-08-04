@@ -525,7 +525,8 @@ static void virtio_snd_stream_init(const unsigned stream_id,
     stream->id = stream_id;
     stream->snd = snd;
     stream->voice.raw = NULL;
-    stream->aud_format = VIRTIO_SND_FORMAT16_BAD;
+    virtio_snd_voice_reopen(snd, stream, g_stream_name[stream_id],
+                            g_stream_default_format);
     ring_buffer_init(&stream->pcm_buf);
     qemu_mutex_init(&stream->mtx);
     stream->state = VIRTIO_PCM_STREAM_STATE_DISABLED;
