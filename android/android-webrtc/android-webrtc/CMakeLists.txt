@@ -29,6 +29,7 @@ android_add_library(
       emulator/webrtc/Switchboard.cpp)
 
 target_include_directories(android-webrtc PUBLIC . ${CMAKE_CURRENT_BINARY_DIR})
+target_compile_options(android-webrtc PUBLIC -Wno-deprecated-non-prototype)
 target_compile_definitions(android-webrtc PUBLIC -DANDROID_WEBRTC)
 target_compile_options(android-webrtc PUBLIC -Wno-inconsistent-missing-override)
 target_link_libraries(android-webrtc PUBLIC nlohmann_json::nlohmann_json

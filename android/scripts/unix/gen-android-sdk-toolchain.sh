@@ -595,9 +595,9 @@ prepare_build_for_linux_x86_64() {
     var_append GCC_LINK_FLAGS "-L$PREBUILT_TOOLCHAIN_DIR/lib/gcc/x86_64-linux/4.8.3/"
     var_append GCC_LINK_FLAGS "-L$PREBUILT_TOOLCHAIN_DIR/x86_64-linux/lib64/"
     var_append GCC_LINK_FLAGS "-fuse-ld=lld"
-    var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/clang/${CLANG_VERSION}/lib/linux/"
-    var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/clang/${CLANG_VERSION}/include"
-    var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/"
+    var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib/clang/${CLANG_VERSION}/lib/linux/"
+    var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib/clang/${CLANG_VERSION}/include"
+    var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib/"
     var_append GCC_LINK_FLAGS "--sysroot=${SYSROOT}"
 
     if [ $(get_verbosity) -gt 3 ]; then
@@ -623,8 +623,8 @@ prepare_build_for_linux_x86_64() {
 
     # Make sure we can find libc++
     EXTRA_LDFLAGS="-m64"
-    var_append EXTRA_LDFLAGS "-L${CLANG_BINDIR}/../lib64/clang/${CLANG_VERSION}/lib/linux/"
-    var_append EXTRA_LDFLAGS "-L${CLANG_BINDIR}/../lib64/"
+    var_append EXTRA_LDFLAGS "-L${CLANG_BINDIR}/../lib/clang/${CLANG_VERSION}/lib/linux/"
+    var_append EXTRA_LDFLAGS "-L${CLANG_BINDIR}/../lib/"
     # Make sure we don't accidently pick up libstdc++
     var_append EXTRA_LDFLAGS "-nodefaultlibs"
 
@@ -893,7 +893,7 @@ prepare_build_for_windows_msvc() {
     log "Using visual studio version: ${VC_VER}"
 
     run mkdir -p $MSVC_DIR/clang-intrins/${CLANG_VERSION}/include
-    run rsync -r ${CLANG_DIR}/lib64/clang/${CLANG_VERSION}/include  $MSVC_DIR/clang-intrins/${CLANG_VERSION}
+    run rsync -r ${CLANG_DIR}/lib/clang/${CLANG_VERSION}/include  $MSVC_DIR/clang-intrins/${CLANG_VERSION}
 
     local CLANG_LINK_FLAGS=
     var_append CLANG_LINK_FLAGS "-fuse-ld=lld"
@@ -1032,7 +1032,7 @@ print_info () {
             if [ "$BUILD_HOST" = "linux" -a "$BUILD_ARCH" = "aarch64" ]; then
                 printf "%s\n" "/usr/aarch64-linux-gnu/lib/libstdc++.so.6"
             else
-                printf "%s\n" "$CLANG_DIR/lib64/libc++.so"
+                printf "%s\n" "$CLANG_DIR/lib/libc++.so"
             fi
             ;;
         libasan-dir)
