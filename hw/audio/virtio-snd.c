@@ -31,7 +31,6 @@
 #define VIRTIO_SND_QUEUE_RX     3
 
 #define VIRTIO_SND_PCM_FORMAT                       S16
-#define VIRTIO_SND_PCM_DEFAULT_FREQ                 48000
 #define VIRTIO_SND_PCM_NUM_MIN_CHANNELS             1
 #define VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS         2
 #define VIRTIO_SND_PCM_MIC_NUM_MAX_CHANNELS         2
@@ -159,11 +158,6 @@ static const struct virtio_snd_jack_info jack_infos[VIRTIO_SND_NUM_JACKS] = {
 };
 
 #undef HDA_REG_DEFCONF
-
-const uint16_t g_stream_default_format =
-    VIRTIO_SND_PACK_FORMAT16(VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS,
-                           GLUE2(VIRTIO_SND_PCM_FMT_, VIRTIO_SND_PCM_FORMAT),
-                           GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_DEFAULT_FREQ));
 
 const static struct virtio_snd_pcm_info g_pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] = {
     {
@@ -425,6 +419,10 @@ static bool virtio_snd_voice_reopen(VirtIOSound *snd,
                                     VirtIOSoundPCMStream *stream,
                                     const char *stream_name,
                                     const uint16_t format16) {
+    if (format16 == VIRTIO_SND_FORMAT16_BAD) {
+        return FAILURE(false);
+    }
+
     struct audsettings as = virtio_snd_unpack_format(format16);
 
     if (is_output_stream(stream)) {
@@ -507,16 +505,6 @@ static bool virtio_snd_voice_reopen(VirtIOSound *snd,
     return FAILURE(false);
 }
 
-static void virtio_snd_voice_close(VirtIOSound *snd, VirtIOSoundPCMStream *stream) {
-    if (stream->voice.raw) {
-        if (is_output_stream(stream)) {
-            AUD_close_out(&snd->card, stream->voice.out);
-        } else {
-            AUD_close_in(&snd->card, stream->voice.in);
-        }
-    }
-}
-
 static void virtio_snd_stream_init(const unsigned stream_id,
                                    VirtIOSoundPCMStream *stream,
                                    VirtIOSound *snd) {
@@ -525,8 +513,7 @@ static void virtio_snd_stream_init(const unsigned stream_id,
     stream->id = stream_id;
     stream->snd = snd;
     stream->voice.raw = NULL;
-    virtio_snd_voice_reopen(snd, stream, g_stream_name[stream_id],
-                            g_stream_default_format);
+    stream->aud_format = VIRTIO_SND_FORMAT16_BAD;
     ring_buffer_init(&stream->pcm_buf);
     qemu_mutex_init(&stream->mtx);
     stream->state = VIRTIO_PCM_STREAM_STATE_DISABLED;
@@ -651,6 +638,17 @@ static void virtio_snd_stream_disable(VirtIOSoundPCMStream *stream) {
 
     case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
     case VIRTIO_PCM_STREAM_STATE_ENABLED:
+        if (stream->voice.raw) {
+            if (is_output_stream(stream)) {
+                AUD_close_out(&stream->snd->card, stream->voice.out);
+            } else {
+                AUD_close_in(&stream->snd->card, stream->voice.in);
+            }
+
+            stream->voice.raw = NULL;
+            stream->aud_format = VIRTIO_SND_FORMAT16_BAD;
+        }
+
         stream->state = VIRTIO_PCM_STREAM_STATE_DISABLED;
         /* fallthrough */
 
@@ -1779,10 +1777,7 @@ static void virtio_snd_device_unrealize(DeviceState *dev, Error **errp) {
     audio_forwarder_register_card(NULL, NULL);
 
     for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
-        VirtIOSoundPCMStream *stream = &snd->streams[i];
-
-        virtio_snd_stream_disable(stream);
-        virtio_snd_voice_close(snd, stream);
+        virtio_snd_stream_disable(&snd->streams[i]);
     }
 
     virtio_del_queue(vdev, VIRTIO_SND_QUEUE_RX);
