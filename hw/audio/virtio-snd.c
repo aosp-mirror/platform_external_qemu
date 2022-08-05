@@ -1517,6 +1517,7 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
         if (!virtio_snd_voice_reopen(snd, stream, g_stream_name[stream_id],
                                      stream->guest_format)) {
             r = FAILURE(VIRTIO_SND_S_BAD_MSG);
+            ring_buffer_free(&stream->pcm_buf);
             goto done;
         }
 
