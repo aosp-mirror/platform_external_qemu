@@ -740,11 +740,9 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
 
     qemu_mutex_lock(&stream->mtx);
     switch (stream->state) {
-    case VIRTIO_PCM_STREAM_STATE_RUNNING:
     case VIRTIO_PCM_STREAM_STATE_PREPARED:
-    case VIRTIO_PCM_STREAM_STATE_DISABLED:
-        qemu_mutex_unlock(&stream->mtx);
-        return FAILURE(VIRTIO_SND_S_BAD_MSG);
+        virtio_snd_stream_unprepare_locked(stream);
+        /* fallthrough */
 
     case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
     case VIRTIO_PCM_STREAM_STATE_ENABLED:
@@ -754,6 +752,11 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
         stream->state = VIRTIO_PCM_STREAM_STATE_PARAMS_SET;
         qemu_mutex_unlock(&stream->mtx);
         return VIRTIO_SND_S_OK;
+
+    case VIRTIO_PCM_STREAM_STATE_RUNNING:
+    case VIRTIO_PCM_STREAM_STATE_DISABLED:
+        qemu_mutex_unlock(&stream->mtx);
+        return FAILURE(VIRTIO_SND_S_BAD_MSG);
 
     default:
         ABORT("stream->state");
