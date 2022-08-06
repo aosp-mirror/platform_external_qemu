@@ -55,6 +55,8 @@ extern "C" {
 struct SwsContext;
 }
 
+#include "android/recording/ffmpegdefs.h"
+
 #include <memory>                           // for unique_ptr
 
 static constexpr int SCALE_FLAGS = SWS_BICUBIC;
@@ -190,7 +192,6 @@ bool GifConverterImpl::initOutputContext(android::base::StringView outFilename,
     }
 
     AVCodecContext* enc_ctx = mOutputStream->codec;
-
     if ((encoder->capabilities & CODEC_CAP_EXPERIMENTAL) != 0) {
         enc_ctx->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
     }

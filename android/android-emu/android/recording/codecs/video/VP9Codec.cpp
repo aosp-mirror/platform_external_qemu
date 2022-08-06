@@ -25,6 +25,8 @@ extern "C" {
 struct SwsContext;
 }
 
+#include "android/recording/ffmpegdefs.h"
+
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 #define SCALE_FLAGS SWS_BICUBIC
 

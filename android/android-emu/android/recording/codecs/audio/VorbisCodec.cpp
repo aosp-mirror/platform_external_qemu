@@ -22,6 +22,8 @@ extern "C" {
 #include <libswresample/swresample.h>  // for swr_init, SwrContext
 }
 
+#include "android/recording/ffmpegdefs.h"
+
 #include "android/base/Log.h"          // for LOG, LogMessage, LogStream
 
 namespace android {
