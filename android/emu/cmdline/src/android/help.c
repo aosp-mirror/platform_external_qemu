@@ -2134,14 +2134,44 @@ help_wifi_tap_script_down(stralloc_t*  out)
     );
 }
 
+#ifdef __APPLE__
 static void
-help_vmnet(stralloc_t*  out)
-{
-    PRINTF(" Enable vmnet framework as the backend for tap network on MacOS\n"
-           " <interface> is the name of the host network interface that QEMU "
-           "virtual NIC is connected to. \n\n");
+help_vmnet_bridged(stralloc_t*  out) {
+     PRINTF(" Enable vmnet framework in bridged mode as the backend of tap netdev on MacOS and provide a host network interface as argument.\n\n");
 }
 
+static void
+help_vmnet_shared(stralloc_t*  out) {
+     PRINTF(" Enable vmnet framework in shared mode as the backend for tap network on MacOS\n\n");
+}
+
+static void
+help_vmnet_start_address(stralloc_t*, out)
+{
+    PRINTF("  If using vmnet in shared mode, starting IPv4 address to assing using DHCP.\n"
+           "  Must be in RFC 1918 private IP range and specified together with vmnet_end_address and vmnet_subnet_mask.\n\n");
+}
+
+static void
+help_vmnet_end_address(stralloc_t*, out)
+{
+    PRINTF("  If using vmnet in shared mode, ending IPv4 address to assing using DHCP.\n"
+           "  Must be in RFC 1918 private IP range and specified together with vmnet_start_address and vmnet_subnet_mask.\n\n");
+}
+
+static void
+help_vmnet_subnet_mask(stralloc_t*, out)
+{
+    PRINTF("  If using vmnet in shared mode, IPv4 netmask to assing using DHCP.\n"
+           "  Must be in RFC 1918 private IP range and specified together with vmnet_start_address and vmnet_end_address.\n\n");
+}
+
+static void
+help_vmnet_isolated(stralloc_t*, out)
+{
+    PRINTF(  "Enable isolation for the interface. Ensures that vmnet interface is not able to communicate with any other vmnet interface.\n\n");
+}
+#endif
 static void help_wifi_user_mode_options(stralloc_t* out) {
     PRINTF("Override default user mode networking option for wifi network in \n"
            "Android Emulator for API 31 and above. It has no effect on wifi "
@@ -2209,7 +2239,6 @@ static void help_hotplug_multi_display(stralloc_t* out) {
 #define help_perf_stat NULL
 #define help_append_userspace_opt NULL
 #define help_no_nested_warnings NULL
-#define help_wifi_vmnet NULL
 #define help_dump_audio NULL
 
 typedef struct {

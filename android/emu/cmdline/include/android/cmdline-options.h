@@ -304,16 +304,29 @@ OPT_FLAG(no_nested_warnings,
 OPT_PARAM( wifi_tap, "<interface>", "use this TAP interface for Virtio Wi-Fi" )
 OPT_PARAM( wifi_tap_script_up, "<script>", "script to run when the TAP interface goes up" )
 OPT_PARAM( wifi_tap_script_down, "<script>", "script to run when the TAP interface goes down" )
+#ifdef __APPLE__
+OPT_PARAM( vmnet_bridged,
+           "<host network interface>",
+           "Enable vmnet framework in bridged mode as the backend of tap netdev on MacOS and provide a host network interface as argument.")
 
-OPT_PARAM(wifi_vmnet,
-          "<interface>",
-          " This option is alias to vmnet, it is used for backward compatibility.")
+OPT_FLAG(vmnet_shared,
+           "Enable vmnet framework in shared mode as the backend of tap netdev on MacOS.")
 
-OPT_PARAM(vmnet,
-          "<interface>",
-          " Use this network <interface> and enable vmnet framework as the "
-          "backend of tap netdev on MacOS.")
+OPT_PARAM(vmnet_start_address,
+          "<ipv4 address>",
+          "If using vmnet in shared mode, starting IPv4 address to assing using DHCP. Must be in RFC 1918 private IP range and specified together with vmnet_end_address and vmnet_subnet_mask.")
 
+OPT_PARAM(vmnet_end_address,
+          "<ipv4 address>",
+          "If using vmnet in shared mode, ending IPv4 address to assing using DHCP. Must be in RFC 1918 private IP range and specified together with vmnet_start_address and vmnet_subnet_mask.")
+
+OPT_PARAM(vmnet_subnet_mask,
+          "<ipv4 address>",
+          "If using vmnet in shared mode, IPv4 netmask to assing using DHCP. Must be in RFC 1918 private IP range and specified together with vmnet_start_address and vmnet_end_address.")
+
+OPT_FLAG(vmnet_isolated,
+          "Enable isolation for the interface. Ensures that vmnet interface is not able to communicate with any other vmnet interface.")
+#endif
 OPT_PARAM(wifi_user_mode_options,
           "<option list>",
           "Override default user mode networking option for wifi network in "
