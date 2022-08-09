@@ -83,6 +83,9 @@ TEST_F(RamSaverTest, Simple) {
 
 // Save 1 nonzero page with compression.
 TEST_F(RamSaverTest, SimpleNonzero) {
+#if defined(__aarch64__) && defined (__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
     std::string ramSaverTestPath = mTempDir->makeSubPath("ram.bin");
 
     const int numPages = 1;
