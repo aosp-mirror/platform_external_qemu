@@ -188,7 +188,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     # Fake Android guest#########################3##################################
 
-    if (NOT WIN32)
+    if (LINUX)
         add_subdirectory(${GFXSTREAM_REPO_ROOT}/fake-android-guest ${GFXSTREAM_PREFIX}-fake-android-guest)
     endif()
 
