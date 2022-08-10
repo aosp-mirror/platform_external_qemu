@@ -76,8 +76,14 @@ bool canUseCudaDecoder() {
 #endif
 }
 
-bool canDecodeToGpuTexture() {
+bool canDecodeToGpuTexture(int w, int h) {
     if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
+        int64_t ww = w;
+        int64_t hh = h;
+        constexpr int ONE_MILLION_PIXELS = 1000 * 1000;
+        if (ww * hh <= ONE_MILLION_PIXELS) {
+            return false;
+        }
         return true;
     } else {
         return false;
@@ -90,7 +96,6 @@ MediaHevcDecoderGeneric::MediaHevcDecoderGeneric(uint64_t id,
     : mId(id), mParser(parser) {
     HEVC_DPRINT("allocated MediaHevcDecoderGeneric %p with version %d", this,
                 (int)mParser.version());
-    mUseGpuTexture = canDecodeToGpuTexture();
 }
 
 MediaHevcDecoderGeneric::~MediaHevcDecoderGeneric() {
@@ -125,6 +130,8 @@ void MediaHevcDecoderGeneric::initHevcContextInternal(unsigned int width,
     mOutputWidth = outWidth;
     mOutputHeight = outHeight;
     mOutPixFmt = outPixFmt;
+
+    mUseGpuTexture = canDecodeToGpuTexture(width, height);
 
 #ifdef __APPLE__
     // enable vtb by default, unless it is explicitly disallowed (for test

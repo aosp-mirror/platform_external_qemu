@@ -74,8 +74,14 @@ bool canUseCudaDecoder() {
 #endif
 }
 
-bool canDecodeToGpuTexture() {
+bool canDecodeToGpuTexture(int w, int h) {
     if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
+        int64_t ww = w;
+        int64_t hh = h;
+        constexpr int ONE_MILLION_PIXELS = 1000 * 1000;
+        if (ww * hh <= ONE_MILLION_PIXELS) {
+            return false;
+        }
         return true;
     } else {
         return false;
@@ -88,7 +94,6 @@ MediaH264DecoderGeneric::MediaH264DecoderGeneric(uint64_t id,
     : mId(id), mParser(parser) {
     H264_DPRINT("allocated MediaH264DecoderGeneric %p with version %d", this,
                 (int)mParser.version());
-    mUseGpuTexture = canDecodeToGpuTexture();
 }
 
 MediaH264DecoderGeneric::~MediaH264DecoderGeneric() {
@@ -123,6 +128,8 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
     mOutputWidth = outWidth;
     mOutputHeight = outHeight;
     mOutPixFmt = outPixFmt;
+
+    mUseGpuTexture = canDecodeToGpuTexture(width, height);
 
 #ifndef __APPLE__
     if (canUseCudaDecoder() && mParser.version() >= 200) {
