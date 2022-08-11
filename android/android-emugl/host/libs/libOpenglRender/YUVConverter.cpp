@@ -222,7 +222,7 @@ bool YUVConverter::checkAndUpdateColorAspectsChanged(void* metadata) {
     bool needToUpdateConversionShader = false;
     // TODO: re-enable this check
     // Intentionally disable this for now
-    if (metadata) {
+    if (metadata && false) {
         uint64_t type = *(uint64_t*)(metadata);
         uint8_t* pmetadata = (uint8_t*)(metadata);
         if (type == 1) {
@@ -293,7 +293,7 @@ void main(void) {
     cutoffCoordsC.x = outCoord.x * cWidthCutoff;
     cutoffCoordsC.y = outCoord.y;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = (texture2D(usampler, cutoffCoordsC).r - 0.5);
+    yuv[1] = 0.96*(texture2D(usampler, cutoffCoordsC).r - 0.5);
     yuv[2] = texture2D(vsampler, cutoffCoordsC).r - 0.5;
     highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
@@ -353,7 +353,7 @@ void main(void) {
     cutoffCoordsC.y = outCoord.y;
     highp float xscale = 219.0/ 224.0;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = xscale* (texture2D(usampler, cutoffCoordsC).r - 0.5);
+    yuv[1] = 0.96*xscale* (texture2D(usampler, cutoffCoordsC).r - 0.5);
     yuv[2] = xscale* (texture2D(vsampler, cutoffCoordsC).r - 0.5);
     highp float yscale = 255.0/224.0;
     rgb = mat3(yscale,                           yscale,            yscale,
@@ -393,12 +393,16 @@ void main(void) {
 }
     )";
 
-    const char* yuvFShader = kFShader;  // default
+    const char* yuvFShader = kFShader_2_4_3;  // default
     if (mColorRange == 1 && mColorPrimaries == 4) {
         yuvFShader = kFShader_1_4_3;
     } else if (mColorRange == 2 && mColorPrimaries == 1) {
         yuvFShader = kFShader_2_1_3;
     }
+
+    // TODO: remove the following once all media cts
+    // are passing
+    yuvFShader = kFShader;  // default
 
     const GLchar* const kFShaders = static_cast<const GLchar*>(yuvFShader);
 
@@ -483,8 +487,8 @@ void main(void) {
     cutoffCoordsC.x = outCoord.x * cWidthCutoff;
     cutoffCoordsC.y = outCoord.y;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = (texture2D(vusampler, cutoffCoordsC).a - 0.5);
-    yuv[2] = (texture2D(vusampler, cutoffCoordsC).r - 0.5);
+    yuv[1] = 0.96 * (texture2D(vusampler, cutoffCoordsC).a - 0.5);
+    yuv[2] = texture2D(vusampler, cutoffCoordsC).r - 0.5;
     highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
                0,                  -0.39176229009491365, 2.017232142857143,
@@ -510,7 +514,7 @@ void main(void) {
     cutoffCoordsC.x = outCoord.x * cWidthCutoff;
     cutoffCoordsC.y = outCoord.y;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = (texture2D(uvsampler, cutoffCoordsC).r - 0.5);
+    yuv[1] = 0.96 * (texture2D(uvsampler, cutoffCoordsC).r - 0.5);
     yuv[2] = (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
     highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
@@ -607,12 +611,16 @@ void main(void) {
 }
     )";
 
-    const char* yuvFShader = kFShaderUv;  // default
+    const char* yuvFShader = kFShaderUv_2_4_3;  // default
     if (mColorRange == 1 && mColorPrimaries == 4) {
         yuvFShader = kFShaderUv_1_4_3;
     } else if (mColorRange == 2 && mColorPrimaries == 1) {
         yuvFShader = kFShaderUv_2_1_3;
     }
+
+    // TODO: remove the following once all the cts
+    // media tests are passing
+    yuvFShader = kFShaderUv;  // default
 
     const GLchar* const kFShaders =
             interleaveDir == YUVInterleaveDirectionVU ? kFShaderVu : yuvFShader;
