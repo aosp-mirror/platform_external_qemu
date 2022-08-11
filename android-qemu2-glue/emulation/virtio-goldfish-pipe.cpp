@@ -1826,7 +1826,7 @@ private:
         for (uint32_t i = 0; i < pipeResEntry.numIovs; ++i) {
             pipeResEntry.addrs[i] = qemu_get_be64(file);
             pipeResEntry.iov[i].iov_len = qemu_get_be64(file);
-            size_t len = (hwaddr)pipeResEntry.iov[i].iov_len;
+            hwaddr len = (hwaddr)pipeResEntry.iov[i].iov_len;
             pipeResEntry.iov[i].iov_base =
                 cpu_physical_memory_map(pipeResEntry.addrs[i], &len, 1);
         }
