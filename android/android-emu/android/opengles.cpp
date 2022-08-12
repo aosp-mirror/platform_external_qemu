@@ -46,6 +46,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <optional>
 #define D(...) do { \
     VERBOSE_PRINT(init,__VA_ARGS__); \
     android_opengl_logger_write(__VA_ARGS__); \
@@ -303,10 +304,12 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     ConsumerInterface interface = {
         // create
         [](struct asg_context context,
-           android::base::Stream* loadStream,
-           ConsumerCallbacks callbacks) {
+           android::base::Stream* loadStream, ConsumerCallbacks callbacks,
+           uint32_t virtioGpuContextId, uint32_t virtioGpuCapsetId,
+           std::optional<std::string> nameOpt) {
            return sRenderer->addressSpaceGraphicsConsumerCreate(
-               context, loadStream, callbacks);
+               context, loadStream, callbacks, virtioGpuContextId, virtioGpuCapsetId,
+               std::move(nameOpt));
         },
         // destroy
         [](void* consumer) {

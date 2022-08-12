@@ -27,8 +27,8 @@
 namespace android {
 namespace base {
 
-Thread::Thread(ThreadFlags flags, int stackSize)
-    : mThread((pthread_t)NULL), mStackSize(stackSize), mFlags(flags) {}
+Thread::Thread(ThreadFlags flags, int stackSize, std::optional<std::string> nameOpt)
+    : mThread((pthread_t)NULL), mStackSize(stackSize), mFlags(flags), mNameOpt(std::move(nameOpt)) {}
 
 Thread::~Thread() {
     assert(!mStarted || mFinished);
@@ -66,6 +66,10 @@ bool Thread::start() {
         mExitStatus = -errno;
         // Nothing to join, so technically it's joined.
         mJoined = true;
+    }
+
+    if (mNameOpt.has_value()) {
+        pthread_setname_np(mThread, (*mNameOpt).c_str());
     }
 
     if (useAttributes) {

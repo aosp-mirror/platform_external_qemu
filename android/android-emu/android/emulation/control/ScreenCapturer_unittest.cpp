@@ -150,7 +150,9 @@ public:
     void* addressSpaceGraphicsConsumerCreate(
         struct asg_context,
         android::base::Stream* loadStream,
-        android::emulation::asg::ConsumerCallbacks) {
+        android::emulation::asg::ConsumerCallbacks,
+        uint32_t virtioGpuContextId, uint32_t virtioGpuCapsetId,
+        std::optional<std::string> nameOpt) {
         return nullptr;
     }
 
