@@ -371,6 +371,9 @@ void MediaH264DecoderGeneric::getImage(void* ptr) {
                     (int)(mMetadata.primaries), (int)(mMetadata.transfer));
     }
 
+    H264_DPRINT("3 %s %d my final range %d primaries %d transfer %d\n",
+                __func__, __LINE__, (int)(mMetadata.range),
+                (int)(mMetadata.primaries), (int)(mMetadata.transfer));
     bool needToCopyToGuest = true;
     if (mParser.version() == 200) {
         if (mUseGpuTexture && pFrame->texture[0] > 0 &&
@@ -420,6 +423,23 @@ void MediaH264DecoderGeneric::sendMetadata(void* ptr) {
     H264_DPRINT("%s %d sendMetadata %p\n", __func__, __LINE__, ptr);
     MetadataParam param{};
     mParser.parseMetadataParams(ptr, param);
+
+    bool isValid = false;
+    if (param.range == 2 && param.primaries == 4 && param.transfer == 3) {
+        isValid = true;
+    } else if (param.range == 1 && param.primaries == 4 &&
+               param.transfer == 3) {
+        isValid = true;
+    } else if (param.range == 2 && param.primaries == 1 &&
+               param.transfer == 3) {
+        isValid = true;
+    }
+
+    if (!isValid) {
+        H264_DPRINT("%s %d invalid values in sendMetadata %p, ignore.\n",
+                    __func__, __LINE__, ptr);
+        return;
+    }
 
     std::swap(mMetadata, param);
     H264_DPRINT("%s %d range %d primaries %d transfer %d\n", __func__, __LINE__,
