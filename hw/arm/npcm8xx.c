@@ -420,7 +420,7 @@ static void npcm8xx_init(Object *obj)
                             TYPE_CPU_CLUSTER);
     for (i = 0; i < NPCM8XX_MAX_NUM_CPUS; i++) {
         object_initialize_child(OBJECT(&s->cpu_cluster), "cpu[*]", &s->cpu[i],
-                                ARM_CPU_TYPE_NAME("cortex-a53"));
+                                ARM_CPU_TYPE_NAME("cortex-a35"));
     }
     object_initialize_child(obj, "gic", &s->gic, TYPE_ARM_GIC);
     object_initialize_child(obj, "gcr", &s->gcr, TYPE_NPCM8XX_GCR);
