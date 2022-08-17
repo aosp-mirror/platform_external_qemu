@@ -1177,11 +1177,11 @@ static int calc_stream_adjustment_bytes(const uint64_t elapsed_nf,
     return (consumed_nf < elapsed_nf) ? (driver_frame_size * (elapsed_nf - consumed_nf)) : 0;
 }
 
-static int calc_drop_bytes_out(VirtIOSoundPCMStream *stream) {
+static int calc_drop_bytes_out(VirtIOSoundPCMStream *stream, const int n_periods) {
     const uint64_t elapsed_usec = AUD_get_elapsed_usec_out(stream->voice.out, &stream->start_timestamp);
     const uint64_t elapsed_nf = elapsed_usec * (uint64_t)stream->freq_hz / 1000000ul;
     // We have to feed the soundcard ahead of the real time.
-    const uint64_t to_be_consumed_nf = elapsed_nf + stream->period_frames;
+    const uint64_t to_be_consumed_nf = elapsed_nf + stream->period_frames * n_periods;
     const uint64_t consumed_nf = stream->frames_sent + stream->frames_skipped;
 
     return calc_stream_adjustment_bytes(to_be_consumed_nf, consumed_nf,
@@ -1267,7 +1267,7 @@ static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) 
     }
 
 aud_write_full:
-    drop_bytes = calc_drop_bytes_out(stream);
+    drop_bytes = calc_drop_bytes_out(stream, 4);
     while (drop_bytes >= driver_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
