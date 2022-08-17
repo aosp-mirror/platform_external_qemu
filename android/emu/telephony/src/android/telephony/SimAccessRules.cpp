@@ -15,12 +15,11 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/cmdline-option.h"
+#include "android/console.h"
 #include "android/telephony/SimAccessRules.h"
 #include "android/telephony/TagLengthValue.h"
 #include "android/utils/debug.h"
 #include "sim_access_rules.pb.h"
-#include "android/avd/hw-config.h"
-#include "android/console.h"
 
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/text_format.h"

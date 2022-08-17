@@ -174,18 +174,6 @@ set(android-emu-common
     android/snapshot/SnapshotUtils.cpp
     android/snapshot/TextureLoader.cpp
     android/snapshot/TextureSaver.cpp
-    android/telephony/debug.c
-    android/telephony/gsm.c
-    android/telephony/MeterService.cpp
-    android/telephony/modem.c
-    android/telephony/modem_driver.c
-    android/telephony/phone_number.cpp
-    android/telephony/remote_call.c
-    android/telephony/sim_card.c
-    android/telephony/SimAccessRules.cpp
-    android/telephony/sms.c
-    android/telephony/sysdeps.c
-    android/telephony/TagLengthValue.cpp
     android/update-check/UpdateChecker.cpp
     android/update-check/VersionExtractor.cpp
     android/verified-boot/load_config.cpp
@@ -298,6 +286,7 @@ target_link_libraries(
          android-emu-adb-interface
          android-emu-hardware
          android-emu-crashreport
+         android-emu-telephony
          emulator-libsparse
          emulator-libselinux
          emulator-libjpeg
@@ -701,11 +690,6 @@ if(NOT LINUX_AARCH64)
       android/snapshot/RamSaver_unittest.cpp
       android/snapshot/RamSnapshot_unittest.cpp
       android/snapshot/Snapshot_unittest.cpp
-      android/telephony/gsm_unittest.cpp
-      android/telephony/modem_unittest.cpp
-      android/telephony/SimAccessRules_unittest.cpp
-      android/telephony/sms_unittest.cpp
-      android/telephony/TagLengthValue_unittest.cpp
       android/update-check/UpdateChecker_unittest.cpp
       android/update-check/VersionExtractor_unittest.cpp
       android/userspace-boot-properties_unittest.cpp
