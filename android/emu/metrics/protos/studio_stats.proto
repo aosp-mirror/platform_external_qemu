@@ -1512,7 +1512,9 @@ message EmulatorFeatureFlagState {
         VSOCK_SNAPSHOT_LOAD_FIXED_B231345789 = 94;
         VULKAN_ASTC_LDR_EMULATION = 95;
         VULKAN_YCBCR_EMULATION = 96;
-        // Next tag: 97
+        VULKAN_ETC2_EMULATION = 97;
+        EXTERNAL_BLOB = 98;
+        // Next tag: 99
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
