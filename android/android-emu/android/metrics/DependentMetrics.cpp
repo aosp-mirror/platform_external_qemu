@@ -497,6 +497,10 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::VULKAN_ASTC_LDR_EMULATION;
         case android::featurecontrol::VulkanYcbcrEmulation:
             return android_studio::EmulatorFeatureFlagState::VULKAN_YCBCR_EMULATION;
+        case android::featurecontrol::VulkanEtc2Emulation:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_ETC2_EMULATION;
+        case android::featurecontrol::ExternalBlob:
+            return android_studio::EmulatorFeatureFlagState::EXTERNAL_BLOB;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
