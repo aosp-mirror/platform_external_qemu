@@ -96,6 +96,7 @@ target_link_libraries(
           GLIB2::GLIB2
           PIXMAN::PIXMAN
           emulator-libdtb
+          android-emu-gps
           ssl
           hostapd
           flatbuffers)
