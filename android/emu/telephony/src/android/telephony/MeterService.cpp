@@ -15,11 +15,11 @@
 #include "android/avd/util.h"
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/adb/AdbInterface.h"
-#include "android/avd/hw-config.h"
 #include "android/console.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"
+#include "android/avd/hw-config.h"
 
 #include <libxml/parser.h>
 
