@@ -111,10 +111,6 @@ set(android-emu-common
     android/emulation/VpxPingInfoParser.cpp
     android/error-messages.cpp
     android/framebuffer.c
-    android/gps.c
-    android/gps/GpxParser.cpp
-    android/gps/KmlParser.cpp
-    android/gps/PassiveGpsUpdater.cpp
     android/gpu_frame.cpp
     android/jdwp/JdwpProxy.cpp
     android/jpeg-compress.c
@@ -294,6 +290,7 @@ target_link_libraries(
          android-emu-base
          android-emu-studio-config
          android-emu-telnet-console-auth
+         android-emu-gps
          android-emu-sockets
          android-emu-adb-interface
          android-emu-hardware
@@ -450,7 +447,6 @@ android_add_library(
       android/emulation/SetupParameters.cpp
       android/error-messages.cpp
       android/framebuffer.c
-      android/gps.c
       android/gpu_frame.cpp
       android/kernel/kernel_utils.cpp
       android/loadpng.c
@@ -677,8 +673,6 @@ if(NOT LINUX_AARCH64)
       android/emulation/serial_line_unittest.cpp
       android/emulation/SetupParameters_unittest.cpp
       android/error-messages_unittest.cpp
-      android/gps/GpxParser_unittest.cpp
-      android/gps/KmlParser_unittest.cpp
       android/jdwp/Jdwp_unittest.cpp
       android/jdwp/JdwpProxy_unittest.cpp
       android/kernel/kernel_utils_unittest.cpp
