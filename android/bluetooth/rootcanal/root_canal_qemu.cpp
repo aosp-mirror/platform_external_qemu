@@ -22,9 +22,16 @@
 #include <vector>      // for vector
 
 // These must be included first due to some windows header issues.
-#include "model/hci/hci_sniffer.h"
 #include "model/setup/test_model.h"  // for TestModel
 #include "root_canal_qemu.h"         // for Rootcanal::...
+
+#include "model/devices/beacon.h"
+#include "model/devices/beacon_swarm.h"
+#include "model/devices/classic.h"
+#include "model/devices/loopback.h"
+#include "model/devices/sniffer.h"
+#include "model/hci/hci_sniffer.h"
+#include "model/setup/device_boutique.h"
 
 #include "android/base/async/ThreadLooper.h"  // for ThreadLooper
 #include "android/base/files/PathUtils.h"
@@ -47,6 +54,7 @@ namespace android {
 
 namespace bluetooth {
 
+using rootcanal::DeviceBoutique;
 using rootcanal::HciDevice;
 using rootcanal::HciSocketTransport;
 using rootcanal::LinkLayerSocketDevice;
@@ -55,7 +63,6 @@ using rootcanal::TestModel;
 using RootcanalBuilder = Rootcanal::Builder;
 using android::base::System;
 using namespace std::placeholders;
-
 
 class RootcanalImpl : public Rootcanal {
 public:
@@ -233,6 +240,13 @@ std::shared_ptr<Rootcanal> RootcanalBuilder::getInstance() {
 }
 
 void RootcanalBuilder::buildSingleton() {
+    // Register devices.
+    DeviceBoutique::Register("beacon", &rootcanal::Beacon::Create);
+    DeviceBoutique::Register("beacon_swarm", &rootcanal::BeaconSwarm::Create);
+    DeviceBoutique::Register("sniffer", &rootcanal::Sniffer::Create);
+    DeviceBoutique::Register("loopback", &rootcanal::Loopback::Create);
+    DeviceBoutique::Register("classic", &rootcanal::Classic::Create);
+
     auto nullChannel = std::make_shared<net::NullDataChannelServer>();
     auto linkServer =
             std::make_shared<net::MultiDataChannelServer>(nullChannel);
