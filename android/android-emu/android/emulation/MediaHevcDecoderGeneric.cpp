@@ -76,8 +76,14 @@ bool canUseCudaDecoder() {
 #endif
 }
 
-bool canDecodeToGpuTexture() {
+bool canDecodeToGpuTexture(int w, int h) {
     if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
+        int64_t ww = w;
+        int64_t hh = h;
+        constexpr int ONE_MILLION_PIXELS = 1000 * 1000;
+        if (ww * hh <= ONE_MILLION_PIXELS) {
+            return false;
+        }
         return true;
     } else {
         return false;
@@ -90,7 +96,6 @@ MediaHevcDecoderGeneric::MediaHevcDecoderGeneric(uint64_t id,
     : mId(id), mParser(parser) {
     HEVC_DPRINT("allocated MediaHevcDecoderGeneric %p with version %d", this,
                 (int)mParser.version());
-    mUseGpuTexture = canDecodeToGpuTexture();
 }
 
 MediaHevcDecoderGeneric::~MediaHevcDecoderGeneric() {
@@ -125,6 +130,8 @@ void MediaHevcDecoderGeneric::initHevcContextInternal(unsigned int width,
     mOutputWidth = outWidth;
     mOutputHeight = outHeight;
     mOutPixFmt = outPixFmt;
+
+    mUseGpuTexture = canDecodeToGpuTexture(width, height);
 
 #ifdef __APPLE__
     // enable vtb by default, unless it is explicitly disallowed (for test
@@ -356,10 +363,28 @@ void MediaHevcDecoderGeneric::sendMetadata(void* ptr) {
     MetadataParam param{};
     mParser.parseMetadataParams(ptr, param);
 
-    std::swap(mMetadata, param);
+    bool isValid = false;
+    if (param.range == 2 && param.primaries == 4 && param.transfer == 3) {
+        isValid = true;
+    } else if (param.range == 1 && param.primaries == 4 &&
+               param.transfer == 3) {
+        isValid = true;
+    } else if (param.range == 2 && param.primaries == 1 &&
+               param.transfer == 3) {
+        isValid = true;
+    }
+
+    if (!isValid) {
+        HEVC_DPRINT("%s %d invalid values in sendMetadata %p, ignore.\n",
+                    __func__, __LINE__, ptr);
+        return;
+    }
+
+    mMetadataPtr.reset(new MetadataParam(param));
+
     HEVC_DPRINT("hevc %s %d range %d primaries %d transfer %d\n", __func__,
-                __LINE__, (int)(mMetadata.range), (int)(mMetadata.primaries),
-                (int)(mMetadata.transfer));
+                __LINE__, (int)(mMetadataPtr->range), (int)(mMetadataPtr->primaries),
+                (int)(mMetadataPtr->transfer));
 }
 
 void MediaHevcDecoderGeneric::getImage(void* ptr) {
@@ -389,22 +414,10 @@ void MediaHevcDecoderGeneric::getImage(void* ptr) {
     }
 
     // update color aspects
-    if (pFrame->color.range != 0) {
-        if (3 - pFrame->color.range != mMetadata.range) {
-            mMetadata.range = 3 - pFrame->color.range;
-            HEVC_DPRINT(
-                    "hevc updated %s %d range %d primaries %d transfer %d\n",
-                    __func__, __LINE__, (int)(mMetadata.range),
-                    (int)(mMetadata.primaries), (int)(mMetadata.transfer));
+    if (mMetadataPtr && pFrame->color.range != 0) {
+        if (3 - pFrame->color.range != mMetadataPtr->range) {
+            mMetadataPtr->range = 3 - pFrame->color.range;
         }
-    }
-
-    if (pFrame->color.primaries != 2 &&
-        pFrame->color.primaries != mMetadata.primaries) {
-        mMetadata.primaries = pFrame->color.primaries;
-        HEVC_DPRINT("hevc updated %s %d range %d primaries %d transfer %d\n",
-                    __func__, __LINE__, (int)(mMetadata.range),
-                    (int)(mMetadata.primaries), (int)(mMetadata.transfer));
     }
 
     bool needToCopyToGuest = true;
@@ -419,14 +432,14 @@ void MediaHevcDecoderGeneric::getImage(void* ptr) {
             mRenderer.renderToHostColorBufferWithTextures(
                     param.hostColorBufferId, pFrame->width, pFrame->height,
                     TextureFrame{pFrame->texture[0], pFrame->texture[1]},
-                    &mMetadata);
+                    mMetadataPtr.get());
         } else {
             HEVC_DPRINT(
                     "calling rendering to host side color buffer with id %d",
                     param.hostColorBufferId);
             mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
                                               pFrame->width, pFrame->height,
-                                              pFrame->data.data(), &mMetadata);
+                                              pFrame->data.data(), mMetadataPtr.get());
         }
         needToCopyToGuest = false;
     }

@@ -271,7 +271,7 @@ if(NOT LINUX_AARCH64)
   add_opengl_dependencies(OpenglRender_unittests)
 
   # Unit tests
-  if(NOT WINDOWS)
+  if(NOT WINDOWS AND NOT DARWIN_AARCH64)
     android_add_test(
       TARGET OpenglRender_vulkan_unittests
       SRC # cmake-format: sortable
