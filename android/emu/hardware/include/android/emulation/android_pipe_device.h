@@ -11,7 +11,7 @@
 */
 #pragma once
 
-#include "android/base/export.h"
+#include "android/hw-export.h"
 #include "android/emulation/android_pipe_common.h"
 #include "android/utils/compiler.h"
 #include "android/utils/stream.h"
@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define ANDROID_PIPE_DEVICE_EXPORT extern AEMU_EXPORT
+#define ANDROID_PIPE_DEVICE_EXPORT extern AEMU_HW_API
 
 ANDROID_BEGIN_HEADER
 
