@@ -50,6 +50,7 @@
 #include "android/base/memory/SharedMemory.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
+#include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/MultiDisplay.h"
@@ -716,7 +717,11 @@ public:
         bool clientAvailable = !context->IsCancelled();
 
         if (clientAvailable) {
-            getScreenshot(context, request, &reply);
+            auto status = getScreenshot(context, request, &reply);
+            if (!status.ok()) {
+                return status;
+            }
+
             assert(reply.image().size() >= cPixels);
             cPixels = reply.image().size();
             clientAvailable = !context->IsCancelled() && writer->Write(reply);
@@ -763,7 +768,10 @@ public:
                 AEMU_SCOPED_TRACE("streamScreenshot::frame");
                 frame += arrived;
                 Stopwatch sw;
-                getScreenshot(context, request, &reply);
+                auto status = getScreenshot(context, request, &reply);
+                if (!status.ok()) {
+                    return status;
+                }
 
                 // The invariant that the pixel buffer does not decrease should
                 // hold. Clients likely rely on the buffer size to match the
@@ -824,14 +832,20 @@ public:
 
         // TODO(b/151387266): Use new query that uses a shared state for
         // multidisplay
-        if (!multiDisplayQueryWorks) {
+        if (!multiDisplayQueryWorks &&
+            getConsoleAgents()->settings->android_cmdLineOptions()->no_window) {
             width = getConsoleAgents()->settings->hw()->hw_lcd_width;
             height = getConsoleAgents()->settings->hw()->hw_lcd_height;
             enabled = true;
         }
 
-        if (!enabled)
-            return Status::OK;
+        if (!enabled) {
+            return Status(::grpc::StatusCode::INVALID_ARGUMENT,
+                          "Invalid display: " +
+                                  std::to_string(request->display()),
+                          "");
+        }
+
         bool isFolded = android_foldable_is_folded();
         // The folded screen is represented as a rectangle within the full
         // screen.
@@ -892,7 +906,6 @@ public:
                 std::swap(rect.size.w, rect.size.h);
             }
         }
-
 
         // Note that we will never scale above the device width and height.
         desiredWidth = std::min<int>(desiredWidth, width);

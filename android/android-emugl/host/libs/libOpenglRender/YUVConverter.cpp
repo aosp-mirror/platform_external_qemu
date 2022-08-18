@@ -353,9 +353,9 @@ void main(void) {
     cutoffCoordsC.y = outCoord.y;
     highp float xscale = 219.0/ 224.0;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = xscale* (texture2D(usampler, cutoffCoordsC).r - 0.5);
+    yuv[1] = 0.96*xscale* (texture2D(usampler, cutoffCoordsC).r - 0.5);
     yuv[2] = xscale* (texture2D(vsampler, cutoffCoordsC).r - 0.5);
-    highp float yscale = 255.0/224.0;
+    highp float yscale = 255.0/219.0;
     rgb = mat3(yscale,                           yscale,            yscale,
                0,                  -0.344136* yscale, 1.772* yscale,
                yscale*1.402, -0.714136* yscale,                  0) * yuv;
@@ -385,7 +385,7 @@ void main(void) {
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
     yuv[1] = xscale* (texture2D(usampler, cutoffCoordsC).r - 0.5);
     yuv[2] = xscale* (texture2D(vsampler, cutoffCoordsC).r - 0.5);
-    highp float yscale = 255.0/224.0;
+    highp float yscale = 255.0/219.0;
     rgb = mat3(yscale,                           yscale,            yscale,
                0,                  -0.1873* yscale, 1.8556* yscale,
                yscale*1.5748, -0.4681* yscale,                  0) * yuv;
@@ -484,7 +484,7 @@ void main(void) {
     cutoffCoordsC.y = outCoord.y;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
     yuv[1] = (texture2D(vusampler, cutoffCoordsC).a - 0.5);
-    yuv[2] = (texture2D(vusampler, cutoffCoordsC).r - 0.5);
+    yuv[2] = texture2D(vusampler, cutoffCoordsC).r - 0.5;
     highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
                0,                  -0.39176229009491365, 2.017232142857143,
@@ -570,7 +570,7 @@ void main(void) {
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
     yuv[1] = xscale* (texture2D(uvsampler, cutoffCoordsC).r - 0.5);
     yuv[2] = xscale* (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
-    highp float yscale = 255.0/224.0;
+    highp float yscale = 255.0/219.0;
     rgb = mat3(yscale,                           yscale,            yscale,
                0,                  -0.344136* yscale, 1.772* yscale,
                yscale*1.402, -0.714136* yscale,                  0) * yuv;
@@ -599,7 +599,7 @@ void main(void) {
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
     yuv[1] = xscale* (texture2D(uvsampler, cutoffCoordsC).r - 0.5);
     yuv[2] = xscale* (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
-    highp float yscale = 255.0/224.0;
+    highp float yscale = 255.0/219.0;
     rgb = mat3(yscale,                           yscale,            yscale,
                0,                  -0.1873* yscale, 1.8556* yscale,
                yscale*1.5748, -0.4681* yscale,                  0) * yuv;

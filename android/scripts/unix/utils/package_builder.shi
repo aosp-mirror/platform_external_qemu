@@ -302,18 +302,6 @@ builder_check_all_timestamps () {
     _shu_builder_setup_local_systems "$HOST_SYSTEMS"
 }
 
-# Call this function to enable C++11 features. Must happen before
-# any build_prepare_xxxxx function call.
-builder_enable_cxx11 () {
-    _SHU_BUILDER_NO_CXX11=
-}
-
-# Call this function to disable C++11 features. Must happen before
-# any build_prepare_xxxx function call.
-build_disable_cxx11 () {
-    _SHU_BUILDER_NO_CXX11=true
-}
-
 # Run a command on the remote Darwin host when --darwin-ssh is used.
 builder_remote_darwin_run () {
     run $ANDROID_EMULATOR_SSH_WRAPPER ssh  "$DARWIN_SSH" "$@"
@@ -635,9 +623,6 @@ EOF
     for _PREFIX in $_SHU_BUILDER_TOOLCHAIN_PREFIX; do
         var_append EXTRA_FLAGS "--prefix=$_PREFIX"
     done
-    if [ ! "$_SHU_BUILDER_NO_CXX11" ]; then
-        var_append EXTRA_FLAGS "--cxx11"
-    fi
     run $(program_directory)/gen-android-sdk-toolchain.sh \
             --aosp-dir="$2" \
             --host=$_SHU_BUILDER_CURRENT_HOST \

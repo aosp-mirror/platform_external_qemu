@@ -3730,7 +3730,7 @@ public:
             ((size + pageOffset + kPageSize - 1) >>
              kPageBits) << kPageBits;
 
-        entry.hva = (uint64_t)(uintptr_t)(info->ptr);
+        entry.hva = (void *)(uintptr_t)(info->ptr);
         entry.size = (uint64_t)(uintptr_t)(info->size);
         entry.caching = info->caching;
 
