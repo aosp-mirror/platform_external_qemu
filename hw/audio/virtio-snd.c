@@ -1206,9 +1206,9 @@ static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) 
     const int aud_fs = stream->aud_frame_size;
     const int driver_fs = stream->driver_frame_size;
     bool notify_vq = false;
-    int drop_bytes;
     int16_t scratch[AUD_SCRATCH_SIZE];
     const int max_scratch_frames = sizeof(scratch) / MAX(aud_fs, driver_fs);
+    int drop_bytes;
 
     while (avail >= aud_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
@@ -1230,15 +1230,15 @@ static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) 
                 const int aud_nb = convert_channels(scratch, driver_nb, driver_fs, aud_fs);
                 const int aud_sent_nb = AUD_write(voice, scratch, aud_nb);
                 if (aud_sent_nb <= 0) {
-                    goto done;
+                    goto aud_write_full;
                 }
+                avail -= aud_sent_nb;
 
                 const int sent_fn = aud_sent_nb / aud_fs;
                 const int driver_sent_nb = sent_fn * driver_fs;
 
                 item->pos += driver_sent_nb;
                 item_size -= driver_sent_nb;
-                avail -= aud_sent_nb;
                 latency_bytes = update_output_latency_bytes(stream, -driver_sent_nb);
                 stream->frames_sent += sent_fn;
             }
@@ -1252,7 +1252,7 @@ static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) 
             }
         } else {
             memset(scratch, 0, MIN(avail, sizeof(scratch)));
-            while (avail > aud_fs) {
+            while (avail >= aud_fs) {
                 const int32_t nf = MIN(avail, sizeof(scratch)) / aud_fs;
                 const int32_t nb = nf * aud_fs;
                 const int32_t sent_bytes = AUD_write(voice, scratch, nb);
@@ -1263,6 +1263,7 @@ static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) 
         }
     }
 
+aud_write_full:
     drop_bytes = calc_drop_bytes_out(stream);
     while (drop_bytes >= driver_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
@@ -1352,6 +1353,7 @@ static VirtQueue *stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     bool notify_vq = false;
     int16_t scratch[AUD_SCRATCH_SIZE];
     const int max_scratch_frames = sizeof(scratch) / MAX(aud_fs, driver_fs);
+    int insert_bytes;
 
     while (avail >= aud_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
@@ -1369,23 +1371,23 @@ static VirtQueue *stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
                 const int aud_to_read = nf * aud_fs;
                 const int aud_read_nb = AUD_read(voice, scratch, aud_to_read);
                 if (aud_read_nb <= 0) {
-                    goto done;
+                    goto aud_read_empty;
                 }
+                avail -= aud_read_nb;
 
                 const int driver_read_nb = convert_channels(scratch, aud_read_nb, aud_fs, driver_fs);
 
                 iov_from_buf(e->in_sg, e->in_num, item->pos, scratch, driver_read_nb);
-                avail -= aud_read_nb;
                 item->pos += driver_read_nb;
                 stream->frames_sent += (driver_read_nb / driver_fs);
+            }
 
-                if (item->pos >= period_bytes) {
-                    const size_t size = el_send_pcm_rx_status(
-                        e, period_bytes, VIRTIO_SND_S_OK, avail);
-                    vq_consume_element(rx_vq, e, size);
-                    ring_buffer_pop(pcm_buf);
-                    notify_vq = true;
-                }
+            if ((period_bytes - item->pos) < driver_fs) {
+                const size_t size = el_send_pcm_rx_status(
+                    e, period_bytes, VIRTIO_SND_S_OK, avail);
+                vq_consume_element(rx_vq, e, size);
+                ring_buffer_pop(pcm_buf);
+                notify_vq = true;
             }
         } else {
             while (avail >= aud_fs) {
@@ -1393,7 +1395,7 @@ static VirtQueue *stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
                 const int nb = nf * aud_fs;
                 const int read_bytes = AUD_read(voice, scratch, nb);
                 if (read_bytes <= 0) {
-                    goto done;
+                    break;
                 }
                 avail -= read_bytes;
             }
@@ -1401,7 +1403,8 @@ static VirtQueue *stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
         }
     }
 
-    int insert_bytes = calc_insert_bytes_in(stream);
+aud_read_empty:
+    insert_bytes = calc_insert_bytes_in(stream);
     memset(scratch, 0, MIN(insert_bytes, sizeof(scratch)));
     while (insert_bytes >= driver_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
