@@ -170,10 +170,7 @@ set(android-emu-common
     android/snapshot/SnapshotUtils.cpp
     android/snapshot/TextureLoader.cpp
     android/snapshot/TextureSaver.cpp
-    android/verified-boot/load_config.cpp
-    android/wear-agent/android_wear_agent.cpp
-    android/wear-agent/PairUpWearPhone.cpp
-    android/wear-agent/WearAgent.cpp)
+    android/verified-boot/load_config.cpp)
 
 # These are the set of sources for which we know we have dependencies. You can
 # use this as a starting point to figure out what can move to a seperate library
@@ -686,10 +683,7 @@ if(NOT LINUX_AARCH64)
       android/userspace-boot-properties_unittest.cpp
       android/verified-boot/load_config_unittest.cpp
       android/videoinjection/VideoInjectionController_unittest.cpp
-      android/virtualscene/TextureUtils_unittest.cpp
-      android/wear-agent/PairUpWearPhone_unittest.cpp
-      android/wear-agent/testing/WearAgentTestUtils.cpp
-      android/wear-agent/WearAgent_unittest.cpp)
+      android/virtualscene/TextureUtils_unittest.cpp)
 
   # And declare the test
   android_add_test(TARGET android-emu_unittests
