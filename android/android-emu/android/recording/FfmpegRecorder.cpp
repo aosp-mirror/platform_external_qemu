@@ -30,7 +30,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-
 #include "android/recording/FfmpegRecorder.h"
 
 #include "android/base/Log.h"                   // for LogStream, LogMessage
@@ -78,6 +77,8 @@ struct SwsContext;
 #include <string>                               // for string, basic_string
 #include <utility>                              // for move
 #include <vector>                               // for vector
+
+#include "android/recording/ffmpegdefs.h"
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
@@ -852,7 +853,6 @@ bool FfmpegRecorderImpl::writeVideoFrame(AVFrame* frame) {
     int gotPacket = 0;
 
     c = mVideoStream.codecCtx.get();
-
     if (mOutputContext->oformat->flags & AVFMT_RAWPICTURE) {
         // a hack to avoid data copy with some raw video muxers
         AVPacket pkt;
