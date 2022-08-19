@@ -30,6 +30,7 @@
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/crashreport/crash-initializer.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/HostapdController.h"
 #include "android/emulation/LogcatPipe.h"

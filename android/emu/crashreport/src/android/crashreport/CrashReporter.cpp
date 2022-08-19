@@ -52,26 +52,17 @@ using android::base::System;
 namespace android {
 namespace crashreport {
 
-#ifdef NDEBUG
-constexpr char CrashURL[] = "https://clients2.google.com/cr/report";
-#else
-constexpr char CrashURL[] = "https://clients2.google.com/cr/staging_report";
-#endif
-
-const constexpr char kCrashpadDatabase[] = "emu-crash.db";
 const constexpr char kCrashOnExitFileName[] = "crash-on-exit";
 
-// The crashpad handler binary, as shipped with the emulator.
-const constexpr char kCrashpadHandler[] = "crashpad_handler";
-
 using DefaultStringAnnotation = crashpad::StringAnnotation<1024>;
-LazyInstance<CrashReporter> sCrashSystem = LAZY_INSTANCE_INIT;
+LazyInstance<CrashReporter> sCrashReporter = LAZY_INSTANCE_INIT;
 
 CrashReporter::CrashReporter()
-    : mDatabasePath(android::base::pj(System::get()->getTempDir(),
-                                      kCrashpadDatabase)),
-      mClient(new CrashpadClient()),
-      mConsentProvider(consentProvider()) {}
+   {}
+
+void CrashReporter::initialize() {
+    mInitialized = true;
+}
 
 void CrashReporter::AppendDump(const char* message) {
     passDumpMessage(message);
@@ -87,7 +78,7 @@ HangDetector& CrashReporter::hangDetector() {
     return *mHangDetector;
 }
 CrashReporter* CrashReporter::get() {
-    return sCrashSystem.ptr();
+    return sCrashReporter.ptr();
 }
 
 void CrashReporter::GenerateDump(const char* message) {
@@ -99,38 +90,6 @@ static const char* formatConsent(CrashConsent::Consent c) {
     return translate[static_cast<int>(c)];
 }
 
-bool CrashReporter::initialize() {
-    if (mInitialized) {
-        return false;
-    }
-    auto handler_path = ::base::FilePath(
-            PathUtils::asUnicodePath(
-                    System::get()->findBundledExecutable(kCrashpadHandler))
-                    .c_str());
-    if (handler_path.empty()) {
-        dwarning("Crash handler not found, crash reporting disabled.");
-    }
-    auto database_path =
-            ::base::FilePath(PathUtils::asUnicodePath(mDatabasePath).c_str());
-    auto metrics_path = ::base::FilePath();
-    auto annotations = std::map<std::string, std::string>{
-            {"prod", "AndroidEmulator"}, {"ver", EMULATOR_FULL_VERSION_STRING}};
-    bool active = mClient->StartHandler(handler_path, database_path,
-                                        metrics_path, CrashURL, annotations,
-                                        {"--no-rate-limit"}, true, true);
-
-    mDatabase = crashpad::CrashReportDatabase::Initialize(database_path);
-    mInitialized = active && mDatabase;
-
-    dinfo("Storing crashdata in: %s, detection is %s", mDatabasePath.c_str(),
-          mInitialized ? "enabled" : "disabled");
-
-    if (mDatabase && mDatabase->GetSettings()) {
-        mDatabase->GetSettings()->SetUploadsEnabled(false);
-    }
-
-    return mInitialized;
-}
 
 void CrashReporter::GenerateDumpAndDie(const char* message) {
     passDumpMessage(message);
@@ -171,50 +130,7 @@ void CrashReporter::attachBinaryData(std::string name,
              name.c_str());
 }
 
-void CrashReporter::uploadEntries() {
-    if (!mDatabase || !mInitialized) {
-        dinfo("Crash database unavailable, or not initialized, we will not "
-              "report any crashes.");
-        return;
-    }
 
-    auto collect = mConsentProvider->consentRequired();
-    bool areUploadsEnabled = (collect == CrashConsent::Consent::ALWAYS);
-    if (mDatabase && areUploadsEnabled) {
-        dinfo("Crash reports will be automatically uploaded to: %s", CrashURL);
-        mDatabase->GetSettings()->SetUploadsEnabled(areUploadsEnabled);
-    }
-
-    // Get consent for any report that was not yet uploaded.
-    std::vector<crashpad::UUID> toRemove;
-    std::vector<crashpad::CrashReportDatabase::Report> reports;
-    std::vector<crashpad::CrashReportDatabase::Report> pendingReports;
-    mDatabase->GetCompletedReports(&reports);
-    mDatabase->GetPendingReports(&pendingReports);
-    reports.insert(reports.end(), pendingReports.begin(), pendingReports.end());
-
-    for (const auto& report : reports) {
-        if (!report.uploaded) {
-            if (mConsentProvider->requestConsent(report)) {
-                mDatabase->RequestUpload(report.uuid);
-                dinfo("Consent given for uploading crashreport %s to %s",
-                      report.uuid.ToString().c_str(), CrashURL);
-            } else {
-                dinfo("No consent for crashreport %s, deleting.",
-                      report.uuid.ToString().c_str());
-                toRemove.push_back(report.uuid);
-            }
-        } else {
-            toRemove.push_back(report.uuid);
-            dinfo("Report %s is available remotely as: %s, deleting.",
-                  report.uuid.ToString().c_str(), report.id.c_str());
-        }
-    }
-
-    for (const auto& remove : toRemove) {
-        mDatabase->DeleteReport(remove);
-    }
-}
 
 }  // namespace crashreport
 }  // namespace android
@@ -223,38 +139,6 @@ using android::crashreport::CrashReporter;
 
 extern "C" {
 
-bool crashhandler_init(int argc, char** argv) {
-    if (!android::base::System::get()->getEnableCrashReporting()) {
-        dinfo("Crashreporting disabled, not reporting crashes.")
-        return false;
-    }
-    
-    // Catch crashes in everything.
-    // This promises to not launch any threads...
-    if (!CrashReporter::get()->initialize()) {
-        return false;
-    }
-
-    std::string arguments = "===== Command-line arguments =====\n";
-    for (int i = 0; i < argc; i++) {
-        arguments += argv[i];
-        arguments += ' ';
-    }
-    arguments += "\n===== Environment =====\n";
-    const auto allEnv = System::get()->envGetAll();
-    for (const std::string& env : allEnv) {
-        arguments += env;
-        arguments += '\n';
-    }
-
-    android::crashreport::CrashReporter::get()->attachData(
-            "command-line-and-environment.txt", arguments);
-
-    // Make sure we don't report any hangs until all related loopers
-    // actually get started.
-    android::crashreport::CrashReporter::get()->hangDetector().pause(true);
-    return true;
-}
 
 void crashhandler_append_message(const char* message) {
     const auto reporter = CrashReporter::get();
@@ -311,13 +195,6 @@ void crashhandler_exitmode(const char* message) {
     const auto reporter = CrashReporter::get();
     if (reporter && reporter->active()) {
         reporter->SetExitMode(message);
-    }
-}
-
-void upload_crashes(void) {
-    const auto reporter = CrashReporter::get();
-    if (reporter && reporter->active()) {
-        reporter->uploadEntries();
     }
 }
 

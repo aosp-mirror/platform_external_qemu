@@ -21,7 +21,7 @@
 #include "android/base/files/MemStream.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/ThreadStore.h"
-#include "android/crashreport/CrashReporter.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/emulation/android_pipe_device.h"
 #include "android/emulation/android_pipe_host.h"
 #include "android/emulation/DeviceContextRunner.h"
@@ -68,7 +68,6 @@ using ServiceList = std::vector<std::unique_ptr<Service>>;
 using VmLock = android::VmLock;
 using android::base::MemStream;
 using android::base::StringFormat;
-using android::crashreport::CrashReporter;
 
 static BaseStream* asBaseStream(CStream* stream) {
     return reinterpret_cast<BaseStream*>(stream);
@@ -451,11 +450,9 @@ AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
     const int pendingFlags = stream->getBe32();
     if (pendingFlags && pipe && !*pForceClose) {
         if (!hwPipe) {
-            CrashReporter::get()->GenerateDumpAndDie(
-                    StringFormat(
+            crashhandler_die_format(
                             "AndroidPipe::%s [%s]: hwPipe is NULL (flags = 0x%x)",
-                            __func__, pipe->name(), (unsigned)pendingFlags)
-                            .c_str());
+                            __func__, pipe->name(), (unsigned)pendingFlags);
             GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
                 << "fatal: AndroidPipe [" << pipe->name() << "] hwPipe is NULL(flags = 0x"
                 << std::hex << unsigned(pendingFlags) << " )";
@@ -502,11 +499,9 @@ void AndroidPipe::signalWake(int wakeFlags) {
     // i.e., pipe not using normal pipe device
     if (mFlags) return;
     if (!mHwPipe) {
-        CrashReporter::get()->GenerateDumpAndDie(
-                StringFormat(
+        crashhandler_die_format(
                         "AndroidPipe::%s [%s]: hwPipe is NULL (flags = 0x%x)",
-                        __func__, name(), (unsigned)wakeFlags)
-                        .c_str());
+                        __func__, name(), (unsigned)wakeFlags);
         GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
             << "AndroidPipe [" << name() << "]: hwPipe is NULL (flags = 0x" << std::hex
             << unsigned(wakeFlags) << ")";
@@ -518,10 +513,8 @@ void AndroidPipe::closeFromHost() {
     // i.e., pipe not using normal pipe device
     if (mFlags) return;
     if (!mHwPipe) {
-        CrashReporter::get()->GenerateDumpAndDie(
-                StringFormat("AndroidPipe::%s [%s]: hwPipe is NULL", __func__,
-                             name())
-                        .c_str());
+        crashhandler_die_format("AndroidPipe::%s [%s]: hwPipe is NULL", __func__,
+                             name());
         GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
             << "AndroidPipe [" << name() << "]: hwPipe is NULL";
     }
@@ -533,10 +526,8 @@ void AndroidPipe::abortPendingOperation() {
     if (mFlags) return;
 
     if (!mHwPipe) {
-        CrashReporter::get()->GenerateDumpAndDie(
-                StringFormat("AndroidPipe::%s [%s]: hwPipe is NULL", __func__,
-                             name())
-                        .c_str());
+        crashhandler_die_format("AndroidPipe::%s [%s]: hwPipe is NULL", __func__,
+                             name());
         GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
             << "AndroidPipe [" << name() << "]: hwPipe is NULL";
     }
@@ -831,10 +822,9 @@ void* android_pipe_lookup_by_id(const int id) {
         void* hwPipe = (*cb.first)(id);
         if (hwPipe) {
             if (hwPipeFound) {
-                CrashReporter::get()->GenerateDumpAndDie(
-                    StringFormat("Pipe id (%d) is not unique, at least two "
+                crashhandler_die_format("Pipe id (%d) is not unique, at least two "
                                  "pipes are found: `%s` and `%s`",
-                                 __func__, id, tagFound, cb.second).c_str());
+                                 __func__, id, tagFound, cb.second);
                 GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
                     << "Pipe id (" << id << ") is not unique, at least two pipes are found: `"
                     << tagFound << "` and `" << cb.second << "`";

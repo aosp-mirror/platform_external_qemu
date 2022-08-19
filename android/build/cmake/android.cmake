@@ -1516,6 +1516,7 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
               emulator-libusb
               ${WINDOWS_LAUNCHER}
               android-emu-wear # vl.c directly refers to wear!
+              android-emu-crash-initializer
               android-emu-crashreport-consent-ui)
 endfunction()
 
@@ -1542,6 +1543,7 @@ function(android_add_qemu_headless_executable ANDROID_AARCH STUBS)
               android-qemu-deps-headless
               emulator-libusb
               android-emu-wear # vl.c directly refers to wear!
+              android-emu-crash-initializer
               android-emu-crashreport-consent-no-ui)
 endfunction()
 

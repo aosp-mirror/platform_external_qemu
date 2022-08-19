@@ -19,7 +19,6 @@
 #include "android/base/files/IniFile.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
-#include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/MetricsReporter.h"
 
@@ -44,7 +43,6 @@ using android::base::Stopwatch;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
-using android::crashreport::CrashReporter;
 using android::metrics::MetricsReporter;
 
 namespace pb = android_studio;

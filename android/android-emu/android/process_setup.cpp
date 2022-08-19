@@ -23,7 +23,6 @@
 #include "android/base/misc/StringUtils.h"      // for strDup
 #include "android/base/system/System.h"         // for System
 #include "android/cmdline-option.h"             // for android_cmdLine
-#include "android/crashreport/CrashReporter.h"  // for CrashReporter
 #include "android/crashreport/HangDetector.h"   // for HangDetector
 #include "android/crashreport/crash-handler.h"  // for crashhandler_cleanup
 #include "android/curl-support.h"               // for curl_cleanup, curl_init
