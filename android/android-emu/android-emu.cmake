@@ -170,8 +170,6 @@ set(android-emu-common
     android/snapshot/SnapshotUtils.cpp
     android/snapshot/TextureLoader.cpp
     android/snapshot/TextureSaver.cpp
-    android/update-check/UpdateChecker.cpp
-    android/update-check/VersionExtractor.cpp
     android/verified-boot/load_config.cpp
     android/wear-agent/android_wear_agent.cpp
     android/wear-agent/PairUpWearPhone.cpp
@@ -282,6 +280,7 @@ target_link_libraries(
          android-emu-sockets
          android-emu-adb-interface
          android-emu-hardware
+         android-emu-update-check
          android-emu-crashreport
          android-emu-telephony
          emulator-libsparse
@@ -684,8 +683,6 @@ if(NOT LINUX_AARCH64)
       android/snapshot/RamSaver_unittest.cpp
       android/snapshot/RamSnapshot_unittest.cpp
       android/snapshot/Snapshot_unittest.cpp
-      android/update-check/UpdateChecker_unittest.cpp
-      android/update-check/VersionExtractor_unittest.cpp
       android/userspace-boot-properties_unittest.cpp
       android/verified-boot/load_config_unittest.cpp
       android/videoinjection/VideoInjectionController_unittest.cpp
