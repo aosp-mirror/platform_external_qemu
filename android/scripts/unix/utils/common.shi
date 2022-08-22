@@ -295,6 +295,9 @@ get_build_arch () {
         case $(get_build_os) in
             darwin)
                 _SHU_BUILD_ARCH=$(uname -m)
+                if [ "$_SHU_BUILD_ARCH" = "arm64" ]; then
+                    _SHU_BUILD_ARCH=aarch64
+                fi
                 ;;
             linux)
                 _SHU_BUILD_ARCH=$(uname -m)
