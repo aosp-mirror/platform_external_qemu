@@ -16,7 +16,6 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
-#include "android/crashreport/CrashReporter.h"
 
 #include <algorithm>
 #include <fstream>
@@ -26,13 +25,14 @@
 #include <string>
 #ifndef _MSC_VER
 #include <sys/time.h>
+#else
+#include "msvc-posix.h"
 #endif
 #include <vector>
 
 using android::base::AutoLock;
 using android::base::Lock;
 using android::base::PathUtils;
-using android::crashreport::CrashReporter;
 
 // The purpose of the OpenGL logger is to log
 // information about such things as EGL initialization

@@ -39,6 +39,7 @@ namespace crashreport {
 
 using crashpad::Annotation;
 
+
 // Class CrashReporter is a singleton class that wraps breakpad OOP crash
 // client.
 // It provides functions to attach to a crash server and to wait for a crash
@@ -49,7 +50,7 @@ public:
     CrashReporter();
     ~CrashReporter() = default;
 
-    bool initialize();
+    void initialize();
 
     // returns dump dir
     const std::string& getDumpDir() const;

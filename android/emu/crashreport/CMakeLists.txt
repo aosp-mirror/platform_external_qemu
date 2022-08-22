@@ -1,5 +1,23 @@
 prebuilt(QT5)
 android_add_library(
+  TARGET android-emu-crash-initializer
+  # SHARED # Used to test if you can compile this stand alone.
+  LICENSE Apache-2.0
+  SOURCE_DIR
+  src
+  SRC android/crashreport/CrashSytemInit.cpp
+  DEPS android-emu-base
+       android-emu-files
+       android-emu-utils
+       android-emu-crashreport
+       crashpad_client
+       protobuf::libprotobuf)
+target_include_directories(android-emu-crash-initializer PRIVATE src
+                           PUBLIC include)
+target_compile_options(android-emu-crash-initializer
+                       PRIVATE -Wno-extern-c-compat PUBLIC -Wno-macro-redefined)
+
+android_add_library(
   TARGET android-emu-crashreport
   # SHARED # Used to test if you can compile this stand alone.
   LICENSE Apache-2.0
@@ -18,7 +36,8 @@ android_add_library(
        protobuf::libprotobuf)
 target_include_directories(android-emu-crashreport PRIVATE src PUBLIC include)
 target_link_libraries(android-emu-crashreport PUBLIC crashpad_client)
-target_compile_options(android-emu-crashreport PRIVATE -Wno-extern-c-compat PUBLIC -Wno-macro-redefined)
+target_compile_options(android-emu-crashreport PRIVATE -Wno-extern-c-compat
+                       PUBLIC -Wno-macro-redefined)
 
 # This file defines emulator crash service
 android_add_library(
@@ -39,12 +58,12 @@ android_add_library(
        crashpad_client
        emulator-libui
        Qt${QT_VERSION_MAJOR}::Widgets)
-target_compile_definitions(
-  android-emu-crashreport-consent-ui PRIVATE AEMU_CRASH_EXPORTS
-  PUBLIC AEMU_CRASH_SHARED)
+target_compile_definitions(android-emu-crashreport-consent-ui
+                           PRIVATE AEMU_CRASH_EXPORTS PUBLIC AEMU_CRASH_SHARED)
 target_include_directories(android-emu-crashreport-consent-ui PRIVATE src
                            PUBLIC include)
-target_compile_options(android-emu-crashreport-consent-ui PRIVATE -Wno-extern-c-compat)
+target_compile_options(android-emu-crashreport-consent-ui
+                       PRIVATE -Wno-extern-c-compat)
 
 android_add_library(
   TARGET android-emu-crashreport-consent-no-ui
@@ -59,8 +78,8 @@ target_compile_definitions(android-emu-crashreport-consent-no-ui
                            PRIVATE AEMU_CRASH_EXPORTS PUBLIC AEMU_CRASH_SHARED)
 target_include_directories(android-emu-crashreport-consent-no-ui PRIVATE src
                            PUBLIC include)
-target_compile_options(android-emu-crashreport-consent-no-ui PRIVATE -Wno-extern-c-compat)
-
+target_compile_options(android-emu-crashreport-consent-no-ui
+                       PRIVATE -Wno-extern-c-compat)
 
 # This one can be used for unit tests.
 android_add_library(

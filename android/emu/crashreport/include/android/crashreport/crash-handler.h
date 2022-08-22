@@ -1,4 +1,4 @@
-// Copyright 2015 The Android Open Source Project
+// Copyright 2022 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
 // limitations under the License.
 #pragma once
 #include "android/utils/compiler.h"
+#include <stdarg.h>
+
 
 #ifdef __cplusplus
-#include "android/base/StringFormat.h"
 #include <utility>
 #include <stdio.h>
+#include "android/base/StringFormat.h"
 #else
 #include <stdbool.h>
 #endif
-#include <stdarg.h>
 
 
 #if defined(__cplusplus) && ! defined(__clang__)
@@ -37,25 +38,8 @@
 
 ANDROID_BEGIN_HEADER
 
-// Enable crash reporting by starting crash service process, initializing and
-// attaching crash handlers.  Should only be run once at the start of the
-// program.
-//
-// Once you have a UI active to provide consent for uploading of generated
-// crashes you should make a call to upload_crashes.
-//
-// It will:
-//  - Activate the crash handler
-//  - Set an attribute containing the launch parameters.
-bool crashhandler_init(int, char**);
-
-// This will seek approval from the user for any crash reports
-// that are stored on the local system that have not yet been
-// reported to google.
-//
-// This should be invoked as soon as the UI has been activated
-// as this could require user input.
-void upload_crashes(void);
+// Call this to enable appending of messages.
+void crashhandler_enable_message_store();
 
 // Append message to crash dump file without aborting.
 // Useful for saving debugging information just before a crash.
@@ -65,10 +49,25 @@ void upload_crashes(void);
 // limited amount of storage space available.
 void crashhandler_append_message(const char* message);
 
-
 // A variadic overload with C interface
 void crashhandler_append_message_format(const char* format, ...);
 void crashhandler_append_message_format_v(const char* format, va_list args);
+
+// Append a string to the crash report. One is free to free both of the
+// parameters after the call - function doesn't take ownership of them.
+//
+// The strings are stored in the minidump as 'name' : 'string'
+void crashhandler_add_string(const char* name, const char* string);
+
+// Reads the contents of file |source| and attaching it as a string annotation 
+// under |source|. This is the same as reading the file source and calling
+// crashhandler_add_string(destination, contents_of_file_source)
+bool crashhandler_copy_attachment(const char* destination, const char* source);
+
+
+
+// Track crashes on exit.
+void crashhandler_exitmode(const char* message);
 
 // Abort the program execution immediately, recording the message
 // with the crashreport if possible.
@@ -79,21 +78,11 @@ ANDROID_NORETURN void crashhandler_die(const char* message)
 ANDROID_NORETURN void crashhandler_die_format(const char* format, ...);
 ANDROID_NORETURN void crashhandler_die_format_v(const char* format, va_list args);
 
-// Append a string to the crash report. One is free to free both of the
-// parameters after the call - function doesn't take ownership of them.
-//
-// The strings are stored in the minidump as 'name' : 'string'
-void crashhandler_add_string(const char* name, const char* string);
-
-// Track crashes on exit.
-void crashhandler_exitmode(const char* message);
-
-// Reads the contents of file |source| and attaching it as a string annotation 
-// under |source|. This is the same as reading the file source and calling
-// crashhandler_add_string(destination, contents_of_file_source)
-bool crashhandler_copy_attachment(const char* destination, const char* source);
-
+void pause_hangdetector();
+void resume_hangdetector();
+void detect_hanging_looper(void*);
 ANDROID_END_HEADER
+
 
 #ifdef __cplusplus
 // A variadic overload for a convenient message formatting
