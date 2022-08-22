@@ -34,7 +34,8 @@ if(OPTION_GFXSTREAM_BACKEND)
             return()
         endif()
         cmake_path(IS_PREFIX GFXSTREAM_REPO_ROOT ${abs_subdir} NORMALIZE IS_GFXSTREAM_SUBDIR)
-        if(NOT IS_GFXSTREAM_SUBDIR)
+        cmake_path(IS_PREFIX GFXSTREAM_PROTOCOLS_DIR ${abs_subdir} NORMALIZE IS_GFXSTREAM_PROTOCOLS_SUBDIR)
+        if(NOT IS_GFXSTREAM_SUBDIR AND NOT IS_GFXSTREAM_PROTOCOLS_SUBDIR)
             return()
         endif()
 
@@ -56,7 +57,7 @@ if(OPTION_GFXSTREAM_BACKEND)
             impl/base/SharedLibrary.cpp)
     target_link_libraries(
         aemu-vkcereal-base
-        PUBLIC
+        PRIVATE
         gfxstream-base.headers
         android-emu
         android-emu-crashreport
@@ -166,11 +167,13 @@ if(OPTION_GFXSTREAM_BACKEND)
     endif()
 
     set(GFXSTREAM_PREFIX "gfxstream")
+    set(GFXSTREAM_PROTOCOLS_DIR ${ANDROID_QEMU2_TOP_DIR}/../../external/gfxstream-protocols)
 
     # Third party dependencies
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/angle ${GFXSTREAM_PREFIX}-third-party-angle)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/renderdoc ${GFXSTREAM_PREFIX}-third-party-renderdoc)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/stb ${GFXSTREAM_PREFIX}-third-party-stb)
+    add_subdirectory(${GFXSTREAM_PROTOCOLS_DIR} ${GFXSTREAM_PREFIX}-gfxstream-protocols)
 
     # Common base libraries for host################################################
 
