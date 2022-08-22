@@ -24,7 +24,7 @@
 #include "VulkanDispatch.h"                                  // for vkDispatch
 #include "android/avd/info.h"                                // for avdInfo_...
 #include "android/avd/util.h"                                // for AVD_PHONE
-#include "android/base/StringView.h"                         // for StringView
+
 #include "android/base/files/MemStream.h"                    // for MemStream
 #include "android/base/files/PathUtils.h"                    // for pj
 #include "android/base/system/System.h"                      // for System

@@ -17,31 +17,32 @@
 
 #include <sstream>
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace perflogger {
 
 // OpenGL benchmarks
 void logDrawCallOverheadTest(
-    base::StringView glVendor,
-    base::StringView glRenderer,
-    base::StringView glVersion,
+        std::string_view glVendor,
+        std::string_view glRenderer,
+        std::string_view glVersion,
 
-    // |variant|: drawArrays, drawElements, drawSwitchVao, drawSwitchVap
-    base::StringView variant,
-    // |indirectionLevel|: fullStack, fullStackOverheadOnly, decoder, or host
-    base::StringView indirectionLevel,
-    int count,
-    long rateHz,
-    long wallTimeUs,
-    long threadCpuTimeUs) {
-
+        // |variant|: drawArrays, drawElements, drawSwitchVao, drawSwitchVap
+        std::string_view variant,
+        // |indirectionLevel|: fullStack, fullStackOverheadOnly, decoder, or
+        // host
+        std::string_view indirectionLevel,
+        int count,
+        long rateHz,
+        long wallTimeUs,
+        long threadCpuTimeUs) {
     std::stringstream ssBenchName;
 
     ssBenchName << "Draw Call Overhead Test: ";
-    ssBenchName << "[" << glVendor.str() << "] ";
-    ssBenchName << "[" << glRenderer.str() << "] ";
-    ssBenchName << "[" << glVersion.str() << "]";
+    ssBenchName << "[" << glVendor << "] ";
+    ssBenchName << "[" << glRenderer << "] ";
+    ssBenchName << "[" << glVersion << "]";
 
     std::string benchName = ssBenchName.str();
 
@@ -54,8 +55,8 @@ void logDrawCallOverheadTest(
 
     std::stringstream ssMetricName;
 
-    ssMetricName << variant.str() << "_";
-    ssMetricName << indirectionLevel.str() << "_";
+    ssMetricName << variant << "_";
+    ssMetricName << indirectionLevel << "_";
     ssMetricName << "count_" << count;
 
     std::string metricBaseName = ssMetricName.str();

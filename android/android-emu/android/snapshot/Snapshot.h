@@ -13,10 +13,11 @@
 
 #include <stdint.h>                                  // for uint64_t, int32_t
 #include <string>                                    // for allocator, string
+#include <string_view>
 #include <vector>                                    // for vector
 
 #include "android/base/Optional.h"                   // for Optional
-#include "android/base/StringView.h"                 // for StringView, oper...
+
 #include "android/base/containers/CircularBuffer.h"  // for CircularBuffer
 #include "android/base/system/System.h"              // for System, System::...
 #include "android/featurecontrol/Features.h"         // for Feature
@@ -37,9 +38,8 @@ public:
     static std::vector<Snapshot> getExistingSnapshots();
     static base::Optional<Snapshot> getSnapshotById(std::string id);
 
-    base::StringView name() const { return mName; }
-    base::StringView dataDir() const { return mDataDir; }
-
+    std::string_view name() const { return mName; }
+    std::string_view dataDir() const { return mDataDir; }
 
     // An imported snapshot stores the qcow2's inside the snapshot directory.
     bool isImported();
@@ -77,7 +77,7 @@ public:
 
     base::Optional<FailureReason> failureReason() const;
 
-    static base::StringView dataDir(const char* name);
+    static std::string dataDir(const char* name);
 
     base::Optional<std::string> parent();
 

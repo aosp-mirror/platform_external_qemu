@@ -12,12 +12,13 @@
 #pragma once
 
 #include <stddef.h>                   // for size_t
+#include <optional>
 #include <string>                     // for string, basic_string
+#include <string_view>
 #include <utility>                    // for move, forward
 #include <vector>                     // for vector
 
 #include "android/base/Optional.h"    // for Optional
-#include "android/base/StringView.h"  // for StringView
 
 #ifdef __APPLE__
 
@@ -39,6 +40,59 @@
 
 namespace android {
 namespace base {
+
+// Helper to get a null-terminated const char* from a string_view.
+// Only allocates if the string_view is not null terminated.
+//
+// Usage:
+//
+//      std::string_view myString = ...;
+//      printf("Contents: %s\n", CStrWrapper(myString).c_str());
+//
+// c_str(...) constructs a temporary object that may allocate memory if the
+// StringView is not null termianted.  The lifetime of the temporary object will
+// be until the next sequence point (typically the next semicolon).  If the
+// value needs to exist for longer than that, cache the instance.
+//
+//      std::string_view myString = ...;
+//      auto myNullTerminatedString = CStrWrapper(myString).c_str();
+//      functionAcceptingConstCharPointer(myNullTerminatedString);
+//
+class CStrWrapper {
+public:
+    CStrWrapper(std::string_view stringView) : mStringView(stringView) {}
+
+    // Returns a null-terminated char*, potentially creating a copy to add a
+    // null terminator.
+    const char* get() {
+        if (mStringView.back() == '\0') {
+            return mStringView.data();
+        } else {
+            // Create the std::string copy on-demand.
+            if (!mStringCopy) {
+                mStringCopy.emplace(mStringView);
+            }
+
+            return mStringCopy->c_str();
+        }
+    }
+
+    // Alias for get
+    const char* c_str() {
+        return get();
+    }
+
+    // Enable casting to const char*
+    operator const char*() { return get(); }
+
+private:
+    const std::string_view mStringView;
+    std::optional<std::string> mStringCopy;
+};
+
+inline CStrWrapper c_str(std::string_view stringView) {
+    return CStrWrapper(stringView);
+}
 
 // Utility functions to manage file paths. None of these should touch the
 // file system. All methods must be static.
@@ -69,9 +123,10 @@ public:
     static const char* const kExeNameSuffix;
 
     // Returns the executable name for a base name |baseName|
-    static std::string toExecutableName(StringView baseName, HostType hostType);
+    static std::string toExecutableName(std::string_view baseName,
+                                        HostType hostType);
 
-    static std::string toExecutableName(StringView baseName) {
+    static std::string toExecutableName(std::string_view baseName) {
         return toExecutableName(baseName, HOST_TYPE);
     }
 
@@ -97,23 +152,23 @@ public:
     }
 
     // Remove trailing separators from a |path| string, for a given |hostType|.
-    static StringView removeTrailingDirSeparator(StringView path,
-                                                 HostType hostType);
+    static std::string_view removeTrailingDirSeparator(std::string_view path,
+                                                       HostType hostType);
 
     // Remove trailing separators from a |path| string for the current host.
-    static StringView removeTrailingDirSeparator(StringView path) {
+    static std::string_view removeTrailingDirSeparator(std::string_view path) {
         return removeTrailingDirSeparator(path, HOST_TYPE);
     }
 
     // Add a trailing separator if needed.
-    static std::string addTrailingDirSeparator(StringView path,
+    static std::string addTrailingDirSeparator(std::string_view path,
                                                HostType hostType);
     static std::string addTrailingDirSeparator(const std::string& path, HostType hostType);
     static std::string addTrailingDirSeparator(const char* path, HostType hostType);
 
 
     // Add a trailing separator if needed.
-    static std::string addTrailingDirSeparator(StringView path) {
+    static std::string addTrailingDirSeparator(std::string_view path) {
         return addTrailingDirSeparator(path, HOST_TYPE);
     }
     static std::string addTrailingDirSeparator(const std::string& path);
@@ -126,20 +181,36 @@ public:
     //    <drive>:
     //    <drive>:<sep>
     //    <sep><sep>volumeName<sep>
-    static size_t rootPrefixSize(StringView path, HostType hostType);
+    static size_t rootPrefixSize(const std::string& path, HostType hostType);
 
     // Return the root prefix for the current platform. See above for
     // documentation.
-    static size_t rootPrefixSize(StringView path) {
+    static size_t rootPrefixSize(const std::string& path) {
         return rootPrefixSize(path, HOST_TYPE);
     }
 
+    static size_t rootPrefixSize(const char* path) {
+        return path ? rootPrefixSize(std::string(path), HOST_TYPE) : 0;
+    }
+
+    static size_t rootPrefixSize(const char* path, HostType hostType) {
+        return path ? rootPrefixSize(std::string(path), hostType) : 0;
+    }
+
     // Return true iff |path| is an absolute path for a given |hostType|.
-    static bool isAbsolute(StringView path, HostType hostType);
+    static bool isAbsolute(const std::string& path, HostType hostType);
 
     // Return true iff |path| is an absolute path for the current host.
-    static bool isAbsolute(StringView path) {
+    static bool isAbsolute(const std::string& path) {
         return isAbsolute(path, HOST_TYPE);
+    }
+
+    static bool isAbsolute(const char* path) {
+        return isAbsolute(path, HOST_TYPE);
+    }
+
+    static bool isAbsolute(const char* path, HostType hostType) {
+        return path ? isAbsolute(std::string(path), hostType) : false;
     }
 
     // Return an extension part of the name/path (the part of the name after
@@ -148,7 +219,8 @@ public:
     //  "file" -> ""
     //  "file." -> "."
     //  "/full/path.png" -> ".png"
-    static StringView extension(StringView path, HostType hostType = HOST_TYPE);
+    static std::string_view extension(const std::string& path,
+                                      HostType hostType = HOST_TYPE);
 
     // Split |path| into a directory name and a file name. |dirName| and
     // |baseName| are optional pointers to strings that will receive the
@@ -165,15 +237,15 @@ public:
     //     <drive>:foo  -> '<drive>:' + 'foo'
     //     <drive>:\foo -> '<drive>:\' + 'foo'
     //
-    static bool split(StringView path,
+    static bool split(std::string_view path,
                       HostType hostType,
-                      StringView* dirName,
-                      StringView* baseName);
+                      std::string_view* dirName,
+                      std::string_view* baseName);
 
     // A variant of split() for the current process' host type.
-    static bool split(StringView path,
-                      StringView* dirName,
-                      StringView* baseName) {
+    static bool split(std::string_view path,
+                      std::string_view* dirName,
+                      std::string_view* baseName) {
         return split(path, HOST_TYPE, dirName, baseName);
     }
 
@@ -182,19 +254,19 @@ public:
     // the result will be the concatenation of |path1| and |path2|, if
     // |path1| doesn't end with a directory separator, a |hostType| specific
     // one will be inserted between the two paths in the result.
-    static std::string join(StringView path1,
-                            StringView path2,
+    static std::string join(const std::string& path1,
+                            const std::string& path2,
                             HostType hostType);
 
     // A variant of join() for the current process' host type.
-    static std::string join(StringView path1, StringView path2) {
+    static std::string join(const std::string& path1, const std::string& path2) {
         return join(path1, path2, HOST_TYPE);
     }
 
     // A convenience function to join a bunch of paths at once
     template <class... Paths>
-    static std::string join(StringView path1,
-                            StringView path2,
+    static std::string join(const std::string& path1,
+                            const std::string& path2,
                             Paths&&... paths) {
         return join(path1, join(path2, std::forward<Paths>(paths)...));
     }
@@ -208,13 +280,13 @@ public:
     // each one being a path component (prefix or subdirectory or file
     // name). Directory separators do not appear in components, except
     // for the root prefix, if any.
-    static std::vector<StringView> decompose(StringView path,
-                                             HostType hostType);
+    static std::vector<std::string_view> decompose(std::string_view path,
+                                                   HostType hostType);
     static std::vector<std::string> decompose(std::string&& path,
                                               HostType hostType);
-    static std::vector<StringView> decompose(const char* path,
-                                             HostType hostType) {
-        return decompose(StringView(path), hostType);
+    static std::vector<std::string_view> decompose(const char* path,
+                                                   HostType hostType) {
+        return decompose(std::string_view(path), hostType);
     }
     static std::vector<std::string> decompose(const std::string& path,
                                               HostType hostType);
@@ -225,14 +297,14 @@ public:
 
     // Decompose |path| into individual components for the host platform.
     // See comments above for more details.
-    static std::vector<StringView> decompose(StringView path) {
+    static std::vector<std::string_view> decompose(std::string_view path) {
         return decompose(path, HOST_TYPE);
     }
     static std::vector<std::string> decompose(std::string&& path) {
         return decompose(std::move(path), HOST_TYPE);
     }
-    static std::vector<StringView> decompose(const char* path) {
-        return decompose(StringView(path));
+    static std::vector<std::string_view> decompose(const char* path) {
+        return decompose(std::string_view(path));
     }
 
     // Recompose a path from individual components into a file path string.
@@ -241,8 +313,9 @@ public:
     // first component is a root prefix, it will be kept as is, i.e.:
     //   [ 'C:', 'foo' ] -> 'C:foo' on Win32, but not Posix where it will
     // be 'C:/foo'.
-    static std::string recompose(const std::vector<StringView>& components,
-                                 HostType hostType);
+    static std::string recompose(
+            const std::vector<std::string_view>& components,
+            HostType hostType);
     static std::string recompose(const std::vector<std::string>& components,
                                  HostType hostType);
     template <class String>
@@ -261,7 +334,7 @@ public:
     // by removing instances of '.' and '..' when that makes sense.
     // Note that it is not possible to simplify initial instances of
     // '..', i.e. "foo/../../bar" -> "../bar"
-    static void simplifyComponents(std::vector<StringView>* components);
+    static void simplifyComponents(std::vector<std::string_view>* components);
     static void simplifyComponents(std::vector<std::string>* components);
     template <class String>
     static void simplifyComponents(std::vector<String>* components);
@@ -276,31 +349,39 @@ public:
     // AppData\Local\Android\Sdk.
     // If |base| is not a prefix of |path|, fails by returning
     // the original |path| unmodified.
-    static std::string relativeTo(StringView base, StringView path, HostType hostType);
-    static std::string relativeTo(StringView base, StringView path) {
+    static std::string relativeTo(const std::string& base,
+                                  const std::string& path,
+                                  HostType hostType);
+    static std::string relativeTo(const std::string& base,
+                                  const std::string& path) {
         return relativeTo(base, path, HOST_TYPE);
     }
 
-    static Optional<std::string> pathWithoutDirs(StringView name);
-    static Optional<std::string> pathToDir(StringView name);
+    static Optional<std::string> pathWithoutDirs(std::string_view name);
+    static Optional<std::string> pathToDir(std::string_view name);
 
     // Replaces the entries ${xx} with the value of the environment variable
     // xx if it exists. Returns kNullopt if the environment variable is
     // not set or empty.
-    static Optional<std::string> pathWithEnvSubstituted(StringView path);
+    static Optional<std::string> pathWithEnvSubstituted(std::string_view path);
 
     // Replaces the entries ${xx} with the value of the environment variable
     // xx if it exists. Returns kNullopt if the environment variable is
     // not set or empty.
-    static Optional<std::string> pathWithEnvSubstituted(std::vector<StringView> decomposedPath);
+    static Optional<std::string> pathWithEnvSubstituted(
+            std::vector<std::string_view> decomposedPath);
 
     // Move a file. It works even when from and to are on different disks.
-    static bool move(StringView from, StringView to);
+    static bool move(std::string_view from, std::string_view to);
 
 #ifdef _WIN32
-    static Win32UnicodeString asUnicodePath(StringView path) { return Win32UnicodeString(path); }
+    static Win32UnicodeString asUnicodePath(std::string_view path) {
+        return Win32UnicodeString(path);
+    }
 #else
-    static CStrWrapper asUnicodePath(StringView path) { return c_str(path); }
+    static CStrWrapper asUnicodePath(std::string_view path) {
+        return c_str(path);
+    }
 #endif
 };
 
@@ -310,14 +391,14 @@ static const PathUtils::HostType kHostWin32 = PathUtils::HOST_WIN32;
 static const PathUtils::HostType kHostType = PathUtils::HOST_TYPE;
 
 template <class... Paths>
-std::string pj(StringView path1,
-                  StringView path2,
-                  Paths&&... paths) {
+std::string pj(const std::string& path1,
+               const std::string& path2,
+               Paths&&... paths) {
     return PathUtils::join(path1,
-               pj(path2, std::forward<Paths>(paths)...));
+                           pj(path2, std::forward<Paths>(paths)...));
 }
 
-std::string pj(StringView path1, StringView path2);
+std::string pj(const std::string& path1, const std::string& path2);
 
 std::string pj(const std::vector<std::string>& paths);
 

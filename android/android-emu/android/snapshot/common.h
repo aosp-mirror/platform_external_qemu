@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/interface.h"
 
@@ -25,7 +24,7 @@
 #include <stdint.h>
 
 struct SnapshotRamBlock {
-    const char* id;
+    std::string id;
     int64_t startOffset;
     uint8_t* hostPtr;
     int64_t totalSize;

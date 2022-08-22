@@ -11,9 +11,8 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
-
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace location {
@@ -24,8 +23,8 @@ public:
     // Key provided by the command-line flag
     virtual const char* userMapsKey() const = 0;
     virtual const char* androidStudioMapsKey() const = 0;
-    virtual void setUserMapsKey(const base::StringView& key) = 0;
-    virtual void setAndroidStudioMapsKey(const base::StringView& key) = 0;
+    virtual void setUserMapsKey(const std::string_view& key) = 0;
+    virtual void setAndroidStudioMapsKey(const std::string_view& key) = 0;
     static MapsKey* get();
 
 protected:

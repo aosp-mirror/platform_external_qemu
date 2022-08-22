@@ -18,10 +18,11 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/containers/SmallVector.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/Profiler.h"
-#include "android/base/StringView.h"
+
 #include "android/base/system/System.h"
 
 #include "GLcommon/GLEScontext.h"
@@ -32,6 +33,7 @@
 #include "emugl/common/logging.h"
 
 #include <algorithm>
+#include <string_view>
 
 #define SAVEABLE_TEXTURE_DEBUG 0
 
@@ -41,10 +43,11 @@
 #define D(fmt,...)
 #endif
 
-using android::base::ScopedMemoryProfiler;
 using android::base::LazyInstance;
 using android::base::MemoryProfiler;
-using android::base::StringView;
+using android::base::ScopedMemoryProfiler;
+using android::base::c_str;
+
 
 static const GLenum kTexParam[] = {
     GL_TEXTURE_MIN_FILTER,
@@ -669,24 +672,23 @@ void SaveableTexture::onSave(
                             imgData.get()[level - 1].m_depth / 2, 1);
 
                     ScopedMemoryProfiler::Callback memoryProfilerCallback =
-                        [this, level, width, height, depth]
-                        (StringView tag, StringView stage,
-                         MemoryProfiler::MemoryUsageBytes currentResident,
-                         MemoryProfiler::MemoryUsageBytes change) {
+                            [this, level, width, height, depth](
+                                    std::string_view tag,
+                                    std::string_view stage,
+                                    MemoryProfiler::MemoryUsageBytes
+                                            currentResident,
+                                    MemoryProfiler::MemoryUsageBytes change) {
+                                double megabyte = 1024.0 * 1024.0;
 
-                        double megabyte = 1024.0 * 1024.0;
-
-                        GL_LOG("%s %s: %f mb current. change: %f mb. texture:"
-                               "format 0x%x type 0x%x level 0x%x dims (%u, %u, %u)\n",
-                               c_str(tag).get(),
-                               c_str(stage).get(),
-                               (double)currentResident / megabyte,
-                               (double)change / megabyte,
-                               m_format,
-                               m_type,
-                               level,
-                               width, height, depth);
-                    };
+                                GL_LOG("%s %s: %f mb current. change: %f mb. "
+                                       "texture:"
+                                       "format 0x%x type 0x%x level 0x%x dims "
+                                       "(%u, %u, %u)\n",
+                                       c_str(tag).get(), c_str(stage).get(),
+                                       (double)currentResident / megabyte,
+                                       (double)change / megabyte, m_format,
+                                       m_type, level, width, height, depth);
+                            };
 
                     ScopedMemoryProfiler mem("saveTexture", memoryProfilerCallback);
 

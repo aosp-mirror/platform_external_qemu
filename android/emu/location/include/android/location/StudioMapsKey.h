@@ -12,15 +12,10 @@
 #pragma once
 
 #include <functional>
-#include <iosfwd>                   // for string
-
-#include "android/base/StringView.h"
+#include <iosfwd>  // for string
+#include <string_view>
 
 namespace android {
-namespace base {
-class StringView;
-}  // namespace base
-
 namespace location {
 
 class StudioMapsKey {
@@ -28,7 +23,7 @@ public:
     // Called when the query for the maps file is complete. The path to the
     // file is returned and an opaque pointer. If the file does not exist,
     // the path will be empty.
-    using UpdateCallback = std::function<void(base::StringView, void*)>;
+    using UpdateCallback = std::function<void(std::string_view, void*)>;
 
     // Creating an instance will run a query in a background thread to
     // fetch the maps key. |cb| will be called once the query is complete.

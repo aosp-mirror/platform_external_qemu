@@ -45,7 +45,7 @@ TEST(AvdUtil, path_getAvdSystemPath) {
     std::string sdkRoot =
         pj(tmp->pathString(), "android_home");
     std::string avdConfig =
-        pj(sdkRoot, "avd", "config.ini");
+        pj({sdkRoot, "avd", "config.ini"});
     sys.envSet("ANDROID_AVD_HOME", sdkRoot);
 
     // Create an in file for the @q avd.

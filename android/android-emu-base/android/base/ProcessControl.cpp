@@ -17,6 +17,7 @@
 #include <fstream>     // for operator<<, basic_ostream
 #include <functional>  // for function, __base
 #include <sstream>
+#include <string_view>
 
 #include "android/base/FunctionView.h"         // for FunctionView
 #include "android/base/Optional.h"             // for Optional, kNullopt
@@ -164,14 +165,14 @@ ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc,
     ProcessLaunchParameters currentLaunchParams = {
             System::get()->getCurrentDirectory(),
             PathUtils::join(System::get()->getProgramDirectory(),
-                            PathUtils::decompose(argv[0]).back()),
+                            PathUtils::decompose(argv[0]).back().data()),
             makeArgvStrings(argc, (const char**)argv),
     };
     return currentLaunchParams;
 }
 
 void saveLaunchParameters(const ProcessLaunchParameters& launchParams,
-                          StringView filename) {
+                          std::string_view filename) {
     std::ofstream file(PathUtils::asUnicodePath(filename).c_str());
 
     file << launchParams.workingDirectory << std::endl;
@@ -184,7 +185,7 @@ void saveLaunchParameters(const ProcessLaunchParameters& launchParams,
     }
 }
 
-ProcessLaunchParameters loadLaunchParameters(StringView filename) {
+ProcessLaunchParameters loadLaunchParameters(std::string_view filename) {
     ProcessLaunchParameters res;
 
     std::ifstream file(PathUtils::asUnicodePath(filename).c_str());

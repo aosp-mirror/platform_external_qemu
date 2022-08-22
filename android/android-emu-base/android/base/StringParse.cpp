@@ -11,11 +11,12 @@
 
 #include "android/base/StringParse.h"
 
-#include "android/base/StringView.h"
-
 #ifdef _WIN32
+#include "android/base/files/PathUtils.h"
+
 #include <algorithm>
 #include <string>
+#include <string_view>
 #else
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
@@ -24,6 +25,7 @@
 #include <assert.h>
 #include <locale.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef __APPLE__
@@ -35,19 +37,19 @@ namespace base {
 
 #ifdef _WIN32
 
-StringView fixStringForFloats(StringView string,
-                              StringView format,
-                              std::string* fixedString) {
+std::string_view fixStringForFloats(std::string_view string,
+                                    std::string_view format,
+                                    std::string* fixedString) {
     static constexpr char floatingPointFormats[][3] = {"%f", "%g", "%a", "%E",
                                                        "%e"};
     static constexpr char decimalDot = '.';
-    const StringView decimalPoint = localeconv()->decimal_point;
+    const std::string_view decimalPoint = localeconv()->decimal_point;
     if (decimalPoint == ".") {
         return string;
     }
 
     const bool hasDecimalDot =
-            std::find(string.begin(), string.end(), decimalDot);
+            std::find(string.begin(), string.end(), decimalDot) != std::end(string);
     if (!hasDecimalDot) {
         return string;
     }

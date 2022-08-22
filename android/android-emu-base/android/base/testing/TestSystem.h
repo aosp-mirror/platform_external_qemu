@@ -21,6 +21,8 @@
 #include "android/base/threads/Thread.h"
 #include "android/utils/path.h"
 
+#include <string_view>
+
 namespace android {
 namespace base {
 
@@ -52,10 +54,10 @@ public:
     using System::getEnvironmentVariable;
     using System::getProgramDirectoryFromPlatform;
 
-    TestSystem(StringView launcherDir,
+    TestSystem(std::string_view launcherDir,
                int hostBitness,
-               StringView homeDir = "/home",
-               StringView appDataDir = "")
+               std::string_view homeDir = "/home",
+               std::string_view appDataDir = "")
         : mProgramDir(launcherDir),
           mProgramSubdir(""),
           mLauncherDir(launcherDir),
@@ -73,8 +75,7 @@ public:
           mShellFunc(NULL),
           mShellOpaque(NULL),
           mUnixTime(),
-          mPid() {
-          }
+          mPid() {}
 
     virtual ~TestSystem() {
         System::setForTesting(mPrevSystem);
@@ -87,13 +88,13 @@ public:
 
     // Set directory of currently executing binary.  This must be a subdirectory
     // of mLauncherDir and specified relative to mLauncherDir
-    void setProgramSubDir(StringView programSubDir) {
+    void setProgramSubDir(std::string_view programSubDir) {
         mProgramSubdir = programSubDir;
         if (programSubDir.empty()) {
             mProgramDir = getLauncherDirectory();
         } else {
             mProgramDir =
-                    PathUtils::join(getLauncherDirectory(), programSubDir);
+                    PathUtils::join(getLauncherDirectory(), programSubDir.data());
         }
     }
 
@@ -105,7 +106,7 @@ public:
         }
     }
 
-    void setLauncherDirectory(StringView launcherDir) {
+    void setLauncherDirectory(std::string_view launcherDir) {
         mLauncherDir = launcherDir;
         // Update directories that are suffixes of |mLauncherDir|.
         setProgramSubDir(mProgramSubdir);
@@ -113,19 +114,19 @@ public:
 
     virtual const std::string& getHomeDirectory() const override { return mHomeDir; }
 
-    void setHomeDirectory(StringView homeDir) { mHomeDir = homeDir; }
+    void setHomeDirectory(std::string_view homeDir) { mHomeDir = homeDir; }
 
     virtual const std::string& getAppDataDirectory() const override {
         return mAppDataDir;
     }
 
-    void setAppDataDirectory(StringView appDataDir) {
+    void setAppDataDirectory(std::string_view appDataDir) {
         mAppDataDir = appDataDir;
     }
 
     virtual std::string getCurrentDirectory() const override { return mCurrentDir; }
 
-    virtual bool setCurrentDirectory(StringView path) override {
+    virtual bool setCurrentDirectory(std::string_view path) override {
         mCurrentDir = path;
         return true;
     }
@@ -168,7 +169,7 @@ public:
 
     void setOsType(OsType type) { mOsType = type; }
 
-    virtual std::string envGet(StringView varname) const override {
+    virtual std::string envGet(std::string_view varname) const override {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
             const std::string& name = mEnvPairs[n];
             if (name == varname) {
@@ -188,7 +189,8 @@ public:
         return res;
     }
 
-    virtual void envSet(StringView varname, StringView varvalue) override {
+    virtual void envSet(const std::string& varname,
+                        const std::string& varvalue) override {
         // First, find if the name is in the array.
         int index = -1;
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
@@ -209,13 +211,13 @@ public:
                 mEnvPairs[index + 1] = varvalue;
             } else {
                 // Addition.
-                mEnvPairs.push_back(varname);
-                mEnvPairs.push_back(varvalue);
+                mEnvPairs.emplace_back(varname);
+                mEnvPairs.emplace_back(varvalue);
             }
         }
     }
 
-    virtual bool envTest(StringView varname) const override {
+    virtual bool envTest(std::string_view varname) const override {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
             const std::string& name = mEnvPairs[n];
             if (name == varname) {
@@ -225,31 +227,31 @@ public:
         return false;
     }
 
-    virtual bool pathExists(StringView path) const override {
+    virtual bool pathExists(std::string_view path) const override {
         return pathExistsInternal(toTempRoot(path));
     }
 
-    virtual bool pathIsFile(StringView path) const override {
+    virtual bool pathIsFile(std::string_view path) const override {
         return pathIsFileInternal(toTempRoot(path));
     }
 
-    virtual bool pathIsDir(StringView path) const override {
+    virtual bool pathIsDir(std::string_view path) const override {
         return pathIsDirInternal(toTempRoot(path));
     }
 
-    virtual bool pathIsLink(StringView path) const override {
+    virtual bool pathIsLink(std::string_view path) const override {
         return pathIsLinkInternal(toTempRoot(path));
     }
 
-    virtual bool pathCanRead(StringView path) const override {
+    virtual bool pathCanRead(std::string_view path) const override {
         return pathCanReadInternal(toTempRoot(path));
     }
 
-    virtual bool pathCanWrite(StringView path) const override {
+    virtual bool pathCanWrite(std::string_view path) const override {
         return pathCanWriteInternal(toTempRoot(path));
     }
 
-    virtual bool pathCanExec(StringView path) const override {
+    virtual bool pathCanExec(std::string_view path) const override {
         return pathCanExecInternal(toTempRoot(path));
     }
 
@@ -257,20 +259,21 @@ public:
         return pathOpenInternal(filename, oflag, pmode);
     }
 
-    virtual bool deleteFile(StringView path) const override {
+    virtual bool deleteFile(std::string_view path) const override {
         return deleteFileInternal(toTempRoot(path));
     }
 
-    virtual bool pathFileSize(StringView path,
+    virtual bool pathFileSize(std::string_view path,
                               FileSize* outFileSize) const override {
         return pathFileSizeInternal(toTempRoot(path), outFileSize);
     }
 
-    virtual FileSize recursiveSize(StringView path) const override {
+    virtual FileSize recursiveSize(std::string_view path) const override {
         return recursiveSizeInternal(toTempRoot(path));
     }
 
-    virtual bool pathFreeSpace(StringView path, FileSize* sizeInBytes) const override {
+    virtual bool pathFreeSpace(std::string_view path,
+                               FileSize* sizeInBytes) const override {
         return pathFreeSpaceInternal(toTempRoot(path), sizeInBytes);
     }
 
@@ -278,8 +281,9 @@ public:
         return fileSizeInternal(fd, outFileSize);
     }
 
-    virtual Optional<std::string> which(StringView executable) const override {
-      return mWhich;
+    virtual Optional<std::string> which(
+            std::string_view executable) const override {
+        return mWhich;
     }
 
     void setWhich(Optional<std::string> which) {
@@ -287,16 +291,16 @@ public:
     }
 
     virtual Optional<Duration> pathCreationTime(
-            StringView path) const override {
+            std::string_view path) const override {
         return pathCreationTimeInternal(toTempRoot(path));
     }
 
     virtual Optional<Duration> pathModificationTime(
-            StringView path) const override {
+            std::string_view path) const override {
         return pathModificationTimeInternal(toTempRoot(path));
     }
 
-    Optional<DiskKind> pathDiskKind(StringView path) override {
+    Optional<DiskKind> pathDiskKind(std::string_view path) override {
         return diskKindInternal(toTempRoot(path));
     }
     Optional<DiskKind> diskKind(int fd) override {
@@ -304,7 +308,7 @@ public:
     }
 
     virtual std::vector<std::string> scanDirEntries(
-            StringView dirPath,
+            std::string_view dirPath,
             bool fullPath = false) const override {
         getTempRoot();  // make sure we have a temp root;
 
@@ -338,7 +342,7 @@ public:
     // Force the remote session type. If |sessionType| is NULL or empty,
     // this sets the session as local. Otherwise, |*sessionType| must be
     // a session type.
-    void setRemoteSessionType(StringView sessionType) {
+    void setRemoteSessionType(std::string_view sessionType) {
         mIsRemoteSession = !sessionType.empty();
         if (mIsRemoteSession) {
             mRemoteSessionType = sessionType;
@@ -456,17 +460,18 @@ public:
     }
 
 private:
-    std::string toTempRoot(StringView pathView) const {
-        std::string path = pathView;
+    std::string toTempRoot(std::string_view pathView) const {
+        std::string path(pathView);
         if (!PathUtils::isAbsolute(path)) {
             auto currdir = getCurrentDirectory();
             path = currdir + PATH_SEP + path;
         }
 
         // mTempRootPrefix ends with a dir separator, ignore it for comparison.
-        StringView prefix(mTempRootPrefix.c_str(), mTempRootPrefix.size() - 1);
+        std::string_view prefix(mTempRootPrefix.c_str(),
+                                mTempRootPrefix.size() - 1);
         if (prefix.size() <= path.size() &&
-            prefix == StringView(path.c_str(), prefix.size()) &&
+            prefix == std::string_view(path.c_str(), prefix.size()) &&
             (prefix.size() == path.size() ||
              PathUtils::isDirSeparator(path[prefix.size()]))) {
             // Avoid prepending prefix if it's already there.

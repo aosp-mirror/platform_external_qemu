@@ -25,7 +25,7 @@
 #include <vector>   // for vector
 
 #include "android/base/Log.h"                        // for LogStreamVoidify
-#include "android/base/StringView.h"                 // for StringView
+
 #include "android/base/files/PathUtils.h"            // for PathUtils
 #include "android/base/memory/LazyInstance.h"        // for LazyInstance
 #include "android/base/memory/SharedMemory.h"        // for SharedMemory

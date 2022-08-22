@@ -13,24 +13,24 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/StringView.h"
+#include <string_view>
 
 namespace android {
 namespace perflogger {
 
 // OpenGL benchmarks
 void logDrawCallOverheadTest(
-    base::StringView glVendor,
-    base::StringView glRenderer,
-    base::StringView glVersion,
-    // |variant|: drawArrays, drawElements, drawSwitchVao, drawSwitchVap
-    base::StringView variant,
-    // |indirectionLevel|: fullStack, decoder, or host
-    base::StringView indirectionLevel,
-    int count,
-    long rateHz,
-    long wallTime,
-    long threadCpuTimeUs);
+        std::string_view glVendor,
+        std::string_view glRenderer,
+        std::string_view glVersion,
+        // |variant|: drawArrays, drawElements, drawSwitchVao, drawSwitchVap
+        std::string_view variant,
+        // |indirectionLevel|: fullStack, decoder, or host
+        std::string_view indirectionLevel,
+        int count,
+        long rateHz,
+        long wallTime,
+        long threadCpuTimeUs);
 
 } // namespace perflogger
 } // namespace android

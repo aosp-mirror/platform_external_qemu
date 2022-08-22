@@ -23,6 +23,7 @@
 #include <functional>     // for __base
 #include <iterator>       // for end
 #include <memory>         // for unique_ptr
+#include <string_view>
 #include <type_traits>    // for decay<>::type
 #include <unordered_set>  // for unordered_set<>...
 #include <utility>        // for hash
@@ -75,8 +76,8 @@ using android::base::PathUtils;
 using android::base::ScopedCPtr;
 using android::base::ScopedFd;
 using android::base::StringFormat;
-using android::base::StringView;
 using android::base::System;
+
 
 using android::featurecontrol::Feature;
 
@@ -92,11 +93,11 @@ namespace android {
 namespace snapshot {
 
 static void fillImageInfo(pb::Image::Type type,
-                          StringView path,
+                          const char* path,
                           pb::Image* image) {
     image->set_type(type);
-    *image->mutable_path() = path;
-    if (path.empty() || !path_is_regular(c_str(path))) {
+    image->set_path(path ? path : "");
+    if (!path || std::string(path).empty() || !path_is_regular(c_str(path))) {
         image->set_present(false);
         return;
     }
@@ -110,22 +111,21 @@ static void fillImageInfo(pb::Image::Type type,
 }
 
 static bool verifyImageInfo(pb::Image::Type type,
-                            StringView path,
+                            const char* path,
                             const pb::Image& in) {
-    auto pathStr = path.str();
-
+    std::string pathStr(path ? path : "");
     if (in.type() != type) {
         return false;
     }
     const bool savedPresent = in.has_present() && in.present();
-    const bool realPresent = !path.empty() && path_is_regular(c_str(path));
+    const bool realPresent = !pathStr.empty() && path_is_regular(pathStr.data());
     if (savedPresent != realPresent) {
         return false;
     }
     struct stat st;
     static_assert(sizeof(st.st_size >= sizeof(uint64_t)),
                   "Bad size member in struct stat, fix build options");
-    if (android_stat(c_str(path), &st) != 0) {
+    if (android_stat(pathStr.data(), &st) != 0) {
         if (in.has_size() || in.has_modification_time()) {
             return false;
         }
@@ -402,7 +402,7 @@ static_assert(kFeatureOffset < 1024, "Too many features to include in the featur
 static constexpr int kVersion = (kVersionBase << 10) + kFeatureOffset;
 static constexpr int kMaxSaveStatsHistory = 10;
 
-base::StringView Snapshot::dataDir(const char* name) {
+std::string Snapshot::dataDir(const char* name) {
     return getSnapshotDir(name);
 }
 
@@ -525,7 +525,8 @@ bool Snapshot::save() {
         }
     }
 
-    auto path = PathUtils::join(avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()),
+    const char* contentPath = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
+    auto path = PathUtils::join(contentPath ? contentPath : "",
                                 base::kLaunchParamsFileName);
     if (System::get()->pathExists(path)) {
         // TODO(yahan@): -read-only emulators might not have this file.
@@ -885,7 +886,7 @@ void Snapshot::incrementInvalidLoads() {
 }
 
 bool Snapshot::isImported() {
-    return !getQcow2Files(dataDir()).empty();
+    return !getQcow2Files(dataDir().data()).empty();
 }
 static bool replace(std::string& src,
                     const std::string& what,

@@ -166,6 +166,7 @@
 #include <memory>
 #include <sstream>  // NOLINT
 #include <string>   // NOLINT
+#include <string_view>
 #include <vector>   // NOLINT
 
 #include <gmock/gmock-matchers.h>
@@ -181,7 +182,6 @@
 #include <google/protobuf/util/message_differencer.h>
 
 #include "android/base/Log.h"
-#include "android/base/StringView.h"
 
 namespace android {
 
@@ -663,7 +663,7 @@ public:
         return MatchAndExplain(&input, listener);
     }
 
-    bool MatchAndExplain(android::base::StringView sp,
+    bool MatchAndExplain(std::string_view sp,
                          ::testing::MatchResultListener* listener) const {
         google::protobuf::io::ArrayInputStream input(sp.data(), sp.size());
         return MatchAndExplain(&input, listener);

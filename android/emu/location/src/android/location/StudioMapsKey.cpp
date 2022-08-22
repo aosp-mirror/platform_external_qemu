@@ -18,10 +18,11 @@
 #include <stdlib.h>                              // for size_t, free
 #include <fstream>                               // for char_traits, string
 #include <string>                                // for basic_string
+#include <string_view>
 
 #include "android/base/Compiler.h"               // for DISALLOW_COPY_AND_AS...
 #include "android/base/Optional.h"               // for Optional
-#include "android/base/StringView.h"             // for CStrWrapper, StringV...
+
 #include "android/base/files/PathUtils.h"        // for PathUtils
 #include "android/base/system/System.h"          // for System
 #include "android/base/threads/FunctorThread.h"  // for FunctorThread
@@ -39,8 +40,8 @@
 #endif
 
 using android::base::PathUtils;
-using android::base::StringView;
 using android::base::System;
+
 
 namespace android {
 namespace location {

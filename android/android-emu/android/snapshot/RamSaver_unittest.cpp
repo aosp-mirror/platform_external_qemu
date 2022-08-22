@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/base/AlignedBuf.h"
-#include "android/base/StringView.h"
+
 #include "android/base/misc/FileUtils.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/snapshot/RamSnapshotTesting.h"
@@ -19,11 +19,12 @@
 
 #include <memory>
 #include <random>
+#include <string_view>
 #include <vector>
 
 using android::AlignedBuf;
-using android::base::StringView;
 using android::base::TestTempDir;
+
 
 namespace android {
 namespace snapshot {
@@ -39,7 +40,7 @@ protected:
 
 static void checkFileEqualToBuffer(const uint8_t* buffer,
                                    size_t size,
-                                   StringView filename) {
+                                   std::string_view filename) {
     const auto fileContents = android::readFileIntoString(filename);
 
     EXPECT_TRUE(fileContents);

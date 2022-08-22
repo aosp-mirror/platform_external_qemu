@@ -12,13 +12,15 @@
 #include "android/utils/tempfile.h"
 
 #include "android/utils/file_io.h"
-#include "android/base/StringView.h"
+
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 
 #include <gtest/gtest.h>
 
-static bool fileExists(android::base::StringView filename) {
+#include <string_view>
+
+static bool fileExists(std::string_view filename) {
     return android::base::System::get()->pathExists(filename);
 }
 

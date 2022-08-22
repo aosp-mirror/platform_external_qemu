@@ -11,8 +11,6 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
-
 #include <string>
 #include <type_traits>
 #include <utility>

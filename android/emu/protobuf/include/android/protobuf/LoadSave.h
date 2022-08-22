@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/base/system/System.h"
 
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 
 #include <functional>
+#include <string_view>
 
 namespace android {
 namespace protobuf {
@@ -44,18 +44,20 @@ using ProtobufSaveCallback =
     std::function<ProtobufSaveResult(google::protobuf::io::FileOutputStream& stream,
                                      android::base::System::FileSize*)>;
 
-ProtobufLoadResult loadProtobufFileImpl(android::base::StringView fileName,
-                                        android::base::System::FileSize* bytesUsed,
-                                        ProtobufLoadCallback loadCb);
-ProtobufSaveResult saveProtobufFileImpl(android::base::StringView fileName,
-                                        android::base::System::FileSize* bytesUsed,
-                                        ProtobufSaveCallback saveCb);
+ProtobufLoadResult loadProtobufFileImpl(
+        std::string_view fileName,
+        android::base::System::FileSize* bytesUsed,
+        ProtobufLoadCallback loadCb);
+ProtobufSaveResult saveProtobufFileImpl(
+        std::string_view fileName,
+        android::base::System::FileSize* bytesUsed,
+        ProtobufSaveCallback saveCb);
 
 template <class T>
-ProtobufLoadResult loadProtobuf(android::base::StringView fileName,
-                                T& toLoad,
-                                android::base::System::FileSize*
-                                bytesUsed = nullptr) {
+ProtobufLoadResult loadProtobuf(
+        std::string_view fileName,
+        T& toLoad,
+        android::base::System::FileSize* bytesUsed = nullptr) {
     return
         loadProtobufFileImpl(
             fileName,
@@ -70,10 +72,10 @@ ProtobufLoadResult loadProtobuf(android::base::StringView fileName,
 }
 
 template <class T>
-ProtobufSaveResult saveProtobuf(android::base::StringView fileName,
-                                const T& toSave,
-                                android::base::System::FileSize*
-                                bytesUsed = nullptr) {
+ProtobufSaveResult saveProtobuf(
+        std::string_view fileName,
+        const T& toSave,
+        android::base::System::FileSize* bytesUsed = nullptr) {
     return
         saveProtobufFileImpl(
             fileName, bytesUsed,

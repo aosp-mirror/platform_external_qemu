@@ -15,7 +15,7 @@
 #include "android/metrics/MetricsReporter.h"
 
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
+
 #include "android/metrics/tests/MockMetricsReporter.h"
 #include "android/metrics/tests/MockMetricsWriter.h"
 #include "android/utils/system.h"
@@ -23,6 +23,8 @@
 #include "studio_stats.pb.h"
 
 #include <gtest/gtest.h>
+
+#include <string_view>
 
 using namespace android::base;
 using namespace android::metrics;
@@ -41,9 +43,9 @@ public:
     Optional<MockMetricsReporter> mReporter;
 
     void createReporter(bool enabled = true,
-                        StringView ver = kVersion,
-                        StringView fullVer = kFullVersion,
-                        StringView qemuVer = kQemuVersion) {
+                        std::string_view ver = kVersion,
+                        std::string_view fullVer = kFullVersion,
+                        std::string_view qemuVer = kQemuVersion) {
         mReporter.emplace(enabled, mWriter, ver, fullVer, qemuVer);
     }
 };

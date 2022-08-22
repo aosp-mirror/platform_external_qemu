@@ -45,7 +45,7 @@ std::string getAvdDir() {
 
 std::string getSnapshotBaseDir() {
     auto avdDir = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
-    auto path = base::PathUtils::join(avdDir, "snapshots");
+    auto path = base::PathUtils::join(avdDir ? avdDir : "", "snapshots");
     return path;
 }
 
@@ -70,7 +70,7 @@ base::System::FileSize folderSize(const std::string& snapshotName) {
 
 std::string getQuickbootChoiceIniPath() {
     auto avdDir = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
-    auto path = base::PathUtils::join(avdDir, "quickbootChoice.ini");
+    auto path = base::PathUtils::join(avdDir ? avdDir : "", "quickbootChoice.ini");
     return path;
 }
 

@@ -10,13 +10,13 @@
 // GNU General Public License for more details.
 
 // Some free functions for manipulating strings as URIs. Wherever possible,
-// these functions take const references to StringView to avoid unnecessary
-// copies.
+// these functions take const references to std::string_view to avoid
+// unnecessary copies.
 
-#include "android/base/StringView.h"
 #include "android/base/StringFormat.h"
 
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -27,28 +27,27 @@ class Uri {
 public:
     // |Encode| is aggressive -- it will always encode a reserved character,
     // disregarding a possibly included URL scheme.
-    static std::string Encode(StringView uri);
+    static std::string Encode(std::string_view uri);
 
     // |Decode| is aggressive. It will decode every occurance of %XX in a single
     // pass -- even for unreserved characters.
     // Returns empty string on error.
-    static std::string Decode(StringView uri);
+    static std::string Decode(std::string_view uri);
 
     // Set of functions for arguments encoding
     struct FormatHelper {
         // Anything which can potentially have encodable character goes here and
         // is encoded into a const char*
-        static std::string encodeArg(StringView str);
+        static std::string encodeArg(std::string_view str);
 
-        // Forward the rest as-is (non-StringView types)
+        // Forward the rest as-is (non-std::string_view types)
         template <class T>
-        static T&& encodeArg(T&& t,
+        static T&& encodeArg(
+                T&& t,
                 typename std::enable_if<
-                    !std::is_convertible<
-                        typename std::decay<T>::type, StringView
-                    >::value
-                >::type* = nullptr) {
-
+                        !std::is_convertible<typename std::decay<T>::type,
+                                             std::string_view>::value>::type* =
+                        nullptr) {
             // Don't allow single char parameters as they have a '%c' format
             // specifier but potentially may encode into a whole string. This
             // is very confusing for the user (which format to use - %c or %s?)

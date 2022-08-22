@@ -14,13 +14,14 @@
 #include "android/avd/generate.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/FileUtils.h"
-#include "android/base/StringView.h"
+
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/utils/path.h"
 
 #include <memory>
+#include <string_view>
 
 #include <gtest/gtest.h>
 
@@ -67,7 +68,7 @@ protected:
         System::get()->envSet("ANDROID_HOME", prevEnvAndroidHome);
     }
 
-    std::string makeSdkAt(StringView dir) {
+    std::string makeSdkAt(std::string_view dir) {
         std::string root = mTempDir->makeSubPath(dir);
         std::string platforms = PathUtils::join(root, "platforms");
         std::string platformTools = PathUtils::join(root, "platform-tools");
@@ -84,7 +85,7 @@ protected:
         return root;
     }
 
-    std::string makeSdkHomeAt(StringView dir) {
+    std::string makeSdkHomeAt(std::string_view dir) {
         std::string root = mTempDir->makeSubPath(dir);
         std::string avdRoot = PathUtils::join(root, "avd");
 
@@ -96,12 +97,12 @@ protected:
         return root;
     }
 
-    void setSdkRoot(StringView sdkRoot) {
-        System::get()->envSet("ANDROID_SDK_ROOT", sdkRoot);
+    void setSdkRoot(std::string_view sdkRoot) {
+        System::get()->envSet("ANDROID_SDK_ROOT", sdkRoot.data());
     }
 
-    void setSdkHome(StringView sdkHome) {
-        System::get()->envSet("ANDROID_SDK_HOME", sdkHome);
+    void setSdkHome(std::string_view sdkHome) {
+        System::get()->envSet("ANDROID_SDK_HOME", sdkHome.data());
     }
 
     std::string launchEmulatorWithResult(
@@ -208,13 +209,12 @@ protected:
         return hasMainLoopStartup && hasColdBootChoice;
     }
 
-    void runAvdTest(StringView avdName,
-                    StringView sdkRoot,
-                    StringView sdkHome,
-                    StringView androidTarget,
-                    StringView variant,
-                    StringView abi) {
-
+    void runAvdTest(std::string_view avdName,
+                    std::string_view sdkRoot,
+                    std::string_view sdkHome,
+                    std::string_view androidTarget,
+                    std::string_view variant,
+                    std::string_view abi) {
         auto sdkRootPath = makeSdkAt(sdkRoot);
         auto sdkHomePath = makeSdkHomeAt(sdkHome);
 
@@ -229,12 +229,12 @@ protected:
         std::string kernelOutput;
         auto result =
             launchEmulatorWithResult(
-                    {"-avd", avdName},
+                    {"-avd", avdName.data()},
                     kLaunchTimeoutMs,
                     &kernelOutput);
 
         // Print the result for posterity.
-        std::string avdNameAsStr = avdName.str();
+        std::string avdNameAsStr(avdName);
         printf("Kernel startup run result for avd %s:\n", avdNameAsStr.c_str());
         printf("%s\n", result.c_str());
         printf("Kernel output: %s\n", kernelOutput.c_str());
@@ -257,14 +257,14 @@ private:
     std::vector<std::string> mCustomDirs;
 
     std::string testdataSdkDir() {
-        return pj(System::get()->getProgramDirectory(),
-                  "testdata", "test-sdk");
+        return pj({System::get()->getProgramDirectory(),
+                  "testdata", "test-sdk"});
     }
 
     // Copy the skin files over. Only nexus_5x supported for now.
-    void sdkSetup_copySkinFiles(StringView sdkRoot) {
-        auto skinDirSrc = pj(testdataSdkDir(), "skins", "nexus_5x");
-        auto skinDirDst = pj(sdkRoot, "skins", "nexus_5x");
+    void sdkSetup_copySkinFiles(std::string_view sdkRoot) {
+        auto skinDirSrc = pj({testdataSdkDir(), "skins", "nexus_5x"});
+        auto skinDirDst = pj({sdkRoot.data(), "skins", "nexus_5x"});
 
         path_mkdir_if_needed(skinDirDst.c_str(), 0755);
 
@@ -285,29 +285,29 @@ private:
         }
     }
 
-    void sdkSetup_copySystemImageFiles(StringView sdkRoot) {
+    void sdkSetup_copySystemImageFiles(std::string_view sdkRoot) {
         // Only API 19 Google APIs ARMv7 supported for now.
         sdkSetup_copySystemImage(
             sdkRoot, "android-19", "google_apis", "armeabi-v7a");
     }
 
-    void sdkSetup_copySystemImage(StringView sdkRoot,
-                                  StringView androidTarget,
-                                  StringView variant,
-                                  StringView abi) {
+    void sdkSetup_copySystemImage(std::string_view sdkRoot,
+                                  std::string_view androidTarget,
+                                  std::string_view variant,
+                                  std::string_view abi) {
         auto testSdkSysImgDir =
-            pj(testdataSdkDir(),
+            pj({testdataSdkDir(),
                "system-images",
-               androidTarget,
-               variant,
-               abi);
+               androidTarget.data(),
+               variant.data(),
+               abi.data()});
 
         auto testSdkSysImgDstDir =
-            pj(sdkRoot,
+            pj({sdkRoot.data(),
                "system-images",
-               androidTarget,
-               variant,
-               abi);
+               androidTarget.data(),
+               variant.data(),
+               abi.data()});
 
         path_mkdir_if_needed(testSdkSysImgDstDir.c_str(), 0755);
 

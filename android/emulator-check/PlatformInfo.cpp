@@ -11,8 +11,6 @@
 
 #include "android/emulator-check/PlatformInfo.h"
 
-#include "android/base/StringView.h"
-
 #ifdef __linux__
 #include "android/base/system/System.h"
 
@@ -21,6 +19,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 #include <ctype.h>
@@ -158,9 +157,9 @@ static std::string getLinuxDesktopEnvironmentName() {
 
 std::string getWindowManagerName() {
 #ifdef _WIN32
-    return android::base::StringView("Windows");
+    return "Windows";
 #elif defined(__APPLE__)
-    return android::base::StringView("Mac");
+    return "Mac";
 #elif defined(__linux__)
     return getLinuxWindowManagerName();
 #else
@@ -171,9 +170,9 @@ std::string getWindowManagerName() {
 
 std::string getDesktopEnvironmentName() {
 #ifdef _WIN32
-    return android::base::StringView("Windows");
+    return "Windows";
 #elif defined(__APPLE__)
-    return android::base::StringView("Mac");
+    return "Mac";
 #elif defined(__linux__)
     return getLinuxDesktopEnvironmentName();
 #else

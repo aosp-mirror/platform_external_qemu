@@ -10,12 +10,14 @@
 // GNU General Public License for more details.
 
 // Some free functions for manipulating strings as URIs. Wherever possible,
-// these functions take const references to StringView to avoid unnecessary
-// copies.
+// these functions take const references to std::string_view to avoid
+// unnecessary copies.
 
 #include "android/base/Uri.h"
 
 #include "android/base/StringFormat.h"
+
+#include <string_view>
 
 #include <stdlib.h>
 
@@ -54,7 +56,7 @@ static void appendEncodedChar(char c, std::string* res) {
 }
 
 // static
-std::string Uri::Encode(StringView uri) {
+std::string Uri::Encode(std::string_view uri) {
     std::string encodedUri;
     encodedUri.reserve(uri.size());
     for (const char c : uri) {
@@ -64,10 +66,10 @@ std::string Uri::Encode(StringView uri) {
 }
 
 // static
-std::string Uri::Decode(StringView uri) {
+std::string Uri::Decode(std::string_view uri) {
     std::string decodedUri;
     decodedUri.reserve(uri.size());
-    for (StringView::const_iterator cit = uri.begin(); cit != uri.end();
+    for (std::string_view::const_iterator cit = uri.begin(); cit != uri.end();
          ++cit) {
         if (*cit == '%') {
             char hex[3];
@@ -97,7 +99,7 @@ std::string Uri::Decode(StringView uri) {
     return decodedUri;
 }
 
-std::string Uri::FormatHelper::encodeArg(StringView str) {
+std::string Uri::FormatHelper::encodeArg(std::string_view str) {
     return Uri::Encode(str);
 }
 

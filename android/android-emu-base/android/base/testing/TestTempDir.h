@@ -17,10 +17,12 @@
 #include "android/base/Compiler.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
-#include "android/base/StringView.h"
+
 #include "android/base/Uuid.h"
 #include "android/base/files/PathUtils.h"
 #include "android/utils/file_io.h"
+
+#include <string_view>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -55,7 +57,7 @@ class TestTempDir {
 public:
     // Create new instance. This also tries to create a new temporary
     // directory. |debugPrefix| is an optional name prefix and can be NULL.
-    TestTempDir(StringView debugName) {
+    TestTempDir(std::string_view debugName) {
         std::string temp_dir = getTempPath();
         if (!debugName.empty()) {
             temp_dir += debugName;
@@ -98,12 +100,12 @@ public:
     }
 
     // Create the path of a directory entry under the temporary directory.
-    std::string makeSubPath(StringView subpath) {
-        return StringFormat("%s/%s", mPath, subpath);
+    std::string makeSubPath(std::string_view subpath) {
+        return StringFormat("%s/%s", mPath, subpath.data());
     }
 
     // Create an empty directory under the temporary directory.
-    bool makeSubDir(StringView subdir) {
+    bool makeSubDir(std::string_view subdir) {
         std::string path = makeSubPath(subdir);
         if (android_mkdir(path.c_str(), 0755) < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
@@ -113,7 +115,7 @@ public:
     }
 
     // Create an empty file under the temporary directory.
-    bool makeSubFile(StringView file) {
+    bool makeSubFile(std::string_view file) {
         std::string path = makeSubPath(file);
         int fd = ::android_open(path.c_str(), O_WRONLY | O_CREAT, 0744);
         if (fd < 0) {

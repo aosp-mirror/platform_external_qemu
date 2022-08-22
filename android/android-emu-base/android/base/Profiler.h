@@ -14,12 +14,14 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/StringView.h"
+
+#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
 
 #include <functional>
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace base {
@@ -50,22 +52,23 @@ private:
 
 class ScopedMemoryProfiler {
 public:
-    using Callback = std::function<void(StringView, StringView,
+    using Callback = std::function<void(std::string_view,
+                                        std::string_view,
                                         MemoryProfiler::MemoryUsageBytes,
                                         MemoryProfiler::MemoryUsageBytes)>;
 
-    ScopedMemoryProfiler(StringView tag) : mProfiler(), mTag(tag) {
+    ScopedMemoryProfiler(std::string_view tag) : mProfiler(), mTag(tag) {
         mProfiler.start();
         check("(start)");
     }
 
-    ScopedMemoryProfiler(StringView tag, Callback c)
+    ScopedMemoryProfiler(std::string_view tag, Callback c)
         : mProfiler(), mTag(tag), mCallback(c) {
         mProfiler.start();
         check("(start)");
     }
 
-    void check(StringView stage = "") {
+    void check(std::string_view stage = "") {
         int64_t currRes = mProfiler.queryCurrentResident();
         mCallback(mTag.c_str(), stage,
                   currRes, currRes - mProfiler.queryStartResident());
@@ -79,9 +82,10 @@ private:
     MemoryProfiler mProfiler;
     std::string mTag;
 
-    Callback mCallback = { [](StringView tag, StringView stage,
-                              MemoryProfiler::MemoryUsageBytes currentResident,
-                              MemoryProfiler::MemoryUsageBytes change) {
+    Callback mCallback = {[](std::string_view tag,
+                             std::string_view stage,
+                             MemoryProfiler::MemoryUsageBytes currentResident,
+                             MemoryProfiler::MemoryUsageBytes change) {
         double megabyte = 1024.0 * 1024.0;
         derror("%s %s: %f mb current. change: %f mb",
                 c_str(tag).get(), c_str(stage).get(),

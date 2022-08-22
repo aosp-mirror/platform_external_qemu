@@ -12,7 +12,6 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/memory/OnDemand.h"
 #include "android/base/synchronization/Lock.h"
@@ -51,6 +50,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Ui {
@@ -410,8 +410,8 @@ public:
     }
 
 private:
-    static const android::base::StringView kRemoteDownloadsDir;
-    static const android::base::StringView kRemoteDownloadsDirApi10;
+    static const std::string_view kRemoteDownloadsDir;
+    static const std::string_view kRemoteDownloadsDirApi10;
     // When the main window appears, close the "Starting..."
     // pop-up, if it was displayed.
     void showEvent(QShowEvent* event) override;
@@ -440,12 +440,12 @@ private:
 
     void runAdbInstall(const QString& path);
     void installDone(android::emulation::ApkInstaller::Result result,
-                     android::base::StringView errorString);
+                     std::string_view errorString);
 
     static const int kPushProgressBarMax;
     void runAdbPush(const QList<QUrl>& urls);
     void adbPushProgress(double progress, bool done);
-    void adbPushDone(android::base::StringView filePath,
+    void adbPushDone(std::string_view filePath,
                      android::emulation::FilePusher::Result result);
 
     void runAdbShellPowerDownAndQuit();

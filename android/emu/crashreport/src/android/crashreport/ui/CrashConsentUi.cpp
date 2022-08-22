@@ -20,10 +20,10 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
-#include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/cmdline-definitions.h"
@@ -151,12 +151,12 @@ private:
         return report;
     }
 
-    std::string readFile(android::base::StringView path) {
+    std::string readFile(std::string_view path) {
         std::ifstream is(base::PathUtils::asUnicodePath(path).c_str());
 
         if (!is) {
             std::string errmsg;
-            errmsg = std::string("Error, Can't open file ") + path.str() +
+            errmsg = std::string("Error, Can't open file ") + path.data() +
                      " for reading. Errno=" + std::to_string(errno);
             return errmsg;
         }

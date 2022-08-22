@@ -12,27 +12,28 @@
 #pragma once
 
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
+
 #include "android/base/files/FileShareOpen.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 
+#include <string_view>
 #include <vector>
 
 namespace android {
 namespace snapshot {
 
 void createCheckpoint(android::AsyncMessagePipeHandle pipe,
-                      android::base::StringView name);
+                      std::string_view name);
 
 void gotoCheckpoint(
         AsyncMessagePipeHandle pipe,
-        android::base::StringView name,
-        android::base::StringView metadata,
+        std::string_view name,
+        std::string_view metadata,
         android::base::Optional<android::base::FileShare> shareMode);
 
 void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe, int forkTotal);
 void doneInstance(android::AsyncMessagePipeHandle pipe,
-        android::base::StringView metadata);
+                  std::string_view metadata);
 
 void onOffworldSave(base::Stream* stream);
 void onOffworldLoad(base::Stream* stream);

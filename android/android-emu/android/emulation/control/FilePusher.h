@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
 #include "android/emulation/control/adb/AdbInterface.h"

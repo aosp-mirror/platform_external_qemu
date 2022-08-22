@@ -14,10 +14,10 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/base/Version.h"
 
 #include <string>
+#include <string_view>
 
 namespace android {
 enum class SdkComponentType { PlatformTools, Tools };
@@ -25,7 +25,6 @@ enum class SdkComponentType { PlatformTools, Tools };
 // A utility function to extract version number from Sdk Root Directory among
 // various components.
 
-android::base::Version getCurrentSdkVersion(
-        android::base::StringView sdkRootDirectory,
-        SdkComponentType type);
+android::base::Version getCurrentSdkVersion(std::string_view sdkRootDirectory,
+                                            SdkComponentType type);
 }  // namespace android

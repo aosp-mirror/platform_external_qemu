@@ -12,6 +12,7 @@
 
 #include <assert.h>     // for assert
 #include <stdio.h>      // for FILE, stdout
+#include <string_view>
 #include <type_traits>  // for swap, integral...
 #include <utility>      // for move
 
@@ -86,9 +87,9 @@ AEMU_METRICS_API void set_unittest_Reporter(MetricsReporter::Ptr newPtr) {
 }
 
 void MetricsReporter::start(const std::string& sessionId,
-                            base::StringView emulatorVersion,
-                            base::StringView emulatorFullVersion,
-                            base::StringView qemuVersion) {
+                            std::string_view emulatorVersion,
+                            std::string_view emulatorFullVersion,
+                            std::string_view qemuVersion) {
     MetricsWriter::Ptr writer;
     if (getConsoleAgents()
                 ->settings->android_cmdLineOptions()
@@ -182,9 +183,9 @@ void MetricsReporter::report(Callback callback) {
 
 MetricsReporter::MetricsReporter(bool enabled,
                                  MetricsWriter::Ptr writer,
-                                 base::StringView emulatorVersion,
-                                 base::StringView emulatorFullVersion,
-                                 base::StringView qemuVersion)
+                                 std::string_view emulatorVersion,
+                                 std::string_view emulatorFullVersion,
+                                 std::string_view qemuVersion)
     : mWriter(std::move(writer)),
       mEnabled(enabled),
       mStartTimeMs(System::get()->getUnixTimeUs() / 1000),
@@ -207,7 +208,7 @@ const std::string& MetricsReporter::sessionId() const {
     return mWriter->sessionId();
 }
 
-std::string MetricsReporter::anonymize(base::StringView s) {
+std::string MetricsReporter::anonymize(std::string_view s) {
     picosha2::hash256_one_by_one hasher;
     hasher.process(s.begin(), s.end());
     const auto salt = this->salt();

@@ -19,6 +19,7 @@ extern "C" {
 
 #include <atomic>
 #include <memory>
+#include <string_view>
 #include <utility>
 
 // These need to go after all STL headers, as they define some macros that make
@@ -34,7 +35,7 @@ namespace qemu {
 CpuLooper::CpuLooper(int cpuNo)
     : mCpuNo(cpuNo), mName(base::StringFormat("QEMU2 CPU%d thread", cpuNo)) {}
 
-base::StringView CpuLooper::name() const {
+std::string_view CpuLooper::name() const {
     return mName;
 }
 

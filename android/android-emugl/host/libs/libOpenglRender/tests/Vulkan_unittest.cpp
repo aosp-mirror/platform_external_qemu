@@ -48,14 +48,14 @@ namespace emugl {
 
 static std::string libDir() {
     return
-        pj(TestSystem::getProgramDirectoryFromPlatform(),
+        pj({TestSystem::getProgramDirectoryFromPlatform(),
 #ifdef _WIN32
            // Windows uses mock Vulkan ICD.
            "testlib64"
 #else
            "lib64", "vulkan"
 #endif
-        );
+        });
 }
 
 static std::string testIcdFilename() {

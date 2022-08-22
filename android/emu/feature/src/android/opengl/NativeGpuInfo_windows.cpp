@@ -15,7 +15,7 @@
 #include "android/opengl/NativeGpuInfo.h"
 
 #include "android/base/StringFormat.h"
-#include "android/base/StringView.h"
+
 #include "android/base/Uuid.h"
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/PathUtils.h"
@@ -35,6 +35,7 @@
 
 #include <algorithm>
 #include <string>
+#include <string_view>
 #include <tuple>
 
 using android::base::makeCustomScopedPtr;
@@ -43,10 +44,10 @@ using android::base::RunOptions;
 using android::base::SmallFixedVector;
 using android::base::startsWith;
 using android::base::StringFormat;
-using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;
 using android::base::Win32UnicodeString;
+
 
 static std::string& toLower(std::string& s) {
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
@@ -334,7 +335,7 @@ void getGpuInfoListNative(GpuInfoList* gpus) {
 
         // Now try inspecting the registry directly; |device|.DeviceKey can be a
         // path to the GPU information key.
-        static constexpr StringView prefix = "\\Registry\\Machine\\";
+        static constexpr std::string_view prefix = "\\Registry\\Machine\\";
         if (startsWith(Win32UnicodeString::convertToUtf8(device.DeviceKey),
                        prefix)) {
             load_gpu_registry_info(device.DeviceKey + prefix.size(), &gpu);

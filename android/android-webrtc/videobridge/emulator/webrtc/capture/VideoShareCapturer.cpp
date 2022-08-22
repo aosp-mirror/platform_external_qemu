@@ -13,6 +13,8 @@
 // limitations under the License.
 #include "VideoShareCapturer.h"
 
+#include <string_view>
+
 #include <api/video/video_frame.h>         // for VideoFrame, VideoFrame...
 #include <api/video/video_frame_buffer.h>  // for VideoFrameBuffer
 #include <api/video/video_rotation.h>      // for kVideoRotation_0
@@ -21,8 +23,7 @@
 #include <stddef.h>                        // for size_t
 #include <string.h>                        // for memcpy
 
-#include "android/base/StringView.h"           // for StringView
-#include "android/base/memory/SharedMemory.h"  // for SharedMemory, StringView
+#include "android/base/memory/SharedMemory.h"  // for SharedMemory, std::string_view
 #include "api/video/i420_buffer.h"             // for I420Buffer
 #include "libyuv/convert.h"                    // for ConvertToI420
 #include "libyuv/rotate.h"                     // for kRotate0

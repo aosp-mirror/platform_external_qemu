@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
+
 #include "android/cpu_accelerator.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulator-check/PlatformInfo.h"
@@ -18,12 +18,13 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+#include <string_view>
 #include <tuple>
 
 #include <stdio.h>
 #include <stdlib.h>
 
-using android::base::StringView;
+
 using CommandReturn = std::pair<int, std::string>;
 
 static const int kGenericError = 100;
@@ -129,7 +130,7 @@ static int processArguments(int argc, const char* const* argv) {
     android::base::Optional<int> retCode;
 
     for (int i = 1; i < argc; ++i) {
-        const StringView arg = argv[i];
+        const std::string_view arg = argv[i];
         const auto opt = std::find_if(
                 std::begin(options), std::end(options),
                 [arg](const Option& opt) { return arg == opt.arg; });

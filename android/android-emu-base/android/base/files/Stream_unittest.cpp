@@ -242,6 +242,34 @@ TEST(Stream, putString) {
     }
 }
 
+TEST(Stream, putStringEmpty) {
+    static const char kInput[] = "";
+    static const uint8_t kExpected[] = {
+        0x00, 0x00, 0x00, 0x00,
+    };
+    uint8_t buffer[32];
+    memset(buffer, 0xff, sizeof(buffer));
+    MemoryStream stream(buffer, sizeof(buffer));
+    stream.putString(kInput);
+    for (size_t n = 0; n < sizeof(kExpected); ++n) {
+        EXPECT_EQ(kExpected[n], buffer[n]) << "#" << n;
+    }
+}
+
+TEST(Stream, putStringNull) {
+    static const char* kInput = nullptr;
+    static const uint8_t kExpected[] = {
+        0x00, 0x00, 0x00, 0x00,
+    };
+    uint8_t buffer[32];
+    memset(buffer, 0xff, sizeof(buffer));
+    MemoryStream stream(buffer, sizeof(buffer));
+    stream.putString(kInput);
+    for (size_t n = 0; n < sizeof(kExpected); ++n) {
+        EXPECT_EQ(kExpected[n], buffer[n]) << "#" << n;
+    }
+}
+
 TEST(Stream, getString) {
     static const uint8_t kInput[] = {
         0x00, 0x00, 0x00, 0x0b,

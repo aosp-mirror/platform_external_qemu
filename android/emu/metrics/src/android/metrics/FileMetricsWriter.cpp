@@ -25,6 +25,8 @@
 #include "google_logs_publishing.pb.h"
 #include "studio_stats.pb.h"
 
+#include <string_view>
+
 #include <assert.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -36,9 +38,9 @@ using android::base::Looper;
 using android::base::makeCustomScopedPtr;
 using android::base::PathUtils;
 using android::base::StringFormat;
-using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;
+
 
 namespace android {
 namespace metrics {
@@ -52,8 +54,8 @@ static constexpr int kCommonOpenFlags = O_CLOEXEC;
 #endif
 
 // Extensions for an active temporary logging file and for the finalized one.
-static constexpr StringView kTempExtension = ".open";
-static constexpr StringView kFinalExtension = ".trk";
+static constexpr std::string_view kTempExtension = ".open";
+static constexpr std::string_view kFinalExtension = ".trk";
 
 // A limit for a counter appended to the log filename to enable multiple files
 // with the same session ID.
@@ -62,19 +64,19 @@ static constexpr int kMaxFilenameCounter = 1000000;
 static constexpr int kMaxFileOperationTries = 1000;
 
 // Create a log filename with the passed |sessionId|, |counter| and |extension|.
-static std::string formatFilename(StringView sessionId,
+static std::string formatFilename(std::string_view sessionId,
                                   int counter,
-                                  StringView extension) {
-    return StringFormat("emulator-metrics-%s-%d-%d%s", sessionId,
+                                  std::string_view extension) {
+    return StringFormat("emulator-metrics-%s-%d-%d%s", sessionId.data(),
                         static_cast<int>(System::get()->getCurrentProcessId()),
-                        counter, extension);
+                        counter, extension.data());
 }
 
 // A cross-platform function to rename an |from| file to |to| name only if |to|
 // doesn't exist.
 // On POSIX one needs to make sure the |to| doesn't exist, otherwise it will be
 // owerwritten. On Windows rename() never overwrites target.
-static bool renameIfNotExists(StringView from, StringView to) {
+static bool renameIfNotExists(std::string_view from, std::string_view to) {
 #ifdef _WIN32
     return rename(c_str(from), c_str(to)) == 0;
 #else
@@ -91,7 +93,7 @@ static bool renameIfNotExists(StringView from, StringView to) {
 #endif
 }
 
-FileMetricsWriter::FileMetricsWriter(StringView spoolDir,
+FileMetricsWriter::FileMetricsWriter(std::string_view spoolDir,
                                      const std::string& sessionId,
                                      int recordCountLimit,
                                      Looper* looper,
@@ -113,7 +115,7 @@ FileMetricsWriter::FileMetricsWriter(StringView spoolDir,
     openNewFileNoLock();
 }
 
-FileMetricsWriter::Ptr FileMetricsWriter::create(StringView spoolDir,
+FileMetricsWriter::Ptr FileMetricsWriter::create(std::string_view spoolDir,
                                                  const std::string& sessionId,
                                                  int recordCountLimit,
                                                  Looper* looper,
@@ -134,7 +136,7 @@ FileMetricsWriter::finalizeAbandonedSessionFilesFromDefault() {
 }
 
 MetricsWriter::AbandonedSessions
-FileMetricsWriter::finalizeAbandonedSessionFiles(StringView spoolDir) {
+FileMetricsWriter::finalizeAbandonedSessionFiles(std::string_view spoolDir) {
     AbandonedSessions abandonedSessions;
     const std::vector<std::string> files =
             System::get()->scanDirEntries(spoolDir);
@@ -145,13 +147,13 @@ FileMetricsWriter::finalizeAbandonedSessionFiles(StringView spoolDir) {
 
         // try to lock the file to find out if it's abandoned
         const auto lock = makeCustomScopedPtr(
-                filelock_create(PathUtils::join(spoolDir, file).c_str()),
+                filelock_create(PathUtils::join(spoolDir.data(), file).c_str()),
                 filelock_release);
         if (!lock) {
             continue;
         }
 
-        if (!System::get()->pathIsFile(PathUtils::join(spoolDir, file))) {
+        if (!System::get()->pathIsFile(PathUtils::join(spoolDir.data(), file))) {
             D("Saw a ghost file right before it disappeared from the file "
               "system; most probably a rename: '%s'",
               file.c_str());
@@ -172,11 +174,11 @@ FileMetricsWriter::finalizeAbandonedSessionFiles(StringView spoolDir) {
                     &filenameCounter,
                     [spoolDir, &sessionId, &filenameCounter, &file]() -> bool {
                         const std::string finalName = PathUtils::join(
-                                spoolDir,
+                                spoolDir.data(),
                                 formatFilename(sessionId, filenameCounter,
                                                kFinalExtension));
                         return renameIfNotExists(
-                                PathUtils::join(spoolDir, file), finalName);
+                                PathUtils::join(spoolDir.data(), file), finalName);
                     })) {
             W("failed to rename an abandoned log file '%s'", file.c_str());
         }

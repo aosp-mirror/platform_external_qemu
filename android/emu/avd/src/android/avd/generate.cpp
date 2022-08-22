@@ -19,12 +19,14 @@
 #include "android/utils/path.h"
 
 #include <string>
+#include <string_view>
 
 #include <stdio.h>
 
 using android::base::IniFile;
+using android::base::c_str;
 using android::base::pj;
-using android::base::StringView;
+
 
 void generateAvd(const AvdGenerateInfo& genInfo) {
     std::string name = genInfo.name;
@@ -114,43 +116,36 @@ void generateAvd(const AvdGenerateInfo& genInfo) {
     configIni.write();
 }
 
-void generateAvdWithDefaults(StringView avdName,
-                             StringView sdkRootPath,
-                             StringView sdkHomePath,
-                             StringView androidTarget,
-                             StringView variant,
-                             StringView abi) {
-
+void generateAvdWithDefaults(std::string_view avdName,
+                             std::string_view sdkRootPath,
+                             std::string_view sdkHomePath,
+                             std::string_view androidTarget,
+                             std::string_view variant,
+                             std::string_view abi) {
     std::string cpuArch("arm");
     std::string cpuModel("cortex-a8");
 
     // TODO: Figure out the other correspondences
     // between system image abi, base arch, and cpu model
-    if (abi.str() == "armeabi-v7a") {
+    if (abi == "armeabi-v7a") {
         cpuArch = "arm";
         cpuModel = "cortex-a8";
-    } else if (abi.str() == "arm64-v8a") {
+    } else if (abi == "arm64-v8a") {
         cpuArch = "arm";
         cpuModel = "cortex-a15";
-    } else if (abi.str() == "x86") {
+    } else if (abi == "x86") {
         cpuArch = "x86";
         cpuModel = "";
-    } else if (abi.str() == "x86_64") {
+    } else if (abi == "x86_64") {
         cpuArch = "x86_64";
         cpuModel = "";
     }
 
     std::string sysDir =
-        pj(sdkRootPath,
-           "system-images",
-           androidTarget,
-           variant,
-           abi);
+        pj({sdkRootPath.data(), "system-images", androidTarget.data(), variant.data(), abi.data()});
 
     std::string skinDir =
-        pj(sdkRootPath,
-           "skins",
-           "nexus_5x");
+        pj({sdkRootPath.data(), "skins", "nexus_5x"});
 
     AvdGenerateInfo genInfo = {
         // sdk home dir, target
@@ -212,12 +207,11 @@ void generateAvdWithDefaults(StringView avdName,
     generateAvd(genInfo);
 }
 
-void deleteAvd(StringView avdName,
-               StringView sdkHomePath) {
+void deleteAvd(std::string_view avdName, std::string_view sdkHomePath) {
     auto avdIniPath =
-        pj(sdkHomePath, "avd", avdName.str() + ".ini");
+        pj({sdkHomePath.data(), "avd", std::string(avdName) + ".ini"});
     auto avdFolderPath =
-        pj(sdkHomePath, "avd", avdName.str() + ".avd");
+        pj({sdkHomePath.data(), "avd", std::string(avdName) + ".avd"});
 
     path_delete_file(avdIniPath.c_str());
     path_delete_dir(avdFolderPath.c_str());

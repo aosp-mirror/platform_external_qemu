@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace base {
@@ -151,7 +152,7 @@ TEST(IpAddress, ConstructorFromStringIpv6) {
 TEST(IpAddress, toStringIpv4) {
     static const struct {
         uint32_t input;
-        StringView expected;
+        std::string_view expected;
     } kData[] = {
             {0x00000000U, "0.0.0.0"},
             {0x7f000001U, "127.0.0.1"},
@@ -167,7 +168,7 @@ TEST(IpAddress, toStringIpv4) {
 TEST(IpAddress, toStringIpv6) {
     static const struct {
         uint8_t input[16];
-        StringView expected;
+        std::string_view expected;
     } kData[] = {
             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, "::"},
             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, "::1"},

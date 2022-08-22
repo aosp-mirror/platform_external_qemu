@@ -25,11 +25,11 @@
 
 #include <atomic>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
 using android::base::PathUtils;
-using android::base::StringView;
 using android::base::System;
 using android::emulation::AdbInterface;
 using android::emulation::FilePusher;
@@ -49,15 +49,15 @@ public:
         mLooper = new android::base::TestLooper();
         mAdb = AdbInterface::Builder().setLooper(mLooper).setAdbLocator(new StaticAdbLocator({ {"adb", 40 }})).build();
         mAdb->setSerialNumberPort(0);
-        mFilePusher.reset(
-            new FilePusher(mAdb.get(),
-                           [this](StringView filePath, FilePusher::Result result) {
-                               mResults.push_back({filePath, result});
-                               mAtomicNumCommands--;
-                            },
-                            [this](double progress, bool done) {
-                                mProgresses.push_back({progress, done});
-                            }));
+        mFilePusher.reset(new FilePusher(
+                mAdb.get(),
+                [this](std::string_view filePath, FilePusher::Result result) {
+                    mResults.push_back({filePath.data(), result});
+                    mAtomicNumCommands--;
+                },
+                [this](double progress, bool done) {
+                    mProgresses.push_back({progress, done});
+                }));
         // By default, the 'adb push' command will always block.
         mTestSystem->setShellCommand(&FilePusherTest::fakeShellCommand, this);
         mAtomicNumCommands = 0;

@@ -113,6 +113,7 @@
 #include <array>
 #include <cmath>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #ifdef __linux__
@@ -133,13 +134,13 @@ using android::base::Lock;
 using android::base::makeOptional;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
-using android::base::StringView;
 using android::base::System;
 using android::crashreport::CrashReporter;
 using android::emulation::ApkInstaller;
 using android::emulation::FilePusher;
 using android::virtualscene::TextureUtils;
 using std::string;
+
 using std::vector;
 
 // Make sure it is POD here
@@ -147,7 +148,8 @@ static LazyInstance<EmulatorQtWindow::Ptr> sInstance = LAZY_INSTANCE_INIT;
 
 // static
 const int EmulatorQtWindow::kPushProgressBarMax = 2000;
-const StringView EmulatorQtWindow::kRemoteDownloadsDir = "/sdcard/Download/";
+const std::string_view EmulatorQtWindow::kRemoteDownloadsDir =
+        "/sdcard/Download/";
 
 constexpr Qt::WindowFlags EmulatorQtWindow::FRAMED_WINDOW_FLAGS;
 constexpr Qt::WindowFlags EmulatorQtWindow::FRAMELESS_WINDOW_FLAGS;
@@ -155,7 +157,7 @@ constexpr Qt::WindowFlags EmulatorQtWindow::FRAME_WINDOW_FLAGS_MASK;
 
 // Gingerbread devices download files to the following directory (note the
 // uncapitalized "download").
-const StringView EmulatorQtWindow::kRemoteDownloadsDirApi10 =
+const std::string_view EmulatorQtWindow::kRemoteDownloadsDirApi10 =
         "/sdcard/download/";
 
 // Place to tell everyone we're exiting
@@ -432,7 +434,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mFilePusher([this] {
           return std::make_tuple(
                   (*mAdbInterface),
-                  [this](StringView filePath, FilePusher::Result result) {
+                  [this](std::string_view filePath, FilePusher::Result result) {
                       runOnUiThread([this, filePath, result] {
                           adbPushDone(filePath, result);
                       });
@@ -2297,7 +2299,7 @@ void EmulatorQtWindow::runAdbInstall(const QString& path) {
 }
 
 void EmulatorQtWindow::installDone(ApkInstaller::Result result,
-                                   StringView errorString) {
+                                   std::string_view errorString) {
     mInstallDialog->hide();
 
     QString msg;
@@ -2338,11 +2340,12 @@ void EmulatorQtWindow::installDone(ApkInstaller::Result result,
 
 void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
     std::vector<std::pair<std::string, std::string>> file_paths;
-    StringView remoteDownloadsDir = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) > 10
-                                            ? kRemoteDownloadsDir
-                                            : kRemoteDownloadsDirApi10;
+    std::string_view remoteDownloadsDir =
+            avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) > 10
+                    ? kRemoteDownloadsDir
+                    : kRemoteDownloadsDirApi10;
     for (const auto& url : urls) {
-        string remoteFile = PathUtils::join(remoteDownloadsDir,
+        string remoteFile = PathUtils::join(remoteDownloadsDir.data(),
                                             url.fileName().toStdString());
         file_paths.push_back(
                 std::make_pair(url.toLocalFile().toStdString(), remoteFile));
@@ -2387,7 +2390,7 @@ void EmulatorQtWindow::adbPushProgress(double progress, bool done) {
     mPushDialog->show();
 }
 
-void EmulatorQtWindow::adbPushDone(StringView filePath,
+void EmulatorQtWindow::adbPushDone(std::string_view filePath,
                                    FilePusher::Result result) {
     QString msg;
     switch (result) {

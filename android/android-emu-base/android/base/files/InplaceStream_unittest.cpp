@@ -11,6 +11,10 @@
 
 #include "android/base/files/InplaceStream.h"
 
+#include "android/base/files/PathUtils.h"
+
+#include <string_view>
+
 #include <gtest/gtest.h>
 
 #include <stdint.h>
@@ -115,10 +119,10 @@ TEST(InplaceStream, saveLoad) {
     InplaceStream stream(&testbuf[0], bufsize);
     const int val = 1;
     const float fval = 2.;
-    const StringView sval = "333 as string";
+    const std::string_view sval = "333 as string";
     stream.putBe32(val);
     stream.putFloat(fval);
-    stream.putString(sval);
+    stream.putString(sval.data());
 
     std::vector<char> savebuf(bufsize + 4);
     InplaceStream saveStream(&savebuf[0], bufsize + 4);

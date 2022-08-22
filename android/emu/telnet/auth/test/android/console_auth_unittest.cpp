@@ -18,7 +18,6 @@
 #include <fstream>                             // for ofstream, operator<<
 #include <string>                              // for string
 
-#include "android/base/StringView.h"           // for CStrWrapper, StringView
 #include "android/base/files/PathUtils.h"      // for pj, PathUtils
 #include "android/base/files/ScopedFd.h"       // for ScopedFd
 #include "android/base/misc/FileUtils.h"       // for readFileIntoString

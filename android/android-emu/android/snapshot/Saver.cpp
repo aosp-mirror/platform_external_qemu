@@ -20,23 +20,28 @@
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 
+#include <string_view>
+
 using android::base::c_str;
 using android::base::PathUtils;
 using android::base::StdioStream;
-using android::base::StringView;
 using android::base::System;
 
 namespace android {
 namespace snapshot {
 
-Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
-             base::StringView ramMapFile, bool ramFileShared, bool isRemapping)
+Saver::Saver(const Snapshot& snapshot,
+             RamLoader* loader,
+             bool isOnExit,
+             std::string_view ramMapFile,
+             bool ramFileShared,
+             bool isRemapping)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (path_mkdir_if_needed_no_cow(c_str(mSnapshot.dataDir()), 0777) != 0) {
         return;
     }
     {
-        const auto ramFile = PathUtils::join(mSnapshot.dataDir(), kRamFileName);
+        const auto ramFile = PathUtils::join(mSnapshot.dataDir().data(), kRamFileName);
         auto flags = RamSaver::Flags::None;
 
         // If we're using a file-backed RAM that is writing through,
@@ -111,7 +116,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
 
     {
         const auto textures = android::base::fsopen(
-                PathUtils::join(mSnapshot.dataDir(), kTexturesFileName).c_str(),
+                PathUtils::join(mSnapshot.dataDir().data(), kTexturesFileName).c_str(),
                 "wb", android::base::FileShare::Write);
         if (!textures) {
             mRamSaver.clear();

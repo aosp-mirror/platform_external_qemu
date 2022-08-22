@@ -12,7 +12,7 @@
 #include "android/base/Debug.h"
 
 #include "android/base/ArraySize.h"
-#include "android/base/StringView.h"
+#include "android/base/files/PathUtils.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -20,6 +20,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #elif defined(__APPLE__)
 #include <sys/sysctl.h>
 #include <sys/types.h>
@@ -32,7 +33,7 @@ namespace android {
 namespace base {
 
 #ifdef __linux__
-static std::string readFile(StringView path) {
+static std::string readFile(std::string_view path) {
     std::ifstream is(c_str(path));
 
     if (!is) {
@@ -51,7 +52,7 @@ bool IsDebuggerAttached() {
 #elif defined(__linux__)
     std::string procStatus = readFile("/proc/self/status");
 
-    static constexpr StringView kTracerPidPrefix = "TracerPid:";
+    static constexpr std::string_view kTracerPidPrefix = "TracerPid:";
     const auto tracerPid = procStatus.find(kTracerPidPrefix.data());
     if (tracerPid == std::string::npos) {
         return false;

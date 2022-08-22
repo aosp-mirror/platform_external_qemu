@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace update_check {
@@ -27,8 +28,7 @@ using android::studio::UpdateChannel;
 
 class MockVersionExtractor : public IVersionExtractor {
 public:
-    virtual Versions extractVersions(
-            android::base::StringView data) const override {
+    virtual Versions extractVersions(std::string_view data) const override {
         ++mExtractVersionCallCount;
         EXPECT_EQ(mExtractVersionDataParam, data);
         return mExtractVersionResult ? Versions{{UpdateChannel::Canary,

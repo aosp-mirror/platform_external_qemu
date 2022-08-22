@@ -19,17 +19,19 @@
 #include "EGLDispatch.h"
 
 #include "android/base/misc/StringUtils.h"
-#include "android/base/StringView.h"
+
+#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/misc.h"
 
 #include <algorithm>
+#include <string_view>
 
 using android::base::c_str;
 using android::base::OsType;
-using android::base::StringView;
 using android::base::System;
+
 
 // Config + context attributes to query the underlying OpenGL if it is
 // a OpenGL ES backend. Only try for OpenGL ES 3, and assume OpenGL ES 2
@@ -163,7 +165,7 @@ bool shouldEnableCoreProfile() {
 void sAddExtensionIfSupported(GLESDispatchMaxVersion currVersion,
                               const std::string& from,
                               GLESDispatchMaxVersion extVersion,
-                              StringView ext,
+                              std::string_view ext,
                               std::string& to) {
     // If we chose a GLES version less than or equal to
     // the |extVersion| the extension |ext| is tagged with,
@@ -175,8 +177,7 @@ void sAddExtensionIfSupported(GLESDispatchMaxVersion currVersion,
     }
 }
 
-static bool sWhitelistedExtensionsGLES2(StringView hostExt) {
-
+static bool sWhitelistedExtensionsGLES2(std::string_view hostExt) {
 #define WHITELIST(ext) \
     if (hostExt == #ext) return true; \
 
@@ -235,7 +236,7 @@ std::string filterExtensionsBasedOnMaxVersion(GLESDispatchMaxVersion ver,
 
     std::string filteredExtensions;
     filteredExtensions.reserve(4096);
-    auto add = [ver, &filteredExtensions](StringView hostExt) {
+    auto add = [ver, &filteredExtensions](std::string_view hostExt) {
         if (!hostExt.empty() &&
             sWhitelistedExtensionsGLES2(hostExt)) {
             filteredExtensions += hostExt;

@@ -12,11 +12,11 @@
 #pragma once
 
 #include "android/base/Version.h"
-#include "android/base/StringView.h"
 
 #include "android/metrics/StudioConfig.h"
 
 #include <map>
+#include <string_view>
 
 namespace android {
 namespace update_check {
@@ -25,7 +25,7 @@ namespace update_check {
 // with their update channels from the xml manifest
 class IVersionExtractor {
 public:
-    using StringView = android::base::StringView;
+
     using UpdateChannel = android::studio::UpdateChannel;
     using Version = android::base::Version;
 
@@ -33,7 +33,7 @@ public:
 
     // Returns the list of the versions by channel extracted from the |data|,
     // or empty collection if the data format is incorrect
-    virtual Versions extractVersions(StringView data) const = 0;
+    virtual Versions extractVersions(std::string_view data) const = 0;
 
     // Returns the current application version
     virtual Version getCurrentVersion() const = 0;

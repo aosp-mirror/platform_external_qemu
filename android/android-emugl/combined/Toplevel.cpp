@@ -678,8 +678,8 @@ private:
     }
 
     void setupGralloc() {
-        auto grallocPath = pj(System::get()->getProgramDirectory(), "lib64",
-                              "gralloc.ranchu" LIBSUFFIX);
+        auto grallocPath = pj({System::get()->getProgramDirectory(), "lib64",
+                              "gralloc.ranchu" LIBSUFFIX});
 
         load_gralloc_module(grallocPath.c_str(), &mGralloc);
         set_global_gralloc_module(&mGralloc);

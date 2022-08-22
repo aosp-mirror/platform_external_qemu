@@ -1,7 +1,6 @@
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/FeatureControlImpl.h"
 
-#include "android/base/StringView.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
@@ -9,6 +8,7 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace featurecontrol {
@@ -19,11 +19,10 @@ public:
     void SetUp() override;
 
 protected:
-
-    void writeDefaultIniHost(android::base::StringView data);
-    void writeDefaultIniGuest(android::base::StringView data);
-    void writeUserIniHost(android::base::StringView data);
-    void writeUserIniGuest(android::base::StringView data);
+    void writeDefaultIniHost(std::string_view data);
+    void writeDefaultIniGuest(std::string_view data);
+    void writeUserIniHost(std::string_view data);
+    void writeUserIniGuest(std::string_view data);
     void loadAllIni();
     std::unique_ptr<android::base::TestTempDir> mTempDir;
     std::string mDefaultIniHostFilePath;
@@ -38,8 +37,7 @@ protected:
     std::string mAllDefaultIniGuestOnly;
 
 private:
-    void writeIni(android::base::StringView filename,
-                  android::base::StringView data);
+    void writeIni(std::string_view filename, std::string_view data);
 };
 
 } // namespace featurecontrol

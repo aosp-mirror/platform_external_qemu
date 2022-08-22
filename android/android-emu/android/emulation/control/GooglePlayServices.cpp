@@ -20,17 +20,17 @@
 
 #include <istream>
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace emulation {
 
-using android::base::StringView;
 using android::base::System;
 using std::string;
 
 // static
 const System::Duration GooglePlayServices::kAdbCommandTimeoutMs = 5000;
-constexpr StringView GooglePlayServices::kPlayServicesPkgName;
+constexpr std::string_view GooglePlayServices::kPlayServicesPkgName;
 
 GooglePlayServices::~GooglePlayServices() {
     if (mServicesPageCommand) {
@@ -53,7 +53,7 @@ bool GooglePlayServices::parseOutputForVersion(std::istream& stream,
     //
     // Where <W> can be any number/kind of whitespace characters.
 
-    const StringView keystr = "versionName=";
+    const std::string_view keystr = "versionName=";
     string line;
 
     // "dumpsys package <pkgname>" may return more than one version
@@ -90,7 +90,7 @@ bool GooglePlayServices::parseOutputForVersion(std::istream& stream,
 }
 
 void GooglePlayServices::getSystemProperty(
-        android::base::StringView sysProp,
+        std::string_view sysProp,
         ResultOutputCallback resultCallback) {
     if (!mAdb) {
         return;
@@ -100,7 +100,7 @@ void GooglePlayServices::getSystemProperty(
         resultCallback(Result::OperationInProgress, "");
         return;
     }
-    std::vector<std::string> getpropCommand{"shell", "getprop", sysProp};
+    std::vector<std::string> getpropCommand{"shell", "getprop", sysProp.data()};
     mGetpropCommand = mAdb->runAdbCommand(
             getpropCommand,
             [resultCallback, this](const OptionalAdbCommandResult& result) {
@@ -148,7 +148,7 @@ void GooglePlayServices::getPlayServicesVersion(
         return;
     }
     mServicesVersionCommand = mAdb->runAdbCommand(
-            {"shell", "dumpsys", "package", kPlayServicesPkgName},
+            {"shell", "dumpsys", "package", kPlayServicesPkgName.data()},
             [this, resultCallback](const OptionalAdbCommandResult& result) {
                 if (!result || result->exit_code) {
                     resultCallback(Result::UnknownError, "");

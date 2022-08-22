@@ -20,6 +20,7 @@
 #include <functional>  // for __base
 #include <memory>      // for unique_ptr
 #include <string>      // for basic_st...
+#include <string_view>
 #include <thread>
 #include <utility>  // for move
 
@@ -351,12 +352,11 @@ static void screen_recorder_record_session(const char* cmdLineArgs) {
     // Format is <filename>,<delay[,<duration>].
     // If no duration, then record until the emulator shuts down.
     std::vector<std::string> tokens;
-    android::base::split(cmdLineArgs, ",",
-                         [&tokens](android::base::StringView s) {
-                             if (!s.empty()) {
-                                 tokens.push_back(s);
-                             }
-                         });
+    android::base::split(cmdLineArgs, ",", [&tokens](std::string_view s) {
+        if (!s.empty()) {
+            tokens.push_back(s.data());
+        }
+    });
 
     if (tokens.size() < 2) {
         derror("Not enough arguments for record-session");

@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/base/async/Looper.h"
 #include "android/base/async/ScopedSocketWatch.h"
 #include "android/base/sockets/ScopedSocket.h"
@@ -25,6 +24,7 @@
 
 #include <map>
 #include <memory>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -80,7 +80,7 @@ namespace emulation {
 //
 class AdbGuestPipe : public AndroidPipe {
 public:
-    using StringView = ::android::base::StringView;
+
     using ScopedSocket = ::android::base::ScopedSocket;
 
     // AndroidPipe::Service class
@@ -209,11 +209,11 @@ private:
 
     // Set the reply to send to the guest as |reply|, and change the state
     // to |newState|.
-    void setReply(StringView reply, State newState);
+    void setReply(std::string_view reply, State newState);
 
     // Set the expected |command| to wait from the guest, and change the
     // state to |newState|.
-    void setExpectedGuestCommand(StringView command, State newState);
+    void setExpectedGuestCommand(std::string_view command, State newState);
 
     // Try to wait for a new host connection. Change the state according to
     // whether one already occured or not.

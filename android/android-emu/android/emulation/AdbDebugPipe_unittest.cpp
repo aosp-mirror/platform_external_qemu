@@ -11,16 +11,17 @@
 
 #include "android/emulation/AdbDebugPipe.h"
 
-#include "android/base/StringView.h"
 #include "android/base/testing/TestMemoryOutputStream.h"
 #include "android/emulation/testing/TestAndroidPipeDevice.h"
 
 #include <gtest/gtest.h>
 
+#include <string_view>
+
 namespace android {
 namespace emulation {
 
-using android::base::StringView;
+
 
 TEST(AdbDebugPipe, noOutput) {
     TestAndroidPipeDevice testDevice;
@@ -28,7 +29,7 @@ TEST(AdbDebugPipe, noOutput) {
 
     auto guest = TestAndroidPipeDevice::Guest::create();
     EXPECT_EQ(0, guest->connect("qemud:adb-debug"));
-    constexpr StringView kMessage = "Hello debug world!";
+    constexpr std::string_view kMessage = "Hello debug world!";
     EXPECT_EQ(static_cast<ssize_t>(kMessage.size()),
               guest->write(kMessage.data(), kMessage.size()));
 }
@@ -40,7 +41,7 @@ TEST(AdbDebugPipe, withOutput) {
 
     auto guest = TestAndroidPipeDevice::Guest::create();
     EXPECT_EQ(0, guest->connect("qemud:adb-debug"));
-    constexpr StringView kMessage = "Hello debug world!";
+    constexpr std::string_view kMessage = "Hello debug world!";
     EXPECT_EQ(static_cast<ssize_t>(kMessage.size()),
               guest->write(kMessage.data(), kMessage.size()));
 

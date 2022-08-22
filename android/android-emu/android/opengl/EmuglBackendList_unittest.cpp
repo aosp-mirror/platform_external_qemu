@@ -28,7 +28,7 @@ using android::base::TestTempDir;
 using android::base::TestSystem;
 
 static std::string makeLibSubPath(const char* name) {
-    return pj("foo", System::kLibSubDir, name);
+    return pj({"foo", System::kLibSubDir, name});
 }
 
 static void makeLibSubDir(TestTempDir* dir, const char* name) {
@@ -112,7 +112,7 @@ TEST(EmuglBackendList, getBackendLibPath) {
 
     for (size_t n = 0; n < kDataLen; ++n) {
         std::string expected =
-            pj("/", "foo", System::kLibSubDir, "gles_bar", kData[n].libName);
+            pj({"/", "foo", System::kLibSubDir, "gles_bar", kData[n].libName});
         std::string libdir;
         EXPECT_TRUE(list.getBackendLibPath("bar", kData[n].library, &libdir));
         EXPECT_TRUE(list.contains("bar"));

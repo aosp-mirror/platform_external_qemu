@@ -15,6 +15,7 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 
 #include "android/automation/EventSource.h"
 #include "android/base/Compiler.h"
@@ -114,7 +115,7 @@ public:
     virtual DurationNs advanceTime() = 0;
 
     // Start a recording to a file.
-    virtual StartResult startRecording(android::base::StringView filename) = 0;
+    virtual StartResult startRecording(const char* filename) = 0;
 
     // Stops a recording to a file.
     virtual StopResult stopRecording() = 0;
@@ -124,26 +125,25 @@ public:
             std::shared_ptr<EventSource> source) = 0;
 
     // Start a playback from a file.
-    virtual StartResult startPlayback(android::base::StringView filename) = 0;
+    virtual StartResult startPlayback(const char* filename) = 0;
 
     // Stop playback from a file.
     virtual StopResult stopPlayback() = 0;
 
     // Start playback with stop callback.
-    virtual StartResult startPlaybackWithCallback(
-            android::base::StringView filename,
-            void (*onStopCallback)()) = 0;
+    virtual StartResult startPlaybackWithCallback(const char* filename,
+                                                  void (*onStopCallback)()) = 0;
 
     // Set the macro name in the header of a file.
-    virtual void setMacroName(android::base::StringView macroName,
-                              android::base::StringView filename) = 0;
+    virtual void setMacroName(std::string_view macroName,
+                              std::string_view filename) = 0;
 
     // Get the macro name from the header of a file.
-    virtual std::string getMacroName(android::base::StringView filename) = 0;
+    virtual std::string getMacroName(std::string_view filename) = 0;
 
     // Get the duration in ns and datetime in ms from a file.
     virtual std::pair<uint64_t, uint64_t> getMetadata(
-            android::base::StringView filename) = 0;
+            std::string_view filename) = 0;
 
     // Get the current timestamp of the looper used by the controller
     virtual uint64_t getLooperNowTimestamp() = 0;
@@ -156,8 +156,7 @@ public:
     //
 
     // Replay an initial state event from the offworld pipe.
-    virtual ReplayResult replayInitialState(
-            android::base::StringView state) = 0;
+    virtual ReplayResult replayInitialState(std::string_view state) = 0;
 
     // Replay an event through from the offworld pipe.
     //
@@ -166,7 +165,7 @@ public:
     // response.  If an error is returned, no messages will be sent to the pipe
     // and the caller should propagate the error to the user.
     virtual ReplayResult replayEvent(android::AsyncMessagePipeHandle pipe,
-                                     android::base::StringView event,
+                                     std::string_view event,
                                      uint32_t asyncId) = 0;
 
     virtual void sendEvent(const emulator_automation::RecordedEvent& event) = 0;

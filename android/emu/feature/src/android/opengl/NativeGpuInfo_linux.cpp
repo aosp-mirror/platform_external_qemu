@@ -14,7 +14,6 @@
 
 #include "android/opengl/NativeGpuInfo.h"
 
-#include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/base/memory/ScopedPtr.h"
@@ -22,13 +21,14 @@
 #include "android/base/system/System.h"
 
 #include <string>
+#include <string_view>
 
 using android::base::makeCustomScopedPtr;
 using android::base::PathUtils;
 using android::base::RunOptions;
 using android::base::ScopedFd;
-using android::base::StringView;
 using android::base::System;
+
 
 static const int kGPUInfoQueryTimeoutMs = 5000;
 

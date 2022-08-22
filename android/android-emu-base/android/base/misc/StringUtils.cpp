@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "android/utils/GfxstreamFatalError.h"
@@ -48,7 +49,7 @@ const void* memmem(const void* haystack, size_t haystackLen,
 namespace android {
 namespace base {
 
-char* strDup(StringView view) {
+char* strDup(std::string_view view) {
     // Same as strdup(str.c_str()) but avoids a strlen() call.
     char* ret = static_cast<char*>(malloc(view.size() + 1u));
     ::memcpy(ret, view.data(), view.size());
@@ -56,7 +57,7 @@ char* strDup(StringView view) {
     return ret;
 }
 
-bool strContains(StringView haystack, const char* needle) {
+bool strContains(std::string_view haystack, const char* needle) {
     return ::memmem(haystack.data(), haystack.size(), needle,
                     ::strlen(needle)) != nullptr;
 }
@@ -103,12 +104,12 @@ bool StartsWith(std::string_view s, std::string_view prefix) {
     return s.substr(0, prefix.size()) == prefix;
 }
 
-bool startsWith(StringView string, StringView prefix) {
+bool startsWith(std::string_view string, std::string_view prefix) {
     return string.size() >= prefix.size() &&
             memcmp(string.data(), prefix.data(), prefix.size()) == 0;
 }
 
-bool endsWith(StringView string, StringView suffix) {
+bool endsWith(std::string_view string, std::string_view suffix) {
     return string.size() >= suffix.size() &&
             memcmp(string.data() + string.size() - suffix.size(),
                    suffix.data(), suffix.size()) == 0;
@@ -116,9 +117,9 @@ bool endsWith(StringView string, StringView suffix) {
 
 void splitTokens(const std::string& input,
                  std::vector<std::string>* out,
-                 StringView splitBy) {
-    auto removeWhiteSpace = [out](StringView strView) {
-        std::string s = strView.str();
+                 std::string_view splitBy) {
+    auto removeWhiteSpace = [out](std::string_view strView) {
+        std::string s(strView);
         s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
         out->push_back(s);
     };

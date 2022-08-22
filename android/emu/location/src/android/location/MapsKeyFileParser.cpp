@@ -14,14 +14,13 @@
 
 #include <fstream>
 #include <sstream>
-#include <string>
 
 using android::base::PathUtils;
 
 namespace android {
 namespace location {
 
-std::string parseMapsKeyFromFile(const base::StringView& file) {
+std::string parseMapsKeyFromFile(const std::string_view& file) {
     // File is in the following format:
     //
     // xx xx xx xx ...

@@ -12,7 +12,7 @@
 #include "android/emulation/AdbGuestPipe.h"
 
 #include "android/base/Log.h"
-#include "android/base/StringView.h"
+
 #include "android/base/async/AsyncSocketServer.h"
 #include "android/base/async/Looper.h"
 #include "android/base/async/ScopedSocketWatch.h"
@@ -30,10 +30,11 @@
 #include "android/utils/debug.h"
 
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <unordered_map>
-#include <iostream>
 
 #include <assert.h>
 
@@ -172,7 +173,7 @@ using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
 using android::base::ScopedSocketWatch;
-using android::base::StringView;
+
 
 AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args,
                                            enum AndroidPipeFlags flags) {
@@ -947,7 +948,7 @@ void AdbGuestPipe::stopSocketTraffic() {
     }
 }
 
-void AdbGuestPipe::setReply(StringView reply, State newState) {
+void AdbGuestPipe::setReply(std::string_view reply, State newState) {
     CHECK(newState == State::SendingAcceptReplyOk);
     CHECK(reply.size() <= sizeof(mBuffer));
     memcpy(mBuffer, reply.data(), reply.size());
@@ -956,7 +957,8 @@ void AdbGuestPipe::setReply(StringView reply, State newState) {
     mState = newState;
 }
 
-void AdbGuestPipe::setExpectedGuestCommand(StringView command, State newState) {
+void AdbGuestPipe::setExpectedGuestCommand(std::string_view command,
+                                           State newState) {
     CHECK(newState == State::WaitingForGuestAcceptCommand ||
           newState == State::WaitingForGuestStartCommand);
     CHECK(command.size() <= sizeof(mBuffer));

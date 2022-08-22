@@ -11,6 +11,7 @@
 
 #include "android/protobuf/LoadSave.h"
 
+#include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -20,6 +21,8 @@
 
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 
+#include <string_view>
+
 #include <fcntl.h>
 #include <sys/mman.h>
 
@@ -27,13 +30,13 @@ using android::base::c_str;
 using android::base::makeCustomScopedPtr;
 using android::base::ScopedCPtr;
 using android::base::ScopedFd;
-using android::base::StringView;
 using android::base::System;
+
 
 namespace android {
 namespace protobuf {
 
-ProtobufLoadResult loadProtobufFileImpl(android::base::StringView fileName,
+ProtobufLoadResult loadProtobufFileImpl(std::string_view fileName,
                                         System::FileSize* bytesUsed,
                                         ProtobufLoadCallback loadCb) {
     const auto file = ScopedFd(
@@ -58,7 +61,7 @@ ProtobufLoadResult loadProtobufFileImpl(android::base::StringView fileName,
     return loadCb(fileMap.get(), size);
 }
 
-ProtobufSaveResult saveProtobufFileImpl(android::base::StringView fileName,
+ProtobufSaveResult saveProtobufFileImpl(std::string_view fileName,
                                         System::FileSize* bytesUsed,
                                         ProtobufSaveCallback saveCb) {
     if (bytesUsed) *bytesUsed = 0;

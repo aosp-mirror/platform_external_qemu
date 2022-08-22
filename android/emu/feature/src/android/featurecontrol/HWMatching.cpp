@@ -14,7 +14,6 @@
 
 #include "android/featurecontrol/HWMatching.h"
 
-#include "android/base/StringView.h"
 #include "android/base/Version.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"

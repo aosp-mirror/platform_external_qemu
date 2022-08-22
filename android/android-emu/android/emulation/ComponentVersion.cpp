@@ -14,12 +14,12 @@
 
 #include <cstdio>
 #include <fstream>
+#include <string_view>
 
 namespace android {
 
-using android::base::Version;
 using android::base::PathUtils;
-using android::base::StringView;
+using android::base::Version;
 
 static Version parseVersionFromSourceProperties(
         const std::string& propertiesPath) {
@@ -39,21 +39,20 @@ static Version parseVersionFromSourceProperties(
     return version;
 }
 
-static std::string getComponentPath(android::base::StringView sdkRootDirectory,
+static std::string getComponentPath(std::string_view sdkRootDirectory,
                                     SdkComponentType type) {
     switch (type) {
         case SdkComponentType::PlatformTools:
-            return PathUtils::join(sdkRootDirectory, "platform-tools");
+            return PathUtils::join(sdkRootDirectory.data(), "platform-tools");
         case SdkComponentType::Tools:
-            return PathUtils::join(sdkRootDirectory, "tools");
+            return PathUtils::join(sdkRootDirectory.data(), "tools");
         default:
             return "";
     }
 }
 
-android::base::Version getCurrentSdkVersion(
-        android::base::StringView sdkRootDirectory,
-        SdkComponentType type) {
+android::base::Version getCurrentSdkVersion(std::string_view sdkRootDirectory,
+                                            SdkComponentType type) {
     Version version = Version::invalid();
     if (!sdkRootDirectory.empty()) {
         std::string componentPath = getComponentPath(sdkRootDirectory, type);

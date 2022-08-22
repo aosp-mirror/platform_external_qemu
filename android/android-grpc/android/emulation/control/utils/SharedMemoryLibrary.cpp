@@ -14,12 +14,13 @@
 #include "android/emulation/control/utils/SharedMemoryLibrary.h"
 
 #include <cassert>  // for assert
+#include <string_view>
 #include <utility>  // for move
 
 #include "android/base/Log.h"
-#include "android/base/StringView.h"           // for StringView
+
 #include "android/base/memory/ScopedPtr.h"     // for makeCustomScopedPtr
-#include "android/base/memory/SharedMemory.h"  // for SharedMemory, StringView
+#include "android/base/memory/SharedMemory.h"  // for SharedMemory, std::string_view
 
 #define assertm(exp, msg) assert(((void)msg, exp))
 

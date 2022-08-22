@@ -14,6 +14,7 @@
 #include "android/base/async/Looper.h"
 
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace qemu {
@@ -47,7 +48,7 @@ class CpuLooper : public android::base::Looper {
 public:
     CpuLooper(int cpuNo);
 
-    base::StringView name() const override;
+    std::string_view name() const override;
 
     Duration nowMs(ClockType clockType) override;
     DurationNs nowNs(ClockType clockType) override;

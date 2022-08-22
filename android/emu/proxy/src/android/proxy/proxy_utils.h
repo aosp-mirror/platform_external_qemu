@@ -15,6 +15,7 @@
 #include "android/base/network/IpAddress.h"
 
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace proxy {
@@ -42,7 +43,7 @@ struct ParseResult {
 //
 // NOTE: This doesn't support a <username> or <password> that contain a @ or
 //       a colon. :-/
-bool parseConfigurationString(StringView str, ParseResult* out);
+bool parseConfigurationString(std::string_view str, ParseResult* out);
 
 }  // namespace proxy
 }  // namespace android

@@ -15,6 +15,8 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/metrics/MetricsReporter.h"
 
+#include <string_view>
+
 namespace android {
 namespace metrics {
 
@@ -32,9 +34,9 @@ namespace metrics {
 class AsyncMetricsReporter final : public MetricsReporter {
 public:
     AsyncMetricsReporter(MetricsWriter::Ptr writer,
-                         base::StringView emulatorVersion,
-                         base::StringView emulatorFullVersion,
-                         base::StringView qemuVersion);
+                         std::string_view emulatorVersion,
+                         std::string_view emulatorFullVersion,
+                         std::string_view qemuVersion);
     ~AsyncMetricsReporter() override;
 
     void reportConditional(ConditionalCallback callback) override;

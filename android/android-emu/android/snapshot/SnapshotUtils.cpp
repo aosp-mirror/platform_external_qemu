@@ -19,6 +19,7 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include "android/android.h"
 #include "android/avd/info.h"
@@ -80,7 +81,7 @@ bool pullSnapshot(const char* snapshotName,
                 }
             });
     if (format != FileFormat::DIRECTORY) {
-        tmpdir = pj(base::System::get()->getTempDir(), snapshot->name());
+        tmpdir = base::pj(base::System::get()->getTempDir(), snapshot->name().data());
         android_mkdir(tmpdir.data(), 0700);
     }
     const char* targetDir = outputDirectory;
@@ -101,7 +102,7 @@ bool pullSnapshot(const char* snapshotName,
                 succeed = !iniFile_saveToFile(
                         avdInfo_getConfigIni(
                                 getConsoleAgents()->settings->avdInfo()),
-                        base::PathUtils::join(snapshot->dataDir(),
+                        base::PathUtils::join(snapshot->dataDir().data(),
                                               CORE_CONFIG_INI)
                                 .c_str());
                 if (!succeed) {
@@ -111,7 +112,7 @@ bool pullSnapshot(const char* snapshotName,
                 }
 
                 std::string exportdIniPath = base::PathUtils::join(
-                        snapshot->dataDir(), "exported.ini");
+                        snapshot->dataDir().data(), "exported.ini");
                 base::IniFile exportedIni(exportdIniPath);
                 exportedIni.setString(
                         "avdId",
@@ -177,7 +178,7 @@ bool pullSnapshot(const char* snapshotName,
                         continue;
                     }
                     struct stat sb;
-                    android::base::StringView name;
+                    std::string_view name;
                     char buf[k64KB];
                     base::PathUtils::split(fname, nullptr, &name);
 
@@ -187,9 +188,9 @@ bool pullSnapshot(const char* snapshotName,
                             PathUtils::asUnicodePath(fname).c_str(),
                             std::ios_base::in | std::ios_base::binary);
                     ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
-                    dprint("Zipping %s", c_str(name).c_str());
+                    dprint("Zipping %s", base::c_str(name).c_str());
                     if (android_stat(fname.c_str(), &sb) != 0 ||
-                        !tw.addFileEntryFromStream(ifs, name, sb)) {
+                        !tw.addFileEntryFromStream(ifs, name.data(), sb)) {
                         logError("Unable to tar " + fname, opaque, errConsumer);
                         succeed = false;
                         break;

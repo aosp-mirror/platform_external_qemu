@@ -19,9 +19,9 @@
 #else  // _WIN32
 
 #include "android/base/Compiler.h"
-#include "android/base/StringView.h"
 
 #include <string>
+#include <string_view>
 
 #include <wchar.h>
 
@@ -47,7 +47,7 @@ public:
     Win32UnicodeString(const char* str, size_t len);
 
     // Initialize a new instance from an existing string instance |str|.
-    explicit Win32UnicodeString(StringView str);
+    explicit Win32UnicodeString(std::string_view str);
 
     // Initialize by reserving enough room for a string of |size| UTF-16
     // codepoints.
@@ -88,7 +88,7 @@ public:
     void reset(const char* str, size_t len);
 
     // Reset content from UTF-8 text at |str|.
-    void reset(StringView str);
+    void reset(std::string_view str);
 
     // Resize array.
     void resize(size_t newSize);

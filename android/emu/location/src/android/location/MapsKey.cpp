@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace location {
@@ -29,19 +30,19 @@ public:
     // Key provided by the command-line flag
     const char* userMapsKey() const override;
     const char* androidStudioMapsKey() const override;
-    void setUserMapsKey(const base::StringView& key) override;
-    void setAndroidStudioMapsKey(const base::StringView& Key) override;
+    void setUserMapsKey(const std::string_view& key) override;
+    void setAndroidStudioMapsKey(const std::string_view& Key) override;
 
 private:
     std::string mUserKey;
     std::string mKey;
 };
 
-void MapsKeyImpl::setUserMapsKey(const base::StringView& key) {
+void MapsKeyImpl::setUserMapsKey(const std::string_view& key) {
     mUserKey = key;
 }
 
-void MapsKeyImpl::setAndroidStudioMapsKey(const base::StringView& key) {
+void MapsKeyImpl::setAndroidStudioMapsKey(const std::string_view& key) {
     mKey = key;
 }
 

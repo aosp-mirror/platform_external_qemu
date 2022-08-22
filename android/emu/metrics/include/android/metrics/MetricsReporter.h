@@ -14,10 +14,11 @@
 #include <functional>  // for function
 #include <memory>      // for unique_ptr
 #include <string>      // for string
+#include <string_view>
 #include <vector>      // for vector
 
 #include "android/base/Compiler.h"              // for DISALLOW_COPY_ASSIGN_...
-#include "android/base/StringView.h"            // for StringView
+
 #include "android/base/synchronization/Lock.h"  // for Lock
 #include "android/base/system/System.h"         // for System, System::Duration
 #include "android/metrics/MetricsWriter.h"      // for MetricsWriter, Metric...
@@ -92,9 +93,9 @@ public:
             std::function<bool(android_studio::AndroidStudioEvent*)>;
 
     static void start(const std::string& sessionId,
-                      base::StringView emulatorVersion,
-                      base::StringView emulatorFullVersion,
-                      base::StringView qemuVersion);
+                      std::string_view emulatorVersion,
+                      std::string_view emulatorFullVersion,
+                      std::string_view qemuVersion);
     static void stop(MetricsStopReason reason);
     static MetricsReporter& get();
 
@@ -114,16 +115,16 @@ public:
     const std::string& sessionId() const;
     // Returns an anonymized copy of |s| string, using the Android Studio's
     // salt value + some hashing algorithm.
-    std::string anonymize(base::StringView s);
+    std::string anonymize(std::string_view s);
     // Returns the start time.
     base::System::Duration getStartTimeMs();
 
 protected:
     MetricsReporter(bool enabled,
                     MetricsWriter::Ptr writer,
-                    base::StringView emulatorVersion,
-                    base::StringView emulatorFullVersion,
-                    base::StringView qemuVersion);
+                    std::string_view emulatorVersion,
+                    std::string_view emulatorFullVersion,
+                    std::string_view qemuVersion);
     void sendToWriter(android_studio::AndroidStudioEvent* event);
 
 private:

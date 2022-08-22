@@ -18,12 +18,13 @@
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
 
+#include <string_view>
+
 namespace android {
 namespace emulation {
 
 using android::base::Looper;
 using android::base::ParallelTask;
-using android::base::StringView;
 using android::base::System;
 using std::string;
 using std::vector;
@@ -35,9 +36,9 @@ FilePusher::FilePusher(AdbInterface* adb,
       mProgressCallback(progressCallback
                                 ? std::move(progressCallback)
                                 : ProgressCallback([](double, bool) {})),
-      mResultCallback(resultCallback
-                              ? std::move(resultCallback)
-                              : ResultCallback([](StringView, Result) {})) {}
+      mResultCallback(resultCallback ? std::move(resultCallback)
+                                     : ResultCallback([](std::string_view,
+                                                         Result) {})) {}
 
 FilePusher::~FilePusher() {
     cancel();

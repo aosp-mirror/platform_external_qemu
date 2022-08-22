@@ -30,6 +30,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 
 using android::base::PathUtils;
@@ -76,7 +77,7 @@ bool writeStringToFile(int fd, const std::string& file_contents) {
     return true;
 }
 
-base::Optional<std::string> readFileIntoString(base::StringView name) {
+base::Optional<std::string> readFileIntoString(std::string_view name) {
     std::ifstream is(PathUtils::asUnicodePath(name).c_str(), std::ios_base::binary);
     if (!is) {
         return {};

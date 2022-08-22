@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include <string_view>
 #include <vector>
 
 using namespace android::virtualscene;
@@ -92,20 +93,22 @@ static void PrintTo(const vector<uint8_t>& vec, ostream* os) {
 }
 }  // namespace std
 
-static std::string testdataPathToAbsolute(StringView filename) {
+static std::string testdataPathToAbsolute(std::string_view filename) {
     return PathUtils::join(System::get()->getProgramDirectory(), "testdata",
-                           filename);
+                           filename.data());
 }
 
 // Load an image using TextureUtils.
-static void loadImage(StringView filename, TextureUtils::Result* outResult) {
+static void loadImage(std::string_view filename,
+                      TextureUtils::Result* outResult) {
     const std::string path = testdataPathToAbsolute(filename);
     Optional<TextureUtils::Result> result = TextureUtils::load(path.c_str());
     ASSERT_TRUE(result);
     *outResult = std::move(result.value());
 }
 
-static void loadGoldenBmp(StringView filename, TextureUtils::Result* result) {
+static void loadGoldenBmp(std::string_view filename,
+                          TextureUtils::Result* result) {
     const std::string path = testdataPathToAbsolute(filename);
 
     constexpr size_t kBmpHeaderSize = 54;

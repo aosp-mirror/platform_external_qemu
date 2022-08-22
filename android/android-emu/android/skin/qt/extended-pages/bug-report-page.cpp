@@ -31,6 +31,7 @@
 #include <fstream>                                     // for ofstream, ios_...
 #include <functional>                                  // for __base
 #include <iterator>                                    // for istreambuf_ite...
+#include <string_view>
 #include <vector>                                      // for vector
 
 #include "android/avd/info.h"                          // for avdInfo_getApi...
@@ -58,13 +59,13 @@ using android::base::PathUtils;
 using android::base::RecurrentTask;
 using android::base::StringAppendFormat;
 using android::base::StringFormat;
-using android::base::StringView;
 using android::base::System;
 using android::base::ThreadLooper;
 using android::base::Uri;
 using android::base::Uuid;
 using android::emulation::AdbInterface;
 using android::emulation::OptionalAdbCommandResult;
+
 
 static const int kDefaultUnknownAPILevel = 1000;
 static const int kReproStepsCharacterLimit = 2000;
@@ -309,7 +310,7 @@ void BugreportPage::on_bug_sendToGoogle_clicked() {
     }
 }
 
-bool BugreportPage::saveBugReportTo(StringView savingPath) {
+bool BugreportPage::saveBugReportTo(std::string_view savingPath) {
     if (savingPath.empty()) {
         return false;
     }
@@ -320,27 +321,27 @@ bool BugreportPage::saveBugReportTo(StringView savingPath) {
 
     if (mUi->bug_bugReportCheckBox->isChecked() &&
         mSavingStates.adbBugreportSucceed) {
-        StringView bugreportBaseName;
+        std::string_view bugreportBaseName;
         if (PathUtils::extension(mSavingStates.adbBugreportFilePath) ==
             ".zip") {
             bugreportBaseName = "bugreport.zip";
         } else {
             bugreportBaseName = "bugreport.txt";
         }
-        path_copy_file(PathUtils::join(savingPath, bugreportBaseName).c_str(),
+        path_copy_file(PathUtils::join(savingPath.data(), bugreportBaseName.data()).c_str(),
                        mSavingStates.adbBugreportFilePath.c_str());
     }
 
     if (mUi->bug_screenshotCheckBox->isChecked() &&
         mSavingStates.screenshotSucceed) {
-        StringView screenshotBaseName = "screenshot.png";
-        path_copy_file(PathUtils::join(savingPath, screenshotBaseName).c_str(),
+        std::string_view screenshotBaseName = "screenshot.png";
+        path_copy_file(PathUtils::join(savingPath.data(), screenshotBaseName.data()).c_str(),
                        mSavingStates.screenshotFilePath.c_str());
     }
 
     if (!mReportingFields.avdDetails.empty()) {
         auto avdDetailsFilePath =
-                PathUtils::join(savingPath, "avd_details.txt");
+                PathUtils::join(savingPath.data(), "avd_details.txt");
         saveToFile(avdDetailsFilePath, mReportingFields.avdDetails.c_str(),
                    mReportingFields.avdDetails.length());
     }
@@ -349,7 +350,7 @@ bool BugreportPage::saveBugReportTo(StringView savingPath) {
     mReproSteps = reproSteps.toStdString();
     if (!mReproSteps.empty()) {
         auto reproStepsFilePath =
-                PathUtils::join(savingPath, "repro_steps.txt");
+                PathUtils::join(savingPath.data(), "repro_steps.txt");
         saveToFile(reproStepsFilePath, mReproSteps.c_str(),
                    mReproSteps.length());
     }
@@ -508,7 +509,7 @@ void BugreportPage::loadScreenshotImage() {
     }
 }
 
-bool BugreportPage::saveToFile(StringView filePath,
+bool BugreportPage::saveToFile(std::string_view filePath,
                                const char* content,
                                size_t length) {
     std::ofstream outFile(PathUtils::asUnicodePath(filePath).c_str(),

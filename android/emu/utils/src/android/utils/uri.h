@@ -10,8 +10,8 @@
 // GNU General Public License for more details.
 
 // Some free functions for manipulating strings as URIs. Wherever possible,
-// these functions take const references to StringView to avoid unnecessary
-// copies.
+// these functions take const references to std::string_view to avoid
+// unnecessary copies.
 
 #pragma once
 

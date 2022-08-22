@@ -17,9 +17,10 @@
 #include <QWidget>                                       // for QWidget
 #include <memory>                                        // for shared_ptr
 #include <string>                                        // for string
+#include <string_view>
 
 #include "android/avd/BugreportInfo.h"                   // for BugreportInfo
-#include "android/base/StringView.h"                     // for StringView
+
 #include "android/base/async/RecurrentTask.h"            // for RecurrentTask
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbCommandPtr
 #include "android/settings-agent.h"                      // for SettingsTheme
@@ -75,8 +76,8 @@ private:
     bool launchIssueTracker();
     void enableInput(bool enabled);
     void showSpinningWheelAnimation(bool enabled);
-    bool saveBugReportTo(android::base::StringView location);
-    bool saveToFile(android::base::StringView filePath,
+    bool saveBugReportTo(std::string_view location);
+    bool saveToFile(std::string_view filePath,
                     const char* content,
                     size_t length);
     std::string generateUniqueBugreportName();

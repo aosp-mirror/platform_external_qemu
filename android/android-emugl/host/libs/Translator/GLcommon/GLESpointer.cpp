@@ -15,6 +15,8 @@
 */
 #include "GLcommon/GLESpointer.h"
 
+#include <cstring>
+
 #include <stdlib.h>
 
 GLenum GLESpointer::getType() const {

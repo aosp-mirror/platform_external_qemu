@@ -14,15 +14,13 @@
 #include <stdio.h>      // for size_t, EOF
 #include <string.h>     // for strcmp
 #include <iostream>     // for ostream, operator<<
+#include <string_view>
 #include <vector>       // for vector
 
 #include "android/base/logging/LogSeverity.h"  // for LogSeverity, EMULATOR_...
 
 namespace android {
 namespace base {
-
-// Forward declarations.
-class StringView;
 
 // Returns the minimal log level.
 ::LogSeverity getMinLogLevel();
@@ -326,8 +324,7 @@ private:
 // Add your own types when needed:
 std::ostream& operator<<(std::ostream& stream,
                          const android::base::LogString& str);
-std::ostream& operator<<(std::ostream& stream,
-                         const android::base::StringView& str);
+std::ostream& operator<<(std::ostream& stream, const std::string_view& str);
 
 // Helper class used to avoid compiler errors, see LOG_LAZY_EVAL for
 // more information.

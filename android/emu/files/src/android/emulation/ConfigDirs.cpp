@@ -21,6 +21,7 @@
 #include <cstdio>     // for printf
 #include <cstring>    // for strerror
 #include <ostream>    // for operator<<, basic_ost...
+#include <string_view>
 #include <vector>     // for vector
 
 #include "android/base/files/PathUtils.h"       // for PathUtils, pj
@@ -261,8 +262,7 @@ auto ConfigDirs::isValidSdkRoot(const std::string& rootPath, bool verbose)
 }
 
 // static
-auto ConfigDirs::isValidAvdRoot(const android::base::StringView& avdPath)
-        -> bool {
+auto ConfigDirs::isValidAvdRoot(const std::string_view& avdPath) -> bool {
     if (avdPath.empty()) {
         return false;
     }
@@ -270,7 +270,7 @@ auto ConfigDirs::isValidAvdRoot(const android::base::StringView& avdPath)
     if (!system->pathIsDir(avdPath) || !system->pathCanRead(avdPath)) {
         return false;
     }
-    std::string avdAvdPath = PathUtils::join(avdPath, "avd");
+    std::string avdAvdPath = PathUtils::join(avdPath.data(), "avd");
     return system->pathIsDir(avdAvdPath);
 }
 
@@ -336,7 +336,7 @@ auto ConfigDirs::getDiscoveryDirectory() -> std::string {
         root = pj(root, discovery.subdir);
     }
 
-    auto desired_directory = pj(root, "avd", "running");
+    auto desired_directory = pj({root, "avd", "running"});
     auto path = PathUtils::decompose(desired_directory);
     PathUtils::simplifyComponents(&path);
     auto recomposed = PathUtils::recompose(path);
@@ -349,10 +349,9 @@ auto ConfigDirs::getDiscoveryDirectory() -> std::string {
     return recomposed;
 }
 
-void ConfigDirs::setCurrentDiscoveryPath(
-        const android::base::StringView& path) {
+void ConfigDirs::setCurrentDiscoveryPath(const std::string_view& path) {
     AutoLock lock(sDiscoveryPathState->lock);
-    sDiscoveryPathState->path = path.str();
+    sDiscoveryPathState->path = path;
 }
 
 auto ConfigDirs::getCurrentDiscoveryPath() -> std::string {

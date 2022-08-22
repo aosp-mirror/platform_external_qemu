@@ -59,7 +59,8 @@ static void loadMaskImage(AConfig* config, char* skinDir, char* skinName) {
         return;
     }
 
-    QString maskPath = PathUtils::join(skinDir, skinName, maskFilename).c_str();
+    QString maskPath =
+            PathUtils::join(skinDir ? skinDir : "", skinName ? skinName : "", maskFilename).c_str();
 
     // Read and decode this file
     QImageReader imageReader(maskPath);
@@ -78,7 +79,8 @@ AConfig* getForegroundConfig() {
     char* skinDir;
 
     avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
-    QString layoutPath = PathUtils::join(skinDir, skinName, "layout").c_str();
+    QString layoutPath =
+            PathUtils::join(skinDir ? skinDir : "", skinName ? skinName : "", "layout").c_str();
     AConfig* rootConfig = aconfig_node("", "");
     aconfig_load_file(rootConfig, layoutPath.toStdString().c_str());
 

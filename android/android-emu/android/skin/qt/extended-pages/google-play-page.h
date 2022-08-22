@@ -15,9 +15,9 @@
 #include <QTimer>                                          // for QTimer
 #include <QWidget>                                         // for QWidget
 #include <memory>                                          // for unique_ptr
+#include <string_view>
 #include <utility>                                         // for pair
 
-#include "android/base/StringView.h"                       // for StringView
 #include "android/emulation/control/GooglePlayServices.h"  // for GooglePlay...
 
 class QObject;
@@ -56,11 +56,11 @@ private:
     static QString getPlayPageDescription(PlayPages page);
     void bootCompletionPropertyDone(
             android::emulation::GooglePlayServices::Result result,
-            android::base::StringView outString);
+            std::string_view outString);
     void getPlayServicesVersion();
     void playVersionDone(android::emulation::GooglePlayServices::Result result,
                          PlayApps app,
-                         android::base::StringView outString);
+                         std::string_view outString);
 
 private slots:
     void on_goog_updateServicesButton_clicked();

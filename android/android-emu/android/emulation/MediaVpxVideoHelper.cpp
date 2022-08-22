@@ -16,6 +16,8 @@
 #include "android/emulation/YuvConverter.h"
 #include "android/utils/debug.h"
 
+#include <cassert>
+
 #define MEDIA_VPX_DEBUG 0
 
 #if MEDIA_VPX_DEBUG

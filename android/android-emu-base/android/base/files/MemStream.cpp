@@ -14,6 +14,7 @@
 #include "android/base/files/StreamSerializing.h"
 
 #include <algorithm>
+#include <cstring>
 #include <utility>
 
 namespace android {

@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/featurecontrol/Features.h"
 
-#include <vector>
 #include <ostream>
+#include <string_view>
+#include <vector>
 
 namespace android {
 
@@ -80,8 +80,8 @@ public:
     void setIfNotOverriden(Feature feature, bool isEnabled);
     void setIfNotOverridenOrGuestDisabled(Feature feature, bool isEnabled);
 
-    static Feature fromString(base::StringView str);
-    static base::StringView toString(Feature feature);
+    static Feature fromString(std::string_view str);
+    static std::string_view toString(Feature feature);
 
     std::vector<Feature> getEnabledNonOverride() const;
     std::vector<Feature> getEnabledOverride() const;
@@ -89,10 +89,10 @@ public:
     std::vector<Feature> getEnabled() const;
     void writeFeaturesToStream(std::ostream& os) const;
 
-    void init(android::base::StringView defaultIniHostPath,
-              android::base::StringView defaultIniGuestPath,
-              android::base::StringView userIniHostPath,
-              android::base::StringView userIniGuestPath);
+    void init(const std::string& defaultIniHostPath,
+              const std::string& defaultIniGuestPath,
+              const std::string& userIniHostPath,
+              const std::string& userIniGuestPath);
     void initNoFiles();
 
     static void create();
@@ -114,7 +114,7 @@ private:
     // Parse the list of overrides and apply those to the control.
     // |overrides| - list of overrides in following format:
     //      "[-]feature1[,[-]feature2,[...]]"
-    void parseAndApplyOverrides(base::StringView overrides);
+    void parseAndApplyOverrides(std::string_view overrides);
 
     void initHostFeatureAndParseDefault(
         android::base::IniFile& defaultIniHost,

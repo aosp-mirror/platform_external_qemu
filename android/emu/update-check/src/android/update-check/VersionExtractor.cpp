@@ -25,6 +25,7 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <string_view>
 #include <unordered_map>
 
 #include <errno.h>
@@ -163,7 +164,7 @@ static UpdateChannel parseUpdateChannelName(const xmlChar* name) {
 }
 
 IVersionExtractor::Versions VersionExtractor::extractVersions(
-        StringView data) const {
+        std::string_view data) const {
     // make sure libxml2 is initialized and is of proper version
     LIBXML_TEST_VERSION
 

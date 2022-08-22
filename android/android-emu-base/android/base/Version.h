@@ -11,9 +11,8 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
-
 #include <string>
+#include <string_view>
 #include <tuple>
 
 namespace android {
@@ -32,7 +31,8 @@ public:
     // This is the value for an invalid/missing version component.
     static constexpr ComponentType kNone = static_cast<ComponentType>(-1);
 
-    explicit Version(StringView ver);
+    explicit Version(const char* ver);
+    explicit Version(const std::string& ver) : Version(ver.data()) {}
 
     constexpr Version();
 

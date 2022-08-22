@@ -44,6 +44,7 @@
 #include "android/utils/system.h"
 
 #include <cassert>
+#include <string_view>
 #include <utility>
 
 #ifdef __x86_64__
@@ -567,8 +568,10 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     // Snapshots vary in size. They can be close to a GB.
     // Rather than taking all the remaining disk space,
     // save only if we have 2 GB of space available.
+    const char* contentPath = getConsoleAgents()->settings->avdInfo() ?
+            avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()) : "";
     if (mDiskSpaceCheck && getConsoleAgents()->settings->avdInfo() &&
-        System::isUnderDiskPressure(avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()))) {
+        System::isUnderDiskPressure(contentPath ? contentPath : "")) {
         showError("Not saving snapshot: Disk space < 2 GB");
         if (reportMetrics) {
             appendFailedSave(
@@ -764,7 +767,7 @@ bool Snapshotter::isSavingCanceled(const char* name) const {
     if (!mSaver)
         return false;
 
-    if (name && (mSaver->snapshot().name() != base::StringView(name))) {
+    if (name && (mSaver->snapshot().name() != std::string_view(name))) {
         return false;
     }
 
@@ -802,7 +805,7 @@ void Snapshotter::deleteSnapshot(const char* name) {
 }
 
 void Snapshotter::invalidateSnapshot(const char* name) {
-    base::StringView nameString = name ? name : kDefaultBootSnapshot;
+    std::string_view nameString = name ? name : kDefaultBootSnapshot;
     auto nameValidated = base::c_str(nameString);
 
     Snapshot tombstone(nameValidated);

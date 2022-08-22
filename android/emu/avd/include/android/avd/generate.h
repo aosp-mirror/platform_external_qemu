@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/StringView.h"
+#include <string_view>
 
 // Includes enough for <avdname>.ini and config.ini
 // Examples shown alongside.
@@ -76,12 +76,11 @@ struct AvdGenerateInfo {
 
 void generateAvd(const AvdGenerateInfo& avdGenerateInfo);
 
-void generateAvdWithDefaults(android::base::StringView avdName,
-                             android::base::StringView sdkRootPath,
-                             android::base::StringView sdkHomePath,
-                             android::base::StringView androidTarget,
-                             android::base::StringView variant,
-                             android::base::StringView abi);
+void generateAvdWithDefaults(std::string_view avdName,
+                             std::string_view sdkRootPath,
+                             std::string_view sdkHomePath,
+                             std::string_view androidTarget,
+                             std::string_view variant,
+                             std::string_view abi);
 
-void deleteAvd(android::base::StringView avdName,
-               android::base::StringView sdkHomePath);
+void deleteAvd(std::string_view avdName, std::string_view sdkHomePath);

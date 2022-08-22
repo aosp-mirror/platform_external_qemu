@@ -30,7 +30,7 @@
 #include "vulkan/VkDecoderGlobalState.h"
 
 #include "android/utils/debug.h"
-#include "android/base/StringView.h"
+
 #include "android/base/Tracing.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
@@ -40,9 +40,10 @@
 #include "emugl/common/thread.h"
 #include "math.h"
 
-#include <atomic>
 #include <inttypes.h>
 #include <string.h>
+#include <atomic>
+#include <string_view>
 
 using android::base::AutoLock;
 using android::base::Lock;
@@ -161,90 +162,119 @@ static const GLint rendererVersion = 1;
 // "ANDROIDEMU_native_sync_v4": Correct eglGetSyncAttrib via rcIsSyncSignaled
 // (We need all the different strings to not be prefixes of any other
 // due to how they are checked for in the GL extensions on the guest)
-static constexpr android::base::StringView kAsyncSwapStrV2 = "ANDROID_EMU_native_sync_v2";
-static constexpr android::base::StringView kAsyncSwapStrV3 = "ANDROID_EMU_native_sync_v3";
-static constexpr android::base::StringView kAsyncSwapStrV4 = "ANDROID_EMU_native_sync_v4";
+static constexpr std::string_view kAsyncSwapStrV2 =
+        "ANDROID_EMU_native_sync_v2";
+static constexpr std::string_view kAsyncSwapStrV3 =
+        "ANDROID_EMU_native_sync_v3";
+static constexpr std::string_view kAsyncSwapStrV4 =
+        "ANDROID_EMU_native_sync_v4";
 
 // DMA version history:
 // "ANDROID_EMU_dma_v1": add dma device and rcUpdateColorBufferDMA and do
 // yv12 conversion on the GPU
 // "ANDROID_EMU_dma_v2": adds DMA support glMapBufferRange (and unmap)
-static constexpr android::base::StringView kDma1Str = "ANDROID_EMU_dma_v1";
-static constexpr android::base::StringView kDma2Str = "ANDROID_EMU_dma_v2";
-static constexpr android::base::StringView kDirectMemStr = "ANDROID_EMU_direct_mem";
+static constexpr std::string_view kDma1Str = "ANDROID_EMU_dma_v1";
+static constexpr std::string_view kDma2Str = "ANDROID_EMU_dma_v2";
+static constexpr std::string_view kDirectMemStr = "ANDROID_EMU_direct_mem";
 
 // GLESDynamicVersion: up to 3.1 so far
-static constexpr android::base::StringView kGLESDynamicVersion_2 = "ANDROID_EMU_gles_max_version_2";
-static constexpr android::base::StringView kGLESDynamicVersion_3_0 = "ANDROID_EMU_gles_max_version_3_0";
-static constexpr android::base::StringView kGLESDynamicVersion_3_1 = "ANDROID_EMU_gles_max_version_3_1";
+static constexpr std::string_view kGLESDynamicVersion_2 =
+        "ANDROID_EMU_gles_max_version_2";
+static constexpr std::string_view kGLESDynamicVersion_3_0 =
+        "ANDROID_EMU_gles_max_version_3_0";
+static constexpr std::string_view kGLESDynamicVersion_3_1 =
+        "ANDROID_EMU_gles_max_version_3_1";
 
 // HWComposer Host Composition
-static constexpr android::base::StringView kHostCompositionV1 = "ANDROID_EMU_host_composition_v1";
-static constexpr android::base::StringView kHostCompositionV2 = "ANDROID_EMU_host_composition_v2";
+static constexpr std::string_view kHostCompositionV1 =
+        "ANDROID_EMU_host_composition_v1";
+static constexpr std::string_view kHostCompositionV2 =
+        "ANDROID_EMU_host_composition_v2";
 
-static constexpr android::base::StringView kGLESNoHostError = "ANDROID_EMU_gles_no_host_error";
+static constexpr std::string_view kGLESNoHostError =
+        "ANDROID_EMU_gles_no_host_error";
 
 // Vulkan
-static constexpr android::base::StringView kVulkanFeatureStr = "ANDROID_EMU_vulkan";
-static constexpr android::base::StringView kDeferredVulkanCommands = "ANDROID_EMU_deferred_vulkan_commands";
-static constexpr android::base::StringView kVulkanNullOptionalStrings = "ANDROID_EMU_vulkan_null_optional_strings";
-static constexpr android::base::StringView kVulkanCreateResourcesWithRequirements = "ANDROID_EMU_vulkan_create_resources_with_requirements";
+static constexpr std::string_view kVulkanFeatureStr = "ANDROID_EMU_vulkan";
+static constexpr std::string_view kDeferredVulkanCommands =
+        "ANDROID_EMU_deferred_vulkan_commands";
+static constexpr std::string_view kVulkanNullOptionalStrings =
+        "ANDROID_EMU_vulkan_null_optional_strings";
+static constexpr std::string_view kVulkanCreateResourcesWithRequirements =
+        "ANDROID_EMU_vulkan_create_resources_with_requirements";
 
 // treat YUV420_888 as NV21
-static constexpr android::base::StringView kYUV420888toNV21 = "ANDROID_EMU_YUV420_888_to_NV21";
+static constexpr std::string_view kYUV420888toNV21 =
+        "ANDROID_EMU_YUV420_888_to_NV21";
 
 // Cache YUV frame
-static constexpr android::base::StringView kYUVCache = "ANDROID_EMU_YUV_Cache";
+static constexpr std::string_view kYUVCache = "ANDROID_EMU_YUV_Cache";
 
 // GL protocol v2
-static constexpr android::base::StringView kAsyncUnmapBuffer = "ANDROID_EMU_async_unmap_buffer";
+static constexpr std::string_view kAsyncUnmapBuffer =
+        "ANDROID_EMU_async_unmap_buffer";
 // Vulkan: Correct marshaling for ignored handles
-static constexpr android::base::StringView kVulkanIgnoredHandles = "ANDROID_EMU_vulkan_ignored_handles";
+static constexpr std::string_view kVulkanIgnoredHandles =
+        "ANDROID_EMU_vulkan_ignored_handles";
 
 // virtio-gpu-next
-static constexpr android::base::StringView kVirtioGpuNext = "ANDROID_EMU_virtio_gpu_next";
+static constexpr std::string_view kVirtioGpuNext =
+        "ANDROID_EMU_virtio_gpu_next";
 
 // address space subdevices
-static constexpr android::base::StringView kHasSharedSlotsHostMemoryAllocator = "ANDROID_EMU_has_shared_slots_host_memory_allocator";
+static constexpr std::string_view kHasSharedSlotsHostMemoryAllocator =
+        "ANDROID_EMU_has_shared_slots_host_memory_allocator";
 
 // vulkan free memory sync
-static constexpr android::base::StringView kVulkanFreeMemorySync = "ANDROID_EMU_vulkan_free_memory_sync";
+static constexpr std::string_view kVulkanFreeMemorySync =
+        "ANDROID_EMU_vulkan_free_memory_sync";
 
 // virtio-gpu native sync
-static constexpr android::base::StringView kVirtioGpuNativeSync = "ANDROID_EMU_virtio_gpu_native_sync";
+static constexpr std::string_view kVirtioGpuNativeSync =
+        "ANDROID_EMU_virtio_gpu_native_sync";
 
 // Struct defs for VK_KHR_shader_float16_int8
-static constexpr android::base::StringView kVulkanShaderFloat16Int8 = "ANDROID_EMU_vulkan_shader_float16_int8";
+static constexpr std::string_view kVulkanShaderFloat16Int8 =
+        "ANDROID_EMU_vulkan_shader_float16_int8";
 
 // Async queue submit
-static constexpr android::base::StringView kVulkanAsyncQueueSubmit = "ANDROID_EMU_vulkan_async_queue_submit";
+static constexpr std::string_view kVulkanAsyncQueueSubmit =
+        "ANDROID_EMU_vulkan_async_queue_submit";
 
 // Host side tracing
-static constexpr android::base::StringView kHostSideTracing = "ANDROID_EMU_host_side_tracing";
+static constexpr std::string_view kHostSideTracing =
+        "ANDROID_EMU_host_side_tracing";
 
 // Some frame commands we can easily make async
 // rcMakeCurrent
 // rcCompose
 // rcDestroySyncKHR
-static constexpr android::base::StringView kAsyncFrameCommands = "ANDROID_EMU_async_frame_commands";
+static constexpr std::string_view kAsyncFrameCommands =
+        "ANDROID_EMU_async_frame_commands";
 
 // Queue submit with commands
-static constexpr android::base::StringView kVulkanQueueSubmitWithCommands = "ANDROID_EMU_vulkan_queue_submit_with_commands";
+static constexpr std::string_view kVulkanQueueSubmitWithCommands =
+        "ANDROID_EMU_vulkan_queue_submit_with_commands";
 
 // Batched descriptor set update
-static constexpr android::base::StringView kVulkanBatchedDescriptorSetUpdate = "ANDROID_EMU_vulkan_batched_descriptor_set_update";
+static constexpr std::string_view kVulkanBatchedDescriptorSetUpdate =
+        "ANDROID_EMU_vulkan_batched_descriptor_set_update";
 
 // Synchronized glBufferData call
-static constexpr android::base::StringView kSyncBufferData = "ANDROID_EMU_sync_buffer_data";
+static constexpr std::string_view kSyncBufferData =
+        "ANDROID_EMU_sync_buffer_data";
 
 // Async vkQSRI
-static constexpr android::base::StringView kVulkanAsyncQsri = "ANDROID_EMU_vulkan_async_qsri";
+static constexpr std::string_view kVulkanAsyncQsri =
+        "ANDROID_EMU_vulkan_async_qsri";
 
 // Read color buffer DMA
-static constexpr android::base::StringView kReadColorBufferDma = "ANDROID_EMU_read_color_buffer_dma";
+static constexpr std::string_view kReadColorBufferDma =
+        "ANDROID_EMU_read_color_buffer_dma";
 
 // Multiple display configs
-static constexpr android::base::StringView kHWCMultiConfigs= "ANDROID_EMU_hwc_multi_configs";
+static constexpr std::string_view kHWCMultiConfigs =
+        "ANDROID_EMU_hwc_multi_configs";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
@@ -378,7 +408,7 @@ static bool shouldEnableVsyncGatedSyncFences() {
     return shouldEnableAsyncSwap();
 }
 
-android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
+std::string_view maxVersionToFeatureString(GLESDispatchMaxVersion version) {
     switch (version) {
         case GLES_DISPATCH_MAX_VERSION_2:
             return kGLESDynamicVersion_2;
@@ -402,8 +432,7 @@ android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion versi
 // is Translator, SwiftShader, ANGLE, et al) may not advertise a GL_VERSION
 // string reflecting their maximum capabilities.
 std::string replaceESVersionString(const std::string& prev,
-                                   android::base::StringView newver) {
-
+                                   std::string_view newver) {
     // There is no need to fiddle with the string
     // if we are in a ES 1.x context.
     // Such contexts are considered as a special case that must

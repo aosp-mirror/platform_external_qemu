@@ -14,13 +14,15 @@
 #include "android/metrics/MetricsLogging.h"
 #include "studio_stats.pb.h"
 
+#include <string_view>
+
 namespace android {
 namespace metrics {
 
 AsyncMetricsReporter::AsyncMetricsReporter(MetricsWriter::Ptr writer,
-                                           base::StringView emulatorVersion,
-                                           base::StringView emulatorFullVersion,
-                                           base::StringView qemuVersion)
+                                           std::string_view emulatorVersion,
+                                           std::string_view emulatorFullVersion,
+                                           std::string_view qemuVersion)
     : MetricsReporter(true,
                       std::move(writer),
                       emulatorVersion,

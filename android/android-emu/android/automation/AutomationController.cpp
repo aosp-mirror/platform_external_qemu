@@ -20,11 +20,12 @@
 #include <chrono>
 #include <deque>
 #include <ostream>
+#include <string_view>
 
 #include "android/automation/AutomationEventSink.h"
 #include "android/automation/EventSource.h"
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
+
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/FileShareOpen.h"
 #include "android/base/files/PathUtils.h"
@@ -245,7 +246,7 @@ private:
 class OffworldEventSource : public EventSource {
 public:
     OffworldEventSource(android::AsyncMessagePipeHandle pipe,
-                        StringView event,
+                        std::string_view event,
                         uint32_t asyncId,
                         std::function<void(android::AsyncMessagePipeHandle,
                                            const ::offworld::Response&)>
@@ -292,12 +293,12 @@ public:
     }
 
     bool addEvents(android::AsyncMessagePipeHandle pipe,
-                   StringView event,
+                   std::string_view event,
                    uint32_t asyncId) {
         using namespace google::protobuf;
 
-        std::vector<StringView> splitEventStrings;
-        split(event, "\n", [&splitEventStrings](StringView str) {
+        std::vector<std::string_view> splitEventStrings;
+        split(event, "\n", [&splitEventStrings](std::string_view str) {
             if (!str.empty()) {
                 splitEventStrings.push_back(str);
             }
@@ -377,26 +378,28 @@ public:
 
     uint64_t getLooperNowTimestamp() override;
 
-    StartResult startRecording(StringView filename) override;
+    StartResult startRecording(const char* filename) override;
     StopResult stopRecording() override;
 
     StartResult startPlaybackFromSource(
             std::shared_ptr<EventSource> source) override;
 
-    StartResult startPlayback(StringView filename) override;
-    StartResult startPlaybackWithCallback(StringView filename,
+    StartResult startPlayback(const char* filename) override;
+    StartResult startPlaybackWithCallback(const char* filename,
                                           void (*onStopCallback)()) override;
     StopResult stopPlayback() override;
 
     // MacroUI helper functions.
-    void setMacroName(StringView macroName, StringView filename) override;
-    std::string getMacroName(StringView filename) override;
-    std::pair<uint64_t, uint64_t> getMetadata(StringView filename) override;
+    void setMacroName(std::string_view macroName,
+                      std::string_view filename) override;
+    std::string getMacroName(std::string_view filename) override;
+    std::pair<uint64_t, uint64_t> getMetadata(
+            std::string_view filename) override;
 
-    ReplayResult replayInitialState(StringView state) override;
+    ReplayResult replayInitialState(std::string_view state) override;
 
     ReplayResult replayEvent(android::AsyncMessagePipeHandle pipe,
-                             StringView event,
+                             std::string_view event,
                              uint32_t asyncId) override;
 
     void sendEvent(const pb::RecordedEvent& event) override;
@@ -571,19 +574,24 @@ void AutomationControllerImpl::setNextPlaybackCommandTime(
     mNextPlaybackCommandTime = nextTimestamp;
 }
 
-StartResult AutomationControllerImpl::startRecording(StringView filename) {
+StartResult AutomationControllerImpl::startRecording(
+        const char* filename) {
+    if (!filename) {
+        return Err(StartError::InvalidFilename);
+    }
+
     AutoLock lock(mLock);
     if (mShutdown) {
         return Err(StartError::InternalError);
     }
 
-    if (filename.empty()) {
+    std::string path(filename);
+    if (path.empty()) {
         return Err(StartError::InvalidFilename);
     }
 
-    std::string path = filename;
     if (!PathUtils::isAbsolute(path)) {
-        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+        path = PathUtils::join(System::get()->getHomeDirectory(), path.data());
     }
 
     if (mRecordingStream) {
@@ -655,13 +663,18 @@ StopResult AutomationControllerImpl::stopRecording() {
     return Ok();
 }
 
-StartResult AutomationControllerImpl::startPlayback(StringView filename) {
+StartResult AutomationControllerImpl::startPlayback(const char* filename) {
+    if (!filename) {
+        return Err(StartError::InvalidFilename);
+    }
+
     AutoLock lock(mLock);
     if (mShutdown) {
         return Err(StartError::InternalError);
     }
 
-    if (filename.empty()) {
+    std::string path(filename);
+    if (path.empty()) {
         return Err(StartError::InvalidFilename);
     }
 
@@ -672,9 +685,8 @@ StartResult AutomationControllerImpl::startPlayback(StringView filename) {
         return Err(StartError::AlreadyStarted);
     }
 
-    std::string path = filename;
     if (!PathUtils::isAbsolute(path)) {
-        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+        path = PathUtils::join(System::get()->getHomeDirectory(), path.data());
     }
 
     // NOTE: The class state is intentionally not modified until after the file
@@ -761,7 +773,7 @@ StartResult AutomationControllerImpl::startPlaybackFromSource(
 }
 
 StartResult AutomationControllerImpl::startPlaybackWithCallback(
-        StringView filename,
+        const char* filename,
         void (*onStopCallback)()) {
     mOnStopCallback = onStopCallback;
     return startPlayback(filename);
@@ -781,10 +793,10 @@ StopResult AutomationControllerImpl::stopPlayback() {
     return Ok();
 }
 
-std::string AutomationControllerImpl::getMacroName(StringView filename) {
-    std::string path = filename;
+std::string AutomationControllerImpl::getMacroName(std::string_view filename) {
+    std::string path(filename);
     if (!PathUtils::isAbsolute(path)) {
-        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename.data());
     }
 
     std::unique_ptr<StdioStream> playbackStream(new StdioStream(
@@ -802,10 +814,10 @@ std::string AutomationControllerImpl::getMacroName(StringView filename) {
 }
 
 std::pair<uint64_t, uint64_t> AutomationControllerImpl::getMetadata(
-        StringView filename) {
-    std::string path = filename;
+        std::string_view filename) {
+    std::string path(filename);
     if (!PathUtils::isAbsolute(path)) {
-        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename.data());
     }
 
     std::unique_ptr<StdioStream> playbackStream(new StdioStream(
@@ -822,13 +834,13 @@ std::pair<uint64_t, uint64_t> AutomationControllerImpl::getMetadata(
 }
 
 ReplayResult AutomationControllerImpl::replayInitialState(
-        android::base::StringView state) {
+        std::string_view state) {
     if (mPlayingFromFile) {
         return Err(ReplayError::PlaybackInProgress);
     }
 
     pb::InitialState initialState;
-    if (!google::protobuf::TextFormat::ParseFromString(state, &initialState)) {
+    if (!google::protobuf::TextFormat::ParseFromString(std::string(state), &initialState)) {
         LOG(ERROR) << "Could not load initial data";
         return Err(ReplayError::ParseError);
     }
@@ -845,7 +857,7 @@ ReplayResult AutomationControllerImpl::replayInitialState(
 
 ReplayResult AutomationControllerImpl::replayEvent(
         android::AsyncMessagePipeHandle pipe,
-        android::base::StringView event,
+        std::string_view event,
         uint32_t asyncId) {
     if (mPlayingFromFile) {
         return Err(ReplayError::PlaybackInProgress);
@@ -878,8 +890,6 @@ ReplayResult AutomationControllerImpl::replayEvent(
 
     return Ok();
 }
-
-
 
 ListenResult AutomationControllerImpl::listen(
         android::AsyncMessagePipeHandle pipe,
@@ -1015,11 +1025,11 @@ void AutomationControllerImpl::addMetadataToHeader(DurationNs durationNs) {
     copyStreamToStream(std::move(originalStream), std::move(modifiedStream));
 }
 
-void AutomationControllerImpl::setMacroName(StringView macroName,
-                                            StringView filename) {
-    std::string path = filename;
+void AutomationControllerImpl::setMacroName(std::string_view macroName,
+                                            std::string_view filename) {
+    std::string path(filename);
     if (!PathUtils::isAbsolute(path)) {
-        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename.data());
     }
     mFilePath = path;
 
@@ -1039,7 +1049,7 @@ void AutomationControllerImpl::setMacroName(StringView macroName,
         LOG(ERROR) << "Could not find header.";
         return;
     }
-    header.set_name(macroName);
+    header.set_name(macroName.data());
 
     std::string modifiedHeader;
     header.SerializeToString(&modifiedHeader);

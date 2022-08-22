@@ -18,18 +18,21 @@
 #include "OpenglCodecCommon/glUtils.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/files/StreamSerializing.h"
 #include "ANGLEShaderParser.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/GLESmacros.h"
 #include "GLcommon/ShareGroup.h"
 
+#include <string_view>
+
 #include <GLES3/gl31.h>
 #include <string.h>
 #include <unordered_set>
 
 using android::base::c_str;
-using android::base::StringView;
+
 
 GLUniformDesc::GLUniformDesc(const char* name, GLint location, GLsizei count, GLboolean transpose,
             GLenum type, GLsizei size, unsigned char* val)
@@ -662,30 +665,30 @@ GLuint ProgramData::getAttachedShader(GLenum type) const {
     return attachedShaders[s_glShaderType2ShaderType(type)].localName;
 }
 
-StringView
-ProgramData::getTranslatedName(StringView userVarName) const {
+std::string_view ProgramData::getTranslatedName(
+        std::string_view userVarName) const {
     if (isGles2Gles()) {
         return userVarName;
     }
     // TODO: translate uniform array names
     for (int i = 0; i < NUM_SHADER_TYPE; i++) {
         if (const auto name = android::base::find(
-                attachedShaders[i].linkInfo.nameMap, userVarName)) {
+                attachedShaders[i].linkInfo.nameMap, userVarName.data())) {
             return *name;
         }
     }
     return userVarName;
 }
 
-StringView
-ProgramData::getDetranslatedName(StringView driverName) const {
+std::string_view ProgramData::getDetranslatedName(
+        std::string_view driverName) const {
     if (isGles2Gles()) {
         return driverName;
     }
     // TODO: detranslate uniform array names
     for (int i = 0; i < NUM_SHADER_TYPE; i++) {
         if (const auto name = android::base::find(
-                attachedShaders[i].linkInfo.nameMapReverse, driverName)) {
+                attachedShaders[i].linkInfo.nameMapReverse, driverName.data())) {
             return *name;
         }
     }
@@ -1084,7 +1087,7 @@ static void sInitializeUniformLocs(ProgramData* pData,
         gl.glGetActiveUniform(pData->getProgramName(), i, nameLength, &length,
                 &size, &type, name.data());
         // fprintf(stderr, "%s: host uniform: %s\n", __func__, name.data());
-        orderedUniforms.push_back(pData->getDetranslatedName(name.data()));
+        orderedUniforms.push_back(pData->getDetranslatedName(name.data()).data());
         // fprintf(stderr, "%s: host uniform detranslated: %s\n", __func__, pData->getDetranslatedName(name.data()).str().c_str());
     }
 
@@ -1110,14 +1113,14 @@ static void sInitializeUniformLocs(ProgramData* pData,
     }
 }
 
-void ProgramData::initGuestUniformLocForKey(StringView key) {
+void ProgramData::initGuestUniformLocForKey(std::string_view key) {
     // fprintf(stderr, "%s: for %s\n", __func__, key.str().c_str());
-    if (mUniNameToGuestLoc.find(key) == mUniNameToGuestLoc.end()) {
-        mUniNameToGuestLoc[key] = mCurrUniformBaseLoc;
+    if (mUniNameToGuestLoc.find(key.data()) == mUniNameToGuestLoc.end()) {
+        mUniNameToGuestLoc[key.data()] = mCurrUniformBaseLoc;
         // Emplace host location beforehand to workaround Unreal bug
         // BUG: 120548998
         GLDispatch& dispatcher = GLEScontext::dispatcher();
-        std::string translatedName = getTranslatedName(key);
+        std::string translatedName(getTranslatedName(key.data()));
         // fprintf(stderr, "%s: trname: %s\n", __func__, translatedName.c_str());
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
@@ -1129,14 +1132,15 @@ void ProgramData::initGuestUniformLocForKey(StringView key) {
     }
 }
 
-void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
+void ProgramData::initGuestUniformLocForKey(std::string_view key,
+                                            std::string_view key2) {
     bool newUniform = false;
-    if (mUniNameToGuestLoc.find(key) == mUniNameToGuestLoc.end()) {
-        mUniNameToGuestLoc[key] = mCurrUniformBaseLoc;
+    if (mUniNameToGuestLoc.find(key.data()) == mUniNameToGuestLoc.end()) {
+        mUniNameToGuestLoc[key.data()] = mCurrUniformBaseLoc;
         newUniform = true;
     }
-    if (mUniNameToGuestLoc.find(key2) == mUniNameToGuestLoc.end()) {
-        mUniNameToGuestLoc[key2] = mCurrUniformBaseLoc;
+    if (mUniNameToGuestLoc.find(key2.data()) == mUniNameToGuestLoc.end()) {
+        mUniNameToGuestLoc[key2.data()] = mCurrUniformBaseLoc;
         newUniform = true;
     }
 
@@ -1144,7 +1148,7 @@ void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
         // Emplace host location beforehand to workaround Unreal bug
         // BUG: 120548998
         GLDispatch& dispatcher = GLEScontext::dispatcher();
-        std::string translatedName = getTranslatedName(key);
+        std::string translatedName(getTranslatedName(key.data()));
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
         if (hostLoc != -1) {
@@ -1187,7 +1191,7 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
                 guestLoc = -1;
             }
 
-            std::string translatedName = getTranslatedName(uniName);
+            std::string translatedName(getTranslatedName(uniName));
             int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                     translatedName.c_str());
             if (hostLoc == -1) {

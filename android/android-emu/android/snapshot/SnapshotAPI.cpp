@@ -16,6 +16,7 @@
 #include <functional>                                   // for __base
 #include <map>                                          // for map, map<>::m...
 #include <string>                                       // for string
+#include <string_view>
 #include <utility>                                      // for pair
 
 #include "android/base/Log.h"                           // for LogMessage
@@ -68,8 +69,7 @@ offworld::Response createErrorResponse() {
     return response;
 }
 
-offworld::Response createCheckpointMetadataResponse(
-        android::base::StringView metadata) {
+offworld::Response createCheckpointMetadataResponse(std::string_view metadata) {
     // Note: metadata are raw bytes, not necessary a string. It is
     // just protobuf encodes them into strings. The data should be
     // handled as raw bytes (no extra '\0' at the end). Please try
@@ -77,19 +77,19 @@ offworld::Response createCheckpointMetadataResponse(
     offworld::Response response;
     response.set_result(offworld::Response::RESULT_NO_ERROR);
     response.mutable_snapshot()->mutable_create_checkpoint()->set_metadata(
-            metadata);
+            metadata.data());
     return response;
 }
 
 offworld::Response createForkIdResponse(int forkId,
-        android::base::StringView metadata = nullptr) {
+                                        std::string_view metadata = nullptr) {
     offworld::Response response;
     response.set_result(offworld::Response::RESULT_NO_ERROR);
     auto forkReadOnlyInstance = response.mutable_snapshot()
             ->mutable_fork_read_only_instances();
     forkReadOnlyInstance->set_instance_id(forkId);
     if (metadata != nullptr) {
-        forkReadOnlyInstance->set_metadata(metadata);
+        forkReadOnlyInstance->set_metadata(metadata.data());
     }
     return response;
 }
@@ -120,15 +120,14 @@ void sendDefaultResponse(android::AsyncMessagePipeHandle pipe,
 namespace android {
 namespace snapshot {
 
-void createCheckpoint(AsyncMessagePipeHandle pipe,
-                      android::base::StringView name) {
+void createCheckpoint(AsyncMessagePipeHandle pipe, std::string_view name) {
     // BUG: 127849628
     if (!emuglConfig_current_renderer_supports_snapshot()) {
         android::offworld::sendResponse(pipe, createErrorResponse());
         return;
     }
 
-    const std::string snapshotName = name;
+    const std::string snapshotName(name);
 
     sSnapshotCrossSession->mPipesAwaitingResponse[pipe] =
             RequestType::CreateCheckpoint;
@@ -150,10 +149,10 @@ void createCheckpoint(AsyncMessagePipeHandle pipe,
 
 void gotoCheckpoint(
         AsyncMessagePipeHandle pipe,
-        android::base::StringView name,
-        android::base::StringView metadata,
+        std::string_view name,
+        std::string_view metadata,
         android::base::Optional<android::base::FileShare> shareMode) {
-    const std::string snapshotName = name;
+    const std::string snapshotName(name);
 
     sSnapshotCrossSession->mOverrideResponse[RequestType::CreateCheckpoint] =
             createCheckpointMetadataResponse(metadata);
@@ -227,7 +226,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
 }
 
 void doneInstance(android::AsyncMessagePipeHandle pipe,
-        android::base::StringView metadata) {
+                  std::string_view metadata) {
     if (sSnapshotCrossSession->sForkId <
         sSnapshotCrossSession->sForkTotal - 1) {
         sSnapshotCrossSession->sForkId++;

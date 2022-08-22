@@ -30,7 +30,7 @@
 
 #include "android/base/Log.h"                    // for setMinLogLevel, EMULATOR_LOG_...
 #include "android/base/Optional.h"               // for Optional
-#include "android/base/StringView.h"             // for StringView
+
 #include "android/base/files/PathUtils.h"        // for PathUtils
 #include "android/base/testing/TestSystem.h"     // for TestSystem
 #include "android/base/testing/TestTempDir.h"    // for TestTempDir

@@ -17,6 +17,7 @@
 #include <iosfwd>       // for string
 #include <memory>       // for shared_ptr
 #include <string>       // for basic_string
+#include <string_view>
 #include <type_traits>  // for remove_extent_t
 #include <utility>      // for pair
 #include <vector>       // for vector
@@ -27,7 +28,7 @@
 #include "android/avd/util.h"                            // for AVD_ANDROID_...
 #include "android/base/Optional.h"                       // for Optional
 #include "android/base/StringFormat.h"                   // for StringFormat
-#include "android/base/StringView.h"                     // for StringView
+
 #include "android/base/Uuid.h"                           // for Uuid
 #include "android/base/async/ThreadLooper.h"             // for ThreadLooper
 #include "android/base/files/IniFile.h"                  // for IniFile
@@ -60,7 +61,6 @@
 using android::base::Optional;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
-using android::base::StringView;
 using android::base::System;
 using android::metrics::MetricsEngine;
 using android::metrics::MetricsReporter;
@@ -70,7 +70,7 @@ static android_studio::EmulatorDetails::GuestCpuArchitecture
 toClearcutLogGuestArch(const char* hw_cpu_arch) {
     using android_studio::EmulatorDetails;
 
-    static constexpr std::pair<StringView,
+    static constexpr std::pair<std::string_view,
                                EmulatorDetails::GuestCpuArchitecture>
             map[] = {
                     {"x86", EmulatorDetails::X86},
@@ -152,21 +152,25 @@ static void fillGuestGlMetrics(android_studio::AndroidStudioEvent* event) {
 }
 
 static Optional<int64_t> getAvdCreationTimeSec(AvdInfo* avd) {
-    if (const auto createTime =
-                System::get()->pathCreationTime(avdInfo_getContentPath(avd))) {
-        return *createTime / 1000000;
-    }
-    // We were either unable to get the creation time, or this is Linux/really
-    // old Mac and the system libs don't support creation times at all. Let's
-    // use modification time for some rarely updated file in the avd,
-    // e.g. <content_path>/data directory, or the root .ini.
+    const char* avdContentPath = avdInfo_getContentPath(avd);
     struct stat st;
-    if (!android_stat(
-                PathUtils::join(avdInfo_getContentPath(avd), "data").c_str(),
-                &st)) {
-        return st.st_mtime;
+    if (avdContentPath) {
+        if (const auto createTime =
+                    System::get()->pathCreationTime(avdContentPath)) {
+            return *createTime / 1000000;
+        }
+        // We were either unable to get the creation time, or this is Linux/really
+        // old Mac and the system libs don't support creation times at all. Let's
+        // use modification time for some rarely updated file in the avd,
+        // e.g. <content_path>/data directory, or the root .ini.
+        if (!android_stat(
+                    PathUtils::join(avdContentPath, "data").c_str(),
+                    &st)) {
+            return st.st_mtime;
+        }
     }
-    if (!android_stat(avdInfo_getRootIniPath(avd), &st)) {
+    const char* rootIniPath = avdInfo_getRootIniPath(avd);
+    if (rootIniPath && !android_stat(rootIniPath, &st)) {
         return st.st_mtime;
     }
     return {};

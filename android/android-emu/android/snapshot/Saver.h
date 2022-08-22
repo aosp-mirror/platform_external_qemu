@@ -13,11 +13,13 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
-#include "android/base/StringView.h"
+
 #include "android/base/system/System.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/RamSaver.h"
 #include "android/snapshot/Snapshot.h"
+
+#include <string_view>
 
 namespace android {
 namespace snapshot {
@@ -28,9 +30,10 @@ class Saver {
     DISALLOW_COPY_AND_ASSIGN(Saver);
 
 public:
-    Saver(const Snapshot& snapshot, RamLoader* loader,
+    Saver(const Snapshot& snapshot,
+          RamLoader* loader,
           bool isOnExit,
-          base::StringView ramMapFile,
+          std::string_view ramMapFile,
           bool ramFileShared,
           bool isRemapping);
     ~Saver();

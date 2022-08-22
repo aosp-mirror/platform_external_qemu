@@ -16,6 +16,7 @@
 
 #include <vector>
 
+#include "android/base/logging/Log.h"
 #include "android/base/sockets/SocketUtils.h"
 
 namespace android {

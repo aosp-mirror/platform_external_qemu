@@ -16,6 +16,8 @@ extern "C" {
 }
 
 #include <algorithm>
+#include <cstring>
+
 /*
  * Undefine type_check to avoid using typedef which is not supported.
  */

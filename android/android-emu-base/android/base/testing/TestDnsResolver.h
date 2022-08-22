@@ -17,8 +17,9 @@
 #include "android/base/network/IpAddress.h"
 
 #include <string>
-#include <vector>
+#include <string_view>
 #include <unordered_map>
+#include <vector>
 
 #include <errno.h>
 
@@ -54,27 +55,27 @@ public:
     // Add new entry to the internal table. |server_name| is a server name,
     // and |address| is a string corresponding to either a dotted IPv4 address
     // or column-separated IPv6 one.
-    void addEntry(StringView server_name, StringView address) {
-        AddressList list = {IpAddress(address)};
+    void addEntry(std::string_view server_name, std::string_view address) {
+        AddressList list = {IpAddress(address.data())};
         addEntryList(server_name, list);
     }
 
     // Add new entry to the internal table. |server_nam| is a server name,
     // and |ipv4| is the host-order 32-bit IPv4 address for it.
-    void addEntryIpv4(StringView server_name, uint32_t ipv4) {
+    void addEntryIpv4(std::string_view server_name, uint32_t ipv4) {
         AddressList list = {IpAddress(ipv4)};
         addEntryList(server_name, list);
     }
 
     // Add a new entry to the internal table. |server_name| is a server name,
     // and |ipv6| is a 26-byte IPv6 address for it.
-    void addEntryIpv6(StringView server_name, const uint8_t ipv6[16]) {
+    void addEntryIpv6(std::string_view server_name, const uint8_t ipv6[16]) {
         addEntryList(server_name, AddressList({IpAddress(ipv6)}));
     }
 
     // Add a |list| of IP addresses to the internal table, associated with
     // |server_name|.
-    void addEntryList(StringView server_name, const AddressList& list) {
+    void addEntryList(std::string_view server_name, const AddressList& list) {
         std::string key(server_name);
         auto it = mMap.find(key);
         if (it == mMap.end()) {
@@ -88,7 +89,8 @@ public:
 
     // Return the list of IpAddress instances associated with |server_name|
     // through previous addEntryXXX() calls.
-    virtual int resolveName(StringView server_name, AddressList* out) override {
+    virtual int resolveName(std::string_view server_name,
+                            AddressList* out) override {
         std::string key(server_name);
         // First try to parse it as a numerical IP address.
         IpAddress ip(key);

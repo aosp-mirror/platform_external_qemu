@@ -17,6 +17,8 @@
 #include "android/opengl/EmuglBackendScanner.h"
 #include "android/utils/path.h"
 
+#include <string_view>
+
 #define DEBUG 0
 
 #if DEBUG
@@ -58,7 +60,7 @@ bool EmuglBackendList::contains(const char* name) const {
 
 std::string EmuglBackendList::getLibDirPath(const char* name) {
     // remove the "_indirect" suffix
-    static constexpr android::base::StringView suffix("_indirect");
+    static constexpr std::string_view suffix("_indirect");
     std::string nameNoSuffix(name);
     int nameNoSuffixLen = (int)nameNoSuffix.size() - (int)suffix.size();
     if (nameNoSuffixLen > 0 &&

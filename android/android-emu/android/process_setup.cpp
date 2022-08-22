@@ -12,13 +12,14 @@
 #include "android/process_setup.h"
 
 #include <string>  // for string
+#include <string_view>
 #include <vector>  // for vector
 
 #include "android/base/Debug.h"                 // for WaitForDebugger
 #include "android/base/Log.h"                   // for LOG, LogMessage
 #include "android/base/ProcessControl.h"        // for createEscapedLaunchSt...
 #include "android/base/StringFormat.h"          // for StringAppendFormatRaw
-#include "android/base/StringView.h"            // for StringView, operator==
+
 #include "android/base/files/PathUtils.h"       // for PathUtils
 #include "android/base/misc/StringUtils.h"      // for strDup
 #include "android/base/system/System.h"         // for System
@@ -39,7 +40,6 @@ class ParameterList;
 using android::ParameterList;
 using android::base::PathUtils;
 using android::base::StringAppendFormatRaw;
-using android::base::StringView;
 using android::base::System;
 
 // The order of initialization here can be very finicky. Handle with care, and
@@ -47,7 +47,7 @@ using android::base::System;
 void process_early_setup(int argc, char** argv) {
     // This function is the first thing emulator calls - so it's the best place
     // to wait for a debugger to attach, before even the options parsing code.
-    static constexpr StringView waitForDebuggerArg = "-wait-for-debugger";
+    static constexpr std::string_view waitForDebuggerArg = "-wait-for-debugger";
     for (int i = 1; i < argc; ++i) {
         if (waitForDebuggerArg == argv[i]) {
             dprint("Waiting for a debugger...");

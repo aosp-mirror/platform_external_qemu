@@ -105,17 +105,17 @@ static Optional<std::string> getSpirvCompilerPath() {
 #endif
 
     auto programDirRelativePath =
-        pj(System::get()->getProgramDirectory(),
-           "lib64", "vulkan", "tools", programName);
+        pj({System::get()->getProgramDirectory(),
+           "lib64", "vulkan", "tools", programName});
 
     if (path_exists(programDirRelativePath.c_str())) {
         return programDirRelativePath;
     }
 
     auto launcherDirRelativePath =
-        pj(System::get()->getLauncherDirectory(),
-           "lib64", "vulkan", programName);
-    
+        pj({System::get()->getLauncherDirectory(),
+           "lib64", "vulkan", programName});
+
     if (path_exists(launcherDirRelativePath.c_str())) {
         return launcherDirRelativePath;
     }
@@ -127,7 +127,7 @@ static Optional<std::string> getSpirvCompilerPath() {
 Optional<std::string> compileSpirvFromGLSL(const std::string& shaderType,
                                            const std::string& src) {
     auto spvCompilerPath = getSpirvCompilerPath();
-    
+
     if (!spvCompilerPath) return {};
 
     const auto glslFile = android::base::makeCustomScopedPtr(

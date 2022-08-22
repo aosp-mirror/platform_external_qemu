@@ -93,7 +93,8 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
 
     setRecordUiState(RecordUiState::Ready);
 
-    mTmpFilePath = PathUtils::join(avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()),
+    const char* contentPath = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
+    mTmpFilePath = PathUtils::join(contentPath ? contentPath : "",
                                    &kTmpMediaName[0]);
     qRegisterMetaType<RecordingStatus>();
     QObject::connect(&mTimer, &QTimer::timeout, this,

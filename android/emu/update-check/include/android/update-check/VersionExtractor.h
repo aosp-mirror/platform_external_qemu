@@ -13,6 +13,8 @@
 
 #include "android/update-check/IVersionExtractor.h"
 
+#include <string_view>
+
 namespace android {
 namespace update_check {
 
@@ -20,7 +22,7 @@ class VersionExtractor : public IVersionExtractor {
 public:
     static const char* const kXmlNamespace;
 
-    virtual Versions extractVersions(StringView data) const override;
+    virtual Versions extractVersions(std::string_view data) const override;
 
     virtual Version getCurrentVersion() const override;
 };

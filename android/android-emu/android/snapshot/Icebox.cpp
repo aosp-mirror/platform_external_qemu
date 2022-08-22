@@ -120,13 +120,13 @@ static bool sign_auth_token(const char* token,
     // read key
     using android::base::pj;
     std::vector<RSA*> keys;
-    std::string key_path = pj(android::base::System::get()->getHomeDirectory(),
-                              ".android", "adbkey");
+    std::string key_path = pj({android::base::System::get()->getHomeDirectory(),
+                              ".android", "adbkey"});
     if (!read_key(key_path.c_str(), keys)) {
         // TODO: test the windows code path
         std::string key_path =
-                pj(android::base::System::get()->getAppDataDirectory(),
-                   ".android", "adbkey");
+                pj({android::base::System::get()->getAppDataDirectory(),
+                   ".android", "adbkey"});
         if (!read_key(key_path.c_str(), keys)) {
             return false;
         }

@@ -15,9 +15,10 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/StringView.h"
+
 #include "android/base/network/IpAddress.h"
 
+#include <string_view>
 #include <vector>
 
 namespace android {
@@ -35,7 +36,7 @@ public:
 
     // Resolve name |server_name| into a list of IpAddress instances.
     // Return an empty list on failure.
-    static AddressList resolveName(StringView server_name);
+    static AddressList resolveName(std::string_view server_name);
 
     // Return the list of DNS server addresses used by the system.
     // This works by either parsing /etc/resolver.conf on Posix or
@@ -56,7 +57,8 @@ public:
         // resolves it to a list of IpAddress instances. On success, return
         // 0 and append results to |*out|. On failure, just return a negative
         // errno code.
-        virtual int resolveName(StringView server_name, AddressList* out) = 0;
+        virtual int resolveName(std::string_view server_name,
+                                AddressList* out) = 0;
 
         // Return the list of DNS servers used by the system. On success,
         // return 0 and append results to |*out|. On failure, just return
