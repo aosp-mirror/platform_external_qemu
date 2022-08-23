@@ -563,7 +563,7 @@ bool androidSnapshot_quickbootSave(const char* _name) {
 }
 
 void androidSnapshot_quickbootInvalidate(const char* name) {
-    android::snapshot::Quickboot::get().invalidate(name);
+    android::snapshot::Quickboot::get().invalidate(name ? name : "");
 }
 
 void androidSnapshot_writeQuickbootChoice(bool save) {
