@@ -9,7 +9,6 @@ android_add_library(
       android/featurecontrol/feature_control.cpp
       android/featurecontrol/FeatureControl.cpp
       android/featurecontrol/FeatureControlImpl.cpp
-      android/featurecontrol/FeatureControlOverride.cpp
       android/featurecontrol/HWMatching.cpp
       android/HostHwInfo.cpp
       android/opengl/gpuinfo.cpp

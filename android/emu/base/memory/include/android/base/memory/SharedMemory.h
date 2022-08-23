@@ -12,8 +12,6 @@
 
 #include <string_view>
 #include <string>
-#include <utility>
-
 #ifdef _WIN32
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -209,12 +207,6 @@ public:
     ShareType type() const { return mShareType; }
 
     handle_type getFd() { return mFd; }
-    handle_type releaseHandle() {
-        if (mShareType == ShareType::FILE_BACKED) {
-            return invalidHandle();
-        }
-        return std::exchange(mFd, invalidHandle());
-    }
     bool isMapped() const { return mAddr != unmappedMemory(); }
 
 private:

@@ -1214,42 +1214,6 @@ bool qemu_is_real_audio_allowed() {
     return allow_real_audio;
 }
 
-static void mute_microphone_S16(int16_t *a, int nsamples) {
-    int rem = nsamples % 8;
-    nsamples -= rem;
-    while (rem > 0) {
-        *a = rem; ++a;
-        --rem;
-    }
-
-    while (nsamples > 0) {
-        int16_t v = (nsamples >> 3) & 31 - 16;
-        v += !v;
-        *a = v; ++a;
-        *a = v; ++a;
-        *a = v; ++a;
-        *a = v; ++a;
-        *a = v; ++a;
-        *a = v; ++a;
-        *a = v; ++a;
-        *a = v; ++a;
-        nsamples -= 8;
-    }
-}
-
-static void mute_microphone(const struct audio_pcm_info *info,
-                            void *buf, int size) {
-    switch (info->bits) {
-    case 16:
-        mute_microphone_S16((int16_t*)buf, size / sizeof(int16_t));
-        break;
-
-    default:
-        dolog("We support only S16, %dbits was requested\n", info->bits);
-        abort();
-    }
-}
-
 int AUD_read (SWVoiceIn *sw, void *buf, int size)
 {
     if (!sw) {
@@ -1265,7 +1229,7 @@ int AUD_read (SWVoiceIn *sw, void *buf, int size)
     int bytes = sw->hw->pcm_ops->read(sw, buf, size);
 
     if (!allow_real_audio) {
-        mute_microphone(&sw->hw->info, buf, size);
+        memset(buf, 0x0, size);
     }
 
     return bytes;

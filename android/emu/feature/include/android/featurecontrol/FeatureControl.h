@@ -95,8 +95,5 @@ void writeFeaturesToStream(std::ostream& os);
 // Overrides feature_is_enabled/isEnabled function above to use a user-provided
 // callback instead.
 void setFeatureEnabledCallback(std::function<bool(Feature)> cb);
-
-// Customization point for the client to inject feature override calls.
-void productFeatureOverride();
 } // namespace android
 } // namespace featurecontrol
