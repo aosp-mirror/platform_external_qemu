@@ -565,7 +565,9 @@ protected:
             // create
             [this](struct asg_context context,
                base::Stream* loadStream,
-               ConsumerCallbacks callbacks) {
+               ConsumerCallbacks callbacks,
+               uint32_t virtioGpuContextId, uint32_t virtioGpuCapsetId,
+               std::optional<std::string> nameOpt) {
                Consumer* c = new Consumer(context, callbacks);
                mCurrentConsumer = c;
                return (void*)c;

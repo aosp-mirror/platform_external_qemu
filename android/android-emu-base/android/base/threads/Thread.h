@@ -25,6 +25,8 @@
 #endif
 
 #include <inttypes.h>
+#include <optional>
+#include <string>
 
 namespace android {
 namespace base {
@@ -62,7 +64,8 @@ class Thread {
 
 public:
     // Public constructor.
-    Thread(ThreadFlags flags = ThreadFlags::MaskSignals, int stackSize = 0);
+    Thread(ThreadFlags flags = ThreadFlags::MaskSignals, int stackSize = 0,
+           std::optional<std::string> name = std::nullopt);
 
     // Virtual destructor.
     virtual ~Thread();
@@ -124,6 +127,7 @@ private:
     bool mStarted = false;
     // Access guarded by |mLock|.
     bool mFinished = false;
+    std::optional<std::string> mNameOpt = std::nullopt;
 #ifndef _WIN32
     // Posix-only, remember if we've joined our non-detached thread already.
     bool mJoined = false;

@@ -512,9 +512,12 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
             // create
             [openglesRenderer](struct asg_context context,
                                android::base::Stream* loadStream,
-                               ConsumerCallbacks callbacks) {
+                               ConsumerCallbacks callbacks,
+                               uint32_t virtioGpuContextId, uint32_t virtioGpuCapsetId,
+                               std::optional<std::string> nameOpt) {
                 return openglesRenderer->addressSpaceGraphicsConsumerCreate(
-                        context, loadStream, callbacks);
+                        context, loadStream, callbacks, virtioGpuContextId, virtioGpuCapsetId,
+                        nameOpt);
             },
             // destroy
             [openglesRenderer](void* consumer) {

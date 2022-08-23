@@ -40,33 +40,33 @@ struct Allocation {
 
 class AddressSpaceGraphicsContext : public AddressSpaceDeviceContext {
 public:
-    AddressSpaceGraphicsContext(bool isVirtio = false, bool fromSnapshot = false);
-    ~AddressSpaceGraphicsContext();
+ AddressSpaceGraphicsContext(const struct AddressSpaceCreateInfo& create);
+ ~AddressSpaceGraphicsContext();
 
-    static void setConsumer(ConsumerInterface);
-    static void init(const address_space_device_control_ops *ops);
-    static void clear();
+ static void setConsumer(ConsumerInterface);
+ static void init(const address_space_device_control_ops* ops);
+ static void clear();
 
-    void perform(AddressSpaceDevicePingInfo *info) override;
-    AddressSpaceDeviceType getDeviceType() const override;
+ void perform(AddressSpaceDevicePingInfo* info) override;
+ AddressSpaceDeviceType getDeviceType() const override;
 
-    void save(base::Stream* stream) const override;
-    bool load(base::Stream* stream) override;
+ void save(base::Stream* stream) const override;
+ bool load(base::Stream* stream) override;
 
-    void preSave() const override;
-    void postSave() const override;
+ void preSave() const override;
+ void postSave() const override;
 
-    static void globalStatePreSave();
-    static void globalStateSave(base::Stream*);
-    static void globalStatePostSave();
+ static void globalStatePreSave();
+ static void globalStateSave(base::Stream*);
+ static void globalStatePostSave();
 
-    static bool globalStateLoad(base::Stream*);
+ static bool globalStateLoad(base::Stream*);
 
-    enum AllocType {
-        AllocTypeRing,
-        AllocTypeBuffer,
-        AllocTypeCombined,
-    };
+ enum AllocType {
+     AllocTypeRing,
+     AllocTypeBuffer,
+     AllocTypeCombined,
+ };
 
 private:
 

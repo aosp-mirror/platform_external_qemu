@@ -25,6 +25,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace android_studio {
@@ -59,9 +60,11 @@ public:
 
     // analog of createRenderChannel, but for the address space graphics device
     virtual void* addressSpaceGraphicsConsumerCreate(
-            struct asg_context,
-            android::base::Stream* loadStream,
-            android::emulation::asg::ConsumerCallbacks) = 0;
+        struct asg_context,
+        android::base::Stream* loadStream,
+        android::emulation::asg::ConsumerCallbacks,
+        uint32_t virtioGpuContextId, uint32_t virtioGpuCapsetId,
+        std::optional<std::string> nameOpt) = 0;
     virtual void addressSpaceGraphicsConsumerDestroy(void*) = 0;
     virtual void addressSpaceGraphicsConsumerPreSave(void* consumer) = 0;
     virtual void addressSpaceGraphicsConsumerSave(

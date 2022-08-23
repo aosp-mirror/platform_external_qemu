@@ -48,7 +48,9 @@ public:
     RenderThread(
         struct asg_context context,
         android::base::Stream* loadStream,
-        android::emulation::asg::ConsumerCallbacks callbacks);
+        android::emulation::asg::ConsumerCallbacks callbacks,
+        uint32_t virtioGpuContextId, uint32_t virtioGpuCapsetId,
+        std::optional<std::string> nameOpt);
     virtual ~RenderThread();
 
     // Returns true iff the thread has finished.
@@ -110,6 +112,9 @@ private:
     bool mRunInLimitedMode = false;
 
     std::function<void()> mOnTeardown = []{};
+
+    uint32_t mVirtioGpuCapsetId = 0;
+    uint32_t mVirtioGpuContextId = 0;
 };
 
 }  // namespace emugl

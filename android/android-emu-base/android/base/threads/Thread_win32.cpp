@@ -22,8 +22,8 @@
 namespace android {
 namespace base {
 
-Thread::Thread(ThreadFlags flags, int stackSize)
-    : mStackSize(stackSize), mFlags(flags) {}
+Thread::Thread(ThreadFlags flags, int stackSize, std::optional<std::string> nameOpt)
+    : mStackSize(stackSize), mFlags(flags), mNameOpt(std::move(nameOpt)) {}
 
 Thread::~Thread() {
     if (mThread) {

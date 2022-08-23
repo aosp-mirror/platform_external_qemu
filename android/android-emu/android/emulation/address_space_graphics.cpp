@@ -576,17 +576,16 @@ void AddressSpaceGraphicsContext::setConsumer(
     sGlobals->setConsumer(interface);
 }
 
-AddressSpaceGraphicsContext::AddressSpaceGraphicsContext(bool isVirtio, bool fromSnapshot) :
-    mConsumerCallbacks((ConsumerCallbacks){
-        [this] { return onUnavailableRead(); },
-        [](uint64_t physAddr) {
-            return (char*)sGlobals->controlOps()->get_host_ptr(physAddr);
-        },
-    }),
-    mConsumerInterface(sGlobals->getConsumerInterface()),
-    mIsVirtio(isVirtio) {
-
-    if (fromSnapshot) {
+AddressSpaceGraphicsContext::AddressSpaceGraphicsContext(
+    const struct AddressSpaceCreateInfo& create)
+    : mConsumerCallbacks((ConsumerCallbacks){
+          [this] { return onUnavailableRead(); },
+          [](uint64_t physAddr) { return (char*)sGlobals->controlOps()->get_host_ptr(physAddr); },
+      }),
+      mConsumerInterface(sGlobals->getConsumerInterface()),
+      mIsVirtio(false) {
+    mIsVirtio = (create.type == AddressSpaceDeviceType::VirtioGpuGraphics);
+    if (create.fromSnapshot) {
         // Use load() instead to initialize
         return;
     }
@@ -625,6 +624,17 @@ AddressSpaceGraphicsContext::AddressSpaceGraphicsContext(bool isVirtio, bool fro
     mHostContext.ring_config->in_error = 0;
 
     mSavedConfig = *mHostContext.ring_config;
+
+    std::optional<std::string> nameOpt;
+    if (create.contextNameSize) {
+        std::string name(create.contextName, create.contextNameSize);
+        nameOpt = name;
+    }
+
+    if (create.createRenderThread) {
+        mCurrentConsumer = mConsumerInterface.create(
+            mHostContext, nullptr, mConsumerCallbacks, 0, 0, std::move(nameOpt));
+    }
 }
 
 AddressSpaceGraphicsContext::~AddressSpaceGraphicsContext() {
@@ -655,7 +665,8 @@ void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo* info) {
         info->size = (uint64_t)(mVersion > guestVersion ? guestVersion : mVersion);
         mVersion = (uint32_t)info->size;
         mCurrentConsumer = mConsumerInterface.create(
-            mHostContext, nullptr /* no load stream */, mConsumerCallbacks);
+            mHostContext, nullptr /* no load stream */, mConsumerCallbacks, 0, 0,
+            std::nullopt);
 
         if (mIsVirtio) {
             info->metadata = mCombinedAllocation.hostmemId;
@@ -791,7 +802,7 @@ bool AddressSpaceGraphicsContext::load(base::Stream* stream) {
 
     if (consumerExists) {
         mCurrentConsumer = mConsumerInterface.create(
-            mHostContext, stream, mConsumerCallbacks);
+            mHostContext, stream, mConsumerCallbacks, 0, 0, std::nullopt);
         mConsumerInterface.postLoad(mCurrentConsumer);
     }
 

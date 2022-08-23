@@ -87,6 +87,12 @@ public:
                          contextDesc.pingInfo);
     }
 
+    void createInstance(const struct AddressSpaceCreateInfo& create) {
+        AutoLock lock(mContextsLock);
+        auto& contextDesc = mContexts[create.handle];
+        contextDesc.device_context = buildAddressSpaceDeviceContext(create);
+    }
+
     void ping(uint32_t handle) {
         AutoLock lock(mContextsLock);
         auto& contextDesc = mContexts[handle];
@@ -107,10 +113,11 @@ public:
             device_context->perform(pingInfo);
         } else {
             // The first ioctl establishes the device type
-            const AddressSpaceDeviceType device_type =
-                static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
+            struct AddressSpaceCreateInfo create = {0};
+            create.type = static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
+            create.physAddr = phys_addr;
 
-            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr, false);
+            contextDesc.device_context = buildAddressSpaceDeviceContext(create);
             pingInfo->metadata = contextDesc.device_context ? 0 : -1;
         }
     }
@@ -133,11 +140,11 @@ public:
         if (device_context) {
             device_context->perform(pingInfo);
         } else {
-            // The first ioctl establishes the device type
-            const AddressSpaceDeviceType device_type =
-                static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
+            struct AddressSpaceCreateInfo create = {0};
+            create.type = static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
+            create.physAddr = phys_addr;
 
-            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr, false);
+            contextDesc.device_context = buildAddressSpaceDeviceContext(create);
             pingInfo->metadata = contextDesc.device_context ? 0 : -1;
         }
     }
@@ -267,11 +274,14 @@ public:
                 break;
 
             case 1: {
-                    const auto device_type =
-                        static_cast<AddressSpaceDeviceType>(stream->getBe32());
-                    context = buildAddressSpaceDeviceContext(device_type, pingInfoGpa, true);
-                    if (!context || !context->load(stream)) {
-                        return false;
+                struct AddressSpaceCreateInfo create = {0};
+                create.type = static_cast<AddressSpaceDeviceType>(stream->getBe32());
+                create.physAddr = pingInfoGpa;
+                create.fromSnapshot = true;
+
+                context = buildAddressSpaceDeviceContext(create);
+                if (!context || !context->load(stream)) {
+                    return false;
                     }
                 }
                 break;
@@ -338,20 +348,19 @@ private:
     typedef std::unordered_map<uint32_t, AddressSpaceContextDescription> Contexts;
     Contexts mContexts;
 
-    std::unique_ptr<AddressSpaceDeviceContext>
-    buildAddressSpaceDeviceContext(const AddressSpaceDeviceType device_type,
-                                   const uint64_t phys_addr,
-                                   bool fromSnapshot) {
+    std::unique_ptr<AddressSpaceDeviceContext> buildAddressSpaceDeviceContext(
+        const struct AddressSpaceCreateInfo& create) {
         typedef std::unique_ptr<AddressSpaceDeviceContext> DeviceContextPtr;
 
-        switch (device_type) {
-        case AddressSpaceDeviceType::Graphics:
-            asg::AddressSpaceGraphicsContext::init(get_address_space_device_control_ops());
-            return DeviceContextPtr(new asg::AddressSpaceGraphicsContext(false /* not virtio */, fromSnapshot));
+        switch (create.type) {
+            case AddressSpaceDeviceType::Graphics:
+                asg::AddressSpaceGraphicsContext::init(get_address_space_device_control_ops());
+                return DeviceContextPtr(new asg::AddressSpaceGraphicsContext(create));
 #ifndef AEMU_MIN
         case AddressSpaceDeviceType::Media:
             AS_DEVICE_DPRINT("allocating media context");
-            return DeviceContextPtr(new AddressSpaceHostMediaContext(phys_addr, get_address_space_device_control_ops(), fromSnapshot));
+            return DeviceContextPtr(
+                new AddressSpaceHostMediaContext(create, get_address_space_device_control_ops()));
 #endif
         case AddressSpaceDeviceType::Sensors:
             return nullptr;
@@ -369,7 +378,7 @@ private:
 
         case AddressSpaceDeviceType::VirtioGpuGraphics:
             asg::AddressSpaceGraphicsContext::init(get_address_space_device_control_ops());
-            return DeviceContextPtr(new asg::AddressSpaceGraphicsContext(true /* is virtio */, fromSnapshot));
+            return DeviceContextPtr(new asg::AddressSpaceGraphicsContext(create));
 
         default:
             AS_DEVICE_DPRINT("Bad device type");
@@ -443,6 +452,10 @@ static uint32_t sAddressSpaceDeviceGenHandle() {
 
 static void sAddressSpaceDeviceDestroyHandle(uint32_t handle) {
     sAddressSpaceDeviceState->destroyHandle(handle);
+}
+
+static void sAddressSpaceDeviceCreateInstance(const struct AddressSpaceCreateInfo& create) {
+    sAddressSpaceDeviceState->createInstance(create);
 }
 
 static void sAddressSpaceDeviceTellPingInfo(uint32_t handle, uint64_t gpa) {
@@ -521,6 +534,7 @@ static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
     &sAddressSpaceDeviceRegisterDeallocationCallback,  // register_deallocation_callback
     &sAddressSpaceDeviceRunDeallocationCallbacks,      // run_deallocation_callbacks
     &sAddressSpaceDeviceControlGetHwFuncs,             // control_get_hw_funcs
+    &sAddressSpaceDeviceCreateInstance,                // create_instance
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {

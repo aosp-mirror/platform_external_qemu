@@ -244,8 +244,11 @@ void RendererImpl::removeListener(FrameBufferChangeEventListener* listener) {
 void* RendererImpl::addressSpaceGraphicsConsumerCreate(
     struct asg_context context,
     android::base::Stream* loadStream,
-    android::emulation::asg::ConsumerCallbacks callbacks) {
-    auto thread = new RenderThread(context, loadStream, callbacks);
+    android::emulation::asg::ConsumerCallbacks callbacks,
+    uint32_t virtioGpuContextId, uint32_t virtioGpuCapsetId,
+    std::optional<std::string> nameOpt) {
+    auto thread = new RenderThread(context, loadStream, callbacks, virtioGpuContextId,
+                                   virtioGpuCapsetId, std::move(nameOpt));
     thread->start();
     return (void*)thread;
 }

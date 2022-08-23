@@ -21,8 +21,23 @@ extern "C" {
 
 struct AddressSpaceHwFuncs;
 
+struct AddressSpaceCreateInfo {
+    uint32_t handle;
+    uint32_t type;
+    uint64_t physAddr;
+    bool fromSnapshot;
+    bool createRenderThread;
+    void *externalAddr;
+    uint64_t externalAddrSize;
+    uint32_t virtioGpuContextId;
+    uint32_t virtioGpuCapsetId;
+    const char *contextName;
+    uint32_t contextNameSize;
+};
+
 typedef uint32_t (*address_space_device_gen_handle_t)(void);
 typedef void (*address_space_device_destroy_handle_t)(uint32_t);
+typedef void (*address_space_device_create_instance_t)(const struct AddressSpaceCreateInfo& create);
 typedef void (*address_space_device_tell_ping_info_t)(uint32_t handle, uint64_t gpa);
 typedef void (*address_space_device_ping_t)(uint32_t handle);
 typedef int (*address_space_device_add_memory_mapping_t)(uint64_t gpa, void *ptr, uint64_t size);
@@ -56,6 +71,7 @@ struct address_space_device_control_ops {
     address_space_device_register_deallocation_callback_t register_deallocation_callback;
     address_space_device_run_deallocation_callbacks_t run_deallocation_callbacks;
     address_space_device_control_get_hw_funcs_t control_get_hw_funcs;
+    address_space_device_create_instance_t create_instance;
 };
 
 AEMU_EXPORT struct address_space_device_control_ops*
