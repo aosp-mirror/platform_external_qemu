@@ -1,10 +1,10 @@
 [
 #  Let's not expose the internals of grpc
-{ include: ["@.*grpcpp/impl/.*", private, "<grpcpp/grpcpp.h>", public] },
+{ include: ["@.*grpcpp/.*", private, "<grpcpp/grpcpp.h>", public] },
 
 # Or gtest.
-{ include: ["@.*gtest/gtest-.+", private, "<gtest/gtest.h>", public] },
-{ include: ["@.*gmock/gmock-.+", private, "<gmock/gmock.h>", public] },
+{ include: ["@.*gtest/.*", private, "<gtest/gtest.h>", public] },
+{ include: ["@.*gmock/.*", private, "<gmock/gmock.h>", public] },
 
 
 { ref: clang-6.intrinsics.imp },

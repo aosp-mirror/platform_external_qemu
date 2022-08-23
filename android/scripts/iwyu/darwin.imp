@@ -2,6 +2,11 @@
 # Mac OS rewrites
 { include: ['@.*sys/_types/.*', 'private', '<sys/types.h>', 'public'] },
 { include: ['@.*sys/_pthread/.*', 'private', '<pthread.h>', 'public'] },
+{ include: ["@<__memory/.*>", "private", "<memory>", "public"] },
+{ include: ["@<__functional/.*>", "private", "<functional>", "public"] },
+{ include: ["@<__algorithm/.*>", "private", "<algorithm>", "public"] },
+{ include: ["@<__utility/.*>", "private", "<utility>", "public"] },
+{ include: ["<__fwd/string_view.h>", "private", "<string_view>", "public"] },
 { include: ['<_ctype.h>', 'private',  '<ctype.h>', 'public'] },
 { include: ['<_xlocale.h>', 'private',  '<locale.h>', 'public'] },
 { include: ['<i386/endian.h>', 'private',  '<arpa/inet.h>', 'public'] },
@@ -13,5 +18,5 @@
 { include: ['<sys/unistd.h>', 'private',  '<unistd.h>', 'public'] },
 { include: ['<sys/fcntl.h>', 'private',  '<fcntl.h>', 'public'] },
 { include: ['<sys/dirent.h>', 'private',  '<dirent.h>', 'public'] },
-{ include: ['<sys/_select.h>', 'private',  '<sys/select.h>' 'public'] },
+{ include: ['<sys/_select.h>', 'private',  '<sys/select.h>', 'public'] },
 ]
