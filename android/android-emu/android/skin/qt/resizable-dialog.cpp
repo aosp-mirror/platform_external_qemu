@@ -24,9 +24,6 @@ ResizableDialog::ResizableDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Popup);
-    // Hide desktop mode. Wait for the new desktop AVD configuration
-    // consolidated
-    ui->size_desktop->hide();
 }
 
 void ResizableDialog::on_size_phone_clicked() {

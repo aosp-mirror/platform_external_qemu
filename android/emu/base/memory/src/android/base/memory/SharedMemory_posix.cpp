@@ -67,9 +67,7 @@ void SharedMemory::close(bool forceDestroy) {
         if (mShareType == ShareType::FILE_BACKED) {
             remove(mName.c_str());
         } else {
-#if !defined(__BIONIC__)
             shm_unlink(mName.c_str());
-#endif
         }
     }
 }
@@ -86,11 +84,7 @@ int SharedMemory::openInternal(int oflag, int mode, bool doMapping) {
     int err = 0;
     struct stat sb;
     if (mShareType == ShareType::SHARED_MEMORY) {
-#if !defined(__BIONIC__)
         mFd = shm_open(mName.c_str(), oflag, mode);
-#else
-        return ENOTTY;
-#endif
     } else {
         mFd = ::open(mName.c_str(), oflag, mode);
         // Make sure the file can hold at least mSize bytes..

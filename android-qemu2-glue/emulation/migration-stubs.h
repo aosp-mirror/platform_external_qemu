@@ -38,4 +38,4 @@ static inline size_t qemu_peek_buffer(QEMUFile* f,
     return 0;
 }
 
-static inline void* cpu_physical_memory_map(hwaddr, hwaddr*, int) { return 0; }
+static inline void* cpu_physical_memory_map(hwaddr, size_t*, int) { return 0; }

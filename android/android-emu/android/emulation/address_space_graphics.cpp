@@ -444,7 +444,7 @@ private:
                         dedicatedSize);
 
                 struct MemEntry entry = { 0 };
-                entry.hva = buf;
+                entry.hva = (uint64_t)(uintptr_t)buf;
                 entry.size = dedicatedSize;
                 entry.register_fixed = hostmemRegisterFixed;
                 entry.fixed_id = hostmemIdOut ? *hostmemIdOut : 0;

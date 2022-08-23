@@ -65,12 +65,6 @@ auto androidQtSetupEnv(int bitness, const char* emulatorDir) -> bool {
     system->envSet("QT_SCREEN_SCALE_FACTORS", "none");
 
 #ifdef __linux__
-    // On some linux distributions, the kernel's anonymous namespaces feature is
-    // turned off, which may cause issues with QtWebEngineProcess in sandbox mode
-    // (See https://doc.qt.io/qt-6/qtwebengine-platform-notes.html#sandboxing-support).
-    // So let's turn off sandboxing.
-    system->envSet("QTWEBENGINE_DISABLE_SANDBOX", "1");
-
     // Some systems will not use the right libfreetype.
     // LD_PRELOAD that stuff.
     auto freetypePath = pj(qtLibSubDir, "libfreetype.so.6");

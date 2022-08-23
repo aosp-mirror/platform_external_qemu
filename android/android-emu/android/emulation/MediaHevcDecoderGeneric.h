@@ -80,8 +80,8 @@ private:
 
     // color aspects related
 private:
-    // default is 601, limited range, sRGB
-    std::unique_ptr<MetadataParam> mMetadataPtr;
+    // default is limited range, 601, sRGB
+    MetadataParam mMetadata = {1, 2, 4, 3};
 
 private:
     std::unique_ptr<MediaSnapshotHelper> mSnapshotHelper;

@@ -70,15 +70,11 @@ add_definitions(-DUNICODE -D_UNICODE)
 add_definitions(-DANDROID_EMULATOR)
 
 include(${protobuf_source_dir}/cmake/libprotobuf-lite.cmake)
-# Linking to both libprotobuf and libprotobuf-lite will cause unexpected behavior,
-# so we exclude libprotobuf-lite from the build.
-set_target_properties(libprotobuf-lite PROPERTIES
-    EXCLUDE_FROM_ALL TRUE)
 include(${protobuf_source_dir}/cmake/libprotobuf.cmake)
-# external/tink links to libprotobuf-lite, but we only want to use libprotobuf.
-add_library(protobuf::libprotobuf-lite ALIAS libprotobuf)
+
 
 target_compile_options(libprotobuf PRIVATE -Wno-invalid-noreturn)
+target_compile_options(libprotobuf-lite PRIVATE -Wno-invalid-noreturn)
 if(NOT CROSSCOMPILE)
   include(${protobuf_source_dir}/cmake/libprotoc.cmake)
   include(${protobuf_source_dir}/cmake/protoc.cmake)
@@ -124,6 +120,9 @@ android_license(
 android_license(TARGET "libprotobuf" LIBNAME protobuf SPDX "BSD-3-Clause"
                 LICENSE "BSD-3-Clause" LOCAL "${protobuf_source_dir}/NOTICE")
 
+android_license(TARGET "libprotobuf-lite" LIBNAME protobuf SPDX "BSD-3-Clause"
+                LICENSE "BSD-3-Clause" LOCAL "${protobuf_source_dir}/NOTICE")
 if(protobuf_BUILD_SHARED_LIBS)
   android_install_shared(libprotobuf)
+  android_install_shared(libprotobuf-lite)
 endif()

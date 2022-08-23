@@ -245,22 +245,6 @@ void MediaVpxDecoderGeneric::sendMetadata(void* ptr) {
     MetadataParam param{};
     mParser.parseMetadataParams(ptr, param);
 
-    bool isValid = false;
-    if (param.range == 2 && param.primaries == 4 && param.transfer == 3) {
-        isValid = true;
-    } else if (param.range == 1 && param.primaries == 4 &&
-               param.transfer == 3) {
-        isValid = true;
-    } else if (param.range == 2 && param.primaries == 1 &&
-               param.transfer == 3) {
-        isValid = true;
-    }
-
-    if (!isValid) {
-        VPX_DPRINT("%s %d invalid values in sendMetadata %p, ignore.\n",
-                    __func__, __LINE__, ptr);
-        return;
-    }
     std::swap(mMetadata, param);
     VPX_DPRINT("vpx %s %d range %d primaries %d transfer %d\n", __func__,
                __LINE__, (int)(mMetadata.range), (int)(mMetadata.primaries),
