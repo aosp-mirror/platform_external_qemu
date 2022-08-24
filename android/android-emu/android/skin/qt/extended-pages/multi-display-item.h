@@ -40,7 +40,7 @@ public:
     MultiDisplayItem(int id, uint32_t width, uint32_t height, uint32_t dpi,
                      QWidget* parent = 0);
     void getValues(uint32_t* width, uint32_t* height, uint32_t* dpi);
-    std::string& getName();
+    std::string const& getName();
     void focusInEvent(QFocusEvent* event) override;
     void focusOutEvent(QFocusEvent* event) override;
     void updateTheme(void);
@@ -55,6 +55,8 @@ private:
         uint32_t dpi;
     };
     static std::vector<displayType> sDisplayTypes;
+    static std::vector<displayType> sDisplayTypesAutoCluster;
+    static std::vector<displayType> sDisplayTypesAutoSecondary;
     std::shared_ptr<UiEventTracker> mDropDownTracker;
     int mId;
     int mCurrentIndex;
@@ -67,6 +69,7 @@ private slots:
     void onDisplayTypeChanged(int index);
     void onCustomParaChanged(double value);
     void on_deleteDisplay_clicked();
+    const std::vector<displayType>& getDisplayTypes() const;
 
 signals:
     void deleteDisplay(int id);

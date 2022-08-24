@@ -88,6 +88,7 @@ set(android-emu-common
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/hostdevices/HostGoldfishPipe.cpp
     android/emulation/HostmemIdMapping.cpp
+    android/emulation/AutoDisplays.cpp
     android/emulation/MediaFfmpegVideoHelper.cpp
     android/emulation/MediaH264Decoder.cpp
     android/emulation/MediaH264DecoderDefault.cpp

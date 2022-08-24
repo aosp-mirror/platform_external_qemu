@@ -23,16 +23,33 @@
 #include "android/skin/qt/emulator-qt-window.h"     // for EmulatorQtWindow
 #include "android/skin/qt/extended-pages/common.h"  // for getIconForCurrent...
 #include "multi-display-page.h"                     // for MultiDisplayPage
+#include "android/avd/info.h"                       // for avdInfo_getAvdFlavor(...)
 
 class QFocusEvent;
 class QWidget;
 
+// name, short name, height, width, density
 std::vector<MultiDisplayItem::displayType> MultiDisplayItem::sDisplayTypes = {
         {"480p(720x480)", "480p", 720, 480, 142},
         {"720p(1280x720)", "720p", 1280, 720, 213},
         {"1080p(1920x1080)", "1080p", 1920, 1080, 320},
         {"4K(3840x2160)", "4K", 3840, 2160, 320},
         {"4K upscaled(3840x2160)", "4K\nupscaled", 3840, 2160, 640},
+        {"custom", "custom", 1080, 720, 213},
+};
+
+std::vector<MultiDisplayItem::displayType> MultiDisplayItem::sDisplayTypesAutoCluster = {
+        {"Cluster(400x600) portrait", "Cluster portrait", 600, 400, 120},
+        {"Cluster(800x600) landscape", "Cluster landscape", 600, 800, 120},
+        {"custom", "custom", 600, 400, 120},
+};
+
+std::vector<MultiDisplayItem::displayType> MultiDisplayItem::sDisplayTypesAutoSecondary = {
+        {"768p(1024x768) landscape", "768p", 768, 1024, 120}, // TODO: figure out if 1024p or 768p
+        {"1024p(1024x768) portrait", "1024p", 1024, 768, 120},
+        {"1080p(1920x1080) landscape", "1080p", 1080, 1920, 320},
+        {"4K(3840x2160) portrait", "4Kportrait", 3840, 2160, 320},
+        {"4K(3840x2160) landscape", "4Klandscape", 2160, 3840, 320},
         {"custom", "custom", 1080, 720, 213},
 };
 
@@ -48,7 +65,7 @@ MultiDisplayItem::MultiDisplayItem(int id, QWidget* parent)
     this->setStyleSheet(parent->styleSheet());
 
     // Initialize the drop-down menu
-    for (auto const& type : sDisplayTypes) {
+    for (auto const& type : getDisplayTypes()) {
         mUi->selectDisplayType->addItem(type.name.c_str());
     }
     mUi->width->setMinValue(0);
@@ -90,9 +107,10 @@ MultiDisplayItem::MultiDisplayItem(int id,
     // check with displayType fits the width, height and dpi, then set to it.
     // If not found, set to "custom" type.
     int i = 0;
-    for (; i < sDisplayTypes.size() - 1; i++) {
-        if (sDisplayTypes[i].width == width &&
-            sDisplayTypes[i].height == height && sDisplayTypes[i].dpi == dpi) {
+    std::vector<MultiDisplayItem::displayType> displayTypes = getDisplayTypes();
+    for (; i < displayTypes.size() - 1; i++) {
+        if (displayTypes[i].width == width &&
+            displayTypes[i].height == height && displayTypes[i].dpi == dpi) {
             break;
         }
     }
@@ -100,14 +118,15 @@ MultiDisplayItem::MultiDisplayItem(int id,
     if (mUi->selectDisplayType->currentIndex() != mCurrentIndex) {
         mUi->selectDisplayType->setCurrentIndex(mCurrentIndex);
         // This selection is not made by the user, so we have to adjust our count.
-        mDropDownTracker->increment(sDisplayTypes[mCurrentIndex].shortName, -1);
+        mDropDownTracker->increment(displayTypes[mCurrentIndex].shortName, -1);
         onDisplayTypeChanged(mCurrentIndex);
     }
 }
 
 void MultiDisplayItem::onDisplayTypeChanged(int index) {
-    mDropDownTracker->increment(sDisplayTypes[index].shortName);
-    if (index == sDisplayTypes.size() - 1) {
+    std::vector<MultiDisplayItem::displayType> displayTypes = getDisplayTypes();
+    mDropDownTracker->increment(displayTypes[index].shortName);
+    if (index == displayTypes.size() - 1) {
         uint32_t w, h, dpi;
         bool enabled;
         EmulatorQtWindow::getInstance()->getMultiDisplay(
@@ -142,12 +161,13 @@ void MultiDisplayItem::on_deleteDisplay_clicked() {
 }
 
 void MultiDisplayItem::setValues(int index) {
-    if (index >= sDisplayTypes.size()) {
+    std::vector<MultiDisplayItem::displayType> displayTypes = getDisplayTypes();
+    if (index >= displayTypes.size()) {
         return;
     }
-    mUi->width->setValue(sDisplayTypes[index].width);
-    mUi->height->setValue(sDisplayTypes[index].height);
-    mUi->dpi->setValue(sDisplayTypes[index].dpi);
+    mUi->width->setValue(displayTypes[index].width);
+    mUi->height->setValue(displayTypes[index].height);
+    mUi->dpi->setValue(displayTypes[index].dpi);
 }
 
 void MultiDisplayItem::getValues(uint32_t* width,
@@ -164,8 +184,8 @@ void MultiDisplayItem::getValues(uint32_t* width,
     }
 }
 
-std::string& MultiDisplayItem::getName() {
-    return sDisplayTypes[mCurrentIndex].shortName;
+const std::string& MultiDisplayItem::getName() {
+    return getDisplayTypes()[mCurrentIndex].shortName;
 }
 
 void MultiDisplayItem::hideWidthHeightDpiBox(bool hide) {
@@ -193,4 +213,16 @@ void MultiDisplayItem::focusOutEvent(QFocusEvent* event) {
 
 void MultiDisplayItem::updateTheme() {
     mUi->deleteDisplay->setIcon(getIconForCurrentTheme("close"));
+}
+
+std::vector<MultiDisplayItem::displayType> const& MultiDisplayItem::getDisplayTypes() const {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
+        if (mId == 1) { // Cluster display have different recommended sizes.
+            return sDisplayTypesAutoCluster;
+        } else {
+            return sDisplayTypesAutoSecondary;
+        }
+    } else {
+        return sDisplayTypes;
+    }
 }
