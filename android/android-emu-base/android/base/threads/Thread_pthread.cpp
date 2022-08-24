@@ -69,7 +69,10 @@ bool Thread::start() {
     }
 
     if (mNameOpt.has_value()) {
+        // TODO: Implement for MacOS
+#ifdef __linux__
         pthread_setname_np(mThread, (*mNameOpt).c_str());
+#endif  // __linux__
     }
 
     if (useAttributes) {
