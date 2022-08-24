@@ -92,6 +92,9 @@ toClearcutLogGuestArch(const char* hw_cpu_arch) {
 static android_studio::ProductDetails::CpuArchitecture
 toClearcutLogCpuArchitecture(int bitness) {
     using android_studio::ProductDetails;
+#ifdef __aarch64__
+    return ProductDetails::ARM;
+#else
     switch (bitness) {
         case 32:
             return ProductDetails::X86;
@@ -100,6 +103,7 @@ toClearcutLogCpuArchitecture(int bitness) {
         default:
             return ProductDetails::UNKNOWN_CPU_ARCHITECTURE;
     }
+#endif
 }
 
 static android_studio::ProductDetails::SoftwareLifeCycleChannel
