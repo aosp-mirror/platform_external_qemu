@@ -59,7 +59,7 @@ void Switchboard::rtcConnectionClosed(const std::string participant) {
     const std::lock_guard<std::mutex> lock(mCleanupMutex);
 
     if (mId.find(participant) != mId.end()) {
-        RTC_LOG(INFO) << "Finalizing " << participant;
+        LOG(INFO) << "Finalizing " << participant;
         auto queue = mId[participant];
         mLocks.erase(queue.get());
         mId.erase(participant);
@@ -81,7 +81,7 @@ void Switchboard::rtcConnectionClosed(const std::string participant) {
 }
 
 void Switchboard::send(std::string to, json message) {
-    RTC_LOG(INFO) << "send to: " << to << " msg: " << message.dump();
+    LOG(INFO) << "send to: " << to << " msg: " << message.dump();
     if (mId.find(to) != mId.end()) {
         auto queue = mId[to];
         {
@@ -92,12 +92,12 @@ void Switchboard::send(std::string to, json message) {
             }
         }
     } else {
-        RTC_LOG(WARNING) << "Sending to an unknown participant!";
+        LOG(WARNING) << "Sending to an unknown participant!";
     }
 }
 
 bool Switchboard::connect(std::string identity) {
-    RTC_LOG(INFO) << "Connecting: " << identity;
+    LOG(INFO) << "Connecting: " << identity;
     mMapLock.lockRead();
     if (mId.find(identity) == mId.end()) {
         mMapLock.unlockRead();
