@@ -6,16 +6,18 @@
   "configurations": [
     {
       "name": "Launch cmake binary",
-     "type": "lldb",
+      "type": "lldb",
       // "type": "cppvsdbg",
       "symbolSearchPath": "${workspaceFolder}\\build\\build\\debug_info",
       "request": "launch",
       "console": "integratedTerminal",
       "program": "${command:cmake.launchTargetPath}",
+
       "args": [
-        "--gtest_filter=EintrWrapperTest.*",
+        // "--gtest_repeat=-1",
+        "--gtest_throw_on_failure",
       ],
-      "cwd": "${workspaceFolder}",
+      "cwd": "${workspaceFolder}/build",
       "stopAtEntry": false,
       "windows": {
         "type": "cppvsdbg",
