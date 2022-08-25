@@ -410,10 +410,21 @@ static SWVoiceIn *virtio_snd_get_voice_in() {
     return g_input_stream ? g_input_stream->voice.in : NULL;
 }
 
-static uint16_t virtio_snd_voice_reopen(VirtIOSound *snd,
-                                        VirtIOSoundPCMStream *stream,
-                                        const char *stream_name,
-                                        const uint16_t format16) {
+static void virtio_snd_stream_set_aud_format(VirtIOSoundPCMStream *stream,
+                                             const unsigned nchannels,
+                                             const uint16_t format16_fmt_freq) {
+    const unsigned fmt = format16_get_format(format16_fmt_freq);
+    const unsigned freq = format16_get_freq(format16_fmt_freq);
+    const uint16_t aud_format = VIRTIO_SND_PACK_FORMAT16(nchannels, fmt, freq);
+
+    stream->aud_format = aud_format;
+    stream->aud_frame_size = format16_get_frame_size(aud_format);
+}
+
+static bool virtio_snd_voice_reopen(VirtIOSound *snd,
+                                    VirtIOSoundPCMStream *stream,
+                                    const char *stream_name,
+                                    const uint16_t format16) {
     struct audsettings as = virtio_snd_unpack_format(format16);
 
     if (is_output_stream(stream)) {
@@ -434,9 +445,8 @@ static uint16_t virtio_snd_voice_reopen(VirtIOSound *snd,
                 ABORT("stream->voice.out");
             }
 
-            const unsigned fmt = format16_get_format(format16);
-            const unsigned freq = format16_get_freq(format16);
-            return VIRTIO_SND_PACK_FORMAT16(as.nchannels, fmt, freq);
+            virtio_snd_stream_set_aud_format(stream, as.nchannels, format16);
+            return true;
         } else if (snd->enable_output_prop) {
             for (as.nchannels = VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS;
                  as.nchannels >= VIRTIO_SND_PCM_NUM_MIN_CHANNELS;
@@ -449,9 +459,8 @@ static uint16_t virtio_snd_voice_reopen(VirtIOSound *snd,
                                                  &stream_out_cb,
                                                  &as);
                 if (stream->voice.out) {
-                    const unsigned fmt = format16_get_format(format16);
-                    const unsigned freq = format16_get_freq(format16);
-                    return VIRTIO_SND_PACK_FORMAT16(as.nchannels, fmt, freq);
+                    virtio_snd_stream_set_aud_format(stream, as.nchannels, format16);
+                    return true;
                 }
             }
         }
@@ -473,9 +482,8 @@ static uint16_t virtio_snd_voice_reopen(VirtIOSound *snd,
                 ABORT("stream->voice.in");
             }
 
-            const unsigned fmt = format16_get_format(format16);
-            const unsigned freq = format16_get_freq(format16);
-            return VIRTIO_SND_PACK_FORMAT16(as.nchannels, fmt, freq);
+            virtio_snd_stream_set_aud_format(stream, as.nchannels, format16);
+            return true;
         } else if (snd->enable_input_prop) {
             for (as.nchannels = VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS;
                  as.nchannels >= VIRTIO_SND_PCM_NUM_MIN_CHANNELS;
@@ -489,15 +497,14 @@ static uint16_t virtio_snd_voice_reopen(VirtIOSound *snd,
                 if (stream->voice.in) {
                     g_input_stream = stream;
 
-                    const unsigned fmt = format16_get_format(format16);
-                    const unsigned freq = format16_get_freq(format16);
-                    return VIRTIO_SND_PACK_FORMAT16(as.nchannels, fmt, freq);
+                    virtio_snd_stream_set_aud_format(stream, as.nchannels, format16);
+                    return true;
                 }
             }
         }
     }
 
-    return FAILURE(VIRTIO_SND_FORMAT16_BAD);
+    return FAILURE(false);
 }
 
 static void virtio_snd_voice_close(VirtIOSound *snd, VirtIOSoundPCMStream *stream) {
@@ -518,10 +525,8 @@ static void virtio_snd_stream_init(const unsigned stream_id,
     stream->id = stream_id;
     stream->snd = snd;
     stream->voice.raw = NULL;
-    stream->aud_format = virtio_snd_voice_reopen(snd, stream,
-                                                 g_stream_name[stream_id],
-                                                 g_stream_default_format);
-    stream->aud_frame_size = format16_get_frame_size(stream->aud_format);
+    virtio_snd_voice_reopen(snd, stream, g_stream_name[stream_id],
+                            g_stream_default_format);
     ring_buffer_init(&stream->pcm_buf);
     qemu_mutex_init(&stream->mtx);
     stream->state = VIRTIO_PCM_STREAM_STATE_DISABLED;
@@ -1468,11 +1473,6 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
 
     qemu_mutex_lock(&stream->mtx);
 
-    if (!stream->voice.raw) {
-        r = FAILURE(VIRTIO_SND_S_IO_ERR);
-        goto done;
-    }
-
     if (!stream->buffer_bytes) {
         r = FAILURE(VIRTIO_SND_S_BAD_MSG);
         goto done;
@@ -1485,9 +1485,11 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
             goto done;
         }
 
-        stream->aud_format = virtio_snd_voice_reopen(snd, stream,
-                                                     g_stream_name[stream_id],
-                                                     stream->guest_format);
+        if (!virtio_snd_voice_reopen(snd, stream, g_stream_name[stream_id],
+                                     stream->guest_format)) {
+            r = FAILURE(VIRTIO_SND_S_BAD_MSG);
+            goto done;
+        }
 
         stream->state = VIRTIO_PCM_STREAM_STATE_PREPARED;
         /* fallthrough */
@@ -1892,9 +1894,7 @@ static int vmstate_VirtIOSound_post_xyz(void *opaque) {
                 ABORT("virtio_snd_stream_prepare_vars");
             }
 
-            stream->aud_format = virtio_snd_voice_reopen(snd, stream,
-                                                         g_stream_name[i],
-                                                         stream->guest_format);
+            virtio_snd_voice_reopen(snd, stream, g_stream_name[i], stream->guest_format);
         }
     }
 
