@@ -43,6 +43,8 @@
 #define RING_BUFFER_BAD_R                           22222
 #define RING_BUFFER_BAD_W                           33333
 
+#define AUD_SCRATCH_SIZE                            2048
+
 #define GLUE(A, B) A##B
 #define GLUE2(A, B) GLUE(A, B)
 #define ABORT(why) abort();
@@ -1205,7 +1207,7 @@ static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) 
     const int driver_fs = stream->driver_frame_size;
     bool notify_vq = false;
     int drop_bytes;
-    int16_t scratch[1024];
+    int16_t scratch[AUD_SCRATCH_SIZE];
     const int max_scratch_frames = sizeof(scratch) / MAX(aud_fs, driver_fs);
 
     while (avail >= aud_fs) {
@@ -1351,7 +1353,7 @@ static VirtQueue *stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     VirtIOSound *const snd = stream->snd;
     VirtQueue *const rx_vq = snd->rx_vq;
     bool notify_vq = false;
-    int16_t scratch[1024];
+    int16_t scratch[AUD_SCRATCH_SIZE];
     const int max_scratch_frames = sizeof(scratch) / MAX(aud_fs, driver_fs);
 
     while (avail >= aud_fs) {
