@@ -30,9 +30,15 @@ set(FFMPEG_LIBRARIES
 )
 if(WINDOWS)
   # We need winsock for avformat, so make that dependency explicit
+  set(wmf_libs dxva2.lib evr.lib mf.lib mfplat.lib mfplay.lib mfreadwrite.lib mfuuid.lib)
   list(APPEND FFMPEG_LIBRARIES
       ws2_32::ws2_32
-      secur32::secur32)
+      secur32::secur32
+      Bcrypt
+      strmiids
+      mfplat
+      mfuuid
+      ${wmf_libs})
 endif()
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
   # Well, macos needs something extra as well
