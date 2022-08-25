@@ -1217,6 +1217,9 @@ static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) 
                 const int32_t nf = MIN(avail, sizeof(scratch)) / aud_fs;
                 const int32_t nb = nf * aud_fs;
                 const int32_t sent_bytes = AUD_write(voice, scratch, nb);
+                if (sent_bytes <= 0) {
+                    break;
+                }
 
                 avail -= sent_bytes;
             }
