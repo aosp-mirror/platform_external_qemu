@@ -502,7 +502,7 @@ void TextureDraw::setScreenMask(int width, int height, const unsigned char* rgba
     mMaskHeight = height;
 }
 
-void TextureDraw::prepareForDrawLayer() {
+void TextureDraw::preDrawLayer() {
     if (!mProgram) {
         ERR("%s: no program\n", __FUNCTION__);
         return;
@@ -564,13 +564,16 @@ void TextureDraw::prepareForDrawLayer() {
     s_gles2.glUniform1i(mTextureSlot, 0);
     s_gles2.glEnable(GL_BLEND);
     s_gles2.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+}
 
+void TextureDraw::prepareForDrawLayer() {
     // clear color
     s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void TextureDraw::drawLayer(ComposeLayer* l, int frameWidth, int frameHeight,
                             int cbWidth, int cbHeight, GLuint texture) {
+    preDrawLayer();
     switch(l->composeMode) {
         case HWC2_COMPOSITION_DEVICE:
             s_gles2.glBindTexture(GL_TEXTURE_2D, texture);

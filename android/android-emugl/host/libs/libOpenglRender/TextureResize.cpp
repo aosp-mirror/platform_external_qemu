@@ -21,6 +21,7 @@
 #include "android/utils/debug.h"
 
 #include "emugl/common/misc.h"
+#include "emugl/common/mutex.h"
 
 #include "GLES2/gl2ext.h"
 
@@ -153,18 +154,8 @@ const char kGenericFragmentShaderSource[] = R"(
 )";
 
 static const float kVertexData[] = {-1, -1, 3, -1, -1, 3};
-
-static void detachShaders(GLuint program) {
-    GLuint shaders[2] = {};
-    GLsizei count = 0;
-    s_gles2.glGetAttachedShaders(program, 2, &count, shaders);
-    if (s_gles2.glGetError() == GL_NO_ERROR) {
-        for (GLsizei i = 0; i < count; i++) {
-            s_gles2.glDetachShader(program, shaders[i]);
-            s_gles2.glDeleteShader(shaders[i]);
-        }
-    }
-}
+static emugl::Mutex s_programLock;
+static std::vector<GLuint> s_programsToRelease;
 
 static GLuint createShader(GLenum type, std::initializer_list<const char*> source) {
     GLint success, infoLength;
@@ -205,12 +196,15 @@ static void attachShaders(TextureResize::Framebuffer* fb, const char* factorDefi
     if (!vShader || !fShader) {
         return;
     }
-
+    if (!fb->program) {
+        fb->program = s_gles2.glCreateProgram();
+    }
     s_gles2.glAttachShader(fb->program, vShader);
     s_gles2.glAttachShader(fb->program, fShader);
     s_gles2.glLinkProgram(fb->program);
+    s_gles2.glDeleteShader(vShader);
+    s_gles2.glDeleteShader(fShader);
 
-    s_gles2.glUseProgram(fb->program);
     fb->aPosition = s_gles2.glGetAttribLocation(fb->program, "aPosition");
     fb->uTexture = s_gles2.glGetUniformLocation(fb->program, "uTexture");
 }
@@ -270,9 +264,6 @@ TextureResize::TextureResize(GLuint width, GLuint height) :
     s_gles2.glGenFramebuffers(1, &mFBWidth.framebuffer);
     s_gles2.glGenFramebuffers(1, &mFBHeight.framebuffer);
 
-    mFBWidth.program = s_gles2.glCreateProgram();
-    mFBHeight.program = s_gles2.glCreateProgram();
-
     s_gles2.glGenBuffers(1, &mVertexBuffer);
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
     s_gles2.glBufferData(GL_ARRAY_BUFFER, sizeof(kVertexData), kVertexData, GL_STATIC_DRAW);
@@ -282,6 +273,8 @@ TextureResize::TextureResize(GLuint width, GLuint height) :
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+
+
 TextureResize::~TextureResize() {
     GLuint fb[2] = {mFBWidth.framebuffer, mFBHeight.framebuffer};
     s_gles2.glDeleteFramebuffers(2, fb);
@@ -289,20 +282,21 @@ TextureResize::~TextureResize() {
     GLuint tex[2] = {mFBWidth.texture, mFBHeight.texture};
     s_gles2.glDeleteTextures(2, tex);
 
-    detachShaders(mFBWidth.program);
-    detachShaders(mFBHeight.program);
-
-    s_gles2.glDeleteProgram(mFBWidth.program);
-    s_gles2.glDeleteProgram(mFBHeight.program);
-
     s_gles2.glDeleteBuffers(1, &mVertexBuffer);
+    // b/242245912
+    // There seems to be a mesa bug that we have to delete the
+    // program in the post thread.
+    android::base::AutoLock lock(s_programLock);
+    s_programsToRelease.push_back(mFBWidth.program);
+    s_programsToRelease.push_back(mFBHeight.program);
 }
 
 GLuint TextureResize::update(GLuint texture) {
     // Store the viewport. The viewport is clobbered due to the framebuffers.
     GLint vport[4] = { 0, };
     s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
-
+    GLint prevFbo = 0;
+    s_gles2.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevFbo);
     // Correctly deal with rotated screens.
     GLint tWidth = vport[2], tHeight = vport[3];
     if ((mWidth < mHeight) != (tWidth < tHeight)) {
@@ -324,8 +318,8 @@ GLuint TextureResize::update(GLuint texture) {
     s_gles2.glGetError(); // Clear any GL errors.
     setupFramebuffers(factor);
     resize(texture);
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]); // Restore the viewport.
-
     // If there was an error while resizing, just use the unscaled texture.
     GLenum error = s_gles2.glGetError();
     if (error != GL_NO_ERROR) {
@@ -362,11 +356,7 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
                 mTextureDataType, nullptr);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
 
-    // Update the shaders to the new factor. First detach the old shaders...
-    detachShaders(mFBWidth.program);
-    detachShaders(mFBHeight.program);
-
-    // ... then attach the new ones.
+    // Update the shaders to the new factor.
     std::ostringstream factorDefine;
     factorDefine << "#define FACTOR " << factor << '\n';
     const std::string factorDefineStr = factorDefine.str();
@@ -403,6 +393,7 @@ void TextureResize::resize(GLuint texture) {
     s_gles2.glDrawArrays(GL_TRIANGLES, 0, sizeof(kVertexData) / (2 * sizeof(float)));
 
     // Restore the previous texture filters.
+    s_gles2.glDisableVertexAttribArray(mFBWidth.aPosition);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
     s_gles2.glFramebufferTexture2D(
@@ -425,8 +416,13 @@ void TextureResize::resize(GLuint texture) {
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
-    s_gles2.glDisableVertexAttribArray(mFBWidth.aPosition);
     s_gles2.glDisableVertexAttribArray(mFBHeight.aPosition);
+    s_gles2.glUseProgram(0);
+    android::base::AutoLock lock(s_programLock);
+    while (s_programsToRelease.size()) {
+        s_gles2.glDeleteProgram(s_programsToRelease.back());
+        s_programsToRelease.pop_back();
+    }
 }
 
 struct Vertex {
@@ -608,7 +604,6 @@ GLuint TextureResize::GenericResizer::draw(GLuint texture, int width, int height
 TextureResize::GenericResizer::~GenericResizer() {
     s_gles2.glDeleteFramebuffers(1, &mFrameBuffer.framebuffer);
     s_gles2.glDeleteTextures(1, &mFrameBuffer.texture);
-    detachShaders(mProgram);
     s_gles2.glUseProgram(0);
     s_gles2.glDeleteProgram(mProgram);
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
