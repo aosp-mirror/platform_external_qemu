@@ -760,11 +760,11 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
     }
 }
 
-static int clamp_s16(int s) {
-    s -= (s > 32767) * (s - 32767);
-    s += (s < -32768) * (-32768 - s);
-    return s;
-}
+#define CLAMP_S16(S) ({ int s = (S); \
+    s -= (s > 32767) * (s - 32767); \
+    s += (s < -32768) * (-32768 - s); \
+    s; \
+})
 
 static int convert_channels_1_to_2(int16_t *buffer, int16_t *in_end) {
     int16_t *in = in_end - 1;
@@ -835,7 +835,7 @@ static int convert_channels_2_to_1(int16_t *buffer, int16_t *in_end) {
     for (; in < in_end; in += 2, out += 1) {
         const int in0 = in[0];
         const int in1 = in[1];
-        out[0] = clamp_s16((in0 + in1) / 2);
+        out[0] = CLAMP_S16((in0 + in1) / 2);
     }
 
     return sizeof(*buffer) * (out - buffer);
@@ -851,7 +851,7 @@ static int convert_channels_2_to_3(int16_t *buffer, int16_t *in_end) {
         const int in1 = in[1];
         out[0] = in0;
         out[1] = in1;
-        out[2] = clamp_s16((in0 + in1) / 2);
+        out[2] = CLAMP_S16((in0 + in1) / 2);
     }
 
     return sizeof(*buffer) * (out_end - buffer);
@@ -886,7 +886,7 @@ static int convert_channels_2_to_5(int16_t *buffer, int16_t *in_end) {
         out[1] = in1;
         out[2] = in0;
         out[3] = in1;
-        out[4] = clamp_s16((in0 + in1) / 2);
+        out[4] = CLAMP_S16((in0 + in1) / 2);
     }
 
     return sizeof(*buffer) * (out_end - buffer);
@@ -900,7 +900,7 @@ static int convert_channels_3_to_1(int16_t *buffer, int16_t *in_end) {
         const int in0 = in[0];
         const int in1 = in[1];
         const int in2 = in[2];
-        out[0] = clamp_s16((85 * (in0 + in1 + in2)) / 256);
+        out[0] = CLAMP_S16((85 * (in0 + in1 + in2)) / 256);
     }
 
     return sizeof(*buffer) * (out - buffer);
@@ -914,8 +914,8 @@ static int convert_channels_3_to_2(int16_t *buffer, int16_t *in_end) {
         const int in0 = in[0];
         const int in1 = in[1];
         const int in22 = in[2] / 2;
-        out[0] = clamp_s16((170 * (in0 + in22)) / 256);
-        out[1] = clamp_s16((170 * (in1 + in22)) / 256);
+        out[0] = CLAMP_S16((170 * (in0 + in22)) / 256);
+        out[1] = CLAMP_S16((170 * (in1 + in22)) / 256);
     }
 
     return sizeof(*buffer) * (out - buffer);
@@ -933,7 +933,7 @@ static int convert_channels_3_to_4(int16_t *buffer, int16_t *in_end) {
         out[0] = in0;
         out[1] = in1;
         out[2] = in2;
-        out[3] = clamp_s16((in1 + in2) / 2);
+        out[3] = CLAMP_S16((in1 + in2) / 2);
     }
 
     return sizeof(*buffer) * (out_end - buffer);
@@ -967,7 +967,7 @@ static int convert_channels_4_to_1(int16_t *buffer, int16_t *in_end) {
         const int in1 = in[1];
         const int in2 = in[2];
         const int in3 = in[3];
-        out[0] = clamp_s16((in0 + in1 + in2 + in3) / 4);
+        out[0] = CLAMP_S16((in0 + in1 + in2 + in3) / 4);
     }
 
     return sizeof(*buffer) * (out - buffer);
@@ -982,8 +982,8 @@ static int convert_channels_4_to_2(int16_t *buffer, int16_t *in_end) {
         const int in1 = in[1];
         const int in2 = in[2];
         const int in3 = in[3];
-        out[0] = clamp_s16((in0 + in2) / 2);
-        out[1] = clamp_s16((in1 + in3) / 2);
+        out[0] = CLAMP_S16((in0 + in2) / 2);
+        out[1] = CLAMP_S16((in1 + in3) / 2);
     }
 
     return sizeof(*buffer) * (out - buffer);
@@ -1000,7 +1000,7 @@ static int convert_channels_4_to_3(int16_t *buffer, int16_t *in_end) {
         const int in3 = in[3];
         out[0] = in0;
         out[1] = in1;
-        out[2] = clamp_s16((in2 + in3) / 2);
+        out[2] = CLAMP_S16((in2 + in3) / 2);
     }
 
     return sizeof(*buffer) * (out - buffer);
@@ -1020,7 +1020,7 @@ static int convert_channels_4_to_5(int16_t *buffer, int16_t *in_end) {
         out[1] = in1;
         out[2] = in2;
         out[3] = in3;
-        out[4] = clamp_s16((in2 + in3) / 2);
+        out[4] = CLAMP_S16((in2 + in3) / 2);
     }
 
     return sizeof(*buffer) * (out_end - buffer);
@@ -1036,7 +1036,7 @@ static int convert_channels_5_to_1(int16_t *buffer, int16_t *in_end) {
         const int in2 = in[2];
         const int in3 = in[3];
         const int in4 = in[4];
-        out[0] = clamp_s16((51 * (in0 + in1 + in2 + in3 + in4)) / 256);
+        out[0] = CLAMP_S16((51 * (in0 + in1 + in2 + in3 + in4)) / 256);
     }
 
     return sizeof(*buffer) * (out - buffer);
@@ -1052,8 +1052,8 @@ static int convert_channels_5_to_2(int16_t *buffer, int16_t *in_end) {
         const int in2 = in[2];
         const int in3 = in[3];
         const int in44 = in[4] / 4;
-        out[0] = clamp_s16(in0 / 2 + in2 / 4 + in44);
-        out[1] = clamp_s16(in1 / 2 + in3 / 4 + in44);
+        out[0] = CLAMP_S16(in0 / 2 + in2 / 4 + in44);
+        out[1] = CLAMP_S16(in1 / 2 + in3 / 4 + in44);
     }
 
     return sizeof(*buffer) * (out - buffer);
@@ -1071,7 +1071,7 @@ static int convert_channels_5_to_3(int16_t *buffer, int16_t *in_end) {
         const int in4 = in[4];
         out[0] = in0;
         out[1] = in1;
-        out[2] = clamp_s16((85 * (in2 + in3 + in4)) / 256);
+        out[2] = CLAMP_S16((85 * (in2 + in3 + in4)) / 256);
     }
 
     return sizeof(*buffer) * (out - buffer);
@@ -1089,8 +1089,8 @@ static int convert_channels_5_to_4(int16_t *buffer, int16_t *in_end) {
         const int in42 = in[4] / 2;
         out[0] = in0;
         out[1] = in1;
-        out[2] = clamp_s16((170 * (in2 + in42)) / 256);
-        out[3] = clamp_s16((170 * (in3 + in42)) / 256);
+        out[2] = CLAMP_S16((170 * (in2 + in42)) / 256);
+        out[3] = CLAMP_S16((170 * (in3 + in42)) / 256);
     }
 
     return sizeof(*buffer) * (out - buffer);
