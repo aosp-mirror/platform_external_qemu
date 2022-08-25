@@ -15,14 +15,14 @@
 // A small benchmark used to compare the performance of android::base::Lock
 // with other mutex implementions.
 
-#include <iostream>                                          // for operator<<
-#include <string>                                            // for string
-#include <utility>                                           // for pair
+#include <iostream>  // for operator<<
+#include <string>    // for string
+#include <utility>   // for pair
 
-#include "android/emulation/control/logcat/RingStreambuf.h"  // for RingStre...
-#include "benchmark/benchmark_api.h"                         // for State
+#include "android/base/streams/RingStreambuf.h"  // for RingStre...
+#include "benchmark/benchmark_api.h"             // for State
 
-using android::emulation::control::RingStreambuf;
+using android::base::streams::RingStreambuf;
 using namespace std::chrono_literals;
 #define BASIC_BENCHMARK_TEST(x) \
     BENCHMARK(x)->RangeMultiplier(2)->Range(1 << 10, 1 << 14)
@@ -48,8 +48,8 @@ void BM_WriteAndRead(benchmark::State& state) {
     while (state.KeepRunning()) {
         stream << src;
 
-        // Reading is very slow compared to the logcat scenario, as each character
-        // gets read one at a time.
+        // Reading is very slow compared to the logcat scenario, as each
+        // character gets read one at a time.
         in >> read;
     }
 }
@@ -71,3 +71,4 @@ void BM_WriteLogcatScenario(benchmark::State& state) {
 BASIC_BENCHMARK_TEST(BM_WriteData);
 BASIC_BENCHMARK_TEST(BM_WriteAndRead);
 BASIC_BENCHMARK_TEST(BM_WriteLogcatScenario);
+BENCHMARK_MAIN()

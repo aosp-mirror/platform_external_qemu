@@ -1,4 +1,3 @@
-// Copyright 2018 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -13,6 +12,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <cassert>
+
 
 #include "android/base/EintrWrapper.h"
 #include "android/base/memory/SharedMemory.h"

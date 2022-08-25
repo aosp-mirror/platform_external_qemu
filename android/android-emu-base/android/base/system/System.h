@@ -18,6 +18,7 @@
 #include "android/base/CpuTime.h"
 #include "android/base/EnumFlags.h"
 #include "android/base/Optional.h"
+#include "android/base/logging/Log.h"
 
 #include <algorithm>
 #include <mutex>

@@ -26,7 +26,7 @@ target_include_directories(emulator-gbench PUBLIC ${src}/../include)
 target_compile_definitions(emulator-gbench PRIVATE -DHAVE_POSIX_REGEX=1)
 target_compile_options(emulator-gbench PRIVATE -Wno-missing-braces)
 
-android_target_link_libraries(emulator-gbench linux-x86_64 PUBLIC pthread)
-android_target_link_libraries(emulator-gbench darwin-x86_64 PUBLIC pthread)
+android_target_link_libraries(emulator-gbench linux PUBLIC pthread)
+android_target_link_libraries(emulator-gbench darwin PUBLIC pthread)
 android_target_link_libraries(emulator-gbench windows
                               PUBLIC emulator-regex-win32 shlwapi::shlwapi)

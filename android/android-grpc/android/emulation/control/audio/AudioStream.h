@@ -20,11 +20,13 @@
 
 #include "android/emulation/AudioCapture.h"                  // for AudioCap...
 #include "android/emulation/AudioCaptureEngine.h"            // for AudioCap...
-#include "android/emulation/control/logcat/RingStreambuf.h"  // for millisec...
+#include "android/base/streams/RingStreambuf.h"  // for millisec...
 #include "emulator_controller.pb.h"                          // for AudioFormat
 
 using namespace std::chrono_literals;
 using std::chrono::milliseconds;
+using android::base::streams::RingStreambuf;
+
 namespace android {
 namespace emulation {
 namespace control {

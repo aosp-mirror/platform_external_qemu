@@ -11,18 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/logcat/RingStreambuf.h"
+#include "android/base/streams/RingStreambuf.h"
 
 #include <string.h>   // for memcpy
 #include <algorithm>  // for max, min
 
-#include "android/base/EnumFlags.h"  // for operator!
-
 namespace android {
-namespace emulation {
-namespace control {
-
-using namespace base;
+namespace base {
+namespace streams {
 
 // See https://jameshfisher.com/2018/03/30/round-up-power-2 for details
 static uint64_t next_pow2(uint64_t x) {
@@ -34,11 +30,25 @@ RingStreambuf::RingStreambuf(uint32_t capacity, milliseconds timeout)
     mRingbuffer.resize(cap);
 }
 
+void RingStreambuf::close() {
+    {
+        std::unique_lock<std::mutex> lock(mLock);
+        mTimeout = std::chrono::milliseconds(0);
+        mClosed = true;
+    }
+    mCanRead.notify_all();
+}
+
 std::streamsize RingStreambuf::xsputn(const char* s, std::streamsize n) {
     // Usually n >> 1..
-    std::unique_lock<std::mutex> lock(mLock);
+    mLock.lock();
     std::streamsize capacity = mRingbuffer.capacity();
     std::streamsize maxWrite = std::max(n, capacity);
+
+    if (mClosed) {
+        mLock.unlock();
+        return 0;
+    }
 
     // Case 1: It doesn't fit in the ringbuffer
     if (n >= capacity) {
@@ -47,6 +57,7 @@ std::streamsize RingStreambuf::xsputn(const char* s, std::streamsize n) {
         mHead = capacity;
         mTail = 0;
         mHeadOffset += n;
+        mLock.unlock();
         mCanRead.notify_all();
         return n;
     }
@@ -82,6 +93,7 @@ std::streamsize RingStreambuf::xsputn(const char* s, std::streamsize n) {
     if (updateTail)
         mTail = (mHead + 1) & (capacity - 1);
     mHeadOffset += n;
+    mLock.unlock();
     mCanRead.notify_all();
     return n;
 }
@@ -90,13 +102,12 @@ int RingStreambuf::overflow(int c) {
     return EOF;
 }
 
-std::streamsize RingStreambuf::waitForAvailableSpace(
-        std::streamsize n) {
+std::streamsize RingStreambuf::waitForAvailableSpace(std::streamsize n) {
     std::unique_lock<std::mutex> lock(mLock);
-    mCanRead.wait_for(lock, mTimeout, [this, n]() { return showmanyw() >= n; });
+    mCanRead.wait_for(lock, mTimeout,
+                      [this, n]() { return showmanyw() >= n || mClosed; });
     return showmanyw();
 }
-
 
 std::streamsize RingStreambuf::showmanyw() {
     return mRingbuffer.capacity() - 1 - showmanyc();
@@ -139,7 +150,10 @@ std::streamsize RingStreambuf::xsgetn(char* s, std::streamsize n) {
 int RingStreambuf::underflow() {
     std::unique_lock<std::mutex> lock(mLock);
     if (!mCanRead.wait_for(lock, mTimeout,
-                           [this]() { return mTail != mHead; })) {
+                           [this]() { return mTail != mHead || mClosed; })) {
+        return traits_type::eof();
+    }
+    if (mClosed && mTail == mHead) {
         return traits_type::eof();
     }
     return mRingbuffer[mTail];
@@ -148,9 +162,14 @@ int RingStreambuf::underflow() {
 int RingStreambuf::uflow() {
     std::unique_lock<std::mutex> lock(mLock);
     if (!mCanRead.wait_for(lock, mTimeout,
-                           [this]() { return mTail != mHead; })) {
+                           [this]() { return mTail != mHead || mClosed; })) {
         return traits_type::eof();
     }
+    if (mClosed && mTail == mHead) {
+        // [[unlikely]]
+        return traits_type::eof();
+    }
+
     int val = mRingbuffer[mTail];
     mTail = (mTail + 1) & (mRingbuffer.capacity() - 1);
     return val;
@@ -199,6 +218,6 @@ std::pair<int, std::string> RingStreambuf::bufferAtOffset(
     return std::make_pair(startOffset + skip, res);
 }
 
-}  // namespace control
-}  // namespace emulation
+}  // namespace streams
+}  // namespace base
 }  // namespace android

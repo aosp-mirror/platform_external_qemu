@@ -107,7 +107,6 @@ android_add_library(
       android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
       android/emulation/control/keyboard/TouchEventSender.cpp
       android/emulation/control/logcat/LogcatParser.cpp
-      android/emulation/control/logcat/RingStreambuf.cpp
       android/emulation/control/secure/BasicTokenAuth.cpp
       android/emulation/control/secure/JwkDirectoryObserver.cpp
       android/emulation/control/secure/JwtTokenAuth.cpp
@@ -125,6 +124,7 @@ target_link_libraries(
   PRIVATE png
   PUBLIC android-grpc-services
          android-emu
+         android-emu-base-streams
          android-emu-tracing
          android-net
          grpc++
@@ -206,7 +206,6 @@ android_add_test(
   SRC # cmake-format: sortable
       android/emulation/control/GrpcServices_unittest.cpp
       android/emulation/control/logcat/LogcatParser_unittest.cpp
-      android/emulation/control/logcat/RingStreambuf_unittest.cpp
       android/emulation/control/secure/JwkDirectoryObserver_unittest.cpp
       android/emulation/control/secure/JwtTokenAuth_unittest.cpp
       android/emulation/control/utils/EventWaiter_unittest.cpp
@@ -241,7 +240,6 @@ android_add_executable(
   NODISTRIBUTE
   SRC # cmake-format: sortable
       android/emulation/control/keyboard/KeytranslatePerf.cpp
-      android/emulation/control/logcat/RingStreamPerf.cpp
       android/emulation/control/snapshot/TarStreamPerf.cpp)
 target_link_libraries(grpc_benchmark PRIVATE android-grpc android-emu-base
                                              emulator-gbench)

@@ -12,26 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <stdint.h>            // for uint32_t, uint64_t
-#include <stdio.h>             // for EOF
-#include <chrono>              // for milliseconds
-#include <condition_variable>  // for condition_variable
-#include <ios>                 // for streamsize, streambuf
-#include <mutex>               // for condition_variable, mutex
-#include <streambuf>           // for streambuf
-#include <string>              // for string
-#include <utility>             // for pair
-#include <vector>              // for vector
-
-#include "android/base/CpuTime.h"  // for base
+#include <chrono>
+#include <condition_variable>
+#include <cstdint>
+#include <cstdio>
+#include <ios>
+#include <mutex>
+#include <streambuf>
+#include <string>
+#include <utility>
+#include <vector>
 
 using std::chrono::milliseconds;
 
 namespace android {
-namespace emulation {
-namespace control {
-
-using namespace base;
+namespace base {
+namespace streams {
 
 // RingStreambuf - a thread safe streambuffer backed by a ring buffer.
 // This thing acts as a sliding window over a stream of data.
@@ -78,6 +74,10 @@ public:
     // The total number of bytes that can be stored in the buffer.
     size_t capacity() { return mRingbuffer.capacity() - 1; }
 
+    // Closes this stream buffer for writing, reading can succeed until
+    // eof, timeouts will be set to 1ms.
+    void close();
+
 protected:
     // Implement streambuf interface, not that writes can overwrite existing
     // data and will report as though all bytes have been written.
@@ -99,12 +99,13 @@ private:
     uint32_t mTail{0};        // Ringbuffer read pointer (tail)
     uint64_t mHeadOffset{0};  // Accumulated offset.
     bool mFull{false};
+    bool mClosed{false};
     std::chrono::milliseconds mTimeout;
 
     std::mutex mLock;
     std::condition_variable mCanRead;
-};  // namespace control
+};
 
-}  // namespace control
-}  // namespace emulation
+}  // namespace streams
+}  // namespace base
 }  // namespace android
