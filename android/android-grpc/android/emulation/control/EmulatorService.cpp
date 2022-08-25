@@ -79,6 +79,7 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/emulation/resizable_display_config.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"
 #include "android/featurecontrol/feature_control.h"
@@ -523,8 +524,8 @@ public:
                 // they are used for control flag like pause touch synching.)
                 buttonsState &= 1;
             }
-            agent->sendMouseEvent(request.x(), request.y(), 0, buttonsState,
-                                  request.display());
+            agent->sendMouseEvent(request.x(), request.y(), 0,
+                                  buttonsState, request.display());
         });
 
         return Status::OK;

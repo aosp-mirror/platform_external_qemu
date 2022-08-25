@@ -61,6 +61,7 @@ public:
 
 private:
     bool drawImpl(GLuint texture, float rotationDegrees, float dx, float dy, bool wantOverlay);
+    void preDrawLayer();
 
     GLuint mVertexShader;
     GLuint mFragmentShader;
