@@ -361,26 +361,12 @@ void MediaH264DecoderGeneric::getImage(void* ptr) {
     }
 
     // update color aspects
-    if (pFrame->color.range != 0) {
-        if (3 - pFrame->color.range != mMetadata.range) {
-            mMetadata.range = 3 - pFrame->color.range;
-            H264_DPRINT("1 updated %s %d range %d primaries %d transfer %d\n",
-                        __func__, __LINE__, (int)(mMetadata.range),
-                        (int)(mMetadata.primaries), (int)(mMetadata.transfer));
+    if (mMetadataPtr && pFrame->color.range != 0) {
+        if (3 - pFrame->color.range != mMetadataPtr->range) {
+            mMetadataPtr->range = 3 - pFrame->color.range;
         }
     }
 
-    if (pFrame->color.primaries != 2 &&
-        pFrame->color.primaries != mMetadata.primaries) {
-        mMetadata.primaries = pFrame->color.primaries;
-        H264_DPRINT("2 updated %s %d range %d primaries %d transfer %d\n",
-                    __func__, __LINE__, (int)(mMetadata.range),
-                    (int)(mMetadata.primaries), (int)(mMetadata.transfer));
-    }
-
-    H264_DPRINT("3 %s %d my final range %d primaries %d transfer %d\n",
-                __func__, __LINE__, (int)(mMetadata.range),
-                (int)(mMetadata.primaries), (int)(mMetadata.transfer));
     bool needToCopyToGuest = true;
     if (mParser.version() == 200) {
         if (mUseGpuTexture && pFrame->texture[0] > 0 &&
@@ -393,14 +379,14 @@ void MediaH264DecoderGeneric::getImage(void* ptr) {
             mRenderer.renderToHostColorBufferWithTextures(
                     param.hostColorBufferId, pFrame->width, pFrame->height,
                     TextureFrame{pFrame->texture[0], pFrame->texture[1]},
-                    &mMetadata);
+                    mMetadataPtr.get());
         } else {
             H264_DPRINT(
                     "calling rendering to host side color buffer with id %d",
                     param.hostColorBufferId);
             mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
                                               pFrame->width, pFrame->height,
-                                              pFrame->data.data(), &mMetadata);
+                                              pFrame->data.data(), mMetadataPtr.get());
         }
         needToCopyToGuest = false;
     }
@@ -448,10 +434,11 @@ void MediaH264DecoderGeneric::sendMetadata(void* ptr) {
         return;
     }
 
-    std::swap(mMetadata, param);
+    mMetadataPtr.reset(new MetadataParam(param));
+
     H264_DPRINT("%s %d range %d primaries %d transfer %d\n", __func__, __LINE__,
-                (int)(mMetadata.range), (int)(mMetadata.primaries),
-                (int)(mMetadata.transfer));
+                (int)(mMetadataPtr->range), (int)(mMetadataPtr->primaries),
+                (int)(mMetadataPtr->transfer));
 }
 
 void MediaH264DecoderGeneric::save(base::Stream* stream) const {
