@@ -201,6 +201,9 @@ class Licensing(object):
                     continue
                 if segment == '::@':
                     continue
+                # We need to skip the entries specified by the generator expression.
+                if segment.startswith('$<') and segment.endswith('>'):
+                    continue
                 dependencies[dep].add(segment)
 
         return dependencies
