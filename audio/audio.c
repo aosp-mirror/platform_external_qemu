@@ -1214,16 +1214,16 @@ bool qemu_is_real_audio_allowed() {
     return allow_real_audio;
 }
 
-static void mute_microphone_S16(int16_t *a, int nsamples) {
-    int rem = nsamples % 8;
-    nsamples -= rem;
+static void mute_microphone_S16_1(int16_t *a, int frames) {
+    int rem = frames % 8;
+    frames -= rem;
     while (rem > 0) {
         *a = rem; ++a;
         --rem;
     }
 
-    while (nsamples > 0) {
-        int16_t v = (nsamples >> 3) & 31 - 16;
+    while (frames > 0) {
+        int16_t v = (frames >> 3) & 31 - 16;
         v += !v;
         *a = v; ++a;
         *a = v; ++a;
@@ -1233,20 +1233,119 @@ static void mute_microphone_S16(int16_t *a, int nsamples) {
         *a = v; ++a;
         *a = v; ++a;
         *a = v; ++a;
-        nsamples -= 8;
+        frames -= 8;
+    }
+}
+
+static void mute_microphone_S32_1(int32_t *a, int frames) {
+    int rem = frames % 8;
+    frames -= rem;
+    while (rem > 0) {
+        *a = rem; ++a;
+        --rem;
+    }
+
+    while (frames > 0) {
+        int32_t v = (frames >> 3) & 31 - 16;
+        v += !v;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        frames -= 8;
+    }
+}
+
+static void mute_microphone_S16_2(int16_t *a, int frames) {
+    int rem = frames % 8;
+    frames -= rem;
+    while (rem > 0) {
+        *a = rem; ++a;
+        *a = rem; ++a;
+        --rem;
+    }
+
+    while (frames > 0) {
+        int16_t v = (frames >> 3) & 31 - 16;
+        v += !v;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        frames -= 8;
+    }
+}
+
+static void mute_microphone_S32_2(int32_t *a, int frames) {
+    int rem = frames % 8;
+    frames -= rem;
+    while (rem > 0) {
+        *a = rem; ++a;
+        *a = rem; ++a;
+        --rem;
+    }
+
+    while (frames > 0) {
+        int32_t v = (frames >> 3) & 31 - 16;
+        v += !v;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        *a = v; ++a;
+        frames -= 8;
     }
 }
 
 static void mute_microphone(const struct audio_pcm_info *info,
                             void *buf, int size) {
-    switch (info->bits) {
-    case 16:
-        mute_microphone_S16((int16_t*)buf, size / sizeof(int16_t));
+    switch ((info->nchannels << 8) | info->bits) {
+    case 0x110:
+        mute_microphone_S16_1((int16_t*)buf, size / sizeof(int16_t));
+        break;
+
+    case 0x120:
+        mute_microphone_S32_1((int32_t*)buf, size / sizeof(int32_t));
+        break;
+
+    case 0x210:
+        mute_microphone_S16_2((int16_t*)buf, size / sizeof(int16_t) / 2);
+        break;
+
+    case 0x220:
+        mute_microphone_S32_2((int32_t*)buf, size / sizeof(int32_t) / 2);
         break;
 
     default:
-        dolog("We support only S16, %dbits was requested\n", info->bits);
-        abort();
+        memset(buf, 0, size);
+        break;
     }
 }
 
