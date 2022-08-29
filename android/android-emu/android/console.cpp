@@ -4325,6 +4325,30 @@ static int do_resize_display(ControlClient client, char* args) {
     return -1;
 }
 
+static int do_set_virtualscene_image(ControlClient client, char* args) {
+    if (args) {
+        std::string arg1, arg2;
+        char* pos = strchr(args, ' ');
+        if (pos) {
+            arg1 = std::string(args, pos - args);
+            arg2 = std::string(pos + 1);
+        printf("arg1 %s\n", arg1.c_str());
+        printf("arg2 %s", arg2.c_str());
+        } else {
+            arg1 = std::string(args);
+        printf("arg1 %s\n", arg1.c_str());
+        }
+        if (arg1 == "wall" || arg1 == "table") {
+            if (client->global->virtual_scene_agent->loadPoster(arg1.c_str(), arg2.c_str())) {
+                return 0;
+            }
+        }
+    }
+    control_write(client,
+                  "KO usage: \"virtualscene-image <wall|table> [path-to-image]\"\n");
+    return -1;
+}
+
 /* NOTE: The names of all commands are listed when the 'help' command
  *       is received.
  *       Android Studio uses the 'help' command and requires that the
@@ -4468,6 +4492,11 @@ extern const CommandDefRec main_commands[] = {
          "As an example: 'resize-display 2' resizes the default display to the "
          "size of tablet",
          NULL, do_resize_display, NULL},
+
+        {"virtualscene-image", "customize virtualscene image for virtulscene camera",
+         "Usage: virtualscene-image <wall|table> [path-to-image].\n"
+         "If path-to-image is void, restore default image.\n",
+         NULL, do_set_virtualscene_image, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
