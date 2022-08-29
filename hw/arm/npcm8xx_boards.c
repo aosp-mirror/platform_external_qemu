@@ -78,6 +78,22 @@ static void npcm8xx_connect_dram(NPCM8xxState *soc, MemoryRegion *dram)
                              &error_abort);
 }
 
+static void sdhci_attach_drive(SDHCIState *sdhci, int unit)
+{
+    DriveInfo *di = drive_get(IF_SD, 0, unit);
+    BlockBackend *blk = di ? blk_by_legacy_dinfo(di) : NULL;
+
+    BusState *bus = qdev_get_child_bus(DEVICE(sdhci), "sd-bus");
+    if (bus == NULL) {
+        error_report("No SD bus found in SOC object");
+        exit(1);
+    }
+
+    DeviceState *carddev = qdev_new(TYPE_SD_CARD);
+    qdev_prop_set_drive_err(carddev, "drive", blk, &error_fatal);
+    qdev_realize_and_unref(carddev, bus, &error_fatal);
+}
+
 static NPCM8xxState *npcm8xx_create_soc(MachineState *machine,
                                         uint32_t hw_straps)
 {
@@ -204,6 +220,7 @@ static void npcm845_evb_init(MachineState *machine)
     npcm8xx_connect_flash(&soc->fiu[0], 0, "w25q256", drive_get(IF_MTD, 0, 0));
     npcm845_evb_i2c_init(soc);
     npcm845_evb_fan_init(NPCM8XX_MACHINE(machine), soc);
+    sdhci_attach_drive(&soc->mmc.sdhci, 0);
     npcm8xx_load_kernel(machine, soc);
 }
 
