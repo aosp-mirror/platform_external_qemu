@@ -191,9 +191,6 @@ static constexpr std::string_view kHostCompositionV1 =
 static constexpr std::string_view kHostCompositionV2 =
         "ANDROID_EMU_host_composition_v2";
 
-static constexpr std::string_view kGLESNoHostError =
-        "ANDROID_EMU_gles_no_host_error";
-
 // Vulkan
 static constexpr std::string_view kVulkanFeatureStr = "ANDROID_EMU_vulkan";
 static constexpr std::string_view kDeferredVulkanCommands =
@@ -715,11 +712,6 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
                     android::featurecontrol::AsyncComposeSupport)) {
             // Async makecurrent support.
             glStr += kAsyncFrameCommands;
-            glStr += " ";
-        }
-
-        if (emugl_feature_is_enabled(android::featurecontrol::IgnoreHostOpenGLErrors)) {
-            glStr += kGLESNoHostError;
             glStr += " ";
         }
 

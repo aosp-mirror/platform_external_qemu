@@ -1438,7 +1438,7 @@ message EmulatorFeatureFlagState {
         SCREEN_RECORDING = 18;
         VIRTUAL_SCENE = 19;
         SYSTEM_AS_ROOT = 20;
-        IGNORE_HOST_OPENGL_ERRORS = 21;
+        DEPRECATED_IGNORE_HOST_OPENGL_ERRORS = 21 [deprecated = true];
         GENERIC_SNAPSHOTS_UI = 22;
         ALLOW_SNAPSHOT_MIGRATION = 23;
         DEPRECATED_GENERIC_INCREMENTAL_SNAPSHOT = 24 [deprecated = true];
