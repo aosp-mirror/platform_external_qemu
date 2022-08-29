@@ -85,7 +85,11 @@ def create_distribution(dist_dir, build_dir, data):
                 )
                 for fname in recursive_glob(search_dir, regex.format(data)):
                     arcname = os.path.relpath(fname[len(search_dir) :], "/")
-                    if os.path.islink(fname):
+                    # b/243331848, android studio cannot handle symlinks.
+                    # For now we will not use symlinks and just duplicate the 
+                    # resource to prevent any unexpected issues.
+                    # Hopefully duplicated files compress well.
+                    if False and os.path.islink(fname):
                         # http://www.mail-archive.com/python-list@python.org/msg34223.html
                         zipInfo = zipfile.ZipInfo(arcname)
                         zipInfo.create_system = 3
