@@ -191,6 +191,10 @@ if(ANDROID_EXTRACT_SYMBOLS AND CROSSCOMPILE)
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 endif()
 
+if(NOT QTWEBENGINE)
+  set(FEATURE_NETSIM TRUE)
+endif()
+
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
@@ -215,7 +219,7 @@ if(OPTION_TIME_INFO)
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
+set(ANDROID_EMULATOR_BUILD ON)
 # Let's bin place everything in the root, with the shared libs in the right
 # place
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib64)

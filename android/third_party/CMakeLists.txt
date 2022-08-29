@@ -142,19 +142,17 @@ endif()
 if(NOT TARGET flatc)
   include(ExternalProject)
   set(FLATC_BINARY_DIR)
-  cmake_path(APPEND CMAKE_CURRENT_BINARY_DIR flatbuffers-flatc OUTPUT_VARIABLE FLATC_BINARY_DIR)
+  cmake_path(APPEND CMAKE_CURRENT_BINARY_DIR flatbuffers-flatc OUTPUT_VARIABLE
+             FLATC_BINARY_DIR)
   set(FLATC_BINARY_PATH)
   cmake_path(APPEND FLATC_BINARY_DIR flatc OUTPUT_VARIABLE FLATC_BINARY_PATH)
-  ExternalProject_add(
+  externalproject_add(
     flatbuffers-flatc
-    SOURCE_DIR ${AOSP_ROOT}/external/flatbuffers BINARY_DIR ${FLATC_BINARY_DIR}
-    CMAKE_ARGS
-    -DFLATBUFFERS_BUILD_TESTS=OFF
-    -DFLATBUFFERS_BUILD_CPP17=ON
-    -DFLATBUFFERS_BUILD_FLAT_LIB=OFF
-    -DFLATBUFFERS_BUILD_FLATC=ON
-    -DFLATBUFFERS_STATIC_FLATC=OFF
-    -DFLATBUFFERS_BUILD_FLATHASH=OFF
+    SOURCE_DIR ${AOSP_ROOT}/external/flatbuffers
+    BINARY_DIR ${FLATC_BINARY_DIR}
+    CMAKE_ARGS -DFLATBUFFERS_BUILD_TESTS=OFF -DFLATBUFFERS_BUILD_CPP17=ON
+               -DFLATBUFFERS_BUILD_FLAT_LIB=OFF -DFLATBUFFERS_BUILD_FLATC=ON
+               -DFLATBUFFERS_STATIC_FLATC=OFF -DFLATBUFFERS_BUILD_FLATHASH=OFF
     INSTALL_COMMAND ""
     BUILD_BYPRODUCTS ${FLATC_BINARY_PATH})
   add_executable(flatc IMPORTED GLOBAL)
@@ -175,5 +173,25 @@ endif()
 android_license(
   LIBNAME flatbuffers URL "https://github.com/google/flatbuffers"
   TARGET flatc flatbuffers SPDX Apache-2.0
-  LOCAL ${AOSP_ROOT}/external/flatbuffers/LICENSE.txt
-  LICENSE Apache-2.0)
+  LOCAL ${AOSP_ROOT}/external/flatbuffers/LICENSE.txt LICENSE Apache-2.0)
+
+# Let's bring the grpc module.
+cmake_policy(SET CMP0079 NEW)
+
+set(_gRPC_RE2_LIBRARIES re2)
+set(_gRPC_RE2_INCLUDE_DIR "${ANDROID_QEMU2_TOP_DIR}/android/third_party/re2")
+
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../cares cares)
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../grpc/emulator grpc)
+
+if(LINUX_X86_64)
+  # Our linux headers are from 2013, and do not define newer socket options.
+  # (b/156635589)
+  target_compile_options(grpc PRIVATE -DSO_REUSEPORT=15)
+  target_compile_options(grpc_unsecure PRIVATE -DSO_REUSEPORT=15)
+endif()
+
+if(FEATURE_NETSIM)
+  set(EXTERNAL_QEMU ${ANDROID_QEMU2_TOP_DIR})
+  add_subdirectory(${AOSP_ROOT}/tools/netsim netsim)
+endif()
