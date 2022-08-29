@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-PYTHON=python
+PYTHON=python3
 PY_VERSION := $(shell $(PYTHON) -c "import sys;sys.stdout.write(str(sys.version_info[0]))")
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR :=  $(abspath $(MAKEFILE_PATH)/..)
@@ -24,7 +24,7 @@ $(OUTPUT_DIR):
 
 
 build: $(OUTPUT_DIR)
-	pip install -q grpcio-tools tox wheel
+	pip3 install -q grpcio-tools tox wheel
 	$(PYTHON) setup.py -q bdist_wheel --dist-dir $(OUTPUT_DIR)
 
 .DEFAULT_GOAL := build

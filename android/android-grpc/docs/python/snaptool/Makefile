@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-PYTHON=python
+PYTHON=python3
 PY_VERSION := $(shell $(PYTHON) -c "import sys;sys.stdout.write(str(sys.version_info[0]))")
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR :=  $(abspath $(MAKEFILE_PATH)/..)
@@ -25,7 +25,7 @@ $(OUTPUT_DIR):
 
 $(WHEEL): $(OUTPUT_DIR)
 	make -C $(AEMU_ROOT) DIST=$(WHEEL_DIR)
-		$(PYTHON) -m pip install -q --upgrade $(WHEEL)
+		pip3 install -q --upgrade $(WHEEL)
 
 build: $(OUTPUT_DIR)
 	$(PYTHON) setup.py -q bdist_wheel --dist-dir $(OUTPUT_DIR)
