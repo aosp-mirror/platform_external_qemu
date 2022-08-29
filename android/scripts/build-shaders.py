@@ -39,15 +39,15 @@ for shader_source_name in shader_source_names:
             combined_shader_source = "\n".join(shader_sources)
         else:
             combined_shader_source = shader_sources[1]
-        os.write(tmp_file, combined_shader_source.replace("${type}", image_type).replace("${UnquantTables}", unquant_table_string))
+        os.write(tmp_file, combined_shader_source.replace("${type}", image_type).replace("${UnquantTables}", unquant_table_string).encode())
         os.close(tmp_file)
         out_spv_path = os.path.join(shader_source_path, shader_source_name + "_" + image_type + ".spv")
         if os.path.exists(out_spv_path):
             os.remove(out_spv_path)
         ret = os.system(" ".join([glslangValidator_path, "--spirv-val", "--target-env", "vulkan1.1", "-V", "-o", out_spv_path, tmp_file_name]))
         if ret != 0:
-            print "Compiling %s got return code %d" % (out_spv_path, ret)
-            print "Please look at intermediate source file for debug: %s" % tmp_file_name
+            print("Compiling %s got return code %d" % (out_spv_path, ret))
+            print("Please look at intermediate source file for debug: %s" % tmp_file_name)
         else:
-            print "Compiled %s successfully" % out_spv_path
+            print("Compiled %s successfully" % out_spv_path)
             os.remove(tmp_file_name)
