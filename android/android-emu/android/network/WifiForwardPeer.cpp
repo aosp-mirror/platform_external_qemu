@@ -11,12 +11,14 @@
 
 #include "WifiForwardPeer.h"
 
+
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/EintrWrapper.h"
 #include "android/base/misc/IpcPipe.h"
 #include "android/base/sockets/SocketUtils.h"
 
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else

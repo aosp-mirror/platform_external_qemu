@@ -11,19 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include "android/base/streams/RingStreambuf.h"
 
-#include "android/emulation/control/logcat/RingStreambuf.h"
+#include <chrono>
+#include <istream>
+#include <ratio>
+#include <string>
+#include <thread>
 
-#include <gtest/gtest.h>                         // for Test, Message, TestP...
-#include <functional>                            // for __base
-#include <istream>                               // for operator<<, operator>>
-
-#include "android/base/threads/FunctorThread.h"  // for FunctorThread
-#include "android/base/threads/Thread.h"         // for Thread
+#include <gtest/gtest.h>
 
 namespace android {
-namespace emulation {
-namespace control {
+namespace base {
+namespace streams {
 
 using namespace std::chrono_literals;
 TEST(RingStreambuf, basic_stream_avail) {
@@ -31,6 +31,54 @@ TEST(RingStreambuf, basic_stream_avail) {
     std::ostream stream(&buf);
     stream << "hi";
     EXPECT_EQ(2, buf.in_avail());
+}
+
+TEST(RingStreambuf, no_write_after_close) {
+    RingStreambuf buf(8);
+    std::ostream stream(&buf);
+    stream << "hi";
+    EXPECT_EQ(2, buf.in_avail());
+    buf.close();
+    stream << "there";
+    EXPECT_EQ(2, buf.in_avail());
+}
+
+
+TEST(RingStreambuf, stream_can_read_after_close) {
+    RingStreambuf buf(8);
+    std::ostream stream(&buf);
+    std::istream in(&buf);
+    std::string read;
+    stream << "hi\n";
+    buf.close();
+    stream << "there\n";
+    in >> read;
+    EXPECT_EQ(read, "hi");
+}
+
+TEST(RingStreambuf, underflow_immediately_return_when_closed) {
+    using namespace std::chrono_literals;
+
+    // Timeout after 10ms..
+    RingStreambuf buf(4, 5ms);
+    auto start = std::chrono::steady_clock::now();
+
+    // This results in an underflow (i.e. buffer is empty)
+    // so after timeout we decleare eof.
+    EXPECT_EQ(buf.sbumpc(), RingStreambuf::traits_type::eof());
+    auto end = std::chrono::steady_clock::now();
+    auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    // We must have waited at least 4ms.
+    EXPECT_GT(diff, 4ms) <<  "Elapsed time in milliseconds: " << diff.count() << " ms.";
+
+    // A closed buffer times out immediately
+    start = std::chrono::steady_clock::now();
+    buf.close();
+    EXPECT_EQ(buf.sbumpc(), RingStreambuf::traits_type::eof());
+    end = std::chrono::steady_clock::now();
+    diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    EXPECT_LT(diff, 1ms) <<  "Elapsed time in milliseconds: " << diff.count() << " ms.";
 }
 
 TEST(RingStreambuf, basic_stream) {
@@ -90,11 +138,34 @@ TEST(RingStreambuf, can_also_read) {
     std::istream in(&buf);
     int offset = 0;
     for (int i = 0; i < 26; i++) {
-        std::string write(6, 'a'+i);
+        std::string write(6, 'a' + i);
         std::string read;
         stream << write << "\n";
         in >> read;
         EXPECT_STREQ(read.c_str(), write.c_str());
+    }
+}
+
+TEST(RingStreambuf, can_also_read_from_buf) {
+    RingStreambuf buf(4);
+    std::ostream stream(&buf);
+    std::istream in(&buf);
+    int offset = 0;
+    for (int i = 0; i < 26; i++) {
+        std::string write(6, 'a' + i);
+        write += "\n";  // EOL parsing..
+        buf.sputn(write.c_str(), write.size());
+
+        in.clear();
+        EXPECT_GT(buf.in_avail(), 0);
+        EXPECT_TRUE(in.good());
+        EXPECT_FALSE(in.bad());
+        EXPECT_FALSE(in.fail());
+
+        std::string read;
+        in >> read;
+        read += "\n";
+        ASSERT_STREQ(read.c_str(), write.c_str());
     }
 }
 
@@ -124,7 +195,7 @@ TEST(RingStreambuf, stream_not_yet_available_no_block) {
 }
 TEST(RingStreambuf, istream_times_out_when_empty) {
     // String buffer that will block at most 10ms.
-    RingStreambuf buf(4, 10ms);
+    RingStreambuf buf(4, 5ms);
     std::istream in(&buf);
     std::string read;
     auto start = std::chrono::high_resolution_clock::now();
@@ -133,8 +204,8 @@ TEST(RingStreambuf, istream_times_out_when_empty) {
 
     auto finish = std::chrono::high_resolution_clock::now();
     auto waited = std::chrono::duration_cast<milliseconds>(finish - start);
-    // We should have waited at least 10ms.
-    EXPECT_GE(waited, 10ms);
+    // We should have waited at least 5ms.
+    EXPECT_GE(waited, 5ms);
     SUCCEED();
 }
 
@@ -149,27 +220,26 @@ TEST(RingStreambuf, stream_not_yet_available_no_block_gives_proper_distance) {
 }
 
 TEST(RingStreambuf, stream_offset_blocks_until_available) {
+    using namespace std::chrono_literals;
     RingStreambuf buf(4);
     std::ostream stream(&buf);
     stream << "aaaaaaa";
-    FunctorThread writer([&stream] {
-        Thread::sleepMs(100);
+    std::thread writer([&stream] {
+        std::this_thread::sleep_for(100ms);
         stream << "bbbbbbb";
-        Thread::sleepMs(100);
+        std::this_thread::sleep_for(100ms);
         stream << "ccccccc";
     });
-    FunctorThread reader([&buf] {
+    std::thread reader([&buf] {
         auto res = buf.bufferAtOffset(14, 1s);
         EXPECT_EQ(res.first, 14);
         EXPECT_STREQ("ccccccc", res.second.c_str());
     });
 
-    writer.start();
-    reader.start();
-    writer.wait(nullptr);
-    reader.wait(nullptr);
+    writer.join();
+    reader.join();
 }
 
-}  // namespace control
-}  // namespace emulation
+}  // namespace streams
+}  // namespace base
 }  // namespace android

@@ -48,6 +48,7 @@
 #include "android/base/Tracing.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/SharedMemory.h"
+#include "android/base/streams/RingStreambuf.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
@@ -68,7 +69,6 @@
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/LogcatParser.h"
-#include "android/emulation/control/logcat/RingStreambuf.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
@@ -122,6 +122,7 @@ using namespace android::control::interceptor;
 using namespace std::chrono_literals;
 using ::google::protobuf::Empty;
 using namespace std::chrono_literals;
+using android::base::streams::RingStreambuf;
 
 namespace android {
 namespace emulation {
@@ -840,10 +841,10 @@ public:
         }
 
         if (!enabled) {
-            return Status(::grpc::StatusCode::INVALID_ARGUMENT,
-                          "Invalid display: " +
-                                  std::to_string(request->display()),
-                          "");
+            return Status(
+                    ::grpc::StatusCode::INVALID_ARGUMENT,
+                    "Invalid display: " + std::to_string(request->display()),
+                    "");
         }
 
         bool isFolded = android_foldable_is_folded();

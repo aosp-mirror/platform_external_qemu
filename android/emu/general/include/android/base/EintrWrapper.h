@@ -12,8 +12,7 @@
 #pragma once
 
 #include <errno.h>
-
-#include "android/base/logging/Log.h"
+#include "android/base/logging/CLog.h"
 
 namespace android {
 namespace base {
@@ -24,11 +23,11 @@ namespace base {
 // Mostly used for unit testing.
 // If the macro is undefined, auto-detect the value based on NDEBUG.
 #if !defined(EINTR_WRAPPER_DEBUG)
-#  ifdef NDEBUG
-#    define EINTR_WRAPPER_DEBUG 0
-#  else
-#    define EINTR_WRAPPER_DEBUG 1
-#  endif
+#ifdef NDEBUG
+#define EINTR_WRAPPER_DEBUG 0
+#else
+#define EINTR_WRAPPER_DEBUG 1
+#endif
 #endif
 
 // HANDLE_EINTR() is a macro used to handle EINTR return values when
@@ -54,34 +53,33 @@ namespace base {
 //   much random! It's better to leave the descriptor open than risk
 //   closing another one by mistake :(
 //
-#define MAX_EINTR_LOOP_COUNT  100
+#define MAX_EINTR_LOOP_COUNT 100
 
 #ifdef _WIN32
-#  define HANDLE_EINTR(x)  (x)
+#define HANDLE_EINTR(x) (x)
 #elif EINTR_WRAPPER_DEBUG == 0
-#  define HANDLE_EINTR(x) \
-    __extension__ ({ \
-        __typeof__(x) eintr_wrapper_result; \
-        do { \
-            eintr_wrapper_result = (x); \
+#define HANDLE_EINTR(x)                                       \
+    __extension__({                                           \
+        __typeof__(x) eintr_wrapper_result;                   \
+        do {                                                  \
+            eintr_wrapper_result = (x);                       \
         } while (eintr_wrapper_result < 0 && errno == EINTR); \
-        eintr_wrapper_result; \
+        eintr_wrapper_result;                                 \
     })
 #else  // !_WIN32 && EINTR_WRAPPER_DEBUG
-
-#  define HANDLE_EINTR(x) \
-    __extension__ ({ \
-        __typeof__(x) eintr_wrapper_result; \
-        int eintr_wrapper_loop_count = 0; \
-        for (;;) { \
-            eintr_wrapper_result = (x); \
-            if (eintr_wrapper_result != -1 || errno != EINTR) \
-                break; \
-            ++eintr_wrapper_loop_count; \
-            CHECK(eintr_wrapper_loop_count < MAX_EINTR_LOOP_COUNT) << \
-                "Looping around EINTR too many times"; \
-        }; \
-        eintr_wrapper_result; \
+#define HANDLE_EINTR(x)                                           \
+    __extension__({                                               \
+        __typeof__(x) eintr_wrapper_result;                       \
+        int eintr_wrapper_loop_count = 0;                         \
+        for (;;) {                                                \
+            eintr_wrapper_result = (x);                           \
+            if (eintr_wrapper_result != -1 || errno != EINTR)     \
+                break;                                            \
+            ++eintr_wrapper_loop_count;                           \
+            if (eintr_wrapper_loop_count >= MAX_EINTR_LOOP_COUNT) \
+                dfatal("Looping around EINTR too many times");    \
+        };                                                        \
+        eintr_wrapper_result;                                     \
     })
 #endif  // !_WIN32 && EINTR_WRAPPER_DEBUG
 
@@ -90,14 +88,14 @@ namespace base {
 // This is mostly used with the close() system call, as described
 // in the HANDLE_EINTR() documentation.
 #ifdef _WIN32
-#  define IGNORE_EINTR(x)  (x)
+#define IGNORE_EINTR(x) (x)
 #else
-#  define IGNORE_EINTR(x) \
-    __extension__ ({ \
-        __typeof__(x) eintr_wrapper_result = (x); \
+#define IGNORE_EINTR(x)                                   \
+    __extension__({                                       \
+        __typeof__(x) eintr_wrapper_result = (x);         \
         if (eintr_wrapper_result == -1 && errno == EINTR) \
-            eintr_wrapper_result = 0; \
-        eintr_wrapper_result; \
+            eintr_wrapper_result = 0;                     \
+        eintr_wrapper_result;                             \
     })
 #endif
 

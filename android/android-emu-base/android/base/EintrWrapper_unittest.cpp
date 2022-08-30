@@ -12,10 +12,12 @@
 // Forces debug mode
 #define EINTR_WRAPPER_DEBUG 1
 
+#define EMULOG(priority, fmt, ...) \
+    test_log_print(priority, __FILE__, __LINE__, fmt, ##__VA_ARGS__);
 #include "android/base/EintrWrapper.h"
 
-#include <stdarg.h>
 #include <setjmp.h>
+#include <stdarg.h>
 
 #include <gtest/gtest.h>
 
@@ -26,35 +28,32 @@ namespace base {
 // HANDLE_EINTR() called panic after too many loop iterations.
 // Uses setjmp()/longjmp() since the panic handler must be
 // __attribute__((noreturn)).
-using namespace ::android::base::testing;
+static std::function<void(const char*)> sLogCallback;
+void test_log_print(LogSeverity prio,
+                                const char* file,
+                                int line,
+                                const char* fmt,
+                                ...) {
+    sLogCallback(fmt);
+}
 
-class EintrWrapperTest : public ::testing::Test, LogOutput {
+class EintrWrapperTest : public ::testing::Test {
 public:
-    EintrWrapperTest() :
-            mFatal(false),
-            mLogged(true),
-            mPrevious(LogOutput::setNewOutput(this)) {}
-
-    ~EintrWrapperTest() {
-        LogOutput::setNewOutput(mPrevious);
+    EintrWrapperTest() : mFatal(false), mLogged(true) {
+        sLogCallback = [&](const char* msg) { return logMessage(msg); };
     }
 
-    virtual void logMessage(const android::base::LogParams& params,
-                            const char* message,
-                            size_t messageLen) {
-        mFatal = (params.severity == EMULATOR_LOG_FATAL);
+    virtual void logMessage(const char* message) {
         mLogged = true;
-        if (mFatal)
-            longjmp(mJumper, 1);
+        mFatal = true;
+        longjmp(mJumper, 1);
     }
 
 protected:
     bool mFatal;
     bool mLogged;
-    LogOutput* mPrevious;
     jmp_buf mJumper;
 };
-
 
 // Loop counter used by several functions below.
 static int gLoopCount = 0;
