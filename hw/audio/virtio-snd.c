@@ -374,9 +374,8 @@ static void ring_buffer_pop(VirtIOSoundRingBuffer *rb) {
 }
 
 static uint32_t update_output_latency_bytes(VirtIOSoundPCMStream *stream, int x) {
-    uint32_t *pval = &stream->latency_bytes;
-    const uint32_t val = *pval + x;
-    *pval = val;
+    const int32_t val = stream->latency_bytes + x;
+    stream->latency_bytes = val;
     return val;
 }
 
@@ -560,7 +559,8 @@ static void virtio_snd_stream_unprepare_out_locked(VirtIOSoundPCMStream *stream)
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
             VirtQueueElement *e = item->el;
-            const uint32_t latency_bytes = update_output_latency_bytes(stream, -item->size);
+            const uint32_t latency_bytes = update_output_latency_bytes(stream,
+                                                                       -(item->size - item->pos));
 
             vq_consume_element(
                 tx_vq, e,
@@ -1336,7 +1336,7 @@ static bool virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     qemu_mutex_lock(&stream->mtx);
 
     if (ring_buffer_push(&stream->pcm_buf, &item)) {
-        update_output_latency_bytes(stream, +item.size);
+        update_output_latency_bytes(stream, item.size - item.pos);
     } else {
         ABORT("ring_buffer_push");
     }
