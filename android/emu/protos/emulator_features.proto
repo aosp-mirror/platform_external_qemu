@@ -42,7 +42,8 @@ enum Feature {
 
     VirtualScene = 20;
 
-    IgnoreHostOpenGLErrors = 21;
+    // Deprecated in 2022/08/29 with http://aosp/2196950.
+    DEPRECATED_IgnoreHostOpenGLErrors = 21 [deprecated = true];
 
     GenericSnapshotsUI = 22;
 

@@ -25,8 +25,6 @@ FEATURE_CONTROL_ITEM(HAXM)
 FEATURE_CONTROL_ITEM(WindowsHypervisorPlatform)
 // Snapshot feature controls enablement of snapshots, not snapshot data
 FEATURE_CONTROL_ITEM(FastSnapshotV1)
-// Controlled by GL extensions advertised to guest; safe to use
-FEATURE_CONTROL_ITEM(IgnoreHostOpenGLErrors)
 // Meta feature affecting snapshot validation, does not affect snapshot data
 FEATURE_CONTROL_ITEM(AllowSnapshotMigration)
 // Only controls whether the RAM snapshot is loaded on demand, not the data itself
