@@ -202,6 +202,10 @@ if [ "$TARGET_OS" = "linux-x86_64" ]; then
         files=$(find $OPT_OUT/distribution \( -type f -and \( -executable -or -name '*.so.*' \) \))
         for file in $files; do
             log2 "Checking $file for dependencies on ld path, or our tree.."
+            case "$file" in
+              *"libprotobuf-lite"*)
+                panic "$file should not be released alongside libprotobuf.so"
+            esac
             needed=$(readelf -d $file | grep "Shared" | cut -d "[" -f2 | cut -d "]" -f1)
             for need in $needed; do
                 libs=$(find $OPT_OUT/distribution/emulator/lib64 -name $need);
