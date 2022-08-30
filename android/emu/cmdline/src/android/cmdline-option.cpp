@@ -433,7 +433,8 @@ bool modem_simulator_parse_port_option(const char* port_string,
 static const char* kUserModeNetworkingOpts[] = {
         "ipv4",     "ipv6",      "dhcpstart", "host",     "net",
         "restrict", "ipv6-host", "ipv6-net",  "hostname", "tftp",
-        "bootfile", "hostfwd",   "guestfwd"};
+        "bootfile", "hostfwd",   "guestfwd", "ipv6-hostfwd",
+        "ipv6-dns", "ipv6-prefix", "ipv6-prefixlen"};
 
 // Check if the option is defined in kUserModeNetworkingOpts.
 bool android_validate_user_mode_networking_option(const char* opt) {
