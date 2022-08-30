@@ -14,6 +14,10 @@
 #include "android/emulation/HostmemIdMapping.h"
 #include "android/base/memory/LazyInstance.h"
 
+#include <utility>
+
+using android::base::ManagedDescriptor;
+
 using android::base::LazyInstance;
 
 namespace android {
@@ -54,6 +58,33 @@ HostmemIdMapping::Id HostmemIdMapping::add(const struct MemEntry* entry) {
 
 void HostmemIdMapping::remove(HostmemIdMapping::Id id) {
     mEntries.erase(id);
+}
+
+HostmemIdMapping::Id HostmemIdMapping::addDescriptorInfo(ManagedDescriptor descriptor,
+                                                         uint32_t handleType, uint32_t caching,
+                                                         std::optional<VulkanInfo> vulkanInfoOpt) {
+    Id wantedId = mCurrentId++;
+    struct ManagedDescriptorInfo info =
+        {
+            .descriptor = std::move(descriptor),
+            .handleType = handleType,
+            .caching = caching,
+            .vulkanInfoOpt = std::move(vulkanInfoOpt),
+        };
+
+    mDescriptorInfos.insert(std::make_pair(wantedId, std::move(info)));
+    return wantedId;
+}
+
+std::optional<ManagedDescriptorInfo> HostmemIdMapping::removeDescriptorInfo(HostmemIdMapping::Id id) {
+    auto found = mDescriptorInfos.find(id);
+    if (found != mDescriptorInfos.end()) {
+        std::optional<ManagedDescriptorInfo> ret = std::move(found->second);
+        mDescriptorInfos.erase(found);
+        return ret;
+    }
+
+    return std::nullopt;
 }
 
 HostmemIdMapping::Entry HostmemIdMapping::get(HostmemIdMapping::Id id) const {
