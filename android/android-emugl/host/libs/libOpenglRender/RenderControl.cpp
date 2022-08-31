@@ -695,15 +695,6 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         // ASTC LDR compressed texture support.
         glStr += "GL_KHR_texture_compression_astc_ldr ";
 
-        // BPTC compressed texture support
-        if (emugl_feature_is_enabled(android::featurecontrol::BptcTextureSupport)) {
-            glStr += "GL_EXT_texture_compression_bptc ";
-        }
-
-        if (emugl_feature_is_enabled(android::featurecontrol::S3tcTextureSupport)) {
-            glStr += "GL_EXT_texture_compression_s3tc ";
-       }
-
         // Host side tracing support.
         glStr += kHostSideTracing;
         glStr += " ";
