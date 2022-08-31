@@ -67,6 +67,13 @@ const ivec4 kAlphaModifierTable[] = {
         /* 14 */ {-4, -6, -8, -9},  {3, 5, 7, 8},
         /* 15 */ {-3, -5, -7, -9},  {2, 4, 6, 8}};
 
+// b/244362429
+// There seems to be an nVidia driver bug (driver version 510.54) that
+// sometimes fail to read int array. Thus we encode it in an ivec4 array.
+const ivec4 kLUT[2] = {
+        ivec4(3, 6, 11, 16),
+        ivec4(23, 32, 41, 64)};
+
 bool isOverflowed(uint base, uint diff) {
     int val = int(0x1f & base) + kLookup[0x7 & diff];
     return (val < 0) || (val >= 32);
@@ -130,7 +137,6 @@ ivec4[16] etc2_decode_block_T(uint high,
                               uint low,
                               bool isPunchthroughAlpha,
                               bool opaque) {
-    const int LUT[] = {3, 6, 11, 16, 23, 32, 41, 64};
     int r1, r2, g1, g2, b1, b2;
     r1 = int(convert4To8((((high >> 27) & 3) << 2) | ((high >> 24) & 3)));
     g1 = int(convert4To8(high >> 20));
@@ -140,7 +146,7 @@ ivec4[16] etc2_decode_block_T(uint high,
     b2 = int(convert4To8(high >> 4));
     // 3 bits intense modifier
     int intenseIdx = int((((high >> 2) & 3) << 1) | (high & 1));
-    int intenseMod = LUT[intenseIdx];
+    int intenseMod = kLUT[intenseIdx/4][intenseIdx%4];
     ivec3 clrTable[4];
     clrTable[0] = ivec3(r1, g1, b1);
     clrTable[1] =
@@ -157,7 +163,6 @@ ivec4[16] etc2_decode_block_H(uint high,
                               uint low,
                               bool isPunchthroughAlpha,
                               bool opaque) {
-    const int LUT[] = {3, 6, 11, 16, 23, 32, 41, 64};
     ivec3 rgb1, rgb2;
     rgb1.r = int(convert4To8(high >> 27));
     rgb1.g = int(convert4To8(((high >> 24) << 1) | ((high >> 20) & 1)));
@@ -170,7 +175,7 @@ ivec4[16] etc2_decode_block_H(uint high,
     intenseIdx |= (high & 1) << 1;
     intenseIdx |= uint(((rgb1.r << 16) | (rgb1.g << 8) | rgb1.b) >=
                       ((rgb2.r << 16) | (rgb2.g << 8) | rgb2.b));
-    int intenseMod = LUT[intenseIdx];
+    int intenseMod = kLUT[intenseIdx/4][intenseIdx%4];
     ivec3 clrTable[4];
     clrTable[0] = _clamp(ivec3(rgb1) + intenseMod);
     clrTable[1] = _clamp(ivec3(rgb1) - intenseMod);
