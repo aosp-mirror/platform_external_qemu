@@ -16,11 +16,14 @@
 #include "android/base/Compiler.h"
 #include "android/base/containers/StaticMap.h"
 #include "android/base/export.h"
+#include "android/base/ManagedDescriptor.hpp"
 #include "android/emulation/control/structs.h"
 
 #include <atomic>
 
 #include <inttypes.h>
+#include <unordered_map>
+#include <optional>
 
 // A global mapping from opaque host memory IDs to host virtual
 // addresses/sizes.  This is so that the guest doesn't have to know the host
@@ -32,8 +35,30 @@
 // address space device, though there are possible other consumers of this, so
 // it becomes a global object. It exports methods into VmOperations.
 
+using android::base::ManagedDescriptor;
+
 namespace android {
 namespace emulation {
+
+#define STREAM_MEM_HANDLE_TYPE_OPAQUE_FD 0x1
+#define STREAM_MEM_HANDLE_TYPE_DMABUF 0x2
+#define STREAM_MEM_HANDLE_TYPE_OPAQUE_WIN32 0x3
+#define STREAM_MEM_HANDLE_TYPE_SHM 0x4
+#define STREAM_FENCE_HANDLE_TYPE_OPAQUE_FD 0x10
+#define STREAM_FENCE_HANDLE_TYPE_SYNC_FD 0x11
+#define STREAM_FENCE_HANDLE_TYPE_OPAQUE_WIN32 0x12
+
+struct VulkanInfo {
+    uint32_t memoryIndex;
+    uint32_t physicalDeviceIndex;
+};
+
+struct ManagedDescriptorInfo {
+    ManagedDescriptor descriptor;
+    uint32_t handleType;
+    uint32_t caching;
+    std::optional<VulkanInfo> vulkanInfoOpt;
+};
 
 class HostmemIdMapping {
 public:
@@ -53,6 +78,11 @@ public:
     // is referenced.
     AEMU_EXPORT void remove(Id id);
 
+    Id addDescriptorInfo(ManagedDescriptor descriptor, uint32_t handleType, uint32_t caching,
+                         std::optional<VulkanInfo> vulkanInfoOpt);
+
+    std::optional<ManagedDescriptorInfo> removeDescriptorInfo(HostmemIdMapping::Id id);
+
     // If id == kInvalidHostmemId or not found in map,
     // returns entry with id == kInvalidHostmemId,
     // hva == 0, and size == 0.
@@ -64,6 +94,8 @@ public:
 private:
     std::atomic<Id> mCurrentId {1};
     base::StaticMap<Id, Entry> mEntries;
+    std::unordered_map<Id, ManagedDescriptor> mDescriptors;
+    std::unordered_map<Id, ManagedDescriptorInfo> mDescriptorInfos;
     DISALLOW_COPY_ASSIGN_AND_MOVE(HostmemIdMapping);
 };
 
