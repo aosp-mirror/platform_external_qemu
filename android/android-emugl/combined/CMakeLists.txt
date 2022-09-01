@@ -135,12 +135,6 @@ if(OPTION_GFXSTREAM_BACKEND)
         add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
     endif()
 
-    # Macro to easily set the TEST_INCLUDE_FILES properties to point to `test_properties.cmake`
-    # This macro should be called at the end of any CMakeLists.txt file that defines test targets.
-    macro("set_test_include_files")
-    set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES ${GFXSTREAM_REPO_ROOT}/test_properties.cmake)
-    endmacro()
-
     # Uncomment for ASAN support
     # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
     # set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
@@ -169,6 +163,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     set(GFXSTREAM_PREFIX "gfxstream")
     set(GFXSTREAM_PROTOCOLS_DIR ${ANDROID_QEMU2_TOP_DIR}/../../external/gfxstream-protocols)
 
+    set(EXTRA_SUBDIR_TEST_INCLUDE_FILES)
     # Third party dependencies
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/angle ${GFXSTREAM_PREFIX}-third-party-angle)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/renderdoc ${GFXSTREAM_PREFIX}-third-party-renderdoc)
@@ -194,6 +189,12 @@ if(OPTION_GFXSTREAM_BACKEND)
     if (LINUX)
         add_subdirectory(${GFXSTREAM_REPO_ROOT}/fake-android-guest ${GFXSTREAM_PREFIX}-fake-android-guest)
     endif()
+
+    if (ENABLE_VKCEREAL_TESTS)
+        list(APPEND EXTRA_SUBDIR_TEST_INCLUDE_FILES ${GFXSTREAM_REPO_ROOT}/cmake/test_properties.cmake)
+    endif()
+
+    include(${GFXSTREAM_REPO_ROOT}/cmake/SetSubdirectorProperties.cmake)
 
     # TODO(joshuaduong): For some reason, our custom rpath is only applied to gfxstream_backend_unittests.
     # for the rest of the unittests below, the rpath is not set, and thus the tests cannot find libc++.
