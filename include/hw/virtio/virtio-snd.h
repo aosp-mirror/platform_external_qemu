@@ -75,7 +75,7 @@ struct VirtIOSoundPCMStream {
     uint64_t frames_sent;
     uint64_t frames_skipped;
     uint32_t period_frames;
-    uint32_t latency_bytes;
+    int32_t latency_bytes;
     uint32_t freq_hz;
     uint16_t aud_format;
     uint8_t id;
