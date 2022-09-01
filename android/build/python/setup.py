@@ -37,7 +37,6 @@ setuptools.setup(
     entry_points={
         "console_scripts": ["emu-build=aemu:aemu"],
     },
-    install_requires=["requests < 2.28"],
     license="Apache License, Version 2.0",
     classifiers=[
         "Programming Language :: Python :: 2",
