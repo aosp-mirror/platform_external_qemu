@@ -439,16 +439,10 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
         case android::featurecontrol::NativeTextureDecompression:
             return android_studio::EmulatorFeatureFlagState::
                     NATIVE_TEXTURE_DECOMPRESSION;
-        case android::featurecontrol::BptcTextureSupport:
-            return android_studio::EmulatorFeatureFlagState::
-                    BPTC_TEXTURE_SUPPORT;
         case android::featurecontrol::GuestUsesAngle:
             return android_studio::EmulatorFeatureFlagState::GUEST_USES_ANGLE;
         case android::featurecontrol::VirtioVsockPipe:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_VSOCK_PIPE;
-        case android::featurecontrol::S3tcTextureSupport:
-            return android_studio::EmulatorFeatureFlagState::
-                    S3TC_TEXTURE_SUPPORT;
         case android::featurecontrol::VirtioMouse:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_MOUSE;
         case android::featurecontrol::VirtconsoleLogcat:
@@ -489,8 +483,6 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::VIRTIO_SND_CARD;
         case android::featurecontrol::VirtioTablet:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_TABLET;
-        case android::featurecontrol::RgtcTextureSupport:
-            return android_studio::EmulatorFeatureFlagState::RGTC_TEXTURE_SUPPORT;
         case android::featurecontrol::VulkanNativeSwapchain:
             return android_studio::EmulatorFeatureFlagState::VULKAN_NATIVE_SWAPCHAIN;
         case android::featurecontrol::VirtioGpuFenceContexts:

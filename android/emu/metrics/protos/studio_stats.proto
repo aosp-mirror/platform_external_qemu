@@ -1487,10 +1487,10 @@ message EmulatorFeatureFlagState {
         MODEM_SIMULATOR = 67;
         TV_REMOTE = 68;
         NATIVE_TEXTURE_DECOMPRESSION = 69;
-        BPTC_TEXTURE_SUPPORT = 70;
+        BPTC_TEXTURE_SUPPORT = 70 [deprecated = true];
         GUEST_USES_ANGLE = 71;
         VIRTIO_VSOCK_PIPE = 72;
-        S3TC_TEXTURE_SUPPORT = 73;
+        S3TC_TEXTURE_SUPPORT = 73 [deprecated = true];
         VIRTIO_MOUSE = 74;
         VIRTCONSOLE_LOGCAT = 75;
         VULKAN_QUEUE_SUBMIT_WITH_COMMANDS = 76;
@@ -1508,7 +1508,7 @@ message EmulatorFeatureFlagState {
         ASYNC_COMPOSE_SUPPORT = 88;
         VIRTIO_SND_CARD = 89;
         VIRTIO_TABLET = 90;
-        RGTC_TEXTURE_SUPPORT = 91;
+        RGTC_TEXTURE_SUPPORT = 91 [deprecated = true];
         VULKAN_NATIVE_SWAPCHAIN = 92;
         VIRTIO_GPU_FENCE_CONTEXTS = 93;
         VSOCK_SNAPSHOT_LOAD_FIXED_B231345789 = 94;

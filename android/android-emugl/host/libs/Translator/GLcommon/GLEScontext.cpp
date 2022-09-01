@@ -1874,17 +1874,13 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     }
 
     // BPTC extension detection
-    if (emugl_feature_is_enabled(android::featurecontrol::BptcTextureSupport)) {
-        if ((strstr(cstring, "GL_EXT_texture_compression_bptc") != NULL) ||
-            (strstr(cstring, "GL_ARB_texture_compression_bptc") != NULL)) {
-            s_glSupport.hasBptcSupport = true;
-        }
+    if ((strstr(cstring, "GL_EXT_texture_compression_bptc") != NULL) ||
+        (strstr(cstring, "GL_ARB_texture_compression_bptc") != NULL)) {
+        s_glSupport.hasBptcSupport = true;
     }
 
-    if (emugl_feature_is_enabled(android::featurecontrol::S3tcTextureSupport)) {
-        if (strstr(cstring, "GL_EXT_texture_compression_s3tc") != NULL) {
-            s_glSupport.hasS3tcSupport = true;
-        }
+    if (strstr(cstring, "GL_EXT_texture_compression_s3tc") != NULL) {
+        s_glSupport.hasS3tcSupport = true;
     }
 }
 
