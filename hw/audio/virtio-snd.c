@@ -16,6 +16,7 @@
 #include "stdio.h"
 #include "qemu/compiler.h"
 #include "qemu/osdep.h"
+#include "qemu/timer.h"
 #include "qemu/typedefs.h"
 #include "qapi/error.h"
 #include "standard-headers/linux/virtio_ids.h"
@@ -528,13 +529,12 @@ static bool virtio_snd_stream_start_locked(VirtIOSoundPCMStream *stream) {
     if (is_output_stream(stream)) {
         SWVoiceOut *voice = stream->voice.out;
         AUD_set_active_out(voice, 1);
-        AUD_init_time_stamp_out(voice, &stream->start_timestamp);
     } else {
         SWVoiceIn *voice = stream->voice.in;
         AUD_set_active_in(voice, 1);
-        AUD_init_time_stamp_in(voice, &stream->start_timestamp);
     }
 
+    stream->start_timestamp = qemu_clock_get_us(QEMU_CLOCK_VIRTUAL_RT);
     stream->frames_consumed = 0;
     return true;
 }
@@ -1177,7 +1177,7 @@ static int calc_stream_adjustment_bytes(const uint64_t elapsed_nf,
 }
 
 static int calc_drop_bytes_out(VirtIOSoundPCMStream *stream, const int n_periods) {
-    const uint64_t elapsed_usec = AUD_get_elapsed_usec_out(stream->voice.out, &stream->start_timestamp);
+    const uint64_t elapsed_usec = qemu_clock_get_us(QEMU_CLOCK_VIRTUAL_RT) - stream->start_timestamp;
     const uint64_t elapsed_nf = elapsed_usec * (uint64_t)stream->freq_hz / 1000000ul;
     // We have to feed the soundcard ahead of the real time.
     const uint64_t to_be_consumed_nf = elapsed_nf + stream->period_frames * n_periods;
@@ -1187,7 +1187,7 @@ static int calc_drop_bytes_out(VirtIOSoundPCMStream *stream, const int n_periods
 }
 
 static int calc_insert_bytes_in(VirtIOSoundPCMStream *stream) {
-    const uint64_t elapsed_usec = AUD_get_elapsed_usec_in(stream->voice.in, &stream->start_timestamp);
+    const uint64_t elapsed_usec = qemu_clock_get_us(QEMU_CLOCK_VIRTUAL_RT) - stream->start_timestamp;
     const uint64_t elapsed_nf = elapsed_usec * (uint64_t)stream->freq_hz / 1000000ul;
     // The consumed position could be delayed up to a period.
     const uint64_t consumed_nf = stream->frames_consumed + stream->period_frames;
