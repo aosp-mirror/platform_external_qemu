@@ -22,8 +22,8 @@ PYTHON=python3
 PY_VER=$(PYTHON --version)
 
 write_local_pip_conf() {
-    cp cfg/pip.conf .venv/pip.conf
-    cp cfg/pypirc .venv/pypirc
+  cp ./cfg/pip.conf $VIRTUAL_ENV/pip.conf
+  cp ./cfg/pypirc $VIRTUAL_ENV/pypirc
 }
 
 echo "Using ${PYTHON} which is version ${PY_VER}"

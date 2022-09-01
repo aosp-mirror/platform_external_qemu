@@ -43,7 +43,7 @@ class TemporaryDirectory(object):
             shutil.rmtree(self.name)
 
 
-def run_tests(out_dir, jobs, additional_opts):
+def run_tests(out_dir, dist_dir, jobs, additional_opts):
     if platform.system() == "Windows":
         if "--skip-emulator-check" in additional_opts:
             pass
@@ -61,6 +61,7 @@ def run_tests(out_dir, jobs, additional_opts):
                         get_qemu_root(), "android", "scripts", "unix", "run_tests.sh"
                     ),
                     "--out-dir=%s" % out_dir,
+                    "--dist-dir=%s" % dist_dir,
                     "--verbose",
                     "--verbose",
                     "-j",
