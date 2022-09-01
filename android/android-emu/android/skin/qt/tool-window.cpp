@@ -187,7 +187,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
-    if (android_foldable_any_folded_area_configured() || resizableEnabled()) {
+    if (android_foldable_any_folded_area_configured() ||
+        android_foldable_hinge_configured() ||
+        resizableEnabled()) {
         mToolsUi->zoom_button->hide();
         mToolsUi->zoom_button->setEnabled(false);
     }
