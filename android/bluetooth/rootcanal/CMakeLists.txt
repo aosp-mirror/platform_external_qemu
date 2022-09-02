@@ -81,6 +81,7 @@ android_add_library(
   ${RootCanalGeneratedPackets_h}
   model/controller/acl_connection.cc
   model/controller/acl_connection_handler.cc
+  model/controller/controller_properties.cc
   model/controller/dual_mode_controller.cc
   model/controller/isochronous_connection_handler.cc
   model/controller/le_advertiser.cc
@@ -89,16 +90,9 @@ android_add_library(
   model/controller/security_manager.cc
   model/devices/beacon.cc
   model/devices/beacon_swarm.cc
-  model/devices/broken_adv.cc
-  model/devices/car_kit.cc
-  model/devices/classic.cc
   model/devices/device.cc
-  model/devices/device_properties.cc
   model/devices/hci_device.cc
-  model/devices/keyboard.cc
   model/devices/link_layer_socket_device.cc
-  model/devices/loopback.cc
-  model/devices/remote_loopback_device.cc
   model/devices/scripted_beacon.cc
   model/devices/sniffer.cc
   model/hci/h4_data_channel_packetizer.cc
