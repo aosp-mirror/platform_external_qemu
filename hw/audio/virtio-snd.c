@@ -353,15 +353,8 @@ static bool ring_buffer_push(VirtIOSoundRingBuffer *rb,
 }
 
 static VirtIOSoundRingBufferItem *ring_buffer_top(VirtIOSoundRingBuffer *rb) {
-    VirtIOSoundRingBufferItem *item;
 
-    if (!rb->size) {
-        return NULL;
-    }
-
-    item = &rb->buf[rb->r];
-
-    return item;
+    return rb->size ? &rb->buf[rb->r] : NULL;
 }
 
 static void ring_buffer_pop(VirtIOSoundRingBuffer *rb) {
