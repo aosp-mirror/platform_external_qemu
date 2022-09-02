@@ -67,6 +67,24 @@ static void peci_rd_endpt_cfg(PECIClientDevice *client, PECICmd *pcmd)
 
 }
 
+static void peci_rd_pci_cfg(PECIClientDevice *client, PECICmd *pcmd)
+{
+    PECIPkgCfg *resp = (PECIPkgCfg *)pcmd->tx;
+    uint32_t val = pcmd->rx[1] | (pcmd->rx[2] << 8) | (pcmd->rx[3] << 16) |
+                  (pcmd->rx[4] << 24);
+    uint8_t bus = (val >> 20) & 0xFF;
+    uint8_t dev = (val >> 15) & 0x1F;
+    uint8_t func = (val >> 12) & 0x7;
+    uint8_t reg = val & 0xFFF;
+
+    resp->data = 0;
+    resp->cc = PECI_DEV_CC_SUCCESS;
+
+    qemu_log_mask(LOG_UNIMP,
+                  "%s: bus: %u, dev: %u, func: %u, reg: 0x%x\n",
+                  __func__, bus, dev, func, reg);
+}
+
 static void peci_rd_pkg_cfg(PECIClientDevice *client, PECICmd *pcmd)
 {
     PECIPkgCfg *resp = (PECIPkgCfg *)pcmd->tx;
@@ -190,11 +208,13 @@ int peci_handle_cmd(PECIBus *bus, PECICmd *pcmd)
     case PECI_CMD_RD_PCI_CFG:
         trace_peci_handle_cmd("RdPCIConfig", pcmd->addr);
         qemu_log_mask(LOG_UNIMP, "%s: unimplemented PCI_CFG\n", __func__);
+        peci_rd_pci_cfg(client, pcmd);
         break;
 
     case PECI_CMD_RD_PCI_CFG_LOCAL:
         trace_peci_handle_cmd("RdPCIConfigLocal", pcmd->addr);
         qemu_log_mask(LOG_UNIMP, "%s: unimplemented PCI_CFG_LOCAL\n", __func__);
+        peci_rd_pci_cfg(client, pcmd);
         break;
 
     case PECI_CMD_RD_END_PT_CFG:
