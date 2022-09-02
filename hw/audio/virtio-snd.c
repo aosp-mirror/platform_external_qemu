@@ -16,6 +16,7 @@
 #include "stdio.h"
 #include "qemu/compiler.h"
 #include "qemu/osdep.h"
+#include "qemu/timer.h"
 #include "qemu/typedefs.h"
 #include "qapi/error.h"
 #include "standard-headers/linux/virtio_ids.h"
@@ -374,9 +375,8 @@ static void ring_buffer_pop(VirtIOSoundRingBuffer *rb) {
 }
 
 static uint32_t update_output_latency_bytes(VirtIOSoundPCMStream *stream, int x) {
-    uint32_t *pval = &stream->latency_bytes;
-    const uint32_t val = *pval + x;
-    *pval = val;
+    const int32_t val = stream->latency_bytes + x;
+    stream->latency_bytes = val;
     return val;
 }
 
@@ -529,15 +529,13 @@ static bool virtio_snd_stream_start_locked(VirtIOSoundPCMStream *stream) {
     if (is_output_stream(stream)) {
         SWVoiceOut *voice = stream->voice.out;
         AUD_set_active_out(voice, 1);
-        AUD_init_time_stamp_out(voice, &stream->start_timestamp);
     } else {
         SWVoiceIn *voice = stream->voice.in;
         AUD_set_active_in(voice, 1);
-        AUD_init_time_stamp_in(voice, &stream->start_timestamp);
     }
 
-    stream->frames_sent = 0;
-    stream->frames_skipped = 0;
+    stream->start_timestamp = qemu_clock_get_us(QEMU_CLOCK_VIRTUAL_RT);
+    stream->frames_consumed = 0;
     return true;
 }
 
@@ -560,7 +558,8 @@ static void virtio_snd_stream_unprepare_out_locked(VirtIOSoundPCMStream *stream)
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
             VirtQueueElement *e = item->el;
-            const uint32_t latency_bytes = update_output_latency_bytes(stream, -item->size);
+            const uint32_t latency_bytes = update_output_latency_bytes(stream,
+                                                                       -(item->size - item->pos));
 
             vq_consume_element(
                 tx_vq, e,
@@ -1178,21 +1177,20 @@ static int calc_stream_adjustment_bytes(const uint64_t elapsed_nf,
 }
 
 static int calc_drop_bytes_out(VirtIOSoundPCMStream *stream, const int n_periods) {
-    const uint64_t elapsed_usec = AUD_get_elapsed_usec_out(stream->voice.out, &stream->start_timestamp);
+    const uint64_t elapsed_usec = qemu_clock_get_us(QEMU_CLOCK_VIRTUAL_RT) - stream->start_timestamp;
     const uint64_t elapsed_nf = elapsed_usec * (uint64_t)stream->freq_hz / 1000000ul;
     // We have to feed the soundcard ahead of the real time.
     const uint64_t to_be_consumed_nf = elapsed_nf + stream->period_frames * n_periods;
-    const uint64_t consumed_nf = stream->frames_sent + stream->frames_skipped;
 
-    return calc_stream_adjustment_bytes(to_be_consumed_nf, consumed_nf,
+    return calc_stream_adjustment_bytes(to_be_consumed_nf, stream->frames_consumed,
                                         stream->driver_frame_size);
 }
 
 static int calc_insert_bytes_in(VirtIOSoundPCMStream *stream) {
-    const uint64_t elapsed_usec = AUD_get_elapsed_usec_in(stream->voice.in, &stream->start_timestamp);
+    const uint64_t elapsed_usec = qemu_clock_get_us(QEMU_CLOCK_VIRTUAL_RT) - stream->start_timestamp;
     const uint64_t elapsed_nf = elapsed_usec * (uint64_t)stream->freq_hz / 1000000ul;
     // The consumed position could be delayed up to a period.
-    const uint64_t consumed_nf = stream->frames_sent + stream->frames_skipped + stream->period_frames;
+    const uint64_t consumed_nf = stream->frames_consumed + stream->period_frames;
 
     return calc_stream_adjustment_bytes(elapsed_nf, consumed_nf,
                                         stream->driver_frame_size);
@@ -1240,7 +1238,7 @@ static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) 
                 item->pos += driver_sent_nb;
                 item_size -= driver_sent_nb;
                 latency_bytes = update_output_latency_bytes(stream, -driver_sent_nb);
-                stream->frames_sent += sent_fn;
+                stream->frames_consumed += sent_fn;
             }
 
             if (item_size < driver_fs) {
@@ -1279,7 +1277,7 @@ aud_write_full:
             item->pos += nb;
             item_size -= nb;
             latency_bytes = update_output_latency_bytes(stream, -nb);
-            stream->frames_skipped += nf;
+            stream->frames_consumed += nf;
 
             if (item_size < driver_fs) {
                 VirtQueueElement *const e = item->el;
@@ -1336,7 +1334,7 @@ static bool virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     qemu_mutex_lock(&stream->mtx);
 
     if (ring_buffer_push(&stream->pcm_buf, &item)) {
-        update_output_latency_bytes(stream, +item.size);
+        update_output_latency_bytes(stream, item.size - item.pos);
     } else {
         ABORT("ring_buffer_push");
     }
@@ -1382,7 +1380,7 @@ static VirtQueue *stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
 
                 iov_from_buf(e->in_sg, e->in_num, item->pos, scratch, driver_read_nb);
                 item->pos += driver_read_nb;
-                stream->frames_sent += (driver_read_nb / driver_fs);
+                stream->frames_consumed += (driver_read_nb / driver_fs);
             }
 
             if ((period_bytes - item->pos) < driver_fs) {
@@ -1420,7 +1418,7 @@ aud_read_empty:
             iov_from_buf(e->in_sg, e->in_num, item->pos, scratch, nb);
             insert_bytes -= nb;
             item->pos += nb;
-            stream->frames_skipped += nf;
+            stream->frames_consumed += nf;
 
             if (item->pos >= period_bytes) {
                 const size_t size = el_send_pcm_rx_status(
