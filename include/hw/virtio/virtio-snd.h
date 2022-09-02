@@ -68,7 +68,7 @@ struct VirtIOSoundPCMStream {
         SWVoiceOut *out;
         void *raw;
     } voice;
-    QEMUAudioTimeStamp start_timestamp;
+    int64_t start_timestamp;
     VirtIOSoundRingBuffer pcm_buf;
     QemuMutex mtx;
 
