@@ -8,24 +8,167 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
-#include "android/base/Optional.h"
-
-#include "android/cpu_accelerator.h"
-#include "android/emulation/CpuAccelerator.h"
-#include "android/emulator-check/PlatformInfo.h"
-
-#include <algorithm>
-#include <iterator>
-#include <sstream>
-#include <string_view>
-#include <tuple>
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <algorithm>
+#include <functional>
+#include <iterator>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <utility>
 
+#include "android/base/Optional.h"
+#include "android/cpu_accelerator.h"
+#include "android/emulation/CpuAccelerator.h"
+#include "android/cmdline-definitions.h"
+#include "android/avd/info.h"  
+#include "android/emulation/control/AndroidAgentFactory.h"
+#include "android/emulation/control/globals_agent.h"
+#include "android/emulator-check/PlatformInfo.h"
 
 using CommandReturn = std::pair<int, std::string>;
+// using  android::emulation::injectConsoleAgents;
+
+AndroidOptions emptyOptions{};
+AndroidOptions* sAndroid_cmdLineOptions = &emptyOptions;
+AvdInfo* sAndroid_avdInfo = nullptr;
+AndroidHwConfig s_hwConfig = {0};
+AvdInfoParams sAndroid_avdInfoParams = {0};
+std::string sCmdlLine;
+LanguageSettings s_languageSettings = {0};
+AUserConfig* s_userConfig = nullptr;
+bool sKeyCodeForwarding = false;
+
+// /* this indicates that guest has mounted data partition */
+int s_guest_data_partition_mounted = 0;
+// /* this indicates that guest has boot completed */
+bool s_guest_boot_completed = 0;
+bool s_arm_snapshot_save_completed = 0;
+bool s_host_emulator_is_headless = 0;
+// /* are we using the emulator in the android mode or plain qemu? */
+bool s_android_qemu_mode = true;
+// /* are we using android-emu libraries for a minimal configuration? */
+// Min config mode and fuchsia mode are equivalent, at least for now.
+bool s_min_config_qemu_mode = false;
+// /* is android-emu running Fuchsia? */
+int s_android_snapshot_update_timer = 0;
+
+static const QAndroidGlobalVarsAgent globalVarsAgent = {
+        .avdParams = []() { return &sAndroid_avdInfoParams; },
+        .avdInfo =
+                []() {
+                    // Do not access the info before it is injected!
+                    return sAndroid_avdInfo;
+                },
+        .hw = []() { return &s_hwConfig; },
+        // /* this indicates that guest has mounted data partition */
+        .guest_data_partition_mounted =
+                []() { return s_guest_data_partition_mounted; },
+
+        // /* this indicates that guest has boot completed */
+        .guest_boot_completed = []() { return s_guest_boot_completed; },
+
+        .arm_snapshot_save_completed =
+                []() { return s_arm_snapshot_save_completed; },
+
+        .host_emulator_is_headless =
+                []() { return s_host_emulator_is_headless; },
+
+        // /* are we using the emulator in the android mode or plain qemu? */
+        .android_qemu_mode = []() { return s_android_qemu_mode; },
+
+        // /* are we using android-emu libraries for a minimal configuration? */
+        .min_config_qemu_mode = []() { return s_min_config_qemu_mode; },
+
+        // /* is android-emu running Fuchsia? */
+        .is_fuchsia = []() { return s_min_config_qemu_mode; },
+
+        .android_snapshot_update_timer =
+                []() { return s_android_snapshot_update_timer; },
+        .language = []() { return &s_languageSettings; },
+        .use_keycode_forwarding = []() { return sKeyCodeForwarding; },
+        .userConfig = []() { return s_userConfig; },
+        .android_cmdLineOptions = []() { return sAndroid_cmdLineOptions; },
+        .inject_cmdLineOptions =
+                [](AndroidOptions* opts) { sAndroid_cmdLineOptions = opts; },
+        .has_cmdLineOptions =
+                []() {
+                    return globalVarsAgent.android_cmdLineOptions() != nullptr;
+                },
+        .android_cmdLine = []() { return (const char*)sCmdlLine.c_str(); },
+        .inject_android_cmdLine =
+                [](const char* cmdline) { sCmdlLine = cmdline; },
+        .inject_language =
+                [](char* language, char* country, char* locale) {
+                    s_languageSettings.language = language;
+                    s_languageSettings.country = country;
+                    s_languageSettings.locale = locale;
+                    s_languageSettings.changing_language_country_locale =
+                            language || country || locale;
+                },
+        .inject_userConfig = [](AUserConfig* config) { s_userConfig = config; },
+        .set_keycode_forwading =
+                [](bool enabled) { sKeyCodeForwarding = enabled; },
+        .inject_AvdInfo = [](AvdInfo* avd) { sAndroid_avdInfo = avd; },
+
+        // /* this indicates that guest has mounted data partition */
+        .set_guest_data_partition_mounted =
+                [](int guest_data_partition_mounted) {
+                    s_guest_data_partition_mounted =
+                            guest_data_partition_mounted;
+                },
+
+        // /* this indicates that guest has boot completed */
+        .set_guest_boot_completed =
+                [](bool guest_boot_completed) {
+                    s_guest_boot_completed = guest_boot_completed;
+                },
+
+        .set_arm_snapshot_save_completed =
+                [](bool arm_snapshot_save_completed) {
+                    s_arm_snapshot_save_completed = arm_snapshot_save_completed;
+                },
+
+        .set_host_emulator_is_headless =
+                [](bool host_emulator_is_headless) {
+                    s_host_emulator_is_headless = host_emulator_is_headless;
+                },
+
+        // /* are we using the emulator in the android mode or plain qemu? */
+        .set_android_qemu_mode =
+                [](bool android_qemu_mode) {
+                    s_android_qemu_mode = android_qemu_mode;
+                },
+
+        // /* are we using android-emu libraries for a minimal configuration? */
+        .set_min_config_qemu_mode =
+                [](bool min_config_qemu_mode) {
+                    s_min_config_qemu_mode = min_config_qemu_mode;
+                },
+
+        // /* is android-emu running Fuchsia? */
+        .set_is_fuchsia =
+                [](bool is_fuchsia) { s_min_config_qemu_mode = is_fuchsia; },
+
+        .set_android_snapshot_update_timer =
+                [](int android_snapshot_update_timer) {
+                    s_android_snapshot_update_timer =
+                            android_snapshot_update_timer;
+                }
+
+};
+
+namespace android::emulation {
+class MockAndroidConsoleFactory : public AndroidConsoleFactory {
+public:
+    const QAndroidGlobalVarsAgent* const android_get_QAndroidGlobalVarsAgent()
+            const override {
+        return &globalVarsAgent;
+    };
+};
+}  // namespace android::emulation
 
 static const int kGenericError = 100;
 
@@ -86,7 +229,7 @@ constexpr struct Option {
 static std::string usage() {
     std::ostringstream str;
     str <<
-R"(Usage: emulator-check <argument1> [<argument2>...]
+            R"(Usage: emulator-check <argument1> [<argument2>...]
 
 Performs the set of checks requested in <argumentX> and returns the result in
 the following format:
@@ -164,5 +307,7 @@ int main(int argc, const char* const* argv) {
         return error("Missing a required argument(s)");
     }
 
+    android::emulation::injectConsoleAgents(
+            android::emulation::MockAndroidConsoleFactory());
     return processArguments(argc, argv);
 }
