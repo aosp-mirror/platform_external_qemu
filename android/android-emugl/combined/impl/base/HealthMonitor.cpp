@@ -58,7 +58,9 @@ HealthMonitor<Clock>::~HealthMonitor() {
 
 template <class Clock>
 typename HealthMonitor<Clock>::Id HealthMonitor<Clock>::startMonitoringTask(
-    std::unique_ptr<EventHangMetadata> metadata, uint64_t timeout) {
+    std::unique_ptr<EventHangMetadata> metadata,
+    std::optional<std::function<std::unique_ptr<HangAnnotations>()>> onHangAnnotationsCallback,
+    uint64_t timeout) {
     auto intervalMs = duration_cast<std::chrono::milliseconds>(mInterval).count();
     if (timeout < intervalMs) {
         WARN("Timeout value %d is too low (heartbeat is every %d). Increasing to %d", timeout,
@@ -72,6 +74,7 @@ typename HealthMonitor<Clock>::Id HealthMonitor<Clock>::startMonitoringTask(
         .id = id,
         .metadata = std::move(metadata),
         .timeOccurred = Clock::now(),
+        .onHangAnnotationsCallback = std::move(onHangAnnotationsCallback),
         .timeoutThreshold = Duration(std::chrono::milliseconds(timeout))});
     mEventQueue.push(std::move(event));
     return id;
@@ -150,7 +153,9 @@ intptr_t HealthMonitor<Clock>::main() {
                                                      event.timeOccurred + event.timeoutThreshold,
                                                  .timeoutThreshold = event.timeoutThreshold,
                                                  .hungTimestamp = std::nullopt,
-                                                 .metadata = std::move(event.metadata)}));
+                                                 .metadata = std::move(event.metadata),
+                                                 .onHangAnnotationsCallback =
+                                                     std::move(event.onHangAnnotationsCallback)}));
                            },
                            [this](typename MonitoredEventType::Touch& event) {
                                auto it = mMonitoredTasks.find(event.id);
@@ -196,6 +201,11 @@ intptr_t HealthMonitor<Clock>::main() {
             if (task.timeoutTimestamp < now) {
                 // Newly hung task
                 if (!task.hungTimestamp.has_value()) {
+                    // Copy over additional annotations captured at hangTime
+                    if (task.onHangAnnotationsCallback) {
+                        auto newAnnotations = (*task.onHangAnnotationsCallback)();
+                        task.metadata->mergeAnnotations(std::move(newAnnotations));
+                    }
                     mLogger.logMetricEvent(MetricEventHang{.metadata = task.metadata.get(),
                                                            .otherHungTasks = newHungTasks});
                     task.hungTimestamp = task.timeoutTimestamp;
