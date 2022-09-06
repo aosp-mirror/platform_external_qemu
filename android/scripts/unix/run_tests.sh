@@ -160,7 +160,7 @@ if [ "$OPT_GFXSTREAM" ] ; then
     export LD_LIBRARY_PATH=$PWD/lib64/vulkan
 fi
 
-# ${CTEST} -j ${NUM_JOBS} --output-on-failure ${DISABLED_TESTS} || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
+${CTEST} -j ${NUM_JOBS} --output-on-failure ${DISABLED_TESTS} || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
 cd $OLD_DIR
 
 EMULATOR_CHECK=$OPT_OUT/emulator-check
