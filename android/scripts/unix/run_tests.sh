@@ -160,8 +160,18 @@ if [ "$OPT_GFXSTREAM" ] ; then
     export LD_LIBRARY_PATH=$PWD/lib64/vulkan
 fi
 
-${CTEST} -j ${NUM_JOBS} --output-on-failure ${DISABLED_TESTS} || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
+# ${CTEST} -j ${NUM_JOBS} --output-on-failure ${DISABLED_TESTS} || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
 cd $OLD_DIR
+
+EMULATOR_CHECK=$OPT_OUT/emulator-check
+if [ ! -f "$EMULATOR_CHECK" ]; then
+    panic "    - FAIL: $EMULATOR_CHECK is missing!"
+fi
+
+# Check that we can run emulator-check
+log "Checking emulator-check, this will produce some output"
+$EMULATOR_CHECK accel || panic "This should provide hypervisor information!"
+log "Success, android studio can probe the emulator accelerator config."
 
 if [ "$OPT_SKIP_EMULATOR_CHECK" ] ; then
     log "Skipping check for 'emulator' launcher program."
@@ -178,7 +188,7 @@ else
         warn "    - FAIL: $EMULATOR is not a 32-bit executable!"
         warn "        File type: $EMULATOR_FILE_TYPE"
         warn "        Expected : $EXPECTED_EMULATOR_FILE_TYPE"
-       paninc "emulator-bitness-check failed"
+       panic "emulator-bitness-check failed"
     fi
 fi
 
