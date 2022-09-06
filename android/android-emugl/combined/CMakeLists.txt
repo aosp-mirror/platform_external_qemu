@@ -15,6 +15,7 @@ endfunction()
 
 if(OPTION_GFXSTREAM_BACKEND)
     set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+    set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
 
     set(BUILD_STANDALONE OFF)
     set(ENABLE_VKCEREAL_TESTS ON)
@@ -26,6 +27,7 @@ if(OPTION_GFXSTREAM_BACKEND)
                 "This function cannot be used by older cmake versions (${CMAKE_VERSION}<3.7.0)"
             )
         endif()
+        message("gfxstream_internal_targets result=${result} subdir=${subdir}")
         get_filename_component(abs_subdir ${subdir} ABSOLUTE)
         set(GFXSTREAM_THIRD_PARTY_ROOT ${GFXSTREAM_REPO_ROOT})
         cmake_path(APPEND GFXSTREAM_THIRD_PARTY_ROOT "third-party")
@@ -34,8 +36,9 @@ if(OPTION_GFXSTREAM_BACKEND)
             return()
         endif()
         cmake_path(IS_PREFIX GFXSTREAM_REPO_ROOT ${abs_subdir} NORMALIZE IS_GFXSTREAM_SUBDIR)
+        cmake_path(IS_PREFIX AEMU_COMMON_REPO_ROOT ${abs_subdir} NORMALIZE IS_AEMU_COMMON_SUBDIR)
         cmake_path(IS_PREFIX GFXSTREAM_PROTOCOLS_DIR ${abs_subdir} NORMALIZE IS_GFXSTREAM_PROTOCOLS_SUBDIR)
-        if(NOT IS_GFXSTREAM_SUBDIR AND NOT IS_GFXSTREAM_PROTOCOLS_SUBDIR)
+        if(NOT IS_GFXSTREAM_SUBDIR AND NOT IS_AEMU_COMMON_SUBDIR AND NOT IS_GFXSTREAM_PROTOCOLS_SUBDIR)
             return()
         endif()
 
@@ -172,9 +175,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     # Common base libraries for host################################################
 
-    add_subdirectory(${GFXSTREAM_REPO_ROOT}/base ${GFXSTREAM_PREFIX}-base)
-    add_subdirectory(${GFXSTREAM_REPO_ROOT}/snapshot ${GFXSTREAM_PREFIX}-snapshot)
-    add_subdirectory(${GFXSTREAM_REPO_ROOT}/host-common ${GFXSTREAM_PREFIX}-host-common)
+    add_subdirectory(${AEMU_COMMON_REPO_ROOT} aemu_common)
 
     # Backends######################################################################
 
