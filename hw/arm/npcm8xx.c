@@ -372,6 +372,7 @@ static struct arm_boot_info npcm8xx_binfo = {
     .smp_bootreg_addr       = NPCM8XX_SMP_BOOTREG_ADDR,
     .gic_cpu_if_addr        = NPCM8XX_GICC_BA,
     .secure_boot            = false,
+    .psci_conduit           = QEMU_PSCI_CONDUIT_SMC,
     .board_id               = -1,
     .board_setup_addr       = NPCM8XX_BOARD_SETUP_ADDR,
 };
