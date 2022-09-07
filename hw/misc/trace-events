@@ -266,6 +266,17 @@ aspeed_peci_read(uint64_t offset, uint64_t data) "offset 0x%" PRIx64 " data 0x%"
 aspeed_peci_write(uint64_t offset, uint64_t data) "offset 0x%" PRIx64 " data 0x%" PRIx64
 aspeed_peci_raise_interrupt(uint32_t ctrl, uint32_t status) "ctrl 0x%" PRIx32 " status 0x%" PRIx32
 
+# aspeed_lpc.c
+aspeed_kcs_handle_req(uint8_t msg_id, unsigned req_len) "IPMI request: msg_id %" PRIx8 ", req_len %u"
+aspeed_kcs_handle_event(const char *id, uint8_t status) "Device path: %s, status: 0x%" PRIx8
+aspeed_kcs_read(uint64_t offset, uint64_t value) "offset: 0x%" PRIx64 ", value 0x%02" PRIx64
+aspeed_kcs_write(uint64_t offset, uint64_t value) "offset: 0x%" PRIx64 ", value 0x%02" PRIx64
+aspeed_kcs_host_read_byte(const char *id, uint8_t value) "%s: value 0x%02" PRIx8
+aspeed_kcs_host_write_byte(const char *id, uint8_t value, bool irq_enable, bool is_cmd, uint32_t str) "%s: value 0x%02" PRIx8 ", irq_enabled: %d, is_cmd: %d, str: 0x%" PRIx32
+aspeed_kcs_lpc_set_irq(int irq, int level) "irq: %d, level: %d"
+aspeed_kcs_read_str(uint64_t offset, uint32_t str) "offset: 0x%" PRIx64 ", str: 0x%" PRIx32
+aspeed_kcs_write_str(uint64_t offset, uint32_t str) "offset: 0x%" PRIx64 ", str: 0x%" PRIx32
+
 # bcm2835_property.c
 bcm2835_mbox_property(uint32_t tag, uint32_t bufsize, size_t resplen) "mbox property tag:0x%08x in_sz:%u out_sz:%zu"
 
