@@ -274,7 +274,7 @@ static int processArguments(int argc, const char* const* argv) {
     android::base::Optional<int> retCode;
 
     for (int i = 1; i < argc; ++i) {
-        const StringView arg = argv[i];
+        const std::string arg = argv[i];
         const auto opt = std::find_if(
                 std::begin(options), std::end(options),
                 [arg](const Option& opt) { return arg == opt.arg; });
