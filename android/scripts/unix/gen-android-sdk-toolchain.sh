@@ -413,7 +413,7 @@ gen_wrapper_toolchain () {
           ;;
         linux-aarch64)
           local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
-          local PROGRAMS="as ar ranlib strings nm objdump objcopy aarch64-linux-gnu-dlltool"
+          local PROGRAMS="as ar ranlib strings nm objdump objcopy aarch64-linux-gnu-dlltool strip"
           ;;
         darwin-*)
           local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
