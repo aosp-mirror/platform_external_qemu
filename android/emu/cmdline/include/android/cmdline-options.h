@@ -326,6 +326,8 @@ OPT_PARAM(network_user_mode_options,
           "networking option"
           "for radio network for API 31 and above.")
 
+CFG_PARAM(adb_path, "<path>", "use adb binary from <path>" )
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
