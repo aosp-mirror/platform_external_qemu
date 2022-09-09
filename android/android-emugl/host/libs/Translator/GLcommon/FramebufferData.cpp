@@ -30,6 +30,7 @@ RenderbufferData::RenderbufferData(android::base::Stream* stream) :
     // TODO: load eglImageGlobalTexObject
     width = stream->getBe32();
     height = stream->getBe32();
+    samples = stream->getBe32();
     internalformat = stream->getBe32();
     hostInternalFormat = stream->getBe32();
     everBound = stream->getBe32();
@@ -46,6 +47,7 @@ void RenderbufferData::onSave(android::base::Stream* stream, unsigned int global
     }
     stream->putBe32(width);
     stream->putBe32(height);
+    stream->putBe32(samples);
     stream->putBe32(internalformat);
     stream->putBe32(hostInternalFormat);
     stream->putBe32(everBound);
@@ -59,8 +61,14 @@ void RenderbufferData::restore(ObjectLocalName localName,
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     dispatcher.glBindRenderbuffer(GL_RENDERBUFFER, globalName);
     if (hostInternalFormat != GL_NONE) {
-        dispatcher.glRenderbufferStorage(GL_RENDERBUFFER, hostInternalFormat,
-                                         width, height);
+        if (samples == 0) {
+            dispatcher.glRenderbufferStorage(GL_RENDERBUFFER,
+                                             hostInternalFormat, width, height);
+        } else {
+            dispatcher.glRenderbufferStorageMultisample(
+                    GL_RENDERBUFFER, samples, hostInternalFormat, width,
+                    height);
+        }
     }
 }
 

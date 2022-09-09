@@ -384,7 +384,7 @@ struct {
 };
 
 // Calculate snapshot version based on a base version plus featurecontrol-derived integer.
-static constexpr int kVersionBase = 80;
+static constexpr int kVersionBase = 81;
 static_assert(kVersionBase < (1 << 20), "Base version number is too high.");
 
 #define FEATURE_CONTROL_ITEM(item) + 1
