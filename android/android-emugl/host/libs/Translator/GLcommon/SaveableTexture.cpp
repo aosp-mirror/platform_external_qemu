@@ -68,6 +68,7 @@ static const GLenum kTexParamGles3[] = {
     GL_TEXTURE_SWIZZLE_B,
     GL_TEXTURE_SWIZZLE_A,
     GL_TEXTURE_WRAP_R,
+    GL_TEXTURE_SAMPLES,
 };
 
 static uint32_t s_texAlign(uint32_t v, uint32_t align) {
