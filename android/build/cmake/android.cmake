@@ -1660,6 +1660,12 @@ function(android_install_exe TGT DST)
   android_install_license(${TGT} ${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
   android_sign(
     INSTALL ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
+  if (LINUX_AARCH64)
+        install(
+            CODE "message(STATUS \"Strip: ${TGT}\")
+            execute_process(COMMAND ${CMAKE_STRIP_CMD} ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})"
+            )
+  endif()
 endfunction()
 
 # Installs the given shared library. The shared library will end up in ../lib64
@@ -1673,6 +1679,14 @@ function(android_install_shared TGT)
   android_sign(
     INSTALL
       ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
+
+  if (LINUX_AARCH64)
+        install(
+            CODE "message(STATUS \"Strip: ${TGT}\")
+            execute_process(COMMAND ${CMAKE_STRIP_CMD}
+                ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})"
+            )
+  endif()
 
   # Binplace for unit tests
   if(WINDOWS_MSVC_X86_64)
