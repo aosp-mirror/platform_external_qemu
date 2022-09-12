@@ -2172,6 +2172,10 @@ static void help_adb_path(stralloc_t* out) {
            "instead of automatically searching for an adb binary.\n\n");
 }
 
+static void help_hotplug_multi_display(stralloc_t* out) {
+    PRINTF(" Use the HAL hotplug display to implement multiDisplay.\n\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

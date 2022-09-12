@@ -149,8 +149,8 @@ private:
                          uint32_t* cb,
                          bool* enabled);
     int getNumberActiveMultiDisplaysLocked();
-
     std::map<uint32_t, MultiDisplayInfo> parseConfig();
+    bool hotPlugDisplayEnabled();
 };
 } // namespace android
 

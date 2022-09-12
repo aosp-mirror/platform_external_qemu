@@ -124,7 +124,7 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         return -1;
     }
 
-    if (featurecontrol::isEnabled(android::featurecontrol::Minigbm)) {
+    if(hotPlugDisplayEnabled()) {
         if (add) {
             mVmAgent->setDisplay(id, w, h, dpi);
         } else {
@@ -536,7 +536,7 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
         }
     }
     if (needUpdate &&
-        featurecontrol::isEnabled(android::featurecontrol::Minigbm)) {
+        hotPlugDisplayEnabled()) {
         // b/131884992 b/186124236
         auto adbInterface = emulation::AdbInterface::getGlobal();
         if (!adbInterface) {
@@ -814,6 +814,16 @@ void MultiDisplay::loadConfig() {
             mWindowAgent->updateUIMultiDisplayPage(3);
         }
     }
+}
+
+bool MultiDisplay::hotPlugDisplayEnabled() {
+    if (featurecontrol::isEnabled(android::featurecontrol::Minigbm) &&
+        ((getConsoleAgents()->settings->android_cmdLineOptions()->hotplug_multi_display ||
+         getConsoleAgents()->settings->hw()->hw_hotplug_multi_display))) {
+        LOG(VERBOSE) << "use hotplug multiDisplay";
+        return true;
+    }
+    return false;
 }
 
 void MultiDisplay::onSave(base::Stream* stream) {
