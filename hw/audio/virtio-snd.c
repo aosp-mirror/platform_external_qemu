@@ -1922,7 +1922,10 @@ static int vmstate_VirtIOSound_post_xyz(void *opaque) {
                 ABORT("virtio_snd_stream_prepare_vars");
             }
 
-            virtio_snd_voice_reopen(snd, stream, g_stream_name[i], stream->guest_format);
+            if (!virtio_snd_voice_reopen(snd, stream, g_stream_name[i],
+                                         stream->guest_format)) {
+                ABORT("virtio_snd_voice_reopen");
+            }
         }
     }
 
