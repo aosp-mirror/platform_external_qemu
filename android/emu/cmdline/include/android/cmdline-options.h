@@ -328,6 +328,8 @@ OPT_PARAM(network_user_mode_options,
 
 CFG_PARAM(adb_path, "<path>", "use adb binary from <path>" )
 
+OPT_FLAG(hotplug_multi_display, "Use the HAL hotplug display to implement multiDisplay.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
