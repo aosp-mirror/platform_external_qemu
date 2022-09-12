@@ -60,7 +60,7 @@ template <class Clock>
 typename HealthMonitor<Clock>::Id HealthMonitor<Clock>::startMonitoringTask(
     std::unique_ptr<EventHangMetadata> metadata,
     std::optional<std::function<std::unique_ptr<HangAnnotations>()>> onHangAnnotationsCallback,
-    uint64_t timeout) {
+    uint64_t timeout, std::optional<Id> parentId) {
     auto intervalMs = duration_cast<std::chrono::milliseconds>(mInterval).count();
     if (timeout < intervalMs) {
         WARN("Timeout value %d is too low (heartbeat is every %d). Increasing to %d", timeout,
@@ -75,7 +75,8 @@ typename HealthMonitor<Clock>::Id HealthMonitor<Clock>::startMonitoringTask(
         .metadata = std::move(metadata),
         .timeOccurred = Clock::now(),
         .onHangAnnotationsCallback = std::move(onHangAnnotationsCallback),
-        .timeoutThreshold = Duration(std::chrono::milliseconds(timeout))});
+        .timeoutThreshold = Duration(std::chrono::milliseconds(timeout)),
+        .parentId = parentId});
     mEventQueue.push(std::move(event));
     return id;
 }
@@ -140,24 +141,34 @@ intptr_t HealthMonitor<Clock>::main() {
                                GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER)) <<
                                    "MonitoredEvent type not found";
                            },
-                           [this](typename MonitoredEventType::Start& event) {
+                           [this, &events](typename MonitoredEventType::Start& event) {
                                auto it = mMonitoredTasks.find(event.id);
                                if (it != mMonitoredTasks.end()) {
                                    ERR("Registered multiple start events for task %d", event.id);
                                    return;
                                }
-                               mMonitoredTasks.emplace(
-                                   event.id, std::move(MonitoredTask{
+                               if (event.parentId && mMonitoredTasks.find(event.parentId.value()) ==
+                                                         mMonitoredTasks.end()) {
+                                   WARN("Requested parent task %d does not exist.",
+                                        event.parentId.value());
+                                   event.parentId = std::nullopt;
+                               }
+                               it = mMonitoredTasks
+                                        .emplace(event.id,
+                                                 std::move(MonitoredTask{
                                                  .id = event.id,
-                                                 .timeoutTimestamp =
-                                                     event.timeOccurred + event.timeoutThreshold,
+                                                     .timeoutTimestamp = event.timeOccurred +
+                                                                         event.timeoutThreshold,
                                                  .timeoutThreshold = event.timeoutThreshold,
                                                  .hungTimestamp = std::nullopt,
                                                  .metadata = std::move(event.metadata),
                                                  .onHangAnnotationsCallback =
-                                                     std::move(event.onHangAnnotationsCallback)}));
+                                                         std::move(event.onHangAnnotationsCallback),
+                                                     .parentId = event.parentId}))
+                                        .first;
+                               updateTaskParent(events, it->second, event.timeOccurred);
                            },
-                           [this](typename MonitoredEventType::Touch& event) {
+                           [this, &events](typename MonitoredEventType::Touch& event) {
                                auto it = mMonitoredTasks.find(event.id);
                                if (it == mMonitoredTasks.end()) {
                                    ERR("HealthMonitor has no task in progress for id %d", event.id);
@@ -166,8 +177,10 @@ intptr_t HealthMonitor<Clock>::main() {
 
                                auto& task = it->second;
                                task.timeoutTimestamp = event.timeOccurred + task.timeoutThreshold;
+                               updateTaskParent(events, task, event.timeOccurred);
                            },
-                           [this, &tasksToRemove](typename MonitoredEventType::Stop& event) {
+                           [this, &tasksToRemove,
+                            &events](typename MonitoredEventType::Stop& event) {
                                auto it = mMonitoredTasks.find(event.id);
                                if (it == mMonitoredTasks.end()) {
                                    ERR("HealthMonitor has no task in progress for id %d", event.id);
@@ -176,6 +189,7 @@ intptr_t HealthMonitor<Clock>::main() {
 
                                auto& task = it->second;
                                task.timeoutTimestamp = event.timeOccurred + task.timeoutThreshold;
+                               updateTaskParent(events, task, event.timeOccurred);
 
                                // Mark it for deletion, but retain it until the end of
                                // the health check concurrent tasks hung
@@ -206,7 +220,8 @@ intptr_t HealthMonitor<Clock>::main() {
                         auto newAnnotations = (*task.onHangAnnotationsCallback)();
                         task.metadata->mergeAnnotations(std::move(newAnnotations));
                     }
-                    mLogger.logMetricEvent(MetricEventHang{.metadata = task.metadata.get(),
+                    mLogger.logMetricEvent(MetricEventHang{.taskId = task.id,
+                                                           .metadata = task.metadata.get(),
                                                            .otherHungTasks = newHungTasks});
                     task.hungTimestamp = task.timeoutTimestamp;
                     newHungTasks++;
@@ -218,8 +233,8 @@ intptr_t HealthMonitor<Clock>::main() {
                                         task.timeoutTimestamp -
                                         (task.hungTimestamp.value() + task.timeoutThreshold))
                                         .count();
-                    mLogger.logMetricEvent(
-                        MetricEventUnHang{.metadata = task.metadata.get(), .hung_ms = hangTime});
+                    mLogger.logMetricEvent(MetricEventUnHang{
+                        .taskId = task.id, .metadata = task.metadata.get(), .hung_ms = hangTime});
                     task.hungTimestamp = std::nullopt;
                     newHungTasks--;
                 }
@@ -241,6 +256,17 @@ intptr_t HealthMonitor<Clock>::main() {
     }
 
     return 0;
+}
+
+template <class Clock>
+void HealthMonitor<Clock>::updateTaskParent(std::queue<std::unique_ptr<MonitoredEvent>>& events,
+                                            const MonitoredTask& task, Timestamp eventTime) {
+    std::optional<Id> parentId = task.parentId;
+    if (parentId) {
+        auto event = std::make_unique<MonitoredEvent>(typename MonitoredEventType::Touch{
+            .id = parentId.value(), .timeOccurred = eventTime + Duration(kTimeEpsilon)});
+        events.push(std::move(event));
+    }
 }
 
 template class HealthMonitor<steady_clock>;
