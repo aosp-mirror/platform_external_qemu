@@ -1126,7 +1126,9 @@ static int convert_channels_5_to_4(int16_t *buffer, int16_t *in_end) {
 
 static int convert_channels(int16_t *buffer, const int in_sz,
                             const int in_fs, const int out_fs) {
-    if (out_fs == in_fs) {
+    if (!in_sz) {
+        return 0;
+    } else if (out_fs == in_fs) {
         return in_sz;
     } else {
         int16_t *buffer_end = buffer + in_sz / sizeof(*buffer);
@@ -1920,7 +1922,10 @@ static int vmstate_VirtIOSound_post_xyz(void *opaque) {
                 ABORT("virtio_snd_stream_prepare_vars");
             }
 
-            virtio_snd_voice_reopen(snd, stream, g_stream_name[i], stream->guest_format);
+            if (!virtio_snd_voice_reopen(snd, stream, g_stream_name[i],
+                                         stream->guest_format)) {
+                ABORT("virtio_snd_voice_reopen");
+            }
         }
     }
 
