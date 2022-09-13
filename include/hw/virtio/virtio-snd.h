@@ -28,6 +28,7 @@
 
 typedef struct VirtIOSoundVqRingBufferItem VirtIOSoundVqRingBufferItem;
 typedef struct VirtIOSoundVqRingBuffer VirtIOSoundVqRingBuffer;
+typedef struct VirtIOSoundPcmRingBuffer VirtIOSoundPcmRingBuffer;
 typedef struct VirtIOSoundPCMBlock VirtIOSoundPCMBlock;
 typedef struct VirtIOSoundPCMStream VirtIOSoundPCMStream;
 typedef struct VirtIOSoundPCM VirtIOSoundPCM;
@@ -55,6 +56,14 @@ struct VirtIOSoundVqRingBuffer {
     uint16_t w;
 };
 
+struct VirtIOSoundPcmRingBuffer {
+    uint8_t *buf;
+    uint32_t capacity;
+    uint32_t size;
+    uint32_t r;
+    uint32_t w;
+};
+
 struct VirtIOSoundPCMStream {
     uint32_t buffer_bytes;
     uint32_t period_bytes;
@@ -70,6 +79,7 @@ struct VirtIOSoundPCMStream {
     } voice;
     int64_t start_timestamp;
     VirtIOSoundVqRingBuffer pcm_buf;
+    VirtIOSoundPcmRingBuffer raw_pcm_buf;
     QemuMutex mtx;
 
     uint64_t frames_consumed;
