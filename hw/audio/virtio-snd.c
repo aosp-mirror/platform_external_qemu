@@ -48,8 +48,20 @@
 
 #define GLUE(A, B) A##B
 #define GLUE2(A, B) GLUE(A, B)
-#define ABORT(why) abort();
+
+static void log_failure(const char *tag, const char *func, int line, const char *why) {
+    fprintf(stderr, "%s | %s:%d %s\n", tag, func, line, why);
+}
+
+#define ABORT(why) do { log_failure("FATAL", __func__, __LINE__, why); abort(); } while (false)
+
+#if 1
+#define FAILURE(X) (log_failure("ERROR", __func__, __LINE__, #X), X)
+#define ASSERT(X) if (!(X)) { log_failure("FATAL", __func__, __LINE__, #X); abort(); }
+#else
 #define FAILURE(X) (X)
+#define ASSERT(X)
+#endif
 
 union VirtIOSoundCtlRequest {
     struct virtio_snd_hdr hdr;
@@ -244,6 +256,7 @@ static const char *stream_state_str(const int state) {
 }
 
 static bool is_output_stream(const VirtIOSoundPCMStream *stream) {
+    ASSERT(stream->id < VIRTIO_SND_NUM_PCM_STREAMS);
     return g_pcm_infos[stream->id].direction == VIRTIO_SND_D_OUTPUT;
 }
 
@@ -292,6 +305,8 @@ static unsigned el_send_pcm_rx_status(VirtQueueElement *e, unsigned period_bytes
 }
 
 static void ring_buffer_init(VirtIOSoundRingBuffer *rb) {
+    ASSERT(rb);
+
     rb->buf = NULL;
     rb->capacity = 0;
     rb->size = RING_BUFFER_BAD_SIZE;
@@ -300,13 +315,10 @@ static void ring_buffer_init(VirtIOSoundRingBuffer *rb) {
 };
 
 static bool ring_buffer_alloc(VirtIOSoundRingBuffer *rb, const size_t capacity) {
-    if (rb->buf) {
-        ABORT("rb->buf");
-    }
-
-    if (rb->capacity) {
-        ABORT("rb->capacity");
-    }
+    ASSERT(capacity > 0);
+    ASSERT(rb);
+    ASSERT(!rb->buf);
+    ASSERT(!rb->capacity);
 
     rb->buf = g_new0(VirtIOSoundRingBufferItem, capacity);
     if (!rb->buf) {
@@ -322,13 +334,10 @@ static bool ring_buffer_alloc(VirtIOSoundRingBuffer *rb, const size_t capacity) 
 };
 
 static void ring_buffer_free(VirtIOSoundRingBuffer *rb) {
-    if (rb->size) {
-        ABORT("rb->size");
-    }
-
-    if (rb->r != rb->w) {
-        ABORT("rb->r != rb->w");
-    }
+    ASSERT(rb);
+    ASSERT(!rb->size);
+    ASSERT(rb->r == rb->w);
+    ASSERT(rb->buf);
 
     g_free(rb->buf);
     ring_buffer_init(rb);
@@ -336,6 +345,11 @@ static void ring_buffer_free(VirtIOSoundRingBuffer *rb) {
 
 static bool ring_buffer_push(VirtIOSoundRingBuffer *rb,
                              const VirtIOSoundRingBufferItem *item) {
+    ASSERT(rb);
+    ASSERT(rb->capacity > 0);
+    ASSERT(rb->size <= rb->capacity);
+    ASSERT(rb->w < rb->capacity);
+
     const int capacity = rb->capacity;
     const int size = rb->size;
     int w;
@@ -353,22 +367,29 @@ static bool ring_buffer_push(VirtIOSoundRingBuffer *rb,
 }
 
 static VirtIOSoundRingBufferItem *ring_buffer_top(VirtIOSoundRingBuffer *rb) {
+    ASSERT(rb);
+    ASSERT(rb->capacity > 0);
+    ASSERT(rb->size <= rb->capacity);
+    ASSERT(rb->r < rb->capacity);
 
     return rb->size ? &rb->buf[rb->r] : NULL;
 }
 
 static void ring_buffer_pop(VirtIOSoundRingBuffer *rb) {
-    const int size = rb->size;
-    if (size <= 0) {
-        ABORT("size <= 0");
-    }
+    ASSERT(rb);
+    ASSERT(rb->capacity > 0);
+    ASSERT(rb->size > 0);
+    ASSERT(rb->size <= rb->capacity);
+    ASSERT(rb->r < rb->capacity);
 
+    const int size = rb->size;
     rb->r = (rb->r + 1) % rb->capacity;
     rb->size = size - 1;
 }
 
 static uint32_t update_output_latency_bytes(VirtIOSoundPCMStream *stream, int x) {
     const int32_t val = stream->latency_bytes + x;
+    ASSERT(val >= 0);
     stream->latency_bytes = val;
     return val;
 }
@@ -564,6 +585,7 @@ static void virtio_snd_stream_unprepare_out_locked(VirtIOSoundPCMStream *stream)
         }
     }
 
+    ASSERT(!stream->latency_bytes);
     virtio_notify(&snd->parent, tx_vq);
 }
 
@@ -1126,6 +1148,8 @@ static int convert_channels_5_to_4(int16_t *buffer, int16_t *in_end) {
 
 static int convert_channels(int16_t *buffer, const int in_sz,
                             const int in_fs, const int out_fs) {
+    ASSERT(in_sz >= 0);
+
     if (!in_sz) {
         return 0;
     } else if (out_fs == in_fs) {
@@ -1200,6 +1224,8 @@ static VirtQueue *stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) 
     const int driver_fs = stream->driver_frame_size;
     bool notify_vq = false;
     int16_t scratch[AUD_SCRATCH_SIZE];
+    ASSERT(aud_fs > 0);
+    ASSERT(driver_fs > 0);
     const int max_scratch_frames = sizeof(scratch) / MAX(aud_fs, driver_fs);
     int drop_bytes;
 
@@ -1348,6 +1374,8 @@ static VirtQueue *stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     VirtQueue *const rx_vq = snd->rx_vq;
     bool notify_vq = false;
     int16_t scratch[AUD_SCRATCH_SIZE];
+    ASSERT(aud_fs > 0);
+    ASSERT(driver_fs > 0);
     const int max_scratch_frames = sizeof(scratch) / MAX(aud_fs, driver_fs);
     int insert_bytes;
 
@@ -1477,6 +1505,9 @@ static bool virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 }
 
 static bool virtio_snd_stream_prepare_vars(VirtIOSoundPCMStream *stream) {
+    ASSERT(stream->buffer_bytes > 0);
+    ASSERT(stream->period_bytes > 0);
+
     if (!ring_buffer_alloc(&stream->pcm_buf,
                            2 * stream->buffer_bytes / stream->period_bytes)) {
         return FAILURE(false);
