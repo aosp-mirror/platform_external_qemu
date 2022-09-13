@@ -26,8 +26,8 @@
 #define VIRTIO_SND(obj) \
         OBJECT_CHECK(VirtIOSound, (obj), TYPE_VIRTIO_SND)
 
-typedef struct VirtIOSoundRingBufferItem VirtIOSoundRingBufferItem;
-typedef struct VirtIOSoundRingBuffer VirtIOSoundRingBuffer;
+typedef struct VirtIOSoundVqRingBufferItem VirtIOSoundVqRingBufferItem;
+typedef struct VirtIOSoundVqRingBuffer VirtIOSoundVqRingBuffer;
 typedef struct VirtIOSoundPCMBlock VirtIOSoundPCMBlock;
 typedef struct VirtIOSoundPCMStream VirtIOSoundPCMStream;
 typedef struct VirtIOSoundPCM VirtIOSoundPCM;
@@ -41,14 +41,14 @@ enum {
     VIRTIO_PCM_STREAM_STATE_RUNNING
 };
 
-struct VirtIOSoundRingBufferItem {
+struct VirtIOSoundVqRingBufferItem {
     VirtQueueElement *el;
     int pos;
     int size;
 };
 
-struct VirtIOSoundRingBuffer {
-    VirtIOSoundRingBufferItem *buf;
+struct VirtIOSoundVqRingBuffer {
+    VirtIOSoundVqRingBufferItem *buf;
     uint16_t capacity;
     uint16_t size;
     uint16_t r;
@@ -69,7 +69,7 @@ struct VirtIOSoundPCMStream {
         void *raw;
     } voice;
     int64_t start_timestamp;
-    VirtIOSoundRingBuffer pcm_buf;
+    VirtIOSoundVqRingBuffer pcm_buf;
     QemuMutex mtx;
 
     uint64_t frames_consumed;
