@@ -95,9 +95,15 @@ VkResult prepareAndroidNativeBufferImage(
     out->extent = pCreateInfo->extent;
     out->usage = pCreateInfo->usage;
 
-    for (uint32_t i = 0; i < pCreateInfo->queueFamilyIndexCount; ++i) {
-        out->queueFamilyIndices.push_back(
-                pCreateInfo->pQueueFamilyIndices[i]);
+    // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImageCreateInfo.html
+    // pQueueFamilyIndices is a pointer to an array of queue families that will
+    // access this image. It is ignored if sharingMode is not
+    // VK_SHARING_MODE_CONCURRENT.
+    if (pCreateInfo->sharingMode == VK_SHARING_MODE_CONCURRENT) {
+        for (uint32_t i = 0; i < pCreateInfo->queueFamilyIndexCount; ++i) {
+            out->queueFamilyIndices.push_back(
+                    pCreateInfo->pQueueFamilyIndices[i]);
+        }
     }
 
     out->format = nativeBufferANDROID->format;
