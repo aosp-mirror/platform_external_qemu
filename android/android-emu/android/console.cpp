@@ -123,8 +123,8 @@ typedef struct ControlClientRec_* ControlClient;
 typedef struct {
     int host_port;
     int host_udp;
-    unsigned int guest_ip;
     int guest_port;
+    bool ipv6;
 } RedirRec, *Redir;
 
 typedef int Socket;
@@ -203,8 +203,8 @@ static bool isCommandEnabled(const char* command_name) {
 static int control_global_add_redir(ControlGlobal global,
                                     int host_port,
                                     int host_udp,
-                                    unsigned int guest_ip,
-                                    int guest_port) {
+                                    int guest_port,
+                                    bool ipv6) {
     Redir redir;
 
     if (global->num_redirs >= global->max_redirs) {
@@ -224,21 +224,22 @@ static int control_global_add_redir(ControlGlobal global,
 
     redir->host_port = host_port;
     redir->host_udp = host_udp;
-    redir->guest_ip = guest_ip;
     redir->guest_port = guest_port;
-
+    redir->ipv6 = ipv6;
     return 0;
 }
 
 static int control_global_del_redir(ControlGlobal global,
                                     int host_port,
-                                    int host_udp) {
+                                    int host_udp,
+                                    bool ipv6) {
     int nn;
 
     for (nn = 0; nn < global->num_redirs; nn++) {
         Redir redir = &global->redirs[nn];
 
-        if (redir->host_port == host_port && redir->host_udp == host_udp) {
+        if (redir->host_port == host_port && redir->host_udp == host_udp &&
+            redir->ipv6 == ipv6) {
             memmove(redir, redir + 1,
                     ((global->num_redirs - nn) - 1) * sizeof(*redir));
             global->num_redirs -= 1;
@@ -1078,7 +1079,8 @@ static int do_redir_list(ControlClient client, char* args) {
         int nn;
         for (nn = 0; nn < global->num_redirs; nn++) {
             Redir redir = &global->redirs[nn];
-            control_write(client, "%s:%-5d => %-5d\r\n",
+            control_write(client, "%s %s:%-5d => %-5d\r\n",
+                          redir->ipv6 ? "ipv6" : "ipv4",
                           redir->host_udp ? "udp" : "tcp", redir->host_port,
                           redir->guest_port);
         }
@@ -1121,21 +1123,21 @@ static int redir_parse_guest_port(char* arg, int* pport) {
     return end - arg;
 }
 
-static Redir redir_find(ControlGlobal global, int port, int isudp) {
+static Redir redir_find(ControlGlobal global, int port, int isudp, bool ipv6) {
     int nn;
 
     for (nn = 0; nn < global->num_redirs; nn++) {
         Redir redir = &global->redirs[nn];
 
-        if (redir->host_port == port && redir->host_udp == isudp)
+        if (redir->host_port == port && redir->host_udp == isudp &&
+            redir->ipv6 == ipv6)
             return redir;
     }
     return NULL;
 }
 
-static int do_redir_add(ControlClient client, char* args) {
-    int len, host_proto, host_port, guest_port;
-    uint32_t guest_ip;
+static int do_redir_add(ControlClient client, char* args, bool ipv6) {
+    int len, host_proto, host_port, guest_port, ret;
     Redir redir;
 
     if (!args)
@@ -1155,7 +1157,7 @@ static int do_redir_add(ControlClient client, char* args) {
     if (len == 0 || args[len] != 0)
         goto BadFormat;
 
-    redir = redir_find(client->global, host_port, host_proto);
+    redir = redir_find(client->global, host_port, host_proto, ipv6);
     if (redir != NULL) {
         control_write(client,
                       "KO: host port already active, use 'redir del' to remove "
@@ -1163,28 +1165,24 @@ static int do_redir_add(ControlClient client, char* args) {
         return -1;
     }
 
-    if (inet_strtoip("10.0.2.15", &guest_ip) < 0) {
-        control_write(
-                client,
-                "KO: unexpected internal failure when resolving 10.0.2.15\r\n");
-        return -1;
-    }
-
     D(("pattern hport=%d gport=%d proto=%d\n", host_port, guest_port,
        host_proto));
+
     if (control_global_add_redir(client->global, host_port, host_proto,
-                                 guest_ip, guest_port) < 0) {
+                                 guest_port, ipv6) < 0) {
         control_write(client,
                       "KO: not enough memory to allocate redirection\r\n");
         return -1;
     }
-
-    if (!client->global->net_agent->slirpRedir(host_proto, host_port, guest_ip,
-                                               guest_port)) {
+    ret = ipv6 ? client->global->net_agent->slirpRedirIpv6(
+                         host_proto, host_port, guest_port)
+               : client->global->net_agent->slirpRedir(host_proto, host_port,
+                                                       guest_port);
+    if (!ret) {
         control_write(client,
                       "KO: can't setup redirection, port probably used by "
                       "another program on host\r\n");
-        control_global_del_redir(client->global, host_port, host_proto);
+        control_global_del_redir(client->global, host_port, host_proto, ipv6);
         return -1;
     }
 
@@ -1198,7 +1196,15 @@ BadFormat:
     return -1;
 }
 
-static int do_redir_del(ControlClient client, char* args) {
+static int do_redir_add_ipv4(ControlClient client, char* args) {
+    return do_redir_add(client, args, false);
+}
+
+static int do_redir_add_ipv6(ControlClient client, char* args) {
+    return do_redir_add(client, args, true);
+}
+
+static int do_redir_del(ControlClient client, char* args, bool ipv6) {
     int len, proto, port;
     Redir redir;
 
@@ -1208,16 +1214,20 @@ static int do_redir_del(ControlClient client, char* args) {
     if (len == 0 || args[len] != 0)
         goto BadFormat;
 
-    redir = redir_find(client->global, port, proto);
+    redir = redir_find(client->global, port, proto, ipv6);
     if (redir == NULL) {
         control_write(client,
                       "KO: can't remove unknown redirection (%s:%d)\r\n",
                       proto ? "udp" : "tcp", port);
         return -1;
     }
-
-    client->global->net_agent->slirpUnredir(redir->host_udp, redir->host_port);
-    control_global_del_redir(client->global, port, proto);
+    if (ipv6)
+        client->global->net_agent->slirpUnredirIpv6(redir->host_udp,
+                                                    redir->host_port);
+    else
+        client->global->net_agent->slirpUnredir(redir->host_udp,
+                                                redir->host_port);
+    control_global_del_redir(client->global, port, proto, ipv6);
 
     return 0;
 
@@ -1227,13 +1237,21 @@ BadFormat:
     return -1;
 }
 
+static int do_redir_del_ipv4(ControlClient client, char* args) {
+    return do_redir_del(client, args, false);
+}
+
+static int do_redir_del_ipv6(ControlClient client, char* args) {
+    return do_redir_del(client, args, true);
+}
+
 static const CommandDefRec redir_commands[] = {
         {"list", "list current redirections",
          "list current port redirections. use 'redir add' and 'redir del' to "
          "add and remove them\r\n",
          NULL, do_redir_list, NULL},
 
-        {"add", "add new redirection",
+        {"add", "add new ipv4 redirection",
          "add a new port redirection, arguments must be:\r\n\r\n"
          "  redir add <protocol>:<host-port>:<guest-port>\r\n\r\n"
          "where:   <protocol>     is either 'tcp' or 'udp'\r\n"
@@ -1241,19 +1259,43 @@ static const CommandDefRec redir_commands[] = {
          "to open\r\n"
          "         <guest-port>   a number indicating which port to route to "
          "on the device\r\n"
-         "\r\nas an example, 'redir  tcp:5000:6000' will allow any packets "
+         "\r\nas an example, 'redir  tcp:5000:6000' will allow any ipv4 "
+         "packets "
          "sent to\r\n"
          "the host's TCP port 5000 to be routed to TCP port 6000 of the "
          "emulated device\r\n",
-         NULL, do_redir_add, NULL},
+         NULL, do_redir_add_ipv4, NULL},
 
-        {"del", "remove existing redirection",
+        {"del", "remove existing ipv4 redirection",
          "remove a port redirecion that was created with 'redir add', "
          "arguments must be:\r\n\r\n"
          "  redir  del <protocol>:<host-port>\r\n\r\n"
          "see the 'help redir add' for the meaning of <protocol> and "
          "<host-port>\r\n",
-         NULL, do_redir_del, NULL},
+         NULL, do_redir_del_ipv4, NULL},
+
+        {"add-ipv6", "add new ipv6 redirection",
+         "add a new port redirection, arguments must be:\r\n\r\n"
+         "  redir add-ipv6 <protocol>:<host-port>:<guest-port>\r\n\r\n"
+         "where:   <protocol>     is either 'tcp' or 'udp'\r\n"
+         "         <host-port>    a number indicating which port on the host "
+         "to open\r\n"
+         "         <guest-port>   a number indicating which port to route to "
+         "on the device\r\n"
+         "\r\nas an example, 'redir  tcp:5000:6000' will allow any ipv6 "
+         "packets "
+         "sent to\r\n"
+         "the host's TCP port 5000 to be routed to TCP port 6000 of the "
+         "emulated device\r\n",
+         NULL, do_redir_add_ipv6, NULL},
+
+        {"del-ipv6", "remove existing ipv6 redirection",
+         "remove a port redirecion that was created with 'redir add-ipv6', "
+         "arguments must be:\r\n\r\n"
+         "  redir  del-ipv6 <protocol>:<host-port>\r\n\r\n"
+         "see the 'help redir add-ipv6' for the meaning of <protocol> and "
+         "<host-port>\r\n",
+         NULL, do_redir_del_ipv6, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
@@ -4421,7 +4463,8 @@ extern const CommandDefRec main_commands[] = {
          "allows you to add, list and remove UDP and/or PORT redirection from "
          "the "
          "host to the device\r\n"
-         "as an example, 'redir  tcp:5000:6000' will route any packet sent to "
+         "as an example, 'redir add tcp:5000:6000' will route any ipv4 packet "
+         "sent to "
          "the "
          "host's TCP port 5000\r\n"
          "to TCP port 6000 of the emulated device\r\n",
@@ -4493,7 +4536,8 @@ extern const CommandDefRec main_commands[] = {
          "size of tablet",
          NULL, do_resize_display, NULL},
 
-        {"virtualscene-image", "customize virtualscene image for virtulscene camera",
+        {"virtualscene-image",
+         "customize virtualscene image for virtulscene camera",
          "Usage: virtualscene-image <wall|table> [path-to-image].\n"
          "If path-to-image is void, restore default image.\n",
          NULL, do_set_virtualscene_image, NULL},

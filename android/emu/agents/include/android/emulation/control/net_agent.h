@@ -23,8 +23,10 @@ ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidNetAgent {
     bool (*isSlirpInited)();
-    bool (*slirpRedir)(bool isUdp, int hostPort, uint32_t guestAddr, int guestPort);
+    bool (*slirpRedir)(bool isUdp, int hostPort, int guestPort);
     bool (*slirpUnredir)(bool isUdp, int hostPort);
+    bool (*slirpRedirIpv6)(bool isUdp, int hostPort, int guestPort);
+    bool (*slirpUnredirIpv6)(bool isUdp, int hostPort);
     bool (*slirpBlockSsid)(const char* ssid, bool enable);
 } QAndroidNetAgent;
 
