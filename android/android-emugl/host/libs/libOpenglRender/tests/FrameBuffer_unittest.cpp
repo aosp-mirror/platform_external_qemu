@@ -56,6 +56,9 @@ public:
 protected:
 
     virtual void SetUp() override {
+        android::base::TestSystem::setEnvironmentVariable(
+            "ANGLE_DEFAULT_PLATFORM",
+            "swiftshader");
         setupStandaloneLibrarySearchPaths();
         emugl::setGLObjectCounter(android::base::GLObjectCounter::get());
         emugl::set_emugl_window_operations(*getConsoleAgents()->emu);

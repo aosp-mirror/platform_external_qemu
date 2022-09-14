@@ -14,6 +14,7 @@
 
 #include "OpenGLTestContext.h"
 
+#include "android/base/testing/TestSystem.h"
 #include "android/utils/system.h"
 
 #include "Standalone.h"
@@ -117,6 +118,9 @@ void destroyDisplay(EGLDisplay dpy) {
 }
 
 void GLTest::SetUp() {
+    android::base::TestSystem::setEnvironmentVariable(
+            "ANGLE_DEFAULT_PLATFORM",
+            "swiftshader");
     setupStandaloneLibrarySearchPaths();
 
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
