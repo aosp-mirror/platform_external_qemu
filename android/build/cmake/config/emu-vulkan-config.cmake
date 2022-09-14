@@ -46,7 +46,7 @@ if(LINUX_X86_64)
       "${PREBUILT_ROOT}/layers/VkLayer_screenshot.json>testlib64/layers/VkLayer_screenshot.json"
       # Shaders
       ${VULKAN_COMMON_DEPENDENCIES})
-elseif(DARWIN_X86_64)
+elseif(DARWIN_X86_64 OR DARWIN_AARCH64)
   set(VULKAN_DEPENDENCIES
       # Swiftshader
       "${PREBUILT_ROOT}/icds/libvk_swiftshader.dylib>lib64/vulkan/libvk_swiftshader.dylib"
@@ -74,16 +74,6 @@ elseif(DARWIN_X86_64)
       "${PREBUILT_ROOT}/layers/VkLayer_khronos_validation.json>testlib64/layers/VkLayer_khronos_validation.json"
       # shaders
       ${VULKAN_COMMON_DEPENDENCIES})
-elseif(DARWIN_AARCH64)
-  set(VULKAN_DEPENDENCIES
-      # Loader
-      "${PREBUILT_ROOT}/libvulkan.dylib>lib64/vulkan/libvulkan.dylib"
-      # Swiftshader
-      "${PREBUILT_ROOT}/icds/libvk_swiftshader.dylib>lib64/vulkan/libvk_swiftshader.dylib"
-      "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
-      # MoltenVK
-      "${PREBUILT_ROOT}/icds/libMoltenVK.dylib>lib64/vulkan/libMoltenVK.dylib"
-      "${PREBUILT_ROOT}/icds/MoltenVK_icd.json>lib64/vulkan/MoltenVK_icd.json")
 elseif(WINDOWS)
   get_filename_component(
     PREBUILT_ROOT
