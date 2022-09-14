@@ -1,0 +1,14 @@
+[distutils]
+index-servers =
+    devpi-stable
+    devpi-staging
+
+[devpi-stable]
+repository = http://localhost:3141/packages/stable/
+username = packages
+password = packages
+
+[devpi-staging]
+repository = http://localhost:3141/packages/staging/
+username = packages
+password = packages
