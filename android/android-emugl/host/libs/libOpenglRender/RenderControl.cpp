@@ -1643,6 +1643,11 @@ static void rcSetProcessMetadata(char* key, RenderControlByte* valuePtr, uint32_
     }
 }
 
+static int rcGetHostExtensionsString(uint32_t bufferSize, void* buffer) {
+    // TODO(b/233939967): split off host extensions from GL extensions.
+    return rcGetGLString(GL_EXTENSIONS, buffer, bufferSize);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1714,4 +1719,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcGetFBDisplayConfigsParam = rcGetFBDisplayConfigsParam;
     dec->rcGetFBDisplayActiveConfig = rcGetFBDisplayActiveConfig;
     dec->rcSetProcessMetadata = rcSetProcessMetadata;
+    dec->rcGetHostExtensionsString = rcGetHostExtensionsString;
 }
