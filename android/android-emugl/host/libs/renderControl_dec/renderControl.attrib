@@ -120,3 +120,7 @@ rcReadColorBufferDMA
 rcSetProcessMetadata
     len key (strlen(key) + 1)
     len valuePtr valueSize
+
+rcGetHostExtensionsString
+    dir buffer out
+    len buffer bufferSize
