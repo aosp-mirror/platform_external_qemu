@@ -24,13 +24,13 @@ shell_import utils/option_parser.shi
 
 # Fancy colors in the terminal
 if [ -t 1 ] ; then
-  RED=`tput setaf 1`
-  GREEN=`tput setaf 2`
-  RESET=`tput sgr0`
+    RED=`tput setaf 1`
+    GREEN=`tput setaf 2`
+    RESET=`tput sgr0`
 else
-  RED=
-  GREEN=
-  RESET=
+    RED=
+    GREEN=
+    RESET=
 fi
 
 
@@ -45,6 +45,9 @@ option_register_var "--jobs=<count>" OPT_NUM_JOBS "Same as -j<count>."
 
 OPT_OUT=objs
 option_register_var "--out-dir=<dir>" OPT_OUT "Use specific output directory"
+
+OPT_DIST=objs
+option_register_var "--dist-dir=<dir>" OPT_DIST "Use specific output directory"
 
 OPT_DEBS=
 option_register_var "--debs" OPT_DEBS "Discover the debian package dependencies, needed to launch the emulator (Debian/Ubuntu only)."
@@ -100,12 +103,41 @@ warn() {
 # $2: element we are looking for
 contains() {
     for item in $1; do
-      if [ "$item" = "$2" ]; then
-        echo "True"
-        return
-      fi
+        if [ "$item" = "$2" ]; then
+            echo "True"
+            return
+        fi
     done
     echo "False"
+}
+
+run_integration_test() {
+    BUILDERNAME="Linux_gce"
+    OS="linux"
+    if [[ $OSTYPE == *"darwin"* ]]; then
+        BUILDERNAME="Mac"
+        OS="darwin"
+    else
+        # Activate vnc, so we have an X surface for the emulator.
+        ps cax | grep vnc >/dev/null
+        if [ $? -eq 1 ]; then
+            log "Start VNC server"
+            vncserver
+        fi
+    fi
+
+    export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+    export SDK_EMULATOR=$HOME/android-sdk
+    export ANDROID_AVD_HOME=$HOME/.android/avd
+    export ANDROID_SDK_ROOT=$HOME/android-sdk
+    export ANDROID_HOME=$HOME/android-sdk
+    export ANDROID_EMU_ENABLE_CRASH_REPORTING=NO
+    export PYTHON=python3
+    export DISPLAY=:1
+    export AOSP_DIR
+
+    mkdir -p $OPT_DIST/session
+    run ${AOSP_DIR}/external/adt-infra/pytest/test_embedded/run_tests.sh --session_dir $OPT_DIST/session --emulator $OPT_OUT/emulator --generate
 }
 
 # Return true iff the file type string |$1| contains the expected
@@ -121,7 +153,7 @@ check_file_type_substring () {
 # Out: minimum version (e.g. '10.8') or empty string on error.
 darwin_min_version () {
     otool -l "$1" 2>/dev/null | awk \
-          'BEGIN { CMD="" } $1 == "cmd" { CMD=$2 } $1 == "version" && CMD == "LC_VERSION_MIN_MACOSX" { print $2 }'
+    'BEGIN { CMD="" } $1 == "cmd" { CMD=$2 } $1 == "version" && CMD == "LC_VERSION_MIN_MACOSX" { print $2 }'
 }
 
 # List all executables to check later.
@@ -135,17 +167,23 @@ case $TARGET_OS in
         EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
         EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
-        ;;
+    ;;
     linux*)
         EXPECTED_64BIT_FILE_TYPE="ELF 64-bit LSB +executable, x86-64"
         EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
-        ;;
+    ;;
     *)
         panic "FAIL: Unsupported target platform: [$TARGET_OS]"
-        ;;
+    ;;
 esac
 
+
+if [ ! "$OPT_GFXSTREAM" ] ; then
+    # TODO(jansene): disable this once we have collected all crucial parts
+    log "Running the integration tests"
+    run_integration_test
+fi
 
 export CTEST_OUTPUT_ON_FAILURE=1
 export CTEST_PROGRESS_OUTPUT=1
@@ -188,7 +226,8 @@ else
         warn "    - FAIL: $EMULATOR is not a 32-bit executable!"
         warn "        File type: $EMULATOR_FILE_TYPE"
         warn "        Expected : $EXPECTED_EMULATOR_FILE_TYPE"
-       panic "emulator-bitness-check failed"
+
+        panic "emulator-bitness-check failed"
     fi
 fi
 
@@ -200,12 +239,12 @@ if [ "$TARGET_OS" = "darwin-x86_64" ]; then
           Code that attempts to check for dynamic library presence by looking for a
           file at a path or enumerating a directory will fail. Instead, check for
           library presence by attempting to dlopen() the path, which will correctly check
-          for the library in the cache."
+    for the library in the cache."
 fi
 
 if [ "$TARGET_OS" = "linux-x86_64" ]; then
-   log "Checking that all the .so dependencies are met"
-   if [ -d $OPT_OUT/distribution ]; then
+    log "Checking that all the .so dependencies are met"
+    if [ -d $OPT_OUT/distribution ]; then
         log "Checking that linux binaries have all needed dependencies in the lib64 dir"
         # Make sure we can load all dependencies of every dylib/executable we have.
         cache=$(ldconfig --print-cache | awk '{ print $1; }')
@@ -213,14 +252,14 @@ if [ "$TARGET_OS" = "linux-x86_64" ]; then
         for file in $files; do
             log2 "Checking $file for dependencies on ld path, or our tree.."
             case "$file" in
-              *"libprotobuf-lite"*)
-                panic "$file should not be released alongside libprotobuf.so"
+                *"libprotobuf-lite"*)
+                    panic "$file should not be released alongside libprotobuf.so"
             esac
             needed=$(readelf -d $file | grep "Shared" | cut -d "[" -f2 | cut -d "]" -f1)
             for need in $needed; do
                 libs=$(find $OPT_OUT/distribution/emulator/lib64 -name $need);
                 if [ $libs ]; then
-                  log2 "  Found $need in our release"
+                    log2 "  Found $need in our release"
                 else
                     ldpath=$(contains "$cache" $need)
                     if [ $ldpath = "True" ]; then
@@ -250,6 +289,9 @@ if [ "$RUN_GEN_ENTRIES_TESTS" ]; then
     log "Running gen-entries.py test suite."
     cd ${QEMU2_TOP_DIR}
     run ./android/scripts/tests/gen-entries/run-tests.sh ||
-        panic "Failed gen-entries_tests"
+    panic "Failed gen-entries_tests"
     cd $OLD_DIR
 fi
+
+
+exit 0

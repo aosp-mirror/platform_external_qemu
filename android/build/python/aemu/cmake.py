@@ -214,7 +214,7 @@ def main(args):
                 run_tests_opts.append("--skip-emulator-check")
             if args.gfxstream or args.gfxstream_only:
                 run_tests_opts.append("--gfxstream")
-            run_tests(args.out, args.test_jobs, run_tests_opts)
+            run_tests(args.out, args.dist, args.test_jobs, run_tests_opts)
             logging.info("Completed testing.")
         else:
             logging.info("Not running tests for cross compile or darwin aarch64.")
