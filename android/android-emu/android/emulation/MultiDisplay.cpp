@@ -535,19 +535,6 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
             mWindowAgent->setUIDisplayRegion(0, 0, width, height, true);
         }
     }
-    if (needUpdate &&
-        hotPlugDisplayEnabled()) {
-        // b/131884992 b/186124236
-        auto adbInterface = emulation::AdbInterface::getGlobal();
-        if (!adbInterface) {
-            LOG(ERROR) << "Adb interface unavailable";
-            return -1;
-        }
-        adbInterface->enqueueCommand({"shell", "wm", "density",
-                                      std::to_string(dpi), "-d",
-                                      std::to_string(displayId)});
-        printf("send adb wm density %d display %d\n", dpi, displayId);
-    }
     LOG(VERBOSE) << "setDisplayColorBuffer " << displayId << " cb "
                  << colorBuffer;
     return 0;
