@@ -181,8 +181,8 @@ esac
 
 if [ ! "$OPT_GFXSTREAM" ] ; then
     # TODO(jansene): disable this once we have collected all crucial parts
-    log "Running the integration tests"
-    run_integration_test
+    log "Integration tests are disabled."
+    # run_integration_test
 fi
 
 export CTEST_OUTPUT_ON_FAILURE=1
