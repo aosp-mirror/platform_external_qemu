@@ -13,8 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 import argparse
 import logging
 import multiprocessing
@@ -27,8 +25,7 @@ from distutils.spawn import find_executable
 
 from aemu.definitions import (ENUMS, find_aosp_root, get_aosp_root, get_cmake,
                               get_qemu_root, infer_target,
-                              load_breakpad_api_key, read_simple_properties,
-                              set_aosp_root)
+                              read_simple_properties, set_aosp_root)
 from aemu.distribution import create_distribution
 from aemu.process import run
 from aemu.run_tests import run_tests
@@ -41,16 +38,6 @@ class LogBelowLevel(logging.Filter):
 
     def filter(self, record):
         return True if record.levelno < self.max_level else False
-
-
-def ensure_requests():
-    """Make sure the requests package is availabe."""
-    try:
-        import requests
-    except:
-        run([sys.executable, "-m", "ensurepip"])
-        run([sys.executable, "-m", "pip", "install", "--user", "requests"])
-
 
 def configure(args, target):
     """Configures the cmake project."""
@@ -139,10 +126,6 @@ def configure(args, target):
 
     cmake_cmd += ENUMS["Generator"][args.generator]
     cmake_cmd += [get_qemu_root()]
-
-    if args.crash != "none":
-        # Make sure we have the requests library
-        ensure_requests()
 
     run(cmake_cmd, args.out)
 
