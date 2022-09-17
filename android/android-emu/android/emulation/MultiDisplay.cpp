@@ -136,7 +136,7 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
             if (ret != 0) {
                 return ret;
             }
-            ret = setDisplayPose(id, x, y, w, h, dpi);
+            ret = setDisplayPose(id, x, y, w, h, dpi, flag);
             if (ret != 0) {
                 return ret;
             }
@@ -409,7 +409,8 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
                                  int32_t y,
                                  uint32_t w,
                                  uint32_t h,
-                                 uint32_t dpi) {
+                                 uint32_t dpi,
+                                 uint32_t flag) {
     bool UIUpdate = false;
     bool checkRecording = false;
     uint32_t width, height;
@@ -430,6 +431,7 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
         mMultiDisplay[displayId].width = w;
         mMultiDisplay[displayId].height = h;
         mMultiDisplay[displayId].dpi = dpi;
+        mMultiDisplay[displayId].flag = flag;
         mMultiDisplay[displayId].pos_x = x;
         mMultiDisplay[displayId].pos_y = y;
         if (mMultiDisplay[displayId].cb != 0) {

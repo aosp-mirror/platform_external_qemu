@@ -129,7 +129,7 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                             uint32_t dpi) -> int {
             auto instance = MultiDisplay::getInstance();
             if (instance) {
-                return instance->setDisplayPose(displayId, x, y, w, h, dpi);
+                return instance->setDisplayPose(displayId, x, y, w, h, dpi, /* flag */ 0);
             } else {
                 return -1;
             }
