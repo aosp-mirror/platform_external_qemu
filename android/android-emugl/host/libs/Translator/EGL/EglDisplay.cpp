@@ -270,10 +270,13 @@ EglConfig* EglDisplay::addSimplePixelFormat(int red_size,
     return config;
 }
 
+// BUG: 246999412
+// We might want to deprecate this list.
 static const EGLint kCommonCfgs[][5] = {
-    {5, 6, 5, 0, EGL_DONT_CARE},
     {8, 8, 8, 0, EGL_DONT_CARE},
     {8, 8, 8, 8, EGL_DONT_CARE},
+    // 565 fails with ANGLE on Mac
+    // {5, 6, 5, 0, EGL_DONT_CARE},
     // The following are multi-sample configs. They have issues with CTS test:
     // (API26) run cts -m CtsOpenGLTestCases -t
     // android.opengl.cts.EglConfigTest#testEglConfigs
