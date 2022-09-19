@@ -175,6 +175,11 @@ static constexpr float kDrawColorGreen[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
 class CombinedFramebufferBlit : public ::testing::Test, public ::testing::WithParamInterface<ClearColorParam> {
 protected:
     virtual void SetUp() override {
+#ifdef __APPLE__
+        if (!shouldUseHostGpu() && !GetParam().fastBlit) {
+            GTEST_SKIP() << "b/247631472 Slow blit does not work with ANGLE.";
+        }
+#endif
         mApp.reset(new ClearColor(GetParam()));
     }
 
