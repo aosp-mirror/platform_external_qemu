@@ -352,13 +352,13 @@ TEST_F(FrameBufferTest, CreateOpenUpdateCloseColorBuffer_FormatChange) {
     EXPECT_NE(0, handle);
     EXPECT_EQ(0, mFb->openColorBuffer(handle));
 
-    TestTexture forUpdate = createTestPatternRGB888(mWidth, mHeight);
-    mFb->updateColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGB, GL_UNSIGNED_BYTE, forUpdate.data());
+    TestTexture forUpdate = createTestPatternRGBA8888(mWidth, mHeight);
+    mFb->updateColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, forUpdate.data());
 
-    TestTexture forRead = createTestTextureRGB888SingleColor(mWidth, mHeight, 0.0f, 0.0f, 0.0f);
-    mFb->readColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGB, GL_UNSIGNED_BYTE, forRead.data());
+    TestTexture forRead = createTestTextureRGBA8888SingleColor(mWidth, mHeight, 0.0f, 0.0f, 0.0f, 0.0f);
+    mFb->readColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, forRead.data());
 
-    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 3, mWidth, forUpdate.data(),
+    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(),
                              forRead.data()));
 
     mFb->closeColorBuffer(handle);
