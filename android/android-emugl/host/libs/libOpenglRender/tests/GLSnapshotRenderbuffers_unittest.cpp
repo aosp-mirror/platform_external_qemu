@@ -16,6 +16,8 @@
 
 #include <gtest/gtest.h>
 
+#include "SampleApplication.h"
+
 namespace emugl {
 
 struct GlRenderbufferFormat {
@@ -113,6 +115,11 @@ protected:
 };
 
 TEST_F(SnapshotGlRenderbufferTest, CreateAndBind) {
+#ifdef __APPLE__
+    if (!shouldUseHostGpu()) {
+        GTEST_SKIP() << "b/247873185 SwANGLE has wrong default format.";
+    }
+#endif
     doCheckedSnapshot();
 }
 
