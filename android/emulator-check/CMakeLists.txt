@@ -4,7 +4,7 @@ android_add_executable(
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       ${WINDOWS_ICON} main-emulator-check.cpp PlatformInfo.cpp
-  DEPS android-emu android-emu-crashreport libqemu2-glue)
+  DEPS android-emu android-emu-base-headers android-emu-crashreport libqemu2-glue)
 target_include_directories(emulator-check PRIVATE ../..
                                                   ${ANDROID_QEMU2_TOP_DIR})
 

@@ -12,6 +12,7 @@ android_add_library(
   DEPS android-emu-agents
        android-emu-avd
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-files
        android-emu-sockets
@@ -34,6 +35,7 @@ android_add_test(
        android-emu-agents
        android-emu-avd
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-files
        android-emu-test-launcher

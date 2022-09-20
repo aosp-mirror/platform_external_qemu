@@ -63,9 +63,15 @@ if(OPTION_GFXSTREAM_BACKEND)
         PRIVATE
         gfxstream-base.headers
         android-emu
+        android-emu-base-headers
         android-emu-crashreport
         android-emu-crashreport-consent-no-ui
         android-emu-tracing)
+    # Allows us a way to include headers from both aemu's base and hardware/google/aemu base.
+    target_include_directories(
+        aemu-vkcereal-base
+        PRIVATE
+        ${ANDROID_QEMU2_TOP_DIR}/android)
     set(GFXSTREAM_BASE_LIB aemu-vkcereal-base)
 
     android_add_library(
@@ -81,6 +87,7 @@ if(OPTION_GFXSTREAM_BACKEND)
         android-emu
         android-emu-agents
         PRIVATE
+        android-emu-base-headers
         aemu-vkcereal-base
         logging-base # TODO(joshuaduong): Replace the logging impl with our own
         )

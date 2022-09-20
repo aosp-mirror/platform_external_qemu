@@ -54,4 +54,4 @@ android_target_link_libraries(
 target_link_libraries(mini_chromium PUBLIC Threads::Threads)
 
 android_target_link_libraries(mini_chromium  windows PUBLIC advapi32::advapi32)
-target_include_directories(mini_chromium PUBLIC ..)
+target_include_directories(mini_chromium PUBLIC .. ../..)

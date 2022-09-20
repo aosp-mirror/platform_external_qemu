@@ -7,6 +7,7 @@ android_add_library(
   src
   SRC android/crashreport/CrashSytemInit.cpp
   DEPS android-emu-base
+       android-emu-base-headers
        android-emu-files
        android-emu-utils
        android-emu-crashreport
@@ -29,6 +30,7 @@ android_add_library(
   DEPS android-emu-agents
        android-emu-avd
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-files
        android-emu-utils
@@ -52,6 +54,7 @@ android_add_library(
   DEPS android-emu
        android-emu-agents
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-utils
        breakpad_processor
@@ -72,7 +75,7 @@ android_add_library(
   SOURCE_DIR
   src
   SRC android/crashreport/CrashConsentNoUi.cpp
-  DEPS android-emu-agents android-emu-base android-emu-cmdline
+  DEPS android-emu-agents android-emu-base android-emu-base-headers android-emu-cmdline
        android-emu-utils crashpad_client)
 target_compile_definitions(android-emu-crashreport-consent-no-ui
                            PRIVATE AEMU_CRASH_EXPORTS PUBLIC AEMU_CRASH_SHARED)

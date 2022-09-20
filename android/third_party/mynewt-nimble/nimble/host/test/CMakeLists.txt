@@ -41,6 +41,7 @@ target_link_libraries(
           _nimble_service_layer
           _nimble_transport_test
           _nimble_os_sysinit
+          android-emu-base-headers
           android-emu-base-logging)
 target_include_directories(nimble_e2e_tests PRIVATE src ../src)
 target_compile_options(

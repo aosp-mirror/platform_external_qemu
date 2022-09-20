@@ -18,16 +18,16 @@
 #include <memory>   // for shared_ptr
 #include <string>   // for string
 
-namespace emulator {
-namespace net {
+namespace android {
+namespace base {
 class AsyncSocketAdapter;
-}  // namespace net
-}  // namespace emulator
+}  // namespace base
+}  // namespace android
 
 namespace android {
 namespace emulation {
 
-using emulator::net::AsyncSocketAdapter;
+using base::AsyncSocketAdapter;
 // A connection to a service endpoint, this is a general
 // std::iostream, you can read bytes that came from the service
 // and write bytes to the service.

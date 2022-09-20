@@ -43,7 +43,7 @@ void SocketForwarder::sendMessage(const rtc::CopyOnWriteBuffer dataBuffer) {
 }
 
 // Called when bytes can be read from the socket.
-void SocketForwarder::onRead(AsyncSocketAdapter* socket) {
+void SocketForwarder::onRead(android::base::AsyncSocketAdapter* socket) {
     int rd = 0;
     char buffer[kMaxMessageSize];
     rtc::CopyOnWriteBuffer dataBuffer;
@@ -67,12 +67,12 @@ void SocketForwarder::onRead(AsyncSocketAdapter* socket) {
 };
 
 // Called when this socket is closed.
-void SocketForwarder::onClose(AsyncSocketAdapter* socket, int err) {
+void SocketForwarder::onClose(android::base::AsyncSocketAdapter* socket, int err) {
     mDataChannel->Close();
 };
 
 // Called when this socket (re) established a connection.
-void SocketForwarder::onConnected(AsyncSocketAdapter* socket) {
+void SocketForwarder::onConnected(android::base::AsyncSocketAdapter* socket) {
     // Nop
     LOG(INFO) << "Connection to socket established.";
 };

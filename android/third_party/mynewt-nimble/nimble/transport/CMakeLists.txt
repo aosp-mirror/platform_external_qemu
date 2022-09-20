@@ -6,7 +6,8 @@ target_include_directories(_nimble_transport_socket PRIVATE socket/src
 target_compile_options(_nimble_transport_socket
                        PRIVATE -Wno-implicit-function-declaration)
 target_link_libraries(_nimble_transport_socket
-                      PRIVATE _nimble_os_abstraction_headers android-emu-base)
+                      PRIVATE _nimble_os_abstraction_headers android-emu-base
+                      android-emu-base-headers)
 
 android_add_library(TARGET _nimble_transport_test LICENSE Apache-2.0
                     SRC test/src/ble_hci_nop_transport.c)
@@ -26,4 +27,4 @@ target_compile_options(_nimble_transport_grpc
 target_link_libraries(
   _nimble_transport_grpc
   PRIVATE _nimble_os_abstraction_headers android-grpc-services
-          grpc-emulated-bluetooth grpc++ android-emu)
+          grpc-emulated-bluetooth grpc++ android-emu android-emu-base-headers)

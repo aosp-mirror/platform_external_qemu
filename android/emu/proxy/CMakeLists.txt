@@ -11,7 +11,7 @@ android_add_library(
       android/proxy/proxy_http_rewriter.c
       android/proxy/proxy_setup.cpp
       android/proxy/ProxyUtils.cpp
-  DEPS android-emu-agents android-emu-base android-emu-utils)
+  DEPS android-emu-agents android-emu-base android-emu-base-headers android-emu-utils)
 target_include_directories(android-emu-proxy PRIVATE src PUBLIC include)
 
 android_add_test(
@@ -19,6 +19,6 @@ android_add_test(
   SOURCE_DIR test
   SRC android/proxy/proxy_common_unittest.cpp
       android/proxy/ProxyUtils_unittest.cpp
-  DEPS android-emu-base gmock gmock_main)
+  DEPS android-emu-base android-emu-base-headers gmock gmock_main)
 target_include_directories(android-emu-proxy_unittests PRIVATE src test)
 target_link_libraries(android-emu-proxy_unittests PRIVATE android-emu-proxy)

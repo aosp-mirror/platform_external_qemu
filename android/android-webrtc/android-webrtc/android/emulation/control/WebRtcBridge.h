@@ -32,14 +32,10 @@
 #include "android/emulation/control/record_screen_agent.h"  // for QAndroidR...
 #include "emulator/net/JsonProtocol.h"                      // for JsonProtocol
 #include "emulator/net/SocketTransport.h"                   // for SocketTra...
-namespace emulator {
-namespace net {
-class AsyncSocketAdapter;
-}  // namespace net
-}  // namespace emulator
 
 namespace android {
 namespace base {
+class AsyncSocketAdapter;
 class Looper;
 }  // namespace base
 
@@ -47,10 +43,10 @@ namespace emulation {
 namespace control {
 
 using MessageQueue = base::BufferQueue<std::string>;
+using base::AsyncSocketAdapter;
 using base::Lock;
 using base::Optional;
 using base::ReadWriteLock;
-using emulator::net::AsyncSocketAdapter;
 using emulator::net::JsonProtocol;
 using emulator::net::JsonReceiver;
 using emulator::net::SocketTransport;

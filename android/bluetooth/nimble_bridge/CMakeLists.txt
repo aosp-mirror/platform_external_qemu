@@ -7,7 +7,8 @@ android_add_executable(
       android/emulation/bluetooth/nimble/ServiceDefinition.cpp
       android/emulation/bluetooth/nimble/TypeTranslator.cpp
       android/emulation/bluetooth/RemoteConnection.cpp
-      android/emulation/bluetooth/RequestForwarder.cpp)
+      android/emulation/bluetooth/RequestForwarder.cpp
+  DEPS android-emu-base-headers)
 target_link_libraries(
   nimble_bridge
   PUBLIC nimble_bluetooth

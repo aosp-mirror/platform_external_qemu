@@ -32,11 +32,11 @@
 #include "android/emulation/control/globals_agent.h"     // for QAndroidGlob...
 #include "android/utils/debug.h"                         // for dinfo, derror
 #include "android/version.h"                             // for EMULATOR_FUL...
-#include "base/files/file_path.h"                        // for FilePath
 #include "client/annotation.h"                           // for Annotation
 #include "client/crash_report_database.h"                // for CrashReportD...
 #include "client/crashpad_client.h"                      // for CrashpadClient
 #include "client/settings.h"                             // for Settings
+#include "mini_chromium/base/files/file_path.h"          // for FilePath
 #include "util/misc/uuid.h"                              // for UUID
 
 #ifdef _WIN32

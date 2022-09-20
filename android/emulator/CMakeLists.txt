@@ -11,6 +11,7 @@ android_add_executable(
   DEPS android-emu-agents-headers
        android-emu-avd
        android-emu-base
+       android-emu-base-headers
        android-emu-files
        android-emu-launch
        android-emu-utils

@@ -26,10 +26,10 @@
 #include "android/crashreport/CrashReporter.h"  // for CrashReporter
 #include "android/crashreport/HangDetector.h"   // for HangDetector
 #include "android/version.h"                    // for EMULATOR_FULL_VERSION...
-#include "base/files/file_path.h"               // for FilePath
 #include "client/crash_report_database.h"       // for CrashReportDatabase::...
 #include "client/crashpad_client.h"             // for CrashpadClient
 #include "client/settings.h"                    // for Settings
+#include "mini_chromium/base/files/file_path.h" // for FilePath
 #include "util/misc/uuid.h"                     // for UUID
 
 #ifdef _WIN32

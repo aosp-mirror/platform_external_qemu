@@ -15,8 +15,8 @@ if(NOT WINDOWS_MSVC_X86_64)
         android/emulation/control/waterfall/SocketController.cpp
         android/emulation/control/waterfall/WaterfallService.cpp)
   target_link_libraries(
-    android-waterfall PRIVATE png PUBLIC protobuf::libprotobuf android-emu
-                                         android-net grpc++)
+    android-waterfall PRIVATE png android-emu-base-headers
+                      PUBLIC protobuf::libprotobuf android-emu android-net grpc++)
   target_include_directories(
     android-waterfall PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                              ${CMAKE_CURRENT_SOURCE_DIR})
@@ -54,7 +54,7 @@ target_include_directories(
   PUBLIC ${ANDROID_QEMU2_TOP_DIR}/android/third_party/modem-simulator)
 target_include_directories(gnss_proxy_lib PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/)
 target_link_libraries(gnss_proxy_lib PRIVATE protobuf::libprotobuf grpc++)
-target_link_libraries(gnss_proxy_lib PRIVATE android-emu-base)
+target_link_libraries(gnss_proxy_lib PRIVATE android-emu-base android-emu-base-headers)
 target_link_libraries(gnss_proxy_lib PRIVATE android-emu GLIB2::GLIB2)
 target_link_libraries(gnss_proxy_lib PRIVATE modem_simulator_lib)
 
@@ -109,6 +109,7 @@ target_link_libraries(
   PRIVATE png
   PUBLIC android-grpc-services
          android-emu
+         android-emu-base-headers
          android-emu-base-streams
          android-emu-tracing
          android-net
@@ -144,7 +145,8 @@ android_add_library(
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       ${UI_CONTROLLER_SERVICE_GRPC_SRC}
-      android/emulation/control/UiController.cpp)
+      android/emulation/control/UiController.cpp
+  DEPS android-emu-base-headers)
 
 target_include_directories(
   android-ui-controller PRIVATE ${CMAKE_CURRENT_BINARY_DIR}

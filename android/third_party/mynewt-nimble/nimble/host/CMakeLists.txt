@@ -35,7 +35,8 @@ if(ENABLE_MESH)
         mesh/src/shell.c
         mesh/src/subnet.c
         mesh/src/transport.c
-        nimble_mesh)
+        nimble_mesh
+    DEPS android-emu-base-headers)
   target_link_libraries(nimble_mesh PRIVATE _nimble_os_abstraction_headers
                                             _nimble_tinycrypt)
   target_include_directories(nimble_mesh PUBLIC include mesh/include
@@ -88,6 +89,7 @@ android_add_library(
       src/ble_store_util.c
       src/ble_uuid.c
       # src/ble_gatts_lcl.c # needs console
+      DEPS android-emu-base-headers
 )
 target_link_libraries(
   _nimble_host_layer

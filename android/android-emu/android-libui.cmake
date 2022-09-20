@@ -408,6 +408,7 @@ target_link_libraries(
           Qt${QT_MAJOR_VERSION}::Gui
           Qt${QT_MAJOR_VERSION}::Svg
           zlib
+          android-emu-base-headers
           android-emu-location
           android-hw-config)
 
@@ -472,7 +473,7 @@ if(NOT LINUX_AARCH64)
 
   target_link_libraries(
     emulator-libui_unittests
-    PRIVATE emulator-libui android-emu FFMPEG::FFMPEG
+    PRIVATE emulator-libui android-emu android-emu-base-headers FFMPEG::FFMPEG
             android-emu-crashreport-consent-never gmock_main)
 
   android_target_link_libraries(emulator-libui_unittests windows_msvc-x86_64
@@ -519,8 +520,8 @@ android_target_compile_options(
 # dependencies will remain internal, we should not be leaking out internal
 # headers and defines.
 target_link_libraries(
-  emulator-libui-headless PRIVATE android-emu emulator-libyuv FFMPEG::FFMPEG
-                                  zlib android-hw-config)
+  emulator-libui-headless PRIVATE android-emu android-emu-base-headers emulator-libyuv
+                                  FFMPEG::FFMPEG zlib android-hw-config)
 
 if(WINDOWS_MSVC_X86_64)
   # Qt in windows will call main from win-main v.s. calling qt_main. we have to
@@ -531,5 +532,5 @@ if(WINDOWS_MSVC_X86_64)
     TARGET emulator-winqt-launcher LICENSE Apache-2.0
     SRC # cmake-format: sortable
         android/skin/qt/windows-qt-launcher.cpp)
-  target_link_libraries(emulator-winqt-launcher PRIVATE android-emu-base)
+  target_link_libraries(emulator-winqt-launcher PRIVATE android-emu-base android-emu-base-headers)
 endif()

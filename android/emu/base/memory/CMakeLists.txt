@@ -10,7 +10,7 @@ android_add_library(
   WINDOWS android/base/memory/SharedMemory_win32.cpp
           # android/base/memory/Win32UnicodeString.cpp
           # android/base/memory/Win32Utils.cpp
-  DEPS android-emu-general-headers)
+  DEPS android-emu-base-headers)
 
 if(OPTION_TCMALLOC)
   android_target_link_libraries(
@@ -26,9 +26,8 @@ else()
                              PUBLIC "AEMU_TCMALLOC_ENABLED=0")
 endif()
 
-target_include_directories(android-emu-base-memory PUBLIC include PRIVATE src)
-target_link_libraries(android-emu-base-memory PUBLIC android-emu-general-headers
-                                                android-emu-base-logging)
+target_include_directories(android-emu-base-memory PRIVATE src)
+target_link_libraries(android-emu-base-memory PUBLIC android-emu-base-logging)
 android_add_test(
   TARGET android-emu-base-memory_unittests
   SOURCE_DIR test
@@ -39,5 +38,5 @@ android_add_test(
       android/base/memory/OnDemand_unittest.cpp
       android/base/memory/ScopedPtr_unittest.cpp
       android/base/memory/SharedMemory_unittest.cpp
-  DEPS android-emu-base android-emu-base-memory gmock_main)
+  DEPS android-emu-base android-emu-base-headers android-emu-base-memory gmock_main)
 target_include_directories(android-emu-base-memory_unittests PRIVATE src)

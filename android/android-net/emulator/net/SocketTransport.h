@@ -16,10 +16,13 @@
 #include <memory>
 #include <string>
 
-#include "emulator/net/AsyncSocketAdapter.h"
+#include "android/base/async/AsyncSocketAdapter.h"
 
 namespace emulator {
 namespace net {
+
+using ::android::base::AsyncSocketAdapter;
+using ::android::base::AsyncSocketEventListener;
 
 enum class State {
     DISCONNECTED,

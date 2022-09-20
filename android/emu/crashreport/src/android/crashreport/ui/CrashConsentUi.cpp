@@ -36,13 +36,13 @@
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
 #include "android/utils/tempfile.h"
-#include "base/files/file_path.h"
 #include "client/crash_report_database.h"
 #include "google_breakpad/processor/basic_source_line_resolver.h"
 #include "google_breakpad/processor/minidump.h"
 #include "google_breakpad/processor/minidump_processor.h"
 #include "google_breakpad/processor/process_result.h"
 #include "google_breakpad/processor/process_state.h"
+#include "mini_chromium/base/files/file_path.h"
 #include "processor/stackwalk_common.h"
 
 namespace android {
