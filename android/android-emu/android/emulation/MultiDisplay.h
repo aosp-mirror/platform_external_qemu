@@ -104,7 +104,8 @@ public:
                        int32_t y,
                        uint32_t w,
                        uint32_t h,
-                       uint32_t dpi);
+                       uint32_t dpi,
+                       uint32_t flag);
     int destroyDisplay(uint32_t displayId);
     int getDisplayPose(uint32_t displayId,
                        int32_t* x,
