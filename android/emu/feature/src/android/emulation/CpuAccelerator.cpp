@@ -1028,39 +1028,42 @@ CpuAccelerator GetCurrentCpuAccelerator() {
 
 #ifndef APPLE_SILICON
         char vendor_id[16];
-        android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
+        CpuVendorIdType vid_type;
 
-        switch (android_get_x86_cpuid_vendor_id_type(vendor_id)) {
+        android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
+        vid_type = android_get_x86_cpuid_vendor_id_type(vendor_id);
+        if (vid_type != VENDOR_ID_AMD && vid_type != VENDOR_ID_INTEL) {
+            StringAppendFormat(
+                    &status,
+                    "Android Emulator requires an Intel or AMD processor "
+                    "with "
+                    "virtualization extension support.  Your CPU: '%s'",
+                    vendor_id);
+            status_code = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
+        } else {
+#if HAVE_GVM
+            status_code = ProbeGVM(&status);
+            if (status_code == ANDROID_CPU_ACCELERATION_READY) {
+                g->accel = CPU_ACCELERATOR_GVM;
+                g->supported_accelerators[CPU_ACCELERATOR_GVM] = true;
+            }
+#endif
 #if HAVE_HAX
-            case VENDOR_ID_INTEL:
-                status_code = ProbeHAX(&status);
-                if (status_code == ANDROID_CPU_ACCELERATION_READY) {
+            if (status_code != ANDROID_CPU_ACCELERATION_READY &&
+                vid_type == VENDOR_ID_INTEL) {
+                std::string statusHax;
+                AndroidCpuAcceleration status_code_HAX;
+
+                status_code_HAX = ProbeHAX(&statusHax);
+                if (status_code_HAX == ANDROID_CPU_ACCELERATION_READY) {
                     g->accel = CPU_ACCELERATOR_HAX;
                     g->supported_accelerators[CPU_ACCELERATOR_HAX] = true;
+                    status = statusHax;
+                    status_code = status_code_HAX;
                 }
-#ifdef _WIN32
-                if (System::get()->envGet("GVM_ENABLE_INTEL") != "1")
-#endif
-                    break;
-#endif
-#if HAVE_GVM
-            case VENDOR_ID_AMD:
-                status_code = ProbeGVM(&status);
-                if (status_code == ANDROID_CPU_ACCELERATION_READY) {
-                    g->accel = CPU_ACCELERATOR_GVM;
-                    g->supported_accelerators[CPU_ACCELERATOR_GVM] = true;
-                }
-                break;
-#endif
-            default:
-                StringAppendFormat(
-                        &status,
-                        "Android Emulator requires an Intel or AMD processor "
-                        "with "
-                        "virtualization extension support.  Your CPU: '%s'",
-                        vendor_id);
-                status_code = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
+            }
         }
+#endif
 #endif
 
 #if HAVE_HVF
@@ -1087,6 +1090,14 @@ CpuAccelerator GetCurrentCpuAccelerator() {
 #else   // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF || HAVE_GVM || HAVE_WHPX)
     status = "This system does not support CPU acceleration.";
 #endif  // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF || HAVE_GVM || HAVE_WHPX)
+
+    // Print HAXM deprecation message
+    if (g->accel == CPU_ACCELERATOR_HAX)
+        fprintf(stderr, "HAXM is deprecated and not supported by Intel "
+                        "any more. Please download and install Android "
+                        "Emulator Hypervisor Driver for AMD Processors, "
+                        "which also supports Intel Processors. Installing "
+                        "from SDK Manager is comming soon.\n");
 
     // cache status
     g->probed = true;
