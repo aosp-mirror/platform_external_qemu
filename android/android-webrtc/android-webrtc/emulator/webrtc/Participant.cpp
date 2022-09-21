@@ -370,6 +370,7 @@ void Participant::SendToDataChannel(DataChannelLabel label, std::string data) {
 }
 
 void Participant::IncomingMessage(json msg) {
+    assert(!msg.is_discarded());
     LOG(INFO) << "IncomingMessage: " << msg.dump();
     if (msg.count("candidate")) {
         if (msg["candidate"].count("candidate")) {
@@ -394,6 +395,7 @@ void Participant::IncomingMessage(json msg) {
 }
 
 void Participant::HandleCandidate(const json& msg) {
+    assert(!msg.is_discarded());
     if (!msg.count("sdpMid") || !msg.count("sdpMLineIndex") ||
         !msg.count("candidate")) {
         LOG(WARNING) << "Missing required properties!";
@@ -415,6 +417,7 @@ void Participant::HandleCandidate(const json& msg) {
 }
 
 void Participant::HandleOffer(const json& msg) {
+    assert(!msg.is_discarded());
     std::string type = msg["type"];
     if (type == "offer-loopback") {
         LOG(ERROR) << "We are not doing loopbacks";

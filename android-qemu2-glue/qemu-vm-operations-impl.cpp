@@ -360,14 +360,18 @@ static std::vector<json> qcow2_drives() {
     while (info) {
         if (info->value->has_inserted) {
             char* js = strstr(info->value->inserted->file, json_str);
-            if (js && json::jsonaccept(js + sizeof(json_str) - 1)) {
-                json drive = json::parse(js + sizeof(json_str) - 1);
-                if (drive.count("driver") > 0 && drive["driver"] == "qcow2" &&
-                    drive.count("file") > 0 &&
+            if (js) {
+                json drive =
+                        json::parse(js + sizeof(json_str) - 1, nullptr, false);
+
+                if (!drive.is_discarded() && drive.count("driver") > 0 &&
+                    drive["driver"] == "qcow2" && drive.count("file") > 0 &&
                     drive["file"].count("filename") > 0) {
                     drive["device"] = info->value->device;
-                    drive["backing"] = info->value->inserted->has_backing_file ?
-                            info->value->inserted->backing_file : "";
+                    drive["backing"] =
+                            info->value->inserted->has_backing_file
+                                    ? info->value->inserted->backing_file
+                                    : "";
                     DD("Found %s", drive.dump().c_str());
                     drives.push_back(drive);
                 }

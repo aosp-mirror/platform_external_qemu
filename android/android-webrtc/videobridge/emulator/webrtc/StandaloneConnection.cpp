@@ -175,10 +175,9 @@ void StandaloneConnection::driveJsep() {
     JsepMsg msg;
     while (mAlive && messages->Read(&msg)) {
         assert(mGuid.guid() == msg.id().guid());
-        if (json::jsonaccept(msg.message())) {
-            auto jsonMessage = json::parse(msg.message());
+        auto jsonMessage = json::parse(msg.message(), nullptr, false);
+        if (!jsonMessage.is_discarded())
             participant->IncomingMessage(jsonMessage);
-        }
     }
 
     LOG(INFO) << "Finished stream, waiting for participant to disappear.";

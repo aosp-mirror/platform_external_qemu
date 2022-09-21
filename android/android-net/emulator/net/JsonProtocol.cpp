@@ -28,8 +28,8 @@ void JsonProtocol::received(SocketTransport* from, const std::string object) {
     for (unsigned int i = 0; i < object.size(); i++) {
         char c = object.at(i);
         if (c == '\0') {
-            if (json::jsonaccept(mBuffer)) {
-                json jmessage = json::parse(mBuffer, nullptr, false);
+            json jmessage = json::parse(mBuffer, nullptr, false);
+            if (!jmessage.is_discarded()) {
                 mReceiver->received(from, std::move(jmessage));
             } else {
                 // Log, notify?
