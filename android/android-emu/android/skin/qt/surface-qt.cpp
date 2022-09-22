@@ -20,6 +20,7 @@
 #include <QPainter>                              // for QPainter
 #include <QPoint>                                // for QPoint
 #include <QRect>                                 // for QRect
+#include <QSemaphore>
 #include <QSize>                                 // for QSize
 #include <memory>                                // for unique_ptr, shared_ptr
 #include <type_traits>                           // for swap
@@ -163,7 +164,9 @@ extern void skin_surface_create_window(SkinSurface* surface,
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) return;
     QRect rect(x, y, w, h);
-    window->showWindow(surface, rect, nullptr);
+    QSemaphore semaphore;
+    window->showWindow(surface, rect, &semaphore);
+    semaphore.acquire();
     D("ID of backing bitmap surface is %d", surface->id);
 }
 

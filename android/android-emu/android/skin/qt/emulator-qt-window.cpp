@@ -1447,6 +1447,10 @@ void EmulatorQtWindow::getSkinPixmap() {
     // display. To avoid masking off the display, we replace the alpha vaule of
     // these pixels as 255 (opage).
     QImage img(skinPath);
+    if (img.isNull()) {
+        qCWarning(emu) << "Failed to load skin file: " << skinPath;
+        return;
+    }
     for (int row = 0; row < img.height(); row++) {
         int left = -1, right = -1;
         for (int col = 0; col < img.width(); col++) {
@@ -1455,7 +1459,7 @@ void EmulatorQtWindow::getSkinPixmap() {
                 break;
             }
         }
-        for (int col = img.width(); col >= 0; col--) {
+        for (int col = img.width() - 1; col >= 0; col--) {
             if (qAlpha(img.pixel(col, row)) != 0) {
                 right = col;
                 break;
