@@ -29,7 +29,7 @@
 #include "tink/util/status.h"                // for Status
 #include "tink/util/statusor.h"              // for StatusOr
 
-#define DEBUG 0
+// #define DEBUG 1
 
 #if DEBUG >= 1
 #define DD(fmt, ...) \
@@ -45,9 +45,8 @@ using android::base::PathUtils;
 
 namespace tink = crypto::tink;
 
-JwtTokenAuth::JwtTokenAuth(Path jwksPath, Path jwksLoadedPath)
-    : BasicTokenAuth(DEFAULT_HEADER, DEFAULT_BEARER),
-      mJwksLoadedPath(jwksLoadedPath) {
+JwtTokenAuth::JwtTokenAuth(Path jwksPath, Path jwksLoadedPath, AllowList* list)
+    : BasicTokenAuth(DEFAULT_HEADER, list), mJwksLoadedPath(jwksLoadedPath) {
     mTinkInitialized = tink::TinkConfig::Register();
     if (mTinkInitialized.ok()) {
         mTinkInitialized = tink::JwtSignatureRegister();
@@ -102,42 +101,93 @@ void JwtTokenAuth::updateKeysetHandle(
     }
 }
 
-absl::Status JwtTokenAuth::isTokenValid(grpc::string_ref path,
+absl::Status JwtTokenAuth::isTokenValid(grpc::string_ref url,
                                         grpc::string_ref token) {
+    // Unprotected?
+    std::string_view path(url.data(), url.length());
+    if (!allowList()->requiresAuthentication(path)) {
+        return absl::OkStatus();
+    }
+
     if (!mTinkInitialized.ok()) {
         return mTinkInitialized;
     }
 
+    constexpr auto offset = DEFAULT_BEARER.size();
+    if (token.size() <= offset) {
+        return absl::PermissionDeniedError(
+                "Invalid token header, missing BEARER.");
+    }
+
+    auto actual_token =
+            absl::string_view(token.data() + offset, token.size() - offset);
+
     const std::lock_guard<std::mutex> lock(mKeyhandleAccess);
     if (!mActiveKeyset) {
-        return absl::NotFoundError("No key handles, rejecting all tokens.");
+        return absl::NotFoundError(
+                "No active keyset, rejecting all tokens. Did you provide your "
+                "public key?");
     }
     auto verify =
             mActiveKeyset->template GetPrimitive<tink::JwtPublicKeyVerify>();
     if (!verify.ok()) {
+        DD("Token error: %s", verify.status().error_message().c_str());
         return verify.status();
     }
 
-    absl::string_view method(path.data(), path.size());
-    DD("Validating aud: %s", std::string(method).c_str());
+    DD("Make sure there is a proper signed jwt token.");
     auto validator = tink::JwtValidatorBuilder()
-                             .ExpectAudience(method)
                              .ExpectIssuedInThePast()
                              .IgnoreIssuer()
+                             .IgnoreAudiences()
                              .Build();
+
     if (!validator.ok()) {
+        DD("Token validator error: %s",
+           validator.status().error_message().c_str());
         return validator.status();
     }
 
     auto verified_jwt = (*verify)->VerifyAndDecode(
-            absl::string_view(token.data(), token.size()), *validator);
+            actual_token, *validator);
 
-    if (!verified_jwt.status().ok() && verified_jwt.status().message() == "audience not found") {
-        return absl::PermissionDeniedError(
-                "Access denied, does you aud claim include: " +
-                std::string(method) + " ?");
+    // Bad token?
+    if (!verified_jwt.ok()) {
+        DD("Bad token!: %s", verified_jwt.status().error_message().c_str());
+        return verified_jwt.status();
     }
-    return verified_jwt.status();
+
+    auto iss = verified_jwt->GetIssuer();
+    if (!iss.ok()) {
+        return absl::PermissionDeniedError("iss is not present.");
+    }
+
+    // Green list, no need to validate aud..
+    if (verified_jwt.ok() && allowList()->isAllowed(*iss, path)) {
+        return absl::OkStatus();
+    }
+
+    // On the block list, go away!
+    if (allowList()->isRed(*iss, path)) {
+        return absl::PermissionDeniedError("Access is blocked by access list");
+    }
+
+    auto audiences = verified_jwt->GetAudiences();
+    if (!audiences.ok()) {
+        DD("Token validator error: %s",
+           audiences.status().error_message().c_str());
+        return absl::PermissionDeniedError("aud is not present.");
+    }
+
+    for (const auto& aud : audiences.value()) {
+        if (aud == path) {
+            return absl::OkStatus();
+        }
+    }
+
+    return absl::PermissionDeniedError(
+            "Access denied, does you aud claim include: " +
+            std::string(path) + " ?");
 }
 
 }  // namespace control

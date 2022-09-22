@@ -186,7 +186,7 @@ bool JwkDirectoryObserver::acceptJwkExtOnly(Path path) {
 absl::StatusOr<json> JwkDirectoryObserver::extractKeys(Path fname) {
     auto jsonFile = readFile(fname);
     DD("Loaded %s, the json is %s.", jsonFile.c_str(),
-       json::jsonaccept(jsonFile) ? "valid" : "invalid");
+       json::accept(jsonFile) ? "valid" : "invalid");
     auto handle = crypto::tink::JwkSetToPublicKeysetHandle(jsonFile);
     if (!handle.ok()) {
         return absl::UnavailableError(

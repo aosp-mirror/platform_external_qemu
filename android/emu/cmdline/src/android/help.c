@@ -1284,6 +1284,14 @@ help_grpc_use_jwt(stralloc_t*  out)
     );
 }
 
+static void
+help_grpc_allowlist(stralloc_t*  out)
+{
+    PRINTF(
+    "  A list that defines which gRPC methods can be accessed by whom.\n\n"
+    "    <path_to_json_file> A json file describing the access rules.\n"
+    "    see details in lib/emulator_access.json on how to specify rules.\n\n");
+}
 
 static void
 help_idle_grpc_timeout(stralloc_t*  out)

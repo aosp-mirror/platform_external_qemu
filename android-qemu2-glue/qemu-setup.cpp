@@ -392,6 +392,9 @@ int qemu_setup_grpc() {
                                             ->settings->android_cmdLineOptions()
                                             ->grpc_tls_ca)
                     .withVerboseLogging(android_verbose)
+                    .withAllowList(getConsoleAgents()
+                                           ->settings->android_cmdLineOptions()
+                                           ->grpc_allowlist)
                     .withAddress(address)
                     .withService(emulator)
                     .withService(h2o)
@@ -421,9 +424,11 @@ int qemu_setup_grpc() {
                "%d", &timeout) == 1) {
         builder.withIdleTimeout(std::chrono::seconds(timeout));
     }
-    if (getConsoleAgents()
+    bool useToken =  getConsoleAgents()
                 ->settings->android_cmdLineOptions()
-                ->grpc_use_token) {
+                ->grpc_use_token || getConsoleAgents()->settings->android_cmdLineOptions()->grpc_use_jwt;
+
+    if (useToken) {
         const int of64Bytes = 64;
         auto token = generateToken(of64Bytes);
         builder.withAuthToken(token);

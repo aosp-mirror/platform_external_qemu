@@ -63,6 +63,9 @@ protected:
     void SetUp() {
         mTestSystem.host()->setEnvironmentVariable("GRPC_VERBOSITY", "DEBUG");
         mEchoService = new AsyncTestEchoService();
+        mBuilder.withAllowList(pj(mTestSystem.host()->getProgramDirectory(),
+                                  "test_allow_list.json")
+                                       .c_str());
         mHelloWorld.set_msg(HELLO);
     }
 
@@ -334,7 +337,8 @@ TEST_F(GrpcServiceTest, InsecureWithGoodTokenAccepts) {
     auto [msg, status] = sayHello(
             ::grpc::experimental::LocalCredentials(LOCAL_TCP), true, token);
     EXPECT_EQ(HELLO, msg.msg());
-    EXPECT_EQ(grpc::StatusCode::OK, status.error_code());
+    EXPECT_EQ(grpc::StatusCode::OK, status.error_code())
+            << "Error: " << status.error_message();
 
     // Underlying service method was called
     EXPECT_EQ(invocations + 1, mEchoService->invocations());
@@ -458,7 +462,8 @@ TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
     int responses = 0;
     auto bidistream = client->streamEcho(&ctx);
     bidistream->Write(hello);
-    while (response.counter() < hello.counter() && bidistream->Read(&response)) {
+    while (response.counter() < hello.counter() &&
+           bidistream->Read(&response)) {
         responses++;
         printf("Got responses: %d\n", responses);
     }

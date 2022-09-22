@@ -37,6 +37,7 @@
 #include "android/emulation/control/interceptor/IdleInterceptor.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/interceptor/MetricsInterceptor.h"
+#include "android/emulation/control/secure/AllowList.h"
 #include "android/emulation/control/secure/BasicTokenAuth.h"
 #include "android/emulation/control/secure/JwtTokenAuth.h"
 #include "android/emulation/control/utils/GrpcAndroidLogAdapter.h"
@@ -83,9 +84,12 @@ public:
     EmulatorControllerServiceImpl(
             int port,
             std::vector<std::shared_ptr<Service>> services,
+            std::unique_ptr<AllowList> allowlist,
             grpc::Server* server)
-        : mPort(port), mRegisteredServices(services), mServer(server) {
-     }
+        : mPort(port),
+          mRegisteredServices(services),
+          mAllowList(std::move(allowlist)),
+          mServer(server) {}
 
     int port() override { return mPort; }
 
@@ -93,6 +97,7 @@ public:
 
 private:
     std::unique_ptr<grpc::Server> mServer;
+    std::unique_ptr<AllowList> mAllowList;
     std::vector<std::shared_ptr<Service>> mRegisteredServices;
     int mPort;
     int queueidx = 0;
@@ -128,7 +133,10 @@ std::string Builder::readSecrets(const char* fname) {
     return contents;
 }
 
-Builder::Builder() = default;
+Builder::Builder() {
+    mEmulatorAccessPath = pj({System::get()->getLauncherDirectory(), "lib",
+                              "emulator_access.json"});
+};
 
 Builder& Builder::withConsoleAgents(
         const AndroidConsoleAgents* const consoleAgents) {
@@ -246,7 +254,12 @@ Builder& Builder::withPortRange(int start, int end) {
     return *this;
 }
 
-
+Builder& Builder::withAllowList(const char* path) {
+    if (path) {
+        mEmulatorAccessPath = path;
+    }
+    return *this;
+}
 //  Human readable logging.
 template <typename tstream>
 tstream& operator<<(tstream& out, const Builder::Security value) {
@@ -262,6 +275,20 @@ tstream& operator<<(tstream& out, const Builder::Security value) {
     }
 #undef STATE
     return out << s;
+}
+
+std::unique_ptr<AllowList> loadAllowlist(std::string path) {
+    auto emulator_access =
+            std::ifstream(PathUtils::asUnicodePath(path.c_str()).c_str());
+
+    if (!emulator_access.good()) {
+        dwarning("Cannot find access file %s, blocking all access.",
+                 path.c_str());
+        return std::make_unique<DisableAccess>();
+    }
+
+    dinfo("Using security allow list from: %s", path.c_str());
+    return AllowList::fromStream(emulator_access);
 }
 
 std::unique_ptr<EmulatorControllerService> Builder::build() {
@@ -293,6 +320,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         }
     }
 
+    std::unique_ptr<AllowList> allowList = loadAllowlist(mEmulatorAccessPath);
     if (!mAuthToken.empty() || !mJwkPath.empty()) {
         if (mSecurity == Security::Insecure) {
             mBindAddress = "[::1]";
@@ -301,25 +329,21 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
             LOG(WARNING) << "Token/JWT auth requested without tls, restricting "
                             "access to localhost.";
         }
-
-        std::vector<BasicTokenAuth> protectors;
-        if (!mAuthToken.empty() && !mJwkPath.empty()) {
-            auto anyauth = std::vector<std::unique_ptr<BasicTokenAuth>>();
-            anyauth.emplace_back(std::make_unique<StaticTokenAuth>(mAuthToken));
-            anyauth.emplace_back(
-                    std::make_unique<JwtTokenAuth>(mJwkPath, mJwkLoadedPath));
-            mCredentials->SetAuthMetadataProcessor(
-                    std::make_shared<AnyTokenAuth>(std::move(anyauth)));
-        } else if (!mAuthToken.empty()) {
-            mCredentials->SetAuthMetadataProcessor(
-                    std::make_shared<StaticTokenAuth>(mAuthToken));
-        } else if (!mJwkPath.empty()) {
-            mCredentials->SetAuthMetadataProcessor(
-                    std::make_shared<JwtTokenAuth>(mJwkPath, mJwkLoadedPath));
+        auto anyauth = std::vector<std::unique_ptr<BasicTokenAuth>>();
+        if (!mAuthToken.empty()) {
+            anyauth.emplace_back(std::make_unique<StaticTokenAuth>(
+                    mAuthToken, "android-studio", allowList.get()));
         }
+        if (!mJwkPath.empty()) {
+            anyauth.emplace_back(std::make_unique<JwtTokenAuth>(
+                    mJwkPath, mJwkLoadedPath, allowList.get()));
+        }
+        mCredentials->SetAuthMetadataProcessor(std::make_shared<AnyTokenAuth>(
+                std::move(anyauth), allowList.get()));
     } else {
         dwarning(
-                "*** No gRPC protection active, consider launching with the "
+                "*** No gRPC protection active, consider launching with "
+                "the "
                 "-grpc-use-jwt flag.***");
     }
     // Translate loopback Ipv4/Ipv6 preference ourselves. gRPC resolver can
@@ -366,6 +390,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
               << ", security: " << mSecurity << ", auth: " << mAuthMode;
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(mPort, std::move(mServices),
+                                              std::move(allowList),
                                               service.release()));
 }
 }  // namespace control
