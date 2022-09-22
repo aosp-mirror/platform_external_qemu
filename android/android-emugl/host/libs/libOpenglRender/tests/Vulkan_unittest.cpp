@@ -485,6 +485,9 @@ protected:
         // the rendering tests on Windows for now.
         SKIP_TEST_IF_WIN32();
 
+        android::base::TestSystem::setEnvironmentVariable(
+            "ANGLE_DEFAULT_PLATFORM",
+            "swiftshader");
         VulkanTest::SetUp();
 
         emugl::set_emugl_feature_is_enabled(

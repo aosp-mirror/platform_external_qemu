@@ -16,8 +16,9 @@ function(add_opengl_dependencies TGT)
     linux
     "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader' -Wl,--disable-new-dtags"
   )
+  # SwANGLE
   android_target_properties(
-    ${TGT} darwin "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+    ${TGT} darwin "INSTALL_RPATH>=@loader_path/lib64/gles_angle")
 endfunction()
 
 android_add_library(
