@@ -27,8 +27,7 @@ static bool isSlirpInited() {
     return net_slirp_state() != NULL;
 }
 
-static bool slirpRedir(bool isUdp, int hostPort,
-                      uint32_t guestAddr, int guestPort) {
+static bool slirpRedir(bool isUdp, int hostPort, int guestPort) {
     struct in_addr host = { .s_addr = htonl(SOCK_ADDRESS_INET_LOOPBACK) };
     struct in_addr guest = { .s_addr = 0 };
     return slirp_add_hostfwd(net_slirp_state(), isUdp, host, hostPort, guest,
@@ -38,6 +37,19 @@ static bool slirpRedir(bool isUdp, int hostPort,
 bool slirpUnredir(bool isUdp, int hostPort) {
     struct in_addr host = { .s_addr = htonl(SOCK_ADDRESS_INET_LOOPBACK) };
     return slirp_remove_hostfwd(net_slirp_state(), isUdp, host, hostPort) == 0;
+}
+
+static bool slirpRedirIpv6(bool isUdp, int hostPort, int guestPort) {
+    struct in6_addr host = in6addr_loopback;
+    struct in6_addr guest = { .s6_addr = 0 };
+    return slirp_add_ipv6_hostfwd(net_slirp_state(), isUdp, host, hostPort,
+                                  guest, guestPort) == 0;
+}
+
+static bool slirpUnredirIpv6(bool isUdp, int hostPort) {
+    struct in6_addr host = in6addr_loopback;
+    return slirp_remove_ipv6_hostfwd(net_slirp_state(), isUdp, host,
+                                     hostPort) == 0;
 }
 
 static bool slirpBlockSsid(const char* ssid, bool enable) {
@@ -55,6 +67,8 @@ static const QAndroidNetAgent netAgent = {
         .isSlirpInited = &isSlirpInited,
         .slirpRedir = &slirpRedir,
         .slirpUnredir = &slirpUnredir,
+        .slirpRedirIpv6 = &slirpRedirIpv6,
+        .slirpUnredirIpv6 = &slirpUnredirIpv6,
         .slirpBlockSsid = &slirpBlockSsid,
 };
 const QAndroidNetAgent* const gQAndroidNetAgent = &netAgent;

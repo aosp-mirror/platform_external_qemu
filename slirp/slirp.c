@@ -1416,11 +1416,9 @@ int slirp_remove_ipv6_hostfwd(Slirp *slirp, int is_udp, struct in6_addr host_add
 int slirp_add_ipv6_hostfwd(Slirp *slirp, int is_udp, struct in6_addr host_addr,
                       int host_port, struct in6_addr guest_addr, int guest_port)
 {
-    // TODO
-    // if (!guest_addr.s_addr) {
-    //     guest_addr = slirp->vdhcp_startaddr;
-    // }
-
+    if (!guest_addr.s6_addr) {
+        guest_addr = slirp->vhost_addr6;
+    }
     if (is_udp) {
         if (!udp6_listen(slirp, host_addr, htons(host_port),
                          guest_addr, htons(guest_port), SS_HOSTFWD))

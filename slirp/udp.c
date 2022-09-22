@@ -461,5 +461,5 @@ udp6_listen(Slirp *slirp, struct in6_addr haddr, u_int hport,
     so->so_state &= SS_PERSISTENT_MASK;
     so->so_state |= SS_ISFCONNECTED | flags;
 
-    return 0;
+    return so;
 }
