@@ -32,6 +32,7 @@ public:
     bool validCommand();
 
     static bool producesValidTurn(std::string cmd);
+
 private:
     std::vector<std::string> mTurnCmd;
 

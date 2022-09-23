@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include "emulator/webrtc/capture/GrpcAudioSource.h"
-#include "emulator/webrtc/capture/GrpcVideoSource.h"
+#include "emulator/webrtc/capture/InprocessAudioSource.h"
+#include "emulator/webrtc/capture/InprocessVideoSource.h"
+
+#include <unordered_map>
 
 namespace webrtc {
 class PeerConnectionFactoryInterface;
@@ -22,26 +24,24 @@ class PeerConnectionFactoryInterface;
 namespace emulator {
 namespace webrtc {
 
-// A MediaSourceLibrary keeps track of all available gRPC based media sources. A
+// A MediaSourceLibrary keeps track of all available media sources. A
 // media source will start producing data as soon as it is checked out.
 class MediaSourceLibrary {
 public:
     MediaSourceLibrary(
-            EmulatorGrpcClient* client,
             ::webrtc::PeerConnectionFactoryInterface* peerConnectionFactory);
 
     // This is a refcounted source, do not delete it.
-    GrpcRefAudioSource getAudioSource() { return &mAudioSource; }
+    InprocessRefAudioSource getAudioSource() { return &mAudioSource; }
 
     // This is a refcounted source, do not delete it.
-    GrpcRefVideoSource getVideoSource(int displayId);
+    InprocessRefVideoSource getVideoSource(int displayId);
 
 private:
-    EmulatorGrpcClient* mClient;
     ::webrtc::PeerConnectionFactoryInterface* mPeerConnectionFactory;
     std::mutex mAccess;
-    GrpcAudioMediaSource mAudioSource;
-    std::unordered_map<int, std::unique_ptr<GrpcVideoMediaSource>>
+    InprocessAudioMediaSource mAudioSource;
+    std::unordered_map<int, std::unique_ptr<InprocessVideoMediaSource>>
             mVideoSources;
 };
 }  // namespace webrtc
