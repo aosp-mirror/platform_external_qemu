@@ -22,7 +22,7 @@
 namespace android {
 namespace snapshot {
 
-constexpr int kTestingPageSize = 4096;
+constexpr int kTestingPageSize = kDefaultPageSize;
 
 using TestRamBuffer = AlignedBuf<uint8_t, kTestingPageSize>;
 
