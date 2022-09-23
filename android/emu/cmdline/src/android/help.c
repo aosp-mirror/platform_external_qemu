@@ -1164,6 +1164,13 @@ help_log_nofilter(stralloc_t*  out)
     "  Disables the duplicate logline filter.\n\n");
 }
 
+static void
+help_log_detailed(stralloc_t*  out)
+{
+    PRINTF(
+    "  Enable detailed logging.\n\n");
+}
+
 
 static void
 help_grpc(stralloc_t*  out)

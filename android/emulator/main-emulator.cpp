@@ -661,6 +661,12 @@ int main(int argc, char** argv) {
             logFlags = static_cast<LoggingFlags>(logFlags &
                                                  ~kLogEnableDuplicateFilter);
         }
+
+        if (!strcmp(opt, "-log-detailed")) {
+            logFlags = static_cast<LoggingFlags>(logFlags |
+                                                 kLogEnableVerbose);
+                                                 
+        }
     }
 
     // Parsing complete, initialize the proper logging config.
