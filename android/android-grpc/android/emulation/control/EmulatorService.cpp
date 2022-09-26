@@ -826,15 +826,15 @@ public:
                          Image* reply) override {
         AEMU_SCOPED_TRACE_CALL();
         uint32_t width, height;
-        bool enabled;
+        bool enabled = false;
         bool multiDisplayQueryWorks = mAgents->emu->getMultiDisplay(
                 request->display(), nullptr, nullptr, &width, &height, nullptr,
                 nullptr, &enabled);
 
-        // TODO(b/151387266): Use new query that uses a shared state for
-        // multidisplay
-        if (!multiDisplayQueryWorks &&
-            getConsoleAgents()->settings->android_cmdLineOptions()->no_window) {
+        // b/248394093 Initialize the value of width and height to the default
+        // hw settings regardless of the display ID when multi display agent
+        // doesn't work.
+        if (!multiDisplayQueryWorks) {
             width = getConsoleAgents()->settings->hw()->hw_lcd_width;
             height = getConsoleAgents()->settings->hw()->hw_lcd_height;
             enabled = true;
