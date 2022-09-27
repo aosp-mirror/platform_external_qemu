@@ -1818,7 +1818,8 @@ extern "C" int main(int argc, char** argv) {
     // studio avd manager does not allow user to change partition size, set a
     // lower limit to 6GB.
     constexpr auto kMinPlaystoreImageSize = 6LL * 1024 * 1024 * 1024;
-    if (fc::isEnabled(fc::PlayStoreImage)) {
+    const int myApiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
+    if (myApiLevel >= 24 || fc::isEnabled(fc::PlayStoreImage)) {
         if (firstTimeSetup &&
             android_hw->disk_dataPartition_size < kMinPlaystoreImageSize) {
             android_hw->disk_dataPartition_size = kMinPlaystoreImageSize;
