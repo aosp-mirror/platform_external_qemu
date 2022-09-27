@@ -415,6 +415,7 @@ void EmulatorContainer::showMinimized() {
 // and then remove the button when it gets reshown.
 #ifdef __linux__
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint);
+    showNormal();
 #endif  // __linux__
     QScrollArea::showMinimized();
 }
