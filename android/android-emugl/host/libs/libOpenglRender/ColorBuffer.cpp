@@ -459,11 +459,37 @@ void ColorBuffer::readPixelsScaled(int width,
         GLint prevAlignment = 0;
         s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        // SwANGLE does not suppot glReadPixels with 3 channels.
+        // In fact, the spec only require RGBA8888 format support. Supports for
+        // other formats are optional.
+        bool needConvert4To3Channel =
+                p_format == GL_RGB && p_type == GL_UNSIGNED_BYTE &&
+                (emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
+                    emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
+        std::vector<uint8_t> tmpPixels;
+        void* readPixelsDst = pixels;
+        if (needConvert4To3Channel) {
+            tmpPixels.resize(width * height * 4);
+            p_format = GL_RGBA;
+            readPixelsDst = tmpPixels.data();
+        }
         if (useSnipping) {
             s_gles2.glReadPixels(rect.pos.x, rect.pos.y, rect.size.w,
-                                 rect.size.h, p_format, p_type, pixels);
+                                 rect.size.h, p_format, p_type, readPixelsDst);
         } else {
-            s_gles2.glReadPixels(0, 0, width, height, p_format, p_type, pixels);
+            s_gles2.glReadPixels(0, 0, width, height, p_format, p_type,
+                                 readPixelsDst);
+        }
+        if (needConvert4To3Channel) {
+            uint8_t* src = tmpPixels.data();
+            uint8_t* dst = static_cast<uint8_t*>(pixels);
+            for (int h = 0; h < height; h++) {
+                for (int w = 0; w < width; w++) {
+                    memcpy(dst, src, 3);
+                    dst += 3;
+                    src += 4;
+                }
+            }
         }
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
         unbindFbo();
