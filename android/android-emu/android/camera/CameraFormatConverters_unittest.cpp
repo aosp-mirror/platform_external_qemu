@@ -27,11 +27,14 @@ static constexpr float kDefaultExpComp = 1.0f;
 
 // Difference squared per pixel.  Libyuv produces slightly different color
 // values for each pixel, allow a slight difference.
-static constexpr double kDifferenceSq = 2.0;
+// Also depending on CPU it uses different instruction sets for conversion,
+// which gives slightly different color on different CPUs. See b/248593843 for
+// details.
+static constexpr double kDifferenceSq = 4.0;
 
 // For exposure compensation, allow a slightly more lenient error to compensate
 // for rounding errors.
-static constexpr double kLenientDifferenceSq = 4.0;
+static constexpr double kLenientDifferenceSq = 6.0;
 
 // Max value that a pixel could differ, used to exclude edge pixel differences.
 static constexpr double kCompletelyDifferentSq = 256.0 * 256.0;
