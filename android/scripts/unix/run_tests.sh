@@ -163,6 +163,11 @@ EXECUTABLES="emulator"
 # on the current target platform. Then EXPECTED_EMULATOR_BITNESS and
 # EXPECTED_EMULATOR_FILE_TYPE accordingly.
 case $TARGET_OS in
+    darwin-aarch64)
+        EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable arm64"
+        EXPECTED_EMULATOR_BITNESS=64
+        EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
+    ;;
     darwin*)
         EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
         EXPECTED_EMULATOR_BITNESS=64
