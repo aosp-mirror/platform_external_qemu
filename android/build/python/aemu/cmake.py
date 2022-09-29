@@ -24,7 +24,7 @@ import time
 from distutils.spawn import find_executable
 
 from aemu.definitions import (ENUMS, find_aosp_root, get_aosp_root, get_cmake,
-                              get_qemu_root, infer_target,
+                              get_qemu_root, infer_target, is_crosscompile,
                               read_simple_properties, set_aosp_root)
 from aemu.distribution import create_distribution
 from aemu.process import run
@@ -38,6 +38,7 @@ class LogBelowLevel(logging.Filter):
 
     def filter(self, record):
         return True if record.levelno < self.max_level else False
+
 
 def configure(args, target):
     """Configures the cmake project."""
@@ -133,11 +134,10 @@ def configure(args, target):
 def get_build_cmd(args):
     """Gets the command that will build all the sources."""
     target = "install"
-    cross_compile = platform.system().lower() != args.target
 
-    # Stripping is meaning less in windows world, or when we are cross compiling.
+    # Stripping is meaning less in windows world
     if (args.crash != "none" or args.strip != "none") and (
-        platform.system().lower() != "windows" and not cross_compile
+        platform.system().lower() != "windows"
     ):
         target += "/strip"
     return [get_cmake(), "--build", args.out, "--target", target]
@@ -173,9 +173,10 @@ def main(args):
     start_time = time.time()
     version = sys.version_info
     target = infer_target(args.target)
+    iscross = is_crosscompile(target)
     logging.info(
-        "Running under Python {0[0]}.{0[1]}.{0[2]}, Platform: {1}, target: {2}".format(
-            version, platform.platform(), target
+        "Running under Python {0[0]}.{0[1]}.{0[2]}, Platform: {1}, target: {2}, {3} compilation".format(
+            version, platform.platform(), target, "cross" if iscross else "native"
         )
     )
 
@@ -190,8 +191,7 @@ def main(args):
 
     # Test.
     if args.tests:
-        cross_compile = platform.system().lower() != args.target
-        if not cross_compile or target == "darwin_aarch64":
+        if not iscross:
             run_tests_opts = []
             if args.gfxstream or args.gfxstream_only:
                 run_tests_opts.append("--skip-emulator-check")
