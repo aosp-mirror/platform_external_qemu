@@ -25,9 +25,6 @@ if platform.system() == "Windows":
     EXE_POSTFIX = ".exe"
 
 AOSP_ROOT = ""
-BREAKPAD_API_KEY_FILE = os.path.join(
-    os.path.expanduser("~"), ".emulator_symbol_server_key"
-)
 
 
 def find_aosp_root():
@@ -146,7 +143,47 @@ def read_simple_properties(fname):
     return res
 
 
+def is_crosscompile(target):
+    """True if the given target needs to be cross compiled.
+
+    Args:
+        target (str): The complete target.
+
+    Raises:
+        Exception: If the given target cannot be inferred or is not supported.
+
+
+    Returns:
+        bool: True if we will crosscompile on this machine for the given target.
+    """
+    target = target.lower().strip()
+    match = re.match("(windows|linux|darwin)([-_](aarch64|x86_64))?", target)
+    if not (match and match.group(3)):
+        raise Exception("Malformed target: {}.".format(target))
+    aarch = platform.machine()
+    if aarch == "arm64":
+        aarch = "aarch64"
+
+    return aarch != match.group(3)
+
+
 def infer_target(target):
+    """Infers the full target name given the potential partial target name.
+
+       A complete target name looks like: ${OS}_{$AARCH} where
+       OS = [windows, linux, darwin] and AARCH = [aarch64, x86_64]
+
+
+    Args:
+        target (str): The desired target you wish to compile for
+
+    Raises:
+        Exception: If the given target cannot be inferred or is not supported.
+
+    Returns:
+        str: The actual complete target name.
+
+    """
     target = target.lower().strip()
     host = platform.system().lower()
     match = re.match("(windows|linux|darwin)([-_](aarch64|x86_64))?", target)
@@ -193,19 +230,6 @@ def infer_target(target):
         )
 
     return target
-
-
-def load_breakpad_api_key():
-    try:
-        with open(BREAKPAD_API_KEY_FILE) as f:
-            return f.read()
-    except IOError as e:
-        logging.error(
-            "Unable to read api key due to: %s.",
-            e,
-        )
-        logging.error("Please provide a valid api key.")
-        raise e
 
 
 ENUMS = {
