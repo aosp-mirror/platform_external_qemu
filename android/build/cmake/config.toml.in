@@ -1,0 +1,11 @@
+# This is a cargo configuration that will make sure
+# all the crates are internal only.
+
+# You will have to process this with the cmake configure_file command
+# and bin place it in the RUST_root
+[source.systembt]
+directory = "${VENDOR_CRATES}"
+
+[source.crates-io]
+replace-with = "systembt"
+local-registry = "/nonexistent"

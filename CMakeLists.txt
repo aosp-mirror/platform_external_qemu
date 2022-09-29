@@ -10,18 +10,18 @@ find_package(Python2 COMPONENTS Interpreter)
 find_package(Python3 COMPONENTS Interpreter)
 
 # Let's setup a compiler cache.
-if (NOT WINDOWS_MSVC_X86_64 AND OPTION_CCACHE)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${OPTION_CCACHE}")
-    message(STATUS "Using ${OPTION_CCACHE} as a compiler cache.")
+if(NOT WINDOWS_MSVC_X86_64 AND OPTION_CCACHE)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${OPTION_CCACHE}")
+  message(STATUS "Using ${OPTION_CCACHE} as a compiler cache.")
 endif()
 
 set(Python_EXECUTABLE ${Python2_EXECUTABLE})
-if (NOT Python2_FOUND)
-    if (NOT Python3_FOUND)
-      message(FATAL_ERROR "A python interpreter is required. ")
-    endif()
-    message(STATUS "Reverting to Python3, this might not work (b/229251286)")
-    set(Python_EXECUTABLE ${Python3_EXECUTABLE})
+if(NOT Python2_FOUND)
+  if(NOT Python3_FOUND)
+    message(FATAL_ERROR "A python interpreter is required. ")
+  endif()
+  message(STATUS "Reverting to Python3, this might not work (b/229251286)")
+  set(Python_EXECUTABLE ${Python3_EXECUTABLE})
 endif()
 
 message(STATUS "Using Python: ${Python_EXECUTABLE}")
@@ -40,17 +40,16 @@ if(NOT DEFINED ANDROID_TARGET_TAG)
   toolchain_configure_tags(${TAG})
 endif()
 
-
 if(ANDROID_TARGET_TAG STREQUAL "darwin-aarch64")
-    set(BUILDING_FOR_AARCH64 TRUE)
+  set(BUILDING_FOR_AARCH64 TRUE)
 elseif(LINUX_AARCH64)
-    set(BUILDING_FOR_AARCH64 TRUE)
+  set(BUILDING_FOR_AARCH64 TRUE)
 else()
-    set(BUILDING_FOR_AARCH64 FALSE)
+  set(BUILDING_FOR_AARCH64 FALSE)
 endif()
 
-if (BUILDING_FOR_AARCH64)
-    message(STATUS "Building for aarch64!")
+if(BUILDING_FOR_AARCH64)
+  message(STATUS "Building for aarch64!")
 endif()
 
 message(
@@ -63,7 +62,12 @@ include(prebuilts)
 include(qemu2-src-gen)
 
 set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
-set(OPTION_TRACE "nop" CACHE STRING "The qemu tracing backend to use. Should be one of: [nop, dtrace, ftrace, log, simple, syslog, ust]")
+set(OPTION_TRACE
+    "nop"
+    CACHE
+      STRING
+      "The qemu tracing backend to use. Should be one of: [nop, dtrace, ftrace, log, simple, syslog, ust]"
+)
 set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING
                                        "The tools revision to use, if any")
 set(OPTION_SDK_TOOLS_BUILD_NUMBER ""
@@ -84,12 +88,8 @@ set(OPTION_CLANG_TIDY_FIX FALSE
     CACHE BOOL "True if you wish clang-tidy to auto fix issues it encounters.")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
 if(LINUX_X86_64 OR LINUX_AARCH64)
-  set(WEBRTC
-      TRUE
-      CACHE
-        BOOL
-        "True if the emulator should be build with WEBRTC support."
-  )
+  set(WEBRTC TRUE
+      CACHE BOOL "True if the emulator should be build with WEBRTC support.")
 else()
   set(WEBRTC
       FALSE
@@ -125,8 +125,14 @@ set(GFXSTREAM
       BOOL
       "True if we should build gfxstream, crosvm, and its accompanying libraries/tests."
 )
-set(OPTIONS_BUILD_PACKET_GEN FALSE CACHE BOOL "True if you wish to generate the bluetooth packet generator .yy and .ll files (posix only)")
-set(BLUETOOTH_EMULATION TRUE CACHE BOOL "True if you wish to build the emulated bluetooth stack")
+set(OPTIONS_BUILD_PACKET_GEN
+    FALSE
+    CACHE
+      BOOL
+      "True if you wish to generate the bluetooth packet generator .yy and .ll files (posix only)"
+)
+set(BLUETOOTH_EMULATION TRUE
+    CACHE BOOL "True if you wish to build the emulated bluetooth stack")
 
 set(OPTION_AEMU_LIBS_ONLY FALSE
     CACHE BOOL "True if we should build only AEMU libraries and their tests.")
@@ -134,24 +140,53 @@ set(OPTION_AEMU_LIBS_ONLY FALSE
 set(GFXSTREAM_ONLY FALSE CACHE BOOL "True if we should build only gfxstream")
 
 if(WINDOWS_MSVC_X86_64)
-  set(OPTION_PERFETTO_USE_SDK FALSE
-      CACHE BOOL "True if we should be building host side tracing on top of the official Perfetto SDK. Defaults false for Windows as it doesn't build on Windows.")
+  set(OPTION_PERFETTO_USE_SDK
+      FALSE
+      CACHE
+        BOOL
+        "True if we should be building host side tracing on top of the official Perfetto SDK. Defaults false for Windows as it doesn't build on Windows."
+  )
 else()
   # Currently FALSE due to needing more integration work for the full SDK.
-  set(OPTION_PERFETTO_USE_SDK FALSE
-      CACHE BOOL "True if we should be building host side tracing on top of the official Perfetto SDK. Defaults false for Windows as it doesn't build on Windows.")
+  set(OPTION_PERFETTO_USE_SDK
+      FALSE
+      CACHE
+        BOOL
+        "True if we should be building host side tracing on top of the official Perfetto SDK. Defaults false for Windows as it doesn't build on Windows."
+  )
+endif()
+
+set(OPTION_ENABLE_SYSTEM_RUST
+    FALSE
+    CACHE
+      BOOL
+      "Enable usage of the system rust compiler, only needed on Mac M1 or Windows"
+)
+
+if(Rust_COMPILER OR OPTION_ENABLE_SYSTEM_RUST)
+  if(OPTION_ENABLE_SYSTEM_RUST)
+    message(STATUS "Attempting to use the system rust compiler")
+    use_system_rust_toolchain()
+  endif()
+
+  # TODO(jansene): Once we have sorted out where we get our crates from
+  # we should uncomment the line below. See b/254511755
+  message(WARNING "Rust enabled without using vendorized crates! (b/254511755)")
+  # enable_vendorized_crates(${AOSP_ROOT}/external/rust/crates)
+  add_subdirectory(android/build/cmake/corrosion)
+  ensure_rust_version_is_compliant()
 endif()
 
 if(GFXSTREAM_ONLY)
   set(GFXSTREAM TRUE)
 endif()
 
-if (LINUX_AARCH64)
+if(LINUX_AARCH64)
   set(QTWEBENGINE FALSE)
 endif()
 
-if (DARWIN_AARCH64)
-    set(OPTION_TCMALLOC FALSE)
+if(DARWIN_AARCH64)
+  set(OPTION_TCMALLOC FALSE)
 endif()
 
 if(GFXSTREAM)
@@ -165,16 +200,16 @@ string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
 
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
 set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
-set(AOSP_ROOT ${ANDROID_QEMU2_TOP_DIR}/../..)
 
 # Symbol extraction is not supported when cross compiling.
 if(OPTION_CRASHUPLOAD STREQUAL "NONE")
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 else()
-  if (WIN32)
-    file (STRINGS "$ENV{USERPROFILE}/.emulator_symbol_server_key" BREAKPAD_API_KEY)
+  if(WIN32)
+    file(STRINGS "$ENV{USERPROFILE}/.emulator_symbol_server_key"
+         BREAKPAD_API_KEY)
   else()
-    file (STRINGS "$ENV{HOME}/.emulator_symbol_server_key" BREAKPAD_API_KEY)
+    file(STRINGS "$ENV{HOME}/.emulator_symbol_server_key" BREAKPAD_API_KEY)
   endif()
   set(ANDROID_EXTRACT_SYMBOLS TRUE)
   set(ANDROID_SYMBOL_DIR ${DBG_INFO})
@@ -210,7 +245,6 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 # Gather compile time statistics
 if(OPTION_TIME_INFO)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
@@ -227,10 +261,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
 set(CMAKE_PDB_OUTPUT_DIRECTORY ${DBG_INFO})
 # Feeling courageous? Set this to $ANDROID_SDK_ROOT
 if(CROSSCOMPILE AND (DARWIN_AARCH64 OR DARWIN_X86_64))
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
-set(CMAKE_INSTALL_CODESIGN ${CMAKE_BINARY_DIR}/distribution/_codesign)
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
+  set(CMAKE_INSTALL_CODESIGN ${CMAKE_BINARY_DIR}/distribution/_codesign)
 else()
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
 endif()
 
 # Pthreads from the prebuilts please!
@@ -239,24 +273,28 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 prebuilt(Threads)
 
 if(CROSSCOMPILE AND (DARWIN_AARCH64 OR DARWIN_X86_64))
-    install(FILES ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
-         DESTINATION ${CMAKE_INSTALL_CODESIGN} RENAME entitlements.xml)
-    install(FILES ${ANDROID_QEMU2_TOP_DIR}/filelist
-         DESTINATION ${CMAKE_INSTALL_CODESIGN})
+  install(FILES ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
+          DESTINATION ${CMAKE_INSTALL_CODESIGN} RENAME entitlements.xml)
+  install(FILES ${ANDROID_QEMU2_TOP_DIR}/filelist
+          DESTINATION ${CMAKE_INSTALL_CODESIGN})
 endif()
 
 # Create the needed qemu2 sources, with the desired backend.
-generate_qemu2_sources(TRACE_BACKEND ${OPTION_TRACE} DEST ${CMAKE_CURRENT_BINARY_DIR}/generated-sources)
+generate_qemu2_sources(TRACE_BACKEND ${OPTION_TRACE} DEST
+                       ${CMAKE_CURRENT_BINARY_DIR}/generated-sources)
 string(TOUPPER "${OPTION_TRACE}" TRACE_CONFIG)
 set(TRACE_CONFIG "CONFIG_TRACE_${TRACE_CONFIG}")
 
 if(LINUX_AARCH64)
-    file(COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/linux-aarch64-fixgcc.sh
-         DESTINATION ${CMAKE_INSTALL_PREFIX})
-    file(COPY ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-aarch64/lib/glibc-2.29.tgz
-         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib64)
-    file(COPY ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-aarch64/lib/patchelf.tgz
-         DESTINATION ${CMAKE_INSTALL_PREFIX})
+  file(
+    COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/linux-aarch64-fixgcc.sh
+    DESTINATION ${CMAKE_INSTALL_PREFIX})
+  file(
+    COPY ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-aarch64/lib/glibc-2.29.tgz
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib64)
+  file(
+    COPY ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-aarch64/lib/patchelf.tgz
+    DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
 # Configure OS depdendency licensenses
@@ -286,7 +324,7 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions("-DANDROID_DEBUG")
-  if (NOT WINDOWS_MSVC_X86_64)
+  if(NOT WINDOWS_MSVC_X86_64)
     add_c_flag("-O0 -g3")
   else()
     add_c_flag("-Zi -Od")
@@ -405,10 +443,9 @@ if(OPTION_CLANG_TIDY)
   set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "${DO_FIX}")
 endif()
 
-if (NOT WINDOWS_MSVC_X86_64)
+if(NOT WINDOWS_MSVC_X86_64)
   add_c_flag("-g")
 endif()
-
 
 # Compiling with -fno-exceptions disables exceptions support and uses the
 # variant of C++ libraries without exceptions. Use of try, catch, or throw
@@ -418,7 +455,7 @@ endif()
 # being linked contain exceptions. If an exception propagates into a function
 # that has been compiled without exceptions support, then the program
 # terminates.
-if (NOT WINDOWS_MSVC_X86_64)
+if(NOT WINDOWS_MSVC_X86_64)
   add_cxx_flag("-fno-exceptions")
 endif()
 add_cxx_flag("-Wno-invalid-offsetof")
@@ -551,9 +588,8 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
   android_license(
     TARGET ANGLE_RENDERER_DEPENDENCIES
     LIBNAME angle-renderer
-    EXECUTABLES
-      "gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      "gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    EXECUTABLES "gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+                "gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
     URL "https://chromium.googlesource.com/angle/angle"
     SPDX "BSD-3-Clause"
     LICENSE "https://chromium.googlesource.com/angle/angle/LICENSE"
@@ -566,7 +602,7 @@ prebuilt(SDL2)
 prebuilt(FDT)
 prebuilt(PIXMAN)
 prebuilt(VIRGLRENDERER)
-if (NOT DARWIN_AARCH64)
+if(NOT DARWIN_AARCH64)
   prebuilt(TCMALLOC)
 endif()
 
@@ -575,8 +611,8 @@ if(WINDOWS)
   include(emu-windows-libs)
 endif()
 
-# Get the versions from git if possible, by default we point to
-# the latest qemu merge commit  (v2.12.0) if we are unable to fetch it.
+# Get the versions from git if possible, by default we point to the latest qemu
+# merge commit  (v2.12.0) if we are unable to fetch it.
 set(ANDROID_QEMU_VERSION "v2.12.0-19097-g85fa07f04ef")
 get_git_version(ANDROID_QEMU_VERSION)
 
@@ -586,7 +622,9 @@ configure_file(qemu-version.h.in qemu-version.h @ONLY)
 # We need the auto generated header for some components, so let's set the
 # ANDROID_HW_CONFIG_H variable to point to the generated header. Those that need
 # it can add it to their sources list, and it will be there.
-set(HW_PROPERTIES_INI ${ANDROID_QEMU2_TOP_DIR}/android/emu/avd/src/android/avd/hardware-properties.ini)
+set(HW_PROPERTIES_INI
+    ${ANDROID_QEMU2_TOP_DIR}/android/emu/avd/src/android/avd/hardware-properties.ini
+)
 android_generate_hw_config()
 
 # Lets set up a qemu dependency that we all can rely on
@@ -602,7 +640,7 @@ android_add_interface(
 
 # This defines all the include directories needed to compile the libqemu
 # libraries. There should be no need to make additions here.
-if (BUILDING_FOR_AARCH64)
+if(BUILDING_FOR_AARCH64)
   set(TCG_ARCH_DIR "tcg/aarch64")
 else()
   set(TCG_ARCH_DIR "tcg/i386")
@@ -621,55 +659,51 @@ target_include_directories(
     ../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}/include
     android-qemu2-glue/config/${ANDROID_TARGET_TAG}/)
 
-
 # These are the rules that every qemu component needs, regardless of the
 # platform you are compiling on. Please document any flags you set as not
 # everyone is a compiler expert!
 target_compile_definitions(
   android-qemu-deps
   INTERFACE # Enable faster migration code when saving RAM to a snapshot
-            "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION"
-            "${TRACE_CONFIG}"
-            )
+            "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION" "${TRACE_CONFIG}")
 target_compile_definitions(android-qemu-deps INTERFACE # Enable VIRGL
                                                        "-DCONFIG_VIRGL")
 
 target_compile_options(
   android-qemu-deps
-  INTERFACE "-Werror=implicit-function-declaration"
-            "-Wno-unused-function"
-            "-Wno-address-of-packed-member"
-            "-Wno-shift-negative-value")
+  INTERFACE "-Werror=implicit-function-declaration" "-Wno-unused-function"
+            "-Wno-address-of-packed-member" "-Wno-shift-negative-value")
 
-if (NOT WINDOWS_MSVC_X86_64)
+if(NOT WINDOWS_MSVC_X86_64)
   target_compile_options(
     android-qemu-deps
-    INTERFACE
-            # Do not allow the compiler to assume the strictest aliasing rules
-            # applicable to the language being compiled. For C (and C++), this
-            # activates optimizations based on the type of expressions. In
-            # particular, an object of one type is assumed never to reside at
-            # the same address as an object of a different type, unless the
-            # types are almost the same. Supposedly this can introduce weird
-            # failures esp. on older gcc versions (MINGW) (See
-            # http://thiemonagel.de/2010/01/no-strict-aliasing/)
-            "-fno-strict-aliasing"
-
-            # This option instructs the compiler to assume that signed arithmetic overflow
-            # of addition, subtraction and multiplication wraps around using twos-complement
-            # representation. This flag enables some optimizations and disables others. The
-            # options -ftrapv and -fwrapv override each other, so using -ftrapv -fwrapv on
-            # the command-line results in -fwrapv being effective. Qemu is using this, so we
-            # use it as well. "-fwrapv" The -fno- common option specifies that the compiler
-            # should instead place uninitialized global variables in the data section of the
-            # object file.  This inhibits the merging of tentative definitions by the linker
-            # so you get a multiple- definition error if the same variable is defined in
-            # more than one compilation unit.  Compiling with -fno- common is useful on
-            # targets for which it provides better performance, or if you wish to verify
-            # that the program will work on other systems that always treat uninitialized
-            # variable definitions this way.  Remove this and you'll get all sorts of fun
-            # linker issues.
-            "-fno-common")
+    INTERFACE # Do not allow the compiler to assume the strictest aliasing rules
+              # applicable to the language being compiled. For C (and C++), this
+              # activates optimizations based on the type of expressions. In
+              # particular, an object of one type is assumed never to reside at
+              # the same address as an object of a different type, unless the
+              # types are almost the same. Supposedly this can introduce weird
+              # failures esp. on older gcc versions (MINGW) (See
+              # http://thiemonagel.de/2010/01/no-strict-aliasing/)
+              "-fno-strict-aliasing"
+              # This option instructs the compiler to assume that signed
+              # arithmetic overflow of addition, subtraction and multiplication
+              # wraps around using twos-complement representation. This flag
+              # enables some optimizations and disables others. The options
+              # -ftrapv and -fwrapv override each other, so using -ftrapv
+              # -fwrapv on the command-line results in -fwrapv being effective.
+              # Qemu is using this, so we use it as well. "-fwrapv" The -fno-
+              # common option specifies that the compiler should instead place
+              # uninitialized global variables in the data section of the object
+              # file.  This inhibits the merging of tentative definitions by the
+              # linker so you get a multiple- definition error if the same
+              # variable is defined in more than one compilation unit. Compiling
+              # with -fno- common is useful on targets for which it provides
+              # better performance, or if you wish to verify that the program
+              # will work on other systems that always treat uninitialized
+              # variable definitions this way.  Remove this and you'll get all
+              # sorts of fun linker issues.
+              "-fno-common")
 endif()
 
 # Make sure we make our dependent libraries available.
@@ -678,15 +712,16 @@ target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN
 
 target_link_libraries(android-qemu-deps INTERFACE virglrenderer-headers)
 
-if (LINUX_AARCH64)
-    message(STATUS "Suprressing all warnings as gcc has too many too count.")
-    add_c_flag("-w")
+if(LINUX_AARCH64)
+  message(STATUS "Suprressing all warnings as gcc has too many too count.")
+  add_c_flag("-w")
 endif()
 # Now we add the normal android libs, so we can use them
 add_subdirectory(android)
 add_subdirectory(android-qemu2-glue)
 
-set(ANDROID_QEMU_ARM_DEVICES "hw/pci/goldfish_address_space.c;hw/virtio/virtio-vsock.c")
+set(ANDROID_QEMU_ARM_DEVICES
+    "hw/pci/goldfish_address_space.c;hw/virtio/virtio-vsock.c")
 set(ANDROID_QEMU_COMMON_DEVICES "${ANDROID_QEMU_ARM_DEVICES};hw/i386/pc_piix.c")
 
 # Darwin definitions
@@ -809,9 +844,9 @@ android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE
 android_target_link_libraries(android-qemu-deps linux-aarch64 INTERFACE
                               "${TCMALLOC_LIBRARIES} -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE
-    "-framework CoreAudio" "-framework AudioToolbox")
+                              "-framework CoreAudio" "-framework AudioToolbox")
 android_target_link_libraries(android-qemu-deps darwin-aarch64 INTERFACE
-    "-framework CoreAudio" "-framework AudioToolbox")
+                              "-framework CoreAudio" "-framework AudioToolbox")
 android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE
                               android-emu-base)
 
@@ -820,7 +855,6 @@ if(LINUX_AARCH64)
 else()
   set(ASM_DIR_TARGET "${ANDROID_QEMU2_TOP_DIR}/linux-headers/asm-x86")
 endif()
-
 
 set(NEED_RELINK_ASM FALSE)
 if(EXISTS ${ANDROID_AUTOGEN}/asm)
@@ -859,8 +893,8 @@ android_add_library(
   SRC # cmake-format: sortable
       ${libqemuutil_generated_sources} ${libqemuutil_sources})
 target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
-android_target_link_libraries(
-  libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
+android_target_link_libraries(libqemu2-util windows
+                              PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
 target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
 
 # Once we have a newer version of cmake we can generate the object library in a
@@ -879,7 +913,8 @@ android_add_library(
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_compile_options(qemu2-common PRIVATE "-Wno-string-plus-int"
                                             "-Wno-return-type")
-target_link_libraries(qemu2-common PUBLIC android-qemu-deps emulator-libusb libqemu2-util)
+target_link_libraries(qemu2-common PUBLIC android-qemu-deps emulator-libusb
+                                          libqemu2-util)
 
 if(NOT OPTION_AEMU_LIBS_ONLY)
 
@@ -968,10 +1003,10 @@ if(NOT OPTION_AEMU_LIBS_ONLY)
     android_add_qemu_headless_executable(
       x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
-    android_add_qemu_executable(
-      aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-    android_add_qemu_headless_executable(
-      aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_executable(
+    aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_headless_executable(
+    aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
 
   if(NOT OPTION_MINBUILD)
     if(NOT BUILDING_FOR_AARCH64)
