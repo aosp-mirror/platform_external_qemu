@@ -79,11 +79,15 @@ path_getAvdContentPath(const char* avdName)
     if (!path_is_dir(avdPath)) {
         const char* relPath = iniFile_getString(ini, ROOT_REL_PATH_KEY, NULL);
         if (relPath != NULL) {
-            p = bufprint_config_path(temp, end);
+            p = bufprint_avd_home_path(temp, end);
             p = bufprint(p, end, PATH_SEP "%s", relPath);
             if (p < end && path_is_dir(temp)) {
-                AFREE(avdPath);
-                avdPath = ASTRDUP(temp);
+                char myPath[PATH_MAX];
+                snprintf(myPath, sizeof(myPath), "%s" PATH_SEP "config.ini", temp);
+                if (path_exists(myPath)) {
+                    AFREE(avdPath);
+                    avdPath = ASTRDUP(temp);
+                }
             }
         }
     }
