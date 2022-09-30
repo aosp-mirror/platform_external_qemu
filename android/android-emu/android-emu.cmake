@@ -425,6 +425,7 @@ android_add_library(
       android/emulation/ComponentVersion.cpp
       android/emulation/control/FilePusher.cpp
       android/emulation/control/NopRtcBridge.cpp
+      android/emulation/control/ScreenCapturer.cpp
       android/emulation/DmaMap.cpp
       android/emulation/GoldfishDma.cpp
       android/emulation/hostdevices/HostAddressSpace.cpp
@@ -597,6 +598,7 @@ target_compile_definitions(
           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 if(WEBRTC)
   target_compile_definitions(android-emu-shared PUBLIC -DANDROID_WEBRTC)
+  android_install_shared(android-emu-shared)
 endif()
 
 target_compile_definitions(android-emu-shared PUBLIC -DAEMU_MIN=1)

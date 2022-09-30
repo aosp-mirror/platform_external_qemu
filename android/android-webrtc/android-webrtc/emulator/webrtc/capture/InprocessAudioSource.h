@@ -1,4 +1,4 @@
-// Copyright (C) 2020 The Android Open Source Project
+// Copyright (C) 2022 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,18 +13,14 @@
 // limitations under the License.
 #pragma once
 
-#include <grpcpp/grpcpp.h>                        // for ClientContext
+#include <rtc_base/ref_counted_object.h>          // for RefCountedObject
 #include <cstdint>                                // for uint8_t
+#include <fstream>                                // for ofstream
 #include <memory>                                 // for unique_ptr
 #include <thread>                                 // for thread
 #include <vector>                                 // for vector
-#include <fstream>                                // for ofstream
-#include <rtc_base/ref_counted_object.h>           // for RefCountedObject
 #include "emulator/webrtc/capture/AudioSource.h"  // for AudioSource
-#include "emulator_controller.grpc.pb.h"          // for EmulatorController
 #include "emulator/webrtc/capture/MediaSource.h"
-#include "android/emulation/control/utils/EmulatorGrcpClient.h"
-
 namespace android {
 namespace emulation {
 namespace control {
@@ -36,17 +32,16 @@ class AudioPacket;
 namespace emulator {
 namespace webrtc {
 
-using android::emulation::control::EmulatorGrpcClient;
-
-class GrpcAudioSource : public AudioSource {
+class InprocessAudioSource : public AudioSource {
 public:
-    explicit GrpcAudioSource(EmulatorGrpcClient* client);
+    explicit InprocessAudioSource();
 
-    ~GrpcAudioSource();
+    ~InprocessAudioSource();
 
     const cricket::AudioOptions options() const override;
 
-    void setAudioDumpFile(const std::string & audioDumpFile);
+    void setAudioDumpFile(const std::string& audioDumpFile);
+
 protected:
     void cancel();
     void run();
@@ -57,17 +52,15 @@ private:
 
     // Consumes a single audio packet received from the Android Emulator.
     void ConsumeAudioPacket(
-            const ::android::emulation::control::AudioPacket& audio_packet);
+            const android::emulation::control::AudioPacket& audio_packet);
 
     std::vector<uint8_t> mPartialFrame;
-    EmulatorGrpcClient* mClient;
-    std::weak_ptr<grpc::ClientContext> mContext;
-    bool mCaptureAudio{true};
+    std::atomic_bool mCaptureAudio{true};
     std::ofstream mAudioDump;
 };
 
-using GrpcAudioMediaSource = MediaSource<GrpcAudioSource>;
-using GrpcRefAudioSource = rtc::scoped_refptr<GrpcAudioMediaSource>;
+using InprocessAudioMediaSource = MediaSource<InprocessAudioSource>;
+using InprocessRefAudioSource = rtc::scoped_refptr<InprocessAudioMediaSource>;
 
 }  // namespace webrtc
 }  // namespace emulator

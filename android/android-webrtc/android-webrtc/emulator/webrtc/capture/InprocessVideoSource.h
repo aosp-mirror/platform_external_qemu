@@ -1,4 +1,4 @@
-// Copyright (C) 2020 The Android Open Source Project
+// Copyright (C) 2022 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,33 +13,26 @@
 // limitations under the License.
 #pragma once
 
-#include <absl/types/optional.h>              // for optional
-#include <api/media_stream_interface.h>       // for MediaSourceInterface::S...
-#include <api/notifier.h>                     // for Notifier
-#include <api/scoped_refptr.h>                // for scoped_refptr
-#include <grpcpp/grpcpp.h>                    // for ClientContext
-#include <media/base/video_adapter.h>         // for VideoAdapter
-#include <media/base/video_broadcaster.h>     // for VideoBroadcaster
-#include <atomic>                             // for atomic_bool
-#include <memory>                             // for unique_ptr
-#include <mutex>                              // for mutex
-#include <thread>                             // for thread
-#include <rtc_base/ref_counted_object.h>    // for RefCountedObject
-#include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
+#include <absl/types/optional.h>           // for optional
+#include <api/media_stream_interface.h>    // for MediaSourceInterface::S...
+#include <api/notifier.h>                  // for Notifier
+#include <api/scoped_refptr.h>             // for scoped_refptr
+#include <grpcpp/grpcpp.h>                 // for ClientContext
+#include <media/base/video_adapter.h>      // for VideoAdapter
+#include <media/base/video_broadcaster.h>  // for VideoBroadcaster
+#include <rtc_base/ref_counted_object.h>   // for RefCountedObject
+#include <atomic>                          // for atomic_bool
+#include <memory>                          // for unique_ptr
+#include <mutex>                           // for mutex
+#include <thread>                          // for thread
 #include "emulator/webrtc/capture/MediaSource.h"
 
 namespace rtc {
 struct VideoSinkWants;
-template <typename VideoFrameT> class VideoSinkInterface;
+template <typename VideoFrameT>
+class VideoSinkInterface;
 }  // namespace rtc
 
-namespace android {
-namespace emulation {
-namespace control {
-class Image;
-}  // namespace control
-}  // namespace emulation
-}  // namespace android
 namespace webrtc {
 class I420Buffer;
 class RecordableEncodedFrame;
@@ -49,13 +42,16 @@ class VideoFrame;
 namespace emulator {
 namespace webrtc {
 
-using ::android::emulation::control::Image;
-using android::emulation::control::EmulatorGrpcClient;
-class GrpcVideoSource
+namespace control {
+class Image;
+}  // namespace control
+
+using control::Image;
+class InprocessVideoSource
     : public ::webrtc::Notifier<::webrtc::VideoTrackSourceInterface> {
 public:
-    explicit GrpcVideoSource(EmulatorGrpcClient* client);
-    ~GrpcVideoSource() override;
+    explicit InprocessVideoSource(int displayId);
+    ~InprocessVideoSource() override;
 
     bool is_screencast() const override { return true; }
     absl::optional<bool> needs_denoising() const override { return false; }
@@ -72,7 +68,8 @@ private:
     // Implements rtc::VideoSourceInterface.
     void AddOrUpdateSink(rtc::VideoSinkInterface<::webrtc::VideoFrame>* sink,
                          const rtc::VideoSinkWants& wants) override;
-    void RemoveSink(rtc::VideoSinkInterface<::webrtc::VideoFrame>* sink) override;
+    void RemoveSink(
+            rtc::VideoSinkInterface<::webrtc::VideoFrame>* sink) override;
 
     // Part of VideoTrackSourceInterface.
     bool GetStats(Stats* stats) override;
@@ -90,9 +87,7 @@ private:
             override {}
 
     void captureFrames();
-
-    EmulatorGrpcClient* mClient;
-    std::weak_ptr<::grpc::ClientContext> mContext;
+    int mDisplayId;
     rtc::scoped_refptr<::webrtc::I420Buffer>
             mI420Buffer;  // Re-usable I420Buffer.
     std::atomic_bool mCaptureVideo{false};
@@ -104,7 +99,8 @@ private:
     rtc::VideoBroadcaster mBroadcaster;
 };
 
-using GrpcVideoMediaSource = MediaSource<GrpcVideoSource>;
-using GrpcRefVideoSource = rtc::scoped_refptr<GrpcVideoMediaSource>;
+using InprocessVideoMediaSource = MediaSource<InprocessVideoSource>;
+using InprocessRefVideoSource = rtc::scoped_refptr<InprocessVideoMediaSource>;
+
 }  // namespace webrtc
 }  // namespace emulator

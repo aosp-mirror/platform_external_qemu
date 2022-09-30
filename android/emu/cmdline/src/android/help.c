@@ -1330,19 +1330,6 @@ help_turncfg(stralloc_t*  out)
 }
 
 static void
-help_rtcfps(stralloc_t*  out)
-{
-    PRINTF(
-    "  The maximimum frequency at which frames are delivered to the webrtc video bridge. \n\n"
-    "   <fps> The maximimum frequency at which frames are delivered.\n\n"
-    "  DEPRECATED. The emulator will always update every frame immediately without any cpu penalty. \n\n"
-    "  <fps> set above.\n\n"
-    "  For example:\n\n"
-    "  -rtcfps 60\n\n"
-    );
-}
-
-static void
 help_rootcanal_controller_properties_file(stralloc_t*  out)
 {
     PRINTF(
@@ -2216,6 +2203,7 @@ static void help_hotplug_multi_display(stralloc_t* out) {
 #define help_append_userspace_opt NULL
 #define help_no_nested_warnings NULL
 #define help_wifi_vmnet NULL
+#define help_dump_audio NULL
 
 typedef struct {
     const char*  name;
