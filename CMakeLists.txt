@@ -83,19 +83,19 @@ set(OPTION_CLANG_TIDY
 set(OPTION_CLANG_TIDY_FIX FALSE
     CACHE BOOL "True if you wish clang-tidy to auto fix issues it encounters.")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
-if(NOT WINDOWS_MSVC_X86_64)
+if(LINUX_X86_64 OR LINUX_AARCH64)
   set(WEBRTC
       TRUE
       CACHE
         BOOL
-        "True if the emulator should be build with WEBRTC support."
+        "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
   )
 else()
   set(WEBRTC
       FALSE
       CACHE
         BOOL
-        "True if the emulator should be build with WEBRTC support. Defaults on for Linux and MacOS"
+        "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
   )
 endif()
 set(ANDROIDSTUDIO FALSE
@@ -157,6 +157,7 @@ endif()
 if(GFXSTREAM)
   set(OPTION_GFXSTREAM_BACKEND TRUE)
   set(OPTION_TCMALLOC FALSE)
+  set(WEBRTC FALSE)
   set(ANDROIDSTUDIO FALSE)
 endif()
 

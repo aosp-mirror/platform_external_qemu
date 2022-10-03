@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <api/scoped_refptr.h>  // for scoped_refptr
-#include <stdint.h>             // for uint16_t
-#include <map>                  // for map
-#include <memory>               // for shared_ptr
-#include <string>               // for string
-#include <unordered_map>        // for unordered_map
-#include <vector>               // for vector
+#include <api/scoped_refptr.h>                             // for scoped_refptr
+#include <stdint.h>                                        // for uint16_t
+#include <map>                                             // for map
+#include <memory>                                          // for shared_ptr
+#include <string>                                          // for string
+#include <unordered_map>                                   // for unordered_map
+#include <vector>                                          // for vector
 
 #include "android/base/containers/BufferQueue.h"           // for BufferQueue
 #include "android/base/synchronization/Lock.h"             // for Lock (ptr ...
 #include "android/base/system/System.h"                    // for System
 #include "android/emulation/control/RtcBridge.h"           // for RtcBridge:...
-#include "android/emulation/control/TurnConfig.h"          // for TurnConfig
 #include "emulator/webrtc/RtcConnection.h"                 // for RtcConnection
+#include "android/emulation/control/TurnConfig.h"          // for TurnConfig
+#include "emulator/webrtc/capture/VideoCapturerFactory.h"  // for VideoCaptu...
 
 namespace emulator {
 namespace webrtc {
@@ -46,7 +47,11 @@ using android::emulation::control::TurnConfig;
 // 4. Participants that are no longer streaming need to be finalized.
 class Switchboard : public RtcBridge, public RtcConnection {
 public:
-    Switchboard(TurnConfig turnconfig, const std::string& audioDumpFile = "");
+    Switchboard(EmulatorGrpcClient* client,
+                const std::string& shmPath,
+                TurnConfig turnconfig,
+                int adbPort,
+                const std::string& audioDumpFile="");
     ~Switchboard();
 
     // Connect will initiate the RTC stream if not yet in progress.
@@ -79,10 +84,18 @@ public:
     // The participant will no longer be in use and close can be called.
     void rtcConnectionClosed(const std::string participant) override;
 
+    VideoCapturerFactory* getVideoCaptureFactory() { return &mCaptureFactory; }
+
     static std::string BRIDGE_RECEIVER;
 
 private:
-    std::unordered_map<std::string, std::shared_ptr<Participant>> mConnections;
+    std::unordered_map<std::string, std::shared_ptr<Participant>>
+            mConnections;
+
+    VideoCapturerFactory mCaptureFactory;
+
+    const std::string mShmPath = "/tmp";
+    int mAdbPort{0};
 
     // Turn configuration object.
     TurnConfig mTurnConfig;

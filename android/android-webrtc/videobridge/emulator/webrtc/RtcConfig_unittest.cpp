@@ -19,7 +19,7 @@ using emulator::webrtc::RtcConfig;
 using nlohmann::json;
 using ::webrtc::PeerConnectionInterface;
 
-static std::string VALID_TURN_CFG = R"#(
+std::string VALID_TURN_CFG = R"#(
 {
    "iceServers":[
       {

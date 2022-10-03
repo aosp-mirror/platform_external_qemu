@@ -106,6 +106,7 @@ extern "C" {
 
 #ifdef ANDROID_WEBRTC
 #include "android/emulation/control/RtcService.h"
+#include "android/emulation/control/TurnConfig.h"
 #endif
 
 #ifdef ANDROID_BLUETOOTH
@@ -416,11 +417,18 @@ int qemu_setup_grpc() {
     }
 
 #ifdef ANDROID_WEBRTC
-    auto rtcSvc = android::emulation::control::getRtcService(
-            getConsoleAgents()->settings->android_cmdLineOptions()->turncfg,
-            getConsoleAgents()->settings->android_cmdLineOptions()->dump_audio,
-            true);
-    builder.withService(rtcSvc);
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->turncfg &&
+        !android::emulation::control::TurnConfig::producesValidTurn(
+                getConsoleAgents()
+                        ->settings->android_cmdLineOptions()
+                        ->turncfg)) {
+        derror("command `%s` does not produce a valid turn configuration.",
+               getConsoleAgents()->settings->android_cmdLineOptions()->turncfg);
+        exit(1);
+    }
+    builder.withService(android::emulation::control::getRtcService(
+            getConsoleAgents(), android_adb_port,
+            getConsoleAgents()->settings->android_cmdLineOptions()->turncfg));
 #endif
     int port = -1;
     grpcService = builder.build();
