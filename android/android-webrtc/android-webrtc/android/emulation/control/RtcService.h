@@ -28,9 +28,6 @@ grpc::Service* getRtcService(const AndroidConsoleAgents* agents,
                              const char* turncfg);
 grpc::Service* getRtcService(RtcBridge* bridge);
 
-grpc::Service* getRtcService(const char* turncfg,
-                                const char* audioDump,
-                                bool verbose);
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

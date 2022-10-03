@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "android/recording/AvFormat.h"  // for AudioFormat
+#include "android/recording/Frame.h"  // for AudioFormat
 
 namespace android {
 namespace emulation {

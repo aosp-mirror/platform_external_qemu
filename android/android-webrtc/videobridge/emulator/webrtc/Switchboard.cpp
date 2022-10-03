@@ -30,10 +30,10 @@
 #include "android/base/containers/BufferQueue.h"  // for BufferQueueResult
 #include "android/base/synchronization/Lock.h"    // for Lock, AutoReadLock
 #include "android/base/system/System.h"           // for System, System::Dur...
-#include "android/console.h"                      // for getConsoleAgents
 #include "emulator/webrtc/Participant.h"          // for Participant
 #include "emulator/webrtc/RtcConnection.h"        // for json, RtcConnection
 #include "nlohmann/json.hpp"                      // for basic_json<>::value...
+
 
 using namespace android::base;
 
@@ -44,9 +44,16 @@ std::string Switchboard::BRIDGE_RECEIVER = "WebrtcVideoBridge";
 
 Switchboard::~Switchboard() {}
 
-Switchboard::Switchboard(TurnConfig turnConfig,
+Switchboard::Switchboard(EmulatorGrpcClient* client,
+                         const std::string& shmPath,
+                         TurnConfig turnConfig,
+                         int adbPort,
                          const std::string& audioDumpFile)
-    : RtcConnection(), mTurnConfig(turnConfig), mAudioDumpFile(audioDumpFile) {}
+    : RtcConnection(client),
+      mShmPath(shmPath),
+      mAdbPort(adbPort),
+      mTurnConfig(turnConfig),
+      mAudioDumpFile(audioDumpFile) {}
 
 void Switchboard::rtcConnectionClosed(const std::string participant) {
     const std::lock_guard<std::mutex> lock(mCleanupMutex);
@@ -110,8 +117,7 @@ bool Switchboard::connect(std::string identity) {
     // locked down pretty well. (Google gce environment for example)
     json turnConfig = mTurnConfig.getConfig();
 
-    auto participant =
-            std::make_shared<Participant>(this, identity, turnConfig, nullptr);
+    auto participant = std::make_shared<Participant>(this, identity, turnConfig, nullptr);
     if (!participant->Initialize()) {
         return false;
     }
@@ -124,22 +130,14 @@ bool Switchboard::connect(std::string identity) {
 
     // Note: Dynamically adding new tracks will likely require participant
     // re-negotiation.
-    const auto* agent = getConsoleAgents();
-    if (agent && agent->multi_display->isMultiDisplayEnabled()) {
-        int32_t startId = -1;
-        uint32_t id;
-        while (agent->multi_display->getNextMultiDisplay(
-                startId, &id, nullptr, nullptr, nullptr, nullptr, nullptr,
-                nullptr, nullptr)) {
-            LOG(INFO) << "Add video track with displayId: " << id;
-            participant->AddVideoTrack(id);
-            startId = id;
-        }
-    } else {
-        LOG(INFO) << "Add default video track 0";
-        participant->AddVideoTrack(0);
-    }
+    participant->AddVideoTrack(0);
     participant->AddAudioTrack(mAudioDumpFile);
+    if (mAdbPort >= 0) {
+        auto adbSocket = std::make_shared<android::base::AsyncSocket>(
+                getLooper(), mAdbPort);
+        adbSocket->connect();
+        participant->RegisterLocalAdbForwarder(adbSocket);
+    }
     participant->CreateOffer();
 
     return true;

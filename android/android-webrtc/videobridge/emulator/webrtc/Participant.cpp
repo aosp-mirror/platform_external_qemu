@@ -35,16 +35,18 @@
 #include <vector>         // for vector
 
 #include "android/base/Log.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/misc/StringUtils.h"  // for splitTokens
-#include "android/emulation/control/adb/AdbInterface.h"
-#include "emulator/webrtc/RtcConfig.h"
-#include "emulator/webrtc/RtcConnection.h"  // for json, RtcCon...
-#include "emulator/webrtc/Switchboard.h"    // for Switchboard
-#include "emulator/webrtc/capture/InprocessVideoSource.h"  // for InprocessVideoSource
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"             // for EmulatorGrpc...
+#include "emulator/net/SocketForwarder.h"                // for AdbPortForwa...
+#include "emulator/webrtc/RtcConnection.h"               // for json, RtcCon...
+#include "emulator/webrtc/Switchboard.h"                 // for Switchboard
+#include "emulator/webrtc/capture/GrpcAudioSource.h"     // for GrpcAudioSource
+#include "emulator/webrtc/capture/GrpcVideoSource.h"     // for GrpcVideoSource
 #include "emulator/webrtc/capture/VideoTrackReceiver.h"  // for VideoTrackRe...
+#include "emulator_controller.grpc.pb.h"                 // for EmulatorCont...
 #include "emulator_controller.pb.h"                      // for KeyboardEvent
+#include "google/protobuf/empty.pb.h"                    // for Empty
 #include "nlohmann/json.hpp"                             // for basic_json
+#include "emulator/webrtc/RtcConfig.h"
 
 namespace android {
 namespace base {
@@ -55,8 +57,10 @@ class AsyncSocket;
 using json = nlohmann::json;
 using MediaStreamPair =
         std::pair<std::string, scoped_refptr<webrtc::MediaStreamInterface>>;
+
 namespace emulator {
 namespace webrtc {
+
 
 const std::string Participant::kAudioTrack = "grpcAudioTrack";
 const std::string Participant::kVideoTrack = "grpcDisplay-";
@@ -176,14 +180,10 @@ private:
 };
 
 EventForwarder::EventForwarder(
-        const AndroidConsoleAgents* agents,
+        EmulatorGrpcClient* client,
         scoped_refptr<::webrtc::DataChannelInterface> channel,
         DataChannelLabel label)
-    : mAgents(agents),
-      mKeyEventSender(agents),
-      mTouchEventSender(agents),
-      mChannel(channel),
-      mLabel(label) {
+    : mClient(client), mChannel(channel), mLabel(label) {
     channel->RegisterObserver(this);
 }
 
@@ -194,46 +194,28 @@ EventForwarder::~EventForwarder() {
 void EventForwarder::OnStateChange() {}
 
 void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
+    if (!mEmulatorGrpc) {
+        mEmulatorGrpc = mClient->stub<android::emulation::control::EmulatorController>();
+    }
+    ::google::protobuf::Empty nullResponse;
+    std::unique_ptr<grpc::ClientContext> context = mClient->newContext();
     switch (mLabel) {
         case DataChannelLabel::keyboard: {
             android::emulation::control::KeyboardEvent keyEvent;
             keyEvent.ParseFromArray(buffer.data.data(), buffer.size());
-            android::base::ThreadLooper::runOnMainLooper([this, keyEvent]() {
-                mKeyEventSender.sendOnThisThread(&keyEvent);
-            });
+            mEmulatorGrpc->sendKey(context.get(), keyEvent, &nullResponse);
             break;
         }
         case DataChannelLabel::mouse: {
             android::emulation::control::MouseEvent mouseEvent;
             mouseEvent.ParseFromArray(buffer.data.data(), buffer.size());
-            auto agent = mAgents->user_event;
-            android::base::ThreadLooper::runOnMainLooper([agent, mouseEvent]() {
-                agent->sendMouseEvent(mouseEvent.x(), mouseEvent.y(), 0,
-                                      mouseEvent.buttons(),
-                                      mouseEvent.display());
-            });
+            mEmulatorGrpc->sendMouse(context.get(), mouseEvent, &nullResponse);
             break;
         }
         case DataChannelLabel::touch: {
             android::emulation::control::TouchEvent touchEvent;
             touchEvent.ParseFromArray(buffer.data.data(), buffer.size());
-            android::base::ThreadLooper::runOnMainLooper([this, touchEvent]() {
-                mTouchEventSender.sendOnThisThread(&touchEvent);
-            });
-            break;
-        }
-        case DataChannelLabel::adb: {
-            auto adbInterface = android::emulation::AdbInterface::getGlobal();
-            if (!adbInterface) {
-                LOG(VERBOSE) << "find no adb interface";
-                return;
-            }
-            const char* data =
-                    reinterpret_cast<const char*>(buffer.data.data());
-            auto adbCmds = android::base::Split(data, " ");
-            // Remove "adb"
-            adbCmds.erase(adbCmds.begin());
-            adbInterface->enqueueCommand(adbCmds);
+            mEmulatorGrpc->sendTouch(context.get(), touchEvent, &nullResponse);
             break;
         }
         default:
@@ -252,6 +234,11 @@ Participant::Participant(RtcConnection* board,
 
 Participant::~Participant() {
     LOG(INFO) << "Participant " << mPeerId << ", completed.";
+    if (mLocalAdbSocket) {
+        // There's a corner case where we never established a local adb
+        // connection and we could be spinning in a connect loop.
+        mLocalAdbSocket->close();
+    }
 }
 
 void Participant::OnAddStream(
@@ -274,13 +261,13 @@ using ::webrtc::PeerConnectionInterface;
 void Participant::OnIceConnectionChange(
         PeerConnectionInterface::IceConnectionState new_state) {
     LOG(INFO) << "OnIceConnectionChange: Participant: " << mPeerId << ": "
-              << asString(new_state);
+                  << asString(new_state);
 }
 
 void Participant::OnConnectionChange(
         PeerConnectionInterface::PeerConnectionState new_state) {
     LOG(INFO) << "OnConnectionChange: Participant: " << mPeerId << ": "
-              << asString(new_state);
+                  << asString(new_state);
     bool closed = false;
     switch (new_state) {
         case PeerConnectionInterface::PeerConnectionState::kFailed:
@@ -365,7 +352,7 @@ void Participant::SendToDataChannel(DataChannelLabel label, std::string data) {
         fwd->second->Send(buffer);
     } else {
         LOG(INFO) << "Dropping message to " << asString(label)
-                  << ", no such datachannel present";
+                      << ", no such datachannel present";
     }
 }
 
@@ -408,7 +395,7 @@ void Participant::HandleCandidate(const json& msg) {
             CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
     if (!candidate) {
         LOG(WARNING) << "Can't parse received candidate message. "
-                     << "SdpParseError was: " << error.description;
+                         << "SdpParseError was: " << error.description;
         return;
     }
     mPeerConnection->AddIceCandidate(std::move(candidate), &logRtcError);
@@ -431,7 +418,7 @@ void Participant::HandleOffer(const json& msg) {
             CreateSessionDescription(type, sdp, &error));
     if (!session_description) {
         LOG(WARNING) << "Can't parse received session description message. "
-                     << "SdpParseError was: " << error.description;
+                         << "SdpParseError was: " << error.description;
         return;
     }
     auto sort = session_description->type();
@@ -463,7 +450,7 @@ bool Participant::AddVideoTrack(int displayId) {
     std::string handle = kVideoTrack + std::to_string(displayId);
     if (mActiveTracks.count(handle) != 0) {
         LOG(ERROR) << "Track " << handle
-                   << " already active, not adding again.";
+                          << " already active, not adding again.";
     }
     LOG(INFO) << "Adding video track: [" << handle << "]";
     auto track =
@@ -475,7 +462,7 @@ bool Participant::AddVideoTrack(int displayId) {
     auto result = mPeerConnection->AddTrack(video_track, {handle});
     if (!result.ok()) {
         LOG(ERROR) << "Failed to add track to video: "
-                   << result.error().message();
+                          << result.error().message();
         return false;
     }
     mVideoSources.push_back(track);
@@ -486,7 +473,7 @@ bool Participant::AddVideoTrack(int displayId) {
 bool Participant::AddAudioTrack(const std::string& audioDumpFile) {
     if (mActiveTracks.count(kAudioTrack) != 0) {
         LOG(ERROR) << "Track " << kAudioTrack
-                   << " already active, not adding again.";
+                          << " already active, not adding again.";
     }
     LOG(INFO) << "Adding audio track: [" << kAudioTrack << "]";
     auto track = mRtcConnection->getMediaSourceLibrary()->getAudioSource();
@@ -498,7 +485,8 @@ bool Participant::AddAudioTrack(const std::string& audioDumpFile) {
 
     auto result = mPeerConnection->AddTrack(audio_track, {kAudioTrack});
     if (!result.ok()) {
-        LOG(ERROR) << "Failed to add audio track: " << result.error().message();
+        LOG(ERROR) << "Failed to add audio track: "
+                          << result.error().message();
         return false;
     }
     mActiveTracks[kAudioTrack] = result.value();
@@ -516,22 +504,37 @@ void Participant::CreateOffer() {
 void Participant::OnDataChannel(
         rtc::scoped_refptr<::webrtc::DataChannelInterface> channel) {
     LOG(INFO) << "Registering data channel: " << channel->label();
+    if (channel->label() == "adb" && mLocalAdbSocket) {
+        mSocketForwarder =
+                std::make_unique<SocketForwarder>(mLocalAdbSocket, channel);
+    }
     mDataChannels[channel->label()] = channel;
+}
+
+bool Participant::RegisterLocalAdbForwarder(
+        std::shared_ptr<android::base::AsyncSocket> adbSocket) {
+    LOG(INFO) << "Registering adb forwarding channel.";
+    mLocalAdbSocket = adbSocket;
+    auto channel = mPeerConnection->CreateDataChannel("adb", nullptr);
+    if (!channel) {
+        return false;
+    }
+    mSocketForwarder = std::make_unique<SocketForwarder>(adbSocket, channel);
+    return true;
 }
 
 void Participant::AddDataChannel(const DataChannelLabel label) {
     auto channel = mPeerConnection->CreateDataChannel(asString(label), nullptr);
     mEventForwarders[label] = std::make_unique<EventForwarder>(
-            getConsoleAgents(), channel, label);
+            mRtcConnection->getEmulatorClient(), channel, label);
 }
 
 bool Participant::Initialize() {
     bool success = CreatePeerConnection(mRtcConfig);
     if (success) {
         AddDataChannel(DataChannelLabel::mouse);
-        AddDataChannel(DataChannelLabel::keyboard);
         AddDataChannel(DataChannelLabel::touch);
-        AddDataChannel(DataChannelLabel::adb);
+        AddDataChannel(DataChannelLabel::keyboard);
     }
     return success;
 }
@@ -540,7 +543,7 @@ bool Participant::CreatePeerConnection(const json& rtcConfiguration) {
     RTC_DCHECK(mPeerConnection.get() == nullptr);
     mPeerConnection =
             mRtcConnection->getPeerConnectionFactory()->CreatePeerConnection(
-                    RtcConfig::parse(rtcConfiguration),
+                   RtcConfig::parse(rtcConfiguration),
                     ::webrtc::PeerConnectionDependencies(this));
     return mPeerConnection.get() != nullptr;
 }

@@ -88,14 +88,14 @@ if(LINUX_X86_64 OR LINUX_AARCH64)
       TRUE
       CACHE
         BOOL
-        "True if the emulator should be build with WEBRTC support."
+        "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
   )
 else()
   set(WEBRTC
       FALSE
       CACHE
         BOOL
-        "True if the emulator should be build with WEBRTC support. Defaults on for Linux and MacOS"
+        "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
   )
 endif()
 set(ANDROIDSTUDIO FALSE
@@ -157,6 +157,7 @@ endif()
 if(GFXSTREAM)
   set(OPTION_GFXSTREAM_BACKEND TRUE)
   set(OPTION_TCMALLOC FALSE)
+  set(WEBRTC FALSE)
   set(ANDROIDSTUDIO FALSE)
 endif()
 

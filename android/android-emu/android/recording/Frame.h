@@ -16,8 +16,6 @@
 #include <cstdint>                // for uint8_t, uint32_t, uint64_t
 #include <vector>                 // for vector
 
-#include "android/recording/AvFormat.h"
-
 extern "C" {
 #include "libavutil/pixfmt.h"     // for AVPixelFormat
 #include "libavutil/samplefmt.h"  // for AVSampleFormat
@@ -25,6 +23,9 @@ extern "C" {
 
 namespace android {
 namespace recording {
+
+enum class VideoFormat { RGB565, RGBA8888, BGRA8888, INVALID_FMT };
+enum class AudioFormat { AUD_FMT_S16, AUD_FMT_U8, INVALID_FMT };
 
 // The video format size in bytes
 int getVideoFormatSize(VideoFormat format);
@@ -37,6 +38,11 @@ int getAudioFormatSize(AudioFormat format);
 
 // Conversion from AudioFormat to AVSampleFormat
 AVSampleFormat toAVSampleFormat(AudioFormat r);
+
+union AVFormat {
+    VideoFormat videoFormat;
+    AudioFormat audioFormat;
+};
 
 // A small structure to encapsulate audio/video data.
 struct Frame {
