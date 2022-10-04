@@ -163,6 +163,12 @@ def is_crosscompile(target):
     aarch = platform.machine()
     if aarch == "arm64":
         aarch = "aarch64"
+    else:
+      # Ok maybe python is running under rosetta, if so the uname.version
+      # will have have something along RELEASE_ARM64_T6000 in it
+      uname = platform.uname()
+      if "ARM64" in uname.version and uname.system == "Darwin":
+        aarch = "aarch64"
 
     return aarch != match.group(3)
 
