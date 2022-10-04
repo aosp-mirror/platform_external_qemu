@@ -265,8 +265,8 @@ if(BLUETOOTH_EMULATION)
     GENERATED BLUETOOTH_SERVICE_GRPC_SRC)
 
   # Lets distribute the proto file
-  install(FILES emulated_bluetooth.proto emulated_bluetooth_device.proto
-                emulated_bluetooth_packets.proto emulated_bluetooth_vhci.proto
+  install(FILES emulated_bluetooth.proto emulated_bluetooth_device.proto grpc_endpoint_description.proto
+                emulated_bluetooth_packets.proto emulated_bluetooth_vhci.proto grpc_endpoint_description.proto
           DESTINATION lib)
 
   android_add_library(
