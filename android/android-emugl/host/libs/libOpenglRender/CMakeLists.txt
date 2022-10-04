@@ -262,7 +262,7 @@ if(NOT LINUX_AARCH64)
         tests/VsyncThread_unittest.cpp)
   target_link_libraries(
     OpenglRender_unittests PRIVATE OpenglRender_standalone_common
-                                   android-emu-test-launcher android-emu)
+                                   android-emu-test-launcher android-emu android-emu-base-headers)
   android_target_compile_definitions(OpenglRender_unittests windows
                                      PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
   android_target_compile_definitions(OpenglRender_unittests linux
@@ -280,7 +280,7 @@ if(NOT LINUX_AARCH64)
           vulkan/VulkanStream_unittest.cpp)
     add_opengl_dependencies(OpenglRender_vulkan_unittests)
     target_link_libraries(OpenglRender_vulkan_unittests
-                          PRIVATE android-emu-test-launcher android-emu)
+                          PRIVATE android-emu-test-launcher android-emu android-emu-base-headers)
     target_link_libraries(
       OpenglRender_vulkan_unittests PUBLIC OpenglRender_standalone_common
                                            OpenglRender_vulkan gmock_main)
@@ -299,6 +299,7 @@ if(NOT LINUX_AARCH64)
         samples/HelloTriangle.cpp samples/HelloTriangleImp.cpp)
   target_link_libraries(
     HelloTriangle
+    PRIVATE android-emu-base-headers
     PUBLIC OpenglRender_standalone_common
            OpenglCodecCommon
            android-emu-base
@@ -317,6 +318,7 @@ if(NOT LINUX_AARCH64)
                                                 samples/HelloSurfaceFlinger.cpp)
   target_link_libraries(
     HelloSurfaceFlinger
+    PRIVATE android-emu-base-headers
     PUBLIC OpenglRender_standalone_common
            OpenglCodecCommon
            android-emu-base
@@ -336,6 +338,7 @@ if(NOT LINUX_AARCH64)
         samples/CreateDestroyContext.cpp)
   target_link_libraries(
     CreateDestroyContext
+    PRIVATE android-emu-base-headers
     PUBLIC OpenglRender_standalone_common
            OpenglCodecCommon
            android-emu-base
@@ -355,6 +358,7 @@ if(NOT LINUX_AARCH64)
         samples/HelloHostComposition.cpp)
   target_link_libraries(
     HelloHostComposition
+    PRIVATE android-emu-base-headers
     PUBLIC OpenglRender_standalone_common
            OpenglCodecCommon
            android-emu-base
@@ -373,6 +377,7 @@ if(NOT LINUX_AARCH64)
                                         samples/HelloVulkan.cpp)
   target_link_libraries(
     HelloVulkan
+    PRIVATE android-emu-base-headers
     PUBLIC OpenglRender_standalone_common
            OpenglCodecCommon
            android-emu-base

@@ -32,6 +32,7 @@ target_link_libraries(libscriptedbeaconpayload-protos-lite
 add_library(libbt-rootcanal.headers INTERFACE)
 target_include_directories(libbt-rootcanal.headers INTERFACE .
   ${ROOTCANAL_ROOT})
+target_link_libraries(libbt-rootcanal.headers INTERFACE android-emu-base-headers)
 android_license(TARGET "libbt-rootcanal.headers" LIBNAME None SPDX Apache-2.0
   LICENSE Apache-2.0 LOCAL "${BT_ROOT}/../NOTICE")
 
@@ -51,7 +52,7 @@ android_add_library(
 target_include_directories(
   BluetoothPacketSources PUBLIC . ${ROOTCANAL_ROOT} ${ROOTCANAL_ROOT}/include
   ${BT_ROOT}/gd ${BT_ROOT})
-target_link_libraries(BluetoothPacketSources PRIVATE android-emu-base)
+target_link_libraries(BluetoothPacketSources PRIVATE android-emu-base android-emu-base-headers)
 target_compile_options(BluetoothPacketSources
   PUBLIC -Wno-inconsistent-missing-override)
 
@@ -118,7 +119,7 @@ android_add_library(
 target_link_libraries(
   libbt-rootcanal
   PRIVATE libscriptedbeaconpayload-protos-lite jsoncpp libbt-crypto_toolbox
-  BluetoothPacketSources android-emu-base)
+  BluetoothPacketSources android-emu-base android-emu-base-headers)
 target_include_directories(
   libbt-rootcanal
   PUBLIC . ${ROOTCANAL_ROOT} ${ROOTCANAL_ROOT}/include ${BT_ROOT}/gd ${BT_ROOT}
@@ -139,7 +140,8 @@ android_add_library(
   net/sockets/loopback_async_socket_server.cc
   root_canal_qemu.cpp)
 
-target_link_libraries(libbt-rootcanal-qemu PRIVATE libbt-rootcanal android-emu)
+target_link_libraries(libbt-rootcanal-qemu PRIVATE libbt-rootcanal android-emu
+                      android-emu-base-headers)
 target_include_directories(libbt-rootcanal-qemu PUBLIC .
   PRIVATE ${ROOTCANAL_ROOT}/desktop/)
 
@@ -159,4 +161,4 @@ target_compile_definitions(rootcanal_test_host PRIVATE -DLOG_NDEBUG=1)
 target_include_directories(rootcanal_test_host PRIVATE .)
 target_link_libraries(
   rootcanal_test_host PRIVATE libbt-rootcanal libbt-rootcanal-qemu android-emu
-  gtest gtest_main)
+  android-emu-base-headers gtest gtest_main)

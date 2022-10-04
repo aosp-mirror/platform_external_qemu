@@ -29,6 +29,7 @@
 #include "android/base/ArraySize.h"                          // for stringLi...
 #include "android/base/Log.h"                                // for LogStream
 #include "android/base/async/AsyncSocket.h"                  // for AsyncSocket
+#include "android/base/async/AsyncSocketAdapter.h"                 // for AsyncSoc...
 #include "android/base/async/ThreadLooper.h"                 // for ThreadLo...
 #include "android/base/files/PathUtils.h"                    // for pj
 #include "android/base/files/QueueStreambuf.h"               // for QueueStr...
@@ -37,7 +38,6 @@
 #include "android/base/system/System.h"                      // for System
 #include "android/base/threads/FunctorThread.h"              // for FunctorT...
 #include "android/emulation/control/adb/adbkey.h"            // for adb_auth...
-#include "emulator/net/AsyncSocketAdapter.h"                 // for AsyncSoc...
 
 namespace android {
 namespace base {
@@ -92,7 +92,7 @@ using android::base::AsyncSocket;
 using android::base::ConditionVariable;
 using android::base::Lock;
 using android::base::System;
-using emulator::net::AsyncSocketAdapter;
+using android::base::AsyncSocketAdapter;
 
 constexpr size_t MAX_PAYLOAD_V1 = 4 * 1024;
 constexpr size_t MAX_PAYLOAD = 1024 * 1024;
@@ -291,7 +291,7 @@ constexpr const char hdr[] =
 // Note that ADBD can be very flaky during system image boot. The kernel
 // can decide to Kill ADBD whenever it sees fit for example.
 class AdbConnectionImpl : public AdbConnection,
-                          public emulator::net::AsyncSocketEventListener {
+                          public android::base::AsyncSocketEventListener {
 public:
     AdbConnectionImpl(AsyncSocketAdapter* socket) : mSocket(socket) {
         mSocket->setSocketEventListener(this);

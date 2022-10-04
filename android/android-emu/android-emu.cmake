@@ -21,6 +21,7 @@ android_add_library(
   DARWIN android/camera/camera-capture-mac.m
   DEPS android-emu-agents-headers
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-files
        android-emu-min-avd
@@ -262,6 +263,7 @@ android_add_library(
 # would like to keep this list small.
 target_link_libraries(
   android-emu
+  PRIVATE android-emu-base-headers
   PUBLIC FFMPEG::FFMPEG
          VPX::VPX
          emulator-libext4_utils
@@ -480,6 +482,7 @@ android_add_library(
 target_link_libraries(
   android-emu-shared
   PUBLIC android-emu-base
+         android-emu-base-headers
          android-emu-avd
          android-emu-agents
          android-emu-cmdline
@@ -620,7 +623,7 @@ android_add_library(
 android_target_compile_options(android-emu-test-launcher Clang
                                PRIVATE -O0 -Wno-invalid-constexpr)
 target_link_libraries(
-  android-emu-test-launcher PRIVATE android-emu
+  android-emu-test-launcher PRIVATE android-emu android-emu-base-headers
   PUBLIC gmock android-emu-cmdline-testing android-emu-feature-test
          android-emu-crashreport-consent-never)
 
@@ -695,7 +698,9 @@ if(NOT LINUX_AARCH64)
     android-emu_unittests PRIVATE -O0 -Wno-invalid-constexpr
                                   -Wno-string-plus-int)
   target_include_directories(android-emu_unittests
-                             PRIVATE ../android-emugl/host/include/)
+                             PRIVATE
+                             ../android-emugl/host/include/
+                             android/)
 
   # Sign unit test if needed.
   android_sign(TARGET android-emu_unittests)
@@ -709,7 +714,7 @@ if(NOT LINUX_AARCH64)
   # Dependecies are exported from android-emu.
   target_link_libraries(
     android-emu_unittests
-    PRIVATE android-emu android-emu-protobuf android-emu-cmdline-testing
+    PRIVATE android-emu android-emu-base-headers android-emu-protobuf android-emu-cmdline-testing
             android-emu-hardware-test android-emu-test-launcher)
 
   list(

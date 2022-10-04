@@ -42,6 +42,7 @@ android_add_library(
        android-emu-agents
        android-emu-avd
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-crashreport
        android-emu-feature
@@ -65,7 +66,7 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR test
   SRC android/emulation/testing/TestAndroidPipeDevice.cpp
-  DEPS android-emu-base android-emu-hardware)
+  DEPS android-emu-base android-emu-base-headers android-emu-hardware)
 target_include_directories(android-emu-hardware-test PRIVATE src PUBLIC include
                                                                         test)
 
@@ -80,6 +81,7 @@ android_add_test(
   DEPS android-emu
        android-emu-agents
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-hardware
        android-emu-hardware-test

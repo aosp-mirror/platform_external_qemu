@@ -13,20 +13,20 @@
 // limitations under the License.
 #pragma once
 #include "android/base/Log.h"
+#include "android/base/async/AsyncSocketAdapter.h"
 #include "android/base/async/AsyncWriter.h"
 #include "android/base/async/Looper.h"
 #include "android/base/containers/BufferQueue.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/FunctorThread.h"
-#include "emulator/net/AsyncSocketAdapter.h"
 #include "android/base/sockets/ScopedSocket.h"
 
 namespace android {
 namespace base {
 using MessageQueue = android::base::BufferQueue<std::string>;
+using android::base::AsyncSocketAdapter;
 using android::base::FunctorThread;
-using emulator::net::AsyncSocketAdapter;
 
 // An AsyncSocket is a socket that can connect to a local port on
 // the current machine.

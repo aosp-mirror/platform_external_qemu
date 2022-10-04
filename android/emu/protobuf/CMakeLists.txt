@@ -5,7 +5,7 @@ android_add_library(
   SOURCE_DIR
   src
   SRC android/protobuf/LoadSave.cpp android/protobuf/ProtobufLogging.cpp
-  DEPS android-emu-base protobuf::libprotobuf)
+  DEPS android-emu-base android-emu-base-headers protobuf::libprotobuf)
 target_include_directories(android-emu-protobuf PRIVATE src PUBLIC include)
 android_target_link_libraries(android-emu-protobuf windows
                               PRIVATE emulator-libmman-win32)

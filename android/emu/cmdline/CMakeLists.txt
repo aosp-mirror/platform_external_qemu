@@ -7,7 +7,7 @@ android_add_library(
   SRC android/cmdline-option.cpp android/emulation/bufprint_config_dirs.cpp
       android/emulation/ParameterList.cpp android/help.c
       android/network/constants.c
-  DEPS android-emu-base android-emu-files)
+  DEPS android-emu-base android-emu-base-headers android-emu-files)
 target_include_directories(
   android-emu-cmdline
   PRIVATE src
@@ -30,7 +30,8 @@ android_add_test(
       android/emulation/bufprint_config_dirs_unittest.cpp
       android/network/constants_unittest.cpp)
 target_link_libraries(android-emu-cmdline_unittests
-                      PRIVATE android-emu-cmdline android-emu-base gmock_main)
+                      PRIVATE android-emu-cmdline android-emu-base android-emu-base-headers
+                      gmock_main)
 
 
 add_library(android-emu-cmdline-testing INTERFACE)

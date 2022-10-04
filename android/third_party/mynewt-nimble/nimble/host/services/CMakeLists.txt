@@ -1,6 +1,7 @@
 function(add_nimble_service SVC_NAME)
   android_add_library(TARGET _nimble_${SVC_NAME} LICENSE Apache-2.0
-                      SRC ${SVC_NAME}/src/ble_svc_${SVC_NAME}.c)
+                      SRC ${SVC_NAME}/src/ble_svc_${SVC_NAME}.c
+                      DEPS android-emu-base-headers)
   target_include_directories(_nimble_${SVC_NAME} PUBLIC ${SVC_NAME}/include)
   target_link_libraries(
     _nimble_${SVC_NAME} PRIVATE _nimble_os_abstraction_headers

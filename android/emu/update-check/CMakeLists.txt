@@ -10,6 +10,7 @@ android_add_library(
   DEPS android-emu-agents
        android-emu-avd
        android-emu-base
+       android-emu-base-headers
        android-emu-curl
        android-emu-files
        android-emu-studio-config
@@ -31,6 +32,7 @@ android_add_test(
   SRC android/update-check/UpdateChecker_unittest.cpp
       android/update-check/VersionExtractor_unittest.cpp
   DEPS android-emu-base
+       android-emu-base-headers
        android-emu-hardware
        android-emu-studio-config
        android-emu-update-check

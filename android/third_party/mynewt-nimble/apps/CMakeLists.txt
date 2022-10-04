@@ -2,13 +2,13 @@
 
 android_add_executable(TARGET nimble_advertiser NODISTRIBUTE
                        SRC advertiser/src/main.c)
-target_link_libraries(nimble_advertiser PRIVATE nimble_bluetooth)
+target_link_libraries(nimble_advertiser PRIVATE android-emu-base-headers nimble_bluetooth)
 target_compile_options(nimble_advertiser
                        PRIVATE -Wno-implicit-function-declaration)
 
 android_add_executable(TARGET nimble_blecsc NODISTRIBUTE
                        SRC blecsc/src/gatt_svr.c blecsc/src/main.c)
-target_link_libraries(nimble_blecsc PRIVATE nimble_bluetooth)
+target_link_libraries(nimble_blecsc PRIVATE android-emu-base-headers nimble_bluetooth)
 target_compile_options(
   nimble_blecsc
   PRIVATE -Wno-implicit-function-declaration
@@ -17,7 +17,7 @@ target_compile_options(
 # BLE Heart Rate peripheral app.
 android_add_executable(TARGET nimble_blehr NODISTRIBUTE SRC blehr/src/gatt_svr.c
                                                             blehr/src/main.c)
-target_link_libraries(nimble_blehr PRIVATE nimble_bluetooth)
+target_link_libraries(nimble_blehr PRIVATE android-emu-base-headers nimble_bluetooth)
 target_compile_options(nimble_blehr PRIVATE -Wno-implicit-function-declaration)
 
 if(FALSE)
@@ -75,18 +75,18 @@ endif()
 
 android_add_executable(TARGET nimble_central NODISTRIBUTE
                        SRC central/src/main.c)
-target_link_libraries(nimble_central PRIVATE nimble_bluetooth)
+target_link_libraries(nimble_central PRIVATE android-emu-base-headers nimble_bluetooth)
 target_compile_options(nimble_central
                        PRIVATE -Wno-implicit-function-declaration)
 
 android_add_executable(TARGET nimble_peripheral NODISTRIBUTE
                        SRC peripheral/src/main.c)
-target_link_libraries(nimble_peripheral PRIVATE nimble_bluetooth)
+target_link_libraries(nimble_peripheral PRIVATE android-emu-base-headers nimble_bluetooth)
 target_compile_options(nimble_peripheral
                        PRIVATE -Wno-implicit-function-declaration)
 
 android_add_executable(TARGET nimble_scanner NODISTRIBUTE
                        SRC scanner/src/main.c)
-target_link_libraries(nimble_scanner PRIVATE nimble_bluetooth)
+target_link_libraries(nimble_scanner PRIVATE android-emu-base-headers nimble_bluetooth)
 target_compile_options(nimble_scanner
                        PRIVATE -Wno-implicit-function-declaration)

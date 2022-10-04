@@ -52,6 +52,7 @@ target_link_libraries(
   android-emu-metrics
   PRIVATE absl::memory
           android-emu-base
+          android-emu-base-headers
           android-emu-avd
           android-emu-utils
           android-emu-cmdline
@@ -101,6 +102,6 @@ if(NOT LINUX_AARCH64)
   target_compile_options(android-emu-metrics_unittests PRIVATE -O0)
   target_include_directories(android-emu-metrics_unittests PRIVATE src test)
   target_link_libraries(android-emu-metrics_unittests
-                        PRIVATE gmock_main android-emu android-emu-metrics)
+                        PRIVATE gmock_main android-emu android-emu-base-headers android-emu-metrics)
 
 endif()

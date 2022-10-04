@@ -29,7 +29,7 @@ android_add_library(
       android/utils/ini.cpp
       android/utils/lock.cpp
       android/utils/property_file.c
-  DEPS android-emu-base android-hw-config emulator-libext4_utils)
+  DEPS android-emu-base android-emu-base-headers android-hw-config emulator-libext4_utils)
 target_include_directories(
   android-emu-files PUBLIC include
   PRIVATE src ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
@@ -59,7 +59,7 @@ target_include_directories(android-emu-files_unittests PRIVATE src)
 target_link_libraries(
   android-emu-files_unittests
   PRIVATE gmock_main android-emu android-emu-test-launcher android-emu-files
-          android-hw-config)
+          android-hw-config android-emu-base-headers)
 
 # Boo! We depend on makeext
 add_custom_command(

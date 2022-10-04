@@ -1511,6 +1511,7 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
               libqemu2-util
               emulator-libui
               android-emu
+              android-emu-base-headers
               android-qemu-deps
               android-qemu-deps-headful
               emulator-libusb
@@ -1538,6 +1539,7 @@ function(android_add_qemu_headless_executable ANDROID_AARCH STUBS)
               libqemu2-glue-vm-operations
               libqemu2-util
               android-emu
+              android-emu-base-headers
               emulator-libui-headless
               android-qemu-deps
               android-qemu-deps-headless

@@ -16,7 +16,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/containers/StaticMap.h"
 #include "android/base/export.h"
-#include "android/base/ManagedDescriptor.hpp"
+#include "android/base/ManagedDescriptor.h"
 #include "android/emulation/control/structs.h"
 
 #include <atomic>

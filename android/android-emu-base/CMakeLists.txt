@@ -121,8 +121,8 @@ target_include_directories(android-emu-base
 # Library dependencies, these are public so they will propagate, if you link
 # against the base you will link against LZ4 & UUID
 target_link_libraries(
-  android-emu-base PRIVATE lz4 UUID::UUID
-  PUBLIC Threads::Threads android-emu-base-logging zlib android-emu-general-headers
+  android-emu-base PRIVATE android-emu-base-headers lz4 UUID::UUID
+  PUBLIC Threads::Threads android-emu-base-logging zlib
          android-emu-base-memory)
 
 if(OPTION_TCMALLOC)
@@ -264,6 +264,7 @@ android_target_compile_options(
 
 # Setup the targets compile config etc..
 target_link_libraries(android-emu-base_unittests PRIVATE android-emu-base
+                                                         android-emu-base-headers
                                                          gmock_main)
 
 # Add the benchmark
@@ -274,5 +275,5 @@ android_add_executable(
       android/base/synchronization/Lock_benchmark.cpp
       android/base/TranslateBenchmark.cpp)
 target_link_libraries(
-  android-emu_benchmark PRIVATE android-emu-base absl::strings absl::str_format
-                                emulator-gbench)
+  android-emu_benchmark PRIVATE android-emu-base android-emu-base-headers absl::strings
+                                absl::str_format emulator-gbench)

@@ -14,7 +14,7 @@ android_add_library(
       android/hw-lcd.c
       android/multi-instance.cpp
       android/user-config.cpp
-  DEPS android-emu-agents android-emu-base android-emu-cmdline
+  DEPS android-emu-agents android-emu-base android-emu-base-headers android-emu-cmdline
        android-emu-files android-emu-utils)
 
 # You usually want ot read the hardware configuration, so lets make it public.
@@ -38,7 +38,7 @@ android_add_library(
       android/avd/util.c
       android/avd/util_wrapper.cpp
       android/hw-lcd.c
-  DEPS android-emu-agents-headers android-emu-base android-emu-cmdline
+  DEPS android-emu-agents-headers android-emu-base android-emu-base-headers android-emu-cmdline
        android-emu-files android-emu-utils android-hw-config)
 target_include_directories(
   android-emu-min-avd PRIVATE src PUBLIC include
@@ -50,4 +50,4 @@ android_add_test(
   SOURCE_DIR test
   SRC android/avd/util_unittest.cpp android/avd/util_wrapper_unittest.cpp
       android/hw-lcd_unittest.cpp
-  DEPS android-emu-avd android-emu-base android-emu-files gmock_main)
+  DEPS android-emu-avd android-emu-base android-emu-base-headers android-emu-files gmock_main)

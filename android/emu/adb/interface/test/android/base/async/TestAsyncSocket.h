@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 #pragma once
 #include <gtest/gtest.h>
-#include "emulator/net/AsyncSocketAdapter.h"
+#include "android/base/async/AsyncSocketAdapter.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -41,7 +41,7 @@ using CallResponse = std::pair<Message, Message>;
 // This is a Mock AsyncSocket which basically mimics a socket.
 // You can call addRecvs to pair a sequence of messages with a sequence of
 // responses.
-class TestAsyncSocketAdapter : public AsyncSocketAdapter {
+class TestAsyncSocketAdapter : public android::base::AsyncSocketAdapter {
 public:
     TestAsyncSocketAdapter()
         : mLooperThread(&TestAsyncSocketAdapter::looperPump, this) {

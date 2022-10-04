@@ -16,8 +16,8 @@
 #include <cstdint>
 #include <limits>
 
-namespace emulator {
-namespace net {
+namespace android {
+namespace base {
 
 class AsyncSocketAdapter;
 class AsyncSocketEventListener {
@@ -69,5 +69,5 @@ protected:
     AsyncSocketEventListener* mListener = nullptr;
 };
 
-}  // namespace net
-}  // namespace emulator
+}  // namespace base
+}  // namespace android

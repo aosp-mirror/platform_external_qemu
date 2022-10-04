@@ -18,14 +18,10 @@
 
 namespace android {
 namespace base {
+class AsyncSocketAdapter;
 class Looper;
 }  // namespace base
 }  // namespace android
-namespace emulator {
-namespace net {
-class AsyncSocketAdapter;
-}  // namespace net
-}  // namespace emulator
 
 using nlohmann::json;
 

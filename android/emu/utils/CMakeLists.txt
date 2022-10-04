@@ -24,7 +24,7 @@ android_add_library(
       android/utils/utf8_utils.cpp
       android/utils/vector.c
       android/skin/rect.c
-  DEPS android-emu-base)
+  DEPS android-emu-base android-emu-base-headers)
 target_include_directories(android-emu-utils PRIVATE src PUBLIC include)
 
 if(WINDOWS_MSVC_X86_64)
@@ -39,5 +39,5 @@ android_add_test(
       android/utils/host_bitness_unittest.cpp android/utils/path_unittest.cpp
       android/utils/Random_unittest.cpp android/utils/sockets_unittest.cpp android/skin/rect_unittest.cpp
   WINDOWS android/utils/win32_cmdline_quote_unittest.cpp
-  DEPS android-emu-base android-emu-utils gtest gtest_main)
+  DEPS android-emu-base android-emu-base-headers android-emu-utils gtest gtest_main)
 target_include_directories(android-emu-utils_unittests PRIVATE src)

@@ -7,13 +7,13 @@ android_add_library(
   SOURCE_DIR src
   SRC android/gps.c android/gps/GpxParser.cpp android/gps/KmlParser.cpp
       android/gps/PassiveGpsUpdater.cpp
-  DEPS android-emu-base android-emu-hardware LibXml2::LibXml2)
+  DEPS android-emu-base android-emu-base-headers android-emu-hardware LibXml2::LibXml2)
 target_include_directories(android-emu-gps PRIVATE src PUBLIC include)
 
 android_add_test(
   TARGET android-emu-gps_unittests
   SOURCE_DIR test
   SRC android/gps/GpxParser_unittest.cpp android/gps/KmlParser_unittest.cpp
-  DEPS android-emu-base android-emu-gps android-emu-hardware gmock gmock_main
+  DEPS android-emu-base android-emu-base-headers android-emu-gps android-emu-hardware gmock gmock_main
        LibXml2::LibXml2)
 target_include_directories(android-emu-gps_unittests PRIVATE src test)

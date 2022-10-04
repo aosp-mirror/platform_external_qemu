@@ -112,15 +112,15 @@ target_include_directories(libqemu2-glue-vm-operations
                            PRIVATE .. ../include ${ANDROID_AUTOGEN})
 target_link_libraries(
   libqemu2-glue-vm-operations
-  PRIVATE android-emu GLIB2::GLIB2 android-hw-config
+  PRIVATE android-emu android-emu-base-headers GLIB2::GLIB2 android-hw-config
           nlohmann_json::nlohmann_json PIXMAN::PIXMAN)
 
 android_add_test(TARGET libqemu2-glue_unittests
                  SRC tests/VirtioGpuTimelines_unittest.cpp)
 
 target_link_libraries(
-  libqemu2-glue_unittests PRIVATE libqemu2-glue android-emu-base gmock gtest
-                                  gmock_main)
+  libqemu2-glue_unittests PRIVATE libqemu2-glue android-emu-base android-emu-base-headers gmock
+                                  gtest gmock_main)
 
 target_include_directories(
   libqemu2-glue_unittests

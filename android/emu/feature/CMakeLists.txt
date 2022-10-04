@@ -20,6 +20,7 @@ android_add_library(
        android-emu-agents
        android-emu-avd
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-crashreport
        android-emu-curl
@@ -43,6 +44,7 @@ android_add_library(
   SOURCE_DIR test
   SRC android/featurecontrol/testing/FeatureControlTest.cpp
   DEPS android-emu-base
+       android-emu-base-headers
        android-emu-feature
        android-emu-files
        android-emu-protos
@@ -62,6 +64,7 @@ android_add_test(
   WINDOWS android/windows_installer_unittest.cpp
   DEPS android-emu-agents
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-cmdline-testing
        android-emu-feature

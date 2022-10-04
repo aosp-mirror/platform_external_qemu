@@ -33,7 +33,7 @@ namespace net {
 // Usually it is used to establish pipes like outlined below:
 //
 // socket <---> secure webrtc datachannel <--> socket
-class SocketForwarder : public AsyncSocketEventListener,
+class SocketForwarder : public android::base::AsyncSocketEventListener,
                          public DataChannelObserver {
 public:
     SocketForwarder(
@@ -41,13 +41,13 @@ public:
             rtc::scoped_refptr<DataChannelInterface> channel);
 
     // Called when bytes can be read from the socket.
-    void onRead(AsyncSocketAdapter* socket) override;
+    void onRead(android::base::AsyncSocketAdapter* socket) override;
 
     // Called when this socket is closed.
-    void onClose(AsyncSocketAdapter* socket, int err) override;
+    void onClose(android::base::AsyncSocketAdapter* socket, int err) override;
 
     // Called when this socket (re) established a connection.
-    void onConnected(AsyncSocketAdapter* socket) override;
+    void onConnected(android::base::AsyncSocketAdapter* socket) override;
 
     void OnStateChange() override;
 

@@ -22,6 +22,7 @@ android_add_library(
        android-emu-agents
        android-emu-avd
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-feature
        android-emu-files
@@ -46,6 +47,7 @@ android_add_test(
       android/telephony/TagLengthValue_unittest.cpp
   DEPS android-emu-agents
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-hardware
        android-emu-protos

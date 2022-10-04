@@ -13,7 +13,8 @@ android_add_library(
   src
   SRC android/emulation/control/AndroidAgentFactory.cpp
       android/emulation/control/LineConsumer.cpp
-  DEPS android-emu-base android-emu-utils android-emu-files android-hw-config)
+  DEPS android-emu-base android-emu-base-headers android-emu-utils android-emu-files
+  android-hw-config)
 
 android_target_properties(android-emu-agents darwin
                           "INSTALL_RPATH>=@loader_path/gles_swiftshader")
@@ -41,6 +42,6 @@ endif()
 android_add_test(
   TARGET android-emu-agents_unittests SOURCE_DIR test
   SRC android/emulation/control/LineConsumer_unittest.cpp
-  DEPS android-emu-agents android-emu-base gmock gmock_main gtest)
+  DEPS android-emu-agents android-emu-base android-emu-base-headers gmock gmock_main gtest)
 target_include_directories(android-emu-agents_unittests PRIVATE src)
 
