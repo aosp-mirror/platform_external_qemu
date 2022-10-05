@@ -19,6 +19,19 @@ set(VPX_INCLUDE_DIRS "${VPX_INCLUDE_DIR}")
 set(VPX_LIBRARIES "${PREBUILT_ROOT}/lib/libvpx${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(VPX_FOUND TRUE)
 
+if (LINUX_X86_64)
+android_add_prebuilt_library(
+  PACKAGE VPX
+  MODULE VPX LOCATION "${PREBUILT_ROOT}/lib/libvpx"
+  INCLUDES "${VPX_INCLUDE_DIR}"
+  LIBNAME libvpx
+  ALIAS libvpx
+  URL "https://chromium.googlesource.com/webm/libvpx/"
+  LICENSE "BSD-3-Clause"
+  NOTICE
+    "https://chromium.googlesource.com/webm/libvpx/+/refs/heads/master/LICENSE"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.WEBM")
+else()
 android_add_prebuilt_library(
   PACKAGE VPX
   MODULE VPX LOCATION "${PREBUILT_ROOT}/lib/libvpx"
@@ -29,5 +42,5 @@ android_add_prebuilt_library(
   NOTICE
     "https://chromium.googlesource.com/webm/libvpx/+/refs/heads/master/LICENSE"
   LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.WEBM")
-
+endif()
 set(PACKAGE_EXPORT "VPX_INCLUDE_DIR;VPX_INCLUDE_DIRS;VPX_LIBRARIES;VPX_FOUND")

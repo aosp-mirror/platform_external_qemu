@@ -22,6 +22,7 @@ endif()
 function(android_add_prebuilt_library)
   set(options NODISTRIBUTE SHARED)
   set(oneValueArgs
+      ALIAS
       PACKAGE
       MODULE
       LOCATION
@@ -37,7 +38,6 @@ function(android_add_prebuilt_library)
 
   if(NOT TARGET ${pre_PACKAGE}::${pre_MODULE})
     add_library(${pre_PACKAGE}::${pre_MODULE} STATIC IMPORTED GLOBAL)
-
     set(SUFFIX ${CMAKE_STATIC_LIBRARY_SUFFIX})
     if(pre_SHARED)
       set(SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX})
@@ -62,6 +62,10 @@ function(android_add_prebuilt_library)
         TARGET ${pre_PACKAGE}::${pre_MODULE} LIBNAME ${pre_LIBNAME}
         URL "${pre_URL}" SPDX "${pre_LICENSE}" LICENSE "${pre_NOTICE}"
         LOCAL "${pre_LOCAL}")
+    endif()
+
+    if (pre_ALIAS)
+      add_library(${pre_ALIAS} ALIAS ${pre_PACKAGE}::${pre_MODULE})
     endif()
   endif()
 endfunction()
