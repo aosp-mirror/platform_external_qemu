@@ -4766,8 +4766,7 @@ static void x86_cpu_initfn(Object *obj)
     object_property_add_alias(obj, "sse4_1", obj, "sse4.1", &error_abort);
     object_property_add_alias(obj, "sse4_2", obj, "sse4.2", &error_abort);
 
-    // b/235127197
-    //android_emulator_set_pmu_feature(cpu);
+    android_emulator_set_pmu_feature(cpu);
     if (xcc->cpu_def) {
         x86_cpu_load_def(cpu, xcc->cpu_def, &error_abort);
     }
