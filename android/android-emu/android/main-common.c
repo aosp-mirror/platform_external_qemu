@@ -1540,14 +1540,19 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
-    base_configure_logs(opts->log_nofilter ? kLogDefaultOptions
-                                           : kLogEnableDuplicateFilter);
+    LoggingFlags log_opts = kLogDefaultOptions;
 
     if (!opts->log_nofilter) {
+        log_opts |= kLogEnableDuplicateFilter;
         dinfo("Duplicate loglines will be removed, if you wish to see each "
               "indiviudal line launch with the -log-nofilter flag.");
     }
 
+    if (opts->log_detailed) {
+        log_opts |= kLogEnableVerbose;
+    }
+
+    base_configure_logs(log_opts);
     getConsoleAgents()->settings->inject_cmdLineOptions(opts);
 
     // BUG: 143949261
