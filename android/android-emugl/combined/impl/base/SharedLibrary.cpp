@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "base/SharedLibrary.h"
+#include "aemu/base/SharedLibrary.h"
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/FunctionView.h"

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "base/HealthMonitor.h"
+#include "aemu/base/HealthMonitor.h"
 
 #include <map>
 
-#include "base/system/System.h"
+#include "aemu/base/system/System.h"
 #include "host-common/logging.h"
 #include "host-common/GfxstreamFatalError.h"
 #include "testing/TestClock.h"
