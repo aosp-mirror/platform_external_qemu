@@ -117,6 +117,7 @@ private:
     android::base::MessageChannel<PostArgs, 1> m_toUiThread;
     EGLContext mContext = EGL_NO_CONTEXT;
     EGLSurface mSurface = EGL_NO_SURFACE;
+    bool m_b246917660workAround = false;
 
     DISALLOW_COPY_AND_ASSIGN(PostWorker);
 };

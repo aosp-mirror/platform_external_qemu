@@ -15,6 +15,8 @@
 */
 #include "PostWorker.h"
 
+#include <thread>
+
 #include "ColorBuffer.h"
 #include "DispatchTables.h"
 #include "FrameBuffer.h"
@@ -49,7 +51,16 @@ PostWorker::PostWorker(
         emugl::get_emugl_window_operations().runOnUiThread :
         sDefaultRunOnUiThread),
     mContext(eglContext),
-    mSurface(eglSurface) {}
+    mSurface(eglSurface) {
+#ifdef _WIN32
+        const char* vendor;
+        const char* renderer;
+        const char* version;
+        mFb->getGLStrings(&vendor, &renderer, &version);
+        // nVidia GeForce specific bug, does not even repro with Quadro
+        m_b246917660workAround = strstr(renderer, "GeForce") != nullptr;
+#endif
+    }
 
 void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l,
                                             hwc_rect_t displayArea,
@@ -190,6 +201,14 @@ void PostWorker::postImpl(HandleType cbHandle) {
             dx, dy);
     }
 
+    if (m_b246917660workAround) {
+        // Certain GeForce driver seems to swap before finishes drawing. They
+        // do not respect glFinish. There is currently no known workaround
+        // other than wait a bit before swap.
+        // Most reports are from laptops with nVidia GeForce cards.
+        // b/246917660
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 
