@@ -826,7 +826,8 @@ public:
                          Image* reply) override {
         AEMU_SCOPED_TRACE_CALL();
         uint32_t width, height;
-        bool enabled = false;
+        bool enabled = true;
+        dinfo("Multi query.");
         bool multiDisplayQueryWorks = mAgents->emu->getMultiDisplay(
                 request->display(), nullptr, nullptr, &width, &height, nullptr,
                 nullptr, &enabled);
@@ -837,7 +838,6 @@ public:
         if (!multiDisplayQueryWorks) {
             width = getConsoleAgents()->settings->hw()->hw_lcd_width;
             height = getConsoleAgents()->settings->hw()->hw_lcd_height;
-            enabled = true;
         }
 
         if (!enabled) {
