@@ -2129,6 +2129,7 @@ bool configAndStartRenderer(
     int api_level = avdInfo_getApiLevel(avd);
     char* api_arch = avdInfo_getTargetAbi(avd);
     bool isGoogle = avdInfo_isGoogleApis(avd);
+    bool isAtd = avdInfo_isAtd(avd);
 
     if (avdInfo_sysImgGuestRenderingBlacklisted(avd) &&
         (isGuestRendererChoice(opts->gpu) ||
@@ -2152,7 +2153,7 @@ bool configAndStartRenderer(
     bool hostGpuVulkanBlacklisted = true;
 
     if (!androidEmuglConfigInit(&config, opts->avd, api_arch, api_level,
-                                isGoogle, opts->gpu, &hw->hw_gpu_mode, 0,
+                                isGoogle, isAtd, opts->gpu, &hw->hw_gpu_mode, 0,
                                 getConsoleAgents()->settings->host_emulator_is_headless(), uiPreferredBackend,
                                 &hostGpuVulkanBlacklisted,
                                 opts->use_host_vulkan)) {

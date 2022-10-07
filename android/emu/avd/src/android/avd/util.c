@@ -237,7 +237,8 @@ AvdFlavor propertyFile_getAvdFlavor(const FileData* data) {
 }
 
 bool propertyFile_isAtd(const FileData* data) {
-    const char* atd_names[] = {"sdk_gslim", "sdk_slim"};
+    const char* atd_names[] = {"sdk_gslim", "sdk_slim", "sdk_goog3_gslim",
+            "sdk_goog3_slim"};
     return propertyFile_findProductName(
             data, atd_names, ARRAY_SIZE(atd_names), false /*prefix*/);
 }
