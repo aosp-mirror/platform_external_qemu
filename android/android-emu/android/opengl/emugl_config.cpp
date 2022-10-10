@@ -106,13 +106,15 @@ SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode) {
         return SELECTED_RENDERER_MESA;
     } else if (!strcmp(gpu_mode, "swiftshader")) {
         return SELECTED_RENDERER_SWIFTSHADER;
-    } else if (!strcmp(gpu_mode, "angle")) {
+    } else if (!strcmp(gpu_mode, "angle")
+            || !strcmp(gpu_mode, "swangle")) {
         return SELECTED_RENDERER_ANGLE;
     } else if (!strcmp(gpu_mode, "angle9")) {
         return SELECTED_RENDERER_ANGLE9;
     } else if (!strcmp(gpu_mode, "swiftshader_indirect")) {
         return SELECTED_RENDERER_SWIFTSHADER_INDIRECT;
-    } else if (!strcmp(gpu_mode, "angle_indirect")) {
+    } else if (!strcmp(gpu_mode, "angle_indirect")
+            || !strcmp(gpu_mode, "swangle_indirect")) {
         return SELECTED_RENDERER_ANGLE_INDIRECT;
     } else if (!strcmp(gpu_mode, "angle9_indirect")) {
         return SELECTED_RENDERER_ANGLE9_INDIRECT;
@@ -280,6 +282,10 @@ bool emuglConfig_init(EmuglConfig* config,
         gpu_mode = "swiftshader_indirect";
     }
 
+    if (!strcmp("swangle", gpu_mode)) {
+        gpu_mode = "swangle_indirect";
+    }
+
     if (!bitness) {
         bitness = System::get()->getProgramBitness();
     }
@@ -287,6 +293,22 @@ bool emuglConfig_init(EmuglConfig* config,
     config->bitness = bitness;
     config->use_host_vulkan = use_host_vulkan;
     resetBackendList(bitness);
+
+    // For GPU mode in software rendering:
+    // On Mac, both swiftshader and swangle will redirect to swangle.
+    // On Linux, swiftshader will go to the old swiftshader, while swangle will
+    // go to swangle.
+    // On Windows, swiftshader will go to the old swiftshader, swangle is not
+    // supported yet.
+    bool force_swiftshader_to_swangle = false;
+    const char* swiftshader_backend_name = "swiftshader";
+    const char* swangle_backend_name = "angle";
+#ifdef __APPLE__
+    force_swiftshader_to_swangle = true;
+#endif
+#ifdef __WIN32
+    swangle_backend_name = nullptr;
+#endif
 
     // Check that the GPU mode is a valid value. 'auto' means determine
     // the best mode depending on the environment. Its purpose is to
@@ -299,7 +321,14 @@ bool emuglConfig_init(EmuglConfig* config,
         std::string sessionType;
         if (System::get()->isRemoteSession(&sessionType)) {
             D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
-            if (!sBackendList->contains("swiftshader")) {
+            if (swangle_backend_name &&
+                    sBackendList->contains(swangle_backend_name)) {
+                D("%s: 'swangle_indirect' mode auto-selected\n", __FUNCTION__);
+                gpu_mode = "swangle_indirect";
+            } else if (sBackendList->contains(swiftshader_backend_name)) {
+                D("%s: 'swiftshader_indirect' mode auto-selected\n", __FUNCTION__);
+                gpu_mode = "swiftshader_indirect";
+            } else {
                 config->enabled = false;
                 gpu_mode = "off";
                 snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
@@ -309,11 +338,16 @@ bool emuglConfig_init(EmuglConfig* config,
                 setCurrentRenderer(gpu_mode);
                 return true;
             }
-            D("%s: 'swiftshader_indirect' mode auto-selected\n", __FUNCTION__);
-            gpu_mode = "swiftshader_indirect";
         }
         else if (!has_auto_no_window && (no_window || (blacklisted && !hasUiPreference))) {
-            if (stringVectorContains(sBackendList->names(), "swiftshader")) {
+            if (stringVectorContains(sBackendList->names(),
+                    swangle_backend_name)) {
+                D("%s: Headless mode or blacklisted GPU driver, "
+                  "using SwANGLE backend\n",
+                  __FUNCTION__);
+                gpu_mode = "swangle_indirect";
+            } else if (stringVectorContains(sBackendList->names(),
+                    swiftshader_backend_name)) {
                 D("%s: Headless mode or blacklisted GPU driver, "
                   "using Swiftshader backend\n",
                   __FUNCTION__);
@@ -351,7 +385,11 @@ bool emuglConfig_init(EmuglConfig* config,
                     gpu_mode = "angle_indirect";
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
-                    gpu_mode = "swiftshader_indirect";
+                    if (force_swiftshader_to_swangle) {
+                        gpu_mode = "swangle_indirect";
+                    } else {
+                        gpu_mode = "swiftshader_indirect";
+                    }
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
                     gpu_mode = "host";
@@ -364,13 +402,19 @@ bool emuglConfig_init(EmuglConfig* config,
               __func__, gpu_mode, uiPreferredBackend);
         }
     }
+    const char* library_mode = gpu_mode;
+    printf("library_mode %s gpu mode %s\n", library_mode, gpu_mode);
+    if ((force_swiftshader_to_swangle && strstr(library_mode, "swiftshader"))
+            || strstr(library_mode, "swangle")) {
+        library_mode = "angle";
+    }
 
     // 'host' is a special value corresponding to the default translation
     // to desktop GL, 'guest' does not use host-side emulation,
     // anything else must be checked against existing host-side backends.
     if (strcmp(gpu_mode, "host") != 0 && strcmp(gpu_mode, "guest") != 0) {
         const std::vector<std::string>& backends = sBackendList->names();
-        if (!stringVectorContains(backends, gpu_mode)) {
+        if (!stringVectorContains(backends, library_mode)) {
             std::string error = StringFormat(
                 "Invalid GPU mode '%s', use one of: host swiftshader_indirect. "
                 "If you're already using one of those modes, "
@@ -415,7 +459,8 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     } else
 #ifndef __APPLE__
     // Default to swiftshader vk on mac
-    if  (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT)
+    if  (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT
+            || strstr(config->backend, "swangle"))
 #endif
     {
         // Use Swiftshader vk icd if using swiftshader_indirect
@@ -432,13 +477,18 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
         return;
     }
 
+    bool use_swangle = strstr(config->backend, "swangle");
+#ifdef __APPLE__
+    use_swangle |= strstr(config->backend, "swiftshader");
+#endif
     // $EXEC_DIR/<lib>/ is already added to the library search path by default,
     // since generic libraries are bundled there. We may need more though:
     resetBackendList(config->bitness);
     if (strcmp(config->backend, "host") != 0) {
         // If the backend is not 'host', we also need to add the
         // backend directory.
-        std::string dir = sBackendList->getLibDirPath(config->backend);
+        std::string dir = sBackendList->getLibDirPath(
+                use_swangle ? "angle" : config->backend);
         if (dir.size()) {
             D("Adding to the library search path: %s\n", dir.c_str());
             system->addLibrarySearchDir(dir);
@@ -450,17 +500,19 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
         return;
     }
 
+    // Set ANGLE backend. This has no effect when not using ANGLE.
 #if defined(__APPLE__)
-    if (!strcmp(config->backend, "angle_indirect")) {
+    if (!strstr(config->backend, "angle")) {
         system->envSet("ANGLE_DEFAULT_PLATFORM", "metal");
     }
-    if (!strcmp(config->backend, "swiftshader_indirect")) {
+#endif
+    if (use_swangle) {
         system->envSet("ANGLE_DEFAULT_PLATFORM", "swiftshader");
     }
-#endif
 
     if (!strcmp(config->backend, "angle_indirect")
-            || !strcmp(config->backend, "swiftshader_indirect")) {
+            || !strcmp(config->backend, "swiftshader_indirect")
+            || !strcmp(config->backend, "swangle_indirect")) {
         system->envSet("ANDROID_EGL_ON_EGL", "1");
         return;
     }

@@ -115,7 +115,7 @@ protected:
 };
 
 TEST_F(SnapshotGlRenderbufferTest, CreateAndBind) {
-#ifdef __APPLE__
+#if defined(__APPLE__) || (defined(__linux__) && defined(__x86_64__))
     if (!shouldUseHostGpu()) {
         GTEST_SKIP() << "b/247873185 SwANGLE has wrong default format.";
     }

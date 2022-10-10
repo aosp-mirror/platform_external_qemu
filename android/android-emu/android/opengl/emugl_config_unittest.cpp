@@ -43,6 +43,23 @@ static void makeLibSubFile(TestTempDir* dir, const char* name) {
     dir->makeSubFile(makeLibSubPath(name).c_str());
 }
 
+static void makeRenderBackendSubDirAndFiles(TestTempDir* dir,
+        const char* backendName) {
+    makeLibSubDir(dir, backendName);
+    std::string backendStr(backendName);
+    makeLibSubFile(dir, (backendStr + "/libEGL.so").c_str());
+    makeLibSubFile(dir, (backendStr + "/libGLES_CM.so").c_str());
+    makeLibSubFile(dir, (backendStr + "/libGLESv2.so").c_str());
+}
+
+static void makeSwiftshaderSubDirAndFiles(TestTempDir* dir) {
+    makeRenderBackendSubDirAndFiles(dir, "gles_swiftshader");
+}
+
+static void makeSwAngleSubDirAndFiles(TestTempDir* dir) {
+    makeRenderBackendSubDirAndFiles(dir, "gles_angle");
+}
+
 TEST(EmuglConfig, init) {
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
@@ -314,10 +331,7 @@ TEST(EmuglConfig, initNxWithSwiftshader) {
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
-    makeLibSubDir(myDir, "gles_swiftshader");
-    makeLibSubFile(myDir, "gles_swiftshader/libEGL.so");
-    makeLibSubFile(myDir, "gles_swiftshader/libGLES_CM.so");
-    makeLibSubFile(myDir, "gles_swiftshader/libGLESv2.so");
+    makeSwiftshaderSubDirAndFiles(myDir);
 
     testSys.setRemoteSessionType("NX");
 
@@ -328,6 +342,26 @@ TEST(EmuglConfig, initNxWithSwiftshader) {
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("swiftshader_indirect", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader_indirect' mode",
+            config.status);
+}
+
+TEST(EmuglConfig, initNxWithSwANGLE) {
+    TestSystem testSys("foo", System::kProgramBitness, "/");
+    TestTempDir* myDir = testSys.getTempRoot();
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
+    makeLibSubDir(myDir, "");
+
+    makeSwAngleSubDirAndFiles(myDir);
+
+    testSys.setRemoteSessionType("NX");
+
+    EmuglConfig config;
+    EXPECT_TRUE(emuglConfig_init(
+                &config, true, "auto", NULL, 0, false, false, false,
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
+    EXPECT_TRUE(config.enabled);
+    EXPECT_STREQ("swangle_indirect", config.backend);
+    EXPECT_STREQ("GPU emulation enabled using 'swangle_indirect' mode",
             config.status);
 }
 
@@ -353,10 +387,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithSwiftshader) {
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
-    makeLibSubDir(myDir, "gles_swiftshader");
-    makeLibSubFile(myDir, "gles_swiftshader/libEGL.so");
-    makeLibSubFile(myDir, "gles_swiftshader/libGLES_CM.so");
-    makeLibSubFile(myDir, "gles_swiftshader/libGLESv2.so");
+    makeSwiftshaderSubDirAndFiles(myDir);
 
     testSys.setRemoteSessionType("Chrome Remote Desktop");
 
@@ -367,6 +398,26 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithSwiftshader) {
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("swiftshader_indirect", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader_indirect' mode",
+            config.status);
+}
+
+TEST(EmuglConfig, initChromeRemoteDesktopWithSwAngle) {
+    TestSystem testSys("foo", System::kProgramBitness, "/");
+    TestTempDir* myDir = testSys.getTempRoot();
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
+    makeLibSubDir(myDir, "");
+
+    makeSwAngleSubDirAndFiles(myDir);
+
+    testSys.setRemoteSessionType("Chrome Remote Desktop");
+
+    EmuglConfig config;
+    EXPECT_TRUE(emuglConfig_init(
+                &config, true, "auto", NULL, 0, false, false, false,
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
+    EXPECT_TRUE(config.enabled);
+    EXPECT_STREQ("swangle_indirect", config.backend);
+    EXPECT_STREQ("GPU emulation enabled using 'swangle_indirect' mode",
             config.status);
 }
 
@@ -395,10 +446,7 @@ TEST(EmuglConfig, initNoWindowWithSwiftshader) {
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
-    makeLibSubDir(myDir, "gles_swiftshader");
-    makeLibSubFile(myDir, "gles_swiftshader/libEGL.so");
-    makeLibSubFile(myDir, "gles_swiftshader/libGLES_CM.so");
-    makeLibSubFile(myDir, "gles_swiftshader/libGLESv2.so");
+    makeSwiftshaderSubDirAndFiles(myDir);
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
@@ -416,10 +464,7 @@ TEST(EmuglConfig, initWithSwiftshaderCheckVulkanEnvVar) {
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
-    makeLibSubDir(myDir, "gles_swiftshader");
-    makeLibSubFile(myDir, "gles_swiftshader/libEGL.so");
-    makeLibSubFile(myDir, "gles_swiftshader/libGLES_CM.so");
-    makeLibSubFile(myDir, "gles_swiftshader/libGLESv2.so");
+    makeSwiftshaderSubDirAndFiles(myDir);
 
     // Do not force use host vulkan
     {
