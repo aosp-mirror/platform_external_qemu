@@ -32,7 +32,7 @@ MultiDisplayPipe::MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pip
     mService(static_cast<Service*>(service)) {
     LOG(VERBOSE) << "MultiDisplayPipe created " << this;
     if (sMultiDisplayPipeInstance) {
-        LOG(ERROR) << "MultiDisplayPipe already created";
+        derror("MultiDisplayPipe has already been created.");
     }
     sMultiDisplayPipeInstance = this;
 }
@@ -77,7 +77,7 @@ void MultiDisplayPipe::onMessage(const std::vector<uint8_t>& data) {
             break;
         }
         default:
-            LOG(WARNING) << "unexpected cmommand " << cmd;
+            dwarning("Unexpected MultiDisplayPipe commmand: %d, ignoring. ", cmd);
     }
 
 }
@@ -100,8 +100,7 @@ void MultiDisplayPipe::onSave(base::Stream* stream) {
     AndroidAsyncMessagePipe::onSave(stream);
     MultiDisplay* instance = MultiDisplay::getInstance();
     if (!instance) {
-        LOG(ERROR) << "Failed to save MultiDisplay info, MultiDisplay "
-                   << "not initiated";
+        derror("Failed to save MultiDisplay info, MultiDisplay not initialized");
         return;
     }
     instance->onSave(stream);
@@ -111,8 +110,7 @@ void MultiDisplayPipe::onLoad(base::Stream* stream) {
     AndroidAsyncMessagePipe::onLoad(stream);
     MultiDisplay* instance = MultiDisplay::getInstance();
     if (!instance) {
-        LOG(ERROR) << "Failed to load MultiDisplay info, MultiDisplay "
-                   << "not initiated";
+        derror("Failed to load MultiDisplay info, MultiDisplay not initialized");
         return;
     }
     instance->onLoad(stream);

@@ -322,15 +322,15 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
     }
 
     if (displayId == nullptr) {
-        LOG(ERROR) << "null displayId pointer";
+        derror("Cannot create a dipslay, the displayId is a nullptr");
         return -1;
     }
 
     AutoLock lock(mLock);
 
     if (mMultiDisplay.size() > s_maxNumMultiDisplay) {
-        LOG(ERROR) << "cannot create more displays, exceeding limits "
-                   << s_maxNumMultiDisplay;
+        derror("Failed to create display. The limit of %d displays has been "
+               "reached.", s_maxNumMultiDisplay);
         return -1;
     }
     if (mMultiDisplay.find(*displayId) != mMultiDisplay.end()) {
@@ -347,8 +347,8 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
         }
     }
     if (*displayId == s_invalidIdMultiDisplay) {
-        LOG(ERROR) << "cannot create more internaldisplays, exceeding limits "
-                   << s_maxNumMultiDisplay - s_displayIdInternalBegin;
+        derror("Failed to create display. The limit of %d displays has been "
+               "reached.", s_maxNumMultiDisplay);
         return -1;
     }
 
@@ -420,7 +420,7 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
     {
         AutoLock lock(mLock);
         if (mMultiDisplay.find(displayId) == mMultiDisplay.end()) {
-            LOG(ERROR) << "cannot find display " << displayId;
+            derror("Display with id: %d does not exist", displayId);
             return -1;
         }
         if (mMultiDisplay[displayId].cb != 0 &&
@@ -476,7 +476,7 @@ int MultiDisplay::getDisplayPose(uint32_t displayId,
     }
     AutoLock lock(mLock);
     if (mMultiDisplay.find(displayId) == mMultiDisplay.end()) {
-        LOG(ERROR) << "cannot find display " << displayId;
+        derror("Display with id: %d does not exist", displayId);
         return -1;
     }
     *x = mMultiDisplay[displayId].pos_x;
@@ -497,7 +497,7 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
     {
         AutoLock lock(mLock);
         if (mMultiDisplay.find(displayId) == mMultiDisplay.end()) {
-            LOG(ERROR) << "cannot find display" << displayId;
+            derror("Display with id: %d does not exist", displayId);
             return -1;
         }
         if (mMultiDisplay[displayId].cb == colorBuffer) {
@@ -633,8 +633,9 @@ void MultiDisplay::recomputeLayoutLocked() {
     uint32_t monitorWidth, monitorHeight;
     double monitorAspectRatio = 1.0;
     if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
-        LOG(WARNING) << "Fail to get monitor width and height, use default "
-                        "ratio 1.0";
+        dwarning(
+                "Unable to get monitor width and height, using default "
+                "ratio of 1.0");
     } else {
         monitorAspectRatio = (double)monitorHeight / (double)monitorWidth;
     }
@@ -668,26 +669,27 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id,
     if (dpi < 120 || dpi > 640) {
         mWindowAgent->showMessage("dpi should be between 120 and 640",
                                   WINDOW_MESSAGE_ERROR, 1000);
-        LOG(ERROR) << "dpi should be between 120 and 640";
+        derror("Display dpi should be between 120 and 640, not %d", dpi);
         return false;
     }
     if (w < 320 * dpi / 160 || h < 320 * dpi / 160) {
         mWindowAgent->showMessage("width and height should be >= 320dp",
                                   WINDOW_MESSAGE_ERROR, 1000);
-        LOG(ERROR) << "width and height should be >= 320dp";
+        derror("Display width and height should be >= 320dp, not %d", dpi);
         return false;
     }
     if (!((w <= 7680 && h <= 4320) || (w <= 4320 && h <= 7680))) {
         mWindowAgent->showMessage("resolution should not exceed 8k (7680*4320)",
                                   WINDOW_MESSAGE_ERROR, 1000);
-        LOG(ERROR) << "resolution should not exceed 8k (7680*4320)";
+        derror("Display resolution should not exceed 8k (7680x4320) vs (%dx%d)",
+               w, h);
         return false;
     }
     if (id > s_maxNumMultiDisplay) {
         std::string msg = "Display index cannot be more than " +
                           std::to_string(s_maxNumMultiDisplay);
         mWindowAgent->showMessage(msg.c_str(), WINDOW_MESSAGE_ERROR, 1000);
-        LOG(ERROR) << msg;
+        derror("%s", msg.c_str());
         return false;
     }
     return true;
@@ -709,20 +711,24 @@ std::map<uint32_t, MultiDisplayInfo> MultiDisplay::parseConfig() {
     }
     params.push_back(std::stoi(s.substr(last)));
     if (params.size() < 5 || params.size() % 5 != 0) {
-        LOG(ERROR) << "Not enough parameters for multidisplay command";
+        derror("A multidisplay command should be a at least 5 and be multiple "
+               "of 5, not %d",
+               params.size());
         return ret;
     }
     int i = 0;
     for (i = 0; i < params.size(); i += 5) {
         if (params[i] == 0 || params[i] > 3) {
-            LOG(ERROR) << "multidisplay index should only be 1, 2, or 3";
+            derror("Multidisplay index should be 1, 2, or 3 not %d", params[i]);
             ret.clear();
             return ret;
         }
         if (multiDisplayParamValidate(params[i], params[i + 1], params[i + 2],
                                       params[i + 3], params[i + 4])) {
-            LOG(ERROR) << "Invalid index/width/height/dpi settings for "
-                          "multidisplay command";
+            derror("Invalid index: %d, width: %d, height: %d, or dpi: %d "
+                   "for multidisplay command,",
+                   params[i], params[i + 1], params[i + 2], params[i + 3],
+                   params[i + 4]);
             ret.clear();
             return ret;
         }
@@ -918,7 +924,7 @@ void android_init_multi_display(
 extern "C" {
 void android_load_multi_display_config() {
     if (!android::sMultiDisplay) {
-        LOG(ERROR) << "Multidisplay not initiated yet, cannot config";
+        derror("Multidisplay has not yet been initialized, not loading configuration");
         return;
     }
     android::sMultiDisplay->loadConfig();

@@ -108,7 +108,9 @@ bool HostapdController::init(bool verbose) {
     }
     int fds[2];
     if (socketCreatePair(&fds[0], &fds[1])) {
-        LOG(ERROR) << "Failed to create socket pair";
+        derror("Unable to initialize HostapdController due to socket creation "
+               "failure, err: %s",
+               strerror(errno));
         return false;
     }
     socketSetNonBlocking(fds[0]);
@@ -160,12 +162,12 @@ bool HostapdController::setSsid(std::string ssid, std::string password) {
     FILE* fp = android_fopen(mConfigFile.c_str(), "w");
     if (!android::writeStringToFile(fileno(fp),
                                     buildHostapdConfig(mSsid, mPassword))) {
-        LOG(ERROR) << "Failed to write to config file: " << mConfigFile;
+        derror("Failed to write to config file: %s", mConfigFile.c_str());
     }
     fclose(fp);
     if (socketSend(mCtrlSock2.get(), VIRTIO_WIFI_CTRL_CMD_RELOAD_CONFIG,
                    sizeof(VIRTIO_WIFI_CTRL_CMD_RELOAD_CONFIG) - 1) < 0) {
-        LOG(ERROR) << "Failed to send control command to hostapd.";
+        derror("Virtual wifi failed to send control command to hostapd.");
     }
     return true;
 }
@@ -177,8 +179,7 @@ void HostapdController::terminate() {
     // Do not send null character.
     if (socketSend(mCtrlSock2.get(), VIRTIO_WIFI_CTRL_CMD_TERMINATE,
                    sizeof(VIRTIO_WIFI_CTRL_CMD_TERMINATE) - 1) < 0) {
-        LOG(ERROR) << "Failed to send control command to hostapd, call "
-                      "eloop_terminate directly.";
+        derror("Failed to gracefully shutdown virtual wifi, terminating. ");
         ::eloop_terminate();
     }
 }
@@ -226,7 +227,8 @@ const std::string HostapdController::genConfigFile() {
     FILE* fp = android_fopen(filePath, "w");
     if (!android::writeStringToFile(fileno(fp),
                                     buildHostapdConfig(mSsid, mPassword))) {
-        LOG(ERROR) << "Failed to write to config file: " << mConfigFile;
+        derror("Failed to write to virtual wifi config file: %s ",
+               mConfigFile.c_str());
     }
     fclose(fp);
     return filePath;

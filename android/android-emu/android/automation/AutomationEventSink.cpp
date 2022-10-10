@@ -50,7 +50,7 @@ void AutomationEventSink::registerStream(Stream* stream,
 void AutomationEventSink::unregisterStream(Stream* stream) {
     AutoLock lock(mLock);
     if (!mTextStreams.erase(stream) && !mBinaryStreams.erase(stream)) {
-        LOG(WARNING) << "Could not find stream.";
+        dwarning("Could not unregisterStream from automation sink");
     }
 
     mLastEventTime.erase(stream);
@@ -79,7 +79,7 @@ void AutomationEventSink::handleEvent(uint64_t timeNs,
 
         std::string binaryProto;
         if (!modifiedEvent.SerializeToString(&binaryProto)) {
-            LOG(WARNING) << "Could not serialize event.";
+            VERBOSE_PRINT(automation, "Could not serialize recorded event.");
             return;
         }
         stream->putString(binaryProto);
@@ -93,7 +93,7 @@ void AutomationEventSink::handleEvent(uint64_t timeNs,
         if (VERBOSE_CHECK(automation)) {
             std::string textProto;
             if (!printer.PrintToString(event, &textProto)) {
-                LOG(WARNING) << "Could not serialize event to string.";
+                dwarning("Could not serialize event to string.");
                 return;
             }
 
@@ -108,7 +108,7 @@ void AutomationEventSink::handleEvent(uint64_t timeNs,
 
             std::string textProto;
             if (!printer.PrintToString(modifiedEvent, &textProto)) {
-                LOG(WARNING) << "Could not serialize event to string.";
+                dwarning("Could not serialize event to string.");
                 return;
             }
 

@@ -14,19 +14,20 @@
 
 #include "android/mp4/MP4Dataset.h"
 
-#include <libavutil/avutil.h>                    // for AVMEDIA_TYPE_AUDIO
-#include <stddef.h>                              // for NULL
-#include <string>                                // for string
-#include <utility>                               // for move
+#include <libavutil/avutil.h>  // for AVMEDIA_TYPE_AUDIO
+#include <stddef.h>            // for NULL
+#include <string>              // for string
+#include <utility>             // for move
 
-#include "aemu/base/Log.h"                    // for LOG, LogMessage
-#include "aemu/base/memory/ScopedPtr.h"       // for FuncDelete
-#include "offworld.pb.h"  // for DataStreamInfo, Data...
-#include "android/recording/AVScopedPtr.h"       // for makeAVScopedPtr, AVS...
+#include "aemu/base/Log.h"                  // for LOG, LogMessage
+#include "aemu/base/memory/ScopedPtr.h"     // for FuncDelete
+#include "android/recording/AVScopedPtr.h"  // for makeAVScopedPtr, AVS...
+#include "android/utils/debug.h"            // for derror
+#include "offworld.pb.h"                    // for DataStreamInfo, Data...
 
 extern "C" {
-#include "libavcodec/avcodec.h"                  // for AVCodecContext
-#include "libavformat/avformat.h"                // for AVFormatContext, AVS...
+#include "libavcodec/avcodec.h"    // for AVCodecContext
+#include "libavformat/avformat.h"  // for AVFormatContext, AVS...
 }
 
 using android::recording::AVScopedPtr;
@@ -39,8 +40,8 @@ typedef ::offworld::DatasetInfo DatasetInfo;
 
 class Mp4DatasetImpl : public Mp4Dataset {
 public:
-    Mp4DatasetImpl() { }
-    virtual ~Mp4DatasetImpl() { }
+    Mp4DatasetImpl() {}
+    virtual ~Mp4DatasetImpl() {}
 
     virtual int getAudioStreamIndex() { return mAudioStreamIdx; }
     virtual int getVideoStreamIndex() { return mVideoStreamIdx; }
@@ -56,6 +57,7 @@ public:
     virtual void clearFormatContext() { mFormatCtx.reset(); }
 
     int init(const std::string filepath, const DatasetInfo& datasetInfo);
+
 private:
     AVScopedPtr<AVFormatContext> mFormatCtx;
     int mAudioStreamIdx = -1;
@@ -70,7 +72,7 @@ std::unique_ptr<Mp4Dataset> Mp4Dataset::create(const std::string filepath,
                                                const DatasetInfo& datasetInfo) {
     auto dataset = new Mp4DatasetImpl();
     if (dataset->init(filepath, datasetInfo) < 0) {
-        LOG(ERROR) << ": Failed to initialize mp4 dataset!";
+        derror("Failed to initialize mp4 dataset!");
         return nullptr;
     }
     std::unique_ptr<Mp4Dataset> ret;
@@ -90,14 +92,14 @@ int Mp4DatasetImpl::init(const std::string filepath,
 
     AVFormatContext* inputCtx = nullptr;
     if (avformat_open_input(&inputCtx, filename, NULL, NULL) != 0) {
-        LOG(ERROR) << ": Failed to open input context";
+        derror("Failed to open av input context for Mp4 dataset.");
         return -1;
     }
 
     mFormatCtx = makeAVScopedPtr(inputCtx);
 
     if (avformat_find_stream_info(mFormatCtx.get(), NULL) < 0) {
-        LOG(ERROR) << ": Failed to find stream info";
+        derror("Failed to open av stream info for Mp4 dataset.");
         return -1;
     }
 
@@ -114,7 +116,7 @@ int Mp4DatasetImpl::init(const std::string filepath,
 
     // We expect a dataset to at least have one video stream
     if (mVideoStreamIdx == -1) {
-        LOG(ERROR) << ": No video stream found";
+        derror("No video stream in mp4 dataset.");
         return -1;
     }
 

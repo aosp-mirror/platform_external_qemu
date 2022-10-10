@@ -373,9 +373,9 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
 
         if (!privkey.empty() && pubkey_from_privkey(privkey, &key)) {
             params.push_back({adbKeyProp, key});
-            LOG(INFO) << "Sending adb public key [" << key << "]";
+            dinfo("Sending adb public key [%s]", key.c_str());
         } else {
-            LOG(WARNING) << "No adb private key exists";
+            dwarning("No adb private key exists");
         }
     }
 
@@ -530,7 +530,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
                 android::featurecontrol::DeviceStateOnBoot)) {
         std::string deviceState = getDeviceStateString(hw);
         if (deviceState != "") {
-            LOG(INFO) << " sending device_state_config: " << deviceState;
+            dinfo(" sending device_state_config:%s", deviceState.c_str());
             params.push_back({deviceStateProp, deviceState});
         }
     }

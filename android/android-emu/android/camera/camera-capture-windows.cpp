@@ -312,9 +312,9 @@ public:
                 mSupportsAdvancedVideoProcessor = true;
             } else {
                 mSupportsAdvancedVideoProcessor = false;
-                QLOG(INFO) << "Webcam support may be limited, Media Foundation "
-                              "does not support Advanced Video Processor, hr="
-                           << hrToString(hr);
+                dinfo("Webcam support may be limited, Media Foundation "
+                      "does not support Advanced Video Processor, hr=%s",
+                      hrToString(hr).c_str());
             }
         }
     }
@@ -359,15 +359,17 @@ public:
         // This must be called after CoInitializeEx, otherwise the
         // supportsAdvancedVideoProcessor property will be invalid.
         if (!mMFApi->isValid()) {
-            LOG(WARNING) << "Media Foundation could not be loaded for webcam "
-                            "support. If this is a Windows N edition, install "
-                            "the Media Feature Pack.";
+            derror("Media Foundation could not be loaded for webcam "
+                   "support. If this is a Windows N edition, install "
+                   "the Media Feature Pack.");
             return;
         }
 
         hr = mMFApi->mfStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
         if (FAILED(hr)) {
-            LOG(INFO) << "MFStartup failed, hr=" << hrToString(hr);
+            derror("Media Foundation could not be initialized for webcam, "
+                   "hr=%s",
+                   hrToString(hr).c_str());
             return;
         }
         mMfInit = true;

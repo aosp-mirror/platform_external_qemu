@@ -22,6 +22,7 @@
 #include "android/metrics/MetricsReporter.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/avd/hw-config.h"
+#include "android/utils/debug.h"
 #include "android/console.h"
 #include "android/opengles.h"
 #include "studio_stats.pb.h"
@@ -92,7 +93,8 @@ public:
     void updateAndroidDisplayConfigPath(enum PresetEmulatorSizeType configId) {
         auto adbInterface = emulation::AdbInterface::getGlobal();
         if (!adbInterface) {
-            LOG(ERROR) << "Adb interface unavailable";
+            derror("Unable to update display configuration, adb interface "
+                   "unavailable");
             return;
         }
 
@@ -132,7 +134,8 @@ public:
 
         auto adbInterface = emulation::AdbInterface::getGlobal();
         if (!adbInterface) {
-            LOG(ERROR) << "Adb interface unavailable";
+            derror("Unable to set active display configuration, adb interface "
+                   "unavailable");
             return;
         }
 
