@@ -22,6 +22,7 @@
 #include "hw/qdev-core.h"
 #include "hw/qdev-properties.h"
 #include "hw/sysbus.h"
+#include "migration/vmstate.h"
 #include "qemu/log.h"
 #include "qemu/module.h"
 #include "qemu/queue.h"
@@ -223,6 +224,18 @@ static void pca954x_init(Object *obj)
     }
 }
 
+static const VMStateDescription pca954x_vmstate = {
+    .name = TYPE_PCA954X,
+    .version_id = 0,
+    .minimum_version_id = 0,
+    .fields = (VMStateField[]) {
+        VMSTATE_SMBUS_DEVICE(parent, Pca954xState),
+        VMSTATE_UINT8(control, Pca954xState),
+        VMSTATE_BOOL_ARRAY(enabled, Pca954xState, PCA9548_CHANNEL_COUNT),
+        VMSTATE_END_OF_LIST()
+    }
+};
+
 static Property pca954x_props[] = {
     DEFINE_PROP_STRING("name", Pca954xState, name),
     DEFINE_PROP_END_OF_LIST()
@@ -241,6 +254,7 @@ static void pca954x_class_init(ObjectClass *klass, void *data)
 
     dc->desc = "Pca954x i2c-mux";
     dc->realize = pca954x_realize;
+    dc->vmsd = &pca954x_vmstate;
 
     k->write_data = pca954x_write_data;
     k->receive_byte = pca954x_read_byte;
