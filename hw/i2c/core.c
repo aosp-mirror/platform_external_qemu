@@ -23,10 +23,29 @@ static Property i2c_props[] = {
     DEFINE_PROP_END_OF_LIST(),
 };
 
+static void i2c_bus_enter_reset(Object *obj, ResetType type)
+{
+    I2CBus *bus = I2C_BUS(obj);
+    I2CNode *node, *next;
+
+    bus->broadcast = false;
+    QLIST_FOREACH_SAFE(node, &bus->current_devs, next, next) {
+        QLIST_REMOVE(node, next);
+        g_free(node);
+    }
+}
+
+static void i2c_bus_class_init(ObjectClass *klass, void *data)
+{
+    ResettableClass *rc = RESETTABLE_CLASS(klass);
+    rc->phases.enter = i2c_bus_enter_reset;
+}
+
 static const TypeInfo i2c_bus_info = {
     .name = TYPE_I2C_BUS,
     .parent = TYPE_BUS,
     .instance_size = sizeof(I2CBus),
+    .class_init = i2c_bus_class_init,
 };
 
 static int i2c_bus_pre_save(void *opaque)
