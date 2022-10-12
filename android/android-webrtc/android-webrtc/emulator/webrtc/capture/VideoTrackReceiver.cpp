@@ -16,7 +16,7 @@
 #include <api/video/video_frame.h>         // for VideoFrame
 #include <api/video/video_frame_buffer.h>  // for VideoFrameBuffer
 #include <rtc_base/logging.h>              // for RTC_LOG
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 namespace emulator {
 namespace webrtc {

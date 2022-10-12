@@ -12,7 +12,7 @@
 #include "android/snapshot/PathUtils.h"
 
 #include "android/avd/info.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 

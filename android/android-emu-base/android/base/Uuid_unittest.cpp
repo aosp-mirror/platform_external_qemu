@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Uuid.h"
+#include "aemu/base/Uuid.h"
 
 #include <gtest/gtest.h>
 

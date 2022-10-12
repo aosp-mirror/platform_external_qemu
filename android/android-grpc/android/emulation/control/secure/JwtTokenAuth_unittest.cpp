@@ -17,7 +17,7 @@
 #include <utility>        // for move
 
 #include "absl/status/statusor.h"              // for StatusOr
-#include "android/base/files/PathUtils.h"      // for pj
+#include "aemu/base/files/PathUtils.h"      // for pj
 #include "android/base/system/System.h"        // for System
 #include "android/base/testing/TestEvent.h"    // for TestEvent
 #include "android/base/testing/TestTempDir.h"  // for TestTempDir

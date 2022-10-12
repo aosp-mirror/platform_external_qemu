@@ -14,14 +14,14 @@
 
 #include "android/metrics/StudioConfig.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/Optional.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/Optional.h"
 
-#include "android/base/Version.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/Version.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/metrics/MetricsPaths.h"
@@ -221,8 +221,8 @@ base::Version lastestAndroidStudioVersion() {
     if (studio.empty()) {
         return {};
     }
-    std::string_view basename;
-    PathUtils::split(studio, nullptr, &basename);
+    std::string basename;
+    PathUtils::split(studio.data(), nullptr, &basename);
     return extractAndroidStudioVersion(c_str(basename));
 }
 
@@ -369,7 +369,7 @@ static Optional<ValueType> getStudioConfigJsonValue(
         std::string_view name,
         ValueExtractor extractValue) {
     const std::string configPath = android::metrics::getSettingsFilePath();
-    std::ifstream in(PathUtils::asUnicodePath(configPath).c_str());
+    std::ifstream in(PathUtils::asUnicodePath(configPath.data()).c_str());
     if (!in) {
         return {};
     }

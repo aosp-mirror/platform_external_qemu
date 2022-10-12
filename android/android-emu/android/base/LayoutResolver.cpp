@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/LayoutResolver.h"
+#include "aemu/base/LayoutResolver.h"
 
 #include <algorithm>
 #include <cmath>

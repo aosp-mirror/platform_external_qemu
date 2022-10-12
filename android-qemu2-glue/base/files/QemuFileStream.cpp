@@ -15,7 +15,7 @@ extern "C" {
 #endif
 #include "android-qemu2-glue/base/files/QemuFileStream.h"
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 extern "C" {
 #include "qemu/osdep.h"

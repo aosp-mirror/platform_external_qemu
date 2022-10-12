@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/Result.h"
+#include "aemu/base/Result.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

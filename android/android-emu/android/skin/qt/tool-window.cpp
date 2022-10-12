@@ -64,8 +64,8 @@
 
 #include "android/avd/info.h"                            // for avdInfo_get...
 #include "android/avd/util.h"                            // for path_getAvd...
-#include "android/base/Log.h"                            // for LogMessage
-#include "android/base/memory/OnDemand.h"                // for OnDemand
+#include "aemu/base/Log.h"                            // for LogMessage
+#include "aemu/base/memory/OnDemand.h"                // for OnDemand
 #include "android/base/system/System.h"                  // for System
 #include "android/cmdline-option.h"                      // for AndroidOptions
 #include "android/emulation/control/adb/AdbInterface.h"  // for OptionalAdb...
@@ -435,11 +435,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 }
 
 ToolWindow::~ToolWindow() {
-    if (mFoldableSyncToAndroid.isStarted()) {
-        mFoldableSyncToAndroid.enqueue({
-                SEND_EXIT,
-        });
-    }
+    mFoldableSyncToAndroid.enqueue({ SEND_EXIT, });
     mFoldableSyncToAndroid.join();
 }
 

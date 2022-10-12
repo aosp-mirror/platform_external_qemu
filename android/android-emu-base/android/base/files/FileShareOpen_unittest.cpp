@@ -9,8 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/FileShareOpen.h"
-#include "android/base/files/FileShareOpenImpl.h"
+#include "aemu/base/files/FileShareOpen.h"
+#include "aemu/base/files/FileShareOpenImpl.h"
 
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"

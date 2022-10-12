@@ -13,9 +13,9 @@
 // these functions take const references to std::string_view to avoid
 // unnecessary copies.
 
-#include "android/base/Uri.h"
+#include "aemu/base/Uri.h"
 
-#include "android/base/StringFormat.h"
+#include "aemu/base/StringFormat.h"
 
 #include <string_view>
 

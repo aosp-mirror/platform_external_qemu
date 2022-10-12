@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/async/Looper.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/async/Looper.h"
 
 // This class establishes a connection between one Android Wear and one
 // compatible phone, so that the wear can get notifications automatically

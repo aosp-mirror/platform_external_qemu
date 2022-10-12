@@ -18,8 +18,8 @@
 #include <memory>                          // for allocator
 #include <string>                          // for operator+, to_string, basi...
 
-#include "android/base/logging/LogFormatter.h" // for VerboseLogFormatter
-#include "android/base/files/PathUtils.h"      // for pj
+#include "aemu/base/logging/LogFormatter.h" // for VerboseLogFormatter
+#include "aemu/base/files/PathUtils.h"      // for pj
 #include "android/base/system/System.h"        // for System
 #include "android/utils/path.h"                // for path_mkdir_if_needed
 

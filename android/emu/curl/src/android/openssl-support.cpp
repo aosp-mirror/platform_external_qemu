@@ -11,8 +11,8 @@
 
 #include "android/openssl-support.h"
 
-#include "android/base/synchronization/Lock.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/threads/Thread.h"
 
 #include <assert.h>
 #include <openssl/crypto.h>

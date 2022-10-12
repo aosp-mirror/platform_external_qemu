@@ -11,9 +11,9 @@
 
 #include "android/utils/socket_drainer.h"
 
-#include "android/base/Log.h"
-#include "android/base/sockets/SocketDrainer.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/sockets/SocketDrainer.h"
+#include "aemu/base/sockets/SocketUtils.h"
 
 #include <stddef.h>
 

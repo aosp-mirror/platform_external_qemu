@@ -23,8 +23,8 @@
 #include <stdio.h>                            // for NULL
 #include <string.h>                           // for memset
 
-#include "android/base/async/Looper.h"        // for Looper, Looper::Timer
-#include "android/base/async/ThreadLooper.h"  // for ThreadLooper
+#include "aemu/base/async/Looper.h"        // for Looper, Looper::Timer
+#include "aemu/base/async/ThreadLooper.h"  // for ThreadLooper
 #include "nimble/nimble_npl.h"                // for ble_npl_eventq_put, ble...
 #include "nimble/os_types.h"                  // for ble_npl_callout, ble_np...
 

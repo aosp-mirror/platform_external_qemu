@@ -14,7 +14,7 @@
 
 #include "android/metrics/StudioConfig.h"
 
-#include "android/base/Version.h"
+#include "aemu/base/Version.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/utils/path.h"

@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 
 #include <stdbool.h>
 #include <stdio.h>

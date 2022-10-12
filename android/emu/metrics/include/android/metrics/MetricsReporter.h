@@ -17,9 +17,9 @@
 #include <string_view>
 #include <vector>      // for vector
 
-#include "android/base/Compiler.h"              // for DISALLOW_COPY_ASSIGN_...
+#include "aemu/base/Compiler.h"              // for DISALLOW_COPY_ASSIGN_...
 
-#include "android/base/synchronization/Lock.h"  // for Lock
+#include "aemu/base/synchronization/Lock.h"  // for Lock
 #include "android/base/system/System.h"         // for System, System::Duration
 #include "android/metrics/MetricsWriter.h"      // for MetricsWriter, Metric...
 #include "android/metrics/export.h"

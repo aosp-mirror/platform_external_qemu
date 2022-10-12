@@ -31,7 +31,7 @@
 #include "stubhal.h"
 
 #include "android/base/system/System.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 
 #include <vector>
 

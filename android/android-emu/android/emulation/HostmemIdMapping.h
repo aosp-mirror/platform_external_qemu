@@ -13,10 +13,10 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/containers/StaticMap.h"
-#include "android/base/export.h"
-#include "android/base/ManagedDescriptor.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/containers/StaticMap.h"
+#include "aemu/base/export.h"
+#include "aemu/base/ManagedDescriptor.h"
 #include "android/emulation/control/structs.h"
 
 #include <atomic>

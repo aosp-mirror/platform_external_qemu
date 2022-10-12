@@ -11,10 +11,10 @@
 
 #include "android/emulation/AdbHostServer.h"
 
-#include "android/base/Log.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/StringFormat.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "aemu/base/StringFormat.h"
 
 #include "android/base/system/System.h"
 

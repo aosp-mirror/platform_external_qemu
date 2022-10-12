@@ -14,7 +14,7 @@
 
 #include "android/utils/async.h"
 
-#include "android/base/threads/Async.h"
+#include "aemu/base/threads/Async.h"
 
 using android::base::ThreadFlags;
 

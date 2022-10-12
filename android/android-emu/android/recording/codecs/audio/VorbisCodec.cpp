@@ -24,7 +24,7 @@ extern "C" {
 
 #include "android/recording/ffmpegdefs.h"
 
-#include "android/base/Log.h"          // for LOG, LogMessage, LogStream
+#include "aemu/base/Log.h"          // for LOG, LogMessage, LogStream
 
 namespace android {
 namespace recording {

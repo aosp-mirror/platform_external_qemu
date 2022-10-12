@@ -12,16 +12,16 @@
 #include "android-qemu2-glue/qemu-console-factory.h"
 #include "android/android.h"
 #include "android/avd/hw-config.h"
-#include "android/base/ProcessControl.h"
-#include "android/base/StringFormat.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/IniFile.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/ProcessControl.h"
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/IniFile.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/system/Win32Utils.h"
+#include "aemu/base/threads/Async.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/base/system/System.h"
-#include "android/base/system/Win32Utils.h"
-#include "android/base/threads/Async.h"
-#include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
 #include "android/bootconfig.h"
 #include "android/camera/camera-virtualscene.h"
@@ -1710,7 +1710,7 @@ extern "C" int main(int argc, char** argv) {
             auto contentPath = avdInfo_getContentPath(avd);
             auto diskKind = System::get()->pathDiskKind(contentPath);
             if (diskKind) {
-                if (*diskKind == System::DiskKind::Hdd) {
+                if (*diskKind == DiskKind::Hdd) {
                     androidSnapshot_setUsingHdd(true /* is hdd */);
 #ifndef _WIN32
                     feature_set_if_not_overridden(kFeature_QuickbootFileBacked,

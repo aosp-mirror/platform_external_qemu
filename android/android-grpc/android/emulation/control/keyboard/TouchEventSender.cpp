@@ -3,10 +3,10 @@
 #include <functional>  // for __base
 #include <vector>      // for vector
 
-#include "android/base/Log.h"  // for LogStream, LOG
+#include "aemu/base/Log.h"  // for LogStream, LOG
 
-#include "android/base/async/Looper.h"                   // for Looper
-#include "android/base/async/ThreadLooper.h"             // for ThreadLooper
+#include "aemu/base/async/Looper.h"                   // for Looper
+#include "aemu/base/async/ThreadLooper.h"             // for ThreadLooper
 #include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
 #include "android/hw-events.h"                           // for EV_ABS, EV_SYN
 #include "android/multitouch-screen.h"                   // for MTS_*

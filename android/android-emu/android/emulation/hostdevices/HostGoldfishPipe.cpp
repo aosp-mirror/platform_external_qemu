@@ -14,15 +14,15 @@
 
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/Result.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/Result.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/android_pipe_device.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/testing/TestVmLock.h"
 #include "android/emulation/VmLock.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/utils/stream.h"
 
 #include <algorithm>

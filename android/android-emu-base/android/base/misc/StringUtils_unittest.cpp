@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 
 #include <gtest/gtest.h>
 
@@ -186,68 +186,68 @@ TEST(StringUtils, endsWith) {
 }
 
 TEST(StringUtils, split) {
-    std::vector<std::string_view> results;
+    std::vector<std::string> results;
 
-    auto testFunc = [&results](std::string_view s) { results.push_back(s); };
+    auto testFunc = [&results](const std::string& s) { results.push_back(s); };
 
-    split(std::string_view(""), std::string_view("abc"), testFunc);
+    split<std::string>(std::string(""), std::string("abc"), testFunc);
     EXPECT_EQ(results.size(), 1);
 
-    split(std::string_view("abc"), std::string_view(""), testFunc);
+    split<std::string>(std::string("abc"), std::string(""), testFunc);
     EXPECT_EQ(results.size(), 1);
 
     results.clear();
-    split(std::string_view("abc"), std::string_view("a"), testFunc);
+    split<std::string>(std::string("abc"), std::string("a"), testFunc);
     EXPECT_EQ(results.size(), 2);
-    EXPECT_EQ(results[0], std::string_view(""));
-    EXPECT_EQ(results[1], std::string_view("bc"));
+    EXPECT_EQ(results[0], std::string(""));
+    EXPECT_EQ(results[1], std::string("bc"));
 
     results.clear();
-    split(std::string_view("aaa"), std::string_view("a"), testFunc);
+    split<std::string>(std::string("aaa"), std::string("a"), testFunc);
     EXPECT_EQ(4, results.size());
-    EXPECT_EQ(std::string_view(""), results[0]);
-    EXPECT_EQ(std::string_view(""), results[1]);
-    EXPECT_EQ(std::string_view(""), results[2]);
-    EXPECT_EQ(std::string_view(""), results[3]);
+    EXPECT_EQ(std::string(""), results[0]);
+    EXPECT_EQ(std::string(""), results[1]);
+    EXPECT_EQ(std::string(""), results[2]);
+    EXPECT_EQ(std::string(""), results[3]);
 
     results.clear();
-    split(std::string_view("1a2a3a4"), std::string_view("a"), testFunc);
+    split<std::string>(std::string("1a2a3a4"), std::string("a"), testFunc);
     EXPECT_EQ(4, results.size());
-    EXPECT_EQ(std::string_view("1"), results[0]);
-    EXPECT_EQ(std::string_view("2"), results[1]);
-    EXPECT_EQ(std::string_view("3"), results[2]);
-    EXPECT_EQ(std::string_view("4"), results[3]);
+    EXPECT_EQ(std::string("1"), results[0]);
+    EXPECT_EQ(std::string("2"), results[1]);
+    EXPECT_EQ(std::string("3"), results[2]);
+    EXPECT_EQ(std::string("4"), results[3]);
 
     results.clear();
-    split(std::string_view("1a2aa3a4"), std::string_view("a"), testFunc);
+    split<std::string>(std::string("1a2aa3a4"), std::string("a"), testFunc);
     EXPECT_EQ(5, results.size());
-    EXPECT_EQ(std::string_view("1"), results[0]);
-    EXPECT_EQ(std::string_view("2"), results[1]);
-    EXPECT_EQ(std::string_view(""), results[2]);
-    EXPECT_EQ(std::string_view("3"), results[3]);
-    EXPECT_EQ(std::string_view("4"), results[4]);
+    EXPECT_EQ(std::string("1"), results[0]);
+    EXPECT_EQ(std::string("2"), results[1]);
+    EXPECT_EQ(std::string(""), results[2]);
+    EXPECT_EQ(std::string("3"), results[3]);
+    EXPECT_EQ(std::string("4"), results[4]);
 
     results.clear();
-    split(std::string_view("The quick brown fox jumped over the lazy dog"),
-          std::string_view(" "), testFunc);
+    split<std::string>(std::string("The quick brown fox jumped over the lazy dog"),
+          std::string(" "), testFunc);
     EXPECT_EQ(9, results.size());
-    EXPECT_EQ(std::string_view("The"), results[0]);
-    EXPECT_EQ(std::string_view("quick"), results[1]);
-    EXPECT_EQ(std::string_view("brown"), results[2]);
-    EXPECT_EQ(std::string_view("fox"), results[3]);
-    EXPECT_EQ(std::string_view("jumped"), results[4]);
-    EXPECT_EQ(std::string_view("over"), results[5]);
-    EXPECT_EQ(std::string_view("the"), results[6]);
-    EXPECT_EQ(std::string_view("lazy"), results[7]);
-    EXPECT_EQ(std::string_view("dog"), results[8]);
+    EXPECT_EQ(std::string("The"), results[0]);
+    EXPECT_EQ(std::string("quick"), results[1]);
+    EXPECT_EQ(std::string("brown"), results[2]);
+    EXPECT_EQ(std::string("fox"), results[3]);
+    EXPECT_EQ(std::string("jumped"), results[4]);
+    EXPECT_EQ(std::string("over"), results[5]);
+    EXPECT_EQ(std::string("the"), results[6]);
+    EXPECT_EQ(std::string("lazy"), results[7]);
+    EXPECT_EQ(std::string("dog"), results[8]);
 
     results.clear();
-    split(std::string_view("a; b; c; d"), std::string_view("; "), testFunc);
+    split<std::string>(std::string("a; b; c; d"), std::string("; "), testFunc);
     EXPECT_EQ(4, results.size());
-    EXPECT_EQ(std::string_view("a"), results[0]);
-    EXPECT_EQ(std::string_view("b"), results[1]);
-    EXPECT_EQ(std::string_view("c"), results[2]);
-    EXPECT_EQ(std::string_view("d"), results[3]);
+    EXPECT_EQ(std::string("a"), results[0]);
+    EXPECT_EQ(std::string("b"), results[1]);
+    EXPECT_EQ(std::string("c"), results[2]);
+    EXPECT_EQ(std::string("d"), results[3]);
 }
 
 }  // namespace base

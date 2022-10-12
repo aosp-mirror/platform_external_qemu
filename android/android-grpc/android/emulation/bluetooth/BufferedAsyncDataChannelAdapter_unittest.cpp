@@ -20,7 +20,7 @@
 #include <thread>       // for thread
 #include <type_traits>  // for remove_extent_t
 
-#include "android/base/async/Looper.h"        // for Looper, Looper::Duration
+#include "aemu/base/async/Looper.h"        // for Looper, Looper::Duration
 #include "android/base/testing/TestEvent.h"   // for TestEvent
 #include "android/base/testing/TestLooper.h"  // for TestLooper
 

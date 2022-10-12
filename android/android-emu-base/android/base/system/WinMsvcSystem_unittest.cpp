@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 #include "android/base/system/System.h"
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 #include "android/base/testing/TestSystem.h"
 
 using android::base::TestSystem;

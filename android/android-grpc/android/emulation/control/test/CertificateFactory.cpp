@@ -21,7 +21,8 @@
 #include <chrono>                          // for seconds
 #include <utility>                         // for __unwrap_reference<>::type
 
-#include "android/base/files/PathUtils.h"  // for pj, PathUtils (ptr only)
+#include "aemu/base/files/PathUtils.h"  // for pj, PathUtils (ptr only)
+#include "aemu/base/logging/Log.h"
 #include "android/utils/file_io.h"         // for android_fopen
 #include "openssl/asn1.h"                  // for ASN1_INTEGER_set, MBSTRING...
 #include "openssl/base.h"                  // for EVP_PKEY, BIO, BIGNUM, RSA

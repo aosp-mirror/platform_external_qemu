@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 
-#include "android/base/threads/Thread.h"
-#include "android/base/Version.h"
+#include "aemu/base/threads/Thread.h"
+#include "aemu/base/Version.h"
 #include "android/update-check/IVersionExtractor.h"
 
 #include <memory>

@@ -11,7 +11,7 @@
 */
 #include "android/utils/timezone.h"
 
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"

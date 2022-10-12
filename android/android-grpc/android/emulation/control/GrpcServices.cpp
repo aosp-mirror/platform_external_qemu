@@ -27,10 +27,12 @@
 #include <utility>
 #include <vector>
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/logging/CLog.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/control/interceptor/IdleInterceptor.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"

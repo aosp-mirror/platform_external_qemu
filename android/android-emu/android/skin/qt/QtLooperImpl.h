@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/async/Looper.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/async/Looper.h"
 #include "android/skin/qt/QtThreading.h"
 
 #include <QThread>

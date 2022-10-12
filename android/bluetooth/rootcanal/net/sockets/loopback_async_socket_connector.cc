@@ -14,7 +14,7 @@
 // limitations under the License.
 #include "net/sockets/loopback_async_socket_connector.h"
 
-#include "android/base/sockets/SocketUtils.h"  // for socketTcp4LoopbackClient
+#include "aemu/base/sockets/SocketUtils.h"  // for socketTcp4LoopbackClient
 #include "net/sockets/async_socket.h"          // for AsyncSocket
 
 namespace android {

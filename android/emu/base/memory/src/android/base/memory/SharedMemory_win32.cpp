@@ -8,20 +8,20 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/memory/SharedMemory.h"
+#include "aemu/base/memory/SharedMemory.h"
 
 #include <shlwapi.h>
 #include <cassert>
 #include <string>
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 
 namespace android {
 namespace base {
 
-SharedMemory::SharedMemory(std::string_view name, size_t size) : mSize(size) {
-    constexpr std::string_view kFileUri = "file://";
+SharedMemory::SharedMemory(const std::string& name, size_t size) : mSize(size) {
+    const std::string kFileUri = "file://";
     if (name.find(kFileUri, 0) == 0) {
         // Convert URI to path using win32 api.
         const Win32UnicodeString srcUri(name);
@@ -34,7 +34,7 @@ SharedMemory::SharedMemory(std::string_view name, size_t size) : mSize(size) {
         mShareType = ShareType::FILE_BACKED;
     } else {
         mShareType = ShareType::SHARED_MEMORY;
-        mName = std::string("SHM_") + std::string(name);
+        mName = "SHM_" + name;
     }
 }
 

@@ -14,9 +14,9 @@
 #include <stdio.h>                                    // for printf
 #include <functional>                                 // for __base
 
-#include "android/base/async/ThreadLooper.h"          // for ThreadLooper
+#include "aemu/base/async/ThreadLooper.h"          // for ThreadLooper
 #include "android/base/system/System.h"               // for System
-#include "android/base/threads/ParallelTask.h"        // for runParallelTask
+#include "aemu/base/threads/ParallelTask.h"        // for runParallelTask
 #include "android/console.h"                          // for getConsoleAgents
 #include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
 

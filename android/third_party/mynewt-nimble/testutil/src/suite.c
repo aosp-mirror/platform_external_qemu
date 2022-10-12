@@ -21,7 +21,7 @@
 #include "os/mynewt.h"
 #include "testutil/testutil.h"
 #include "testutil_priv.h"
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
 
 const char *tu_suite_name = 0;
 int tu_suite_failed = 0;

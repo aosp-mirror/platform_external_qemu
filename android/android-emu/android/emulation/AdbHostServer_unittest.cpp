@@ -11,9 +11,9 @@
 
 #include "android/emulation/AdbHostServer.h"
 
-#include "android/base/threads/Thread.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/threads/Thread.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/base/testing/TestInputBufferSocketServerThread.h"
 #include "android/base/testing/TestSystem.h"
 

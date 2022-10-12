@@ -19,8 +19,8 @@
 #include <zlib.h>                                   // for crc32
 #include <functional>                               // for __base
 
-#include "android/base/Log.h"                       // for LogStream, LOG
-#include "android/base/memory/LazyInstance.h"       // for LazyInstance, LAZ...
+#include "aemu/base/Log.h"                       // for LogStream, LOG
+#include "aemu/base/memory/LazyInstance.h"       // for LazyInstance, LAZ...
 #include "android/metrics/MetricsReporter.h"        // for MetricsReporter
 #include "studio_stats.pb.h"  // for EmulatorGrpc, And...
 

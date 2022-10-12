@@ -50,7 +50,7 @@ with most of the Android-specific code under $AOSP/external/qemu/android/.
 The 'qemu2' Android emulator code base lives under $AOSP/external/qemu/
 and is *NOT* affected by this coding style guide.
 
-  - `external/qemu/android/base/`
+  - `external/qemu/aemu/base/`
 
       Set of low-level C++ interfaces to system facilities.
       These should be completely self-contained (i.e. not depend on other
@@ -60,7 +60,7 @@ and is *NOT* affected by this coding style guide.
 
       **IMPORTANT:* Any new addition here should come with unit-tests that
                    will be run each time android/rebuild.sh runs.
-                   Also see `android/base/testing/` for helper classes to use
+                   Also see `aemu/base/testing/` for helper classes to use
                    inside your unit tests.
 
       Generally speaking, the use of C++ makes it easier to provide abstract
@@ -80,14 +80,14 @@ and is *NOT* affected by this coding style guide.
   - `external/qemu/android/utils/`:
 
       Similar low-level C-based interfaces, some of them are actual wrappers
-      for android/base/ features. Should not depend on anything else besides
+      for aemu/base/ features. Should not depend on anything else besides
       system interfaces.
 
       *NOTE:* Do not put high-level features here.
 
   - `external/qemu/android-qemu1-glue/base/`:
 
-      Currently contains QEMU-specific implementations of android/base/
+      Currently contains QEMU-specific implementations of aemu/base/
       interfaces. E.g. `android-qemu1-glue/base/async/Looper.h` provides
       `android::qemu::createLooper()`, which returns a Looper instance
       based on the QEMU main event loop.
@@ -104,7 +104,7 @@ and is *NOT* affected by this coding style guide.
   - `external/qemu/android/<feature>/`:
 
       Should contain code related to a specific feature used during emulation.
-      Ideally, the code should only depend on android/base/ and android/utils/,
+      Ideally, the code should only depend on aemu/base/ and android/utils/,
       stuff as much as possible. Anything that is QEMU-specific should be moved
       somewhere else.
 
@@ -139,7 +139,7 @@ and is *NOT* affected by this coding style guide.
       be re-implemented for QEMU2 as well).
 
     - Avoid using system interfaces directly. Use the abstractions provided
-      by android/base/ and android/utils/ instead, since they can more easily
+      by aemu/base/ and android/utils/ instead, since they can more easily
       be mocked during unit-tests, making our regression test suite more
       robust / less dependent on host/development system specifics.
 
@@ -467,7 +467,7 @@ ask on the public mailing list for information.
 
         #include "android/myfeature/Api.h"
 
-        #include "android/base/Log.h"
+        #include "aemu/base/Log.h"
         #include "android/myfeature/Helper.h"
         #include "android/otherFeather.h"
 
@@ -686,10 +686,10 @@ V. C++11 and beyond
   Note: Scoped enums have one drawback: they do not support bitwise operations
         which are typically handy for dealing with bitflags. There is
         fortunately one solution for this, which is to include
-        "android/base/EnumFlags.h" in your source file, and add the
+        "aemu/base/EnumFlags.h" in your source file, and add the
         following flag if you're not in the android::base namespace:
 
-           #include "android/base/EnumFlags.h"
+           #include "aemu/base/EnumFlags.h"
 
            ...
 

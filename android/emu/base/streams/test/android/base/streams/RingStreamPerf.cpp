@@ -19,7 +19,7 @@
 #include <string>    // for string
 #include <utility>   // for pair
 
-#include "android/base/streams/RingStreambuf.h"  // for RingStre...
+#include "aemu/base/streams/RingStreambuf.h"  // for RingStre...
 #include "benchmark/benchmark_api.h"             // for State
 
 using android::base::streams::RingStreambuf;

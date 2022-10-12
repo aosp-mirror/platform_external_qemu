@@ -11,7 +11,7 @@
 
 #include "android/console_internal.h"
 
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/telephony/modem_driver.h"
 
 #include <gtest/gtest.h>

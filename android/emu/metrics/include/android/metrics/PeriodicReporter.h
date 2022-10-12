@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/Optional.h"
-#include "android/base/async/Looper.h"
-#include "android/base/async/RecurrentTask.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/RecurrentTask.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/export.h"

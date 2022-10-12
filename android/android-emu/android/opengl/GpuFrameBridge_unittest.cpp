@@ -14,9 +14,9 @@
 
 #include "android/opengl/GpuFrameBridge.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/Log.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/memory/ScopedPtr.h"
 
 #include <gtest/gtest.h>
 

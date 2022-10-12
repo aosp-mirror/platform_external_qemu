@@ -13,11 +13,11 @@
 #pragma once
 
 #include "android/hw-sensors.h"
-#include "android/base/containers/CircularBuffer.h"
-#include "android/base/memory/OnDemand.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/threads/WorkerThread.h"
+#include "aemu/base/containers/CircularBuffer.h"
+#include "aemu/base/memory/OnDemand.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/threads/WorkerThread.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/extended-window.h"

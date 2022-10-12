@@ -11,7 +11,7 @@
 
 #include "android/utils/http_utils.h"
 
-#include "android/base/misc/HttpUtils.h"
+#include "aemu/base/misc/HttpUtils.h"
 
 bool android_http_is_request_line(const char* line,
                                   size_t line_len) {

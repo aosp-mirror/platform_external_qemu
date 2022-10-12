@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "android/base/export.h"
+#include "aemu/base/export.h"
 #include "android/utils/compiler.h"
 #include "android/utils/looper.h"
 

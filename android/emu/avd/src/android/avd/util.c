@@ -13,7 +13,7 @@
 #include "android/avd/util.h"
 
 #include "android/constants.h"
-#include "android/base/ArraySize.h"
+#include "aemu/base/ArraySize.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"

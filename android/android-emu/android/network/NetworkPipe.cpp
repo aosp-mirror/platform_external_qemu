@@ -11,11 +11,13 @@
 
 #include "NetworkPipe.h"
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/emulation/AndroidPipe.h"
 
 #include <atomic>
+#include <cstring>
 #include <ctime>
+#include <limits>
 #include <unordered_set>
 #include <vector>
 

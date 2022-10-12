@@ -27,8 +27,8 @@
 #include <tuple>   // for make_tuple, tuple_elem...
 
 #include "android/avd/hw-config.h"
-#include "android/base/EventNotificationSupport.h"
-#include "android/base/Log.h"
+#include "aemu/base/EventNotificationSupport.h"
+#include "aemu/base/Log.h"
 #include "android/console.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/emulation/control/ScreenCapturer.h"

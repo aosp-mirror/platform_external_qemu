@@ -15,7 +15,7 @@
 #include "android/emulation/control/window_agent.h"
 
 #include "android/avd/hw-config.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/console.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/emulator-window.h"

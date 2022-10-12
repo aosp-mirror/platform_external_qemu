@@ -16,7 +16,7 @@
 
 #include "android/skin/qt/native-keyboard-event-handler.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 

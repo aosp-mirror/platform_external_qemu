@@ -19,14 +19,14 @@
 #include <functional>     // for function, __base
 #include <vector>         // for vector
 
-#include "android/base/EnumFlags.h"   // for operator|
-#include "android/base/Log.h"         // for LogStream, LOG, LogMes...
-#include "android/base/Optional.h"    // for Optional
+#include "aemu/base/EnumFlags.h"   // for operator|
+#include "aemu/base/Log.h"         // for LogStream, LOG, LogMes...
+#include "aemu/base/Optional.h"    // for Optional
 
-#include "android/base/files/IniFile.h"
-#include "android/base/files/PathUtils.h"  // for pj, PathUtils (ptr only)
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/files/IniFile.h"
+#include "aemu/base/files/PathUtils.h"  // for pj, PathUtils (ptr only)
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/base/system/System.h"        // for System, System::Pid
 #include "android/base/testing/TestTempDir.h"  // for TestTempDir
 #include "android/emulation/ConfigDirs.h"      // for ConfigDirs

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/testing/MockAndroidVmOperations.h"
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 #include "android/emulation/hostdevices/HostAddressSpace.h"
 #include "android/emulation/HostmemIdMapping.h"
 

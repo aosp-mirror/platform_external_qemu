@@ -17,10 +17,10 @@
 
 #include "RenderWindow.h"
 
-#include "android/base/Compiler.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/MessageChannel.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/snapshot/common.h"
 
 #include "RenderThread.h"

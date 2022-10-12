@@ -19,8 +19,8 @@
 #include <string>
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/Optional.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/Optional.h"
 #include "android/utils/compiler.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/videoinjection/VideoInjectionController.h"

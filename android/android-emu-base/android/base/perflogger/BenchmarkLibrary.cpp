@@ -11,9 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/perflogger/BenchmarkLibrary.h"
+#include "aemu/base/perflogger/BenchmarkLibrary.h"
 
-#include "android/base/perflogger/Benchmark.h"
+#include "aemu/base/perflogger/Benchmark.h"
 
 #include <sstream>
 #include <string>

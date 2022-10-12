@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>                         // for EXPECT_EQ, Message
 #include <libavformat/avformat.h>                // for AVFormatContext
 
-#include "android/base/files/PathUtils.h"        // for PathUtils
+#include "aemu/base/files/PathUtils.h"        // for PathUtils
 #include "android/base/system/System.h"          // for System
 #include "android/hw-sensors.h"                  // for ANDROID_SENSOR_ACCEL...
 #include "offworld.pb.h"  // for DataStreamInfo

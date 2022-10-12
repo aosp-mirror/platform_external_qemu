@@ -11,7 +11,7 @@
 
 #include "android/filesystems/ramdisk_extractor.h"
 
-#include "android/base/EintrWrapper.h"
+#include "aemu/base/EintrWrapper.h"
 #include "android/filesystems/testing/TestSupport.h"
 #include "android/utils/file_io.h"
 

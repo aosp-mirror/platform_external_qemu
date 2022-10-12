@@ -11,15 +11,16 @@
 
 #include "WifiForwardPipe.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/network/WifiForwardClient.h"
 #include "android/network/WifiForwardPeer.h"
 #include "android/network/WifiForwardServer.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/emulation/AndroidPipe.h"
 
+#include <cstring>
 #include <memory>
 #include <thread>
 

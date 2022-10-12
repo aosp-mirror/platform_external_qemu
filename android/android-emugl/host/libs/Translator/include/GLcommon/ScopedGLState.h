@@ -15,7 +15,7 @@
 */
 #pragma once
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 
 #include <GLES/gl.h>
 

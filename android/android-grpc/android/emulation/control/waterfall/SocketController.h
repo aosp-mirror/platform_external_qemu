@@ -18,9 +18,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "android/base/async/Looper.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/emulation/control/waterfall/WaterfallServiceLibrary.h"
 #include "control_socket.pb.h"
 #include "waterfall.grpc.pb.h"

@@ -23,7 +23,7 @@
 #include "android/hw-control.h"
 
 #include "android/avd/hw-config.h"
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 #include "android/emulation/android_qemud.h"
 #include "android/console.h"
 #include "android/utils/debug.h"

@@ -11,8 +11,8 @@
 */
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/sockets/ScopedSocket.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/sockets/ScopedSocket.h"
 #include "android/network/Ieee80211Frame.h"
 
 #include <atomic>

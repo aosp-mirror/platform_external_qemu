@@ -23,7 +23,7 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/files/StreamSerializing.h"
 #include "emugl/common/crash_reporter.h"
 #include "GLEScmValidate.h"
 

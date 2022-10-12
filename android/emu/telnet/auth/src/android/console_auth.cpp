@@ -11,10 +11,10 @@
 
 #include "android/console_auth.h"  // for CONSOLE_AUTH_STATUS_DISABLED
 
-#include "android/base/files/PathUtils.h"   // for PathUtils
-#include "android/base/files/ScopedFd.h"    // for ScopedFd
-#include "android/base/misc/FileUtils.h"    // for readFileIntoString, write...
-#include "android/base/misc/StringUtils.h"  // for trim
+#include "aemu/base/files/PathUtils.h"   // for PathUtils
+#include "aemu/base/files/ScopedFd.h"    // for ScopedFd
+#include "aemu/base/misc/FileUtils.h"    // for readFileIntoString, write...
+#include "aemu/base/misc/StringUtils.h"  // for trim
 #include "android/base/system/System.h"     // for System
 #include "android/console_auth_internal.h"  // for fn_get_auth_token_path
 #include "android/utils/Random.h"           // for generateRandomBytes

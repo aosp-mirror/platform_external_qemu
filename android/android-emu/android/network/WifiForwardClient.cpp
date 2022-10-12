@@ -11,9 +11,9 @@
 
 #include "WifiForwardClient.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/sockets/SocketUtils.h"
 
 namespace android {
 namespace network {

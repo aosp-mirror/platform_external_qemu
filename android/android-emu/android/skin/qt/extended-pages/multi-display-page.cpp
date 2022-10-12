@@ -23,8 +23,8 @@
 #include <utility>
 
 #include "android/avd/info.h"
-#include "android/base/LayoutResolver.h"
-#include "android/base/Log.h"
+#include "aemu/base/LayoutResolver.h"
+#include "aemu/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"

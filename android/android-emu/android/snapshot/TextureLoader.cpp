@@ -16,8 +16,8 @@
 
 #include "android/snapshot/TextureLoader.h"
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/files/DecompressingStream.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/files/DecompressingStream.h"
 
 #include <assert.h>
 

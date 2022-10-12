@@ -21,8 +21,8 @@
 #include <string_view>
 #include <vector>                        // for vector
 
-#include "android/base/Compiler.h"       // for DISALLOW_COPY_ASSIGN_AND_MOVE
-#include "android/base/Optional.h"       // for Optional
+#include "aemu/base/Compiler.h"       // for DISALLOW_COPY_ASSIGN_AND_MOVE
+#include "aemu/base/Optional.h"       // for Optional
 
 #include "android/base/system/System.h"  // for System, System::ProcessExitCode
 

@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/IOVector.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/IOVector.h"
 #include "android/network/MacAddress.h"
 
 #include <array>

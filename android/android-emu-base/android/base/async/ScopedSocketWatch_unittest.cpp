@@ -9,10 +9,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/async/ScopedSocketWatch.h"
+#include "aemu/base/async/ScopedSocketWatch.h"
 
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/async/ThreadLooper.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "aemu/base/async/ThreadLooper.h"
 
 #include <gtest/gtest.h>
 

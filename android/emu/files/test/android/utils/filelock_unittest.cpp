@@ -11,7 +11,7 @@
 
 #include "android/utils/filelock.h"
 
-#include "android/base/ArraySize.h"
+#include "aemu/base/ArraySize.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/utils/path.h"

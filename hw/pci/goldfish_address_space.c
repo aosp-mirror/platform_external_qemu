@@ -45,7 +45,7 @@ void goldfish_address_space_set_service_ops(const GoldfishAddressSpaceOps *ops) 
 
 #ifdef CONFIG_ANDROID
 
-#include "android/base/address_space.h"
+#include "aemu/base/address_space.h"
 
 #else
 

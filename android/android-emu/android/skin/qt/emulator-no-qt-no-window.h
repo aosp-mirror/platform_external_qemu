@@ -12,11 +12,13 @@
 
 #pragma once
 
+#include <cstring>
 #include <functional>                           // for function
 #include <memory>                               // for shared_ptr
 #include <queue>                                // for queue
+#include <string>
 
-#include "android/base/synchronization/Lock.h"  // for Lock
+#include "aemu/base/synchronization/Lock.h"  // for Lock
 #include "android/skin/event.h"                 // for SkinEvent
 #include "android/ui-emu-agent.h"               // for UiEmuAgent
 

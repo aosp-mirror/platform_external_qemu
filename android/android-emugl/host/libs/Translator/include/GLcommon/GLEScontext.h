@@ -17,8 +17,8 @@
 #ifndef GLES_CONTEXT_H
 #define GLES_CONTEXT_H
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/files/Stream.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/files/Stream.h"
 
 #include "emugl/common/mutex.h"
 #include "GLDispatch.h"

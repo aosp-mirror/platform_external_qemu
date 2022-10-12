@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/export.h"
+#include "aemu/base/export.h"
 #include "android/skin/winsys.h"
 #include "android/utils/compiler.h"
 

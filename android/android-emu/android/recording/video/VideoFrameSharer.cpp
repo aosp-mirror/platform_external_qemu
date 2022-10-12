@@ -19,9 +19,9 @@
 #include <functional>                          // for _1, _2, _3
 #include <string_view>
 
-#include "android/base/Log.h"                  // for LogStream, LOG, LogMes...
+#include "aemu/base/Log.h"                  // for LogStream, LOG, LogMes...
 
-#include "android/base/memory/SharedMemory.h"  // for SharedMemory, std::string_view
+#include "aemu/base/memory/SharedMemory.h"  // for SharedMemory, std::string_view
 #include "android/base/system/System.h"        // for System
 #include "android/gpu_frame.h"                 // for gpu_set_shared_memory_...
 #include "android/recording/Producer.h"        // for Producer

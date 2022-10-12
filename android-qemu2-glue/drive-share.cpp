@@ -19,9 +19,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "android/base/files/FileShareOpen.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/files/FileShareOpen.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/console.h"
 #include "android/multi-instance.h"
 #include "android/utils/bufprint.h"

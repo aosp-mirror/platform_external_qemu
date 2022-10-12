@@ -18,8 +18,8 @@
 #include <string_view>
 
 #include "android/automation/EventSource.h"
-#include "android/base/Compiler.h"
-#include "android/base/Result.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Result.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 
 // Forward declarations.

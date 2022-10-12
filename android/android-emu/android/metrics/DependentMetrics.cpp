@@ -26,14 +26,14 @@
 #include "android/CommonReportedInfo.h"                  // for setDetails
 #include "android/avd/info.h"                            // for avdInfo_getA...
 #include "android/avd/util.h"                            // for AVD_ANDROID_...
-#include "android/base/Optional.h"                       // for Optional
-#include "android/base/StringFormat.h"                   // for StringFormat
+#include "aemu/base/Optional.h"                       // for Optional
+#include "aemu/base/StringFormat.h"                   // for StringFormat
 
-#include "android/base/Uuid.h"                           // for Uuid
-#include "android/base/async/ThreadLooper.h"             // for ThreadLooper
-#include "android/base/files/IniFile.h"                  // for IniFile
-#include "android/base/files/PathUtils.h"                // for PathUtils
-#include "android/base/memory/ScopedPtr.h"               // for ScopedCPtr
+#include "aemu/base/Uuid.h"                           // for Uuid
+#include "aemu/base/async/ThreadLooper.h"             // for ThreadLooper
+#include "aemu/base/files/IniFile.h"                  // for IniFile
+#include "aemu/base/files/PathUtils.h"                // for PathUtils
+#include "aemu/base/memory/ScopedPtr.h"               // for ScopedCPtr
 #include "android/base/system/System.h"                  // for System, Syst...
 #include "android/cmdline-definitions.h"                 // for AndroidOptions
 #include "android/console.h"                             // for getConsoleAg...

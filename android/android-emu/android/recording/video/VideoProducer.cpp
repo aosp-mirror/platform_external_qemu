@@ -22,10 +22,10 @@
 #include <utility>                                        // for move
 #include <vector>                                         // for vector
 
-#include "android/base/Optional.h"                        // for Optional
-#include "android/base/synchronization/MessageChannel.h"  // for MessageChannel
+#include "aemu/base/Optional.h"                        // for Optional
+#include "aemu/base/synchronization/MessageChannel.h"  // for MessageChannel
 #include "android/base/system/System.h"                   // for System
-#include "android/base/threads/Async.h"                   // for async
+#include "aemu/base/threads/Async.h"                   // for async
 #include "android/emulation/control/display_agent.h"      // for QAndroidDis...
 #include "android/gpu_frame.h"                            // for gpu_frame_s...
 #include "android/opengles.h"                             // for android_red...

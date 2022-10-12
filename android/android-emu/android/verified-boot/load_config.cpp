@@ -11,7 +11,7 @@
 
 #include "android/verified-boot/load_config.h"
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 #include "verified_boot_config.pb.h"
 
 #include <google/protobuf/io/tokenizer.h>

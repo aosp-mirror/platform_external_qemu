@@ -25,8 +25,8 @@
 #include <vector>   // for vector
 
 #include "OpenglRender/Renderer.h"                    // for Renderer
-#include "android/base/Log.h"                         // for LOG, LogMessage
-#include "android/base/files/PathUtils.h"             // for PathUtils
+#include "aemu/base/Log.h"                         // for LOG, LogMessage
+#include "aemu/base/files/PathUtils.h"             // for PathUtils
 #include "android/base/system/System.h"               // for System
 #include "android/console.h"                          // for getConsoleAgents
 #include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...

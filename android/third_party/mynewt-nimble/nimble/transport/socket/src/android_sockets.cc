@@ -11,7 +11,7 @@
 #include "android_sockets.h"
 #include <ctype.h>
 #include <stdio.h>
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/sockets/SocketUtils.h"
 
 /* set to 1 for very verbose debugging */
 #define DEBUG 0

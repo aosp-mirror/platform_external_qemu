@@ -18,11 +18,11 @@
 
 #include <atomic>  // for atomic_bool
 
-#include "android/base/Log.h"                     // for LogMessage, DCHECK
-#include "android/base/async/CallbackRegistry.h"  // for CallbackRegistry
-#include "android/base/async/ThreadLooper.h"      // for ThreadLooper
-#include "android/base/memory/LazyInstance.h"     // for LazyInstance, LAZY_...
-#include "android/base/synchronization/Lock.h"    // for Lock, AutoLock
+#include "aemu/base/Log.h"                     // for LogMessage, DCHECK
+#include "aemu/base/async/CallbackRegistry.h"  // for CallbackRegistry
+#include "aemu/base/async/ThreadLooper.h"      // for ThreadLooper
+#include "aemu/base/memory/LazyInstance.h"     // for LazyInstance, LAZY_...
+#include "aemu/base/synchronization/Lock.h"    // for Lock, AutoLock
 #include "android/emulation/MultiDisplay.h"       // for MultiDisplay, Multi...
 #include "android/opengl/GpuFrameBridge.h"        // for GpuFrameBridge
 #include "android/opengl/virtio_gpu_ops.h"        // for AndroidVirtioGpuOps

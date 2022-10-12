@@ -24,9 +24,9 @@
 #include <utility>                                        // for move
 #include <vector>                                         // for vector
 
-#include "android/base/Log.h"                             // for LOG, LogMes...
-#include "android/base/Optional.h"                        // for Optional
-#include "android/base/synchronization/MessageChannel.h"  // for MessageChannel
+#include "aemu/base/Log.h"                             // for LOG, LogMes...
+#include "aemu/base/Optional.h"                        // for Optional
+#include "aemu/base/synchronization/MessageChannel.h"  // for MessageChannel
 #include "android/base/system/System.h"                   // for System
 #include "android/emulation/AudioCapture.h"               // for AudioCapturer
 #include "android/emulation/AudioCaptureEngine.h"         // for AudioCaptur...

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/threads/Thread.h"
+#include "aemu/base/threads/Thread.h"
 
-#include "android/base/Log.h"
-#include "android/base/threads/ThreadStore.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/threads/ThreadStore.h"
 
 #include <assert.h>
 #include <signal.h>

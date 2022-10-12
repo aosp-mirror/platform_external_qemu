@@ -15,8 +15,8 @@
 
 #include "OpenglRender/RenderChannel.h"
 #include "OpenglRender/render_api_platform_types.h"
-#include "android/base/files/Stream.h"
-#include "android/base/ring_buffer.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/ring_buffer.h"
 #include "android/emulation/address_space_graphics_types.h"
 #include "android/opengl/virtio_gpu_ops.h"
 #include "android/skin/rect.h"

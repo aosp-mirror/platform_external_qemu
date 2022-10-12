@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/logging/LogFormatter.h"
+#include "aemu/base/logging/LogFormatter.h"
 
 #include <stdarg.h>     // for va_list, va_end, va_start
 #include <stdint.h>     // for uint32_t
@@ -21,7 +21,7 @@
 #include <type_traits>  // for remove_extent_t
 
 #include "absl/strings/str_format.h"           // for StrFormat, ParsedFormat
-#include "android/base/logging/LogSeverity.h"  // for LogSeverity
+#include "aemu/base/logging/LogSeverity.h"  // for LogSeverity
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #include <windows.h>

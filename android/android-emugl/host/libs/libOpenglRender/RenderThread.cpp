@@ -30,9 +30,9 @@
 #include "../../../shared/OpenglCodecCommon/ChecksumCalculatorThreadInfo.h"
 
 #include "android/base/system/System.h"
-#include "android/base/Tracing.h"
-#include "android/base/files/StreamSerializing.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/Tracing.h"
+#include "aemu/base/files/StreamSerializing.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/utils/path.h"
 #include "android/utils/file_io.h"
 

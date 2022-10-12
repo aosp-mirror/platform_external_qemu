@@ -156,7 +156,7 @@ int main(int argc, char **argv)
 #include "android-qemu2-glue/qemu-console-factory.h"
 #include "android-qemu2-glue/qemu-setup.h"
 #include "android/android.h"
-#include "android/base/process-control.h"
+#include "aemu/base/process-control.h"
 #include "android/boot-properties.h"
 #include "android/camera/camera-service.h"
 #include "android/cmdline-option.h"

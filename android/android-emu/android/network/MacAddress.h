@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 
 #include <stdint.h>
 #include <string.h>

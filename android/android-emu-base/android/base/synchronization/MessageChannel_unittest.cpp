@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/synchronization/MessageChannel.h"
 
+#include "android/base/system/System.h"
 #include "android/base/testing/TestThread.h"
 
 #include <gtest/gtest.h>

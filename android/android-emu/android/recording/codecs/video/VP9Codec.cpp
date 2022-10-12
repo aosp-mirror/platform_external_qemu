@@ -15,7 +15,7 @@
 #include <algorithm>                     // for min
 #include <utility>                       // for move
 
-#include "android/base/Log.h"            // for LOG, LogMessage, LogStream
+#include "aemu/base/Log.h"            // for LOG, LogMessage, LogStream
 #include "android/base/system/System.h"  // for System
 
 extern "C" {

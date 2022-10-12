@@ -16,9 +16,9 @@
 
 #include "RenderThreadInfo.h"
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/files/StreamSerializing.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/files/StreamSerializing.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include "emugl/common/lazy_instance.h"
 #include "FrameBuffer.h"

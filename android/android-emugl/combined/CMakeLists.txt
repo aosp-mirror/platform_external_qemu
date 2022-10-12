@@ -190,13 +190,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     set(EXTRA_SUBDIR_TEST_INCLUDE_FILES)
     # Third party dependencies
-    add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/renderdoc ${GFXSTREAM_PREFIX}-third-party-renderdoc)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/stb ${GFXSTREAM_PREFIX}-third-party-stb)
-    add_subdirectory(${GFXSTREAM_PROTOCOLS_DIR} ${GFXSTREAM_PREFIX}-gfxstream-protocols)
-
-    # Common base libraries for host################################################
-
-    add_subdirectory(${AEMU_COMMON_REPO_ROOT} aemu_common)
 
     # Backends######################################################################
 
@@ -221,8 +215,6 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     # TODO(joshuaduong): For some reason, our custom rpath is only applied to gfxstream_backend_unittests.
     # for the rest of the unittests below, the rpath is not set, and thus the tests cannot find libc++.
-    add_opengl_dependencies(aemu-base_unittests)
-    add_opengl_dependencies(aemu-host-common_unittests)
     add_opengl_dependencies(Vulkan_unittests)
     add_opengl_dependencies(OpenglRender_unittests)
     add_opengl_dependencies(OpenglRender_snapshot_unittests)

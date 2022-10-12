@@ -13,13 +13,13 @@
 // limitations under the License.
 
 #include "android/emulation/control/adb/AdbInterface.h"
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 #include "android/emulation/control/TestAdbInterface.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/testing/TestSystem.h"
-#include "android/base/threads/Async.h"
+#include "aemu/base/threads/Async.h"
 #include "android/emulation/ConfigDirs.h"
 
 #include <gtest/gtest.h>

@@ -16,7 +16,7 @@
 #ifndef GLES_BUFFER_H
 #define GLES_BUFFER_H
 
-#include <android/base/files/Stream.h>
+#include <aemu/base/files/Stream.h>
 #include <stdio.h>
 #include <GLES/gl.h>
 #include <GLcommon/ObjectData.h>

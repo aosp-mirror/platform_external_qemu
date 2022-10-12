@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/async/CallbackRegistry.h"
+#include "aemu/base/async/CallbackRegistry.h"
 
 #include <gtest/gtest.h>  // for Message, TestPartResult, EXP...
 

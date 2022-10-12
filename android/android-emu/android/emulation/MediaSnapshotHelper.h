@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 #include "android/emulation/MediaSnapshotState.h"
 
 #include <cstdint>

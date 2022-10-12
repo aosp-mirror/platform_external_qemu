@@ -14,7 +14,7 @@
 // limitations under the License.
 #include "android/emulation/control/clipboard/Clipboard.h"
 
-#include "android/base/synchronization/Lock.h"  // for AutoLock, StaticLock
+#include "aemu/base/synchronization/Lock.h"  // for AutoLock, StaticLock
 
 namespace android {
 namespace emulation {

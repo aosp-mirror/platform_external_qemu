@@ -13,10 +13,10 @@
 #include "android/emulation/goldfish_sync.h"
 #include "android/emulation/GoldfishSyncCommandQueue.h"
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include "android/utils/assert.h"
 #include "android/utils/debug.h"

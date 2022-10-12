@@ -18,8 +18,8 @@
 #include <stdint.h>                                      // for int64_t
 #include <utility>                                       // for move
 
-#include "android/base/Log.h"                            // for LOG, LogMessage
-#include "android/base/synchronization/Lock.h"           // for Lock, AutoLock
+#include "aemu/base/Log.h"                            // for LOG, LogMessage
+#include "aemu/base/synchronization/Lock.h"           // for Lock, AutoLock
 #include "android/hw-sensors.h"                          // for AndroidSensor
 #include "android/mp4/MP4Dataset.h"                      // for Mp4Dataset
 #include "android/mp4/SensorLocationEventProvider.h"     // for SensorLocati...
@@ -34,6 +34,11 @@ extern "C" {
 #include <libavutil/avutil.h>                            // for AV_TIME_BASE
 #include <libavutil/error.h>                             // for AVERROR_EOF
 }
+
+// Conflicts with Log.h
+#ifdef ERROR
+#undef ERROR
+#endif
 
 namespace android {
 namespace videoplayer {

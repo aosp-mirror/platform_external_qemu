@@ -9,8 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Version.h"
-#include "android/base/StringFormat.h"
+#include "aemu/base/Version.h"
+#include "aemu/base/StringFormat.h"
 
 #include <sstream>
 #include <string_view>

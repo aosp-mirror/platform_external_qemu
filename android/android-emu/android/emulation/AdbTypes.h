@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/ScopedSocket.h"
 
 #include <memory>
 

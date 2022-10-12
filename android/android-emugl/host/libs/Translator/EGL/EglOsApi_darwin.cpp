@@ -17,7 +17,7 @@
 
 #include "MacNative.h"
 
-#include "android/base/containers/Lookup.h"
+#include "aemu/base/containers/Lookup.h"
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/logging.h"

@@ -16,7 +16,7 @@
 
 #include "android/camera/camera-metrics.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/utils/debug.h"
 

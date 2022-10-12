@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/memory/OnDemand.h"
+#include "aemu/base/memory/OnDemand.h"
 
-#include "android/base/threads/ThreadPool.h"
+#include "aemu/base/threads/ThreadPool.h"
 
 #include <gtest/gtest.h>
 
@@ -224,6 +224,7 @@ constexpr int kNumThreads = 200;
 
 TEST_F(OnDemandTest, multiConstruct) {
     ThreadPool pool(kNumThreads, [](ThreadPool::Item&& f) { f(); });
+    pool.start();
     auto t = makeAtomicOnDemand<Test1>(100);
     Test1* values[kNumThreads] = {};
     for (int i = 0; i < kNumThreads; ++i) {
@@ -232,7 +233,6 @@ TEST_F(OnDemandTest, multiConstruct) {
             EXPECT_EQ(100, t.ptr()->n);
         });
     }
-    pool.start();
     pool.done();
     pool.join();
 
@@ -247,13 +247,13 @@ TEST_F(OnDemandTest, multiConstruct) {
 
 TEST_F(OnDemandTest, multiDestroy) {
     ThreadPool pool(kNumThreads, [](ThreadPool::Item&& f) { f(); });
+    pool.start();
     auto t = makeAtomicOnDemand<Test1>(100);
     t.get();
     EXPECT_EQ((State{1, 0}), sState);
     for (int i = 0; i < kNumThreads; ++i) {
         pool.enqueue([&t]() { t.clear(); });
     }
-    pool.start();
     pool.done();
     pool.join();
 

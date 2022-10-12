@@ -14,7 +14,7 @@
 
 #include <fstream>
 #include <vector>
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 
 namespace android {
 namespace emulation {

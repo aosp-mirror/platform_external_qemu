@@ -24,13 +24,13 @@
 #include <string>   // for string, operator+
 #include <vector>   // for vector
 
-#include "android/base/Log.h"                        // for LogStreamVoidify
+#include "aemu/base/Log.h"                        // for LogStreamVoidify
 
-#include "android/base/files/PathUtils.h"            // for PathUtils
-#include "android/base/memory/LazyInstance.h"        // for LazyInstance
-#include "android/base/memory/SharedMemory.h"        // for SharedMemory
-#include "android/base/sockets/ScopedSocket.h"       // for ScopedSocket
-#include "android/base/sockets/SocketUtils.h"        // for socketRecvAll
+#include "aemu/base/files/PathUtils.h"            // for PathUtils
+#include "aemu/base/memory/LazyInstance.h"        // for LazyInstance
+#include "aemu/base/memory/SharedMemory.h"        // for SharedMemory
+#include "aemu/base/sockets/ScopedSocket.h"       // for ScopedSocket
+#include "aemu/base/sockets/SocketUtils.h"        // for socketRecvAll
 #include "android/base/system/System.h"              // for System, RunOptions
 #include "android/base/testing/TestTempDir.h"        // for TestTempDir
 #include "android/emulation/control/GrpcServices.h"  // for control

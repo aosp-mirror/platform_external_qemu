@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 
 #include <errno.h>
 #include <string_view>

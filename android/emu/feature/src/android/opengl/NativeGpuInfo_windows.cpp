@@ -14,16 +14,16 @@
 
 #include "android/opengl/NativeGpuInfo.h"
 
-#include "android/base/StringFormat.h"
+#include "aemu/base/StringFormat.h"
 
-#include "android/base/Uuid.h"
-#include "android/base/containers/SmallVector.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/FileUtils.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/Uuid.h"
+#include "aemu/base/containers/SmallVector.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/misc/FileUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 #include "android/crashreport/crash-handler.h"
 
 #include "android/utils/path.h"

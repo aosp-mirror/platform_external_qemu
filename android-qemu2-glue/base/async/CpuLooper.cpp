@@ -15,7 +15,7 @@ extern "C" {
 #endif
 #include "android-qemu2-glue/base/async/CpuLooper.h"
 
-#include "android/base/StringFormat.h"
+#include "aemu/base/StringFormat.h"
 
 #include <atomic>
 #include <memory>

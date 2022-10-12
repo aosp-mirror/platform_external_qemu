@@ -14,8 +14,8 @@
 #include <cassert>
 
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/memory/SharedMemory.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/memory/SharedMemory.h"
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
@@ -23,7 +23,7 @@
 namespace android {
 namespace base {
 
-SharedMemory::SharedMemory(std::string_view uriOrHandle, size_t size) : mSize(size) {
+SharedMemory::SharedMemory(const std::string& uriOrHandle, size_t size) : mSize(size) {
     constexpr std::string_view kFileUri = "file://";
     if (uriOrHandle.find(kFileUri, 0) == 0) {
         mShareType = ShareType::FILE_BACKED;

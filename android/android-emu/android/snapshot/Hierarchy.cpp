@@ -11,9 +11,9 @@
 
 #include "android/snapshot/Hierarchy.h"
 
-#include "android/base/files/ScopedFd.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/files/ScopedFd.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/console.h"
 #include "android/protobuf/LoadSave.h"
 #include "android/snapshot/common.h"

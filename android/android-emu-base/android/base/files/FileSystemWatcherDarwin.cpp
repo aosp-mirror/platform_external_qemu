@@ -29,8 +29,8 @@
 #include <vector>         // for vector
 
 #include <CoreServices/CoreServices.h>
-#include "android/base/files/FileSystemWatcher.h"  // for FileSystemWatcher:...
-#include "android/base/synchronization/Event.h"
+#include "aemu/base/files/FileSystemWatcher.h"  // for FileSystemWatcher:...
+#include "aemu/base/synchronization/Event.h"
 #include "android/base/system/System.h"  // for System
 #include "android/utils/debug.h"         // for derror
 

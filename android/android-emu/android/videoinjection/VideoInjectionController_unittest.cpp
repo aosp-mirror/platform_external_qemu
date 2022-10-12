@@ -11,8 +11,8 @@
 
 #include "android/videoinjection/VideoInjectionController.h"
 
-#include "android/base/files/StdioStream.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/files/StdioStream.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/base/testing/ProtobufMatchers.h"
 #include "android/base/testing/ResultMatchers.h"
 #include "android/base/testing/TestSystem.h"

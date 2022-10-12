@@ -28,10 +28,10 @@
 #include "android/automation/AutomationController.h"
 #include "android/avd/BugreportInfo.h"
 #include "android/avd/info.h"
-#include "android/base/ProcessControl.h"
+#include "aemu/base/ProcessControl.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
 #include "android/crashreport/crash-handler.h"
@@ -71,7 +71,6 @@
 #include <fstream>
 #include <memory>
 #include <sstream>
-#include <string_view>
 #include <vector>
 
 #include <assert.h>
@@ -2554,7 +2553,7 @@ static int do_snapshot_pull(ControlClient client, char* args) {
     }
     if (format != android::emulation::control::DIRECTORY) {
         dstFile.reset(new std::ofstream(
-                android::base::PathUtils::asUnicodePath(filename).c_str(),
+                android::base::PathUtils::asUnicodePath(filename.data()).c_str(),
                 std::ios::binary | std::ios::out));
         if (!dstFile->is_open()) {
             control_write(client, "KO: Failed to write to %s\r\n",
@@ -2602,7 +2601,7 @@ static int do_snapshot_push(ControlClient client, char* args) {
     std::unique_ptr<std::ifstream> srcFile;
     if (format != android::emulation::control::DIRECTORY) {
         srcFile.reset(new std::ifstream(
-                android::base::PathUtils::asUnicodePath(filename).c_str(),
+                android::base::PathUtils::asUnicodePath(filename.data()).c_str(),
                 std::ios::binary | std::ios::in));
         if (!srcFile->is_open()) {
             control_write(client, "KO: Failed to write to %s\r\n",
@@ -3664,7 +3663,7 @@ static int do_screenrecord_start(ControlClient client, char* args) {
     // Need to get it into a format for getopt_long().
     std::vector<std::string> splitArgs;
     splitArgs.push_back("screenrecord");
-    android::base::split(args, " ", [&splitArgs](std::string_view s) {
+    android::base::split<std::string>(args, " ", [&splitArgs](const std::string& s) {
         if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
             splitArgs.emplace_back(s);
     });
@@ -3822,7 +3821,7 @@ static int do_screenrecord_screenshot(ControlClient client, char* args) {
     // Need to get it into a format for getopt_long().
     std::vector<std::string> splitArgs;
     splitArgs.push_back("screenshot");
-    android::base::split(args, " ", [&splitArgs](std::string_view s) {
+    android::base::split<std::string>(args, " ", [&splitArgs](const std::string& s) {
         if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
             splitArgs.emplace_back(s);
     });
@@ -3883,7 +3882,7 @@ static int do_screenrecord_webrtc(ControlClient client, char* args) {
 
     // Count number of arguments
     std::vector<std::string> splitArgs;
-    android::base::split(args, " ", [&splitArgs](std::string_view s) {
+    android::base::split<std::string>(args, " ", [&splitArgs](const std::string& s) {
         if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
             splitArgs.emplace_back(s);
     });
@@ -4064,7 +4063,7 @@ static int do_multi_display_add(ControlClient client, char* args) {
 
     // Count number of arguments
     std::vector<std::string> splitArgs;
-    android::base::split(args, " ", [&splitArgs](std::string_view s) {
+    android::base::split<std::string>(args, " ", [&splitArgs](const std::string& s) {
         if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
             splitArgs.emplace_back(s);
     });
@@ -4100,7 +4099,7 @@ static int do_multi_display_del(ControlClient client, char* args) {
 
     // Count number of arguments
     std::vector<std::string> splitArgs;
-    android::base::split(args, " ", [&splitArgs](std::string_view s) {
+    android::base::split<std::string>(args, " ", [&splitArgs](const std::string& s) {
         if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
             splitArgs.emplace_back(s);
     });

@@ -15,8 +15,8 @@
 #include <string>                          // for string, basic_string, allo...
 #include <vector>                          // for vector
 
-#include "android/base/Log.h"              // for base
-#include "android/base/files/PathUtils.h"  // for PathUtils
+#include "aemu/base/Log.h"              // for base
+#include "aemu/base/files/PathUtils.h"  // for PathUtils
 #include "android/base/system/System.h"    // for System
 
 using namespace android::base;

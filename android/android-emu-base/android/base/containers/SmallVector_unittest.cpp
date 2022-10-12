@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/containers/SmallVector.h"
+#include "aemu/base/containers/SmallVector.h"
 
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/testing/GTestUtils.h"
 
 #include <gtest/gtest.h>

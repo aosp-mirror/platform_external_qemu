@@ -15,7 +15,7 @@
 */
 #include "GLcommon/FramebufferData.h"
 
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TextureData.h"

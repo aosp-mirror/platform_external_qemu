@@ -11,8 +11,8 @@
 
 #include "android/snapshot/RamSnapshotTesting.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StdioStream.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StdioStream.h"
 #include "android/utils/file_io.h"
 
 #include <cstdlib>

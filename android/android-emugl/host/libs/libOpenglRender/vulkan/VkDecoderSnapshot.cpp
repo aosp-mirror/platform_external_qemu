@@ -30,7 +30,7 @@
 #include "VkDecoderGlobalState.h"
 #include "VkReconstruction.h"
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 
 
 

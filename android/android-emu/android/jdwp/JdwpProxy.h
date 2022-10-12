@@ -15,8 +15,8 @@
 #include <memory>
 #include <unordered_set>
 
-#include "android/base/files/Stream.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/emulation/AdbProxy.h"
 #include "android/emulation/android_pipe_common.h"
 #include "android/emulation/apacket_utils.h"

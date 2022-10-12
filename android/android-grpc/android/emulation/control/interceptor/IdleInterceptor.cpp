@@ -17,8 +17,8 @@
 #include <functional>  // for __base
 #include <ratio>       // for ratio
 
-#include "android/base/Log.h"                         // for LOG, LogMessage
-#include "android/base/async/ThreadLooper.h"          // for ThreadLooper
+#include "aemu/base/Log.h"                         // for LOG, LogMessage
+#include "aemu/base/async/ThreadLooper.h"          // for ThreadLooper
 #include "android/base/system/System.h"               // for System
 #include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
 

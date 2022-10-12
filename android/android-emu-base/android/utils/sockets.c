@@ -16,6 +16,7 @@
 
 #include "android/utils/sockets.h"
 
+#include "aemu/base/msvc.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/fd.h"

@@ -18,8 +18,9 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
+#include <vector>
 #include "Hwc2.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "emugl/common/mutex.h"
 
 

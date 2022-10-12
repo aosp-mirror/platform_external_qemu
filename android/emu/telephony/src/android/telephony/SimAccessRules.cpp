@@ -11,9 +11,9 @@
 */
 #include "sim_access_rules.h"
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/telephony/SimAccessRules.h"

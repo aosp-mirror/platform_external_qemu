@@ -27,13 +27,13 @@
 
 #include "android/avd/hw-config.h"                       // for AndroidHwConfig
 #include "android/avd/info.h"                            // for avdInfo_getA...
-#include "android/base/ProcessControl.h"                 // for restartEmulator
+#include "aemu/base/ProcessControl.h"                 // for restartEmulator
 
-#include "android/base/files/MemStream.h"                // for MemStream
-#include "android/base/files/PathUtils.h"                // for PathUtils
-#include "android/base/misc/StringUtils.h"               // for Split
+#include "aemu/base/files/MemStream.h"                // for MemStream
+#include "aemu/base/files/PathUtils.h"                // for PathUtils
+#include "aemu/base/misc/StringUtils.h"               // for Split
 #include "android/base/system/System.h"                  // for System
-#include "android/base/threads/Thread.h"                 // for Thread
+#include "aemu/base/threads/Thread.h"                 // for Thread
 #include "android/console.h"                             // for getConsoleAg...
 #include "android/emulation/AndroidMessagePipe.h"        // for AndroidMessa...
 #include "android/emulation/AndroidPipe.h"               // for AndroidPipe:...
@@ -266,7 +266,7 @@ static void runAdbScripts(emulation::AdbInterface* adbInterface,
 
     auto list = base::System::get()->scanDirEntries(adbScriptsDir, true);
     for (auto filepath : list) {
-        std::ifstream inFile(PathUtils::asUnicodePath(filepath).c_str(), std::ios_base::in);
+        std::ifstream inFile(PathUtils::asUnicodePath(filepath.data()).c_str(), std::ios_base::in);
         if (!inFile.is_open()) {
             continue;
         }

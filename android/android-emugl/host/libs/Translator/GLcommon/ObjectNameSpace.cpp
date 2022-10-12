@@ -16,10 +16,10 @@
 
 #include "GLcommon/ObjectNameSpace.h"
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StreamSerializing.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StreamSerializing.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
 #include "emugl/common/crash_reporter.h"

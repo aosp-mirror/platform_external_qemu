@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/memory/OnDemand.h"
+#include "aemu/base/memory/OnDemand.h"
 
 #include <QtCore>
 #include <QFrame>

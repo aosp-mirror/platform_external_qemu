@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/process/Command.h"
+#include "aemu/base/process/Command.h"
 
 #include <poll.h>
 #include <signal.h>
@@ -32,8 +32,8 @@
 #include <utility>
 #include <vector>
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/logging/CLog.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/logging/CLog.h"
 
 #define DEBUG 0
 

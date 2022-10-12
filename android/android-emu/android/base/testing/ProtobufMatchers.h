@@ -181,7 +181,7 @@
 #include <google/protobuf/util/field_comparator.h>
 #include <google/protobuf/util/message_differencer.h>
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 namespace android {
 

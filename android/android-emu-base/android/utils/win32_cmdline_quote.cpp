@@ -11,8 +11,8 @@
 
 #include "android/utils/win32_cmdline_quote.h"
 
-#include "android/base/misc/StringUtils.h"
-#include "android/base/system/Win32Utils.h"
+#include "aemu/base/misc/StringUtils.h"
+#include "aemu/base/system/Win32Utils.h"
 
 #include "android/utils/system.h"
 

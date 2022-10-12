@@ -1,5 +1,5 @@
-#include "android/base/files/Stream.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/memory/LazyInstance.h"
 
 #include "android/emulation/GoldfishDma.h"
 #include "android/emulation/DmaMap.h"

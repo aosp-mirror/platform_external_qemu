@@ -4,7 +4,7 @@
 #include <ostream>      // for ostream
 #include <string_view>  // for string_view
 
-#include "android/base/logging/LogSeverity.h"  // for EMULATOR_LOG_INFO, EMULATOR_...
+#include "aemu/base/logging/LogSeverity.h"  // for EMULATOR_LOG_INFO, EMULATOR_...
 #include "android/utils/debug.h"  // for __emu_log_print, VERBOSE_CHECK
 
 extern "C" void __blue_write_to_file(LogSeverity prio,

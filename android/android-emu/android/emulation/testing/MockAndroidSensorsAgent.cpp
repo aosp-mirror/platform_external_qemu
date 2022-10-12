@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/testing/MockAndroidSensorsAgent.h"
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 static const QAndroidSensorsAgent sQAndroidSensorsAgent = {
         .setPhysicalParameterTarget =

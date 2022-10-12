@@ -16,7 +16,7 @@
 #ifndef EGL_CONTEXT_H
 #define EGL_CONTEXT_H
 
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 
 #include "EglConfig.h"
 #include "EglOsApi.h"

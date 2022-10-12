@@ -18,8 +18,8 @@
 
 #include <memory>
 
-#include "android/base/Log.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/camera/camera-format-converters.h"
 #include "android/opengles.h"
 #include "android/virtualscene/VirtualSceneManager.h"

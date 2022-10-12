@@ -11,8 +11,8 @@
 
 #include "android/opengl/EmuglBackendList.h"
 
-#include "android/base/Log.h"
-#include "android/base/StringFormat.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/opengl/EmuglBackendScanner.h"
 #include "android/utils/path.h"

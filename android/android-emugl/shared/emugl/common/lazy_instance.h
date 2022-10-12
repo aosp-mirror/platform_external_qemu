@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 
 namespace emugl {
 

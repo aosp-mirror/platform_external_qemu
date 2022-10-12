@@ -11,7 +11,7 @@
 
 #include "android/utils/stream.h"
 
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 
 #include <stdlib.h>
 #include <string.h>

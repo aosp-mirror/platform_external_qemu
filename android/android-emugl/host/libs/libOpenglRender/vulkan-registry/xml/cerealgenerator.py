@@ -169,9 +169,9 @@ class IOStream;
 #include "Validation.h"
 #include "%s.h"
 
-#include "android/base/AlignedBuf.h"
-#include "android/base/BumpPool.h"
-#include "android/base/synchronization/AndroidLock.h"
+#include "aemu/base/AlignedBuf.h"
+#include "aemu/base/BumpPool.h"
+#include "aemu/base/synchronization/AndroidLock.h"
 
 #include <cutils/properties.h>
 
@@ -237,7 +237,7 @@ class IOStream;
 #include "goldfish_vk_private_defs.h"
 
 #include "%s.h"
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/files/StreamSerializing.h"
 """ % VULKAN_STREAM_TYPE
 
         testingInclude = """
@@ -248,7 +248,7 @@ using OnFailCompareFunc = std::function<void(const char*)>;
 """
         poolInclude = """
 #include "goldfish_vk_private_defs.h"
-#include "android/base/BumpPool.h"
+#include "aemu/base/BumpPool.h"
 using android::base::Allocator;
 using android::base::BumpPool;
 """
@@ -274,7 +274,7 @@ using android::base::BumpPool;
 """
         poolIncludeGuest = """
 #include "goldfish_vk_private_defs.h"
-#include "android/base/BumpPool.h"
+#include "aemu/base/BumpPool.h"
 using android::base::Allocator;
 using android::base::BumpPool;
 // Stuff we are not going to use but if included,
@@ -352,7 +352,7 @@ using DlSymFunc = void* (void*, const char*);
 #include "VkDecoderGlobalState.h"
 #include "VkReconstruction.h"
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 """
 
         decoderHeaderIncludes = """
@@ -372,9 +372,9 @@ class BumpPool;
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
-#include "android/base/BumpPool.h"
+#include "aemu/base/BumpPool.h"
 #include "android/base/system/System.h"
-#include "android/base/Tracing.h"
+#include "aemu/base/Tracing.h"
 #include "android/utils/GfxstreamFatalError.h"
 
 #include "IOStream.h"

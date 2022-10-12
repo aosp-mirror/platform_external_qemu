@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/AlignedBuf.h"
+#include "aemu/base/AlignedBuf.h"
 
-#include "android/base/misc/FileUtils.h"
+#include "aemu/base/misc/FileUtils.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/snapshot/RamSnapshotTesting.h"
 
@@ -41,7 +41,7 @@ protected:
 static void checkFileEqualToBuffer(const uint8_t* buffer,
                                    size_t size,
                                    std::string_view filename) {
-    const auto fileContents = android::readFileIntoString(filename);
+    const auto fileContents = android::readFileIntoString(filename.data());
 
     EXPECT_TRUE(fileContents);
     EXPECT_LE(size, fileContents->size());

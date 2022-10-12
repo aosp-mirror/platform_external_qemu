@@ -15,7 +15,8 @@
 #pragma once
 
 #include <string>
-#include "android/base/containers/BufferQueue.h"
+#include "aemu/base/containers/BufferQueue.h"
+#include "android/base/system/System.h"
 
 namespace android {
 namespace emulation {

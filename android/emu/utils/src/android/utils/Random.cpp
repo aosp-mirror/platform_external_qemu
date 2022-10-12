@@ -11,7 +11,7 @@
 
 #include "android/utils/Random.h"
 
-#include "android/base/files/ScopedStdioFile.h"
+#include "aemu/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
 

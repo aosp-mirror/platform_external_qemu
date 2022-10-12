@@ -20,7 +20,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
-#include "android/base/containers/SmallVector.h"
+#include "aemu/base/containers/SmallVector.h"
 
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"

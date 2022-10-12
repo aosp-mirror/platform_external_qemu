@@ -11,9 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/perflogger/WindowDeviationAnalyzer.h"
+#include "aemu/base/perflogger/WindowDeviationAnalyzer.h"
 
-#include "android/base/JsonWriter.h"
+#include "aemu/base/JsonWriter.h"
 
 #include <sstream>
 

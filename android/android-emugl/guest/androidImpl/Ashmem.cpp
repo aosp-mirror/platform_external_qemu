@@ -13,10 +13,10 @@
 // limitations under the License.
 #include <cutils/ashmem.h>
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/memory/SharedMemory.h"
-#include "android/base/Uuid.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/memory/SharedMemory.h"
+#include "aemu/base/Uuid.h"
 
 #include "AndroidHostCommon.h"
 #include "Ashmem.h"

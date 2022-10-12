@@ -9,13 +9,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/async/ThreadLooper.h"
+#include "aemu/base/async/ThreadLooper.h"
 
-#include "android/base/Log.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Event.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/ThreadStore.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Event.h"
+#include "aemu/base/synchronization/MessageChannel.h"
+#include "aemu/base/threads/ThreadStore.h"
 #include "android/utils/debug.h"
 #include "android/utils/looper.h"
 

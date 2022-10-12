@@ -19,7 +19,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 #include "cereal/common/goldfish_vk_private_defs.h"
 
 namespace goldfish_vk {

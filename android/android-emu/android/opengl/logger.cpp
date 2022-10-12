@@ -11,10 +11,10 @@
 
 #include "android/opengl/logger.h"
 
-#include "android/base/logging/CLog.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 
 #include <algorithm>
@@ -97,16 +97,16 @@ OpenGLLogger::OpenGLLogger() {
         android::base::System::get()->getTempDir();
     mFileName = PathUtils::join(data_dir,
                                 "opengl_log.txt");
-    mFileHandle.open(PathUtils::asUnicodePath(mFileName).c_str(), std::ios::app);
+    mFileHandle.open(PathUtils::asUnicodePath(mFileName.data()).c_str(), std::ios::app);
     mFineLogFileName = PathUtils::join(data_dir,
                                        "opengl_cxt_log.txt");
-    mFineLogFileHandle.open(PathUtils::asUnicodePath(mFineLogFileName).c_str(), std::ios::app);
+    mFineLogFileHandle.open(PathUtils::asUnicodePath(mFineLogFileName.data()).c_str(), std::ios::app);
 #endif
 }
 
 OpenGLLogger::OpenGLLogger(const char* filename) :
     mFileName(filename) {
-    mFileHandle.open(PathUtils::asUnicodePath(mFileName).c_str(), std::ios::app);
+    mFileHandle.open(PathUtils::asUnicodePath(mFileName.data()).c_str(), std::ios::app);
 }
 
 void OpenGLLogger::writeCoarse(const char* str) {

@@ -16,9 +16,9 @@
 #include <string_view>
 #include <vector>                                    // for vector
 
-#include "android/base/Optional.h"                   // for Optional
+#include "aemu/base/Optional.h"                   // for Optional
 
-#include "android/base/containers/CircularBuffer.h"  // for CircularBuffer
+#include "aemu/base/containers/CircularBuffer.h"  // for CircularBuffer
 #include "android/base/system/System.h"              // for System, System::...
 #include "android/featurecontrol/Features.h"         // for Feature
 #include "android/snapshot/common.h"                 // for FailureReason

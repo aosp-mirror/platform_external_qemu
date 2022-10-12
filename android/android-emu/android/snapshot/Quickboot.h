@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 
-#include "android/base/async/Looper.h"
+#include "aemu/base/async/Looper.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/common.h"

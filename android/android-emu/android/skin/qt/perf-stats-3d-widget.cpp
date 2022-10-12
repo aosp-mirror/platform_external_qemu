@@ -27,11 +27,11 @@
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
 #include "android/avd/hw-config.h"
-#include "android/base/ArraySize.h"             // for base
-#include "android/base/CpuUsage.h"              // for CpuUsage, CpuUsage::U...
-#include "android/base/Log.h"                   // for LOG, LogMessage
-#include "android/base/memory/MemoryTracker.h"  // for MemoryTracker, Memory...
-#include "android/base/system/System.h"         // for System, System::MemUsage
+#include "aemu/base/ArraySize.h"             // for base
+#include "aemu/base/CpuUsage.h"              // for CpuUsage, CpuUsage::U...
+#include "aemu/base/Log.h"                   // for LOG, LogMessage
+#include "aemu/base/memory/MemoryTracker.h"  // for MemoryTracker, Memory...
+#include "android/base/system/System.h"         // for System, MemUsage
 #include "android/console.h"                    // for android_hw
 #include "android/skin/qt/gl-common.h"          // for createShader, CHECK_G...
 #include "android/skin/qt/logging-category.h"   // for emu

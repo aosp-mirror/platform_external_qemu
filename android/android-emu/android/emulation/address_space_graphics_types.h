@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/ring_buffer.h"
+#include "aemu/base/ring_buffer.h"
 
 #include <functional>
 #include <optional>

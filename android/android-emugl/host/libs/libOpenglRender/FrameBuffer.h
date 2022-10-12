@@ -16,12 +16,12 @@
 #ifndef _LIBRENDER_FRAMEBUFFER_H
 #define _LIBRENDER_FRAMEBUFFER_H
 
-#include "android/base/files/Stream.h"
-#include "android/base/threads/Thread.h"
-#include "android/base/threads/WorkerThread.h"
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/threads/Thread.h"
+#include "aemu/base/threads/WorkerThread.h"
+#include "aemu/base/synchronization/MessageChannel.h"
 #include "android/snapshot/common.h"
-#include "android/base/EventNotificationSupport.h"
+#include "aemu/base/EventNotificationSupport.h"
 #include "android/opengl/virtio_gpu_ops.h"
 
 #include "ColorBuffer.h"
@@ -827,6 +827,7 @@ private:
     std::map<uint32_t, onPost> m_onPost;
     std::unique_ptr<ReadbackWorker> m_readbackWorker;
     android::base::WorkerThread<Readback> m_readbackThread;
+    std::atomic_bool m_readbackThreadStarted = false;
 
     std::string m_glVendor;
     std::string m_glRenderer;
@@ -892,6 +893,7 @@ private:
     };
 
     std::unique_ptr<PostWorker> m_postWorker = {};
+    std::atomic_bool m_postThreadStarted = false;
     android::base::WorkerThread<Post> m_postThread;
     android::base::WorkerProcessingResult postWorkerFunc(const Post& post);
     void sendPostWorkerCmd(Post post);

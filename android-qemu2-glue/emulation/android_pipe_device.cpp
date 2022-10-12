@@ -11,8 +11,8 @@
 */
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
 
-#include "android/base/Compiler.h"
-#include "android/base/Log.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Log.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/android_pipe_common.h"
 #include "android/emulation/android_pipe_device.h"

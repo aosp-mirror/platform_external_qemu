@@ -17,9 +17,14 @@
 #include <deque>
 #include <sstream>
 
-#include "android/base/Log.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/offworld/OffworldPipe.h"
+
+// Conflicts with Log.h
+#ifdef ERROR
+#undef ERROR
+#endif
 
 using namespace android::base;
 

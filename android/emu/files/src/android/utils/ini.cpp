@@ -15,11 +15,11 @@
 #include <ostream>   // for basic_ostream::operator<<
 #include <string>    // for allocator
 
-#include "android/base/Log.h"               // for LOG, LogMessage
+#include "aemu/base/Log.h"               // for LOG, LogMessage
 
-#include "android/base/files/IniFile.h"     // for IniFile, IniFile::const_i...
-#include "android/base/misc/StringUtils.h"  // for strDup
-#include "android/base/logging/LogSeverity.h"     // for EMULATOR_LOG_VERBOSE
+#include "aemu/base/files/IniFile.h"     // for IniFile, IniFile::const_i...
+#include "aemu/base/misc/StringUtils.h"  // for strDup
+#include "aemu/base/logging/LogSeverity.h"     // for EMULATOR_LOG_VERBOSE
 
 using CIniFile = ::CIniFile;
 using BaseIniFile = android::base::IniFile;

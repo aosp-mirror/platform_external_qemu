@@ -16,7 +16,7 @@
 
 #include "files.h"
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
 
@@ -51,7 +51,7 @@ std::string AbsolutePath(const std::string& path) {
 
 std::string ReadFile(const std::string& file) {
     std::string contents;
-    std::ifstream in(android::base::PathUtils::asUnicodePath(file).c_str(),
+    std::ifstream in(android::base::PathUtils::asUnicodePath(file.data()).c_str(),
                      std::ios::in | std::ios::binary);
     in.seekg(0, std::ios::end);
     contents.resize(in.tellg());

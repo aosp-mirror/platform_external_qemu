@@ -3,7 +3,7 @@
 #include <string>                                        // for string
 #include <vector>                                        // for vector
 
-#include "android/base/containers/BufferQueue.h"         // for BufferQueue
+#include "aemu/base/containers/BufferQueue.h"         // for BufferQueue
 #include "android/console.h"                             // for AndroidConso...
 #include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
 #include "emulator_controller.pb.h"                      // for KeyboardEvent

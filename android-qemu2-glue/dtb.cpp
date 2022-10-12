@@ -12,7 +12,7 @@
 #include "android-qemu2-glue/dtb.h"
 #include <vector>
 #include <cstring>
-#include "android/base/files/ScopedStdioFile.h"
+#include "aemu/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
 

@@ -17,9 +17,9 @@
 #include <string>     // for string, operator+
 
 #include "android/avd/info.h"
-#include "android/base/Log.h"                      // for LOG, LogMessage
-#include "android/base/StringFormat.h"             // for StringFormat
-#include "android/base/misc/StringUtils.h"         // for splitTokens
+#include "aemu/base/Log.h"                      // for LOG, LogMessage
+#include "aemu/base/StringFormat.h"             // for StringFormat
+#include "aemu/base/misc/StringUtils.h"         // for splitTokens
 #include "android/emulation/control/adb/adbkey.h"  // for getPrivateAdbKeyPath
 #include "android/emulation/resizable_display_config.h"
 #include "android/featurecontrol/FeatureControl.h"  // for isEnabled

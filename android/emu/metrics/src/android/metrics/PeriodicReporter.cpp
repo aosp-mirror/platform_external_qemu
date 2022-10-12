@@ -11,7 +11,7 @@
 
 #include "android/metrics/PeriodicReporter.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 
 #include <iterator>
 #include <type_traits>

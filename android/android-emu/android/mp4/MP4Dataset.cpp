@@ -19,8 +19,8 @@
 #include <string>                                // for string
 #include <utility>                               // for move
 
-#include "android/base/Log.h"                    // for LOG, LogMessage
-#include "android/base/memory/ScopedPtr.h"       // for FuncDelete
+#include "aemu/base/Log.h"                    // for LOG, LogMessage
+#include "aemu/base/memory/ScopedPtr.h"       // for FuncDelete
 #include "offworld.pb.h"  // for DataStreamInfo, Data...
 #include "android/recording/AVScopedPtr.h"       // for makeAVScopedPtr, AVS...
 

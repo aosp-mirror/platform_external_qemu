@@ -11,11 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/SubAllocator.h"
+#include "aemu/base/SubAllocator.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/files/MemStream.h"
-#include "android/base/FunctionView.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/files/MemStream.h"
+#include "aemu/base/FunctionView.h"
 
 #include <gtest/gtest.h>
 

@@ -7,9 +7,9 @@
 #include <string>      // for string, oper...
 #include <vector>      // for vector
 
-#include "android/base/ArraySize.h"                      // for ARRAY_SIZE
-#include "android/base/async/Looper.h"                   // for Looper
-#include "android/base/async/ThreadLooper.h"             // for ThreadLooper
+#include "aemu/base/ArraySize.h"                      // for ARRAY_SIZE
+#include "aemu/base/async/Looper.h"                   // for Looper
+#include "aemu/base/async/ThreadLooper.h"             // for ThreadLooper
 #include "android/console.h"                             // for AndroidConso...
 #include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
 #include "android/emulation/control/libui_agent.h"       // for LibuiKeyCode...

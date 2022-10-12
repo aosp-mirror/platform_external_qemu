@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/memory/ContiguousRangeMapper.h"
+#include "aemu/base/memory/ContiguousRangeMapper.h"
 
 #include <gtest/gtest.h>
 

@@ -17,8 +17,8 @@
 
 #include "OpenglRender/render_api.h"
 
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/synchronization/MessageChannel.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "emugl/common/thread.h"
 
 class RenderWindowChannel;

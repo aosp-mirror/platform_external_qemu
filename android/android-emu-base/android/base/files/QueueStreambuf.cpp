@@ -11,10 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/files/QueueStreambuf.h"
+#include "aemu/base/files/QueueStreambuf.h"
 
 #include <algorithm>  // for max, min
 #include <cassert>
+#include <cstring>
 #include <iostream>  // for streamsize
 
 namespace android {

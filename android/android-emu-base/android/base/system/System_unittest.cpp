@@ -14,10 +14,10 @@
 
 #include "android/base/system/System.h"
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/Log.h"
-#include "android/base/misc/FileUtils.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/misc/FileUtils.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 

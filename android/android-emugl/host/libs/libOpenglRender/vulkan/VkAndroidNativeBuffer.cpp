@@ -12,7 +12,7 @@
 // limitations under the License.
 #include "VkAndroidNativeBuffer.h"
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 #include "cereal/common/goldfish_vk_private_defs.h"
 #include "cereal/common/goldfish_vk_extension_structs.h"

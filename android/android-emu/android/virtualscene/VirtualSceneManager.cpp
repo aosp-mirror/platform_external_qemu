@@ -17,7 +17,8 @@
 #include "android/virtualscene/VirtualSceneManager.h"
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
+#include "android/base/system/System.h"
 #include "android/cmdline-option.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/avd/hw-config.h"

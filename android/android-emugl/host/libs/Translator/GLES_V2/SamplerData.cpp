@@ -16,7 +16,7 @@
 
 #include "SamplerData.h"
 
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
 
 SamplerData::SamplerData(android::base::Stream* stream)

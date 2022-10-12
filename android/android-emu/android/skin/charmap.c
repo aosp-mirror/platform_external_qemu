@@ -16,7 +16,7 @@
 #include <string.h>                  // for strlen, strcmp, strerror, strrchr
 #include <errno.h>                   // for errno
 
-#include "android/base/ArraySize.h"  // for ARRAY_SIZE
+#include "aemu/base/ArraySize.h"  // for ARRAY_SIZE
 #include "android/skin/keycode.h"    // for kKeyCode0, kKeyCode1, kKeyCode2
 #include "android/utils/debug.h"     // for derror
 #include "android/utils/file_io.h"   // for android_fopen

@@ -15,8 +15,8 @@
 
 #include "android/utils/uri.h"
 
-#include "android/base/misc/StringUtils.h"
-#include "android/base/Uri.h"
+#include "aemu/base/misc/StringUtils.h"
+#include "aemu/base/Uri.h"
 
 #include <string_view>
 

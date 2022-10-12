@@ -14,7 +14,7 @@
 
 #include "android/emulation/AudioOutputEngine.h"
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 namespace android {
 namespace emulation {

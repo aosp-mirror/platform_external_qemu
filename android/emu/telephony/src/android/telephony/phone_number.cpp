@@ -16,8 +16,8 @@
 
 #include "android/telephony/phone_number.h"
 
-#include "android/base/StringFormat.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/cmdline-option.h"
 #include "android/utils/debug.h"
 #include "android/console.h"

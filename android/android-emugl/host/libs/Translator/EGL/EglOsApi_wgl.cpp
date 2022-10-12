@@ -15,7 +15,7 @@
 */
 #include "EglOsApi.h"
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"

@@ -15,16 +15,6 @@
 
 ANDROID_BEGIN_HEADER
 
-#ifndef __linux__
-// Make sure these are defined and don't change anything if used.
-enum {
-    SOCK_CLOEXEC = 0,
-#ifndef __APPLE__
-    O_CLOEXEC = 0
-#endif
-};
-#endif  // !__linux__
-
 // A C wrapper for android::base::fdSetCloexec().
 void fd_set_cloexec(int fd);
 

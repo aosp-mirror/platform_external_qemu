@@ -21,8 +21,8 @@
 #include <string>         // for string, hash, operator==
 #include <unordered_map>  // for unordered_map
 
-#include "android/base/memory/ScopedPtr.h"     // for makeCustomScopedPtr
-#include "android/base/memory/SharedMemory.h"  // for SharedMemory
+#include "aemu/base/memory/ScopedPtr.h"     // for makeCustomScopedPtr
+#include "aemu/base/memory/SharedMemory.h"  // for SharedMemory
 
 namespace android {
 namespace emulation {

@@ -17,7 +17,7 @@
 #include <string.h>   // for memcpy
 #include <algorithm>  // for min
 
-#include "android/base/async/Looper.h"  // for Looper
+#include "aemu/base/async/Looper.h"  // for Looper
 
 #define DEBUG 0
 /* set  >1 for very verbose debugging */

@@ -11,10 +11,10 @@
 
 #include "android/adb-server.h"
 
-#include "android/base/files/StdioStream.h"
-#include "android/base/files/Stream.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/threads/Async.h"
+#include "aemu/base/files/StdioStream.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/threads/Async.h"
 #include "android/base/system/System.h"
 #include "android/emulation/AdbDebugPipe.h"
 #include "android/emulation/AdbGuestPipe.h"

@@ -31,7 +31,7 @@
 #include "goldfish_vk_private_defs.h"
 
 #include "VulkanStream.h"
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/files/StreamSerializing.h"
 
 
 namespace goldfish_vk {

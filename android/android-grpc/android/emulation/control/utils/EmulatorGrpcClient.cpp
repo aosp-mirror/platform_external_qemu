@@ -23,10 +23,10 @@
 #include <unordered_map>    // for __ha...
 #include <utility>          // for move
 
-#include "android/base/Stopwatch.h"                           // for Stop...
+#include "aemu/base/Stopwatch.h"                           // for Stop...
 
-#include "android/base/files/IniFile.h"                       // for IniFile
-#include "android/base/files/PathUtils.h"                     // for Path...
+#include "aemu/base/files/IniFile.h"                       // for IniFile
+#include "aemu/base/files/PathUtils.h"                     // for Path...
 #include "android/emulation/control/secure/BasicTokenAuth.h"  // for Basi...
 #include "android/utils/debug.h"                              // for VERB...
 #include "grpc/grpc_security_constants.h"                     // for LOCA...
@@ -110,7 +110,7 @@ bool EmulatorGrpcClient::hasOpenChannel(bool tryConnect) {
 }
 
 static std::string readFile(std::string_view fname) {
-    std::ifstream fstream(PathUtils::asUnicodePath(fname).c_str());
+    std::ifstream fstream(PathUtils::asUnicodePath(fname.data()).c_str());
     std::string contents((std::istreambuf_iterator<char>(fstream)),
                          std::istreambuf_iterator<char>());
     return contents;
@@ -187,16 +187,16 @@ bool EmulatorGrpcClient::initializeChannel() {
 std::unique_ptr<EmulatorGrpcClient> EmulatorGrpcClient::loadFromProto(
         std::string_view pathToEndpointProto) {
     // Read the existing address book.
-    std::fstream input(PathUtils::asUnicodePath(pathToEndpointProto).c_str(),
+    std::fstream input(PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str(),
                        std::ios::in | std::ios::binary);
     Endpoint endpoint;
     if (!input) {
         derror("File %s not found",
-               PathUtils::asUnicodePath(pathToEndpointProto).c_str());
+               PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str());
         return nullptr;
     } else if (!endpoint.ParseFromIstream(&input)) {
         derror("File %s does not contain a valid endpoint",
-               PathUtils::asUnicodePath(pathToEndpointProto).c_str());
+               PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str());
         return nullptr;
     }
 

@@ -22,16 +22,16 @@
 #include <vulkan/vulkan_android.h>
 #include <vulkan/vk_android_native_buffer.h>
 
-#include "android/base/ArraySize.h"
-#include "android/base/files/MemStream.h"
-#include "android/base/files/Stream.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/files/MemStream.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/base/Tracing.h"
+#include "aemu/base/threads/FunctorThread.h"
+#include "aemu/base/Tracing.h"
 #include "android/opengles.h"
 #include "android/snapshot/interface.h"
 

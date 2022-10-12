@@ -22,7 +22,7 @@
 #include <QTimer>                                     // for QTimer
 #include <memory>                                     // for unique_ptr
 
-#include "android/base/Optional.h"                    // for Optional
+#include "aemu/base/Optional.h"                    // for Optional
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/skin/qt/qt-ui-commands.h"           // for QtKeyEventSource
 #include "android/skin/qt/size-tweaker.h"             // for SizeTweaker

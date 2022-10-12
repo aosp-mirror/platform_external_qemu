@@ -13,10 +13,10 @@
 #include <errno.h>
 #include <cstdio>
 
-#include "android/base/files/FileShareOpen.h"
-#include "android/base/files/FileShareOpenImpl.h"
-#include "android/base/StringFormat.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/files/FileShareOpen.h"
+#include "aemu/base/files/FileShareOpenImpl.h"
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/utils/file_io.h"
 #include "android/utils/debug.h"
 
@@ -48,7 +48,7 @@ FILE* android::base::fsopenWithTimeout(const char* filename, const char* mode,
 
 #ifdef _WIN32
 
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 
 #include <share.h>
 #include <windows.h>

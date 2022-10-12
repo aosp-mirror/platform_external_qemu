@@ -30,18 +30,18 @@
 
 #include "android/avd/info.h"                              // for avdInfo_ge...
 #include "android/avd/util.h"                              // for ANDROID_AV...
-#include "android/base/EnumFlags.h"                        // for operator|
-#include "android/base/Log.h"                              // for LogStream
-#include "android/base/Optional.h"                         // for Optional
+#include "aemu/base/EnumFlags.h"                        // for operator|
+#include "aemu/base/Log.h"                              // for LogStream
+#include "aemu/base/Optional.h"                         // for Optional
 
-#include "android/base/Uuid.h"                             // for Uuid
-#include "android/base/files/PathUtils.h"                  // for PathUtils
-#include "android/base/memory/LazyInstance.h"              // for LazyInstance
-#include "android/base/memory/ScopedPtr.h"                 // for ScopedCPtr
-#include "android/base/synchronization/Lock.h"             // for Lock, Auto...
+#include "aemu/base/Uuid.h"                             // for Uuid
+#include "aemu/base/files/PathUtils.h"                  // for PathUtils
+#include "aemu/base/memory/LazyInstance.h"              // for LazyInstance
+#include "aemu/base/memory/ScopedPtr.h"                 // for ScopedCPtr
+#include "aemu/base/synchronization/Lock.h"             // for Lock, Auto...
 #include "android/base/system/System.h"                    // for System
-#include "android/base/threads/Async.h"                    // for AsyncThrea...
-#include "android/base/threads/ParallelTask.h"             // for ParallelTask
+#include "aemu/base/threads/Async.h"                    // for AsyncThrea...
+#include "aemu/base/threads/ParallelTask.h"             // for ParallelTask
 #include "android/cmdline-option.h"                        // for android_cm...
 #include "android/emulation/AdbHostServer.h"               // for AdbHostServer
 #include "android/emulation/ConfigDirs.h"                  // for ConfigDirs
@@ -657,7 +657,7 @@ AdbCommandResult::AdbCommandResult(System::ProcessExitCode exitCode,
       output(outputName.empty()
                      ? nullptr
                      : new std::ifstream(
-                               PathUtils::asUnicodePath(outputName).c_str())),
+                               PathUtils::asUnicodePath(outputName.data()).c_str())),
       output_name(outputName) {}
 
 AdbCommandResult::AdbCommandResult(

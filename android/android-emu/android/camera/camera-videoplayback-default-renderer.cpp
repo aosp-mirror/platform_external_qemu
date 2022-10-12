@@ -16,8 +16,8 @@
 
 #include "android/camera/camera-videoplayback-default-renderer.h"
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/Log.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/Log.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "offworld.pb.h"
 

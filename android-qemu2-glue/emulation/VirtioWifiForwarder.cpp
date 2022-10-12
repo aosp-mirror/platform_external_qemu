@@ -16,10 +16,10 @@ extern "C" {
 #endif
 #include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
 
-#include "android/base/Log.h"
-#include "android/base/StringFormat.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/console.h"
 #include "android/network/Endian.h"
 #include "android/network/WifiForwardClient.h"
@@ -64,6 +64,11 @@ extern uint16_t android_wifi_server_port;
 extern uint16_t android_wifi_client_port;
 
 }  // extern "C"
+
+// Conflicts with Log.h
+#ifdef ERROR
+#undef ERROR
+#endif
 
 namespace android {
 namespace qemu2 {

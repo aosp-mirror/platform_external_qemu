@@ -11,7 +11,7 @@
 
 #include "android/utils/win32_unicode.h"
 
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 
 using android::base::Win32UnicodeString;
 

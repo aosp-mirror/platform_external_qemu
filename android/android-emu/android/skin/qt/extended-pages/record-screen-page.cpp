@@ -32,7 +32,7 @@
 #include "android/metrics/UiEventTracker.h"            // for UiEventTracker
 
 #include "android/avd/info.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/console.h"
 #include "android/recording/GifConverter.h"

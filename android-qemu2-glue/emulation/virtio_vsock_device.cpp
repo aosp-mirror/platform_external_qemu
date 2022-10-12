@@ -33,7 +33,7 @@ extern "C" {
 
 #include <android-qemu2-glue/base/files/QemuFileStream.h>
 #include <android-qemu2-glue/emulation/virtio_vsock_transport.h>
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/AdbVsockPipe.h"
 #include "android/emulation/SocketBuffer.h"

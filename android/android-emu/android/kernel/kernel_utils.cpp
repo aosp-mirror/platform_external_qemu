@@ -15,9 +15,9 @@
 #include <string.h>
 #include "android/kernel/kernel_utils.h"
 #include "android/kernel/kernel_utils_testing.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/files/ScopedFd.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 #include "android/uncompress.h"
 #include "android/utils/path.h"

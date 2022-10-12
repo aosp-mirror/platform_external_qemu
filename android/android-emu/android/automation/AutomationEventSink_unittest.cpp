@@ -12,6 +12,7 @@
 #include "android/automation/AutomationController.h"
 
 #include "android/automation/AutomationEventSink.h"
+#include "android/base/system/System.h"
 #include "android/base/testing/ProtobufMatchers.h"
 #include "android/base/testing/TestLooper.h"
 #include "android/base/testing/TestMemoryOutputStream.h"

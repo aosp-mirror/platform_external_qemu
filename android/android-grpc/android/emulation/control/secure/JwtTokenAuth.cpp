@@ -18,8 +18,8 @@
 #include <utility>     // for move
 
 #include "absl/strings/string_view.h"  // for string_view
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/StringUtils.h"  // for EndsWith
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/misc/StringUtils.h"  // for EndsWith
 #include "android/utils/debug.h"            // for derror
 #include "tink/config/tink_config.h"        // for TinkConfig
 #include "tink/jwt/jwk_set_converter.h"
@@ -92,7 +92,7 @@ void JwtTokenAuth::updateKeysetHandle(
             }
         }
 
-        std::ofstream out(PathUtils::asUnicodePath(mJwksLoadedPath).c_str(),
+        std::ofstream out(PathUtils::asUnicodePath(mJwksLoadedPath.data()).c_str(),
                           std::ios::trunc);
         out << jsonSnippet;
         out.close();

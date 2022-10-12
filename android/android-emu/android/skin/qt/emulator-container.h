@@ -20,7 +20,7 @@
 #include <QString>                         // for QString
 #include <QTimer>                          // for QTimer
 
-#include "android/base/memory/OnDemand.h"  // for OnDemand
+#include "aemu/base/memory/OnDemand.h"  // for OnDemand
 #include "android/skin/qt/ModalOverlay.h"  // for ModalOverlay, ModalOverlay...
 #include "android/skin/qt/OverlayMessageCenter.h"
 class EmulatorQtWindow;

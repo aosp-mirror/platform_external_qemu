@@ -15,8 +15,8 @@
 */
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/synchronization/MessageChannel.h"
 #include "android/emulation/control/window_agent.h"
 
 #include <EGL/egl.h>
@@ -27,8 +27,8 @@
 #include <vector>
 
 #include "Hwc2.h"
-#include "android/base/Compiler.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/skin/rect.h"
 
 class ColorBuffer;

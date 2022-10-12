@@ -15,8 +15,8 @@ extern "C" {
 #endif
 #include "android-qemu2-glue/base/async/Looper.h"
 
-#include "android/base/Log.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android-qemu2-glue/base/files/QemuFileStream.h"

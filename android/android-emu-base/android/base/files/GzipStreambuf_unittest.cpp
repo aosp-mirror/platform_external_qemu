@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/files/GzipStreambuf.h"
+#include "aemu/base/files/GzipStreambuf.h"
 
 #include <gtest/gtest.h>  // for Test, SuiteApiResolver, TestInfo (ptr only)
 #include <cstdlib>        // for srand, rand

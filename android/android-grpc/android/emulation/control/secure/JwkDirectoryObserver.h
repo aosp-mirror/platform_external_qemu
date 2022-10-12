@@ -20,7 +20,7 @@
 #include <unordered_map>                           // for unordered_map
 
 #include "absl/status/statusor.h"                  // for StatusOr
-#include "android/base/files/FileSystemWatcher.h"  // for FileSystemWatcher
+#include "aemu/base/files/FileSystemWatcher.h"  // for FileSystemWatcher
 #include "nlohmann/json.hpp"                       // for json
 
 namespace crypto {

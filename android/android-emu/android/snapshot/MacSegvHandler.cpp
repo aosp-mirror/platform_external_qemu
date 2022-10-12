@@ -16,10 +16,10 @@
 // info.ravenbrook.com/project/mps/master/code/protxc.c#17
 // Copyright (c) 2013-2016 Ravenbrook Limited.
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/threads/FunctorThread.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/snapshot/MacSegvHandler.h"
 #include "android/snapshot/mach_exception_defs.h"

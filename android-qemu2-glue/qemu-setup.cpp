@@ -20,7 +20,7 @@ extern "C" {
 
 #include "android-qemu2-glue/qemu-setup.h"
 #include "android/base/system/System.h"
-#include "android/base/logging/LogSeverity.h"
+#include "aemu/base/logging/LogSeverity.h"
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -61,14 +61,14 @@ extern "C" {
 #include "android-qemu2-glue/snapshot_compression.h"
 #include "android/android.h"
 #include "android/avd/info.h"
-#include "android/base/CpuUsage.h"
-#include "android/base/Log.h"
-#include "android/base/Tracing.h"
-#include "android/base/Uuid.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/MemStream.h"
-#include "android/base/files/PathUtils.h"  // for pj
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/CpuUsage.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/Tracing.h"
+#include "aemu/base/Uuid.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/MemStream.h"
+#include "aemu/base/files/PathUtils.h"  // for pj
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/bluetooth/rootcanal/root_canal_qemu.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"

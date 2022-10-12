@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "android/CommonReportedInfo.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include "studio_stats.pb.h"
 
@@ -63,7 +63,7 @@ void appendMemoryUsage() {
     android_studio::EmulatorMemoryUsage* memUsageProto =
         get()->performanceStats.add_memory_usage();
 
-    base::System::MemUsage usage = base::System::get()->getMemUsage();
+    base::MemUsage usage = base::System::get()->getMemUsage();
     memUsageProto->set_resident_memory(usage.resident);
     memUsageProto->set_resident_memory_max(usage.resident_max);
     memUsageProto->set_virtual_memory(usage.virt);

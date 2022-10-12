@@ -18,9 +18,9 @@
 
 #include "EGLDispatch.h"
 
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/misc.h"
@@ -236,7 +236,7 @@ std::string filterExtensionsBasedOnMaxVersion(GLESDispatchMaxVersion ver,
 
     std::string filteredExtensions;
     filteredExtensions.reserve(4096);
-    auto add = [ver, &filteredExtensions](std::string_view hostExt) {
+    auto add = [ver, &filteredExtensions](const std::string& hostExt) {
         if (!hostExt.empty() &&
             sWhitelistedExtensionsGLES2(hostExt)) {
             filteredExtensions += hostExt;
@@ -244,7 +244,7 @@ std::string filterExtensionsBasedOnMaxVersion(GLESDispatchMaxVersion ver,
         }
     };
 
-    android::base::split(exts, " ", add);
+    android::base::split<std::string>(exts, " ", add);
 
     return filteredExtensions;
 }

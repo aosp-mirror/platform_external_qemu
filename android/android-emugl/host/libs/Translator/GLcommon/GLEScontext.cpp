@@ -16,8 +16,8 @@
 
 #include <GLcommon/GLEScontext.h>
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/files/StreamSerializing.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 

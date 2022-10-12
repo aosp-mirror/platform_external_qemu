@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "android/base/ArraySize.h"
+#include "aemu/base/ArraySize.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "benchmark/benchmark_api.h"
 

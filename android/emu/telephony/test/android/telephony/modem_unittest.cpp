@@ -11,7 +11,7 @@
 */
 
 #include "android/telephony/modem.h"
-#include "android/base/ArraySize.h"
+#include "aemu/base/ArraySize.h"
 
 #include <gtest/gtest.h>
 

@@ -11,7 +11,7 @@
 
 #include "android/utils/property_file.h"
 
-#include "android/base/ArraySize.h"
+#include "aemu/base/ArraySize.h"
 #include "android/utils/system.h"
 
 #include <stdlib.h>

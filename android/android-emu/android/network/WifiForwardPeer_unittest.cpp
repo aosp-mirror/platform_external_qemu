@@ -11,9 +11,9 @@
 
 #include "android/network/WifiForwardPeer.h"
 
-#include "android/base/misc/IpcPipe.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/misc/IpcPipe.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/base/testing/TestLooper.h"
 
 #include <gtest/gtest.h>

@@ -11,9 +11,9 @@
 
 #include "android/snapshot/Saver.h"
 
-#include "android/base/files/FileShareOpen.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StdioStream.h"
+#include "aemu/base/files/FileShareOpen.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StdioStream.h"
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/TextureSaver.h"
 #include "android/snapshot/common.h"
@@ -23,6 +23,7 @@
 #include <string_view>
 
 using android::base::c_str;
+using android::base::DiskKind;
 using android::base::PathUtils;
 using android::base::StdioStream;
 using android::base::System;
@@ -90,8 +91,8 @@ Saver::Saver(const Snapshot& snapshot,
                             "Enabling RAM compression: only %u MB of free RAM",
                             unsigned(freeMb));
                 } else {
-                    if (mDiskKind.valueOr(System::DiskKind::Ssd) ==
-                        System::DiskKind::Hdd) {
+                    if (mDiskKind.valueOr(DiskKind::Ssd) ==
+                        DiskKind::Hdd) {
                         flags |= RamSaver::Flags::Compress;
                         VERBOSE_PRINT(
                                 snapshot,

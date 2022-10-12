@@ -18,9 +18,9 @@
 #include <string_view>
 #include <utility>  // for move
 
-#include "android/base/Compiler.h"             // for DISALLOW_COPY_AND_ASSIGN
+#include "aemu/base/Compiler.h"             // for DISALLOW_COPY_AND_ASSIGN
 
-#include "android/base/async/Looper.h"         // for Looper::ClockType, Looper
+#include "aemu/base/async/Looper.h"         // for Looper::ClockType, Looper
 #include "android/skin/qt/QtLooperImpl.h"      // for TimerImpl, TaskImpl
 #include "android/skin/qt/logging-category.h"  // for emu
 

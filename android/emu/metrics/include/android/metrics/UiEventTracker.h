@@ -17,7 +17,7 @@
 #include <unordered_map>  // for unordered_map
 #include <vector>
 
-#include "android/base/Compiler.h"  // for DISALLOW_COPY_ASSIGN_...
+#include "aemu/base/Compiler.h"  // for DISALLOW_COPY_ASSIGN_...
 #include "android/metrics/export.h"
 #include "studio_stats.pb.h"  // for EmulatorUiEvent_EmulatorUiEventContext
 

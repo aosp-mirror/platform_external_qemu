@@ -12,11 +12,11 @@
 
 #include "android/opengles.h"
 
-#include "android/base/CpuUsage.h"
-#include "android/base/GLObjectCounter.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/Stream.h"
-#include "android/base/memory/MemoryTracker.h"
+#include "aemu/base/CpuUsage.h"
+#include "aemu/base/GLObjectCounter.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/memory/MemoryTracker.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/address_space_device.h"

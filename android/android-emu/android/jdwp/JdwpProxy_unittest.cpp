@@ -18,7 +18,7 @@
 #include <cstring>
 #include <memory>
 
-#include "android/base/files/MemStream.h"
+#include "aemu/base/files/MemStream.h"
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/Jdwp.h"
 

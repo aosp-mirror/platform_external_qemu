@@ -11,7 +11,7 @@
 
 #include "android-qemu2-glue/utils/stream.h"
 
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 #include "android-qemu2-glue/base/files/QemuFileStream.h"
 
 using android::qemu::QemuFileStream;

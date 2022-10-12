@@ -24,7 +24,7 @@
 #include <variant>
 #include <vector>
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "hw/virtio/virtio-goldfish-pipe.h"
 #include "android/opengl/virtio_gpu_ops.h"
 

@@ -31,14 +31,14 @@
 #include "vulkan/VkCommonOperations.h"
 #include "vulkan/VkDecoderGlobalState.h"
 
-#include "android/base/CpuUsage.h"
-#include "android/base/LayoutResolver.h"
-#include "android/base/Tracing.h"
-#include "android/base/containers/Lookup.h"
-#include "android/base/files/StreamSerializing.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/memory/MemoryTracker.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/CpuUsage.h"
+#include "aemu/base/LayoutResolver.h"
+#include "aemu/base/Tracing.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/files/StreamSerializing.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/memory/MemoryTracker.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
 #include "android/utils/GfxstreamFatalError.h"
@@ -815,9 +815,7 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
 FrameBuffer::~FrameBuffer() {
     finalize();
 
-    if (m_postThread.isStarted()) {
-        m_postThread.enqueue({ PostCmd::Exit, });
-    }
+    m_postThread.enqueue({ PostCmd::Exit, });
 
     delete m_textureDraw;
     delete m_configs;
@@ -904,7 +902,8 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
     bool postOnlyOnMainThread = false;
 #endif
 
-    if (!m_postThread.isStarted()) {
+    bool expectedPostThreadStarted = false;
+    if (m_postThreadStarted.compare_exchange_strong(expectedPostThreadStarted, true)) {
         if (postOnlyOnMainThread) {
             EGLContext prevContext = s_egl.eglGetCurrentContext();
             EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
@@ -982,7 +981,8 @@ void FrameBuffer::setPostCallback(
         m_onPost[displayId].height = h;
         m_onPost[displayId].img = new unsigned char[4 * w * h];
         m_onPost[displayId].readBgra = useBgraReadback;
-        if (!m_readbackThread.isStarted()) {
+        bool expectedReadbackThreadStarted = false;
+        if (m_readbackThreadStarted.compare_exchange_strong(expectedReadbackThreadStarted, true)) {
             m_readbackThread.start();
             m_readbackThread.enqueue({ ReadbackCmd::Init });
         }

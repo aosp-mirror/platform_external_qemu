@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/metrics/MetricsWriter.h"
 #include "android/metrics/export.h"

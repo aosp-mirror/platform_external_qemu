@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/threads/Async.h"
+#include "aemu/base/threads/Async.h"
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/base/system/System.h"
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
 
 #include <memory>
 

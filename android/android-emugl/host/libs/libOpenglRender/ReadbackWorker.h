@@ -21,8 +21,8 @@
 #include <stdint.h>                             // for uint32_t
 #include <vector>                               // for vector
 
-#include "android/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
-#include "android/base/synchronization/Lock.h"  // for Lock
+#include "aemu/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
+#include "aemu/base/synchronization/Lock.h"  // for Lock
 
 class ColorBuffer;
 class FrameBuffer;

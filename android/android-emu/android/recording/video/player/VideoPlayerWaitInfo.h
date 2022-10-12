@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
 
 namespace android {
 namespace videoplayer {

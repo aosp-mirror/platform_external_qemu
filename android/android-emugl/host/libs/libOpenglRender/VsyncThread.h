@@ -13,8 +13,8 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/threads/FunctorThread.h"
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/threads/FunctorThread.h"
+#include "aemu/base/synchronization/MessageChannel.h"
 
 #include <inttypes.h>
 #include <functional>

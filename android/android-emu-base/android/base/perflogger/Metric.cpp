@@ -11,12 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/perflogger/Metric.h"
+#include "aemu/base/perflogger/Metric.h"
 
-#include "android/base/JsonWriter.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/logging/CLog.h"
-#include "android/base/perflogger/Benchmark.h"
+#include "aemu/base/JsonWriter.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/perflogger/Benchmark.h"
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
 

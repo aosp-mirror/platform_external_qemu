@@ -10,11 +10,11 @@
 // GNU General Public License for more details.
 #include "android/update-check/VersionExtractor.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/Compiler.h"
-#include "android/base/containers/Lookup.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/Optional.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/Optional.h"
 #include "android/utils/debug.h"
 #include "android/version.h"
 #include "config-host.h"

@@ -18,7 +18,7 @@
 #include <qsizepolicy.h>                        // for QSizePolicy::Expanding
 #include <qwindowdefs.h>                        // for WId
 
-#include "android/base/Optional.h"              // for Optional
+#include "aemu/base/Optional.h"              // for Optional
 #include "android/settings-agent.h"             // for SETTINGS_THEME_DARK
 #include "android/skin/qt/stylesheet.h"         // for stylesheetFontSize
 

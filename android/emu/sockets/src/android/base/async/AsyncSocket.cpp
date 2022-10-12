@@ -1,7 +1,8 @@
-#include "android/base/async/AsyncSocket.h"
+#include "aemu/base/async/AsyncSocket.h"
 
-#include "android/base/Log.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "android/base/system/System.h"
 
 #define DEBUG 0
 

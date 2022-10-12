@@ -19,7 +19,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 #include "android/cpu_accelerator.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/cmdline-definitions.h"

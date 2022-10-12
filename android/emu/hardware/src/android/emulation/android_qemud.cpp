@@ -11,7 +11,7 @@
 
 #include "android/emulation/android_qemud.h"
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/panic.h"

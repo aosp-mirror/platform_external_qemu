@@ -25,9 +25,9 @@
 #include <utility>        // for move
 #include <vector>         // for vector
 
-#include "android/base/Optional.h"                  // for Optional
-#include "android/base/files/Stream.h"              // for Stream
-#include "android/base/synchronization/Lock.h"      // for AutoLock, Lock
+#include "aemu/base/Optional.h"                  // for Optional
+#include "aemu/base/files/Stream.h"              // for Stream
+#include "aemu/base/synchronization/Lock.h"      // for AutoLock, Lock
 #include "android/emulation/AndroidPipe.h"          // for AndroidPipe, Andr...
 #include "android/emulation/android_pipe_common.h"  // for AndroidPipeBuffer
 #include "android/utils/debug.h"                    // for dprint

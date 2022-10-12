@@ -25,10 +25,10 @@
 #include <utility>                        // for move
 #include <vector>                         // for vector
 
-#include "android/base/Log.h"                     // for LogStreamVoidify, LOG
-#include "android/base/async/AsyncSocket.h"       // for AsyncSocket
-#include "android/base/containers/BufferQueue.h"  // for BufferQueueResult
-#include "android/base/synchronization/Lock.h"    // for Lock, AutoReadLock
+#include "aemu/base/Log.h"                     // for LogStreamVoidify, LOG
+#include "aemu/base/async/AsyncSocket.h"       // for AsyncSocket
+#include "aemu/base/containers/BufferQueue.h"  // for BufferQueueResult
+#include "aemu/base/synchronization/Lock.h"    // for Lock, AutoReadLock
 #include "android/base/system/System.h"           // for System, System::Dur...
 #include "android/console.h"                      // for getConsoleAgents
 #include "emulator/webrtc/Participant.h"          // for Participant

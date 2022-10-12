@@ -20,8 +20,8 @@
  * Defines the Virtual Scene, used by the Virtual Scene Camera
  */
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/emulation/control/virtual_scene_agent.h"
 #include "android/utils/compiler.h"
 

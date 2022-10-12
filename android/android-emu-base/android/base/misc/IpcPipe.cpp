@@ -9,10 +9,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/misc/IpcPipe.h"
+#include "aemu/base/misc/IpcPipe.h"
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/files/Fd.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/files/Fd.h"
 
 #ifdef _WIN32
 #include <fcntl.h>

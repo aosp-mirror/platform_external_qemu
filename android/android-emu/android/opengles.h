@@ -14,7 +14,7 @@
 
 #include <stddef.h>
 
-#include "android/base/export.h"
+#include "aemu/base/export.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"

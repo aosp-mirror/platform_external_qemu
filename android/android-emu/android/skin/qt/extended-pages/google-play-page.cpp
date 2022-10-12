@@ -11,7 +11,7 @@
 
 #include "android/skin/qt/extended-pages/google-play-page.h"
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/skin/qt/emulator-qt-window.h"        // for EmulatorQtWindow
 
 #include <qapplication.h>                  // for QApplication (ptr only), qApp

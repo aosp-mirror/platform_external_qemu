@@ -15,7 +15,7 @@
 #include <fcntl.h>
 #include <cassert>
 #include <cerrno>
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
 #include "android/base/system/System.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/file_io.h"
@@ -27,9 +27,9 @@
 #include <cstdlib>
 #include <ctime>
 #ifdef _WIN32
-#include "android/base/files/ScopedFileHandle.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/files/ScopedFileHandle.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif

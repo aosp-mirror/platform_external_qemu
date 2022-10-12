@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 
-#include "android/base/files/FileShareOpen.h"
+#include "aemu/base/files/FileShareOpen.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 
 #include <string_view>

@@ -14,7 +14,7 @@
 
 #include "android/metrics/Percentiles.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/base/testing/GTestUtils.h"
 #include "studio_stats.pb.h"
 

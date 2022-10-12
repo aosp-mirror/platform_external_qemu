@@ -16,9 +16,10 @@ extern "C" {
 #include "qemu/osdep.h"
 }
 #endif
-#include "android/base/AlignedBuf.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/AlignedBuf.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/emulation/AddressSpaceService.h"
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/android_pipe_common.h"

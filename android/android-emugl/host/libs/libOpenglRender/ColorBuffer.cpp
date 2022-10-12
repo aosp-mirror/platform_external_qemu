@@ -15,9 +15,9 @@
 */
 #include "ColorBuffer.h"
 
-#include "android/base/Log.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/Tracing.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/Tracing.h"
 
 #include "DispatchTables.h"
 #include "GLcommon/GLutils.h"
@@ -34,6 +34,11 @@
 
 #include <stdio.h>
 #include <string.h>
+
+// Conflicts with Log.h
+#ifdef ERROR
+#undef ERROR
+#endif
 
 #ifdef NDEBUG
 #define DEBUG_CB_FBO 0

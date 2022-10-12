@@ -16,7 +16,7 @@
 #ifndef GLES_POINTER_H
 #define GLES_POINTER_H
 
-#include <android/base/files/Stream.h>
+#include <aemu/base/files/Stream.h>
 #include <GLES/gl.h>
 #include "GLESbuffer.h"
 

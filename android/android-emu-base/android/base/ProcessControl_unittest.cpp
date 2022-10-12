@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/ProcessControl.h"
+#include "aemu/base/ProcessControl.h"
 
 #include <gtest/gtest.h>
 

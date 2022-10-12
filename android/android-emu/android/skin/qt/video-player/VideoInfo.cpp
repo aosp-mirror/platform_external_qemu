@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/recording/video/player/PacketQueue.h"
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"

@@ -16,10 +16,11 @@
 
 #include "android/virtualscene/Renderer.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/WorkerThread.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/synchronization/MessageChannel.h"
+#include "aemu/base/threads/WorkerThread.h"
+#include "android/base/system/System.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 #include "android/virtualscene/RenderTarget.h"

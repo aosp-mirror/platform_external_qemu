@@ -14,7 +14,7 @@
 
 #include "emugl/common/OpenGLDispatchLoader.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 
 #include "OpenGLESDispatch/DispatchTables.h"
 

@@ -17,8 +17,8 @@
 #include "android/virtualscene/TextureUtils.h"
 #include <string>
 #include <string_view>
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/ScopedStdioFile.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
 

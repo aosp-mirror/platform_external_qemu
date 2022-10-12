@@ -15,8 +15,8 @@
 #include "android/base/testing/TestTempDir.h"
 
 #include "automation.pb.h"
-#include "android/base/Debug.h"
-#include "android/base/files/MemStream.h"
+#include "aemu/base/Debug.h"
+#include "aemu/base/files/MemStream.h"
 #include "android/base/testing/GlmTestHelpers.h"
 #include "android/base/testing/ProtobufMatchers.h"
 #include "android/avd/hw-config.h"

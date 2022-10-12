@@ -15,9 +15,10 @@
 
 #include "AndroidHostCommon.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 
+#include <string>
 #include <unordered_map>
 #include <string.h>
 

@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/files/StdioStream.h"
+#include "aemu/base/files/StdioStream.h"
 #include "android/metrics/MetricsWriter.h"
 #include "android/metrics/export.h"
 

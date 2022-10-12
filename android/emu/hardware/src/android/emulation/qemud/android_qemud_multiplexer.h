@@ -17,7 +17,7 @@
 #include "android/emulation/qemud/android_qemud_service.h"
 #include "android/utils/compiler.h"
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 
 ANDROID_BEGIN_HEADER
 

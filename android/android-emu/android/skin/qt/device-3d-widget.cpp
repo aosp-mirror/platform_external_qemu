@@ -30,7 +30,7 @@
 #include <vector>                  // for vector
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/avd/hw-config.h"
 #include "android/console.h"                          // for QAndroidSensors...

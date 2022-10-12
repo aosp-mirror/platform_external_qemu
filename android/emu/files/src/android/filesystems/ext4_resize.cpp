@@ -14,8 +14,8 @@
 
 #include "android/filesystems/ext4_resize.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/logging/CLog.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/logging/CLog.h"
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
 
@@ -30,7 +30,7 @@
 #endif
 
 #ifdef _WIN32
-#include "android/base/system/Win32Utils.h"
+#include "aemu/base/system/Win32Utils.h"
 #include "android/utils/win32_cmdline_quote.h"
 #include <windows.h>
 

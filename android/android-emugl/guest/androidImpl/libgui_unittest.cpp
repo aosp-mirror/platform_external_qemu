@@ -16,7 +16,7 @@
 #include "AndroidWindow.h"
 #include "Vsync.h"
 
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 
 #include <atomic>

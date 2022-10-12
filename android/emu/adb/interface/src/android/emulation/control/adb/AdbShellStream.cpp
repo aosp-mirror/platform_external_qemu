@@ -19,7 +19,7 @@
 #include <istream>    // for basic_istream<>::__istream_type, basic...
 #include <iterator>   // for begin, end
 
-#include "android/base/Log.h"  // for LOG, LogMessage, LogStream
+#include "aemu/base/Log.h"  // for LOG, LogMessage, LogStream
 
 #define DEBUG 0
 

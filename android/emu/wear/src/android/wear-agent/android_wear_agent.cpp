@@ -11,7 +11,7 @@
 
 #include "android/wear-agent/android_wear_agent.h"
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 #include "android/wear-agent/WearAgent.h"
 
 namespace {

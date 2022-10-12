@@ -15,7 +15,7 @@
 
 #include "OpenglRender/RenderLib.h"
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 #include "emugl/common/vm_operations.h"
 #include "emugl/common/misc.h"
 

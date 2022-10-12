@@ -16,11 +16,11 @@
 
 #include "android/physics/FoldableModel.h"
 
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/avd/hw-config.h"
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
 #include "android/console.h"
 #include "android/utils/debug.h"
 

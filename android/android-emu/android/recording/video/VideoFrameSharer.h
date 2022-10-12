@@ -19,7 +19,7 @@
 #include <atomic>                              // for atomic
 #include <memory>                              // for unique_ptr
 #include <string>                              // for string, basic_string
-#include "android/base/memory/SharedMemory.h"  // for SharedMemory
+#include "aemu/base/memory/SharedMemory.h"  // for SharedMemory
 #include "android/opengles.h"                  // for ReadPixelsFunc
 
 namespace android {

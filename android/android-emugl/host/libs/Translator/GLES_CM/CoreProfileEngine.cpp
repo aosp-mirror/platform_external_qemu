@@ -21,7 +21,7 @@
 #include "GLcommon/GLESpointer.h"
 #include "GLEScmContext.h"
 
-#include "android/base/containers/Lookup.h"
+#include "aemu/base/containers/Lookup.h"
 #include "emugl/common/crash_reporter.h"
 
 #include <glm/vec3.hpp>

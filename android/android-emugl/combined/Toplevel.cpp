@@ -14,9 +14,9 @@
 #include "Toplevel.h"
 
 #include "android/avd/hw-config.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/OnDemand.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/OnDemand.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/AndroidPipe.h"

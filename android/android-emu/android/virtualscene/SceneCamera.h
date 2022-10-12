@@ -21,7 +21,7 @@
  * 3D scene and produces view/projection matrices based on calibration.
  */
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 #include "android/utils/compiler.h"
 
 #include <glm/glm.hpp>

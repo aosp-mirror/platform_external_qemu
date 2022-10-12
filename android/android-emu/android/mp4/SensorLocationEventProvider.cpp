@@ -22,8 +22,8 @@
 
 #include "android/automation/AutomationController.h"
 #include "android/automation/EventSource.h"      // for DurationNs
-#include "android/base/Log.h"                    // for LogMessage, LOG, CHECK
-#include "android/base/synchronization/Lock.h"   // for Lock
+#include "aemu/base/Log.h"                    // for LogMessage, LOG, CHECK
+#include "aemu/base/synchronization/Lock.h"   // for Lock
 #include "android/hw-sensors.h"                  // for ANDROID_SENSOR_ACCEL...
 #include "android/mp4/FieldDecodeInfo.h"         // for FieldDecodeInfo
 #include "offworld.pb.h"  // for SensorDataPacketInfo
@@ -31,6 +31,11 @@
 extern "C" {
 #include "libavcodec/avcodec.h"                  // for AVPacket
 }
+
+// Conflicts with Log.h
+#ifdef ERROR
+#undef ERROR
+#endif
 
 namespace android {
 namespace mp4 {

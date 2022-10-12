@@ -571,7 +571,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_enc.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include <vector>\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
-    fprintf(fp, "#include \"android/base/Tracing.h\"\n\n");
+    fprintf(fp, "#include \"aemu/base/Tracing.h\"\n\n");
     fprintf(fp, "#include \"EncoderDebug.h\"\n\n");
     fprintf(fp, "namespace {\n\n");
 

@@ -11,8 +11,8 @@
  */
 #include <windows.h>
 #include <shellapi.h>
-#include "android/base/system/Win32UnicodeString.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/system/Win32UnicodeString.h"
+#include "aemu/base/memory/ScopedPtr.h"
 
 #include <vector>
 

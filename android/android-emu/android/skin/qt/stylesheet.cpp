@@ -27,7 +27,7 @@
 #include <string>                              // for basic_string, string
 #include <vector>                              // for vector
 
-#include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "aemu/base/memory/LazyInstance.h"  // for LazyInstance
 #include "android/cmdline-option.h"            // for android_cmdLineOptions
 #include "android/skin/qt/logging-category.h"  // for emu
 

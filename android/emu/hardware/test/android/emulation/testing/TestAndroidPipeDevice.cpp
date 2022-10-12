@@ -12,7 +12,7 @@
 #include "android/emulation/testing/TestAndroidPipeDevice.h"
 
 #include "android/emulation/AndroidPipe.h"
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 #include <errno.h>
 #include <stdint.h>

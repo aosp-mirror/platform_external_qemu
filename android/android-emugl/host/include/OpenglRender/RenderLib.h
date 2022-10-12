@@ -17,7 +17,7 @@
 
 #include "OpenglRender/Renderer.h"
 #include "OpenglRender/render_api_types.h"
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 #include "android/emulation/RefcountPipe.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"

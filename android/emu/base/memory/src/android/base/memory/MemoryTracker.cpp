@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/memory/MemoryTracker.h"
+#include "aemu/base/memory/MemoryTracker.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 
 #ifndef AEMU_TCMALLOC_ENABLED
 #error "Need to know whether we enabled TCMalloc!"
@@ -29,7 +29,7 @@
 #include <vector>
 #endif
 
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
 
 using android::base::LazyInstance;
 

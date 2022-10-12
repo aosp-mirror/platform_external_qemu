@@ -33,7 +33,7 @@
 #include "absl/status/status.h"                                  // for Status
 #include "absl/strings/string_view.h"                            // for stri...
 
-#include "android/base/files/PathUtils.h"                        // for Path...
+#include "aemu/base/files/PathUtils.h"                        // for Path...
 #include "android/emulation/control/EmulatorAdvertisement.h"     // for Emul...
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emul...
 #include "android/utils/debug.h"                                 // for dinfo
@@ -55,16 +55,16 @@ using namespace android::emulation::control;
 using android::base::PathUtils;
 
 std::optional<GattDevice> loadFromProto(std::string_view pathToEndpointProto) {
-    std::fstream input(PathUtils::asUnicodePath(pathToEndpointProto).c_str(),
+    std::fstream input(PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str(),
                        std::ios::in | std::ios::binary);
     GattDevice device;
     if (!input) {
         derror("File %s not found",
-               PathUtils::asUnicodePath(pathToEndpointProto).c_str());
+               PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str());
         return {};
     } else if (!device.ParseFromIstream(&input)) {
         derror("File %s does not contain a valid device",
-               PathUtils::asUnicodePath(pathToEndpointProto).c_str());
+               PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str());
         return {};
     }
 

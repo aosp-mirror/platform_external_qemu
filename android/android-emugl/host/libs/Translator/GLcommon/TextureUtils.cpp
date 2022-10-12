@@ -21,7 +21,7 @@
 #include <cmath>
 #include <memory>
 
-#include "android/base/AlignedBuf.h"
+#include "aemu/base/AlignedBuf.h"
 
 #include <astc-codec/astc-codec.h>
 

@@ -16,7 +16,7 @@
 #include <cassert>
 #include <functional>
 
-#include "android/base/async/Looper.h"
+#include "aemu/base/async/Looper.h"
 #include "android/emulation/bluetooth/BufferedAsyncDataChannelAdapter.h"
 
 #define DEBUG 1

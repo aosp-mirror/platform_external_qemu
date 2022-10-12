@@ -12,9 +12,9 @@
 
 #pragma once
 
-#include "android/base/containers/CircularBuffer.h"
-#include "android/base/memory/OnDemand.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/containers/CircularBuffer.h"
+#include "aemu/base/memory/OnDemand.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/emulation/control/ApkInstaller.h"
 #include "android/emulation/control/FilePusher.h"
 #include "android/emulation/control/ScreenCapturer.h"

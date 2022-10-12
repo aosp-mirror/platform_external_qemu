@@ -1,6 +1,6 @@
 #include <string>
 
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/cmdline-option.h"
 #include "android/telephony/SimAccessRules.h"

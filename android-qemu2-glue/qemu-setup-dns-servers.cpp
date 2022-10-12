@@ -18,9 +18,9 @@ extern "C" {
 #endif
 #include "android-qemu2-glue/qemu-setup.h"
 
-#include "android/base/Log.h"
-#include "android/base/network/IpAddress.h"
-#include "android/base/network/Dns.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/network/IpAddress.h"
+#include "aemu/base/network/Dns.h"
 #include "android/utils/debug.h"
 
 extern "C" {

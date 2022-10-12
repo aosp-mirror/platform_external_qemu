@@ -22,7 +22,7 @@
 #include <string_view>
 #include <utility>     // for pair
 
-#include "android/base/Log.h"                           // for base
+#include "aemu/base/Log.h"                           // for base
 
 #include "android/metrics/MetricsReporter.h"            // for MetricsReporter
 #include "android/metrics/metrics.h"                    // for MetricsStopRe...

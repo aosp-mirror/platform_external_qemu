@@ -15,13 +15,13 @@
 #include <string_view>
 #include <vector>  // for vector
 
-#include "android/base/Debug.h"                 // for WaitForDebugger
-#include "android/base/Log.h"                   // for LOG, LogMessage
-#include "android/base/ProcessControl.h"        // for createEscapedLaunchSt...
-#include "android/base/StringFormat.h"          // for StringAppendFormatRaw
+#include "aemu/base/Debug.h"                 // for WaitForDebugger
+#include "aemu/base/Log.h"                   // for LOG, LogMessage
+#include "aemu/base/ProcessControl.h"        // for createEscapedLaunchSt...
+#include "aemu/base/StringFormat.h"          // for StringAppendFormatRaw
 
-#include "android/base/files/PathUtils.h"       // for PathUtils
-#include "android/base/misc/StringUtils.h"      // for strDup
+#include "aemu/base/files/PathUtils.h"       // for PathUtils
+#include "aemu/base/misc/StringUtils.h"      // for strDup
 #include "android/base/system/System.h"         // for System
 #include "android/cmdline-option.h"             // for android_cmdLine
 #include "android/crashreport/HangDetector.h"   // for HangDetector

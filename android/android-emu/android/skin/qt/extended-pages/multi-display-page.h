@@ -17,7 +17,7 @@
 #include <memory>                   // for unique_ptr
 #include <vector>                   // for vector
 
-#include "android/base/EventNotificationSupport.h"
+#include "aemu/base/EventNotificationSupport.h"
 #include "android/emulation/control/window_agent.h"
 #include "ui_multi-display-page.h"  // for MultiDisplayPage
 

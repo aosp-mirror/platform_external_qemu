@@ -25,8 +25,8 @@
 #include "android/avd/info.h"                                // for avdInfo_...
 #include "android/avd/util.h"                                // for AVD_PHONE
 
-#include "android/base/files/MemStream.h"                    // for MemStream
-#include "android/base/files/PathUtils.h"                    // for pj
+#include "aemu/base/files/MemStream.h"                    // for MemStream
+#include "aemu/base/files/PathUtils.h"                    // for pj
 #include "android/base/system/System.h"                      // for System
 #include "android/base/testing/TestTempDir.h"                // for TestTempDir
 #include "android/cmdline-option.h"                          // for AndroidO...
@@ -392,7 +392,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     auto customHwIniPath = pj(sTestContentDir->path(), "hardware.ini");
 
     std::ofstream hwIniPathTouch(
-            PathUtils::asUnicodePath(customHwIniPath).c_str(), std::ios::out);
+            PathUtils::asUnicodePath(customHwIniPath.data()).c_str(), std::ios::out);
     hwIniPathTouch << "test ini";
     hwIniPathTouch.close();
 

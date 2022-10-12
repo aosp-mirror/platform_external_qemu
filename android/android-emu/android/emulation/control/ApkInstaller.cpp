@@ -14,11 +14,11 @@
 
 #include "android/emulation/control/ApkInstaller.h"
 
-#include "android/base/StringFormat.h"
-#include "android/base/Uuid.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/Uuid.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/Async.h"
+#include "aemu/base/threads/Async.h"
 
 #include <iostream>
 #include <istream>

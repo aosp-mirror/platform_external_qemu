@@ -18,9 +18,9 @@
 #include <fstream>                             // for ofstream, operator<<
 #include <string>                              // for string
 
-#include "android/base/files/PathUtils.h"      // for pj, PathUtils
-#include "android/base/files/ScopedFd.h"       // for ScopedFd
-#include "android/base/misc/FileUtils.h"       // for readFileIntoString
+#include "aemu/base/files/PathUtils.h"      // for pj, PathUtils
+#include "aemu/base/files/ScopedFd.h"       // for ScopedFd
+#include "aemu/base/misc/FileUtils.h"       // for readFileIntoString
 #include "android/base/system/System.h"        // for System, System::kProgr...
 #include "android/base/testing/TestSystem.h"   // for TestSystem
 #include "android/base/testing/TestTempDir.h"  // for TestTempDir
@@ -83,7 +83,7 @@ TEST(ConsoleAuth, get_token_from_unicode_path) {
 
     // Note that using the unicode_file directly on windows will fail
     // std::ofstream out(unicode_file);
-    std::ofstream out(android::base::PathUtils::asUnicodePath(unicode_file).c_str());
+    std::ofstream out(android::base::PathUtils::asUnicodePath(unicode_file.data()).c_str());
     out << secret;
     out.close();
 

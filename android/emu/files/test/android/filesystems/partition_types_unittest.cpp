@@ -11,8 +11,8 @@
 
 #include "android/filesystems/partition_types.h"
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/files/ScopedStdioFile.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/files/ScopedStdioFile.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/filesystems/testing/TestExt4ImageHeader.h"
 #include "android/filesystems/testing/TestSupport.h"

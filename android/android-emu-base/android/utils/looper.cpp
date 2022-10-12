@@ -11,11 +11,11 @@
 
 #include "android/utils/looper.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/Stream.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/threads/Async.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "aemu/base/threads/Async.h"
 
 typedef ::Looper CLooper;
 typedef android::base::Looper BaseLooper;

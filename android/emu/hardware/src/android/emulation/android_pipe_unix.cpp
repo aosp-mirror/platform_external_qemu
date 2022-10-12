@@ -28,7 +28,7 @@
 #ifndef _WIN32
 
 #include "android/async-utils.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/emulation/CrossSessionSocket.h"
 #include "android/emulation/android_pipe_host.h"
 #include "android/featurecontrol/FeatureControl.h"

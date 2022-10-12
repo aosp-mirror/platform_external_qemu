@@ -14,7 +14,7 @@
 #pragma once
 
 #include "android/utils/stream.h"
-#include "android/base/export.h"
+#include "aemu/base/export.h"
 
 struct QAndroidVmOperations;
 

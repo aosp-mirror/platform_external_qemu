@@ -14,7 +14,7 @@
 // Glue code between the virtual goldfish sync device, and the
 // host-side sync service implementation.
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/GoldfishSyncCommandQueue.h"
 #include "android/emulation/goldfish_sync.h"

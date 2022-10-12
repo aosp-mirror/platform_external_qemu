@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/emulation/AndroidPipe.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include "android/opengles.h"
 #include <assert.h>

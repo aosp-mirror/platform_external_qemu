@@ -26,8 +26,8 @@
 #include <string>                          // for string, basic_string
 #include <vector>                          // for vector
 
-#include "android/base/Log.h"              // for LOG, LogMessage, LogStream
-#include "android/base/files/PathUtils.h"  // for PathUtils
+#include "aemu/base/Log.h"              // for LOG, LogMessage, LogStream
+#include "aemu/base/files/PathUtils.h"  // for PathUtils
 #include "android/base/system/System.h"    // for System
 #include "android/emulation/ConfigDirs.h"  // for ConfigDirs
 #include "android/utils/debug.h"           // for dwarning, VERBOSE_PRINT

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/LayoutResolver.h"
+#include "aemu/base/LayoutResolver.h"
 
 #include <gtest/gtest.h>
 
-#include "android/base/ArraySize.h"
+#include "aemu/base/ArraySize.h"
 
 namespace android {
 namespace base {

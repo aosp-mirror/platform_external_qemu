@@ -14,7 +14,7 @@
 // limitations under the License.
 #include "android/emulation/control/camera/VirtualSceneCamera.h"
 
-#include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "aemu/base/memory/LazyInstance.h"  // for LazyInstance
 #include "android/camera/camera-common.h"      // for kVirtualScene
 #include "android/camera/camera-service.h"     // for register_ca...
 #include "android/physics/GlmHelpers.h"

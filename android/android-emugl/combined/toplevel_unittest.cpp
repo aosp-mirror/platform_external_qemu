@@ -15,7 +15,7 @@
 
 #include "Toplevel.h"
 
-#include "android/base/GLObjectCounter.h"
+#include "aemu/base/GLObjectCounter.h"
 #include "android/base/system/System.h"
 
 #include <EGL/egl.h>

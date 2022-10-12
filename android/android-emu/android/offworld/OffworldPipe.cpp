@@ -15,10 +15,10 @@
 #include "android/offworld/OffworldPipe.h"
 
 #include "android/automation/AutomationController.h"
-#include "android/base/Log.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/sensor_mock/SensorMockUtils.h"
@@ -33,6 +33,11 @@
 #include <memory>
 #include <sstream>
 #include <vector>
+
+// Conflicts with Log.h
+#ifdef ERROR
+#undef ERROR
+#endif
 
 using android::automation::AutomationController;
 using android::base::LazyInstance;

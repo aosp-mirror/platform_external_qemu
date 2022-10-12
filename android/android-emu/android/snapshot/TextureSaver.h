@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "android/base/containers/SmallVector.h"
-#include "android/base/export.h"
-#include "android/base/files/StdioStream.h"
+#include "aemu/base/containers/SmallVector.h"
+#include "aemu/base/export.h"
+#include "aemu/base/files/StdioStream.h"
 #include "android/base/system/System.h"
 #include "android/snapshot/common.h"
 

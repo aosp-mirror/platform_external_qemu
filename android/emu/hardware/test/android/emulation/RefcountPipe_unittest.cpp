@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "android/emulation/RefcountPipe.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/MemStream.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/MemStream.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestEvent.h"
 #include "android/base/testing/TestLooper.h"

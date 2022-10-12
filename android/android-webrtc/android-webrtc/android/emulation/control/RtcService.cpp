@@ -21,12 +21,12 @@
 #include <ratio>                                     // for ratio
 
 //#include "android/android.h"
-#include "android/base/Log.h"                        // for LogStreamVoidify
-#include "android/base/Optional.h"                   // for Optional
-#include "android/base/Stopwatch.h"                  // for Stopwatch
-#include "android/base/Uuid.h"                       // for Uuid
-#include "android/base/sockets/ScopedSocket.h"       // for ScopedSocket
-#include "android/base/sockets/SocketUtils.h"        // for socketGetPort
+#include "aemu/base/Log.h"                        // for LogStreamVoidify
+#include "aemu/base/Optional.h"                   // for Optional
+#include "aemu/base/Stopwatch.h"                  // for Stopwatch
+#include "aemu/base/Uuid.h"                       // for Uuid
+#include "aemu/base/sockets/ScopedSocket.h"       // for ScopedSocket
+#include "aemu/base/sockets/SocketUtils.h"        // for socketGetPort
 #include "android/base/system/System.h"              // for System::Pid, System
 #include "android/console.h"                         // for AndroidConsoleAg...
 #include "android/emulation/control/RtcBridge.h"     // for RtcBridge, System

@@ -27,7 +27,7 @@
 #include "android/snapshot.h"
 
 #ifdef _WIN32
-#  include "android/base/sockets/Winsock.h"
+#  include "aemu/base/sockets/Winsock.h"
 #else
 #  include <netinet/in.h>
 #endif

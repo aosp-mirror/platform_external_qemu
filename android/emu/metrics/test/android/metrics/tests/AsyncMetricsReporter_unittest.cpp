@@ -14,7 +14,7 @@
 
 #include "android/metrics/AsyncMetricsReporter.h"
 
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 
 #include "android/metrics/tests/MockMetricsWriter.h"
 #include "android/utils/system.h"

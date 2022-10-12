@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/avd/generate.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/FileUtils.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/misc/FileUtils.h"
 
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"

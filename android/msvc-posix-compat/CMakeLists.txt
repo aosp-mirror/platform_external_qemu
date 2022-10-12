@@ -12,6 +12,7 @@ if(NOT TARGET msvc-posix-compat)
 
   # Msvc posix needs the file-io libs from android-emu-base.
   target_link_libraries(msvc-posix-compat PRIVATE setjmp_asm_lib)
+  target_link_libraries(msvc-posix-compat PUBLIC aemu-base.headers)
 
   # Msvc redefines macro's to inject compatibility.
   target_compile_options(

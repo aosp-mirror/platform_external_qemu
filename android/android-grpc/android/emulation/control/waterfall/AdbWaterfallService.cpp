@@ -20,7 +20,7 @@
 #include <thread>
 #include <vector>
 
-#include "android/base/Log.h"                                      // for LOG
+#include "aemu/base/Log.h"                                      // for LOG
 #include "android/emulation/control/adb/AdbConnection.h"
 #include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"

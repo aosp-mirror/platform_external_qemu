@@ -24,8 +24,8 @@
 #include <utility>
 #include <vector>
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/cmdline-definitions.h"
 #include "android/console.h"
 #include "android/constants.h"
@@ -152,7 +152,7 @@ private:
     }
 
     std::string readFile(std::string_view path) {
-        std::ifstream is(base::PathUtils::asUnicodePath(path).c_str());
+        std::ifstream is(base::PathUtils::asUnicodePath(path.data()).c_str());
 
         if (!is) {
             std::string errmsg;

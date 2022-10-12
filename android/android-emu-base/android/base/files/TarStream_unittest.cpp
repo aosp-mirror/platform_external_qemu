@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/files/TarStream.h"
+#include "aemu/base/files/TarStream.h"
 
 #include <gtest/gtest.h>  // for Assert...
 #include <string.h>       // for memcmp
 #include <fstream>        // for ostream
 
-#include "android/base/Optional.h"             // for Optional
+#include "aemu/base/Optional.h"             // for Optional
 
-#include "android/base/files/GzipStreambuf.h"  // for GzipIn...
-#include "android/base/files/PathUtils.h"      // for pj
+#include "aemu/base/files/GzipStreambuf.h"  // for GzipIn...
+#include "aemu/base/files/PathUtils.h"      // for pj
 #include "android/base/system/System.h"        // for System
 #include "android/base/testing/TestSystem.h"   // for TestSy...
 #include "android/base/testing/TestTempDir.h"  // for TestTe...

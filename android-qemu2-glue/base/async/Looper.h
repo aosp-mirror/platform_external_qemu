@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
+#include "aemu/base/async/Looper.h"
 
 // An implementation of android::base::Looper based on the QEMU event loop.
 namespace android {

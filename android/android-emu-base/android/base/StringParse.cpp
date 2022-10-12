@@ -9,17 +9,17 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/StringParse.h"
+#include "aemu/base/StringParse.h"
 
 #ifdef _WIN32
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 
 #include <algorithm>
 #include <string>
 #include <string_view>
 #else
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #endif
 
 #include <assert.h>

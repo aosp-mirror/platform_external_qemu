@@ -21,8 +21,8 @@
  */
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/utils/compiler.h"
 #include "android/virtualscene/VertexTypes.h"
 
