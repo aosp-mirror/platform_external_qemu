@@ -247,8 +247,8 @@ OPT_PARAM(idle_grpc_timeout, "<timeout>", "Terminate the emulator if there is no
 OPT_PARAM(waterfall, "<mode>", "Mode in which to run waterfall.")
 
 #ifdef ANDROID_WEBRTC
-OPT_PARAM(turncfg, "cmd", "Command to execute to obtain turn configuration for the webrtc video bridge.")
-OPT_PARAM(rtcfps, "<fps>", "The frequency at which frames are delivered to webrtc video bridge.")
+OPT_PARAM(turncfg, "cmd", "Command to execute to obtain turn configuration for the webrtc connection.")
+OPT_PARAM(dump_audio, "<file>", "Dump audio to apointed file for the webrtc connection.")
 #endif
 
 #ifdef ANDROID_BLUETOOTH

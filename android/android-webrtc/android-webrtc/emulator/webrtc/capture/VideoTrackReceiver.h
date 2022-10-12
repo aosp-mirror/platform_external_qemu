@@ -13,8 +13,8 @@
 // limitations under the License.
 #pragma once
 
-#include <api/scoped_refptr.h>                            // for scoped_refptr
-#include <chrono>                                         // for milliseconds
+#include <api/scoped_refptr.h>  // for scoped_refptr
+#include <chrono>               // for milliseconds
 
 #include "android/emulation/control/utils/EventWaiter.h"  // for EventWaiter
 #include "api/video/video_frame_buffer.h"                 // for VideoFrameB...
@@ -38,11 +38,15 @@ public:
     // limiting.
     void OnDiscardedFrame();
 
-    rtc::scoped_refptr<VideoFrameBuffer> currentFrame() { return mCurrentFrame; }
+    rtc::scoped_refptr<VideoFrameBuffer> currentFrame() {
+        return mCurrentFrame;
+    }
 
-    // Wait at most timeout ms for the next frame. Returns the number of skipped frames.
-    // 0 means no frame was received.
-    int next(std::chrono::milliseconds timeout) { return frameWaiter.next(timeout); }
+    // Wait at most timeout ms for the next frame. Returns the number of skipped
+    // frames. 0 means no frame was received.
+    int next(std::chrono::milliseconds timeout) {
+        return frameWaiter.next(timeout);
+    }
 
 private:
     rtc::scoped_refptr<VideoFrameBuffer> mCurrentFrame;
