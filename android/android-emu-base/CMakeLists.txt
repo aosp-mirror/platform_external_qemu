@@ -46,6 +46,7 @@ android_add_library(
       android/base/GLObjectCounter.cpp
       android/base/IOVector.cpp
       android/base/JsonWriter.cpp
+      android/base/Process.cpp
       android/base/misc/FileUtils.cpp
       android/base/misc/HttpUtils.cpp
       android/base/misc/IpcPipe.cpp
