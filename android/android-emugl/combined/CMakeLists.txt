@@ -61,7 +61,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     target_link_libraries(
         aemu-vkcereal-base
         PRIVATE
-        gfxstream-base.headers
+        aemu-base.headers
         android-emu
         android-emu-base-headers
         android-emu-crashreport
@@ -206,8 +206,8 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     # TODO(joshuaduong): For some reason, our custom rpath is only applied to gfxstream_backend_unittests.
     # for the rest of the unittests below, the rpath is not set, and thus the tests cannot find libc++.
-    add_opengl_dependencies(gfxstream-base_unittests)
-    add_opengl_dependencies(gfxstream-host-common_unittests)
+    add_opengl_dependencies(aemu-base_unittests)
+    add_opengl_dependencies(aemu-host-common_unittests)
     add_opengl_dependencies(Vulkan_unittests)
     add_opengl_dependencies(OpenglRender_unittests)
     add_opengl_dependencies(OpenglRender_snapshot_unittests)
