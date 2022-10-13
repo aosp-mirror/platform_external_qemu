@@ -179,6 +179,11 @@ if(WINDOWS_MSVC_X86_64)
   list(APPEND TINK_DISABLED_TESTS tink_test_core_version_test)
 endif()
 
+if(DARWIN_AARCH64)
+  # b/252237763
+  list(APPEND TINK_DISABLED_TESTS tink_test_aead__internal_ssl_aead_large_inputs_test)
+endif()
+
 # Declare a Tink test using googletest, with a syntax similar to Bazel.
 #
 # Parameters: NAME base name of the test. SRCS list of test source files,
