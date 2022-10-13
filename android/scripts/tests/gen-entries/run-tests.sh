@@ -78,7 +78,7 @@ for TEST_DIR in $TEST_DIRS; do
         echo "Processing $TEST_DIR/$NAME.entries"
         run cp -f "$IN/$NAME.entries" "$OUT/$NAME.entries"
         for MODE in $MODES; do
-            run $OPT_SCRIPT --mode=$MODE "$IN/$NAME.entries" --output=$OUT/$NAME.$MODE
+            python3 $OPT_SCRIPT --mode=$MODE "$IN/$NAME.entries" --output=$OUT/$NAME.$MODE
         done
     done
     if ! diff -qr "$IN" "$OUT"; then
