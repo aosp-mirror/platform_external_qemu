@@ -99,8 +99,10 @@ target_include_directories(crypto PUBLIC ${BORINGSSL_ROOT}/src/include)
 target_link_libraries(ssl PUBLIC crypto)
 
 # Tests
-if(NOT WINDOWS) # BUG: 147893224: clang 10 results in a flaky failure in
-                # ABITest.SanityCheck on Windows
+if((NOT WINDOWS) AND (NOT DARWIN_AARCH64))
+  # BUG: 147893224: clang 10 results in a flaky failure in
+  # ABITest.SanityCheck on Windows
+  # BUG: 252237763: timeout on Mac M2
   android_add_library(
     TARGET boringssl_test_support NODISTRIBUTE SRC # cmake-format: sortable
                                                    ${test_support_sources})
