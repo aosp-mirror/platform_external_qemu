@@ -481,6 +481,9 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
                     ASYNC_COMPOSE_SUPPORT;
         case android::featurecontrol::VirtioSndCard:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_SND_CARD;
+        case android::featurecontrol::DownloadableSnapshot:
+            return android_studio::EmulatorFeatureFlagState::
+                    DOWNLOADABLE_SNAPSHOT;
         case android::featurecontrol::VirtioTablet:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_TABLET;
         case android::featurecontrol::VulkanNativeSwapchain:

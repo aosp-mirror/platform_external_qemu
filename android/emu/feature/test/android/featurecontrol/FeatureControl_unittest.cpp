@@ -283,7 +283,8 @@ TEST_F(FeatureControlTest, writesFeatureToStream) {
     writeFeaturesToStream(ss);
 
     // Make sure we write the expected list that would go to crash report.
-    std::string feature_list=R"#(Feature: 'GLPipeChecksum' (0), value: 0, default: 0, is overridden: 1
+    std::string feature_list =
+            R"#(Feature: 'GLPipeChecksum' (0), value: 0, default: 0, is overridden: 1
 Feature: 'ForceANGLE' (1), value: 0, default: 0, is overridden: 0
 Feature: 'ForceSwiftshader' (2), value: 0, default: 0, is overridden: 0
 Feature: 'HYPERV' (3), value: 0, default: 0, is overridden: 0
@@ -374,6 +375,7 @@ Feature: 'HWCMultiConfigs' (87), value: 0, default: 0, is overridden: 0
 Feature: 'VirtioSndCard' (88), value: 0, default: 0, is overridden: 0
 Feature: 'VirtioTablet' (89), value: 0, default: 0, is overridden: 0
 Feature: 'VsockSnapshotLoadFixed_b231345789' (90), value: 0, default: 0, is overridden: 0
+Feature: 'DownloadableSnapshot' (91), value: 0, default: 0, is overridden: 0
 )#";
     EXPECT_EQ(feature_list, ss.str());
 }

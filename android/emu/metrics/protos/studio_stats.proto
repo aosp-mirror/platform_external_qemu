@@ -1516,7 +1516,8 @@ message EmulatorFeatureFlagState {
         VULKAN_YCBCR_EMULATION = 96;
         VULKAN_ETC2_EMULATION = 97;
         EXTERNAL_BLOB = 98;
-        // Next tag: 99
+        DOWNLOADABLE_SNAPSHOT = 99;
+        // Next tag: 100
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
