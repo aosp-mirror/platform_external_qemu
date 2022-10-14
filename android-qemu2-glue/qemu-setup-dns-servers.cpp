@@ -143,8 +143,7 @@ bool qemu_android_emulation_setup_dns_servers(const char* dns_servers,
 }
 
 void qemu_android_emulation_init_slirp(void) {
-    slirp_init_custom_dns_servers(static_cast<Slirp*>(net_slirp_state()),
-                                  s_dns_server_addresses,
+    net_slirp_init_custom_dns_servers(s_dns_server_addresses,
                                   s_num_dns_server_addresses);
 }
 
