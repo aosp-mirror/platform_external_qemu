@@ -13,6 +13,7 @@
 
 #include "android/avd/util.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/utils/debug.h"
 #include "android/utils/string.h"
@@ -27,6 +28,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             const char* avdArch,
                             int apiLevel,
                             bool hasGoogleApis,
+                            bool isAtd,
                             const char* gpuOption,
                             char** hwGpuModePtr,
                             int wantedBitness,
@@ -98,6 +100,12 @@ bool androidEmuglConfigInit(EmuglConfig* config,
         dwarning("Your GPU drivers may have a bug. "
                  "If you experience graphical issues, "
                  "please consider switching to software rendering.");
+    }
+
+    if (apiLevel < 32 && !isAtd) {
+        // b/243189303
+        android::featurecontrol::setIfNotOverriden(
+            android::featurecontrol::HostComposition, false);
     }
 
     bool result = emuglConfig_init(
