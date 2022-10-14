@@ -2065,15 +2065,12 @@ extern "C" int main(int argc, char** argv) {
     if (hw->hw_cpu_ncore > 1) {
         args.add("-smp");
 
-#ifdef _WIN32
-        if (hw->hw_cpu_ncore > 16 &&
-            accelerator == ANDROID_CPU_ACCELERATOR_HAX) {
+        if (hw->hw_cpu_ncore > 6) {
             dwarning(
-                    "HAXM does not support more than 16 cores. Number of cores "
-                    "set to 16");
-            hw->hw_cpu_ncore = 16;
+                    "Emualtor does not support more than 6 cores. Number of cores "
+                    "set to 6");
+            hw->hw_cpu_ncore = 6;
         }
-#endif
         args.addFormat("cores=%d", hw->hw_cpu_ncore);
 
 #ifdef __APPLE__
