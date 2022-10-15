@@ -439,13 +439,10 @@ struct MyThread {
 static MyThread s_mythread;
 
 // start with a given guest fd, and host fd
-int start_android_modem_simulator_detached(int modem_simulator_port, bool& isIpv4) {
+int start_android_modem_simulator_detached(int modem_simulator_port, bool& isIpv4, const std::string& timezone) {
     android_modem_version = 2;
 
     int actual_guest_server_port = start_android_modem_guest_server(modem_simulator_port, isIpv4);
-
-    char buffer[1024];
-    bufprint_zoneinfo_timezone(buffer, buffer + sizeof(buffer));
     {
         int32_t modem_id = 0;
 
@@ -463,7 +460,7 @@ int start_android_modem_simulator_detached(int modem_simulator_port, bool& isIpv
                 s_channel_monitor = channel_monitor.get();
             }
             modem_simulator->Initialize(std::move(channel_monitor));
-            modem_simulator->SetTimeZone(buffer);
+            modem_simulator->SetTimeZone(timezone);
             modem_simulators.push_back(modem_simulator);
 
             modem_id++;

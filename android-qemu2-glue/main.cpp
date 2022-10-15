@@ -76,6 +76,7 @@
 #include "android/utils/stralloc.h"
 #include "android/utils/string.h"
 #include "android/utils/tempfile.h"
+#include "android/utils/timezone.h"
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/verified-boot/load_config.h"
 
@@ -2260,8 +2261,17 @@ extern "C" int main(int argc, char** argv) {
             }
 
             // start modem now, so qemu can proceed with virtioport setup
+            std::string timezone;
+            if (opts->timezone) {
+                timezone = opts->timezone;
+            } else {
+                char buffer[1024];
+                bufprint_zoneinfo_timezone(buffer, buffer + sizeof(buffer));
+                timezone = buffer;
+            }
             int modem_simulator_guest_port =
-                    cuttlefish::start_android_modem_simulator_detached(modem_simulator_port, isIpv4);
+                    cuttlefish::start_android_modem_simulator_detached(
+                            modem_simulator_port, isIpv4, std::move(timezone));
 
             args.add("-device");
             args.add("virtio-serial,ioeventfd=off");
