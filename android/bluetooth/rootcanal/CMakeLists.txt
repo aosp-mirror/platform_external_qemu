@@ -150,8 +150,9 @@ android_add_test(
   SOURCE_DIR ${ROOTCANAL_ROOT}
   SRC # cmake-format: sortable
   test/h4_parser_unittest.cc test/security_manager_unittest.cc
-  DARWIN # cmake-format: sortable
-  test/async_manager_unittest.cc
+  # b/253467695: flaky on Mac m1
+  # DARWIN # cmake-format: sortable
+  # test/async_manager_unittest.cc
   LINUX # cmake-format: sortable
   test/async_manager_unittest.cc test/posix_socket_unittest.cc)
 
