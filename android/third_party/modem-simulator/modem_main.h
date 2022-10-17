@@ -71,6 +71,6 @@ void queue_modem_message(ModemMessage msg);
 
 // listening for guest RIL connection
 // returns the actual port number
-int start_android_modem_simulator_detached(int modem_simulator_port, bool& isIpv4);
+int start_android_modem_simulator_detached(int modem_simulator_port, bool& isIpv4, const std::string& timezone);
 int stop_android_modem_simulator();
 }  // namespace cuttlefish
