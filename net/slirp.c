@@ -1260,6 +1260,18 @@ int net_slirp_parse_legacy(QemuOptsList *opts_list, const char *optarg, int *ret
     return 1;
 }
 
+void net_slirp_init_custom_dns_servers(const struct sockaddr_storage* dns,
+                                   int dns_count) {
+    SlirpState *s = NULL;
+    QTAILQ_FOREACH(s, &slirp_stacks, entry) {
+        if (!s || !s->slirp) {
+            qemu_abort("Trying to init custom DNS before slirp "
+                   "initialization\n");
+        }
+        slirp_init_custom_dns_servers(s->slirp, dns, dns_count);
+    }
+}
+
 void net_slirp_set_shapers(void* out_opaque,
                             SlirpShaperSendFunc out_send,
                             void* in_opaque,
