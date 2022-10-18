@@ -462,6 +462,10 @@ net/tap-bsd.c
 net/tap.c
 net/util.c
 net/vhost-user.c
+net/vmnet-common.m
+net/vmnet-bridged.m
+net/vmnet-host.c
+net/vmnet-shared.c
 os-posix.c
 qdev-monitor.c
 qemu-io-cmds.c
@@ -1565,7 +1569,7 @@ ${ANDROID_AUTOGEN}/nbd/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/net/can/can_core.c ${ANDROID_QEMU2_TOP_DIR}/net/can/can_host.c
 PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/net/can")
 
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/net/checksum.c ${ANDROID_QEMU2_TOP_DIR}/net/colo-compare.c ${ANDROID_QEMU2_TOP_DIR}/net/colo.c ${ANDROID_QEMU2_TOP_DIR}/net/dump.c ${ANDROID_QEMU2_TOP_DIR}/net/eth.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-buffer.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-mirror.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-replay.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-rewriter.c ${ANDROID_QEMU2_TOP_DIR}/net/filter.c ${ANDROID_QEMU2_TOP_DIR}/net/hub.c ${ANDROID_QEMU2_TOP_DIR}/net/net.c ${ANDROID_QEMU2_TOP_DIR}/net/queue.c ${ANDROID_QEMU2_TOP_DIR}/net/slirp.c ${ANDROID_QEMU2_TOP_DIR}/net/socket.c ${ANDROID_QEMU2_TOP_DIR}/net/tap-bsd.c ${ANDROID_QEMU2_TOP_DIR}/net/tap.c ${ANDROID_QEMU2_TOP_DIR}/net/util.c ${ANDROID_QEMU2_TOP_DIR}/net/vhost-user.c
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/net/checksum.c ${ANDROID_QEMU2_TOP_DIR}/net/colo-compare.c ${ANDROID_QEMU2_TOP_DIR}/net/colo.c ${ANDROID_QEMU2_TOP_DIR}/net/dump.c ${ANDROID_QEMU2_TOP_DIR}/net/eth.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-buffer.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-mirror.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-replay.c ${ANDROID_QEMU2_TOP_DIR}/net/filter-rewriter.c ${ANDROID_QEMU2_TOP_DIR}/net/filter.c ${ANDROID_QEMU2_TOP_DIR}/net/hub.c ${ANDROID_QEMU2_TOP_DIR}/net/net.c ${ANDROID_QEMU2_TOP_DIR}/net/queue.c ${ANDROID_QEMU2_TOP_DIR}/net/slirp.c ${ANDROID_QEMU2_TOP_DIR}/net/socket.c ${ANDROID_QEMU2_TOP_DIR}/net/tap-bsd.c ${ANDROID_QEMU2_TOP_DIR}/net/tap.c ${ANDROID_QEMU2_TOP_DIR}/net/util.c ${ANDROID_QEMU2_TOP_DIR}/net/vhost-user.c ${ANDROID_QEMU2_TOP_DIR}/net/vmnet-common.m ${ANDROID_QEMU2_TOP_DIR}/net/vmnet-bridged.m ${ANDROID_QEMU2_TOP_DIR}/net/vmnet-host.c ${ANDROID_QEMU2_TOP_DIR}/net/vmnet-shared.c
 ${ANDROID_AUTOGEN}/net/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/net")
 
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/qapi/opts-visitor.c ${ANDROID_QEMU2_TOP_DIR}/qapi/qapi-clone-visitor.c ${ANDROID_QEMU2_TOP_DIR}/qapi/qapi-dealloc-visitor.c ${ANDROID_QEMU2_TOP_DIR}/qapi/qapi-util.c ${ANDROID_QEMU2_TOP_DIR}/qapi/qapi-visit-core.c ${ANDROID_QEMU2_TOP_DIR}/qapi/qmp-dispatch.c ${ANDROID_QEMU2_TOP_DIR}/qapi/qmp-event.c ${ANDROID_QEMU2_TOP_DIR}/qapi/qmp-registry.c ${ANDROID_QEMU2_TOP_DIR}/qapi/qobject-input-visitor.c ${ANDROID_QEMU2_TOP_DIR}/qapi/qobject-output-visitor.c ${ANDROID_QEMU2_TOP_DIR}/qapi/string-input-visitor.c ${ANDROID_QEMU2_TOP_DIR}/qapi/string-output-visitor.c
