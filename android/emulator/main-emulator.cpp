@@ -179,11 +179,16 @@ static void delete_files(const std::string_view file_dir,
                          unsigned int num_files) {
     for (unsigned int i = 0; i < num_files; ++i) {
         std::string file = PathUtils::join(file_dir.data(), files_to_delete[i].data());
-        APosixStatus ret = path_delete_file(file.c_str());
-        if (ret == 0) {
-            D("Deleting file %s done", file.c_str());
+        APosixStatus ret;
+        if (path_is_dir(file.c_str())) {
+            ret = path_delete_dir(file.c_str());
         } else {
-            D("Deleting file %s failed", file.c_str());
+            ret = path_delete_file(file.c_str());
+        }
+        if (ret == 0) {
+            D("Deleting %s done", file.c_str());
+        } else {
+            D("Deleting %s failed", file.c_str());
         }
     }
 }
@@ -193,13 +198,28 @@ static void clean_up_avd_contents_except_config_ini(const char* avd_folder) {
     // and we dont know how to re-create it from emulator yet
     // TODO: fixit
     static constexpr std::string_view files_to_delete[] = {
-            "system.img.qcow2",  "vendor.img.qcow2",
-            "userdata-qemu.img", "userdata-qemu.img.qcow2",
-            "userdata.img",      "userdata.img.qcow2",
-            "cache.img",         "cache.img.qcow2",
-            "version_num.cache", "sdcard.img.qcow2",
-            "encryptionkey.img", "encryptionkey.img.qcow2",
-            "hardware-qemu.ini", "emulator-user.ini",
+            "system.img.qcow2",
+            "vendor.img.qcow2",
+            "userdata-qemu.img",
+            "userdata-qemu.img.qcow2",
+            "userdata.img",
+            "userdata.img.qcow2",
+            "cache.img",
+            "cache.img.qcow2",
+            "version_num.cache",
+            "sdcard.img.qcow2",
+            "encryptionkey.img",
+            "encryptionkey.img.qcow2",
+            "hardware-qemu.ini",
+            "emulator-user.ini",
+            "quickbootChoice.ini",
+            "emu-launch-params.txt",
+            "initrd",
+            "AVD.conf",
+            "multiinstance.lock",
+            "read-snapshot.txt",
+            "data",
+            "modem_simulator",
             "default.dtb"};
     delete_files(avd_folder, files_to_delete, ARRAY_SIZE(files_to_delete));
 }

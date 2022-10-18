@@ -39,6 +39,7 @@ public:
     bool save(std::string_view name);
     void invalidate(std::string_view name);
 
+    bool saveAvdToSystemImageSnapshotsLocalDir();
     void setShortRunCheck(bool enable);
 
 private:

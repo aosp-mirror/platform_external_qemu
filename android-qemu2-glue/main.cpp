@@ -15,6 +15,7 @@
 #include "android/base/ProcessControl.h"
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -426,6 +427,33 @@ static bool creatUserDataExt4Img(AndroidHwConfig* hw,
     }
 }
 
+static void convertExt4ToQcow2(std::string ext4filepath) {
+    if (!path_exists(ext4filepath.c_str())) {
+        return;
+    }
+
+    auto startTime = std::chrono::steady_clock::now();
+    auto qemu_img = System::get()->findBundledExecutable("qemu-img");
+    std::string dataimageext4 = ext4filepath;
+    std::string dataimageqcow2 = dataimageext4 + std::string(".tmp.qcow2");
+    auto res = System::get()->runCommandWithResult({qemu_img, "convert", "-O",
+                                                    "qcow2", dataimageext4,
+                                                    dataimageqcow2});
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - startTime);
+
+    long long timeUsedMs = (long long)elapsed.count();
+    dprint("convert img from ext4 %s to qcow2 image %s %s, using "
+           "%lld "
+           "mini seconds",
+           dataimageext4.c_str(), dataimageqcow2.c_str(),
+           res == true ? " succeeded" : " failed", timeUsedMs);
+
+    path_delete_file(dataimageext4.c_str());
+    path_copy_file(dataimageext4.c_str(), dataimageqcow2.c_str());
+    path_delete_file(dataimageqcow2.c_str());
+}
+
 static int createUserData(AvdInfo* avd,
                           const char* dataPath,
                           AndroidHwConfig* hw) {
@@ -438,6 +466,21 @@ static int createUserData(AvdInfo* avd,
 
         needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
         path_delete_dir(dataPath);
+
+        // convert the ext4 to qcow2
+        bool bShoudlConvertToQcow2 = false;
+
+        if (feature_is_enabled(kFeature_DownloadableSnapshot)) {
+            bShoudlConvertToQcow2 = true;
+        }
+
+        if (bShoudlConvertToQcow2) {
+            auto startTime = std::chrono::steady_clock::now();
+            auto qemu_img = System::get()->findBundledExecutable("qemu-img");
+            std::string dataimageext4 =
+                    std::string(hw->disk_dataPartition_path);
+            convertExt4ToQcow2(dataimageext4);
+        };
     }
 
     if (needCopyDataPartition) {
@@ -1231,6 +1274,71 @@ static std::string buildSoundhwParam(const int apiLevel,
     return param;
 }
 
+// TODO-bohu: add code to check snapshot compatibility
+
+static bool checkConfigIniCompatible(std::string srcConfig,
+                                     std::string destConfig) {
+    IniFile srcConfigIni(srcConfig);
+    if (!srcConfigIni.read(false /* don't keep comments */)) {
+        dwarning("could not read %s at %s %d", srcConfig.c_str(), __FILE__,
+                 __LINE__);
+        return false;
+    }
+
+    IniFile destConfigIni(destConfig);
+    if (!destConfigIni.read(false /* don't keep comments */)) {
+        dwarning("could not read %s at %s %d", destConfig.c_str(), __FILE__,
+                 __LINE__);
+        return false;
+    }
+
+    std::unordered_set<std::string> important{
+            "abi.type",      "hw.cpu.arch",  "hw.lcd.density",
+            "hw.lcd.height", "hw.lcd.width",
+    };
+    for (auto&& key : srcConfigIni) {
+        if (important.count(key) == 0) {
+            continue;  // not important, ignore
+        }
+
+        if (!srcConfigIni.hasKey(key))
+            return false;
+        if (!destConfigIni.hasKey(key))
+            return false;
+        if (srcConfigIni.getString(key, "$$$") !=
+            destConfigIni.getString(key, "$$$"))
+            return false;
+    }
+
+    dprint("%s and %s are compatible", srcConfig.c_str(), destConfig.c_str());
+    return true;
+}
+
+static void fixAvdIdAndDisplayName(std::string avdDir, std::string avdName) {
+    IniFile configIni(PathUtils::join(avdDir, "config.ini"));
+    if (!configIni.read(false)) {
+        dwarning("could not open %s/config.ini %s %d", avdDir.c_str(), __FILE__,
+                 __LINE__);
+        return;
+    }
+
+    configIni.setString("AvdId", avdName);
+    configIni.setString("avd.ini.displayname", avdName);
+    configIni.writeIfChanged();
+}
+
+static bool checkCompatable(std::string srcAvdDir, std::string destAvdDir) {
+    // 1, compare config.ini content
+    if (!checkConfigIniCompatible(PathUtils::join(srcAvdDir, "config.ini"),
+                                  PathUtils::join(destAvdDir, "config.ini"))) {
+        return false;
+    }
+
+    // 2, TODO: check cpuid
+
+    return true;
+}
+
 extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
     if (argc < 1) {
@@ -1824,8 +1932,74 @@ extern "C" int main(int argc, char** argv) {
                    pstore.start, pstore.size, pstoreFile.c_str());
 
 #endif
+
     bool firstTimeSetup =
             (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path));
+
+    if (avd && feature_is_enabled(kFeature_DownloadableSnapshot) &&
+        !path_exists(hw->disk_dataPartition_path)) {
+        const char* avdName = avdInfo_getName(avd);
+        char* s_AvdFolder = path_getAvdContentPath(avdName);
+        if (s_AvdFolder) {
+            std::string systemImagePath =
+                    path_getAvdSystemPath(avdName, path_getSdkRoot(), false);
+            // try copy content from <sysimgdir>/snapshots/avd/default
+            std::string srcDir = PathUtils::join(systemImagePath, "snapshots",
+                                                 "local", "avd");
+            std::string srcDirDownloaded = PathUtils::join(
+                    systemImagePath, "snapshots", "downloaded", "avd");
+            std::string default_config_ini =
+                    PathUtils::join(srcDir, "config.ini");
+            std::string default_config_ini_downloaded =
+                    PathUtils::join(srcDirDownloaded, "config.ini");
+
+            // check local first, if it does not exit, check download second;
+            if (!path_exists(default_config_ini.c_str())) {
+                srcDir = srcDirDownloaded;
+                default_config_ini = default_config_ini_downloaded;
+            }
+
+            if (path_exists(default_config_ini.c_str()) &&
+                checkCompatable(srcDir, std::string(s_AvdFolder))) {
+                dprint("emulator: First boot, copying snapshot...");
+                dprint("emulator: copying snapshot from %s to %s",
+                       srcDir.c_str(), s_AvdFolder);
+                auto startTime = std::chrono::steady_clock::now();
+                path_delete_dir(s_AvdFolder);
+                path_copy_dir(s_AvdFolder, srcDir.c_str());
+                //            exit(1);
+                auto elapsed =
+                        std::chrono::duration_cast<std::chrono::milliseconds>(
+                                std::chrono::steady_clock::now() - startTime);
+
+                long long timeUsedMs = (long long)elapsed.count();
+                dprint("emulator: copying snapshot done, using %lld mini "
+                       "seconds",
+                       timeUsedMs);
+                firstTimeSetup = false;  // already setup
+                // fix AvdId and displayname
+                fixAvdIdAndDisplayName(std::string(s_AvdFolder), avdName);
+            } else {
+                // TODO: when snapshot is not possible, maybe try cold boot, at
+                //  least it will be still much faster than first boot.
+                //
+                //  first boot, and there is no local avd, then convert
+                //  sdcard.img to qcow2
+                if (true) {
+                    auto startTime = std::chrono::steady_clock::now();
+                    auto qemu_img =
+                            System::get()->findBundledExecutable("qemu-img");
+                    std::string dataimageext4 = std::string(hw->hw_sdCard_path);
+                    convertExt4ToQcow2(dataimageext4);
+                };
+            }
+        }
+
+        if (s_AvdFolder) {
+            free(s_AvdFolder);
+            s_AvdFolder = nullptr;
+        }
+    }
 
     // studio avd manager does not allow user to change partition size, set a
     // lower limit to 6GB.

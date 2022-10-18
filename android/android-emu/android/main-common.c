@@ -996,7 +996,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         } else {
             str_reset_null(&hw->disk_dataPartition_initPath);
         }
-        android_op_wipe_data = opts->wipe_data;
+        // ignore wipedata
+        if (!feature_is_enabled(kFeature_DownloadableSnapshot)) {
+            android_op_wipe_data = opts->wipe_data;
+        }
         android_op_writable_system = opts->writable_system;
 
         uint64_t defaultBytes = hw->disk_dataPartition_size;
@@ -1113,7 +1116,8 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             /* due to what looks like limitations of the MMC protocol, one has
              * to use an SD Card image that is equal or larger than 9 MB
              */
-            if (size < 9 * 1024 * 1024ULL) {
+            if (size < 9 * 1024 * 1024ULL &&
+                !feature_is_enabled(kFeature_DownloadableSnapshot)) {
                 dwarning("SD Card files must be at least 9MB, ignoring '%s'",
                          opts->sdcard);
             } else {

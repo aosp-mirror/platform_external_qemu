@@ -22,6 +22,7 @@
 #include "android/console.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/MetricsReporter.h"
+#include "android/utils/path.h"
 
 #if SNAPSHOT_METRICS
 #include "studio_stats.pb.h"
@@ -383,6 +384,37 @@ void Quickboot::decideFailureReport(
     }
 }
 
+bool Quickboot::saveAvdToSystemImageSnapshotsLocalDir() {
+    if (!isEnabled(featurecontrol::DownloadableSnapshot)) {
+        return false;
+    }
+
+    using android::base::PathUtils;
+
+    const AvdInfo* myAvdInfo = getConsoleAgents()->settings->avdInfo();
+    const char* avdName = avdInfo_getName(myAvdInfo);
+    const std::string srcDir(path_getAvdContentPath(avdName));
+    const std::string mySdkRoot(path_getSdkRoot());
+    const std::string destDir = PathUtils::join(
+            std::string(path_getAvdSystemPath(avdName, mySdkRoot.c_str(),
+                                              false /* no debug print */)),
+            "snapshots", "local", "avd");
+    const std::string destAvdConfigIni = PathUtils::join(destDir, "config.ini");
+    if (path_exists(destAvdConfigIni.c_str())) {
+        return false;
+    }
+    auto startTime = std::chrono::steady_clock::now();
+    path_copy_dir(destDir.c_str(), srcDir.c_str());
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - startTime);
+
+    long long timeUsedMs = (long long)elapsed.count();
+    dprint("emulator: copying snapshot done, using %lld mini seconds",
+           timeUsedMs);
+
+    return true;
+}
+
 bool Quickboot::save(std::string_view name) {
     // TODO: detect if emulator was restarted since loading.
     const bool shouldTrySaving = mLoaded || isSnapshotAlive();
@@ -550,6 +582,9 @@ bool androidSnapshot_quickbootSave(const char* _name) {
         if (android::snapshot::Snapshotter::get().isRamFileShared()) {
             androidSnapshot_setRamFileDirty(c_str(name), false);
         }
+        // bohu-TODO: add code to copy to snapshots/avd
+        android::snapshot::Quickboot::get()
+                .saveAvdToSystemImageSnapshotsLocalDir();
     }
 
     // Write user choice to the ini file if we are using file-backed RAM.
