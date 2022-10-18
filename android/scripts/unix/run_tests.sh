@@ -200,7 +200,7 @@ cd $OPT_OUT
 if [ "$OPT_GFXSTREAM" ] ; then
     export VK_ICD_FILENAMES=$PWD/lib64/vulkan/vk_swiftshader_icd.json
     # Path to the vulkan ICD loader used for testing, libvulkan.so
-    export LD_LIBRARY_PATH=$PWD/lib64/vulkan
+    export LD_LIBRARY_PATH=$PWD/lib64/vulkan:$PWD/lib64/gles_swiftshader
 fi
 
 ${CTEST} -j ${NUM_JOBS} --output-on-failure ${DISABLED_TESTS} || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
