@@ -10,7 +10,7 @@
 #
 
 # Requires >= 2.6
-from __future__ import print_function
+
 
 import csv
 try:
@@ -169,7 +169,7 @@ class Database:
             # key is a MAP_XXX, value is a MAP_LINUX
             self.mapfrom[name] = {}
 
-        for name in self.NAME_COLUMNS.keys():
+        for name in list(self.NAME_COLUMNS.keys()):
             # key is a MAP_LINUX, value is a string
             self.mapname[name] = {}
 
@@ -343,10 +343,10 @@ class LanguageSrcGenerator(LanguageGenerator):
     def generate_code_map(self, varname, database, frommapname, tomapname):
         if frommapname not in database.mapfrom:
             raise Exception("Unknown map %s, expected one of %s" % (
-                            frommapname, ", ".join(database.mapfrom.keys())))
+                            frommapname, ", ".join(list(database.mapfrom.keys()))))
         if tomapname not in database.mapto:
             raise Exception("Unknown map %s, expected one of %s" % (
-                            tomapname, ", ".join(database.mapto.keys())))
+                            tomapname, ", ".join(list(database.mapto.keys()))))
 
         tolinux = database.mapfrom[frommapname]
         fromlinux = database.mapto[tomapname]
@@ -356,22 +356,22 @@ class LanguageSrcGenerator(LanguageGenerator):
 
         if frommapname in database.ENUM_COLUMNS:
             fromtype = self.TYPE_ENUM
-        elif type(tolinux.keys()[0]) == str:
+        elif type(list(tolinux.keys())[0]) == str:
             fromtype = self.TYPE_STRING
         else:
             fromtype = self.TYPE_INT
 
         if tomapname in database.ENUM_COLUMNS:
             totype = self.TYPE_ENUM
-        elif type(fromlinux.values()[0]) == str:
+        elif type(list(fromlinux.values())[0]) == str:
             totype = self.TYPE_STRING
         else:
             totype = self.TYPE_INT
 
-        keys = tolinux.keys()
+        keys = list(tolinux.keys())
         keys.sort()
         if fromtype == self.TYPE_INT:
-            keys = range(keys[-1] + 1)
+            keys = list(range(keys[-1] + 1))
 
         if fromtype == self.TYPE_ENUM:
             keymax = database.ENUM_BOUND[frommapname]
@@ -400,9 +400,9 @@ class LanguageSrcGenerator(LanguageGenerator):
     def generate_code_table(self, varname, database, mapname):
         if mapname not in database.mapto:
             raise Exception("Unknown map %s, expected one of %s" % (
-                            mapname, ", ".join(database.mapto.keys())))
+                            mapname, ", ".join(list(database.mapto.keys()))))
 
-        keys = database.mapto[Database.MAP_LINUX].keys()
+        keys = list(database.mapto[Database.MAP_LINUX].keys())
         keys.sort()
         names = [database.mapname[Database.MAP_LINUX].get(key, "unnamed") for key in keys]
 
@@ -411,7 +411,7 @@ class LanguageSrcGenerator(LanguageGenerator):
 
         if mapname in database.ENUM_COLUMNS:
             totype = self.TYPE_ENUM
-        elif type(database.mapto[mapname].values()[0]) == str:
+        elif type(list(database.mapto[mapname].values())[0]) == str:
             totype = self.TYPE_STRING
         else:
             totype = self.TYPE_INT
@@ -429,10 +429,10 @@ class LanguageSrcGenerator(LanguageGenerator):
     def generate_name_map(self, varname, database, frommapname, tomapname):
         if frommapname not in database.mapfrom:
             raise Exception("Unknown map %s, expected one of %s" % (
-                            frommapname, ", ".join(database.mapfrom.keys())))
+                            frommapname, ", ".join(list(database.mapfrom.keys()))))
         if tomapname not in database.mapname:
             raise Exception("Unknown map %s, expected one of %s" % (
-                            tomapname, ", ".join(database.mapname.keys())))
+                            tomapname, ", ".join(list(database.mapname.keys()))))
 
         tolinux = database.mapfrom[frommapname]
         fromlinux = database.mapname[tomapname]
@@ -440,10 +440,10 @@ class LanguageSrcGenerator(LanguageGenerator):
         if varname is None:
             varname = "name_map_%s_to_%s" % (frommapname, tomapname)
 
-        keys = tolinux.keys()
+        keys = list(tolinux.keys())
         keys.sort()
         if type(keys[0]) == int:
-            keys = range(keys[-1] + 1)
+            keys = list(range(keys[-1] + 1))
 
         if type(keys[0]) == int:
             fromtype = self.TYPE_INT
@@ -468,9 +468,9 @@ class LanguageSrcGenerator(LanguageGenerator):
     def generate_name_table(self, varname, database, mapname):
         if mapname not in database.mapname:
             raise Exception("Unknown map %s, expected one of %s" % (
-                            mapname, ", ".join(database.mapname.keys())))
+                            mapname, ", ".join(list(database.mapname.keys()))))
 
-        keys = database.mapto[Database.MAP_LINUX].keys()
+        keys = list(database.mapto[Database.MAP_LINUX].keys())
         keys.sort()
         names = [database.mapname[Database.MAP_LINUX].get(key, "unnamed") for key in keys]
 
@@ -512,9 +512,9 @@ class LanguageDocGenerator(LanguageGenerator):
     def generate_name_docs(self, varname, database, mapname):
         if mapname not in database.mapname:
             raise Exception("Unknown map %s, expected one of %s" % (
-                            mapname, ", ".join(database.mapname.keys())))
+                            mapname, ", ".join(list(database.mapname.keys()))))
 
-        keys = database.mapto[Database.MAP_LINUX].keys()
+        keys = list(database.mapto[Database.MAP_LINUX].keys())
         keys.sort()
         names = [database.mapname[Database.MAP_LINUX].get(key, "unnamed") for key in keys]
 
@@ -534,10 +534,10 @@ class LanguageDocGenerator(LanguageGenerator):
     def generate_code_docs(self, varname, database, mapname):
         if mapname not in database.mapfrom:
             raise Exception("Unknown map %s, expected one of %s" % (
-                            mapname, ", ".join(database.mapfrom.keys())))
+                            mapname, ", ".join(list(database.mapfrom.keys()))))
 
         tolinux = database.mapfrom[mapname]
-        keys = tolinux.keys()
+        keys = list(tolinux.keys())
         keys.sort()
         if mapname in database.mapname:
             names = database.mapname[mapname]
@@ -923,8 +923,8 @@ def main():
 
     parser.add_argument("--lang", default="stdc",
                         help="Output language, (src=%s, doc=%s)" % (
-                            ",".join(SRC_GENERATORS.keys()),
-                            ",".join(DOC_GENERATORS.keys())))
+                            ",".join(list(SRC_GENERATORS.keys())),
+                            ",".join(list(DOC_GENERATORS.keys()))))
     parser.add_argument("--varname", default=None,
                         help="Data variable name")
 
