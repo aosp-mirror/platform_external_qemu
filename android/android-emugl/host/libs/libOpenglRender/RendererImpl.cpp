@@ -500,6 +500,10 @@ void RendererImpl::setScreenMask(int width, int height, const unsigned char* rgb
     mRenderWindow->setScreenMask(width, height, rgbaData);
 }
 
+void RendererImpl::onGuestGraphicsProcessCreate(uint64_t puid) {
+    // TODO(kaiyili): cherry-pick the entire https://r.android.com/c/2258774 change.
+}
+
 void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
     mCleanupThread->cleanup(puid);
 }

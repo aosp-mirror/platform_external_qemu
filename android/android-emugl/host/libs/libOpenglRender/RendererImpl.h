@@ -95,6 +95,8 @@ public:
                          uint32_t dpi,
                          bool add) final;
     void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) override;
+    void onGuestGraphicsProcessCreate(uint64_t puid) final;
+    // TODO(kaiyili): rename this interface to onGuestGraphicsProcessDestroy.
     void cleanupProcGLObjects(uint64_t puid) final;
     void waitForProcessCleanup() final;
     struct AndroidVirtioGpuOps* getVirtioGpuOps() final;

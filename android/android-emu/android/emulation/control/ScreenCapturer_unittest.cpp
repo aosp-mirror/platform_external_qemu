@@ -221,6 +221,7 @@ public:
                          bool add) { }
     void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) { }
 
+    virtual void onGuestGraphicsProcessCreate(uint64_t puid) { }
     void cleanupProcGLObjects(uint64_t puid) { }
     void waitForProcessCleanup() { }
     struct AndroidVirtioGpuOps* getVirtioGpuOps() { return nullptr; }

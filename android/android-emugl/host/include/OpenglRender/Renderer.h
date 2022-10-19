@@ -232,10 +232,14 @@ public:
     //    bind ColorBuffer to the display
     virtual void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) = 0;
 
+    // onGuestGraphicsProcessCreate
+    //    Notify the renderer that a new graphics process is created. Used to create process
+    //    specific resources.
+    virtual void onGuestGraphicsProcessCreate(uint64_t puid) = 0;
     // cleanupProcGLObjects -
     //    clean up all per-process resources when guest process exits (or is
-    // killed). Such resources include color buffer handles and EglImage
-    // handles.
+    // killed). Such resources include color buffer handles and EglImage handles.
+    // TODO(kaiyili): rename this interface to onGuestGraphicsProcessDestroy.
     virtual void cleanupProcGLObjects(uint64_t puid) = 0;
 
     // Wait for cleanupProcGLObjects to finish.
