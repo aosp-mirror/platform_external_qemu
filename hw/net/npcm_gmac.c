@@ -106,6 +106,20 @@ static const uint32_t npcm_gmac_cold_reset_values[NPCM_GMAC_NR_REGS] = {
     [R_NPCM_DMA_HW_FEATURE]       = 0x100d4f37,
 };
 
+static const uint16_t phy_reg_init[] = {
+    [MII_BMCR]      = MII_BMCR_AUTOEN | MII_BMCR_FD | MII_BMCR_SPEED1000,
+    [MII_BMSR]      = MII_BMSR_100TX_FD | MII_BMSR_100TX_HD | MII_BMSR_10T_FD |
+                      MII_BMSR_10T_HD | MII_BMSR_EXTSTAT | MII_BMSR_AUTONEG |
+                      MII_BMSR_EXTCAP,
+    [MII_PHYID1]    = 0x0362,
+    [MII_PHYID2]    = 0x5e6a,
+    [MII_ANAR]      = MII_ANAR_TXFD | MII_ANAR_TX | MII_ANAR_10FD |
+                      MII_ANAR_10 | MII_ANAR_CSMACD,
+    [MII_ANER]      = 0x64,
+    [MII_ANNP]      = 0x2001,
+    [MII_CTRL1000]  = MII_CTRL1000_FULL,
+};
+
 static void npcm_gmac_soft_reset(NPCMGMACState *s)
 {
     memcpy(s->regs, npcm_gmac_cold_reset_values,
@@ -274,6 +288,8 @@ static void npcm_gmac_reset(DeviceState *dev)
         /* Kernel thinks that we need a 0x6600 to work */
         s->phy_regs[0][1] |= MII_BMCR_LOOPBACK | MII_BMCR_SPEED100 |
                              MII_BMCR_ANRESTART;
+    } else {
+        memcpy(s->phy_regs[0], phy_reg_init, sizeof(phy_reg_init));
     }
 
     trace_npcm_gmac_reset(DEVICE(s)->canonical_path, s->phy_regs[0][MII_BMSR]);
