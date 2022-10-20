@@ -98,6 +98,7 @@ function(_generator_parse_target manifest package target)
     string(JSON manifest_path GET "${package}" "manifest_path")
     string(JSON target_name GET "${target}" "name")
     string(JSON target_kind GET "${target}" "kind")
+    string(JSON has_tests GET "${target}" "test")
 
     string(JSON target_kind_len LENGTH "${target_kind}")
     math(EXPR target_kind_len-1 "${target_kind_len} - 1")
@@ -179,6 +180,7 @@ function(_generator_parse_target manifest package target)
             CORROSION_TARGET${ix}_TARGET_NAME "${target_name}"
 
             CORROSION_TARGET${ix}_IS_LIBRARY "${is_library}"
+            CORROSION_TARGET${ix}_HAS_TEST "${has_tests}"
             CORROSION_TARGET${ix}_HAS_STATICLIB "${has_staticlib}"
             CORROSION_TARGET${ix}_HAS_CDYLIB "${has_cdylib}"
             CORROSION_TARGET${ix}_IS_EXECUTABLE "${is_executable}"
@@ -213,6 +215,7 @@ function(_generator_add_target manifest ix cargo_version profile)
     get_source_file_property(implib_name ${manifest} CORROSION_TARGET${ix}_IMPLIB_NAME)
     get_source_file_property(pdb_name ${manifest} CORROSION_TARGET${ix}_PDB_NAME)
     get_source_file_property(exe_name ${manifest} CORROSION_TARGET${ix}_EXE_NAME)
+    get_source_file_property(has_tests ${manifest} CORROSION_TARGET${ix}_HAS_TEST)
 
     get_source_file_property(libs ${manifest} CORROSION_PLATFORM_LIBS)
     get_source_file_property(libs_debug ${manifest} CORROSION_PLATFORM_LIBS_DEBUG)
@@ -222,6 +225,7 @@ function(_generator_add_target manifest ix cargo_version profile)
     get_source_file_property(is_windows_msvc ${manifest} CORROSION_PLATFORM_IS_WINDOWS_MSVC)
     get_source_file_property(is_windows_gnu ${manifest} CORROSION_PLATFORM_IS_WINDOWS_GNU)
     get_source_file_property(is_macos ${manifest} CORROSION_PLATFORM_IS_MACOS)
+
 
     string(REPLACE "\\" "/" manifest_path "${manifest_path}")
 
@@ -331,6 +335,7 @@ function(_generator_add_target manifest ix cargo_version profile)
             TARGET ${target_name}
             MANIFEST_PATH "${manifest_path}"
             BYPRODUCTS ${byproducts}
+            HAS_TESTS ${has_tests}
             PROFILE "${profile}"
     )
 endfunction()

@@ -44,7 +44,7 @@ set(_CORR_PROP_HOST_BUILD CORROSION_USE_HOST_BUILD CACHE INTERNAL "")
 
 function(_add_cargo_build)
     set(options "")
-    set(one_value_args PACKAGE TARGET MANIFEST_PATH PROFILE)
+    set(one_value_args PACKAGE TARGET MANIFEST_PATH PROFILE HAS_TESTS)
     set(multi_value_args BYPRODUCTS)
     cmake_parse_arguments(
         ACB
@@ -58,6 +58,7 @@ function(_add_cargo_build)
     set(target_name "${ACB_TARGET}")
     set(path_to_toml "${ACB_MANIFEST_PATH}")
     set(cargo_profile_name "${ACB_PROFILE}")
+    set(has_tests "${ACB_HAS_TESTS}")
 
     if (NOT IS_ABSOLUTE "${path_to_toml}")
         set(path_to_toml "${CMAKE_SOURCE_DIR}/${path_to_toml}")
@@ -248,6 +249,55 @@ function(_add_cargo_build)
         message(STATUS "No linker preference for target ${target_name} could be detected.")
     endif()
 
+    if(has_tests)
+        if(WIN32)
+            set(run_cmd "")
+            set(cmd_ext ".cmd")
+            add_custom_target(
+                cargo-gen_test_${target_name}  ALL
+                COMMAND echo ${CMAKE_COMMAND} -E env
+                    ${build_env_variable_genex} ${rustflags_genex_test}
+                    ${cargo_target_linker} ${corrosion_cc_rs_flags}
+                    ${cargo_library_path} CORROSION_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+                    CARGO_BUILD_RUSTC="${_CORROSION_RUSTC}" "${_CORROSION_CARGO}" test
+                    ${cargo_target_option}
+                    ${features_args} ${all_features_arg}
+                    ${no_default_features_arg} ${features_genex}
+                    --package ${package_name} --manifest-path "${path_to_toml}"
+                    ${cargo_profile} > ${target_dir}/run_test${cmd_ext}
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${build_dir}
+                USES_TERMINAL
+                COMMAND_EXPAND_LISTS
+                DEPENDS cargo-build_${target_name}
+            )
+        else()
+            set(cmd_ext ".sh")
+            set(run_cmd "sh")
+            add_custom_target(
+                cargo-gen_test_${target_name}  ALL
+                COMMAND echo ${CMAKE_COMMAND} -E env
+                    "${build_env_variable_genex}" "${rustflags_genex_test}"
+                    "${cargo_target_linker}" "${corrosion_cc_rs_flags}"
+                    "${cargo_library_path}" "CORROSION_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+                    "CARGO_BUILD_RUSTC=${_CORROSION_RUSTC}" "${_CORROSION_CARGO}" test
+                    "${cargo_target_option}"
+                    "${features_args}" "${all_features_arg}"
+                    "${no_default_features_arg}" "${features_genex}"
+                    --package ${package_name} --manifest-path "${path_to_toml}"
+                    "${cargo_profile}" > ${target_dir}/run_test${cmd_ext}
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${build_dir}
+                USES_TERMINAL
+                COMMAND_EXPAND_LISTS
+                VERBATIM
+                DEPENDS cargo-build_${target_name}
+            )
+        endif()
+        add_test(
+            NAME cargo-test_${target_name}
+            COMMAND ${run_cmd} ${target_dir}/run_test${cmd_ext}
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${build_dir})
+    endif()
+    
     add_custom_target(
     cargo-build_${target_name}
     ALL
@@ -264,7 +314,7 @@ function(_add_cargo_build)
             ${cargo_library_path}
             CORROSION_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
             CARGO_BUILD_RUSTC="${_CORROSION_RUSTC}"
-        "${_CORROSION_CARGO}"
+            "${_CORROSION_CARGO}"
             build
             ${cargo_target_option}
             ${_CORROSION_VERBOSE_OUTPUT_FLAG}
@@ -297,6 +347,7 @@ function(_add_cargo_build)
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${build_dir}
         USES_TERMINAL
     )
+
 
     if (NOT TARGET cargo-clean)
         add_custom_target(cargo-clean)
