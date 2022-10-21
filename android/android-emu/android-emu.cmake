@@ -77,7 +77,6 @@ set(android-emu-common
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
-    android/emulation/control/NopRtcBridge.cpp
     android/emulation/control/ServiceUtils.cpp
     android/emulation/DmaMap.cpp
     android/emulation/GoldfishDma.cpp
@@ -426,7 +425,6 @@ android_add_library(
       android/emulation/AudioOutputEngine.cpp
       android/emulation/ComponentVersion.cpp
       android/emulation/control/FilePusher.cpp
-      android/emulation/control/NopRtcBridge.cpp
       android/emulation/control/ScreenCapturer.cpp
       android/emulation/DmaMap.cpp
       android/emulation/GoldfishDma.cpp

@@ -57,21 +57,6 @@ public:
     virtual BridgeState state() = 0;
 };
 
-class NopRtcBridge : public RtcBridge {
-public:
-    NopRtcBridge();
-    ~NopRtcBridge();
-    bool connect(std::string identity) override;
-    void disconnect(std::string identity) override;
-    bool acceptJsepMessage(std::string identity, std::string msg) override;
-    bool nextMessage(std::string identity,
-                     std::string* nextMessage,
-                     System::Duration blockAtMostMs) override;
-    void terminate() override;
-    bool start() override;
-    BridgeState state() override;
-};
-
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
