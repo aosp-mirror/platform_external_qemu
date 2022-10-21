@@ -30,6 +30,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include <set>
+#include <string>
+#include <vector>
+
 #ifdef _WIN32
 #include <process.h>
 #include <shlobj.h>
@@ -682,6 +686,51 @@ APosixStatus path_copy_dir(const char* dst, const char* src) {
         } else {
             if (path_copy_file(fullDstName.c_str(), fullSrcName.c_str()) < 0) {
                 return -1;
+            }
+        }
+        baseName = dirScanner_next(dirScanner.get());
+    }
+    return 0;
+}
+
+APosixStatus path_copy_dir_ex(const char* dst,
+                              const char* src,
+                              void* pSkipSet) {
+    bool isSameDir = false;
+    int status = path_is_same(src, dst, &isSameDir);
+    if (status != 0 || isSameDir) {
+        return status;
+    }
+    using StrSet = std::set<std::string>;
+
+    if (!pSkipSet) {
+        return -1;
+    }
+
+    std::set<std::string>& doNotCopySet = *(static_cast<StrSet*>(pSkipSet));
+    auto dirScanner = android::base::makeCustomScopedPtr(dirScanner_new(src),
+                                                         dirScanner_free);
+    if (!dirScanner)
+        return -1;
+    if (path_mkdir_if_needed(dst, 0777) < 0)
+        return -1;
+    const char* baseName = dirScanner_next(dirScanner.get());
+    while (baseName) {
+        if (doNotCopySet.find(baseName) != doNotCopySet.end()) {
+            // ignore this file
+        } else {
+            std::string fullDstName = PathUtils::join(dst, baseName);
+            std::string fullSrcName = PathUtils::join(src, baseName);
+            if (path_is_dir(fullSrcName.c_str())) {
+                if (path_copy_dir_ex(fullDstName.c_str(), fullSrcName.c_str(),
+                                     pSkipSet) < 0) {
+                    return -1;
+                }
+            } else {
+                if (path_copy_file(fullDstName.c_str(), fullSrcName.c_str()) <
+                    0) {
+                    return -1;
+                }
             }
         }
         baseName = dirScanner_next(dirScanner.get());

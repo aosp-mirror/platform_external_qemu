@@ -1966,8 +1966,12 @@ extern "C" int main(int argc, char** argv) {
                        srcDir.c_str(), s_AvdFolder);
                 auto startTime = std::chrono::steady_clock::now();
                 path_delete_dir(s_AvdFolder);
-                path_copy_dir(s_AvdFolder, srcDir.c_str());
-                //            exit(1);
+                std::set<std::string> skipSet;
+                skipSet.insert("multiinstance.lock");
+                skipSet.insert("hardware-qemu.ini.lock");
+                path_copy_dir_ex(s_AvdFolder, srcDir.c_str(), &skipSet);
+                // TODO: handle copy failure by doing either cold boot or true
+                // firsr boot
                 auto elapsed =
                         std::chrono::duration_cast<std::chrono::milliseconds>(
                                 std::chrono::steady_clock::now() - startTime);
