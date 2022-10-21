@@ -27,6 +27,20 @@ if platform.system() == "Windows":
 AOSP_ROOT = ""
 
 
+CPU_ARCHITECTURE_MAP = {
+    # Arm based
+    "aarch64": "aarch64",
+    "aarch64_be": "aarch64",
+    "arm64": "aarch64",
+    "armv8b": "aarch64",
+    "armv8l": "aarch64",
+    # Intel based.
+    "amd64": "x86_64",
+    "i686": "x86_64",
+    "x86_64": "x86_64",
+}
+
+
 def find_aosp_root():
     path = os.path.abspath(os.getcwd())
     qemu = os.path.join("external", "qemu")
@@ -160,15 +174,15 @@ def is_crosscompile(target):
     match = re.match("(windows|linux|darwin)([-_](aarch64|x86_64))?", target)
     if not (match and match.group(3)):
         raise Exception("Malformed target: {}.".format(target))
-    aarch = platform.machine()
+    aarch = CPU_ARCHITECTURE_MAP.get(platform.machine().lower(), "unknown_cpu")
     if aarch == "arm64":
         aarch = "aarch64"
     else:
-      # Ok maybe python is running under rosetta, if so the uname.version
-      # will have have something along RELEASE_ARM64_T6000 in it
-      uname = platform.uname()
-      if "ARM64" in uname.version and uname.system == "Darwin":
-        aarch = "aarch64"
+        # Ok maybe python is running under rosetta, if so the uname.version
+        # will have have something along RELEASE_ARM64_T6000 in it
+        uname = platform.uname()
+        if "ARM64" in uname.version and uname.system == "Darwin":
+            aarch = "aarch64"
 
     return aarch != match.group(3)
 
