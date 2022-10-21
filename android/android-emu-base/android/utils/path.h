@@ -261,4 +261,12 @@ extern char*          path_join( const char* part1,
  */
 extern APosixStatus   path_copy_dir(const char* dst, const char* src);
 
+/* copy folder, but skip file if it is in the skipset (type
+   std::set<std::string>)
+   keeps copy
+   */
+extern APosixStatus path_copy_dir_ex(const char* dst,
+                                     const char* src,
+                                     void* pSkipSet);
+
 ANDROID_END_HEADER

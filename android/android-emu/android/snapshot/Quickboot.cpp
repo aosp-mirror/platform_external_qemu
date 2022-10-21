@@ -404,7 +404,16 @@ bool Quickboot::saveAvdToSystemImageSnapshotsLocalDir() {
         return false;
     }
     auto startTime = std::chrono::steady_clock::now();
-    path_copy_dir(destDir.c_str(), srcDir.c_str());
+    std::set<std::string> filesToSkip;
+    filesToSkip.insert("multiinstance.lock");
+    filesToSkip.insert("hardware-qemu.ini.lock");
+    std::vector<std::string> filesFailed;
+    if (-1 == path_copy_dir_ex(destDir.c_str(), srcDir.c_str(), &filesToSkip)) {
+        // failed, then just delete it
+        path_delete_file(destAvdConfigIni.c_str());
+        dprint("deleting local copy's config.ini file %s as dir copy failed",
+               destAvdConfigIni.c_str());
+    }
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - startTime);
 
