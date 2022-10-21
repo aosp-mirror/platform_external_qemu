@@ -42,6 +42,12 @@ const int DEFAULT_FLAGS_AUTO =
         DisplayManager::VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS |
         DisplayManager::VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
 
+const int DEFAULT_FLAGS_AUTO_CLUSTER =
+        DisplayManager::VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY |
+        DisplayManager::VIRTUAL_DISPLAY_FLAG_TRUSTED |
+        DisplayManager::VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH |
+        DisplayManager::VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
+
 // The build property key for multi display support
 static const char kMultiDisplayProp[] = "ro.emulator.car.multidisplay";
 

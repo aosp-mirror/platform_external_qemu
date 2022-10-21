@@ -22,8 +22,7 @@ namespace android {
 namespace automotive
 {
 int getDefaultFlagsForDisplay(int displayId) {
-    // TODO(237787920): Implement cluster display specific flags.
-    return DEFAULT_FLAGS_AUTO;
+    return displayId == 1 ? DEFAULT_FLAGS_AUTO_CLUSTER : DEFAULT_FLAGS_AUTO;
 }
 bool isMultiDisplaySupported(const AvdInfo* info) {
     return avdInfo_getBuildPropertyBool(info, kMultiDisplayProp, false);
