@@ -669,7 +669,7 @@ APosixStatus path_copy_dir(const char* dst, const char* src) {
     }
     auto dirScanner = android::base::makeCustomScopedPtr(
                             dirScanner_new(src), dirScanner_free);
-    if (!dirScanner) return false;
+    if (!dirScanner) return -1;
     if (path_mkdir_if_needed(dst, 0777) < 0) return -1;
     const char* baseName = dirScanner_next(dirScanner.get());
     while (baseName) {
