@@ -14,10 +14,13 @@
 
 # The toolchain files get processed multiple times during compile detection keep these files simple, and do not setup
 # libraries or anything else. merely tags, compiler toolchain and flags should be set here.
-
-get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
-list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 include(toolchain)
+include(toolchain-rust)
+
+get_filename_component(AOSP_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../.."
+                       ABSOLUTE)
+set(ANDROID_QEMU2_TOP_DIR "${AOSP_ROOT}/external/qemu")
 
 # First we setup all the tags.
 toolchain_configure_tags("darwin-x86_64")
@@ -61,7 +64,11 @@ endif()
 # Always consider the source to be darwin.
 add_definitions(-D_DARWIN_C_SOURCE=1)
 
+# Next we configure rust.
+get_rust_version(RUST_VER)
+configure_rust(COMPILER_ROOT "${AOSP_ROOT}/prebuilts/rust/darwin-x86/${RUST_VER}/bin")
 
 # And the asm type if we are compiling with ASM
 set(ANDROID_ASM_TYPE macho64)
 # No magical includes or dependencies for darwin..
+

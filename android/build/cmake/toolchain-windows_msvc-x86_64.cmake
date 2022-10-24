@@ -20,8 +20,13 @@ get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 # cmake will look for WinMSVCCrossCompile in Platform/WinMSVCCrossCompile.cmake
 list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}/Modules")
-
 include(toolchain)
+include(toolchain-rust)
+
+get_filename_component(AOSP_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../.."
+                       ABSOLUTE)
+set(ANDROID_QEMU2_TOP_DIR "${AOSP_ROOT}/external/qemu")
+
 # First we setup all the tags.
 toolchain_configure_tags("windows_msvc-x86_64")
 
@@ -46,16 +51,18 @@ if(WIN32)
     # Compile the wrapper..
     internal_get_env_cache(CC_EXE)
 
-    if (NOT CC_EXE)
+    if(NOT CC_EXE)
       message(STATUS "Building flattener to handle @rsp files.")
       execute_process(
         COMMAND
           "${CLANG_CL}"
           "${ANDROID_QEMU2_TOP_DIR}/android/build/win/flattenrsp.cpp"
           "/DCLANG_CL=${CLANG_CL}" "/DCCACHE=${OPTION_CCACHE}" "/DUNICODE" "/O2"
-          "/std:c++17" "/Fe:${CMAKE_BINARY_DIR}/cc.exe" OUTPUT_VARIABLE STD_OUT ERROR_VARIABLE STD_ERR)
-          internal_set_env_cache(CC_EXE "${CMAKE_BINARY_DIR}/cc.exe")
-   endif()
+          "/std:c++17" "/Fe:${CMAKE_BINARY_DIR}/cc.exe"
+        OUTPUT_VARIABLE STD_OUT
+        ERROR_VARIABLE STD_ERR)
+      internal_set_env_cache(CC_EXE "${CMAKE_BINARY_DIR}/cc.exe")
+    endif()
     set(CMAKE_C_COMPILER "${CC_EXE}")
     set(CMAKE_CXX_COMPILER "${CC_EXE}")
   else()
@@ -64,7 +71,7 @@ if(WIN32)
     set(CMAKE_CXX_COMPILER "${CLANG_CL}")
   endif()
   set(ANDROID_LLVM_SYMBOLIZER "${CLANG_DIR}/bin/llvm-symbolizer.exe")
-# Set the debug flags, erasing whatever cmake stuffs in there. We are going to
+  # Set the debug flags, erasing whatever cmake stuffs in there. We are going to
   # produce "fat" binaries with all debug information in there.
   set(CMAKE_CXX_FLAGS_DEBUG "/MD /Z7")
   set(CMAKE_C_FLAGS_DEBUG "/MD /Z7")
@@ -134,3 +141,9 @@ endif()
 # And the asm type if we are compiling with ASM
 set(ANDROID_ASM_TYPE win64)
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
+
+# Uncomment this once we have a rust toolchain for msvc in AOSP
+# get_rust_version(RUST_VER)
+# configure_rust(COMPILER_ROOT "${AOSP_ROOT}/prebuilts/rust/windows-x86/${RUST_VER}/bin")
+set(Rust_CARGO_TARGET "x86_64-pc-windows-msvc")
+set(OPTION_ENABLE_SYSTEM_RUST TRUE CACHE BOOL "Forcing the system rust compiler on windows")

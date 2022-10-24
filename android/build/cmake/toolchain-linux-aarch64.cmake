@@ -18,13 +18,16 @@
 
 # Note! This file can get included many times, so we use some tricks to
 # Only calculate the settings once.
-get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
-list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 include(toolchain)
+include(toolchain-rust)
+
+get_filename_component(AOSP_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../.."
+                       ABSOLUTE)
+set(ANDROID_QEMU2_TOP_DIR "${AOSP_ROOT}/external/qemu")
 
 # First we setup all the tags and configure the toolchain
 toolchain_configure_tags("linux-aarch64")
-get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
 toolchain_generate("${ANDROID_TARGET_TAG}")
 
 internal_get_env_cache(RUNTIME_OS_PROPERTIES)
@@ -54,3 +57,8 @@ set(CMAKE_STRIP_CMD "${CMAKE_STRIP} -s")
 
 # And the asm type if we are compiling with ASM
 set(ANDROID_ASM_TYPE elf64)
+
+# Next we configure rust.
+get_rust_version(RUST_VER)
+# configure_rust(COMPILER_ROOT "${AOSP_ROOT}/prebuilts/rust/linux-x86/${RUST_VER}/bin")
+
