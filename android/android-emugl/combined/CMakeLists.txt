@@ -186,6 +186,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     # Backends######################################################################
 
+    add_subdirectory(${GFXSTREAM_REPO_ROOT}/utils ${GFXSTREAM_PREFIX}-utils)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/stream-servers ${GFXSTREAM_PREFIX}-stream-servers)
 
     # Protocols and associated code generators######################################
