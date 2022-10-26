@@ -297,14 +297,13 @@ function(_add_cargo_build)
             COMMAND ${run_cmd} ${target_dir}/run_test${cmd_ext}
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${build_dir})
     endif()
-    
+
     add_custom_target(
     cargo-build_${target_name}
     ALL
     # Ensure the target directory exists
     COMMAND
         ${CMAKE_COMMAND} -E make_directory ${target_dir}
-    # Build crate
     COMMAND
         ${CMAKE_COMMAND} -E env
             ${build_env_variable_genex}
@@ -326,8 +325,9 @@ function(_add_cargo_build)
             ${features_genex}
             --package ${package_name}
             --manifest-path "${path_to_toml}"
+            ${COR_FLAGS}
             ${cargo_profile}
-
+    # Build crate
     # Copy crate artifacts to the binary dir
     COMMAND
         ${CMAKE_COMMAND} -E copy_if_different ${build_byproducts} ${target_dir}
@@ -358,7 +358,7 @@ endfunction(_add_cargo_build)
 function(corrosion_import_crate)
     set(OPTIONS ALL_FEATURES NO_DEFAULT_FEATURES NO_STD)
     set(ONE_VALUE_KEYWORDS MANIFEST_PATH PROFILE)
-    set(MULTI_VALUE_KEYWORDS CRATES FEATURES)
+    set(MULTI_VALUE_KEYWORDS CRATES FEATURES FLAGS)
     cmake_parse_arguments(COR "${OPTIONS}" "${ONE_VALUE_KEYWORDS}" "${MULTI_VALUE_KEYWORDS}" ${ARGN})
 
     if (NOT DEFINED COR_MANIFEST_PATH)
