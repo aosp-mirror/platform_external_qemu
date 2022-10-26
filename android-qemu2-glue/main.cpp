@@ -1937,6 +1937,8 @@ extern "C" int main(int argc, char** argv) {
             (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path));
 
     if (avd && feature_is_enabled(kFeature_DownloadableSnapshot) &&
+        (hw->firstboot_bootFromDownloadableSnapshot ||
+         hw->firstboot_bootFromLocalSnapshot) &&
         !path_exists(hw->disk_dataPartition_path)) {
         const char* avdName = avdInfo_getName(avd);
         char* s_AvdFolder = path_getAvdContentPath(avdName);
@@ -1944,22 +1946,31 @@ extern "C" int main(int argc, char** argv) {
             std::string systemImagePath =
                     path_getAvdSystemPath(avdName, path_getSdkRoot(), false);
             // try copy content from <sysimgdir>/snapshots/avd/default
-            std::string srcDir = PathUtils::join(systemImagePath, "snapshots",
-                                                 "local", "avd");
+            std::string srcDirLocal = PathUtils::join(
+                    systemImagePath, "snapshots", "local", "avd");
             std::string srcDirDownloaded = PathUtils::join(
                     systemImagePath, "snapshots", "downloaded", "avd");
-            std::string default_config_ini =
-                    PathUtils::join(srcDir, "config.ini");
-            std::string default_config_ini_downloaded =
-                    PathUtils::join(srcDirDownloaded, "config.ini");
 
-            // check local first, if it does not exit, check download second;
-            if (!path_exists(default_config_ini.c_str())) {
-                srcDir = srcDirDownloaded;
-                default_config_ini = default_config_ini_downloaded;
+            std::string srcDir;
+            std::string default_config_ini;
+
+            if (hw->firstboot_bootFromLocalSnapshot) {
+                srcDir = srcDirLocal;
+                default_config_ini = PathUtils::join(srcDir, "config.ini");
+                if (!path_exists(default_config_ini.c_str())) {
+                    srcDir.clear();
+                    default_config_ini.clear();
+                }
             }
 
-            if (path_exists(default_config_ini.c_str()) &&
+            // use downloaded snapshot if we cannot use local snapshot
+            if (srcDir.empty() && hw->firstboot_bootFromDownloadableSnapshot) {
+                srcDir = srcDirDownloaded;
+                default_config_ini = PathUtils::join(srcDir, "config.ini");
+            }
+
+            if (!default_config_ini.empty() &&
+                path_exists(default_config_ini.c_str()) &&
                 checkCompatable(srcDir, std::string(s_AvdFolder))) {
                 dprint("emulator: First boot, copying snapshot...");
                 dprint("emulator: copying snapshot from %s to %s",

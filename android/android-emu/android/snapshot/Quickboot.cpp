@@ -389,6 +389,11 @@ bool Quickboot::saveAvdToSystemImageSnapshotsLocalDir() {
         return false;
     }
 
+    auto* myHw = getConsoleAgents()->settings->hw();
+    if (myHw->firstboot_saveToLocalSnapshot) {
+        return false;
+    }
+
     using android::base::PathUtils;
 
     const AvdInfo* myAvdInfo = getConsoleAgents()->settings->avdInfo();
