@@ -169,10 +169,7 @@ if(Rust_COMPILER OR OPTION_ENABLE_SYSTEM_RUST)
     use_system_rust_toolchain()
   endif()
 
-  # TODO(jansene): Once we have sorted out where we get our crates from
-  # we should uncomment the line below. See b/254511755
-  message(WARNING "Rust enabled without using vendorized crates! (b/254511755)")
-  # enable_vendorized_crates(${AOSP_ROOT}/external/rust/crates)
+  enable_vendorized_crates("${ANDROID_QEMU2_TOP_DIR}/android/third_party/rust/crates")
   add_subdirectory(android/build/cmake/corrosion)
   ensure_rust_version_is_compliant()
 endif()
