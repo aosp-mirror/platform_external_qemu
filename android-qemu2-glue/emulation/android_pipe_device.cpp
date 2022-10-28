@@ -13,6 +13,8 @@
 
 #include "aemu/base/Compiler.h"
 #include "aemu/base/Log.h"
+#include "android/avd/info.h"
+#include "android/console.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/android_pipe_common.h"
 #include "android/emulation/android_pipe_device.h"
@@ -51,17 +53,43 @@ static ::Stream* asCStream(android::base::Stream* stream) {
     return reinterpret_cast<::Stream*>(stream);
 }
 
+typedef void(*CheckPipeNameCallback)(const char*);
+
+CheckPipeNameCallback getCheckPipeNameCallback() {
+    static int apiLevel;
+    if (!apiLevel) {
+        apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
+    }
+
+    static const CheckPipeNameCallback crashIfNotGraphics = [](const char* pipename){
+        if (strcmp(pipename, "opengles")
+                && strcmp(pipename, "GLProcessPipe")
+                && strcmp(pipename, "refcount")) {
+            fprintf(stderr, "The system image requested '%s' to be created via "
+                    "goldfish_pipe. goldfish_pipe is deprecated, please "
+                    "switch to virtio-vsock.\n", pipename);
+            ::abort();
+        }
+    };
+
+    if (apiLevel >= 34) {
+        return crashIfNotGraphics;
+    } else {
+        return nullptr;
+    }
+}
+
 // These callbacks are called from the virtual device into the pipe service.
 static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         // guest_open()
         [](GoldfishHwPipe* hwPipe) -> GoldfishHostPipe* {
             return static_cast<GoldfishHostPipe*>(
-                    android_pipe_guest_open(hwPipe));
+                    android_pipe_guest_open(hwPipe, getCheckPipeNameCallback()));
         },
         // guest_open_with_flags()
         [](GoldfishHwPipe* hwPipe, uint32_t flags) -> GoldfishHostPipe* {
             return static_cast<GoldfishHostPipe*>(
-                    android_pipe_guest_open_with_flags(hwPipe, flags));
+                    android_pipe_guest_open_with_flags(hwPipe, flags, getCheckPipeNameCallback()));
         },
         // guest_close()
         [](GoldfishHostPipe* hostPipe, GoldfishPipeCloseReason reason) {
