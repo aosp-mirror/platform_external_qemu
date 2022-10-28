@@ -390,7 +390,7 @@ bool Quickboot::saveAvdToSystemImageSnapshotsLocalDir() {
     }
 
     auto* myHw = getConsoleAgents()->settings->hw();
-    if (myHw->firstboot_saveToLocalSnapshot) {
+    if (!myHw->firstboot_saveToLocalSnapshot) {
         return false;
     }
 
