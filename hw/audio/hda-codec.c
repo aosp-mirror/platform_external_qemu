@@ -254,30 +254,7 @@ static void hda_audio_set_running(HDAAudioStream *st, bool running)
 
 static void hda_audio_set_amp(HDAAudioStream *st)
 {
-    bool muted;
-    uint32_t left, right;
-
-    if (st->node == NULL) {
-        return;
-    }
-
-    muted = st->mute_left && st->mute_right;
-    left  = st->mute_left  ? 0 : st->gain_left;
-    right = st->mute_right ? 0 : st->gain_right;
-
-    left = left * 255 / QEMU_HDA_AMP_STEPS;
-    right = right * 255 / QEMU_HDA_AMP_STEPS;
-
-    if (!st->state->mixer) {
-        return;
-    }
-    if (st->voice.raw) {
-        if (st->output) {
-            AUD_set_volume_out(st->voice.out, muted, left, right);
-        } else {
-            AUD_set_volume_in(st->voice.in, muted, left, right);
-        }
-    }
+    /* do not touch audio levels */
 }
 
 // AEMU
