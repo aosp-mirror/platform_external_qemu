@@ -16,6 +16,7 @@ endfunction()
 if(OPTION_GFXSTREAM_BACKEND)
     set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
     set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
+    set(ANGLE_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../external/angle)
 
     set(BUILD_STANDALONE OFF)
     set(ENABLE_VKCEREAL_TESTS ON)
@@ -109,6 +110,8 @@ if(OPTION_GFXSTREAM_BACKEND)
         add_definitions(-DVIRGL_RENDERER_UNSTABLE_APIS)
     endif()
 
+    add_definitions("-I${ANGLE_REPO_ROOT}/include")
+
     if(UNIX AND NOT APPLE)
         set(LINUX TRUE)
     endif()
@@ -175,7 +178,6 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     set(EXTRA_SUBDIR_TEST_INCLUDE_FILES)
     # Third party dependencies
-    add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/angle ${GFXSTREAM_PREFIX}-third-party-angle)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/renderdoc ${GFXSTREAM_PREFIX}-third-party-renderdoc)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/stb ${GFXSTREAM_PREFIX}-third-party-stb)
     add_subdirectory(${GFXSTREAM_PROTOCOLS_DIR} ${GFXSTREAM_PREFIX}-gfxstream-protocols)
@@ -226,8 +228,8 @@ if(OPTION_GFXSTREAM_BACKEND)
                    LIBNAME gfxstream
                    URL "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master"
                    SPDX Apache-2.0
-                   LOCAL "${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal/third-party/angle/LICENSE"
-                   LICENSE "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master/third-party/angle/LICENSE")
+                   LOCAL "${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal/LICENSE"
+                   LICENSE "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master/LICENSE")
 endif()
 
 # TODO(joshuaduong): Make it work for gfxstream build.
