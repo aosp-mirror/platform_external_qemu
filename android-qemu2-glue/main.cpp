@@ -1970,8 +1970,7 @@ extern "C" int main(int argc, char** argv) {
             }
 
             if (!default_config_ini.empty() &&
-                path_exists(default_config_ini.c_str()) &&
-                checkCompatable(srcDir, std::string(s_AvdFolder))) {
+                path_exists(default_config_ini.c_str())) {
                 dprint("emulator: First boot, copying snapshot...");
                 dprint("emulator: copying snapshot from %s to %s",
                        srcDir.c_str(), s_AvdFolder);
@@ -1981,8 +1980,17 @@ extern "C" int main(int argc, char** argv) {
                 skipSet.insert("multiinstance.lock");
                 skipSet.insert("hardware-qemu.ini.lock");
                 path_copy_dir_ex(s_AvdFolder, srcDir.c_str(), &skipSet);
-                // TODO: handle copy failure by doing either cold boot or true
-                // firsr boot
+
+                // when not compatible, do a cold boot, but still leverage
+                // the already booted userdata partition etc.
+                if (!checkCompatable(srcDir, std::string(s_AvdFolder))) {
+                    opts->no_snapshot_load = true;
+                }
+                if (opts->no_snapshot_load) {
+                    const std::string avdSnapshotDir =
+                            PathUtils::join(s_AvdFolder, "snapshots");
+                    path_delete_dir(avdSnapshotDir.c_str());
+                }
                 auto elapsed =
                         std::chrono::duration_cast<std::chrono::milliseconds>(
                                 std::chrono::steady_clock::now() - startTime);
