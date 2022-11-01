@@ -45,7 +45,7 @@
 #define RING_BUFFER_BAD_W                           33333
 
 #define AUD_SCRATCH_SIZE                            2048
-#define VIRTIO_SND_CONSUME_AHEAD_PERIODS            4
+#define VIRTIO_SND_CONSUME_AHEAD_PERIODS            2
 #define VIRTIO_SND_RAW_PCM_BUFFER_PERIODS           VIRTIO_SND_CONSUME_AHEAD_PERIODS
 
 #define GLUE(A, B) A##B
