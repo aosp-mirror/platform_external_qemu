@@ -287,6 +287,14 @@ public:
     // user.
     virtual bool pathCanWrite(std::string_view path) const = 0;
 
+    // Return true iff |path| exists and is qcow2 file
+    // user.
+    virtual bool pathIsQcow2(std::string_view path) const = 0;
+
+    // Return true iff |path| exists and is qcow2 file
+    // user.
+    virtual bool pathIsExt4(std::string_view path) const = 0;
+
     // Return true iff |path| exists and can be executed to by the current
     // user.
     virtual bool pathCanExec(std::string_view path) const = 0;
@@ -538,6 +546,11 @@ protected:
     // directory or something like that. Always returns short paths.
     static std::vector<std::string> scanDirInternal(std::string_view dirPath);
 
+    static bool readSomeBytes(std::string_view path,
+                              char* array,
+                              int pos,
+                              int size);
+
     static bool pathExistsInternal(std::string_view path);
     static bool pathIsFileInternal(std::string_view path);
     static bool pathIsDirInternal(std::string_view path);
@@ -545,6 +558,8 @@ protected:
     static bool pathCanReadInternal(std::string_view path);
     static bool pathCanWriteInternal(std::string_view path);
     static bool pathCanExecInternal(std::string_view path);
+    static bool pathIsQcow2Internal(std::string_view path);
+    static bool pathIsExt4Internal(std::string_view path);
     static int pathOpenInternal(const char *filename, int oflag, int pmode);
     static bool deleteFileInternal(std::string_view path);
     static bool pathFileSizeInternal(std::string_view path,
