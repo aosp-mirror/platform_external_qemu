@@ -185,16 +185,18 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
         LIST_GLES31_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
     }
 
-#if defined(__APPLE__)
-    // On Mac, ANGLE loads a bad glGetTexImage. (No it is not the dummy.)
-    // Overwrite it.
-    void* _glGetTexImageANGLE = (void*)getGLFuncAddress(
-        "glGetTexImageANGLE", glLib);
-    if (_glGetTexImageANGLE) {
-        GL_FUNC_NAME(glGetTexImage) =
-            (__typeof__(GL_FUNC_NAME(glGetTexImage)))_glGetTexImageANGLE;
+    const char* kAngleName = "ANGLE";
+    if (0 == strncmp(reinterpret_cast<const char*>(glGetString(GL_RENDERER)),
+                     kAngleName, strlen(kAngleName))) {
+        // ANGLE loads a bad glGetTexImage. (No it is not the dummy.)
+        // Overwrite it.
+        void* _glGetTexImageANGLE =
+                (void*)getGLFuncAddress("glGetTexImageANGLE", glLib);
+        if (_glGetTexImageANGLE) {
+            GL_FUNC_NAME(glGetTexImage) = (__typeof__(GL_FUNC_NAME(
+                    glGetTexImage)))_glGetTexImageANGLE;
+        }
     }
-#endif
 
     m_isLoaded = true;
     m_version = version;

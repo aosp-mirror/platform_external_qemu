@@ -3,14 +3,26 @@ prebuilt(ANGLE)
 prebuilt(VULKAN)
 
 function(add_opengl_dependencies TGT)
-    android_target_dependency(${TGT} all SWIFTSHADER_DEPENDENCIES)
+    android_target_dependency(${TGT} windows_msvc-x86_64 SWIFTSHADER_DEPENDENCIES)
+    android_target_dependency(${TGT} linux-aarch64 SWIFTSHADER_DEPENDENCIES)
+    android_target_dependency(${TGT} linux-x86_64 ANGLE_RENDERER_DEPENDENCIES)
+    android_target_dependency(${TGT} darwin ANGLE_RENDERER_DEPENDENCIES)
     android_target_dependency(${TGT} all ANGLE_DEPENDENCIES)
     android_target_dependency(${TGT} all VULKAN_DEPENDENCIES)
     android_target_dependency(${TGT} all VULKAN_TEST_DEPENDENCIES)
     android_target_properties(
-        ${TGT} linux "${RUNTIME_OS_PROPERTIES} -Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader' -Wl,--disable-new-dtags")
+        ${TGT}
+        linux-aarch64
+        "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader' -Wl,--disable-new-dtags"
+      )
+    # SwANGLE
     android_target_properties(
-        ${TGT} darwin "${RUNTIME_OS_PROPERTIES} INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+        ${TGT}
+        linux-x86_64
+        "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN/lib64/gles_angle' -Wl,--disable-new-dtags"
+      )
+    android_target_properties(
+        ${TGT} darwin "${RUNTIME_OS_PROPERTIES} INSTALL_RPATH>=@loader_path/lib64/gles_angle")
 endfunction()
 
 if(OPTION_GFXSTREAM_BACKEND)
@@ -297,16 +309,29 @@ if(NOT OPTION_GFXSTREAM_BACKEND AND NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
 
   android_target_dependency(emugl_combined_unittests all
                             EMULATOR_FEATURE_DEPENDENCIES)
-  android_target_dependency(emugl_combined_unittests all
+  android_target_dependency(emugl_combined_unittests windows_msvc-x86_64
                             SWIFTSHADER_DEPENDENCIES)
+  android_target_dependency(emugl_combined_unittests linux-aarch64
+                            SWIFTSHADER_DEPENDENCIES)
+  android_target_dependency(emugl_combined_unittests linux-x86_64
+                            ANGLE_RENDERER_DEPENDENCIES)
+  android_target_dependency(emugl_combined_unittests darwin
+                            ANGLE_RENDERER_DEPENDENCIES)
   android_target_properties(
-    emugl_combined_unittests darwin
-    "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+    emugl_combined_unittests
+    linux-aarch64
+    "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader' -Wl,--disable-new-dtags")
+    # SwANGLE
   android_target_properties(
-    emugl_combined_unittests linux
-    "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader' -Wl,--disable-new-dtags")
+    emugl_combined_unittests
+    linux-x86_64
+    "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN/lib64/gles_angle' -Wl,--disable-new-dtags")
+  android_target_properties(
+    emugl_combined_unittests
+    darwin
+    "INSTALL_RPATH>=@loader_path/lib64/gles_angle")
 
-  # Toplevel unit tests
+# Toplevel unit tests
   android_add_test(
     TARGET aemugraphics_toplevel_unittests SRC # cmake-format: sortable
                                                toplevel_unittest.cpp)
@@ -322,16 +347,28 @@ if(NOT OPTION_GFXSTREAM_BACKEND AND NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
     aemugraphics_toplevel_unittests PUBLIC aemugraphics OSWindow gtest gmock
                                            android-emu-test-launcher)
   android_target_dependency(aemugraphics_toplevel_unittests all
-                            SWIFTSHADER_DEPENDENCIES)
-  android_target_dependency(aemugraphics_toplevel_unittests all
                             EMULATOR_FEATURE_DEPENDENCIES)
+                            android_target_dependency(emugl_combined_unittests windows_msvc-x86_64
+                            SWIFTSHADER_DEPENDENCIES)
+  android_target_dependency(aemugraphics_toplevel_unittests linux-aarch64
+                            SWIFTSHADER_DEPENDENCIES)
+  android_target_dependency(aemugraphics_toplevel_unittests linux-x86_64
+                            ANGLE_RENDERER_DEPENDENCIES)
+  android_target_dependency(aemugraphics_toplevel_unittests darwin
+                            ANGLE_RENDERER_DEPENDENCIES)
   android_target_properties(
-    aemugraphics_toplevel_unittests darwin
-    "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+    aemugraphics_toplevel_unittests
+    linux-aarch64
+    "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader' -Wl,--disable-new-dtags")
+    # SwANGLE
   android_target_properties(
-    aemugraphics_toplevel_unittests linux
-    "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'  -Wl,--disable-new-dtags")
-
+    aemugraphics_toplevel_unittests
+    linux-x86_64
+    "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN/lib64/gles_angle' -Wl,--disable-new-dtags")
+  android_target_properties(
+    aemugraphics_toplevel_unittests
+    darwin
+    "INSTALL_RPATH>=@loader_path/lib64/gles_angle")
   # Vulkan encoder unit tests
   android_add_test(
     TARGET vulkan_enc_unittests

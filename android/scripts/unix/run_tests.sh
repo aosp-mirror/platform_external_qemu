@@ -203,6 +203,9 @@ if [ "$OPT_GFXSTREAM" ] ; then
     export LD_LIBRARY_PATH=$PWD/lib64/vulkan:$PWD/lib64/gles_swiftshader
 fi
 
+# Flags for SwANGLE
+export ANGLE_DEFAULT_PLATFORM=swiftshader
+
 ${CTEST} -j ${NUM_JOBS} --output-on-failure ${DISABLED_TESTS} || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
 cd $OLD_DIR
 

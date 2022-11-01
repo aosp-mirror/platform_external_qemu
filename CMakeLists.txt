@@ -575,7 +575,31 @@ if(WINDOWS_MSVC_X86_64)
 
 endif()
 
+# On Linux, it loads libvulkan.so.
+if(LINUX_X86_64)
+  set(ANGLE_RENDERER_DEPENDENCIES
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libvk_swiftshader${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libvk_swiftshader${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/vk_swiftshader_icd.json>lib64/gles_angle/vk_swiftshader_icd.json"
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/libvulkan${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libvulkan${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/libvulkan${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libvulkan.so.1"
+  )
+  # Angle executables licensing information.
+  android_license(
+    TARGET ANGLE_RENDERER_DEPENDENCIES
+    LIBNAME angle-renderer
+    EXECUTABLES
+      "gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    URL "https://chromium.googlesource.com/angle/angle"
+    SPDX "BSD-3-Clause"
+    LICENSE "https://chromium.googlesource.com/angle/angle/LICENSE"
+    LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.ANGLE")
+endif()
+
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
+  # On Mac, ANGLE directly read the ICD file and find the Vulkan library (libvk_swiftshader).
   set(ANGLE_RENDERER_DEPENDENCIES
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
@@ -594,7 +618,6 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
     SPDX "BSD-3-Clause"
     LICENSE "https://chromium.googlesource.com/angle/angle/LICENSE"
     LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.ANGLE")
-
 endif()
 
 prebuilt(GLIB2)

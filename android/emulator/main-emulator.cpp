@@ -1286,12 +1286,12 @@ static void updateLibrarySearchPath(bool isHeadless,
     D("Adding library search path: '%s'", fullPath);
     add_library_search_dir(fullPath);
 
-    bool useSwAngle = false;
-#ifdef __APPLE__
-    useSwAngle = true;
+    bool forceSwAngle = false;
+#if defined(__APPLE__)
+    forceSwAngle = true;
 #endif
 
-    if ((gpu && strstr(gpu, "angle") != NULL) || useSwAngle) {
+    if ((gpu && strstr(gpu, "angle") != NULL) || forceSwAngle) {
         bufprint(fullPath, fullPath + sizeof(fullPath),
                  "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir,
                  "gles_angle");

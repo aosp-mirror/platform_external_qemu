@@ -61,9 +61,6 @@ template <typename T>
 class SnapshotGlRenderingSampleTest : public ::testing::Test {
 protected:
     virtual void SetUp() override {
-        android::base::TestSystem::setEnvironmentVariable(
-            "ANGLE_DEFAULT_PLATFORM",
-            "swiftshader");
         setupStandaloneLibrarySearchPaths();
         emugl::set_emugl_window_operations(*getConsoleAgents()->emu);
         //const EGLDispatch* egl = LazyLoadedEGLDispatch::get();

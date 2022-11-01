@@ -13,8 +13,9 @@
 // limitations under the License.
 #include <gtest/gtest.h>
 
-#include "Standalone.h"
 #include "GLTestUtils.h"
+#include "Standalone.h"
+#include "android/base/testing/TestSystem.h"
 
 #include <memory>
 
@@ -155,6 +156,14 @@ public:
             ImageMatches(mWidth, mHeight, 4, mWidth, targetBuffer.data(), forRead.data()));
     }
 
+    bool isAngle() {
+        const char* vendor;
+        const char* renderer;
+        const char* version;
+        mFb->getGLStrings(&vendor, &renderer, &version);
+        return strstr(renderer, "ANGLE");
+    }
+
 private:
     bool mUseFboCombined = false;
     bool mUseFboDraw = false;
@@ -175,12 +184,12 @@ static constexpr float kDrawColorGreen[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
 class CombinedFramebufferBlit : public ::testing::Test, public ::testing::WithParamInterface<ClearColorParam> {
 protected:
     virtual void SetUp() override {
-#ifdef __APPLE__
-        if (!shouldUseHostGpu() && !GetParam().fastBlit) {
+        android::base::TestSystem::setEnvironmentVariable(
+                "ANGLE_DEFAULT_PLATFORM", "swiftshader");
+        mApp.reset(new ClearColor(GetParam()));
+        if (mApp->isAngle() && !GetParam().fastBlit) {
             GTEST_SKIP() << "b/247631472 Slow blit does not work with ANGLE.";
         }
-#endif
-        mApp.reset(new ClearColor(GetParam()));
     }
 
     virtual void TearDown() override {
