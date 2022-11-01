@@ -71,6 +71,7 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <fstream>
 #include <memory>
 #include <string_view>
 #include <unordered_set>
@@ -1074,6 +1075,14 @@ public:
         return pathCanExecInternal(path);
     }
 
+    bool pathIsQcow2(std::string_view path) const override {
+        return pathIsQcow2Internal(path);
+    }
+
+    bool pathIsExt4(std::string_view path) const override {
+        return pathIsExt4Internal(path);
+    }
+
     int pathOpen(const char *filename, int oflag, int pmode) const override {
         return pathOpenInternal(filename, oflag, pmode);
     }
@@ -2073,6 +2082,68 @@ bool System::pathCanExecInternal(std::string_view path) {
         return false;
     }
     return pathAccess(path, X_OK) == 0;
+}
+
+bool System::readSomeBytes(std::string_view path,
+                           char* array,
+                           int pos,
+                           int size) {
+    if (size <= 0 || !pathCanReadInternal(path)) {
+        return false;
+    }
+    std::string filename(path);
+#ifdef _WIN32
+    android::base::Win32UnicodeString wfilename(filename);
+    std::ifstream ifs(wfilename.c_str(), std::ios_base::binary);
+#else
+    std::ifstream ifs(filename.c_str(), std::ios_base::binary);
+#endif
+    if (!ifs.good()) {
+        return false;
+    }
+
+    if (pos > 0) {
+        ifs.ignore(pos);
+    }
+
+    ifs.read(array, size);
+
+    return true;
+}
+
+// static
+bool System::pathIsExt4Internal(std::string_view path) {
+    // read 2 bytes
+    uint8_t magic[2] = {'\0'};
+
+    if (!readSomeBytes(path, reinterpret_cast<char*>(magic), 1080,
+                       sizeof(magic))) {
+        return false;
+    }
+    bool matched2bytes = false;
+    if (magic[0] == 0x53 && magic[1] == 0xEF) {
+        matched2bytes = true;
+    }
+
+    return matched2bytes;
+}
+
+// static
+bool System::pathIsQcow2Internal(std::string_view path) {
+    // read 4 bytes
+    uint8_t magic[4] = {'\0'};
+    if (!readSomeBytes(path, reinterpret_cast<char*>(magic), 0,
+                       sizeof(magic))) {
+        return false;
+    }
+
+    bool matched4bytes = false;
+    if (magic[0] == 'Q' && magic[1] == 'F' && magic[2] == 'I' &&
+        magic[3] == static_cast<uint8_t>('\xfb')) {
+        matched4bytes = true;
+    }
+
+    return matched4bytes;
 }
 
 // static

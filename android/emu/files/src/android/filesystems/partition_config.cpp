@@ -422,6 +422,7 @@ auto android_partition_configuration_setup(
                                 &current_data_size);
     if ((config->wipe_data ||
          current_data_size < config->data_partition.size) &&
+        !System::get()->pathIsQcow2(config->data_partition.path) &&
         userdata_partition_type == ANDROID_PARTITION_TYPE_EXT4) {
         if (current_data_size < config->data_partition.size) {
             VERBOSE_PRINT(init,

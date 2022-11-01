@@ -243,6 +243,14 @@ public:
         return pathIsLinkInternal(toTempRoot(path));
     }
 
+    virtual bool pathIsQcow2(std::string_view path) const override {
+        return pathIsQcow2Internal(toTempRoot(path));
+    }
+
+    virtual bool pathIsExt4(std::string_view path) const override {
+        return pathIsExt4Internal(toTempRoot(path));
+    }
+
     virtual bool pathCanRead(std::string_view path) const override {
         return pathCanReadInternal(toTempRoot(path));
     }
