@@ -479,7 +479,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 
     bool use_swangle = strstr(config->backend, "swangle");
 #ifdef __APPLE__
-    use_swangle |= strstr(config->backend, "swiftshader");
+    use_swangle |= strstr(config->backend, "swiftshader") != nullptr;
 #endif
     // $EXEC_DIR/<lib>/ is already added to the library search path by default,
     // since generic libraries are bundled there. We may need more though:
