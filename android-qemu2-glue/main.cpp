@@ -432,13 +432,23 @@ static void convertExt4ToQcow2(std::string ext4filepath) {
         return;
     }
 
+    std::string dataimageext4 = ext4filepath;
+    if (!System::get()->pathIsExt4(dataimageext4)) {
+        dprint("%s is not ext4\n", dataimageext4.c_str());
+        return;
+    }
+
     auto startTime = std::chrono::steady_clock::now();
     auto qemu_img = System::get()->findBundledExecutable("qemu-img");
-    std::string dataimageext4 = ext4filepath;
     std::string dataimageqcow2 = dataimageext4 + std::string(".tmp.qcow2");
     auto res = System::get()->runCommandWithResult({qemu_img, "convert", "-O",
                                                     "qcow2", dataimageext4,
                                                     dataimageqcow2});
+    if (!System::get()->pathIsQcow2(dataimageqcow2)) {
+        dprint("%s is not qcow2\n", dataimageqcow2.c_str());
+        return;
+    }
+
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - startTime);
 
@@ -2089,7 +2099,8 @@ extern "C" int main(int argc, char** argv) {
         // This can happen as user wants a larger data
         // partition without wiping it. b.android.com/196926
         System::FileSize current_data_size;
-        if (System::get()->pathFileSize(hw->disk_dataPartition_path,
+        if (System::get()->pathIsExt4(hw->disk_dataPartition_path) &&
+            System::get()->pathFileSize(hw->disk_dataPartition_path,
                                         &current_data_size)) {
             System::FileSize partition_size = static_cast<System::FileSize>(
                     getConsoleAgents()
