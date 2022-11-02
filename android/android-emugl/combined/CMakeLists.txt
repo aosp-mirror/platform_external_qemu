@@ -24,6 +24,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
     set(ANGLE_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../external/angle)
 
+
     set(BUILD_STANDALONE OFF)
     set(ENABLE_VKCEREAL_TESTS ON)
 
@@ -116,11 +117,12 @@ if(OPTION_GFXSTREAM_BACKEND)
         add_definitions(-DVIRGL_RENDERER_UNSTABLE_APIS)
     endif()
 
-    add_definitions("-I${ANGLE_REPO_ROOT}/include")
-
     if(UNIX AND NOT APPLE)
         set(LINUX TRUE)
     endif()
+
+    # TODO(http://b/257068626): bring back ANGLE shader translator
+    option(USE_ANGLE_SHADER_PARSER "Build with ANGLE shader parser." OFF)
 
     find_package(Threads)
     include(ExternalProject)
@@ -185,6 +187,11 @@ if(OPTION_GFXSTREAM_BACKEND)
     set(EXTRA_SUBDIR_TEST_INCLUDE_FILES)
     # Third party dependencies
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/stb ${GFXSTREAM_PREFIX}-third-party-stb)
+    # TODO(http://b/257068626): bring back ANGLE shader translator
+    # add_library(angle_shader_translator SHARED IMPORTED)
+    # set_target_properties(angle_shader_translator PROPERTIES IMPORTED_LOCATION "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libshadertranslator${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    add_library(gfxstream_egl_headers INTERFACE)
+    target_include_directories(gfxstream_egl_headers INTERFACE ${ANGLE_REPO_ROOT}/include)
 
     # Backends######################################################################
 
@@ -221,7 +228,8 @@ if(OPTION_GFXSTREAM_BACKEND)
         ${GFXSTREAM_INTERNAL_TARGETS}
         angle_common
         angle_shader_translator
-        renderdoc)
+        renderdoc
+        gfxstream_egl_headers)
    android_license(TARGET "${GFXSTREAM_DEPENDENCIES}"
                    LIBNAME gfxstream
                    URL "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master"
