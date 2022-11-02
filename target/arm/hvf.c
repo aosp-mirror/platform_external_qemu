@@ -33,6 +33,51 @@
 #include "sysemu/accel.h"
 #include "sysemu/sysemu.h"
 
+#define SYSREG_OP0_SHIFT      20
+#define SYSREG_OP0_MASK       0x3
+#define SYSREG_OP0(sysreg)    ((sysreg >> SYSREG_OP0_SHIFT) & SYSREG_OP0_MASK)
+#define SYSREG_OP1_SHIFT      14
+#define SYSREG_OP1_MASK       0x7
+#define SYSREG_OP1(sysreg)    ((sysreg >> SYSREG_OP1_SHIFT) & SYSREG_OP1_MASK)
+#define SYSREG_CRN_SHIFT      10
+#define SYSREG_CRN_MASK       0xf
+#define SYSREG_CRN(sysreg)    ((sysreg >> SYSREG_CRN_SHIFT) & SYSREG_CRN_MASK)
+#define SYSREG_CRM_SHIFT      1
+#define SYSREG_CRM_MASK       0xf
+#define SYSREG_CRM(sysreg)    ((sysreg >> SYSREG_CRM_SHIFT) & SYSREG_CRM_MASK)
+#define SYSREG_OP2_SHIFT      17
+#define SYSREG_OP2_MASK       0x7
+#define SYSREG_OP2(sysreg)    ((sysreg >> SYSREG_OP2_SHIFT) & SYSREG_OP2_MASK)
+
+#define SYSREG(op0, op1, crn, crm, op2) \
+    ((op0 << SYSREG_OP0_SHIFT) | \
+     (op1 << SYSREG_OP1_SHIFT) | \
+     (crn << SYSREG_CRN_SHIFT) | \
+     (crm << SYSREG_CRM_SHIFT) | \
+     (op2 << SYSREG_OP2_SHIFT))
+#define SYSREG_MASK \
+    SYSREG(SYSREG_OP0_MASK, \
+           SYSREG_OP1_MASK, \
+           SYSREG_CRN_MASK, \
+           SYSREG_CRM_MASK, \
+           SYSREG_OP2_MASK)
+#define SYSREG_OSLAR_EL1      SYSREG(2, 0, 1, 0, 4)
+#define SYSREG_OSLSR_EL1      SYSREG(2, 0, 1, 1, 4)
+#define SYSREG_OSDLR_EL1      SYSREG(2, 0, 1, 3, 4)
+#define SYSREG_CNTPCT_EL0     SYSREG(3, 3, 14, 0, 1)
+#define SYSREG_PMCR_EL0       SYSREG(3, 3, 9, 12, 0)
+#define SYSREG_PMUSERENR_EL0  SYSREG(3, 3, 9, 14, 0)
+#define SYSREG_PMCNTENSET_EL0 SYSREG(3, 3, 9, 12, 1)
+#define SYSREG_PMCNTENCLR_EL0 SYSREG(3, 3, 9, 12, 2)
+#define SYSREG_PMINTENCLR_EL1 SYSREG(3, 0, 9, 14, 2)
+#define SYSREG_PMOVSCLR_EL0   SYSREG(3, 3, 9, 12, 3)
+#define SYSREG_PMSWINC_EL0    SYSREG(3, 3, 9, 12, 4)
+#define SYSREG_PMSELR_EL0     SYSREG(3, 3, 9, 12, 5)
+#define SYSREG_PMCEID0_EL0    SYSREG(3, 3, 9, 12, 6)
+#define SYSREG_PMCEID1_EL0    SYSREG(3, 3, 9, 12, 7)
+#define SYSREG_PMCCNTR_EL0    SYSREG(3, 3, 9, 13, 0)
+#define SYSREG_PMCCFILTR_EL0  SYSREG(3, 3, 14, 15, 7)
+
 static const char kHVFVcpuSyncFailed[] = "Failed to sync HVF vcpu context";
 
 #define derror(msg) do { fprintf(stderr, (msg)); } while (0)
@@ -1238,6 +1283,15 @@ static void hvf_handle_smc(CPUState* cpu, uint32_t ec) {
     abort();
 }
 
+static bool is_id_sysreg(uint32_t reg)
+{
+    return SYSREG_OP0(reg) == 3 &&
+           SYSREG_OP1(reg) == 0 &&
+           SYSREG_CRN(reg) == 0 &&
+           SYSREG_CRM(reg) >= 1 &&
+           SYSREG_CRM(reg) < 8;
+}
+
 static void hvf_handle_sys_reg(CPUState* cpu) {
     DPRINTF("%s: call\n", __func__);
     uint32_t esr = cpu->hvf_vcpu_exit_info->exception.syndrome;
@@ -1246,20 +1300,28 @@ static void hvf_handle_sys_reg(CPUState* cpu) {
     unsigned long sys = esr & ESR_ELx_SYS64_ISS_SYS_MASK;
 
     DPRINTF("%s: sys reg 0x%lx %d\n", __func__, sys, is_write);
+
     switch (sys) {
+        // b/204582046 PMU related system registers, RAZ/WI
+        case SYSREG_PMCR_EL0:
+        case SYSREG_PMCNTENCLR_EL0:
+        case SYSREG_PMINTENCLR_EL1:
+        case SYSREG_PMOVSCLR_EL0:
         // Apple hardware does not implement OS Lock, handle the system registers as RAZ/WI.
-        case 0x280406:   // osdlr_el1
-        case 0x280400: { // oslar_el1
+        case SYSREG_OSDLR_EL1:
+        case SYSREG_OSLAR_EL1:
             if (!is_write) {
                 hvf_write_rt(cpu, rt, 0);
             }
             break;
-        }
         default:
-            DPRINTF("%s: sys reg unhandled\n", __func__);
-            // TODO: b/204582046
-            // We dont support  performance measurement unit on M1 yet
-            // but should consider implement that; for now ignore this
+            if (!is_write && is_id_sysreg(sys)) {
+                /* ID system registers read as RES0 */
+                hvf_write_rt(cpu, rt, 0);
+                break;
+            }
+            fprintf(stderr, "%s: sys reg 0x%lx unhandled\n", __func__, sys);
+            abort();
     }
 
     hvf_skip_instr(cpu);
