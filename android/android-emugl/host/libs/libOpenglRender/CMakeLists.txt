@@ -7,23 +7,17 @@ endif()
 # Adds the proper graphic driver dependencies to the given target.
 function(add_opengl_dependencies TGT)
   # And setup the depedencies
-  android_target_dependency(${TGT} windows_msvc-x86_64 SWIFTSHADER_DEPENDENCIES)
-  android_target_dependency(${TGT} linux-aarch64 SWIFTSHADER_DEPENDENCIES)
-  android_target_dependency(${TGT} linux-x86_64 ANGLE_RENDERER_DEPENDENCIES)
+  android_target_dependency(${TGT} windows SWIFTSHADER_DEPENDENCIES)
+  # b/257077718 Linux presubmit is flaky with SwANGLE
+  android_target_dependency(${TGT} linux SWIFTSHADER_DEPENDENCIES)
   android_target_dependency(${TGT} darwin ANGLE_RENDERER_DEPENDENCIES)
   android_target_dependency(${TGT} all ANGLE_DEPENDENCIES)
   android_target_dependency(${TGT} all VULKAN_DEPENDENCIES)
   android_target_dependency(${TGT} all VULKAN_TEST_DEPENDENCIES)
   android_target_properties(
     ${TGT}
-    linux-aarch64
+    linux
     "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader' -Wl,--disable-new-dtags"
-  )
-  # SwANGLE
-  android_target_properties(
-    ${TGT}
-    linux-x86_64
-    "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN/lib64/gles_angle' -Wl,--disable-new-dtags"
   )
   android_target_properties(
     ${TGT} darwin "INSTALL_RPATH>=@loader_path/lib64/gles_angle")
