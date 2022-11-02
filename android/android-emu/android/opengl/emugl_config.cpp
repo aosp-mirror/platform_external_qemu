@@ -206,11 +206,7 @@ bool emuglConfig_init(EmuglConfig* config,
     memset(config, 0, sizeof(*config));
 
     bool host_set_in_hwconfig = false;
-#if defined(__APPLE__) && defined(__aarch64__)
-    bool has_auto_no_window = true;
-#else
     bool has_auto_no_window = false;
-#endif
 
     bool hasUiPreference = uiPreferredBackend != WINSYS_GLESBACKEND_PREFERENCE_AUTO;
 
