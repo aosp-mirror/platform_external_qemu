@@ -2394,18 +2394,30 @@ extern "C" int main(int argc, char** argv) {
 
     // Network
     args.add("-netdev");
-    // Configure the tap device to use vmnet
-    if (opts->vmnet || opts->wifi_vmnet) {
-        args.addFormat("tap,id=mynet,ifname=%s,vmnet=on",
-                       opts->vmnet ? opts->vmnet : opts->wifi_vmnet);
-    } else if (opts->net_tap) {
+    if (opts->net_tap) {
         const char* upScript =
                 opts->net_tap_script_up ? opts->net_tap_script_up : "no";
         const char* downScript =
                 opts->net_tap_script_down ? opts->net_tap_script_down : "no";
         args.addFormat("tap,id=mynet,script=%s,downscript=%s,ifname=%s",
                        upScript, downScript, opts->net_tap);
-    } else {
+    }
+#if defined(__APPLE__)
+    else if (opts->vmnet_bridged) {
+        args.addFormat("vmnet-bridged,id=mynet,ifname=%s%s",
+                           opts->vmnet_bridged, opts->vmnet_isolated ? ",isolated=on" : "");
+    } else if (opts->vmnet_shared) {
+        if(opts->vmnet_start_address && opts->vmnet_end_address && opts->vmnet_subnet_mask) {
+            args.addFormat("vmnet-shared,id=mynet,start-address=%s,end-address=%s,subnet-mask=%s%s",
+                           opts->vmnet_start_address, opts->vmnet_end_address, opts->vmnet_subnet_mask,
+                           opts->vmnet_isolated ? ",isolated=on" : "");
+        } else {
+            args.addFormat("vmnet-shared,id=mynet%s",
+                           opts->vmnet_isolated ? ",isolated=on" : "");
+        }
+    }
+#endif
+    else {
         if (opts->net_tap_script_up) {
             dwarning("-net-tap-script-up ignored without -net-tap option");
         }
@@ -2594,10 +2606,7 @@ extern "C" int main(int argc, char** argv) {
     initialize_virtio_input_devs(args, hw);
     if (feature_is_enabled(kFeature_VirtioWifi)) {
         args.add("-netdev");
-        if (opts->vmnet || opts->wifi_vmnet) {
-            args.addFormat("tap,id=virtio-wifi,ifname=%s,vmnet=on",
-                           opts->vmnet ? opts->vmnet : opts->wifi_vmnet);
-        } else if (opts->wifi_tap) {
+        if (opts->wifi_tap) {
             const char* upScript =
                     opts->wifi_tap_script_up ? opts->wifi_tap_script_up : "no";
             const char* downScript = opts->wifi_tap_script_down
@@ -2606,7 +2615,23 @@ extern "C" int main(int argc, char** argv) {
             args.addFormat(
                     "tap,id=virtio-wifi,script=%s,downscript=%s,ifname=%s",
                     upScript, downScript, opts->wifi_tap);
-        } else {
+        }
+#if defined(__APPLE__)
+        else if (opts->vmnet_bridged) {
+            args.addFormat("vmnet-bridged,id=virtio-wifi,ifname=%s%s",
+                           opts->vmnet_bridged, opts->vmnet_isolated ? ",isolated=on" : "");
+        } else if (opts->vmnet_shared) {
+            if(opts->vmnet_start_address && opts->vmnet_end_address && opts->vmnet_subnet_mask) {
+                args.addFormat("vmnet-shared,id=virtio-wifi,start-address=%s,end-address=%s,subnet-mask=%s%s",
+                               opts->vmnet_start_address, opts->vmnet_end_address, opts->vmnet_subnet_mask,
+                               opts->vmnet_isolated ? ",isolated=on" : "");
+            } else {
+                args.addFormat("vmnet-shared,id=virtio-wifi%s",
+                               opts->vmnet_isolated ? ",isolated=on" : "");
+            }
+        }
+#endif
+        else {
             if (opts->wifi_tap_script_up) {
                 dwarning(
                         "-wifi-tap-script-up ignored without -wifi-tap option");

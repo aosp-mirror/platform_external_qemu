@@ -743,7 +743,11 @@
 {
 .name       = "netdev_add",
 .args_type  = "netdev:O",
-.params     = "[user|tap|socket|vde|bridge|hubport|netmap|vhost-user],id=str[,prop=value][,...]",
+.params     = "[user|tap|socket|vde|bridge|hubport|netmap|vhost-user"
+#if defined(__APPLE__)
+"|vmnet-host|vmnet-shared|vmnet-bridged"
+#endif
+"],id=str[,prop=value][,...]",
 .help       = "add host network device",
 .cmd        = hmp_netdev_add,
 .command_completion = netdev_add_completion,
