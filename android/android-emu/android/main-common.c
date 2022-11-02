@@ -1552,8 +1552,12 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
               "indiviudal line launch with the -log-nofilter flag.");
     }
 
-    if (opts->log_detailed) {
+    if (opts->log_detailed || VERBOSE_CHECK(log)) {
         log_opts |= kLogEnableVerbose;
+    }
+
+    if (VERBOSE_CHECK(time)) {
+        log_opts |= kLogEnableTime;
     }
 
     base_configure_logs(log_opts);
