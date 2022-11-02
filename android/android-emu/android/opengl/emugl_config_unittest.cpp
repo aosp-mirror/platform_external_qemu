@@ -272,7 +272,12 @@ TEST(EmuglConfig, initFromUISetting) {
             EXPECT_STREQ("angle_indirect", config.backend);
             break;
         case 3:
+#ifdef __APPLE__
+            // Mac redirects swiftshader to swangle
+            EXPECT_STREQ("swangle_indirect", config.backend);
+#else
             EXPECT_STREQ("swiftshader_indirect", config.backend);
+#endif
             break;
         case 4:
             EXPECT_STREQ("host", config.backend);
@@ -326,6 +331,9 @@ TEST(EmuglConfig, initGLESv2Only) {
 }
 
 TEST(EmuglConfig, initNxWithSwiftshader) {
+#ifdef __APPLE__
+    GTEST_SKIP() << "Mac uses swangle.";
+#endif
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
@@ -382,6 +390,9 @@ TEST(EmuglConfig, initNxWithoutSwiftshader) {
 }
 
 TEST(EmuglConfig, initChromeRemoteDesktopWithSwiftshader) {
+#ifdef __APPLE__
+    GTEST_SKIP() << "Mac uses swangle.";
+#endif
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
@@ -438,24 +449,31 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutSwiftshader) {
 }
 
 TEST(EmuglConfig, initNoWindowWithSwiftshader) {
-#if defined(__aarch64__) && defined(__APPLE__)
-    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
-#endif
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
+#ifdef __APPLE__
+    makeSwAngleSubDirAndFiles(myDir);
+#else
     makeSwiftshaderSubDirAndFiles(myDir);
+#endif
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, true, false, false,
                 WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
     EXPECT_TRUE(config.enabled);
+#ifdef __APPLE__
+    EXPECT_STREQ("swangle_indirect", config.backend);
+    EXPECT_STREQ("GPU emulation enabled using 'swangle_indirect' mode",
+            config.status);
+#else
     EXPECT_STREQ("swiftshader_indirect", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader_indirect' mode",
             config.status);
+#endif
 }
 
 TEST(EmuglConfig, initWithSwiftshaderCheckVulkanEnvVar) {
@@ -464,7 +482,11 @@ TEST(EmuglConfig, initWithSwiftshaderCheckVulkanEnvVar) {
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
+#ifdef __APPLE__
+    makeSwAngleSubDirAndFiles(myDir);
+#else
     makeSwiftshaderSubDirAndFiles(myDir);
+#endif
 
     // Do not force use host vulkan
     {
@@ -490,9 +512,6 @@ TEST(EmuglConfig, initWithSwiftshaderCheckVulkanEnvVar) {
 }
 
 TEST(EmuglConfig, initNoWindowWithoutSwiftshader) {
-#if defined(__aarch64__) && defined(__APPLE__)
-    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
-#endif
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
