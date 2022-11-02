@@ -57,6 +57,7 @@ class ConfigureTask(BuildTask):
         sanitizer: List[str],
         options: List[str],
         ccache: str,
+        thread_safety: bool,
     ):
         super().__init__()
         self.toolchain = Toolchain(aosp, target)
@@ -89,6 +90,9 @@ class ConfigureTask(BuildTask):
 
         if gfxstream_only:
             self.with_gfxstream_only()
+
+        if thread_safety:
+            self.with_thread_safety()
 
         if self._find_ccache(aosp, ccache):
             self.with_ccache(self._find_ccache(aosp, ccache))
@@ -155,6 +159,9 @@ class ConfigureTask(BuildTask):
 
     def with_gfxstream_only(self):
         return self.add_option("GFXSTREAM_ONLY", True)
+
+    def with_thread_safety(self):
+        return self.add_option("OPTION_CLANG_THREAD_SAFETY_CHECKS", True)
 
     def with_options(self, raw_options):
         if raw_options:

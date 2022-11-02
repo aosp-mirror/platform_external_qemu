@@ -68,6 +68,7 @@ def get_tasks(args) -> List[BuildTask]:
             gfxstream_only=args.gfxstream_only,
             options=args.cmake_option,
             ccache=args.ccache,
+            thread_safety=args.thread_safety,
         ),
         CompileTask(args.aosp, args.out),
         CTestTask(
@@ -165,6 +166,13 @@ def launch():
         "--sanitizer",
         action="append",
         help="List of sanitizers ([address, thread]) to enable in the built binaries.",
+    )
+    parser.add_argument(
+        "--enable-thread-safety-checks",
+        dest="thread_safety",
+        default=False,
+        action="store_true",
+        help="Enable clang thread-safety compile-time checks (-Wthread-safety)",
     )
     parser.add_argument(
         "--target",
