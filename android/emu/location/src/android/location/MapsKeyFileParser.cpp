@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/location/MapsKeyFileParser.h"
-#include "android/base/files/PathUtils.h"      // for PathUtils
+#include "aemu/base/files/PathUtils.h"      // for PathUtils
 
 #include <fstream>
 #include <sstream>
@@ -29,7 +29,7 @@ std::string parseMapsKeyFromFile(const std::string_view& file) {
     std::ifstream fin;
     std::string apikey;
 
-    fin.open(PathUtils::asUnicodePath(file).c_str(), std::ifstream::in);
+    fin.open(PathUtils::asUnicodePath(file.data()).c_str(), std::ifstream::in);
     if (!fin.good()) {
         return "";
     }

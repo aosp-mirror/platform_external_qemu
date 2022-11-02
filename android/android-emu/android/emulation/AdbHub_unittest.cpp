@@ -11,11 +11,11 @@
 
 #include "android/emulation/AdbHub.h"
 
-#include "android/base/files/MemStream.h"
-#include "android/base/files/ScopedStdioFile.h"
-#include "android/base/files/StdioStream.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/files/MemStream.h"
+#include "aemu/base/files/ScopedStdioFile.h"
+#include "aemu/base/files/StdioStream.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/emulation/apacket_utils.h"
 

@@ -17,7 +17,7 @@
 #pragma once
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
-#include "android/base/async/ThreadLooper.h"
+#include "aemu/base/async/ThreadLooper.h"
 #include "android/camera/camera-virtualscene-utils.h"
 #include "android/videoplayback/VideoplaybackRenderTarget.h"
 

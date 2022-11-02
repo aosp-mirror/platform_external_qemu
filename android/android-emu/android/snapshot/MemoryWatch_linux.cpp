@@ -11,11 +11,11 @@
 
 #include "android/snapshot/MemoryWatch.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/Debug.h"
-#include "android/base/EintrWrapper.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/Debug.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/files/ScopedFd.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/debug.h"
 

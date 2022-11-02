@@ -15,7 +15,7 @@
 #pragma once
 
 #include <stdint.h>                  // for uint32_t
-#include "android/base/export.h"
+#include "aemu/base/export.h"
 #include "android/utils/compiler.h"  // for ANDROID_BEGIN_HEADER, ANDROID_EN...
 
 ANDROID_BEGIN_HEADER

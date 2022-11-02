@@ -15,11 +15,11 @@
 */
 #pragma once
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/files/Stream.h"
-#include "android/base/files/StreamSerializing.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/Compiler.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/files/StreamSerializing.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/Compiler.h"
 
 #include <algorithm>
 #include <cstdint>

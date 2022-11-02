@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/async/ThreadLooper.h"
+#include "aemu/base/async/ThreadLooper.h"
 #include "android/emulation/AdbHub.h"
 #include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbVsockPipe.h"

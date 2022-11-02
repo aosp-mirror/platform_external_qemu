@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/FileSystemWatcher.h"
+#include "aemu/base/files/FileSystemWatcher.h"
 
 #include <gtest/gtest.h>  // for Message, TestPartResult
 #include <fstream>        // for endl
@@ -25,7 +25,7 @@
 #include "android/base/testing/TestTempDir.h"  // for TestTempDir
 #include "gtest/gtest.h"                       // for AssertionResult, EXPEC...
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 namespace android {
 namespace base {
 using android::base::pj;

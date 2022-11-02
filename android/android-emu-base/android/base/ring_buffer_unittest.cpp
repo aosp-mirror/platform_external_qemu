@@ -8,10 +8,10 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/ring_buffer.h"
+#include "aemu/base/ring_buffer.h"
 
 #include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/threads/FunctorThread.h"
 
 #include <gtest/gtest.h>
 

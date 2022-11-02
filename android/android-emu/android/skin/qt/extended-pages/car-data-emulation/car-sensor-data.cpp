@@ -25,7 +25,7 @@
 #include <QTextStream>    // for QSlider
 #include <utility>        // for move
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/skin/qt/error-dialog.h"  // for showErrorDialog
 #include "android/utils/debug.h"           // for VERBOSE_PRINT

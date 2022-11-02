@@ -16,7 +16,7 @@
 
 #include "android/camera/camera-videoplayback.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/camera/camera-format-converters.h"
 #include "android/camera/camera-videoplayback-render-multiplexer.h"
 

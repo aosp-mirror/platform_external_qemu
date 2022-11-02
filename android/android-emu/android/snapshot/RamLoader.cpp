@@ -12,16 +12,16 @@
 #include "android/snapshot/RamLoader.h"
 
 #include "android/avd/info.h"
-#include "android/base/ArraySize.h"
-#include "android/base/memory/ContiguousRangeMapper.h"
-#include "android/base/EintrWrapper.h"
-#include "android/base/Profiler.h"
-#include "android/base/Stopwatch.h"
-#include "android/base/files/MemStream.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/preadwrite.h"
-#include "android/base/memory/MemoryHints.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/memory/ContiguousRangeMapper.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/Profiler.h"
+#include "aemu/base/Stopwatch.h"
+#include "aemu/base/files/MemStream.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/preadwrite.h"
+#include "aemu/base/memory/MemoryHints.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
 #include "android/snapshot/PathUtils.h"
@@ -42,6 +42,7 @@ using android::base::MemStream;
 using android::base::PathUtils;
 using android::base::ScopedMemoryProfiler;
 using android::base::Stopwatch;
+using android::base::ThreadPoolWorkerId;
 
 namespace android {
 namespace snapshot {
@@ -834,7 +835,7 @@ bool RamLoader::readAllPages() {
 }
 
 void RamLoader::startDecompressor() {
-    mDecompressor.emplace([this](Page* page) {
+    mDecompressor.emplace([this](Page* page, ThreadPoolWorkerId workerId) {
         const bool res = Decompressor::decompress(
                 page->data, int32_t(page->sizeOnDisk), pagePtr(*page),
                 int32_t(pageSize(*page)));

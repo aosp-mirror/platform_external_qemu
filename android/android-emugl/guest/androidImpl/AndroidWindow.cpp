@@ -15,7 +15,7 @@
 
 #include "AndroidHostCommon.h"
 
-#include "android/base/Backtrace.h"
+#include "aemu/base/Backtrace.h"
 
 #include <errno.h>
 #include <hardware/gralloc.h>

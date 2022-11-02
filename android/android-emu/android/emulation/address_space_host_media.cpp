@@ -14,7 +14,7 @@
 
 #include "android/emulation/address_space_host_media.h"
 #include "android/emulation/control/vm_operations.h"
-#include "android/base/AlignedBuf.h"
+#include "aemu/base/AlignedBuf.h"
 
 #define AS_DEVICE_DEBUG 0
 

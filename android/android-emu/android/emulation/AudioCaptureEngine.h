@@ -14,9 +14,9 @@
 
 #pragma once
 
-#include "android/base/export.h"
-#include "android/base/Compiler.h"
-#include "android/base/Log.h"
+#include "aemu/base/export.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Log.h"
 
 namespace android {
 namespace emulation {

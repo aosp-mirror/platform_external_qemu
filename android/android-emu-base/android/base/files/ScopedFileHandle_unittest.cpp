@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/ScopedFileHandle.h"
+#include "aemu/base/files/ScopedFileHandle.h"
 
 #include <gtest/gtest.h>
 

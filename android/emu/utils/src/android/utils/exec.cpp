@@ -11,7 +11,7 @@
 
 #include "android/utils/exec.h"
 
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"

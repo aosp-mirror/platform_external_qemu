@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/synchronization/MessageChannel.h"
+
+#include "android/base/system/System.h"
 
 namespace android {
 namespace base {
@@ -96,7 +98,7 @@ Optional<size_t> MessageChannelBase::beforeTryRead() {
 }
 
 Optional<size_t> MessageChannelBase::beforeTimedRead(
-        System::Duration wallTimeUs) {
+        uint64_t wallTimeUs) {
     mLock.lock();
 
     while (mCount == 0 && !mStopped) {

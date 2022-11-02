@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/ProcessControl.h"
+#include "aemu/base/ProcessControl.h"
 
 #include <stddef.h>  // for size_t
 
@@ -19,11 +19,11 @@
 #include <sstream>
 #include <string_view>
 
-#include "android/base/FunctionView.h"         // for FunctionView
-#include "android/base/Optional.h"             // for Optional, kNullopt
-#include "android/base/files/PathUtils.h"      // for PathUtils
-#include "android/base/memory/LazyInstance.h"  // for LazyInstance, LAZY_INS...
-#include "android/base/process-control.h"      // for handle_emulator_restart
+#include "aemu/base/FunctionView.h"         // for FunctionView
+#include "aemu/base/Optional.h"             // for Optional, kNullopt
+#include "aemu/base/files/PathUtils.h"      // for PathUtils
+#include "aemu/base/memory/LazyInstance.h"  // for LazyInstance, LAZY_INS...
+#include "aemu/base/process-control.h"      // for handle_emulator_restart
 #include "android/base/system/System.h"        // for System
 
 using android::base::PathUtils;
@@ -173,7 +173,7 @@ ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc,
 
 void saveLaunchParameters(const ProcessLaunchParameters& launchParams,
                           std::string_view filename) {
-    std::ofstream file(PathUtils::asUnicodePath(filename).c_str());
+    std::ofstream file(PathUtils::asUnicodePath(filename.data()).c_str());
 
     file << launchParams.workingDirectory << std::endl;
     file << launchParams.programPath << std::endl;
@@ -188,7 +188,7 @@ void saveLaunchParameters(const ProcessLaunchParameters& launchParams,
 ProcessLaunchParameters loadLaunchParameters(std::string_view filename) {
     ProcessLaunchParameters res;
 
-    std::ifstream file(PathUtils::asUnicodePath(filename).c_str());
+    std::ifstream file(PathUtils::asUnicodePath(filename.data()).c_str());
 
     std::string line;
 

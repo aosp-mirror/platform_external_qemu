@@ -20,7 +20,7 @@
 
 #include "android/camera/camera-service.h"
 
-#include "android/base/threads/WorkerThread.h"
+#include "aemu/base/threads/WorkerThread.h"
 #include "android/boot-properties.h"
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
@@ -862,9 +862,7 @@ struct CameraClient
           }) {};
 
     ~CameraClient() {
-        if (eventHandlerThread.isStarted()) {
-            eventHandlerThread.enqueue({END, nullptr, 0, nullptr});
-        }
+        eventHandlerThread.enqueue({END, nullptr, 0, nullptr});
         eventHandlerThread.join();
 
         if (camera_info != NULL) {

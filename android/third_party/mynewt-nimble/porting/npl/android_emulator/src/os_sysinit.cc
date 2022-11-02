@@ -17,8 +17,8 @@
 
 // This contains the system initialization routines.
 
-#include "android/base/async/RecurrentTask.h"
-#include "android/base/async/ThreadLooper.h"
+#include "aemu/base/async/RecurrentTask.h"
+#include "aemu/base/async/ThreadLooper.h"
 #include <atomic>
 extern "C" {
 #include "nimble/nimble_npl.h"

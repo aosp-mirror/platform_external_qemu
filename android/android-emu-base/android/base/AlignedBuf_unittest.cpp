@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/AlignedBuf.h"
+#include "aemu/base/AlignedBuf.h"
 
-#include "android/base/ArraySize.h"
+#include "aemu/base/ArraySize.h"
 
 #include <gtest/gtest.h>
 

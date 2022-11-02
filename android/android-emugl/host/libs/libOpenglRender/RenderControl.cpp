@@ -31,7 +31,7 @@
 
 #include "android/utils/debug.h"
 
-#include "android/base/Tracing.h"
+#include "aemu/base/Tracing.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/sync_device.h"

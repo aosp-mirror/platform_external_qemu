@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/Optional.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Optional.h"
 #include "android/base/system/System.h"
 #include "android/snapshot/common.h"
 
@@ -52,7 +52,7 @@ public:
         bool incrementallySaved = false;
         bool compressedRam = false;
         bool compressedTextures = false;
-        base::System::MemUsage memUsage;
+        base::MemUsage memUsage;
         bool usingHDD = false;
         int64_t diskSize = 0;
         int64_t ramSize = 0;

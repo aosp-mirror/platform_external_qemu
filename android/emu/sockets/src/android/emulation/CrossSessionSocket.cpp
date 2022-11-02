@@ -11,15 +11,17 @@
 
 #include "android/emulation/CrossSessionSocket.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include <unordered_map>
 
 #ifdef _WIN32
-#include "android/base/sockets/Winsock.h"
+#include "aemu/base/sockets/Winsock.h"
 #else
 #include <sys/socket.h>
+
+#include <cstring>
 #endif
 
 #define DEBUG 0

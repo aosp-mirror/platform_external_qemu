@@ -23,9 +23,9 @@
 
 #include "android/automation/AutomationController.h"
 #include "android/automation/AutomationEventSink.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StdioStream.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StdioStream.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
@@ -1385,7 +1385,7 @@ int PhysicalModelImpl::recordGroundTruth(const char* filename) {
     }
 
     std::string path = filename;
-    if (!PathUtils::isAbsolute(path)) {
+    if (!PathUtils::isAbsolute(path.data())) {
         path = PathUtils::join(System::get()->getHomeDirectory(), filename);
     }
 

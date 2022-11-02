@@ -90,24 +90,24 @@ This will produce a file like this:
 warning: argument unused during compilation: '-fuse-ld=/usr/local/google/home/jansene/src/emu-master-dev/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ld'
 warning: argument unused during compilation: '-fuse-ld=/usr/local/google/home/jansene/src/emu-master-dev/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/bin/x86_64-linux-ld'
 
-android/android-emu/android/base/Optional.h should add these lines:
+android/android-emu/aemu/base/Optional.h should add these lines:
 #include <new>                        // for operator new
 
-android/android-emu/android/base/Optional.h should remove these lines:
+android/android-emu/aemu/base/Optional.h should remove these lines:
 - #include <cassert>  // lines 17-17
 - #include <utility>  // lines 20-20
 
-The full include-list for android/android-emu/android/base/Optional.h:
+The full include-list for android/android-emu/aemu/base/Optional.h:
 #include <cstddef>                    // for size_t
 #include <initializer_list>           // for initializer_list
 #include <new>                        // for operator new
 #include <type_traits>                // for move, decay, forward, is_constr...
-#include "android/base/Log.h"         // for CHECK, LogMessage
-#include "android/base/TypeTraits.h"  // for enable_if_convertible, enable_if_c
+#include "aemu/base/Log.h"         // for CHECK, LogMessage
+#include "aemu/base/TypeTraits.h"  // for enable_if_convertible, enable_if_c
 namespace android { namespace base { template <class T> class Optional; } }  // lines 143-144
 ---
 
-/usr/local/google/home/jansene/src/emu-master-dev/external/qemu/android/android-emu/android/base/Optional_unittest.cpp should add these lines:
+/usr/local/google/home/jansene/src/emu-master-dev/external/qemu/android/android-emu/aemu/base/Optional_unittest.cpp should add these lines:
 #include <gtest/gtest-message.h>    // for Message
 #include <gtest/gtest-test-part.h>  // for TestPartResult
 #include <stdint.h>                 // for int64_t, int16_t, int32_t
@@ -119,11 +119,11 @@ namespace android { namespace base { template <class T> class Optional; } }  // 
 #include "string"                   // for basic_string
 #include "type_traits"              // for move, integral_constant<>::value
 
-/usr/local/google/home/jansene/src/emu-master-dev/external/qemu/android/android-emu/android/base/Optional_unittest.cpp should remove these lines:
+/usr/local/google/home/jansene/src/emu-master-dev/external/qemu/android/android-emu/aemu/base/Optional_unittest.cpp should remove these lines:
 - #include <gtest/gtest.h>  // lines 15-15
 
-The full include-list for /usr/local/google/home/jansene/src/emu-master-dev/external/qemu/android/android-emu/android/base/Optional_unittest.cpp:
-#include "android/base/Optional.h"
+The full include-list for /usr/local/google/home/jansene/src/emu-master-dev/external/qemu/android/android-emu/aemu/base/Optional_unittest.cpp:
+#include "aemu/base/Optional.h"
 #include <gtest/gtest-message.h>    // for Message
 #include <gtest/gtest-test-part.h>  // for TestPartResult
 #include <stdint.h>                 // for int64_t, int16_t, int32_t

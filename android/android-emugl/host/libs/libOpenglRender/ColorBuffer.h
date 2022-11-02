@@ -20,7 +20,7 @@
 #include <EGL/eglext.h>
 #include <GLES/gl.h>
 #include <GLES3/gl3.h>
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 #include "android/skin/rect.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "emugl/common/smart_ptr.h"

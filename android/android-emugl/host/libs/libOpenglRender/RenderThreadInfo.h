@@ -16,7 +16,7 @@
 #ifndef _LIB_OPENGL_RENDER_THREAD_INFO_H
 #define _LIB_OPENGL_RENDER_THREAD_INFO_H
 
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 #include "RenderContext.h"
 #include "WindowSurface.h"
 #include "GLESv1Decoder.h"

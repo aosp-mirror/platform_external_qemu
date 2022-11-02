@@ -20,12 +20,12 @@
 #include <string>                                // for basic_string
 #include <string_view>
 
-#include "android/base/Compiler.h"               // for DISALLOW_COPY_AND_AS...
-#include "android/base/Optional.h"               // for Optional
+#include "aemu/base/Compiler.h"               // for DISALLOW_COPY_AND_AS...
+#include "aemu/base/Optional.h"               // for Optional
 
-#include "android/base/files/PathUtils.h"        // for PathUtils
+#include "aemu/base/files/PathUtils.h"        // for PathUtils
 #include "android/base/system/System.h"          // for System
-#include "android/base/threads/FunctorThread.h"  // for FunctorThread
+#include "aemu/base/threads/FunctorThread.h"  // for FunctorThread
 #include "android/curl-support.h"                // for curl_download
 
 #define DEBUG 0
@@ -111,7 +111,7 @@ bool StudioMapsKeyImpl::downloadMapsFile() {
 
     D("got: %s", res.c_str());
 
-    std::ofstream outFile(PathUtils::asUnicodePath(mMapsFile).c_str(),
+    std::ofstream outFile(PathUtils::asUnicodePath(mMapsFile.c_str()).c_str(),
                           std::ios_base::trunc);
     if (!outFile) {
         D("not valid file: %s\n", mMapsFile.c_str());

@@ -16,11 +16,11 @@
 #include "shared_fd.h"
 #include "shared_select.h"
 
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android-base/logging.h"
 
 #ifdef _WIN32
-#include "android/base/sockets/Winsock.h"
+#include "aemu/base/sockets/Winsock.h"
 #else
 #include <errno.h>
 #include <fcntl.h>

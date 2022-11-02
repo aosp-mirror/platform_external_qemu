@@ -11,15 +11,15 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/EnumFlags.h"
-#include "android/base/containers/SmallVector.h"
-#include "android/base/files/StdioStream.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/EnumFlags.h"
+#include "aemu/base/containers/SmallVector.h"
+#include "aemu/base/files/StdioStream.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/base/threads/ThreadPool.h"
+#include "aemu/base/threads/FunctorThread.h"
+#include "aemu/base/threads/ThreadPool.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/FastReleasePool.h"
 #include "android/snapshot/GapTracker.h"

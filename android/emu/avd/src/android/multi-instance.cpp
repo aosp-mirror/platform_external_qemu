@@ -11,10 +11,10 @@
 
 #include "android/multi-instance.h"
 
-#include "android/base/files/FileShareOpen.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/files/FileShareOpen.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/console.h"
 #include "android/utils/debug.h"
 #include "android/avd/info.h"

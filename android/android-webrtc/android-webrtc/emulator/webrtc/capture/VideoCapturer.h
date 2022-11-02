@@ -14,7 +14,7 @@
 #pragma once
 #include <absl/types/optional.h>
 #include <api/video/video_frame.h>
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 
 namespace emulator {
 namespace webrtc {

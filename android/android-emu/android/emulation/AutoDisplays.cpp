@@ -16,7 +16,7 @@
 
 #include "AutoDisplays.h"
 #include "android/avd/info.h"
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 namespace android {
 namespace automotive

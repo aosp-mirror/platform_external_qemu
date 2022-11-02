@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/process/Command.h"
+#include "aemu/base/process/Command.h"
 
 #include <windows.h>
 #include <cassert>
 #include <string_view>
-#include "android/base/files/ScopedFileHandle.h"
-#include "android/base/streams/RingStreambuf.h"
+#include "aemu/base/files/ScopedFileHandle.h"
+#include "aemu/base/streams/RingStreambuf.h"
 
 #include <psapi.h>
 

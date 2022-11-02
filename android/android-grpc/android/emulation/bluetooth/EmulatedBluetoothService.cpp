@@ -24,8 +24,8 @@
 #include <utility>
 #include <vector>
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/ScopedFd.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/ScopedFd.h"
 #include "android/base/system/System.h"
 #include "android/bluetooth/rootcanal/net/multi_datachannel_server.h"
 #include "android/emulation/ConfigDirs.h"
@@ -380,7 +380,7 @@ public:
         }
 
         std::ofstream out(
-                android::base::PathUtils::asUnicodePath(temp_file_path).c_str(),
+                android::base::PathUtils::asUnicodePath(temp_file_path.data()).c_str(),
                 std::ios::out | std::ios::binary);
         request->SerializeToOstream(&out);
         std::vector<std::string> cmdArgs{executable, "--with_device_proto",

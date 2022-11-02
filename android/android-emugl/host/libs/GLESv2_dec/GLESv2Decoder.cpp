@@ -17,8 +17,8 @@
 #include "GLESv2Decoder.h"
 #include "GLESv2Dispatch.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include "emugl/common/dma_device.h"
 #include "emugl/common/vm_operations.h"

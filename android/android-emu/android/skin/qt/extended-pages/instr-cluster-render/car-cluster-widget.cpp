@@ -17,7 +17,7 @@
 #include <qnamespace.h>                         // for AlignCenter, black
 #include <QPainter>                             // for QPainter
 
-#include "android/base/threads/WorkerThread.h"  // for WorkerProcessingResult
+#include "aemu/base/threads/WorkerThread.h"  // for WorkerProcessingResult
 
 class QImage;
 class QPaintEvent;

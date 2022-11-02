@@ -13,9 +13,9 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/BumpPool.h"
-#include "android/base/files/Stream.h"
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/BumpPool.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/files/StreamSerializing.h"
 
 #include "VulkanHandleMapping.h"
 #include "common/goldfish_vk_private_defs.h"

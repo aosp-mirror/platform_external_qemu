@@ -1,7 +1,7 @@
 #include "android/cmdline-option.h"
 
 #include <android/utils/x86_cpuid.h>
-#include "android/base/ArraySize.h"
+#include "aemu/base/ArraySize.h"
 #include "android/constants.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"

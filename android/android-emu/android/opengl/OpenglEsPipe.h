@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 #include "android/emulation/AndroidPipe.h"
 
 #include "OpenglRender/RenderChannel.h"

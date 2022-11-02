@@ -32,8 +32,8 @@
 #include "model/hci/hci_sniffer.h"
 #include "model/setup/device_boutique.h"
 
-#include "android/base/async/ThreadLooper.h"  // for ThreadLooper
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/async/ThreadLooper.h"  // for ThreadLooper
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"  // for derror
 #include "android/utils/path.h"

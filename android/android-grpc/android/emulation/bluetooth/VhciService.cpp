@@ -22,7 +22,7 @@
 #include <type_traits>  // for remove_...
 #include <vector>       // for vector
 
-#include "android/base/async/ThreadLooper.h"  // for ThreadLooper
+#include "aemu/base/async/ThreadLooper.h"  // for ThreadLooper
 #include "android/console.h"  // for getConsoleAgents, AndroidCons...
 #include "android/emulation/bluetooth/HciAsyncDataChannelAdapter.h"
 #include "android/utils/debug.h"   // for dwarning

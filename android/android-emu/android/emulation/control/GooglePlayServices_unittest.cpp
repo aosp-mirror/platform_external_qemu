@@ -14,7 +14,7 @@
 
 #include "android/emulation/control/GooglePlayServices.h"
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"

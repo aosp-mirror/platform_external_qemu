@@ -15,7 +15,7 @@
 
 #include <algorithm>
 
-#include "android/base/files/ScopedFd.h"
+#include "aemu/base/files/ScopedFd.h"
 #include "android/protobuf/LoadSave.h"
 #include "google/protobuf/text_format.h"
 

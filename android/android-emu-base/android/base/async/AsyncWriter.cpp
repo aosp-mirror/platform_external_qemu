@@ -1,7 +1,7 @@
-#include "android/base/async/AsyncWriter.h"
+#include "aemu/base/async/AsyncWriter.h"
 
-#include "android/base/sockets/SocketErrors.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/sockets/SocketErrors.h"
+#include "aemu/base/sockets/SocketUtils.h"
 
 namespace android {
 namespace base {

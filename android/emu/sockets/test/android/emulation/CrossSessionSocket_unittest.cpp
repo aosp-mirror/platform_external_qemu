@@ -11,8 +11,8 @@
 
 #include "android/emulation/CrossSessionSocket.h"
 
-#include "android/base/files/InplaceStream.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/files/InplaceStream.h"
+#include "aemu/base/sockets/SocketUtils.h"
 
 #include <cstring>
 #include <gtest/gtest.h>

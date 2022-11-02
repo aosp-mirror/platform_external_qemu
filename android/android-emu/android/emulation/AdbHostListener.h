@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/async/AsyncSocketServer.h"
+#include "aemu/base/async/AsyncSocketServer.h"
 #include "android/emulation/AdbTypes.h"
 
 #include <memory>

@@ -15,10 +15,10 @@
 #pragma once
 
 #include "automation.pb.h"
-#include "android/base/Compiler.h"
-#include "android/base/async/Looper.h"
-#include "android/base/files/Stream.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include <unordered_map>
 #include <unordered_set>

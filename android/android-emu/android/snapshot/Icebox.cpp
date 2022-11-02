@@ -26,16 +26,16 @@
 #include <memory>                                            // for unique_ptr
 #include <vector>                                            // for vector
 
-#include "android/base/Log.h"                 // for CHECK
-#include "android/base/async/ThreadLooper.h"  // for ThreadLo...
-#include "android/base/files/PathUtils.h"     // for pj
-#include "android/base/files/ScopedFd.h"
-#include "android/base/sockets/SocketUtils.h"                // for socketSe...
-#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
-#include "android/base/synchronization/Lock.h"               // for Lock
+#include "aemu/base/Log.h"                 // for CHECK
+#include "aemu/base/async/ThreadLooper.h"  // for ThreadLo...
+#include "aemu/base/files/PathUtils.h"     // for pj
+#include "aemu/base/files/ScopedFd.h"
+#include "aemu/base/sockets/SocketUtils.h"                // for socketSe...
+#include "aemu/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "aemu/base/synchronization/Lock.h"               // for Lock
 #include "android/base/system/System.h"                      // for System
-#include "android/base/threads/FunctorThread.h"              // for FunctorT...
-#include "android/base/threads/Thread.h"                     // for Thread
+#include "aemu/base/threads/FunctorThread.h"              // for FunctorT...
+#include "aemu/base/threads/Thread.h"                     // for Thread
 #include "android/console.h"                                 // for getConso...
 #include "android/emulation/apacket_utils.h"                 // for apacket
 #include "android/emulation/control/vm_operations.h"         // for QAndroid...
@@ -46,7 +46,7 @@
 #include "openssl/base.h"                // for RSA
 #include "openssl/nid.h"                 // for NID_sha1
 #include "studio_stats.pb.h"
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
 
 #define DEBUG 0
 

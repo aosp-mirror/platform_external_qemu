@@ -8,7 +8,7 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/files/FileSystemWatcher.h"  // for FileSystemWatcher:...
+#include "aemu/base/files/FileSystemWatcher.h"  // for FileSystemWatcher:...
 
 #include <algorithm>      // for set_difference
 #include <atomic>         // for atomic_bool
@@ -20,12 +20,12 @@
 #include <vector>         // for vector
 
 #include "android/base/system/System.h"  // for System
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 #include "android/utils/debug.h"  // for derror
 
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/synchronization/Event.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/synchronization/Event.h"
 
 #define DEBUG 0
 

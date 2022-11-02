@@ -37,9 +37,9 @@
 #include "android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.h"
 #include "android/skin/qt/extended-pages/car-data-emulation/vehicle_constants_generated.h"
 #include "android/skin/qt/raised-material-button.h"
-#include "android/base/Log.h"                               // for LogStream...
+#include "aemu/base/Log.h"                               // for LogStream...
 #include "android/avd/info.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/console.h"  // for getConsoleAgents, AndroidCons...
 
 #include "ui_vhal-table.h"

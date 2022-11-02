@@ -12,11 +12,11 @@
 
 #include "android/utils/path.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 
 #include <string>
 #include <string_view>
@@ -78,7 +78,7 @@ char* path_get_absolute(const char* path) {
 }
 
 int path_split(const char* path, char** dirname, char** basename) {
-    std::string_view dir, file;
+    std::string dir, file;
     if (!PathUtils::split(path, &dir, &file)) {
         return -1;
     }
@@ -92,7 +92,7 @@ int path_split(const char* path, char** dirname, char** basename) {
 }
 
 char* path_dirname(const char* path) {
-    std::string_view dir;
+    std::string dir;
     if (!PathUtils::split(path, &dir, nullptr)) {
         return nullptr;
     }
@@ -100,7 +100,7 @@ char* path_dirname(const char* path) {
 }
 
 char* path_basename(const char* path) {
-    std::string_view file;
+    std::string file;
     if (!PathUtils::split(path, nullptr, &file)) {
         return nullptr;
     }

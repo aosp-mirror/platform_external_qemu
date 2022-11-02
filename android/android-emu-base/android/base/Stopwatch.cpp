@@ -9,18 +9,20 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Stopwatch.h"
+#include "aemu/base/Stopwatch.h"
+
+#include "android/base/system/System.h"
 
 namespace android {
 namespace base {
 
 Stopwatch::Stopwatch() : mStartUs(System::get()->getHighResTimeUs()) {}
 
-System::WallDuration Stopwatch::elapsedUs() const {
+uint64_t Stopwatch::elapsedUs() const {
     return System::get()->getHighResTimeUs() - mStartUs;
 }
 
-System::WallDuration Stopwatch::restartUs() {
+uint64_t Stopwatch::restartUs() {
     const auto now = System::get()->getHighResTimeUs();
     const auto oldStart = mStartUs;
     mStartUs = now;

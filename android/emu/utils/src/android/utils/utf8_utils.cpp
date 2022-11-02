@@ -11,7 +11,7 @@
 
 #include "android/utils/utf8_utils.h"
 
-#include "android/base/misc/Utf8Utils.h"
+#include "aemu/base/misc/Utf8Utils.h"
 
 bool android_utf8_is_valid(const char* text, size_t text_len) {
     return android::base::utf8IsValid(text, text_len);

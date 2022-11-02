@@ -14,7 +14,7 @@
 
 #include "android/emulation/testing/TestVmLock.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 
 using android::base::LazyInstance;
 

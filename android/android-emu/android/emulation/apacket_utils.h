@@ -16,8 +16,8 @@
 
 #include <vector>
 
-#include "android/base/logging/Log.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/logging/Log.h"
+#include "aemu/base/sockets/SocketUtils.h"
 
 namespace android {
 namespace emulation {

@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/files/Stream.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>

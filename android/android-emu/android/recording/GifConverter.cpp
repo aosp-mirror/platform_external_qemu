@@ -36,9 +36,9 @@
 #include <stddef.h>                         // for NULL
 #include <errno.h>                          // for ENOMEM
 
-#include "android/base/Log.h"               // for LOG, LogMessage, LogStream
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"  // for FuncDelete
+#include "aemu/base/Log.h"               // for LOG, LogMessage, LogStream
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/ScopedPtr.h"  // for FuncDelete
 #include "android/recording/AVScopedPtr.h"  // for makeAVScopedPtr
 
 extern "C" {

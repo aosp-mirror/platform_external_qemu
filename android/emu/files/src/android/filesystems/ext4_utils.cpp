@@ -11,8 +11,8 @@
 
 #include "android/filesystems/ext4_utils.h"
 
-#include "android/base/Log.h"
-#include "android/base/files/ScopedStdioFile.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
 
 #include "make_ext4fs.h"

@@ -10,12 +10,12 @@
 // GNU General Public License for more details.
 #include "android/opengl/OpenglEsPipe.h"
 
-#include "android/base/Optional.h"
-#include "android/base/Stopwatch.h"
-#include "android/base/async/Looper.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StreamSerializing.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/Stopwatch.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StreamSerializing.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/console.h"
 #include "android/loadpng.h"
 #include "android/opengl/GLProcessPipe.h"

@@ -12,7 +12,7 @@
 #include "android/main-emugl.h"
 
 #include "android/avd/util.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/utils/debug.h"
 #include "android/utils/string.h"

@@ -9,11 +9,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/IniFile.h"
+#include "aemu/base/files/IniFile.h"
 
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
-#include "android/base/ArraySize.h"
+#include "aemu/base/ArraySize.h"
 
 #include <gtest/gtest.h>
 

@@ -16,7 +16,7 @@
 #include "OpenglRender/IOStream.h"
 #include "OpenglRender/RenderChannel.h"
 
-#include "android/base/ring_buffer.h"
+#include "aemu/base/ring_buffer.h"
 #include "android/emulation/address_space_graphics_types.h"
 
 #include <functional>

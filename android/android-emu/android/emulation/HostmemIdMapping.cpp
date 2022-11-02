@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/emulation/HostmemIdMapping.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 
 #include <utility>
 

@@ -16,9 +16,9 @@
 
 #include "SyncThread.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/utils/debug.h"
 #include "emugl/common/OpenGLDispatchLoader.h"
 #include "emugl/common/crash_reporter.h"

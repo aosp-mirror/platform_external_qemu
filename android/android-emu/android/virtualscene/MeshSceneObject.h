@@ -19,7 +19,7 @@
  * file.
  */
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 #include "android/utils/compiler.h"
 #include "android/virtualscene/SceneObject.h"
 

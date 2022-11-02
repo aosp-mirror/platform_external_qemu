@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/network/Dns.h"
+#include "aemu/base/network/Dns.h"
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 #include "android/base/testing/GTestUtils.h"
 #include "android/base/testing/TestDnsResolver.h"
 

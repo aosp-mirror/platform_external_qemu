@@ -11,8 +11,8 @@
 
 #include "android/filesystems/ramdisk_extractor.h"
 
-#include "android/base/Compiler.h"
-#include "android/base/Log.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Log.h"
 
 #include <cinttypes>
 #include <climits>

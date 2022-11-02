@@ -16,8 +16,8 @@
 #include <atomic>  // for atomic
 #include <functional>
 
-#include "android/base/Compiler.h"
-#include "android/base/EventNotificationSupport.h"        // for EventNotifi...
+#include "aemu/base/Compiler.h"
+#include "aemu/base/EventNotificationSupport.h"        // for EventNotifi...
 #include "android/emulation/control/utils/EventWaiter.h"  // for EventWaiter
 #include "android/virtualscene/WASDInputHandler.h"
 

@@ -18,7 +18,7 @@
 #include <atomic>  // for atomic
 #include <chrono>  // for seconds
 
-#include "android/base/async/RecurrentTask.h"  // for RecurrentTask
+#include "aemu/base/async/RecurrentTask.h"  // for RecurrentTask
 #include "android/console.h"                   // for AndroidConsoleAgents
 
 namespace android {

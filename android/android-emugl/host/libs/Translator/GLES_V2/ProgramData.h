@@ -18,7 +18,7 @@
 
 #include "ShaderParser.h"
 
-#include "android/base/containers/HybridComponentManager.h"
+#include "aemu/base/containers/HybridComponentManager.h"
 
 #include <memory>
 #include <sstream>

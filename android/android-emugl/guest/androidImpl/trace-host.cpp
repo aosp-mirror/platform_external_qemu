@@ -15,7 +15,7 @@
  */
 #include <cutils/trace.h>
 
-#include "android/base/Tracing.h"
+#include "aemu/base/Tracing.h"
 
 atomic_bool             atrace_is_ready      = ATOMIC_VAR_INIT(false);
 int                     atrace_marker_fd     = -1;

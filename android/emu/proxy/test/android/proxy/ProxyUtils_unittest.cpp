@@ -11,9 +11,9 @@
 */
 #include "android/proxy/ProxyUtils.h"
 
-#include "android/base/Log.h"
-#include "android/base/Optional.h"
-#include "android/base/network/IpAddress.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/network/IpAddress.h"
 #include "android/base/testing/TestDnsResolver.h"
 
 #include "gtest/gtest.h"

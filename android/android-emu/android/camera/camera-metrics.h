@@ -21,7 +21,7 @@
  */
 
 #ifdef __cplusplus
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "studio_stats.pb.h"
 #endif  // __cplusplus

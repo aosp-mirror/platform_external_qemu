@@ -11,8 +11,8 @@
 */
 #pragma once
 
-#include "android/base/network/IpAddress.h"
-#include "android/base/Optional.h"
+#include "aemu/base/network/IpAddress.h"
+#include "aemu/base/Optional.h"
 
 #include <string>
 #include <string_view>

@@ -15,7 +15,7 @@
 #include "android/emulation/control/callbacks.h"
 
 #include "android/console_exports.h"
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 
 #include <string>
 #include <vector>

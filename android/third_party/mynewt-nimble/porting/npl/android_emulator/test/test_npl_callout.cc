@@ -27,7 +27,7 @@
 */
 
 #include <stdlib.h>
-#include "android/base/async/ThreadLooper.h"
+#include "aemu/base/async/ThreadLooper.h"
 #include "nimble/nimble_npl.h"
 #include "test_util.h"
 

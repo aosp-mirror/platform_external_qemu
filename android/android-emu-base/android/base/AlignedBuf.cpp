@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/AlignedBuf.h"
+#include "aemu/base/AlignedBuf.h"
 
 namespace android {
 

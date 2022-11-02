@@ -19,7 +19,7 @@
 
 #include "adb_service.grpc.pb.h"  // for Rtc, Rtc::Stub
 #include "adb_service.pb.h"       // for JsepMsg, RtcId
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/emulation/control/adb/adbkey.h"
 
 namespace google {
@@ -49,7 +49,7 @@ public:
             return Status(StatusCode::ABORTED, "Private key was not found", "");
         }
 
-        std::ifstream privateKey(PathUtils::asUnicodePath(privKey).c_str());
+        std::ifstream privateKey(PathUtils::asUnicodePath(privKey.data()).c_str());
         std::stringstream keyText;
         keyText << privateKey.rdbuf();
 

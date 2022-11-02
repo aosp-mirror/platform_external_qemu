@@ -16,7 +16,7 @@
 #ifndef _OBJECT_NAME_MANAGER_H
 #define _OBJECT_NAME_MANAGER_H
 
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
 #include "GLcommon/NamedObject.h"

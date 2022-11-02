@@ -19,8 +19,8 @@
 // TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this undef
 #undef ERROR_INVALID_OPERATION
 #include "VehicleHalProto.pb.h"
-#include "android/base/Log.h"  // for DCHECK
-#include "android/base/StringFormat.h"  // for StringFormat
+#include "aemu/base/Log.h"  // for DCHECK
+#include "aemu/base/StringFormat.h"  // for StringFormat
 #include "android/emulation/control/car_data_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/sensors_agent.h"

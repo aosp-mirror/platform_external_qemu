@@ -14,9 +14,9 @@
 
 #include "emugl/common/misc.h"
 
-#include "android/base/GLObjectCounter.h"
-#include "android/base/CpuUsage.h"
-#include "android/base/memory/MemoryTracker.h"
+#include "aemu/base/GLObjectCounter.h"
+#include "aemu/base/CpuUsage.h"
+#include "aemu/base/memory/MemoryTracker.h"
 
 #include <cstring>
 

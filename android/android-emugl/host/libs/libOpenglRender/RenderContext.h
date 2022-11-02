@@ -16,7 +16,7 @@
 #ifndef _LIBRENDER_RENDER_CONTEXT_H
 #define _LIBRENDER_RENDER_CONTEXT_H
 
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 #include "emugl/common/smart_ptr.h"
 #include "GLDecoderContextData.h"
 

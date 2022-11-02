@@ -16,6 +16,8 @@ android_add_library(
   TARGET android-emu-base
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
+      aemu/base/system/Memory.cpp
+      aemu/base/system/System.cpp
       android/base/AlignedBuf.cpp
       android/base/async/AsyncReader.cpp
       android/base/async/AsyncSocketServer.cpp
@@ -124,7 +126,7 @@ target_include_directories(android-emu-base
 target_link_libraries(
   android-emu-base PRIVATE android-emu-base-headers lz4 UUID::UUID
   PUBLIC Threads::Threads android-emu-base-logging zlib
-         android-emu-base-memory)
+         android-emu-base-memory logging-base)
 
 if(OPTION_TCMALLOC)
   android_target_link_libraries(

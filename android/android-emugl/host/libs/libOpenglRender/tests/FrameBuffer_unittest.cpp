@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StdioStream.h"
-#include "android/base/GLObjectCounter.h"
-#include "android/base/perflogger/BenchmarkLibrary.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StdioStream.h"
+#include "aemu/base/GLObjectCounter.h"
+#include "aemu/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/console.h"

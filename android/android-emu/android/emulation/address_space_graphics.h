@@ -15,9 +15,9 @@
 
 #include "android/emulation/AddressSpaceService.h"
 
-#include "android/base/ring_buffer.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/ring_buffer.h"
+#include "aemu/base/synchronization/MessageChannel.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/address_space_graphics_types.h"
 

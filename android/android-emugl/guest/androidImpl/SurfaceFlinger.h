@@ -19,8 +19,8 @@
 
 #include <system/window.h>
 
-#include "android/base/FunctionView.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/FunctionView.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include <functional>
 #include <memory>

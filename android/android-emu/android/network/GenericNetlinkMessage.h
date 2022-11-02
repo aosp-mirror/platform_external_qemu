@@ -14,8 +14,8 @@
 #include <stdint.h>
 #include <vector>
 
-#include "android/base/Compiler.h"
-#include "android/base/IOVector.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/IOVector.h"
 
 namespace android {
 namespace network {

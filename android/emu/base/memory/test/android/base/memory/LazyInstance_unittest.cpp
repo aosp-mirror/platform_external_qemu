@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 
-// #include "android/base/synchronization/Lock.h"
+// #include "aemu/base/synchronization/Lock.h"
 // #include "android/base/testing/TestThread.h"
 
 #include <gtest/gtest.h>

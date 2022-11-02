@@ -12,9 +12,9 @@
 #include "android/avd/util.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/utils/file_data.h"
-#include "android/base/ArraySize.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestSystem.h"
 
 #include <iostream>

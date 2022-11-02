@@ -14,11 +14,11 @@
 
 #pragma once
 
-#include "android/base/Log.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/utils/path.h"
 
 #include <string_view>
@@ -323,7 +323,7 @@ public:
         std::string newPath = toTempRoot(dirPath);
         std::vector<std::string> result = scanDirInternal(newPath);
         if (fullPath) {
-            std::string prefix = PathUtils::addTrailingDirSeparator(dirPath);
+            std::string prefix = PathUtils::addTrailingDirSeparator(dirPath.data());
             for (size_t n = 0; n < result.size(); ++n) {
                 result[n] = prefix + result[n];
             }
@@ -470,7 +470,7 @@ public:
 private:
     std::string toTempRoot(std::string_view pathView) const {
         std::string path(pathView);
-        if (!PathUtils::isAbsolute(path)) {
+        if (!PathUtils::isAbsolute(path.data())) {
             auto currdir = getCurrentDirectory();
             path = currdir + PATH_SEP + path;
         }

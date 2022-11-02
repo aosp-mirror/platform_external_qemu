@@ -14,7 +14,7 @@
 
 #include "android/featurecontrol/testing/FeatureControlTest.h"
 
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"

@@ -68,10 +68,10 @@
 
 #include "android/avd/info.h"                        // for AVDINFO_NO_SNAPS...
 #include "android/avd/util.h"                        // for path_getAvdConte...
-#include "android/base/logging/CLog.h"               // for base
-#include "android/base/ProcessControl.h"             // for isRestartDisabled
-#include "android/base/async/ThreadLooper.h"         // for ThreadLooper
-#include "android/base/files/PathUtils.h"            // for PathUtils
+#include "aemu/base/logging/CLog.h"               // for base
+#include "aemu/base/ProcessControl.h"             // for isRestartDisabled
+#include "aemu/base/async/ThreadLooper.h"         // for ThreadLooper
+#include "aemu/base/files/PathUtils.h"            // for PathUtils
 #include "android/base/system/System.h"              // for System, System::...
 #include "android/cmdline-option.h"                  // for AndroidOptions
 #include "android/emulation/control/window_agent.h"  // for EmulatorWindow
@@ -1652,7 +1652,7 @@ void SnapshotPage::writeProtobuf(
     std::string protoFileName = PathUtils::join(
             getSnapshotBaseDir().c_str(), fileName.toStdString().c_str(),
             android::snapshot::kSnapshotProtobufName);
-    std::ofstream outStream(PathUtils::asUnicodePath(protoFileName).c_str(),
+    std::ofstream outStream(PathUtils::asUnicodePath(protoFileName.data()).c_str(),
                             std::ofstream::binary);
 
     protobuf->SerializeToOstream(&outStream);

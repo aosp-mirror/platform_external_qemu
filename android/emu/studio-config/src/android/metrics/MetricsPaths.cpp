@@ -11,7 +11,7 @@
 
 #include "android/metrics/MetricsPaths.h"
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/emulation/ConfigDirs.h"
 
 using android::ConfigDirs;

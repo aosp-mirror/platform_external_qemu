@@ -15,7 +15,7 @@
 #include "android/emulation/control/FilePusher.h"
 
 #include "android/base/testing/TestLooper.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/emulation/control/TestAdbInterface.h"

@@ -22,8 +22,8 @@
  */
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
-#include "android/base/Compiler.h"
-#include "android/base/Optional.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Optional.h"
 #include "android/utils/compiler.h"
 
 #include <vector>

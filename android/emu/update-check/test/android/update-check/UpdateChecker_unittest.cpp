@@ -11,9 +11,9 @@
 
 #include "android/update-check/UpdateChecker.h"
 #include "android/update-check/VersionExtractor.h"
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 #include "android/base/testing/TestSystem.h"
-#include "android/base/Version.h"
+#include "aemu/base/Version.h"
 
 #include <gtest/gtest.h>
 

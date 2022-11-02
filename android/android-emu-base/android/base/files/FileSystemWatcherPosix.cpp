@@ -18,9 +18,10 @@
 #include <thread>         // for thread
 #include <utility>        // for move
 
-#include "android/base/files/FileSystemWatcher.h"  // for FileSystemWatcher:...
-#include "android/base/files/PathUtils.h"
-#include "android/base/synchronization/Event.h"  // for Event
+#include "aemu/base/files/FileSystemWatcher.h"  // for FileSystemWatcher:...
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/synchronization/Event.h"  // for Event
+#include "android/base/system/System.h"
 
 #define DEBUG 0
 

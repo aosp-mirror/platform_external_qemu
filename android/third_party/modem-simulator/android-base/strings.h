@@ -16,4 +16,4 @@
 
 #pragma once
 
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/misc/StringUtils.h"

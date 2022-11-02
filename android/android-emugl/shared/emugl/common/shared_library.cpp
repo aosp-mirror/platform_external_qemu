@@ -14,9 +14,9 @@
 
 #include "emugl/common/shared_library.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/FunctionView.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/FunctionView.h"
+#include "aemu/base/memory/LazyInstance.h"
 
 #include "emugl/common/logging.h"
 

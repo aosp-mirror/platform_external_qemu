@@ -8,11 +8,11 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/logging/LogFormatter.h"
+#include "aemu/base/logging/LogFormatter.h"
 
 #include <regex>                               // for regex_match, match_res...
 
-#include "android/base/logging/LogSeverity.h"  // for LogSeverity, EMULATOR_...
+#include "aemu/base/logging/LogSeverity.h"  // for LogSeverity, EMULATOR_...
 #include "gtest/gtest.h"                       // for Message
   
 namespace android {

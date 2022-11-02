@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/base/network/NetworkUtils.h"
+#include "aemu/base/network/NetworkUtils.h"
 
 #include <vector>
 

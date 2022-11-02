@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/containers/BufferQueue.h"
+#include "aemu/base/containers/BufferQueue.h"
 #include "OpenglRender/RenderChannel.h"
 #include "RendererImpl.h"
 

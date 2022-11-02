@@ -11,11 +11,12 @@
 
 #include "android/emulation/AdbHostListener.h"
 
-#include "android/base/async/AsyncSocketServer.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/logging/CLog.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/async/AsyncSocketServer.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/emulation/AdbHostServer.h"
 #include "android/emulation/AdbTypes.h"
 

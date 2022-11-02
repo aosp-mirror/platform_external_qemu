@@ -16,20 +16,20 @@
 // bluetooth chip)
 
 // These must come first, or win32 will not compile.
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ThreadLooper.h"
 
 #include <stddef.h>  // for NULL
 #include <stdint.h>  // for uint8_t, uint16_t
 #include <thread>    // for yield, thread
 
-#include "android/base/threads/Thread.h"  // for getCurrentThreadId
+#include "aemu/base/threads/Thread.h"  // for getCurrentThreadId
 #include "nimble/nimble_npl.h"            // for ble_npl_get_current_task_id
 #include "nimble/os_types.h"              // for ble_npl_task_func_t, ble_np...
 #include "os/os.h"                        // for OS_INVALID_PARM
 
 #ifdef _WIN32
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 #else
 #include <pthread.h>  // for pthread_setname_np
 #endif

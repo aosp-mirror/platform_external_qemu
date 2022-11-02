@@ -16,7 +16,7 @@
 
 #include <cstdio>
 #include <cstring>
-#include "android/base/MruCache.h"
+#include "aemu/base/MruCache.h"
 
 #include <map>
 #include <vector>

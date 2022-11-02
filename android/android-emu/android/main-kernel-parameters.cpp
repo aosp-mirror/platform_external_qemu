@@ -11,7 +11,7 @@
 
 #include "android/main-kernel-parameters.h"
 
-#include "android/base/StringFormat.h"
+#include "aemu/base/StringFormat.h"
 #include "android/emulation/GoldfishDma.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"

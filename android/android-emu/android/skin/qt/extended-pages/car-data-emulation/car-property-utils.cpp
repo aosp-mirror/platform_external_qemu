@@ -25,7 +25,7 @@
 #include "VehicleHalProto.pb.h"
 #include "android/skin/qt/extended-pages/car-data-emulation/vehicle_constants_generated.h"
 #include "android/utils/debug.h"
-#include "android/base/Log.h"                               // for LogStream...
+#include "aemu/base/Log.h"                               // for LogStream...
 
 using std::map;
 using std::vector;

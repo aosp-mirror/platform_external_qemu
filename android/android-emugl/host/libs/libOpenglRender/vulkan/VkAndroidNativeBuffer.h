@@ -17,8 +17,8 @@
 
 #include <vulkan/vulkan.h>
 
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
 #include "cereal/common/goldfish_vk_private_defs.h"
 
 #include <deque>

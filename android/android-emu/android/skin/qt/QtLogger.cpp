@@ -16,7 +16,7 @@
 #include <stdarg.h>                            // for va_end, va_list, va_start
 #include <stdio.h>                             // for vsnprintf
 
-#include "android/base/memory/LazyInstance.h"  // for LazyInstance, LAZY_INS...
+#include "aemu/base/memory/LazyInstance.h"  // for LazyInstance, LAZY_INS...
 #include "android/utils/debug.h"               // for dinfo
 
 

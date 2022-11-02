@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/memory/MemoryHints.h"
+#include "aemu/base/memory/MemoryHints.h"
 
 #include <gtest/gtest.h>
 

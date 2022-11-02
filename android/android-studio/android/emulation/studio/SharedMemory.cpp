@@ -8,7 +8,7 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/memory/SharedMemory.h"
+#include "aemu/base/memory/SharedMemory.h"
 
 #include "studio-view-headers.h"
 

@@ -13,7 +13,7 @@
 
 #ifdef USE_WEBENGINE // This entire file is stubbed out if we don't have WebEngine
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 
 #include "android/emulation/ConfigDirs.h"
 #include "android/location/Point.h"
@@ -463,8 +463,8 @@ bool LocationPage::editPoint(PointListElement& pointElement, bool isNewPoint) {
 void LocationPage::deletePoint(PointWidgetItem* item) {
     auto& pointElement = item->pointElement();
     std::string protobufName = pointElement.protoFilePath.toStdString();
-    std::string_view dirName;
-    bool haveDirName = android::base::PathUtils::split(protobufName,
+    std::string dirName;
+    bool haveDirName = android::base::PathUtils::split(protobufName.data(),
                                                        &dirName,
                                                        nullptr /* base name */);
     if (haveDirName) {
@@ -509,7 +509,8 @@ void LocationPage::writePointProtobufFullPath(
         const QString& protoFullPath,
         const emulator_location::PointMetadata& protobuf)
 {
-    std::ofstream outStream(android::base::PathUtils::asUnicodePath(protoFullPath.toStdString()).c_str(), std::ofstream::binary);
+    std::ofstream outStream(android::base::PathUtils::asUnicodePath(
+            protoFullPath.toStdString().data()).c_str(), std::ofstream::binary);
     protobuf.SerializeToOstream(&outStream);
 }
 

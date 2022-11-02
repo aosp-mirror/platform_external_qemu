@@ -14,7 +14,7 @@
 
 #include "android/emulation/testing/MockAndroidEmulatorWindowAgent.h"
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 static bool sIsFolded = false;
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {

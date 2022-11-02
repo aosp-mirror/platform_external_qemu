@@ -18,7 +18,7 @@
 #include <unordered_map>                 // for unordered_map
 #include <vector>                        // for vector
 
-#include "android/base/Compiler.h"       // for DISALLOW_COPY_AND_ASSIGN
+#include "aemu/base/Compiler.h"       // for DISALLOW_COPY_AND_ASSIGN
 #include "android/base/system/System.h"  // for System, System::Pid
 
 namespace android {

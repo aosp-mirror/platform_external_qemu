@@ -14,7 +14,7 @@
 
 #include "android/metrics/MetricsReporter.h"
 
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 
 #include "android/metrics/tests/MockMetricsReporter.h"
 #include "android/metrics/tests/MockMetricsWriter.h"

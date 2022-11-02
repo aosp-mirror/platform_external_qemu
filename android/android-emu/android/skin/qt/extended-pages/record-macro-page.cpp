@@ -56,10 +56,10 @@
 #include <utility>
 
 #include "android/automation/AutomationController.h"
-#include "android/base/EnumFlags.h"
-#include "android/base/Log.h"
-#include "android/base/Result.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/EnumFlags.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/Result.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/automation_agent.h"
 #include "android/featurecontrol/FeatureControl.h"

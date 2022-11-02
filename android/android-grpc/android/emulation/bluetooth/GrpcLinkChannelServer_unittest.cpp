@@ -14,7 +14,7 @@
 #include <string>         // for string, operator==, bas...
 #include <thread>         // for thread
 
-#include "android/base/async/Looper.h"        // for Looper, Looper::Duration
+#include "aemu/base/async/Looper.h"        // for Looper, Looper::Duration
 #include "android/base/testing/TestEvent.h"   // for TestEvent
 #include "android/base/testing/TestLooper.h"  // for TestLooper
 

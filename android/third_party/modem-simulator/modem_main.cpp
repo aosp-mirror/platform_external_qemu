@@ -20,14 +20,20 @@
 
 #include "modem_main.h"
 #include <string>
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "aemu/base/synchronization/MessageChannel.h"
 #include "android/console.h"
 #include "android/telephony/modem.h"
 #include "android/utils/system.h"
 #include "android/utils/timezone.h"
 // from cuttlefish modem-simulator library
 #include "modem_simulator.h"
+
+// Conflicts with Log.h
+#ifdef ERROR
+#undef ERROR
+#endif
 
 #define MODEM_DEBUG 0
 

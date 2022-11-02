@@ -15,7 +15,7 @@
 #include <string>         // for string, basic_string
 #include <unordered_set>  // for unordered_set
 
-#include "android/base/Compiler.h"  // for DISALLOW_COPY_ASSIGN_AND_MOVE
+#include "aemu/base/Compiler.h"  // for DISALLOW_COPY_ASSIGN_AND_MOVE
 #include "android/metrics/export.h"
 
 namespace wireless_android_play_playlog {

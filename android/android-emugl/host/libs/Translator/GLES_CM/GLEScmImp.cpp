@@ -21,7 +21,7 @@
 #endif
 
 #define GL_GLEXT_PROTOTYPES
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "GLEScmContext.h"
 #include "GLEScmValidate.h"
 #include "GLEScmUtils.h"

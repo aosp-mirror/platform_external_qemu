@@ -17,8 +17,8 @@
 #include "android/videoplayback/VideoplaybackRenderTarget.h"
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
-#include "android/base/Log.h"
-#include "android/base/Optional.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/Optional.h"
 
 #include <algorithm>
 #include <vector>

@@ -12,15 +12,15 @@
 #include "android/wear-agent/PairUpWearPhone.h"
 
 
-#include "android/base/async/AsyncReader.h"
-#include "android/base/async/AsyncStatus.h"
-#include "android/base/async/AsyncWriter.h"
-#include "android/base/async/Looper.h"
-#include "android/base/Log.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/sockets/SocketErrors.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/async/AsyncReader.h"
+#include "aemu/base/async/AsyncStatus.h"
+#include "aemu/base/async/AsyncWriter.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/misc/StringUtils.h"
+#include "aemu/base/sockets/SocketErrors.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/utils/debug.h"
 
 #include <assert.h>

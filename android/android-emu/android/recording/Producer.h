@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "android/base/threads/Thread.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/recording/Frame.h"
 
 namespace android {

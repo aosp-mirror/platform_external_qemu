@@ -11,7 +11,7 @@
 */
 
 #include "android/network/Ieee80211Frame.h"
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 #include "android/network/Endian.h"
 #include "android/network/mac80211_hwsim.h"
 
@@ -19,7 +19,7 @@
 #include <sstream>
 
 #ifdef _WIN32
-#include "android/base/sockets/Winsock.h"
+#include "aemu/base/sockets/Winsock.h"
 #elif defined(__linux__)
 #include <arpa/inet.h>
 #endif

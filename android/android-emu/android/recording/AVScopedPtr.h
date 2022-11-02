@@ -16,7 +16,7 @@
 //
 #pragma once
 
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/memory/ScopedPtr.h"
 
 #include <cassert>
 

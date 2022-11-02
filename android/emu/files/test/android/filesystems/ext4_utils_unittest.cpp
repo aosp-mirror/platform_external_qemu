@@ -11,9 +11,9 @@
 
 #include "android/filesystems/ext4_utils.h"
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/Log.h"
-#include "android/base/files/ScopedStdioFile.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/files/ScopedStdioFile.h"
 #include "android/filesystems/testing/TestExt4ImageHeader.h"
 #include "android/filesystems/testing/TestSupport.h"
 #include "android/utils/file_io.h"

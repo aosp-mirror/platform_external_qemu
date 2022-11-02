@@ -23,11 +23,11 @@ extern "C" {
 
 #include <nlohmann/json.hpp>                          // for basic_json, bas...
 #include "android/console.h"
-#include "android/base/Log.h"                         // for LOG, LogMessage
-#include "android/base/Optional.h"                    // for Optional
-#include "android/base/StringFormat.h"                // for StringFormatWit...
+#include "aemu/base/Log.h"                         // for LOG, LogMessage
+#include "aemu/base/Optional.h"                    // for Optional
+#include "aemu/base/StringFormat.h"                // for StringFormatWit...
 
-#include "android/base/files/PathUtils.h"             // for pj, PathUtils
+#include "aemu/base/files/PathUtils.h"             // for pj, PathUtils
 #include "android/base/system/System.h"               // for System
 #include "android/emulation/CpuAccelerator.h"         // for GetCurrentCpuAc...
 #include "android/emulation/HostmemIdMapping.h"       // for android_emulati...
@@ -968,14 +968,14 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
 
     for (auto drive : drives) {
         auto overlay = drive["file"]["filename"].get<std::string>();
-        std::string_view qcow;
-        if (!PathUtils::split(overlay, nullptr, &qcow)) {
+        std::string qcow;
+        if (!PathUtils::split(overlay.data(), nullptr, &qcow)) {
             success = false;
             std::string err = "Failed to extract basename from " + overlay;
             errConsumer(opaque, err.c_str(), err.size());
             break;
         }
-        auto final_overlay = pj(dest, qcow.data());
+        auto final_overlay = pj(dest, qcow);
 
         // Remove the suffix if there is any.
         // This would happen if you import then export.
@@ -989,7 +989,7 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
         path_delete_file(final_overlay.c_str());
         // Extract the target snapshot from qcow2.
         // It doesn't work with cache.img.
-        if (qcow.find("cache") == std::string::npos) {
+        if (std::string_view(qcow).find("cache") == std::string::npos) {
 #ifdef _WIN32
             // Windows has file access issues when accessing the same file from
             // multiple processes simultaneously (probably a bad file share option

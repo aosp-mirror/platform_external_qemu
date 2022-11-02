@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 #include "android/emulation/SerialLine.h"
 extern "C" {
   #include "qemu/osdep.h"

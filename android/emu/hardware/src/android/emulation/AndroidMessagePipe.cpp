@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/emulation/AndroidMessagePipe.h"
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/files/StreamSerializing.h"
 #include "android/utils/debug.h"
 
 #include <assert.h>

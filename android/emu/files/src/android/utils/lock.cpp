@@ -14,7 +14,7 @@
 
 #include "android/utils/lock.h"
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 
 using android::base::Lock;
 using android::base::ReadWriteLock;

@@ -11,18 +11,18 @@
 
 #include "android/emulation/AdbGuestPipe.h"
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
-#include "android/base/async/AsyncSocketServer.h"
-#include "android/base/async/Looper.h"
-#include "android/base/async/ScopedSocketWatch.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/threads/Async.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/async/AsyncSocketServer.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ScopedSocketWatch.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/threads/Async.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/emulation/VmLock.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/avd/hw-config.h"
@@ -39,7 +39,7 @@
 #include <assert.h>
 
 #ifdef _WIN32
-#include "android/base/sockets/Winsock.h"
+#include "aemu/base/sockets/Winsock.h"
 #else
 #include <sys/socket.h>
 #endif

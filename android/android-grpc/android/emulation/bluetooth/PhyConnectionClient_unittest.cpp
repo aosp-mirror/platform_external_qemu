@@ -18,11 +18,11 @@
 #include <string>
 #include <thread>
 #include <type_traits>
-#include "android/base/logging/Log.h"
-#include "android/base/logging/LogFormatter.h"
+#include "aemu/base/logging/Log.h"
+#include "aemu/base/logging/LogFormatter.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestEvent.h"
 #include "android/base/testing/TestLooper.h"

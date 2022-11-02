@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/async/Looper.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/emulation/DeviceContextRunner.h"
 #include "android/emulation/testing/TestVmLock.h"
 #include "android/emulation/VmLock.h"

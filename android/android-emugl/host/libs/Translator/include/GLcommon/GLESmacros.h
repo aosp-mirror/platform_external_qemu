@@ -12,9 +12,10 @@
 #if defined(__linux__) || defined(__APPLE__)
 
 #include <mutex>
+#include <string>
 #include <string_view>
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/MemoryTracker.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/MemoryTracker.h"
 #include "android/utils/debug.h"
 #include "emugl/common/misc.h"
 
@@ -25,8 +26,8 @@
         std::call_once(once_flag, [&func]() {                           \
             if (emugl::getMemoryTracker()) {                            \
                 std::string_view file(__FILE__);                        \
-                std::string_view baseName;                              \
-                android::base::PathUtils::split(file, NULL, &baseName); \
+                std::string baseName;                                   \
+                android::base::PathUtils::split(file.data(), NULL, &baseName); \
                 emugl::getMemoryTracker()->addToGroup(                  \
                         group, std::string(baseName) + ":" + func);            \
             }                                                           \

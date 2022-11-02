@@ -21,7 +21,7 @@
 
 #include "android/avd/BugreportInfo.h"                   // for BugreportInfo
 
-#include "android/base/async/RecurrentTask.h"            // for RecurrentTask
+#include "aemu/base/async/RecurrentTask.h"            // for RecurrentTask
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbCommandPtr
 #include "android/settings-agent.h"                      // for SettingsTheme
 

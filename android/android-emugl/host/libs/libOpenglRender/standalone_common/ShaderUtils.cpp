@@ -14,11 +14,11 @@
 
 #include "ShaderUtils.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/FileUtils.h"
-#include "android/base/Optional.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/ScopedFd.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/misc/FileUtils.h"
+#include "aemu/base/Optional.h"
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"

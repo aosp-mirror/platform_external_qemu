@@ -14,7 +14,7 @@
 
 #include "android/HostHwInfo.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/cpu_accelerator.h"
 #include "android/emulation/CpuAccelerator.h"

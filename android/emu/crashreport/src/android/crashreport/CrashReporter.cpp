@@ -23,8 +23,8 @@
 #include <utility>   // for move
 #include <vector>    // for vector<>::it...
 
-#include "android/base/files/PathUtils.h"                // for pj, PathUtils
-#include "android/base/memory/LazyInstance.h"            // for LazyInstance
+#include "aemu/base/files/PathUtils.h"                // for pj, PathUtils
+#include "aemu/base/memory/LazyInstance.h"            // for LazyInstance
 #include "android/base/system/System.h"                  // for System
 #include "android/console.h"                             // for getConsoleAg...
 #include "android/crashreport/SimpleStringAnnotation.h"  // for SimpleString...

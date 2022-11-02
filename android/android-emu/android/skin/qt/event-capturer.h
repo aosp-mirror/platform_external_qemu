@@ -18,8 +18,8 @@
 #include <functional>                           // for function
 #include <unordered_set>                        // for unordered_set
 
-#include "android/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
-#include "android/base/async/SubscriberList.h"  // for SubscriberList, Subsc...
+#include "aemu/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
+#include "aemu/base/async/SubscriberList.h"  // for SubscriberList, Subsc...
 #include "android/skin/qt/qt-std-hash.h"        // for hash
 
 class QObject;

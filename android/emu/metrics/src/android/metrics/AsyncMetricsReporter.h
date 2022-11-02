@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/synchronization/MessageChannel.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/metrics/MetricsReporter.h"
 
 #include <string_view>

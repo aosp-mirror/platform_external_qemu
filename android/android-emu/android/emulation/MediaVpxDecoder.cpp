@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/MediaVpxDecoder.h"
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
 #include "android/base/system/System.h"
 #include "android/emulation/MediaVpxDecoderGeneric.h"
 #include "android/emulation/VpxPingInfoParser.h"

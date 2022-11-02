@@ -25,7 +25,7 @@
 #include "GLcommon/TextureData.h"
 #include "GLcommon/TranslatorIfaces.h"
 #include "ThreadInfo.h"
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 #include "android/base/system/System.h"
 #include "android/utils/GfxstreamFatalError.h"
 #include "emugl/common/logging.h"

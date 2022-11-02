@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/export.h"
+#include "aemu/base/export.h"
 
 #include <inttypes.h>
 

@@ -11,7 +11,7 @@
 */
 #include "android/user-config.h"
 
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/memory/ScopedPtr.h"
 
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/bufprint.h"

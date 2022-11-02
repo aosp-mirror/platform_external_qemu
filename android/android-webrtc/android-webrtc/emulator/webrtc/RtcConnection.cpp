@@ -31,8 +31,8 @@
 #include <memory>                                               // for uniqu...
 #include <thread>                                               // for thread
 
-#include "android/base/Log.h"                                   // for base
-#include "android/base/async/Looper.h"                          // for Looper
+#include "aemu/base/Log.h"                                   // for base
+#include "aemu/base/async/Looper.h"                          // for Looper
 #include "emulator/webrtc/capture/GoldfishAudioDeviceModule.h"  // for Goldf...
 
 using namespace android::base;

@@ -16,7 +16,7 @@
 #include <QMetaObject>                         // for QMetaObject
 #include <iomanip>                             // for operator<<, setw
 
-#include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "aemu/base/memory/LazyInstance.h"  // for LazyInstance
 #include "android/skin/qt/event-serializer.h"  // for operator<<
 
 namespace {

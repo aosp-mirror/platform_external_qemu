@@ -13,10 +13,10 @@
 // limitations under the License.
 #include "Vsync.h"
 
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/threads/FunctorThread.h"
 
 #include <atomic>
 #include <memory>

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/async/RecurrentTask.h"
+#include "aemu/base/async/RecurrentTask.h"
 
-#include "android/base/async/Looper.h"
+#include "aemu/base/async/Looper.h"
 #include "android/base/testing/TestLooper.h"
 #include "android/base/testing/TestThread.h"
 

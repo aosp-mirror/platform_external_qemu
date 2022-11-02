@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/network/Dns.h"
+#include "aemu/base/network/Dns.h"
 
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 
 #include <string>
 #include <string_view>
 #include <unordered_set>
 
 #ifdef _WIN32
-#include "android/base/ArraySize.h"
-#include "android/base/sockets/Winsock.h"
-#include "android/base/sockets/SocketErrors.h"
-#include "android/base/system/Win32UnicodeString.h"
-#include "android/base/system/Win32Utils.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/sockets/Winsock.h"
+#include "aemu/base/sockets/SocketErrors.h"
+#include "aemu/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32Utils.h"
 #include "wincrypt.h"
 #include "iphlpapi.h"
 # include <windows.h>

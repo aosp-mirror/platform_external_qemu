@@ -31,9 +31,9 @@
 
 #include "android/android.h"                     // for android_serial_nu...
 #include "android/avd/info.h"                    // for avdInfo_getApiLevel
-#include "android/base/Optional.h"               // for Optional
-#include "android/base/Uri.h"                    // for Uri
-#include "android/base/Version.h"                // for Version
+#include "aemu/base/Optional.h"               // for Optional
+#include "aemu/base/Uri.h"                    // for Uri
+#include "aemu/base/Version.h"                // for Version
 #include "android/base/system/System.h"          // for System
 #include "android/cmdline-option.h"              // for android_cmdLineOptions
 #include "android/console.h"                     // for getConsoleAgents()->settings->avdInfo()

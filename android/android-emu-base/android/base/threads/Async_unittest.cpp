@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/threads/Async.h"
+#include "aemu/base/threads/Async.h"
 
-#include "android/base/async/Looper.h"
+#include "aemu/base/async/Looper.h"
 
 #include <gtest/gtest.h>
 

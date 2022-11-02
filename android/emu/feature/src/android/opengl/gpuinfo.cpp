@@ -12,10 +12,10 @@
 #include "android/opengl/gpuinfo.h"
 
 #include "absl/strings/match.h"
-#include "android/base/ArraySize.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/opengl/NativeGpuInfo.h"
 #include "android/opengl/gpuinfo.h"
 

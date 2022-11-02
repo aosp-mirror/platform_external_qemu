@@ -11,8 +11,8 @@
 
 #include "android/skin/qt/extended-pages/location-page.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/Log.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/Log.h"
 
 #include "android/emulation/ConfigDirs.h"
 #include "android/location/Route.h"
@@ -366,8 +366,8 @@ void LocationPage::deleteSelectedRoutes() {
 void LocationPage::deleteRoute(RouteWidgetItem* item) {
     auto& routeElement = item->routeElement();
     std::string protobufName = routeElement.protoFilePath.toStdString();
-    std::string_view dirName;
-    bool haveDirName = android::base::PathUtils::split(protobufName,
+    std::string dirName = nullptr;
+    bool haveDirName = android::base::PathUtils::split(protobufName.data(),
                                                        &dirName,
                                                        nullptr /* base name */);
     if (haveDirName) {
@@ -551,7 +551,8 @@ void LocationPage::writeRouteProtobufFullPath(
         const QString& protoFullPath,
         const emulator_location::RouteMetadata& protobuf)
 {
-    std::ofstream outStream(PathUtils::asUnicodePath(protoFullPath.toStdString()).c_str(), std::ofstream::binary);
+    std::ofstream outStream(PathUtils::asUnicodePath(protoFullPath.toStdString().data()).c_str(),
+                            std::ofstream::binary);
     protobuf.SerializeToOstream(&outStream);
 }
 

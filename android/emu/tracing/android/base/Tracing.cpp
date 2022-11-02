@@ -12,7 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/Tracing.h"
+#include "aemu/base/Tracing.h"
 
 #include "perfetto-tracing-only.h"
 

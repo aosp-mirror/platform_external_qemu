@@ -16,6 +16,7 @@
 #include <functional>  // for __base
 #include <memory>      // for static_pointer...
 
+#include "android/base/system/System.h"
 #include "android/cmdline-option.h"
 #include "android/avd/hw-config.h"
 #include "android/avd/info.h"
@@ -25,16 +26,10 @@
 #include "android/skin/winsys.h"                       // for WinsysPreferre...
 #include "android/ui-emu-agent.h"                      // for UiEmuAgent
 
-namespace android {
-namespace base {
-class System;
-}  // namespace base
-}  // namespace android
-
 #ifdef _WIN32
 #include <shellapi.h>
 #include <windows.h>
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 using android::base::Win32UnicodeString;
 #else
 #include <pthread.h>

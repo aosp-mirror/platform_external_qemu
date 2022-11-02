@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/files/TarStream.h"
+#include "aemu/base/files/TarStream.h"
 
 #include <assert.h>  // for assert
 #include <stdio.h>   // for sprintf
@@ -25,8 +25,8 @@
 #include <unordered_map>  // for unordered_map, unordered_m...
 #include <vector>         // for vector<>::iterator, vector
 
-#include "android/base/Log.h"              // for LOG, LogMessage
-#include "android/base/files/PathUtils.h"  // for PathUtils
+#include "aemu/base/Log.h"              // for LOG, LogMessage
+#include "aemu/base/files/PathUtils.h"  // for PathUtils
 #include "android/base/system/System.h"    // for System
 #include "android/utils/file_io.h"         // for android_mkdir, android_stat
 #include "android/utils/path.h"            // for path_mkdir_if_needed
@@ -221,7 +221,8 @@ bool TarWriter::addFileEntry(std::string name) {
         return error("Unable to stat " + fname);
     }
 
-    std::ifstream ifs(PathUtils::asUnicodePath(fname).c_str(), std::ios_base::in | std::ios_base::binary);
+    std::ifstream ifs(PathUtils::asUnicodePath(fname.c_str()).c_str(),
+                      std::ios_base::in | std::ios_base::binary);
     char readBuffer[mBufferSize];
     if (mBufferSize != 0) {
         ifs.rdbuf()->pubsetbuf(readBuffer, mBufferSize);
@@ -430,8 +431,8 @@ bool TarReader::extract(TarInfo src) {
     int64_t left = src.size, rd = 0;
 
     // Okay, let's create and extract a regular file..
-    std::ofstream ofs(PathUtils::asUnicodePath(fname).c_str(), std::ios_base::out | std::ios_base::binary |
-                                     std::ios_base::trunc);
+    std::ofstream ofs(PathUtils::asUnicodePath(fname.c_str()).c_str(),
+                      std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
 
     // File of 0 length.. we are done!
     if (left == 0) {

@@ -31,9 +31,9 @@
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
-#include "android/base/BumpPool.h"
+#include "aemu/base/BumpPool.h"
 #include "android/base/system/System.h"
-#include "android/base/Tracing.h"
+#include "aemu/base/Tracing.h"
 #include "android/utils/GfxstreamFatalError.h"
 
 #include "IOStream.h"

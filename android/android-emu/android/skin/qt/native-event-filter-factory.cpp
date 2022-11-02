@@ -16,7 +16,7 @@
 
 #include "android/skin/qt/native-event-filter-factory.h"
 
-#include "android/base/memory/LazyInstance.h"         // for LazyInstance
+#include "aemu/base/memory/LazyInstance.h"         // for LazyInstance
 
 class QAbstractNativeEventFilter;
 

@@ -17,7 +17,7 @@
 #include <assert.h>                                   // for assert
 #include <vector>                                     // for vector
 
-#include "android/base/synchronization/Lock.h"        // for AutoLock, Lock
+#include "aemu/base/synchronization/Lock.h"        // for AutoLock, Lock
 #include "android/base/system/System.h"               // for System
 #include "android/emulation/VmLock.h"                 // for RecursiveScoped...
 #include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...

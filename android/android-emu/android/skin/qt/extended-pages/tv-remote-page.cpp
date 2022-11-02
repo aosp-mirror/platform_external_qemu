@@ -34,7 +34,7 @@
 #include <QSize>                                    // for QSize
 #include <QVariant>                                 // for QVariant
 
-#include "android/base/logging/Log.h"
+#include "aemu/base/logging/Log.h"
 #include "android/utils/debug.h"
 #include "android/console.h"                        // for android_hw
 #include "android/settings-agent.h"                 // for SettingsTheme

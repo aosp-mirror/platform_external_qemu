@@ -17,7 +17,8 @@
 #include <type_traits>                         // for swap
 #include <utility>                             // for move
 
-#include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "aemu/base/memory/LazyInstance.h"  // for LazyInstance
+#include "aemu/base/logging/Log.h"
 #include "android/clipboard-pipe.h"            // for android_init_clipboard...
 
 namespace android {

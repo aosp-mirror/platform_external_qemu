@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/StringFormat.h"
+#include "aemu/base/StringFormat.h"
 
 #include <string>
 #include <vector>

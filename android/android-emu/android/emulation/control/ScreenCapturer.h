@@ -22,7 +22,7 @@
 #include <utility>                    // for move
 #include <vector>                     // for vector
 
-#include "android/base/export.h"
+#include "aemu/base/export.h"
 #include "android/skin/rect.h"        // for SkinRotation
 
 namespace emugl {

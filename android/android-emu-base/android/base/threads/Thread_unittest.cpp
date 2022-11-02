@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/threads/Thread.h"
+#include "aemu/base/threads/Thread.h"
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 
 #include <gtest/gtest.h>

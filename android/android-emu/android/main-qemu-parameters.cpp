@@ -12,7 +12,7 @@
 #include "android/main-common.h"
 #include "android/main-qemu-parameters.h"
 
-#include "android/base/StringFormat.h"
+#include "aemu/base/StringFormat.h"
 #include "android/boot-properties.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"

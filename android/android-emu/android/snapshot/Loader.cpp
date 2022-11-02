@@ -12,9 +12,9 @@
 #include "android/snapshot/Loader.h"
 #include <errno.h>
 
-#include "android/base/files/FileShareOpen.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StdioStream.h"
+#include "aemu/base/files/FileShareOpen.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StdioStream.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/utils/path.h"
 #include "android/utils/file_io.h"

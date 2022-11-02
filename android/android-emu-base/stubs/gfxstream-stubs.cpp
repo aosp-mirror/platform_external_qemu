@@ -1,5 +1,5 @@
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ThreadLooper.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/HangDetector.h"

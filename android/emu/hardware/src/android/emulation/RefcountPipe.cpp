@@ -11,8 +11,8 @@
 
 #include "android/emulation/RefcountPipe.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/refcount-pipe.h"
 #include "android/utils/debug.h"
 

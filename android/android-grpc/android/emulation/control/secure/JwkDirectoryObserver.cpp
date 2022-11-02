@@ -24,8 +24,8 @@
 #include "absl/status/status.h"             // for Status, InternalError
 #include "absl/strings/str_format.h"        // for StrFormat
 #include "absl/strings/string_view.h"       // for string_view
-#include "android/base/files/PathUtils.h"   // for PathUtils
-#include "android/base/misc/StringUtils.h"  // for EndsWith
+#include "aemu/base/files/PathUtils.h"   // for PathUtils
+#include "aemu/base/misc/StringUtils.h"  // for EndsWith
 #include "android/base/system/System.h"     // for System
 #include "android/utils/debug.h"            // for VERBOSE_INFO, VERBOSE_grpc
 #include "tink/jwt/jwk_set_converter.h"     // for JwkSetToPublicKeysetHandle
@@ -168,7 +168,7 @@ std::string JwkDirectoryObserver::mergeKeys() {
 
 // Reads a file into a string.
 static std::string readFile(Path fname) {
-    std::ifstream fstream(PathUtils::asUnicodePath(fname).c_str());
+    std::ifstream fstream(PathUtils::asUnicodePath(fname.data()).c_str());
     std::string contents((std::istreambuf_iterator<char>(fstream)),
                          std::istreambuf_iterator<char>());
 

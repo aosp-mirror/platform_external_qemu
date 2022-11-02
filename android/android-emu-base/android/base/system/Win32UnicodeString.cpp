@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 
 #include <algorithm>
-#include <string_view>
 
 #include <windows.h>
 
@@ -28,12 +27,17 @@ Win32UnicodeString::Win32UnicodeString() : mStr(nullptr), mSize(0u) {}
 
 Win32UnicodeString::Win32UnicodeString(const char* str, size_t len)
     : mStr(nullptr), mSize(0u) {
-    reset(std::string_view(str, len));
+    reset(str, len);
 }
 
-Win32UnicodeString::Win32UnicodeString(std::string_view str)
+Win32UnicodeString::Win32UnicodeString(const char* str)
     : mStr(nullptr), mSize(0u) {
     reset(str);
+}
+
+Win32UnicodeString::Win32UnicodeString(const std::string& str)
+    : mStr(nullptr), mSize(0u) {
+    reset(str.c_str());
 }
 
 Win32UnicodeString::Win32UnicodeString(size_t size) : mStr(nullptr), mSize(0u) {
@@ -96,8 +100,8 @@ void Win32UnicodeString::reset(const char* str, size_t len) {
     mStr[mSize] = L'\0';
 }
 
-void Win32UnicodeString::reset(std::string_view str) {
-    reset(str.data(), str.size());
+void Win32UnicodeString::reset(const char* str) {
+    reset(str, strlen(str));
 }
 
 void Win32UnicodeString::resize(size_t newSize) {

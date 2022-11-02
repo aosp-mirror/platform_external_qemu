@@ -18,12 +18,12 @@
 
 #include <string>
 
-#include "android/base/Log.h"
-#include "android/base/Optional.h"
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/misc/FileUtils.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/ScopedFd.h"
+#include "aemu/base/misc/FileUtils.h"
 #include "offworld.pb.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 

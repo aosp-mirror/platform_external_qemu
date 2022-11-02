@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "android/automation/AutomationController.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/emulation/android_qemud.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/avd/info.h"

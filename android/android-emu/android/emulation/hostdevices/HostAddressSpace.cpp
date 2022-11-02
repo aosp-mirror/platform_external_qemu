@@ -14,14 +14,15 @@
 // limitations under the License.
 #include "android/emulation/hostdevices/HostAddressSpace.h"
 
-#include "android/base/SubAllocator.h"
-#include "android/base/logging/CLog.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/SubAllocator.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/address_space_device.hpp"
 
 #include <unordered_map>
+#include <vector>
 
 #define HASD_DEBUG 0
 

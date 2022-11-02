@@ -9,20 +9,21 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/sockets/SocketUtils.h"
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/EnumFlags.h"
-#include "android/base/files/Fd.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketErrors.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/EnumFlags.h"
+#include "aemu/base/msvc.h"
+#include "aemu/base/files/Fd.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketErrors.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
 #include "android/utils/sockets.h"
 #include "android/utils/system.h"
 
 #ifdef _WIN32
-#include "android/base/sockets/Winsock.h"
+#include "aemu/base/sockets/Winsock.h"
 #else
 #  include <sys/socket.h>
 #  include <unistd.h>

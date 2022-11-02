@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/containers/BufferQueue.h"
+#include "aemu/base/containers/BufferQueue.h"
 
 #ifdef _WIN32
 #undef ERROR  // Make LOG(ERROR) compile properly.
 #endif
 
-#include "android/base/Log.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/MessageChannel.h"
+#include "aemu/base/threads/Thread.h"
+#include "android/base/system/System.h"
 
 #include <gtest/gtest.h>
 
@@ -44,8 +45,7 @@ TEST(BufferQueue, popLockedBefore) {
     BufferQueue<Buffer> queue(2, lock);
     AutoLock al(lock);
     Buffer msg;
-    System::Duration blockUntil =
-            System::get()->getUnixTimeUs() + 2 * 1000;
+    int64_t blockUntil = System::get()->getUnixTimeUs() + 2 * 1000;
     EXPECT_EQ(Result::Timeout, queue.popLockedBefore(&msg, blockUntil));
 }
 
@@ -56,8 +56,7 @@ TEST(BufferQueue, popLockedBeforeWithDataPresent) {
     Buffer msg;
     EXPECT_EQ(Result::Ok, queue.tryPushLocked(Buffer("Hello")));
 
-    System::Duration blockUntil =
-            System::get()->getUnixTimeUs() + 2 * 1000;
+    int64_t blockUntil = System::get()->getUnixTimeUs() + 2 * 1000;
     EXPECT_EQ(Result::Ok, queue.popLockedBefore(&msg, blockUntil));
     EXPECT_STREQ("Hello", msg.c_str());
 }

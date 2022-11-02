@@ -20,7 +20,7 @@
 #include <GLES2/gl2.h>
 #include <GLES3/gl3.h>
 
-#include "android/base/threads/Thread.h"
+#include "aemu/base/threads/Thread.h"
 
 #include "OpenGLESDispatch/gldefs.h"
 #include "OpenGLESDispatch/gles_functions.h"

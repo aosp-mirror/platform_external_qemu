@@ -19,7 +19,7 @@
 #ifdef __cplusplus
 #include <utility>
 #include <stdio.h>
-#include "android/base/StringFormat.h"
+#include "aemu/base/StringFormat.h"
 #else
 #include <stdbool.h>
 #endif

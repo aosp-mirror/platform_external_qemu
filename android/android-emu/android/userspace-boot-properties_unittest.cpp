@@ -15,7 +15,7 @@
 #include <map>                                      // for map
 #include <string>                                   // for string_view
 
-#include "android/base/misc/StringUtils.h"          // for join
+#include "aemu/base/misc/StringUtils.h"          // for join
 #include "android/featurecontrol/FeatureControl.h"  // for setEnabledOverride
 #include "android/featurecontrol/Features.h"        // for AndroidbootProps
 #include "gtest/gtest_pred_impl.h"                  // for EXPECT_STREQ, Test

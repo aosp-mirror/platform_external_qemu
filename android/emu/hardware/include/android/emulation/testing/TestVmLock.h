@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/emulation/VmLock.h"
 
 namespace android {

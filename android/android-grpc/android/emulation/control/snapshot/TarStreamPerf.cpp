@@ -20,8 +20,8 @@
 #include <string>    // for string
 #include <utility>   // for pair
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/TarStream.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/TarStream.h"
 #include "android/base/system/System.h"
 #include "android/utils/Random.h"
 #include "benchmark/benchmark_api.h"  // for State
@@ -40,7 +40,7 @@ void SetUp() {
     if (!System::get()->pathExists(tstfile)) {
         std::cout << "Test file in: " << tstfile << std::endl;
 
-        std::ofstream rnd(PathUtils::asUnicodePath(tstfile).c_str(), std::ios::binary);
+        std::ofstream rnd(PathUtils::asUnicodePath(tstfile.data()).c_str(), std::ios::binary);
         char sz[4096];
         for (int i = 0; i < 25600; i++) {
             android::generateRandomBytes(sz, sizeof(sz));

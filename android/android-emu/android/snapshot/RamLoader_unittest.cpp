@@ -9,11 +9,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/AlignedBuf.h"
+#include "aemu/base/AlignedBuf.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StdioStream.h"
-#include "android/base/misc/FileUtils.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StdioStream.h"
+#include "aemu/base/misc/FileUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/snapshot/RamSnapshotTesting.h"

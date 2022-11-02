@@ -21,16 +21,16 @@
 #include <utility>           // for move
 #include <vector>            // for vector, __vector_base...
 
-#include "android/base/Log.h"                   // for LOG, LogMessage
-#include "android/base/StringFormat.h"          // for StringFormat
+#include "aemu/base/Log.h"                   // for LOG, LogMessage
+#include "aemu/base/StringFormat.h"          // for StringFormat
 
-#include "android/base/files/IniFile.h"         // for IniFile
-#include "android/base/files/PathUtils.h"       // for pj, PathUtils
-#include "android/base/sockets/ScopedSocket.h"  // for ScopedSocket
-#include "android/base/sockets/SocketUtils.h"   // for socketTcp4LoopbackClient
+#include "aemu/base/files/IniFile.h"         // for IniFile
+#include "aemu/base/files/PathUtils.h"       // for pj, PathUtils
+#include "aemu/base/sockets/ScopedSocket.h"  // for ScopedSocket
+#include "aemu/base/sockets/SocketUtils.h"   // for socketTcp4LoopbackClient
 #include "android/base/system/System.h"         // for System, System::Pid
 #include "android/emulation/ConfigDirs.h"       // for ConfigDirs
-#include "android/base/logging/LogSeverity.h"
+#include "aemu/base/logging/LogSeverity.h"
 
 namespace android {
 namespace emulation {
@@ -190,7 +190,7 @@ bool EmulatorAdvertisement::write() const {
         LOG(WARNING) << "Overwriting existing discovery file: " << pidFile;
     }
     LOG(INFO) << "Advertising in: " << pidFile;
-    auto shareFile = std::ofstream(PathUtils::asUnicodePath(pidFile).c_str());
+    auto shareFile = std::ofstream(PathUtils::asUnicodePath(pidFile.data()).c_str());
     for (const auto& elem : mStudioConfig) {
         shareFile << elem.first << "=" << elem.second << "\n";
     }

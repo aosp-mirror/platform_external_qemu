@@ -15,7 +15,7 @@
 #pragma once
 
 #include "android/base/system/System.h"
-#include "android/base/threads/ParallelTask.h"
+#include "aemu/base/threads/ParallelTask.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 
 #include <functional>

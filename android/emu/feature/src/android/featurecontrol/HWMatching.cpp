@@ -14,13 +14,13 @@
 
 #include "android/featurecontrol/HWMatching.h"
 
-#include "android/base/Version.h"
-#include "android/base/containers/Lookup.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/misc/FileUtils.h"
+#include "aemu/base/Version.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/misc/FileUtils.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/curl-support.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -84,7 +84,7 @@ static const char kBackupPatternsFilename[] =
 static bool tryParseFeaturePatternsProtobuf(
         const std::string& filename,
         emulator_features::EmulatorFeaturePatterns* out_patterns) {
-    std::ifstream in(PathUtils::asUnicodePath(filename).c_str(),
+    std::ifstream in(PathUtils::asUnicodePath(filename.data()).c_str(),
                      std::ios::binary);
 
     if (out_patterns->ParseFromIstream(&in)) {
@@ -157,7 +157,7 @@ public:
         }
 
         {
-            std::ofstream outFile(PathUtils::asUnicodePath(mFilename).c_str(),
+            std::ofstream outFile(PathUtils::asUnicodePath(mFilename.data()).c_str(),
                                   std::ios_base::binary | std::ios_base::trunc);
 
             if (!outFile) {

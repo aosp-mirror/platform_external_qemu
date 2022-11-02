@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/async/Looper.h"
+#include "aemu/base/async/Looper.h"
 
-#include "android/base/async/DefaultLooper.h"
+#include "aemu/base/async/DefaultLooper.h"
 
 #include <utility>
 

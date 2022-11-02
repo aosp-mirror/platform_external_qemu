@@ -14,7 +14,7 @@
 
 #include "android/gps/PassiveGpsUpdater.h"
 
-#include "android/base/files/PathUtils.h"      // for PathUtils
+#include "aemu/base/files/PathUtils.h"      // for PathUtils
 
 #include <fstream>
 #include <istream>
@@ -55,7 +55,7 @@ void PassiveGpsUpdater::parseLocationConf(const std::string& AVDconf,
                                           double& paltitude,
                                           double& pvelocity,
                                           double& pheading) {
-    std::ifstream inFile(PathUtils::asUnicodePath(AVDconf).c_str());
+    std::ifstream inFile(PathUtils::asUnicodePath(AVDconf.data()).c_str());
     if (!inFile)
         return;
 

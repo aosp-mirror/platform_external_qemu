@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/synchronization/MessageChannel.h"
 
 namespace emugl {
 

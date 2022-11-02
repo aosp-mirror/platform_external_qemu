@@ -14,12 +14,12 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/Log.h"
-#include "android/base/StringFormat.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/StringFormat.h"
 
-#include "android/base/Uuid.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/Uuid.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/utils/file_io.h"
 
 #include <string_view>

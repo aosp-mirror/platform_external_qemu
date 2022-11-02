@@ -14,7 +14,7 @@
 
 #include "android/emulation/ComponentVersion.h"
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/testing/TestSystem.h"
 
 #include <gtest/gtest.h>

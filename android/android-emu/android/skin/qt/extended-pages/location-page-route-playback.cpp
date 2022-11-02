@@ -11,7 +11,7 @@
 
 #include "android/skin/qt/extended-pages/location-page.h"
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>

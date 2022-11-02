@@ -11,8 +11,8 @@
 */
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 
-#include "android/base/Log.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/proxy/proxy_common.h"
 #include "android/utils/sockets.h"
 
@@ -21,7 +21,7 @@ extern "C" {
 }
 
 #ifdef _WIN32
-#include "android/base/sockets/Winsock.h"
+#include "aemu/base/sockets/Winsock.h"
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>

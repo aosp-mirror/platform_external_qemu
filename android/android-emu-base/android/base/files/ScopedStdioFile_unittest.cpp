@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/ScopedStdioFile.h"
+#include "aemu/base/files/ScopedStdioFile.h"
 #include "android/utils/file_io.h"
 
 

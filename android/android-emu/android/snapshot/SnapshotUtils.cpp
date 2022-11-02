@@ -23,14 +23,14 @@
 
 #include "android/android.h"
 #include "android/avd/info.h"
-#include "android/base/Stopwatch.h"
-#include "android/base/Uuid.h"  // for Uuid
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/GzipStreambuf.h"
-#include "android/base/files/IniFile.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/TarStream.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/Stopwatch.h"
+#include "aemu/base/Uuid.h"  // for Uuid
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/GzipStreambuf.h"
+#include "aemu/base/files/IniFile.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/TarStream.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/snapshot/PathUtils.h"
@@ -131,7 +131,7 @@ bool pullSnapshot(const char* snapshotName,
                 }
 
                 if (deleteAfterPull) {
-                    base::PathUtils::move(snapshot->dataDir(), targetDir);
+                    base::PathUtils::move(std::string(snapshot->dataDir()), targetDir);
                 } else {
                     path_copy_dir(targetDir, snapshot->dataDir().data());
                 }
@@ -178,19 +178,19 @@ bool pullSnapshot(const char* snapshotName,
                         continue;
                     }
                     struct stat sb;
-                    std::string_view name;
+                    std::string name;
                     char buf[k64KB];
-                    base::PathUtils::split(fname, nullptr, &name);
+                    base::PathUtils::split(fname.data(), nullptr, &name);
 
                     // Use of  a 64 KB  buffer gives good performance (see
                     // performance tests.)
                     std::ifstream ifs(
-                            PathUtils::asUnicodePath(fname).c_str(),
+                            PathUtils::asUnicodePath(fname.data()).c_str(),
                             std::ios_base::in | std::ios_base::binary);
                     ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
-                    dprint("Zipping %s", base::c_str(name).c_str());
+                    dprint("Zipping %s", name.data());
                     if (android_stat(fname.c_str(), &sb) != 0 ||
-                        !tw.addFileEntryFromStream(ifs, name.data(), sb)) {
+                        !tw.addFileEntryFromStream(ifs, name, sb)) {
                         logError("Unable to tar " + fname, opaque, errConsumer);
                         succeed = false;
                         break;

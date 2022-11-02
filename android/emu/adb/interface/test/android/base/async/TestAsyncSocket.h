@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 #pragma once
 #include <gtest/gtest.h>
-#include "android/base/async/AsyncSocketAdapter.h"
+#include "aemu/base/async/AsyncSocketAdapter.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -21,10 +21,11 @@
 #include <thread>
 #include <vector>
 
-#include "android/base/Log.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/MessageChannel.h"
+#include "android/base/system/System.h"
 #include "android/base/testing/TestLooper.h"
 
 using namespace android;

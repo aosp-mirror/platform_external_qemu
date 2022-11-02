@@ -16,7 +16,7 @@
 
 #include "android/virtualscene/Scene.h"
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/camera/camera-metrics.h"
 #include "android/utils/debug.h"

@@ -16,8 +16,8 @@
 #include "FrameBuffer.h"
 #include "RendererImpl.h"
 
-#include "android/base/CpuUsage.h"
-#include "android/base/files/Stream.h"
+#include "aemu/base/CpuUsage.h"
+#include "aemu/base/files/Stream.h"
 #include "emugl/common/address_space_device_control_ops.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/dma_device.h"

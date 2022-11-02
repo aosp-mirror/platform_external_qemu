@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
-#include "android/base/async/ScopedSocketWatch.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ScopedSocketWatch.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/emulation/AdbHub.h"
 #include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbTypes.h"

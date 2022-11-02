@@ -16,26 +16,26 @@
 
 #include <inttypes.h>
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/logging/CLog.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/FileUtils.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/StringFormat.h"
-#include "android/base/StringParse.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/ScopedFd.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/misc/FileUtils.h"
+#include "aemu/base/misc/StringUtils.h"
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/StringParse.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"
 
 #ifdef _WIN32
-#include "android/base/files/ScopedRegKey.h"
-#include "android/base/files/ScopedFileHandle.h"
-#include "android/base/system/Win32UnicodeString.h"
-#include "android/base/system/Win32Utils.h"
+#include "aemu/base/files/ScopedRegKey.h"
+#include "aemu/base/files/ScopedFileHandle.h"
+#include "aemu/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32Utils.h"
 #endif
 
 #ifdef _WIN32
@@ -132,7 +132,7 @@ using std::vector;
 
 #ifdef __APPLE__
 // Defined in system-native-mac.mm
-Optional<System::DiskKind> nativeDiskKind(int st_dev);
+Optional<DiskKind> nativeDiskKind(int st_dev);
 #endif
 
 namespace {
@@ -222,7 +222,7 @@ static bool isRunningUnderWine() {
 }
 
 static bool extractFullPath(std::string* cmd) {
-    if (PathUtils::isAbsolute(*cmd)) {
+    if (PathUtils::isAbsolute(cmd->data())) {
         return true;
     } else {
         // try searching %PATH% and current directory for the binary
@@ -316,7 +316,7 @@ public:
 
     bool setCurrentDirectory(std::string_view directory) override {
 #if defined(_WIN32)
-        Win32UnicodeString directory_unicode(directory);
+        Win32UnicodeString directory_unicode(directory.data());
         return SetCurrentDirectoryW(directory_unicode.c_str());
 #else   // !_WIN32
         char currentDir[PATH_MAX];
@@ -921,7 +921,7 @@ public:
         std::vector<std::string> result = scanDirInternal(dirPath);
         if (fullPath) {
             // Prepend |dirPath| to each entry.
-            std::string prefix = PathUtils::addTrailingDirSeparator(dirPath);
+            std::string prefix = PathUtils::addTrailingDirSeparator(dirPath.data());
             for (auto& entry : result) {
                 entry.insert(0, prefix);
             }
@@ -939,7 +939,7 @@ public:
 
     bool envTest(std::string_view varname) const override {
 #ifdef _WIN32
-        Win32UnicodeString varname_unicode(varname);
+        Win32UnicodeString varname_unicode(varname.data());
         const wchar_t* value = _wgetenv(varname_unicode.c_str());
         return value && value[0] != L'\0';
 #else
@@ -1855,7 +1855,7 @@ void HostSystem::atexit_HostSystem() {
 #ifdef _WIN32
 // Return |path| as a Unicode string, while discarding trailing separators.
 Win32UnicodeString win32Path(std::string_view path) {
-    Win32UnicodeString wpath(path);
+    Win32UnicodeString wpath(path.data());
     // Get rid of trailing directory separators, Windows doesn't like them.
     size_t size = wpath.size();
     while (size > 0U &&
@@ -1975,7 +1975,7 @@ std::vector<std::string> System::scanDirInternal(std::string_view dirPath) {
         return result;
     }
 #ifdef _WIN32
-    auto root = PathUtils::addTrailingDirSeparator(dirPath);
+    auto root = PathUtils::addTrailingDirSeparator(dirPath.data());
     root += '*';
     Win32UnicodeString rootUnicode(root);
     struct _wfinddata_t findData;
@@ -2161,7 +2161,7 @@ bool System::deleteFileInternal(std::string_view path) {
     }
 
 #ifdef _WIN32
-    Win32UnicodeString path_unicode(path);
+    Win32UnicodeString path_unicode(path.data());
     int remove_res = _wremove(path_unicode.c_str());
 #else
     int remove_res = remove(c_str(path));
@@ -2306,7 +2306,7 @@ Optional<System::Duration> System::pathModificationTimeInternal(
 #endif
 }
 
-static Optional<System::DiskKind> diskKind(const PathStat& st) {
+static Optional<DiskKind> diskKind(const PathStat& st) {
 #ifdef _WIN32
 
     auto volumeName = StringFormat(R"(\\?\%c:)", 'A' + st.st_dev);
@@ -2350,7 +2350,7 @@ static Optional<System::DiskKind> diskKind(const PathStat& st) {
         bytesReturned == sizeof(dtd)) {
         // Some SSDs don't support TRIM, so this can't be a sign of an HDD.
         if (dtd.TrimEnabled) {
-            return System::DiskKind::Ssd;
+            return DiskKind::Ssd;
         }
     }
 
@@ -2363,8 +2363,8 @@ static Optional<System::DiskKind> diskKind(const PathStat& st) {
                           sizeof(spqSeekP), &dspd, sizeof(dspd), &bytesReturned,
                           NULL) &&
         bytesReturned == sizeof(dspd)) {
-        return dspd.IncursSeekPenalty ? System::DiskKind::Hdd
-                                      : System::DiskKind::Ssd;
+        return dspd.IncursSeekPenalty ? DiskKind::Hdd
+                                      : DiskKind::Ssd;
     }
 
     // TODO: figure out how to issue this query when not admin and not opening
@@ -2406,9 +2406,9 @@ static Optional<System::DiskKind> diskKind(const PathStat& st) {
         //          FFFFh           Reserved
         unsigned rate = id_query.data[217];
         if (rate == 1) {
-            return System::DiskKind::Ssd;
+            return DiskKind::Ssd;
         } else if (rate >= 0x0401 && rate <= 0xFFFE) {
-            return System::DiskKind::Hdd;
+            return DiskKind::Hdd;
         }
     }
 #endif
@@ -2469,9 +2469,9 @@ static Optional<System::DiskKind> diskKind(const PathStat& st) {
         return {};
     }
     if (isRotational == '0') {
-        return System::DiskKind::Ssd;
+        return DiskKind::Ssd;
     } else if (isRotational == '1') {
-        return System::DiskKind::Hdd;
+        return DiskKind::Hdd;
     }
 
 #else
@@ -2484,7 +2484,7 @@ static Optional<System::DiskKind> diskKind(const PathStat& st) {
     return {};
 }
 
-Optional<System::DiskKind> System::diskKindInternal(std::string_view path) {
+Optional<DiskKind> System::diskKindInternal(std::string_view path) {
     PathStat stat;
     if (pathStat(path, &stat)) {
         return {};
@@ -2492,7 +2492,7 @@ Optional<System::DiskKind> System::diskKindInternal(std::string_view path) {
     return android::base::diskKind(stat);
 }
 
-Optional<System::DiskKind> System::diskKindInternal(int fd) {
+Optional<DiskKind> System::diskKindInternal(int fd) {
     PathStat stat;
     if (fdStat(fd, &stat)) {
         return {};
@@ -2518,7 +2518,7 @@ void System::addLibrarySearchDir(std::string_view path) {
 // static
 std::string System::findBundledExecutable(std::string_view programName) {
     System* const system = System::get();
-    const std::string executableName = PathUtils::toExecutableName(programName);
+    const std::string executableName = PathUtils::toExecutableName(programName.data());
 
     // first, try the root launcher directory
     std::vector<std::string> pathList = {system->getLauncherDirectory(),
@@ -2660,7 +2660,7 @@ void System::setEnvironmentVariable(std::string_view varname,
 // static
 std::string System::getEnvironmentVariable(std::string_view varname) {
 #ifdef _WIN32
-    Win32UnicodeString varname_unicode(varname);
+    Win32UnicodeString varname_unicode(varname.data());
     const wchar_t* value = _wgetenv(varname_unicode.c_str());
     if (!value) {
         return std::string();
@@ -2916,7 +2916,7 @@ std::vector<System::Pid> System::queryRunningProcessPids(
 
         if (!path) continue;
 
-        auto filePart = PathUtils::pathWithoutDirs(*path);
+        auto filePart = PathUtils::pathWithoutDirs(path->data());
 
         if (!filePart) continue;
 
@@ -2938,7 +2938,7 @@ std::vector<System::Pid> System::queryRunningProcessPids(
 }
 
 static bool looksLikeTempDir(std::string_view tempDir) {
-    auto pathComponents = PathUtils::decompose(tempDir);
+    auto pathComponents = PathUtils::decompose(tempDir.data());
 
     if (pathComponents.empty()) return false;
 
@@ -3290,7 +3290,7 @@ bool System::queryFileVersionInfo(std::string_view path,
     if (!initFileVersionInfoFuncs()) return false;
     if (!canQueryFileVersion) return false;
 
-    const Win32UnicodeString pathWide(path);
+    const Win32UnicodeString pathWide(path.data());
     DWORD dummy;
     DWORD length = 0;
     const DWORD fileVerGetNeutral = 0x02;

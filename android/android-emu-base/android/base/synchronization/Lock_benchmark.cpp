@@ -15,7 +15,7 @@
 // A small benchmark used to compare the performance of android::base::Lock
 // with other mutex implementions.
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include <mutex>
 #include <atomic>

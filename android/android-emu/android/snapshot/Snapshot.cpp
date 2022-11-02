@@ -30,19 +30,19 @@
 
 #include "android/avd/hw-config.h"        // for androidHwConfig...
 #include "android/avd/info.h"             // for avdInfo_getCach...
-#include "android/base/ArraySize.h"       // for ARRAY_SIZE
-#include "android/base/Log.h"             // for LogStreamVoidify
-#include "android/base/Optional.h"        // for Optional, makeO...
-#include "android/base/ProcessControl.h"  // for loadLaunchParam...
-#include "android/base/StringFormat.h"    // for StringFormat
-#include "android/base/files/GzipStreambuf.h"
-#include "android/base/files/IniFile.h"    // for IniFile
-#include "android/base/files/PathUtils.h"  // for PathUtils, pj
-#include "android/base/files/ScopedFd.h"   // for ScopedFd
-#include "android/base/files/TarStream.h"
-#include "android/base/logging/CLog.h"
-#include "android/base/memory/ScopedPtr.h"  // for makeCustomScope...
-#include "android/base/misc/StringUtils.h"  // for endsWith
+#include "aemu/base/ArraySize.h"       // for ARRAY_SIZE
+#include "aemu/base/Log.h"             // for LogStreamVoidify
+#include "aemu/base/Optional.h"        // for Optional, makeO...
+#include "aemu/base/ProcessControl.h"  // for loadLaunchParam...
+#include "aemu/base/StringFormat.h"    // for StringFormat
+#include "aemu/base/files/GzipStreambuf.h"
+#include "aemu/base/files/IniFile.h"    // for IniFile
+#include "aemu/base/files/PathUtils.h"  // for PathUtils, pj
+#include "aemu/base/files/ScopedFd.h"   // for ScopedFd
+#include "aemu/base/files/TarStream.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/memory/ScopedPtr.h"  // for makeCustomScope...
+#include "aemu/base/misc/StringUtils.h"  // for endsWith
 #include "android/base/system/System.h"     // for System, System:...
 #include "android/console.h"  // for getConsoleAgents()->settings->avdInfo()
 #include "android/emulation/ConfigDirs.h"             // for ConfigDirs

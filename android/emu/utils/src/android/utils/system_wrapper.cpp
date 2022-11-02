@@ -16,7 +16,7 @@
  */
 #include "android/base/system/System.h"
 
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 
 // This is a very thin wrapper around C++ implementations of some functions
 // NOTE: cpp headers need to go before this so that inttypes.h doesn't pollute

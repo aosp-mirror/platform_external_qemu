@@ -13,11 +13,11 @@
 
 #include <memory>
 
-#include "android/base/Compiler.h"
-#include "android/base/Optional.h"
-#include "android/base/async/Looper.h"
-#include "android/base/async/RecurrentTask.h"
-#include "android/base/sockets/ScopedSocket.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/RecurrentTask.h"
+#include "aemu/base/sockets/ScopedSocket.h"
 #include "android/emulation/HostapdController.h"
 #include "android/network/GenericNetlinkMessage.h"
 #include "android/network/Ieee80211Frame.h"

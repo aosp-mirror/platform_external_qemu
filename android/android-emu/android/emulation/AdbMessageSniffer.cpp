@@ -11,8 +11,8 @@
 
 #include "android/emulation/AdbMessageSniffer.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/logging/Log.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/logging/Log.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/console.h"
 

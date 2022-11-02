@@ -28,14 +28,14 @@
 
 #include <stdio.h>
 
-#include "android/base/Compiler.h"
-#include "android/base/Log.h"
-#include "android/base/StringFormat.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/StringFormat.h"
 
-#include "android/base/files/ScopedFd.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/FileUtils.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/files/ScopedFd.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/misc/FileUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 #include "android/cpu_accelerator.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -47,10 +47,10 @@
 #include "android/utils/x86_cpuid.h"
 
 #ifdef _WIN32
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/ScopedFileHandle.h"
-#include "android/base/system/Win32UnicodeString.h"
-#include "android/base/system/Win32Utils.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/ScopedFileHandle.h"
+#include "aemu/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32Utils.h"
 #include "android/windows_installer.h"
 #endif
 
@@ -273,8 +273,8 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
         const auto fileContents = android::readFileIntoString(kEtcGroupsPath);
 
         if (fileContents) {
-            base::split(*fileContents, std::string_view("\n"),
-                  [&etcGroupsKvmLine](std::string_view line) {
+            base::split<std::string>(*fileContents, std::string("\n"),
+                  [&etcGroupsKvmLine](const std::string& line) {
                       if (!strncmp("kvm:", line.data(), 4)) {
                           etcGroupsKvmLine = line.data();
                       }

@@ -12,7 +12,7 @@
 
 #include "android/utils/dns.h"
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 
 #include <gtest/gtest.h>
 #include <string>

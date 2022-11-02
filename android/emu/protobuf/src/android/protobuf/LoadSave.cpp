@@ -11,9 +11,9 @@
 
 #include "android/protobuf/LoadSave.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/ScopedFd.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/utils/fd.h"
 #include "android/utils/file_io.h"

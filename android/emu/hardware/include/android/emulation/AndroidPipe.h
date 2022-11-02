@@ -12,7 +12,7 @@
 #pragma once
 
 #include <memory>
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 #include "android/emulation/android_pipe_common.h"
 #include "android/emulation/VmLock.h"
 

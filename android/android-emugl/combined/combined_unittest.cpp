@@ -13,12 +13,12 @@
 // limitations under the License.
 #include <gtest/gtest.h>
 
-#include "android/base/GLObjectCounter.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/perflogger/BenchmarkLibrary.h"
+#include "aemu/base/GLObjectCounter.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/base/Tracing.h"
+#include "aemu/base/threads/FunctorThread.h"
+#include "aemu/base/Tracing.h"
 #include "android/opengles.h"
 #include "android/emulation/testing/TestDmaMap.h"
 #include "android/console.h"

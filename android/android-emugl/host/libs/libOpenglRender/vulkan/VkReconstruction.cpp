@@ -13,7 +13,7 @@
 // limitations under the License.
 #include "VkReconstruction.h"
 
-#include "android/base/containers/EntityManager.h"
+#include "aemu/base/containers/EntityManager.h"
 
 #include "VkDecoder.h"
 #include "IOStream.h"

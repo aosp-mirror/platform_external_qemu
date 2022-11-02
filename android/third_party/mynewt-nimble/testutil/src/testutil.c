@@ -26,7 +26,7 @@
 #include "nimble/nimble_npl.h"
 #include "nimble/os_types.h"
 #include "sysinit/sysinit.h"
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
 
 #define OS_MAIN_STACK_SIZE 1024
 #define OS_MAIN_TASK_PRIO 0

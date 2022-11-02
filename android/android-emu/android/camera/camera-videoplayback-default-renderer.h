@@ -17,9 +17,9 @@
 #pragma once
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
-#include "android/base/Optional.h"
-#include "android/base/Result.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/Result.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/utils/compiler.h"
 #include "android/videoinjection/VideoInjectionController.h"
 #include "android/camera/camera-virtualscene-utils.h"

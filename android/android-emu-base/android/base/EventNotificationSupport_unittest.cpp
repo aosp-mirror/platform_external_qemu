@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/EventNotificationSupport.h"
+#include "aemu/base/EventNotificationSupport.h"
 
 #include <gtest/gtest.h>            // for Message, SuiteApiResolver, TestPa...
 

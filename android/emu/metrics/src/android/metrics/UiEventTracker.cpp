@@ -14,7 +14,7 @@
 #include <unordered_map>  // for __hash_map_iterator
 #include <utility>        // for pair
 
-#include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "aemu/base/memory/LazyInstance.h"  // for LazyInstance
 #include "android/metrics/MetricsReporter.h"   // for MetricsReporter
 #include "studio_stats.pb.h"                   // for EmulatorUiEvent, Andro...
 

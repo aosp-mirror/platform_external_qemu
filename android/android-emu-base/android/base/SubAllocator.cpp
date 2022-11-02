@@ -11,11 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/SubAllocator.h"
+#include "aemu/base/SubAllocator.h"
 
-#include "android/base/address_space.h"
-#include "android/base/files/Stream.h"
-#include "android/base/Log.h"
+#include "aemu/base/address_space.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/Log.h"
 
 #include <iomanip>
 #include <sstream>

@@ -15,9 +15,9 @@
  */
 
 #include "android/emulation/resizable_display_config.h"
-#include "android/base/Log.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/metrics/MetricsReporter.h"
 #include "android/featurecontrol/feature_control.h"

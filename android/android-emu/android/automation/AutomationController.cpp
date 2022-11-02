@@ -24,17 +24,18 @@
 
 #include "android/automation/AutomationEventSink.h"
 #include "android/automation/EventSource.h"
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/FileShareOpen.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StdioStream.h"
-#include "android/base/files/Stream.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/FileShareOpen.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StdioStream.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/misc/StringUtils.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/hw-sensors.h"
+#include "android/base/system/System.h"
 #include "android/offworld/OffworldPipe.h"
 #include "android/physics/PhysicalModel.h"
 
@@ -297,8 +298,8 @@ public:
                    uint32_t asyncId) {
         using namespace google::protobuf;
 
-        std::vector<std::string_view> splitEventStrings;
-        split(event, "\n", [&splitEventStrings](std::string_view str) {
+        std::vector<std::string> splitEventStrings;
+        split<std::string>(std::string(event), "\n", [&splitEventStrings](const std::string& str) {
             if (!str.empty()) {
                 splitEventStrings.push_back(str);
             }
@@ -590,7 +591,7 @@ StartResult AutomationControllerImpl::startRecording(
         return Err(StartError::InvalidFilename);
     }
 
-    if (!PathUtils::isAbsolute(path)) {
+    if (!PathUtils::isAbsolute(path.data())) {
         path = PathUtils::join(System::get()->getHomeDirectory(), path.data());
     }
 
@@ -685,7 +686,7 @@ StartResult AutomationControllerImpl::startPlayback(const char* filename) {
         return Err(StartError::AlreadyStarted);
     }
 
-    if (!PathUtils::isAbsolute(path)) {
+    if (!PathUtils::isAbsolute(path.data())) {
         path = PathUtils::join(System::get()->getHomeDirectory(), path.data());
     }
 
@@ -795,7 +796,7 @@ StopResult AutomationControllerImpl::stopPlayback() {
 
 std::string AutomationControllerImpl::getMacroName(std::string_view filename) {
     std::string path(filename);
-    if (!PathUtils::isAbsolute(path)) {
+    if (!PathUtils::isAbsolute(path.data())) {
         path = PathUtils::join(System::get()->getHomeDirectory(), filename.data());
     }
 
@@ -816,7 +817,7 @@ std::string AutomationControllerImpl::getMacroName(std::string_view filename) {
 std::pair<uint64_t, uint64_t> AutomationControllerImpl::getMetadata(
         std::string_view filename) {
     std::string path(filename);
-    if (!PathUtils::isAbsolute(path)) {
+    if (!PathUtils::isAbsolute(path.data())) {
         path = PathUtils::join(System::get()->getHomeDirectory(), filename.data());
     }
 
@@ -1028,7 +1029,7 @@ void AutomationControllerImpl::addMetadataToHeader(DurationNs durationNs) {
 void AutomationControllerImpl::setMacroName(std::string_view macroName,
                                             std::string_view filename) {
     std::string path(filename);
-    if (!PathUtils::isAbsolute(path)) {
+    if (!PathUtils::isAbsolute(path.data())) {
         path = PathUtils::join(System::get()->getHomeDirectory(), filename.data());
     }
     mFilePath = path;

@@ -13,9 +13,9 @@
 // limitations under the License.
 #include "android/emulation/control/TurnConfig.h"
 
-#include "android/base/Log.h"
-#include "android/base/Optional.h"        // for Optional
-#include "android/base/ProcessControl.h"  // for parseEscapedLaunchString
+#include "aemu/base/Log.h"
+#include "aemu/base/Optional.h"        // for Optional
+#include "aemu/base/ProcessControl.h"  // for parseEscapedLaunchString
 #include "android/base/system/System.h"   // for System, System::ProcessExit...
 
 namespace android {

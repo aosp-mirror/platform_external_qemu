@@ -21,12 +21,12 @@
 
 #include "android/camera/camera-capture.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/Compiler.h"
-#include "android/base/Log.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 #include "android/camera/camera-format-converters.h"
 
 #include <initguid.h>
@@ -36,6 +36,7 @@
 
 #include <wrl/client.h>
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <set>

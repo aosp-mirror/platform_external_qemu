@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Version.h"
+#include "aemu/base/Version.h"
 
 #include <gtest/gtest.h>
 

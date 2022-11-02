@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/base/threads/ThreadStore.h"
+#include "aemu/base/threads/ThreadStore.h"
 
 namespace emugl {
 

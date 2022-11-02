@@ -19,9 +19,9 @@
 #include "VulkanDispatch.h"
 #include "emugl/common/feature_control.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/GLObjectCounter.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/GLObjectCounter.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/emulation/control/AndroidAgentFactory.h"
@@ -34,7 +34,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 using android::base::Win32UnicodeString;
 #else
 #include <dlfcn.h>

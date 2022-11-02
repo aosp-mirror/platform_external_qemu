@@ -15,8 +15,9 @@
 #include "android/crashreport/HangDetector.h"
 
 #include "android/avd/info.h"
-#include "android/base/Optional.h"
-#include "android/base/StringFormat.h"
+#include "aemu/base/Debug.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/StringFormat.h"
 #include "android/console.h"
 #include "android/utils/debug.h"
 

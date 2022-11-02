@@ -34,9 +34,9 @@
 #include <utility>        // for pair
 #include <vector>         // for vector
 
-#include "android/base/Log.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/misc/StringUtils.h"  // for splitTokens
+#include "aemu/base/Log.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/misc/StringUtils.h"  // for splitTokens
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "emulator/webrtc/RtcConfig.h"
 #include "emulator/webrtc/RtcConnection.h"  // for json, RtcCon...

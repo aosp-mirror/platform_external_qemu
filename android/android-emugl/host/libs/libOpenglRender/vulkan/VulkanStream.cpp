@@ -15,7 +15,7 @@
 
 #include "IOStream.h"
 
-#include "android/base/BumpPool.h"
+#include "aemu/base/BumpPool.h"
 #include "android/utils/GfxstreamFatalError.h"
 
 #include "emugl/common/feature_control.h"

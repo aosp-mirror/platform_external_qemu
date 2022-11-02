@@ -19,11 +19,11 @@
 #include <stdint.h>                                         // for uint32_t
 #include <map>                                              // for map
 
-#include "android/base/synchronization/Lock.h"              // for Lock, Aut...
+#include "aemu/base/synchronization/Lock.h"              // for Lock, Aut...
 #include "android/emulation/control/record_screen_agent.h"  // for QAndroidR...
 #include "android/emulation/control/vm_operations.h"        // for vmOpratons
 #include "android/emulation/control/window_agent.h"         // for QAndroidE...
-#include "android/base/EventNotificationSupport.h"
+#include "aemu/base/EventNotificationSupport.h"
 
 namespace android {
 namespace base {

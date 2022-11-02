@@ -13,7 +13,7 @@
 #include "android/telephony/MeterService.h"
 
 #include "android/avd/util.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/console.h"
 #include "android/utils/debug.h"

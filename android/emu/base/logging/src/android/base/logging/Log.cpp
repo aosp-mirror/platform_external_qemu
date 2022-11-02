@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/logging/Log.h"
+#include "aemu/base/logging/Log.h"
 
 #include <stdarg.h>                             // for va_end, va_start
 #include <stdio.h>                              // for size_t, fflush, vsnpr...
@@ -18,8 +18,8 @@
 #include <string_view>                          // for string_view
 
 #include "absl/strings/str_format.h"            // for FPrintF
-#include "android/base/logging/CLog.h"          // for __emu_log_print
-#include "android/base/logging/LogFormatter.h"  // for SimpleLogFormatter
+#include "aemu/base/logging/CLog.h"          // for __emu_log_print
+#include "aemu/base/logging/LogFormatter.h"  // for SimpleLogFormatter
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else

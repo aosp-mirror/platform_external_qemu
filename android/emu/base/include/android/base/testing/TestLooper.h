@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/async/DefaultLooper.h"
+#include "aemu/base/async/DefaultLooper.h"
 
 namespace android {
 namespace base {

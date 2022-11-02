@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/Optional.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Optional.h"
 #include "android/base/system/System.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/RamLoader.h"
@@ -51,9 +51,9 @@ public:
     // Loader good for doing all other operations that can happen on it.
     void synchronize(bool isOnExit);
 
-    const base::System::MemUsage& memUsage() const { return mMemUsage; }
-    bool isHDD() const { return mDiskKind.valueOr(base::System::DiskKind::Ssd) ==
-                                base::System::DiskKind::Hdd; }
+    const base::MemUsage& memUsage() const { return mMemUsage; }
+    bool isHDD() const { return mDiskKind.valueOr(base::DiskKind::Ssd) ==
+                                base::DiskKind::Hdd; }
 
 private:
     OperationStatus mStatus;
@@ -61,8 +61,8 @@ private:
     base::Optional<RamLoader> mRamLoader;
     std::shared_ptr<TextureLoader> mTextureLoader;
 
-    base::System::MemUsage mMemUsage;
-    base::Optional<base::System::DiskKind> mDiskKind = {};
+    base::MemUsage mMemUsage;
+    base::Optional<base::DiskKind> mDiskKind = {};
 };
 
 }  // namespace snapshot

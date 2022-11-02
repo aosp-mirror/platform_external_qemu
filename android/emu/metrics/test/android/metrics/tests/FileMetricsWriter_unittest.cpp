@@ -14,9 +14,9 @@
 
 #include "android/metrics/FileMetricsWriter.h"
 
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 
-#include "android/base/Uuid.h"
+#include "aemu/base/Uuid.h"
 #include "android/base/testing/TestLooper.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"

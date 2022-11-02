@@ -16,8 +16,8 @@ extern "C" {
 #include "sysemu/os-win32-msvc.h"
 }
 #endif
-#include "android/base/containers/Lookup.h"
-#include "android/base/logging/CLog.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/logging/CLog.h"
 #include "android-qemu2-glue/emulation/DmaMap.h"
 
 #include <type_traits>

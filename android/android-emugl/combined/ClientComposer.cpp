@@ -24,8 +24,8 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include "android/base/synchronization/Lock.h"
-#include "android/base/threads/WorkerThread.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/threads/WorkerThread.h"
 #include "android/utils/debug.h"
 
 #include <atomic>

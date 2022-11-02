@@ -19,10 +19,10 @@
 #include <sstream>  // IWYU pragma: keep
 #include <utility>  // for move
 
-#include "android/base/Log.h"                  // for LOG
-#include "android/base/Uuid.h"                 // for Uuid
-#include "android/base/files/GzipStreambuf.h"  // for GzipOut...
-#include "android/base/files/PathUtils.h"      // for PathUtils
+#include "aemu/base/Log.h"                  // for LOG
+#include "aemu/base/Uuid.h"                 // for Uuid
+#include "aemu/base/files/GzipStreambuf.h"  // for GzipOut...
+#include "aemu/base/files/PathUtils.h"      // for PathUtils
 #include "android/base/system/System.h"        // for System
 #include "android/curl-support.h"              // for curl_post
 #include "android/metrics/MetricsLogging.h"    // for D
@@ -51,7 +51,7 @@ PlaystoreMetricsWriter::PlaystoreMetricsWriter(const std::string& sessionId,
                                                const std::string& cookieFile,
                                                std::string url)
     : MetricsWriter(sessionId), mUrl(std::move(url)), mCookieFile(cookieFile) {
-    std::ifstream cookieResponse(PathUtils::asUnicodePath(cookieFile).c_str(),
+    std::ifstream cookieResponse(PathUtils::asUnicodePath(cookieFile.data()).c_str(),
                                  std::ios::in | std::ios::binary);
     if (cookieResponse.good()) {
         LogResponse response;
@@ -153,7 +153,7 @@ void PlaystoreMetricsWriter::writeCookie(std::string proto) {
 
         response.set_next_request_wait_millis(mSendAfterMs.count());
         std::ofstream cookieResponse(
-                PathUtils::asUnicodePath(mCookieFile).c_str(),
+                PathUtils::asUnicodePath(mCookieFile.data()).c_str(),
                 std::ios::out | std::ios::binary | std::ios::trunc);
         response.SerializeToOstream(&cookieResponse);
         cookieResponse.close();

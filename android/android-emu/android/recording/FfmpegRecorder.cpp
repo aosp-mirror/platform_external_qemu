@@ -32,10 +32,10 @@
 //
 #include "android/recording/FfmpegRecorder.h"
 
-#include "android/base/Log.h"                   // for LogStream, LogMessage
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"      // for FuncDelete
-#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "aemu/base/Log.h"                   // for LogStream, LogMessage
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/ScopedPtr.h"      // for FuncDelete
+#include "aemu/base/synchronization/Lock.h"  // for Lock, AutoLock
 #include "android/base/system/System.h"         // for System
 #include "android/recording/AVScopedPtr.h"      // for makeAVScopedPtr
 #include "android/recording/Frame.h"            // for Frame, AVFormat, getV...

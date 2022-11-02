@@ -9,10 +9,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Debug.h"
+#include "aemu/base/Debug.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/files/PathUtils.h"
+#include "android/base/system/System.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -77,10 +78,10 @@ bool IsDebuggerAttached() {
 #endif
 }
 
-bool WaitForDebugger(System::Duration timeoutMs) {
-    static const System::Duration sleepTimeoutMs = 500;
+bool WaitForDebugger(int64_t timeoutMs) {
+    static const int64_t sleepTimeoutMs = 500;
 
-    System::Duration sleptForMs = 0;
+    int64_t sleptForMs = 0;
     while (!IsDebuggerAttached()
            && (timeoutMs == -1 || sleptForMs < timeoutMs)) {
         System::get()->sleepMs(sleepTimeoutMs);

@@ -16,7 +16,7 @@
 #pragma once
 
 #include "emugl/common/logging.h"
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 
 #include <assert.h>
 #include <inttypes.h>

@@ -14,7 +14,8 @@
 
 #define EMULOG(priority, fmt, ...) \
     test_log_print(priority, __FILE__, __LINE__, fmt, ##__VA_ARGS__);
-#include "android/base/EintrWrapper.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/logging/LogSeverity.h"
 
 #include <setjmp.h>
 #include <stdarg.h>

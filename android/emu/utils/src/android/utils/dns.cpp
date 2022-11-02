@@ -12,8 +12,8 @@
 
 #include "android/utils/dns.h"
 
-#include "android/base/network/Dns.h"
-#include "android/base/network/IpAddress.h"
+#include "aemu/base/network/Dns.h"
+#include "aemu/base/network/IpAddress.h"
 
 #include "android/utils/debug.h"
 

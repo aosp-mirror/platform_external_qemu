@@ -9,11 +9,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Log.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
 
-#include "android/base/threads/Thread.h"
+#include "aemu/base/threads/Thread.h"
 
 #include <string>
 #include <string_view>

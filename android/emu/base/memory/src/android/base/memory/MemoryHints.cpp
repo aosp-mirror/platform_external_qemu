@@ -18,9 +18,9 @@
 #include <functional>  // for __base
 #include <vector>      // for vector
 
-#include "android/base/memory/ContiguousRangeMapper.h"  // for ContiguousRan...
-#include "android/base/memory/LazyInstance.h"           // for LazyInstance
-#include "android/base/memory/MemoryHints.h"
+#include "aemu/base/memory/ContiguousRangeMapper.h"  // for ContiguousRan...
+#include "aemu/base/memory/LazyInstance.h"           // for LazyInstance
+#include "aemu/base/memory/MemoryHints.h"
 
 #ifndef _WIN32
 #include <sys/mman.h>  // for mprotect, mad...

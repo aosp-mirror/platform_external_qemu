@@ -9,9 +9,9 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/base/ArraySize.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/dirscanner.h"
@@ -20,8 +20,8 @@
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 
-#include "android/base/files/ScopedFileHandle.h"
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/files/ScopedFileHandle.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 
 #include <memory>
 #include <stdio.h>

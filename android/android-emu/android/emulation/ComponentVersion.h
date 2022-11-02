@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/base/Version.h"
+#include "aemu/base/Version.h"
 
 #include <string>
 #include <string_view>

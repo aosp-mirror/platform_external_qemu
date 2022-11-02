@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/AlignedBuf.h"
+#include "aemu/base/AlignedBuf.h"
 
 #include "render_api_platform_types.h"
 

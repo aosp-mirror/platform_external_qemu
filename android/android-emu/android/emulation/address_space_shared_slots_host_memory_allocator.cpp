@@ -15,8 +15,8 @@
 #include "android/emulation/address_space_shared_slots_host_memory_allocator.h"
 #include "android/emulation/address_space_device.hpp"
 #include "android/emulation/control/vm_operations.h"
-#include "android/base/AlignedBuf.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/AlignedBuf.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/crashreport/crash-handler.h"
 #include <map>
 #include <unordered_set>

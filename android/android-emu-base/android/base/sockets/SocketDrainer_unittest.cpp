@@ -9,8 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/sockets/SocketDrainer.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/sockets/SocketDrainer.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/utils/looper.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/socket_drainer.h"

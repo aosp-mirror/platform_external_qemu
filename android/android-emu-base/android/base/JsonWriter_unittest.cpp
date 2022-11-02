@@ -8,9 +8,9 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/JsonWriter.h"
+#include "aemu/base/JsonWriter.h"
 
-#include "android/base/misc/FileUtils.h"
+#include "aemu/base/misc/FileUtils.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>

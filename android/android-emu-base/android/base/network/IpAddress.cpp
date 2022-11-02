@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/network/IpAddress.h"
+#include "aemu/base/network/IpAddress.h"
 
-#include "android/base/network/NetworkUtils.h"
-#include "android/base/Log.h"
+#include "aemu/base/network/NetworkUtils.h"
+#include "aemu/base/Log.h"
 
 #include <algorithm>
 #include <cstring>
 #include <string>
 
 #ifdef _WIN32
-#include "android/base/sockets/Winsock.h"
+#include "aemu/base/sockets/Winsock.h"
 #include <wincrypt.h>
 #include <iphlpapi.h>
 #include <ws2tcpip.h>

@@ -15,7 +15,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/metrics/Percentiles.h"
 

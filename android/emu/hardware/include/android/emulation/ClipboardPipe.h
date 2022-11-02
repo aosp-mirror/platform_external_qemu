@@ -16,7 +16,7 @@
 #include <memory>                                   // for shared_ptr
 #include <vector>                                   // for vector
 
-#include "android/base/synchronization/Lock.h"      // for Lock, AutoLock
+#include "aemu/base/synchronization/Lock.h"      // for Lock, AutoLock
 #include "android/emulation/AndroidPipe.h"          // for AndroidPipe, Andr...
 #include "android/emulation/android_pipe_common.h"  // for AndroidPipeBuffer
 

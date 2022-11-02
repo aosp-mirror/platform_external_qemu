@@ -11,9 +11,9 @@
 
 #include "android/wear-agent/testing/WearAgentTestUtils.h"
 
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketErrors.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketErrors.h"
+#include "aemu/base/sockets/SocketUtils.h"
 
 #include <errno.h>
 #include <stdio.h>

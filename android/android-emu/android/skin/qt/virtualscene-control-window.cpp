@@ -46,7 +46,7 @@
 #include <cmath>
 #include <functional>
 
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
 #include "android/featurecontrol/feature_control.h"

@@ -12,7 +12,7 @@
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 
-#include "android/base/StringFormat.h"
+#include "aemu/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/avd/hw-config.h"

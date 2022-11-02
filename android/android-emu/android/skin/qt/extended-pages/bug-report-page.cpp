@@ -35,11 +35,11 @@
 #include <vector>                                      // for vector
 
 #include "android/avd/info.h"                          // for avdInfo_getApi...
-#include "android/base/StringFormat.h"                 // for StringFormat
-#include "android/base/Uri.h"                          // for Uri
-#include "android/base/Uuid.h"                         // for Uuid
-#include "android/base/async/ThreadLooper.h"           // for ThreadLooper
-#include "android/base/files/PathUtils.h"              // for PathUtils
+#include "aemu/base/StringFormat.h"                 // for StringFormat
+#include "aemu/base/Uri.h"                          // for Uri
+#include "aemu/base/Uuid.h"                         // for Uuid
+#include "aemu/base/async/ThreadLooper.h"           // for ThreadLooper
+#include "aemu/base/files/PathUtils.h"              // for PathUtils
 #include "android/base/system/System.h"                // for System, System...
 #include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
 #include "android/console.h"                           // for getConsoleAgents()->settings->avdInfo()
@@ -512,7 +512,7 @@ void BugreportPage::loadScreenshotImage() {
 bool BugreportPage::saveToFile(std::string_view filePath,
                                const char* content,
                                size_t length) {
-    std::ofstream outFile(PathUtils::asUnicodePath(filePath).c_str(),
+    std::ofstream outFile(PathUtils::asUnicodePath(filePath.data()).c_str(),
                           std::ios_base::out | std::ios_base::binary);
     if (!outFile.is_open() || !outFile.good())
         return false;

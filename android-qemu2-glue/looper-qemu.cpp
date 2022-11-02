@@ -12,7 +12,7 @@
 #include "android-qemu2-glue/looper-qemu.h"
 
 #include "android-qemu2-glue/base/async/Looper.h"
-#include "android/base/async/Looper.h"
+#include "aemu/base/async/Looper.h"
 #include "android/utils/looper.h"
 
 typedef ::Looper CLooper;

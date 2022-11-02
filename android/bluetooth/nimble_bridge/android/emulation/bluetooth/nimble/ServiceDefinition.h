@@ -17,7 +17,7 @@
 #include <memory>                          // for unique_ptr
 #include <vector>                          // for vector
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 #include "emulated_bluetooth_device.pb.h"  // for Uuid, GattCharacteristic (...
 #include "host/ble_gatt.h"                 // for ble_gatt_chr_def, ble_gatt...
 #include "host/ble_uuid.h"                 // for ble_uuid_any_t

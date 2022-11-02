@@ -13,7 +13,7 @@
 
 #include <string>
 
-#include "android/base/files/FileShareOpen.h"
+#include "aemu/base/files/FileShareOpen.h"
 
 namespace android {
 namespace multiinstance {

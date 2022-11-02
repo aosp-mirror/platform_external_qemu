@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/synchronization/Event.h"
+#include "aemu/base/synchronization/Event.h"
 
 #include "android/base/testing/TestThread.h"
 

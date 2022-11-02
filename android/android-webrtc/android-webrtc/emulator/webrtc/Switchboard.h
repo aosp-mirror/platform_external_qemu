@@ -20,8 +20,8 @@
 #include <unordered_map>        // for unordered_map
 #include <vector>               // for vector
 
-#include "android/base/containers/BufferQueue.h"           // for BufferQueue
-#include "android/base/synchronization/Lock.h"             // for Lock (ptr ...
+#include "aemu/base/containers/BufferQueue.h"           // for BufferQueue
+#include "aemu/base/synchronization/Lock.h"             // for Lock (ptr ...
 #include "android/base/system/System.h"                    // for System
 #include "android/emulation/control/RtcBridge.h"           // for RtcBridge:...
 #include "android/emulation/control/TurnConfig.h"          // for TurnConfig

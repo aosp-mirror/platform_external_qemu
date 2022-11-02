@@ -29,7 +29,7 @@
 
 
 #include "goldfish_vk_private_defs.h"
-#include "android/base/BumpPool.h"
+#include "aemu/base/BumpPool.h"
 using android::base::Allocator;
 using android::base::BumpPool;
 

@@ -16,8 +16,8 @@
 #include "ui_location-page_noMaps.h"
 #endif // USE_WEBENGINE
 
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/gps/GpsFix.h"
 #include "android/location/Point.h"
 #include "android/location/Route.h"

@@ -1,4 +1,4 @@
-#include "android/base/logging/CLog.h"/*
+#include "aemu/base/logging/CLog.h"/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -23,7 +23,7 @@
 #include <stdarg.h>
 #include "testutil/testutil.h"
 #include "testutil_priv.h"
-#include "android/base/logging/CLog.h"
+#include "aemu/base/logging/CLog.h"
 
 jmp_buf tu_case_jb;
 int tu_case_reported;

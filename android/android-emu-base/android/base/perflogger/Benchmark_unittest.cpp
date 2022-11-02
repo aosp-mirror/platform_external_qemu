@@ -8,11 +8,11 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/perflogger/Benchmark.h"
+#include "aemu/base/perflogger/Benchmark.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/FileUtils.h"
-#include "android/base/perflogger/Metric.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/misc/FileUtils.h"
+#include "aemu/base/perflogger/Metric.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>

@@ -11,8 +11,8 @@
 
 #include "android/filesystems/testing/TestSupport.h"
 
-#include "android/base/Log.h"
-#include "android/base/EintrWrapper.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/EintrWrapper.h"
 
 #include <stdlib.h>
 

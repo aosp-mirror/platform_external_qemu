@@ -14,11 +14,12 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/CpuTime.h"
-#include "android/base/EnumFlags.h"
-#include "android/base/Optional.h"
-#include "android/base/logging/Log.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/CpuTime.h"
+#include "aemu/base/EnumFlags.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/logging/Log.h"
+#include "aemu/base/system/Memory.h"
 
 #include <algorithm>
 #include <mutex>
@@ -158,16 +159,6 @@ public:
     // counted as separate here.
     virtual int getCpuCoreCount() const = 0;
 
-    // Gets memory statistics.
-    struct MemUsage {
-        uint64_t resident;
-        uint64_t resident_max;
-        uint64_t virt;
-        uint64_t virt_max;
-        uint64_t total_phys_memory;
-        uint64_t avail_phys_memory;
-        uint64_t total_page_file;
-    };
     virtual MemUsage getMemUsage() const = 0;
 
     // Returns just the free RAM on the system. Useful in many cases.
@@ -347,11 +338,6 @@ public:
     virtual Optional<Duration> pathModificationTime(
             std::string_view path) const = 0;
 
-    // Known distinct kinds of disks.
-    enum class DiskKind {
-        Hdd,
-        Ssd
-    };
     virtual Optional<DiskKind> pathDiskKind(std::string_view path) = 0;
     virtual Optional<DiskKind> diskKind(int fd) = 0;
 

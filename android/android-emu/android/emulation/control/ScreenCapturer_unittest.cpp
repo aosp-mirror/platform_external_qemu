@@ -16,8 +16,8 @@
 
 #include "OpenglRender/RenderChannel.h"
 #include "OpenglRender/Renderer.h"
-#include "android/base/Compiler.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"

@@ -19,7 +19,7 @@
 
 #include "android/emulation/control/clipboard_agent.h"    // for QAndroidCli...
 #include "android/emulation/control/utils/EventWaiter.h"  // for EventWaiter
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 
 namespace android {
 namespace emulation {

@@ -17,10 +17,10 @@
 #include <string>   // for basic_string, operator<
 #include <vector>   // for vector<>::iterator
 
-#include "android/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
-#include "android/base/files/PathUtils.h"       // for pj, PathUtils
-#include "android/base/logging/CLog.h"          // for dinfo, dwarning
-#include "android/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
+#include "aemu/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
+#include "aemu/base/files/PathUtils.h"       // for pj, PathUtils
+#include "aemu/base/logging/CLog.h"          // for dinfo, dwarning
+#include "aemu/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
 #include "android/base/system/System.h"         // for System
 #include "android/crashreport/CrashConsent.h"   // for CrashReportDatabase
 #include "android/crashreport/CrashReporter.h"  // for CrashReporter
@@ -73,13 +73,13 @@ public:
         }
         auto handler_path = ::base::FilePath(
                 PathUtils::asUnicodePath(
-                        System::get()->findBundledExecutable(kCrashpadHandler))
+                        System::get()->findBundledExecutable(kCrashpadHandler).data())
                         .c_str());
         if (handler_path.empty()) {
             dwarning("Crash handler not found, crash reporting disabled.");
         }
         auto database_path = ::base::FilePath(
-                PathUtils::asUnicodePath(mDatabasePath).c_str());
+                PathUtils::asUnicodePath(mDatabasePath.data()).c_str());
         auto metrics_path = ::base::FilePath();
         auto annotations = std::map<std::string, std::string>{
                 {"prod", "AndroidEmulator"},

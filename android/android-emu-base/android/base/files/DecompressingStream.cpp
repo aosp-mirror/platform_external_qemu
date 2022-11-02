@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/DecompressingStream.h"
+#include "aemu/base/files/DecompressingStream.h"
 
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/files/StreamSerializing.h"
 #include "lz4.h"
 
 #ifdef _MSC_VER

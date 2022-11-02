@@ -22,11 +22,11 @@
 #include <string_view>
 #include <utility>                                        // for move
 
-#include "android/base/memory/ScopedPtr.h"                // for FuncDelete
+#include "aemu/base/memory/ScopedPtr.h"                // for FuncDelete
 #include "android/base/system/System.h"                   // for System, Sys...
 #include "android/base/testing/TestSystem.h"              // for TestSystem
 #include "android/base/testing/TestTempDir.h"             // for TestTempDir
-#include "android/base/threads/Thread.h"                  // for Thread
+#include "aemu/base/threads/Thread.h"                  // for Thread
 #include "android/recording/AVScopedPtr.h"                // for makeAVScope...
 #include "android/recording/Frame.h"                      // for toAVPixelFo...
 #include "android/recording/GifConverter.h"               // for GifConverter

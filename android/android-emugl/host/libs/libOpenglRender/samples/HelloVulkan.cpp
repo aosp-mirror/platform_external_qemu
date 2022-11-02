@@ -16,10 +16,10 @@
 
 #include "VulkanDispatch.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/FileUtils.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/files/ScopedFd.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/misc/FileUtils.h"
 #include "android/base/system/System.h"
 
 #include <sstream>

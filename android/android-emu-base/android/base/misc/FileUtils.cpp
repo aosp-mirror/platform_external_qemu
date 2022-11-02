@@ -9,8 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/misc/FileUtils.h"
-#include "android/base/files/PathUtils.h"      // for PathUtils
+#include "aemu/base/misc/FileUtils.h"
+#include "aemu/base/files/PathUtils.h"      // for PathUtils
 #include "android/utils/eintr_wrapper.h"
 
 #include <assert.h>
@@ -77,8 +77,8 @@ bool writeStringToFile(int fd, const std::string& file_contents) {
     return true;
 }
 
-base::Optional<std::string> readFileIntoString(std::string_view name) {
-    std::ifstream is(PathUtils::asUnicodePath(name).c_str(), std::ios_base::binary);
+base::Optional<std::string> readFileIntoString(const std::string& name) {
+    std::ifstream is(PathUtils::asUnicodePath(name.data()).c_str(), std::ios_base::binary);
     if (!is) {
         return {};
     }

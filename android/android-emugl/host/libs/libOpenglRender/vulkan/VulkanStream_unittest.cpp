@@ -21,8 +21,8 @@
 #include "common/goldfish_vk_reserved_marshaling.h"
 #include "common/goldfish_vk_testing.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/BumpPool.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/BumpPool.h"
 
 #include <gtest/gtest.h>
 #include <string.h>

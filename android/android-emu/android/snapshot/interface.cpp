@@ -11,8 +11,8 @@
 
 #include "android/snapshot/interface.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/Log.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/snapshot/common.h"
@@ -178,7 +178,7 @@ void androidSnapshot_setRamFileDirty(const char* _name, bool setDirty) {
             dir, android::snapshot::kMappedRamFileDirtyName);
 
     if (setDirty) {
-        std::ofstream file(PathUtils::asUnicodePath(dirtyPath).c_str(), std::ios::trunc);
+        std::ofstream file(PathUtils::asUnicodePath(dirtyPath.data()).c_str(), std::ios::trunc);
         file << "1";
     } else {
         path_delete_file(dirtyPath.c_str());

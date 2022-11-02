@@ -27,10 +27,10 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #endif
-#include "android/base/files/GzipStreambuf.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/files/GzipStreambuf.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/curl-support.h"
 #include "android/metrics/MetricsLogging.h"

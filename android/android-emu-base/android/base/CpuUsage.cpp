@@ -11,20 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/CpuUsage.h"
+#include "aemu/base/CpuUsage.h"
 
 #include <stdio.h>
 #include <array>
 #include <iomanip>
 #include <sstream>
 
-#include "android/base/async/Looper.h"
-#include "android/base/logging/CLog.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/threads/FunctorThread.h"
 
 namespace android {
 namespace base {

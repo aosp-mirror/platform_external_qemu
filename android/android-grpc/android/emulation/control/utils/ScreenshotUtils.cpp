@@ -19,8 +19,8 @@
 #include <ostream>   // for operator<<, bas...
 #include <utility>   // for make_pair, pair
 
-#include "android/base/Log.h"  // for LogStreamVoidify
-#include "android/base/Tracing.h"
+#include "aemu/base/Log.h"  // for LogStreamVoidify
+#include "aemu/base/Tracing.h"
 #include "android/console.h"
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/hw-sensors.h"                       // for ANDROID_SENSOR_...

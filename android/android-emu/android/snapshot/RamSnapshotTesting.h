@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/AlignedBuf.h"
+#include "aemu/base/AlignedBuf.h"
 
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/RamSaver.h"

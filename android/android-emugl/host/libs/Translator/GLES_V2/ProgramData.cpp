@@ -17,9 +17,9 @@
 #include "ProgramData.h"
 #include "OpenglCodecCommon/glUtils.h"
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StreamSerializing.h"
 #include "ANGLEShaderParser.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/GLESmacros.h"

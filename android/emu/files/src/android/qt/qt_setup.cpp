@@ -14,9 +14,9 @@
 #include <ostream>  // for operator<<, ostream
 #include <string>   // for string, allocator, operator+
 
-#include "android/base/files/PathUtils.h"      // for pj
-#include "android/base/logging/Log.h"          // for LOG, LogMessage
-#include "android/base/logging/LogSeverity.h"  // for EMULATOR_LOG_ERROR
+#include "aemu/base/files/PathUtils.h"      // for pj
+#include "aemu/base/logging/Log.h"          // for LOG, LogMessage
+#include "aemu/base/logging/LogSeverity.h"  // for EMULATOR_LOG_ERROR
 #include "android/base/system/System.h"        // for System
 #include "android/qt/qt_path.h"                // for androidQtGetLibraryDir
 #include "android/utils/debug.h"               // for VERBOSE_PRINT, VERBOSE_init

@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/misc/FileUtils.h"
+#include "aemu/base/misc/FileUtils.h"
 
-#include "android/base/files/ScopedFd.h"
+#include "aemu/base/files/ScopedFd.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/file_io.h"
 #include "android/utils/tempfile.h"

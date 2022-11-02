@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
 
 namespace emugl {
 

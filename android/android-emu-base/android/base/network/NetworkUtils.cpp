@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/network/NetworkUtils.h"
+#include "aemu/base/network/NetworkUtils.h"
 
-#include "android/base/Log.h"
-#include "android/base/StringFormat.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/StringFormat.h"
 #include "android/base/system/System.h"
 
 #include <limits.h>
@@ -31,9 +31,9 @@
 #include <string.h>
 
 #ifdef _WIN32
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/sockets/Winsock.h"
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/sockets/Winsock.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 #include <wincrypt.h>
 #include <iphlpapi.h>
 #include <unordered_map>

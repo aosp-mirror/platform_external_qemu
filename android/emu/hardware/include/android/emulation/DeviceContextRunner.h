@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include "android/base/Log.h"
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/emulation/VmLock.h"
 
 #include <algorithm>

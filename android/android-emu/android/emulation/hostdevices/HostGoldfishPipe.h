@@ -13,8 +13,8 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/Result.h"
-#include "android/base/files/Stream.h"
+#include "aemu/base/Result.h"
+#include "aemu/base/files/Stream.h"
 #include "android/emulation/android_pipe_base.h"
 
 #include <cstdint>

@@ -11,8 +11,8 @@
 
 #include "android/utils/dirscanner.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>

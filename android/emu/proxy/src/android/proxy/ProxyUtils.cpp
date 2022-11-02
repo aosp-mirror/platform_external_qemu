@@ -11,8 +11,8 @@
 */
 #include "android/proxy/ProxyUtils.h"
 
-#include "android/base/network/Dns.h"
-#include "android/base/network/IpAddress.h"
+#include "aemu/base/network/Dns.h"
+#include "aemu/base/network/IpAddress.h"
 
 #include <algorithm>
 #include <string_view>

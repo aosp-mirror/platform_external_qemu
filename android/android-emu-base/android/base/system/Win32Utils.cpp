@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/StringFormat.h"
-#include "android/base/system/Win32UnicodeString.h"
-#include "android/base/system/Win32Utils.h"
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32Utils.h"
 
 #include <string_view>
 

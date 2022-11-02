@@ -14,10 +14,10 @@
 #include <memory>
 #include <string>
 
-#include "android/base/StringFormat.h"
-#include "android/base/files/ScopedRegKey.h"
-#include "android/base/system/Win32UnicodeString.h"
-#include "android/base/system/Win32Utils.h"
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/files/ScopedRegKey.h"
+#include "aemu/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32Utils.h"
 #include "android/windows_installer.h"
 
 namespace android {

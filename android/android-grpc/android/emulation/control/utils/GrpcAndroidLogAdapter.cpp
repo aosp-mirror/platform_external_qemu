@@ -13,7 +13,7 @@
 // limitations under the License.
 #include "android/emulation/control/utils/GrpcAndroidLogAdapter.h"
 
-#include "android/base/Log.h"  // for LogMessage, LOG_ERROR, LOG_INFO, LOG_V...
+#include "aemu/base/Log.h"  // for LogMessage, LOG_ERROR, LOG_INFO, LOG_V...
 
 using android::base::LogMessage;
 

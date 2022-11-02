@@ -11,12 +11,12 @@
 
 #include "android/emulation/AdbGuestPipe.h"
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/Log.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/StringFormat.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/emulation/testing/TestAndroidPipeDevice.h"
 
 #include <gtest/gtest.h>

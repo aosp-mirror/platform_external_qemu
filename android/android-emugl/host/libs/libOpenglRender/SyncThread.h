@@ -22,12 +22,12 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include "android/base/Optional.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/MessageChannel.h"
 
-#include "android/base/threads/ThreadPool.h"
+#include "aemu/base/threads/ThreadPool.h"
 #include "emugl/common/thread.h"
 #include "vulkan/VkDecoderGlobalState.h"
 #include "android/opengl/virtio_gpu_ops.h"

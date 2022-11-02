@@ -11,8 +11,8 @@
 
 #include "android/emulation/qemud/android_qemud_client.h"
 
-#include "android/base/containers/StaticMap.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/containers/StaticMap.h"
+#include "aemu/base/memory/LazyInstance.h"
 
 #include "android/emulation/android_pipe_host.h"
 #include "android/emulation/qemud/android_qemud_common.h"
@@ -24,7 +24,7 @@
 #include <stdlib.h>
 
 #ifdef _WIN32
-#  include "android/base/sockets/Winsock.h"
+#  include "aemu/base/sockets/Winsock.h"
 #else
 #  include <netinet/in.h>
 #endif

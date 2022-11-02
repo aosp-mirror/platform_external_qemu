@@ -14,7 +14,7 @@
 
 #include "android/utils/ipaddr.h"
 
-#include "android/base/network/IpAddress.h"
+#include "aemu/base/network/IpAddress.h"
 
 #include <stdio.h>
 

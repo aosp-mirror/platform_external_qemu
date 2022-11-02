@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/StdioStream.h"
+#include "aemu/base/files/StdioStream.h"
 
 #include <assert.h>
 #include <errno.h>

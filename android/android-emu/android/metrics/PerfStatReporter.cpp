@@ -15,8 +15,8 @@
 #include "android/metrics/PerfStatReporter.h"
 
 #include "android/CommonReportedInfo.h"
-#include "android/base/CpuUsage.h"
-#include "android/base/files/StdioStream.h"
+#include "aemu/base/CpuUsage.h"
+#include "aemu/base/files/StdioStream.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/metrics/MetricsWriter.h"
@@ -45,6 +45,7 @@ namespace metrics {
 using android::base::CpuTime;
 using android::base::CpuUsage;
 using android::base::Lock;
+using android::base::MemUsage;
 using android::base::StdioStream;
 using android::base::System;
 using std::shared_ptr;
@@ -163,7 +164,7 @@ void PerfStatReporter::refreshPerfStats() {
 
 static void fillProtoMemUsage(
         android_studio::EmulatorPerformanceStats* stats_out) {
-    System::MemUsage rawMemUsage = System::get()->getMemUsage();
+    MemUsage rawMemUsage = System::get()->getMemUsage();
     auto resources = stats_out->mutable_resource_usage();
     auto memUsageProto = resources->mutable_memory_usage();
     memUsageProto->set_resident_memory(rawMemUsage.resident);

@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 #include "android/emulation/ComponentVersion.h"
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 
 #include <cstdio>
 #include <fstream>
@@ -24,7 +24,7 @@ using android::base::Version;
 static Version parseVersionFromSourceProperties(
         const std::string& propertiesPath) {
     Version version = Version::invalid();
-    std::ifstream propertiesFile(PathUtils::asUnicodePath(propertiesPath).c_str());
+    std::ifstream propertiesFile(PathUtils::asUnicodePath(propertiesPath.data()).c_str());
     if (propertiesFile.is_open()) {
         // Find the line containing "Pkg.Revision".
         std::string line;

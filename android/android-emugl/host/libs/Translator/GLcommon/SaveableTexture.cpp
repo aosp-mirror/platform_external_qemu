@@ -16,12 +16,12 @@
 
 #include "GLcommon/SaveableTexture.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/containers/SmallVector.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StreamSerializing.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/Profiler.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/containers/SmallVector.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StreamSerializing.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/Profiler.h"
 
 #include "android/base/system/System.h"
 

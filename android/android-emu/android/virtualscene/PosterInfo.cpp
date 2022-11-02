@@ -14,7 +14,7 @@
 
 #include "android/virtualscene/PosterInfo.h"
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/utils/debug.h"
@@ -43,7 +43,7 @@ std::vector<PosterInfo> parsePostersFile(
     const std::string filePath = PathUtils::join(
             System::get()->getLauncherDirectory(), "resources", filename);
 
-    std::ifstream in(PathUtils::asUnicodePath(filePath).c_str());
+    std::ifstream in(PathUtils::asUnicodePath(filePath.data()).c_str());
     if (!in) {
         W("%s: Could not find file '%s'", __FUNCTION__, filename);
         return {};

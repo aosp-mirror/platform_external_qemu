@@ -1,6 +1,6 @@
 #pragma once
 
-#include "android/base/Tracing.h"
+#include "aemu/base/Tracing.h"
 
 #include <assert.h>
 #include <stddef.h>

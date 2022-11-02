@@ -44,8 +44,8 @@
 #include <string>
 #include <vector>
 
-#include "android/base/Log.h"
-#include "android/base/threads/Thread.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/cmdline-option.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/emulation/control/multi_display_agent.h"
@@ -86,7 +86,7 @@ class System;
 #ifdef _WIN32
 #include <shellapi.h>
 #include <windows.h>
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 #endif
 
 #ifdef __APPLE__

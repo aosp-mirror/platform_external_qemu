@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
-#include "android/base/files/Stream.h"
-#include "android/base/sockets/ScopedSocket.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/sockets/ScopedSocket.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/SocketBuffer.h"
 #include "android/emulation/virtio_vsock_device.h"

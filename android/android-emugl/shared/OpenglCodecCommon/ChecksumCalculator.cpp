@@ -16,7 +16,7 @@
 
 #include "ChecksumCalculator.h"
 
-#include "android/base/files/Stream.h"
+#include "aemu/base/files/Stream.h"
 
 #include <string>
 #include <vector>

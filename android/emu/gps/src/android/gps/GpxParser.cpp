@@ -11,7 +11,7 @@
 
 #include "android/gps/GpxParser.h"
 
-#include "android/base/StringParse.h"
+#include "aemu/base/StringParse.h"
 
 #include <libxml/parser.h>
 

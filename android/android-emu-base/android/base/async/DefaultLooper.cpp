@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/async/DefaultLooper.h"
+#include "aemu/base/async/DefaultLooper.h"
 
 #include <errno.h>    // for ETIMEDOUT, EWOULDBLOCK
 #include <stdint.h>   // for INT64_MAX, uint64_t
@@ -17,10 +17,10 @@
 #include <iterator>   // for prev
 #include <utility>    // for move, pair
 
-#include "android/base/files/Stream.h"          // for Stream
-#include "android/base/logging/Log.h"           // for DCHECK, LogMessage
-#include "android/base/logging/LogSeverity.h"   // for EMULATOR_LOG_FATAL
-#include "android/base/sockets/SocketWaiter.h"  // for SocketWaiter
+#include "aemu/base/files/Stream.h"          // for Stream
+#include "aemu/base/logging/Log.h"           // for DCHECK, LogMessage
+#include "aemu/base/logging/LogSeverity.h"   // for EMULATOR_LOG_FATAL
+#include "aemu/base/sockets/SocketWaiter.h"  // for SocketWaiter
 #include "android/base/system/System.h"         // for System
 
 namespace android {

@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "android/emulation/AndroidAsyncMessagePipe.h"
-#include "android/base/ArraySize.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/MemStream.h"
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/MemStream.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/ResultMatchers.h"
 #include "android/base/testing/TestEvent.h"

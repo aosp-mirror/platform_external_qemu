@@ -15,7 +15,7 @@
 #pragma once
 
 #include <cstdint>
-#include "android/base/async/Looper.h"
+#include "aemu/base/async/Looper.h"
 
 class Looper;
 namespace android {

@@ -24,10 +24,10 @@
 #include <string_view>
 #include <vector>     // for vector
 
-#include "android/base/files/PathUtils.h"       // for PathUtils, pj
-#include "android/base/logging/CLog.h"          // for LOG, LogMessage
-#include "android/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
-#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "aemu/base/files/PathUtils.h"       // for PathUtils, pj
+#include "aemu/base/logging/CLog.h"          // for LOG, LogMessage
+#include "aemu/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
+#include "aemu/base/synchronization/Lock.h"  // for Lock, AutoLock
 #include "android/base/system/System.h"         // for System
 #include "android/utils/path.h"                 // for path_mkdir_if_needed
 

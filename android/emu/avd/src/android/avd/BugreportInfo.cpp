@@ -19,10 +19,10 @@
 
 #include "android/avd/info.h"
 #include "android/avd/keys.h"
-#include "android/base/StringFormat.h"
+#include "aemu/base/StringFormat.h"
 
-#include "android/base/files/IniFile.h"
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/files/IniFile.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"

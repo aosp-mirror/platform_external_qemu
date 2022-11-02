@@ -10,8 +10,8 @@
 // GNU General Public License for more details.
 
 #include "android/virtualscene/TextureUtils.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/ScopedStdioFile.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/ScopedStdioFile.h"
 #include "android/utils/file_io.h"
 #include "android/base/system/System.h"
 

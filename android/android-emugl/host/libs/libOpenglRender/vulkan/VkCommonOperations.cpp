@@ -13,12 +13,12 @@
 // limitations under the License.
 #include "VkCommonOperations.h"
 
-#include "android/base/Log.h"
-#include "android/base/Optional.h"
-#include "android/base/containers/Lookup.h"
-#include "android/base/containers/StaticMap.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/containers/StaticMap.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include "FrameBuffer.h"
 #include "VulkanDispatch.h"

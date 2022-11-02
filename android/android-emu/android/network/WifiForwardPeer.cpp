@@ -12,10 +12,10 @@
 #include "WifiForwardPeer.h"
 
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/EintrWrapper.h"
-#include "android/base/misc/IpcPipe.h"
-#include "android/base/sockets/SocketUtils.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/misc/IpcPipe.h"
+#include "aemu/base/sockets/SocketUtils.h"
 
 #include <cstring>
 #include <cstdio>

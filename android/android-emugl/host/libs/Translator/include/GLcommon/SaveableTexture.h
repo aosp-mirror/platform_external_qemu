@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "android/base/containers/SmallVector.h"
-#include "android/base/files/Stream.h"
+#include "aemu/base/containers/SmallVector.h"
+#include "aemu/base/files/Stream.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "GLcommon/NamedObject.h"
 #include "GLcommon/TextureData.h"

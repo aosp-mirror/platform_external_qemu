@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/misc/StringUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -118,13 +118,13 @@ bool endsWith(std::string_view string, std::string_view suffix) {
 void splitTokens(const std::string& input,
                  std::vector<std::string>* out,
                  std::string_view splitBy) {
-    auto removeWhiteSpace = [out](std::string_view strView) {
+    auto removeWhiteSpace = [out](const std::string& strView) {
         std::string s(strView);
         s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
         out->push_back(s);
     };
     out->clear();
-    split(input, splitBy, removeWhiteSpace);
+    split<std::string>(input, std::string(splitBy), removeWhiteSpace);
 }
 
 #define CHECK_NE(a, b) \

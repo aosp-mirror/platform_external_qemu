@@ -14,8 +14,8 @@
 
 #pragma once
 
-#include "android/base/Optional.h"
-#include "android/base/Result.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/Result.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "offworld.pb.h"
 #include <string>

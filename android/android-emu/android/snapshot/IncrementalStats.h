@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/Stopwatch.h"
+#include "aemu/base/Stopwatch.h"
 
 #include <array>
 #include <atomic>

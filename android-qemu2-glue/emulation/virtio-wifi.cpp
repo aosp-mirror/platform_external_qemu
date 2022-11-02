@@ -5,7 +5,7 @@ extern "C" {
 #endif
 #include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
 #include "android-qemu2-glue/utils/stream.h"
-#include "android/base/Log.h"
+#include "aemu/base/Log.h"
 #include "android/telephony/sysdeps.h"
 #include "android/emulation/VmLock.h"
 

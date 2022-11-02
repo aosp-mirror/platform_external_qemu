@@ -16,7 +16,7 @@
 #include <stdint.h>     // for uint64_t
 #include <sys/types.h>  // for ssize_t
 
-#include "android/base/async/Looper.h"                      // for Looper
+#include "aemu/base/async/Looper.h"                      // for Looper
 #include "android/emulation/control/rootcanal_hci_agent.h"  // for QAndroidR...
 #include "net/async_data_channel.h"                         // for ReadCallback
 

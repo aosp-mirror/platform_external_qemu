@@ -26,10 +26,10 @@
 #include <GLES3/gl3.h>
 #include <GLES3/gl31.h>
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
 #include "GLcommon/FramebufferData.h"

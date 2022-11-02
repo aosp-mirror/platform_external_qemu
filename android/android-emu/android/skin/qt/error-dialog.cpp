@@ -18,7 +18,7 @@
 
 #include "android/avd/hw-config.h"
 #include "android/console.h"
-#include "android/base/memory/OnDemand.h"  // for OnDemand
+#include "aemu/base/memory/OnDemand.h"  // for OnDemand
 #include "android/cmdline-option.h"        // for android_cmdLineOptions
 #include "android/utils/debug.h"
 

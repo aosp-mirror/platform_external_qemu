@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/network/IpAddress.h"
+#include "aemu/base/network/IpAddress.h"
 
-#include "android/base/Log.h"
-#include "android/base/StringFormat.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/StringFormat.h"
 #include "android/base/testing/GTestUtils.h"
 #include "android/base/testing/TestNetworkInterfaceNameResolver.h"
 

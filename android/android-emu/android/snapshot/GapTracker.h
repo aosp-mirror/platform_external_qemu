@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/Optional.h"
-#include "android/base/containers/SmallVector.h"
-#include "android/base/files/Stream.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/Compiler.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/containers/SmallVector.h"
+#include "aemu/base/files/Stream.h"
+#include "aemu/base/synchronization/Lock.h"
 
 #include <atomic>
 #include <list>

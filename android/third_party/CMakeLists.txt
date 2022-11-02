@@ -195,3 +195,66 @@ if(FEATURE_NETSIM)
   set(EXTERNAL_QEMU ${ANDROID_QEMU2_TOP_DIR})
   add_subdirectory(${AOSP_ROOT}/tools/netsim netsim)
 endif()
+
+# gfxstream, aemu-common modules
+set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+function(discover_gfxstream_internal_targets result subdir)
+    if(CMAKE_VERSION VERSION_LESS "3.7.0")
+        message(
+            FATAL_ERROR
+            "This function cannot be used by older cmake versions (${CMAKE_VERSION}<3.7.0)"
+        )
+    endif()
+    message("gfxstream_internal_targets result=${result} subdir=${subdir}")
+    get_filename_component(abs_subdir ${subdir} ABSOLUTE)
+    set(GFXSTREAM_THIRD_PARTY_ROOT ${GFXSTREAM_REPO_ROOT})
+    cmake_path(APPEND GFXSTREAM_THIRD_PARTY_ROOT "third-party")
+    cmake_path(IS_PREFIX GFXSTREAM_THIRD_PARTY_ROOT ${abs_subdir} NORMALIZE IS_THIRD_PARTY)
+    if(IS_THIRD_PARTY)
+        return()
+    endif()
+    cmake_path(IS_PREFIX GFXSTREAM_REPO_ROOT ${abs_subdir} NORMALIZE IS_GFXSTREAM_SUBDIR)
+    cmake_path(IS_PREFIX AEMU_COMMON_REPO_ROOT ${abs_subdir} NORMALIZE IS_AEMU_COMMON_SUBDIR)
+    cmake_path(IS_PREFIX GFXSTREAM_PROTOCOLS_DIR ${abs_subdir} NORMALIZE IS_GFXSTREAM_PROTOCOLS_SUBDIR)
+    if(NOT IS_GFXSTREAM_SUBDIR AND NOT IS_AEMU_COMMON_SUBDIR AND NOT IS_GFXSTREAM_PROTOCOLS_SUBDIR)
+        return()
+    endif()
+
+    get_directory_property(subdirs DIRECTORY "${abs_subdir}" SUBDIRECTORIES)
+    foreach(subdir IN LISTS subdirs)
+        discover_gfxstream_internal_targets(${result} "${subdir}")
+    endforeach()
+
+    get_property(targets_in_dir DIRECTORY "${subdir}"
+                 PROPERTY BUILDSYSTEM_TARGETS)
+    set(${result} ${${result}} ${targets_in_dir} PARENT_SCOPE)
+endfunction()
+set(GFXSTREAM_PREFIX "gfxstream")
+add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/renderdoc ${GFXSTREAM_PREFIX}-third-party-renderdoc)
+# Include external/gfxstream-protocols project
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../gfxstream-protocols gfxstream-protocols)
+# Include hardware/google/aemu project
+set(AEMU_COMMON_BUILD_CONFIG "qemu-android" CACHE STRING "")
+set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
+set(GFXSTREAM_PROTOCOLS_DIR ${ANDROID_QEMU2_TOP_DIR}/../../external/gfxstream-protocols)
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu aemu_common)
+
+# Figure out all gfxstream dependencies
+include(${GFXSTREAM_REPO_ROOT}/cmake/SetSubdirectorProperties.cmake)
+get_directory_property(GFXSTREAM_SUBDIRS SUBDIRECTORIES)
+foreach(GFXSTREAM_SUBDIR IN LISTS GFXSTREAM_SUBDIRS)
+    discover_gfxstream_internal_targets(GFXSTREAM_INTERNAL_TARGETS ${GFXSTREAM_SUBDIR})
+endforeach()
+set(GFXSTREAM_DEPENDENCIES
+    ${GFXSTREAM_INTERNAL_TARGETS}
+    angle_common
+    angle_shader_translator
+    renderdoc)
+android_license(TARGET "${GFXSTREAM_DEPENDENCIES}"
+               LIBNAME gfxstream
+               URL "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master"
+               SPDX Apache-2.0
+               LOCAL "${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal/LICENSE"
+               LICENSE "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master/LICENSE")
+

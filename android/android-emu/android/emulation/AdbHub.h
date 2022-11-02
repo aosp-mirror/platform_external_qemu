@@ -18,8 +18,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "android/base/async/Looper.h"
-#include "android/base/files/Stream.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/files/Stream.h"
 #include "android/emulation/AdbProxy.h"
 #include "android/emulation/android_pipe_common.h"
 #include "android/emulation/apacket_utils.h"

@@ -14,9 +14,9 @@
 
 #include "GLSnapshotTesting.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StdioStream.h"
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/StdioStream.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/snapshot/TextureLoader.h"

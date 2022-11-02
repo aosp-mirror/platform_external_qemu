@@ -16,7 +16,7 @@
 
 #include "android/snapshot/TextureSaver.h"
 
-#include "android/base/files/CompressingStream.h"
+#include "aemu/base/files/CompressingStream.h"
 #include "android/base/system/System.h"
 
 #include <algorithm>

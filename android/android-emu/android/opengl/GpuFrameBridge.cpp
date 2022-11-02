@@ -21,10 +21,10 @@
 #include <atomic>  // for atomic_bool, memory_o...
 #include <memory>  // for unique_ptr
 
-#include "android/base/async/Looper.h"          // for Looper::Timer, Looper
-#include "android/base/async/ThreadLooper.h"    // for ThreadLooper
-#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
-#include "android/base/synchronization/MessageChannel.h"
+#include "aemu/base/async/Looper.h"          // for Looper::Timer, Looper
+#include "aemu/base/async/ThreadLooper.h"    // for ThreadLooper
+#include "aemu/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "aemu/base/synchronization/MessageChannel.h"
 #include "android/opengles.h"  // for android_getFlushReadP...
 
 #ifdef _WIN32

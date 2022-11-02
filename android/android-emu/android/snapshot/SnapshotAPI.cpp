@@ -19,10 +19,10 @@
 #include <string_view>
 #include <utility>                                      // for pair
 
-#include "android/base/Log.h"                           // for LogMessage
-#include "android/base/async/ThreadLooper.h"            // for ThreadLooper
-#include "android/base/files/Stream.h"                  // for Stream
-#include "android/base/memory/LazyInstance.h"           // for LazyInstance
+#include "aemu/base/Log.h"                           // for LogMessage
+#include "aemu/base/async/ThreadLooper.h"            // for ThreadLooper
+#include "aemu/base/files/Stream.h"                  // for Stream
+#include "aemu/base/memory/LazyInstance.h"           // for LazyInstance
 #include "android/console.h"                            // for getConsoleAgents
 #include "android/emulation/AndroidAsyncMessagePipe.h"  // for AsyncMessageP...
 #include "android/emulation/control/vm_operations.h"    // for QAndroidVmOpe...
@@ -32,6 +32,11 @@
 #include "android/snapshot/common.h"                    // for kDefaultBootS...
 #include "android/snapshot/interface.h"                 // for AndroidSnapsh...
 #include "offworld.pb.h"                                // for Response, Res...
+
+// Conflicts with Log.h
+#ifdef ERROR
+#undef ERROR
+#endif
 
 namespace {
 

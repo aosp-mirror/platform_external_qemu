@@ -9,12 +9,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/sockets/SocketDrainer.h"
+#include "aemu/base/sockets/SocketDrainer.h"
 
-#include "android/base/EintrWrapper.h"
-#include "android/base/sockets/SocketErrors.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/async/Looper.h"
+#include "aemu/base/EintrWrapper.h"
+#include "aemu/base/sockets/SocketErrors.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "aemu/base/async/Looper.h"
 
 #include <unordered_set>
 

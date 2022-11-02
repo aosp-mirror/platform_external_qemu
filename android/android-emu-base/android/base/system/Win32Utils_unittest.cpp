@@ -26,7 +26,7 @@
 #include <windows.h>
 #include <winnls.h>
 
-#include "android/base/system/Win32Utils.h"
+#include "aemu/base/system/Win32Utils.h"
 #include "gtest/gtest.h"
 
 namespace android {

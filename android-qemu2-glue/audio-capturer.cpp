@@ -16,7 +16,7 @@ extern "C" {
 #include "android-qemu2-glue/audio-capturer.h"
 #include "android-qemu2-glue/utils/stream.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/utils/debug.h"
 
 extern "C" {

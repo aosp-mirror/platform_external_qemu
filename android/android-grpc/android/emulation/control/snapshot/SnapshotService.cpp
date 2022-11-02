@@ -25,16 +25,16 @@
 
 #include "android/android.h"
 #include "android/avd/info.h"
-#include "android/base/Log.h"
-#include "android/base/Optional.h"
-#include "android/base/Stopwatch.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/Optional.h"
+#include "aemu/base/Stopwatch.h"
 
-#include "android/base/Uuid.h"  // for Uuid
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/GzipStreambuf.h"
-#include "android/base/files/PathUtils.h"  // for pj
-#include "android/base/files/TarStream.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "aemu/base/Uuid.h"  // for Uuid
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/GzipStreambuf.h"
+#include "aemu/base/files/PathUtils.h"  // for pj
+#include "aemu/base/files/TarStream.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
@@ -133,8 +133,7 @@ public:
                 streamBufPtr = csb.get();
             } else {
                 dstFile.reset(new std::ofstream(
-                        android::base::PathUtils::asUnicodePath(request->path())
-                                .c_str(),
+                        android::base::PathUtils::asUnicodePath(request->path().data()).data(),
                         std::ios::binary | std::ios::out));
                 if (!dstFile->is_open()) {
                     result.set_success(false);

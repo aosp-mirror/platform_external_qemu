@@ -16,7 +16,7 @@
 #ifndef EGL_OS_API_H
 #define EGL_OS_API_H
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 
 #include "emugl/common/smart_ptr.h"
 

@@ -16,7 +16,7 @@
 #include <memory>
 #include <string>
 
-#include "android/base/async/AsyncSocketAdapter.h"
+#include "aemu/base/async/AsyncSocketAdapter.h"
 
 namespace emulator {
 namespace net {

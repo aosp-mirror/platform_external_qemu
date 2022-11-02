@@ -40,12 +40,12 @@
 #include <utility>
 
 #include "android/automation/AutomationController.h"
-#include "android/base/Log.h"                                        // for LOG
-#include "android/base/Result.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/Log.h"                                        // for LOG
+#include "aemu/base/Result.h"
+#include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/emulation/AudioOutputEngine.h"
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/MP4Demuxer.h"
@@ -82,6 +82,11 @@ struct SwsContext;
 }
 
 #include <cmath>
+
+// Conflicts with Log.h
+#ifdef ERROR
+#undef ERROR
+#endif
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 

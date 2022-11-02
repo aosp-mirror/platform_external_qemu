@@ -17,7 +17,7 @@
 #include <GLcommon/ObjectNameSpace.h>
 #include <GLcommon/GLEScontext.h>
 
-#include "android/base/containers/Lookup.h"
+#include "aemu/base/containers/Lookup.h"
 #include "GLcommon/FramebufferData.h"
 
 #include "emugl/common/logging.h"

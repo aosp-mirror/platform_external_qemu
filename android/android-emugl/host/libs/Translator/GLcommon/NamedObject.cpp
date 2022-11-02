@@ -18,7 +18,7 @@
 
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/ObjectNameSpace.h"
-#include "android/base/GLObjectCounter.h"
+#include "aemu/base/GLObjectCounter.h"
 #include "emugl/common/misc.h"
 #include "emugl/common/mutex.h"
 

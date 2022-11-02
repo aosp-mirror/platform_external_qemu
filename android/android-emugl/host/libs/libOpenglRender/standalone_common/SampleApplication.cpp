@@ -14,13 +14,13 @@
 
 #include "SampleApplication.h"
 
-#include "android/base/GLObjectCounter.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/GLObjectCounter.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/console.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/MultiDisplay.h"

@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/InplaceStream.h"
+#include "aemu/base/files/InplaceStream.h"
 
-#include "android/base/files/StreamSerializing.h"
+#include "aemu/base/files/StreamSerializing.h"
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"

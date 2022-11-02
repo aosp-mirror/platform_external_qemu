@@ -9,12 +9,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/sockets/SocketWaiter.h"
+#include "aemu/base/sockets/SocketWaiter.h"
 
-#include "android/base/sockets/SocketErrors.h"
+#include "aemu/base/sockets/SocketErrors.h"
 
 #ifdef _WIN32
-#include "android/base/sockets/Winsock.h"
+#include "aemu/base/sockets/Winsock.h"
 #else
 #  include <sys/types.h>
 #  include <sys/select.h>

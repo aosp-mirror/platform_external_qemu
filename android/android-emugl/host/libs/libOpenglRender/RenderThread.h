@@ -15,12 +15,12 @@
 */
 #pragma once
 
-#include "android/base/files/MemStream.h"
-#include "android/base/Optional.h"
+#include "aemu/base/files/MemStream.h"
+#include "aemu/base/Optional.h"
 #include "android/emulation/address_space_graphics_types.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/synchronization/MessageChannel.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
 

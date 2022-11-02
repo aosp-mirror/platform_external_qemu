@@ -11,9 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/base/Pool.h"
+#include "aemu/base/Pool.h"
 
-#include "android/base/FunctionView.h"
+#include "aemu/base/FunctionView.h"
 
 #include <gtest/gtest.h>
 

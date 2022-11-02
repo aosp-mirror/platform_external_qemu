@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "android/base/memory/LazyInstance.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "android/emulation/DeviceContextRunner.h"
 #include "android/emulation/goldfish_sync.h"
 #include "android/emulation/VmLock.h"

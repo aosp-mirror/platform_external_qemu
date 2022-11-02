@@ -15,7 +15,7 @@
 #include "android/console.h"
 #include "android/avd/keys.h"
 #include "android/avd/util.h"
-#include "android/base/ArraySize.h"
+#include "aemu/base/ArraySize.h"
 #include "android/avd/avd-export.h"
 #include "android/cmdline-definitions.h"
 #include "android/emulation/bufprint_config_dirs.h"

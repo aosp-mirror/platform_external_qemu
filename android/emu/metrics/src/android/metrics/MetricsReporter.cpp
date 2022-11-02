@@ -16,12 +16,12 @@
 #include <type_traits>  // for swap, integral...
 #include <utility>      // for move
 
-#include "android/base/Optional.h"                   // for Optional
-#include "android/base/async/ThreadLooper.h"         // for ThreadLooper
-#include "android/base/files/PathUtils.h"            // for pj
-#include "android/base/files/StdioStream.h"          // for StdioStream
-#include "android/base/memory/LazyInstance.h"        // for LazyInstance
-#include "android/base/threads/Async.h"              // for async
+#include "aemu/base/Optional.h"                   // for Optional
+#include "aemu/base/async/ThreadLooper.h"         // for ThreadLooper
+#include "aemu/base/files/PathUtils.h"            // for pj
+#include "aemu/base/files/StdioStream.h"          // for StdioStream
+#include "aemu/base/memory/LazyInstance.h"        // for LazyInstance
+#include "aemu/base/threads/Async.h"              // for async
 #include "android/cmdline-option.h"                  // for AndroidOptions
 #include "android/metrics/AsyncMetricsReporter.h"    // for AsyncMetricsRe...
 #include "android/metrics/CrashMetricsReporting.h"   // for reportCrashMet...

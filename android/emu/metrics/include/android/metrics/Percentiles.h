@@ -16,7 +16,7 @@
 #include <initializer_list>
 #include <vector>
 
-#include "android/base/Optional.h"
+#include "aemu/base/Optional.h"
 #include "android/metrics/export.h"
 
 namespace android_studio {

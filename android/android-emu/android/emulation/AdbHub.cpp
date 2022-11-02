@@ -11,10 +11,10 @@
 
 #include "android/emulation/AdbHub.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/logging/CLog.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "aemu/base/threads/FunctorThread.h"
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/JdwpProxy.h"
 

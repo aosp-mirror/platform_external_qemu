@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/network/NetworkUtils.h"
+#include "aemu/base/network/NetworkUtils.h"
 #include "android/base/testing/GTestUtils.h"
 #include "android/base/testing/TestNetworkInterfaceNameResolver.h"
 #include <gtest/gtest.h>

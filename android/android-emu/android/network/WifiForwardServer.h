@@ -13,8 +13,8 @@
 
 #include "WifiForwardPeer.h"
 
-#include "android/base/async/AsyncSocketServer.h"
-#include "android/base/async/Looper.h"
+#include "aemu/base/async/AsyncSocketServer.h"
+#include "aemu/base/async/Looper.h"
 
 #include <stdint.h>
 

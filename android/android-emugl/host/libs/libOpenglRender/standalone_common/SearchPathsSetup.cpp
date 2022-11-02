@@ -14,7 +14,7 @@
 
 #include "SearchPathsSetup.h"
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 
 #include "emugl/common/OpenGLDispatchLoader.h"
 #include "emugl/common/shared_library.h"

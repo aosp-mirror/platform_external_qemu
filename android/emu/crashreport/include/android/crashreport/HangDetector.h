@@ -14,13 +14,13 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
+#include "aemu/base/Compiler.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
+#include "aemu/base/threads/FunctorThread.h"
 
 #include <functional>
 #include <memory>

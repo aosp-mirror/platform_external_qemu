@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 
 #include <gtest/gtest.h>                      // for Message, Test, TestPart...
 #include <fstream>
@@ -111,15 +111,15 @@ TEST(PathUtils, removeTrailingDirSeparator) {
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
         std::string path;
         std::string input = kData[n].path;
-        path = PathUtils::removeTrailingDirSeparator(input, kHostPosix);
+        path = PathUtils::removeTrailingDirSeparator(input.c_str(), kHostPosix);
         EXPECT_STREQ(kData[n].expected[kHostPosix], path.c_str())
                 << "Testing '" << input.c_str() << "'";
 
-        path = PathUtils::removeTrailingDirSeparator(input, kHostWin32);
+        path = PathUtils::removeTrailingDirSeparator(input.c_str(), kHostWin32);
         EXPECT_STREQ(kData[n].expected[kHostWin32], path.c_str())
                 << "Testing '" << input.c_str() << "'";
 
-        path = PathUtils::removeTrailingDirSeparator(input);
+        path = PathUtils::removeTrailingDirSeparator(input.c_str());
         EXPECT_STREQ(kData[n].expected[kHostType], path.c_str())
                 << "Testing '" << input.c_str() << "'";
     }
@@ -216,7 +216,7 @@ TEST(PathUtils, split) {
             {"C:/foo", {{true, "C:/", "foo"}, {true, "C:/", "foo"}}},
     };
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
-        std::string_view dirname, basename;
+        std::string dirname, basename;
 
         EXPECT_EQ(kData[n].expected[kHostPosix].result,
                   PathUtils::split(kData[n].path, kHostPosix, &dirname,
@@ -237,8 +237,7 @@ TEST(PathUtils, split) {
         if (kData[n].expected[kHostWin32].result) {
             EXPECT_EQ(kData[n].expected[kHostWin32].dirname, dirname)
                     << "when testing win32 [" << kData[n].path << "]";
-            EXPECT_EQ(kData[n].expected[kHostWin32].basename,
-                         basename)
+            EXPECT_EQ(kData[n].expected[kHostWin32].basename, basename)
                     << "when testing win32 [" << kData[n].path << "]";
         }
 
@@ -292,7 +291,7 @@ static const int kMaxComponents = 10;
 typedef const char* ComponentList[kMaxComponents];
 
 static void checkComponents(const ComponentList& expected,
-                            const std::vector<std::string_view>& components,
+                            const std::vector<std::string>& components,
                             const char* hostType,
                             const char* path) {
     size_t m;
@@ -344,17 +343,17 @@ TEST(PathUtils, decompose) {
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
         const char* path = kData[n].path;
         checkComponents(kData[n].components[kHostPosix],
-                        PathUtils::decompose(path, kHostPosix),
+                        PathUtils::decompose(std::string(path), kHostPosix),
                         "posix",
                         path);
 
         checkComponents(kData[n].components[kHostWin32],
-                        PathUtils::decompose(path, kHostWin32),
+                        PathUtils::decompose(std::string(path), kHostWin32),
                         "win32",
                         path);
 
         checkComponents(kData[n].components[kHostType],
-                        PathUtils::decompose(path),
+                        PathUtils::decompose(std::string(path)),
                         "host",
                         path);
     }
@@ -524,11 +523,11 @@ TEST(PathUtils, substitute_envs) {
     test.envSet("foo", "bar");
     test.envSet("bar", "foo");
     EXPECT_EQ("bar", System::get()->envGet("foo"));
-    EXPECT_EQ(kNullopt,  PathUtils::pathWithEnvSubstituted(pj({"a", "${NopeUnknown}", "b"})));
-    EXPECT_EQ(kNullopt,  PathUtils::pathWithEnvSubstituted(pj({"a", "${foo}", "${NopeUnknown}"})));
-    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "bar", "c"}), PathUtils::pathWithEnvSubstituted(pj({"a", "${foo}", "c"})));
-    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "bar", "c", "foo"}), PathUtils::pathWithEnvSubstituted(pj({"a", "${foo}", "c", "${bar}"})));
-    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "b", "c"}), PathUtils::pathWithEnvSubstituted(pj({"a", "b", "c"})));
+    EXPECT_EQ(kNullopt,  PathUtils::pathWithEnvSubstituted(pj({"a", "${NopeUnknown}", "b"}).c_str()));
+    EXPECT_EQ(kNullopt,  PathUtils::pathWithEnvSubstituted(pj({"a", "${foo}", "${NopeUnknown}"}).c_str()));
+    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "bar", "c"}), PathUtils::pathWithEnvSubstituted(pj({"a", "${foo}", "c"}).c_str()));
+    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "bar", "c", "foo"}), PathUtils::pathWithEnvSubstituted(pj({"a", "${foo}", "c", "${bar}"}).c_str()));
+    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "b", "c"}), PathUtils::pathWithEnvSubstituted(pj({"a", "b", "c"}).c_str()));
 
     // Make sure we properly observe win32 decomposition on /
     EXPECT_EQ(PathUtils::decompose("a/b/c", kHostWin32), PathUtils::decompose("a/b/c", kHostPosix));
@@ -577,7 +576,7 @@ TEST(PathUtils, streams_use_unicode_paths) {
 
     // Note that using the unicode_file directly on windows will fail
     // std::ofstream out(unicode_file);
-    std::ofstream out(android::base::PathUtils::asUnicodePath(unicode_file).c_str());
+    std::ofstream out(android::base::PathUtils::asUnicodePath(unicode_file.c_str()).c_str());
     out << "Hello there!";
     out.close();
 

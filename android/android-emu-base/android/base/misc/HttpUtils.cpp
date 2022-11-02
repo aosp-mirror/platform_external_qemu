@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/misc/HttpUtils.h"
+#include "aemu/base/misc/HttpUtils.h"
 
 #include <string.h>
 

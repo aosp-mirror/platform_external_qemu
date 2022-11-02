@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/files/GzipStreambuf.h"
+#include "aemu/base/files/GzipStreambuf.h"
 
 #include <streambuf>  // for basic_streambuf<>::traits_type, basic_streambuf
 

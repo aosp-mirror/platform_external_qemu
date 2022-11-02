@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/Result.h"
-#include "android/base/Compiler.h"
+#include "aemu/base/Result.h"
+#include "aemu/base/Compiler.h"
 #include "android/base/testing/ResultMatchers.h"
 
 #include <gtest/gtest.h>

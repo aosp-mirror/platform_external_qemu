@@ -15,9 +15,9 @@
  */
 
 #include "android/avd/util.h"
-#include "android/base/files/PathUtils.h"
+#include "aemu/base/files/PathUtils.h"
 #ifdef _WIN32
-#include "android/base/system/Win32UnicodeString.h"
+#include "aemu/base/system/Win32UnicodeString.h"
 #endif
 #include "android/cmdline-option.h"
 #include "android/avd/info.h"

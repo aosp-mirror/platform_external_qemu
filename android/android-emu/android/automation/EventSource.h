@@ -17,7 +17,7 @@
 #include <chrono>
 
 #include "automation.pb.h"
-#include "android/base/async/Looper.h"
+#include "aemu/base/async/Looper.h"
 
 namespace android {
 namespace automation {
