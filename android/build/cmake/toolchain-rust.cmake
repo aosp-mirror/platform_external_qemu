@@ -44,13 +44,13 @@ endfunction()
 # \argn: Directory where the vendored crates can be found
 # ~~~
 function(enable_vendorized_crates VENDOR_CRATES)
+  set(Rust_ROOT "${CMAKE_BINARY_DIR}/rust")
+  set(CARGO_HOME "${Rust_ROOT}/.cargo")
+  set(CARGO_CONFIG "${CARGO_HOME}/config.toml")
   message(
     STATUS
       "Writing ${CARGO_CONFIG}, cargo should now use vendor crates from ${VENDOR_CRATES}"
   )
-  set(Rust_ROOT "${CMAKE_BINARY_DIR}/rust")
-  set(CARGO_HOME "${Rust_ROOT}/.cargo")
-  set(CARGO_CONFIG "${CARGO_HOME}/config.toml")
   configure_file("${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/config.toml.in"
                  ${CARGO_CONFIG})
   set(Rust_CARGO_HOME ${CARGO_HOME} PARENT_SCOPE)
