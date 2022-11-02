@@ -73,7 +73,6 @@ def run_tests(out_dir, dist_dir, jobs, additional_opts):
             )
 
 
-
 def run_binary_exists(out_dir):
     if not os.path.isfile(os.path.join(out_dir, "emulator%s" % EXE_POSTFIX)):
         raise Exception("Emulator binary is missing")
@@ -83,7 +82,7 @@ def run_ctest(out_dir, jobs):
     cmd = [get_ctest(), "-j", jobs, "--output-on-failure"]
     with TemporaryDirectory() as tmpdir:
         logging.info("Running tests with TMP=%s", tmpdir)
-        run(cmd, out_dir, {"TMP": tmpdir, "TEMP": tmpdir})
+        run(cmd, out_dir, {"TMP": tmpdir, "TEMP": tmpdir, "TMPDIR": tmpdir})
 
 
 def run_emugen_test(out_dir):
