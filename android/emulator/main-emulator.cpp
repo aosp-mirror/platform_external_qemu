@@ -682,10 +682,14 @@ int main(int argc, char** argv) {
                                                  ~kLogEnableDuplicateFilter);
         }
 
-        if (!strcmp(opt, "-log-detailed")) {
+        if (!strcmp(opt, "-log-detailed") || !strcmp(opt, "-debug-log")) {
             logFlags = static_cast<LoggingFlags>(logFlags |
                                                  kLogEnableVerbose);
-                                                 
+        }
+
+        if (!strcmp(opt, "-debug-time")) {
+            logFlags = static_cast<LoggingFlags>(logFlags |
+                                                 kLogEnableTime);
         }
     }
 
