@@ -43,5 +43,7 @@ public:
                                               void* userData) = 0;
 };
 
+static ModemBase* getModemBase();
+
 }  // namespace modem
 }  // namespace android

@@ -328,3 +328,5 @@ if(BLUETOOTH_EMULATION)
     PRIVATE grpc-emulated-bluetooth libbt-rootcanal libbt-rootcanal-qemu
             android-grpc android-emu-base gmock_main)
 endif()
+
+add_subdirectory(incubating)

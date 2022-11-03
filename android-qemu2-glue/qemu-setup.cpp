@@ -87,6 +87,7 @@ extern "C" {
 #include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/UiController.h"
 #include "android/emulation/control/adb/AdbService.h"
+#include "android/emulation/control/incubating/Services.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
@@ -377,6 +378,7 @@ int qemu_setup_grpc() {
             getConsoleAgents());
     auto adb = android::emulation::control::getAdbService();
     auto stats = android::emulation::stats::getStatsService();
+    auto modem = android::emulation::control::incubating::getModemService(getConsoleAgents());
     auto builder =
             EmulatorControllerService::Builder()
                     .withConsoleAgents(getConsoleAgents())
@@ -396,6 +398,7 @@ int qemu_setup_grpc() {
                                            ->settings->android_cmdLineOptions()
                                            ->grpc_allowlist)
                     .withAddress(address)
+                    .withService(modem)
                     .withService(emulator)
                     .withService(h2o)
                     .withService(snapshot)

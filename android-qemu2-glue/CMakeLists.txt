@@ -110,10 +110,15 @@ target_include_directories(
           ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/
           ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(libqemu2-glue PRIVATE android-grpc android-ui-controller)
+target_link_libraries(
+  libqemu2-glue
+  PRIVATE android-grpc android-ui-controller android-grpc-modem-service
+          android-grpc-incubating-services)
+
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
+
 if(BLUETOOTH_EMULATION)
   target_link_libraries(
     libqemu2-glue

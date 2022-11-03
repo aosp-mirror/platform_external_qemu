@@ -33,6 +33,7 @@ from aemu.proto.emulated_bluetooth_pb2_grpc import EmulatedBluetoothServiceStub
 from aemu.proto.emulated_bluetooth_vhci_pb2_grpc import VhciForwardingServiceStub
 from aemu.proto.emulator_controller_pb2 import VmRunState
 from aemu.proto.emulator_controller_pb2_grpc import EmulatorControllerStub
+from aemu.proto.modem_service_pb2_grpc import ModemStub
 from aemu.proto.rtc_service_pb2_grpc import RtcStub
 from aemu.proto.snapshot_service_pb2_grpc import SnapshotServiceStub
 from aemu.proto.ui_controller_service_pb2_grpc import UiControllerStub
@@ -169,6 +170,22 @@ class BasicEmulatorDescription(dict):
         """Returns a stub to the Vhci Forwarding  service."""
         channel = self.get_grpc_channel(use_async)
         return VhciForwardingServiceStub(channel)
+
+
+    def get_incubating_modem_service(self, use_async=False) -> ModemStub:
+        """Returns a stub to modem service.
+
+        Warning! This service is incubating and might change.
+
+        Args:
+            use_async (bool, optional): True if you wish to use the async api. Defaults to False.
+
+        Returns:
+            ModemStub: A stub to the modem service.
+        """
+        channel = self.get_grpc_channel(use_async)
+        return ModemStub(channel)
+
 
     def get_emulated_bluetooth_service(
         self, use_async=False
