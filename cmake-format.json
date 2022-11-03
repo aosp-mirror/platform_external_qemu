@@ -23,6 +23,7 @@
         "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "OUTPUT_DIR": "*",
         "INCLUDES": "*",
+        "LANG": "*",
         "GENERATED": "*"
       }
     },
