@@ -1,4 +1,3 @@
-# We might be running in cross compile build, so setup the required paths and includes..
 cmake_minimum_required(VERSION 3.5)
 if(NOT ANDROID_QEMU2_TOP_DIR)
   set(CMAKE_CXX_STANDARD 17)
@@ -83,7 +82,6 @@ if(NOT CROSSCOMPILE)
   include(${protobuf_source_dir}/cmake/libprotoc.cmake)
   include(${protobuf_source_dir}/cmake/protoc.cmake)
 
-  message("Settings ${protobuf_BUILD_SHARED_LIBS}")
   android_target_dependency(protoc all RUNTIME_OS_DEPENDENCIES)
   android_target_properties(protoc all "${RUNTIME_OS_PROPERTIES}")
 
