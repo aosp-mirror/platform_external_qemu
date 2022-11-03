@@ -209,7 +209,7 @@ target_include_directories(
 target_compile_options(libbt-rootcanal
                        PUBLIC -Wno-inconsistent-missing-override)
 
-if(TARGET Rust::Rustc AND NOT WINDOWS_MSVC_X86_64)
+if(TARGET Rust::Rustc)
   add_subdirectory(lmp)
 else()
   message(WARNING "Disabling lmp for bluetooth, no complete toolchain present (Windows/M1)")
