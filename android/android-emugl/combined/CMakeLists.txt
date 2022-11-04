@@ -24,7 +24,6 @@ if(OPTION_GFXSTREAM_BACKEND)
     set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
     set(ANGLE_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../external/angle)
 
-
     set(BUILD_STANDALONE OFF)
     set(ENABLE_VKCEREAL_TESTS ON)
 
@@ -145,6 +144,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     elseif(WIN32)
         add_compile_definitions(VK_USE_PLATFORM_WIN32_KHR)
     endif()
+    add_compile_definitions(USE_ANGLE_SHADER_PARSER)
 
     add_compile_definitions(GLM_FORCE_RADIANS)
     add_compile_definitions(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
@@ -197,6 +197,9 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/utils ${GFXSTREAM_PREFIX}-utils)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/stream-servers ${GFXSTREAM_PREFIX}-stream-servers)
+    target_link_libraries(
+        GLES_V2_translator_static PRIVATE ANGLE::ANGLE
+    )
 
     # Protocols and associated code generators######################################
 
