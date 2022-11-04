@@ -111,12 +111,12 @@ ANDROID_BEGIN_HEADER
 // from AndroidPipeHwFuncs. This returns a new |internal-pipe| value that is
 // only used by the virtual device to call android_pipe_xxx() functions below.
 ANDROID_PIPE_DEVICE_EXPORT void* android_pipe_guest_open(
-    void* hwpipe, void(*check_pipe_name)(const char* name));
+    void* hwpipe);
 
 // Similar to android_pipe_guest_open(), but has a flags parameter that is used
 // to communicate unique transport properties about the pipe.
 ANDROID_PIPE_DEVICE_EXPORT void* android_pipe_guest_open_with_flags(
-    void* hwpipe, uint32_t flags, void(*check_pipe_name)(const char* name));
+    void* hwpipe, uint32_t flags);
 
 // Close and free an Android pipe. |pipe| must be the result of a previous
 // android_pipe_guest_open() call or the second parameter to

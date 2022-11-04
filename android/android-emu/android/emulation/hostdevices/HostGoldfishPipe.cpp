@@ -94,7 +94,7 @@ int HostGoldfishPipeDevice::connect(const char* name) {
     std::unique_ptr<HostHwPipe> hwPipe = HostHwPipe::create(hwPipeFd);
 
     InternalPipe* hostPipe = static_cast<InternalPipe*>(
-        android_pipe_guest_open(hwPipe.get(), nullptr));
+        android_pipe_guest_open(hwPipe.get()));
     if (!hostPipe) {
         mErrno = ENOENT;
         return kNoFd;
