@@ -23,7 +23,11 @@ namespace base {
 
 // static
 std::string Win32Utils::quoteCommandLine(std::string_view commandLine) {
+    // On Windows, following error returned:
+    // no member named 'isNullTerminated' in 'std::basic_string_view<char>'
+#ifndef _WIN32
     assert(commandLine.isNullTerminated());
+#endif
 
     // If |commandLine| doesn't contain any problematic character, just return
     // it as-is.
