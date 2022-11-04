@@ -131,7 +131,7 @@ struct VSockStream {
           mGuestBufAlloc(guest_buf_alloc),
           mGuestFwdCnt(guest_fwd_cnt) {
         if (!hostCallbacks && !mNewTransport) {
-            mPipe = android_pipe_guest_open(this, nullptr);
+            mPipe = android_pipe_guest_open(this);
         }
     }
 
