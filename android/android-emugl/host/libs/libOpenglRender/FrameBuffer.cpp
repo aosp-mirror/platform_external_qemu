@@ -2293,17 +2293,14 @@ bool FrameBuffer::bindContext(HandleType p_context,
 }
 
 RenderContextPtr FrameBuffer::getContext_locked(HandleType p_context) {
-    assert(m_lock.isLocked());
     return android::base::findOrDefault(m_contexts, p_context);
 }
 
 ColorBufferPtr FrameBuffer::getColorBuffer_locked(HandleType p_colorBuffer) {
-    assert(m_lock.isLocked());
     return android::base::findOrDefault(m_colorbuffers, p_colorBuffer).cb;
 }
 
 WindowSurfacePtr FrameBuffer::getWindowSurface_locked(HandleType p_windowsurface) {
-    assert(m_lock.isLocked());
     return android::base::findOrDefault(m_windows, p_windowsurface).first;
 }
 
