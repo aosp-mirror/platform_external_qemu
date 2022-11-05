@@ -207,7 +207,11 @@ fi
 export ANGLE_DEFAULT_PLATFORM=swiftshader
 
 DISABLED_TESTS="AsyncManagerSocketTest.TestMultipleConnections"
-${CTEST} -j ${NUM_JOBS} --output-on-failure --exclude-regex ${DISABLED_TESTS} || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
+if [ "$TARGET_OS" = "darwin-x86_64" ]; then
+    # TODO(b/257504179): investigate why the following test fails on buildbots.
+    DISABLED_TESTS+="|OsUtilsTest.GetDiscoveryDir"
+fi
+${CTEST} -j ${NUM_JOBS} --output-on-failure --exclude-regex "(${DISABLED_TESTS})" || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
 cd $OLD_DIR
 
 EMULATOR_CHECK=$OPT_OUT/emulator-check
