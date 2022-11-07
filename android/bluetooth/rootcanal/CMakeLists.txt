@@ -242,7 +242,10 @@ android_add_test(
   # DARWIN # cmake-format: sortable
   # test/async_manager_unittest.cc
   LINUX # cmake-format: sortable
-        test/async_manager_unittest.cc test/posix_socket_unittest.cc)
+        test/async_manager_unittest.cc test/posix_socket_unittest.cc
+  TEST_PARAMS
+      --gtest_filter=-AsyncManagerSocketTest.TestMultipleConnections
+)
 
 # Disable until we stabilise the non determinism DARWIN # cmake-format: sortable
 # test/posix_socket_unittest.cc)
