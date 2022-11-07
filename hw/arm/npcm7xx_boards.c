@@ -350,7 +350,10 @@ static void kudo_bmc_i2c_init(NPCM7xxState *soc)
 
     i2c_slave_create_simple(npcm7xx_i2c_get_bus(soc, 1), TYPE_PCA9548, 0x77);
 
-    i2c_slave_create_simple(npcm7xx_i2c_get_bus(soc, 4), TYPE_PCA9548, 0x77);
+    i2c_mux = i2c_slave_create_simple(npcm7xx_i2c_get_bus(soc, 4),
+                                      TYPE_PCA9548, 0x77);
+    i2c_slave_create_simple(pca954x_i2c_get_bus(i2c_mux, 0), "adm1266", 0x40);
+    i2c_slave_create_simple(pca954x_i2c_get_bus(i2c_mux, 1), "adm1266", 0x41);
 
     at24c_eeprom_init(npcm7xx_i2c_get_bus(soc, 4), 0x50, 8192); /* mbfru */
 
