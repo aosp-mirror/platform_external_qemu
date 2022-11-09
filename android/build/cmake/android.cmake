@@ -401,7 +401,7 @@ endfunction()
 
 # ~~~
 # Registers the given target, by calculating the source set and setting
-# licensens.
+# licenses.
 #
 # ``TARGET``     The library/executable target. For example emulatory-libyuv
 # ``LIBNAME``    Public library name, this is how it is known in the world.
@@ -547,7 +547,7 @@ function(android_sign)
 endfunction()
 
 # ~~~
-# Registers the given library, by calculating the source set and setting licensens.
+# Registers the given library, by calculating the source set and setting licenses.
 #
 # ``SHARED``  Option indicating that this is a shared library.
 # ``ALIAS``   The library is an alias for another
@@ -678,7 +678,7 @@ function(android_clang_tidy name)
 endfunction()
 
 # ~~~
-# Registers the given library as an interface by calculating the source set and setting licensens.
+# Registers the given library as an interface by calculating the source set and setting licenses.
 # An INTERFACE library target does not directly create build output, though it may have properties
 # set on it and it may be installed, exported and imported.
 #
@@ -770,7 +770,7 @@ function(finalize_all_licenses)
          ";${tgt}|${target_type}|${DEPS}\n")
   endforeach()
 
-  message(STATUS "Validating liceneses..")
+  message(STATUS "Validating licenses..")
   execute_process(
     COMMAND "${Python_EXECUTABLE}" "android/build/python/aemu/licensing.py" "-w"
             "${PROJECT_BINARY_DIR}" WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
