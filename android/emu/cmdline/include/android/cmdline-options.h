@@ -344,8 +344,6 @@ CFG_PARAM(adb_path, "<path>", "use adb binary from <path>" )
 
 OPT_FLAG(hotplug_multi_display, "Use the HAL hotplug display to implement multiDisplay.")
 
-OPT_FLAG(xts, "Use android64-xts CPU profile instead of the default one")
-
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
