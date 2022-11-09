@@ -1114,26 +1114,55 @@ static int whpx_vcpu_run(CPUState *cpu)
             WHV_REGISTER_VALUE reg_values[5];
             WHV_REGISTER_NAME reg_names[5];
             UINT32 reg_count = 5;
-            UINT64 rip, rax = 0, rcx = 0, rdx = 0, rbx = 0;
+            UINT64 rip, rax, rcx, rdx, rbx;
             UINT32 signature[3] = {0};
-            struct CPUX86State *env = (CPUArchState *)(cpu->env_ptr);
 
             memset(reg_values, 0, sizeof(reg_values));
 
             rip = vcpu->exit_ctx.VpContext.Rip +
                   vcpu->exit_ctx.VpContext.InstructionLength;
-
-            cpu_x86_cpuid(env, vcpu->exit_ctx.CpuidAccess.Rax,
-                               vcpu->exit_ctx.CpuidAccess.Rcx,
-                               &rax, &rbx, &rcx, &rdx);
-
             switch (vcpu->exit_ctx.CpuidAccess.Rax) {
+                case 1:
+                    rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
+                    /* Advertise that we are running on a hypervisor */
+                    rcx =
+                        vcpu->exit_ctx.CpuidAccess.DefaultResultRcx |
+                        CPUID_EXT_HYPERVISOR;
+
+                    rdx = vcpu->exit_ctx.CpuidAccess.DefaultResultRdx;
+                    rbx = vcpu->exit_ctx.CpuidAccess.DefaultResultRbx;
+                    break;
+                case 7:
+                    rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
+                    /* Disable SMAP support*/
+                    rbx =
+                        vcpu->exit_ctx.CpuidAccess.DefaultResultRbx &
+                        ~CPUID_7_0_EBX_SMAP;
+                    rcx = vcpu->exit_ctx.CpuidAccess.DefaultResultRcx;
+                    rdx = vcpu->exit_ctx.CpuidAccess.DefaultResultRdx;
+                    break;
+                case WHPX_CPUID_SIGNATURE:
+                    memcpy(signature, "WHPXWHPXWHPX", 12);
+                    rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
+                    rbx = signature[0];
+                    rcx = signature[1];
+                    rdx = signature[2];
+                    break;
                 case 0x80000001:
+                    rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
                     /* Remove any support of OSVW */
-                    rcx &= ~CPUID_EXT3_OSVW;
+                    rcx =
+                        vcpu->exit_ctx.CpuidAccess.DefaultResultRcx &
+                        ~CPUID_EXT3_OSVW;
+
+                    rdx = vcpu->exit_ctx.CpuidAccess.DefaultResultRdx;
+                    rbx = vcpu->exit_ctx.CpuidAccess.DefaultResultRbx;
                     break;
                 default:
-                    break;
+                    rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
+                    rcx = vcpu->exit_ctx.CpuidAccess.DefaultResultRcx;
+                    rdx = vcpu->exit_ctx.CpuidAccess.DefaultResultRdx;
+                    rbx = vcpu->exit_ctx.CpuidAccess.DefaultResultRbx;
             }
 
             reg_names[0] = WHvX64RegisterRip;
@@ -1789,52 +1818,7 @@ static int whpx_accel_init(MachineState *ms)
         goto error;
     }
 
-    /* We don't know whether HyperV has limitation on how many CPUID leaves
-     * can be intercepted. Since the "full" list below can work, let's keep
-     * it. Note: the "full" list contains CPUID leaves I can know.
-     */
-    UINT32 cpuidExitList[] = {0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-                              0x10, 0x11, 0x12, 0x13,0x14, 0x15, 0x16, 0x17, 0x18, 0x19,
-                              0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
-                              WHPX_CPUID_SIGNATURE,
-                              WHPX_CPUID_SIGNATURE + 1,
-                              WHPX_CPUID_SIGNATURE + 2,
-                              WHPX_CPUID_SIGNATURE + 3,
-                              WHPX_CPUID_SIGNATURE + 4,
-                              WHPX_CPUID_SIGNATURE + 5,
-                              0x80000000,
-                              0x80000001,
-                              0x80000002,
-                              0x80000003,
-                              0x80000004,
-                              0x80000005,
-                              0x80000006,
-                              0x80000007,
-                              0x80000008,
-                              0x80000009,
-                              0x8000000a,
-                              0x8000000b,
-                              0x8000000c,
-                              0x8000000d,
-                              0x8000000e,
-                              0x8000000f,
-                              0x80000010,
-                              0x80000011,
-                              0x80000012,
-                              0x80000013,
-                              0x80000014,
-                              0x80000015,
-                              0x80000016,
-                              0x80000017,
-                              0x80000018,
-                              0x80000019,
-                              0x8000001a,
-                              0x8000001b,
-                              0x8000001c,
-                              0x8000001d,
-                              0x8000001e,
-                              0x8000001f,
-                              0x80000020};
+    UINT32 cpuidExitList[] = {1, 7, WHPX_CPUID_SIGNATURE, 0x80000001};
     hr = whp_dispatch.WHvSetPartitionProperty(
         whpx->partition,
         WHvPartitionPropertyCodeCpuidExitList,
