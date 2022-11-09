@@ -326,7 +326,6 @@ void ControlSocket::registerControlSocket(int fd) {
 }
 
 void ControlSocket::clearConnections() {
-    assert(mMapLock.isLocked());
     for (auto idFd : mIdToFd) {
         close(idFd.second);
         mFdToWatch.erase(idFd.second);
