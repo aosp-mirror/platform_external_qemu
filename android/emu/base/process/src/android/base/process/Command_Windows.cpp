@@ -20,6 +20,7 @@
 #include "aemu/base/files/ScopedFileHandle.h"
 #include "aemu/base/streams/RingStreambuf.h"
 
+#include <Tlhelp32.h>
 #include <psapi.h>
 
 #define DEBUG 0
@@ -283,8 +284,9 @@ public:
 
                 if (!pipe->fPendingIO) {
                     DWORD bytesToRead = BUFSIZE * sizeof(char);
-                    BOOL fSuccess = ReadFile(pipe->hRead, pipe->chRead, bytesToRead,
-                                        NULL, &pipe->oOverlap);
+                    BOOL fSuccess =
+                            ReadFile(pipe->hRead, pipe->chRead, bytesToRead,
+                                     NULL, &pipe->oOverlap);
 
                     DD("Readfile: (%p), %s, read: %d (%s)", pipe->hRead,
                        fSuccess ? "success" : "fail", pipe->cbRead,
@@ -557,6 +559,26 @@ std::unique_ptr<Process> Process::fromPid(Pid pid) {
         return std::make_unique<WinProcess>(hProc.release());
     }
     return nullptr;
+}
+
+std::vector<std::unique_ptr<Process>> Process::fromName(std::string name) {
+    std::vector<std::unique_ptr<Process>> processes;
+
+    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    PROCESSENTRY32 process = {0};
+    process.dwSize = sizeof(process);
+
+    if (!Process32First(snapshot, &process)) {
+        return processes;
+    }
+    do {
+        if (std::string(process.szExeFile).find(name) != std::string::npos) {
+            processes.push_back(fromPid(process.th32ProcessID));
+        }
+    } while (Process32Next(snapshot, &process));
+
+    CloseHandle(snapshot);
+    return processes;
 }
 
 std::unique_ptr<Process> Process::me() {

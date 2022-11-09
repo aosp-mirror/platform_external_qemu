@@ -73,11 +73,26 @@ TEST(Process, find_me) {
     EXPECT_NE(me, nullptr);
     EXPECT_GT(me->pid(), 0);
 }
+
 TEST(Process, discovered_proc_same_as_launched) {
     auto proc = Command::create({sleep_exe(), "100", "0"}).execute();
     auto sleep = Process::fromPid(proc->pid());
     EXPECT_EQ(proc->pid(), sleep->pid());
     EXPECT_EQ(*proc, *sleep);
+}
+
+TEST(Process, can_discover_launched_proc) {
+    auto proc = Command::create({sleep_exe(), "100", "0"}).execute();
+    auto pids = Process::fromName("sleep_emu");
+    EXPECT_GT(pids.size(), 0);
+
+    bool found = false;
+    for(const auto& pid : pids) {
+        if (pid->pid() == proc->pid()) {
+            found = true;
+        }
+    }
+    EXPECT_TRUE(found) << sleep_exe() << "was not found.";
 }
 
 TEST(Process, can_read_process_name) {
