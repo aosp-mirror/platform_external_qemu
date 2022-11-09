@@ -677,10 +677,10 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id,
         LOG(ERROR) << "width and height should be >= 320dp";
         return false;
     }
-    if (!((w <= 4096 && h <= 2160) || (w <= 2160 && h <= 4096))) {
-        mWindowAgent->showMessage("resolution should not exceed 4k (4096*2160)",
+    if (!((w <= 7680 && h <= 4320) || (w <= 4320 && h <= 7680))) {
+        mWindowAgent->showMessage("resolution should not exceed 8k (7680*4320)",
                                   WINDOW_MESSAGE_ERROR, 1000);
-        LOG(ERROR) << "resolution should not exceed 4k (4096*2160)";
+        LOG(ERROR) << "resolution should not exceed 8k (7680*4320)";
         return false;
     }
     if (id > s_maxNumMultiDisplay) {

@@ -69,9 +69,9 @@ MultiDisplayItem::MultiDisplayItem(int id, QWidget* parent)
         mUi->selectDisplayType->addItem(type.name.c_str());
     }
     mUi->width->setMinValue(0);
-    mUi->width->setMaxValue(2160);
+    mUi->width->setMaxValue(7680);
     mUi->height->setMinValue(0);
-    mUi->height->setMaxValue(4096);
+    mUi->height->setMaxValue(7680);
     mUi->dpi->setMinValue(120);
     mUi->dpi->setMaxValue(640);
 
