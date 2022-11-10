@@ -48,6 +48,8 @@
 #include <crt_externs.h>
 #include <libproc.h>
 #define environ (*_NSGetEnviron())
+#else
+#include <filesystem>
 #endif
 
 namespace android {
@@ -61,6 +63,36 @@ std::vector<char*> toCharArray(const std::vector<std::string>& params) {
     args.push_back(nullptr);
     return args;
 }
+
+#ifndef __APPLE__
+static std::string read_proc_linux(int pid) {
+    // parse out /proc/xx/cmdline
+    std::string proc = "/proc/" + std::to_string(pid) + "/cmdline";
+    DD("Looking for commandline in %s", proc.c_str());
+
+    std::string name;
+    FILE* proc_file;
+    char ch;
+
+    // Opening file in reading mode
+    proc_file = fopen(proc.c_str(), "r");
+    if (!proc_file) {
+        DD("Warning, cannot find proc.");
+        return "";
+    }
+
+    // /proc likely will not report file size, so read it!
+    while ((ch = fgetc(proc_file)) != EOF) {
+        if (ch == 0) {
+            fclose(proc_file);
+            return name;
+        }
+        name += ch;
+    }
+    fclose(proc_file);
+    return name;
+}
+#endif
 
 class PosixOverseer : public ProcessOverseer {
 public:
@@ -188,30 +220,7 @@ public:
         char name[PROC_PIDPATHINFO_MAXSIZE] = {0};
         proc_pidpath(mPid, name, sizeof(name));
 #else
-        // parse out /proc/xx/cmdline
-        std::string proc = "/proc/" + std::to_string(mPid) + "/cmdline";
-        DD("Looking for commandline in %s", proc.c_str());
-
-        std::string name;
-        FILE* proc_file;
-        char ch;
-
-        // Opening file in reading mode
-        proc_file = fopen(proc.c_str(), "r");
-        if (!proc_file) {
-            DD("Warning, cannot find proc.");
-            return "";
-        }
-
-        // /proc likely will not report file size, so read it!
-        while ((ch = fgetc(proc_file)) != EOF) {
-            if (ch == 0) {
-                fclose(proc_file);
-                return name;
-            }
-            name += ch;
-        }
-        fclose(proc_file);
+        std::string name = read_proc_linux(mPid);
 #endif
         return name;
     }
@@ -294,6 +303,48 @@ std::unique_ptr<Process> Process::fromPid(Pid pid) {
 
 std::unique_ptr<Process> Process::me() {
     return fromPid(getpid());
+}
+
+std::vector<std::unique_ptr<Process>> Process::fromName(std::string name) {
+    std::vector<std::unique_ptr<Process>> processes;
+
+#ifdef __APPLE__
+    // Get list of all processes.
+    int pid_array_size_needed = proc_listallpids(nullptr, 0);
+    if (pid_array_size_needed <= 0) {
+        return processes;
+    }
+
+    std::vector<pid_t> pid_array(pid_array_size_needed * 4);
+    int pid_count = proc_listallpids(pid_array.data(),
+                                     pid_array.size() * sizeof(pid_array[0]));
+    if (pid_count <= 0) {
+        return processes;
+    }
+
+    pid_array.resize(pid_count);
+
+    // Ok, now we have an array of pids, and we just find the
+    // one with the proper executable substring.
+    for (const auto pid : pid_array) {
+        char pname[PROC_PIDPATHINFO_MAXSIZE] = {0};
+        proc_pidpath(pid, pname, sizeof(pname));
+        if (strstr(pname, name.c_str())) {
+            processes.push_back(Process::fromPid(pid));
+        }
+    }
+#else
+    for (const auto& entry : std::filesystem::directory_iterator("/proc")) {
+        int pid = 0;
+        if (std::sscanf(entry.path().c_str(), "/proc/%d", &pid) == 1) {
+            if (read_proc_linux(pid).find(name) != std::string::npos) {
+                processes.push_back(Process::fromPid(pid));
+            }
+        }
+    }
+#endif
+
+    return processes;
 }
 
 }  // namespace base
