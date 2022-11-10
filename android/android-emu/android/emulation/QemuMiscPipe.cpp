@@ -297,11 +297,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
         fillWithOK(output);
         // bug: 152636877
         auto bootTimeInMs = (long long)(get_uptime_ms() - s_reset_request_uptime_ms);
-#ifdef _WIN32
-        dinfo("Boot completed");
-#else
         dinfo("Boot completed in %lld ms",  bootTimeInMs);
-#endif
         android::metrics::MetricsReporter::get().report(
                 [=](android_studio::AndroidStudioEvent* event) {
                     auto boot_info = event->mutable_emulator_details()
