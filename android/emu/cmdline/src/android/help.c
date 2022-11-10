@@ -2200,10 +2200,6 @@ static void help_hotplug_multi_display(stralloc_t* out) {
     PRINTF(" Use the HAL hotplug display to implement multiDisplay.\n\n");
 }
 
-static void help_xts(stralloc_t* out) {
-    PRINTF(" Turn on tweaks made for running xTS.\n\n");
-}
-
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
