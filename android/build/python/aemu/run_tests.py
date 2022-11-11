@@ -18,12 +18,12 @@
 import os
 import platform
 import shutil
-import subprocess
-import sys
 import tempfile
 import logging
+import sys
+from pathlib import Path
 
-from aemu.definitions import EXE_POSTFIX, get_ctest, get_qemu_root
+from aemu.definitions import EXE_POSTFIX, get_ctest, get_qemu_root, get_aosp_root
 from aemu.process import run
 
 
@@ -76,6 +76,30 @@ def run_tests(out_dir, dist_dir, jobs, additional_opts):
 def run_binary_exists(out_dir):
     if not os.path.isfile(os.path.join(out_dir, "emulator%s" % EXE_POSTFIX)):
         raise Exception("Emulator binary is missing")
+
+
+def run_e2e_tests(out_dir, dist_dir):
+    if dist_dir is None:
+        dist_dir = Path(out_dir) / "tmp_dist"
+
+    launcher = (
+        Path(get_aosp_root())
+        / "external"
+        / "adt-infra"
+        / "pytest"
+        / "test_embedded"
+        / "run_tests.py"
+    )
+    run(
+        [
+            sys.executable,
+            launcher,
+            "--emulator",
+            Path(out_dir) / "distribution" / "emulator" / f"emulator{EXE_POSTFIX}",
+            "--session_dir",
+            Path(dist_dir) / "session",
+        ]
+    )
 
 
 def run_ctest(out_dir, jobs):

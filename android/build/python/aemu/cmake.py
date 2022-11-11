@@ -38,6 +38,7 @@ from aemu.distribution import create_distribution
 from aemu.process import run
 from aemu.run_tests import run_tests
 from pathlib import Path
+from aemu.run_tests import run_tests, run_e2e_tests
 
 
 class LogBelowLevel(logging.Filter):
@@ -226,8 +227,10 @@ def main(args):
     logging.info("Completed build in %d seconds", time.time() - start_time)
 
     # Test.
-    if args.tests:
-        if not iscross:
+    if iscross:
+        logging.info("Not running tests when cross compiling.")
+    else:
+        if args.tests:
             run_tests_opts = []
             if args.gfxstream or args.gfxstream_only:
                 run_tests_opts.append("--skip-emulator-check")
@@ -235,8 +238,9 @@ def main(args):
                 run_tests_opts.append("--gfxstream")
             run_tests(args.out, args.dist, args.test_jobs, run_tests_opts)
             logging.info("Completed testing.")
-        else:
-            logging.info("Not running tests for cross compile or darwin aarch64.")
+
+        if args.integration and not (args.gfxstream or args.gfxstream_only):
+            run_e2e_tests(args.out, args.dist)
 
     # Create a distribution if needed.
     if args.dist:
@@ -406,6 +410,13 @@ def launch():
         default=find_aosp_root(),
         help="AOSP directory ({})".format(find_aosp_root()),
     )
+    parser.add_argument(
+        "--integration-tests",
+        dest="integration",
+        default=False,
+        action="store_true",
+        help="Run the emulator integration tests as part of the test verification.",
+    )
 
     parser.add_argument(
         "--ccache",
@@ -427,6 +438,13 @@ def launch():
     logging.root.setLevel(lvl)
     logging.root.addHandler(logging_handler_out)
     logging.root.addHandler(logging_handler_err)
+
+    if leftover:
+        logging.warning("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+        logging.warning(
+            "Leftover arguments: %s, are ignored and will soon be removed.", leftover
+        )
+        logging.warning("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
 
     set_aosp_root(args.aosp)
 
