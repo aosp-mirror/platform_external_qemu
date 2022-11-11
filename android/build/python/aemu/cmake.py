@@ -23,12 +23,21 @@ import sys
 import time
 from distutils.spawn import find_executable
 
-from aemu.definitions import (ENUMS, find_aosp_root, get_aosp_root, get_cmake,
-                              get_qemu_root, infer_target, is_crosscompile,
-                              read_simple_properties, set_aosp_root)
+from aemu.definitions import (
+    ENUMS,
+    find_aosp_root,
+    get_aosp_root,
+    get_cmake,
+    get_qemu_root,
+    infer_target,
+    is_crosscompile,
+    read_simple_properties,
+    set_aosp_root,
+)
 from aemu.distribution import create_distribution
 from aemu.process import run
 from aemu.run_tests import run_tests
+from pathlib import Path
 
 
 class LogBelowLevel(logging.Filter):
@@ -38,6 +47,33 @@ class LogBelowLevel(logging.Filter):
 
     def filter(self, record):
         return True if record.levelno < self.max_level else False
+
+
+def fix_up_rust_symlinks():
+    """Temporarily fix up all the rust symlinks: b/258854722"""
+    crates = Path(get_qemu_root()) / "android" / "third_party" / "rust" / "crates"
+    with open(crates / "symlinks", "r", encoding="utf-8") as links:
+        for fname in links.readlines():
+            try:
+                fname = fname.strip()
+                source_crate = (
+                    crates.parents[4]
+                    / "rust"
+                    / "chromium"
+                    / "crates"
+                    / "vendor"
+                    / fname
+                ).absolute()
+                assert (
+                    source_crate.exists()
+                ), f"The source crate {source_crate} does not exist"
+                crate = crates / fname
+                crate.unlink(missing_ok=True)
+                crate.symlink_to(source_crate, target_is_directory=True)
+                logging.info("Created link form %s to %s", crate, source_crate)
+            except Exception as err:
+                logging.error("Failed to fix up %s, due to %s", fname.strip(), err)
+                raise err
 
 
 def configure(args, target):
@@ -393,6 +429,9 @@ def launch():
     logging.root.addHandler(logging_handler_err)
 
     set_aosp_root(args.aosp)
+
+    # b/258854722
+    fix_up_rust_symlinks()
 
     try:
         main(args)
