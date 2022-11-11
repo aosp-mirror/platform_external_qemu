@@ -16,6 +16,8 @@ import os
 import platform
 import re
 from typing import Optional
+from pathlib import Path
+
 
 from aemu.discovery.emulator_description import EmulatorDescription
 
@@ -39,12 +41,12 @@ class EmulatorDiscovery(object):
         self._emulators = set()
         for discovery_dir in self.discovery_dirs:
             logging.debug("Discovering emulators in %s", discovery_dir)
-            if os.path.exists(discovery_dir):
-                for file in os.listdir(discovery_dir):
-                    m = self._PID_FILE_.match(file)
+            if discovery_dir.exists():
+                for file in discovery_dir.glob("*.ini"):
+                    m = self._PID_FILE_.match(file.name)
                     if m:
                         logging.debug("Found %s", file)
-                        emu = self._parse_ini(os.path.join(discovery_dir, file))
+                        emu = self._parse_ini(file)
                         if emu:
                             self._emulators.add(EmulatorDescription(m.group(1), emu))
 
@@ -116,27 +118,26 @@ class EmulatorDiscovery(object):
         return next(iter(self._emulators))
 
 
-def get_discovery_directories() -> list[str]:
+def get_discovery_directories() -> list[Path]:
     """All the discovery directories that can contain emulator discovery files.
 
     Returns:
-        list[str]: A list of directories with possible discovery files.
+        list[Path]: A list of directories with possible discovery files.
     """
     path = None
     if platform.system() == "Windows" and "LOCALAPPDATA" in os.environ:
-        path = os.path.join(os.environ.get("LOCALAPPDATA"), "Temp")
+        path = Path(os.environ.get("LOCALAPPDATA")) / "Temp"
     if platform.system() == "Linux":
-        path = os.environ.get("XDG_RUNTIME_DIR")
-        if path is None or not os.path.exists(path):
-            path = os.path.join("run", "user", str(os.getuid()))
+        if "XDG_RUNTIME_DIR" in os.environ:
+            path = Path(os.environ.get("XDG_RUNTIME_DIR"))
+        if path is None or not path.exists():
+            path = Path("/") / "run" / "user" / Path(os.getuid())
     if platform.system() == "Darwin" and "HOME" in os.environ:
-        path = os.path.join(
-            os.environ.get("HOME"), "Library", "Caches", "TemporaryItems"
-        )
+        path = Path.home() / "Library" / "Caches" / "TemporaryItems"
 
     paths = _get_user_directories()
     paths.append(path)
-    return [os.path.join(path, "avd", "running") for path in paths if path != None]
+    return [path / "avd" / "running" for path in paths if path != None]
 
 
 def _get_user_directories():
@@ -145,19 +146,17 @@ def _get_user_directories():
     paths = []
 
     if "ANDROID_EMULATOR_HOME" in os.environ:
-        paths.append(os.environ.get("ANDROID_EMULATOR_HOME"))
+        paths.append(Path(os.environ.get("ANDROID_EMULATOR_HOME")))
 
     if "ANDROID_SDK_HOME" in os.environ:
         paths.append(
-            os.path.join(
-                os.environ.get("ANDROID_SDK_HOME"), EmulatorDiscovery.ANDROID_SUBDIR
-            )
+            Path(os.environ.get("ANDROID_SDK_HOME")) / EmulatorDiscovery.ANDROID_SUBDIR
         )
 
     if "ANDROID_AVD_HOME" in os.environ:
-        paths.append(os.environ.get("ANDROID_AVD_HOME"))
+        paths.append(Path(os.environ.get("ANDROID_AVD_HOME")))
 
-    paths.append(os.path.join(os.environ.get("HOME"), EmulatorDiscovery.ANDROID_SUBDIR))
+    paths.append(Path.home() / EmulatorDiscovery.ANDROID_SUBDIR)
     return paths
 
 

@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
+import platform
 import os
 from aemu.discovery.emulator_discovery import get_discovery_directories
+from pathlib import Path
 
 test_expected = [
     ("Linux", {"XDG_RUNTIME_DIR": "foo"}, "foo"),
@@ -26,14 +28,15 @@ test_expected = [
 ]
 
 
-@pytest.mark.parametrize("platform,env,expected", test_expected)
-def test_get_discovery_directory(platform, env, expected, mocker):
+@pytest.mark.parametrize("target_os,env,expected", test_expected)
+def test_get_discovery_directory(target_os, env, expected, mocker):
     env["ANDROID_SDK_HOME"] = "bar"
     mocker.patch.dict(os.environ, env)
-    mocker.patch.object(os.path, "exists", return_value=True)
-    mocker.patch("platform.system", return_value=platform)
+    mocker.patch.object(Path, "home", return_value=Path("foo"))
+    mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch("platform.system", return_value=target_os)
     disc = get_discovery_directories()
-    assert os.path.join(expected, "avd", "running") in disc
+    assert Path(expected) / "avd" / "running" in disc
 
 
 test_fallback = [
@@ -43,21 +46,24 @@ test_fallback = [
 ]
 
 
-@pytest.mark.parametrize("platform,env", test_fallback)
-def test_get_discovery_directory_fallback(platform, env, mocker):
+@pytest.mark.parametrize("target_os,env", test_fallback)
+def test_get_discovery_directory_fallback(target_os, env, mocker):
+    if platform.system() == "Windows" and target_os != "Windows":
+        pytest.skip()
+
     env["ANDROID_EMULATOR_HOME"] = "bar"
     mocker.patch.dict(os.environ, env)
-    mocker.patch.object(os, "getuid", return_value="bar")
-    mocker.patch("platform.system", return_value=platform)
+    mocker.patch.object(os, "getuid", return_value="bar", create=True)
+    mocker.patch("platform.system", return_value=target_os)
     disc = get_discovery_directories()
-    assert os.path.join("bar", "avd", "running") in disc
+    assert Path("bar") / "avd" / "running" in disc
 
 
-@pytest.mark.parametrize("platform,env", test_fallback)
-def test_get_discovery_directory_fallback(platform, env, mocker):
+@pytest.mark.parametrize("target_os,env", test_fallback)
+def test_get_discovery_directory_fallback(target_os, env, mocker):
     env["ANDROID_SDK_HOME"] = "bar"
     mocker.patch.dict(os.environ, env)
-    mocker.patch.object(os, "getuid", return_value="bar")
-    mocker.patch("platform.system", return_value=platform)
+    mocker.patch.object(os, "getuid", return_value="bar", create=True)
+    mocker.patch("platform.system", return_value=target_os)
     disc = get_discovery_directories()
-    assert os.path.join("bar", ".android", "avd", "running") in disc
+    assert Path("bar") / ".android" / "avd" / "running" in disc

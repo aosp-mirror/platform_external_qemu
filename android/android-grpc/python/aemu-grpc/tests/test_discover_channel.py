@@ -12,64 +12,73 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import pytest
-import grpc
+from pathlib import Path
 
 import aemu.discovery.emulator_discovery
+import grpc
+import pytest
 from aemu.discovery.emulator_discovery import get_default_emulator
 
 
 @pytest.fixture(scope="session")
 def fake_emu_pid_file(tmpdir_factory):
-    fn = str(tmpdir_factory.mktemp("data").join("pid_1234.ini"))
+    fn = tmpdir_factory.mktemp("data") / "pid_1234.ini"
     with open(fn, "w") as w:
         w.write("grpc.port=8554\n")
-    return fn
+    return Path(fn)
 
 
 @pytest.fixture(scope="session")
 def fake_emu_pid_file_with_token(tmpdir_factory):
-    fn = str(tmpdir_factory.mktemp("data").join("pid_1234.ini"))
+    fn = tmpdir_factory.mktemp("data") / "pid_1234.ini"
     with open(fn, "w") as w:
         w.write("grpc.port=8554\n")
         w.write("grpc.token=abcd")
-    return fn
+    return Path(fn)
 
 
 def test_get_default_channel(mocker, fake_emu_pid_file):
     """Test you gets a standard insecure channel."""
-    path = os.path.dirname(fake_emu_pid_file)
-    pid_file = os.path.basename(fake_emu_pid_file)
+    path = fake_emu_pid_file.parent
+    pid_file = fake_emu_pid_file
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
+        aemu.discovery.emulator_discovery,
+        "get_discovery_directories",
+        return_value=[path],
     )
-    mocker.patch.object(os, "listdir", return_value=[pid_file])
+    mocker.patch.object(Path, "glob", return_value=[pid_file])
     channel = get_default_emulator().get_grpc_channel()
     assert channel is not None
     assert isinstance(channel, grpc.Channel)
     assert channel.__class__.__name__ == "Channel"
 
+
 def test_get_default_async_channel(mocker, fake_emu_pid_file):
     """Test you gets a standard async insecure channel."""
-    path = os.path.dirname(fake_emu_pid_file)
-    pid_file = os.path.basename(fake_emu_pid_file)
+    path = fake_emu_pid_file.parent
+    pid_file = fake_emu_pid_file
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
+        aemu.discovery.emulator_discovery,
+        "get_discovery_directories",
+        return_value=[path],
     )
-    mocker.patch.object(os, "listdir", return_value=[pid_file])
+    mocker.patch.object(Path, "glob", return_value=[pid_file])
     channel = get_default_emulator().get_async_grpc_channel()
     assert channel is not None
     assert isinstance(channel, grpc.aio.Channel)
     assert channel.__class__.__name__ == "Channel"
 
+
 def test_get_token_channel(mocker, fake_emu_pid_file_with_token):
     """Test you gets a standard insecure channel with interceptor."""
-    path = os.path.dirname(fake_emu_pid_file_with_token)
-    pid_file = os.path.basename(fake_emu_pid_file_with_token)
+    path = fake_emu_pid_file_with_token.parent
+    pid_file = fake_emu_pid_file_with_token
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
+        aemu.discovery.emulator_discovery,
+        "get_discovery_directories",
+        return_value=[path],
     )
-    mocker.patch.object(os, "listdir", return_value=[pid_file])
+    mocker.patch.object(Path, "glob", return_value=[pid_file])
     channel = get_default_emulator().get_grpc_channel()
     assert channel is not None
     # Note the hijacked channel class!
@@ -78,12 +87,14 @@ def test_get_token_channel(mocker, fake_emu_pid_file_with_token):
 
 def test_get_token_async_channel(mocker, fake_emu_pid_file_with_token):
     """Test you gets a standard insecure channel with interceptor."""
-    path = os.path.dirname(fake_emu_pid_file_with_token)
-    pid_file = os.path.basename(fake_emu_pid_file_with_token)
+    path = fake_emu_pid_file_with_token.parent
+    pid_file = fake_emu_pid_file_with_token
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
+        aemu.discovery.emulator_discovery,
+        "get_discovery_directories",
+        return_value=[path],
     )
-    mocker.patch.object(os, "listdir", return_value=[pid_file])
+    mocker.patch.object(Path, "glob", return_value=[pid_file])
     channel = get_default_emulator().get_async_grpc_channel()
     assert channel is not None
     # Note the hijacked channel class!
