@@ -11,6 +11,9 @@ This can be accomplished by either:
 
 - Using a crate from [AOSP](https://android.googlesource.com/platform/external/rust/crates/). These crates are missing `.cargo-checksum.json` files and cannot be used as direct depdendencies. Instead you will have to [patch](https://doc.rust-lang.org/cargo/reference/overriding-dependencies.html#the-patch-section) them in your workspace definition.
 
+Due to b/258854722 you must add the crate you want to import to the symlink file
+after which you can add the symlink here directly.
+
 To use bindgen for AOSP you would add the following section to your workspace:
 
 ```rust
