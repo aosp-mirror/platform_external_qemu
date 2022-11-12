@@ -251,6 +251,10 @@ static uint8_t max34451_read_byte(PMBusDevice *pmdev)
         pmbus_send8(pmdev, 0x59);
         break;
 
+    case PMBUS_MFR_REVISION:
+        pmbus_send16(pmdev, 0x3236);
+        break;
+
     case PMBUS_MFR_LOCATION:
         pmbus_send64(pmdev, s->mfr_location);
         break;
@@ -390,22 +394,6 @@ static int max34451_write_data(PMBusDevice *pmdev, const uint8_t *buf,
                                uint8_t len)
 {
     MAX34451State *s = MAX34451(pmdev);
-
-    if (len == 0) {
-        qemu_log_mask(LOG_GUEST_ERROR, "%s: writing empty data\n", __func__);
-        return -1;
-    }
-
-    pmdev->code = buf[0]; /* PMBus command code */
-
-    if (len == 1) {
-        return 0;
-    }
-
-    /* Exclude command code from buffer */
-    buf++;
-    len--;
-    uint8_t index = pmdev->page;
 
     switch (pmdev->code) {
     case MAX34451_MFR_STORE_ALL:
@@ -558,8 +546,8 @@ static int max34451_write_data(PMBusDevice *pmdev, const uint8_t *buf,
     case MAX34451_MFR_FW_SERIAL:
     case MAX34451_MFR_IOUT_AVG:
         /* Read only commands */
-        pmdev->pages[index].status_word |= PMBUS_STATUS_CML;
-        pmdev->pages[index].status_cml |= PB_CML_FAULT_INVALID_DATA;
+        pmdev->pages[pmdev->page].status_word |= PMBUS_STATUS_CML;
+        pmdev->pages[pmdev->page].status_cml |= PB_CML_FAULT_INVALID_DATA;
         qemu_log_mask(LOG_GUEST_ERROR,
                       "%s: writing to read-only register 0x%02x\n",
                       __func__, pmdev->code);
