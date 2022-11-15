@@ -101,6 +101,10 @@ if(OPTION_GFXSTREAM_BACKEND)
     # We define some of vkcereal's base API in android-emu (e.g. resolveLayout), so we can't simply
     # link to android-emu-base.
     set(GFXSTREAM_HOST_COMMON_LIB aemu-vkcereal-host-common)
+    add_library(gfxstream-gl-host-common INTERFACE)
+    target_link_libraries(
+        gfxstream-gl-host-common
+        INTERFACE gfxstream-gl-host-common.headers aemu-vkcereal-host-common)
 
     if (WIN32)
         add_definitions("-DUNICODE -D_UNICODE -DNOMINMAX -DEMUGL_BUILD -DVK_USE_PLATFORM_WIN32_KHR -DBUILDING_EMUGL_COMMON_SHARED")
@@ -196,6 +200,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     # Backends######################################################################
 
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/utils ${GFXSTREAM_PREFIX}-utils)
+    add_subdirectory(${GFXSTREAM_REPO_ROOT}/gl-host-common ${GFXSTREAM_PREFIX}-gl-host-common)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/stream-servers ${GFXSTREAM_PREFIX}-stream-servers)
     target_link_libraries(
         GLES_V2_translator_static PRIVATE ANGLE::ANGLE

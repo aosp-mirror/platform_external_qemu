@@ -198,6 +198,7 @@ endif()
 
 # gfxstream, aemu-common modules
 set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+set(ENABLE_VKCEREAL_TESTS ON)
 function(discover_gfxstream_internal_targets result subdir)
     if(CMAKE_VERSION VERSION_LESS "3.7.0")
         message(
@@ -239,6 +240,14 @@ set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cer
 set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
 set(GFXSTREAM_PROTOCOLS_DIR ${ANDROID_QEMU2_TOP_DIR}/../../external/gfxstream-protocols)
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu aemu_common)
+if(ENABLE_VKCEREAL_TESTS)
+    set(AEMU_COMMON_TESTS
+      aemu-base_unittests
+      aemu-host-common_unittests)
+  foreach(TST ${AEMU_COMMON_TESTS})
+    android_target_properties(${TST} all "${RUNTIME_OS_PROPERTIES}")
+  endforeach()
+endif()
 
 # Figure out all gfxstream dependencies
 include(${GFXSTREAM_REPO_ROOT}/cmake/SetSubdirectorProperties.cmake)
