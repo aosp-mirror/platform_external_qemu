@@ -334,6 +334,7 @@ bool emuglConfig_init(EmuglConfig* config,
                 setCurrentRenderer(gpu_mode);
                 return true;
             }
+            setCurrentRenderer(gpu_mode);
         }
         else if (!has_auto_no_window && (no_window || (blacklisted && !hasUiPreference))) {
             if (stringVectorContains(sBackendList->names(),
@@ -456,6 +457,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 #ifndef __APPLE__
     // Default to swiftshader vk on mac
     if  (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT
+            || sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER
             || strstr(config->backend, "swangle"))
 #endif
     {
