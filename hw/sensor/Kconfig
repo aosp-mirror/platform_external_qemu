@@ -27,6 +27,10 @@ config ADM1266
     depends on PMBUS
     default y if PMBUS
 
+config ADP1050
+    bool
+    depends on I2C
+
 config MAX34451
     bool
     depends on I2C
