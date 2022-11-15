@@ -1,4 +1,3 @@
-
 from tink import jwt
 from aemu.discovery.security.jwt_keygen import JwtKeygen
 
@@ -24,7 +23,8 @@ def jwt_header_interceptor(key_path, active_path):
 
         raw_jwt = jwt.new_raw_jwt(
             audiences=[client_call_details.method],
-            expiration=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=15),
+            expiration=datetime.datetime.now(datetime.timezone.utc)
+            + datetime.timedelta(minutes=15),
             issuer="PyModule",
             issued_at=datetime.datetime.now(datetime.timezone.utc),
         )

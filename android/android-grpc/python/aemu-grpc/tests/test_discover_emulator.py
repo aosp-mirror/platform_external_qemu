@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import pytest
+from pathlib import Path
 
 import aemu.discovery.emulator_discovery
+import pytest
 from aemu.discovery.emulator_discovery import EmulatorDiscovery, get_default_emulator
 
 
@@ -26,7 +27,7 @@ def tmp_directory(tmp_path_factory):
 @pytest.fixture
 def fake_emu_pid_file(tmp_directory):
     def write_pid_file(number):
-        fn = str(tmp_directory / "pid_123{}.ini".format(number))
+        fn = tmp_directory / f"pid_123{number}.ini"
         with open(fn, "w") as w:
             w.write("port.serial={}\n".format(5554 + number * 2))
             w.write("port.adb={}\n".format(5555 + number * 2))
@@ -35,7 +36,7 @@ def fake_emu_pid_file(tmp_directory):
             w.write("avd.id=Q\n")
             w.write("cmdline=unused\n")
             w.write("grpc.port={}\n".format(8554 + number * 2))
-        return os.path.dirname(fn), os.path.basename(fn)
+        return fn.parent, fn
 
     return write_pid_file
 
@@ -56,7 +57,7 @@ def test_no_pid_file_means_no_emulator(mocker):
 
 
 def test_bad_pid_file_means_no_emulator(mocker, bad_emu_pid_file):
-    path = os.path.dirname(bad_emu_pid_file)
+    path = Path(bad_emu_pid_file)
     mocker.patch.object(
         aemu.discovery.emulator_discovery,
         "get_discovery_directories",
@@ -73,7 +74,7 @@ def test_can_parse_and_read_emu_file(mocker, fake_emu_pid_file):
         "get_discovery_directories",
         return_value=[path],
     )
-    mocker.patch.object(os, "listdir", return_value=[pid_file])
+    mocker.patch.object(Path, "glob", return_value=[pid_file])
     emu = EmulatorDiscovery()
     assert emu.available() == 1
     assert emu.find_by_pid(1230) is not None

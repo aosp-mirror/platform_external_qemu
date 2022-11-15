@@ -86,7 +86,6 @@ class JwtKeygen(object):
         self.fname = os.path.join(key_path, "{}.jwk".format(uuid.uuid4()))
         self.sign = self._generate_signer_and_write(self.fname, active_path)
 
-
     def __del__(self):
         if os.path.exists(self.fname):
             os.remove(self.fname)
