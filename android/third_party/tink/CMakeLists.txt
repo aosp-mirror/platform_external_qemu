@@ -20,6 +20,7 @@ function(add_directory_alias SOURCE DESTINATION)
     file(TO_NATIVE_PATH "${DESTINATION}" _native_destination)
     execute_process(COMMAND $ENV{ComSpec} /c mklink /J "${_native_destination}" "${_native_source}" ERROR_QUIET)
   else()
+      message(STATUS "create_symlink ${SOURCE} ${DESTINATION}")
     execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${SOURCE}" "${DESTINATION}")
   endif()
 endfunction(add_directory_alias)
@@ -310,4 +311,4 @@ add_subdirectory(${TINK_DIR}/proto proto)
 # Make sure we can find the protobuf includes.
 add_directory_alias("${CMAKE_CURRENT_BINARY_DIR}"
                     "${TINK_INCLUDE_ALIAS_DIR}/proto")
-add_directory_alias("${CMAKE_CURRENT_LIST_DIR}" "external")
+add_directory_alias("${CMAKE_CURRENT_LIST_DIR}" ${CMAKE_BINARY_DIR}/external)

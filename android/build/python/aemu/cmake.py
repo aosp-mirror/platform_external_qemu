@@ -16,305 +16,144 @@
 import argparse
 import logging
 import multiprocessing
-import os
 import platform
-import shutil
 import sys
-import time
-from distutils.spawn import find_executable
-
-from aemu.definitions import (
-    ENUMS,
-    find_aosp_root,
-    get_aosp_root,
-    get_cmake,
-    get_qemu_root,
-    infer_target,
-    is_crosscompile,
-    read_simple_properties,
-    set_aosp_root,
-)
-from aemu.distribution import create_distribution
-from aemu.process import run
-from aemu.run_tests import run_tests
 from pathlib import Path
-from aemu.run_tests import run_tests, run_e2e_tests
+from typing import List
+
+from aemu.platform.log_configuration import configure_logging
+from aemu.platform.toolchains import Toolchain
+from aemu.tasks.build_task import BuildTask
+from aemu.tasks.clean import CleanTask
+from aemu.tasks.compile import CompileTask
+from aemu.tasks.configure import ConfigureTask
+from aemu.tasks.crate_prepare import CratePrepareTask
+from aemu.tasks.distribution import DistributionTask
+from aemu.tasks.gen_entries import GenEntriesTestTask
+from aemu.tasks.integration_tests import IntegrationTestTask
+from aemu.tasks.unit_tests import AccelerationCheckTask, CTestTask
+from aemu.tasks.emugen_test import EmugenTestTask
 
 
-class LogBelowLevel(logging.Filter):
-    def __init__(self, exclusive_maximum, name=""):
-        super(LogBelowLevel, self).__init__(name)
-        self.max_level = exclusive_maximum
+def get_tasks(args) -> List[BuildTask]:
+    """A list of tasks that should be executed.
 
-    def filter(self, record):
-        return True if record.levelno < self.max_level else False
+    Args:
+        args: Parsed commandline arguments
 
-
-def fix_up_rust_symlinks():
-    """Temporarily fix up all the rust symlinks: b/258854722"""
-    crates = Path(get_qemu_root()) / "android" / "third_party" / "rust" / "crates"
-    with open(crates / "symlinks", "r", encoding="utf-8") as links:
-        for fname in links.readlines():
-            try:
-                fname = fname.strip()
-                source_crate = (
-                    crates.parents[4]
-                    / "rust"
-                    / "chromium"
-                    / "crates"
-                    / "vendor"
-                    / fname
-                ).absolute()
-                assert (
-                    source_crate.exists()
-                ), f"The source crate {source_crate} does not exist"
-                crate = crates / fname
-                crate.unlink(missing_ok=True)
-                crate.symlink_to(source_crate, target_is_directory=True)
-                logging.info("Created link form %s to %s", crate, source_crate)
-            except Exception as err:
-                logging.error("Failed to fix up %s, due to %s", fname.strip(), err)
-                raise err
-
-
-def configure(args, target):
-    """Configures the cmake project."""
-
-    # Clear out the existing directory.
-    toolchain = ENUMS["Toolchain"][target]
-    if args.clean:
-        if os.path.exists(args.out):
-            logging.info("Clearing out %s", args.out)
-            if platform.system() == "Windows":
-                run(["rmdir", "/S", "/Q", args.out])
-            else:
-                shutil.rmtree(args.out)
-        if not os.path.exists(args.out):
-            os.makedirs(args.out)
-
-    # Configure..
-    cmake_cmd = [get_cmake(), "-B%s" % args.out]
-
-    # Setup the right toolchain/compiler configuration.
-    cmake_cmd += [
-        "-DCMAKE_TOOLCHAIN_FILE={}".format(
-            os.path.join(
-                get_qemu_root(),
-                "android",
-                "build",
-                "cmake",
-                toolchain,
-            )
-        )
+    Returns:
+        list[BuildTask]: List of tasks that need to be executed.
+    """
+    run_tests = not Toolchain(args.aosp, args.target).is_crosscompile()
+    return [
+        CratePrepareTask(args.aosp),
+        # A task can be disabled, or explicitly enabled by calling
+        # .enable(False) <- Disable the task
+        CleanTask(args.out),
+        ConfigureTask(
+            aosp=args.aosp,
+            target=args.target,
+            destination=args.out,
+            crash=args.crash,
+            configuration=args.config,
+            build_number=args.sdk_build_number,
+            sanitizer=args.sanitizer,
+            webengine=(
+                args.qtwebengine
+                or args.target == "darwin"
+                or args.target == "darwin_aarch64"
+                or args.target == "windows"
+            ),
+            gfxstream=args.gfxstream,
+            gfxstream_only=args.gfxstream_only,
+            options=args.cmake_option,
+            ccache=args.ccache,
+        ),
+        CompileTask(args.aosp, args.out),
+        CTestTask(
+            aosp=args.aosp,
+            destination=args.out,
+            concurrency=args.test_jobs,
+            with_gfx_stream=args.gfxstream or args.gfxstream_only,
+            distribution_directory=args.dist,
+        ).enable(run_tests),
+        AccelerationCheckTask(args.out).enable(run_tests),
+        EmugenTestTask(args.aosp, args.out).enable(run_tests),
+        GenEntriesTestTask(args.aosp, args.out),
+        # Enable the integration tests by default once they are stable enough
+        IntegrationTestTask(args.aosp, args.out).enable(False),
+        DistributionTask(
+            aosp=args.aosp,
+            build_directory=args.out,
+            distribution_directory=args.dist,
+            target=args.target,
+            sdk_build_number=args.sdk_build_number,
+            configuration=args.config,
+        ).enable(args.dist is not None),
     ]
-    cmake_cmd += ENUMS["Crash"][args.crash]
-    cmake_cmd += ENUMS["BuildConfig"][args.config]
-
-    # Make darwin (x86_64 and aarch64) and msvc builds have QtWebEngine support for the default
-    # build.
-    build_qtwebengine = False
-    if args.qtwebengine and args.no_qtwebengine:
-        logging.error(
-            "--qtwebengine and --no-qtwebengine cannot be set at the same time!"
-        )
-        sys.exit(1)
-    if (
-        args.qtwebengine
-        or args.target == "darwin"
-        or args.target == "darwin_aarch64"
-        or args.target == "windows"
-    ):
-        build_qtwebengine = True
-    if args.no_qtwebengine:
-        build_qtwebengine = False
-    cmake_cmd += ["-DQTWEBENGINE=%s" % build_qtwebengine]
-
-    if args.cmake_option:
-        additional_cmake_args = ["-D%s" % x for x in args.cmake_option]
-        logging.warning(
-            "Dangerously adding the following args to cmake: %s", additional_cmake_args
-        )
-        cmake_cmd += additional_cmake_args
-
-    if args.sdk_revision:
-        sdk_revision = args.sdk_revision
-    else:
-        sdk_revision = read_simple_properties(
-            os.path.join(get_aosp_root(), "external", "qemu", "source.properties")
-        )["Pkg.Revision"]
-    cmake_cmd += ["-DOPTION_SDK_TOOLS_REVISION=%s" % sdk_revision]
-
-    if args.sdk_build_number:
-        cmake_cmd += ["-DOPTION_SDK_TOOLS_BUILD_NUMBER=%s" % args.sdk_build_number]
-    if args.sanitizer:
-        cmake_cmd += ["-DOPTION_ASAN=%s" % (",".join(args.sanitizer))]
-
-    if args.minbuild:
-        cmake_cmd += ["-DOPTION_MINBUILD=%s" % args.minbuild]
-
-    if args.gfxstream:
-        cmake_cmd += ["-DGFXSTREAM=%s" % args.gfxstream]
-
-    if args.gfxstream_only:
-        cmake_cmd += ["-DGFXSTREAM_ONLY=%s" % args.gfxstream_only]
-
-    ccache = find_ccache(args.ccache, platform.system().lower())
-    if ccache:
-        cmake_cmd += ["-DOPTION_CCACHE=%s" % ccache]
-
-    cmake_cmd += ENUMS["Generator"][args.generator]
-    cmake_cmd += [get_qemu_root()]
-
-    run(cmake_cmd, args.out)
-
-
-def get_build_cmd(args):
-    """Gets the command that will build all the sources."""
-    target = "install"
-
-    # Stripping is meaning less in windows world
-    if (args.crash != "none" or args.strip != "none") and (
-        platform.system().lower() != "windows"
-    ):
-        target += "/strip"
-    return [get_cmake(), "--build", args.out, "--target", target]
-
-
-def find_ccache(cache, host):
-    """Locates the cache executable as a posix path"""
-    if cache == "none" or cache == None:
-        return None
-    if cache != "auto":
-        return cache.replace("\\", "/")
-
-    if host != "windows":
-        # prefer ccache for local builds, it is slightly faster
-        # but does not work on windows.
-        ccache = find_executable("ccache")
-        if ccache:
-            return ccache
-
-    # Our build bots use sccache, so we will def. have it
-    search_dir = os.path.join(
-        get_aosp_root(),
-        "prebuilts",
-        "android-emulator-build",
-        "common",
-        "sccache",
-        "{}-x86_64".format(host),
-    )
-    return find_executable("sccache", search_dir).replace("\\", "/")
 
 
 def main(args):
-    start_time = time.time()
-    version = sys.version_info
-    target = infer_target(args.target)
-    iscross = is_crosscompile(target)
-    logging.info(
-        "Running under Python {0[0]}.{0[1]}.{0[2]}, Platform: {1}, target: {2}, {3} compilation".format(
-            version, platform.platform(), target, "cross" if iscross else "native"
-        )
-    )
+    logging.info("cmake.py %s", " ".join(sys.argv[1:]))
 
-    configure(args, target)
-    if args.build == "config":
-        print("You can now build with: %s " % " ".join(get_build_cmd(args)))
+    tasks = get_tasks(args)
+    if args.task_list:
+        for task in tasks:
+            print(f"{task.name} :  {task.__class__.__doc__}")
         return
 
-    # Build
-    run(get_build_cmd(args), None, {"NINJA_STATUS": "[ninja] "})
-    logging.info("Completed build in %d seconds", time.time() - start_time)
+    if args.task:
+        # Get explicit task you wish to run
+        tasks = [x.enable(True) for x in tasks if x.name.lower() == args.task.lower()]
 
-    # Test.
-    if iscross:
-        logging.info("Not running tests when cross compiling.")
-    else:
-        if args.tests:
-            run_tests_opts = []
-            if args.gfxstream or args.gfxstream_only:
-                run_tests_opts.append("--skip-emulator-check")
-            if args.gfxstream or args.gfxstream_only:
-                run_tests_opts.append("--gfxstream")
-            run_tests(args.out, args.dist, args.test_jobs, run_tests_opts)
-            logging.info("Completed testing.")
+    enabled = [x.lower() for x in args.task_enable] if args.task_enable else []
+    disabled = [x.lower() for x in args.task_disable] if args.task_disable else []
+    for task in tasks:
+        if task.name.lower() in enabled:
+            task.enable(True)
+        if task.name.lower() in disabled:
+            task.enable(False)
 
-        if args.integration and not (args.gfxstream or args.gfxstream_only):
-            run_e2e_tests(args.out, args.dist)
-
-    # Create a distribution if needed.
-    if args.dist:
-        data = {
-            "aosp": get_aosp_root(),
-            "target": args.target,
-            "sdk_build_number": args.sdk_build_number,
-            "config": args.config,
-        }
-        logging.info("Creating distribution.")
-        create_distribution(args.dist, args.out, data)
-
-    if platform.system() != "Windows" and args.config == "debug":
-        overrides = open(
-            os.path.join(get_qemu_root(), "android", "asan_overrides")
-        ).read()
-        print("Debug build enabled.")
-        print(
-            "ASAN may be in use; recommend disabling some ASAN checks as build is not"
-        )
-        print("universally ASANified. This can be done with")
-        print()
-        print(". android/envsetup.sh")
-        print("")
-        print("or export ASAN_OPTIONS=%s" % overrides)
+        # A failing task should raise an exception.
+        task.run()
 
 
 def launch():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--sdk_revision",
-        dest="sdk_revision",
-        help="## DEPRECATED ##, it will automatically use the one defined in source.properties",
+    parser = argparse.ArgumentParser(
+        description="Configures the emulator build and runs the tests."
+        "The build works by executing a series of tasks. "
+        "You can enable/disable tasks or execute a specific task. "
+        "Task names are case insensitive."
+        "Note that tasks are very simple without any dependency resolution.",
     )
     parser.add_argument("--sdk_build_number", help="The emulator sdk build number.")
     parser.add_argument(
         "--config",
         default="release",
-        choices=(ENUMS["BuildConfig"].keys()),
+        choices=["debug", "release"],
         help="Whether we are building a release or debug configuration.",
     )
     parser.add_argument(
         "--crash",
         default="none",
-        choices=(ENUMS["Crash"].keys()),
+        choices=["none", "prod", "staging"],
         help="Which crash server to use or none if you do not want crash uploads. Enabling this will result in symbol processing and uploading during install.",
     )
     parser.add_argument(
-        "--out", default=os.path.abspath("objs"), help="Use specific output directory."
+        "--out",
+        default=Path("objs").absolute(),
+        help="Use specific output directory, defaults to: objs",
     )
-    parser.add_argument("--dist", help="Create distribution in directory")
+    parser.add_argument(
+        "--dist",
+        help="The distribution directory, or empty if no distribution should be created.",
+    )
     parser.add_argument(
         "--qtwebengine",
         dest="qtwebengine",
         default=False,
         action="store_true",
-        help="Enforce building with QtWebEngine support (cannot be used together with --no-qtwebengine)",
-    )
-    parser.add_argument(
-        "--no-qtwebengine",
-        dest="no_qtwebengine",
-        default=False,
-        action="store_true",
-        help="Enforce building without QtWebEngine support (cannot be used together with --qtwebengine)",
-    )
-    parser.add_argument(
-        "--no-tests", dest="tests", action="store_false", help="Do not run the tests"
-    )
-    parser.add_argument(
-        "--tests",
-        dest="tests",
-        default=True,
-        action="store_true",
-        help="Run all the tests",
+        help="Enable location ui, with QtWebegine.",
     )
     parser.add_argument(
         "--test_jobs",
@@ -328,38 +167,9 @@ def launch():
         help="List of sanitizers ([address, thread]) to enable in the built binaries.",
     )
     parser.add_argument(
-        "--generator",
-        default="ninja",
-        choices=ENUMS["Generator"].keys(),
-        help="CMake generator to use.",
-    )
-    parser.add_argument(
         "--target",
         default=platform.system().lower(),
-        help="Which platform to target (windows|linux|darwin)([-_](aarch64|x86_64))?. The system will infer the architecture if possible. Supported targets: [{}],  Default: ({}). ".format(
-            ", ".join(ENUMS["Toolchain"].keys()),
-            infer_target(platform.system().lower()),
-        ),
-    )
-    parser.add_argument(
-        "--build",
-        default="check",
-        choices=ENUMS["Make"].keys(),
-        help="Target that should be build after configuration. The config target will only configure the build, no symbol processing or testing will take place.",
-    )
-    parser.add_argument(
-        "--no-clean",
-        dest="clean",
-        default=True,
-        action="store_false",
-        help="Attempt an incremental build. Note that this can introduce cmake caching issues.",
-    )
-    parser.add_argument(
-        "--clean",
-        dest="clean",
-        default=True,
-        action="store_true",
-        help="Clean the destination directory before building.",
+        help="Which platform to target (windows|linux|darwin)([-_](aarch64|x86_64))?. The system will infer the architecture if possible",
     )
     parser.add_argument(
         "--cmake_option",
@@ -367,24 +177,6 @@ def launch():
         help="Options that should be passed on directly to cmake. These will be passed on directly to the underlying cmake project. For example: "
         "--cmake_option WEBRTC=TRUE",
     )
-    parser.add_argument(
-        "--strip", dest="strip", action="store_true", help="Strip debug symbols."
-    )
-    parser.add_argument(
-        "--no-strip",
-        dest="strip",
-        default=False,
-        action="store_false",
-        help="Do not strip debug symbols.",
-    )
-
-    parser.add_argument(
-        "--minbuild",
-        default=False,
-        action="store_true",
-        help="Minimize the build to only support x86_64/aarch64.",
-    )
-
     parser.add_argument(
         "--gfxstream",
         action="store_true",
@@ -404,40 +196,38 @@ def launch():
         action="store_true",
         help="Verbose logging",
     )
+    aosp = Path(__file__).parents[6]
     parser.add_argument(
-        "--aosp",
-        dest="aosp",
-        default=find_aosp_root(),
-        help="AOSP directory ({})".format(find_aosp_root()),
+        "--aosp", dest="aosp", default=aosp, help=f"AOSP directory: {aosp}"
     )
-    parser.add_argument(
-        "--integration-tests",
-        dest="integration",
-        default=False,
-        action="store_true",
-        help="Run the emulator integration tests as part of the test verification.",
-    )
-
     parser.add_argument(
         "--ccache",
         help="Use a compiler cache, set to auto to infer on, or none if omitted.",
     )
+    parser.add_argument(
+        "--task",
+        help="Run the specified task. (Note no dependency analysis!)",
+    )
+    parser.add_argument(
+        "--task-enable",
+        action="append",
+        help="Explicitly enable this task, for example --task-enable integrationtest",
+    )
+    parser.add_argument(
+        "--task-disable",
+        action="append",
+        help="Explicitly disable this task, for example --task-disable clean",
+    )
+    parser.add_argument(
+        "--task-list",
+        action="store_true",
+        help="Lists all the tasks.",
+    )
 
     args, leftover = parser.parse_known_args()
 
-    # Configure logging, splitting info to stdout, and error to stderr
     lvl = logging.DEBUG if args.verbose else logging.INFO
-    logging_handler_out = logging.StreamHandler(sys.stdout)
-    logging_handler_out.setLevel(logging.DEBUG)
-    logging_handler_out.addFilter(LogBelowLevel(logging.WARNING))
-
-    logging_handler_err = logging.StreamHandler(sys.stderr)
-    logging_handler_err.setLevel(logging.WARNING)
-
-    logging.root = logging.getLogger("root")
-    logging.root.setLevel(lvl)
-    logging.root.addHandler(logging_handler_out)
-    logging.root.addHandler(logging_handler_err)
+    configure_logging(lvl)
 
     if leftover:
         logging.warning("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
@@ -446,15 +236,16 @@ def launch():
         )
         logging.warning("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
 
-    set_aosp_root(args.aosp)
-
-    # b/258854722
-    fix_up_rust_symlinks()
-
     try:
         main(args)
-    except (Exception, KeyboardInterrupt) as exc:
-        sys.exit(exc)
+    except KeyboardInterrupt:
+        logging.error("Terminated by user")
+        sys.exit(1)
+    except Exception as exc:
+        logging.error("Build failure due to %s", exc)
+        if args.verbose:
+            raise exc
+        sys.exit(1)
 
 
 if __name__ == "__main__":

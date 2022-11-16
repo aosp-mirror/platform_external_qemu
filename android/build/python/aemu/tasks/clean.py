@@ -11,3 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
+import platform
+import shutil
+import subprocess
+from pathlib import Path
+
+from aemu.tasks.build_task import BuildTask
+
+
+class CleanTask(BuildTask):
+    """Deletes the destination directory."""
+
+    def __init__(self, destination: Path) -> None:
+        super().__init__()
+        self.destination = Path(destination)
+
+    def do_run(self) -> None:
+        if self.destination.exists():
+            logging.info("Cleaning %s", self.destination)
+            shutil.rmtree(self.destination, ignore_errors=True)
+        self.destination.mkdir(parents=True, exist_ok=True)
