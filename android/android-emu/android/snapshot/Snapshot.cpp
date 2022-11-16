@@ -399,7 +399,9 @@ static constexpr int kFeatureOffset = 0
 
 static_assert(kFeatureOffset < 1024, "Too many features to include in the feature offset component of the snapshot version");
 
-static constexpr int kVersion = (kVersionBase << 10) + kFeatureOffset;
+static constexpr int kEmu31VersionBase = 79;
+static constexpr int kEmu31FeatureOffset = 87;
+static constexpr int kVersion = (kEmu31VersionBase << 10) + kEmu31FeatureOffset;
 static constexpr int kMaxSaveStatsHistory = 10;
 
 base::StringView Snapshot::dataDir(const char* name) {
