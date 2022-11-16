@@ -59,3 +59,7 @@ config MAX31790
 config MAX20730
     bool
     depends on I2C
+
+config DELTA_U50SU8P167
+    bool
+    depends on I2C

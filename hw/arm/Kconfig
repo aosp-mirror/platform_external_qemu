@@ -497,6 +497,7 @@ config NPCM7XX
     select ARM_GIC
     select SMBUS
     select AT24C  # EEPROM
+    select DELTA_U50SU8P167
     select MAX34451
     select ISL_PMBUS_VR
     select PCA_I2C_GPIO
