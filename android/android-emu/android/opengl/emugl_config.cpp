@@ -310,6 +310,7 @@ bool emuglConfig_init(EmuglConfig* config,
             }
             D("%s: 'swiftshader_indirect' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader_indirect";
+            setCurrentRenderer(gpu_mode);
         }
         else if (!has_auto_no_window && (no_window || (blacklisted && !hasUiPreference))) {
             if (stringVectorContains(sBackendList->names(), "swiftshader")) {
@@ -414,7 +415,9 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     } else
 #ifndef __APPLE__
     // Default to swiftshader vk on mac
-    if  (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT)
+    if  (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT
+            || sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER
+            || strstr(config->backend, "swangle"))
 #endif
     {
         // Use Swiftshader vk icd if using swiftshader_indirect
