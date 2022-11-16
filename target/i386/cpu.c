@@ -862,8 +862,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
             (PPRO_FEATURES & CPUID_EXT2_AMD_ALIASES) |
             CPUID_EXT2_LM | CPUID_EXT2_SYSCALL | CPUID_EXT2_NX,
         .features[FEAT_8000_0001_ECX] =
-            CPUID_EXT3_LAHF_LM | CPUID_EXT3_SVM |
-            CPUID_EXT3_ABM,
+            CPUID_EXT3_LAHF_LM | CPUID_EXT3_ABM,
         .xlevel = 0x8000000A,
         .model_id = "Android virtual processor"
     },
@@ -5074,38 +5073,9 @@ X86CPUDefinition *x86_cpu_find(X86CPUDefinition *cpu, int n, const char *name)
     return NULL;
 }
 
-static void x86_cpu_update_enable_features(X86CPUDefinition *cpus,
-                                           int cpus_size,
-                                           const char *cpu_name,
-                                           uint32_t extra_ecx,
-                                           uint32_t extra_edx)
-
-{
-    X86CPUDefinition *cpu = x86_cpu_find(cpus, cpus_size, cpu_name);
-    if (cpu) {
-        uint32_t eax, ebx, ecx, edx;
-        host_cpuid(1, 0, &eax, &ebx, &ecx, &edx);
-
-        cpu->features[FEAT_1_ECX] |= (ecx & extra_ecx);
-        cpu->features[FEAT_1_EDX] |= (edx & extra_edx);
-    }
-}
-
 static void x86_cpu_register_types(void)
 {
     int i;
-    x86_cpu_update_enable_features(builtin_x86_defs,
-                                   ARRAY_SIZE(builtin_x86_defs),
-                                   "android64",
-                                   /* Extra ECX bits */
-                                   CPUID_EXT_AES |
-                                   CPUID_EXT_PCLMULQDQ |
-                                   CPUID_EXT_XSAVE |
-                                   CPUID_EXT_AVX |
-                                   CPUID_EXT_F16C,
-                                   /* Extra EDX bits */
-                                   CPUID_FXSR
-    );
 
     type_register_static(&x86_cpu_type_info);
     for (i = 0; i < ARRAY_SIZE(builtin_x86_defs); i++) {
