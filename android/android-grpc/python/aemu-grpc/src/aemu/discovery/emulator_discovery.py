@@ -131,7 +131,7 @@ def get_discovery_directories() -> list[Path]:
         if "XDG_RUNTIME_DIR" in os.environ:
             path = Path(os.environ.get("XDG_RUNTIME_DIR"))
         if path is None or not path.exists():
-            path = Path("/") / "run" / "user" / Path(os.getuid())
+            path = Path("/") / "run" / "user" / Path(str(os.getuid()))
     if platform.system() == "Darwin" and "HOME" in os.environ:
         path = Path.home() / "Library" / "Caches" / "TemporaryItems"
 
