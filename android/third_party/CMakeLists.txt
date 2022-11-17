@@ -199,6 +199,10 @@ endif()
 # gfxstream, aemu-common modules
 set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
 set(ENABLE_VKCEREAL_TESTS ON)
+if(APPLE)
+    message(STATUS "Disabling unittests on MacOS due to failures (b/259469941)")
+    set(ENABLE_VKCEREAL_TESTS OFF)
+endif()
 function(discover_gfxstream_internal_targets result subdir)
     if(CMAKE_VERSION VERSION_LESS "3.7.0")
         message(
