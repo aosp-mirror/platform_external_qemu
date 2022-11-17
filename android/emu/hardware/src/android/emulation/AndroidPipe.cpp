@@ -11,6 +11,7 @@
 
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/android_pipe_base.h"
+#include "android/emulation/android_pipe_device.h"
 
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/async/ThreadLooper.h"
@@ -625,6 +626,10 @@ void* android_pipe_guest_open(void* hwpipe, void(*check_pipe_name)(const char*))
         hwpipe, nullptr, (AndroidPipeFlags)0, check_pipe_name);
 }
 
+void* android_pipe_guest_open(void* hwpipe) {
+    return android_pipe_guest_open(hwpipe, nullptr);
+}
+
 void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags,
                                          void(*check_pipe_name)(const char*)) {
     CHECK_VM_STATE_LOCK();
@@ -633,6 +638,10 @@ void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags,
         hwpipe, nullptr, (AndroidPipeFlags)0, check_pipe_name);
     pipe->setFlags((AndroidPipeFlags)flags);
     return pipe;
+}
+
+void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags) {
+    return android_pipe_guest_open_with_flags(hwpipe, flags, nullptr);
 }
 
 void android_pipe_guest_close(void* internalPipe, PipeCloseReason reason) {

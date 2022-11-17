@@ -21,8 +21,6 @@
 
 #define ANDROID_PIPE_DEVICE_EXPORT extern AEMU_HW_API
 
-ANDROID_BEGIN_HEADER
-
 // TECHNICAL NOTE:
 //
 // An Android pipe is a very fast communication channel between the guest
@@ -186,5 +184,3 @@ ANDROID_PIPE_DEVICE_EXPORT void* android_pipe_lookup_by_id(int id);
 // The |tag| argiment will be used in the crash message.
 ANDROID_PIPE_DEVICE_EXPORT void android_pipe_append_lookup_by_id_callback(
     void*(*callback)(int), const char* tag);
-
-ANDROID_END_HEADER

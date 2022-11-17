@@ -56,10 +56,6 @@ target_link_libraries(android-emu-hardware PUBLIC android-emu-base)
 target_include_directories(android-emu-hardware PRIVATE src PUBLIC include)
 target_compile_options(android-emu-hardware PUBLIC -Wno-extern-c-compat)
 
-# Make sure we always set the visibility as exported (even when we are static)
-target_compile_definitions(android-emu-hardware PUBLIC AEMU_HW_SHARED
-                           PRIVATE AEMU_HW_EXPORTS)
-
 android_add_library(
   TARGET android-emu-hardware-test
   # SHARED # Used to test if you can compile this stand alone.

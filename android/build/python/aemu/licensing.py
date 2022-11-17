@@ -90,6 +90,7 @@ class Licensing(object):
         "mincore::mincore",
         "imagehlp::imagehlp",
         "setupapi::setupapi",
+        "D3d9.lib"
     ]
 
     def __init__(self, build_dir, qemu_root):

@@ -103,8 +103,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     set(GFXSTREAM_HOST_COMMON_LIB aemu-vkcereal-host-common)
 
     if (WIN32)
-        add_definitions("-DUNICODE -D_UNICODE -DNOMINMAX -DEMUGL_BUILD -DVK_USE_PLATFORM_WIN32_KHR -DBUILDING_EMUGL_COMMON_SHARED")
-
+        target_compile_definitions(aemu-vkcereal-base PUBLIC "-DUNICODE -D_UNICODE -DNOMINMAX -DEMUGL_BUILD -DVK_USE_PLATFORM_WIN32_KHR -DSTATIC_EMUGL")
         option(RECORDER_DELEGATE_LIB "Use recorder_delegate_lib dll" OFF)
         if(RECORDER_DELEGATE_LIB)
             add_definitions(-DRECORDER_DELEGATE_LIB)
