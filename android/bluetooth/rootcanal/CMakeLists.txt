@@ -204,7 +204,7 @@ target_link_libraries(
           BluetoothPacketSources android-emu-base android-emu-base-headers)
 target_include_directories(
   libbt-rootcanal
-  PUBLIC . ${ROOTCANAL_ROOT} ${ROOTCANAL_ROOT}/include ${BT_ROOT}/gd ${BT_ROOT}
+  PUBLIC . include ${ROOTCANAL_ROOT} ${ROOTCANAL_ROOT}/include ${BT_ROOT}/gd ${BT_ROOT}
          ${CMAKE_CURRENT_BINARY_DIR}/packet_gen)
 target_compile_options(libbt-rootcanal
                        PUBLIC -Wno-inconsistent-missing-override)
