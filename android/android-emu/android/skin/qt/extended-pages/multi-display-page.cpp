@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "android/avd/info.h"
+#include "android/utils/system.h"
 #include "aemu/base/LayoutResolver.h"
 #include "aemu/base/Log.h"
 #include "android/base/system/System.h"
@@ -52,10 +53,15 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
     mUi->setupUi(this);
 
     // set default display title
+    char* skinName;
     char* skinDir;
-    avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &mSkinName, &skinDir);
+    avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
+    mSkinName = skinName;
+    AFREE(skinName);
+    AFREE(skinDir);
+
     std::string defaultDisplayDisp =
-            std::string(mSkinName) + " (" +
+            mSkinName + " (" +
             std::to_string(getConsoleAgents()->settings->hw()->hw_lcd_width) + 'x' +
             std::to_string(getConsoleAgents()->settings->hw()->hw_lcd_height) + ')';
     mUi->defaultDisplayText->setText(defaultDisplayDisp.c_str());
@@ -214,7 +220,7 @@ void MultiDisplayPage::recomputeLayout() {
     std::unordered_map<uint32_t, std::string> names;
     rectangles[0] =
             std::make_pair(getConsoleAgents()->settings->hw()->hw_lcd_width, getConsoleAgents()->settings->hw()->hw_lcd_height);
-    names[0] = std::string(mSkinName);
+    names[0] = mSkinName;
     for (int i = 1; i <= sMaxItem; i++) {
         if (mItem[i] != nullptr) {
             uint32_t width, height;

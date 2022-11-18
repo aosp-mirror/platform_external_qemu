@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 #pragma once
 
+#include <string>
 #include <qobjectdefs.h>            // for Q_OBJECT, slots
 #include <stdint.h>                 // for uint32_t, uint64_t
 #include <QString>                  // for QString
@@ -62,7 +63,7 @@ private:
 
     int mSecondaryItemCount = 0;
     double m_monitorAspectRatio = 1.0;
-    char* mSkinName;
+    std::string mSkinName;
     uint64_t mReportWindowStartUs = 0;
     uint32_t mReportWindowCount = 0;
     uint32_t mApplyCnt = 0;

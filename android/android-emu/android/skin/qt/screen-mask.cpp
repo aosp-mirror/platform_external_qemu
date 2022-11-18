@@ -19,6 +19,7 @@
 #include <string>                                    // for basic_string
                                                      //
 #include "android/avd/info.h"                        // for avdInfo_getSkinInfo
+#include "android/utils/system.h"
 #include "aemu/base/files/PathUtils.h"            // for PathUtils
 #include "aemu/base/memory/LazyInstance.h"        // for LazyInstance
 #include "android/emulator-window.h"                 // for emulator_window_...
@@ -81,6 +82,10 @@ AConfig* getForegroundConfig() {
     avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
     QString layoutPath =
             PathUtils::join(skinDir ? skinDir : "", skinName ? skinName : "", "layout").c_str();
+
+    AFREE(skinName);
+    AFREE(skinDir);
+
     AConfig* rootConfig = aconfig_node("", "");
     aconfig_load_file(rootConfig, layoutPath.toStdString().c_str());
 
@@ -108,6 +113,9 @@ void loadMask() {
     if (foregroundConfig != nullptr) {
         loadMaskImage(foregroundConfig, skinDir, skinName);
     }
+
+    AFREE(skinName);
+    AFREE(skinDir);
 }
 
 } // namespace ScreenMask
