@@ -93,8 +93,8 @@ SharedLibrary* SharedLibrary::open(const char* libraryName,
 SharedLibrary* SharedLibrary::do_open(const char* libraryName,
                                    char* error,
                                    size_t errorSize) {
-    GL_LOG("SharedLibrary::open for [%s] (win32): call LoadLibrary\n", libraryName);
-    HMODULE lib = LoadLibrary(libraryName);
+    GL_LOG("SharedLibrary::open for [%s] (win32): call LoadLibraryA\n", libraryName);
+    HMODULE lib = LoadLibraryA(libraryName);
 
     // Try a bit harder to find the shared library if we cannot find it.
     if (!lib) {
@@ -105,7 +105,7 @@ SharedLibrary* SharedLibrary::do_open(const char* libraryName,
                 auto libName = PathUtils::join(path, libraryName);
                 GL_LOG("SharedLibrary::open for [%s]: trying [%s]\n",
                        libraryName, libName.c_str());
-                lib = LoadLibrary(libName.c_str());
+                lib = LoadLibraryA(libName.c_str());
                 GL_LOG("SharedLibrary::open for [%s]: trying [%s]. found? %d\n",
                        libraryName, libName.c_str(), lib != nullptr);
             }
