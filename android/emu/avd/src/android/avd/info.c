@@ -1637,32 +1637,6 @@ void avdInfo_getSkinInfo(const AvdInfo* i, char** pSkinName, char** pSkinDir) {
     *pSkinName = NULL;
     *pSkinDir = NULL;
 
-    // TODO: Apple Silicon Qt support is spotty; we can't currently use device
-    // skins with our build. So hardcode the skin to the lcd widthxheight.
-#if defined(__APPLE__) && defined(__aarch64__)
-    if (i->configIni != NULL) {
-        /* We need to create a name.
-         * Make a "magical" name using the screen size from config.ini
-         * (parse_skin_files() in main-common-ui.c parses this name
-         *  to determine the screen size.)
-         */
-        int width = iniFile_getInteger(i->configIni, "hw.lcd.width", 0);
-        int height = iniFile_getInteger(i->configIni, "hw.lcd.height", 0);
-        if (width > 0 && height > 0) {
-            char skinNameBuf[64];
-            snprintf(skinNameBuf, sizeof skinNameBuf, "%dx%d", width, height);
-            skinName = ASTRDUP(skinNameBuf);
-        } else {
-            skinName = ASTRDUP(SKIN_DEFAULT);
-        }
-    } else {
-        skinName = ASTRDUP(SKIN_DEFAULT);
-    }
-
-    *pSkinName = skinName;
-    return;
-#endif
-
     if (!i->contentPath) {
         *pSkinName = ASTRDUP(SKIN_DEFAULT);
         return;
