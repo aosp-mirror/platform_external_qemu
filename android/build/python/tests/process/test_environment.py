@@ -11,3 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pytest
+from aemu.process.environment import BaseEnvironment
+from pathlib import Path
+
+def test_env_contains_path():
+    base = BaseEnvironment(Path("foo") / "bar")
+    assert "foo" in base["PATH"]
+    assert "bar" in base["PATH"]
+

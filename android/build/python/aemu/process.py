@@ -20,21 +20,18 @@ import subprocess
 import sys
 from threading import Thread
 
-from aemu.definitions import get_qemu_root, get_visual_studio
 
-if sys.version_info[0] == 3:
-    from queue import Queue
-else:
-    from Queue import Queue
-
-
-def _reader(pipe, logfn):
-    try:
-        with pipe:
-            for line in iter(pipe.readline, b""):
-                logfn(line[:-1].decode("utf-8").strip())
-    finally:
+class Process:
+    def __init__(self, cmd: [str]):
         pass
+
+    def _reader(pipe, logfn):
+        try:
+            with pipe:
+                for line in iter(pipe.readline, b""):
+                    logfn(line[:-1].decode("utf-8").strip())
+        finally:
+            pass
 
 
 NINJA_PREFIX = "[ninja] "
