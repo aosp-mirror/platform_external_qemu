@@ -292,8 +292,15 @@ static void chr_event(void *opaque, QEMUChrEvent event)
 {
     IPMIExtern *ibe = opaque;
     IPMIInterface *s = ibe->core->intf;
-    IPMIInterfaceClass *k = IPMI_INTERFACE_GET_CLASS(s);
+    IPMIInterfaceClass *k;
     unsigned char v;
+
+    if (!s) {
+        error_report("ipmi-extern: chr_event called without an interface");
+        exit(1);
+    }
+
+    k = IPMI_INTERFACE_GET_CLASS(s);
 
     switch (event) {
     case CHR_EVENT_OPENED:
