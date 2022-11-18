@@ -63,7 +63,11 @@ class CTestTask(BuildTask):
                 / "bin"
             ),
         )
-        junit_file = self.distribution / "test_results.xml"
+
+        # Create the testlog in the right place so it will be picked up
+        # by our test scraper.
+        junit_file = self.distribution / "testlogs" / "test_results.xml"
+        junit_file.parent.mkdir(parents=True, exist_ok=True)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             env = {
