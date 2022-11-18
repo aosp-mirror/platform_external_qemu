@@ -3564,6 +3564,9 @@ void EmulatorQtWindow::setNoSkin() {
     runOnUiThread([this]() {
         char *skinName, *skinDir;
         avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
+        AFREE(skinName);
+        AFREE(skinDir);
+
         if (skinDir != NULL) {
             SkinEvent* event = new SkinEvent();
             event->type = kEventSetNoSkin;
@@ -3578,6 +3581,9 @@ void EmulatorQtWindow::restoreSkin() {
     runOnUiThread([this]() {
         char *skinName, *skinDir;
         avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
+        AFREE(skinName);
+        AFREE(skinDir);
+
         if (skinDir != NULL) {
             SkinEvent* event = new SkinEvent();
             event->type = kEventRestoreSkin;

@@ -168,6 +168,9 @@ static AConfig* miscPipeGetForegroundConfig() {
     avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
     std::string layoutPath = android::base::PathUtils::join(
             skinDir ? skinDir : "", skinName ? skinName : "", "layout");
+    AFREE(skinName);
+    AFREE(skinDir);
+
     AConfig* rootConfig = aconfig_node("", "");
     aconfig_load_file(rootConfig, layoutPath.c_str());
 
@@ -246,8 +249,12 @@ void miscPipeSetAndroidOverlay(emulation::AdbInterface* adbInterface) {
             adbInterface->enqueueCommand({ "shell", "cmd", "overlay",
                                            "enable-exclusive", "--category",
                                            systemUIOverlay.c_str() });
+            AFREE(skinName);
+            AFREE(skinDir);
             return;
         }
+        AFREE(skinName);
+        AFREE(skinDir);
     }
     AConfig* foregroundConfig = miscPipeGetForegroundConfig();
     if (foregroundConfig != nullptr) {
