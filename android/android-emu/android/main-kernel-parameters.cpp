@@ -124,13 +124,11 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
             // For API 30, we still use mac80211_hwsim.mac_prefix within kernel
             // driver to configure mac address. For API 31  and above, we cannot
             // make assumption about mac80211_hwsim.mac_prefix in kernel.
-            if (apiLevel == 30) {
+            if (apiLevel <= 30) {
                 params.add("mac80211_hwsim.radios=1");
                 android::featurecontrol::setIfNotOverriden(
                         android::featurecontrol::Mac80211hwsimUserspaceManaged,
                         false);
-            } else if (apiLevel < 30) {
-                dwarning("VirtioWifi is only support on API level 30 and above.");
             }
         } else if (android::featurecontrol::isEnabled(
                            android::featurecontrol::Wifi)) {
