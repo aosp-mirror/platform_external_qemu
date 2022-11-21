@@ -14,6 +14,7 @@
 import logging
 import platform
 from distutils.spawn import find_executable
+import os
 from pathlib import Path
 from typing import List
 
@@ -133,7 +134,7 @@ class ConfigureTask(BuildTask):
                 return Path(ccache)
 
         # Our build bots use sccache, so we will def. have it
-        search_dir = (
+        search_dir = os.path.join(
             aosp
             / "prebuilts"
             / "android-emulator-build"
