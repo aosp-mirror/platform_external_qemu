@@ -224,7 +224,9 @@ if(ANDROID_EXTRACT_SYMBOLS AND CROSSCOMPILE)
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 endif()
 
-set(FEATURE_NETSIM TRUE)
+if (NOT LINUX_AARCH64)
+  set(FEATURE_NETSIM TRUE)
+endif()
 
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
