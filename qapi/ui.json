@@ -848,7 +848,7 @@
 ##
 { 'enum'  : 'InputButton',
   'data'  : [ 'left', 'middle', 'right', 'wheel-up', 'wheel-down', 'side',
-  'extra' ] }
+  'extra', 'touch', 'tool-pen' ] }
 
 ##
 # @InputAxis:

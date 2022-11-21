@@ -67,6 +67,8 @@ void qemu_remove_led_event_handler(QEMUPutLEDEntry *entry);
 
 void kbd_put_ledstate(int ledstate);
 
+void kbd_put_tablet_button_state(int button_state);
+
 void kbd_mouse_event(int dx, int dy, int dz, int buttonsState);
 
 void kbd_mouse_wheel_event(int dx, int dy);

@@ -41,6 +41,8 @@ static const unsigned short keymap_button[INPUT_BUTTON__MAX] = {
     [INPUT_BUTTON_WHEEL_DOWN]        = BTN_GEAR_DOWN,
     [INPUT_BUTTON_SIDE]              = BTN_SIDE,
     [INPUT_BUTTON_EXTRA]             = BTN_EXTRA,
+    [INPUT_BUTTON_TOUCH]             = BTN_TOUCH,
+    [INPUT_BUTTON_TOOL_PEN]          = BTN_TOOL_PEN,
 };
 
 static const unsigned short axismap_rel[INPUT_AXIS__MAX] = {

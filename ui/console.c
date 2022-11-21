@@ -2387,6 +2387,20 @@ void qemu_chr_parse_vc(QemuOpts *opts, ChardevBackend *backend, Error **errp)
     }
 }
 
+void kbd_put_tablet_button_state(int button_state) {
+    assert(active_console && qemu_console_is_graphic(active_console));
+
+    static bool prev_down = false;
+    const bool down = button_state
+        & (MOUSE_EVENT_LBUTTON | MOUSE_EVENT_MBUTTON | MOUSE_EVENT_RBUTTON);
+    if (down == prev_down) {
+        return;
+    }
+    prev_down = down;
+    qemu_input_queue_btn(active_console, INPUT_BUTTON_TOUCH, down);
+    qemu_input_queue_btn(active_console, INPUT_BUTTON_TOOL_PEN, true);
+}
+
 void kbd_mouse_event(int dx, int dy, int dz, int button_state) {
 
     assert(active_console && qemu_console_is_graphic(active_console));

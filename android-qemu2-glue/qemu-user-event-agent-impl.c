@@ -111,8 +111,12 @@ static void user_event_mouse(int dx,
         !feature_is_enabled(kFeature_VirtioMouse) &&
         !feature_is_enabled(kFeature_VirtioTablet))
         android_virtio_kbd_mouse_event(dx, dy, dz, buttonsState, displayId);
-    else
+    else {
+        if (feature_is_enabled(kFeature_VirtioTablet)) {
+            kbd_put_tablet_button_state(buttonsState);
+        }
         kbd_mouse_event(dx, dy, dz, buttonsState);
+    }
 }
 
 static void user_event_pen(int dx,
