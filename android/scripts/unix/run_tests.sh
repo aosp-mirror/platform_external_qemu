@@ -205,6 +205,8 @@ fi
 
 # Flags for SwANGLE
 export ANGLE_DEFAULT_PLATFORM=swiftshader
+# Mac CTest fails if ANDROID_EMU_VK_ICD is not set explicitly
+export ANDROID_EMU_VK_ICD=swiftshader
 
 ${CTEST} -j ${NUM_JOBS} --output-on-failure || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
 cd $OLD_DIR
