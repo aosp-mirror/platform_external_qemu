@@ -86,6 +86,8 @@ set(OPTION_CLANG_TIDY
       "List of targets for which you wish to run clang-tidy for code analysis.")
 set(OPTION_CLANG_TIDY_FIX FALSE
     CACHE BOOL "True if you wish clang-tidy to auto fix issues it encounters.")
+set(OPTION_CLANG_THREAD_SAFETY_CHECKS FALSE
+    CACHE BOOL "True to turn on compile-time thread safety checks (-Wthread-safety).")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
 if(LINUX_X86_64 OR LINUX_AARCH64)
   set(WEBRTC TRUE
@@ -436,6 +438,11 @@ if(OPTION_CLANG_TIDY)
   file(WRITE "${PROJECT_BINARY_DIR}/.clang-tidy"
        "Checks: '-*,android-cloexec-accept'")
   set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "${DO_FIX}")
+endif()
+
+if(OPTION_CLANG_THREAD_SAFETY_CHECKS)
+    set(ENABLE_CLANG_THREAD_SAFETY_CHECKS ON)
+    add_definitions("-D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS")
 endif()
 
 if(NOT WINDOWS_MSVC_X86_64)
