@@ -16,7 +16,7 @@ function(add_opengl_dependencies TGT)
         "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader' -Wl,--disable-new-dtags"
       )
     android_target_properties(
-        ${TGT} darwin "${RUNTIME_OS_PROPERTIES} INSTALL_RPATH>=@loader_path/lib64/gles_angle")
+        ${TGT} darwin "${RUNTIME_OS_PROPERTIES};INSTALL_RPATH>=@loader_path/lib64/gles_angle")
 endfunction()
 
 if(OPTION_GFXSTREAM_BACKEND)
@@ -221,8 +221,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     include(${GFXSTREAM_REPO_ROOT}/cmake/SetSubdirectorProperties.cmake)
 
-    # TODO(joshuaduong): For some reason, our custom rpath is only applied to gfxstream_backend_unittests.
-    # for the rest of the unittests below, the rpath is not set, and thus the tests cannot find libc++.
+    add_opengl_dependencies(gfxstream_backend_unittests)
     add_opengl_dependencies(Vulkan_unittests)
     add_opengl_dependencies(OpenglRender_unittests)
     add_opengl_dependencies(OpenglRender_snapshot_unittests)
