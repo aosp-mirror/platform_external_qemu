@@ -2180,6 +2180,13 @@ extern "C" int main(int argc, char** argv) {
 #if defined(TARGET_MIPS)
     args.add((hw->hw_cpu_model && hw->hw_cpu_model[0]) ? hw->hw_cpu_model
                                                        : kTarget.qemuCpu);
+#elif defined(TARGET_X86_64)
+    // Add "-xts" to turn on tweaks only made for xts
+    // Right now, only a few CPU features are turned on
+    if (opts->xts)
+        args.add("android64-xts");
+    else
+        args.add(kTarget.qemuCpu);
 #else
     args.add(kTarget.qemuCpu);
 #endif
