@@ -57,10 +57,32 @@ if(WIN32)
         COMMAND
           "${CLANG_CL}"
           "${ANDROID_QEMU2_TOP_DIR}/android/build/win/flattenrsp.cpp"
-          "/DCLANG_CL=${CLANG_CL}" "/DCCACHE=${OPTION_CCACHE}" "/DUNICODE" "/O2"
-          "/std:c++17" "/Fe:${CMAKE_BINARY_DIR}/cc.exe"
+          "/DCLANG_CL=${CLANG_CL}"
+          "/DCCACHE=${OPTION_CCACHE}"
+          "/DUNICODE"
+          "/O2"
+          "/std:c++17"
+          "/Fe:${CMAKE_BINARY_DIR}/cc.exe"
         OUTPUT_VARIABLE STD_OUT
-        ERROR_VARIABLE STD_ERR)
+        ERROR_VARIABLE STD_ERR
+        RESULT_VARIABLE ERR_CODE)
+      if (ERR_CODE)
+         # Try again but set vcvars64.bat first
+         execute_process(
+          COMMAND
+            "cmd" "/c" "$ENV{VSINSTALLDIR}\\VC\\Auxiliary\\Build\\vcvars64.bat" "&&"
+            "${CLANG_CL}"
+            "${ANDROID_QEMU2_TOP_DIR}/android/build/win/flattenrsp.cpp"
+            "/DCLANG_CL=${CLANG_CL}"
+            "/DCCACHE=${OPTION_CCACHE}"
+            "/DUNICODE"
+            "/O2"
+            "/std:c++17"
+            "/Fe:${CMAKE_BINARY_DIR}/cc.exe"
+          OUTPUT_VARIABLE STD_OUT
+          ERROR_VARIABLE STD_ERR)
+      endif()
+
       internal_set_env_cache(CC_EXE "${CMAKE_BINARY_DIR}/cc.exe")
     endif()
     set(CMAKE_C_COMPILER "${CC_EXE}")
