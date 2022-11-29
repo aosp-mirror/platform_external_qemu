@@ -824,7 +824,6 @@ public:
         AEMU_SCOPED_TRACE_CALL();
         uint32_t width, height;
         bool enabled = true;
-        dinfo("Multi query.");
         bool multiDisplayQueryWorks = mAgents->emu->getMultiDisplay(
                 request->display(), nullptr, nullptr, &width, &height, nullptr,
                 nullptr, &enabled);

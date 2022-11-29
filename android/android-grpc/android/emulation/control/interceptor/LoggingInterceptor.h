@@ -89,7 +89,7 @@ private:
     const unsigned int kMaxProtbufStrlen = 20;
 
     // Maximum size of a protobuf message we are willing to log.
-    const unsigned int kMaxProtobufMsgLogSize = 1024;
+    const unsigned int kMaxProtobufMsgLogSize = 2048;
 
     InvocationRecord mLoginfo;
     ReportingFunction mReporter;
