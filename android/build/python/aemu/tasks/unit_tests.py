@@ -11,13 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 import platform
 import shutil
 import tempfile
 from pathlib import Path
 
-from aemu.process.command import Command
+from aemu.process.command import Command, CommandFailedException
 from aemu.tasks.build_task import BuildTask
+
 
 class AccelerationCheckTask(BuildTask):
     """Verify that we can determine the hypervisor."""
@@ -50,7 +52,6 @@ class CTestTask(BuildTask):
             self.distribution = Path(distribution_directory)
         self.jobs = concurrency
         self.gfxstream = with_gfx_stream
-
 
     def do_run(self):
         ctest = shutil.which(
@@ -87,17 +88,24 @@ class CTestTask(BuildTask):
                     + str(self.destination / "lib64" / "gles_swiftshader")
                 )
 
-            Command(
-                [
-                    ctest,
-                    "-j",
-                    self.jobs,
-                    "--output-junit",
-                    junit_file.absolute(),
-                    "--output-on-failure",
-                    "--repeat",
-                    "until-pass:2",  # Flaky tests get 2 chances
-                    "--timeout",  # Every test gets at most 3 minutes.
-                    "180",
-                ]
-            ).in_directory(self.destination).with_environment(env).run()
+            try:
+                Command(
+                    [
+                        ctest,
+                        "-j",
+                        self.jobs,
+                        "--output-junit",
+                        junit_file.absolute(),
+                        "--repeat",
+                        "until-pass:2",  # Flaky tests get 2 chances
+                        "--timeout",  # Every test gets at most 3 minutes.
+                        "180",
+                    ]
+                ).in_directory(self.destination).with_environment(env).run()
+            except CommandFailedException:
+                logging.error("Test failures encountered:")
+                test_log_file = (
+                    self.destination / "Testing" / "Temporary" / "LastTest.log"
+                )
+                with open(test_log_file.absolute(), "r", encoding="utf-8") as log_file:
+                    logging.error("%s", log_file.read())
