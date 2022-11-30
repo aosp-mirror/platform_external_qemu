@@ -120,10 +120,9 @@ PeerConnectionInterface::RTCConfiguration RtcConfig::parse(
 
 PeerConnectionInterface::RTCConfiguration RtcConfig::parse(
         std::string rtcConfiguration) {
-    if (json::jsonaccept(rtcConfiguration)) {
-        json config = json::parse(rtcConfiguration, nullptr, false);
+    json config = json::parse(rtcConfiguration, nullptr, false);
+    if (!config.is_discarded())
         return parse(config);
-    }
     return {};
 }
 }  // namespace webrtc

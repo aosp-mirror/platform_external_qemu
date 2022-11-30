@@ -37,9 +37,9 @@ json TurnConfig::getConfig() {
         System::ProcessExitCode exitCode;
         auto turn = System::get()->runCommandWithResult(
                 mTurnCmd, kMaxTurnConfigTime, &exitCode);
-        if (exitCode == 0 && turn && json::jsonaccept(*turn)) {
+        if (exitCode == 0 && turn) {
             json config = json::parse(*turn, nullptr, false);
-            if (config.count("iceServers")) {
+            if (!config.is_discarded() && config.count("iceServers")) {
                 turnConfig = config;
             } else {
                 LOG(ERROR) << "Unusable turn config: " << turn;
@@ -64,9 +64,10 @@ bool TurnConfig::validCommand() {
     auto turn = android::base::System::get()->runCommandWithResult(
             mTurnCmd, kMaxTurnConfigTime, &exitCode);
 
+    
     if (turn) {
-        if (exitCode == 0 && json::jsonaccept(*turn)) {
-            json config = json::parse(*turn, nullptr, false);
+        json config = json::parse(*turn, nullptr, false);          
+        if (exitCode == 0 && !config.is_discarded()) {
             if (config.count("iceServers")) {
                 LOG(INFO) << "TurnCFG: Turn command produces valid json.";
                 return true;

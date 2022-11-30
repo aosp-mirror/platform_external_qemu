@@ -175,10 +175,11 @@ bool Switchboard::acceptJsepMessage(std::string identity, std::string message) {
         LOG(ERROR) << "Trying to send to unknown identity.";
         return false;
     }
-    if (!json::jsonaccept(message)) {
+    auto parsedMessage = json::parse(message, nullptr, false);
+    if (parsedMessage.is_discarded()) {
         return false;
     }
-    mConnections[identity]->IncomingMessage(json::parse(message));
+    mConnections[identity]->IncomingMessage(parsedMessage);
     return true;
 }
 
