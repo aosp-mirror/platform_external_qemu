@@ -33,6 +33,7 @@ from aemu.tasks.gen_entries import GenEntriesTestTask
 from aemu.tasks.integration_tests import IntegrationTestTask
 from aemu.tasks.unit_tests import AccelerationCheckTask, CTestTask
 from aemu.tasks.emugen_test import EmugenTestTask
+from aemu.tasks.kill_netsimd import KillNetsimdTask
 
 
 def get_tasks(args) -> List[BuildTask]:
@@ -46,6 +47,7 @@ def get_tasks(args) -> List[BuildTask]:
     """
     run_tests = not Toolchain(args.aosp, args.target).is_crosscompile()
     return [
+        KillNetsimdTask(),
         CratePrepareTask(args.aosp),
         # A task can be disabled, or explicitly enabled by calling
         # .enable(False) <- Disable the task
@@ -78,6 +80,7 @@ def get_tasks(args) -> List[BuildTask]:
             with_gfx_stream=args.gfxstream or args.gfxstream_only,
             distribution_directory=args.dist,
         ).enable(run_tests),
+        KillNetsimdTask().enable(run_tests),
         AccelerationCheckTask(args.out).enable(run_tests),
         EmugenTestTask(args.aosp, args.out).enable(run_tests),
         GenEntriesTestTask(args.aosp, args.out),
