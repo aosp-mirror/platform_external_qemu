@@ -227,3 +227,19 @@ typedef struct QAndroidVmOperations {
 
 } QAndroidVmOperations;
 ANDROID_END_HEADER
+
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
+
+EMUGL_COMMON_API void set_emugl_vm_operations(const QAndroidVmOperations &vm_operations);
+
+EMUGL_COMMON_API const QAndroidVmOperations &get_emugl_vm_operations();
+
+#undef EMUGL_COMMON_API
