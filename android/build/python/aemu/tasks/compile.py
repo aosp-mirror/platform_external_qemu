@@ -13,17 +13,21 @@
 # limitations under the License.
 
 import platform
-from distutils.spawn import find_executable
+import logging
+import re
+import shutil
 from pathlib import Path
 
-from aemu.platform.toolchains import Toolchain
 from aemu.process.command import Command
+from aemu.process.log_handler import LogHandler
 from aemu.process.environment import get_default_environment
 from aemu.tasks.build_task import BuildTask
 
 
 class CompileTask(BuildTask):
     """Compiles the code base."""
+
+    NINJA_FILTER = re.compile(r"^\[\d+/\d+\]")
 
     def __init__(
         self,
@@ -40,7 +44,7 @@ class CompileTask(BuildTask):
             aosp / "prebuilts" / "cmake" / f"{platform.system().lower()}-x86" / "bin"
         )
         self.cmake_cmd = [
-            find_executable("cmake", path=str(cmake_dir)),
+            shutil.which("cmake", path=str(cmake_dir)),
             "--build",
             destination,
             "--target",
@@ -48,5 +52,19 @@ class CompileTask(BuildTask):
         ]
         self.env = get_default_environment(aosp)
 
+    def filter_ninja_error(self, logline: str):
+        """Filters ninja lines to std out, and failures to stderr
+
+        Args:
+            logline (str): Logline that is to be filtered.
+        """
+        if self.NINJA_FILTER.match(logline):
+            logging.info(logline)
+        else:
+            logging.error(logline)
+
     def do_run(self):
-        Command(self.cmake_cmd).with_environment(self.env).run()
+        ninja_err_filter = LogHandler(self.filter_ninja_error)
+        Command(self.cmake_cmd).with_environment(self.env).with_log_handler(
+            ninja_err_filter
+        ).run()

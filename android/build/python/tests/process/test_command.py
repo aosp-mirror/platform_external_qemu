@@ -15,6 +15,7 @@ import pytest
 import platform
 import time
 from aemu.process.command import Command, CommandFailedException
+from aemu.process.log_handler import LogHandler
 
 @pytest.mark.skipif(platform.system() == "Windows", reason="false binary does not exist in windows")
 def test_failing_run_throws():
@@ -33,7 +34,9 @@ def test_log_filter_gets_called():
         nonlocal called
         called = True
 
-    Command(["echo", "Hello"]).with_std_out_transform(log_transform).run()
+    handler = LogHandler(log_transform)
+
+    Command(["echo", "Hello"]).with_log_handler(handler).run()
 
     # There are other threads doing the logging. give them a chance.
     time.sleep(0.2)
