@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import subprocess
-import subprocess
+import logging
 import shutil
 import re
 
@@ -39,12 +39,23 @@ class WinPsList:
         Returns:
             dict[int, str]: A map from pid to process name
         """
-        process = subprocess.check_output(
-            [self.wmic, "process", "get", "name,processid"], encoding="utf-8"
+        process = subprocess.run(
+            [self.wmic, "process", "get", "name,processid"],
+            encoding="utf-8",
+            check=False,
+            capture_output=True,
+            shell=True,
         )
-        output = re.compile(r"(.*) (\d+)")
+
+        if process.returncode != 0:
+            logging.warning(
+                "Unable to query process list %s, %s", process.stdout, process.stderr
+            )
+            return {}
+
         pid_map = {}
-        for proc in process.splitlines():
+        output = re.compile(r"(.*) (\d+)")
+        for proc in process.stdout.splitlines():
             match = output.match(proc)
             if match:
                 process_name = match.group(1).strip()
@@ -54,7 +65,7 @@ class WinPsList:
         return pid_map
 
     def kill_proc_by_name(self, proc_name: str):
-        """Kills the given process name
+        """Kills the given process name if it exists
 
         If the process exists it will be forcefully terminated using
         taskkill /f /pid xxx
