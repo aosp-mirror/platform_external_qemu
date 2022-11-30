@@ -47,6 +47,8 @@ if(WIN32)
   # clang-cl acts as a cl.exe drop replacement.
   set(CLANG_CL ${CLANG_DIR}/bin/clang-cl.exe)
   if(OPTION_CCACHE)
+    # Fix potential path escaping issues..
+    string(REPLACE "\\" "/" OPTION_CCACHE "${OPTION_CCACHE}")
     message(STATUS "Enabling ${OPTION_CCACHE} with ${CLANG_CL}")
     # Compile the wrapper..
     internal_get_env_cache(CC_EXE)

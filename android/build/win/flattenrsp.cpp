@@ -21,7 +21,7 @@
 #define str(s) #s
 
 #ifndef CLANG_CL
-#define CLANG_CL clang - cl.exe
+#define CLANG_CL clang-cl.exe
 #endif
 
 #ifndef CCACHE
