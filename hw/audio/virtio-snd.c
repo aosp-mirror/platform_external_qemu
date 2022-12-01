@@ -1964,7 +1964,6 @@ static const VMStateDescription vmstate_VirtIOSoundPCMStream = {
          */
         VMSTATE_UINT32(buffer_bytes, VirtIOSoundPCMStream),
         VMSTATE_UINT32(period_bytes, VirtIOSoundPCMStream),
-        VMSTATE_UINT32(buffer_frames, VirtIOSoundPCMStream),
         VMSTATE_UINT16(guest_format, VirtIOSoundPCMStream),
         VMSTATE_UINT8(state, VirtIOSoundPCMStream),
         VMSTATE_END_OF_LIST()
