@@ -500,7 +500,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 
     // Set ANGLE backend. This has no effect when not using ANGLE.
 #if defined(__APPLE__)
-    if (!strstr(config->backend, "angle")) {
+    if (strstr(config->backend, "angle")) {
         system->envSet("ANGLE_DEFAULT_PLATFORM", "metal");
     }
 #endif
