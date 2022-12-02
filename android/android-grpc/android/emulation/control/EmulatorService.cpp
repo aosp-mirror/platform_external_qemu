@@ -540,6 +540,19 @@ public:
         return Status::OK;
     }
 
+    Status injectWheel(ServerContext* context,
+                       ::grpc::ServerReader<WheelEvent>* reader,
+                       ::google::protobuf::Empty* reply) override {
+        WheelEvent event;
+        auto agent = mAgents->user_event;
+        while (reader->Read(&event)) {
+            android::base::ThreadLooper::runOnMainLooper([agent, event]() {
+                agent->sendMouseWheelEvent(event.dx(), event.dy(), event.display());
+            });
+        }
+        return Status::OK;
+    }
+
     Status getStatus(ServerContext* context,
                      const Empty* request,
                      EmulatorStatus* reply) override {
