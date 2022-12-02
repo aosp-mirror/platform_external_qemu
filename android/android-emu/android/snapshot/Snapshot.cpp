@@ -743,6 +743,10 @@ const bool Snapshot::checkValid(bool writeFailure) {
         return true;
     }
 
+    if (fc::isEnabled(fc::DownloadableSnapshot)) {
+        return true;
+    }
+
     if (mSnapshotPb.has_host() &&
         !verifyHost(mSnapshotPb.host(), writeFailure)) {
         return false;
