@@ -2014,8 +2014,3 @@ const char* avdInfo_screen_off_timeout(int apiLevel) {
         return "2147483647";  // 576 hours
     }
 }
-
-bool avdInfo_getBuildPropertyBool(const AvdInfo* info, const char* property, bool defValue) {
-    return propertyFile_getBool(
-            info->buildProperties, property, defValue, NULL);
-}
