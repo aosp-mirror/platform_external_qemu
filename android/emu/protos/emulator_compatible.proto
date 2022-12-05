@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package emulator_compatible;
+
+message FramebufferDataSnapshotV1 {
+    int32 attachedFB = 1;
+    int32 attachedPoint = 2;
+    int32 width = 3;
+    int32 height = 4;
+    int32 samples = 5;
+    int32 internalformat = 6;
+    int32 hostInternalFormat = 7;
+    int32 everBound = 8;
+}
+
+message FramebufferDataSnapshot {
+  int32 version = 1;
+  repeated FramebufferDataSnapshotV1 v1_buffers = 2;
+  int32 v1_buffers_front_index = 3;
+}
+
+message Snapshot {
+    repeated string enabled_guest_features = 1;
+    FramebufferDataSnapshot framebuffer_data_snapshot = 2;
+}

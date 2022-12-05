@@ -150,6 +150,8 @@ qemu_get_address_space_device_control_ops(void);
 
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks);
 
+void qemu_set_snapshot_protobuf(void *pb);
+
 typedef void (*QEMURamLoadCallback)(void*, uint64_t);
 
 void qemu_set_ram_load_callback(QEMURamLoadCallback f);

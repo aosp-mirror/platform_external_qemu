@@ -14,6 +14,7 @@ if(WINDOWS_MSVC_X86_64)
            crash_info.proto
            emulator_feature_patterns.proto
            emulator_features.proto
+           emulator_compatible.proto
            observation.proto
            offworld.proto
            point.proto
@@ -39,6 +40,7 @@ else()
            crash_info.proto
            emulator_feature_patterns.proto
            emulator_features.proto
+           emulator_compatible.proto
            observation.proto
            offworld.proto
            point.proto

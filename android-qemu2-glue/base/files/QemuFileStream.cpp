@@ -27,9 +27,18 @@ extern "C" {
 namespace android {
 namespace qemu {
 
-QemuFileStream::QemuFileStream(QEMUFile* file) : mFile(file) {}
+QemuFileStream::QemuFileStream(QEMUFile* file) : mFile(file) {
+    mSnapshotPb =
+            static_cast<emulator_compatible::Snapshot*>(qemu_file_get_pb(file));
+}
 
-QemuFileStream::~QemuFileStream() {}
+QemuFileStream::~QemuFileStream() {
+    mSnapshotPb = nullptr;
+}
+
+void* QemuFileStream::getProtobuf() {
+    return mSnapshotPb;
+}
 
 ssize_t QemuFileStream::read(void* buffer, size_t len) {
     DCHECK(static_cast<ssize_t>(len) >= 0);

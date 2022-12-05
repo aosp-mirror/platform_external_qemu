@@ -14,6 +14,9 @@
 #include "aemu/base/Compiler.h"
 #include "aemu/base/files/Stream.h"
 
+#include "emulator_compatible.pb.h"
+#include "google/protobuf/any.pb.h"
+
 struct QEMUFile;
 
 namespace android {
@@ -29,6 +32,8 @@ public:
     virtual ssize_t read(void* buffer, size_t len);
     virtual ssize_t write(const void* buffer, size_t len);
 
+    virtual void* getProtobuf();
+
     QEMUFile* file() const { return mFile; }
 
 private:
@@ -36,6 +41,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(QemuFileStream);
 
     QEMUFile* mFile;
+    emulator_compatible::Snapshot* mSnapshotPb = nullptr;
 };
 
 }  // namespace qemu

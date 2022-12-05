@@ -1363,6 +1363,10 @@ void migrate_set_file_hooks(const QEMUFileHooks* save_hooks,
     sLoadFileHooks = load_hooks;
 }
 
+static void *s_protobuf = NULL;
+
+void qemu_set_snapshot_protobuf(void *pb) { s_protobuf = pb; }
+
 static int qemu_savevm_state(QEMUFile *f, Error **errp)
 {
     int ret;
@@ -2497,6 +2501,8 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
     }
     qemu_file_set_hooks(f, sSaveFileHooks);
 
+    qemu_file_set_pb(f, s_protobuf);
+
 #if SNAPSHOT_PROFILE > 1
     int64_t beginSaveStateTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
     printf("preparation time %.03f ms\n",
@@ -2772,6 +2778,8 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
         goto err_drain;
     }
     qemu_file_set_hooks(f, sLoadFileHooks);
+
+    qemu_file_set_pb(f, s_protobuf);
 
     qemu_system_reset(SHUTDOWN_CAUSE_NONE);
     mis->from_src_file = f;

@@ -560,6 +560,7 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
     }
 
     MemStream pipeStream;
+    pipeStream.setProtobuf(stream->getProtobuf());
     writeOptionalString(&pipeStream, mArgs.c_str());
 
     // Save pipe-specific state now.
@@ -581,6 +582,7 @@ AndroidPipe* AndroidPipe::loadFromStream(BaseStream* stream,
     Service* service = sGlobals->loadServiceByName(stream);
     // Always load the pipeStream, it allows us to safely skip loading streams.
     MemStream pipeStream;
+    pipeStream.setProtobuf(stream->getProtobuf());
     pipeStream.load(stream);
 
     if (!service) {
@@ -665,6 +667,7 @@ static void forEachServiceToStream(CStream* stream, Func&& func) {
         // Write to the pipeStream first so that we know the length and can
         // enable skipping loading specific pipes on load, see isPipeOptional.
         MemStream pipeStream;
+        pipeStream.setProtobuf(bs->getProtobuf());
         func(service.get(), &pipeStream);
         pipeStream.save(bs);
     }
@@ -688,6 +691,7 @@ static void forEachServiceFromStream(CStream* stream, Func&& func) {
         // Always load the pipeStream, so that if the pipe is missing it does
         // not corrupt the next pipe.
         MemStream pipeStream;
+        pipeStream.setProtobuf(bs->getProtobuf());
         pipeStream.load(bs);
 
         if (servicePos >= 0) {
