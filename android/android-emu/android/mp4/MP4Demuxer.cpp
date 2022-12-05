@@ -26,6 +26,7 @@
 #include "android/mp4/VideoMetadataProvider.h"           // for VideoMetadat...
 #include "android/recording/video/player/PacketQueue.h"  // for PacketQueue
 #include "android/recording/video/player/VideoPlayer.h"  // for VideoPlayer
+#include "android/utils/debug.h"
 
 extern "C" {
 #include "libavcodec/avcodec.h"                          // for AVPacket
@@ -186,7 +187,7 @@ void Mp4DemuxerImpl::seek(double timestamp) {
     int ret = av_seek_frame(formatCtx, -1, convertedTimestamp, AVSEEK_FLAG_ANY);
 
     if (ret < 0) {
-        LOG(ERROR) << "av_seek_frame returned error";
+        derror("The mp4 demuxer is unable  to seek to timestamp %d", timestamp);
         return;
     }
     if (mAudioPacketQueue != nullptr && audioStreamIndex >= 0) {

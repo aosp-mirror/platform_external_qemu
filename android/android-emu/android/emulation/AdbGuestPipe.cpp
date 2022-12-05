@@ -522,7 +522,9 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
     } else {
         if (mState != State::ClosedByHost) {
             // Invalid state !!!
-            LOG(ERROR) << "Invalid state: " << toString(mState);
+            derror("The adb guest pipe is in an invalid state, expected "
+                   "State::ClosedByHost, not %s",
+                   toString(mState));
         }
         return PIPE_ERROR_IO;
     }
@@ -566,7 +568,9 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
     } else {
         if (mState != State::ClosedByHost) {
             // Invalid state !!!
-            LOG(ERROR) << "Invalid state: " << toString(mState);
+            derror("The adb guest pipe is in an invalid state, expected "
+                   "State::ClosedByHost, not %s",
+                   toString(mState));
         }
         return PIPE_ERROR_IO;
     }

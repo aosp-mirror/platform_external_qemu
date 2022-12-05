@@ -364,13 +364,10 @@ AdbProxy* AdbHub::onNewConnection(const apacket& requestPacket,
     if (requestPacket.mesg.command != ADB_OPEN ||
         requestPacket.mesg.data_length == 0 ||
         replyPacket.mesg.command != ADB_OKAY) {
-        LOG(WARNING) << "WARNING: onNewConnection expect requestPacket command "
-                        "ADB_OPEN, actual command "
-                     << requestPacket.mesg.command;
-        LOG(WARNING) << "WARNING: onNewConnection expect replyPacket command "
-                        "ADB_OKAY "
-                        "actual command "
-                     << replyPacket.mesg.command;
+        dwarning(
+                "onNewConnection expect requestPacket command "
+                "ADB_OPEN, not %d, and replyPacked ADB_OK, not %d",
+                requestPacket.mesg.command, replyPacket.mesg.command);
         return nullptr;
     }
     CHECK(requestPacket.mesg.arg0 == replyPacket.mesg.arg1);

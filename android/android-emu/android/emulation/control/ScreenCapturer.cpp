@@ -35,6 +35,7 @@
 #include "android/loadpng.h"                          // for savepng, write_...
 #include "android/opengles.h"                         // for android_getOpen...
 #include "android/utils/string.h"                     // for str_ends_with
+#include "android/utils/debug.h"
 #include "observation.pb.h"                           // for Observation
 #include "pngconf.h"                                  // for png_byte, png_b...
 
@@ -219,7 +220,10 @@ bool captureScreenshot(
         std::string* pOutputFilepath,
         int displayId) {
     if (!renderer && !getFrameBuffer) {
-        LOG(WARNING) << "Cannot take screenshots.\n";
+        dwarning(
+                "Unable to take a screenshot of display: %d. No framebuffer, "
+                "or renderer available",
+                displayId);
         return false;
     }
 
@@ -227,7 +231,8 @@ bool captureScreenshot(
                                getFrameBuffer, displayId);
 
     if (img.getWidth() == 0 || img.getHeight() == 0) {
-        LOG(ERROR) << "take screenshot failed";
+        derror("Failed to take a screenshot of display: %d, received: (%dx%d)",
+               displayId, img.getWidth(), img.getHeight());
         return false;
     }
 
@@ -237,7 +242,8 @@ bool captureScreenshot(
     if (str_ends_with(outputDirectoryPath.data(), ".pb")) {
         std::ofstream file(PathUtils::asUnicodePath(outputDirectoryPath.data()).c_str(), std::ios_base::binary);
         if (!file) {
-            LOG(ERROR) << "Failed to open " << outputDirectoryPath;
+            derror("Failed to write a screenshot of display: %d to %s",
+                   displayId, outputDirectoryPath.data());
             return false;
         }
 
