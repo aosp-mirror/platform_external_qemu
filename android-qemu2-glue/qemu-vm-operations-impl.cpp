@@ -776,6 +776,10 @@ static void* tcg_gpa2hva(uint64_t gpa, bool *found) {
     return res;
 }
 
+static void set_snapshot_protobuf(void* pb) {
+    qemu_set_snapshot_protobuf(pb);
+}
+
 static void set_snapshot_callbacks(void* opaque,
                                    const SnapshotCallbacks* callbacks) {
     if (!opaque || !callbacks) {
@@ -1142,6 +1146,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotExport = qemu_snapshot_export_qcow,
         .snapshotLastLoaded = qemu_snapshot_last_loaded,
         .setSnapshotCallbacks = set_snapshot_callbacks,
+        .setSnapshotProtobuf = set_snapshot_protobuf,
         .mapUserBackedRam = map_user_backed_ram,
         .unmapUserBackedRam = unmap_user_backed_ram,
         .getVmConfiguration = get_vm_config,

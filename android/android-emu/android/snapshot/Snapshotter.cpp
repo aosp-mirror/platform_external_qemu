@@ -29,6 +29,9 @@
 #include "studio_stats.pb.h"
 #endif
 
+#include "emulator_compatible.pb.h"
+#include "google/protobuf/any.pb.h"
+
 #include "android/metrics/StudioConfig.h"
 #include "android/opengl/emugl_config.h"
 #include "android/snapshot/Hierarchy.h"
@@ -44,6 +47,7 @@
 #include "android/utils/system.h"
 
 #include <cassert>
+#include <fstream>
 #include <string_view>
 #include <utility>
 
@@ -304,6 +308,14 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     mLastLoadDuration = android::base::kNullopt;
     mIsQuickboot = isQuickboot;
     Stopwatch sw;
+    emulator_compatible::Snapshot compatible_pb;
+    if (mVmOperations.setSnapshotProtobuf) {
+        std::string compatiblePbPath =
+                PathUtils::join(getSnapshotDir(name), "compatible.pb");
+        std::ifstream compatible_in(compatiblePbPath, std::ios::binary);
+        compatible_pb.ParseFromIstream(&compatible_in);
+        mVmOperations.setSnapshotProtobuf(&compatible_pb);
+    }
     mVmOperations.snapshotLoad(name, this, nullptr);
     mIsQuickboot = false;
     mLastLoadDuration.emplace(sw.elapsedUs() / 1000);
@@ -741,7 +753,21 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
     if (mIsOnExit) {
         mVmOperations.setExiting();
     }
+
+    emulator_compatible::Snapshot compatible_pb;
+    if (mVmOperations.setSnapshotProtobuf) {
+        mVmOperations.setSnapshotProtobuf(&compatible_pb);
+    }
+
     mVmOperations.snapshotSave(name, this, nullptr);
+
+    if (mVmOperations.setSnapshotProtobuf) {
+        std::string compatiblePbPath =
+                PathUtils::join(getSnapshotDir(name), "compatible.pb");
+        std::ofstream compatible_out(compatiblePbPath, std::ios::binary);
+        compatible_pb.SerializeToOstream(&compatible_out);
+    }
+
     mLastSaveDuration.emplace(sw.elapsedUs() / 1000);
     // In unit tests, we don't have a saver, so trivially succeed.
     return mSaver ? mSaver->status() : OperationStatus::Ok;

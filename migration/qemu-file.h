@@ -115,6 +115,8 @@ typedef struct QEMUFileHooks {
 
 QEMUFile *qemu_fopen_ops(void *opaque, const QEMUFileOps *ops);
 void qemu_file_set_hooks(QEMUFile *f, const QEMUFileHooks *hooks);
+void qemu_file_set_pb(QEMUFile *f, void *pb);
+void *qemu_file_get_pb(QEMUFile *f);
 int qemu_get_fd(QEMUFile *f);
 int qemu_fclose(QEMUFile *f);
 int64_t qemu_ftell(QEMUFile *f);

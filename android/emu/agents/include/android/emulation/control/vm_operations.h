@@ -182,6 +182,9 @@ typedef struct QAndroidVmOperations {
     void (*setSnapshotCallbacks)(void* opaque,
                                  const SnapshotCallbacks* callbacks);
 
+    // Sets a protobuf for the snapshot save and load
+    void (*setSnapshotProtobuf)(void* pb);
+
     // callbacks to "plug" and "unplug" memory into the provided address range
     // on fly.
     void (*mapUserBackedRam)(uint64_t gpa, void* hva, uint64_t size);

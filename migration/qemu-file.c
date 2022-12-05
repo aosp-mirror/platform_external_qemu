@@ -40,6 +40,9 @@ struct QEMUFile {
     const QEMUFileHooks *hooks;
     void *opaque;
 
+    /* protobuffer pointer */
+    void *pb;
+
     int64_t bytes_xfer;
     int64_t xfer_limit;
 
@@ -108,6 +111,10 @@ void qemu_file_set_hooks(QEMUFile *f, const QEMUFileHooks *hooks)
 {
     f->hooks = hooks;
 }
+
+void qemu_file_set_pb(QEMUFile *f, void *pb) { f->pb = pb; }
+
+void *qemu_file_get_pb(QEMUFile *f) { return f->pb; }
 
 /*
  * Get last error for stream f
