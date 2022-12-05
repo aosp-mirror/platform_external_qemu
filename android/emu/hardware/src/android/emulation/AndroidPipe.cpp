@@ -9,25 +9,26 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/emulation/AndroidPipe.h"
-#include "android/emulation/android_pipe_base.h"
-#include "android/emulation/android_pipe_device.h"
+#include "host-common/AndroidPipe.h"
+#include "host-common/android_pipe_base.h"
+#include "host-common/android_pipe_device.h"
 
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/Optional.h"
 #include "aemu/base/StringFormat.h"
 #include "aemu/base/files/MemStream.h"
 #include "aemu/base/synchronization/Lock.h"
 #include "aemu/base/threads/ThreadStore.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/emulation/android_pipe_device.h"
-#include "android/emulation/android_pipe_host.h"
-#include "android/emulation/DeviceContextRunner.h"
-#include "android/emulation/VmLock.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/crash-handler.h"
+#include "host-common/android_pipe_device.h"
+#include "host-common/android_pipe_host.h"
+#include "host-common/DeviceContextRunner.h"
+#include "host-common/VmLock.h"
+#include "host-common/GfxstreamFatalError.h"
 
 #include <algorithm>
 #include <memory>
@@ -70,6 +71,8 @@ using ServiceList = std::vector<std::unique_ptr<Service>>;
 using VmLock = android::VmLock;
 using android::base::MemStream;
 using android::base::StringFormat;
+using emugl::ABORT_REASON_OTHER;
+using emugl::FatalError;
 
 static BaseStream* asBaseStream(CStream* stream) {
     return reinterpret_cast<BaseStream*>(stream);
@@ -352,6 +355,29 @@ struct PipeWakeCommand {
 
 class PipeWaker final : public DeviceContextRunner<PipeWakeCommand> {
 public:
+    void createTimer(std::function<void()> installedFunc, Looper* looper = nullptr) {
+        if (!looper) {
+            looper = ThreadLooper::get();
+        }
+        mTimerCallback = installedFunc;
+        mTimer.reset(looper->createTimer(
+                [](void* opaque, Looper::Timer*) {
+                    auto* me = static_cast<PipeWaker*>(opaque);
+                    me->mTimerCallback();
+                }, this));
+        if (!mTimer) {
+            LOG(FATAL) << "Failed to create a loop timer in DeviceContextRunner";
+        }
+    }
+
+    void destroyTimer() {
+        mTimer.reset();
+    }
+
+    void startWithTimeout(uint64_t timeout) {
+        mTimer->startAbsolute(0);
+    }
+
     void signalWake(void* hwPipe, int wakeFlags) {
         queueDeviceOperation({ hwPipe, wakeFlags });
     }
@@ -391,6 +417,9 @@ private:
             getPipeHwFuncs(hwPipe)->signalWake(hwPipe, flags);
         }
     }
+
+    std::unique_ptr<Looper::Timer> mTimer;
+    std::function<void()> mTimerCallback;
 };
 
 struct Globals {
@@ -483,12 +512,44 @@ AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
 
 // static
 void AndroidPipe::initThreading(VmLock* vmLock) {
-    sGlobals->pipeWaker.init(vmLock);
+    sGlobals->pipeWaker.init(vmLock, {
+        // installFunc
+        [](DeviceContextRunner<PipeWakeCommand>* dcr, std::function<void()> installedFunc) {
+            auto* p = static_cast<PipeWaker*>(dcr);
+            p->createTimer(installedFunc);
+        },
+        // uninstallFunc
+        [](DeviceContextRunner<PipeWakeCommand>* dcr) {
+            auto* p = static_cast<PipeWaker*>(dcr);
+            p->destroyTimer();
+        },
+        // startWithTimeoutFunc
+        [](DeviceContextRunner<PipeWakeCommand>* dcr, uint64_t timeout) {
+            auto* p = static_cast<PipeWaker*>(dcr);
+            p->startWithTimeout(timeout);
+        },
+    });
 }
 
 // static
 void AndroidPipe::initThreadingForTest(VmLock* vmLock, base::Looper* looper) {
-    sGlobals->pipeWaker.init(vmLock, looper);
+    sGlobals->pipeWaker.init(vmLock, {
+        // installFunc
+        [looper](DeviceContextRunner<PipeWakeCommand>* dcr, std::function<void()> installedFunc) {
+            auto* p = static_cast<PipeWaker*>(dcr);
+            p->createTimer(installedFunc, looper);
+        },
+        // uninstallFunc
+        [](DeviceContextRunner<PipeWakeCommand>* dcr) {
+            auto* p = static_cast<PipeWaker*>(dcr);
+            p->destroyTimer();
+        },
+        // startWithTimeoutFunc
+        [](DeviceContextRunner<PipeWakeCommand>* dcr, uint64_t timeout) {
+            auto* p = static_cast<PipeWaker*>(dcr);
+            p->startWithTimeout(timeout);
+        },
+    });
 }
 
 AndroidPipe::~AndroidPipe() {

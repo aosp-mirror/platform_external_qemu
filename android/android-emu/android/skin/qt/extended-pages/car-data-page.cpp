@@ -21,7 +21,7 @@
 // defined in windows.h & redefined in VehicleHalProto.proto, causing conflicts.
 #undef ERROR_INVALID_OPERATION
 #include "VehicleHalProto.pb.h"
-#include "android/featurecontrol/feature_control.h"
+#include "host-common/feature_control.h"
 #include "android/utils/debug.h"
 #include "ui_car-data-page.h"
 

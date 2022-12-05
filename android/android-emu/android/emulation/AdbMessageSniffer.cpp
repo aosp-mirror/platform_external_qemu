@@ -13,7 +13,7 @@
 
 #include "aemu/base/ArraySize.h"
 #include "aemu/base/logging/Log.h"
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 #include "android/console.h"
 
 #include <algorithm>

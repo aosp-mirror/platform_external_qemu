@@ -15,7 +15,7 @@
 #pragma once
 
 #include "android/automation/AutomationController.h"
-#include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "host-common/AndroidAsyncMessagePipe.h"
 #include "offworld.pb.h"
 #include "android/videoinjection/VideoInjectionController.h"
 

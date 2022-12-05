@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/VmLock.h"
+#include "host-common/VmLock.h"
 
 namespace android {
 

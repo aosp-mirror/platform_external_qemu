@@ -15,7 +15,7 @@
 #include <mutex>
 #include <vector>
 #include <android-qemu2-glue/emulation/virtio_vsock_transport.h>
-#include <android/crashreport/crash-handler.h>
+#include <host-common/crash-handler.h>
 #include <android/emulation/SocketBuffer.h>
 #include <android/emulation/CrossSessionSocket.h>
 #include <android/utils/looper.h>

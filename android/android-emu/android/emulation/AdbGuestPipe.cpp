@@ -23,9 +23,9 @@
 #include "aemu/base/synchronization/Lock.h"
 #include "aemu/base/threads/Async.h"
 #include "aemu/base/threads/FunctorThread.h"
-#include "android/emulation/VmLock.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/avd/hw-config.h"
+#include "host-common/VmLock.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"
 #include "android/utils/debug.h"
 

@@ -22,7 +22,7 @@
 #include "aemu/base/synchronization/MessageChannel.h"
 #include "android/snapshot/common.h"
 #include "aemu/base/EventNotificationSupport.h"
-#include "android/opengl/virtio_gpu_ops.h"
+#include "render-utils/virtio_gpu_ops.h"
 
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"

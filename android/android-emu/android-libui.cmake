@@ -409,6 +409,7 @@ target_link_libraries(
           Qt${QT_MAJOR_VERSION}::Svg
           zlib
           android-emu-base-headers
+          qemu-host-common-headers
           android-emu-location
           android-hw-config)
 
@@ -521,7 +522,7 @@ android_target_compile_options(
 # headers and defines.
 target_link_libraries(
   emulator-libui-headless PRIVATE android-emu android-emu-base-headers emulator-libyuv
-                                  FFMPEG::FFMPEG zlib android-hw-config)
+                                  FFMPEG::FFMPEG zlib android-hw-config qemu-host-common-headers)
 
 if(WINDOWS_MSVC_X86_64)
   # Qt in windows will call main from win-main v.s. calling qt_main. we have to

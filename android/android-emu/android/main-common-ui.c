@@ -29,7 +29,7 @@
 #include "android/console.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/emulator-window.h"
-#include "android/featurecontrol/feature_control.h"
+#include "host-common/feature_control.h"
 #include "android/framebuffer.h"
 #include "android/main-common.h"
 #include "android/resource.h"

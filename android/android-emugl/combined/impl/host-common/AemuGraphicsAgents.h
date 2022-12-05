@@ -16,7 +16,7 @@
 #include <stdio.h>
 
 #include "host-common/GraphicsAgentFactory.h"
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 
 namespace android {
 namespace emulation {

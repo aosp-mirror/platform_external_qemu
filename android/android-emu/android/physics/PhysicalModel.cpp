@@ -34,8 +34,9 @@
 #include "android/physics/FoldableModel.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/physics/InertialModel.h"
+#include "android/utils/debug.h"
 #include "android/utils/file_io.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 
 #define D(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)

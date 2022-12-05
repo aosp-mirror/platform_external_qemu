@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaFfmpegVideoHelper.h"
-#include "android/emulation/YuvConverter.h"
+#include "host-common/MediaFfmpegVideoHelper.h"
+#include "host-common/YuvConverter.h"
 #include "android/utils/debug.h"
 
 #define MEDIA_FFMPEG_DEBUG 0

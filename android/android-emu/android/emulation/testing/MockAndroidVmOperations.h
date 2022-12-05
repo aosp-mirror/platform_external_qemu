@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/vm_operations.h"
+#include "host-common/vm_operations.h"
 
 #include <gmock/gmock.h>
 

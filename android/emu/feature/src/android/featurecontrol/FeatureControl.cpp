@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 
 #include "android/featurecontrol/FeatureControlImpl.h"
 

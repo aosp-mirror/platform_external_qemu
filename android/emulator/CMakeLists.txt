@@ -15,7 +15,8 @@ android_add_executable(
        android-emu-files
        android-emu-launch
        android-emu-utils
-       android-hw-config)
+       android-hw-config
+       qemu-host-common-headers)
 target_include_directories(
   emulator # This is not right!, an implicit dependency..
   PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)

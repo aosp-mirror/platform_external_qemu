@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaVideoHelper.h"
+#include "host-common/MediaVideoHelper.h"
 
 #define MEDIA_VIDEO_DEBUG 0
 

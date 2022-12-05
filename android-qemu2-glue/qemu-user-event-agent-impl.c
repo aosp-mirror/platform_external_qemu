@@ -15,7 +15,7 @@
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
 #include "android-qemu2-glue/emulation/virtio-input-rotary.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
-#include "android/featurecontrol/feature_control.h"
+#include "host-common/feature_control.h"
 #include "android/multitouch-screen.h"
 #include "android/skin/event.h"
 #include "android/skin/generic-event-buffer.h"

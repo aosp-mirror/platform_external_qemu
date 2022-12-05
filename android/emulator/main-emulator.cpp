@@ -50,7 +50,7 @@
 #include "android/emulation/USBAssist.h"
 #include "android/main-emugl.h"
 #include "android/main-help.h"
-#include "android/opengl/emugl_config.h"
+#include "host-common/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/compiler.h"

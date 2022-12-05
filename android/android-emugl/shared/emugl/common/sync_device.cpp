@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-#include "sync_device.h"
+#include "host-common/sync_device.h"
 
 static uint64_t defaultCreateTimeline() { return 0; }
 

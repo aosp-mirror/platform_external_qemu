@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/recording/screen-recorder.h"
+#include "host-common/screen-recorder.h"
 
 #include <assert.h>    // for assert
 #include <string.h>    // for strlen
@@ -25,6 +25,7 @@
 #include <utility>  // for move
 
 #include "android/android.h"                                 // for android_...
+#include "android/console.h"
 #include "aemu/base/Log.h"                                // for LOG, Log...
 #include "aemu/base/memory/LazyInstance.h"                // for LazyInst...
 #include "aemu/base/misc/StringUtils.h"                   // for split

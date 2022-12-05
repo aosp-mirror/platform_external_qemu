@@ -22,7 +22,7 @@
 #include "TransformFeedbackData.h"
 #include "aemu/base/files/StreamSerializing.h"
 
-#include "emugl/common/crash_reporter.h"
+#include "host-common/crash_reporter.h"
 
 #include <string.h>
 

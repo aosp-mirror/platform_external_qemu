@@ -20,12 +20,12 @@ extern "C" {
 #include "aemu/base/synchronization/Lock.h"
 #include "aemu/base/logging/CLog.h"
 #include "aemu/base/memory/LazyInstance.h"
-#include "android/emulation/AddressSpaceService.h"
-#include "android/emulation/address_space_device.h"
-#include "android/emulation/android_pipe_common.h"
-#include "android/emulation/HostmemIdMapping.h"
-#include "android/opengles.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/AddressSpaceService.h"
+#include "host-common/address_space_device.h"
+#include "host-common/android_pipe_common.h"
+#include "host-common/HostmemIdMapping.h"
+#include "host-common/opengles.h"
+#include "host-common/GfxstreamFatalError.h"
 
 #include <deque>
 #include <type_traits>
@@ -39,7 +39,7 @@ extern "C" {
 #include "standard-headers/drm/drm_fourcc.h"
 #include "standard-headers/linux/virtio_gpu.h"
 
-#include "hw/misc/goldfish_pipe.h"
+#include "host-common/goldfish_pipe.h"
 #include "hw/virtio/virtio-goldfish-pipe.h"
 
 #ifdef AEMU_GFXSTREAM_BACKEND
@@ -162,6 +162,8 @@ using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
 using android::emulation::HostmemIdMapping;
+using emugl::ABORT_REASON_OTHER;
+using emugl::FatalError;
 
 using VirglResId = uint32_t;
 

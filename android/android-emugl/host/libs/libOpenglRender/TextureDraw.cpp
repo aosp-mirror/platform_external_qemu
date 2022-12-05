@@ -16,7 +16,7 @@
 
 #include "DispatchTables.h"
 
-#include "emugl/common/crash_reporter.h"
+#include "host-common/crash_reporter.h"
 
 #include <string>
 #include <assert.h>

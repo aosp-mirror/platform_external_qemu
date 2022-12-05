@@ -13,27 +13,28 @@
 // limitations under the License.
 #include "Toplevel.h"
 
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/OnDemand.h"
 #include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
-#include "android/emulation/AndroidPipe.h"
-#include "android/emulation/HostmemIdMapping.h"
-#include "android/emulation/MultiDisplay.h"
-#include "android/emulation/address_space_device.hpp"
+#include "host-common/AndroidPipe.h"
+#include "host-common/HostmemIdMapping.h"
+#include "host-common/MultiDisplay.h"
+#include "host-common/address_space_device.hpp"
+#include "host-common/globals.h"
 #include "android/emulation/control/AndroidAgentFactory.h"
-#include "android/emulation/control/multi_display_agent.h"
-#include "android/emulation/control/vm_operations.h"
-#include "android/emulation/control/window_agent.h"
+#include "host-common/multi_display_agent.h"
+#include "host-common/vm_operations.h"
+#include "host-common/window_agent.h"
 #include "android/emulation/hostdevices/HostAddressSpace.h"
-#include "android/emulation/hostdevices/HostGoldfishPipe.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/opengl/emugl_config.h"
+#include "host-common/HostGoldfishPipe.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/opengl/emugl_config.h"
 #include "android/opengles-pipe.h"
 #include "android/opengles.h"
-#include "android/refcount-pipe.h"
+#include "host-common/refcount-pipe.h"
 
 #include "AndroidBufferQueue.h"
 #include "AndroidWindow.h"
@@ -392,7 +393,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return true;
                 },
         .rotate =
-                [](SkinRotation rotation) {
+                [](int rotation) {
                     fprintf(stderr,
                             "window-agent-GfxStream-impl: "
                             ".rotate90Clockwise\n");
@@ -402,7 +403,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 [](void) {
                     fprintf(stderr,
                             "window-agent-GfxStream-impl: .getRotation\n");
-                    return SKIN_ROTATION_0;
+                    return (int)SKIN_ROTATION_0;
                 },
         .showMessage =
                 [](const char* message, WindowMessageType type, int timeoutMs) {

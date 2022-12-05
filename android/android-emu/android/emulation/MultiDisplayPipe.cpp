@@ -14,8 +14,8 @@
 * limitations under the License.
 */
 
-#include "MultiDisplayPipe.h"
-#include "MultiDisplay.h"
+#include "host-common/MultiDisplayPipe.h"
+#include "host-common/MultiDisplay.h"
 #include "android/opengles.h"
 
 namespace android {

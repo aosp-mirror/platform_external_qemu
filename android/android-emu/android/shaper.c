@@ -11,7 +11,7 @@
 */
 #include "android/shaper.h"
 
-#include "android/crashreport/crash-handler.h"
+#include "host-common/crash-handler.h"
 #include "android/utils/looper.h"
 
 #include <stdint.h>

@@ -14,9 +14,9 @@
 
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/memory/LazyInstance.h"
-#include "android/emulation/DeviceContextRunner.h"
+#include "host-common/DeviceContextRunner.h"
 #include "android/emulation/testing/TestVmLock.h"
-#include "android/emulation/VmLock.h"
+#include "host-common/VmLock.h"
 
 #include <gtest/gtest.h>
 
@@ -60,10 +60,35 @@ public:
     void signal(const DeviceContextRunnerTestOp& op) {
         queueDeviceOperation(op);
     }
+    void initWithLooper(Looper* looper, TestVmLock* testLock) {
+        init(testLock, {
+            // installFunc
+            [&](DeviceContextRunner<DeviceContextRunnerTestOp>*, std::function<void()> installedFunc) {
+                mTimerCb = installedFunc;
+                mTimer.reset(looper->createTimer(
+                    [](void* opaque, Looper::Timer*) {
+                        auto* p = static_cast<TestDeviceContextRunner*>(opaque);
+                        p->mTimerCb();
+                    }, this));
+            },
+            // uninstallFunc
+            [](DeviceContextRunner<DeviceContextRunnerTestOp>*) {
+            },
+            // startWithTimeoutFunc
+            [](DeviceContextRunner<DeviceContextRunnerTestOp>* opaque, uint64_t timeout) {
+                auto* p = static_cast<TestDeviceContextRunner*>(opaque);
+                p->mTimer->startAbsolute(timeout);
+            },
+        });
+    }
+
 private:
     void performDeviceOperation(const DeviceContextRunnerTestOp& op) {
         getTestDevice()->requests.push_back(op.request_code);
     }
+
+    std::function<void()> mTimerCb;
+    std::unique_ptr<Looper::Timer> mTimer;
 };
 
 TEST(DeviceContextRunner, init) {
@@ -72,7 +97,7 @@ TEST(DeviceContextRunner, init) {
     std::unique_ptr<Looper> testLooper(Looper::create());
     TestVmLock testLock;
     TestDeviceContextRunner testRunner;
-    testRunner.init(&testLock, testLooper.get());
+    testRunner.initWithLooper(testLooper.get(), &testLock);
 
     EXPECT_EQ(0U, getTestDevice()->requests.size());
 
@@ -89,7 +114,7 @@ TEST(DeviceContextRunner, oneRequest) {
     testLock.lock();
 
     TestDeviceContextRunner testRunner;
-    testRunner.init(&testLock, testLooper.get());
+    testRunner.initWithLooper(testLooper.get(), &testLock);
 
     // We have the lock, so this should immediately
     // go to the device.
@@ -109,7 +134,7 @@ TEST(DeviceContextRunner, oneRequestNeedWait) {
     TestVmLock testLock;
 
     TestDeviceContextRunner testRunner;
-    testRunner.init(&testLock, testLooper.get());
+    testRunner.initWithLooper(testLooper.get(), &testLock);
 
     // We don't have the lock, but the device should
     // get the request after we do have the lock.
@@ -136,7 +161,7 @@ TEST(DeviceContextRunner, multiRequests) {
     testLock.lock();
 
     TestDeviceContextRunner testRunner;
-    testRunner.init(&testLock, testLooper.get());
+    testRunner.initWithLooper(testLooper.get(), &testLock);
 
     for (size_t i = 0; i < kNumRequests; i++) {
         testRunner.signal({ .request_code = (int)i });
@@ -163,7 +188,7 @@ TEST(DeviceContextRunner, multiRequestsNeedWait) {
     TestVmLock testLock;
 
     TestDeviceContextRunner testRunner;
-    testRunner.init(&testLock, testLooper.get());
+    testRunner.initWithLooper(testLooper.get(), &testLock);
 
     for (size_t i = 0; i < kNumRequests; i++) {
         testRunner.signal({ .request_code = (int)i });

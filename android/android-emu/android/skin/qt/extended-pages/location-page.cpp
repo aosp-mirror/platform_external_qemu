@@ -33,7 +33,7 @@
 #include <QVariant>           // for QVariant
 #include <QtGui>              // for QBrush
 
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "android/avd/util.h"  // for path_...
 #include "aemu/base/Log.h"  // for LOG
 #include "aemu/base/files/PathUtils.h"
@@ -47,7 +47,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/control/globals_agent.h"   // for QAndr...
 #include "android/emulation/control/location_agent.h"  // for QAndr...
-#include "android/featurecontrol/feature_control.h"
+#include "host-common/feature_control.h"
 #include "android/gps/GpxParser.h"  // for GpxPa...
 #include "android/gps/KmlParser.h"  // for KmlPa...
 #include "android/location/MapsKey.h"

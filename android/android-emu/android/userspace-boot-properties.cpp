@@ -22,8 +22,8 @@
 #include "aemu/base/misc/StringUtils.h"         // for splitTokens
 #include "android/emulation/control/adb/adbkey.h"  // for getPrivateAdbKeyPath
 #include "android/emulation/resizable_display_config.h"
-#include "android/featurecontrol/FeatureControl.h"  // for isEnabled
-#include "android/featurecontrol/Features.h"        // for AndroidbootProps2
+#include "host-common/FeatureControl.h"  // for isEnabled
+#include "host-common/Features.h"        // for AndroidbootProps2
 #include "android/hw-sensors.h"                     // for android_foldable_...
 #include "android/utils/debug.h"                    // for dwarning
 

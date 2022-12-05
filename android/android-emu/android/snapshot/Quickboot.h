@@ -15,7 +15,7 @@
 
 #include "aemu/base/async/Looper.h"
 #include "android/base/system/System.h"
-#include "android/emulation/control/vm_operations.h"
+#include "host-common/vm_operations.h"
 #include "android/snapshot/common.h"
 
 #include <string_view>

@@ -17,7 +17,7 @@
 #include "OpenglRender/RenderChannel.h"
 
 #include "aemu/base/ring_buffer.h"
-#include "android/emulation/address_space_graphics_types.h"
+#include "host-common/address_space_graphics_types.h"
 
 #include <functional>
 #include <vector>

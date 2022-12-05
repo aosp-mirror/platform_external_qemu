@@ -15,11 +15,11 @@
 #include <stdbool.h>                      // for bool
 #include <stdint.h>                       // for uint64_t
 
-#include "android/avd/hw-config.h"        // for AndroidHwConfig
+#include "host-common/hw-config.h"        // for AndroidHwConfig
 #include "android/avd/info.h"             // for AvdInfo
 #include "android/cmdline-definitions.h"  // for AndroidOptions
 #include "android/cpu_accelerator.h"      // for AndroidCpuAccelerator
-#include "android/opengl/emugl_config.h"  // for AndroidGlesEmulationMode
+#include "host-common/opengl/emugl_config.h"  // for AndroidGlesEmulationMode
 #include "android/skin/winsys.h"          // for WinsysPreferredGlesBackend
 #include "android/utils/compiler.h"       // for ANDROID_BEGIN_HEADER, ANDRO...
 

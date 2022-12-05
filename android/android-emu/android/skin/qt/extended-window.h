@@ -26,6 +26,7 @@
 #include "android/skin/qt/qt-ui-commands.h"          // for QtUICommand
 #include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
 #include "android/ui-emu-agent.h"                    // for UiEmuAgent
+#include "host-common/qt_ui_defs.h"
 
 
 class EmulatorQtWindow;

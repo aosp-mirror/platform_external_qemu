@@ -24,7 +24,7 @@
 #include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 #include "aemu/base/system/Win32UnicodeString.h"
-#include "android/crashreport/crash-handler.h"
+#include "host-common/crash-handler.h"
 
 #include "android/utils/path.h"
 

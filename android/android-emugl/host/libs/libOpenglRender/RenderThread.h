@@ -17,7 +17,7 @@
 
 #include "aemu/base/files/MemStream.h"
 #include "aemu/base/Optional.h"
-#include "android/emulation/address_space_graphics_types.h"
+#include "host-common/address_space_graphics_types.h"
 #include "aemu/base/synchronization/MessageChannel.h"
 #include "aemu/base/synchronization/ConditionVariable.h"
 #include "aemu/base/synchronization/Lock.h"

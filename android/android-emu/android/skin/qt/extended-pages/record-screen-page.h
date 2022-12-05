@@ -18,7 +18,7 @@
 #include <memory>         // for unique_ptr
 #include <string>         // for string
 
-#include "android/recording/screen-recorder.h"  // for RecordingStatus
+#include "host-common/screen-recorder.h"  // for RecordingStatus
 
 namespace android {
 namespace metrics {

@@ -74,10 +74,10 @@
 #include "aemu/base/files/PathUtils.h"            // for PathUtils
 #include "android/base/system/System.h"              // for System, System::...
 #include "android/cmdline-option.h"                  // for AndroidOptions
-#include "android/emulation/control/window_agent.h"  // for EmulatorWindow
+#include "host-common/window_agent.h"  // for EmulatorWindow
 #include "android/emulator-window.h"                 // for emulator_window_get
-#include "android/featurecontrol/FeatureControl.h"   // for isEnabled
-#include "android/featurecontrol/Features.h"         // for QuickbootFileBacked
+#include "host-common/FeatureControl.h"   // for isEnabled
+#include "host-common/Features.h"         // for QuickbootFileBacked
 #include "android/console.h"                         // for getConsoleAgents()->settings->avdParams()
 #include "android/metrics/MetricsReporter.h"         // for MetricsReporter
 #include "android/metrics/MetricsWriter.h"           // for android_studio

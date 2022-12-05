@@ -13,7 +13,7 @@
 
 #include "android/utils/looper.h"
 #include "android/utils/sockets.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 
 #include <assert.h>
 #include <stdio.h>

@@ -36,20 +36,22 @@
 #include "aemu/base/containers/Lookup.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/files/Stream.h"
+#include "aemu/base/logging/CLog.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/synchronization/ConditionVariable.h"
 #include "aemu/base/synchronization/Lock.h"
 #include "aemu/base/Tracing.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/emugl_vm_operations.h"
+#include "host-common/GfxstreamFatalError.h"
 #include "common/goldfish_vk_marshaling.h"
 #include "common/goldfish_vk_reserved_marshaling.h"
 #include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_dispatch.h"
-#include "emugl/common/address_space_device_control_ops.h"
-#include "emugl/common/crash_reporter.h"
+#include "host-common/address_space_device_control_ops.h"
+#include "host-common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
-#include "emugl/common/vm_operations.h"
+#include "host-common/vm_operations.h"
 #include "vk_util.h"
 
 #ifdef __APPLE__
@@ -64,6 +66,8 @@ using android::base::Lock;
 using android::base::Optional;
 using android::base::pj;
 using android::base::System;
+using emugl::ABORT_REASON_OTHER;
+using emugl::FatalError;
 
 #define VKDGS_DEBUG 0
 

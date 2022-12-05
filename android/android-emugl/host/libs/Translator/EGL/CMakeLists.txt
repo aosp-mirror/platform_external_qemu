@@ -22,7 +22,7 @@ android_add_library(
 
 target_link_libraries(EGL_translator_static PUBLIC GLcommon emugl_common)
 target_link_libraries(EGL_translator_static PRIVATE emugl_base android-emu-base
-                                                    astc-codec)
+                                                    astc-codec qemu-host-common-headers)
 target_link_libraries(EGL_translator_static PUBLIC GLES_CM_translator_static
                                                    GLES_V2_translator_static)
 target_compile_options(

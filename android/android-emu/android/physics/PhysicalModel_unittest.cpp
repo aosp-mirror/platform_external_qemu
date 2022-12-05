@@ -19,11 +19,11 @@
 #include "aemu/base/files/MemStream.h"
 #include "android/base/testing/GlmTestHelpers.h"
 #include "android/base/testing/ProtobufMatchers.h"
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"
 #include "android/physics/InertialModel.h"
 #include "android/physics/physical_state_agent.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

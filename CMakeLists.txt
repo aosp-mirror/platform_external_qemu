@@ -737,7 +737,7 @@ endif()
 target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN
                                                   zlib android-emu-tracing)
 
-target_link_libraries(android-qemu-deps INTERFACE virglrenderer-headers)
+target_link_libraries(android-qemu-deps INTERFACE virglrenderer-headers qemu-host-common-headers)
 
 if(LINUX_AARCH64)
   message(STATUS "Suprressing all warnings as gcc has too many too count.")

@@ -59,7 +59,7 @@ android_add_library(
 
 target_link_libraries(
   OpenglRender_vulkan PUBLIC emugl_common OpenglRender_vulkan_cereal android-emu-tracing
-  PRIVATE emugl_base GLcommon)
+  PRIVATE emugl_base GLcommon qemu-host-common-headers)
 android_target_compile_definitions(OpenglRender_vulkan windows
                                    PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 android_target_compile_definitions(OpenglRender_vulkan linux
@@ -136,7 +136,7 @@ android_target_compile_definitions(OpenglRender darwin
                                    PRIVATE -DVK_USE_PLATFORM_METAL_EXT)
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
 target_compile_options(OpenglRender PUBLIC -Wno-return-type-c-linkage)
-target_link_libraries(OpenglRender PRIVATE emugl_base android-emu-tracing)
+target_link_libraries(OpenglRender PRIVATE emugl_base android-emu-tracing qemu-host-common-headers)
 target_include_directories(
   OpenglRender
   PUBLIC ${ANDROID_EMUGL_DIR}/host/libs/Translator/include .
@@ -214,7 +214,8 @@ if(NOT LINUX_AARCH64)
            OpenglRender_vulkan
            OSWindow)
   target_link_libraries(OpenglRender_standalone_common PRIVATE emugl_base
-                                                               ANGLE::ANGLE)
+                                                               ANGLE::ANGLE
+                                                               qemu-host-common-headers)
   target_compile_options(OpenglRender_standalone_common
                          PRIVATE -fvisibility=hidden)
   android_target_compile_definitions(OpenglRender_standalone_common windows
@@ -264,7 +265,8 @@ if(NOT LINUX_AARCH64)
         tests/VsyncThread_unittest.cpp)
   target_link_libraries(
     OpenglRender_unittests PRIVATE OpenglRender_standalone_common
-                                   android-emu-test-launcher android-emu android-emu-base-headers)
+                                   android-emu-test-launcher android-emu android-emu-base-headers
+                                   qemu-host-common-headers)
   android_target_compile_definitions(OpenglRender_unittests windows
                                      PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
   android_target_compile_definitions(OpenglRender_unittests linux
@@ -305,6 +307,7 @@ if(NOT LINUX_AARCH64)
     PUBLIC OpenglRender_standalone_common
            OpenglCodecCommon
            android-emu-base
+           qemu-host-common-headers
            emugl_common
            gmock_main
            OpenglRender
@@ -324,6 +327,7 @@ if(NOT LINUX_AARCH64)
     PUBLIC OpenglRender_standalone_common
            OpenglCodecCommon
            android-emu-base
+           qemu-host-common-headers
            emugl_common
            gmock_main
            OpenglRender
@@ -344,6 +348,7 @@ if(NOT LINUX_AARCH64)
     PUBLIC OpenglRender_standalone_common
            OpenglCodecCommon
            android-emu-base
+           qemu-host-common-headers
            emugl_common
            gmock_main
            OpenglRender
@@ -364,6 +369,7 @@ if(NOT LINUX_AARCH64)
     PUBLIC OpenglRender_standalone_common
            OpenglCodecCommon
            android-emu-base
+           qemu-host-common-headers
            emugl_common
            gmock_main
            OpenglRender
@@ -383,6 +389,7 @@ if(NOT LINUX_AARCH64)
     PUBLIC OpenglRender_standalone_common
            OpenglCodecCommon
            android-emu-base
+           qemu-host-common-headers
            emugl_common
            gmock_main
            OpenglRender

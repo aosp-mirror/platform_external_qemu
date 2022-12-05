@@ -63,6 +63,7 @@ target_link_libraries(
           picosha2
           LibXml2::LibXml2
           android-emu-agents
+          qemu-host-common-headers
           protobuf::libprotobuf
   PUBLIC android-emu-files android-emu-studio-config)
 

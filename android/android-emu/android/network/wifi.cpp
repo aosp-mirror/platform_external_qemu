@@ -12,7 +12,7 @@
 #include "android/network/wifi.h"
 
 #include "android/emulation/HostapdController.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 #include "android/network/NetworkPipe.h"
 #include "android/utils/debug.h"
 

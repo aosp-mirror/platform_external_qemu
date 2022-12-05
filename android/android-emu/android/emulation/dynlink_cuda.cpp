@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #define INIT_CUDA_GL 1
-#include "dynlink_cuda.h"
+#include "host-common/dynlink_cuda.h"
 #if INIT_CUDA_GL
 #include "dynlink_cudaGL.h"
 #endif

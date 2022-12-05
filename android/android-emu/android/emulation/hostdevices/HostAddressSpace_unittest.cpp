@@ -15,8 +15,8 @@
 
 #include "aemu/base/AlignedBuf.h"
 #include "android/console.h"
-#include "android/emulation/address_space_device.h"
-#include "android/emulation/address_space_device.hpp"
+#include "host-common/address_space_device.h"
+#include "host-common/address_space_device.hpp"
 
 #include <gtest/gtest.h>
 

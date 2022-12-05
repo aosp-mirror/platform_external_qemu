@@ -23,7 +23,7 @@
 #include "aemu/base/threads/FunctorThread.h"
 #include "android/curl-support.h"
 #include "android/emulation/ConfigDirs.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 #include "android/utils/filelock.h"
 #include "android/version.h"
 

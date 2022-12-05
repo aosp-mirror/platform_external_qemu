@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/address_space_graphics.h"
+#include "host-common/address_space_graphics.h"
 
-#include "android/emulation/address_space_device.hpp"
-#include "android/emulation/address_space_device.h"
-#include "android/emulation/control/vm_operations.h"
+#include "host-common/address_space_device.hpp"
+#include "host-common/address_space_device.h"
+#include "host-common/vm_operations.h"
 #include "aemu/base/AlignedBuf.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/SubAllocator.h"
 #include "aemu/base/synchronization/Lock.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/avd/hw-config.h"
+#include "host-common/crash-handler.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/GfxstreamFatalError.h"
 
 #include <memory>
 
@@ -40,6 +40,8 @@ using android::base::AutoLock;
 using android::base::Lock;
 using android::base::LazyInstance;
 using android::base::SubAllocator;
+using emugl::ABORT_REASON_OTHER;
+using emugl::FatalError;
 
 namespace android {
 namespace emulation {

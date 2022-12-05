@@ -19,7 +19,8 @@
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/ObjectNameSpace.h"
 #include "aemu/base/GLObjectCounter.h"
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
+#include "host-common/opengl/misc.h"
 #include "emugl/common/mutex.h"
 
 static constexpr int toIndex(NamedObjectType type) {

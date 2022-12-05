@@ -11,7 +11,8 @@
 */
 #include "android/avd/info.h"
 
-#include "android/constants.h"
+#include "host-common/constants.h"
+#include "host-common/hw-config-helper.h"
 #include "android/console.h"
 #include "android/avd/keys.h"
 #include "android/avd/util.h"

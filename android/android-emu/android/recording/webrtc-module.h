@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "android/recording/screen-recorder.h"
+#include "host-common/screen-recorder.h"
 
 ANDROID_BEGIN_HEADER
 

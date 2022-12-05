@@ -9,7 +9,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-# this script is used to generate 'android/avd/hw-config.h' by
+# this script is used to generate 'host-common/hw-config.h' by
 # parsing 'android/avd/hardware-properties.ini'
 #
 #

@@ -38,7 +38,7 @@
 #include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 #include "android/cpu_accelerator.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_data.h"
 #include "android/utils/file_io.h"

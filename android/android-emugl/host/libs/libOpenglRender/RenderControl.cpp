@@ -34,9 +34,10 @@
 #include "aemu/base/Tracing.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
-#include "emugl/common/sync_device.h"
-#include "emugl/common/dma_device.h"
-#include "emugl/common/misc.h"
+#include "host-common/sync_device.h"
+#include "host-common/dma_device.h"
+#include "host-common/misc.h"
+#include "host-common/opengl/misc.h"
 #include "emugl/common/thread.h"
 #include "math.h"
 

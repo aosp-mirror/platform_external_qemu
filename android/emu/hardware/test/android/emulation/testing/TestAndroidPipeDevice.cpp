@@ -11,7 +11,7 @@
 
 #include "android/emulation/testing/TestAndroidPipeDevice.h"
 
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 #include "aemu/base/Log.h"
 
 #include <errno.h>

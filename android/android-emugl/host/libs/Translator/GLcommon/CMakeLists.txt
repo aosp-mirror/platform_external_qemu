@@ -27,7 +27,7 @@ target_include_directories(
 target_link_libraries(GLcommon PUBLIC android-emu astc-codec)
 target_compile_options(GLcommon PRIVATE -fvisibility=hidden)
 target_compile_options(GLcommon PUBLIC -Wno-inconsistent-missing-override)
-target_link_libraries(GLcommon PRIVATE emugl_base)
+target_link_libraries(GLcommon PRIVATE emugl_base qemu-host-common-headers)
 android_target_link_libraries(GLcommon linux-x86_64 PRIVATE "-ldl"
                                                             "-Wl,-Bsymbolic")
 android_target_link_libraries(GLcommon windows

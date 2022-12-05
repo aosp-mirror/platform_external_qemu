@@ -18,8 +18,8 @@
 #include "aemu/base/logging/CLog.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/synchronization/Lock.h"
-#include "android/emulation/address_space_device.h"
-#include "android/emulation/address_space_device.hpp"
+#include "host-common/address_space_device.h"
+#include "host-common/address_space_device.hpp"
 
 #include <unordered_map>
 #include <vector>

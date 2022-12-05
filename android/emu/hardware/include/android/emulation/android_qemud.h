@@ -13,7 +13,7 @@
 
 #include "android/emulation/serial_line.h"
 #include "android/utils/compiler.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 
 #include <stdbool.h>
 

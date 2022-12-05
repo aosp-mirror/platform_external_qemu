@@ -10,7 +10,12 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/emulation/GoldfishSyncCommandQueue.h"
+#include "host-common/GoldfishSyncCommandQueue.h"
+
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/logging/Log.h"
+#include "aemu/base/memory/LazyInstance.h"
 
 #include <memory>
 #include <string>
@@ -19,13 +24,40 @@
 namespace android {
 
 using base::Stream;
+using base::Looper;
+using base::ThreadLooper;
 
-base::LazyInstance<GoldfishSyncCommandQueue>
-GoldfishSyncCommandQueue::sCommandQueue = LAZY_INSTANCE_INIT;
+namespace {
+base::LazyInstance<GoldfishSyncCommandQueue> sCommandQueue = LAZY_INSTANCE_INIT;
+std::unique_ptr<Looper::Timer> sTimer;
+std::function<void()> sTimerCallback;
+}
 
 // static
 void GoldfishSyncCommandQueue::initThreading(VmLock* vmLock) {
-    sCommandQueue.ptr()->init(vmLock);
+    sCommandQueue.ptr()->init(vmLock, {
+        // installFunc
+        [](DeviceContextRunner<GoldfishSyncWakeInfo>*, std::function<void()> installedFunc) {
+            Looper* looper = ThreadLooper::get();
+            sTimerCallback = installedFunc;
+            sTimer.reset(looper->createTimer(
+                    [](void* opaque, Looper::Timer*) {
+                        auto* fn = static_cast<std::function<void()>*>(opaque);
+                        (*fn)();
+                    }, &sTimerCallback));
+            if (!sTimer) {
+                LOG(FATAL) << "Failed to create a loop timer in DeviceContextRunner";
+            }
+        },
+        // uninstallFunc
+        [](DeviceContextRunner<GoldfishSyncWakeInfo>*) {
+            sTimer.reset();
+        },
+        // startWithTimeoutFunc
+        [](DeviceContextRunner<GoldfishSyncWakeInfo>* dcr, uint64_t timeout) {
+            sTimer->startAbsolute(timeout);
+        },
+    });
 }
 
 // static

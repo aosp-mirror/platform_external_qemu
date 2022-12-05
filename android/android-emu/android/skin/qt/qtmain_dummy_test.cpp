@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/emulation/control/vm_operations.h"
+#include "host-common/vm_operations.h"
 #include <gtest/gtest.h>
 
 extern "C" int qt_main(int, char**) { return 0; }

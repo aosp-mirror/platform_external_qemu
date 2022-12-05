@@ -28,7 +28,9 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
+#include "host-common/opengl/misc.h"
+#include "host-common/opengl/emugl_config.h"
 
 #include <GLES2/gl2ext.h>
 

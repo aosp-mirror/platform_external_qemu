@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaVpxVideoHelper.h"
-#include "android/emulation/YuvConverter.h"
+#include "host-common/MediaVpxVideoHelper.h"
+#include "host-common/YuvConverter.h"
 #include "android/utils/debug.h"
 
 #include <cassert>

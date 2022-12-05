@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 
 namespace android {
 namespace featurecontrol {

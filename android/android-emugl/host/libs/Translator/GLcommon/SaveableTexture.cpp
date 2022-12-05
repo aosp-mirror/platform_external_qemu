@@ -29,7 +29,7 @@
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TextureUtils.h"
 
-#include "emugl/common/crash_reporter.h"
+#include "host-common/crash_reporter.h"
 #include "emugl/common/logging.h"
 
 #include <algorithm>

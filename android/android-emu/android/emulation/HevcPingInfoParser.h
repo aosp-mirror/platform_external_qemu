@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "android/emulation/GoldfishMediaDefs.h"
-#include "android/emulation/MediaHevcDecoder.h"
+#include "host-common/GoldfishMediaDefs.h"
+#include "host-common/MediaHevcDecoder.h"
 
 #include <cstdint>
 #include <string>

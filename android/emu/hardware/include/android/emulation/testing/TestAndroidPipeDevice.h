@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "android/emulation/android_pipe_device.h"
-#include "android/emulation/android_pipe_base.h"
+#include "host-common/android_pipe_device.h"
+#include "host-common/android_pipe_base.h"
 #include "android/emulation/testing/TestVmLock.h"
 
 #include <memory>

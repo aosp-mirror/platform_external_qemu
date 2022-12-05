@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "MultiDisplay.h"
+#include "host-common/MultiDisplay.h"
 
 #include <stddef.h>       // for size_t
 #include <algorithm>      // for max
@@ -31,18 +31,18 @@
 #include "aemu/base/files/Stream.h"                   // for Stream
 #include "aemu/base/files/StreamSerializing.h"        // for loadCollection
 #include "android/cmdline-option.h"                      // for android_cmdL...
-#include "android/emulation/MultiDisplayPipe.h"          // for MultiDisplay...
+#include "host-common/MultiDisplayPipe.h"          // for MultiDisplay...
 #include "android/emulation/AutoDisplays.h"              // For AutoDisplays...
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/emulation/resizable_display_config.h"
 #include "android/emulator-window.h"                // for emulator_win...
-#include "android/featurecontrol/FeatureControl.h"  // for isEnabled
-#include "android/featurecontrol/Features.h"        // for MultiDisplay
+#include "host-common/FeatureControl.h"  // for isEnabled
+#include "host-common/Features.h"        // for MultiDisplay
 #include "android/avd/info.h"
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"                        // for android_hw
 #include "android/hw-sensors.h"                     // for android_fold...
-#include "android/recording/screen-recorder.h"      // for RecorderStates
+#include "host-common/screen-recorder.h"      // for RecorderStates
 #include "android/skin/file.h"                      // for SkinLayout
 #include "android/skin/rect.h"                      // for SKIN_ROTATION_0
 

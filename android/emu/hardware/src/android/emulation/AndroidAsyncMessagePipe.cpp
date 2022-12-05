@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "host-common/AndroidAsyncMessagePipe.h"
 
 #include <algorithm>    // for min
 #include <cassert>      // for assert

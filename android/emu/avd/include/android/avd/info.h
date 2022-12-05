@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "android/avd/util.h"
 #include "android/avd/avd-export.h"
 #include "android/utils/compiler.h"

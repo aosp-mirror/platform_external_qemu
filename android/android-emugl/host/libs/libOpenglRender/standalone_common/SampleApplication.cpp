@@ -22,8 +22,9 @@
 #include "android/base/testing/TestSystem.h"
 #include "aemu/base/threads/FunctorThread.h"
 #include "android/console.h"
-#include "android/emulation/control/multi_display_agent.h"
-#include "android/emulation/MultiDisplay.h"
+#include "host-common/opengl/misc.h"
+#include "host-common/multi_display_agent.h"
+#include "host-common/MultiDisplay.h"
 #include "Standalone.h"
 
 #include <EGL/egl.h>

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/DmaMap.h"
+#include "host-common/DmaMap.h"
 #include "android/emulation/testing/TestDmaMap.h"
 
 #include <gtest/gtest.h>

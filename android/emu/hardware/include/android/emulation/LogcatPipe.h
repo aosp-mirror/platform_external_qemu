@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 
 #include <fstream>
 #include <vector>

@@ -1,4 +1,5 @@
-#include "emugl/common/vm_operations.h"
+#include "host-common/emugl_vm_operations.h"
+#include "host-common/vm_operations.h"
 
 namespace {
 

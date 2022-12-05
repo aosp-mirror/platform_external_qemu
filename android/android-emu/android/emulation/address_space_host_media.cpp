@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/address_space_host_media.h"
-#include "android/emulation/control/vm_operations.h"
+#include "host-common/address_space_host_media.h"
+#include "host-common/vm_operations.h"
 #include "aemu/base/AlignedBuf.h"
 
 #define AS_DEVICE_DEBUG 0
@@ -96,7 +96,7 @@ bool AddressSpaceHostMediaContext::load(base::Stream* stream) {
         switch (t) {
         case DecoderType::Vpx:
             AS_DEVICE_DPRINT("Loading VpxDecoder snapshot");
-            mVpxDecoder.reset(new MediaVpxDecoder);
+            mVpxDecoder.reset(MediaVpxDecoder::create());
             mVpxDecoder->load(stream);
             break;
         case DecoderType::H264:
@@ -186,7 +186,7 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
         case MediaCodecType::VP8Codec:
         case MediaCodecType::VP9Codec:
             if (!mVpxDecoder) {
-                mVpxDecoder.reset(new MediaVpxDecoder);
+                mVpxDecoder.reset(MediaVpxDecoder::create());
             }
             mVpxDecoder->handlePing(
                     codecType, op,

@@ -14,9 +14,11 @@
 
 #include "FbConfig.h"
 
-#include "android/opengl/emugl_config.h"
 #include "emugl/common/feature_control.h"
-#include "emugl/common/misc.h"
+#include "host-common/opengl/emugl_config.h"
+#include "host-common/feature_control.h"
+#include "host-common/misc.h"
+#include "host-common/opengl/misc.h"
 #include "FrameBuffer.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 

@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/featurecontrol/Features.h"
+#include "host-common/Features.h"
 
 #include <ostream>
 #include <string_view>
@@ -24,7 +24,7 @@ namespace base { class IniFile; }
 namespace featurecontrol {
 
 // FeatureControlImpl is the implementation of feature control.
-// Please access it through the API in android/featurecontrol/FeatureControl.h
+// Please access it through the API in host-common/FeatureControl.h
 
 // Features are controlled through ini files.
 // There are two different types of features: host-only features that

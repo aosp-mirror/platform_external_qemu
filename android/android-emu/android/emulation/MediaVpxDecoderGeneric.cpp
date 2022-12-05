@@ -11,18 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/MediaVpxDecoderGeneric.h"
+#include "host-common/MediaVpxDecoderGeneric.h"
 #include "android/base/system/System.h"
-#include "android/emulation/MediaFfmpegVideoHelper.h"
-#include "android/emulation/MediaVpxVideoHelper.h"
-#include "android/emulation/VpxFrameParser.h"
+#include "host-common/MediaFfmpegVideoHelper.h"
+#include "host-common/MediaVpxVideoHelper.h"
+#include "host-common/VpxFrameParser.h"
 #include "android/main-emugl.h"
 #include "android/utils/debug.h"
 
 #ifndef __APPLE__
 // for Linux and Window, Cuvid is available
-#include "android/emulation/MediaCudaDriverHelper.h"
-#include "android/emulation/MediaCudaVideoHelper.h"
+#include "host-common/MediaCudaDriverHelper.h"
+#include "host-common/MediaCudaVideoHelper.h"
 #endif
 
 #include <stdio.h>

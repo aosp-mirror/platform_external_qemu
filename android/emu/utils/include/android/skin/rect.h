@@ -14,20 +14,14 @@
 
 #include "android/utils/compiler.h"
 
+#include "host-common/misc.h"
+
 #include <stdbool.h>
 
 ANDROID_BEGIN_HEADER
 
 /**  Rectangles
  **/
-
-// List of values used to identify a clockwise 90-degree rotation.
-typedef enum {
-    SKIN_ROTATION_0,
-    SKIN_ROTATION_90,
-    SKIN_ROTATION_180,
-    SKIN_ROTATION_270
-} SkinRotation;
 
 // A structure used to model a position in pixels on the screen.
 // |x| is the horizontal coordinate.

@@ -16,7 +16,7 @@
 #include "android/boot-properties.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_data.h"
 #include "android/utils/property_file.h"

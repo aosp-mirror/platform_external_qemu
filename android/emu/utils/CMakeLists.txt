@@ -41,3 +41,4 @@ android_add_test(
   WINDOWS android/utils/win32_cmdline_quote_unittest.cpp
   DEPS android-emu-base android-emu-base-headers android-emu-utils gtest gtest_main)
 target_include_directories(android-emu-utils_unittests PRIVATE src)
+target_compile_options(android-emu-utils_unittests PRIVATE -Wno-extern-c-compat)

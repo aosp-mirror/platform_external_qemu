@@ -123,7 +123,7 @@ private:
 #else  // windows
 
 #include <windows.h>
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/native-keyboard-event-handler.h"

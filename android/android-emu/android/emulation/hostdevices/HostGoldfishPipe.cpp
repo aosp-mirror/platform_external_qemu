@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/hostdevices/HostGoldfishPipe.h"
+#include "host-common/HostGoldfishPipe.h"
 
 #include "aemu/base/containers/Lookup.h"
 #include "aemu/base/Result.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/emulation/android_pipe_device.h"
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/crash-handler.h"
+#include "host-common/android_pipe_device.h"
+#include "host-common/AndroidPipe.h"
 #include "android/emulation/testing/TestVmLock.h"
-#include "android/emulation/VmLock.h"
+#include "host-common/VmLock.h"
 
 #include "aemu/base/memory/LazyInstance.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 
 #include <algorithm>
 #include <unordered_map>

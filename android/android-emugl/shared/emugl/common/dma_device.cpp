@@ -1,6 +1,6 @@
 
-#include "android/emulation/GoldfishDma.h"
-#include "emugl/common/dma_device.h"
+#include "host-common/GoldfishDma.h"
+#include "host-common/dma_device.h"
 
 static void* defaultDmaGetHostAddr(uint64_t guest_paddr) { return nullptr; }
 static void defaultDmaUnlock(uint64_t addr) { }

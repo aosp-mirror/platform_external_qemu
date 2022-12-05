@@ -25,7 +25,7 @@
 #include "android/base/system/System.h"         // for System
 #include "android/cmdline-option.h"             // for android_cmdLine
 #include "android/crashreport/HangDetector.h"   // for HangDetector
-#include "android/crashreport/crash-handler.h"  // for crashhandler_cleanup
+#include "host-common/crash-handler.h"  // for crashhandler_cleanup
 #include "android/curl-support.h"               // for curl_cleanup, curl_init
 #include "android/protobuf/ProtobufLogging.h"   // for initProtobufLogger
 #include "android/utils/debug.h"                // for dprint

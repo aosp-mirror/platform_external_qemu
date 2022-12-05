@@ -914,7 +914,7 @@ int ApiGen::genDecoderHeader(const std::string &filename)
     fprintf(fp, "#include \"OpenglRender/IOStream.h\"\n");
     fprintf(fp, "#include \"ChecksumCalculator.h\"\n");
     fprintf(fp, "#include \"%s_%s_context.h\"\n\n\n", m_basename.c_str(), sideString(SERVER_SIDE));
-    fprintf(fp, "#include \"emugl/common/logging.h\"\n");
+    fprintf(fp, "#include \"host-common/logging.h\"\n");
 #if INSTRUMENT_TIMING_HOST
     fprintf(fp, "#include \"time.h\"\n");
 #endif
@@ -1000,7 +1000,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_dec.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include \"ProtocolUtils.h\"\n\n");
     fprintf(fp, "#include \"ChecksumCalculatorThreadInfo.h\"\n\n");
-    fprintf(fp, "#include \"emugl/common/logging.h\"\n\n");
+    fprintf(fp, "#include \"host-common/logging.h\"\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
     fprintf(fp, "typedef unsigned int tsize_t; // Target \"size_t\", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.\n\n");
 

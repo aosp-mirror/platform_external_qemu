@@ -9,7 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
+#include "host-common/hw-config-helper.h"
 #include "android/avd/avd-export.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/avd/util.h"

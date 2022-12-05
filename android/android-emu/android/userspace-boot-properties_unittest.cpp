@@ -16,8 +16,8 @@
 #include <string>                                   // for string_view
 
 #include "aemu/base/misc/StringUtils.h"          // for join
-#include "android/featurecontrol/FeatureControl.h"  // for setEnabledOverride
-#include "android/featurecontrol/Features.h"        // for AndroidbootProps
+#include "host-common/FeatureControl.h"  // for setEnabledOverride
+#include "host-common/Features.h"        // for AndroidbootProps
 #include "gtest/gtest_pred_impl.h"                  // for EXPECT_STREQ, Test
 
 namespace android {

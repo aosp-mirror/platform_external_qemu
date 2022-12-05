@@ -20,7 +20,7 @@
 #include "aemu/base/Log.h"                         // for LOG, LogMessage
 #include "aemu/base/async/ThreadLooper.h"          // for ThreadLooper
 #include "android/base/system/System.h"               // for System
-#include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
+#include "host-common/vm_operations.h"  // for QAndroidVmOpera...
 
 namespace android {
 namespace control {

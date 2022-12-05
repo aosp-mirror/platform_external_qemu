@@ -15,12 +15,15 @@
 */
 
 #include "emugl/common/logging.h"
+
+#include "OpenglRender/render_api_types.h"
+
 namespace emugl {
 
 void default_logger(const char* fmt, ...) { }
 
-EMUGL_COMMON_API emugl_logger_t emugl_logger = default_logger;
-EMUGL_COMMON_API emugl_logger_t emugl_cxt_logger = default_logger;
+emugl_logger_t emugl_logger = default_logger;
+emugl_logger_t emugl_cxt_logger = default_logger;
 
 void set_emugl_logger(emugl_logger_t f) {
     if (!f) {

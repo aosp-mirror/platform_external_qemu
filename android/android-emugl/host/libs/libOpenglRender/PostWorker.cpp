@@ -23,7 +23,7 @@
 #include "RenderThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
 
 #define POST_DEBUG 0
 #if POST_DEBUG >= 1

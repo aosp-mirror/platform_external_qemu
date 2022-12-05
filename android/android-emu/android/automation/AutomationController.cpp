@@ -38,6 +38,7 @@
 #include "android/base/system/System.h"
 #include "android/offworld/OffworldPipe.h"
 #include "android/physics/PhysicalModel.h"
+#include "android/utils/debug.h"
 
 extern "C" {
 #include "android/gps.h"

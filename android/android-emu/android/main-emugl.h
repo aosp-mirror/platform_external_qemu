@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/opengl/emugl_config.h"
+#include "host-common/opengl/emugl_config.h"
 #include "android/skin/winsys.h"
 #include "android/utils/compiler.h"
 

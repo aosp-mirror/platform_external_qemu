@@ -11,15 +11,15 @@
 
 #include "android/snapshot/Snapshotter.h"
 
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "android/avd/info.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/Stopwatch.h"
 #include "aemu/base/StringFormat.h"
 #include "android/crashreport/CrashReporter.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/emulation/VmLock.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/VmLock.h"
 #include "android/console.h"
 #include "android/metrics/metrics.h"
 #include "android/metrics/MetricsReporter.h"
@@ -33,7 +33,7 @@
 #include "google/protobuf/any.pb.h"
 
 #include "android/metrics/StudioConfig.h"
-#include "android/opengl/emugl_config.h"
+#include "host-common/opengl/emugl_config.h"
 #include "android/snapshot/Hierarchy.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/PathUtils.h"

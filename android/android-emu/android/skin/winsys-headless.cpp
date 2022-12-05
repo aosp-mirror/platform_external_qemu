@@ -18,7 +18,7 @@
 
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "android/avd/info.h"
 #include "android/console.h"                           // for android_hw
 #include "android/skin/qt/emulator-no-qt-no-window.h"  // for EmulatorNoQtNo...

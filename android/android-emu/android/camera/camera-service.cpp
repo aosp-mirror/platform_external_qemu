@@ -27,10 +27,11 @@
 #include "android/camera/camera-metrics.h"
 #include "android/camera/camera-videoplayback.h"
 #include "android/camera/camera-virtualscene.h"
-#include "android/emulation/address_space_device.h"
+#include "host-common/address_space_device.h"
 #include "android/emulation/android_qemud.h"
-#include "android/featurecontrol/feature_control.h"
-#include "android/avd/hw-config.h"
+#include "host-common/feature_control.h"
+#include "host-common/hw-config.h"
+#include "host-common/hw-config-helper.h"
 #include "android/avd/info.h"
 #include "android/console.h" /* for android_hw */
 #include "android/hw-sensors.h"
@@ -38,7 +39,7 @@
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 
 #include <stdio.h>
 

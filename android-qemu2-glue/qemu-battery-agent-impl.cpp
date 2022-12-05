@@ -10,7 +10,7 @@
  ** GNU General Public License for more details.
  */
 #include "android/emulation/control/battery_agent.h"
-#include "android/emulation/VmLock.h"
+#include "host-common/VmLock.h"
 
 #include <stdio.h>
 

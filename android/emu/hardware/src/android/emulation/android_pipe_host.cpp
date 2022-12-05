@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/emulation/android_pipe_host.h"
+#include "host-common/android_pipe_host.h"
 
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 
 namespace android {
 

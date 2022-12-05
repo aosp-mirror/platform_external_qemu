@@ -30,7 +30,7 @@
 #include "aemu/base/threads/ThreadPool.h"
 #include "emugl/common/thread.h"
 #include "vulkan/VkDecoderGlobalState.h"
-#include "android/opengl/virtio_gpu_ops.h"
+#include "render-utils/virtio_gpu_ops.h"
 
 // SyncThread///////////////////////////////////////////////////////////////////
 // The purpose of SyncThread is to track sync device timelines and give out +

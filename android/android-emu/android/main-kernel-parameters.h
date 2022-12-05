@@ -13,7 +13,7 @@
 
 #include "android/cmdline-option.h"
 #include "android/utils/compiler.h"
-#include "android/opengl/emugl_config.h"
+#include "host-common/opengl/emugl_config.h"
 
 #include <stdint.h>
 #include <string>

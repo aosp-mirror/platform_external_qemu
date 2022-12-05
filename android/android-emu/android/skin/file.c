@@ -13,7 +13,7 @@
 #include <stdlib.h>                      // for NULL, strtol
 #include <string.h>                      // for memcmp, strchr, strcmp, memcpy
 
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"             // for android_hw
 #include "android/skin/file.h"           // for SkinPart, SkinLayout, SkinLo...
 #include "android/skin/image.h"          // for skin_image_clone_rotated

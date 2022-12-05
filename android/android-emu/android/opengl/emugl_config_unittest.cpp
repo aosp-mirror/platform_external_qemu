@@ -9,12 +9,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/opengl/emugl_config.h"
+#include "host-common/opengl/emugl_config.h"
 #include "android/opengl/EmuglBackendList.h"
 #include "android/opengl/gpuinfo.h"
 
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
+
+#include "host-common/globals.h"
 
 #include <gtest/gtest.h>
 

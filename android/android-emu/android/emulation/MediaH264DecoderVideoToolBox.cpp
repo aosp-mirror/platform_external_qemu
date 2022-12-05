@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaH264DecoderVideoToolBox.h"
+#include "host-common/MediaH264DecoderVideoToolBox.h"
 
-#include "android/emulation/H264NaluParser.h"
+#include "host-common/H264NaluParser.h"
 
 #include <VideoToolbox/VideoToolbox.h>
 

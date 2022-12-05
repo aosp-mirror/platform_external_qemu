@@ -15,6 +15,7 @@
 #include "android/emulation/testing/MockAndroidEmulatorWindowAgent.h"
 
 #include "aemu/base/Log.h"
+#include "host-common/misc.h"
 
 static bool sIsFolded = false;
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
@@ -29,14 +30,14 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return true;
                 },
         .rotate =
-                [](SkinRotation rotation) {
+                [](int rotation) {
                     printf("window-agent-mock-impl: .rotate90Clockwise\n");
                     return true;
                 },
         .getRotation =
                 [](void) {
                     printf("window-agent-mock-impl: .getRotation\n");
-                    return SKIN_ROTATION_0;
+                    return (int)SKIN_ROTATION_0;
                 },
         .showMessage =
                 [](const char* message, WindowMessageType type, int timeoutMs) {

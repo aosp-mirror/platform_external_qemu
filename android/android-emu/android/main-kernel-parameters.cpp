@@ -12,10 +12,10 @@
 #include "android/main-kernel-parameters.h"
 
 #include "aemu/base/StringFormat.h"
-#include "android/emulation/GoldfishDma.h"
+#include "host-common/GoldfishDma.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/utils/debug.h"
 #include "android/utils/dns.h"

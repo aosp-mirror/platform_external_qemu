@@ -16,7 +16,7 @@
 
 #include "ChecksumCalculatorThreadInfo.h"
 
-#include "emugl/common/crash_reporter.h"
+#include "host-common/crash_reporter.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
 

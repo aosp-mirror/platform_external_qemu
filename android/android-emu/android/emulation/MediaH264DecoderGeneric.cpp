@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaH264DecoderGeneric.h"
+#include "host-common/MediaH264DecoderGeneric.h"
 #include "android/base/system/System.h"
-#include "android/emulation/H264PingInfoParser.h"
-#include "android/emulation/MediaFfmpegVideoHelper.h"
+#include "host-common/H264PingInfoParser.h"
+#include "host-common/MediaFfmpegVideoHelper.h"
 #include "android/main-emugl.h"
 
 #ifndef __APPLE__
 // for Linux and Window, Cuvid is available
-#include "android/emulation/MediaCudaDriverHelper.h"
-#include "android/emulation/MediaCudaVideoHelper.h"
+#include "host-common/MediaCudaDriverHelper.h"
+#include "host-common/MediaCudaVideoHelper.h"
 #else
 #include "android/emulation/MediaVideoToolBoxVideoHelper.h"
 #endif

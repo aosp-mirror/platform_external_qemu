@@ -16,7 +16,7 @@
 #include <functional>     // for __base
 #include <tuple>          // for tuple
 
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"
 #include "aemu/base/memory/OnDemand.h"  // for OnDemand
 #include "android/cmdline-option.h"        // for android_cmdLineOptions

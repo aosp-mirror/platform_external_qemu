@@ -19,9 +19,10 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/console.h"
-#include "android/emulation/control/multi_display_agent.h"
-#include "android/emulation/control/window_agent.h"
-#include "android/emulation/MultiDisplay.h"
+#include "host-common/opengl/misc.h"
+#include "host-common/multi_display_agent.h"
+#include "host-common/window_agent.h"
+#include "host-common/MultiDisplay.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
 

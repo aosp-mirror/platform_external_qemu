@@ -15,7 +15,7 @@
 #pragma once
 
 #include "aemu/base/synchronization/Lock.h"
-#include "android/emulation/DmaMap.h"
+#include "host-common/DmaMap.h"
 
 namespace qemu2 {
 

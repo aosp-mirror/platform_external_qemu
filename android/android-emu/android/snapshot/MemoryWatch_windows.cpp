@@ -17,9 +17,9 @@
 #include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "aemu/base/threads/FunctorThread.h"
-#include "android/crashreport/crash-handler.h"
+#include "host-common/crash-handler.h"
 #include "android/emulation/CpuAccelerator.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 #include "android/utils/debug.h"
 
 #include <windows.h>

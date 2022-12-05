@@ -18,7 +18,7 @@
 
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/Log.h"
-#include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "host-common/AndroidAsyncMessagePipe.h"
 #include "offworld.pb.h"
 
 namespace android {

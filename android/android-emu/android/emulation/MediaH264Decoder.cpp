@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaH264DecoderDefault.h"
+#include "host-common/MediaH264DecoderDefault.h"
 
 namespace android {
 namespace emulation {

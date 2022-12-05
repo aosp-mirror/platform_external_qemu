@@ -26,7 +26,10 @@
 #include <string_view>
 #include <vector>
 
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/GfxstreamFatalError.h"
+
+using emugl::ABORT_REASON_OTHER;
+using emugl::FatalError;
 
 #ifdef _WIN32
 const void* memmem(const void* haystack, size_t haystackLen,

@@ -34,16 +34,16 @@ extern "C" {
 #include <android-qemu2-glue/base/files/QemuFileStream.h>
 #include <android-qemu2-glue/emulation/virtio_vsock_transport.h>
 #include "aemu/base/logging/CLog.h"
-#include "android/crashreport/crash-handler.h"
+#include "host-common/crash-handler.h"
 #include "android/emulation/AdbVsockPipe.h"
 #include "android/emulation/SocketBuffer.h"
-#include "android/emulation/VmLock.h"
-#include "android/emulation/android_pipe_base.h"
-#include "android/emulation/android_pipe_common.h"
-#include "android/emulation/android_pipe_device.h"
 #include "android/emulation/virtio_vsock_device.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/featurecontrol/feature_control.h"
+#include "host-common/VmLock.h"
+#include "host-common/android_pipe_base.h"
+#include "host-common/android_pipe_common.h"
+#include "host-common/android_pipe_device.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/feature_control.h"
 
 namespace fc = android::featurecontrol;
 

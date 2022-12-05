@@ -19,7 +19,8 @@
 
 #include "aemu/base/async/ThreadLooper.h"
 #include "android/base/system/System.h"
-#include "android/emulation/control/window_agent.h"
+#include "host-common/qt_ui_defs.h"
+#include "host-common/window_agent.h"
 #include "android/settings-agent.h"
 
 #include "android/emulation/control/ServiceUtils.h"

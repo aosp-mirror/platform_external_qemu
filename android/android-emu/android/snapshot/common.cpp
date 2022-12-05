@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/snapshot/common.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 #include "android/console.h"
 #include "android/opengles.h"
 

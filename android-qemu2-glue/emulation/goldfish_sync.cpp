@@ -15,10 +15,10 @@
 // host-side sync service implementation.
 
 #include "aemu/base/Log.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/emulation/GoldfishSyncCommandQueue.h"
-#include "android/emulation/goldfish_sync.h"
-#include "android/utils/stream.h"
+#include "host-common/crash-handler.h"
+#include "host-common/GoldfishSyncCommandQueue.h"
+#include "host-common/goldfish_sync.h"
+#include "aemu/base/utils/stream.h"
 #include "android-qemu2-glue/base/files/QemuFileStream.h"
 
 using android::qemu::QemuFileStream;

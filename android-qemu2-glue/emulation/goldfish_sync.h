@@ -11,7 +11,7 @@
 */
 #pragma once
 
-#include "android/emulation/VmLock.h"
+#include "host-common/VmLock.h"
 
 /* Initialize Goldfish Sync device and service. */
 bool qemu_android_sync_init(android::VmLock* vmLock);

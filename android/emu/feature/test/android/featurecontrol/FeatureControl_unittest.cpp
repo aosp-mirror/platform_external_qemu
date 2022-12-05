@@ -109,12 +109,12 @@ TEST_F(FeatureControlTest, readDefaultSettingsHostGuestDifferent) {
                                    mDefaultIniGuestFilePath, "", "");
 
 #define FEATURE_CONTROL_ITEM(item) EXPECT_TRUE(isEnabled(item));
-#include "android/featurecontrol/FeatureControlDefHost.h"
+#include "host-common/FeatureControlDefHost.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
 #define FEATURE_CONTROL_ITEM(item) EXPECT_FALSE(isEnabled(item));
-#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
@@ -153,8 +153,8 @@ TEST_F(FeatureControlTest, stringConversion) {
 #define FEATURE_CONTROL_ITEM(item)           \
     EXPECT_EQ(item, stringToFeature(#item)); \
     EXPECT_STREQ(#item, FeatureControlImpl::toString(item).data());
-#include "android/featurecontrol/FeatureControlDefGuest.h"
-#include "android/featurecontrol/FeatureControlDefHost.h"
+#include "host-common/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
     EXPECT_EQ(Feature_n_items,

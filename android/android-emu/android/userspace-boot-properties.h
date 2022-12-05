@@ -15,9 +15,9 @@
 #include <utility>                        // for pair
 #include <vector>                         // for vector
 
-#include "android/avd/hw-config.h"        // for AndroidHwConfig
+#include "host-common/hw-config.h"        // for AndroidHwConfig
 #include "android/cmdline-option.h"       // for AndroidOptions
-#include "android/opengl/emugl_config.h"  // for AndroidGlesEmulationMode
+#include "host-common/opengl/emugl_config.h"  // for AndroidGlesEmulationMode
 #include "android/utils/compiler.h"       // for ANDROID_BEGIN_HEADER, ANDRO...
 
 ANDROID_BEGIN_HEADER

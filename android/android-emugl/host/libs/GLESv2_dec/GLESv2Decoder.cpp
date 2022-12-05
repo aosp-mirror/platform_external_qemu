@@ -20,8 +20,9 @@
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/synchronization/Lock.h"
 
-#include "emugl/common/dma_device.h"
-#include "emugl/common/vm_operations.h"
+#include "host-common/dma_device.h"
+#include "host-common/emugl_vm_operations.h"
+#include "host-common/vm_operations.h"
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>

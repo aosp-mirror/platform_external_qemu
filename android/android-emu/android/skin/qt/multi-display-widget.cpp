@@ -13,7 +13,7 @@
 #include "android/skin/qt/multi-display-widget.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
 #include "aemu/base/Log.h"                 // for LOG
-#include "android/opengl/virtio_gpu_ops.h"
+#include "render-utils/virtio_gpu_ops.h"
 #include "android/opengles.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/gl-common.h"

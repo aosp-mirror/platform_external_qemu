@@ -18,7 +18,7 @@
 #include "aemu/base/files/Stream.h"
 #include "aemu/base/threads/Thread.h"
 #include "android/emulation/AdbProxy.h"
-#include "android/emulation/android_pipe_common.h"
+#include "host-common/android_pipe_common.h"
 #include "android/emulation/apacket_utils.h"
 
 namespace android {

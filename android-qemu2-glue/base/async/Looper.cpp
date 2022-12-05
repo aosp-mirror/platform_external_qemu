@@ -18,9 +18,9 @@ extern "C" {
 #include "aemu/base/Log.h"
 #include "aemu/base/sockets/SocketUtils.h"
 #include "android/base/system/System.h"
-#include "android/emulation/control/vm_operations.h"
+#include "host-common/vm_operations.h"
 #include "android-qemu2-glue/base/files/QemuFileStream.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 
 extern "C" {
 #include "qemu/osdep.h"

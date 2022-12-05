@@ -21,8 +21,8 @@
 #include "aemu/base/threads/Thread.h"
 #include "android/utils/debug.h"
 #include "emugl/common/OpenGLDispatchLoader.h"
-#include "emugl/common/crash_reporter.h"
-#include "emugl/common/sync_device.h"
+#include "host-common/crash_reporter.h"
+#include "host-common/sync_device.h"
 
 #ifndef _MSC_VER
 #include <sys/time.h>

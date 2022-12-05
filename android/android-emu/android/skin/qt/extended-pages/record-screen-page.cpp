@@ -33,7 +33,7 @@
 
 #include "android/avd/info.h"
 #include "aemu/base/files/PathUtils.h"
-#include "android/emulation/control/record_screen_agent.h"
+#include "host-common/record_screen_agent.h"
 #include "android/console.h"
 #include "android/recording/GifConverter.h"
 #include "android/recording/video/player/VideoPlayer.h"

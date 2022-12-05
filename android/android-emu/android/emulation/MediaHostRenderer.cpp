@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaHostRenderer.h"
+#include "host-common/MediaHostRenderer.h"
 
 #include <cstdint>
 #include <string>

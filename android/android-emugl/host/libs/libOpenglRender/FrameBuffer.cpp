@@ -41,13 +41,14 @@
 #include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/GfxstreamFatalError.h"
 
-#include "emugl/common/crash_reporter.h"
+#include "host-common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
-#include "emugl/common/misc.h"
-#include "emugl/common/vm_operations.h"
+#include "host-common/misc.h"
+#include "host-common/opengl/misc.h"
+#include "host-common/vm_operations.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -59,6 +60,8 @@ using android::base::LazyInstance;
 using android::base::Stream;
 using android::base::System;
 using android::base::WorkerProcessingResult;
+using emugl::ABORT_REASON_OTHER;
+using emugl::FatalError;
 
 namespace {
 
