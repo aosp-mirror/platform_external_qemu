@@ -1260,7 +1260,8 @@ int camera_device_read_frame(CameraDevice* ccd,
                              float r_scale,
                              float g_scale,
                              float b_scale,
-                             float exp_comp) {
+                             float exp_comp,
+                             const char* direction) {
     MediaFoundationCameraDevice* cd = toMediaFoundationCameraDevice(ccd);
     if (!cd) {
         LOG(ERROR) << "Invalid camera descriptor.";

@@ -216,4 +216,19 @@ enum ClientStartResult {
 
 typedef enum ClientStartResult ClientStartResult;
 
+// Return the coarse orientation of the device.
+// 0:     ANDROID_COARSE_PORTRAIT, 0 degrees
+// 1:     ANDROID_COARSE_REVERSE_LANDSCAPE, 90 degrees
+// 2:     ANDROID_COARSE_REVERSE_PORTRAIT, 180 degrees
+// 3:     ANDROID_COARSE_LANDSCAPE, 270 degrees
+typedef int (*GetCoarseOrientation)();
+
+// Pass the function pointer to get coarse orientation.
+// Because of build dependency issue we need to set the function pointer here.
+void set_coarse_orientation_getter(GetCoarseOrientation getCoarseOrientation);
+
+// Return the coarse orientation of the device, using the
+// coarse orientation getter that was previously set.
+int get_coarse_orientation();
+
 ANDROID_END_HEADER
