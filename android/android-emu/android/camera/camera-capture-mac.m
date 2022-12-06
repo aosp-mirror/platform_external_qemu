@@ -21,6 +21,7 @@
 
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
+#include "android/hw-sensors.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 
@@ -106,6 +107,8 @@ FourCCToInternal(uint32_t cm_pix_format)
     int                           desired_width;
     /* Desired frame height */
     int                           desired_height;
+    /* Scratch buffer to hold imgs of desired rotation. */
+    void*                         desired_rotated_frame;
     /* Scratch buffer to hold imgs of desired width and height. */
     void*                         desired_scaled_frame;
 }
@@ -137,12 +140,14 @@ FourCCToInternal(uint32_t cm_pix_format)
  *  in the device. The client should respond to this value by repeating the
  *  read, rather than reporting an error.
  */
-- (int)read_frame:(ClientFrame*)
-     result_frame:(int)
-          fbs_num:(float)
-          r_scale:(float)
-          g_scale:(float)
-          b_scale:(float)exp_comp;
+- (int)read_frame:
+    (ClientFrame*)result_frame:
+    (int)fbs_num:
+    (float)r_scale:
+    (float)g_scale:
+    (float)b_scale:
+    (float)exp_comp:
+    (const char*)direction;
 
 @end
 
@@ -175,6 +180,7 @@ FourCCToInternal(uint32_t cm_pix_format)
         return nil;
     }
     success = false;
+    desired_rotated_frame = nil;
     desired_scaled_frame = nil;
 
     /* Create capture session. */
@@ -269,6 +275,11 @@ FourCCToInternal(uint32_t cm_pix_format)
             free(desired_scaled_frame);
             desired_scaled_frame = nil;
         }
+
+        if (desired_rotated_frame != nil) {
+            free(desired_rotated_frame);
+            desired_rotated_frame = nil;
+        }
     }
 }
 
@@ -309,11 +320,13 @@ FourCCToInternal(uint32_t cm_pix_format)
     }
 }
 
-- (int)read_frame:(ClientFrame*)
-     result_frame:(float)
-          r_scale:(float)
-          g_scale:(float)
-          b_scale:(float)exp_comp {
+- (int)read_frame:
+        (ClientFrame*)result_frame:
+        (float)r_scale:
+        (float)g_scale:
+        (float)b_scale:
+        (float)exp_comp:
+        (const char*)direction {
     int res = -1;
 
 
@@ -347,7 +360,50 @@ FourCCToInternal(uint32_t cm_pix_format)
 
             if (pixels != nil) {
                 D("%s: convert frame\n", __func__);
+                vImage_Buffer rotate_input;
+                rotate_input.width = frame_width;
+                rotate_input.height = frame_height;
+                rotate_input.rowBytes = srcBpr;
+                rotate_input.data = pixels;
 
+                vImage_Buffer rotate_output;
+                AndroidCoarseOrientation orientation
+                        = get_coarse_orientation();
+                switch (orientation) {
+                    case ANDROID_COARSE_PORTRAIT:
+                    case ANDROID_COARSE_REVERSE_PORTRAIT:
+                        // Swap width and height
+                        frame_height ^= frame_width;
+                        frame_width ^= frame_height;
+                        frame_height ^= frame_width;
+
+                        srcBpr = srcBpp * frame_width;
+                        break;
+                    case ANDROID_COARSE_LANDSCAPE:
+                    case ANDROID_COARSE_REVERSE_LANDSCAPE:
+                        break;
+                }
+                rotate_output.width = frame_width;
+                rotate_output.height = frame_height;
+                rotate_output.rowBytes = srcBpr;
+                if (desired_rotated_frame == nil) {
+                    desired_rotated_frame = realloc(desired_rotated_frame,
+                            4 * frame_width * frame_height);
+                }
+                rotate_output.data = desired_rotated_frame;
+
+                vImage_Error err = 0;
+                UInt8 backColor[] = {0, 0, 0, 0};
+                // Front and back camera has different rotations
+                int rotation = 0 == strcmp("back", direction) ?
+                    (1 + orientation) % 4:
+                    (5 - orientation) % 4;
+                err = vImageRotate90_ARGB8888(&rotate_input, &rotate_output,
+                            rotation, backColor, 0);
+
+                if (err != kvImageNoError) {
+                    E("%s: error in scale: 0x%x\n", __func__, err);
+                }
                 // AVFoundation doesn't provide pre-scaled output.
                 // Scale it here, using the Accelerate framework.
                 // Also needs to be the correct aspect ratio,
@@ -382,7 +438,7 @@ FourCCToInternal(uint32_t cm_pix_format)
                 scale_input.width = cropW;
                 scale_input.height = cropH;
                 scale_input.rowBytes = srcBpr;
-                scale_input.data = ((char*)pixels) + start;
+                scale_input.data = ((char*)desired_rotated_frame) + start;
 
                 const int dstBpp = 4; // ARGB8888
                 scale_output.width = desired_width;
@@ -393,7 +449,7 @@ FourCCToInternal(uint32_t cm_pix_format)
                 D("%s:  image scale %d %d -> %d %d\n",
                         __func__, frame_width, frame_height, desired_width, desired_height);
 
-                vImage_Error err = vImageScale_ARGB8888(&scale_input, &scale_output, NULL, 0);
+                err = vImageScale_ARGB8888(&scale_input, &scale_output, NULL, 0);
                 if (err != kvImageNoError) {
                     E("%s: error in scale: 0x%x\n", __func__, err);
                 }
@@ -575,7 +631,8 @@ int camera_device_read_frame(CameraDevice* cd,
                              float r_scale,
                              float g_scale,
                              float b_scale,
-                             float exp_comp) {
+                             float exp_comp,
+                             const char* direction) {
     MacCameraDevice* mcd;
 
     /* Sanity checks. */
@@ -598,7 +655,9 @@ int camera_device_read_frame(CameraDevice* cd,
                       result_frame:
                            r_scale:
                            g_scale:
-                           b_scale:exp_comp];
+                           b_scale:
+                           exp_comp:
+                           direction];
 }
 
 void
