@@ -100,8 +100,6 @@ public:
         delete this;
     }
 
-    void OnCancel() override { Finish(grpc::Status::CANCELLED); }
-
 private:
     std::unique_ptr<HciAsyncDataChannelAdapter> mHciChannel;
     std::shared_ptr<AsyncDataChannel> mQemuChannel;
