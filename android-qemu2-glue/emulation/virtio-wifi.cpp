@@ -3,11 +3,16 @@ extern "C" {
 #include "sysemu/os-win32-msvc.h"
 }
 #endif
-#include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
-#include "android-qemu2-glue/utils/stream.h"
 #include "aemu/base/Log.h"
 #include "android/telephony/sysdeps.h"
 #include "host-common/VmLock.h"
+#include "android-qemu2-glue/emulation/WifiService.h"
+#include "android-qemu2-glue/utils/stream.h"
+#include "android/cmdline-definitions.h"  // for AndroidOptions
+#include "android/console.h"
+#include "android/network/Ieee80211Frame.h"
+#include "android/telephony/sysdeps.h"
+#include "android/utils/debug.h"
 
 extern "C" {
 #include "android-qemu2-glue/emulation/virtio-wifi.h"
@@ -26,7 +31,8 @@ extern "C" {
 
 using android::base::IOVector;
 using android::network::Ieee80211Frame;
-using android::qemu2::VirtioWifiForwarder;
+using android::qemu2::WifiService;
+using android::qemu2::HostapdOptions;
 namespace {
 
 /* Limit the number of packets that can be sent via a single flush
@@ -45,35 +51,57 @@ constexpr uint16_t VIRTIO_LINK_UP = 1;
 
 static const uint8_t kBssID[] = {0x00, 0x13, 0x10, 0x85, 0xfe, 0x01};
 static const uint8_t kMacAddr[] = {0x02, 0x15, 0xb2, 0x00, 0x00, 0x00};
-
+static const char kNicModel[] = "virtio-wifi-device";
+static const char kNicName[] = "virtio-wifi-device";
 static ssize_t virtio_wifi_on_frame_available(const uint8_t*, size_t);
 
 static void virtio_wifi_set_link_status(NetClientState* nc);
 
-static int virtio_wifi_can_receive(NetClientState* nc);
+static int virtio_wifi_can_receive(size_t queue_index);
 
-static void virtio_wifi_tx_complete(NetClientState* nc, ssize_t len);
+static void virtio_wifi_tx_complete(size_t queue_index);
 
-struct Globals {
-    bool initWifiForwarder(NICConf* conf) {
-        if (!wifiForwarder) {
-            wifiForwarder.reset(new VirtioWifiForwarder(
-                    bssID, &virtio_wifi_on_frame_available,
-                    &virtio_wifi_set_link_status, &virtio_wifi_can_receive,
-                    conf, &virtio_wifi_tx_complete));
-            return wifiForwarder->init();
+struct GlobalState {
+    bool initWifiService(NICConf* conf) {
+        if (!wifiService) {
+            auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
+            HostapdOptions hostapd = {.disabled = true};
+            auto builder =
+                    WifiService::Builder()
+                            .withRedirectToNetsim(opts->redirect_to_netsim)
+                            .withHostapd(hostapd)
+                            .withBssid(std::vector<uint8_t>(
+                                    kBssID, kBssID + sizeof(kBssID)))
+                            .withNicConf(conf)
+                            .withVerboseLogging(VERBOSE_CHECK(wifi))
+                            .withOnReceiveCallback(
+                                    &virtio_wifi_on_frame_available)
+                            .withOnSentCallback(&virtio_wifi_tx_complete)
+                            .withCanReceiveCallback(&virtio_wifi_can_receive)
+                            .withOnLinkStatusChangedCallback(
+                                    &virtio_wifi_set_link_status);
+
+            if (opts->wifi_client_port) {
+                builder.withClientPort(std::stoi(opts->wifi_client_port));
+            }
+            if (opts->wifi_server_port) {
+                builder.withServerPort(std::stoi(opts->wifi_server_port));
+            }
+            wifiService.reset(builder.build().release());
+            return wifiService->init();
         } else {
             return true;
         }
     }
-
-    const uint8_t* bssID = kBssID;
     int macPrefix = 0;
-    std::unique_ptr<VirtioWifiForwarder> wifiForwarder = nullptr;
+    std::unique_ptr<WifiService> wifiService = nullptr;
     VirtIOWifi* wifi = nullptr;
 };
 
-static Globals sGlobal;
+static GlobalState* globalState() {
+    static GlobalState sGlobal;
+    return &sGlobal;
+}
 
 struct virtio_wifi_config {
     uint8_t mac[ETH_ALEN];
@@ -131,25 +159,25 @@ static ssize_t virtio_wifi_add_buf(VirtIODevice* vdev,
 }
 
 static ssize_t virtio_wifi_on_frame_available(const uint8_t* buf, size_t size) {
-    VirtIOWifi* n = sGlobal.wifi;
+    VirtIOWifi* n = globalState()->wifi;
     VirtIODevice* vdev = VIRTIO_DEVICE(n);
     ssize_t ret = 0;
     if (size > 0) {
-        NetClientState* nc = qemu_get_queue(sGlobal.wifiForwarder->getNic());
-        size_t index = nc->queue_index;
+        NetClientState* nc =
+                qemu_get_queue(globalState()->wifiService->getNic());
+        size_t index = nc ? nc->queue_index : 0;
         ret = virtio_wifi_add_buf(vdev, n->vqs[index].rx, buf, size);
     }
     return ret;
 }
 
-static int virtio_wifi_can_receive(NetClientState* nc) {
-    VirtIOWifi* n = sGlobal.wifi;
+static int virtio_wifi_can_receive(size_t queue_index) {
+    VirtIOWifi* n = globalState()->wifi;
     VirtIODevice* vdev = VIRTIO_DEVICE(n);
-    size_t index = nc->queue_index;
     if (!vdev->vm_running) {
         return 0;
     }
-    if (!virtio_queue_ready(n->vqs[index].rx) ||
+    if (!virtio_queue_ready(n->vqs[queue_index].rx) ||
         !(vdev->status & VIRTIO_CONFIG_S_DRIVER_OK)) {
         return 0;
     }
@@ -158,7 +186,8 @@ static int virtio_wifi_can_receive(NetClientState* nc) {
 
 // If the vq is tx_p2p, then it is destined for remote VM.
 static ssize_t virtio_wifi_flush_tx(VirtIOWifiQueue* q) {
-    VirtIOWifi* n = sGlobal.wifi;
+    GlobalState& state = *globalState();
+    VirtIOWifi* n = state.wifi;
     VirtIODevice* vdev = VIRTIO_DEVICE(n);
     VirtQueue* vq = q->tx;
     size_t num_packets = 0;
@@ -180,7 +209,7 @@ static ssize_t virtio_wifi_flush_tx(VirtIOWifiQueue* q) {
         }
 
         IOVector iovec(elem->out_sg, elem->out_sg + elem->out_num);
-        if (sGlobal.wifiForwarder->forwardFrame(iovec) == -EBUSY) {
+        if (state.wifiService->send(iovec) == -EBUSY) {
             virtio_queue_set_notification(vq, 0);
             q->async_tx.elem = elem;
             return -EBUSY;
@@ -198,9 +227,9 @@ static ssize_t virtio_wifi_flush_tx(VirtIOWifiQueue* q) {
 
 // This function will only be called when the frame is sent to qemu networking.
 // Thus, we can safely assume the virtqueue is always q->tx;
-static void virtio_wifi_tx_complete(NetClientState* nc, ssize_t len) {
-    VirtIOWifi* n = sGlobal.wifi;
-    VirtIOWifiQueue* q = &n->vqs[nc->queue_index];
+static void virtio_wifi_tx_complete(size_t queue_index) {
+    VirtIOWifi* n = globalState()->wifi;
+    VirtIOWifiQueue* q = &n->vqs[queue_index];
     VirtIODevice* vdev = VIRTIO_DEVICE(n);
     if (q->async_tx.elem) {
         virtqueue_push(q->tx, q->async_tx.elem, 0);
@@ -214,7 +243,7 @@ static void virtio_wifi_tx_complete(NetClientState* nc, ssize_t len) {
 
 // set virtio-wifi link status according to netclientstate
 static void virtio_wifi_set_link_status(NetClientState* nc) {
-    VirtIOWifi* n = sGlobal.wifi;
+    VirtIOWifi* n = globalState()->wifi;
     VirtIODevice* vdev = VIRTIO_DEVICE(n);
     uint16_t old_status = n->status;
     if (nc->link_down)
@@ -227,7 +256,7 @@ static void virtio_wifi_set_link_status(NetClientState* nc) {
 }
 
 static VirtIOWifiQueue* getWifiQueue(VirtQueue* vq) {
-    VirtIOWifi* n = sGlobal.wifi;
+    VirtIOWifi* n = globalState()->wifi;
     return std::find_if(n->vqs, n->vqs + kQueueSize,
                         [vq](const VirtIOWifiQueue& q) { return q.tx == vq; });
 }
@@ -238,7 +267,7 @@ extern "C" {
 
 static void virtio_wifi_state_save(QEMUFile* file, void* opaque) {
     Stream* const s = stream_from_qemufile(file);
-    VirtIOWifi* n = static_cast<struct Globals*>(opaque)->wifi;
+    VirtIOWifi* n = static_cast<struct GlobalState*>(opaque)->wifi;
     sys_file_put_buffer((SysFile*)s, (uint8_t*)n->mac, ETH_ALEN);
     sys_file_put_be32((SysFile*)s, n->status);
     stream_free(s);
@@ -248,7 +277,7 @@ static int virtio_wifi_state_load(QEMUFile* file,
                                   void* opaque,
                                   int version_id) {
     Stream* const s = stream_from_qemufile(file);
-    VirtIOWifi* n = static_cast<struct Globals*>(opaque)->wifi;
+    VirtIOWifi* n = static_cast<struct GlobalState*>(opaque)->wifi;
     sys_file_get_buffer((SysFile*)s, n->mac, ETH_ALEN);
     uint32_t status = sys_file_get_be32((SysFile*)s);
     n->status = status;
@@ -270,19 +299,21 @@ static const VMStateDescription vmstate_virtio_wifi = {
 };
 
 void virtio_wifi_set_mac_prefix(int prefix) {
-    if (sGlobal.wifi) {
-        sGlobal.wifi->mac[4] = (prefix >> 8) & 0xff;
-        sGlobal.wifi->mac[5] = prefix & 0xff;
+    GlobalState& state = *globalState();
+    if (state.wifi) {
+        state.wifi->mac[4] = (prefix >> 8) & 0xff;
+        state.wifi->mac[5] = prefix & 0xff;
     }
-    sGlobal.macPrefix = prefix;
+    state.macPrefix = prefix;
 }
 
 const uint8_t* virtio_wifi_ssid_to_ethaddr(const char* ssid) {
-    if (sGlobal.wifi) {
-        auto mac = sGlobal.wifiForwarder->getStaMacAddr(ssid);
+    GlobalState& state = *globalState();
+    if (state.wifi) {
+        auto mac = state.wifiService->getStaMacAddr(ssid);
         if (!mac.empty()) {
-            std::memcpy(sGlobal.wifi->mac, mac.mAddr, ETH_ALEN);
-            return reinterpret_cast<const uint8_t*>(sGlobal.wifi->mac);
+            std::memcpy(state.wifi->mac, mac.mAddr, ETH_ALEN);
+            return reinterpret_cast<const uint8_t*>(state.wifi->mac);
         }
     }
     return nullptr;
@@ -311,7 +342,7 @@ static void virtio_wifi_handle_tx(VirtIODevice* vdev, VirtQueue* vq) {
 }
 
 static void virtio_wifi_tx_bh(void* opaque) {
-    VirtIOWifi* n = sGlobal.wifi;
+    VirtIOWifi* n = globalState()->wifi;
     VirtIOWifiQueue* q = static_cast<VirtIOWifiQueue*>(opaque);
     VirtQueue* vq = q->tx;
     VirtIODevice* vdev = VIRTIO_DEVICE(n);
@@ -351,8 +382,10 @@ static void virtio_wifi_tx_bh(void* opaque) {
 
 static void virtio_wifi_handle_rx(VirtIODevice* vdev, VirtQueue* vq) {
     VirtIOWifi* n = VIRTIO_WIFI(vdev);
-    qemu_flush_queued_packets(
-            qemu_get_subqueue(sGlobal.wifiForwarder->getNic(), 0));
+    NICState* nic = globalState()->wifiService->getNic();
+    if (nic) {
+        qemu_flush_queued_packets(qemu_get_subqueue(nic, 0));
+    }
 }
 
 static void virtio_wifi_handle_ctrl(VirtIODevice* vdev, VirtQueue* vq) {}
@@ -360,9 +393,10 @@ static void virtio_wifi_handle_ctrl(VirtIODevice* vdev, VirtQueue* vq) {}
 static void virtio_wifi_device_realize(DeviceState* dev, Error** errp) {
     VirtIODevice* vdev = VIRTIO_DEVICE(dev);
     VirtIOWifi* n = VIRTIO_WIFI(dev);
-
+    GlobalState& state = *globalState();
     n->nic_conf.peers.queues = kQueueSize;
-    if (!sGlobal.initWifiForwarder(&n->nic_conf)) {
+
+    if (!state.initWifiService(&n->nic_conf)) {
         LOG(WARNING) << "Mac80211 Hwsim device failed to initialize.";
         virtio_cleanup(vdev);
         return;
@@ -382,12 +416,12 @@ static void virtio_wifi_device_realize(DeviceState* dev, Error** errp) {
     n->tx_burst = kTXBurst;
 
     memcpy(n->mac, kMacAddr, ETH_ALEN);
-    n->mac[4] = (sGlobal.macPrefix >> 8) & 0xff;
-    n->mac[5] = sGlobal.macPrefix & 0xff;
+    n->mac[4] = (state.macPrefix >> 8) & 0xff;
+    n->mac[5] = state.macPrefix & 0xff;
     n->status = VIRTIO_LINK_UP;
     n->qdev = dev;
     register_savevm_live(NULL, "virtio_wifi", 0, 0, &virtio_vmhandlers,
-            &sGlobal);
+                         &state);
 }
 
 static void virtio_wifi_device_unrealize(DeviceState* dev, Error** errp) {
@@ -400,7 +434,7 @@ static void virtio_wifi_device_unrealize(DeviceState* dev, Error** errp) {
         n->vqs[index].tx_bh = NULL;
     }
     delete[] n->vqs;
-    sGlobal.wifiForwarder->stop();
+    globalState()->wifiService->stop();
     virtio_cleanup(vdev);
 }
 
@@ -420,9 +454,9 @@ static uint64_t virtio_wifi_bad_features(VirtIODevice* vdev) {
 static void virtio_wifi_instance_init(Object* obj) {
     VirtIOWifi* n = VIRTIO_WIFI(obj);
     // Keep reference to VirtIOWifi so that callback functions
-    // register to the VirtioWifiForwarder will not need to pass
+    // register to the WifiService does not have to pass back
     // an opaque pointer which is essentially VirtIOWifi ptr.
-    sGlobal.wifi = n;
+    globalState()->wifi = n;
 }
 
 static bool virtio_wifi_started(VirtIOWifi *n, uint8_t status)

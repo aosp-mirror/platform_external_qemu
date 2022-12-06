@@ -55,14 +55,6 @@ extern "C" {
 #include "net/net.h"
 #include "common/ieee802_11_defs.h"
 #include "drivers/driver_virtio_wifi.h"
-
-
-/* The port to use for WiFi forwarding as a server */
-extern uint16_t android_wifi_server_port;
-
-/* The port to use for WiFi forwarding as a client */
-extern uint16_t android_wifi_client_port;
-
 }  // extern "C"
 
 // Conflicts with Log.h
@@ -121,18 +113,22 @@ static constexpr float kTUtoMS = 1.024f;
 
 VirtioWifiForwarder::VirtioWifiForwarder(
         const uint8_t* bssid,
-        OnFrameAvailableCallback cb,
-        OnLinkStatusChanged onLinkStatusChanged,
-        CanReceive canReceive,
+        WifiService::OnReceiveCallback cb,
+        WifiService::OnLinkStatusChangedCallback onLinkStatusChanged,
+        WifiService::CanReceiveCallback canReceive,
         ::NICConf* conf,
-        OnFrameSentCallback onFrameSentCallback)
+        WifiService::OnSentCallback onFrameSentCallback,
+        uint16_t serverPort,
+        uint16_t clientPort)
     : mBssID(MACARG(bssid)),
       mOnFrameAvailableCallback(std::move(cb)),
       mOnLinkStatusChanged(std::move(onLinkStatusChanged)),
       mCanReceive(std::move(canReceive)),
       mOnFrameSentCallback(std::move(onFrameSentCallback)),
       mLooper(ThreadLooper::get()),
-      mNicConf(conf) {}
+      mNicConf(conf),
+      mServerPort(serverPort),
+      mClientPort(clientPort) {}
 
 VirtioWifiForwarder::~VirtioWifiForwarder() {
     stop();
@@ -157,29 +153,28 @@ bool VirtioWifiForwarder::init() {
                                       &VirtioWifiForwarder::onHostApd, this);
     mFdWatch->wantRead();
     mFdWatch->dontWantWrite();
+    if (mNicConf) {
+        // init Qemu Nic
+        static NetClientInfo info = {
+                .type = NET_CLIENT_DRIVER_NIC,
+                .size = sizeof(NICState),
+                .receive = &VirtioWifiForwarder::onNICFrameAvailable,
+                .can_receive = &VirtioWifiForwarder::canReceive,
+                .link_status_changed =
+                        &VirtioWifiForwarder::onLinkStatusChanged,
+        };
 
-    // init Qemu Nic
-    static NetClientInfo info = {
-            .type = NET_CLIENT_DRIVER_NIC,
-            .size = sizeof(NICState),
-            .receive = &VirtioWifiForwarder::onNICFrameAvailable,
-            .can_receive = &VirtioWifiForwarder::canReceive,
-            .link_status_changed = &VirtioWifiForwarder::onLinkStatusChanged,
-    };
-
-    mNic = qemu_new_nic(&info, mNicConf, kNicModel, kNicName, this);
-
+        mNic = qemu_new_nic(&info, mNicConf, kNicModel, kNicName, this);
+    }
     // init WifiFordPeer for P2P network.
     auto onData = [this](const uint8_t* data, size_t size) {
         return this->onRemoteData(data, size);
     };
 
-    if (android_wifi_client_port > 0) {
-        mRemotePeer.reset(
-                new WifiForwardClient(android_wifi_client_port, onData));
-    } else if (android_wifi_server_port > 0) {
-        mRemotePeer.reset(
-                new WifiForwardServer(android_wifi_server_port, onData));
+    if (mClientPort > 0) {
+        mRemotePeer.reset(new WifiForwardClient(mClientPort, onData));
+    } else if (mServerPort > 0) {
+        mRemotePeer.reset(new WifiForwardServer(mServerPort, onData));
     }
     if (mRemotePeer != nullptr) {
         mRemotePeer->init();
@@ -209,7 +204,7 @@ void VirtioWifiForwarder::ackLocalFrame(const Ieee80211Frame* frame) {
     mOnFrameAvailableCallback(txInfo.data(), txInfo.dataLen());
 }
 
-int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
+int VirtioWifiForwarder::send(const IOVector& iov) {
     if (!mHostapd->isRunning()) {
         return 0;
     }
@@ -265,6 +260,11 @@ int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
     return 0;
 }
 
+// Because virtio-wifi driver uses recv callback, this function is not used.
+int VirtioWifiForwarder::recv(android::base::IOVector& iov) {
+    return 0;
+}
+
 void VirtioWifiForwarder::stop() {
     mBeaconTask.clear();
     mNic = nullptr;
@@ -290,7 +290,7 @@ VirtioWifiForwarder* VirtioWifiForwarder::getInstance(NetClientState* nc) {
 
 int VirtioWifiForwarder::canReceive(NetClientState* nc) {
     auto forwarder = getInstance(nc);
-    return forwarder->mCanReceive(nc);
+    return forwarder->mCanReceive(nc->queue_index);
 }
 
 void VirtioWifiForwarder::onLinkStatusChanged(NetClientState* nc) {
@@ -302,7 +302,7 @@ void VirtioWifiForwarder::onFrameSentCallback(NetClientState* nc,
                                               ssize_t size) {
     auto forwarder = getInstance(nc);
     if (forwarder->mOnFrameSentCallback) {
-        forwarder->mOnFrameSentCallback(nc, size);
+        forwarder->mOnFrameSentCallback(nc->queue_index);
     }
 }
 
@@ -336,7 +336,7 @@ ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
     if (!forwarder->mHostapd->isRunning()) {
         return -1;
     }
-    if (!forwarder->mCanReceive(nc)) {
+    if (!forwarder->mCanReceive(nc->queue_index)) {
         return -1;
     }
     std::unique_ptr<Ieee80211Frame> frame =

@@ -2209,6 +2209,11 @@ static void help_xts(stralloc_t* out) {
     PRINTF(" Turn on tweaks made for running xTS.\n\n");
 }
 
+static void help_redirect_to_netsim(stralloc_t* out) {
+    PRINTF(" All WiFi network traffic will be redirected to the external "
+           " netsim process which is a full stack network service. By default,"
+           " Emulator will use its own in process network stack.\n\n");
+}
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

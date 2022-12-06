@@ -36,6 +36,7 @@ set(android-qemu2-glue_src
     emulation/virtio_vsock_transport.cpp
     emulation/virtio-wifi.cpp
     emulation/VirtioGpuTimelines.cpp
+    emulation/WifiService.cpp
     emulation/VirtioWifiForwarder.cpp
     looper-qemu.cpp
     net-android.cpp

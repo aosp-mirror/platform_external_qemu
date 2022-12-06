@@ -347,6 +347,8 @@ OPT_FLAG(hotplug_multi_display, "Use the HAL hotplug display to implement multiD
 
 OPT_FLAG(xts, "Use android64-xts CPU profile instead of the default one")
 
+OPT_FLAG(redirect_to_netsim, "Forward network traffic to the netsim process via gRPC. ")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
