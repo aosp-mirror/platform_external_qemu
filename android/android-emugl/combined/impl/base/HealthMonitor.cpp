@@ -269,6 +269,18 @@ void HealthMonitor<Clock>::updateTaskParent(std::queue<std::unique_ptr<Monitored
     }
 }
 
+std::unique_ptr<HealthMonitor<>> CreateHealthMonitor(
+        MetricsLogger& metricsLogger,
+        uint64_t heartbeatInterval) {
+#if ENABLE_HEALTH_MONITOR
+    INFO("HealthMonitor enabled.");
+    return std::make_unique<HealthMonitor<>>(metricsLogger, heartbeatInterval);
+#else
+    INFO("HealthMonitor disabled.");
+    return nullptr;
+#endif
+}
+
 template class HealthMonitor<steady_clock>;
 template class HealthMonitor<TestClock>;
 
