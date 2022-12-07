@@ -68,6 +68,7 @@ add_definitions(-D_DARWIN_C_SOURCE=1)
 get_rust_version(RUST_VER)
 configure_rust(COMPILER_ROOT "${AOSP_ROOT}/prebuilts/rust/darwin-x86/${RUST_VER}/bin")
 
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
 # And the asm type if we are compiling with ASM
 set(ANDROID_ASM_TYPE macho64)
 # No magical includes or dependencies for darwin..
