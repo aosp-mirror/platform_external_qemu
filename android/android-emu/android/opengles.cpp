@@ -214,6 +214,12 @@ BAD_EXIT:
     return -1;
 }
 
+namespace android {
+namespace featurecontrol {
+    extern bool isEnabledLocal(Feature feature);
+}
+}
+
 int
 android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int guestApiLevel,
                               const QAndroidVmOperations *vm_operations,
@@ -253,10 +259,10 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     // Don't override the feature controller when running under
     // gfxstream_backend_unittests
     if (!sRunningInGfxstreamBackend) {
-        sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);
+        sRenderLib->setFeatureController(&android::featurecontrol::isEnabledLocal);
     }
 #else
-    sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);
+    sRenderLib->setFeatureController(&android::featurecontrol::isEnabledLocal);
 #endif
     sRenderLib->setSyncDevice(goldfish_sync_create_timeline,
             goldfish_sync_create_fence,

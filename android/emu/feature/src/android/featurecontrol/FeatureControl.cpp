@@ -27,6 +27,10 @@ bool isEnabled(Feature feature) {
         : FeatureControlImpl::get().isEnabled(feature);
 }
 
+bool isEnabledLocal(Feature feature) {
+    return FeatureControlImpl::get().isEnabled(feature);
+}
+
 bool isEnabledByGuest(Feature feature) {
     return FeatureControlImpl::get().isEnabledByGuest(feature);
 }
