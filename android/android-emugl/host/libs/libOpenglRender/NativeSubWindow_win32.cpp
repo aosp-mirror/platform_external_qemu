@@ -36,7 +36,7 @@ static LRESULT CALLBACK subWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 }
 
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
-                                    int x, int y,int width, int height,
+                                    int x, int y,int width, int height, float dpr,
                                     SubWindowRepaintCallback repaint_callback,
                                     void* repaint_callback_param, int hideWindow){
     static const char className[] = "subWin";

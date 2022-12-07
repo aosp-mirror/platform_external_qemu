@@ -45,6 +45,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int y,
                                     int width,
                                     int height,
+                                    float dpr,
                                     SubWindowRepaintCallback repaint_callback,
                                     void* repaint_callback_param,
                                     int hideWindow);
