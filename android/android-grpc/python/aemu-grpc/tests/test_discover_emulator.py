@@ -15,19 +15,19 @@ import os
 from pathlib import Path
 
 import aemu.discovery.emulator_discovery
+import psutil
 import pytest
 from aemu.discovery.emulator_discovery import EmulatorDiscovery, get_default_emulator
 
-
-@pytest.fixture(scope="session")
+@pytest.fixture
 def tmp_directory(tmp_path_factory):
     return tmp_path_factory.mktemp("data")
 
 
 @pytest.fixture
-def fake_emu_pid_file(tmp_directory):
+def fake_emu_pid_file(tmp_directory, mocker):
     def write_pid_file(number):
-        fn = tmp_directory / f"pid_123{number}.ini"
+        fn = Path(tmp_directory / f"pid_123{number}.ini")
         with open(fn, "w") as w:
             w.write("port.serial={}\n".format(5554 + number * 2))
             w.write("port.adb={}\n".format(5555 + number * 2))
@@ -36,17 +36,28 @@ def fake_emu_pid_file(tmp_directory):
             w.write("avd.id=Q\n")
             w.write("cmdline=unused\n")
             w.write("grpc.port={}\n".format(8554 + number * 2))
-        return fn.parent, fn
+
+        mocker.patch.object(
+            aemu.discovery.emulator_discovery,
+            "get_discovery_directories",
+            return_value=[tmp_directory],
+        )
+        mocker.patch.object(psutil, "pid_exists", return_value=True)
 
     return write_pid_file
 
 
 @pytest.fixture
-def bad_emu_pid_file(tmp_directory):
-    fn = tmp_directory / "pid_1234.ini"
-    with open(fn, "w") as w:
+def bad_emu_pid_file(tmp_directory, mocker):
+    bad_file = Path(tmp_directory / "pid_1234.ini")
+    with open(bad_file, "w") as w:
         w.write("bad_new_bears\n")
-    return fn
+
+    mocker.patch.object(
+        aemu.discovery.emulator_discovery,
+        "get_discovery_directories",
+        return_value=[bad_file],
+    )
 
 
 def test_no_pid_file_means_no_emulator(mocker):
@@ -56,25 +67,12 @@ def test_no_pid_file_means_no_emulator(mocker):
     assert emu.available() == 0
 
 
-def test_bad_pid_file_means_no_emulator(mocker, bad_emu_pid_file):
-    path = Path(bad_emu_pid_file)
-    mocker.patch.object(
-        aemu.discovery.emulator_discovery,
-        "get_discovery_directories",
-        return_value=[path],
-    )
-    emu = EmulatorDiscovery()
-    assert emu.available() == 0
+def test_bad_pid_file_means_no_emulator(bad_emu_pid_file):
+    assert EmulatorDiscovery().available() == 0
 
 
-def test_can_parse_and_read_emu_file(mocker, fake_emu_pid_file):
-    path, pid_file = fake_emu_pid_file(0)
-    mocker.patch.object(
-        aemu.discovery.emulator_discovery,
-        "get_discovery_directories",
-        return_value=[path],
-    )
-    mocker.patch.object(Path, "glob", return_value=[pid_file])
+def test_can_parse_and_read_emu_file(fake_emu_pid_file):
+    fake_emu_pid_file(0)
     emu = EmulatorDiscovery()
     assert emu.available() == 1
     assert emu.find_by_pid(1230) is not None
@@ -82,30 +80,17 @@ def test_can_parse_and_read_emu_file(mocker, fake_emu_pid_file):
 
 
 def test_finds_default_emulator(mocker, fake_emu_pid_file):
-    path, pid_file = fake_emu_pid_file(0)
-    mocker.patch.object(
-        aemu.discovery.emulator_discovery,
-        "get_discovery_directories",
-        return_value=[path],
-    )
-    mocker.patch.object(os, "listdir", return_value=[pid_file])
+    fake_emu_pid_file(0)
     assert get_default_emulator() is not None
     assert get_default_emulator().name() == "emulator-5554"
 
 
-def test_finds_two_emulators(mocker, fake_emu_pid_file):
-    path1, pid_file1 = fake_emu_pid_file(0)
-    path2, pid_file2 = fake_emu_pid_file(1)
-    assert path1 == path2
-    assert pid_file1 != pid_file2
+def test_finds_two_emulators(fake_emu_pid_file):
+    fake_emu_pid_file(0)
+    fake_emu_pid_file(1)
 
-    mocker.patch.object(
-        aemu.discovery.emulator_discovery,
-        "get_discovery_directories",
-        return_value=[path1],
-    )
-    mocker.patch.object(os, "listdir", return_value=[pid_file1, pid_file2])
     discovery = EmulatorDiscovery()
     assert discovery.available() == 2
     assert discovery.find_by_pid("1230").name() == "emulator-5554"
     assert discovery.find_by_pid("1231").name() == "emulator-5556"
+

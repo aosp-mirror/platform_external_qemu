@@ -11,10 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from ast import Not
 import logging
+from typing import Optional
 
 import grpc
+import psutil
 from aemu.discovery.header_manipulator_client_interceptor import (
     header_adder_interceptor,
 )
@@ -30,6 +31,7 @@ except ImportError:
 
 from aemu.proto.emulated_bluetooth_pb2_grpc import EmulatedBluetoothServiceStub
 from aemu.proto.emulated_bluetooth_vhci_pb2_grpc import VhciForwardingServiceStub
+from aemu.proto.emulator_controller_pb2 import VmRunState
 from aemu.proto.emulator_controller_pb2_grpc import EmulatorControllerStub
 from aemu.proto.rtc_service_pb2_grpc import RtcStub
 from aemu.proto.snapshot_service_pb2_grpc import SnapshotServiceStub
@@ -104,6 +106,62 @@ class EmulatorDescription(dict):
 
         logging.debug("Insecure channel to %s", addr)
         return channel
+
+    def process(self) -> Optional[psutil.Process]:
+        """Returns the process object associated with the qemu process.
+
+        Returns:
+            Optional[psutil.Process]: The psutil process object, or one if not running
+        """
+        procs = [p for p in psutil.process_iter(["pid"]) if p.pid == self.pid()]
+        return next(iter(procs), None)
+
+    def is_alive(self) -> bool:
+        """Checks to see if this emulator description is still alive.
+
+        A Liveness check is done by determining if the pid is still alive
+
+        Returns:
+            bool: True if the pid associated with this description is alive
+        """
+        return psutil.pid_exists(self.pid())
+
+    def shutdown(self, timeout=30) -> bool:
+        """Gracefully shutdown the emulator.
+
+        This sends the shutdown signal to the emulator over gRPC.
+        The emulator will be terminated if:
+
+        - The emulator does not shutdown in timeout seconds.
+        - The gRPC endpoint is not responding
+
+        Args:
+            timeout (int, optional): Timeout before forcefully terminating the emulator. Defaults to 30.
+
+        Returns:
+            bool: True if the emulator is no longer running.
+        """
+        proc = self.process()
+        if not proc:
+            return True
+
+        try:
+            self.get_emulator_controller().setVmState(
+                VmRunState(state=VmRunState.SHUTDOWN)
+            )
+        except Exception as err:
+            logging.error("Failed to shutdown using gRPC (%s), terminating.", err)
+            proc.terminate()
+
+        try:
+            proc.wait(timeout=timeout)
+        except psutil.TimeoutExpired as expired:
+            logging.error(
+                "Emulator did not shutdown gracefully, terminating. (%s)", expired
+            )
+            proc.terminate()
+
+        return not self.is_alive()
 
     def get_async_grpc_channel(self) -> grpc.aio.Channel:
         """Gets an asynchronous channel to the emulator.
