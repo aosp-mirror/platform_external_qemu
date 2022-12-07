@@ -107,5 +107,7 @@ class CTestTask(BuildTask):
                 test_log_file = (
                     self.destination / "Testing" / "Temporary" / "LastTest.log"
                 )
-                with open(test_log_file.absolute(), "r", encoding="utf-8") as log_file:
+                with open(
+                    test_log_file.absolute(), "r", encoding="utf-8", errors="ignore"
+                ) as log_file:
                     logging.error("%s", log_file.read())
