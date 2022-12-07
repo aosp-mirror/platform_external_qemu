@@ -5,7 +5,12 @@
 #include <string_view>  // for string_view
 
 #include "aemu/base/logging/LogSeverity.h"  // for EMULATOR_LOG_INFO, EMULATOR_...
-#include "android/utils/debug.h"  // for __emu_log_print, VERBOSE_CHECK
+
+#ifdef ANDROID_EMULATOR_BUILD
+#include "android/utils/debug.h" // for __emu_log_print, VERBOSE_CHECK
+#else
+#include "aemu/base/logging/CLog.h"
+#endif
 
 extern "C" void __blue_write_to_file(LogSeverity prio,
                                      const char* file,
@@ -21,6 +26,7 @@ std::shared_ptr<std::ostream> getLogstream(std::string_view id);
 }  // namespace android::bluetooth
 
 // Note that we log both to a file as well as the emulator log system.
+#ifdef ANDROID_EMULATOR_BUILD
 #define LOGWRAPPER(level, fmt, args...)                                      \
     do {                                                                     \
         if (VERBOSE_CHECK(bluetooth)) {                                      \
@@ -28,6 +34,13 @@ std::shared_ptr<std::ostream> getLogstream(std::string_view id);
             __emu_log_print(level, __FILE__, __LINE__, fmt "", ##args);      \
         }                                                                    \
     } while (false)
+#else
+#define LOGWRAPPER(level, fmt, args...)                                  \
+    do {                                                                 \
+        __blue_write_to_file(level, __FILE__, __LINE__, fmt "", ##args); \
+        __emu_log_print(level, __FILE__, __LINE__, fmt "", ##args);      \
+    } while (false)
+#endif
 
 #define LOG_VERBOSE(fmt, args...) LOGWRAPPER(EMULATOR_LOG_VERBOSE, fmt, ##args);
 #define LOG_DEBUG(fmt, args...) LOGWRAPPER(EMULATOR_LOG_DEBUG, fmt, ##args);

@@ -17,7 +17,7 @@
 #include <unordered_set>  // for unordered_set
 #include <vector>         // for vector
 
-#include "android/utils/debug.h"
+#include "aemu/base/logging/CLog.h"
 #include "net/async_data_channel_server.h"  // for AsyncDataChannelServer (p...
 #include "net/multi_datachannel_server.h"   // for MultiDataChannelServer
 

@@ -193,7 +193,28 @@ endif()
 
 if(FEATURE_NETSIM)
   set(EXTERNAL_QEMU ${ANDROID_QEMU2_TOP_DIR})
-  add_subdirectory(${AOSP_ROOT}/tools/netsim netsim)
+  if (DARWIN_AARCH64 AND NOT Rust_COMPILER)
+    message(STATUS "Cross compiling netsim to target Rosetta X86_64")
+    include(ExternalProject)
+    set(NETSIM_CROSS_DIR ${ANDROID_CROSS_BUILD_DIRECTORY}/netsim_ext_cross/src/netsim_ext_cross-build/)
+    externalproject_add(
+      netsim_ext_cross
+      PREFIX ${ANDROID_CROSS_BUILD_DIRECTORY}/netsim_ext_cross
+      DOWNLOAD_COMMAND ""
+      SOURCE_DIR ${AOSP_ROOT}/tools/netsim
+      CMAKE_ARGS
+        "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-darwin-x86_64.cmake"
+        "-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+      BUILD_BYPRODUCTS "${NETSIM_CROSS_DIR}/netsim;${NETSIM_CROSS_DIR}/netsimd"
+      LOG_BUILD TRUE
+      LOG_INSTALL TRUE
+      INSTALL_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+      INSTALL_COMMAND "")
+
+      install(PROGRAMS ${NETSIM_CROSS_DIR}/netsim ${NETSIM_CROSS_DIR}/netsimd DESTINATION .)
+  else()
+    add_subdirectory(${AOSP_ROOT}/tools/netsim netsim)
+  endif()
 endif()
 
 # gfxstream, aemu-common modules
