@@ -111,6 +111,8 @@ private:
 
     base::CircularBuffer<emulator_snapshot::SaveStats> mSaveStats;
     FailureReason mLatestFailureReason = FailureReason::Empty;
+
+    bool isVersionCompatible() const;
 };
 
 inline bool operator==(const Snapshot& l, const Snapshot& r) {

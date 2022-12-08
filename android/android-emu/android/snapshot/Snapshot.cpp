@@ -619,11 +619,23 @@ void Snapshot::loadProtobufOnce() {
                 FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
         return;
     }
-    if (!mSnapshotPb.has_version() || mSnapshotPb.version() != kVersion) {
+    if (!isVersionCompatible()) {
         saveFailure(FailureReason::IncompatibleVersion);
         return;
     }
     // Success
+}
+
+bool Snapshot::isVersionCompatible() const {
+    if (mSnapshotPb.has_version()) {
+        if (fc::isEnabled(fc::DownloadableSnapshot)) {
+            return (mSnapshotPb.version() >> 10) == (kVersion >> 10);
+        } else {
+            return (mSnapshotPb.version() == kVersion);
+        }
+    } else {
+        return false;
+    }
 }
 
 // preload(): Obtain the protobuf metadata. Logic for deciding
@@ -633,7 +645,7 @@ void Snapshot::loadProtobufOnce() {
 bool Snapshot::preload() {
     loadProtobufOnce();
 
-    return (mSnapshotPb.has_version() && mSnapshotPb.version() == kVersion);
+    return isVersionCompatible();
 }
 
 const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
