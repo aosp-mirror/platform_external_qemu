@@ -173,7 +173,7 @@ struct VirtMachineState {
     DeviceState *acpi_dev;
     Notifier powerdown_notifier;
     PCIBus *bus;
-    I2CBus *smbus;
+    DeviceState *smbus;
     char *oem_id;
     char *oem_table_id;
 };

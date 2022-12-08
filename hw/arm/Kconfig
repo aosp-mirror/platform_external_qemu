@@ -33,6 +33,8 @@ config ARM_VIRT
     select ACPI_CXL
     select ACPI_HMAT
     select DESIGNWARE_I2C
+    select IPMI_EXTERN
+    select IPMI_SSIF
 
 config CHEETAH
     bool

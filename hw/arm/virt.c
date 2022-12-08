@@ -942,11 +942,9 @@ static void create_smbus(VirtMachineState *vms)
     int irq = vms->irqmap[VIRT_SMBUS];
     const char compat[] = "snps,designware-i2c";
     MachineState *ms = MACHINE(vms);
-    DeviceState *dev;
 
-    dev = sysbus_create_simple(TYPE_DESIGNWARE_I2C, base,
-                               qdev_get_gpio_in(vms->gic, irq));
-    vms->smbus = (I2CBus *)qdev_get_child_bus(dev, "i2c-bus");
+    vms->smbus = sysbus_create_simple(TYPE_DESIGNWARE_I2C, base,
+                                      qdev_get_gpio_in(vms->gic, irq));
 
     nodename = g_strdup_printf("/i2c@%" PRIx64, base);
     qemu_fdt_add_subnode(ms->fdt, nodename);

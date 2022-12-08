@@ -36,6 +36,7 @@
 #include "hw/acpi/acpi-defs.h"
 #include "hw/acpi/acpi.h"
 #include "hw/nvram/fw_cfg.h"
+#include "hw/acpi/acpi_aml_interface.h"
 #include "hw/acpi/bios-linker-loader.h"
 #include "hw/acpi/aml-build.h"
 #include "hw/acpi/utils.h"
@@ -95,7 +96,7 @@ static void acpi_dsdt_add_uart(Aml *scope, const MemMapEntry *uart_memmap,
 }
 
 static void acpi_dsdt_add_smbus(Aml *scope, const MemMapEntry *smbus_memmap,
-                                           uint32_t i2c_irq, I2CBus *smbus)
+                                           uint32_t i2c_irq, DeviceState *smbus)
 {
     Aml *dev = aml_device("SMB0");
     aml_append(dev, aml_name_decl("_HID", aml_string("APMC0D0F")));
@@ -111,6 +112,9 @@ static void acpi_dsdt_add_smbus(Aml *scope, const MemMapEntry *smbus_memmap,
                              AML_EXCLUSIVE, &i2c_irq, 1));
     aml_append(dev, aml_name_decl("_CRS", crs));
 
+    /* TODO(b/261895337) - Integrate the rest of the acpi code in the
+     * designware_i2c model. */
+    call_dev_aml_func(smbus, dev);
     aml_append(scope, dev);
 }
 
