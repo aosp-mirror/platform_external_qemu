@@ -322,7 +322,7 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
     }
 
     if (displayId == nullptr) {
-        derror("Cannot create a dipslay, the displayId is a nullptr");
+        derror("Cannot create a display, the displayId is a nullptr");
         return -1;
     }
 
@@ -711,7 +711,7 @@ std::map<uint32_t, MultiDisplayInfo> MultiDisplay::parseConfig() {
     }
     params.push_back(std::stoi(s.substr(last)));
     if (params.size() < 5 || params.size() % 5 != 0) {
-        derror("A multidisplay command should be a at least 5 and be multiple "
+        derror("A multidisplay command should be at least 5 and be a multiple "
                "of 5, not %d",
                params.size());
         return ret;
@@ -727,8 +727,7 @@ std::map<uint32_t, MultiDisplayInfo> MultiDisplay::parseConfig() {
                                       params[i + 3], params[i + 4])) {
             derror("Invalid index: %d, width: %d, height: %d, or dpi: %d "
                    "for multidisplay command,",
-                   params[i], params[i + 1], params[i + 2], params[i + 3],
-                   params[i + 4]);
+                   params[i], params[i + 1], params[i + 2], params[i + 3]);
             ret.clear();
             return ret;
         }

@@ -92,14 +92,14 @@ int Mp4DatasetImpl::init(const std::string filepath,
 
     AVFormatContext* inputCtx = nullptr;
     if (avformat_open_input(&inputCtx, filename, NULL, NULL) != 0) {
-        derror("Failed to open av input context for Mp4 dataset.");
+        derror("Failed to open av input context for mp4 dataset.");
         return -1;
     }
 
     mFormatCtx = makeAVScopedPtr(inputCtx);
 
     if (avformat_find_stream_info(mFormatCtx.get(), NULL) < 0) {
-        derror("Failed to open av stream info for Mp4 dataset.");
+        derror("Failed to open av stream info for mp4 dataset.");
         return -1;
     }
 
