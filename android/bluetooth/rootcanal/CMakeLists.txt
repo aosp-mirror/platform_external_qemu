@@ -146,29 +146,16 @@ target_compile_options(BluetoothPacketSources
   PUBLIC -Wno-inconsistent-missing-override)
 
 android_add_library(
-  TARGET libbt-crypto_toolbox LICENSE Apache-2.0
-  SOURCE_DIR ${BT_ROOT}/gd/crypto_toolbox/ SRC aes.cc aes_cmac.cc
-  crypto_toolbox.cc)
-
-target_include_directories(libbt-crypto_toolbox PUBLIC include ${BT_ROOT}/gd/)
-
-android_add_test(
-  TARGET test-libbt-crypto_toolbox SOURCE_DIR ${BT_ROOT}/gd/crypto_toolbox/
-  SRC # cmake-format: sortable
-  crypto_toolbox_test.cc)
-
-target_link_libraries(test-libbt-crypto_toolbox PRIVATE libbt-crypto_toolbox
-  gmock_main)
-android_add_library(
   TARGET libbt-rootcanal
   LICENSE Apache-2.0
   SOURCE_DIR ${ROOTCANAL_ROOT}
   SRC # cmake-format: sortable
   ${BluetoothGeneratedPackets_h}
-  ${BT_ROOT}/gd/hci/address.cc
-  ${BT_ROOT}/gd/hci/class_of_device.cc
   ${CMAKE_CURRENT_LIST_DIR}/os/log.cpp
   ${RootCanalGeneratedPackets_h}
+  lib/crypto/crypto.cc
+  lib/hci/address.cc
+  lib/hci/class_of_device.cc
   model/controller/acl_connection.cc
   model/controller/acl_connection_handler.cc
   model/controller/controller_properties.cc
@@ -206,7 +193,7 @@ android_add_library(
 
 target_link_libraries(
   libbt-rootcanal
-  PRIVATE libscriptedbeaconpayload-protos-lite jsoncpp libbt-crypto_toolbox
+  PRIVATE libscriptedbeaconpayload-protos-lite jsoncpp crypto
   BluetoothPacketSources android-emu-base android-emu-base-headers)
 target_include_directories(
   libbt-rootcanal
