@@ -407,7 +407,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 #ifdef _WIN32
       mVgkWarningBox(QMessageBox::Information,
                      tr("Incompatible Software Detected"),
-                     tr("Vanguard anti-cheat software is deteced on your "
+                     tr("Vanguard anti-cheat software is detected on your "
                         "system. It is known to have compatibility issues "
                         "with Android emulator. It is recommended to uninstall "
                         "or deactivate Vanguard anti-cheat software while "
