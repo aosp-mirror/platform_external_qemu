@@ -22,6 +22,10 @@ from pathlib import Path
 from aemu.discovery.emulator_description import EmulatorDescription
 
 
+class EmulatorNotFound(Exception):
+    pass
+
+
 class EmulatorDiscovery(object):
     """A Class used to discover all running emulators on the system."""
 
@@ -32,23 +36,26 @@ class EmulatorDiscovery(object):
 
     def __init__(self):
         self.discovery_dirs = get_discovery_directories()
-        self.discover()
 
-    def discover(self) -> None:
+    def _discover_running(self) -> set[EmulatorDescription]:
         """Discovers all the running emulators by parsing the
         available discovery files.
         """
-        self._emulators = set()
+        emulators = set()
         for discovery_dir in self.discovery_dirs:
             logging.debug("Discovering emulators in %s", discovery_dir)
             if discovery_dir.exists():
                 for file in discovery_dir.glob("*.ini"):
-                    m = self._PID_FILE_.match(file.name)
-                    if m:
+                    pid_file = self._PID_FILE_.match(file.name)
+                    if pid_file:
                         logging.debug("Found %s", file)
-                        emu = self._parse_ini(file)
-                        if emu:
-                            self._emulators.add(EmulatorDescription(m.group(1), emu))
+                        emu = EmulatorDescription(
+                            pid_file.group(1), self._parse_ini(file)
+                        )
+                        if emu.is_alive():
+                            emulators.add(emu)
+
+        return emulators
 
     def _parse_ini(self, ini_file: str) -> dict[str, str]:
         """Parse a discovered ini file
@@ -75,7 +82,7 @@ class EmulatorDiscovery(object):
         Returns:
             int: The number of discovered emulators.
         """
-        return len(self._emulators)
+        return len(self._discover_running())
 
     def emulators(self) -> set[EmulatorDescription]:
         """All the running emulators
@@ -83,9 +90,9 @@ class EmulatorDiscovery(object):
         Returns:
             set[EmulatorDescription]: All discovered emulators.
         """
-        return frozenset(self._emulators)
+        return frozenset(self._discover_running())
 
-    def find_emulator(self, prop: str, value: str) -> Optional[EmulatorDescription]:
+    def find_emulator(self, prop: str, value: str) -> EmulatorDescription:
         """Finds the emulator where the given property has the given value.
 
         Args:
@@ -93,16 +100,16 @@ class EmulatorDiscovery(object):
             value (str): The value of the property
 
         Returns:
-            EmulatorDescription: The discovered emulator or None if not found.
+            EmulatorDescription: The discovered emulator or None if no such emulator
         """
-        for emu in self._emulators:
+        for emu in self._discover_running():
             if emu.get(prop) == value:
                 return emu
 
         return None
 
     def find_by_pid(self, pid: int) -> Optional[EmulatorDescription]:
-        """Finds the emulator with the give process id
+        """Finds the emulator with the give process id.
 
         Args:
             pid (int): The process id of the running emulator.
@@ -114,8 +121,18 @@ class EmulatorDiscovery(object):
         return self.find_emulator("pid", str(pid))
 
     def first(self) -> EmulatorDescription:
-        """Gets the first discovered emulator."""
-        return next(iter(self._emulators))
+        """Gets the first discovered emulator.
+
+        Raises:
+            EmulatorNotFound: No running emulators were found.
+
+        Returns:
+            EmulatorDescription: The first discovered running emulator.
+        """
+        emulators = self._discover_running()
+        if len(emulators) == 0:
+            raise EmulatorNotFound("No running emulators were found.")
+        return next(iter(emulators))
 
 
 def get_discovery_directories() -> list[Path]:
@@ -164,6 +181,9 @@ def get_default_emulator() -> EmulatorDescription:
     """The first discovered emulator.
 
         Useful if you expect only one running emulator.
+
+    Raises:
+        EmulatorNotFound: No running emulators were found.
 
     Returns:
         EmulatorDescription: The first discovered emulator.
