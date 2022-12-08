@@ -16,6 +16,7 @@
 
 #include "qemu/osdep.h"
 
+#include "hw/acpi/acpi_aml_interface.h"
 #include "hw/i2c/designware_i2c.h"
 #include "migration/vmstate.h"
 #include "qemu/bitops.h"
@@ -798,15 +799,30 @@ static void designware_i2c_smbus_init(Object *obj)
     s->bus = i2c_init_bus(DEVICE(s), "i2c-bus");
 }
 
+static void designware_i2c_build_smb_aml(AcpiDevAmlIf *adev, Aml *scope)
+{
+    /* TODO(b/261895337) - This only handles child nodes right now.  Integrate
+     * the rest of the acpi code in the designware_i2c model. */
+    BusChild *kid;
+    DesignWareI2CState *s = DESIGNWARE_I2C(adev);
+    BusState *bus = BUS(s->bus);
+
+    QTAILQ_FOREACH(kid, &bus->children, sibling) {
+        call_dev_aml_func(DEVICE(kid->child), scope);
+    }
+}
+
 static void designware_i2c_class_init(ObjectClass *klass, void *data)
 {
     ResettableClass *rc = RESETTABLE_CLASS(klass);
     DeviceClass *dc = DEVICE_CLASS(klass);
+    AcpiDevAmlIfClass *adevc = ACPI_DEV_AML_IF_CLASS(klass);
 
     dc->desc = "Designware I2C";
     dc->vmsd = &vmstate_designware_i2c;
     rc->phases.enter = designware_i2c_enter_reset;
     rc->phases.hold = designware_i2c_hold_reset;
+    adevc->build_dev_aml = designware_i2c_build_smb_aml;
 }
 
 static const TypeInfo designware_i2c_types[] = {
@@ -816,6 +832,10 @@ static const TypeInfo designware_i2c_types[] = {
         .instance_size = sizeof(DesignWareI2CState),
         .class_init = designware_i2c_class_init,
         .instance_init = designware_i2c_smbus_init,
+        .interfaces = (InterfaceInfo[]) {
+            { TYPE_ACPI_DEV_AML_IF },
+            { },
+        },
     },
 };
 DEFINE_TYPES(designware_i2c_types);
