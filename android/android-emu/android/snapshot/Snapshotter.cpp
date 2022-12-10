@@ -268,6 +268,10 @@ void Snapshotter::setDiskSpaceCheck(bool enable) {
     mDiskSpaceCheck = enable;
 }
 
+void Snapshotter::setSnapshotAvdSource(SnapshotAvdSource src) {
+    mSnapshotAvdSource = src;
+}
+
 static constexpr int kDefaultMessageTimeoutMs = 10000;
 
 #if SNAPSHOT_METRICS

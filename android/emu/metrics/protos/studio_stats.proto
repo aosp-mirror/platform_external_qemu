@@ -1663,7 +1663,30 @@ message EmulatorSnapshot {
     // Duration of load / save (textures).
     optional uint64 textures_load_duration_ms = 16;
     optional uint64 textures_save_duration_ms = 17;
-    // Next tag: 18
+    // Next tag: 19
+}
+
+message EmulatorDownloadableSnapshotLoad {
+    optional uint64 snapshot_source = 1;
+    optional uint64 snapshot_copy_duration_ms = 2;
+    enum EmulatorDownloadableSnapshotLoadState {
+        EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_SUCCEEDED = 0;
+        // failed but not sure why
+        EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_FAILED = 1;
+        // failed because incompatible avd config
+        EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_FAILED_INCOMPATIBLE_AVD = 2;
+        EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_FAILED_TO_COPY_AVD = 3;
+    }
+    optional EmulatorDownloadableSnapshotLoadState state = 3;
+}
+
+message EmulatorDownloadableSnapshotSave {
+    optional uint64 snapshot_copy_duration_ms = 1;
+    enum EmulatorDownloadableSnapshotSaveState {
+        EMULATOR_DOWNLOADABLE_SAVE_SUCCEEDED = 0;
+        EMULATOR_DOWNLOADABLE_SAVE_FAILED = 1;
+    }
+    optional EmulatorDownloadableSnapshotSaveState state = 2;
 }
 
 // Description of emulator's quickboot load.
@@ -1701,7 +1724,8 @@ message EmulatorQuickbootLoad {
     optional bool on_demand_ram_enabled = 4;
     // ADB connection retries.
     optional uint32 adb_connection_retries = 6;
-    // Next tag: 7
+    optional EmulatorDownloadableSnapshotLoad downloadable_load = 7;
+    // Next tag: 8
 }
 
 // Description of emulator's quickboot saving.
@@ -1735,6 +1759,7 @@ message EmulatorQuickbootSave {
     optional EmulatorSnapshot snapshot = 3;
     // What was the guest session uptime at the time of saving.
     optional uint64 sesion_uptime_ms = 4;
+    optional EmulatorDownloadableSnapshotSave downloadable_save = 5;
 }
 
 // Track whether a GLES1 command is used or not
