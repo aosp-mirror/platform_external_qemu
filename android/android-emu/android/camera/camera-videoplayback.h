@@ -85,7 +85,8 @@ int camera_videoplayback_read_frame(CameraDevice* cd,
                                     float r_scale,
                                     float g_scale,
                                     float b_scale,
-                                    float exp_comp);
+                                    float exp_comp,
+                                    const char* direction);
 
 // Closes the camera device, which was opened from the camera_videoplayback_open
 // API.

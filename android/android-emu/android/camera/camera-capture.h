@@ -113,7 +113,8 @@ extern int camera_device_read_frame(CameraDevice* cd,
                                     float r_scale,
                                     float g_scale,
                                     float b_scale,
-                                    float exp_comp);
+                                    float exp_comp,
+                                    const char* direction);
 
 /* Closes camera device, opened in camera_device_open routine.
  * Param:
