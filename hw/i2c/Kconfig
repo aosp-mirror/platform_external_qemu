@@ -54,6 +54,10 @@ config PMBUS
     bool
     select SMBUS
 
+config MCTP_I2C
+    bool
+    select I2C
+
 config CMIS
     bool
     select I2C
