@@ -38,6 +38,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFrame>
+#include <QGuiApplication>
 #include <QImage>
 #include <QImageReader>
 #include <QMessageBox>
@@ -401,7 +402,7 @@ public slots:
 
     void onScreenConfigChanged();
     void onScreenChanged(QScreen* newScreen);
-
+    void onApplicationStateChanged(Qt::ApplicationState state);
     bool event(QEvent* ev) override;  // Used to resume the MV on un-minimize
 
 public:
