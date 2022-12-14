@@ -162,8 +162,6 @@ class ConfigureTask(BuildTask):
 
     def with_gfxstream_only(self):
         self.add_option("ENABLE_VKCEREAL_TESTS", True)
-        # TODO(kaiyili): Revert this change once AEMU switches lz4 to the master branch.
-        self.add_option("AEMU_BASE_USE_LZ4", False)
 
     def with_thread_safety(self):
         return self.add_option("OPTION_CLANG_THREAD_SAFETY_CHECKS", True)
