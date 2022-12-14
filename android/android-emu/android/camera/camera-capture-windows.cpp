@@ -502,7 +502,9 @@ public:
                   float rScale,
                   float gScale,
                   float bScale,
-                  float expComp);
+                  float expComp,
+                  const char* direction,
+                  int orientation);
 
 private:
     HRESULT configureMediaSource(const ComPtr<IMFMediaSource>& source);
@@ -910,7 +912,9 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
                                            float rScale,
                                            float gScale,
                                            float bScale,
-                                           float expComp) {
+                                           float expComp,
+                                           const char* direction,
+                                           int orientation) {
     if (!mSourceReader || !mCallback) {
         LOG(INFO) << "No webcam source reader, read frame failed.";
         return -1;
@@ -951,8 +955,8 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
             VLOG(camera) << "Sample not available, returning empty frame.";
             uint32_t emptyPixel = 0;
             return convert_frame_fast(&emptyPixel, V4L2_PIX_FMT_BGR32,
-                                      sizeof(emptyPixel), 1, 1,
-                                      resultFrame, expComp);
+                                      sizeof(emptyPixel), 1, 1, resultFrame,
+                                      expComp, 0);
         }
 
         ++mRetries;
@@ -992,11 +996,13 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
         return -1;
     }
 
+    int rotation = 0 == strcmp("back", direction) ? (7 - orientation) % 4
+                                                  : (3 + orientation) % 4;
     // Convert frame to the receiving buffers.
     const int result = convert_frame_fast(
             data, subtypeToPixelFormat(mSubtype), currentLength,
-            mSourceFramebufferWidth, mSourceFramebufferHeight,
-            resultFrame, expComp);
+            mSourceFramebufferWidth, mSourceFramebufferHeight, resultFrame,
+            expComp, rotation);
     (void)buffer->Unlock();
 
     return result;
@@ -1268,7 +1274,8 @@ int camera_device_read_frame(CameraDevice* ccd,
         return -1;
     }
 
-    return cd->readFrame(result_frame, r_scale, g_scale, b_scale, exp_comp);
+    return cd->readFrame(result_frame, r_scale, g_scale, b_scale, exp_comp,
+                         direction, get_coarse_orientation());
 }
 
 void camera_device_close(CameraDevice* ccd) {
