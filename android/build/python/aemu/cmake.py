@@ -71,6 +71,7 @@ def get_tasks(args) -> List[BuildTask]:
             options=args.cmake_option,
             ccache=args.ccache,
             thread_safety=args.thread_safety,
+            dist=args.dist
         ),
         CompileTask(args.aosp, args.out),
     ]
