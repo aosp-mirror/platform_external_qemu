@@ -102,7 +102,10 @@ class ConfigureTask(BuildTask):
         if sanitizer:
             self.add_option("OPTION_ASAN", ",".join(sanitizer))
 
-        self.cmake_cmd.append(aosp / "external" / "qemu")
+        if gfxstream_only:
+            self.cmake_cmd.append(aosp / "device" / "generic" / "vulkan-cereal")
+        else:
+            self.cmake_cmd.append(aosp / "external" / "qemu")
         self._add_sdk_revision(aosp)
         self.env = get_default_environment(aosp)
 
@@ -158,7 +161,9 @@ class ConfigureTask(BuildTask):
         return self.add_option("GFXSTREAM", True)
 
     def with_gfxstream_only(self):
-        return self.add_option("GFXSTREAM_ONLY", True)
+        self.add_option("ENABLE_VKCEREAL_TESTS", True)
+        # TODO(kaiyili): Revert this change once AEMU switches lz4 to the master branch.
+        self.add_option("AEMU_BASE_USE_LZ4", False)
 
     def with_thread_safety(self):
         return self.add_option("OPTION_CLANG_THREAD_SAFETY_CHECKS", True)
