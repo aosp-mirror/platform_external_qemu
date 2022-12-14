@@ -13,13 +13,13 @@
 # limitations under the License.
 import logging
 import platform
-from distutils.spawn import find_executable
 import os
+import shutil
 from pathlib import Path
 from typing import List
 
 from aemu.platform.toolchains import Toolchain
-from aemu.process.command import Command
+from aemu.process.command import Command, CommandFailedException
 from aemu.process.environment import get_default_environment
 from aemu.tasks.build_task import BuildTask
 
@@ -58,10 +58,11 @@ class ConfigureTask(BuildTask):
         options: List[str],
         ccache: str,
         thread_safety: bool,
+        dist: str,
     ):
         super().__init__()
         self.toolchain = Toolchain(aosp, target)
-        cmake = find_executable(
+        cmake = shutil.which(
             "cmake",
             path=str(
                 aosp
@@ -108,6 +109,8 @@ class ConfigureTask(BuildTask):
             self.cmake_cmd.append(aosp / "external" / "qemu")
         self._add_sdk_revision(aosp)
         self.env = get_default_environment(aosp)
+        self.log_dir = Path(dist or destination) / "logs"
+        self.destination = destination
 
     def add_option(self, key: str, val: str):
         self.cmake_cmd += [f"-D{key}={val}"]
@@ -136,7 +139,7 @@ class ConfigureTask(BuildTask):
         if host != "windows":
             # prefer ccache for local builds, it is slightly faster
             # but does not work on windows.
-            ccache = find_executable("ccache")
+            ccache = shutil.which("ccache")
             if ccache:
                 return Path(ccache)
 
@@ -174,10 +177,27 @@ class ConfigureTask(BuildTask):
     def with_asan(self, sanitizer: [str]):
         return self.add_option("OPTION_ASAN", ",".join(sanitizer))
 
+    def _bin_place_log_file(self, log_path: Path):
+        """Copies a log file if it exists.
+
+        Args:
+            log_path (Path): Path to the logfile that needs to be copied.
+        """
+        if log_path.exists():
+            self.log_dir.mkdir(exist_ok=True, parents=True)
+            logging.info("Copy %s --> %s", log_path, self.log_dir / log_path.name)
+            shutil.copyfile(log_path.absolute(), self.log_dir / log_path.name)
+
+
     def do_run(self):
         logging.info(
             "Configure target: %s, %s compilation",
             self.toolchain.target,
             "cross" if self.toolchain.is_crosscompile() else "native",
         )
-        Command(self.cmake_cmd).with_environment(self.env).run()
+        try:
+            Command(self.cmake_cmd).with_environment(self.env).run()
+        except CommandFailedException as cfe:
+            self._bin_place_log_file(self.destination / "CMakeFiles" / "CMakeOutput.log")
+            self._bin_place_log_file(self.destination / "CMakeFiles" / "CMakeError.log")
+            raise cfe
