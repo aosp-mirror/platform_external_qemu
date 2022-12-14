@@ -138,7 +138,8 @@ int camera_videoplayback_read_frame(CameraDevice* ccd,
     }
 
     return cd->getMultiplexedCameraDevice()->readFrame(
-        result_frame, r_scale, g_scale, b_scale, exp_comp);
+            result_frame, r_scale, g_scale, b_scale, exp_comp, direction,
+            get_coarse_orientation());
 }
 
 void camera_videoplayback_close(CameraDevice* ccd) {

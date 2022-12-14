@@ -119,7 +119,8 @@ int camera_virtualscene_read_frame(CameraDevice* ccd,
         return -1;
     }
 
-    return cd->readFrame(result_frame, r_scale, g_scale, b_scale, exp_comp);
+    return cd->readFrame(result_frame, r_scale, g_scale, b_scale, exp_comp,
+                         direction, get_coarse_orientation());
 }
 
 void camera_virtualscene_close(CameraDevice* ccd) {
