@@ -1458,9 +1458,10 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR
 
 EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint* attrib_list) {
     MEM_TRACE("EMUGL");
-    // swiftshader_indirect does not work with eglCreateSyncKHR
-    // Disable it before we figure out a proper fix in swiftshader
+    // swiftshader_indirect used to have a bug with eglCreateSyncKHR
+    // but it seems to have been fixed now.
     // BUG: 65587659
+    // BUG: 246740239
     if (!g_eglInfo->isEgl2EglSyncSafeToUse()) {
         return (EGLSyncKHR)0x42;
     }
@@ -1726,9 +1727,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
 EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable) {
     MEM_TRACE("EMUGL");
     EglGlobalInfo::setEgl2Egl(enable);
-    bool safeToUse = android::base::System::getEnvironmentVariable("ANDROID_GFXSTREAM_EGL") == "1";
-    EglGlobalInfo::setEgl2EglSyncSafeToUse(
-        safeToUse ? EGL_TRUE : EGL_FALSE);
+    EglGlobalInfo::setEgl2EglSyncSafeToUse(EGL_TRUE);
 }
 
 EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
