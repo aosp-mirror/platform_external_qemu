@@ -156,6 +156,7 @@ android_add_library(
   lib/crypto/crypto.cc
   lib/hci/address.cc
   lib/hci/class_of_device.cc
+  lib/hci/pcap_filter.cc
   model/controller/acl_connection.cc
   model/controller/acl_connection_handler.cc
   model/controller/controller_properties.cc

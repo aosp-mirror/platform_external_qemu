@@ -11,9 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/bluetooth/EmulatedBluetoothService.h"
-
-#include <grpcpp/grpcpp.h>
 #include <cstdint>
 #include <fstream>
 #include <functional>
@@ -24,6 +21,12 @@
 #include <utility>
 #include <vector>
 
+// This files need to be included before EmulatedBluetoothService.h
+// because of windows winnt.h header issues.
+#include "model/hci/hci_sniffer.h"
+
+#include <grpcpp/grpcpp.h>
+#include "android/emulation/bluetooth/EmulatedBluetoothService.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/files/ScopedFd.h"
 #include "android/base/system/System.h"
@@ -32,11 +35,10 @@
 #include "android/emulation/bluetooth/GrpcLinkChannelServer.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
-#include "android/utils/debug.h"    
+#include "android/utils/debug.h"
 #include "emulated_bluetooth.pb.h"
 #include "emulated_bluetooth_device.pb.h"
 #include "emulated_bluetooth_packets.pb.h"
-#include "model/hci/hci_sniffer.h"
 #include "model/hci/hci_transport.h"
 #include "os/log.h"
 #include "root_canal_qemu.h"
