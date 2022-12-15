@@ -152,7 +152,7 @@ class ConfigureTask(BuildTask):
             / "sccache"
             / f"{host}-x86_64"
         )
-        return Path(find_executable("sccache", search_dir))
+        return Path(shutil.which("sccache", search_dir))
 
     def with_ccache(self, ccache: str):
         return self.add_option("OPTION_CCACHE", ccache)
