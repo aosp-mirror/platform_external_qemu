@@ -34,6 +34,7 @@ class Command:
         self.log_handler = LogHandler()
         self.working_directory = None
         self.use_shell = platform.system() == "Windows"
+        self.ignore_errors = False
 
     def with_environment(self, env: BaseEnvironment):
         """Additional environment to use when running this command
@@ -64,6 +65,10 @@ class Command:
         self.working_directory = Path(directory)
         return self
 
+    def ignore_failures(self):
+        self.ignore_errors = True
+        return self
+
     def run(self):
         """Runs the given command.
 
@@ -84,5 +89,5 @@ class Command:
         )
 
         self.log_handler.start_log_proc(proc)
-        if proc.wait() != 0:
+        if proc.wait() != 0 and not self.ignore_errors:
             raise CommandFailedException(f"{cmdstr} Status: {proc.returncode} != 0")

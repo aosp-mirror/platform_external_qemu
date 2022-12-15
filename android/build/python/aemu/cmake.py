@@ -34,6 +34,7 @@ from aemu.tasks.integration_tests import IntegrationTestTask
 from aemu.tasks.unit_tests import AccelerationCheckTask, CTestTask
 from aemu.tasks.emugen_test import EmugenTestTask
 from aemu.tasks.kill_netsimd import KillNetsimdTask
+from aemu.tasks.fix_cargo import FixCargoTask
 
 
 def get_tasks(args) -> List[BuildTask]:
@@ -48,6 +49,7 @@ def get_tasks(args) -> List[BuildTask]:
     run_tests = not Toolchain(args.aosp, args.target).is_crosscompile()
     tasks = [
         KillNetsimdTask(),
+        FixCargoTask(args.aosp).enable(False),
         CratePrepareTask(args.aosp),
         # A task can be disabled, or explicitly enabled by calling
         # .enable(False) <- Disable the task
@@ -255,10 +257,10 @@ def launch():
     try:
         main(args)
     except KeyboardInterrupt:
-        logging.error("Terminated by user")
+        logging.critical("Terminated by user")
         sys.exit(1)
     except Exception as exc:
-        logging.error("Build failure due to %s", exc)
+        logging.critical("Build failure due to %s", exc)
         if args.verbose:
             raise exc
         sys.exit(1)

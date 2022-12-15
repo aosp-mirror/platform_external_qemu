@@ -124,8 +124,15 @@ class WindowsEnvironment(BaseEnvironment):
         )
 
 
-def get_default_environment(aosp: Path):
-    if platform.system() == "Windows":
-        return WindowsEnvironment(aosp)
+environment = None
 
-    return PosixEnvironment(aosp)
+def get_default_environment(aosp: Path):
+    global environment
+    
+    if environment is None:
+        if platform.system() == "Windows":
+            environment = WindowsEnvironment(aosp)
+        else:
+            environment = PosixEnvironment(aosp)
+
+    return environment

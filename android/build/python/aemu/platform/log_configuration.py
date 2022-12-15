@@ -13,9 +13,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import logging
+import os
+import platform
 import sys
+
+
+class ColorFormatter(logging.Formatter):
+
+    # See https://chrisyeh96.github.io/2020/03/28/terminal-colors.html
+
+    yellow = "\N{ESC}[33;20m"
+    red = "\N{ESC}[31;20m"
+    reset = "\N{ESC}[0m"
+    format = "%(message)s"
+
+    FORMATS = {
+        logging.DEBUG: format,
+        logging.INFO: format,
+        logging.WARNING: red + format + reset,
+        logging.ERROR: yellow + format + reset,
+        logging.CRITICAL: red + format + reset,
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
 
 
 class LogBelowLevel(logging.Filter):
@@ -41,6 +65,13 @@ def configure_logging(logging_level):
 
     logging_handler_err = logging.StreamHandler(sys.stderr)
     logging_handler_err.setLevel(logging.WARNING)
+
+    if sys.stdin and sys.stdin.isatty():
+        logging_handler_out.setFormatter(ColorFormatter())
+        logging_handler_err.setFormatter(ColorFormatter())
+
+        if platform.system() == "Windows":
+            os.system("") # Activate ansi colors!
 
     logging.root = logging.getLogger("root")
     logging.root.setLevel(logging_level)
