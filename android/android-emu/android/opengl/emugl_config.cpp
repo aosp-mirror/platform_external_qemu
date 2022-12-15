@@ -336,8 +336,7 @@ bool emuglConfig_init(EmuglConfig* config,
             }
             setCurrentRenderer(gpu_mode);
         }
-        else if ((!has_auto_no_window && no_window) ||
-                (blacklisted && !hasUiPreference)) {
+        else if (!has_auto_no_window && (no_window || (blacklisted && !hasUiPreference))) {
             if (stringVectorContains(sBackendList->names(),
                     swangle_backend_name)) {
                 D("%s: Headless mode or blacklisted GPU driver, "

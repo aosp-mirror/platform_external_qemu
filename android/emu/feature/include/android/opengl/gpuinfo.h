@@ -95,7 +95,6 @@ public:
     GpuInfo& currGpu();
     std::string dump() const;
     void clear();
-    bool hasGpu() const;
 
     std::vector<GpuInfo> infos;
 

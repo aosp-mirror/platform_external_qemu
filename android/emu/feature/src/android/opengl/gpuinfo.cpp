@@ -98,34 +98,6 @@ std::string GpuInfoList::dump() const {
     return ss.str();
 }
 
-bool GpuInfoList::hasGpu() const {
-    if (infos.size() != 0) {
-        return true;
-    }
-#ifdef __linux__
-    // Linux doesn't really populate infos.
-    // b/68085265
-    auto version_string = System::get()
-        ->runCommandWithResult({"glxinfo"}, 5000);
-    if (version_string) {
-        const char* kVersionStringPrefix = "OpenGL version string:";
-        const int kVersionStringPrefixLength = strlen(kVersionStringPrefix);
-        const char* loc = version_string->c_str();
-        loc = strstr(loc, kVersionStringPrefix);
-        while (loc) {
-            loc += kVersionStringPrefixLength;
-            float version_number = 0;
-            sscanf(loc, "%f", &version_number);
-            if (version_number >= 2.0f) {
-                return true;
-            }
-            loc = strstr(loc, kVersionStringPrefix);
-        }
-    }
-#endif
-    return false;
-}
-
 void GpuInfoList::clear() {
     blacklist_status = false;
     Anglelist_status = false;
@@ -402,8 +374,7 @@ public:
         : mAsyncLoadThread([this]() {
               getGpuInfoListNative(&mGpuInfoList);
 
-              mGpuInfoList.blacklist_status = !mGpuInfoList.hasGpu() ||
-                    gpuinfo_query_blacklist(
+              mGpuInfoList.blacklist_status = gpuinfo_query_blacklist(
                       &mGpuInfoList, sGpuBlacklist, arraySize(sGpuBlacklist));
 #ifdef _WIN32
               mGpuInfoList.Anglelist_status =
