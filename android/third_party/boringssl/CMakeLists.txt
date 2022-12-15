@@ -117,8 +117,8 @@ if(NOT WINDOWS) # BUG: 147893224: clang 10 results in a flaky failure in
   #                                         ${crypto_test_sources}
   #                                         # b/261625953, excluding host match test.
   #                                         TEST_PARAMS "--gtest_filter=-SSLTest.HostMatching")
-  target_link_libraries(boringssl_crypto_unittests
-                        PRIVATE gmock_main crypto boringssl_test_support)
+  #target_link_libraries(boringssl_crypto_unittests
+  #                      PRIVATE gmock_main crypto boringssl_test_support)
   android_target_link_libraries(boringssl_test_support windows
                                 PRIVATE ws2_32::ws2_32 dbghelp::dbghelp)
 endif()
