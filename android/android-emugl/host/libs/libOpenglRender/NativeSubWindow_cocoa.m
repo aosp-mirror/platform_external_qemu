@@ -62,6 +62,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int y,
                                     int width,
                                     int height,
+                                    float dpr,
                                     SubWindowRepaintCallback repaint_callback,
                                     void* repaint_callback_param,
                                     int hideWindow) {
@@ -92,6 +93,9 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
     if (hideWindow) {
         [glView setHidden:YES];
     }
+    // We cannot use the dpr from [NSScreen mainScreen], which usually
+    // gives the wrong screen at this point.
+    [glView.layer setContentsScale:dpr];
     return (EGLNativeWindowType)(glView);
 }
 
