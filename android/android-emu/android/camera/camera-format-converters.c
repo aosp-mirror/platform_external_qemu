@@ -1974,6 +1974,16 @@ int convert_to_i420(const void* src_frame,
         }
     } else {
         const uint32_t src_format = pixel_format_to_libyuv(pixel_format);
+        int crop_width;
+        int crop_height;
+        if (rotation == 90 || rotation == 270) {
+            crop_width = dst_height;
+            crop_height = dst_width;
+        } else {
+            crop_width = dst_width;
+            crop_height = dst_height;
+        }
+
         int result = ConvertToI420(src_frame,               // src_frame
                                    framebuffer_size,        // src_size
                                    y_staging,               // dst_y
@@ -1986,8 +1996,8 @@ int convert_to_i420(const void* src_frame,
                                    0,                       // crop_y
                                    src_width,               // src_width
                                    src_height,              // src_height
-                                   src_width,               // crop_width
-                                   src_height,              // crop_height
+                                   crop_width,              // crop_width
+                                   crop_height,             // crop_height
                                    rotation,                // rotation
                                    src_format);             // format
         if (result != 0) {
@@ -2011,20 +2021,35 @@ int convert_frame_fast(const void* src_frame,
     int n;
     for (n = 0; n < result_frame->framebuffers_count; ++n) {
         YUVInfo src_info = get_yuv_info(src_width, src_height);
+        int result_width = result_frame->framebuffers[n].width;
+        int result_height = result_frame->framebuffers[n].height;
         int rotated_width = 0;
         int rotated_height = 0;
         if (rotation == 1 || rotation == 3) {
-            rotated_width = src_height;
-            rotated_height = src_width;
+            // Require rotation and cropping.
+            // We want to crop as little as possible.
+            if (src_height * result_height > src_width * result_width) {
+                rotated_height = src_width;
+                rotated_width = rotated_height * result_width / result_height;
+            } else {
+                rotated_width = src_height;
+                rotated_height = rotated_width * result_height / result_width;
+            }
         } else {
-            rotated_width = src_width;
-            rotated_height = src_height;
+            if (src_width * result_height > src_height * result_width) {
+                // Source aspect ratio is larger than result aspect ratio,
+                // thus crop the width.
+                rotated_height = src_height;
+                rotated_width = rotated_height * result_width / result_height;
+            } else {
+                // Otherwise, crop the height.
+                rotated_width = src_width;
+                rotated_height = rotated_width * result_height / result_width;
+            }
         }
         YUVInfo rotated_info = get_yuv_info(rotated_width, rotated_height);
         size_t rotated_size =
                 rotated_info.y_size + 2 * rotated_info.u_or_v_size;
-        int result_width = result_frame->framebuffers[n].width;
-        int result_height = result_frame->framebuffers[n].height;
         YUVInfo result_info = get_yuv_info(result_width, result_height);
         const size_t result_size =
             result_info.y_size + 2 * result_info.u_or_v_size;
