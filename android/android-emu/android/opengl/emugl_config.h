@@ -105,6 +105,10 @@ SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode);
 // Returns the renderer that is active, after config is done.
 SelectedRenderer emuglConfig_get_current_renderer();
 
+// Returns the '-gpu <mode>' option. If '-gpu <mode>' option is NULL, returns
+// the hw.gpu.mode hardware property.
+const char* emuglConfig_get_user_gpu_option();
+
 // Returns a string representation of the renderer enum. Return value is a
 // static constant string, it is NOT heap-allocated.
 const char* emuglConfig_renderer_to_string(SelectedRenderer renderer);

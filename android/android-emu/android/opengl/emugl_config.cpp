@@ -132,6 +132,12 @@ SelectedRenderer emuglConfig_get_current_renderer() {
     return sCurrentRenderer;
 }
 
+static std::string sGpuOption;
+
+const char* emuglConfig_get_user_gpu_option() {
+    return sGpuOption.c_str();
+}
+
 const char* emuglConfig_renderer_to_string(SelectedRenderer renderer) {
     switch (renderer) {
         case SELECTED_RENDERER_UNKNOWN:
@@ -217,6 +223,7 @@ bool emuglConfig_init(EmuglConfig* config,
     // The value of '-gpu <mode>' overrides both the hardware properties
     // and the UI setting, except if <mode> is 'auto'.
     if (gpu_option) {
+        sGpuOption = gpu_option;
         if (!strcmp(gpu_option, "on") || !strcmp(gpu_option, "enable")) {
             gpu_enabled = true;
             if (!gpu_mode || !strcmp(gpu_mode, "auto")) {
@@ -248,6 +255,7 @@ bool emuglConfig_init(EmuglConfig* config,
             gpu_mode = "host";
             host_set_in_hwconfig = true;
         }
+        sGpuOption = gpu_mode;
     }
 
     if (gpu_mode &&
