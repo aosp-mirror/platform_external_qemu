@@ -99,11 +99,6 @@ function(configure_rust)
 
   if(cfg_VENDOR_CRATES)
     enable_vendorized_crates(cfg_VENDOR_CRATES)
-  else()
-    message(
-      WARNING
-        "Using standard crates from crates.io. You should really be using vendorized crates!"
-    )
   endif()
 endfunction()
 

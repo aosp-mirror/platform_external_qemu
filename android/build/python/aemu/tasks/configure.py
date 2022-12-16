@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import platform
 import os
+import platform
 import shutil
+import subprocess
 from pathlib import Path
 from typing import List
 
@@ -152,7 +153,8 @@ class ConfigureTask(BuildTask):
             / "sccache"
             / f"{host}-x86_64"
         )
-        return Path(shutil.which("sccache", search_dir))
+        logging.info("Looking in %s", search_dir)
+        return Path(shutil.which("sccache", path=search_dir))
 
     def with_ccache(self, ccache: str):
         return self.add_option("OPTION_CCACHE", ccache)
@@ -188,7 +190,6 @@ class ConfigureTask(BuildTask):
             logging.info("Copy %s --> %s", log_path, self.log_dir / log_path.name)
             shutil.copyfile(log_path.absolute(), self.log_dir / log_path.name)
 
-
     def do_run(self):
         logging.info(
             "Configure target: %s, %s compilation",
@@ -198,6 +199,8 @@ class ConfigureTask(BuildTask):
         try:
             Command(self.cmake_cmd).with_environment(self.env).run()
         except CommandFailedException as cfe:
-            self._bin_place_log_file(self.destination / "CMakeFiles" / "CMakeOutput.log")
+            self._bin_place_log_file(
+                self.destination / "CMakeFiles" / "CMakeOutput.log"
+            )
             self._bin_place_log_file(self.destination / "CMakeFiles" / "CMakeError.log")
             raise cfe
