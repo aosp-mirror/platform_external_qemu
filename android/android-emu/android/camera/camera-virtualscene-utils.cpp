@@ -91,10 +91,12 @@ void RenderedCameraDevice::stopCapturing() {
 }
 
 int RenderedCameraDevice::readFrame(ClientFrame* resultFrame,
-                                        float rScale,
-                                        float gScale,
-                                        float bScale,
-                                        float expComp) {
+                                    float rScale,
+                                    float gScale,
+                                    float bScale,
+                                    float expComp,
+                                    const char* direction,
+                                    int orientation) {
     auto context = makeEglCurrent();
     if (!context.isValid()) {
         return -1;
@@ -109,7 +111,7 @@ int RenderedCameraDevice::readFrame(ClientFrame* resultFrame,
     return convert_frame(mFramebufferData.data(), VIRTUALSCENE_PIXEL_FORMAT,
                          mFramebufferData.size(), mFramebufferWidth,
                          mFramebufferHeight, resultFrame, rScale, gScale,
-                         bScale, expComp);
+                         bScale, expComp, "front", 1);
 }
 
 bool RenderedCameraDevice::initializeEgl() {
