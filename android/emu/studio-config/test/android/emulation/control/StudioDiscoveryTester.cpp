@@ -1,4 +1,4 @@
-
+//
 // Copyright (C) 2020 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,15 +30,16 @@ using android::emulation::control::EmulatorAdvertisement;
 
 int main(int argc, char* argv[]) {
     EmulatorProperties cfg({{"hello", "world"}});
+    std::unique_ptr<EmulatorAdvertisement> discovery;
     if (argc < 2) {
-        EmulatorAdvertisement discovery(std::move(cfg));
-        discovery.write();
-        LOG(INFO) << "Wrote: " << discovery.location();
+        discovery = std::make_unique<EmulatorAdvertisement>(std::move(cfg));
+        auto status = discovery->write();
+        LOG(INFO) <<  (status ? "Successfully Wrote: " : "Failed to write: ") << discovery->location();
     } else {
         auto path = argv[1];
-        EmulatorAdvertisement discovery(std::move(cfg), path);
-        discovery.write();
-        LOG(INFO) << "Wrote: " << discovery.location();
+        discovery = std::make_unique<EmulatorAdvertisement>(std::move(cfg), path);
+        auto status = discovery->write();
+        LOG(INFO) <<  (status ? "Successfully Wrote: " : "Failed to write: ") << discovery->location();
     }
 
     std::chrono::seconds awhile(300);

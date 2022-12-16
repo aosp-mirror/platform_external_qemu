@@ -50,7 +50,9 @@ public:
     template <class T>
     auto stub() {
         if (!hasOpenChannel()) {
-            derror("Channel is not open!");
+            dwarning(
+                    "A gRPC channel to %s discovered by %s is not (yet?) open.",
+                    mAddress.c_str(), mDiscoveryFile.c_str());
         }
 
         return T::NewStub(mChannel);
