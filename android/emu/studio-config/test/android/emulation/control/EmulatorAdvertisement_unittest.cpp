@@ -19,9 +19,9 @@
 #include <functional>     // for function, __base
 #include <vector>         // for vector
 
-#include "aemu/base/EnumFlags.h"   // for operator|
-#include "aemu/base/Log.h"         // for LogStream, LOG, LogMes...
-#include "aemu/base/Optional.h"    // for Optional
+#include "aemu/base/EnumFlags.h"  // for operator|
+#include "aemu/base/Log.h"        // for LogStream, LOG, LogMes...
+#include "aemu/base/Optional.h"   // for Optional
 
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"  // for pj, PathUtils (ptr only)
@@ -99,8 +99,10 @@ protected:
 
     bool waitForPid(std::string dir, int pid) {
         auto path = pj(dir, "pid_" + std::to_string(pid) + ".ini");
+        LOG(INFO) << "Waiting for   : " << path;
         return waitForPred(
-                [&path]() { return System::get()->pathIsFile(path); });
+                [&path]() {
+                    return System::get()->pathIsFile(path); });
     }
 
     TestTempDir mTempDir{"DiscoveryTest"};
@@ -185,6 +187,35 @@ TEST_F(EmulatorAdvertisementTest, my_file_is_alive) {
     EXPECT_TRUE(OpenPortChecker().isAlive(tst1, tst1));
 }
 
+TEST_F(EmulatorAdvertisementTest, bad_pid_file_not_alive) {
+    auto tst1 = pj(mTempDir.path(), "tst1.ini");
+    EXPECT_FALSE(PidChecker().isAlive(tst1, tst1));
+}
+
+TEST_F(EmulatorAdvertisementTest, wrong_pid_file_not_alive) {
+    auto ignored = pj(mTempDir.path(), "pid_123.ini");
+    // 999999 > maxpid (Usually 32768)
+    auto tst1 = pj(mTempDir.path(), "pid_999999.ini");
+    EXPECT_FALSE(PidChecker().isAlive(ignored, tst1));
+}
+
+TEST_F(EmulatorAdvertisementTest, alive_pid_with_open_port_is_alive) {
+    auto pid = launchInBackground(mTempDir.path());
+    EXPECT_TRUE(pid);
+
+    auto tst1 = pj(mTempDir.path(),
+                   std::string("pid_") + std::to_string(*pid) + ".ini");
+    base::IniFile ini(tst1);
+    auto socket = base::ScopedSocket(base::socketTcp4LoopbackServer(0));
+    EXPECT_TRUE(socket.valid());
+
+    ini.setInt64("grpc.port", base::socketGetPort(socket.get()));
+    ini.write();
+    EXPECT_TRUE(OpenPortChecker().isAlive("ignored", tst1));
+    auto ignored = pj(mTempDir.path(), "pid_123.ini");
+    EXPECT_FALSE(PidChecker().isAlive(ignored, tst1));
+}
+
 TEST_F(EmulatorAdvertisementTest, open_port_is_alive) {
     auto tst1 = pj(mTempDir.path(), "tst1.ini");
     base::IniFile ini(tst1);
@@ -199,8 +230,9 @@ TEST_F(EmulatorAdvertisementTest, open_port_is_alive) {
 TEST_F(EmulatorAdvertisementTest, open_port_different_file_is_dead) {
     // Validate the case where my discoery file mentions
     // the same ports as another (which is impossible).
-    // This can happen if the old emulator crashed with the default ports in pid_file_old
-    // and we wrote out pid_file_new talking the same default ports.
+    // This can happen if the old emulator crashed with the default ports in
+    // pid_file_old and we wrote out pid_file_new talking the same default
+    // ports.
     auto tst1 = pj(mTempDir.path(), "tst1.ini");
     auto tst2 = pj(mTempDir.path(), "tst2.ini");
     base::IniFile ini(tst1);

@@ -13,12 +13,12 @@
 // limitations under the License.
 #pragma once
 
-#include <memory>                        // for make_unique, unique_ptr
-#include <string>                        // for string, hash, operator==
-#include <unordered_map>                 // for unordered_map
-#include <vector>                        // for vector
+#include <memory>         // for make_unique, unique_ptr
+#include <string>         // for string, hash, operator==
+#include <unordered_map>  // for unordered_map
+#include <vector>         // for vector
 
-#include "aemu/base/Compiler.h"       // for DISALLOW_COPY_AND_ASSIGN
+#include "aemu/base/Compiler.h"          // for DISALLOW_COPY_AND_ASSIGN
 #include "android/base/system/System.h"  // for System, System::Pid
 
 namespace android {
@@ -48,6 +48,13 @@ public:
     bool isAlive(std::string myFile, std::string discoveryFile) const override;
 };
 
+// Liveness checker that tries to load the discovery file
+// and tries to see that the pid exists and port is open.
+class PidChecker : public OpenPortChecker {
+public:
+    bool isAlive(std::string myFile, std::string discoveryFile) const override;
+};
+
 // External services might need to know where to find information about
 // running emulators. An EmulatorAdvertisement can write an
 // EmulatorConfiguration dictionary to a
@@ -68,12 +75,12 @@ public:
     explicit EmulatorAdvertisement(
             EmulatorProperties&& config,
             std::unique_ptr<EmulatorLivenessStrategy> livenessChecker =
-                    std::make_unique<OpenPortChecker>());
+                    std::make_unique<PidChecker>());
     EmulatorAdvertisement(
             EmulatorProperties&& config,
             std::string sharedDirectory,
             std::unique_ptr<EmulatorLivenessStrategy> livenessChecker =
-                    std::make_unique<OpenPortChecker>());
+                    std::make_unique<PidChecker>());
     ~EmulatorAdvertisement();
 
     // The location where the .ini file will be written to.
