@@ -150,11 +150,8 @@ typedef union RGB32_t {
 /* Clips a value to the unsigned 0-255 range, treating negative values as zero.
  */
 static __inline__ int
-clamp(int x)
-{
-    if (x > 255) return 255;
-    if (x < 0)   return 0;
-    return x;
+clamp(int x) {
+    return x - (x > 255) * (x - 255) - (x < 0) * x;
 }
 
 /********************************************************************************
