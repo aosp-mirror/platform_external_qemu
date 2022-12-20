@@ -825,17 +825,12 @@ void EmulatorQtWindow::showAvdArchWarning() {
 }
 
 void EmulatorQtWindow::checkShouldShowGpuWarning() {
-    mGpuBlacklisted = globalGpuInfoList().blacklist_status;
-    std::array<android::featurecontrol::Feature, 2> forced = {
-            android::featurecontrol::ForceANGLE,
-            android::featurecontrol::ForceSwiftshader,
-    };
-
-    for (const auto& elt : forced) {
-        mHasForcedRenderer |= android::featurecontrol::isEnabled(elt);
-    }
-
-    mShouldShowGpuWarning = mGpuBlacklisted || mHasForcedRenderer;
+    mShouldShowGpuWarning =
+            globalGpuInfoList().blacklist_status &&
+            !(strstr(emuglConfig_get_user_gpu_option(), "swiftshader") ||
+              strstr(emuglConfig_get_user_gpu_option(), "swangle") ||
+              0 == strcmp(emuglConfig_get_user_gpu_option(), "auto") ||
+              0 == strcmp(emuglConfig_get_user_gpu_option(), "auto-no-window"));
 }
 
 void EmulatorQtWindow::showGpuWarning() {
