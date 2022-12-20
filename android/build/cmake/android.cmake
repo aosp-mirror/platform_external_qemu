@@ -1315,6 +1315,49 @@ function(get_git_version VER)
 
 endfunction()
 
+
+# ~~~
+# ! android_link_complete_archive: Links an archive to be completely included
+#
+# For example:
+#
+# android_link_complete_archive(TARGET grpc++_reflection AS grpc++_reflection_whole)
+# target_link_libraries(
+#  android-grpc
+#  PUBLIC grpc++_reflection_whole)
+#
+#
+#
+# ``TARGET``  The target that should become a complete archive
+# ``AS``      Target you can use to link it in as a complete archive.
+# ~~
+
+function(android_link_complete_archive)
+  set(options)
+  set(oneValueArgs TARGET AS)
+  set(multiValueArgs)
+  cmake_parse_arguments(lnk "${options}" "${oneValueArgs}"
+                        "${multiValueArgs}" ${ARGN})
+
+  if(DARWIN_X86_64 OR DARWIN_AARCH64)
+    set(WHOLE_LINK_CMD "-Wl,-force_load,$<TARGET_FILE:${lnk_TARGET}>")
+  elseif(WINDOWS_MSVC_X86_64)
+    if(MSVC)
+      # The native build calls the linker directly
+      set(WHOLE_LINK_CMD "-wholearchive:$<TARGET_FILE:${lnk_TARGET}>")
+    else()
+      # The cross compiler calls the linker through clang.
+      set(WHOLE_LINK_CMD "-Wl,-wholearchive:$<TARGET_FILE:${lnk_TARGET}>")
+    endif()
+  else()
+      set(WHOLE_LINK_CMD "-Wl,--whole-archive $<TARGET_FILE:${lnk_TARGET}> -Wl,--no-whole-archive")
+  endif()
+  set_property(GLOBAL APPEND PROPERTY ALIAS_LST "${lnk_AS}|${lnk_TARGET}\n")
+  add_library(${lnk_AS} INTERFACE)
+  add_dependencies(${lnk_AS} ${lnk_TARGET})
+  target_link_libraries(${lnk_AS} INTERFACE ${WHOLE_LINK_CMD})
+endfunction()
+
 # Constructs a linker command that will make sure the whole archive is included,
 # not just the ones referenced.
 #
