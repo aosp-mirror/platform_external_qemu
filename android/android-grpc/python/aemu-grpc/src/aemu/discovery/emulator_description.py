@@ -113,7 +113,7 @@ class EmulatorDescription(dict):
         Returns:
             Optional[psutil.Process]: The psutil process object, or one if not running
         """
-        procs = [p for p in psutil.process_iter(["pid"]) if p.pid == self.pid()]
+        procs = [p for p in psutil.process_iter(["pid"]) if p and p.pid == self.pid()]
         return next(iter(procs), None)
 
     def is_alive(self) -> bool:
