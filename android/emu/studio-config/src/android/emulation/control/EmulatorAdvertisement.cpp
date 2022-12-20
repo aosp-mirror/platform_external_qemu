@@ -122,8 +122,9 @@ bool OpenPortChecker::isAlive(std::string myFile,
 
 bool PidChecker::isAlive(std::string myFile, std::string discoveryFile) const {
     // Check to see if the process is alive
+    std::string entry(PathUtils::decompose(discoveryFile).back());
     int pid = 0;
-    if (sscanf(discoveryFile.c_str(), location_format, &pid) != 1) {
+    if (sscanf(entry.c_str(), location_format, &pid) != 1) {
         // Not a discovery file..
         return false;
     }
@@ -131,6 +132,7 @@ bool PidChecker::isAlive(std::string myFile, std::string discoveryFile) const {
     auto proc = android::base::Process::fromPid(pid);
     if (!proc) {
         // tsk tsk process is not alive.
+        DD("pid: %d is not alive", pid);
         return false;
     }
 
