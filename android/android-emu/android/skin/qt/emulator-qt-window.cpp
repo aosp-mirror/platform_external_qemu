@@ -3231,39 +3231,56 @@ bool EmulatorQtWindow::mouseInside() {
 void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
     if (mIgnoreWheelEvent) {
         event->ignore();
-    } else if (android::featurecontrol::isEnabled(
-                       android::featurecontrol::VirtioMouse)) {
-        if (mMouseGrabbed) {
-#if QT_VERSION >= 0x060000
-            handleMouseWheelEvent(event->angleDelta().y() / 8,
-                                  Qt::Orientation::Vertical);
-            handleMouseWheelEvent(event->angleDelta().x() / 8,
-                                  Qt::Orientation::Horizontal);
-#else
-            handleMouseWheelEvent(event->delta() / 8, event->orientation());
-#endif  // QT_VERSION
+        return;
+    }
+
+    const bool inputDeviceHasWheel =
+            android::featurecontrol::isEnabled(
+                    android::featurecontrol::VirtioMouse) ||
+            android::featurecontrol::isEnabled(
+                    android::featurecontrol::VirtioTablet);
+
+    if (inputDeviceHasWheel) {
+        // Mouse is active only when it's grabbed. Tablet is always active.
+        const bool inputDeviceActive = (
+                android::featurecontrol::isEnabled(
+                    android::featurecontrol::VirtioMouse) && mMouseGrabbed) ||
+                android::featurecontrol::isEnabled(
+                    android::featurecontrol::VirtioTablet);
+        if (!inputDeviceActive) {
+            return;
         }
+#if QT_VERSION >= 0x060000
+        handleMouseWheelEvent(event->angleDelta().y() / 8,
+                                Qt::Orientation::Vertical);
+        handleMouseWheelEvent(event->angleDelta().x() / 8,
+                                Qt::Orientation::Horizontal);
+#else
+        handleMouseWheelEvent(event->delta() / 8, event->orientation());
+#endif  // QT_VERSION
     } else {
-        if (!mWheelScrollTimer.isActive()) {
-#if QT_VERSION >= 0x060000
-            handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
-                             event->position(), QPointF(0.0, 0.0));
-            mWheelScrollPos = event->position();
-            mWheelScrollTimer.start();
-            mWheelScrollPos.setY(mWheelScrollPos.y() +
-                                 event->angleDelta().y() / 8);
-            handleMouseEvent(kEventMouseMotion, kMouseButtonLeft,
-                             mWheelScrollPos, QPointF(0.0, 0.0));
-#else
-            handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
-                             event->pos(), QPoint(0, 0));
-            mWheelScrollPos = event->pos();
-            mWheelScrollTimer.start();
-            mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-            handleMouseEvent(kEventMouseMotion, kMouseButtonLeft,
-                             mWheelScrollPos, QPoint(0, 0));
-#endif  // QT_VERSION
+        if (mWheelScrollTimer.isActive()) {
+            // Scroll gesture is in progress.
+            return;
         }
+#if QT_VERSION >= 0x060000
+        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
+                            event->position(), QPointF(0.0, 0.0));
+        mWheelScrollPos = event->position();
+        mWheelScrollTimer.start();
+        mWheelScrollPos.setY(mWheelScrollPos.y() +
+                                event->angleDelta().y() / 8);
+        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft,
+                            mWheelScrollPos, QPointF(0.0, 0.0));
+#else
+        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
+                            event->pos(), QPoint(0, 0));
+        mWheelScrollPos = event->pos();
+        mWheelScrollTimer.start();
+        mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
+        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft,
+                            mWheelScrollPos, QPoint(0, 0));
+#endif  // QT_VERSION
     }
 }
 

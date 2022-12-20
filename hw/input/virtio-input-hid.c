@@ -426,9 +426,22 @@ static const TypeInfo virtio_mouse_info = {
 
 /* ----------------------------------------------------------------- */
 
-static QemuInputHandler virtio_tablet_handler = {
+static QemuInputHandler virtio_tablet_handler_v1 = {
     .name  = VIRTIO_ID_NAME_TABLET,
     .mask  = INPUT_EVENT_MASK_BTN | INPUT_EVENT_MASK_ABS,
+    .event = virtio_input_handle_event,
+    .sync  = virtio_input_handle_sync,
+};
+
+// Added virtio_tablet_handler_v2.
+// Upstream has single virtio_tablet_handler for virtio_tablet_config_v1 and
+// virtio_tablet_config_v2. For virtio_tablet_config_v2, we actually need to
+// receive relative axis values for wheel events, thus fliped
+// INPUT_EVENT_MASK_REL bit of the mask field here.
+static QemuInputHandler virtio_tablet_handler_v2 = {
+    .name  = VIRTIO_ID_NAME_TABLET,
+    .mask  = INPUT_EVENT_MASK_BTN | INPUT_EVENT_MASK_ABS |
+            INPUT_EVENT_MASK_REL,
     .event = virtio_input_handle_event,
     .sync  = virtio_input_handle_sync,
 };
@@ -532,7 +545,8 @@ static void virtio_tablet_init(Object *obj)
     VirtIOInputHID *vhid = VIRTIO_INPUT_HID(obj);
     VirtIOInput *vinput = VIRTIO_INPUT(obj);
 
-    vhid->handler = &virtio_tablet_handler;
+    vhid->handler = vhid->wheel_axis
+            ? &virtio_tablet_handler_v2 : &virtio_tablet_handler_v1;
     virtio_input_init_config(vinput, vhid->wheel_axis
                              ? virtio_tablet_config_v2
                              : virtio_tablet_config_v1);

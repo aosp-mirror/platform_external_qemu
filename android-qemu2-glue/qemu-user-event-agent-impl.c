@@ -134,7 +134,8 @@ static void user_event_mouse_wheel(int dx, int dy, int displayId) {
     if (VERBOSE_CHECK(keys)) {
         dprint(">> MOUSE WHEEL [%d %d]", dx, dy);
     }
-    if (feature_is_enabled(kFeature_VirtioMouse)) {
+    if (feature_is_enabled(kFeature_VirtioMouse) ||
+            feature_is_enabled(kFeature_VirtioTablet)) {
         kbd_mouse_wheel_event(dx, dy);
     }
 }
