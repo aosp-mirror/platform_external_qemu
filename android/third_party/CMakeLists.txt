@@ -193,7 +193,7 @@ endif()
 
 if(FEATURE_NETSIM)
   set(EXTERNAL_QEMU ${ANDROID_QEMU2_TOP_DIR})
-  if (DARWIN_AARCH64 AND NOT Rust_COMPILER)
+  if (DARWIN_AARCH64 AND NOT TARGET Rust::Rustc)
     message(STATUS "Cross compiling netsim to target Rosetta X86_64")
     include(ExternalProject)
     set(NETSIM_CROSS_DIR ${ANDROID_CROSS_BUILD_DIRECTORY}/netsim_ext_cross/src/netsim_ext_cross-build/)
