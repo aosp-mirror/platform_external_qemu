@@ -10,14 +10,15 @@
 // GNU General Public License for more details.
 #include "android/snapshot/Quickboot.h"
 
-#include "android/adb-server.h"
-#include "android/avd/hw-config.h"
-#include "android/avd/info.h"
+#include "aemu/base/Log.h"
 #include "aemu/base/Stopwatch.h"
 #include "aemu/base/StringFormat.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
+#include "android/adb-server.h"
+#include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -391,6 +392,10 @@ void Quickboot::decideFailureReport(
                                     .c_str(),
                             WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
 
+        LOG(WARNING) << "Failed to load snapshot, becasue '"
+                     << failureReasonToString(*failureReason, SNAPSHOT_LOAD)
+                     << "'; Emulator will delete existing snapshot and do a "
+                        "cold boot instead... ";
         Snapshotter::get().loader().reportInvalid();
         Snapshotter::get().deleteSnapshot(c_str(name));
 
