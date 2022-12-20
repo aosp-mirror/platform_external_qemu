@@ -5,10 +5,13 @@ This document describes how to get started with emulator development under MacOS
 
 # Software Requirements
 
-- You will need Xcode 10.1 or newer. We recommend 10.1.
-- You will need MacOS10.13 SDK.
+- You will need Xcode 10.1 or newer. Our official builds are using `Xcode 12.5.1 Build version 12E507`  with SDK version 11.3
+- You will need MacOS10.13 SDK or later.
 
 We have pinned the compiler and MacOS SDK on the build bots to make sure we do not encounter unexpected issues.
+
+If you are using an M1 Mac, you can install a rust compiler toolchain to make sure you do not have to cross compile. You can
+install rust, by following the instructions [here](https://www.rust-lang.org/tools/install).
 
 ## Getting Xcode
 
@@ -28,8 +31,6 @@ The next step is to to accept the license and install the command line tools.
 
     sudo xcodebuild -license accept &&
     sudo xcode-select --install
-
-- _Note_: You can compile with any version of Xcode > 10.1, but might run into issues around Qt. You will only be able to launch the emulator with the `-gpu off` flag.
 
 - _Note_: Xcode is usually installed in `/Applications/Xcode.app` you might run into unexpected issues if this is not the case.
 
