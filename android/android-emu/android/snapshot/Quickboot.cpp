@@ -70,6 +70,33 @@ static void reportFailedLoad(
                 ->mutable_snapshot()
                 ->set_load_failure_reason(
                         (pb::EmulatorSnapshotFailureReason)failureReason);
+        const bool isFirstBootUsingDownloadableSnapshot =
+                (Snapshotter::get().getSnapshotAvdSource() !=
+                 Snapshotter::SnapshotAvdSource::NoSource);
+        if (isFirstBootUsingDownloadableSnapshot) {
+            auto dstate = pb::EmulatorDownloadableSnapshotLoad::
+                    EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_FAILED;
+            if (Snapshotter::get().getDownloadableSnapshotFailure() ==
+                static_cast<int>(Snapshotter::DownloadableSnapshotFailure::
+                                         IncompatibleAvd)) {
+                dstate = pb::EmulatorDownloadableSnapshotLoad::
+                        EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_FAILED_INCOMPATIBLE_AVD;
+            } else if (Snapshotter::get().getDownloadableSnapshotFailure() ==
+                       static_cast<int>(
+                               Snapshotter::DownloadableSnapshotFailure::
+                                       FailedToCopyAvd)) {
+                dstate = pb::EmulatorDownloadableSnapshotLoad::
+                        EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_FAILED_TO_COPY_AVD;
+            }
+            auto dmesg = event->mutable_emulator_details()
+                                 ->mutable_quickboot_load()
+                                 ->mutable_downloadable_load();
+            dmesg->set_state(dstate);
+            dmesg->set_snapshot_source(
+                    Snapshotter::get().getSnapshotAvdSource());
+            dmesg->set_snapshot_copy_duration_ms(
+                    Snapshotter::get().gettDownloadableSnapshotCopyTime());
+        }
     });
 }
 
@@ -137,6 +164,21 @@ void Quickboot::reportSuccessfulLoad(std::string_view name,
         load->set_duration_ms(stats.durationMs);
         load->set_on_demand_ram_enabled(stats.onDemandRamEnabled);
         Snapshotter::fillSnapshotMetrics(event, stats);
+
+        // report downloadable snapshot as well
+        const bool isFirstBootUsingDownloadableSnapshot =
+                (Snapshotter::get().getSnapshotAvdSource() !=
+                 Snapshotter::SnapshotAvdSource::NoSource);
+        if (isFirstBootUsingDownloadableSnapshot) {
+            auto dstate = pb::EmulatorDownloadableSnapshotLoad::
+                    EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_SUCCEEDED;
+            auto dmesg = event->mutable_emulator_details()
+                                 ->mutable_quickboot_load()
+                                 ->mutable_downloadable_load();
+            dmesg->set_state(dstate);
+            dmesg->set_snapshot_copy_duration_ms(
+                    Snapshotter::get().gettDownloadableSnapshotCopyTime());
+        }
     });
 #endif
 }

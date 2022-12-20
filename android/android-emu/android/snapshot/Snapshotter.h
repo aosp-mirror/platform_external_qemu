@@ -74,6 +74,29 @@ public:
 
     void setDiskSpaceCheck(bool enable);
 
+    // related to downloadable snapshot
+    enum class SnapshotAvdSource { NoSource = 0, Downloaded = 1, Local = 2 };
+    void setSnapshotAvdSource(SnapshotAvdSource src);
+    int getSnapshotAvdSource() { return static_cast<int>(mSnapshotAvdSource); }
+
+    // failure details of downloadable snapshot
+    enum class DownloadableSnapshotFailure {
+        NoFailure = 0,
+        IncompatibleAvd = 1,
+        FailedToCopyAvd = 2
+    };
+    void setDownloadableSnapshotFailure(DownloadableSnapshotFailure failure) {
+        mDownloadableSnapshotFailureReason = failure;
+    }
+    int getDownloadableSnapshotFailure() {
+        return static_cast<int>(mDownloadableSnapshotFailureReason);
+    }
+
+    void settDownloadableSnapshotCopyTime(int mini_seconds) {
+        mAvdCopyTime = mini_seconds;
+    }
+    int gettDownloadableSnapshotCopyTime() { return mAvdCopyTime; }
+
     OperationStatus prepareForLoading(const char* name);
     OperationStatus load(bool isQuickboot, const char* name);
     OperationStatus prepareForSaving(const char* name);
@@ -186,6 +209,12 @@ private:
     bool mUsingHdd = false;
 
     bool mDiskSpaceCheck = true;
+
+    SnapshotAvdSource mSnapshotAvdSource =
+            SnapshotAvdSource::NoSource;  // from .android/avd/<name.avd/
+    int mAvdCopyTime = 0;
+    DownloadableSnapshotFailure mDownloadableSnapshotFailureReason =
+            DownloadableSnapshotFailure::NoFailure;
 };
 
 }  // namespace snapshot

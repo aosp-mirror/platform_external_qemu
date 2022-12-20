@@ -64,6 +64,7 @@
 #include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
 #include "android/snapshot/check_snapshot_loadable.h"
+#include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/interface.h"
 #include "android/userspace-boot-properties.h"
 #include "android/utils/bufprint.h"
@@ -425,6 +426,14 @@ static bool creatUserDataExt4Img(AndroidHwConfig* hw,
         path_delete_file(hw->disk_dataPartition_path);
         return false;
     }
+}
+
+static void createSdCard(std::string sdcardFilePath, int size) {
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "%d", size);
+    auto mksdcard = System::get()->findBundledExecutable("mksdcard");
+    auto res = System::get()->runCommandWithResult(
+            {mksdcard, buf, sdcardFilePath});
 }
 
 static void convertExt4ToQcow2(std::string ext4filepath) {
@@ -1964,12 +1973,16 @@ extern "C" int main(int argc, char** argv) {
             std::string srcDir;
             std::string default_config_ini;
 
+            using android::snapshot::Snapshotter;
             if (hw->firstboot_bootFromLocalSnapshot) {
                 srcDir = srcDirLocal;
                 default_config_ini = PathUtils::join(srcDir, "config.ini");
                 if (!path_exists(default_config_ini.c_str())) {
                     srcDir.clear();
                     default_config_ini.clear();
+                } else {
+                    Snapshotter::get().setSnapshotAvdSource(
+                            Snapshotter::SnapshotAvdSource::Local);
                 }
             }
 
@@ -1977,10 +1990,31 @@ extern "C" int main(int argc, char** argv) {
             if (srcDir.empty() && hw->firstboot_bootFromDownloadableSnapshot) {
                 srcDir = srcDirDownloaded;
                 default_config_ini = PathUtils::join(srcDir, "config.ini");
+                Snapshotter::get().setSnapshotAvdSource(
+                        Snapshotter::SnapshotAvdSource::Downloaded);
             }
 
+            using DownloadableSnapshotFailure =
+                    android::snapshot::Snapshotter::DownloadableSnapshotFailure;
             if (!default_config_ini.empty() &&
                 path_exists(default_config_ini.c_str())) {
+                IniFile orgSrcConfigIni(
+                        PathUtils::join(s_AvdFolder, "config.ini"));
+                orgSrcConfigIni.read();
+                std::string orgSdcardPath =
+                        PathUtils::join(s_AvdFolder, "sdcard.img");
+                uint64_t sdcard_size = 0;
+                if (path_exists(orgSdcardPath.c_str())) {
+                    path_get_size(orgSdcardPath.c_str(), &sdcard_size);
+                }
+
+                // when not compatible, do a cold boot, but still leverage
+                // the already booted userdata partition etc.
+                if (!checkCompatable(srcDir, std::string(s_AvdFolder))) {
+                    opts->no_snapshot_load = true;
+                    Snapshotter::get().setDownloadableSnapshotFailure(
+                                DownloadableSnapshotFailure::IncompatibleAvd);
+                }
                 dprint("emulator: First boot, copying snapshot...");
                 dprint("emulator: copying snapshot from %s to %s",
                        srcDir.c_str(), s_AvdFolder);
@@ -1989,29 +2023,44 @@ extern "C" int main(int argc, char** argv) {
                 std::set<std::string> skipSet;
                 skipSet.insert("multiinstance.lock");
                 skipSet.insert("hardware-qemu.ini.lock");
-                path_copy_dir_ex(s_AvdFolder, srcDir.c_str(), &skipSet);
-
-                // when not compatible, do a cold boot, but still leverage
-                // the already booted userdata partition etc.
-                if (!checkCompatable(srcDir, std::string(s_AvdFolder))) {
+                if (-1 ==
+                    path_copy_dir_ex(s_AvdFolder, srcDir.c_str(), &skipSet)) {
+                    // copy failed
                     opts->no_snapshot_load = true;
-                }
-                if (opts->no_snapshot_load) {
-                    const std::string avdSnapshotDir =
-                            PathUtils::join(s_AvdFolder, "snapshots");
-                    path_delete_dir(avdSnapshotDir.c_str());
-                }
-                auto elapsed =
-                        std::chrono::duration_cast<std::chrono::milliseconds>(
-                                std::chrono::steady_clock::now() - startTime);
+                    Snapshotter::get().setDownloadableSnapshotFailure(
+                            DownloadableSnapshotFailure::FailedToCopyAvd);
+                    // need to do a wipedata again
+                    path_delete_dir(s_AvdFolder);
+                    path_mkdir_if_needed(s_AvdFolder, 0777);
+                    // create config.ini
+                    orgSrcConfigIni.write();
+                    // create sdcard.img if applicable
+                    if (sdcard_size > 0) {
+                        createSdCard(std::string(PathUtils::join(s_AvdFolder,
+                                                                 "sdcard.img")),
+                                     static_cast<int>(sdcard_size));
+                    }
+                    firstTimeSetup = true;
+                } else {
+                    if (opts->no_snapshot_load) {
+                        const std::string avdSnapshotDir =
+                                PathUtils::join(s_AvdFolder, "snapshots");
+                        path_delete_dir(avdSnapshotDir.c_str());
+                    }
+                    auto elapsed = std::chrono::duration_cast<
+                            std::chrono::milliseconds>(
+                            std::chrono::steady_clock::now() - startTime);
 
-                long long timeUsedMs = (long long)elapsed.count();
-                dprint("emulator: copying snapshot done, using %lld mini "
-                       "seconds",
-                       timeUsedMs);
-                firstTimeSetup = false;  // already setup
-                // fix AvdId and displayname
-                fixAvdIdAndDisplayName(std::string(s_AvdFolder), avdName);
+                    long long timeUsedMs = (long long)elapsed.count();
+                    dprint("emulator: copying snapshot done, using %lld mini "
+                           "seconds",
+                           timeUsedMs);
+                    Snapshotter::get().settDownloadableSnapshotCopyTime(
+                            timeUsedMs);
+                    firstTimeSetup = false;  // already setup
+                    // fix AvdId and displayname
+                    fixAvdIdAndDisplayName(std::string(s_AvdFolder), avdName);
+                }
             } else {
                 // TODO: when snapshot is not possible, maybe try cold boot, at
                 //  least it will be still much faster than first boot.
