@@ -44,7 +44,7 @@ def sizeof_fmt(num):
 
 
 @click.group()
-@click.option("--grpc", default="", help="Port of the grpc service to use.")
+@click.option("--grpc", default="", help="Port or address of the grpc service to use.")
 @click.pass_context
 def cli(ctx, grpc):
     ctx.obj = SnapshotService(grpc)

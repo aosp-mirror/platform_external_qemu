@@ -32,11 +32,10 @@ class SnapshotService(object):
     def __init__(self, port=None, snapshot_service=None, logger=logging.getLogger()):
         """Connect to the emulator on the given port, and log on the given logger."""
         if port and not snapshot_service:
-            snapshot_service = (
-                EmulatorDiscovery()
-                .find_emulator("grpc.port", port)
-                .get_snapshot_service()
-            )
+            emulator = EmulatorDiscovery().find_emulator("grpc.port", port)
+            if not emulator:
+                emulator = EmulatorDiscovery.connection(port)
+            snapshot_service = emulator.get_snapshot_service()
         if not snapshot_service:
             snapshot_service = get_default_emulator().get_snapshot_service()
 
@@ -96,8 +95,7 @@ class SnapshotService(object):
         """
 
         def read_in_chunks(file_object, chunk_size=(256 * 1024)):
-            """Ye olde python chunk reader.
-            """
+            """Ye olde python chunk reader."""
             while True:
                 data = file_object.read(chunk_size)
                 if not data:
@@ -129,14 +127,21 @@ class SnapshotService(object):
     def info(self, snap_id):
         """Lists all available snapshots."""
         self.logger.debug("Retrieving snapshots")
-        response = self.stub.ListSnapshots(SnapshotFilter(statusFilter=SnapshotFilter.All))
+        response = self.stub.ListSnapshots(
+            SnapshotFilter(statusFilter=SnapshotFilter.All)
+        )
         self.logger.debug("Response %s", response)
-        return next((f for f in response.snapshots if f.snapshot_id == snap_id), None,)
+        return next(
+            (f for f in response.snapshots if f.snapshot_id == snap_id),
+            None,
+        )
 
     def lists(self):
         """Lists all available snapshots."""
         self.logger.debug("Retrieving snapshots")
-        response = self.stub.ListSnapshots(SnapshotFilter(statusFilter=SnapshotFilter.All))
+        response = self.stub.ListSnapshots(
+            SnapshotFilter(statusFilter=SnapshotFilter.All)
+        )
         self.logger.debug("Response %s", response)
         return [f for f in response.snapshots]
 
