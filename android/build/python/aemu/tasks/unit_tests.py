@@ -103,11 +103,12 @@ class CTestTask(BuildTask):
                     ]
                 ).in_directory(self.destination).with_environment(env).run()
             except CommandFailedException:
-                logging.error("Test failures encountered:")
+                logging.critical("Test failures encountered:")
                 test_log_file = (
                     self.destination / "Testing" / "Temporary" / "LastTest.log"
                 )
                 with open(
                     test_log_file.absolute(), "r", encoding="utf-8", errors="ignore"
                 ) as log_file:
-                    logging.error("%s", log_file.read())
+                    logging.critical("%s", log_file.read())
+                raise
