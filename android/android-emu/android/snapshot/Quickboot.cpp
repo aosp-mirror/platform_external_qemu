@@ -325,6 +325,7 @@ bool Quickboot::load(const char* name) {
             // line), and not an AVD option.
             mWindow.showMessage("Cold boot: requested by the user",
                                 WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
+            LOG(WARNING) << "Cold boot:  requested by the user";
         }
         reportFailedLoad(getConsoleAgents()->settings->hw()->fastboot_forceColdBoot
                                  ? pb::EmulatorQuickbootLoad::
@@ -343,6 +344,10 @@ bool Quickboot::load(const char* name) {
         reportFailedLoad(pb::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED,
                          FailureReason::Empty);
+        LOG(WARNING) << "Cold boot: selected renderer '"
+                     << emuglConfig_renderer_to_string(
+                                emuglConfig_get_current_renderer())
+                     << "' doesn't support snapshots";
     } else {
         // TODO: Figure out how we can detect that this snapshot caused a crash?
         // See b/233665745
@@ -370,6 +375,7 @@ bool Quickboot::load(const char* name) {
             mWindow.showMessage("Cold boot: snapshot failed to load",
                                 WINDOW_MESSAGE_WARNING,
                                 kDefaultMessageTimeoutMs);
+            LOG(WARNING) << "Cold boot: snapshot failed to load";
             mVmOps.vmReset();
             reportFailedLoad(pb::EmulatorQuickbootLoad::
                                      EMULATOR_QUICKBOOT_LOAD_NO_SNAPSHOT,
@@ -412,6 +418,7 @@ void Quickboot::decideFailureReport(
         reportFailedLoad(
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                 *failureReason);
+        LOG(WARNING) << "Cold boot based on user configuration";
     } else {
         if (*failureReason != FailureReason::NoSnapshotInImage) {
             mWindow.showMessage(
@@ -420,6 +427,9 @@ void Quickboot::decideFailureReport(
                                                        SNAPSHOT_LOAD))
                             .c_str(),
                     WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
+            LOG(WARNING) << "Cold boot: "
+                         << failureReasonToString(*failureReason,
+                                                  SNAPSHOT_LOAD);
         }
         reportFailedLoad(
                 failureReason < FailureReason::UnrecoverableErrorLimit
