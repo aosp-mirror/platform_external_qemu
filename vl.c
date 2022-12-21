@@ -4550,11 +4550,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     case LCD_DENSITY_XXXHDPI:
                         break;
                     default:
-                        fprintf(stderr, "qemu: Bad LCD density: %d. Available densities are: "
+                        fprintf(stderr, "WARNING: qemu: Bad LCD density: %d. Available densities are: "
                                 "120, 140, 160, 180, 213, 240, 280, "
                                 "320, 340, 360, 400, 420, 440, 480, 560, 640.\n",
                                 lcd_density);
-                        return 1;
                 }
                 break;
             case QEMU_OPTION_dns_server:
