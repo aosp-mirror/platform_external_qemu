@@ -121,7 +121,8 @@ android_add_library(
       android/emulation/control/utils/SharedMemoryLibrary.cpp
       android/emulation/control/waterfall/WaterfallFactory.cpp)
 
-android_complete_archive(ANDROID_GRPC_REFLECTION grpc++_reflection)
+android_link_complete_archive(TARGET grpc++_reflection AS grpc++_reflection_whole)
+add_dependencies(android-grpc-services grpc++_reflection)
 target_link_libraries(
   android-grpc
   PRIVATE png
@@ -132,7 +133,7 @@ target_link_libraries(
          android-emu-tracing
          android-net
          grpc++
-         ${ANDROID_GRPC_REFLECTION}
+         grpc++_reflection_whole
          protobuf::libprotobuf
          tink::config::tink_config
          tink::jwt::jwk_set_converter
