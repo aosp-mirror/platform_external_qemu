@@ -637,7 +637,6 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
 endif()
 
 prebuilt(GLIB2)
-prebuilt(SDL2)
 prebuilt(FDT)
 prebuilt(PIXMAN)
 prebuilt(VIRGLRENDERER)
