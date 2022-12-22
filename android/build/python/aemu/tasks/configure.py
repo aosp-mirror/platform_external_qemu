@@ -15,7 +15,6 @@ import logging
 import os
 import platform
 import shutil
-import subprocess
 from pathlib import Path
 from typing import List
 
@@ -23,6 +22,7 @@ from aemu.platform.toolchains import Toolchain
 from aemu.process.command import Command, CommandFailedException
 from aemu.process.environment import get_default_environment
 from aemu.tasks.build_task import BuildTask
+from aemu.util.simple_feature_parser import FeatureParser
 
 
 class ConfigureTask(BuildTask):
@@ -60,9 +60,11 @@ class ConfigureTask(BuildTask):
         ccache: str,
         thread_safety: bool,
         dist: str,
+        features: List[str],
     ):
         super().__init__()
         self.toolchain = Toolchain(aosp, target)
+
         cmake = shutil.which(
             "cmake",
             path=str(
@@ -108,6 +110,8 @@ class ConfigureTask(BuildTask):
             self.cmake_cmd.append(aosp / "device" / "generic" / "vulkan-cereal")
         else:
             self.cmake_cmd.append(aosp / "external" / "qemu")
+
+        self.with_features(aosp, features)
         self._add_sdk_revision(aosp)
         self.env = get_default_environment(aosp)
         self.log_dir = Path(dist or destination) / "logs"
@@ -175,6 +179,13 @@ class ConfigureTask(BuildTask):
         if raw_options:
             self.cmake_cmd += [f"-D{x}" for x in raw_options]
         return self
+
+    def with_features(self, aosp, raw_features):
+        if raw_features:
+            feature = FeatureParser(aosp / "external" / "qemu" / "CMakeLists.txt")
+            self.cmake_cmd += [
+                feature.feature_to_cmake_parameter(f) for f in raw_features
+            ]
 
     def with_asan(self, sanitizer: [str]):
         return self.add_option("OPTION_ASAN", ",".join(sanitizer))

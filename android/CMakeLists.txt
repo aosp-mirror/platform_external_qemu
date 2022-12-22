@@ -37,7 +37,7 @@ else()
 endif()
 
 
-if(ANDROIDSTUDIO)
+if(OPTION_ANDROID_STUDIO)
   message(STATUS "Including android-studio")
   add_subdirectory(android-studio)
 endif()
