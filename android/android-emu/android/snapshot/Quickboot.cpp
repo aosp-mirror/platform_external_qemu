@@ -446,6 +446,13 @@ bool Quickboot::saveAvdToSystemImageSnapshotsLocalDir() {
         return false;
     }
 
+    if (!getConsoleAgents() || !getConsoleAgents()->settings ||
+        !getConsoleAgents()->settings->guest_boot_completed()) {
+        dprint("Guest has not completed booting yet, snapshot won't be save to "
+               "local/avd directory.");
+        return false;
+    }
+
     auto* myHw = getConsoleAgents()->settings->hw();
     if (!myHw->firstboot_saveToLocalSnapshot) {
         return false;
