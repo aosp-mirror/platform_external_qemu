@@ -108,11 +108,12 @@ bool OpenPortChecker::isAlive(std::string myFile,
         auto myPort = me.getInt64(port, 0);
 
         if (myPort != 0 && myPort == checkPort) {
-            // Imposter! You're ini file contains ports that are owned by me!
+            DD("Imposter! Your ini file contains ports that are owned by me!");
             return false;
         }
 
         if (checkPort != 0 && canConnectToPort(checkPort)) {
+            DD("Able to connect to port %d", checkPort);
             return true;
         }
     }

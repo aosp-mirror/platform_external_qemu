@@ -31,6 +31,7 @@
 #include "android/base/testing/TestTempDir.h"  // for TestTempDir
 #include "android/emulation/ConfigDirs.h"      // for ConfigDirs
 #include "android/utils/path.h"
+#include "aemu/base/process/Command.h"
 
 #ifndef _WIN32
 #include <sys/wait.h>  // for waitpid
@@ -43,6 +44,7 @@ using android::base::pj;
 using android::base::System;
 using android::base::TestTempDir;
 using namespace std::chrono;
+using android::base::Command;
 
 /* Tests rely on non-existing pids, linux declares a max for 4 million. All
 os'es recycle pids, so unlikely to hit this limit.
@@ -57,6 +59,13 @@ class EmulatorAdvertisementTest : public testing::Test {
 protected:
     EmulatorAdvertisementTest() {}
 
+    void TearDown() override  {
+        if (mTesterProc) {
+            LOG(INFO) << "Terminating tester.";
+            mTesterProc->terminate();
+        }
+    }
+
     void write_hello(std::string fname) {
         std::ofstream hello(fname, std::ios_base::binary);
         hello << "hello=world";
@@ -67,8 +76,9 @@ protected:
         std::string executable =
                 System::get()->findBundledExecutable(kDiscovery);
         std::vector<std::string> cmdArgs{executable};
+        auto cmd = Command::create({executable});
         if (!dir.empty()) {
-            cmdArgs.push_back(dir);
+            cmd.arg(dir);
         }
         System::Pid exePid = -1;
         std::string invoke = "";
@@ -76,17 +86,15 @@ protected:
             invoke += arg + " ";
         }
 
-        LOG(INFO) << "Launching: " << invoke << "&";
-        if (!System::get()->runCommand(cmdArgs,
-                                       System::RunOptions::DontWait |
-                                               System::RunOptions::ShowOutput,
-                                       System::kInfinite, nullptr, &exePid)) {
+        mTesterProc = cmd.execute();
+        LOG(INFO) << "Launching: " << executable << " " << dir  << "&";
+        if (!mTesterProc) {
             // Failed to start Mission abort!
-            LOG(INFO) << "Failed to start " << invoke;
+            LOG(INFO) << "Failed to start (does the emulator binary exist?): " << invoke;
             return {};
         }
 
-        return exePid;
+        return mTesterProc->pid();
     }
 
     bool waitForPred(std::function<bool()> pred) {
@@ -106,7 +114,7 @@ protected:
     }
 
     TestTempDir mTempDir{"DiscoveryTest"};
-
+    std::unique_ptr<base::ObservableProcess> mTesterProc;
     const std::string kDiscovery = "studio_discovery_tester";
     const seconds kPauseForLaunch{10};
     const int kWaitIntervalMs = 5;
@@ -173,7 +181,6 @@ TEST_F(EmulatorAdvertisementTest, pid_file_is_written) {
     EXPECT_TRUE(pid);
     if (pid) {
         EXPECT_TRUE(waitForPid(mTempDir.path(), *pid));
-        System::get()->killProcess(*pid);
     }
 }
 
@@ -203,17 +210,27 @@ TEST_F(EmulatorAdvertisementTest, alive_pid_with_open_port_is_alive) {
     auto pid = launchInBackground(mTempDir.path());
     EXPECT_TRUE(pid);
 
+    // Make sure the process has finished writing the ini file.
+    EXPECT_TRUE(waitForPid(mTempDir.path(), *pid));
+
     auto tst1 = pj(mTempDir.path(),
                    std::string("pid_") + std::to_string(*pid) + ".ini");
     base::IniFile ini(tst1);
     auto socket = base::ScopedSocket(base::socketTcp4LoopbackServer(0));
     EXPECT_TRUE(socket.valid());
 
-    ini.setInt64("grpc.port", base::socketGetPort(socket.get()));
+    int port = base::socketGetPort(socket.get());
+    EXPECT_GT(port, 0) << "The port should actually exist!";
+
+
+
+    ini.setInt64("grpc.port", port);
     ini.write();
+
+    EXPECT_TRUE(base::ScopedSocket(base::socketTcp4LoopbackClient(port)).valid());
     EXPECT_TRUE(OpenPortChecker().isAlive("ignored", tst1));
     auto ignored = pj(mTempDir.path(), "pid_123.ini");
-    EXPECT_FALSE(PidChecker().isAlive(ignored, tst1));
+    EXPECT_TRUE(PidChecker().isAlive(ignored, tst1));
 }
 
 TEST_F(EmulatorAdvertisementTest, open_port_is_alive) {
