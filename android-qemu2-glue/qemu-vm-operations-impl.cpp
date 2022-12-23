@@ -449,6 +449,15 @@ static bool import_snapshot(const char* name,
     return success;
 }
 
+static int myStdErrCallback(void* opaque, const char* buff, int len) {
+    (void)opaque;
+    char mybuf[1024] = {};
+    len = std::min(len, (int)(sizeof(mybuf)) - 1);
+    memcpy(mybuf, buff, len);
+    LOG(WARNING) << mybuf;
+    return len;
+}
+
 static bool qemu_snapshot_load(const char* name,
                                void* opaque,
                                LineConsumerCallback errConsumer) {
@@ -471,8 +480,10 @@ static bool qemu_snapshot_load(const char* name,
     // live in the swapped out snapshot.
     import_snapshot(name, opaque, errConsumer);
 
-    int loadVmRes =
-            qemu_loadvm(name, MessageCallback(opaque, nullptr, errConsumer));
+    int loadVmRes = qemu_loadvm(
+            name,
+            MessageCallback(opaque, NULL,
+                            errConsumer ? errConsumer : myStdErrCallback));
     DD("Snapshot load vm result %d success %d", loadVmRes, loadVmRes != 0);
 
     bool failed = loadVmRes != 0;
