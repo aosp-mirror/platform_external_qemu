@@ -356,6 +356,8 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
 
 #define HAXM_INSTALLER_VERSION_MINIMUM 0x06000001
 #define HAXM_INSTALLER_VERSION_MINIMUM_APPLE 0x6020001
+#define HAXM_INSTALLER_VERSION_RECOMMENDED 0x7060005
+#define HAXM_INSTALLER_VERSION_INCOMPATIBLE 0x7080000
 
 std::string cpuAcceleratorFormatVersion(int32_t version) {
     if (version < 0) {
@@ -591,6 +593,14 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
                     cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM));
             return ANDROID_CPU_ACCELERATION_ACCEL_OBSOLETE;
         }
+
+        if (haxm_installer_version >= HAXM_INSTALLER_VERSION_INCOMPATIBLE) {
+            StringAppendFormat(
+                    status, "HAXM (version %s) is not compatible with the "
+		    "android emulator. Version 7.6.5 is recommended.",
+                    cpuAcceleratorFormatVersion(haxm_installer_version));
+            return ANDROID_CPU_ACCELERATION_ACCEL_OBSOLETE;
+        }
     }
 
     // 1) Try to find the HAX kernel module.
@@ -807,6 +817,9 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
     StringAppendFormat(status, "HAXM version %s (%d) is installed and usable.",
                        cpuAcceleratorFormatVersion(version),
                        hax_version.current_version);
+    if (haxm_installer_version > HAXM_INSTALLER_VERSION_RECOMMENDED)
+        StringAppendFormat(status, " Warning: HAXM version greater than 7.6.5 is not "
+                       "recommended. Some AVDs may fail to boot.");
     GlobalState* g = &gGlobals;
     ::snprintf(g->version, sizeof(g->version), "%s",
                cpuAcceleratorFormatVersion(version).c_str());
