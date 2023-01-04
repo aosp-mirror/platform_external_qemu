@@ -63,6 +63,7 @@ protobuf_generate_grpc_cpp(
   INCLUDES ${ANDROID_QEMU2_TOP_DIR}/android/emu/protos
   SOURCES adb_service.proto emulator_controller.proto
           grpc_endpoint_description.proto snapshot_service.proto
+          emulator_stats.proto
   OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
   GENERATED EMULATOR_GRPC_SRC)
 
@@ -119,7 +120,8 @@ android_add_library(
       android/emulation/control/utils/GrpcAndroidLogAdapter.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp
       android/emulation/control/utils/SharedMemoryLibrary.cpp
-      android/emulation/control/waterfall/WaterfallFactory.cpp)
+      android/emulation/control/waterfall/WaterfallFactory.cpp
+      android/emulation/stats/EmulatorStats.cpp)
 
 android_link_complete_archive(TARGET grpc++_reflection AS grpc++_reflection_whole)
 add_dependencies(android-grpc-services grpc++_reflection)
@@ -229,7 +231,7 @@ set_property(TARGET android-grpc_unittest PROPERTY CXX_STANDARD 17)
 # Lets distribute the proto file
 install(
   FILES emulator_controller.proto snapshot_service.proto
-        ui_controller_service.proto
+        ui_controller_service.proto emulator_stats.proto
         ${ANDROID_QEMU2_TOP_DIR}/android/emu/protos/snapshot.proto
   DESTINATION lib)
 

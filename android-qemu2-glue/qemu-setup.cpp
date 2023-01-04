@@ -93,6 +93,7 @@ extern "C" {
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
+#include "android/emulation/stats/EmulatorStats.h"
 #include "android/emulation/virtio_vsock_device.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/console.h"
@@ -341,6 +342,7 @@ int qemu_setup_grpc() {
     auto uiController = android::emulation::control::getUiControllerService(
             getConsoleAgents());
     auto adb = android::emulation::control::getAdbService();
+    auto stats = android::emulation::stats::getStatsService();
     auto builder =
             EmulatorControllerService::Builder()
                     .withConsoleAgents(getConsoleAgents())
@@ -361,6 +363,7 @@ int qemu_setup_grpc() {
                     .withService(h2o)
                     .withService(snapshot)
                     .withService(uiController)
+                    .withService(stats)
                     .withSecureService(adb);
 
 #ifdef ANDROID_BLUETOOTH
