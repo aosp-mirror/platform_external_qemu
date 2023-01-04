@@ -19,6 +19,7 @@ import psutil
 import pytest
 from aemu.discovery.emulator_discovery import EmulatorDiscovery, get_default_emulator
 
+
 @pytest.fixture
 def tmp_directory(tmp_path_factory):
     return tmp_path_factory.mktemp("data")
@@ -94,3 +95,19 @@ def test_finds_two_emulators(fake_emu_pid_file):
     assert discovery.find_by_pid("1230").name() == "emulator-5554"
     assert discovery.find_by_pid("1231").name() == "emulator-5556"
 
+
+def test_create_description_from_uri():
+    assert EmulatorDiscovery.connection("localhost:8444") is not None
+
+
+def test_create_description_from_uri_is_same():
+    assert EmulatorDiscovery.connection(
+        "localhost:8444"
+    ) == EmulatorDiscovery.connection("localhost:8444")
+
+
+def test_create_controlller_from_uri():
+    assert (
+        EmulatorDiscovery.connection("localhost:8444").get_emulator_controller()
+        is not None
+    )

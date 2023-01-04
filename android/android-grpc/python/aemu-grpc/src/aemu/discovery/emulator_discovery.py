@@ -19,7 +19,7 @@ from typing import Optional
 from pathlib import Path
 
 
-from aemu.discovery.emulator_description import EmulatorDescription
+from aemu.discovery.emulator_description import EmulatorDescription, BasicEmulatorDescription
 
 
 class EmulatorNotFound(Exception):
@@ -134,6 +134,23 @@ class EmulatorDiscovery(object):
             raise EmulatorNotFound("No running emulators were found.")
         return next(iter(emulators))
 
+    @staticmethod
+    def connection(address: str, token: Optional[str] = None) -> BasicEmulatorDescription:
+        """Creates a connection to an emulator based upon a uri
+        and token.
+
+        You usually want to use this if you want to establish a connection
+        to a remote emulator.
+
+        Args:
+            address (str): The endpoint you wish to connect to
+            token (Optional[str]): Token to use, if any
+        """
+        description = {"grpc.address": address}
+        if token:
+            description["grpc.token"] = token
+        return BasicEmulatorDescription(description)
+
 
 def get_discovery_directories() -> list[Path]:
     """All the discovery directories that can contain emulator discovery files.
@@ -177,6 +194,8 @@ def _get_user_directories():
     return paths
 
 
+
+
 def get_default_emulator() -> EmulatorDescription:
     """The first discovered emulator.
 
@@ -189,3 +208,5 @@ def get_default_emulator() -> EmulatorDescription:
         EmulatorDescription: The first discovered emulator.
     """
     return EmulatorDiscovery().first()
+
+

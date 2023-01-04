@@ -27,7 +27,7 @@ write_local_pip_conf() {
 }
 
 echo "Using ${PYTHON} which is version ${PY_VER}"
-echo "Make sure you have devpi runninng on port 3141 with tink, or build it manually yourself!"
+echo "Make sure you have devpi running on port 3141 i.e. run: \$AOSP/external/adt-infra/devpi/launch-devpi.sh"
 if [ ! -f "./.venv/bin/activate" ]; then
   $PYTHON -m venv .venv
   write_local_pip_conf

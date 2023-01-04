@@ -39,15 +39,23 @@ from aemu.proto.ui_controller_service_pb2_grpc import UiControllerStub
 from aemu.proto.waterfall_pb2_grpc import WaterfallStub
 
 
-class EmulatorDescription(dict):
-    """A description of a (possibly) running emulator.
+class BasicEmulatorDescription(dict):
+    """A description of an emulator you can connect to using gRPC."""
 
-    The description comes from the parsed discovery file.
-    """
+    def __init__(self, description_dict):
+        """A BasicEmulatorDescription should have at least the following
+        properties:
 
-    def __init__(self, pid, description_dict):
+        - grpc.port or grpc.address
+        - Optionally grpc.token
+        - Optionally grpc.jwks and grpc.jwks_active
+
+        Currently only produces insecure channels.
+
+        Args:
+            description_dict (_type_): _description_
+        """
         self._description = description_dict
-        self._description["pid"] = pid
 
     def get_grpc_channel(self, use_async: bool = False) -> grpc.aio.Channel:
         """Gets a configured gRPC channel to the emulator.
@@ -66,7 +74,8 @@ class EmulatorDescription(dict):
         # This should default to max
         MAX_MESSAGE_LENGTH = -1
 
-        addr = "localhost:{}".format(self.get("grpc.port", 8554))
+        port = self.get("grpc.port", 8554)
+        addr = self.get("grpc.address", f"localhost:{port}")
         if use_async:
             channel = grpc.aio.insecure_channel(
                 addr,
@@ -106,62 +115,6 @@ class EmulatorDescription(dict):
 
         logging.debug("Insecure channel to %s", addr)
         return channel
-
-    def process(self) -> Optional[psutil.Process]:
-        """Returns the process object associated with the qemu process.
-
-        Returns:
-            Optional[psutil.Process]: The psutil process object, or one if not running
-        """
-        procs = [p for p in psutil.process_iter(["pid"]) if p and p.pid == self.pid()]
-        return next(iter(procs), None)
-
-    def is_alive(self) -> bool:
-        """Checks to see if this emulator description is still alive.
-
-        A Liveness check is done by determining if the pid is still alive
-
-        Returns:
-            bool: True if the pid associated with this description is alive
-        """
-        return psutil.pid_exists(self.pid())
-
-    def shutdown(self, timeout=30) -> bool:
-        """Gracefully shutdown the emulator.
-
-        This sends the shutdown signal to the emulator over gRPC.
-        The emulator will be terminated if:
-
-        - The emulator does not shutdown in timeout seconds.
-        - The gRPC endpoint is not responding
-
-        Args:
-            timeout (int, optional): Timeout before forcefully terminating the emulator. Defaults to 30.
-
-        Returns:
-            bool: True if the emulator is no longer running.
-        """
-        proc = self.process()
-        if not proc:
-            return True
-
-        try:
-            self.get_emulator_controller().setVmState(
-                VmRunState(state=VmRunState.SHUTDOWN)
-            )
-        except Exception as err:
-            logging.error("Failed to shutdown using gRPC (%s), terminating.", err)
-            proc.terminate()
-
-        try:
-            proc.wait(timeout=timeout)
-        except psutil.TimeoutExpired as expired:
-            logging.error(
-                "Emulator did not shutdown gracefully, terminating. (%s)", expired
-            )
-            proc.terminate()
-
-        return not self.is_alive()
 
     def get_async_grpc_channel(self) -> grpc.aio.Channel:
         """Gets an asynchronous channel to the emulator.
@@ -224,6 +177,89 @@ class EmulatorDescription(dict):
         channel = self.get_grpc_channel(use_async)
         return EmulatedBluetoothServiceStub(channel)
 
+    def get(self, prop: str, default_value: str = None) -> str:
+        """Gets the property from the emulator description
+
+        Args:
+            prop (str): The property from the discovery file
+            default_value (str, optional): Default value if the
+                    property does not exist. Defaults to None.
+
+        Returns:
+            str: _description_
+        """
+        return self._description.get(prop, default_value)
+
+    def __hash__(self):
+        return hash(frozenset(self._description.items()))
+
+
+class EmulatorDescription(BasicEmulatorDescription):
+    """A description of a (possibly) locally running emulator.
+
+    The description comes from the parsed discovery file.
+    """
+
+    def __init__(self, pid, description_dict):
+        super().__init__(description_dict)
+        self._description["pid"] = pid
+
+    def process(self) -> Optional[psutil.Process]:
+        """Returns the process object associated with the qemu process.
+
+        Returns:
+            Optional[psutil.Process]: The psutil process object, or one if not running
+        """
+        procs = [p for p in psutil.process_iter(["pid"]) if p and p.pid == self.pid()]
+        return next(iter(procs), None)
+
+    def is_alive(self) -> bool:
+        """Checks to see if this emulator description is still alive.
+
+        A Liveness check is done by determining if the pid is still alive
+
+        Returns:
+            bool: True if the pid associated with this description is alive
+        """
+        return psutil.pid_exists(self.pid())
+
+    def shutdown(self, timeout=30) -> bool:
+        """Gracefully shutdown the emulator.
+
+        This sends the shutdown signal to the emulator over gRPC.
+        The emulator will be terminated if:
+
+        - The emulator does not shutdown in timeout seconds.
+        - The gRPC endpoint is not responding
+
+        Args:
+            timeout (int, optional): Timeout before forcefully terminating the emulator. Defaults to 30.
+
+        Returns:
+            bool: True if the emulator is no longer running.
+        """
+        proc = self.process()
+        if not proc:
+            return True
+
+        try:
+            self.get_emulator_controller().setVmState(
+                VmRunState(state=VmRunState.SHUTDOWN)
+            )
+        except Exception as err:
+            logging.error("Failed to shutdown using gRPC (%s), terminating.", err)
+            proc.terminate()
+
+        try:
+            proc.wait(timeout=timeout)
+        except psutil.TimeoutExpired as expired:
+            logging.error(
+                "Emulator did not shutdown gracefully, terminating. (%s)", expired
+            )
+            proc.terminate()
+
+        return not self.is_alive()
+
     def name(self) -> str:
         """Returns the name of the emulator as displayed by adb.
 
@@ -243,19 +279,3 @@ class EmulatorDescription(dict):
             int: The process id of the emulator.
         """
         return int(self.get("pid"))
-
-    def get(self, prop: str, default_value: str = None) -> str:
-        """Gets the property from the emulator description
-
-        Args:
-            prop (str): The property from the discovery file
-            default_value (str, optional): Default value if the
-                    property does not exist. Defaults to None.
-
-        Returns:
-            str: _description_
-        """
-        return self._description.get(prop, default_value)
-
-    def __hash__(self):
-        return hash(frozenset(self._description.items()))
