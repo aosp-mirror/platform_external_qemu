@@ -61,6 +61,7 @@ include(android)
 include(prebuilts)
 include(qemu2-src-gen)
 
+set(OPTION_RUST TRUE CACHE BOOL "Enable all rust dependencies.")
 set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
 set(OPTION_TRACE
     "nop"
@@ -74,118 +75,106 @@ set(OPTION_SDK_TOOLS_BUILD_NUMBER ""
     CACHE STRING "The sdk buildnumber to use, if any.")
 set(OPTION_ASAN "" CACHE STRING "The list of build sanitizers to user")
 set(OPTION_COVERAGE_IN_DEBUG FALSE
-    CACHE BOOL "True if code coverage should be enabled in debug builds.")
+    CACHE BOOL "Code coverage in debug builds.")
 set(OPTION_ASAN_IN_DEBUG TRUE
-    CACHE BOOL "True if asan should be turned on for debug builds.")
+    CACHE BOOL "Asan for debug builds.")
 set(OPTION_TIME_INFO FALSE
-    CACHE BOOL "True if you wish to collect compile time statistics")
+    CACHE BOOL "Collect compile time statistics.")
 set(OPTION_CLANG_TIDY
     ""
     CACHE
       STRING
       "List of targets for which you wish to run clang-tidy for code analysis.")
 set(OPTION_CLANG_TIDY_FIX FALSE
-    CACHE BOOL "True if you wish clang-tidy to auto fix issues it encounters.")
+    CACHE BOOL "Auto fix issues clang-tidy encounters.")
 set(OPTION_CLANG_THREAD_SAFETY_CHECKS FALSE
-    CACHE BOOL "True to turn on compile-time thread safety checks (-Wthread-safety).")
-set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
+    CACHE BOOL "Compile-time thread safety checks (-Wthread-safety).")
+set(QTWEBENGINE FALSE CACHE BOOL "The webengine (chromium) that provides the location UI.")
 if(LINUX_X86_64 OR LINUX_AARCH64)
   set(WEBRTC TRUE
-      CACHE BOOL "True if the emulator should be build with WEBRTC support.")
+      CACHE BOOL "Build with WEBRTC support.")
 else()
   set(WEBRTC
       FALSE
       CACHE
         BOOL
-        "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
+        "Build with WEBRTC support."
   )
 endif()
 set(ANDROIDSTUDIO FALSE
     CACHE BOOL
-          "Deprecated. Android studio is using the gRPC interface directly.")
+          "Android Studio Java bridge (Deprecated).")
 set(OPTION_MINBUILD
     FALSE
     CACHE
       BOOL
-      "True if we should build a minimum set of components to support 64-bit guets only."
+      "Minimum set of components to support 64-bit guets only."
 )
 set(OPTION_TCMALLOC
     TRUE
     CACHE
       BOOL
-      "True if we should use TCMalloc on its supported platforms (currently, linux)."
+      "Use TCMalloc on supported platforms (currently, linux)."
 )
 set(OPTION_GFXSTREAM_BACKEND
     FALSE
     CACHE
       BOOL
-      "True if we should build the gfxstream backend (plus everything else).")
+      "Build the gfxstream backend (plus everything else).")
 
 set(GFXSTREAM
     FALSE
     CACHE
       BOOL
-      "True if we should build gfxstream, crosvm, and its accompanying libraries/tests."
+      "Build gfxstream, crosvm, and its accompanying libraries/tests."
 )
 set(OPTIONS_BUILD_PACKET_GEN
     FALSE
     CACHE
       BOOL
-      "True if you wish to generate the bluetooth packet generator .yy and .ll files (posix only)"
+      "Generate the bluetooth packet generator .yy and .ll files (posix only)."
 )
 set(BLUETOOTH_EMULATION TRUE
-    CACHE BOOL "True if you wish to build the emulated bluetooth stack")
+    CACHE BOOL "Build the emulated bluetooth stack.")
 
 set(OPTION_AEMU_LIBS_ONLY FALSE
-    CACHE BOOL "True if we should build only AEMU libraries and their tests.")
+    CACHE BOOL "Build only AEMU libraries and their tests.")
 
-set(GFXSTREAM_ONLY FALSE CACHE BOOL "True if we should build only gfxstream")
-
-if(WINDOWS_MSVC_X86_64)
-  set(OPTION_PERFETTO_USE_SDK
-      FALSE
-      CACHE
-        BOOL
-        "True if we should be building host side tracing on top of the official Perfetto SDK. Defaults false for Windows as it doesn't build on Windows."
-  )
-else()
-  # Currently FALSE due to needing more integration work for the full SDK.
-  set(OPTION_PERFETTO_USE_SDK
-      FALSE
-      CACHE
-        BOOL
-        "True if we should be building host side tracing on top of the official Perfetto SDK. Defaults false for Windows as it doesn't build on Windows."
-  )
-endif()
+set(GFXSTREAM_ONLY FALSE CACHE BOOL "Build only gfxstream.")
 
 set(OPTION_ENABLE_SYSTEM_RUST
     FALSE
     CACHE
       BOOL
-      "Enable usage of the system rust compiler, only needed on Mac M1 or Windows"
+      "Use the system rust compiler, only needed on Mac M1 or Windows."
 )
 
-if (DARWIN_AARCH64 AND NOT Rust_COMPILER)
-   message(STATUS "On Apple sillicon attempting to use platform toolchain if available.")
-   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/android/build/cmake/corrosion/cmake/")
-   find_package(Rust REQUIRED)
-   if (TARGET Rust::Rustc)
-      set(OPTION_ENABLE_SYSTEM_RUST TRUE)
-   else()
-      message(STATUS "Unable to derive local toolchain, using cross compilation.")
-      message(STATUS "If you are a developer you can install rust with `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`")
-   endif()
-endif()
-
-if(Rust_COMPILER OR OPTION_ENABLE_SYSTEM_RUST)
-  if(OPTION_ENABLE_SYSTEM_RUST)
-    message(STATUS "Attempting to use the system rust compiler")
-    use_system_rust_toolchain()
+if(OPTION_RUST)
+  if (DARWIN_AARCH64 AND NOT Rust_COMPILER)
+    message(STATUS "On Apple sillicon attempting to use platform toolchain if available.")
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/android/build/cmake/corrosion/cmake/")
+    find_package(Rust REQUIRED)
+    if (TARGET Rust::Rustc)
+        set(OPTION_ENABLE_SYSTEM_RUST TRUE)
+    else()
+        message(STATUS "Unable to derive local toolchain, using cross compilation.")
+        message(STATUS "If you are a developer you can install rust with `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`")
+    endif()
   endif()
 
-  enable_vendorized_crates("${ANDROID_QEMU2_TOP_DIR}/android/third_party/rust/crates")
-  add_subdirectory(android/build/cmake/corrosion)
-  ensure_rust_version_is_compliant()
+  if(Rust_COMPILER OR OPTION_ENABLE_SYSTEM_RUST)
+    if(OPTION_ENABLE_SYSTEM_RUST)
+      message(STATUS "Attempting to use the system rust compiler")
+      use_system_rust_toolchain()
+    endif()
+
+    enable_vendorized_crates("${ANDROID_QEMU2_TOP_DIR}/android/third_party/rust/crates")
+    add_subdirectory(android/build/cmake/corrosion)
+    ensure_rust_version_is_compliant()
+  endif()
+  else()
+    message(WARNING "Disabling RUST, you might have reduced functionality.")
+    set(FEATURE_NETSIM FALSE)
 endif()
 
 if(GFXSTREAM_ONLY)
@@ -237,7 +226,7 @@ if(ANDROID_EXTRACT_SYMBOLS AND CROSSCOMPILE)
 endif()
 
 if (NOT LINUX_AARCH64)
-  set(FEATURE_NETSIM TRUE)
+  set(FEATURE_NETSIM TRUE CACHE BOOL "Include netsim the network simulator.")
 endif()
 
 # Make sure targets have complete control of include order.

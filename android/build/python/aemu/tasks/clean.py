@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import platform
 import shutil
-import subprocess
 from pathlib import Path
 
 from aemu.tasks.build_task import BuildTask

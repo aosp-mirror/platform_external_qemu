@@ -191,7 +191,7 @@ if(LINUX_X86_64)
   target_compile_options(grpc_unsecure PRIVATE -DSO_REUSEPORT=15)
 endif()
 
-if(FEATURE_NETSIM)
+if(FEATURE_NETSIM AND OPTION_RUST)
   set(EXTERNAL_QEMU ${ANDROID_QEMU2_TOP_DIR})
   if (DARWIN_AARCH64 AND NOT TARGET Rust::Rustc)
     message(STATUS "Cross compiling netsim to target Rosetta X86_64")
@@ -215,6 +215,8 @@ if(FEATURE_NETSIM)
   else()
     add_subdirectory(${AOSP_ROOT}/tools/netsim netsim)
   endif()
+  else()
+    message(STATUS "Netsim is not enabled.")
 endif()
 
 # gfxstream, aemu-common modules

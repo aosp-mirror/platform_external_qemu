@@ -35,6 +35,7 @@ from aemu.tasks.unit_tests import AccelerationCheckTask, CTestTask
 from aemu.tasks.emugen_test import EmugenTestTask
 from aemu.tasks.kill_netsimd import KillNetsimdTask
 from aemu.tasks.fix_cargo import FixCargoTask
+from aemu.util.simple_feature_parser import FeatureParser
 
 
 def get_tasks(args) -> List[BuildTask]:
@@ -73,7 +74,8 @@ def get_tasks(args) -> List[BuildTask]:
             options=args.cmake_option,
             ccache=args.ccache,
             thread_safety=args.thread_safety,
-            dist=args.dist
+            dist=args.dist,
+            features=args.feature,
         ),
         CompileTask(args.aosp, args.out),
     ]
@@ -106,6 +108,12 @@ def get_tasks(args) -> List[BuildTask]:
 
 def main(args):
     logging.info("cmake.py %s", " ".join(sys.argv[1:]))
+
+    if args.feature_list:
+        FeatureParser(
+            Path(args.aosp) / "external" / "qemu" / "CMakeLists.txt"
+        ).list_help()
+        return
 
     tasks = get_tasks(args)
     if args.task_list:
@@ -240,6 +248,16 @@ def launch():
         "--task-list",
         action="store_true",
         help="Lists all the tasks.",
+    )
+    parser.add_argument(
+        "--feature",
+        action="append",
+        help="Explicitly enable/disable a feature, for example --feature no-rust",
+    )
+    parser.add_argument(
+        "--feature-list",
+        action="store_true",
+        help="Lists all the available features that can be enabled or disabled.",
     )
 
     args, leftover = parser.parse_known_args()
