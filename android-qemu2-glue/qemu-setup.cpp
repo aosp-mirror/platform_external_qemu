@@ -66,6 +66,7 @@ extern "C" {
 #include "aemu/base/Tracing.h"
 #include "aemu/base/Uuid.h"
 #include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/MemStream.h"
 #include "aemu/base/files/PathUtils.h"  // for pj
 #include "aemu/base/memory/ScopedPtr.h"
@@ -312,12 +313,16 @@ int qemu_setup_grpc() {
     if (grpcService)
         return grpcService->port();
 
-    auto contentPath = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
+    auto avdInfo = getConsoleAgents()->settings->avdInfo();
+    auto cfgIni = reinterpret_cast<const android::base::IniFile*>(avdInfo_getConfigIni(avdInfo));
+    auto displayName =
+            cfgIni->getString("avd.ini.displayname", getConsoleAgents()->settings->hw()->avd_name);
 
+    auto contentPath = avdInfo_getContentPath(avdInfo);
     EmulatorProperties props{
             {"port.serial", std::to_string(android_serial_number_port)},
             {"port.adb", std::to_string(android_adb_port)},
-            {"avd.name", avdInfo_getName(getConsoleAgents()->settings->avdInfo())},
+            {"avd.name", displayName},
             {"avd.id", avdInfo_getId(getConsoleAgents()->settings->avdInfo())},
             {"avd.dir", contentPath ? contentPath : ""},
             {"cmdline", getConsoleAgents()->settings->android_cmdLine()}};
