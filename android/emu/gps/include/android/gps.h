@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/emulation/serial_line.h"
+#include "android/utils/compiler.h"
 
 #include <stdbool.h>
 #ifdef _MSC_VER
@@ -20,6 +21,8 @@
 #else
 #include <sys/time.h>
 #endif
+
+ANDROID_BEGIN_HEADER
 
 /* this is the internal character driver used to communicate with the
  * emulated GPS unit. see qemu_chr_open() in vl.c */
@@ -81,6 +84,15 @@ extern void android_gps_enable_gnssgrpcv1();
 
 extern bool android_gps_get_passive_update();
 
+void android_gps_set_send_nmea_func(void* fptr);
+
+// Atomically refreshes the current gps state. I.e. it will send the current
+// gps coordinates to android. Coordinates cannot be set when this method
+// is running.
+void android_gps_refresh();
+
 // For gps signal emulation
 extern bool android_gps_get_gps_signal();
 extern void android_gps_set_gps_signal(bool enable);
+
+ANDROID_END_HEADER

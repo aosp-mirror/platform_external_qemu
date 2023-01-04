@@ -110,47 +110,12 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
 
 static const QAndroidLocationAgent* sLocationAgent = nullptr;
 
-static void updateThreadLoop();
 
 struct LocationPageGlobals {
     LocationPage* locationPagePtr = nullptr;
-
-    // For sending periodic GPS updates
-    bool shouldCloseUpdateThread = false;
-    android::base::ConditionVariable updateThreadCv;
-    android::base::Lock updateThreadLock;
-    android::base::FunctorThread updateThread{&updateThreadLoop};
 };
 
 static LazyInstance<LocationPageGlobals> sGlobals = LAZY_INSTANCE_INIT;
-
-static void updateThreadLoop() {
-    // Update the location every second, until we exit
-    static constexpr int sleepMicrosec = 1 * 1000 * 1000;
-    AutoLock lock(sGlobals->updateThreadLock);
-    auto now = android::base::System::get()->getUnixTimeUs();
-    auto wakeTime = now + sleepMicrosec;
-
-    while (1) {
-        bool gotSignal = sGlobals->updateThreadCv.timedWait(
-                &sGlobals->updateThreadLock, wakeTime);
-
-        if (sGlobals->shouldCloseUpdateThread)
-            break;
-
-        now = android::base::System::get()->getUnixTimeUs();
-        if (!gotSignal && now < wakeTime) {
-            // We did not get the signal and it's too early for
-            // time out. This is a spurious return from timedWait().
-            // Just wait again, without updating "wakeTime".
-            continue;
-        }
-        if (sLocationAgent && sLocationAgent->gpsGetPassiveUpdate()) {
-            sendLocationToDevice();
-        }
-        wakeTime = now + sleepMicrosec;
-    }
-}
 
 LocationPage::LocationPage(QWidget* parent)
     : QWidget(parent),
@@ -372,16 +337,10 @@ void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
                                   curHeading);
 
     sendLocationToDevice();
-
-    sGlobals->updateThread.start();
 }
 
 // static
 void LocationPage::shutDown() {
-    AutoLock lock(sGlobals->updateThreadLock);
-    sGlobals->shouldCloseUpdateThread = true;
-    sGlobals->updateThreadCv.signalAndUnlock(&lock);
-    sGlobals->updateThread.wait();
 }
 
 void LocationPage::updateTheme() {
@@ -461,15 +420,12 @@ void LocationPage::on_loc_sendPointButton_clicked() {
     mUi->loc_latitudeInput->forceUpdate();
     mUi->loc_longitudeInput->forceUpdate();
 
-    AutoLock lock(sGlobals->updateThreadLock);
     double lat = mUi->loc_latitudeInput->value();
     double lon = mUi->loc_longitudeInput->value();
     double velocity = mUi->loc_speedInput->text().toDouble();
     double altitude = mUi->loc_altitudeInput->text().toDouble();
     double heading = 0.0;
     updateDisplayedLocation(lat, lon, altitude, velocity, heading);
-
-    sGlobals->updateThreadCv.signalAndUnlock(&lock);
 }
 
 void LocationPage::updateDisplayedLocation(double lat,
@@ -812,11 +768,8 @@ void LocationPage::timeout() {
     mUi->loc_pathTable->scrollToItem(currentItem);
     mUi->loc_pathTable->setCurrentItem(currentItem);
 
-    AutoLock lock(sGlobals->updateThreadLock);
     updateDisplayedLocation(lat, lon, alt, speed, direction);
 
-    // Send the command.
-    sGlobals->updateThreadCv.signalAndUnlock(&lock);
 
     // Go on to the next row
     mRowToSend = nextRow;
@@ -903,10 +856,8 @@ void LocationPage::timeout_v2() {
     }
 
     // Send the current location
-    AutoLock lock(sGlobals->updateThreadLock);
     LocationPage::writeDeviceLocationToSettings(
             latNow, lngNow, altNow, mVelocityOnRoute, mHeadingOnRoute);
-    sGlobals->updateThreadCv.signalAndUnlock(&lock);
 
     // Update the location marker on the UI map
     emit mMapBridge->locationChanged(QString::number(latNow, 'g', 12),
@@ -1154,6 +1105,9 @@ void LocationPage::writeDeviceLocationToSettings(double lat,
         settings.setValue(Ui::Settings::LOCATION_RECENT_VELOCITY, velocity);
         settings.setValue(Ui::Settings::LOCATION_RECENT_HEADING, heading);
     }
+
+    // Inform the device of the updated coordinates.
+    sendLocationToDevice();
 }
 
 // Get the current location from the device. If that fails, use
