@@ -704,7 +704,7 @@ bool Ieee80211Frame::encrypt(const CipherScheme cs) {
     }
 }
 
-const IOVector Ieee80211Frame::toEthernet() {
+const IOVector Ieee80211Frame::toEthernetIOVector() {
     IOVector ret;
     uint16_t ethertype = getEtherType();
     if (!validEtherType(ethertype)) {
@@ -723,6 +723,25 @@ const IOVector Ieee80211Frame::toEthernet() {
     IOVector inSg;
     inSg.push_back({.iov_base = data(), .iov_len = size()});
     inSg.appendEntriesTo(&ret, offset, size() - offset);
+    return ret;
+}
+
+const std::vector<uint8_t> Ieee80211Frame::toEthernet() {
+    std::vector<uint8_t> ret;
+    uint16_t ethertype = getEtherType();
+    if (!validEtherType(ethertype)) {
+        LOG(DEBUG) << "Unexpected ether type: " << ethertype
+                   << ". Dump frame: " << toStr().c_str();
+        return ret;
+    }
+
+    mEthHdr.ethertype = htons(ethertype);
+    // Order of addresses: RA SA DA
+    memcpy(mEthHdr.dest, &(addr3()[0]), ETH_ALEN);
+    memcpy(mEthHdr.src, &(addr2()[0]), ETH_ALEN);
+    ret.assign((uint8_t*)&mEthHdr, ((uint8_t*)&mEthHdr) + ETH_HLEN);
+    size_t offset = hdrLength() + ETH_ALEN + sizeof(ethertype);
+    ret.insert(ret.end(), data() + offset, data() + size());
     return ret;
 }
 

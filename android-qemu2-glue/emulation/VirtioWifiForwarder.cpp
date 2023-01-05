@@ -55,6 +55,8 @@ extern "C" {
 #include "net/net.h"
 #include "common/ieee802_11_defs.h"
 #include "drivers/driver_virtio_wifi.h"
+#include "net/slirp.h"
+#include "slirp/libslirp.h"
 }  // extern "C"
 
 // Conflicts with Log.h
@@ -119,7 +121,8 @@ VirtioWifiForwarder::VirtioWifiForwarder(
         ::NICConf* conf,
         WifiService::OnSentCallback onFrameSentCallback,
         uint16_t serverPort,
-        uint16_t clientPort)
+        uint16_t clientPort,
+        Slirp* slirp)
     : mBssID(MACARG(bssid)),
       mOnFrameAvailableCallback(std::move(cb)),
       mOnLinkStatusChanged(std::move(onLinkStatusChanged)),
@@ -128,7 +131,8 @@ VirtioWifiForwarder::VirtioWifiForwarder(
       mLooper(ThreadLooper::get()),
       mNicConf(conf),
       mServerPort(serverPort),
-      mClientPort(clientPort) {}
+      mClientPort(clientPort),
+      mSlirp(slirp) {}
 
 VirtioWifiForwarder::~VirtioWifiForwarder() {
     stop();
@@ -138,13 +142,15 @@ bool VirtioWifiForwarder::init() {
     // init socket pair.
     int fds[2];
     if (socketCreatePair(&fds[0], &fds[1])) {
-        LOG(ERROR) << "Unable to create socket pair";
+        LOG(ERROR)
+                << "Failed to initialize Wi-Fi: Unable to create socket pair.";
         return false;
     }
     mVirtIOSock = ScopedSocket(fds[1]);
     mHostapd = HostapdController::getInstance();
     if (!mHostapd) {
-        LOG(ERROR) << "HostapdController instance must be non-null.";
+        LOG(ERROR)
+                << "Failed to initialize Wi-Fi:  hostapd controller is null.";
         return false;
     }
     mHostapd->setDriverSocket(ScopedSocket(fds[0]));
@@ -153,6 +159,13 @@ bool VirtioWifiForwarder::init() {
                                       &VirtioWifiForwarder::onHostApd, this);
     mFdWatch->wantRead();
     mFdWatch->dontWantWrite();
+    if (mSlirp &&
+        !net_slirp_set_custom_slirp_output_callback(
+                mSlirp, &VirtioWifiForwarder::onRxPacketAvailable, this)) {
+        LOG(ERROR) << "Failed to initialize Wi-Fi: Unable to set slirp output "
+                      "callback.";
+        return false;
+    }
     if (mNicConf) {
         // init Qemu Nic
         static NetClientInfo info = {
@@ -268,6 +281,7 @@ int VirtioWifiForwarder::recv(android::base::IOVector& iov) {
 void VirtioWifiForwarder::stop() {
     mBeaconTask.clear();
     mNic = nullptr;
+    mSlirp = nullptr;
     if (mHostapd) {
         mHostapd->terminate();
     }
@@ -325,20 +339,14 @@ ssize_t VirtioWifiForwarder::sendToGuest(
     return forwarder->mOnFrameAvailableCallback(msg.data(), msg.dataLen());
 }
 
-// QEMU NIC client will receive one ethernet packet at a time.
-ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
+ssize_t VirtioWifiForwarder::onRxPacketAvailable(void* opaque,
                                                  const uint8_t* buf,
                                                  size_t size) {
-    if (size < ETH_HLEN) {
+    auto forwarder = static_cast<VirtioWifiForwarder*>(opaque);
+    if (!forwarder || size < ETH_HLEN || !forwarder->mHostapd->isRunning()) {
         return -1;
     }
-    auto forwarder = getInstance(nc);
-    if (!forwarder->mHostapd->isRunning()) {
-        return -1;
-    }
-    if (!forwarder->mCanReceive(nc->queue_index)) {
-        return -1;
-    }
+
     std::unique_ptr<Ieee80211Frame> frame =
             Ieee80211Frame::buildFromEthernet(buf, size, forwarder->mBssID);
     if (frame == nullptr) {
@@ -353,6 +361,13 @@ ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
     auto& info = frame->info();
     info = forwarder->mFrameInfo;
     return sendToGuest(forwarder, std::move(frame));
+}
+
+// QEMU NIC client will receive one ethernet packet at a time.
+ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
+                                                 const uint8_t* buf,
+                                                 size_t size) {
+    return VirtioWifiForwarder::onRxPacketAvailable(getInstance(nc), buf, size);
 }
 
 void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
@@ -479,18 +494,24 @@ void VirtioWifiForwarder::sendToRemoteVM(
 // from IEEE80211 frame to Ethernet frame.
 int VirtioWifiForwarder::sendToNIC(
         std::unique_ptr<android::network::Ieee80211Frame> frame) {
-    if (mNic == nullptr) {
-        return 0;
-    }
     if (frame->isDataNull()) {
         return 0;
     }
-    auto outSg = frame->toEthernet();
+
+    // Send to QEMU Slirp stack. There are two code paths.
+    // When slirp instance is present, we can send the packet directly.
+    if (mSlirp) {
+        auto packet = frame->toEthernet();
+        slirp_input(mSlirp, packet.data(), packet.size());
+        return packet.size();
+    } else if (!mNic) {
+        return 0;
+    }
+    int res;
+    auto outSg = frame->toEthernetIOVector();
     if (outSg.size() == 0) {
         return 0;
     }
-    // Send to QEMU NIC.
-    int res;
     if (mOnFrameSentCallback) {
         res = qemu_sendv_packet_async(
                 qemu_get_subqueue(mNic, 0), &outSg[0], outSg.size(),

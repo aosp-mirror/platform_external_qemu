@@ -27,6 +27,7 @@
 typedef struct NetClientState NetClientState;
 typedef struct NICState NICState;
 typedef struct NICConf NICConf;
+typedef struct Slirp Slirp;
 
 namespace android {
 namespace qemu2 {
@@ -41,7 +42,8 @@ public:
             NICConf* conf,
             WifiService::OnSentCallback onFrameSentCallback = {},
             uint16_t serverPort = 0,
-            uint16_t clientPort = 0);
+            uint16_t clientPort = 0,
+            Slirp* slirp = nullptr);
     ~VirtioWifiForwarder();
     bool init() override;
     int send(const android::base::IOVector& iov) override;
@@ -52,16 +54,21 @@ public:
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
     static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
     static const uint8_t kWifiForwardVersion = 0x02;
-
 private:
-    // Wrapper functions for passing C-sytle func ptr to C API.
-    static int canReceive(NetClientState* nc);
-    static void onLinkStatusChanged(NetClientState* nc);
+    // Wrapper functions for passing C-sytle func ptr to slirp defined
+    // in net/slirp.h
+    static ssize_t onRxPacketAvailable(void* forwarder,
+                                       const uint8_t* buf,
+                                       size_t size);
+    // Wrapper functions for passing C-sytle func ptr to struct NetClientInfo
+    // defined in net/net.h
     static ssize_t onNICFrameAvailable(NetClientState* nc,
                                        const uint8_t* buf,
                                        size_t size);
-
+    static int canReceive(NetClientState* nc);
+    static void onLinkStatusChanged(NetClientState* nc);
     static void onFrameSentCallback(NetClientState*, ssize_t);
+    // Wrapper function for pass C-style func ptr to hostapd socket
     static void onHostApd(void* opaque, int fd, unsigned events);
     static ssize_t sendToGuest(
             VirtioWifiForwarder* forwarder,
@@ -86,6 +93,7 @@ private:
     uint16_t mServerPort = 0;
     uint16_t mClientPort = 0;
 
+    Slirp* mSlirp = nullptr;
     NICState* mNic = nullptr;
     std::unique_ptr<android::network::WifiForwardPeer> mRemotePeer;
     android::base::Looper::FdWatch* mFdWatch = nullptr;
@@ -96,6 +104,7 @@ private:
 
     NICConf* mNicConf = nullptr;
     android::network::FrameInfo mFrameInfo;
+
     DISALLOW_COPY_AND_ASSIGN(VirtioWifiForwarder);
 };
 

@@ -90,6 +90,8 @@ typedef struct SlirpState {
     Notifier exit_notifier;
     SlirpShaper shaper_out;
     SlirpShaper shaper_in;
+    SlirpReceiveCallbackFunc recv_cb;
+    void *opaque;
 #ifndef _WIN32
     gchar *smb_dir;
 #endif
@@ -129,10 +131,14 @@ void slirp_output(void *opaque, const uint8_t *pkt, int pkt_len)
     SlirpState *s = opaque;
     SlirpShaper* shaper = &s->shaper_out;
 
-    if (shaper->send) {
-        shaper->send(shaper->peer, pkt, pkt_len, (void*)s);
+    if (s->recv_cb) {
+        s->recv_cb(s->opaque, pkt, pkt_len);
     } else {
-        net_slirp_output_raw(opaque, pkt, pkt_len);
+        if (shaper->send) {
+          shaper->send(shaper->peer, pkt, pkt_len, (void *)s);
+        } else {
+          net_slirp_output_raw(opaque, pkt, pkt_len);
+        }
     }
 }
 
@@ -440,6 +446,7 @@ static int net_slirp_init(NetClientState *peer, const char *model,
 
     s->shaper_out.send = NULL;
     s->shaper_in.send = NULL;
+    s->recv_cb = NULL;
     return 0;
 
 error:
@@ -1288,4 +1295,36 @@ void net_slirp_set_shapers(void* out_opaque,
         s->shaper_in.peer = in_opaque;
         s->shaper_in.send = in_send;
     }
+}
+
+int net_slirp_set_custom_slirp_output_callback(void *slirp,
+                                               SlirpReceiveCallbackFunc cb,
+                                               void *opaque) {
+    SlirpState *s = NULL;
+    int found = 0;
+    if (!slirp) return found;
+    QTAILQ_FOREACH(s, &slirp_stacks, entry) {
+        if (!s || s->slirp != (Slirp *)slirp) {
+            continue;
+        }
+        found = 1;
+        s->recv_cb = cb;
+        s->opaque = opaque;
+    }
+    return found;
+}
+void *net_slirp_init_custom_slirp_state(
+    int restricted, bool in_enabled, struct in_addr vnetwork,
+    struct in_addr vnetmask, struct in_addr vhost, bool in6_enabled,
+    struct in6_addr vprefix_addr6, uint8_t vprefix_len, struct in6_addr vhost6,
+    const char *vhostname, const char *tftp_path, const char *bootfile,
+    struct in_addr vdhcp_start, struct in_addr vnameserver,
+    struct in6_addr vnameserver6, const char **vdnssearch) {
+    SlirpState* s = g_malloc0(sizeof(SlirpState));
+    s->slirp = slirp_init(restricted, in_enabled, vnetwork, vnetmask, vhost,
+                          in6_enabled, vprefix_addr6, vprefix_len, vhost6,
+                          vhostname, tftp_path, bootfile, vdhcp_start,
+                          vnameserver, vnameserver6, vdnssearch, s);
+    QTAILQ_INSERT_TAIL(&slirp_stacks, s, entry);
+    return s->slirp;
 }
