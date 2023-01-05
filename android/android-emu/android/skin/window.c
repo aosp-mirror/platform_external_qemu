@@ -2598,7 +2598,9 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
             break;
 
         case kEventMouseWheel:
-            if (feature_is_enabled(kFeature_VirtioMouse) && mouse->tracking) {
+            if ((feature_is_enabled(kFeature_VirtioMouse) &&
+                    mouse->tracking) ||
+                    feature_is_enabled(kFeature_VirtioTablet)) {
                 add_mouse_wheel_event(window, ev->u.wheel.x_delta,
                                       ev->u.wheel.y_delta);
             }
