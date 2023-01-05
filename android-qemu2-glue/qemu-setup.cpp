@@ -556,9 +556,7 @@ bool qemu_android_emulation_setup() {
 
     android::base::ScopedCPtr<const char> arch(
             avdInfo_getTargetCpuArch(getConsoleAgents()->settings->avdInfo()));
-    const bool isX86 =
-            arch && (strstr(arch.get(), "x86") || strstr(arch.get(), "i386"));
-    const int nCores = isX86 ? getConsoleAgents()->settings->hw()->hw_cpu_ncore : 1;
+    const int nCores = getConsoleAgents()->settings->hw()->hw_cpu_ncore;
     for (int i = 0; i < nCores; ++i) {
         auto cpuLooper = new android::qemu::CpuLooper(i);
         android::crashreport::CrashReporter::get()
