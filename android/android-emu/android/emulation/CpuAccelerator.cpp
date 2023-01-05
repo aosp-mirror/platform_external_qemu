@@ -688,6 +688,9 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
             status, "HAXM version %s (%d) is installed and usable.",
             cpuAcceleratorFormatVersion(haxm_installer_version),
             hax_version.current_version);
+    if (haxm_installer_version > HAXM_INSTALLER_VERSION_RECOMMENDED)
+        StringAppendFormat(status, " Warning: HAXM version greater than 7.6.5 is not "
+                       "recommended. Some AVDs may fail to boot.");
     GlobalState* g = &gGlobals;
     ::snprintf(g->version, sizeof(g->version), "%s",
                cpuAcceleratorFormatVersion(haxm_installer_version).c_str());
@@ -817,9 +820,6 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
     StringAppendFormat(status, "HAXM version %s (%d) is installed and usable.",
                        cpuAcceleratorFormatVersion(version),
                        hax_version.current_version);
-    if (haxm_installer_version > HAXM_INSTALLER_VERSION_RECOMMENDED)
-        StringAppendFormat(status, " Warning: HAXM version greater than 7.6.5 is not "
-                       "recommended. Some AVDs may fail to boot.");
     GlobalState* g = &gGlobals;
     ::snprintf(g->version, sizeof(g->version), "%s",
                cpuAcceleratorFormatVersion(version).c_str());
