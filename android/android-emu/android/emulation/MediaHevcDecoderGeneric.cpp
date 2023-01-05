@@ -15,13 +15,13 @@
 #include "android/emulation/MediaHevcDecoderGeneric.h"
 #include "android/base/system/System.h"
 #include "android/emulation/HevcPingInfoParser.h"
-#include "android/emulation/MediaFfmpegVideoHelper.h"
+#include "host-common/MediaFfmpegVideoHelper.h"
 #include "android/main-emugl.h"
 
 #ifndef __APPLE__
 // for Linux and Window, Cuvid is available
-#include "android/emulation/MediaCudaDriverHelper.h"
-#include "android/emulation/MediaCudaVideoHelper.h"
+#include "host-common/MediaCudaDriverHelper.h"
+#include "host-common/MediaCudaVideoHelper.h"
 #else
 #include "android/emulation/MediaVideoToolBoxHevcVideoHelper.h"
 #endif

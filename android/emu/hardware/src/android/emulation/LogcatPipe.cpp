@@ -16,7 +16,7 @@
 #include <memory>
 
 #include "aemu/base/files/PathUtils.h"      // for PathUtils
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"
 #include "android/logcat-pipe.h"
 #include "android/utils/debug.h"

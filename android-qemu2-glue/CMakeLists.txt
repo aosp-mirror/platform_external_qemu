@@ -99,7 +99,8 @@ target_link_libraries(
           android-emu-gps
           ssl
           hostapd
-          flatbuffers)
+          flatbuffers
+          qemu-host-common-headers)
 
 add_dependencies(libqemu2-glue virtio_gpu_timelines_fbs_header)
 
@@ -119,8 +120,8 @@ android_add_test(TARGET libqemu2-glue_unittests
                  SRC tests/VirtioGpuTimelines_unittest.cpp)
 
 target_link_libraries(
-  libqemu2-glue_unittests PRIVATE libqemu2-glue android-emu-base android-emu-base-headers gmock
-                                  gtest gmock_main)
+  libqemu2-glue_unittests PRIVATE libqemu2-glue qemu-host-common-headers android-emu-base android-emu-base-headers
+                                  gmock gtest gmock_main)
 
 target_include_directories(
   libqemu2-glue_unittests

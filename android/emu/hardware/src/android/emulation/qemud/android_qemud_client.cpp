@@ -14,7 +14,7 @@
 #include "aemu/base/containers/StaticMap.h"
 #include "aemu/base/memory/LazyInstance.h"
 
-#include "android/emulation/android_pipe_host.h"
+#include "host-common/android_pipe_host.h"
 #include "android/emulation/qemud/android_qemud_common.h"
 #include "android/emulation/qemud/android_qemud_multiplexer.h"
 #include "android/utils/bufprint.h"

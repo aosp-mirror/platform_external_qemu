@@ -14,7 +14,7 @@
 
 #include "android/physics/Physics.h"
 #include "android/utils/compiler.h"
-#include "android/emulation/control/window_agent.h"
+#include "host-common/window_agent.h"
 
 #include <stdint.h>
 #include <math.h>

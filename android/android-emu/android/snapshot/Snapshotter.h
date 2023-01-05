@@ -16,8 +16,8 @@
 #include "android/base/system/System.h"
 #include "android/snapshot/common.h"
 
-#include "android/emulation/control/vm_operations.h"
-#include "android/emulation/control/window_agent.h"
+#include "host-common/vm_operations.h"
+#include "host-common/window_agent.h"
 
 #include <functional>
 #include <string>

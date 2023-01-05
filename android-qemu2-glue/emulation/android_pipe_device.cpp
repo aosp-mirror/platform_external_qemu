@@ -15,19 +15,19 @@
 #include "aemu/base/Log.h"
 #include "android/avd/info.h"
 #include "android/console.h"
-#include "android/emulation/AndroidPipe.h"
-#include "android/emulation/android_pipe_common.h"
-#include "android/emulation/android_pipe_device.h"
-#include "android/emulation/GoldfishDma.h"
-#include "android/emulation/VmLock.h"
-#include "android/utils/stream.h"
+#include "host-common/AndroidPipe.h"
+#include "host-common/android_pipe_common.h"
+#include "host-common/android_pipe_device.h"
+#include "host-common/GoldfishDma.h"
+#include "host-common/VmLock.h"
+#include "aemu/base/utils/stream.h"
 #include "android-qemu2-glue/base/files/QemuFileStream.h"
 
 #include <assert.h>
 #include <memory>
 
 extern "C" {
-#include "hw/misc/goldfish_pipe.h"
+#include "host-common/goldfish_pipe.h"
 #include "hw/virtio/virtio-goldfish-pipe.h"
 }  // extern "C"
 

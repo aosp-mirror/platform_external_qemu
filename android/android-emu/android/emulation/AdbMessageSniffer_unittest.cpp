@@ -17,7 +17,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 
 namespace android {
 namespace emulation {

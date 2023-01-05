@@ -14,7 +14,7 @@
 // limitations under the License.
 #pragma once
 
-#include "android/emulation/AddressSpaceService.h"
+#include "host-common/AddressSpaceService.h"
 
 #include <memory>
 

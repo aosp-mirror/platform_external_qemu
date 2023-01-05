@@ -16,7 +16,7 @@
 #include "IOStream.h"
 
 #include "aemu/base/BumpPool.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/GfxstreamFatalError.h"
 
 #include "emugl/common/feature_control.h"
 
@@ -27,6 +27,8 @@
 #define E(fmt,...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
 
 using emugl::emugl_feature_is_enabled;
+using emugl::ABORT_REASON_OTHER;
+using emugl::FatalError;
 
 namespace goldfish_vk {
 

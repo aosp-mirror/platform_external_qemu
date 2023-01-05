@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/emulation/VmLock.h"
+#include "host-common/VmLock.h"
 
 namespace qemu2 {
 

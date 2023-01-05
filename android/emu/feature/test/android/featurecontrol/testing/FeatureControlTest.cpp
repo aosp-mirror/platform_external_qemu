@@ -24,40 +24,40 @@ void FeatureControlTest::SetUp() {
 #define FEATURE_CONTROL_ITEM(item) \
     #item " = on\n"
     mAllOnIni =
-#include "android/featurecontrol/FeatureControlDefHost.h"
-#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefHost.h"
+#include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
 #define FEATURE_CONTROL_ITEM(item) #item " = on\n"
     mAllOnIniGuestOnly =
-#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
 #define FEATURE_CONTROL_ITEM(item) #item " = off\n"
     mAllOffIni =
-#include "android/featurecontrol/FeatureControlDefHost.h"
-#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefHost.h"
+#include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
 #define FEATURE_CONTROL_ITEM(item) #item " = off\n"
     mAllOffIniGuestOnly =
-#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
 #define FEATURE_CONTROL_ITEM(item) #item " = default\n"
     mAllDefaultIni =
-#include "android/featurecontrol/FeatureControlDefHost.h"
-#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefHost.h"
+#include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
 #define FEATURE_CONTROL_ITEM(item) #item " = default\n"
     mAllDefaultIniGuestOnly =
-#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 }

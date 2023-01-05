@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaTexturePool.h"
+#include "host-common/MediaTexturePool.h"
 
 #include <cstdint>
 #include <string>

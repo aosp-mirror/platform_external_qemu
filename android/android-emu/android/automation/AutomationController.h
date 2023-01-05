@@ -20,7 +20,7 @@
 #include "android/automation/EventSource.h"
 #include "aemu/base/Compiler.h"
 #include "aemu/base/Result.h"
-#include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "host-common/AndroidAsyncMessagePipe.h"
 
 // Forward declarations.
 typedef struct PhysicalModel PhysicalModel;

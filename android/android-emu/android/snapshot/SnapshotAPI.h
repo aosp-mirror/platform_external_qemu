@@ -14,7 +14,7 @@
 #include "aemu/base/Optional.h"
 
 #include "aemu/base/files/FileShareOpen.h"
-#include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "host-common/AndroidAsyncMessagePipe.h"
 
 #include <string_view>
 #include <vector>

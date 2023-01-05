@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaSnapshotHelper.h"
-#include "android/emulation/H264NaluParser.h"
+#include "host-common/MediaSnapshotHelper.h"
+#include "host-common/H264NaluParser.h"
 #include "android/emulation/HevcNaluParser.h"
-#include "android/emulation/VpxFrameParser.h"
+#include "host-common/VpxFrameParser.h"
 
 #include "android/utils/debug.h"
 

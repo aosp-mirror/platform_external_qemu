@@ -29,8 +29,8 @@
 ** advantage of that infrastructure to create the pipes.
 */
 
-#include "hw/misc/goldfish_pipe.h"
-#include "android/emulation/android_pipe_base.h"
+#include "host-common/goldfish_pipe.h"
+#include "host-common/android_pipe_base.h"
 
 #include "qemu/osdep.h"
 #include "hw/hw.h"

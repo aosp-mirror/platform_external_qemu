@@ -25,6 +25,7 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/emulation/control/AndroidAgentFactory.h"
+#include "host-common/opengl/misc.h"
 
 #include "Standalone.h"
 

@@ -49,7 +49,7 @@
 #include "aemu/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
-#include "android/featurecontrol/feature_control.h"
+#include "host-common/feature_control.h"
 #include "android/hw-sensors.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/physics/GlmHelpers.h"

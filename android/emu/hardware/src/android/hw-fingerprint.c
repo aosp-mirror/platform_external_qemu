@@ -16,7 +16,7 @@
 #include "android/console.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 #include "android/utils/system.h"
 
 #include <stdio.h>

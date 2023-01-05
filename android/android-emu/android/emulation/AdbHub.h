@@ -21,7 +21,7 @@
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/files/Stream.h"
 #include "android/emulation/AdbProxy.h"
-#include "android/emulation/android_pipe_common.h"
+#include "host-common/android_pipe_common.h"
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/JdwpProxy.h"
 

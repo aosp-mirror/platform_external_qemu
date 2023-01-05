@@ -17,8 +17,8 @@
 #include <vector>                                   // for vector
 
 #include "aemu/base/synchronization/Lock.h"      // for Lock, AutoLock
-#include "android/emulation/AndroidPipe.h"          // for AndroidPipe, Andr...
-#include "android/emulation/android_pipe_common.h"  // for AndroidPipeBuffer
+#include "host-common/AndroidPipe.h"          // for AndroidPipe, Andr...
+#include "host-common/android_pipe_common.h"  // for AndroidPipeBuffer
 
 namespace android {
 namespace emulation {

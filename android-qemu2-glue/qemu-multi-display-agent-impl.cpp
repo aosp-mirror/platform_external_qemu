@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/emulation/control/multi_display_agent.h"
-#include "android/emulation/MultiDisplay.h"
-#include "android/opengles.h"
+#include "host-common/multi_display_agent.h"
+#include "host-common/MultiDisplay.h"
+#include "host-common/opengles.h"
 
 using android::MultiDisplay;
 

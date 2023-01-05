@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "aemu/base/logging/CLog.h"
-#include "android/emulation/address_space_device.h"
-#include "android/emulation/AddressSpaceService.h"
-#include "android/emulation/address_space_graphics.h"
+#include "host-common/address_space_device.h"
+#include "host-common/AddressSpaceService.h"
+#include "host-common/address_space_graphics.h"
 #ifndef AEMU_MIN
-#include "android/emulation/address_space_host_media.h"
+#include "host-common/address_space_host_media.h"
 #endif
-#include "android/emulation/address_space_host_memory_allocator.h"
-#include "android/emulation/address_space_shared_slots_host_memory_allocator.h"
-#include "android/emulation/control/vm_operations.h"
+#include "host-common/address_space_host_memory_allocator.h"
+#include "host-common/address_space_shared_slots_host_memory_allocator.h"
+#include "host-common/vm_operations.h"
 
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/synchronization/Lock.h"

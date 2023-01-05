@@ -19,7 +19,7 @@
 #include "android/emulation/AdbHub.h"
 #include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbTypes.h"
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 #include "android/emulation/CrossSessionSocket.h"
 
 #include <map>

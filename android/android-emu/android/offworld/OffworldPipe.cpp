@@ -19,12 +19,13 @@
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/synchronization/Lock.h"
-#include "android/emulation/AndroidAsyncMessagePipe.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/AndroidAsyncMessagePipe.h"
+#include "host-common/FeatureControl.h"
 #include "android/sensor_mock/SensorMockUtils.h"
 #include "android/snapshot/SnapshotAPI.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
+#include "android/utils/debug.h"
 #include "android/videoinjection/VideoInjectionController.h"
 
 #include <atomic>

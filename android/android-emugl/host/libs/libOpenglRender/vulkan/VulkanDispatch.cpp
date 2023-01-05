@@ -21,7 +21,8 @@
 #include "aemu/base/synchronization/Lock.h"
 #include "android/utils/path.h"
 
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
+#include "host-common/opengl/misc.h"
 #include "emugl/common/shared_library.h"
 
 using android::base::AutoLock;

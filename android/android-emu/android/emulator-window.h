@@ -15,7 +15,7 @@
 #include <stdbool.h>                            // for bool
 
 #include "android/cmdline-option.h"             // for AndroidOptions
-#include "android/recording/screen-recorder.h"  // for RecordingInfo, Record...
+#include "host-common/screen-recorder.h"  // for RecordingInfo, Record...
 #include "android/skin/file.h"                  // for SkinFile, SkinLayout
 #include "android/skin/image.h"                 // for SkinImage
 #include "android/skin/rect.h"                  // for SkinRotation
@@ -81,7 +81,7 @@ bool emulator_window_rotate_90(bool clockwise);
 
 /* Rotates the emulator UI to match the input rotation, but not the underlying
  * device.  This should be called in response to a device orientation change. */
-bool emulator_window_rotate(SkinRotation rotation);
+bool emulator_window_rotate(int rotation);
 
 /* Start recording the screen. Returns false if recording is already
  * running. */

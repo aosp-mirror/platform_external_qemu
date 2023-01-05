@@ -20,7 +20,7 @@
 #include "aemu/base/synchronization/Lock.h"
 #include "aemu/base/threads/FunctorThread.h"
 #include "aemu/base/threads/Thread.h"
-#include "android/crashreport/crash-handler.h"
+#include "host-common/crash-handler.h"
 #include "android/snapshot/MacSegvHandler.h"
 #include "android/snapshot/mach_exception_defs.h"
 

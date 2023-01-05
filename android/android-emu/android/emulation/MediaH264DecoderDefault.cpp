@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaH264DecoderDefault.h"
+#include "host-common/MediaH264DecoderDefault.h"
 #include "android/base/system/System.h"
-#include "android/emulation/H264PingInfoParser.h"
-#include "android/emulation/MediaH264DecoderGeneric.h"
+#include "host-common/H264PingInfoParser.h"
+#include "host-common/MediaH264DecoderGeneric.h"
 
 #include <cstdint>
 #include <string>

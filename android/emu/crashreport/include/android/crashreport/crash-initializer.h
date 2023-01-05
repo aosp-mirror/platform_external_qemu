@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 #include "android/utils/compiler.h"
-#include "android/crashreport/crash-handler.h"
+#include "host-common/crash-handler.h"
 
 ANDROID_BEGIN_HEADER
 

@@ -11,7 +11,7 @@
 */
 #pragma once
 
-#include "android/emulation/VmLock.h"
+#include "host-common/VmLock.h"
 
 /* Initialize Android pipe device support. Return true on success, false
  * otherwise. */

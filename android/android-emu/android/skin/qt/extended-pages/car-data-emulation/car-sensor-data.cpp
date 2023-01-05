@@ -26,7 +26,7 @@
 #include <utility>        // for move
 
 #include "aemu/base/Log.h"
-#include "android/featurecontrol/feature_control.h"
+#include "host-common/feature_control.h"
 #include "android/skin/qt/error-dialog.h"  // for showErrorDialog
 #include "android/utils/debug.h"           // for VERBOSE_PRINT
 #include "ui_car-sensor-data.h"            // for CarSensorData

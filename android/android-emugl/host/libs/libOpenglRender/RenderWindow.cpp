@@ -14,6 +14,7 @@
 
 #include "RenderWindow.h"
 
+#include "aemu/base/logging/CLog.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/message_channel.h"
 #include "emugl/common/mutex.h"

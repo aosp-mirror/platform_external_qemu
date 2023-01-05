@@ -19,7 +19,7 @@
 #include <utility>  // for make_pair, pair
 
 #include "android/emulation/control/sensors_agent.h"   // for QAndroidSensor...
-#include "android/emulation/control/window_agent.h"    // for WINDOW_MESSAGE...
+#include "host-common/window_agent.h"    // for WINDOW_MESSAGE...
 #include "android/emulator-window.h"                   // for emulator_windo...
 #include "android/hw-sensors.h"                        // for ANDROID_SENSOR...
 #include "android/skin/qt/emulator-no-qt-no-window.h"  // for EmulatorNoQtNo...
@@ -64,7 +64,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
         .rotate90Clockwise = [] { return emulator_window_rotate_90(true); },
         .rotate = emulator_window_rotate,
-        .getRotation = [] { return getRotation(); },
+        .getRotation = [] { return (int)getRotation(); },
         .showMessage =
                 [](const char* message, WindowMessageType type, int timeoutMs) {
                         switch(type) {
@@ -144,7 +144,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return true;
                 },
         .startExtendedWindow =
-                [](ExtendedWindowPane pane) {
+                [](int pane) {
                 // Not implemented
                 return false;
                 },
@@ -153,7 +153,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 // Not implemented
                 return false;
                 },
-        .setUiTheme = [](SettingsTheme type) {
+        .setUiTheme = [](int type) {
                 // Not implemented
                 return false;
                 },

@@ -12,7 +12,7 @@
 #pragma once
 
 #include "android/utils/compiler.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 
 ANDROID_BEGIN_HEADER
 

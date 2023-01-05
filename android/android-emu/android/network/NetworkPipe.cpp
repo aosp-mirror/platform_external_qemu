@@ -12,7 +12,7 @@
 #include "NetworkPipe.h"
 
 #include "aemu/base/synchronization/Lock.h"
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 
 #include <atomic>
 #include <cstring>

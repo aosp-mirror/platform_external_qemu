@@ -17,10 +17,10 @@
 
 #define EMUGL_DEBUG_LEVEL  0
 
-#include "emugl/common/crash_reporter.h"
-#include "emugl/common/debug.h"
-#include "emugl/common/dma_device.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/crash_reporter.h"
+#include "host-common/debug.h"
+#include "host-common/dma_device.h"
+#include "host-common/GfxstreamFatalError.h"
 
 #include <assert.h>
 #include <memory.h>

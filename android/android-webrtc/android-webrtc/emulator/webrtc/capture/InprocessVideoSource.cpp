@@ -26,11 +26,11 @@
 #include <thread>  // for thread
 #include <tuple>   // for make_tuple, tuple_elem...
 
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "aemu/base/EventNotificationSupport.h"
 #include "aemu/base/Log.h"
 #include "android/console.h"
-#include "android/emulation/MultiDisplay.h"
+#include "host-common/MultiDisplay.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/emulation/control/utils/EventWaiter.h"

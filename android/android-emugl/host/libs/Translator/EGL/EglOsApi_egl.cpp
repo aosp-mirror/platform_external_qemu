@@ -21,7 +21,8 @@
 #include "android/base/system/System.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/logging.h"
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
+#include "host-common/opengl/misc.h"
 #include "emugl/common/shared_library.h"
 
 #include <EGL/egl.h>

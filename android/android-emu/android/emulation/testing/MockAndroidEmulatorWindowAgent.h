@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/window_agent.h"
+#include "host-common/window_agent.h"
 
 #include <gmock/gmock.h>
 

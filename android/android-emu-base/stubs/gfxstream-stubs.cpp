@@ -1,10 +1,10 @@
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/async/ThreadLooper.h"
-#include "android/crashreport/crash-handler.h"
+#include "host-common/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/HangDetector.h"
 #include "android/emulation/CpuAccelerator.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 #include "android/metrics/StudioConfig.h"
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"

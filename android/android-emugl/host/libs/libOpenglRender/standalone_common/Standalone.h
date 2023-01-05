@@ -20,5 +20,5 @@
 #include "SearchPathsSetup.h"
 #include "ShaderUtils.h"
 
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
 #include "emugl/common/OpenGLDispatchLoader.h"

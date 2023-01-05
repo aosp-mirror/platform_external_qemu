@@ -13,8 +13,8 @@
 #include "android/emulation/AdbHub.h"
 #include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbVsockPipe.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/avd/hw-config.h"
+#include "host-common/crash-handler.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"
 
 #include <algorithm>

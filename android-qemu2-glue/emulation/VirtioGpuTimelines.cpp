@@ -13,7 +13,7 @@
 // limitations under the License.
 #include "VirtioGpuTimelines.h"
 #include "VirtioGpuTimelines_generated.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/GfxstreamFatalError.h"
 
 #include <cinttypes>
 #include <cstdio>
@@ -23,6 +23,8 @@ using TaskId = VirtioGpuTimelines::TaskId;
 using Ring = VirtioGpuTimelines::Ring;
 using FenceId = VirtioGpuTimelines::FenceId;
 using AutoLock = android::base::AutoLock;
+using emugl::ABORT_REASON_OTHER;
+using emugl::FatalError;
 
 std::unique_ptr<VirtioGpuTimelines> VirtioGpuTimelines::create(bool withAsyncCallback) {
     return std::unique_ptr<VirtioGpuTimelines>(new VirtioGpuTimelines(withAsyncCallback));

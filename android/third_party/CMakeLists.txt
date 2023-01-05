@@ -254,7 +254,10 @@ function(discover_gfxstream_internal_targets result subdir)
     set(${result} ${${result}} ${targets_in_dir} PARENT_SCOPE)
 endfunction()
 set(GFXSTREAM_PREFIX "gfxstream")
-add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/renderdoc ${GFXSTREAM_PREFIX}-third-party-renderdoc)
+set(ANGLE_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../external/angle)
+add_library(gfxstream_egl_headers INTERFACE)
+target_include_directories(gfxstream_egl_headers INTERFACE ${ANGLE_REPO_ROOT}/include)
+add_subdirectory(${GFXSTREAM_REPO_ROOT}/gl-host-common ${GFXSTREAM_PREFIX}-gl-host-common)
 # Include external/gfxstream-protocols project
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../gfxstream-protocols gfxstream-protocols)
 # Include hardware/google/aemu project

@@ -14,13 +14,13 @@
 
 #pragma once
 
-#include "android/emulation/GoldfishMediaDefs.h"
+#include "host-common/GoldfishMediaDefs.h"
 #include "android/emulation/HevcPingInfoParser.h"
-#include "android/emulation/MediaFfmpegVideoHelper.h"
+#include "host-common/MediaFfmpegVideoHelper.h"
 #include "android/emulation/MediaHevcDecoderPlugin.h"
-#include "android/emulation/MediaHostRenderer.h"
-#include "android/emulation/MediaSnapshotHelper.h"
-#include "android/emulation/MediaSnapshotState.h"
+#include "host-common/MediaHostRenderer.h"
+#include "host-common/MediaSnapshotHelper.h"
+#include "host-common/MediaSnapshotState.h"
 
 #include <cstdint>
 #include <string>

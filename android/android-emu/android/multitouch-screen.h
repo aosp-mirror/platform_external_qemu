@@ -17,7 +17,7 @@
 #pragma once
 
 #include "android/emulation/control/user_event_agent.h"
-#include "android/emulation/control/display_agent.h"
+#include "host-common/display_agent.h"
 #include "android/sdk-controller-socket.h"
 #include "android/skin/event.h"
 #include "android/multitouch-port.h"

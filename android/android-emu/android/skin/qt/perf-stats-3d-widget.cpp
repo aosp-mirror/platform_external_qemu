@@ -26,7 +26,7 @@
 #include <sstream>             // for operator<<, stringstream
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "aemu/base/ArraySize.h"             // for base
 #include "aemu/base/CpuUsage.h"              // for CpuUsage, CpuUsage::U...
 #include "aemu/base/Log.h"                   // for LOG, LogMessage

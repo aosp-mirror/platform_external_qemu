@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaCudaVideoHelper.h"
-#include "android/emulation/MediaCudaDriverHelper.h"
-#include "android/emulation/MediaCudaUtils.h"
-#include "android/emulation/YuvConverter.h"
+#include "host-common/MediaCudaVideoHelper.h"
+#include "host-common/MediaCudaDriverHelper.h"
+#include "host-common/MediaCudaUtils.h"
+#include "host-common/YuvConverter.h"
 #include "android/utils/debug.h"
 
 extern "C" {
 #define INIT_CUDA_GL 1
-#include "android/emulation/dynlink_cuda.h"
 #include "android/emulation/dynlink_cudaGL.h"
-#include "android/emulation/dynlink_nvcuvid.h"
+#include "host-common/dynlink_cuda.h"
+#include "host-common/dynlink_nvcuvid.h"
 }
 #define MEDIA_CUDA_DEBUG 0
 

@@ -12,7 +12,7 @@
 
 #include "android/emulation/android_pipe_throttle.h"
 
-#include "android/emulation/android_pipe_host.h"
+#include "host-common/android_pipe_host.h"
 #include "android/utils/looper.h"
 #include "android/utils/system.h"
 #include "android/utils/debug.h"

@@ -18,7 +18,7 @@
 #include <map>
 
 #include "aemu/base/system/System.h"
-#include "host-common/logging.h"
+#include "emugl/common/logging.h"
 #include "host-common/GfxstreamFatalError.h"
 #include "testing/TestClock.h"
 

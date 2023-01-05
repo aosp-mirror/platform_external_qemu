@@ -15,9 +15,9 @@
 
 // Interface between android-emu non-base libraries and emugl
 
-#include "android/emulation/GoldfishDma.h"
-#include "android/emulation/goldfish_sync.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/GoldfishDma.h"
+#include "host-common/goldfish_sync.h"
+#include "host-common/FeatureControl.h"
 
 // Crash reporter
 typedef void (*emugl_crash_reporter_t)(const char* format, ...);
@@ -47,8 +47,3 @@ typedef struct {
 // accessing Goldfish DMA regions at a specified offset.
 typedef void* (*emugl_dma_get_host_addr_t)(uint64_t);
 typedef void (*emugl_dma_unlock_t)(uint64_t);
-
-typedef struct {
-    emugl_dma_get_host_addr_t get_host_addr;
-    emugl_dma_unlock_t unlock;
-} emugl_dma_ops;

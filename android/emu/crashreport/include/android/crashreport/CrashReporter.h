@@ -27,7 +27,7 @@
 #include "android/crashreport/AnnotationStreambuf.h"  // for DefaultAnnotati...
 #include "android/crashreport/CrashConsent.h"         // for CrashConsent
 #include "android/crashreport/HangDetector.h"         // for HangDetector
-#include "android/crashreport/crash-handler.h"        // for ANDROID_NORETURN
+#include "host-common/crash-handler.h"        // for ANDROID_NORETURN
 #include "client/annotation.h"                        // for Annotation
 
 namespace crashpad {

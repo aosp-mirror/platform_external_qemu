@@ -16,13 +16,13 @@
 
 #include "android/emulation/resizable_display_config.h"
 #include "aemu/base/Log.h"
+#include "aemu/base/logging/CLog.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/misc/StringUtils.h"
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/metrics/MetricsReporter.h"
-#include "android/featurecontrol/feature_control.h"
-#include "android/avd/hw-config.h"
-#include "android/utils/debug.h"
+#include "host-common/feature_control.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"
 #include "android/opengles.h"
 #include "studio_stats.pb.h"

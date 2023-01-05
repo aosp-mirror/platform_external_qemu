@@ -1,11 +1,11 @@
 #include "aemu/base/files/Stream.h"
 #include "aemu/base/memory/LazyInstance.h"
 
-#include "android/emulation/GoldfishDma.h"
-#include "android/emulation/DmaMap.h"
+#include "host-common/GoldfishDma.h"
+#include "host-common/DmaMap.h"
 
-#include "android/emulation/address_space_device.h"
-#include "android/emulation/android_pipe_host.h"
+#include "host-common/address_space_device.h"
+#include "host-common/android_pipe_host.h"
 #include "android/utils/assert.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"

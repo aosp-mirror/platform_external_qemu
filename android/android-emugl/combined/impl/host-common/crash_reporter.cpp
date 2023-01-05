@@ -14,7 +14,7 @@
 
 #include "host-common/crash_reporter.h"
 
-#include "emugl/common/crash_reporter.h"
+#include "host-common/crash_reporter.h"
 
 void emugl_crash_reporter(const char* message) {
     emugl::emugl_crash_reporter(message);

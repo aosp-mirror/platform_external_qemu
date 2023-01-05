@@ -22,7 +22,7 @@
 #include "GLEScmContext.h"
 
 #include "aemu/base/containers/Lookup.h"
-#include "emugl/common/crash_reporter.h"
+#include "host-common/crash_reporter.h"
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>

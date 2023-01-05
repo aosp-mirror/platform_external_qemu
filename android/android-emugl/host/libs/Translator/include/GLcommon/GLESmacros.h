@@ -17,7 +17,7 @@
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/MemoryTracker.h"
 #include "android/utils/debug.h"
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
 
 #define MEM_TRACE_IF(condition, group)                                  \
     if ((condition)) {                                                  \

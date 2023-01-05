@@ -23,7 +23,10 @@
 #include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "emugl/common/feature_control.h"
-#include "emugl/common/misc.h"
+#include "host-common/feature_control.h"
+#include "host-common/misc.h"
+#include "host-common/opengl/misc.h"
+#include "host-common/opengl/emugl_config.h"
 
 #include <algorithm>
 #include <string_view>

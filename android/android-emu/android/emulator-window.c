@@ -18,14 +18,15 @@
 #include <string.h>  // for strcmp
 
 #include "android/android.h"         // for android_base...
-#include "android/avd/hw-config.h"   // for androidHwCon...
+#include "host-common/hw-config.h"   // for androidHwCon...
+#include "host-common/hw-config-helper.h"
 #include "android/avd/info.h"        // for avdInfo_getName
 #include "android/cmdline-option.h"  // for android_cmdLineOptions
 #include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
-#include "android/emulation/control/vm_operations.h"     // for QEMU_SHUTDOW...
-#include "android/emulation/control/window_agent.h"      // for EmulatorWindow
+#include "host-common/vm_operations.h"     // for QEMU_SHUTDOW...
+#include "host-common/window_agent.h"      // for EmulatorWindow
 #include "android/emulation/resizable_display_config.h"
-#include "android/featurecontrol/feature_control.h"
+#include "host-common/feature_control.h"
 #include "android/framebuffer.h"                // for QFrameBuffer
 #include "android/console.h"                    // for android_hw
 #include "android/hw-control.h"                 // for android_hw_c...
@@ -601,11 +602,11 @@ bool emulator_window_rotate_90(bool clockwise) {
     return false;
 }
 
-bool emulator_window_rotate(SkinRotation rot) {
+bool emulator_window_rotate(int rot) {
     if (!qemulator->ui) {
         return false;
     }
-    return skin_ui_rotate(qemulator->ui, rot);
+    return skin_ui_rotate(qemulator->ui, (SkinRotation)rot);
 }
 
 void emulator_window_set_screen_mask(int width,

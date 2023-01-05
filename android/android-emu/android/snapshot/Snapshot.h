@@ -20,7 +20,7 @@
 
 #include "aemu/base/containers/CircularBuffer.h"  // for CircularBuffer
 #include "android/base/system/System.h"              // for System, System::...
-#include "android/featurecontrol/Features.h"         // for Feature
+#include "host-common/Features.h"         // for Feature
 #include "android/snapshot/common.h"                 // for FailureReason
 #include "snapshot.pb.h"                             // for SaveStats, Confi...
 

@@ -12,7 +12,7 @@
 #include "android/avd/keys.h"
 #include "android/avd/util.h"
 
-#include "android/constants.h"
+#include "host-common/constants.h"
 #include "aemu/base/ArraySize.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/bufprint.h"

@@ -21,7 +21,7 @@
 #include "android/telephony/sysdeps.h"
 
 #include "android/emulation/bufprint_config_dirs.h"
-#include "android/featurecontrol/feature_control.h"
+#include "host-common/feature_control.h"
 #include "android/network/constants.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"

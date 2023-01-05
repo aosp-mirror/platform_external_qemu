@@ -375,7 +375,7 @@ class BumpPool;
 #include "aemu/base/BumpPool.h"
 #include "android/base/system/System.h"
 #include "aemu/base/Tracing.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/GfxstreamFatalError.h"
 
 #include "IOStream.h"
 #include "emugl/common/feature_control.h"

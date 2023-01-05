@@ -193,13 +193,11 @@ if(OPTION_GFXSTREAM_BACKEND)
     # TODO(http://b/257068626): bring back ANGLE shader translator
     # add_library(angle_shader_translator SHARED IMPORTED)
     # set_target_properties(angle_shader_translator PROPERTIES IMPORTED_LOCATION "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libshadertranslator${CMAKE_SHARED_LIBRARY_SUFFIX}")
-    add_library(gfxstream_egl_headers INTERFACE)
-    target_include_directories(gfxstream_egl_headers INTERFACE ${ANGLE_REPO_ROOT}/include)
 
     # Backends######################################################################
 
+    add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/renderdoc ${GFXSTREAM_PREFIX}-third-party-renderdoc)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/utils ${GFXSTREAM_PREFIX}-utils)
-    add_subdirectory(${GFXSTREAM_REPO_ROOT}/gl-host-common ${GFXSTREAM_PREFIX}-gl-host-common)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/stream-servers ${GFXSTREAM_PREFIX}-stream-servers)
     target_link_libraries(
         GLES_V2_translator_static PRIVATE ANGLE::ANGLE

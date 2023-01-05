@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
 
 #include "aemu/base/GLObjectCounter.h"
 #include "aemu/base/CpuUsage.h"
 #include "aemu/base/memory/MemoryTracker.h"
+#include "host-common/opengl/emugl_config.h"
+#include "host-common/opengl/misc.h"
 
 #include <cstring>
 

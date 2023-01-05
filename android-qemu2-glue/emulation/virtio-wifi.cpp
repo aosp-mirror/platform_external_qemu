@@ -7,7 +7,7 @@ extern "C" {
 #include "android-qemu2-glue/utils/stream.h"
 #include "aemu/base/Log.h"
 #include "android/telephony/sysdeps.h"
-#include "android/emulation/VmLock.h"
+#include "host-common/VmLock.h"
 
 extern "C" {
 #include "android-qemu2-glue/emulation/virtio-wifi.h"

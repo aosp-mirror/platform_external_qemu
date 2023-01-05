@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
 #include <cassert>
 
 namespace {

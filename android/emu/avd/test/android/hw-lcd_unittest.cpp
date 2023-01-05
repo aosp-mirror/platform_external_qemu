@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 
-#include "android/hw-lcd.h"
+#include "host-common/hw-lcd.h"
 
 namespace lcd_density {
 

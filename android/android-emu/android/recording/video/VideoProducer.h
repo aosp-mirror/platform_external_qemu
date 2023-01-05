@@ -17,7 +17,7 @@
 #include <stdint.h>                                   // for uint32_t, uint8_t
 #include <memory>                                     // for unique_ptr
 
-#include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...
+#include "host-common/display_agent.h"  // for QAndroidDisplay...
 
 namespace android {
 namespace recording {

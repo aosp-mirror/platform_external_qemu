@@ -24,7 +24,7 @@
 
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
 
 #include <assert.h>
 

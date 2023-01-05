@@ -15,7 +15,7 @@ if(NOT WINDOWS_MSVC_X86_64)
         android/emulation/control/waterfall/SocketController.cpp
         android/emulation/control/waterfall/WaterfallService.cpp)
   target_link_libraries(
-    android-waterfall PRIVATE png android-emu-base-headers
+    android-waterfall PRIVATE png android-emu-base-headers qemu-host-common-headers
                       PUBLIC protobuf::libprotobuf android-emu android-net grpc++)
   target_include_directories(
     android-waterfall PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
@@ -143,7 +143,8 @@ target_link_libraries(
          tink::jwt::jwt_signature_config
          tink::jwt::jwt_validator
          tink::jwt::verified_jwt
-         nlohmann_json::nlohmann_json)
+         nlohmann_json::nlohmann_json
+         qemu-host-common-headers)
 target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                                ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
@@ -168,7 +169,8 @@ android_add_library(
   SRC # cmake-format: sortable
       ${UI_CONTROLLER_SERVICE_GRPC_SRC}
       android/emulation/control/UiController.cpp
-  DEPS android-emu-base-headers)
+  DEPS android-emu-base-headers
+       qemu-host-common-headers)
 
 target_include_directories(
   android-ui-controller PRIVATE ${CMAKE_CURRENT_BINARY_DIR}

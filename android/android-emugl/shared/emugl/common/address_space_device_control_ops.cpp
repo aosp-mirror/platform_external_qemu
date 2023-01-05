@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "emugl/common/address_space_device_control_ops.h"
+#include "host-common/address_space_device_control_ops.h"
 
 namespace {
 

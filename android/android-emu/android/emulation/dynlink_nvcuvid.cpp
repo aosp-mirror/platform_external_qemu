@@ -11,7 +11,7 @@
 
 
 #include <stdio.h>
-#include "dynlink_nvcuvid.h"
+#include "host-common/dynlink_nvcuvid.h"
 
 tcuvidCreateVideoSource               *cuvidCreateVideoSource;
 tcuvidCreateVideoSourceW              *cuvidCreateVideoSourceW;

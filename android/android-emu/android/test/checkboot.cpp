@@ -18,7 +18,7 @@
 #include "android/base/system/System.h"               // for System
 #include "aemu/base/threads/ParallelTask.h"        // for runParallelTask
 #include "android/console.h"                          // for getConsoleAgents
-#include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
+#include "host-common/vm_operations.h"  // for QAndroidVmOpera...
 
 static int s_SleepTime = 0;
 

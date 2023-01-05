@@ -14,7 +14,7 @@
 #pragma once
 
 #include "aemu/base/synchronization/Lock.h"
-#include "android/emulation/VmLock.h"
+#include "host-common/VmLock.h"
 
 namespace android {
 

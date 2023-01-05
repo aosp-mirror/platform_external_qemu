@@ -27,7 +27,7 @@
 #include "ThreadInfo.h"
 #include "aemu/base/files/Stream.h"
 #include "android/base/system/System.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/GfxstreamFatalError.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/shared_library.h"
 
@@ -51,6 +51,9 @@
 
 #define MAJOR          1
 #define MINOR          4
+
+using emugl::ABORT_REASON_OTHER;
+using emugl::FatalError;
 
 //declarations
 

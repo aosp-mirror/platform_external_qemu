@@ -14,7 +14,7 @@
 
 #include "android/emulation/MediaVideoToolBoxVideoHelper.h"
 #include "android/emulation/MediaVideoToolBoxUtils.h"
-#include "android/emulation/YuvConverter.h"
+#include "host-common/YuvConverter.h"
 #include "android/utils/debug.h"
 
 #define MEDIA_VTB_DEBUG 0

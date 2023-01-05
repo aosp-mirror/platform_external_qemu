@@ -34,7 +34,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 #include "android/utils/system.h"
 
 #define E(...) derror(__VA_ARGS__)

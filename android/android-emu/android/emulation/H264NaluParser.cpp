@@ -15,7 +15,7 @@
 // A parser for H.264 bitstream. It will determine will kind of Netowrk
 // Abstraction Layer Unit (NALU) we have received from the guest.
 
-#include "android/emulation/H264NaluParser.h"
+#include "host-common/H264NaluParser.h"
 
 #define H264_DEBUG 0
 

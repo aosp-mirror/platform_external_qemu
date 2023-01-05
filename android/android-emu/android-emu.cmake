@@ -263,6 +263,7 @@ android_add_library(
 target_link_libraries(
   android-emu
   PRIVATE android-emu-base-headers
+          qemu-host-common-headers
   PUBLIC FFMPEG::FFMPEG
          VPX::VPX
          emulator-libext4_utils
@@ -494,6 +495,7 @@ target_link_libraries(
          android-emu-adb-interface
          android-emu-sockets
          android-emu-hardware
+         qemu-host-common-headers
          # Protobuf dependencies
          android-emu-protos
          protobuf::libprotobuf
@@ -715,7 +717,7 @@ if(NOT LINUX_AARCH64)
   target_link_libraries(
     android-emu_unittests
     PRIVATE android-emu android-emu-base-headers android-emu-protobuf android-emu-cmdline-testing
-            android-emu-hardware-test android-emu-test-launcher)
+            android-emu-hardware-test android-emu-test-launcher qemu-host-common-headers)
 
   list(
     APPEND

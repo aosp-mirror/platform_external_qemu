@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/window_agent.h"
+#include "host-common/window_agent.h"
 
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "aemu/base/threads/Thread.h"
 #include "android/console.h"
-#include "android/emulation/MultiDisplay.h"
+#include "host-common/MultiDisplay.h"
 #include "android/emulator-window.h"
 #include "android/hw-sensors.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -55,7 +55,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .rotate = emulator_window_rotate,
         .getRotation =
-                [] {
+                []() -> int {
                     EmulatorWindow* window = emulator_window_get();
                     if (!window)
                         return SKIN_ROTATION_0;
@@ -223,8 +223,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .moveExtendedWindow =
                 [](uint32_t x,
                    uint32_t y,
-                   HorizontalAnchor horizontal,
-                   VerticalAnchor vertical) {
+                   int horizontal,
+                   int vertical) {
                     int unused;
                     auto userConfig =
                             getConsoleAgents()->settings->userConfig();
@@ -233,12 +233,12 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                                            &unused) == 0 ||
                         DEBUG_GRPC_ENDPOINT) {
                         auserConfig_setExtendedControlsPos(userConfig, x, y,
-                                                           (int)horizontal,
-                                                           (int)vertical);
+                                                           horizontal,
+                                                           vertical);
                     }
                 },
         .startExtendedWindow =
-                [](ExtendedWindowPane pane) {
+                [](int pane) {
                     std::lock_guard<std::mutex> extended(s_extendedWindow);
                     auto* win = EmulatorQtWindow::getInstance();
                     bool visibilityChanged = false;
@@ -248,7 +248,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                 !win->toolWindow()->isExtendedWindowVisible();
                         win->runOnUiThread(
                                 [win, pane]() {
-                                    win->toolWindow()->showExtendedWindow(pane);
+                                    win->toolWindow()->showExtendedWindow((ExtendedWindowPane)pane);
                                 },
                                 &completed);
                         completed.acquire();
@@ -284,11 +284,11 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .setUiTheme =
-                [](SettingsTheme type) {
+                [](int type) {
                     skin_winsys_touch_qt_extended_virtual_sensors();
                     if (auto* win = EmulatorQtWindow::getInstance()) {
                         win->runOnUiThread([win, type]() {
-                            win->toolWindow()->setUiTheme(type, false);
+                            win->toolWindow()->setUiTheme((SettingsTheme)type, false);
                         });
                         return true;
                     } else {

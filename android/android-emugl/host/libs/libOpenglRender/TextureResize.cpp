@@ -20,7 +20,8 @@
 #include "FrameBuffer.h"
 #include "android/utils/debug.h"
 
-#include "emugl/common/misc.h"
+#include "host-common/misc.h"
+#include "host-common/opengl/misc.h"
 #include "emugl/common/mutex.h"
 
 #include "GLES2/gl2ext.h"

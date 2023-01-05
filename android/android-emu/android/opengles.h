@@ -15,10 +15,10 @@
 #include <stddef.h>
 
 #include "aemu/base/export.h"
-#include "android/emulation/control/multi_display_agent.h"
-#include "android/emulation/control/vm_operations.h"
-#include "android/emulation/control/window_agent.h"
-#include "android/opengl/virtio_gpu_ops.h"
+#include "host-common/multi_display_agent.h"
+#include "host-common/vm_operations.h"
+#include "host-common/window_agent.h"
+#include "render-utils/virtio_gpu_ops.h"
 #include "android/utils/compiler.h"
 
 #ifdef __cplusplus

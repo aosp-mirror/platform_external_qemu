@@ -17,8 +17,8 @@ ANDROID_BEGIN_HEADER
 
 typedef enum {
 #define FEATURE_CONTROL_ITEM(item) kFeature_##item,
-#include "android/featurecontrol/FeatureControlDefHost.h"
-#include "android/featurecontrol/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefHost.h"
+#include "host-common/FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
     kFeature_n_items
 } Feature;

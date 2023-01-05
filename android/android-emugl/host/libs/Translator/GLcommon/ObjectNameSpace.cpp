@@ -22,7 +22,7 @@
 #include "aemu/base/memory/LazyInstance.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
-#include "emugl/common/crash_reporter.h"
+#include "host-common/crash_reporter.h"
 #include "emugl/common/logging.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/TranslatorIfaces.h"

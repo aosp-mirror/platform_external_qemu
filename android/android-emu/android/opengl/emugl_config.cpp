@@ -9,13 +9,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/opengl/emugl_config.h"
+#include "host-common/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 
 #include "aemu/base/StringFormat.h"
 #include "android/base/system/System.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/avd/hw-config.h"
+#include "host-common/crash-handler.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"
 #include "android/opengl/EmuglBackendList.h"
 #include "android/skin/winsys.h"
@@ -204,7 +204,7 @@ bool emuglConfig_init(EmuglConfig* config,
                       bool no_window,
                       bool blacklisted,
                       bool has_guest_renderer,
-                      enum WinsysPreferredGlesBackend uiPreferredBackend,
+                      int uiPreferredBackend,
                       bool use_host_vulkan) {
     D("%s: blacklisted=%d has_guest_renderer=%d, mode: %s, option: %s\n",
       __FUNCTION__,
@@ -218,7 +218,7 @@ bool emuglConfig_init(EmuglConfig* config,
     bool host_set_in_hwconfig = false;
     bool has_auto_no_window = false;
 
-    bool hasUiPreference = uiPreferredBackend != WINSYS_GLESBACKEND_PREFERENCE_AUTO;
+    bool hasUiPreference = (enum WinsysPreferredGlesBackend)uiPreferredBackend != WINSYS_GLESBACKEND_PREFERENCE_AUTO;
 
     // The value of '-gpu <mode>' overrides both the hardware properties
     // and the UI setting, except if <mode> is 'auto'.

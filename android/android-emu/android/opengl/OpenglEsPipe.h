@@ -11,7 +11,7 @@
 #pragma once
 
 #include "aemu/base/Compiler.h"
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 
 #include "OpenglRender/RenderChannel.h"
 

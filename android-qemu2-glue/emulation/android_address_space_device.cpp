@@ -12,9 +12,9 @@
 
 #include "android-qemu2-glue/emulation/android_address_space_device.h"
 #include "android-qemu2-glue/base/files/QemuFileStream.h"
-#include "android/emulation/address_space_device.hpp"
-#include "android/emulation/address_space_device.h"
-#include "android/utils/stream.h"
+#include "host-common/address_space_device.hpp"
+#include "host-common/address_space_device.h"
+#include "aemu/base/utils/stream.h"
 
 extern "C" {
 #include "hw/pci/goldfish_address_space.h"

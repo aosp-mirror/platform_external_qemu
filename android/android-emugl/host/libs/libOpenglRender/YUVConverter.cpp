@@ -18,7 +18,9 @@
 
 #include "DispatchTables.h"
 #include "emugl/common/feature_control.h"
-#include "emugl/common/misc.h"
+#include "host-common/feature_control.h"
+#include "host-common/misc.h"
+#include "host-common/opengl/misc.h"
 
 #include <assert.h>
 #include <stdio.h>

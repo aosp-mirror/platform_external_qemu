@@ -17,7 +17,7 @@
 
 #include "aemu/base/Compiler.h"
 #include "aemu/base/synchronization/MessageChannel.h"
-#include "android/emulation/control/window_agent.h"
+#include "host-common/window_agent.h"
 
 #include <EGL/egl.h>
 #include <GLES/gl.h>

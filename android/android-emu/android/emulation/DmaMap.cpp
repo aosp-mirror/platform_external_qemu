@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/DmaMap.h"
+#include "host-common/DmaMap.h"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -21,7 +21,7 @@
 #include "aemu/base/files/StreamSerializing.h"
 #include "aemu/base/logging/CLog.h"
 #include "aemu/base/memory/LazyInstance.h"
-#include "android/emulation/android_pipe_device.h"
+#include "host-common/android_pipe_device.h"
 
 #define DEBUG 0
 

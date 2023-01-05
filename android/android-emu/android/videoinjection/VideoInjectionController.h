@@ -16,7 +16,7 @@
 
 #include "aemu/base/Optional.h"
 #include "aemu/base/Result.h"
-#include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "host-common/AndroidAsyncMessagePipe.h"
 #include "offworld.pb.h"
 #include <string>
 

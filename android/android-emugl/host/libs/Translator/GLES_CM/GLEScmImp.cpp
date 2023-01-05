@@ -33,7 +33,7 @@
 #include <GLcommon/TranslatorIfaces.h>
 #include <GLcommon/FramebufferData.h>
 
-#include "emugl/common/crash_reporter.h"
+#include "host-common/crash_reporter.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/metrics.h"
 

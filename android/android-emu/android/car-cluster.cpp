@@ -14,7 +14,7 @@
 #include "android/emulation/android_qemud.h"
 #include "android/console.h"
 #include "android/utils/debug.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 #include "android/utils/system.h"
 
 #include <assert.h>

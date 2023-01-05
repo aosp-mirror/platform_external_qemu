@@ -9,8 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/featurecontrol/feature_control.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/feature_control.h"
+#include "host-common/FeatureControl.h"
 
 void feature_initialize() {
     android::featurecontrol::initialize();

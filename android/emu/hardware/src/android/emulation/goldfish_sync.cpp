@@ -10,8 +10,8 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/emulation/goldfish_sync.h"
-#include "android/emulation/GoldfishSyncCommandQueue.h"
+#include "host-common/goldfish_sync.h"
+#include "host-common/GoldfishSyncCommandQueue.h"
 
 #include "aemu/base/containers/Lookup.h"
 #include "aemu/base/memory/LazyInstance.h"

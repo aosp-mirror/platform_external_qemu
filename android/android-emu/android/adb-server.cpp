@@ -21,10 +21,10 @@
 #include "android/emulation/AdbVsockPipe.h"
 #include "android/emulation/AdbHostListener.h"
 #include "android/emulation/AdbHostServer.h"
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 #include "android/utils/debug.h"
 
-#include "android/featurecontrol/feature_control.h"
+#include "host-common/feature_control.h"
 
 #include <memory>
 #include <string>

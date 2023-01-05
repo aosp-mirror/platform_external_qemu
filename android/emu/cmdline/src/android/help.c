@@ -4,7 +4,7 @@
 #include <stdlib.h>                                  // for NULL
 #include <string.h>                                  // for strlen, strcmp
 
-#include "android/constants.h"                       // for CORE_HARDWARE_INI
+#include "host-common/constants.h"                       // for CORE_HARDWARE_INI
 #include "android/emulation/bufprint_config_dirs.h"  // for bufprint_config_...
 #include "android/network/constants.h"               // for AndroidNetworkLa...
 #include "android/utils/bufprint.h"                  // for bufprint

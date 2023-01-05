@@ -9,11 +9,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/emulation/RefcountPipe.h"
+#include "host-common/RefcountPipe.h"
 
 #include "aemu/base/ArraySize.h"
 #include "aemu/base/memory/LazyInstance.h"
-#include "android/refcount-pipe.h"
+#include "host-common/refcount-pipe.h"
 #include "android/utils/debug.h"
 
 using android::base::arraySize;

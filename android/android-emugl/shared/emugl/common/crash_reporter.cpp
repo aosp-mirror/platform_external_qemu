@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-#include "crash_reporter.h"
+#include "host-common/crash_reporter.h"
 
 #include <cstdlib>
 namespace emugl {

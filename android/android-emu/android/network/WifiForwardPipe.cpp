@@ -18,7 +18,7 @@
 #include "android/network/WifiForwardPeer.h"
 #include "android/network/WifiForwardServer.h"
 #include "aemu/base/sockets/SocketUtils.h"
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 
 #include <cstring>
 #include <memory>

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/record_screen_agent.h"
+#include "host-common/record_screen_agent.h"
 #include "android/emulator-window.h"
 #include "android/opengles.h"
-#include "android/recording/screen-recorder.h"
+#include "host-common/screen-recorder.h"
 
 #include <stdbool.h>
 

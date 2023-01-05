@@ -19,7 +19,7 @@
 #include <vector>                   // for vector
 
 #include "aemu/base/EventNotificationSupport.h"
-#include "android/emulation/control/window_agent.h"
+#include "host-common/window_agent.h"
 #include "ui_multi-display-page.h"  // for MultiDisplayPage
 
 

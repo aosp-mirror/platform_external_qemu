@@ -11,7 +11,7 @@
 
 #include <cassert>
 #include <string>
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "android/avd/info.h"
 #include "android/cmdline-definitions.h"
 #include "android/emulation/control/globals_agent.h"

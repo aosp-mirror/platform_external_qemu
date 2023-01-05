@@ -9,9 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/emulation/HostmemIdMapping.h"
+#include "host-common/HostmemIdMapping.h"
 
-#include "android/emulation/control/vm_operations.h"
+#include "host-common/vm_operations.h"
 
 #include <gtest/gtest.h>
 

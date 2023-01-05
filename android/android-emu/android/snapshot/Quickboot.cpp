@@ -17,11 +17,11 @@
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
 #include "android/adb-server.h"
-#include "android/avd/hw-config.h"
 #include "android/avd/info.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/hw-config.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/utils/path.h"
 
@@ -29,7 +29,7 @@
 #include "studio_stats.pb.h"
 #endif
 
-#include "android/opengl/emugl_config.h"
+#include "host-common/opengl/emugl_config.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Saver.h"

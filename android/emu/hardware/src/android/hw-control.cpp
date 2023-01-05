@@ -22,13 +22,13 @@
 //
 #include "android/hw-control.h"
 
-#include "android/avd/hw-config.h"
+#include "host-common/hw-config.h"
 #include "aemu/base/Log.h"
 #include "android/emulation/android_qemud.h"
 #include "android/console.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
-#include "android/utils/stream.h"
+#include "aemu/base/utils/stream.h"
 
 #include <cerrno>
 #include <cstdint>

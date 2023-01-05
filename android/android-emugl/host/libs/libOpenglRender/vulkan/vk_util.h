@@ -37,9 +37,11 @@
 #include <vector>
 
 #include "VkCommonOperations.h"
-#include "android/utils/GfxstreamFatalError.h"
+#include "host-common/GfxstreamFatalError.h"
 #include "common/vk_struct_id.h"
 #include "vk_fn_info.h"
+
+using emugl::FatalError;
 
 struct vk_struct_common {
     VkStructureType sType;

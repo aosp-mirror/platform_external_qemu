@@ -16,11 +16,11 @@
 #include <stdio.h>   // for NULL, fprintf, stderr
 #include <stdlib.h>  // for calloc, free, malloc
 
-#include "android/crashreport/crash-handler.h"  // for crashhandler_die_format
-#include "android/emulation/control/multi_display_agent.h"
+#include "host-common/crash-handler.h"  // for crashhandler_die_format
+#include "host-common/multi_display_agent.h"
 #include "android/emulator-window.h"
-#include "android/featurecontrol/feature_control.h"
-#include "android/avd/hw-config.h"
+#include "host-common/feature_control.h"
+#include "host-common/hw-config.h"
 #include "android/console.h"
 #include "android/hw-sensors.h"
 #include "android/multitouch-screen.h"    // for multitouch_create_but...

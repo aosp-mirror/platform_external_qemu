@@ -15,6 +15,7 @@
 #include "android/automation/AutomationEventSink.h"
 
 #include "android/automation/AutomationController.h"
+#include "android/utils/debug.h"
 #include "aemu/base/Log.h"
 
 #include <google/protobuf/text_format.h>

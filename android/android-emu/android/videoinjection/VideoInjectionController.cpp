@@ -20,6 +20,7 @@
 #include "aemu/base/Log.h"
 #include "aemu/base/synchronization/Lock.h"
 #include "android/offworld/OffworldPipe.h"
+#include "android/utils/debug.h"
 
 // Conflicts with Log.h
 #ifdef ERROR

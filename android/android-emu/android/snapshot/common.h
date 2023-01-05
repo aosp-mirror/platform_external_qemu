@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "android/emulation/control/vm_operations.h"
+#include "host-common/vm_operations.h"
 #include "android/snapshot/interface.h"
 
 #include <memory>

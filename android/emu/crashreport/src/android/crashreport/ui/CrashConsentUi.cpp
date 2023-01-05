@@ -28,7 +28,7 @@
 #include "aemu/base/memory/ScopedPtr.h"
 #include "android/cmdline-definitions.h"
 #include "android/console.h"
-#include "android/constants.h"
+#include "host-common/constants.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
 #include "android/crashreport/ui/UserSuggestions.h"
 #include "android/emulation/control/globals_agent.h"

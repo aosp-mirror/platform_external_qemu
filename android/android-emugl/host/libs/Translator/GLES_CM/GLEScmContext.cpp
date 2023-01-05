@@ -24,7 +24,7 @@
 #include <GLES/glext.h>
 
 #include "aemu/base/files/StreamSerializing.h"
-#include "emugl/common/crash_reporter.h"
+#include "host-common/crash_reporter.h"
 #include "GLEScmValidate.h"
 
 #include <glm/vec3.hpp>

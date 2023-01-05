@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/RefcountPipe.h"
+#include "host-common/RefcountPipe.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/files/MemStream.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestEvent.h"
 #include "android/base/testing/TestLooper.h"
-#include "android/emulation/VmLock.h"
-#include "android/emulation/android_pipe_device.h"
-#include "android/emulation/hostdevices/HostGoldfishPipe.h"
+#include "host-common/VmLock.h"
+#include "host-common/android_pipe_device.h"
+#include "host-common/HostGoldfishPipe.h"
 #include "android/emulation/testing/TestVmLock.h"
-#include "android/refcount-pipe.h"
+#include "host-common/refcount-pipe.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

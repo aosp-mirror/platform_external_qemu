@@ -14,7 +14,7 @@
 
 #include <stdbool.h>                      // for bool
 
-#include "android/avd/hw-config.h"        // for AndroidHwConfig
+#include "host-common/hw-config.h"        // for AndroidHwConfig
 #include "android/avd/info.h"             // for AvdInfo
 #include "android/cmdline-definitions.h"  // for AndroidOptions
 #include "android/ui-emu-agent.h"         // for UiEmuAgent

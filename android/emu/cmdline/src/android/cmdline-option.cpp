@@ -2,7 +2,7 @@
 
 #include <android/utils/x86_cpuid.h>
 #include "aemu/base/ArraySize.h"
-#include "android/constants.h"
+#include "host-common/constants.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"

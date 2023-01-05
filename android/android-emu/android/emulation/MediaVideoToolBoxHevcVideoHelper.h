@@ -15,11 +15,11 @@
 #pragma once
 
 #include "android/emulation/HevcNaluParser.h"
-#include "android/emulation/MediaFfmpegVideoHelper.h"
-#include "android/emulation/MediaSnapshotState.h"
-#include "android/emulation/MediaTexturePool.h"
-#include "android/emulation/MediaVideoHelper.h"
-#include "android/emulation/YuvConverter.h"
+#include "host-common/MediaFfmpegVideoHelper.h"
+#include "host-common/MediaSnapshotState.h"
+#include "host-common/MediaTexturePool.h"
+#include "host-common/MediaVideoHelper.h"
+#include "host-common/YuvConverter.h"
 
 // this is apple's video tool box header
 #include <VideoToolbox/VideoToolbox.h>

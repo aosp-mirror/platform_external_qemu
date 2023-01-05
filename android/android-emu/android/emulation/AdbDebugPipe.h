@@ -12,7 +12,7 @@
 #pragma once
 
 #include "aemu/base/files/Stream.h"
-#include "android/emulation/AndroidPipe.h"
+#include "host-common/AndroidPipe.h"
 
 #include <memory>
 

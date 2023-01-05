@@ -16,7 +16,7 @@
 #include "aemu/base/EintrWrapper.h"
 #include "aemu/base/files/ScopedFd.h"
 #include "aemu/base/threads/FunctorThread.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "host-common/FeatureControl.h"
 #include "android/utils/debug.h"
 
 #include <fcntl.h>

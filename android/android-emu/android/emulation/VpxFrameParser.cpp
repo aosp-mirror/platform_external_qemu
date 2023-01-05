@@ -24,7 +24,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "android/emulation/VpxFrameParser.h"
+#include "host-common/VpxFrameParser.h"
 
 #define VPX_DEBUG 0
 
