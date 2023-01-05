@@ -468,21 +468,37 @@ bool Quickboot::saveAvdToSystemImageSnapshotsLocalDir() {
             std::string(path_getAvdSystemPath(avdName, mySdkRoot.c_str(),
                                               false /* no debug print */)),
             "snapshots", "local", "avd");
-    const std::string destAvdConfigIni = PathUtils::join(destDir, "config.ini");
-    if (path_exists(destAvdConfigIni.c_str())) {
+    const std::string destAvdSrcProp =
+            PathUtils::join(destDir, "source.properties");
+    if (path_exists(destAvdSrcProp.c_str())) {
+        dprint("skip saving to snapshot/avd, as it has already been saved "
+               "previously.");
+        return false;
+    }
+
+    // clean up against incomplete copy previously done
+    if (path_is_dir(destDir.c_str()) && path_delete_dir(destDir.c_str())) {
+        dwarning("cannot delete snapshot/avd\n");
         return false;
     }
     auto startTime = std::chrono::steady_clock::now();
     std::set<std::string> filesToSkip;
+    filesToSkip.insert("source.properties");
     filesToSkip.insert("multiinstance.lock");
     filesToSkip.insert("hardware-qemu.ini.lock");
     std::vector<std::string> filesFailed;
     if (-1 == path_copy_dir_ex(destDir.c_str(), srcDir.c_str(), &filesToSkip)) {
-        // failed, then just delete it
-        path_delete_file(destAvdConfigIni.c_str());
-        dprint("deleting local copy's config.ini file %s as dir copy failed",
-               destAvdConfigIni.c_str());
+        LOG(WARNING) << "Failed to save avd to " << destDir;
+        return false;
     }
+
+    // for now, just empty source.properties: TODO add some relevant information
+    if (path_empty_file(destAvdSrcProp.c_str())) {
+        return false;
+    }
+
+    LOG(VERBOSE) << "Succesfully saved avd to " << destDir;
+
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - startTime);
 

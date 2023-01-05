@@ -1977,7 +1977,10 @@ extern "C" int main(int argc, char** argv) {
             if (hw->firstboot_bootFromLocalSnapshot) {
                 srcDir = srcDirLocal;
                 default_config_ini = PathUtils::join(srcDir, "config.ini");
-                if (!path_exists(default_config_ini.c_str())) {
+                const std::string local_avd_src_prop =
+                        PathUtils::join(srcDirLocal, "source.properties");
+                if (!path_exists(default_config_ini.c_str()) ||
+                    !path_exists(local_avd_src_prop.c_str())) {
                     srcDir.clear();
                     default_config_ini.clear();
                 } else {
@@ -2021,6 +2024,7 @@ extern "C" int main(int argc, char** argv) {
                 auto startTime = std::chrono::steady_clock::now();
                 path_delete_dir(s_AvdFolder);
                 std::set<std::string> skipSet;
+                skipSet.insert("source.properties");
                 skipSet.insert("multiinstance.lock");
                 skipSet.insert("hardware-qemu.ini.lock");
                 if (-1 ==
