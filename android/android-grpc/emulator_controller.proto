@@ -72,15 +72,8 @@ service EmulatorController {
     rpc setBattery(BatteryState) returns (google.protobuf.Empty) {}
     rpc getBattery(google.protobuf.Empty) returns (BatteryState) {}
 
-    // Set the state of the gps, gps support will only work
-    // properly if:
-    //
-    // - no location ui is active. That is the emulator
-    //   is launched in headless mode (-no-window) or the location
-    //   ui is disabled (-no-location-ui).
-    // - the passiveUpdate is set to false. Setting this to false
-    //   will disable/break the LocationUI.
-    //
+    // Set the state of the gps.
+    // Note: Setting the gps position will not be reflected in the user interface.
     // Keep in mind that android usually only samples the gps at 1 hz.
     rpc setGps(GpsState) returns (google.protobuf.Empty) {}
 

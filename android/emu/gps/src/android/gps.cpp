@@ -10,18 +10,26 @@
 ** GNU General Public License for more details.
 */
 #include "android/gps.h"
+#include "android/emulation/serial_line.h"
+#include "android/gps/PassiveGpsUpdater.h"
 #include "android/utils/debug.h"
 #include "android/utils/stralloc.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include <stdio.h>
+#include <memory>
+#include <mutex>
+
+using android::emulation::PassiveGpsUpdater;
 
 CSerialLine* android_gps_serial_line;
 // Set to true to ping guest for location updates every few seconds
 static bool s_enable_passive_location_update = true;
 static bool s_enable_gps_signal = true;
 static bool s_enable_gnssgrpcv1 = false;
+static std::mutex s_set_location_mutex;
+std::unique_ptr<PassiveGpsUpdater> s_updater;
 
 // Last state of the gps, initial coordinates point to Googleplex.
 double s_latitude = 39.237256;
@@ -31,15 +39,13 @@ double s_speedKnots = 0;
 double s_headingDegrees = 0;
 int s_nSatellites = 4;
 
-#define  D(...)  VERBOSE_PRINT(gps,__VA_ARGS__)
+#define D(...) VERBOSE_PRINT(gps, __VA_ARGS__)
 
 typedef void (*android_gnssgrpcv1_send_nmea_func)(const char*, int);
 
 static android_gnssgrpcv1_send_nmea_func s_gnssgrpcv1_send_nmea = NULL;
 
-void
-android_gps_send_nmea( const char*  sentence )
-{
+void android_gps_send_nmea(const char* sentence) {
     if (sentence == NULL)
         return;
 
@@ -56,13 +62,12 @@ android_gps_send_nmea( const char*  sentence )
         }
         return;
     }
-    android_serialline_write( android_gps_serial_line, (const void*)sentence, strlen(sentence) );
-    android_serialline_write( android_gps_serial_line, (const void*)"\n", 1 );
+    android_serialline_write(android_gps_serial_line, (const uint8_t*)sentence,
+                             strlen(sentence));
+    android_serialline_write(android_gps_serial_line, (const uint8_t*)"\n", 1);
 }
 
-void
-android_gps_send_gnss( const char*  sentence )
-{
+void android_gps_send_gnss(const char* sentence) {
     if (sentence == NULL)
         return;
 
@@ -81,32 +86,35 @@ android_gps_send_gnss( const char*  sentence )
         return;
     }
 
-    android_serialline_write( android_gps_serial_line, (const void*)temp, strlen(temp) );
-    android_serialline_write( android_gps_serial_line, (const void*)"\n", 1 );
+    const uint8_t newline[] = "\n";
+
+    android_serialline_write(android_gps_serial_line, (const uint8_t*)temp,
+                             strlen(temp));
+    android_serialline_write(android_gps_serial_line, (const uint8_t*)"\n", 1);
 }
 
-////////////////////////////////////////////////////////////
-//
-// android_gps_send_location
-//
-// Send a GPS location to the AVD using an NMEA sentence
-//
-// Inputs: latitude:        Degrees
-//         longitude:       Degrees
-//         metersElevation: Meters above sea level
-//         speedKnots:      Speed in knots
-//         headingDegrees:  Heading -180..+360, 0=north, 90=east
-//         nSatellites:     Number of satellites used
-//         time:            UTC, in the format provided
-//                          by gettimeofday()
 
-void
-android_gps_send_location(double latitude, double longitude,
-                          double metersElevation,
-                          double speedKnots, double headingDegrees,
-                          int nSatellites,
-                          const struct timeval *time)
-{
+
+/**
+Sends the current location to the device. Callers should have the
+s_set_location_mutex.
+
+
+@param latitude The current latitude, in decimal degrees.
+@param longitude The current longitude, in decimal degrees.
+@param metersElevation The current elevation, in meters.
+@param speedKnots The current speed, in knots.
+@param headingDegrees The current heading, in degrees.
+@param nSatellites The number of satellites being used to calculate the location.
+@param time The current time.
+*/
+static void send_location_to_device_internal(double latitude,
+                                        double longitude,
+                                        double metersElevation,
+                                        double speedKnots,
+                                        double headingDegrees,
+                                        int nSatellites,
+                                        const struct timeval* time) {
     s_latitude = latitude;
     s_longitude = longitude;
     s_metersElevation = metersElevation;
@@ -118,10 +126,10 @@ android_gps_send_location(double latitude, double longitude,
     STRALLOC_DEFINE(elevationStr);
     char* elevStrPtr;
 
-    int      latDeg, latMin, latFraction;
-    int      lngDeg, lngMin, lngFraction;
-    char     hemiNS, hemiEW;
-    int      hh = 0, mm = 0, ss = 0;
+    int latDeg, latMin, latFraction;
+    int lngDeg, lngMin, lngFraction;
+    char hemiNS, hemiEW;
+    int hh = 0, mm = 0, ss = 0;
 
     // GPGGA format overview:
     //    time of fix      123519     12:35:19 UTC
@@ -140,11 +148,11 @@ android_gps_send_location(double latitude, double longitude,
     //    dgps sid         <dontcare> DGPS station id
 
     // time->tv_sec is elapsed seconds since epoch, UTC
-    hh = (int) (time->tv_sec / (60 * 60)) % 24;
-    mm = (int) (time->tv_sec /  60      ) % 60;
-    ss = (int) (time->tv_sec            ) % 60;
+    hh = (int)(time->tv_sec / (60 * 60)) % 24;
+    mm = (int)(time->tv_sec / 60) % 60;
+    ss = (int)(time->tv_sec) % 60;
 
-    stralloc_add_format( msgStr, "$GPGGA,%02d%02d%02d", hh, mm, ss);
+    stralloc_add_format(msgStr, "$GPGGA,%02d%02d%02d", hh, mm, ss);
 
     // Latitude
     hemiNS = 'N';
@@ -152,45 +160,47 @@ android_gps_send_location(double latitude, double longitude,
         hemiNS = 'S';
         latitude = -latitude;
     }
-    latDeg = (int) latitude;
-    latitude = 60*(latitude - latDeg);
-    latMin = (int) latitude;
-    latFraction = 10000*(latitude - latMin);
-    stralloc_add_format(msgStr, ",%02d%02d.%04d,%c", latDeg, latMin, latFraction, hemiNS);
+    latDeg = (int)latitude;
+    latitude = 60 * (latitude - latDeg);
+    latMin = (int)latitude;
+    latFraction = 10000 * (latitude - latMin);
+    stralloc_add_format(msgStr, ",%02d%02d.%04d,%c", latDeg, latMin,
+                        latFraction, hemiNS);
 
     // Longitude
     hemiEW = 'E';
     if (longitude < 0) {
         hemiEW = 'W';
-        longitude  = -longitude;
+        longitude = -longitude;
     }
-    lngDeg = (int) longitude;
-    longitude = 60*(longitude - lngDeg);
-    lngMin = (int) longitude;
-    lngFraction = 10000*(longitude - lngMin);
-    stralloc_add_format(msgStr, ",%02d%02d.%04d,%c", lngDeg, lngMin, lngFraction, hemiEW);
+    lngDeg = (int)longitude;
+    longitude = 60 * (longitude - lngDeg);
+    lngMin = (int)longitude;
+    lngFraction = 10000 * (longitude - lngMin);
+    stralloc_add_format(msgStr, ",%02d%02d.%04d,%c", lngDeg, lngMin,
+                        lngFraction, hemiEW);
 
     // Bogus fix quality (1), satellite count, and bogus dilution
-    stralloc_add_format( msgStr, ",1,6,");
+    stralloc_add_format(msgStr, ",1,6,");
 
     // Altitude (to 0.1 meter precision) + bogus diff
     // Make sure elevation is formatted with a decimal point instead of comma.
     // setlocale isn't used because of thread safety concerns.
-    stralloc_add_format( elevationStr, "%.1f", metersElevation );
+    stralloc_add_format(elevationStr, "%.1f", metersElevation);
     for (elevStrPtr = stralloc_cstr(elevationStr); *elevStrPtr; ++elevStrPtr) {
         if (*elevStrPtr == ',') {
             *elevStrPtr = '.';
             break;
         }
     }
-    stralloc_add_format( msgStr, ",%s,M,0.,M", stralloc_cstr(elevationStr) );
+    stralloc_add_format(msgStr, ",%s,M,0.,M", stralloc_cstr(elevationStr));
     stralloc_reset(elevationStr);
 
     // Bogus rest and checksum
-    stralloc_add_str( msgStr, ",,,*47" );
+    stralloc_add_str(msgStr, ",,,*47");
 
     // Send it
-    android_gps_send_nmea( stralloc_cstr(msgStr) );
+    android_gps_send_nmea(stralloc_cstr(msgStr));
 
     // Free it
     stralloc_reset(msgStr);
@@ -217,21 +227,25 @@ android_gps_send_location(double latitude, double longitude,
     stralloc_add_format(rmcStr, "$GPRMC,%02d%02d%02d,A", hh, mm, ss);
 
     // Latitude
-    stralloc_add_format(rmcStr, ",%02d%02d.%04d,%c", latDeg, latMin, latFraction, hemiNS);
+    stralloc_add_format(rmcStr, ",%02d%02d.%04d,%c", latDeg, latMin,
+                        latFraction, hemiNS);
 
     // Longitude
-    stralloc_add_format(rmcStr, ",%02d%02d.%04d,%c", lngDeg, lngMin, lngFraction, hemiEW);
+    stralloc_add_format(rmcStr, ",%02d%02d.%04d,%c", lngDeg, lngMin,
+                        lngFraction, hemiEW);
 
     // Speed in knots, course
-    if (headingDegrees < 0.0) headingDegrees += 360.0;
+    if (headingDegrees < 0.0)
+        headingDegrees += 360.0;
     stralloc_add_format(rmcStr, ",%.2f,%.2f", speedKnots, headingDegrees);
 
     // Date
     time_t ttTime = time->tv_sec;
-    struct tm *pTm = gmtime(&ttTime);
-    stralloc_add_format(rmcStr, ",%02d%02d%02d", pTm->tm_mday, pTm->tm_mon+1, (pTm->tm_year)%100);
+    struct tm* pTm = gmtime(&ttTime);
+    stralloc_add_format(rmcStr, ",%02d%02d%02d", pTm->tm_mday, pTm->tm_mon + 1,
+                        (pTm->tm_year) % 100);
 
-    if(s_enable_gnssgrpcv1) {
+    if (s_enable_gnssgrpcv1) {
         // TODO: fix checksum
         stralloc_add_format(rmcStr, ",,,W*47");
     } else {
@@ -241,7 +255,7 @@ android_gps_send_location(double latitude, double longitude,
 
     // Send it
     if (s_enable_gps_signal) {
-        android_gps_send_nmea( stralloc_cstr(rmcStr) );
+        android_gps_send_nmea(stralloc_cstr(rmcStr));
     }
 
     // Free it
@@ -254,7 +268,6 @@ int android_gps_get_location(double* outLatitude,
                              double* outVelocityKnots,
                              double* outHeading,
                              int* outNSatellites) {
-
     // Note: This does not retrieve the gps state from the actual device
     // which means that it is possible to observe a gps state that is
     // different from what is actually reported in the device.
@@ -278,19 +291,58 @@ int android_gps_get_location(double* outLatitude,
     return 0;
 }
 
-void
-android_gps_set_passive_update(bool enable)
-{
+////////////////////////////////////////////////////////////
+//
+// android_gps_send_location
+//
+// Send a GPS location to the AVD using an NMEA sentence
+//
+// Inputs: latitude:        Degrees
+//         longitude:       Degrees
+//         metersElevation: Meters above sea level
+//         speedKnots:      Speed in knots
+//         headingDegrees:  Heading -180..+360, 0=north, 90=east
+//         nSatellites:     Number of satellites used
+//         time:            UTC, in the format provided
+//                          by gettimeofday()
+void android_gps_send_location(double latitude,
+                               double longitude,
+                               double metersElevation,
+                               double speedKnots,
+                               double headingDegrees,
+                               int nSatellites,
+                               const struct timeval* time) {
+    const std::lock_guard<std::mutex> lock(s_set_location_mutex);
+    send_location_to_device_internal(latitude, longitude, metersElevation,
+                                       speedKnots, headingDegrees, nSatellites,
+                                       time);
+}
+
+void android_gps_refresh() {
+    const std::lock_guard<std::mutex> lock(s_set_location_mutex);
+    timeval timeVal = {};
+    gettimeofday(&timeVal, nullptr);
+
+    send_location_to_device_internal(
+            s_latitude, s_longitude, s_metersElevation, s_speedKnots,
+            s_headingDegrees, s_nSatellites, &timeVal);
+}
+
+void android_gps_set_passive_update(bool enable) {
     s_enable_passive_location_update = enable;
+    if (enable) {
+        // Start updater.
+        s_updater = std::make_unique<PassiveGpsUpdater>(android_gps_refresh);
+    } else {
+        s_updater.reset();
+    }
 }
 
 void android_gps_enable_gnssgrpcv1() {
     s_enable_gnssgrpcv1 = true;
 }
 
-bool
-android_gps_get_passive_update()
-{
+bool android_gps_get_passive_update() {
     return s_enable_passive_location_update;
 }
 
@@ -305,6 +357,5 @@ bool android_gps_get_gps_signal() {
 }
 
 void android_gps_set_gps_signal(bool enable) {
-     s_enable_gps_signal = enable;
+    s_enable_gps_signal = enable;
 }
-
