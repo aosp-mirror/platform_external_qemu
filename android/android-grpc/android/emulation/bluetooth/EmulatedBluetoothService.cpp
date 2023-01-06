@@ -44,9 +44,9 @@
 #include "root_canal_qemu.h"
 
 #ifdef DISABLE_ASYNC_GRPC
-#include "android/emulation/control/utils/SyncToAsyncAdapter.h"
+#include "android/grpc/utils/SyncToAsyncAdapter.h"
 #else
-#include "android/emulation/control/utils/SimpleAsyncGrpc.h"
+#include "android/grpc/utils/SimpleAsyncGrpc.h"
 #endif
 
 using android::base::System;

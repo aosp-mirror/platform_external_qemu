@@ -73,7 +73,7 @@ android_add_library(
 target_include_directories(
   android-grpc-services PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(android-grpc-services PUBLIC protobuf::libprotobuf grpc++
+target_link_libraries(android-grpc-services PUBLIC protobuf::libprotobuf grpc++ android-emu-grpc-utils
                                                    android-emu-protos)
 #lib which doesn't include android-emu
 android_add_library(

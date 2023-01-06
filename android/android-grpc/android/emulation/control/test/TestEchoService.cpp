@@ -18,9 +18,9 @@
 #include "test_echo_service.pb.h"
 
 #ifndef DISABLE_ASYNC_GRPC
-#include "android/emulation/control/utils/SimpleAsyncGrpc.h"
+#include "android/grpc/utils/SimpleAsyncGrpc.h"
 #else
-#include "android/emulation/control/utils/SyncToAsyncAdapter.h"
+#include "android/grpc/utils/SyncToAsyncAdapter.h"
 #endif
 
 using grpc::ServerContext;
