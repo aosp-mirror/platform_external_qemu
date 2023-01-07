@@ -284,7 +284,8 @@ if(NOT LINUX_AARCH64)
           vulkan/VulkanStream_unittest.cpp)
     add_opengl_dependencies(OpenglRender_vulkan_unittests)
     target_link_libraries(OpenglRender_vulkan_unittests
-                          PRIVATE android-emu-test-launcher android-emu android-emu-base-headers)
+                          PRIVATE android-emu-test-launcher android-emu android-emu-base-headers
+                                  qemu-host-common-headers)
     target_link_libraries(
       OpenglRender_vulkan_unittests PUBLIC OpenglRender_standalone_common
                                            OpenglRender_vulkan gmock_main)
