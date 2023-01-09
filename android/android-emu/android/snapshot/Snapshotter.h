@@ -30,6 +30,10 @@ class AndroidStudioEvent;
 class EmulatorSnapshot;
 } // namespace android_studio
 
+namespace emulator_compatible {
+class Snapshot;
+}
+
 namespace android {
 namespace snapshot {
 
@@ -215,6 +219,8 @@ private:
     int mAvdCopyTime = 0;
     DownloadableSnapshotFailure mDownloadableSnapshotFailureReason =
             DownloadableSnapshotFailure::NoFailure;
+
+    std::unique_ptr<emulator_compatible::Snapshot> mCompatiblePb;
 };
 
 }  // namespace snapshot

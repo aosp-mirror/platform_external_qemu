@@ -312,13 +312,13 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     mLastLoadDuration = android::base::kNullopt;
     mIsQuickboot = isQuickboot;
     Stopwatch sw;
-    emulator_compatible::Snapshot compatible_pb;
     if (mVmOperations.setSnapshotProtobuf) {
         std::string compatiblePbPath =
                 PathUtils::join(getSnapshotDir(name), "compatible.pb");
         std::ifstream compatible_in(compatiblePbPath, std::ios::binary);
-        compatible_pb.ParseFromIstream(&compatible_in);
-        mVmOperations.setSnapshotProtobuf(&compatible_pb);
+        mCompatiblePb.reset(new emulator_compatible::Snapshot());
+        mCompatiblePb->ParseFromIstream(&compatible_in);
+        mVmOperations.setSnapshotProtobuf(mCompatiblePb.get());
     }
     mVmOperations.snapshotLoad(name, this, nullptr);
     mIsQuickboot = false;
@@ -758,9 +758,9 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
         mVmOperations.setExiting();
     }
 
-    emulator_compatible::Snapshot compatible_pb;
     if (mVmOperations.setSnapshotProtobuf) {
-        mVmOperations.setSnapshotProtobuf(&compatible_pb);
+        mCompatiblePb.reset(new emulator_compatible::Snapshot());
+        mVmOperations.setSnapshotProtobuf(mCompatiblePb.get());
     }
 
     mVmOperations.snapshotSave(name, this, nullptr);
@@ -769,7 +769,7 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
         std::string compatiblePbPath =
                 PathUtils::join(getSnapshotDir(name), "compatible.pb");
         std::ofstream compatible_out(compatiblePbPath, std::ios::binary);
-        compatible_pb.SerializeToOstream(&compatible_out);
+        mCompatiblePb->SerializeToOstream(&compatible_out);
     }
 
     mLastSaveDuration.emplace(sw.elapsedUs() / 1000);
