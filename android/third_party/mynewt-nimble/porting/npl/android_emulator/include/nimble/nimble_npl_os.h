@@ -30,7 +30,9 @@
 extern "C" {
 #endif
 
-#define BLE_NPL_OS_ALIGNMENT    4
+#define BLE_NPL_OS_ALIGNMENT    8
+
+static_assert(BLE_NPL_OS_ALIGNMENT == sizeof(void*), "This expects a 64 bit os.");
 
 #define BLE_NPL_TIME_FOREVER    INT32_MAX
 
