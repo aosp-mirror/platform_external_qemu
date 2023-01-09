@@ -2146,28 +2146,28 @@ help_vmnet_shared(stralloc_t*  out) {
 }
 
 static void
-help_vmnet_start_address(stralloc_t*, out)
+help_vmnet_start_address(stralloc_t* out)
 {
     PRINTF("  If using vmnet in shared mode, starting IPv4 address to assing using DHCP.\n"
            "  Must be in RFC 1918 private IP range and specified together with vmnet_end_address and vmnet_subnet_mask.\n\n");
 }
 
 static void
-help_vmnet_end_address(stralloc_t*, out)
+help_vmnet_end_address(stralloc_t* out)
 {
     PRINTF("  If using vmnet in shared mode, ending IPv4 address to assing using DHCP.\n"
            "  Must be in RFC 1918 private IP range and specified together with vmnet_start_address and vmnet_subnet_mask.\n\n");
 }
 
 static void
-help_vmnet_subnet_mask(stralloc_t*, out)
+help_vmnet_subnet_mask(stralloc_t* out)
 {
     PRINTF("  If using vmnet in shared mode, IPv4 netmask to assing using DHCP.\n"
            "  Must be in RFC 1918 private IP range and specified together with vmnet_start_address and vmnet_end_address.\n\n");
 }
 
 static void
-help_vmnet_isolated(stralloc_t*, out)
+help_vmnet_isolated(stralloc_t* out)
 {
     PRINTF(  "Enable isolation for the interface. Ensures that vmnet interface is not able to communicate with any other vmnet interface.\n\n");
 }
