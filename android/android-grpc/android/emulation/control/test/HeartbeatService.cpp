@@ -30,9 +30,9 @@
 #include "test_echo_service.pb.h"                            // for Msg
 
 #ifdef DISABLE_ASYNC_GRPC
-#include "android/emulation/control/utils/SyncToAsyncAdapter.h"
+#include "android/grpc/utils/SyncToAsyncAdapter.h"
 #else
-#include "android/emulation/control/utils/SimpleAsyncGrpc.h"
+#include "android/grpc/utils/SimpleAsyncGrpc.h"
 #endif
 
 using grpc::ServerContext;

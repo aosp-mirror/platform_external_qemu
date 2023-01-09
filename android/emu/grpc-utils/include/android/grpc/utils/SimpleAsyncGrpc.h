@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 #include <grpcpp/grpcpp.h>
+#include <grpcpp/support/client_callback.h>
 #include <mutex>
 #include <queue>
 #include <type_traits>
@@ -120,5 +121,5 @@ using SimpleServerWriter = WithSimpleQueueWriter<grpc::ServerWriteReactor<W>, W>
 // A client bidi stream
 template <typename R, typename W>
 using SimpleClientBidiStream = WithSimpleQueueWriter<
-        WithSimpleReader<grpc::ClientBidiReactor<R, W>, R>,
+        WithSimpleReader<grpc::ClientBidiReactor<W, R>, R>,
         W>;
