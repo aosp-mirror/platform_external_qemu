@@ -209,6 +209,20 @@ export ANGLE_DEFAULT_PLATFORM=swiftshader
 export ANDROID_EMU_VK_ICD=swiftshader
 
 ${CTEST} -j ${NUM_JOBS} --output-on-failure || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
+
+# Generate the coverage report if profraw files are in $OPT_OUT after running
+# the unittests.
+PROFRAWS=$(ls *.profraw)
+CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for $OS)
+PROFDATA=qemu.profdata
+if [ ! -z "$PROFRAWS" ]; then
+    echo "Generating code coverage report"
+    run $CLANG_BINDIR/llvm-profdata merge -sparse *.profraw -o $PROFDATA
+    COV_OBJS=$(ls *.profraw | awk -F '.profraw' '{print "--object="$1}')
+    $CLANG_BINDIR/llvm-cov export --format=lcov --instr-profile=$PROFDATA $COV_OBJS > lcov
+    echo "Generated coverage file $OPT_OUT/lcov"
+fi
+
 cd $OLD_DIR
 
 EMULATOR_CHECK=$OPT_OUT/emulator-check
@@ -302,6 +316,5 @@ if [ "$RUN_GEN_ENTRIES_TESTS" ]; then
     panic "Failed gen-entries_tests"
     cd $OLD_DIR
 fi
-
 
 exit 0
