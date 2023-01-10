@@ -66,3 +66,5 @@ GL_ENTRY(int, rcReadColorBufferDMA, uint32_t colorbuffer, GLint x, GLint y, GLin
 GL_ENTRY(int, rcGetFBDisplayConfigsCount);
 GL_ENTRY(int, rcGetFBDisplayConfigsParam, int configId, EGLint param);
 GL_ENTRY(int, rcGetFBDisplayActiveConfig);
+GL_ENTRY(void, rcSetProcessMetadata, char* key, RenderControlByte* valuePtr, uint32_t valueSize);
+GL_ENTRY(int, rcGetHostExtensionsString, uint32_t bufferSize, void *buffer);
