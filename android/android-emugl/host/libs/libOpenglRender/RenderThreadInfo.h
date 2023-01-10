@@ -27,6 +27,7 @@
 #include "SyncThread.h"
 
 #include <functional>
+#include <optional>
 #include <unordered_set>
 
 typedef uint32_t HandleType;
