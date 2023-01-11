@@ -476,7 +476,8 @@ static void convertExt4ToQcow2(std::string ext4filepath) {
 
 static int createUserData(AvdInfo* avd,
                           const char* dataPath,
-                          AndroidHwConfig* hw) {
+                          AndroidHwConfig* hw,
+                          bool bShoudlConvertToQcow2) {
     ScopedCPtr<char> initDir(avdInfo_getDataInitDirPath(avd));
     bool needCopyDataPartition = true;
     if (path_exists(initDir.get())) {
@@ -486,13 +487,6 @@ static int createUserData(AvdInfo* avd,
 
         needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
         path_delete_dir(dataPath);
-
-        // convert the ext4 to qcow2
-        bool bShoudlConvertToQcow2 = false;
-
-        if (feature_is_enabled(kFeature_DownloadableSnapshot)) {
-            bShoudlConvertToQcow2 = true;
-        }
 
         if (bShoudlConvertToQcow2) {
             auto startTime = std::chrono::steady_clock::now();
@@ -2121,7 +2115,16 @@ extern "C" int main(int argc, char** argv) {
             }
         }
 
-        int ret = createUserData(avd, dataPath.c_str(), hw);
+        // convert the ext4 to qcow2
+        bool bShoudlConvertToQcow2 = false;
+
+        if (feature_is_enabled(kFeature_DownloadableSnapshot) ||
+            opts->qcow2_for_userdata) {
+            bShoudlConvertToQcow2 = true;
+        }
+
+        int ret = createUserData(avd, dataPath.c_str(), hw,
+                                 bShoudlConvertToQcow2);
         if (ret != 0) {
             crashhandler_die("Failed to initialize userdata.img.");
             return ret;

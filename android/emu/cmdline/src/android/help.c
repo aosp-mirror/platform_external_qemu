@@ -666,6 +666,11 @@ help_no_snapshot_load(stralloc_t*  out)
     );
 }
 
+static void help_qcow2_for_userdata(stralloc_t* out) {
+    PRINTF("  Use Qcow2 format for userdata (instead of the default "
+           "ext4).\n\n");
+}
+
 static void
 help_no_snapshot_save(stralloc_t*  out)
 {
