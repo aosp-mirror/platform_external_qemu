@@ -1234,6 +1234,12 @@ constexpr bool targetIsX86 = true;
 constexpr bool targetIsX86 = false;
 #endif
 
+#if defined(TARGET_ARM64)
+constexpr bool targetIsArm64 = true;
+#else
+constexpr bool targetIsArm64 = false;
+#endif
+
 static std::string buildSoundhwParam(const int apiLevel,
                                      const AndroidHwConfig* hw) {
     std::string param;
@@ -2718,7 +2724,7 @@ extern "C" int main(int argc, char** argv) {
 
 // USB
 #define usb_passthrough_driver "Android USB Assistant Driver"
-    if (targetIsX86 && apiLevel >= 29) {
+    if ((targetIsX86 || targetIsArm64) && apiLevel >= 29) {
         if (opts->usb_passthrough)
             args.add2("-device", "qemu-xhci,p2=15,p3=15");
 
