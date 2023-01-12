@@ -174,7 +174,6 @@ if(OPTION_RUST)
   endif()
   else()
     message(WARNING "Disabling RUST, you might have reduced functionality.")
-    set(FEATURE_NETSIM FALSE)
 endif()
 
 if(GFXSTREAM_ONLY)
@@ -225,9 +224,7 @@ if(ANDROID_EXTRACT_SYMBOLS AND CROSSCOMPILE)
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 endif()
 
-if (NOT LINUX_AARCH64)
-  set(FEATURE_NETSIM TRUE CACHE BOOL "Include netsim the network simulator.")
-endif()
+set(FEATURE_NETSIM TRUE CACHE BOOL "Include netsim the network simulator.")
 
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)

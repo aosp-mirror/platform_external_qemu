@@ -129,10 +129,7 @@ else()
   add_subdirectory(perfetto-tracing-only-stub)
 endif()
 
-add_subdirectory(mynewt-nimble)
-if(WEBRTC OR BLUETOOTH_EMULATION)
-  add_subdirectory(abseil-cpp)
-endif()
+add_subdirectory(abseil-cpp)
 
 # libevent is needed for bluetooth, and webrtc in case of linux.
 if(LINUX_X86_64 OR LINUX_AARCH64)
@@ -191,12 +188,17 @@ if(LINUX_X86_64)
   target_compile_options(grpc_unsecure PRIVATE -DSO_REUSEPORT=15)
 endif()
 
-if(FEATURE_NETSIM AND OPTION_RUST)
+if(FEATURE_NETSIM)
   set(EXTERNAL_QEMU ${ANDROID_QEMU2_TOP_DIR})
-  if (DARWIN_AARCH64 AND NOT TARGET Rust::Rustc)
+  add_subdirectory(${AOSP_ROOT}/tools/netsim netsim)
+  add_subdirectory(mynewt-nimble)
+
+  if(DARWIN_AARCH64 AND NOT TARGET Rust::Rustc)
     message(STATUS "Cross compiling netsim to target Rosetta X86_64")
     include(ExternalProject)
-    set(NETSIM_CROSS_DIR ${ANDROID_CROSS_BUILD_DIRECTORY}/netsim_ext_cross/src/netsim_ext_cross-build/)
+    set(NETSIM_CROSS_DIR
+        ${ANDROID_CROSS_BUILD_DIRECTORY}/netsim_ext_cross/src/netsim_ext_cross-build/
+    )
     externalproject_add(
       netsim_ext_cross
       PREFIX ${ANDROID_CROSS_BUILD_DIRECTORY}/netsim_ext_cross
@@ -210,66 +212,74 @@ if(FEATURE_NETSIM AND OPTION_RUST)
       LOG_INSTALL TRUE
       INSTALL_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
       INSTALL_COMMAND "")
-
-      install(PROGRAMS ${NETSIM_CROSS_DIR}/netsim ${NETSIM_CROSS_DIR}/netsimd DESTINATION .)
-  else()
-    add_subdirectory(${AOSP_ROOT}/tools/netsim netsim)
+    install(PROGRAMS ${NETSIM_CROSS_DIR}/netsim ${NETSIM_CROSS_DIR}/netsimd
+            DESTINATION .)
   endif()
-  else()
-    message(STATUS "Netsim is not enabled.")
+else()
+  message(STATUS "Netsim is not enabled.")
 endif()
 
 # gfxstream, aemu-common modules
-set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+set(GFXSTREAM_REPO_ROOT
+    ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
 set(ENABLE_VKCEREAL_TESTS ON)
 function(discover_gfxstream_internal_targets result subdir)
-    if(CMAKE_VERSION VERSION_LESS "3.7.0")
-        message(
-            FATAL_ERROR
-            "This function cannot be used by older cmake versions (${CMAKE_VERSION}<3.7.0)"
-        )
-    endif()
-    message("gfxstream_internal_targets result=${result} subdir=${subdir}")
-    get_filename_component(abs_subdir ${subdir} ABSOLUTE)
-    set(GFXSTREAM_THIRD_PARTY_ROOT ${GFXSTREAM_REPO_ROOT})
-    cmake_path(APPEND GFXSTREAM_THIRD_PARTY_ROOT "third-party")
-    cmake_path(IS_PREFIX GFXSTREAM_THIRD_PARTY_ROOT ${abs_subdir} NORMALIZE IS_THIRD_PARTY)
-    if(IS_THIRD_PARTY)
-        return()
-    endif()
-    cmake_path(IS_PREFIX GFXSTREAM_REPO_ROOT ${abs_subdir} NORMALIZE IS_GFXSTREAM_SUBDIR)
-    cmake_path(IS_PREFIX AEMU_COMMON_REPO_ROOT ${abs_subdir} NORMALIZE IS_AEMU_COMMON_SUBDIR)
-    cmake_path(IS_PREFIX GFXSTREAM_PROTOCOLS_DIR ${abs_subdir} NORMALIZE IS_GFXSTREAM_PROTOCOLS_SUBDIR)
-    if(NOT IS_GFXSTREAM_SUBDIR AND NOT IS_AEMU_COMMON_SUBDIR AND NOT IS_GFXSTREAM_PROTOCOLS_SUBDIR)
-        return()
-    endif()
+  if(CMAKE_VERSION VERSION_LESS "3.7.0")
+    message(
+      FATAL_ERROR
+        "This function cannot be used by older cmake versions (${CMAKE_VERSION}<3.7.0)"
+    )
+  endif()
+  message("gfxstream_internal_targets result=${result} subdir=${subdir}")
+  get_filename_component(abs_subdir ${subdir} ABSOLUTE)
+  set(GFXSTREAM_THIRD_PARTY_ROOT ${GFXSTREAM_REPO_ROOT})
+  cmake_path(APPEND GFXSTREAM_THIRD_PARTY_ROOT "third-party")
+  cmake_path(IS_PREFIX GFXSTREAM_THIRD_PARTY_ROOT ${abs_subdir} NORMALIZE
+             IS_THIRD_PARTY)
+  if(IS_THIRD_PARTY)
+    return()
+  endif()
+  cmake_path(IS_PREFIX GFXSTREAM_REPO_ROOT ${abs_subdir} NORMALIZE
+             IS_GFXSTREAM_SUBDIR)
+  cmake_path(IS_PREFIX AEMU_COMMON_REPO_ROOT ${abs_subdir} NORMALIZE
+             IS_AEMU_COMMON_SUBDIR)
+  cmake_path(IS_PREFIX GFXSTREAM_PROTOCOLS_DIR ${abs_subdir} NORMALIZE
+             IS_GFXSTREAM_PROTOCOLS_SUBDIR)
+  if(NOT IS_GFXSTREAM_SUBDIR AND NOT IS_AEMU_COMMON_SUBDIR
+     AND NOT IS_GFXSTREAM_PROTOCOLS_SUBDIR)
+    return()
+  endif()
 
-    get_directory_property(subdirs DIRECTORY "${abs_subdir}" SUBDIRECTORIES)
-    foreach(subdir IN LISTS subdirs)
-        discover_gfxstream_internal_targets(${result} "${subdir}")
-    endforeach()
+  get_directory_property(subdirs DIRECTORY "${abs_subdir}" SUBDIRECTORIES)
+  foreach(subdir IN LISTS subdirs)
+    discover_gfxstream_internal_targets(${result} "${subdir}")
+  endforeach()
 
-    get_property(targets_in_dir DIRECTORY "${subdir}"
-                 PROPERTY BUILDSYSTEM_TARGETS)
-    set(${result} ${${result}} ${targets_in_dir} PARENT_SCOPE)
+  get_property(targets_in_dir DIRECTORY "${subdir}"
+               PROPERTY BUILDSYSTEM_TARGETS)
+  set(${result} ${${result}} ${targets_in_dir} PARENT_SCOPE)
 endfunction()
 set(GFXSTREAM_PREFIX "gfxstream")
 set(ANGLE_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../external/angle)
 add_library(gfxstream_egl_headers INTERFACE)
-target_include_directories(gfxstream_egl_headers INTERFACE ${ANGLE_REPO_ROOT}/include)
-add_subdirectory(${GFXSTREAM_REPO_ROOT}/gl-host-common ${GFXSTREAM_PREFIX}-gl-host-common)
+target_include_directories(gfxstream_egl_headers
+                           INTERFACE ${ANGLE_REPO_ROOT}/include)
+add_subdirectory(${GFXSTREAM_REPO_ROOT}/gl-host-common
+                 ${GFXSTREAM_PREFIX}-gl-host-common)
 # Include external/gfxstream-protocols project
-add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../gfxstream-protocols gfxstream-protocols)
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../gfxstream-protocols
+                 gfxstream-protocols)
 # Include hardware/google/aemu project
 set(AEMU_COMMON_BUILD_CONFIG "qemu-android" CACHE STRING "")
-set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+set(GFXSTREAM_REPO_ROOT
+    ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
 set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
-set(GFXSTREAM_PROTOCOLS_DIR ${ANDROID_QEMU2_TOP_DIR}/../../external/gfxstream-protocols)
-add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu aemu_common)
+set(GFXSTREAM_PROTOCOLS_DIR
+    ${ANDROID_QEMU2_TOP_DIR}/../../external/gfxstream-protocols)
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu
+                 aemu_common)
 if(ENABLE_VKCEREAL_TESTS)
-    set(AEMU_COMMON_TESTS
-      aemu-base_unittests
-      aemu-host-common_unittests)
+  set(AEMU_COMMON_TESTS aemu-base_unittests aemu-host-common_unittests)
   foreach(TST ${AEMU_COMMON_TESTS})
     android_target_properties(${TST} all "${RUNTIME_OS_PROPERTIES}")
   endforeach()
@@ -279,17 +289,17 @@ endif()
 include(${GFXSTREAM_REPO_ROOT}/cmake/SetSubdirectorProperties.cmake)
 get_directory_property(GFXSTREAM_SUBDIRS SUBDIRECTORIES)
 foreach(GFXSTREAM_SUBDIR IN LISTS GFXSTREAM_SUBDIRS)
-    discover_gfxstream_internal_targets(GFXSTREAM_INTERNAL_TARGETS ${GFXSTREAM_SUBDIR})
+  discover_gfxstream_internal_targets(GFXSTREAM_INTERNAL_TARGETS
+                                      ${GFXSTREAM_SUBDIR})
 endforeach()
-set(GFXSTREAM_DEPENDENCIES
-    ${GFXSTREAM_INTERNAL_TARGETS}
-    angle_common
-    angle_shader_translator
-    renderdoc)
-android_license(TARGET "${GFXSTREAM_DEPENDENCIES}"
-               LIBNAME gfxstream
-               URL "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master"
-               SPDX Apache-2.0
-               LOCAL "${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal/LICENSE"
-               LICENSE "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master/LICENSE")
-
+set(GFXSTREAM_DEPENDENCIES ${GFXSTREAM_INTERNAL_TARGETS} angle_common
+                           angle_shader_translator renderdoc)
+android_license(
+  TARGET "${GFXSTREAM_DEPENDENCIES}"
+  LIBNAME gfxstream
+  URL "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master"
+  SPDX Apache-2.0
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal/LICENSE"
+  LICENSE
+    "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master/LICENSE"
+)
