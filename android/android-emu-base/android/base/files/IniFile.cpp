@@ -493,7 +493,8 @@ static IniFile::DiskSize parseDiskSize(std::string_view valueStr,
 
     char* end;
     errno = 0;
-    IniFile::DiskSize result = strtoll(c_str(valueStr), &end, 10);
+    auto safe_str = c_str(valueStr);
+    IniFile::DiskSize result = strtoll(safe_str, &end, 10);
     bool malformed = (errno != 0);
     if (!malformed) {
         switch (*end) {
