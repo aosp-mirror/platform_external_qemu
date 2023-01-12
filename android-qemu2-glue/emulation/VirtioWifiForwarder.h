@@ -18,6 +18,7 @@
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/async/RecurrentTask.h"
 #include "aemu/base/sockets/ScopedSocket.h"
+#include "android-qemu2-glue/emulation/WifiService.h"
 #include "android/emulation/HostapdController.h"
 #include "android/network/GenericNetlinkMessage.h"
 #include "android/network/Ieee80211Frame.h"
@@ -30,34 +31,24 @@ typedef struct NICConf NICConf;
 namespace android {
 namespace qemu2 {
 
-class VirtioWifiForwarder {
+class VirtioWifiForwarder : public WifiService {
 public:
-    // The callback function will only provide the client with one and only one
-    // IEEE80211 frame.
-    // The client should return the number of bytes consumed.
-    // So if the client is busy or encouter a partial frame (It could happen
-    // when communicating with the remote VM, it should return zero.
-
-    using OnFrameAvailableCallback =
-            std::function<ssize_t(const uint8_t*, size_t)>;
-    // Used when the outbound frame has been transmitted.
-    // It is possible that the network device is busy therefore the client needs
-    // to handle retransmission.
-    using OnFrameSentCallback = std::function<void(::NetClientState*, ssize_t)>;
-    using CanReceive = std::function<int(::NetClientState*)>;
-    using OnLinkStatusChanged = std::function<void(::NetClientState*)>;
-    VirtioWifiForwarder(const uint8_t* bssid,
-                        OnFrameAvailableCallback cb,
-                        OnLinkStatusChanged onLinkStatusChanged,
-                        CanReceive canReceive,
-                        NICConf* conf,
-                        OnFrameSentCallback onFrameSentCallback = {});
+    VirtioWifiForwarder(
+            const uint8_t* bssid,
+            WifiService::OnReceiveCallback cb,
+            WifiService::OnLinkStatusChangedCallback onLinkStatusChanged,
+            WifiService::CanReceiveCallback canReceive,
+            NICConf* conf,
+            WifiService::OnSentCallback onFrameSentCallback = {},
+            uint16_t serverPort = 0,
+            uint16_t clientPort = 0);
     ~VirtioWifiForwarder();
-    bool init();
-    int forwardFrame(const android::base::IOVector& iov);
-    void stop();
-    NICState* getNic() { return mNic; }
-    android::network::MacAddress getStaMacAddr(const char* ssid);
+    bool init() override;
+    int send(const android::base::IOVector& iov) override;
+    int recv(android::base::IOVector& iov) override;
+    void stop() override;
+    NICState* getNic() override { return mNic; }
+    android::network::MacAddress getStaMacAddr(const char* ssid) override;
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
     static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
     static const uint8_t kWifiForwardVersion = 0x02;
@@ -86,12 +77,14 @@ private:
     std::unique_ptr<android::network::Ieee80211Frame> parseHwsimCmdFrame(
             const android::network::GenericNetlinkMessage& msg);
     android::network::MacAddress mBssID;
-    OnFrameAvailableCallback mOnFrameAvailableCallback;
-    OnLinkStatusChanged mOnLinkStatusChanged;
-    OnFrameSentCallback mOnFrameSentCallback;
-    CanReceive mCanReceive;
+    WifiService::OnReceiveCallback mOnFrameAvailableCallback;
+    WifiService::OnLinkStatusChangedCallback mOnLinkStatusChanged;
+    WifiService::OnSentCallback mOnFrameSentCallback;
+    WifiService::CanReceiveCallback mCanReceive;
     android::base::Looper* mLooper;
     android::base::ScopedSocket mVirtIOSock;
+    uint16_t mServerPort = 0;
+    uint16_t mClientPort = 0;
 
     NICState* mNic = nullptr;
     std::unique_ptr<android::network::WifiForwardPeer> mRemotePeer;
