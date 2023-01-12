@@ -13,7 +13,6 @@
 // limitations under the License.
 
 /* BLE */
-#include "transport/ble_hci_grpc.h"
 #include "nimble/ble.h"            // for BLE_...
 #include "nimble/ble_hci_trans.h"  // for ble_...
 #include "nimble/hci_common.h"     // for BLE_...
@@ -41,26 +40,27 @@
 #include <memory>              // for uniq...
 #include <mutex>               // for cond...
 #include <optional>            // for opti...
-#include <string>              // for string
-#include <thread>              // for slee...
-#include <type_traits>         // for remo...
-#include <utility>             // for move
-#include <vector>              // for vector
+#include <random>
+#include <string>       // for string
+#include <thread>       // for slee...
+#include <type_traits>  // for remo...
+#include <utility>      // for move
+#include <vector>       // for vector
 
-#include "android/emulation/control/EmulatorAdvertisement.h"     // for Emul...
-#include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emul...
-#include "android/grpc/utils/SimpleAsyncGrpc.h"                  // for Simp...
-#include "android/utils/debug.h"                                 // for dinfo
-#include "emulated_bluetooth.grpc.pb.h"                          // for Emul...
-#include "emulated_bluetooth_packets.pb.h"                       // for HCIP...
+#include "aemu/base/logging/CLog.h"
+#include "android/grpc/utils/SimpleAsyncGrpc.h"
+#include "backend/packet_streamer_client.h"
+#include "packet_streamer.grpc.pb.h"
 
-using namespace android::emulation::bluetooth;
-using namespace android::emulation::control;
 using namespace grpc;
+using netsim::packet::HCIPacket;
+using netsim::packet::PacketRequest;
+using netsim::packet::PacketResponse;
+using netsim::packet::PacketStreamer;
 
 #define DEBUG 0
 /* set  for very verbose debugging */
-#if DEBUG <= 1
+#if DEBUG < 1
 #define DD(...) (void)0
 #define DD_BUF(buf, len) (void)0
 #else
@@ -138,26 +138,32 @@ static struct ble_hci_grpc_state {
 
 static struct os_mbuf* ble_hci_trans_acl_buf_alloc(void);
 
-class HciTransport : public SimpleClientBidiStream<HCIPacket, HCIPacket> {
+class HciTransport
+    : public SimpleClientBidiStream<PacketResponse, PacketRequest> {
 public:
-    HciTransport(std::unique_ptr<ClientContext>&& ctx)
-        : mContext(std::move(ctx)) {}
+    HciTransport() {}
     virtual ~HciTransport() {}
 
-    void Read(const HCIPacket* received) override {
-        DD("Forwarding %s -> %d", mContext->peer().c_str(),
-           received->packet().size());
+    void Read(const PacketResponse* received) override {
+        // We should only get hci packets.
+        DD("Forwarding %s -> %s", mContext.peer().c_str(),
+           received->ShortDebugString().c_str());
 
-        switch (received->type()) {
-            case HCIPacket::PACKET_TYPE_EVENT: {
+        assert(received->has_hci_packet());
+        auto packet = received->hci_packet();
+
+        switch (packet.packet_type()) {
+            case HCIPacket::EVENT: {
                 int sr;
                 uint8_t* data =
                         ble_hci_trans_buf_alloc(BLE_HCI_TRANS_BUF_EVT_HI);
-                auto len = 1 + sizeof(struct ble_hci_ev) +
-                           received->packet().data()[1];
-                DD("%d = %d", len - 1, received->packet().size());
-                memcpy(data, received->packet().data(),
-                       received->packet().size());
+
+                // Packet length as per bluetooth spec.
+                auto len =
+                        sizeof(struct ble_hci_ev) + packet.packet().data()[1];
+                DD("Packet declared lenght, vs. actual length %d = %d", len,
+                   packet.packet().size());
+                memcpy(data, packet.packet().data(), packet.packet().size());
                 OS_ENTER_CRITICAL(sr);
                 int rc = ble_hci_grpc_rx_cmd_cb(data, ble_hci_grpc_rx_cmd_arg);
                 OS_EXIT_CRITICAL(sr);
@@ -167,14 +173,14 @@ public:
 
                 break;
             }
-            case HCIPacket::PACKET_TYPE_ACL: {
+            case HCIPacket::ACL: {
                 int sr;
                 struct os_mbuf* m = ble_hci_trans_acl_buf_alloc();
                 if (!m) {
                     break;
                 }
-                if (os_mbuf_append(m, received->packet().data(),
-                                   received->packet().size())) {
+                if (os_mbuf_append(m, packet.packet().data(),
+                                   packet.packet().size())) {
                     os_mbuf_free_chain(m);
                     break;
                 }
@@ -191,8 +197,8 @@ public:
 
     void OnDone(const grpc::Status& s) override {
         // TODO(jansene): well, hci is dead.. so... what now?
-        dfatal("Emulator %s is gone due to: %s", mContext->peer().c_str(),
-               s.error_message().c_str());
+        dwarning("Netsim %s is gone due to: %s", mContext.peer().c_str(),
+                 s.error_message().c_str());
     }
 
     // Blocks and waits until this connection has completed.
@@ -202,16 +208,16 @@ public:
         return std::move(mStatus);
     }
 
-    void cancel() { mContext->TryCancel(); }
+    void cancel() { mContext.TryCancel(); }
 
-    void startCall(EmulatedBluetoothService::Stub* stub) {
-        stub->async()->registerHCIDevice(mContext.get(), this);
+    void startCall(PacketStreamer::Stub* stub) {
+        stub->async()->StreamPackets(&mContext, this);
         StartCall();
         StartRead();
     };
 
 protected:
-    std::unique_ptr<grpc::ClientContext> mContext;
+    grpc::ClientContext mContext;
 
 private:
     std::mutex mAwaitMutex;
@@ -220,38 +226,37 @@ private:
     bool mDone = false;
 };
 
-std::unique_ptr<EmulatorGrpcClient> firstEmulatorOrNone() {
-    auto emulators = EmulatorAdvertisement({}).discoverRunningEmulators();
-    for (const auto& discovered : emulators) {
-        auto client = std::make_unique<EmulatorGrpcClient>(discovered);
-        if (client->hasOpenChannel()) {
-            return client;
-        }
-    }
-    return nullptr;
-}
-
 std::unique_ptr<HciTransport> sTransport;
-std::unique_ptr<EmulatedBluetoothService::Stub> sTransportStub;
-std::unique_ptr<EmulatorGrpcClient> sClient;
+std::unique_ptr<PacketStreamer::Stub> sTransportStub;
 
-void injectGrpcClient(std::unique_ptr<EmulatorGrpcClient> client) {
-    sClient = std::move(client);
+// Creates a random serial name
+std::string serial_name() {
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<std::mt19937::result_type> distletter(
+            'a', 'z');  // distribution in range [a, z]
+    std::string serial = "nimble-";
+    for (int i = 0; i < 6; i++) {
+        serial += (char)distletter(rng);
+    }
+    return serial;
 }
 
 int ble_hci_grpc_open_connection() {
-    using namespace std::chrono_literals;
+    auto channel = netsim::packet::CreateChannel("", "");
+    sTransportStub = PacketStreamer::NewStub(channel);
 
-    // This only happens if we didn't inject a client.
-    while (!sClient) {
-        dinfo("Waiting for first emulator..");
-        std::this_thread::sleep_for(1s);
-        sClient = firstEmulatorOrNone();
-    }
-
-    sTransportStub = sClient->stub<EmulatedBluetoothService>();
-    sTransport = std::make_unique<HciTransport>(sClient->newContext());
+    sTransport = std::make_unique<HciTransport>();
     sTransport->startCall(sTransportStub.get());
+
+    auto serial = serial_name();
+    PacketRequest initial_request;  // = std::make_unique<PacketRequest>();
+    initial_request.mutable_initial_info()->set_serial(serial_name());
+    initial_request.mutable_initial_info()->mutable_chip()->set_kind(
+            netsim::startup::Chip_ChipKind_BLUETOOTH);
+    sTransport->Write(initial_request);
+
+    dinfo("Registered as %s", serial.c_str());
     return 0;
 }
 
@@ -352,14 +357,16 @@ extern "C" void ble_hci_transport_init(void) {
  *                              A BLE_ERR_[...] error code on failure.
  */
 int ble_hci_trans_ll_evt_tx(uint8_t* cmd) {
-    HCIPacket toSend;
-    toSend.set_type(HCIPacket::PACKET_TYPE_EVENT);
+    PacketRequest toSend;  // = std::make_unique<PacketRequest>();
+    auto packet = toSend.mutable_hci_packet();
+    packet->set_packet_type(HCIPacket::EVENT);
     auto len = sizeof(struct ble_hci_ev) + cmd[1];
-    toSend.set_packet(cmd, len);
+    packet->set_packet(std::string((char*)cmd, len));
     ble_hci_trans_buf_free(cmd);
     if (!sTransport) {
         return BLE_ERR_HW_FAIL;
     }
+    // sTransport->Write(std::move(toSend));
     sTransport->Write(toSend);
     return 0;
 }
@@ -404,14 +411,20 @@ int ble_hci_trans_ll_acl_tx(struct os_mbuf* om) {
  *                              A BLE_ERR_[...] error code on failure.
  */
 int ble_hci_trans_hs_cmd_tx(uint8_t* cmd) {
-    HCIPacket toSend;
-    toSend.set_type(HCIPacket::PACKET_TYPE_HCI_COMMAND);
     auto len = sizeof(struct ble_hci_cmd) + cmd[2];
-    toSend.set_packet(cmd, len);
+    auto msg = std::string((char*)cmd, len);
+
+    PacketRequest toSend;
+    auto packet = toSend.mutable_hci_packet();
+    packet->set_packet_type(HCIPacket::COMMAND);
+    packet->set_packet(cmd, len);
+
     ble_hci_trans_buf_free(cmd);
     if (!sTransport) {
         return BLE_ERR_HW_FAIL;
     }
+
+    // *toSend.mutable_hci_packet() = packet;
     sTransport->Write(toSend);
     return 0;
 }
@@ -428,16 +441,17 @@ int ble_hci_trans_hs_acl_tx(struct os_mbuf* om) {
     int i;
     struct os_mbuf* m;
     uint8_t ch;
-    std::string packet;
+    std::string data;
 
-    HCIPacket toSend;
-    toSend.set_type(HCIPacket::PACKET_TYPE_ACL);
+    PacketRequest toSend;
+    auto packet = toSend.mutable_hci_packet();
+    packet->set_packet_type(HCIPacket::ACL);
 
     for (m = om; m; m = SLIST_NEXT(m, om_next)) {
-        packet.append((char*)m->om_data, m->om_len);
+        data.append((char*)m->om_data, m->om_len);
     }
 
-    toSend.set_packet(std::move(packet));
+    packet->set_packet(std::move(data));
     if (!sTransport) {
         return BLE_ERR_HW_FAIL;
     }
@@ -575,11 +589,12 @@ void ble_hci_trans_buf_free(uint8_t* buf) {
 int ble_hci_trans_reset(void) {
     /* Close the connection. */
     if (sTransport) {
-        dinfo("Cancelling the transport.");
-        sTransport->cancel();
+        dinfo("Cancelling the transport?");
+        // sTransport->cancel();
     }
 
-    dfatal("The stack is performing a reset.. this is not (yet?) "
-           "supported");
+    dwarning(
+            "The stack is performing a reset.. this is not (yet?) "
+            "supported");
     return 0;
 }

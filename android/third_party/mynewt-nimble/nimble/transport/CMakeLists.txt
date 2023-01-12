@@ -5,9 +5,9 @@ target_include_directories(_nimble_transport_socket PRIVATE socket/src
                            PUBLIC socket/include)
 target_compile_options(_nimble_transport_socket
                        PRIVATE -Wno-implicit-function-declaration)
-target_link_libraries(_nimble_transport_socket
-                      PRIVATE _nimble_os_abstraction_headers android-emu-base
-                      android-emu-base-headers)
+target_link_libraries(
+  _nimble_transport_socket PRIVATE _nimble_os_abstraction_headers
+                                   android-emu-base android-emu-base-headers)
 
 android_add_library(TARGET _nimble_transport_test LICENSE Apache-2.0
                     SRC test/src/ble_hci_nop_transport.c)
@@ -26,5 +26,12 @@ target_compile_options(_nimble_transport_grpc
                        PRIVATE -Wno-implicit-function-declaration)
 target_link_libraries(
   _nimble_transport_grpc
-  PRIVATE _nimble_os_abstraction_headers android-grpc-services
-          grpc-emulated-bluetooth grpc++ android-emu android-emu-base-headers)
+  PRIVATE _nimble_os_abstraction_headers
+          android-emu-base-headers
+          android-emu-base-logging
+          android-emu-grpc-utils
+          frontend-grpc-lib
+          grpc++
+          packet-streamer-client-lib
+          protobuf::libprotobuf
+          packet-streamer-client-grpc-lib)

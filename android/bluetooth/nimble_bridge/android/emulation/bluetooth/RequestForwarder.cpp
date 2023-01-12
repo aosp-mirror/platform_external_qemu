@@ -19,7 +19,6 @@
 #include "android/utils/debug.h"
 #include "host/ble_hs.h"
 #include "services/gap/ble_svc_gap.h"
-#include "transport/ble_hci_grpc.h"
 
 #undef min
 #undef max
@@ -52,8 +51,6 @@ RequestForwarder::RequestForwarder(const GattDevice& device)
 RequestForwarder* RequestForwarder::registerDevice(
         GattDevice device,
         std::unique_ptr<EmulatorGrpcClient> hci_transport) {
-    // Get the ble stack ready..
-    injectGrpcClient(std::move(hci_transport));
 
     // Initialize OS
     sysinit();
