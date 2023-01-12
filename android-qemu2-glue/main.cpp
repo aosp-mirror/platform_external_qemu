@@ -2119,7 +2119,7 @@ extern "C" int main(int argc, char** argv) {
         bool bShoudlConvertToQcow2 = false;
 
         if (feature_is_enabled(kFeature_DownloadableSnapshot) ||
-            opts->qcow2_for_userdata) {
+            opts->qcow2_for_userdata || hw->userdata_useQcow2) {
             bShoudlConvertToQcow2 = true;
         }
 
