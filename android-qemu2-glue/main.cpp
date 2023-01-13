@@ -2549,7 +2549,16 @@ extern "C" int main(int argc, char** argv) {
                feature_is_enabled(kFeature_BluetoothEmulation) ? "user"
                                                                : "guest");
         args.add("-chardev");
-        args.addFormat("rootcanal,id=rootcanal");
+        if (opts->packet_streamer_endpoint) {
+            dwarning(
+                    "Activating netsim, but ignoring: %s until b/265451720 is resolved"
+                    " reverting to auto discovery.",
+                    opts->packet_streamer_endpoint);
+            args.addFormat("netsim,id=rootcanal");
+        } else {
+            dwarning("Using *DEPRECATED* rootcanal bluetooth emulation.");
+            args.addFormat("rootcanal,id=rootcanal");
+        }
         args.add2("-device", "virtserialport,chardev=rootcanal,name=bluetooth");
     }
 

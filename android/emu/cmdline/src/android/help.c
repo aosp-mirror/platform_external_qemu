@@ -1365,10 +1365,8 @@ help_rootcanal_no_mesh(stralloc_t*  out)
 {
     PRINTF(
     "  Disables the disovery of running emulators. \n\n"
-    "  By default the emulator will discover all running emulators and\n"
-    "  establish a connection to the discovered emulated bluetooth chip creating\n"
-    "  a mesh of devices.\n\n"
-    "  Setting this flag will disable the auto discovery.\n\n"
+    "  ** DEPRECATED **\n\n"
+    "  This flag does nothing and will be removed in future versions of the emulator.\n\n"
     );
 }
 
@@ -1377,16 +1375,28 @@ help_forward_vhci(stralloc_t*  out)
 {
     PRINTF(
     "  Enables the gRPC service that gives access to /dev/vhci\n\n"
-    "  This allows you to provide your own virtual bluetooth chip.\n"
-    "  This will disable rootcanal and any service that relies on it.\n\n"
-    "  Some things to be aware of:\n"
-    "    - The system image must have support for /dev/vhci\n"
-    "    - You usually want to register when bluetooth is not active, otherwise there is the potential for failures"
-    "    - Only one client can be attached at the time.\n"
-    "    - Rootcanal will be restarted when a client disconnects, but might not behave as expected\n\n"
-    "  This is not officially supported, and is for internal testing only. \n\n"
+    "  \n\n"
+    "  ** DEPRECATED **\n\n"
+    "  Please implement the packet streamer interface as defined in:\n"
+    "  https://android.googlesource.com/platform/tools/netsim/+/refs/heads/master/src/proto/packet_streamer.proto\n"
+    "  and use the -packet-streamer-endpoint flag to provide uri to the service.\n\n"
     );
 }
+
+static void
+help_packet_streamer_endpoint(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the packet stream at the given endpoint\n\n"
+    "  A packet streamer provides the emulator with a set of emulated radio devices\n"
+    "  The address should follow the gRPC name resolution as explained in detail:\n"
+    "  here: https://grpc.github.io/grpc/cpp/md_doc_naming.html. \n\n"
+    "  NOTE: This is currently under active development (b/265451720). \n"
+    "  providing this parameter will currently enable the default packet streamer. \n\n"
+    );
+}
+
+
 
 
 static void

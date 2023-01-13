@@ -18,9 +18,9 @@ extern "C" {
 }
 #endif
 
+#include "aemu/base/logging/LogSeverity.h"
 #include "android-qemu2-glue/qemu-setup.h"
 #include "android/base/system/System.h"
-#include "aemu/base/logging/LogSeverity.h"
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -42,6 +42,16 @@ extern "C" {
 #include <utility>
 #include <vector>
 
+#include "aemu/base/CpuUsage.h"
+#include "aemu/base/Log.h"
+#include "aemu/base/Tracing.h"
+#include "aemu/base/process/Process.h"
+#include "aemu/base/Uuid.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/IniFile.h"
+#include "aemu/base/files/MemStream.h"
+#include "aemu/base/files/PathUtils.h"  // for pj
+#include "aemu/base/memory/ScopedPtr.h"
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/audio-capturer.h"
 #include "android-qemu2-glue/audio-output.h"
@@ -57,53 +67,44 @@ extern "C" {
 #include "android-qemu2-glue/emulation/virtio_vsock_transport.h"
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/net-android.h"
+#include "android-qemu2-glue/netsim/netsim.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/snapshot_compression.h"
 #include "android/android.h"
 #include "android/avd/info.h"
-#include "aemu/base/CpuUsage.h"
-#include "aemu/base/Log.h"
-#include "aemu/base/Tracing.h"
-#include "aemu/base/Uuid.h"
-#include "aemu/base/async/ThreadLooper.h"
-#include "aemu/base/files/IniFile.h"
-#include "aemu/base/files/MemStream.h"
-#include "aemu/base/files/PathUtils.h"  // for pj
-#include "aemu/base/memory/ScopedPtr.h"
 #include "android/bluetooth/rootcanal/root_canal_qemu.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/HangDetector.h"
-#include "host-common/crash-handler.h"
 #include "android/crashreport/detectors/CrashDetectors.h"
 #include "android/emulation/AudioCaptureEngine.h"
 #include "android/emulation/AudioOutputEngine.h"
 #include "android/emulation/ConfigDirs.h"
-#include "host-common/DmaMap.h"
 #include "android/emulation/QemuMiscPipe.h"
-#include "host-common/VmLock.h"
-#include "host-common/address_space_device.h"
-#include "host-common/address_space_device.hpp"
 #include "android/emulation/control/EmulatorAdvertisement.h"
 #include "android/emulation/control/EmulatorService.h"
 #include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/UiController.h"
 #include "android/emulation/control/adb/AdbService.h"
-#include "host-common/record_screen_agent.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/stats/EmulatorStats.h"
 #include "android/emulation/virtio_vsock_device.h"
-#include "host-common/feature_control.h"
-#include "android/console.h"
 #include "android/gpu_frame.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/Random.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
+#include "host-common/DmaMap.h"
+#include "host-common/VmLock.h"
+#include "host-common/address_space_device.h"
+#include "host-common/address_space_device.hpp"
+#include "host-common/crash-handler.h"
+#include "host-common/feature_control.h"
+#include "host-common/record_screen_agent.h"
 #include "snapshot_service.grpc.pb.h"
 
 #ifdef ANDROID_WEBRTC
@@ -141,6 +142,11 @@ using android::emulation::control::EmulatorAdvertisement;
 using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::EmulatorProperties;
 
+// Tansfrom a const char* to std::string returning empty "" for nullptr
+inline static std::string to_string(const char* str) {
+    return str ? std::string(str) : "";
+}
+
 extern "C" void ranchu_device_tree_setup(void* fdt) {
     /* fstab */
     qemu_fdt_add_subnode(fdt, "/firmware/android/fstab");
@@ -167,8 +173,8 @@ extern "C" void ranchu_device_tree_setup(void* fdt) {
         free(system_path);
     }
 
-    char* vendor_path =
-            avdInfo_getVendorImageDevicePathInGuest(getConsoleAgents()->settings->avdInfo());
+    char* vendor_path = avdInfo_getVendorImageDevicePathInGuest(
+            getConsoleAgents()->settings->avdInfo());
     if (vendor_path) {
         qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/vendor");
         qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor",
@@ -223,8 +229,7 @@ bool qemu_android_emulation_early_setup() {
     // Activate the virtual bluetooth chip.
     auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
     android::bluetooth::Rootcanal::Builder builder;
-    builder.withControllerProperties(
-                    opts->rootcanal_controller_properties_file)
+    builder.withControllerProperties(opts->rootcanal_controller_properties_file)
             .withCommandFile(opts->rootcanal_default_commands_file);
     builder.buildSingleton();
 #endif
@@ -271,6 +276,14 @@ bool qemu_android_emulation_early_setup() {
 
     android::emulation::AudioOutputEngine::set(
             new android::qemu::QemuAudioOutputEngine());
+
+    if (opts->packet_streamer_endpoint) {
+        std::string id =
+                "emulator/" + std::to_string(android::base::Process::me()->pid());
+        register_netsim(to_string(opts->packet_streamer_endpoint),
+                        to_string(opts->rootcanal_default_commands_file),
+                        to_string(opts->rootcanal_controller_properties_file), id);
+    }
     return true;
 }
 
@@ -315,9 +328,11 @@ int qemu_setup_grpc() {
         return grpcService->port();
 
     auto avdInfo = getConsoleAgents()->settings->avdInfo();
-    auto cfgIni = reinterpret_cast<const android::base::IniFile*>(avdInfo_getConfigIni(avdInfo));
+    auto cfgIni = reinterpret_cast<const android::base::IniFile*>(
+            avdInfo_getConfigIni(avdInfo));
     auto displayName =
-            cfgIni->getString("avd.ini.displayname", getConsoleAgents()->settings->hw()->avd_name);
+            cfgIni->getString("avd.ini.displayname",
+                              getConsoleAgents()->settings->hw()->avd_name);
 
     auto contentPath = avdInfo_getContentPath(avdInfo);
     EmulatorProperties props{
@@ -401,11 +416,11 @@ int qemu_setup_grpc() {
         props["grpc.token"] = token;
     }
     if (getConsoleAgents()->settings->android_cmdLineOptions()->grpc_use_jwt) {
-        auto jwkDir = android::base::pj({
-                android::ConfigDirs::getDiscoveryDirectory(),
-                std::to_string(
-                        android::base::System::get()->getCurrentProcessId()),
-                "jwks", android::base::Uuid::generate().toString()});
+        auto jwkDir = android::base::pj(
+                {android::ConfigDirs::getDiscoveryDirectory(),
+                 std::to_string(
+                         android::base::System::get()->getCurrentProcessId()),
+                 "jwks", android::base::Uuid::generate().toString()});
         auto jwkLoadedFile = android::base::pj(jwkDir, "active.jwk");
         if (path_mkdir_if_needed(jwkDir.c_str(), 0700) != 0) {
             dfatal("Failed to create jwk directory %s", jwkDir.c_str());
@@ -595,6 +610,7 @@ bool qemu_android_emulation_setup() {
     if (feature_is_enabled(kFeature_VirtioWifi)) {
         virtio_wifi_set_mac_prefix(android_serial_number_port);
     }
+
     return true;
 }
 
