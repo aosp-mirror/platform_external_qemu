@@ -809,7 +809,7 @@ static void enter_qemu_main_loop(int argc, char** argv) {
 #endif
 
     D("Starting QEMU main loop");
-    run_qemu_main(argc, (const char**)argv, [] {
+    int retval = run_qemu_main(argc, (const char**)argv, [] {
         skin_winsys_run_ui_update(
                 [](void*) {
                     // It is only safe to stop the OpenGL ES renderer after the
@@ -819,7 +819,12 @@ static void enter_qemu_main_loop(int argc, char** argv) {
                 },
                 nullptr, false);
     });
-    D("Done with QEMU main loop");
+    if (retval) {
+        dwarning("QEMU main loop exits abnormally with code %d", retval);
+        System::get()->waitAndKillSelf(10);
+    } else {
+        D("Done with QEMU main loop");
+    }
 
     if (android_init_error_occurred()) {
         skin_winsys_error_dialog(android_init_error_get_message(), "Error");
