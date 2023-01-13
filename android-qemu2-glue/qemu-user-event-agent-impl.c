@@ -130,14 +130,25 @@ static void user_event_pen(int dx,
     android_virtio_pen_event(dx, dy, ev, buttonsState, displayId);
 }
 
+// Scales v by a factor of 1/d. If the result is zero, returns 1 or -1 instead
+// to retain v's sign. d must be a positive integer.
+static int scale_with_retaining_sign(int v, int d) {
+    if (v == 0) return 0;
+    else if (v > 0 && v < d) return 1;
+    else if (v < 0 && v > -d) return -1;
+    else return v / d;
+}
+
 static void user_event_mouse_wheel(int dx, int dy, int displayId) {
     if (VERBOSE_CHECK(keys)) {
         dprint(">> MOUSE WHEEL [%d %d]", dx, dy);
     }
-    if (feature_is_enabled(kFeature_VirtioMouse) ||
-            feature_is_enabled(kFeature_VirtioTablet)) {
-        kbd_mouse_wheel_event(dx, dy);
+    if (!feature_is_enabled(kFeature_VirtioMouse) &&
+            !feature_is_enabled(kFeature_VirtioTablet)) {
+        return;
     }
+    kbd_mouse_wheel_event(
+        scale_with_retaining_sign(dx, 120), scale_with_retaining_sign(dy, 120));
 }
 
 static void user_event_rotary(int delta) {

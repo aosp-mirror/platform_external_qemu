@@ -3228,14 +3228,6 @@ bool EmulatorQtWindow::mouseInside() {
            widget_cursor_coords.y() >= 0 && widget_cursor_coords.y() < height();
 }
 
-// Scales v by a factor of 1/d. If the result is zero, returns 1 or -1 instead
-// to retain v's sign. d must be a positive integer.
-int scale_with_retaining_sign(int v, int d) {
-    if (v == 0) return 0;
-    else if (v > 0) return std::max({v / d, 1});
-    else return std::min({v / d, -1});
-}
-
 void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
     if (mIgnoreWheelEvent) {
         event->ignore();
@@ -3260,13 +3252,12 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
         }
 #if QT_VERSION >= 0x060000
         // For most mice, 1 wheel click = 15 degrees
-        handleMouseWheelEvent(scale_with_retaining_sign(event->angleDelta().y(), 15),
-                                Qt::Orientation::Vertical);
-        handleMouseWheelEvent(scale_with_retaining_sign(event->angleDelta().x(), 15),
-                                Qt::Orientation::Horizontal);
-#else
         handleMouseWheelEvent(
-                scale_with_retaining_sign(event->delta(), 120), event->orientation());
+            event->angleDelta().y() * 120 / 15, Qt::Orientation::Vertical);
+        handleMouseWheelEvent(
+            event->angleDelta().x() * 120 / 15, Qt::Orientation::Horizontal);
+#else
+        handleMouseWheelEvent(event->delta(), event->orientation());
 #endif  // QT_VERSION
     } else {
         if (mWheelScrollTimer.isActive()) {

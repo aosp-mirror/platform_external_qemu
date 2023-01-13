@@ -44,6 +44,13 @@ typedef struct QAndroidUserEventAgent {
                          int buttonsState,
                          int displayId);
     // Mouse wheel event.
+    // dx and dy are indicating how much the mouse wheel is rotated. Scaled so
+    // that 120 equals to 1 wheel click. (120 is chosen as a multiplier often
+    // used to represent wheel movements less than 1 wheel click. e.g.
+    // https://doc.qt.io/qt-5/qwheelevent.html#angleDelta) Positive delta value
+    // is assigned to dx when the top of wheel is moved to the left. Similarly
+    // positive delta value is assigned to dy when the top of wheel is moved
+    // away from the user.
     void (*sendMouseWheelEvent)(int dx, int dy, int displayId);
 
     // Rotary encoder events
