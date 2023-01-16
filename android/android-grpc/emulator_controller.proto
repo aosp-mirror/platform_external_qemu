@@ -94,6 +94,7 @@ service EmulatorController {
     // by touch events.
     rpc sendTouch(TouchEvent) returns (google.protobuf.Empty) {}
     rpc sendMouse(MouseEvent) returns (google.protobuf.Empty) {}
+    rpc injectWheel(stream WheelEvent) returns (google.protobuf.Empty) {}
 
     // Make a phone call.
     rpc sendPhone(PhoneCall) returns (PhoneResponse) {}
@@ -659,6 +660,22 @@ message MouseEvent {
     // The display device where the mouse event occurred.
     // Omitting or using the value 0 indicates the main display.
     int32 display = 4;
+}
+
+message WheelEvent {
+  // The value indicating how much the mouse wheel is rotated. Scaled so that
+  // 120 equals to 1 wheel click. (120 is chosen as a multiplier often used to
+  // represent wheel movements less than 1 wheel click. e.g.
+  // https://doc.qt.io/qt-5/qwheelevent.html#angleDelta) Positive delta value
+  // is assigned to dx when the top of wheel is moved to left. Similarly
+  // positive delta value is assigned to dy when the top of wheel is moved
+  // away from the user.
+  int32 dx = 1;
+  int32 dy = 2;
+
+  // The display device where the mouse event occurred.
+  // Omitting or using the value 0 indicates the main display.
+  int32 display = 3;
 }
 
 // KeyboardEvent objects describe a user interaction with the keyboard; each
