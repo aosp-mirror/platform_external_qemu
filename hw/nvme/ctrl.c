@@ -8097,6 +8097,13 @@ static bool nvme_init_pci(NvmeCtrl *n, PCIDevice *pci_dev, Error **errp)
         pci_config_set_vendor_id(pci_conf, PCI_VENDOR_ID_REDHAT);
         pci_config_set_device_id(pci_conf, PCI_DEVICE_ID_REDHAT_NVME);
     }
+    /*
+     * Override the vendor id.
+     * b/260904508#comment87
+     */
+    if (n->params.override_vendor_id != PCI_VENDOR_ID_REDHAT) {
+        pci_config_set_vendor_id(pci_conf, n->params.override_vendor_id);
+    }
 
     pci_config_set_class(pci_conf, PCI_CLASS_STORAGE_EXPRESS);
     nvme_add_pm_capability(pci_dev, 0x60);
@@ -8443,6 +8450,8 @@ static Property nvme_props[] = {
                       params.sriov_max_vq_per_vf, 0),
     DEFINE_PROP_BOOL("msix-exclusive-bar", NvmeCtrl, params.msix_exclusive_bar,
                      false),
+    DEFINE_PROP_UINT16("override_vendor_id", NvmeCtrl,
+                      params.override_vendor_id, PCI_VENDOR_ID_REDHAT),
     DEFINE_PROP_END_OF_LIST(),
 };
 
