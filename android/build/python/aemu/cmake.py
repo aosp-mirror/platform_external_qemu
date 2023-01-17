@@ -31,7 +31,7 @@ from aemu.tasks.crate_prepare import CratePrepareTask
 from aemu.tasks.distribution import DistributionTask
 from aemu.tasks.gen_entries import GenEntriesTestTask
 from aemu.tasks.integration_tests import IntegrationTestTask
-from aemu.tasks.unit_tests import AccelerationCheckTask, CTestTask
+from aemu.tasks.unit_tests import AccelerationCheckTask, CTestTask, CoverageReportTask
 from aemu.tasks.emugen_test import EmugenTestTask
 from aemu.tasks.kill_netsimd import KillNetsimdTask
 from aemu.tasks.fix_cargo import FixCargoTask
@@ -94,6 +94,7 @@ def get_tasks(args) -> List[BuildTask]:
             GenEntriesTestTask(args.aosp, args.out),
             # Enable the integration tests by default once they are stable enough
             IntegrationTestTask(args.aosp, args.out).enable(False),
+            CoverageReportTask(aosp=args.aosp, destination=args.out).enable(run_tests),
             DistributionTask(
                 aosp=args.aosp,
                 build_directory=args.out,

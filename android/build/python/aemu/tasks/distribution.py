@@ -14,6 +14,7 @@
 
 import logging
 import re
+import shutil
 import zipfile
 from pathlib import Path
 
@@ -100,6 +101,14 @@ class DistributionTask(BuildTask):
             return
 
         self.dist_dir.mkdir(exist_ok=True, parents=True)
+
+        src_cov_name = Path(self.build_dir) / "lcov"
+        if src_cov_name.is_file():
+            dist_cov_dir = self.dist_dir / "coverage"
+            dist_cov_dir.mkdir(exist_ok=True, parents=True)
+            dist_cov_name = dist_cov_dir / "lcov"
+            logging.info("Copying %s ==> %s", src_cov_name, dist_cov_name)
+            shutil.copy(src_cov_name, dist_cov_name)
 
         # Let's find the set of
         zip_set = self.zip_sets[self.data["config"]]

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import glob
 import logging
 import platform
 import shutil
@@ -18,6 +19,7 @@ import tempfile
 from pathlib import Path
 
 from aemu.process.command import Command, CommandFailedException
+from aemu.process.log_handler import LogHandler
 from aemu.tasks.build_task import BuildTask
 
 
@@ -111,4 +113,74 @@ class CTestTask(BuildTask):
                     test_log_file.absolute(), "r", encoding="utf-8", errors="ignore"
                 ) as log_file:
                     logging.critical("%s", log_file.read())
+                raise
+
+class CoverageReportTask(BuildTask):
+    """Generates the code coverage report. CTestTask needs to run prior to this.
+    """
+
+    def __init__(
+        self,
+        aosp: Path,
+        destination: Path,
+    ):
+        super().__init__()
+        self.aosp = Path(aosp)
+        self.destination = Path(destination)
+
+    def lcov_out(self, logline: str):
+        """Writes all output to lcov file
+
+        Args:
+            logline (str): Logline that is to be filtered.
+        """
+        logging.info("****josh: " + logline)
+
+    def do_run(self):
+        clang_version = "clang-r450784d"
+        clang_path = (
+                self.aosp
+                / "prebuilts"
+                / "clang"
+                / "host"
+                / f"{platform.system().lower()}-x86"
+                / clang_version
+                / "bin")
+        llvm_profdata = shutil.which(
+            cmd="llvm-profdata",
+            path=clang_path,
+        )
+        llvm_cov = shutil.which(
+            cmd="llvm-cov",
+            path=clang_path,
+        )
+        profdata_name = "qemu.profdata"
+        # Generate the coverage report if raw profile files were created after
+        # running the unittests.
+        wc = self.destination / "*.profraw"
+        profraws = glob.glob(str(wc))
+        if not profraws:
+            logging.info("No .profraw files present. Skipping coverage report.")
+        else:
+            logging.info("Found profraw files. Generating coverage report.")
+            try:
+                Command(
+                    [llvm_profdata, "merge", "-sparse"]
+                    + profraws
+                    + ["-o", profdata_name]
+                ).in_directory(self.destination).run()
+            except CommandFailedException:
+                logging.critical("llvm_profdata failed")
+                raise
+            try:
+                cov_objs = ["--object=" + i.replace(".profraw", "") for i in profraws]
+
+                with open(self.destination / "lcov", "w") as lcov_file:
+                    lcov_out = LogHandler(lambda s : lcov_file.write(s + "\n"))
+                    Command(
+                        [llvm_cov, "export", "--format", "lcov", "--instr-profile=" + profdata_name]
+                        + cov_objs
+                    ).in_directory(self.destination).with_log_handler(lcov_out).run()
+            except CommandFailedException:
+                logging.critical("llvm_cov failed")
                 raise
