@@ -366,7 +366,7 @@ void LocationPage::deleteSelectedRoutes() {
 void LocationPage::deleteRoute(RouteWidgetItem* item) {
     auto& routeElement = item->routeElement();
     std::string protobufName = routeElement.protoFilePath.toStdString();
-    std::string dirName = nullptr;
+    std::string dirName;
     bool haveDirName = android::base::PathUtils::split(protobufName.data(),
                                                        &dirName,
                                                        nullptr /* base name */);
