@@ -169,7 +169,7 @@ public:
         }
         MetricsReporter::get().reportOnExit(
             [&](android_studio::AndroidStudioEvent* event) {
-              LOG(VERBOSE) << "Send resizable metrics";
+              LOG(DEBUG) << "Send resizable metrics";
               android_studio::EmulatorResizableDisplay metrics;
               metrics.set_display_phone_count(mTypeCount[PRESET_SIZE_PHONE]);
               metrics.set_display_foldable_count(mTypeCount[PRESET_SIZE_UNFOLDED]);

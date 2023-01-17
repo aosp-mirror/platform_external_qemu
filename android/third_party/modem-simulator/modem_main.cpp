@@ -404,7 +404,7 @@ int stop_android_modem_simulator() {
                 cuttlefish::SharedFD::SocketLocalClient(s_host_server_port);
         std::string msg("STOP");
         if (monitor_sock->IsOpen()) {
-            LOG(VERBOSE) << "sending STOP to modem simulator host server";
+            LOG(DEBUG) << "sending STOP to modem simulator host server";
             monitor_sock->Write(msg.data(), msg.size());
             s_stop_requested = true;
             return 0;
@@ -491,7 +491,7 @@ void main_host_thread() {
     }
 
     auto monitor_socket = modem_host_servers[0];
-    LOG(VERBOSE) << "started modem simulator host server at port: "
+    LOG(DEBUG) << "started modem simulator host server at port: "
                  << s_host_server_port;
     while (true) {
         DD("looping at main host server at %d", s_host_server_port);
@@ -511,7 +511,7 @@ void main_host_thread() {
                 continue;
             }
             if (buf == "STOP") {  // Exit request from parent process
-                LOG(VERBOSE) << "received exit request from parent process";
+                LOG(DEBUG) << "received exit request from parent process";
                 s_stop_requested = true;
                 break;
             } else if (buf.compare(0, 3, "REM") ==

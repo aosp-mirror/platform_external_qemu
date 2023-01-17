@@ -148,8 +148,8 @@ GLuint MultiDisplayWidget::createShader(GLint shaderType,
         std::string infoLog(infoLogLength + 1, '\0');
         LOG(ERROR) << __func__ << ": TextureDraw shader compile failed";
         mGLES2->glGetShaderInfoLog(shader, infoLogLength, 0, &infoLog[0]);
-        LOG(VERBOSE) << "Info log: " << infoLog;
-        LOG(VERBOSE) << "Source: " << shaderText;
+        LOG(DEBUG) << "Info log: " << infoLog;
+        LOG(DEBUG) << "Source: " << shaderText;
         mGLES2->glDeleteShader(shader);
     }
 

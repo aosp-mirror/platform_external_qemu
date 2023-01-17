@@ -1158,7 +1158,7 @@ void ToolWindow::setClipboardCallbacks(const UiEmuAgent* agPtr) {
                 SLOT(onGuestClipboardChanged(QString)), Qt::QueuedConnection);
         agPtr->clipboard->registerGuestClipboardCallback(
                 [](void* context, const uint8_t* data, size_t size) {
-                    LOG(VERBOSE) << "Clipboard update, guest->host, value='"
+                    LOG(DEBUG) << "Clipboard update, guest->host, value='"
                         << std::string_view(reinterpret_cast<const char*>(data), size)
                         << "'";
 

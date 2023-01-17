@@ -520,7 +520,7 @@ public:
           string errorStr =
               StringFormat("Error: RegGetValueW failed %ld %s", result,
                            Win32Utils::getErrorString(result));
-          LOG(VERBOSE) << errorStr;
+          LOG(DEBUG) << errorStr;
           return errorStr;
         }
         ScopedRegKey hOsVersionKey(hkey);
@@ -533,7 +533,7 @@ public:
           string errorStr =
               StringFormat("Error: RegGetValueW failed %ld %s", result,
                            Win32Utils::getErrorString(result));
-          LOG(VERBOSE) << errorStr;
+          LOG(DEBUG) << errorStr;
           return errorStr;
         }
 
@@ -546,7 +546,7 @@ public:
           string errorStr =
               StringFormat("Error: RegGetValueW failed %ld %s", result,
                            Win32Utils::getErrorString(result));
-          LOG(VERBOSE) << errorStr;
+          LOG(DEBUG) << errorStr;
           return errorStr;
         }
         lastSuccessfulValue = osName.toString();
@@ -587,7 +587,7 @@ public:
             dict = _CFCopySystemVersionDictionary();
         }
         if (!dict) {
-             LOG(VERBOSE) << "Failed to get a version dictionary";
+             LOG(DEBUG) << "Failed to get a version dictionary";
              return "<Unknown>";
         }
 
@@ -599,21 +599,21 @@ public:
                     CFDictionaryGetValue(dict, _kCFSystemVersionProductVersionKey));
         if (!str) {
             CFRelease(dict);
-            LOG(VERBOSE) << "Failed to get a version string from a dictionary";
+            LOG(DEBUG) << "Failed to get a version string from a dictionary";
             return "<Unknown>";
         }
         int length = CFStringGetLength(str);
         if (!length) {
             CFRelease(str);
             CFRelease(dict);
-            LOG(VERBOSE) << "Failed to get a version string length";
+            LOG(DEBUG) << "Failed to get a version string length";
             return "<Unknown>";
         }
         std::string version(length, '\0');
         if (!CFStringGetCString(str, &version[0], version.size() + 1, CFStringGetSystemEncoding())) {
             CFRelease(str);
             CFRelease(dict);
-            LOG(VERBOSE) << "Failed to get a version string as C string";
+            LOG(DEBUG) << "Failed to get a version string as C string";
             return "<Unknown>";
         }
         CFRelease(str);
@@ -630,7 +630,7 @@ public:
         if (!versionNumFile) {
           string errorStr =
             "Error: Internal error: could not create a temporary file";
-          LOG(VERBOSE) << errorStr;
+          LOG(DEBUG) << errorStr;
           return errorStr;
         }
 
@@ -647,13 +647,13 @@ public:
 
         if (exitCode) {
           string errorStr = "Could not get host OS product version.";
-          LOG(VERBOSE) << errorStr;
+          LOG(DEBUG) << errorStr;
           return errorStr;
         }
 
         ScopedFd tempfileFd(open(tempPath.c_str(), O_RDONLY));
         if (!tempfileFd.valid()) {
-            LOG(VERBOSE) << "Could not open" << tempPath << " : "
+            LOG(DEBUG) << "Could not open" << tempPath << " : "
                          << strerror(errno);
             return "";
         }
@@ -664,7 +664,7 @@ public:
           string errorStr = StringFormat(
               "Error: Internal error: could not read temporary file '%s'",
               tempPath);
-          LOG(VERBOSE) << errorStr;
+          LOG(DEBUG) << errorStr;
           return errorStr;
         }
         //"lsb_release -d" output is "Description:      [os-product-version]"
@@ -1323,7 +1323,7 @@ public:
 #ifndef _WIN32
         std::lock_guard<std::mutex> lock(mMutex);
         for (auto pid : mWaitingPids) {
-            LOG(VERBOSE) << "Force killing pid=" << pid;
+            LOG(DEBUG) << "Force killing pid=" << pid;
             kill(pid, SIGKILL);
         }
 #endif
@@ -1595,7 +1595,7 @@ public:
 #endif  // !defined(__APPLE__)
 
         if (pid < 0) {
-            LOG(VERBOSE) << "Failed to fork for command " << cmd;
+            LOG(DEBUG) << "Failed to fork for command " << cmd;
             return false;
         }
 
@@ -1644,7 +1644,7 @@ public:
             }
             if (waitPid < 0) {
                 auto local_errno = errno;
-                LOG(VERBOSE) << "Error running command " << cmd
+                LOG(DEBUG) << "Error running command " << cmd
                     << ". waitpid failed with |"
                     << strerror(local_errno) << "|";
                 return false;
@@ -1667,7 +1667,7 @@ public:
             kill(pid, SIGKILL);
             waitpid(pid, nullptr, WNOHANG);
         }
-        LOG(VERBOSE) << "Timed out with running command " << cmd;
+        LOG(DEBUG) << "Timed out with running command " << cmd;
         return false;
     }
 
@@ -1683,7 +1683,7 @@ public:
         int outputFd = 0;
         if ((options & RunOptions::DumpOutputToFile) != RunOptions::Empty) {
             if (outputFile.empty()) {
-                LOG(VERBOSE) << "Can not redirect output to empty file!";
+                LOG(DEBUG) << "Can not redirect output to empty file!";
                 return -1;
             }
 
@@ -1694,7 +1694,7 @@ public:
                     0700);
             umask(old);
             if (outputFd < 0) {
-                LOG(VERBOSE) << "Failed to open file to redirect stdout/stderr";
+                LOG(DEBUG) << "Failed to open file to redirect stdout/stderr";
                 return -1;
             }
         }
@@ -1753,7 +1753,7 @@ public:
             const string& outputFile) {
         posix_spawnattr_t attr;
         if (posix_spawnattr_init(&attr)) {
-            LOG(VERBOSE) << "Failed to initialize spawnattr obj.";
+            LOG(DEBUG) << "Failed to initialize spawnattr obj.";
             return -1;
         }
         // Automatically destroy the successfully initialized attr.
@@ -1764,13 +1764,13 @@ public:
                 &attr, attrDeleter);
 
         if (posix_spawnattr_setflags(&attr, POSIX_SPAWN_CLOEXEC_DEFAULT)) {
-            LOG(VERBOSE) << "Failed to request CLOEXEC.";
+            LOG(DEBUG) << "Failed to request CLOEXEC.";
             return -1;
         }
 
         posix_spawn_file_actions_t fileActions;
         if (posix_spawn_file_actions_init(&fileActions)) {
-            LOG(VERBOSE) << "Failed to initialize fileactions obj.";
+            LOG(DEBUG) << "Failed to initialize fileactions obj.";
             return -1;
         }
         // Automatically destroy the successfully initialized fileActions.
@@ -1787,14 +1787,14 @@ public:
                     posix_spawn_file_actions_addopen(
                         &fileActions, 2, outputFile.c_str(),
                         O_WRONLY | O_CREAT | O_TRUNC, 0700)) {
-                LOG(VERBOSE) << "Failed to redirect child output to file "
+                LOG(DEBUG) << "Failed to redirect child output to file "
                     << outputFile;
                 return -1;
             }
         } else if ((options & RunOptions::ShowOutput) != RunOptions::Empty) {
             if (posix_spawn_file_actions_addinherit_np(&fileActions, 1) ||
                     posix_spawn_file_actions_addinherit_np(&fileActions, 2)) {
-                LOG(VERBOSE) << "Failed to request child stdout/stderr to be "
+                LOG(DEBUG) << "Failed to request child stdout/stderr to be "
                     "left intact";
                 return -1;
             }
@@ -1803,7 +1803,7 @@ public:
                         O_WRONLY, 0700) ||
                     posix_spawn_file_actions_addopen(&fileActions, 2, "/dev/null",
                         O_WRONLY, 0700)) {
-                LOG(VERBOSE) << "Failed to redirect child output to /dev/null";
+                LOG(DEBUG) << "Failed to redirect child output to /dev/null";
                 return -1;
             }
         }
@@ -1812,7 +1812,7 @@ public:
         // hand, closing it can confuse some programs.
         if (posix_spawn_file_actions_addopen(&fileActions, 0, "/dev/null",
                     O_RDONLY, 0700)) {
-            LOG(VERBOSE) << "Failed to redirect child stdin from /dev/null";
+            LOG(DEBUG) << "Failed to redirect child stdin from /dev/null";
             return -1;
         }
 
@@ -1822,7 +1822,7 @@ public:
         int pid;
         if (int error_code = posix_spawnp(&pid, command, &fileActions, &attr,
                     params.data(), environ)) {
-            LOG(VERBOSE) << "posix_spawnp failed: " << strerror(error_code);
+            LOG(DEBUG) << "posix_spawnp failed: " << strerror(error_code);
             return -1;
         }
         return pid;
@@ -2609,7 +2609,7 @@ System::FileSize System::getFilePageSizeForPath(std::string_view path) {
     } while (ret != 0 && errno == EINTR);
 
     if (ret != 0) {
-        LOG(VERBOSE) << "statvfs('" << path << "') failed: " << strerror(errno)
+        LOG(DEBUG) << "statvfs('" << path << "') failed: " << strerror(errno)
                      << "\n";
         pageSize = (System::FileSize)getpagesize();
     } else {
@@ -3221,7 +3221,7 @@ static bool getFileVersionInfoExFuncsAvailable = false;
 static bool canQueryFileVersion = false;
 
 bool initFileVersionInfoFuncs() {
-    LOG(VERBOSE) << "querying file version info API...";
+    LOG(DEBUG) << "querying file version info API...";
 
     if (canQueryFileVersion) return true;
 
@@ -3229,24 +3229,24 @@ bool initFileVersionInfoFuncs() {
 
     if (!kernelLib) return false;
 
-    LOG(VERBOSE) << "found kernelbase.dll";
+    LOG(DEBUG) << "found kernelbase.dll";
 
     getFileVersionInfoSizeW_func =
         (get_file_version_info_size_w_t)GetProcAddress(kernelLib, "GetFileVersionInfoSizeW");
 
     if (!getFileVersionInfoSizeW_func) {
-        LOG(VERBOSE) << "GetFileVersionInfoSizeW not found. Not on Windows 10?";
+        LOG(DEBUG) << "GetFileVersionInfoSizeW not found. Not on Windows 10?";
     } else {
-        LOG(VERBOSE) << "GetFileVersionInfoSizeW found. On Windows 10?";
+        LOG(DEBUG) << "GetFileVersionInfoSizeW found. On Windows 10?";
     }
 
     getFileVersionInfoW_func =
         (get_file_version_info_w_t)GetProcAddress(kernelLib, "GetFileVersionInfoW");
 
     if (!getFileVersionInfoW_func) {
-        LOG(VERBOSE) << "GetFileVersionInfoW not found. Not on Windows 10?";
+        LOG(DEBUG) << "GetFileVersionInfoW not found. Not on Windows 10?";
     } else {
-        LOG(VERBOSE) << "GetFileVersionInfoW found. On Windows 10?";
+        LOG(DEBUG) << "GetFileVersionInfoW found. On Windows 10?";
     }
 
     getFileVersionInfoFuncsAvailable =
@@ -3264,7 +3264,7 @@ bool initFileVersionInfoFuncs() {
 
     if (!getFileVersionInfoFuncsAvailable &&
         !getFileVersionInfoExFuncsAvailable) {
-        LOG(VERBOSE) << "Cannot get file version info funcs";
+        LOG(DEBUG) << "Cannot get file version info funcs";
         return false;
     }
 
@@ -3272,11 +3272,11 @@ bool initFileVersionInfoFuncs() {
         (ver_query_value_w_t)GetProcAddress(kernelLib, "VerQueryValueW");
 
     if (!verQueryValueW_func) {
-        LOG(VERBOSE) << "VerQueryValueW not found";
+        LOG(DEBUG) << "VerQueryValueW not found";
         return false;
     }
 
-    LOG(VERBOSE) << "VerQueryValueW found. Can query file versions";
+    LOG(DEBUG) << "VerQueryValueW found. Can query file versions";
     canQueryFileVersion = true;
 
     return true;
@@ -3302,7 +3302,7 @@ bool System::queryFileVersionInfo(std::string_view path,
     }
 
     if (length == 0) {
-        LOG(VERBOSE) << "queryFileVersionInfo: path not found: " << path.data();
+        LOG(DEBUG) << "queryFileVersionInfo: path not found: " << path.data();
         return false;
     }
 
@@ -3310,12 +3310,12 @@ bool System::queryFileVersionInfo(std::string_view path,
 
     if (getFileVersionInfoFuncsAvailable) {
         if (!getFileVersionInfoW_func(pathWide.c_str(), dummy, length, data.data())) {
-            LOG(VERBOSE) << "GetFileVersionInfoW failed";
+            LOG(DEBUG) << "GetFileVersionInfoW failed";
             return false;
         }
     } else if (getFileVersionInfoExFuncsAvailable) {
         if (!getFileVersionInfoExW_func(fileVerGetNeutral, pathWide.c_str(), dummy, length, data.data())) {
-            LOG(VERBOSE) << "GetFileVersionInfoExW failed";
+            LOG(DEBUG) << "GetFileVersionInfoExW failed";
             return false;
         }
     }
@@ -3328,7 +3328,7 @@ bool System::queryFileVersionInfo(std::string_view path,
             L"\\",
             reinterpret_cast<void**>(&fixedFileInfo),
             &fixedFileInfoLength)) {
-        LOG(VERBOSE) << "VerQueryValueW failed";
+        LOG(DEBUG) << "VerQueryValueW failed";
         return false;
     }
 

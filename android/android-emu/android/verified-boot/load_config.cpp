@@ -239,7 +239,7 @@ Status getParameters(const std::string& textproto,
 Status getParametersFromFile(const char* pathname,
                              std::vector<std::string>* params) {
     if (!pathname) {
-        LOG(VERBOSE) << "Verified boot params were not found.";
+        LOG(DEBUG) << "Verified boot params were not found.";
         return Status::CouldNotOpenFile;
     }
 

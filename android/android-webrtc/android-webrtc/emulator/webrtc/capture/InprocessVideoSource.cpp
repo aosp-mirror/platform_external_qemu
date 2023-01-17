@@ -63,7 +63,7 @@ InprocessVideoSource::InprocessVideoSource(int displayId)
     : mDisplayId(displayId) {}
 
 void InprocessVideoSource::captureFrames() {
-    LOG(VERBOSE) << "Started capturing frame for display: " << mDisplayId;
+    LOG(DEBUG) << "Started capturing frame for display: " << mDisplayId;
 
     std::unique_ptr<EventWaiter> frameEvent;
     std::unique_ptr<
@@ -81,7 +81,7 @@ void InprocessVideoSource::captureFrames() {
                 });
     } else {
         // slow mode, you are likely using older api..
-        LOG(VERBOSE) << "Reverting to slow callbacks";
+        LOG(DEBUG) << "Reverting to slow callbacks";
         frameEvent = std::make_unique<EventWaiter>(
                 [](Callback frameAvailable, void* opaque) {
                     gpu_register_shared_memory_callback(frameAvailable, opaque);
@@ -106,7 +106,7 @@ void InprocessVideoSource::captureFrames() {
     // TODO(b/151387266): Use new query that uses a shared state for
     // multidisplay
     if (!multiDisplayQueryWorks) {
-        LOG(VERBOSE) << "Using the default width and height from display 0.";
+        LOG(DEBUG) << "Using the default width and height from display 0.";
         width = getConsoleAgents()->settings->hw()->hw_lcd_width;
         height = getConsoleAgents()->settings->hw()->hw_lcd_height;
     }
@@ -177,11 +177,11 @@ void InprocessVideoSource::captureFrames() {
             }
         }
     }
-    LOG(VERBOSE) << "Completed streaming frame for display: " << mDisplayId;
+    LOG(DEBUG) << "Completed streaming frame for display: " << mDisplayId;
 }
 
 void InprocessVideoSource::cancel() {
-    LOG(VERBOSE) << "Cancelling video stream for display: " << mDisplayId;
+    LOG(DEBUG) << "Cancelling video stream for display: " << mDisplayId;
     mCaptureVideo = false;
 }
 

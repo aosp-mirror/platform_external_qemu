@@ -30,7 +30,7 @@ const uint8_t MultiDisplayPipe::MAX_DISPLAYS = 10;
 MultiDisplayPipe::MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
   : AndroidAsyncMessagePipe(service, std::move(pipeArgs)),
     mService(static_cast<Service*>(service)) {
-    LOG(VERBOSE) << "MultiDisplayPipe created " << this;
+    LOG(DEBUG) << "MultiDisplayPipe created " << this;
     if (sMultiDisplayPipeInstance) {
         derror("MultiDisplayPipe has already been created.");
     }
@@ -38,7 +38,7 @@ MultiDisplayPipe::MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pip
 }
 
 MultiDisplayPipe::~MultiDisplayPipe() {
-    LOG(VERBOSE) << "MultiDisplayPipe deleted self " << this;
+    LOG(DEBUG) << "MultiDisplayPipe deleted self " << this;
     sMultiDisplayPipeInstance = NULL;
 }
 
@@ -46,7 +46,7 @@ void MultiDisplayPipe::onMessage(const std::vector<uint8_t>& data) {
     uint8_t cmd = data[0];
     switch (cmd) {
         case QUERY: {
-            LOG(VERBOSE) << "MultiDisplayPipe recevied QUERY";
+            LOG(DEBUG) << "MultiDisplayPipe recevied QUERY";
             uint32_t w, h, dpi, flag, id;
             int32_t startId = -1;
             const auto ins = MultiDisplay::getInstance();
@@ -59,7 +59,7 @@ void MultiDisplayPipe::onMessage(const std::vector<uint8_t>& data) {
                 }
                 std::vector<uint8_t> buf;
                 fillData(buf, id, w, h, dpi, flag, true);
-                LOG(VERBOSE) << "MultiDisplayPipe send add id " << id << " width " << w
+                LOG(DEBUG) << "MultiDisplayPipe send add id " << id << " width " << w
                                 << " height " << h << " dpi " << dpi << " flag " << flag;
                 send(std::move(buf));
                 startId = id;
@@ -69,7 +69,7 @@ void MultiDisplayPipe::onMessage(const std::vector<uint8_t>& data) {
         case BIND: {
             uint32_t id = *(uint32_t*)&(data[1]);
             uint32_t cb = *(uint32_t*)&(data[5]);
-            LOG(VERBOSE) << "MultiDisplayPipe bind display " << id << " cb " << cb;
+            LOG(DEBUG) << "MultiDisplayPipe bind display " << id << " cb " << cb;
             const auto ins = MultiDisplay::getInstance();
             if (ins) {
                 ins->setDisplayColorBuffer(id, cb);

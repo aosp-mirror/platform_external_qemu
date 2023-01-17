@@ -1117,9 +1117,9 @@ void VideoPlayerImpl::loadVideoFileWithData(
     mDataset.reset();
     mEventProvider.reset();
     mVideoMetadataProvider.reset();
-    LOG(VERBOSE) << "Load dataset!";
+    LOG(DEBUG) << "Load dataset!";
     mDataset = Mp4Dataset::create(mVideoFile, datasetInfo);
-    LOG(VERBOSE) << "Find decode info";
+    LOG(DEBUG) << "Find decode info";
     if (datasetInfo.has_location() || datasetInfo.has_accelerometer() ||
         datasetInfo.has_gyroscope() || datasetInfo.has_magnetic_field()) {
         LOG(INFO) << "Dataset info not empty! Creating event provider!";
@@ -1159,7 +1159,7 @@ bool VideoPlayerImpl::isRealTimeFormat(AVFormatContext* s) {
 int VideoPlayerImpl::play() {
 
     if (mDataset.get() == nullptr) {
-        LOG(VERBOSE) << "Dataset not loaded. Create dataset instance now.";
+        LOG(DEBUG) << "Dataset not loaded. Create dataset instance now.";
         loadVideoFileWithData(::offworld::DatasetInfo::default_instance());
 
         if (mDataset.get() == nullptr) {

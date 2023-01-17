@@ -179,7 +179,7 @@ void ClipboardPipe::setGuestClipboardContents(const uint8_t* buf, size_t len) {
         return;  // who cares.
     }
 
-    LOG(VERBOSE) << "Clipboard update, host->guest, value='"
+    LOG(DEBUG) << "Clipboard update, host->guest, value='"
         << std::string_view(reinterpret_cast<const char*>(buf), len)
         << "'";
 

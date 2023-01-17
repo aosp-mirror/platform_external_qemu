@@ -83,7 +83,7 @@ void InvocationMetrics::reportMetric(const std::string& name,
                 metric.sndBytes.fillMetricsEvent(
                         grpc->mutable_snd_bytes_estimate());
                 metric.duration.fillMetricsEvent(grpc->mutable_duration());
-                LOG(VERBOSE) << "Sending metric [" << name
+                LOG(DEBUG) << "Sending metric [" << name
                              << "]: " << grpc->ShortDebugString();
             });
 }

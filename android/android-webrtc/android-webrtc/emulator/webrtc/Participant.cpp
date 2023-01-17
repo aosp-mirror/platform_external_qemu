@@ -225,7 +225,7 @@ void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
         case DataChannelLabel::adb: {
             auto adbInterface = android::emulation::AdbInterface::getGlobal();
             if (!adbInterface) {
-                LOG(VERBOSE) << "find no adb interface";
+                LOG(DEBUG) << "find no adb interface";
                 return;
             }
             const char* data =

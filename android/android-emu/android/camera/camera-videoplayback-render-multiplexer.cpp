@@ -230,12 +230,12 @@ int64_t RenderMultiplexer::render() {
                 switchRenderer(mVideoRenderer.get());
                 mPlaysData = maybe_next_request->load().has_dataset_info();
                 if (mPlaysData) {
-                    LOG(VERBOSE) << "Load video with dataset info";
+                    LOG(DEBUG) << "Load video with dataset info";
                     loadVideoWithData(maybe_next_request->load().video_data(),
                                       maybe_next_request->load().dataset_info(),
                                       async_id);
                 } else {
-                    LOG(VERBOSE) << "Load video without dataset info";
+                    LOG(DEBUG) << "Load video without dataset info";
                     loadVideo(maybe_next_request->load().video_data(),
                               async_id);
                 }

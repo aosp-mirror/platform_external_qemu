@@ -25,8 +25,8 @@ using android::base::VerboseLogFormatter;
 extern "C" uint64_t android_verbose = 0;
 extern "C" LogSeverity android_log_severity = EMULATOR_LOG_INFO;
 void base_enable_verbose_logs() {
-    android::base::setMinLogLevel(EMULATOR_LOG_VERBOSE);
-    android_log_severity = EMULATOR_LOG_VERBOSE;
+    android::base::setMinLogLevel(EMULATOR_LOG_DEBUG);
+    android_log_severity = EMULATOR_LOG_DEBUG;
 }
 
 void base_disable_verbose_logs() {

@@ -66,7 +66,7 @@ void FilePusher::pushNextItem() {
     if (mPushQueue.empty()) {
         return;
     }
-    LOG(VERBOSE) << "Pushing next item... [Queue length: " << mPushQueue.size()
+    LOG(DEBUG) << "Pushing next item... [Queue length: " << mPushQueue.size()
                  << "]";
     mCurrentItem = mPushQueue.front();
     mPushQueue.pop_front();

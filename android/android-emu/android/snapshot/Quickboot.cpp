@@ -497,7 +497,7 @@ bool Quickboot::saveAvdToSystemImageSnapshotsLocalDir() {
         return false;
     }
 
-    LOG(VERBOSE) << "Succesfully saved avd to " << destDir;
+    LOG(DEBUG) << "Succesfully saved avd to " << destDir;
 
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - startTime);

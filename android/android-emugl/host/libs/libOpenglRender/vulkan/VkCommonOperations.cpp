@@ -191,7 +191,7 @@ static bool extensionsSupported(
     std::vector<bool> foundExts(wantedExtNames.size(), false);
 
     for (uint32_t i = 0; i < currentProps.size(); ++i) {
-        LOG(VERBOSE) << "has extension: " << currentProps[i].extensionName;
+        LOG(DEBUG) << "has extension: " << currentProps[i].extensionName;
         for (size_t j = 0; j < wantedExtNames.size(); ++j) {
             if (!strcmp(wantedExtNames[j], currentProps[i].extensionName)) {
                 foundExts[j] = true;
@@ -201,10 +201,10 @@ static bool extensionsSupported(
 
     for (size_t i = 0; i < wantedExtNames.size(); ++i) {
         bool found = foundExts[i];
-        LOG(VERBOSE) << "needed extension: " << wantedExtNames[i]
+        LOG(DEBUG) << "needed extension: " << wantedExtNames[i]
                      << " found: " << found;
         if (!found) {
-            LOG(VERBOSE) << wantedExtNames[i] << " not found, bailing.";
+            LOG(DEBUG) << wantedExtNames[i] << " not found, bailing.";
             return false;
         }
     }
@@ -267,7 +267,7 @@ static bool getImageFormatExternalMemorySupportInfo(
             outImageFormatProps,
         };
 
-        LOG(VERBOSE) << "Supported (not externally): "
+        LOG(DEBUG) << "Supported (not externally): "
             << string_VkFormat(info->format) << " "
             << string_VkImageType(info->type) << " "
             << string_VkImageTiling(info->tiling) << " "
@@ -353,7 +353,7 @@ static bool getImageFormatExternalMemorySupportInfo(
     info->extFormatProps = outExternalProps;
     info->imageFormatProps2.pNext = &info->extFormatProps;
 
-    LOG(VERBOSE) << "Supported: "
+    LOG(DEBUG) << "Supported: "
                  << string_VkFormat(info->format) << " "
                  << string_VkImageType(info->type) << " "
                  << string_VkImageTiling(info->tiling) << " "
@@ -519,18 +519,18 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     // Can we know instance version early?
     if (gvk->vkEnumerateInstanceVersion) {
-        LOG(VERBOSE) << "global loader has vkEnumerateInstanceVersion.";
+        LOG(DEBUG) << "global loader has vkEnumerateInstanceVersion.";
         uint32_t instanceVersion;
         VkResult res = gvk->vkEnumerateInstanceVersion(&instanceVersion);
         if (VK_SUCCESS == res) {
             if (instanceVersion >= VK_MAKE_VERSION(1, 1, 0)) {
-                LOG(VERBOSE) << "global loader has vkEnumerateInstanceVersion returning >= 1.1.";
+                LOG(DEBUG) << "global loader has vkEnumerateInstanceVersion returning >= 1.1.";
                 appInfo.apiVersion = VK_MAKE_VERSION(1, 1, 0);
             }
         }
     }
 
-    LOG(VERBOSE) << "Creating instance, asking for version "
+    LOG(DEBUG) << "Creating instance, asking for version "
                  << VK_VERSION_MAJOR(appInfo.apiVersion) << "."
                  << VK_VERSION_MINOR(appInfo.apiVersion) << "."
                  << VK_VERSION_PATCH(appInfo.apiVersion) << " ...";
@@ -565,7 +565,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
         if (appInfo.apiVersion < VK_MAKE_VERSION(1, 1, 0) &&
             instanceVersion >= VK_MAKE_VERSION(1, 1, 0)) {
-            LOG(VERBOSE) << "Found out that we can create a higher version instance.";
+            LOG(DEBUG) << "Found out that we can create a higher version instance.";
             appInfo.apiVersion = VK_MAKE_VERSION(1, 1, 0);
 
             gvk->vkDestroyInstance(sVkEmulation->instance, nullptr);
@@ -580,7 +580,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             init_vulkan_dispatch_from_instance(
                 vk, sVkEmulation->instance, sVkEmulation->ivk);
 
-            LOG(VERBOSE) << "Created Vulkan 1.1 instance on second try.";
+            LOG(DEBUG) << "Created Vulkan 1.1 instance on second try.";
 
             if (!vulkan_dispatch_check_instance_VK_VERSION_1_1(ivk)) {
                 fprintf(stderr, "%s: Warning: Vulkan 1.1 APIs missing from instance (2nd try)\n", __func__);
@@ -612,7 +612,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             LOG(ERROR) << "Cannot find vkGetMTLTextureMVK";
             return sVkEmulation;
         }
-        LOG(VERBOSE) << "Instance supports VK_MVK_moltenvk.";
+        LOG(DEBUG) << "Instance supports VK_MVK_moltenvk.";
     }
 
     uint32_t physdevCount = 0;
@@ -622,10 +622,10 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
     ivk->vkEnumeratePhysicalDevices(sVkEmulation->instance, &physdevCount,
                                    physdevs.data());
 
-    LOG(VERBOSE) << "Found " << physdevCount << " Vulkan physical devices.";
+    LOG(DEBUG) << "Found " << physdevCount << " Vulkan physical devices.";
 
     if (physdevCount == 0) {
-        LOG(VERBOSE) << "No physical devices available.";
+        LOG(DEBUG) << "No physical devices available.";
         return sVkEmulation;
     }
 
@@ -635,7 +635,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         ivk->vkGetPhysicalDeviceProperties(physdevs[i],
                                            &deviceInfos[i].physdevProps);
 
-        LOG(VERBOSE) << "Considering Vulkan physical device " << i << ": "
+        LOG(DEBUG) << "Considering Vulkan physical device " << i << ": "
                      << deviceInfos[i].physdevProps.deviceName;
 
         // It's easier to figure out the staging buffer along with
@@ -703,12 +703,12 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
             if (hasGraphicsQueueFamily) {
                 deviceInfos[i].graphicsQueueFamilyIndices.push_back(j);
-                LOG(VERBOSE) << "Graphics queue family index: " << j;
+                LOG(DEBUG) << "Graphics queue family index: " << j;
             }
 
             if (hasComputeQueueFamily) {
                 deviceInfos[i].computeQueueFamilyIndices.push_back(j);
-                LOG(VERBOSE) << "Compute queue family index: " << j;
+                LOG(DEBUG) << "Compute queue family index: " << j;
             }
         }
     }
@@ -784,21 +784,21 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
     }
 
     if (!sVkEmulation->deviceInfo.hasGraphicsQueueFamily) {
-        LOG(VERBOSE) << "No Vulkan devices with graphics queues found.";
+        LOG(DEBUG) << "No Vulkan devices with graphics queues found.";
         return sVkEmulation;
     }
 
     auto deviceVersion = sVkEmulation->deviceInfo.physdevProps.apiVersion;
 
-    LOG(VERBOSE) << "Vulkan device found: "
+    LOG(DEBUG) << "Vulkan device found: "
                  << sVkEmulation->deviceInfo.physdevProps.deviceName;
-    LOG(VERBOSE) << "Version: "
+    LOG(DEBUG) << "Version: "
                  << VK_VERSION_MAJOR(deviceVersion) << "." << VK_VERSION_MINOR(deviceVersion) << "." << VK_VERSION_PATCH(deviceVersion);
-    LOG(VERBOSE) << "Has graphics queue? "
+    LOG(DEBUG) << "Has graphics queue? "
                  << sVkEmulation->deviceInfo.hasGraphicsQueueFamily;
-    LOG(VERBOSE) << "Has external memory support? "
+    LOG(DEBUG) << "Has external memory support? "
                  << sVkEmulation->deviceInfo.supportsExternalMemory;
-    LOG(VERBOSE) << "Has compute queue? "
+    LOG(DEBUG) << "Has compute queue? "
                  << sVkEmulation->deviceInfo.hasComputeQueueFamily;
 
     float priority = 1.0f;
@@ -885,7 +885,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         }
     }
 
-    LOG(VERBOSE) << "Vulkan logical device created and extension functions obtained.\n";
+    LOG(DEBUG) << "Vulkan logical device created and extension functions obtained.\n";
 
     dvk->vkGetDeviceQueue(
             sVkEmulation->device,
@@ -895,7 +895,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
     sVkEmulation->queueFamilyIndex =
             sVkEmulation->deviceInfo.graphicsQueueFamilyIndices[0];
 
-    LOG(VERBOSE) << "Vulkan device queue obtained.";
+    LOG(DEBUG) << "Vulkan device queue obtained.";
 
     VkCommandPoolCreateInfo poolCi = {
         VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0,
@@ -1000,7 +1000,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         return sVkEmulation;
     }
 
-    LOG(VERBOSE) << "Vulkan global emulation state successfully initialized.";
+    LOG(DEBUG) << "Vulkan global emulation state successfully initialized.";
     sVkEmulation->live = true;
 
     return sVkEmulation;
@@ -1008,11 +1008,11 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
 void setGlInteropSupported(bool supported) {
     if (!sVkEmulation) {
-        LOG(VERBOSE) << "Not setting vk/gl interop support, Vulkan not enabled";
+        LOG(DEBUG) << "Not setting vk/gl interop support, Vulkan not enabled";
         return;
     }
 
-    LOG(VERBOSE) << "Setting gl interop support for Vk to: " << supported;
+    LOG(DEBUG) << "Setting gl interop support for Vk to: " << supported;
     sVkEmulation->deviceInfo.glInteropSupported = supported;
 }
 
@@ -1020,7 +1020,7 @@ void setUseDeferredCommands(VkEmulation* emu, bool useDeferredCommands) {
     if (!emu) return;
     if (!emu->live) return;
 
-    LOG(VERBOSE) << "Using deferred Vulkan commands: " << useDeferredCommands;
+    LOG(DEBUG) << "Using deferred Vulkan commands: " << useDeferredCommands;
     emu->useDeferredCommands = useDeferredCommands;
 }
 
@@ -1028,7 +1028,7 @@ void setUseCreateResourcesWithRequirements(VkEmulation* emu, bool useCreateResou
     if (!emu) return;
     if (!emu->live) return;
 
-    LOG(VERBOSE) << "Using deferred Vulkan commands: " << useCreateResourcesWithRequirements;
+    LOG(DEBUG) << "Using deferred Vulkan commands: " << useCreateResourcesWithRequirements;
     emu->useCreateResourcesWithRequirements = useCreateResourcesWithRequirements;
 }
 
@@ -1037,7 +1037,7 @@ void setEnableAstcLdrEmulation(VkEmulation* emu, bool enableAstcLdrEmulation) {
     if (!emu) return;
     if (!emu->live) return;
 
-    LOG(VERBOSE) << "Enable ASTC LDR emulation: " << enableAstcLdrEmulation;
+    LOG(DEBUG) << "Enable ASTC LDR emulation: " << enableAstcLdrEmulation;
     emu->enableAstcLdrEmulation = enableAstcLdrEmulation;
 }
 
@@ -1092,7 +1092,7 @@ bool allocExternalMemory(VulkanDispatch* vk,
                 sVkEmulation->device, &allocInfo, nullptr, &info->memory);
 
         if (allocRes != VK_SUCCESS) {
-            LOG(VERBOSE) << "allocExternalMemory: failed in vkAllocateMemory: "
+            LOG(DEBUG) << "allocExternalMemory: failed in vkAllocateMemory: "
                          << allocRes;
             break;
         }
@@ -1104,7 +1104,7 @@ bool allocExternalMemory(VulkanDispatch* vk,
                     vk->vkMapMemory(sVkEmulation->device, info->memory, 0,
                                     info->actualSize, 0, &info->mappedPtr);
             if (mapRes != VK_SUCCESS) {
-                LOG(VERBOSE) << "allocExternalMemory: failed in vkMapMemory: "
+                LOG(DEBUG) << "allocExternalMemory: failed in vkMapMemory: "
                              << mapRes;
                 break;
             }
@@ -1131,14 +1131,14 @@ bool allocExternalMemory(VulkanDispatch* vk,
         } else {
             allocationAttempts.push_back(info->memory);
 
-            LOG(VERBOSE) << "allocExternalMemory: attempt #"
+            LOG(DEBUG) << "allocExternalMemory: attempt #"
                          << allocationAttempts.size()
                          << " failed; deviceAlignment: "
                          << deviceAlignment.valueOr(0)
                          << " mappedPtrPageOffset: " << mappedPtrPageOffset;
 
             if (allocationAttempts.size() >= kMaxAllocationAttempts) {
-                LOG(VERBOSE) << "allocExternalMemory: unable to allocate"
+                LOG(DEBUG) << "allocExternalMemory: unable to allocate"
                              << " memory with CPU mapped ptr aligned to page";
                 break;
             }
@@ -1179,7 +1179,7 @@ bool allocExternalMemory(VulkanDispatch* vk,
 #endif
 
     if (exportRes != VK_SUCCESS) {
-        LOG(VERBOSE) << "allocExternalMemory: Failed to get external memory "
+        LOG(DEBUG) << "allocExternalMemory: Failed to get external memory "
                         "native handle: "
                      << exportRes;
         return false;
@@ -1545,7 +1545,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     VkResult createRes = vk->vkCreateImage(sVkEmulation->device, &imageCi,
                                            nullptr, &res.image);
     if (createRes != VK_SUCCESS) {
-        LOG(VERBOSE) << "Failed to create Vulkan image for ColorBuffer "
+        LOG(DEBUG) << "Failed to create Vulkan image for ColorBuffer "
                      << colorBufferHandle;
         return false;
     }
@@ -1569,7 +1569,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
         res.memory.typeIndex = lastGoodTypeIndex(res.memReqs.memoryTypeBits);
     }
 
-    LOG(VERBOSE) << "ColorBuffer " << colorBufferHandle
+    LOG(DEBUG) << "ColorBuffer " << colorBufferHandle
                  << ", allocation size and type index: " << res.memory.size
                  << ", " << res.memory.typeIndex
                  << ", allocated memory property: "
@@ -1585,7 +1585,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
             vk, &res.memory, true /*actuallyExternal*/, deviceAlignment);
 
     if (!allocRes) {
-        LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
+        LOG(DEBUG) << "Failed to allocate ColorBuffer with Vulkan backing.";
         return false;
     }
 
@@ -2124,7 +2124,7 @@ int32_t mapGpaToBufferHandle(uint32_t bufferHandle,
     memoryInfoPtr->sizeToPage = ((rawSize + kPageSize - 1) >> kPageBits)
                                 << kPageBits;
 
-    LOG(VERBOSE) << "mapGpaToColorBuffer: hva = " << memoryInfoPtr->mappedPtr
+    LOG(DEBUG) << "mapGpaToColorBuffer: hva = " << memoryInfoPtr->mappedPtr
                  << ", pageAlignedHva = " << memoryInfoPtr->pageAlignedHva
                  << " -> [ " << memoryInfoPtr->gpa << ", "
                  << memoryInfoPtr->gpa + memoryInfoPtr->sizeToPage << " ]";
@@ -2221,7 +2221,7 @@ bool setupVkBuffer(uint32_t bufferHandle,
                                             nullptr, &res.buffer);
 
     if (createRes != VK_SUCCESS) {
-        LOG(VERBOSE) << "Failed to create Vulkan Buffer for Buffer "
+        LOG(DEBUG) << "Failed to create Vulkan Buffer for Buffer "
                      << bufferHandle;
         return false;
     }
@@ -2245,7 +2245,7 @@ bool setupVkBuffer(uint32_t bufferHandle,
         res.memory.typeIndex = lastGoodTypeIndex(res.memReqs.memoryTypeBits);
     }
 
-    LOG(VERBOSE) << "Buffer " << bufferHandle
+    LOG(DEBUG) << "Buffer " << bufferHandle
                  << "allocation size and type index: " << res.memory.size
                  << ", " << res.memory.typeIndex
                  << ", allocated memory property: "
@@ -2261,7 +2261,7 @@ bool setupVkBuffer(uint32_t bufferHandle,
             vk, &res.memory, true /* actuallyExternal */, deviceAlignment);
 
     if (!allocRes) {
-        LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
+        LOG(DEBUG) << "Failed to allocate ColorBuffer with Vulkan backing.";
     }
 
     res.memory.pageOffset =

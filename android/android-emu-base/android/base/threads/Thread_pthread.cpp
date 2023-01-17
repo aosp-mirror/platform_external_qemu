@@ -140,7 +140,7 @@ void* Thread::thread_main(void* arg) {
         if ((self->mFlags & ThreadFlags::Detach) != ThreadFlags::NoFlags) {
             if (pthread_detach(pthread_self())) {
                 // This only means a slow memory leak, so use VERBOSE.
-                LOG(VERBOSE) << "Failed to set thread to detach mode";
+                LOG(DEBUG) << "Failed to set thread to detach mode";
             }
         }
 

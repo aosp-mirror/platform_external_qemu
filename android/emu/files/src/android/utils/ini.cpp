@@ -66,7 +66,7 @@ auto iniFile_saveToFileClean(CIniFile* f, const char* filepath) -> int {
 auto iniFile_getEntry(CIniFile* f, int index, char** key, char** value) -> int {
     BaseIniFile* ini = asBaseIniFile(f);
     if (index >= ini->size()) {
-        LOG(VERBOSE) << "Index " << index
+        LOG(DEBUG) << "Index " << index
                      << "exceeds the number of ini file entries "
                      << ini->size();
         return -1;

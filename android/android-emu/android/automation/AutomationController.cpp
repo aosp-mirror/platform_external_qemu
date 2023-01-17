@@ -619,7 +619,7 @@ StartResult AutomationControllerImpl::startRecording(
         return Err(StartError::InternalError);
     }
 
-    LOG(VERBOSE) << "Starting record to " << path;
+    LOG(DEBUG) << "Starting record to " << path;
     std::unique_ptr<StdioStream> recordingStream(new StdioStream(
             fsopen(path.c_str(), "wb", FileShare::Write), StdioStream::kOwner));
 
@@ -693,7 +693,7 @@ StartResult AutomationControllerImpl::startPlayback(const char* filename) {
 
     // NOTE: The class state is intentionally not modified until after the file
     // header has been parsed.
-    LOG(VERBOSE) << "Starting playback of " << path;
+    LOG(DEBUG) << "Starting playback of " << path;
     std::unique_ptr<StdioStream> playbackStream(new StdioStream(
             fsopen(path.c_str(), "rb", FileShare::Read), StdioStream::kOwner));
     if (!playbackStream->get()) {
@@ -1001,7 +1001,7 @@ void AutomationControllerImpl::addMetadataToHeader(DurationNs durationNs) {
                             StdioStream::kOwner));
     const std::string tmpPath = mFilePath + "_tmp";
 
-    LOG(VERBOSE) << "Copy to " << tmpPath;
+    LOG(DEBUG) << "Copy to " << tmpPath;
     std::unique_ptr<StdioStream> modifiedStream(
             new StdioStream(fsopen(tmpPath.c_str(), "wb", FileShare::Write),
                             StdioStream::kOwner));
@@ -1040,7 +1040,7 @@ void AutomationControllerImpl::setMacroName(std::string_view macroName,
                             StdioStream::kOwner));
     const std::string tmpPath = mFilePath + "_tmp";
 
-    LOG(VERBOSE) << "Copy to " << tmpPath;
+    LOG(DEBUG) << "Copy to " << tmpPath;
     std::unique_ptr<StdioStream> modifiedStream(
             new StdioStream(fsopen(tmpPath.c_str(), "wb", FileShare::Write),
                             StdioStream::kOwner));

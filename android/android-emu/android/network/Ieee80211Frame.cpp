@@ -111,7 +111,7 @@ std::unique_ptr<Ieee80211Frame> Ieee80211Frame::buildFromEthernet(
         encapLen = ETH_ALEN;
         skippedBytes -= sizeof(ethertype);
     } else {
-        LOG(VERBOSE) << "Unexpected ether type: " << ethertype;
+        LOG(DEBUG) << "Unexpected ether type: " << ethertype;
         return nullptr;
     }
 
@@ -362,13 +362,13 @@ std::string Ieee80211Frame::toStr() {
 bool Ieee80211Frame::isValid() const {
     bool isValid = true;
     if (size() < IEEE80211_HDRLEN) {
-        LOG(VERBOSE) << "Frame length is less than " << IEEE80211_HDRLEN;
+        LOG(DEBUG) << "Frame length is less than " << IEEE80211_HDRLEN;
         isValid = false;
     }
     if (isData() && !isProtected() && !isDataNull()) {
         isValid = validEtherType(getEtherType());
         if (!isValid) {
-            LOG(VERBOSE) << "Data frame has invalid ether type "
+            LOG(DEBUG) << "Data frame has invalid ether type "
                          << getEtherType();
         }
     }
@@ -708,7 +708,7 @@ const IOVector Ieee80211Frame::toEthernet() {
     IOVector ret;
     uint16_t ethertype = getEtherType();
     if (!validEtherType(ethertype)) {
-        LOG(VERBOSE) << "Unexpected ether type: " << ethertype
+        LOG(DEBUG) << "Unexpected ether type: " << ethertype
                      << ". Dump frame: " << toStr().c_str();
         return ret;
     }
