@@ -61,6 +61,7 @@ set(android-qemu2-glue_src
     qemu-setup-dns-servers.cpp
     qemu-setup.cpp
     qemu-rootcanal-agent-impl.cpp
+    netsim/qemu-netsim-agent-impl.cpp
     qemu-telephony-agent-impl.c
     qemu-user-event-agent-impl.c
     qemu-virtual-scene-agent-impl.cpp
@@ -87,8 +88,16 @@ if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
 if(BLUETOOTH_EMULATION)
-  target_link_libraries(libqemu2-glue PRIVATE grpc-emulated-bluetooth
-                                              libbt-rootcanal-qemu)
+  target_link_libraries(
+    libqemu2-glue
+    PRIVATE grpc-emulated-bluetooth
+            frontend-grpc-lib
+            grpc++
+            packet-streamer-client-lib
+            protobuf::libprotobuf
+            libbt-rootcanal
+            packet-streamer-client-grpc-lib
+            libbt-rootcanal-qemu)
 endif()
 
 target_link_libraries(
@@ -121,8 +130,14 @@ android_add_test(TARGET libqemu2-glue_unittests
                  SRC tests/VirtioGpuTimelines_unittest.cpp)
 
 target_link_libraries(
-  libqemu2-glue_unittests PRIVATE libqemu2-glue qemu-host-common-headers android-emu-base android-emu-base-headers
-                                  gmock gtest gmock_main)
+  libqemu2-glue_unittests
+  PRIVATE libqemu2-glue
+          qemu-host-common-headers
+          android-emu-base
+          android-emu-base-headers
+          gmock
+          gtest
+          gmock_main)
 
 target_include_directories(
   libqemu2-glue_unittests
