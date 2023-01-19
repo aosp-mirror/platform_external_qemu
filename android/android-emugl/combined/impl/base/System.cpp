@@ -62,6 +62,10 @@ void sleepUs(uint64_t us) {
     return System::get()->sleepUs(us);
 }
 
+void sleepToUs(uint64_t us) {
+    return System::get()->sleepToUs(us);
+}
+
 CpuTime cpuTime() {
     return System::cpuTime();
 }
