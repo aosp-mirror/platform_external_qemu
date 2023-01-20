@@ -758,6 +758,7 @@ void VirtualSensorsPage::updateModelFromAccelWidget(
 
     const glm::vec3 currentPosition =
             getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_POSITION);
+
     if (!vecNearEqual(position, currentPosition)) {
         setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode,
                                    {position.x, position.y, position.z});
@@ -765,6 +766,8 @@ void VirtualSensorsPage::updateModelFromAccelWidget(
 
     const glm::vec3 currentRotationDegrees =
             getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_ROTATION);
+    const glm::vec3 currentPositionUncalib =
+            getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_ROTATION_UNCALIBRATED);
     if (!vecNearEqual(rotationDegrees, currentRotationDegrees)) {
         setPhysicalParameterTarget(
                 PHYSICAL_PARAMETER_ROTATION, mode,

@@ -427,6 +427,8 @@ message SensorValue {
         RGBC_LIGHT = 15;
         // WIRST_TILT (16) is skipped; clients should use get/setPhysicalModel()
         // instead.
+        // Measures acceleration force and provides bias data.
+        ACCELERATION_UNCALIBRATED = 17;
     }
 
     // Type of sensor
