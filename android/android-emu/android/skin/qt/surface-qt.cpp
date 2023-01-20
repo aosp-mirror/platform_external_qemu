@@ -239,6 +239,12 @@ extern void skin_surface_get_scaled_rect(SkinSurface *surface, const SkinRect *f
     int original_w = surface->bitmap->size().width();
     int original_h = surface->bitmap->size().height();
 
+    if (w == original_w && h == original_h) {
+        to->pos = from->pos;
+        to->size = from->size;
+        return;
+    }
+
     to->pos.x = from->pos.x * w / original_w;
     to->pos.y = from->pos.y * h / original_h;
 
