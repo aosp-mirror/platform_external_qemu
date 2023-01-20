@@ -26,14 +26,15 @@ class EmulatorDistributionNotFoundException(Exception):
 class IntegrationTestTask(BuildTask):
     """Runs the e2e integration tests."""
 
-    def __init__(self, aosp: Path, destination: Path):
+    def __init__(self, aosp: Path, build_directory: Path, distribution_directory: Path):
         super().__init__()
         self.aosp = Path(aosp)
-        self.destination = Path(destination)
+        self.build_directory = Path(build_directory)
+        self.logdir = Path(distribution_directory or build_directory) / "testlogs"
 
     def do_run(self):
-        emulator_dir = self.destination / "distribution" / "emulator"
-        if shutil.which(emulator_dir / "emulator", path=emulator_dir) is None:
+        emulator_dir = self.build_directory / "distribution" / "emulator"
+        if shutil.which("emulator", path=emulator_dir) is None:
             raise EmulatorDistributionNotFoundException(
                 f"No emulator found in {emulator_dir}, did you run ninja install?"
             )
@@ -53,6 +54,8 @@ class IntegrationTestTask(BuildTask):
                 "--emulator",
                 emulator_dir / "emulator",
                 "--session_dir",
-                self.destination / "session",
+                self.build_directory / "session",
+                "--logdir",
+                self.logdir,
             ]
         ).run()

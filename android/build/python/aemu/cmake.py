@@ -93,7 +93,7 @@ def get_tasks(args) -> List[BuildTask]:
             EmugenTestTask(args.aosp, args.out).enable(run_tests),
             GenEntriesTestTask(args.aosp, args.out),
             # Enable the integration tests by default once they are stable enough
-            IntegrationTestTask(args.aosp, args.out).enable(False),
+            IntegrationTestTask(args.aosp, args.out, args.dist).enable(False),
             CoverageReportTask(aosp=args.aosp, destination=args.out).enable(run_tests),
             DistributionTask(
                 aosp=args.aosp,
