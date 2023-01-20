@@ -105,7 +105,8 @@ for h in HANDLE_TYPES:
             HANDLE_INFO[h] = \
                 HandleInfo(
                     "VkQueue",
-                    "vkGetDeviceQueue", None)
+                    ["vkGetDeviceQueue", "vkGetDeviceQueue2"],
+                    None)
         if h == "VkPipeline":
             HANDLE_INFO[h] = \
                 HandleInfo(

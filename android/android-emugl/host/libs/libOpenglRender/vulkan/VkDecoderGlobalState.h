@@ -206,6 +206,12 @@ public:
         uint32_t queueIndex,
         VkQueue* pQueue);
 
+    void on_vkGetDeviceQueue2(
+        android::base::BumpPool* pool,
+        VkDevice device,
+        const VkDeviceQueueInfo2* pQueueInfo,
+        VkQueue* pQueue);
+
     void on_vkDestroyDevice(
         android::base::BumpPool* pool,
         VkDevice device,

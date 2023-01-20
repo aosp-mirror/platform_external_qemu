@@ -611,6 +611,8 @@ custom_decodes = {
     "vkGetDeviceQueue" : emit_global_state_wrapped_decoding,
     "vkDestroyDevice" : emit_global_state_wrapped_decoding,
 
+    "vkGetDeviceQueue2" : emit_global_state_wrapped_decoding,
+
     "vkBindImageMemory" : emit_global_state_wrapped_decoding,
     "vkCreateImage" : emit_global_state_wrapped_decoding,
     "vkCreateImageView" : emit_global_state_wrapped_decoding,

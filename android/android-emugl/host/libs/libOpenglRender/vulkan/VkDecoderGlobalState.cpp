@@ -1414,6 +1414,24 @@ public:
         *pQueue = (VkQueue)queueInfo->boxed;
     }
 
+    void on_vkGetDeviceQueue2(
+            android::base::BumpPool* pool,
+            VkDevice boxed_device,
+            const VkDeviceQueueInfo2* pQueueInfo,
+            VkQueue* pQueue) {
+        // Protected memory is not supported on emulators. So we should
+        // not return any queue if a client requests a protected device
+        // queue.
+        if (pQueueInfo->flags & VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT) {
+            *pQueue = VK_NULL_HANDLE;
+            LOG(ERROR) << "Cannot get protected Vulkan device queue.";
+            return;
+        }
+        uint32_t queueFamilyIndex = pQueueInfo->queueFamilyIndex;
+        uint32_t queueIndex = pQueueInfo->queueIndex;
+        on_vkGetDeviceQueue(pool, boxed_device, queueFamilyIndex, queueIndex, pQueue);
+    }
+
     void destroyDeviceLocked(VkDevice device, const VkAllocationCallbacks* pAllocator) {
         auto it = mDeviceInfo.find(device);
         if (it == mDeviceInfo.end()) return;
@@ -7249,6 +7267,14 @@ void VkDecoderGlobalState::on_vkGetDeviceQueue(
     uint32_t queueIndex,
     VkQueue* pQueue) {
     mImpl->on_vkGetDeviceQueue(pool, device, queueFamilyIndex, queueIndex, pQueue);
+}
+
+void VkDecoderGlobalState::on_vkGetDeviceQueue2(
+    android::base::BumpPool* pool,
+    VkDevice device,
+    const VkDeviceQueueInfo2* pQueueInfo,
+        VkQueue* pQueue) {
+    mImpl->on_vkGetDeviceQueue2(pool, device, pQueueInfo, pQueue);
 }
 
 void VkDecoderGlobalState::on_vkDestroyDevice(
