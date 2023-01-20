@@ -17,6 +17,11 @@ if (NOT CORROSION_NATIVE_TOOLING)
     include(CorrosionGenerator)
 endif()
 
+if (OPTION_CCACHE MATCHES ".*sccache.*")
+   set(_CORROSION_RUSTC_WRAPPER "${OPTION_CCACHE}" CACHE INTERNAL "Path to sccache")
+   message(STATUS "Using sccache: ${_CORROSION_RUSTC_WRAPPER}")
+endif()
+
 if (CORROSION_VERBOSE_OUTPUT)
     set(_CORROSION_VERBOSE_OUTPUT_FLAG --verbose)
 endif()
@@ -259,6 +264,7 @@ function(_add_cargo_build)
                     ${build_env_variable_genex} ${rustflags_genex_test}
                     ${cargo_target_linker} ${corrosion_cc_rs_flags}
                     ${cargo_library_path} CORROSION_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+                    RUSTC_WRAPPER="${_CORROSION_RUSTC_WRAPPER}"
                     CARGO_BUILD_RUSTC="${_CORROSION_RUSTC}" "${_CORROSION_CARGO}" test
                     ${cargo_target_option}
                     ${features_args} ${all_features_arg}
@@ -279,6 +285,7 @@ function(_add_cargo_build)
                     "${build_env_variable_genex}" "${rustflags_genex_test}"
                     "${cargo_target_linker}" "${corrosion_cc_rs_flags}"
                     "${cargo_library_path}" "CORROSION_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+                    "RUSTC_WRAPPER=${_CORROSION_RUSTC_WRAPPER}"
                     "CARGO_BUILD_RUSTC=${_CORROSION_RUSTC}" "${_CORROSION_CARGO}" test
                     "${cargo_target_option}"
                     "${features_args}" "${all_features_arg}"
@@ -311,6 +318,7 @@ function(_add_cargo_build)
             ${cargo_target_linker}
             ${corrosion_cc_rs_flags}
             ${cargo_library_path}
+            RUSTC_WRAPPER="${_CORROSION_RUSTC_WRAPPER}"
             CORROSION_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
             CARGO_BUILD_RUSTC="${_CORROSION_RUSTC}"
             "${_CORROSION_CARGO}"
