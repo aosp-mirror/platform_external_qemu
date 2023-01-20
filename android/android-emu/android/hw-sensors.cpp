@@ -936,6 +936,10 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_ACCELERATION].enabled = true;
     }
 
+    if (getConsoleAgents()->settings->hw()->hw_accelerometer_uncalibrated) {
+        h->sensors[ANDROID_SENSOR_ACCELERATION_UNCALIBRATED].enabled = true;
+    }
+
     if (getConsoleAgents()->settings->hw()->hw_gyroscope) {
         h->sensors[ANDROID_SENSOR_GYROSCOPE].enabled = true;
     }

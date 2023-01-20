@@ -123,6 +123,7 @@ typedef enum{
     SENSOR_(HEART_RATE, "heart-rate", HeartRate, float, "heart-rate:%g") \
     SENSOR_(RGBC_LIGHT, "rgbc-light", RgbcLight, vec4, "rgbc-light:%g:%g:%g:%g") \
     SENSOR_(WRIST_TILT, "wrist-tilt", WristTilt, float, "wrist-tilt:%g") \
+    SENSOR_(ACCELERATION_UNCALIBRATED,"acceleration-uncalibrated",AccelerometerUncalibrated,vec3,"acceleration-uncalibrated:%g:%g:%g") \
 // clang-format on
 typedef enum {
 #define  SENSOR_(x,y,z,v,w)  ANDROID_SENSOR_##x,
@@ -170,6 +171,7 @@ typedef enum{
     PHYSICAL_PARAMETER_(HEART_RATE, "heart-rate", HeartRate, float) \
     PHYSICAL_PARAMETER_(RGBC_LIGHT, "rgbc-light", RgbcLight, vec4) \
     PHYSICAL_PARAMETER_(WRIST_TILT, "wrist-tilt", WristTilt, float) \
+    PHYSICAL_PARAMETER_(ROTATION_UNCALIBRATED, "rotation-uncalibrated", AccelerometerUncalibrated, vec3) \
 // clang-format on
 typedef enum {
 #define PHYSICAL_PARAMETER_(x,y,z,w)  PHYSICAL_PARAMETER_##x,
