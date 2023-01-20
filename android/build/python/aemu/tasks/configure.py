@@ -141,12 +141,6 @@ class ConfigureTask(BuildTask):
             return Path(cache)
 
         host = platform.system().lower()
-        if host != "windows":
-            # prefer ccache for local builds, it is slightly faster
-            # but does not work on windows.
-            ccache = shutil.which("ccache")
-            if ccache:
-                return Path(ccache)
 
         # Our build bots use sccache, so we will def. have it
         search_dir = os.path.join(
