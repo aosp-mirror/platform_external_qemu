@@ -89,6 +89,7 @@ class CTestTask(BuildTask):
                     + ":"
                     + str(self.destination / "lib64" / "gles_swiftshader")
                 )
+                env["ANDROID_EMU_VK_ICD"] = "swiftshader"
 
             try:
                 Command(
