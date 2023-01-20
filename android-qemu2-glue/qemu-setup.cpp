@@ -327,12 +327,20 @@ int qemu_setup_grpc() {
     if (grpcService)
         return grpcService->port();
 
+    std::string displayName;
+
+    // Ideally we use the display name, which is not available for all
+    // systems (fuchsia).
     auto avdInfo = getConsoleAgents()->settings->avdInfo();
-    auto cfgIni = reinterpret_cast<const android::base::IniFile*>(
-            avdInfo_getConfigIni(avdInfo));
-    auto displayName =
-            cfgIni->getString("avd.ini.displayname",
-                              getConsoleAgents()->settings->hw()->avd_name);
+    auto iniFile = avdInfo ? avdInfo_getConfigIni(avdInfo) : nullptr;
+    if (iniFile) {
+        auto cfgIni = reinterpret_cast<const android::base::IniFile*>(iniFile);
+        displayName =
+                cfgIni->getString("avd.ini.displayname",
+                                  getConsoleAgents()->settings->hw()->avd_name);
+    } else {
+        displayName = avdInfo_getName(getConsoleAgents()->settings->avdInfo());
+    }
 
     auto contentPath = avdInfo_getContentPath(avdInfo);
     EmulatorProperties props{
