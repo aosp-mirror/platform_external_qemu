@@ -635,7 +635,7 @@ bool carpropertyutils::isVendor(int32_t val) {
 
 void carpropertyutils::loadDescriptionsFromJson(const char *filename) {
     QFile file(filename);
-    LOG(VERBOSE) << "Reading vendor vhal properties json file: " << filename << std::endl;
+    LOG(DEBUG) << "Reading vendor vhal properties json file: " << filename << std::endl;
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
           LOG(WARNING) << "Can't open vhal properties file: " << filename << std::endl;
           return;

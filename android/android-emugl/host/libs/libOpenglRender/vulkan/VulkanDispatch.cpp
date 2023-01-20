@@ -35,9 +35,9 @@ namespace emugl {
 
 static void setIcdPath(const std::string& path) {
     if (path_exists(path.c_str())) {
-        LOG(VERBOSE) << "setIcdPath: path exists: " << path;
+        LOG(DEBUG) << "setIcdPath: path exists: " << path;
     } else {
-        LOG(VERBOSE) << "setIcdPath: path doesn't exist: " << path;
+        LOG(DEBUG) << "setIcdPath: path doesn't exist: " << path;
     }
     System::get()->envSet("VK_ICD_FILENAMES", path);
 }
@@ -71,26 +71,26 @@ static void initIcdPaths(bool forTesting) {
     } else {
         if (forTesting || androidIcd == "swiftshader") {
             auto res = pj({System::get()->getProgramDirectory(), "lib64", "vulkan"});
-            LOG(VERBOSE) << "In test environment or ICD set to swiftshader, using "
+            LOG(DEBUG) << "In test environment or ICD set to swiftshader, using "
                          << "Swiftshader ICD " << getTestIcdFilename();
             auto libPath = pj({System::get()->getProgramDirectory(), "lib64", "vulkan",
                               getTestIcdFilename()});
             if (path_exists(libPath.c_str())) {
-                LOG(VERBOSE) << "Swiftshader library exists";
+                LOG(DEBUG) << "Swiftshader library exists";
             } else {
-                LOG(VERBOSE) << "Swiftshader library doesn't exist, trying launcher path";
+                LOG(DEBUG) << "Swiftshader library doesn't exist, trying launcher path";
                 libPath = pj({System::get()->getLauncherDirectory(), "lib64", "vulkan",
                              getTestIcdFilename()});
                 if (path_exists(libPath.c_str())) {
-                    LOG(VERBOSE) << "Swiftshader library found in launcher path";
+                    LOG(DEBUG) << "Swiftshader library found in launcher path";
                 } else {
-                    LOG(VERBOSE) << "Swiftshader library not found in program nor launcher path";
+                    LOG(DEBUG) << "Swiftshader library not found in program nor launcher path";
                 }
             }
             setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
             System::get()->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
         } else {
-            LOG(VERBOSE) << "Not in test environment. ICD (blank for default): ["
+            LOG(DEBUG) << "Not in test environment. ICD (blank for default): ["
                          << androidIcd << "]";
             // Mac: Use MoltenVK by default unless GPU mode is set to
             // swiftshader.
@@ -133,15 +133,15 @@ static std::string getLoaderPath(const std::string& directory, bool forTesting) 
     auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
     if (forTesting || androidIcd == "mock") {
         auto path = pj({directory, "testlib64", VULKAN_LOADER_FILENAME});
-        LOG(VERBOSE) << "In test environment or using Swiftshader. Using loader: " << path;
+        LOG(DEBUG) << "In test environment or using Swiftshader. Using loader: " << path;
         return path;
     } else {
 #ifdef _WIN32
-        LOG(VERBOSE) << "Not in test environment. Using loader: " << VULKAN_LOADER_FILENAME;
+        LOG(DEBUG) << "Not in test environment. Using loader: " << VULKAN_LOADER_FILENAME;
         return VULKAN_LOADER_FILENAME;
 #else
         auto path = pj({directory, "lib64", "vulkan", VULKAN_LOADER_FILENAME});
-        LOG(VERBOSE) << "Not in test environment. Using loader: " << path;
+        LOG(DEBUG) << "Not in test environment. Using loader: " << path;
         return path;
 #endif
     }
@@ -159,7 +159,7 @@ static std::string getMoltenVkPath(const std::string& directory, bool forTesting
     // VK_MVK_moltenvk, which is required for external memory support.
     if (!forTesting && androidIcd == "moltenvk") {
         auto path = pj({directory, "lib64", "vulkan", "libMoltenVK.dylib"});
-        LOG(VERBOSE) << "Skipping loader and using ICD directly: " << path;
+        LOG(DEBUG) << "Skipping loader and using ICD directly: " << path;
         return path;
     }
 

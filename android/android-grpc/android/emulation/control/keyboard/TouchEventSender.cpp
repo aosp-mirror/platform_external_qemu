@@ -143,7 +143,7 @@ void TouchEventSender::doSend(const TouchEvent request) {
                     {EV_ABS, LINUX_ABS_MT_TRACKING_ID, slot, displayId});
             mUsedSlots.insert(slot);
             mIdMap[touch.identifier()] = slot;
-            LOG(VERBOSE) << "Registering " << touch.identifier() << " ->"
+            LOG(DEBUG) << "Registering " << touch.identifier() << " ->"
                          << slot;
         }
 

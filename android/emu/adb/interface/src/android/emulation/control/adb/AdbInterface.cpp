@@ -364,10 +364,10 @@ static Optional<int> extractProtocolVersion(std::string_view adbPath) {
     if (!read ||
         sscanf(read->c_str(), "Android Debug Bridge version %*d.%*d.%d",
                &protocol) != 1) {
-        LOG(VERBOSE) << "Failed obtain protocol version from " << adbPath;
+        LOG(DEBUG) << "Failed obtain protocol version from " << adbPath;
         return {};
     }
-    LOG(VERBOSE) << "Path:" << adbPath << " protocol version: " << protocol;
+    LOG(DEBUG) << "Path:" << adbPath << " protocol version: " << protocol;
     return Optional<int>(protocol);
 }
 
@@ -378,7 +378,7 @@ static Optional<int> extractProtocolVersion(std::string_view adbPath) {
 // - if the executable does not produce a version string.
 static Optional<std::string> platformPath(std::string_view root) {
     if (root.empty()) {
-        LOG(VERBOSE) << " no root specified: ";
+        LOG(DEBUG) << " no root specified: ";
         return Optional<std::string>();
     }
 
@@ -408,9 +408,9 @@ std::vector<std::string> AdbLocatorImpl::availableAdb() {
         available.push_back(std::move(*adb));
     }
 
-    LOG(VERBOSE) << "Found: " << available.size() << " adb executables";
+    LOG(DEBUG) << "Found: " << available.size() << " adb executables";
     for (const auto& install : available) {
-        LOG(VERBOSE) << "Adb: " << install;
+        LOG(DEBUG) << "Adb: " << install;
     }
 
     return available;

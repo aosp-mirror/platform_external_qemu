@@ -31,7 +31,7 @@ AndroidAsyncMessagePipe::AndroidAsyncMessagePipe(AndroidPipe::Service* service,
     : AndroidPipe(args.hwPipe, service),
       mHandle(args.handle),
       mDeleter(std::move(args.deleter)) {
-    LOG(VERBOSE) << "Registering pipe service " << service->name();
+    LOG(DEBUG) << "Registering pipe service " << service->name();
 }
 
 AndroidAsyncMessagePipe::~AndroidAsyncMessagePipe() {
@@ -40,7 +40,7 @@ AndroidAsyncMessagePipe::~AndroidAsyncMessagePipe() {
 
 void AndroidAsyncMessagePipe::send(std::vector<uint8_t>&& data) {
     std::lock_guard<std::recursive_mutex> lock(mState->mMutex);
-    DLOG(VERBOSE) << "Sending packet, " << data.size() << " bytes";
+    DLOG(DEBUG) << "Sending packet, " << data.size() << " bytes";
     mOutgoingPackets.emplace_back(std::move(data));
 
     signalWake(PIPE_WAKE_READ);
@@ -104,7 +104,7 @@ int AndroidAsyncMessagePipe::readBuffers(const AndroidPipeBuffer* buffers,
     std::shared_ptr<PipeState> state = mState;
     std::lock_guard<std::recursive_mutex> lock(state->mMutex);
     if (!allowRead()) {
-        DLOG(VERBOSE) << "Returning PIPE_ERROR_AGAIN, incoming="
+        DLOG(DEBUG) << "Returning PIPE_ERROR_AGAIN, incoming="
                       << (mIncomingPacket ? 1 : 0)
                       << ", outgoing=" << mOutgoingPackets.size();
         return PIPE_ERROR_AGAIN;
@@ -131,7 +131,7 @@ int AndroidAsyncMessagePipe::readBuffers(const AndroidPipeBuffer* buffers,
             bytesRead += static_cast<int>(currentBytesRead);
 
             if (mIncomingPacket->complete()) {
-                DLOG(VERBOSE) << "Packet complete, "
+                DLOG(DEBUG) << "Packet complete, "
                               << mIncomingPacket->messageLength << " bytes";
                 IncomingPacket packet = std::move(mIncomingPacket.value());
                 mIncomingPacket.clear();
@@ -140,14 +140,14 @@ int AndroidAsyncMessagePipe::readBuffers(const AndroidPipeBuffer* buffers,
                 // data members past this point.
                 onMessage(packet.data);
                 if (state->mDeleted) {
-                    DLOG(VERBOSE) << "Pipe deleted during onMessage.";
+                    DLOG(DEBUG) << "Pipe deleted during onMessage.";
                     return bytesRead;
                 }
             }
         }
     }
 
-    DLOG(VERBOSE) << "readBuffers complete, " << bytesRead << " bytes total";
+    DLOG(DEBUG) << "readBuffers complete, " << bytesRead << " bytes total";
     return bytesRead;
 }
 
@@ -157,7 +157,7 @@ int AndroidAsyncMessagePipe::writeBuffers(AndroidPipeBuffer* buffers,
     std::shared_ptr<PipeState> state = mState;
     std::lock_guard<std::recursive_mutex> lock(state->mMutex);
     if (mOutgoingPackets.empty()) {
-        DLOG(VERBOSE) << "Returning PIPE_ERROR_AGAIN, outgoing="
+        DLOG(DEBUG) << "Returning PIPE_ERROR_AGAIN, outgoing="
                       << mOutgoingPackets.size();
         return PIPE_ERROR_AGAIN;
     }
@@ -173,7 +173,7 @@ int AndroidAsyncMessagePipe::writeBuffers(AndroidPipeBuffer* buffers,
             packet.copyToBuffer(buffers[i], &bufferWriteOffset);
 
             if (packet.complete()) {
-                DLOG(VERBOSE) << "Packet send complete, " << packet.data.size()
+                DLOG(DEBUG) << "Packet send complete, " << packet.data.size()
                               << " bytes";
                 mOutgoingPackets.pop_front();
             }
@@ -184,12 +184,12 @@ int AndroidAsyncMessagePipe::writeBuffers(AndroidPipeBuffer* buffers,
     }
 
     if (mCloseQueued && mOutgoingPackets.empty()) {
-        DLOG(VERBOSE) << "Closing pipe, queued close operation.";
+        DLOG(DEBUG) << "Closing pipe, queued close operation.";
         // It's not safe to use any members past this point.
         closeFromHost();
     }
 
-    DLOG(VERBOSE) << "writeBuffers complete, " << bytesWritten << " bytes";
+    DLOG(DEBUG) << "writeBuffers complete, " << bytesWritten << " bytes";
     return bytesWritten;
 }
 
@@ -250,7 +250,7 @@ void AndroidAsyncMessagePipe::OutgoingPacket::copyToBuffer(
         offset += maxWrite;
     }
 
-    DLOG(VERBOSE) << "copyToBuffer " << currentWriteOffset - *writeOffset
+    DLOG(DEBUG) << "copyToBuffer " << currentWriteOffset - *writeOffset
                   << " bytes";
     *writeOffset = currentWriteOffset;
 }
@@ -318,7 +318,7 @@ size_t AndroidAsyncMessagePipe::IncomingPacket::copyFromBuffer(
         currentReadOffset += maxRead;
     }
 
-    DLOG(VERBOSE) << "copyFromBuffer " << currentReadOffset - *readOffset
+    DLOG(DEBUG) << "copyFromBuffer " << currentReadOffset - *readOffset
                   << " bytes";
     *readOffset = currentReadOffset;
 

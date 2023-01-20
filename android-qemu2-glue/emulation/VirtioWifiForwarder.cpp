@@ -218,7 +218,7 @@ int VirtioWifiForwarder::send(const IOVector& iov) {
 
     std::unique_ptr<Ieee80211Frame> frame = parseHwsimCmdFrame(msg);
     if (frame == nullptr) {
-        LOG(VERBOSE) << "Not a HWSIM_CMD_FRAME netlink message";
+        LOG(DEBUG) << "Not a HWSIM_CMD_FRAME netlink message";
         return 0;
     }
     const MacAddress addr1 = frame->addr1();
@@ -238,7 +238,7 @@ int VirtioWifiForwarder::send(const IOVector& iov) {
         if (frame->isEAPoL()) {
             if (socketSend(mVirtIOSock.get(), frame->data(), frame->size()) <
                 0) {
-                LOG(VERBOSE) << "Failed to send frame to hostapd.";
+                LOG(DEBUG) << "Failed to send frame to hostapd.";
             }
         } else if (addr1 != mBssID) {
             sendToRemoteVM(std::move(frame), FrameType::Data);
@@ -250,7 +250,7 @@ int VirtioWifiForwarder::send(const IOVector& iov) {
             // TODO (wdu@) Experiement with shared memory approach
             if (socketSend(mVirtIOSock.get(), frame->data(), frame->size()) <
                 0) {
-                LOG(VERBOSE) << "Failed to send frame to hostapd.";
+                LOG(DEBUG) << "Failed to send frame to hostapd.";
             }
         }
         if (addr1.isMulticast() || addr1 != mBssID) {
@@ -342,7 +342,7 @@ ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
     std::unique_ptr<Ieee80211Frame> frame =
             Ieee80211Frame::buildFromEthernet(buf, size, forwarder->mBssID);
     if (frame == nullptr) {
-        LOG(VERBOSE) << "Unable to convert from Ethernet to Ieee80211.";
+        LOG(DEBUG) << "Unable to convert from Ethernet to Ieee80211.";
         return -1;
     }
     // encrypt will be no-op if cipher scheme is none.
@@ -410,7 +410,7 @@ size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
                     "onRemoteData skip data at offset %zu size %zu due to "
                     "incorrect magic or version number\n",
                     offset, size);
-            LOG(VERBOSE) << errStr;
+            LOG(DEBUG) << errStr;
             offset += sizeof(WifiForwardHeader);
             continue;
         }
@@ -422,7 +422,7 @@ size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
                     "onRemoteData skip data at offset %zu size %zu due to "
                     "incorrect header offset or length\n",
                     offset, size);
-            LOG(VERBOSE) << errStr;
+            LOG(DEBUG) << errStr;
             continue;
         }
         if (offset + header->fullLength <= size) {
@@ -452,7 +452,7 @@ size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
         }
     }
     if (offset != size) {
-        LOG(VERBOSE) << "onRemoteData sends partial data. Size: " << size
+        LOG(DEBUG) << "onRemoteData sends partial data. Size: " << size
                      << " actually sent: " << offset;
         return offset;
     } else {

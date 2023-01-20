@@ -149,7 +149,7 @@ public:
     ~StdLogSink() override {}
 
     void OnLogMessage(const std::string& message) override {
-        LOG(VERBOSE) << message;
+        LOG(DEBUG) << message;
     }
 };
 

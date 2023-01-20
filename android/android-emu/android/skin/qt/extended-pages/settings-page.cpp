@@ -398,7 +398,7 @@ void SettingsPage::on_tabChanged() {
             mSettingsTracker->increment("ADVANCED");
             break;
         default:
-            LOG(VERBOSE) << "Unknown tab selected.";
+            LOG(DEBUG) << "Unknown tab selected.";
     }
 }
 

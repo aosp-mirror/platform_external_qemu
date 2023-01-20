@@ -30,9 +30,9 @@
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_DEBUG || defined __DOXYGEN__
 #define MODLOG_DEBUG(ml_mod_, ml_msg_, ...) \
-    EMULOG(EMULATOR_LOG_VERBOSE, (ml_msg_), ##__VA_ARGS__) 
+    EMULOG(EMULATOR_LOG_DEBUG, (ml_msg_), ##__VA_ARGS__)
 #else
-#define MODLOG_DEBUG(ml_mod_, ml_msg_, ...) EMULOG(EMULATOR_LOG_VERBOSE, (ml_msg_), ##__VA_ARGS__) 
+#define MODLOG_DEBUG(ml_mod_, ml_msg_, ...) EMULOG(EMULATOR_LOG_DEBUG, (ml_msg_), ##__VA_ARGS__)
 #endif
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_INFO || defined __DOXYGEN__

@@ -78,7 +78,7 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
                                   bool add) {
     int ret = 0;
     SkinRotation rotation = SKIN_ROTATION_0;
-    LOG(VERBOSE) << "setMultiDisplay id " << id << " " << x << " " << y << " "
+    LOG(DEBUG) << "setMultiDisplay id " << id << " " << x << " " << y << " "
                  << w << " " << h << " " << dpi << " " << flag << " "
                  << (add ? "add" : "del");
     if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
@@ -105,7 +105,7 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         avdInfo_getAvdFlavor(
             getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
         flag = automotive::getDefaultFlagsForDisplay(id);
-        LOG(VERBOSE) << "Setting flags " << flag << " for display id " << id;
+        LOG(DEBUG) << "Setting flags " << flag << " for display id " << id;
     }
 
     // fetch rotation from EmulatorWindow
@@ -168,7 +168,7 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         if (pipe) {
             std::vector<uint8_t> data;
             pipe->fillData(data, id, w, h, dpi, flag, add);
-            LOG(VERBOSE) << "MultiDisplayPipe send " << (add ? "add" : "del")
+            LOG(DEBUG) << "MultiDisplayPipe send " << (add ? "add" : "del")
                          << " id " << id << " width " << w << " height " << h
                          << " dpi " << dpi << " flag " << flag;
             pipe->send(std::move(data));
@@ -215,7 +215,7 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
         *enabled = mMultiDisplay[id].enabled;
     }
 #if MULTI_DISPLAY_DEBUG
-    LOG(VERBOSE) << "getMultiDisplay " << id << " x " << mMultiDisplay[id].pos_x
+    LOG(DEBUG) << "getMultiDisplay " << id << " x " << mMultiDisplay[id].pos_x
                  << " y " << mMultiDisplay[id].pos_y << " w "
                  << mMultiDisplay[id].width << " h " << mMultiDisplay[id].height
                  << " dpi " << mMultiDisplay[id].dpi << " flag "
@@ -353,7 +353,7 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
     }
 
     mMultiDisplay.emplace(*displayId, MultiDisplayInfo());
-    LOG(VERBOSE) << "create display " << *displayId;
+    LOG(DEBUG) << "create display " << *displayId;
     fireEvent(DisplayChangeEvent{DisplayChange::DisplayAdded, *displayId});
     return 0;
 }
@@ -399,7 +399,7 @@ int MultiDisplay::destroyDisplay(uint32_t displayId) {
             mWindowAgent->restoreSkin();
         }
     }
-    LOG(VERBOSE) << "delete display " << displayId;
+    LOG(DEBUG) << "delete display " << displayId;
     fireEvent(DisplayChangeEvent{DisplayChange::DisplayRemoved, displayId});
     return 0;
 }
@@ -459,7 +459,7 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
             mWindowAgent->setUIDisplayRegion(0, 0, width, height, true);
         }
     }
-    LOG(VERBOSE) << "setDisplayPose " << displayId << " x " << x << " y " << y
+    LOG(DEBUG) << "setDisplayPose " << displayId << " x " << x << " y " << y
                  << " w " << w << " h " << h << " dpi " << dpi;
 
     fireEvent(DisplayChangeEvent{DisplayChange::DisplayChanged, displayId});
@@ -525,7 +525,7 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
         mMultiDisplay[displayId].cb = colorBuffer;
     }
     if (noSkin) {
-        LOG(VERBOSE) << "disable skin";
+        LOG(DEBUG) << "disable skin";
         mWindowAgent->setNoSkin();
     }
     if (needUpdate) {
@@ -533,11 +533,11 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
             mWindowAgent->addMultiDisplayWindow(displayId, true, width, height);
         } else {
             // Explicitly adjust host window size
-            LOG(VERBOSE) << "change window size to " << width << "x" << height;
+            LOG(DEBUG) << "change window size to " << width << "x" << height;
             mWindowAgent->setUIDisplayRegion(0, 0, width, height, true);
         }
     }
-    LOG(VERBOSE) << "setDisplayColorBuffer " << displayId << " cb "
+    LOG(DEBUG) << "setDisplayColorBuffer " << displayId << " cb "
                  << colorBuffer;
     return 0;
 }
@@ -760,14 +760,14 @@ void MultiDisplay::loadConfig() {
 
     std::map<uint32_t, MultiDisplayInfo> info = parseConfig();
     if (info.size()) {
-        LOG(VERBOSE) << "config multidisplay with command-line";
+        LOG(DEBUG) << "config multidisplay with command-line";
         for (const auto& i : info) {
             setMultiDisplay(i.first, -1, -1, i.second.width, i.second.height,
                             i.second.dpi, i.second.flag, true);
             mWindowAgent->updateUIMultiDisplayPage(i.first);
         }
     } else {
-        LOG(VERBOSE) << "config multidisplay with config.ini "
+        LOG(DEBUG) << "config multidisplay with config.ini "
                      << getConsoleAgents()->settings->hw()->hw_display1_width << "x"
                      << getConsoleAgents()->settings->hw()->hw_display1_height << " "
                      << getConsoleAgents()->settings->hw()->hw_display2_width << "x"
@@ -776,7 +776,7 @@ void MultiDisplay::loadConfig() {
                      << getConsoleAgents()->settings->hw()->hw_display3_height;
         if (getConsoleAgents()->settings->hw()->hw_display1_width != 0 &&
             getConsoleAgents()->settings->hw()->hw_display1_height != 0) {
-            LOG(VERBOSE) << " add display 1";
+            LOG(DEBUG) << " add display 1";
             setMultiDisplay(1, getConsoleAgents()->settings->hw()->hw_display1_xOffset,
                             getConsoleAgents()->settings->hw()->hw_display1_yOffset,
                             getConsoleAgents()->settings->hw()->hw_display1_width,
@@ -787,7 +787,7 @@ void MultiDisplay::loadConfig() {
         }
         if (getConsoleAgents()->settings->hw()->hw_display2_width != 0 &&
             getConsoleAgents()->settings->hw()->hw_display2_height != 0) {
-            LOG(VERBOSE) << " add display 2";
+            LOG(DEBUG) << " add display 2";
             setMultiDisplay(2, getConsoleAgents()->settings->hw()->hw_display2_xOffset,
                             getConsoleAgents()->settings->hw()->hw_display2_yOffset,
                             getConsoleAgents()->settings->hw()->hw_display2_width,
@@ -798,7 +798,7 @@ void MultiDisplay::loadConfig() {
         }
         if (getConsoleAgents()->settings->hw()->hw_display3_width != 0 &&
             getConsoleAgents()->settings->hw()->hw_display3_height != 0) {
-            LOG(VERBOSE) << " add display 3";
+            LOG(DEBUG) << " add display 3";
             setMultiDisplay(3, getConsoleAgents()->settings->hw()->hw_display3_xOffset,
                             getConsoleAgents()->settings->hw()->hw_display3_yOffset,
                             getConsoleAgents()->settings->hw()->hw_display3_width,
@@ -814,7 +814,7 @@ bool MultiDisplay::hotPlugDisplayEnabled() {
     if (featurecontrol::isEnabled(android::featurecontrol::Minigbm) &&
         ((getConsoleAgents()->settings->android_cmdLineOptions()->hotplug_multi_display ||
          getConsoleAgents()->settings->hw()->hw_hotplug_multi_display))) {
-        LOG(VERBOSE) << "use hotplug multiDisplay";
+        LOG(DEBUG) << "use hotplug multiDisplay";
         return true;
     }
     return false;

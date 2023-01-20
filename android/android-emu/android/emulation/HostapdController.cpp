@@ -130,9 +130,9 @@ bool HostapdController::run() {
         android::ParameterList args{"hostapd"};
         mConfigFile = genConfigFile();
         args.add(mConfigFile);
-        LOG(VERBOSE) << "Starting hostapd main loop.";
+        LOG(DEBUG) << "Starting hostapd main loop.";
         run_hostapd_main(args.size(), (const char**)args.array(), nullptr);
-        LOG(VERBOSE) << "Hostapd main loop has stopped.";
+        LOG(DEBUG) << "Hostapd main loop has stopped.";
         mRunning = false;
     });
 }
@@ -147,11 +147,11 @@ void HostapdController::setDriverSocket(ScopedSocket sock) {
 
 bool HostapdController::setSsid(std::string ssid, std::string password) {
     if (ssid.empty()) {
-        LOG(VERBOSE) << "Must have a non-empty SSID name";
+        LOG(DEBUG) << "Must have a non-empty SSID name";
         return false;
     }
     if (!mSsid.compare(ssid) && !mPassword.compare(password)) {
-        LOG(VERBOSE) << "SSID and password match with current configuration. "
+        LOG(DEBUG) << "SSID and password match with current configuration. "
                         "No need to "
                         "restart.";
         return true;

@@ -278,7 +278,7 @@ void doneInstance(android::AsyncMessagePipeHandle pipe,
 void onOffworldSave(base::Stream* stream) {
     stream->putBe32(
             uint32_t(sSnapshotCrossSession->mPipesAwaitingResponse.size()));
-    LOG(VERBOSE) << "Snapshot save pipe count " << sSnapshotCrossSession->mPipesAwaitingResponse.size();
+    LOG(DEBUG) << "Snapshot save pipe count " << sSnapshotCrossSession->mPipesAwaitingResponse.size();
     assert(sSnapshotCrossSession->mPipesAwaitingResponse.size() <= 1);
     for (auto it : sSnapshotCrossSession->mPipesAwaitingResponse) {
         stream->putBe32(it.first.id);
@@ -290,7 +290,7 @@ void onOffworldLoad(base::Stream* stream) {
     sSnapshotCrossSession->mPipesAwaitingResponse.clear();
 
     const uint32_t pipeCount = stream->getBe32();
-    LOG(VERBOSE) << "Snapshot load pipe count " << pipeCount;
+    LOG(DEBUG) << "Snapshot load pipe count " << pipeCount;
     assert(pipeCount <= 1);
     for (uint32_t i = 0; i < pipeCount; ++i) {
         AsyncMessagePipeHandle pipe;
@@ -300,12 +300,12 @@ void onOffworldLoad(base::Stream* stream) {
 
         auto overrideIt = sSnapshotCrossSession->mOverrideResponse.find(type);
         if (overrideIt != sSnapshotCrossSession->mOverrideResponse.end()) {
-            LOG(VERBOSE) << "Sending response from load request pipe="
+            LOG(DEBUG) << "Sending response from load request pipe="
                          << pipe.id;
             offworld::sendResponse(pipe, overrideIt->second);
         } else {
             // No override response, send default.
-            LOG(VERBOSE) << "Sending default response pipe=" << pipe.id
+            LOG(DEBUG) << "Sending default response pipe=" << pipe.id
                          << ", type=" << uint32_t(type);
             sendDefaultResponse(pipe, type);
         }

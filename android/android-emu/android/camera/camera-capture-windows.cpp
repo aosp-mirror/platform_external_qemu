@@ -633,16 +633,16 @@ MediaFoundationCameraDevice::getWebcamInfo(
     }
 
     if (LOG_IS_ON(VERBOSE)) {
-        QLOG(VERBOSE) << "Supported dimensions:";
+        QLOG(DEBUG) << "Supported dimensions:";
         for (const auto& dimFormats : supportedDimsAndFormats) {
-            QLOG(VERBOSE) << dimFormats.first.width << "x"
+            QLOG(DEBUG) << dimFormats.first.width << "x"
                           << dimFormats.first.height << ": "
                           << formatsToString(dimFormats.second);
         }
 
-        QLOG(VERBOSE) << "Additional ignored dimensions:";
+        QLOG(DEBUG) << "Additional ignored dimensions:";
         for (const auto& dimFormats : unsupportedDimsAndFormats) {
-            QLOG(VERBOSE) << dimFormats.first.width << "x"
+            QLOG(DEBUG) << dimFormats.first.width << "x"
                           << dimFormats.first.height << ": "
                           << formatsToString(dimFormats.second);
         }
@@ -676,7 +676,7 @@ MediaFoundationCameraDevice::getWebcamInfo(
     for (const auto& item : kSupportedPixelFormats) {
         if (subtypes.count(item.mfSubtype)) {
             info.subtype = item.mfSubtype;
-            QLOG(VERBOSE) << "Selected format "
+            QLOG(DEBUG) << "Selected format "
                           << subtypeHumanReadableName(info.subtype);
             break;
         }
@@ -746,7 +746,7 @@ int MediaFoundationCameraDevice::enumerateDevices(MFInitialize& mf,
             ComPtr<IMFMediaSource> source;
             hr = device->ActivateObject(IID_PPV_ARGS(&source));
             if (SUCCEEDED(hr)) {
-                QLOG(VERBOSE) << "Getting webcam info for '"
+                QLOG(DEBUG) << "Getting webcam info for '"
                               << deviceName.toString() << "'";
                 webcamInfo = getWebcamInfo(source);
                 hr = device->ShutdownObject();
@@ -760,7 +760,7 @@ int MediaFoundationCameraDevice::enumerateDevices(MFInitialize& mf,
             }
 
             if (LOG_IS_ON(VERBOSE)) {
-                QLOG(VERBOSE)
+                QLOG(DEBUG)
                         << "Found webcam '" << deviceName.toString() << "'";
 
                 std::ostringstream dims;
@@ -768,8 +768,8 @@ int MediaFoundationCameraDevice::enumerateDevices(MFInitialize& mf,
                     dims << d.width << "x" << d.height << " ";
                 }
 
-                QLOG(VERBOSE) << "Supported dimensions: " << dims.str();
-                QLOG(VERBOSE) << "Pixel Format: "
+                QLOG(DEBUG) << "Supported dimensions: " << dims.str();
+                QLOG(DEBUG) << "Pixel Format: "
                               << subtypeHumanReadableName(webcamInfo.subtype);
             }
         }
@@ -844,7 +844,7 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
         return -1;
     }
 
-    QLOG(VERBOSE) << "Getting webcam info for '" << mDeviceName << "'";
+    QLOG(DEBUG) << "Getting webcam info for '" << mDeviceName << "'";
     WebcamInfo info = getWebcamInfo(source);
 
     bool foundDim = false;
@@ -884,7 +884,7 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
         return -1;
     }
 
-    QLOG(VERBOSE) << "Source reader created, reading first sample to confirm.";
+    QLOG(DEBUG) << "Source reader created, reading first sample to confirm.";
 
     // Try to read a sample and see if the stream worked, so that failures will
     // originate here instead of in readFrame().
@@ -896,7 +896,7 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
         return -1;
     }
 
-    QLOG(VERBOSE) << "Webcam started.";
+    QLOG(DEBUG) << "Webcam started.";
     return 0;
 }
 
@@ -1134,7 +1134,7 @@ HRESULT MediaFoundationCameraDevice::configureMediaSource(
             // mapping list, so subtypeToPixelFormat cannot be used here. In
             // this situation, the SourceReader's advanced video processing will
             // convert to a supported format.
-            LOG(VERBOSE) << "SetCurrentMediaType to subtype "
+            LOG(DEBUG) << "SetCurrentMediaType to subtype "
                          << subtypeHumanReadableName(subtype) << ", size "
                          << width << "x" << height << ", frame rate "
                          << frameRateNum << "/" << frameRateDenom << " (~"

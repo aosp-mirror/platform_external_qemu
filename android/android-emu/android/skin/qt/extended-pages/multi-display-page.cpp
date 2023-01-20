@@ -94,7 +94,7 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
                     i, nullptr, nullptr, &w, &h, &d, nullptr, &e) &&
             e && d != 0) {
             MultiDisplayItem* item = new MultiDisplayItem(i, w, h, d, this);
-            LOG(VERBOSE) << "add MultiDisplayItem " << i
+            LOG(DEBUG) << "add MultiDisplayItem " << i
                          << " and insert widget";
             mUi->verticalLayout_5->insertWidget(i - 1, item);
             mItem[i] = item;
@@ -141,7 +141,7 @@ void MultiDisplayPage::on_addSecondaryDisplay_clicked() {
         return;
     }
     MultiDisplayItem* item = new MultiDisplayItem(i, this);
-    LOG(VERBOSE) << "add MultiDisplayItem " << i << " and insert widget";
+    LOG(DEBUG) << "add MultiDisplayItem " << i << " and insert widget";
     mUi->verticalLayout_5->insertWidget(i - 1, item);
     mItem[i] = item;
     setSecondaryDisplaysTitle(++mSecondaryItemCount);
@@ -154,7 +154,7 @@ void MultiDisplayPage::on_addSecondaryDisplay_clicked() {
 }
 
 void MultiDisplayPage::deleteSecondaryDisplay(int id) {
-    LOG(VERBOSE) << "deleteSecondaryDisplay " << id;
+    LOG(DEBUG) << "deleteSecondaryDisplay " << id;
     delete (mItem[id]);
     mItem[id] = nullptr;
     setSecondaryDisplaysTitle(--mSecondaryItemCount);
@@ -178,14 +178,14 @@ void MultiDisplayPage::updateSecondaryDisplay(int i) {
             i, nullptr, nullptr, &width, &height, &dpi, nullptr, &enabled);
     if (!enabled) {
         if (mItem[i] == nullptr) {
-            LOG(VERBOSE) << "already void MultiDisplayItem";
+            LOG(DEBUG) << "already void MultiDisplayItem";
             return;
         } else {
             deleteSecondaryDisplay(i);
         }
     } else {
         if (mItem[i] == nullptr) {
-            LOG(VERBOSE) << "create MultiDisplayItem " << i
+            LOG(DEBUG) << "create MultiDisplayItem " << i
                          << " and insert widget";
             MultiDisplayItem* item =
                     new MultiDisplayItem(i, width, height, dpi, this);
@@ -198,18 +198,18 @@ void MultiDisplayPage::updateSecondaryDisplay(int i) {
             uint32_t w, h, d;
             mItem[i]->getValues(&w, &h, &d);
             if (width != w || height != h || dpi != d) {
-                LOG(VERBOSE) << "delete MultiDisplayItem " << i;
+                LOG(DEBUG) << "delete MultiDisplayItem " << i;
                 delete (mItem[i]);
                 mItem[i] = nullptr;
                 MultiDisplayItem* item =
                         new MultiDisplayItem(i, width, height, dpi, this);
                 mItem[i] = item;
-                LOG(VERBOSE)
+                LOG(DEBUG)
                         << "add MultiDisplayItem " << i << " and insert widget";
                 mUi->verticalLayout_5->insertWidget(i - 1, item);
                 recomputeLayout();
             } else {
-                LOG(VERBOSE) << "same MultiDisplayItem, not update UI";
+                LOG(DEBUG) << "same MultiDisplayItem, not update UI";
             }
         }
     }

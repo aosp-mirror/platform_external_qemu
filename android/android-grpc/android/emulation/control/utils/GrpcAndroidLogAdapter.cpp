@@ -25,7 +25,7 @@ void gpr_log_to_android_log(gpr_log_func_args* args) {
     if (!args)
         return;
 
-    LogSeverity severity = EMULATOR_LOG_VERBOSE;
+    LogSeverity severity = EMULATOR_LOG_DEBUG;
     switch (args->severity) {
         case GPR_LOG_SEVERITY_DEBUG:
             break;

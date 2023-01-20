@@ -759,7 +759,7 @@ public:
                     });
         } else {
             // slow mode, you are likely using older api..
-            LOG(VERBOSE) << "Reverting to slow callbacks";
+            LOG(DEBUG) << "Reverting to slow callbacks";
             frameEvent = std::make_unique<EventWaiter>(
                     &gpu_register_shared_memory_callback,
                     &gpu_unregister_shared_memory_callback);
@@ -1016,7 +1016,7 @@ public:
             // - The first screenshot in a series is requested and we need to
             // allocate the first frame.
             if (reply->mutable_image()->size() != cPixels) {
-                LOG(VERBOSE)
+                LOG(DEBUG)
                         << "Allocation of string object. "
                         << reply->mutable_image()->size() << " < " << cPixels;
                 auto buffer = new std::string(cPixels, 0);
@@ -1039,7 +1039,7 @@ public:
         // Update format information with the retrieved width, height.
         format->set_height(height);
         format->set_width(width);
-        LOG(VERBOSE) << "Screenshot " << width << "x" << height
+        LOG(DEBUG) << "Screenshot " << width << "x" << height
                      << ", cPixels: " << cPixels << ", in: " << sw.elapsedUs()
                      << " us";
 

@@ -48,9 +48,6 @@
 #include <errno.h>
 #include <string.h>
 
-// Set to 1 to increase verbosity of debug messages.
-#define DEBUG 0
-
 namespace android {
 namespace base {
 
@@ -107,18 +104,16 @@ static void print_dns_v6_address(struct in6_addr address) {
         LOG(ERROR) << "Failed to stringify IPv6 address for logging.";
         return;
     }
-    LOG(VERBOSE) << "IPv6 DNS server found: " << address_str;
+    LOG(DEBUG) << "IPv6 DNS server found: " << address_str;
 }
 #endif
 
-#if DEBUG
 #ifdef _WIN32
 // Convenience function to save typing.
 static std::string toUtf8(const wchar_t* str) {
     return android::base::Win32UnicodeString::convertToUtf8(str);
 }
 #endif  // !_WIN32
-#endif  // _DEBUG
 
 // Implementation of Dns::Resolver interface based on ::getaddrinfo().
 class SystemResolver : public Dns::Resolver {
