@@ -35,9 +35,7 @@ target_link_libraries(
 target_compile_options(android-emu-agents PRIVATE "-Wno-extern-c-compat")
 target_compile_definitions(android-emu-agents PRIVATE "CONSOLE_EXPORTS")
 android_install_shared(android-emu-agents)
-if(WINDOWS_MSVC_X86_64)
-  install(TARGETS android-emu-agents DESTINATION .)
-endif()
+
 
 android_add_test(
   TARGET android-emu-agents_unittests SOURCE_DIR test
