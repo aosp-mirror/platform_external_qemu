@@ -159,3 +159,8 @@ android_target_properties(emulator all "${RUNTIME_OS_PROPERTIES}")
 install(FILES ${ANDROID_QEMU2_TOP_DIR}/android-info.txt DESTINATION .)
 install(FILES ${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2 DESTINATION .
         RENAME LICENSE)
+
+# Duplicate install for windows (emulator-check needs these)
+if(WINDOWS_MSVC_X86_64)
+  install(TARGETS android-emu-agents libprotobuf DESTINATION .)
+endif()

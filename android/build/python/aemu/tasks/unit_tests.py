@@ -31,7 +31,9 @@ class AccelerationCheckTask(BuildTask):
         self.destination = Path(destination)
 
     def do_run(self):
-        Command([self.destination / "emulator-check", "accel"]).run()
+        Command(
+            [self.destination / "distribution" / "emulator" / "emulator-check", "accel"]
+        ).run()
 
 
 class CTestTask(BuildTask):
@@ -116,9 +118,9 @@ class CTestTask(BuildTask):
                     logging.critical("%s", log_file.read())
                 raise
 
+
 class CoverageReportTask(BuildTask):
-    """Generates the code coverage report. CTestTask needs to run prior to this.
-    """
+    """Generates the code coverage report. CTestTask needs to run prior to this."""
 
     def __init__(
         self,
@@ -140,13 +142,14 @@ class CoverageReportTask(BuildTask):
     def do_run(self):
         clang_version = "clang-r450784d"
         clang_path = (
-                self.aosp
-                / "prebuilts"
-                / "clang"
-                / "host"
-                / f"{platform.system().lower()}-x86"
-                / clang_version
-                / "bin")
+            self.aosp
+            / "prebuilts"
+            / "clang"
+            / "host"
+            / f"{platform.system().lower()}-x86"
+            / clang_version
+            / "bin"
+        )
         llvm_profdata = shutil.which(
             cmd="llvm-profdata",
             path=clang_path,
@@ -177,9 +180,15 @@ class CoverageReportTask(BuildTask):
                 cov_objs = ["--object=" + i.replace(".profraw", "") for i in profraws]
 
                 with open(self.destination / "lcov", "w") as lcov_file:
-                    lcov_out = LogHandler(lambda s : lcov_file.write(s + "\n"))
+                    lcov_out = LogHandler(lambda s: lcov_file.write(s + "\n"))
                     Command(
-                        [llvm_cov, "export", "--format", "lcov", "--instr-profile=" + profdata_name]
+                        [
+                            llvm_cov,
+                            "export",
+                            "--format",
+                            "lcov",
+                            "--instr-profile=" + profdata_name,
+                        ]
                         + cov_objs
                     ).in_directory(self.destination).with_log_handler(lcov_out).run()
             except CommandFailedException:
