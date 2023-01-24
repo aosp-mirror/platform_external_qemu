@@ -1220,20 +1220,20 @@ public:
         bool emulateTextureEtc2 = false;
         bool emulateTextureAstc = false;
         VkPhysicalDeviceFeatures featuresFiltered;
+        if (needEmulatedEtc2(physicalDevice, vk)) {
+            emulateTextureEtc2 = true;
+        }
+        if (needEmulatedAstc(physicalDevice, vk)) {
+            emulateTextureAstc = true;
+        }
 
         if (pCreateInfo->pEnabledFeatures) {
             featuresFiltered = *pCreateInfo->pEnabledFeatures;
-            if (featuresFiltered.textureCompressionETC2) {
-                if (needEmulatedEtc2(physicalDevice, vk)) {
-                    emulateTextureEtc2 = true;
-                    featuresFiltered.textureCompressionETC2 = false;
-                }
+            if (emulateTextureEtc2) {
+                featuresFiltered.textureCompressionETC2 = false;
             }
-            if (featuresFiltered.textureCompressionASTC_LDR) {
-                if (needEmulatedAstc(physicalDevice, vk)) {
-                    emulateTextureAstc = true;
-                    featuresFiltered.textureCompressionASTC_LDR = false;
-                }
+            if (emulateTextureAstc) {
+                featuresFiltered.textureCompressionASTC_LDR = false;
             }
             createInfoFiltered.pEnabledFeatures = &featuresFiltered;
         }
@@ -1241,13 +1241,12 @@ public:
         vk_foreach_struct(ext, pCreateInfo->pNext) {
             switch (ext->sType) {
                 case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2:
-                    if (needEmulatedEtc2(physicalDevice, vk)) {
-                        emulateTextureEtc2 = true;
+                    if (emulateTextureEtc2) {
                         VkPhysicalDeviceFeatures2* features2 =
                             (VkPhysicalDeviceFeatures2*)ext;
                         features2->features.textureCompressionETC2 = false;
                     }
-                    if (needEmulatedAstc(physicalDevice, vk)) {
+                    if (emulateTextureAstc) {
                         emulateTextureAstc = true;
                         VkPhysicalDeviceFeatures2* features2 =
                                 (VkPhysicalDeviceFeatures2*)ext;
