@@ -58,6 +58,7 @@ set(android-emu-common
     android/boot-properties.c
     android/bootconfig.cpp
     android/car-cluster.cpp
+    android/car-physics.cpp
     android/car.cpp
     android/cros.c
     android/emulation/AdbDebugPipe.cpp

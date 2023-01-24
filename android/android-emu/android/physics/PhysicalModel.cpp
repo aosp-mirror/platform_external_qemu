@@ -89,6 +89,11 @@ public:
     void setCurrentTime(int64_t time_ns);
 
     /*
+     * Sets the current gravity of the PhysicalModel simulation.
+     */
+    void setGravity(float x, float y, float z);
+
+    /*
      * Replays a PhysicalModelEvent onto the current PhysicalModel state.
      */
     void replayEvent(const pb::PhysicalModelEvent& event);
@@ -524,6 +529,11 @@ void PhysicalModelImpl::setCurrentTime(int64_t time_ns) {
     if (stateStabilized) {
         physicalStateStabilized();
     }
+}
+
+void PhysicalModelImpl::setGravity(float x, float y, float z) {
+    mAmbientEnvironment.setGravity(glm::vec3(x, y, z),
+                                   PHYSICAL_INTERPOLATION_STEP);
 }
 
 void PhysicalModelImpl::replayEvent(const pb::PhysicalModelEvent& event) {
@@ -1538,6 +1548,13 @@ void physicalModel_setCurrentTime(PhysicalModel* model, int64_t time_ns) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->setCurrentTime(time_ns);
+    }
+}
+
+void physicalModel_setGravity(PhysicalModel* model, float x, float y, float z) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        impl->setGravity(x, y, z);
     }
 }
 
