@@ -16,6 +16,7 @@ import logging
 import platform
 import shutil
 import tempfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from aemu.process.command import Command, CommandFailedException
@@ -108,14 +109,28 @@ class CTestTask(BuildTask):
                     ]
                 ).in_directory(self.destination).with_environment(env).run()
             except CommandFailedException:
-                logging.critical("Test failures encountered:")
+                # First log the failures
+                logging.critical("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
                 test_log_file = (
                     self.destination / "Testing" / "Temporary" / "LastTest.log"
                 )
                 with open(
                     test_log_file.absolute(), "r", encoding="utf-8", errors="ignore"
                 ) as log_file:
-                    logging.critical("%s", log_file.read())
+                    logging.error("%s", log_file.read())
+
+                logging.critical("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+
+                # Next log the failed test case (to make it easier to find)
+                junit = ET.parse(junit_file.absolute())
+                failures = junit.findall(".//testcase[@status='fail']")
+                for failure in failures:
+                    logging.critical(
+                        "Test: %s Time: (%s)", failure.get("name"), failure.get("time")
+                    )
+                    system_out = failure.find("system-out").text
+                    logging.critical("%s", system_out)
+
                 raise
 
 
