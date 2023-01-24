@@ -70,6 +70,11 @@ void physicalModel_free(PhysicalModel* model);
  */
 void physicalModel_setCurrentTime(PhysicalModel* model, int64_t time_ns);
 
+/*
+ * Update the gravity in the model.
+ */
+void physicalModel_setGravity(PhysicalModel* model, float x, float y, float z);
+
 /* Target setters for all physical parameters */
 #define SET_TARGET_FUNCTION_NAME(x) physicalModel_setTarget##x
 #define PHYSICAL_PARAMETER_(x,y,z,w) void SET_TARGET_FUNCTION_NAME(z)(\
