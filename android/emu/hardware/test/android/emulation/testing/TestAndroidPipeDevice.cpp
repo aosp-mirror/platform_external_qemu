@@ -33,7 +33,7 @@ const AndroidPipeHwFuncs TestAndroidPipeDevice::Guest::vtbl = {
 };
 
 TestAndroidPipeDevice::Guest::Guest() : vtblPtr(&vtbl) {
-    mPipe = android_pipe_guest_open(this, nullptr);
+    mPipe = android_pipe_guest_open(this);
     if (!mPipe) {
         LOG(ERROR) << "Could not create new "
                       "TestAndroidPipeDevice::Guest instance!";
