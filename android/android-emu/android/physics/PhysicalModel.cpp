@@ -763,6 +763,19 @@ void PhysicalModelImpl::setTargetInternalWristTilt(float value,
     targetStateChanged();
 }
 
+void PhysicalModelImpl::setTargetInternalAccelerometerUncalibrated(vec3, PhysicalInterpolation) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        // Not supported to set the uncalibrated accelerometer value.
+    }
+    targetStateChanged();
+}
+
+vec3 PhysicalModelImpl::getParameterAccelerometerUncalibrated(ParameterValueType) const {
+    return fromGlm(mInertialModel.getAcceleration());
+}
+
 vec3 PhysicalModelImpl::getParameterPosition(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -927,6 +940,12 @@ vec3 PhysicalModelImpl::getPhysicalAccelerometer() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
                    (mInertialModel.getAcceleration() -
                     mAmbientEnvironment.getGravity()));
+}
+
+vec3 PhysicalModelImpl::getPhysicalAccelerometerUncalibrated() const {
+    // Same values for the calibrated and uncalibrated accelerometer
+    // Bias will be added to the balues on the guest side.
+    return getPhysicalAccelerometer();
 }
 
 vec3 PhysicalModelImpl::getPhysicalGyroscope() const {
