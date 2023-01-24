@@ -385,4 +385,5 @@ bool android_foldable_rollable_configured();
 bool android_hw_sensors_is_loading_snapshot();
 bool android_heart_rate_sensor_configured();
 bool android_foldable_posture_name(int posture, char* name);
+bool android_is_automotive();
 ANDROID_END_HEADER
