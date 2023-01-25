@@ -58,6 +58,7 @@ set(android-emu-common
     android/base/LayoutResolver.cpp
     android/bootconfig.cpp
     android/car-cluster.cpp
+    android/car-physics.cpp
     android/car.cpp
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
