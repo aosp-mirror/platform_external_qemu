@@ -51,7 +51,7 @@ def get_tasks(args) -> List[BuildTask]:
     tasks = [
         KillNetsimdTask(),
         FixCargoTask(args.aosp).enable(False),
-        CratePrepareTask(args.aosp),
+        CratePrepareTask(args.aosp).enable(False), # b/266452652
         # A task can be disabled, or explicitly enabled by calling
         # .enable(False) <- Disable the task
         CleanTask(args.out),
