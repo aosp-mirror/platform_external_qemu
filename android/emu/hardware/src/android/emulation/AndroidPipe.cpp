@@ -123,8 +123,8 @@ Service* findServiceByName(const char* name);
 // which will detect when this happens.
 class ConnectorPipe : public AndroidPipe {
 public:
-    ConnectorPipe(void* hwPipe, Service* service, void (*checkPipeMame)(const char*))
-        : AndroidPipe(hwPipe, service), mCheckPipeName(checkPipeMame) {
+    ConnectorPipe(void* hwPipe, Service* service)
+        : AndroidPipe(hwPipe, service) {
         DD("%s: Creating new ConnectorPipe hwpipe=%p", __FUNCTION__, mHwPipe);
     }
 
@@ -249,10 +249,6 @@ public:
         }
 
         if (!svc) {
-            if (mCheckPipeName) {
-                mCheckPipeName(pipeName);
-            }
-
             svc = findServiceByName(pipeName);
         }
 
@@ -311,7 +307,6 @@ private:
     static constexpr int kBufferSize = 128;
     char mBuffer[kBufferSize];
     int mPos = 0;
-    void (*mCheckPipeName)(const char*);
 };
 
 // Associated AndroidPipe::Service class for ConnectorPipe instances.
@@ -321,14 +316,7 @@ public:
 
     virtual AndroidPipe* create(void* hwPipe, const char* args,
                                 enum AndroidPipeFlags flags) override {
-        ::abort();
-        return nullptr;
-    }
-
-    AndroidPipe* create2(void* hwPipe, const char* args,
-                         enum AndroidPipeFlags flags,
-                         void (*checkPipeName)(const char*)) {
-        return new ConnectorPipe(hwPipe, this, checkPipeName);
+        return new ConnectorPipe(hwPipe, this);
     }
 
     virtual bool canLoad() const override { return true; }
@@ -336,7 +324,7 @@ public:
     virtual AndroidPipe* load(void* hwPipe,
                               const char* args,
                               BaseStream* stream) override {
-        ConnectorPipe* pipe = new ConnectorPipe(hwPipe, this, nullptr);
+        ConnectorPipe* pipe = new ConnectorPipe(hwPipe, this);
         if (!pipe->onLoad(stream)) {
             delete pipe;
             return nullptr;
@@ -682,29 +670,18 @@ void android_pipe_reset_services() {
     AndroidPipe::Service::resetAll();
 }
 
-void* android_pipe_guest_open(void* hwpipe, void(*check_pipe_name)(const char*)) {
-    CHECK_VM_STATE_LOCK();
-    DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
-    return android::sGlobals->connectorService.create2(
-        hwpipe, nullptr, (AndroidPipeFlags)0, check_pipe_name);
-}
-
 void* android_pipe_guest_open(void* hwpipe) {
-    return android_pipe_guest_open(hwpipe, nullptr);
-}
-
-void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags,
-                                         void(*check_pipe_name)(const char*)) {
     CHECK_VM_STATE_LOCK();
     DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
-    auto pipe = android::sGlobals->connectorService.create2(
-        hwpipe, nullptr, (AndroidPipeFlags)0, check_pipe_name);
-    pipe->setFlags((AndroidPipeFlags)flags);
-    return pipe;
+    return android::sGlobals->connectorService.create(hwpipe, nullptr, (AndroidPipeFlags)0);
 }
 
 void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags) {
-    return android_pipe_guest_open_with_flags(hwpipe, flags, nullptr);
+    CHECK_VM_STATE_LOCK();
+    DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
+    auto pipe = android::sGlobals->connectorService.create(hwpipe, nullptr, (AndroidPipeFlags)0);
+    pipe->setFlags((AndroidPipeFlags)flags);
+    return pipe;
 }
 
 void android_pipe_guest_close(void* internalPipe, PipeCloseReason reason) {
