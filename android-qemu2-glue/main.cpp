@@ -437,6 +437,33 @@ static void createSdCard(std::string sdcardFilePath, int size) {
             {mksdcard, buf, sdcardFilePath});
 }
 
+static void replaceDefaultPath(AvdInfo* avd,
+                               const char* proposedPath,
+                               std::string& defaultPath) {
+    if (!proposedPath || !avd || (strlen(proposedPath) == 0)) {
+        dprint("%s %d %s:proposed path is not set or avd is null\n", __FILE__,
+               __LINE__, __func__);
+        return;
+    } else {
+        dprint("%s %d %s:proposed path has size %d and is %s \n", __FILE__,
+               __LINE__, __func__, strlen(proposedPath), proposedPath);
+    }
+
+    std::string strProposed =
+            path_is_absolute(proposedPath)
+                    ? std::string(proposedPath)
+                    : PathUtils::join(path_getSdkRoot(), proposedPath);
+    if (!path_is_dir(strProposed.c_str())) {
+        dprint("%s %d %s:proposed path %s is not dir\n", __FILE__, __LINE__,
+               __func__, strProposed.c_str());
+        return;
+    }
+
+    dprint("%s %d %s:proposed dir %s is replacing default dir %s\n", __FILE__,
+           __LINE__, __func__, strProposed.c_str(), defaultPath.c_str());
+    defaultPath.swap(strProposed);
+}
+
 static void convertExt4ToQcow2(std::string ext4filepath) {
     if (!path_exists(ext4filepath.c_str())) {
         return;
@@ -1312,7 +1339,9 @@ static bool checkConfigIniCompatible(std::string srcConfig,
     return true;
 }
 
-static void fixAvdIdAndDisplayName(std::string avdDir, std::string avdName) {
+static void fixAvdConfig(std::string avdDir,
+                         std::string avdName,
+                         AndroidHwConfig* hw) {
     IniFile configIni(PathUtils::join(avdDir, "config.ini"));
     if (!configIni.read(false)) {
         dwarning("could not open %s/config.ini %s %d", avdDir.c_str(), __FILE__,
@@ -1322,6 +1351,9 @@ static void fixAvdIdAndDisplayName(std::string avdDir, std::string avdName) {
 
     configIni.setString("AvdId", avdName);
     configIni.setString("avd.ini.displayname", avdName);
+    configIni.setString("firstboot.downloaded.path",
+                        hw->firstboot_downloaded_path);
+    configIni.setString("firstboot.local.path", hw->firstboot_local_path);
     configIni.writeIfChanged();
 }
 
@@ -1946,8 +1978,14 @@ extern "C" int main(int argc, char** argv) {
             // try copy content from <sysimgdir>/snapshots/avd/default
             std::string srcDirLocal = PathUtils::join(
                     systemImagePath, "snapshots", "local", "avd");
+            replaceDefaultPath(avd, hw->firstboot_local_path, srcDirLocal);
+            str_reset(&hw->firstboot_local_path, srcDirLocal.c_str());
+
             std::string srcDirDownloaded = PathUtils::join(
                     systemImagePath, "snapshots", "downloaded", "avd");
+            replaceDefaultPath(avd, hw->firstboot_downloaded_path,
+                               srcDirDownloaded);
+            str_reset(&hw->firstboot_downloaded_path, srcDirDownloaded.c_str());
 
             std::string srcDir;
             std::string default_config_ini;
@@ -2041,8 +2079,8 @@ extern "C" int main(int argc, char** argv) {
                     Snapshotter::get().settDownloadableSnapshotCopyTime(
                             timeUsedMs);
                     firstTimeSetup = false;  // already setup
-                    // fix AvdId and displayname
-                    fixAvdIdAndDisplayName(std::string(s_AvdFolder), avdName);
+                    // fix AvdId, displayname and paths
+                    fixAvdConfig(std::string(s_AvdFolder), avdName, hw);
                 }
             } else {
                 // TODO: when snapshot is not possible, maybe try cold boot, at
