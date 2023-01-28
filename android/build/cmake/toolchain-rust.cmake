@@ -38,8 +38,8 @@ endfunction()
 # first parameter. The config.toml will be written to the ${Rust_ROOT}
 # directory.
 #
-# This function will set the Rust_CARGO_HOME variable that is used by corrosion to
-# configure cargo.
+# This function will set the Rust_CARGO_HOME variable and CARGO_HOME environment
+# variable that is used by corrosion to configure cargo.
 #
 # \argn: Directory where the vendored crates can be found
 # ~~~
@@ -54,6 +54,7 @@ function(enable_vendorized_crates VENDOR_CRATES)
   configure_file("${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/config.toml.in"
                  ${CARGO_CONFIG})
   set(Rust_CARGO_HOME ${CARGO_HOME} PARENT_SCOPE)
+  set(ENV{CARGO_HOME} ${CARGO_HOME})
 endfunction()
 
 # ~~~
