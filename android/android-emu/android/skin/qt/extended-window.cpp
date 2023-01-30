@@ -374,6 +374,10 @@ ExtendedWindow::~ExtendedWindow() {
     }
 }
 
+VirtualSensorsPage* ExtendedWindow::getVirtualSensorsPage() {
+    return mExtendedUi->virtualSensorsPage;
+}
+
 // Translates an ExtendWindowPane value into a human
 // readable string. Translation is done by
 // turning the identifier into a string and removing

@@ -85,6 +85,7 @@
 #include "android/skin/linux_keycodes.h"             // for LINUX_KEY_BACK
 #include "android/skin/qt/emulator-qt-window.h"      // for EmulatorQtW...
 #include "android/skin/qt/extended-pages/common.h"   // for adjustAllBu...
+#include "android/skin/qt/extended-pages/virtual-sensors-page.h"
 #include "android/skin/qt/extended-window-styles.h"  // for PANE_IDX_BA...
 #include "android/skin/qt/extended-window.h"         // for ExtendedWindow
 #include "android/skin/qt/posture-selection-dialog.h"  // for PostureSelectionDialog
@@ -153,6 +154,7 @@ ToolWindow::WindowHolder<T>::~WindowHolder() {
 
 const UiEmuAgent* ToolWindow::sUiEmuAgent = nullptr;
 static ToolWindow* sToolWindow = nullptr;
+
 
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
@@ -407,14 +409,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     // to show all the buttons, so we should never shrink it
     // smaller than this.
 
-    if (!android_foldable_hinge_configured() &&
-        !android_foldable_folded_area_configured(0) &&
-        !android_foldable_rollable_configured()) {
-        mToolsUi->change_posture_button->hide();
-    } else {
-        // show posture icon for rollable, foldable and legacy fold
+    if (android_foldable_hinge_configured() ||
+        android_foldable_folded_area_configured(0) ||
+        android_foldable_rollable_configured()) {
         mFoldableSyncToAndroid.start();
     }
+    updateFoldableButtonVisibility();
 
     connect(mPostureSelectionDialog, SIGNAL(newPostureRequested(int)), this,
             SLOT(on_new_posture_requested(int)));
@@ -438,6 +438,17 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 ToolWindow::~ToolWindow() {
     mFoldableSyncToAndroid.enqueue({ SEND_EXIT, });
     mFoldableSyncToAndroid.join();
+}
+
+void ToolWindow::updateFoldableButtonVisibility() {
+    if (android_foldable_hinge_enabled()) {
+        mToolsUi->change_posture_button->show();
+    } else {
+        mToolsUi->change_posture_button->hide();
+    }
+    if (mExtendedWindow.hasInstance()) {
+        mExtendedWindow.get()->getVirtualSensorsPage()->updateHingeSensorUI();
+    }
 }
 
 void ToolWindow::updateButtonUiCommand(QPushButton* button,
@@ -939,6 +950,16 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
                    << newSize;
         return;
     }
+
+    // If folded, we need to unfold it first, otherwise it will mess up
+    // non-foldable devices.
+    if (getResizableActiveConfigId() == PRESET_SIZE_UNFOLDED &&
+        mLastRequestedFoldablePosture == POSTURE_CLOSED) {
+        // Directly call posture change function without going through emit,
+        // because we want it to be processed before the resizable event.
+        on_new_posture_requested(POSTURE_OPENED);
+    }
+
     std::string updateMsg = "Updating device size\n";
     switch (info.type) {
         case PRESET_SIZE_PHONE:
@@ -968,6 +989,7 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
     mEmulatorWindow->resizeAndChangeAspectRatio(0, 0, info.width, info.height);
     sUiEmuAgent->window->showMessage(updateMsg.c_str(), WINDOW_MESSAGE_GENERIC,
                                      3000);
+    updateFoldableButtonVisibility();
 }
 
 void ToolWindow::resizableChangeIcon(PresetEmulatorSizeType type) {

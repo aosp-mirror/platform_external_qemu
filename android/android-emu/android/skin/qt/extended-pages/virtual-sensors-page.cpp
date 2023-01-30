@@ -93,7 +93,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
                                    false);
     mUi->positionZSlider->setRange(Device3DWidget::MinZ, Device3DWidget::MaxZ,
                                    false);
-    setupHingeSensorUI();
+    updateHingeSensorUI();
     setupRollableUI();
     setupRgbcLightUI();
     connect(mUi->accelWidget, SIGNAL(targetRotationChanged()), this,
@@ -176,7 +176,7 @@ void VirtualSensorsPage::togglePostureButtonsVisibility(bool newVisibility) {
     mUi->btn_postureTent->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_TENT]);
 }
 
-void VirtualSensorsPage::setupHingeSensorUI() {
+void VirtualSensorsPage::updateHingeSensorUI() {
     // Hide the hinge sensors based on the config.
     mUi->hinge0Label->setHidden(true);
     mUi->hinge1Label->setHidden(true);
@@ -189,7 +189,11 @@ void VirtualSensorsPage::setupHingeSensorUI() {
     mUi->hinge2Slider->setLabelHidden();
     mUi->verticalLayout->setSpacing(1);
     mUi->accelModeFold->setHidden(true);
-    if (android_foldable_hinge_configured()) {
+    if (mUi->accelerometerSliders->currentIndex() >= 2) {
+        mUi->accelModeRotate->setChecked(true);
+        mUi->accelerometerSliders->setCurrentIndex(0);
+    }
+    if (android_foldable_hinge_enabled()) {
         mUi->lbl_posture->setHidden(false);
         mUi->lbl_currentPosture->setHidden(false);
         mUi->lbl_currentPostureValue->setHidden(false);

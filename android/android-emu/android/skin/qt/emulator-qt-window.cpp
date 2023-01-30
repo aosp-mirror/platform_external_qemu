@@ -2600,6 +2600,15 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     int displayX = getConsoleAgents()->settings->hw()->hw_lcd_width;
     int displayY = getConsoleAgents()->settings->hw()->hw_lcd_height;
 
+    if (resizableEnabled()) {
+        PresetEmulatorSizeType activeConfig = getResizableActiveConfigId();
+        PresetEmulatorSizeInfo info;
+        if (getResizableConfig(activeConfig, &info)) {
+            displayX = info.width;
+            displayY = info.height;
+        }
+    }
+
     if (isFolded) {
         int displayXFolded;
         int displayYFolded;
