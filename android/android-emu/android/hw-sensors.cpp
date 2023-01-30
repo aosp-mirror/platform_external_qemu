@@ -1469,6 +1469,14 @@ bool android_foldable_rollable_configured() {
     return (getConsoleAgents()->settings->hw()->hw_sensor_roll && getConsoleAgents()->settings->hw()->hw_sensor_roll_count > 0);
 }
 
+bool android_is_automotive() {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
+        AvdFlavor flavor = avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo());
+        return flavor == AVD_ANDROID_AUTO;
+    }
+    return false;
+}
+
 bool android_hw_sensors_is_loading_snapshot() {
     return physicalModel_isLoadingSnapshot(android_physical_model_instance());
 }

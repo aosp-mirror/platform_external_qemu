@@ -60,7 +60,10 @@ static glm::vec3 clampPosition(glm::vec3 position) {
 static constexpr int kAnimationIntervalMs = 33;
 
 Device3DWidget::Device3DWidget(QWidget* parent)
-    : GLWidget(parent), mUseAbstractDevice(android_foldable_hinge_configured() || android_foldable_rollable_configured()) {
+    : GLWidget(parent), mUseAbstractDevice(
+        android_foldable_hinge_configured()
+        || android_foldable_rollable_configured()
+        || android_is_automotive()) {
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
 
@@ -249,7 +252,7 @@ bool Device3DWidget::initModel() {
         // Load the model and set up buffers.
         std::vector<float> model_vertex_data;
         std::vector<GLuint> indices;
-        QFile model_file(":/phone-model/model.obj");
+        QFile model_file(":/car-model/model.obj");
         if (model_file.open(QFile::ReadOnly)) {
             QTextStream file_stream(&model_file);
             if (!parseWavefrontOBJ(file_stream, model_vertex_data, indices)) {

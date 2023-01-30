@@ -142,10 +142,6 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
 
     updateSensorValuesInUI();
 
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
-        mUi->tabWidget->removeTab(kAccelerometerTabIndex);
-    }
-
     if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
         if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) < 28) {
             // This feature is currently only available on Wear OS API 28+ emulators.
@@ -909,8 +905,6 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
     if (sSensorsAgent != nullptr) {
         sSensorsAgent->advanceTime();
 
-        glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
-
         glm::vec3 device_accelerometer;
         std::vector<float*> out = {&device_accelerometer.x,
                                    &device_accelerometer.y,
@@ -944,9 +938,17 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
             }
             if (coarse_orientation != mCoarseOrientation) {
                 mCoarseOrientation = coarse_orientation;
-                // Signal to the extended-window to rotate the emulator window
-                // since an orientation has been detected in the sensor values.
-                emit(coarseOrientationChanged(mCoarseOrientation));
+                // Only allow orientation changes on cars, when the orientation
+                // sensor was enabled in the AVD config.
+                if (!android_is_automotive() ||
+                    getConsoleAgents()
+                            ->settings->hw()
+                            ->hw_sensors_orientation) {
+                    // Signal to the extended-window to rotate the emulator
+                    // window since an orientation has been detected in the
+                    // sensor values.
+                    emit(coarseOrientationChanged(mCoarseOrientation));
+                }
             }
         }
 
