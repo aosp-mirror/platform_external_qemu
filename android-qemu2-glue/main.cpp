@@ -709,6 +709,11 @@ static void enableSignalTermination() {
     sigaddset(&set, SIGTERM);
     sigaddset(&set, SIGHUP);
     sigaddset(&set, SIGINT);
+
+    // We will not get crash reports without the signals below enabled.
+    sigaddset(&set, SIGSEGV);
+    sigaddset(&set, SIGABRT);
+    sigaddset(&set, SIGILL);
     int result = pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
     if (result != 0) {
         D("Could not set thread sigmask: %d", result);
@@ -1281,7 +1286,6 @@ extern "C" int main(int argc, char** argv) {
 #endif
     process_early_setup(argc, argv);
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
-
     // Start GPU information query to use it later for the renderer seleciton.
     async_query_host_gpu_start();
 
