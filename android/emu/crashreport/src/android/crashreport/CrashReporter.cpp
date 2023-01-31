@@ -23,12 +23,11 @@
 #include <utility>   // for move
 #include <vector>    // for vector<>::it...
 
-#include "aemu/base/files/PathUtils.h"                // for pj, PathUtils
-#include "aemu/base/memory/LazyInstance.h"            // for LazyInstance
+#include "aemu/base/files/PathUtils.h"                   // for pj, PathUtils
+#include "aemu/base/memory/LazyInstance.h"               // for LazyInstance
 #include "android/base/system/System.h"                  // for System
 #include "android/console.h"                             // for getConsoleAg...
 #include "android/crashreport/SimpleStringAnnotation.h"  // for SimpleString...
-#include "host-common/crash-handler.h"           // for crashhandler...
 #include "android/emulation/control/globals_agent.h"     // for QAndroidGlob...
 #include "android/utils/debug.h"                         // for dinfo, derror
 #include "android/version.h"                             // for EMULATOR_FUL...
@@ -36,11 +35,14 @@
 #include "client/crash_report_database.h"                // for CrashReportD...
 #include "client/crashpad_client.h"                      // for CrashpadClient
 #include "client/settings.h"                             // for Settings
+#include "host-common/crash-handler.h"                   // for crashhandler...
 #include "mini_chromium/base/files/file_path.h"          // for FilePath
 #include "util/misc/uuid.h"                              // for UUID
 
 #ifdef _WIN32
 #include <io.h>
+#else
+#include <signal.h>
 #endif
 
 using android::base::c_str;
@@ -56,8 +58,7 @@ const constexpr char kCrashOnExitFileName[] = "crash-on-exit";
 using DefaultStringAnnotation = crashpad::StringAnnotation<1024>;
 LazyInstance<CrashReporter> sCrashReporter = LAZY_INSTANCE_INIT;
 
-CrashReporter::CrashReporter()
-   {}
+CrashReporter::CrashReporter() {}
 
 void CrashReporter::initialize() {
     mInitialized = true;
@@ -89,7 +90,6 @@ static const char* formatConsent(CrashConsent::Consent c) {
     return translate[static_cast<int>(c)];
 }
 
-
 void CrashReporter::GenerateDumpAndDie(const char* message) {
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
@@ -99,9 +99,11 @@ void CrashReporter::GenerateDumpAndDie(const char* message) {
     //  - explicit *null = 1 can be optimized out
     //  - requesting dump and exiting later has a very noticable delay in
     //    between, so some real crash could stick in the middle
-#ifndef __APPLE__
     volatile int* volatile ptr = nullptr;
     *ptr = 1313;  // die
+
+#ifndef _WIN32
+    raise(SIGABRT);
 #endif
     abort();  // make compiler believe it doesn't return
 }
@@ -129,15 +131,12 @@ void CrashReporter::attachBinaryData(std::string name,
              name.c_str());
 }
 
-
-
 }  // namespace crashreport
 }  // namespace android
 
 using android::crashreport::CrashReporter;
 
 extern "C" {
-
 
 void crashhandler_append_message(const char* message) {
     const auto reporter = CrashReporter::get();
