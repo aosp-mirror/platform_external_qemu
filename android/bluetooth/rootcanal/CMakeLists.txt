@@ -179,7 +179,8 @@ android_add_library(
   model/hci/hci_sniffer.cc
   model/hci/hci_socket_transport.cc
   model/setup/device_boutique.cc
-  model/setup/phy_layer_factory.cc
+  model/setup/phy_device.cc
+  model/setup/phy_layer.cc
   model/setup/test_channel_transport.cc
   model/setup/test_command_handler.cc
   model/setup/test_model.cc
