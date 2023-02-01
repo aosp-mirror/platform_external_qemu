@@ -77,6 +77,9 @@
 /* PCS Module */
 #define NPCM8XX_PCS_BA          (0xf0780000)
 
+/* PSPI Module */
+#define NPCM8XX_PSPI_BA         (0xf0201000)
+
 /* Run PLL1 at 1600 MHz */
 #define NPCM8XX_PLLCON1_FIXUP_VAL   (0x00402101)
 /* Run the CPU from PLL1 and UART from PLL2 */
@@ -97,6 +100,7 @@ enum NPCM8xxInterrupt {
     NPCM8XX_GMAC3_IRQ,
     NPCM8XX_GMAC4_IRQ,
     NPCM8XX_MMC_IRQ             = 26,
+    NPCM8XX_PSPI_IRQ            = 28,
     NPCM8XX_TIMER0_IRQ          = 32,   /* Timer Module 0 */
     NPCM8XX_TIMER1_IRQ,
     NPCM8XX_TIMER2_IRQ,
@@ -499,6 +503,7 @@ static void npcm8xx_init(Object *obj)
     object_initialize_child(obj, "mmc", &s->mmc, TYPE_NPCM7XX_SDHCI);
     object_initialize_child(obj, "peci", &s->peci, TYPE_NPCM7XX_PECI);
     object_initialize_child(obj, "pcierc", &s->pcierc, TYPE_NPCM_PCIERC);
+    object_initialize_child(obj, "pspi", &s->pspi, TYPE_NPCM_PSPI);
 
     for (i = 0; i < ARRAY_SIZE(s->i3c); i++) {
         object_initialize_child(obj, "i3c[*]", &s->i3c[i], TYPE_SVC_I3C);
@@ -831,6 +836,12 @@ static void npcm8xx_realize(DeviceState *dev, Error **errp)
     sysbus_connect_irq(SYS_BUS_DEVICE(&s->pcierc), 0,
                        npcm8xx_irq(s, NPCM8XX_PCIE_RC_IRQ));
 
+    /* PSPI */
+    sysbus_realize(SYS_BUS_DEVICE(&s->pspi), &error_abort);
+    sysbus_mmio_map(SYS_BUS_DEVICE(&s->pspi), 0, NPCM8XX_PSPI_BA);
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->pspi), 0,
+                       npcm8xx_irq(s, NPCM8XX_PSPI_IRQ));
+
     /* I3C */
     for (i = 0; i < ARRAY_SIZE(s->i3c); i++) {
         object_property_set_int(OBJECT(&s->i3c[i]), "device-id", i,
@@ -852,7 +863,6 @@ static void npcm8xx_realize(DeviceState *dev, Error **errp)
     create_unimplemented_device("npcm8xx.siox[1]",      0xf0101000,   4 * KiB);
     create_unimplemented_device("npcm8xx.siox[2]",      0xf0102000,   4 * KiB);
     create_unimplemented_device("npcm8xx.tmps",         0xf0188000,   4 * KiB);
-    create_unimplemented_device("npcm8xx.pspi",         0xf0201000,   4 * KiB);
     create_unimplemented_device("npcm8xx.viru1",        0xf0204000,   4 * KiB);
     create_unimplemented_device("npcm8xx.viru2",        0xf0205000,   4 * KiB);
     create_unimplemented_device("npcm8xx.jtm1",         0xf0208000,   4 * KiB);
