@@ -2434,6 +2434,11 @@ extern "C" int main(int argc, char** argv) {
         fc::setIfNotOverriden(fc::HasSharedSlotsHostMemoryAllocator, false);
     }
 
+    if (apiLevel >= 33) {
+        // API31 and API32 are affected, API33+ are fixed
+        fc::setIfNotOverriden(fc::VsockSnapshotLoadFixed_b231345789, true);
+    }
+
     // Support for changing default lcd-density
     if (hw->hw_lcd_density) {
         args.add("-lcd-density");
