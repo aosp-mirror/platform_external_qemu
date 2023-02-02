@@ -121,7 +121,7 @@ android_add_executable(
   SRC android/crashreport/CrashUploader.cpp
   DEPS android-emu-base-headers android-emu-crashreport
        android-emu-crashreport-consent-always breakpad_common
-       breakpad_processor)
+       breakpad_processor crashpad_handler_handler)
 add_dependencies(crashreport crashpad_handler)
 
 android_add_executable(
