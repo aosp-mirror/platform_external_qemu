@@ -313,6 +313,11 @@ class AsyncManager::AsyncTaskManager {
     return true;
   }
 
+  void Synchronize(const CriticalCallback& critical) {
+    std::unique_lock<std::mutex> guard(synchronization_mutex_);
+    critical();
+  }
+
   AsyncTaskManager() = default;
   AsyncTaskManager(const AsyncTaskManager&) = delete;
   AsyncTaskManager& operator=(const AsyncTaskManager&) = delete;
@@ -484,7 +489,7 @@ class AsyncManager::AsyncTaskManager {
       }
       if (run_it) {
         const std::lock_guard<std::mutex> lock(task_p->in_callback);
-        callback();
+        Synchronize(callback);
       }
       {
         std::unique_lock<std::mutex> guard(internal_mutex_);
@@ -508,6 +513,7 @@ class AsyncManager::AsyncTaskManager {
   bool running_ = false;
   std::thread thread_;
   std::mutex internal_mutex_;
+  std::mutex synchronization_mutex_;
   std::condition_variable internal_cond_var_;
 
   AsyncTaskId lastTaskId_ = kInvalidTaskId;
@@ -566,7 +572,6 @@ bool AsyncManager::CancelAsyncTasksFromUser(
 }
 
 void AsyncManager::Synchronize(const CriticalCallback& critical) {
-  std::unique_lock<std::mutex> guard(synchronization_mutex_);
-  critical();
+  taskManager_p_->Synchronize(critical);
 }
 }  // namespace rootcanal
