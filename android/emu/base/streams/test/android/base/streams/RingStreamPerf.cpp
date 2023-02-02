@@ -20,7 +20,7 @@
 #include <utility>   // for pair
 
 #include "aemu/base/streams/RingStreambuf.h"  // for RingStre...
-#include "benchmark/benchmark_api.h"             // for State
+#include "benchmark/benchmark.h"              // for State
 
 using android::base::streams::RingStreambuf;
 using namespace std::chrono_literals;
@@ -71,4 +71,4 @@ void BM_WriteLogcatScenario(benchmark::State& state) {
 BASIC_BENCHMARK_TEST(BM_WriteData);
 BASIC_BENCHMARK_TEST(BM_WriteAndRead);
 BASIC_BENCHMARK_TEST(BM_WriteLogcatScenario);
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();

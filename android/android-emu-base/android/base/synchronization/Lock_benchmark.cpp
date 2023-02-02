@@ -20,7 +20,7 @@
 #include <mutex>
 #include <atomic>
 
-#include "benchmark/benchmark_api.h"
+#include "benchmark/benchmark.h"
 
 #define BASIC_BENCHMARK_TEST(x) \
     BENCHMARK(x)->Arg(8)->Arg(512)->Arg(8192)
@@ -96,4 +96,4 @@ BENCHMARK(BM_StdMutex_Contention)->Arg(32)->ThreadPerCpu();
 static StdMutexContention sStdContention;
 
 
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();
