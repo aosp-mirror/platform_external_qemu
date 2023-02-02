@@ -38,6 +38,7 @@ set(android-qemu2-glue_src
     emulation/VirtioGpuTimelines.cpp
     emulation/WifiService.cpp
     emulation/VirtioWifiForwarder.cpp
+    emulation/NetsimWifiForwarder.cpp
     looper-qemu.cpp
     net-android.cpp
     proxy/slirp_proxy.cpp
@@ -110,7 +111,11 @@ target_link_libraries(
           ssl
           hostapd
           flatbuffers
-          qemu-host-common-headers)
+          qemu-host-common-headers
+          grpc++
+          packet-streamer-client-lib
+          protobuf::libprotobuf
+          packet-streamer-client-grpc-lib)
 
 add_dependencies(libqemu2-glue virtio_gpu_timelines_fbs_header)
 
