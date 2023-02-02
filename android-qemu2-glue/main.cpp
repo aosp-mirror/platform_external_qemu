@@ -437,6 +437,33 @@ static void createSdCard(std::string sdcardFilePath, int size) {
             {mksdcard, buf, sdcardFilePath});
 }
 
+static void replaceDefaultPath(AvdInfo* avd,
+                               const char* proposedPath,
+                               std::string& defaultPath) {
+    if (!proposedPath || !avd || (strlen(proposedPath) == 0)) {
+        dprint("%s %d %s:proposed path is not set or avd is null\n", __FILE__,
+               __LINE__, __func__);
+        return;
+    } else {
+        dprint("%s %d %s:proposed path has size %d and is %s \n", __FILE__,
+               __LINE__, __func__, strlen(proposedPath), proposedPath);
+    }
+
+    std::string strProposed =
+            path_is_absolute(proposedPath)
+                    ? std::string(proposedPath)
+                    : PathUtils::join(path_getSdkRoot(), proposedPath);
+    if (!path_is_dir(strProposed.c_str())) {
+        dprint("%s %d %s:proposed path %s is not dir\n", __FILE__, __LINE__,
+               __func__, strProposed.c_str());
+        return;
+    }
+
+    dprint("%s %d %s:proposed dir %s is replacing default dir %s\n", __FILE__,
+           __LINE__, __func__, strProposed.c_str(), defaultPath.c_str());
+    defaultPath.swap(strProposed);
+}
+
 static void convertExt4ToQcow2(std::string ext4filepath) {
     if (!path_exists(ext4filepath.c_str())) {
         return;
@@ -1277,7 +1304,23 @@ static std::string buildSoundhwParam(const int apiLevel,
     return param;
 }
 
-// TODO-bohu: add code to check snapshot compatibility
+static std::string getSkinPathFromConfigFile(std::string config) {
+    IniFile configIni(config);
+    if (!configIni.read(false /* don't keep comments */)) {
+        dwarning("could not read %s at %s %d", config.c_str(), __FILE__,
+                 __LINE__);
+        return "";
+    }
+
+    const std::string key = "skin.path";
+
+    if (!configIni.hasKey(key)) {
+        return "";
+    }
+
+    std::string ret = configIni.getString(key, "");
+    return ret;
+}
 
 static bool checkConfigIniCompatible(std::string srcConfig,
                                      std::string destConfig) {
@@ -1297,7 +1340,7 @@ static bool checkConfigIniCompatible(std::string srcConfig,
 
     std::unordered_set<std::string> important{
             "abi.type",      "hw.cpu.arch",  "hw.lcd.density",
-            "hw.lcd.height", "hw.lcd.width",
+            "hw.lcd.height", "hw.lcd.width", "skin.name",
     };
     for (auto&& key : srcConfigIni) {
         if (important.count(key) == 0) {
@@ -1317,7 +1360,10 @@ static bool checkConfigIniCompatible(std::string srcConfig,
     return true;
 }
 
-static void fixAvdIdAndDisplayName(std::string avdDir, std::string avdName) {
+static void fixAvdConfig(std::string avdDir,
+                         std::string avdName,
+                         std::string skinPath,
+                         AndroidHwConfig* hw) {
     IniFile configIni(PathUtils::join(avdDir, "config.ini"));
     if (!configIni.read(false)) {
         dwarning("could not open %s/config.ini %s %d", avdDir.c_str(), __FILE__,
@@ -1327,6 +1373,10 @@ static void fixAvdIdAndDisplayName(std::string avdDir, std::string avdName) {
 
     configIni.setString("AvdId", avdName);
     configIni.setString("avd.ini.displayname", avdName);
+    configIni.setString("firstboot.downloaded.path",
+                        hw->firstboot_downloaded_path);
+    configIni.setString("firstboot.local.path", hw->firstboot_local_path);
+    configIni.setString("skin.path", skinPath);
     configIni.writeIfChanged();
 }
 
@@ -1950,8 +2000,14 @@ extern "C" int main(int argc, char** argv) {
             // try copy content from <sysimgdir>/snapshots/avd/default
             std::string srcDirLocal = PathUtils::join(
                     systemImagePath, "snapshots", "local", "avd");
+            replaceDefaultPath(avd, hw->firstboot_local_path, srcDirLocal);
+            str_reset(&hw->firstboot_local_path, srcDirLocal.c_str());
+
             std::string srcDirDownloaded = PathUtils::join(
                     systemImagePath, "snapshots", "downloaded", "avd");
+            replaceDefaultPath(avd, hw->firstboot_downloaded_path,
+                               srcDirDownloaded);
+            str_reset(&hw->firstboot_downloaded_path, srcDirDownloaded.c_str());
 
             std::string srcDir;
             std::string default_config_ini;
@@ -1994,10 +2050,16 @@ extern "C" int main(int argc, char** argv) {
                     path_get_size(orgSdcardPath.c_str(), &sdcard_size);
                 }
 
+                std::set<std::string> skipSet;
                 // when not compatible, do a cold boot, but still leverage
                 // the already booted userdata partition etc.
                 if (!checkCompatable(srcDir, std::string(s_AvdFolder))) {
+                    dwarning(
+                            "emulator: Not compatible with downloaded "
+                            "snapshot, forcing code boot");
                     opts->no_snapshot_load = true;
+                    // not compatible keep the original config.ini file
+                    skipSet.insert("config.ini");
                     Snapshotter::get().setDownloadableSnapshotFailure(
                                 DownloadableSnapshotFailure::IncompatibleAvd);
                 }
@@ -2006,13 +2068,15 @@ extern "C" int main(int argc, char** argv) {
                        srcDir.c_str(), s_AvdFolder);
                 auto startTime = std::chrono::steady_clock::now();
                 path_delete_dir(s_AvdFolder);
-                std::set<std::string> skipSet;
                 skipSet.insert("source.properties");
                 skipSet.insert("multiinstance.lock");
                 skipSet.insert("hardware-qemu.ini.lock");
                 if (-1 ==
                     path_copy_dir_ex(s_AvdFolder, srcDir.c_str(), &skipSet)) {
                     // copy failed
+                    dwarning(
+                            "emulator: failed to copy downloaded snapshot, "
+                            "fresh boot");
                     opts->no_snapshot_load = true;
                     Snapshotter::get().setDownloadableSnapshotFailure(
                             DownloadableSnapshotFailure::FailedToCopyAvd);
@@ -2045,8 +2109,14 @@ extern "C" int main(int argc, char** argv) {
                     Snapshotter::get().settDownloadableSnapshotCopyTime(
                             timeUsedMs);
                     firstTimeSetup = false;  // already setup
-                    // fix AvdId and displayname
-                    fixAvdIdAndDisplayName(std::string(s_AvdFolder), avdName);
+                    if (opts->no_snapshot_load) {
+                        std::string orgSkinPath = getSkinPathFromConfigFile(
+                                PathUtils::join(std::string(s_AvdFolder),
+                                                "config.ini"));
+                        // fix AvdId, displayname and paths
+                        fixAvdConfig(std::string(s_AvdFolder), avdName,
+                                     orgSkinPath, hw);
+                    }
                 }
             } else {
                 // TODO: when snapshot is not possible, maybe try cold boot, at
