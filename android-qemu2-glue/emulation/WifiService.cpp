@@ -15,12 +15,12 @@
 #include "android-qemu2-glue/emulation/WifiService.h"
 
 #include "aemu/base/Log.h"
+#include "android-qemu2-glue/emulation/NetsimWifiForwarder.h"
 #include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
 #include "android/emulation/HostapdController.h"
 #include "android/utils/debug.h"
 
 using android::network::MacAddress;
-using android::qemu2::VirtioWifiForwarder;
 
 namespace android {
 namespace qemu2 {
@@ -97,9 +97,15 @@ std::unique_ptr<WifiService> Builder::build() {
             derror("Failed to initialize hostpad event loop.");
         }
     }
-    return std::unique_ptr<WifiService>(new VirtioWifiForwarder(
-            mBssID.data(), mOnReceiveCallback, mOnLinkStatusChanged,
-            mCanReceive, mNicConf, mOnSentCallback, mServerPort, mClientPort));
+    if (mRedirectToNetsim) {
+        return std::unique_ptr<WifiService>(
+                new NetsimWifiForwarder(mOnReceiveCallback, mCanReceive));
+    } else {
+        return std::unique_ptr<WifiService>(new VirtioWifiForwarder(
+                mBssID.data(), mOnReceiveCallback, mOnLinkStatusChanged,
+                mCanReceive, mNicConf, mOnSentCallback, mServerPort,
+                mClientPort));
+    }
 }
 
 }  // namespace qemu2
