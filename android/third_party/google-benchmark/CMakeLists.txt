@@ -6,20 +6,24 @@ android_add_library(
   TARGET emulator-gbench
   NODISTRIBUTE
   SRC # cmake-format: sortable
+      ${src}/benchmark_api_internal.cc
       ${src}/benchmark.cc
+      ${src}/benchmark_name.cc
+      ${src}/benchmark_register.cc
+      ${src}/benchmark_runner.cc
       ${src}/colorprint.cc
       ${src}/commandlineflags.cc
       ${src}/complexity.cc
       ${src}/console_reporter.cc
+      ${src}/counter.cc
       ${src}/csv_reporter.cc
       ${src}/json_reporter.cc
-      ${src}/log.cc
-      ${src}/re_posix.cc
       ${src}/reporter.cc
       ${src}/sleep.cc
+      ${src}/statistics.cc
       ${src}/string_util.cc
       ${src}/sysinfo.cc
-      ${src}/walltime.cc)
+      ${src}/timers.cc)
 
 target_include_directories(emulator-gbench PUBLIC ${src}/../include)
 # NOTE HAVE_STD_REGEX doesn't seem to work with our toolchains.

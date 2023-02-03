@@ -355,4 +355,4 @@ BASIC_BENCHMARK_TEST(BM_stream_screen_rgba8888_frame_counter);
 BASIC_BENCHMARK_TEST(BM_stream_screen_rgb888_frame_counter);
 BASIC_BENCHMARK_TEST(BM_stream_screen_shared_rgba8888_frame_counter);
 BASIC_BENCHMARK_TEST(BM_share_vid_frame_counter);
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();

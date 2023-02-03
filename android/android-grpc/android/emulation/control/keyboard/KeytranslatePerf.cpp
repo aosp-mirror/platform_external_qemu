@@ -22,7 +22,7 @@
 
 #include "aemu/base/ArraySize.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
-#include "benchmark/benchmark_api.h"
+#include "benchmark/benchmark.h"
 
 // Results will vary pending optimization. List is never worse
 // than a map.
