@@ -1304,21 +1304,21 @@ static std::string buildSoundhwParam(const int apiLevel,
     return param;
 }
 
-static std::string getSkinPathFromConfigFile(std::string config) {
+static std::string getKeyFromConfigFile(std::string config,
+                                        std::string key,
+                                        std::string defaultVal) {
     IniFile configIni(config);
     if (!configIni.read(false /* don't keep comments */)) {
         dwarning("could not read %s at %s %d", config.c_str(), __FILE__,
                  __LINE__);
-        return "";
+        return defaultVal;
     }
-
-    const std::string key = "skin.path";
 
     if (!configIni.hasKey(key)) {
-        return "";
+        return defaultVal;
     }
 
-    std::string ret = configIni.getString(key, "");
+    std::string ret = configIni.getString(key, defaultVal);
     return ret;
 }
 
@@ -1362,6 +1362,7 @@ static bool checkConfigIniCompatible(std::string srcConfig,
 
 static void fixAvdConfig(std::string avdDir,
                          std::string avdName,
+                         std::string avdDisplayName,
                          std::string skinPath,
                          AndroidHwConfig* hw) {
     IniFile configIni(PathUtils::join(avdDir, "config.ini"));
@@ -1372,7 +1373,7 @@ static void fixAvdConfig(std::string avdDir,
     }
 
     configIni.setString("AvdId", avdName);
-    configIni.setString("avd.ini.displayname", avdName);
+    configIni.setString("avd.ini.displayname", avdDisplayName);
     configIni.setString("firstboot.downloaded.path",
                         hw->firstboot_downloaded_path);
     configIni.setString("firstboot.local.path", hw->firstboot_local_path);
@@ -2050,6 +2051,12 @@ extern "C" int main(int argc, char** argv) {
                     path_get_size(orgSdcardPath.c_str(), &sdcard_size);
                 }
 
+                const std::string orgConfigFile =
+                        PathUtils::join(std::string(s_AvdFolder), "config.ini");
+                const std::string orgSkinPath =
+                        getKeyFromConfigFile(orgConfigFile, "skin.path", "");
+                const std::string orgDisplayName = getKeyFromConfigFile(
+                        orgConfigFile, "avd.ini.displayname", avdName);
                 std::set<std::string> skipSet;
                 // when not compatible, do a cold boot, but still leverage
                 // the already booted userdata partition etc.
@@ -2109,13 +2116,10 @@ extern "C" int main(int argc, char** argv) {
                     Snapshotter::get().settDownloadableSnapshotCopyTime(
                             timeUsedMs);
                     firstTimeSetup = false;  // already setup
-                    if (opts->no_snapshot_load) {
-                        std::string orgSkinPath = getSkinPathFromConfigFile(
-                                PathUtils::join(std::string(s_AvdFolder),
-                                                "config.ini"));
+                    if (!opts->no_snapshot_load) {
                         // fix AvdId, displayname and paths
                         fixAvdConfig(std::string(s_AvdFolder), avdName,
-                                     orgSkinPath, hw);
+                                     orgDisplayName, orgSkinPath, hw);
                     }
                 }
             } else {
