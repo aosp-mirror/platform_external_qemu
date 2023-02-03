@@ -216,12 +216,20 @@ class EmulatorDescription(BasicEmulatorDescription):
     def is_alive(self) -> bool:
         """Checks to see if this emulator description is still alive.
 
-        A Liveness check is done by determining if the pid is still alive
+        A Liveness check is done by determining if the pid is still alive, and its
+        status is not zombie or dead.
 
         Returns:
             bool: True if the pid associated with this description is alive
         """
-        return psutil.pid_exists(self.pid())
+        if not psutil.pid_exists(self.pid()):
+            return False
+
+        try:
+            status = psutil.Process(self.pid()).status()
+            return status != psutil.STATUS_DEAD and status != psutil.STATUS_ZOMBIE
+        except:
+            return False
 
     def shutdown(self, timeout=30) -> bool:
         """Gracefully shutdown the emulator.
