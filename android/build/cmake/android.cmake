@@ -87,7 +87,6 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
   endif()
 endfunction()
 
-
 # ~~~
 # Enable the compilation of .l / .ll files using flex. This relies on
 # ./external/flex being available
@@ -1315,7 +1314,6 @@ function(get_git_version VER)
 
 endfunction()
 
-
 # ~~~
 # ! android_link_complete_archive: Links an archive to be completely included
 #
@@ -1336,8 +1334,8 @@ function(android_link_complete_archive)
   set(options)
   set(oneValueArgs TARGET AS)
   set(multiValueArgs)
-  cmake_parse_arguments(lnk "${options}" "${oneValueArgs}"
-                        "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(lnk "${options}" "${oneValueArgs}" "${multiValueArgs}"
+                        ${ARGN})
 
   if(DARWIN_X86_64 OR DARWIN_AARCH64)
     set(WHOLE_LINK_CMD "-Wl,-force_load,$<TARGET_FILE:${lnk_TARGET}>")
@@ -1350,7 +1348,9 @@ function(android_link_complete_archive)
       set(WHOLE_LINK_CMD "-Wl,-wholearchive:$<TARGET_FILE:${lnk_TARGET}>")
     endif()
   else()
-      set(WHOLE_LINK_CMD "-Wl,--whole-archive $<TARGET_FILE:${lnk_TARGET}> -Wl,--no-whole-archive")
+    set(WHOLE_LINK_CMD
+        "-Wl,--whole-archive $<TARGET_FILE:${lnk_TARGET}> -Wl,--no-whole-archive"
+    )
   endif()
   set_property(GLOBAL APPEND PROPERTY ALIAS_LST "${lnk_AS}|${lnk_TARGET}\n")
   add_library(${lnk_AS} INTERFACE)
@@ -1604,23 +1604,24 @@ function(android_upload_symbols TGT)
   if(NOT ANDROID_EXTRACT_SYMBOLS)
     return()
   endif()
+  set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
   if(WIN32)
-    add_custom_command(
-      TARGET ${TGT}
-      POST_BUILD
-      COMMAND sym_upload -p "$<TARGET_FILE:${TGT}>" "${BREAKPAD_API_URL}"
-              "${BREAKPAD_API_KEY}" DEPENDS sym_upload
-      COMMENT "Uploading symbols for ${TGT}")
+    set(SYM_SOURCE "$<TARGET_FILE:${TGT}>")
   else()
-    set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
-    add_custom_command(
-      TARGET ${TGT}
-      POST_BUILD
-      COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST} DEPENDS dump_syms
-      COMMAND sym_upload -p sym-upload-v2 -k "${BREAKPAD_API_KEY}" ${DEST}
-              "${BREAKPAD_API_URL}" || exit 0
-      COMMENT "Extracting symbols for ${TGT}" DEPENDS sym_upload dump_syms)
+    set(SYM_SOURCE "${DEST}")
   endif()
+  add_custom_command(
+    TARGET ${TGT}
+    POST_BUILD
+    COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
+    COMMAND sym_upload -p sym-upload-v2 -k "${BREAKPAD_API_KEY}" ${SYM_SOURCE}
+            "${BREAKPAD_API_URL}" || exit 0
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
+      "-o" "${ANDROID_SYMBOL_DIR}" "${DEST}"
+    COMMENT "Extracting symbols for ${TGT}"
+    DEPENDS sym_upload dump_syms)
 endfunction()
 
 # Installs the given target executable into the given destinations. Symbols will
@@ -1633,11 +1634,11 @@ function(android_install_exe TGT DST)
   android_install_license(${TGT} ${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
   android_sign(
     INSTALL ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
-  if (LINUX_AARCH64)
-        install(
-            CODE "message(STATUS \"Strip: ${TGT}\")
+  if(LINUX_AARCH64)
+    install(
+      CODE "message(STATUS \"Strip: ${TGT}\")
             execute_process(COMMAND ${CMAKE_STRIP_CMD} ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})"
-            )
+    )
   endif()
 endfunction()
 
@@ -1653,12 +1654,12 @@ function(android_install_shared TGT)
     INSTALL
       ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
 
-  if (LINUX_AARCH64)
-        install(
-            CODE "message(STATUS \"Strip: ${TGT}\")
+  if(LINUX_AARCH64)
+    install(
+      CODE "message(STATUS \"Strip: ${TGT}\")
             execute_process(COMMAND ${CMAKE_STRIP_CMD}
                 ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})"
-            )
+    )
   endif()
 
   # Binplace for unit tests
