@@ -1339,9 +1339,11 @@ static bool checkConfigIniCompatible(std::string srcConfig,
     }
 
     std::unordered_set<std::string> important{
-            "abi.type",      "hw.cpu.arch",  "hw.lcd.density",
-            "hw.lcd.height", "hw.lcd.width", "skin.name",
-    };
+            "abi.type",       "hw.cpu.arch",     "hw.lcd.density",
+            "hw.lcd.height",  "hw.lcd.width",    "skin.name",
+            "hw.camera.back", "hw.camera.front", "hw.gpu.enabled",
+            "hw.gpu.mode",    "hw.sdCard",       "hw.keyboard",
+            "hw.arc"};
     for (auto&& key : srcConfigIni) {
         if (important.count(key) == 0) {
             continue;  // not important, ignore
@@ -2065,10 +2067,12 @@ extern "C" int main(int argc, char** argv) {
                             "emulator: Not compatible with downloaded "
                             "snapshot, forcing code boot");
                     opts->no_snapshot_load = true;
-                    // not compatible keep the original config.ini file
-                    skipSet.insert("config.ini");
                     Snapshotter::get().setDownloadableSnapshotFailure(
                                 DownloadableSnapshotFailure::IncompatibleAvd);
+                }
+                if (opts->no_snapshot_load) {
+                    // keep the original config.ini file
+                    skipSet.insert("config.ini");
                 }
                 dprint("emulator: First boot, copying snapshot...");
                 dprint("emulator: copying snapshot from %s to %s",
@@ -2104,6 +2108,8 @@ extern "C" int main(int argc, char** argv) {
                         const std::string avdSnapshotDir =
                                 PathUtils::join(s_AvdFolder, "snapshots");
                         path_delete_dir(avdSnapshotDir.c_str());
+                        // create config.ini
+                        orgSrcConfigIni.write();
                     }
                     auto elapsed = std::chrono::duration_cast<
                             std::chrono::milliseconds>(
