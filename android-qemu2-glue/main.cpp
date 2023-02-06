@@ -9,9 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android-qemu2-glue/qemu-console-factory.h"
-#include "android/android.h"
-#include "host-common/hw-config.h"
 #include "aemu/base/ProcessControl.h"
 #include "aemu/base/StringFormat.h"
 #include "aemu/base/async/ThreadLooper.h"
@@ -21,34 +18,28 @@
 #include "aemu/base/system/Win32Utils.h"
 #include "aemu/base/threads/Async.h"
 #include "aemu/base/threads/Thread.h"
+#include "android-qemu2-glue/qemu-console-factory.h"
+#include "android/android.h"
+#include "android/avd/BugreportInfo.h"
 #include "android/base/system/System.h"
 #include "android/boot-properties.h"
 #include "android/bootconfig.h"
 #include "android/camera/camera-virtualscene.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
-#include "host-common/constants.h"
-#include "host-common/hw-config-helper.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
-#include "host-common/crash-handler.h"
 #include "android/crashreport/crash-initializer.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/HostapdController.h"
 #include "android/emulation/LogcatPipe.h"
-#include "host-common/MultiDisplay.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/USBAssist.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/emulation/control/adb/adbkey.h"
 #include "android/emulation/control/automation_agent.h"
-#include "host-common/multi_display_agent.h"
-#include "host-common/vm_operations.h"
-#include "host-common/window_agent.h"
 #include "android/error-messages.h"
-#include "host-common/FeatureControl.h"
-#include "host-common/feature_control.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/help.h"
@@ -58,14 +49,12 @@
 #include "android/main-common.h"
 #include "android/main-kernel-parameters.h"
 #include "android/multi-instance.h"
-#include "host-common/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/opengles.h"
 #include "android/process_setup.h"
-#include "host-common/screen-recorder.h"
 #include "android/session_phase_reporter.h"
-#include "android/snapshot/check_snapshot_loadable.h"
 #include "android/snapshot/Snapshotter.h"
+#include "android/snapshot/check_snapshot_loadable.h"
 #include "android/snapshot/interface.h"
 #include "android/userspace-boot-properties.h"
 #include "android/utils/bufprint.h"
@@ -81,6 +70,18 @@
 #include "android/utils/timezone.h"
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/verified-boot/load_config.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/MultiDisplay.h"
+#include "host-common/constants.h"
+#include "host-common/crash-handler.h"
+#include "host-common/feature_control.h"
+#include "host-common/hw-config-helper.h"
+#include "host-common/hw-config.h"
+#include "host-common/multi_display_agent.h"
+#include "host-common/opengl/emugl_config.h"
+#include "host-common/screen-recorder.h"
+#include "host-common/vm_operations.h"
+#include "host-common/window_agent.h"
 
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/winsys.h"
@@ -1998,6 +1999,13 @@ extern "C" int main(int argc, char** argv) {
         const char* avdName = avdInfo_getName(avd);
         char* s_AvdFolder = path_getAvdContentPath(avdName);
         if (s_AvdFolder) {
+            // create firstboot.ini
+            std::string orgSrcFirstbootIniFileName(
+                    PathUtils::join(s_AvdFolder, "firstboot.ini"));
+            android::avd::BugreportInfo bugInfo;
+            bugInfo.dumpFirstbootInfoForDownloadableSnapshot(
+                    orgSrcFirstbootIniFileName);
+
             std::string systemImagePath =
                     path_getAvdSystemPath(avdName, path_getSdkRoot(), false);
             // try copy content from <sysimgdir>/snapshots/avd/default
@@ -2079,6 +2087,7 @@ extern "C" int main(int argc, char** argv) {
                        srcDir.c_str(), s_AvdFolder);
                 auto startTime = std::chrono::steady_clock::now();
                 path_delete_dir(s_AvdFolder);
+                skipSet.insert("firstboot.ini");
                 skipSet.insert("source.properties");
                 skipSet.insert("multiinstance.lock");
                 skipSet.insert("hardware-qemu.ini.lock");
