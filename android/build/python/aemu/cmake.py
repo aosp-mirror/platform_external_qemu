@@ -27,7 +27,6 @@ from aemu.tasks.build_task import BuildTask
 from aemu.tasks.clean import CleanTask
 from aemu.tasks.compile import CompileTask
 from aemu.tasks.configure import ConfigureTask
-from aemu.tasks.crate_prepare import CratePrepareTask
 from aemu.tasks.distribution import DistributionTask
 from aemu.tasks.gen_entries import GenEntriesTestTask
 from aemu.tasks.integration_tests import IntegrationTestTask
@@ -51,7 +50,6 @@ def get_tasks(args) -> List[BuildTask]:
     tasks = [
         KillNetsimdTask(),
         FixCargoTask(args.aosp).enable(False),
-        CratePrepareTask(args.aosp).enable(False), # b/266452652
         # A task can be disabled, or explicitly enabled by calling
         # .enable(False) <- Disable the task
         CleanTask(args.out),
