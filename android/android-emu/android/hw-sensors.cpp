@@ -23,18 +23,19 @@
 #include <string>
 #include <vector>
 
-#include "android/automation/AutomationController.h"
 #include "aemu/base/misc/StringUtils.h"
-#include "android/emulation/android_qemud.h"
-#include "android/emulation/control/adb/AdbInterface.h"
+#include "aemu/base/utils/stream.h"
+#include "android/automation/AutomationController.h"
 #include "android/avd/info.h"
 #include "android/console.h"
+#include "android/emulation/android_qemud.h"
+#include "android/emulation/control/adb/AdbInterface.h"
+#include "android/emulation/resizable_display_config.h"
 #include "android/physics/PhysicalModel.h"
 #include "android/sensors-port.h"
 #include "android/utils/debug.h"
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
-#include "aemu/base/utils/stream.h"
 #include "android/utils/system.h"
 
 #define E(...) derror(__VA_ARGS__)
@@ -1329,6 +1330,15 @@ int android_foldable_get_state(struct FoldableState* state) {
 
 bool android_foldable_hinge_configured() {
     return (getConsoleAgents()->settings->hw()->hw_sensor_hinge && getConsoleAgents()->settings->hw()->hw_sensor_hinge_count > 0);
+}
+
+// We still need to discuss how to support foldable for secondary displays
+bool android_foldable_hinge_enabled() {
+    return ((android_foldable_hinge_configured() ||
+             android_foldable_folded_area_configured(0) ||
+             android_foldable_rollable_configured()) &&
+            (!resizableEnabled() ||
+             getResizableActiveConfigId() == PRESET_SIZE_UNFOLDED));
 }
 
 bool android_foldable_any_folded_area_configured() {

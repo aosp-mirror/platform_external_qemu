@@ -98,6 +98,7 @@ public:
     bool isExtendedWindowVisible();
     void closeExtendedWindow();
     void enableCloseButton();
+    void updateFoldableButtonVisibility();
 
     // Observed only on Windows:
     // Whenever we set the window flags for the EmulatorContainer,
