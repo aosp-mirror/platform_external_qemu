@@ -181,15 +181,23 @@ auto ConfigDirs::getSdkRootDirectoryByPath(bool verbose) -> std::string {
     auto* system = System::get();
 
     auto parts = PathUtils::decompose(system->getLauncherDirectory());
-    parts.emplace_back("..");
-    PathUtils::simplifyComponents(&parts);
 
     std::string sdkRoot = PathUtils::recompose(parts);
-    if (verbose) {
-        dinfo("guessed sdk root is %s", sdkRoot.c_str());
-    }
-    if (isValidSdkRoot(sdkRoot, verbose)) {
-        return sdkRoot;
+    for (int i = 0; i < 3; ++i) {
+        parts.emplace_back("..");
+        PathUtils::simplifyComponents(&parts);
+
+        sdkRoot = PathUtils::recompose(parts);
+        if (verbose) {
+            dinfo("guessed sdk root is %s", sdkRoot.c_str());
+        }
+        if (isValidSdkRoot(sdkRoot, verbose)) {
+            return sdkRoot;
+        }
+        if (verbose) {
+            dinfo("guessed sdk root %s does not seem to be valid",
+                  sdkRoot.c_str());
+        }
     }
     if (verbose) {
         dwarning("invalid sdk root %s", sdkRoot.c_str());
