@@ -28,7 +28,7 @@
 # \argn: The variable that will hold the expected rust version.
 # ~~~
 function(get_rust_version RET_VAL)
-  set(${RET_VAL} "1.64.0" PARENT_SCOPE)
+  set(${RET_VAL} "1.65.0" PARENT_SCOPE)
 endfunction()
 
 # ~~~
