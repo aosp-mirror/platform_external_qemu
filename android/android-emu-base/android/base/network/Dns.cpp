@@ -99,14 +99,6 @@ static int is_site_local_dns_broadcast(struct in6_addr* address) {
     return 0;
 }
 
-static void print_dns_v6_address(struct in6_addr address) {
-    char address_str[INET6_ADDRSTRLEN] = "";
-    if (inet_ntop(AF_INET6, &address, address_str, INET6_ADDRSTRLEN) == NULL) {
-        LOG(ERROR) << "Failed to stringify IPv6 address for logging.";
-        return;
-    }
-    LOG(INFO) << "IPv6 DNS server found: " << address_str;
-}
 #endif
 
 #if DEBUG
@@ -280,15 +272,27 @@ public:
 
                     dns_v6_addr = (struct sockaddr_in6*)
                                           dns_server->Address.lpSockaddr;
-                    if (is_site_local_dns_broadcast(&dns_v6_addr->sin6_addr) ==
-                        0) {
-                        print_dns_v6_address(dns_v6_addr->sin6_addr);
-                        IpAddress ip = IpAddress(dns_v6_addr->sin6_addr.s6_addr);
-                        if (ip.valid()) {
-                            auto ret = present.insert(ip);
-                            if (ret.second) {
-                                out->emplace_back(std::move(ip));
-                            }
+                    char address_str[INET6_ADDRSTRLEN] = "";
+                    if (inet_ntop(AF_INET6, &address, address_str,
+                                  INET6_ADDRSTRLEN) == NULL) {
+                        LOG(ERROR) << "Failed to stringify IPv6 address for "
+                                      "logging.";
+                    }
+                    // b/267647323
+                    // Ignore IPv6 DNS address which is site local DNS broadcast
+                    // or link local.
+                    if (is_site_local_dns_broadcast(&dns_v6_addr->sin6_addr) ||
+                        IN6_IS_ADDR_LINKLOCAL(&dns_v6_addr->sin6_addr)) {
+                        LOG(DEBUG) << "Ignore IPv6 address: " << address_str;
+                        continue;
+                    }
+
+                    LOG(DEBUG) << "IPv6 DNS server found: " << address_str;
+                    IpAddress ip = IpAddress(dns_v6_addr->sin6_addr.s6_addr);
+                    if (ip.valid()) {
+                        auto ret = present.insert(ip);
+                        if (ret.second) {
+                            out->emplace_back(std::move(ip));
                         }
                     }
                 }
@@ -328,9 +332,27 @@ public:
             if (sscanf(line.c_str(), "nameserver%*[ \t]%256s", nameserver) ==
                 1) {
                 IpAddress ip(nameserver);
+
                 if (ip.valid()) {
-                    out->emplace_back(std::move(ip));
-                    count++;
+                    // b/267647323, discard IPv6 DNS address which is also link
+                    // local
+                    bool skip = false;
+                    if (ip.isIpv6()) {
+                        struct in6_addr sin6_addr;
+                        if (!inet_pton(AF_INET6, nameserver, &sin6_addr)) {
+                            LOG(DEBUG) << "Failed to parse IPv6 DNS address "
+                                       << nameserver;
+                        } else {
+                            skip = IN6_IS_ADDR_LINKLOCAL(&sin6_addr);
+                        }
+                    }
+                    if (!skip) {
+                        out->emplace_back(std::move(ip));
+                        count++;
+                    } else {
+                        LOG(DEBUG) << "Ignore IPv6 link local address: "
+                                   << ip.toString();
+                    }
                 }
             }
         }
