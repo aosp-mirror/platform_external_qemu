@@ -38,6 +38,7 @@ class QPushButton;
 class QShowEvent;
 class ToolWindow;
 class VirtualSceneControlWindow;
+class VirtualSensorsPage;
 template <class CommandType> class ShortcutKeyStore;
 
 namespace android {
@@ -80,6 +81,7 @@ public:
     void connectVirtualSceneWindow(
             VirtualSceneControlWindow* virtualSceneWindow);
 
+    VirtualSensorsPage* getVirtualSensorsPage();
 private slots:
     void switchFrameAlways(bool showFrame);
     void switchOnTop(bool isOntop);

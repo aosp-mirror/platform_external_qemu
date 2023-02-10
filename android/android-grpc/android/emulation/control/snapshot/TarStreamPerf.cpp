@@ -24,7 +24,7 @@
 #include "aemu/base/files/TarStream.h"
 #include "android/base/system/System.h"
 #include "android/utils/Random.h"
-#include "benchmark/benchmark_api.h"  // for State
+#include "benchmark/benchmark.h"  // for State
 
 #define BASIC_BENCHMARK_TEST(x) \
     BENCHMARK(x)->RangeMultiplier(2)->Range(1 << 10, 1 << 20)

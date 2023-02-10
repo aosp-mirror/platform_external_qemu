@@ -790,36 +790,7 @@ static EGLint rcGetFBParam(EGLint param)
     if (!fb) {
         return 0;
     }
-
-    EGLint ret = 0;
-
-    switch(param) {
-        case FB_WIDTH:
-            ret = fb->getWidth();
-            break;
-        case FB_HEIGHT:
-            ret = fb->getHeight();
-            break;
-        case FB_XDPI:
-            ret = 72; // XXX: should be implemented
-            break;
-        case FB_YDPI:
-            ret = 72; // XXX: should be implemented
-            break;
-        case FB_FPS:
-            ret = 60;
-            break;
-        case FB_MIN_SWAP_INTERVAL:
-            ret = 1; // XXX: should be implemented
-            break;
-        case FB_MAX_SWAP_INTERVAL:
-            ret = 1; // XXX: should be implemented
-            break;
-        default:
-            break;
-    }
-
-    return ret;
+    return fb->getDisplayConfigsParam(0, param);
 }
 
 static uint32_t rcCreateContext(uint32_t config,

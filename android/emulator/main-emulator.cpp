@@ -42,6 +42,8 @@
 #include "aemu/base/ArraySize.h"
 #include "aemu/base/ProcessControl.h"
 
+#include "aemu/base/Version.h"
+#include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -50,7 +52,6 @@
 #include "android/emulation/USBAssist.h"
 #include "android/main-emugl.h"
 #include "android/main-help.h"
-#include "host-common/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/compiler.h"
@@ -60,6 +61,7 @@
 #include "android/utils/path.h"
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/version.h"
+#include "host-common/opengl/emugl_config.h"
 
 #include "android/skin/winsys.h"
 
@@ -354,6 +356,26 @@ bool handle_kill_command(int argc, char** argv) {
         System::get()->killProcess(killPid);
     }
     return hasKill;
+}
+
+android::base::Version getRequiredEmulatorVersion(
+        const std::string& config,
+        android::base::Version defaultVersion) {
+    android::base::IniFile configIni(config);
+    if (!configIni.read(false /* don't keep comments */)) {
+        dwarning("could not read %s at %s %d", config.c_str(), __FILE__,
+                 __LINE__);
+        return defaultVersion;
+    }
+
+    const std::string key = "requires.emulator.version";
+    if (!configIni.hasKey(key)) {
+        return defaultVersion;
+    }
+
+    std::string ret = configIni.getString(key, "");
+
+    return android::base::Version(ret);
 }
 
 /* Main routine */
@@ -829,6 +851,41 @@ int main(int argc, char** argv) {
           " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
           EMULATOR_CL_SHA1);
 #endif
+
+    // check version requirement in avd's config.ini file and make
+    // sure curent version >= the required version;
+    if (avdName) {
+        char* avd_folder = path_getAvdContentPath(avdName);
+        if (avd_folder) {
+            const std::string configIniPath =
+                    PathUtils::join(avd_folder, "config.ini");
+            if (path_exists(configIniPath.c_str())) {
+                const auto myVersion =
+                        android::base::Version{EMULATOR_VERSION_STRING_SHORT};
+                const auto requiredVersion =
+                        getRequiredEmulatorVersion(configIniPath, myVersion);
+                if (myVersion < requiredVersion) {
+                    derror("Current emulator version %s is less than the "
+                           "required version %s, quit.",
+                           myVersion.toString().c_str(),
+                           requiredVersion.toString().c_str());
+                    return 1;
+                } else if (myVersion == requiredVersion) {
+                    dprint("Current emulator version %s is the same as the "
+                           "required version %s.",
+                           myVersion.toString().c_str(),
+                           requiredVersion.toString().c_str());
+                } else {
+                    dwarning(
+                            "Current emulator version %s is higher than the "
+                            "required version %s, could lead to cold boot.",
+                            myVersion.toString().c_str(),
+                            requiredVersion.toString().c_str());
+                }
+            }
+        }
+        free(avd_folder);
+    }
 
     // If this is a restart, wait for the restartPid to exit.
     if (isRestart && restartPid > -1) {

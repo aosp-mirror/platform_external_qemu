@@ -37,5 +37,13 @@ public:
 // Factory that produces a consent provider
 AEMU_CRASH_API CrashConsent* consentProvider();
 
+
+// Inject a crash consent provider into the active crash system.
+// This will re-initialize the crash system if it has already been initialized.
+//
+// This is mainly there to enable unit tests to validate and verify crash
+// system behavior.
+bool inject_consent_provider(CrashConsent* myProvider);
+
 }  // namespace crashreport
 }  // namespace android

@@ -1,0 +1,20 @@
+[package]
+edition = "2018"
+name = "wasi"
+version = "0.11.0+wasi-snapshot-preview1"
+authors = [ "The Cranelift Project Developers",]
+description = "Empty crate that should not build."
+documentation = "https://docs.rs/wasi"
+readme = "README.md"
+keywords = [ "webassembly", "wasm",]
+categories = [ "no-std", "wasm",]
+license = "Apache-2.0"
+repository = "https://github.com/bytecodealliance/wasi"
+
+[features]
+default = []
+rustc-dep-of-std = []
+std = []
+
+[badges.maintenance]
+status = "experimental"

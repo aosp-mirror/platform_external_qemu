@@ -1,0 +1,10 @@
+[package]
+edition = "2018"
+name = "windows_macros"
+version = "0.10.0"
+authors = [ "Microsoft",]
+description = "Empty crate that should not build."
+license = "Apache-2.0"
+
+[lib]
+proc-macro = true

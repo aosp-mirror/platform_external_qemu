@@ -40,6 +40,8 @@ public:
     std::string sdkToolsVer;
     std::string totalMem;
 
+    bool dumpFirstbootInfoForDownloadableSnapshot(std::string filename);
+
     DISALLOW_COPY_AND_ASSIGN(BugreportInfo);
 };
 

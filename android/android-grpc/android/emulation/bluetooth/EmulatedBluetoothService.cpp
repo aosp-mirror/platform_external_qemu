@@ -202,7 +202,7 @@ public:
         mCloseCallback = closeCallback;
     }
 
-    void TimerTick() override {}
+    void Tick() override {}
 
     void Close() override {
         const std::lock_guard<std::recursive_mutex> lock(mClosingMutex);

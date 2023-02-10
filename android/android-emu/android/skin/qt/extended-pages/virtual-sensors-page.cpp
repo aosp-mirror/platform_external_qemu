@@ -93,7 +93,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
                                    false);
     mUi->positionZSlider->setRange(Device3DWidget::MinZ, Device3DWidget::MaxZ,
                                    false);
-    setupHingeSensorUI();
+    updateHingeSensorUI();
     setupRollableUI();
     setupRgbcLightUI();
     connect(mUi->accelWidget, SIGNAL(targetRotationChanged()), this,
@@ -142,10 +142,6 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
 
     updateSensorValuesInUI();
 
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
-        mUi->tabWidget->removeTab(kAccelerometerTabIndex);
-    }
-
     if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
         if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) < 28) {
             // This feature is currently only available on Wear OS API 28+ emulators.
@@ -176,7 +172,7 @@ void VirtualSensorsPage::togglePostureButtonsVisibility(bool newVisibility) {
     mUi->btn_postureTent->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_TENT]);
 }
 
-void VirtualSensorsPage::setupHingeSensorUI() {
+void VirtualSensorsPage::updateHingeSensorUI() {
     // Hide the hinge sensors based on the config.
     mUi->hinge0Label->setHidden(true);
     mUi->hinge1Label->setHidden(true);
@@ -189,7 +185,11 @@ void VirtualSensorsPage::setupHingeSensorUI() {
     mUi->hinge2Slider->setLabelHidden();
     mUi->verticalLayout->setSpacing(1);
     mUi->accelModeFold->setHidden(true);
-    if (android_foldable_hinge_configured()) {
+    if (mUi->accelerometerSliders->currentIndex() >= 2) {
+        mUi->accelModeRotate->setChecked(true);
+        mUi->accelerometerSliders->setCurrentIndex(0);
+    }
+    if (android_foldable_hinge_enabled()) {
         mUi->lbl_posture->setHidden(false);
         mUi->lbl_currentPosture->setHidden(false);
         mUi->lbl_currentPostureValue->setHidden(false);
@@ -909,8 +909,6 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
     if (sSensorsAgent != nullptr) {
         sSensorsAgent->advanceTime();
 
-        glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
-
         glm::vec3 device_accelerometer;
         std::vector<float*> out = {&device_accelerometer.x,
                                    &device_accelerometer.y,
@@ -944,9 +942,17 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
             }
             if (coarse_orientation != mCoarseOrientation) {
                 mCoarseOrientation = coarse_orientation;
-                // Signal to the extended-window to rotate the emulator window
-                // since an orientation has been detected in the sensor values.
-                emit(coarseOrientationChanged(mCoarseOrientation));
+                // Only allow orientation changes on cars, when the orientation
+                // sensor was enabled in the AVD config.
+                if (!android_is_automotive() ||
+                    getConsoleAgents()
+                            ->settings->hw()
+                            ->hw_sensors_orientation) {
+                    // Signal to the extended-window to rotate the emulator
+                    // window since an orientation has been detected in the
+                    // sensor values.
+                    emit(coarseOrientationChanged(mCoarseOrientation));
+                }
             }
         }
 

@@ -24,15 +24,15 @@
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
+#include "android/console.h"
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/CpuAccelerator.h"
-#include "android/console.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/update-check/VersionExtractor.h"
 #include "android/utils/system.h"
-
+#include "android/version.h"
 using android::base::IniFile;
 using android::base::StringAppendFormat;
 using android::base::StringFormat;
@@ -76,6 +76,9 @@ BugreportInfo::BugreportInfo() {
     const auto buildProps = avdInfo_getBuildProperties(getConsoleAgents()->settings->avdInfo());
     android::base::IniFile ini((const char*)buildProps->data, buildProps->size);
     buildFingerprint = ini.getString("ro.build.fingerprint", "");
+    if (buildFingerprint.empty()) {
+        buildFingerprint = ini.getString("ro.system.build.fingerprint", "");
+    }
     auto usage = System::get()->getMemUsage();
     totalMem = StringFormat("%d", (int)(usage.total_phys_memory / 1048576.0f));
 
@@ -135,6 +138,33 @@ BugreportInfo::BugreportInfo() {
             }
         }
     }
+}
+
+bool BugreportInfo::dumpFirstbootInfoForDownloadableSnapshot(
+        std::string filename) {
+    IniFile avdIni(filename);
+
+    avdIni.setString("Host.Os.Type",
+                     android::base::toString(System::get()->getOsType()));
+    avdIni.setString("Host.Os.Name", hostOsName);
+    avdIni.setString("Host.Hypervisor.Name",
+                     android::CpuAcceleratorToString(
+                             android::GetCurrentCpuAccelerator()));
+    avdIni.setString("Host.Hypervisor.Version",
+                     android::GetCurrentCpuAcceleratorVersion().toString());
+    std::string myCpu{cpuModel};
+    std::replace(myCpu.begin(), myCpu.end(), '\n', ';');
+    avdIni.setString("Host.Cpu.Model", myCpu);
+
+    const auto myVersion =
+            android::base::Version{EMULATOR_VERSION_STRING_SHORT};
+    avdIni.setString("Emulator.Version", myVersion.toString());
+    avdIni.setString("Emulator.Build",
+                     STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER));
+    avdIni.setString("System.Image.Fingerprint", buildFingerprint);
+
+    avdIni.write();
+    return true;
 }
 
 std::string BugreportInfo::dump() {

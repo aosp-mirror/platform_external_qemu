@@ -9,9 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android-qemu2-glue/qemu-console-factory.h"
-#include "android/android.h"
-#include "host-common/hw-config.h"
 #include "aemu/base/ProcessControl.h"
 #include "aemu/base/StringFormat.h"
 #include "aemu/base/async/ThreadLooper.h"
@@ -21,34 +18,28 @@
 #include "aemu/base/system/Win32Utils.h"
 #include "aemu/base/threads/Async.h"
 #include "aemu/base/threads/Thread.h"
+#include "android-qemu2-glue/qemu-console-factory.h"
+#include "android/android.h"
+#include "android/avd/BugreportInfo.h"
 #include "android/base/system/System.h"
 #include "android/boot-properties.h"
 #include "android/bootconfig.h"
 #include "android/camera/camera-virtualscene.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
-#include "host-common/constants.h"
-#include "host-common/hw-config-helper.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
-#include "host-common/crash-handler.h"
 #include "android/crashreport/crash-initializer.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/HostapdController.h"
 #include "android/emulation/LogcatPipe.h"
-#include "host-common/MultiDisplay.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/USBAssist.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/emulation/control/adb/adbkey.h"
 #include "android/emulation/control/automation_agent.h"
-#include "host-common/multi_display_agent.h"
-#include "host-common/vm_operations.h"
-#include "host-common/window_agent.h"
 #include "android/error-messages.h"
-#include "host-common/FeatureControl.h"
-#include "host-common/feature_control.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/help.h"
@@ -58,14 +49,12 @@
 #include "android/main-common.h"
 #include "android/main-kernel-parameters.h"
 #include "android/multi-instance.h"
-#include "host-common/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/opengles.h"
 #include "android/process_setup.h"
-#include "host-common/screen-recorder.h"
 #include "android/session_phase_reporter.h"
-#include "android/snapshot/check_snapshot_loadable.h"
 #include "android/snapshot/Snapshotter.h"
+#include "android/snapshot/check_snapshot_loadable.h"
 #include "android/snapshot/interface.h"
 #include "android/userspace-boot-properties.h"
 #include "android/utils/bufprint.h"
@@ -81,6 +70,18 @@
 #include "android/utils/timezone.h"
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/verified-boot/load_config.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/MultiDisplay.h"
+#include "host-common/constants.h"
+#include "host-common/crash-handler.h"
+#include "host-common/feature_control.h"
+#include "host-common/hw-config-helper.h"
+#include "host-common/hw-config.h"
+#include "host-common/multi_display_agent.h"
+#include "host-common/opengl/emugl_config.h"
+#include "host-common/screen-recorder.h"
+#include "host-common/vm_operations.h"
+#include "host-common/window_agent.h"
 
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/winsys.h"
@@ -437,6 +438,33 @@ static void createSdCard(std::string sdcardFilePath, int size) {
             {mksdcard, buf, sdcardFilePath});
 }
 
+static void replaceDefaultPath(AvdInfo* avd,
+                               const char* proposedPath,
+                               std::string& defaultPath) {
+    if (!proposedPath || !avd || (strlen(proposedPath) == 0)) {
+        dprint("%s %d %s:proposed path is not set or avd is null\n", __FILE__,
+               __LINE__, __func__);
+        return;
+    } else {
+        dprint("%s %d %s:proposed path has size %d and is %s \n", __FILE__,
+               __LINE__, __func__, strlen(proposedPath), proposedPath);
+    }
+
+    std::string strProposed =
+            path_is_absolute(proposedPath)
+                    ? std::string(proposedPath)
+                    : PathUtils::join(path_getSdkRoot(), proposedPath);
+    if (!path_is_dir(strProposed.c_str())) {
+        dprint("%s %d %s:proposed path %s is not dir\n", __FILE__, __LINE__,
+               __func__, strProposed.c_str());
+        return;
+    }
+
+    dprint("%s %d %s:proposed dir %s is replacing default dir %s\n", __FILE__,
+           __LINE__, __func__, strProposed.c_str(), defaultPath.c_str());
+    defaultPath.swap(strProposed);
+}
+
 static void convertExt4ToQcow2(std::string ext4filepath) {
     if (!path_exists(ext4filepath.c_str())) {
         return;
@@ -770,6 +798,11 @@ static void enableSignalTermination() {
     sigaddset(&set, SIGTERM);
     sigaddset(&set, SIGHUP);
     sigaddset(&set, SIGINT);
+
+    // We will not get crash reports without the signals below enabled.
+    sigaddset(&set, SIGSEGV);
+    sigaddset(&set, SIGABRT);
+    sigaddset(&set, SIGILL);
     int result = pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
     if (result != 0) {
         D("Could not set thread sigmask: %d", result);
@@ -1272,7 +1305,23 @@ static std::string buildSoundhwParam(const int apiLevel,
     return param;
 }
 
-// TODO-bohu: add code to check snapshot compatibility
+static std::string getKeyFromConfigFile(std::string config,
+                                        std::string key,
+                                        std::string defaultVal) {
+    IniFile configIni(config);
+    if (!configIni.read(false /* don't keep comments */)) {
+        dwarning("could not read %s at %s %d", config.c_str(), __FILE__,
+                 __LINE__);
+        return defaultVal;
+    }
+
+    if (!configIni.hasKey(key)) {
+        return defaultVal;
+    }
+
+    std::string ret = configIni.getString(key, defaultVal);
+    return ret;
+}
 
 static bool checkConfigIniCompatible(std::string srcConfig,
                                      std::string destConfig) {
@@ -1291,9 +1340,11 @@ static bool checkConfigIniCompatible(std::string srcConfig,
     }
 
     std::unordered_set<std::string> important{
-            "abi.type",      "hw.cpu.arch",  "hw.lcd.density",
-            "hw.lcd.height", "hw.lcd.width",
-    };
+            "abi.type",       "hw.cpu.arch",     "hw.lcd.density",
+            "hw.lcd.height",  "hw.lcd.width",    "skin.name",
+            "hw.camera.back", "hw.camera.front", "hw.gpu.enabled",
+            "hw.gpu.mode",    "hw.sdCard",       "hw.keyboard",
+            "hw.arc"};
     for (auto&& key : srcConfigIni) {
         if (important.count(key) == 0) {
             continue;  // not important, ignore
@@ -1312,7 +1363,11 @@ static bool checkConfigIniCompatible(std::string srcConfig,
     return true;
 }
 
-static void fixAvdIdAndDisplayName(std::string avdDir, std::string avdName) {
+static void fixAvdConfig(std::string avdDir,
+                         std::string avdName,
+                         std::string avdDisplayName,
+                         std::string skinPath,
+                         AndroidHwConfig* hw) {
     IniFile configIni(PathUtils::join(avdDir, "config.ini"));
     if (!configIni.read(false)) {
         dwarning("could not open %s/config.ini %s %d", avdDir.c_str(), __FILE__,
@@ -1321,20 +1376,100 @@ static void fixAvdIdAndDisplayName(std::string avdDir, std::string avdName) {
     }
 
     configIni.setString("AvdId", avdName);
-    configIni.setString("avd.ini.displayname", avdName);
+    configIni.setString("avd.ini.displayname", avdDisplayName);
+    configIni.setString("firstboot.downloaded.path",
+                        hw->firstboot_downloaded_path);
+    configIni.setString("firstboot.local.path", hw->firstboot_local_path);
+    configIni.setString("skin.path", skinPath);
     configIni.writeIfChanged();
 }
 
-static bool checkCompatable(std::string srcAvdDir, std::string destAvdDir) {
-    // 1, compare config.ini content
-    if (!checkConfigIniCompatible(PathUtils::join(srcAvdDir, "config.ini"),
-                                  PathUtils::join(destAvdDir, "config.ini"))) {
-        return false;
+enum class SnapshotCompatibleType {
+    NONE,
+    COLD_BOOTABLE,
+    SNAPSHOT_LOADABLE,
+};
+
+static SnapshotCompatibleType checkFirstbootIniCompatible(
+        std::string srcFile,
+        std::string destFile) {
+    IniFile srcIni(srcFile);
+    if (!srcIni.read(false /* don't keep comments */)) {
+        dwarning("could not read %s at %s %d", srcFile.c_str(), __FILE__,
+                 __LINE__);
+        return SnapshotCompatibleType::NONE;
     }
 
-    // 2, TODO: check cpuid
+    IniFile destIni(destFile);
+    if (!destIni.read(false /* don't keep comments */)) {
+        dwarning("could not read %s at %s %d", destFile.c_str(), __FILE__,
+                 __LINE__);
+        return SnapshotCompatibleType::NONE;
+    }
 
-    return true;
+    auto checkMatch = [&](std::vector<std::string>& keys,
+                          SnapshotCompatibleType retValWhenFail)
+            -> SnapshotCompatibleType {
+        for (const auto& key : keys) {
+            if (srcIni.getString(key, "$$$") != destIni.getString(key, "$$")) {
+                return retValWhenFail;
+            }
+        }
+        return SnapshotCompatibleType::SNAPSHOT_LOADABLE;
+    };
+
+    std::vector<std::string> keysNONE{
+            "System.Image.Fingerprint",
+    };
+
+    if (checkMatch(keysNONE, SnapshotCompatibleType::NONE) ==
+        SnapshotCompatibleType::NONE) {
+        return SnapshotCompatibleType::NONE;
+    }
+
+    // emulator version >= 33, should be backward compatible to 33;
+    // so we take it for granted that emulator version is not essential
+    // in addition, hypervisor version is not checked
+
+    std::vector<std::string> keysOther{
+            "Host.Os.Type",
+            "Host.Cpu.Model",
+            "Host.Hypervisor.Name",
+    };
+
+    if (checkMatch(keysOther, SnapshotCompatibleType::COLD_BOOTABLE) ==
+        SnapshotCompatibleType::COLD_BOOTABLE) {
+        return SnapshotCompatibleType::COLD_BOOTABLE;
+    }
+
+    return SnapshotCompatibleType::SNAPSHOT_LOADABLE;
+}
+
+static SnapshotCompatibleType checkCompatable(std::string srcAvdDir,
+                                              std::string destAvdDir) {
+    // 1, check basic compatibility: such as host/cpu/system image
+    // fingperprint/emulator version etc
+    auto srcFirstbootIni =
+            std::string{PathUtils::join(srcAvdDir, "firstboot.ini")};
+    auto destFirstbootIni =
+            std::string{PathUtils::join(destAvdDir, "firstboot.ini")};
+
+    auto firstbootCheck =
+            checkFirstbootIniCompatible(srcFirstbootIni, destFirstbootIni);
+    if (firstbootCheck == SnapshotCompatibleType::NONE) {
+        return SnapshotCompatibleType::NONE;
+    }
+
+    // 2, compare config.ini content
+    auto configCompatible =
+            checkConfigIniCompatible(PathUtils::join(srcAvdDir, "config.ini"),
+                                     PathUtils::join(destAvdDir, "config.ini"));
+
+    if (!configCompatible) {
+        return SnapshotCompatibleType::COLD_BOOTABLE;
+    }
+
+    return firstbootCheck;
 }
 
 extern "C" AndroidProxyCB* gAndroidProxyCB;
@@ -1391,7 +1526,6 @@ extern "C" int main(int argc, char** argv) {
 #endif
     process_early_setup(argc, argv);
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
-
     // Start GPU information query to use it later for the renderer seleciton.
     async_query_host_gpu_start();
 
@@ -1941,13 +2075,26 @@ extern "C" int main(int argc, char** argv) {
         const char* avdName = avdInfo_getName(avd);
         char* s_AvdFolder = path_getAvdContentPath(avdName);
         if (s_AvdFolder) {
+            // create firstboot.ini
+            std::string orgSrcFirstbootIniFileName(
+                    PathUtils::join(s_AvdFolder, "firstboot.ini"));
+            android::avd::BugreportInfo bugInfo;
+            bugInfo.dumpFirstbootInfoForDownloadableSnapshot(
+                    orgSrcFirstbootIniFileName);
+
             std::string systemImagePath =
                     path_getAvdSystemPath(avdName, path_getSdkRoot(), false);
             // try copy content from <sysimgdir>/snapshots/avd/default
             std::string srcDirLocal = PathUtils::join(
                     systemImagePath, "snapshots", "local", "avd");
+            replaceDefaultPath(avd, hw->firstboot_local_path, srcDirLocal);
+            str_reset(&hw->firstboot_local_path, srcDirLocal.c_str());
+
             std::string srcDirDownloaded = PathUtils::join(
                     systemImagePath, "snapshots", "downloaded", "avd");
+            replaceDefaultPath(avd, hw->firstboot_downloaded_path,
+                               srcDirDownloaded);
+            str_reset(&hw->firstboot_downloaded_path, srcDirDownloaded.c_str());
 
             std::string srcDir;
             std::string default_config_ini;
@@ -1976,6 +2123,7 @@ extern "C" int main(int argc, char** argv) {
                         Snapshotter::SnapshotAvdSource::Downloaded);
             }
 
+            bool startFromScratch = false;
             using DownloadableSnapshotFailure =
                     android::snapshot::Snapshotter::DownloadableSnapshotFailure;
             if (!default_config_ini.empty() &&
@@ -1990,77 +2138,110 @@ extern "C" int main(int argc, char** argv) {
                     path_get_size(orgSdcardPath.c_str(), &sdcard_size);
                 }
 
-                // when not compatible, do a cold boot, but still leverage
-                // the already booted userdata partition etc.
-                if (!checkCompatable(srcDir, std::string(s_AvdFolder))) {
+                const std::string orgConfigFile =
+                        PathUtils::join(std::string(s_AvdFolder), "config.ini");
+                const std::string orgSkinPath =
+                        getKeyFromConfigFile(orgConfigFile, "skin.path", "");
+                const std::string orgDisplayName = getKeyFromConfigFile(
+                        orgConfigFile, "avd.ini.displayname", avdName);
+                std::set<std::string> skipSet;
+
+                const auto compatibleCheckResult =
+                        checkCompatable(srcDir, std::string(s_AvdFolder));
+                if (compatibleCheckResult == SnapshotCompatibleType::NONE) {
+                    // cannot use anything from the downloadable snapshot
+                    startFromScratch = true;
+                    dwarning(
+                            "DownloadableSnapshot feature is not applicable on "
+                            "avd %s",
+                            avdName);
+                } else if (compatibleCheckResult ==
+                           SnapshotCompatibleType::COLD_BOOTABLE) {
+                    dwarning(
+                            "emulator: Not compatible with downloaded "
+                            "snapshot, forcing code boot");
                     opts->no_snapshot_load = true;
                     Snapshotter::get().setDownloadableSnapshotFailure(
                                 DownloadableSnapshotFailure::IncompatibleAvd);
                 }
-                dprint("emulator: First boot, copying snapshot...");
-                dprint("emulator: copying snapshot from %s to %s",
-                       srcDir.c_str(), s_AvdFolder);
-                auto startTime = std::chrono::steady_clock::now();
-                path_delete_dir(s_AvdFolder);
-                std::set<std::string> skipSet;
-                skipSet.insert("source.properties");
-                skipSet.insert("multiinstance.lock");
-                skipSet.insert("hardware-qemu.ini.lock");
-                if (-1 ==
-                    path_copy_dir_ex(s_AvdFolder, srcDir.c_str(), &skipSet)) {
-                    // copy failed
-                    opts->no_snapshot_load = true;
-                    Snapshotter::get().setDownloadableSnapshotFailure(
-                            DownloadableSnapshotFailure::FailedToCopyAvd);
-                    // need to do a wipedata again
-                    path_delete_dir(s_AvdFolder);
-                    path_mkdir_if_needed(s_AvdFolder, 0777);
-                    // create config.ini
-                    orgSrcConfigIni.write();
-                    // create sdcard.img if applicable
-                    if (sdcard_size > 0) {
-                        createSdCard(std::string(PathUtils::join(s_AvdFolder,
-                                                                 "sdcard.img")),
-                                     static_cast<int>(sdcard_size));
-                    }
-                    firstTimeSetup = true;
-                } else {
-                    if (opts->no_snapshot_load) {
-                        const std::string avdSnapshotDir =
-                                PathUtils::join(s_AvdFolder, "snapshots");
-                        path_delete_dir(avdSnapshotDir.c_str());
-                    }
-                    auto elapsed = std::chrono::duration_cast<
-                            std::chrono::milliseconds>(
-                            std::chrono::steady_clock::now() - startTime);
 
-                    long long timeUsedMs = (long long)elapsed.count();
-                    dprint("emulator: copying snapshot done, using %lld mini "
-                           "seconds",
-                           timeUsedMs);
-                    Snapshotter::get().settDownloadableSnapshotCopyTime(
-                            timeUsedMs);
-                    firstTimeSetup = false;  // already setup
-                    // fix AvdId and displayname
-                    fixAvdIdAndDisplayName(std::string(s_AvdFolder), avdName);
+                if (!startFromScratch) {
+                    if (opts->no_snapshot_load) {
+                        // keep the original config.ini file
+                        skipSet.insert("config.ini");
+                    }
+
+                    dprint("emulator: First boot, copying snapshot...");
+                    dprint("emulator: copying snapshot from %s to %s",
+                           srcDir.c_str(), s_AvdFolder);
+                    auto startTime = std::chrono::steady_clock::now();
+                    path_delete_dir(s_AvdFolder);
+                    skipSet.insert("firstboot.ini");
+                    skipSet.insert("source.properties");
+                    skipSet.insert("multiinstance.lock");
+                    skipSet.insert("hardware-qemu.ini.lock");
+                    if (-1 == path_copy_dir_ex(s_AvdFolder, srcDir.c_str(),
+                                               &skipSet)) {
+                        // copy failed
+                        dwarning(
+                                "emulator: failed to copy downloaded snapshot, "
+                                "fresh boot");
+                        opts->no_snapshot_load = true;
+                        Snapshotter::get().setDownloadableSnapshotFailure(
+                                DownloadableSnapshotFailure::FailedToCopyAvd);
+                        // need to do a wipedata again
+                        path_delete_dir(s_AvdFolder);
+                        path_mkdir_if_needed(s_AvdFolder, 0777);
+                        // create config.ini
+                        orgSrcConfigIni.write();
+                        // create sdcard.img if applicable
+                        if (sdcard_size > 0) {
+                            createSdCard(std::string(PathUtils::join(
+                                                 s_AvdFolder, "sdcard.img")),
+                                         static_cast<int>(sdcard_size));
+                        }
+                        startFromScratch = true;
+                    } else {
+                        if (opts->no_snapshot_load) {
+                            const std::string avdSnapshotDir =
+                                    PathUtils::join(s_AvdFolder, "snapshots");
+                            path_delete_dir(avdSnapshotDir.c_str());
+                            // create config.ini
+                            orgSrcConfigIni.write();
+                        }
+                        auto elapsed = std::chrono::duration_cast<
+                                std::chrono::milliseconds>(
+                                std::chrono::steady_clock::now() - startTime);
+
+                        long long timeUsedMs = (long long)elapsed.count();
+                        dprint("emulator: copying snapshot done, using %lld "
+                               "mini "
+                               "seconds",
+                               timeUsedMs);
+                        Snapshotter::get().settDownloadableSnapshotCopyTime(
+                                timeUsedMs);
+                        firstTimeSetup = false;  // already setup
+                        if (!opts->no_snapshot_load) {
+                            // fix AvdId, displayname and paths
+                            fixAvdConfig(std::string(s_AvdFolder), avdName,
+                                         orgDisplayName, orgSkinPath, hw);
+                        }
+                    }
                 }
             } else {
-                // TODO: when snapshot is not possible, maybe try cold boot, at
-                //  least it will be still much faster than first boot.
-                //
+                startFromScratch = true;
+            }
+
+            if (startFromScratch) {
                 //  first boot, and there is no local avd, then convert
                 //  sdcard.img to qcow2
-                if (true) {
-                    auto startTime = std::chrono::steady_clock::now();
-                    auto qemu_img =
-                            System::get()->findBundledExecutable("qemu-img");
-                    std::string dataimageext4 = std::string(hw->hw_sdCard_path);
-                    convertExt4ToQcow2(dataimageext4);
-                };
+                auto startTime = std::chrono::steady_clock::now();
+                auto qemu_img =
+                        System::get()->findBundledExecutable("qemu-img");
+                std::string dataimageext4 = std::string(hw->hw_sdCard_path);
+                convertExt4ToQcow2(dataimageext4);
             }
-        }
 
-        if (s_AvdFolder) {
             free(s_AvdFolder);
             s_AvdFolder = nullptr;
         }
@@ -2358,6 +2539,11 @@ extern "C" int main(int argc, char** argv) {
         // shared slots host memory allocator and it is too late to fix
         // it there.
         fc::setIfNotOverriden(fc::HasSharedSlotsHostMemoryAllocator, false);
+    }
+
+    if (apiLevel >= 33) {
+        // API31 and API32 are affected, API33+ are fixed
+        fc::setIfNotOverriden(fc::VsockSnapshotLoadFixed_b231345789, true);
     }
 
     // Support for changing default lcd-density

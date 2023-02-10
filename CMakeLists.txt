@@ -61,7 +61,7 @@ include(android)
 include(prebuilts)
 include(qemu2-src-gen)
 
-set(OPTION_RUST FALSE CACHE BOOL "Enable all rust dependencies, disabled for now b/266452652.")
+set(OPTION_RUST TRUE CACHE BOOL "Enable all rust dependencies.")
 set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
 set(OPTION_TRACE
     "nop"
@@ -211,7 +211,7 @@ else()
     file(STRINGS "$ENV{HOME}/.emulator_symbol_server_key" BREAKPAD_API_KEY)
   endif()
   set(ANDROID_EXTRACT_SYMBOLS TRUE)
-  set(ANDROID_SYMBOL_DIR ${DBG_INFO})
+  set(ANDROID_SYMBOL_DIR ${CMAKE_BINARY_DIR}/build/symbols)
   file(MAKE_DIRECTORY ${ANDROID_SYMBOL_DIR})
   message(STATUS "Uploading symbols to ${BREAKPAD_API_URL}")
 endif()

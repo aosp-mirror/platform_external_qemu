@@ -17,20 +17,20 @@
 #include <string>   // for basic_string, operator<
 #include <vector>   // for vector<>::iterator
 
-#include "aemu/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
-#include "aemu/base/files/PathUtils.h"       // for pj, PathUtils
-#include "aemu/base/logging/CLog.h"          // for dinfo, dwarning
-#include "aemu/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
-#include "android/base/system/System.h"         // for System
-#include "android/crashreport/CrashConsent.h"   // for CrashReportDatabase
-#include "android/crashreport/CrashReporter.h"  // for CrashReporter
-#include "android/crashreport/HangDetector.h"   // for HangDetector
-#include "android/version.h"                    // for EMULATOR_FULL_VERSION...
-#include "client/crash_report_database.h"       // for CrashReportDatabase::...
-#include "client/crashpad_client.h"             // for CrashpadClient
-#include "client/settings.h"                    // for Settings
-#include "mini_chromium/base/files/file_path.h" // for FilePath
-#include "util/misc/uuid.h"                     // for UUID
+#include "aemu/base/Compiler.h"                  // for DISALLOW_COPY_AND_ASSIGN
+#include "aemu/base/files/PathUtils.h"           // for pj, PathUtils
+#include "aemu/base/logging/CLog.h"              // for dinfo, dwarning
+#include "aemu/base/memory/LazyInstance.h"       // for LazyInstance, LAZY_IN...
+#include "android/base/system/System.h"          // for System
+#include "android/crashreport/CrashConsent.h"    // for CrashReportDatabase
+#include "android/crashreport/CrashReporter.h"   // for CrashReporter
+#include "android/crashreport/HangDetector.h"    // for HangDetector
+#include "android/version.h"                     // for EMULATOR_FULL_VERSION...
+#include "client/crash_report_database.h"        // for CrashReportDatabase::...
+#include "client/crashpad_client.h"              // for CrashpadClient
+#include "client/settings.h"                     // for Settings
+#include "mini_chromium/base/files/file_path.h"  // for FilePath
+#include "util/misc/uuid.h"                      // for UUID
 
 #ifdef _WIN32
 #include <io.h>
@@ -73,7 +73,9 @@ public:
         }
         auto handler_path = ::base::FilePath(
                 PathUtils::asUnicodePath(
-                        System::get()->findBundledExecutable(kCrashpadHandler).data())
+                        System::get()
+                                ->findBundledExecutable(kCrashpadHandler)
+                                .data())
                         .c_str());
         if (handler_path.empty()) {
             dwarning("Crash handler not found, crash reporting disabled.");
@@ -91,8 +93,9 @@ public:
         mDatabase = crashpad::CrashReportDatabase::Initialize(database_path);
         mInitialized = active && mDatabase;
 
-        dinfo("Storing crashdata in: %s, detection is %s",
-              mDatabasePath.c_str(), mInitialized ? "enabled" : "disabled");
+        dinfo("Storing crashdata in: %s, detection is %s for process: %d",
+              mDatabasePath.c_str(), mInitialized ? "enabled" : "disabled",
+              android::base::System::get()->getCurrentProcessId());
 
         if (mDatabase && mDatabase->GetSettings()) {
             mDatabase->GetSettings()->SetUploadsEnabled(false);
@@ -151,6 +154,10 @@ public:
         }
     }
 
+    void setConsentProvider(CrashConsent* replacement) {
+        mConsentProvider.reset(replacement);
+    }
+
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashSystem);
 
@@ -166,6 +173,13 @@ LazyInstance<CrashSystem> sCrashSystem = LAZY_INSTANCE_INIT;
 CrashSystem* CrashSystem::get() {
     return sCrashSystem.ptr();
 }
+
+bool inject_consent_provider(CrashConsent* myProvider) {
+    auto crashSystem = CrashSystem::get();
+    crashSystem->setConsentProvider(myProvider);
+    return crashSystem->initialize();
+}
+
 }  // namespace crashreport
 }  // namespace android
 
@@ -174,7 +188,8 @@ using android::crashreport::CrashSystem;
 
 bool crashhandler_init(int argc, char** argv) {
     if (!android::base::System::get()->getEnableCrashReporting()) {
-        dinfo("Crashreporting disabled, not reporting crashes.") return false;
+        dinfo("Crashreporting disabled, not reporting crashes.");
+        return false;
     }
 
     // Catch crashes in everything.
