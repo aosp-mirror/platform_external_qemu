@@ -27,12 +27,12 @@ android_add_library(
 
 target_include_directories(android-webrtc PUBLIC . ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_definitions(android-webrtc PUBLIC -DANDROID_WEBRTC)
+target_compile_options(android-webrtc PUBLIC -Wno-inconsistent-missing-override)
 target_link_libraries(android-webrtc PUBLIC nlohmann_json::nlohmann_json
                       PRIVATE protobuf::libprotobuf
                               grpc++
                               android-grpc-utils
                               webrtc_platform_defs
-                              webrtc_api_libjingle_peerconnection_api.headers
                               webrtc_api_libjingle_peerconnection_api
                               webrtc_pc_peerconnection
                               webrtc_api_create_peerconnection_factory
@@ -52,7 +52,6 @@ if(NOT LINUX_AARCH64)
   target_link_libraries(android-webrtc_unittest
                         PUBLIC android-webrtc
                               webrtc_platform_defs
-                              webrtc_api_libjingle_peerconnection_api.headers
                               webrtc_api_libjingle_peerconnection_api
                               gmock_main)
 endif()

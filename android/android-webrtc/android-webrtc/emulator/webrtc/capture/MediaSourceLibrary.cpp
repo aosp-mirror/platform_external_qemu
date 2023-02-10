@@ -34,12 +34,12 @@ InprocessRefVideoSource MediaSourceLibrary::getVideoSource(int displayId) {
     const std::lock_guard<std::mutex> lock(mAccess);
     auto it = mVideoSources.find(displayId);
     if (it != mVideoSources.end()) {
-        return it->second.get();
+        return InprocessRefVideoSource(it->second.get());
     }
 
     mVideoSources[displayId] =
             std::make_unique<InprocessVideoMediaSource>(displayId);
-    return mVideoSources[displayId].get();
+    return InprocessRefVideoSource(mVideoSources[displayId].get());
 }
 
 }  // namespace webrtc

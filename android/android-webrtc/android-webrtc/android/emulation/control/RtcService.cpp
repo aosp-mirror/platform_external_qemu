@@ -13,27 +13,27 @@
 // limitations under the License.
 #include "android/emulation/control/RtcService.h"
 
-#include <grpcpp/grpcpp.h>                           // for Status, ServerCo...
-#include <stdint.h>                                  // for uint16_t
-#include <chrono>                                    // for milliseconds
-#include <memory>                                    // for shared_ptr, uniq...
-#include <ostream>                                   // for operator<<, basi...
-#include <ratio>                                     // for ratio
+#include <grpcpp/grpcpp.h>  // for Status, ServerCo...
+#include <stdint.h>         // for uint16_t
+#include <chrono>           // for milliseconds
+#include <memory>           // for shared_ptr, uniq...
+#include <ostream>          // for operator<<, basi...
+#include <ratio>            // for ratio
 
-//#include "android/android.h"
-#include "aemu/base/Log.h"                        // for LogStreamVoidify
-#include "aemu/base/Optional.h"                   // for Optional
-#include "aemu/base/Stopwatch.h"                  // for Stopwatch
-#include "aemu/base/Uuid.h"                       // for Uuid
-#include "aemu/base/sockets/ScopedSocket.h"       // for ScopedSocket
-#include "aemu/base/sockets/SocketUtils.h"        // for socketGetPort
-#include "android/base/system/System.h"              // for System::Pid, System
-#include "android/console.h"                         // for AndroidConsoleAg...
-#include "android/emulation/control/RtcBridge.h"     // for RtcBridge, System
-#include "android/emulation/control/TurnConfig.h"    // for TurnConfig
-#include "emulator/webrtc/Switchboard.h"             // for Switchboard
-#include "rtc_service.grpc.pb.h"                     // for Rtc, Rtc::Stub
-#include "rtc_service.pb.h"                          // for JsepMsg, RtcId
+// #include "android/android.h"
+#include "aemu/base/Log.h"                         // for LogStreamVoidify
+#include "aemu/base/Optional.h"                    // for Optional
+#include "aemu/base/Stopwatch.h"                   // for Stopwatch
+#include "aemu/base/Uuid.h"                        // for Uuid
+#include "aemu/base/sockets/ScopedSocket.h"        // for ScopedSocket
+#include "aemu/base/sockets/SocketUtils.h"         // for socketGetPort
+#include "android/base/system/System.h"            // for System::Pid, System
+#include "android/console.h"                       // for AndroidConsoleAg...
+#include "android/emulation/control/RtcBridge.h"   // for RtcBridge, System
+#include "android/emulation/control/TurnConfig.h"  // for TurnConfig
+#include "emulator/webrtc/Switchboard.h"           // for Switchboard
+#include "rtc_service.grpc.pb.h"                   // for Rtc, Rtc::Stub
+#include "rtc_service.pb.h"                        // for JsepMsg, RtcId
 
 #include <rtc_base/logging.h>      // for LogSink, LogStre...
 #include <rtc_base/ssl_adapter.h>  // for CleanupSSL, Init...
@@ -156,11 +156,11 @@ public:
 static const int kMaxFileLogSizeInBytes = 128 * 1024 * 1024;
 
 grpc::Service* getRtcService(const char* turncfg,
-                                const char* audioDump,
-                                bool verbose) {
+                             const char* audioDump,
+                             bool verbose) {
     if (verbose) {
         rtc::LogMessage::AddLogToStream(new StdLogSink(),
-                                        rtc::LoggingSeverity::INFO);
+                                        rtc::LoggingSeverity::LS_INFO);
     }
     TurnConfig config(turncfg ? turncfg : "");
     if (!config.validCommand()) {

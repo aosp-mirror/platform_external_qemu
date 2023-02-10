@@ -32,7 +32,7 @@ public:
             ::webrtc::PeerConnectionFactoryInterface* peerConnectionFactory);
 
     // This is a refcounted source, do not delete it.
-    InprocessRefAudioSource getAudioSource() { return &mAudioSource; }
+    InprocessRefAudioSource getAudioSource() { return InprocessRefAudioSource(&mAudioSource); }
 
     // This is a refcounted source, do not delete it.
     InprocessRefVideoSource getVideoSource(int displayId);
