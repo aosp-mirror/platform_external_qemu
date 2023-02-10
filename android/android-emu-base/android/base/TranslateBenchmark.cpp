@@ -20,7 +20,7 @@
 #include <cstdint>                    // for uint8_t
 #include <vector>                     // for vector, vector<>::value_type
 
-#include "benchmark/benchmark_api.h"  // for State, Benchmark, BENCHMARK
+#include "benchmark/benchmark.h"      // for State, Benchmark, BENCHMARK
 
 #define BASIC_BENCHMARK_TEST(x) \
     BENCHMARK(x)                \

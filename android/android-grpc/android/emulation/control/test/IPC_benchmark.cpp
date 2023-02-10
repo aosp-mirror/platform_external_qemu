@@ -34,7 +34,7 @@
 #include "android/base/system/System.h"              // for System, RunOptions
 #include "android/base/testing/TestTempDir.h"        // for TestTempDir
 #include "android/emulation/control/GrpcServices.h"  // for control
-#include "benchmark/benchmark_api.h"                 // for State, Benchmark
+#include "benchmark/benchmark.h"                     // for State, Benchmark
 #include "google/protobuf/empty.pb.h"                // for Empty
 #include "grpcpp/impl/grpc_library.h"  // Hack Attack! Needed for static initializer
 #include "grpcpp/security/credentials.h"       // for InsecureChannelC...
@@ -448,4 +448,4 @@ BASIC_BENCHMARK_TEST(BM_read_mmap_ext_chk);  // memory mapped files.
 BASIC_BENCHMARK_TEST(BM_read_mmap_reuse_ext_chk);
 BASIC_BENCHMARK_TEST(BM_read_grpc_ext_chk);  // grpc endpoint.
 BASIC_BENCHMARK_TEST(BM_read_grpc_reuse_ext_chk);
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();

@@ -26,6 +26,12 @@ target_include_directories(
   PUBLIC include)
 target_compile_options(android-emu-update-check PRIVATE -Wno-extern-c-compat)
 
+
+target_compile_definitions(
+  android-emu-update-check
+  PRIVATE "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
+          "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
+
 android_add_test(
   TARGET android-emu-update-check_unittests
   SOURCE_DIR test

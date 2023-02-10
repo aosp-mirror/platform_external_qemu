@@ -52,6 +52,7 @@ public:
     void showEvent(QShowEvent* event) override;
     static void setSensorsAgent(const QAndroidSensorsAgent* agent);
     void hideRotationButtons(bool hide);
+    void updateHingeSensorUI();
 
 private slots:
     void on_temperatureSensorValueWidget_valueChanged(double value);
@@ -158,7 +159,6 @@ private:
     void onTargetStateChanged();
     void onPhysicalStateChanging();
     void onPhysicalStateStabilized();
-    void setupHingeSensorUI();
     void togglePostureButtonsVisibility(bool newVisibility);
     void setupRollableUI();
     void updateUIPosture();

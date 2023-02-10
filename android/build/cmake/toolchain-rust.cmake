@@ -28,7 +28,7 @@
 # \argn: The variable that will hold the expected rust version.
 # ~~~
 function(get_rust_version RET_VAL)
-  set(${RET_VAL} "1.64.0" PARENT_SCOPE)
+  set(${RET_VAL} "1.65.0" PARENT_SCOPE)
 endfunction()
 
 # ~~~
@@ -38,8 +38,8 @@ endfunction()
 # first parameter. The config.toml will be written to the ${Rust_ROOT}
 # directory.
 #
-# This function will set the Rust_CARGO_HOME variable that is used by corrosion to
-# configure cargo.
+# This function will set the Rust_CARGO_HOME variable and CARGO_HOME environment
+# variable that is used by corrosion to configure cargo.
 #
 # \argn: Directory where the vendored crates can be found
 # ~~~
@@ -54,6 +54,7 @@ function(enable_vendorized_crates VENDOR_CRATES)
   configure_file("${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/config.toml.in"
                  ${CARGO_CONFIG})
   set(Rust_CARGO_HOME ${CARGO_HOME} PARENT_SCOPE)
+  set(ENV{CARGO_HOME} ${CARGO_HOME})
 endfunction()
 
 # ~~~
@@ -88,11 +89,16 @@ function(configure_rust)
     set(Rust_CARGO ${cfg_COMPILER_ROOT}/cargo PARENT_SCOPE)
     internal_set_env_cache(Rust_CARGO "${RUST_COMPILER_ROOT}/cargo")
   else()
-    message(STATUS "Using default system rust compiler.")
-    if(NOT WIN32)
+    if(WIN32)
+      message(STATUS "Using default system rust compiler.")
+    else()
       message(
-        WARNING
-          "This is uncommon, you should be using the AOSP rust compiler. Are you sure you want this?"
+        FATAL_ERROR
+          "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
+          "The rust directory ${cfg_COMPILER_ROOT} does not exist. If the compiler version has changed you must "
+          "update the function `get_rust_version` in the file ${CMAKE_CURRENT_LIST_FILE} to return the proper version.\n"
+          "You will also need to upgrade the windows build bots to use the new rust toolchain. \n"
+          "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n"
       )
     endif()
   endif()
@@ -130,9 +136,23 @@ function(ensure_rust_version_is_compliant)
     )
   endif()
   if(NOT Rust_VERSION VERSION_EQUAL EXPECTED_VERSION)
-    message(
-      FATAL_ERROR
-        "Expected version rust compiler to provide: ${EXPECTED_VERSION}, not ${Rust_VERSION}, please update ${Rust_COMPILER} to the expected version: ${EXPECTED_VERSION}"
-    )
+    if(WIN32)
+      # We don't want to break the windows build bots immediately, instead will create a warning
+      message(
+        WARNING
+          "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
+          "Expected version rust compiler to provide: ${EXPECTED_VERSION}, not ${Rust_VERSION}, \n"
+          "please update ${Rust_COMPILER} to the expected version: ${EXPECTED_VERSION} \n"
+          "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n"
+      )
+    else()
+      message(
+        FATAL_ERROR
+          "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
+          "Expected version rust compiler to provide: ${EXPECTED_VERSION}, not ${Rust_VERSION}, \n"
+          "please update ${Rust_COMPILER} to the expected version: ${EXPECTED_VERSION} \n"
+          "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n"
+      )
+    endif()
   endif()
 endfunction()

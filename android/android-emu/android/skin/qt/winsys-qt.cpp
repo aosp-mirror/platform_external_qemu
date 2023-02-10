@@ -490,18 +490,8 @@ extern void skin_winsys_quit_request() {
 void skin_winsys_destroy() {
     D(__FUNCTION__);
 
-    // Mac is still causing us troubles - it somehow manages to not call the
-    // main window destructor (in qemu1 only!) and crashes if QApplication
-    // is destroyed right here. So let's delay the deletion for now
-#ifdef __APPLE__
-    atexit([] {
-        delete globalState()->app;
-        globalState()->app = nullptr;
-    });
-#else
     delete globalState()->app;
     globalState()->app = nullptr;
-#endif
 
 #ifdef Q_OS_LINUX
     if (s_display)

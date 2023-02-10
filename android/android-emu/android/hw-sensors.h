@@ -374,6 +374,7 @@ struct FoldableState {
 
 int android_foldable_get_state(struct FoldableState* state);
 bool android_foldable_hinge_configured();
+bool android_foldable_hinge_enabled();
 bool android_foldable_any_folded_area_configured();
 bool android_foldable_folded_area_configured(int area);
 bool android_foldable_is_folded();
@@ -385,4 +386,5 @@ bool android_foldable_rollable_configured();
 bool android_hw_sensors_is_loading_snapshot();
 bool android_heart_rate_sensor_configured();
 bool android_foldable_posture_name(int posture, char* name);
+bool android_is_automotive();
 ANDROID_END_HEADER

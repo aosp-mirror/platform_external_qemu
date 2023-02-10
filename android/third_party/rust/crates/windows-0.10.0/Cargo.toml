@@ -1,0 +1,19 @@
+[package]
+edition = "2018"
+name = "windows"
+version = "0.10.0"
+authors = [ "Microsoft",]
+exclude = [ ".github", ".windows", "docs", "examples",]
+description = "Empty crate that should not build."
+documentation = "https://docs.rs/windows"
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/microsoft/windows-rs"
+
+[features]
+default = []
+macros = []
+
+[package.metadata.docs.rs]
+default-target = "x86_64-pc-windows-msvc"
+targets = [ "x86_64-pc-windows-msvc",]

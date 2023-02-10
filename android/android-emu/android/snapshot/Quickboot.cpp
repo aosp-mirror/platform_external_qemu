@@ -446,14 +446,16 @@ bool Quickboot::saveAvdToSystemImageSnapshotsLocalDir() {
         return false;
     }
 
+    auto* myHw = getConsoleAgents()->settings->hw();
     if (!getConsoleAgents() || !getConsoleAgents()->settings ||
         !getConsoleAgents()->settings->guest_boot_completed()) {
         dprint("Guest has not completed booting yet, snapshot won't be save to "
-               "local/avd directory.");
+               "%s directory.",
+               myHw->firstboot_local_path ? myHw->firstboot_local_path
+                                          : "local/avd");
         return false;
     }
 
-    auto* myHw = getConsoleAgents()->settings->hw();
     if (!myHw->firstboot_saveToLocalSnapshot) {
         return false;
     }
@@ -464,10 +466,13 @@ bool Quickboot::saveAvdToSystemImageSnapshotsLocalDir() {
     const char* avdName = avdInfo_getName(myAvdInfo);
     const std::string srcDir(path_getAvdContentPath(avdName));
     const std::string mySdkRoot(path_getSdkRoot());
-    const std::string destDir = PathUtils::join(
+    std::string destDir = PathUtils::join(
             std::string(path_getAvdSystemPath(avdName, mySdkRoot.c_str(),
                                               false /* no debug print */)),
             "snapshots", "local", "avd");
+    if (myHw->firstboot_local_path && path_is_dir(myHw->firstboot_local_path)) {
+        destDir = std::string(myHw->firstboot_local_path);
+    }
     const std::string destAvdSrcProp =
             PathUtils::join(destDir, "source.properties");
     if (path_exists(destAvdSrcProp.c_str())) {
