@@ -155,7 +155,7 @@ class CoverageReportTask(BuildTask):
         logging.info("****josh: " + logline)
 
     def do_run(self):
-        clang_version = "clang-r450784d"
+        clang_version = "clang-r475365b"
         clang_path = (
             self.aosp
             / "prebuilts"
