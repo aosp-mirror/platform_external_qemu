@@ -229,17 +229,17 @@ private:
 std::unique_ptr<HciTransport> sTransport;
 std::unique_ptr<PacketStreamer::Stub> sTransportStub;
 
-// Creates a random serial name
-std::string serial_name() {
+// Creates a random name
+std::string get_name() {
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_int_distribution<std::mt19937::result_type> distletter(
             'a', 'z');  // distribution in range [a, z]
-    std::string serial = "nimble-";
+    std::string name = "nimble-";
     for (int i = 0; i < 6; i++) {
-        serial += (char)distletter(rng);
+        name += (char)distletter(rng);
     }
-    return serial;
+    return name;
 }
 
 int ble_hci_grpc_open_connection() {
@@ -249,14 +249,14 @@ int ble_hci_grpc_open_connection() {
     sTransport = std::make_unique<HciTransport>();
     sTransport->startCall(sTransportStub.get());
 
-    auto serial = serial_name();
+    auto name = get_name();
     PacketRequest initial_request;  // = std::make_unique<PacketRequest>();
-    initial_request.mutable_initial_info()->set_serial(serial_name());
+    initial_request.mutable_initial_info()->set_name(name);
     initial_request.mutable_initial_info()->mutable_chip()->set_kind(
-            netsim::startup::Chip_ChipKind_BLUETOOTH);
+        netsim::common::ChipKind::BLUETOOTH);
     sTransport->Write(initial_request);
 
-    dinfo("Registered as %s", serial.c_str());
+    dinfo("Registered as %s", name.c_str());
     return 0;
 }
 
