@@ -469,7 +469,7 @@ static void filelock_atexit() {
             filelock_release(lock);
             FileLock* const prev = lock;
             lock = lock->next;
-            delete prev;
+            free(prev);
         }
     }
     is_exiting = true;
@@ -518,7 +518,7 @@ auto filelock_create_timeout(const char* file, int timeout) -> FileLock* {
 
     if (filelock_lock(lock, timeout) < 0) {
         free(paths);
-        delete lock;
+        free(lock);
         return nullptr;
     }
 
