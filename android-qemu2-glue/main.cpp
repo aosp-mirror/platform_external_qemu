@@ -1340,11 +1340,9 @@ static bool checkConfigIniCompatible(std::string srcConfig,
     }
 
     std::unordered_set<std::string> important{
-            "abi.type",       "hw.cpu.arch",     "hw.lcd.density",
-            "hw.lcd.height",  "hw.lcd.width",    "skin.name",
-            "hw.camera.back", "hw.camera.front", "hw.gpu.enabled",
-            "hw.gpu.mode",    "hw.sdCard",       "hw.keyboard",
-            "hw.arc"};
+            "abi.type",     "hw.cpu.arch", "hw.lcd.density", "hw.lcd.height",
+            "hw.lcd.width", "skin.name",   "hw.camera.back", "hw.camera.front",
+            "hw.sdCard",    "hw.keyboard", "hw.arc"};
     for (auto&& key : srcConfigIni) {
         if (important.count(key) == 0) {
             continue;  // not important, ignore
