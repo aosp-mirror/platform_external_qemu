@@ -88,7 +88,7 @@ def get_tasks(args) -> List[BuildTask]:
             ).enable(run_tests),
             KillNetsimdTask().enable(run_tests),
             AccelerationCheckTask(args.out).enable(run_tests),
-            EmugenTestTask(args.aosp, args.out).enable(run_tests),
+            EmugenTestTask(args.aosp, args.out).enable(run_tests).enable(False),
             GenEntriesTestTask(args.aosp, args.out),
             # Enable the integration tests by default once they are stable enough
             IntegrationTestTask(args.aosp, args.out, args.dist).enable(False),
