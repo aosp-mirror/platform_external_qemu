@@ -413,8 +413,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         android_foldable_folded_area_configured(0) ||
         android_foldable_rollable_configured()) {
         mFoldableSyncToAndroid.start();
-    } else {
-        mToolsUi->change_posture_button->setHidden(true);
     }
     updateFoldableButtonVisibility();
 
@@ -443,8 +441,11 @@ ToolWindow::~ToolWindow() {
 }
 
 void ToolWindow::updateFoldableButtonVisibility() {
-    mToolsUi->change_posture_button->setEnabled(
-        android_foldable_hinge_enabled());
+    if (android_foldable_hinge_enabled()) {
+        mToolsUi->change_posture_button->show();
+    } else {
+        mToolsUi->change_posture_button->hide();
+    }
     if (mExtendedWindow.hasInstance()) {
         mExtendedWindow.get()->getVirtualSensorsPage()->updateHingeSensorUI();
     }
