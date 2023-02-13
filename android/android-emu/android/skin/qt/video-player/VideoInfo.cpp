@@ -130,6 +130,11 @@ void VideoInfo::initialize() {
 
     // create image convert context
     AVPixelFormat dst_fmt = AV_PIX_FMT_RGB24;
+    // sws_getContext will crash if videoCodecCtx is AV_PIX_FMT_NONE.
+    if (videoCodecCtx->pix_fmt == AV_PIX_FMT_NONE) {
+        derror("Video codec has invalid pixel format\n");
+        return;
+    }
     SwsContext* imgConvertCtx = sws_getContext(
             videoCodecCtx->width, videoCodecCtx->height, videoCodecCtx->pix_fmt,
             dst_w, dst_h, dst_fmt, SWS_FAST_BILINEAR, NULL, NULL, NULL);
