@@ -100,6 +100,7 @@ class WindowsEnvironment(BaseEnvironment):
                 ),
                 "-requires",
                 "Microsoft.VisualStudio.Workload.NativeDesktop",
+                "-sort",
                 "-format",
                 "json",
                 "-utf8",
