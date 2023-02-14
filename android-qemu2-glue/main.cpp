@@ -1365,6 +1365,8 @@ static void fixAvdConfig(std::string avdDir,
                          std::string avdName,
                          std::string avdDisplayName,
                          std::string skinPath,
+                         std::string gpuMode,
+                         std::string gpuEnabled,
                          AndroidHwConfig* hw) {
     IniFile configIni(PathUtils::join(avdDir, "config.ini"));
     if (!configIni.read(false)) {
@@ -1379,6 +1381,8 @@ static void fixAvdConfig(std::string avdDir,
                         hw->firstboot_downloaded_path);
     configIni.setString("firstboot.local.path", hw->firstboot_local_path);
     configIni.setString("skin.path", skinPath);
+    configIni.setString("gpu.mode", gpuMode);
+    configIni.setString("gpu.enabled", gpuEnabled);
     configIni.writeIfChanged();
 }
 
@@ -2142,6 +2146,10 @@ extern "C" int main(int argc, char** argv) {
                         getKeyFromConfigFile(orgConfigFile, "skin.path", "");
                 const std::string orgDisplayName = getKeyFromConfigFile(
                         orgConfigFile, "avd.ini.displayname", avdName);
+                const std::string orgGpuMode = getKeyFromConfigFile(
+                        orgConfigFile, "gpu.mode", avdName);
+                const std::string orgGpuEnabled = getKeyFromConfigFile(
+                        orgConfigFile, "gpu.enabled", avdName);
                 std::set<std::string> skipSet;
 
                 const auto compatibleCheckResult =
@@ -2222,7 +2230,8 @@ extern "C" int main(int argc, char** argv) {
                         if (!opts->no_snapshot_load) {
                             // fix AvdId, displayname and paths
                             fixAvdConfig(std::string(s_AvdFolder), avdName,
-                                         orgDisplayName, orgSkinPath, hw);
+                                         orgDisplayName, orgSkinPath,
+                                         orgGpuMode, orgGpuEnabled, hw);
                         }
                     }
                 }
