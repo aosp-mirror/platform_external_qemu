@@ -1621,7 +1621,7 @@ function(android_upload_symbols TGT)
       TARGET ${TGT}
       POST_BUILD
       COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
-      COMMAND sym_upload -p sym-upload-v2 -k ${BREAKPAD_API_KEY} ${SYM_SOURCE}
+      COMMAND sym_upload -p sym-upload-v2 -k ${BREAKPAD_API_KEY} ${DEST}
       ${BREAKPAD_API_URL} || exit 0
       COMMAND
       "${Python3_EXECUTABLE}"
