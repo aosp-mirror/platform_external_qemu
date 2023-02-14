@@ -1095,11 +1095,17 @@ static HANDLE gvm_open_device(void)
 {
     HANDLE hDevice;
 
+    hDevice = CreateFile("\\\\.\\AEHD", GENERIC_READ | GENERIC_WRITE, 0, NULL,
+        CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hDevice != INVALID_HANDLE_VALUE)
+        return hDevice;
+
+    /* AEHD 2.0 or below only support the old name */
     hDevice = CreateFile("\\\\.\\gvm", GENERIC_READ | GENERIC_WRITE, 0, NULL,
         CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (hDevice == INVALID_HANDLE_VALUE)
-        fprintf(stderr, "Failed to open the gvm device! Error code %lx\n",
+        fprintf(stderr, "Failed to open the AEHD device! Error code %lx\n",
                 GetLastError());
     return hDevice;
 }
