@@ -420,6 +420,16 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
             // Foldable hinge area and posture update. Called when cold boot or Android reboot itself
             if (android_foldable_hinge_configured()) {
+                int xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_xOffset;
+                int yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_yOffset;
+                int width = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_width;
+                int height = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_height;
+                char foldedArea[64];
+                sprintf(foldedArea, "%d,%d,%d,%d", xOffset, yOffset,
+                        xOffset + width, yOffset + height);
+                adbInterface->enqueueCommand({ "shell", "wm", "folded-area",
+                                foldedArea});
+
                 FoldableState state;
                 if (!android_foldable_get_state(&state)) {
                     adbInterface->enqueueCommand({ "shell", "settings", "put",
