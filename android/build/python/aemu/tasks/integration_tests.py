@@ -57,5 +57,6 @@ class IntegrationTestTask(BuildTask):
                 self.build_directory / "session",
                 "--logdir",
                 self.logdir,
+                "--failures_as_errors",
             ]
         ).run()
