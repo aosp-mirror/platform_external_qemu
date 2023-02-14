@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaVideoToolBoxUtils.h"
+#include "host-common/MediaVideoToolBoxUtils.h"
 #include "OpenglRender/MediaNative.h"
 
 #define MEDIA_VTB_DEBUG 0
