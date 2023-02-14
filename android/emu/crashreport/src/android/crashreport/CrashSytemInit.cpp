@@ -88,7 +88,7 @@ public:
                 {"ver", EMULATOR_FULL_VERSION_STRING}};
         bool active = mClient->StartHandler(handler_path, database_path,
                                             metrics_path, CrashURL, annotations,
-                                            {"--no-rate-limit"}, true, true);
+                                            {"--no-rate-limit"}, true, false);
 
         mDatabase = crashpad::CrashReportDatabase::Initialize(database_path);
         mInitialized = active && mDatabase;
