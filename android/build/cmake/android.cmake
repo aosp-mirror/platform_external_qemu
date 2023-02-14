@@ -935,12 +935,10 @@ endfunction()
 #
 # protofiles: The set of protofiles to be included.
 function(android_add_protobuf name protofiles)
-  protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
-  android_add_library(TARGET ${name} LICENSE Apache-2.0 SRC ${PROTO_HDRS}
-                                                            ${PROTO_SRCS})
-  target_link_libraries(${name} PUBLIC protobuf::libprotobuf)
-  target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-  android_clang_tidy(${name})
+  message(STATUS "This method is deprecated, please use protobuf_generate_with_plugin instead for target ${name}.")
+  android_add_library(TARGET ${name} LICENSE Apache-2.0)
+  protobuf_generate_with_plugin(TARGET ${name} PROTOS ${protofiles})
+  target_link_libraries(${name} PRIVATE libprotobuf)
 endfunction()
 
 function(protobuf_generate_with_plugin)
