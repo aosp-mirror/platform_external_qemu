@@ -111,7 +111,7 @@ TEST_F(Ieee80211FrameTest, conversionTest) {
     EXPECT_TRUE(MacAddress(MACARG(kDst)) == frame->addr1());
     EXPECT_TRUE(MacAddress(MACARG(kBssID)) == frame->addr2());
     EXPECT_TRUE(MacAddress(MACARG(kSrc)) == frame->addr3());
-    auto outSg = frame->toEthernet();
+    auto outSg = frame->toEthernetIOVector();
     std::vector<uint8_t> packet(outSg.summedLength());
     EXPECT_EQ(outSg.size(), 2);
     outSg.copyTo(packet.data(), 0, outSg.summedLength());
@@ -130,6 +130,28 @@ TEST_F(Ieee80211FrameTest, conversionTest) {
     auto frame2 = Ieee80211Frame::buildFromEthernet(
             ethernet.data(), ethernet.size(), MacAddress(MACARG(kBssID)));
     EXPECT_TRUE(frame2.get() == nullptr);
+}
+
+// To verify that toEthernetIOVector() is equivalent to toEthernet()
+TEST_F(Ieee80211FrameTest, toEthernetTest) {
+    // build up the ethernet packet.
+    std::vector<uint8_t> ethernet;
+    ethernet.insert(ethernet.end(), kDst, kDst + sizeof(kDst));
+    ethernet.insert(ethernet.end(), kSrc, kSrc + sizeof(kSrc));
+    ethernet.insert(ethernet.end(), kPayload, kPayload + sizeof(kPayload));
+
+    // init Ieee80211 frame with ethernet
+    auto frame = Ieee80211Frame::buildFromEthernet(
+            ethernet.data(), ethernet.size(), MacAddress(MACARG(kBssID)));
+    auto outSg = frame->toEthernetIOVector();
+    std::vector<uint8_t> copied(outSg.summedLength());
+    EXPECT_EQ(outSg.size(), 2);
+    outSg.copyTo(copied.data(), 0, outSg.summedLength());
+    auto packet = frame->toEthernet();
+    EXPECT_EQ(packet.size(), copied.size());
+    for (size_t s = 0; s < packet.size(); s++) {
+        EXPECT_EQ(packet[s], copied[s]);
+    }
 }
 
 //TODO(wdu@) b/216352528 Re-enable this test after a test has been fixed. 

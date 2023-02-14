@@ -31,8 +31,9 @@ extern "C" {
 
 using android::base::IOVector;
 using android::network::Ieee80211Frame;
-using android::qemu2::WifiService;
 using android::qemu2::HostapdOptions;
+using android::qemu2::SlirpOptions;
+using android::qemu2::WifiService;
 namespace {
 
 /* Limit the number of packets that can be sent via a single flush
@@ -65,11 +66,14 @@ struct GlobalState {
     bool initWifiService(NICConf* conf) {
         if (!wifiService) {
             auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
+            // Do not initialize hostapd and slirp inside Wifi Servic.
             HostapdOptions hostapd = {.disabled = true};
+            SlirpOptions slirpOpts = {.disabled = true};
             auto builder =
                     WifiService::Builder()
                             .withRedirectToNetsim(opts->redirect_to_netsim)
                             .withHostapd(hostapd)
+                            .withSlirp(slirpOpts)
                             .withBssid(std::vector<uint8_t>(
                                     kBssID, kBssID + sizeof(kBssID)))
                             .withNicConf(conf)
@@ -162,13 +166,17 @@ static ssize_t virtio_wifi_on_frame_available(const uint8_t* buf, size_t size) {
     VirtIOWifi* n = globalState()->wifi;
     VirtIODevice* vdev = VIRTIO_DEVICE(n);
     ssize_t ret = 0;
-    if (size > 0) {
-        NetClientState* nc =
-                qemu_get_queue(globalState()->wifiService->getNic());
-        size_t index = nc ? nc->queue_index : 0;
-        ret = virtio_wifi_add_buf(vdev, n->vqs[index].rx, buf, size);
+    size_t index = kQueueSize - 1;
+    if (size == 0)
+        return ret;
+
+    auto nic = globalState()->wifiService->getNic();
+    if (nic) {
+        NetClientState* nc = qemu_get_queue(nic);
+        if (nc)
+            index = nc->queue_index;
     }
-    return ret;
+    return virtio_wifi_add_buf(vdev, n->vqs[index].rx, buf, size);
 }
 
 static int virtio_wifi_can_receive(size_t queue_index) {
