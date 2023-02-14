@@ -96,19 +96,6 @@ private:
     bool mDone = false;
 };
 
-// Creates a random serial name
-static std::string serial_name() {
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> distletter(
-            'a', 'z');  // distribution in range [a, z]
-    std::string serial = "netsimwifi-";
-    for (int i = 0; i < 6; i++) {
-        serial += (char)distletter(rng);
-    }
-    return serial;
-}
-
 NetsimWifiForwarder::NetsimWifiForwarder(
         WifiService::OnReceiveCallback onRecv,
         WifiService::CanReceiveCallback canReceive)
@@ -129,13 +116,11 @@ bool NetsimWifiForwarder::init() {
     sTransport = std::make_unique<NetsimWifiTransport>(mOnRecv, mCanReceive);
     sTransport->startCall(sTransportStub.get());
 
-    auto serial = serial_name();
     PacketRequest initial_request;
-    initial_request.mutable_initial_info()->set_serial(serial_name());
     initial_request.mutable_initial_info()->mutable_chip()->set_kind(
-            netsim::startup::Chip_ChipKind_WIFI);
+        netsim::common::ChipKind::WIFI);
     sTransport->Write(initial_request);
-    LOG(INFO) << "Registered as " << serial.c_str();
+    LOG(INFO) << "Registered as WiFi";
     return true;
 }
 

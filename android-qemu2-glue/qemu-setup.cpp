@@ -142,6 +142,8 @@ using android::emulation::control::EmulatorAdvertisement;
 using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::EmulatorProperties;
 
+std::string get_display_name();
+
 // Tansfrom a const char* to std::string returning empty "" for nullptr
 inline static std::string to_string(const char* str) {
     return str ? std::string(str) : "";
@@ -278,11 +280,10 @@ bool qemu_android_emulation_early_setup() {
             new android::qemu::QemuAudioOutputEngine());
 
     if (opts->packet_streamer_endpoint) {
-        std::string id =
-                "emulator/" + std::to_string(android::base::Process::me()->pid());
+        std::string name = get_display_name();
         register_netsim(to_string(opts->packet_streamer_endpoint),
                         to_string(opts->rootcanal_default_commands_file),
-                        to_string(opts->rootcanal_controller_properties_file), id);
+                        to_string(opts->rootcanal_controller_properties_file), name);
     }
     return true;
 }
@@ -323,12 +324,8 @@ int qemu_grpc_port() {
     return -1;
 }
 
-int qemu_setup_grpc() {
-    if (grpcService)
-        return grpcService->port();
-
+std::string get_display_name() {
     std::string displayName;
-
     // Ideally we use the display name, which is not available for all
     // systems (fuchsia).
     auto avdInfo = getConsoleAgents()->settings->avdInfo();
@@ -341,7 +338,16 @@ int qemu_setup_grpc() {
     } else {
         displayName = avdInfo_getName(getConsoleAgents()->settings->avdInfo());
     }
+    return displayName;
+}
 
+int qemu_setup_grpc() {
+    if (grpcService)
+        return grpcService->port();
+
+    std::string displayName = get_display_name();
+
+    auto avdInfo = getConsoleAgents()->settings->avdInfo();
     auto contentPath = avdInfo_getContentPath(avdInfo);
     EmulatorProperties props{
             {"port.serial", std::to_string(android_serial_number_port)},
