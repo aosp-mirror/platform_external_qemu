@@ -1293,9 +1293,17 @@ std::pair<AndroidCpuInfoFlags, std::string> GetCpuInfo() {
             }
             break;
         default:
+#ifdef APPLE_SILICON
+            flags |= ANDROID_CPU_INFO_APPLE;
+            status += "Apple CPU\n";
+            status +=
+                    "Virtualization is supported\n";  // we have not found
+                                                      // otherwise on apple cpu
+#else
             flags |= ANDROID_CPU_INFO_OTHER;
             status += "Other CPU: ";
             status += vendor_id;
+#endif
             status += '\n';
             break;
     }
@@ -1303,6 +1311,8 @@ std::pair<AndroidCpuInfoFlags, std::string> GetCpuInfo() {
     if (android_get_x86_cpuid_is_vcpu()) {
         flags |= ANDROID_CPU_INFO_VM;
         status += "Inside a VM\n";
+    } else {
+        status += "Bare metal\n";
     }
 
     const int osBitness = base::System::get()->getHostBitness();
