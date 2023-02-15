@@ -306,6 +306,7 @@ OPT_FLAG(no_nested_warnings,
 OPT_PARAM( wifi_tap, "<interface>", "use this TAP interface for Virtio Wi-Fi" )
 OPT_PARAM( wifi_tap_script_up, "<script>", "script to run when the TAP interface goes up" )
 OPT_PARAM( wifi_tap_script_down, "<script>", "script to run when the TAP interface goes down" )
+OPT_PARAM( wifi_socket, "<option>", "use Socket interface for Virtio Wi-Fi, one of fd=, listen=, or connect=")
 #ifdef __APPLE__
 OPT_PARAM( vmnet_bridged,
            "<host network interface>",

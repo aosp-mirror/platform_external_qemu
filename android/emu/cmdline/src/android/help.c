@@ -2149,6 +2149,23 @@ help_wifi_tap_script_down(stralloc_t*  out)
     );
 }
 
+static void
+help_wifi_socket(stralloc_t* out)
+{
+    PRINTF(
+    "  by default, the emulator's virtio wifi device uses user mode networking which\n"
+    "  does address translation of all network traffic. Use -wifi-socket <option>\n"
+    "  to switch to Socket network mode where Virtio Wi-Fi will use a socket interface to\n"
+    "  connect to the host network directly. Android will attempt to configure the Socket\n"
+    "  network using DHCP for IPv4 and SLAAC for IPv6. To be able to access the\n"
+    "  network that the host is connected to the Socket interface should be backed\n"
+    "  with another network interface on the host.\n\n"
+
+    "  <option> depends on how the socket is configured. It could be one of fd=, listen=,\n"
+    "  or connect=. See https://wiki.qemu.org/Documentation/Networking#Socket\n\n"
+    );
+}
+
 #ifdef __APPLE__
 static void
 help_vmnet_bridged(stralloc_t*  out) {

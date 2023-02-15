@@ -2863,6 +2863,8 @@ extern "C" int main(int argc, char** argv) {
             args.addFormat(
                     "tap,id=virtio-wifi,script=%s,downscript=%s,ifname=%s",
                     upScript, downScript, opts->wifi_tap);
+        } else if (opts->wifi_socket) {
+            args.addFormat("socket,id=virtio-wifi,%s", opts->wifi_socket);
         }
 #if defined(__APPLE__)
         else if (opts->vmnet_bridged) {
