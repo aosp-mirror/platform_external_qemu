@@ -1435,7 +1435,6 @@ static SnapshotCompatibleType checkFirstbootIniCompatible(
 
     std::vector<std::string> keysOther{
             "Host.Os.Type",
-            "Host.Cpu.Model",
             "Host.Hypervisor.Name",
     };
 
@@ -2247,6 +2246,13 @@ extern "C" int main(int argc, char** argv) {
                         System::get()->findBundledExecutable("qemu-img");
                 std::string dataimageext4 = std::string(hw->hw_sdCard_path);
                 convertExt4ToQcow2(dataimageext4);
+            }
+
+            // firstboot.ini could be wiped out, create again
+            if (!path_exists(orgSrcFirstbootIniFileName.c_str())) {
+                android::avd::BugreportInfo bugInfo;
+                bugInfo.dumpFirstbootInfoForDownloadableSnapshot(
+                        orgSrcFirstbootIniFileName);
             }
 
             free(s_AvdFolder);
