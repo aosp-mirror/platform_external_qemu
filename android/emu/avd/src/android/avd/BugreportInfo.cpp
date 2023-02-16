@@ -155,6 +155,16 @@ bool BugreportInfo::dumpFirstbootInfoForDownloadableSnapshot(
     std::string myCpu{cpuModel};
     std::replace(myCpu.begin(), myCpu.end(), '\n', ';');
     avdIni.setString("Host.Cpu.Model", myCpu);
+    std::string cpuVendor = "Unknown";
+    auto cpuType = android::GetCpuInfo().first;
+    if (cpuType & ANDROID_CPU_INFO_INTEL) {
+        cpuVendor = "Intel";
+    } else if (cpuType & ANDROID_CPU_INFO_AMD) {
+        cpuVendor = "AMD";
+    } else if (cpuType & ANDROID_CPU_INFO_APPLE) {
+        cpuVendor = "Apple";
+    }
+    avdIni.setString("Host.Cpu.Vendor", cpuVendor);
 
     const auto myVersion =
             android::base::Version{EMULATOR_VERSION_STRING_SHORT};
