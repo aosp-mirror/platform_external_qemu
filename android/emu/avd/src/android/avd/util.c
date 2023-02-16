@@ -81,7 +81,7 @@ path_getAvdContentPath(const char* avdName)
         const char* relPath = iniFile_getString(ini, ROOT_REL_PATH_KEY, NULL);
         if (relPath != NULL) {
             p = bufprint_avd_home_path(temp, end);
-            p = bufprint(p, end, PATH_SEP "%s", relPath);
+            p = bufprint(p, end, PATH_SEP ".." PATH_SEP "%s", relPath);
             if (p < end && path_is_dir(temp)) {
                 char myPath[PATH_MAX];
                 snprintf(myPath, sizeof(myPath), "%s" PATH_SEP "config.ini", temp);
