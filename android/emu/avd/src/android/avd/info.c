@@ -482,7 +482,7 @@ static int _avdInfo_getContentPath(AvdInfo* i) {
                 iniFile_getString(i->rootIni, ROOT_REL_PATH_KEY, NULL);
         if (relPath != NULL) {
             p = bufprint_avd_home_path(temp, end);
-            p = bufprint(p, end, PATH_SEP "%s", relPath);
+            p = bufprint(p, end, PATH_SEP ".." PATH_SEP "%s", relPath);
             if (p < end && path_is_dir(temp)) {
                 str_reset(&i->contentPath, temp);
             }
@@ -497,7 +497,8 @@ static int _avdInfo_getContentPath(AvdInfo* i) {
     if (!path_is_dir(i->contentPath)) {
         derror("bad config: %s",
                "virtual device file has no valid " ROOT_REL_PATH_KEY
-               " entry nor " ROOT_ABS_PATH_KEY " entry");
+               " entry nor " ROOT_ABS_PATH_KEY " entry",
+               i->contentPath);
         return -1;
     }
 
