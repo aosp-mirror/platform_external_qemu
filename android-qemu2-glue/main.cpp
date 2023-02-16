@@ -1435,6 +1435,7 @@ static SnapshotCompatibleType checkFirstbootIniCompatible(
 
     std::vector<std::string> keysOther{
             "Host.Os.Type",
+            "Host.Cpu.Vendor",
             "Host.Hypervisor.Name",
     };
 
