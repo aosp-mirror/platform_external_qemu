@@ -19,6 +19,7 @@
 
 #include "aemu/base/async/ThreadLooper.h"
 #include "android/base/system/System.h"
+#include "android/utils/debug.h"
 #include "host-common/qt_ui_defs.h"
 #include "host-common/window_agent.h"
 #include "android/settings-agent.h"
@@ -140,14 +141,22 @@ public:
                       const ThemingStyle* request,
                       Empty* reply) override {
         const auto* agent = mAgents->emu;
-        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
-            if (request->style() == ThemingStyle::LIGHT)
-                agent->setUiTheme(SETTINGS_THEME_STUDIO_LIGHT);
-            else if (request->style() == ThemingStyle::CONTRAST)
-                agent->setUiTheme(SETTINGS_THEME_STUDIO_CONTRAST);
-            else if (request->style() == ThemingStyle::DARK)
-                agent->setUiTheme(SETTINGS_THEME_STUDIO_DARK);
-        });
+        android::base::ThreadLooper::runOnMainLooper(
+                [agent, style = request->style()]() {
+                    switch (style) {
+                        case ThemingStyle::LIGHT:
+                            agent->setUiTheme(SETTINGS_THEME_STUDIO_LIGHT);
+                            break;
+                        case ThemingStyle::CONTRAST:
+                            agent->setUiTheme(SETTINGS_THEME_STUDIO_CONTRAST);
+                            break;
+                        case ThemingStyle::DARK:
+                            agent->setUiTheme(SETTINGS_THEME_STUDIO_DARK);
+                            break;
+                        default:
+                            derror("setUiTheme has been called with an unknown studio theme, ignoring.");
+                    }
+                });
         return Status::OK;
     }
 
