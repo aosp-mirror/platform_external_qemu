@@ -337,6 +337,10 @@ bool allocExternalMemory(VulkanDispatch* vk,
                          VkEmulation::ExternalMemoryInfo* info,
                          bool actuallyExternal = true,
                          android::base::Optional<uint64_t> deviceAlignment =
+                                 android::base::kNullopt,
+                         android::base::Optional<VkImage> dedicatedImage =
+                                 android::base::kNullopt,
+                         android::base::Optional<VkBuffer> dedicatedBuffer =
                                  android::base::kNullopt);
 void freeExternalMemoryLocked(VulkanDispatch* vk,
                               VkEmulation::ExternalMemoryInfo* info);
