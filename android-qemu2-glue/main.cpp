@@ -2650,7 +2650,9 @@ extern "C" int main(int argc, char** argv) {
                 opts->net_tap_script_down ? opts->net_tap_script_down : "no";
         args.addFormat("tap,id=mynet,script=%s,downscript=%s,ifname=%s",
                        upScript, downScript, opts->net_tap);
-    }
+    } else if (opts->net_socket) {
+        args.addFormat("socket,id=mynet,%s", opts->net_socket);
+     }
 #if defined(__APPLE__)
     else if (opts->vmnet_bridged) {
         args.addFormat("vmnet-bridged,id=mynet,ifname=%s%s",
