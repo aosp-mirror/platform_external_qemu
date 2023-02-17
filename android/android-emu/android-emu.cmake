@@ -21,6 +21,7 @@ android_add_library(
   DARWIN android/camera/camera-capture-mac.m
   DEPS android-emu-agents-headers
        android-emu-base
+       android-emu-base-headers
        android-emu-cmdline
        android-emu-files
        android-emu-min-avd
@@ -55,11 +56,10 @@ set(android-emu-common
     android/adb-server.cpp
     android/base/async/CallbackRegistry.cpp
     android/base/LayoutResolver.cpp
-    android/boot-properties.c
     android/bootconfig.cpp
     android/car-cluster.cpp
+    android/car-physics.cpp
     android/car.cpp
-    android/cros.c
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
     android/emulation/AdbHostListener.cpp
@@ -71,29 +71,16 @@ set(android-emu-common
     android/emulation/address_space_host_media.cpp
     android/emulation/address_space_host_memory_allocator.cpp
     android/emulation/address_space_shared_slots_host_memory_allocator.cpp
-    android/emulation/android_pipe_host.cpp
-    android/emulation/android_pipe_pingpong.c
-    android/emulation/android_pipe_throttle.c
-    android/emulation/android_pipe_unix.cpp
-    android/emulation/android_pipe_zero.c
-    android/emulation/android_qemud.cpp
-    android/emulation/AndroidAsyncMessagePipe.cpp
-    android/emulation/AndroidMessagePipe.cpp
-    android/emulation/AndroidPipe.cpp
     android/emulation/AudioCaptureEngine.cpp
     android/emulation/AudioOutputEngine.cpp
-    android/emulation/ClipboardPipe.cpp
     android/emulation/ComponentVersion.cpp
     android/emulation/control/AgentLogger.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
-    android/emulation/control/NopRtcBridge.cpp
     android/emulation/control/ServiceUtils.cpp
     android/emulation/DmaMap.cpp
-    android/emulation/goldfish_sync.cpp
     android/emulation/GoldfishDma.cpp
-    android/emulation/GoldfishSyncCommandQueue.cpp
     android/emulation/H264NaluParser.cpp
     android/emulation/H264PingInfoParser.cpp
     android/emulation/HevcNaluParser.cpp
@@ -102,7 +89,7 @@ set(android-emu-common
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/hostdevices/HostGoldfishPipe.cpp
     android/emulation/HostmemIdMapping.cpp
-    android/emulation/LogcatPipe.cpp
+    android/emulation/AutoDisplays.cpp
     android/emulation/MediaFfmpegVideoHelper.cpp
     android/emulation/MediaH264Decoder.cpp
     android/emulation/MediaH264DecoderDefault.cpp
@@ -120,32 +107,13 @@ set(android-emu-common
     android/emulation/MediaVpxVideoHelper.cpp
     android/emulation/MultiDisplay.cpp
     android/emulation/MultiDisplayPipe.cpp
-    android/emulation/qemud/android_qemud_client.cpp
-    android/emulation/qemud/android_qemud_multiplexer.cpp
-    android/emulation/qemud/android_qemud_serial.cpp
-    android/emulation/qemud/android_qemud_service.cpp
-    android/emulation/qemud/android_qemud_sink.cpp
-    android/emulation/RefcountPipe.cpp
-    android/emulation/serial_line.cpp
-    android/emulation/SerialLine.cpp
     android/emulation/SetupParameters.cpp
-    android/emulation/testing/TestVmLock.cpp
     android/emulation/USBAssist.cpp
-    android/emulation/VmLock.cpp
     android/emulation/VpxFrameParser.cpp
     android/emulation/VpxPingInfoParser.cpp
     android/error-messages.cpp
     android/framebuffer.c
-    android/gps.c
-    android/gps/GpxParser.cpp
-    android/gps/KmlParser.cpp
-    android/gps/PassiveGpsUpdater.cpp
     android/gpu_frame.cpp
-    android/hw-control.cpp
-    android/hw-events.c
-    android/hw-fingerprint.c
-    android/hw-kmsg.c
-    android/hw-qemud.cpp
     android/jdwp/JdwpProxy.cpp
     android/jpeg-compress.c
     android/kernel/kernel_utils.cpp
@@ -204,25 +172,7 @@ set(android-emu-common
     android/snapshot/SnapshotUtils.cpp
     android/snapshot/TextureLoader.cpp
     android/snapshot/TextureSaver.cpp
-    android/telephony/debug.c
-    android/telephony/gsm.c
-    android/telephony/MeterService.cpp
-    android/telephony/modem.c
-    android/telephony/modem_driver.c
-    android/telephony/phone_number.cpp
-    android/telephony/remote_call.c
-    android/telephony/sim_card.c
-    android/telephony/SimAccessRules.cpp
-    android/telephony/sms.c
-    android/telephony/sysdeps.c
-    android/telephony/TagLengthValue.cpp
-    android/update-check/UpdateChecker.cpp
-    android/update-check/VersionExtractor.cpp
-    android/userspace-boot-properties.cpp
-    android/verified-boot/load_config.cpp
-    android/wear-agent/android_wear_agent.cpp
-    android/wear-agent/PairUpWearPhone.cpp
-    android/wear-agent/WearAgent.cpp)
+    android/verified-boot/load_config.cpp)
 
 # These are the set of sources for which we know we have dependencies. You can
 # use this as a starting point to figure out what can move to a seperate library
@@ -247,6 +197,7 @@ set(android_emu_dependent_src
     android/emulation/QemuMiscPipe.cpp
     android/emulation/resizable_display_config.cpp
     android/hw-sensors.cpp
+    android/userspace-boot-properties.cpp
     android/main-common.c
     android/main-qemu-parameters.cpp
     android/offworld/OffworldPipe.cpp
@@ -312,6 +263,7 @@ android_add_library(
 # would like to keep this list small.
 target_link_libraries(
   android-emu
+  PRIVATE android-emu-base-headers qemu-host-common-headers
   PUBLIC FFMPEG::FFMPEG
          VPX::VPX
          emulator-libext4_utils
@@ -324,9 +276,13 @@ target_link_libraries(
          android-emu-base
          android-emu-studio-config
          android-emu-telnet-console-auth
+         android-emu-gps
          android-emu-sockets
          android-emu-adb-interface
+         android-emu-hardware
+         android-emu-update-check
          android-emu-crashreport
+         android-emu-telephony
          emulator-libsparse
          emulator-libselinux
          emulator-libjpeg
@@ -412,15 +368,9 @@ target_include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${DARWINN_INCLUDE_DIRS})
 
-android_target_compile_options(
-  android-emu Clang PRIVATE -Wno-invalid-constexpr -Wno-return-type-c-linkage
-                            -fvisibility=default)
-
-android_target_compile_options(
-  android-emu Clang
-  PUBLIC -Wno-extern-c-compat # Needed for serial_line.h
-         -Wno-return-type-c-linkage # android_getOpenglesRenderer
-)
+target_compile_options(
+  android-emu PRIVATE -Wno-invalid-constexpr -Wno-return-type-c-linkage
+                      -fvisibility=default PUBLIC -Wno-return-type-c-linkage)
 
 android_target_compile_options(
   android-emu linux-x86_64 PRIVATE -idirafter
@@ -437,17 +387,10 @@ android_target_compile_options(
           -Wno-pessimizing-move -Wno-unused-lambda-capture)
 
 android_target_compile_definitions(
-  android-emu darwin-x86_64 PRIVATE "-D_DARWIN_C_SOURCE=1" "-Dftello64=ftell"
-                                    "-Dfseeko64=fseek")
-android_target_compile_definitions(
-  android-emu darwin-aarch64 PRIVATE "-D_DARWIN_C_SOURCE=1" "-Dftello64=ftell"
-                                     "-Dfseeko64=fseek")
+  android-emu darwin PRIVATE "-D_DARWIN_C_SOURCE=1" "-Dftello64=ftell"
+                             "-Dfseeko64=fseek")
 
-target_compile_definitions(
-  android-emu
-  PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}" "-D_LIBCPP_VERSION=__GLIBCPP__"
-          "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-          "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
+target_compile_definitions(android-emu PRIVATE "-D_LIBCPP_VERSION=__GLIBCPP__")
 
 if(WEBRTC)
   target_compile_definitions(android-emu PUBLIC -DANDROID_WEBRTC)
@@ -475,36 +418,20 @@ android_add_library(
       android/emulation/address_space_graphics.cpp
       android/emulation/address_space_host_memory_allocator.cpp
       android/emulation/address_space_shared_slots_host_memory_allocator.cpp
-      android/emulation/android_pipe_host.cpp
-      android/emulation/AndroidAsyncMessagePipe.cpp
-      android/emulation/AndroidMessagePipe.cpp
-      android/emulation/AndroidPipe.cpp
       android/emulation/AudioCaptureEngine.cpp
       android/emulation/AudioOutputEngine.cpp
-      android/emulation/ClipboardPipe.cpp
       android/emulation/ComponentVersion.cpp
       android/emulation/control/FilePusher.cpp
-      android/emulation/control/NopRtcBridge.cpp
+      android/emulation/control/ScreenCapturer.cpp
       android/emulation/DmaMap.cpp
-      android/emulation/goldfish_sync.cpp
       android/emulation/GoldfishDma.cpp
-      android/emulation/GoldfishSyncCommandQueue.cpp
       android/emulation/hostdevices/HostAddressSpace.cpp
       android/emulation/hostdevices/HostGoldfishPipe.cpp
       android/emulation/HostmemIdMapping.cpp
-      android/emulation/LogcatPipe.cpp
-      android/emulation/RefcountPipe.cpp
-      android/emulation/serial_line.cpp
-      android/emulation/SerialLine.cpp
       android/emulation/SetupParameters.cpp
-      android/emulation/testing/TestVmLock.cpp
-      android/emulation/VmLock.cpp
       android/error-messages.cpp
       android/framebuffer.c
-      android/gps.c
       android/gpu_frame.cpp
-      android/hw-events.c
-      android/hw-kmsg.c
       android/kernel/kernel_utils.cpp
       android/loadpng.c
       android/opengl/emugl_config.cpp
@@ -551,6 +478,7 @@ android_add_library(
 target_link_libraries(
   android-emu-shared
   PUBLIC android-emu-base
+         android-emu-base-headers
          android-emu-avd
          android-emu-agents
          android-emu-cmdline
@@ -562,6 +490,8 @@ target_link_libraries(
          android-emu-crashreport
          android-emu-adb-interface
          android-emu-sockets
+         android-emu-hardware
+         qemu-host-common-headers
          # Protobuf dependencies
          android-emu-protos
          protobuf::libprotobuf
@@ -667,6 +597,7 @@ target_compile_definitions(
           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 if(WEBRTC)
   target_compile_definitions(android-emu-shared PUBLIC -DANDROID_WEBRTC)
+  android_install_shared(android-emu-shared)
 endif()
 
 target_compile_definitions(android-emu-shared PUBLIC -DAEMU_MIN=1)
@@ -690,7 +621,7 @@ android_add_library(
 android_target_compile_options(android-emu-test-launcher Clang
                                PRIVATE -O0 -Wno-invalid-constexpr)
 target_link_libraries(
-  android-emu-test-launcher PRIVATE android-emu
+  android-emu-test-launcher PRIVATE android-emu android-emu-base-headers
   PUBLIC gmock android-emu-cmdline-testing android-emu-feature-test
          android-emu-crashreport-consent-never)
 
@@ -714,15 +645,11 @@ if(NOT LINUX_AARCH64)
       android/emulation/address_space_graphics_unittests.cpp
       android/emulation/address_space_host_memory_allocator_unittests.cpp
       android/emulation/address_space_shared_slots_host_memory_allocator_unittests.cpp
-      android/emulation/android_pipe_pingpong_unittest.cpp
-      android/emulation/android_pipe_zero_unittest.cpp
-      android/emulation/AndroidAsyncMessagePipe_unittest.cpp
       android/emulation/ComponentVersion_unittest.cpp
       android/emulation/control/ApkInstaller_unittest.cpp
       android/emulation/control/FilePusher_unittest.cpp
       android/emulation/control/GooglePlayServices_unittest.cpp
       android/emulation/control/ScreenCapturer_unittest.cpp
-      android/emulation/DeviceContextRunner_unittest.cpp
       android/emulation/DmaMap_unittest.cpp
       android/emulation/hostdevices/HostAddressSpace_unittest.cpp
       android/emulation/hostdevices/HostGoldfishPipe_unittest.cpp
@@ -730,14 +657,9 @@ if(NOT LINUX_AARCH64)
       android/emulation/HostMemoryService_unittest.cpp
       android/emulation/Hypervisor_unittest.cpp
       android/emulation/ParameterList_unittest.cpp
-      android/emulation/RefcountPipe_unittest.cpp
       android/emulation/serial_line_unittest.cpp
       android/emulation/SetupParameters_unittest.cpp
-      android/emulation/testing/TestAndroidPipeDevice.cpp
-      android/emulation/VmLock_unittest.cpp
       android/error-messages_unittest.cpp
-      android/gps/GpxParser_unittest.cpp
-      android/gps/KmlParser_unittest.cpp
       android/jdwp/Jdwp_unittest.cpp
       android/jdwp/JdwpProxy_unittest.cpp
       android/kernel/kernel_utils_unittest.cpp
@@ -760,52 +682,41 @@ if(NOT LINUX_AARCH64)
       android/snapshot/RamSaver_unittest.cpp
       android/snapshot/RamSnapshot_unittest.cpp
       android/snapshot/Snapshot_unittest.cpp
-      android/telephony/gsm_unittest.cpp
-      android/telephony/modem_unittest.cpp
-      android/telephony/SimAccessRules_unittest.cpp
-      android/telephony/sms_unittest.cpp
-      android/telephony/TagLengthValue_unittest.cpp
-      android/update-check/UpdateChecker_unittest.cpp
-      android/update-check/VersionExtractor_unittest.cpp
       android/userspace-boot-properties_unittest.cpp
       android/verified-boot/load_config_unittest.cpp
       android/videoinjection/VideoInjectionController_unittest.cpp
-      android/virtualscene/TextureUtils_unittest.cpp
-      android/wear-agent/PairUpWearPhone_unittest.cpp
-      android/wear-agent/testing/WearAgentTestUtils.cpp
-      android/wear-agent/WearAgent_unittest.cpp)
+      android/virtualscene/TextureUtils_unittest.cpp)
 
   # And declare the test
   android_add_test(TARGET android-emu_unittests
                    SRC ${android-emu_unittests_common})
 
   # Setup the targets compile config etc..
-  android_target_compile_options(
-    android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr
-                                        -Wno-string-plus-int)
+  target_compile_options(
+    android-emu_unittests PRIVATE -O0 -Wno-invalid-constexpr
+                                  -Wno-string-plus-int)
   target_include_directories(android-emu_unittests
-                             PRIVATE ../android-emugl/host/include/)
+                             PRIVATE ../android-emugl/host/include/ android/)
 
   # Sign unit test if needed.
   android_sign(TARGET android-emu_unittests)
 
   # Settings needed for darwin
   android_target_compile_definitions(
-    android-emu_unittests darwin-x86_64
-    PRIVATE "-D_DARWIN_C_SOURCE=1" "-Dftello64=ftell" "-Dfseeko64=fseek")
-  android_target_compile_options(android-emu_unittests darwin-x86_64
+    android-emu_unittests darwin PRIVATE "-D_DARWIN_C_SOURCE=1"
+                                         "-Dftello64=ftell" "-Dfseeko64=fseek")
+  android_target_compile_options(android-emu_unittests darwin
                                  PRIVATE "-Wno-deprecated-declarations")
-  android_target_compile_definitions(
-    android-emu_unittests darwin-aarch64
-    PRIVATE "-D_DARWIN_C_SOURCE=1" "-Dftello64=ftell" "-Dfseeko64=fseek")
-  android_target_compile_options(android-emu_unittests darwin-aarch64
-                                 PRIVATE "-Wno-deprecated-declarations")
-
   # Dependecies are exported from android-emu.
   target_link_libraries(
     android-emu_unittests
-    PRIVATE android-emu android-emu-protobuf android-emu-cmdline-testing
-            android-emu-test-launcher)
+    PRIVATE android-emu
+            android-emu-base-headers
+            android-emu-protobuf
+            android-emu-cmdline-testing
+            android-emu-hardware-test
+            android-emu-test-launcher
+            qemu-host-common-headers)
 
   list(
     APPEND
