@@ -189,7 +189,10 @@ def start_server():
     server.start()
     return server
 
-
-if __name__ == "__main__":
+def main():
     logging.basicConfig(level=logging.INFO)
     register()
+
+
+if __name__ == "__main__":
+    main

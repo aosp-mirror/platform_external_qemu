@@ -33,6 +33,7 @@ from aemu.tasks.integration_tests import IntegrationTestTask
 from aemu.tasks.unit_tests import AccelerationCheckTask, CTestTask, CoverageReportTask
 from aemu.tasks.emugen_test import EmugenTestTask
 from aemu.tasks.kill_netsimd import KillNetsimdTask
+from aemu.tasks.package_samples import PackageSamplesTask
 from aemu.tasks.fix_cargo import FixCargoTask
 from aemu.util.simple_feature_parser import FeatureParser
 
@@ -93,6 +94,9 @@ def get_tasks(args) -> List[BuildTask]:
             # Enable the integration tests by default once they are stable enough
             IntegrationTestTask(args.aosp, args.out, args.dist).enable(False),
             CoverageReportTask(aosp=args.aosp, destination=args.out).enable(run_tests),
+            PackageSamplesTask(
+                args.aosp, args.out, args.dist, args.target, args.sdk_build_number
+            ),
             DistributionTask(
                 aosp=args.aosp,
                 build_directory=args.out,
