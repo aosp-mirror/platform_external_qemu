@@ -153,4 +153,7 @@ bool android_get_x86_cpuid_is_vcpu();
 // Returns true if the CPU supports AMD64 instruction set.
 bool android_get_x86_cpuid_is_64bit_capable();
 
+// Returns true if the CPU is running inside a Hyper-V Root Partition
+bool android_get_x86_cpuid_hyperv_root();
+
 ANDROID_END_HEADER

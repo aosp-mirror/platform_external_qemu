@@ -1309,8 +1309,12 @@ std::pair<AndroidCpuInfoFlags, std::string> GetCpuInfo() {
     }
 
     if (android_get_x86_cpuid_is_vcpu()) {
-        flags |= ANDROID_CPU_INFO_VM;
-        status += "Inside a VM\n";
+        if (android_get_x86_cpuid_hyperv_root()) {
+            status += "Hyper-V Root Partition\n";
+        } else {
+            status += "Inside a VM\n";
+            flags |= ANDROID_CPU_INFO_VM;
+        }
     } else {
         status += "Bare metal\n";
     }
