@@ -45,6 +45,8 @@ using emugl::vkDispatch;
 using namespace goldfish_vk;
 
 using android::base::System;
+using emugl::ABORT_REASON_OTHER;
+using emugl::FatalError;
 
 class VkDecoder::Impl {
 public:
