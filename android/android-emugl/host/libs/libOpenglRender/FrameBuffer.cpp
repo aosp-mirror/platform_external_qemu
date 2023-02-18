@@ -1721,7 +1721,8 @@ void FrameBuffer::createGraphicsProcessResources(uint64_t puid) {
     AutoLock mutex(m_lock);
     bool inserted = m_procOwnedResources.try_emplace(puid, ProcessResources::create()).second;
     if (!inserted) {
-        WARN("Failed to create process resource for puid %" PRIu64 ".", puid);
+        // Debug-only on AEMU; otherwise it's too noisy.
+        GL_LOG("Failed to create process resource for puid %" PRIu64 ".", puid);
     }
 }
 
