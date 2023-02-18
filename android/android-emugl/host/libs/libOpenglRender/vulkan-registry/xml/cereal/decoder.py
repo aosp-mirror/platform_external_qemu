@@ -24,6 +24,7 @@ DELAYED_DECODER_DELETES = [
 
 decoder_decl_preamble = """
 
+class ProcessResources;
 class IOStream;
 
 class VkDecoder {
@@ -32,7 +33,7 @@ public:
     ~VkDecoder();
     void setForSnapshotLoad(bool forSnapshotLoad);
     void onThreadTeardown();
-    size_t decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr);
+    size_t decode(void* buf, size_t bufsize, IOStream* stream, const ProcessResources* processResources);
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
@@ -69,7 +70,7 @@ public:
         m_threadTeardown = true;
     }
 
-    size_t decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr);
+    size_t decode(void* buf, size_t bufsize, IOStream* stream, const ProcessResources* processResources);
 
 private:
     bool m_logCalls;
@@ -100,8 +101,8 @@ void VkDecoder::onThreadTeardown() {
     mImpl->onThreadTeardown();
 }
 
-size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr) {
-    return mImpl->decode(buf, bufsize, stream, seqnoPtr);
+size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream, const ProcessResources* processResources) {
+    return mImpl->decode(buf, bufsize, stream, processResources);
 }
 
 // VkDecoder::Impl::decode to follow
@@ -439,7 +440,7 @@ def emit_pool_free(cgen):
     cgen.stmt("%s->clearPool()" % READ_STREAM)
 
 def emit_seqno_incr(api, cgen):
-    cgen.stmt("if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST)")
+    cgen.stmt("if (queueSubmitWithCommandsEnabled) seqnoPtr->fetch_add(1, std::memory_order_seq_cst)")
 
 def emit_snapshot(typeInfo, api, cgen):
 
@@ -732,7 +733,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.module.appendImpl(decoder_impl_preamble)
 
         self.module.appendImpl(
-            "size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32_t* seqnoPtr)\n")
+            "size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, const ProcessResources* processResources)\n")
 
         self.cgen.beginBlock() # function body
 
@@ -760,10 +761,12 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.line("""
+        std::atomic<uint32_t>* seqnoPtr = processResources->getSequenceNumberPtr();
+
         if (queueSubmitWithCommandsEnabled && ((opcode >= OP_vkFirst && opcode < OP_vkLast) || (opcode >= OP_vkFirst_old && opcode < OP_vkLast_old))) {
             uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
             if (seqnoPtr && !m_forSnapshotLoad) {
-                while (!m_threadTeardown && (seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));
+                while (!m_threadTeardown && (seqno - seqnoPtr->load(std::memory_order_seq_cst) != 1));
             }
         }
         """)

@@ -41,6 +41,7 @@ class BumpPool;
 
 
 
+class ProcessResources;
 class IOStream;
 
 class VkDecoder {
@@ -49,7 +50,7 @@ public:
     ~VkDecoder();
     void setForSnapshotLoad(bool forSnapshotLoad);
     void onThreadTeardown();
-    size_t decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr);
+    size_t decode(void* buf, size_t bufsize, IOStream* stream, const ProcessResources* processResources);
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

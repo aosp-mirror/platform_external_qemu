@@ -455,8 +455,7 @@ intptr_t RenderThread::main() {
             //
             {
                 last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
-                                            ioStream,
-                                            processResources->getSequenceNumberPtr());
+                                            ioStream, processResources);
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;

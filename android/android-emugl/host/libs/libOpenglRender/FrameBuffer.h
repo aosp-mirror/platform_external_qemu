@@ -79,11 +79,13 @@ class ProcessResources {
     DISALLOW_COPY_ASSIGN_AND_MOVE(ProcessResources);
 
     ~ProcessResources() = default;
-    uint32_t* getSequenceNumberPtr() const { return &mSequenceNumber; }
+    std::atomic<uint32_t>* getSequenceNumberPtr() const {
+        return &mSequenceNumber;
+    }
 
    private:
     ProcessResources() : mSequenceNumber(0) {}
-    mutable uint32_t mSequenceNumber;
+    mutable std::atomic<uint32_t> mSequenceNumber;
 };
 
 
