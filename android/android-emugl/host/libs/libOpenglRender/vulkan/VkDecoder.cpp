@@ -140,12 +140,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, const 
         uint8_t* snapshotTraceBegin = vkReadStream->beginTrace();
         vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
         
-        std::atomic<uint32_t>* seqnoPtr = processResources->getSequenceNumberPtr();
+        std::atomic<uint32_t>* seqnoPtr = processResources ? processResources->getSequenceNumberPtr() : nullptr;
+        std::atomic<bool>* skipWaitingForSeqnoPtr = processResources ? processResources->getSkipWaitingForSequenceNumber() : nullptr;
 
         if (queueSubmitWithCommandsEnabled && ((opcode >= OP_vkFirst && opcode < OP_vkLast) || (opcode >= OP_vkFirst_old && opcode < OP_vkLast_old))) {
             uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
-            if (seqnoPtr && !m_forSnapshotLoad) {
-                while (!m_threadTeardown && (seqno - seqnoPtr->load(std::memory_order_seq_cst) != 1));
+            if (seqnoPtr && skipWaitingForSeqnoPtr && !m_forSnapshotLoad) {
+                while (!m_threadTeardown && !skipWaitingForSeqnoPtr->load(std::memory_order_relaxed) && (seqno - seqnoPtr->load(std::memory_order_seq_cst) != 1));
             }
         }
         

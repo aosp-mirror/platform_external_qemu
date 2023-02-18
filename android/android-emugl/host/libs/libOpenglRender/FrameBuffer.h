@@ -82,10 +82,15 @@ class ProcessResources {
     std::atomic<uint32_t>* getSequenceNumberPtr() const {
         return &mSequenceNumber;
     }
+    std::atomic<bool>* getSkipWaitingForSequenceNumber() const {
+        return &mSkipWaitingForSequenceNumber;
+    }
 
    private:
-    ProcessResources() : mSequenceNumber(0) {}
-    mutable std::atomic<uint32_t> mSequenceNumber;
+       ProcessResources()
+           : mSequenceNumber(0), mSkipWaitingForSequenceNumber(false) {}
+       mutable std::atomic<uint32_t> mSequenceNumber;
+       mutable std::atomic<bool> mSkipWaitingForSequenceNumber;
 };
 
 
