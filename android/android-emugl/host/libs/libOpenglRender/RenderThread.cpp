@@ -353,7 +353,7 @@ intptr_t RenderThread::main() {
         delete[] fname;
     }
 
-    uint32_t* seqnoPtr = nullptr;
+    const ProcessResources* processResources = nullptr;
 
     while (1) {
         // Let's make sure we read enough data for at least some processing.
@@ -437,8 +437,8 @@ intptr_t RenderThread::main() {
 
         do {
 
-            if (!seqnoPtr && tInfo.m_puid) {
-                seqnoPtr = FrameBuffer::getFB()->getProcessSequenceNumberPtr(tInfo.m_puid);
+            if (!processResources && tInfo.m_puid) {
+                processResources = FrameBuffer::getFB()->getProcessResources(tInfo.m_puid);
             }
 
             if (mRunInLimitedMode) {
@@ -454,9 +454,9 @@ intptr_t RenderThread::main() {
             // Vulkan decoder
             //
             {
-                (void)seqnoPtr;
                 last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
-                                            ioStream, seqnoPtr);
+                                            ioStream,
+                                            processResources->getSequenceNumberPtr());
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;
