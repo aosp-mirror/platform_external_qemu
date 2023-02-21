@@ -252,7 +252,9 @@ bool Device3DWidget::initModel() {
         // Load the model and set up buffers.
         std::vector<float> model_vertex_data;
         std::vector<GLuint> indices;
-        QFile model_file(":/car-model/model.obj");
+        QFile model_file(android_is_automotive()
+            ? ":/car-model/model.obj"
+            : ":/phone-model/model.obj");
         if (model_file.open(QFile::ReadOnly)) {
             QTextStream file_stream(&model_file);
             if (!parseWavefrontOBJ(file_stream, model_vertex_data, indices)) {
