@@ -1717,6 +1717,29 @@ void FrameBuffer::eraseDelayedCloseColorBufferLocked(
     }
 }
 
+void FrameBuffer::createGraphicsProcessResources(uint64_t puid) {
+    AutoLock mutex(m_lock);
+    bool inserted = m_procOwnedResources.try_emplace(puid, ProcessResources::create()).second;
+    if (!inserted) {
+        // Debug-only on AEMU; otherwise it's too noisy.
+        GL_LOG("Failed to create process resource for puid %" PRIu64 ".", puid);
+    }
+}
+
+std::unique_ptr<ProcessResources> FrameBuffer::removeGraphicsProcessResources(uint64_t puid) {
+    std::unordered_map<uint64_t, std::unique_ptr<ProcessResources>>::node_type node;
+    {
+        AutoLock mutex(m_lock);
+        node = m_procOwnedResources.extract(puid);
+    }
+    if (node.empty()) {
+        WARN("Failed to find process resource for puid %" PRIu64 ".", puid);
+        return nullptr;
+    }
+    std::unique_ptr<ProcessResources> res = std::move(node.mapped());
+    return res;
+}
+
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
     bool renderThreadWithThisPuidExists = false;
 
@@ -1745,14 +1768,6 @@ void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
                 callbacks.push_back(it.second);
             }
             m_procOwnedCleanupCallbacks.erase(procIte);
-        }
-    }
-
-    {
-        auto procIte = m_procOwnedSequenceNumbers.find(puid);
-        if (procIte != m_procOwnedSequenceNumbers.end()) {
-            delete procIte->second;
-            m_procOwnedSequenceNumbers.erase(procIte);
         }
     }
 
@@ -3067,13 +3082,7 @@ bool FrameBuffer::onLoad(Stream* stream,
                 }
             }
 
-            while (m_procOwnedSequenceNumbers.size()) {
-                auto it = m_procOwnedSequenceNumbers.begin();
-                while (it != m_procOwnedSequenceNumbers.end()) {
-                    delete it->second;
-                    it = m_procOwnedSequenceNumbers.erase(it);
-                }
-            }
+            m_procOwnedResources.clear();
 
             performDelayedColorBufferCloseLocked(true);
 
@@ -3242,26 +3251,14 @@ void FrameBuffer::unregisterProcessCleanupCallback(void* key) {
     callbackMap.erase(key);
 }
 
-void FrameBuffer::registerProcessSequenceNumberForPuid(uint64_t puid) {
+const ProcessResources* FrameBuffer::getProcessResources(uint64_t puid) {
     AutoLock mutex(m_lock);
-
-    auto procIte = m_procOwnedSequenceNumbers.find(puid);
-    if (procIte != m_procOwnedSequenceNumbers.end()) {
-        return;
+    auto i = m_procOwnedResources.find(puid);
+    if (i == m_procOwnedResources.end()) {
+        ERR("Failed to find process owned resources for puid %" PRIu64 ".", puid);
+        return nullptr;
     }
-    uint32_t* seqnoPtr = new uint32_t;
-    *seqnoPtr = 0;
-    m_procOwnedSequenceNumbers[puid] = seqnoPtr;
-}
-
-uint32_t* FrameBuffer::getProcessSequenceNumberPtr(uint64_t puid) {
-    AutoLock mutex(m_lock);
-
-    auto procIte = m_procOwnedSequenceNumbers.find(puid);
-    if (procIte != m_procOwnedSequenceNumbers.end()) {
-        return procIte->second;
-    }
-    return nullptr;
+    return i->second.get();
 }
 
 int FrameBuffer::createDisplay(uint32_t *displayId) {

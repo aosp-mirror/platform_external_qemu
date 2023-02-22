@@ -377,6 +377,7 @@ class BumpPool;
 #include "aemu/base/Tracing.h"
 #include "host-common/GfxstreamFatalError.h"
 
+#include "FrameBuffer.h"
 #include "IOStream.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
