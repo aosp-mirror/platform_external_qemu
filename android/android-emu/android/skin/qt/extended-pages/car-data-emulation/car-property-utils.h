@@ -34,9 +34,36 @@ using android::base::FunctorThread;
 
 namespace carpropertyutils {
     struct PropertyDescription {
+        /**
+         * Property name in String.
+        */
         QString label;
+        /**
+         * How a property value will be translated into.
+         * When lookupTableName is given, it is used as a key of lookupTablesMap
+         * to get value->string mapping function. This string replaces
+         * property value.
+         *
+         * e.g. if a property value is 48 ( = VehicleUnit::CELSIUS)
+         * and "tempUnits" was set as lookupTableName, it will use tempUnitsMap
+         * and value will be shown as "Celsius" instead of 48 in Vhal item
+        */
         QString lookupTableName;
+        /**
+         * How a property value will be translated into.
+         * Directly sets a value->string mapping function.
+         * Resulted string will not replace the value, it will be printed
+         * in the bracket next to the value.
+         *
+         * e.g. When a function heatingCoolingToString is given and property value is 0
+         *      "0 (off)" is printed
+        */
         QString (*int32ToString)(int32_t val);
+        /**
+         * How a property value will be translated into.
+         * Directly sets a value->string mapping function, when value is a type of
+         * a vector of intergers
+        */
         QString (*int32VecToString)(std::vector<int32_t> vals);
     };
 
