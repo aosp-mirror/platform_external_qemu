@@ -40,7 +40,6 @@
 #include <utility>
 #include <vector>
 
-#include "android/avd/info.h"
 #include "aemu/base/EventNotificationSupport.h"
 #include "aemu/base/Log.h"
 #include "aemu/base/Optional.h"
@@ -50,11 +49,11 @@
 #include "aemu/base/memory/SharedMemory.h"
 #include "aemu/base/streams/RingStreambuf.h"
 #include "aemu/base/synchronization/MessageChannel.h"
+#include "android/avd/info.h"
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
-#include "host-common/MultiDisplay.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
@@ -62,14 +61,12 @@
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/camera/VirtualSceneCamera.h"
 #include "android/emulation/control/clipboard/Clipboard.h"
-#include "host-common/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/LogcatParser.h"
-#include "host-common/multi_display_agent.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
@@ -77,12 +74,7 @@
 #include "android/emulation/control/utils/EventWaiter.h"
 #include "android/emulation/control/utils/ScreenshotUtils.h"
 #include "android/emulation/control/utils/SharedMemoryLibrary.h"
-#include "host-common/vm_operations.h"
-#include "host-common/window_agent.h"
 #include "android/emulation/resizable_display_config.h"
-#include "host-common/FeatureControl.h"
-#include "host-common/Features.h"
-#include "host-common/feature_control.h"
 #include "android/gpu_frame.h"
 #include "android/hw-sensors.h"
 #include "android/metrics/MetricsReporter.h"
@@ -98,6 +90,14 @@
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/Features.h"
+#include "host-common/MultiDisplay.h"
+#include "host-common/display_agent.h"
+#include "host-common/feature_control.h"
+#include "host-common/multi_display_agent.h"
+#include "host-common/vm_operations.h"
+#include "host-common/window_agent.h"
 #include "studio_stats.pb.h"
 
 namespace android {
@@ -547,7 +547,8 @@ public:
         auto agent = mAgents->user_event;
         while (reader->Read(&event)) {
             android::base::ThreadLooper::runOnMainLooper([agent, event]() {
-                agent->sendMouseWheelEvent(event.dx(), event.dy(), event.display());
+                agent->sendMouseWheelEvent(event.dx(), event.dy(),
+                                           event.display());
             });
         }
         return Status::OK;
@@ -813,13 +814,14 @@ public:
         if (perfEstimator.isBucketized() &&
             (request->format() == ImageFormat::RGB888 ||
              request->format() == ImageFormat::RGBA8888)) {
+            auto size = reply.format().width() * reply.format().height() *
+                        ScreenshotUtils::getBytesPerPixel(*request);
             android::metrics::MetricsReporter::get().report(
-                    [=](android_studio::AndroidStudioEvent* event) {
-                        int bpp = ScreenshotUtils::getBytesPerPixel(*request);
+                    [size, frame,
+                     perfEstimator](android_studio::AndroidStudioEvent* event) {
                         auto screenshot = event->mutable_emulator_details()
                                                   ->mutable_screenshot();
-                        screenshot->set_size(reply.format().width() *
-                                             reply.format().height() * bpp);
+                        screenshot->set_size(size);
                         screenshot->set_frames(frame);
                         // We care about median, 95%, and 100%.
                         // (max enables us to calculate # of dropped frames.)
@@ -1016,9 +1018,9 @@ public:
             // - The first screenshot in a series is requested and we need to
             // allocate the first frame.
             if (reply->mutable_image()->size() != cPixels) {
-                LOG(DEBUG)
-                        << "Allocation of string object. "
-                        << reply->mutable_image()->size() << " < " << cPixels;
+                LOG(DEBUG) << "Allocation of string object. "
+                           << reply->mutable_image()->size() << " < "
+                           << cPixels;
                 auto buffer = new std::string(cPixels, 0);
                 // The protobuf message takes ownership of the pointer.
                 reply->set_allocated_image(buffer);
@@ -1039,9 +1041,8 @@ public:
         // Update format information with the retrieved width, height.
         format->set_height(height);
         format->set_width(width);
-        LOG(DEBUG) << "Screenshot " << width << "x" << height
-                     << ", cPixels: " << cPixels << ", in: " << sw.elapsedUs()
-                     << " us";
+        VERBOSE_PRINT(grpc, "Screenshot %dx%d, pixels: %d in %d us.", width,
+                      height, cPixels, sw.elapsedUs());
 
         return Status::OK;
     }
