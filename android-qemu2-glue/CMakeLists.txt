@@ -1,5 +1,33 @@
 cmake_minimum_required(VERSION 3.5)
 
+android_add_library(
+  TARGET android-wifi-service
+  LICENSE Apache-2.0
+  SRC # cmake-format: sortable
+      emulation/virtio-wifi.cpp
+      emulation/WifiService.cpp
+      emulation/VirtioWifiForwarder.cpp
+      emulation/NetsimWifiForwarder.cpp)
+
+target_include_directories(
+  android-wifi-service
+  PRIVATE ..
+          ../include
+          ${ANDROID_AUTOGEN}
+          ../slirp)
+
+target_link_libraries(
+  android-wifi-service
+  PRIVATE android-emu
+          GLIB2::GLIB2
+          ssl
+          hostapd
+          android-grpc
+          qemu-host-common-headers
+          packet-streamer-client-lib
+          protobuf::libprotobuf
+          packet-streamer-client-grpc-lib)
+
 # Generate the VirtioGpuTimelines flatbuffers header
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/VirtioGpuTimelines_generated.h
@@ -34,11 +62,7 @@ set(android-qemu2-glue_src
     emulation/virtio-input-rotary.c
     emulation/virtio_vsock_device.cpp
     emulation/virtio_vsock_transport.cpp
-    emulation/virtio-wifi.cpp
     emulation/VirtioGpuTimelines.cpp
-    emulation/WifiService.cpp
-    emulation/VirtioWifiForwarder.cpp
-    emulation/NetsimWifiForwarder.cpp
     looper-qemu.cpp
     net-android.cpp
     proxy/slirp_proxy.cpp
@@ -104,12 +128,12 @@ endif()
 target_link_libraries(
   libqemu2-glue
   PRIVATE android-emu
+          android-wifi-service
           GLIB2::GLIB2
           PIXMAN::PIXMAN
           emulator-libdtb
           android-emu-gps
           ssl
-          hostapd
           flatbuffers
           qemu-host-common-headers
           grpc++
