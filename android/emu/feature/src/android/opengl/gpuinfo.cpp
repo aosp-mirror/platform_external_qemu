@@ -98,8 +98,12 @@ std::string GpuInfoList::dump() const {
     return ss.str();
 }
 
-bool GpuInfoList::hasGpu() const {
+bool GpuInfoList::hasGpu() {
+    if (has_gpu_cached.has_value()) {
+        return has_gpu_cached.value();
+    }
     if (infos.size() != 0) {
+        has_gpu_cached = true;
         return true;
     }
 #ifdef __linux__
@@ -117,12 +121,20 @@ bool GpuInfoList::hasGpu() const {
             float version_number = 0;
             sscanf(loc, "%f", &version_number);
             if (version_number >= 2.0f) {
+                has_gpu_cached = true;
                 return true;
             }
             loc = strstr(loc, kVersionStringPrefix);
         }
     }
-#endif
+#endif // __linux__
+
+#ifdef __APPLE__
+    // Our MacOS GPU list code does not work on M1
+    has_gpu_cached = hasMetal();
+    return has_gpu_cached.value();
+#endif // __APPLE__
+    has_gpu_cached = false;
     return false;
 }
 
