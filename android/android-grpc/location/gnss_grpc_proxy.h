@@ -57,7 +57,7 @@ public:
 
     void ReadNmeaFromLocalFile();
 
-    void oneShotSendNmea(const char* data, int len);
+    void oneShotSendNmea(const char* data, int len, const char* sep);
 
 private:
     static constexpr char CMD_GET_LOCATION[] = "CMD_GET_LOCATION";

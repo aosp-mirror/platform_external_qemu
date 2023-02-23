@@ -158,14 +158,15 @@ void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
     }
 }
 
-void GnssGrpcProxyServiceImpl::oneShotSendNmea(const char* data, int len) {
-    std::string mystr;
-    mystr.assign(data, len);
-    mystr += "\n";
+void GnssGrpcProxyServiceImpl::oneShotSendNmea(const char* data, int len,
+                                               const char* sep) {
+    std::string mystr(data, len);
+    mystr += sep;
     std::lock_guard<std::mutex> lock(cached_nmea_mutex);
     legacy_nmea += mystr;
-    if (legacy_nmea.find("GPGGA") != std::string::npos &&
-        legacy_nmea.find("GPRMC") != std::string::npos) {
+    if ((legacy_nmea.find("GnssRpcV1") != std::string::npos) ||
+        (legacy_nmea.find("GPGGA") != std::string::npos &&
+         legacy_nmea.find("GPRMC") != std::string::npos)) {
         cached_nmea = legacy_nmea;
         legacy_nmea.clear();
     }
@@ -178,7 +179,9 @@ void android_gnssgrpcv1_send_nmea(const char* data, int len) {
     if (!cuttlefish::s_proxy || !data || len <= 0)
         return;
 
-    cuttlefish::s_proxy->oneShotSendNmea(data, len);
+    // The separator must match the one used in DeviceFileReader::getDataFromDeviceFile
+    // https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/master/gnss/common/utils/default/DeviceFileReader.cpp#71
+    cuttlefish::s_proxy->oneShotSendNmea(data, len, "\n\n\n\n");
 }
 
 }  // external callable
