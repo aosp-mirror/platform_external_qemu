@@ -2404,6 +2404,10 @@ amodem_addTimeUpdate( AModem  modem )
              tzname );
 }
 
+int amodem_set_phone_number(AModem modem, const char* number) {
+    return set_phone_number(number);
+}
+
 static const char*
 handleEndOfInit( const char*  cmd, AModem  modem )
 {

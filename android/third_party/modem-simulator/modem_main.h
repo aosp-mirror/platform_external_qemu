@@ -35,6 +35,7 @@ enum ModemMessageType {
     MODEM_MSG_VOICE_REG,
     MODEM_MSG_RADIO_STATE,
     MODEM_MSG_TIME_UPDATE,
+    MODEM_MSG_PHONE_NUMBER_UPDATE,
 };
 
 struct ModemMessage {
@@ -57,6 +58,8 @@ void set_signal_strength_profile(int quality);
 
 void update_time();
 
+int set_phone_number(std::string number);
+
 void set_data_registration(int state);
 
 void set_voice_registration(int state);
@@ -71,6 +74,10 @@ void queue_modem_message(ModemMessage msg);
 
 // listening for guest RIL connection
 // returns the actual port number
-int start_android_modem_simulator_detached(int modem_simulator_port, bool& isIpv4, const std::string& timezone);
+int start_android_modem_simulator_detached(int modem_simulator_port,
+                                           bool& isIpv4,
+                                           const std::string& timezone,
+                                           const char* phone_number);
+
 int stop_android_modem_simulator();
 }  // namespace cuttlefish
