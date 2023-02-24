@@ -1,4 +1,4 @@
-# Copyright 2017 The Crashpad Authors
+# Copyright 2017 The Crashpad Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,8 +39,6 @@ if (crashpad_is_in_chromium || crashpad_is_in_fuchsia) {
     if (crashpad_is_in_fuchsia) {
       # TODO(fuchsia:46559): Fix the leaks and remove this.
       deps += [ "//build/config/sanitizers:suppress-lsan.DO-NOT-USE-THIS" ]
-      # TODO(fxbug.dev/108368): Remove this once the underlying issue is addressed.
-      exclude_toolchain_tags = [ "hwasan" ]
     }
     if (crashpad_is_android) {
       use_raw_android_executable = true
@@ -69,7 +67,7 @@ if (crashpad_is_in_chromium || crashpad_is_in_fuchsia) {
   if (crashpad_is_in_fuchsia) {
     import("//build/components.gni")
     fuchsia_test_component("crashpad-test-component") {
-      manifest = "test/fuchsia_crashpad_tests.cml"
+      manifest = "test/fuchsia_crashpad_tests.cmx"
       deps = [
         ":crashpad-test-resources",
         ":crashpad_tests",
@@ -86,8 +84,8 @@ if (crashpad_is_in_chromium || crashpad_is_in_fuchsia) {
       test_components = [ ":crashpad-test-component" ]
 
       deps = [
-        "//src/connectivity/network/dns:component",
-        "//src/connectivity/network/netstack:component",
+        "//src/connectivity/network/dns:component-legacy",
+        "//src/connectivity/network/netstack:component-legacy",
       ]
 
       test_specs = {

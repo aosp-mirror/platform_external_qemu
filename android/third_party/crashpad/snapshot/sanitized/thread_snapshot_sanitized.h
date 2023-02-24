@@ -1,4 +1,4 @@
-// Copyright 2018 The Crashpad Authors
+// Copyright 2018 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 #define CRASHPAD_SNAPSHOT_SANITIZED_THREAD_SNAPSHOT_SANITIZED_H_
 
 #include "snapshot/thread_snapshot.h"
-
-#include <string>
 
 #include "snapshot/sanitized/memory_snapshot_sanitized.h"
 #include "util/misc/range_set.h"
@@ -46,7 +44,6 @@ class ThreadSnapshotSanitized final : public ThreadSnapshot {
   const CPUContext* Context() const override;
   const MemorySnapshot* Stack() const override;
   uint64_t ThreadID() const override;
-  std::string ThreadName() const override;
   int SuspendCount() const override;
   int Priority() const override;
   uint64_t ThreadSpecificDataAddress() const override;

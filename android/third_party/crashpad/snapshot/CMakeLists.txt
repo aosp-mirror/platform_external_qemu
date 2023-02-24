@@ -72,9 +72,6 @@ android_add_library(
 if(LINUX_X86_64 OR WINDOWS OR DARWIN_X86_64)
   target_sources(crashpad_snapshot PRIVATE x86/cpuid_reader.cc)
 endif()
-if (WINDOWS)
-  target_compile_definitions(crashpad_snapshot PUBLIC UNICODE PRIVATE NTDDI_VERSION=NTDDI_WIN10_RS5)
-endif()
 android_target_link_libraries(crashpad_snapshot windows
                               PUBLIC powrprof::powrprof)
 target_link_libraries(crashpad_snapshot PUBLIC mini_chromium crashpad_compat

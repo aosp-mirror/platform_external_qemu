@@ -1,4 +1,4 @@
-// Copyright 2021 The Crashpad Authors
+// Copyright 2021 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,18 +46,14 @@ class ScopedVMReadInternal {
   vm_address_t data() const { return data_; }
 
  private:
-  //! \brief Deallocates any resources allocated by this object and resets it
-  //!     to its original state.
-  void Reset();
-
-  // The address within region_start_ at which the the data is available.
+  // The address of the requested data.
   vm_address_t data_;
 
-  // The region returned by vm_read().
-  vm_address_t region_start_;
+  // The rounded down page boundary of the requested data.
+  vm_address_t vm_read_data_;
 
-  // The size of the region returned by vm_read().
-  mach_msg_type_number_t region_size_;
+  // The size of the pages that were actually read.
+  mach_msg_type_number_t vm_read_data_count_;
 };
 
 //! \brief A scoped wrapper for calls to `vm_read` and `vm_deallocate`.  Allows

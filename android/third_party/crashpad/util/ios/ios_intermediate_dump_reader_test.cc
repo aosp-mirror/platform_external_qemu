@@ -1,4 +1,4 @@
-// Copyright 2021 The Crashpad Authors
+// Copyright 2021 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,7 +53,6 @@ class IOSIntermediateDumpReaderTest : public testing::Test {
   }
 
   void TearDown() override {
-    ASSERT_TRUE(writer_->Close());
     fd_.reset();
     writer_.reset();
     EXPECT_FALSE(IsRegularFile(path_));

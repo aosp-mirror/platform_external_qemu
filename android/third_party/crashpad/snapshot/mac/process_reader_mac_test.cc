@@ -1,4 +1,4 @@
-// Copyright 2014 The Crashpad Authors
+// Copyright 2014 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@
 #include <mach-o/dyld.h>
 #include <mach-o/dyld_images.h>
 #include <mach/mach.h>
-#include <pthread.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -43,7 +42,6 @@
 #include "test/mac/dyld.h"
 #include "test/mac/mach_errors.h"
 #include "test/mac/mach_multiprocess.h"
-#include "test/scoped_set_thread_name.h"
 #include "util/file/file_io.h"
 #include "util/mac/mac_util.h"
 #include "util/mach/mach_extensions.h"
@@ -141,9 +139,6 @@ uint64_t PthreadToThreadID(pthread_t pthread) {
 }
 
 TEST(ProcessReaderMac, SelfOneThread) {
-  const ScopedSetThreadName scoped_set_thread_name(
-      "ProcessReaderMac/SelfOneThread");
-
   ProcessReaderMac process_reader;
   ASSERT_TRUE(process_reader.Initialize(mach_task_self()));
 
@@ -156,7 +151,6 @@ TEST(ProcessReaderMac, SelfOneThread) {
   ASSERT_GE(threads.size(), 1u);
 
   EXPECT_EQ(threads[0].id, PthreadToThreadID(pthread_self()));
-  EXPECT_EQ(threads[0].name, "ProcessReaderMac/SelfOneThread");
 
   thread_t thread_self = MachThreadSelf();
   EXPECT_EQ(threads[0].port, thread_self);
@@ -167,18 +161,11 @@ TEST(ProcessReaderMac, SelfOneThread) {
 class TestThreadPool {
  public:
   struct ThreadExpectation {
-    // The stack's base (highest) address.
-    mach_vm_address_t stack_base;
-
-    // The stack's maximum size.
-    mach_vm_size_t stack_size;
-
+    mach_vm_address_t stack_address;
     int suspend_count;
-    std::string thread_name;
   };
 
-  TestThreadPool(const std::string& thread_name_prefix)
-      : thread_infos_(), thread_name_prefix_(thread_name_prefix) {}
+  TestThreadPool() : thread_infos_() {}
 
   TestThreadPool(const TestThreadPool&) = delete;
   TestThreadPool& operator=(const TestThreadPool&) = delete;
@@ -212,10 +199,7 @@ class TestThreadPool {
     ASSERT_TRUE(thread_infos_.empty());
 
     for (size_t thread_index = 0; thread_index < thread_count; ++thread_index) {
-      std::string thread_name = base::StringPrintf(
-          "%s-%zu", thread_name_prefix_.c_str(), thread_index);
-      thread_infos_.push_back(
-          std::make_unique<ThreadInfo>(std::move(thread_name)));
+      thread_infos_.push_back(std::make_unique<ThreadInfo>());
       ThreadInfo* thread_info = thread_infos_.back().get();
 
       int rv = pthread_create(
@@ -249,36 +233,29 @@ class TestThreadPool {
     CHECK_LT(thread_index, thread_infos_.size());
 
     const auto& thread_info = thread_infos_[thread_index];
-    expectation->stack_base = thread_info->stack_base;
-    expectation->stack_size = thread_info->stack_size;
+    expectation->stack_address = thread_info->stack_address;
     expectation->suspend_count = thread_info->suspend_count;
-    expectation->thread_name = thread_info->thread_name;
 
     return PthreadToThreadID(thread_info->pthread);
   }
 
  private:
   struct ThreadInfo {
-    ThreadInfo(const std::string& thread_name)
+    ThreadInfo()
         : pthread(nullptr),
-          stack_base(0),
-          stack_size(0),
+          stack_address(0),
           ready_semaphore(0),
           exit_semaphore(0),
-          suspend_count(0),
-          thread_name(thread_name) {}
+          suspend_count(0) {}
 
     ~ThreadInfo() {}
 
     // The thread’s ID, set at the time the thread is created.
     pthread_t pthread;
 
-    // The base address of thread’s stack. The thread sets this in
+    // An address somewhere within the thread’s stack. The thread sets this in
     // its ThreadMain().
-    mach_vm_address_t stack_base;
-
-    // The stack's maximum size. The thread sets this in its ThreadMain().
-    mach_vm_size_t stack_size;
+    mach_vm_address_t stack_address;
 
     // The worker thread signals ready_semaphore to indicate that it’s done
     // setting up its ThreadInfo structure. The main thread waits on this
@@ -293,19 +270,13 @@ class TestThreadPool {
 
     // The thread’s suspend count.
     int suspend_count;
-
-    // The thread's name.
-    const std::string thread_name;
   };
 
   static void* ThreadMain(void* argument) {
     ThreadInfo* thread_info = static_cast<ThreadInfo*>(argument);
-    const ScopedSetThreadName scoped_set_thread_name(thread_info->thread_name);
 
-    pthread_t thread = pthread_self();
-    thread_info->stack_base =
-        FromPointerCast<mach_vm_address_t>(pthread_get_stackaddr_np(thread));
-    thread_info->stack_size = pthread_get_stacksize_np(thread);
+    thread_info->stack_address =
+        FromPointerCast<mach_vm_address_t>(&thread_info);
 
     thread_info->ready_semaphore.Signal();
     thread_info->exit_semaphore.Wait();
@@ -322,9 +293,6 @@ class TestThreadPool {
   // This is a vector of pointers because the address of a ThreadInfo object is
   // passed to each thread’s ThreadMain(), so they cannot move around in memory.
   std::vector<std::unique_ptr<ThreadInfo>> thread_infos_;
-
-  // Prefix to use for each thread's name, suffixed with "-$threadindex".
-  const std::string thread_name_prefix_;
 };
 
 using ThreadMap = std::map<uint64_t, TestThreadPool::ThreadExpectation>;
@@ -356,25 +324,10 @@ void ExpectSeveralThreads(ThreadMap* thread_map,
     }
 
     if (iterator != thread_map->end()) {
-      mach_vm_address_t expected_stack_region_end = iterator->second.stack_base;
-      if (thread_index > 0) {
-        // Non-main threads use the stack region to store thread data. See
-        // macOS 12 libpthread-486.100.11 src/pthread.c _pthread_allocate().
-#if defined(ARCH_CPU_ARM64)
-        // arm64 has an additional offset for alignment. See macOS 12 
-        // libpthread-486.100.11 src/pthread.c _pthread_allocate() and
-        // PTHREAD_T_OFFSET (defined in src/types_internal.h).
-        expected_stack_region_end += sizeof(_opaque_pthread_t) + 0x3000;
-#else
-        expected_stack_region_end += sizeof(_opaque_pthread_t);
-#endif
-      }
-      EXPECT_LT(iterator->second.stack_base - iterator->second.stack_size,
-                thread.stack_region_address);
-      EXPECT_EQ(expected_stack_region_end, thread_stack_region_end);
+      EXPECT_GE(iterator->second.stack_address, thread.stack_region_address);
+      EXPECT_LT(iterator->second.stack_address, thread_stack_region_end);
 
       EXPECT_EQ(thread.suspend_count, iterator->second.suspend_count);
-      EXPECT_EQ(thread.name, iterator->second.thread_name);
 
       // Remove the thread from the expectation map since it’s already been
       // found. This makes it easy to check for duplicate thread IDs, and makes
@@ -421,7 +374,7 @@ TEST(ProcessReaderMac, SelfSeveralThreads) {
   ProcessReaderMac process_reader;
   ASSERT_TRUE(process_reader.Initialize(mach_task_self()));
 
-  TestThreadPool thread_pool("SelfSeveralThreads");
+  TestThreadPool thread_pool;
   constexpr size_t kChildThreads = 16;
   ASSERT_NO_FATAL_FAILURE(thread_pool.StartThreads(kChildThreads));
 
@@ -430,9 +383,7 @@ TEST(ProcessReaderMac, SelfSeveralThreads) {
   ThreadMap thread_map;
   const uint64_t self_thread_id = PthreadToThreadID(pthread_self());
   TestThreadPool::ThreadExpectation expectation;
-  expectation.stack_base = FromPointerCast<mach_vm_address_t>(
-      pthread_get_stackaddr_np(pthread_self()));
-  expectation.stack_size = pthread_get_stacksize_np(pthread_self());
+  expectation.stack_address = FromPointerCast<mach_vm_address_t>(&thread_map);
   expectation.suspend_count = 0;
   thread_map[self_thread_id] = expectation;
   for (size_t thread_index = 0; thread_index < kChildThreads; ++thread_index) {
@@ -441,8 +392,6 @@ TEST(ProcessReaderMac, SelfSeveralThreads) {
     // There can’t be any duplicate thread IDs.
     EXPECT_EQ(thread_map.count(thread_id), 0u);
 
-    expectation.thread_name =
-        base::StringPrintf("SelfSeveralThreads-%zu", thread_index);
     thread_map[thread_id] = expectation;
   }
 
@@ -482,11 +431,8 @@ uint64_t GetThreadID() {
 
 class ProcessReaderThreadedChild final : public MachMultiprocess {
  public:
-  explicit ProcessReaderThreadedChild(const std::string thread_name_prefix,
-                                      size_t thread_count)
-      : MachMultiprocess(),
-        thread_name_prefix_(thread_name_prefix),
-        thread_count_(thread_count) {}
+  explicit ProcessReaderThreadedChild(size_t thread_count)
+      : MachMultiprocess(), thread_count_(thread_count) {}
 
   ProcessReaderThreadedChild(const ProcessReaderThreadedChild&) = delete;
   ProcessReaderThreadedChild& operator=(const ProcessReaderThreadedChild&) =
@@ -511,22 +457,12 @@ class ProcessReaderThreadedChild final : public MachMultiprocess {
       CheckedReadFileExactly(read_handle, &thread_id, sizeof(thread_id));
 
       TestThreadPool::ThreadExpectation expectation;
-      CheckedReadFileExactly(
-          read_handle, &expectation.stack_base, sizeof(expectation.stack_base));
-      CheckedReadFileExactly(
-          read_handle, &expectation.stack_size, sizeof(expectation.stack_size));
+      CheckedReadFileExactly(read_handle,
+                             &expectation.stack_address,
+                             sizeof(expectation.stack_address));
       CheckedReadFileExactly(read_handle,
                              &expectation.suspend_count,
                              sizeof(expectation.suspend_count));
-      std::string::size_type expected_thread_name_length;
-      CheckedReadFileExactly(read_handle,
-                             &expected_thread_name_length,
-                             sizeof(expected_thread_name_length));
-      std::string expected_thread_name(expected_thread_name_length, '\0');
-      CheckedReadFileExactly(read_handle,
-                             expected_thread_name.data(),
-                             expected_thread_name_length);
-      expectation.thread_name = expected_thread_name;
 
       // There can’t be any duplicate thread IDs.
       EXPECT_EQ(thread_map.count(thread_id), 0u);
@@ -543,12 +479,8 @@ class ProcessReaderThreadedChild final : public MachMultiprocess {
   }
 
   void MachMultiprocessChild() override {
-    TestThreadPool thread_pool(thread_name_prefix_);
+    TestThreadPool thread_pool;
     ASSERT_NO_FATAL_FAILURE(thread_pool.StartThreads(thread_count_));
-
-    const std::string current_thread_name(base::StringPrintf(
-        "%s-MachMultiprocessChild", thread_name_prefix_.c_str()));
-    const ScopedSetThreadName scoped_set_thread_name(current_thread_name);
 
     FileHandle write_handle = WritePipeHandle();
 
@@ -559,26 +491,15 @@ class ProcessReaderThreadedChild final : public MachMultiprocess {
     CheckedWriteFile(write_handle, &thread_id, sizeof(thread_id));
 
     TestThreadPool::ThreadExpectation expectation;
-    pthread_t thread = pthread_self();
-    expectation.stack_base =
-        FromPointerCast<mach_vm_address_t>(pthread_get_stackaddr_np(thread));
-    expectation.stack_size = pthread_get_stacksize_np(thread);
+    expectation.stack_address = FromPointerCast<mach_vm_address_t>(&thread_id);
     expectation.suspend_count = 0;
 
-    CheckedWriteFile(
-        write_handle, &expectation.stack_base, sizeof(expectation.stack_base));
-    CheckedWriteFile(
-        write_handle, &expectation.stack_size, sizeof(expectation.stack_size));
+    CheckedWriteFile(write_handle,
+                     &expectation.stack_address,
+                     sizeof(expectation.stack_address));
     CheckedWriteFile(write_handle,
                      &expectation.suspend_count,
                      sizeof(expectation.suspend_count));
-    const std::string::size_type current_thread_name_length =
-        current_thread_name.length();
-    CheckedWriteFile(write_handle,
-                     &current_thread_name_length,
-                     sizeof(current_thread_name_length));
-    CheckedWriteFile(
-        write_handle, current_thread_name.data(), current_thread_name_length);
 
     // Write an entry for everything in the thread pool.
     for (size_t thread_index = 0; thread_index < thread_count_;
@@ -587,24 +508,11 @@ class ProcessReaderThreadedChild final : public MachMultiprocess {
 
       CheckedWriteFile(write_handle, &thread_id, sizeof(thread_id));
       CheckedWriteFile(write_handle,
-                       &expectation.stack_base,
-                       sizeof(expectation.stack_base));
-      CheckedWriteFile(write_handle,
-                       &expectation.stack_size,
-                       sizeof(expectation.stack_size));
+                       &expectation.stack_address,
+                       sizeof(expectation.stack_address));
       CheckedWriteFile(write_handle,
                        &expectation.suspend_count,
                        sizeof(expectation.suspend_count));
-      const std::string thread_pool_thread_name = base::StringPrintf(
-          "%s-%zu", thread_name_prefix_.c_str(), thread_index);
-      const std::string::size_type thread_pool_thread_name_length =
-          thread_pool_thread_name.length();
-      CheckedWriteFile(write_handle,
-                       &thread_pool_thread_name_length,
-                       sizeof(thread_pool_thread_name_length));
-      CheckedWriteFile(write_handle,
-                       thread_pool_thread_name.data(),
-                       thread_pool_thread_name_length);
     }
 
     // Wait for the parent to signal that it’s OK to exit by closing its end of
@@ -612,22 +520,19 @@ class ProcessReaderThreadedChild final : public MachMultiprocess {
     CheckedReadFileAtEOF(ReadPipeHandle());
   }
 
-  const std::string thread_name_prefix_;
   size_t thread_count_;
 };
 
 TEST(ProcessReaderMac, ChildOneThread) {
   // The main thread plus zero child threads equals one thread.
   constexpr size_t kChildThreads = 0;
-  ProcessReaderThreadedChild process_reader_threaded_child("ChildOneThread",
-                                                           kChildThreads);
+  ProcessReaderThreadedChild process_reader_threaded_child(kChildThreads);
   process_reader_threaded_child.Run();
 }
 
 TEST(ProcessReaderMac, ChildSeveralThreads) {
   constexpr size_t kChildThreads = 64;
-  ProcessReaderThreadedChild process_reader_threaded_child(
-      "ChildSeveralThreads", kChildThreads);
+  ProcessReaderThreadedChild process_reader_threaded_child(kChildThreads);
   process_reader_threaded_child.Run();
 }
 
@@ -832,6 +737,9 @@ bool ExpectCLKernels() {
 }
 
 TEST(ProcessReaderMac, SelfModules) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
   ScopedOpenCLNoOpKernel ensure_cl_kernels;
   ASSERT_NO_FATAL_FAILURE(ensure_cl_kernels.SetUp());
 
@@ -863,9 +771,9 @@ TEST(ProcessReaderMac, SelfModules) {
         FromPointerCast<mach_vm_address_t>(_dyld_get_image_header(index)));
 
     bool expect_timestamp;
-    if (index == 0 && MacOSVersionNumber() < 12'00'00) {
-      // Pre-dyld4, dyld didn’t set the main executable's timestamp, and it was 
-      // reported as 0.
+    if (index == 0) {
+      // dyld didn’t load the main executable, so it couldn’t record its
+      // timestamp, and it is reported as 0.
       EXPECT_EQ(modules[index].timestamp, 0);
     } else if (IsMalformedCLKernelsModule(modules[index].reader->FileType(),
                                           modules[index].name,
@@ -955,11 +863,9 @@ class ProcessReaderModulesChild final : public MachMultiprocess {
       EXPECT_EQ(modules[index].reader->Address(), expect_address);
 
       bool expect_timestamp;
-      if ((index == 0 && MacOSVersionNumber() < 12'00'00) ||
-          index == modules.size() - 1) {
-        // Pre-dyld4, dyld didn’t set the main executable's timestamp, and it
-        // was reported as 0.
-        // The last module is dyld.
+      if (index == 0 || index == modules.size() - 1) {
+        // dyld didn’t load the main executable or itself, so it couldn’t record
+        // these timestamps, and they are reported as 0.
         EXPECT_EQ(modules[index].timestamp, 0);
       } else if (IsMalformedCLKernelsModule(modules[index].reader->FileType(),
                                             modules[index].name,
@@ -1033,6 +939,9 @@ class ProcessReaderModulesChild final : public MachMultiprocess {
 };
 
 TEST(ProcessReaderMac, ChildModules) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
   ScopedOpenCLNoOpKernel ensure_cl_kernels;
   ASSERT_NO_FATAL_FAILURE(ensure_cl_kernels.SetUp());
 

@@ -1,4 +1,4 @@
-// Copyright 2020 The Crashpad Authors
+// Copyright 2020 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
 
 #ifndef CRASHPAD_SNAPSHOT_IOS_INTERMEDIATE_DUMP_THREAD_SNAPSHOT_IOS_INTERMEDIATEDUMP_H_
 #define CRASHPAD_SNAPSHOT_IOS_INTERMEDIATE_DUMP_THREAD_SNAPSHOT_IOS_INTERMEDIATEDUMP_H_
-
-#include <string>
 
 #include "build/build_config.h"
 #include "snapshot/cpu_context.h"
@@ -51,7 +49,6 @@ class ThreadSnapshotIOSIntermediateDump final : public ThreadSnapshot {
   const CPUContext* Context() const override;
   const MemorySnapshot* Stack() const override;
   uint64_t ThreadID() const override;
-  std::string ThreadName() const override;
   int SuspendCount() const override;
   int Priority() const override;
   uint64_t ThreadSpecificDataAddress() const override;
@@ -68,7 +65,6 @@ class ThreadSnapshotIOSIntermediateDump final : public ThreadSnapshot {
   CPUContext context_;
   std::vector<uint8_t> exception_stack_memory_;
   MemorySnapshotIOSIntermediateDump stack_;
-  std::string thread_name_;
   uint64_t thread_id_;
   uint64_t thread_specific_data_address_;
   int suspend_count_;

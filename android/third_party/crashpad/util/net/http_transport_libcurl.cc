@@ -1,4 +1,4 @@
-// Copyright 2017 The Crashpad Authors
+// Copyright 2017 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -107,6 +107,7 @@ class Libcurl {
                "libcurl-gnutls.so.4",
                "libcurl-nss.so.4",
                "libcurl.so.4",
+               "libandroid-emu-curl.dylib",
            }) {
         void* libcurl = dlopen(lib, RTLD_LAZY | RTLD_LOCAL);
         if (libcurl) {
@@ -385,6 +386,7 @@ bool HTTPTransportLibcurl::ExecuteSynchronously(std::string* response_body) {
     }                                      \
   } while (false)
 
+  TRY_CURL_EASY_SETOPT(curl.get(), CURLOPT_VERBOSE, 1);
   TRY_CURL_EASY_SETOPT(curl.get(), CURLOPT_USERAGENT, UserAgent().c_str());
 
   // Accept and automatically decode any encoding that libcurl understands.
@@ -522,10 +524,6 @@ size_t HTTPTransportLibcurl::WriteResponseBody(char* buffer,
                                                size_t size,
                                                size_t nitems,
                                                void* userdata) {
-#if defined(MEMORY_SANITIZER)
-  // Work around an MSAN false-positive in passing `userdata`.
-  __msan_unpoison(&userdata, sizeof(userdata));
-#endif
   std::string* response_body = reinterpret_cast<std::string*>(userdata);
 
   // This libcurl callback mimics the silly stdio-style fread() interface: size

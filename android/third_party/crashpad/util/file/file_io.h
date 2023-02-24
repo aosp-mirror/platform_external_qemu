@@ -1,4 +1,4 @@
-// Copyright 2014 The Crashpad Authors
+// Copyright 2014 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -461,7 +461,7 @@ FileHandle LoggingOpenFileForReadAndWrite(const base::FilePath& path,
 // Fuchsia does not currently support any sort of file locking. See
 // https://crashpad.chromium.org/bug/196 and
 // https://crashpad.chromium.org/bug/217.
-#if CRASHPAD_FLOCK_ALWAYS_SUPPORTED
+#if !BUILDFLAG(IS_FUCHSIA)
 
 //! \brief Locks the given \a file using `flock()` on POSIX or `LockFileEx()` on
 //!     Windows.
@@ -500,7 +500,7 @@ FileLockingResult LoggingLockFile(FileHandle file,
 //! \return `true` on success, or `false` and a message will be logged.
 bool LoggingUnlockFile(FileHandle file);
 
-#endif  // CRASHPAD_FLOCK_ALWAYS_SUPPORTED
+#endif  // !BUILDFLAG(IS_FUCHSIA)
 
 //! \brief Wraps `lseek()` or `SetFilePointerEx()`. Logs an error if the
 //!     operation fails.

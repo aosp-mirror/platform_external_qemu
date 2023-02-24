@@ -1,4 +1,4 @@
-// Copyright 2014 The Crashpad Authors
+// Copyright 2014 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 #include <stdint.h>
 
-#include <string>
 #include <vector>
 
 namespace crashpad {
@@ -51,9 +50,6 @@ class ThreadSnapshot {
   //! %Thread identifiers are at least unique within a process, and may be
   //! unique system-wide.
   virtual uint64_t ThreadID() const = 0;
-
-  //! \brief Returns the thread's name.
-  virtual std::string ThreadName() const = 0;
 
   //! \brief Returns the thread’s suspend count.
   //!

@@ -1,4 +1,4 @@
-// Copyright 2014 The Crashpad Authors
+// Copyright 2014 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -215,21 +215,13 @@ class TestMachOImageAnnotationsReader final
           case kCrashModuleInitialization:
             // This message is set by dyld-353.2.1/src/ImageLoaderMachO.cpp
             // ImageLoaderMachO::doInitialization().
-            // dyld4 no longer sets this, so instead check for fork() without
-            // exec() like above.
-            expected_annotation =
-                macos_version_number < 12'00'00
-                    ? ModuleWithCrashyInitializer().value()
-                    : "crashed on child side of fork pre-exec";
+            expected_annotation = ModuleWithCrashyInitializer().value();
             break;
 
           case kCrashDyld:
             // This is independent of dyld’s error_string, which is tested
-            // below. dyld4 no longer sets this.
-            expected_annotation =
-                macos_version_number < 12'00'00
-                    ? "dyld: launch, loading dependent libraries"
-                    : "";
+            // below.
+            expected_annotation = "dyld: launch, loading dependent libraries";
             break;
 
           default:
@@ -254,24 +246,22 @@ class TestMachOImageAnnotationsReader final
 
       // dyld exposes its error_string at least as far back as Mac OS X 10.4.
       if (test_type_ == kCrashDyld) {
-        std::string couldnt_load_annotation =
-            macos_version_number < 12'00'00
-                ? "could not load inserted library"
-                // dyld4 no longer writes an annotation for the primary error
-                // See https://crbug.com/1334418/#c26
-                : "tried: '/var/empty/NoDirectory/NoLibrary' (no such file)";
+        static constexpr char kExpectedAnnotation[] =
+            "could not load inserted library";
+        size_t expected_annotation_length = strlen(kExpectedAnnotation);
         bool found = false;
         for (const std::string& annotation : all_annotations_vector) {
-          // Look for the expectation as a substring, because the actual
-          // string will contain the library’s pathname and a reason, or on
-          // macOS 12, only the reason.
-          if (annotation.find(couldnt_load_annotation) != std::string::npos) {
+          // Look for the expectation as a leading substring, because the actual
+          // string will contain the library’s pathname and, on OS X 10.9 and
+          // later, a reason.
+          if (annotation.substr(0, expected_annotation_length) ==
+                  kExpectedAnnotation) {
             found = true;
             break;
           }
         }
 
-        EXPECT_TRUE(found) << couldnt_load_annotation;
+        EXPECT_TRUE(found) << kExpectedAnnotation;
       }
     }
 
@@ -470,13 +460,25 @@ TEST(MachOImageAnnotationsReader, CrashAbort) {
   test_mach_o_image_annotations_reader.Run();
 }
 
-TEST(MachOImageAnnotationsReader, CrashModuleInitialization) {
+#if defined(ADDRESS_SANITIZER)
+// https://crbug.com/844396
+#define MAYBE_CrashModuleInitialization DISABLED_CrashModuleInitialization
+#else
+#define MAYBE_CrashModuleInitialization CrashModuleInitialization
+#endif
+TEST(MachOImageAnnotationsReader, MAYBE_CrashModuleInitialization) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
   TestMachOImageAnnotationsReader test_mach_o_image_annotations_reader(
       TestMachOImageAnnotationsReader::kCrashModuleInitialization);
   test_mach_o_image_annotations_reader.Run();
 }
 
 TEST(MachOImageAnnotationsReader, CrashDyld) {
+#if defined(__aarch64__) && defined(__APPLE__)
+    GTEST_SKIP() << "Skipping test for mac_arm_x64 bots";
+#endif
   TestMachOImageAnnotationsReader test_mach_o_image_annotations_reader(
       TestMachOImageAnnotationsReader::kCrashDyld);
   test_mach_o_image_annotations_reader.Run();

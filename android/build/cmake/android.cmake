@@ -852,9 +852,7 @@ function(android_add_test)
     WORKING_DIRECTORY $<TARGET_FILE_DIR:${build_TARGET}>)
 
   # Let's not optimize our tests.
-  if (NOT WINDOWS_MSVC_X86_64)
-    target_compile_options(${build_TARGET} PRIVATE -O0)
-  endif()
+  target_compile_options(${build_TARGET} PRIVATE -O0)
   target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
 
   android_add_default_test_properties(${build_TARGET})

@@ -1,4 +1,4 @@
-// Copyright 2014 The Crashpad Authors
+// Copyright 2014 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ FileHandle LoggingOpenFileForReadAndWrite(const base::FilePath& path,
   return fd;
 }
 
-#if CRASHPAD_FLOCK_ALWAYS_SUPPORTED
+#if !BUILDFLAG(IS_FUCHSIA)
 
 FileLockingResult LoggingLockFile(FileHandle file,
                                   FileLocking locking,
@@ -234,7 +234,7 @@ bool LoggingUnlockFile(FileHandle file) {
   return rv == 0;
 }
 
-#endif  // CRASHPAD_FLOCK_ALWAYS_SUPPORTED
+#endif  // !BUILDFLAG(IS_FUCHSIA)
 
 FileOffset LoggingSeekFile(FileHandle file, FileOffset offset, int whence) {
   off_t rv = lseek(file, offset, whence);
