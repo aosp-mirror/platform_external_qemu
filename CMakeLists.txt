@@ -6,21 +6,17 @@ cmake_minimum_required(VERSION 3.12)
 # ${GFXSTREAM_HOST_COMMON_LIB}.
 cmake_policy(SET CMP0079 NEW)
 
-find_package(Python2 COMPONENTS Interpreter)
-find_package(Python3 COMPONENTS Interpreter)
-
 # Let's setup a compiler cache.
 if(NOT WINDOWS_MSVC_X86_64 AND OPTION_CCACHE)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${OPTION_CCACHE}")
   message(STATUS "Using ${OPTION_CCACHE} as a compiler cache.")
 endif()
 
-set(Python_EXECUTABLE ${Python2_EXECUTABLE})
-if(NOT Python2_FOUND)
+if(NOT Python_EXECUTABLE)
+  find_package(Python3 COMPONENTS Interpreter)
   if(NOT Python3_FOUND)
     message(FATAL_ERROR "A python interpreter is required. ")
   endif()
-  message(STATUS "Reverting to Python3, this might not work (b/229251286)")
   set(Python_EXECUTABLE ${Python3_EXECUTABLE})
 endif()
 
