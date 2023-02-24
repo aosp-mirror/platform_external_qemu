@@ -315,6 +315,16 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 });
         fflush(stdout);
 
+        if (getConsoleAgents()->settings->avdInfo()) {
+            const char* avd_dir = avdInfo_getContentPath(
+                    getConsoleAgents()->settings->avdInfo());
+            if (avd_dir) {
+                const auto bootcomplete_ini =
+                        std::string{android::base::PathUtils::join(
+                                avd_dir, "bootcompleted.ini")};
+                path_empty_file(bootcomplete_ini.c_str());
+            }
+        }
         getConsoleAgents()->settings->set_guest_boot_completed(true);
 
         if (getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut > 0) {
