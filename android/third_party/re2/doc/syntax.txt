@@ -258,6 +258,7 @@ Common
 Coptic
 Cuneiform
 Cypriot
+Cypro_Minoan
 Cyrillic
 Deseret
 Devanagari
@@ -291,6 +292,7 @@ Javanese
 Kaithi
 Kannada
 Katakana
+Kawi
 Kayah_Li
 Kharoshthi
 Khitan_Small_Script
@@ -325,6 +327,7 @@ Mro
 Multani
 Myanmar
 Nabataean
+Nag_Mundari
 Nandinagari
 New_Tai_Lue
 Newa
@@ -341,6 +344,7 @@ Old_Persian
 Old_Sogdian
 Old_South_Arabian
 Old_Turkic
+Old_Uyghur
 Oriya
 Osage
 Osmanya
@@ -372,6 +376,7 @@ Tai_Tham
 Tai_Viet
 Takri
 Tamil
+Tangsa
 Tangut
 Telugu
 Thaana
@@ -379,8 +384,10 @@ Thai
 Tibetan
 Tifinagh
 Tirhuta
+Toto
 Ugaritic
 Vai
+Vithkuqi
 Wancho
 Warang_Citi
 Yezidi
