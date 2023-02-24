@@ -86,14 +86,40 @@ void android_gps_send_gnss(const char* sentence) {
         return;
     }
 
-    const uint8_t newline[] = "\n";
-
     android_serialline_write(android_gps_serial_line, (const uint8_t*)temp,
                              strlen(temp));
     android_serialline_write(android_gps_serial_line, (const uint8_t*)"\n", 1);
 }
 
+// must match
+// https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/master/gnss/common/utils/default/FixLocationParser.cpp
+static void send_location_to_device_gnssrpcv1(double latitude,
+                                              double longitude,
+                                              double metersElevation,
+                                              double speedKnots,
+                                              double headingDegrees,
+                                              const struct timeval* time) {
+    constexpr double kAccuracyMeters = 1;
+    constexpr double kAccuracySpeed = .5;
+    constexpr double kAccuracyHeading = 2;
+    constexpr int kUnused = 0;
 
+    const double speedMetersPerSecond = speedKnots / 1.94384;
+    char buf[128];
+    const long long int tMs = time->tv_usec / 1000 + time->tv_sec * 1000LL;
+    const int len = snprintf(buf, sizeof(buf),
+                             "$GnssRpcV1,%d,%g,%g,%g,%g,%g,%g,%lld,%g,%g,%d",
+                             kUnused,
+                             latitude, longitude, metersElevation,
+                             speedMetersPerSecond, kAccuracyMeters,
+                             headingDegrees, tMs,
+                             kAccuracySpeed, kAccuracyHeading,
+                             kUnused);
+
+    if (s_gnssgrpcv1_send_nmea) {
+        s_gnssgrpcv1_send_nmea(buf, len);
+    }
+}
 
 /**
 Sends the current location to the device. Callers should have the
@@ -115,13 +141,6 @@ static void send_location_to_device_internal(double latitude,
                                         double headingDegrees,
                                         int nSatellites,
                                         const struct timeval* time) {
-    s_latitude = latitude;
-    s_longitude = longitude;
-    s_metersElevation = metersElevation;
-    s_speedKnots = speedKnots;
-    s_headingDegrees = headingDegrees;
-    s_nSatellites = nSatellites;
-
     STRALLOC_DEFINE(msgStr);
     STRALLOC_DEFINE(elevationStr);
     char* elevStrPtr;
@@ -313,9 +332,22 @@ void android_gps_send_location(double latitude,
                                int nSatellites,
                                const struct timeval* time) {
     const std::lock_guard<std::mutex> lock(s_set_location_mutex);
-    send_location_to_device_internal(latitude, longitude, metersElevation,
-                                       speedKnots, headingDegrees, nSatellites,
-                                       time);
+
+    s_latitude = latitude;
+    s_longitude = longitude;
+    s_metersElevation = metersElevation;
+    s_speedKnots = speedKnots;
+    s_headingDegrees = headingDegrees;
+    s_nSatellites = nSatellites;
+
+    if (s_enable_gnssgrpcv1) {
+        send_location_to_device_gnssrpcv1(latitude, longitude, metersElevation,
+                                          speedKnots, headingDegrees, time);
+    } else {
+        send_location_to_device_internal(latitude, longitude, metersElevation,
+                                         speedKnots, headingDegrees, nSatellites,
+                                         time);
+    }
 }
 
 void android_gps_refresh() {
@@ -323,9 +355,15 @@ void android_gps_refresh() {
     timeval timeVal = {};
     gettimeofday(&timeVal, nullptr);
 
-    send_location_to_device_internal(
+    if (s_enable_gnssgrpcv1) {
+        send_location_to_device_gnssrpcv1(
+            s_latitude, s_longitude, s_metersElevation, s_speedKnots,
+            s_headingDegrees, &timeVal);
+    } else {
+        send_location_to_device_internal(
             s_latitude, s_longitude, s_metersElevation, s_speedKnots,
             s_headingDegrees, s_nSatellites, &timeVal);
+    }
 }
 
 void android_gps_set_passive_update(bool enable) {

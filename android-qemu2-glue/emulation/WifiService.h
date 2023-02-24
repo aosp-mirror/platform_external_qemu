@@ -37,6 +37,25 @@ typedef struct NICConf NICConf;
 namespace android {
 namespace qemu2 {
 
+struct SlirpOptions {
+    bool disabled;
+    bool ipv4 = true;
+    bool restricted = false;
+    std::string vnet;
+    std::string vhost;
+    std::string vmask;
+    bool ipv6 = true;
+    std::string vprefix6;
+    uint8_t vprefixLen;
+    std::string vhost6;
+    std::string vhostname;
+    std::string tftpath;
+    std::string bootfile;
+    std::string dhcpstart;
+    std::string dns;
+    std::string dns6;
+};
+
 struct HostapdOptions {
     bool disabled;
     std::string ssid;
@@ -92,6 +111,10 @@ public:
     // In default emulator setup, Hostapd thread is launched in QT
     // main loop thread.
     AEMU_WIFI_API Builder& withHostapd(HostapdOptions options);
+    // WiFi service should initialize user-mode network if disabled field is
+    // false stack SLIPR. In default emulator setup, SLIRP is initialized in
+    // Qemu main loop thread.
+    AEMU_WIFI_API Builder& withSlirp(SlirpOptions options);
     // Set the bssid of the virtual router. The default value is
     // 00:13:10:85:fe:01 which is defined in hostapd.conf configuration file.
     AEMU_WIFI_API Builder& withBssid(std::vector<uint8_t> bssid);
@@ -118,12 +141,12 @@ public:
 private:
     bool mRedirectToNetsim = false;
     HostapdOptions mHostapdOpts;
+    SlirpOptions mSlirpOpts;
     bool mVerbose = false;
     std::vector<uint8_t> mBssID;
     NICConf* mNicConf = nullptr;
     uint16_t mServerPort = 0;
     uint16_t mClientPort = 0;
-    WifiService::OnReceiveCallback mOnReceiveCallback;
     WifiService::OnLinkStatusChangedCallback mOnLinkStatusChanged;
     WifiService::OnSentCallback mOnSentCallback;
     WifiService::CanReceiveCallback mCanReceive;

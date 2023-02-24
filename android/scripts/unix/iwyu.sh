@@ -90,15 +90,15 @@ function analyze() {
 
 
   var_append COMPILER_FLAGS "${CFLAGS} ${CXXFLAGS}"
-  log $IWYU/iwyu_tool.py  -cflags "${COMPILER_FLAGS}" -j ${NUM_JOBS} -p ${OPT_BUILD} ${PARAMETER_1}
-  $IWYU/iwyu_tool.py  -cflags "${COMPILER_FLAGS}" -j ${NUM_JOBS} -p ${OPT_BUILD} ${PARAMETER_1}
+  log $IWYU/iwyu_tool.py  -cflags "${COMPILER_FLAGS}" -j ${NUM_JOBS} -p ${OPT_BUILD} ${PARAMETER_1} -- -Xiwyu --update_comments -Xiwyu --no_fwd_decls --cxx17ns
+  $IWYU/iwyu_tool.py  -cflags "${COMPILER_FLAGS}" -j ${NUM_JOBS} -p ${OPT_BUILD} ${PARAMETER_1} -- -Xiwyu --update_comments  -Xiwyu --no_fwd_decls -Xiwyu --cxx17ns
 }
 
 
 function fix() {
    BUILD_DIR=$(realpath ${OPT_BUILD})
-   log $IWYU/fix_includes.py  --ignore_re "${BUILD_DIR}/.*" --comments --nosafe_headers -n -p ${OPT_BUILD}
-   $IWYU/fix_includes.py  --ignore_re "${BUILD_DIR}/.*" --comments --nosafe_headers --reorder  -p ${OPT_BUILD}
+   log $IWYU/fix_includes.py  --ignore_re "${BUILD_DIR}/.*" --nocomments --nosafe_headers -n -p ${OPT_BUILD}
+   $IWYU/fix_includes.py  --ignore_re "${BUILD_DIR}/.*" --nocomments --nosafe_headers --reorder  -p ${OPT_BUILD}
 }
 
 

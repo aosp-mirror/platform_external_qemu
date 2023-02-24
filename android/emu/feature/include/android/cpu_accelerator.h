@@ -69,6 +69,7 @@ typedef enum {
     ANDROID_CPU_INFO_32_BIT = 1 << 5,           // 32-bit CPU, really!
     ANDROID_CPU_INFO_64_BIT_32_BIT_OS = 1 << 6, // 32-bit OS on a 64-bit CPU
     ANDROID_CPU_INFO_64_BIT = 1 << 7,           // 64-bit CPU
+    ANDROID_CPU_INFO_APPLE = 1 << 8,     //  Apple CPU (such as M1, M2, ...)
 
 } AndroidCpuInfoFlags;
 

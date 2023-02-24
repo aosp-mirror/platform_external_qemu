@@ -121,7 +121,8 @@ public:
     bool decrypt(const CipherScheme cs);
     // encrypt a frame in place.
     bool encrypt(const CipherScheme cs);
-    const android::base::IOVector toEthernet();
+    const android::base::IOVector toEthernetIOVector();
+    const std::vector<uint8_t> toEthernet();
     static constexpr uint32_t MAX_FRAME_LEN = 2352;
     static constexpr uint32_t TX_MAX_RATES = 4;
     static constexpr uint32_t WPA_GTK_MAX_LEN = 32;

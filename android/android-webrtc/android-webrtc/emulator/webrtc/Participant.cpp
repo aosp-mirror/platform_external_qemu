@@ -131,6 +131,11 @@ public:
         logRtcError(error);
     }
 
+    static rtc::scoped_refptr<SetRemoteDescriptionCallback> Create() {
+        return rtc::scoped_refptr<SetRemoteDescriptionCallback>(
+                new rtc::RefCountedObject<SetRemoteDescriptionCallback>());
+    }
+
 private:
     DISALLOW_COPY_AND_ASSIGN(SetRemoteDescriptionCallback);
 };
@@ -318,8 +323,7 @@ void Participant::Close() {
     if (mRtcConnection->signalingThread()->IsCurrent()) {
         DoClose();
     } else {
-        mRtcConnection->signalingThread()->Invoke<void>(RTC_FROM_HERE,
-                                                        [&] { DoClose(); });
+        mRtcConnection->signalingThread()->BlockingCall([&] { DoClose(); });
     }
 }
 void Participant::WaitForClose() {
@@ -439,7 +443,7 @@ void Participant::HandleOffer(const json& msg) {
     }
     auto sort = session_description->type();
     mPeerConnection->SetRemoteDescription(std::move(session_description),
-                                          new SetRemoteDescriptionCallback());
+                                          SetRemoteDescriptionCallback::Create());
     if (sort == ::webrtc::SessionDescriptionInterface::kOffer) {
         mPeerConnection->CreateAnswer(
                 DefaultSessionDescriptionObserver::Create(
@@ -473,7 +477,7 @@ bool Participant::AddVideoTrack(int displayId) {
             mRtcConnection->getMediaSourceLibrary()->getVideoSource(displayId);
     scoped_refptr<::webrtc::VideoTrackInterface> video_track(
             mRtcConnection->getPeerConnectionFactory()->CreateVideoTrack(
-                    handle, track));
+                    handle, track.get()));
 
     auto result = mPeerConnection->AddTrack(video_track, {handle});
     if (!result.ok()) {
@@ -497,7 +501,7 @@ bool Participant::AddAudioTrack(const std::string& audioDumpFile) {
 
     scoped_refptr<::webrtc::AudioTrackInterface> audio_track(
             mRtcConnection->getPeerConnectionFactory()->CreateAudioTrack(
-                    kAudioTrack, track));
+                    kAudioTrack, track.get()));
 
     auto result = mPeerConnection->AddTrack(audio_track, {kAudioTrack});
     if (!result.ok()) {

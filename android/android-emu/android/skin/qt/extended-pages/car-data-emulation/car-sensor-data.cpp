@@ -139,6 +139,14 @@ void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
         value->add_float_values(speedMetersPerSecond);
         string log = "Speed changed to " + std::to_string(speedMetersPerSecond);
         mSendEmulatorMsg(emulatorMsg, log);
+
+        EmulatorMessage emulatorMsgSpeedDisplay = makeSetPropMsg();
+        VehiclePropValue* valueSpeedDisplay = emulatorMsgSpeedDisplay.add_value();
+        valueSpeedDisplay->set_prop(
+                static_cast<int32_t>(VehicleProperty::PERF_VEHICLE_SPEED_DISPLAY));
+        valueSpeedDisplay->add_float_values(speedMetersPerSecond);
+        string logSpeedDisplay = "Speed display changed to " + std::to_string(speedMetersPerSecond);
+        mSendEmulatorMsg(emulatorMsgSpeedDisplay, logSpeedDisplay);
     }
 }
 
