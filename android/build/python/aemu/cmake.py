@@ -148,7 +148,11 @@ def launch():
         "Task names are case insensitive."
         "Note that tasks are very simple without any dependency resolution.",
     )
-    parser.add_argument("--sdk_build_number", help="The emulator sdk build number.")
+    parser.add_argument(
+        "--sdk_build_number",
+        default="standalone-0",
+        help="The emulator sdk build number.",
+    )
     parser.add_argument(
         "--config",
         default="release",
