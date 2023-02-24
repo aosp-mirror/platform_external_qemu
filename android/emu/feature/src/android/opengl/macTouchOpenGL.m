@@ -35,3 +35,8 @@ void macTouchOpenGL() {
     void* res = [[NSOpenGLPixelFormat alloc] initWithAttributes:testAttrs];
     [res release];
 }
+
+int hasMetalNative() {
+    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+    return device != nil;
+}
