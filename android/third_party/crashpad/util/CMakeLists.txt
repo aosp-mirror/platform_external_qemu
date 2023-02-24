@@ -77,8 +77,7 @@ endfunction()
 android_add_library(
   TARGET crashpad_util
   LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      file/delimited_file_reader.cc
+  SRC file/delimited_file_reader.cc
       file/file_helper.cc
       file/file_io.cc
       file/file_reader.cc
@@ -119,8 +118,7 @@ android_add_library(
       thread/thread.cc
       thread/thread_log_messages.cc
       thread/worker_thread.cc
-  LINUX # cmake-format: sortable
-        file/directory_reader_posix.cc
+  LINUX file/directory_reader_posix.cc
         file/file_io_posix.cc
         file/filesystem_posix.cc
         linux/auxiliary_vector.cc
@@ -145,19 +143,18 @@ android_add_library(
         net/http_transport_socket.cc
         posix/close_multiple.cc
         posix/close_stdio.cc
-        posix/double_fork_and_exec.cc
         posix/drop_privileges.cc
         posix/process_info_linux.cc
         posix/scoped_dir.cc
         posix/scoped_mmap.cc
         posix/signals.cc
+        posix/spawn_subprocess.cc
         posix/symbolic_constants_posix.cc
         process/process_memory_linux.cc
         process/process_memory_sanitized.cc
         synchronization/semaphore_posix.cc
         thread/thread_posix.cc
-  DARWIN # cmake-format: sortable
-         file/directory_reader_posix.cc
+  DARWIN file/directory_reader_posix.cc
          file/file_io_posix.cc
          file/filesystem_posix.cc
          mac/launchd.mm
@@ -188,19 +185,18 @@ android_add_library(
          net/http_transport_mac.mm
          posix/close_multiple.cc
          posix/close_stdio.cc
-         posix/double_fork_and_exec.cc
          posix/drop_privileges.cc
          posix/process_info_mac.cc
          posix/scoped_dir.cc
          posix/scoped_mmap.cc
          posix/signals.cc
+         posix/spawn_subprocess.cc
          posix/symbolic_constants_posix.cc
          process/process_memory_mac.cc
          synchronization/semaphore_mac.cc
          synchronization/semaphore_posix.cc
          thread/thread_posix.cc
-  WINDOWS # cmake-format: sortable
-          file/directory_reader_win.cc
+  WINDOWS file/directory_reader_win.cc
           file/file_io_win.cc
           file/filesystem_win.cc
           misc/clock_win.cc
@@ -231,10 +227,10 @@ android_add_library(
           win/xp_compat.h)
 
 target_include_directories(crashpad_util PUBLIC ..)
+target_compile_definitions(crashpad_util PRIVATE CRASHPAD_FLOCK_ALWAYS_SUPPORTED=true)
 target_link_libraries(crashpad_util PUBLIC mini_chromium crashpad_compat)
-android_target_compile_definitions(crashpad_util windows PRIVATE UNICODE)
 if(WINDOWS_MSVC_X86_64)
-
+  target_compile_definitions(crashpad_util PRIVATE UNICODE)
   # We have setup git to covert \n -> \r\n causing these tests to fail, these
   # will succeed if you have configued git properly.
   set(CRASHPAD_UTIL_TEST_FILTER
@@ -303,8 +299,7 @@ target_link_libraries(crashpad_util PRIVATE crypto ssl PUBLIC zlib)
 
 android_add_test(
   TARGET crashpad_util_test
-  SRC # cmake-format: sortable
-      file/delimited_file_reader_test.cc
+  SRC file/delimited_file_reader_test.cc
       file/directory_reader_test.cc
       file/file_io_test.cc
       file/file_reader_test.cc
@@ -351,8 +346,7 @@ android_add_test(
       thread/thread_log_messages_test.cc
       thread/thread_test.cc
       thread/worker_thread_test.cc
-  LINUX # cmake-format: sortable
-        linux/auxiliary_vector_test.cc
+  LINUX linux/auxiliary_vector_test.cc
         linux/memory_map_test.cc
         linux/proc_stat_reader_test.cc
         linux/proc_task_reader_test.cc
@@ -366,8 +360,7 @@ android_add_test(
         posix/signals_test.cc
         posix/symbolic_constants_posix_test.cc
         process/process_memory_sanitized_test.cc
-  DARWIN # cmake-format: sortable
-         mac/launchd_test.mm
+  DARWIN mac/launchd_test.mm
          mac/mac_util_test.mm
          mac/service_management_test.mm
          mac/sysctl_test.cc
@@ -389,8 +382,7 @@ android_add_test(
          mach/symbolic_constants_mach_test.cc
          misc/capture_context_test_util_mac.cc
          process/process_memory_mac_test.cc
-  WINDOWS # cmake-format: sortable
-          misc/capture_context_test_util_win.cc
+  WINDOWS misc/capture_context_test_util_win.cc
           win/command_line_test.cc
           win/critical_section_with_debug_info_test.cc
           win/exception_handler_server_test.cc
@@ -414,6 +406,9 @@ android_target_link_libraries(crashpad_util_test windows_msvc-x86_64
 
 if(WINDOWS_MSVC_X86_64)
   target_compile_definitions(crashpad_util_test PUBLIC UNICODE)
+  target_compile_options(
+    crashpad_util_test PUBLIC -Wno-unused-command-line-argument
+                              -Wno-missing-field-initializers)
   android_add_executable(TARGET crashpad_util_test_process_info_test_child
                          NODISTRIBUTE SRC win/process_info_test_child.cc)
   target_compile_definitions(crashpad_util_test_process_info_test_child
