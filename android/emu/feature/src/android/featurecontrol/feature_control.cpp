@@ -51,3 +51,20 @@ void feature_update_from_server() {
     android::featurecontrol::applyCachedServerFeaturePatterns();
     android::featurecontrol::asyncUpdateServerFeaturePatterns();
 }
+
+const char* feature_name(Feature feature) {
+    static const std::vector<std::string>* const sFeatureNames = [] {
+        return new std::vector<std::string>{
+#define FEATURE_CONTROL_ITEM(item) #item,
+#include "host-common/FeatureControlDefHost.h"
+#include "host-common/FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+        };
+    }();
+
+    if (feature >= sFeatureNames->size()) {
+        return "InvalidFeature";
+    }
+
+    return (*sFeatureNames)[feature].c_str();
+}
