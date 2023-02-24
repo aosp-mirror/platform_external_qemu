@@ -1,4 +1,4 @@
-// Copyright 2018 The Crashpad Authors
+// Copyright 2018 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,10 +37,6 @@ const MemorySnapshot* ThreadSnapshotSanitized::Stack() const {
 
 uint64_t ThreadSnapshotSanitized::ThreadID() const {
   return snapshot_->ThreadID();
-}
-
-std::string ThreadSnapshotSanitized::ThreadName() const {
-  return snapshot_->ThreadName();
 }
 
 int ThreadSnapshotSanitized::SuspendCount() const {

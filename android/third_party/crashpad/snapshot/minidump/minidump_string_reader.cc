@@ -1,4 +1,4 @@
-// Copyright 2015 The Crashpad Authors
+// Copyright 2015 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ namespace internal {
 
 namespace {
 
-template<typename StringType, typename RVAType>
+template<typename StringType>
 bool ReadMinidumpString(FileReaderInterface* file_reader,
-                        RVAType rva,
-                        StringType* string) {
+                            RVA rva,
+                            StringType* string) {
   if (rva == 0) {
     string->clear();
     return true;
@@ -59,12 +59,6 @@ bool ReadMinidumpUTF8String(FileReaderInterface* file_reader,
   return ReadMinidumpString(file_reader, rva, string);
 }
 
-bool ReadMinidumpUTF8String(FileReaderInterface* file_reader,
-                            RVA64 rva,
-                            std::string* string) {
-  return ReadMinidumpString(file_reader, rva, string);
-}
-
 bool ReadMinidumpUTF16String(FileReaderInterface* file_reader,
                              RVA rva,
                              std::u16string* string) {
@@ -72,28 +66,8 @@ bool ReadMinidumpUTF16String(FileReaderInterface* file_reader,
 }
 
 bool ReadMinidumpUTF16String(FileReaderInterface* file_reader,
-                             RVA64 rva,
-                             std::u16string* string) {
-  return ReadMinidumpString(file_reader, rva, string);
-}
-
-bool ReadMinidumpUTF16String(FileReaderInterface* file_reader,
                             RVA rva,
                             std::string* string) {
-  std::u16string string_raw;
-
-  if (!ReadMinidumpString(file_reader, rva, &string_raw)) {
-    return false;
-  }
-
-  base::UTF16ToUTF8(string_raw.data(), string_raw.size(), string);
-
-  return true;
-}
-
-bool ReadMinidumpUTF16String(FileReaderInterface* file_reader,
-                             RVA64 rva,
-                             std::string* string) {
   std::u16string string_raw;
 
   if (!ReadMinidumpString(file_reader, rva, &string_raw)) {

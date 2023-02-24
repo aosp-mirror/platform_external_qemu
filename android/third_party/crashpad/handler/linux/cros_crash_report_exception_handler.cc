@@ -1,4 +1,4 @@
-// Copyright 2019 The Crashpad Authors
+// Copyright 2019 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 #include "util/linux/ptrace_client.h"
 #include "util/misc/metrics.h"
 #include "util/misc/uuid.h"
-#include "util/posix/spawn_subprocess.h"
+#include "util/posix/double_fork_and_exec.h"
 
 namespace crashpad {
 
@@ -266,11 +266,12 @@ bool CrosCrashReportExceptionHandler::HandleExceptionWithConnection(
     argv.push_back("--always_allow_feedback");
   }
 
-  if (!SpawnSubprocess(argv,
-                       nullptr /* envp */,
-                       file_writer.fd() /* preserve_fd */,
-                       false /* use_path */,
-                       nullptr /* child_function */)) {
+  if (!DoubleForkAndExec(argv,
+                         nullptr /* envp */,
+                         file_writer.fd() /* preserve_fd */,
+                         false /* use_path */,
+                         nullptr /* child_function */)) {
+    LOG(ERROR) << "DoubleForkAndExec failed";
     Metrics::ExceptionCaptureResult(
         Metrics::CaptureResult::kFinishedWritingCrashReportFailed);
     return false;

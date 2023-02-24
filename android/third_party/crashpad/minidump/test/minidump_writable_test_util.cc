@@ -1,4 +1,4 @@
-// Copyright 2014 The Crashpad Authors
+// Copyright 2014 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@
 #include "gtest/gtest.h"
 #include "util/file/file_writer.h"
 #include "util/misc/implicit_cast.h"
-#include "util/numeric/in_range_cast.h"
 
 namespace crashpad {
 namespace test {
@@ -40,26 +39,25 @@ namespace {
 //!
 //! Do not call this function. Use the typed version, MinidumpWritableAtRVA<>(),
 //! or another type-specific function.
-template <typename RVAType>
 const void* MinidumpWritableAtRVAInternal(const std::string& file_contents,
-                                          RVAType rva) {
-  const auto rva_offset = crashpad::InRangeCast(rva, file_contents.size());
-  if (rva_offset >= file_contents.size()) {
-    EXPECT_LT(rva_offset, file_contents.size());
+                                          RVA rva) {
+  if (rva >= file_contents.size()) {
+    EXPECT_LT(rva, file_contents.size());
     return nullptr;
   }
 
-  return &file_contents[rva_offset];
+  return &file_contents[rva];
 }
 
-template <typename RVAType, typename MinidumpLocationDescriptorType>
-const void* TMinidumpWritableAtLocationDescriptorInternal(
+}  // namespace
+
+const void* MinidumpWritableAtLocationDescriptorInternal(
     const std::string& file_contents,
-    const MinidumpLocationDescriptorType& location,
+    const MINIDUMP_LOCATION_DESCRIPTOR& location,
     size_t expected_size,
     bool allow_oversized_data) {
   if (location.DataSize == 0) {
-    EXPECT_EQ(location.Rva, RVAType(0));
+    EXPECT_EQ(location.Rva, 0u);
     return nullptr;
   }
 
@@ -73,40 +71,15 @@ const void* TMinidumpWritableAtLocationDescriptorInternal(
     return nullptr;
   }
 
-  RVAType end = location.Rva + location.DataSize;
+  RVA end = location.Rva + location.DataSize;
   if (end > file_contents.size()) {
     EXPECT_LE(end, file_contents.size());
     return nullptr;
   }
 
-  const void* rv =
-      MinidumpWritableAtRVAInternal<RVAType>(file_contents, location.Rva);
+  const void* rv = MinidumpWritableAtRVAInternal(file_contents, location.Rva);
 
   return rv;
-}
-
-}  // namespace
-
-const void* MinidumpWritableAtLocationDescriptorInternal(
-    const std::string& file_contents,
-    const MINIDUMP_LOCATION_DESCRIPTOR& location,
-    size_t expected_size,
-    bool allow_oversized_data) {
-  return TMinidumpWritableAtLocationDescriptorInternal<
-      RVA,
-      MINIDUMP_LOCATION_DESCRIPTOR>(
-      file_contents, location, expected_size, allow_oversized_data);
-}
-
-const void* MinidumpWritableAtLocationDescriptorInternal(
-    const std::string& file_contents,
-    const MINIDUMP_LOCATION_DESCRIPTOR64& location,
-    size_t expected_size,
-    bool allow_oversized_data) {
-  return TMinidumpWritableAtLocationDescriptorInternal<
-      RVA64,
-      MINIDUMP_LOCATION_DESCRIPTOR64>(
-      file_contents, location, expected_size, allow_oversized_data);
 }
 
 template <>
@@ -216,14 +189,6 @@ struct MinidumpThreadListTraits {
   }
 };
 
-struct MinidumpThreadNameListTraits {
-  using ListType = MINIDUMP_THREAD_NAME_LIST;
-  enum : size_t { kElementSize = sizeof(MINIDUMP_THREAD_NAME) };
-  static size_t ElementCount(const ListType* list) {
-    return list->NumberOfThreadNames;
-  }
-};
-
 struct MinidumpHandleDataStreamTraits {
   using ListType = MINIDUMP_HANDLE_DATA_STREAM;
   enum : size_t { kElementSize = sizeof(MINIDUMP_HANDLE_DESCRIPTOR) };
@@ -314,15 +279,6 @@ MinidumpWritableAtLocationDescriptor<MINIDUMP_THREAD_LIST>(
     const std::string& file_contents,
     const MINIDUMP_LOCATION_DESCRIPTOR& location) {
   return MinidumpListAtLocationDescriptor<MinidumpThreadListTraits>(
-      file_contents, location);
-}
-
-template <>
-const MINIDUMP_THREAD_NAME_LIST*
-MinidumpWritableAtLocationDescriptor<MINIDUMP_THREAD_NAME_LIST>(
-    const std::string& file_contents,
-    const MINIDUMP_LOCATION_DESCRIPTOR& location) {
-  return MinidumpListAtLocationDescriptor<MinidumpThreadNameListTraits>(
       file_contents, location);
 }
 

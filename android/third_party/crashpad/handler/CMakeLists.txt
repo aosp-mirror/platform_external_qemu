@@ -28,8 +28,7 @@ target_link_libraries(crashpad_handler PRIVATE crashpad_handler_handler
                                                Threads::Threads)
 
 install(TARGETS crashpad_handler RUNTIME DESTINATION .)
-android_sign(
-  INSTALL ${CMAKE_INSTALL_PREFIX}/crashpad_handler${CMAKE_EXECUTABLE_SUFFIX})
+android_sign(INSTALL ${CMAKE_INSTALL_PREFIX}/crashpad_handler${CMAKE_EXECUTABLE_SUFFIX})
 
 if(OPTION_ASAN)
   message(STATUS "Disabling snapshot tests for asan builds")
@@ -52,10 +51,6 @@ target_link_libraries(
           crashpad_minidump_test_support mini_chromium crashpad_tool_support)
 
 if(WINDOWS_MSVC_X86_64)
-  android_add_executable(TARGET fastfail_program NODISTRIBUTE
-                         SRC win/fastfail_test_program.cc)
-  target_link_libraries(fastfail_program PRIVATE crashpad_client crashpad_util)
-
   android_add_executable(TARGET crashpad_handler_com NODISTRIBUTE SRC main.cc)
   target_link_libraries(
     crashpad_handler_com PRIVATE crashpad_handler_handler crashpad_util
@@ -71,16 +66,10 @@ if(WINDOWS_MSVC_X86_64)
 
   android_add_executable(TARGET crashy_program NODISTRIBUTE
                          SRC win/crashy_test_program.cc)
-
+                         
   target_compile_definitions(crashy_program PRIVATE UNICODE)
-  target_link_libraries(crashy_program PRIVATE crashpad_client)
-
-  android_add_executable(TARGET self_destroying_program NODISTRIBUTE
-                         SRC win/self_destroying_test_program.cc)
-
-  target_compile_definitions(self_destroying_program PRIVATE UNICODE)
-  target_link_libraries(self_destroying_program PRIVATE crashpad_client
-                                                        crashpad_snapshot)
+  target_link_libraries(crashy_program PRIVATE crashpad_client crashpad_util
+                                               crashpad_test gtest)
 
   android_add_executable(TARGET crashy_signal NODISTRIBUTE
                          SRC win/crashy_signal.cc)

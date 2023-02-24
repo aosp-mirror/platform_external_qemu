@@ -1,4 +1,4 @@
-// Copyright 2020 The Crashpad Authors
+// Copyright 2020 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,10 +37,7 @@ class CrashpadIOSClient : public PlatformTest {
 
   void SetUp() override {
     ASSERT_TRUE(client_.StartCrashpadInProcessHandler(
-        base::FilePath(database_dir.path()),
-        "",
-        {},
-        CrashpadClient::ProcessPendingReportsObservationCallback()));
+        base::FilePath(database_dir.path()), "", {}));
     database_ = CrashReportDatabase::Initialize(database_dir.path());
   }
 

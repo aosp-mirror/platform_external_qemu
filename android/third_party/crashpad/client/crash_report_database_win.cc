@@ -1,4 +1,4 @@
-// Copyright 2015 The Crashpad Authors
+// Copyright 2015 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@
 #include <time.h>
 #include <wchar.h>
 
-#include <mutex>
 #include <tuple>
 #include <utility>
 
@@ -663,25 +662,13 @@ class CrashReportDatabaseWin : public CrashReportDatabase {
 
   std::unique_ptr<Metadata> AcquireMetadata();
 
-  Settings& SettingsInternal() {
-    std::call_once(settings_init_, [this]() {
-      settings_.Initialize(base_dir_.Append(kSettings));
-    });
-    return settings_;
-  }
-
   base::FilePath base_dir_;
   Settings settings_;
-  std::once_flag settings_init_;
   InitializationStateDcheck initialized_;
 };
 
 CrashReportDatabaseWin::CrashReportDatabaseWin(const base::FilePath& path)
-    : CrashReportDatabase(),
-      base_dir_(path),
-      settings_(),
-      settings_init_(),
-      initialized_() {}
+    : CrashReportDatabase(), base_dir_(path), settings_(), initialized_() {}
 
 CrashReportDatabaseWin::~CrashReportDatabaseWin() {
 }
@@ -704,6 +691,9 @@ bool CrashReportDatabaseWin::Initialize(bool may_create) {
   if (!CreateDirectoryIfNecessary(AttachmentsRootPath()))
     return false;
 
+  if (!settings_.Initialize(base_dir_.Append(kSettings)))
+    return false;
+
   INITIALIZATION_STATE_SET_VALID(initialized_);
   return true;
 }
@@ -714,7 +704,7 @@ base::FilePath CrashReportDatabaseWin::DatabasePath() {
 
 Settings* CrashReportDatabaseWin::GetSettings() {
   INITIALIZATION_STATE_DCHECK_VALID(initialized_);
-  return &SettingsInternal();
+  return &settings_;
 }
 
 OperationStatus CrashReportDatabaseWin::PrepareNewCrashReport(
@@ -858,7 +848,7 @@ OperationStatus CrashReportDatabaseWin::RecordUploadAttempt(
         report->upload_explicitly_requested;
   }
 
-  if (!SettingsInternal().SetLastUploadAttemptTime(now))
+  if (!settings_.SetLastUploadAttemptTime(now))
     return kDatabaseError;
 
   return kNoError;

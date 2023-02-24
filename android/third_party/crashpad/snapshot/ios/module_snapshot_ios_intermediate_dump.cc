@@ -1,4 +1,4 @@
-// Copyright 2020 The Crashpad Authors
+// Copyright 2020 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 
 #include "base/files/file_path.h"
 #include "base/mac/mach_logging.h"
-#include "client/annotation.h"
 #include "snapshot/ios/intermediate_dump_reader_util.h"
 #include "util/ios/ios_intermediate_dump_data.h"
 #include "util/ios/ios_intermediate_dump_list.h"
@@ -82,11 +81,8 @@ bool ModuleSnapshotIOSIntermediateDump::Initialize(
       std::string name;
       if (!GetDataStringFromMap(
               annotation.get(), Key::kAnnotationName, &name) ||
-          name.empty() || name.length() > Annotation::kNameMaxLength) {
-        LOG(ERROR) << "Invalid annotation name (" << name
-                   << "), size=" << name.size()
-                   << ", max size=" << Annotation::kNameMaxLength
-                   << ", discarding annotation.";
+          name.empty() || name.length() > 64) {  // Annotation::kNameMaxLength
+        LOG(ERROR) << "Invalid annotation name length.";
         continue;
       }
 
@@ -98,10 +94,8 @@ bool ModuleSnapshotIOSIntermediateDump::Initialize(
       if (type_dump && value_dump && type_dump->GetValue<uint16_t>(&type)) {
         const std::vector<uint8_t>& bytes = value_dump->bytes();
         uint64_t length = bytes.size();
-        if (!bytes.data() || length > Annotation::kValueMaxSize) {
-          LOG(ERROR) << "Invalid annotation value, size=" << length
-                     << ", max size=" << Annotation::kValueMaxSize
-                     << ", discarding annotation.";
+        if (!bytes.data() || length > 20480) {  // Annotation::kValueMaxSize
+          LOG(ERROR) << "Invalid annotation value length.";
           continue;
         }
         annotation_objects_.push_back(AnnotationSnapshot(name, type, bytes));

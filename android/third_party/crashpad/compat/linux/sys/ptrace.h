@@ -1,4 +1,4 @@
-// Copyright 2017 The Crashpad Authors
+// Copyright 2017 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 
 #include <sys/cdefs.h>
 #ifdef __cplusplus
-
 // https://sourceware.org/bugzilla/show_bug.cgi?id=22433
 #if !defined(PTRACE_GET_THREAD_AREA) && !defined(PT_GET_THREAD_AREA) && \
     defined(__GLIBC__)
@@ -50,5 +49,4 @@ static constexpr __ptrace_request PTRACE_GETVFPREGS =
 #define PTRACE_GETVFPREGS PTRACE_GETVFPREGS
 #endif
 #endif
-
 #endif  // CRASHPAD_COMPAT_LINUX_SYS_PTRACE_H_

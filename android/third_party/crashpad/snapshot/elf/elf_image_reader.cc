@@ -1,4 +1,4 @@
-// Copyright 2017 The Crashpad Authors
+// Copyright 2017 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,14 +56,14 @@ template <typename PhdrType>
 class ElfImageReader::ProgramHeaderTableSpecific
     : public ElfImageReader::ProgramHeaderTable {
  public:
-  ProgramHeaderTableSpecific() {}
+  ProgramHeaderTableSpecific<PhdrType>() {}
 
-  ProgramHeaderTableSpecific(
+  ProgramHeaderTableSpecific<PhdrType>(
       const ProgramHeaderTableSpecific<PhdrType>&) = delete;
   ProgramHeaderTableSpecific<PhdrType>& operator=(
       const ProgramHeaderTableSpecific<PhdrType>&) = delete;
 
-  ~ProgramHeaderTableSpecific() {}
+  ~ProgramHeaderTableSpecific<PhdrType>() {}
 
   bool Initialize(const ProcessMemoryRange& memory,
                   VMAddress address,

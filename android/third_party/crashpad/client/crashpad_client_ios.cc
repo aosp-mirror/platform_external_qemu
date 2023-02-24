@@ -1,4 +1,4 @@
-// Copyright 2020 The Crashpad Authors
+// Copyright 2020 The Crashpad Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include <atomic>
 #include <ios>
 #include <iterator>
 
@@ -72,14 +71,11 @@ class CrashHandler : public Thread,
     instance_ = nullptr;
   }
 
-  bool Initialize(
-      const base::FilePath& database,
-      const std::string& url,
-      const std::map<std::string, std::string>& annotations,
-      internal::InProcessHandler::ProcessPendingReportsObservationCallback
-          callback) {
+  bool Initialize(const base::FilePath& database,
+                  const std::string& url,
+                  const std::map<std::string, std::string>& annotations) {
     INITIALIZATION_STATE_SET_INITIALIZING(initialized_);
-    if (!in_process_handler_.Initialize(database, url, annotations, callback) ||
+    if (!in_process_handler_.Initialize(database, url, annotations) ||
         !InstallMachExceptionHandler() ||
         // xnu turns hardware faults into Mach exceptions, so the only signal
         // left to register is SIGABRT, which never starts off as a hardware
@@ -148,9 +144,9 @@ class CrashHandler : public Thread,
         context, kMachExceptionSimulated, path);
   }
 
-  void StartProcessingPendingReports(UploadBehavior upload_behavior) {
+  void StartProcessingPendingReports() {
     INITIALIZATION_STATE_DCHECK_VALID(initialized_);
-    in_process_handler_.StartProcessingPendingReports(upload_behavior);
+    in_process_handler_.StartProcessingPendingReports();
   }
 
   void SetMachExceptionCallbackForTesting(void (*callback)()) {
@@ -223,19 +219,9 @@ class CrashHandler : public Thread,
                                  MachMessageServer::kPersistent,
                                  MachMessageServer::kReceiveLargeIgnore,
                                  kMachMessageTimeoutWaitIndefinitely);
-      MACH_CHECK(
-          mach_handler_running_
-              ? mr == MACH_SEND_INVALID_DEST  // This shouldn't happen for
-                                              // exception messages that come
-                                              // from the kernel itself, but if
-                                              // something else in-process sends
-                                              // exception messages and breaks,
-                                              // handle that case.
-              : (mr == MACH_RCV_PORT_CHANGED ||  // Port was closed while the
-                                                 // thread was listening.
-                 mr == MACH_RCV_INVALID_NAME),  // Port was closed before the
-                                                // thread started listening.
-          mr)
+      MACH_CHECK(mr == (mach_handler_running_ ? MACH_SEND_INVALID_DEST
+                                              : MACH_RCV_PORT_CHANGED),
+                 mr)
           << "MachMessageServer::Run";
     }
   }
@@ -398,7 +384,7 @@ class CrashHandler : public Thread,
   struct sigaction old_action_ = {};
   internal::InProcessHandler in_process_handler_;
   static CrashHandler* instance_;
-  std::atomic<bool> mach_handler_running_ = false;
+  bool mach_handler_running_ = false;
   InitializationStateDcheck initialized_;
 };
 
@@ -414,11 +400,10 @@ CrashpadClient::~CrashpadClient() {}
 bool CrashpadClient::StartCrashpadInProcessHandler(
     const base::FilePath& database,
     const std::string& url,
-    const std::map<std::string, std::string>& annotations,
-    ProcessPendingReportsObservationCallback callback) {
+    const std::map<std::string, std::string>& annotations) {
   CrashHandler* crash_handler = CrashHandler::Get();
   DCHECK(crash_handler);
-  return crash_handler->Initialize(database, url, annotations, callback);
+  return crash_handler->Initialize(database, url, annotations);
 }
 
 // static
@@ -439,11 +424,10 @@ void CrashpadClient::ProcessIntermediateDump(
 }
 
 // static
-void CrashpadClient::StartProcessingPendingReports(
-    UploadBehavior upload_behavior) {
+void CrashpadClient::StartProcessingPendingReports() {
   CrashHandler* crash_handler = CrashHandler::Get();
   DCHECK(crash_handler);
-  crash_handler->StartProcessingPendingReports(upload_behavior);
+  crash_handler->StartProcessingPendingReports();
 }
 
 // static
