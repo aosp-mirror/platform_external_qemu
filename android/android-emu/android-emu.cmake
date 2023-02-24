@@ -618,8 +618,11 @@ android_add_library(
       android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
       android/emulation/testing/MockAndroidMultiDisplayAgent.cpp
       android/emulation/testing/MockAndroidVmOperations.cpp)
-android_target_compile_options(android-emu-test-launcher Clang
+if(NOT WINDOWS_MSVC_X86_64)
+ target_compile_options(android-emu-test-launcher
                                PRIVATE -O0 -Wno-invalid-constexpr)
+endif()
+
 target_link_libraries(
   android-emu-test-launcher PRIVATE android-emu android-emu-base-headers
   PUBLIC gmock android-emu-cmdline-testing android-emu-feature-test
