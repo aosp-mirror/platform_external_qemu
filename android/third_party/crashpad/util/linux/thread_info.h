@@ -1,4 +1,4 @@
-// Copyright 2017 The Crashpad Authors. All rights reserved.
+// Copyright 2017 The Crashpad Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 #ifndef CRASHPAD_UTIL_LINUX_THREAD_INFO_H_
 #define CRASHPAD_UTIL_LINUX_THREAD_INFO_H_
 
+#include <features.h>
 #include <stdint.h>
 #include <sys/user.h>
 
@@ -274,7 +275,7 @@ union FloatContext {
                 "Size mismatch");
 #elif defined(ARCH_CPU_ARMEL)
   static_assert(sizeof(f32_t::fpregs) == sizeof(user_fpregs), "Size mismatch");
-#if !defined(__GLIBC__)
+#if defined(__BIONIC__)
   static_assert(sizeof(f32_t::vfp) == sizeof(user_vfp), "Size mismatch");
 #endif
 #elif defined(ARCH_CPU_ARM64)
