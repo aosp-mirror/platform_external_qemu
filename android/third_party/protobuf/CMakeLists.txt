@@ -6,6 +6,8 @@ if(NOT ANDROID_QEMU2_TOP_DIR)
   include(prebuilts)
 endif()
 
+# Display version information etc.
+set(protobuf_VERBOSE TRUE)
 if(NOT TARGET zlib)
   # Cross build needs zlib for protoc.
   add_subdirectory(../zlib zlib)
@@ -15,39 +17,54 @@ set(ZLIB_LIBRARIES zlib)
 
 set(protobuf_DEBUG_POSTFIX "d" CACHE STRING "Default debug postfix")
 
-set(protobuf_source_dir "${ANDROID_QEMU2_TOP_DIR}/../protobuf")
+set(protobuf_SOURCE_DIR "${ANDROID_QEMU2_TOP_DIR}/../protobuf")
 # Path to main configure script
-set(protobuf_CONFIGURE_SCRIPT "${protobuf_source_dir}/configure.ac")
+set(protobuf_CONFIGURE_SCRIPT "${protobuf_SOURCE_DIR}/configure.ac")
 
 # Parse configure script
 set(protobuf_AC_INIT_REGEX
-    "^AC_INIT\\(\\[([^]]+)\\],\\[([^]]+)\\],\\[([^]]+)\\],\\[([^]]+)\\]\\)$")
-file(STRINGS "${protobuf_CONFIGURE_SCRIPT}" protobuf_AC_INIT_LINE LIMIT_COUNT 1
-     REGEX "^AC_INIT")
+  "^AC_INIT\\(\\[([^]]+)\\],\\[([^]]+)\\],\\[([^]]+)\\],\\[([^]]+)\\]\\)$")
+file(STRINGS "${protobuf_CONFIGURE_SCRIPT}" protobuf_AC_INIT_LINE
+  LIMIT_COUNT 1 REGEX "^AC_INIT")
 # Description
-string(REGEX REPLACE "${protobuf_AC_INIT_REGEX}" "\\1" protobuf_DESCRIPTION
-                     "${protobuf_AC_INIT_LINE}")
+string(REGEX REPLACE        "${protobuf_AC_INIT_REGEX}" "\\1"
+    protobuf_DESCRIPTION    "${protobuf_AC_INIT_LINE}")
 # Version
-string(REGEX REPLACE "${protobuf_AC_INIT_REGEX}" "\\2" protobuf_VERSION_STRING
-                     "${protobuf_AC_INIT_LINE}")
+string(REGEX REPLACE        "${protobuf_AC_INIT_REGEX}" "\\2"
+    protobuf_VERSION_STRING "${protobuf_AC_INIT_LINE}")
 # Contact
-string(REGEX REPLACE "${protobuf_AC_INIT_REGEX}" "\\3" protobuf_CONTACT
-                     "${protobuf_AC_INIT_LINE}")
+string(REGEX REPLACE        "${protobuf_AC_INIT_REGEX}" "\\3"
+    protobuf_CONTACT        "${protobuf_AC_INIT_LINE}")
 # Parse version tweaks
-set(protobuf_VERSION_REGEX "^([0-9]+)\\.([0-9]+)\\.([0-9]+).*$")
-string(REGEX REPLACE "${protobuf_VERSION_REGEX}" "\\1" protobuf_VERSION_MAJOR
-                     "${protobuf_VERSION_STRING}")
-string(REGEX REPLACE "${protobuf_VERSION_REGEX}" "\\2" protobuf_VERSION_MINOR
-                     "${protobuf_VERSION_STRING}")
-string(REGEX REPLACE "${protobuf_VERSION_REGEX}" "\\3" protobuf_VERSION_PATCH
-                     "${protobuf_VERSION_STRING}")
+set(protobuf_VERSION_REGEX "^([0-9]+)\\.([0-9]+)\\.([0-9]+)([-]rc[-]|\\.)?([0-9]*)$")
+string(REGEX REPLACE     "${protobuf_VERSION_REGEX}" "\\1"
+  protobuf_VERSION_MAJOR "${protobuf_VERSION_STRING}")
+string(REGEX REPLACE     "${protobuf_VERSION_REGEX}" "\\2"
+  protobuf_VERSION_MINOR "${protobuf_VERSION_STRING}")
+string(REGEX REPLACE     "${protobuf_VERSION_REGEX}" "\\3"
+  protobuf_VERSION_PATCH "${protobuf_VERSION_STRING}")
+string(REGEX REPLACE     "${protobuf_VERSION_REGEX}" "\\5"
+  protobuf_VERSION_PRERELEASE "${protobuf_VERSION_STRING}")
+
+# message(STATUS "${protobuf_VERSION_PRERELEASE}")
+
 # Package version
 set(protobuf_VERSION
-    "${protobuf_VERSION_MAJOR}.${protobuf_VERSION_MINOR}.${protobuf_VERSION_PATCH}"
-)
-set(PROTO_DESC
-    "${protobuf_DESCRIPTION}, Version: ${protobuf_VERSION} (${protobuf_VERSION_STRING})"
-)
+  "${protobuf_VERSION_MAJOR}.${protobuf_VERSION_MINOR}.${protobuf_VERSION_PATCH}")
+
+if(protobuf_VERSION_PRERELEASE)
+  set(protobuf_VERSION "${protobuf_VERSION}.${protobuf_VERSION_PRERELEASE}")
+else()
+  set(protobuf_VERSION "${protobuf_VERSION}.0")
+endif()
+
+if(protobuf_VERBOSE)
+  message(STATUS "Configuration script parsing status [")
+  message(STATUS "  Description : ${protobuf_DESCRIPTION}")
+  message(STATUS "  Version     : ${protobuf_VERSION} (${protobuf_VERSION_STRING})")
+  message(STATUS "  Contact     : ${protobuf_CONTACT}")
+  message(STATUS "]")
+endif()
 
 add_definitions(-DGOOGLE_PROTOBUF_CMAKE_BUILD)
 
@@ -68,19 +85,19 @@ add_definitions(-DUNICODE -D_UNICODE)
 # And we can successfully compile as both shared/static library.
 add_definitions(-DANDROID_EMULATOR)
 
-include(${protobuf_source_dir}/cmake/libprotobuf-lite.cmake)
+include(${protobuf_SOURCE_DIR}/cmake/libprotobuf-lite.cmake)
 # Linking to both libprotobuf and libprotobuf-lite will cause unexpected behavior,
 # so we exclude libprotobuf-lite from the build.
 set_target_properties(libprotobuf-lite PROPERTIES
     EXCLUDE_FROM_ALL TRUE)
-include(${protobuf_source_dir}/cmake/libprotobuf.cmake)
+include(${protobuf_SOURCE_DIR}/cmake/libprotobuf.cmake)
 # external/tink links to libprotobuf-lite, but we only want to use libprotobuf.
 add_library(protobuf::libprotobuf-lite ALIAS libprotobuf)
 
 target_compile_options(libprotobuf PRIVATE -Wno-invalid-noreturn)
 if(NOT CROSSCOMPILE)
-  include(${protobuf_source_dir}/cmake/libprotoc.cmake)
-  include(${protobuf_source_dir}/cmake/protoc.cmake)
+  include(${protobuf_SOURCE_DIR}/cmake/libprotoc.cmake)
+  include(${protobuf_SOURCE_DIR}/cmake/protoc.cmake)
 
   android_target_dependency(protoc all RUNTIME_OS_DEPENDENCIES)
   android_target_properties(protoc all "${RUNTIME_OS_PROPERTIES}")
@@ -101,26 +118,18 @@ else()
 endif()
 
 set(PROTOBUF_LIBRARY "${PROTO_DESC}")
-set(PROTOBUF_INCLUDE_DIR "${protobuf_source_dir}/src")
+set(PROTOBUF_INCLUDE_DIR "${protobuf_SOURCE_DIR}/src")
 
 # Later versions of cmake want this to be lower case..
 set(Protobuf_INCLUDE_DIR "${PROTOBUF_INCLUDE_DIR}")
 set(Protobuf_LIBRARY "${PROTOBUF_LIBRARY}")
 set(Protobuf_PROTOC_EXECUTABLE "${PROTOBUF_PROTOC_EXECUTABLE}")
-find_package(Protobuf REQUIRED)
-if(NOT "${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" VERSION_EQUAL
-   "${Protobuf_VERSION}")
-  message(
-    STATUS
-      "It's safe to ignore version warnings, it's a result of compiling protoc in the tree with CMake version > 3.5."
-  )
-endif()
 
 android_license(
   TARGET "protobuf::libprotobuf" LIBNAME protobuf SPDX "BSD-3-Clause"
-  LICENSE "BSD-3-Clause" LOCAL "${protobuf_source_dir}/NOTICE")
+  LICENSE "BSD-3-Clause" LOCAL "${protobuf_SOURCE_DIR}/NOTICE")
 android_license(TARGET "libprotobuf" LIBNAME protobuf SPDX "BSD-3-Clause"
-                LICENSE "BSD-3-Clause" LOCAL "${protobuf_source_dir}/NOTICE")
+                LICENSE "BSD-3-Clause" LOCAL "${protobuf_SOURCE_DIR}/NOTICE")
 
 if(protobuf_BUILD_SHARED_LIBS)
   android_install_shared(libprotobuf)

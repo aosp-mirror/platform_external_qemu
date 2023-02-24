@@ -259,3 +259,20 @@ bool android_get_x86_cpuid_is_64bit_capable()
     return false;
 #endif
 }
+
+bool android_get_x86_cpuid_hyperv_root()
+{
+    char hv_vendor_id[16] = {};
+    android_get_x86_cpuid_vmhost_vendor_id(hv_vendor_id, sizeof(hv_vendor_id));
+    auto vmhost = android_get_x86_cpuid_vendor_vmhost_type(hv_vendor_id);
+    if (vmhost != VENDOR_VM_HYPERV) {
+        return false;
+    }
+
+    // The linux kernel uses CPUID LEAF 0x40000000 EBX BIT 12 to check whether
+    // this is a Hyper-V Root Partition. Use the same method here.
+    uint32_t cpuid_function40000003_ebx;
+    android_get_x86_cpuid(0x40000003, 0, NULL, &cpuid_function40000003_ebx, NULL, NULL);
+    const uint32_t HV_PARTITION_PRIVILEGE_CPUMANAGEMENT = (1<<12);
+    return (cpuid_function40000003_ebx & HV_PARTITION_PRIVILEGE_CPUMANAGEMENT) != 0;
+}

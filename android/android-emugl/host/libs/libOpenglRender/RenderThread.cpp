@@ -278,8 +278,32 @@ intptr_t RenderThread::main() {
     initRenderControlContext(&tInfo.m_rcDec);
     {
         AutoLock lock(mLock);
-        setOnTeardownLocked([vkDec = &tInfo.m_vkDec] {
-            vkDec->onThreadTeardown();
+        // This callback is only used when a RenderThread::main() is running
+        // and will be cleared when `tInfo` goes out of scope, so it's safe to
+        // use `&tInfo` here.
+        setOnTeardownLocked([this, &tInfo] {
+            D("RenderThread @%p gets teardown request. puid=%ul", this,
+              tInfo.m_puid);
+
+            // If this callback is called, it indicates that other components
+            // requested a teardown of this RenderThread; the most probable
+            // cause is the address space stream is destroyed. In such cases,
+            // it won't make sense for decoders to wait on the global command
+            // sequences, because the command it waits might never arrive. So
+            // all the render threads associated with this process should skip
+            // waiting for seqnos, until a new stream (and new process context)
+            // is recreated for this process later.
+            if (tInfo.m_puid) {
+                const ProcessResources* processResources =
+                        FrameBuffer::getFB()->getProcessResources(tInfo.m_puid);
+
+                // This is the only place skipSeqnoWait is set and we only need
+                // atomicity for it, so we can just use relaxed memory order.
+                processResources->getSkipWaitingForSequenceNumber()->store(
+                        true, std::memory_order_relaxed);
+            }
+
+            tInfo.m_vkDec.onThreadTeardown();
         });
     }
 
@@ -353,7 +377,7 @@ intptr_t RenderThread::main() {
         delete[] fname;
     }
 
-    uint32_t* seqnoPtr = nullptr;
+    const ProcessResources* processResources = nullptr;
 
     while (1) {
         // Let's make sure we read enough data for at least some processing.
@@ -437,8 +461,8 @@ intptr_t RenderThread::main() {
 
         do {
 
-            if (!seqnoPtr && tInfo.m_puid) {
-                seqnoPtr = FrameBuffer::getFB()->getProcessSequenceNumberPtr(tInfo.m_puid);
+            if (!processResources && tInfo.m_puid) {
+                processResources = FrameBuffer::getFB()->getProcessResources(tInfo.m_puid);
             }
 
             if (mRunInLimitedMode) {
@@ -454,9 +478,8 @@ intptr_t RenderThread::main() {
             // Vulkan decoder
             //
             {
-                (void)seqnoPtr;
                 last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
-                                            ioStream, seqnoPtr);
+                                            ioStream, processResources);
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;

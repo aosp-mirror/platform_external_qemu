@@ -263,8 +263,7 @@ android_add_library(
 # would like to keep this list small.
 target_link_libraries(
   android-emu
-  PRIVATE android-emu-base-headers
-          qemu-host-common-headers
+  PRIVATE android-emu-base-headers qemu-host-common-headers
   PUBLIC FFMPEG::FFMPEG
          VPX::VPX
          emulator-libext4_utils
@@ -391,11 +390,7 @@ android_target_compile_definitions(
   android-emu darwin PRIVATE "-D_DARWIN_C_SOURCE=1" "-Dftello64=ftell"
                              "-Dfseeko64=fseek")
 
-target_compile_definitions(
-  android-emu
-  PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}" "-D_LIBCPP_VERSION=__GLIBCPP__"
-          "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-          "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
+target_compile_definitions(android-emu PRIVATE "-D_LIBCPP_VERSION=__GLIBCPP__")
 
 if(WEBRTC)
   target_compile_definitions(android-emu PUBLIC -DANDROID_WEBRTC)
@@ -623,8 +618,11 @@ android_add_library(
       android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
       android/emulation/testing/MockAndroidMultiDisplayAgent.cpp
       android/emulation/testing/MockAndroidVmOperations.cpp)
-android_target_compile_options(android-emu-test-launcher Clang
+if(NOT WINDOWS_MSVC_X86_64)
+ target_compile_options(android-emu-test-launcher
                                PRIVATE -O0 -Wno-invalid-constexpr)
+endif()
+
 target_link_libraries(
   android-emu-test-launcher PRIVATE android-emu android-emu-base-headers
   PUBLIC gmock android-emu-cmdline-testing android-emu-feature-test
@@ -701,9 +699,7 @@ if(NOT LINUX_AARCH64)
     android-emu_unittests PRIVATE -O0 -Wno-invalid-constexpr
                                   -Wno-string-plus-int)
   target_include_directories(android-emu_unittests
-                             PRIVATE
-                             ../android-emugl/host/include/
-                             android/)
+                             PRIVATE ../android-emugl/host/include/ android/)
 
   # Sign unit test if needed.
   android_sign(TARGET android-emu_unittests)
@@ -717,8 +713,13 @@ if(NOT LINUX_AARCH64)
   # Dependecies are exported from android-emu.
   target_link_libraries(
     android-emu_unittests
-    PRIVATE android-emu android-emu-base-headers android-emu-protobuf android-emu-cmdline-testing
-            android-emu-hardware-test android-emu-test-launcher qemu-host-common-headers)
+    PRIVATE android-emu
+            android-emu-base-headers
+            android-emu-protobuf
+            android-emu-cmdline-testing
+            android-emu-hardware-test
+            android-emu-test-launcher
+            qemu-host-common-headers)
 
   list(
     APPEND

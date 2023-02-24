@@ -15,8 +15,9 @@
 
 #include "aemu/base/containers/EntityManager.h"
 
-#include "VkDecoder.h"
+#include "FrameBuffer.h"
 #include "IOStream.h"
+#include "VkDecoder.h"
 
 #include <unordered_map>
 
@@ -260,8 +261,9 @@ void VkReconstruction::load(android::base::Stream* stream) {
     DEBUG_RECON("start decoding trace");
 
     // TODO: This needs to be the puid seqno ptr
-    uint32_t seqno;
-    decoderForLoading.decode(mLoadedTrace.data(), mLoadedTrace.size(), &trivialStream, &seqno);
+    auto resources = ProcessResources::create();
+    decoderForLoading.decode(mLoadedTrace.data(), mLoadedTrace.size(),
+                             &trivialStream, resources.get());
 
     DEBUG_RECON("finished decoding trace");
 }

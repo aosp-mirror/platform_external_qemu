@@ -921,36 +921,44 @@ AndroidCpuAcceleration ProbeGVM(std::string* status) {
     if (cpu != ANDROID_CPU_ACCELERATION_READY)
         return cpu;
 
+    ScopedFileHandle aehd(CreateFile("\\\\.\\AEHD", GENERIC_READ | GENERIC_WRITE,
+                                    0, NULL, CREATE_ALWAYS,
+                                    FILE_ATTRIBUTE_NORMAL, NULL));
+    if (aehd.valid())
+        goto success;
     ScopedFileHandle gvm(CreateFile("\\\\.\\gvm", GENERIC_READ | GENERIC_WRITE,
                                     0, NULL, CREATE_ALWAYS,
                                     FILE_ATTRIBUTE_NORMAL, NULL));
-    if (!gvm.valid()) {
+    if (!aehd.valid() && !gvm.valid()) {
         DWORD err = GetLastError();
         if (err == ERROR_FILE_NOT_FOUND) {
-            status->assign("GVM is not installed on this machine");
+            status->assign("Android Emulator hypervisor driver is not installed"
+                           " on this machine");
             return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
         } else if (err == ERROR_ACCESS_DENIED) {
-            status->assign("Unable to open GVM device: ERROR_ACCESS_DENIED");
+            status->assign("Unable to open AEHD device: ERROR_ACCESS_DENIED");
             return ANDROID_CPU_ACCELERATION_DEV_PERMISSION;
         }
-        StringAppendFormat(status, "Opening GVM kernel module failed: %u", err);
+        StringAppendFormat(status, "Opening Android Emulator hypervisor driver"
+                                   " failed: %u", err);
         return ANDROID_CPU_ACCELERATION_DEV_OPEN_FAILED;
     }
 
+success:
     int version;
 
     DWORD dSize = 0;
-    BOOL ret =
-            DeviceIoControl(gvm.get(), GVM_GET_API_VERSION, NULL, 0, &version,
-                            sizeof(version), &dSize, (LPOVERLAPPED)NULL);
+    BOOL ret = DeviceIoControl(aehd.valid() ? aehd.get() : gvm.get(),
+                               GVM_GET_API_VERSION, NULL, 0, &version,
+                               sizeof(version), &dSize, (LPOVERLAPPED)NULL);
     if (!ret) {
         DWORD err = GetLastError();
-        StringAppendFormat(status, "Could not extract GVM version: %u", err);
+        StringAppendFormat(status, "Could not extract AEHD version: %u", err);
         return ANDROID_CPU_ACCELERATION_DEV_IOCTL_FAILED;
     }
 
     // Profit!
-    StringAppendFormat(status, "GVM (version %d.%d) is installed and usable.",
+    StringAppendFormat(status, "AEHD (version %d.%d) is installed and usable.",
                        version >> 16, version & 0xFFFF);
     GlobalState* g = &gGlobals;
     ::snprintf(g->version, sizeof(g->version), "%d", version);
@@ -1285,16 +1293,30 @@ std::pair<AndroidCpuInfoFlags, std::string> GetCpuInfo() {
             }
             break;
         default:
+#ifdef APPLE_SILICON
+            flags |= ANDROID_CPU_INFO_APPLE;
+            status += "Apple CPU\n";
+            status +=
+                    "Virtualization is supported\n";  // we have not found
+                                                      // otherwise on apple cpu
+#else
             flags |= ANDROID_CPU_INFO_OTHER;
             status += "Other CPU: ";
             status += vendor_id;
+#endif
             status += '\n';
             break;
     }
 
     if (android_get_x86_cpuid_is_vcpu()) {
-        flags |= ANDROID_CPU_INFO_VM;
-        status += "Inside a VM\n";
+        if (android_get_x86_cpuid_hyperv_root()) {
+            status += "Hyper-V Root Partition\n";
+        } else {
+            status += "Inside a VM\n";
+            flags |= ANDROID_CPU_INFO_VM;
+        }
+    } else {
+        status += "Bare metal\n";
     }
 
     const int osBitness = base::System::get()->getHostBitness();

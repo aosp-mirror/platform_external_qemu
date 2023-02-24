@@ -1340,11 +1340,9 @@ static bool checkConfigIniCompatible(std::string srcConfig,
     }
 
     std::unordered_set<std::string> important{
-            "abi.type",       "hw.cpu.arch",     "hw.lcd.density",
-            "hw.lcd.height",  "hw.lcd.width",    "skin.name",
-            "hw.camera.back", "hw.camera.front", "hw.gpu.enabled",
-            "hw.gpu.mode",    "hw.sdCard",       "hw.keyboard",
-            "hw.arc"};
+            "abi.type",     "hw.cpu.arch", "hw.lcd.density", "hw.lcd.height",
+            "hw.lcd.width", "skin.name",   "hw.camera.back", "hw.camera.front",
+            "hw.sdCard",    "hw.keyboard", "hw.arc"};
     for (auto&& key : srcConfigIni) {
         if (important.count(key) == 0) {
             continue;  // not important, ignore
@@ -1367,6 +1365,8 @@ static void fixAvdConfig(std::string avdDir,
                          std::string avdName,
                          std::string avdDisplayName,
                          std::string skinPath,
+                         std::string gpuMode,
+                         std::string gpuEnabled,
                          AndroidHwConfig* hw) {
     IniFile configIni(PathUtils::join(avdDir, "config.ini"));
     if (!configIni.read(false)) {
@@ -1381,6 +1381,8 @@ static void fixAvdConfig(std::string avdDir,
                         hw->firstboot_downloaded_path);
     configIni.setString("firstboot.local.path", hw->firstboot_local_path);
     configIni.setString("skin.path", skinPath);
+    configIni.setString("gpu.mode", gpuMode);
+    configIni.setString("gpu.enabled", gpuEnabled);
     configIni.writeIfChanged();
 }
 
@@ -1433,7 +1435,7 @@ static SnapshotCompatibleType checkFirstbootIniCompatible(
 
     std::vector<std::string> keysOther{
             "Host.Os.Type",
-            "Host.Cpu.Model",
+            "Host.Cpu.Vendor",
             "Host.Hypervisor.Name",
     };
 
@@ -2144,6 +2146,10 @@ extern "C" int main(int argc, char** argv) {
                         getKeyFromConfigFile(orgConfigFile, "skin.path", "");
                 const std::string orgDisplayName = getKeyFromConfigFile(
                         orgConfigFile, "avd.ini.displayname", avdName);
+                const std::string orgGpuMode = getKeyFromConfigFile(
+                        orgConfigFile, "gpu.mode", avdName);
+                const std::string orgGpuEnabled = getKeyFromConfigFile(
+                        orgConfigFile, "gpu.enabled", avdName);
                 std::set<std::string> skipSet;
 
                 const auto compatibleCheckResult =
@@ -2224,7 +2230,8 @@ extern "C" int main(int argc, char** argv) {
                         if (!opts->no_snapshot_load) {
                             // fix AvdId, displayname and paths
                             fixAvdConfig(std::string(s_AvdFolder), avdName,
-                                         orgDisplayName, orgSkinPath, hw);
+                                         orgDisplayName, orgSkinPath,
+                                         orgGpuMode, orgGpuEnabled, hw);
                         }
                     }
                 }
@@ -2240,6 +2247,13 @@ extern "C" int main(int argc, char** argv) {
                         System::get()->findBundledExecutable("qemu-img");
                 std::string dataimageext4 = std::string(hw->hw_sdCard_path);
                 convertExt4ToQcow2(dataimageext4);
+            }
+
+            // firstboot.ini could be wiped out, create again
+            if (!path_exists(orgSrcFirstbootIniFileName.c_str())) {
+                android::avd::BugreportInfo bugInfo;
+                bugInfo.dumpFirstbootInfoForDownloadableSnapshot(
+                        orgSrcFirstbootIniFileName);
             }
 
             free(s_AvdFolder);
@@ -2636,7 +2650,9 @@ extern "C" int main(int argc, char** argv) {
                 opts->net_tap_script_down ? opts->net_tap_script_down : "no";
         args.addFormat("tap,id=mynet,script=%s,downscript=%s,ifname=%s",
                        upScript, downScript, opts->net_tap);
-    }
+    } else if (opts->net_socket) {
+        args.addFormat("socket,id=mynet,%s", opts->net_socket);
+     }
 #if defined(__APPLE__)
     else if (opts->vmnet_bridged) {
         args.addFormat("vmnet-bridged,id=mynet,ifname=%s%s",
@@ -2850,6 +2866,8 @@ extern "C" int main(int argc, char** argv) {
             args.addFormat(
                     "tap,id=virtio-wifi,script=%s,downscript=%s,ifname=%s",
                     upScript, downScript, opts->wifi_tap);
+        } else if (opts->wifi_socket) {
+            args.addFormat("socket,id=virtio-wifi,%s", opts->wifi_socket);
         }
 #if defined(__APPLE__)
         else if (opts->vmnet_bridged) {

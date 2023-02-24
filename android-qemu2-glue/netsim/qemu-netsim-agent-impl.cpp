@@ -88,7 +88,7 @@ typedef struct NetsimChardev {
 
 // Global netsim configuration.
 static struct {
-    std::string serial;
+    std::string name;
     std::string default_commands_file;
     std::string controller_properties_file;
 } gNetsimConfiguration;
@@ -163,10 +163,10 @@ public:
 
         // And register.
         PacketRequest registration;
-        registration.mutable_initial_info()->set_serial(
-                gNetsimConfiguration.serial);
+        registration.mutable_initial_info()->set_name(
+                gNetsimConfiguration.name);
         registration.mutable_initial_info()->mutable_chip()->set_kind(
-                netsim::startup::Chip::BLUETOOTH);
+                netsim::common::ChipKind::BLUETOOTH);
         Write(registration);
 
         dinfo("Bluetooth registration: %s send to netsim at: %s",
@@ -249,7 +249,7 @@ static void connect_netsim(NetsimChardev* netsim) {
                      "%s as: %s",
                      gNetsimConfiguration.default_commands_file.c_str(),
                      gNetsimConfiguration.controller_properties_file.c_str(),
-                     gNetsimConfiguration.serial.c_str());
+                     gNetsimConfiguration.name.c_str());
 
         // TODO(jansene): Add support for connect to custom endpoint vs.
         // discovery.
@@ -347,14 +347,14 @@ static const TypeInfo char_netsim_type_info = {
 void register_netsim(const std::string address,
                      const std::string rootcanal_default_commands_file,
                      const std::string rootcanal_controller_properties_file,
-                     const std::string host_id) {
+                     const std::string name) {
     if (!address.empty()) {
         dwarning(
                 "Unable to connect to %s, (b/265451720) reverting to auto "
                 "discovery.",
                 address.c_str());
     }
-    gNetsimConfiguration.serial = host_id;
+    gNetsimConfiguration.name = name;
     gNetsimConfiguration.default_commands_file =
             rootcanal_default_commands_file;
     gNetsimConfiguration.controller_properties_file =

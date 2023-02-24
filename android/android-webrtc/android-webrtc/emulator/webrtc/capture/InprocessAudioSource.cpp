@@ -138,8 +138,6 @@ const cricket::AudioOptions InprocessAudioSource::options() const {
     options.auto_gain_control = false;
     options.noise_suppression = false;
     options.highpass_filter = false;
-    options.typing_detection = false;
-    options.residual_echo_detector = false;
     return options;
 }
 

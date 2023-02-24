@@ -13,7 +13,8 @@
 // limitations under the License.
 #include "emulator/webrtc/Switchboard.h"
 
-#include <api/scoped_refptr.h>            // for scoped_refptr
+#include <api/scoped_refptr.h>  // for scoped_refptr
+#include <api/units/time_delta.h>
 #include <rtc_base/logging.h>             // for Val, RTC_LOG
 #include <rtc_base/ref_counted_object.h>  // for RefCountedObject
 #include <map>                            // for map, operator==
@@ -25,15 +26,16 @@
 #include <utility>                        // for move
 #include <vector>                         // for vector
 
+
 #include "aemu/base/Log.h"                     // for LogStreamVoidify, LOG
 #include "aemu/base/async/AsyncSocket.h"       // for AsyncSocket
 #include "aemu/base/containers/BufferQueue.h"  // for BufferQueueResult
 #include "aemu/base/synchronization/Lock.h"    // for Lock, AutoReadLock
-#include "android/base/system/System.h"           // for System, System::Dur...
-#include "android/console.h"                      // for getConsoleAgents
-#include "emulator/webrtc/Participant.h"          // for Participant
-#include "emulator/webrtc/RtcConnection.h"        // for json, RtcConnection
-#include "nlohmann/json.hpp"                      // for basic_json<>::value...
+#include "android/base/system/System.h"        // for System, System::Dur...
+#include "android/console.h"                   // for getConsoleAgents
+#include "emulator/webrtc/Participant.h"       // for Participant
+#include "emulator/webrtc/RtcConnection.h"     // for json, RtcConnection
+#include "nlohmann/json.hpp"                   // for basic_json<>::value...
 
 using namespace android::base;
 
@@ -59,7 +61,6 @@ void Switchboard::rtcConnectionClosed(const std::string participant) {
     }
 
     signalingThread()->PostDelayedTask(
-            RTC_FROM_HERE,
             [this, participant] {
                 const std::lock_guard<std::mutex> lock(mCleanupMutex);
                 LOG(INFO) << "disconnect: " << participant
@@ -70,7 +71,7 @@ void Switchboard::rtcConnectionClosed(const std::string participant) {
                     mConnections.erase(participant);
                 }
             },
-            1);
+            ::webrtc::TimeDelta::Seconds(0));
 }
 
 void Switchboard::send(std::string to, json message) {

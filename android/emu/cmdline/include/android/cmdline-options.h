@@ -156,6 +156,7 @@ OPT_PARAM( change_country, "<country>", "use this country instead of the current
 OPT_PARAM( change_locale, "<locale>", "use this locale instead of the current one. Restarts the framework." )
 OPT_PARAM( dns_server, "<servers>", "use this DNS server(s) in the emulated system" )
 OPT_PARAM( net_tap, "<interface>", "use this TAP interface for networking" )
+OPT_PARAM( net_socket, "option", "use Socket interface for network, one of fd=, listen=, or connect=" )
 OPT_PARAM( net_tap_script_up, "<script>", "script to run when the TAP interface goes up" )
 OPT_PARAM( net_tap_script_down, "<script>", "script to run when the TAP interface goes down" )
 OPT_PARAM( cpu_delay, "<cpudelay>", "throttle CPU emulation" )
@@ -306,6 +307,7 @@ OPT_FLAG(no_nested_warnings,
 OPT_PARAM( wifi_tap, "<interface>", "use this TAP interface for Virtio Wi-Fi" )
 OPT_PARAM( wifi_tap_script_up, "<script>", "script to run when the TAP interface goes up" )
 OPT_PARAM( wifi_tap_script_down, "<script>", "script to run when the TAP interface goes down" )
+OPT_PARAM( wifi_socket, "<option>", "use Socket interface for Virtio Wi-Fi, one of fd=, listen=, or connect=")
 #ifdef __APPLE__
 OPT_PARAM( vmnet_bridged,
            "<host network interface>",

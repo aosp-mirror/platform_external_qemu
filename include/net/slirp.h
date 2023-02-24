@@ -56,6 +56,22 @@ void net_slirp_set_shapers(void* out_opaque,
 void net_slirp_init_custom_dns_servers(const struct sockaddr_storage* dns,
                                    int dns_count);
 
+/* Callback functions to be invoked when new packets are arriving from the
+ * specified Slirp instance*/
+typedef ssize_t (*SlirpReceiveCallbackFunc)(void *opaque, const uint8_t *pkt,
+                                            size_t pkt_len);
+
+int net_slirp_set_custom_slirp_output_callback(void *slirp,
+                                               SlirpReceiveCallbackFunc cb,
+                                               void *opaque);
+
+void *net_slirp_init_custom_slirp_state(
+    int restricted, bool in_enabled, struct in_addr vnetwork,
+    struct in_addr vnetmask, struct in_addr vhost, bool in6_enabled,
+    struct in6_addr vprefix_addr6, uint8_t vprefix_len, struct in6_addr vhost6,
+    const char *vhostname, const char *tftp_path, const char *bootfile,
+    struct in_addr vdhcp_start, struct in_addr vnameserver,
+    struct in6_addr vnameserver6, const char **vdnssearch);
 #endif
 
 #endif /* QEMU_NET_SLIRP_H */

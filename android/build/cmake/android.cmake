@@ -582,6 +582,11 @@ function(android_add_library)
 
   _register_target(${ARGN})
 
+
+  if (LINUX)
+      target_link_options(${build_TARGET} PRIVATE "LINKER:--build-id=sha1")
+  endif()
+
   target_sources(${build_TARGET} PRIVATE ${REGISTERED_SRC})
   target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
   if(WINDOWS_MSVC_X86_64 AND NOT ${build_TARGET} STREQUAL "msvc-posix-compat")
@@ -852,7 +857,9 @@ function(android_add_test)
     WORKING_DIRECTORY $<TARGET_FILE_DIR:${build_TARGET}>)
 
   # Let's not optimize our tests.
-  target_compile_options(${build_TARGET} PRIVATE -O0)
+  if (NOT WINDOWS_MSVC_X86_64)
+    target_compile_options(${build_TARGET} PRIVATE -O0)
+  endif()
   target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
 
   android_add_default_test_properties(${build_TARGET})
@@ -902,6 +909,11 @@ function(android_add_executable)
 
   add_executable(${build_TARGET} ${REGISTERED_SRC})
   target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
+
+  if (LINUX)
+      target_link_options(${build_TARGET} PRIVATE "LINKER:--build-id=sha1")
+  endif()
+
   # Clang on mac os does not get properly recognized by cmake
   if(NOT DARWIN_X86_64 AND NOT DARWIN_AARCH64)
     target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
@@ -935,12 +947,10 @@ endfunction()
 #
 # protofiles: The set of protofiles to be included.
 function(android_add_protobuf name protofiles)
-  protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
-  android_add_library(TARGET ${name} LICENSE Apache-2.0 SRC ${PROTO_HDRS}
-                                                            ${PROTO_SRCS})
-  target_link_libraries(${name} PUBLIC protobuf::libprotobuf)
-  target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-  android_clang_tidy(${name})
+  message(STATUS "This method is deprecated, please use protobuf_generate_with_plugin instead for target ${name}.")
+  android_add_library(TARGET ${name} LICENSE Apache-2.0)
+  protobuf_generate_with_plugin(TARGET ${name} PROTOS ${protofiles})
+  target_link_libraries(${name} PRIVATE libprotobuf)
 endfunction()
 
 function(protobuf_generate_with_plugin)
@@ -1621,7 +1631,7 @@ function(android_upload_symbols TGT)
       TARGET ${TGT}
       POST_BUILD
       COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
-      COMMAND sym_upload -p sym-upload-v2 -k ${BREAKPAD_API_KEY} ${SYM_SOURCE}
+      COMMAND sym_upload -p sym-upload-v2 -k ${BREAKPAD_API_KEY} ${DEST}
       ${BREAKPAD_API_URL} || exit 0
       COMMAND
       "${Python3_EXECUTABLE}"
