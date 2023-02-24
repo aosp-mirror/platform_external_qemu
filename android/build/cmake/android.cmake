@@ -582,6 +582,11 @@ function(android_add_library)
 
   _register_target(${ARGN})
 
+
+  if (LINUX)
+      target_link_options(${build_TARGET} PRIVATE "LINKER:--build-id=sha1")
+  endif()
+
   target_sources(${build_TARGET} PRIVATE ${REGISTERED_SRC})
   target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
   if(WINDOWS_MSVC_X86_64 AND NOT ${build_TARGET} STREQUAL "msvc-posix-compat")
@@ -902,6 +907,11 @@ function(android_add_executable)
 
   add_executable(${build_TARGET} ${REGISTERED_SRC})
   target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
+
+  if (LINUX)
+      target_link_options(${build_TARGET} PRIVATE "LINKER:--build-id=sha1")
+  endif()
+
   # Clang on mac os does not get properly recognized by cmake
   if(NOT DARWIN_X86_64 AND NOT DARWIN_AARCH64)
     target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
