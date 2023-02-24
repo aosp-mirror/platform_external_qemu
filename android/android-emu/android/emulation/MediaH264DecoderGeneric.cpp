@@ -23,7 +23,7 @@
 #include "host-common/MediaCudaDriverHelper.h"
 #include "host-common/MediaCudaVideoHelper.h"
 #else
-#include "android/emulation/MediaVideoToolBoxVideoHelper.h"
+#include "host-common/MediaVideoToolBoxVideoHelper.h"
 #endif
 
 #include <cstdint>
