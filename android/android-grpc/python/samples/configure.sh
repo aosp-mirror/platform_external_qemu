@@ -14,28 +14,21 @@
 # limitations under the License.
 if [ "${BASH_SOURCE-}" = "$0" ]; then
   echo "You must source this script: \$ source $0" >&2
-  echo "It will create a virtual environment in which emu-docker will be installed."
   exit 33
 fi
 
 PYTHON=python3
 PY_VER=$(PYTHON --version)
 
-write_local_pip_conf() {
-  cp ./cfg/pip.conf $VIRTUAL_ENV/pip.conf
-  cp ./cfg/pypirc $VIRTUAL_ENV/pypirc
-}
-
 echo "Using ${PYTHON} which is version ${PY_VER}"
-echo "Make sure you have devpi runninng on port 3141!"
+echo "Note: This expects you to be in the emu-master-dev emulator development branch!"
 
 if [ ! -f "./venv/bin/activate" ]; then
   $PYTHON -m venv .venv
-  write_local_pip_conf
 fi
 
 if [ -e ./.venv/bin/activate ]; then
   . ./.venv/bin/activate
-  pip install wheel ../aemu-grpc
+  pip install wheel ../aemu-grpc --index-url file://$PWD/../../../../../adt-infra/devpi/repo/simple
 fi
 
