@@ -305,6 +305,10 @@ public:
     virtual void setVsyncHz(int vsyncHz) = 0;
     virtual void setDisplayConfigs(int configId, int w, int h, int dpiX, int dpiY) = 0;
     virtual void setDisplayActiveConfig(int configId) = 0;
+
+    virtual const void* getEglDispatch() = 0;
+    virtual const void* getGles2Dispatch() = 0;
+
 protected:
     ~Renderer() = default;
 };

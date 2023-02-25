@@ -19,9 +19,12 @@
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
 
+#include "emugl/common/OpenGLDispatchLoader.h"
 #include "emugl/common/logging.h"
 #include "FenceSync.h"
 #include "FrameBuffer.h"
+#include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/DispatchTables.h"
 
 #include <algorithm>
 #include <utility>
@@ -102,6 +105,32 @@ RendererImpl::~RendererImpl() {
 bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl2egl) {
     if (android::base::System::get()->envGet("ANDROID_EMUGL_VERBOSE") == "1") {
         base_enable_verbose_logs();
+    }
+
+    // NOTE: vulkan-cereal initializes the following inside of FrameBuffer.
+
+    //
+    // Load EGL Plugin
+    //
+    if (!emugl::LazyLoadedEGLDispatch::get()) {
+        printf("Failed to init_egl_dispatch\n");
+        return false;
+    }
+
+    //
+    // Load GLES Plugin
+    //
+    if (!emugl::LazyLoadedGLESv1Dispatch::get()) {
+        ERR("Failed to gles1_dispatch_init\n");
+        return false;
+    }
+
+    //
+    // Load GLES 2 Plugin
+    //
+    if (!emugl::LazyLoadedGLESv2Dispatch::get()) {
+        ERR("Failed to gles2_dispatch_init\n");
+        return false;
     }
 
     if (mRenderWindow) {
@@ -737,6 +766,14 @@ void RendererImpl::setDisplayActiveConfig(int configId) {
     if (mRenderWindow) {
         mRenderWindow->setDisplayActiveConfig(configId);
     }
+}
+
+const void* RendererImpl::getEglDispatch() {
+    return &s_egl;
+}
+
+const void* RendererImpl::getGles2Dispatch() {
+    return &s_gles2;
 }
 
 }  // namespace emugl
