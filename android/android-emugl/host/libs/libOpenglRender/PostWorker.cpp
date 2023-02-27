@@ -53,12 +53,14 @@ PostWorker::PostWorker(
     mContext(eglContext),
     mSurface(eglSurface) {
 #ifdef _WIN32
-        const char* vendor;
-        const char* renderer;
-        const char* version;
-        mFb->getGLStrings(&vendor, &renderer, &version);
-        // nVidia GeForce specific bug, does not even repro with Quadro
-        m_b246917660workAround = strstr(renderer, "GeForce") != nullptr;
+        if (emugl::get_emugl_window_operations().hasWindow()) {
+            const char* vendor;
+            const char* renderer;
+            const char* version;
+            mFb->getGLStrings(&vendor, &renderer, &version);
+            // nVidia GeForce specific bug, does not even repro with Quadro
+            m_b246917660workAround = strstr(renderer, "GeForce") != nullptr;
+        }
 #endif
     }
 
