@@ -3246,6 +3246,10 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
         return;
     }
 
+    if (mBackingSurface == nullptr) {
+        return;
+    }
+
     const bool inputDeviceHasWheel =
             android::featurecontrol::isEnabled(
                     android::featurecontrol::VirtioMouse) ||
@@ -3277,23 +3281,20 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
             return;
         }
 #if QT_VERSION >= 0x060000
-        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
-                            event->position(), QPointF(0.0, 0.0));
-        mWheelScrollPos = event->position();
-        mWheelScrollTimer.start();
-        mWheelScrollPos.setY(mWheelScrollPos.y() +
-                                event->angleDelta().y() / 8);
-        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft,
-                            mWheelScrollPos, QPointF(0.0, 0.0));
+        // For most mice, 1 wheel click = 15 degrees
+        const int delta = event->angleDelta().y() * 120 / 15;
+        const auto pos = event->position();
 #else
-        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
-                            event->pos(), QPoint(0, 0));
-        mWheelScrollPos = event->pos();
-        mWheelScrollTimer.start();
-        mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft,
-                            mWheelScrollPos, QPoint(0, 0));
+        const int delta = event->delta();
+        const auto pos = event->pos();
 #endif  // QT_VERSION
+        // Scroll 1/9 of window height per a wheel click.
+        const int scaledDelta = mBackingSurface->h * delta / 120 / 9;
+        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, pos, {0, 0});
+        mWheelScrollPos = pos;
+        mWheelScrollTimer.start();
+        mWheelScrollPos.setY(mWheelScrollPos.y() + scaledDelta);
+        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos, {0, 0});
     }
 }
 
