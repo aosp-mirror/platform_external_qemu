@@ -1085,6 +1085,9 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
     }
 }
 void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
+    // The motion event will interfere with the swipe gesture being synthesized.
+    if (mWheelScrollTimer.isActive()) return;
+
     if (android::featurecontrol::isEnabled(
                 android::featurecontrol::VirtioMouse) &&
         !getConsoleAgents()
