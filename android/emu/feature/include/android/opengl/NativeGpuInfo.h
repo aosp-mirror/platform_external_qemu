@@ -19,3 +19,7 @@
 void getGpuInfoListNative(GpuInfoList*);
 
 bool isVulkanSafeToUseNative();
+
+#ifdef __APPLE__
+bool hasMetal();
+#endif
