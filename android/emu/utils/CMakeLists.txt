@@ -26,6 +26,9 @@ android_add_library(
       android/skin/rect.c
   DEPS android-emu-base android-emu-base-headers)
 target_include_directories(android-emu-utils PRIVATE src PUBLIC include)
+target_compile_definitions(android-emu-utils
+    PUBLIC "ANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
+    "ANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
 if(WINDOWS_MSVC_X86_64)
   target_link_libraries(android-emu-utils PRIVATE ws2_32::ws2_32
