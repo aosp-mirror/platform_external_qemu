@@ -98,6 +98,46 @@ std::string GpuInfoList::dump() const {
     return ss.str();
 }
 
+bool GpuInfoList::hasGpu() {
+    if (has_gpu_cached.has_value()) {
+        return has_gpu_cached.value();
+    }
+    if (infos.size() != 0) {
+        has_gpu_cached = true;
+        return true;
+    }
+#ifdef __linux__
+    // Linux doesn't really populate infos.
+    // b/68085265
+    auto version_string = System::get()
+        ->runCommandWithResult({"glxinfo"}, 5000);
+    if (version_string) {
+        const char* kVersionStringPrefix = "OpenGL version string:";
+        const int kVersionStringPrefixLength = strlen(kVersionStringPrefix);
+        const char* loc = version_string->c_str();
+        loc = strstr(loc, kVersionStringPrefix);
+        while (loc) {
+            loc += kVersionStringPrefixLength;
+            float version_number = 0;
+            sscanf(loc, "%f", &version_number);
+            if (version_number >= 2.0f) {
+                has_gpu_cached = true;
+                return true;
+            }
+            loc = strstr(loc, kVersionStringPrefix);
+        }
+    }
+#endif // __linux__
+
+#ifdef __APPLE__
+    // Our MacOS GPU list code does not work on M1
+    has_gpu_cached = hasMetal();
+    return has_gpu_cached.value();
+#endif // __APPLE__
+    has_gpu_cached = false;
+    return false;
+}
+
 void GpuInfoList::clear() {
     blacklist_status = false;
     Anglelist_status = false;

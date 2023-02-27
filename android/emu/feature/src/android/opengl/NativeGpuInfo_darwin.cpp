@@ -117,3 +117,7 @@ bool isVulkanSafeToUseNative() {
     return false;
 #endif
 }
+
+bool hasMetal() {
+    return hasMetalNative();
+}

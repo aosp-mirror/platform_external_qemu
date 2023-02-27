@@ -1061,23 +1061,40 @@ void teardownGlobalVkEmulation() {
 bool allocExternalMemory(VulkanDispatch* vk,
                          VkEmulation::ExternalMemoryInfo* info,
                          bool actuallyExternal,
-                         Optional<uint64_t> deviceAlignment) {
+                         Optional<uint64_t> deviceAlignment,
+                         Optional<VkImage> dedicatedImage,
+                         Optional<VkBuffer> dedicatedBuffer) {
     VkExportMemoryAllocateInfo exportAi = {
-        VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO, 0,
+            VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO,
+            0,
         VK_EXT_MEMORY_HANDLE_TYPE_BIT,
     };
+    bool dedicated = dedicatedImage || dedicatedBuffer;
 
-    VkExportMemoryAllocateInfo* exportAiPtr = nullptr;
+    VkMemoryDedicatedAllocateInfoKHR dedicated_memory_info = {
+            VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO_KHR,
+            NULL,
+            dedicatedImage ? dedicatedImage.value() : VK_NULL_HANDLE,
+            dedicatedBuffer? dedicatedBuffer.value(): VK_NULL_HANDLE,
+    };
 
-    if (sVkEmulation->deviceInfo.supportsExternalMemory &&
-        actuallyExternal) {
-        exportAiPtr = &exportAi;
+    void* pNext = nullptr;
+
+    if (sVkEmulation->deviceInfo.supportsExternalMemory && actuallyExternal) {
+        pNext = &exportAi;
+        if (dedicated) {
+            exportAi.pNext = &dedicated_memory_info;
+        }
+    } else if (dedicated) {
+        pNext = &dedicated_memory_info;
     }
 
-    info->actualSize = (info->size + 2 * kPageSize - 1) / kPageSize * kPageSize;
+    info->actualSize = dedicated ? info->size
+                                      : (info->size + 2 * kPageSize - 1) /
+                                                kPageSize * kPageSize;
     VkMemoryAllocateInfo allocInfo = {
             VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-            exportAiPtr,
+            pNext,
             info->actualSize,
             info->typeIndex,
     };
@@ -1549,8 +1566,25 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
         return false;
     }
 
-    vk->vkGetImageMemoryRequirements(sVkEmulation->device, res.image,
-                                     &res.memReqs);
+    bool use_dedicated = false;
+    if (vk->vkGetImageMemoryRequirements2KHR) {
+        VkMemoryDedicatedRequirements dedicated_reqs{
+                VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS, nullptr};
+        VkMemoryRequirements2 reqs{VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2,
+                                   &dedicated_reqs};
+
+        VkImageMemoryRequirementsInfo2 info{
+            VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2,
+            nullptr,
+            res.image
+        };
+        vk->vkGetImageMemoryRequirements2KHR(sVkEmulation->device, &info, &reqs);
+        use_dedicated = dedicated_reqs.prefersDedicatedAllocation;
+        res.memReqs = reqs.memoryRequirements;
+    } else {
+        vk->vkGetImageMemoryRequirements(sVkEmulation->device, res.image,
+                                        &res.memReqs);
+    }
 
     // Currently we only care about two memory properties: DEVICE_LOCAL
     // and HOST_VISIBLE; other memory properties specified in
@@ -1580,8 +1614,11 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     bool isHostVisible = memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
     Optional<uint64_t> deviceAlignment =
             isHostVisible ? Optional(res.memReqs.alignment) : kNullopt;
-    bool allocRes = allocExternalMemory(
-            vk, &res.memory, true /*actuallyExternal*/, deviceAlignment);
+    bool allocRes =
+            allocExternalMemory(vk, &res.memory, true /*actuallyExternal*/,
+                                deviceAlignment, 
+                                use_dedicated? 
+                                Optional<VkImage>(res.image): android::base::kNullopt);
 
     if (!allocRes) {
         LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
@@ -2225,8 +2262,27 @@ bool setupVkBuffer(uint32_t bufferHandle,
         return false;
     }
 
+
+    bool use_dedicated = false;
+    if (vk->vkGetImageMemoryRequirements2KHR) {
+        VkMemoryDedicatedRequirements dedicated_reqs{
+                VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS, nullptr};
+        VkMemoryRequirements2 reqs{VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2,
+                                   &dedicated_reqs};
+
+        VkBufferMemoryRequirementsInfo2 info{
+            VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2,
+            nullptr,
+            res.buffer
+        };
+        vk->vkGetBufferMemoryRequirements2KHR(sVkEmulation->device, &info, &reqs);
+        use_dedicated = dedicated_reqs.prefersDedicatedAllocation;
+        res.memReqs = reqs.memoryRequirements;
+    } else {
     vk->vkGetBufferMemoryRequirements(sVkEmulation->device, res.buffer,
                                       &res.memReqs);
+    }
+
 
     // Currently we only care about two memory properties: DEVICE_LOCAL
     // and HOST_VISIBLE; other memory properties specified in
@@ -2257,7 +2313,9 @@ bool setupVkBuffer(uint32_t bufferHandle,
     Optional<uint64_t> deviceAlignment =
             isHostVisible ? Optional(res.memReqs.alignment) : kNullopt;
     bool allocRes = allocExternalMemory(
-            vk, &res.memory, true /* actuallyExternal */, deviceAlignment);
+            vk, &res.memory, true /* actuallyExternal */, deviceAlignment,
+                android::base::kNullopt,
+                use_dedicated? Optional(res.buffer): android::base::kNullopt);
 
     if (!allocRes) {
         LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";

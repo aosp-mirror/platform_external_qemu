@@ -12,6 +12,7 @@
 
 #include "android/base/Compiler.h"
 
+#include <optional>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -95,6 +96,7 @@ public:
     GpuInfo& currGpu();
     std::string dump() const;
     void clear();
+    bool hasGpu();
 
     std::vector<GpuInfo> infos;
 
@@ -102,6 +104,7 @@ public:
     bool Anglelist_status = false;
     bool SyncBlacklist_status = false;
     bool VulkanBlacklist_status = false;
+    std::optional<bool> has_gpu_cached = {};
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(GpuInfoList);
 };
