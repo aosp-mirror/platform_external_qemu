@@ -1611,10 +1611,9 @@ endfunction()
 
 # Uploads the symbols to the breakpad crash server
 function(android_upload_symbols TGT)
-  if (NOT TARGET dump_syms)
-      # Likely a cross compile target without support for symbol dumping
-      message(STATUS "dump_syms is missing, no symbol dumping for ${TGT}")
-      return()
+  if (LINUX_AARCH64)
+    message(STATUS "No symbol support on linux arm")
+    return()
   endif()
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
   if(WIN32)
