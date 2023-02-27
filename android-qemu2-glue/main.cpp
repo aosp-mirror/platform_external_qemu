@@ -2761,12 +2761,12 @@ extern "C" int main(int argc, char** argv) {
                     "Activating netsim, but ignoring: %s until b/265451720 is resolved"
                     " reverting to auto discovery.",
                     opts->packet_streamer_endpoint);
-            args.addFormat("netsim,id=rootcanal");
+            args.addFormat("netsim,id=bluetooth,path=foo");
         } else {
             dwarning("Using *DEPRECATED* rootcanal bluetooth emulation.");
-            args.addFormat("rootcanal,id=rootcanal");
+            args.addFormat("rootcanal,id=bluetooth");
         }
-        args.add2("-device", "virtserialport,chardev=rootcanal,name=bluetooth");
+        args.add2("-device", "virtserialport,chardev=bluetooth,name=bluetooth");
     }
 
     if (feature_is_enabled(kFeature_ModemSimulator)) {

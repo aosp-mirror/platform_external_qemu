@@ -86,7 +86,9 @@ set(android-qemu2-glue_src
     qemu-setup-dns-servers.cpp
     qemu-setup.cpp
     qemu-rootcanal-agent-impl.cpp
-    netsim/qemu-netsim-agent-impl.cpp
+    netsim/BluetoothPacketProtocol.cpp
+    netsim/PacketStreamTransport.cpp
+    netsim/qemu-packet-stream-agent-impl.cpp
     qemu-telephony-agent-impl.c
     qemu-user-event-agent-impl.c
     qemu-virtual-scene-agent-impl.cpp
