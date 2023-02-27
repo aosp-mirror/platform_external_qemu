@@ -197,6 +197,8 @@ set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
 set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
 
 # Symbol extraction is not supported when cross compiling.
+set(ANDROID_SYMBOL_DIR ${CMAKE_BINARY_DIR}/build/symbols)
+file(MAKE_DIRECTORY ${ANDROID_SYMBOL_DIR})
 if(OPTION_CRASHUPLOAD STREQUAL "NONE")
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 else()
@@ -207,8 +209,6 @@ else()
     file(STRINGS "$ENV{HOME}/.emulator_symbol_server_key" BREAKPAD_API_KEY)
   endif()
   set(ANDROID_EXTRACT_SYMBOLS TRUE)
-  set(ANDROID_SYMBOL_DIR ${CMAKE_BINARY_DIR}/build/symbols)
-  file(MAKE_DIRECTORY ${ANDROID_SYMBOL_DIR})
   message(STATUS "Uploading symbols to ${BREAKPAD_API_URL}")
 endif()
 

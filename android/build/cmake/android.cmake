@@ -1611,33 +1611,58 @@ endfunction()
 
 # Uploads the symbols to the breakpad crash server
 function(android_upload_symbols TGT)
-  if(NOT ANDROID_EXTRACT_SYMBOLS)
-    return()
+  if (NOT TARGET dump_syms)
+      # Likely a cross compile target without support for symbol dumping
+      message(STATUS "dump_syms is missing, no symbol dumping for ${TGT}")
+      return()
   endif()
-
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
   if(WIN32)
-    add_custom_command(
-      TARGET ${TGT} POST_BUILD
-      COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
-      COMMAND sym_upload -p $<TARGET_FILE:${TGT}> ${BREAKPAD_API_URL} ${BREAKPAD_API_KEY}
-      COMMAND
-      "${Python3_EXECUTABLE}"
-      "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
-      "-o" "${ANDROID_SYMBOL_DIR}" "${DEST}"
-      COMMENT "Extracting symbols for ${TGT}" DEPENDS sym_upload dump_syms)
-  else()
     add_custom_command(
       TARGET ${TGT}
       POST_BUILD
       COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
-      COMMAND sym_upload -p sym-upload-v2 -k ${BREAKPAD_API_KEY} ${DEST}
-      ${BREAKPAD_API_URL} || exit 0
+      COMMAND sym_upload -p $<TARGET_FILE:${TGT}> ${BREAKPAD_API_URL}
+              ${BREAKPAD_API_KEY}
       COMMAND
-      "${Python3_EXECUTABLE}"
-      "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
-      "-o" "${ANDROID_SYMBOL_DIR}" "${DEST}"
+        "${Python_EXECUTABLE}"
+        "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
+        "-o" "${ANDROID_SYMBOL_DIR}" "${DEST}"
       COMMENT "Extracting symbols for ${TGT}" DEPENDS sym_upload dump_syms)
+
+    if(ANDROID_EXTRACT_SYMBOLS)
+      add_custom_command(
+        TARGET ${TGT} POST_BUILD COMMAND sym_upload -p $<TARGET_FILE:${TGT}>
+                                         ${BREAKPAD_API_URL} ${BREAKPAD_API_KEY}
+        COMMENT "Uploading symbols for ${TGT}" DEPENDS sym_upload)
+    endif()
+  else()
+    add_custom_command(
+      TARGET ${TGT} POST_BUILD COMMENT "Extracting symbols for ${TGT}" DEPENDS
+                                       dump_syms)
+    if(ANDROID_EXTRACT_SYMBOLS)
+      add_custom_command(
+        TARGET ${TGT}
+        POST_BUILD
+        COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
+        COMMAND sym_upload -p sym-upload-v2 -k ${BREAKPAD_API_KEY} ${DEST}
+                ${BREAKPAD_API_URL} || exit 0
+        COMMAND
+          "${Python_EXECUTABLE}"
+          "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
+          "-o" "${ANDROID_SYMBOL_DIR}" "${DEST}"
+        COMMENT "Uploading symbols for ${TGT}" DEPENDS sym_upload dump_syms)
+    else()
+      add_custom_command(
+        TARGET ${TGT}
+        POST_BUILD
+        COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
+        COMMAND
+          "${Python_EXECUTABLE}"
+          "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
+          "-o" "${ANDROID_SYMBOL_DIR}" "${DEST}"
+        COMMENT "Extracting symbols for ${TGT}" DEPENDS sym_upload dump_syms)
+    endif()
   endif()
 endfunction()
 
