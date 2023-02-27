@@ -96,6 +96,10 @@ public:
         }
 
         auto crashpad_info = dump.GetCrashpadInfo();
+        if (!crashpad_info) {
+            dwarning("Minidump crashpad info is not valid, ignoring.");
+            return false;
+        }
         auto module_annotations = crashpad_info->module_annotations();
         std::string hw_ini = "";
         for (const auto& annotation : module_annotations) {
