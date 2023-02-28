@@ -1,4 +1,4 @@
-ndroid_add_library(
+android_add_library(
   TARGET android-emu-utils
   # SHARED Used to test if you can compile this stand alone.
   LICENSE Apache-2.0
