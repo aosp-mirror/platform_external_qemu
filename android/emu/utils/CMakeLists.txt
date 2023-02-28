@@ -1,4 +1,4 @@
-android_add_library(
+ndroid_add_library(
   TARGET android-emu-utils
   # SHARED Used to test if you can compile this stand alone.
   LICENSE Apache-2.0
@@ -24,7 +24,7 @@ android_add_library(
       android/utils/utf8_utils.cpp
       android/utils/vector.c
       android/skin/rect.c
-  DEPS android-emu-base android-emu-base-headers)
+  DEPS android-emu-base)
 target_include_directories(android-emu-utils PRIVATE src PUBLIC include)
 target_compile_definitions(android-emu-utils
     PUBLIC "ANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
@@ -42,6 +42,5 @@ android_add_test(
       android/utils/host_bitness_unittest.cpp android/utils/path_unittest.cpp
       android/utils/Random_unittest.cpp android/utils/sockets_unittest.cpp android/skin/rect_unittest.cpp
   WINDOWS android/utils/win32_cmdline_quote_unittest.cpp
-  DEPS android-emu-base android-emu-base-headers android-emu-utils gtest gtest_main)
+  DEPS android-emu-base android-emu-utils gtest gtest_main)
 target_include_directories(android-emu-utils_unittests PRIVATE src)
-target_compile_options(android-emu-utils_unittests PRIVATE -Wno-extern-c-compat)
