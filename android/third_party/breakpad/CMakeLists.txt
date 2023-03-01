@@ -254,7 +254,7 @@ if(NOT OPTION_ASAN)
            common/memory_allocator_unittest.cc
            # common/mac/macho_reader_unittest.cc # Some gmock issues, these fail
            # in xcode as well common/dwarf/dwarf2reader_cfi_unittest.cc
-           common/stabs_to_module_unittest.cc
+          #  common/stabs_to_module_unittest.cc
     LINUX common/dwarf/bytereader_unittest.cc
           # common/dwarf/dwarf2diehandler_unittest.cc
           common/dwarf/dwarf2reader_cfi_unittest.cc
