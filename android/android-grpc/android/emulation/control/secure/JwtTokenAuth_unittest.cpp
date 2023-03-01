@@ -10,33 +10,34 @@
 // GNU General Public License for more details.
 #include "android/emulation/control/secure/JwtTokenAuth.h"
 
-#include <gtest/gtest.h>  // for SuiteApiResolver, Message
-#include <fstream>        // for ofstream, operator<<
-#include <memory>         // for unique_ptr, operator==
-#include <string>         // for char_traits, string
-#include <utility>        // for move
+#include <gtest/gtest.h>
+#include <fstream>
+#include <initializer_list>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include "absl/status/statusor.h"              // for StatusOr
-#include "aemu/base/files/PathUtils.h"      // for pj
-#include "android/base/system/System.h"        // for System
-#include "android/base/testing/TestEvent.h"    // for TestEvent
-#include "android/base/testing/TestTempDir.h"  // for TestTempDir
-#include "tink/config/tink_config.h"           // for TinkConfig
-#include "tink/jwt/jwk_set_converter.h"        // for JwkSetFromPublicKeyset...
-#include "tink/jwt/jwt_key_templates.h"        // for JwtEs512Template
-#include "tink/jwt/jwt_public_key_sign.h"      // for JwtPublicKeySign
-#include "tink/jwt/jwt_signature_config.h"     // for JwtSignatureRegister
-#include "tink/jwt/jwt_validator.h"            // for JwtValidator, JwtValid...
-#include "tink/jwt/raw_jwt.h"                  // for RawJwt, RawJwtBuilder
-#include "tink/keyset_handle.h"                // for KeysetHandle
-#include "tink/util/status.h"                  // for Status
-#include "tink/util/statusor.h"                // for StatusOr
-
-namespace crypto {
-namespace tink {
-class JwtPublicKeyVerify;
-}  // namespace tink
-}  // namespace crypto
+#include "absl/status/statusor.h"
+#include "absl/strings/string_view.h"
+#include "absl/time/clock.h"
+#include "absl/time/time.h"
+#include "aemu/base/files/PathUtils.h"
+#include "android/base/system/System.h"
+#include "android/base/testing/TestEvent.h"
+#include "android/base/testing/TestTempDir.h"
+#include "android/emulation/control/secure/BasicTokenAuth.h"
+#include "nlohmann/json.hpp"
+#include "tink/config/tink_config.h"
+#include "tink/jwt/jwk_set_converter.h"
+#include "tink/jwt/jwt_key_templates.h"
+#include "tink/jwt/jwt_public_key_sign.h"
+#include "tink/jwt/jwt_signature_config.h"
+#include "tink/jwt/jwt_validator.h"
+#include "tink/jwt/raw_jwt.h"
+#include "tink/keyset_handle.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace android {
 namespace emulation {
@@ -115,7 +116,6 @@ TEST_F(JwkTokenAuthTest, writes_a_discovery_file) {
     EXPECT_TRUE(base::System::get()->pathExists(discover_file));
 }
 
-
 TEST_F(JwkTokenAuthTest, discovery_file_contains_our_key) {
     auto private_handle = writeEs512("valid.jwk");
     auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
@@ -126,15 +126,17 @@ TEST_F(JwkTokenAuthTest, discovery_file_contains_our_key) {
 
     EXPECT_TRUE(base::System::get()->pathExists(discover_file));
     auto discoverd_json = readFile(discover_file);
-    auto discovered_handle = crypto::tink::JwkSetToPublicKeysetHandle(discoverd_json);
+    auto discovered_handle =
+            crypto::tink::JwkSetToPublicKeysetHandle(discoverd_json);
     auto public_handle = private_handle->GetPublicKeysetHandle();
 
     EXPECT_TRUE(discovered_handle.ok()) << public_handle.status().message();
-    auto ours = crypto::tink::JwkSetFromPublicKeysetHandle(*public_handle->get());
-    auto loaded = crypto::tink::JwkSetFromPublicKeysetHandle(*discovered_handle->get());
+    auto ours =
+            crypto::tink::JwkSetFromPublicKeysetHandle(*public_handle->get());
+    auto loaded = crypto::tink::JwkSetFromPublicKeysetHandle(
+            *discovered_handle->get());
     EXPECT_EQ(json::parse(ours.ValueOrDie()), json::parse(loaded.ValueOrDie()));
 }
-
 
 TEST_F(JwkTokenAuthTest, create_and_validate) {
     auto private_handle = writeEs512("valid.jwk");
@@ -178,7 +180,7 @@ TEST_F(JwkTokenAuthTest, reject_not_ready_yet) {
                            .SetIssuer("JwkTokenAuthTest")
                            .SetAudiences({"a", "b", "c"})
                            .SetExpiration(now + absl::Seconds(300))
-                           .SetIssuedAt(now  + absl::Seconds(30))
+                           .SetIssuedAt(now + absl::Seconds(30))
                            .Build();
 
     JwtTokenAuth jwt(mTempDir->path());
@@ -186,11 +188,53 @@ TEST_F(JwkTokenAuthTest, reject_not_ready_yet) {
     EXPECT_FALSE(jwt.isTokenValid("a", *token).ok());
 }
 
+TEST_F(JwkTokenAuthTest, message) {
+    absl::Time now = absl::Now();
+    auto private_handle = writeEs512("valid.jwk");
+    auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
+    auto raw_jwt = tink::RawJwtBuilder()
+                           .SetIssuer("JwkTokenAuthTest")
+                           .SetAudiences({"a", "b", "c"})
+                           .SetExpiration(now + absl::Seconds(300))
+                           .SetIssuedAt(now)
+                           .Build();
+
+    JwtTokenAuth jwt(mTempDir->path());
+    auto token = (*sign)->SignAndEncode(*raw_jwt);
+    auto message = std::string(jwt.isTokenValid("d/e/f", *token).message());
+    EXPECT_EQ(message, "Access denied, does you aud claim include: d/e/f ?");
+}
+
+TEST_F(JwkTokenAuthTest, any_message) {
+    absl::Time now = absl::Now();
+    auto private_handle = writeEs512("valid.jwk");
+    auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
+    auto raw_jwt = tink::RawJwtBuilder()
+                           .SetIssuer("JwkTokenAuthTest")
+                           .SetAudiences({"a", "b", "c"})
+                           .SetExpiration(now + absl::Seconds(300))
+                           .SetIssuedAt(now)
+                           .Build();
+
+    JwtTokenAuth jwt(mTempDir->path());
+    auto token = (*sign)->SignAndEncode(*raw_jwt);
+
+    auto anyauth = std::vector<std::unique_ptr<BasicTokenAuth>>();
+    anyauth.emplace_back(std::make_unique<StaticTokenAuth>("foo"));
+    anyauth.emplace_back(std::make_unique<JwtTokenAuth>(mTempDir->path()));
+
+    AnyTokenAuth any(std::move(anyauth));
+    auto message = std::string(any.isTokenValid("d/e/f", *token).message());
+    EXPECT_EQ(message,
+              "Validation failed: [\"Incorrect token\", \"Access denied, does "
+              "you aud claim include: d/e/f ?\", ]");
+}
+
 TEST_F(JwkTokenAuthTest, deleted_jwks_is_rejected) {
 #ifdef __APPLE__
     // There are some issues  on darwin around file deletion detection
     // that differes by OS version.
-     GTEST_SKIP();
+    GTEST_SKIP();
 #endif
     auto private_handle = writeEs512("valid.jwk");
     auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
@@ -198,12 +242,13 @@ TEST_F(JwkTokenAuthTest, deleted_jwks_is_rejected) {
     auto discover_file = pj(mTempDir->path(), "loaded.jwk");
 
     JwtTokenAuth jwt(mTempDir->path(), discover_file);
-    EXPECT_TRUE(base::System::get()->deleteFile(pj(mTempDir->path(), "valid.jwk")));
+    EXPECT_TRUE(
+            base::System::get()->deleteFile(pj(mTempDir->path(), "valid.jwk")));
 
-    // We have to wait until the discovery file becomes empty, indicating that the emulator
-    // activated a new keyset.
+    // We have to wait until the discovery file becomes empty, indicating that
+    // the emulator activated a new keyset.
     auto json = readFile(discover_file);
-    for(int i = 0; json != "" && i < 10; i++) {
+    for (int i = 0; json != "" && i < 10; i++) {
         base::System::get()->sleepMs(100);
         json = readFile(discover_file);
     }
