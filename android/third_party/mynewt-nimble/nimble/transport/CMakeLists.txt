@@ -30,8 +30,7 @@ target_link_libraries(
           android-emu-base-headers
           android-emu-base-logging
           android-emu-grpc-utils
-          frontend-grpc-lib
           grpc++
           packet-streamer-client-lib
-          protobuf::libprotobuf
-          packet-streamer-client-grpc-lib)
+          packet-streamer-proto-lib
+          protobuf::libprotobuf)
