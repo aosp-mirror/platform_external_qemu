@@ -143,7 +143,7 @@ private:
             return errmsg;
         }
         google_breakpad::SetPrintStream(fp);
-        google_breakpad::PrintProcessState(processState, true, lineResolver);
+        google_breakpad::PrintProcessState(processState, true, /*output_requesting_thread_only=*/false, lineResolver);
         crashpadInfo->Print(fp);
 
         fprintf(fp, "thread requested=%d\n", processState.requesting_thread());

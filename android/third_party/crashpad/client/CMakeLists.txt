@@ -50,6 +50,7 @@ android_add_test(
   DARWIN simulate_crash_mac_test.cc
   WINDOWS crashpad_client_win_test.cc)
 
+target_compile_options(crashpad_client_test PRIVATE -UNDEBUG)
 target_link_libraries(
   crashpad_client_test PRIVATE crashpad_client crashpad_test gmock
                                crashpad_googlemock_main)
