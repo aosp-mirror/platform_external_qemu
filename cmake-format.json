@@ -20,7 +20,15 @@
       "flags": [],
       "kwargs": {
         "SOURCE_DIR": "*",
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "OUTPUT_DIR": "*",
         "INCLUDES": "*",
         "LANG": "*",
@@ -46,7 +54,15 @@
       "flags": [],
       "kwargs": {
         "SOURCE_DIR": "*",
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "OUTPUT_DIR": "*",
         "GENERATED": "*"
       }
@@ -55,7 +71,15 @@
       "flags": [],
       "kwargs": {
         "PREFIX": "*",
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "OUT": "*"
       }
     },
@@ -63,13 +87,23 @@
       "flags": [],
       "kwargs": {
         "SOURCE_DIR": "*",
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "OUTPUT_DIR": "*",
         "GENERATED": "*"
       }
     },
     "protobuf_generate_with_plugin": {
-      "flags": ["APPEND_PATH"],
+      "flags": [
+        "APPEND_PATH"
+      ],
       "kwargs": {
         "EXPORT_MACRO": "*",
         "HEADERFILEEXTENSION": "*",
@@ -79,8 +113,24 @@
         "PLUGIN": "*",
         "PLUGINOUT": "*",
         "PROTOC_OUT_DIR": "*",
-        "PROTOPATH": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "PROTOS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "PROTOPATH": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "PROTOS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "TARGET": "*"
       }
     },
@@ -89,7 +139,15 @@
       "kwargs": {
         "SOURCE_DIR": "*",
         "INCLUDES": "*",
-        "SOURCES": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SOURCES": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "OUTPUT_DIR": "*",
         "GENERATED": "*"
       }
@@ -110,19 +168,75 @@
       ],
       "kwargs": {
         "TARGET": "*",
-        "ALIAS" : "*",
+        "ALIAS": "*",
         "LIBNAME": "*",
         "REPO": "*",
         "LICENSE": "*",
         "REPO_DIR": "*",
         "NOTICE": "*",
-        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "POSIX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "DEPS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "DARWIN": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "WINDOWS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "MSVC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "LINUX": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "POSIX": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "DEPS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "SRC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "SOURCE_DIR": "*",
         "WINDOWS_SOURCE_DIR": "*",
         "LINUX_SOURCE_DIR": "*",
@@ -140,11 +254,72 @@
         "LICENSE": "*",
         "REPO_DIR": "*",
         "NOTICE": "*",
-        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "POSIX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+        "DARWIN": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "LINUX": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "MSVC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "POSIX": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "SRC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        }
+      }
+    },
+    "android_target_link_libraries2": {
+      "flags": [
+        "DARWIN",
+        "WINDOWS",
+        "POSIX",
+        "LINUX"
+      ],
+      "kwargs": {
+        "TARGET": "*",
+        "PRIVATE": "*",
+        "PUBLIC": "*"
+      }
+    },
+    "android_upload_symbols": {
+      "kwargs": {
+        "TARGET": "*",
+        "API_KEY": "*",
+        "DIRECTORY": "*",
+        "URI": "*"
       }
     },
     "android_add_interface": {
@@ -176,19 +351,83 @@
     "android_add_test": {
       "flags": [],
       "kwargs": {
-        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "POSIX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "TEST_PARAMS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "DARWIN": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "LINUX": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "MSVC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "POSIX": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "TEST_PARAMS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "SOURCE_DIR": "*",
         "WINDOWS_SOURCE_DIR": "*",
         "LINUX_SOURCE_DIR": "*",
         "DARWIN_SOURCE_DIR": "*",
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "DEPS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "DEPS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "TARGET": "*",
-        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+        "WINDOWS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        }
       }
     },
     "android_build_qemu_variant": {
@@ -198,7 +437,15 @@
       "kwargs": {
         "EXE": "*",
         "CPU": "*",
-        "SOURCES": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SOURCES": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "DEFINITIONS": "*",
         "LIBRARIES": "*"
       }
@@ -249,13 +496,69 @@
         "LICENSE": "*",
         "REPO_DIR": "*",
         "NOTICE": "*",
-        "DEPS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "POSIX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+        "DEPS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "DARWIN": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "WINDOWS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "MSVC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "LINUX": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "POSIX": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "SRC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        }
       }
     },
     "tink_cc_library": {
@@ -264,8 +567,24 @@
       ],
       "kwargs": {
         "NAME": "*",
-        "SRCS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "DEPS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+        "SRCS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "DEPS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        }
       }
     },
     "tink_cc_test": {
@@ -274,9 +593,33 @@
       ],
       "kwargs": {
         "NAME": "*",
-        "SRCS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "DEPS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "DATA": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+        "SRCS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "DEPS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "DATA": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        }
       }
     }
   },

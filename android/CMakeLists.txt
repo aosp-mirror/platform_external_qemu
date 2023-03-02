@@ -1,8 +1,9 @@
 if(WINDOWS_MSVC_X86_64)
   add_subdirectory(msvc-posix-compat)
 endif()
-add_subdirectory(emu)
 add_subdirectory(third_party)
+
+add_subdirectory(emu)
 add_subdirectory(android-net)
 add_subdirectory(android-emu-base)
 add_subdirectory(android-emu)
