@@ -83,7 +83,6 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
         TEST_BEFORE_INSTALL True
         LOG_BUILD ON
         LOG_INSTALL ON
-        LOG_OUTPUT_ON_FAILURE ON
         INSTALL_COMMAND "")
     endif()
     set(${OUT_PATH} ${BUILD_PRODUCT} PARENT_SCOPE)
@@ -1619,9 +1618,6 @@ function(android_upload_symbols TGT)
     return()
   endif()
   set(ANDROID_SYMBOL_DIR ${CMAKE_BINARY_DIR}/build/symbols)
-  if (NOT EXISTS ${ANDROID_SYMBOL_DIR})
-    file(MAKE_DIRECTORY ${ANDROID_SYMBOL_DIR})
-  endif()
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
   if(WIN32)
     add_custom_command(
