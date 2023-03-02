@@ -194,26 +194,27 @@ if(FEATURE_NETSIM)
   add_subdirectory(mynewt-nimble)
 
   if(DARWIN_AARCH64 AND NOT TARGET Rust::Rustc AND OPTION_RUST)
-    message(STATUS "Cross compiling netsim to target Rosetta X86_64")
-    include(ExternalProject)
-    set(NETSIM_CROSS_DIR
-        ${ANDROID_CROSS_BUILD_DIRECTORY}/netsim_ext_cross/src/netsim_ext_cross-build/
-    )
-    externalproject_add(
-      netsim_ext_cross
-      PREFIX ${ANDROID_CROSS_BUILD_DIRECTORY}/netsim_ext_cross
-      DOWNLOAD_COMMAND ""
-      SOURCE_DIR ${AOSP_ROOT}/tools/netsim
-      CMAKE_ARGS
-        "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-darwin-x86_64.cmake"
-        "-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-      BUILD_BYPRODUCTS "${NETSIM_CROSS_DIR}/netsim;${NETSIM_CROSS_DIR}/netsimd"
-      LOG_BUILD TRUE
-      LOG_INSTALL TRUE
-      INSTALL_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-      INSTALL_COMMAND "")
-    install(PROGRAMS ${NETSIM_CROSS_DIR}/netsim ${NETSIM_CROSS_DIR}/netsimd
-            DESTINATION .)
+    # message(STATUS "Cross compiling netsim to target Rosetta X86_64")
+    # include(ExternalProject)
+    # set(NETSIM_CROSS_DIR
+    #     ${ANDROID_CROSS_BUILD_DIRECTORY}/netsim_ext_cross/src/netsim_ext_cross-build/
+    # )
+    message(WARNING "Netsim disabled until build bot issue is sorted b/271329265")
+    # externalproject_add(
+    #   netsim_ext_cross
+    #   PREFIX ${ANDROID_CROSS_BUILD_DIRECTORY}/netsim_ext_cross
+    #   DOWNLOAD_COMMAND ""
+    #   SOURCE_DIR ${AOSP_ROOT}/tools/netsim
+    #   CMAKE_ARGS
+    #     "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-darwin-x86_64.cmake"
+    #     "-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+    #   BUILD_BYPRODUCTS "${NETSIM_CROSS_DIR}/netsim;${NETSIM_CROSS_DIR}/netsimd"
+    #   LOG_BUILD TRUE
+    #   LOG_INSTALL TRUE
+    #   INSTALL_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+    #   INSTALL_COMMAND "")
+    # install(PROGRAMS ${NETSIM_CROSS_DIR}/netsim ${NETSIM_CROSS_DIR}/netsimd
+    #         DESTINATION .)
   endif()
 else()
   message(STATUS "Netsim is not enabled.")
