@@ -81,6 +81,8 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
           "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
         BUILD_BYPRODUCTS ${BUILD_PRODUCT}
         TEST_BEFORE_INSTALL True
+        LOG_BUILD ON
+        LOG_INSTALL ON
         INSTALL_COMMAND "")
     endif()
     set(${OUT_PATH} ${BUILD_PRODUCT} PARENT_SCOPE)
@@ -1615,6 +1617,7 @@ function(android_upload_symbols TGT)
     message(STATUS "No symbol support on linux arm")
     return()
   endif()
+  set(ANDROID_SYMBOL_DIR ${CMAKE_BINARY_DIR}/build/symbols)
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
   if(WIN32)
     add_custom_command(
