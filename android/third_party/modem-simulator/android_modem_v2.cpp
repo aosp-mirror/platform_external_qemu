@@ -62,6 +62,10 @@ void amodem_update_time(AModem modem) {
     s_modem->update_time(modem);
 }
 
+int amodem_update_phone_number(AModem modem, const char* number) {
+    return s_modem->set_phone_number(modem, number);
+}
+
 void amodem_set_data_registration_vx(AModem modem, ARegistrationState state) {
     s_modem->set_data_registration(modem, state);
 }

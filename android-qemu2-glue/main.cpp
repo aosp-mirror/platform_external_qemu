@@ -2793,7 +2793,8 @@ extern "C" int main(int argc, char** argv) {
             }
             int modem_simulator_guest_port =
                     cuttlefish::start_android_modem_simulator_detached(
-                            modem_simulator_port, isIpv4, std::move(timezone));
+                            modem_simulator_port, isIpv4, std::move(timezone),
+                            opts->phone_number);
 
             args.add("-device");
             args.add("virtio-serial,ioeventfd=off");

@@ -85,9 +85,9 @@
 #include "android/skin/rect.h"
 #include "android/skin/winsys.h"
 #include "android/telephony/gsm.h"
-#include "android/telephony/modem.h"
 #include "android/telephony/sms.h"
 #include "android/version.h"
+#include "android_modem_v2.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
 #include "host-common/FeatureControl.h"
@@ -1304,6 +1304,22 @@ public:
         }
         smspdu_free_list(pdus);
 
+        return Status::OK;
+    }
+
+    Status setPhoneNumber(ServerContext* context,
+                          const PhoneNumber* numberPtr,
+                          PhoneResponse* reply) override {
+        (void)context;
+        PhoneNumber number = *numberPtr;
+        auto modem = mAgents->telephony->getModem();
+        if (!modem) {
+            reply->set_response(PhoneResponse::ActionFailed);
+            return Status::OK;
+        }
+        if (amodem_update_phone_number(modem, number.number().c_str())) {
+            reply->set_response(PhoneResponse::BadNumber);
+        }
         return Status::OK;
     }
 

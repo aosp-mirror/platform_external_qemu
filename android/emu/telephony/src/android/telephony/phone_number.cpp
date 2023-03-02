@@ -76,6 +76,14 @@ public:
         return mPhoneNumberForSim;
     }
 
+    void set_phone_number(std::string number) {
+        mPhoneNumberPrefix = std::string(number, 0, number.size() - 4);
+        mPhoneNumber = number;
+        mPhoneNumberForSim = std::string(15, 'f');
+        std::copy(mPhoneNumber.begin(), mPhoneNumber.end(),
+                  mPhoneNumberForSim.begin());
+    }
+
 private:
     std::string mPhoneNumberPrefix;
     std::string mPhoneNumber;
@@ -97,4 +105,37 @@ const char* get_phone_number(int port) {
 const char* get_phone_number_for_sim(int port) {
     return android::sPhoneNumberContainer->get_phone_number_for_sim(port)
             .c_str();
+}
+
+int set_phone_number(const char* number) {
+    char phone_number[16];
+    int ret = validate_and_parse_phone_number(number, phone_number);
+    if (ret) {
+        return -1;
+    }
+    android::sPhoneNumberContainer->set_phone_number(number);
+    return 0;
+}
+
+int validate_and_parse_phone_number(const char* input, char* output) {
+    // phone number should be all decimal digits and '-' (dash) which will
+    // be ignored.
+    int i;
+    int j;
+    for (i = 0, j = 0; input[i] != '\0'; i++) {
+        if (input[i] == '-') {
+            continue;  // ignore the '-' character and continue.
+        } else if (!isdigit(input[i])) {
+            derror("Phone number should be all decimal digits\n");
+            return -1;
+        } else {
+            if (j == 15) {  // max possible MSISDN length
+                derror("length of phone_number should be at most 15");
+                return -1;
+            }
+            output[j++] = input[i];
+        }
+    }
+    output[j] = '\0';
+    return 0;
 }

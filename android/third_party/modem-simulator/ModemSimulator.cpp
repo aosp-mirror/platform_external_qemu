@@ -74,6 +74,11 @@ void ModemSimulator::update_time(AModem modem) {
     cuttlefish::update_time();
 }
 
+int ModemSimulator::set_phone_number(AModem modem, const char* number) {
+    (void)modem;
+    return cuttlefish::set_phone_number(number);
+}
+
 void ModemSimulator::set_data_registration(AModem modem,
                                            ARegistrationState state) {
     (void)modem;

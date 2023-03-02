@@ -188,6 +188,17 @@ void update_time() {
     s_msg_channel.send(mymsg);
 }
 
+int set_phone_number(std::string number) {
+    ModemMessage mymsg;
+    mymsg.type = MODEM_MSG_PHONE_NUMBER_UPDATE;
+    std::string ss("AT+REMOTEUPADATEPHONENUMBER: ");
+    ss += number;
+    ss += "\r";
+    mymsg.sdata = ss;
+    s_msg_channel.send(mymsg);
+    return 0;
+}
+
 void set_data_registration(int state) {
     ModemMessage mymsg;
     mymsg.type = MODEM_MSG_DATA_REG;
@@ -322,9 +333,10 @@ void process_msgs() {
             }
         } else if (msg.type == MODEM_MSG_CTEC || msg.type == MODEM_MSG_SIGNAL ||
                    msg.type == MODEM_MSG_DATA_REG ||
-                   msg.type == MODEM_MSG_TIME_UPDATE||
+                   msg.type == MODEM_MSG_TIME_UPDATE ||
                    msg.type == MODEM_MSG_RADIO_STATE ||
-                   msg.type == MODEM_MSG_VOICE_REG) {
+                   msg.type == MODEM_MSG_VOICE_REG ||
+                   msg.type == MODEM_MSG_PHONE_NUMBER_UPDATE) {
             if (!s_one_shot_monitor_sock->IsOpen()) {
                 s_one_shot_monitor_sock =
                         cuttlefish::SharedFD::SocketLocalClient(
@@ -445,7 +457,10 @@ struct MyThread {
 static MyThread s_mythread;
 
 // start with a given guest fd, and host fd
-int start_android_modem_simulator_detached(int modem_simulator_port, bool& isIpv4, const std::string& timezone) {
+int start_android_modem_simulator_detached(int modem_simulator_port,
+                                           bool& isIpv4,
+                                           const std::string& timezone,
+                                           const char* phone_number) {
     android_modem_version = 2;
 
     int actual_guest_server_port = start_android_modem_guest_server(modem_simulator_port, isIpv4);
@@ -467,8 +482,9 @@ int start_android_modem_simulator_detached(int modem_simulator_port, bool& isIpv
             }
             modem_simulator->Initialize(std::move(channel_monitor));
             modem_simulator->SetTimeZone(timezone);
+            if (phone_number)
+                modem_simulator->SetPhoneNumber(phone_number);
             modem_simulators.push_back(modem_simulator);
-
             modem_id++;
         }
     }
