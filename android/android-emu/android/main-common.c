@@ -1551,7 +1551,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     if (!opts->log_nofilter) {
         log_opts |= kLogEnableDuplicateFilter;
         dinfo("Duplicate loglines will be removed, if you wish to see each "
-              "indiviudal line launch with the -log-nofilter flag.");
+              "individual line launch with the -log-nofilter flag.");
     }
 
     if (opts->log_detailed || VERBOSE_CHECK(log)) {
