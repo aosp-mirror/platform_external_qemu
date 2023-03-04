@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.23)
 project(breakpad)
 
 if(NOT ANDROID_QEMU2_TOP_DIR)
+  # You are likely including this from outside qemu.
+  # TODO(jansene): We should just move this to breakpad itself.
   get_filename_component(ANDROID_QEMU2_TOP_DIR
                          "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
   get_filename_component(
@@ -12,15 +14,12 @@ if(NOT ANDROID_QEMU2_TOP_DIR)
   prebuilt(THREADS)
   set(CMAKE_CXX_STANDARD 17)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-endif()
 
-if(NOT TARGET gmock_main)
-  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/third_party/googletest
-                   googletest)
+  if(NOT TARGET gmock_main)
+    add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/third_party/googletest
+                     googletest)
+  endif()
 endif()
-
-# Unit tests please!
-enable_testing()
 
 # Location of the root of the breakpad source.
 set(BREAKPAD_SRC ${ANDROID_QEMU2_TOP_DIR}/../google-breakpad/src)
@@ -44,6 +43,7 @@ if(APPLE)
               HAVE_SYS_STAT_H
               HAVE_SYS_TYPES_H
               HAVE_UNISTD_H
+              HAVE_MACH_O_NLIST_H
               _THREAD_SAFE
               STDC_HEADERS)
   target_compile_options(
@@ -129,8 +129,6 @@ android_add_library(
 target_compile_features(breakpad_disasm PRIVATE cxx_std_17)
 android_target_compile_options(breakpad_disasm windows
                                PRIVATE -Wno-int-to-void-pointer-cast)
-android_target_compile_definitions(breakpad_disasm windows PRIVATE UNICODE
-                                                                   _UNICODE)
 target_link_libraries(breakpad_disasm PRIVATE breakpad_compiler_config)
 
 android_add_library(
@@ -202,7 +200,6 @@ android_add_library(
          common/mac/dump_syms.cc
          common/mac/file_id.cc
          common/mac/GTMLogger.m
-         common/mac/HTTPMultipartUpload.m
          common/mac/MachIPC.mm
          common/mac/macho_id.cc
          common/mac/macho_reader.cc
@@ -216,24 +213,20 @@ target_compile_features(breakpad_common PRIVATE cxx_std_17)
 target_include_directories(breakpad_common PUBLIC ${BREAKPAD_SRC})
 target_link_libraries(breakpad_common PRIVATE breakpad_compiler_config zlib)
 
-android_target_compile_definitions(breakpad_common darwin
-                                   PUBLIC -DHAVE_MACH_O_NLIST_H)
+android_target_link_libraries2(
+  TARGET breakpad_common DARWIN PRIVATE "-framework Foundation"
+                                        "-framework CoreFoundation")
 
 if(LINUX)
   target_include_directories(breakpad_common
                              PUBLIC ${ANDROID_QEMU2_TOP_DIR}/android)
-  target_compile_definitions(breakpad_common PUBLIC -DHAVE_A_OUT_H)
   target_link_libraries(breakpad_common PRIVATE dl)
 endif()
 
-if(WINDOWS_MSVC_X86_64)
-  target_compile_definitions(breakpad_common
-                             PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
-  target_link_libraries(breakpad_common PRIVATE atls::atls)
-  target_link_libraries(
-    breakpad_common PRIVATE wininet::wininet diaguids::diaguids
-                            dbghelp::dbghelp imagehlp::imagehlp)
-endif()
+android_target_link_libraries2(
+  TARGET breakpad_common WINDOWS
+  PRIVATE wininet::wininet diaguids::diaguids atls::atls dbghelp::dbghelp
+          imagehlp::imagehlp)
 
 # ASAN does not play nice with breakpad tests
 if(NOT OPTION_ASAN)
@@ -254,7 +247,7 @@ if(NOT OPTION_ASAN)
            common/memory_allocator_unittest.cc
            # common/mac/macho_reader_unittest.cc # Some gmock issues, these fail
            # in xcode as well common/dwarf/dwarf2reader_cfi_unittest.cc
-          #  common/stabs_to_module_unittest.cc
+           # common/stabs_to_module_unittest.cc
     LINUX common/dwarf/bytereader_unittest.cc
           # common/dwarf/dwarf2diehandler_unittest.cc
           common/dwarf/dwarf2reader_cfi_unittest.cc
@@ -278,14 +271,8 @@ if(NOT OPTION_ASAN)
   target_link_libraries(
     breakpad_common_unittests PRIVATE breakpad_common gmock_main
                                       breakpad_compiler_config)
-  android_target_link_libraries(breakpad_common_unittests windows
-                                PRIVATE diaguids::diaguids)
-  android_target_compile_definitions(breakpad_common_unittests windows
-                                     PRIVATE UNICODE _UNICODE)
-  android_target_compile_definitions(breakpad_common_unittests linux
-                                     PUBLIC -DHAVE_A_OUT_H)
-  android_target_compile_definitions(breakpad_common_unittests darwin
-                                     PUBLIC -DHAVE_MACH_O_NLIST_H)
+  android_target_link_libraries2(TARGET breakpad_common_unittests WINDOWS
+                                 PRIVATE diaguids::diaguids)
 endif()
 
 android_add_library(
@@ -352,8 +339,6 @@ target_compile_definitions(breakpad_processor
                            PRIVATE BPLOG_MINIMUM_SEVERITY=SEVERITY_CRITICAL)
 android_target_compile_definitions(
   breakpad_processor linux PRIVATE "O_TMPFILE=(020000000 | O_DIRECTORY)")
-android_target_compile_definitions(breakpad_processor darwin
-                                   PUBLIC HAVE_MACH_O_NLIST_H)
 
 function(add_proc_test name)
   if(CROSSCOMPILE)
@@ -397,18 +382,16 @@ endif()
 if(NOT WINDOWS_MSVC_X86_64)
   android_add_executable(TARGET minidump_dump NODISTRIBUTE
                          SRC ${BREAKPAD_SRC}/processor/minidump_dump.cc)
-  android_install_as_debug_info(minidump_dump)
   set_property(TARGET minidump_dump PROPERTY CXX_STANDARD 17)
   target_link_libraries(minidump_dump PRIVATE breakpad_processor)
 
   android_add_executable(TARGET minidump_stackwalk NODISTRIBUTE
                          SRC ${BREAKPAD_SRC}/processor/minidump_stackwalk.cc)
-  android_install_as_debug_info(minidump_stackwalk)
   set_property(TARGET minidump_stackwalk PROPERTY CXX_STANDARD 17)
   target_link_libraries(minidump_stackwalk PRIVATE breakpad_processor
                                                    breakpad_common)
 endif()
-#
+
 # dump_syms
 if(NOT LINUX_AARCH64)
   android_add_executable(
@@ -421,18 +404,10 @@ if(NOT LINUX_AARCH64)
   android_install_as_debug_info(dump_syms)
   set_property(TARGET dump_syms PROPERTY CXX_STANDARD 17)
   target_link_libraries(dump_syms PRIVATE breakpad_common)
-  android_target_link_libraries(dump_syms windows_msvc-x86_64
-                                PRIVATE shell32::shell32 diaguids::diaguids)
-  if(ANDROID_HOST_TAG STREQUAL "windows_msvc-x86_64")
-    android_target_link_libraries(dump_syms windows_msvc-x86_64
-                                  PRIVATE atls::atls)
-  endif()
-  android_target_compile_definitions(dump_syms linux-x86_64
-                                     PUBLIC -DHAVE_A_OUT_H)
-  android_target_compile_definitions(dump_syms linux-aarch64
-                                     PUBLIC -DHAVE_A_OUT_H)
-  android_target_compile_definitions(dump_syms darwin-x86_64
-                                     PUBLIC -DHAVE_MACH_O_NLIST_H)
+  android_target_link_libraries2(
+    TARGET dump_syms WINDOWS PRIVATE shell32::shell32 diaguids::diaguids
+                                     atls::atls)
+
   #
   # Symupload
   android_add_executable(
@@ -443,7 +418,7 @@ if(NOT LINUX_AARCH64)
           tools/linux/symupload/sym_upload.cc
     DARWIN common/mac/encoding_util.m
            common/mac/HTTPGetRequest.m
-           common/mac/HTTPMultipartUpload.m;
+           common/mac/HTTPMultipartUpload.m
            common/mac/HTTPPutRequest.m
            common/mac/HTTPRequest.m
            common/mac/HTTPSimplePostRequest.m
@@ -459,16 +434,10 @@ if(NOT LINUX_AARCH64)
   # it on due to the mincore dependency. the mincore dependency will bring in
   # Api-ms- win-core-version-l1-1-0.dll which may not be available on every
   # windows version.
-  android_target_link_libraries(
-    sym_upload windows PRIVATE dbghelp::dbghelp diaguids::diaguids
-                               mincore::mincore)
-  android_target_link_libraries(
-    sym_upload darwin PRIVATE "-framework Foundation"
-                              "-framework CoreFoundation")
-  android_target_compile_definitions(sym_upload linux PUBLIC -DHAVE_A_OUT_H)
-  android_target_compile_definitions(sym_upload darwin
-                                     PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0)
-  android_target_compile_definitions(sym_upload windows PRIVATE UNICODE
-                                                                _UNICODE)
-  android_install_as_debug_info(sym_upload)
+  android_target_link_libraries2(
+    TARGET sym_upload WINDOWS PRIVATE dbghelp::dbghelp diaguids::diaguids
+                                      mincore::mincore)
+  android_target_link_libraries2(
+    TARGET sym_upload DARWIN PRIVATE "-framework Foundation"
+                                     "-framework CoreFoundation")
 endif()
