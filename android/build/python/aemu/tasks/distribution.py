@@ -49,7 +49,7 @@ class DistributionTask(BuildTask):
                 # Look for all files under {out}/build/debug_info/
                 ("{build_dir}/build/debug_info", r".*"),
             ],
-            "sdk-repo-{target}-breakpad-symbols-{sdk_build_number}.zip": [
+            "sdk-repo-{target}-emulator-symbols-{sdk_build_number}.zip": [
                 # Look for all files under {out}/build/debug_info/ with the .sym extension
                 ("{build_dir}/build/symbols", r".*sym"),
             ],

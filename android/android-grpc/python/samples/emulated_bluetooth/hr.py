@@ -191,8 +191,9 @@ def start_server():
 
 def main():
     logging.basicConfig(level=logging.INFO)
+    logging.warning("This might require you to run the emulator with the `-packet-streamer-endpoint default` flag.")
     register()
 
 
 if __name__ == "__main__":
-    main
+    main()

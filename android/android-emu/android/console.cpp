@@ -4441,6 +4441,18 @@ static int do_set_virtualscene_image(ControlClient client, char* args) {
     return -1;
 }
 
+static int do_set_phone_number(ControlClient client, char* args) {
+    if (args) {
+        if (amodem_update_phone_number(android_modem_get(), args)) {
+            control_write(client, "KO: Failed to set phone number: %s\n", args);
+            return -1;
+        }
+        return 0;
+    }
+    control_write(client, "KO usage: \"phonenumber <gsm-formatted number>\"\n");
+    return -1;
+}
+
 /* NOTE: The names of all commands are listed when the 'help' command
  *       is received.
  *       Android Studio uses the 'help' command and requires that the
@@ -4592,8 +4604,12 @@ extern const CommandDefRec main_commands[] = {
          "If path-to-image is void, restore default image.\n",
          NULL, do_set_virtualscene_image, NULL},
 
-        {"proxy", "manage network proxy server settings", NULL,
-         NULL, NULL, proxy_commands},
+        {"proxy", "manage network proxy server settings", NULL, NULL, NULL,
+         proxy_commands},
+
+        {"phonenumber", "set phone number for the device",
+         "Usage: phonenumber <gsm-formatted number>.\n", NULL,
+         do_set_phone_number, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 

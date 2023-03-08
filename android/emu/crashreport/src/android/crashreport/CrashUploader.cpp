@@ -140,7 +140,7 @@ bool PrintMinidumpProcess(const Options& options) {
         PrintProcessStateMachineReadable(process_state);
     } else {
         PrintProcessState(process_state, options.output_stack_contents,
-                          &resolver);
+                          /*output_requesting_thread_only=*/false, &resolver);
     }
 
     return true;
@@ -332,7 +332,7 @@ UploadResult UploadReport(const CrashReportDatabase::UploadReport* report,
 void ProcessPendingReport(std::shared_ptr<CrashReportDatabase> database_,
                           const CrashReportDatabase::Report& report) {
 #ifdef __APPLE__
-     crashpad::RecordFileLimitAnnotation();
+    crashpad::RecordFileLimitAnnotation();
 #endif
 
     std::unique_ptr<const CrashReportDatabase::UploadReport> upload_report;

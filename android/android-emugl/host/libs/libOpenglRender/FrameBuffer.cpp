@@ -3255,7 +3255,7 @@ const ProcessResources* FrameBuffer::getProcessResources(uint64_t puid) {
     AutoLock mutex(m_lock);
     auto i = m_procOwnedResources.find(puid);
     if (i == m_procOwnedResources.end()) {
-        ERR("Failed to find process owned resources for puid %" PRIu64 ".", puid);
+        GL_LOG("Failed to find process owned resources for puid %" PRIu64 ".", puid);
         return nullptr;
     }
     return i->second.get();

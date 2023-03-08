@@ -102,6 +102,9 @@ service EmulatorController {
     // Sends an sms message to the emulator.
     rpc sendSms(SmsMessage) returns (PhoneResponse) {}
 
+    // Sends an sms message to the emulator.
+    rpc setPhoneNumber(PhoneNumber) returns (PhoneResponse) {}
+
     // Retrieve the status of the emulator. This will contain general
     // hardware information, and whether the device has booted or not.
     rpc getStatus(google.protobuf.Empty) returns (EmulatorStatus) {}
@@ -1259,4 +1262,13 @@ message Posture {
         POSTURE_MAX = 6;
     }
     PostureValue value = 3;
+}
+
+message PhoneNumber {
+    //
+    // The phone number should be a valid GSM-formatted number as specified by
+    // 3GPP 23.040 Sec 9.1.2.5.
+    //
+    // For example: +3106225412 or (650) 555-1221
+    string number = 1;
 }

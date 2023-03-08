@@ -59,7 +59,10 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/emulator",
       "args": [
-        "@T",
+        "@33",
+        "-no-snapshot",
+        "-packet-streamer-endpoint",
+        "default"
       ],
       "cwd": "${workspaceFolder}/build",
       "stopAtEntry": false,

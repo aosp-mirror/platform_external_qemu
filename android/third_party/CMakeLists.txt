@@ -1,4 +1,5 @@
 add_subdirectory(googletest)
+add_subdirectory(breakpad)
 android_add_library(
   TARGET emulator-tinyobjloader
   LIBNAME
@@ -75,7 +76,6 @@ add_subdirectory(libkeymaster3)
 add_subdirectory(ext4_utils)
 add_subdirectory(google-benchmark)
 add_subdirectory(mksdcard)
-add_subdirectory(breakpad)
 add_subdirectory(boringssl)
 add_subdirectory(hostapd)
 add_subdirectory(tink)
@@ -207,9 +207,14 @@ if(FEATURE_NETSIM)
       CMAKE_ARGS
         "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-darwin-x86_64.cmake"
         "-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+        "-DBREAKPAD_API_KEY=${BREAKPAD_API_KEY}"
+        "-DBREAKPAD_API_URL=${BREAKPAD_API_URL}"
+        "-DANDROID_SYMBOL_DIR=${ANDROID_SYMBOL_DIR}"
+        "-DPython_EXECUTABLE=${Python_EXECUTABLE}"
       BUILD_BYPRODUCTS "${NETSIM_CROSS_DIR}/netsim;${NETSIM_CROSS_DIR}/netsimd"
       LOG_BUILD TRUE
       LOG_INSTALL TRUE
+      LOG_OUTPUT_ON_FAILURE TRUE
       INSTALL_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
       INSTALL_COMMAND "")
     install(PROGRAMS ${NETSIM_CROSS_DIR}/netsim ${NETSIM_CROSS_DIR}/netsimd

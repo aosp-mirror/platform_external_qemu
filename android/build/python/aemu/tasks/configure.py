@@ -15,6 +15,7 @@ import logging
 import os
 import platform
 import shutil
+import sys
 from pathlib import Path
 from typing import List
 
@@ -85,7 +86,10 @@ class ConfigureTask(BuildTask):
 
         self.add_option(
             "CMAKE_TOOLCHAIN_FILE", self.toolchain.cmake_toolchain()
-        ).add_option("OPTION_SDK_TOOLS_BUILD_NUMBER", build_number)
+        ).add_option("OPTION_SDK_TOOLS_BUILD_NUMBER", build_number).add_option(
+            "Python_EXECUTABLE", sys.executable
+        )
+
         if webengine:
             self.with_webengine()
 

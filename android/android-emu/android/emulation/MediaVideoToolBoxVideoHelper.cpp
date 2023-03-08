@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/MediaVideoToolBoxVideoHelper.h"
-#include "android/emulation/MediaVideoToolBoxUtils.h"
+#include "host-common/MediaVideoToolBoxUtils.h"
+#include "host-common/MediaVideoToolBoxVideoHelper.h"
 #include "host-common/YuvConverter.h"
 #include "android/utils/debug.h"
 

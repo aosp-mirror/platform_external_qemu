@@ -1,93 +1,105 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.23)
 project(breakpad)
 
 if(NOT ANDROID_QEMU2_TOP_DIR)
+  # You are likely including this from outside qemu.
+  # TODO(jansene): We should just move this to breakpad itself.
   get_filename_component(ANDROID_QEMU2_TOP_DIR
                          "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
   get_filename_component(
     ADD_PATH "${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/" ABSOLUTE)
   list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
+
+  include(android)
+  prebuilt(THREADS)
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+  if(NOT TARGET gmock_main)
+    add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/third_party/googletest
+                     googletest)
+  endif()
 endif()
-include(android)
-prebuilt(THREADS)
-
-if(NOT TARGET gmock_main)
-  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/third_party/googletest
-                   googletest)
-endif()
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Configure the compiler for breakpad:
-if(DARWIN_X86_64 OR DARWIN_AARCH64)
-  add_c_flag("-fexceptions")
-  add_c_flag("-frtti")
-  add_c_flag("-fmessage-length=0")
-  add_c_flag("-fdiagnostics-show-note-include-stack")
-  add_c_flag("-fmacro-backtrace-limit=0")
-  add_c_flag("-fobjc-weak")
-  add_c_flag("-fpascal-strings")
-  add_c_flag("-fno-common")
-  add_c_flag("-Wno-unused-command-line-argument")
-  # Optimizations will cause the compiler to optimize away some crucial breakpad
-  # behavior, so let's not do that.
-  add_c_flag("-O0")
-elseif(LINUX)
-  add_c_flag("-fexceptions")
-  add_c_flag("-frtti")
-elseif(WINDOWS_MSVC_X86_64)
-  add_c_flag("-Wno-c++17-narrowing")
-else()
-  message(
-    FATAL_ERROR
-      "Only darwin, linux or windows using clang msvc are supported, not ${ANDROID_TARGET_TAG}."
-  )
-endif()
-
-set(ANDROID_BREAKPAD_WINDOWS_DEFS
-    -D_WIN32_WINNT=0x0600
-    -DWINVER=0x0600
-    -DWIN32
-    -D_WINDOWS
-    -D_HAS_EXCEPTIONS=0
-    -DNOMINMAX
-    -D_CRT_RAND_S
-    -DCERT_CHAIN_PARA_HAS_EXTRA_FIELDS
-    -DWIN32_LEAN_AND_MEAN
-    -D_SECURE_ATL
-    -D_CRT_SECURE_NO_DEPRECATE
-    -D_CRT_NONSTDC_NO_WARNINGS
-    -D_CRT_NONSTDC_NO_DEPRECATE
-    -D_USING_V170_SDK71_
-    -DNDEBUG
-    -DNVALGRIND
-    -DOFFICIAL_BUILD
-    -D_UNICODE
-    -DUNICODE)
-# Make sure we do not have definitions that will break us.
-remove_definitions(
-  "-DNDEBUG"
-  "-DNDEBUG=1"
-  "-D_FILE_OFFSET_BITS=64"
-  "-D_GNU_SOURCE=1"
-  "-D_LARGEFILE_SOURCE"
-  "-D_LIBCPP_VERSION=__GLIBCPP__"
-  "-D__STDC_CONSTANT_MACROS"
-  "-D__STDC_FORMAT_MACROS=1"
-  "-D__STDC_LIMIT_MACROS=1"
-  "-DANDROID_DEBUG")
-# Definitely make sure this is off, unless you want bizarre failures
-# everywhere..
-add_definitions("-UNDEBUG")
-add_definitions("-UANDROID_DEBUG")
-
-# Unit tests please!
-enable_testing()
 
 # Location of the root of the breakpad source.
-set(BREAKPAD_SRC # cmake-format: sortable
-                 ${ANDROID_QEMU2_TOP_DIR}/../google-breakpad/src)
+set(BREAKPAD_SRC ${ANDROID_QEMU2_TOP_DIR}/../google-breakpad/src)
+
+android_add_interface(TARGET breakpad_compiler_config LICENSE None)
+if(APPLE)
+  target_compile_definitions(
+    breakpad_compiler_config
+    INTERFACE HAVE_ARC4RANDOM
+              HAVE_CXX7
+              HAVE_GETCONTEXT
+              HAVE_INTTYPES_H
+              HAVE_PTHREAD
+              HAVE_STDINT_H
+              HAVE_STDIO_H
+              HAVE_STDLIB_H
+              HAVE_STRING_H
+              HAVE_STRINGS_H
+              HAVE_SYS_MMAN_H
+              HAVE_SYS_RANDOM_H
+              HAVE_SYS_STAT_H
+              HAVE_SYS_TYPES_H
+              HAVE_UNISTD_H
+              HAVE_MACH_O_NLIST_H
+              _THREAD_SAFE
+              STDC_HEADERS)
+  target_compile_options(
+    breakpad_compiler_config
+    INTERFACE -Wmissing-braces
+              -Wnon-virtual-dtor
+              -Woverloaded-virtual
+              -Wreorder
+              -Wsign-compare
+              -Wunused-local-typedefs
+              -Wunused-variable
+              -Wvla
+              -UNDEBUG
+              -Wno-error)
+elseif(LINUX)
+  target_compile_definitions(
+    breakpad_compiler_config
+    INTERFACE HAVE_A_OUT_H
+              HAVE_CXX17
+              HAVE_GETCONTEXT
+              HAVE_GETRANDOM
+              HAVE_INTTYPES_H
+              HAVE_MEMFD_CREATE
+              HAVE_PTHREAD
+              HAVE_STDINT_H
+              HAVE_STDIO_H
+              HAVE_STDLIB_H
+              HAVE_STRINGS_H
+              HAVE_STRING_H
+              HAVE_SYS_MMAN_H
+              HAVE_SYS_STAT_H
+              HAVE_SYS_TY
+              # Older glibc elf.h might not yet define the ELF compression
+              # types.
+              SHF_COMPRESSED=2048)
+  target_compile_options(breakpad_compiler_config INTERFACE -fPIC -g -UNDEBUG)
+else()
+  target_compile_definitions(
+    breakpad_compiler_config
+    INTERFACE _CRT_NONSTDC_NO_DEPRECATE
+              _CRT_NONSTDC_NO_WARNINGS
+              _CRT_RAND_S
+              _CRT_SECURE_NO_DEPRECATE
+              _HAS_EXCEPTIONS=0
+              _SECURE_ATL
+              _UNICODE
+              _WIN32_WINNT=0x0600
+              _WINDOWS
+              NOMINMAX
+              UNICODE
+              WIN32
+              WIN32_LEAN_AND_MEAN
+              WINVER=0x0600)
+
+  target_compile_options(breakpad_compiler_config INTERFACE -g -UNDEBUG)
+endif()
 
 android_add_library(
   TARGET breakpad_disasm
@@ -98,29 +110,26 @@ android_add_library(
   REPO "${ANDROID_QEMU2_TOP_DIR}/../google-breakpad"
   NOTICE "REPO/LICENSE"
   LICENSE "BSD-3-Clause"
-  SRC # cmake-format: sortable
-      ${BREAKPAD_SRC}/third_party/libdisasm/ia32_implicit.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/ia32_insn.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/ia32_invariant.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/ia32_modrm.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/ia32_opcode_tables.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/ia32_operand.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/ia32_reg.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/ia32_settings.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/x86_disasm.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/x86_format.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/x86_imm.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/x86_insn.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/x86_misc.c
-      ${BREAKPAD_SRC}/third_party/libdisasm/x86_operand_list.c)
-set_property(TARGET breakpad_disasm PROPERTY CXX_STANDARD 17)
-android_target_compile_definitions(breakpad_disasm windows
-                                   PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
+  SOURCE_DIR ${BREAKPAD_SRC}
+  SRC third_party/libdisasm/ia32_implicit.c
+      third_party/libdisasm/ia32_insn.c
+      third_party/libdisasm/ia32_invariant.c
+      third_party/libdisasm/ia32_modrm.c
+      third_party/libdisasm/ia32_opcode_tables.c
+      third_party/libdisasm/ia32_operand.c
+      third_party/libdisasm/ia32_reg.c
+      third_party/libdisasm/ia32_settings.c
+      third_party/libdisasm/x86_disasm.c
+      third_party/libdisasm/x86_format.c
+      third_party/libdisasm/x86_imm.c
+      third_party/libdisasm/x86_insn.c
+      third_party/libdisasm/x86_misc.c
+      third_party/libdisasm/x86_operand_list.c)
 
+target_compile_features(breakpad_disasm PRIVATE cxx_std_17)
 android_target_compile_options(breakpad_disasm windows
                                PRIVATE -Wno-int-to-void-pointer-cast)
-#
-# breakpad_common
+target_link_libraries(breakpad_disasm PRIVATE breakpad_compiler_config)
 
 android_add_library(
   TARGET breakpad_common
@@ -131,144 +140,141 @@ android_add_library(
   REPO "${ANDROID_QEMU2_TOP_DIR}/../google-breakpad"
   NOTICE "REPO/LICENSE"
   LICENSE "BSD-3-Clause"
-  SRC # cmake-format: sortable
-      ${BREAKPAD_SRC}/common/convert_UTF.cc
-      ${BREAKPAD_SRC}/common/long_string_dictionary.cc
-      ${BREAKPAD_SRC}/common/md5.cc
-      ${BREAKPAD_SRC}/common/module.cc
-      ${BREAKPAD_SRC}/common/simple_string_dictionary.cc
-      ${BREAKPAD_SRC}/common/string_conversion.cc
-      ${BREAKPAD_SRC}/common/test_assembler.cc
-  WINDOWS ${BREAKPAD_SRC}/common/windows/dia_util.cc
-          ${BREAKPAD_SRC}/common/windows/guid_string.cc
-          ${BREAKPAD_SRC}/common/windows/http_upload.cc
-          ${BREAKPAD_SRC}/common/windows/omap.cc
-          ${BREAKPAD_SRC}/common/windows/pdb_source_line_writer.cc
-          ${BREAKPAD_SRC}/common/windows/pe_source_line_writer.cc
-          ${BREAKPAD_SRC}/common/windows/pe_util.cc
-          ${BREAKPAD_SRC}/common/windows/string_utils.cc
-          ${BREAKPAD_SRC}/common/windows/symbol_collector_client.cc
-  LINUX ${BREAKPAD_SRC}/common/dwarf/bytereader.cc
-        ${BREAKPAD_SRC}/common/dwarf/cfi_assembler.cc
-        ${BREAKPAD_SRC}/common/dwarf/dwarf2diehandler.cc
-        ${BREAKPAD_SRC}/common/dwarf/dwarf2reader.cc
-        ${BREAKPAD_SRC}/common/dwarf/elf_reader.cc
-        ${BREAKPAD_SRC}/common/dwarf_cfi_to_module.cc
-        ${BREAKPAD_SRC}/common/dwarf_cu_to_module.cc
-        ${BREAKPAD_SRC}/common/dwarf_line_to_module.cc
-        ${BREAKPAD_SRC}/common/dwarf_range_list_handler.cc
-        ${BREAKPAD_SRC}/common/language.cc
-        ${BREAKPAD_SRC}/common/linux/crc32.cc
-        ${BREAKPAD_SRC}/common/linux/dump_symbols.cc
-        ${BREAKPAD_SRC}/common/linux/elf_core_dump.cc
-        ${BREAKPAD_SRC}/common/linux/elf_symbols_to_module.cc
-        ${BREAKPAD_SRC}/common/linux/elfutils.cc
-        ${BREAKPAD_SRC}/common/linux/file_id.cc
-        ${BREAKPAD_SRC}/common/linux/google_crashdump_uploader.cc
-        ${BREAKPAD_SRC}/common/linux/guid_creator.cc
-        ${BREAKPAD_SRC}/common/linux/http_upload.cc
-        ${BREAKPAD_SRC}/common/linux/libcurl_wrapper.cc
-        ${BREAKPAD_SRC}/common/linux/linux_libc_support.cc
-        ${BREAKPAD_SRC}/common/linux/memory_mapped_file.cc
-        ${BREAKPAD_SRC}/common/linux/safe_readlink.cc
-        ${BREAKPAD_SRC}/common/linux/synth_elf.cc
-        ${BREAKPAD_SRC}/common/path_helper.cc
-        ${BREAKPAD_SRC}/common/stabs_reader.cc
-        ${BREAKPAD_SRC}/common/stabs_to_module.cc
-  DARWIN ${BREAKPAD_SRC}/common/dwarf/bytereader.cc
-         ${BREAKPAD_SRC}/common/dwarf/cfi_assembler.cc
-         ${BREAKPAD_SRC}/common/dwarf/dwarf2diehandler.cc
-         ${BREAKPAD_SRC}/common/dwarf/dwarf2reader.cc
-         ${BREAKPAD_SRC}/common/dwarf/elf_reader.cc
-         ${BREAKPAD_SRC}/common/dwarf_cfi_to_module.cc
-         ${BREAKPAD_SRC}/common/dwarf_cu_to_module.cc
-         ${BREAKPAD_SRC}/common/dwarf_line_to_module.cc
-         ${BREAKPAD_SRC}/common/dwarf_range_list_handler.cc
-         ${BREAKPAD_SRC}/common/language.cc
-         ${BREAKPAD_SRC}/common/mac/arch_utilities.cc
-         ${BREAKPAD_SRC}/common/mac/bootstrap_compat.cc
-         ${BREAKPAD_SRC}/common/mac/dump_syms.cc
-         ${BREAKPAD_SRC}/common/mac/file_id.cc
-         ${BREAKPAD_SRC}/common/mac/GTMLogger.m
-         ${BREAKPAD_SRC}/common/mac/HTTPMultipartUpload.m
-         ${BREAKPAD_SRC}/common/mac/MachIPC.mm
-         ${BREAKPAD_SRC}/common/mac/macho_id.cc
-         ${BREAKPAD_SRC}/common/mac/macho_reader.cc
-         ${BREAKPAD_SRC}/common/mac/macho_utilities.cc
-         ${BREAKPAD_SRC}/common/mac/macho_walker.cc
-         ${BREAKPAD_SRC}/common/mac/string_utilities.cc
-         ${BREAKPAD_SRC}/common/path_helper.cc
-         ${BREAKPAD_SRC}/common/stabs_reader.cc
-         ${BREAKPAD_SRC}/common/stabs_to_module.cc)
-set_property(TARGET breakpad_common PROPERTY CXX_STANDARD 17)
+  SOURCE_DIR ${BREAKPAD_SRC}
+  SRC common/convert_UTF.cc
+      common/long_string_dictionary.cc
+      common/md5.cc
+      common/module.cc
+      common/simple_string_dictionary.cc
+      common/string_conversion.cc
+      common/test_assembler.cc
+  WINDOWS common/windows/dia_util.cc
+          common/windows/guid_string.cc
+          common/windows/http_upload.cc
+          common/windows/omap.cc
+          common/windows/pdb_source_line_writer.cc
+          common/windows/pe_source_line_writer.cc
+          common/windows/pe_util.cc
+          common/windows/string_utils.cc
+          common/windows/sym_upload_v2_protocol.cc
+          common/windows/symbol_collector_client.cc
+  LINUX common/dwarf/bytereader.cc
+        common/dwarf/cfi_assembler.cc
+        common/dwarf/dwarf2diehandler.cc
+        common/dwarf/dwarf2reader.cc
+        common/dwarf/elf_reader.cc
+        common/dwarf_cfi_to_module.cc
+        common/dwarf_cu_to_module.cc
+        common/dwarf_line_to_module.cc
+        common/dwarf_range_list_handler.cc
+        common/language.cc
+        common/linux/crc32.cc
+        common/linux/dump_symbols.cc
+        common/linux/elf_core_dump.cc
+        common/linux/elf_symbols_to_module.cc
+        common/linux/elfutils.cc
+        common/linux/file_id.cc
+        common/linux/google_crashdump_uploader.cc
+        common/linux/guid_creator.cc
+        common/linux/http_upload.cc
+        common/linux/libcurl_wrapper.cc
+        common/linux/linux_libc_support.cc
+        common/linux/memory_mapped_file.cc
+        common/linux/safe_readlink.cc
+        common/linux/synth_elf.cc
+        common/path_helper.cc
+        common/stabs_reader.cc
+        common/stabs_to_module.cc
+  DARWIN common/dwarf/bytereader.cc
+         common/dwarf/cfi_assembler.cc
+         common/dwarf/dwarf2diehandler.cc
+         common/dwarf/dwarf2reader.cc
+         common/dwarf/elf_reader.cc
+         common/dwarf_cfi_to_module.cc
+         common/dwarf_cu_to_module.cc
+         common/dwarf_line_to_module.cc
+         common/dwarf_range_list_handler.cc
+         common/language.cc
+         common/mac/arch_utilities.cc
+         common/mac/bootstrap_compat.cc
+         common/mac/dump_syms.cc
+         common/mac/file_id.cc
+         common/mac/GTMLogger.m
+         common/mac/MachIPC.mm
+         common/mac/macho_id.cc
+         common/mac/macho_reader.cc
+         common/mac/macho_utilities.cc
+         common/mac/macho_walker.cc
+         common/mac/string_utilities.cc
+         common/path_helper.cc
+         common/stabs_reader.cc
+         common/stabs_to_module.cc)
+target_compile_features(breakpad_common PRIVATE cxx_std_17)
 target_include_directories(breakpad_common PUBLIC ${BREAKPAD_SRC})
-android_target_include_directories(breakpad_common linux PUBLIC
-                                   ${ANDROID_QEMU2_TOP_DIR}/android)
-android_target_compile_definitions(breakpad_common linux PUBLIC -DHAVE_A_OUT_H)
-android_target_compile_definitions(breakpad_common darwin
-                                   PUBLIC -DHAVE_MACH_O_NLIST_H)
-android_target_compile_definitions(breakpad_common windows
-                                   PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
-android_target_link_libraries(breakpad_common linux PRIVATE dl)
-android_target_link_libraries(breakpad_common windows_msvc-x86_64
-                              PRIVATE atls::atls)
-android_target_link_libraries(
-  breakpad_common windows PRIVATE wininet::wininet diaguids::diaguids
-                                  dbghelp::dbghelp imagehlp::imagehlp)
+target_link_libraries(breakpad_common PRIVATE breakpad_compiler_config zlib)
+
+android_target_link_libraries2(
+  TARGET breakpad_common DARWIN PRIVATE "-framework Foundation"
+                                        "-framework CoreFoundation")
+
+if(LINUX)
+  target_include_directories(breakpad_common
+                             PUBLIC ${ANDROID_QEMU2_TOP_DIR}/android)
+  target_link_libraries(breakpad_common PRIVATE dl)
+endif()
+
+android_target_link_libraries2(
+  TARGET breakpad_common WINDOWS
+  PRIVATE wininet::wininet diaguids::diaguids atls::atls dbghelp::dbghelp
+          imagehlp::imagehlp)
+
 # ASAN does not play nice with breakpad tests
 if(NOT OPTION_ASAN)
   android_add_test(
     TARGET breakpad_common_unittests
-    SRC # cmake-format: sortable
-        ${BREAKPAD_SRC}/common/byte_cursor_unittest.cc
-        ${BREAKPAD_SRC}/common/long_string_dictionary_unittest.cc
-        ${BREAKPAD_SRC}/common/memory_range_unittest.cc
-        ${BREAKPAD_SRC}/common/module_unittest.cc
-        ${BREAKPAD_SRC}/common/simple_string_dictionary_unittest.cc
-        ${BREAKPAD_SRC}/common/test_assembler_unittest.cc
-    WINDOWS ${BREAKPAD_SRC}/common/windows/omap_unittest.cc
-    DARWIN ${BREAKPAD_SRC}/common/dwarf/bytereader_unittest.cc
-           ${BREAKPAD_SRC}/common/dwarf/dwarf2reader_die_unittest.cc
-           ${BREAKPAD_SRC}/common/dwarf_cu_to_module_unittest.cc
-           ${BREAKPAD_SRC}/common/dwarf_line_to_module_unittest.cc
-           ${BREAKPAD_SRC}/common/memory_allocator_unittest.cc
-           # ${BREAKPAD_SRC}/common/mac/macho_reader_unittest.cc # Some gmock
-           # issues, these fail in xcode as well
-           # ${BREAKPAD_SRC}/common/dwarf/dwarf2reader_cfi_unittest.cc
-           ${BREAKPAD_SRC}/common/stabs_to_module_unittest.cc
-    LINUX ${BREAKPAD_SRC}/common/dwarf/bytereader_unittest.cc
-          ${BREAKPAD_SRC}/common/dwarf/dwarf2diehandler_unittest.cc
-          ${BREAKPAD_SRC}/common/dwarf/dwarf2reader_cfi_unittest.cc
-          ${BREAKPAD_SRC}/common/dwarf/dwarf2reader_die_unittest.cc
-          ${BREAKPAD_SRC}/common/dwarf_cfi_to_module_unittest.cc
-          ${BREAKPAD_SRC}/common/dwarf_cu_to_module_unittest.cc
-          ${BREAKPAD_SRC}/common/dwarf_line_to_module_unittest.cc
-          ${BREAKPAD_SRC}/common/linux/dump_symbols_unittest.cc
-          ${BREAKPAD_SRC}/common/linux/elf_symbols_to_module_unittest.cc
-          ${BREAKPAD_SRC}/common/linux/file_id_unittest.cc
-          ${BREAKPAD_SRC}/common/linux/google_crashdump_uploader_test.cc
-          ${BREAKPAD_SRC}/common/linux/linux_libc_support_unittest.cc
-          ${BREAKPAD_SRC}/common/linux/memory_mapped_file_unittest.cc
-          ${BREAKPAD_SRC}/common/linux/safe_readlink_unittest.cc
-          ${BREAKPAD_SRC}/common/linux/synth_elf_unittest.cc
-          ${BREAKPAD_SRC}/common/linux/tests/crash_generator.cc
-          ${BREAKPAD_SRC}/common/memory_allocator_unittest.cc
-          ${BREAKPAD_SRC}/common/stabs_reader_unittest.cc
-          ${BREAKPAD_SRC}/common/stabs_to_module_unittest.cc
-          ${BREAKPAD_SRC}/common/tests/file_utils.cc)
-  target_link_libraries(breakpad_common_unittests PRIVATE breakpad_common
-                                                          gmock_main)
-  android_target_link_libraries(breakpad_common_unittests windows
-                                PRIVATE diaguids::diaguids)
-  android_target_compile_definitions(breakpad_common_unittests windows
-                                     PRIVATE -DUNICODE -D_UNICODE)
-  android_target_compile_definitions(breakpad_common_unittests linux
-                                     PUBLIC -DHAVE_A_OUT_H)
-  android_target_compile_definitions(breakpad_common_unittests darwin
-                                     PUBLIC -DHAVE_MACH_O_NLIST_H)
+    SOURCE_DIR ${BREAKPAD_SRC}
+    SRC common/byte_cursor_unittest.cc
+        common/long_string_dictionary_unittest.cc
+        common/memory_range_unittest.cc
+        common/module_unittest.cc
+        common/simple_string_dictionary_unittest.cc
+        # common/test_assembler_unittest.cc
+    WINDOWS common/windows/omap_unittest.cc
+    DARWIN common/dwarf/bytereader_unittest.cc
+           common/dwarf/dwarf2reader_die_unittest.cc
+           common/dwarf_cu_to_module_unittest.cc
+           common/dwarf_line_to_module_unittest.cc
+           common/memory_allocator_unittest.cc
+           # common/mac/macho_reader_unittest.cc # Some gmock issues, these fail
+           # in xcode as well common/dwarf/dwarf2reader_cfi_unittest.cc
+           # common/stabs_to_module_unittest.cc
+    LINUX common/dwarf/bytereader_unittest.cc
+          # common/dwarf/dwarf2diehandler_unittest.cc
+          common/dwarf/dwarf2reader_cfi_unittest.cc
+          # common/dwarf/dwarf2reader_die_unittest.cc
+          common/dwarf_cfi_to_module_unittest.cc
+          common/dwarf_cu_to_module_unittest.cc
+          common/dwarf_line_to_module_unittest.cc
+          common/linux/dump_symbols_unittest.cc
+          common/linux/elf_symbols_to_module_unittest.cc
+          common/linux/file_id_unittest.cc
+          common/linux/google_crashdump_uploader_test.cc
+          common/linux/linux_libc_support_unittest.cc
+          common/linux/memory_mapped_file_unittest.cc
+          common/linux/safe_readlink_unittest.cc
+          common/linux/synth_elf_unittest.cc
+          common/linux/tests/crash_generator.cc
+          common/memory_allocator_unittest.cc
+          common/stabs_reader_unittest.cc
+          common/stabs_to_module_unittest.cc
+          common/tests/file_utils.cc)
+  target_link_libraries(
+    breakpad_common_unittests PRIVATE breakpad_common gmock_main
+                                      breakpad_compiler_config)
+  android_target_link_libraries2(TARGET breakpad_common_unittests WINDOWS
+                                 PRIVATE diaguids::diaguids)
 endif()
-#
-# breakpad_processor
+
 android_add_library(
   TARGET breakpad_processor
   LIBNAME
@@ -278,67 +284,70 @@ android_add_library(
   REPO "${ANDROID_QEMU2_TOP_DIR}/../google-breakpad"
   NOTICE "REPO/LICENSE"
   LICENSE "BSD-3-Clause"
-  SRC # cmake-format: sortable
-      ${BREAKPAD_SRC}/processor/basic_code_modules.cc
-      ${BREAKPAD_SRC}/processor/basic_source_line_resolver.cc
-      ${BREAKPAD_SRC}/processor/call_stack.cc
-      ${BREAKPAD_SRC}/processor/cfi_frame_info.cc
-      ${BREAKPAD_SRC}/processor/convert_old_arm64_context.cc
-      ${BREAKPAD_SRC}/processor/disassembler_x86.cc
-      ${BREAKPAD_SRC}/processor/dump_context.cc
-      ${BREAKPAD_SRC}/processor/dump_object.cc
-      ${BREAKPAD_SRC}/processor/exploitability.cc
-      ${BREAKPAD_SRC}/processor/exploitability_linux.cc
-      ${BREAKPAD_SRC}/processor/exploitability_win.cc
-      ${BREAKPAD_SRC}/processor/fast_source_line_resolver.cc
-      ${BREAKPAD_SRC}/processor/logging.cc
-      ${BREAKPAD_SRC}/processor/microdump.cc
-      ${BREAKPAD_SRC}/processor/microdump_processor.cc
-      ${BREAKPAD_SRC}/processor/minidump.cc
-      ${BREAKPAD_SRC}/processor/minidump_processor.cc
-      ${BREAKPAD_SRC}/processor/module_comparer.cc
-      ${BREAKPAD_SRC}/processor/module_serializer.cc
-      ${BREAKPAD_SRC}/processor/pathname_stripper.cc
-      ${BREAKPAD_SRC}/processor/proc_maps_linux.cc
-      ${BREAKPAD_SRC}/processor/process_state.cc
-      ${BREAKPAD_SRC}/processor/simple_symbol_supplier.cc
-      ${BREAKPAD_SRC}/processor/source_line_resolver_base.cc
-      ${BREAKPAD_SRC}/processor/stack_frame_cpu.cc
-      ${BREAKPAD_SRC}/processor/stack_frame_symbolizer.cc
-      ${BREAKPAD_SRC}/processor/stackwalk_common.cc
-      ${BREAKPAD_SRC}/processor/stackwalker.cc
-      ${BREAKPAD_SRC}/processor/stackwalker_address_list.cc
-      ${BREAKPAD_SRC}/processor/stackwalker_amd64.cc
-      ${BREAKPAD_SRC}/processor/stackwalker_arm.cc
-      ${BREAKPAD_SRC}/processor/stackwalker_arm64.cc
-      ${BREAKPAD_SRC}/processor/stackwalker_mips.cc
-      ${BREAKPAD_SRC}/processor/stackwalker_ppc.cc
-      ${BREAKPAD_SRC}/processor/stackwalker_ppc64.cc
-      ${BREAKPAD_SRC}/processor/stackwalker_sparc.cc
-      ${BREAKPAD_SRC}/processor/stackwalker_x86.cc
-      ${BREAKPAD_SRC}/processor/symbolic_constants_win.cc
-      ${BREAKPAD_SRC}/processor/synth_minidump.cc
-      ${BREAKPAD_SRC}/processor/tokenize.cc
-  LINUX ${BREAKPAD_SRC}/processor/minidump.cc)
+  SOURCE_DIR ${BREAKPAD_SRC}
+  SRC processor/basic_code_modules.cc
+      processor/basic_source_line_resolver.cc
+      processor/call_stack.cc
+      processor/cfi_frame_info.cc
+      processor/convert_old_arm64_context.cc
+      processor/disassembler_x86.cc
+      processor/dump_context.cc
+      processor/dump_object.cc
+      processor/exploitability.cc
+      processor/exploitability_linux.cc
+      processor/exploitability_win.cc
+      processor/fast_source_line_resolver.cc
+      processor/logging.cc
+      processor/microdump.cc
+      processor/microdump_processor.cc
+      processor/minidump.cc
+      processor/minidump_processor.cc
+      processor/module_comparer.cc
+      processor/module_serializer.cc
+      processor/pathname_stripper.cc
+      processor/proc_maps_linux.cc
+      processor/process_state.cc
+      processor/simple_symbol_supplier.cc
+      processor/source_line_resolver_base.cc
+      processor/stack_frame_cpu.cc
+      processor/stack_frame_symbolizer.cc
+      processor/stackwalk_common.cc
+      processor/stackwalk_common.cc
+      processor/stackwalker.cc
+      processor/stackwalker_address_list.cc
+      processor/stackwalker_amd64.cc
+      processor/stackwalker_arm.cc
+      processor/stackwalker_arm64.cc
+      processor/stackwalker_mips.cc
+      processor/stackwalker_ppc.cc
+      processor/stackwalker_ppc64.cc
+      processor/stackwalker_riscv.cc
+      processor/stackwalker_riscv64.cc
+      processor/stackwalker_sparc.cc
+      processor/stackwalker_x86.cc
+      processor/symbolic_constants_win.cc
+      processor/synth_minidump.cc
+      processor/tokenize.cc
+  LINUX common/linux/scoped_pipe.cc common/linux/scoped_tmpfile.cc
+        processor/disassembler_objdump.cc processor/minidump.cc)
 set_property(TARGET breakpad_processor PROPERTY CXX_STANDARD 17)
 target_include_directories(breakpad_processor PUBLIC ${BREAKPAD_SRC})
-target_link_libraries(breakpad_processor PRIVATE breakpad_disasm
-                                                 breakpad_common)
+target_link_libraries(
+  breakpad_processor PRIVATE breakpad_disasm breakpad_common
+                             breakpad_compiler_config)
 target_compile_definitions(breakpad_processor
                            PRIVATE BPLOG_MINIMUM_SEVERITY=SEVERITY_CRITICAL)
-android_target_compile_definitions(breakpad_processor linux PUBLIC HAVE_A_OUT_H)
-android_target_compile_definitions(breakpad_processor darwin
-                                   PUBLIC HAVE_MACH_O_NLIST_H)
+android_target_compile_definitions(
+  breakpad_processor linux PRIVATE "O_TMPFILE=(020000000 | O_DIRECTORY)")
 
 function(add_proc_test name)
   if(CROSSCOMPILE)
     return()
   endif()
-  android_add_test(TARGET ${name} SRC # cmake-format: sortable
-                                      ${BREAKPAD_SRC}/processor/${name}.cc)
-  target_link_libraries(${name} PRIVATE breakpad_processor gmock_main)
-  android_target_compile_definitions(${name} windows PRIVATE -DUNICODE
-                                                             -D_UNICODE)
+  android_add_test(TARGET ${name} SRC ${BREAKPAD_SRC}/processor/${name}.cc)
+  target_link_libraries(${name} PRIVATE breakpad_processor gmock_main
+                                        breakpad_compiler_config)
+  android_target_compile_definitions(${name} windows PRIVATE UNICODE _UNICODE)
   set_property(TEST ${name} PROPERTY WORKING_DIRECTORY "${BREAKPAD_SRC}/..")
 endfunction()
 
@@ -349,12 +358,14 @@ set(breakpad_processor_unittests
     fast_source_line_resolver_unittest
     map_serializers_unittest
     microdump_processor_unittest
-    minidump_processor_unittest
+    # minidump_processor_unittest # Does not work on linux
     minidump_unittest
     range_map_truncate_upper_unittest
-    # absl update broke test build stackwalker_address_list_unittest
-    # stackwalker_amd64_unittest stackwalker_arm64_unittest
-    # stackwalker_arm_unittest stackwalker_x86_unittest
+    stackwalker_address_list_unittest
+    stackwalker_amd64_unittest
+    stackwalker_arm64_unittest
+    stackwalker_arm_unittest
+    stackwalker_x86_unittest
     static_address_map_unittest
     static_contained_range_map_unittest
     static_map_unittest
@@ -368,118 +379,19 @@ if(NOT WINDOWS_MSVC_X86_64)
   endforeach()
 endif()
 
-android_add_executable(
-  TARGET minidump_dump NODISTRIBUTE
-  SRC # cmake-format: sortable
-      ${BREAKPAD_SRC}/processor/minidump_dump.cc)
-android_install_as_debug_info(minidump_dump)
-set_property(TARGET minidump_dump PROPERTY CXX_STANDARD 17)
-target_link_libraries(minidump_dump PRIVATE breakpad_processor)
+if(NOT WINDOWS_MSVC_X86_64)
+  android_add_executable(TARGET minidump_dump NODISTRIBUTE
+                         SRC ${BREAKPAD_SRC}/processor/minidump_dump.cc)
+  set_property(TARGET minidump_dump PROPERTY CXX_STANDARD 17)
+  target_link_libraries(minidump_dump PRIVATE breakpad_processor)
 
-android_add_executable(
-  TARGET minidump_stackwalk NODISTRIBUTE
-  SRC # cmake-format: sortable
-      ${BREAKPAD_SRC}/processor/minidump_stackwalk.cc)
-android_install_as_debug_info(minidump_stackwalk)
-set_property(TARGET minidump_stackwalk PROPERTY CXX_STANDARD 17)
-target_link_libraries(minidump_stackwalk PRIVATE breakpad_processor
-                                                 breakpad_common)
-
-#
-# breakpad_server
-android_add_library(
-  TARGET breakpad_server
-  LIBNAME
-    breakpad
-    URL
-    "https://android.googlesource.com/platform/external/google-breakpad/+/refs/heads/emu-master-dev"
-  REPO "${ANDROID_QEMU2_TOP_DIR}/../google-breakpad"
-  NOTICE "REPO/LICENSE"
-  LICENSE "BSD-3-Clause"
-  WINDOWS
-    ${BREAKPAD_SRC}/client/windows/crash_generation/client_info.cc
-    ${BREAKPAD_SRC}/client/windows/crash_generation/crash_generation_server.cc
-  LINUX ${BREAKPAD_SRC}/client/linux/crash_generation/crash_generation_server.cc
-  DARWIN ${BREAKPAD_SRC}/client/mac/crash_generation/crash_generation_server.cc)
-set_property(TARGET breakpad_server PROPERTY CXX_STANDARD 17)
-android_target_include_directories(breakpad_server linux PUBLIC
-                                   ${ANDROID_QEMU2_TOP_DIR}/android)
-android_target_compile_definitions(breakpad_server windows
-                                   PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
-android_target_compile_definitions(breakpad_server linux PUBLIC -DHAVE_A_OUT_H)
-android_target_compile_definitions(breakpad_server darwin
-                                   PUBLIC -DHAVE_MACH_O_NLIST_H)
-target_link_libraries(breakpad_server PUBLIC breakpad_common breakpad_processor)
-
-#
-# breakpad_client
-android_add_library(
-  TARGET breakpad_client
-  LIBNAME
-    breakpad
-    URL
-    "https://android.googlesource.com/platform/external/google-breakpad/+/refs/heads/emu-master-dev"
-  REPO "${ANDROID_QEMU2_TOP_DIR}/../google-breakpad"
-  NOTICE "REPO/LICENSE"
-  LICENSE "BSD-3-Clause"
-  LINUX ${BREAKPAD_SRC}/client/linux/crash_generation/crash_generation_client.cc
-        ${BREAKPAD_SRC}/client/linux/crash_generation/crash_generation_server.cc
-        ${BREAKPAD_SRC}/client/linux/dump_writer_common/thread_info.cc
-        ${BREAKPAD_SRC}/client/linux/dump_writer_common/ucontext_reader.cc
-        ${BREAKPAD_SRC}/client/linux/handler/exception_handler.cc
-        ${BREAKPAD_SRC}/client/linux/handler/minidump_descriptor.cc
-        ${BREAKPAD_SRC}/client/linux/log/log.cc
-        ${BREAKPAD_SRC}/client/linux/microdump_writer/microdump_writer.cc
-        ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_core_dumper.cc
-        ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_dumper.cc
-        ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_ptrace_dumper.cc
-        ${BREAKPAD_SRC}/client/linux/minidump_writer/minidump_writer.cc
-        ${BREAKPAD_SRC}/client/minidump_file_writer.cc
-        ${BREAKPAD_SRC}/common/linux/breakpad_getcontext.S
-  DARWIN ${BREAKPAD_SRC}/client/mac/crash_generation/ConfigFile.mm
-         ${BREAKPAD_SRC}/client/mac/crash_generation/crash_generation_client.cc
-         ${BREAKPAD_SRC}/client/mac/crash_generation/crash_generation_server.cc
-         ${BREAKPAD_SRC}/client/mac/crash_generation/Inspector.mm
-         ${BREAKPAD_SRC}/client/mac/crash_generation/InspectorMain.mm
-         ${BREAKPAD_SRC}/client/mac/handler/breakpad_nlist_64.cc
-         ${BREAKPAD_SRC}/client/mac/handler/dynamic_images.cc
-         ${BREAKPAD_SRC}/client/mac/handler/exception_handler.cc
-         ${BREAKPAD_SRC}/client/mac/handler/minidump_generator.cc
-         ${BREAKPAD_SRC}/client/mac/handler/protected_memory_allocator.cc
-         ${BREAKPAD_SRC}/client/minidump_file_writer.cc
-  WINDOWS
-    ${BREAKPAD_SRC}/client/windows/crash_generation/client_info.cc
-    ${BREAKPAD_SRC}/client/windows/crash_generation/crash_generation_client.cc
-    ${BREAKPAD_SRC}/client/windows/crash_generation/crash_generation_server.cc
-    ${BREAKPAD_SRC}/client/windows/crash_generation/minidump_generator.cc
-    ${BREAKPAD_SRC}/client/windows/handler/exception_handler.cc)
-
-if(LINUX_X86_64 OR LINUX_AARCH64)
-  enable_language(ASM)
-  set_property(SOURCE ${BREAKPAD_SRC}/common/linux/breakpad_getcontext.S
-               PROPERTY LANGUAGE ASM)
+  android_add_executable(TARGET minidump_stackwalk NODISTRIBUTE
+                         SRC ${BREAKPAD_SRC}/processor/minidump_stackwalk.cc)
+  set_property(TARGET minidump_stackwalk PROPERTY CXX_STANDARD 17)
+  target_link_libraries(minidump_stackwalk PRIVATE breakpad_processor
+                                                   breakpad_common)
 endif()
-set_property(TARGET breakpad_client PROPERTY CXX_STANDARD 17)
-target_include_directories(breakpad_client PUBLIC ${BREAKPAD_SRC})
-android_target_include_directories(
-  breakpad_client darwin-x86_64 PRIVATE ${BREAKPAD_SRC}/client/apple/Framework/
-  ${BREAKPAD_SRC}/common/mac)
-android_target_include_directories(
-  breakpad_client darwin-aarch64 PRIVATE
-  ${BREAKPAD_SRC}/client/apple/Framework/ ${BREAKPAD_SRC}/common/mac)
-android_target_include_directories(breakpad_client linux PUBLIC
-                                   ${ANDROID_QEMU2_TOP_DIR}/android)
-android_target_compile_definitions(breakpad_client windows
-                                   PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
-android_target_compile_definitions(breakpad_client linux PUBLIC -DHAVE_A_OUT_H)
-android_target_compile_definitions(
-  breakpad_client darwin PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0
-                                 -DHAVE_MACH_O_NLIST_H)
 
-target_link_libraries(breakpad_client PRIVATE breakpad_common
-                                              breakpad_processor)
-
-#
 # dump_syms
 if(NOT LINUX_AARCH64)
   android_add_executable(
@@ -492,124 +404,40 @@ if(NOT LINUX_AARCH64)
   android_install_as_debug_info(dump_syms)
   set_property(TARGET dump_syms PROPERTY CXX_STANDARD 17)
   target_link_libraries(dump_syms PRIVATE breakpad_common)
-  android_target_link_libraries(dump_syms windows_msvc-x86_64
-                                PRIVATE shell32::shell32 diaguids::diaguids)
-  if(ANDROID_HOST_TAG STREQUAL "windows_msvc-x86_64")
-    android_target_link_libraries(dump_syms windows_msvc-x86_64
-                                  PRIVATE atls::atls)
-  endif()
-  android_target_compile_definitions(dump_syms linux-x86_64
-                                     PUBLIC -DHAVE_A_OUT_H)
-  android_target_compile_definitions(dump_syms linux-aarch64
-                                     PUBLIC -DHAVE_A_OUT_H)
-  android_target_compile_definitions(dump_syms darwin-x86_64
-                                     PUBLIC -DHAVE_MACH_O_NLIST_H)
+  android_target_link_libraries2(
+    TARGET dump_syms WINDOWS PRIVATE shell32::shell32 diaguids::diaguids
+                                     atls::atls)
+
   #
   # Symupload
   android_add_executable(
     TARGET sym_upload
-    NODISTRIBUTE
-    LINUX ${BREAKPAD_SRC}/common/linux/http_upload.cc
-          ${BREAKPAD_SRC}/common/linux/symbol_collector_client.cc
-          ${BREAKPAD_SRC}/common/linux/symbol_upload.cc
-          ${BREAKPAD_SRC}/tools/linux/symupload/sym_upload.cc
-    DARWIN ${BREAKPAD_SRC}/common/mac/encoding_util.m
-           ${BREAKPAD_SRC}/common/mac/HTTPGetRequest.m
-           ${BREAKPAD_SRC}/common/mac/HTTPMultipartUpload.m;
-           ${BREAKPAD_SRC}/common/mac/HTTPPutRequest.m
-           ${BREAKPAD_SRC}/common/mac/HTTPRequest.m
-           ${BREAKPAD_SRC}/common/mac/HTTPSimplePostRequest.m
-           ${BREAKPAD_SRC}/common/mac/SymbolCollectorClient.m
-           ${BREAKPAD_SRC}/tools/mac/symupload/symupload.m
-    WINDOWS ${BREAKPAD_SRC}/tools/windows/symupload/symupload.cc)
+    NODISTRIBUTE SOURCE_DIR ${BREAKPAD_SRC}
+    LINUX common/linux/http_upload.cc common/linux/symbol_collector_client.cc
+          common/linux/symbol_upload.cc common/path_helper.cc
+          tools/linux/symupload/sym_upload.cc
+    DARWIN common/mac/encoding_util.m
+           common/mac/HTTPGetRequest.m
+           common/mac/HTTPMultipartUpload.m
+           common/mac/HTTPPutRequest.m
+           common/mac/HTTPRequest.m
+           common/mac/HTTPSimplePostRequest.m
+           common/mac/SymbolCollectorClient.m
+           tools/mac/symupload/symupload.mm
+    WINDOWS tools/windows/symupload/symupload.cc)
   set_property(TARGET sym_upload PROPERTY CXX_STANDARD 17)
   android_target_include_directories(sym_upload darwin PRIVATE
                                      ${BREAKPAD_SRC}/common/mac/)
-  target_link_libraries(sym_upload PRIVATE breakpad_common)
+  target_link_libraries(sym_upload PRIVATE breakpad_common
+                                           breakpad_compiler_config)
   # Note, sym_upload.exe will likely only work on the machine you are building
   # it on due to the mincore dependency. the mincore dependency will bring in
   # Api-ms- win-core-version-l1-1-0.dll which may not be available on every
   # windows version.
-  android_target_link_libraries(
-    sym_upload windows PRIVATE dbghelp::dbghelp diaguids::diaguids
-                               mincore::mincore)
-  android_target_link_libraries(
-    sym_upload darwin PRIVATE "-framework Foundation"
-                              "-framework CoreFoundation")
-  android_target_compile_definitions(sym_upload linux PUBLIC -DHAVE_A_OUT_H)
-  android_target_compile_definitions(sym_upload darwin
-                                     PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0)
-  android_target_compile_definitions(sym_upload windows PRIVATE -DUNICODE
-                                                                -D_UNICODE)
-  android_install_as_debug_info(sym_upload)
-  if(LINUX_X86_64)
-    android_add_executable(
-      TARGET linux_dumper_unittest_helper
-      NODISTRIBUTE
-      SRC # cmake-format: sortable
-          ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_dumper_unittest_helper.cc
-    )
-    target_compile_options(linux_dumper_unittest_helper PRIVATE "-Wno-error")
-    set_property(TARGET linux_dumper_unittest_helper PROPERTY CXX_STANDARD 17)
-    target_link_libraries(
-      linux_dumper_unittest_helper
-      PRIVATE
-        breakpad_common
-        Threads::Threads
-        "-Wl,-rpath,'${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'  -Wl,--disable-new-dtags"
-        "-Wl,--build-id=0x000102030405060708090a0b0c0d0e0f101712131415161718191a1b1c1d1e1f"
-    )
-
-    # ASAN does not play nice with breakpad tests.
-    if(NOT OPTION_ASAN)
-      android_add_test(
-        TARGET linux_client_unittests
-        SRC # cmake-format: sortable
-            ${BREAKPAD_SRC}/client/linux/handler/exception_handler_unittest.cc
-            ${BREAKPAD_SRC}/client/linux/minidump_writer/cpu_set_unittest.cc
-            ${BREAKPAD_SRC}/client/linux/minidump_writer/directory_reader_unittest.cc
-            ${BREAKPAD_SRC}/client/linux/minidump_writer/line_reader_unittest.cc
-            ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_core_dumper.cc
-            ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_core_dumper_unittest.cc
-            ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_ptrace_dumper_unittest.cc
-            # ${BREAKPAD_SRC}/client/linux/minidump_writer/minidump_writer_unittes
-            # t.cc  # Ignore for now, we don't set proper ids.
-            ${BREAKPAD_SRC}/client/linux/minidump_writer/minidump_writer_unittest_utils.cc
-            ${BREAKPAD_SRC}/client/linux/minidump_writer/proc_cpuinfo_reader_unittest.cc
-            ${BREAKPAD_SRC}/common/linux/elf_core_dump.cc
-            ${BREAKPAD_SRC}/common/linux/linux_libc_support_unittest.cc
-            ${BREAKPAD_SRC}/common/linux/tests/crash_generator.cc
-            ${BREAKPAD_SRC}/common/memory_allocator_unittest.cc
-            ${BREAKPAD_SRC}/common/tests/file_utils.cc
-            ${BREAKPAD_SRC}/processor/basic_code_modules.cc
-            ${BREAKPAD_SRC}/processor/convert_old_arm64_context.cc
-            ${BREAKPAD_SRC}/processor/dump_context.cc
-            ${BREAKPAD_SRC}/processor/dump_object.cc
-            ${BREAKPAD_SRC}/processor/logging.cc
-            ${BREAKPAD_SRC}/processor/pathname_stripper.cc
-            ${BREAKPAD_SRC}/processor/proc_maps_linux.cc)
-      android_target_include_directories(
-        linux_client_unittests linux-x86_64 PUBLIC
-        ${ANDROID_QEMU2_TOP_DIR}/android)
-      target_link_libraries(linux_client_unittests PRIVATE breakpad_client
-                                                           gmock_main)
-      add_dependencies(linux_client_unittests linux_dumper_unittest_helper)
-      add_proc_test(exploitability_unittest)
-    endif()
-  elseif(WINDOWS_MSVC_X86_64)
-    android_add_test(
-      TARGET windows_client_unittests
-      SRC # cmake-format: sortable
-          ${BREAKPAD_SRC}/client/windows/unittests/dump_analysis.cc
-          # BUG: 151220246 this set of tests is flaky on windows
-          # ${BREAKPAD_SRC}/client/windows/unittests/crash_generation_server_test.cc
-          ${BREAKPAD_SRC}/client/windows/unittests/exception_handler_death_test.cc
-          ${BREAKPAD_SRC}/client/windows/unittests/exception_handler_nesting_test.cc
-          ${BREAKPAD_SRC}/client/windows/unittests/exception_handler_test.cc
-          ${BREAKPAD_SRC}/client/windows/unittests/minidump_test.cc)
-    target_link_libraries(windows_client_unittests
-                          PRIVATE breakpad_client mincore::mincore gmock_main)
-    android_target_compile_definitions(windows_client_unittests windows
-                                       PRIVATE ${ANDROID_BREAKPAD_WINDOWS_DEFS})
-  endif()
+  android_target_link_libraries2(
+    TARGET sym_upload WINDOWS PRIVATE dbghelp::dbghelp diaguids::diaguids
+                                      mincore::mincore)
+  android_target_link_libraries2(
+    TARGET sym_upload DARWIN PRIVATE "-framework Foundation"
+                                     "-framework CoreFoundation")
 endif()

@@ -18,5 +18,6 @@ ANDROID_BEGIN_HEADER
 const char* get_phone_number_prefix(void);
 const char* get_phone_number(int port);
 const char* get_phone_number_for_sim(int port);
-
+int set_phone_number(const char* number);
+int validate_and_parse_phone_number(const char* input, char* output);
 ANDROID_END_HEADER

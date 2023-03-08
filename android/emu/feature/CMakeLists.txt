@@ -31,6 +31,8 @@ android_add_library(
        android-hw-config
        protobuf::libprotobuf)
 target_include_directories(android-emu-feature PRIVATE src PUBLIC include)
+android_target_link_libraries(android-emu-feature darwin
+                              PUBLIC "-framework Metal")
 target_compile_options(android-emu-feature PRIVATE "-Wno-extern-c-compat")
 
 if(WINDOWS_MSVC_X86_64)

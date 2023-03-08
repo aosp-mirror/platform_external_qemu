@@ -77,12 +77,16 @@ AnyTokenAuth::AnyTokenAuth(
 
 absl::Status AnyTokenAuth::isTokenValid(grpc::string_ref path,
                                         grpc::string_ref token) {
+    std::string error_message = "Validation failed: [";
     for (const auto& validator : mValidators) {
-        if (validator->isTokenValid(path, token).ok()) {
+        auto status = validator->isTokenValid(path, token);
+        if (status.ok()) {
             return absl::OkStatus();
         }
+        error_message += "\"" + std::string(status.message()) + "\", ";
     }
-    return absl::PermissionDeniedError("Token rejected by all validators.");
+    error_message += "]";
+    return absl::PermissionDeniedError(error_message);
 }
 
 }  // namespace control

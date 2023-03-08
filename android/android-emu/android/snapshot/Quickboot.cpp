@@ -231,6 +231,18 @@ void Quickboot::onLivenessTimer() {
                       (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
                               1000.0);
         // done here: snapshot loaded fine and emulator's working.
+
+        // touch the bootcompleted.ini if it is not there yet
+        if (getConsoleAgents()->settings->avdInfo()) {
+            const char* avd_dir = avdInfo_getContentPath(
+                    getConsoleAgents()->settings->avdInfo());
+            if (avd_dir) {
+                const auto bootcomplete_ini =
+                        std::string{android::base::PathUtils::join(
+                                avd_dir, "bootcompleted.ini")};
+                path_empty_file(bootcomplete_ini.c_str());
+            }
+        }
         return;
     }
 

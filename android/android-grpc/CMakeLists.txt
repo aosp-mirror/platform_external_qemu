@@ -212,6 +212,7 @@ target_link_libraries(android-grpc-test-services PUBLIC android-grpc grpc++)
 target_include_directories(android-grpc-test-services
                            PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
+                           android_license(TARGET "frontend-grpc-lib" LIBNAME None SPDX None LICENSE None LOCAL None)
 android_add_test(
   TARGET android-grpc_unittest
   SRC # cmake-format: sortable

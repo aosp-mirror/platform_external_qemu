@@ -25,8 +25,8 @@ target_link_libraries(
           android-grpc
           qemu-host-common-headers
           packet-streamer-client-lib
-          protobuf::libprotobuf
-          packet-streamer-client-grpc-lib)
+          packet-streamer-proto-lib
+          protobuf::libprotobuf)
 
 # Generate the VirtioGpuTimelines flatbuffers header
 add_custom_command(
@@ -86,7 +86,9 @@ set(android-qemu2-glue_src
     qemu-setup-dns-servers.cpp
     qemu-setup.cpp
     qemu-rootcanal-agent-impl.cpp
-    netsim/qemu-netsim-agent-impl.cpp
+    netsim/BluetoothPacketProtocol.cpp
+    netsim/PacketStreamTransport.cpp
+    netsim/qemu-packet-stream-agent-impl.cpp
     qemu-telephony-agent-impl.c
     qemu-user-event-agent-impl.c
     qemu-virtual-scene-agent-impl.cpp
@@ -116,12 +118,11 @@ if(BLUETOOTH_EMULATION)
   target_link_libraries(
     libqemu2-glue
     PRIVATE grpc-emulated-bluetooth
-            frontend-grpc-lib
             grpc++
             packet-streamer-client-lib
+            packet-streamer-proto-lib
             protobuf::libprotobuf
             libbt-rootcanal
-            packet-streamer-client-grpc-lib
             libbt-rootcanal-qemu)
 endif()
 
@@ -138,8 +139,8 @@ target_link_libraries(
           qemu-host-common-headers
           grpc++
           packet-streamer-client-lib
-          protobuf::libprotobuf
-          packet-streamer-client-grpc-lib)
+          packet-streamer-proto-lib
+          protobuf::libprotobuf)
 
 add_dependencies(libqemu2-glue virtio_gpu_timelines_fbs_header)
 

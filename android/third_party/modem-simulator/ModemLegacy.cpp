@@ -47,6 +47,10 @@ void ModemLegacy::update_time(AModem modem) {
     amodem_addTimeUpdate(modem);
 }
 
+int ModemLegacy::set_phone_number(AModem modem, const char* number) {
+    return amodem_set_phone_number(modem, number);
+}
+
 void ModemLegacy::set_data_registration(AModem modem,
                                         ARegistrationState state) {
     amodem_set_data_registration(modem, state);
