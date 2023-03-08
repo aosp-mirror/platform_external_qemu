@@ -1692,6 +1692,13 @@ extern "C" int main(int argc, char** argv) {
                 avdInfo_getContentPath(avd));
     }
 
+    // Early initializaion of the hostpad loop.
+    if (fc::isEnabled(fc::VirtioWifi)) {
+        auto* hostapd = android::emulation::HostapdController::getInstance();
+        if (!hostapd->init(VERBOSE_CHECK(wifi)) || !hostapd->run()) {
+            derror("Error: could not initialize hostpad event loop.");
+        }
+    }
     // Lock the AVD as soon as we can to make sure other copy won't do anything
     // stupid before detecting that the AVD is already in use.
     const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
@@ -3266,15 +3273,6 @@ extern "C" int main(int argc, char** argv) {
         }
         // Dump final command-line option to make debugging the core easier
         dinfo("Concatenated QEMU options: %s", args.toString().c_str());
-    }
-    if (fc::isEnabled(fc::VirtioWifi)) {
-        auto* hostapd = android::emulation::HostapdController::getInstance();
-        if (hostapd->init(VERBOSE_CHECK(wifi))) {
-            hostapd->run();
-        } else {
-            derror("%s: Error: could not initialize hostpad event loop.",
-                   __func__);
-        }
     }
     if (opts->check_snapshot_loadable) {
         android_check_snapshot_loadable(opts->check_snapshot_loadable);
