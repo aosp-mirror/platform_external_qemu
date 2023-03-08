@@ -153,7 +153,11 @@ bool VirtioWifiForwarder::init() {
                 << "Failed to initialize Wi-Fi:  hostapd controller is null.";
         return false;
     }
-    mHostapd->setDriverSocket(ScopedSocket(fds[0]));
+    if (!mHostapd->setDriverSocket(ScopedSocket(fds[0]))) {
+        LOG(ERROR)
+                << "Failed to initialize Wi-Fi:  Uable to set driver sockets.";
+        return false;
+    }
     //  Looper FdWatch and set callback functions
     mFdWatch = mLooper->createFdWatch(mVirtIOSock.get(),
                                       &VirtioWifiForwarder::onHostApd, this);
