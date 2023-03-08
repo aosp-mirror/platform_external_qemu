@@ -131,7 +131,7 @@ android_add_executable(
   DEPS android-emu android-emu-crash-initializer android-emu-crashreport
        android-emu-crashreport-consent-never)
 
-android_upload_symbols(crash-me)
+android_upload_symbols(TARGET crash-me DIRECTORY ${ANDROID_SYMBOL_DIR})
 
 android_add_test(
   TARGET android-emu-crashreport-testing

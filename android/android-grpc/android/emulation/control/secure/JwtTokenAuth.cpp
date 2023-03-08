@@ -20,8 +20,8 @@
 #include "absl/strings/string_view.h"  // for string_view
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/misc/StringUtils.h"  // for EndsWith
-#include "android/utils/debug.h"            // for derror
-#include "tink/config/tink_config.h"        // for TinkConfig
+#include "android/utils/debug.h"         // for derror
+#include "tink/config/tink_config.h"     // for TinkConfig
 #include "tink/jwt/jwk_set_converter.h"
 #include "tink/jwt/jwt_public_key_verify.h"  // for JwtPublicKeyVerify
 #include "tink/jwt/jwt_signature_config.h"   // for JwtSignatureRegister
@@ -92,8 +92,9 @@ void JwtTokenAuth::updateKeysetHandle(
             }
         }
 
-        std::ofstream out(PathUtils::asUnicodePath(mJwksLoadedPath.data()).c_str(),
-                          std::ios::trunc);
+        std::ofstream out(
+                PathUtils::asUnicodePath(mJwksLoadedPath.data()).c_str(),
+                std::ios::trunc);
         out << jsonSnippet;
         out.close();
         DD("Updated %s with latest loaded keys to: %s", mJwksLoadedPath.c_str(),
@@ -130,6 +131,12 @@ absl::Status JwtTokenAuth::isTokenValid(grpc::string_ref path,
 
     auto verified_jwt = (*verify)->VerifyAndDecode(
             absl::string_view(token.data(), token.size()), *validator);
+
+    if (!verified_jwt.status().ok() && verified_jwt.status().message() == "audience not found") {
+        return absl::PermissionDeniedError(
+                "Access denied, does you aud claim include: " +
+                std::string(method) + " ?");
+    }
     return verified_jwt.status();
 }
 

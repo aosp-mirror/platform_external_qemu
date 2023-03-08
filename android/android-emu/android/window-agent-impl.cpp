@@ -315,6 +315,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                     return false;
                 },
+        .hasWindow = [] { return true; },
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const

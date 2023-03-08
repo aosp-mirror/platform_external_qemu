@@ -38,7 +38,26 @@ const std::string kCrashMe = "crash-me";
 
 class CrashTest : public ::testing::Test {
 protected:
-    void SetUp() override { mCrashdatabase = InitializeCrashDatabase(); }
+    void SetUp() override {
+        mCrashdatabase = InitializeCrashDatabase();
+        deleteReports();
+    }
+
+    void TearDown() override { deleteReports(); }
+
+    void deleteReports() {
+        std::vector<crashpad::CrashReportDatabase::Report> reports;
+        std::vector<crashpad::CrashReportDatabase::Report> pendingReports;
+        mCrashdatabase->GetCompletedReports(&reports);
+        mCrashdatabase->GetPendingReports(&pendingReports);
+        reports.insert(reports.end(), pendingReports.begin(),
+                       pendingReports.end());
+
+        for (const auto& report : reports) {
+            dinfo("Erasing %s\n", report.uuid.ToString().c_str());
+            mCrashdatabase->DeleteReport(report.uuid);
+        }
+    }
 
     std::unique_ptr<CrashReportDatabase> InitializeCrashDatabase() {
         auto crashDatabasePath = android::base::pj(System::get()->getTempDir(),
@@ -94,5 +113,5 @@ TEST_F(CrashTest, crash_generates_minidump) {
 }
 
 TEST_F(CrashTest, minidump_is_usable) {
-   // TODO: This requires us to binplace all the .sym files ourselves.
+    // TODO: This requires us to binplace all the .sym files ourselves.
 }

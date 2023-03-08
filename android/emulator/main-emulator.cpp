@@ -209,6 +209,7 @@ static void clean_up_avd_contents_except_config_ini(const char* avd_folder) {
             "cache.img",
             "cache.img.qcow2",
             "version_num.cache",
+            "bootcompleted.ini",
             "sdcard.img.qcow2",
             "encryptionkey.img",
             "encryptionkey.img.qcow2",
@@ -884,7 +885,23 @@ int main(int argc, char** argv) {
                 }
             }
         }
-        free(avd_folder);
+    }
+
+    // delete bootcompleted.ini if it is there
+    if (avdName) {
+        const char* avd_folder = path_getAvdContentPath(avdName);
+        if (avd_folder) {
+            const std::string file =
+                    PathUtils::join(avd_folder, "bootcompleted.ini");
+            if (path_exists(file.c_str())) {
+                const auto ret = path_delete_file(file.c_str());
+                if (ret == 0) {
+                    D("Deleting %s done", file.c_str());
+                } else {
+                    dwarning("Deleting %s failed", file.c_str());
+                }
+            }
+        }
     }
 
     // If this is a restart, wait for the restartPid to exit.
@@ -958,7 +975,6 @@ int main(int argc, char** argv) {
                 clean_up_avd_contents_except_config_ini(avd_folder);
                 delete_snapshots_at(avd_folder);
                 delete_adbCmds_at(avd_folder);
-                free(avd_folder);
             }
         } else if (androidOut) {
             clean_up_android_out(androidOut);

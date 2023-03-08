@@ -57,6 +57,8 @@ def relocate_symbol_file(symbol_file, destination_directory, copy):
     destination.mkdir(exist_ok=True, parents=True)
     destination_sym = (destination / module.name).with_suffix(".sym")
 
+    assert destination.exists(), f"Directory creation of {destination} did not succeed."
+
 
     if destination_sym.exists():
         logging.warning("Destination symbol %s already exists, deleting", destination_sym)
@@ -69,12 +71,7 @@ def relocate_symbol_file(symbol_file, destination_directory, copy):
         logging.info("Moving %s -> %s", symbol_file, destination_sym)
         shutil.move(symbol_file, destination_sym)
 
-    # Make this the default symbol
-    null_directory = (
-        destination_directory / module.name / "000000000000000000000000000000000"
-    )
-    if not null_directory.exists():
-        null_directory.symlink_to(destination, target_is_directory=True)
+    assert destination_sym.exists(), f"Expecting {destination_sym} to exist!"
 
 
 def recursively_relocate_symbols(src, dest, copy):

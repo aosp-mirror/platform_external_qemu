@@ -96,6 +96,10 @@ public:
         }
 
         auto crashpad_info = dump.GetCrashpadInfo();
+        if (!crashpad_info) {
+            dwarning("Minidump crashpad info is not valid, ignoring.");
+            return false;
+        }
         auto module_annotations = crashpad_info->module_annotations();
         std::string hw_ini = "";
         for (const auto& annotation : module_annotations) {
@@ -139,7 +143,7 @@ private:
             return errmsg;
         }
         google_breakpad::SetPrintStream(fp);
-        google_breakpad::PrintProcessState(processState, true, lineResolver);
+        google_breakpad::PrintProcessState(processState, true, /*output_requesting_thread_only=*/false, lineResolver);
         crashpadInfo->Print(fp);
 
         fprintf(fp, "thread requested=%d\n", processState.requesting_thread());

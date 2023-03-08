@@ -18,6 +18,7 @@ endif()
 set(INCLUDE_ANDROID_CMAKE 1)
 
 include(prebuilts)
+include(symbols)
 
 # We want to make sure all the cross targets end up in a unique location
 set(ANDROID_CROSS_BUILD_DIRECTORY ${CMAKE_BINARY_DIR}/build/${ANDROID_HOST_TAG})
@@ -79,8 +80,15 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
         SOURCE_DIR ${SOURCE}
         CMAKE_ARGS
           "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
+          "-DBREAKPAD_API_KEY=${BREAKPAD_API_KEY}"
+          "-DBREAKPAD_API_URL=${BREAKPAD_API_URL}"
+          "-DANDROID_SYMBOL_DIR=${ANDROID_SYMBOL_DIR}"
+          "-DPython_EXECUTABLE=${Python_EXECUTABLE}"
         BUILD_BYPRODUCTS ${BUILD_PRODUCT}
         TEST_BEFORE_INSTALL True
+        LOG_BUILD ON
+        LOG_INSTALL ON
+        LOG_OUTPUT_ON_FAILURE TRUE
         INSTALL_COMMAND "")
     endif()
     set(${OUT_PATH} ${BUILD_PRODUCT} PARENT_SCOPE)
@@ -312,6 +320,26 @@ function(android_target_compile_definitions TGT OS MODIFIER ITEMS)
     foreach(DEF ${ARGN})
       target_compile_definitions(${TGT} ${MODIFIER} ${DEF})
     endforeach()
+  endif()
+endfunction()
+
+function(android_target_link_libraries2)
+  set(options DARWIN WINDOWS POSIX LINUX)
+  set(oneValueArgs TARGET)
+  set(multiValueArgs PRIVATE PUBLIC)
+  cmake_parse_arguments(lnk "${options}" "${oneValueArgs}" "${multiValueArgs}"
+                        ${ARGN})
+  if(LINUX AND (lnk_LINUX OR lnk_POSIX))
+    target_link_libraries(${lnk_TARGET} PRIVATE ${lnk_PRIVATE}
+                          PUBLIC ${lnk_PUBLIC})
+  elseif((DARWIN_X86_64 OR DARWIN_AARCH64) AND (lnk_DARWIN OR lnk_POSIX))
+    target_link_libraries(${lnk_TARGET} PRIVATE ${lnk_PRIVATE}
+                          PUBLIC ${lnk_PUBLIC})
+
+  elseif(WINDOWS_MSVC_X86_64 AND (lnk_MSVC OR lnk_WINDOWS))
+    target_link_libraries(${lnk_TARGET} PRIVATE ${lnk_PRIVATE}
+                          PUBLIC ${lnk_PUBLIC})
+
   endif()
 endfunction()
 
@@ -582,9 +610,8 @@ function(android_add_library)
 
   _register_target(${ARGN})
 
-
-  if (LINUX)
-      target_link_options(${build_TARGET} PRIVATE "LINKER:--build-id=sha1")
+  if(LINUX)
+    target_link_options(${build_TARGET} PRIVATE "LINKER:--build-id=sha1")
   endif()
 
   target_sources(${build_TARGET} PRIVATE ${REGISTERED_SRC})
@@ -857,7 +884,7 @@ function(android_add_test)
     WORKING_DIRECTORY $<TARGET_FILE_DIR:${build_TARGET}>)
 
   # Let's not optimize our tests.
-  if (NOT WINDOWS_MSVC_X86_64)
+  if(NOT WINDOWS_MSVC_X86_64)
     target_compile_options(${build_TARGET} PRIVATE -O0)
   endif()
   target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
@@ -910,8 +937,8 @@ function(android_add_executable)
   add_executable(${build_TARGET} ${REGISTERED_SRC})
   target_link_libraries(${build_TARGET} PRIVATE ${build_DEPS})
 
-  if (LINUX)
-      target_link_options(${build_TARGET} PRIVATE "LINKER:--build-id=sha1")
+  if(LINUX)
+    target_link_options(${build_TARGET} PRIVATE "LINKER:--build-id=sha1")
   endif()
 
   # Clang on mac os does not get properly recognized by cmake
@@ -947,7 +974,10 @@ endfunction()
 #
 # protofiles: The set of protofiles to be included.
 function(android_add_protobuf name protofiles)
-  message(STATUS "This method is deprecated, please use protobuf_generate_with_plugin instead for target ${name}.")
+  message(
+    STATUS
+      "This method is deprecated, please use protobuf_generate_with_plugin instead for target ${name}."
+  )
   android_add_library(TARGET ${name} LICENSE Apache-2.0)
   protobuf_generate_with_plugin(TARGET ${name} PROTOS ${protofiles})
   target_link_libraries(${name} PRIVATE libprotobuf)
@@ -1609,45 +1639,15 @@ function(android_validate_sha)
   endif()
 endfunction()
 
-# Uploads the symbols to the breakpad crash server
-function(android_upload_symbols TGT)
-  if(NOT ANDROID_EXTRACT_SYMBOLS)
-    return()
-  endif()
-
-  set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
-  if(WIN32)
-    add_custom_command(
-      TARGET ${TGT} POST_BUILD
-      COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
-      COMMAND sym_upload -p $<TARGET_FILE:${TGT}> ${BREAKPAD_API_URL} ${BREAKPAD_API_KEY}
-      COMMAND
-      "${Python3_EXECUTABLE}"
-      "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
-      "-o" "${ANDROID_SYMBOL_DIR}" "${DEST}"
-      COMMENT "Extracting symbols for ${TGT}" DEPENDS sym_upload dump_syms)
-  else()
-    add_custom_command(
-      TARGET ${TGT}
-      POST_BUILD
-      COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
-      COMMAND sym_upload -p sym-upload-v2 -k ${BREAKPAD_API_KEY} ${DEST}
-      ${BREAKPAD_API_URL} || exit 0
-      COMMAND
-      "${Python3_EXECUTABLE}"
-      "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
-      "-o" "${ANDROID_SYMBOL_DIR}" "${DEST}"
-      COMMENT "Extracting symbols for ${TGT}" DEPENDS sym_upload dump_syms)
-  endif()
-endfunction()
-
 # Installs the given target executable into the given destinations. Symbols will
 # be extracted during build, and uploaded during install.
 function(android_install_exe TGT DST)
   install(TARGETS ${TGT} RUNTIME DESTINATION ${DST})
 
-  # Make it available on the build server
-  android_upload_symbols(${TGT})
+  # Make it available on the build server if needed..
+  android_upload_symbols(
+    TARGET ${TGT} DIRECTORY ${ANDROID_SYMBOL_DIR} API_KEY "${BREAKPAD_API_KEY}"
+    URI "${BREAKPAD_API_URL}")
   android_install_license(${TGT} ${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
   android_sign(
     INSTALL ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
@@ -1658,13 +1658,14 @@ function(android_install_exe TGT DST)
     )
   endif()
 endfunction()
-
 # Installs the given shared library. The shared library will end up in ../lib64
 # Symbols will be extracted during build, and uploaded during install.
 function(android_install_shared TGT)
   # We don't want windows to binplace dlls in the exe dir
   install(TARGETS ${TGT} RUNTIME DESTINATION lib64 LIBRARY DESTINATION lib64)
-  android_upload_symbols(${TGT})
+  android_upload_symbols(
+    TARGET ${TGT} DIRECTORY ${ANDROID_SYMBOL_DIR} API_KEY "${BREAKPAD_API_KEY}"
+    URI "${BREAKPAD_API_URL}")
   android_install_license(${TGT} ${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
   # Account for lib prefix when signing
   android_sign(

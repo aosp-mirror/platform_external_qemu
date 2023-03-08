@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/MediaVideoToolBoxHevcVideoHelper.h"
-#include "android/emulation/MediaVideoToolBoxUtils.h"
+#include "host-common/MediaVideoToolBoxUtils.h"
 #include "host-common/YuvConverter.h"
 #include "android/utils/debug.h"
 

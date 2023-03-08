@@ -6,21 +6,17 @@ cmake_minimum_required(VERSION 3.12)
 # ${GFXSTREAM_HOST_COMMON_LIB}.
 cmake_policy(SET CMP0079 NEW)
 
-find_package(Python2 COMPONENTS Interpreter)
-find_package(Python3 COMPONENTS Interpreter)
-
 # Let's setup a compiler cache.
 if(NOT WINDOWS_MSVC_X86_64 AND OPTION_CCACHE)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${OPTION_CCACHE}")
   message(STATUS "Using ${OPTION_CCACHE} as a compiler cache.")
 endif()
 
-set(Python_EXECUTABLE ${Python2_EXECUTABLE})
-if(NOT Python2_FOUND)
+if(NOT Python_EXECUTABLE)
+  find_package(Python3 COMPONENTS Interpreter)
   if(NOT Python3_FOUND)
     message(FATAL_ERROR "A python interpreter is required. ")
   endif()
-  message(STATUS "Reverting to Python3, this might not work (b/229251286)")
   set(Python_EXECUTABLE ${Python3_EXECUTABLE})
 endif()
 
@@ -201,27 +197,15 @@ set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
 set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
 
 # Symbol extraction is not supported when cross compiling.
-if(OPTION_CRASHUPLOAD STREQUAL "NONE")
-  set(ANDROID_EXTRACT_SYMBOLS FALSE)
-else()
+set(ANDROID_SYMBOL_DIR ${CMAKE_BINARY_DIR}/build/symbols)
+if(NOT OPTION_CRASHUPLOAD STREQUAL "NONE")
   if(WIN32)
     file(STRINGS "$ENV{USERPROFILE}/.emulator_symbol_server_key"
          BREAKPAD_API_KEY)
   else()
     file(STRINGS "$ENV{HOME}/.emulator_symbol_server_key" BREAKPAD_API_KEY)
   endif()
-  set(ANDROID_EXTRACT_SYMBOLS TRUE)
-  set(ANDROID_SYMBOL_DIR ${CMAKE_BINARY_DIR}/build/symbols)
-  file(MAKE_DIRECTORY ${ANDROID_SYMBOL_DIR})
   message(STATUS "Uploading symbols to ${BREAKPAD_API_URL}")
-endif()
-
-if(ANDROID_EXTRACT_SYMBOLS AND CROSSCOMPILE)
-  message(
-    WARNING
-      "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}, disabling."
-  )
-  set(ANDROID_EXTRACT_SYMBOLS FALSE)
 endif()
 
 set(FEATURE_NETSIM TRUE CACHE BOOL "Include netsim the network simulator.")

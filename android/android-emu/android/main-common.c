@@ -36,6 +36,7 @@
 #include "android/network/control.h"                        // for android_n...
 #include "android/opengles.h"                               // for android_i...
 #include "android/snapshot.h"                               // for snapshot_...
+#include "android/telephony/phone_number.h"
 #include "android/utils/bufprint.h"                         // for bufprint
 #include "android/utils/debug.h"                            // for dprint
 #include "android/utils/dirscanner.h"                       // for dirScanne...
@@ -1550,7 +1551,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     if (!opts->log_nofilter) {
         log_opts |= kLogEnableDuplicateFilter;
         dinfo("Duplicate loglines will be removed, if you wish to see each "
-              "indiviudal line launch with the -log-nofilter flag.");
+              "individual line launch with the -log-nofilter flag.");
     }
 
     if (opts->log_detailed || VERBOSE_CHECK(log)) {
@@ -2048,28 +2049,12 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     if (opts->phone_number) {
         char phone_number[16];
-
-        // phone number should be all decimal digits and '-' (dash) which will
-        // be ignored.
-        int i;
-        int j;
-        for (i = 0, j = 0; opts->phone_number[i] != '\0'; i++) {
-            if (opts->phone_number[i] == '-') {
-                continue;  // ignore the '-' character and continue.
-            } else if (!isdigit(opts->phone_number[i])) {
-                derror("Phone number should be all decimal digits\n");
-                *exit_status = 2;
-                return false;
-            } else {
-                if (j == 15) {  // max possible MSISDN length
-                    derror("length of phone_number should be at most 15");
-                    *exit_status = 2;
-                    return false;
-                }
-                phone_number[j++] = opts->phone_number[i];
-            }
+        int ret = validate_and_parse_phone_number(opts->phone_number,
+                                                  phone_number);
+        if (ret) {
+            *exit_status = 2;
+            return false;
         }
-        phone_number[j] = '\0';
         str_reset(&opts->phone_number, phone_number);
     }
 
