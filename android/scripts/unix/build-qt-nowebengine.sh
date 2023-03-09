@@ -261,6 +261,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         -qt-xcb \
                         -no-use-gold-linker \
                         -platform linux-clang \
+
                 var_append LD_LIBRARY_PATH \
                   $(dirname $(aosp_clang_libcplusplus))
                 ;;
