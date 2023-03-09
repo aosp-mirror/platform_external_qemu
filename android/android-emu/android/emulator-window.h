@@ -39,6 +39,8 @@ typedef struct EmulatorWindow {
     SkinFile*      layout_file_no_skin;
     int            win_x;
     int            win_y;
+    int            win_w;
+    int            win_h;
     SkinUI*        ui;
     SkinImage*     onion;
     SkinRotation   onion_rotation;
@@ -59,6 +61,8 @@ int emulator_window_init(EmulatorWindow* emulator,
                          const char* basepath,
                          int x,
                          int y,
+                         int w,
+                         int h,
                          const AndroidOptions* opts,
                          const UiEmuAgent* uiEmuAgent);
 

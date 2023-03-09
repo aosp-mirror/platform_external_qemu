@@ -41,10 +41,10 @@ void           auserConfig_free( AUserConfig* uconfig );
 uint64_t       auserConfig_getUUID( AUserConfig*  uconfig );
 
 /* Retrieve the stored window position for this AVD */
-void           auserConfig_getWindowPos( AUserConfig*  uconfig, int  *pX, int  *pY );
+void           auserConfig_getWindowGeo( AUserConfig*  uconfig, int  *pX, int  *pY, int *pW, int *pH );
 
 /* Change the stored window position for this AVD */
-void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y );
+void           auserConfig_setWindowGeo( AUserConfig*  uconfig, int  x, int  y, int w, int h );
 
 /* Retrieve the stored extended controls window position for this AVD,
 return 1 if the userconfig stores the position previously */

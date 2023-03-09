@@ -38,6 +38,8 @@ struct AUserConfig {
     ABool        changed;
     int          windowX;
     int          windowY;
+    int          windowW;
+    int          windowH;
     int extendedControlsX;
     int extendedControlsY;
 
@@ -53,6 +55,8 @@ struct AUserConfig {
 
 #define  KEY_WINDOW_X  "window.x"
 #define  KEY_WINDOW_Y  "window.y"
+#define  KEY_WINDOW_W  "window.w"
+#define  KEY_WINDOW_H  "window.h"
 #define KEY_EXTENDED_CONTROLS_X "extended_controls.x"
 #define KEY_EXTENDED_CONTROLS_Y "extended_controls.y"
 #define KEY_EXTENDED_CONTROLS_HOR "extended_controls.hanchor"
@@ -83,8 +87,8 @@ auserConfig_new_custom(
     if (default_h < 100) default_h = 100;
     uc->windowX  = DEFAULT_X;
     uc->windowY  = DEFAULT_Y;
-    // uc->windowW  = default_w;
-    // uc->windowH  = default_h;
+    uc->windowW  = default_w;
+    uc->windowH  = default_h;
     // uc->frameX   = DEFAULT_X;
     // uc->frameY   = DEFAULT_Y;
     // uc->frameW   = default_w;
@@ -187,6 +191,13 @@ auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int scre
 
         uc->windowY = iniFile_getInteger(ini, KEY_WINDOW_Y, DEFAULT_Y);
         DD("    found %s = %d", KEY_WINDOW_Y, uc->windowY);
+
+        uc->windowW = iniFile_getInteger(ini, KEY_WINDOW_W, default_w);
+        DD("    found %s = %d", KEY_WINDOW_W, uc->windowW);
+
+        uc->windowH = iniFile_getInteger(ini, KEY_WINDOW_H, default_h);
+        DD("    found %s = %d", KEY_WINDOW_H, uc->windowH);
+
         if (iniFile_hasKey(ini, KEY_EXTENDED_CONTROLS_X)) {
             uc->hasExtendedControlPos = 1;
             uc->extendedControlsX =
@@ -227,6 +238,8 @@ auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int scre
     else {
         uc->windowX  = DEFAULT_X;
         uc->windowY  = DEFAULT_Y;
+        uc->windowW  = default_w;
+        uc->windowH  = default_h;
         uc->changed  = 1;
     }
 
@@ -253,19 +266,23 @@ auserConfig_getUUID( AUserConfig*  uconfig )
 }
 
 void
-auserConfig_getWindowPos( AUserConfig*  uconfig, int  *pX, int  *pY )
+auserConfig_getWindowGeo( AUserConfig*  uconfig, int  *pX, int  *pY, int *pW, int *pH )
 {
     *pX = uconfig->windowX;
     *pY = uconfig->windowY;
+    *pW = uconfig->windowW;
+    *pH = uconfig->windowH;
 }
 
 
 void
-auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y )
+auserConfig_setWindowGeo( AUserConfig*  uconfig, int  x, int  y, int w, int h )
 {
     if (x != uconfig->windowX || y != uconfig->windowY) {
         uconfig->windowX = x;
         uconfig->windowY = y;
+        uconfig->windowW = w;
+        uconfig->windowH = h;
         uconfig->changed = 1;
     }
 }
@@ -316,6 +333,8 @@ auserConfig_save( AUserConfig*  uconfig )
 
     iniFile_setInteger(ini, KEY_WINDOW_X, uconfig->windowX);
     iniFile_setInteger(ini, KEY_WINDOW_Y, uconfig->windowY);
+    iniFile_setInteger(ini, KEY_WINDOW_W, uconfig->windowW);
+    iniFile_setInteger(ini, KEY_WINDOW_H, uconfig->windowH);
 
     if (uconfig->hasExtendedControlPos) {
         iniFile_setInteger(ini, KEY_EXTENDED_CONTROLS_X,
