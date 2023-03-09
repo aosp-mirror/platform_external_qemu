@@ -15,7 +15,7 @@
 
       "args": [
         // "--gtest_repeat=-1",
-        "--gtest_throw_on_failure",
+        "--gtest_filter=JwkTokenAuthTest.message",
       ],
       "cwd": "${workspaceFolder}/build",
       "stopAtEntry": false,

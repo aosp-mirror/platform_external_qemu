@@ -13,9 +13,9 @@
 // limitations under the License.
 #include "android/emulation/control/secure/BasicTokenAuth.h"
 
-#include <map>                        // for operator==, __map_const_iterator
-#include <string>                     // for string
-#include <utility>                    // for move, pair
+#include <map>      // for operator==, __map_const_iterator
+#include <string>   // for string
+#include <utility>  // for move, pair
 
 #include "absl/strings/str_format.h"  // for StrFormat
 #include "android/utils/debug.h"
@@ -24,8 +24,11 @@ namespace android {
 namespace emulation {
 namespace control {
 
-BasicTokenAuth::BasicTokenAuth(std::string header, std::string prefix)
-    : mHeader(header), mPrefix(prefix) {}
+DisableAccess BasicTokenAuth::noAccess;
+
+BasicTokenAuth::BasicTokenAuth(std::string header, AllowList* list)
+    : mHeader(header), mAllowList(list) {
+    }
 
 BasicTokenAuth::~BasicTokenAuth() = default;
 
@@ -33,7 +36,6 @@ grpc::Status BasicTokenAuth::Process(const InputMetadata& auth_metadata,
                                      grpc::AuthContext* context,
                                      OutputMetadata* consumed_auth_metadata,
                                      OutputMetadata* response_metadata) {
-
     auto path = auth_metadata.find(PATH);
     if (path == auth_metadata.end()) {
         return grpc::Status(grpc::StatusCode::INTERNAL,
@@ -47,39 +49,60 @@ grpc::Status BasicTokenAuth::Process(const InputMetadata& auth_metadata,
                 absl::StrFormat("No '%s' header present.", mHeader));
     }
 
-    if (!header->second.starts_with(mPrefix)) {
-        return grpc::Status(
-                grpc::StatusCode::UNAUTHENTICATED,
-                absl::StrFormat("Header does not start with '%s'.", mPrefix));
-    }
-
-    auto token = header->second.substr(mPrefix.size());
-    auto auth = isTokenValid(path->second, token);
+    auto auth = isTokenValid(path->second, header->second);
     return auth.ok() ? grpc::Status::OK
                      : grpc::Status(grpc::StatusCode::UNAUTHENTICATED,
                                     (std::string)auth.message());
 };
 
-StaticTokenAuth::StaticTokenAuth(std::string token)
-    : BasicTokenAuth(DEFAULT_HEADER, DEFAULT_BEARER), mStaticToken(token){
-        dwarning("*** Basic token auth will be deprecated soon, please migrate to using -grpc-use-jwt ***");
-    };
+StaticTokenAuth::StaticTokenAuth(std::string token,
+                                 std::string iss,
+                                 AllowList* list)
+    : BasicTokenAuth(DEFAULT_HEADER, list),
+      mStaticToken(DEFAULT_BEARER + token),
+      mIssuer(iss) {
+    dwarning(
+            "*** Basic token auth will be deprecated soon, and access points will be limited. ***");
+};
 
 absl::Status StaticTokenAuth::isTokenValid(grpc::string_ref url,
                                            grpc::string_ref token) {
-    return token == mStaticToken
-                   ? absl::OkStatus()
-                   : absl::PermissionDeniedError("Incorrect token");
+    std::string_view path(url.data(), url.length());
+
+    if (!allowList()->requiresAuthentication(path)) {
+        return absl::OkStatus();
+    }
+
+
+    auto status = token == mStaticToken
+                          ? absl::OkStatus()
+                          : absl::PermissionDeniedError("Incorrect token");
+    if (status.ok() && allowList()->isRed(mIssuer, path)) {
+        return absl::PermissionDeniedError("Access is blocked by access list");
+    }
+    if (!status.ok()) {
+        dwarning("%s != %s", mStaticToken.c_str(), token.data());
+    }
+
+    return status;
 }
 AnyTokenAuth::AnyTokenAuth(
-        std::vector<std::unique_ptr<BasicTokenAuth>> validators)
-    : BasicTokenAuth(DEFAULT_HEADER), mValidators(std::move(validators)) {}
+        std::vector<std::unique_ptr<BasicTokenAuth>> validators,
+        AllowList* allowlist)
+    : BasicTokenAuth(DEFAULT_HEADER, allowlist), mValidators(std::move(validators)) {
+}
 
-absl::Status AnyTokenAuth::isTokenValid(grpc::string_ref path,
+absl::Status AnyTokenAuth::isTokenValid(grpc::string_ref url,
                                         grpc::string_ref token) {
+
+    std::string_view path(url.data(), url.length());
+    if (mValidators.empty() || !allowList()->requiresAuthentication(path)) {
+        return absl::OkStatus();
+    }
+
     std::string error_message = "Validation failed: [";
     for (const auto& validator : mValidators) {
-        auto status = validator->isTokenValid(path, token);
+        auto status = validator->isTokenValid(url, token);
         if (status.ok()) {
             return absl::OkStatus();
         }

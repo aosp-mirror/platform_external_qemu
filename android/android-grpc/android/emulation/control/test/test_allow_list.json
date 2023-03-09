@@ -1,0 +1,18 @@
+// Used by the unit tests.
+{
+    "unprotected": [],
+    "allowlist": [
+        {
+            "iss": "android-studio",
+            "protected": [
+                ".*"
+            ]
+        },
+        {
+            "iss": "JwkTokenAuthTest",
+            "protected": [
+                ".*"
+            ]
+        }
+    ]
+}

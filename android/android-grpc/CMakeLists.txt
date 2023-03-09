@@ -1,4 +1,3 @@
-
 # Add waterfall only for posix, as there are some issues around
 # stderr/stdout/stdin in the gRPC compiler. See b/148079576 for details.
 if(NOT WINDOWS_MSVC_X86_64)
@@ -9,8 +8,7 @@ if(NOT WINDOWS_MSVC_X86_64)
   android_add_library(
     TARGET android-waterfall
     LICENSE Apache-2.0
-    SRC # cmake-format: sortable
-        ${WATERFALL_GRPC_SRC}
+    SRC ${WATERFALL_GRPC_SRC}
         android/emulation/control/waterfall/AdbWaterfallService.cpp
         android/emulation/control/waterfall/SocketController.cpp
         android/emulation/control/waterfall/WaterfallService.cpp)
@@ -46,8 +44,7 @@ android_add_library(
     "https://android.googlesource.com/device/google/cuttlefish/+/refs/heads/master/host/commands/gnss_grpc_proxy"
   REPO "${ANDROID_QEMU2_TOP_DIR}/../../device/google/cuttlefish}"
   LICENSE "Apache-2.0"
-  SRC # cmake-format: sortable
-      ${emu_gnss_sources})
+  SRC ${emu_gnss_sources})
 
 target_include_directories(
   gnss_proxy_lib
@@ -67,9 +64,8 @@ protobuf_generate_grpc_cpp(
   OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
   GENERATED EMULATOR_GRPC_SRC)
 
-android_add_library(
-  TARGET android-grpc-services LICENSE Apache-2.0 SRC # cmake-format: sortable
-                                                      ${EMULATOR_GRPC_SRC})
+android_add_library(TARGET android-grpc-services LICENSE Apache-2.0
+                    SRC ${EMULATOR_GRPC_SRC})
 target_include_directories(
   android-grpc-services PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                ${CMAKE_CURRENT_SOURCE_DIR})
@@ -97,8 +93,7 @@ target_include_directories(android-grpc-utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 android_add_library(
   TARGET android-grpc
   LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      android/emulation/control/adb/AdbService.cpp
+  SRC android/emulation/control/adb/AdbService.cpp
       android/emulation/control/audio/AudioStream.cpp
       android/emulation/control/camera/VirtualSceneCamera.cpp
       android/emulation/control/clipboard/Clipboard.cpp
@@ -110,6 +105,7 @@ android_add_library(
       android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
       android/emulation/control/keyboard/TouchEventSender.cpp
       android/emulation/control/logcat/LogcatParser.cpp
+      android/emulation/control/secure/AllowList.cpp
       android/emulation/control/secure/BasicTokenAuth.cpp
       android/emulation/control/secure/JwkDirectoryObserver.cpp
       android/emulation/control/secure/JwtTokenAuth.cpp
@@ -157,6 +153,14 @@ if(WINDOWS_MSVC_X86_64)
 endif()
 set_target_properties(android-grpc PROPERTIES CXX_STANDARD 17)
 
+add_custom_command(
+  TARGET android-grpc
+  PRE_BUILD
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-grpc/android/emulation/control/secure/emulator_access.json
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib/emulator_access.json)
+
 protobuf_generate_grpc_cpp(
   SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} SOURCES ui_controller_service.proto
   OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
@@ -202,8 +206,7 @@ protobuf_generate_grpc_cpp(
 android_add_library(
   TARGET android-grpc-test-services
   NODISTRIBUTE
-  SRC # cmake-format: sortable
-      ${ECHO_SERVICE_GRPC_SRC}
+  SRC ${ECHO_SERVICE_GRPC_SRC}
       ${IPC_SERVICE_GRPC_SRC}
       android/emulation/control/test/CertificateFactory.cpp
       android/emulation/control/test/HeartbeatService.cpp
@@ -215,9 +218,9 @@ target_include_directories(android-grpc-test-services
                            android_license(TARGET "frontend-grpc-lib" LIBNAME None SPDX None LICENSE None LOCAL None)
 android_add_test(
   TARGET android-grpc_unittest
-  SRC # cmake-format: sortable
-      android/emulation/control/GrpcServices_unittest.cpp
+  SRC android/emulation/control/GrpcServices_unittest.cpp
       android/emulation/control/logcat/LogcatParser_unittest.cpp
+      android/emulation/control/secure/AllowList_unittest.cpp
       android/emulation/control/secure/JwkDirectoryObserver_unittest.cpp
       android/emulation/control/secure/JwtTokenAuth_unittest.cpp
       android/emulation/control/utils/EventWaiter_unittest.cpp
@@ -231,53 +234,55 @@ target_link_libraries(
 android_target_dependency(android-grpc_unittest linux-x86_64
                           TCMALLOC_OS_DEPENDENCIES)
 set_property(TARGET android-grpc_unittest PROPERTY CXX_STANDARD 17)
-# Lets distribute the proto file
+
+add_custom_command(
+  TARGET android-grpc_unittest
+  PRE_BUILD
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-grpc/android/emulation/control/test/test_allow_list.json
+    $<TARGET_FILE_DIR:android-grpc_unittest>/test_allow_list.json)
+
+# Lets distribute the proto files, and the security configuration
 install(
   FILES emulator_controller.proto snapshot_service.proto
         ui_controller_service.proto emulator_stats.proto
         ${ANDROID_QEMU2_TOP_DIR}/android/emu/protos/snapshot.proto
+        ${ANDROID_QEMU2_TOP_DIR}/android/android-grpc/android/emulation/control/secure/emulator_access.json
   DESTINATION lib)
 
-android_add_executable(
-  TARGET qsn INSTALL . LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      android/emulation/control/QueryEmulator.cpp)
-target_link_libraries(qsn PRIVATE android-emu android-grpc libqemu2-glue
-                                  android-emu-crashreport
-                                  android-emu-crashreport-consent-never)
+android_add_executable(TARGET qsn INSTALL . LICENSE Apache-2.0
+                       SRC android/emulation/control/QueryEmulator.cpp)
+target_link_libraries(
+  qsn PRIVATE android-emu android-grpc libqemu2-glue android-emu-crashreport
+              android-emu-crashreport-consent-never)
 
 # Add the benchmark
 android_add_executable(
   TARGET grpc_benchmark
   NODISTRIBUTE
-  SRC # cmake-format: sortable
-      android/emulation/control/keyboard/KeytranslatePerf.cpp
-      android/emulation/control/snapshot/TarStreamPerf.cpp)
+  SRC android/emulation/control/keyboard/KeytranslatePerf.cpp
+      android/emulation/control/snapshot/TarStreamPerf.cpp
+      android/emulation/control/test/AllowListPerf.cpp)
 target_link_libraries(grpc_benchmark PRIVATE android-grpc android-emu-base
                                              emulator-gbench)
 
 # IPC benchmarks
-android_add_executable(
-  TARGET ipc_benchmark NODISTRIBUTE
-  SRC # cmake-format: sortable
-      android/emulation/control/test/IPC_benchmark.cpp)
+android_add_executable(TARGET ipc_benchmark NODISTRIBUTE
+                       SRC android/emulation/control/test/IPC_benchmark.cpp)
 target_link_libraries(ipc_benchmark PRIVATE android-emu emulator-gbench
                                             android-grpc-test-services)
 
 android_add_executable(
-  TARGET ipc_reader
-  NODISTRIBUTE
-  SRC # cmake-format: sortable
-      android/emulation/control/test/IPC_reader.cpp
+  TARGET ipc_reader NODISTRIBUTE
+  SRC android/emulation/control/test/IPC_reader.cpp
       android/emulation/control/test/TestEchoService.cpp)
 target_link_libraries(ipc_reader PRIVATE android-emu android-grpc-test-services)
 add_dependencies(ipc_benchmark ipc_reader)
 
 # Add the benchmark for streaming screenshots
-android_add_executable(
-  TARGET grpc_stream_screen_benchmark NODISTRIBUTE
-  SRC # cmake-format: sortable
-      android/emulation/control/test/StreamScreenPerf.cpp)
+android_add_executable(TARGET grpc_stream_screen_benchmark NODISTRIBUTE
+                       SRC android/emulation/control/test/StreamScreenPerf.cpp)
 target_link_libraries(
   grpc_stream_screen_benchmark PRIVATE android-grpc android-emu-base
                                        android-emu emulator-gbench)
@@ -315,8 +320,7 @@ if(BLUETOOTH_EMULATION)
 
   android_add_test(
     TARGET android-grpc-emulated-bluetooth_unittest
-    SRC # cmake-format: sortable
-        android/emulation/bluetooth/BufferedAsyncDataChannelAdapter_unittest.cpp
+    SRC android/emulation/bluetooth/BufferedAsyncDataChannelAdapter_unittest.cpp
         android/emulation/bluetooth/GrpcLinkChannelServer_unittest.cpp
         android/emulation/bluetooth/PhyConnectionClient_unittest.cpp)
   target_link_libraries(

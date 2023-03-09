@@ -111,6 +111,10 @@ public:
     // loopback device or "0.0.0.0" to bind to all available devices.
     Builder& withAddress(std::string address);
 
+    // The json allowlist used to protect the grpc endpoint.
+    // defaults to <program-dir>/lib/emulator_access.json
+    Builder& withAllowList(const char* path);
+
     Builder& withService(::grpc::Service* service);
 
     // Add a service only if tls and client-ca is enabled.
@@ -143,6 +147,7 @@ private:
     std::string mAuthToken;
     std::string mJwkPath;
     std::string mJwkLoadedPath;
+    std::string mEmulatorAccessPath;
     Authorization mAuthMode{Authorization::None};
     bool mValid{true};
     bool mVerbose{false};

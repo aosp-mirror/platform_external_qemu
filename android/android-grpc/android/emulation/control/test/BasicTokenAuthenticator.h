@@ -80,7 +80,6 @@ public:
         std::size_t found = url.rfind("/");
         auto aud = absl::StrFormat(
                 "%s/%s", std::string(url.begin() + found, url.end()), method);
-
         absl::Time now = absl::Now();
 
         auto raw_jwt = tink::RawJwtBuilder()

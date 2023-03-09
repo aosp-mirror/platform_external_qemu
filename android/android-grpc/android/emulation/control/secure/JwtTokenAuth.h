@@ -19,6 +19,7 @@
 #include <string_view>
 
 #include "absl/status/status.h"
+#include "android/emulation/control/secure/AllowList.h"
 #include "android/emulation/control/secure/BasicTokenAuth.h"
 #include "android/emulation/control/secure/JwkDirectoryObserver.h"
 #include "tink/keyset_handle.h"
@@ -40,21 +41,24 @@ using Path = std::string;
 //
 // Tokens must contain the following:
 //
-// An 'aud' field matching the 'path' of the method invoked.
+// An 'iss' field, that must be on the allow list.
+// An 'aud' field matching the 'path' of the method invoked if 
+// the 'path' is not on the green list.
 // The 'exp' field is not yet expired.
-//
-//
 class JwtTokenAuth : public BasicTokenAuth {
 public:
-    JwtTokenAuth(Path jwksPath, Path jwksLoadedPath = "");
+    JwtTokenAuth(Path jwksPath,
+                 Path jwksLoadedPath,
+                 AllowList* list);
     ~JwtTokenAuth() = default;
-     absl::Status isTokenValid(grpc::string_ref path, grpc::string_ref token) override;
+    absl::Status isTokenValid(grpc::string_ref path,
+                              grpc::string_ref token) override;
 
 private:
     void updateKeysetHandle(
             std::unique_ptr<crypto::tink::KeysetHandle> incomingHandle);
 
-    const static inline std::string DEFAULT_BEARER{"Bearer "};
+    static constexpr const std::string_view DEFAULT_BEARER{"Bearer "};
     static constexpr const std::string_view kJwkExt{".jwk"};
     Path mJwksLoadedPath;
     std::mutex mKeyhandleAccess;

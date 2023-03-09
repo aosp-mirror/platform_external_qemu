@@ -18,6 +18,7 @@
 #include <vector>           // for vector
 
 #include "absl/status/status.h"  // for Status
+#include "android/emulation/control/secure/AllowList.h"
 
 namespace android {
 namespace emulation {
@@ -41,9 +42,8 @@ public:
     // the isTokenValid call.
     //
     // |header| The header to look for
-    // |prefix| The prefix to remove before passing on the call to
-    // isTokenValid
-    BasicTokenAuth(std::string header, std::string prefix = "");
+    // |list| The allow list to use.
+    BasicTokenAuth(std::string header, AllowList* list);
     virtual ~BasicTokenAuth();
 
     /// context is read/write: it contains the properties of the channel peer
@@ -79,9 +79,12 @@ public:
     // The metadata that contains the path of the method that is being invoked.
     const static inline std::string PATH{":path"};
 
+    AllowList* allowList() { return mAllowList; }
 private:
+    AllowList* mAllowList{&noAccess};
     std::string mHeader;
-    std::string mPrefix;
+
+    static DisableAccess noAccess;
 };
 
 // A class that validates that the header:
@@ -92,7 +95,7 @@ private:
 //
 class StaticTokenAuth : public BasicTokenAuth {
 public:
-    StaticTokenAuth(std::string token);
+    StaticTokenAuth(std::string token, std::string iss, AllowList* list);
     ~StaticTokenAuth() = default;
     absl::Status isTokenValid(grpc::string_ref path,
                               grpc::string_ref token) override;
@@ -101,6 +104,7 @@ public:
 
 private:
     std::string mStaticToken;
+    std::string mIssuer;
 };
 
 // A class that will validate that any of the provided validators
@@ -111,7 +115,8 @@ private:
 // Only one of the validators has to succeed.
 class AnyTokenAuth : public BasicTokenAuth {
 public:
-    AnyTokenAuth(std::vector<std::unique_ptr<BasicTokenAuth>> validators);
+    AnyTokenAuth(std::vector<std::unique_ptr<BasicTokenAuth>> validators,
+                 AllowList* list);
     ~AnyTokenAuth() = default;
     absl::Status isTokenValid(grpc::string_ref path,
                               grpc::string_ref token) override;
