@@ -110,6 +110,7 @@ extern "C" {
 
 #ifdef ANDROID_WEBRTC
 #include "android/emulation/control/RtcService.h"
+#include "android/emulation/control/RtcServiceV2.h"
 #endif
 
 #ifdef ANDROID_BLUETOOTH
@@ -461,11 +462,20 @@ int qemu_setup_grpc() {
     }
 
 #ifdef ANDROID_WEBRTC
+    // There are two versions of rtc service and we keep both of them to
+    // maintain backward compatibility.
     auto rtcSvc = android::emulation::control::getRtcService(
             getConsoleAgents()->settings->android_cmdLineOptions()->turncfg,
             getConsoleAgents()->settings->android_cmdLineOptions()->dump_audio,
             true);
     builder.withService(rtcSvc);
+
+    auto rtcSvcV2 = android::emulation::control::v2::getRtcService(
+            getConsoleAgents()->settings->android_cmdLineOptions()->turncfg,
+            getConsoleAgents()->settings->android_cmdLineOptions()->dump_audio,
+            true);
+    builder.withService(rtcSvcV2);
+
 #endif
     int port = -1;
     grpcService = builder.build();

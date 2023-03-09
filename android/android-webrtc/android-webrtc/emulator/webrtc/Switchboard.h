@@ -52,6 +52,9 @@ public:
     // Connect will initiate the RTC stream if not yet in progress.
     bool connect(std::string identity) override;
 
+    // Connect with the turn config provided by client.
+    bool connect(std::string identity, std::string turnConfig) override;
+
     // Disconnects the RTC stream in progress.
     void disconnect(std::string identity) override;
 
@@ -82,6 +85,8 @@ public:
     static std::string BRIDGE_RECEIVER;
 
 private:
+    bool connect(std::string identity, json turnConfig);
+
     std::unordered_map<std::string, std::shared_ptr<Participant>> mConnections;
 
     // Turn configuration object.
