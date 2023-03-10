@@ -14,51 +14,33 @@
 
 #include <grpcpp/grpcpp.h>
 #include <stdint.h>
-#include <sys/stat.h>  // for stat
-
 #include <cstdio>
 #include <fstream>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
-#include "android/android.h"
-#include "android/avd/info.h"
-#include "aemu/base/Log.h"
-#include "aemu/base/Optional.h"
-#include "aemu/base/Stopwatch.h"
-
-#include "aemu/base/Uuid.h"  // for Uuid
+#include "aemu/base/TypeTraits.h"
 #include "aemu/base/async/ThreadLooper.h"
-#include "aemu/base/files/GzipStreambuf.h"
-#include "aemu/base/files/PathUtils.h"  // for pj
-#include "aemu/base/files/TarStream.h"
-#include "aemu/base/memory/ScopedPtr.h"
-#include "android/base/system/System.h"
+#include "aemu/base/files/PathUtils.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
+#include "android/crashreport/HangDetector.h"
 #include "android/emulation/control/LineConsumer.h"
 #include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
-#include "host-common/vm_operations.h"
 #include "android/snapshot/Icebox.h"
-#include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
 #include "android/snapshot/SnapshotUtils.h"
 #include "android/snapshot/Snapshotter.h"
-#include "android/utils/file_io.h"
-#include "android/utils/ini.h"
-#include "android/utils/path.h"
+#include "host-common/vm_operations.h"
 #include "snapshot.pb.h"
 #include "snapshot_service.grpc.pb.h"
 #include "snapshot_service.pb.h"
-
-namespace google {
-namespace protobuf {
-class Empty;
-}  // namespace protobuf
-}  // namespace google
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -85,6 +67,7 @@ public:
         mStatus->set_err("Operation failed due to: " + errMsg);
         return mStatus;
     }
+
 private:
     SnapshotPackage* mStatus;
 };
@@ -133,7 +116,9 @@ public:
                 streamBufPtr = csb.get();
             } else {
                 dstFile.reset(new std::ofstream(
-                        android::base::PathUtils::asUnicodePath(request->path().data()).data(),
+                        android::base::PathUtils::asUnicodePath(
+                                request->path().data())
+                                .data(),
                         std::ios::binary | std::ios::out));
                 if (!dstFile->is_open()) {
                     result.set_success(false);
@@ -221,21 +206,25 @@ public:
         for (auto snapshot : snapshot::Snapshot::getExistingSnapshots()) {
             auto protobuf = snapshot.getGeneralInfo();
 
-            bool keep =
-                    (request->statusfilter() == SnapshotFilter::CompatibleOnly &&
-                     snapshot.checkValid(false)) ||
-                    request->statusfilter() == SnapshotFilter::All;
+            bool keep = (request->statusfilter() ==
+                                 SnapshotFilter::CompatibleOnly &&
+                         snapshot.checkValid(false)) ||
+                        request->statusfilter() == SnapshotFilter::All;
             if (protobuf && keep) {
                 auto details = reply->add_snapshots();
                 details->set_snapshot_id(snapshot.name().data());
                 details->set_size(snapshot.folderSize());
                 if (snapshot.isLoaded()) {
-                    // Invariant: SnapshotDetails::Loaded -> SnapshotDetails::Compatible
+                    // Invariant: SnapshotDetails::Loaded ->
+                    // SnapshotDetails::Compatible
                     details->set_status(SnapshotDetails::Loaded);
                 } else {
                     // We only need to check for snapshot validity once.
-                    // Invariant: SnapshotFilter::CompatbileOnly -> snapshot.checkValid(false)
-                    if (request->statusfilter() == SnapshotFilter::CompatibleOnly || snapshot.checkValid(false)) {
+                    // Invariant: SnapshotFilter::CompatbileOnly ->
+                    // snapshot.checkValid(false)
+                    if (request->statusfilter() ==
+                                SnapshotFilter::CompatibleOnly ||
+                        snapshot.checkValid(false)) {
                         details->set_status(SnapshotDetails::Compatible);
                     } else {
                         details->set_status(SnapshotDetails::Incompatible);
@@ -364,7 +353,115 @@ public:
         return Status::OK;
     }
 
+    Status UpdateSnapshot(ServerContext* context,
+                          const SnapshotUpdateDescription* request,
+                          SnapshotDetails* reply) override {
+        auto snapshot =
+                snapshot::Snapshot::getSnapshotById(request->snapshot_id());
+        if (!snapshot.hasValue()) {
+            return Status(grpc::StatusCode::NOT_FOUND,
+                          "Snapshot with id " + request->snapshot_id() +
+                                  " does not exist.");
+        }
+
+        emulator_snapshot::Snapshot* info =
+                const_cast<emulator_snapshot::Snapshot*>(
+                        snapshot->getGeneralInfo());
+        if (!info) {
+            return Status(grpc::StatusCode::INTERNAL,
+                          "Unable to retrieve general info for " +
+                                  request->snapshot_id());
+        }
+
+        if (!request->has_description() && !request->has_logical_name()) {
+            return Status(grpc::StatusCode::INVALID_ARGUMENT,
+                          "No description, nor logical_name present for " +
+                                  request->snapshot_id());
+        }
+
+        if (request->has_description()) {
+            info->set_description(request->description().value());
+        }
+
+        if (request->has_logical_name()) {
+            info->set_logical_name(request->logical_name().value());
+        }
+
+        if (!snapshot->writeSnapshotToDisk()) {
+            return Status(grpc::StatusCode::INTERNAL,
+                          "Unable to retrieve general info for " +
+                                  request->snapshot_id());
+        }
+
+        return GetSnapshot(context, request->snapshot_id(), reply);
+    }
+
+    Status GetScreenshot(ServerContext* context,
+                         const SnapshotId* request,
+                         SnapshotScreenshotFile* response) override {
+        auto snapshot =
+                snapshot::Snapshot::getSnapshotById(request->snapshot_id());
+
+        if (!snapshot.hasValue()) {
+            return Status(grpc::StatusCode::NOT_FOUND,
+                          "Snapshot with id " + request->snapshot_id() +
+                                  " does not exist.");
+        }
+        std::ifstream file(snapshot->screenshot(), std::ios::binary);
+        if (!file) {
+            return Status(grpc::StatusCode::INTERNAL,
+                          "Unable to open screenshot for snapshot: " +
+                                  request->snapshot_id());
+        }
+        auto screenshot = std::string((std::istreambuf_iterator<char>(file)),
+                                      std::istreambuf_iterator<char>());
+        response->set_format(SnapshotScreenshotFile::FORMAT_PNG);
+        response->set_data(std::move(screenshot));
+        return Status::OK;
+    }
+
 private:
+    // Gets an individual snapshot
+    Status GetSnapshot(ServerContext* context,
+                       const std::string snapshot_id,
+                       SnapshotDetails* reply) {
+        auto snapshot = snapshot::Snapshot::getSnapshotById(snapshot_id);
+        if (!snapshot.hasValue()) {
+            return Status(
+                    grpc::StatusCode::NOT_FOUND,
+                    "Snapshot with id " + snapshot_id + " does not exist.");
+        }
+
+        emulator_snapshot::Snapshot* info =
+                const_cast<emulator_snapshot::Snapshot*>(
+                        snapshot->getGeneralInfo());
+        if (!info) {
+            return Status(grpc::StatusCode::INTERNAL,
+                          "Unable to retrieve general info for " + snapshot_id);
+        }
+        auto details = reply->mutable_details();
+        details->CopyFrom(*info);
+
+        reply->set_snapshot_id(snapshot->name().data());
+        reply->set_size(snapshot->folderSize());
+        if (snapshot->isLoaded()) {
+            // Invariant: SnapshotDetails::Loaded ->
+            // SnapshotDetails::Compatible
+            reply->set_status(SnapshotDetails::Loaded);
+        } else {
+            // We only need to check for snapshot validity once.
+            // Invariant: SnapshotFilter::CompatbileOnly ->
+            // snapshot.checkValid(false)
+            if (snapshot->checkValid(false)) {
+                reply->set_status(SnapshotDetails::Compatible);
+            } else {
+                reply->set_status(SnapshotDetails::Incompatible);
+            }
+        }
+
+        return Status::OK;
+    }
+
     static constexpr uint32_t k256KB = 256 * 1024;
     static constexpr uint32_t k64KB = 64 * 1024;
 };  // namespace control

@@ -92,6 +92,9 @@ public:
     bool isCompatibleWithCurrentFeatures();
     bool isLoaded();
 
+    // Returns the path to the screenshot
+    std::string screenshot();
+
 private:
     void loadProtobufOnce();
     bool verifyHost(const emulator_snapshot::Host& host, bool writeFailure);
