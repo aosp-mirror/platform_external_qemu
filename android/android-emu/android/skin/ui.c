@@ -96,6 +96,7 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
 
     ui->window = skin_window_create(
             ui->layout, ui->ui_params.window_x, ui->ui_params.window_y,
+            ui->ui_params.window_w, ui->ui_params.window_h,
             ui->ui_params.enable_scale,
             use_emugl_subwindow, ui->ui_funcs->window_funcs);
     if (!ui->window) {

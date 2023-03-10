@@ -59,6 +59,7 @@ typedef struct SkinUIFuncs {
 // <port>:<name> where <port> is a console port number (e.g. 5554) and
 // <name> is the AVD's name.
 // |window_x| and |window_y| are the the initial UI window coordinates.
+// |window_w| and |window_h| are the the initial UI window size.
 // |window_scale| is the window scaling factor. Use 1.0 for unscaled display.
 // |enable_touch| is true iff touch emulation is needed.
 // |enable_dpad| is true iff DPad emulation is needed.
@@ -73,6 +74,8 @@ typedef struct SkinUIParams {
     char window_name[256];
     int window_x;
     int window_y;
+    int window_w;
+    int window_h;
 
     bool enable_touch;
     bool enable_dpad;
