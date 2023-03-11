@@ -315,11 +315,11 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 # the verion used, let's dump all sdks
                 echo "The list of the installed OS X SDKs:"
                 xcodebuild -showsdks | grep macosx
-                echo "(using the latest version for the Qt build)"
+                echo "(using version 10.13 for the Qt build)"
 
                 var_append EXTRA_CONFIGURE_FLAGS \
                     -no-framework \
-                    -sdk macosx
+                    -sdk macosx10.13
                 var_append CFLAGS -mmacosx-version-min=10.11
                 var_append LDFLAGS -mmacosx-version-min=10.11
                 var_append LDFLAGS -lc++
@@ -438,6 +438,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         tofix=$(otool -LX $bin | grep "libQt.*.dylib" | cut -f1 -d ' ')
                         for fix in $tofix; do
                             fix_basename=$(basename $fix)
+                            # Always point to the hard-link (libQt5*.<3-digit-ver>.dylib)
+                            qt_version="5.12.1"
+                            fix_basename="${fix_basename%%.*}.$qt_version.dylib"
                             echo "\t$fix ==> @rpath/$fix_basename"
                             run install_name_tool -change "$fix" "@rpath/$fix_basename" $bin
                         done
