@@ -1290,6 +1290,9 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     // Hide the Cancel button so X is the only way to cancel.
     cancelButton->setHidden(true);
 
+    // ten seconds
+    constexpr int timeout = 10000;
+    QTimer::singleShot(timeout, (msgBox.button(QMessageBox::Yes)), SLOT(animateClick()));
     int selection = msgBox.exec();
 
     int64_t endTime = get_uptime_ms();
