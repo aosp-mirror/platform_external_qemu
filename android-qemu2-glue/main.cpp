@@ -2764,10 +2764,6 @@ extern "C" int main(int argc, char** argv) {
                                                                : "guest");
         args.add("-chardev");
         if (opts->packet_streamer_endpoint) {
-            dwarning(
-                    "Activating netsim, but ignoring: %s until b/265451720 is resolved"
-                    " reverting to auto discovery.",
-                    opts->packet_streamer_endpoint);
             args.addFormat("netsim,id=bluetooth,path=foo");
         } else {
             dwarning("Using *DEPRECATED* rootcanal bluetooth emulation.");
