@@ -53,6 +53,9 @@ void net_slirp_set_shapers(void* out_opaque,
                             void* in_opaque,
                             SlirpShaperSendFunc in_send);
 
+void net_slirp_init_custom_dns_servers(const struct sockaddr_storage* dns,
+                                   int dns_count);
+
 #endif
 
 #endif /* QEMU_NET_SLIRP_H */
