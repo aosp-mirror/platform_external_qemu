@@ -38,7 +38,7 @@
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emul...
 #include "android/utils/debug.h"                                 // for dinfo
 #include "emulated_bluetooth_device.pb.h"                        // for Gatt...
-#include "emulator_controller.pb.h"                              // for control
+// #include "emulator_controller.pb.h"                              // for control
 
 ABSL_FLAG(std::string,
           with_device_proto,

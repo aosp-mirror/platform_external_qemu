@@ -34,7 +34,10 @@ target_compile_options(android-webrtc PUBLIC -Wno-inconsistent-missing-override)
 target_link_libraries(android-webrtc PUBLIC nlohmann_json::nlohmann_json
                       PRIVATE protobuf::libprotobuf
                               grpc++
-                              android-grpc-utils
+                              android-emu
+                              emulator_controller-server-impl
+                              android-grpc-event-waiter
+                              qemu-host-common-headers
                               webrtc_platform_defs
                               webrtc_api_libjingle_peerconnection_api
                               webrtc_pc_peerconnection
