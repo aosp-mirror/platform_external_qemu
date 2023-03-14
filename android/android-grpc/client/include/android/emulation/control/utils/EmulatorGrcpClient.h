@@ -64,6 +64,9 @@ public:
     static std::unique_ptr<EmulatorGrpcClient> loadFromProto(
             std::string_view patToEndpointProto);
 
+    // Returns a connection to the current emulator
+    static std::shared_ptr<EmulatorGrpcClient> me();
+
 protected:
     bool initializeChannel();
 
