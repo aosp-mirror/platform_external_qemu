@@ -3252,6 +3252,14 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
             android::featurecontrol::isEnabled(
                     android::featurecontrol::VirtioTablet);
 
+    const QAndroidGlobalVarsAgent *settings = getConsoleAgents()->settings;
+    const bool inputDeviceHasRotary =
+            android::featurecontrol::isEnabled(
+                    android::featurecontrol::VirtioInput) &&
+            (settings->hw()->hw_rotaryInput ||
+             (settings->avdInfo() &&
+              avdInfo_getAvdFlavor(settings->avdInfo()) == AVD_WEAR));
+
     if (inputDeviceHasWheel) {
         // Mouse is active only when it's grabbed. Tablet is always active.
         const bool inputDeviceActive = (
@@ -3271,6 +3279,14 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
 #else
         handleMouseWheelEvent(event->delta(), event->orientation());
 #endif  // QT_VERSION
+    } else if (inputDeviceHasRotary) {
+        SkinEvent* skin_event = createSkinEvent(kEventRotaryInput);
+#if QT_VERSION >= 0x060000
+        skin_event->u.rotary_input.delta = event->angleDelta().y() / 8;
+#else
+        skin_event->u.rotary_input.delta = event->delta() / 8;
+#endif  // QT_VERSION
+        queueSkinEvent(skin_event);
     } else {
         if (mWheelScrollTimer.isActive()) {
             // Scroll gesture is in progress.
