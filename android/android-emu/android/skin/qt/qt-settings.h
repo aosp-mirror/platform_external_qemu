@@ -59,6 +59,7 @@ constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
 constexpr char DISABLE_MOUSE_WHEEL[] = "set/disableMouseWheel";
 constexpr char PAUSE_AVD_WHEN_MINIMIZED[] = "set/pauseAvdWhenMinimized";
+constexpr char DISABLE_PINCH_TO_ZOOM[] = "set/disablePinchToZoom";
 
 constexpr char BATTERY_CHARGE_LEVEL[]  = "battery/charge_level";
 constexpr char BATTERY_CHARGER_TYPE[]  = "battery/charger_type";

@@ -643,6 +643,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mIgnoreWheelEvent =
             settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
 
+    mDisablePinchToZoom =
+            settings.value(Ui::Settings::DISABLE_PINCH_TO_ZOOM, false).toBool();
     // set custom ADB path if saved
     bool autoFindAdb =
             settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool();
@@ -1567,6 +1569,10 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways) {
 
 void EmulatorQtWindow::setIgnoreWheelEvent(bool ignore) {
     mIgnoreWheelEvent = ignore;
+}
+
+void EmulatorQtWindow::setDisablePinchToZoom(bool disabled) {
+    mDisablePinchToZoom = disabled;
 }
 
 void EmulatorQtWindow::setPauseAvdWhenMinimized(bool pause) {
@@ -2851,7 +2857,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
         event->key() == Qt::Key_Control &&
         (event->modifiers() == Qt::ControlModifier ||
          event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))) {
-        if (type == kEventKeyDown) {
+        if (type == kEventKeyDown && !mDisablePinchToZoom) {
             if (mToolWindow->getUiEmuAgent()
                         ->multiDisplay->isMultiDisplayEnabled() == false) {
                 raise();
