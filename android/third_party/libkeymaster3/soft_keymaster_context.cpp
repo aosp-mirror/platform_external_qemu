@@ -927,7 +927,7 @@ keymaster_error_t SoftKeymasterContext::FakeKeyAuthorizations(EVP_PKEY* pubkey,
     hw_enforced->Clear();
     sw_enforced->Clear();
 
-    switch (EVP_PKEY_type(pubkey->type)) {
+    switch (EVP_PKEY_type(EVP_PKEY_id(pubkey))) {
     case EVP_PKEY_RSA: {
         hw_enforced->push_back(TAG_ALGORITHM, KM_ALGORITHM_RSA);
         hw_enforced->push_back(TAG_DIGEST, KM_DIGEST_NONE);
