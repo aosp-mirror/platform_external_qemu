@@ -118,6 +118,9 @@ set(OPTION_GFXSTREAM_BACKEND
       BOOL
       "Build the gfxstream backend (plus everything else).")
 
+set(OPTION_TEST_LOGS "${CMAKE_BINARY_DIR}/testlogs" CACHE
+    STRING "Directory where all the unit test xml files will be stored.")
+
 set(GFXSTREAM
     FALSE
     CACHE
