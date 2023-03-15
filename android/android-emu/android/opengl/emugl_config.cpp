@@ -220,6 +220,12 @@ bool emuglConfig_init(EmuglConfig* config,
 
     bool hasUiPreference = (enum WinsysPreferredGlesBackend)uiPreferredBackend != WINSYS_GLESBACKEND_PREFERENCE_AUTO;
 
+#ifdef __APPLE__
+    const char* kDefaultHostMode = "angle_indirect";
+#else
+    const char* kDefaultHostMode = "host";
+#endif
+
     // The value of '-gpu <mode>' overrides both the hardware properties
     // and the UI setting, except if <mode> is 'auto'.
     if (gpu_option) {
@@ -227,7 +233,7 @@ bool emuglConfig_init(EmuglConfig* config,
         if (!strcmp(gpu_option, "on") || !strcmp(gpu_option, "enable")) {
             gpu_enabled = true;
             if (!gpu_mode || !strcmp(gpu_mode, "auto")) {
-                gpu_mode = "host";
+                gpu_mode = kDefaultHostMode;
             }
         } else if (!strcmp(gpu_option, "off") ||
                    !strcmp(gpu_option, "disable") ||
@@ -252,7 +258,7 @@ bool emuglConfig_init(EmuglConfig* config,
             !strcmp(gpu_mode, "enable") ||
             !strcmp(gpu_mode, "host"))) {
             gpu_enabled = true;
-            gpu_mode = "host";
+            gpu_mode = kDefaultHostMode;
             host_set_in_hwconfig = true;
         }
         sGpuOption = gpu_mode;
@@ -398,10 +404,10 @@ bool emuglConfig_init(EmuglConfig* config,
                     }
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
-                    gpu_mode = "host";
+                    gpu_mode = kDefaultHostMode;
                     break;
                 default:
-                    gpu_mode = "host";
+                    gpu_mode = kDefaultHostMode;
                     break;
             }
             D("%s: auto-selected %s based on conditions and UI preference %d\n",
