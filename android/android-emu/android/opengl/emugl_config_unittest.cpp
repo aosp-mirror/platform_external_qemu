@@ -31,6 +31,14 @@ namespace base {
 #  define LIB_NAME(x)  "lib" x ".so"
 #endif
 
+#ifdef __APPLE__
+const char* kDefaultHostGpuMode = "angle_indirect";
+const char* kDefaultConfigString = "GPU emulation enabled using 'angle_indirect' mode";
+#else
+const char* kDefaultHostGpuMode = "host";
+const char* kDefaultConfigString = "GPU emulation enabled using 'host' mode";
+#endif
+
 static std::string makeLibSubPath(const char* name) {
     return StringFormat("%s/%s/%s",
                         System::get()->getLauncherDirectory().c_str(),
@@ -75,6 +83,10 @@ TEST(EmuglConfig, init) {
     makeLibSubFile(myDir, "gles_vendor/" LIB_NAME("EGL"));
     makeLibSubFile(myDir, "gles_vendor/" LIB_NAME("GLESv2"));
 
+    makeLibSubDir(myDir, "gles_angle");
+    makeLibSubFile(myDir, "gles_angle/" LIB_NAME("EGL"));
+    makeLibSubFile(myDir, "gles_angle/" LIB_NAME("GLESv2"));
+
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
@@ -90,8 +102,8 @@ TEST(EmuglConfig, init) {
                     &config, true, "host", NULL, 0, false, false, false,
                     WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("host", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
+        EXPECT_STREQ(kDefaultHostGpuMode, config.backend);
+        EXPECT_STREQ(kDefaultConfigString, config.status);
     }
 
     // Check that "host" mode is available with -no-window if explicitly
@@ -150,8 +162,8 @@ TEST(EmuglConfig, init) {
                     &config, false, NULL, "on", 0, false, false, false,
                     WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("host", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
+        EXPECT_STREQ(kDefaultHostGpuMode, config.backend);
+        EXPECT_STREQ(kDefaultConfigString, config.status);
     }
 
     {
@@ -282,7 +294,7 @@ TEST(EmuglConfig, initFromUISetting) {
 #endif
             break;
         case 4:
-            EXPECT_STREQ("host", config.backend);
+            EXPECT_STREQ(kDefaultHostGpuMode, config.backend);
             break;
         default:
             break;
