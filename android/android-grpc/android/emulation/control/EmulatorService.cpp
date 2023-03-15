@@ -54,7 +54,6 @@
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
-#include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
 #include "android/emulation/control/audio/AudioStream.h"

@@ -1,9 +1,11 @@
 protobuf_generate_grpc_cpp(
-  SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} SOURCES rtc_service.proto
+  SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} SOURCES ice_config.proto rtc_service.proto rtc_service_v2.proto
   OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} GENERATED EMULATOR_WEBRTC_GRPC_SRC)
 
 # Lets distribute the proto file
 install(FILES rtc_service.proto DESTINATION lib)
+install(FILES rtc_service_v2.proto DESTINATION lib)
+install(FILES ice_config.proto DESTINATION lib)
 
 # Let's add in the library
 android_add_library(
@@ -13,6 +15,7 @@ android_add_library(
   SRC # cmake-format: sortable
       ${EMULATOR_WEBRTC_GRPC_SRC}
       android/emulation/control/RtcService.cpp
+      android/emulation/control/RtcServiceV2.cpp
       android/emulation/control/TurnConfig.cpp
       emulator/webrtc/capture/AudioSource.cpp
       emulator/webrtc/capture/InprocessAudioSource.cpp
