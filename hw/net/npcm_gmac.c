@@ -110,14 +110,19 @@ static const uint16_t phy_reg_init[] = {
     [MII_BMCR]      = MII_BMCR_AUTOEN | MII_BMCR_FD | MII_BMCR_SPEED1000,
     [MII_BMSR]      = MII_BMSR_100TX_FD | MII_BMSR_100TX_HD | MII_BMSR_10T_FD |
                       MII_BMSR_10T_HD | MII_BMSR_EXTSTAT | MII_BMSR_AUTONEG |
-                      MII_BMSR_EXTCAP,
+                      MII_BMSR_LINK_ST | MII_BMSR_EXTCAP,
     [MII_PHYID1]    = 0x0362,
     [MII_PHYID2]    = 0x5e6a,
     [MII_ANAR]      = MII_ANAR_TXFD | MII_ANAR_TX | MII_ANAR_10FD |
                       MII_ANAR_10 | MII_ANAR_CSMACD,
-    [MII_ANER]      = 0x64,
+    [MII_ANLPAR]    = MII_ANLPAR_ACK | MII_ANLPAR_PAUSE |
+                      MII_ANLPAR_TXFD | MII_ANLPAR_TX | MII_ANLPAR_10FD |
+                      MII_ANLPAR_10 | MII_ANLPAR_CSMACD,
+    [MII_ANER]      = 0x64 | MII_ANER_NWAY,
     [MII_ANNP]      = 0x2001,
     [MII_CTRL1000]  = MII_CTRL1000_FULL,
+    [MII_STAT1000]  = MII_STAT1000_FULL,
+    [MII_EXTSTAT]   = 0x3000, /* 1000BASTE_T full-duplex capable */
 };
 
 static void npcm_gmac_soft_reset(NPCMGMACState *s)
@@ -126,6 +131,16 @@ static void npcm_gmac_soft_reset(NPCMGMACState *s)
            NPCM_GMAC_NR_REGS * sizeof(uint32_t));
     /* Clear reset bits */
     s->regs[R_NPCM_DMA_BUS_MODE] &= ~NPCM_DMA_BUS_MODE_SWR;
+}
+
+static void gmac_phy_set_link(NPCMGMACState *s, bool active)
+{
+    /* Autonegotiation status mirrors link status.  */
+    if (active) {
+        s->phy_regs[0][MII_BMSR] |= (MII_BMSR_LINK_ST | MII_BMSR_AN_COMP);
+    } else {
+        s->phy_regs[0][MII_BMSR] &= ~(MII_BMSR_LINK_ST | MII_BMSR_AN_COMP);
+    }
 }
 
 static bool gmac_can_receive(NetClientState *nc)
@@ -145,7 +160,10 @@ static void gmac_cleanup(NetClientState *nc)
 
 static void gmac_set_link(NetClientState *nc)
 {
-    /* Nothing to do yet. */
+    NPCMGMACState *s = qemu_get_nic_opaque(nc);
+
+    trace_npcm_gmac_set_link(!nc->link_down);
+    gmac_phy_set_link(s, !nc->link_down);
 }
 
 static void npcm_gmac_mdio_access(NPCMGMACState *s, uint16_t v)
@@ -283,14 +301,7 @@ static void npcm_gmac_reset(DeviceState *dev)
     NPCMGMACState *s = NPCM_GMAC(dev);
 
     npcm_gmac_soft_reset(s);
-    if (s->pcs != NULL) {
-        memcpy(s->phy_regs[0], s->pcs->sr_mii, sizeof(s->pcs->sr_mii));
-        /* Kernel thinks that we need a 0x6600 to work */
-        s->phy_regs[0][1] |= MII_BMCR_LOOPBACK | MII_BMCR_SPEED100 |
-                             MII_BMCR_ANRESTART;
-    } else {
-        memcpy(s->phy_regs[0], phy_reg_init, sizeof(phy_reg_init));
-    }
+    memcpy(s->phy_regs[0], phy_reg_init, sizeof(phy_reg_init));
 
     trace_npcm_gmac_reset(DEVICE(s)->canonical_path, s->phy_regs[0][MII_BMSR]);
 }
