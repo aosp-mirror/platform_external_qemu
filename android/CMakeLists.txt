@@ -24,7 +24,10 @@ add_subdirectory(android-grpc)
 if(WEBRTC)
   message(STATUS "Including webrtc support")
   add_subdirectory(android-webrtc)
+else()
+  add_subdirectory(${AOSP_ROOT}/external/webrtc/third_party/libyuv libyuv)
 endif()
+
 
 if(BLUETOOTH_EMULATION)
   message(

@@ -86,6 +86,7 @@
 #include "android/skin/winsys.h"
 #include "android/telephony/gsm.h"
 #include "android/telephony/sms.h"
+#include "android/utils/debug.h"
 #include "android/version.h"
 #include "android_modem_v2.h"
 #include "emulator_controller.grpc.pb.h"
