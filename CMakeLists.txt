@@ -1040,4 +1040,4 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/target.tag "${ANDROID_TARGET_TAG}")
 
 # Construct licenses for all targets, this should always be the last thing we
 # do.
-finalize_all_licenses()
+# finalize_all_licenses()

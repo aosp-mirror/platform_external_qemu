@@ -126,7 +126,7 @@ class HeartRateMonitor(GattDeviceServiceServicer):
 def register():
     """Registers the heart rate monitor with the first discovered emulator."""
     server = start_server()
-    stub = get_default_emulator().get_emulated_bluetooth_service()
+    stub = get_default_emulator().get_emulated-bluetooth-service()
 
     device_description = GattDevice(
         # Location where I registered my server, the nimble stack will
