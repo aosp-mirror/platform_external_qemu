@@ -70,3 +70,7 @@ if(WINDOWS_MSVC_X86_64)
   target_compile_options(emulator-libkeymaster3
                          PRIVATE "-mssse3" "-Wno-incompatible-pointer-types")
 endif()
+if(LINUX_X86_64 OR LINUX_AARCH64)
+  target_compile_options(emulator-libkeymaster3
+                         PRIVATE "-Wno-c++11-narrowing")
+endif()
