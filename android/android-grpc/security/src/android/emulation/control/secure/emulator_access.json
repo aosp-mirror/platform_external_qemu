@@ -96,7 +96,6 @@
                 "/android.emulation.control.EmulatorController/getGps",
                 "/android.emulation.control.EmulatorController/sendPhone",
                 "/android.emulation.control.EmulatorController/sendSms",
-                "/android.emulation.control.EmulatorController/getStatus",
                 "/android.emulation.control.EmulatorController/setDisplayConfigurations",
                 "/android.emulation.control.EmulatorController/getDisplayConfigurations",
                 "/android.emulation.control.EmulatorController/rotateVirtualSceneCamera",
