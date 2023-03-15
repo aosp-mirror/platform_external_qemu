@@ -60,6 +60,7 @@ class EmulatorWindow;
 
 typedef struct SkinSurface SkinSurface;
 class SkinSurfaceBitmap;
+class SwipeGesture;
 
 using RunOnUiThreadFunc = std::function<void()>;
 Q_DECLARE_METATYPE(QPainter::CompositionMode);
@@ -574,11 +575,7 @@ private:
     bool mDisablePinchToZoom = false;
     bool mPauseAvdWhenMinimized = false;
     QTimer mWheelScrollTimer;
-#if QT_VERSION >= 0x060000
-    QPointF mWheelScrollPos;
-#else
-    QPoint mWheelScrollPos;
-#endif  // QT_VERSION
+    std::unique_ptr<SwipeGesture> mSwipeGesture;
     bool mStartedAdbStopProcess;
 
     bool         mFrameAlways;       // true = no floating emulator
