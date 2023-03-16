@@ -131,6 +131,7 @@ public:
 
     Builder& withLogging(bool logging);
 
+    std::string allowlist() { return mEmulatorAccessPath; }
 private:
     std::string readSecrets(const char* fname);
 

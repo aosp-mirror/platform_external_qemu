@@ -45,13 +45,13 @@ extern "C" {
 #include "aemu/base/CpuUsage.h"
 #include "aemu/base/Log.h"
 #include "aemu/base/Tracing.h"
-#include "aemu/base/process/Process.h"
 #include "aemu/base/Uuid.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/MemStream.h"
-#include "aemu/base/files/PathUtils.h"  // for pj
+#include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/process/Process.h"
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/audio-capturer.h"
 #include "android-qemu2-glue/audio-output.h"
@@ -99,6 +99,7 @@ extern "C" {
 #include "android/utils/Random.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
+#include "android/version.h"
 #include "host-common/DmaMap.h"
 #include "host-common/VmLock.h"
 #include "host-common/address_space_device.h"
@@ -285,7 +286,8 @@ bool qemu_android_emulation_early_setup() {
         std::string name = get_display_name();
         register_netsim(to_string(opts->packet_streamer_endpoint),
                         to_string(opts->rootcanal_default_commands_file),
-                        to_string(opts->rootcanal_controller_properties_file), name);
+                        to_string(opts->rootcanal_controller_properties_file),
+                        name);
     }
     return true;
 }
@@ -353,6 +355,8 @@ int qemu_setup_grpc() {
     auto contentPath = avdInfo_getContentPath(avdInfo);
     EmulatorProperties props{
             {"port.serial", std::to_string(android_serial_number_port)},
+            {"emulator.build", EMULATOR_BUILD_STRING},
+            {"emulator.version", EMULATOR_VERSION_STRING},
             {"port.adb", std::to_string(android_adb_port)},
             {"avd.name", displayName},
             {"avd.id", avdInfo_getId(getConsoleAgents()->settings->avdInfo())},
@@ -379,7 +383,8 @@ int qemu_setup_grpc() {
             getConsoleAgents());
     auto adb = android::emulation::control::getAdbService();
     auto stats = android::emulation::stats::getStatsService();
-    auto modem = android::emulation::control::incubating::getModemService(getConsoleAgents());
+    auto modem = android::emulation::control::incubating::getModemService(
+            getConsoleAgents());
     auto builder =
             EmulatorControllerService::Builder()
                     .withConsoleAgents(getConsoleAgents())
@@ -428,9 +433,12 @@ int qemu_setup_grpc() {
                "%d", &timeout) == 1) {
         builder.withIdleTimeout(std::chrono::seconds(timeout));
     }
-    bool useToken =  getConsoleAgents()
-                ->settings->android_cmdLineOptions()
-                ->grpc_use_token || getConsoleAgents()->settings->android_cmdLineOptions()->grpc_use_jwt;
+    bool useToken = getConsoleAgents()
+                            ->settings->android_cmdLineOptions()
+                            ->grpc_use_token ||
+                    getConsoleAgents()
+                            ->settings->android_cmdLineOptions()
+                            ->grpc_use_jwt;
 
     if (useToken) {
         const int of64Bytes = 64;
@@ -484,6 +492,7 @@ int qemu_setup_grpc() {
         port = grpcService->port();
 
         props["grpc.port"] = std::to_string(port);
+        props["grpc.allowlist"] = builder.allowlist();
         if (getConsoleAgents()
                     ->settings->android_cmdLineOptions()
                     ->grpc_tls_cer) {
