@@ -2174,6 +2174,10 @@ bool configAndStartRenderer(
     if (getConsoleAgents()->settings->android_qemu_mode()) {
         // Always enable GLDirectMem for API >= 29
         bool shouldEnableGLDirectMem = api_level >= 29;
+#if defined(__aarch64__) && defined(__APPLE__)
+        // b/273985153
+        shouldEnableGLDirectMem = false;
+#endif
         bool shouldEnableVulkan = true;
 
         crashhandler_append_message_format(
@@ -2226,7 +2230,6 @@ bool configAndStartRenderer(
 
         if (shouldEnableVulkan) {
             crashhandler_append_message_format("Enabling Vulkan");
-            feature_set_if_not_overridden(kFeature_GLDirectMem, true);
             feature_set_if_not_overridden(kFeature_Vulkan, true);
         } else {
             crashhandler_append_message_format(
