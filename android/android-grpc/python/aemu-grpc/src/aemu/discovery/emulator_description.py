@@ -187,7 +187,7 @@ class BasicEmulatorDescription(dict):
         return ModemStub(channel)
 
 
-    def get_emulated-bluetooth-service(
+    def get_emulated_bluetooth_service(
         self, use_async=False
     ) -> EmulatedBluetoothServiceStub:
         """Returns a stub to the emulated bluetooth service."""
