@@ -4164,12 +4164,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 olist = qemu_find_opts("machine");
                 qemu_opts_parse_noisily(olist, "accel=whpx", false);
                 break;
-#ifdef CONFIG_GVM
-            case QEMU_OPTION_enable_gvm:
+#ifdef CONFIG_AEHD
+            case QEMU_OPTION_enable_aehd:
                 olist = qemu_find_opts("machine");
-                qemu_opts_parse_noisily(olist, "accel=gvm", false);
+                qemu_opts_parse_noisily(olist, "accel=aehd", false);
                 break;
-#endif /* CONFIG_GVM */
+#endif /* CONFIG_AEHD */
             case QEMU_OPTION_M:
             case QEMU_OPTION_machine:
                 olist = qemu_find_opts("machine");

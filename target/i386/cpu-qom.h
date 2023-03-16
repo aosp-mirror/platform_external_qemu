@@ -67,7 +67,7 @@ typedef struct X86CPUClass {
     X86CPUDefinition *cpu_def;
 
     bool kvm_required;
-    bool gvm_required;
+    bool aehd_required;
     int ordering;
     bool migration_safe;
     bool static_model;

@@ -3494,7 +3494,7 @@ void EmulatorQtWindow::checkVgkAndWarn() {
     AndroidCpuAccelerator accelerator = androidCpuAcceleration_getAccelerator();
 
     if (accelerator != ANDROID_CPU_ACCELERATOR_HAX &&
-        accelerator != ANDROID_CPU_ACCELERATOR_GVM)
+        accelerator != ANDROID_CPU_ACCELERATOR_AEHD)
         return;
 
     if (::android::base::Win32Utils::getServiceStatus("vgk") <= SVC_NOT_FOUND)

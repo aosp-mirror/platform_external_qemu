@@ -39,8 +39,8 @@
 #include "sysemu/kvm.h"
 #include "kvm_i386.h"
 #include "hw/kvm/clock.h"
-#include "sysemu/gvm.h"
-#include "gvm_i386.h"
+#include "sysemu/aehd.h"
+#include "aehd_i386.h"
 #include "hw/pci-host/q35.h"
 #include "exec/address-spaces.h"
 #include "hw/i386/pc.h"
@@ -168,9 +168,9 @@ static void pc_q35_init(MachineState *machine)
         kvm_pc_setup_irq_routing(pcmc->pci_enabled);
         pcms->gsi = qemu_allocate_irqs(kvm_pc_gsi_handler, gsi_state,
                                        GSI_NUM_PINS);
-    } else if (gvm_ioapic_in_kernel()) {
-        gvm_pc_setup_irq_routing(pcmc->pci_enabled);
-        pcms->gsi = qemu_allocate_irqs(gvm_pc_gsi_handler, gsi_state,
+    } else if (aehd_ioapic_in_kernel()) {
+        aehd_pc_setup_irq_routing(pcmc->pci_enabled);
+        pcms->gsi = qemu_allocate_irqs(aehd_pc_gsi_handler, gsi_state,
                                        GSI_NUM_PINS);
     } else {
         pcms->gsi = qemu_allocate_irqs(gsi_handler, gsi_state, GSI_NUM_PINS);
@@ -222,8 +222,8 @@ static void pc_q35_init(MachineState *machine)
     if (kvm_pic_in_kernel()) {
         i8259 = kvm_i8259_init(isa_bus);
 #if 0
-    } else if (gvm_pic_in_kernel()) {
-        i8259 = gvm_i8259_init(isa_bus);
+    } else if (aehd_pic_in_kernel()) {
+        i8259 = aehd_i8259_init(isa_bus);
 #endif
     } else if (xen_enabled()) {
         i8259 = xen_interrupt_controller_init();

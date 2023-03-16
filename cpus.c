@@ -42,7 +42,7 @@
 #include "sysemu/hvf.h"
 #endif
 #include "sysemu/whpx.h"
-#include "sysemu/gvm.h"
+#include "sysemu/aehd.h"
 #include "exec/exec-all.h"
 
 #include "qemu/thread.h"
@@ -1141,10 +1141,10 @@ static void qemu_kvm_destroy_vcpu(CPUState *cpu)
     }
 }
 
-static void qemu_gvm_destroy_vcpu(CPUState *cpu)
+static void qemu_aehd_destroy_vcpu(CPUState *cpu)
 {
-    if (gvm_destroy_vcpu(cpu) < 0) {
-        error_report("gvm_destroy_vcpu failed");
+    if (aehd_destroy_vcpu(cpu) < 0) {
+        error_report("aehd_destroy_vcpu failed");
         exit(EXIT_FAILURE);
     }
 }
@@ -1255,7 +1255,7 @@ static void *qemu_kvm_cpu_thread_fn(void *arg)
     return NULL;
 }
 
-static void *qemu_gvm_cpu_thread_fn(void *arg)
+static void *qemu_aehd_cpu_thread_fn(void *arg)
 {
     CPUState *cpu = arg;
     int r;
@@ -1268,9 +1268,9 @@ static void *qemu_gvm_cpu_thread_fn(void *arg)
     cpu->can_do_io = 1;
     current_cpu = cpu;
 
-    r = gvm_init_vcpu(cpu);
+    r = aehd_init_vcpu(cpu);
     if (r < 0) {
-        fprintf(stderr, "gvm_init_vcpu failed: %s\n", strerror(-r));
+        fprintf(stderr, "aehd_init_vcpu failed: %s\n", strerror(-r));
         exit(1);
     }
 
@@ -1280,7 +1280,7 @@ static void *qemu_gvm_cpu_thread_fn(void *arg)
 
     do {
         if (cpu_can_run(cpu)) {
-            r = gvm_cpu_exec(cpu);
+            r = aehd_cpu_exec(cpu);
             if (r == EXCP_DEBUG) {
                 cpu_handle_guest_debug(cpu);
             }
@@ -1288,7 +1288,7 @@ static void *qemu_gvm_cpu_thread_fn(void *arg)
         qemu_wait_io_event(cpu);
     } while (!cpu->unplug || cpu_can_run(cpu));
 
-    qemu_gvm_destroy_vcpu(cpu);
+    qemu_aehd_destroy_vcpu(cpu);
     cpu->created = false;
     qemu_cond_signal(&qemu_cpu_cond);
     qemu_mutex_unlock_iothread();
@@ -1813,21 +1813,21 @@ static void qemu_cpu_kick_thread(CPUState *cpu)
     }
 #endif /* CONFIG_HVf */
 #else /* _WIN32 */
-#ifdef CONFIG_GVM
+#ifdef CONFIG_AEHD
     if (cpu->thread_kicked) {
         return;
     }
     cpu->thread_kicked = true;
-    if (gvm_enabled()) {
+    if (aehd_enabled()) {
         //Remove assert(!qemu_cpu_is_self(cpu)) since it is triggered
         //often during runtime. It is either QEMU common code issue
         //or the usage here is wrong. We could address it later.
         //Removing does not bring any harm.
         cpu_exit(cpu);
-        gvm_raise_event(cpu);
+        aehd_raise_event(cpu);
         return;
     }
-#endif /* CONFIG_GVM */
+#endif /* CONFIG_AEHD */
     if (!qemu_cpu_is_self(cpu)) {
         if (whpx_enabled()) {
             whpx_vcpu_kick(cpu);
@@ -2116,16 +2116,16 @@ static void qemu_whpx_start_vcpu(CPUState *cpu)
 #endif
 }
 
-static void qemu_gvm_start_vcpu(CPUState *cpu)
+static void qemu_aehd_start_vcpu(CPUState *cpu)
 {
     char thread_name[VCPU_THREAD_NAME_SIZE];
 
     cpu->thread = g_malloc0(sizeof(QemuThread));
     cpu->halt_cond = g_malloc0(sizeof(QemuCond));
     qemu_cond_init(cpu->halt_cond);
-    snprintf(thread_name, VCPU_THREAD_NAME_SIZE, "CPU %d/GVM",
+    snprintf(thread_name, VCPU_THREAD_NAME_SIZE, "CPU %d/AEHD",
              cpu->cpu_index);
-    qemu_thread_create(cpu->thread, thread_name, qemu_gvm_cpu_thread_fn,
+    qemu_thread_create(cpu->thread, thread_name, qemu_aehd_cpu_thread_fn,
                        cpu, QEMU_THREAD_JOINABLE);
     while (!cpu->created) {
         qemu_cond_wait(&qemu_cpu_cond, &qemu_global_mutex);
@@ -2170,8 +2170,8 @@ void qemu_init_vcpu(CPUState *cpu)
     } else if (hvf_enabled()) {
         qemu_hvf_start_vcpu(cpu);
 #endif
-    } else if (gvm_enabled()) {
-        qemu_gvm_start_vcpu(cpu);
+    } else if (aehd_enabled()) {
+        qemu_aehd_start_vcpu(cpu);
     } else if (tcg_enabled()) {
         qemu_tcg_init_vcpu(cpu);
     } else if (whpx_enabled()) {

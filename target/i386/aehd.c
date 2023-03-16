@@ -1,5 +1,5 @@
 /*
- * QEMU GVM support
+ * QEMU AEHD support
  *
  * Copyright (C) 2006-2008 Qumranet Technologies
  * Copyright IBM, Corp. 2008
@@ -17,9 +17,9 @@
 
 #include "qemu-common.h"
 #include "cpu.h"
-#include "gvm_i386.h"
+#include "aehd_i386.h"
 #include "sysemu/sysemu.h"
-#include "sysemu/gvm_int.h"
+#include "sysemu/aehd_int.h"
 #include "sysemu/hw_accel.h"
 
 #include "exec/gdbstub.h"
@@ -37,7 +37,7 @@
 #include "migration/migration.h"
 #include "exec/memattrs.h"
 
-#ifdef DEBUG_GVM
+#ifdef DEBUG_AEHD
 #define DPRINTF(fmt, ...) \
     do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
 #else
@@ -45,8 +45,8 @@
     do { } while (0)
 #endif
 
-/* A 4096-byte buffer can hold the 8-byte gvm_msrs header, plus
- * 255 gvm_msr_entry structs */
+/* A 4096-byte buffer can hold the 8-byte aehd_msrs header, plus
+ * 255 aehd_msr_entry structs */
 #define MSR_BUF_SIZE 4096
 
 #ifndef BUS_MCEERR_AR
@@ -56,8 +56,8 @@
 #define BUS_MCEERR_AO 5
 #endif
 
-const GVMCapabilityInfo gvm_arch_required_capabilities[] = {
-    GVM_CAP_LAST_INFO
+const AEHDCapabilityInfo aehd_arch_required_capabilities[] = {
+    AEHD_CAP_LAST_INFO
 };
 
 static bool has_msr_star;
@@ -78,15 +78,15 @@ static uint32_t num_architectural_pmu_counters;
 static int has_xsave;
 static int has_xcrs;
 
-static struct gvm_cpuid *cpuid_cache;
+static struct aehd_cpuid *cpuid_cache;
 
-static int gvm_get_tsc(CPUState *cs)
+static int aehd_get_tsc(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);
     CPUX86State *env = &cpu->env;
     struct {
-        struct gvm_msrs info;
-        struct gvm_msr_entry entries[1];
+        struct aehd_msrs info;
+        struct aehd_msr_entry entries[1];
     } msr_data;
     int ret;
 
@@ -98,7 +98,7 @@ static int gvm_get_tsc(CPUState *cs)
     msr_data.entries[0].index = MSR_IA32_TSC;
     env->tsc_valid = !runstate_is_running();
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_MSRS,
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_GET_MSRS,
             &msr_data, sizeof(msr_data),
             &msr_data, sizeof(msr_data));
     if (ret < 0)
@@ -111,31 +111,31 @@ static int gvm_get_tsc(CPUState *cs)
     return 0;
 }
 
-static inline void do_gvm_synchronize_tsc(CPUState *cpu, run_on_cpu_data arg)
+static inline void do_aehd_synchronize_tsc(CPUState *cpu, run_on_cpu_data arg)
 {
-    gvm_get_tsc(cpu);
+    aehd_get_tsc(cpu);
 }
 
-void gvm_synchronize_all_tsc(void)
+void aehd_synchronize_all_tsc(void)
 {
     CPUState *cpu;
 
-    if (gvm_enabled()) {
+    if (aehd_enabled()) {
         CPU_FOREACH(cpu) {
-            run_on_cpu(cpu, do_gvm_synchronize_tsc, RUN_ON_CPU_NULL);
+            run_on_cpu(cpu, do_aehd_synchronize_tsc, RUN_ON_CPU_NULL);
         }
     }
 }
 
-static struct gvm_cpuid *try_get_cpuid(GVMState *s, int max)
+static struct aehd_cpuid *try_get_cpuid(AEHDState *s, int max)
 {
-    struct gvm_cpuid *cpuid;
+    struct aehd_cpuid *cpuid;
     int r, size;
 
     size = sizeof(*cpuid) + max * sizeof(*cpuid->entries);
     cpuid = g_malloc0(size);
     cpuid->nent = max;
-    r = gvm_ioctl(s, GVM_GET_SUPPORTED_CPUID,
+    r = aehd_ioctl(s, AEHD_GET_SUPPORTED_CPUID,
             cpuid, size, cpuid, size);
     if (r == 0 && cpuid->nent >= max) {
         r = -E2BIG;
@@ -145,7 +145,7 @@ static struct gvm_cpuid *try_get_cpuid(GVMState *s, int max)
             g_free(cpuid);
             return NULL;
         } else {
-            fprintf(stderr, "GVM_GET_SUPPORTED_CPUID failed: %s\n",
+            fprintf(stderr, "AEHD_GET_SUPPORTED_CPUID failed: %s\n",
                     strerror(-r));
             exit(1);
         }
@@ -153,12 +153,12 @@ static struct gvm_cpuid *try_get_cpuid(GVMState *s, int max)
     return cpuid;
 }
 
-/* Run GVM_GET_SUPPORTED_CPUID ioctl(), allocating a buffer large enough
+/* Run AEHD_GET_SUPPORTED_CPUID ioctl(), allocating a buffer large enough
  * for all entries.
  */
-static struct gvm_cpuid *get_supported_cpuid(GVMState *s)
+static struct aehd_cpuid *get_supported_cpuid(AEHDState *s)
 {
-    struct gvm_cpuid *cpuid;
+    struct aehd_cpuid *cpuid;
     int max = 1;
 
     if (cpuid_cache != NULL) {
@@ -173,7 +173,7 @@ static struct gvm_cpuid *get_supported_cpuid(GVMState *s)
 
 /* Returns the value for a specific register on the cpuid entry
  */
-static uint32_t cpuid_entry_get_reg(struct gvm_cpuid_entry *entry, int reg)
+static uint32_t cpuid_entry_get_reg(struct aehd_cpuid_entry *entry, int reg)
 {
     uint32_t ret = 0;
     switch (reg) {
@@ -193,9 +193,9 @@ static uint32_t cpuid_entry_get_reg(struct gvm_cpuid_entry *entry, int reg)
     return ret;
 }
 
-/* Find matching entry for function/index on gvm_cpuid struct
+/* Find matching entry for function/index on aehd_cpuid struct
  */
-static struct gvm_cpuid_entry *cpuid_find_entry(struct gvm_cpuid *cpuid,
+static struct aehd_cpuid_entry *cpuid_find_entry(struct aehd_cpuid *cpuid,
                                                  uint32_t function,
                                                  uint32_t index)
 {
@@ -210,26 +210,26 @@ static struct gvm_cpuid_entry *cpuid_find_entry(struct gvm_cpuid *cpuid,
     return NULL;
 }
 
-uint32_t gvm_arch_get_supported_cpuid(GVMState *s, uint32_t function,
+uint32_t aehd_arch_get_supported_cpuid(AEHDState *s, uint32_t function,
                                       uint32_t index, int reg)
 {
-    struct gvm_cpuid *cpuid;
+    struct aehd_cpuid *cpuid;
     uint32_t ret = 0;
     uint32_t cpuid_1_edx;
     bool found = false;
 
     cpuid = get_supported_cpuid(s);
 
-    struct gvm_cpuid_entry *entry = cpuid_find_entry(cpuid, function, index);
+    struct aehd_cpuid_entry *entry = cpuid_find_entry(cpuid, function, index);
     if (entry) {
         found = true;
         ret = cpuid_entry_get_reg(entry, reg);
     }
 
-    /* Fixups for the data returned by GVM, below */
+    /* Fixups for the data returned by AEHD, below */
 
     if (function == 1 && reg == R_ECX) {
-        /* We can set the hypervisor flag, even if GVM does not return it on
+        /* We can set the hypervisor flag, even if AEHD does not return it on
          * GET_SUPPORTED_CPUID
          */
         ret |= CPUID_EXT_HYPERVISOR;
@@ -237,16 +237,16 @@ uint32_t gvm_arch_get_supported_cpuid(GVMState *s, uint32_t function,
         /* x2apic is reported by GET_SUPPORTED_CPUID, but it can't be enabled
          * without the in-kernel irqchip
          */
-        if (!gvm_irqchip_in_kernel()) {
+        if (!aehd_irqchip_in_kernel()) {
             ret &= ~CPUID_EXT_X2APIC;
         }
     } else if (function == 6 && reg == R_EAX) {
         ret |= CPUID_6_EAX_ARAT; /* safe to allow because of emulated APIC */
     } else if (function == 0x80000001 && reg == R_EDX) {
-        /* On Intel, gvm returns cpuid according to the Intel spec,
+        /* On Intel, aehd returns cpuid according to the Intel spec,
          * so add missing bits according to the AMD spec:
          */
-        cpuid_1_edx = gvm_arch_get_supported_cpuid(s, 1, 0, R_EDX);
+        cpuid_1_edx = aehd_arch_get_supported_cpuid(s, 1, 0, R_EDX);
         ret |= cpuid_1_edx & CPUID_EXT2_AMD_ALIASES;
     }
 
@@ -262,7 +262,7 @@ static void cpu_update_state(void *opaque, int running, RunState state)
     }
 }
 
-unsigned long gvm_arch_vcpu_id(CPUState *cs)
+unsigned long aehd_arch_vcpu_id(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);
     return cpu->apic_id;
@@ -270,19 +270,19 @@ unsigned long gvm_arch_vcpu_id(CPUState *cs)
 
 static Error *invtsc_mig_blocker;
 
-#define GVM_MAX_CPUID_ENTRIES  100
+#define AEHD_MAX_CPUID_ENTRIES  100
 
-int gvm_arch_init_vcpu(CPUState *cs)
+int aehd_arch_init_vcpu(CPUState *cs)
 {
     struct {
-        struct gvm_cpuid cpuid;
-        struct gvm_cpuid_entry entries[GVM_MAX_CPUID_ENTRIES];
+        struct aehd_cpuid cpuid;
+        struct aehd_cpuid_entry entries[AEHD_MAX_CPUID_ENTRIES];
     } QEMU_PACKED cpuid_data;
     X86CPU *cpu = X86_CPU(cs);
     CPUX86State *env = &cpu->env;
     uint32_t limit, i, j, cpuid_i;
     uint32_t unused;
-    struct gvm_cpuid_entry *c;
+    struct aehd_cpuid_entry *c;
     int r;
     Error *local_err = NULL;
 
@@ -293,7 +293,7 @@ int gvm_arch_init_vcpu(CPUState *cs)
     cpu_x86_cpuid(env, 0, 0, &limit, &unused, &unused, &unused);
 
     for (i = 0; i <= limit; i++) {
-        if (cpuid_i == GVM_MAX_CPUID_ENTRIES) {
+        if (cpuid_i == AEHD_MAX_CPUID_ENTRIES) {
             fprintf(stderr, "unsupported level value: 0x%x\n", limit);
             abort();
         }
@@ -305,20 +305,20 @@ int gvm_arch_init_vcpu(CPUState *cs)
             int times;
 
             c->function = i;
-            c->flags = GVM_CPUID_FLAG_STATEFUL_FUNC |
-                       GVM_CPUID_FLAG_STATE_READ_NEXT;
+            c->flags = AEHD_CPUID_FLAG_STATEFUL_FUNC |
+                       AEHD_CPUID_FLAG_STATE_READ_NEXT;
             cpu_x86_cpuid(env, i, 0, &c->eax, &c->ebx, &c->ecx, &c->edx);
             times = c->eax & 0xff;
 
             for (j = 1; j < times; ++j) {
-                if (cpuid_i == GVM_MAX_CPUID_ENTRIES) {
+                if (cpuid_i == AEHD_MAX_CPUID_ENTRIES) {
                     fprintf(stderr, "cpuid_data is full, no space for "
                             "cpuid(eax:2):eax & 0xf = 0x%x\n", times);
                     abort();
                 }
                 c = &cpuid_data.entries[cpuid_i++];
                 c->function = i;
-                c->flags = GVM_CPUID_FLAG_STATEFUL_FUNC;
+                c->flags = AEHD_CPUID_FLAG_STATEFUL_FUNC;
                 cpu_x86_cpuid(env, i, 0, &c->eax, &c->ebx, &c->ecx, &c->edx);
             }
             break;
@@ -331,7 +331,7 @@ int gvm_arch_init_vcpu(CPUState *cs)
                     break;
                 }
                 c->function = i;
-                c->flags = GVM_CPUID_FLAG_SIGNIFCANT_INDEX;
+                c->flags = AEHD_CPUID_FLAG_SIGNIFCANT_INDEX;
                 c->index = j;
                 cpu_x86_cpuid(env, i, j, &c->eax, &c->ebx, &c->ecx, &c->edx);
 
@@ -344,7 +344,7 @@ int gvm_arch_init_vcpu(CPUState *cs)
                 if (i == 0xd && c->eax == 0) {
                     continue;
                 }
-                if (cpuid_i == GVM_MAX_CPUID_ENTRIES) {
+                if (cpuid_i == AEHD_MAX_CPUID_ENTRIES) {
                     fprintf(stderr, "cpuid_data is full, no space for "
                             "cpuid(eax:0x%x,ecx:0x%x)\n", i, j);
                     abort();
@@ -381,7 +381,7 @@ int gvm_arch_init_vcpu(CPUState *cs)
     cpu_x86_cpuid(env, 0x80000000, 0, &limit, &unused, &unused, &unused);
 
     for (i = 0x80000000; i <= limit; i++) {
-        if (cpuid_i == GVM_MAX_CPUID_ENTRIES) {
+        if (cpuid_i == AEHD_MAX_CPUID_ENTRIES) {
             fprintf(stderr, "unsupported xlevel value: 0x%x\n", limit);
             abort();
         }
@@ -419,7 +419,7 @@ int gvm_arch_init_vcpu(CPUState *cs)
     }
 
     cpuid_data.cpuid.padding = 0;
-    r = gvm_vcpu_ioctl(cs, GVM_SET_CPUID,
+    r = aehd_vcpu_ioctl(cs, AEHD_SET_CPUID,
             &cpuid_data, sizeof(cpuid_data),
             NULL, 0);
     if (r) {
@@ -427,9 +427,9 @@ int gvm_arch_init_vcpu(CPUState *cs)
     }
 
     if (has_xsave) {
-        env->gvm_xsave_buf = qemu_memalign(4096, sizeof(struct gvm_xsave));
+        env->aehd_xsave_buf = qemu_memalign(4096, sizeof(struct aehd_xsave));
     }
-    cpu->gvm_msr_buf = g_malloc0(MSR_BUF_SIZE);
+    cpu->aehd_msr_buf = g_malloc0(MSR_BUF_SIZE);
 
     if (env->features[FEAT_1_EDX] & CPUID_MTRR) {
         has_msr_mtrr = true;
@@ -441,47 +441,47 @@ int gvm_arch_init_vcpu(CPUState *cs)
     return 0;
 }
 
-void gvm_arch_reset_vcpu(X86CPU *cpu)
+void aehd_arch_reset_vcpu(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
 
     env->exception_injected = -1;
     env->interrupt_injected = -1;
     env->xcr0 = 1;
-    if (gvm_irqchip_in_kernel()) {
-        env->mp_state = cpu_is_bsp(cpu) ? GVM_MP_STATE_RUNNABLE :
-                                          GVM_MP_STATE_UNINITIALIZED;
+    if (aehd_irqchip_in_kernel()) {
+        env->mp_state = cpu_is_bsp(cpu) ? AEHD_MP_STATE_RUNNABLE :
+                                          AEHD_MP_STATE_UNINITIALIZED;
     } else {
-        env->mp_state = GVM_MP_STATE_RUNNABLE;
+        env->mp_state = AEHD_MP_STATE_RUNNABLE;
     }
 }
 
-void gvm_arch_do_init_vcpu(X86CPU *cpu)
+void aehd_arch_do_init_vcpu(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
 
     /* APs get directly into wait-for-SIPI state.  */
-    if (env->mp_state == GVM_MP_STATE_UNINITIALIZED) {
-        env->mp_state = GVM_MP_STATE_INIT_RECEIVED;
+    if (env->mp_state == AEHD_MP_STATE_UNINITIALIZED) {
+        env->mp_state = AEHD_MP_STATE_INIT_RECEIVED;
     }
 }
 
-static int gvm_get_supported_msrs(GVMState *s)
+static int aehd_get_supported_msrs(AEHDState *s)
 {
-    static int gvm_supported_msrs;
+    static int aehd_supported_msrs;
     int ret = 0;
     unsigned long msr_list_size;
 
     /* first time */
-    if (gvm_supported_msrs == 0) {
-        struct gvm_msr_list msr_list, *gvm_msr_list;
+    if (aehd_supported_msrs == 0) {
+        struct aehd_msr_list msr_list, *aehd_msr_list;
 
-        gvm_supported_msrs = -1;
+        aehd_supported_msrs = -1;
 
-        /* Obtain MSR list from GVM.  These are the MSRs that we must
+        /* Obtain MSR list from AEHD.  These are the MSRs that we must
          * save/restore */
         msr_list.nmsrs = 0;
-        ret = gvm_ioctl(s, GVM_GET_MSR_INDEX_LIST,
+        ret = aehd_ioctl(s, AEHD_GET_MSR_INDEX_LIST,
                 &msr_list, sizeof(msr_list),
                 &msr_list, sizeof(msr_list));
         if (ret < 0 && ret != -E2BIG) {
@@ -490,63 +490,63 @@ static int gvm_get_supported_msrs(GVMState *s)
 
         msr_list_size = sizeof(msr_list) + msr_list.nmsrs *
                                               sizeof(msr_list.indices[0]);
-        gvm_msr_list = g_malloc0(msr_list_size);
+        aehd_msr_list = g_malloc0(msr_list_size);
 
-        gvm_msr_list->nmsrs = msr_list.nmsrs;
-        ret = gvm_ioctl(s, GVM_GET_MSR_INDEX_LIST,
-                gvm_msr_list, msr_list_size,
-                gvm_msr_list, msr_list_size);
+        aehd_msr_list->nmsrs = msr_list.nmsrs;
+        ret = aehd_ioctl(s, AEHD_GET_MSR_INDEX_LIST,
+                aehd_msr_list, msr_list_size,
+                aehd_msr_list, msr_list_size);
         if (ret >= 0) {
             int i;
 
-            for (i = 0; i < gvm_msr_list->nmsrs; i++) {
-                if (gvm_msr_list->indices[i] == MSR_STAR) {
+            for (i = 0; i < aehd_msr_list->nmsrs; i++) {
+                if (aehd_msr_list->indices[i] == MSR_STAR) {
                     has_msr_star = true;
                     continue;
                 }
-                if (gvm_msr_list->indices[i] == MSR_VM_HSAVE_PA) {
+                if (aehd_msr_list->indices[i] == MSR_VM_HSAVE_PA) {
                     has_msr_hsave_pa = true;
                     continue;
                 }
-                if (gvm_msr_list->indices[i] == MSR_TSC_AUX) {
+                if (aehd_msr_list->indices[i] == MSR_TSC_AUX) {
                     has_msr_tsc_aux = true;
                     continue;
                 }
-                if (gvm_msr_list->indices[i] == MSR_TSC_ADJUST) {
+                if (aehd_msr_list->indices[i] == MSR_TSC_ADJUST) {
                     has_msr_tsc_adjust = true;
                     continue;
                 }
-                if (gvm_msr_list->indices[i] == MSR_IA32_TSCDEADLINE) {
+                if (aehd_msr_list->indices[i] == MSR_IA32_TSCDEADLINE) {
                     has_msr_tsc_deadline = true;
                     continue;
                 }
-                if (gvm_msr_list->indices[i] == MSR_IA32_SMBASE) {
+                if (aehd_msr_list->indices[i] == MSR_IA32_SMBASE) {
                     has_msr_smbase = true;
                     continue;
                 }
-                if (gvm_msr_list->indices[i] == MSR_IA32_MISC_ENABLE) {
+                if (aehd_msr_list->indices[i] == MSR_IA32_MISC_ENABLE) {
                     has_msr_misc_enable = true;
                     continue;
                 }
-                if (gvm_msr_list->indices[i] == MSR_IA32_BNDCFGS) {
+                if (aehd_msr_list->indices[i] == MSR_IA32_BNDCFGS) {
                     has_msr_bndcfgs = true;
                     continue;
                 }
-                if (gvm_msr_list->indices[i] == MSR_IA32_XSS) {
+                if (aehd_msr_list->indices[i] == MSR_IA32_XSS) {
                     has_msr_xss = true;
                     continue;
                 }
             }
         }
 
-        g_free(gvm_msr_list);
+        g_free(aehd_msr_list);
     }
 
     return ret;
 }
 
 static Notifier smram_machine_done;
-static GVMMemoryListener smram_listener;
+static AEHDMemoryListener smram_listener;
 static AddressSpace smram_address_space;
 static MemoryRegion smram_as_root;
 static MemoryRegion smram_as_mem;
@@ -557,13 +557,13 @@ static void register_smram_listener(Notifier *n, void *unused)
         (MemoryRegion *) object_resolve_path("/machine/smram", NULL);
 
     /* Outer container... */
-    memory_region_init(&smram_as_root, OBJECT(gvm_state), "mem-container-smram", ~0ull);
+    memory_region_init(&smram_as_root, OBJECT(aehd_state), "mem-container-smram", ~0ull);
     memory_region_set_enabled(&smram_as_root, true);
 
     /* ... with two regions inside: normal system memory with low
      * priority, and...
      */
-    memory_region_init_alias(&smram_as_mem, OBJECT(gvm_state), "mem-smram",
+    memory_region_init_alias(&smram_as_mem, OBJECT(aehd_state), "mem-smram",
                              get_system_memory(), 0, ~0ull);
     memory_region_add_subregion_overlap(&smram_as_root, 0, &smram_as_mem, 0);
     memory_region_set_enabled(&smram_as_mem, true);
@@ -574,35 +574,35 @@ static void register_smram_listener(Notifier *n, void *unused)
         memory_region_set_enabled(smram, true);
     }
 
-    address_space_init(&smram_address_space, &smram_as_root, "GVM-SMRAM");
-    gvm_memory_listener_register(gvm_state, &smram_listener,
+    address_space_init(&smram_address_space, &smram_as_root, "AEHD-SMRAM");
+    aehd_memory_listener_register(aehd_state, &smram_listener,
                                  &smram_address_space, 1);
 }
 
-int gvm_arch_init(MachineState *ms, GVMState *s)
+int aehd_arch_init(MachineState *ms, AEHDState *s)
 {
     /* Allows up to 16M BIOSes. */
     uint64_t identity_base = 0xfeffc000;
     uint64_t tss_base;
     int ret;
 
-    has_xsave = gvm_check_extension(s, GVM_CAP_XSAVE);
+    has_xsave = aehd_check_extension(s, AEHD_CAP_XSAVE);
 
-    has_xcrs = gvm_check_extension(s, GVM_CAP_XCRS);
+    has_xcrs = aehd_check_extension(s, AEHD_CAP_XCRS);
 
-    ret = gvm_get_supported_msrs(s);
+    ret = aehd_get_supported_msrs(s);
     if (ret < 0) {
         return ret;
     }
 
     /*
-     * On older Intel CPUs, GVM uses vm86 mode to emulate 16-bit code directly.
+     * On older Intel CPUs, AEHD uses vm86 mode to emulate 16-bit code directly.
      * In order to use vm86 mode, an EPT identity map and a TSS  are needed.
      * Since these must be part of guest physical memory, we need to allocate
      * them, both by setting their start addresses in the kernel and by
      * creating a corresponding e820 entry. We need 4 pages before the BIOS.
      */
-    ret = gvm_vm_ioctl(s, GVM_SET_IDENTITY_MAP_ADDR,
+    ret = aehd_vm_ioctl(s, AEHD_SET_IDENTITY_MAP_ADDR,
             &identity_base, sizeof(identity_base),
             NULL, 0);
     if (ret < 0)
@@ -610,7 +610,7 @@ int gvm_arch_init(MachineState *ms, GVMState *s)
 
     /* Set TSS base one page after EPT identity map. */
     tss_base = identity_base + 0x1000;
-    ret = gvm_vm_ioctl(s, GVM_SET_TSS_ADDR,
+    ret = aehd_vm_ioctl(s, AEHD_SET_TSS_ADDR,
             &tss_base, sizeof(tss_base),
             NULL, 0);
     if (ret < 0) {
@@ -632,7 +632,7 @@ int gvm_arch_init(MachineState *ms, GVMState *s)
     return 0;
 }
 
-static void set_v8086_seg(struct gvm_segment *lhs, const SegmentCache *rhs)
+static void set_v8086_seg(struct aehd_segment *lhs, const SegmentCache *rhs)
 {
     lhs->selector = rhs->selector;
     lhs->base = rhs->base;
@@ -648,7 +648,7 @@ static void set_v8086_seg(struct gvm_segment *lhs, const SegmentCache *rhs)
     lhs->unusable = 0;
 }
 
-static void set_seg(struct gvm_segment *lhs, const SegmentCache *rhs)
+static void set_seg(struct aehd_segment *lhs, const SegmentCache *rhs)
 {
     unsigned flags = rhs->flags;
     lhs->selector = rhs->selector;
@@ -666,7 +666,7 @@ static void set_seg(struct gvm_segment *lhs, const SegmentCache *rhs)
     lhs->padding = 0;
 }
 
-static void get_seg(SegmentCache *lhs, const struct gvm_segment *rhs)
+static void get_seg(SegmentCache *lhs, const struct aehd_segment *rhs)
 {
     lhs->selector = rhs->selector;
     lhs->base = rhs->base;
@@ -685,63 +685,63 @@ static void get_seg(SegmentCache *lhs, const struct gvm_segment *rhs)
     }
 }
 
-static void gvm_getput_reg(__u64 *gvm_reg, target_ulong *qemu_reg, int set)
+static void aehd_getput_reg(__u64 *aehd_reg, target_ulong *qemu_reg, int set)
 {
     if (set) {
-        *gvm_reg = *qemu_reg;
+        *aehd_reg = *qemu_reg;
     } else {
-        *qemu_reg = *gvm_reg;
+        *qemu_reg = *aehd_reg;
     }
 }
 
-static int gvm_getput_regs(X86CPU *cpu, int set)
+static int aehd_getput_regs(X86CPU *cpu, int set)
 {
     CPUX86State *env = &cpu->env;
-    struct gvm_regs regs;
+    struct aehd_regs regs;
     int ret = 0;
 
     if (!set) {
-        ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_REGS,
+        ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_GET_REGS,
                 NULL, 0, &regs, sizeof(regs));
         if (ret < 0) {
             return ret;
         }
     }
 
-    gvm_getput_reg(&regs.rax, &env->regs[R_EAX], set);
-    gvm_getput_reg(&regs.rbx, &env->regs[R_EBX], set);
-    gvm_getput_reg(&regs.rcx, &env->regs[R_ECX], set);
-    gvm_getput_reg(&regs.rdx, &env->regs[R_EDX], set);
-    gvm_getput_reg(&regs.rsi, &env->regs[R_ESI], set);
-    gvm_getput_reg(&regs.rdi, &env->regs[R_EDI], set);
-    gvm_getput_reg(&regs.rsp, &env->regs[R_ESP], set);
-    gvm_getput_reg(&regs.rbp, &env->regs[R_EBP], set);
+    aehd_getput_reg(&regs.rax, &env->regs[R_EAX], set);
+    aehd_getput_reg(&regs.rbx, &env->regs[R_EBX], set);
+    aehd_getput_reg(&regs.rcx, &env->regs[R_ECX], set);
+    aehd_getput_reg(&regs.rdx, &env->regs[R_EDX], set);
+    aehd_getput_reg(&regs.rsi, &env->regs[R_ESI], set);
+    aehd_getput_reg(&regs.rdi, &env->regs[R_EDI], set);
+    aehd_getput_reg(&regs.rsp, &env->regs[R_ESP], set);
+    aehd_getput_reg(&regs.rbp, &env->regs[R_EBP], set);
 #ifdef TARGET_X86_64
-    gvm_getput_reg(&regs.r8, &env->regs[8], set);
-    gvm_getput_reg(&regs.r9, &env->regs[9], set);
-    gvm_getput_reg(&regs.r10, &env->regs[10], set);
-    gvm_getput_reg(&regs.r11, &env->regs[11], set);
-    gvm_getput_reg(&regs.r12, &env->regs[12], set);
-    gvm_getput_reg(&regs.r13, &env->regs[13], set);
-    gvm_getput_reg(&regs.r14, &env->regs[14], set);
-    gvm_getput_reg(&regs.r15, &env->regs[15], set);
+    aehd_getput_reg(&regs.r8, &env->regs[8], set);
+    aehd_getput_reg(&regs.r9, &env->regs[9], set);
+    aehd_getput_reg(&regs.r10, &env->regs[10], set);
+    aehd_getput_reg(&regs.r11, &env->regs[11], set);
+    aehd_getput_reg(&regs.r12, &env->regs[12], set);
+    aehd_getput_reg(&regs.r13, &env->regs[13], set);
+    aehd_getput_reg(&regs.r14, &env->regs[14], set);
+    aehd_getput_reg(&regs.r15, &env->regs[15], set);
 #endif
 
-    gvm_getput_reg(&regs.rflags, &env->eflags, set);
-    gvm_getput_reg(&regs.rip, &env->eip, set);
+    aehd_getput_reg(&regs.rflags, &env->eflags, set);
+    aehd_getput_reg(&regs.rip, &env->eip, set);
 
     if (set) {
-        ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_REGS,
+        ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_REGS,
                 &regs, sizeof(regs), NULL, 0);
     }
 
     return ret;
 }
 
-static int gvm_put_fpu(X86CPU *cpu)
+static int aehd_put_fpu(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    struct gvm_fpu fpu;
+    struct aehd_fpu fpu;
     int i;
 
     memset(&fpu, 0, sizeof fpu);
@@ -761,7 +761,7 @@ static int gvm_put_fpu(X86CPU *cpu)
     }
     fpu.mxcsr = env->mxcsr;
 
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_FPU,
+    return aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_FPU,
             &fpu, sizeof(fpu), NULL, 0);
 }
 
@@ -782,7 +782,7 @@ static int gvm_put_fpu(X86CPU *cpu)
 #define XSAVE_PKRU        672
 
 #define XSAVE_BYTE_OFFSET(word_offset) \
-    ((word_offset) * sizeof(((struct gvm_xsave *)0)->region[0]))
+    ((word_offset) * sizeof(((struct aehd_xsave *)0)->region[0]))
 
 #define ASSERT_OFFSET(word_offset, field) \
     QEMU_BUILD_BUG_ON(XSAVE_BYTE_OFFSET(word_offset) != \
@@ -804,18 +804,18 @@ ASSERT_OFFSET(XSAVE_ZMM_Hi256, zmm_hi256_state);
 ASSERT_OFFSET(XSAVE_Hi16_ZMM, hi16_zmm_state);
 ASSERT_OFFSET(XSAVE_PKRU, pkru_state);
 
-static int gvm_put_xsave(X86CPU *cpu)
+static int aehd_put_xsave(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    X86XSaveArea *xsave = env->gvm_xsave_buf;
+    X86XSaveArea *xsave = env->aehd_xsave_buf;
     uint16_t cwd, swd, twd;
     int i;
 
     if (!has_xsave) {
-        return gvm_put_fpu(cpu);
+        return aehd_put_fpu(cpu);
     }
 
-    memset(xsave, 0, sizeof(struct gvm_xsave));
+    memset(xsave, 0, sizeof(struct aehd_xsave));
     twd = 0;
     swd = env->fpus & ~(7 << 11);
     swd |= (env->fpstt & 7) << 11;
@@ -858,14 +858,14 @@ static int gvm_put_xsave(X86CPU *cpu)
             16 * sizeof env->xmm_regs[16]);
     memcpy(&xsave->pkru_state, &env->pkru, sizeof env->pkru);
 #endif
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_XSAVE,
+    return aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_XSAVE,
             xsave, sizeof(*xsave), NULL, 0);
 }
 
-static int gvm_put_xcrs(X86CPU *cpu)
+static int aehd_put_xcrs(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    struct gvm_xcrs xcrs = {};
+    struct aehd_xcrs xcrs = {};
 
     if (!has_xcrs) {
         return 0;
@@ -875,14 +875,14 @@ static int gvm_put_xcrs(X86CPU *cpu)
     xcrs.flags = 0;
     xcrs.xcrs[0].xcr = 0;
     xcrs.xcrs[0].value = env->xcr0;
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_XCRS,
+    return aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_XCRS,
             &xcrs, sizeof(xcrs), NULL, 0);
 }
 
-static int gvm_put_sregs(X86CPU *cpu)
+static int aehd_put_sregs(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    struct gvm_sregs sregs;
+    struct aehd_sregs sregs;
 
     memset(sregs.interrupt_bitmap, 0, sizeof(sregs.interrupt_bitmap));
     if (env->interrupt_injected >= 0) {
@@ -926,20 +926,20 @@ static int gvm_put_sregs(X86CPU *cpu)
 
     sregs.efer = env->efer;
 
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_SREGS,
+    return aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_SREGS,
             &sregs, sizeof(sregs), NULL, 0);
 }
 
-static void gvm_msr_buf_reset(X86CPU *cpu)
+static void aehd_msr_buf_reset(X86CPU *cpu)
 {
-    memset(cpu->gvm_msr_buf, 0, MSR_BUF_SIZE);
+    memset(cpu->aehd_msr_buf, 0, MSR_BUF_SIZE);
 }
 
-static void gvm_msr_entry_add(X86CPU *cpu, uint32_t index, uint64_t value)
+static void aehd_msr_entry_add(X86CPU *cpu, uint32_t index, uint64_t value)
 {
-    struct gvm_msrs *msrs = cpu->gvm_msr_buf;
+    struct aehd_msrs *msrs = cpu->aehd_msr_buf;
     void *limit = ((void *)msrs) + MSR_BUF_SIZE;
-    struct gvm_msr_entry *entry = &msrs->entries[msrs->nmsrs];
+    struct aehd_msr_entry *entry = &msrs->entries[msrs->nmsrs];
 
     assert((void *)(entry + 1) <= limit);
 
@@ -949,7 +949,7 @@ static void gvm_msr_entry_add(X86CPU *cpu, uint32_t index, uint64_t value)
     msrs->nmsrs++;
 }
 
-static int gvm_put_tscdeadline_msr(X86CPU *cpu)
+static int aehd_put_tscdeadline_msr(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
     int ret;
@@ -958,17 +958,17 @@ static int gvm_put_tscdeadline_msr(X86CPU *cpu)
         return 0;
     }
 
-    gvm_msr_buf_reset(cpu);
-    gvm_msr_entry_add(cpu, MSR_IA32_TSCDEADLINE, env->tsc_deadline);
+    aehd_msr_buf_reset(cpu);
+    aehd_msr_entry_add(cpu, MSR_IA32_TSCDEADLINE, env->tsc_deadline);
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MSRS,
-            cpu->gvm_msr_buf,
-            sizeof(struct gvm_msrs) + sizeof(struct gvm_msr_entry),
-            cpu->gvm_msr_buf, sizeof(struct gvm_msrs));
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_MSRS,
+            cpu->aehd_msr_buf,
+            sizeof(struct aehd_msrs) + sizeof(struct aehd_msr_entry),
+            cpu->aehd_msr_buf, sizeof(struct aehd_msrs));
     if (ret < 0)
         return ret;
     else
-        ret = cpu->gvm_msr_buf->nmsrs;
+        ret = cpu->aehd_msr_buf->nmsrs;
 
     assert(ret == 1);
     return 0;
@@ -980,7 +980,7 @@ static int gvm_put_tscdeadline_msr(X86CPU *cpu)
  * before writing any other state because forcibly leaving nested mode
  * invalidates the VCPU state.
  */
-static int gvm_put_msr_feature_control(X86CPU *cpu)
+static int aehd_put_msr_feature_control(X86CPU *cpu)
 {
     int ret;
 
@@ -988,135 +988,135 @@ static int gvm_put_msr_feature_control(X86CPU *cpu)
         return 0;
     }
 
-    gvm_msr_buf_reset(cpu);
-    gvm_msr_entry_add(cpu, MSR_IA32_FEATURE_CONTROL,
+    aehd_msr_buf_reset(cpu);
+    aehd_msr_entry_add(cpu, MSR_IA32_FEATURE_CONTROL,
                       cpu->env.msr_ia32_feature_control);
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MSRS,
-            cpu->gvm_msr_buf,
-            sizeof(struct gvm_msrs) + sizeof(struct gvm_msr_entry),
-            cpu->gvm_msr_buf, sizeof(struct gvm_msrs));
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_MSRS,
+            cpu->aehd_msr_buf,
+            sizeof(struct aehd_msrs) + sizeof(struct aehd_msr_entry),
+            cpu->aehd_msr_buf, sizeof(struct aehd_msrs));
     if (ret < 0)
         return ret;
     else
-        ret = cpu->gvm_msr_buf->nmsrs;
+        ret = cpu->aehd_msr_buf->nmsrs;
 
     assert(ret == 1);
     return 0;
 }
 
-static int gvm_put_msrs(X86CPU *cpu, int level)
+static int aehd_put_msrs(X86CPU *cpu, int level)
 {
     CPUX86State *env = &cpu->env;
     int i;
     int ret;
 
-    gvm_msr_buf_reset(cpu);
+    aehd_msr_buf_reset(cpu);
 
-    gvm_msr_entry_add(cpu, MSR_IA32_SYSENTER_CS, env->sysenter_cs);
-    gvm_msr_entry_add(cpu, MSR_IA32_SYSENTER_ESP, env->sysenter_esp);
-    gvm_msr_entry_add(cpu, MSR_IA32_SYSENTER_EIP, env->sysenter_eip);
-    gvm_msr_entry_add(cpu, MSR_PAT, env->pat);
+    aehd_msr_entry_add(cpu, MSR_IA32_SYSENTER_CS, env->sysenter_cs);
+    aehd_msr_entry_add(cpu, MSR_IA32_SYSENTER_ESP, env->sysenter_esp);
+    aehd_msr_entry_add(cpu, MSR_IA32_SYSENTER_EIP, env->sysenter_eip);
+    aehd_msr_entry_add(cpu, MSR_PAT, env->pat);
     if (has_msr_star) {
-        gvm_msr_entry_add(cpu, MSR_STAR, env->star);
+        aehd_msr_entry_add(cpu, MSR_STAR, env->star);
     }
     if (has_msr_hsave_pa) {
-        gvm_msr_entry_add(cpu, MSR_VM_HSAVE_PA, env->vm_hsave);
+        aehd_msr_entry_add(cpu, MSR_VM_HSAVE_PA, env->vm_hsave);
     }
     if (has_msr_tsc_aux) {
-        gvm_msr_entry_add(cpu, MSR_TSC_AUX, env->tsc_aux);
+        aehd_msr_entry_add(cpu, MSR_TSC_AUX, env->tsc_aux);
     }
     if (has_msr_tsc_adjust) {
-        gvm_msr_entry_add(cpu, MSR_TSC_ADJUST, env->tsc_adjust);
+        aehd_msr_entry_add(cpu, MSR_TSC_ADJUST, env->tsc_adjust);
     }
     if (has_msr_misc_enable) {
-        gvm_msr_entry_add(cpu, MSR_IA32_MISC_ENABLE,
+        aehd_msr_entry_add(cpu, MSR_IA32_MISC_ENABLE,
                           env->msr_ia32_misc_enable);
     }
     if (has_msr_smbase) {
-        gvm_msr_entry_add(cpu, MSR_IA32_SMBASE, env->smbase);
+        aehd_msr_entry_add(cpu, MSR_IA32_SMBASE, env->smbase);
     }
     if (has_msr_bndcfgs) {
-        gvm_msr_entry_add(cpu, MSR_IA32_BNDCFGS, env->msr_bndcfgs);
+        aehd_msr_entry_add(cpu, MSR_IA32_BNDCFGS, env->msr_bndcfgs);
     }
     if (has_msr_xss) {
-        gvm_msr_entry_add(cpu, MSR_IA32_XSS, env->xss);
+        aehd_msr_entry_add(cpu, MSR_IA32_XSS, env->xss);
     }
 #ifdef TARGET_X86_64
-    gvm_msr_entry_add(cpu, MSR_CSTAR, env->cstar);
-    gvm_msr_entry_add(cpu, MSR_KERNELGSBASE, env->kernelgsbase);
-    gvm_msr_entry_add(cpu, MSR_FMASK, env->fmask);
-    gvm_msr_entry_add(cpu, MSR_LSTAR, env->lstar);
+    aehd_msr_entry_add(cpu, MSR_CSTAR, env->cstar);
+    aehd_msr_entry_add(cpu, MSR_KERNELGSBASE, env->kernelgsbase);
+    aehd_msr_entry_add(cpu, MSR_FMASK, env->fmask);
+    aehd_msr_entry_add(cpu, MSR_LSTAR, env->lstar);
 #endif
     /*
      * The following MSRs have side effects on the guest or are too heavy
      * for normal writeback. Limit them to reset or full state updates.
      */
-    if (level >= GVM_PUT_RESET_STATE) {
-        gvm_msr_entry_add(cpu, MSR_IA32_TSC, env->tsc);
+    if (level >= AEHD_PUT_RESET_STATE) {
+        aehd_msr_entry_add(cpu, MSR_IA32_TSC, env->tsc);
         if (has_msr_architectural_pmu) {
             /* Stop the counter.  */
-            gvm_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR_CTRL, 0);
-            gvm_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_CTRL, 0);
+            aehd_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR_CTRL, 0);
+            aehd_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_CTRL, 0);
 
             /* Set the counter values.  */
             for (i = 0; i < MAX_FIXED_COUNTERS; i++) {
-                gvm_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR0 + i,
+                aehd_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR0 + i,
                                   env->msr_fixed_counters[i]);
             }
             for (i = 0; i < num_architectural_pmu_counters; i++) {
-                gvm_msr_entry_add(cpu, MSR_P6_PERFCTR0 + i,
+                aehd_msr_entry_add(cpu, MSR_P6_PERFCTR0 + i,
                                   env->msr_gp_counters[i]);
-                gvm_msr_entry_add(cpu, MSR_P6_EVNTSEL0 + i,
+                aehd_msr_entry_add(cpu, MSR_P6_EVNTSEL0 + i,
                                   env->msr_gp_evtsel[i]);
             }
-            gvm_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_STATUS,
+            aehd_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_STATUS,
                               env->msr_global_status);
-            gvm_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_OVF_CTRL,
+            aehd_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_OVF_CTRL,
                               env->msr_global_ovf_ctrl);
 
             /* Now start the PMU.  */
-            gvm_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR_CTRL,
+            aehd_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR_CTRL,
                               env->msr_fixed_ctr_ctrl);
-            gvm_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_CTRL,
+            aehd_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_CTRL,
                               env->msr_global_ctrl);
         }
         if (has_msr_mtrr) {
             uint64_t phys_mask = MAKE_64BIT_MASK(0, cpu->phys_bits);
 
-            gvm_msr_entry_add(cpu, MSR_MTRRdefType, env->mtrr_deftype);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix64K_00000, env->mtrr_fixed[0]);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix16K_80000, env->mtrr_fixed[1]);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix16K_A0000, env->mtrr_fixed[2]);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix4K_C0000, env->mtrr_fixed[3]);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix4K_C8000, env->mtrr_fixed[4]);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix4K_D0000, env->mtrr_fixed[5]);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix4K_D8000, env->mtrr_fixed[6]);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix4K_E0000, env->mtrr_fixed[7]);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix4K_E8000, env->mtrr_fixed[8]);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix4K_F0000, env->mtrr_fixed[9]);
-            gvm_msr_entry_add(cpu, MSR_MTRRfix4K_F8000, env->mtrr_fixed[10]);
+            aehd_msr_entry_add(cpu, MSR_MTRRdefType, env->mtrr_deftype);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix64K_00000, env->mtrr_fixed[0]);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix16K_80000, env->mtrr_fixed[1]);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix16K_A0000, env->mtrr_fixed[2]);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix4K_C0000, env->mtrr_fixed[3]);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix4K_C8000, env->mtrr_fixed[4]);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix4K_D0000, env->mtrr_fixed[5]);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix4K_D8000, env->mtrr_fixed[6]);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix4K_E0000, env->mtrr_fixed[7]);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix4K_E8000, env->mtrr_fixed[8]);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix4K_F0000, env->mtrr_fixed[9]);
+            aehd_msr_entry_add(cpu, MSR_MTRRfix4K_F8000, env->mtrr_fixed[10]);
             for (i = 0; i < MSR_MTRRcap_VCNT; i++) {
                 /* The CPU GPs if we write to a bit above the physical limit of
-                 * the host CPU (and GVM emulates that)
+                 * the host CPU (and AEHD emulates that)
                  */
                 uint64_t mask = env->mtrr_var[i].mask;
                 mask &= phys_mask;
 
-                gvm_msr_entry_add(cpu, MSR_MTRRphysBase(i),
+                aehd_msr_entry_add(cpu, MSR_MTRRphysBase(i),
                                   env->mtrr_var[i].base);
-                gvm_msr_entry_add(cpu, MSR_MTRRphysMask(i), mask);
+                aehd_msr_entry_add(cpu, MSR_MTRRphysMask(i), mask);
             }
         }
 
         /* Note: MSR_IA32_FEATURE_CONTROL is written separately, see
-         *       gvm_put_msr_feature_control. */
+         *       aehd_put_msr_feature_control. */
     }
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MSRS, cpu->gvm_msr_buf,
-            sizeof(struct gvm_msrs) + cpu->gvm_msr_buf->nmsrs *
-                sizeof(struct  gvm_msr_entry),
-            cpu->gvm_msr_buf, sizeof(struct gvm_msrs));
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_MSRS, cpu->aehd_msr_buf,
+            sizeof(struct aehd_msrs) + cpu->aehd_msr_buf->nmsrs *
+                sizeof(struct  aehd_msr_entry),
+            cpu->aehd_msr_buf, sizeof(struct aehd_msrs));
     if (ret < 0) {
         return ret;
     }
@@ -1125,13 +1125,13 @@ static int gvm_put_msrs(X86CPU *cpu, int level)
 }
 
 
-static int gvm_get_fpu(X86CPU *cpu)
+static int aehd_get_fpu(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    struct gvm_fpu fpu;
+    struct aehd_fpu fpu;
     int i, ret;
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_FPU,
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_GET_FPU,
             NULL, 0,
             &fpu, sizeof(fpu));
     if (ret < 0) {
@@ -1157,18 +1157,18 @@ static int gvm_get_fpu(X86CPU *cpu)
     return 0;
 }
 
-static int gvm_get_xsave(X86CPU *cpu)
+static int aehd_get_xsave(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    X86XSaveArea *xsave = env->gvm_xsave_buf;
+    X86XSaveArea *xsave = env->aehd_xsave_buf;
     int ret, i;
     uint16_t cwd, swd, twd;
 
     if (!has_xsave) {
-        return gvm_get_fpu(cpu);
+        return aehd_get_fpu(cpu);
     }
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_XSAVE,
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_GET_XSAVE,
             NULL, 0, xsave, sizeof(*xsave));
     if (ret < 0) {
         return ret;
@@ -1218,17 +1218,17 @@ static int gvm_get_xsave(X86CPU *cpu)
     return 0;
 }
 
-static int gvm_get_xcrs(X86CPU *cpu)
+static int aehd_get_xcrs(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
     int i, ret;
-    struct gvm_xcrs xcrs;
+    struct aehd_xcrs xcrs;
 
     if (!has_xcrs) {
         return 0;
     }
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_XCRS,
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_GET_XCRS,
             NULL, 0, &xcrs, sizeof(xcrs));
     if (ret < 0) {
         return ret;
@@ -1244,14 +1244,14 @@ static int gvm_get_xcrs(X86CPU *cpu)
     return 0;
 }
 
-static int gvm_get_sregs(X86CPU *cpu)
+static int aehd_get_sregs(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    struct gvm_sregs sregs;
+    struct aehd_sregs sregs;
     uint32_t hflags;
     int bit, i, ret;
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_SREGS,
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_GET_SREGS,
             NULL, 0, &sregs, sizeof(sregs));
     if (ret < 0) {
         return ret;
@@ -1290,7 +1290,7 @@ static int gvm_get_sregs(X86CPU *cpu)
 
     env->efer = sregs.efer;
 
-    /* changes to apic base and cr8/tpr are read back via gvm_arch_post_run */
+    /* changes to apic base and cr8/tpr are read back via aehd_arch_post_run */
 
 #define HFLAG_COPY_MASK \
     ~( HF_CPL_MASK | HF_PE_MASK | HF_MP_MASK | HF_EM_MASK | \
@@ -1333,105 +1333,105 @@ static int gvm_get_sregs(X86CPU *cpu)
     return 0;
 }
 
-static int gvm_get_msrs(X86CPU *cpu)
+static int aehd_get_msrs(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    struct gvm_msr_entry *msrs = cpu->gvm_msr_buf->entries;
+    struct aehd_msr_entry *msrs = cpu->aehd_msr_buf->entries;
     int ret, i;
     uint64_t mtrr_top_bits;
     uint64_t bufsize;
 
-    gvm_msr_buf_reset(cpu);
+    aehd_msr_buf_reset(cpu);
 
-    gvm_msr_entry_add(cpu, MSR_IA32_SYSENTER_CS, 0);
-    gvm_msr_entry_add(cpu, MSR_IA32_SYSENTER_ESP, 0);
-    gvm_msr_entry_add(cpu, MSR_IA32_SYSENTER_EIP, 0);
-    gvm_msr_entry_add(cpu, MSR_PAT, 0);
+    aehd_msr_entry_add(cpu, MSR_IA32_SYSENTER_CS, 0);
+    aehd_msr_entry_add(cpu, MSR_IA32_SYSENTER_ESP, 0);
+    aehd_msr_entry_add(cpu, MSR_IA32_SYSENTER_EIP, 0);
+    aehd_msr_entry_add(cpu, MSR_PAT, 0);
     if (has_msr_star) {
-        gvm_msr_entry_add(cpu, MSR_STAR, 0);
+        aehd_msr_entry_add(cpu, MSR_STAR, 0);
     }
     if (has_msr_hsave_pa) {
-        gvm_msr_entry_add(cpu, MSR_VM_HSAVE_PA, 0);
+        aehd_msr_entry_add(cpu, MSR_VM_HSAVE_PA, 0);
     }
     if (has_msr_tsc_aux) {
-        gvm_msr_entry_add(cpu, MSR_TSC_AUX, 0);
+        aehd_msr_entry_add(cpu, MSR_TSC_AUX, 0);
     }
     if (has_msr_tsc_adjust) {
-        gvm_msr_entry_add(cpu, MSR_TSC_ADJUST, 0);
+        aehd_msr_entry_add(cpu, MSR_TSC_ADJUST, 0);
     }
     if (has_msr_tsc_deadline) {
-        gvm_msr_entry_add(cpu, MSR_IA32_TSCDEADLINE, 0);
+        aehd_msr_entry_add(cpu, MSR_IA32_TSCDEADLINE, 0);
     }
     if (has_msr_misc_enable) {
-        gvm_msr_entry_add(cpu, MSR_IA32_MISC_ENABLE, 0);
+        aehd_msr_entry_add(cpu, MSR_IA32_MISC_ENABLE, 0);
     }
     if (has_msr_smbase) {
-        gvm_msr_entry_add(cpu, MSR_IA32_SMBASE, 0);
+        aehd_msr_entry_add(cpu, MSR_IA32_SMBASE, 0);
     }
     if (has_msr_feature_control) {
-        gvm_msr_entry_add(cpu, MSR_IA32_FEATURE_CONTROL, 0);
+        aehd_msr_entry_add(cpu, MSR_IA32_FEATURE_CONTROL, 0);
     }
     if (has_msr_bndcfgs) {
-        gvm_msr_entry_add(cpu, MSR_IA32_BNDCFGS, 0);
+        aehd_msr_entry_add(cpu, MSR_IA32_BNDCFGS, 0);
     }
     if (has_msr_xss) {
-        gvm_msr_entry_add(cpu, MSR_IA32_XSS, 0);
+        aehd_msr_entry_add(cpu, MSR_IA32_XSS, 0);
     }
 
 
     if (!env->tsc_valid) {
-        gvm_msr_entry_add(cpu, MSR_IA32_TSC, 0);
+        aehd_msr_entry_add(cpu, MSR_IA32_TSC, 0);
         env->tsc_valid = !runstate_is_running();
     }
 
 #ifdef TARGET_X86_64
-    gvm_msr_entry_add(cpu, MSR_CSTAR, 0);
-    gvm_msr_entry_add(cpu, MSR_KERNELGSBASE, 0);
-    gvm_msr_entry_add(cpu, MSR_FMASK, 0);
-    gvm_msr_entry_add(cpu, MSR_LSTAR, 0);
+    aehd_msr_entry_add(cpu, MSR_CSTAR, 0);
+    aehd_msr_entry_add(cpu, MSR_KERNELGSBASE, 0);
+    aehd_msr_entry_add(cpu, MSR_FMASK, 0);
+    aehd_msr_entry_add(cpu, MSR_LSTAR, 0);
 #endif
     if (has_msr_architectural_pmu) {
-        gvm_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR_CTRL, 0);
-        gvm_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_CTRL, 0);
-        gvm_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_STATUS, 0);
-        gvm_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_OVF_CTRL, 0);
+        aehd_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR_CTRL, 0);
+        aehd_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_CTRL, 0);
+        aehd_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_STATUS, 0);
+        aehd_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_OVF_CTRL, 0);
         for (i = 0; i < MAX_FIXED_COUNTERS; i++) {
-            gvm_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR0 + i, 0);
+            aehd_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR0 + i, 0);
         }
         for (i = 0; i < num_architectural_pmu_counters; i++) {
-            gvm_msr_entry_add(cpu, MSR_P6_PERFCTR0 + i, 0);
-            gvm_msr_entry_add(cpu, MSR_P6_EVNTSEL0 + i, 0);
+            aehd_msr_entry_add(cpu, MSR_P6_PERFCTR0 + i, 0);
+            aehd_msr_entry_add(cpu, MSR_P6_EVNTSEL0 + i, 0);
         }
     }
 
     if (has_msr_mtrr) {
-        gvm_msr_entry_add(cpu, MSR_MTRRdefType, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix64K_00000, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix16K_80000, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix16K_A0000, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix4K_C0000, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix4K_C8000, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix4K_D0000, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix4K_D8000, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix4K_E0000, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix4K_E8000, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix4K_F0000, 0);
-        gvm_msr_entry_add(cpu, MSR_MTRRfix4K_F8000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRdefType, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix64K_00000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix16K_80000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix16K_A0000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix4K_C0000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix4K_C8000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix4K_D0000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix4K_D8000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix4K_E0000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix4K_E8000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix4K_F0000, 0);
+        aehd_msr_entry_add(cpu, MSR_MTRRfix4K_F8000, 0);
         for (i = 0; i < MSR_MTRRcap_VCNT; i++) {
-            gvm_msr_entry_add(cpu, MSR_MTRRphysBase(i), 0);
-            gvm_msr_entry_add(cpu, MSR_MTRRphysMask(i), 0);
+            aehd_msr_entry_add(cpu, MSR_MTRRphysBase(i), 0);
+            aehd_msr_entry_add(cpu, MSR_MTRRphysMask(i), 0);
         }
     }
 
-    bufsize = sizeof(struct gvm_msrs) + cpu->gvm_msr_buf->nmsrs *
-        sizeof(struct gvm_msr_entry);
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_MSRS,
-            cpu->gvm_msr_buf, bufsize,
-            cpu->gvm_msr_buf, bufsize);
+    bufsize = sizeof(struct aehd_msrs) + cpu->aehd_msr_buf->nmsrs *
+        sizeof(struct aehd_msr_entry);
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_GET_MSRS,
+            cpu->aehd_msr_buf, bufsize,
+            cpu->aehd_msr_buf, bufsize);
     if (ret < 0)
         return ret;
     else
-        ret = cpu->gvm_msr_buf->nmsrs;
+        ret = cpu->aehd_msr_buf->nmsrs;
 
     /*
      * MTRR masks: Each mask consists of 5 parts
@@ -1605,70 +1605,70 @@ static int gvm_get_msrs(X86CPU *cpu)
     return 0;
 }
 
-static int gvm_put_mp_state(X86CPU *cpu)
+static int aehd_put_mp_state(X86CPU *cpu)
 {
-    struct gvm_mp_state mp_state = { .mp_state = cpu->env.mp_state };
+    struct aehd_mp_state mp_state = { .mp_state = cpu->env.mp_state };
 
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_MP_STATE,
+    return aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_MP_STATE,
             &mp_state, sizeof(mp_state), NULL, 0);
 }
 
-static int gvm_get_mp_state(X86CPU *cpu)
+static int aehd_get_mp_state(X86CPU *cpu)
 {
     CPUState *cs = CPU(cpu);
     CPUX86State *env = &cpu->env;
-    struct gvm_mp_state mp_state;
+    struct aehd_mp_state mp_state;
     int ret;
 
-    ret = gvm_vcpu_ioctl(cs, GVM_GET_MP_STATE,
+    ret = aehd_vcpu_ioctl(cs, AEHD_GET_MP_STATE,
             NULL, 0, &mp_state, sizeof(mp_state));
     if (ret < 0) {
         return ret;
     }
     env->mp_state = mp_state.mp_state;
-    if (gvm_irqchip_in_kernel()) {
-        cs->halted = (mp_state.mp_state == GVM_MP_STATE_HALTED);
+    if (aehd_irqchip_in_kernel()) {
+        cs->halted = (mp_state.mp_state == AEHD_MP_STATE_HALTED);
     }
     return 0;
 }
 
-static int gvm_get_apic(X86CPU *cpu)
+static int aehd_get_apic(X86CPU *cpu)
 {
     DeviceState *apic = cpu->apic_state;
-    struct gvm_lapic_state kapic;
+    struct aehd_lapic_state aapic;
     int ret;
 
-    if (apic && gvm_irqchip_in_kernel()) {
-        ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_LAPIC,
-                NULL, 0, &kapic, sizeof(kapic));
+    if (apic && aehd_irqchip_in_kernel()) {
+        ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_GET_LAPIC,
+                NULL, 0, &aapic, sizeof(aapic));
         if (ret < 0) {
             return ret;
         }
 
-        gvm_get_apic_state(apic, &kapic);
+        aehd_get_apic_state(apic, &aapic);
     }
     return 0;
 }
 
-static int gvm_put_apic(X86CPU *cpu)
+static int aehd_put_apic(X86CPU *cpu)
 {
     DeviceState *apic = cpu->apic_state;
-    struct gvm_lapic_state kapic;
+    struct aehd_lapic_state aapic;
 
-    if (apic && gvm_irqchip_in_kernel()) {
-        gvm_put_apic_state(apic, &kapic);
+    if (apic && aehd_irqchip_in_kernel()) {
+        aehd_put_apic_state(apic, &aapic);
 
-        return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_LAPIC,
-                &kapic, sizeof(kapic), NULL, 0);
+        return aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_LAPIC,
+                &aapic, sizeof(aapic), NULL, 0);
     }
     return 0;
 }
 
-static int gvm_put_vcpu_events(X86CPU *cpu, int level)
+static int aehd_put_vcpu_events(X86CPU *cpu, int level)
 {
     CPUState *cs = CPU(cpu);
     CPUX86State *env = &cpu->env;
-    struct gvm_vcpu_events events = {};
+    struct aehd_vcpu_events events = {};
 
     events.exception.injected = (env->exception_injected >= 0);
     events.exception.nr = env->exception_injected;
@@ -1690,7 +1690,7 @@ static int gvm_put_vcpu_events(X86CPU *cpu, int level)
     if (has_msr_smbase) {
         events.smi.smm = !!(env->hflags & HF_SMM_MASK);
         events.smi.smm_inside_nmi = !!(env->hflags2 & HF2_SMM_INSIDE_NMI_MASK);
-        if (gvm_irqchip_in_kernel()) {
+        if (aehd_irqchip_in_kernel()) {
             /* As soon as these are moved to the kernel, remove them
              * from cs->interrupt_request.
              */
@@ -1702,27 +1702,27 @@ static int gvm_put_vcpu_events(X86CPU *cpu, int level)
             events.smi.pending = 0;
             events.smi.latched_init = 0;
         }
-        events.flags |= GVM_VCPUEVENT_VALID_SMM;
+        events.flags |= AEHD_VCPUEVENT_VALID_SMM;
     }
 
     events.flags = 0;
-    if (level >= GVM_PUT_RESET_STATE) {
+    if (level >= AEHD_PUT_RESET_STATE) {
         events.flags |=
-            GVM_VCPUEVENT_VALID_NMI_PENDING | GVM_VCPUEVENT_VALID_SIPI_VECTOR;
+            AEHD_VCPUEVENT_VALID_NMI_PENDING | AEHD_VCPUEVENT_VALID_SIPI_VECTOR;
     }
 
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_VCPU_EVENTS,
+    return aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_VCPU_EVENTS,
             &events, sizeof(events), NULL, 0);
 }
 
-static int gvm_get_vcpu_events(X86CPU *cpu)
+static int aehd_get_vcpu_events(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    struct gvm_vcpu_events events;
+    struct aehd_vcpu_events events;
     int ret;
 
     memset(&events, 0, sizeof(events));
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_VCPU_EVENTS,
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_GET_VCPU_EVENTS,
             NULL, 0, &events, sizeof(events));
     if (ret < 0) {
        return ret;
@@ -1744,7 +1744,7 @@ static int gvm_get_vcpu_events(X86CPU *cpu)
         env->hflags2 &= ~HF2_NMI_MASK;
     }
 
-    if (events.flags & GVM_VCPUEVENT_VALID_SMM) {
+    if (events.flags & AEHD_VCPUEVENT_VALID_SMM) {
         if (events.smi.smm) {
             env->hflags |= HF_SMM_MASK;
         } else {
@@ -1772,10 +1772,10 @@ static int gvm_get_vcpu_events(X86CPU *cpu)
     return 0;
 }
 
-static int gvm_put_debugregs(X86CPU *cpu)
+static int aehd_put_debugregs(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    struct gvm_debugregs dbgregs;
+    struct aehd_debugregs dbgregs;
     int i;
 
     for (i = 0; i < 4; i++) {
@@ -1785,17 +1785,17 @@ static int gvm_put_debugregs(X86CPU *cpu)
     dbgregs.dr7 = env->dr[7];
     dbgregs.flags = 0;
 
-    return gvm_vcpu_ioctl(CPU(cpu), GVM_SET_DEBUGREGS,
+    return aehd_vcpu_ioctl(CPU(cpu), AEHD_SET_DEBUGREGS,
             &dbgregs, sizeof(dbgregs), NULL, 0);
 }
 
-static int gvm_get_debugregs(X86CPU *cpu)
+static int aehd_get_debugregs(X86CPU *cpu)
 {
     CPUX86State *env = &cpu->env;
-    struct gvm_debugregs dbgregs;
+    struct aehd_debugregs dbgregs;
     int i, ret;
 
-    ret = gvm_vcpu_ioctl(CPU(cpu), GVM_GET_DEBUGREGS,
+    ret = aehd_vcpu_ioctl(CPU(cpu), AEHD_GET_DEBUGREGS,
             &dbgregs, sizeof(dbgregs), NULL, 0);
     if (ret < 0) {
         return ret;
@@ -1809,107 +1809,107 @@ static int gvm_get_debugregs(X86CPU *cpu)
     return 0;
 }
 
-int gvm_arch_put_registers(CPUState *cpu, int level)
+int aehd_arch_put_registers(CPUState *cpu, int level)
 {
     X86CPU *x86_cpu = X86_CPU(cpu);
     int ret;
 
     assert(cpu_is_stopped(cpu) || qemu_cpu_is_self(cpu));
 
-    if (level >= GVM_PUT_RESET_STATE) {
-        ret = gvm_put_msr_feature_control(x86_cpu);
+    if (level >= AEHD_PUT_RESET_STATE) {
+        ret = aehd_put_msr_feature_control(x86_cpu);
         if (ret < 0) {
             return ret;
         }
     }
 
-    ret = gvm_getput_regs(x86_cpu, 1);
+    ret = aehd_getput_regs(x86_cpu, 1);
     if (ret < 0) {
         return ret;
     }
-    ret = gvm_put_xsave(x86_cpu);
+    ret = aehd_put_xsave(x86_cpu);
     if (ret < 0) {
         return ret;
     }
-    ret = gvm_put_xcrs(x86_cpu);
+    ret = aehd_put_xcrs(x86_cpu);
     if (ret < 0) {
         return ret;
     }
-    ret = gvm_put_sregs(x86_cpu);
+    ret = aehd_put_sregs(x86_cpu);
     if (ret < 0) {
         return ret;
     }
-    ret = gvm_put_msrs(x86_cpu, level);
+    ret = aehd_put_msrs(x86_cpu, level);
     if (ret < 0) {
         return ret;
     }
-    if (level >= GVM_PUT_RESET_STATE) {
-        ret = gvm_put_mp_state(x86_cpu);
+    if (level >= AEHD_PUT_RESET_STATE) {
+        ret = aehd_put_mp_state(x86_cpu);
         if (ret < 0) {
             return ret;
         }
-        ret = gvm_put_apic(x86_cpu);
+        ret = aehd_put_apic(x86_cpu);
         if (ret < 0) {
             return ret;
         }
     }
 
-    ret = gvm_put_tscdeadline_msr(x86_cpu);
+    ret = aehd_put_tscdeadline_msr(x86_cpu);
     if (ret < 0) {
         return ret;
     }
 
-    ret = gvm_put_vcpu_events(x86_cpu, level);
+    ret = aehd_put_vcpu_events(x86_cpu, level);
     if (ret < 0) {
         return ret;
     }
-    ret = gvm_put_debugregs(x86_cpu);
+    ret = aehd_put_debugregs(x86_cpu);
     if (ret < 0) {
         return ret;
     }
     return 0;
 }
 
-int gvm_arch_get_registers(CPUState *cs)
+int aehd_arch_get_registers(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);
     int ret;
 
     assert(cpu_is_stopped(cs) || qemu_cpu_is_self(cs));
 
-    ret = gvm_getput_regs(cpu, 0);
+    ret = aehd_getput_regs(cpu, 0);
     if (ret < 0) {
         goto out;
     }
-    ret = gvm_get_xsave(cpu);
+    ret = aehd_get_xsave(cpu);
     if (ret < 0) {
         goto out;
     }
-    ret = gvm_get_xcrs(cpu);
+    ret = aehd_get_xcrs(cpu);
     if (ret < 0) {
         goto out;
     }
-    ret = gvm_get_sregs(cpu);
+    ret = aehd_get_sregs(cpu);
     if (ret < 0) {
         goto out;
     }
-    ret = gvm_get_msrs(cpu);
+    ret = aehd_get_msrs(cpu);
     if (ret < 0) {
         goto out;
     }
-    ret = gvm_get_mp_state(cpu);
+    ret = aehd_get_mp_state(cpu);
     if (ret < 0) {
         goto out;
     }
-    ret = gvm_get_apic(cpu);
+    ret = aehd_get_apic(cpu);
     if (ret < 0) {
         goto out;
     }
-    ret = gvm_get_vcpu_events(cpu);
+    ret = aehd_get_vcpu_events(cpu);
     if (ret < 0) {
         goto out;
     }
-    ret = gvm_get_debugregs(cpu);
+    ret = aehd_get_debugregs(cpu);
     if (ret < 0) {
         goto out;
     }
@@ -1919,7 +1919,7 @@ int gvm_arch_get_registers(CPUState *cs)
     return ret;
 }
 
-void gvm_arch_pre_run(CPUState *cpu, struct gvm_run *run)
+void aehd_arch_pre_run(CPUState *cpu, struct aehd_run *run)
 {
     X86CPU *x86_cpu = X86_CPU(cpu);
     CPUX86State *env = &x86_cpu->env;
@@ -1932,9 +1932,9 @@ void gvm_arch_pre_run(CPUState *cpu, struct gvm_run *run)
             cpu->interrupt_request &= ~CPU_INTERRUPT_NMI;
             qemu_mutex_unlock_iothread();
             DPRINTF("injected NMI\n");
-            ret = gvm_vcpu_ioctl(cpu, GVM_NMI, NULL, 0, NULL, 0);
+            ret = aehd_vcpu_ioctl(cpu, AEHD_NMI, NULL, 0, NULL, 0);
             if (ret < 0) {
-                fprintf(stderr, "GVM: injection failed, NMI lost (%s)\n",
+                fprintf(stderr, "AEHD: injection failed, NMI lost (%s)\n",
                         strerror(-ret));
             }
         }
@@ -1943,15 +1943,15 @@ void gvm_arch_pre_run(CPUState *cpu, struct gvm_run *run)
             cpu->interrupt_request &= ~CPU_INTERRUPT_SMI;
             qemu_mutex_unlock_iothread();
             DPRINTF("injected SMI\n");
-            ret = gvm_vcpu_ioctl(cpu, GVM_SMI, NULL, 0, NULL, 0);
+            ret = aehd_vcpu_ioctl(cpu, AEHD_SMI, NULL, 0, NULL, 0);
             if (ret < 0) {
-                fprintf(stderr, "GVM: injection failed, SMI lost (%s)\n",
+                fprintf(stderr, "AEHD: injection failed, SMI lost (%s)\n",
                         strerror(-ret));
             }
         }
     }
 
-    if (!gvm_pic_in_kernel()) {
+    if (!aehd_pic_in_kernel()) {
         qemu_mutex_lock_iothread();
     }
 
@@ -1969,7 +1969,7 @@ void gvm_arch_pre_run(CPUState *cpu, struct gvm_run *run)
         }
     }
 
-    if (!gvm_pic_in_kernel()) {
+    if (!aehd_pic_in_kernel()) {
         /* Try to inject an interrupt if the guest can accept it */
         if (run->ready_for_interrupt_injection &&
             (cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
@@ -1979,15 +1979,15 @@ void gvm_arch_pre_run(CPUState *cpu, struct gvm_run *run)
             cpu->interrupt_request &= ~CPU_INTERRUPT_HARD;
             irq = cpu_get_pic_interrupt(env);
             if (irq >= 0) {
-                struct gvm_interrupt intr;
+                struct aehd_interrupt intr;
 
                 intr.irq = irq;
                 DPRINTF("injected interrupt %d\n", irq);
-                ret = gvm_vcpu_ioctl(cpu, GVM_INTERRUPT,
+                ret = aehd_vcpu_ioctl(cpu, AEHD_INTERRUPT,
                         &intr, sizeof(intr), NULL, 0);
                 if (ret < 0) {
                     fprintf(stderr,
-                            "GVM: injection failed, interrupt lost (%s)\n",
+                            "AEHD: injection failed, interrupt lost (%s)\n",
                             strerror(-ret));
                 }
             }
@@ -2010,12 +2010,12 @@ void gvm_arch_pre_run(CPUState *cpu, struct gvm_run *run)
     }
 }
 
-MemTxAttrs gvm_arch_post_run(CPUState *cpu, struct gvm_run *run)
+MemTxAttrs aehd_arch_post_run(CPUState *cpu, struct aehd_run *run)
 {
     X86CPU *x86_cpu = X86_CPU(cpu);
     CPUX86State *env = &x86_cpu->env;
 
-    if (run->flags & GVM_RUN_X86_SMM) {
+    if (run->flags & AEHD_RUN_X86_SMM) {
         env->hflags |= HF_SMM_MASK;
     } else {
         env->hflags &= HF_SMM_MASK;
@@ -2028,18 +2028,18 @@ MemTxAttrs gvm_arch_post_run(CPUState *cpu, struct gvm_run *run)
 
     /* We need to protect the apic state against concurrent accesses from
      * different threads in case the userspace irqchip is used. */
-    if (!gvm_irqchip_in_kernel()) {
+    if (!aehd_irqchip_in_kernel()) {
         qemu_mutex_lock_iothread();
     }
     cpu_set_apic_tpr(x86_cpu->apic_state, run->cr8);
     cpu_set_apic_base(x86_cpu->apic_state, run->apic_base);
-    if (!gvm_irqchip_in_kernel()) {
+    if (!aehd_irqchip_in_kernel()) {
         qemu_mutex_unlock_iothread();
     }
     return cpu_get_mem_attrs(env);
 }
 
-int gvm_arch_process_async_events(CPUState *cs)
+int aehd_arch_process_async_events(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);
     CPUX86State *env = &cpu->env;
@@ -2050,7 +2050,7 @@ int gvm_arch_process_async_events(CPUState *cs)
 
         cs->interrupt_request &= ~CPU_INTERRUPT_MCE;
 
-        gvm_cpu_synchronize_state(cs);
+        aehd_cpu_synchronize_state(cs);
 
         if (env->exception_injected == EXCP08_DBLE) {
             /* this means triple fault */
@@ -2062,18 +2062,18 @@ int gvm_arch_process_async_events(CPUState *cs)
         env->has_error_code = 0;
 
         cs->halted = 0;
-        if (gvm_irqchip_in_kernel() && env->mp_state == GVM_MP_STATE_HALTED) {
-            env->mp_state = GVM_MP_STATE_RUNNABLE;
+        if (aehd_irqchip_in_kernel() && env->mp_state == AEHD_MP_STATE_HALTED) {
+            env->mp_state = AEHD_MP_STATE_RUNNABLE;
         }
     }
 
     if ((cs->interrupt_request & CPU_INTERRUPT_INIT) &&
         !(env->hflags & HF_SMM_MASK)) {
-        gvm_cpu_synchronize_state(cs);
+        aehd_cpu_synchronize_state(cs);
         do_cpu_init(cpu);
     }
 
-    if (gvm_irqchip_in_kernel()) {
+    if (aehd_irqchip_in_kernel()) {
         return 0;
     }
 
@@ -2087,12 +2087,12 @@ int gvm_arch_process_async_events(CPUState *cs)
         cs->halted = 0;
     }
     if (cs->interrupt_request & CPU_INTERRUPT_SIPI) {
-        gvm_cpu_synchronize_state(cs);
+        aehd_cpu_synchronize_state(cs);
         do_cpu_sipi(cpu);
     }
     if (cs->interrupt_request & CPU_INTERRUPT_TPR) {
         cs->interrupt_request &= ~CPU_INTERRUPT_TPR;
-        gvm_cpu_synchronize_state(cs);
+        aehd_cpu_synchronize_state(cs);
         apic_handle_tpr_access_report(cpu->apic_state, env->eip,
                                       env->tpr_access_type);
     }
@@ -2100,7 +2100,7 @@ int gvm_arch_process_async_events(CPUState *cs)
     return cs->halted;
 }
 
-static int gvm_handle_halt(X86CPU *cpu)
+static int aehd_handle_halt(X86CPU *cpu)
 {
     CPUState *cs = CPU(cpu);
     CPUX86State *env = &cpu->env;
@@ -2115,10 +2115,10 @@ static int gvm_handle_halt(X86CPU *cpu)
     return 0;
 }
 
-static int gvm_handle_tpr_access(X86CPU *cpu)
+static int aehd_handle_tpr_access(X86CPU *cpu)
 {
     CPUState *cs = CPU(cpu);
-    struct gvm_run *run = cs->gvm_run;
+    struct aehd_run *run = cs->aehd_run;
 
     apic_handle_tpr_access_report(cpu->apic_state, run->tpr_access.rip,
                                   run->tpr_access.is_write ? TPR_ACCESS_WRITE
@@ -2126,7 +2126,7 @@ static int gvm_handle_tpr_access(X86CPU *cpu)
     return 1;
 }
 
-int gvm_arch_insert_sw_breakpoint(CPUState *cs, struct gvm_sw_breakpoint *bp)
+int aehd_arch_insert_sw_breakpoint(CPUState *cs, struct aehd_sw_breakpoint *bp)
 {
     static const uint8_t int3 = 0xcc;
 
@@ -2137,7 +2137,7 @@ int gvm_arch_insert_sw_breakpoint(CPUState *cs, struct gvm_sw_breakpoint *bp)
     return 0;
 }
 
-int gvm_arch_remove_sw_breakpoint(CPUState *cs, struct gvm_sw_breakpoint *bp)
+int aehd_arch_remove_sw_breakpoint(CPUState *cs, struct aehd_sw_breakpoint *bp)
 {
     uint8_t int3;
 
@@ -2169,7 +2169,7 @@ static int find_hw_breakpoint(target_ulong addr, int len, int type)
     return -1;
 }
 
-int gvm_arch_insert_hw_breakpoint(target_ulong addr,
+int aehd_arch_insert_hw_breakpoint(target_ulong addr,
                                   target_ulong len, int type)
 {
     switch (type) {
@@ -2210,7 +2210,7 @@ int gvm_arch_insert_hw_breakpoint(target_ulong addr,
     return 0;
 }
 
-int gvm_arch_remove_hw_breakpoint(target_ulong addr,
+int aehd_arch_remove_hw_breakpoint(target_ulong addr,
                                   target_ulong len, int type)
 {
     int n;
@@ -2225,15 +2225,15 @@ int gvm_arch_remove_hw_breakpoint(target_ulong addr,
     return 0;
 }
 
-void gvm_arch_remove_all_hw_breakpoints(void)
+void aehd_arch_remove_all_hw_breakpoints(void)
 {
     nb_hw_breakpoint = 0;
 }
 
 static CPUWatchpoint hw_watchpoint;
 
-static int gvm_handle_debug(X86CPU *cpu,
-                            struct gvm_debug_exit_arch *arch_info)
+static int aehd_handle_debug(X86CPU *cpu,
+                            struct aehd_debug_exit_arch *arch_info)
 {
     CPUState *cs = CPU(cpu);
     CPUX86State *env = &cpu->env;
@@ -2268,7 +2268,7 @@ static int gvm_handle_debug(X86CPU *cpu,
                 }
             }
         }
-    } else if (gvm_find_sw_breakpoint(cs, arch_info->pc)) {
+    } else if (aehd_find_sw_breakpoint(cs, arch_info->pc)) {
         ret = EXCP_DEBUG;
     }
     if (ret == 0) {
@@ -2283,7 +2283,7 @@ static int gvm_handle_debug(X86CPU *cpu,
     return ret;
 }
 
-void gvm_arch_update_guest_debug(CPUState *cpu, struct gvm_guest_debug *dbg)
+void aehd_arch_update_guest_debug(CPUState *cpu, struct aehd_guest_debug *dbg)
 {
     const uint8_t type_code[] = {
         [GDB_BREAKPOINT_HW] = 0x0,
@@ -2295,11 +2295,11 @@ void gvm_arch_update_guest_debug(CPUState *cpu, struct gvm_guest_debug *dbg)
     };
     int n;
 
-    if (gvm_sw_breakpoints_active(cpu)) {
-        dbg->control |= GVM_GUESTDBG_ENABLE | GVM_GUESTDBG_USE_SW_BP;
+    if (aehd_sw_breakpoints_active(cpu)) {
+        dbg->control |= AEHD_GUESTDBG_ENABLE | AEHD_GUESTDBG_USE_SW_BP;
     }
     if (nb_hw_breakpoint > 0) {
-        dbg->control |= GVM_GUESTDBG_ENABLE | GVM_GUESTDBG_USE_HW_BP;
+        dbg->control |= AEHD_GUESTDBG_ENABLE | AEHD_GUESTDBG_USE_HW_BP;
         dbg->arch.debugreg[7] = 0x0600;
         for (n = 0; n < nb_hw_breakpoint; n++) {
             dbg->arch.debugreg[n] = hw_breakpoint[n].addr;
@@ -2320,30 +2320,30 @@ static bool host_supports_vmx(void)
 
 #define VMX_INVALID_GUEST_STATE 0x80000021
 
-int gvm_arch_handle_exit(CPUState *cs, struct gvm_run *run)
+int aehd_arch_handle_exit(CPUState *cs, struct aehd_run *run)
 {
     X86CPU *cpu = X86_CPU(cs);
     uint64_t code;
     int ret;
 
     switch (run->exit_reason) {
-    case GVM_EXIT_HLT:
+    case AEHD_EXIT_HLT:
         DPRINTF("handle_hlt\n");
         qemu_mutex_lock_iothread();
-        ret = gvm_handle_halt(cpu);
+        ret = aehd_handle_halt(cpu);
         qemu_mutex_unlock_iothread();
         break;
-    case GVM_EXIT_SET_TPR:
+    case AEHD_EXIT_SET_TPR:
         ret = 0;
         break;
-    case GVM_EXIT_TPR_ACCESS:
+    case AEHD_EXIT_TPR_ACCESS:
         qemu_mutex_lock_iothread();
-        ret = gvm_handle_tpr_access(cpu);
+        ret = aehd_handle_tpr_access(cpu);
         qemu_mutex_unlock_iothread();
         break;
-    case GVM_EXIT_FAIL_ENTRY:
+    case AEHD_EXIT_FAIL_ENTRY:
         code = run->fail_entry.hardware_entry_failure_reason;
-        fprintf(stderr, "GVM: entry failed, hardware error 0x%" PRIx64 "\n",
+        fprintf(stderr, "AEHD: entry failed, hardware error 0x%" PRIx64 "\n",
                 code);
         if (host_supports_vmx() && code == VMX_INVALID_GUEST_STATE) {
             fprintf(stderr,
@@ -2358,23 +2358,23 @@ int gvm_arch_handle_exit(CPUState *cs, struct gvm_run *run)
         }
         ret = -1;
         break;
-    case GVM_EXIT_EXCEPTION:
-        fprintf(stderr, "GVM: exception %d exit (error code 0x%x)\n",
+    case AEHD_EXIT_EXCEPTION:
+        fprintf(stderr, "AEHD: exception %d exit (error code 0x%x)\n",
                 run->ex.exception, run->ex.error_code);
         ret = -1;
         break;
-    case GVM_EXIT_DEBUG:
-        DPRINTF("gvm_exit_debug\n");
+    case AEHD_EXIT_DEBUG:
+        DPRINTF("aehd_exit_debug\n");
         qemu_mutex_lock_iothread();
-        ret = gvm_handle_debug(cpu, &run->debug.arch);
+        ret = aehd_handle_debug(cpu, &run->debug.arch);
         qemu_mutex_unlock_iothread();
         break;
-    case GVM_EXIT_IOAPIC_EOI:
+    case AEHD_EXIT_IOAPIC_EOI:
         ioapic_eoi_broadcast(run->eoi.vector);
         ret = 0;
         break;
     default:
-        fprintf(stderr, "GVM: unknown exit reason %d\n", run->exit_reason);
+        fprintf(stderr, "AEHD: unknown exit reason %d\n", run->exit_reason);
         ret = -1;
         break;
     }
@@ -2382,17 +2382,17 @@ int gvm_arch_handle_exit(CPUState *cs, struct gvm_run *run)
     return ret;
 }
 
-bool gvm_arch_stop_on_emulation_error(CPUState *cs)
+bool aehd_arch_stop_on_emulation_error(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);
     CPUX86State *env = &cpu->env;
 
-    gvm_cpu_synchronize_state(cs);
+    aehd_cpu_synchronize_state(cs);
     return !(env->cr[0] & CR0_PE_MASK) ||
            ((env->segs[R_CS].selector  & 3) != 3);
 }
 
-int gvm_arch_irqchip_create(MachineState *ms, GVMState *s)
+int aehd_arch_irqchip_create(MachineState *ms, AEHDState *s)
 {
     return 0;
 }
@@ -2410,7 +2410,7 @@ struct MSIRouteEntry {
 static QLIST_HEAD(, MSIRouteEntry) msi_route_list = \
     QLIST_HEAD_INITIALIZER(msi_route_list);
 
-int gvm_arch_add_msi_route_post(struct gvm_irq_routing_entry *route,
+int aehd_arch_add_msi_route_post(struct aehd_irq_routing_entry *route,
                                 int vector, PCIDevice *dev)
 {
     MSIRouteEntry *entry;
@@ -2430,7 +2430,7 @@ int gvm_arch_add_msi_route_post(struct gvm_irq_routing_entry *route,
     return 0;
 }
 
-int gvm_arch_release_virq_post(int virq)
+int aehd_arch_release_virq_post(int virq)
 {
     MSIRouteEntry *entry, *next;
     QLIST_FOREACH_SAFE(entry, &msi_route_list, list, next) {

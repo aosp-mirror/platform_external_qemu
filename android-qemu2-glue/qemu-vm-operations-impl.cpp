@@ -63,7 +63,7 @@ extern "C" {
 #include "qapi/qmp/qdict.h"                           // for qdict_set_defau...
 #include "sysemu/block-backend.h"                     // for blk_flush, blk_...
 #include "sysemu/cpus.h"                              // for smp_cores, smp_...
-#include "sysemu/gvm.h"                               // for gvm_gpa2hva
+#include "sysemu/aehd.h"                               // for aehd_gpa2hva
 #include "sysemu/hax.h"                               // for hax_gpa2hva
 #include "sysemu/hvf.h"                               // for hvf_enabled
 #include "sysemu/kvm.h"                               // for kvm_enabled
@@ -822,8 +822,8 @@ static void set_snapshot_callbacks(void* opaque,
             case android::CPU_ACCELERATOR_WHPX:
                 set_address_translation_funcs(0, whpx_gpa2hva);
                 break;
-            case android::CPU_ACCELERATOR_GVM:
-                set_address_translation_funcs(gvm_hva2gpa, gvm_gpa2hva);
+            case android::CPU_ACCELERATOR_AEHD:
+                set_address_translation_funcs(aehd_hva2gpa, aehd_gpa2hva);
                 break;
             case android::CPU_ACCELERATOR_KVM:
 #ifdef __linux__

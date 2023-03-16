@@ -15,7 +15,7 @@
 #include "sysemu/hax.h"
 #include "sysemu/kvm.h"
 #include "sysemu/whpx.h"
-#include "sysemu/gvm.h"
+#include "sysemu/aehd.h"
 
 static inline void cpu_synchronize_state(CPUState *cpu)
 {
@@ -28,8 +28,8 @@ static inline void cpu_synchronize_state(CPUState *cpu)
     if (whpx_enabled()) {
         whpx_cpu_synchronize_state(cpu);
     }
-    if (gvm_enabled()) {
-        gvm_cpu_synchronize_state(cpu);
+    if (aehd_enabled()) {
+        aehd_cpu_synchronize_state(cpu);
     }
 }
 
@@ -44,8 +44,8 @@ static inline void cpu_synchronize_post_reset(CPUState *cpu)
     if (whpx_enabled()) {
         whpx_cpu_synchronize_post_reset(cpu);
     }
-    if (gvm_enabled()) {
-        gvm_cpu_synchronize_post_reset(cpu);
+    if (aehd_enabled()) {
+        aehd_cpu_synchronize_post_reset(cpu);
     }
 }
 
@@ -60,8 +60,8 @@ static inline void cpu_synchronize_post_init(CPUState *cpu)
     if (whpx_enabled()) {
         whpx_cpu_synchronize_post_init(cpu);
     }
-    if (gvm_enabled()) {
-        gvm_cpu_synchronize_post_init(cpu);
+    if (aehd_enabled()) {
+        aehd_cpu_synchronize_post_init(cpu);
     }
 }
 
@@ -76,8 +76,8 @@ static inline void cpu_synchronize_pre_loadvm(CPUState *cpu)
     if (whpx_enabled()) {
         whpx_cpu_synchronize_pre_loadvm(cpu);
     }
-    if (gvm_enabled()) {
-        gvm_cpu_synchronize_pre_loadvm(cpu);
+    if (aehd_enabled()) {
+        aehd_cpu_synchronize_pre_loadvm(cpu);
     }
 }
 

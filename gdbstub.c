@@ -789,8 +789,8 @@ static int gdb_breakpoint_insert(target_ulong addr, target_ulong len, int type)
         return kvm_insert_breakpoint(gdbserver_state->c_cpu, addr, len, type);
     }
 
-    if (gvm_enabled()) {
-        return gvm_insert_breakpoint(gdbserver_state->c_cpu, addr, len, type);
+    if (aehd_enabled()) {
+        return aehd_insert_breakpoint(gdbserver_state->c_cpu, addr, len, type);
     }
 
     switch (type) {
@@ -830,8 +830,8 @@ static int gdb_breakpoint_remove(target_ulong addr, target_ulong len, int type)
         return kvm_remove_breakpoint(gdbserver_state->c_cpu, addr, len, type);
     }
 
-    if (gvm_enabled()) {
-        return gvm_remove_breakpoint(gdbserver_state->c_cpu, addr, len, type);
+    if (aehd_enabled()) {
+        return aehd_remove_breakpoint(gdbserver_state->c_cpu, addr, len, type);
     }
 
     switch (type) {
@@ -870,8 +870,8 @@ static void gdb_breakpoint_remove_all(void)
         return;
     }
 
-    if (gvm_enabled()) {
-        gvm_remove_all_breakpoints(gdbserver_state->c_cpu);
+    if (aehd_enabled()) {
+        aehd_remove_all_breakpoints(gdbserver_state->c_cpu);
         return;
     }
 

@@ -23,10 +23,10 @@
 #include "cpu.h"
 #include "exec/exec-all.h"
 #include "sysemu/kvm.h"
-#include "sysemu/gvm.h"
+#include "sysemu/aehd.h"
 #include "sysemu/cpus.h"
 #include "kvm_i386.h"
-#include "gvm_i386.h"
+#include "aehd_i386.h"
 #include "sev_i386.h"
 
 #include "qemu/error-report.h"
@@ -2290,8 +2290,8 @@ static void max_x86_cpu_initfn(Object *obj)
         if (lmce_supported()) {
             object_property_set_bool(OBJECT(cpu), true, "lmce", &error_abort);
         }
-    } else if (gvm_enabled()) {
-        GVMState *s = gvm_state;
+    } else if (aehd_enabled()) {
+        AEHDState *s = aehd_state;
         char vendor[CPUID_VENDOR_SZ + 1] = { 0 };
         char model_id[CPUID_MODEL_ID_SZ + 1] = { 0 };
         int family, model, stepping;
@@ -2309,11 +2309,11 @@ static void max_x86_cpu_initfn(Object *obj)
                                 &error_abort);
 
         env->cpuid_min_level =
-            gvm_arch_get_supported_cpuid(s, 0x0, 0, R_EAX);
+            aehd_arch_get_supported_cpuid(s, 0x0, 0, R_EAX);
         env->cpuid_min_xlevel =
-            gvm_arch_get_supported_cpuid(s, 0x80000000, 0, R_EAX);
+            aehd_arch_get_supported_cpuid(s, 0x80000000, 0, R_EAX);
         env->cpuid_min_xlevel2 =
-            gvm_arch_get_supported_cpuid(s, 0xC0000000, 0, R_EAX);
+            aehd_arch_get_supported_cpuid(s, 0xC0000000, 0, R_EAX);
     } else {
         object_property_set_str(OBJECT(cpu), CPUID_VENDOR_AMD,
                                 "vendor", &error_abort);
@@ -2335,7 +2335,7 @@ static const TypeInfo max_x86_cpu_type_info = {
     .class_init = max_x86_cpu_class_init,
 };
 
-#if defined (CONFIG_KVM) || defined (CONFIG_GVM)
+#if defined (CONFIG_KVM) || defined (CONFIG_AEHD)
 
 static void host_x86_cpu_class_init(ObjectClass *oc, void *data)
 {
@@ -2343,8 +2343,8 @@ static void host_x86_cpu_class_init(ObjectClass *oc, void *data)
 
 #if defined CONFIG_KVM
     xcc->kvm_required = true;
-#elif defined CONFIG_GVM
-    xcc->gvm_required = true;
+#elif defined CONFIG_AEHD
+    xcc->aehd_required = true;
 #endif
     xcc->ordering = 8;
 
@@ -2372,7 +2372,7 @@ static void report_unavailable_features(FeatureWord w, uint32_t mask)
             assert(reg);
             fprintf(stdout, "%s doesn't support requested feature: "
                         "CPUID.%02XH:%s%s%s [bit %d]\n",
-                        kvm_enabled() || gvm_enabled() ? "host" : "TCG",
+                        kvm_enabled() || aehd_enabled() ? "host" : "TCG",
                         f->cpuid_eax, reg,
                         f->feat_names[i] ? "." : "",
                         f->feat_names[i] ? f->feat_names[i] : "", i);
@@ -2830,9 +2830,9 @@ static void x86_cpu_class_check_missing_features(X86CPUClass *xcc,
         return;
     }
 
-    if (xcc->gvm_required && !gvm_enabled()) {
+    if (xcc->aehd_required && !aehd_enabled()) {
         strList *new = g_new0(strList, 1);
-        new->value = g_strdup("gvm");
+        new->value = g_strdup("aehd");
         *missing_feats = new;
         return;
     }
@@ -2992,8 +2992,8 @@ static uint32_t x86_cpu_get_supported_feature_word(FeatureWord w,
         r = kvm_arch_get_supported_cpuid(kvm_state, wi->cpuid_eax,
                                                     wi->cpuid_ecx,
                                                     wi->cpuid_reg);
-    } else if (gvm_enabled()) {
-        r = gvm_arch_get_supported_cpuid(gvm_state, wi->cpuid_eax,
+    } else if (aehd_enabled()) {
+        r = aehd_arch_get_supported_cpuid(aehd_state, wi->cpuid_eax,
                                                     wi->cpuid_ecx,
                                                     wi->cpuid_reg);
     } else if (tcg_enabled()) {
@@ -3081,7 +3081,7 @@ static void x86_cpu_load_def(X86CPU *cpu, X86CPUDefinition *def, Error **errp)
         vendor = "Goldfish-CPU";
     } else {
         vendor = def->vendor;
-        if (kvm_enabled() || gvm_enabled()) {
+        if (kvm_enabled() || aehd_enabled()) {
             uint32_t  ebx = 0, ecx = 0, edx = 0;
             host_cpuid(0, 0, NULL, &ebx, &ecx, &edx);
             x86_cpu_vendor_words2str(host_vendor, ebx, edx, ecx);
@@ -3537,13 +3537,13 @@ void cpu_x86_cpuid(CPUX86State *env, uint32_t index, uint32_t count,
             *ebx = kvm_arch_get_supported_cpuid(s, 0xA, count, R_EBX);
             *ecx = kvm_arch_get_supported_cpuid(s, 0xA, count, R_ECX);
             *edx = kvm_arch_get_supported_cpuid(s, 0xA, count, R_EDX);
-        } else if (gvm_enabled() && cpu->enable_pmu) {
-            GVMState *s = cs->gvm_state;
+        } else if (aehd_enabled() && cpu->enable_pmu) {
+            AEHDState *s = cs->aehd_state;
 
-            *eax = gvm_arch_get_supported_cpuid(s, 0xA, count, R_EAX);
-            *ebx = gvm_arch_get_supported_cpuid(s, 0xA, count, R_EBX);
-            *ecx = gvm_arch_get_supported_cpuid(s, 0xA, count, R_ECX);
-            *edx = gvm_arch_get_supported_cpuid(s, 0xA, count, R_EDX);
+            *eax = aehd_arch_get_supported_cpuid(s, 0xA, count, R_EAX);
+            *ebx = aehd_arch_get_supported_cpuid(s, 0xA, count, R_EBX);
+            *ecx = aehd_arch_get_supported_cpuid(s, 0xA, count, R_ECX);
+            *edx = aehd_arch_get_supported_cpuid(s, 0xA, count, R_EDX);
         } else {
             *eax = 0;
             *ebx = 0;
@@ -3924,8 +3924,8 @@ static void x86_cpu_reset(CPUState *s)
     if (kvm_enabled()) {
         kvm_arch_reset_vcpu(cpu);
     }
-    if (gvm_enabled()) {
-        gvm_arch_reset_vcpu(cpu);
+    if (aehd_enabled()) {
+        aehd_arch_reset_vcpu(cpu);
     }
 #endif
 }
@@ -3968,8 +3968,8 @@ APICCommonClass *apic_get_class(void)
 
     if (kvm_apic_in_kernel()) {
         apic_type = "kvm-apic";
-    } else if (gvm_apic_in_kernel()) {
-        apic_type = "gvm-apic";
+    } else if (aehd_apic_in_kernel()) {
+        apic_type = "aehd-apic";
     } else if (xen_enabled()) {
         apic_type = "xen-apic";
     }
@@ -4324,9 +4324,9 @@ static void x86_cpu_realizefn(DeviceState *dev, Error **errp)
         goto out;
     }
 
-    if (xcc->gvm_required && !gvm_enabled()) {
+    if (xcc->aehd_required && !aehd_enabled()) {
         char *name = x86_cpu_class_get_model_name(xcc);
-        error_setg(&local_err, "CPU model '%s' requires GVM", name);
+        error_setg(&local_err, "CPU model '%s' requires AEHD", name);
         g_free(name);
         goto out;
     }
@@ -4346,7 +4346,7 @@ static void x86_cpu_realizefn(DeviceState *dev, Error **errp)
         x86_cpu_report_filtered_features(cpu);
         if (cpu->enforce_cpuid) {
             error_setg(&local_err,
-                       kvm_enabled() || gvm_enabled() ?
+                       kvm_enabled() || aehd_enabled() ?
                            "Host doesn't support requested features" :
                            "TCG doesn't support requested features");
             goto out;
@@ -4369,7 +4369,7 @@ static void x86_cpu_realizefn(DeviceState *dev, Error **errp)
      * consumer AMD devices but nothing else.
      */
     if (env->features[FEAT_8000_0001_EDX] & CPUID_EXT2_LM) {
-        if (kvm_enabled() || gvm_enabled()) {
+        if (kvm_enabled() || aehd_enabled()) {
             uint32_t host_phys_bits = x86_host_phys_bits();
             static bool warned;
 
@@ -4696,20 +4696,20 @@ static void android_emulator_set_pmu_feature(X86CPU *cpu)
         /* Enable PMU (this has no effect if env->cpuid_level < 0xA) */
         object_property_set_bool(OBJECT(cpu), true, "pmu", &error_abort);
     }
-    if (gvm_enabled() &&
+    if (aehd_enabled() &&
         intel_pmu_enabled &&
         !strcmp("on", intel_pmu_enabled)) {
 
         CPUX86State *env = &cpu->env;
-        GVMState *s = gvm_state;
+        AEHDState *s = aehd_state;
 
         /* Use the host/KVM CPUID level in order to enable additional features
          * supported by the host CPU, such as PMU. Cf. host_x86_cpu_initfn().
          */
-        env->cpuid_level = gvm_arch_get_supported_cpuid(s, 0x0, 0, R_EAX);
-        env->cpuid_xlevel = gvm_arch_get_supported_cpuid(s, 0x80000000, 0,
+        env->cpuid_level = aehd_arch_get_supported_cpuid(s, 0x0, 0, R_EAX);
+        env->cpuid_xlevel = aehd_arch_get_supported_cpuid(s, 0x80000000, 0,
                                                          R_EAX);
-        env->cpuid_xlevel2 = gvm_arch_get_supported_cpuid(s, 0xC0000000, 0,
+        env->cpuid_xlevel2 = aehd_arch_get_supported_cpuid(s, 0xC0000000, 0,
                                                           R_EAX);
 
         /* Enable PMU (this has no effect if env->cpuid_level < 0xA) */
@@ -5084,7 +5084,7 @@ static void x86_cpu_register_types(void)
 
     type_register_static(&max_x86_cpu_type_info);
     type_register_static(&x86_base_cpu_type_info);
-#if defined (CONFIG_KVM) || defined (CONFIG_GVM)
+#if defined (CONFIG_KVM) || defined (CONFIG_AEHD)
     type_register_static(&host_x86_cpu_type_info);
 #endif
 }

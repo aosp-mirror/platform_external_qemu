@@ -1,5 +1,5 @@
 /*
- * QEMU GVM support
+ * QEMU AEHD support
  *
  * Copyright IBM, Corp. 2008
  *           Red Hat, Inc. 2008
@@ -24,7 +24,7 @@
 #include "hw/pci/msi.h"
 #include "hw/pci/msix.h"
 #include "exec/gdbstub.h"
-#include "sysemu/gvm_int.h"
+#include "sysemu/aehd_int.h"
 #include "sysemu/cpus.h"
 #include "qemu/bswap.h"
 #include "exec/memory.h"
@@ -38,10 +38,10 @@
 
 #include "hw/boards.h"
 
-#include "gvm_i386.h"
+#include "aehd_i386.h"
 
 
-#ifdef DEBUG_GVM
+#ifdef DEBUG_AEHD
 #define DPRINTF(fmt, ...) \
     do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
 #else
@@ -49,48 +49,48 @@
     do { } while (0)
 #endif
 
-#define GVM_MSI_HASHTAB_SIZE    256
+#define AEHD_MSI_HASHTAB_SIZE    256
 
-struct GVMParkedVcpu {
+struct AEHDParkedVcpu {
     unsigned long vcpu_id;
-    HANDLE gvm_fd;
-    QLIST_ENTRY(GVMParkedVcpu) node;
+    HANDLE aehd_fd;
+    QLIST_ENTRY(AEHDParkedVcpu) node;
 };
 
-struct GVMState
+struct AEHDState
 {
     AccelState parent_obj;
 
     int nr_slots;
     HANDLE fd;
     HANDLE vmfd;
-    struct gvm_sw_breakpoint_head gvm_sw_breakpoints;
+    struct aehd_sw_breakpoint_head aehd_sw_breakpoints;
     int intx_set_mask;
     unsigned int sigmask_len;
     GHashTable *gsimap;
-    struct gvm_irq_routing *irq_routes;
+    struct aehd_irq_routing *irq_routes;
     int nr_allocated_irq_routes;
     unsigned long *used_gsi_bitmap;
     unsigned int gsi_count;
-    QTAILQ_HEAD(msi_hashtab, GVMMSIRoute) msi_hashtab[GVM_MSI_HASHTAB_SIZE];
-    GVMMemoryListener memory_listener;
-    QLIST_HEAD(, GVMParkedVcpu) gvm_parked_vcpus;
+    QTAILQ_HEAD(msi_hashtab, AEHDMSIRoute) msi_hashtab[AEHD_MSI_HASHTAB_SIZE];
+    AEHDMemoryListener memory_listener;
+    QLIST_HEAD(, AEHDParkedVcpu) aehd_parked_vcpus;
 };
 
-GVMState *gvm_state;
-bool gvm_kernel_irqchip;
-bool gvm_allowed;
+AEHDState *aehd_state;
+bool aehd_kernel_irqchip;
+bool aehd_allowed;
 
-int gvm_get_max_memslots(void)
+int aehd_get_max_memslots(void)
 {
-    GVMState *s = GVM_STATE(current_machine->accelerator);
+    AEHDState *s = AEHD_STATE(current_machine->accelerator);
 
     return s->nr_slots;
 }
 
-static GVMSlot *gvm_get_free_slot(GVMMemoryListener *kml)
+static AEHDSlot *aehd_get_free_slot(AEHDMemoryListener *kml)
 {
-    GVMState *s = gvm_state;
+    AEHDState *s = aehd_state;
     int i;
 
     for (i = 0; i < s->nr_slots; i++) {
@@ -102,16 +102,16 @@ static GVMSlot *gvm_get_free_slot(GVMMemoryListener *kml)
     return NULL;
 }
 
-bool gvm_has_free_slot(MachineState *ms)
+bool aehd_has_free_slot(MachineState *ms)
 {
-    GVMState *s = GVM_STATE(ms->accelerator);
+    AEHDState *s = AEHD_STATE(ms->accelerator);
 
-    return gvm_get_free_slot(&s->memory_listener);
+    return aehd_get_free_slot(&s->memory_listener);
 }
 
-static GVMSlot *gvm_alloc_slot(GVMMemoryListener *kml)
+static AEHDSlot *aehd_alloc_slot(AEHDMemoryListener *kml)
 {
-    GVMSlot *slot = gvm_get_free_slot(kml);
+    AEHDSlot *slot = aehd_get_free_slot(kml);
 
     if (slot) {
         return slot;
@@ -120,15 +120,15 @@ static GVMSlot *gvm_alloc_slot(GVMMemoryListener *kml)
     qemu_abort("%s: no free slot available\n", __func__);
 }
 
-static GVMSlot *gvm_lookup_matching_slot(GVMMemoryListener *kml,
+static AEHDSlot *aehd_lookup_matching_slot(AEHDMemoryListener *kml,
                                          hwaddr start_addr,
                                          hwaddr size)
 {
-    GVMState *s = gvm_state;
+    AEHDState *s = aehd_state;
     int i;
 
     for (i = 0; i < s->nr_slots; i++) {
-        GVMSlot *mem = &kml->slots[i];
+        AEHDSlot *mem = &kml->slots[i];
 
         if (start_addr == mem->start_addr && size == mem->memory_size) {
             return mem;
@@ -138,15 +138,15 @@ static GVMSlot *gvm_lookup_matching_slot(GVMMemoryListener *kml,
     return NULL;
 }
 
-void* gvm_gpa2hva(uint64_t gpa, bool *found) {
+void* aehd_gpa2hva(uint64_t gpa, bool *found) {
     int i = 0;
-    GVMState *s = gvm_state;
-    GVMMemoryListener* gml = &s->memory_listener;
+    AEHDState *s = aehd_state;
+    AEHDMemoryListener* gml = &s->memory_listener;
 
     *found = false;
 
     for (i = 0; i < s->nr_slots; i++) {
-        GVMSlot *mem = &gml->slots[i];
+        AEHDSlot *mem = &gml->slots[i];
         if (gpa >= mem->start_addr &&
             gpa < mem->start_addr + mem->memory_size) {
             *found = true;
@@ -161,15 +161,15 @@ void* gvm_gpa2hva(uint64_t gpa, bool *found) {
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
-int gvm_hva2gpa(void* hva, uint64_t length, int array_size,
+int aehd_hva2gpa(void* hva, uint64_t length, int array_size,
                 uint64_t* gpa, uint64_t* size) {
     int count = 0, i = 0;
-    GVMState *s = gvm_state;
-    GVMMemoryListener* gml = &s->memory_listener;
+    AEHDState *s = aehd_state;
+    AEHDMemoryListener* gml = &s->memory_listener;
 
     for (i = 0; i < s->nr_slots; i++) {
         size_t hva_start_num, hva_num;
-        GVMSlot *mem = &gml->slots[i];
+        AEHDSlot *mem = &gml->slots[i];
 
         hva_start_num = (size_t)mem->ram;
         hva_num = (size_t)hva;
@@ -208,7 +208,7 @@ int gvm_hva2gpa(void* hva, uint64_t length, int array_size,
  * Calculate and align the start address and the size of the section.
  * Return the size. If the size is 0, the aligned section is empty.
  */
-static hwaddr gvm_align_section(MemoryRegionSection *section,
+static hwaddr aehd_align_section(MemoryRegionSection *section,
                                 hwaddr *start)
 {
     hwaddr size = int128_get64(section->size);
@@ -228,14 +228,14 @@ static hwaddr gvm_align_section(MemoryRegionSection *section,
     return (size - delta) & qemu_real_host_page_mask;
 }
 
-int gvm_physical_memory_addr_from_host(GVMState *s, void *ram,
+int aehd_physical_memory_addr_from_host(AEHDState *s, void *ram,
                                        hwaddr *phys_addr)
 {
-    GVMMemoryListener *kml = &s->memory_listener;
+    AEHDMemoryListener *kml = &s->memory_listener;
     int i;
 
     for (i = 0; i < s->nr_slots; i++) {
-        GVMSlot *mem = &kml->slots[i];
+        AEHDSlot *mem = &kml->slots[i];
 
         if (ram >= mem->ram && ram < mem->ram + mem->memory_size) {
             *phys_addr = mem->start_addr + (ram - mem->ram);
@@ -246,10 +246,10 @@ int gvm_physical_memory_addr_from_host(GVMState *s, void *ram,
     return 0;
 }
 
-static int gvm_set_user_memory_region(GVMMemoryListener *kml, GVMSlot *slot)
+static int aehd_set_user_memory_region(AEHDMemoryListener *kml, AEHDSlot *slot)
 {
-    GVMState *s = gvm_state;
-    struct gvm_userspace_memory_region mem;
+    AEHDState *s = aehd_state;
+    struct aehd_userspace_memory_region mem;
     int r;
 
     mem.slot = slot->slot | (kml->as_id << 16);
@@ -257,68 +257,68 @@ static int gvm_set_user_memory_region(GVMMemoryListener *kml, GVMSlot *slot)
     mem.userspace_addr = (uint64_t)slot->ram;
     mem.flags = slot->flags;
 
-    if (slot->memory_size && mem.flags & GVM_MEM_READONLY) {
+    if (slot->memory_size && mem.flags & AEHD_MEM_READONLY) {
         /* Set the slot size to 0 before setting the slot to the desired
          * value. This is needed based on KVM commit 75d61fbc. */
         mem.memory_size = 0;
-        r = gvm_vm_ioctl(s, GVM_SET_USER_MEMORY_REGION,
+        r = aehd_vm_ioctl(s, AEHD_SET_USER_MEMORY_REGION,
                 &mem, sizeof(mem), NULL, 0);
     }
     mem.memory_size = slot->memory_size;
-    r = gvm_vm_ioctl(s, GVM_SET_USER_MEMORY_REGION,
+    r = aehd_vm_ioctl(s, AEHD_SET_USER_MEMORY_REGION,
             &mem, sizeof(mem), NULL, 0);
     return r;
 }
 
-int gvm_destroy_vcpu(CPUState *cpu)
+int aehd_destroy_vcpu(CPUState *cpu)
 {
-    GVMState *s = gvm_state;
+    AEHDState *s = aehd_state;
     long mmap_size;
-    struct GVMParkedVcpu *vcpu = NULL;
+    struct AEHDParkedVcpu *vcpu = NULL;
     int ret = 0;
 
-    DPRINTF("gvm_destroy_vcpu\n");
+    DPRINTF("aehd_destroy_vcpu\n");
 
-    ret = gvm_ioctl(s, GVM_GET_VCPU_MMAP_SIZE,
+    ret = aehd_ioctl(s, AEHD_GET_VCPU_MMAP_SIZE,
             NULL, 0, &mmap_size, sizeof(mmap_size));
     if (ret < 0) {
         ret = mmap_size;
-        DPRINTF("GVM_GET_VCPU_MMAP_SIZE failed\n");
+        DPRINTF("AEHD_GET_VCPU_MMAP_SIZE failed\n");
         goto err;
     }
 
     //XXX
-    //ret = munmap(cpu->gvm_run, mmap_size);
+    //ret = munmap(cpu->aehd_run, mmap_size);
     if (ret < 0) {
         goto err;
     }
 
     vcpu = g_malloc0(sizeof(*vcpu));
-    vcpu->vcpu_id = gvm_arch_vcpu_id(cpu);
-    vcpu->gvm_fd = cpu->gvm_fd;
-    QLIST_INSERT_HEAD(&gvm_state->gvm_parked_vcpus, vcpu, node);
+    vcpu->vcpu_id = aehd_arch_vcpu_id(cpu);
+    vcpu->aehd_fd = cpu->aehd_fd;
+    QLIST_INSERT_HEAD(&aehd_state->aehd_parked_vcpus, vcpu, node);
 err:
     return ret;
 }
 
-static HANDLE gvm_get_vcpu(GVMState *s, unsigned long vcpu_id)
+static HANDLE aehd_get_vcpu(AEHDState *s, unsigned long vcpu_id)
 {
-    struct GVMParkedVcpu *cpu;
+    struct AEHDParkedVcpu *cpu;
     HANDLE vcpu_fd = INVALID_HANDLE_VALUE;
     int ret;
 
-    QLIST_FOREACH(cpu, &s->gvm_parked_vcpus, node) {
+    QLIST_FOREACH(cpu, &s->aehd_parked_vcpus, node) {
         if (cpu->vcpu_id == vcpu_id) {
-            HANDLE gvm_fd;
+            HANDLE aehd_fd;
 
             QLIST_REMOVE(cpu, node);
-            gvm_fd = cpu->gvm_fd;
+            aehd_fd = cpu->aehd_fd;
             g_free(cpu);
-            return gvm_fd;
+            return aehd_fd;
         }
     }
 
-    ret = gvm_vm_ioctl(s, GVM_CREATE_VCPU,
+    ret = aehd_vm_ioctl(s, AEHD_CREATE_VCPU,
             &vcpu_id, sizeof(vcpu_id), &vcpu_fd, sizeof(vcpu_fd));
     if (ret)
         return INVALID_HANDLE_VALUE;
@@ -326,41 +326,41 @@ static HANDLE gvm_get_vcpu(GVMState *s, unsigned long vcpu_id)
     return vcpu_fd;
 }
 
-int gvm_init_vcpu(CPUState *cpu)
+int aehd_init_vcpu(CPUState *cpu)
 {
-    GVMState *s = gvm_state;
+    AEHDState *s = aehd_state;
     long mmap_size;
     int ret;
     HANDLE vcpu_fd;
 
-    DPRINTF("gvm_init_vcpu\n");
+    DPRINTF("aehd_init_vcpu\n");
 
-    vcpu_fd = gvm_get_vcpu(s, gvm_arch_vcpu_id(cpu));
+    vcpu_fd = aehd_get_vcpu(s, aehd_arch_vcpu_id(cpu));
     if (vcpu_fd == INVALID_HANDLE_VALUE) {
-        DPRINTF("gvm_create_vcpu failed\n");
+        DPRINTF("aehd_create_vcpu failed\n");
         ret = -EFAULT;
         goto err;
     }
 
-    cpu->gvm_fd = vcpu_fd;
-    cpu->gvm_state = s;
+    cpu->aehd_fd = vcpu_fd;
+    cpu->aehd_state = s;
     cpu->vcpu_dirty = true;
 
-    ret = gvm_ioctl(s, GVM_GET_VCPU_MMAP_SIZE,
+    ret = aehd_ioctl(s, AEHD_GET_VCPU_MMAP_SIZE,
             NULL, 0, &mmap_size, sizeof(mmap_size));
     if (ret) {
-        DPRINTF("GVM_GET_VCPU_MMAP_SIZE failed\n");
+        DPRINTF("AEHD_GET_VCPU_MMAP_SIZE failed\n");
         goto err;
     }
 
-    ret = gvm_vcpu_ioctl(cpu, GVM_VCPU_MMAP,
-            NULL, 0, &cpu->gvm_run, sizeof(cpu->gvm_run));
+    ret = aehd_vcpu_ioctl(cpu, AEHD_VCPU_MMAP,
+            NULL, 0, &cpu->aehd_run, sizeof(cpu->aehd_run));
     if (ret) {
         DPRINTF("mmap'ing vcpu state failed\n");
         goto err;
     }
 
-    ret = gvm_arch_init_vcpu(cpu);
+    ret = aehd_arch_init_vcpu(cpu);
 err:
     return ret;
 }
@@ -369,92 +369,92 @@ err:
  * dirty pages logging control
  */
 
-static int gvm_mem_flags(MemoryRegion *mr)
+static int aehd_mem_flags(MemoryRegion *mr)
 {
     bool readonly = mr->readonly || memory_region_is_romd(mr);
     int flags = 0;
 
     if (memory_region_get_dirty_log_mask(mr) != 0) {
-        flags |= GVM_MEM_LOG_DIRTY_PAGES;
+        flags |= AEHD_MEM_LOG_DIRTY_PAGES;
     }
     if (readonly) {
-        flags |= GVM_MEM_READONLY;
+        flags |= AEHD_MEM_READONLY;
     }
     return flags;
 }
 
-static int gvm_slot_update_flags(GVMMemoryListener *kml, GVMSlot *mem,
+static int aehd_slot_update_flags(AEHDMemoryListener *kml, AEHDSlot *mem,
                                  MemoryRegion *mr)
 {
     int old_flags;
 
     old_flags = mem->flags;
-    mem->flags = gvm_mem_flags(mr);
+    mem->flags = aehd_mem_flags(mr);
 
     /* If nothing changed effectively, no need to issue ioctl */
     if (mem->flags == old_flags) {
         return 0;
     }
 
-    return gvm_set_user_memory_region(kml, mem);
+    return aehd_set_user_memory_region(kml, mem);
 }
 
-static int gvm_section_update_flags(GVMMemoryListener *kml,
+static int aehd_section_update_flags(AEHDMemoryListener *kml,
                                     MemoryRegionSection *section)
 {
     hwaddr start_addr, size;
-    GVMSlot *mem;
+    AEHDSlot *mem;
 
-    size = gvm_align_section(section, &start_addr);
+    size = aehd_align_section(section, &start_addr);
     if (!size) {
         return 0;
     }
 
-    mem = gvm_lookup_matching_slot(kml, start_addr, size);
+    mem = aehd_lookup_matching_slot(kml, start_addr, size);
     if (!mem) {
         /* We don't have a slot if we want to trap every access. */
         return 0;
     }
 
-    return gvm_slot_update_flags(kml, mem, section->mr);
+    return aehd_slot_update_flags(kml, mem, section->mr);
 }
 
-static void gvm_log_start(MemoryListener *listener,
+static void aehd_log_start(MemoryListener *listener,
                           MemoryRegionSection *section,
                           int old, int new)
 {
-    GVMMemoryListener *kml = container_of(listener, GVMMemoryListener, listener);
+    AEHDMemoryListener *kml = container_of(listener, AEHDMemoryListener, listener);
     int r;
 
     if (old != 0) {
         return;
     }
 
-    r = gvm_section_update_flags(kml, section);
+    r = aehd_section_update_flags(kml, section);
     if (r < 0) {
         qemu_abort("%s: dirty pages log change\n", __func__);
     }
 }
 
-static void gvm_log_stop(MemoryListener *listener,
+static void aehd_log_stop(MemoryListener *listener,
                           MemoryRegionSection *section,
                           int old, int new)
 {
-    GVMMemoryListener *kml = container_of(listener, GVMMemoryListener, listener);
+    AEHDMemoryListener *kml = container_of(listener, AEHDMemoryListener, listener);
     int r;
 
     if (new != 0) {
         return;
     }
 
-    r = gvm_section_update_flags(kml, section);
+    r = aehd_section_update_flags(kml, section);
     if (r < 0) {
         qemu_abort("%s: dirty pages log change\n", __func__);
     }
 }
 
-/* get gvm's dirty pages bitmap and update qemu's */
-static int gvm_get_dirty_pages_log_range(MemoryRegionSection *section,
+/* get aehd's dirty pages bitmap and update qemu's */
+static int aehd_get_dirty_pages_log_range(MemoryRegionSection *section,
                                          unsigned long *bitmap)
 {
     ram_addr_t start = section->offset_within_region +
@@ -468,7 +468,7 @@ static int gvm_get_dirty_pages_log_range(MemoryRegionSection *section,
 #define ALIGN(x, y)  (((x)+(y)-1) & ~((y)-1))
 
 /**
- * gvm_physical_sync_dirty_bitmap - Grab dirty bitmap from kernel space
+ * aehd_physical_sync_dirty_bitmap - Grab dirty bitmap from kernel space
  * This function updates qemu's dirty bitmap using
  * memory_region_set_dirty().  This means all bits are set
  * to dirty.
@@ -476,17 +476,17 @@ static int gvm_get_dirty_pages_log_range(MemoryRegionSection *section,
  * @start_add: start of logged region.
  * @end_addr: end of logged region.
  */
-static int gvm_physical_sync_dirty_bitmap(GVMMemoryListener *kml,
+static int aehd_physical_sync_dirty_bitmap(AEHDMemoryListener *kml,
                                           MemoryRegionSection *section)
 {
-    GVMState *s = gvm_state;
-    struct gvm_dirty_log d = {};
-    GVMSlot *mem;
+    AEHDState *s = aehd_state;
+    struct aehd_dirty_log d = {};
+    AEHDSlot *mem;
     hwaddr start_addr, size;
 
-    size = gvm_align_section(section, &start_addr);
+    size = aehd_align_section(section, &start_addr);
     if (size) {
-        mem = gvm_lookup_matching_slot(kml, start_addr, size);
+        mem = aehd_lookup_matching_slot(kml, start_addr, size);
         if (!mem) {
             /* We don't have a slot if we want to trap every access. */
             return 0;
@@ -509,62 +509,62 @@ static int gvm_physical_sync_dirty_bitmap(GVMMemoryListener *kml,
         d.dirty_bitmap = g_malloc0(size);
 
         d.slot = mem->slot | (kml->as_id << 16);
-        if (gvm_vm_ioctl(s, GVM_GET_DIRTY_LOG, &d, sizeof(d), &d, sizeof(d))) {
+        if (aehd_vm_ioctl(s, AEHD_GET_DIRTY_LOG, &d, sizeof(d), &d, sizeof(d))) {
             DPRINTF("ioctl failed %d\n", errno);
             g_free(d.dirty_bitmap);
             return -1;
         }
 
-        gvm_get_dirty_pages_log_range(section, d.dirty_bitmap);
+        aehd_get_dirty_pages_log_range(section, d.dirty_bitmap);
         g_free(d.dirty_bitmap);
     }
 
     return 0;
 }
 
-int gvm_check_extension(GVMState *s, unsigned int extension)
+int aehd_check_extension(AEHDState *s, unsigned int extension)
 {
     int ret;
     int result;
     HANDLE hDevice = s->fd;
 
     if (hDevice == INVALID_HANDLE_VALUE) {
-        DPRINTF("Invalid HANDLE for gvm device!\n");
+        DPRINTF("Invalid HANDLE for aehd device!\n");
         return 0;
     }
 
-    ret = gvm_ioctl(s, GVM_CHECK_EXTENSION,
+    ret = aehd_ioctl(s, AEHD_CHECK_EXTENSION,
             &extension, sizeof(extension),
             &result, sizeof(result));
 
     if (ret) {
-        DPRINTF("Failed to get gvm capabilities: %lx\n", GetLastError());
+        DPRINTF("Failed to get aehd capabilities: %lx\n", GetLastError());
         return 0;
     }
 
     return result;
 }
 
-int gvm_vm_check_extension(GVMState *s, unsigned int extension)
+int aehd_vm_check_extension(AEHDState *s, unsigned int extension)
 {
     int ret;
     int result;
 
-    ret = gvm_vm_ioctl(s, GVM_CHECK_EXTENSION,
+    ret = aehd_vm_ioctl(s, AEHD_CHECK_EXTENSION,
             &extension, sizeof(extension),
             &result, sizeof(result));
     if (ret < 0) {
         /* VM wide version not implemented, use global one instead */
-        ret = gvm_check_extension(s, extension);
+        ret = aehd_check_extension(s, extension);
     }
 
     return result;
 }
 
-static void gvm_set_phys_mem(GVMMemoryListener *kml,
+static void aehd_set_phys_mem(AEHDMemoryListener *kml,
                              MemoryRegionSection *section, bool add)
 {
-    GVMSlot *mem;
+    AEHDSlot *mem;
     int err;
     MemoryRegion *mr = section->mr;
     bool writeable = !mr->readonly && !mr->rom_device;
@@ -578,12 +578,12 @@ static void gvm_set_phys_mem(GVMMemoryListener *kml,
             return;
         } else if (!mr->romd_mode) {
             /* If the memory device is not in romd_mode, then we actually want
-             * to remove the gvm memory slot so all accesses will trap. */
+             * to remove the aehd memory slot so all accesses will trap. */
             add = false;
         }
     }
 
-    size = gvm_align_section(section, &start_addr);
+    size = aehd_align_section(section, &start_addr);
     if (!size) {
         return;
     }
@@ -593,17 +593,17 @@ static void gvm_set_phys_mem(GVMMemoryListener *kml,
           (start_addr - section->offset_within_address_space);
 
     if (!add) {
-        mem = gvm_lookup_matching_slot(kml, start_addr, size);
+        mem = aehd_lookup_matching_slot(kml, start_addr, size);
         if (!mem) {
             return;
         }
-        if (mem->flags & GVM_MEM_LOG_DIRTY_PAGES) {
-            gvm_physical_sync_dirty_bitmap(kml, section);
+        if (mem->flags & AEHD_MEM_LOG_DIRTY_PAGES) {
+            aehd_physical_sync_dirty_bitmap(kml, section);
         }
 
         /* unregister the slot */
         mem->memory_size = 0;
-        err = gvm_set_user_memory_region(kml, mem);
+        err = aehd_set_user_memory_region(kml, mem);
         if (err) {
             qemu_abort("%s: error unregistering overlapping slot: %s\n",
                     __func__, strerror(-err));
@@ -612,101 +612,101 @@ static void gvm_set_phys_mem(GVMMemoryListener *kml,
     }
 
     /* register the new slot */
-    mem = gvm_alloc_slot(kml);
+    mem = aehd_alloc_slot(kml);
     mem->memory_size = size;
     mem->start_addr = start_addr;
     mem->ram = ram;
-    mem->flags = gvm_mem_flags(mr);
+    mem->flags = aehd_mem_flags(mr);
 
-    err = gvm_set_user_memory_region(kml, mem);
+    err = aehd_set_user_memory_region(kml, mem);
     if (err) {
         qemu_abort("%s: error registering slot: %s\n", __func__,
                 strerror(-err));
     }
 }
 
-static void gvm_region_add(MemoryListener *listener,
+static void aehd_region_add(MemoryListener *listener,
                            MemoryRegionSection *section)
 {
-    GVMMemoryListener *kml = container_of(listener, GVMMemoryListener, listener);
+    AEHDMemoryListener *kml = container_of(listener, AEHDMemoryListener, listener);
 
     memory_region_ref(section->mr);
-    gvm_set_phys_mem(kml, section, true);
+    aehd_set_phys_mem(kml, section, true);
 }
 
-static void gvm_region_del(MemoryListener *listener,
+static void aehd_region_del(MemoryListener *listener,
                            MemoryRegionSection *section)
 {
-    GVMMemoryListener *kml = container_of(listener, GVMMemoryListener, listener);
+    AEHDMemoryListener *kml = container_of(listener, AEHDMemoryListener, listener);
 
-    gvm_set_phys_mem(kml, section, false);
+    aehd_set_phys_mem(kml, section, false);
     memory_region_unref(section->mr);
 }
 
-static void gvm_log_sync(MemoryListener *listener,
+static void aehd_log_sync(MemoryListener *listener,
                          MemoryRegionSection *section)
 {
-    GVMMemoryListener *kml = container_of(listener, GVMMemoryListener, listener);
+    AEHDMemoryListener *kml = container_of(listener, AEHDMemoryListener, listener);
     int r;
 
-    r = gvm_physical_sync_dirty_bitmap(kml, section);
+    r = aehd_physical_sync_dirty_bitmap(kml, section);
     if (r < 0) {
         qemu_abort("%s: sync dirty bitmap\n", __func__);
     }
 }
 
-void gvm_memory_listener_register(GVMState *s, GVMMemoryListener *kml,
+void aehd_memory_listener_register(AEHDState *s, AEHDMemoryListener *kml,
                                   AddressSpace *as, int as_id)
 {
     int i;
 
-    kml->slots = g_malloc0(s->nr_slots * sizeof(GVMSlot));
+    kml->slots = g_malloc0(s->nr_slots * sizeof(AEHDSlot));
     kml->as_id = as_id;
 
     for (i = 0; i < s->nr_slots; i++) {
         kml->slots[i].slot = i;
     }
 
-    kml->listener.region_add = gvm_region_add;
-    kml->listener.region_del = gvm_region_del;
-    kml->listener.log_start = gvm_log_start;
-    kml->listener.log_stop = gvm_log_stop;
-    kml->listener.log_sync = gvm_log_sync;
+    kml->listener.region_add = aehd_region_add;
+    kml->listener.region_del = aehd_region_del;
+    kml->listener.log_start = aehd_log_start;
+    kml->listener.log_stop = aehd_log_stop;
+    kml->listener.log_sync = aehd_log_sync;
     kml->listener.priority = 10;
 
     memory_listener_register(&kml->listener, as);
 }
 
 // User backed memory region API
-static int user_backed_flags_to_gvm_flags(int flags)
+static int user_backed_flags_to_aehd_flags(int flags)
 {
-    int gvm_flags = 0;
+    int aehd_flags = 0;
     if (!(flags & USER_BACKED_RAM_FLAGS_WRITE)) {
-        gvm_flags |= GVM_MEM_READONLY;
+        aehd_flags |= AEHD_MEM_READONLY;
     }
-    return gvm_flags;
+    return aehd_flags;
 }
 
-static void gvm_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size,
+static void aehd_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size,
                                     int flags)
 {
-    GVMSlot *slot;
-    GVMMemoryListener* kml;
+    AEHDSlot *slot;
+    AEHDMemoryListener* kml;
     int err;
 
-    if (!gvm_state) {
-        qemu_abort("%s: attempted to map RAM before GVM initialized\n", __func__);
+    if (!aehd_state) {
+        qemu_abort("%s: attempted to map RAM before AEHD initialized\n", __func__);
     }
 
-    kml = &gvm_state->memory_listener;
+    kml = &aehd_state->memory_listener;
 
-    slot = gvm_alloc_slot(kml);
+    slot = aehd_alloc_slot(kml);
 
     slot->memory_size = size;
     slot->start_addr = gpa;
     slot->ram = hva;
-    slot->flags = user_backed_flags_to_gvm_flags(flags);
-    err = gvm_set_user_memory_region(kml, slot);
+    slot->flags = user_backed_flags_to_aehd_flags(flags);
+    err = aehd_set_user_memory_region(kml, slot);
 
     if (err) {
         qemu_abort("%s: error registering slot: %s\n", __func__,
@@ -714,33 +714,33 @@ static void gvm_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size,
     }
 }
 
-static void gvm_user_backed_ram_unmap(hwaddr gpa, hwaddr size)
+static void aehd_user_backed_ram_unmap(hwaddr gpa, hwaddr size)
 {
-    GVMSlot *slot;
-    GVMMemoryListener* kml;
+    AEHDSlot *slot;
+    AEHDMemoryListener* kml;
     int err;
 
-    if (!gvm_state) {
-        qemu_abort("%s: attempted to map RAM before GVM initialized\n", __func__);
+    if (!aehd_state) {
+        qemu_abort("%s: attempted to map RAM before AEHD initialized\n", __func__);
     }
 
-    kml = &gvm_state->memory_listener;
+    kml = &aehd_state->memory_listener;
 
-    slot = gvm_lookup_matching_slot(kml, gpa, size);
+    slot = aehd_lookup_matching_slot(kml, gpa, size);
     if (!slot) {
         return;
     }
 
     /* unregister the slot */
     slot->memory_size = 0;
-    err = gvm_set_user_memory_region(kml, slot);
+    err = aehd_set_user_memory_region(kml, slot);
     if (err) {
         qemu_abort("%s: error unregistering slot: %s\n",
                 __func__, strerror(-err));
     }
 }
 
-static void gvm_handle_interrupt(CPUState *cpu, int mask)
+static void aehd_handle_interrupt(CPUState *cpu, int mask)
 {
     cpu->interrupt_request |= mask;
 
@@ -749,44 +749,44 @@ static void gvm_handle_interrupt(CPUState *cpu, int mask)
     }
 }
 
-int gvm_set_irq(GVMState *s, int irq, int level)
+int aehd_set_irq(AEHDState *s, int irq, int level)
 {
-    struct gvm_irq_level event;
+    struct aehd_irq_level event;
     int ret;
 
     event.level = level;
     event.irq = irq;
-    ret = gvm_vm_ioctl(s, GVM_IRQ_LINE_STATUS,
+    ret = aehd_vm_ioctl(s, AEHD_IRQ_LINE_STATUS,
             &event, sizeof(event), &event, sizeof(event));
 
     if (ret < 0) {
-        perror("gvm_set_irq");
+        perror("aehd_set_irq");
         abort();
     }
 
     return event.status;
 }
 
-typedef struct GVMMSIRoute {
-    struct gvm_irq_routing_entry kroute;
-    QTAILQ_ENTRY(GVMMSIRoute) entry;
-} GVMMSIRoute;
+typedef struct AEHDMSIRoute {
+    struct aehd_irq_routing_entry kroute;
+    QTAILQ_ENTRY(AEHDMSIRoute) entry;
+} AEHDMSIRoute;
 
-static void set_gsi(GVMState *s, unsigned int gsi)
+static void set_gsi(AEHDState *s, unsigned int gsi)
 {
     set_bit(gsi, s->used_gsi_bitmap);
 }
 
-static void clear_gsi(GVMState *s, unsigned int gsi)
+static void clear_gsi(AEHDState *s, unsigned int gsi)
 {
     clear_bit(gsi, s->used_gsi_bitmap);
 }
 
-void gvm_init_irq_routing(GVMState *s)
+void aehd_init_irq_routing(AEHDState *s)
 {
     int gsi_count, i;
 
-    gsi_count = gvm_check_extension(s, GVM_CAP_IRQ_ROUTING) - 1;
+    gsi_count = aehd_check_extension(s, AEHD_CAP_IRQ_ROUTING) - 1;
     if (gsi_count > 0) {
         /* Round up so we can search ints using ffs */
         s->used_gsi_bitmap = bitmap_new(gsi_count);
@@ -796,28 +796,28 @@ void gvm_init_irq_routing(GVMState *s)
     s->irq_routes = g_malloc0(sizeof(*s->irq_routes));
     s->nr_allocated_irq_routes = 0;
 
-    for (i = 0; i < GVM_MSI_HASHTAB_SIZE; i++) {
+    for (i = 0; i < AEHD_MSI_HASHTAB_SIZE; i++) {
         QTAILQ_INIT(&s->msi_hashtab[i]);
     }
 }
 
-void gvm_irqchip_commit_routes(GVMState *s)
+void aehd_irqchip_commit_routes(AEHDState *s)
 {
     int ret;
     size_t irq_routing_size;
 
     s->irq_routes->flags = 0;
-    irq_routing_size = sizeof(struct gvm_irq_routing) +
-                       s->irq_routes->nr * sizeof(struct gvm_irq_routing_entry);
-    ret = gvm_vm_ioctl(s, GVM_SET_GSI_ROUTING,
+    irq_routing_size = sizeof(struct aehd_irq_routing) +
+                       s->irq_routes->nr * sizeof(struct aehd_irq_routing_entry);
+    ret = aehd_vm_ioctl(s, AEHD_SET_GSI_ROUTING,
             s->irq_routes, irq_routing_size, NULL, 0);
     assert(ret == 0);
 }
 
-static void gvm_add_routing_entry(GVMState *s,
-                                  struct gvm_irq_routing_entry *entry)
+static void aehd_add_routing_entry(AEHDState *s,
+                                  struct aehd_irq_routing_entry *entry)
 {
-    struct gvm_irq_routing_entry *new;
+    struct aehd_irq_routing_entry *new;
     int n, size;
 
     if (s->irq_routes->nr == s->nr_allocated_irq_routes) {
@@ -825,7 +825,7 @@ static void gvm_add_routing_entry(GVMState *s,
         if (n < 64) {
             n = 64;
         }
-        size = sizeof(struct gvm_irq_routing);
+        size = sizeof(struct aehd_irq_routing);
         size += n * sizeof(*new);
         s->irq_routes = g_realloc(s->irq_routes, size);
         s->nr_allocated_irq_routes = n;
@@ -838,12 +838,12 @@ static void gvm_add_routing_entry(GVMState *s,
     set_gsi(s, entry->gsi);
 }
 
-int gvm_update_routing_entry(GVMState *s,
-                                    struct gvm_irq_routing_entry *new_entry);
-int gvm_update_routing_entry(GVMState *s,
-                                    struct gvm_irq_routing_entry *new_entry)
+int aehd_update_routing_entry(AEHDState *s,
+                                    struct aehd_irq_routing_entry *new_entry);
+int aehd_update_routing_entry(AEHDState *s,
+                                    struct aehd_irq_routing_entry *new_entry)
 {
-    struct gvm_irq_routing_entry *entry;
+    struct aehd_irq_routing_entry *entry;
     int n;
 
     for (n = 0; n < s->irq_routes->nr; n++) {
@@ -864,23 +864,23 @@ int gvm_update_routing_entry(GVMState *s,
     return -ESRCH;
 }
 
-void gvm_irqchip_add_irq_route(GVMState *s, int irq, int irqchip, int pin)
+void aehd_irqchip_add_irq_route(AEHDState *s, int irq, int irqchip, int pin)
 {
-    struct gvm_irq_routing_entry e = {};
+    struct aehd_irq_routing_entry e = {};
 
     assert(pin < s->gsi_count);
 
     e.gsi = irq;
-    e.type = GVM_IRQ_ROUTING_IRQCHIP;
+    e.type = AEHD_IRQ_ROUTING_IRQCHIP;
     e.flags = 0;
     e.u.irqchip.irqchip = irqchip;
     e.u.irqchip.pin = pin;
-    gvm_add_routing_entry(s, &e);
+    aehd_add_routing_entry(s, &e);
 }
 
-void gvm_irqchip_release_virq(GVMState *s, int virq)
+void aehd_irqchip_release_virq(AEHDState *s, int virq)
 {
-    struct gvm_irq_routing_entry *e;
+    struct aehd_irq_routing_entry *e;
     int i;
 
     for (i = 0; i < s->irq_routes->nr; i++) {
@@ -891,31 +891,31 @@ void gvm_irqchip_release_virq(GVMState *s, int virq)
         }
     }
     clear_gsi(s, virq);
-    gvm_arch_release_virq_post(virq);
+    aehd_arch_release_virq_post(virq);
 }
 
-static unsigned int gvm_hash_msi(uint32_t data)
+static unsigned int aehd_hash_msi(uint32_t data)
 {
     /* This is optimized for IA32 MSI layout. However, no other arch shall
      * repeat the mistake of not providing a direct MSI injection API. */
     return data & 0xff;
 }
 
-static void gvm_flush_dynamic_msi_routes(GVMState *s)
+static void aehd_flush_dynamic_msi_routes(AEHDState *s)
 {
-    GVMMSIRoute *route, *next;
+    AEHDMSIRoute *route, *next;
     unsigned int hash;
 
-    for (hash = 0; hash < GVM_MSI_HASHTAB_SIZE; hash++) {
+    for (hash = 0; hash < AEHD_MSI_HASHTAB_SIZE; hash++) {
         QTAILQ_FOREACH_SAFE(route, &s->msi_hashtab[hash], entry, next) {
-            gvm_irqchip_release_virq(s, route->kroute.gsi);
+            aehd_irqchip_release_virq(s, route->kroute.gsi);
             QTAILQ_REMOVE(&s->msi_hashtab[hash], route, entry);
             g_free(route);
         }
     }
 }
 
-static int gvm_irqchip_get_virq(GVMState *s)
+static int aehd_irqchip_get_virq(AEHDState *s)
 {
     int next_virq;
 
@@ -926,7 +926,7 @@ static int gvm_irqchip_get_virq(GVMState *s)
      * When this happens, flush dynamic MSI entries to free IRQ route entries.
      */
     if (s->irq_routes->nr == s->gsi_count) {
-        gvm_flush_dynamic_msi_routes(s);
+        aehd_flush_dynamic_msi_routes(s);
     }
 
     /* Return the lowest unused GSI in the bitmap */
@@ -938,10 +938,10 @@ static int gvm_irqchip_get_virq(GVMState *s)
     }
 }
 
-static GVMMSIRoute *gvm_lookup_msi_route(GVMState *s, MSIMessage msg)
+static AEHDMSIRoute *aehd_lookup_msi_route(AEHDState *s, MSIMessage msg)
 {
-    unsigned int hash = gvm_hash_msi(msg.data);
-    GVMMSIRoute *route;
+    unsigned int hash = aehd_hash_msi(msg.data);
+    AEHDMSIRoute *route;
 
     QTAILQ_FOREACH(route, &s->msi_hashtab[hash], entry) {
         if (route->kroute.u.msi.address_lo == (uint32_t)msg.address &&
@@ -953,43 +953,43 @@ static GVMMSIRoute *gvm_lookup_msi_route(GVMState *s, MSIMessage msg)
     return NULL;
 }
 
-int gvm_irqchip_send_msi(GVMState *s, MSIMessage msg)
+int aehd_irqchip_send_msi(AEHDState *s, MSIMessage msg)
 {
-    struct gvm_msi msi;
-    GVMMSIRoute *route;
+    struct aehd_msi msi;
+    AEHDMSIRoute *route;
 
-    route = gvm_lookup_msi_route(s, msg);
+    route = aehd_lookup_msi_route(s, msg);
     if (!route) {
         int virq;
 
-        virq = gvm_irqchip_get_virq(s);
+        virq = aehd_irqchip_get_virq(s);
         if (virq < 0) {
             return virq;
         }
 
-        route = g_malloc0(sizeof(GVMMSIRoute));
+        route = g_malloc0(sizeof(AEHDMSIRoute));
         route->kroute.gsi = virq;
-        route->kroute.type = GVM_IRQ_ROUTING_MSI;
+        route->kroute.type = AEHD_IRQ_ROUTING_MSI;
         route->kroute.flags = 0;
         route->kroute.u.msi.address_lo = (uint32_t)msg.address;
         route->kroute.u.msi.address_hi = msg.address >> 32;
         route->kroute.u.msi.data = le32_to_cpu(msg.data);
 
-        gvm_add_routing_entry(s, &route->kroute);
-        gvm_irqchip_commit_routes(s);
+        aehd_add_routing_entry(s, &route->kroute);
+        aehd_irqchip_commit_routes(s);
 
-        QTAILQ_INSERT_TAIL(&s->msi_hashtab[gvm_hash_msi(msg.data)], route,
+        QTAILQ_INSERT_TAIL(&s->msi_hashtab[aehd_hash_msi(msg.data)], route,
                            entry);
     }
 
-    assert(route->kroute.type == GVM_IRQ_ROUTING_MSI);
+    assert(route->kroute.type == AEHD_IRQ_ROUTING_MSI);
 
-    return gvm_set_irq(s, route->kroute.gsi, 1);
+    return aehd_set_irq(s, route->kroute.gsi, 1);
 }
 
-int gvm_irqchip_add_msi_route(GVMState *s, int vector, PCIDevice *dev)
+int aehd_irqchip_add_msi_route(AEHDState *s, int vector, PCIDevice *dev)
 {
-    struct gvm_irq_routing_entry kroute = {};
+    struct aehd_irq_routing_entry kroute = {};
     int virq;
     MSIMessage msg = {0, 0};
 
@@ -997,58 +997,58 @@ int gvm_irqchip_add_msi_route(GVMState *s, int vector, PCIDevice *dev)
         msg = pci_get_msi_message(dev, vector);
     }
 
-    virq = gvm_irqchip_get_virq(s);
+    virq = aehd_irqchip_get_virq(s);
     if (virq < 0) {
         return virq;
     }
 
     kroute.gsi = virq;
-    kroute.type = GVM_IRQ_ROUTING_MSI;
+    kroute.type = AEHD_IRQ_ROUTING_MSI;
     kroute.flags = 0;
     kroute.u.msi.address_lo = (uint32_t)msg.address;
     kroute.u.msi.address_hi = msg.address >> 32;
     kroute.u.msi.data = le32_to_cpu(msg.data);
 
-    gvm_add_routing_entry(s, &kroute);
-    gvm_arch_add_msi_route_post(&kroute, vector, dev);
-    gvm_irqchip_commit_routes(s);
+    aehd_add_routing_entry(s, &kroute);
+    aehd_arch_add_msi_route_post(&kroute, vector, dev);
+    aehd_irqchip_commit_routes(s);
 
     return virq;
 }
 
-int gvm_irqchip_update_msi_route(GVMState *s, int virq, MSIMessage msg,
+int aehd_irqchip_update_msi_route(AEHDState *s, int virq, MSIMessage msg,
                                  PCIDevice *dev)
 {
-    struct gvm_irq_routing_entry kroute = {};
+    struct aehd_irq_routing_entry kroute = {};
 
     kroute.gsi = virq;
-    kroute.type = GVM_IRQ_ROUTING_MSI;
+    kroute.type = AEHD_IRQ_ROUTING_MSI;
     kroute.flags = 0;
     kroute.u.msi.address_lo = (uint32_t)msg.address;
     kroute.u.msi.address_hi = msg.address >> 32;
     kroute.u.msi.data = le32_to_cpu(msg.data);
 
-    return gvm_update_routing_entry(s, &kroute);
+    return aehd_update_routing_entry(s, &kroute);
 }
 
-void gvm_irqchip_set_qemuirq_gsi(GVMState *s, qemu_irq irq, int gsi)
+void aehd_irqchip_set_qemuirq_gsi(AEHDState *s, qemu_irq irq, int gsi)
 {
     g_hash_table_insert(s->gsimap, irq, GINT_TO_POINTER(gsi));
 }
 
-static void gvm_irqchip_create(MachineState *machine, GVMState *s)
+static void aehd_irqchip_create(MachineState *machine, AEHDState *s)
 {
     int ret;
 
     /* First probe and see if there's a arch-specific hook to create the
      * in-kernel irqchip for us */
-    ret = gvm_arch_irqchip_create(machine, s);
+    ret = aehd_arch_irqchip_create(machine, s);
     if (ret == 0) {
         if (machine_kernel_irqchip_split(machine)) {
             perror("Split IRQ chip mode not supported.");
             exit(1);
         } else {
-            ret = gvm_vm_ioctl(s, GVM_CREATE_IRQCHIP, NULL, 0, NULL, 0);
+            ret = aehd_vm_ioctl(s, AEHD_CREATE_IRQCHIP, NULL, 0, NULL, 0);
         }
     }
     if (ret < 0) {
@@ -1056,9 +1056,9 @@ static void gvm_irqchip_create(MachineState *machine, GVMState *s)
         exit(1);
     }
 
-    gvm_kernel_irqchip = true;
+    aehd_kernel_irqchip = true;
 
-    gvm_init_irq_routing(s);
+    aehd_init_irq_routing(s);
 
     s->gsimap = g_hash_table_new(g_direct_hash, g_direct_equal);
 }
@@ -1067,31 +1067,31 @@ static void gvm_irqchip_create(MachineState *machine, GVMState *s)
  * procedure from the kernel API documentation to cope with
  * older kernels that may be missing capabilities.
  */
-static int gvm_recommended_vcpus(GVMState *s)
+static int aehd_recommended_vcpus(AEHDState *s)
 {
-    int ret = gvm_check_extension(s, GVM_CAP_NR_VCPUS);
+    int ret = aehd_check_extension(s, AEHD_CAP_NR_VCPUS);
     return (ret) ? ret : 4;
 }
 
-static int gvm_max_vcpus(GVMState *s)
+static int aehd_max_vcpus(AEHDState *s)
 {
-    int ret = gvm_check_extension(s, GVM_CAP_MAX_VCPUS);
-    return (ret) ? ret : gvm_recommended_vcpus(s);
+    int ret = aehd_check_extension(s, AEHD_CAP_MAX_VCPUS);
+    return (ret) ? ret : aehd_recommended_vcpus(s);
 }
 
-static int gvm_max_vcpu_id(GVMState *s)
+static int aehd_max_vcpu_id(AEHDState *s)
 {
-    int ret = gvm_check_extension(s, GVM_CAP_MAX_VCPU_ID);
-    return (ret) ? ret : gvm_max_vcpus(s);
+    int ret = aehd_check_extension(s, AEHD_CAP_MAX_VCPU_ID);
+    return (ret) ? ret : aehd_max_vcpus(s);
 }
 
-bool gvm_vcpu_id_is_valid(int vcpu_id)
+bool aehd_vcpu_id_is_valid(int vcpu_id)
 {
-    GVMState *s = GVM_STATE(current_machine->accelerator);
-    return vcpu_id >= 0 && vcpu_id < gvm_max_vcpu_id(s);
+    AEHDState *s = AEHD_STATE(current_machine->accelerator);
+    return vcpu_id >= 0 && vcpu_id < aehd_max_vcpu_id(s);
 }
 
-static HANDLE gvm_open_device(void)
+static HANDLE aehd_open_device(void)
 {
     HANDLE hDevice;
 
@@ -1101,7 +1101,7 @@ static HANDLE gvm_open_device(void)
         return hDevice;
 
     /* AEHD 2.0 or below only support the old name */
-    hDevice = CreateFile("\\\\.\\gvm", GENERIC_READ | GENERIC_WRITE, 0, NULL,
+    hDevice = CreateFile("\\\\.\\aehd", GENERIC_READ | GENERIC_WRITE, 0, NULL,
         CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (hDevice == INVALID_HANDLE_VALUE)
@@ -1110,7 +1110,7 @@ static HANDLE gvm_open_device(void)
     return hDevice;
 }
 
-static int gvm_init(MachineState *ms)
+static int aehd_init(MachineState *ms)
 {
     struct {
         const char *name;
@@ -1121,35 +1121,35 @@ static int gvm_init(MachineState *ms)
         { NULL, }
     }, *nc = num_cpus;
     int soft_vcpus_limit, hard_vcpus_limit;
-    GVMState *s;
-    const GVMCapabilityInfo *missing_cap;
+    AEHDState *s;
+    const AEHDCapabilityInfo *missing_cap;
     int ret;
     int type = 0;
     HANDLE vmfd;
 
-    s = GVM_STATE(ms->accelerator);
+    s = AEHD_STATE(ms->accelerator);
 
     /*
      * On systems where the kernel can support different base page
      * sizes, host page size may be different from TARGET_PAGE_SIZE,
-     * even with GVM.  TARGET_PAGE_SIZE is assumed to be the minimum
+     * even with AEHD.  TARGET_PAGE_SIZE is assumed to be the minimum
      * page size for the system though.
      */
     assert(TARGET_PAGE_SIZE <= getpagesize());
 
     s->sigmask_len = 8;
 
-    QTAILQ_INIT(&s->gvm_sw_breakpoints);
-    QLIST_INIT(&s->gvm_parked_vcpus);
+    QTAILQ_INIT(&s->aehd_sw_breakpoints);
+    QLIST_INIT(&s->aehd_parked_vcpus);
     s->vmfd = INVALID_HANDLE_VALUE;
-    s->fd = gvm_open_device();
+    s->fd = aehd_open_device();
     if (s->fd == INVALID_HANDLE_VALUE) {
-        fprintf(stderr, "Could not access GVM kernel module: %m\n");
+        fprintf(stderr, "Could not access AEHD kernel module: %m\n");
         ret = -ENODEV;
         goto err;
     }
 
-    s->nr_slots = gvm_check_extension(s, GVM_CAP_NR_MEMSLOTS);
+    s->nr_slots = aehd_check_extension(s, AEHD_CAP_NR_MEMSLOTS);
 
     /* If unspecified, use the default value */
     if (!s->nr_slots) {
@@ -1157,19 +1157,19 @@ static int gvm_init(MachineState *ms)
     }
 
     /* check the vcpu limits */
-    soft_vcpus_limit = gvm_recommended_vcpus(s);
-    hard_vcpus_limit = gvm_max_vcpus(s);
+    soft_vcpus_limit = aehd_recommended_vcpus(s);
+    hard_vcpus_limit = aehd_max_vcpus(s);
 
     while (nc->name) {
         if (nc->num > soft_vcpus_limit) {
             fprintf(stderr,
                     "Warning: Number of %s cpus requested (%d) exceeds "
-                    "the recommended cpus supported by GVM (%d)\n",
+                    "the recommended cpus supported by AEHD (%d)\n",
                     nc->name, nc->num, soft_vcpus_limit);
 
             if (nc->num > hard_vcpus_limit) {
                 fprintf(stderr, "Number of %s cpus requested (%d) exceeds "
-                        "the maximum cpus supported by GVM (%d)\n",
+                        "the maximum cpus supported by AEHD (%d)\n",
                         nc->name, nc->num, hard_vcpus_limit);
                 exit(1);
             }
@@ -1178,39 +1178,39 @@ static int gvm_init(MachineState *ms)
     }
 
     do {
-        ret = gvm_ioctl(s, GVM_CREATE_VM, &type, sizeof(type),
+        ret = aehd_ioctl(s, AEHD_CREATE_VM, &type, sizeof(type),
                 &vmfd, sizeof(vmfd));
     } while (ret == -EINTR);
 
     if (ret < 0) {
-        fprintf(stderr, "ioctl(GVM_CREATE_VM) failed: %d %s\n", -ret,
+        fprintf(stderr, "ioctl(AEHD_CREATE_VM) failed: %d %s\n", -ret,
                 strerror(-ret));
         goto err;
     }
 
     s->vmfd = vmfd;
 
-    ret = gvm_arch_init(ms, s);
+    ret = aehd_arch_init(ms, s);
     if (ret < 0) {
         goto err;
     }
 
     if (machine_kernel_irqchip_allowed(ms)) {
-        gvm_irqchip_create(ms, s);
+        aehd_irqchip_create(ms, s);
     }
 
-    gvm_state = s;
+    aehd_state = s;
 
-    gvm_memory_listener_register(s, &s->memory_listener,
+    aehd_memory_listener_register(s, &s->memory_listener,
                                  &address_space_memory, 0);
 
-    cpu_interrupt_handler = gvm_handle_interrupt;
+    cpu_interrupt_handler = aehd_handle_interrupt;
 
     qemu_set_user_backed_mapping_funcs(
-        gvm_user_backed_ram_map,
-        gvm_user_backed_ram_unmap);
+        aehd_user_backed_ram_map,
+        aehd_user_backed_ram_unmap);
 
-    printf("GVM is operational\n");
+    printf("AEHD is operational\n");
 
     return 0;
 
@@ -1227,12 +1227,12 @@ err:
     return ret;
 }
 
-void gvm_set_sigmask_len(GVMState *s, unsigned int sigmask_len)
+void aehd_set_sigmask_len(AEHDState *s, unsigned int sigmask_len)
 {
     s->sigmask_len = sigmask_len;
 }
 
-static void gvm_handle_io(uint16_t port, MemTxAttrs attrs, void *data, int direction,
+static void aehd_handle_io(uint16_t port, MemTxAttrs attrs, void *data, int direction,
                           int size, uint32_t count)
 {
     int i;
@@ -1241,14 +1241,14 @@ static void gvm_handle_io(uint16_t port, MemTxAttrs attrs, void *data, int direc
     for (i = 0; i < count; i++) {
         address_space_rw(&address_space_io, port, attrs,
                          ptr, size,
-                         direction == GVM_EXIT_IO_OUT);
+                         direction == AEHD_EXIT_IO_OUT);
         ptr += size;
     }
 }
 
-static int gvm_handle_internal_error(CPUState *cpu, struct gvm_run *run)
+static int aehd_handle_internal_error(CPUState *cpu, struct aehd_run *run)
 {
-    fprintf(stderr, "GVM internal error. Suberror: %d\n",
+    fprintf(stderr, "AEHD internal error. Suberror: %d\n",
             run->internal.suberror);
 
     int i;
@@ -1258,9 +1258,9 @@ static int gvm_handle_internal_error(CPUState *cpu, struct gvm_run *run)
                 i, (uint64_t)run->internal.data[i]);
     }
 
-    if (run->internal.suberror == GVM_INTERNAL_ERROR_EMULATION) {
+    if (run->internal.suberror == AEHD_INTERNAL_ERROR_EMULATION) {
         fprintf(stderr, "emulation failure\n");
-        if (!gvm_arch_stop_on_emulation_error(cpu)) {
+        if (!aehd_arch_stop_on_emulation_error(cpu)) {
             cpu_dump_state(cpu, stderr, fprintf, CPU_DUMP_CODE);
             return EXCP_INTERRUPT;
         }
@@ -1271,73 +1271,73 @@ static int gvm_handle_internal_error(CPUState *cpu, struct gvm_run *run)
     return -1;
 }
 
-void gvm_raise_event(CPUState *cpu)
+void aehd_raise_event(CPUState *cpu)
 {
-    GVMState *s = gvm_state;
-    struct gvm_run *run = cpu->gvm_run;
-    unsigned long vcpu_id = gvm_arch_vcpu_id(cpu);
+    AEHDState *s = aehd_state;
+    struct aehd_run *run = cpu->aehd_run;
+    unsigned long vcpu_id = aehd_arch_vcpu_id(cpu);
 
     if (!run)
         return;
     run->user_event_pending = 1;
-    gvm_vm_ioctl(s, GVM_KICK_VCPU, &vcpu_id, sizeof(vcpu_id), NULL, 0);
+    aehd_vm_ioctl(s, AEHD_KICK_VCPU, &vcpu_id, sizeof(vcpu_id), NULL, 0);
 }
 
-static void do_gvm_cpu_synchronize_state(CPUState *cpu, run_on_cpu_data arg)
+static void do_aehd_cpu_synchronize_state(CPUState *cpu, run_on_cpu_data arg)
 {
     if (!cpu->vcpu_dirty) {
-        gvm_arch_get_registers(cpu);
+        aehd_arch_get_registers(cpu);
         cpu->vcpu_dirty = true;
     }
 }
 
-void gvm_cpu_synchronize_state(CPUState *cpu)
+void aehd_cpu_synchronize_state(CPUState *cpu)
 {
     if (!cpu->vcpu_dirty) {
-        run_on_cpu(cpu, do_gvm_cpu_synchronize_state, RUN_ON_CPU_NULL);
+        run_on_cpu(cpu, do_aehd_cpu_synchronize_state, RUN_ON_CPU_NULL);
     }
 }
 
-static void do_gvm_cpu_synchronize_post_reset(CPUState *cpu, run_on_cpu_data arg)
+static void do_aehd_cpu_synchronize_post_reset(CPUState *cpu, run_on_cpu_data arg)
 {
-    gvm_arch_put_registers(cpu, GVM_PUT_RESET_STATE);
+    aehd_arch_put_registers(cpu, AEHD_PUT_RESET_STATE);
     cpu->vcpu_dirty = false;
 }
 
-void gvm_cpu_synchronize_post_reset(CPUState *cpu)
+void aehd_cpu_synchronize_post_reset(CPUState *cpu)
 {
-    run_on_cpu(cpu, do_gvm_cpu_synchronize_post_reset, RUN_ON_CPU_NULL);
+    run_on_cpu(cpu, do_aehd_cpu_synchronize_post_reset, RUN_ON_CPU_NULL);
 }
 
-static void do_gvm_cpu_synchronize_post_init(CPUState *cpu, run_on_cpu_data arg)
+static void do_aehd_cpu_synchronize_post_init(CPUState *cpu, run_on_cpu_data arg)
 {
-    gvm_arch_put_registers(cpu, GVM_PUT_FULL_STATE);
+    aehd_arch_put_registers(cpu, AEHD_PUT_FULL_STATE);
     cpu->vcpu_dirty = false;
 }
 
-void gvm_cpu_synchronize_post_init(CPUState *cpu)
+void aehd_cpu_synchronize_post_init(CPUState *cpu)
 {
-    run_on_cpu(cpu, do_gvm_cpu_synchronize_post_init, RUN_ON_CPU_NULL);
+    run_on_cpu(cpu, do_aehd_cpu_synchronize_post_init, RUN_ON_CPU_NULL);
 }
 
-static void do_gvm_cpu_synchronize_pre_loadvm(CPUState *cpu, run_on_cpu_data arg)
+static void do_aehd_cpu_synchronize_pre_loadvm(CPUState *cpu, run_on_cpu_data arg)
 {
     cpu->vcpu_dirty = true;
 }
 
-void gvm_cpu_synchronize_pre_loadvm(CPUState *cpu)
+void aehd_cpu_synchronize_pre_loadvm(CPUState *cpu)
 {
-    run_on_cpu(cpu, do_gvm_cpu_synchronize_pre_loadvm, RUN_ON_CPU_NULL);
+    run_on_cpu(cpu, do_aehd_cpu_synchronize_pre_loadvm, RUN_ON_CPU_NULL);
 }
 
-int gvm_cpu_exec(CPUState *cpu)
+int aehd_cpu_exec(CPUState *cpu)
 {
-    struct gvm_run *run = cpu->gvm_run;
+    struct aehd_run *run = cpu->aehd_run;
     int ret, run_ret;
 
-    DPRINTF("gvm_cpu_exec()\n");
+    DPRINTF("aehd_cpu_exec()\n");
 
-    if (gvm_arch_process_async_events(cpu)) {
+    if (aehd_arch_process_async_events(cpu)) {
         cpu->exit_request = 0;
         return EXCP_HLT;
     }
@@ -1348,24 +1348,24 @@ int gvm_cpu_exec(CPUState *cpu)
         MemTxAttrs attrs;
 
         if (cpu->vcpu_dirty) {
-            gvm_arch_put_registers(cpu, GVM_PUT_RUNTIME_STATE);
+            aehd_arch_put_registers(cpu, AEHD_PUT_RUNTIME_STATE);
             cpu->vcpu_dirty = false;
         }
 
-        gvm_arch_pre_run(cpu, run);
+        aehd_arch_pre_run(cpu, run);
         if (cpu->exit_request) {
             DPRINTF("interrupt exit requested\n");
             /*
-             * GVM requires us to reenter the kernel after IO exits to complete
+             * AEHD requires us to reenter the kernel after IO exits to complete
              * instruction emulation. This self-signal will ensure that we
              * leave ASAP again.
              */
             qemu_cpu_kick_self();
         }
 
-        run_ret = gvm_vcpu_ioctl(cpu, GVM_RUN, NULL, 0, NULL, 0);
+        run_ret = aehd_vcpu_ioctl(cpu, AEHD_RUN, NULL, 0, NULL, 0);
 
-        attrs = gvm_arch_post_run(cpu, run);
+        attrs = aehd_arch_post_run(cpu, run);
 
         if (run_ret < 0) {
             if (run_ret == -EINTR || run_ret == -EAGAIN) {
@@ -1373,25 +1373,25 @@ int gvm_cpu_exec(CPUState *cpu)
                 ret = EXCP_INTERRUPT;
                 break;
             }
-            fprintf(stderr, "error: gvm run failed %s\n",
+            fprintf(stderr, "error: aehd run failed %s\n",
                     strerror(-run_ret));
             ret = -1;
             break;
         }
 
-        //trace_gvm_run_exit(cpu->cpu_index, run->exit_reason);
+        //trace_aehd_run_exit(cpu->cpu_index, run->exit_reason);
         switch (run->exit_reason) {
-        case GVM_EXIT_IO:
+        case AEHD_EXIT_IO:
             DPRINTF("handle_io\n");
             /* Called outside BQL */
-            gvm_handle_io(run->io.port, attrs,
+            aehd_handle_io(run->io.port, attrs,
                           (uint8_t *)run + run->io.data_offset,
                           run->io.direction,
                           run->io.size,
                           run->io.count);
             ret = 0;
             break;
-        case GVM_EXIT_MMIO:
+        case AEHD_EXIT_MMIO:
             DPRINTF("handle_mmio\n");
             /* Called outside BQL */
             address_space_rw(&address_space_memory,
@@ -1401,53 +1401,53 @@ int gvm_cpu_exec(CPUState *cpu)
                              run->mmio.is_write);
             ret = 0;
             break;
-        case GVM_EXIT_IRQ_WINDOW_OPEN:
+        case AEHD_EXIT_IRQ_WINDOW_OPEN:
             DPRINTF("irq_window_open\n");
             ret = EXCP_INTERRUPT;
             break;
-        case GVM_EXIT_INTR:
-            DPRINTF("gvm raise event exiting\n");
+        case AEHD_EXIT_INTR:
+            DPRINTF("aehd raise event exiting\n");
             ret = EXCP_INTERRUPT;
             break;
-        case GVM_EXIT_SHUTDOWN:
+        case AEHD_EXIT_SHUTDOWN:
             DPRINTF("shutdown\n");
             qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
             ret = EXCP_INTERRUPT;
             break;
-        case GVM_EXIT_UNKNOWN:
-            fprintf(stderr, "GVM: unknown exit, hardware reason %" PRIx64 "\n",
+        case AEHD_EXIT_UNKNOWN:
+            fprintf(stderr, "AEHD: unknown exit, hardware reason %" PRIx64 "\n",
                     (uint64_t)run->hw.hardware_exit_reason);
             ret = -1;
             break;
-        case GVM_EXIT_INTERNAL_ERROR:
-            ret = gvm_handle_internal_error(cpu, run);
+        case AEHD_EXIT_INTERNAL_ERROR:
+            ret = aehd_handle_internal_error(cpu, run);
             break;
-        case GVM_EXIT_SYSTEM_EVENT:
+        case AEHD_EXIT_SYSTEM_EVENT:
             switch (run->system_event.type) {
-            case GVM_SYSTEM_EVENT_SHUTDOWN:
+            case AEHD_SYSTEM_EVENT_SHUTDOWN:
                 qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
                 ret = EXCP_INTERRUPT;
                 break;
-            case GVM_SYSTEM_EVENT_RESET:
+            case AEHD_SYSTEM_EVENT_RESET:
                 qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
                 ret = EXCP_INTERRUPT;
                 break;
-            case GVM_SYSTEM_EVENT_CRASH:
-                gvm_cpu_synchronize_state(cpu);
+            case AEHD_SYSTEM_EVENT_CRASH:
+                aehd_cpu_synchronize_state(cpu);
                 qemu_mutex_lock_iothread();
                 qemu_system_guest_panicked(cpu_get_crash_info(cpu));
                 qemu_mutex_unlock_iothread();
                 ret = 0;
                 break;
             default:
-                DPRINTF("gvm_arch_handle_exit\n");
-                ret = gvm_arch_handle_exit(cpu, run);
+                DPRINTF("aehd_arch_handle_exit\n");
+                ret = aehd_arch_handle_exit(cpu, run);
                 break;
             }
             break;
         default:
-            DPRINTF("gvm_arch_handle_exit\n");
-            ret = gvm_arch_handle_exit(cpu, run);
+            DPRINTF("aehd_arch_handle_exit\n");
+            ret = aehd_arch_handle_exit(cpu, run);
             break;
         }
     } while (ret == 0);
@@ -1463,7 +1463,7 @@ int gvm_cpu_exec(CPUState *cpu)
     return ret;
 }
 
-int gvm_ioctl(GVMState *s, int type,
+int aehd_ioctl(AEHDState *s, int type,
         void *input, size_t input_size,
         void *output, size_t output_size)
 {
@@ -1475,7 +1475,7 @@ int gvm_ioctl(GVMState *s, int type,
             output, output_size,
             &byteRet, NULL);
     if (!ret) {
-        DPRINTF("gvm device IO control %x failed: %lx\n",
+        DPRINTF("aehd device IO control %x failed: %lx\n",
                 type, GetLastError());
         switch (GetLastError()) {
         case ERROR_MORE_DATA:
@@ -1493,7 +1493,7 @@ int gvm_ioctl(GVMState *s, int type,
     return ret;
 }
 
-int gvm_vm_ioctl(GVMState *s, int type,
+int aehd_vm_ioctl(AEHDState *s, int type,
         void *input, size_t input_size,
         void *output, size_t output_size)
 {
@@ -1505,7 +1505,7 @@ int gvm_vm_ioctl(GVMState *s, int type,
             output, output_size,
             &byteRet, NULL);
     if (!ret) {
-        DPRINTF("gvm VM IO control %x failed: %lx\n",
+        DPRINTF("aehd VM IO control %x failed: %lx\n",
                 type, GetLastError());
         switch (GetLastError()) {
         case ERROR_MORE_DATA:
@@ -1523,19 +1523,19 @@ int gvm_vm_ioctl(GVMState *s, int type,
     return ret;
 }
 
-int gvm_vcpu_ioctl(CPUState *cpu, int type,
+int aehd_vcpu_ioctl(CPUState *cpu, int type,
         void *input, size_t input_size,
         void *output, size_t output_size)
 {
     int ret;
     DWORD byteRet;
 
-    ret = DeviceIoControl(cpu->gvm_fd, type,
+    ret = DeviceIoControl(cpu->aehd_fd, type,
             input, input_size,
             output, output_size,
             &byteRet, NULL);
     if (!ret) {
-        DPRINTF("gvm VCPU IO control %x failed: %lx\n",
+        DPRINTF("aehd VCPU IO control %x failed: %lx\n",
                 type, GetLastError());
         switch (GetLastError()) {
         case ERROR_MORE_DATA:
@@ -1553,12 +1553,12 @@ int gvm_vcpu_ioctl(CPUState *cpu, int type,
     return ret;
 }
 
-struct gvm_sw_breakpoint *gvm_find_sw_breakpoint(CPUState *cpu,
+struct aehd_sw_breakpoint *aehd_find_sw_breakpoint(CPUState *cpu,
                                                  target_ulong pc)
 {
-    struct gvm_sw_breakpoint *bp;
+    struct aehd_sw_breakpoint *bp;
 
-    QTAILQ_FOREACH(bp, &cpu->gvm_state->gvm_sw_breakpoints, entry) {
+    QTAILQ_FOREACH(bp, &cpu->aehd_state->aehd_sw_breakpoints, entry) {
         if (bp->pc == pc) {
             return bp;
         }
@@ -1566,72 +1566,72 @@ struct gvm_sw_breakpoint *gvm_find_sw_breakpoint(CPUState *cpu,
     return NULL;
 }
 
-int gvm_sw_breakpoints_active(CPUState *cpu)
+int aehd_sw_breakpoints_active(CPUState *cpu)
 {
-    return !QTAILQ_EMPTY(&cpu->gvm_state->gvm_sw_breakpoints);
+    return !QTAILQ_EMPTY(&cpu->aehd_state->aehd_sw_breakpoints);
 }
 
-struct gvm_set_guest_debug_data {
-    struct gvm_guest_debug dbg;
+struct aehd_set_guest_debug_data {
+    struct aehd_guest_debug dbg;
     int err;
 };
 
-static void gvm_invoke_set_guest_debug(CPUState *cpu, run_on_cpu_data data)
+static void aehd_invoke_set_guest_debug(CPUState *cpu, run_on_cpu_data data)
 {
-    struct gvm_set_guest_debug_data *dbg_data = data.host_ptr;
+    struct aehd_set_guest_debug_data *dbg_data = data.host_ptr;
 
-    dbg_data->err = gvm_vcpu_ioctl(cpu, GVM_SET_GUEST_DEBUG,
+    dbg_data->err = aehd_vcpu_ioctl(cpu, AEHD_SET_GUEST_DEBUG,
                            &dbg_data->dbg, sizeof(dbg_data->dbg), NULL, 0);
 }
 
-int gvm_update_guest_debug(CPUState *cpu, unsigned long reinject_trap)
+int aehd_update_guest_debug(CPUState *cpu, unsigned long reinject_trap)
 {
-    struct gvm_set_guest_debug_data data;
+    struct aehd_set_guest_debug_data data;
 
     data.dbg.control = reinject_trap;
 
     if (cpu->singlestep_enabled) {
-        data.dbg.control |= GVM_GUESTDBG_ENABLE | GVM_GUESTDBG_SINGLESTEP;
+        data.dbg.control |= AEHD_GUESTDBG_ENABLE | AEHD_GUESTDBG_SINGLESTEP;
     }
-    gvm_arch_update_guest_debug(cpu, &data.dbg);
+    aehd_arch_update_guest_debug(cpu, &data.dbg);
 
-    run_on_cpu(cpu, gvm_invoke_set_guest_debug,
+    run_on_cpu(cpu, aehd_invoke_set_guest_debug,
                RUN_ON_CPU_HOST_PTR(&data));
     return data.err;
 }
 
-int gvm_insert_breakpoint(CPUState *cpu, target_ulong addr,
+int aehd_insert_breakpoint(CPUState *cpu, target_ulong addr,
                           target_ulong len, int type)
 {
-    struct gvm_sw_breakpoint *bp;
+    struct aehd_sw_breakpoint *bp;
     int err;
 
     if (type == GDB_BREAKPOINT_SW) {
-        bp = gvm_find_sw_breakpoint(cpu, addr);
+        bp = aehd_find_sw_breakpoint(cpu, addr);
         if (bp) {
             bp->use_count++;
             return 0;
         }
 
-        bp = g_malloc(sizeof(struct gvm_sw_breakpoint));
+        bp = g_malloc(sizeof(struct aehd_sw_breakpoint));
         bp->pc = addr;
         bp->use_count = 1;
-        err = gvm_arch_insert_sw_breakpoint(cpu, bp);
+        err = aehd_arch_insert_sw_breakpoint(cpu, bp);
         if (err) {
             g_free(bp);
             return err;
         }
 
-        QTAILQ_INSERT_HEAD(&cpu->gvm_state->gvm_sw_breakpoints, bp, entry);
+        QTAILQ_INSERT_HEAD(&cpu->aehd_state->aehd_sw_breakpoints, bp, entry);
     } else {
-        err = gvm_arch_insert_hw_breakpoint(addr, len, type);
+        err = aehd_arch_insert_hw_breakpoint(addr, len, type);
         if (err) {
             return err;
         }
     }
 
     CPU_FOREACH(cpu) {
-        err = gvm_update_guest_debug(cpu, 0);
+        err = aehd_update_guest_debug(cpu, 0);
         if (err) {
             return err;
         }
@@ -1639,14 +1639,14 @@ int gvm_insert_breakpoint(CPUState *cpu, target_ulong addr,
     return 0;
 }
 
-int gvm_remove_breakpoint(CPUState *cpu, target_ulong addr,
+int aehd_remove_breakpoint(CPUState *cpu, target_ulong addr,
                           target_ulong len, int type)
 {
-    struct gvm_sw_breakpoint *bp;
+    struct aehd_sw_breakpoint *bp;
     int err;
 
     if (type == GDB_BREAKPOINT_SW) {
-        bp = gvm_find_sw_breakpoint(cpu, addr);
+        bp = aehd_find_sw_breakpoint(cpu, addr);
         if (!bp) {
             return -ENOENT;
         }
@@ -1656,22 +1656,22 @@ int gvm_remove_breakpoint(CPUState *cpu, target_ulong addr,
             return 0;
         }
 
-        err = gvm_arch_remove_sw_breakpoint(cpu, bp);
+        err = aehd_arch_remove_sw_breakpoint(cpu, bp);
         if (err) {
             return err;
         }
 
-        QTAILQ_REMOVE(&cpu->gvm_state->gvm_sw_breakpoints, bp, entry);
+        QTAILQ_REMOVE(&cpu->aehd_state->aehd_sw_breakpoints, bp, entry);
         g_free(bp);
     } else {
-        err = gvm_arch_remove_hw_breakpoint(addr, len, type);
+        err = aehd_arch_remove_hw_breakpoint(addr, len, type);
         if (err) {
             return err;
         }
     }
 
     CPU_FOREACH(cpu) {
-        err = gvm_update_guest_debug(cpu, 0);
+        err = aehd_update_guest_debug(cpu, 0);
         if (err) {
             return err;
         }
@@ -1679,49 +1679,49 @@ int gvm_remove_breakpoint(CPUState *cpu, target_ulong addr,
     return 0;
 }
 
-void gvm_remove_all_breakpoints(CPUState *cpu)
+void aehd_remove_all_breakpoints(CPUState *cpu)
 {
-    struct gvm_sw_breakpoint *bp, *next;
-    GVMState *s = cpu->gvm_state;
+    struct aehd_sw_breakpoint *bp, *next;
+    AEHDState *s = cpu->aehd_state;
     CPUState *tmpcpu;
 
-    QTAILQ_FOREACH_SAFE(bp, &s->gvm_sw_breakpoints, entry, next) {
-        if (gvm_arch_remove_sw_breakpoint(cpu, bp) != 0) {
+    QTAILQ_FOREACH_SAFE(bp, &s->aehd_sw_breakpoints, entry, next) {
+        if (aehd_arch_remove_sw_breakpoint(cpu, bp) != 0) {
             /* Try harder to find a CPU that currently sees the breakpoint. */
             CPU_FOREACH(tmpcpu) {
-                if (gvm_arch_remove_sw_breakpoint(tmpcpu, bp) == 0) {
+                if (aehd_arch_remove_sw_breakpoint(tmpcpu, bp) == 0) {
                     break;
                 }
             }
         }
-        QTAILQ_REMOVE(&s->gvm_sw_breakpoints, bp, entry);
+        QTAILQ_REMOVE(&s->aehd_sw_breakpoints, bp, entry);
         g_free(bp);
     }
-    gvm_arch_remove_all_hw_breakpoints();
+    aehd_arch_remove_all_hw_breakpoints();
 
     CPU_FOREACH(cpu) {
-        gvm_update_guest_debug(cpu, 0);
+        aehd_update_guest_debug(cpu, 0);
     }
 }
 
-static void gvm_accel_class_init(ObjectClass *oc, void *data)
+static void aehd_accel_class_init(ObjectClass *oc, void *data)
 {
     AccelClass *ac = ACCEL_CLASS(oc);
-    ac->name = "GVM";
-    ac->init_machine = gvm_init;
-    ac->allowed = &gvm_allowed;
+    ac->name = "AEHD";
+    ac->init_machine = aehd_init;
+    ac->allowed = &aehd_allowed;
 }
 
-static const TypeInfo gvm_accel_type = {
-    .name = TYPE_GVM_ACCEL,
+static const TypeInfo aehd_accel_type = {
+    .name = TYPE_AEHD_ACCEL,
     .parent = TYPE_ACCEL,
-    .class_init = gvm_accel_class_init,
-    .instance_size = sizeof(GVMState),
+    .class_init = aehd_accel_class_init,
+    .instance_size = sizeof(AEHDState),
 };
 
-static void gvm_type_init(void)
+static void aehd_type_init(void)
 {
-    type_register_static(&gvm_accel_type);
+    type_register_static(&aehd_accel_type);
 }
 
-type_init(gvm_type_init);
+type_init(aehd_type_init);
