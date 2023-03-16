@@ -12,10 +12,12 @@
 #include "aemu/base/files/FileSystemWatcher.h"
 
 #include <gtest/gtest.h>  // for Message, TestPartResult
-#include <fstream>        // for endl
-#include <limits>         // for numeric_limits
-#include <memory>         // for std::unique_ptr
-#include <string>         // for string
+#include <chrono>
+#include <fstream>  // for endl
+#include <limits>   // for numeric_limits
+#include <memory>   // for std::unique_ptr
+#include <string>   // for string
+#include <thread>
 #include <unordered_map>  // for unordered_map
 #include <vector>         // for vector
 
@@ -52,10 +54,10 @@ protected:
 }  // namespace
 
 TEST_F(FileSystemWatcherTest, file_add) {
-    #ifdef __APPLE__
+#ifdef __APPLE__
     // The buildbots appear to be locked down and not firing FSevents
     GTEST_SKIP();
-    #endif
+#endif
     auto watcher = FileSystemWatcher::getFileSystemWatcher(
             mTempDir->path(), [=](auto change, auto path) {
                 EXPECT_EQ(change,
@@ -69,10 +71,10 @@ TEST_F(FileSystemWatcherTest, file_add) {
 }
 
 TEST_F(FileSystemWatcherTest, dir_add) {
-    #ifdef __APPLE__
+#ifdef __APPLE__
     // The buildbots appear to be locked down and not firing FSevents
     GTEST_SKIP();
-    #endif
+#endif
     auto watcher = FileSystemWatcher::getFileSystemWatcher(
             mTempDir->path(), [=](auto change, auto path) {
                 EXPECT_EQ(change,
@@ -86,10 +88,10 @@ TEST_F(FileSystemWatcherTest, dir_add) {
 }
 
 TEST_F(FileSystemWatcherTest, file_remove) {
-    #ifdef __APPLE__
+#ifdef __APPLE__
     // The buildbots appear to be locked down and not firing FSevents
     GTEST_SKIP();
-    #endif
+#endif
     ASSERT_TRUE(mTempDir->makeSubFile("hello.txt"));
     auto watcher = FileSystemWatcher::getFileSystemWatcher(
             mTempDir->path(), [=](auto change, auto path) {
@@ -104,10 +106,10 @@ TEST_F(FileSystemWatcherTest, file_remove) {
 }
 
 TEST_F(FileSystemWatcherTest, file_change) {
-    #ifdef __APPLE__
+#ifdef __APPLE__
     // The buildbots appear to be locked down and not firing FSevents
     GTEST_SKIP();
-    #endif
+#endif
     ASSERT_TRUE(mTempDir->makeSubFile("hello.txt"));
     auto fname = mTempDir->path();
     auto watcher = FileSystemWatcher::getFileSystemWatcher(
@@ -126,10 +128,10 @@ TEST_F(FileSystemWatcherTest, file_change) {
 }
 
 TEST_F(FileSystemWatcherTest, file_add_unicode) {
-    #ifdef __APPLE__
+#ifdef __APPLE__
     // The buildbots appear to be locked down and not firing FSevents
     GTEST_SKIP();
-    #endif
+#endif
     auto watcher = FileSystemWatcher::getFileSystemWatcher(
             mTempDir->path(), [=](auto change, auto path) {
                 EXPECT_EQ(change,
@@ -140,6 +142,40 @@ TEST_F(FileSystemWatcherTest, file_add_unicode) {
     EXPECT_TRUE(watcher->start());
     ASSERT_TRUE(mTempDir->makeSubFile("hello☺.txt"));
     mTestEv.wait();
+}
+
+TEST_F(FileSystemWatcherTest, many_add_remove) {
+#ifdef __APPLE__
+    // The buildbots appear to be locked down and not firing FSevents
+    GTEST_SKIP();
+#endif
+    int added = 0;
+    int removed = 0;
+    auto watcher = FileSystemWatcher::getFileSystemWatcher(
+            mTempDir->path(), [&added, &removed](auto change, auto path) {
+                switch (change) {
+                    case FileSystemWatcher::WatcherChangeType::Created:
+                        added++;
+                        break;
+                    case FileSystemWatcher::WatcherChangeType::Deleted:
+                        removed++;
+                        break;
+                    default:
+                        FAIL();
+                };
+            });
+    EXPECT_TRUE(watcher->start());
+    int loop_count = 100;
+    for (int i = 0; i < loop_count; i++) {
+        ASSERT_TRUE(mTempDir->makeSubFile("hello.txt"));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        ASSERT_TRUE(
+                System::get()->deleteFile(pj(mTempDir->path(), "hello.txt")));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    EXPECT_EQ(added, loop_count);
+    EXPECT_EQ(removed, loop_count);
 }
 
 }  // namespace base
