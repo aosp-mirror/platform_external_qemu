@@ -87,7 +87,7 @@ bool user_config_init(void) {
 /* only call this function on normal exits, so that ^C doesn't save the
  * configuration */
 void user_config_done(void) {
-    int win_x, win_y, win_w, win_h;
+    int win_x, win_y;
 
     AUserConfig* userConfig = getConsoleAgents()->settings->userConfig();
     if (!userConfig) {
@@ -96,22 +96,18 @@ void user_config_done(void) {
     }
 
     skin_winsys_get_window_pos(&win_x, &win_y);
-    skin_winsys_get_window_size(&win_w, &win_h);
-    auserConfig_setWindowGeo(userConfig, win_x, win_y, win_w, win_h);
+    auserConfig_setWindowPos(userConfig, win_x, win_y);
     auserConfig_save(userConfig);
     auserConfig_free(userConfig);
     getConsoleAgents()->settings->inject_userConfig(NULL);
 }
 
-void user_config_get_window_geo(int* window_x, int* window_y, int* window_w, int* window_h) {
-    *window_x =  10;
-    *window_y =  10;
-    *window_w = 365; // Arbitrary, but reasonable
-    *window_h = 676;
+void user_config_get_window_pos(int* window_x, int* window_y) {
+    *window_x = *window_y = 10;
 
     AUserConfig* userConfig = getConsoleAgents()->settings->userConfig();
     if (userConfig)
-        auserConfig_getWindowGeo(userConfig, window_x, window_y, window_w, window_h);
+        auserConfig_getWindowPos(userConfig, window_x, window_y);
 }
 
 /***********************************************************************/
@@ -478,7 +474,7 @@ bool ui_init(const AConfig* skinConfig,
              const char* skinPath,
              const AndroidOptions* opts,
              const UiEmuAgent* uiEmuAgent) {
-    int win_x, win_y, win_w, win_h;
+    int win_x, win_y;
 
     signal(SIGINT, SIG_DFL);
 #ifndef _WIN32
@@ -540,10 +536,10 @@ bool ui_init(const AConfig* skinConfig,
         }
     }
 
-    user_config_get_window_geo(&win_x, &win_y, &win_w, &win_h);
+    user_config_get_window_pos(&win_x, &win_y);
 
     if (emulator_window_init(emulator_window_get(), skinConfig, skinPath, win_x,
-                             win_y, win_w, win_h, opts, uiEmuAgent) < 0) {
+                             win_y, opts, uiEmuAgent) < 0) {
         derror("Could not load emulator skin from '%s'", skinPath);
         return false;
     }
