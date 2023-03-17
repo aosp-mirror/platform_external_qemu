@@ -57,6 +57,7 @@ if(NOT LINUX_AARCH64)
         emulator/webrtc/RtcConfig_unittest.cpp)
   target_link_libraries(android-webrtc_unittest
                         PUBLIC android-webrtc
+                              android-emu
                               webrtc_platform_defs
                               webrtc_api_libjingle_peerconnection_api
                               gmock_main)
