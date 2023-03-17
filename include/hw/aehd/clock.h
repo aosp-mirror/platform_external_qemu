@@ -1,5 +1,5 @@
 /*
- * QEMU GVM support, paravirtual clock device
+ * QEMU AEHD support, paravirtual clock device
  *
  * Copyright (C) 2011 Siemens AG
  *
@@ -11,14 +11,14 @@
  *
  */
 
-#ifdef CONFIG_GVM
+#ifdef CONFIG_AEHD
 
-void gvmclock_create(void);
+void aehdclock_create(void);
 
-#else /* CONFIG_GVM */
+#else /* CONFIG_AEHD */
 
-static inline void gvmclock_create(void)
+static inline void aehdclock_create(void)
 {
 }
 
-#endif /* !CONFIG_GVM */
+#endif /* !CONFIG_AEHD */

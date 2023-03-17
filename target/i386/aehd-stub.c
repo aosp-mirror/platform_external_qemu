@@ -1,5 +1,5 @@
 /*
- * QEMU GVM x86 specific function stubs
+ * QEMU AEHD x86 specific function stubs
  *
  * Copyright Linaro Limited 2012
  *
@@ -12,14 +12,14 @@
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "cpu.h"
-#include "gvm_i386.h"
+#include "aehd_i386.h"
 
 #ifndef __OPTIMIZE__
 /* This function is only called inside conditionals which we
- * rely on the compiler to optimize out when CONFIG_GVM is not
+ * rely on the compiler to optimize out when CONFIG_AEHD is not
  * defined.
  */
-uint32_t gvm_arch_get_supported_cpuid(GVMState *env, uint32_t function,
+uint32_t aehd_arch_get_supported_cpuid(AEHDState *env, uint32_t function,
                                       uint32_t index, int reg)
 {
     abort();

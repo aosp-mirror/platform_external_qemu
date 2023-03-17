@@ -731,8 +731,8 @@ DEF("enable-whpx", 0, QEMU_OPTION_enable_whpx, \
 DEF("enable-hvf", 0, QEMU_OPTION_enable_hvf, \
 "-enable-hvf     enable Hypervisor.framework virtualization support\n", QEMU_ARCH_ALL)
 
-DEF("enable-gvm", 0, QEMU_OPTION_enable_gvm, \
-"-enable-gvm     enable GVM full virtualization support\n", QEMU_ARCH_I386)
+DEF("enable-aehd", 0, QEMU_OPTION_enable_aehd, \
+"-enable-aehd     enable AEHD full virtualization support\n", QEMU_ARCH_I386)
 
 DEF("xen-domid", HAS_ARG, QEMU_OPTION_xen_domid,
 "-xen-domid id   specify xen guest domain id\n", QEMU_ARCH_ALL)

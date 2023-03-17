@@ -813,7 +813,7 @@ set(qemu-img_dep libqemuutil)
 ## TARGET: qemu-system-aarch64 ##
 set(qemu-system-aarch64_sources ""
 accel/accel.c
-accel/stubs/gvm-stub.c
+accel/stubs/aehd-stub.c
 accel/stubs/hvf-stub.c
 accel/stubs/kvm-stub.c
 accel/stubs/whpx-stub.c
@@ -1175,7 +1175,7 @@ set(qemu-system-aarch64_dep libqemuutil qemu2-shared)
 ## TARGET: qemu-system-arm ##
 set(qemu-system-arm_sources ""
 accel/accel.c
-accel/stubs/gvm-stub.c
+accel/stubs/aehd-stub.c
 accel/stubs/hvf-stub.c
 accel/stubs/kvm-stub.c
 accel/stubs/whpx-stub.c
@@ -1525,7 +1525,7 @@ set(qemu-system-arm_dep libqemuutil qemu2-shared)
 set(qemu-system-i386_sources ""
 accel/accel.c
 accel/kvm/kvm-all.c
-accel/stubs/gvm-stub.c
+accel/stubs/aehd-stub.c
 accel/stubs/hvf-stub.c
 accel/stubs/whpx-stub.c
 accel/tcg/cpu-exec-common.c
@@ -1707,7 +1707,7 @@ set(qemu-system-i386_dep libqemuutil qemu2-shared)
 set(qemu-system-x86_64_sources ""
 accel/accel.c
 accel/kvm/kvm-all.c
-accel/stubs/gvm-stub.c
+accel/stubs/aehd-stub.c
 accel/stubs/hvf-stub.c
 accel/stubs/whpx-stub.c
 accel/tcg/cpu-exec-common.c
@@ -1925,7 +1925,7 @@ PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/accel")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/accel/kvm/kvm-all.c
 ${ANDROID_AUTOGEN}/accel/kvm/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/accel/kvm")
 
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/accel/stubs/gvm-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/hvf-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/kvm-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/whpx-stub.c
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/accel/stubs/aehd-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/hvf-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/kvm-stub.c ${ANDROID_QEMU2_TOP_DIR}/accel/stubs/whpx-stub.c
 PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/accel/stubs")
 
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/accel/tcg/cpu-exec-common.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/cpu-exec.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/cputlb.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/tcg-all.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/tcg-runtime-gvec.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/tcg-runtime.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/translate-all.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/translator.c

@@ -37,7 +37,7 @@
 #include "hw/boards.h"
 #include "hw/ide.h"
 #include "sysemu/kvm.h"
-#include "sysemu/gvm.h"
+#include "sysemu/aehd.h"
 #include "hw/kvm/clock.h"
 #include "sysemu/sysemu.h"
 #include "hw/sysbus.h"
@@ -57,7 +57,7 @@
 #include "migration/global_state.h"
 #include "migration/misc.h"
 #include "kvm_i386.h"
-#include "gvm_i386.h"
+#include "aehd_i386.h"
 #include "sysemu/numa.h"
 
 #ifdef CONFIG_ANDROID
@@ -200,9 +200,9 @@ static void pc_init1(MachineState *machine,
         kvm_pc_setup_irq_routing(pcmc->pci_enabled);
         pcms->gsi = qemu_allocate_irqs(kvm_pc_gsi_handler, gsi_state,
                                        GSI_NUM_PINS);
-    } else if (gvm_ioapic_in_kernel()) {
-        gvm_pc_setup_irq_routing(pcmc->pci_enabled);
-        pcms->gsi = qemu_allocate_irqs(gvm_pc_gsi_handler, gsi_state,
+    } else if (aehd_ioapic_in_kernel()) {
+        aehd_pc_setup_irq_routing(pcmc->pci_enabled);
+        pcms->gsi = qemu_allocate_irqs(aehd_pc_gsi_handler, gsi_state,
                                  GSI_NUM_PINS);
     } else {
         pcms->gsi = qemu_allocate_irqs(gsi_handler, gsi_state, GSI_NUM_PINS);
@@ -239,8 +239,8 @@ static void pc_init1(MachineState *machine,
 
     if (kvm_pic_in_kernel()) {
         i8259 = kvm_i8259_init(isa_bus);
-    } else if (gvm_pic_in_kernel()) {
-        i8259 = gvm_i8259_init(isa_bus);
+    } else if (aehd_pic_in_kernel()) {
+        i8259 = aehd_i8259_init(isa_bus);
     } else if (xen_enabled()) {
         i8259 = xen_interrupt_controller_init();
     } else {

@@ -551,7 +551,7 @@ message VmConfiguration {
         // https://docs.microsoft.com/en-us/virtualization/api/
         WHPX = 5;
 
-        GVM = 6;
+        AEHD = 6;
     }
 
     VmHypervisorType hypervisorType = 1;
