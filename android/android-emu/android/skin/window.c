@@ -1052,8 +1052,6 @@ struct SkinWindow {
 
     int x_pos;
     int y_pos;
-    int width;
-    int height;
     double scale;
     double dpr;  // Needed for HiDPI
 
@@ -1631,8 +1629,6 @@ static void skin_window_set_device_pixel_ratio(SkinWindow* window) {
 SkinWindow* skin_window_create(SkinLayout* slayout,
                                int x,
                                int y,
-                               int w,
-                               int h,
                                bool enable_scale,
                                bool use_emugl_subwindow,
                                const SkinWindowFuncs* win_funcs) {
@@ -1652,8 +1648,6 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
 
     window->x_pos = x;
     window->y_pos = y;
-    window->width = w;
-    window->height = h;
     window->scroll_h = 0;
 
     window->drag_x_start = 0;
@@ -1667,22 +1661,13 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     double scale_w = 1.0;
     double scale_h = 1.0;
 
-
-    // Orient the layout to match the window
-    bool windowIsPortrait = w <= h;
-    bool layoutIsPortrait = win_w <= win_h;
-    if (windowIsPortrait != layoutIsPortrait) {
-        int temp = win_w;
-        win_w = win_h;
-        win_h = temp;
-    }
-
     skin_winsys_get_monitor_rect(&monitor);
 
-    if (enable_scale) {
-        scale_w = ((double)w) / win_w;
-        scale_h = ((double)h) / win_h;
-    }
+    // Make the default scale about 80% of the screen size.
+    if (enable_scale && monitor.size.w < win_w && win_w > 1.)
+        scale_w = 0.80 * monitor.size.w / win_w;
+    if (enable_scale && monitor.size.h < win_h && win_h > 1.)
+        scale_h = 0.80 * monitor.size.h / win_h;
 
     window->scale = (scale_w <= scale_h) ? scale_w : scale_h;
 
@@ -1691,7 +1676,6 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
         return NULL;
     }
     skin_winsys_set_window_pos(x, y);
-    skin_winsys_set_window_size(w, h);
 
     /* Ensure that the window is fully visible */
     if (enable_scale) {

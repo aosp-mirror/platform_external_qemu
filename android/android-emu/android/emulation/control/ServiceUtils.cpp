@@ -58,19 +58,17 @@ std::unordered_map<std::string, std::string> getQemuConfig() {
 std::unordered_map<std::string, std::string> getUserConfig() {
     std::unordered_map<std::string, std::string> userCfg;
     auto userConfig = getConsoleAgents()->settings->userConfig();
-    int x, y, w, h, va, ha;
-    if (auserConfig_getExtendedControlsPos(userConfig, &x, &y, &ha, &va)) {
+    int x, y, v, h;
+    if (auserConfig_getExtendedControlsPos(userConfig, &x, &y, &h, &v)) {
         userCfg["extended_controls.x"] = std::to_string(x);
         userCfg["extended_controls.y"] = std::to_string(y);
-        userCfg["extended_controls.vanchor"] = std::to_string(va);
-        userCfg["extended_controls.hanchor"] = std::to_string(ha);
+        userCfg["extended_controls.vanchor"] = std::to_string(v);
+        userCfg["extended_controls.hanchor"] = std::to_string(h);
     }
 
-    auserConfig_getWindowGeo(userConfig, &x, &y, &w, &h);
+    auserConfig_getWindowPos(userConfig, &x, &y);
     userCfg["window.x"] = std::to_string(x);
     userCfg["window.y"] = std::to_string(y);
-    userCfg["window.w"] = std::to_string(w);
-    userCfg["window.h"] = std::to_string(h);
 
     userCfg["uuid"] = std::to_string(auserConfig_getUUID(userConfig));
     return userCfg;
