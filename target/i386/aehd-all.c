@@ -1101,7 +1101,7 @@ static HANDLE aehd_open_device(void)
         return hDevice;
 
     /* AEHD 2.0 or below only support the old name */
-    hDevice = CreateFile("\\\\.\\aehd", GENERIC_READ | GENERIC_WRITE, 0, NULL,
+    hDevice = CreateFile("\\\\.\\gvm", GENERIC_READ | GENERIC_WRITE, 0, NULL,
         CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (hDevice == INVALID_HANDLE_VALUE)
