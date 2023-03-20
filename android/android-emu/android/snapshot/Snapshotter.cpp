@@ -308,7 +308,25 @@ OperationStatus Snapshotter::prepareForLoading(const char* name) {
     return mLoader->status();
 }
 
+static void append_to_file(const std::string& filename, const char* sentence) {
+    std::ofstream fout(filename, std::ios::app | std::ios::out);
+    fout << sentence << std::endl;
+}
+
 OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
+    const char* contentPath =
+            getConsoleAgents()->settings->avdInfo()
+                    ? avdInfo_getContentPath(
+                              getConsoleAgents()->settings->avdInfo())
+                    : nullptr;
+    const std::string snapshot_trace_file =
+            contentPath ? PathUtils::join(contentPath, "snapshot.trace") : "";
+    if (!snapshot_trace_file.empty()) {
+        path_empty_file(snapshot_trace_file.c_str());
+        append_to_file(snapshot_trace_file, "load_started");
+    }
+
+    dinfo("Loading snapshot '%s' ...", name ? name : "unknown");
     mLastLoadDuration = android::base::kNullopt;
     mIsQuickboot = isQuickboot;
     Stopwatch sw;
@@ -334,11 +352,22 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     // we didn't reallocate mLoader, or even deallocated it.
     // Quit early here.
     if (!mLoader) {
+        dwarning("Failed to load snapshot '%s'; %s %d", name ? name : "unknown",
+                 __func__, __LINE__);
         return OperationStatus::Error;
     }
 
     mLoadedSnapshotFile =
             (mLoader->status() == OperationStatus::Ok) ? name : "";
+    if (mLoader->status() == OperationStatus::Ok) {
+        dinfo("Successfully loaded snapshot '%s'", name ? name : "unknown");
+        if (!snapshot_trace_file.empty()) {
+            append_to_file(snapshot_trace_file, "load_succeeded");
+        }
+    } else {
+        dwarning("Failed to load snapshot '%s'; %s %d", name ? name : "unknown",
+                 __func__, __LINE__);
+    }
     return mLoader->status();
 }
 
@@ -763,6 +792,7 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
         mVmOperations.setSnapshotProtobuf(mCompatiblePb.get());
     }
 
+    dinfo("Saving snapshot '%s' ...", name ? name : "unknown");
     mVmOperations.snapshotSave(name, this, nullptr);
 
     if (mVmOperations.setSnapshotProtobuf) {
@@ -774,7 +804,17 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
 
     mLastSaveDuration.emplace(sw.elapsedUs() / 1000);
     // In unit tests, we don't have a saver, so trivially succeed.
-    return mSaver ? mSaver->status() : OperationStatus::Ok;
+    if (mSaver) {
+        if (mSaver->status() == OperationStatus::Ok) {
+            dinfo("Successfully saved snapshot '%s'", name ? name : "unknown");
+        } else {
+            dwarning("Failed to save snapshot '%s'; %s %d",
+                     name ? name : "unknown", __func__, __LINE__);
+        }
+        return mSaver->status();
+    } else {
+        return OperationStatus::Ok;
+    }
 }
 
 void Snapshotter::setRamFile(const char* path, bool shared) {

@@ -891,14 +891,18 @@ int main(int argc, char** argv) {
     if (avdName) {
         const char* avd_folder = path_getAvdContentPath(avdName);
         if (avd_folder) {
-            const std::string file =
-                    PathUtils::join(avd_folder, "bootcompleted.ini");
-            if (path_exists(file.c_str())) {
-                const auto ret = path_delete_file(file.c_str());
-                if (ret == 0) {
-                    D("Deleting %s done", file.c_str());
-                } else {
-                    dwarning("Deleting %s failed", file.c_str());
+            const std::vector<std::string> files_to_delete{"bootcompleted.ini",
+                                                           "snapshot.trace"};
+            for (const auto& filename : files_to_delete) {
+                const std::string file =
+                        PathUtils::join(avd_folder, filename.c_str());
+                if (path_exists(file.c_str())) {
+                    const auto ret = path_delete_file(file.c_str());
+                    if (ret == 0) {
+                        D("Deleting %s done", file.c_str());
+                    } else {
+                        dwarning("Deleting %s failed", file.c_str());
+                    }
                 }
             }
         }
