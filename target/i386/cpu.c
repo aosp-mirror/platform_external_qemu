@@ -24,6 +24,7 @@
 #include "exec/exec-all.h"
 #include "sysemu/kvm.h"
 #include "sysemu/aehd.h"
+#include "sysemu/whpx.h"
 #include "sysemu/cpus.h"
 #include "kvm_i386.h"
 #include "aehd_i386.h"
@@ -3081,7 +3082,7 @@ static void x86_cpu_load_def(X86CPU *cpu, X86CPUDefinition *def, Error **errp)
         vendor = "Goldfish-CPU";
     } else {
         vendor = def->vendor;
-        if (kvm_enabled() || aehd_enabled()) {
+        if (kvm_enabled() || aehd_enabled() || whpx_enabled()) {
             uint32_t  ebx = 0, ecx = 0, edx = 0;
             host_cpuid(0, 0, NULL, &ebx, &ecx, &edx);
             x86_cpu_vendor_words2str(host_vendor, ebx, edx, ecx);
