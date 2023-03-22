@@ -28,7 +28,7 @@
 # \argn: The variable that will hold the expected rust version.
 # ~~~
 function(get_rust_version RET_VAL)
-  set(${RET_VAL} "1.65.0" PARENT_SCOPE)
+  set(${RET_VAL} "1.68.0" PARENT_SCOPE)
 endfunction()
 
 # ~~~
@@ -137,7 +137,8 @@ function(ensure_rust_version_is_compliant)
   endif()
   if(NOT Rust_VERSION VERSION_EQUAL EXPECTED_VERSION)
     if(WIN32)
-      # We don't want to break the windows build bots immediately, instead will create a warning
+      # We don't want to break the windows build bots immediately, instead will
+      # create a warning
       message(
         WARNING
           "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
