@@ -23,6 +23,8 @@ public:
     virtual ~ModemLegacy() = default;
 
 public:
+    virtual int number_of_calls(AModem) override;
+    virtual ACall call_by_index(AModem, int idx) override;
     virtual void receive_sms(AModem, SmsPDU) override;
     virtual int add_inbound_call(AModem, const char*) override;
     virtual int disconnect_call(AModem, const char*) override;

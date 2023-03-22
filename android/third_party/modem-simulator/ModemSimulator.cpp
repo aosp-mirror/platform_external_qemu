@@ -16,6 +16,23 @@
 namespace android {
 namespace modem {
 
+int ModemSimulator::number_of_calls(AModem) {
+    return mCalls.size();
+}
+
+ACall ModemSimulator::call_by_index(AModem, int idx) {
+    if (idx < 0 || idx >= mCalls.size())
+        return nullptr;
+    for (auto iter = mCalls.begin(); iter != mCalls.end(); ++iter) {
+        if (idx == 0) {
+            return &(iter->second);
+        }
+        idx--;
+    }
+
+    return nullptr;
+}
+
 void ModemSimulator::receive_sms(AModem modem, SmsPDU sms) {
     (void)modem;
     cuttlefish::send_sms_msg(std::string(amodem_sms_to_string(modem, sms)));
@@ -27,10 +44,13 @@ int ModemSimulator::add_inbound_call(AModem modem, const char* args) {
         return 0;
     int res = cuttlefish::receive_inbound_call(std::string(args));
     if (res == A_CALL_OP_OK) {
-        ACallRec rec;
+        ACallRec rec = {.dir = ACallDir::A_CALL_INBOUND,
+                        .state = ACallState::A_CALL_INCOMING,
+                        .mode = ACallMode::A_CALL_VOICE};
         snprintf(rec.number, sizeof(rec.number), "%s", args);
         mCalls[std::string(args)] = rec;
     }
+
     return res;
 }
 
@@ -55,6 +75,10 @@ int ModemSimulator::disconnect_call(AModem modem, const char* args) {
 int ModemSimulator::update_call(AModem modem, const char* args, int state) {
     (void)modem;
     cuttlefish::update_call(std::string(args), state);
+    auto iter = mCalls.find(std::string(args));
+    if (iter != mCalls.end()) {
+        iter->second.state = (ACallState)state;
+    }
     return 0;
 }
 
@@ -115,11 +139,23 @@ int ModemSimulator::load_sate(AModem modem, SysFile* file, int version_id) {
     return res;
 }
 
+void ModemSimulator::modem_callback_forwarder(void* user_data,
+                                                     int numActiveCalls) {
+    ModemSimulator* me = (ModemSimulator*)user_data;
+    if (numActiveCalls == 0) {
+        me->mCalls.clear();
+    }
+    me->mCallbackFunc(me->mUserData, numActiveCalls);
+}
+
 void ModemSimulator::set_notification_callback_vx(AModem modem,
                                                   ModemCallback callbackFunc,
                                                   void* userData) {
     (void)modem;
-    cuttlefish::set_notification_callback(reinterpret_cast<void*>(callbackFunc), userData);
+    mUserData = userData;
+    mCallbackFunc = callbackFunc;
+    cuttlefish::set_notification_callback(
+            reinterpret_cast<void*>(&modem_callback_forwarder), this);
 }
 
 }  // namespace modem

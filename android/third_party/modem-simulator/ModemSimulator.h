@@ -26,6 +26,8 @@ public:
     virtual ~ModemSimulator() = default;
 
 public:
+    virtual int number_of_calls(AModem) override;
+    virtual ACall call_by_index(AModem, int idx) override;
     virtual void receive_sms(AModem, SmsPDU) override;
     virtual int add_inbound_call(AModem, const char*) override;
     virtual int disconnect_call(AModem, const char*) override;
@@ -46,7 +48,12 @@ public:
                                               void* userData) override;
 
 private:
+    static void modem_callback_forwarder(void* user_data,
+                                                         int numActiveCalls);
+
     std::unordered_map<std::string, ACallRec> mCalls;
+    void* mUserData;
+    ModemCallback* mCallbackFunc;
     ARegistrationState mDataState{A_REGISTRATION_HOME};
     ARegistrationState mVoiceState{A_REGISTRATION_HOME};
 };
