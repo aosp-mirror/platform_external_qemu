@@ -1,8 +1,9 @@
 # Let's add in the library
 android_add_library(
-  TARGET android-grpc-modem-service
+  TARGET modem-service-impl
   LICENSE Apache-2.0
-  SOURCE_DIR src
+  SOURCE_DIR
+  src
   SRC android/emulation/control/incubating/ModemService.cpp
   DEPS android-emu-agents
        android-emu-avd
@@ -15,8 +16,6 @@ android_add_library(
        android-grpc-event-waiter
        modem_simulator_lib
        qemu-host-common-headers)
-target_include_directories(android-grpc-modem-service PUBLIC include
-                           PRIVATE src)
+target_include_directories(modem-service-impl PUBLIC include PRIVATE src)
 
-target_link_libraries(android-grpc-modem-service
-                      PUBLIC android-grpc-incubating-services)
+target_link_libraries(modem-service-impl PUBLIC modem-service)
