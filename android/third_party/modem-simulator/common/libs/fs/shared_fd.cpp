@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 #include "shared_fd.h"
-#include "shared_select.h"
 
+#include "aemu/base/logging/CLog.h"
 #include "aemu/base/sockets/SocketUtils.h"
-#include "android-base/logging.h"
+#include "android/utils/debug.h"
+#include "shared_select.h"
 
 #ifdef _WIN32
 #include "aemu/base/sockets/Winsock.h"
 #else
 #include <errno.h>
-#include <fcntl.h>
 #include <poll.h>
-#include <stdlib.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 #endif
-
-#include "glib.h"
 
 #include <map>
 #include <vector>
@@ -212,8 +209,7 @@ int UnixPollFDs(SharedFDSet& read_set, struct timeval* timeout) {
 #endif
 
 #ifdef _WIN32
-int WindowsPollFDs(SharedFDSet& read_set,
-           struct timeval* timeout) {
+int WindowsPollFDs(SharedFDSet& read_set, struct timeval* timeout) {
     std::map<int, SharedFD> myreadmap;
     std::map<HANDLE, int> myhandlemap;
     std::vector<HANDLE> myevents;
@@ -243,14 +239,15 @@ int WindowsPollFDs(SharedFDSet& read_set,
         read_set.Set(myreadmap[fd]);
         ++numFdReady;
         // check for other fd
-        LOG(DEBUG)<<"fd fired " << fd;
-        for (int i = index + 1; i < myevents.size(); ++ i) {
+        VERBOSE_INFO(modem, "fd fired %s", fd);
+        for (int i = index + 1; i < myevents.size(); ++i) {
             ret = WaitForMultipleObjects(1, &(myevents[i]), TRUE, 0);
             if (ret == WAIT_OBJECT_0) {
                 fd = myhandlemap[myevents[i]];
                 read_set.Set(myreadmap[fd]);
                 ++numFdReady;
-                LOG(DEBUG)<<"additional fd fired " << fd << " total fired fd " << numFdReady;
+                VERBOSE_INFO(modem, "additional fd fired %d total fired fd: %d",
+                             fd, numFdReady);
             }
         }
     }
@@ -281,7 +278,7 @@ int Select(SharedFDSet* read_set,
 
 #ifdef _WIN32
     return WindowsPollFDs(*read_set, timeout);
-    //return UnixSelect(read_set, nullptr, nullptr, timeout);
+    // return UnixSelect(read_set, nullptr, nullptr, timeout);
 #else
     return UnixPollFDs(*read_set, timeout);
 #endif
