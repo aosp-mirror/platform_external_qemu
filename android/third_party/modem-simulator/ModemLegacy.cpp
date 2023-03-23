@@ -44,7 +44,7 @@ void ModemLegacy::set_signal_strength_profile(AModem modem, int quality) {
 }
 
 void ModemLegacy::update_time(AModem modem) {
-    amodem_addTimeUpdate(modem);
+    amodem_add_time_update(modem);
 }
 
 int ModemLegacy::set_phone_number(AModem modem, const char* number) {
