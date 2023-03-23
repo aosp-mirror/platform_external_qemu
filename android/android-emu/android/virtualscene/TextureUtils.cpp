@@ -77,7 +77,8 @@ TextureUtils::Result TextureUtils::createPlaceholder() {
 
 Optional<TextureUtils::Result> TextureUtils::load(const char* filename,
                                                   Orientation orientation) {
-    const std::string_view extension = PathUtils::extension(filename);
+    const std::string filename_str{filename};
+    const std::string_view extension{PathUtils::extension(filename_str)};
 
     if (strncasecmp(extension.data(), ".png", extension.size()) == 0) {
         return loadPNG(filename, orientation);
