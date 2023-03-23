@@ -96,8 +96,7 @@ bool PathUtils::isAbsolute(const char* path, HostType hostType) {
     return isDirSeparator(path[prefixSize - 1], HOST_WIN32);
 }
 
-// static
-std::string_view PathUtils::extension(const std::string& path,
+std::string_view PathUtils::extension(const char* path,
                                       HostType hostType) {
     std::string_view tmp = path;
     using riter = std::reverse_iterator<std::string_view::const_iterator>;
@@ -118,6 +117,12 @@ std::string_view PathUtils::extension(const std::string& path,
     // either there's no dot in the whole path, or we found directory separator
     // first - anyway, there's no extension in this name
     return "";
+}
+
+// static
+std::string_view PathUtils::extension(const std::string& path,
+                                      HostType hostType) {
+    return PathUtils::extension(path.c_str(), hostType);
 }
 
 // static
