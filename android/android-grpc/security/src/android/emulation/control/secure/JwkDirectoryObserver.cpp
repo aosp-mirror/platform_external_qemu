@@ -13,23 +13,17 @@
 // limitations under the License.
 #include "android/emulation/control/secure/JwkDirectoryObserver.h"
 
-#include <stdint.h>          // for uint8_t
-#include <fstream>           // for basic_istream, basic_stre...
-#include <initializer_list>  // for initializer_list
-#include <iterator>          // for istreambuf_iterator
-#include <tuple>             // for tuple_element<>::type
-#include <utility>           // for move
-#include <vector>            // for vector
+#include <utility>
+#include <vector>
 
-#include "absl/status/status.h"             // for Status, InternalError
-#include "absl/strings/str_format.h"        // for StrFormat
-#include "absl/strings/string_view.h"       // for string_view
-#include "aemu/base/files/PathUtils.h"   // for PathUtils
-#include "aemu/base/misc/StringUtils.h"  // for EndsWith
-#include "android/base/system/System.h"     // for System
-#include "android/utils/debug.h"            // for VERBOSE_INFO, VERBOSE_grpc
-#include "tink/jwt/jwk_set_converter.h"     // for JwkSetToPublicKeysetHandle
-#include "tink/util/statusor.h"             // for StatusOr
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/strings/string_view.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/misc/StringUtils.h"
+#include "android/base/system/System.h"
+#include "android/utils/debug.h"
 
 #define DEBUG 0
 
@@ -62,7 +56,7 @@ JwkDirectoryObserver::JwkDirectoryObserver(Path jwksDir,
         if (!start()) {
             dfatal("Unable to start observing %s, jwks will not be updated. "
                    "%d were keysets loaded.",
-                   jwksDir.c_str(), mPublicKeys.size());
+                   jwksDir.c_str(), mLoadedKeys.size());
         }
     }
 }
@@ -77,16 +71,23 @@ bool JwkDirectoryObserver::start() {
         return false;
     }
     // Initial scan..
-    mPublicKeys.clear();
+    scanJwkPath();
+    notifyKeysetUpdated();
+    return mWatcher ? mWatcher->start() : false;
+}
+
+void JwkDirectoryObserver::scanJwkPath() {
+    mLoadedKeys.clear();
+    dinfo("Scanning %s for jwk keys.", mJwkPath.c_str());
     for (auto strPath : System::get()->scanDirEntries(mJwkPath.c_str(), true)) {
-        auto maybeJson = extractKeys(strPath);
-        if (maybeJson.ok()) {
-            mPublicKeys[strPath] = maybeJson.value();
+        auto status = mLoadedKeys.add(strPath);
+        if (!status.ok()) {
+            derror("Failed add jwk key: %s, due to: %s, access will be "
+                   "denied to this provider and the file deleted.",
+                   strPath.c_str(), status.message().data());
+            System::get()->deleteFile(strPath);
         }
     };
-
-    constructHandleAndNotify();
-    return mWatcher ? mWatcher->start() : false;
 }
 
 void JwkDirectoryObserver::stop() {
@@ -94,6 +95,8 @@ void JwkDirectoryObserver::stop() {
     if (!mRunning.compare_exchange_strong(expected, false)) {
         mWatcher->stop();
     }
+
+    mLoadedKeys.clear();
 }
 
 void JwkDirectoryObserver::fileChangeHandler(
@@ -111,101 +114,67 @@ void JwkDirectoryObserver::fileChangeHandler(
             [[fallthrough]];
         case FileSystemWatcher::WatcherChangeType::Changed: {
             DD("Changed/Created event for: %s", path.c_str());
-            auto maybeJson = extractKeys(path);
-            if (!maybeJson.ok()) {
-                derror("Failed to extract keys: %s",
-                       maybeJson.status().message().data());
+            auto status = mLoadedKeys.add(path);
+            if (!status.ok()) {
+                derror("Failed add jwk key: %s, due to: %s, access will be "
+                       "denied to this provider and the file deleted.",
+                       path.c_str(), status.message().data());
+                System::get()->deleteFile(path);
                 return;
             }
-            mPublicKeys[path] = maybeJson.value();
+            VERBOSE_INFO(grpc,
+                         "Added JSON Web Key Sets from %s, %d keys loaded",
+                         path.c_str(), mLoadedKeys.size());
             break;
         }
         case FileSystemWatcher::WatcherChangeType::Deleted:
-            DD("Deleted %s (in set: %s)", path.c_str(),
-               mPublicKeys.count(path) ? "yes" : "no");
-            if (mPublicKeys.erase(path)) {
-                VERBOSE_INFO(grpc, "Removed JSON Web Key Sets from %s",
-                             path.c_str());
+            DD("Deleted %s", path.c_str());
+            auto status = mLoadedKeys.remove(path);
+            if (!status.ok()) {
+                // This usually means it is already deleted.
+                derror("Failed to remove jwk key: %s, due to: %s", path.c_str(),
+                       status.message().data());
+                return;
             }
+            VERBOSE_INFO(grpc,
+                         "Removed JSON Web Key Sets from %s, %d keys loaded",
+                         path.c_str(), mLoadedKeys.size());
     };
 
-    constructHandleAndNotify();
+    notifyKeysetUpdated();
 }
 
-void JwkDirectoryObserver::constructHandleAndNotify() {
-    DD("Have %lu keys.", mPublicKeys.size());
-    if (mPublicKeys.empty()) {
-        // mCallback(absl::NotFoundError(
-        //         absl::StrFormat("No public keys found in %s", mJwkPath)));
-        mCallback(nullptr);
-        return;
-    }
-    // Create a valid JWK snippet with all the available keys.
-    auto jsonKeys = mergeKeys();
-    auto keyHandle = crypto::tink::JwkSetToPublicKeysetHandle(jsonKeys);
-    if (!keyHandle.ok()) {
-        derror("Internal error: merging keys resulted in an invalid JWK.");
-        return;
+static absl::Status notify(JwkDirectoryObserver::KeysetUpdatedCallback callback,
+                           const JwkKeyLoader& loader) {
+    if (loader.empty()) {
+        callback(nullptr);
+        return absl::OkStatus();
     }
 
-    mCallback(std::move(*keyHandle));
+    auto keyset = loader.activeKeySet();
+    if (keyset.ok()) {
+        callback(std::move(*keyset));
+        return absl::OkStatus();
+    }
+
+    return keyset.status();
 }
 
-std::string JwkDirectoryObserver::mergeKeys() {
-    // Now let's reconstruct our key set.
-    std::vector<json> keys;
-    for (const auto& [fname, keyset] : mPublicKeys) {
-        // contents is a json JWKS, so let's merge them together.
-        for (const auto& key : keyset) {
-            keys.emplace_back(key);
-        }
+void JwkDirectoryObserver::notifyKeysetUpdated() {
+    auto notified = notify(mCallback, mLoadedKeys);
+
+    // Notification failed, lets see if we can rescan and update
+    // our keyset..
+    if (!notified.ok()) {
+        derror("Failed construct jwk keyset due to: %s, rescanning.",
+               notified.message().data());
+        scanJwkPath();
+        notify(mCallback, mLoadedKeys).IgnoreError();
     }
-
-    json combinedJwk = {{"keys", keys}};
-    constexpr int indentation = 2;
-    return combinedJwk.dump(indentation);
-}
-
-// Reads a file into a string.
-static std::string readFile(Path fname) {
-    std::ifstream fstream(PathUtils::asUnicodePath(fname.data()).c_str());
-    std::string contents((std::istreambuf_iterator<char>(fstream)),
-                         std::istreambuf_iterator<char>());
-
-    if (!fstream) {
-        derror("Failure reading %s due to: %s", fname.c_str(),
-               std::strerror(errno));
-    }
-    return contents;
 }
 
 bool JwkDirectoryObserver::acceptJwkExtOnly(Path path) {
     return android::base::EndsWith(path, kJwkExt);
-}
-
-absl::StatusOr<json> JwkDirectoryObserver::extractKeys(Path fname) {
-    auto jsonFile = readFile(fname);
-    DD("Loaded %s, the json is %s.", jsonFile.c_str(),
-       json::accept(jsonFile) ? "valid" : "invalid");
-    auto handle = crypto::tink::JwkSetToPublicKeysetHandle(jsonFile);
-    if (!handle.ok()) {
-        return absl::UnavailableError(
-                absl::StrFormat("%s does not contain a valid jwk", fname));
-    }
-
-    auto jsonSnippet =
-            crypto::tink::JwkSetFromPublicKeysetHandle(*handle->get());
-    if (!jsonSnippet.ok()) {
-        return absl::InternalError(absl::StrFormat(
-                "Unable to convert key handle to json for file: %s ",
-                fname.c_str()));
-    }
-
-    VERBOSE_INFO(grpc, "Loaded JSON Web Key Sets from %s", fname.c_str());
-
-    // We should have a "keys" array (see:
-    // https://datatracker.ietf.org/doc/html/rfc7517)
-    return json::parse(*jsonSnippet)["keys"];
 }
 
 }  // namespace control

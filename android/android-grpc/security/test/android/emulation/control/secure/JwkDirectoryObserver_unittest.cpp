@@ -1,14 +1,16 @@
-// Copyright 2022 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
-// This software is licensed under the terms of the GNU General Public
-// License version 2, as published by the Free Software Foundation, and
-// may be copied, distributed, and modified under those terms.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include "android/emulation/control/secure/JwkDirectoryObserver.h"
 
 #include <gtest/gtest.h>  // for SuiteApiResolver, Message
@@ -19,7 +21,7 @@
 #include <utility>        // for move
 
 #include "absl/status/statusor.h"              // for StatusOr
-#include "aemu/base/files/PathUtils.h"      // for pj
+#include "aemu/base/files/PathUtils.h"         // for pj
 #include "android/base/system/System.h"        // for System
 #include "android/base/testing/TestEvent.h"    // for TestEvent
 #include "android/base/testing/TestTempDir.h"  // for TestTempDir
@@ -189,9 +191,9 @@ TEST_F(JwkDirectoryObserverTest, create_and_validate) {
 }
 
 TEST_F(JwkDirectoryObserverTest, create_multi_and_validate) {
-    #ifdef __APPLE__
+#ifdef __APPLE__
     GTEST_SKIP() << "This test is flaky on the build bots: b/233946633";
-    #endif
+#endif
     // Let's generate a series of json keys
     writeEs512("valid1.jwk");
     writeEs512("valid2.jwk");
@@ -211,9 +213,9 @@ TEST_F(JwkDirectoryObserverTest, create_multi_and_validate) {
 }
 
 TEST_F(JwkDirectoryObserverTest, create_validate_and_delete) {
-    #ifdef __APPLE__
+#ifdef __APPLE__
     GTEST_SKIP() << "This test is flaky on the build bots: b/233946633";
-    #endif
+#endif
     // Let's generate a series of json keys
     writeEs512("valid1.jwk");
     writeEs512("valid2.jwk");

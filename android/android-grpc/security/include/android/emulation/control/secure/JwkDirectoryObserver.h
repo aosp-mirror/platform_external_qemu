@@ -12,22 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <atomic>                                  // for atomic_bool
-#include <functional>                              // for function
-#include <memory>                                  // for unique_ptr
-#include <string>                                  // for operator==, string
-#include <string_view>                             // for string_view
-#include <unordered_map>                           // for unordered_map
+#include <atomic>
+#include <functional>
+#include <memory>
+#include <string>
+#include <string_view>
 
-#include "absl/status/statusor.h"                  // for StatusOr
-#include "aemu/base/files/FileSystemWatcher.h"  // for FileSystemWatcher
-#include "nlohmann/json.hpp"                       // for json
-
-namespace crypto {
-namespace tink {
-class KeysetHandle;
-}  // namespace tink
-}  // namespace crypto
+#include "aemu/base/files/FileSystemWatcher.h"
+#include "android/emulation/control/secure/JwkKeyLoader.h"
+#include "nlohmann/json.hpp"
+#include "tink/keyset_handle.h"
 
 namespace android {
 namespace emulation {
@@ -68,14 +62,17 @@ public:
     //
     // \jwksDir| Path to observe for file changes
     // \callback| callback to invoke whenever we detect changes
-    // |filter| Filter to use, when this predicate return true the file will be processed.
-    // |startImmediately| True if we immediately should attemp to observe file changes.
+    // |filter| Filter to use, when this predicate return true the file will be
+    // processed. |startImmediately| True if we immediately should attemp to
+    // observe file changes.
     //
-    // Note: setting startImmediately to true means you will not detect failures in the watcher.
-    JwkDirectoryObserver(Path jwksDir,
-                         KeysetUpdatedCallback callback,
-                         PathFilterPredicate filter = JwkDirectoryObserver::acceptJwkExtOnly,
-                         bool startImmediately = true);
+    // Note: setting startImmediately to true means you will not detect failures
+    // in the watcher.
+    JwkDirectoryObserver(
+            Path jwksDir,
+            KeysetUpdatedCallback callback,
+            PathFilterPredicate filter = JwkDirectoryObserver::acceptJwkExtOnly,
+            bool startImmediately = true);
     ~JwkDirectoryObserver();
 
     // Start observing the directory structure.
@@ -93,17 +90,15 @@ private:
     void fileChangeHandler(FileSystemWatcher::WatcherChangeType change,
                            Path path);
 
-    void constructHandleAndNotify();
-    std::string mergeKeys();
-    static ::absl::StatusOr<json> extractKeys(Path file);
+    void notifyKeysetUpdated();
+    void scanJwkPath();
 
     PathFilterPredicate mPathFilter;
-    std::unordered_map<Path, json> mPublicKeys;
     Path mJwkPath;
+    JwkKeyLoader mLoadedKeys;
     KeysetUpdatedCallback mCallback;
     std::unique_ptr<FileSystemWatcher> mWatcher;
     std::atomic_bool mRunning{false};
-
 
     static constexpr const std::string_view kJwkExt{".jwk"};
 };

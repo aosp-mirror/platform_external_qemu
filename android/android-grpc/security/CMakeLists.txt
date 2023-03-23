@@ -6,6 +6,7 @@ android_add_library(
   SRC android/emulation/control/secure/AllowList.cpp
       android/emulation/control/secure/BasicTokenAuth.cpp
       android/emulation/control/secure/JwkDirectoryObserver.cpp
+      android/emulation/control/secure/JwkKeyLoader.cpp
       android/emulation/control/secure/JwtTokenAuth.cpp
   DEPS android-emu-base tink::jwt::jwk_set_converter
        tink::jwt::jwt_public_key_verify tink::jwt::jwt_signature_config
@@ -36,6 +37,7 @@ android_add_test(
   SRC android/emulation/control/secure/AllowList_unittest.cpp
       android/emulation/control/secure/JwkDirectoryObserver_unittest.cpp
       android/emulation/control/secure/JwtTokenAuth_unittest.cpp
+      android/emulation/control/secure/JwkKeyLoader_unittest.cpp
   DEPS android-emu-base android-grpc-security gmock_main grpc++
        tink::jwt::jwt_key_templates tink::jwt::jwt_signature_config)
 
