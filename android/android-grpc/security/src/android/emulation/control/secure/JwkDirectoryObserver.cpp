@@ -114,7 +114,10 @@ void JwkDirectoryObserver::fileChangeHandler(
             [[fallthrough]];
         case FileSystemWatcher::WatcherChangeType::Changed: {
             DD("Changed/Created event for: %s", path.c_str());
-            auto status = mLoadedKeys.add(path);
+
+            // Wait at most 1 second for non-empty files
+            auto status = mLoadedKeys.addWithRetryForEmpty(
+                    path, 8, std::chrono::milliseconds(125));
             if (!status.ok()) {
                 derror("Failed add jwk key: %s, due to: %s, access will be "
                        "denied to this provider and the file deleted.",

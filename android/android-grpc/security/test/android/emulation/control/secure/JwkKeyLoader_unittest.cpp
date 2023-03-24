@@ -19,6 +19,8 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <thread>
+#include <chrono>
 
 #include "absl/strings/string_view.h"
 #include "aemu/base/files/PathUtils.h"
@@ -107,6 +109,67 @@ TEST_F(JwkKeyLoaderTest, refuses_large_files) {
     auto status = loader.add(pj(mTempDir->path(), "foo"));
     EXPECT_FALSE(status.ok());
     ASSERT_THAT(status.message(), ContainsSubstr("which is over our max of"));
+}
+
+TEST_F(JwkKeyLoaderTest, will_bail_on_retries_with_empty) {
+    using namespace std::chrono_literals;
+
+    JwkKeyLoader loader;
+    write("foo", std::string(0, 'x'));
+    auto start = std::chrono::system_clock::now();
+    auto status =
+            loader.addWithRetryForEmpty(pj(mTempDir->path(), "foo"), 8, 10ms);
+    auto end = std::chrono::system_clock::now();
+    std::chrono::milliseconds waited =
+            std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    EXPECT_FALSE(status.ok());
+    ASSERT_EQ(status.code(), absl::StatusCode::kUnavailable);
+    EXPECT_GE(waited, 79ms)
+            << "We should have waited around 80ms, not: " << waited.count()
+            << " ms.";
+}
+
+TEST_F(JwkKeyLoaderTest, eventually_detects_written_file) {
+    using namespace std::chrono_literals;
+    std::string valid = R"##(
+        {
+            "keys":[
+                {
+                    "y":"AMPDr6djvlXpu8PsUIAY7VEFj9oB9PLkM0EugPt5PjCxDFzxBKmb7cAaocsUVJ2iOYnkGNHdLzkNogpcMPXgOmNp",
+                    "alg":"ES512",
+                    "key_ops":[
+                        "verify"
+                    ],
+                    "crv":"P-521",
+                    "kty":"EC",
+                    "use":"sig",
+                    "kid":"test",
+                    "x":"AUweorpR5_H-ZbypEJAywniBZaVpht7-k1E75oDGIDhYYGKwHB77M8SUHOYrQahOhzA4KZB5_cJmIX3CshQVDmsT"
+                }
+            ]
+        })##";
+
+    JwkKeyLoader loader;
+    write("foo", std::string(0, 'x'));
+
+    // Write the actual token after 15ms delay..
+    auto t = std::thread([&]() {
+        std::this_thread::sleep_for(15ms);
+        write("foo", valid);
+    });
+
+    auto start = std::chrono::system_clock::now();
+    auto status =
+            loader.addWithRetryForEmpty(pj(mTempDir->path(), "foo"), 100, 10ms);
+    auto end = std::chrono::system_clock::now();
+    std::chrono::milliseconds waited =
+            std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+
+    EXPECT_TRUE(status.ok()) << "Failure: " << status.message();
+    EXPECT_GT(waited, 10ms) << "We had a write delay of at least 15ms, so we should have hit at least one wait.";
+
+    t.join();
 }
 
 TEST_F(JwkKeyLoaderTest, accepts_json) {
