@@ -1580,7 +1580,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
             res.image
         };
         vk->vkGetImageMemoryRequirements2KHR(sVkEmulation->device, &info, &reqs);
-        use_dedicated = dedicated_reqs.prefersDedicatedAllocation;
+        use_dedicated = dedicated_reqs.requiresDedicatedAllocation;
         res.memReqs = reqs.memoryRequirements;
     } else {
         vk->vkGetImageMemoryRequirements(sVkEmulation->device, res.image,
@@ -2277,7 +2277,7 @@ bool setupVkBuffer(uint32_t bufferHandle,
             res.buffer
         };
         vk->vkGetBufferMemoryRequirements2KHR(sVkEmulation->device, &info, &reqs);
-        use_dedicated = dedicated_reqs.prefersDedicatedAllocation;
+        use_dedicated = dedicated_reqs.requiresDedicatedAllocation;
         res.memReqs = reqs.memoryRequirements;
     } else {
     vk->vkGetBufferMemoryRequirements(sVkEmulation->device, res.buffer,

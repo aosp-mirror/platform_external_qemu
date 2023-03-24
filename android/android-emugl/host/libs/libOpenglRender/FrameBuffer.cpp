@@ -1086,26 +1086,28 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         m_windowWidth = ww;
         m_windowHeight = wh;
 
-        m_subWin = ::createSubWindow(p_window, m_x, m_y, m_windowWidth,
-                                     m_windowHeight, dpr, subWindowRepaint, this,
-                                     hideWindow);
-        if (m_subWin) {
-            m_nativeWindow = p_window;
+        if (!hideWindow) {
+            m_subWin = ::createSubWindow(p_window, m_x, m_y, m_windowWidth,
+                                         m_windowHeight, dpr, subWindowRepaint, this,
+                                         hideWindow);
+            if (m_subWin) {
+                m_nativeWindow = p_window;
 
-            // create EGLSurface from the generated subwindow
-            m_eglSurface = s_egl.eglCreateWindowSurface(
-                    m_eglDisplay, m_eglConfig, m_subWin, NULL);
+                // create EGLSurface from the generated subwindow
+                m_eglSurface = s_egl.eglCreateWindowSurface(
+                        m_eglDisplay, m_eglConfig, m_subWin, NULL);
 
-            if (m_eglSurface == EGL_NO_SURFACE) {
-                // NOTE: This can typically happen with software-only renderers
-                // like OSMesa.
-                destroySubWindow(m_subWin);
-                m_subWin = (EGLNativeWindowType)0;
-            } else {
-                m_px = 0;
-                m_py = 0;
+                if (m_eglSurface == EGL_NO_SURFACE) {
+                    // NOTE: This can typically happen with software-only renderers
+                    // like OSMesa.
+                    destroySubWindow(m_subWin);
+                    m_subWin = (EGLNativeWindowType)0;
+                } else {
+                    m_px = 0;
+                    m_py = 0;
 
-                success = true;
+                    success = true;
+                }
             }
         }
     }

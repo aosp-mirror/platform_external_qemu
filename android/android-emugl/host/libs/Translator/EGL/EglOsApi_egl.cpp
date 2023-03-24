@@ -53,6 +53,7 @@ static const char* kGLES2LibName = "libGLESv2.dll";
 
 #elif defined(__linux__)
 
+#include "X11ErrorHandler.h"
 
 static const char* kEGLLibName = "libEGL.so";
 static const char* kGLES2LibName = "libGLESv2.so";
@@ -650,6 +651,7 @@ bool EglOsEglDisplay::isValidNativeWin(EGLNativeWindowType win) {
     Window root;
     int t;
     unsigned int u;
+    X11ErrorHandler handler(mGlxDisplay);
     return XGetGeometry(mGlxDisplay, win, &root, &t, &t, &u, &u, &u, &u) != 0;
 #else // __APPLE__
     unsigned int width, height;
@@ -674,6 +676,7 @@ bool EglOsEglDisplay::checkWindowPixelFormatMatch(EGLNativeWindowType win,
     unsigned int depth, border;
     int x, y;
     Window root;
+    X11ErrorHandler handler(mGlxDisplay);
     return XGetGeometry(
             mGlxDisplay, win, &root, &x, &y, width, height, &border, &depth);
 #else // __APPLE__

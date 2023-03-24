@@ -41,7 +41,7 @@ extern "C" {
 // IWYU pragma: end_keep
 // clang-format on
 
-#define DEBUG 2
+// #define DEBUG 2
 /* set  for very verbose debugging */
 #ifndef DEBUG
 #define DD(...) (void)0
@@ -180,12 +180,7 @@ void register_netsim(const std::string address,
                      const std::string rootcanal_default_commands_file,
                      const std::string rootcanal_controller_properties_file,
                      const std::string name) {
-    if (!address.empty()) {
-        dwarning(
-                "The packet stream is unable to connect to %s, (b/265451720) reverting to auto "
-                "discovery.",
-                address.c_str());
-    }
+    netsim::packet::SetPacketStreamEndpoint(address);
     gNetsimConfiguration.name = name;
     gNetsimConfiguration.default_commands_file =
             rootcanal_default_commands_file;

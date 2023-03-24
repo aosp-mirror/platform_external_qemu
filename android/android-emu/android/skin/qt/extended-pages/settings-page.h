@@ -62,6 +62,7 @@ signals:
     void enableClipboardSharingChanged(bool enabled);
     void disableMouseWheelChanged(bool disabled);
     void pauseAvdWhenMinimizedChanged(bool pause);
+    void disablePinchToZoomChanged(bool disabled);
 
 private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
@@ -101,6 +102,7 @@ private slots:
 
     void on_set_clipboardSharing_toggled(bool checked);
     void on_set_disableMouseWheel_toggled(bool checked);
+    void on_set_disablePinchToZoom_toggled(bool checked);
     void on_set_pauseAvdWhenMinimized_toggled(bool checked);
 
 private:

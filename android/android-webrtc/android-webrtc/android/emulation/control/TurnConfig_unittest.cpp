@@ -9,9 +9,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 #include "android/emulation/control/TurnConfig.h"
+#include "android/base/testing/TestSystem.h"
+
 #include <gtest/gtest.h>
 #include <string>
 
+using android::base::TestSystem;
 using android::emulation::control::TurnConfig;
 using nlohmann::json;
 static std::string VALID_TURN_CFG = R"#(
@@ -43,6 +46,13 @@ TEST(TurnConfig, Timeout) {
     EXPECT_FALSE(cfg.validCommand());
 }
 
+TEST(TurnConfig, MaxTurnCfgTime) {
+    TestSystem testSystem("/bin", 32);
+    testSystem.envSet("ANDROID_EMU_MAX_TURNCFG_TIME", "100");
+    TurnConfig cfg("sleep 800");
+    EXPECT_FALSE(cfg.validCommand());
+}
+
 TEST(TurnConfig, Valid) {
     TurnConfig cfg("printf '" + VALID_TURN_CFG + "'");
     EXPECT_TRUE(cfg.validCommand());
@@ -59,8 +69,6 @@ TEST(TurnConfig, EmptyIsValid) {
 TEST(TurnConfig, BadExit) {
     EXPECT_FALSE(TurnConfig::producesValidTurn("false"));
 }
-
-
 
 TEST(TurnConfig, BadJson) {
     EXPECT_FALSE(TurnConfig::producesValidTurn("printf '{{}'"));

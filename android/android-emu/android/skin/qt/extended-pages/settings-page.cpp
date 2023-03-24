@@ -377,6 +377,11 @@ SettingsPage::SettingsPage(QWidget* parent)
     mUi->set_pauseAvdWhenMinimized->setChecked(pauseAvdWhenMinimized);
     on_set_pauseAvdWhenMinimized_toggled(pauseAvdWhenMinimized);
 
+    const auto disablePinchToZoom =
+            settings.value(Ui::Settings::DISABLE_PINCH_TO_ZOOM, false).toBool();
+    mUi->set_disablePinchToZoom->setChecked(disablePinchToZoom);
+    on_set_disablePinchToZoom_toggled(disablePinchToZoom);
+
     // Connect the tab signaling
     connect(mUi->set_tabs, SIGNAL(currentChanged(int)), this,
             SLOT(on_tabChanged()));
@@ -784,6 +789,12 @@ void SettingsPage::on_set_pauseAvdWhenMinimized_toggled(bool checked) {
     // settings.setValue(Ui::Settings::PAUSE_AVD_WHEN_MINIMIZED, checked);
     savePauseAvdWhenMinimized(checked);
     emit pauseAvdWhenMinimizedChanged(checked);
+}
+
+void SettingsPage::on_set_disablePinchToZoom_toggled(bool checked) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::DISABLE_PINCH_TO_ZOOM, checked);
+    emit disablePinchToZoomChanged(checked);
 }
 
 void SettingsPage::disableForEmbeddedEmulator() {

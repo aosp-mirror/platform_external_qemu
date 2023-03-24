@@ -1,0 +1,216 @@
+// Copyright (C) 2022 The Android Open Source Project
+//
+// Licensed under the Apache License= ; Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing= ; software
+// distributed under the License is distributed on an "AS IS" BASIS= ;
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND= ; either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Note that if you add/remove methods in this file you must update
+// the metrics sql as well ./android/scripts/gen-grpc-sql.py
+//
+// Please group deleted methods in a block including the date (MM/DD/YY)
+// it was removed. This enables us to easily keep metrics around after removal
+//
+// List of deleted methods
+// rpc iWasDeleted (03/12/12)
+// ...
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.android.emulation.control.incubating";
+
+package android.emulation.control.incubating;
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+
+// A Modem service allows you to interact with the
+// emulated modem. The emulated modem can be used
+// to receive sms, phone calls, and to modify the
+// cellular information.
+//
+// This service is supported for API > 31
+service Modem {
+    // Set the current cell info, returning the active cell info state.
+    rpc setCellInfo(CellInfo) returns (CellInfo);
+
+    // Gets the current cell info.
+    // Note: this is not fully implemented yet.
+    rpc getCellInfo(google.protobuf.Empty) returns (CellInfo);
+
+    // Creates a new call object, this usually results in
+    // the emulator receiving a new incoming call.
+    rpc createCall(Call) returns (Call);
+
+    // Updates the state of the given call.
+    // The unique number indentifying the call must exist.
+    rpc updateCall(Call) returns (Call);
+
+    // Removes the active call, this will disconnect
+    // the call.
+    rpc deleteCall(Call) returns (google.protobuf.Empty);
+
+    // Lists all the calls that are currently active in the modem
+    rpc listCalls(google.protobuf.Empty) returns (ActiveCalls);
+
+    // The emulator will receive an sms message.
+    //
+    // Returns:
+    //   - INVALID_ARGUMENT: The text message was longer than 1024 characters
+    //   - INVALID_ARGUMENT: The phone number provided was invalid.
+    //   - INVALID_ARGUMENT: The text message contains invalid characters
+    //   - INVALID_ARGUMENT: The encoded message contains invalid hex values
+    //   - INVALID_ARGUMENT: Trying to receive both text and encoded message.
+
+    rpc receiveSms(SmsMessage) returns (google.protobuf.Empty);
+}
+
+message CellSignalStrength {
+    // Represents the general signal quality.
+    enum CellSignalLevel {
+        SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+        SIGNAL_STRENGTH_POOR = 1;
+        SIGNAL_STRENGTH_MODERATE = 2;
+        SIGNAL_STRENGTH_GOOD = 3;
+        SIGNAL_STRENGTH_GREAT = 4;
+    }
+
+    oneof message {
+        // The rssi of the signal. (Must be between 0-31)
+        int32 rssi = 2;
+
+        //  The abstract level value for the overall signal quality.
+        CellSignalLevel level = 3;
+    }
+}
+
+// CellIdentity represents the identity of a unique cell.
+message CellIdentity {
+    // The long alpha tag associated with the current scan result (may be
+    // the operator name string or extended operator name string). May be
+    // empty (not set) if unknown.
+    google.protobuf.StringValue operatorAlphaLong = 1;
+
+
+    // The short alpha tag associated with the current scan result (may be
+    // the operator name string or extended operator name string). May be
+    // empty (not set) if unknown.
+    google.protobuf.StringValue operatorAlphaShort = 2;
+}
+
+message CellInfo {
+    enum CellStandard {
+        CELL_STANDARD_UNKNOWN = 0;
+        CELL_STANDARD_GSM = 1;
+        CELL_STANDARD_HSCSD = 2;
+        CELL_STANDARD_GPRS = 3;
+        CELL_STANDARD_EDGE = 4;
+        CELL_STANDARD_UMTS = 5;
+        CELL_STANDARD_HSDPA = 6;
+        CELL_STANDARD_LTE = 7;
+        CELL_STANDARD_FULL = 8;
+        CELL_STANDARD_5G = 9;
+    }
+
+    enum CellStatus {
+        CELL_STATUS_UNKNOWN = 0;
+        CELL_STATUS_HOME = 1;
+        CELL_STATUS_ROAMING = 2;
+        CELL_STATUS_SEARCHING = 3;
+        CELL_STATUS_DENIED = 4;
+        CELL_STATUS_UNREGISTERED = 5;
+    };
+
+    // The connection status of this cell.
+    // [INPUT ONLY]: Currently unable to read the active cell standard.
+    CellStandard cell_standard = 1;
+
+    // The identity of this cell.
+    CellIdentity cell_identity = 2;
+
+    // Status
+    // Note: might not be available for older API levels.
+    CellStatus cell_status = 3;
+
+    // The signal strength of this cell
+    // [INPUT ONLY]: Currently unable to read the signal strength.
+    CellSignalStrength cell_signal_strength = 4;
+
+    // True if a sim is present
+    bool sim_present = 5;
+};
+
+message CallResult {
+    enum CallStatus {
+        CALL_RESULT_OK = 0;
+        CALL_RESULT_NUMBER_NOT_FOUND = 1;
+        CALL_RESULT_EXCEED_MAX_NUM = 2;
+        CALL_RESULT_RADIO_OFF = 3;
+    };
+    CallStatus status = 1;
+}
+
+// A voice call that can be made
+message Call {
+    enum CallState {
+        CALL_STATE_UNSPECIFIED = 0;
+        CALL_STATE_ACTIVE = 1;
+        CALL_STATE_HELD = 2;
+        CALL_STATE_DIALING = 3;
+        CALL_STATE_ALERTING = 4;
+        CALL_STATE_INCOMING = 5;
+        CALL_STATE_WAITING = 6;
+    }
+    enum CallDirection {
+        CALL_DIRECTION_UNSPECIFIED = 0;
+        CALL_DIRECTION_OUTBOUND = 1;
+        CALL_DIRECTION_INBOUND = 2;
+    }
+
+    // [Output only]
+    CallDirection direction = 1;
+    CallState state = 2;
+
+    // The number should be a valid GSM-formatted address as specified by
+    // 3GPP 23.040 Sec 9.1.2.5.
+    // Note that this number uniquely identifies this call.
+    string number = 3;
+}
+
+message ActiveCalls {
+    repeated Call calls = 1;
+}
+
+message SmsMessage {
+    // The source number where this message came from.
+    //
+    // The adnumberdress should be a valid GSM-formatted address as specified by
+    // 3GPP 23.040 Sec 9.1.2.5.
+    //
+    // For example: +3106225412 or (650) 555-1221
+    string number = 1;
+
+    oneof message {
+        // A utf8 encoded text message of at most 1024 characters.
+        //
+        // You can use the following special symbols:
+        // \n      for a newline
+        // \xNN    where NN are two hexadecimal numbers
+        // \uNNNN  where NNNN are four hexadecimal numbers
+        // \\      to send a '\' character"
+        string text = 2;
+
+        // A PDU encoded message as a hex string.
+        // See the spec:
+        // https://www.etsi.org/deliver/etsi_gts/07/0705/05.01.00_60/gsmts_0705v050100p.pdf
+        // for details on how to use this.
+        string encodedMessage = 3;
+    }
+}

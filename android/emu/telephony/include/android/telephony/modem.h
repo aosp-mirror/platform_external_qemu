@@ -64,7 +64,7 @@ extern void         amodem_set_signal_strength( AModem modem, int rssi, int ber 
 
 /* Set the received signal strength profile */
 extern void         amodem_set_signal_strength_profile( AModem modem, int quality );
-extern void         amodem_addTimeUpdate( AModem modem);
+extern void         amodem_add_time_update( AModem modem);
 /* Set the phone number of the sim */
 extern int amodem_set_phone_number(AModem modem, const char* number);
 /** SIM CARD STATUS

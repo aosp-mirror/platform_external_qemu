@@ -157,14 +157,14 @@ struct PCMachineClass {
 extern DeviceState *isa_pic;
 qemu_irq *i8259_init(ISABus *bus, qemu_irq parent_irq);
 qemu_irq *kvm_i8259_init(ISABus *bus);
-qemu_irq *gvm_i8259_init(ISABus *bus);
+qemu_irq *aehd_i8259_init(ISABus *bus);
 int pic_read_irq(DeviceState *d);
 int pic_get_output(DeviceState *d);
 
 /* ioapic.c */
 
 void kvm_ioapic_dump_state(Monitor *mon, const QDict *qdict);
-void gvm_ioapic_dump_state(Monitor *mon, const QDict *qdict);
+void aehd_ioapic_dump_state(Monitor *mon, const QDict *qdict);
 void ioapic_dump_state(Monitor *mon, const QDict *qdict);
 
 /* Global System Interrupts */

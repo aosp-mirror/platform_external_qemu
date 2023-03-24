@@ -2,8 +2,7 @@
 android_add_executable(
   TARGET nimble_bridge INSTALL .
   LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      android/emulation/bluetooth/main.cpp
+  SRC android/emulation/bluetooth/main.cpp
       android/emulation/bluetooth/nimble/ServiceDefinition.cpp
       android/emulation/bluetooth/nimble/TypeTranslator.cpp
       android/emulation/bluetooth/RemoteConnection.cpp
@@ -12,7 +11,8 @@ android_add_executable(
 target_link_libraries(
   nimble_bridge
   PUBLIC nimble_bluetooth
-         grpc-emulated-bluetooth
+         emulated-bluetooth-service
+         android-grpc-client
          grpc++
          absl::status
          absl::statusor

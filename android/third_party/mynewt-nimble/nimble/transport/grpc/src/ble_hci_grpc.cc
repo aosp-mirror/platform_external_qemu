@@ -49,6 +49,7 @@
 
 #include "aemu/base/logging/CLog.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
+#include "android/base/system/System.h"
 #include "backend/packet_streamer_client.h"
 #include "packet_streamer.grpc.pb.h"
 
@@ -57,6 +58,7 @@ using netsim::packet::HCIPacket;
 using netsim::packet::PacketRequest;
 using netsim::packet::PacketResponse;
 using netsim::packet::PacketStreamer;
+using android::base::System;
 
 #define DEBUG 0
 /* set  for very verbose debugging */
@@ -243,6 +245,14 @@ std::string get_name() {
 }
 
 int ble_hci_grpc_open_connection() {
+
+    // Connect to a remote netsim address.
+    auto address = System::get()->getEnvironmentVariable("NETSIM_GRPC_ADDRESS");
+    if (!address.empty()) {
+        dinfo("Setting packet stream endpoint to: %s", address.c_str());
+        netsim::packet::SetPacketStreamEndpoint(address);
+    }
+
     auto channel = netsim::packet::CreateChannel("", "");
     sTransportStub = PacketStreamer::NewStub(channel);
 

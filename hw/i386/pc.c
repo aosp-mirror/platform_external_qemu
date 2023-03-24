@@ -50,13 +50,13 @@
 #include "sysemu/sysemu.h"
 #include "sysemu/numa.h"
 #include "sysemu/kvm.h"
-#include "sysemu/gvm.h"
+#include "sysemu/aehd.h"
 #ifdef CONFIG_HAX
 #include "sysemu/hax.h"
 #endif
 #include "sysemu/qtest.h"
 #include "kvm_i386.h"
-#include "gvm_i386.h"
+#include "aehd_i386.h"
 #include "hw/xen/xen.h"
 #include "ui/qemu-spice.h"
 #include "exec/memory.h"
@@ -783,7 +783,7 @@ static FWCfgState *bochs_bios_init(AddressSpace *as, PCMachineState *pcms)
     fw_cfg_add_bytes(fw_cfg, FW_CFG_ACPI_TABLES,
                      acpi_tables, acpi_tables_len);
     fw_cfg_add_i32(fw_cfg, FW_CFG_IRQ0_OVERRIDE,
-                   gvm_enabled() || kvm_allows_irq0_override());
+                   aehd_enabled() || kvm_allows_irq0_override());
 
     fw_cfg_add_bytes(fw_cfg, FW_CFG_E820_TABLE,
                      &e820_reserve, sizeof(e820_reserve));
@@ -1260,7 +1260,7 @@ void pc_guest_info_init(PCMachineState *pcms)
 {
     int i;
 
-    pcms->apic_xrupt_override = gvm_enabled() || kvm_allows_irq0_override();
+    pcms->apic_xrupt_override = aehd_enabled() || kvm_allows_irq0_override();
     pcms->numa_nodes = nb_numa_nodes;
     pcms->node_mem = g_malloc0(pcms->numa_nodes *
                                     sizeof *pcms->node_mem);
@@ -1695,8 +1695,8 @@ void ioapic_init_gsi(GSIState *gsi_state, const char *parent_name)
 
     if (kvm_ioapic_in_kernel()) {
         dev = qdev_create(NULL, "kvm-ioapic");
-    } else if (gvm_ioapic_in_kernel()) {
-        dev = qdev_create(NULL, "gvm-ioapic");
+    } else if (aehd_ioapic_in_kernel()) {
+        dev = qdev_create(NULL, "aehd-ioapic");
     } else {
         dev = qdev_create(NULL, "ioapic");
     }
@@ -2187,7 +2187,7 @@ bool pc_machine_is_smm_enabled(PCMachineState *pcms)
         smm_available = true;
     } else if (kvm_enabled()) {
         smm_available = kvm_has_smm();
-    } else if (gvm_enabled()) {
+    } else if (aehd_enabled()) {
         smm_available = true;
 #ifdef CONFIG_HAX
     } else if (hax_enabled()) {

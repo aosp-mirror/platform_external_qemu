@@ -156,6 +156,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     connect(mExtendedUi->settingsPage, SIGNAL(disableMouseWheelChanged(bool)),
             this, SLOT(disableMouseWheel(bool)));
 
+    connect(mExtendedUi->settingsPage, SIGNAL(disablePinchToZoomChanged(bool)),
+            this, SLOT(disablePinchToZoom(bool)));
+
     connect(mExtendedUi->settingsPage,
             SIGNAL(pauseAvdWhenMinimizedChanged(bool)), this,
             SLOT(pauseAvdWhenMinimized(bool)));
@@ -687,6 +690,10 @@ void ExtendedWindow::disableMouseWheel(bool disabled) {
 
 void ExtendedWindow::pauseAvdWhenMinimized(bool pause) {
     mEmulatorWindow->setPauseAvdWhenMinimized(pause);
+}
+
+void ExtendedWindow::disablePinchToZoom(bool disabled) {
+    mEmulatorWindow->setDisablePinchToZoom(disabled);
 }
 
 void ExtendedWindow::showEvent(QShowEvent* e) {

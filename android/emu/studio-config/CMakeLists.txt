@@ -25,6 +25,6 @@ target_include_directories(android-emu-studio-config_unittests PRIVATE src test)
 android_add_executable(
   TARGET studio_discovery_tester NODISTRIBUTE SOURCE_DIR test
   SRC android/emulation/control/StudioDiscoveryTester.cpp
-  DEPS android-emu-base android-emu-base-headers android-emu-studio-config android-grpc)
+  DEPS android-emu-base android-emu-base-headers android-emu-studio-config)
 target_include_directories(studio_discovery_tester PRIVATE src test)
 add_dependencies(android-emu-studio-config_unittests studio_discovery_tester)

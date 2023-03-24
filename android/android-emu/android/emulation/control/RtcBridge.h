@@ -36,6 +36,9 @@ public:
     // Connect will initiate the RTC stream if not yet in progress.
     virtual bool connect(std::string identity) = 0;
 
+    // Connect will initiate the RTC stream with the provided turnConfig
+    virtual bool connect(std::string identity, std::string turnConfig) = 0;
+
     // Disconnects the RTC stream in progress.
     virtual void disconnect(std::string identity) = 0;
 

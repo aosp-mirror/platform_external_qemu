@@ -74,10 +74,10 @@
 
 #if defined(_WIN32)
 #define HAVE_WHPX 1
-#define HAVE_GVM 1
+#define HAVE_AEHD 1
 #else
 #define HAVE_WHPX 0
-#define HAVE_GVM 0
+#define HAVE_AEHD 0
 #endif
 
 #if defined(__APPLE__)
@@ -873,27 +873,27 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
 
 #endif  // HAVE_HAX
 
-// Windows GVM hypervisor support
+// Windows AEHD hypervisor support
 
-#if HAVE_GVM
+#if HAVE_AEHD
 
 #include "android/base/system/System.h"
 
 using ::android::base::System;
 
-// Windows IOCTL code to extract GVM version.
-#define FILE_DEVICE_GVM 0xE3E3
-#define GVM_GET_API_VERSION \
-    CTL_CODE(FILE_DEVICE_GVM, 0x00, METHOD_BUFFERED, FILE_ANY_ACCESS)
+// Windows IOCTL code to extract AEHD version.
+#define FILE_DEVICE_AEHD 0xE3E3
+#define AEHD_GET_API_VERSION \
+    CTL_CODE(FILE_DEVICE_AEHD, 0x00, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
 /*
- * ProbeGVMCpu: returns ANDROID_CPU_ACCELERATION_READY if the CPU supports
- * GVM requirements.
+ * ProbeAEHDCpu: returns ANDROID_CPU_ACCELERATION_READY if the CPU supports
+ * AEHD requirements.
  *
  * Otherwise returns some other AndroidCpuAcceleration status and sets
  * |status| to a user-understandable error string
  */
-AndroidCpuAcceleration ProbeGVMCpu(std::string* status) {
+AndroidCpuAcceleration ProbeAEHDCpu(std::string* status) {
     char vendor_id[16];
     android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
 
@@ -906,7 +906,7 @@ AndroidCpuAcceleration ProbeGVMCpu(std::string* status) {
                 "Android Emulator requires an %s processor with virtualization "
                 "extension support.  "
                 "(Virtualization extension is not supported)",
-                (System::get()->envGet("GVM_ENABLE_INTEL") == "1") ? "Intel/AMD"
+                (System::get()->envGet("AEHD_ENABLE_INTEL") == "1") ? "Intel/AMD"
                                                                    : "AMD");
         return ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
     }
@@ -914,10 +914,10 @@ AndroidCpuAcceleration ProbeGVMCpu(std::string* status) {
     return ANDROID_CPU_ACCELERATION_READY;
 }
 
-AndroidCpuAcceleration ProbeGVM(std::string* status) {
+AndroidCpuAcceleration ProbeAEHD(std::string* status) {
     status->clear();
 
-    AndroidCpuAcceleration cpu = ProbeGVMCpu(status);
+    AndroidCpuAcceleration cpu = ProbeAEHDCpu(status);
     if (cpu != ANDROID_CPU_ACCELERATION_READY)
         return cpu;
 
@@ -949,7 +949,7 @@ success:
 
     DWORD dSize = 0;
     BOOL ret = DeviceIoControl(aehd.valid() ? aehd.get() : gvm.get(),
-                               GVM_GET_API_VERSION, NULL, 0, &version,
+                               AEHD_GET_API_VERSION, NULL, 0, &version,
                                sizeof(version), &dSize, (LPOVERLAPPED)NULL);
     if (!ret) {
         DWORD err = GetLastError();
@@ -965,7 +965,7 @@ success:
     return ANDROID_CPU_ACCELERATION_READY;
 }
 
-#endif  // HAVE_GVM
+#endif  // HAVE_AEHD
 
 }  // namespace
 
@@ -1004,7 +1004,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         g->accel = CPU_ACCELERATOR_KVM;
         g->supported_accelerators[CPU_ACCELERATOR_KVM] = true;
     }
-#elif HAVE_HAX || HAVE_HVF || HAVE_WHPX || HAVE_GVM
+#elif HAVE_HAX || HAVE_HVF || HAVE_WHPX || HAVE_AEHD
     auto hvStatus = GetHyperVStatus();
     if (hvStatus.first == ANDROID_HYPERV_RUNNING) {
         status = "Please disable Hyper-V before using the Android Emulator.  "
@@ -1062,11 +1062,11 @@ CpuAccelerator GetCurrentCpuAccelerator() {
                     vendor_id);
             status_code = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
         } else {
-#if HAVE_GVM
-            status_code = ProbeGVM(&status);
+#if HAVE_AEHD
+            status_code = ProbeAEHD(&status);
             if (status_code == ANDROID_CPU_ACCELERATION_READY) {
-                g->accel = CPU_ACCELERATOR_GVM;
-                g->supported_accelerators[CPU_ACCELERATOR_GVM] = true;
+                g->accel = CPU_ACCELERATOR_AEHD;
+                g->supported_accelerators[CPU_ACCELERATOR_AEHD] = true;
             }
 #endif
 #if HAVE_HAX
@@ -1108,9 +1108,9 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         }
 #endif  // HAVE_HVF
     }
-#else   // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF || HAVE_GVM || HAVE_WHPX)
+#else   // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF || HAVE_AEHD || HAVE_WHPX)
     status = "This system does not support CPU acceleration.";
-#endif  // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF || HAVE_GVM || HAVE_WHPX)
+#endif  // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF || HAVE_AEHD || HAVE_WHPX)
 
     // Print HAXM deprecation message
     if (g->accel == CPU_ACCELERATOR_HAX)
@@ -1348,8 +1348,8 @@ std::string CpuAcceleratorToString(CpuAccelerator type) {
             return "HVF";
         case CPU_ACCELERATOR_WHPX:
             return "WHPX";
-        case CPU_ACCELERATOR_GVM:
-            return "gvm";
+        case CPU_ACCELERATOR_AEHD:
+            return "aehd";
         case CPU_ACCELERATOR_NONE:
         case CPU_ACCELERATOR_MAX:
             return "";

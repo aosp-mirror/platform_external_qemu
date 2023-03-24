@@ -205,10 +205,10 @@ aosp_find_top_dir_from () {
             # Could not find anything, weird.
             return
         fi
-        # Use prebuilts/qemu-kernel, as the test sub-directory, given that
+        # Use prebuilts/clang, as the test sub-directory, given that
         # it should be part of all interesting AOSP checkouts (platform and
         # SDK ones).
-        if [ -d "$PROBE_DIR"/prebuilts/qemu-kernel ]; then
+        if [ -d "$PROBE_DIR"/prebuilts/clang ]; then
             printf "%s" "$PROBE_DIR"
             return
         fi

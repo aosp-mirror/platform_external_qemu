@@ -54,7 +54,7 @@ void Switchboard::rtcConnectionClosed(const std::string participant) {
     const std::lock_guard<std::mutex> lock(mCleanupMutex);
 
     if (mId.find(participant) != mId.end()) {
-        LOG(INFO) << "Finalizing " << participant;
+        LOG(DEBUG) << "Finalizing " << participant;
         auto queue = mId[participant];
         mLocks.erase(queue.get());
         mId.erase(participant);
@@ -63,7 +63,7 @@ void Switchboard::rtcConnectionClosed(const std::string participant) {
     signalingThread()->PostDelayedTask(
             [this, participant] {
                 const std::lock_guard<std::mutex> lock(mCleanupMutex);
-                LOG(INFO) << "disconnect: " << participant
+                LOG(DEBUG) << "disconnect: " << participant
                           << ", available: " << mConnections.count(participant);
                 auto it = mConnections.find(participant);
                 if (it != mConnections.end()) {
@@ -75,7 +75,7 @@ void Switchboard::rtcConnectionClosed(const std::string participant) {
 }
 
 void Switchboard::send(std::string to, json message) {
-    LOG(INFO) << "send to: " << to << " msg: " << message.dump();
+    LOG(DEBUG) << "send to: " << to << " msg: " << message.dump();
     if (mId.find(to) != mId.end()) {
         auto queue = mId[to];
         {
@@ -91,7 +91,25 @@ void Switchboard::send(std::string to, json message) {
 }
 
 bool Switchboard::connect(std::string identity) {
-    LOG(INFO) << "Connecting: " << identity;
+    // Inform the client we are going to start, this is the place
+    // where we should send the turn config to the client.
+    // Turn is really only needed when your server is
+    // locked down pretty well. (Google gce environment for example)
+    return connect(std::move(identity), mTurnConfig.getConfig());
+}
+
+bool Switchboard::connect(std::string identity, std::string turnConfig) {
+    auto j = json::parse(turnConfig, nullptr, false);
+    if (j.is_discarded()) {
+        LOG(ERROR) << "Failed to parse turnConfig to json. TurnConfig: "
+                   << turnConfig;
+        return false;
+    }
+    return connect(std::move(identity), j["ice_servers"]);
+}
+
+bool Switchboard::connect(std::string identity, json turnConfig) {
+    LOG(DEBUG) << "Connecting: " << identity;
     mMapLock.lockRead();
     if (mId.find(identity) == mId.end()) {
         mMapLock.unlockRead();
@@ -105,15 +123,11 @@ bool Switchboard::connect(std::string identity) {
         mMapLock.unlockRead();
     }
 
-    // Inform the client we are going to start, this is the place
-    // where we should send the turn config to the client.
-    // Turn is really only needed when your server is
-    // locked down pretty well. (Google gce environment for example)
-    json turnConfig = mTurnConfig.getConfig();
-
     auto participant =
             std::make_shared<Participant>(this, identity, turnConfig, nullptr);
     if (!participant->Initialize()) {
+        LOG(ERROR) << "Failed to initialize the participant with id: "
+                   << identity << " and turnConfig" << turnConfig.dump();
         return false;
     }
     mConnections[identity] = participant;
@@ -132,12 +146,12 @@ bool Switchboard::connect(std::string identity) {
         while (agent->multi_display->getNextMultiDisplay(
                 startId, &id, nullptr, nullptr, nullptr, nullptr, nullptr,
                 nullptr, nullptr)) {
-            LOG(INFO) << "Add video track with displayId: " << id;
+            LOG(DEBUG) << "Add video track with displayId: " << id;
             participant->AddVideoTrack(id);
             startId = id;
         }
     } else {
-        LOG(INFO) << "Add default video track 0";
+        LOG(DEBUG) << "Add default video track 0";
         participant->AddVideoTrack(0);
     }
     participant->AddAudioTrack(mAudioDumpFile);
@@ -154,7 +168,7 @@ void Switchboard::disconnect(std::string identity) {
             return;
         }
     }
-    LOG(INFO) << "disconnect: " << identity;
+    LOG(DEBUG) << "disconnect: " << identity;
     AutoWriteLock upgrade(mMapLock);
     // Unlikely but someone could have yanked identity out of the map
     if (mId.find(identity) == mId.end()) {

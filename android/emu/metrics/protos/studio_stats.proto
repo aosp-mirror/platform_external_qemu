@@ -2154,7 +2154,7 @@ message EmulatorDetails {
         HAXM = 3;    // Intel HAXM
         HVF = 4;     // Apple Hypervisor.Framework
         HYPERV = 5;  // Microsoft Hyper-V
-        GVM = 6;     // GVM
+        AEHD = 6;    // AEHD
                      // Next tag: 7
     }
 }

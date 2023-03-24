@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package android.emulation.control.v2;
+
+import "google/protobuf/duration.proto";
+
+// ICE Server configuration based on the RTCIceServer type in the WebRTC W3C
+// specification: https://www.w3.org/TR/webrtc/#rtciceserver-dictionary.
+message IceServerList {
+    // STUN or TURN URI(s) as defined in [rfc7064] and [rfc7065] or other URI
+    // types.
+    repeated string urls = 1;
+
+    // If this IceServer object represents a TURN server, then this attribute
+    // specifies the credential to use with that TURN server.
+    string username = 2;
+
+    // If this IceServer object represents a TURN server, then this attribute
+    // specifies the credential to use with that TURN server.
+    string credential = 3;
+
+    // The TLS certificate policy to use for TLS urls.
+    TlsCertPolicy.Value tls_cert_policy = 4;
+
+    // If the URIs in urls only contain IP addresses, this field can be used to
+    // indicate the hostname. If specified, it should be used for TLS SNI and
+    // certificate validation for any applicable URLs. For urls that themselves
+    // contains the hostname, this can be ignored.
+    string hostname = 5;
+
+    // List of protocols to be used in the TLS ALPN extension.
+    repeated string tls_alpn_protocols = 6;
+
+    // List of elliptic curves to be used in the TLS elliptic curves extension.
+    // Only curves supported by OpenSSL should be used (e.g. "P-256", "X25519").
+    repeated string tls_elliptic_curves = 7;
+
+    // Setting for STUN alternative magic cookie.
+    StunAltMagicSetting.Type stun_alt_magic = 9;
+
+    // Maximum rate in kilobits per second (kilo = 1000).
+    // Can be used as hint to the bandwidth estimator to improve media quality.
+    // If less than or equal to zero, the maximum send rate is not specified.
+    int64 max_rate_kbps = 10;
+
+    reserved 8;
+}
+
+// ICE server configuration.
+// Each configuration is ephemeral and should not be shared across WebRTC
+// peer connections or cached for later use.
+message IceServerConfig {
+    // Duration the config is valid for.
+    google.protobuf.Duration lifetime_duration = 1;
+
+    // ICE servers to be used by the client to establish a connection.
+    // E.g.:
+    // [ { "urls": "stun:stun1.example.net" }, { "urls":
+    // "turn:turn.example.org", "username": "user", "credential": "myPassword" }
+    // ]
+    repeated IceServerList ice_servers = 2;
+
+    // Corresponds to: https://www.w3.org/TR/webrtc/#rtcicetransportpolicy-enum
+    // The recommended ICE transport policy to use in the RTC configuration.
+    string ice_transport_policy = 6;
+
+    // Possible detected network provider interference with ice_servers
+    // connectivity. This is an estimation which might be inaccurate.
+    BlockStatus.Value block_status = 3;
+
+    // Extra ice servers that can be present when block_status indicates
+    // POSSIBLY_BLOCKED and which might be able to provide better connectivity
+    // than ice_servers in that scenario. However the network quality is likely
+    // to be strictly worse. Applications are recommended to use these servers
+    // instead of ice_servers to be robust against blocking. However these ice
+    // servers also currently requires applications to disable TLS validation.
+    // This is because TURNS is used for obfuscation instead of security, and no
+    // valid certificate is returned since valid certificates can be blocked.
+    repeated IceServerList unblock_ice_servers = 4;
+
+    // Extra optional configuration for unblocking purposes.
+    UnblockConfig unblock_config = 7;
+
+    reserved 5, 8;
+}
+
+// Extra unblocking configuration.
+message UnblockConfig {
+    // Minimum length to pad STUN messages.
+    int32 min_pad_length = 1;
+    // Maximum length to pad STUN messages.
+    int32 max_pad_length = 2;
+    // The minimum payload size of channel data. Smaller messages should be sent
+    // as TURN send indications. Since channel data messages are not easily
+    // padded it is useful to avoid sending some smaller messages as channel
+    // data.
+    int32 min_channel_data_payload_size = 3;
+    // Pad ICE STUN ping requests and responses.
+    bool pad_ice_stun_ping = 4;
+    // Enable padding.
+    bool enable_padding = 5;
+}
+
+// Reported connectivity of client network
+message BlockStatus {
+    enum Value {
+        // Connectivity status is unspecified.
+        STATUS_UNSPECIFIED = 0;
+        // Connectivity to ICE servers is unimpaired.
+        NOT_BLOCKED = 1;
+        // Connectivity to ICE servers is possibly blocked.
+        POSSIBLY_BLOCKED = 2;
+    }
+}
+
+// TLS certificate policy.
+message TlsCertPolicy {
+    enum Value {
+        // For TLS based protocols, ensure the connection is secure by not
+        // circumventing certificate validation. This is the default and should
+        // be used when unspecified.
+        DEFAULT_SECURE = 0;
+        // For TLS based protocols, disregard security completely by skipping
+        // certificate validation. This is insecure and should never be used
+        // unless security is irrelevant in that particular context.
+        INSECURE_NO_CHECK = 1;
+    }
+}
+
+// Setting for StunAltMagic.
+message StunAltMagicSetting {
+    enum Type {
+        // Use default.
+        DEFAULT = 0;
+        // Use normal stun magic.
+        DISABLED = 1;
+        // Use stun alt magic.
+        ENABLED = 2;
+    }
+}

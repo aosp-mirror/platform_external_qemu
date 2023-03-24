@@ -30,6 +30,10 @@ void init_modem_simulator() {
 }
 }
 
+android::modem::ModemBase* getModemBase() {
+    return s_modem.get();
+}
+
 void amodem_receive_sms_vx(AModem modem, SmsPDU sms) {
     s_modem->receive_sms(modem, sms);
 }

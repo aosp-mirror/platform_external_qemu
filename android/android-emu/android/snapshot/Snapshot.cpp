@@ -472,6 +472,10 @@ base::Optional<Snapshot> Snapshot::getSnapshotById(std::string id) {
     return {};
 }
 
+std::string Snapshot::screenshot() {
+    return PathUtils::join(mDataDir, "screenshot.png");
+}
+
 bool Snapshot::save() {
     // In saving, we assume the state is different,
     // so we reset the invalid/successful counters.
