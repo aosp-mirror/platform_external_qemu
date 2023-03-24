@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "android/emulation/control/secure/JwkKeyLoader.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <fstream>
 #include <memory>
@@ -33,6 +34,10 @@
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+
+MATCHER_P(ContainsSubstr, expected, "") {
+    return arg.find(expected) != std::string::npos;
+}
 
 namespace android {
 namespace emulation {
@@ -95,6 +100,14 @@ protected:
     absl::StatusOr<tink::RawJwt> mSampleJwt;
     absl::StatusOr<tink::JwtValidator> mSampleValidator;
 };
+
+TEST_F(JwkKeyLoaderTest, refuses_large_files) {
+    JwkKeyLoader loader;
+    write("foo", std::string(8196 * 2, 'x'));
+    auto status = loader.add(pj(mTempDir->path(), "foo"));
+    EXPECT_FALSE(status.ok());
+    ASSERT_THAT(status.message(), ContainsSubstr("which is over our max of"));
+}
 
 TEST_F(JwkKeyLoaderTest, accepts_json) {
     JwkKeyLoader loader;
@@ -225,7 +238,9 @@ TEST_F(JwkKeyLoaderTest, gracefully_rejects_broken_json) {
 
     auto status = loader.add("test", borked);
     EXPECT_FALSE(status.ok());
-    EXPECT_EQ(status.message(), "test does not contain a valid jwk");
+    EXPECT_THAT(status.message(),
+                ContainsSubstr("test does not contain a valid jwk"))
+            << status.message();
     EXPECT_TRUE(loader.empty());
 }
 
@@ -260,9 +275,9 @@ TEST_F(JwkKeyLoaderTest, gracefully_rejects_missing_file) {
     auto status = loader.add("this_path_does_not_exist");
 
     EXPECT_FALSE(status.ok());
-    EXPECT_EQ(status.message().find(
-                      "Failure reading this_path_does_not_exist due to:"),
-              0);
+    EXPECT_THAT(
+            status.message(),
+            ContainsSubstr("this_path_does_not_exist does not exist."));
     EXPECT_TRUE(loader.empty());
 }
 
@@ -317,7 +332,6 @@ TEST_F(JwkKeyLoaderTest, no_keys) {
     EXPECT_FALSE(keyset.ok());
     EXPECT_EQ(keyset.status().message(), "keys list is empty");
 }
-
 
 TEST_F(JwkKeyLoaderTest, missing_key_id) {
     JwkKeyLoader loader;
