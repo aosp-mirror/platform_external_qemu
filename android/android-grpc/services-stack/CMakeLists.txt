@@ -11,14 +11,15 @@ android_link_complete_archive(TARGET grpc++_reflection AS
 target_link_libraries(
   android-grpc-services-stack
   PRIVATE png android-emu android-emu-base-headers android-grpc-interceptors
-          android-grpc-modem-service android-grpc-security
+          modem-service android-grpc-security
   PUBLIC adb-service-server-impl
+         android-grpc-incubating-services-stack
+         android-waterfall-server-impl
          emulated-bluetooth-service-server-impl
          emulator_controller-server-impl
          emulator-stats-server-impl
          snapshot-service-server-impl
          ui-controller-server-impl
-         android-waterfall-server-impl
          grpc++
          grpc++_reflection_whole)
 
