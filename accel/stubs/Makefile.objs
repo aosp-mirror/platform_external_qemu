@@ -1,6 +1,6 @@
 obj-$(call lnot,$(CONFIG_HAX))  += hax-stub.o
 obj-$(call lnot,$(CONFIG_WHPX)) += whpx-stub.o
 obj-$(call lnot,$(CONFIG_KVM))  += kvm-stub.o
-obj-$(call lnot,$(CONFIG_GVM))  += gvm-stub.o
+obj-$(call lnot,$(CONFIG_AEHD))  += aehd-stub.o
 obj-$(call lnot,$(CONFIG_HVF))  += hvf-stub.o
 obj-$(call lnot,$(CONFIG_TCG))  += tcg-stub.o

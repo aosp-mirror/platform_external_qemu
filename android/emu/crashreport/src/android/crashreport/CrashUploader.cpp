@@ -13,11 +13,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <limits>
 #include <map>
 #include <memory>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -126,13 +128,13 @@ bool PrintMinidumpProcess(const Options& options) {
     // Process the minidump.
     Minidump dump(options.minidump_file);
     if (!dump.Read()) {
-        BPLOG(ERROR) << "Minidump " << dump.path() << " could not be read";
+        fprintf(stderr, "Minidump %s could not be read", dump.path().c_str());
         return false;
     }
     ProcessState process_state;
     if (minidump_processor.Process(&dump, &process_state) !=
         google_breakpad::PROCESS_OK) {
-        BPLOG(ERROR) << "MinidumpProcessor::Process failed";
+        fprintf(stderr, "MinidumpProcessor::Process failed");
         return false;
     }
 
@@ -185,11 +187,22 @@ std::unique_ptr<CrashReportDatabase> InitializeCrashDatabase() {
     android::base::pj(System::get()->getTempDir(), kCrashpadDatabase);
     auto database_path = ::base::FilePath(
             PathUtils::asUnicodePath(crashDatabasePath.data()).c_str());
-    auto crashDatabase =
-            crashpad::CrashReportDatabase::Initialize(database_path);
+
+    std::unique_ptr<CrashReportDatabase> crashDatabase;
+    for (int i = 0; !crashDatabase && i < 5; i++) {
+        crashDatabase =
+                crashpad::CrashReportDatabase::Initialize(database_path);
+        if (!crashDatabase) {
+            fprintf(stderr, "Unable to obtain crashdatabase, retrying in 1 second.\n");
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }
+    if (!crashDatabase) {
+        fprintf(stderr, "Unable to obtain crashdatabase.. aborting\n");
+        std::abort();
+    }
 
     crashDatabase->GetSettings()->SetUploadsEnabled(false);
-
     return crashDatabase;
 }
 
@@ -361,8 +374,8 @@ void ProcessPendingReport(std::shared_ptr<CrashReportDatabase> database_,
             upload_report.reset();
 
             // TODO(mark): Deal with retries properly: don’t call
-            // SkipReportUplaod() if the result was kRetry and the report hasn’t
-            // already been retried too many times.
+            // SkipReportUplaod() if the result was kRetry and the report
+            // hasn’t already been retried too many times.
             database_->SkipReportUpload(
                     report.uuid,
                     crashpad::Metrics::CrashSkippedReason::kUploadFailed);
@@ -444,6 +457,11 @@ static void SetupOptions(int argc, const char* argv[], Options* options) {
     }
 
     options->minidump_file = argv[optind];
+
+    if (optind + 1 == argc) {
+        // Let's add the developer default path for symbols.
+        options->symbol_paths.push_back("objs/build/symbols");
+    }
 
     for (int argi = optind + 1; argi < argc; ++argi)
         options->symbol_paths.push_back(argv[argi]);

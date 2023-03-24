@@ -1,0 +1,55 @@
+This document will briefly describe how aehd source code is organized in
+emulator(Qemu).
+
+The AEHD name itself comes from Google's tradition of gXyz.
+
+The initial source files are made by a complete clone of KVM and rename symbols
+from kvm/KVM_xxxx to aehd/AEHD_xxxx. The reason of doing so instead of hacking KVM
+source files directly is:
+1. Avoid massive modifications to KVM source code. Most of them would be
+   #ifdef CONFIG_AEHD
+   #ifdef _WIN32
+   This is not reader friendly either.
+2. Need to decouple AEHD from KVM, although AEHD comes from KVM. We don't have to
+   contantly check whether an KVM change needs to be followed or filtered out by
+   "#ifdef". There are enough differences between them. So AEHD will eventually
+   diverge from KVM in terms of APIs, features, etc. And AEHD won't be regularly
+   rebased to KVM, which is impossible.
+
+The AEHD source files include both dedicated source files and scattered changes
+to common QEMU source files.
+
+Dedicated files are:
+.
+└── gdbstub.c
+└─ hw
+    └── i386
+        └── aehd
+            ├── apic.c
+            ├── i8259.c
+            └── ioapic.c
+└── target
+    └── i386
+        ├── aehd-all.c
+        └── aehd.c
+  First three source files are user space code for in-kernel irq chip. KVM has
+  additional in-kernel PIT, which isn't important nowadays. So AEHD removes that.
+
+  The last two are user space code for the AEHD hypervisor. This looks pretty
+  similar with HVF, WHPX, HAX. The reason for two separate files is that they
+  are inheritted from KVM. KVM has its kvm-all.c placed accel\kvm, which is
+  shared among i386, arm, ..., etc. AEHD only supports i386 so aehd-all.c is
+  placed here. The only reason for not merging then together is for possible
+  future ARM support.
+
+Scattered changes typically look like:
+  #ifdef CONFIG_KVM
+  #endif
+  #ifdef CONFIG_AEHD
+  #endif
+-------------or-----------------------
+  if (kvm_enabled()) {
+  }
+  if (aehd_enabled()) {
+  }
+The code samples here can explain themselves quite well.

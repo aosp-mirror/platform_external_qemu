@@ -3669,13 +3669,13 @@ virtualization support on OS X.  This option
 is only available if HVF support is enabled when compiling.
 ETEXI
 
-DEF("enable-gvm", 0, QEMU_OPTION_enable_gvm, \
-    "-enable-gvm     enable GVM full virtualization support\n", QEMU_ARCH_I386)
+DEF("enable-aehd", 0, QEMU_OPTION_enable_aehd, \
+    "-enable-aehd     enable AEHD full virtualization support\n", QEMU_ARCH_I386)
 STEXI
-@item -enable-gvm
-@findex -enable-gvm
-Enable GVM full virtualization support. This option is only available
-if GVM support is enabled when compiling.
+@item -enable-aehd
+@findex -enable-aehd
+Enable AEHD full virtualization support. This option is only available
+if AEHD support is enabled when compiling.
 ETEXI
 
 DEF("xen-domid", HAS_ARG, QEMU_OPTION_xen_domid,

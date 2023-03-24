@@ -94,8 +94,8 @@ keymaster_error_t convert_pkcs8_blob_to_evp(const uint8_t* key_data, size_t key_
     if (!pkey->get())
         return TranslateLastOpenSslError(true /* log_message */);
 
-    if (EVP_PKEY_type((*pkey)->type) != convert_to_evp(expected_algorithm)) {
-        LOG_E("EVP key algorithm was %d, not the expected %d", EVP_PKEY_type((*pkey)->type),
+    if (EVP_PKEY_type(EVP_PKEY_id(pkey->get())) != convert_to_evp(expected_algorithm)) {
+        LOG_E("EVP key algorithm was %d, not the expected %d", EVP_PKEY_type(EVP_PKEY_id(pkey->get())),
               convert_to_evp(expected_algorithm));
         return KM_ERROR_INVALID_KEY_BLOB;
     }

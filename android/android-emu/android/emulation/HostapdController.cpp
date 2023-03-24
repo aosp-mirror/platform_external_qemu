@@ -137,12 +137,16 @@ bool HostapdController::run() {
     });
 }
 
-void HostapdController::setDriverSocket(ScopedSocket sock) {
+bool HostapdController::setDriverSocket(ScopedSocket sock) {
+    bool res = false;
     mDataSock = std::move(sock);
-    if (mDataSock.valid())
-        ::set_virtio_sock(mDataSock.get());
-    if (mCtrlSock1.valid())
-        ::set_virtio_ctrl_sock(mCtrlSock1.get());
+    if (isRunning()) {
+        if (mDataSock.valid() && mCtrlSock1.valid()) {
+            res = !::set_virtio_sock(mDataSock.get()) &&
+                  !::set_virtio_ctrl_sock(mCtrlSock1.get());
+        }
+    }
+    return res;
 }
 
 bool HostapdController::setSsid(std::string ssid, std::string password) {

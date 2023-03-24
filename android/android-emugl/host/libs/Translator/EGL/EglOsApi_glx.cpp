@@ -23,6 +23,7 @@
 #include "emugl/common/mutex.h"
 #include "emugl/common/shared_library.h"
 #include "GLcommon/GLLibrary.h"
+#include "X11ErrorHandler.h"
 
 #include <string.h>
 #include <X11/Xlib.h>
@@ -41,44 +42,6 @@
 namespace {
 
 typedef Display X11Display;
-
-class ErrorHandler{
-public:
-    ErrorHandler(EGLNativeDisplayType dpy);
-    ~ErrorHandler();
-    int getLastError() const { return s_lastErrorCode; }
-
-private:
-    static int s_lastErrorCode;
-    int (*m_oldErrorHandler)(Display *, XErrorEvent *) = nullptr;
-    static emugl::Mutex s_lock;
-    static int errorHandlerProc(EGLNativeDisplayType dpy,XErrorEvent* event);
-};
-
-// static
-int ErrorHandler::s_lastErrorCode = 0;
-
-// static
-emugl::Mutex ErrorHandler::s_lock;
-
-ErrorHandler::ErrorHandler(EGLNativeDisplayType dpy) {
-   emugl::Mutex::AutoLock mutex(s_lock);
-   XSync(dpy,False);
-   s_lastErrorCode = 0;
-   m_oldErrorHandler = XSetErrorHandler(errorHandlerProc);
-}
-
-ErrorHandler::~ErrorHandler() {
-   emugl::Mutex::AutoLock mutex(s_lock);
-   XSetErrorHandler(m_oldErrorHandler);
-   s_lastErrorCode = 0;
-}
-
-int ErrorHandler::errorHandlerProc(EGLNativeDisplayType dpy,
-                                   XErrorEvent* event) {
-    s_lastErrorCode = event->error_code;
-    return 0;
-}
 
 #define IS_SUCCESS(a) \
         do { if (a != Success) return 0; } while (0)
@@ -403,7 +366,7 @@ public:
         Window root;
         int t;
         unsigned int u;
-        ErrorHandler handler(mDisplay);
+        X11ErrorHandler handler(mDisplay);
         if (!XGetGeometry(mDisplay, win, &root, &t, &t, &u, &u, &u, &u)) {
             return false;
         }
@@ -444,7 +407,7 @@ public:
         bool useCoreProfile = mCoreProfileSupported &&
            (profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
 
-        ErrorHandler handler(mDisplay);
+        X11ErrorHandler handler(mDisplay);
 
         GLXContext ctx;
         if (useCoreProfile) {
@@ -561,7 +524,7 @@ public:
                              EglOS::Surface* draw,
                              EglOS::Context* context) {
         PROFILE_SLOW("makeCurrent");
-        ErrorHandler handler(mDisplay);
+        X11ErrorHandler handler(mDisplay);
         bool retval = false;
         if (!context && !read && !draw) {
             // unbind
@@ -607,7 +570,7 @@ private:
     // this GLX implementation.
     void queryCoreProfileSupport() {
         mCoreProfileSupported = false;
-        ErrorHandler handler(mDisplay);
+        X11ErrorHandler handler(mDisplay);
 
         GlxLibrary* lib = sGlxLibrary.ptr();
         mCreateContextAttribs =

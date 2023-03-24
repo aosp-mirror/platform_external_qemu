@@ -947,7 +947,7 @@ bool handleCpuAccelerationForMinConfig(int argc,
     int hasEnableHax = 0;
     int hasEnableHvf = 0;
     int hasEnableWhpx = 0;
-    int hasEnableGvm = 0;
+    int hasEnableAehd = 0;
 
     for (int i = 0; i < argc; i++) {
         if (!strcmp(argv[i], "-enable-kvm")) {
@@ -958,19 +958,19 @@ bool handleCpuAccelerationForMinConfig(int argc,
             hasEnableHvf = 1;
         } else if (!strcmp(argv[i], "-enable-whpx")) {
             hasEnableWhpx = 1;
-        } else if (!strcmp(argv[i], "-enable-gvm")) {
-            hasEnableGvm = 1;
+        } else if (!strcmp(argv[i], "-enable-aehd")) {
+            hasEnableAehd = 1;
         }
     }
 
     int totalEnabled = hasEnableKvm + hasEnableHax + hasEnableHvf +
-                       hasEnableWhpx + hasEnableGvm;
+                       hasEnableWhpx + hasEnableAehd;
 
     if (totalEnabled > 1) {
         derror("%s: tried to enable more than once acceleration mode. "
-               "Attempted enables: kvm %d haxm %d hvf %d whpx %d gvm %d",
+               "Attempted enables: kvm %d haxm %d hvf %d whpx %d aehd %d",
                __func__, hasEnableKvm, hasEnableHax, hasEnableHvf,
-               hasEnableWhpx, hasEnableGvm);
+               hasEnableWhpx, hasEnableAehd);
         exit(1);
     }
 
@@ -1015,9 +1015,9 @@ bool handleCpuAccelerationForMinConfig(int argc,
         dprint("%s: Selecting WHPX for CPU acceleration", __func__);
         androidCpuAcceleration_resetCpuAccelerator(
                 ANDROID_CPU_ACCELERATOR_WHPX);
-    } else if (hasEnableGvm) {
-        dprint("%s: Selecting GVM for CPU acceleration", __func__);
-        androidCpuAcceleration_resetCpuAccelerator(ANDROID_CPU_ACCELERATOR_GVM);
+    } else if (hasEnableAehd) {
+        dprint("%s: Selecting AEHD for CPU acceleration", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(ANDROID_CPU_ACCELERATOR_AEHD);
     }
 
     return true;
@@ -1692,6 +1692,13 @@ extern "C" int main(int argc, char** argv) {
                 avdInfo_getContentPath(avd));
     }
 
+    // Early initializaion of the hostpad loop.
+    if (fc::isEnabled(fc::VirtioWifi)) {
+        auto* hostapd = android::emulation::HostapdController::getInstance();
+        if (!hostapd->init(VERBOSE_CHECK(wifi)) || !hostapd->run()) {
+            derror("Error: could not initialize hostpad event loop.");
+        }
+    }
     // Lock the AVD as soon as we can to make sure other copy won't do anything
     // stupid before detecting that the AVD is already in use.
     const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
@@ -2468,7 +2475,7 @@ extern "C" int main(int argc, char** argv) {
 
 #ifdef _WIN32
     if ((accelerator == ANDROID_CPU_ACCELERATOR_HAX ||
-         accelerator == ANDROID_CPU_ACCELERATOR_GVM) &&
+         accelerator == ANDROID_CPU_ACCELERATOR_AEHD) &&
         ::android::base::Win32Utils::getServiceStatus("vgk") > SVC_NOT_FOUND) {
         dwarning(
                 "Vanguard anti-cheat software is deteced on your system. "
@@ -2757,10 +2764,6 @@ extern "C" int main(int argc, char** argv) {
                                                                : "guest");
         args.add("-chardev");
         if (opts->packet_streamer_endpoint) {
-            dwarning(
-                    "Activating netsim, but ignoring: %s until b/265451720 is resolved"
-                    " reverting to auto discovery.",
-                    opts->packet_streamer_endpoint);
             args.addFormat("netsim,id=bluetooth,path=foo");
         } else {
             dwarning("Using *DEPRECATED* rootcanal bluetooth emulation.");
@@ -3266,15 +3269,6 @@ extern "C" int main(int argc, char** argv) {
         }
         // Dump final command-line option to make debugging the core easier
         dinfo("Concatenated QEMU options: %s", args.toString().c_str());
-    }
-    if (fc::isEnabled(fc::VirtioWifi)) {
-        auto* hostapd = android::emulation::HostapdController::getInstance();
-        if (hostapd->init(VERBOSE_CHECK(wifi))) {
-            hostapd->run();
-        } else {
-            derror("%s: Error: could not initialize hostpad event loop.",
-                   __func__);
-        }
     }
     if (opts->check_snapshot_loadable) {
         android_check_snapshot_loadable(opts->check_snapshot_loadable);

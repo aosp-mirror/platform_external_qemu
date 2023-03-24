@@ -19,16 +19,14 @@
 #include <utility>        // for move
 #include <vector>         // for vector
 
-#include "android/base/system/System.h"  // for System
 #include "aemu/base/system/Win32UnicodeString.h"
-#include "android/utils/debug.h"  // for derror
-
+#include "android/base/system/System.h"  // for System
+#include "android/utils/debug.h"         // for derror
 
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/synchronization/Event.h"
 
 #define DEBUG 0
-
 #if DEBUG >= 1
 #define DD(fmt, ...)                                                          \
     printf("ReadDirectoryChangesWin32: %s:%d| " fmt "\n", __func__, __LINE__, \
@@ -36,7 +34,6 @@
 #else
 #define DD(...) (void)0
 #endif
-
 
 using android::base::pj;
 namespace android {
@@ -71,7 +68,6 @@ public:
     }
 
 private:
-
     bool watchForChanges() {
         const Win32UnicodeString szDirectory(mPath.c_str());
         mDirHandle = CreateFileW(
@@ -87,21 +83,25 @@ private:
 
         while (mRunning) {
             DWORD dwBytesReturned = 0;
-            BYTE buffer[4096];
+            BYTE buffer[4096] = {0};
             if (ReadDirectoryChangesW(mDirHandle, buffer, sizeof(buffer), TRUE,
-                                      FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME |
+                                      FILE_NOTIFY_CHANGE_FILE_NAME |
+                                              FILE_NOTIFY_CHANGE_DIR_NAME |
                                               FILE_NOTIFY_CHANGE_ATTRIBUTES,
                                       &dwBytesReturned, NULL, NULL) == 0) {
                 CloseHandle(mDirHandle);
                 mDirHandle = INVALID_HANDLE_VALUE;
                 return false;
             }
-            for (FILE_NOTIFY_INFORMATION* info =
-                         reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buffer);
-                 mRunning && !info->NextEntryOffset; info->NextEntryOffset) {
+            DWORD offset = 0;
+            while (mRunning) {
+                FILE_NOTIFY_INFORMATION* info =
+                        reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buffer +
+                                                                   offset);
                 Win32UnicodeString filename(info->FileName);
                 Path changed = pj(mPath, filename.toString());
-                DD("Action: %d", info->Action);
+                DD("Action: %d - %s (%d)", info->Action, changed.c_str(),
+                   offset);
                 switch (info->Action) {
                     case FILE_ACTION_ADDED:
                         mChangeCallback(WatcherChangeType::Created, changed);
@@ -121,6 +121,12 @@ private:
                     default:
                         break;
                 }
+
+                if (info->NextEntryOffset == 0) {
+                    break;
+                }
+
+                offset += info->NextEntryOffset;
             }
         }
 

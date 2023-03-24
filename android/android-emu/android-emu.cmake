@@ -27,7 +27,7 @@ android_add_library(
        android-emu-min-avd
        android-emu-utils
        android-hw-config
-       emulator-libyuv
+       webrtc-yuv
        gtest)
 target_include_directories(android-emu-launch PRIVATE .)
 target_compile_options(android-emu-launch PRIVATE -Wno-extern-c-compat)
@@ -286,13 +286,12 @@ target_link_libraries(
          emulator-libsparse
          emulator-libselinux
          emulator-libjpeg
-         emulator-libyuv
          emulator-libwebp
          emulator-tinyobjloader
          emulator-libkeymaster3
          emulator-murmurhash
          emulator-tinyepoxy
-         emulator-libyuv
+         webrtc-yuv
          android-emu-curl
          picosha2
          # Protobuf dependencies

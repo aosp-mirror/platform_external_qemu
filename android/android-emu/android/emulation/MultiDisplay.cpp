@@ -723,7 +723,7 @@ std::map<uint32_t, MultiDisplayInfo> MultiDisplay::parseConfig() {
             ret.clear();
             return ret;
         }
-        if (multiDisplayParamValidate(params[i], params[i + 1], params[i + 2],
+        if (!multiDisplayParamValidate(params[i], params[i + 1], params[i + 2],
                                       params[i + 3], params[i + 4])) {
             derror("Invalid index: %d, width: %d, height: %d, or dpi: %d "
                    "for multidisplay command,",

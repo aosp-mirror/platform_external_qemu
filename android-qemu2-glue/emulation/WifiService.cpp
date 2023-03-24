@@ -190,14 +190,16 @@ Builder& Builder::withOnLinkStatusChangedCallback(
 
 std::unique_ptr<WifiService> Builder::build() {
     if (!mHostapdOpts.disabled) {
+        bool success = false;
         auto* hostapd = android::emulation::HostapdController::getInstance();
         if (hostapd->init(mVerbose)) {
             if (!mHostapdOpts.ssid.empty()) {
                 hostapd->setSsid(
                     std::move(mHostapdOpts.ssid), std::move(mHostapdOpts.passwd));
             }
-            hostapd->run();
-        } else {
+            success = hostapd->run();
+        }
+        if (!success) {
             LOG(ERROR) << "Failed to initialize WiFi service: hostpad event "
                           "loop failed to start";
             return nullptr;

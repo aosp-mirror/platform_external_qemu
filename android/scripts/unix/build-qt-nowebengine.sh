@@ -261,6 +261,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         -qt-xcb \
                         -no-use-gold-linker \
                         -platform linux-clang \
+
                 var_append LD_LIBRARY_PATH \
                   $(dirname $(aosp_clang_libcplusplus))
                 ;;
@@ -292,11 +293,11 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 # the verion used, let's dump all sdks
                 echo "The list of the installed OS X SDKs:"
                 xcodebuild -showsdks | grep macosx
-                echo "(using the latest version for the Qt build)"
+                echo "(using version 10.13 for the Qt build)"
 
                 var_append EXTRA_CONFIGURE_FLAGS \
                     -no-framework \
-                    -sdk macosx
+                    -sdk macosx10.13
                 var_append CFLAGS -mmacosx-version-min=10.11
                 var_append LDFLAGS -mmacosx-version-min=10.11
                 var_append LDFLAGS -lc++

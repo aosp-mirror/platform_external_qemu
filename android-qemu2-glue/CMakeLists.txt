@@ -22,7 +22,9 @@ target_link_libraries(
           GLIB2::GLIB2
           ssl
           hostapd
-          android-grpc
+          android-grpc-services-stack
+          android-grpc-client
+          android-emu-grpc-utils
           qemu-host-common-headers
           packet-streamer-client-lib
           packet-streamer-proto-lib
@@ -110,14 +112,19 @@ target_include_directories(
           ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/
           ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(libqemu2-glue PRIVATE android-grpc android-ui-controller)
+target_link_libraries(
+  libqemu2-glue
+  PRIVATE android-grpc-services-stack ui-controller-server-impl  android-grpc-modem-service
+          android-grpc-incubating-services)
+
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
+
 if(BLUETOOTH_EMULATION)
   target_link_libraries(
     libqemu2-glue
-    PRIVATE grpc-emulated-bluetooth
+    PRIVATE emulated-bluetooth-service-server-impl
             grpc++
             packet-streamer-client-lib
             packet-streamer-proto-lib
@@ -137,6 +144,7 @@ target_link_libraries(
           ssl
           flatbuffers
           qemu-host-common-headers
+          android-emu-grpc-utils
           grpc++
           packet-streamer-client-lib
           packet-streamer-proto-lib

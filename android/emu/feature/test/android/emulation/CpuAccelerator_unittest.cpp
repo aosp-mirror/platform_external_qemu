@@ -71,8 +71,8 @@ TEST_F(CpuAcceleratorTest, Default) {
     case CPU_ACCELERATOR_WHPX:
         printf("WHPX acceleration usable on this machine!\n");
         break;
-    case CPU_ACCELERATOR_GVM:
-        printf("GVM acceleration usable on this machine!\n");
+    case CPU_ACCELERATOR_AEHD:
+        printf("AEHD acceleration usable on this machine!\n");
         break;
     case  CPU_ACCELERATOR_MAX:
         ASSERT_FALSE(1) << "Invalid accelerator value: " << accel;

@@ -36,8 +36,10 @@ public:
 private:
     std::vector<std::string> mTurnCmd;
 
-    // We want the turn config delivered in under a second.
-    const int kMaxTurnConfigTime = 1000;
+    static constexpr int kMaxTurnConfigTime = 1000;  // ms
+    // By default, we want the turn config delivered in under a second.
+    // Users can set env variable ANDROID_EMU_MAX_TURNCFG_TIME
+    int getMaxTurnCfgTime();
 };
 }
 }

@@ -19,7 +19,7 @@ obj-y += hvf-utils/x86_mmu.o
 obj-y += hvf-utils/x86hvf.o
 endif
 obj-$(call lnot,$(CONFIG_SEV)) += sev-stub.o
-obj-$(CONFIG_GVM) += gvm-all.o gvm.o
+obj-$(CONFIG_AEHD) += aehd-all.o aehd.o
 # HAX support
 ifdef CONFIG_WIN32
 obj-$(CONFIG_HAX) += hax-all.o hax-mem.o hax-windows.o

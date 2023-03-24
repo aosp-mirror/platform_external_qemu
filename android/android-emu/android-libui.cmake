@@ -401,7 +401,7 @@ android_target_compile_options(
 target_link_libraries(
   emulator-libui
   PRIVATE android-emu
-          emulator-libyuv
+          webrtc-yuv
           FFMPEG::FFMPEG
           Qt${QT_MAJOR_VERSION}::Core
           Qt${QT_MAJOR_VERSION}::Widgets
@@ -521,7 +521,7 @@ android_target_compile_options(
 # dependencies will remain internal, we should not be leaking out internal
 # headers and defines.
 target_link_libraries(
-  emulator-libui-headless PRIVATE android-emu android-emu-base-headers emulator-libyuv
+  emulator-libui-headless PRIVATE android-emu android-emu-base-headers webrtc-yuv
                                   FFMPEG::FFMPEG zlib android-hw-config qemu-host-common-headers)
 
 if(WINDOWS_MSVC_X86_64)

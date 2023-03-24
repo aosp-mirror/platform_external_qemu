@@ -635,14 +635,15 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     setFrameAlways(mFrameAlways);
 
-    mWheelScrollTimer.setInterval(100);
-    mWheelScrollTimer.setSingleShot(true);
+    mWheelScrollTimer.setInterval(15);
     connect(&mWheelScrollTimer, SIGNAL(timeout()), this,
             SLOT(wheelScrollTimeout()));
 
     mIgnoreWheelEvent =
             settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
 
+    mDisablePinchToZoom =
+            settings.value(Ui::Settings::DISABLE_PINCH_TO_ZOOM, false).toBool();
     // set custom ADB path if saved
     bool autoFindAdb =
             settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool();
@@ -1567,6 +1568,10 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways) {
 
 void EmulatorQtWindow::setIgnoreWheelEvent(bool ignore) {
     mIgnoreWheelEvent = ignore;
+}
+
+void EmulatorQtWindow::setDisablePinchToZoom(bool disabled) {
+    mDisablePinchToZoom = disabled;
 }
 
 void EmulatorQtWindow::setPauseAvdWhenMinimized(bool pause) {
@@ -2851,7 +2856,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
         event->key() == Qt::Key_Control &&
         (event->modifiers() == Qt::ControlModifier ||
          event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))) {
-        if (type == kEventKeyDown) {
+        if (type == kEventKeyDown && !mDisablePinchToZoom) {
             if (mToolWindow->getUiEmuAgent()
                         ->multiDisplay->isMultiDisplayEnabled() == false) {
                 raise();
@@ -3240,9 +3245,96 @@ bool EmulatorQtWindow::mouseInside() {
            widget_cursor_coords.y() >= 0 && widget_cursor_coords.y() < height();
 }
 
+template<typename N>
+struct QuadraticMotion {
+    int length;
+    N a;
+    N b;
+    N c;
+
+    N get(int x) const {
+        return (a * x * x + b * x + c) / (length * length);
+    }
+
+    // Fits f(x) = ax^2 + bx + c, so that it satisfies the following boundary
+    // conditions.
+    // f(0) = y0
+    // f(length) = y1
+    // df/dx(length) = 2x + b = 0
+    static QuadraticMotion smoothEnd(int length, N y0, N y1) {
+        return {
+            length,
+            y0 - y1,
+            -2 * length * y0 + 2 * length * y1,
+            length * length * y0,
+        };
+    }
+};
+
+class SwipeGesture {
+    constexpr static int kWheelCount = 20;
+#if QT_VERSION >= 0x060000
+    typedef QPointF P;
+#else
+    typedef QPoint P;
+#endif  // QT_VERSION
+    typedef decltype(P().y()) N;
+
+    QuadraticMotion<N> mMotion;
+    P mTouchDownPoint;
+    int mTick{0};
+
+public:
+
+    SwipeGesture(const P& touchDownPoint, int delta) {
+        mTouchDownPoint = touchDownPoint;
+        mMotion = QuadraticMotion<N>::smoothEnd(kWheelCount, 0, delta);
+    }
+
+    void tick() {
+        if (!atEnd()) {
+            mTick++;
+        }
+    }
+
+    // Starts the motion from the current touch point to the previous destination point shifted by delta.
+    void moveMore(int delta) {
+        auto newStartPoint = mMotion.get(mTick);
+        mTick = 0;
+        mMotion = QuadraticMotion<N>::smoothEnd(kWheelCount, newStartPoint, mMotion.get(mMotion.length) + delta);
+    }
+
+    // Starts the motion from the new touch down point with restoring the previous remaining delta + adding new delta.
+    void reposition(const P& touchDownPoint, int delta) {
+        auto newDelta = mMotion.get(mMotion.length) - mMotion.get(mTick) + delta;
+        mTick = 0;
+        mTouchDownPoint = touchDownPoint;
+        mMotion = QuadraticMotion<N>::smoothEnd(kWheelCount, 0, newDelta);
+    }
+
+    P point() const {
+        return {
+            mTouchDownPoint.x(),
+            mTouchDownPoint.y() + swiped()
+        };
+    }
+
+    bool atEnd() const {
+        return mTick == mMotion.length;
+    }
+
+    N swiped() const {
+        return mMotion.get(mTick);
+    }
+};
+
 void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
     if (mIgnoreWheelEvent) {
         event->ignore();
+        return;
+    }
+
+    if (mBackingSurface == nullptr) {
         return;
     }
 
@@ -3251,6 +3343,14 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
                     android::featurecontrol::VirtioMouse) ||
             android::featurecontrol::isEnabled(
                     android::featurecontrol::VirtioTablet);
+
+    const QAndroidGlobalVarsAgent *settings = getConsoleAgents()->settings;
+    const bool inputDeviceHasRotary =
+            android::featurecontrol::isEnabled(
+                    android::featurecontrol::VirtioInput) &&
+            (settings->hw()->hw_rotaryInput ||
+             (settings->avdInfo() &&
+              avdInfo_getAvdFlavor(settings->avdInfo()) == AVD_WEAR));
 
     if (inputDeviceHasWheel) {
         // Mouse is active only when it's grabbed. Tablet is always active.
@@ -3271,40 +3371,58 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
 #else
         handleMouseWheelEvent(event->delta(), event->orientation());
 #endif  // QT_VERSION
-    } else {
-        if (mWheelScrollTimer.isActive()) {
-            // Scroll gesture is in progress.
-            return;
-        }
+    } else if (inputDeviceHasRotary) {
+        SkinEvent* skin_event = createSkinEvent(kEventRotaryInput);
 #if QT_VERSION >= 0x060000
-        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
-                            event->position(), QPointF(0.0, 0.0));
-        mWheelScrollPos = event->position();
-        mWheelScrollTimer.start();
-        mWheelScrollPos.setY(mWheelScrollPos.y() +
-                                event->angleDelta().y() / 8);
-        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft,
-                            mWheelScrollPos, QPointF(0.0, 0.0));
+        skin_event->u.rotary_input.delta = event->angleDelta().y() / 8;
 #else
-        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
-                            event->pos(), QPoint(0, 0));
-        mWheelScrollPos = event->pos();
-        mWheelScrollTimer.start();
-        mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft,
-                            mWheelScrollPos, QPoint(0, 0));
+        skin_event->u.rotary_input.delta = event->delta() / 8;
 #endif  // QT_VERSION
+        queueSkinEvent(skin_event);
+    } else {
+#if QT_VERSION >= 0x060000
+        // For most mice, 1 wheel click = 15 degrees
+        const int delta = event->angleDelta().y() * 120 / 15;
+        const auto pos = event->position();
+#else
+        const int delta = event->delta();
+        const auto pos = event->pos();
+#endif  // QT_VERSION
+        // Scroll 1/9 of window height per a wheel click.
+        const int scaledDelta = mBackingSurface->h * delta / 120 / 9;
+
+        if (!mSwipeGesture) {
+            // Start the gesture if it's not yet.
+            mSwipeGesture = std::make_unique<SwipeGesture>(pos, scaledDelta);
+            mWheelScrollTimer.start();
+            handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
+                             mSwipeGesture->point(), {0, 0});
+        } else if (abs(mSwipeGesture->swiped()) >= mBackingSurface->h / 16) {
+            // Reposition the gesture to avoid the fake touch point from going
+            // outside of the window.
+            auto lastGesturePoint = mSwipeGesture->point();
+            mSwipeGesture->reposition(pos, scaledDelta);
+            handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft,
+                             lastGesturePoint, {0, 0});
+            handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
+                             mSwipeGesture->point(), {0, 0});
+        } else {
+            mSwipeGesture->moveMore(scaledDelta);
+        }
     }
 }
 
 void EmulatorQtWindow::wheelScrollTimeout() {
-#if QT_VERSION >= 0x060000
-    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos,
-                     QPointF(0.0, 0.0));
-#else
-    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos,
-                     QPoint(0, 0));
-#endif  // QT_VERSION
+    mSwipeGesture->tick();
+
+    handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mSwipeGesture->point(), {0, 0});
+    if (!mSwipeGesture->atEnd()) {
+        return;
+    }
+
+    mWheelScrollTimer.stop();
+    std::unique_ptr<SwipeGesture> gesture(std::move(mSwipeGesture));
+    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, gesture->point(), {0, 0});
 }
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {
@@ -3376,7 +3494,7 @@ void EmulatorQtWindow::checkVgkAndWarn() {
     AndroidCpuAccelerator accelerator = androidCpuAcceleration_getAccelerator();
 
     if (accelerator != ANDROID_CPU_ACCELERATOR_HAX &&
-        accelerator != ANDROID_CPU_ACCELERATOR_GVM)
+        accelerator != ANDROID_CPU_ACCELERATOR_AEHD)
         return;
 
     if (::android::base::Win32Utils::getServiceStatus("vgk") <= SVC_NOT_FOUND)

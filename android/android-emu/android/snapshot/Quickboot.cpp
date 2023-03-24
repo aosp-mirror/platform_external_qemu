@@ -40,6 +40,7 @@
 #include "android/utils/debug.h"
 
 #include <cassert>
+#include <fstream>
 #include <string_view>
 
 using android::base::c_str;
@@ -365,7 +366,28 @@ bool Quickboot::load(const char* name) {
         // See b/233665745
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
         auto& snapshotter = Snapshotter::get();
+        LOG(INFO) << "Loading snapshot '" << namestr << "'...";
         auto res = snapshotter.load(true /* isQuickboot */, namestr.data());
+        if (res == OperationStatus::Ok) {
+            LOG(INFO) << "Successfully loaded snapshot '" << namestr << "'";
+            const char* contentPath =
+                    getConsoleAgents()->settings->avdInfo()
+                            ? avdInfo_getContentPath(
+                                      getConsoleAgents()->settings->avdInfo())
+                            : nullptr;
+            const std::string snapshot_trace_file =
+                    contentPath ? base::PathUtils::join(contentPath,
+                                                        "snapshot.trace")
+                                : "";
+
+            if (!snapshot_trace_file.empty()) {
+                path_empty_file(snapshot_trace_file.c_str());
+                std::ofstream fout(snapshot_trace_file, std::ios::out);
+                fout << "load_succeeded" << std::endl;
+            }
+        } else {
+            LOG(WARNING) << "Failed to load snapshot '" << namestr << "'";
+        }
         mLoaded = false;
         mLoadStatus = res;
         mLoadTimeMs = System::get()->getHighResTimeUs() / 1000;

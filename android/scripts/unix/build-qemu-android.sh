@@ -301,14 +301,14 @@ build_qemu_android () {
                 ;;
         esac
 
-        GVM_FLAG=
+        AEHD_FLAG=
         case $1 in
             windows*)
-                # gvm is only available on windows.
-                GVM_FLAG="--enable-gvm"
+                # aehd is only available on windows.
+                AEHD_FLAG="--enable-aehd"
                 ;;
             *)
-                GVM_FLAG="--disable-gvm"
+                AEHD_FLAG="--disable-aehd"
                 ;;
         esac
 
@@ -462,7 +462,7 @@ EOF
             $DEBUG_FLAGS \
             $LIBUSB_FLAGS \
             $AUDIO_BACKENDS_FLAG \
-            $GVM_FLAG \
+            $AEHD_FLAG \
             $WHPX_FLAG \
             --disable-attr \
             --disable-bluez \

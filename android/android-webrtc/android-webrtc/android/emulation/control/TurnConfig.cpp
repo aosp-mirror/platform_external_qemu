@@ -31,12 +31,29 @@ bool TurnConfig::producesValidTurn(std::string cmd) {
 TurnConfig::TurnConfig(std::string cmd)
     : mTurnCmd(android::base::parseEscapedLaunchString(cmd)) {}
 
+int TurnConfig::getMaxTurnCfgTime() {
+    int res = kMaxTurnConfigTime;
+    const auto str = System::get()->envGet("ANDROID_EMU_MAX_TURNCFG_TIME");
+    if (!str.empty()) {
+        if (sscanf(str.c_str(), "%d", &res) == 1) {
+            LOG(DEBUG) << "TurnCFG: Use max turn config time from "
+                            "ANDROID_EMU_MAX_TURNCFG_TIME: "
+                         << str << " ms";
+        } else {
+            LOG(WARNING) << "TurnCFG: Failed to parse max turn config time: "
+                         << str;
+            res = kMaxTurnConfigTime;
+        }
+    }
+    return res;
+}
+
 json TurnConfig::getConfig() {
     json turnConfig = "{}"_json;
     if (mTurnCmd.size() > 0) {
         System::ProcessExitCode exitCode;
         auto turn = System::get()->runCommandWithResult(
-                mTurnCmd, kMaxTurnConfigTime, &exitCode);
+                mTurnCmd, getMaxTurnCfgTime(), &exitCode);
         if (exitCode == 0 && turn) {
             json config = json::parse(*turn, nullptr, false);
             if (!config.is_discarded() && config.count("iceServers")) {
@@ -62,11 +79,10 @@ bool TurnConfig::validCommand() {
 
     android::base::System::ProcessExitCode exitCode = -1;
     auto turn = android::base::System::get()->runCommandWithResult(
-            mTurnCmd, kMaxTurnConfigTime, &exitCode);
+            mTurnCmd, getMaxTurnCfgTime(), &exitCode);
 
-    
     if (turn) {
-        json config = json::parse(*turn, nullptr, false);          
+        json config = json::parse(*turn, nullptr, false);
         if (exitCode == 0 && !config.is_discarded()) {
             if (config.count("iceServers")) {
                 LOG(INFO) << "TurnCFG: Turn command produces valid json.";

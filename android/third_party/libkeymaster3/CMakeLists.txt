@@ -9,8 +9,7 @@ android_add_library(
   REPO "${ANDROID_QEMU2_TOP_DIR}/android/third_party/libkeymaster3"
   LICENSE "Apache-2.0"
   NOTICE "REPO/NOTICE"
-  SRC # cmake-format: sortable
-      aes_key.cpp
+  SRC aes_key.cpp
       aes_operation.cpp
       android_keymaster.cpp
       android_keymaster_messages.cpp
@@ -70,3 +69,4 @@ if(WINDOWS_MSVC_X86_64)
   target_compile_options(emulator-libkeymaster3
                          PRIVATE "-mssse3" "-Wno-incompatible-pointer-types")
 endif()
+target_compile_options(emulator-libkeymaster3 PRIVATE "-Wno-c++11-narrowing")

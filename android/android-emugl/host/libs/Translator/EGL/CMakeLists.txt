@@ -17,7 +17,7 @@ android_add_library(
       ThreadInfo.cpp
   DARWIN EglOsApi_darwin.cpp EglOsApi_egl.cpp MacNative.m
          MacPixelFormatsAttribs.m
-  LINUX CoreProfileConfigs_linux.cpp EglOsApi_egl.cpp EglOsApi_glx.cpp
+  LINUX CoreProfileConfigs_linux.cpp EglOsApi_egl.cpp EglOsApi_glx.cpp X11ErrorHandler.cpp
   WINDOWS CoreProfileConfigs_windows.cpp EglOsApi_egl.cpp EglOsApi_wgl.cpp)
 
 target_link_libraries(EGL_translator_static PUBLIC GLcommon emugl_common)

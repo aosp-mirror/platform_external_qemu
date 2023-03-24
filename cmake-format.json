@@ -35,6 +35,21 @@
         "GENERATED": "*"
       }
     },
+    "android_grpc_service_lib": {
+      "flags": [],
+      "kwargs": {
+        "TARGET": "*",
+        "SOURCES": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        }
+      }
+    },
     "android_validate_sha": {
       "flags": [],
       "kwargs": {

@@ -1315,8 +1315,8 @@ const char* getAcceleratorEnableParam(AndroidCpuAccelerator accel_type) {
             return "-enable-hvf";
         case ANDROID_CPU_ACCELERATOR_WHPX:
             return "-enable-whpx";
-        case ANDROID_CPU_ACCELERATOR_GVM:
-            return "-enable-gvm";
+        case ANDROID_CPU_ACCELERATOR_AEHD:
+            return "-enable-aehd";
         default:
             return "";
     }
