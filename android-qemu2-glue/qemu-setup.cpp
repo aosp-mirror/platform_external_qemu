@@ -89,6 +89,7 @@ extern "C" {
 #include "android/emulation/control/adb/AdbService.h"
 #include "android/emulation/control/incubating/CarService.h"
 #include "android/emulation/control/incubating/ModemService.h"
+#include "android/emulation/control/incubating/SensorService.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
@@ -388,6 +389,8 @@ int qemu_setup_grpc() {
             getConsoleAgents());
     auto car = android::emulation::control::incubating::getCarService(
             getConsoleAgents());
+    auto sensor = android::emulation::control::incubating::getSensorService(
+            getConsoleAgents());
     auto builder =
             EmulatorControllerService::Builder()
                     .withConsoleAgents(getConsoleAgents())
@@ -414,6 +417,7 @@ int qemu_setup_grpc() {
                     .withService(uiController)
                     .withService(stats)
                     .withService(car)
+                    .withService(sensor)
                     .withSecureService(adb);
 
 #ifdef ANDROID_BLUETOOTH
