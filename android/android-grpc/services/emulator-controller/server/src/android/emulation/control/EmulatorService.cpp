@@ -1245,29 +1245,30 @@ public:
 
         // These need to happen on the qemu looper as these transitions
         // will require io locks.
-        android::base::ThreadLooper::runOnMainLooper([=]() {
-            switch (request->state()) {
-                case VmRunState::RESET:
-                    mAgents->vm->vmReset();
-                    break;
-                case VmRunState::SHUTDOWN:
-                    skin_winsys_quit_request();
-                    break;
-                case VmRunState::TERMINATE: {
-                    LOG(INFO) << "Terminating the emulator.";
-                    auto pid = System::get()->getCurrentProcessId();
-                    System::get()->killProcess(pid);
-                }; break;
-                case VmRunState::PAUSED:
-                    mAgents->vm->vmPause();
-                    break;
-                case VmRunState::RUNNING:
-                    mAgents->vm->vmResume();
-                    break;
-                default:
-                    break;
-            };
-        });
+        android::base::ThreadLooper::runOnMainLooper(
+                [state = request->state(), vm = mAgents->vm]() {
+                    switch (state) {
+                        case VmRunState::RESET:
+                            vm->vmReset();
+                            break;
+                        case VmRunState::SHUTDOWN:
+                            skin_winsys_quit_request();
+                            break;
+                        case VmRunState::TERMINATE: {
+                            LOG(INFO) << "Terminating the emulator.";
+                            auto pid = System::get()->getCurrentProcessId();
+                            System::get()->killProcess(pid);
+                        }; break;
+                        case VmRunState::PAUSED:
+                            vm->vmPause();
+                            break;
+                        case VmRunState::RUNNING:
+                            vm->vmResume();
+                            break;
+                        default:
+                            break;
+                    };
+                });
 
         return Status::OK;
     }
