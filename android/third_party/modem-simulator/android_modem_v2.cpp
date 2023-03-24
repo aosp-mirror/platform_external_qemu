@@ -34,6 +34,16 @@ android::modem::ModemBase* getModemBase() {
     return s_modem.get();
 }
 
+
+extern int amodem_number_of_calls_vx(AModem modem) {
+    return s_modem->number_of_calls(modem);
+}
+
+extern ACall amodem_call_by_idx_vx(AModem modem, int idx) {
+    return s_modem->call_by_index(modem, idx);
+}
+
+
 void amodem_receive_sms_vx(AModem modem, SmsPDU sms) {
     s_modem->receive_sms(modem, sms);
 }

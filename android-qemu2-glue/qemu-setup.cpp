@@ -87,7 +87,7 @@ extern "C" {
 #include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/UiController.h"
 #include "android/emulation/control/adb/AdbService.h"
-#include "android/emulation/control/incubating/Services.h"
+#include "android/emulation/control/incubating/ModemService.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"

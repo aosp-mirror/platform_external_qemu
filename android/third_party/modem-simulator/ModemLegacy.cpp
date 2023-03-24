@@ -15,6 +15,15 @@
 namespace android {
 namespace modem {
 
+int ModemLegacy::number_of_calls(AModem modem) {
+    return amodem_get_call_count(modem);
+}
+
+
+ACall ModemLegacy::call_by_index(AModem modem, int idx) {
+    return amodem_get_call(modem, idx);
+}
+
 void ModemLegacy::receive_sms(AModem modem, SmsPDU sms) {
     amodem_receive_sms(modem, sms);
 }

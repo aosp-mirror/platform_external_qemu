@@ -18,7 +18,7 @@
 #include "android/avd/info.h"
 #include "android/console.h"
 #include "android/emulation/control/cellular_agent.h"
-#include "android/emulation/control/incubating/Services.h"
+#include "android/emulation/control/incubating/ModemService.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/utils/EventSupport.h"
 #include "android/grpc/utils/EnumTranslate.h"
@@ -57,7 +57,6 @@ extern "C" {
 static void telephony_callback(void* userData, int numActiveCalls);
 }
 
-
 using PhoneEventStream = GenericEventStreamWriter<PhoneEvent>;
 
 static bool isValidPhoneNr(std::string number) {
@@ -66,8 +65,8 @@ static bool isValidPhoneNr(std::string number) {
             sms_address_from_str(&sender, number.c_str(), number.size()) < 0;
     return !invalid;
 }
-class ModemImpl final : public ModemService::WithCallbackMethod_streamEvents<
-                                ModemService::Service>
+class ModemImpl final
+    : public Modem::WithCallbackMethod_receivePhoneEvents<Modem::Service>
 
 {
 public:
@@ -76,7 +75,7 @@ public:
           mModem(agents->telephony->getModem()),
           mTelephonyAgent(agents->telephony) {
         // android::RecursiveScopedVmLock vmlock;
-        //
+        mTelephonyAgent->setNotifyCallback(telephony_callback, (void*)this);
     }
 
     ::grpc::Status setCellInfo(::grpc::ServerContext* context,
@@ -320,7 +319,7 @@ public:
 
             android::RecursiveScopedVmLock vmlock;
             for (int nn = 0; pdus[nn] != NULL; nn++) {
-                amodem_receive_sms(mModem, pdus[nn]);
+                amodem_receive_sms_vx(mModem, pdus[nn]);
             }
 
             smspdu_free_list(pdus);
@@ -344,10 +343,8 @@ public:
 
     ::grpc::ServerWriteReactor<
             ::android::emulation::control::incubating::PhoneEvent>*
-    streamEvents(::grpc::CallbackServerContext* /*context*/,
-                 const ::google::protobuf::Empty* /*request*/) override {
-        dwarning("Hijacking the telephone callback, you will see reduced functionality in the Qt UI.");
-        mTelephonyAgent->setNotifyCallback(telephony_callback, (void*)this);
+    receivePhoneEvents(::grpc::CallbackServerContext* /*context*/,
+                       const ::google::protobuf::Empty* /*request*/) override {
         return new PhoneEventStream(&s_activeCallListeners);
     }
 

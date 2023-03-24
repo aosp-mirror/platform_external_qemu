@@ -2,6 +2,7 @@ android_add_library(
   TARGET android-grpc-event-waiter LICENSE Apache-2.0 SOURCE_DIR src
   SRC android/emulation/control/utils/EventWaiter.cpp)
 target_include_directories(android-grpc-event-waiter PUBLIC include PRIVATE src)
+target_link_libraries(android-grpc-event-waiter PUBLIC android-emu-grpc-utils)
 
 android_add_test(
   TARGET android-grpc-event-waiter_unittests SOURCE_DIR test
