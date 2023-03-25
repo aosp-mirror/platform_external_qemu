@@ -15,9 +15,11 @@
 
 #include <cassert>
 #include <cerrno>
+#include <chrono>
 #include <cstring>
 #include <fstream>
 #include <initializer_list>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -75,12 +77,17 @@ static absl::StatusOr<std::string> readFile(JwkKeyLoader::Path fname) {
                           std::ios::binary | std::ios::ate);
     std::streampos fileSize = fstream.tellg();
 
+    if (fileSize == 0) {
+        auto message = absl::StrFormat("%s is empty", fname);
+        return absl::UnavailableError(message);
+    }
+
     // Usually a jkw file is around 300 bytes... so...
     constexpr int MAX_JWK_SIZE = 8 * 1024;
     if (fileSize > MAX_JWK_SIZE) {
         auto message = absl::StrFormat(
                 "Refusing to read %s of size %d, which is over our max of %d.",
-                fname, fileSize, MAX_JWK_SIZE);
+                fname, (int)fileSize, MAX_JWK_SIZE);
         return absl::PermissionDeniedError(message);
     }
 
@@ -96,6 +103,24 @@ static absl::StatusOr<std::string> readFile(JwkKeyLoader::Path fname) {
     }
 
     return contents;
+}
+
+absl::Status JwkKeyLoader::addWithRetryForEmpty(
+        Path toAdd,
+        int retries,
+        std::chrono::milliseconds wait_for) {
+    absl::Status status;
+    do {
+        status = add(toAdd);
+        if (status.code() == absl::StatusCode::kUnavailable) {
+            VERBOSE_INFO(grpc, "Token not yet available, waiting %d ms.",
+                         wait_for.count());
+            std::this_thread::sleep_for(wait_for);
+        }
+        retries--;
+    } while (status.code() == absl::StatusCode::kUnavailable && retries > 0);
+
+    return status;
 }
 
 absl::Status JwkKeyLoader::add(Path toAdd) {

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+#include <chrono>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -40,6 +41,23 @@ public:
     void clear();
     bool empty() const;
     int size() const;
+
+    /**
+     * Loads a JWK set from a file and adds it to the collection.
+     * This will attempt to re-access empty files, which can happen
+     * in certain windows configuration (gWindows).
+     *
+     * Note: This is a workaround for b/274984168 where we see anti
+     * virus software temporarily blocking file access.
+     *
+     * @param toAdd The path to the file containing the JWK set.
+     * @param retries The maximum number of attempts we make
+     * @param wait_for The delay between each retry attempt.
+     * @return An absl::Status indicating success or failure of the operation.
+     */
+    absl::Status addWithRetryForEmpty(Path toAdd,
+                                      int retries,
+                                      std::chrono::milliseconds wait_for);
 
     /**
      * Loads a JWK set from a file and adds it to the collection.
