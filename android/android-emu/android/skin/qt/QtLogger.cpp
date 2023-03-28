@@ -15,6 +15,7 @@
 
 #include <stdarg.h>                            // for va_end, va_list, va_start
 #include <stdio.h>                             // for vsnprintf
+#include <wchar.h>
 
 #include "aemu/base/memory/LazyInstance.h"  // for LazyInstance, LAZY_INS...
 #include "android/utils/debug.h"               // for dinfo
@@ -32,12 +33,14 @@ QtLogger* QtLogger::get() {
 
 
 void QtLogger::write(const char* fmt, ...) {
-    char buf[kBufferLen] = {};
+    wchar_t buf[kBufferLen] = {};
+    std::vector<wchar_t> wfmt(strlen(fmt) + 1);
+    mbstowcs(wfmt.data(), fmt, wfmt.size());
     va_list ap;
     va_start(ap, fmt);
-    vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
+    vswprintf(buf, sizeof(buf) - 1, wfmt.data(), ap);
     va_end(ap);
 
-    dinfo("%s", buf);
+    dinfo("%S", buf);
     mFileHandle << buf << std::endl;
 }
