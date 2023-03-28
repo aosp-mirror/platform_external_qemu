@@ -354,7 +354,6 @@ void EmulatorQtWindow::create() {
 EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     : QFrame(parent),
       mLooper(android::qt::createLooper()),
-      mStartupDialog(this),
       mToolWindow(nullptr),
       mCarClusterWindow(nullptr),
       mCarClusterConnector(nullptr),
@@ -743,11 +742,6 @@ EmulatorQtWindow::~EmulatorQtWindow() {
         mCarClusterConnector = NULL;
     }
 
-    mStartupDialog.ifExists([&] {
-        mStartupDialog->hide();
-        mStartupDialog.clear();
-    });
-
     AutoLock lock(mSnapshotStateLock);
     mShouldShowSnapshotModalOverlay = false;
     mContainer.hideModalOverlay();
@@ -854,44 +848,8 @@ void EmulatorQtWindow::showGpuWarning() {
 }
 
 void EmulatorQtWindow::slot_startupTick() {
-    // It's been a while since we were launched, and the main
-    // window still hasn't appeared.
-    // Show a pop-up that lets the user know we are working.
-    if (getConsoleAgents()
-                ->settings->android_cmdLineOptions()
-                ->qt_hide_window) {
-        return;
-    }
-    if (getConsoleAgents()->settings->is_fuchsia()) {
-        mStartupDialog->setWindowTitle(tr("Fuchsia Emulator"));
-    } else {
-        mStartupDialog->setWindowTitle(tr("Android Emulator"));
-    }
-    // Hide close/minimize/maximize buttons
-    mStartupDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
-                                   Qt::WindowTitleHint);
-    // Make sure the icon is the same as in the main window
-    mStartupDialog->setWindowIcon(QApplication::windowIcon());
-
-    // Emulator logo
-    QLabel* label = new QLabel();
-    label->setAlignment(Qt::AlignCenter);
-    QSize size;
-    size.setWidth(mStartupDialog->size().width() / 2);
-    size.setHeight(size.width());
-    QPixmap pixmap = windowIcon().pixmap(size);
-    label->setPixmap(pixmap);
-    mStartupDialog->setLabel(label);
-
-    // The default progress bar on Windows isn't centered for some reason
-    QProgressBar* bar = new QProgressBar();
-    bar->setAlignment(Qt::AlignHCenter);
-    mStartupDialog->setBar(bar);
-
-    mStartupDialog->setRange(0, 0);      // Don't show % complete
-    mStartupDialog->setCancelButton(0);  // No "cancel" button
-    mStartupDialog->setMinimumSize(mStartupDialog->sizeHint());
-    mStartupDialog->show();
+// this is useless as we are moving to embed already
+    return;
 }
 
 void EmulatorQtWindow::slot_avdArchWarningMessageAccepted() {
@@ -941,10 +899,6 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     // forever.
     mStartupTimer.stop();
     mStartupTimer.disconnect();
-    mStartupDialog.ifExists([&] {
-        mStartupDialog->hide();
-        mStartupDialog.clear();
-    });
 
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         if (!alreadyClosed) {
@@ -2238,8 +2192,6 @@ void EmulatorQtWindow::onApplicationStateChanged(Qt::ApplicationState state) {
 
 void EmulatorQtWindow::showEvent(QShowEvent* event) {
     mStartupTimer.stop();
-    mStartupDialog->hide();
-    mStartupDialog.clear();
     mStartupDone = true;
 
     if (mClosed) {
