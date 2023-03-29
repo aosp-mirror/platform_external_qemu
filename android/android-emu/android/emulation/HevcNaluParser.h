@@ -124,8 +124,6 @@ public:
                          // so checking is simpler.
     };
 
-    static const std::string kNaluTypesStrings[];
-
     static bool checkSpsFrame(const uint8_t* frame, size_t szBytes);
     static bool checkPpsFrame(const uint8_t* frame, size_t szBytes);
     static bool checkVpsFrame(const uint8_t* frame, size_t szBytes);
