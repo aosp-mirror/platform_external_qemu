@@ -332,6 +332,13 @@ void PathUtils::simplifyComponents(std::vector<std::string>* components) {
     simplifyComponents<std::string>(components);
 }
 
+std::string PathUtils::canonicalPath(std::string desired_directory) {
+    auto path = PathUtils::decompose(desired_directory);
+    PathUtils::simplifyComponents(&path);
+    auto recomposed = PathUtils::recompose(path);
+    return recomposed;
+}
+
 // static
 std::string PathUtils::relativeTo(const std::string& base,
                                   const std::string& path,
