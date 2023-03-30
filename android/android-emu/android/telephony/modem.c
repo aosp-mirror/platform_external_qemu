@@ -544,6 +544,10 @@ amodem_begin_line( AModem  modem )
 static void
 amodem_add_line( AModem  modem, const char*  format, ... )
 {
+    if (modem->out_size > sizeof(modem->out_buff)) {
+        derror("modem->out_size cannot exceed the size of modem->out_buff");
+        return;
+    }
     va_list  args;
     va_start(args, format);
     modem->out_size += vsnprintf( modem->out_buff + modem->out_size,
@@ -2402,6 +2406,12 @@ amodem_addTimeUpdate( AModem  modem )
              (tzdiff >= 0) ? '+' : '-', (tzdiff >= 0 ? tzdiff : -tzdiff),
              (isdst > 0),
              tzname );
+}
+
+void amodem_add_time_update(AModem modem) {
+    amodem_begin_line(modem);
+    amodem_addTimeUpdate(modem);
+    amodem_end_line(modem);
 }
 
 static const char*
