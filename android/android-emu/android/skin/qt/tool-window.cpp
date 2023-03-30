@@ -245,7 +245,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         default_shortcuts += "Ctrl+Up   ZOOM_IN\n";
         default_shortcuts += "Ctrl+Down ZOOM_OUT\n";
     }
-    if (fc::isEnabled(fc::PlayStoreImage)) {
+    if (fc::isEnabled(fc::PlayStoreImage) &&
+	getConsoleAgents()->settings->hw()->PlayStore_enabled) {
         default_shortcuts += "Ctrl+Shift+G SHOW_PANE_GPLAY\n";
     }
     if (fc::isEnabled(fc::ScreenRecording)) {
