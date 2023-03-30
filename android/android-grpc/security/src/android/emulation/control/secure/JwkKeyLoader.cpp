@@ -82,6 +82,11 @@ static absl::StatusOr<std::string> readFile(JwkKeyLoader::Path fname) {
         return absl::UnavailableError(message);
     }
 
+    if (fstream.fail()) {
+        auto message = absl::StrFormat("%s failed to open.", fname);
+        return absl::UnavailableError(message);
+    }
+
     // Usually a jkw file is around 300 bytes... so...
     constexpr int MAX_JWK_SIZE = 8 * 1024;
     if (fileSize > MAX_JWK_SIZE) {
