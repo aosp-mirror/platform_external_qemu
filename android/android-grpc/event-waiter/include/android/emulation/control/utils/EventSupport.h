@@ -16,6 +16,15 @@
 #include <unordered_set>
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
 
+#define DEBUG_EVT 0
+
+#if DEBUG_EVT >= 1
+#define DD_EVT(fmt, ...) \
+    printf("EventSupport: %s:%d| " fmt "\n", __func__, __LINE__, ##__VA_ARGS__)
+#else
+#define DD_EVT(...) (void)0
+#endif
+
 namespace android {
 namespace emulation {
 namespace control {
@@ -80,6 +89,7 @@ public:
      */
     void addListener(EventListener<T>* listener) {
         const std::lock_guard<std::mutex> lock(mListenerLock);
+        DD_EVT("Adding %p", listener);
         mListeners.insert(listener);
     }
 
@@ -93,6 +103,7 @@ public:
      */
     void removeListener(EventListener<T>* listener) {
         const std::lock_guard<std::mutex> lock(mListenerLock);
+        DD_EVT("Removing %p", listener);
         mListeners.erase(listener);
     }
 
@@ -106,6 +117,7 @@ public:
     void fireEvent(const T event) {
         const std::lock_guard<std::mutex> lock(mListenerLock);
         for (auto listener : mListeners) {
+            DD_EVT("Informing %p", listener);
             listener->eventArrived(event);
         }
     }
@@ -208,6 +220,7 @@ public:
      *        event subscriptions and event notifications.
      */
     GenericEventStreamWriter(ChangeSupport* listener) : mListener(listener) {
+        DD_EVT("Created %p", this);
         mListener->addListener(this);
     }
 
@@ -215,7 +228,10 @@ public:
      * Destroys the GenericEventStreamWriter and unregisters itself as an
      * event listener from the ChangeSupport instance.
      */
-    ~GenericEventStreamWriter() { mListener->removeListener(this); }
+    ~GenericEventStreamWriter() {
+        DD_EVT("Deleted %p", this);
+        mListener->removeListener(this);
+    }
 
     /**
      * Overrides the EventListener<T>::eventArrived() method to write an
@@ -226,6 +242,7 @@ public:
      *        to the client.
      */
     void eventArrived(const T event) override {
+        DD_EVT("Writing %p, %s", this, event.ShortDebugString().c_str());
         SimpleServerWriter<T>::Write(event);
     };
 
@@ -235,6 +252,16 @@ public:
      * event stream.
      */
     void OnDone() override { delete this; };
+
+    /**
+     * Overrides the SimpleServerWriter<T>::OnCancel() method to inform the
+     * parent we want to Cancel this connection. This should result in a
+     * callback to OnDone, which will do the final cleanup.
+     */
+    void OnCancel() override {
+        DD_EVT("Cancelled %p", this);
+        grpc::ServerWriteReactor<T>::Finish(grpc::Status::CANCELLED);
+    }
 
 private:
     ChangeSupport* mListener;
