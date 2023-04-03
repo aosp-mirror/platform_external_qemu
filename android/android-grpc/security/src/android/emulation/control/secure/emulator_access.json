@@ -43,6 +43,7 @@
                 "/android.emulation.control.EmulatorController/getStatus",
                 "/android.emulation.control.EmulatorController/getVmState",
                 "/android.emulation.control.EmulatorController/injectAudio",
+                "/android.emulation.control.EmulatorController/injectWheel",
                 "/android.emulation.control.EmulatorController/rotateVirtualSceneCamera",
                 "/android.emulation.control.EmulatorController/sendKey",
                 "/android.emulation.control.EmulatorController/sendMouse",
@@ -57,6 +58,10 @@
                 "/android.emulation.control.EmulatorController/streamClipboard",
                 "/android.emulation.control.EmulatorController/streamNotification",
                 "/android.emulation.control.EmulatorController/streamScreenshot",
+                // Interaction with extended controls.
+                "/android.emulation.control.UiController/setUiTheme",
+                "/android.emulation.control.UiController/showExtendedControls",
+                "/android.emulation.control.UiController/closeExtendedControls",
                 // Snapshot related functions
                 "/android.emulation.control.SnapshotService/DeleteSnapshot",
                 "/android.emulation.control.SnapshotService/ListSnapshots",
