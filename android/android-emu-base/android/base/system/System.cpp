@@ -1723,6 +1723,17 @@ public:
             close(fd);
         }
 
+#ifndef _WIN32
+        // b/267354112
+        // need to close all the fds (other than stdio/... ) inherited from parent
+        if ((options & RunOptions::WaitForCompletion) == 0) {
+            int fdlimit = (int)sysconf(_SC_OPEN_MAX);
+            for (int i = STDERR_FILENO + 1; i < fdlimit; i++) {
+                close(i);
+            }
+        }
+#endif
+
         if (execvp(command, params.data()) == -1) {
             // emulator doesn't really like exit calls from a forked process
             // (it just hangs), so let's just kill it
