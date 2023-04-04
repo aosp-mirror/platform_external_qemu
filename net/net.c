@@ -114,24 +114,124 @@ int convert_host_port(struct sockaddr_in *saddr, const char *host,
     return 0;
 }
 
-int parse_host_port(struct sockaddr_in *saddr, const char *str,
+const char *sockaddr_in_in6_ntoa(const union sockaddr_in_in6 *saddr) {
+    static char buffer[INET_ADDRSTRLEN > INET6_ADDRSTRLEN ?
+        INET_ADDRSTRLEN : INET6_ADDRSTRLEN];
+    if (saddr->saddr.sa_family == AF_INET) {
+        return inet_ntop(AF_INET, &saddr->in.sin_addr, buffer, sizeof(buffer));
+    } else if (saddr->saddr.sa_family == AF_INET6) {
+        return inet_ntop(AF_INET6, &saddr->in6.sin6_addr, buffer,
+                         sizeof(buffer));
+    }
+    strncpy(buffer, "Unknown protocol", sizeof(buffer));
+    buffer[sizeof(buffer) - 1] = '\0';
+    return buffer;
+}
+
+static bool host_supports_ipv4(void) {
+  static bool detected = false;
+  static bool supports_ipv4 = true;
+  if (!detected) {
+    int fd = qemu_socket(AF_INET, SOCK_STREAM, 0);
+    supports_ipv4 = (fd >= 0 || errno != EAFNOSUPPORT);
+    detected = true;
+    if (fd >= 0) {
+        close(fd);
+    }
+  }
+  return supports_ipv4;
+}
+
+int parse_host_port(union sockaddr_in_in6 *saddr, const char *str,
                     Error **errp)
 {
-    gchar **substrings;
-    int ret;
+    gchar *separator, *haddr;
+    struct addrinfo hints = {};
+    struct addrinfo *result;
+    const char *p, *r;
+    int port, ret = 0, n;
 
-    substrings = g_strsplit(str, ":", 2);
-    if (!substrings || !substrings[0] || !substrings[1]) {
+    memset(saddr, 0, sizeof(*saddr));
+
+    separator = g_strrstr(str, ":");
+    if (!separator) {
         error_setg(errp, "host address '%s' doesn't contain ':' "
                    "separating host from port", str);
-        ret = -1;
-        goto out;
+        return -1;
     }
 
-    ret = convert_host_port(saddr, substrings[0], substrings[1], errp);
+    p = separator + 1;
+    port = strtol(p, (char **)&r, 0);
+    if (r == p || *r != '\0' || errno == ERANGE) {
+        /* Checking *r to prevent [::1] from being parsed as port = 1 */
+        error_setg(errp, "port number '%s' is invalid", p);
+        return -1;
+    }
+    haddr = g_strndup(str, separator - str);
+
+    if (haddr[0] == '\0') {
+        /* empty address */
+        if (host_supports_ipv4()) {
+            saddr->in.sin_family = AF_INET;
+            saddr->in.sin_addr.s_addr = 0;
+            saddr->in.sin_port = htons(port);
+        } else {
+            saddr->in6.sin6_family = AF_INET6;
+            memset(&saddr->in6.sin6_addr, 0, sizeof(saddr->in6.sin6_addr));
+            saddr->in6.sin6_port = htons(port);
+        }
+    } else if (qemu_isdigit(haddr[0])) {
+        /* IPv4 */
+        saddr->in.sin_family = AF_INET;
+        saddr->in.sin_port = htons(port);
+        if (!inet_aton(haddr, &saddr->in.sin_addr)) {
+            error_setg(errp, "host address '%s' is not a valid "
+                       "IPv4 address", haddr);
+            ret = -1;
+            goto out;
+        }
+    } else if (haddr[0] == '[') {
+        /* IPv6 */
+        int last_char = strlen(haddr) - 1;
+        if (haddr[last_char] != ']') {
+            error_setg(errp, "IPv6 host address '%s' not enclosed in square "
+                       "brackets", haddr);
+            ret = -1;
+            goto out;
+        }
+        haddr[last_char] = '\0';
+
+        saddr->in6.sin6_family = AF_INET6;
+        saddr->in6.sin6_port = htons(port);
+        if (!inet_pton(AF_INET6, haddr + 1, &saddr->in6.sin6_addr)) {
+            error_setg(errp, "host address '%s' is not a valid "
+                       "IPv6 address", haddr + 1);
+            ret = -1;
+            goto out;
+        }
+    } else {
+        /* DNS host name */
+        hints.ai_family = host_supports_ipv4() ? AF_INET : AF_INET6;
+        n = getaddrinfo(haddr, NULL, &hints, &result);
+        if (n < 0) {
+            error_setg(errp, "getaddrinfo error '%s'", gai_strerror(n));
+            ret = -1;
+            goto out;
+        }
+        if (hints.ai_family == AF_INET) {
+            assert(sizeof(saddr->in) == result->ai_addrlen);
+            memcpy(&saddr->in, result->ai_addr, result->ai_addrlen);
+            saddr->in.sin_port = htons(port);
+        } else {
+            assert(sizeof(saddr->in6) == result->ai_addrlen);
+            memcpy(&saddr->in6, result->ai_addr, result->ai_addrlen);
+            saddr->in6.sin6_port = htons(port);
+        }
+        freeaddrinfo(result);
+    }
 
 out:
-    g_strfreev(substrings);
+    g_free(haddr);
     return ret;
 }
 

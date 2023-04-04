@@ -84,8 +84,44 @@ int socket_dgram(SocketAddress *remote, SocketAddress *local, Error **errp);
 /* Old, ipv4 only bits.  Don't use for new code. */
 int convert_host_port(struct sockaddr_in *saddr, const char *host,
                       const char *port, Error **errp);
-int parse_host_port(struct sockaddr_in *saddr, const char *str,
+
+union sockaddr_in_in6 {
+    struct sockaddr saddr;
+    struct sockaddr_in in;
+    struct sockaddr_in6 in6;
+};
+
+inline size_t sockaddr_in_in6_size(const union sockaddr_in_in6 *saddr) {
+    return saddr->saddr.sa_family == AF_INET ?
+        sizeof(saddr->in) : sizeof(saddr->in6);
+}
+
+inline int sockaddr_in_in6_port(const union sockaddr_in_in6 *saddr) {
+    return ntohs(saddr->saddr.sa_family == AF_INET ?
+                 saddr->in.sin_port : saddr->in6.sin6_port);
+}
+
+/*
+ * Variant of inet_ntoa for the union. Similar to inet_ntoa, the string is
+ * returned in a statically allocated buffer, which subsequent calls will
+ * overwrite.
+ */
+const char *sockaddr_in_in6_ntoa(const union sockaddr_in_in6 *saddr);
+
+/*
+ * Parses a host-and-port string into `sockaddr`. Accepted string formats are
+ *  - :{portnum}
+ *  - x.x.x.x:{portnum}
+ *  - [{ipv6_addr}]:{portnum}
+ *  - example.com:{portnum}
+ * When the host part is IPv4 or v6 addresses, `saddr->in` or `saddr->in6` is
+ * populated, respectively. For empty or DNS host names, if IPv4 is supported on
+ * the host it populates `saddr->in`, otherwise it assumes we are on an
+ * IPv6-only host and populates `saddr->in6`.
+ */
+int parse_host_port(union sockaddr_in_in6 *saddr, const char *str,
                     Error **errp);
+
 int socket_init(void);
 
 /**

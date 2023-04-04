@@ -43,6 +43,7 @@ typedef struct NetSocketState {
     IOHandler *send_fn;           /* differs between SOCK_STREAM/SOCK_DGRAM */
     bool read_poll;               /* waiting to receive data? */
     bool write_poll;              /* waiting to transmit data? */
+    sa_family_t sa_family;        /* address family */
 } NetSocketState;
 
 static void net_socket_accept(void *opaque);
@@ -333,7 +334,7 @@ static NetSocketState *net_socket_fd_init_dgram(NetClientState *peer,
                                                 const char *mcast,
                                                 Error **errp)
 {
-    struct sockaddr_in saddr;
+    union sockaddr_in_in6 saddr;
     int newfd;
     NetClientState *nc;
     NetSocketState *s;
@@ -356,13 +357,17 @@ static NetSocketState *net_socket_fd_init_dgram(NetClientState *peer,
             if (parse_host_port(&saddr, mcast, errp) < 0) {
                 goto err;
             }
+            if (saddr.saddr.sa_family != AF_INET) {
+                error_setg(errp, "can't setup multicast on non-IPv4 address");
+                goto err;
+            }
             /* must be bound */
-            if (saddr.sin_addr.s_addr == 0) {
+            if (saddr.in.sin_addr.s_addr == 0) {
                 error_setg(errp, "can't setup multicast destination address");
                 goto err;
             }
             /* clone dgram socket */
-            newfd = net_socket_mcast_create(&saddr, NULL, errp);
+            newfd = net_socket_mcast_create(&saddr.in, NULL, errp);
             if (newfd < 0) {
                 goto err;
             }
@@ -384,9 +389,10 @@ static NetSocketState *net_socket_fd_init_dgram(NetClientState *peer,
 
     /* mcast: save bound address as dst */
     if (is_connected && mcast != NULL) {
-        s->dgram_dst = saddr;
+        s->dgram_dst = saddr.in;
         qemu_set_info_str(nc, "socket: fd=%d (cloned mcast=%s:%d)", fd,
-                          inet_ntoa(saddr.sin_addr), ntohs(saddr.sin_port));
+                          inet_ntoa(saddr.in.sin_addr),
+                          ntohs(saddr.in.sin_port));
     } else {
         if (sa_type == SOCKET_ADDRESS_TYPE_UNIX) {
             s->dgram_dst.sin_family = AF_UNIX;
@@ -466,13 +472,21 @@ static int net_socket_fd_check(int fd, Error **errp)
 static void net_socket_accept(void *opaque)
 {
     NetSocketState *s = opaque;
-    struct sockaddr_in saddr;
-    socklen_t len;
+    union sockaddr_in_in6 saddr;
+    socklen_t len, socklen;
     int fd;
 
+    if (s->sa_family == AF_INET) {
+        socklen = sizeof(saddr.in);
+    } else if (s->sa_family == AF_INET6) {
+        socklen = sizeof(saddr.in6);
+    } else {
+        assert(!"NetSocketState.sa_family must be either AF_INET or AF_INET6");
+    }
+
     for(;;) {
-        len = sizeof(saddr);
-        fd = qemu_accept(s->listen_fd, (struct sockaddr *)&saddr, &len);
+        len = socklen;
+        fd = qemu_accept(s->listen_fd, &saddr.saddr, &len);
         if (fd < 0 && errno != EINTR) {
             return;
         } else if (fd >= 0) {
@@ -485,7 +499,8 @@ static void net_socket_accept(void *opaque)
     s->nc.link_down = false;
     net_socket_connect(s);
     qemu_set_info_str(&s->nc, "socket: connection from %s:%d",
-                      inet_ntoa(saddr.sin_addr), ntohs(saddr.sin_port));
+                      sockaddr_in_in6_ntoa(&saddr),
+                      sockaddr_in_in6_port(&saddr));
 }
 
 static int net_socket_listen_init(NetClientState *peer,
@@ -496,26 +511,27 @@ static int net_socket_listen_init(NetClientState *peer,
 {
     NetClientState *nc;
     NetSocketState *s;
-    struct sockaddr_in saddr;
+    union sockaddr_in_in6 saddr;
     int fd, ret;
 
     if (parse_host_port(&saddr, host_str, errp) < 0) {
         return -1;
     }
 
-    fd = qemu_socket(PF_INET, SOCK_STREAM, 0);
+    fd = qemu_socket(saddr.saddr.sa_family, SOCK_STREAM, 0);
     if (fd < 0) {
-        error_setg_errno(errp, errno, "can't create stream socket");
+        int err = errno;
+        error_setg_errno(errp, err, "can't create stream socket");
         return -1;
     }
     qemu_socket_set_nonblock(fd);
 
     socket_set_fast_reuse(fd);
 
-    ret = bind(fd, (struct sockaddr *)&saddr, sizeof(saddr));
+    ret = bind(fd, &saddr.saddr, sockaddr_in_in6_size(&saddr));
     if (ret < 0) {
         error_setg_errno(errp, errno, "can't bind ip=%s to socket",
-                         inet_ntoa(saddr.sin_addr));
+                         sockaddr_in_in6_ntoa(&saddr));
         close(fd);
         return -1;
     }
@@ -531,6 +547,7 @@ static int net_socket_listen_init(NetClientState *peer,
     s->fd = -1;
     s->listen_fd = fd;
     s->nc.link_down = true;
+    s->sa_family = saddr.saddr.sa_family;
     net_socket_rs_init(&s->rs, net_socket_rs_finalize, false);
 
     qemu_set_fd_handler(s->listen_fd, net_socket_accept, NULL, s);
@@ -545,13 +562,13 @@ static int net_socket_connect_init(NetClientState *peer,
 {
     NetSocketState *s;
     int fd, connected, ret;
-    struct sockaddr_in saddr;
+    union sockaddr_in_in6 saddr;
 
     if (parse_host_port(&saddr, host_str, errp) < 0) {
         return -1;
     }
 
-    fd = qemu_socket(PF_INET, SOCK_STREAM, 0);
+    fd = qemu_socket(saddr.saddr.sa_family, SOCK_STREAM, 0);
     if (fd < 0) {
         error_setg_errno(errp, errno, "can't create stream socket");
         return -1;
@@ -560,7 +577,7 @@ static int net_socket_connect_init(NetClientState *peer,
 
     connected = 0;
     for(;;) {
-        ret = connect(fd, (struct sockaddr *)&saddr, sizeof(saddr));
+        ret = connect(fd, &saddr.saddr, sockaddr_in_in6_size(&saddr));
         if (ret < 0) {
             if (errno == EINTR || errno == EWOULDBLOCK) {
                 /* continue */
@@ -583,7 +600,8 @@ static int net_socket_connect_init(NetClientState *peer,
     }
 
     qemu_set_info_str(&s->nc, "socket: connect to %s:%d",
-                      inet_ntoa(saddr.sin_addr), ntohs(saddr.sin_port));
+                      sockaddr_in_in6_ntoa(&saddr),
+                      sockaddr_in_in6_port(&saddr));
     return 0;
 }
 
@@ -596,10 +614,14 @@ static int net_socket_mcast_init(NetClientState *peer,
 {
     NetSocketState *s;
     int fd;
-    struct sockaddr_in saddr;
+    union sockaddr_in_in6 saddr;
     struct in_addr localaddr, *param_localaddr;
 
     if (parse_host_port(&saddr, host_str, errp) < 0) {
+        return -1;
+    }
+    if (saddr.saddr.sa_family != AF_INET) {
+        error_setg(errp, "can't setup multicast on non-IPv4 address");
         return -1;
     }
 
@@ -614,7 +636,7 @@ static int net_socket_mcast_init(NetClientState *peer,
         param_localaddr = NULL;
     }
 
-    fd = net_socket_mcast_create(&saddr, param_localaddr, errp);
+    fd = net_socket_mcast_create(&saddr.in, param_localaddr, errp);
     if (fd < 0) {
         return -1;
     }
@@ -624,10 +646,10 @@ static int net_socket_mcast_init(NetClientState *peer,
         return -1;
     }
 
-    s->dgram_dst = saddr;
+    s->dgram_dst = saddr.in;
 
     qemu_set_info_str(&s->nc, "socket: mcast=%s:%d",
-                      inet_ntoa(saddr.sin_addr), ntohs(saddr.sin_port));
+                      inet_ntoa(saddr.in.sin_addr), ntohs(saddr.in.sin_port));
     return 0;
 
 }
@@ -641,13 +663,19 @@ static int net_socket_udp_init(NetClientState *peer,
 {
     NetSocketState *s;
     int fd, ret;
-    struct sockaddr_in laddr, raddr;
+    union sockaddr_in_in6 laddr, raddr;
 
     if (parse_host_port(&laddr, lhost, errp) < 0) {
         return -1;
     }
 
     if (parse_host_port(&raddr, rhost, errp) < 0) {
+        return -1;
+    }
+
+    if (laddr.saddr.sa_family != AF_INET || raddr.saddr.sa_family != AF_INET) {
+        error_setg_errno(errp, errno,
+                         "can't setup datagram on non-IPv4 address");
         return -1;
     }
 
@@ -664,10 +692,10 @@ static int net_socket_udp_init(NetClientState *peer,
         close(fd);
         return -1;
     }
-    ret = bind(fd, (struct sockaddr *)&laddr, sizeof(laddr));
+    ret = bind(fd, &laddr.saddr, sizeof(laddr.in));
     if (ret < 0) {
         error_setg_errno(errp, errno, "can't bind ip=%s to socket",
-                         inet_ntoa(laddr.sin_addr));
+                         inet_ntoa(laddr.in.sin_addr));
         close(fd);
         return -1;
     }
@@ -678,10 +706,10 @@ static int net_socket_udp_init(NetClientState *peer,
         return -1;
     }
 
-    s->dgram_dst = raddr;
+    s->dgram_dst = raddr.in;
 
-    qemu_set_info_str(&s->nc, "socket: udp=%s:%d", inet_ntoa(raddr.sin_addr),
-                      ntohs(raddr.sin_port));
+    qemu_set_info_str(&s->nc, "socket: udp=%s:%d", inet_ntoa(raddr.in.sin_addr),
+                      ntohs(raddr.in.sin_port));
     return 0;
 }
 
