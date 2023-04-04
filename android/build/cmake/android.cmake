@@ -82,6 +82,7 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
           "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
           "-DBREAKPAD_API_KEY=${BREAKPAD_API_KEY}"
           "-DBREAKPAD_API_URL=${BREAKPAD_API_URL}"
+          "-DOPTION_TEST_LOGS=${OPTION_TEST_LOGS}"
           "-DANDROID_SYMBOL_DIR=${ANDROID_SYMBOL_DIR}"
           "-DPython_EXECUTABLE=${Python_EXECUTABLE}"
         BUILD_BYPRODUCTS ${BUILD_PRODUCT}
@@ -879,7 +880,7 @@ function(android_add_test)
     NAME ${build_TARGET}
     COMMAND
       $<TARGET_FILE:${build_TARGET}>
-      --gtest_output=xml:$<TARGET_FILE_NAME:${build_TARGET}>.xml
+      --gtest_output=xml:${OPTION_TEST_LOGS}/$<TARGET_FILE_NAME:${build_TARGET}>.xml
       --gtest_catch_exceptions=0 ${build_TEST_PARAMS}
     WORKING_DIRECTORY $<TARGET_FILE_DIR:${build_TARGET}>)
 
