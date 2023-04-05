@@ -30,6 +30,7 @@
 #include "host-common/vm_operations.h"        // for QAndroidV...
 #include "host-common/feature_control.h"         // for feature_i...
 #include "host-common/hw-config-helper.h"
+#include "android/hw-sensors.h"
 #include "android/kernel/kernel_utils.h"                    // for KERNEL_VE...
 #include "android/main-emugl.h"                             // for androidEm...
 #include "android/main-help.h"                              // for emulator_...
@@ -1194,8 +1195,13 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     // enforce CDD minimums
     int minRam = 32;
-    if (avdInfo_getApiLevel(avd) >= 33) {
+    bool isFoldable = android_foldable_any_folded_area_configured() ||
+                      android_foldable_hinge_configured() ||
+                      android_foldable_rollable_configured();
+
+    if (avdInfo_getApiLevel(avd) >= 33 && isFoldable) {
         minRam = 3072; // 3G is required for U and up, to avoid kswapd eating cpus
+        D("foldable devices with api >=33 is set to have minimum ram 3G");
     } else if (avdInfo_getApiLevel(avd) >= 29) {
         // bug: 129958266
         // Q preview where API level is not 29 yet,
@@ -1239,7 +1245,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     }
 
     if (hw->hw_ramSize < minRam) {
-        D("Increasing RAM size to %iMB", minRam);
+        dinfo("Increasing RAM size to %iMB", minRam);
         hw->hw_ramSize = minRam;
     } else if (limit_is_4gb && hw->hw_ramSize > 4096) {
         D("Decreasing RAM size to 4096MB");
