@@ -1194,7 +1194,9 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     // enforce CDD minimums
     int minRam = 32;
-    if (avdInfo_getApiLevel(avd) >= 29) {
+    if (avdInfo_getApiLevel(avd) >= 33) {
+        minRam = 3072; // 3G is required for U and up, to avoid kswapd eating cpus
+    } else if (avdInfo_getApiLevel(avd) >= 29) {
         // bug: 129958266
         // Q preview where API level is not 29 yet,
         // it becomes 1000 so we still get the effect we want.
