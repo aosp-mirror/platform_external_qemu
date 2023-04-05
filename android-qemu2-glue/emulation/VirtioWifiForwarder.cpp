@@ -20,7 +20,6 @@ extern "C" {
 #include "aemu/base/StringFormat.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/sockets/SocketUtils.h"
-#include "android/console.h"
 #include "android/network/Endian.h"
 #include "android/network/WifiForwardClient.h"
 #include "android/network/WifiForwardPeer.h"
@@ -139,6 +138,12 @@ VirtioWifiForwarder::~VirtioWifiForwarder() {
 }
 
 bool VirtioWifiForwarder::init() {
+    mHostapd = HostapdController::getInstance();
+    if (!mHostapd) {
+        LOG(ERROR)
+                << "Failed to initialize Wi-Fi:  hostapd controller is null.";
+        return false;
+    }
     // init socket pair.
     int fds[2];
     if (socketCreatePair(&fds[0], &fds[1])) {
@@ -146,23 +151,15 @@ bool VirtioWifiForwarder::init() {
                 << "Failed to initialize Wi-Fi: Unable to create socket pair.";
         return false;
     }
+    mHostapdSock = ScopedSocket(fds[0]);
     mVirtIOSock = ScopedSocket(fds[1]);
-    mHostapd = HostapdController::getInstance();
-    if (!mHostapd) {
-        LOG(ERROR)
-                << "Failed to initialize Wi-Fi:  hostapd controller is null.";
-        return false;
-    }
-    if (!mHostapd->setDriverSocket(ScopedSocket(fds[0]))) {
-        LOG(ERROR)
-                << "Failed to initialize Wi-Fi:  Uable to set driver sockets.";
-        return false;
-    }
+    mHostapdSockInitSuccess = mHostapd->setDriverSocket(mHostapdSock);
     //  Looper FdWatch and set callback functions
     mFdWatch = mLooper->createFdWatch(mVirtIOSock.get(),
                                       &VirtioWifiForwarder::onHostApd, this);
     mFdWatch->wantRead();
     mFdWatch->dontWantWrite();
+
     if (mSlirp &&
         !net_slirp_set_custom_slirp_output_callback(
                 mSlirp, &VirtioWifiForwarder::onRxPacketAvailable, this)) {
@@ -224,6 +221,13 @@ void VirtioWifiForwarder::ackLocalFrame(const Ieee80211Frame* frame) {
 int VirtioWifiForwarder::send(const IOVector& iov) {
     if (!mHostapd->isRunning()) {
         return 0;
+    }
+    if (!mHostapdSockInitSuccess.load()) {
+        mHostapdSockInitSuccess = mHostapd->setDriverSocket(mHostapdSock);
+        if (!mHostapdSockInitSuccess.load()) {
+            LOG(DEBUG) << "Hostapd event loop has not been initialized yet.";
+            return 0;
+        }
     }
     if (iov.summedLength() < IEEE80211_HDRLEN) {
         return 0;
