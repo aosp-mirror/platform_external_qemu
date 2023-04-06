@@ -205,9 +205,6 @@ int android_initOpenglesEmulation() {
         }
     }
 
-    sEgl = (const EGLDispatch *)sRenderLib->getEGLDispatch();
-    sGlesv2 = (const GLESv2Dispatch *)sRenderLib->getGLESv2Dispatch();
-
     return 0;
 
 BAD_EXIT:
@@ -232,16 +229,6 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
 {
     if (!sRenderLib) {
         D("Can't start OpenGLES renderer without support libraries");
-        return -1;
-    }
-
-    if (!sEgl) {
-        D("Can't start OpenGLES renderer without EGL libraries");
-        return -1;
-    }
-
-    if (!sGlesv2) {
-        D("Can't start OpenGLES renderer without GLES libraries");
         return -1;
     }
 
@@ -299,6 +286,9 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
                                 android::base::MemoryTracker::get());
 
     sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
+
+    sEgl = (const EGLDispatch *)sRenderer->getEglDispatch();
+    sGlesv2 = (const GLESv2Dispatch *)sRenderer->getGles2Dispatch();
 
     android::snapshot::Snapshotter::get().addOperationCallback(
             [](android::snapshot::Snapshotter::Operation op,

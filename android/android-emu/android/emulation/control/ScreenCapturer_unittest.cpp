@@ -288,6 +288,9 @@ public:
     void setDisplayConfigs(int configId, int w, int h, int dpiX, int dpiY) override {}
     void setDisplayActiveConfig(int configId) override {}
 
+    const void* getEglDispatch() override { return nullptr; }
+    const void* getGles2Dispatch() override { return nullptr; }
+
 private:
     bool mHasValidScreenshot = false;
     bool mGuestPostedAFrame = false;
