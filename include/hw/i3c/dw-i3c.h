@@ -21,13 +21,6 @@ OBJECT_DECLARE_SIMPLE_TYPE(DWI3C, DW_I3C)
 
 #define DW_I3C_NR_REGS (0x300 >> 2)
 
-#define DW_I3C_CMD_QUEUE_CAPACITY  0x10
-#define DW_I3C_RESP_QUEUE_CAPACITY 0x10
-#define DW_I3C_TX_QUEUE_CAPACITY   0x40
-#define DW_I3C_RX_QUEUE_CAPACITY   0x40
-#define DW_I3C_IBI_QUEUE_CAPACITY  0x10
-#define DW_I3C_DEVICE_ADDR_TABLE_SIZE 0x8
-
 /* From datasheet. */
 #define DW_I3C_CMD_ATTR_TRANSFER_CMD 0
 #define DW_I3C_CMD_ATTR_TRANSFER_ARG 1
@@ -186,7 +179,13 @@ typedef struct DWI3C {
     /* Temporary storage for IBI data. */
     DWI3CIBIData ibi_data;
 
-    uint8_t id;
+    struct {
+        uint8_t id;
+        uint8_t cmd_resp_queue_capacity_bytes;
+        uint16_t tx_rx_queue_capacity_bytes;
+        uint8_t ibi_queue_capacity_bytes;
+        uint8_t num_addressable_devices;
+    } cfg;
     uint32_t regs[DW_I3C_NR_REGS];
 } DWI3C;
 

@@ -457,7 +457,7 @@ static int dw_i3c_send(DWI3C *s, const uint8_t *data, uint32_t num_to_send,
         ARRAY_FIELD_DP32(s->regs, DEVICE_CTRL, I3C_RESUME, 1);
     }
 
-    trace_dw_i3c_send(s->id, *num_sent);
+    trace_dw_i3c_send(s->cfg.id, *num_sent);
 
     return ret;
 }
@@ -482,7 +482,7 @@ static int dw_i3c_recv_data(DWI3C *s, bool is_i2c, uint8_t *data,
         }
         /* I2C devices cannot NACK a read, nor end transfers early. */
         *num_read = num_to_read;
-        trace_dw_i3c_recv_data(s->id, *num_read);
+        trace_dw_i3c_recv_data(s->cfg.id, *num_read);
         return 0;
     }
     /* I3C devices can NACK if the controller sends an unsupported CCC. */
@@ -497,7 +497,7 @@ static int dw_i3c_recv_data(DWI3C *s, bool is_i2c, uint8_t *data,
         ARRAY_FIELD_DP32(s->regs, INTR_STATUS, TRANSFER_ERR, 1);
         ARRAY_FIELD_DP32(s->regs, DEVICE_CTRL, I3C_RESUME, 1);
     }
-    trace_dw_i3c_recv_data(s->id, *num_read);
+    trace_dw_i3c_recv_data(s->cfg.id, *num_read);
 
     return ret;
 }
@@ -541,7 +541,7 @@ static inline bool dw_i3c_target_is_i2c(DWI3C *s, uint16_t offset)
 
 static uint8_t dw_i3c_target_addr(DWI3C *s, uint16_t offset)
 {
-    if (offset > DW_I3C_DEVICE_ADDR_TABLE_SIZE) {
+    if (offset > s->cfg.num_addressable_devices) {
         qemu_log_mask(LOG_GUEST_ERROR, "%s: Device addr table offset %d out of "
                       "bounds\n", object_get_canonical_path(OBJECT(s)), offset);
         /* If we're out of bounds, return an address of 0. */
@@ -664,7 +664,7 @@ static int dw_i3c_ibi_handle(I3CBus *bus, uint8_t addr, bool is_recv)
 {
     DWI3C *s = DW_I3C(bus->qbus.parent);
 
-    trace_dw_i3c_ibi_handle(s->id, addr, is_recv);
+    trace_dw_i3c_ibi_handle(s->cfg.id, addr, is_recv);
     s->ibi_data.ibi_queue_status = FIELD_DP32(s->ibi_data.ibi_queue_status,
                                               IBI_QUEUE_STATUS, IBI_ID,
                                               (addr << 1) | is_recv);
@@ -694,7 +694,7 @@ static int dw_i3c_ibi_recv(I3CBus *bus, uint8_t data)
     }
 
     fifo8_push(&s->ibi_data.ibi_intermediate_queue, data);
-    trace_dw_i3c_ibi_recv(s->id, data);
+    trace_dw_i3c_ibi_recv(s->cfg.id, data);
     return 0;
 }
 
@@ -916,7 +916,7 @@ static void dw_i3c_rx_queue_reset(DWI3C *s)
 static void dw_i3c_reset(DeviceState *dev)
 {
     DWI3C *s = DW_I3C(dev);
-    trace_dw_i3c_reset(s->id);
+    trace_dw_i3c_reset(s->cfg.id);
 
     memcpy(s->regs, dw_i3c_resets, sizeof(s->regs));
     dw_i3c_cmd_queue_reset(s);
@@ -968,7 +968,7 @@ static uint32_t dw_i3c_pop_rx(DWI3C *s)
         dw_i3c_update_irq(s);
     }
 
-    trace_dw_i3c_pop_rx(s->id, val);
+    trace_dw_i3c_pop_rx(s->cfg.id, val);
     return val;
 }
 
@@ -1043,7 +1043,7 @@ static uint64_t dw_i3c_read(void *opaque, hwaddr offset, unsigned size)
         break;
     }
 
-    trace_dw_i3c_read(s->id, offset, value);
+    trace_dw_i3c_read(s->cfg.id, offset, value);
 
     return value;
 }
@@ -1057,7 +1057,7 @@ static void dw_i3c_resp_queue_push(DWI3C *s, uint8_t err, uint8_t tid,
     val = FIELD_DP32(val, RESPONSE_QUEUE_PORT, CCCT, ccc_type);
     val = FIELD_DP32(val, RESPONSE_QUEUE_PORT, DL, data_len);
     if (!fifo32_is_full(&s->resp_queue)) {
-        trace_dw_i3c_resp_queue_push(s->id, val);
+        trace_dw_i3c_resp_queue_push(s->cfg.id, val);
         fifo32_push(&s->resp_queue, val);
     }
 
@@ -1080,7 +1080,7 @@ static void dw_i3c_push_tx(DWI3C *s, uint32_t val)
         return;
     }
 
-    trace_dw_i3c_push_tx(s->id, val);
+    trace_dw_i3c_push_tx(s->cfg.id, val);
     fifo32_push(&s->tx_queue, val);
     ARRAY_FIELD_DP32(s->regs, DATA_BUFFER_STATUS_LEVEL, TX_BUF_EMPTY_LOC,
                      fifo32_num_free(&s->tx_queue));
@@ -1104,7 +1104,7 @@ static uint32_t dw_i3c_pop_tx(DWI3C *s)
     }
 
     uint32_t val = fifo32_pop(&s->tx_queue);
-    trace_dw_i3c_pop_tx(s->id, val);
+    trace_dw_i3c_pop_tx(s->cfg.id, val);
     ARRAY_FIELD_DP32(s->regs, DATA_BUFFER_STATUS_LEVEL, TX_BUF_EMPTY_LOC,
                      fifo32_num_free(&s->tx_queue));
 
@@ -1126,7 +1126,7 @@ static void dw_i3c_push_rx(DWI3C *s, uint32_t val)
                       "full\n", object_get_canonical_path(OBJECT(s)));
         return;
     }
-    trace_dw_i3c_push_rx(s->id, val);
+    trace_dw_i3c_push_rx(s->cfg.id, val);
     fifo32_push(&s->rx_queue, val);
 
     ARRAY_FIELD_DP32(s->regs, DATA_BUFFER_STATUS_LEVEL, RX_BUF_BLR,
@@ -1282,7 +1282,7 @@ static int dw_i3c_transfer_ccc(DWI3C *s, DWI3CTransferCmd cmd,
                                      /*is_i2c=*/false)) {
         return DW_I3C_RESP_QUEUE_ERR_BROADCAST_NACK;
     }
-    trace_dw_i3c_transfer_ccc(s->id, cmd.cmd);
+    trace_dw_i3c_transfer_ccc(s->cfg.id, cmd.cmd);
     if (dw_i3c_send_byte(s, cmd.cmd, /*is_i2c=*/false)) {
         return DW_I3C_RESP_QUEUE_ERR_I2C_NACK;
     }
@@ -1394,7 +1394,7 @@ static void dw_i3c_transfer_cmd(DWI3C *s, DWI3CTransferCmd cmd,
 static void dw_i3c_update_char_table(DWI3C *s, uint8_t offset, uint64_t pid,
                                      uint8_t bcr, uint8_t dcr, uint8_t addr)
 {
-    if (offset > DW_I3C_DEVICE_ADDR_TABLE_SIZE) {
+    if (offset > s->cfg.num_addressable_devices) {
         qemu_log_mask(LOG_GUEST_ERROR, "%s: Device char table offset %d out of "
                       "bounds\n", object_get_canonical_path(OBJECT(s)), offset);
         /* If we're out of bounds, do nothing. */
@@ -1567,7 +1567,7 @@ static void dw_i3c_cmd_queue_execute(DWI3C *s)
         arg.word = dw_i3c_cmd_queue_pop(s);
         DWI3CCmdQueueData cmd;
         cmd.word = dw_i3c_cmd_queue_pop(s);
-        trace_dw_i3c_cmd_queue_execute(s->id, cmd.word, arg.word);
+        trace_dw_i3c_cmd_queue_execute(s->cfg.id, cmd.word, arg.word);
 
         uint8_t cmd_attr = FIELD_EX32(cmd.word, COMMAND_QUEUE_PORT, CMD_ATTR);
         switch (cmd_attr) {
@@ -1602,7 +1602,7 @@ static void dw_i3c_cmd_queue_push(DWI3C *s, uint32_t val)
                       "already full\n", object_get_canonical_path(OBJECT(s)));
         return;
     }
-    trace_dw_i3c_cmd_queue_push(s->id, val);
+    trace_dw_i3c_cmd_queue_push(s->cfg.id, val);
     fifo32_push(&s->cmd_queue, val);
 
     uint8_t empty_threshold = ARRAY_FIELD_EX32(s->regs, QUEUE_THLD_CTRL,
@@ -1652,7 +1652,7 @@ static void dw_i3c_write(void *opaque, hwaddr offset, uint64_t value,
     uint32_t addr = offset >> 2;
     uint32_t val32 = (uint32_t)value;
 
-    trace_dw_i3c_write(s->id, offset, value);
+    trace_dw_i3c_write(s->cfg.id, offset, value);
 
     val32 &= ~dw_i3c_ro[addr];
     switch (addr) {
@@ -1726,7 +1726,7 @@ static void dw_i3c_realize(DeviceState *dev, Error **errp)
 {
     DWI3C *s = DW_I3C(dev);
     g_autofree char *name = g_strdup_printf(TYPE_DW_I3C ".%d",
-                                            s->id);
+                                            s->cfg.id);
 
     sysbus_init_irq(SYS_BUS_DEVICE(dev), &s->irq);
 
@@ -1734,14 +1734,14 @@ static void dw_i3c_realize(DeviceState *dev, Error **errp)
                           s, name, DW_I3C_NR_REGS << 2);
     sysbus_init_mmio(SYS_BUS_DEVICE(dev), &s->mr);
 
-    fifo32_create(&s->cmd_queue, DW_I3C_CMD_QUEUE_CAPACITY);
-    fifo32_create(&s->resp_queue, DW_I3C_RESP_QUEUE_CAPACITY);
-    fifo32_create(&s->tx_queue, DW_I3C_TX_QUEUE_CAPACITY);
-    fifo32_create(&s->rx_queue, DW_I3C_RX_QUEUE_CAPACITY);
-    fifo32_create(&s->ibi_queue, DW_I3C_IBI_QUEUE_CAPACITY);
+    fifo32_create(&s->cmd_queue, s->cfg.cmd_resp_queue_capacity_bytes);
+    fifo32_create(&s->resp_queue, s->cfg.cmd_resp_queue_capacity_bytes);
+    fifo32_create(&s->tx_queue, s->cfg.tx_rx_queue_capacity_bytes);
+    fifo32_create(&s->rx_queue, s->cfg.tx_rx_queue_capacity_bytes);
+    fifo32_create(&s->ibi_queue, s->cfg.ibi_queue_capacity_bytes);
     /* Arbitrarily large enough to not be an issue. */
     fifo8_create(&s->ibi_data.ibi_intermediate_queue,
-                  DW_I3C_IBI_QUEUE_CAPACITY * 8);
+                 s->cfg.ibi_queue_capacity_bytes * 8);
 
     s->bus = i3c_init_bus(DEVICE(s), name);
     I3CBusClass *bc = I3C_BUS_GET_CLASS(s->bus);
@@ -1751,7 +1751,15 @@ static void dw_i3c_realize(DeviceState *dev, Error **errp)
 }
 
 static Property dw_i3c_properties[] = {
-    DEFINE_PROP_UINT8("device-id", DWI3C, id, 0),
+    DEFINE_PROP_UINT8("device-id", DWI3C, cfg.id, 0),
+    DEFINE_PROP_UINT8("command-response-queue-capacity-bytes", DWI3C,
+                      cfg.cmd_resp_queue_capacity_bytes, 0x10),
+    DEFINE_PROP_UINT16("tx-rx-queue-capacity-bytes", DWI3C,
+                      cfg.tx_rx_queue_capacity_bytes, 0x40),
+    DEFINE_PROP_UINT8("ibi-queue-capacity-bytes", DWI3C,
+                      cfg.ibi_queue_capacity_bytes, 0x10),
+    DEFINE_PROP_UINT8("num-addressable-devices", DWI3C,
+                      cfg.num_addressable_devices, 8),
     DEFINE_PROP_END_OF_LIST(),
 };
 
