@@ -20,13 +20,16 @@
 #include "hw/i3c/i3c.h"
 #include "hw/i3c/remote-i3c.h"
 #include "hw/i3c/aspeed_i3c.h"
+#include "hw/i3c/dw-i3c.h"
 
 /* Starting address of the AST2600 I3C block. */
 #define ASPEED_I3C_BASE 0x1e7a0000
 /* Offset to the first controller in the block. */
-#define ASPEED_I3C_CONTROLLER_OFFSET 0x2000
-#define I3C(x) (ASPEED_I3C_BASE + ASPEED_I3C_CONTROLLER_OFFSET + ((x) * 0x1000))
+#define DW_I3C_CONTROLLER_OFFSET 0x2000
+#define I3C(x) (ASPEED_I3C_BASE + DW_I3C_CONTROLLER_OFFSET + ((x) * 0x1000))
 #define TARGET_ADDR 0x10
+
+#define DW_I3C_RX_QUEUE_CAPACITY 0x40
 
 /* I3C Device Registers */
 REG32(DEVICE_CTRL,                  0x00)
@@ -89,13 +92,13 @@ REG32(DATA_BUFFER_STATUS_LEVEL,     0x50)
 REG32(DEVICE_ADDR_TABLE_LOC1, 0x280)
     FIELD(DEVICE_ADDR_TABLE_LOC1, DEV_DYNAMIC_ADDR, 16, 8)
 
-typedef union AspeedI3CResponse {
+typedef union DWI3CResponse {
     uint32_t word;
     uint16_t data_len;
     uint8_t ccc_type;
     uint8_t tid:4;
     uint8_t err:4;
-} AspeedI3CResponse;
+} DWI3CResponse;
 
 static int sock;
 static int fd;
@@ -131,13 +134,13 @@ static void setup_fd(void)
     fd = accept(sock, NULL, 0);
 }
 
-static AspeedI3CTransferCmd aspeed_i3c_create_xfer_cmd(uint8_t cmd,
+static DWI3CTransferCmd aspeed_i3c_create_xfer_cmd(uint8_t cmd,
                                                        uint8_t dev_index,
                                                        bool rnw,
                                                        bool dbp)
 {
-    return ((AspeedI3CTransferCmd) {
-        .cmd_attr = ASPEED_I3C_CMD_ATTR_TRANSFER_CMD,
+    return ((DWI3CTransferCmd) {
+        .cmd_attr = DW_I3C_CMD_ATTR_TRANSFER_CMD,
         .tid = 0x01,
         .cmd = cmd,
         .cp = (cmd != 0) ? 1 : 0,
@@ -152,11 +155,11 @@ static AspeedI3CTransferCmd aspeed_i3c_create_xfer_cmd(uint8_t cmd,
     });
 }
 
-static AspeedI3CTransferArg aspeed_i3c_create_xfer_arg(uint8_t db,
+static DWI3CTransferArg aspeed_i3c_create_xfer_arg(uint8_t db,
                                                        uint16_t data_len)
 {
-    return ((AspeedI3CTransferArg) {
-        .cmd_attr = ASPEED_I3C_CMD_ATTR_TRANSFER_ARG,
+    return ((DWI3CTransferArg) {
+        .cmd_attr = DW_I3C_CMD_ATTR_TRANSFER_ARG,
         .db = db,
         .data_len = data_len,
     });
@@ -175,9 +178,9 @@ static void aspeed_i3c_enable(uint32_t base)
     g_assert(readl(base + A_DEVICE_CTRL) & R_DEVICE_CTRL_I3C_EN_MASK);
 }
 
-static AspeedI3CResponse aspeed_i3c_read_resp(uint32_t base)
+static DWI3CResponse aspeed_i3c_read_resp(uint32_t base)
 {
-    AspeedI3CResponse resp;
+    DWI3CResponse resp;
     uint32_t queue_status = readl(base + A_QUEUE_STATUS_LEVEL);
     /* No response to read. */
     if (FIELD_EX32(queue_status, QUEUE_STATUS_LEVEL, RESP_BUF_BLR) == 0) {
@@ -191,8 +194,8 @@ static AspeedI3CResponse aspeed_i3c_read_resp(uint32_t base)
 static void aspeed_i3c_send(uint32_t base, uint8_t dev_index,
                             const uint32_t *data, uint16_t len)
 {
-    AspeedI3CCmdQueueData cmd;
-    AspeedI3CCmdQueueData arg;
+    DWI3CCmdQueueData cmd;
+    DWI3CCmdQueueData arg;
     uint16_t words_txed = 0;
 
     /* Start doing the transfer. */
@@ -227,8 +230,8 @@ static void aspeed_i3c_send(uint32_t base, uint8_t dev_index,
 
 static void aspeed_i3c_send_ccc(uint32_t base, uint8_t ccc_cmd)
 {
-    AspeedI3CCmdQueueData cmd;
-    AspeedI3CCmdQueueData arg;
+    DWI3CCmdQueueData cmd;
+    DWI3CCmdQueueData arg;
 
     cmd.transfer_cmd = aspeed_i3c_create_xfer_cmd(ccc_cmd, 0, false,
                                                   false);
@@ -241,8 +244,8 @@ static void aspeed_i3c_send_ccc(uint32_t base, uint8_t ccc_cmd)
 static void aspeed_i3c_recv(uint32_t base, uint8_t dev_index, uint8_t *data,
                             uint16_t len)
 {
-    AspeedI3CCmdQueueData cmd;
-    AspeedI3CCmdQueueData arg;
+    DWI3CCmdQueueData cmd;
+    DWI3CCmdQueueData arg;
     uint16_t bytes_rxed = 0;
     uint32_t *p32_data = (uint32_t *)data;
 
@@ -255,8 +258,8 @@ static void aspeed_i3c_recv(uint32_t base, uint8_t dev_index, uint8_t *data,
          */
         cmd.transfer_cmd = aspeed_i3c_create_xfer_cmd(0, dev_index, true,
                                                       false);
-        uint16_t num_to_rx = (len - bytes_rxed) > ASPEED_I3C_RX_QUEUE_CAPACITY ?
-            ASPEED_I3C_RX_QUEUE_CAPACITY : (len - bytes_rxed);
+        uint16_t num_to_rx = (len - bytes_rxed) > DW_I3C_RX_QUEUE_CAPACITY ?
+            DW_I3C_RX_QUEUE_CAPACITY : (len - bytes_rxed);
         arg.transfer_arg = aspeed_i3c_create_xfer_arg(0, num_to_rx);
         /* Order to push is arg then command. */
         writel(base + A_COMMAND_QUEUE_PORT, arg.word);
@@ -277,8 +280,8 @@ static void aspeed_i3c_recv(uint32_t base, uint8_t dev_index, uint8_t *data,
 static void assert_good_resp(uint32_t base)
 {
     /* We expect a good response from this. */
-    AspeedI3CResponse resp = aspeed_i3c_read_resp(base);
-    g_assert(resp.err == ASPEED_I3C_RESP_QUEUE_ERR_NONE);
+    DWI3CResponse resp = aspeed_i3c_read_resp(base);
+    g_assert(resp.err == DW_I3C_RESP_QUEUE_ERR_NONE);
 }
 
 static void read_data(uint8_t *data, size_t len)
@@ -585,7 +588,7 @@ int main(int argc, char **argv)
                 "-device %s,"
                 "chardev=remote-i3c-chr,"
                 "device-name=remote-target,"
-                "bus=aspeed.i3c.device.0,"
+                "bus=dw.i3c.0,"
                 "pid=0xfeedf00dd00d,"
                 "dcr=0xaa,"
                 "bcr=0x55,"
