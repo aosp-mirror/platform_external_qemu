@@ -61,6 +61,7 @@ private:
     std::atomic<bool> mRunning{false};
     std::string mSsid;
     std::string mPassword;
+    bool mVerbose;
     android::base::ScopedSocket mDataSock;
     android::base::ScopedSocket mCtrlSock1;
     android::base::ScopedSocket mCtrlSock2;

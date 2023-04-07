@@ -102,6 +102,7 @@ bool HostapdController::init(bool verbose) {
     }
     if (verbose) {
         wpa_debug_level = (int)DebugLevel::MSG_DEBUG;
+        mVerbose = verbose;
     } else {
         // Disable logging by default.
         wpa_debug_level = (int)DebugLevel::MSG_DISABLE;
@@ -128,6 +129,9 @@ bool HostapdController::run() {
     }
     return async([this]() {
         android::ParameterList args{"hostapd"};
+        if (mVerbose) {
+            args.add("-dd");
+        }
         mConfigFile = genConfigFile();
         args.add(mConfigFile);
         LOG(DEBUG) << "Starting hostapd main loop.";
