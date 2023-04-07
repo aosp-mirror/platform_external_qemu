@@ -99,6 +99,9 @@ extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
 extern "C" const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
 extern "C" const QAndroidLibuiAgent* const gQAndroidLibuiAgent;
 
+// android-qemu2-glue/qemu-rootcanal-agent-impl.cpp
+extern "C" const QAndroidHciAgent* const gQAndroidHciAgent;
+
 // Defined in android-qemu2-glue/qemu-hw-control-agent-impl.cpp
 extern "C" const QAndroidHwControlAgent* const gQAndroidHwControlAgent;
 

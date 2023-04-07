@@ -4,11 +4,17 @@ android_add_library(
   TARGET android-wifi-service
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
-      emulation/NetsimWifiForwarder.cpp emulation/virtio-wifi.cpp
-      emulation/VirtioWifiForwarder.cpp emulation/WifiService.cpp)
+      emulation/virtio-wifi.cpp
+      emulation/WifiService.cpp
+      emulation/VirtioWifiForwarder.cpp
+      emulation/NetsimWifiForwarder.cpp)
 
-target_include_directories(android-wifi-service
-                           PRIVATE .. ../include ${ANDROID_AUTOGEN} ../slirp)
+target_include_directories(
+  android-wifi-service
+  PRIVATE ..
+          ../include
+          ${ANDROID_AUTOGEN}
+          ../slirp)
 
 target_link_libraries(
   android-wifi-service
@@ -81,6 +87,7 @@ set(android-qemu2-glue_src
     qemu-sensors-agent-impl.cpp
     qemu-setup-dns-servers.cpp
     qemu-setup.cpp
+    qemu-rootcanal-agent-impl.cpp
     netsim/BluetoothPacketProtocol.cpp
     netsim/PacketStreamTransport.cpp
     netsim/qemu-packet-stream-agent-impl.cpp
@@ -105,17 +112,25 @@ target_include_directories(
           ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/
           ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(libqemu2-glue PRIVATE android-grpc-services-stack)
+target_link_libraries(
+  libqemu2-glue
+  PRIVATE android-grpc-services-stack)
 
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
 
-target_link_libraries(
-  libqemu2-glue
-  PRIVATE emulated-bluetooth-service-server-impl grpc++
-          packet-streamer-client-lib packet-streamer-proto-lib
-          protobuf::libprotobuf libbt-hci-packets)
+if(BLUETOOTH_EMULATION)
+  target_link_libraries(
+    libqemu2-glue
+    PRIVATE emulated-bluetooth-service-server-impl
+            grpc++
+            packet-streamer-client-lib
+            packet-streamer-proto-lib
+            protobuf::libprotobuf
+            libbt-rootcanal
+            libbt-rootcanal-qemu)
+endif()
 
 target_link_libraries(
   libqemu2-glue

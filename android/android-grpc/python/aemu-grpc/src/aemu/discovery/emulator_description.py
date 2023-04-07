@@ -30,6 +30,7 @@ except ImportError:
 
 
 from aemu.proto.emulated_bluetooth_pb2_grpc import EmulatedBluetoothServiceStub
+from aemu.proto.emulated_bluetooth_vhci_pb2_grpc import VhciForwardingServiceStub
 from aemu.proto.emulator_controller_pb2 import VmRunState
 from aemu.proto.emulator_controller_pb2_grpc import EmulatorControllerStub
 from aemu.proto.modem_service_pb2_grpc import ModemStub
@@ -164,6 +165,11 @@ class BasicEmulatorDescription(dict):
         """Returns a stub to the Ui Controller service."""
         channel = self.get_grpc_channel(use_async)
         return UiControllerStub(channel)
+
+    def get_vhci_forwarder_service(self, use_async=False) -> VhciForwardingServiceStub:
+        """Returns a stub to the Vhci Forwarding  service."""
+        channel = self.get_grpc_channel(use_async)
+        return VhciForwardingServiceStub(channel)
 
 
     def get_incubating_modem_service(self, use_async=False) -> ModemStub:

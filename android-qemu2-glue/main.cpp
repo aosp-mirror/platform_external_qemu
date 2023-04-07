@@ -2764,7 +2764,13 @@ extern "C" int main(int argc, char** argv) {
         dprint("Bluetooth requested by %s",
                feature_is_enabled(kFeature_BluetoothEmulation) ? "user"
                                                                : "guest");
-        args.add2("-chardev", "netsim,id=bluetooth");
+        args.add("-chardev");
+        if (opts->packet_streamer_endpoint) {
+            args.addFormat("netsim,id=bluetooth,path=foo");
+        } else {
+            dwarning("Using *DEPRECATED* rootcanal bluetooth emulation.");
+            args.addFormat("rootcanal,id=bluetooth");
+        }
         args.add2("-device", "virtserialport,chardev=bluetooth,name=bluetooth");
     }
 
