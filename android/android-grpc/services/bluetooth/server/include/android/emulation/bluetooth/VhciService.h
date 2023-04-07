@@ -12,26 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include "emulated_bluetooth.grpc.pb.h"  // for EmulatedBluetoothService
+#include "emulated_bluetooth_vhci.grpc.pb.h"  // for VhciForwardingService
 
 namespace android {
-namespace base {
-class Looper;
-}  // namespace base
-namespace bluetooth {
-class Rootcanal;
-}  // namespace bluetooth
-
 namespace emulation {
 namespace bluetooth {
 
-using AsyncEmulatedBluetoothService = EmulatedBluetoothService::CallbackService;
+#ifndef DISABLE_ASYNC_GRPC
+using AsyncVhciForwardingService = VhciForwardingService::CallbackService;
+#else
+using AsyncVhciForwardingService = VhciForwardingService::Service;
+#endif
 
-// Initializes the EmulatedBluetooth gRPC service endpoint,
-// backed by rootcanal and provided looper.
-EmulatedBluetoothService::Service* getEmulatedBluetoothService(
-        android::bluetooth::Rootcanal* rootcanal,
-        base::Looper* looper);
+AsyncVhciForwardingService* getVhciForwarder();
 
 }  // namespace bluetooth
 }  // namespace emulation

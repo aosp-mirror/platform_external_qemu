@@ -72,6 +72,7 @@ extern "C" {
 #include "android-qemu2-glue/snapshot_compression.h"
 #include "android/android.h"
 #include "android/avd/info.h"
+#include "android/bluetooth/rootcanal/root_canal_qemu.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
@@ -81,7 +82,6 @@ extern "C" {
 #include "android/emulation/AudioOutputEngine.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/QemuMiscPipe.h"
-#include "android/emulation/bluetooth/EmulatedBluetoothService.h"
 #include "android/emulation/control/EmulatorAdvertisement.h"
 #include "android/emulation/control/EmulatorService.h"
 #include "android/emulation/control/GrpcServices.h"
@@ -114,6 +114,13 @@ extern "C" {
 #ifdef ANDROID_WEBRTC
 #include "android/emulation/control/RtcService.h"
 #include "android/emulation/control/RtcServiceV2.h"
+#endif
+
+#ifdef ANDROID_BLUETOOTH
+#include "android/bluetooth/rootcanal/root_canal_qemu.h"
+#include "android/emulation/bluetooth/EmulatedBluetoothService.h"
+#include "android/emulation/bluetooth/PhyConnectionClient.h"
+#include "android/emulation/bluetooth/VhciService.h"
 #endif
 
 extern "C" {
@@ -225,6 +232,14 @@ bool qemu_android_emulation_early_setup() {
     // Setup qemud and register qemud-related snapshot callbacks.
     android_qemu2_qemud_init();
 
+#ifdef ANDROID_BLUETOOTH
+    // Activate the virtual bluetooth chip.
+    auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
+    android::bluetooth::Rootcanal::Builder builder;
+    builder.withControllerProperties(opts->rootcanal_controller_properties_file)
+            .withCommandFile(opts->rootcanal_default_commands_file);
+    builder.buildSingleton();
+#endif
     // Ensure the VmLock implementation is setup.
     VmLock* vmLock = new qemu2::VmLock();
     VmLock* prevVmLock = VmLock::set(vmLock);
@@ -269,7 +284,6 @@ bool qemu_android_emulation_early_setup() {
     android::emulation::AudioOutputEngine::set(
             new android::qemu::QemuAudioOutputEngine());
 
-    auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
     if (opts->packet_streamer_endpoint) {
         std::string name = get_display_name();
         register_netsim(to_string(opts->packet_streamer_endpoint),
@@ -280,8 +294,10 @@ bool qemu_android_emulation_early_setup() {
     return true;
 }
 
+using android::emulation::bluetooth::PhyConnectionClient;
 static std::unique_ptr<EmulatorAdvertisement> advertiser;
 static std::unique_ptr<EmulatorControllerService> grpcService;
+static std::vector<std::unique_ptr<PhyConnectionClient>> phyConnections;
 
 bool qemu_android_ports_setup() {
     return android_ports_setup(getConsoleAgents(), true);
@@ -375,8 +391,6 @@ int qemu_setup_grpc() {
             getConsoleAgents());
     auto sensor = android::emulation::control::incubating::getSensorService(
             getConsoleAgents());
-    auto bluetooth =
-            android::emulation::bluetooth::getEmulatedBluetoothService();
     auto builder =
             EmulatorControllerService::Builder()
                     .withConsoleAgents(getConsoleAgents())
@@ -404,8 +418,18 @@ int qemu_setup_grpc() {
                     .withService(stats)
                     .withService(car)
                     .withService(sensor)
-                    .withSecureService(adb)
-                    .withService(bluetooth);
+                    .withSecureService(adb);
+
+#ifdef ANDROID_BLUETOOTH
+    auto bluetooth = android::emulation::bluetooth::getEmulatedBluetoothService(
+            android::bluetooth::Rootcanal::Builder::getInstance().get(),
+            android::base::ThreadLooper::get());
+    builder.withService(bluetooth);
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->forward_vhci) {
+        dinfo("Enabling vhci forwarding");
+        builder.withService(android::emulation::bluetooth::getVhciForwarder());
+    }
+#endif
 
     int timeout = 0;
     if (getConsoleAgents()
@@ -518,6 +542,22 @@ int qemu_setup_grpc() {
     advertiser->garbageCollect();
     advertiser->write();
 
+#ifdef ANDROID_BLUETOOTH
+    // Discover all running emulators and connect the bluetooth channel.
+    // This has to happen after advertising so we can properly distinguish
+    // ourselves from others.
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->rootcanal_no_mesh) {
+        dinfo("Disabling bluetooth autodiscovery.");
+    } else {
+        phyConnections = android::emulation::bluetooth::PhyConnectionClient::
+                connectToAllEmulators(
+                        android::bluetooth::Rootcanal::Builder::getInstance()
+                                .get(),
+                        android::base::ThreadLooper::get());
+    }
+#endif
     return port;
 }
 
@@ -625,6 +665,10 @@ bool qemu_android_emulation_setup() {
 
 void qemu_android_emulation_teardown() {
     android::qemu::skipTimerOps();
+#ifdef ANDROID_BLUETOOTH
+    phyConnections.clear();
+    android::bluetooth::Rootcanal::Builder::getInstance()->close();
+#endif
     androidSnapshot_finalize();
     android_emulation_teardown();
     if (grpcService) {
