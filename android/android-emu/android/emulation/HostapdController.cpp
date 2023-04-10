@@ -220,10 +220,8 @@ android::network::CipherScheme HostapdController::getCipherScheme() {
 const std::string HostapdController::genConfigFile() {
     // Use the default template config file if ssid is "AndroidWifi"
     // and password is empty.
-    if (!fc::isEnabled(fc::WifiConfigurable)) {
-        if (!mSsid.compare(kAndroidWifiSsid) && mPassword.empty()) {
-            return mTemplateConf;
-        }
+    if (!mSsid.compare(kAndroidWifiSsid) && mPassword.empty()) {
+        return mTemplateConf;
     }
     // Otherwise, generate a hard-coded hostapd config file with the
     // newly-created SSID and password.
