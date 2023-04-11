@@ -9,6 +9,7 @@ bitflags = { path = "${AOSP_ROOT}/external/rust/crates/bitflags" }
 bytes = { path = "${AOSP_ROOT}/external/rust/crates/bytes" }
 cexpr = { path = "${AOSP_ROOT}/external/rust/crates/cexpr" }
 cfg-if = { path = "${AOSP_ROOT}/external/rust/crates/cfg-if" }
+chrono = { path = "${AOSP_ROOT}/external/rust/crates/chrono" }
 clang-sys = { path = "${AOSP_ROOT}/external/rust/crates/clang-sys" }
 clap = { path = "${AOSP_ROOT}/external/rust/crates/clap" }
 clap_derive = { path = "${AOSP_ROOT}/external/rust/crates/clap_derive" }
