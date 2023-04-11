@@ -15,6 +15,7 @@ import logging
 import platform
 import shutil
 import subprocess
+import os
 from pathlib import Path
 
 from aemu.process.command import Command
@@ -71,7 +72,6 @@ class FixCargoTask(BuildTask):
         # Known paths where we use rust.
         fix_paths = [
             self.aosp / "packages" / "modules" / "Bluetooth",
-            self.aosp / "external" / "rust" / "chromium" / "crates",
             self.aosp / "tools" / "netsim",
             self.aosp / "external" / "qemu",
         ]
@@ -79,16 +79,19 @@ class FixCargoTask(BuildTask):
         # Fixup the crlf setting
         Command(["git", "config", "--global", "core.autocrlf", "false"]).run()
         for path in fix_paths:
-            logging.info("Stashing changes and removing %s", path)
-            Command(["git", "stash"]).in_directory(path).run()
-            for fname in path.glob("*"):
-                if fname.name == ".git":
-                    logging.info("Not removing git directory.")
-                shutil.rmtree(fname, ignore_errors=True)
+            if os.path.exists(path):
+                logging.info("Stashing changes and removing %s", path)
+                Command(["git", "stash"]).in_directory(path).run()
+                for fname in path.glob("*"):
+                    if fname.name == ".git":
+                        logging.info("Not removing git directory.")
+                    shutil.rmtree(fname, ignore_errors=True)
 
-            logging.info("Bringing back active changes..")
-            Command(["git", "checkout", "."]).in_directory(path).run()
-            Command(["git", "stash", "pop"]).in_directory(path).ignore_failures().run()
+                logging.info("Bringing back active changes..")
+                Command(["git", "checkout", "."]).in_directory(path).run()
+                Command(["git", "stash", "pop"]).in_directory(path).ignore_failures().run()
+            else:
+                logging.warning("Skipping attempt to fix crlf setting on invalid directory: %s", path)
 
         logging.info(
             "Updated your git settings, and re-synced, you will need to run %s, as we cleared out everything.",

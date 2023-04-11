@@ -2190,6 +2190,8 @@ extern "C" int main(int argc, char** argv) {
                     auto startTime = std::chrono::steady_clock::now();
                     path_delete_dir(s_AvdFolder);
                     skipSet.insert("firstboot.ini");
+                    skipSet.insert("bootcompleted.ini");
+                    skipSet.insert("snapshot.trace");
                     skipSet.insert("source.properties");
                     skipSet.insert("multiinstance.lock");
                     skipSet.insert("hardware-qemu.ini.lock");

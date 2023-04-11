@@ -22,8 +22,7 @@
 // a stream of data.
 //
 // For a server reader the channel will be closed with status::ok
-// if a message is not ok. Do not use this in a serverif you want to write
-// while the client reads are already finished (done/failed).
+// if a message cannot be read (i.e. OnReadDone is not ok)
 //
 // T can be a Server or Client Reactor..
 template <typename T, typename R>
@@ -57,6 +56,81 @@ public:
 
 private:
     R mIncoming;
+};
+
+// A simple reader reactor, use this if you want to read
+// a stream of data. You provide read and done std::function.
+// This class will auto delete itself.
+//
+// The channel will be closed with status::ok
+// if a message cannot be read (i.e. OnReadDone is not ok)
+template <typename R>
+class SimpleServerLambdaReader
+    : public WithSimpleReader<grpc::ServerReadReactor<R>, R> {
+    using ReadCallback = std::function<void(const R*)>;
+    using OnDoneCallback = std::function<void()>;
+
+public:
+    SimpleServerLambdaReader(
+            ReadCallback readFn,
+            OnDoneCallback doneFn = []() {})
+        : mReadFn(readFn), mDoneFn(doneFn) {}
+
+    virtual void Read(const R* read) override { mReadFn(read); }
+
+    virtual void OnDone() override {
+        mDoneFn();
+        delete this;
+    }
+
+private:
+    ReadCallback mReadFn;
+    OnDoneCallback mDoneFn;
+};
+
+// A simple client reader reactor, use this if you want to read
+// a stream of data in an async fashion. You provide read and done callback
+// functions This class will auto delete itself.
+//
+// For example:
+//
+//
+// grpc::ClientContext* context = mClient->newContext().release();
+// static google::protobuf::Empty empty;
+// auto read = new SimpleClientLambdaReader<PhoneEvent>(
+//         [](auto event) {
+//            std::cout << "Received event: " << event.ShortDebugString();
+//         }
+//         ,
+//         [context](auto status) {
+//             std::cout << "Finished: " << status.error_message());
+//             delete context;
+//         });
+// mService->async()->receivePhoneEvents(context, &empty, read);
+// read->StartRead();
+// read->StartCall();
+template <typename R>
+class SimpleClientLambdaReader
+    : public WithSimpleReader<grpc::ClientReadReactor<R>, R> {
+    using ReadCallback = std::function<void(const R*)>;
+    using OnDoneCallback = std::function<void(::grpc::Status)>;
+
+public:
+    SimpleClientLambdaReader(
+            ReadCallback readFn,
+            OnDoneCallback doneFn = [](auto s) {})
+        : mReadFn(readFn), mDoneFn(doneFn) {}
+
+    virtual void Read(const R* read) override { mReadFn(read); }
+
+    virtual void OnDone(const grpc::Status& status) override {
+        mDoneFn(status);
+        delete this;
+    }
+
+private:
+    ReadCallback mReadFn;
+    OnDoneCallback mDoneFn;
 };
 
 // A simple async writer where objects will be placed in a queue and written
@@ -116,7 +190,8 @@ using SimpleServerReader = WithSimpleReader<grpc::ServerReadReactor<R>, R>;
 
 // A simple server writer
 template <typename W>
-using SimpleServerWriter = WithSimpleQueueWriter<grpc::ServerWriteReactor<W>, W>;
+using SimpleServerWriter =
+        WithSimpleQueueWriter<grpc::ServerWriteReactor<W>, W>;
 
 // A client bidi stream
 template <typename R, typename W>

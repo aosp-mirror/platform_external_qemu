@@ -167,7 +167,7 @@ std::string VerboseLogFormatter::format(const LogParams& params,
 
     // Get the basename of the file.
     std::string_view path = params.file;
-    auto loc = path.rfind(PATH_SEP);
+    auto loc = path.rfind('/');
     auto filename = path.substr(loc + 1);
 
     char readable_location[35];

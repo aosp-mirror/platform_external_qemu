@@ -1,2 +1,2 @@
 @echo off
-python android\build\python\cmake.py --ccache auto %* 
+python %~dp0\build\python\cmake.py --ccache auto %* 

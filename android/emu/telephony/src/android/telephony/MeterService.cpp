@@ -23,6 +23,8 @@
 
 #include <libxml/parser.h>
 
+#include <condition_variable>
+#include <chrono>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -39,6 +41,8 @@
 #else
 #define DD(...) (void)0
 #endif
+
+using namespace std::chrono_literals;
 
 namespace android {
 namespace emulation {
@@ -209,24 +213,38 @@ int set_mobile_data_meterness(int on) {
         return -1;
     }
 
-    int myresult = -1;
+    int myresult = 1;
 
     for (size_t i = 0; i < android::emulation::s_adb_commands[on].size(); ++i) {
         DD("cmd %s", android::emulation::s_adb_commands[on][i].c_str());
     }
 
-    mAdb->runAdbCommand(
+    std::mutex mtx;
+    std::condition_variable cv;
+
+    std::unique_lock<std::mutex> lock(mtx);
+
+    auto cmd = mAdb->runAdbCommand(
             android::emulation::s_adb_commands[on],
             [&](const android::emulation::OptionalAdbCommandResult& result) {
-                if (!result) {
-                    myresult = -1;
-                } else if (result->exit_code) {
-                    myresult = -2;
-                } else {
-                    myresult = 0;
+                {
+                    std::lock_guard<std::mutex> l(mtx);
+                    if (!result) {
+                        myresult = -1;
+                    } else if (result->exit_code) {
+                        myresult = -2;
+                    } else {
+                        myresult = 0;
+                    }
                 }
+                cv.notify_all();
             },
             android::base::System::kInfinite);
 
+    if (!cv.wait_for(lock, 5s, [&]{return myresult < 1;})) {
+        W("timed out running adb command");
+        cmd->cancel();
+        myresult = -1;
+    }
     return myresult;
 }

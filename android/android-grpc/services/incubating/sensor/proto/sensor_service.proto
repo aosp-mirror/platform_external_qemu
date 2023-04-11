@@ -1,0 +1,208 @@
+// Copyright (C) 2022 The Android Open Source Project
+//
+// Licensed under the Apache License= ; Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing= ; software
+// distributed under the License is distributed on an "AS IS" BASIS= ;
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND= ; either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Note that if you add/remove methods in this file you must update
+// the metrics sql as well ./android/scripts/gen-grpc-sql.py
+//
+// Please group deleted methods in a block including the date (MM/DD/YY)
+// it was removed. This enables us to easily keep metrics around after removal
+//
+// List of deleted methods
+// rpc iWasDeleted (03/12/12)
+// ...
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.android.emulation.control.incubating";
+
+package android.emulation.control.incubating;
+import "google/protobuf/empty.proto";
+
+// This service is responsible for interacting with the sensor module of the
+// emulator. It provides methods to set, get, and stream sensor data as well as
+// the physical model.
+service SensorService {
+    // gets the sensor value.
+    rpc getSensor(SensorValue) returns (SensorValue);
+
+    // sets the value. The value will eventually be set, an immediate
+    // get might not read the value that has just been set.
+    // This can result in an event if it changes an existing sensor value.
+    rpc setSensor(SensorValue) returns (google.protobuf.Empty);
+
+    // Receive a message whenever the sensor value subscribed to changes
+    // Note that you can receive spurious events.  (i.e the same event 2x)
+    rpc receiveSensorEvents(SensorValue) returns (stream SensorValue);
+
+    // set/get/stream the physical model, this is likely the one you are
+    // looking for when you wish to modify the device state.
+
+    // sets the value. The value will eventually be set, an immediate
+    // get might not read the value that has just been set.
+    // This can result in an event if it changes an existing physical value.
+    rpc setPhysicalModel(PhysicalModelValue) returns (google.protobuf.Empty)
+    ;
+    rpc getPhysicalModel(PhysicalModelValue) returns (PhysicalModelValue);
+
+    // Receive a message whenever the physical model value subscribed to changes
+    // Note that you can receive spurious events.  (i.e the same event 2x)
+    rpc receivePhysicalModelEvents(PhysicalModelValue)
+            returns (stream PhysicalModelValue);
+}
+
+message ParameterValue {
+    repeated float data = 1 [packed = true];
+}
+
+// A single sensor value.
+message SensorValue {
+    enum SensorState {
+        SENSOR_STATE_UNDEFINED = 0;
+        SENSOR_STATE_OK = 1;
+        SENSOR_STATE_NO_SERVICE =
+                -3;  // qemud service is not available/initiated.
+        SENSOR_STATE_DISABLED = -2;  // Sensor is disabled.
+        SENSOR_STATE_UNKNOWN = -1;   // Unknown sensor (should not happen)
+    }
+
+    // These are the various sensors that can be available in an emulated
+    // devices.
+    enum SensorType {
+        SENSOR_SENSOR_TYPE_UNSPECIFIED = 0;
+        // Measures the acceleration force in m/s2 that is applied to a device
+        // on all three physical axes (x, y, and z), including the force of
+        // gravity.
+        SENSOR_SENSOR_TYPE_ACCELERATION = 1;
+        // Measures a device's rate of rotation in rad/s around each of the
+        // three physical axes (x, y, and z).
+        SENSOR_SENSOR_TYPE_GYROSCOPE = 2;
+        // Measures the ambient geomagnetic field for all three physical axes
+        // (x, y, z) in μT.
+        SENSOR_SENSOR_TYPE_MAGNETIC_FIELD = 3;
+        // Measures degrees of rotation that a device makes around all three
+        // physical axes (x, y, z)
+        SENSOR_SENSOR_TYPE_ORIENTATION = 4;
+        // Measures the temperature of the device in degrees Celsius (°C).
+        SENSOR_SENSOR_TYPE_TEMPERATURE = 5;
+        // Measures the proximity of an object in cm relative to the view screen
+        // of a device. This sensor is typically used to determine whether a
+        // handset is being held up to a person's ear.
+        SENSOR_SENSOR_TYPE_PROXIMITY = 6;
+        // Measures the ambient light level (illumination) in lx.
+        SENSOR_SENSOR_TYPE_LIGHT = 7;
+        // Measures the ambient air pressure in hPa or mbar.
+        SENSOR_SENSOR_TYPE_PRESSURE = 8;
+        // Measures the relative ambient humidity in percent (%).
+        SENSOR_SENSOR_TYPE_HUMIDITY = 9;
+        SENSOR_SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED = 10;
+        SENSOR_SENSOR_TYPE_GYROSCOPE_UNCALIBRATED = 11;
+
+        // HINGE_ANGLE0 (11), HINGE_ANGLE1 (12), HINGE_ANGLE2 (13) are
+        // skipped; clients should use get/setPhysicalModel() instead for these
+        // "sensors".
+
+        // Measures the heart rate in bpm.
+        SENSOR_SENSOR_TYPE_HEART_RATE = 15;
+        // Measures the ambient RGBC light intensity.
+        // Values are in order (Red, Green, Blue, Clear).
+        SENSOR_SENSOR_TYPE_RGBC_LIGHT = 16;
+        // WIRST_TILT (16) is skipped; clients should use get/setPhysicalModel()
+        // instead.
+        // Measures acceleration force and provides bias data.
+        SENSOR_SENSOR_TYPE_ACCELERATION_UNCALIBRATED = 18;
+    }
+
+    // Type of sensor
+    SensorType target = 1;
+
+    // [Output Only]
+    SensorState status = 2;
+
+    // Value interpretation depends on sensor enum.
+    ParameterValue value = 3;
+}
+
+message PhysicalModelValue {
+    enum PhysicalState {
+        PHYSICAL_STATE_UNSPECIFIED = 0;
+        PHYSICAL_STATE_VALUE_OK = 1;
+        PHYSICAL_STATE_VALUE_NO_SERVICE =
+                -3;  // qemud service is not available/initiated.
+        PHYSICAL_STATE_VALUE_DISABLED = -2;  // Sensor is disabled.
+        PHYSICAL_STATE_UNKNOWN = -1;  // Unknown sensor (should not happen)
+    }
+
+    // Details on the sensors documentation can be found here:
+    // https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_
+    // The types must follow the order defined in
+    // "external/qemu/android/hw-sensors.h"
+    enum PhysicalType {
+        PHYSICAL_TYPE_UNSPECIFIED = 0;
+        PHYSICAL_TYPE_POSITION = 1;
+
+        // All values are angles in degrees.
+        // values = [x,y,z]
+        PHYSICAL_TYPE_ROTATION = 2;
+
+        PHYSICAL_TYPE_MAGNETIC_FIELD = 3;
+
+        // Temperature in °C
+        PHYSICAL_TYPE_TEMPERATURE = 4;
+
+        // Proximity sensor distance measured in centimeters
+        PHYSICAL_TYPE_PROXIMITY = 5;
+
+        // Ambient light level in SI lux units
+        PHYSICAL_TYPE_LIGHT = 6;
+
+        // Atmospheric pressure in hPa (millibar)
+        PHYSICAL_TYPE_PRESSURE = 7;
+
+        // Relative ambient air humidity in percent
+        PHYSICAL_TYPE_HUMIDITY = 8;
+
+        PHYSICAL_TYPE_VELOCITY = 9;
+        PHYSICAL_TYPE_AMBIENT_MOTION = 10;
+
+        // Describing a hinge angle sensor in degrees.
+        PHYSICAL_TYPE_HINGE_ANGLE0 = 11;
+        PHYSICAL_TYPE_HINGE_ANGLE1 = 12;
+        PHYSICAL_TYPE_HINGE_ANGLE2 = 13;
+
+        PHYSICAL_TYPE_ROLLABLE0 = 14;
+        PHYSICAL_TYPE_ROLLABLE1 = 15;
+        PHYSICAL_TYPE_ROLLABLE2 = 16;
+
+        // Describing the device posture; the value should be an enum defined
+        // in Posture::PostureValue.
+        PHYSICAL_TYPE_POSTURE = 17;
+
+        // Heart rate in bpm
+        PHYSICAL_TYPE_HEART_RATE = 18;
+
+        // Ambient RGBC light intensity. Values are in order (Red, Green, Blue,
+        // Clear).
+        PHYSICAL_TYPE_RGBC_LIGHT = 19;
+
+        // Wrist tilt gesture (1 = gaze, 0 = ungaze)
+        PHYSICAL_TYPE_WRIST_TILT = 20;
+    }
+    PhysicalType target = 1;
+
+    // [Output Only]
+    PhysicalState status = 2;
+
+    // Value interpretation depends on sensor.
+    ParameterValue value = 3;
+}

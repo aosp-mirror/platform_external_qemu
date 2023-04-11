@@ -24,7 +24,10 @@ namespace android {
 namespace emulation {
 
 // static
-const HostmemIdMapping::Id HostmemIdMapping::kInvalidHostmemId = 0;
+using Id = uint64_t;
+
+// static
+const Id HostmemIdMapping::kInvalidHostmemId = 0;
 
 static LazyInstance<HostmemIdMapping> sMapping = LAZY_INSTANCE_INIT;
 
@@ -35,7 +38,7 @@ HostmemIdMapping* HostmemIdMapping::get() {
 
 // TODO: Add registerHostmemFixed version that takes a predetermined id,
 // for snapshots
-HostmemIdMapping::Id HostmemIdMapping::add(const struct MemEntry* entry) {
+Id HostmemIdMapping::add(const struct MemEntry *entry) {
     if (entry->hva == 0 || entry->size == 0) return kInvalidHostmemId;
 
     Id wantedId;
@@ -56,14 +59,22 @@ HostmemIdMapping::Id HostmemIdMapping::add(const struct MemEntry* entry) {
     return wantedId;
 }
 
-void HostmemIdMapping::remove(HostmemIdMapping::Id id) {
+void HostmemIdMapping::remove(Id id) {
     mEntries.erase(id);
 }
 
-HostmemIdMapping::Id HostmemIdMapping::addDescriptorInfo(ManagedDescriptor descriptor,
-                                                         uint32_t handleType, uint32_t caching,
-                                                         std::optional<VulkanInfo> vulkanInfoOpt) {
-    Id wantedId = mCurrentId++;
+void HostmemIdMapping::addMapping(Id id, const struct MemEntry *entry) {
+    HostmemIdMapping::Entry hostmem_entry;
+    hostmem_entry.id = id;
+    hostmem_entry.hva = entry->hva;
+    hostmem_entry.size = entry->size;
+    hostmem_entry.caching = entry->caching;
+    mEntries.set(id, hostmem_entry);
+}
+
+void HostmemIdMapping::addDescriptorInfo(Id id, ManagedDescriptor descriptor,
+                                         uint32_t handleType, uint32_t caching,
+                                         std::optional<VulkanInfo> vulkanInfoOpt) {
     struct ManagedDescriptorInfo info =
         {
             .descriptor = std::move(descriptor),
@@ -72,11 +83,11 @@ HostmemIdMapping::Id HostmemIdMapping::addDescriptorInfo(ManagedDescriptor descr
             .vulkanInfoOpt = std::move(vulkanInfoOpt),
         };
 
-    mDescriptorInfos.insert(std::make_pair(wantedId, std::move(info)));
-    return wantedId;
+
+    mDescriptorInfos.insert(std::make_pair(id, std::move(info)));
 }
 
-std::optional<ManagedDescriptorInfo> HostmemIdMapping::removeDescriptorInfo(HostmemIdMapping::Id id) {
+std::optional<ManagedDescriptorInfo> HostmemIdMapping::removeDescriptorInfo(Id id) {
     auto found = mDescriptorInfos.find(id);
     if (found != mDescriptorInfos.end()) {
         std::optional<ManagedDescriptorInfo> ret = std::move(found->second);
@@ -87,7 +98,7 @@ std::optional<ManagedDescriptorInfo> HostmemIdMapping::removeDescriptorInfo(Host
     return std::nullopt;
 }
 
-HostmemIdMapping::Entry HostmemIdMapping::get(HostmemIdMapping::Id id) const {
+HostmemIdMapping::Entry HostmemIdMapping::get(Id id) const {
     const HostmemIdMapping::Entry badEntry {
         kInvalidHostmemId, 0, 0,
     };

@@ -22,6 +22,10 @@ extern void init_modem_simulator();
 
 extern int android_modem_version;
 
+extern int amodem_number_of_calls_vx(AModem moden);
+
+extern ACall amodem_call_by_idx_vx(AModem modem, int idx);
+
 extern void amodem_receive_sms_vx(AModem modem, SmsPDU sms);
 
 extern int amodem_add_inbound_call_vx(AModem modem, const char* args);

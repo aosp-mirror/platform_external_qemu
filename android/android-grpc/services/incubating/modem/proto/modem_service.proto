@@ -70,6 +70,12 @@ service Modem {
     //   - INVALID_ARGUMENT: Trying to receive both text and encoded message.
 
     rpc receiveSms(SmsMessage) returns (google.protobuf.Empty);
+
+    // Update the modem clock.  This will likely disappear
+    rpc updateClock(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+    // Listen for events in the service as they arive.
+    rpc receivePhoneEvents(google.protobuf.Empty) returns (stream PhoneEvent);
 }
 
 message CellSignalStrength {
@@ -187,6 +193,23 @@ message Call {
 message ActiveCalls {
     repeated Call calls = 1;
 }
+
+message PhoneEvent {
+    enum PhoneEventType {
+        PHONE_EVENT_TYPE_UNKNOWN = 0;
+        PHONE_EVENT_TYPE_ACTIVE = 1;
+    }
+
+    // Type of event that was received.
+    PhoneEventType type = 1;
+
+    oneof event {
+        // List of active calls.
+        ActiveCalls active = 2;
+
+        //....
+    }
+};
 
 message SmsMessage {
     // The source number where this message came from.
