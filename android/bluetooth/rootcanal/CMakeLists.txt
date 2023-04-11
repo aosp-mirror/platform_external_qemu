@@ -89,9 +89,9 @@ function(android_bluetooth_packet_gen)
 endfunction()
 
 android_bluetooth_packet_gen(
-  GENERATED BluetoothGeneratedPackets_h INCLUDES gd
-  SRC hci/hci_packets.pdl l2cap/l2cap_packets.pdl security/smp_packets.pdl
-  SOURCE_DIR ${BT_ROOT})
+  GENERATED BluetoothGeneratedPackets_h INCLUDES tools/rootcanal/packets
+  SRC hci/hci_packets.pdl
+  SOURCE_DIR ${BT_ROOT}/..)
 
 android_bluetooth_packet_gen(
   GENERATED RootCanalGeneratedPackets_h INCLUDES tools/rootcanal NAMESPACE model
