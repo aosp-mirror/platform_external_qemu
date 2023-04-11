@@ -23,10 +23,11 @@
 #include <unordered_map>    // for __ha...
 #include <utility>          // for move
 
-#include "aemu/base/Stopwatch.h"                           // for Stop...
+#include "aemu/base/Stopwatch.h"  // for Stop...
 
-#include "aemu/base/files/IniFile.h"                       // for IniFile
-#include "aemu/base/files/PathUtils.h"                     // for Path...
+#include "aemu/base/files/IniFile.h"    // for IniFile
+#include "aemu/base/files/PathUtils.h"  // for Path...
+#include "android/emulation/control/EmulatorAdvertisement.h"
 #include "android/emulation/control/secure/BasicTokenAuth.h"  // for Basi...
 #include "aemu/base/logging/CLog.h"
 #include "grpc/grpc_security_constants.h"                     // for LOCA...
@@ -187,8 +188,9 @@ bool EmulatorGrpcClient::initializeChannel() {
 std::unique_ptr<EmulatorGrpcClient> EmulatorGrpcClient::loadFromProto(
         std::string_view pathToEndpointProto) {
     // Read the existing address book.
-    std::fstream input(PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str(),
-                       std::ios::in | std::ios::binary);
+    std::fstream input(
+            PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str(),
+            std::ios::in | std::ios::binary);
     Endpoint endpoint;
     if (!input) {
         derror("File %s not found",
@@ -201,6 +203,20 @@ std::unique_ptr<EmulatorGrpcClient> EmulatorGrpcClient::loadFromProto(
     }
 
     return std::make_unique<EmulatorGrpcClient>(endpoint);
+}
+
+std::shared_ptr<EmulatorGrpcClient> sMe;
+std::mutex sMeLock;
+
+std::shared_ptr<EmulatorGrpcClient> EmulatorGrpcClient::me() {
+    std::lock_guard<std::mutex> guard(sMeLock);
+    if (sMe) {
+        return sMe;
+    }
+
+    auto discovery = EmulatorAdvertisement({}).location();
+    sMe = std::make_shared<EmulatorGrpcClient>(discovery);
+    return sMe;
 }
 }  // namespace control
 }  // namespace emulation

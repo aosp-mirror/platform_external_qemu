@@ -39,10 +39,7 @@
 #define HEVC_WARN(fmt, ...) HEVC_PRINT(YEL, fmt, ##__VA_ARGS__);
 #define HEVC_ERROR(fmt, ...) HEVC_PRINT(RED, fmt, ##__VA_ARGS__);
 
-namespace android {
-namespace emulation {
-
-const std::string HevcNaluParser::kNaluTypesStrings[] = {
+static const std::string kNaluTypesStrings[] = {
         "0: TRAIL_N",
         "1: TRAIL_R",  // P frame
         "2: TSA_N",
@@ -109,6 +106,9 @@ const std::string HevcNaluParser::kNaluTypesStrings[] = {
         "63: RSV_NVCL63",
         "64: Undefied",
 };
+
+namespace android {
+namespace emulation {
 
 const std::string& HevcNaluParser::naluTypeToString(HevcNaluType n) {
     uint8_t idx = static_cast<uint8_t>(n);

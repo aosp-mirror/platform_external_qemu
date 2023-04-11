@@ -114,8 +114,7 @@ target_include_directories(
 
 target_link_libraries(
   libqemu2-glue
-  PRIVATE android-grpc-services-stack ui-controller-server-impl  android-grpc-modem-service
-          android-grpc-incubating-services)
+  PRIVATE android-grpc-services-stack)
 
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)

@@ -40,9 +40,13 @@
 #include "host-common/vm_operations.h"
 #include "host-common/window_agent.h"
 #include "android/emulation/testing/MockAndroidAgentFactory.h"
+#include "android/utils/debug.h"
 #include "emulated_bluetooth.grpc.pb.h"
 #include "emulated_bluetooth.pb.h"
 #include "gtest/gtest_pred_impl.h"
+#include "host-common/multi_display_agent.h"
+#include "host-common/vm_operations.h"
+#include "host-common/window_agent.h"
 #include "net/async_data_channel.h"
 #include "net/multi_datachannel_server.h"
 #define DEBUG 2

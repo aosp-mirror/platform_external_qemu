@@ -20,28 +20,69 @@
 #include "android/emulation/control/cellular_agent.h"
 #include "android/emulation/control/incubating/Services.h"
 #include "android/emulation/control/telephony_agent.h"
+#include "android/emulation/control/utils/EventSupport.h"
 #include "android/grpc/utils/EnumTranslate.h"
 #include "android/telephony/modem.h"
 #include "android/utils/debug.h"
 #include "android_modem_v2.h"
 #include "host-common/FeatureControl.h"
+#include "host-common/VmLock.h"
 #include "host-common/feature_control.h"
 #include "host-common/hw-config.h"
 #include "modem_service.grpc.pb.h"
 #include "modem_service.pb.h"
 
+#ifdef DISABLE_ASYNC_GRPC
+#include "android/grpc/utils/SyncToAsyncAdapter.h"
+#else
+#include "android/grpc/utils/SimpleAsyncGrpc.h"
+#endif
+
+// #define DEBUG 1
+#if DEBUG >= 1
+#define DD(fmt, ...) \
+    printf("ModemService: %s:%d| " fmt "\n", __func__, __LINE__, ##__VA_ARGS__)
+#else
+#define DD(...) (void)0
+#endif
+
 namespace android {
 namespace emulation {
 namespace control {
 namespace incubating {
-class ModemImpl final : public Modem::Service {
+
+EventChangeSupport<PhoneEvent> s_activeCallListeners;
+
+extern "C" {
+static void telephony_callback(void* userData, int numActiveCalls);
+}
+
+
+using PhoneEventStream = GenericEventStreamWriter<PhoneEvent>;
+
+static bool isValidPhoneNr(std::string number) {
+    SmsAddressRec sender;
+    bool invalid =
+            sms_address_from_str(&sender, number.c_str(), number.size()) < 0;
+    return !invalid;
+}
+class ModemImpl final : public ModemService::WithCallbackMethod_streamEvents<
+                                ModemService::Service>
+
+{
 public:
     ModemImpl(const AndroidConsoleAgents* agents)
-        : mConsoleAgents(agents), mModem(agents->telephony->getModem()) {}
+        : mConsoleAgents(agents),
+          mModem(agents->telephony->getModem()),
+          mTelephonyAgent(agents->telephony) {
+        // android::RecursiveScopedVmLock vmlock;
+        //
+    }
 
     ::grpc::Status setCellInfo(::grpc::ServerContext* context,
                                const CellInfo* request,
                                CellInfo* response) override {
+        android::RecursiveScopedVmLock vmlock;
         mConsoleAgents->cellular->setStandard(EnumTranslate::translate(
                 mCellStandardMap, request->cell_standard()));
 
@@ -88,6 +129,7 @@ public:
     ::grpc::Status getCellInfo(::grpc::ServerContext* context,
                                const ::google::protobuf::Empty* request,
                                CellInfo* response) override {
+        android::RecursiveScopedVmLock vmlock;
         constexpr std::size_t MAX_OPERATOR_NAME = 32;
         std::string long_name(MAX_OPERATOR_NAME, ' ');
         amodem_get_operator_name(mModem, A_NAME_LONG, long_name.data(),
@@ -118,15 +160,33 @@ public:
     ::grpc::Status createCall(::grpc::ServerContext* context,
                               const Call* request,
                               Call* response) override {
-        int result = amodem_add_inbound_call(mModem, request->number().c_str());
+        android::RecursiveScopedVmLock vmlock;
+        // Validate number
+        if (!isValidPhoneNr(request->number())) {
+            return ::grpc::Status(
+                    ::grpc::StatusCode::INVALID_ARGUMENT,
+                    "The number: " + request->number() + " is invalid.");
+        }
 
+        // We sort of assume the call has status active..
+        int result =
+                amodem_add_inbound_call_vx(mModem, request->number().c_str());
+
+        DD("Created: %d (%s)", result, request->number().c_str());
+        if (result == A_CALL_RADIO_OFF) {
+            return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                                  "The radio is turned off.");
+        }
         if (result == A_CALL_EXCEED_MAX_NUM) {
             return ::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
                                   "There are too many active calls.");
         }
 
-        auto call =
-                amodem_find_call_by_number(mModem, request->number().c_str());
+        DD("Finding call");
+        auto call = amodem_find_call_by_number_vx(mModem,
+                                                  request->number().c_str());
+
+        DD("Found: %p", call);
         if (call == nullptr) {
             return ::grpc::Status(
                     ::grpc::StatusCode::INTERNAL,
@@ -143,17 +203,38 @@ public:
     ::grpc::Status updateCall(::grpc::ServerContext* context,
                               const Call* request,
                               Call* response) override {
-        if (amodem_update_call(
-                    mModem, request->number().c_str(),
-                    static_cast<ACallState>(static_cast<int>(request->state()) -
-                                            1)) == A_CALL_NUMBER_NOT_FOUND) {
+        android::RecursiveScopedVmLock vmlock;
+        // Validate number
+        if (!isValidPhoneNr(request->number())) {
+            return ::grpc::Status(
+                    ::grpc::StatusCode::INVALID_ARGUMENT,
+                    "The number: " + request->number() + " is invalid.");
+        }
+
+        auto call = amodem_find_call_by_number_vx(mModem,
+                                                  request->number().c_str());
+
+        if (call == nullptr) {
+            return ::grpc::Status(::grpc::StatusCode::NOT_FOUND,
+                                  "Unable to find call " + request->number());
+        }
+
+        ACallState updated =
+                static_cast<ACallState>(static_cast<int>(request->state()) - 1);
+        DD("Update call from %d->%d", call->state, updated);
+        auto res = amodem_update_call_vx(mModem, request->number().c_str(),
+                                         updated);
+        if (res == A_CALL_NUMBER_NOT_FOUND) {
             return ::grpc::Status(::grpc::StatusCode::NOT_FOUND,
                                   "No call with the number: " +
                                           request->number() + ", exists.");
         }
+        if (res < 0) {
+            return ::grpc::Status(::grpc::StatusCode::INTERNAL,
+                                  "Failed to update call");
+        }
 
-        auto call =
-                amodem_find_call_by_number(mModem, request->number().c_str());
+        call = amodem_find_call_by_number_vx(mModem, request->number().c_str());
         if (call == nullptr) {
             return ::grpc::Status(
                     ::grpc::StatusCode::INTERNAL,
@@ -161,6 +242,7 @@ public:
                     "on it's status (It might have been deleted?).");
         }
 
+        DD("Call state is now %d", call->state);
         translateCall(call, response);
         return ::grpc::Status::OK;
     }
@@ -170,18 +252,22 @@ public:
     ::grpc::Status deleteCall(::grpc::ServerContext* context,
                               const Call* request,
                               ::google::protobuf::Empty* response) override {
-        amodem_disconnect_call(mModem, request->number().c_str());
-        return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+        android::RecursiveScopedVmLock vmlock;
+        amodem_disconnect_call_vx(mModem, request->number().c_str());
+        return ::grpc::Status::OK;
     }
 
     // Lists all the calls that are currently active in the modem
     ::grpc::Status listCalls(::grpc::ServerContext* context,
                              const ::google::protobuf::Empty* request,
                              ActiveCalls* response) override {
-        int activeCalls = amodem_get_call_count(mModem);
+        android::RecursiveScopedVmLock vmlock;
+        int activeCalls = amodem_number_of_calls_vx(mModem);
+        DD("Found %d active calls", activeCalls);
 
         for (int i = 0; i < activeCalls; i++) {
-            auto call = amodem_get_call(mModem, i);
+            DD("Retrieving call %d", i);
+            auto call = amodem_call_by_idx_vx(mModem, i);
             if (call == nullptr)
                 continue;
 
@@ -189,6 +275,14 @@ public:
             translateCall(call, active);
         }
 
+        return ::grpc::Status::OK;
+    }
+
+    ::grpc::Status updateClock(::grpc::ServerContext* context,
+                               const ::google::protobuf::Empty* request,
+                               ::google::protobuf::Empty* response) override {
+        android::RecursiveScopedVmLock vmlock;
+        amodem_update_time(mModem);
         return ::grpc::Status::OK;
     }
 
@@ -224,6 +318,7 @@ public:
                         "The message text contains invalid characters.");
             }
 
+            android::RecursiveScopedVmLock vmlock;
             for (int nn = 0; pdus[nn] != NULL; nn++) {
                 amodem_receive_sms(mModem, pdus[nn]);
             }
@@ -239,14 +334,27 @@ public:
                                       "The encoded message contains an "
                                       "invalid hex string.");
             }
-            amodem_receive_sms(mModem, pdu);
+
+            android::RecursiveScopedVmLock vmlock;
+            amodem_receive_sms_vx(mModem, pdu);
         }
 
         return ::grpc::Status::OK;
     }
 
+    ::grpc::ServerWriteReactor<
+            ::android::emulation::control::incubating::PhoneEvent>*
+    streamEvents(::grpc::CallbackServerContext* /*context*/,
+                 const ::google::protobuf::Empty* /*request*/) override {
+        dwarning("Hijacking the telephone callback, you will see reduced functionality in the Qt UI.");
+        mTelephonyAgent->setNotifyCallback(telephony_callback, (void*)this);
+        return new PhoneEventStream(&s_activeCallListeners);
+    }
+
 private:
     void translateCall(ACall call, Call* translated) {
+        DD("State, direction: %d, state: %d, number: %s", call->dir,
+           call->state, call->number);
         translated->set_direction(static_cast<Call_CallDirection>(
                 static_cast<int>(call->dir) + 1));
         translated->set_state(
@@ -255,6 +363,7 @@ private:
     }
 
     AModem mModem;
+    const QAndroidTelephonyAgent* mTelephonyAgent;
     const AndroidConsoleAgents* mConsoleAgents;
 
     // internal <--> external proto mappings.
@@ -307,9 +416,32 @@ private:
                      Cellular_Signal_Great}};
 };
 
+extern "C" {
+static void telephony_callback(void* userData, int numActiveCalls) {
+    if (s_activeCallListeners.size() == 0) {
+        // No listeners, so no need to fire events.
+        return;
+    }
+
+    DD("telephony_callback is invoked.. Listing calls");
+    // So we updated our call count, let's fetch the active calls
+    // and notify all the listeners.
+    ModemImpl* modem = reinterpret_cast<ModemImpl*>(userData);
+    PhoneEvent event;
+
+    // ActiveCalls active;
+    modem->listCalls(nullptr, nullptr, event.mutable_active());
+    event.set_type(PhoneEvent::PHONE_EVENT_TYPE_ACTIVE);
+
+    DD("Broadcast %s", event.ShortDebugString().c_str());
+    s_activeCallListeners.fireEvent(event);
+}
+}
+
 grpc::Service* getModemService(const AndroidConsoleAgents* telephone) {
     return new ModemImpl(telephone);
 }
+
 }  // namespace incubating
 }  // namespace control
 }  // namespace emulation

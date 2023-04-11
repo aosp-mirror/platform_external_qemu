@@ -457,7 +457,6 @@ private:
 
     android::base::Looper* mLooper;
     QTimer mStartupTimer;
-    android::base::MemberOnDemandT<QProgressDialog, QWidget*> mStartupDialog;
     bool mStartupDone = false;
 
     SkinSurface* mBackingSurface;

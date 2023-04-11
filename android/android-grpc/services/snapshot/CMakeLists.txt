@@ -9,7 +9,7 @@ install(FILES proto/snapshot_service.proto
               ${ANDROID_QEMU2_TOP_DIR}/android/emu/protos/snapshot.proto
         DESTINATION lib)
 
-# add_subdirectory(client)
+add_subdirectory(client)
 add_subdirectory(server)
 
 android_add_executable(

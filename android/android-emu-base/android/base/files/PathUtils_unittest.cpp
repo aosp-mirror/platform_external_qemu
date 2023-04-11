@@ -397,6 +397,28 @@ TEST(PathUtils, recompose) {
     }
 }
 
+TEST(PathUtils, canonicalPath) {
+    static const struct {
+        const char* input[kHostTypeCount];
+        const char* output[kHostTypeCount];
+    } kData[] = {{
+                         {"/Users/me/.android/avd/test.avd",
+                          "C:\\Users\\me\\.android\\avd\\test.avd"},
+                         {"/Users/me/.android/avd/test.avd",
+                          "C:\\Users\\me\\.android\\avd\\test.avd"},
+                 },
+                 {
+                         {"/Users/me/.android/avd/../avd/test.avd",
+                          "C:\\Users\\me\\.android\\avd\\..\\avd\\test.avd"},
+                         {"/Users/me/.android/avd/test.avd",
+                          "C:\\Users\\me\\.android\\avd\\test.avd"},
+                 }};
+    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
+        EXPECT_STREQ(
+                kData[n].output[kHostType],
+                PathUtils::canonicalPath(kData[n].input[kHostType]).c_str());
+    }
+}
 
 // Convert a vector of strings |components| into a file path, using
 // |separator| as the directory separator.

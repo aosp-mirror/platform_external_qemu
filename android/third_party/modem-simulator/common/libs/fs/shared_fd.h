@@ -34,8 +34,6 @@
 
 namespace cuttlefish {
 
-class FileInstance;
-
 class FileInstance {
     // Give SharedFD access to the aliasing constructor.
     friend class SharedFD;

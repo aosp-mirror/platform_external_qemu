@@ -58,6 +58,7 @@ class CTestTask(BuildTask):
         self.jobs = concurrency
         self.gfxstream = with_gfx_stream
 
+
     def do_run(self):
         ctest = shutil.which(
             cmd="ctest",
@@ -102,36 +103,27 @@ class CTestTask(BuildTask):
                         self.jobs,
                         "--output-junit",
                         junit_file.absolute(),
-                        "--repeat",
-                        "until-pass:2",  # Flaky tests get 2 chances
                         "--timeout",  # Every test gets at most 3 minutes.
                         "180",
                     ]
                 ).in_directory(self.destination).with_environment(env).run()
             except CommandFailedException:
-                # First log the failures
-                logging.critical("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-                test_log_file = (
-                    self.destination / "Testing" / "Temporary" / "LastTest.log"
+                # Okay we have failures, let's give ourselves a 2nd chance
+                # and log all the failures we encounter directly.
+                logging.critical(
+                    "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
                 )
-                with open(
-                    test_log_file.absolute(), "r", encoding="utf-8", errors="ignore"
-                ) as log_file:
-                    logging.error("%s", log_file.read())
-
-                logging.critical("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-
-                # Next log the failed test case (to make it easier to find)
-                junit = ET.parse(junit_file.absolute())
-                failures = junit.findall(".//testcase[@status='fail']")
-                for failure in failures:
-                    logging.critical(
-                        "Test: %s Time: (%s)", failure.get("name"), failure.get("time")
-                    )
-                    system_out = failure.find("system-out").text
-                    logging.critical("%s", system_out)
-
-                raise
+                Command(
+                    [
+                        ctest,
+                        "-j",
+                        self.jobs,
+                        "--rerun-failed",
+                        "--output-on-failure",
+                        "--timeout",  # Every test gets at most 3 minutes.
+                        "180",
+                    ]
+                ).in_directory(self.destination).with_environment(env).run()
 
 
 class CoverageReportTask(BuildTask):

@@ -105,7 +105,6 @@ class ConfigureTask(BuildTask):
         if self._find_ccache(aosp, ccache):
             self.with_ccache(self._find_ccache(aosp, ccache))
 
-        self.with_options(options)
 
         if sanitizer:
             self.add_option("OPTION_ASAN", ",".join(sanitizer))
@@ -115,11 +114,16 @@ class ConfigureTask(BuildTask):
         else:
             self.cmake_cmd.append(aosp / "external" / "qemu")
 
-        self.with_features(aosp, features)
         self._add_sdk_revision(aosp)
         self.env = get_default_environment(aosp)
-        self.log_dir = Path(dist or destination) / "logs"
+        self.log_dir = Path(dist or destination) / "testlogs"
         self.destination = destination
+
+        self.add_option("OPTION_TEST_LOGS", self.log_dir.absolute())
+
+        self.with_features(aosp, features)
+        self.with_options(options)
+
 
     def add_option(self, key: str, val: str):
         self.cmake_cmd += [f"-D{key}={val}"]

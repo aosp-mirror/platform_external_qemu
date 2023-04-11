@@ -23,6 +23,8 @@ public:
     virtual ~ModemBase() = default;
 
 public:
+    virtual int number_of_calls(AModem) = 0;
+    virtual ACall call_by_index(AModem, int idx) = 0;
     virtual void receive_sms(AModem, SmsPDU) = 0;
     virtual int add_inbound_call(AModem, const char*) = 0;
     virtual ACall find_call_by_number(AModem, const char*) = 0;

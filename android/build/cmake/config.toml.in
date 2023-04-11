@@ -13,6 +13,7 @@ clang-sys = { path = "${AOSP_ROOT}/external/rust/crates/clang-sys" }
 clap = { path = "${AOSP_ROOT}/external/rust/crates/clap" }
 clap_derive = { path = "${AOSP_ROOT}/external/rust/crates/clap_derive" }
 clap_lex = { path = "${AOSP_ROOT}/external/rust/crates/clap_lex" }
+codespan-reporting = { path = "${AOSP_ROOT}/external/rust/crates/codespan-reporting" }
 cxx = { path = "${AOSP_ROOT}/external/rust/crates/cxx" }
 either = { path = "${AOSP_ROOT}/external/rust/crates/either" }
 env_logger = { path = "${AOSP_ROOT}/external/rust/crates/env_logger" }
@@ -37,6 +38,7 @@ once_cell = { path = "${AOSP_ROOT}/external/rust/crates/once_cell" }
 os_str_bytes = { path = "${AOSP_ROOT}/external/rust/crates/os_str_bytes" }
 paste = { path = "${AOSP_ROOT}/external/rust/crates/paste" }
 peeking_take_while = { path = "${AOSP_ROOT}/external/rust/crates/peeking_take_while" }
+pin-project-lite = { path = "${AOSP_ROOT}/external/rust/crates/pin-project-lite" }
 pin-utils = { path = "${AOSP_ROOT}/external/rust/crates/pin-utils" }
 ppv-lite86 = { path = "${AOSP_ROOT}/external/rust/crates/ppv-lite86" }
 proc-macro-error = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro-error" }
@@ -57,6 +59,7 @@ termcolor = { path = "${AOSP_ROOT}/external/rust/crates/termcolor" }
 textwrap = { path = "${AOSP_ROOT}/external/rust/crates/textwrap" }
 thiserror = { path = "${AOSP_ROOT}/external/rust/crates/thiserror" }
 thiserror-impl = { path = "${AOSP_ROOT}/external/rust/crates/thiserror-impl" }
+tokio = { path = "${AOSP_ROOT}/external/rust/crates/tokio" }
 unicode-ident = { path = "${AOSP_ROOT}/external/rust/crates/unicode-ident" }
 unicode-width = { path = "${AOSP_ROOT}/external/rust/crates/unicode-width" }
 walkdir = { path = "${AOSP_ROOT}/external/rust/crates/walkdir" }

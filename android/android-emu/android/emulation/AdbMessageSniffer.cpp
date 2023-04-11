@@ -25,6 +25,16 @@
 
 static std::atomic<int> host_cts_heart_beat_count{};
 
+// Shell v1 commands that should not result in a heartbeat.
+static const std::array<std::string_view, 4> kShellV1{
+        "shell:exit", "shell:getprop",
+        "shell:cat /sys/class/power_supply/*/capacity", "framebuffer"};
+
+// Shell v2 commands that should not result in a heartbeat.
+static const std::array<std::string_view, 3> kShellV2{
+        ",raw:exit", ",raw:getprop",
+        ",raw:cat /sys/class/power_supply/*/capacity"};
+
 namespace android {
 namespace emulation {
 
@@ -62,9 +72,6 @@ private:
 
     std::unordered_set<unsigned> mDummyShellArg0;
 
-    static const std::array<const std::string, 4> kShellV1;
-    static const std::array<const std::string, 3> kShellV2;
-
     bool packetSeemsValid();
     void grow_buffer_if_needed(int count);
     int getAllowedBytesToPrint(int bytes) const;
@@ -89,16 +96,6 @@ AdbMessageSniffer* AdbMessageSniffer::create(const char* name,
                                              std::ostream* oStream) {
     return new AdbMessageSnifferImpl(name, level, oStream);
 }
-
-// Shell v1 commands that should not result in a heartbeat.
-const std::array<const std::string, 4> AdbMessageSnifferImpl::kShellV1{
-        "shell:exit", "shell:getprop",
-        "shell:cat /sys/class/power_supply/*/capacity", "framebuffer"};
-
-// Shell v2 commands that should not result in a heartbeat.
-const std::array<const std::string, 3> AdbMessageSnifferImpl::kShellV2{
-        ",raw:exit", ",raw:getprop",
-        ",raw:cat /sys/class/power_supply/*/capacity"};
 
 // the following definition is defined in system/core/adb
 #define ADB_SYNC 0x434e5953
@@ -221,7 +218,7 @@ bool AdbMessageSnifferImpl::checkForDummyShellCommand() {
         }
 
         // True if "substr" in "str"
-        auto containsPurpose = [&purpose](const std::string& substr) {
+        auto containsPurpose = [&purpose](std::string_view substr) {
             return purpose.find(substr) != std::string::npos;
         };
 

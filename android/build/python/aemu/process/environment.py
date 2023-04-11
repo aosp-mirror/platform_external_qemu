@@ -70,7 +70,7 @@ class WindowsEnvironment(BaseEnvironment):
         ).splitlines()
         for line in env_lines:
             if "=" in line:
-                key, val = line.split("=")
+                key, val = line.split("=", 1)
                 # Variables in windows are case insensitive, but not in python dict!
                 self[key.upper()] = val
 

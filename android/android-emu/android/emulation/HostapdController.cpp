@@ -102,6 +102,7 @@ bool HostapdController::init(bool verbose) {
     }
     if (verbose) {
         wpa_debug_level = (int)DebugLevel::MSG_DEBUG;
+        mVerbose = verbose;
     } else {
         // Disable logging by default.
         wpa_debug_level = (int)DebugLevel::MSG_DISABLE;
@@ -128,6 +129,9 @@ bool HostapdController::run() {
     }
     return async([this]() {
         android::ParameterList args{"hostapd"};
+        if (mVerbose) {
+            args.add("-dd");
+        }
         mConfigFile = genConfigFile();
         args.add(mConfigFile);
         LOG(DEBUG) << "Starting hostapd main loop.";
@@ -216,10 +220,8 @@ android::network::CipherScheme HostapdController::getCipherScheme() {
 const std::string HostapdController::genConfigFile() {
     // Use the default template config file if ssid is "AndroidWifi"
     // and password is empty.
-    if (!fc::isEnabled(fc::WifiConfigurable)) {
-        if (!mSsid.compare(kAndroidWifiSsid) && mPassword.empty()) {
-            return mTemplateConf;
-        }
+    if (!mSsid.compare(kAndroidWifiSsid) && mPassword.empty()) {
+        return mTemplateConf;
     }
     // Otherwise, generate a hard-coded hostapd config file with the
     // newly-created SSID and password.
