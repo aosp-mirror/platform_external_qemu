@@ -44,7 +44,7 @@ using android::base::PathUtils;
 namespace android {
 namespace emulation {
 
-bool captureScreenshot(std::string_view outputDirectoryPath,
+bool captureScreenshot(const char* outputDirectoryPath,
                        std::string* pOutputFilepath,
                        uint32_t displayId) {
     const auto& renderer = android_getOpenglesRenderer();
@@ -216,7 +216,7 @@ bool captureScreenshot(
                            int* bytesPerPixel,
                            uint8_t** frameBufferData)> getFrameBuffer,
         SkinRotation rotation,
-        std::string_view outputDirectoryPath,
+        const char* outputDirectoryPath,
         std::string* pOutputFilepath,
         int displayId) {
     if (!renderer && !getFrameBuffer) {
@@ -239,11 +239,11 @@ bool captureScreenshot(
     // If the given directory path is actually a filename with a protobuf
     // extension, write a serialized Observation instead.
     std::string outputFilePath;
-    if (str_ends_with(outputDirectoryPath.data(), ".pb")) {
-        std::ofstream file(PathUtils::asUnicodePath(outputDirectoryPath.data()).c_str(), std::ios_base::binary);
+    if (outputDirectoryPath && str_ends_with(outputDirectoryPath, ".pb")) {
+        std::ofstream file(PathUtils::asUnicodePath(outputDirectoryPath).c_str(), std::ios_base::binary);
         if (!file) {
             derror("Failed to write a screenshot of display: %d to %s",
-                   displayId, outputDirectoryPath.data());
+                   displayId, outputDirectoryPath);
             return false;
         }
 
@@ -260,7 +260,7 @@ bool captureScreenshot(
     }
 
     // Custom filename
-    if (str_ends_with(outputDirectoryPath.data(), ".png")) {
+    if (outputDirectoryPath && str_ends_with(outputDirectoryPath, ".png")) {
         outputFilePath = outputDirectoryPath;
     } else {
         char fileName[100];
@@ -271,8 +271,8 @@ bool captureScreenshot(
         assert(fileNameSize < sizeof(fileName));
         (void)fileNameSize;
 
-        outputFilePath =
-                android::base::PathUtils::join(outputDirectoryPath.data(), fileName);
+        outputFilePath = outputDirectoryPath ?
+                android::base::PathUtils::join(outputDirectoryPath, fileName) : fileName;
     }
     if (pOutputFilepath) {
         *pOutputFilepath = outputFilePath;
