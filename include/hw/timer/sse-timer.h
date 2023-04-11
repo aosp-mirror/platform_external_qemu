@@ -43,6 +43,8 @@ struct SSETimer {
     QEMUTimer timer;
     Notifier counter_notifier;
 
+    uint32_t cntfrq_reset;
+
     uint32_t cntfrq;
     uint32_t cntp_ctl;
     uint64_t cntp_cval;

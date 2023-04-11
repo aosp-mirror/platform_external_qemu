@@ -376,7 +376,7 @@ static void sse_timer_reset(DeviceState *dev)
     trace_sse_timer_reset();
 
     timer_del(&s->timer);
-    s->cntfrq = 0;
+    s->cntfrq = s->cntfrq_reset;
     s->cntp_ctl = 0;
     s->cntp_cval = 0;
     s->cntp_aival = 0;
@@ -430,6 +430,7 @@ static const VMStateDescription sse_timer_vmstate = {
     .minimum_version_id = 1,
     .fields = (VMStateField[]) {
         VMSTATE_TIMER(timer, SSETimer),
+        VMSTATE_UINT32(cntfrq_reset, SSETimer),
         VMSTATE_UINT32(cntfrq, SSETimer),
         VMSTATE_UINT32(cntp_ctl, SSETimer),
         VMSTATE_UINT64(cntp_cval, SSETimer),
@@ -442,6 +443,7 @@ static const VMStateDescription sse_timer_vmstate = {
 
 static Property sse_timer_properties[] = {
     DEFINE_PROP_LINK("counter", SSETimer, counter, TYPE_SSE_COUNTER, SSECounter *),
+    DEFINE_PROP_UINT32("cntfrq-reset", SSETimer, cntfrq_reset, 0),
     DEFINE_PROP_END_OF_LIST(),
 };
 
