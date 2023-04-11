@@ -28,7 +28,7 @@ public:
     bool init(bool verbose);
     bool run();
     // Assuming hostapd event loop is already running.
-    bool setDriverSocket(android::base::ScopedSocket sock);
+    bool setDriverSocket(android::base::ScopedSocket& sock);
     // Return false if ssid is empty. If [ssid] and [password] match
     // with current configurations, do not update the config file.
     // Otherwise, update the config file and reload config in hostapd.
