@@ -531,10 +531,39 @@ float FoldableModel::getPosture(ParameterValueType parameterValueType) const {
 
 void FoldableModel::sendPostureToSystem(enum FoldablePostures p) {
     auto adbInterface = emulation::AdbInterface::getGlobal();
-    if (!adbInterface) return;
-    adbInterface->enqueueCommand({ "shell", "settings", "put",
-                                    "global", "device_posture",
-                                    std::to_string((int)p).c_str() });
+    if (!adbInterface) {
+        W("No adb binary found, cannot perform %s", __func__);
+        return;
+    }
+    switch (p) {
+        case POSTURE_CLOSED:
+            [[fallthrough]];
+        case POSTURE_FLIPPED:
+            D("%s %d sending ignore orientation true \n", __func__, __LINE__);
+            adbInterface->enqueueCommand({"shell", "cmd", "window",
+                                          "set-ignore-orientation-request",
+                                          "false"});
+            break;
+        case POSTURE_HALF_OPENED:
+            [[fallthrough]];
+        case POSTURE_OPENED:
+            [[fallthrough]];
+        case POSTURE_TENT:
+            D("%s %d sending ignore orientation false\n", __func__, __LINE__);
+            adbInterface->enqueueCommand({"shell", "cmd", "window",
+                                          "set-ignore-orientation-request",
+                                          "true"});
+            break;
+        default:
+            W("unknown device_posture %d, ignored.\n", static_cast<int>(p));
+            break;
+    }
+
+    adbInterface->enqueueCommand({"shell", "settings", "put", "global",
+                                  "device_posture",
+                                  std::to_string((int)p).c_str()});
+    D("%s %d sending device_posture %s\n", __func__, __LINE__,
+      std::to_string((int)p).c_str());
 }
 
 float FoldableModel::getRollable(uint32_t index,
