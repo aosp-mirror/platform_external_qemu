@@ -44,7 +44,7 @@ ppv-lite86 = { path = "${AOSP_ROOT}/external/rust/crates/ppv-lite86" }
 proc-macro-error = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro-error" }
 proc-macro-error-attr = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro-error-attr" }
 proc-macro2 = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro2" }
-protobuf = { path = "${AOSP_ROOT}/external/rust/crates/protobuf" }
+protobuf = { path = "${AOSP_ROOT}/external/rust/crates/protobuf/2.27.1" }
 quote = { path = "${AOSP_ROOT}/external/rust/crates/quote" }
 rand = { path = "${AOSP_ROOT}/external/rust/crates/rand" }
 rand_chacha = { path = "${AOSP_ROOT}/external/rust/crates/rand_chacha" }
