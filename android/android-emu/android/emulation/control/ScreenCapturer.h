@@ -84,7 +84,7 @@ AEMU_EXPORT Image takeScreenshot(
         int desiredHeight = 0,
         SkinRect rect = {{0, 0}, {0, 0}});
 
-AEMU_EXPORT bool captureScreenshot(std::string_view outputDirectoryPath,
+AEMU_EXPORT bool captureScreenshot(const char* outputDirectoryPath,
                        std::string* outputFilepath = NULL,
                        uint32_t displayId = 0);
 // The following one is for testing only
@@ -99,7 +99,7 @@ AEMU_EXPORT bool captureScreenshot(
                            int* bytesPerPixel,
                            uint8_t** frameBufferData)> getFrameBuffer,
         SkinRotation rotation,
-        std::string_view outputDirectoryPath,
+        const char* outputDirectoryPath,
         std::string* outputFilepath = nullptr,
         int displayId = 0);
 

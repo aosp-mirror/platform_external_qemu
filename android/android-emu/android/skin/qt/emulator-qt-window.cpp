@@ -2230,7 +2230,7 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    if (!android::emulation::captureScreenshot(savePath.toStdString())) {
+    if (!android::emulation::captureScreenshot(savePath.toStdString().c_str())) {
         showErrorDialog(tr("Screenshot failed"), tr("Screenshot"));
     } else {
         // Display the flash animation immediately as feedback - if it fails, an
