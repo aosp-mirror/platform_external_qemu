@@ -489,7 +489,7 @@ void BugreportPage::loadScreenshotImage() {
     }
     mSavingStates.screenshotSucceed = false;
     if (android::emulation::captureScreenshot(
-                System::get()->getTempDir(),
+                System::get()->getTempDir().c_str(),
                 &mSavingStates.screenshotFilePath)) {
         if (System::get()->pathIsFile(mSavingStates.screenshotFilePath) &&
             System::get()->pathCanRead(mSavingStates.screenshotFilePath)) {

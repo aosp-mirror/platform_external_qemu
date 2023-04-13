@@ -141,14 +141,16 @@ bool HostapdController::run() {
     });
 }
 
-bool HostapdController::setDriverSocket(ScopedSocket sock) {
+bool HostapdController::setDriverSocket(android::base::ScopedSocket& sock) {
     bool res = false;
-    mDataSock = std::move(sock);
     if (isRunning()) {
-        if (mDataSock.valid() && mCtrlSock1.valid()) {
-            res = !::set_virtio_sock(mDataSock.get()) &&
+        if (sock.valid() && mCtrlSock1.valid()) {
+            res = !::set_virtio_sock(sock.get()) &&
                   !::set_virtio_ctrl_sock(mCtrlSock1.get());
         }
+    }
+    if (res) {
+        swap(mDataSock, sock);
     }
     return res;
 }

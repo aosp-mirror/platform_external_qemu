@@ -89,7 +89,9 @@ private:
     WifiService::OnSentCallback mOnFrameSentCallback;
     WifiService::CanReceiveCallback mCanReceive;
     android::base::Looper* mLooper;
+    // Scoped sockets holding the socket pair.
     android::base::ScopedSocket mVirtIOSock;
+    android::base::ScopedSocket mHostapdSock;
     uint16_t mServerPort = 0;
     uint16_t mClientPort = 0;
 
@@ -101,7 +103,7 @@ private:
     android::base::Optional<android::base::RecurrentTask> mBeaconTask;
     android::base::Looper::Duration mBeaconIntMs = 1024;
     std::unique_ptr<android::network::Ieee80211Frame> mBeaconFrame;
-
+    std::atomic<bool> mHostapdSockInitSuccess{false};
     NICConf* mNicConf = nullptr;
     android::network::FrameInfo mFrameInfo;
 
