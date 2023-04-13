@@ -13,30 +13,32 @@
 // limitations under the License.
 #include "os/log.h"
 
-#include <stdarg.h>                        // for va_end, va_list, va_start
-#include <fstream>                         // for basic_filebuf<>::int_type
-#include <memory>                          // for allocator
-#include <string>                          // for operator+, to_string, basi...
+#include <stdarg.h>
+#include <fstream>
+#include <memory>
+#include <string>
+#include <string_view>
 
-#include "aemu/base/logging/LogFormatter.h" // for VerboseLogFormatter
-#include "aemu/base/files/PathUtils.h"      // for pj
-#include "android/base/system/System.h"        // for System
-#include "android/utils/path.h"                // for path_mkdir_if_needed
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/LogFormatter.h"
+#include "aemu/base/logging/LogSeverity.h"
+#include "android/base/system/System.h"
+#include "android/utils/path.h"
 
 static constexpr std::string_view BLUETOOTH_LOG{"bluetooth"};
 using android::base::System;
 using android::base::VerboseLogFormatter;
 
-
 namespace android::bluetooth {
 std::shared_ptr<std::ostream> getLogstream(std::string_view id) {
-    auto basedir = android::base::pj({
-            System::get()->getTempDir(), BLUETOOTH_LOG.data(),
-            std::to_string(System::get()->getCurrentProcessId())});
+    auto basedir = android::base::pj(
+            {System::get()->getTempDir(), BLUETOOTH_LOG.data(),
+             std::to_string(System::get()->getCurrentProcessId())});
 
     if (path_mkdir_if_needed(basedir.c_str(), 0700) != 0) {
         dfatal("Unable to create bluetooth logging directory: %s",
-                         basedir.c_str());
+               basedir.c_str());
     }
     std::string filename = android::base::pj(basedir, id.data());
     for (int i = 0; System::get()->pathExists(filename); i++) {
