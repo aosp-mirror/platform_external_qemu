@@ -46,6 +46,7 @@
 #include "host-common/Features.h"             // for DeviceSkinOv...
 #include "android/hw-sensors.h"                          // for FoldableHing...
 #include "android/metrics/MetricsReporter.h"             // for MetricsReporter
+#include "android/physics/FoldableModel.h"
 #include "android/utils/aconfig-file.h"                  // for aconfig_find
 #include "android/utils/debug.h"                         // for dinfo
 #include "android/utils/path.h"                          // for path_exists
@@ -442,9 +443,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
                 FoldableState state;
                 if (!android_foldable_get_state(&state)) {
-                    adbInterface->enqueueCommand({ "shell", "settings", "put",
-                                                   "global", "device_posture",
-                                                   std::to_string((int)state.currentPosture).c_str() });
+                    android::physics::FoldableModel::sendPostureToSystem(state.currentPosture);
                     // Android accepts only one hinge area currently
                     char hingeArea[128];
                     snprintf(hingeArea, 128, "%s-[%d,%d,%d,%d]",
