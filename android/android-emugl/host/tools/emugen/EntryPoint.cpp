@@ -39,7 +39,7 @@ void EntryPoint::reset()
     m_customDecoder = false;
     m_notApi = false;
     m_flushOnEncode = false;
-    m_vars.empty();
+    m_vars.clear();
 }
 
 // return true for valid line (need to get into the entry points list)
