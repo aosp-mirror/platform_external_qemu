@@ -462,6 +462,26 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 android_foldable_rollable_configured() ||
                 android_foldable_folded_area_configured(0)) {
                 getConsoleAgents()->emu->updateFoldablePostureIndicator(true);
+            } else {
+                auto isTablet = [&]() -> bool {
+                    if (resizableEnabled()) {
+                        return false;
+                    }
+                    auto myhw = getConsoleAgents()->settings->hw();
+                    if (myhw->hw_lcd_width > myhw->hw_lcd_height) {
+                        dprint("Width %d > Height %d, assume this is a tablet",
+                               static_cast<int>(myhw->hw_lcd_width),
+                               static_cast<int>(myhw->hw_lcd_height));
+                        return true;
+                    }
+                    return false;
+                };
+                if (isTablet()) {
+                    dprint("Ignore orientation request for tablet");
+                    adbInterface->enqueueCommand(
+                            {"shell", "cmd", "window",
+                             "set-ignore-orientation-request", "true"});
+                }
             }
 
             if (getConsoleAgents()->settings->language()->changing_language_country_locale) {
