@@ -36,7 +36,8 @@ android_target_compile_definitions(zlib linux-x86_64
                                    PRIVATE -D_LARGEFILE64_SOURCE=1)
 android_target_compile_definitions(zlib darwin-x86_64
                                    PRIVATE -D_LARGEFILE64_SOURCE=1)
-target_compile_options(zlib PRIVATE -Wno-implicit-function-declaration)
+target_compile_options(zlib PRIVATE -Wno-implicit-function-declaration
+                                    -Wno-deprecated-non-prototype)
 android_target_compile_definitions(
   zlib windows_msvc-x86_64
   PRIVATE -DWIN32
