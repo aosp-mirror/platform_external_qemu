@@ -183,7 +183,8 @@ void TvRemotePage::onSettingsButtonPressed() {
         "shell",
         "am",
         "start",
-        "com.android.tv.settings/com.android.tv.settings.MainSettings"
+        "-n",
+        "com.android.tv.settings/com.android.tv.settings.MainSettings",
     };
     std::string command_tag = "Open Settings";
 
@@ -211,6 +212,7 @@ void TvRemotePage::onProgramGuideButtonPressed() {
         "shell",
         "am",
         "start",
+        "-n",
         "com.google.android.tv/com.android.tv.MainActivity"
     };
     std::string command_tag = "Open Live Channels";
