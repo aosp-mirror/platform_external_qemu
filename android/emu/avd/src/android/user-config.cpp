@@ -45,12 +45,14 @@ struct AUserConfig {
     int extenedControlsHorizontalAnchor;
     ABool hasExtendedControlPos;
     uint64_t     uuid;
+    int posture;  // only applicable to foldable
     char*        iniPath;
 };
 
 /* Name of the user-config file */
 #define  USER_CONFIG_FILE  "emulator-user.ini"
 
+#define KEY_POSTURE "posture"
 #define  KEY_WINDOW_X  "window.x"
 #define  KEY_WINDOW_Y  "window.y"
 #define KEY_EXTENDED_CONTROLS_X "extended_controls.x"
@@ -61,6 +63,8 @@ struct AUserConfig {
 
 #define  DEFAULT_X 100
 #define  DEFAULT_Y 100
+
+constexpr int DEFAULT_POSTURE_UNKNOWN = 0;
 
 void auserConfig_free( AUserConfig* uconfig) {
     if (uconfig->iniPath) {
@@ -83,6 +87,7 @@ auserConfig_new_custom(
     if (default_h < 100) default_h = 100;
     uc->windowX  = DEFAULT_X;
     uc->windowY  = DEFAULT_Y;
+    uc->posture = DEFAULT_POSTURE_UNKNOWN;
     // uc->windowW  = default_w;
     // uc->windowH  = default_h;
     // uc->frameX   = DEFAULT_X;
@@ -195,6 +200,9 @@ auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int scre
                uc->extendedControlsX);
         }
 
+        uc->posture =
+                iniFile_getInteger(ini, KEY_POSTURE, DEFAULT_POSTURE_UNKNOWN);
+
         if (iniFile_hasKey(ini, KEY_EXTENDED_CONTROLS_Y)) {
             uc->hasExtendedControlPos = 1;
             uc->extendedControlsY =
@@ -227,6 +235,7 @@ auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int scre
     else {
         uc->windowX  = DEFAULT_X;
         uc->windowY  = DEFAULT_Y;
+        uc->posture = DEFAULT_POSTURE_UNKNOWN;
         uc->changed  = 1;
     }
 
@@ -250,6 +259,17 @@ uint64_t
 auserConfig_getUUID( AUserConfig*  uconfig )
 {
     return uconfig->uuid;
+}
+
+int auserConfig_getPosture(AUserConfig* uconfig) {
+    return uconfig->posture;
+}
+
+void auserConfig_setPosture(AUserConfig* uconfig, int posture) {
+    if (uconfig->posture != posture) {
+        uconfig->posture = posture;
+        uconfig->changed = 1;
+    }
 }
 
 void
@@ -316,6 +336,7 @@ auserConfig_save( AUserConfig*  uconfig )
 
     iniFile_setInteger(ini, KEY_WINDOW_X, uconfig->windowX);
     iniFile_setInteger(ini, KEY_WINDOW_Y, uconfig->windowY);
+    iniFile_setInteger(ini, KEY_POSTURE, uconfig->posture);
 
     if (uconfig->hasExtendedControlPos) {
         iniFile_setInteger(ini, KEY_EXTENDED_CONTROLS_X,

@@ -43,6 +43,9 @@ uint64_t       auserConfig_getUUID( AUserConfig*  uconfig );
 /* Retrieve the stored window position for this AVD */
 void           auserConfig_getWindowPos( AUserConfig*  uconfig, int  *pX, int  *pY );
 
+int auserConfig_getPosture(AUserConfig* uconfig);
+void auserConfig_setPosture(AUserConfig* uconfig, int posture);
+
 /* Change the stored window position for this AVD */
 void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y );
 

@@ -29,29 +29,30 @@
 #include "android/avd/info.h"                            // for avdInfo_getA...
 #include "aemu/base/ProcessControl.h"                 // for restartEmulator
 
-#include "aemu/base/files/MemStream.h"                // for MemStream
-#include "aemu/base/files/PathUtils.h"                // for PathUtils
-#include "aemu/base/misc/StringUtils.h"               // for Split
+#include "aemu/base/files/MemStream.h"                   // for MemStream
+#include "aemu/base/files/PathUtils.h"                   // for PathUtils
+#include "aemu/base/misc/StringUtils.h"                  // for Split
+#include "aemu/base/threads/Thread.h"                    // for Thread
 #include "android/base/system/System.h"                  // for System
-#include "aemu/base/threads/Thread.h"                 // for Thread
 #include "android/console.h"                             // for getConsoleAg...
 #include "android/emulation/AndroidMessagePipe.h"        // for AndroidMessa...
-#include "host-common/AndroidPipe.h"               // for AndroidPipe:...
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/emulation/control/globals_agent.h"     // for LanguageSett...
-#include "host-common/vm_operations.h"     // for QAndroidVmOp...
-#include "host-common/window_agent.h"      // for QAndroidEmul...
 #include "android/emulation/resizable_display_config.h"  // for getResizable...
-#include "host-common/FeatureControl.h"       // for isEnabled
-#include "host-common/Features.h"             // for DeviceSkinOv...
 #include "android/hw-sensors.h"                          // for FoldableHing...
 #include "android/metrics/MetricsReporter.h"             // for MetricsReporter
 #include "android/physics/FoldableModel.h"
-#include "android/utils/aconfig-file.h"                  // for aconfig_find
-#include "android/utils/debug.h"                         // for dinfo
-#include "android/utils/path.h"                          // for path_exists
-#include "android/utils/system.h"                        // for get_uptime_ms
-#include "studio_stats.pb.h"                             // for EmulatorBoot...
+#include "android/user-config.h"
+#include "android/utils/aconfig-file.h"  // for aconfig_find
+#include "android/utils/debug.h"         // for dinfo
+#include "android/utils/path.h"          // for path_exists
+#include "android/utils/system.h"        // for get_uptime_ms
+#include "host-common/AndroidPipe.h"     // for AndroidPipe:...
+#include "host-common/FeatureControl.h"  // for isEnabled
+#include "host-common/Features.h"        // for DeviceSkinOv...
+#include "host-common/vm_operations.h"   // for QAndroidVmOp...
+#include "host-common/window_agent.h"    // for QAndroidEmul...
+#include "studio_stats.pb.h"             // for EmulatorBoot...
 
 // This indicates the number of heartbeats from guest
 static std::atomic<int> guest_heart_beat_count {};
@@ -462,6 +463,12 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 android_foldable_rollable_configured() ||
                 android_foldable_folded_area_configured(0)) {
                 getConsoleAgents()->emu->updateFoldablePostureIndicator(true);
+                auto userConfig = getConsoleAgents()->settings->userConfig();
+                int posture = auserConfig_getPosture(userConfig);
+                if (posture > POSTURE_UNKNOWN && posture < POSTURE_MAX) {
+                    adbInterface->enqueueCommand(
+                            {"emu", "posture", std::to_string(posture)});
+                }
             } else {
                 auto isTablet = [&]() -> bool {
                     if (resizableEnabled()) {

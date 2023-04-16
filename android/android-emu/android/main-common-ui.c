@@ -29,8 +29,8 @@
 #include "android/console.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/emulator-window.h"
-#include "host-common/feature_control.h"
 #include "android/framebuffer.h"
+#include "android/hw-sensors.h"
 #include "android/main-common.h"
 #include "android/resource.h"
 #include "android/skin/charmap.h"
@@ -47,6 +47,7 @@
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 #include "android/utils/string.h"
+#include "host-common/feature_control.h"
 
 #define D(...)                   \
     do {                         \
@@ -97,6 +98,9 @@ void user_config_done(void) {
 
     skin_winsys_get_window_pos(&win_x, &win_y);
     auserConfig_setWindowPos(userConfig, win_x, win_y);
+    const int posture = android_foldable_get_posture();
+    auserConfig_setPosture(userConfig, posture);
+    D("saving posture %d", posture);
     auserConfig_save(userConfig);
     auserConfig_free(userConfig);
     getConsoleAgents()->settings->inject_userConfig(NULL);
