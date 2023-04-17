@@ -1324,6 +1324,18 @@ extern int android_physical_model_stop_recording() {
     return physicalModel_stopRecording(hw->physical_model);
 }
 
+int android_foldable_get_posture() {
+    struct FoldableState state;
+    constexpr int unknown_posture = static_cast<int>(POSTURE_UNKNOWN);
+    if (android_foldable_get_state(&state) >= 0) {
+        const auto posture = state.currentPosture;
+        if (posture > POSTURE_UNKNOWN && posture < POSTURE_MAX) {
+            return static_cast<int>(posture);
+        }
+    }
+    return unknown_posture;
+}
+
 int android_foldable_get_state(struct FoldableState* state) {
     return physicalModel_getFoldableState(android_physical_model_instance(), state);
 }
