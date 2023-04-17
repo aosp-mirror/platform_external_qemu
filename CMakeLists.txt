@@ -133,8 +133,6 @@ set(OPTIONS_BUILD_PACKET_GEN
       BOOL
       "Generate the bluetooth packet generator .yy and .ll files (posix only)."
 )
-set(BLUETOOTH_EMULATION TRUE
-    CACHE BOOL "Build the emulated bluetooth stack.")
 
 set(OPTION_AEMU_LIBS_ONLY FALSE
     CACHE BOOL "Build only AEMU libraries and their tests.")

@@ -134,13 +134,12 @@ android_add_library(
       iterator.cc
       packet_view.cc
       raw_builder.cc
-      view.cc)
+      view.cc
+  DEPS android-emu-base android-emu-base-headers)
 
 target_include_directories(
   BluetoothPacketSources PUBLIC . ${ROOTCANAL_ROOT} ${ROOTCANAL_ROOT}/include
                                 ${BT_ROOT}/gd ${BT_ROOT})
-target_link_libraries(BluetoothPacketSources PRIVATE android-emu-base
-                                                     android-emu-base-headers)
 target_compile_options(BluetoothPacketSources
                        PUBLIC -Wno-inconsistent-missing-override)
 
@@ -161,8 +160,7 @@ android_add_library(
   TARGET libbt-rootcanal
   LICENSE Apache-2.0
   SOURCE_DIR ${ROOTCANAL_ROOT}
-  SRC # cmake-format: sortable
-      ${BluetoothGeneratedPackets_h}
+  SRC ${BluetoothGeneratedPackets_h}
       ${RootCanalGeneratedPackets_h}
       lib/crypto/crypto.cc
       lib/hci/address.cc
@@ -195,25 +193,20 @@ android_add_library(
       model/setup/test_channel_transport.cc
       model/setup/test_command_handler.cc
       model/setup/test_model.cc
-  LINUX # cmake-format: sortable
-        net/posix/posix_async_socket.cc
+  LINUX net/posix/posix_async_socket.cc
         net/posix/posix_async_socket_connector.cc
         net/posix/posix_async_socket_server.cc
-  DARWIN # cmake-format: sortable
-         net/posix/posix_async_socket.cc
+  DARWIN net/posix/posix_async_socket.cc
          net/posix/posix_async_socket_connector.cc
-         net/posix/posix_async_socket_server.cc)
-
-target_link_libraries(
-  libbt-rootcanal
-  PRIVATE libscriptedbeaconpayload-protos-lite
-          jsoncpp
-          crypto
-          libbt-hci-packets
-          BluetoothPacketSources
-          android-emu-base
-          aemu-rootcanal-log-wrapper
-          android-emu-base-headers)
+         net/posix/posix_async_socket_server.cc
+  DEPS aemu-rootcanal-log-wrapper
+       android-emu-base
+       android-emu-base-headers
+       BluetoothPacketSources
+       crypto
+       jsoncpp
+       libbt-hci-packets
+       libscriptedbeaconpayload-protos-lite)
 target_include_directories(
   libbt-rootcanal
   PUBLIC .
@@ -230,15 +223,10 @@ target_compile_options(libbt-rootcanal
 android_add_library(
   TARGET libbt-rootcanal-qemu
   LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      async_manager.cc
-      net/mutli_datachannel_server.cpp
-      net/sockets/async_socket.cc
-      net/sockets/loopback_async_socket_connector.cc
-      net/sockets/loopback_async_socket_server.cc)
-
-target_link_libraries(libbt-rootcanal-qemu PRIVATE libbt-rootcanal
-                                                   android-emu-base-headers)
+  SRC async_manager.cc net/mutli_datachannel_server.cpp
+      net/sockets/async_socket.cc net/sockets/loopback_async_socket_connector.cc
+      net/sockets/loopback_async_socket_server.cc
+  DEPS android-emu-base-headers libbt-rootcanal)
 target_include_directories(libbt-rootcanal-qemu PUBLIC .
                            PRIVATE ${ROOTCANAL_ROOT}/desktop/)
 

@@ -15,10 +15,6 @@ target_include_directories(
     include
     ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG})
 
-if(BLUETOOTH_EMULATION)
-  target_compile_definitions(android-emu-cmdline PRIVATE -DANDROID_BLUETOOTH)
-endif()
-
 if(WEBRTC)
   target_compile_definitions(android-emu-cmdline PRIVATE -DANDROID_WEBRTC)
 endif()

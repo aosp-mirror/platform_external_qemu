@@ -395,10 +395,6 @@ if(WEBRTC)
   target_compile_definitions(android-emu PUBLIC -DANDROID_WEBRTC)
 endif()
 
-if(BLUETOOTH_EMULATION)
-  target_compile_definitions(android-emu PUBLIC -DANDROID_BLUETOOTH)
-endif()
-
 if(OPTION_GFXSTREAM_BACKEND)
   target_compile_definitions(android-emu PUBLIC -DAEMU_GFXSTREAM_BACKEND=1)
 endif()

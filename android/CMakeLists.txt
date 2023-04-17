@@ -12,8 +12,8 @@ add_subdirectory(coverage-poc)
 if(NOT OPTION_AEMU_LIBS_ONLY)
   add_subdirectory(emulator)
   add_subdirectory(emulator-check)
-  if (NOT LINUX_AARCH64)
-    if (NOT DARWIN_AARCH64)
+  if(NOT LINUX_AARCH64)
+    if(NOT DARWIN_AARCH64)
       add_subdirectory(tests)
     endif()
   endif()
@@ -28,19 +28,11 @@ else()
   add_subdirectory(${AOSP_ROOT}/external/webrtc/third_party/libyuv libyuv)
 endif()
 
-
-if(BLUETOOTH_EMULATION)
-  message(
-    STATUS "Including bluetooth emulation (and dependencies) from rootcanal")
-  add_subdirectory(bluetooth)
-  if (NOT WEBRTC)
-    # We need jsoncpp, which is part of webrtc.
-    add_subdirectory(${AOSP_ROOT}/external/webrtc/third_party/jsoncpp jsoncpp)
-  endif()
-else()
-  message(STATUS "Bluetooth emulation disabled.")
+add_subdirectory(bluetooth)
+if(NOT WEBRTC)
+  # We need jsoncpp, which is part of webrtc.
+  add_subdirectory(${AOSP_ROOT}/external/webrtc/third_party/jsoncpp jsoncpp)
 endif()
-
 
 if(OPTION_ANDROID_STUDIO)
   message(STATUS "Including android-studio")
