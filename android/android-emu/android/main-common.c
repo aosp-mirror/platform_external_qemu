@@ -1198,10 +1198,14 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     bool isFoldable = android_foldable_any_folded_area_configured() ||
                       android_foldable_hinge_configured() ||
                       android_foldable_rollable_configured();
+    bool isLargeScreen =
+            ((long long)(hw->hw_lcd_width) * (long long)(hw->hw_lcd_height)) >=
+            3LL * 1000LL * 1000LL;
 
-    if (avdInfo_getApiLevel(avd) >= 33 && isFoldable) {
+    if (avdInfo_getApiLevel(avd) >= 33 && (isFoldable || isLargeScreen)) {
         minRam = 3072; // 3G is required for U and up, to avoid kswapd eating cpus
-        D("foldable devices with api >=33 is set to have minimum ram 3G");
+        D("foldable or large screen devices with api >=33 is set to have "
+          "minimum ram 3G");
     } else if (avdInfo_getApiLevel(avd) >= 29) {
         // bug: 129958266
         // Q preview where API level is not 29 yet,
