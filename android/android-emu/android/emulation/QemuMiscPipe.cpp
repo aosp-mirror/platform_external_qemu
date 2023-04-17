@@ -471,6 +471,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 }
             } else {
                 auto isTablet = [&]() -> bool {
+                    return false;
                     if (resizableEnabled()) {
                         return false;
                     }
