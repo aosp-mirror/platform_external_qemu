@@ -471,16 +471,33 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 }
             } else {
                 auto isTablet = [&]() -> bool {
-                    return false;
                     if (resizableEnabled()) {
                         return false;
                     }
                     auto myhw = getConsoleAgents()->settings->hw();
-                    if (myhw->hw_lcd_width > myhw->hw_lcd_height) {
-                        dprint("Width %d > Height %d, assume this is a tablet",
-                               static_cast<int>(myhw->hw_lcd_width),
-                               static_cast<int>(myhw->hw_lcd_height));
-                        return true;
+                    if (!myhw) {
+                        return false;
+                    }
+                    auto isTabletDeviceName =
+                            [&](std::string_view view) -> bool {
+                        if (view == std::string_view("Nexus 10"))
+                            return true;
+                        if (std::string::npos != view.find("Tablet"))
+                            return true;
+                        return false;
+                    };
+                    if (myhw->hw_initialOrientation &&
+                        std::string_view(myhw->hw_initialOrientation) ==
+                                std::string_view("landscape") &&
+                        myhw->hw_device_name &&
+                        isTabletDeviceName(myhw->hw_device_name)) {
+                        if (myhw->hw_lcd_width > myhw->hw_lcd_height) {
+                            dprint("Width %d > Height %d, assume this is a "
+                                   "tablet",
+                                   static_cast<int>(myhw->hw_lcd_width),
+                                   static_cast<int>(myhw->hw_lcd_height));
+                            return true;
+                        }
                     }
                     return false;
                 };
