@@ -239,15 +239,4 @@ target_include_directories(
 target_compile_options(libbt-rootcanal
                        PUBLIC -Wno-inconsistent-missing-override)
 
-# Compatibility layer for android emulator.
-android_add_library(
-  TARGET libbt-rootcanal-qemu
-  LICENSE Apache-2.0
-  SRC async_manager.cc net/mutli_datachannel_server.cpp
-      net/sockets/async_socket.cc net/sockets/loopback_async_socket_connector.cc
-      net/sockets/loopback_async_socket_server.cc
-  DEPS android-emu-base-headers libbt-rootcanal)
-target_include_directories(libbt-rootcanal-qemu PUBLIC .
-                           PRIVATE ${ROOTCANAL_ROOT}/desktop/)
-
 add_subdirectory(lmp)
