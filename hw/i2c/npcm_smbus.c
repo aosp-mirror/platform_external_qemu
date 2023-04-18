@@ -749,6 +749,11 @@ static void npcm_smbus_write_ctl2(NPCMSMBusState *s, uint8_t value)
     s->ctl2 = value;
 
     if (!NPCM_SMBUS_ENABLED(s)) {
+        /*
+         * When disabling the SMBus module, the SDA and SCL lines go high,
+         * which can look like an I2C stop.
+         */
+        npcm_smbus_execute_stop(s);
         /* Disable this SMBus module. */
         s->ctl1 = 0;
         s->st = 0;
