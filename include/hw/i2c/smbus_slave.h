@@ -35,6 +35,7 @@ OBJECT_DECLARE_TYPE(SMBusDevice, SMBusDeviceClass,
 
 struct SMBusDeviceClass {
     I2CSlaveClass parent_class;
+    ResettablePhases parent_phases;
 
     /*
      * An operation with no data, special in SMBus.

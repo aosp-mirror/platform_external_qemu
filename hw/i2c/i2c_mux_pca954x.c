@@ -160,8 +160,13 @@ static uint8_t pca954x_read_byte(SMBusDevice *d)
 static void pca954x_enter_reset(Object *obj, ResetType type)
 {
     Pca954xState *s = PCA954X(obj);
+    Pca954xClass *pc = PCA954X_GET_CLASS(obj);
+
     /* Reset will disable all channels. */
     pca954x_write(s, 0);
+    if (pc->parent.parent_phases.enter) {
+        pc->parent.parent_phases.enter(obj, type);
+    }
 }
 
 I2CBus *pca954x_i2c_get_bus(I2CSlave *mux, uint8_t channel)

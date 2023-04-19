@@ -219,8 +219,11 @@ static void smbus_device_class_init(ObjectClass *klass, void *data)
 {
     I2CSlaveClass *sc = I2C_SLAVE_CLASS(klass);
     ResettableClass *rc = RESETTABLE_CLASS(klass);
+    SMBusDeviceClass *sdc = SMBUS_DEVICE_CLASS(klass);
 
     rc->phases.enter = smbus_device_enter_reset;
+    resettable_class_set_parent_phases(rc, smbus_device_enter_reset, NULL, NULL,
+                                       &sdc->parent_phases);
     sc->event = smbus_i2c_event;
     sc->recv = smbus_i2c_recv;
     sc->send = smbus_i2c_send;
