@@ -18,6 +18,7 @@
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/async/RecurrentTask.h"
 #include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android-qemu2-glue/emulation/WifiService.h"
 #include "android/emulation/HostapdController.h"
 #include "android/network/GenericNetlinkMessage.h"
@@ -70,11 +71,10 @@ private:
     static void onFrameSentCallback(NetClientState*, ssize_t);
     // Wrapper function for pass C-style func ptr to hostapd socket
     static void onHostApd(void* opaque, int fd, unsigned events);
-    static ssize_t sendToGuest(
-            VirtioWifiForwarder* forwarder,
-            std::unique_ptr<android::network::Ieee80211Frame> frame);
     static const char* const kNicModel;
     static const char* const kNicName;
+    ssize_t sendToGuest(
+            std::unique_ptr<android::network::Ieee80211Frame> frame);
     void resetBeaconTask();
     size_t onRemoteData(const uint8_t* data, size_t size);
     void sendToRemoteVM(std::unique_ptr<android::network::Ieee80211Frame> frame,
@@ -106,6 +106,7 @@ private:
     std::atomic<bool> mHostapdSockInitSuccess{false};
     NICConf* mNicConf = nullptr;
     android::network::FrameInfo mFrameInfo;
+    android::base::Lock mLock;
 
     DISALLOW_COPY_AND_ASSIGN(VirtioWifiForwarder);
 };
