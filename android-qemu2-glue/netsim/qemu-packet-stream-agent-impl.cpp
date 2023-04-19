@@ -16,6 +16,7 @@
 #include <memory>
 #include <new>
 #include <string>
+#include <thread>
 #include <utility>
 
 #include "PacketProtocol.h"
@@ -26,7 +27,6 @@
 #include "android/utils/debug.h"
 #include "backend/packet_streamer_client.h"
 #include "netsim.h"
-
 
 // clang-format off
 // IWYU pragma: begin_keep
@@ -129,8 +129,8 @@ static void netsim_chr_open(Chardev* chr,
     // Directly opening the channel can take >2 seconds.. so let's just
     // assume it succeeds and do it async. If this fails we will simply
     // not respond to any hardware requests.
-    android::base::ThreadLooper::get()->scheduleCallback(
-            [netsim]() { netsim_chr_connect(netsim); });
+    std::thread connect([netsim]() { netsim_chr_connect(netsim); });
+    connect.detach();
 
     *be_opened = true;
 }
