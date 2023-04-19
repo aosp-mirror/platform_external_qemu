@@ -339,10 +339,14 @@ static const VMStateDescription vmstate_sbtsi = {
 static void sbtsi_enter_reset(Object *obj, ResetType type)
 {
     SBTSIState *s = SBTSI(obj);
+    SMBusDeviceClass *sdc = SMBUS_DEVICE_GET_CLASS(&s->parent);
 
     s->config = 0;
     s->limit_low = SBTSI_LIMIT_LOW_DEFAULT;
     s->limit_high = SBTSI_LIMIT_HIGH_DEFAULT;
+    if (sdc->parent_phases.enter) {
+        sdc->parent_phases.enter(obj, type);
+    }
 }
 
 static void sbtsi_hold_reset(Object *obj)
