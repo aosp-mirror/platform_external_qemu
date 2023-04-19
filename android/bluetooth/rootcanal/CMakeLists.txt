@@ -1,25 +1,5 @@
 set(BT_ROOT ${AOSP_ROOT}/packages/modules/Bluetooth/system)
-set(ROOTCANAL_ROOT ${AOSP_ROOT}/packages/modules/Bluetooth/tools/rootcanal)
-set(PDL_ROOT ${AOSP_ROOT}/packages/modules/Bluetooth/tools/pdl)
-
-corrosion_import_crate(
-    MANIFEST_PATH ${PDL_ROOT}/Cargo.toml
-    FLAGS --offline --verbose --verbose)
-
-corrosion_set_env_vars(generate-canonical-tests CARGO_HOME=${Rust_CARGO_HOME})
-corrosion_set_env_vars(pdl CARGO_HOME=${Rust_CARGO_HOME})
-
-# These tests depend on the tempfile crate which was not imported because
-# the crate remove_dir_all does not have a compatible version.
-set_tests_properties(cargo-test_pdl PROPERTIES DISABLED True)
-set_tests_properties(cargo-test_generate-canonical-tests PROPERTIES DISABLED True)
-
-android_license(
-    TARGET "pdl"
-    LIBNAME None
-    SPDX None
-    LICENSE None
-    LOCAL None)
+set(ROOTCANAL_ROOT ${BT_ROOT}/../tools/rootcanal)
 
 # ~~~
 # ! foobar : Compile .pdl files to C++/Rust!
@@ -239,4 +219,21 @@ target_include_directories(
 target_compile_options(libbt-rootcanal
                        PUBLIC -Wno-inconsistent-missing-override)
 
-add_subdirectory(lmp)
+# Compatibility layer for android emulator.
+android_add_library(
+  TARGET libbt-rootcanal-qemu
+  LICENSE Apache-2.0
+  SRC async_manager.cc net/mutli_datachannel_server.cpp
+      net/sockets/async_socket.cc net/sockets/loopback_async_socket_connector.cc
+      net/sockets/loopback_async_socket_server.cc
+  DEPS android-emu-base-headers libbt-rootcanal)
+target_include_directories(libbt-rootcanal-qemu PUBLIC .
+                           PRIVATE ${ROOTCANAL_ROOT}/desktop/)
+
+if(TARGET Rust::Rustc)
+  add_subdirectory(lmp)
+else()
+  message(
+    WARNING
+      "Disabling lmp for bluetooth, no complete toolchain present (Windows/M1)")
+endif()

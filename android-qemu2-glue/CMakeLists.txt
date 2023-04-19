@@ -81,7 +81,6 @@ set(android-qemu2-glue_src
     qemu-sensors-agent-impl.cpp
     qemu-setup-dns-servers.cpp
     qemu-setup.cpp
-    netsim/h4_parser.cc
     netsim/BluetoothPacketProtocol.cpp
     netsim/PacketStreamTransport.cpp
     netsim/qemu-packet-stream-agent-impl.cpp
@@ -116,7 +115,7 @@ target_link_libraries(
   libqemu2-glue
   PRIVATE emulated-bluetooth-service-server-impl grpc++
           packet-streamer-client-lib packet-streamer-proto-lib
-          protobuf::libprotobuf)
+          protobuf::libprotobuf libbt-hci-packets)
 
 target_link_libraries(
   libqemu2-glue

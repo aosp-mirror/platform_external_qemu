@@ -10,10 +10,9 @@ android_bluetooth_packet_gen(
 # This will automatically register all the tests as well.
 corrosion_import_crate(MANIFEST_PATH ${ROOTCANAL_ROOT}/lmp/Cargo.toml FLAGS
                        --offline --verbose --verbose)
-corrosion_set_env_vars(lmp
-  LMP_PACKETS_PREBUILT=${LmpGeneratedPackets_rs}
-  HCI_PACKETS_PREBUILT=${HciGeneratedPackets_rs}
-  CARGO_HOME=${Rust_CARGO_HOME})
+corrosion_set_env_vars(
+  lmp LMP_PACKETS_PREBUILT=${LmpGeneratedPackets_rs}
+  HCI_PACKETS_PREBUILT=${HciGeneratedPackets_rs} CARGO_HOME=${Rust_CARGO_HOME})
 android_license(TARGET "lmp" LIBNAME None SPDX None LICENSE None LOCAL None)
 
 add_custom_target(lmp_rust_packets DEPENDS ${LmpGeneratedPackets_rs}
