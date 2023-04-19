@@ -27,6 +27,7 @@ extern "C" {
 #include "android/network/WifiForwardServer.h"
 #include "android/network/mac80211_hwsim.h"
 
+using android::base::AutoLock;
 using android::base::IOVector;
 using android::base::Looper;
 using android::base::RecurrentTask;
@@ -214,6 +215,7 @@ void VirtioWifiForwarder::ackLocalFrame(const Ieee80211Frame* frame) {
     txInfo.putAttribute(HWSIM_ATTR_SIGNAL, &signal, sizeof(signal));
     txInfo.putAttribute(HWSIM_ATTR_TX_INFO, info.mTxRates.data(),
                         Ieee80211Frame::TX_MAX_RATES * sizeof(hwsim_tx_rate));
+    AutoLock lock(mLock);
     mOnFrameAvailableCallback(txInfo.data(), txInfo.dataLen());
 }
 
@@ -342,6 +344,7 @@ ssize_t VirtioWifiForwarder::sendToGuest(
     uint32_t signal = -50;
     msg.putAttribute(HWSIM_ATTR_SIGNAL, &signal, sizeof(signal));
     msg.putAttribute(HWSIM_ATTR_FREQ, &info.mChannel, sizeof(uint32_t));
+    AutoLock lock(mLock);
     return mOnFrameAvailableCallback(msg.data(), msg.dataLen());
 }
 

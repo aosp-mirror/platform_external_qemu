@@ -18,6 +18,7 @@
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/async/RecurrentTask.h"
 #include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "android-qemu2-glue/emulation/WifiService.h"
 #include "android/emulation/HostapdController.h"
 #include "android/network/GenericNetlinkMessage.h"
@@ -105,6 +106,7 @@ private:
     std::atomic<bool> mHostapdSockInitSuccess{false};
     NICConf* mNicConf = nullptr;
     android::network::FrameInfo mFrameInfo;
+    android::base::Lock mLock;
 
     DISALLOW_COPY_AND_ASSIGN(VirtioWifiForwarder);
 };
