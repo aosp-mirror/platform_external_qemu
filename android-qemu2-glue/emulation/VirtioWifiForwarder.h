@@ -70,11 +70,10 @@ private:
     static void onFrameSentCallback(NetClientState*, ssize_t);
     // Wrapper function for pass C-style func ptr to hostapd socket
     static void onHostApd(void* opaque, int fd, unsigned events);
-    static ssize_t sendToGuest(
-            VirtioWifiForwarder* forwarder,
-            std::unique_ptr<android::network::Ieee80211Frame> frame);
     static const char* const kNicModel;
     static const char* const kNicName;
+    ssize_t sendToGuest(
+            std::unique_ptr<android::network::Ieee80211Frame> frame);
     void resetBeaconTask();
     size_t onRemoteData(const uint8_t* data, size_t size);
     void sendToRemoteVM(std::unique_ptr<android::network::Ieee80211Frame> frame,
