@@ -255,6 +255,8 @@ function(toolchain_configure_tags tag)
     set(HOST_LINUX_X86_64 TRUE PARENT_SCOPE)
   elseif(ANDOID_HOST_TAG STREQUAL "darwin-x86_64")
     set(HOST_DARWIN_X86_64 TRUE PARENT_SCOPE)
+  elseif(ANDROID_HOST_TAG STREQUAL "darwin-aarch64")
+    set(HOST_DARWIN_AARCH64 TRUE PARENT_SCOPE)
   endif()
 
   # Export the oldschool tags as well.
