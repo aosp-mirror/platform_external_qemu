@@ -24,10 +24,10 @@ extern "C" {
 #include <libavutil/mem.h>
 #include <libavutil/pixfmt.h>
 #include <libswscale/swscale.h>
-
 }
 
 #include "android/car-cluster.h"
+#include "android/console.h"
 #include "android/skin/qt/car-cluster-window.h"
 #include "android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h"
 #include "android/skin/winsys.h"
@@ -142,8 +142,7 @@ WorkerProcessingResult CarClusterConnector::workerProcessFrame(
     av_log_set_level(AV_LOG_INFO);
 
     auto showFunc = [](void* data) {
-        CarClusterWindow* window =
-            static_cast<CarClusterWindow*>(data);
+        CarClusterWindow* window = static_cast<CarClusterWindow*>(data);
         if (!window->isVisible() && !window->isDismissed()) {
             // Open the Cluster window, stop the request thread,
             // Restart the pipe to get first frame
@@ -151,8 +150,8 @@ WorkerProcessingResult CarClusterConnector::workerProcessFrame(
         }
     };
 
-    skin_winsys_run_ui_update(
-        showFunc, mCarClusterWindow, true /* wait for result */);
+    getConsoleAgents()->emu->runOnUiThread(showFunc, mCarClusterWindow,
+                                           true /* wait for result */);
 
     mRefreshMsg.trySend(MSG_RESTART);
 
@@ -162,16 +161,16 @@ WorkerProcessingResult CarClusterConnector::workerProcessFrame(
         if (mCarClusterWindow) {
             auto pixmapUpdateFunc = [](void* data) {
                 CarClusterConnector* connector =
-                    static_cast<CarClusterConnector*>(data);
+                        static_cast<CarClusterConnector*>(data);
                 CarClusterWindow* window = connector->mCarClusterWindow;
                 uint8_t* rgbData = connector->mRgbData;
-                auto widget = window->findChild<CarClusterWidget*>(
-                        "render_window");
-                widget->updatePixmap(QImage(
-                        rgbData, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB32));
+                auto widget =
+                        window->findChild<CarClusterWidget*>("render_window");
+                widget->updatePixmap(QImage(rgbData, FRAME_WIDTH, FRAME_HEIGHT,
+                                            QImage::Format_RGB32));
             };
-            skin_winsys_run_ui_update(
-                pixmapUpdateFunc, this, false /* async */);
+            getConsoleAgents()->emu->runOnUiThread(pixmapUpdateFunc, this,
+                                                   false /* async */);
         }
     }
 
