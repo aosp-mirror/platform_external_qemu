@@ -15,10 +15,10 @@
 #include "aemu/base/containers/CircularBuffer.h"
 #include "aemu/base/memory/OnDemand.h"
 #include "aemu/base/synchronization/Lock.h"
-#include "android/console.h"
 #include "android/emulation/control/ApkInstaller.h"
 #include "android/emulation/control/FilePusher.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/console.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/settings-agent.h"
 #include "android/skin/event.h"
@@ -188,11 +188,8 @@ signals:
                        QSemaphore* semaphore = NULL);
     void setWindowPos(int x, int y, QSemaphore* semaphore = NULL);
     void setWindowSize(int w, int h, QSemaphore* semaphore = NULL);
-    void paintWindowOverlayForResize(int mouseX,
-                                     int mouseY,
-                                     QSemaphore* semaphore = NULL);
-    void setWindowOverlayForResize(int whichCorner,
-                                   QSemaphore* semaphore = NULL);
+    void paintWindowOverlayForResize(int mouseX, int mouseY, QSemaphore* semaphore = NULL);
+    void setWindowOverlayForResize(int whichCorner, QSemaphore* semaphore = NULL);
     void clearWindowOverlay(QSemaphore* semaphore = NULL);
     void setWindowCursorResize(int whichCorner, QSemaphore* semaphore = NULL);
     void setWindowCursorNormal(QSemaphore* semaphore = NULL);
@@ -216,15 +213,14 @@ signals:
     void updateMultiDisplayPage(int id);
 
 public:
-    void handleTouchPoints(const QTouchEvent& touchEvents,
-                           uint32_t displayId = 0);
+    void handleTouchPoints(const QTouchEvent& touchEvents, uint32_t displayId = 0);
     void pollEvent(SkinEvent* event, bool* hasEvent);
 
     WId getWindowId();
 
     android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
-    ToolWindow* toolWindow() const;
+    ToolWindow*  toolWindow() const;
     CarClusterWindow* carClusterWindow() const;
     CarClusterConnector* carClusterConnector() const;
 
@@ -233,12 +229,10 @@ public:
     QSize containerSize() const;
     QRect deviceGeometry() const;
 
-    void doResize(const QSize& size, bool isKbdShortcut = false);
+    void doResize(const QSize& size,
+                  bool isKbdShortcut = false);
     void resizeAndChangeAspectRatio(bool isFolded);
-    void resizeAndChangeAspectRatio(int x,
-                                    int y,
-                                    int w,
-                                    int h,
+    void resizeAndChangeAspectRatio(int x, int y, int w, int h,
                                     bool ignoreOrientation = false);
 #if QT_VERSION >= 0x060000
     void handleMouseEvent(SkinEventType type,
@@ -276,10 +270,7 @@ public:
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
     void setDisplayRegion(int xOffset, int yOffset, int width, int height);
-    void setDisplayRegionAndUpdate(int xOffset,
-                                   int yOffset,
-                                   int width,
-                                   int height);
+    void setDisplayRegionAndUpdate(int xOffset, int yOffset, int width, int height);
     void simulateSetScale(double scale);
     void simulateSetZoom(double zoom);
     void simulateWindowMoved(const QPoint& pos);
@@ -291,10 +282,10 @@ public:
     void zoomOut(const QPoint& focus, const QPoint& viewportFocus);
     void zoomReset();
     void zoomTo(const QPoint& focus, const QSize& rectSize);
-    int getTopTransparency() { return mSkinGapTop; }
-    int getRightTransparency() { return mSkinGapRight; }
-    int getBottomTransparency() { return mSkinGapBottom; }
-    int getLeftTransparency() { return mSkinGapLeft; }
+    int  getTopTransparency()    { return mSkinGapTop; }
+    int  getRightTransparency()  { return mSkinGapRight; }
+    int  getBottomTransparency() { return mSkinGapBottom; }
+    int  getLeftTransparency()   { return mSkinGapLeft; }
     bool getMultiDisplay(uint32_t id,
                          int32_t* x,
                          int32_t* y,
@@ -304,29 +295,23 @@ public:
                          uint32_t* flag,
                          bool* enabled);
     int switchMultiDisplay(bool enabled,
-                           uint32_t id,
-                           int32_t x,
-                           int32_t y,
-                           uint32_t width,
-                           uint32_t height,
-                           uint32_t dpi,
-                           uint32_t flag);
+                            uint32_t id,
+                            int32_t x,
+                            int32_t y,
+                            uint32_t width,
+                            uint32_t height,
+                            uint32_t dpi,
+                            uint32_t flag);
     bool getMonitorRect(uint32_t* width, uint32_t* height);
     void setNoSkin();
     void restoreSkin();
-    bool multiDisplayParamValidate(uint32_t id,
-                                   uint32_t w,
-                                   uint32_t h,
-                                   uint32_t dpi,
-                                   uint32_t flag);
+    bool multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
+                                   uint32_t dpi, uint32_t flag);
     void updateUIMultiDisplayPage(uint32_t id);
-    void setUIDisplayRegion(int x,
-                            int y,
-                            int w,
-                            int h,
-                            bool ignoreOrientation = false);
+    void setUIDisplayRegion(int x, int y, int w, int h, bool ignoreOrientation = false);
     bool addMultiDisplayWindow(uint32_t id, bool add, uint32_t w, uint32_t h);
     bool paintMultiDisplayWindow(uint32_t id, uint32_t texture);
+    const QPixmap* getRawSkinPixmap() { getSkinPixmap(); return mRawSkinPixmap; }
 
     static bool sClosed;
 
@@ -360,30 +345,30 @@ private slots:
     void slot_getWindowSize(int* w, int* h, QSemaphore* semaphore = NULL);
     void slot_isWindowFullyVisible(bool* out_value,
                                    QSemaphore* semaphore = NULL);
-    void slot_isWindowOffScreen(bool* out_value, QSemaphore* semaphore = NULL);
+    void slot_isWindowOffScreen(bool* out_value,
+                                QSemaphore* semaphore = NULL);
     void slot_releaseBitmap(SkinSurface* s, QSemaphore* sempahore = NULL);
     void slot_requestClose(QSemaphore* semaphore = NULL);
     void slot_requestUpdate(QRect rect, QSemaphore* semaphore = NULL);
-    void slot_setDeviceGeometry(QRect rect, QSemaphore* semaphore = NULL);
+    void slot_setDeviceGeometry(QRect rect,
+                                QSemaphore* semaphore = NULL);
     void slot_setWindowIcon(const unsigned char* data,
                             int size,
                             QSemaphore* semaphore = NULL);
     void slot_setWindowPos(int x, int y, QSemaphore* semaphore = NULL);
     void slot_setWindowSize(int w, int h, QSemaphore* semaphore = NULL);
-    void slot_paintWindowOverlayForResize(int mouseX,
-                                          int mouseY,
-                                          QSemaphore* semaphore = NULL);
+    void slot_paintWindowOverlayForResize(int mouseX, int mouseY, QSemaphore* semaphore = NULL);
     void slot_clearWindowOverlay(QSemaphore* semaphore = NULL);
-    void slot_setWindowOverlayForResize(int whichCorner,
-                                        QSemaphore* semaphore = NULL);
-    void slot_setWindowCursorResize(int whichCorner,
-                                    QSemaphore* semaphore = NULL);
+    void slot_setWindowOverlayForResize(int whichCorner, QSemaphore* semaphore = NULL);
+    void slot_setWindowCursorResize(int whichCorner, QSemaphore* semaphore = NULL);
     void slot_setWindowCursorNormal(QSemaphore* semaphore = NULL);
-    void slot_setWindowTitle(QString title, QSemaphore* semaphore = NULL);
+    void slot_setWindowTitle(QString title,
+                             QSemaphore* semaphore = NULL);
     void slot_showWindow(SkinSurface* surface,
                          QRect rect,
                          QSemaphore* semaphore = NULL);
-    void slot_runOnUiThread(RunOnUiThreadFunc f, QSemaphore* semaphore = NULL);
+    void slot_runOnUiThread(RunOnUiThreadFunc f,
+                            QSemaphore* semaphore = NULL);
     void slot_updateRotation(SkinRotation rotation);
 
     void slot_horizontalScrollChanged(int value);
@@ -399,15 +384,13 @@ private slots:
     void slot_installCanceled();
     void slot_adbPushCanceled();
 
-    void slot_showMessage(QString text,
-                          Ui::OverlayMessageType icon,
+    void slot_showMessage(QString text, Ui::OverlayMessageType icon,
                           int timeoutMs);
-    void slot_showMessageWithDismissCallback(
-            QString text,
-            Ui::OverlayMessageType icon,
-            QString dismissText,
-            Ui::OverlayChildWidget::DismissFunc func,
-            int timeoutMs);
+    void slot_showMessageWithDismissCallback(QString text,
+                                             Ui::OverlayMessageType icon,
+                                             QString dismissText,
+                                             Ui::OverlayChildWidget::DismissFunc func,
+                                             int timeoutMs);
 
 public slots:
     // Here are conventional slots that perform interesting high-level functions
@@ -470,6 +453,7 @@ private:
 
     void runAdbShellPowerDownAndQuit();
     void setVisibleExtent(QBitmap bitMap);
+    void getSkinPixmap(); // For masking the skin when frameless
 
     android::base::Looper* mLooper;
     QTimer mStartupTimer;
@@ -477,7 +461,9 @@ private:
 
     SkinSurface* mBackingSurface;
     QPixmap mScaledBackingImage;
+    QPixmap* mRawSkinPixmap = nullptr; // For masking frameless AVDs
     bool mBackingBitmapChanged = true;
+    bool mSkinPixmapIsPortrait = true;
 
     QQueue<SkinEvent*> mSkinEventQueue;
     android::base::Lock mSkinEventQueueLock;
@@ -486,7 +472,7 @@ private:
     bool mShouldShowSnapshotModalOverlay = false;
     android::base::Lock mSnapshotStateLock;
 
-    ToolWindow* mToolWindow;
+    ToolWindow*  mToolWindow;
     CarClusterWindow* mCarClusterWindow;
     CarClusterConnector* mCarClusterConnector;
 
@@ -501,17 +487,18 @@ private:
 
     // Window flags to use for frameless and framed appearance
 
-    static constexpr Qt::WindowFlags FRAMELESS_WINDOW_FLAGS =
-            (Qt::Window | Qt::NoDropShadowWindowHint | Qt::FramelessWindowHint);
-    static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS =
-            (Qt::Window | Qt::WindowTitleHint
+    static constexpr Qt::WindowFlags FRAMELESS_WINDOW_FLAGS  = (  Qt::Window
+                                                                | Qt::NoDropShadowWindowHint
+                                                                | Qt::FramelessWindowHint);
+    static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (  Qt::Window
+                                                                | Qt::WindowTitleHint
 #ifndef __APPLE__
-             | Qt::CustomizeWindowHint
+                                                                | Qt::CustomizeWindowHint
 #endif
-            );
+                                                               );
 
-    static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK =
-            (FRAMELESS_WINDOW_FLAGS | FRAMED_WINDOW_FLAGS);
+    static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (  FRAMELESS_WINDOW_FLAGS
+                                                                | FRAMED_WINDOW_FLAGS);
 
     QPointF mFocus;
     QPoint mViewportFocus;
@@ -561,8 +548,9 @@ private:
             mEventLogger;
 
     std::shared_ptr<android::qt::UserActionsCounter> mUserActionsCounter;
-    android::base::MemberOnDemandT<android::emulation::AdbInterface*,
-                                   android::emulation::AdbInterface*>
+    android::base::MemberOnDemandT<
+            android::emulation::AdbInterface*,
+            android::emulation::AdbInterface*>
             mAdbInterface;
     android::emulation::AdbCommandPtr mApkInstallCommand;
     android::base::MemberOnDemandT<android::emulation::ApkInstaller,
@@ -589,12 +577,12 @@ private:
     std::unique_ptr<SwipeGesture> mSwipeGesture;
     bool mStartedAdbStopProcess;
 
-    bool mFrameAlways;  // true = no floating emulator
-    bool mPreviouslyFramed = false;
-    bool mHaveBeenFrameless;
+    bool         mFrameAlways;       // true = no floating emulator
+    bool         mPreviouslyFramed = false;
+    bool         mHaveBeenFrameless;
     unsigned int mHardRefreshCountDown = 0;
-    SkinRotation mOrientation;  // Rotation of the main window
-    bool mWindowIsMinimized = false;
+    SkinRotation mOrientation;       // Rotation of the main window
+    bool         mWindowIsMinimized = false;
 
     QScreen* mCurrentScreen = nullptr;
 
@@ -602,8 +590,8 @@ private:
     void saveMultidisplayToConfig();
 
     /* Current values of Pen event data. */
-    int mPenPosX = 0;
-    int mPenPosY = 0;
+    int  mPenPosX = 0;
+    int  mPenPosY = 0;
     bool mPenButtonPressed = false;
 
     /* State of pen event type translation state machine. */
@@ -635,9 +623,7 @@ public:
     QSize size() const;
 
     void fill(const QRect& area, const QColor& color);
-    void drawFrom(SkinSurfaceBitmap* what,
-                  QPoint where,
-                  const QRect& area,
+    void drawFrom(SkinSurfaceBitmap* what, QPoint where, const QRect& area,
                   QPainter::CompositionMode op);
 
     QImage& get();

@@ -29,7 +29,7 @@
 #include <QUrl>                                      // for QUrl
 
 #include "android/skin/qt/editable-slider-widget.h"  // for EditableSliderWi...
-#include "android/utils/debug.h"
+#include "android/skin/qt/logging-category.h"        // for emu
 
 class QDragEnterEvent;
 class QDragLeaveEvent;
@@ -176,7 +176,7 @@ bool PosterImageWell::setPathInternal(const QString& path) {
     QPixmap image(path);
     if (image.isNull()) {
         // Failed to load, reset back to an empty path.
-        dwarning("Can't load image: %s",  path.toStdString().c_str());
+        qCWarning(emu) << tr("Can't load image: ") << path;
 
         const bool pathChanged = !mPath.isNull();
         removeImage();

@@ -25,7 +25,6 @@
 
 #include "android/skin/qt/error-dialog.h"  // for showErrorDialog
 #include "ui_google-play-page.h"           // for GooglePlayPage
-#include "android/skin/qt/utils/common.h"
 
 class QPlainTextEdit;
 class QString;
@@ -95,7 +94,7 @@ void GooglePlayPage::queryPlayVersions() {
 void GooglePlayPage::bootCompletionPropertyDone(
         GooglePlayServices::Result result,
         std::string_view outString) {
-    runOnEmuUiThread([this, result, outString] {
+    EmulatorQtWindow::getInstance()->runOnUiThread([this, result, outString] {
         if (result == GooglePlayServices::Result::Success && !outString.empty() &&
             outString[0] == '1') {
             // TODO: remove this once we have android properties to wait on.
@@ -147,7 +146,7 @@ void GooglePlayPage::showPlayServicesPage() {
 
 void GooglePlayPage::playPageDone(GooglePlayServices::Result result,
                                   PlayPages page) {
-    runOnEmuUiThread([this, result, page] {
+    EmulatorQtWindow::getInstance()->runOnUiThread([this, result, page] {
         QString msg;
         switch (result) {
             case GooglePlayServices::Result::Success:
@@ -173,7 +172,7 @@ void GooglePlayPage::getPlayServicesVersion() {
 void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
                                      PlayApps app,
                                      std::string_view outString) {
-    runOnEmuUiThread([this, result, app, outString] {
+    EmulatorQtWindow::getInstance()->runOnUiThread([this, result, app, outString] {
         QString msg;
         QPlainTextEdit* textEdit = nullptr;
 

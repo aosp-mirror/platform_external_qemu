@@ -81,9 +81,6 @@ set(EMULATOR_HW_DEPENDENCIES "${HW_PROPERTIES_INI}>lib/hardware-properties.ini")
 
 # Install all the depencies in the right place during build
 android_target_dependency(emulator all QT5_SHARED_DEPENDENCIES)
-if(QTWEBENGINE)
-  android_target_dependency(emulator all QT5_WEBENGINE_SHARED_DEPENDENCIES)
-endif()
 if(NOT OPTION_MINBUILD)
   android_target_dependency(emulator all MESA_DEPENDENCIES)
 endif()
@@ -112,9 +109,6 @@ android_target_dependency(emulator windows_msvc-x86_64 MSVC_DEPENDENCIES)
 # installation. Once this issue is fixed, remove all of these
 # "android_install_dependency_force_exec()" calls.
 android_install_dependency_force_exec(all QT5_SHARED_DEPENDENCIES)
-if(QTWEBENGINE)
-    android_install_dependency_force_exec(all QT5_WEBENGINE_SHARED_DEPENDENCIES)
-endif()
 if(NOT OPTION_MINBUILD)
   android_install_dependency(all MESA_DEPENDENCIES)
 endif()

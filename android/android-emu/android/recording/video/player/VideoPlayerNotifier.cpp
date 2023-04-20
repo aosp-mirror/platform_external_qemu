@@ -32,8 +32,14 @@
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/recording/video/player/VideoPlayer.h"
 
+namespace android {
+namespace videoplayer {
+
 void VideoPlayerNotifier::onVideoRefresh() {
     if (mPlayer) {
         mPlayer->videoRefresh();
     }
 }
+
+}  // namespace videoplayer
+}  // namespace android

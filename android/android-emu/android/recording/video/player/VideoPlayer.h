@@ -36,13 +36,13 @@
 #include <string>  // for string
 
 class VideoPlayerRenderTarget;
-class VideoPlayerNotifier;
 namespace offworld {
 class DatasetInfo;
 }  // namespace offworld
 
 namespace android {
 namespace videoplayer {
+class VideoPlayerNotifier;
 
 struct PlayConfig {
     // absolute timestamp from the beginning of the video, measured in seconds
@@ -92,18 +92,9 @@ public:
     virtual void loadVideoFileWithData(
             const ::offworld::DatasetInfo& datasetInfo) = 0;
 
-    virtual void setErrorStatusAndRecordErrorMessage(
-            std::string errorDetails) = 0;
+    virtual void setErrorStatusAndRecordErrorMessage(std::string errorDetails) = 0;
     virtual bool getErrorStatus() = 0;
     virtual std::string getErrorMessage() = 0;
-
-    // create a video player instance the input video file, the output widget to
-    // display, and the notifier to receive updates. The video player will take
-    // onwership of the notifier.
-    static std::unique_ptr<VideoPlayer> createVideoPlayer(
-            const char* videoFile,
-            VideoPlayerRenderTarget* widget,
-            std::unique_ptr<VideoPlayerNotifier> notifier);
 };
 
 }  // namespace videoplayer

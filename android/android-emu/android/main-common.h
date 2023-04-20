@@ -22,7 +22,6 @@
 #include "host-common/opengl/emugl_config.h"  // for AndroidGlesEmulationMode
 #include "android/skin/winsys.h"          // for WinsysPreferredGlesBackend
 #include "android/utils/compiler.h"       // for ANDROID_BEGIN_HEADER, ANDRO...
-#include "android/main-common-ui.h"       // for backwards compatibility
 
 struct QAndroidEmulatorWindowAgent;
 struct QAndroidMultiDisplayAgent;
@@ -80,10 +79,39 @@ bool emulator_parseFeatureCommandLineOptions(AndroidOptions* opts,
 // |selectedRenderer|: Returns OpenGL ES backend (host/angle/swiftshader etc)
 // Useful for reserving extra memory for in-guest framebuffers.
 
+// First, there is a struct to hold outputs.
+typedef struct {
+    AndroidGlesEmulationMode glesMode;
+    int openglAlive;
+    int bootPropOpenglesVersion;
+    int glFramebufferSizeBytes;
+    SelectedRenderer selectedRenderer;
+} RendererConfig;
+// Function itself:
+
+bool configAndStartRenderer(
+        AvdInfo* avd,
+        AndroidOptions* opt,
+        AndroidHwConfig* hw,
+        const struct QAndroidVmOperations* vm_operations,
+        const struct QAndroidEmulatorWindowAgent* window_agent,
+        const struct QAndroidMultiDisplayAgent* multi_display_agent,
+        enum WinsysPreferredGlesBackend uiPreferredBackend,
+        RendererConfig* config_out);
+
+// stopRenderer() - stop all the render threads and wait until their exit.
+// NOTE: It is only safe to stop the OpenGL ES renderer after the main loop
+//   has exited. This is not necessarily before |skin_window_free| is called,
+//   especially on Windows!
+void stopRenderer(void);
+
 // Update server-based hw config / feature flags.
 // Must be done after createAVD,  which sets up critical info needed
 // by featurecontrol component itself.
 void initializeFeatures(void);
+
+// After configAndStartRenderer is called, one can query last output values:
+RendererConfig getLastRendererConfig(void);
 
 // HACK: Value will be true if emulator_parseCommonCommandLineOptions()
 //       has seen a network-related option (e.g. -netspeed). This is

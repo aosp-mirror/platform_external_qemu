@@ -16,6 +16,10 @@
 
 #include "offworld.pb.h"
 
+extern "C" {
+#include "libavcodec/avcodec.h"
+}
+
 #include <gtest/gtest.h>
 
 using namespace android::mp4;

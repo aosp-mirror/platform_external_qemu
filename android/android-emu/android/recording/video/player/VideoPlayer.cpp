@@ -31,27 +31,27 @@
 
 #include "android/recording/video/player/VideoPlayer.h"
 
-#include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits>
-#include <ostream>
+#include <errno.h>
+#include <functional>
 #include <string>
 #include <utility>
 
-#include "aemu/base/logging/CLog.h"
-#include "aemu/base/logging/Log.h"
-#include "aemu/base/logging/LogSeverity.h"
+#include "android/automation/AutomationController.h"
+#include "aemu/base/Log.h"                                        // for LOG
+#include "aemu/base/Result.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "aemu/base/synchronization/ConditionVariable.h"
 #include "aemu/base/synchronization/Lock.h"
 #include "aemu/base/threads/FunctorThread.h"
-#include "android/automation/AutomationController.h"
 #include "android/emulation/AudioOutputEngine.h"
 #include "android/mp4/MP4Dataset.h"
 #include "android/mp4/MP4Demuxer.h"
 #include "android/mp4/SensorLocationEventProvider.h"
 #include "android/mp4/VideoMetadataProvider.h"
+#include "offworld.pb.h"
 #include "android/recording/AVScopedPtr.h"
 #include "android/recording/video/player/Clock.h"
 #include "android/recording/video/player/FrameQueue.h"
@@ -60,9 +60,11 @@
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
 #include "android/recording/video/player/VideoPlayerWaitInfo.h"
 #include "android/utils/debug.h"
-#include "offworld.pb.h"
 
 extern "C" {
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+
 #include <libavutil/avutil.h>
 #include <libavutil/error.h>
 #include <libavutil/frame.h>
@@ -73,8 +75,6 @@ extern "C" {
 #include <libavutil/rational.h>
 #include <libavutil/time.h>
 
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
 #include "libswresample/swresample.h"
 #include "libswscale/swscale.h"
 
@@ -170,8 +170,7 @@ public:
                  FrameQueue* frameQueue,
                  VideoPlayerWaitInfo* empty_queue_cond,
                  Mp4Demuxer* demuxer)
-        : Decoder(player, avctx, queue, frameQueue, empty_queue_cond, demuxer) {
-    }
+        : Decoder(player, avctx, queue, frameQueue, empty_queue_cond, demuxer) {}
 
     virtual void workerThreadFunc();
 
@@ -241,7 +240,7 @@ public:
                      int64_t pos,
                      int serial);
 
-    // Methods record and report error status and message.
+    //Methods record and report error status and message.
     virtual void setErrorStatusAndRecordErrorMessage(std::string errorDetails);
     virtual bool getErrorStatus();
     virtual std::string getErrorMessage();
@@ -253,7 +252,7 @@ private:
 
     void internalPause();
     void internalResume();
-    void internalSeek(double timestamp);  // timestamp in seconds
+    void internalSeek(double timestamp); // timestamp in seconds
 
     void adjustWindowSize(AVCodecContext* c, int* pWidth, int* pHeight);
 
@@ -296,14 +295,14 @@ public:
 
 private:
     enum class State {
-        LOADED,  // initial state when VideoPlayer class is created
+        LOADED, // initial state when VideoPlayer class is created
         PLAYING,
         PAUSED,
-        PAUSING_AT,  // pending pauseAt request to render 1 frame before pause
-        STOPPED,     // video finished or stopped
+        PAUSING_AT, // pending pauseAt request to render 1 frame before pause
+        STOPPED, // video finished or stopped
     };
 
-    std::atomic<State> mState{State::LOADED};
+    std::atomic<State> mState {State::LOADED};
 
     std::string mVideoFile;
     VideoPlayerRenderTarget* mRenderTarget = nullptr;
@@ -483,17 +482,14 @@ int AudioDecoder::decodeAudioFrame(AVFrame* frame) {
             return -1;
         }
 
-        int ret =
-                avcodec_decode_audio4(mAvCtx, frame, &got_frame, &mLeftoverPkt);
+        int ret = avcodec_decode_audio4(mAvCtx, frame, &got_frame, &mLeftoverPkt);
         if (got_frame) {
             // Try to guess the pts if not set
             if (frame->pts == AV_NOPTS_VALUE && mNextPts != AV_NOPTS_VALUE) {
                 frame->pts = mNextPts;
             }
             if (frame->pts != AV_NOPTS_VALUE) {
-                mNextPts = frame->pts + av_rescale_q(frame->nb_samples,
-                                                     mAvCtx->time_base,
-                                                     st->time_base);
+                mNextPts = frame->pts + av_rescale_q(frame->nb_samples, mAvCtx->time_base, st->time_base);
             }
         }
 
@@ -532,10 +528,9 @@ void AudioDecoder::workerThreadFunc() {
             break;
         }
         if (got_frame) {
-            // Sync to the stream time base, not the codec's time base. We
-            // assume that all encoders, if wrapping the data in a container,
-            // will set the time base of all of it's containing codecs to the
-            // container's timebase.
+            // Sync to the stream time base, not the codec's time base. We assume that
+            // all encoders, if wrapping the data in a container, will set the time base
+            // of all of it's containing codecs to the container's timebase.
             AVStream* st = mPlayer->mDataset->getFormatContext()
                                    ->streams[mPlayer->mAudioStreamIdx];
             AVRational tb = st->time_base;
@@ -694,15 +689,14 @@ void VideoDecoder::workerThreadFunc() {
 
 // VideoPlayer implementations
 
-// create a video player instance the input video file, the output renderTarget
-// to display, and the notifier to receive updates
+// create a video player instance the input video file, the output renderTarget to
+// display, and the notifier to receive updates
 std::unique_ptr<VideoPlayer> VideoPlayer::create(
         std::string videoFile,
         VideoPlayerRenderTarget* renderTarget,
         std::unique_ptr<VideoPlayerNotifier> notifier) {
     std::unique_ptr<VideoPlayerImpl> player;
-    player.reset(
-            new VideoPlayerImpl(videoFile, renderTarget, std::move(notifier)));
+    player.reset(new VideoPlayerImpl(videoFile, renderTarget, std::move(notifier)));
     return std::move(player);
 }
 
@@ -739,6 +733,7 @@ VideoPlayerImpl::~VideoPlayerImpl() {
 void VideoPlayerImpl::adjustWindowSize(AVCodecContext* c,
                                        int* pWidth,
                                        int* pHeight) {
+
     float aspect_ratio;
 
     if (c->sample_aspect_ratio.num == 0) {
@@ -751,8 +746,8 @@ void VideoPlayerImpl::adjustWindowSize(AVCodecContext* c,
         aspect_ratio = (float)c->width / (float)c->height;
     }
 
-    mRenderTarget->getRenderTargetSize(aspect_ratio, c->width, c->height,
-                                       pWidth, pHeight);
+    mRenderTarget->getRenderTargetSize(
+        aspect_ratio, c->width, c->height, pWidth, pHeight);
 }
 
 AvSyncMaster VideoPlayerImpl::getMasterSyncType() {
@@ -893,11 +888,12 @@ void VideoPlayerImpl::displayVideoFrame(Frame* vp) {
     frameInfo.height = vp->height;
     // A paused video should still display the last displayed frame, but a
     // stopped video should not be showing a video frame.
-    if (mState == State::PLAYING || mState == State::PAUSED ||
+    if (mState == State::PLAYING ||
+        mState == State::PAUSED ||
         mState == State::PAUSING_AT) {
-        mRenderTarget->setPixelBuffer(frameInfo, vp->buf, vp->len);
+      mRenderTarget->setPixelBuffer(frameInfo, vp->buf, vp->len);
     } else {
-        mRenderTarget->setPixelBuffer(frameInfo, nullptr, 0);
+      mRenderTarget->setPixelBuffer(frameInfo, nullptr, 0);
     }
 
     mNotifier->emitUpdateWidget();
@@ -909,8 +905,7 @@ double VideoPlayerImpl::computeTargetDelay(double delay) {
         // if video is slave, we try to correct big delays by
         // duplicating or deleting a frame
         double diff = mVideoClock.getTime() - getMasterClock();
-        D("videoclock=%f masterclock=%f ", mVideoClock.getTime(),
-          getMasterClock());
+        D("videoclock=%f masterclock=%f ", mVideoClock.getTime(), getMasterClock());
 
         // skip or repeat frame. We take into account the
         // delay to compute the threshold. I still don't know
@@ -959,7 +954,8 @@ double rdftspeed = 0.02;
 // called to display each frame
 void VideoPlayerImpl::refreshFrame(double* remaining_time) {
     if (mState != State::PAUSED &&
-        getMasterSyncType() == AvSyncMaster::External && this->mRealTime) {
+        getMasterSyncType() == AvSyncMaster::External &&
+        this->mRealTime) {
         checkExternalClockSpeed();
     }
 
@@ -1161,6 +1157,7 @@ bool VideoPlayerImpl::isRealTimeFormat(AVFormatContext* s) {
 }
 
 int VideoPlayerImpl::play() {
+
     if (mDataset.get() == nullptr) {
         LOG(DEBUG) << "Dataset not loaded. Create dataset instance now.";
         loadVideoFileWithData(::offworld::DatasetInfo::default_instance());
@@ -1210,8 +1207,7 @@ int VideoPlayerImpl::play() {
         mAudioStreamIdx = audioStream;
 
         // Find the decoder for the video stream
-        mAudioCodec = avcodec_find_decoder(
-                formatCtx->streams[audioStream]->codec->codec_id);
+        mAudioCodec = avcodec_find_decoder(formatCtx->streams[audioStream]->codec->codec_id);
         if (mAudioCodec == nullptr) {
             return -1;
         }
@@ -1219,18 +1215,14 @@ int VideoPlayerImpl::play() {
         /* Allocate a codec context for the decoder */
         mAudioCodecCtx = makeAVScopedPtr(avcodec_alloc_context3(mAudioCodec));
         if (!mAudioCodecCtx) {
-            LOG(ERROR) << __func__
-                       << ": Failed to allocate audio codec context";
+            LOG(ERROR) << __func__ << ": Failed to allocate audio codec context";
             return -1;
         }
 
         /* Copy codec parameters from input stream to output codec context */
         if (avcodec_parameters_to_context(
-                    mAudioCodecCtx.get(),
-                    formatCtx->streams[audioStream]->codecpar) < 0) {
-            LOG(ERROR) << __func__
-                       << ": Failed to copy audio codec parameters to decoder "
-                          "context";
+            mAudioCodecCtx.get(), formatCtx->streams[audioStream]->codecpar) < 0) {
+            LOG(ERROR) << __func__ << ": Failed to copy audio codec parameters to decoder context";
             return -1;
         }
 
@@ -1282,18 +1274,17 @@ int VideoPlayerImpl::play() {
         mAudioFrameQueue.reset(new FrameQueue(this, mAudioQueue.get(),
                                               AUDIO_SAMPLE_QUEUE_SIZE, true));
 
-        mAudioDecoder.reset(
-                new AudioDecoder(this, mAudioCodecCtx.get(), mAudioQueue.get(),
-                                 mAudioFrameQueue.get(), &mContinueReadWaitInfo,
-                                 mDemuxer.get()));
+        mAudioDecoder.reset(new AudioDecoder(
+                this, mAudioCodecCtx.get(), mAudioQueue.get(), mAudioFrameQueue.get(),
+                &mContinueReadWaitInfo, mDemuxer.get()));
     }
 
     if (videoStream != -1) {
         mVideoStreamIdx = videoStream;
 
+
         // Find the decoder for the video stream
-        mVideoCodec = avcodec_find_decoder(
-                formatCtx->streams[videoStream]->codec->codec_id);
+        mVideoCodec = avcodec_find_decoder(formatCtx->streams[videoStream]->codec->codec_id);
         if (mVideoCodec == nullptr) {
             return -1;
         }
@@ -1301,19 +1292,14 @@ int VideoPlayerImpl::play() {
         /* Allocate a codec context for the decoder */
         mVideoCodecCtx = makeAVScopedPtr(avcodec_alloc_context3(mVideoCodec));
         if (!mVideoCodecCtx) {
-            LOG(ERROR) << __func__
-                       << ": Failed to copy video codec parameters to decoder "
-                          "context";
+            LOG(ERROR) << __func__ << ": Failed to copy video codec parameters to decoder context";
             return -1;
         }
 
         /* Copy codec parameters from input stream to output codec context */
         if (avcodec_parameters_to_context(
-                    mVideoCodecCtx.get(),
-                    formatCtx->streams[videoStream]->codecpar) < 0) {
-            LOG(ERROR) << __func__
-                       << ": Failed to copy video codec parameters to decoder "
-                          "context";
+            mVideoCodecCtx.get(), formatCtx->streams[videoStream]->codecpar) < 0) {
+            LOG(ERROR) << __func__ << ": Failed to copy video codec parameters to decoder context";
             return -1;
         }
 
@@ -1354,10 +1340,9 @@ int VideoPlayerImpl::play() {
         mVideoFrameQueue.reset(new FrameQueue(this, mVideoQueue.get(),
                                               VIDEO_PICTURE_QUEUE_SIZE, true));
 
-        mVideoDecoder.reset(
-                new VideoDecoder(this, mVideoCodecCtx.get(), mVideoQueue.get(),
-                                 mVideoFrameQueue.get(), &mContinueReadWaitInfo,
-                                 mDemuxer.get()));
+        mVideoDecoder.reset(new VideoDecoder(
+                this, mVideoCodecCtx.get(), mVideoQueue.get(), mVideoFrameQueue.get(),
+                &mContinueReadWaitInfo, mDemuxer.get()));
     }
 
     // Seek before starting to play for playAt request
@@ -1459,8 +1444,7 @@ int VideoPlayerImpl::getConvertedAudioFrame() {
     if (!std::isnan(af->pts)) {
         this->mAudioClockValue = af->pts + (double)af->frame->nb_samples /
                                                    af->frame->sample_rate;
-        D("pts=%f nb_samples=%d sample_rate=%d\n", af->pts,
-          af->frame->nb_samples, af->frame->sample_rate);
+        D("pts=%f nb_samples=%d sample_rate=%d\n", af->pts, af->frame->nb_samples, af->frame->sample_rate);
     } else {
         this->mAudioClockValue = NAN;
     }
@@ -1480,7 +1464,7 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
             if (audio_size < 0) {
                 // if error, we output silent buffer
                 std::string silent(len, '\0');
-                pThis->mAudioOutputEngine->write((void*)silent.data(), len);
+                pThis->mAudioOutputEngine->write((void *)silent.data(), len);
                 break;
             } else {
                 pThis->mAudioBufSize = audio_size;
@@ -1502,18 +1486,10 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
     pThis->mAudioWriteBufSize = pThis->mAudioBufSize - pThis->mAudioBufIndex;
 
     if (!std::isnan(pThis->mAudioClockValue)) {
-        int bytes_per_sec = av_samples_get_buffer_size(NULL, 2, 48000,
-                                                       AV_SAMPLE_FMT_S16, 1);
-        pThis->mAudioClock.setAt(
-                pThis->mAudioClockValue -
-                        (double)(2 * 1024 + pThis->mAudioWriteBufSize) /
-                                bytes_per_sec,
-                pThis->mAudioClockSerial,
-                pThis->mAudioCallbackTime / 1000000.0);
+        int bytes_per_sec = av_samples_get_buffer_size(NULL, 2, 48000, AV_SAMPLE_FMT_S16, 1);
+        pThis->mAudioClock.setAt(pThis->mAudioClockValue - (double)(2 * 1024 + pThis->mAudioWriteBufSize) / bytes_per_sec, pThis->mAudioClockSerial, pThis->mAudioCallbackTime / 1000000.0);
         pThis->mExternalClock.syncToSlave(&pThis->mAudioClock);
-        D("mAudioclock=%f maudioclockvalue=%f writebufsiize=%d\n",
-          pThis->mAudioClock.getTime(), pThis->mAudioClockValue,
-          pThis->mAudioWriteBufSize);
+        D("mAudioclock=%f maudioclockvalue=%f writebufsiize=%d\n", pThis->mAudioClock.getTime(), pThis->mAudioClockValue, pThis->mAudioWriteBufSize);
     }
 }
 
@@ -1530,8 +1506,7 @@ void VideoPlayerImpl::start(const PlayConfig& playConfig, bool PauseAtRequest) {
     mPlayConfig = playConfig;
 
     if (mState == State::LOADED || mState == State::STOPPED) {
-        mWorkerThread.reset(
-                new base::FunctorThread([this]() { workerThreadFunc(); }));
+        mWorkerThread.reset(new base::FunctorThread([this]() { workerThreadFunc(); }));
         if (PauseAtRequest) {
             mState = State::PAUSING_AT;
         } else {
@@ -1565,8 +1540,7 @@ void VideoPlayerImpl::internalResume() {
     if (mState != State::PAUSED) {
         return;
     }
-    mFrameTimer =
-            av_gettime_relative() / 1000000.0 - mVideoClock.getLastUpdated();
+    mFrameTimer = av_gettime_relative() / 1000000.0 - mVideoClock.getLastUpdated();
     mVideoClock.set(mVideoClock.getTime(), mVideoClock.getSerial());
     mExternalClock.set(mExternalClock.getTime(), mExternalClock.getSerial());
     mAudioClock.setPaused(false);
@@ -1702,12 +1676,5 @@ std::string VideoPlayerImpl::getErrorMessage() {
     return mErrorMessage;
 }
 
-std::unique_ptr<VideoPlayer> VideoPlayer::createVideoPlayer(
-        const char* videoFile,
-        struct VideoPlayerRenderTarget* widget,
-        std::unique_ptr<VideoPlayerNotifier> notifier) {
-    return android::videoplayer::VideoPlayer::create(videoFile, widget,
-                                                     std::move(notifier));
-}
 }  // namespace videoplayer
 }  // namespace android

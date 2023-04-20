@@ -11,7 +11,7 @@
 
 # TODO(joshuaduong): Only mac-aarch64 is using Qt6 at the moment. Remove once all platforms use
 # the same version of Qt.
-if(ANDROID_TARGET_TAG MATCHES "darwin-aarch64")
+if(QTWEBENGINE AND (ANDROID_TARGET_TAG MATCHES "darwin-aarch64"))
   set(QT_VERSION_MAJOR 6)
   set(QT_VERSION_MINOR 2)
 else()
@@ -210,7 +210,7 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
 
     list(
       APPEND
-      QT5_WEBENGINE_SHARED_DEPENDENCIES
+      QT5_SHARED_DEPENDENCIES
       ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess
       ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/translations/qtwebengine_locales
       ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/resources/icudtl.dat
@@ -417,7 +417,7 @@ elseif(LINUX)
          -lQt5WebEngineWidgetsAndroidEmu -lQt5WebSocketsAndroidEmu)
     list(
       APPEND
-      QT5_WEBENGINE_SHARED_DEPENDENCIES
+      QT5_SHARED_DEPENDENCIES
       ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess
       ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/translations/qtwebengine_locales
       ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/resources/icudtl.dat
@@ -497,20 +497,11 @@ set(PACKAGE_EXPORT
     QT_RCC_EXECUTABLE
     QT_VERSION_MAJOR
     QT5_SHARED_DEPENDENCIES
-    QT5_WEBENGINE_SHARED_DEPENDENCIES
     QT5_SHARED_PROPERTIES
     QT_VERSION_MINOR)
 
 android_license(
   TARGET QT5_SHARED_DEPENDENCIES
-  LIBNAME "Qt 5"
-  URL "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/qt-everywhere-src-5.12.1.tar.xz"
-  SPDX "LGPL-3.0-only"
-  LICENSE "https://doc.qt.io/qt-5/licensing.html"
-  LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LGPLv3")
-
-android_license(
-  TARGET QT5_WEBENGINE_SHARED_DEPENDENCIES
   LIBNAME "Qt 5"
   URL "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/qt-everywhere-src-5.12.1.tar.xz"
   SPDX "LGPL-3.0-only"

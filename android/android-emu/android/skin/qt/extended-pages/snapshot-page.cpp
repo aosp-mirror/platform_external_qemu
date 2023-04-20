@@ -556,8 +556,6 @@ void SnapshotPage::changeUiFromSaveOnExitSetting(SaveSnapshotOnExit choice) {
             getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
     }
-    getConsoleAgents()->emu->setUserSettingIsDontSaveSnapshot(
-            getSaveOnExitChoice() == SaveSnapshotOnExit::Never);
 }
 
 void SnapshotPage::on_enlargeInfoButton_clicked() {
@@ -1682,7 +1680,6 @@ void SnapshotPage::getOutputFileName() {
     mOutputFileName = "";
 
     // Get the name of the file containing parameters from Android Studio
-
     EmulatorWindow* const ew = emulator_window_get();
     if (!ew || !ew->opts->studio_params) {
         // No file to read

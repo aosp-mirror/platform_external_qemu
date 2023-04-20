@@ -434,3 +434,8 @@ extern bool skin_winsys_is_folded() {
 
 extern void skin_winsys_touch_qt_extended_virtual_sensors(void) {}
 
+// Other skin functions (Just fix link errors for now)
+
+extern "C" int sim_is_present() {
+    return 1;
+}

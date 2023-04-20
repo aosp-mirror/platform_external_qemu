@@ -15,7 +15,6 @@
 #include "android/telephony/modem_driver.h"
 #include "android_modem_v2.h"
 #include "android-qemu2-glue/utils/stream.h"
-#include "android/emulator-window.h"
 
 #include "qemu/osdep.h"
 #include "hw/hw.h"
@@ -23,6 +22,7 @@
 #include <assert.h>
 #include "migration/register.h"
 
+extern int sim_is_present();
 
 static void modem_state_save(QEMUFile* file, void* opaque)
 {
@@ -50,17 +50,6 @@ static SaveVMHandlers modem_vmhandlers = {
     .save_state = modem_state_save,
     .load_state = modem_state_load,
 };
-
-bool sim_is_present() {
-    EmulatorWindow* const ew = getConsoleAgents()->emu->getEmulatorWindow();
-    if (ew) {
-        // If the command line says no SIM, we say no SIM.
-        if (ew->opts->no_sim)
-            return false;
-    }
-    // In the absence of UI controls, the default is 'true'.
-    return true;
-}
 
 void qemu_android_modem_init(int base_port) {
     android_modem_init(base_port, sim_is_present());

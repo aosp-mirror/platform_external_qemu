@@ -34,18 +34,19 @@
 
 namespace android {
 namespace videoplayer {
+
 class VideoPlayer;
-}
-}  // namespace android
 
 // Abstract VideoPlayerNotifier class, backing AndroidEmu and Qt impls.
 class VideoPlayerNotifier {
+
 public:
+
     virtual ~VideoPlayerNotifier() = default;
 
     using WidgetUpdateCallback = std::function<void()>;
 
-    void setVideoPlayer(android::videoplayer::VideoPlayer* player) { mPlayer = player; }
+    void setVideoPlayer(VideoPlayer* player) { mPlayer = player; }
 
     void onVideoRefresh();
 
@@ -57,5 +58,8 @@ public:
     virtual void emitVideoStopped() = 0;
 
 protected:
-   android::videoplayer::VideoPlayer* mPlayer = nullptr;
+    VideoPlayer* mPlayer = nullptr;
 };
+
+}  // namespace videoplayer
+}  // namespace android
