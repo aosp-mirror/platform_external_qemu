@@ -39,4 +39,9 @@ if(OPTION_ANDROID_STUDIO)
   add_subdirectory(android-studio)
 endif()
 
-add_subdirectory(image_converter)
+if(HOST_DARWIN_AARCH64 AND DARWIN_X86_64)
+  message(
+    WARNING "Unable to compile image converter in M1 -> X86 cross build. This will not be installed.")
+else()
+  add_subdirectory(image_converter)
+endif()

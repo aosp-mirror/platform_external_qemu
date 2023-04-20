@@ -59,7 +59,10 @@ android_add_library(
       jquant2.c
       jutils.c)
 target_include_directories(emulator-libjpeg PUBLIC .)
-if(NOT BUILDING_FOR_AARCH64)
+if (HOST_DARWIN_AARCH64 AND DARWIN_X86_64)
+  message(WARNING "Cross compiling from M1 -> X86, disabling optimizations for libjpeg. Do not release this!")
+endif()
+if(NOT BUILDING_FOR_AARCH64 AND NOT (HOST_DARWIN_AARCH64 AND DARWIN_X86_64))
   target_compile_options(emulator-libjpeg PRIVATE -O3 -fstrict-aliasing -msse2
                                                   -Wno-all)
   target_compile_definitions(
