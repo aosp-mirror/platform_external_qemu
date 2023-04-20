@@ -102,9 +102,7 @@ class ConfigureTask(BuildTask):
         if thread_safety:
             self.with_thread_safety()
 
-        if self._find_ccache(aosp, ccache):
-            self.with_ccache(self._find_ccache(aosp, ccache))
-
+        self.with_ccache(self._find_ccache(aosp, ccache))
 
         if sanitizer:
             self.add_option("OPTION_ASAN", ",".join(sanitizer))
@@ -117,16 +115,26 @@ class ConfigureTask(BuildTask):
         self._add_sdk_revision(aosp)
         self.env = get_default_environment(aosp)
         self.log_dir = Path(dist or destination) / "testlogs"
-        self.destination = destination
+        self.destination = Path(destination)
 
         self.add_option("OPTION_TEST_LOGS", self.log_dir.absolute())
 
         self.with_features(aosp, features)
         self.with_options(options)
 
-
     def add_option(self, key: str, val: str):
-        self.cmake_cmd += [f"-D{key}={val}"]
+        """
+        Add an option to the CMake command.
+
+        Args:
+            key: The key of the option.
+            val: The value of the option.
+
+        Returns:
+            Self.
+        """
+        if key and val:
+            self.cmake_cmd += [f"-D{key}={val}"]
         return self
 
     def _add_sdk_revision(self, aosp: Path) -> str:
@@ -159,7 +167,7 @@ class ConfigureTask(BuildTask):
             / "sccache"
             / f"{host}-x86_64"
         )
-        logging.info("Looking in %s", search_dir)
+        logging.debug("Looking in %s for sccache", search_dir)
         return Path(shutil.which("sccache", path=search_dir))
 
     def with_ccache(self, ccache: str):
