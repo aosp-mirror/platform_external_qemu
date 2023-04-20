@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 // Init args.
- void skin_winsys_init_args(int argc, char** argv);
+void skin_winsys_init_args(int argc, char** argv);
 
 // Return window handle of main UI. MUST BE CALLED FROM THE MAIN UI THREAD.
 void* skin_winsys_get_window_handle();

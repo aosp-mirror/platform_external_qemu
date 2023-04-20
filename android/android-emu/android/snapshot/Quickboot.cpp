@@ -53,6 +53,8 @@ namespace pb = android_studio;
 
 static constexpr int kDefaultMessageTimeoutMs = 10000;
 
+extern bool userSettingIsDontSaveSnapshot();
+
 namespace android {
 namespace snapshot {
 
@@ -442,8 +444,7 @@ void Quickboot::decideFailureReport(
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_FAILED,
                 *failureReason);
     } else if (*failureReason == FailureReason::NoSnapshotInImage &&
-               mWindow.userSettingIsDontSaveSnapshot())
-    {
+               userSettingIsDontSaveSnapshot()) {
         // There's no quickboot snapshot and the user is configured
         // for NO save on exit. Say that is the reason.
         mWindow.showMessage("Cold boot based on user configuration",

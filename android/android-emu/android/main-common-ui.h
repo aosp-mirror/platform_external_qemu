@@ -14,14 +14,12 @@
 
 #include <stdbool.h>                      // for bool
 
-#include "aemu/base/c_header.h"
+#include "host-common/hw-config.h"        // for AndroidHwConfig
 #include "android/avd/info.h"             // for AvdInfo
 #include "android/cmdline-definitions.h"  // for AndroidOptions
-#include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"         // for UiEmuAgent
 #include "android/utils/aconfig-file.h"   // for AConfig
-#include "host-common/hw-config.h"        // for AndroidHwConfig
-#include "host-common/opengl/emugl_config.h"  // for AndroidGlesEmulationMode
+#include "android/utils/compiler.h"       // for ANDROID_BEGIN_HEADER, ANDRO...
 
 ANDROID_BEGIN_HEADER
 
@@ -44,30 +42,6 @@ bool emulator_initUserInterface(const AndroidOptions* opts,
 // Finalize the user interface. Call this on exit.
 void emulator_finiUserInterface(void);
 
-// First, there is a struct to hold outputs.
-typedef struct {
-    AndroidGlesEmulationMode glesMode;
-    int openglAlive;
-    int bootPropOpenglesVersion;
-    int glFramebufferSizeBytes;
-    SelectedRenderer selectedRenderer;
-} RendererConfig;
-// Function itself:
-bool configAndStartRenderer(
-        enum WinsysPreferredGlesBackend uiPreferredBackend,
-        RendererConfig* config_out);
-
-
-// stopRenderer() - stop all the render threads and wait until their exit.
-// NOTE: It is only safe to stop the OpenGL ES renderer after the main loop
-//   has exited. This is not necessarily before |skin_window_free| is called,
-//   especially on Windows!
-void stopRenderer(void);
-
-
-// After configAndStartRenderer is called, one can query last output values:
-RendererConfig getLastRendererConfig(void);
-
 // TODO(digit): Remove the deprecated declarations below once QEMU2 has been
 //              ported to use emulator_parseUiCommandLineOptions() and
 //              emulator_initUserInterface()
@@ -79,6 +53,16 @@ bool user_config_init( void );
 void user_config_done( void );
 
 void user_config_get_window_pos( int *window_x, int *window_y );
+
+/* Find the skin corresponding to our options, and return an AConfig pointer
+ * and the base path to load skin data from
+ */
+void parse_skin_files(const char*      skinDirPath,
+                      const char*      skinName,
+                      AndroidOptions*  opts,
+                      AndroidHwConfig* hwConfig,
+                      AConfig*        *skinConfig,
+                      char*           *skinPath);
 
 bool ui_init(const AConfig*    skinConfig,
              const char*       skinPath,

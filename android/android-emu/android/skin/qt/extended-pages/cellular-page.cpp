@@ -27,7 +27,6 @@
 #include "android/metrics/UiEventTracker.h"
 #include "android/skin/qt/qt-settings.h"  // for PER_AVD_SETTIN...
 #include "ui_cellular-page.h"             // for CellularPage
-#include "android/console.h"
 
 class QWidget;
 
@@ -136,6 +135,22 @@ CellularPage::CellularPage(QWidget* parent)
     // Meter status
     mUi->cell_meterStatusBox->setCurrentIndex(
             getSavedMeterStatus());  // always metered
+}
+
+extern "C" int sim_is_present() {
+    return (CellularPage::simIsPresent());
+}
+
+// static
+bool CellularPage::simIsPresent() {
+    EmulatorWindow* const ew = emulator_window_get();
+    if (ew) {
+        // If the command line says no SIM, we say no SIM.
+        if (ew->opts->no_sim)
+            return false;
+    }
+    // In the absence of UI controls, the default is 'true'.
+    return true;
 }
 
 // static

@@ -12,6 +12,7 @@
 #ifdef _MSC_VER
 #define _USE_MATH_DEFINES
 #endif
+
 #include "android/skin/qt/extended-pages/location-page.h"
 
 #include <QAbstractItemView>  // for QAbst...

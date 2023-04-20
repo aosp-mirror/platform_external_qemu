@@ -149,6 +149,7 @@ set(android-emu-common
     android/sensor_mock/SensorMockUtils.cpp
     android/sensor_replay/sensor_session_playback.cpp
     android/shaper.c
+    android/skin/charmap.c
     android/snaphost-android.c
     android/snapshot.c
     android/snapshot/common.cpp

@@ -281,12 +281,12 @@ void EmulatorNoQtNoWindow::requestClose() {
     android::base::System::get()->waitAndKillSelf();
 
     if (fastSnapshotV1) {
-        getConsoleAgents()->vm->system_shutdown_request(QemuShutdownCause::QEMU_SHUTDOWN_CAUSE_HOST_UI);
+        qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI);
     } else {
         mAdbInterface->runAdbCommand(
                 {"shell", "reboot", "-p"},
                 [](const android::emulation::OptionalAdbCommandResult&) {
-                     getConsoleAgents()->vm->system_shutdown_request(QemuShutdownCause::QEMU_SHUTDOWN_CAUSE_HOST_UI);
+                    qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI);
                 },
                 5000, false);
     }

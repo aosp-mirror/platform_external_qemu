@@ -18,7 +18,6 @@
 
 
 #include "android/skin/generic-event-buffer.h"
-#include "android/skin/linux_keycodes.h"
 #include "android/console.h"  /* for android_hw */
 #include "android/hw-events.h"
 #include "android/skin/charmap.h"

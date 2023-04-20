@@ -29,7 +29,7 @@
 #include <unordered_map>                       // for unordered_map, operator==
 #include <utility>                             // for hash, pair
 
-#include "android/utils/debug.h"
+#include "android/skin/qt/logging-category.h"  // for emu
 
 namespace std {
 template <>
@@ -72,7 +72,7 @@ bool parseWavefrontOBJ(QTextStream& stream,
             float xyz[3];
             stream >> xyz[0] >> xyz[1] >> xyz[2];
             if (stream.status() != QTextStream::Ok) {
-                dwarning("OBJ parser: invalid position or normal");
+                qCWarning(emu, "OBJ parser: invalid position or normal");
                 return false;
             }
             auto& container = (str == "v" ? pos : norm);
@@ -83,7 +83,7 @@ bool parseWavefrontOBJ(QTextStream& stream,
             float uv[2];
             stream >> uv[0] >> uv[1];
             if (stream.status() != QTextStream::Ok) {
-                dwarning("OBJ parser: invalid UV");
+                qCWarning(emu, "OBJ parser: invalid UV");
                 return false;
             }
             tex.insert(tex.end(), uv, uv + 2);
@@ -103,7 +103,7 @@ bool parseWavefrontOBJ(QTextStream& stream,
                 QStringList components = v.split('/', QString::SkipEmptyParts);
 #endif  // QT_VERSION
                 if (components.size() != 3) {
-                    dwarning("OBJ parser: invalid face specification");
+                    qCWarning(emu, "OBJ parser: invalid face specification");
                     return false;
                 }
                 bool pos_result, tex_result, nrm_result;
@@ -115,7 +115,7 @@ bool parseWavefrontOBJ(QTextStream& stream,
                     vp * 3 >= pos.size() ||
                     vt * 2 >= tex.size() ||
                     vn * 3 >= norm.size()) {
-                    dwarning("OBJ parser: invalid face specification");
+                    qCWarning(emu, "OBJ parser: invalid face specification");
                     return false;
                 }
                 auto vertex_idx = std::make_tuple(vp, vt, vn);
@@ -137,7 +137,7 @@ bool parseWavefrontOBJ(QTextStream& stream,
             }
         } else {
             // Something's wrong, bail out.
-            dwarning("OBJ parser: invalid input [%s]", str.toStdString().c_str());
+            qCWarning(emu, "OBJ parser: invalid input [%s]", str.toStdString().c_str());
             return false;
         }
     }

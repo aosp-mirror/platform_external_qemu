@@ -11,18 +11,17 @@
 */
 #include "android/skin/charmap.h"
 
-#include <errno.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdint.h>                  // for uint8_t
+#include <stdio.h>                   // for NULL, fclose, feof, fgets, size_t
+#include <string.h>                  // for strlen, strcmp, strerror, strrchr
+#include <errno.h>                   // for errno
 
-#include "android/skin/linux_keycodes.h"
-#include "aemu/base/ArraySize.h"
-#include "aemu/base/logging/CLog.h"
-#include "android/skin/keycode.h"
-#include "android/utils/file_io.h"
-#include "android/utils/misc.h"
-#include "android/utils/system.h"
+#include "aemu/base/ArraySize.h"  // for ARRAY_SIZE
+#include "android/skin/keycode.h"    // for kKeyCode0, kKeyCode1, kKeyCode2
+#include "android/utils/debug.h"     // for derror
+#include "android/utils/file_io.h"   // for android_fopen
+#include "android/utils/misc.h"      // for hex2int
+#include "android/utils/system.h"    // for AFREE, AARRAY_NEW0, AARRAY_RENEW
 
 /* Parses .kcm file producing key characters map.
  * .kcm file parsed by this module is expected to contain 4 types of
@@ -49,13 +48,13 @@
  * A               'A'     '2'     'a'     'A'     '#'     0x00
  * PERIOD          '.'     '.'     '.'     ':'     ':'     0x2026
  * SPACE           0x20    0x20    0x20    0x20    0xEF01  0xEF01
- */
+*/
 
 /* Maximum length of a line expected in .kcm file. */
-#define KCM_MAX_LINE_LEN 1024
+#define KCM_MAX_LINE_LEN    1024
 
 /* Maximum length of a token in a key map line. */
-#define KCM_MAX_TOKEN_LEN 512
+#define KCM_MAX_TOKEN_LEN   512
 
 /* Maps symbol name from .kcm file to a keycode value. */
 typedef struct AKeycodeMapEntry {
@@ -63,7 +62,7 @@ typedef struct AKeycodeMapEntry {
     const char* key_name;
 
     /* Key code value for the symbol. */
-    int key_code;
+    int         key_code;
 } AKeycodeMapEntry;
 
 /* Result of parsing a line in a .kcm file. */
@@ -79,63 +78,63 @@ typedef enum {
 } ParseStatus;
 
 static const AKeycodeMapEntry keycode_map[] = {
-        /*  Symbol           Key code */
+    /*  Symbol           Key code */
 
-        {"A", kKeyCodeA},
-        {"B", kKeyCodeB},
-        {"C", kKeyCodeC},
-        {"D", kKeyCodeD},
-        {"E", kKeyCodeE},
-        {"F", kKeyCodeF},
-        {"G", kKeyCodeG},
-        {"H", kKeyCodeH},
-        {"I", kKeyCodeI},
-        {"J", kKeyCodeJ},
-        {"K", kKeyCodeK},
-        {"L", kKeyCodeL},
-        {"M", kKeyCodeM},
-        {"N", kKeyCodeN},
-        {"O", kKeyCodeO},
-        {"P", kKeyCodeP},
-        {"Q", kKeyCodeQ},
-        {"R", kKeyCodeR},
-        {"S", kKeyCodeS},
-        {"T", kKeyCodeT},
-        {"U", kKeyCodeU},
-        {"V", kKeyCodeV},
-        {"W", kKeyCodeW},
-        {"X", kKeyCodeX},
-        {"Y", kKeyCodeY},
-        {"Z", kKeyCodeZ},
-        {"0", kKeyCode0},
-        {"1", kKeyCode1},
-        {"2", kKeyCode2},
-        {"3", kKeyCode3},
-        {"4", kKeyCode4},
-        {"5", kKeyCode5},
-        {"6", kKeyCode6},
-        {"7", kKeyCode7},
-        {"8", kKeyCode8},
-        {"9", kKeyCode9},
-        {"COMMA", kKeyCodeComma},
-        {"PERIOD", kKeyCodePeriod},
-        {"AT", kKeyCodeAt},
-        {"SLASH", kKeyCodeSlash},
-        {"SPACE", kKeyCodeSpace},
-        {"ENTER", kKeyCodeNewline},
-        {"TAB", kKeyCodeTab},
-        {"GRAVE", kKeyCodeGrave},
-        {"MINUS", kKeyCodeMinus},
-        {"EQUALS", kKeyCodeEquals},
-        {"LEFT_BRACKET", kKeyCodeLeftBracket},
-        {"RIGHT_BRACKET", kKeyCodeRightBracket},
-        {"BACKSLASH", kKeyCodeBackslash},
-        {"SEMICOLON", kKeyCodeSemicolon},
-        {"APOSTROPHE", kKeyCodeApostrophe},
-        {"STAR", kKeyCodeStar},
-        {"POUND", kKeyCodePound},
-        {"PLUS", kKeyCodePlus},
-        {"DEL", kKeyCodeDel},
+      { "A",             kKeyCodeA },
+      { "B",             kKeyCodeB },
+      { "C",             kKeyCodeC },
+      { "D",             kKeyCodeD },
+      { "E",             kKeyCodeE },
+      { "F",             kKeyCodeF },
+      { "G",             kKeyCodeG },
+      { "H",             kKeyCodeH },
+      { "I",             kKeyCodeI },
+      { "J",             kKeyCodeJ },
+      { "K",             kKeyCodeK },
+      { "L",             kKeyCodeL },
+      { "M",             kKeyCodeM },
+      { "N",             kKeyCodeN },
+      { "O",             kKeyCodeO },
+      { "P",             kKeyCodeP },
+      { "Q",             kKeyCodeQ },
+      { "R",             kKeyCodeR },
+      { "S",             kKeyCodeS },
+      { "T",             kKeyCodeT },
+      { "U",             kKeyCodeU },
+      { "V",             kKeyCodeV },
+      { "W",             kKeyCodeW },
+      { "X",             kKeyCodeX },
+      { "Y",             kKeyCodeY },
+      { "Z",             kKeyCodeZ },
+      { "0",             kKeyCode0 },
+      { "1",             kKeyCode1 },
+      { "2",             kKeyCode2 },
+      { "3",             kKeyCode3 },
+      { "4",             kKeyCode4 },
+      { "5",             kKeyCode5 },
+      { "6",             kKeyCode6 },
+      { "7",             kKeyCode7 },
+      { "8",             kKeyCode8 },
+      { "9",             kKeyCode9 },
+      { "COMMA",         kKeyCodeComma },
+      { "PERIOD",        kKeyCodePeriod },
+      { "AT",            kKeyCodeAt },
+      { "SLASH",         kKeyCodeSlash },
+      { "SPACE",         kKeyCodeSpace },
+      { "ENTER",         kKeyCodeNewline },
+      { "TAB",           kKeyCodeTab },
+      { "GRAVE",         kKeyCodeGrave },
+      { "MINUS",         kKeyCodeMinus },
+      { "EQUALS",        kKeyCodeEquals },
+      { "LEFT_BRACKET",  kKeyCodeLeftBracket },
+      { "RIGHT_BRACKET", kKeyCodeRightBracket },
+      { "BACKSLASH",     kKeyCodeBackslash },
+      { "SEMICOLON",     kKeyCodeSemicolon },
+      { "APOSTROPHE",    kKeyCodeApostrophe },
+      { "STAR",          kKeyCodeStar },
+      { "POUND",         kKeyCodePound },
+      { "PLUS",          kKeyCodePlus },
+      { "DEL",           kKeyCodeDel },
 };
 
 /* the following is automatically generated by the 'gen-charmap.py' script
@@ -143,74 +142,80 @@ static const AKeycodeMapEntry keycode_map[] = {
  *   gen-charmap.py qwerty2.kcm
  */
 
-static const SkinKeyEntry _qwerty2_keys[] = {
-        /* keycode                   base   caps    fn  caps+fn   number */
+static const SkinKeyEntry  _qwerty2_keys[] =
+{
+   /* keycode                   base   caps    fn  caps+fn   number */
 
-        {kKeyCodeA, 'a', 'A', 0xe1, 0xc1, 'a'},
-        {kKeyCodeB, 'b', 'B', 'b', 'B', 'b'},
-        {kKeyCodeC, 'c', 'C', 0xa9, 0xa2, 'c'},
-        {kKeyCodeD, 'd', 'D', 0xf0, 0xd0, '\''},
-        {kKeyCodeE, 'e', 'E', 0xe9, 0xc9, '"'},
-        {kKeyCodeF, 'f', 'F', '[', '[', '['},
-        {kKeyCodeG, 'g', 'G', ']', ']', ']'},
-        {kKeyCodeH, 'h', 'H', '<', '<', '<'},
-        {kKeyCodeI, 'i', 'I', 0xed, 0xcd, '-'},
-        {kKeyCodeJ, 'j', 'J', '>', '>', '>'},
-        {kKeyCodeK, 'k', 'K', ';', 'K', ';'},
-        {kKeyCodeL, 'l', 'L', 0xf8, 0xd8, ':'},
-        {kKeyCodeM, 'm', 'M', 0xb5, 'M', '%'},
-        {kKeyCodeN, 'n', 'N', 0xf1, 0xd1, 'n'},
-        {kKeyCodeO, 'o', 'O', 0xf3, 0xd3, '+'},
-        {kKeyCodeP, 'p', 'P', 0xf6, 0xd6, '='},
-        {kKeyCodeQ, 'q', 'Q', 0xe4, 0xc4, '|'},
-        {kKeyCodeR, 'r', 'R', 0xae, 'R', '`'},
-        {kKeyCodeS, 's', 'S', 0xdf, 0xa7, '\\'},
-        {kKeyCodeT, 't', 'T', 0xfe, 0xde, '}'},
-        {kKeyCodeU, 'u', 'U', 0xfa, 0xda, '_'},
-        {kKeyCodeV, 'v', 'V', 'v', 'V', 'v'},
-        {kKeyCodeW, 'w', 'W', 0xe5, 0xc5, '~'},
-        {kKeyCodeX, 'x', 'X', 'x', 'X', 'x'},
-        {kKeyCodeY, 'y', 'Y', 0xfc, 0xdc, '}'},
-        {kKeyCodeZ, 'z', 'Z', 0xe6, 0xc6, 'z'},
-        {kKeyCodeComma, ',', '<', 0xe7, 0xc7, ','},
-        {kKeyCodePeriod, '.', '>', '.', 0x2026, '.'},
-        {kKeyCodeSlash, '/', '?', 0xbf, '?', '/'},
-        {kKeyCodeSpace, 0x20, 0x20, 0x9, 0x9, 0x20},
-        {kKeyCodeNewline, 0xa, 0xa, 0xa, 0xa, 0xa},
-        {kKeyCode0, '0', ')', 0x2bc, ')', '0'},
-        {kKeyCode1, '1', '!', 0xa1, 0xb9, '1'},
-        {kKeyCode2, '2', '@', 0xb2, '@', '2'},
-        {kKeyCode3, '3', '#', 0xb3, '#', '3'},
-        {kKeyCode4, '4', '$', 0xa4, 0xa3, '4'},
-        {kKeyCode5, '5', '%', 0x20ac, '%', '5'},
-        {kKeyCode6, '6', '^', 0xbc, 0x0302, '6'},
-        {kKeyCode7, '7', '&', 0xbd, '&', '7'},
-        {kKeyCode8, '8', '*', 0xbe, '*', '8'},
-        {kKeyCode9, '9', '(', 0x2bb, '(', '9'},
-        {kKeyCodeTab, 0x9, 0x9, 0x9, 0x9, 0x9},
-        {kKeyCodeGrave, '`', '~', 0x300, 0x0303, '`'},
-        {kKeyCodeMinus, '-', '_', 0xa5, '_', '-'},
-        {kKeyCodeEquals, '=', '+', 0xd7, 0xf7, '='},
-        {kKeyCodeLeftBracket, '[', '{', 0xab, '{', '['},
-        {kKeyCodeRightBracket, ']', '}', 0xbb, '}', ']'},
-        {kKeyCodeBackslash, '\\', '|', 0xac, 0xa6, '\\'},
-        {kKeyCodeSemicolon, ';', ':', 0xb6, 0xb0, ';'},
-        {kKeyCodeApostrophe, '\'', '"', 0x301, 0x308, '\''},
+    { kKeyCodeA             ,   'a',   'A',  0xe1,   0xc1,   'a' },
+    { kKeyCodeB             ,   'b',   'B',   'b',    'B',   'b' },
+    { kKeyCodeC             ,   'c',   'C',  0xa9,   0xa2,   'c' },
+    { kKeyCodeD             ,   'd',   'D',  0xf0,   0xd0,  '\'' },
+    { kKeyCodeE             ,   'e',   'E',  0xe9,   0xc9,   '"' },
+    { kKeyCodeF             ,   'f',   'F',   '[',    '[',   '[' },
+    { kKeyCodeG             ,   'g',   'G',   ']',    ']',   ']' },
+    { kKeyCodeH             ,   'h',   'H',   '<',    '<',   '<' },
+    { kKeyCodeI             ,   'i',   'I',  0xed,   0xcd,   '-' },
+    { kKeyCodeJ             ,   'j',   'J',   '>',    '>',   '>' },
+    { kKeyCodeK             ,   'k',   'K',   ';',    'K',   ';' },
+    { kKeyCodeL             ,   'l',   'L',  0xf8,   0xd8,   ':' },
+    { kKeyCodeM             ,   'm',   'M',  0xb5,    'M',   '%' },
+    { kKeyCodeN             ,   'n',   'N',  0xf1,   0xd1,   'n' },
+    { kKeyCodeO             ,   'o',   'O',  0xf3,   0xd3,   '+' },
+    { kKeyCodeP             ,   'p',   'P',  0xf6,   0xd6,   '=' },
+    { kKeyCodeQ             ,   'q',   'Q',  0xe4,   0xc4,   '|' },
+    { kKeyCodeR             ,   'r',   'R',  0xae,    'R',   '`' },
+    { kKeyCodeS             ,   's',   'S',  0xdf,   0xa7,  '\\' },
+    { kKeyCodeT             ,   't',   'T',  0xfe,   0xde,   '}' },
+    { kKeyCodeU             ,   'u',   'U',  0xfa,   0xda,   '_' },
+    { kKeyCodeV             ,   'v',   'V',   'v',    'V',   'v' },
+    { kKeyCodeW             ,   'w',   'W',  0xe5,   0xc5,   '~' },
+    { kKeyCodeX             ,   'x',   'X',   'x',    'X',   'x' },
+    { kKeyCodeY             ,   'y',   'Y',  0xfc,   0xdc,   '}' },
+    { kKeyCodeZ             ,   'z',   'Z',  0xe6,   0xc6,   'z' },
+    { kKeyCodeComma         ,   ',',   '<',  0xe7,   0xc7,   ',' },
+    { kKeyCodePeriod        ,   '.',   '>',   '.', 0x2026,   '.' },
+    { kKeyCodeSlash         ,   '/',   '?',  0xbf,    '?',   '/' },
+    { kKeyCodeSpace         ,  0x20,  0x20,   0x9,    0x9,  0x20 },
+    { kKeyCodeNewline       ,   0xa,   0xa,   0xa,    0xa,   0xa },
+    { kKeyCode0             ,   '0',   ')', 0x2bc,    ')',   '0' },
+    { kKeyCode1             ,   '1',   '!',  0xa1,   0xb9,   '1' },
+    { kKeyCode2             ,   '2',   '@',  0xb2,    '@',   '2' },
+    { kKeyCode3             ,   '3',   '#',  0xb3,    '#',   '3' },
+    { kKeyCode4             ,   '4',   '$',  0xa4,   0xa3,   '4' },
+    { kKeyCode5             ,   '5',   '%',0x20ac,    '%',   '5' },
+    { kKeyCode6             ,   '6',   '^',  0xbc, 0x0302,   '6' },
+    { kKeyCode7             ,   '7',   '&',  0xbd,    '&',   '7' },
+    { kKeyCode8             ,   '8',   '*',  0xbe,    '*',   '8' },
+    { kKeyCode9             ,   '9',   '(', 0x2bb,    '(',   '9' },
+    { kKeyCodeTab           ,   0x9,   0x9,   0x9,    0x9,   0x9 },
+    { kKeyCodeGrave         ,   '`',   '~', 0x300, 0x0303,   '`' },
+    { kKeyCodeMinus         ,   '-',   '_',  0xa5,    '_',   '-' },
+    { kKeyCodeEquals        ,   '=',   '+',  0xd7,   0xf7,   '=' },
+    { kKeyCodeLeftBracket   ,   '[',   '{',  0xab,    '{',   '[' },
+    { kKeyCodeRightBracket  ,   ']',   '}',  0xbb,    '}',   ']' },
+    { kKeyCodeBackslash     ,  '\\',   '|',  0xac,   0xa6,  '\\' },
+    { kKeyCodeSemicolon     ,   ';',   ':',  0xb6,   0xb0,   ';' },
+    { kKeyCodeApostrophe    ,  '\'',   '"', 0x301,  0x308,  '\'' },
 };
 
-static const SkinCharmap _default_charmap = {
-        _qwerty2_keys, ARRAY_SIZE(_qwerty2_keys), "qwerty2"};
+static const SkinCharmap  _default_charmap =
+{
+    _qwerty2_keys,
+    ARRAY_SIZE(_qwerty2_keys),
+    "qwerty2"
+};
 
 /* Custom character map created with -charmap option. */
-static SkinCharmap android_custom_charmap = {0};
+static SkinCharmap android_custom_charmap = { 0 };
 
 static const SkinCharmap* android_charmap = &_default_charmap;
 
 /* Checks if a character represents an end of the line.
  * Returns a non-zero value if ch is an EOL character. Returns
  * zero value if ch is not an EOL character.
- */
-static int kcm_is_eol(char ch) {
+*/
+static int
+kcm_is_eol(char ch) {
     // EOLs are 0, \r and \n chars.
     return ('\0' == ch) || ('\n' == ch) || ('\r' == ch);
 }
@@ -218,8 +223,9 @@ static int kcm_is_eol(char ch) {
 /* Checks if a character represents a token separator.
  * Returns a non-zero value if ch is a token separator.
  * Returns zero value if ch is not a token separator.
- */
-static int kcm_is_token_separator(char ch) {
+*/
+static int
+kcm_is_token_separator(char ch) {
     // Spaces and tabs are the only separators allowed
     // between tokens in .kcm files.
     return (' ' == ch) || ('\t' == ch);
@@ -228,8 +234,9 @@ static int kcm_is_token_separator(char ch) {
 /* Checks if a character represents a path separator.
  * Returns a non-zero value if ch is a path separator.
  * Returns zero value if ch is not a path separator.
- */
-static int kcm_is_path_separator(char ch) {
+*/
+static int
+kcm_is_path_separator(char ch) {
 #ifdef _WIN32
     return '/' == ch || '\\' == ch;
 #else
@@ -243,8 +250,9 @@ static int kcm_is_path_separator(char ch) {
  * not a space separator. Note that this routine may return
  * pointer to EOL in case if all characters in the string were
  * space separators.
- */
-static const char* kcm_skip_spaces(const char* str) {
+*/
+static const char*
+kcm_skip_spaces(const char* str) {
     while (!kcm_is_eol(*str) && kcm_is_token_separator(*str)) {
         str++;
     }
@@ -256,8 +264,9 @@ static const char* kcm_skip_spaces(const char* str) {
  * Returns pointer to the first space separator character in the string.
  * Note that this routine may return pointer to EOL in case if all
  * characters in the string were not space separators.
- */
-static const char* kcm_skip_non_spaces(const char* str) {
+*/
+static const char*
+kcm_skip_non_spaces(const char* str) {
     while (!kcm_is_eol(*str) && !kcm_is_token_separator(*str)) {
         str++;
     }
@@ -274,10 +283,9 @@ static const char* kcm_skip_non_spaces(const char* str) {
  * the 'token' parameter.
  * Returns NULL if there were no tokens found in the string, or
  * a pointer to the line string, advanced past the found token.
- */
-static const char* kcm_get_token(const char* line,
-                                 char* token,
-                                 size_t max_token_len) {
+*/
+static const char*
+kcm_get_token(const char* line, char* token, size_t max_token_len) {
     // Pass spaces and tabs.
     const char* token_starts = kcm_skip_spaces(line);
     // Advance to next space.
@@ -285,7 +293,7 @@ static const char* kcm_get_token(const char* line,
     // Calc token length
     size_t token_len = token_ends - token_starts;
     if ((0 == token_len) || (token_len >= max_token_len)) {
-        return NULL;
+      return NULL;
     }
     memcpy(token, token_starts, token_len);
     token[token_len] = '\0';
@@ -294,8 +302,9 @@ static const char* kcm_get_token(const char* line,
 
 /* Checks if token represents a comment.
  * Returns non-zero value if token represents a comment, or zero otherwise.
- */
-static int kcm_is_token_comment(const char* token) {
+*/
+static int
+kcm_is_token_comment(const char* token) {
     return '#' == *token;
 }
 
@@ -304,8 +313,9 @@ static int kcm_is_token_comment(const char* token) {
  * key_code - Upon success contains key code value for the key_name.
  * Returns a zero value on success, or -1 if key code was not found
  * for the given key_name.
- */
-static int kcm_get_key_code(const char* key_name, unsigned short* key_code) {
+*/
+static int
+kcm_get_key_code(const char* key_name, unsigned short* key_code) {
     int n;
     // Iterate through the key code map, matching key names.
     for (n = 0; n < sizeof(keycode_map) / sizeof(keycode_map[0]); n++) {
@@ -323,12 +333,13 @@ static int kcm_get_key_code(const char* key_name, unsigned short* key_code) {
  * represented by the token string.
  * val - Upon success contains hexadecimal value for the token.
  * Returns a zero value on success, or -1 on error.
- */
-static int kcm_get_ushort_hex_val(const char* token, unsigned short* val) {
+*/
+static int
+kcm_get_ushort_hex_val(const char* token, unsigned short* val) {
     int hex_val = hex2int((const uint8_t*)token, strlen(token));
     // Make sure token format was ok and value doesn't exceed unsigned short.
     if (-1 == hex_val || 0 != (hex_val & ~0xFFFF)) {
-        return -1;
+      return -1;
     }
 
     *val = (unsigned short)hex_val;
@@ -341,8 +352,9 @@ static int kcm_get_ushort_hex_val(const char* token, unsigned short* val) {
  * val - Upon success will contain a character or hexadecimal
  * value represented by a token.
  * Returns a zero value on success, or -1 on error.
- */
-static int kcm_get_char_or_hex_val(const char* token, unsigned short* val) {
+*/
+static int
+kcm_get_char_or_hex_val(const char* token, unsigned short* val) {
     // For chars token must begin with ' followed by character followed by '
     if ('\'' == *token) {
         if ('\0' == token[1] || '\'' != token[2] || '\0' != token[3]) {
@@ -366,9 +378,9 @@ static int kcm_get_char_or_hex_val(const char* token, unsigned short* val) {
  * value represented by the first token in the line.
  * returns NULL on error, or a pointer to the line string,
  * advanced past the found token.
- */
-static const char* kcm_get_char_or_hex_token_value(const char* line,
-                                                   unsigned short* val) {
+*/
+static const char*
+kcm_get_char_or_hex_token_value(const char* line, unsigned short* val) {
     char token[KCM_MAX_TOKEN_LEN];
     line = kcm_get_token(line, token, KCM_MAX_TOKEN_LEN);
     if (NULL != line) {
@@ -390,109 +402,107 @@ static const char* kcm_get_char_or_hex_token_value(const char* line,
  * returns BAD_FORMAT if line format was not recognized, SKIP_LINE if line
  * format was ok, but it didn't contain key information, or KEY_ENTRY
  * if key information was successfuly extracted from the line.
- */
-static ParseStatus kcm_parse_line(const char* line,
-                                  int line_index,
-                                  SkinKeyEntry* key_entry,
-                                  const char* kcm_file_path) {
-    char token[KCM_MAX_TOKEN_LEN];
-    unsigned short disp;
+*/
+static ParseStatus
+kcm_parse_line(const char* line,
+               int line_index,
+               SkinKeyEntry* key_entry,
+               const char* kcm_file_path) {
+      char token[KCM_MAX_TOKEN_LEN];
+      unsigned short disp;
 
-    // Get first token, and see if it's an empty, or a comment line.
-    line = kcm_get_token(line, token, KCM_MAX_TOKEN_LEN);
-    if ((NULL == line) || kcm_is_token_comment(token)) {
-        // Empty line, or a comment.
-        return SKIP_LINE;
-    }
+      // Get first token, and see if it's an empty, or a comment line.
+      line = kcm_get_token(line, token, KCM_MAX_TOKEN_LEN);
+      if ((NULL == line) || kcm_is_token_comment(token)) {
+          // Empty line, or a comment.
+          return SKIP_LINE;
+      }
 
-    // Here we expect either [type=XXXX], or a key string.
-    if ('[' == token[0]) {
-        return SKIP_LINE;
-    }
+      // Here we expect either [type=XXXX], or a key string.
+      if ('[' == token[0]) {
+          return SKIP_LINE;
+      }
 
-    // It must be a key string.
-    // First token is key code.
-    if (kcm_get_key_code(token, &key_entry->code)) {
-        derror("Invalid format of charmap file %s. Unknown key %s in line %d",
-               kcm_file_path, token, line_index);
-        return BAD_FORMAT;
-    }
+      // It must be a key string.
+      // First token is key code.
+      if (kcm_get_key_code(token, &key_entry->code)) {
+          derror("Invalid format of charmap file %s. Unknown key %s in line %d",
+                 kcm_file_path, token, line_index);
+          return BAD_FORMAT;
+      }
 
-    // 2-nd token is display character, which is ignored.
-    line = kcm_get_char_or_hex_token_value(line, &disp);
-    if (NULL == line) {
-        derror("Invalid format of charmap file %s. Invalid display value in "
-               "line %d",
-               kcm_file_path, line_index);
-        return BAD_FORMAT;
-    }
+      // 2-nd token is display character, which is ignored.
+      line = kcm_get_char_or_hex_token_value(line, &disp);
+      if (NULL == line) {
+          derror("Invalid format of charmap file %s. Invalid display value in line %d",
+                 kcm_file_path, line_index);
+          return BAD_FORMAT;
+      }
 
-    // 3-rd token is number.
-    line = kcm_get_char_or_hex_token_value(line, &key_entry->number);
-    if (NULL == line) {
-        derror("Invalid format of charmap file %s. Invalid number value in "
-               "line %d",
-               kcm_file_path, line_index);
-        return BAD_FORMAT;
-    }
+      // 3-rd token is number.
+      line = kcm_get_char_or_hex_token_value(line, &key_entry->number);
+      if (NULL == line) {
+          derror("Invalid format of charmap file %s. Invalid number value in line %d",
+                 kcm_file_path, line_index);
+          return BAD_FORMAT;
+      }
 
-    // 4-th token is base.
-    line = kcm_get_char_or_hex_token_value(line, &key_entry->base);
-    if (NULL == line) {
-        derror("Invalid format of charmap file %s. Invalid base value in line "
-               "%d",
-               kcm_file_path, line_index);
-        return BAD_FORMAT;
-    }
+      // 4-th token is base.
+      line = kcm_get_char_or_hex_token_value(line, &key_entry->base);
+      if (NULL == line) {
+          derror("Invalid format of charmap file %s. Invalid base value in line %d",
+                 kcm_file_path, line_index);
+          return BAD_FORMAT;
+      }
 
-    // 5-th token is caps.
-    line = kcm_get_char_or_hex_token_value(line, &key_entry->caps);
-    if (NULL == line) {
-        derror("Invalid format of charmap file %s. Invalid caps value in line "
-               "%d",
-               kcm_file_path, line_index);
-        return BAD_FORMAT;
-    }
+      // 5-th token is caps.
+      line = kcm_get_char_or_hex_token_value(line, &key_entry->caps);
+      if (NULL == line) {
+          derror("Invalid format of charmap file %s. Invalid caps value in line %d",
+                 kcm_file_path, line_index);
+          return BAD_FORMAT;
+      }
 
-    // 6-th token is fn.
-    line = kcm_get_char_or_hex_token_value(line, &key_entry->fn);
-    if (NULL == line) {
-        derror("Invalid format of charmap file %s. Invalid fn value in line %d",
-               kcm_file_path, line_index);
-        return BAD_FORMAT;
-    }
+      // 6-th token is fn.
+      line = kcm_get_char_or_hex_token_value(line, &key_entry->fn);
+      if (NULL == line) {
+          derror("Invalid format of charmap file %s. Invalid fn value in line %d",
+                 kcm_file_path, line_index);
+          return BAD_FORMAT;
+      }
 
-    // 7-th token is caps_fn.
-    line = kcm_get_char_or_hex_token_value(line, &key_entry->caps_fn);
-    if (NULL == line) {
-        derror("Invalid format of charmap file %s. Invalid caps_fn value in "
-               "line %d",
-               kcm_file_path, line_index);
-        return BAD_FORMAT;
-    }
+      // 7-th token is caps_fn.
+      line = kcm_get_char_or_hex_token_value(line, &key_entry->caps_fn);
+      if (NULL == line) {
+          derror("Invalid format of charmap file %s. Invalid caps_fn value in line %d",
+                 kcm_file_path, line_index);
+          return BAD_FORMAT;
+      }
 
-    // Make sure that line doesn't contain anything else,
-    // except (may be) a comment token.
-    line = kcm_get_token(line, token, KCM_MAX_TOKEN_LEN);
-    if ((NULL == line) || kcm_is_token_comment(token)) {
-        return KEY_ENTRY;
-    } else {
-        derror("Invalid format of charmap file %s in line %d", kcm_file_path,
-               line_index);
-        return BAD_FORMAT;
-    }
+      // Make sure that line doesn't contain anything else,
+      // except (may be) a comment token.
+      line = kcm_get_token(line, token, KCM_MAX_TOKEN_LEN);
+      if ((NULL == line) || kcm_is_token_comment(token)) {
+          return KEY_ENTRY;
+      } else {
+          derror("Invalid format of charmap file %s in line %d",
+                 kcm_file_path, line_index);
+          return BAD_FORMAT;
+      }
 }
 
-void kcm_extract_charmap_name(const char* kcm_file_path,
-                              char* charmap_name,
-                              int max_len) {
+void
+kcm_extract_charmap_name(const char* kcm_file_path,
+                         char* charmap_name,
+                         int max_len) {
     const char* ext_separator;
     size_t to_copy;
 
     // Initialize charmap name with name of .kcm file.
     // First, get file name from the full path to .kcm file.
     const char* file_name = kcm_file_path + strlen(kcm_file_path);
-    while (!kcm_is_path_separator(*file_name) && (file_name != kcm_file_path)) {
+    while (!kcm_is_path_separator(*file_name) &&
+           (file_name != kcm_file_path)) {
         file_name--;
     }
     if (kcm_is_path_separator(*file_name)) {
@@ -502,13 +512,13 @@ void kcm_extract_charmap_name(const char* kcm_file_path,
     // Cut off file name extension.
     ext_separator = strrchr(file_name, '.');
     if (NULL == ext_separator) {
-        // "filename" is legal name.
-        ext_separator = file_name + strlen(file_name);
+      // "filename" is legal name.
+      ext_separator = file_name + strlen(file_name);
     } else if (ext_separator == file_name) {
-        // ".filename" is legal name too. In this case we will use
-        // "filename" as our custom charmap name.
-        file_name++;
-        ext_separator = file_name + strlen(file_name);
+      // ".filename" is legal name too. In this case we will use
+      // "filename" as our custom charmap name.
+      file_name++;
+      ext_separator = file_name + strlen(file_name);
     }
 
     // Copy file name to charmap name.
@@ -522,9 +532,9 @@ void kcm_extract_charmap_name(const char* kcm_file_path,
 
 /* Extracts charmap name from .kcm file name,
  * and saves it into char_map as its name.
- */
-static void kcm_get_charmap_name(const char* kcm_file_path,
-                                 SkinCharmap* char_map) {
+*/
+static void
+kcm_get_charmap_name(const char* kcm_file_path, SkinCharmap* char_map) {
     kcm_extract_charmap_name(kcm_file_path, char_map->name,
                              sizeof(char_map->name));
 }
@@ -540,8 +550,9 @@ static void kcm_get_charmap_name(const char* kcm_file_path,
  * kcm_file_path - Full path to the .kcm file to parse.
  * char_map - Upon success will contain initialized characters map.
  * Returns a zero value on success, or -1 on failure.
- */
-static int parse_kcm_file(const char* kcm_file_path, SkinCharmap* char_map) {
+*/
+static int
+parse_kcm_file(const char* kcm_file_path, SkinCharmap* char_map) {
     // A line read from .kcm file.
     char line[KCM_MAX_LINE_LEN];
     // Return code.
@@ -557,8 +568,8 @@ static int parse_kcm_file(const char* kcm_file_path, SkinCharmap* char_map) {
 
     kcm_file = android_fopen(kcm_file_path, "r");
     if (NULL == kcm_file) {
-        derror("Unable to open charmap file %s : %s", kcm_file_path,
-               strerror(errno));
+        derror("Unable to open charmap file %s : %s",
+               kcm_file_path, strerror(errno));
         return -1;
     }
 
@@ -573,7 +584,7 @@ static int parse_kcm_file(const char* kcm_file_path, SkinCharmap* char_map) {
     for (; 0 != fgets(line, sizeof(line), kcm_file); cur_line++) {
         SkinKeyEntry key_entry;
         ParseStatus parse_res =
-                kcm_parse_line(line, cur_line, &key_entry, kcm_file_path);
+            kcm_parse_line(line, cur_line, &key_entry, kcm_file_path);
         if (BAD_FORMAT == parse_res) {
             err = -1;
             break;
@@ -600,8 +611,8 @@ static int parse_kcm_file(const char* kcm_file_path, SkinCharmap* char_map) {
             err = -1;
         }
         if (err) {
-            derror("Error reading charmap file %s : %s", kcm_file_path,
-                   strerror(errno));
+          derror("Error reading charmap file %s : %s",
+                  kcm_file_path, strerror(errno));
         }
     }
 
@@ -619,7 +630,9 @@ static int parse_kcm_file(const char* kcm_file_path, SkinCharmap* char_map) {
     return err;
 }
 
-int skin_charmap_setup(const char* kcm_file_path) {
+int
+skin_charmap_setup(const char* kcm_file_path) {
+
     /* Return if we already loaded a charmap */
     if (android_charmap != &_default_charmap || kcm_file_path == NULL)
         return 0;
@@ -635,12 +648,14 @@ int skin_charmap_setup(const char* kcm_file_path) {
     return 0;
 }
 
-void skin_charmap_done(void) {
+void
+skin_charmap_done(void) {
     if (android_charmap != &_default_charmap)
         AFREE((void*)android_charmap->entries);
 }
 
-const SkinCharmap* skin_charmap_get_by_name(const char* name) {
+const SkinCharmap*
+skin_charmap_get_by_name(const char* name) {
     if (name != NULL) {
         if (!strcmp(android_charmap->name, name))
             return android_charmap;
@@ -650,11 +665,13 @@ const SkinCharmap* skin_charmap_get_by_name(const char* name) {
     return NULL;
 }
 
-int skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
-                                     unsigned int unicode,
-                                     int down,
-                                     SkinKeycodeBuffer* keycodes) {
-    int n;
+int
+skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
+                                    unsigned int unicode,
+                                    int  down,
+                                    SkinKeycodeBuffer* keycodes)
+{
+    int                 n;
 
     if (cmap == NULL)
         return 0;
@@ -718,6 +735,7 @@ int skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
     return 0;
 }
 
-const SkinCharmap* skin_charmap_get(void) {
+const SkinCharmap* skin_charmap_get(void)
+{
     return android_charmap;
 }
