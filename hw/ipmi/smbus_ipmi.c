@@ -351,12 +351,27 @@ static void smbus_ipmi_get_fwinfo(struct IPMIInterface *ii, IPMIFwInfo *info)
     info->uuid = sid->uuid;
 }
 
+static void smbus_ipmi_enter_reset(Object *obj, ResetType type)
+{
+    SMBusIPMIDevice *sid = SMBUS_IPMI(obj);
+    SMBusDeviceClass *sdc = SMBUS_DEVICE_GET_CLASS(&sid->parent);
+
+    sid->outlen = 0;
+    sid->currblk = 0;
+    sid->outpos = 0;
+    sid->inlen = 0;
+    if (sdc->parent_phases.enter) {
+        sdc->parent_phases.enter(obj, type);
+    }
+}
+
 static void smbus_ipmi_class_init(ObjectClass *oc, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(oc);
     IPMIInterfaceClass *iic = IPMI_INTERFACE_CLASS(oc);
     SMBusDeviceClass *sc = SMBUS_DEVICE_CLASS(oc);
     AcpiDevAmlIfClass *adevc = ACPI_DEV_AML_IF_CLASS(oc);
+    ResettableClass *rc = RESETTABLE_CLASS(oc);
 
     sc->receive_byte = ipmi_receive_byte;
     sc->write_data = ipmi_write_data;
@@ -369,6 +384,7 @@ static void smbus_ipmi_class_init(ObjectClass *oc, void *data)
     iic->set_irq_enable = smbus_ipmi_set_irq_enable;
     iic->get_fwinfo = smbus_ipmi_get_fwinfo;
     adevc->build_dev_aml = build_ipmi_dev_aml;
+    rc->phases.enter = smbus_ipmi_enter_reset;
 }
 
 static const TypeInfo smbus_ipmi_info = {
