@@ -69,8 +69,6 @@ static bool s_qt_hide_windw = 0;
 
 static void emulator_window_refresh(EmulatorWindow* emulator);
 
-extern void qemu_system_shutdown_request(QemuShutdownCause reason);
-
 static void write_window_name(char* buff,
                               size_t buff_len,
                               int base_port,
@@ -540,7 +538,7 @@ static void emulator_window_refresh(EmulatorWindow* emulator) {
         if (skin_ui_process_events(emulator->ui)) {
             // Quit program.
             emulator->done = true;
-            qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI);
+            getConsoleAgents()->vm->system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI);
         }
     }
 }

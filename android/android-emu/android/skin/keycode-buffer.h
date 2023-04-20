@@ -13,7 +13,6 @@
 #pragma once
 
 #include "android/utils/compiler.h"
-
 #include <stdbool.h>
 
 ANDROID_BEGIN_HEADER

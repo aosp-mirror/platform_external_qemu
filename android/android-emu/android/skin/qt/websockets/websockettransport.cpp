@@ -1,6 +1,7 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
+** Copyright (C) 2016 Klarälvdalens Datakonsult AB, a KDAB Group company,
+*info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the QtWebChannel module of the Qt Toolkit.
@@ -50,22 +51,23 @@
 
 #include "android/skin/qt/websockets/websockettransport.h"
 
-#include <qjsondocument.h>                     // for QJsonDocument::Compact
-#include <qloggingcategory.h>                  // for qCWarning
-#include <QDebug>                              // for QDebug
-#include <QJsonDocument>                       // for QJsonDocument
-#include <QJsonObject>                         // for QJsonObject
-#include <QJsonParseError>                     // for QJsonParseError
-#include <QObject>                             // for QObject
-#include <QWebSocket>                          // for QWebSocket
+#include <qjsondocument.h>     // for QJsonDocument::Compact
+#include <qloggingcategory.h>  // for qCWarning
+#include <QDebug>              // for QDebug
+#include <QJsonDocument>       // for QJsonDocument
+#include <QJsonObject>         // for QJsonObject
+#include <QJsonParseError>     // for QJsonParseError
+#include <QObject>             // for QObject
+#include <QWebSocket>          // for QWebSocket
 
-#include "android/skin/qt/logging-category.h"  // for emu
+#include "android/utils/debug.h"
 
 class QJsonObject;
 class QString;
 
 /*!
-    \brief QWebChannelAbstractSocket implementation that uses a QWebSocket internally.
+    \brief QWebChannelAbstractSocket implementation that uses a QWebSocket
+   internally.
 
     The transport delegates all messages received over the QWebSocket over its
     textMessageReceived signal. Analogously, all calls to sendTextMessage will
@@ -77,46 +79,48 @@ class QString;
 
     The socket is also set as the parent of the transport object.
 */
-WebSocketTransport::WebSocketTransport(QWebSocket *socket)
-: QWebChannelAbstractTransport(socket)
-, m_socket(socket)
-{
-    connect(socket, &QWebSocket::textMessageReceived,
-            this, &WebSocketTransport::textMessageReceived);
-    connect(socket, &QWebSocket::disconnected,
-            this, &WebSocketTransport::deleteLater);
+WebSocketTransport::WebSocketTransport(QWebSocket* socket)
+    : QWebChannelAbstractTransport(socket), m_socket(socket) {
+    connect(socket, &QWebSocket::textMessageReceived, this,
+            &WebSocketTransport::textMessageReceived);
+    connect(socket, &QWebSocket::disconnected, this,
+            &WebSocketTransport::deleteLater);
 }
 
 /*!
     Destroys the WebSocketTransport.
 */
-WebSocketTransport::~WebSocketTransport()
-{
+WebSocketTransport::~WebSocketTransport() {
     m_socket->deleteLater();
 }
 
 /*!
-    Serialize the JSON message and send it as a text message via the WebSocket to the client.
+    Serialize the JSON message and send it as a text message via the WebSocket
+   to the client.
 */
-void WebSocketTransport::sendMessage(const QJsonObject &message)
-{
+void WebSocketTransport::sendMessage(const QJsonObject& message) {
     QJsonDocument doc(message);
-    m_socket->sendTextMessage(QString::fromUtf8(doc.toJson(QJsonDocument::Compact)));
+    m_socket->sendTextMessage(
+            QString::fromUtf8(doc.toJson(QJsonDocument::Compact)));
 }
 
 /*!
     Deserialize the stringified JSON messageData and emit messageReceived.
 */
-void WebSocketTransport::textMessageReceived(const QString &messageData)
-{
+void WebSocketTransport::textMessageReceived(const QString& messageData) {
     QJsonParseError error;
-    QJsonDocument message = QJsonDocument::fromJson(messageData.toUtf8(), &error);
+    QJsonDocument message =
+            QJsonDocument::fromJson(messageData.toUtf8(), &error);
     if (error.error) {
-        qCWarning(emu) << "Failed to parse text message as JSON object:" << messageData
-                   << "Error is:" << error.errorString();
+        dwarning(
+                "Failed to parse text message as JSON object: %s, "
+                "Error is: %s",
+                messageData.toStdString().c_str(),
+                error.errorString().toStdString().c_str());
         return;
     } else if (!message.isObject()) {
-        qCWarning(emu) << "Received JSON message that is not an object: " << messageData;
+        dwarning("Received JSON message that is not an object:  %s",
+                 messageData.toStdString().c_str());
         return;
     }
     emit messageReceived(message.object(), this);

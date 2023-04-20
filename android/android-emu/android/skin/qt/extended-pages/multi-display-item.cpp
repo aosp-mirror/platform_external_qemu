@@ -18,6 +18,7 @@
 #include <QPushButton>  // for QPushButton
 #include <QStyle>       // for QStyle
 
+#include "android/console.h"
 #include "android/metrics/UiEventTracker.h"
 #include "android/skin/qt/angle-input-widget.h"     // for AngleInputWidget
 #include "android/skin/qt/emulator-qt-window.h"     // for EmulatorQtWindow
@@ -129,8 +130,8 @@ void MultiDisplayItem::onDisplayTypeChanged(int index) {
     if (index == displayTypes.size() - 1) {
         uint32_t w, h, dpi;
         bool enabled;
-        EmulatorQtWindow::getInstance()->getMultiDisplay(
-                mId, NULL, NULL, &w, &h, &dpi, NULL, &enabled);
+        getConsoleAgents()->emu->getMultiDisplay(mId, NULL, NULL, &w, &h, &dpi,
+                                                 NULL, &enabled);
         if (enabled) {
             mUi->height->setValue(h);
             mUi->width->setValue(w);
@@ -150,8 +151,8 @@ void MultiDisplayItem::onDisplayTypeChanged(int index) {
 void MultiDisplayItem::onCustomParaChanged(double /*value*/) {
     uint32_t w, h, d;
     getValues(&w, &h, &d);
-    if (EmulatorQtWindow::getInstance()->multiDisplayParamValidate(mId, w, h, d,
-                                                                   0)) {
+    if (getConsoleAgents()->multi_display->multiDisplayParamValidate(mId, w, h,
+                                                                     d, 0)) {
         emit changeDisplay(mId);
     }
 }

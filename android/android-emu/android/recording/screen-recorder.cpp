@@ -409,7 +409,8 @@ void screen_recorder_init(uint32_t w,
     globals.multiDisplayAgent = mdpy_agent;
 
     if (dpy_agent) {
-        if (emulator_window_get()->opts->no_window) {
+
+        if (getConsoleAgents()->emu->getEmulatorWindow()->opts->no_window) {
             // no-window mode in gpu guest
             // Need to make a dummy producer to use the invalidate and fb check
             // callbacks, so we can request for a repost when we start

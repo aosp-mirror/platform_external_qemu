@@ -17,6 +17,7 @@
 #include <qwindowdefs.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #ifdef CONFIG_POSIX
 #include <pthread.h>
 #include <sys/signal.h>
@@ -175,7 +176,15 @@ std::shared_ptr<void> skin_winsys_get_shared_ptr() {
     return std::static_pointer_cast<void>(EmulatorQtWindow::getInstancePtr());
 }
 
+extern bool userSettingIsDontSaveSnapshot();
+void injectUiConfiguration() {
+    getConsoleAgents()->emu->setUserSettingIsDontSaveSnapshot(
+            userSettingIsDontSaveSnapshot());
+}
+
 extern void skin_winsys_enter_main_loop(bool no_window) {
+    injectUiConfiguration();
+
     if (no_window) {
         D("Starting QEMU main loop\n");
 #ifdef _WIN32

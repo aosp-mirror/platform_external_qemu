@@ -30,7 +30,6 @@
 #include "android/skin/qt/virtualscene-control-window.h"
 #include "android/utils/compiler.h"
 
-#include "ui_tools.h"
 
 #include <QFrame>
 #include <QKeyEvent>
@@ -44,6 +43,11 @@ class EmulatorQtWindow;
 class ExtendedWindow;
 class PostureSelectionDialog;
 class ResizableDialog;
+
+namespace Ui {
+    class ToolControls;
+}
+
 
 class ToolWindow : public QFrame {
     Q_OBJECT

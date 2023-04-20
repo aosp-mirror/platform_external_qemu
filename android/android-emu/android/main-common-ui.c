@@ -9,45 +9,41 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-
 #include "android/main-common-ui.h"
 
 #ifdef __APPLE__
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 
-#include <assert.h>   // for assert
-#include <ctype.h>    // for isdigit
-#include <signal.h>   // for signal, SIG_DFL
-#include <stdio.h>    // for NULL, snprintf
-#include <stdlib.h>   // for atoi, exit, free
-#include <string.h>   // for strdup, strchr
+#include <assert.h>
+#include <signal.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
-#include "android/avd/util.h"
 #include "android/boot-properties.h"
-#include "android/cmdline-option.h"
+#include "aemu/base/gl_object_counter.h"
+#include "aemu/base/logging/CLog.h"
+#include "android/avd/util.h"
 #include "android/console.h"
-#include "android/emulation/bufprint_config_dirs.h"
+#include "android/emulation/control/globals_agent.h"
 #include "android/emulator-window.h"
-#include "android/framebuffer.h"
-#include "android/hw-sensors.h"
-#include "android/main-common.h"
+#include "android/main-emugl.h"
+#include "android/opengles.h"
 #include "android/resource.h"
-#include "android/skin/charmap.h"
-#include "android/skin/file.h"
 #include "android/skin/image.h"
-#include "android/skin/keyboard.h"
-#include "android/skin/resource.h"
-#include "android/skin/trackball.h"
-#include "android/skin/window.h"
+#include "android/skin/rect.h"
+#include "android/skin/user-config.h"
 #include "android/skin/winsys.h"
 #include "android/user-config.h"
-#include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/path.h"
 #include "android/utils/string.h"
 #include "host-common/feature_control.h"
+#include "android/utils/system.h"
+#include "host-common/crash-handler.h"
+#include "host-common/misc.h"
+#include "host-common/multi_display_agent.h"
+#include "host-common/vm_operations.h"
 
 #define D(...)                   \
     do {                         \
@@ -63,56 +59,10 @@ static char* s_skinPath = NULL;
 static int s_deviceLcdWidth = 0;
 static int s_deviceLcdHeight = 0;
 
-bool emulator_initMinimalSkinConfig(
-    int lcd_width, int lcd_height,
-    const SkinRect* rect,
-    AUserConfig** userConfig_out);
-
-bool user_config_init(void) {
-    AUserConfig* userConfig = NULL;
-    SkinRect mmmRect;
-    skin_winsys_get_monitor_rect(&mmmRect);
-    if (getConsoleAgents()->settings->min_config_qemu_mode()) {
-        emulator_initMinimalSkinConfig(
-            getConsoleAgents()->settings->hw()->hw_lcd_width,
-            getConsoleAgents()->settings->hw()->hw_lcd_height,
-            &mmmRect,
-            &userConfig);
-    } else {
-        userConfig = auserConfig_new(getConsoleAgents()->settings->avdInfo(), &mmmRect, s_deviceLcdWidth, s_deviceLcdHeight);
-    }
-    getConsoleAgents()->settings->inject_userConfig(userConfig);
-    return userConfig != NULL;
-}
-
-/* only call this function on normal exits, so that ^C doesn't save the
- * configuration */
-void user_config_done(void) {
-    int win_x, win_y;
-
-    AUserConfig* userConfig = getConsoleAgents()->settings->userConfig();
-    if (!userConfig) {
-        D("no user configuration?");
-        return;
-    }
-
-    skin_winsys_get_window_pos(&win_x, &win_y);
-    auserConfig_setWindowPos(userConfig, win_x, win_y);
-    const int posture = android_foldable_get_posture();
-    auserConfig_setPosture(userConfig, posture);
-    D("saving posture %d", posture);
-    auserConfig_save(userConfig);
-    auserConfig_free(userConfig);
-    getConsoleAgents()->settings->inject_userConfig(NULL);
-}
-
-void user_config_get_window_pos(int* window_x, int* window_y) {
-    *window_x = *window_y = 10;
-
-    AUserConfig* userConfig = getConsoleAgents()->settings->userConfig();
-    if (userConfig)
-        auserConfig_getWindowPos(userConfig, window_x, window_y);
-}
+bool emulator_initMinimalSkinConfig(int lcd_width,
+                                    int lcd_height,
+                                    const SkinRect* rect,
+                                    AUserConfig** userConfig_out);
 
 /***********************************************************************/
 /***********************************************************************/
@@ -131,280 +81,16 @@ static const struct {
                     {"QVGA", "320x240"},   {"HVGA", "320x480"},
                     {NULL, NULL}};
 
-void parse_skin_files(const char* skinDirPath,
-                      const char* skinName,
-                      AndroidOptions* opts,
-                      AndroidHwConfig* hwConfig,
-                      AConfig** skinConfig,
-                      char** skinPath) {
-    char tmp[1024];
-    AConfig* root;
-    const char* path = NULL;
-    AConfig* n;
-
-    root = aconfig_node("", "");
-
-    if (skinName == NULL)
-        goto DEFAULT_SKIN;
-
-    /* Support skin aliases like QVGA-H QVGA-P, etc...
-       But first we check if it's a directory that exist before applying
-       the alias */
-    int checkAlias = 1;
-
-    if (skinDirPath != NULL) {
-        bufprint(tmp, tmp + sizeof(tmp), "%s" PATH_SEP "%s", skinDirPath,
-                 skinName);
-        if (path_exists(tmp)) {
-            checkAlias = 0;
-        } else {
-            D("there is no '%s' skin in '%s'", skinName, skinDirPath);
-        }
-    }
-
-    if (checkAlias) {
-        int nn;
-
-        for (nn = 0;; nn++) {
-            const char* skin_name = skin_aliases[nn].name;
-            const char* skin_alias = skin_aliases[nn].alias;
-
-            if (!skin_name)
-                break;
-
-            if (!strcasecmp(skin_name, skinName)) {
-                D("skin name '%s' aliased to '%s'", skinName, skin_alias);
-                skinName = skin_alias;
-                break;
-            }
-        }
-    }
-
-    /* Magically support skins like "320x240" or "320x240x16" */
-    if (isdigit(skinName[0])) {
-        char* x = strchr(skinName, 'x');
-        if (x && isdigit(x[1])) {
-            int width = atoi(skinName);
-            int height = atoi(x + 1);
-            int bpp = hwConfig->hw_lcd_depth;  // respect the depth setting in
-                                               // the config.ini
-            char* y = strchr(x + 1, 'x');
-            if (y && isdigit(y[1])) {
-                bpp = atoi(y + 1);
-            }
-
-            snprintf(tmp, sizeof tmp,
-                     "display {\n  width %d\n  height %d\n bpp %d}\n", width,
-                     height, bpp);
-            aconfig_load(root, strdup(tmp));
-            path = ":";
-            D("found magic skin width=%d height=%d bpp=%d\n", width, height,
-              bpp);
-            goto FOUND_SKIN;
-        }
-    }
-
-    if (skinDirPath == NULL) {
-        derror("unknown skin name '%s'", skinName);
-        exit(1);
-    }
-
-    snprintf(tmp, sizeof tmp, "%s" PATH_SEP "%s" PATH_SEP "layout", skinDirPath,
-             skinName);
-    D("trying to load skin file '%s'", tmp);
-
-    if (aconfig_load_file(root, tmp) < 0) {
-        dwarning("could not load skin file '%s', using built-in one\n", tmp);
-        goto DEFAULT_SKIN;
-    }
-
-    snprintf(tmp, sizeof tmp, "%s" PATH_SEP "%s" PATH_SEP, skinDirPath,
-             skinName);
-    path = tmp;
-    goto FOUND_SKIN;
-
-FOUND_SKIN:
-    /* the default network speed and latency can now be specified by the device
-     * skin */
-    n = aconfig_find(root, "network");
-    if (n != NULL) {
-        android_skin_net_speed = aconfig_str(n, "speed", 0);
-        android_skin_net_delay = aconfig_str(n, "delay", 0);
-    }
-
-    /* extract framebuffer information from the skin.
-     *
-     * for version 1 of the skin format, they are in the top-level
-     * 'display' element.
-     *
-     * for version 2 of the skin format, they are under parts.device.display
-     */
-    n = aconfig_find(root, "display");
-    if (n == NULL) {
-        n = aconfig_find(root, "parts");
-        if (n != NULL) {
-            n = aconfig_find(n, "device");
-            if (n != NULL) {
-                n = aconfig_find(n, "display");
-            }
-        }
-    }
-
-    if (n != NULL) {
-        int width = aconfig_int(n, "width", hwConfig->hw_lcd_width);
-        int height = aconfig_int(n, "height", hwConfig->hw_lcd_height);
-        int depth = aconfig_int(n, "bpp", hwConfig->hw_lcd_depth);
-
-        if (width > 0 && height > 0) {
-            /* The emulated framebuffer wants a width that is a multiple of 2 */
-            if ((width & 1) != 0) {
-                width = (width + 1) & ~1;
-                D("adjusting LCD dimensions to (%dx%dx)", width, height);
-            }
-
-            /* only depth values of 16 and 32 are correct. 16 is the default. */
-            if (depth != 32 && depth != 16) {
-                depth = 16;
-                D("adjusting LCD bit depth to %d", depth);
-            }
-
-            hwConfig->hw_lcd_width = width;
-            hwConfig->hw_lcd_height = height;
-            hwConfig->hw_lcd_depth = depth;
-        } else {
-            D("ignoring invalid skin LCD dimensions (%dx%dx%d)", width, height,
-              depth);
-        }
-    }
-
-    *skinConfig = root;
-    *skinPath = strdup(path);
-    return;
-
-DEFAULT_SKIN : {
-    const unsigned char* layout_base;
-    size_t layout_size;
-    char* base;
-
-    skinName = "<builtin>";
-
-    layout_base = skin_resource_find("layout", &layout_size);
-    if (layout_base == NULL) {
-        dfatal("Couldn't load builtin skin");
-        exit(1);
-    }
-    base = malloc(layout_size + 1);
-    memcpy(base, layout_base, layout_size);
-    base[layout_size] = 0;
-
-    D("parsing built-in skin layout file (%d bytes)", (int)layout_size);
-    aconfig_load(root, base);
-    path = ":";
-}
-    goto FOUND_SKIN;
-}
-
-void create_minimal_skin_config(int lcd_width,
-                                int lcd_height,
-                                AConfig** skinConfig,
-                                char** skinPath) {
-    char tmp[1024];
-    AConfig* root;
-    const char* path = NULL;
-    AConfig* n;
-
-    root = aconfig_node("", "");
-
-    int width = lcd_width;
-    int height = lcd_height;
-    int bpp = 32;
-    snprintf(tmp, sizeof tmp, "display {\n  width %d\n  height %d\n bpp %d}\n",
-             width, height, bpp);
-    aconfig_load(root, strdup(tmp));
-    path = ":";
-    D("found magic skin width=%d height=%d bpp=%d\n", width, height, bpp);
-
-    /* the default network speed and latency can now be specified by the device
-     * skin */
-    n = aconfig_find(root, "network");
-    if (n != NULL) {
-        android_skin_net_speed = aconfig_str(n, "speed", 0);
-        android_skin_net_delay = aconfig_str(n, "delay", 0);
-    }
-
-    /* extract framebuffer information from the skin.
-     *
-     * for version 1 of the skin format, they are in the top-level
-     * 'display' element.
-     *
-     * for version 2 of the skin format, they are under parts.device.display
-     */
-    n = aconfig_find(root, "display");
-    if (n == NULL) {
-        n = aconfig_find(root, "parts");
-        if (n != NULL) {
-            n = aconfig_find(n, "device");
-            if (n != NULL) {
-                n = aconfig_find(n, "display");
-            }
-        }
-    }
-
-    if (n != NULL) {
-        int width = aconfig_int(n, "width", lcd_width);
-        int height = aconfig_int(n, "height", lcd_height);
-        int depth = aconfig_int(n, "bpp", 32);
-
-        if (width > 0 && height > 0) {
-            /* The emulated framebuffer wants a width that is a multiple of 2 */
-            if ((width & 1) != 0) {
-                width = (width + 1) & ~1;
-                D("adjusting LCD dimensions to (%dx%dx)", width, height);
-            }
-
-            /* only depth values of 16 and 32 are correct. 16 is the default. */
-            if (depth != 32 && depth != 16) {
-                depth = 16;
-                D("adjusting LCD bit depth to %d", depth);
-            }
-
-        } else {
-            D("ignoring invalid skin LCD dimensions (%dx%dx%d)", width, height,
-              depth);
-        }
-    }
-
-    *skinConfig = root;
-    *skinPath = strdup(path);
-    return;
-}
-
-bool emulator_initMinimalSkinConfig(int lcd_width,
-                                    int lcd_height,
-                                    const SkinRect* rect,
-                                    AUserConfig** userConfig_out) {
-    s_deviceLcdWidth = lcd_width;
-    s_deviceLcdHeight = lcd_height;
-
-    create_minimal_skin_config(lcd_width, lcd_height, &s_skinConfig,
-                               &s_skinPath);
-
-    *userConfig_out =
-        auserConfig_new_custom(
-            getConsoleAgents()->settings->avdInfo(), rect,
-            s_deviceLcdWidth, s_deviceLcdHeight);
-    return true;
-}
-
 bool emulator_parseInputCommandLineOptions(AndroidOptions* opts) {
 #ifndef CONFIG_HEADLESS
     if (opts->use_keycode_forwarding ||
         feature_is_enabled(kFeature_KeycodeForwarding)) {
-            getConsoleAgents()->settings->set_keycode_forwading(true);
+        getConsoleAgents()->settings->set_keycode_forwading(true);
     }
 
     // Set keyboard layout for Android only.
-    if (getConsoleAgents()->settings->use_keycode_forwarding() && !opts->fuchsia) {
+    if (getConsoleAgents()->settings->use_keycode_forwarding() &&
+        !opts->fuchsia) {
         const char* cur_keyboard_layout = skin_keyboard_host_layout_name();
         const char* android_keyboard_layout =
                 skin_keyboard_host_to_guest_layout_name(cur_keyboard_layout);
@@ -424,53 +110,14 @@ bool emulator_parseInputCommandLineOptions(AndroidOptions* opts) {
     return true;
 }
 
-bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
-                                        AvdInfo* avd,
-                                        AndroidHwConfig* hw) {
-    s_deviceLcdWidth = hw->hw_lcd_width;
-    s_deviceLcdHeight = hw->hw_lcd_height;
-    if (skin_charmap_setup(opts->charmap)) {
-        return false;
-    }
-
-    parse_skin_files(opts->skindir, opts->skin, opts, hw, &s_skinConfig,
-                     &s_skinPath);
-
-    if (!opts->charmap) {
-        /* Try to find a valid charmap name */
-        char* charmap = avdInfo_getCharmapFile(avd, hw->hw_keyboard_charmap);
-        if (charmap != NULL) {
-            D("autoconfig: -charmap %s", charmap);
-            str_reset_nocopy(&opts->charmap, charmap);
-        }
-    }
-
-    if (opts->charmap) {
-        char charmap_name[SKIN_CHARMAP_NAME_SIZE];
-
-        if (!path_exists(opts->charmap)) {
-            derror("Charmap file does not exist: %s", opts->charmap);
-            return 1;
-        }
-        /* We need to store the charmap name in the hardware configuration.
-         * However, the charmap file itself is only used by the UI component
-         * and doesn't need to be set to the emulation engine.
-         */
-        kcm_extract_charmap_name(opts->charmap, charmap_name,
-                                 sizeof(charmap_name));
-        str_reset(&hw->hw_keyboard_charmap, charmap_name);
-    }
-    return true;
-}
-
 bool emulator_initUserInterface(const AndroidOptions* opts,
                                 const UiEmuAgent* uiEmuAgent) {
     user_config_init();
 
-    assert(s_skinConfig != NULL);
-    assert(s_skinPath != NULL);
+    assert(get_skin_config() != NULL);
+    assert(get_skin_path() != NULL);
 
-    return ui_init(s_skinConfig, s_skinPath, opts, uiEmuAgent);
+    return ui_init(get_skin_config(), get_skin_path(), opts, uiEmuAgent);
 }
 
 // TODO(digit): Remove once QEMU2 uses emulator_initUserInterface().
@@ -573,11 +220,8 @@ bool ui_init(const AConfig* skinConfig,
 }
 
 void emulator_finiUserInterface(void) {
-    if (s_skinConfig) {
-        aconfig_node_free(s_skinConfig);
-        free(s_skinPath);
-        s_skinConfig = NULL;
-        s_skinPath = NULL;
+    if (get_skin_config()) {
+        aconfig_node_free(get_skin_config());
     }
 
     ui_done();
@@ -588,4 +232,253 @@ void ui_done(void) {
     user_config_done();
     emulator_window_done(emulator_window_get());
     skin_winsys_destroy();
+}
+
+static RendererConfig lastRendererConfig;
+
+static bool isGuestRendererChoice(const char* choice) {
+    return choice && (!strcmp(choice, "off") || !strcmp(choice, "guest"));
+}
+
+static const char DEFAULT_SOFTWARE_GPU_MODE[] = "swiftshader_indirect";
+
+bool configAndStartRenderer(enum WinsysPreferredGlesBackend uiPreferredBackend,
+                            RendererConfig* config_out) {
+    EmuglConfig config;
+    AvdInfo* avd = getConsoleAgents()->settings->avdInfo();
+    AndroidHwConfig* hw = getConsoleAgents()->settings->hw();
+    AndroidOptions* opts =
+            getConsoleAgents()->settings->android_cmdLineOptions();
+
+    const QAndroidVmOperations* vm_operations = getConsoleAgents()->vm;
+    const struct QAndroidEmulatorWindowAgent* window_agent =
+            getConsoleAgents()->emu;
+    const QAndroidMultiDisplayAgent* multi_display_agent =
+            getConsoleAgents()->multi_display;
+
+    int api_level = avdInfo_getApiLevel(avd);
+    char* api_arch = avdInfo_getTargetAbi(avd);
+    bool isGoogle = avdInfo_isGoogleApis(avd);
+
+    if (avdInfo_sysImgGuestRenderingBlacklisted(avd) &&
+        (isGuestRendererChoice(opts->gpu) ||
+         isGuestRendererChoice(hw->hw_gpu_mode))) {
+        dwarning(
+                "Your AVD has been configured with an in-guest renderer, "
+                "but the system image does not support guest rendering."
+                "Falling back to 'swiftshader_indirect' mode.");
+        if (opts->gpu) {
+            str_reset(&opts->gpu, DEFAULT_SOFTWARE_GPU_MODE);
+        } else {
+            str_reset(&hw->hw_gpu_mode, DEFAULT_SOFTWARE_GPU_MODE);
+        }
+    }
+
+    // Map the generic "software" setting to our default software renderer
+    if (!strcmp(hw->hw_gpu_mode, "software")) {
+        str_reset(&hw->hw_gpu_mode, DEFAULT_SOFTWARE_GPU_MODE);
+    }
+
+    bool hostGpuVulkanBlacklisted = true;
+
+    if (!androidEmuglConfigInit(
+                &config, opts->avd, api_arch, api_level, isGoogle, opts->gpu,
+                &hw->hw_gpu_mode, 0,
+                getConsoleAgents()->settings->host_emulator_is_headless(),
+                uiPreferredBackend, &hostGpuVulkanBlacklisted,
+                opts->use_host_vulkan)) {
+        derror("%s", config.status);
+        config_out->openglAlive = 0;
+
+        crashhandler_append_message_format("androidEmuglConfigInit failed.\n");
+
+        lastRendererConfig = *config_out;
+        AFREE(api_arch);
+
+        return false;
+    }
+
+    // Also write the selected renderer.
+    config_out->selectedRenderer = emuglConfig_get_current_renderer();
+
+    // Determine whether to enable Vulkan (if in android qemu mode)
+
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
+        // Always enable GLDirectMem for API >= 29
+        bool shouldEnableGLDirectMem = api_level >= 29;
+#if defined(__aarch64__) && defined(__APPLE__)
+        // b/273985153
+        shouldEnableGLDirectMem = false;
+#endif
+        bool shouldEnableVulkan = true;
+
+        crashhandler_append_message_format(
+                "Deciding if GLDirectMem/Vulkan should be enabled. "
+                "Selected renderer: %d "
+                "API level: %d host GPU blacklisted? %d\n",
+                config_out->selectedRenderer, api_level,
+                hostGpuVulkanBlacklisted);
+        switch (config_out->selectedRenderer) {
+            // Host gpu: enable as long as not on blacklist
+            // and api >= 29
+            case SELECTED_RENDERER_HOST:
+                shouldEnableVulkan =
+                        (api_level >= 29) && !hostGpuVulkanBlacklisted;
+                if (shouldEnableVulkan) {
+                    crashhandler_append_message_format(
+                            "Host GPU selected, enabling Vulkan.\n");
+                } else {
+                    crashhandler_append_message_format(
+                            "Host GPU selected, not enabling Vulkan because "
+                            "either API level is < 29 or host GPU driver is "
+                            "blacklisted.\n");
+                }
+                break;
+            // Swiftshader: always enable if api level >= 29
+            case SELECTED_RENDERER_SWIFTSHADER_INDIRECT:
+                shouldEnableVulkan = api_level >= 29;
+                if (shouldEnableVulkan) {
+                    crashhandler_append_message_format(
+                            "Swiftshader selected, enabling Vulkan.\n");
+                } else {
+                    crashhandler_append_message_format(
+                            "Swiftshader selected, not enabling Vulkan because "
+                            "API level is < 29.\n");
+                }
+                break;
+            // Other renderers (such as angle, mesa):
+            default:
+                shouldEnableVulkan = false;
+                crashhandler_append_message_format(
+                        "Some other renderer selected, not enabling Vulkan.\n");
+        }
+
+        if (shouldEnableGLDirectMem) {
+            crashhandler_append_message_format("Enabling GLDirectMem");
+            // Do not enable if we did not enable it on the API 29 image itself.
+            feature_set_if_not_overridden_or_guest_disabled(
+                    kFeature_GLDirectMem, true);
+        }
+
+        if (shouldEnableVulkan) {
+            crashhandler_append_message_format("Enabling Vulkan");
+            feature_set_if_not_overridden(kFeature_Vulkan, true);
+        } else {
+            crashhandler_append_message_format(
+                    "Not enabling Vulkan here "
+                    "(feature flag may be turned on manually)");
+        }
+    }
+
+    AFREE(api_arch);
+
+    // If the user is using -gpu off (not -gpu guest),
+    // or if the API level is lower than 14 (Ice Cream Sandwich)
+    // force 16-bit color depth.
+
+    if (api_level < 14 || (opts->gpu && !strcmp(opts->gpu, "off"))) {
+        hw->hw_lcd_depth = 16;
+    }
+
+    hw->hw_gpu_enabled = config.enabled;
+
+    /* Update hw_gpu_mode with the canonical renderer name determined by
+     * emuglConfig_init (host/guest/off/swiftshader etc)
+     */
+    str_reset(&hw->hw_gpu_mode, config.backend);
+    D("%s", config.status);
+
+    const char* gpu_mode = opts->gpu ? opts->gpu : hw->hw_gpu_mode;
+
+#ifdef _WIN32
+    // BUG: https://code.google.com/p/android/issues/detail?id=199427
+    // Booting will be severely slowed down, if not disabled outright, when
+    // 1. On Windows
+    // 2. Using an AVD resolution of >= 1080p (can vary across host setups)
+    // 3. -gpu mesa
+    // What happens is that Mesa will hog the CPU, while disallowing
+    // critical boot services from making progress, causing
+    // the services to give up and put the emulator in a reboot loop
+    // until it either fails to boot altogether or gets lucky and
+    // successfully boots.
+    // This workaround disables the boot animation under the above conditions,
+    // which frees up the CPU enough for the device to boot.
+    if (gpu_mode && (!strcmp(gpu_mode, "mesa"))) {
+        opts->no_boot_anim = 1;
+        D("Starting AVD without boot animation.\n");
+    }
+#endif
+
+    emuglConfig_setupEnv(&config);
+
+    // Now start the renderer, if applicable, and determine various things such
+    // as max supported GLES version and the correct props to write.
+    config_out->glesMode = kAndroidGlesEmulationHost;
+    config_out->openglAlive = 1;
+    int gles_major_version = 2;
+    int gles_minor_version = 0;
+    if (strcmp(gpu_mode, "guest") == 0 || strcmp(gpu_mode, "off") == 0 ||
+        !hw->hw_gpu_enabled) {
+        android_gl_object_counter_get();
+
+        if (avdInfo_isGoogleApis(avd) && avdInfo_getApiLevel(avd) >= 19) {
+            config_out->glesMode = kAndroidGlesEmulationGuest;
+        } else {
+            config_out->glesMode = kAndroidGlesEmulationOff;
+        }
+    } else {
+        int gles_init_res = android_initOpenglesEmulation();
+        int renderer_startup_res = android_startOpenglesRenderer(
+                hw->hw_lcd_width, hw->hw_lcd_height,
+                avdInfo_getAvdFlavor(avd) == AVD_PHONE,
+                avdInfo_getApiLevel(avd), vm_operations, window_agent,
+                multi_display_agent, &gles_major_version, &gles_minor_version);
+        if (gles_init_res || renderer_startup_res) {
+            config_out->openglAlive = 0;
+            if (gles_init_res) {
+                crashhandler_append_message_format(
+                        "android_initOpenglesEmulation failed. "
+                        "Error: %d\n",
+                        gles_init_res);
+            }
+            if (renderer_startup_res) {
+                crashhandler_append_message_format(
+                        "android_startOpenglesRenderer failed. "
+                        "Error: %d\n",
+                        renderer_startup_res);
+            }
+        } else {
+            VERBOSE_INFO(init, "Setting vsync to %d hz", hw->hw_lcd_vsync);
+            android_setVsyncHz(hw->hw_lcd_vsync);
+        }
+    }
+
+    // We need to know boot property
+    // for opengles version in advance.
+    const bool guest_es3_is_ok =
+            feature_is_enabled(kFeature_GLESDynamicVersion);
+    if (guest_es3_is_ok) {
+        config_out->bootPropOpenglesVersion =
+                gles_major_version << 16 | gles_minor_version;
+    } else {
+        config_out->bootPropOpenglesVersion = (2 << 16) | 0;
+    }
+
+    // Now estimate the GL framebuffer size.
+    // Use the conservative value for bytes per pixel (RGBA8)
+    uint64_t pixelSizeBytes = 4;
+
+    config_out->glFramebufferSizeBytes =
+            hw->hw_lcd_width * hw->hw_lcd_height * pixelSizeBytes;
+
+    lastRendererConfig = *config_out;
+    return true;
+}
+
+RendererConfig getLastRendererConfig(void) {
+    return lastRendererConfig;
+}
+
+void stopRenderer(void) {
+    android_stopOpenglesRenderer(true);
 }

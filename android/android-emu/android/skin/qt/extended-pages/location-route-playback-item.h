@@ -14,6 +14,7 @@
 #include "android/skin/qt/common-controls/cc-list-item.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/stylesheet.h"
+#include <QListWidget>
 
 class RoutePlaybackTitleItem : public CCListItem {
     Q_OBJECT

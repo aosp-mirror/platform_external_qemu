@@ -35,6 +35,8 @@ class QTextStream;
 
 namespace Ui {
 
+Q_LOGGING_CATEGORY(emu, "android.emu")
+
 const char TABLE_BOTTOM_COLOR_VAR[] = "TABLE_BOTTOM_COLOR";
 const char THEME_PATH_VAR[] = "PATH";
 const char THEME_TEXT_COLOR[] = "TEXT_COLOR";
