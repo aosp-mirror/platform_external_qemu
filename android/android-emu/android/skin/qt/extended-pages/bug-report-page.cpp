@@ -13,6 +13,7 @@
 
 #include <QtConcurrent/qtconcurrentrun.h>              // for run
 #include <QtCore/qglobal.h>                            // for Q_NULLPTR
+#include <QVBoxLayout>
 #include <time.h>                                      // for localtime, str...
 #include <QCheckBox>                                   // for QCheckBox
 #include <QDesktopServices>                            // for QDesktopServices
@@ -52,6 +53,7 @@
 #include "android/utils/path.h"                        // for path_copy_file
 #include "studio_stats.pb.h"                           // for EmulatorUiEvent
 #include "ui_bug-report-page.h"                        // for BugreportPage
+#include "android/skin/qt/utils/common.h"
 
 class QShowEvent;
 
@@ -190,7 +192,8 @@ void BugreportPage::showEvent(QShowEvent* event) {
     // Refresh contents for screenshot, logcat and adb bugreport
     // every time the page is shown unless its underlying command is still
     // ongoing.
-    if (!mTask.inFlight())  mTask.start();
+    if (!mTask.inFlight())
+        mTask.start();
 }
 
 void BugreportPage::refreshContents() {
@@ -249,7 +252,7 @@ void BugreportPage::showSpinningWheelAnimation(bool enabled) {
 }
 
 void BugreportPage::on_bug_bugReportCheckBox_clicked() {
-    if(mUi->bug_bugReportCheckBox->isChecked()) {
+    if (mUi->bug_bugReportCheckBox->isChecked()) {
         if (mAdbBugreport && mAdbBugreport->inFlight()) {
             showSpinningWheelAnimation(true);
             enableInput(false);
@@ -272,8 +275,8 @@ void BugreportPage::on_bug_saveButton_clicked() {
 
     enableInput(false);
 #if QT_VERSION >= 0x060000
-    QFuture<bool> future = QtConcurrent::run(
-            &BugreportPage::saveBugReportTo, this, savingPath);
+    QFuture<bool> future = QtConcurrent::run(&BugreportPage::saveBugReportTo,
+                                             this, savingPath);
 #else
     QFuture<bool> future = QtConcurrent::run(
             this, &BugreportPage::saveBugReportTo, savingPath);
@@ -377,7 +380,8 @@ void BugreportPage::loadAdbBugreport() {
         return;
 
     // No-op if no adb interface
-    if (!mAdb) return;
+    if (!mAdb)
+        return;
 
     mSavingStates.adbBugreportSucceed = false;
     enableInput(false);
@@ -419,8 +423,7 @@ void BugreportPage::loadAdbBugreport() {
                     success = saveToFile(filePath, s.c_str(), s.length());
                 }
 
-
-                EmulatorQtWindow::getInstance()->runOnUiThread([this, success, filePath] {
+                runOnEmuUiThread([this, success, filePath] {
                     enableInput(true);
                     showSpinningWheelAnimation(false);
                     if (System::get()->pathIsFile(
@@ -433,8 +436,8 @@ void BugreportPage::loadAdbBugreport() {
                         mSavingStates.adbBugreportSucceed = true;
                         mSavingStates.adbBugreportFilePath = filePath;
                     } else {
-                        // TODO(wdu) Better error handling for failed adb bugreport
-                        // generation
+                        // TODO(wdu) Better error handling for failed adb
+                        // bugreport generation
                         showErrorDialog(
                                 tr("Bug report interrupted by snapshot load? "
                                    "There was an error while generating "
@@ -452,7 +455,8 @@ void BugreportPage::loadAdbLogcat() {
         return;
     }
 
-    if (!mAdb) return;
+    if (!mAdb)
+        return;
     // After apiLevel 19, buffer "all" become available
     int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
     mAdbLogcat = mAdb->runAdbCommand(
@@ -464,15 +468,15 @@ void BugreportPage::loadAdbLogcat() {
             [this](const OptionalAdbCommandResult& result) {
                 mAdbLogcat.reset();
                 if (!result || result->exit_code || !result->output) {
-                    EmulatorQtWindow::getInstance()->runOnUiThread([this] {
-                        mUi->bug_bugReportTextEdit->setPlainText(
-                                tr("There was an error while loading adb logcat"));
+                    runOnEmuUiThread([this] {
+                        mUi->bug_bugReportTextEdit->setPlainText(tr(
+                                "There was an error while loading adb logcat"));
                     });
                 } else {
                     std::string s(
                             std::istreambuf_iterator<char>(*result->output),
                             {});
-                    EmulatorQtWindow::getInstance()->runOnUiThread([this, s] {
+                    runOnEmuUiThread([this, s] {
                         mUi->bug_bugReportTextEdit->setPlainText(
                                 QString::fromStdString(s));
                     });

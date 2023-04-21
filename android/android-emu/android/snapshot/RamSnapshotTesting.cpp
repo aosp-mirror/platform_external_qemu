@@ -22,15 +22,6 @@
 using android::base::c_str;
 using android::base::StdioStream;
 
-#ifndef userSettingIsDontSaveSnapshot
-
-// Needed because Quickboot statically depends on Qt and there is a link
-// failure if the function is not defined.
-bool userSettingIsDontSaveSnapshot() {
-    return false;
-}
-
-#endif
 
 namespace android {
 namespace snapshot {

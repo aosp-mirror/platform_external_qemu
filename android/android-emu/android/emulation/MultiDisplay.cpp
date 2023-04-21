@@ -78,29 +78,45 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
                                   bool add) {
     int ret = 0;
     SkinRotation rotation = SKIN_ROTATION_0;
+
+    printf("%s:%d\n", __func__, __LINE__);
     LOG(DEBUG) << "setMultiDisplay id " << id << " " << x << " " << y << " "
                  << w << " " << h << " " << dpi << " " << flag << " "
                  << (add ? "add" : "del");
+
+    printf("%s:%d\n", __func__, __LINE__);
     if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
         return -1;
     }
+
+    printf("%s:%d\n", __func__, __LINE__);
     if (android_foldable_any_folded_area_configured()) {
         return -1;
     }
+
+    printf("%s:%d\n", __func__, __LINE__);
     if (resizableEnabled()) {
         return -1;
     }
+
+    printf("%s:%d\n", __func__, __LINE__);
     if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV ||
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
         LOG(ERROR) << "Multidisplay does not support TV or WEAR";
         return -1;
     }
+
+    printf("%s:%d\n", __func__, __LINE__);
     if (mGuestMode) {
         return -1;
     }
+
+    printf("%s:%d\n", __func__, __LINE__);
     if (add && !multiDisplayParamValidate(id, w, h, dpi, flag)) {
         return -1;
     }
+
+    printf("%s:%d\n", __func__, __LINE__);
     if (flag == 0 &&
         avdInfo_getAvdFlavor(
             getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
@@ -108,15 +124,13 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         LOG(DEBUG) << "Setting flags " << flag << " for display id " << id;
     }
 
-    // fetch rotation from EmulatorWindow
-    // TODO: link to libui source code???
-    EmulatorWindow* window = emulator_window_get();
-    if (window) {
-        SkinLayout* layout = emulator_window_get_layout(window);
-        if (layout) {
-            rotation = layout->orientation;
-        }
+
+    SkinLayout* layout = (SkinLayout*) getConsoleAgents()->emu->getLayout();
+    if (layout) {
+        rotation = layout->orientation;
     }
+
+    printf("%s:%d\n", __func__, __LINE__);
     if (rotation != SKIN_ROTATION_0) {
         mWindowAgent->showMessage(
                 "Please apply multiple displays without rotation",
@@ -124,6 +138,7 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         return -1;
     }
 
+    printf("%s:%d\n", __func__, __LINE__);
     if(hotPlugDisplayEnabled()) {
         if (add) {
             mVmAgent->setDisplay(id, w, h, dpi);
@@ -174,6 +189,8 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
             pipe->send(std::move(data));
         }
     }
+
+    printf("%s:%d\n", __func__, __LINE__);
     return 0;
 }
 

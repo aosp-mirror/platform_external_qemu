@@ -28,7 +28,6 @@
 #include "android/emulation/control/libui_agent.h"          // for QAndroidL...
 #include "android/emulation/control/location_agent.h"       // for QAndroidL...
 #include "android/emulation/control/net_agent.h"            // for QAndroidN...
-#include "android/emulation/control/rootcanal_hci_agent.h"  // for QAndroidH...
 #include "android/emulation/control/sensors_agent.h"        // for QAndroidS...
 #include "android/emulation/control/telephony_agent.h"      // for QAndroidT...
 #include "android/emulation/control/user_event_agent.h"     // for QAndroidU...
@@ -91,13 +90,9 @@ extern "C" const QGrpcAgent* const gQGrpcAgent;
 // android-qemu2-glue/qemu-multi-display-agent-impl.cpp
 extern "C" const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
 
-extern "C" const QAndroidEmulatorWindowAgent* const
-        gQAndroidEmulatorWindowAgent;
-
 extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
 
 extern "C" const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
-extern "C" const QAndroidLibuiAgent* const gQAndroidLibuiAgent;
 
 // Defined in android-qemu2-glue/qemu-hw-control-agent-impl.cpp
 extern "C" const QAndroidHwControlAgent* const gQAndroidHwControlAgent;
@@ -106,12 +101,50 @@ extern "C" const QAndroidHwControlAgent* const gQAndroidHwControlAgent;
 extern "C" const QAndroidGlobalVarsAgent* const gQAndroidGlobalVarsAgent;
 
 
-#define ANDROID_DEFINE_CONSOLE_GETTER_IMPL(typ, name) \
+#define ANDROID_DEFINE_CONSOLE_GETTER_IMPL(typ) \
     const typ* const android_get_##typ() const override { return g##typ; };
+
+const QAndroidEmulatorWindowAgent* const getEmulatorWindowAgent();
+
+const QAndroidLibuiAgent* const getQAndroidLibuiAgent();
+
+#define ANDROID_AGENTS_LIST(X)   \
+    X(QAndroidAutomationAgent)   \
+    X(QAndroidBatteryAgent)      \
+    X(QAndroidClipboardAgent)    \
+    X(QAndroidCellularAgent)     \
+    X(QAndroidDisplayAgent)      \
+    X(QAndroidFingerAgent)       \
+    X(QAndroidHttpProxyAgent)    \
+    X(QAndroidLocationAgent)     \
+    X(QAndroidMultiDisplayAgent) \
+    X(QAndroidNetAgent)          \
+    X(QAndroidRecordScreenAgent) \
+    X(QAndroidSensorsAgent)      \
+    X(QAndroidTelephonyAgent)    \
+    X(QAndroidUserEventAgent)    \
+    X(QAndroidVirtualSceneAgent) \
+    X(QAndroidVmOperations)      \
+    X(QCarDataAgent)             \
+    X(QGrpcAgent)                \
+    X(QAndroidHwControlAgent)    \
+    X(QAndroidGlobalVarsAgent)
 
 class QemuAndroidConsoleAgentFactory
     : public android::emulation::AndroidConsoleFactory {
-    ANDROID_CONSOLE_AGENTS_LIST(ANDROID_DEFINE_CONSOLE_GETTER_IMPL)
+    ANDROID_AGENTS_LIST(ANDROID_DEFINE_CONSOLE_GETTER_IMPL)
+
+    // These are exported from shared memory modules, and hence cannot be
+    // directly refering to constants..
+    const QAndroidEmulatorWindowAgent* const
+    android_get_QAndroidEmulatorWindowAgent() const override {
+        return getEmulatorWindowAgent();
+    }
+
+    const QAndroidLibuiAgent* const android_get_QAndroidLibuiAgent()
+            const override {
+        return getQAndroidLibuiAgent();
+    }
 };
 
 using android::emulation::AndroidLoggingConsoleFactory;

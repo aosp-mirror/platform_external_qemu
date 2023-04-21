@@ -24,9 +24,9 @@
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/files/ScopedFd.h"
 #include "aemu/base/misc/FileUtils.h"
-#include "offworld.pb.h"
+#include "android/console.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
-
+#include "offworld.pb.h"
 namespace android {
 namespace videoplayback {
 
@@ -34,7 +34,7 @@ using ::android::base::Looper;
 using ::android::base::ThreadLooper;
 using videoinjection::VideoInjectionController;
 
-class VideoplaybackNotifier : public android::videoplayer::VideoPlayerNotifier {
+class VideoplaybackNotifier : public VideoPlayerNotifier {
 public:
     VideoplaybackNotifier();
     virtual ~VideoplaybackNotifier() override;
@@ -148,7 +148,7 @@ int64_t RenderMultiplexer::render() {
     if (maybe_next_request_context) {
         if (mOngoingAsyncId) {
             videoinjection::VideoInjectionController::trySendAsyncResponse(
-                mOngoingAsyncId.value(), base::Ok(), true, "");
+                    mOngoingAsyncId.value(), base::Ok(), true, "");
             mOngoingAsyncId.clear();
         }
 
@@ -170,28 +170,31 @@ int64_t RenderMultiplexer::render() {
                 switchRenderer(mVideoRenderer.get());
                 if (maybe_next_request->play().has_offset_in_seconds() &&
                     mPlaysData) {
-                  LOG(ERROR) << "Seeking is not implemented for data playback.";
-                  return -1;
+                    LOG(ERROR)
+                            << "Seeking is not implemented for data playback.";
+                    return -1;
                 }
 
                 if (maybe_next_request->play().looping() && mPlaysData) {
-                  LOG(ERROR) << "Looping is not implemented for data playback.";
-                  return -1;
+                    LOG(ERROR)
+                            << "Looping is not implemented for data playback.";
+                    return -1;
                 }
 
                 if (maybe_next_request->play().has_offset_in_seconds() &&
                     maybe_next_request->play().offset_in_seconds() < 0) {
-                    // TODO: send error response through VideoInjectionController
+                    // TODO: send error response through
+                    // VideoInjectionController
                     return -1;
                 }
 
                 videoplayer::PlayConfig playConfig(
-                    maybe_next_request->play().offset_in_seconds(),
-                    maybe_next_request->play().looping());
+                        maybe_next_request->play().offset_in_seconds(),
+                        maybe_next_request->play().looping());
                 mPlayer->start(playConfig);
                 // Successfully started playing the video.
                 videoinjection::VideoInjectionController::trySendAsyncResponse(
-                    async_id, base::Ok(), false, "");
+                        async_id, base::Ok(), false, "");
                 break;
             }
             case ::offworld::VideoInjectionRequest::kStop:
@@ -200,15 +203,15 @@ int64_t RenderMultiplexer::render() {
                     mPlayer->stop();
                 }
                 videoinjection::VideoInjectionController::trySendAsyncResponse(
-                            async_id, base::Ok(), true, "");
+                        async_id, base::Ok(), true, "");
                 break;
             case ::offworld::VideoInjectionRequest::kPause:
                 if (!videoIsLoaded(async_id)) {
                     return -1;
                 }
                 if (mPlaysData) {
-                  LOG(ERROR) << "Pause not implemented for data playback.";
-                  return -1;
+                    LOG(ERROR) << "Pause not implemented for data playback.";
+                    return -1;
                 }
                 mOngoingAsyncId = async_id;
                 switchRenderer(mVideoRenderer.get());
@@ -218,10 +221,12 @@ int64_t RenderMultiplexer::render() {
                 } else {
                     // pauseAt request
                     if (maybe_next_request->pause().offset_in_seconds() < 0) {
-                        // TODO: send error response through VideoInjectionController
+                        // TODO: send error response through
+                        // VideoInjectionController
                         return -1;
                     }
-                    mPlayer->pauseAt(maybe_next_request->pause().offset_in_seconds());
+                    mPlayer->pauseAt(
+                            maybe_next_request->pause().offset_in_seconds());
                 }
                 videoinjection::VideoInjectionController::trySendAsyncResponse(
                         async_id, base::Ok(), false, "");
@@ -261,7 +266,7 @@ void RenderMultiplexer::loadVideo(const std::string& video_data,
     FILE* videofile = fopen(path, "wb");
     android::base::ScopedFd fd(fileno(videofile));
 
-    //If there is any Error in Loading.
+    // If there is any Error in Loading.
     if (!writeStringToFile(fd.get(), video_data)) {
         LOG(ERROR) << "Failed to write video to tempfile.";
         videoinjection::VideoInjectionController::trySendAsyncResponse(
@@ -270,12 +275,11 @@ void RenderMultiplexer::loadVideo(const std::string& video_data,
                 true, "Failed to load the video.");
         return;
     }
-    mPlayer = videoplayer::VideoPlayer::create(
+    mPlayer = android::videoplayer::VideoPlayer::createVideoPlayer(
             path, mVideoRenderer->renderTarget(),
-            std::unique_ptr<videoplayer::VideoPlayerNotifier>(
-                    new VideoplaybackNotifier()));
+            std::make_unique<videoplayback::VideoplaybackNotifier>());
 
-    //File Loaded, sends async response indicating execution completed.
+    // File Loaded, sends async response indicating execution completed.
     videoinjection::VideoInjectionController::trySendAsyncResponse(
             async_id, base::Ok(), true, "");
 }
@@ -326,13 +330,10 @@ void RenderMultiplexer::switchRenderer(
 bool RenderMultiplexer::videoIsLoaded(uint32_t async_id) {
     if (mPlayer == nullptr) {
         LOG(ERROR) << "No video loaded.";
-        videoinjection::VideoInjectionController::
-                trySendAsyncResponse(
-                        async_id,
-                        base::Err(videoinjection::
-                                          VideoInjectionError::
-                                                  FileIsNotLoaded),
-                        true, "Video is not loaded");
+        videoinjection::VideoInjectionController::trySendAsyncResponse(
+                async_id,
+                base::Err(videoinjection::VideoInjectionError::FileIsNotLoaded),
+                true, "Video is not loaded");
         return false;
     }
     return true;

@@ -246,7 +246,7 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
 
     list(
       APPEND
-      QT5_SHARED_DEPENDENCIES
+      QT5_WEBENGINE_SHARED_DEPENDENCIES
       ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess
       ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/translations/qtwebengine_locales
       ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/resources/icudtl.dat
@@ -469,7 +469,7 @@ elseif(LINUX)
          -lQt5WebEngineWidgetsAndroidEmu -lQt5WebSocketsAndroidEmu)
     list(
       APPEND
-      QT5_SHARED_DEPENDENCIES
+      QT5_WEBENGINE_SHARED_DEPENDENCIES
       ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess
       ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/translations/qtwebengine_locales
       ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/resources/icudtl.dat
@@ -550,6 +550,7 @@ set(PACKAGE_EXPORT
     QT_RCC_EXECUTABLE
     QT_VERSION_MAJOR
     QT5_SHARED_DEPENDENCIES
+    QT5_WEBENGINE_SHARED_DEPENDENCIES
     QT5_SHARED_PROPERTIES
     QT_VERSION_MINOR)
 

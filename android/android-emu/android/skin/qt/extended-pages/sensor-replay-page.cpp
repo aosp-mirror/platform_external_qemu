@@ -14,21 +14,25 @@
 #include <qmessagebox.h>  // for QMessageBox::C...f
 #include <QFileDialog>    // for QFileDialog
 #include <QMenu>
+#include <QSettings>
 #include <ctime>
 
 // TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this undef
 #undef ERROR_INVALID_OPERATION
 #include "VehicleHalProto.pb.h"
-#include "aemu/base/Log.h"  // for DCHECK
+#include "aemu/base/Log.h"           // for DCHECK
 #include "aemu/base/StringFormat.h"  // for StringFormat
+#include "android/console.h"
 #include "android/emulation/control/car_data_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/sensors_agent.h"
+#include "host-common/hw-config.h"
+#include "android/avd/util.h"
 #include "android/hw-sensors.h"  // for ANDROID_SENSOR_ACCEL...
 #include "android/skin/qt/extended-pages/car-data-emulation/car-property-utils.h"
-#include "android/skin/qt/extended-pages/common.h"   // for setButtonEnabled
-#include "android/skin/qt/extended-pages/location-page.h"
+#include "android/skin/qt/extended-pages/common.h"  // for setButtonEnabled
 #include "android/skin/qt/extended-pages/sensor-replay-item.h"
+#include "android/skin/qt/qt-settings.h"
 #include "android/utils/debug.h"
 #include "sensor_session.pb.h"
 #include "ui_sensor-replay-page.h"  // for CarSensorReplayPage
@@ -65,6 +69,33 @@ static constexpr int ANDROID_SENSOR_TYPE_PRESSURE = 6;
 const QCarDataAgent* SensorReplayPage::sCarDataAgent = nullptr;
 const QAndroidLocationAgent* SensorReplayPage::sLocationAgent = nullptr;
 const QAndroidSensorsAgent* SensorReplayPage::sSensorAgent = nullptr;
+
+static void writeDeviceLocationToSettings(double lat,
+                                          double lon,
+                                          double alt,
+                                          double velocity,
+                                          double heading) {
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_LATITUDE, lat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_LONGITUDE, lon);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_ALTITUDE, alt);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_VELOCITY, velocity);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_HEADING, heading);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::LOCATION_RECENT_LATITUDE, lat);
+        settings.setValue(Ui::Settings::LOCATION_RECENT_LONGITUDE, lon);
+        settings.setValue(Ui::Settings::LOCATION_RECENT_ALTITUDE, alt);
+        settings.setValue(Ui::Settings::LOCATION_RECENT_VELOCITY, velocity);
+        settings.setValue(Ui::Settings::LOCATION_RECENT_HEADING, heading);
+    }
+}
 
 SensorReplayPage::SensorReplayPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::SensorReplayPage) {
@@ -122,7 +153,7 @@ bool SensorReplayPage::eventFilter(QObject* object, QEvent* event) {
 void SensorReplayPage::adjustPlaybackSlider() {
     if (mUi->sensor_savedSensorRecordList->count() == 0) {
         QMessageBox::warning(this, tr("Warning"),
-                            tr("Please import a sensor file first"),
+                             tr("Please import a sensor file first"),
                              QMessageBox::Cancel);
         mUi->sensor_playbackSlider->setValue(0);
         return;
@@ -181,87 +212,94 @@ void SensorReplayPage::on_sensor_loadSensorButton_clicked() {
 
 void SensorReplayPage::registerSensorSessionPlaybackCallback(
         SensorSessionPlayback* sensorSessionPlayback) {
-    google::protobuf::Map<std::string, emulator::SensorSession::SessionMetadata::Sensor>
-        subscribedSensors = sensorSessionPlayback->metadata().subscribed_sensors();
+    google::protobuf::Map<std::string,
+                          emulator::SensorSession::SessionMetadata::Sensor>
+            subscribedSensors =
+                    sensorSessionPlayback->metadata().subscribed_sensors();
 
-    sensorSessionPlayback->registerCallback(
-            [this, subscribedSensors](emulator::SensorSession::SensorRecord record) {
+    sensorSessionPlayback->registerCallback([this, subscribedSensors](
+                                                    emulator::SensorSession::
+                                                            SensorRecord
+                                                                    record) {
+        if (sCarDataAgent != nullptr && record.car_property_values_size() > 0) {
+            std::map<int32_t,
+                     emulator::SensorSession::SensorRecord::CarPropertyValue>
+                    vhal_property_map(record.car_property_values().begin(),
+                                      record.car_property_values().end());
+            std::map<int32_t, emulator::SensorSession::SensorRecord::
+                                      CarPropertyValue>::iterator it;
 
-                if (sCarDataAgent != nullptr && record.car_property_values_size() > 0) {
-                    std::map<int32_t, emulator::SensorSession::SensorRecord::
-                                              CarPropertyValue>
-                            vhal_property_map(
-                                    record.car_property_values().begin(),
-                                    record.car_property_values().end());
-                    std::map<int32_t, emulator::SensorSession::SensorRecord::
-                                              CarPropertyValue>::iterator it;
+            for (it = vhal_property_map.begin(); it != vhal_property_map.end();
+                 it++) {
+                EmulatorMessage emulatorMsg =
+                        makePropMsg((int)it->first, it->second);
+                sendCarEmulatorMessageLogged(emulatorMsg,
+                                             "Replay record is sent");
+            }
+        }
 
-                    for (it = vhal_property_map.begin();
-                         it != vhal_property_map.end(); it++) {
-                        EmulatorMessage emulatorMsg =
-                                makePropMsg((int)it->first, it->second);
-                        sendCarEmulatorMessageLogged(emulatorMsg,
-                                                     "Replay record is sent");
-                    }
+        if (sLocationAgent != nullptr && record.locations_size() > 0) {
+            const auto& locations = record.locations();
+            auto locationIterator = std::find_if(
+                    locations.begin(), locations.end(),
+                    [](const SensorSession::SensorRecord::PositionProto&
+                               location) {
+                        return location.has_provider() &&
+                               (location.provider() ==
+                                SensorSession::SensorRecord::PositionProto::
+                                        GPS);
+                    });
+
+            if (locationIterator != locations.end()) {
+                double latitude =
+                        ((int)locationIterator->point().lat_e7()) / E7;
+                double longitude =
+                        ((int)locationIterator->point().lng_e7()) / E7;
+                double altitude = locationIterator->altitude_m();
+                double velocity =
+                        (double)locationIterator->speed_mps() * MPS_TO_KNOTS;
+                double heading =
+                        (double)locationIterator->bearing_deg_full_accuracy();
+
+                timeval timeVal = {};
+                gettimeofday(&timeVal, nullptr);
+                sLocationAgent->gpsSendLoc(latitude, longitude, altitude,
+                                           velocity, heading, 4, &timeVal);
+
+                // To sync with LocationPage, update location to settings
+                writeDeviceLocationToSettings(latitude, longitude, altitude,
+                                              velocity, heading);
+            }
+        }
+
+        if (sSensorAgent != nullptr && record.sensor_events_size() > 0) {
+            std::map<std::string,
+                     emulator::SensorSession::SensorRecord::SensorEvent>
+                    sensor_map(record.sensor_events().begin(),
+                               record.sensor_events().end());
+            std::map<std::string, emulator::SensorSession::SensorRecord::
+                                          SensorEvent>::iterator it;
+
+            for (it = sensor_map.begin(); it != sensor_map.end(); it++) {
+                std::string sensorKey = it->first;
+                emulator::SensorSession::SessionMetadata::Sensor
+                        subscribedSensor = subscribedSensors.at(it->first);
+                int sensorId =
+                        convertSensorTypeToSensorId(subscribedSensor.type());
+                if (sensorId >= 0 && !subscribedSensor.wake_up_sensor()) {
+                    size_t sensorVectorSize;
+                    sSensorAgent->getSensorSize(sensorId, &sensorVectorSize);
+                    DCHECK(sensorVectorSize == it->second.values_size());
+                    sSensorAgent->setSensorOverride(sensorId,
+                                                    it->second.values().data(),
+                                                    it->second.values_size());
                 }
-
-                if (sLocationAgent != nullptr && record.locations_size() > 0) {
-                    const auto& locations = record.locations();
-                    auto locationIterator =
-                        std::find_if(locations.begin(), locations.end(),
-                                     [](const SensorSession::SensorRecord::PositionProto& location)
-                                     {return location.has_provider() && (location.provider() ==
-                                       SensorSession::SensorRecord::PositionProto::GPS);});
-
-                    if (locationIterator != locations.end()) {
-                        double latitude =
-                                ((int)locationIterator->point().lat_e7()) / E7;
-                        double longitude =
-                                ((int)locationIterator->point().lng_e7()) / E7;
-                        double altitude = locationIterator->altitude_m();
-                        double velocity = (double)locationIterator->speed_mps() *
-                                          MPS_TO_KNOTS;
-                        double heading = (double)locationIterator->bearing_deg_full_accuracy();
-
-                        timeval timeVal = {};
-                        gettimeofday(&timeVal, nullptr);
-                        sLocationAgent->gpsSendLoc(latitude, longitude, altitude,
-                                                   velocity, heading, 4, &timeVal);
-
-                        // To sync with LocationPage, update location to settings
-                        LocationPage::writeDeviceLocationToSettings(
-                                latitude, longitude, altitude, velocity, heading);
-                    }
-                }
-
-                if (sSensorAgent != nullptr && record.sensor_events_size() > 0) {
-                    std::map<std::string, emulator::SensorSession::SensorRecord::
-                                              SensorEvent>
-                            sensor_map(
-                                    record.sensor_events().begin(),
-                                    record.sensor_events().end());
-                    std::map<std::string, emulator::SensorSession::SensorRecord::
-                                              SensorEvent>::iterator it;
-
-                    for (it = sensor_map.begin();
-                         it != sensor_map.end(); it++) {
-                        std::string sensorKey = it->first;
-                        emulator::SensorSession::SessionMetadata::Sensor subscribedSensor =
-                            subscribedSensors.at(it->first);
-                        int sensorId = convertSensorTypeToSensorId(subscribedSensor.type());
-                        if(sensorId >= 0 && !subscribedSensor.wake_up_sensor()) {
-                            size_t sensorVectorSize;
-                            sSensorAgent->getSensorSize(sensorId, &sensorVectorSize);
-                            DCHECK(sensorVectorSize == it->second.values_size());
-                            sSensorAgent->setSensorOverride(sensorId, it->second.values().data(),
-                                                            it->second.values_size());
-                        }
-                    }
-                }
-                // update slider and time ticker,
-                // reset playbacksession if it's the end
-                this->updateTimeLine(record.timestamp_ns());
-            });
+            }
+        }
+        // update slider and time ticker,
+        // reset playbacksession if it's the end
+        this->updateTimeLine(record.timestamp_ns());
+    });
 }
 
 void SensorReplayPage::updatePanel(SensorSessionPlayback* sensorSessionPlayback,
@@ -379,8 +417,8 @@ void SensorReplayPage::addTimeLineTableRow(QTableWidget* table,
     QTableWidgetItem* timeLineItem = new QTableWidgetItem(timeline);
     QTableWidgetItem* eventCountItem = new QTableWidgetItem(eventCount);
 
-    timeLineItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
-    eventCountItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+    timeLineItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    eventCountItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
     table->setItem(tableRow, 0, timeLineItem);
     table->setItem(tableRow, 1, eventCountItem);
@@ -538,15 +576,15 @@ EmulatorMessage SensorReplayPage::makePropMsg(
 }
 
 int SensorReplayPage::convertSensorTypeToSensorId(int sensorType) {
-    if(sensorType == ANDROID_SENSOR_TYPE_GYROSCOPE) {
+    if (sensorType == ANDROID_SENSOR_TYPE_GYROSCOPE) {
         return ANDROID_SENSOR_GYROSCOPE;
-    } else if(sensorType == ANDROID_SENSOR_TYPE_GYROSCOPE_UNCALIBRATED) {
+    } else if (sensorType == ANDROID_SENSOR_TYPE_GYROSCOPE_UNCALIBRATED) {
         return ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED;
-    } else if(sensorType == ANDROID_SENSOR_TYPE_ACCELEROMETER) {
+    } else if (sensorType == ANDROID_SENSOR_TYPE_ACCELEROMETER) {
         return ANDROID_SENSOR_ACCELERATION;
-    } else if(sensorType == ANDROID_SENSOR_TYPE_MAGNETIC_FIELD) {
+    } else if (sensorType == ANDROID_SENSOR_TYPE_MAGNETIC_FIELD) {
         return ANDROID_SENSOR_MAGNETIC_FIELD;
-    } else if(sensorType == ANDROID_SENSOR_TYPE_PRESSURE) {
+    } else if (sensorType == ANDROID_SENSOR_TYPE_PRESSURE) {
         return ANDROID_SENSOR_PRESSURE;
     } else {
         return -1;

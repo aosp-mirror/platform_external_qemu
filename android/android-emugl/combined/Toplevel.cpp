@@ -474,7 +474,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 *h = 1600;
             return true;
         },
-        .changeResizableDisplay = [](int presetSize) { return false; },
+        .changeResizableDisplay =
+                [](int presetSize) { return false; },
+        .userSettingIsDontSaveSnapshot = [](){ return false; },
+        .setUserSettingIsDontSaveSnapshot = [](bool val) {  }
 };
 
 class ToplevelConsoleFactory
