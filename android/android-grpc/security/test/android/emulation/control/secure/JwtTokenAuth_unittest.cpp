@@ -52,6 +52,8 @@ using json = nlohmann::json;
 namespace tink = crypto::tink;
 using crypto::tink::TinkConfig;
 
+const std::string kGRADLE = "gradle-utp-emulator-control";
+
 class AllYellow : public AllowList {
 public:
     bool requiresAuthentication(std::string_view path) override {
@@ -189,7 +191,6 @@ TEST_F(JwkTokenAuthTest, discovery_file_contains_our_key) {
     EXPECT_EQ(json::parse(ours.ValueOrDie()), json::parse(loaded.ValueOrDie()));
 }
 
-
 TEST_F(JwkTokenAuthTest, accept_yellow) {
     // AUD on the yellow list, you're ok
     auto private_handle = writeEs512("valid.jwk");
@@ -261,7 +262,7 @@ TEST_F(JwkTokenAuthTest, reject_not_ready_yet) {
     EXPECT_FALSE(jwt.isTokenValid("a", "Bearer " + *token).ok());
 }
 
-TEST_F(JwkTokenAuthTest, message) {
+TEST_F(JwkTokenAuthTest, fail_with_generic_message) {
     absl::Time now = absl::Now();
     auto private_handle = writeEs512("valid.jwk");
     auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
@@ -274,8 +275,69 @@ TEST_F(JwkTokenAuthTest, message) {
 
     JwtTokenAuth jwt(mTempDir->path(), "", &mAllYellow);
     auto token = (*sign)->SignAndEncode(*raw_jwt);
-    auto message = std::string(jwt.isTokenValid("d/e/f",  "Bearer " + *token).message());
-    EXPECT_EQ(message, "Access denied, does you aud claim include: d/e/f ?");
+    auto message = std::string(
+            jwt.isTokenValid("d/e/f", "Bearer " + *token).message());
+    EXPECT_EQ(message,
+              "The JWT does not include d/e/f in the aud claim. Make sure to "
+              "add it to the array.");
+}
+
+TEST_F(JwkTokenAuthTest, fail_with_gradle_message) {
+    absl::Time now = absl::Now();
+    auto private_handle = writeEs512("valid.jwk");
+    auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
+    auto raw_jwt = tink::RawJwtBuilder()
+                           .SetIssuer(kGRADLE)
+                           .SetAudiences({"a", "b", "c"})
+                           .SetExpiration(now + absl::Seconds(300))
+                           .SetIssuedAt(now)
+                           .Build();
+
+    JwtTokenAuth jwt(mTempDir->path(), "", &mAllYellow);
+    auto token = (*sign)->SignAndEncode(*raw_jwt);
+    auto message = std::string(
+            jwt.isTokenValid("d/e/f", "Bearer " + *token).message());
+    EXPECT_EQ(message,
+              "Make sure to add allowedEndpoints.add(\"d/e/f\") to the "
+              "emulatorControl block in your gradle build file.");
+}
+
+TEST_F(JwkTokenAuthTest, fail_with_generic_message_no_aud) {
+    absl::Time now = absl::Now();
+    auto private_handle = writeEs512("valid.jwk");
+    auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
+    auto raw_jwt = tink::RawJwtBuilder()
+                           .SetIssuer("JwkTokenAuthTest")
+                           .SetExpiration(now + absl::Seconds(300))
+                           .SetIssuedAt(now)
+                           .Build();
+
+    JwtTokenAuth jwt(mTempDir->path(), "", &mAllYellow);
+    auto token = (*sign)->SignAndEncode(*raw_jwt);
+    auto message = std::string(
+            jwt.isTokenValid("d/e/f", "Bearer " + *token).message());
+    EXPECT_EQ(message,
+              "The JWT does not have an aud claim. Make sure to include: "
+              "\"aud\" : [\"d/e/f\"] in your JWT.");
+}
+
+TEST_F(JwkTokenAuthTest, fail_with_gradle_message_no_aud) {
+    absl::Time now = absl::Now();
+    auto private_handle = writeEs512("valid.jwk");
+    auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
+    auto raw_jwt = tink::RawJwtBuilder()
+                           .SetIssuer(kGRADLE)
+                           .SetExpiration(now + absl::Seconds(300))
+                           .SetIssuedAt(now)
+                           .Build();
+
+    JwtTokenAuth jwt(mTempDir->path(), "", &mAllYellow);
+    auto token = (*sign)->SignAndEncode(*raw_jwt);
+    auto message = std::string(
+            jwt.isTokenValid("d/e/f", "Bearer " + *token).message());
+    EXPECT_EQ(message,
+              "Make sure to add allowedEndpoints.add(\"d/e/f\") to the "
+              "emulatorControl block in your gradle build file.");
 }
 
 TEST_F(JwkTokenAuthTest, any_message) {
@@ -293,14 +355,17 @@ TEST_F(JwkTokenAuthTest, any_message) {
     auto token = (*sign)->SignAndEncode(*raw_jwt);
 
     auto anyauth = std::vector<std::unique_ptr<BasicTokenAuth>>();
-    anyauth.emplace_back(std::make_unique<StaticTokenAuth>("foo", "android-studio", &mAllYellow));
-    anyauth.emplace_back(std::make_unique<JwtTokenAuth>(mTempDir->path(), "", &mAllYellow));
+    anyauth.emplace_back(std::make_unique<StaticTokenAuth>(
+            "foo", "android-studio", &mAllYellow));
+    anyauth.emplace_back(
+            std::make_unique<JwtTokenAuth>(mTempDir->path(), "", &mAllYellow));
 
     AnyTokenAuth any(std::move(anyauth), &mAllYellow);
-    auto message = std::string(any.isTokenValid("d/e/f",  "Bearer " + *token).message());
+    auto message = std::string(
+            any.isTokenValid("d/e/f", "Bearer " + *token).message());
     EXPECT_EQ(message,
-              "Validation failed: [\"Incorrect token\", \"Access denied, does "
-              "you aud claim include: d/e/f ?\", ]");
+              "The JWT does not include d/e/f in the aud claim. Make sure to "
+              "add it to the array.");
 }
 
 TEST_F(JwkTokenAuthTest, deleted_jwks_is_rejected) {
