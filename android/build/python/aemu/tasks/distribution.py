@@ -74,6 +74,7 @@ class DistributionTask(BuildTask):
         configuration: str,
     ):
         super().__init__()
+        dist = Toolchain(aosp, target).distribution()
         valid_targets = [
             "linux",
             "linux_aarch64",
@@ -81,7 +82,7 @@ class DistributionTask(BuildTask):
             "darwin",
             "windows",
         ]
-        if not target in valid_targets:
+        if not dist in valid_targets:
             raise InvalidTargetException(
                 f"Unknown distribution target! {target} not in {valid_targets}."
             )
@@ -91,7 +92,7 @@ class DistributionTask(BuildTask):
         self.src_dir = Path(aosp) / "external" / "qemu"
         self.data = {
             "aosp": str(aosp),
-            "target": target,
+            "target": dist,
             "sdk_build_number": sdk_build_number,
             "config": configuration,
         }

@@ -149,7 +149,6 @@ set(android-emu-common
     android/sensor_mock/SensorMockUtils.cpp
     android/sensor_replay/sensor_session_playback.cpp
     android/shaper.c
-    android/skin/charmap.c
     android/snaphost-android.c
     android/snapshot.c
     android/snapshot/common.cpp
@@ -393,10 +392,6 @@ target_compile_definitions(android-emu PRIVATE "-D_LIBCPP_VERSION=__GLIBCPP__")
 
 if(WEBRTC)
   target_compile_definitions(android-emu PUBLIC -DANDROID_WEBRTC)
-endif()
-
-if(BLUETOOTH_EMULATION)
-  target_compile_definitions(android-emu PUBLIC -DANDROID_BLUETOOTH)
 endif()
 
 if(OPTION_GFXSTREAM_BACKEND)

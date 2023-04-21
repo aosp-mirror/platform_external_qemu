@@ -220,11 +220,13 @@ USB_KEYMAP_DECLARATION {
   USB_KEYMAP(0x070048, 0x0077, 0x007f, 0x0045, 0xffff, "Pause", PAUSE),
   // USB#0x070049 Insert, labeled "Help/Insert" on Mac -- see note M1 at top.
   USB_KEYMAP(0x070049, 0x006e, 0x0076, 0xe052, 0x0072, "Insert", INSERT),
-  USB_KEYMAP(0x07004a, 0x0066, 0x006e, 0xe047, 0x0073, "Home", HOME),
+  // Generally the scan code for "Home" is 0x0066, but old Android guests see it as "GoHome". Use 0x01c4 instead
+  USB_KEYMAP(0x07004a, 0x01c4, 0x006e, 0xe047, 0x0073, "Home", HOME),
   USB_KEYMAP(0x07004b, 0x0068, 0x0070, 0xe049, 0x0074, "PageUp", PAGE_UP),
   // Delete (Forward Delete) named DEL because DELETE conflicts with <windows.h>
   USB_KEYMAP(0x07004c, 0x006f, 0x0077, 0xe053, 0x0075, "Delete", DEL),
-  USB_KEYMAP(0x07004d, 0x006b, 0x0073, 0xe04f, 0x0077, "End", END),
+  // Generally the scan code for "End" is 0x006b, but old Android guests see it as "EndCall". Use 0x01c5 instead
+  USB_KEYMAP(0x07004d, 0x01c5, 0x0073, 0xe04f, 0x0077, "End", END),
   USB_KEYMAP(0x07004e, 0x006d, 0x0075, 0xe051, 0x0079, "PageDown", PAGE_DOWN),
   USB_KEYMAP(0x07004f, 0x006a, 0x0072, 0xe04d, 0x007c, "ArrowRight", ARROW_RIGHT),
 
@@ -590,7 +592,7 @@ USB_KEYMAP_DECLARATION {
   // Note, non printable should be added to android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp as well
   // otherwise the Dom translation will fail.
   USB_KEYMAP(0x0c0224, 0x009e, 0x0000, 0x0000, 0xffff, "GoBack", GO_BACK),  // AC Back in usb
-  USB_KEYMAP(0x07004a, 0x0066, 0x006e, 0xe047, 0x0073, "GoHome", GO_HOME), // Same as HOME
+  USB_KEYMAP(0x0c01aa, 0x0066, 0x006e, 0xe047, 0x0073, "GoHome", GO_HOME), // Same as AL Desktop ("Home" in android)
   USB_KEYMAP(0x0c01a2, 0x0244, 0x024c, 0x0000, 0xffff, "AppSwitch", APP_SWITCH), // Same as AL Select Task/Application ("Overview" in android)
 
   // TODO(jansene): Kernel excavation needed for others.

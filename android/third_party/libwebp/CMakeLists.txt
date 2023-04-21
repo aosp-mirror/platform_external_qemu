@@ -100,7 +100,9 @@ target_include_directories(emulator-libwebp PUBLIC include)
 target_include_directories(emulator-libwebp PRIVATE src)
 target_include_directories(emulator-libwebp PRIVATE .)
 # Forget about warnings for this code.
-target_compile_options(emulator-libwebp PRIVATE -w)
+target_compile_options(emulator-libwebp PRIVATE -w
+                                                -Wno-implicit-function-declaration
+                                                -Wno-int-conversion)
 
 if(WINDOWS_MSVC_X86_64)
   # clang whining about not enabling sse41 support

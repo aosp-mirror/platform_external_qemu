@@ -18,6 +18,7 @@
 #include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
+#include <QApplication>
 
 #if QT_VERSION >= 0x060000
 #include <QWindow>

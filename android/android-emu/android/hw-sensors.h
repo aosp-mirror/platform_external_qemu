@@ -372,6 +372,7 @@ struct FoldableState {
     enum FoldablePostures currentPosture;
 };
 
+int android_foldable_get_posture();
 int android_foldable_get_state(struct FoldableState* state);
 bool android_foldable_hinge_configured();
 bool android_foldable_hinge_enabled();

@@ -29,28 +29,30 @@
 #include "android/avd/info.h"                            // for avdInfo_getA...
 #include "aemu/base/ProcessControl.h"                 // for restartEmulator
 
-#include "aemu/base/files/MemStream.h"                // for MemStream
-#include "aemu/base/files/PathUtils.h"                // for PathUtils
-#include "aemu/base/misc/StringUtils.h"               // for Split
+#include "aemu/base/files/MemStream.h"                   // for MemStream
+#include "aemu/base/files/PathUtils.h"                   // for PathUtils
+#include "aemu/base/misc/StringUtils.h"                  // for Split
+#include "aemu/base/threads/Thread.h"                    // for Thread
 #include "android/base/system/System.h"                  // for System
-#include "aemu/base/threads/Thread.h"                 // for Thread
 #include "android/console.h"                             // for getConsoleAg...
 #include "android/emulation/AndroidMessagePipe.h"        // for AndroidMessa...
-#include "host-common/AndroidPipe.h"               // for AndroidPipe:...
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/emulation/control/globals_agent.h"     // for LanguageSett...
-#include "host-common/vm_operations.h"     // for QAndroidVmOp...
-#include "host-common/window_agent.h"      // for QAndroidEmul...
 #include "android/emulation/resizable_display_config.h"  // for getResizable...
-#include "host-common/FeatureControl.h"       // for isEnabled
-#include "host-common/Features.h"             // for DeviceSkinOv...
 #include "android/hw-sensors.h"                          // for FoldableHing...
 #include "android/metrics/MetricsReporter.h"             // for MetricsReporter
-#include "android/utils/aconfig-file.h"                  // for aconfig_find
-#include "android/utils/debug.h"                         // for dinfo
-#include "android/utils/path.h"                          // for path_exists
-#include "android/utils/system.h"                        // for get_uptime_ms
-#include "studio_stats.pb.h"                             // for EmulatorBoot...
+#include "android/physics/FoldableModel.h"
+#include "android/user-config.h"
+#include "android/utils/aconfig-file.h"  // for aconfig_find
+#include "android/utils/debug.h"         // for dinfo
+#include "android/utils/path.h"          // for path_exists
+#include "android/utils/system.h"        // for get_uptime_ms
+#include "host-common/AndroidPipe.h"     // for AndroidPipe:...
+#include "host-common/FeatureControl.h"  // for isEnabled
+#include "host-common/Features.h"        // for DeviceSkinOv...
+#include "host-common/vm_operations.h"   // for QAndroidVmOp...
+#include "host-common/window_agent.h"    // for QAndroidEmul...
+#include "studio_stats.pb.h"             // for EmulatorBoot...
 
 // This indicates the number of heartbeats from guest
 static std::atomic<int> guest_heart_beat_count {};
@@ -442,9 +444,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
                 FoldableState state;
                 if (!android_foldable_get_state(&state)) {
-                    adbInterface->enqueueCommand({ "shell", "settings", "put",
-                                                   "global", "device_posture",
-                                                   std::to_string((int)state.currentPosture).c_str() });
+                    android::physics::FoldableModel::sendPostureToSystem(state.currentPosture);
                     // Android accepts only one hinge area currently
                     char hingeArea[128];
                     snprintf(hingeArea, 128, "%s-[%d,%d,%d,%d]",
@@ -463,6 +463,50 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 android_foldable_rollable_configured() ||
                 android_foldable_folded_area_configured(0)) {
                 getConsoleAgents()->emu->updateFoldablePostureIndicator(true);
+                auto userConfig = getConsoleAgents()->settings->userConfig();
+                int posture = auserConfig_getPosture(userConfig);
+                if (posture > POSTURE_UNKNOWN && posture < POSTURE_MAX) {
+                    adbInterface->enqueueCommand(
+                            {"emu", "posture", std::to_string(posture)});
+                }
+            } else {
+                auto isTablet = [&]() -> bool {
+                    if (resizableEnabled()) {
+                        return false;
+                    }
+                    auto myhw = getConsoleAgents()->settings->hw();
+                    if (!myhw) {
+                        return false;
+                    }
+                    auto isTabletDeviceName =
+                            [&](std::string_view view) -> bool {
+                        if (view == std::string_view("Nexus 10"))
+                            return true;
+                        if (std::string::npos != view.find("Tablet"))
+                            return true;
+                        return false;
+                    };
+                    if (myhw->hw_initialOrientation &&
+                        std::string_view(myhw->hw_initialOrientation) ==
+                                std::string_view("landscape") &&
+                        myhw->hw_device_name &&
+                        isTabletDeviceName(myhw->hw_device_name)) {
+                        if (myhw->hw_lcd_width > myhw->hw_lcd_height) {
+                            dprint("Width %d > Height %d, assume this is a "
+                                   "tablet",
+                                   static_cast<int>(myhw->hw_lcd_width),
+                                   static_cast<int>(myhw->hw_lcd_height));
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+                if (isTablet()) {
+                    dprint("Ignore orientation request for tablet");
+                    adbInterface->enqueueCommand(
+                            {"shell", "cmd", "window",
+                             "set-ignore-orientation-request", "true"});
+                }
             }
 
             if (getConsoleAgents()->settings->language()->changing_language_country_locale) {

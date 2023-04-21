@@ -14,16 +14,28 @@
 
 #include "host-common/window_agent.h"
 
-#include "host-common/hw-config.h"
 #include "aemu/base/threads/Thread.h"
 #include "android/console.h"
-#include "host-common/MultiDisplay.h"
 #include "android/emulator-window.h"
 #include "android/hw-sensors.h"
+#include "android/recording/video/player/VideoPlayer.h"
+#include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/winsys.h"
 #include "android/user-config.h"
 #include "android/utils/debug.h"
+#include "host-common/MultiDisplay.h"
+#include "host-common/hw-config.h"
+
+#include <QSemaphore>
+/* set >0 for very verbose debugging */
+#define DEBUG 1
+#ifndef DEBUG
+#define DD(...) (void)0
+#else
+#define DD(fmt, ...) \
+    printf("window-agent-impl: %s:%d| " fmt, __func__, __LINE__, ##__VA_ARGS__)
+#endif
 
 // Set this to true if you wish to enable debugging of the window position.
 constexpr bool DEBUG_GRPC_ENDPOINT = false;
@@ -40,6 +52,9 @@ static_assert(WINDOW_MESSAGE_ERROR == int(Ui::OverlayMessageType::Error),
 static_assert(WINDOW_MESSAGE_OK == int(Ui::OverlayMessageType::Ok),
               "Bad message type enum value (Ok)");
 
+static bool gUserSettingIsDontSaveSnapshot = true;
+static QSemaphore gWindowPosSemaphore;
+
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
         .rotate90Clockwise =
@@ -54,16 +69,15 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return false;
                 },
         .rotate = emulator_window_rotate,
-        .getRotation =
-                []() -> int {
-                    EmulatorWindow* window = emulator_window_get();
-                    if (!window)
-                        return SKIN_ROTATION_0;
-                    SkinLayout* layout = emulator_window_get_layout(window);
-                    if (!layout)
-                        return SKIN_ROTATION_0;
-                    return layout->orientation;
-                },
+        .getRotation = []() -> int {
+            EmulatorWindow* window = emulator_window_get();
+            if (!window)
+                return SKIN_ROTATION_0;
+            SkinLayout* layout = emulator_window_get_layout(window);
+            if (!layout)
+                return SKIN_ROTATION_0;
+            return layout->orientation;
+        },
         .showMessage =
                 [](const char* message, WindowMessageType type, int timeoutMs) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
@@ -221,10 +235,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
             }
         },
         .moveExtendedWindow =
-                [](uint32_t x,
-                   uint32_t y,
-                   int horizontal,
-                   int vertical) {
+                [](uint32_t x, uint32_t y, int horizontal, int vertical) {
                     int unused;
                     auto userConfig =
                             getConsoleAgents()->settings->userConfig();
@@ -232,9 +243,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                                            &unused, &unused,
                                                            &unused) == 0 ||
                         DEBUG_GRPC_ENDPOINT) {
-                        auserConfig_setExtendedControlsPos(userConfig, x, y,
-                                                           horizontal,
-                                                           vertical);
+                        auserConfig_setExtendedControlsPos(
+                                userConfig, x, y, horizontal, vertical);
                     }
                 },
         .startExtendedWindow =
@@ -248,7 +258,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                 !win->toolWindow()->isExtendedWindowVisible();
                         win->runOnUiThread(
                                 [win, pane]() {
-                                    win->toolWindow()->showExtendedWindow((ExtendedWindowPane)pane);
+                                    win->toolWindow()->showExtendedWindow(
+                                            (ExtendedWindowPane)pane);
                                 },
                                 &completed);
                         completed.acquire();
@@ -288,7 +299,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     skin_winsys_touch_qt_extended_virtual_sensors();
                     if (auto* win = EmulatorQtWindow::getInstance()) {
                         win->runOnUiThread([win, type]() {
-                            win->toolWindow()->setUiTheme((SettingsTheme)type, false);
+                            win->toolWindow()->setUiTheme((SettingsTheme)type,
+                                                          false);
                         });
                         return true;
                     } else {
@@ -315,8 +327,28 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                     return false;
                 },
+        .getLayout = []() {
+            SkinLayout* layout = nullptr;
+            auto win = emulator_window_get();
+            if (win) {
+                layout = emulator_window_get_layout(win);
+            }
+            return (void*) layout;
+        },
+        .getWindowPosition =
+                [](int* x, int* y) {
+                        skin_winsys_get_window_pos(x, y);
+                },
         .hasWindow = [] { return true; },
+        .userSettingIsDontSaveSnapshot =
+                []() { return gUserSettingIsDontSaveSnapshot; },
+        .setUserSettingIsDontSaveSnapshot =
+                [](bool val) { gUserSettingIsDontSaveSnapshot = val; },
 };
 
-extern "C" const QAndroidEmulatorWindowAgent* const
-        gQAndroidEmulatorWindowAgent = &sQAndroidEmulatorWindowAgent;
+const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
+        &sQAndroidEmulatorWindowAgent;
+
+const QAndroidEmulatorWindowAgent* const getEmulatorWindowAgent() {
+    return gQAndroidEmulatorWindowAgent;
+}

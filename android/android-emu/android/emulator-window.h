@@ -53,6 +53,9 @@ typedef struct EmulatorWindow {
 EmulatorWindow*
 emulator_window_get(void);
 
+
+void android_emulator_set_base_port(int);
+
 /* Initializes EmulatorWindow structure instance. */
 int emulator_window_init(EmulatorWindow* emulator,
                          const AConfig* aconfig,

@@ -62,12 +62,12 @@ public:
 
     bool getFoldedArea(int* x, int* y, int* w, int* h);
 
+    static void sendPostureToSystem(enum FoldablePostures p);
 private:
     void initPostures();
     void initFoldableHinge();
     void initFoldableRoll();
     enum FoldablePostures calculatePosture();
-    void sendPostureToSystem(enum FoldablePostures p);
     void updateFoldablePostureIndicator();
 
     FoldableState mState;

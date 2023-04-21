@@ -16,6 +16,10 @@
 
 #pragma once
 
+#include <stddef.h>
+#include <stdint.h>
+#include <iosfwd>
+#include <memory>
 #include <string>
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
@@ -28,7 +32,14 @@
 #include "android/camera/camera-videoplayback-default-renderer.h"
 #include "android/camera/camera-videoplayback-video-renderer.h"
 #include "android/camera/camera-virtualscene-utils.h"
+#include "android/recording/video/player/VideoPlayer.h"
+#include "android/utils/compiler.h"
 #include "android/utils/tempfile.h"
+#include "android/videoinjection/VideoInjectionController.h"
+#include "android/videoplayback/VideoplaybackRenderTarget.h"
+#include "offworld.pb.h"
+
+struct GLESv2Dispatch;
 
 using namespace android::base;
 typedef ::offworld::DatasetInfo DatasetInfo;
@@ -59,17 +70,18 @@ private:
     void switchRenderer(virtualscene::CameraRenderer* renderer);
     bool videoIsLoaded(uint32_t async_id);
 
-     std::unique_ptr<DefaultFrameRenderer> mDefaultRenderer;
-     std::unique_ptr<VideoplaybackVideoRenderer> mVideoRenderer;
-     std::unique_ptr<videoplayer::VideoPlayer> mPlayer;
-     virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
-     bool mInitialized = false;
-     size_t mCounter = 0;
-     // async_id for ongoing non-sequential execution, including but not limited to play, pause.
-     Optional<uint32_t> mOngoingAsyncId;
-     bool mPlaysData = false;
+    std::unique_ptr<DefaultFrameRenderer> mDefaultRenderer;
+    std::unique_ptr<VideoplaybackVideoRenderer> mVideoRenderer;
+    std::unique_ptr<videoplayer::VideoPlayer> mPlayer;
+    virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
+    bool mInitialized = false;
+    size_t mCounter = 0;
+    // async_id for ongoing non-sequential execution, including but not limited
+    // to play, pause.
+    Optional<uint32_t> mOngoingAsyncId;
+    bool mPlaysData = false;
 
-     TempFile* mTempfile = nullptr;
+    TempFile* mTempfile = nullptr;
 };
 
 }  // namespace videoplayback
