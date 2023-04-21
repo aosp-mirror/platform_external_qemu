@@ -2792,7 +2792,7 @@ static int do_avd_path(ControlClient client, char* args) {
     }
 
     auto canonicalPath = android::base::PathUtils::canonicalPath(contentPath);
-    control_write(client, "'%s'\r\n", canonicalPath.c_str());
+    control_write(client, "%s\r\n", canonicalPath.c_str());
 
     return 0;
 }
