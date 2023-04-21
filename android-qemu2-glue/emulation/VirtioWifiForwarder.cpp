@@ -27,6 +27,7 @@ extern "C" {
 #include "android/network/WifiForwardServer.h"
 #include "android/network/mac80211_hwsim.h"
 
+using android::base::AutoLock;
 using android::base::IOVector;
 using android::base::Looper;
 using android::base::RecurrentTask;
@@ -214,7 +215,7 @@ void VirtioWifiForwarder::ackLocalFrame(const Ieee80211Frame* frame) {
     txInfo.putAttribute(HWSIM_ATTR_SIGNAL, &signal, sizeof(signal));
     txInfo.putAttribute(HWSIM_ATTR_TX_INFO, info.mTxRates.data(),
                         Ieee80211Frame::TX_MAX_RATES * sizeof(hwsim_tx_rate));
-
+    AutoLock lock(mLock);
     mOnFrameAvailableCallback(txInfo.data(), txInfo.dataLen());
 }
 
@@ -329,22 +330,22 @@ void VirtioWifiForwarder::onFrameSentCallback(NetClientState* nc,
 }
 
 ssize_t VirtioWifiForwarder::sendToGuest(
-        VirtioWifiForwarder* forwarder,
         std::unique_ptr<Ieee80211Frame> frame) {
     GenericNetlinkMessage msg(GenericNetlinkMessage::NL_AUTO_PORT,
                               GenericNetlinkMessage::NL_AUTO_SEQ,
                               GenericNetlinkMessage::NLMSG_MIN_TYPE, 0, 0,
                               HWSIM_CMD_FRAME, 0);
     const auto& info = frame->info();
-    msg.putAttribute(HWSIM_ATTR_ADDR_RECEIVER,
-                     forwarder->mFrameInfo.mTransmitter.mAddr, ETH_ALEN);
+    msg.putAttribute(HWSIM_ATTR_ADDR_RECEIVER, mFrameInfo.mTransmitter.mAddr,
+                     ETH_ALEN);
     msg.putAttribute(HWSIM_ATTR_FRAME, frame->data(), frame->size());
     uint32_t rateIdx = 1;
     msg.putAttribute(HWSIM_ATTR_RX_RATE, &rateIdx, sizeof(uint32_t));
     uint32_t signal = -50;
     msg.putAttribute(HWSIM_ATTR_SIGNAL, &signal, sizeof(signal));
     msg.putAttribute(HWSIM_ATTR_FREQ, &info.mChannel, sizeof(uint32_t));
-    return forwarder->mOnFrameAvailableCallback(msg.data(), msg.dataLen());
+    AutoLock lock(mLock);
+    return mOnFrameAvailableCallback(msg.data(), msg.dataLen());
 }
 
 ssize_t VirtioWifiForwarder::onRxPacketAvailable(void* opaque,
@@ -368,7 +369,7 @@ ssize_t VirtioWifiForwarder::onRxPacketAvailable(void* opaque,
     }
     auto& info = frame->info();
     info = forwarder->mFrameInfo;
-    return sendToGuest(forwarder, std::move(frame));
+    return forwarder->sendToGuest(std::move(frame));
 }
 
 // QEMU NIC client will receive one ethernet packet at a time.
@@ -402,7 +403,7 @@ void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
             forwarder->mBeaconTask->start();
         }
     } else {
-        sendToGuest(forwarder, std::move(frame));
+        forwarder->sendToGuest(std::move(frame));
     }
 }
 
@@ -412,10 +413,9 @@ void VirtioWifiForwarder::resetBeaconTask() {
             mLooper,
             [this]() {
                 if (mBeaconFrame != nullptr && mBeaconFrame->isBeacon()) {
-                    sendToGuest(this, std::make_unique<Ieee80211Frame>(
-                                              mBeaconFrame->data(),
-                                              mBeaconFrame->size(),
-                                              mBeaconFrame->info()));
+                    sendToGuest(std::make_unique<Ieee80211Frame>(
+                            mBeaconFrame->data(), mBeaconFrame->size(),
+                            mBeaconFrame->info()));
                 }
                 return true;
             },
@@ -459,7 +459,7 @@ size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
                                header->numRates);
                 auto frame = std::make_unique<Ieee80211Frame>(
                         payload, payloadSize, info);
-                if (sendToGuest(this, std::move(frame)) >= payloadSize) {
+                if (sendToGuest(std::move(frame)) >= payloadSize) {
                     offset += header->fullLength;
                 } else {
                     break;

@@ -97,7 +97,7 @@ aosp_winsdk_version () {
 aosp_clang_libcplusplus () {
     local CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
     local CLANG_DIR=$(realpath $CLANG_BINDIR/..)
-    printf "%s" "$CLANG_DIR/lib64/libc++.so"
+    printf "%s" "$CLANG_DIR/lib/libc++.so"
 }
 
 # Returns the directory where we can find the clang compiler.

@@ -19,7 +19,6 @@
 #include <utility>  // for make_pair, pair
 
 #include "android/emulation/control/sensors_agent.h"   // for QAndroidSensor...
-#include "host-common/window_agent.h"    // for WINDOW_MESSAGE...
 #include "android/emulator-window.h"                   // for emulator_windo...
 #include "android/hw-sensors.h"                        // for ANDROID_SENSOR...
 #include "android/skin/qt/emulator-no-qt-no-window.h"  // for EmulatorNoQtNo...
@@ -28,6 +27,9 @@
 #include "glm/detail/func_geometric.hpp"               // for dot, normalize
 #include "glm/detail/type_vec.hpp"                     // for vec3
 #include "glm/detail/type_vec3.hpp"                    // for tvec3
+#include "host-common/window_agent.h"                  // for WINDOW_MESSAGE...
+
+static bool gUserSettingIsDontSaveSnapshot = true;
 
 static SkinRotation getRotation() {
     // Calculate the skin rotation based upon the state of the physical sensors.
@@ -67,16 +69,16 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getRotation = [] { return (int)getRotation(); },
         .showMessage =
                 [](const char* message, WindowMessageType type, int timeoutMs) {
-                        switch(type) {
-                            case WINDOW_MESSAGE_ERROR:
-                                derror("%s", message);
-                                break;
-                            case WINDOW_MESSAGE_WARNING:
-                                dwarning("%s", message);
-                                break;
-                            default:
-                                dinfo("%s", message);
-                        }
+                    switch (type) {
+                        case WINDOW_MESSAGE_ERROR:
+                            derror("%s", message);
+                            break;
+                        case WINDOW_MESSAGE_WARNING:
+                            dwarning("%s", message);
+                            break;
+                        default:
+                            dinfo("%s", message);
+                    }
                 },
         .showMessageWithDismissCallback =
                 [](const char* message,
@@ -87,39 +89,34 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                    int timeoutMs) {
                     // Don't necessarily perform the func since the
                     // user doesn't get a chance to dismiss.
-                     switch(type) {
-                            case WINDOW_MESSAGE_ERROR:
-                                derror("%s", message);
-                                break;
-                            case WINDOW_MESSAGE_WARNING:
-                                dwarning("%s", message);
-                                break;
-                            default:
-                                dinfo("%s", message);
-                        }
-                },
-        .fold =
-                [](bool is_fold) -> bool {
-                    if (is_fold) {
-                        return android_foldable_fold();
-                    } else {
-                        return android_foldable_unfold();
+                    switch (type) {
+                        case WINDOW_MESSAGE_ERROR:
+                            derror("%s", message);
+                            break;
+                        case WINDOW_MESSAGE_WARNING:
+                            dwarning("%s", message);
+                            break;
+                        default:
+                            dinfo("%s", message);
                     }
                 },
-        .isFolded =
-                []() -> bool {
-                    return android_foldable_is_folded();
-                },
-        .getFoldedArea =
-                [](int* x, int* y, int* w, int* h) -> bool {
-                    return android_foldable_get_folded_area(x, y, w, h);
-                },
+        .fold = [](bool is_fold) -> bool {
+            if (is_fold) {
+                return android_foldable_fold();
+            } else {
+                return android_foldable_unfold();
+            }
+        },
+        .isFolded = []() -> bool { return android_foldable_is_folded(); },
+        .getFoldedArea = [](int* x, int* y, int* w, int* h) -> bool {
+            return android_foldable_get_folded_area(x, y, w, h);
+        },
         .updateFoldablePostureIndicator = [](bool) {},
-        .setPosture =
-                [](int posture) -> bool {
-                    return android_foldable_set_posture(posture);
-                },
-        .setUIDisplayRegion = [](int x, int y, int w, int h, bool ignoreOrientation) {},
+        .setPosture = [](int posture) -> bool {
+            return android_foldable_set_posture(posture);
+        },
+        .setUIDisplayRegion =
+                [](int x, int y, int w, int h, bool ignoreOrientation) {},
         .getMultiDisplay = [](uint32_t id,
                               int32_t* x,
                               int32_t* y,
@@ -132,41 +129,59 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .restoreSkin = []() {},
         .updateUIMultiDisplayPage = [](uint32_t id) {},
         .addMultiDisplayWindow =
-                [](uint32_t id, bool add, uint32_t w, uint32_t h) { return true; },
-        .paintMultiDisplayWindow =
-                [](uint32_t id, uint32_t texture) { return true; },
-        .getMonitorRect =
-                [](uint32_t* w, uint32_t* h) -> bool {
-                    if (w)
-                        *w = 2500;
-                    if (h)
-                        *h = 1600;
+                [](uint32_t id, bool add, uint32_t w, uint32_t h) {
                     return true;
                 },
+        .paintMultiDisplayWindow = [](uint32_t id,
+                                      uint32_t texture) { return true; },
+        .getMonitorRect = [](uint32_t* w, uint32_t* h) -> bool {
+            if (w)
+                *w = 2500;
+            if (h)
+                *h = 1600;
+            return true;
+        },
         .startExtendedWindow =
                 [](int pane) {
-                // Not implemented
-                return false;
+                    // Not implemented
+                    return false;
                 },
         .quitExtendedWindow =
                 []() {
-                // Not implemented
-                return false;
+                    // Not implemented
+                    return false;
                 },
-        .setUiTheme = [](int type) {
-                // Not implemented
-                return false;
+        .setUiTheme =
+                [](int type) {
+                    // Not implemented
+                    return false;
                 },
-        .runOnUiThread =
-                [](UiUpdateFunc f, void* data, bool wait) {
-                    f(data);
+        .runOnUiThread = [](UiUpdateFunc f, void* data, bool wait) { f(data); },
+        .isRunningInUiThread = []() { return false; },
+        .changeResizableDisplay = [](int presetSize) { return false; },
+        .getLayout =
+                []() {
+                    SkinLayout* layout = nullptr;
+                    auto win = emulator_window_get();
+                    if (win) {
+                        layout = emulator_window_get_layout(win);
+                    }
+                    return (void*)layout;
                 },
-        .isRunningInUiThread =
-                []() { return false; },
-        .changeResizableDisplay =
-                [](int presetSize) { return false; },
+        .getWindowPosition =
+                [](int* x, int* y) {
+                    *x = 0;
+                    *y = 0;
+                },
         .hasWindow = [] { return false; },
-};
+        .userSettingIsDontSaveSnapshot =
+                []() { return gUserSettingIsDontSaveSnapshot; },
+        .setUserSettingIsDontSaveSnapshot =
+                [](bool val) { gUserSettingIsDontSaveSnapshot = val; }};
 
-extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
-        &sQAndroidEmulatorWindowAgent;
+extern "C" const QAndroidEmulatorWindowAgent* const
+        gQAndroidEmulatorWindowAgent = &sQAndroidEmulatorWindowAgent;
+
+const QAndroidEmulatorWindowAgent* const getEmulatorWindowAgent() {
+    return gQAndroidEmulatorWindowAgent;
+}

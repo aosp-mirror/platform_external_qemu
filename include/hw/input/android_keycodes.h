@@ -28,3 +28,14 @@
 #define ANDROID_KEY_STEM_1 582
 #define ANDROID_KEY_STEM_2 583
 #define ANDROID_KEY_STEM_3 584
+
+// Defines Android specific key codes for moving the text cursor to the head
+// or to the end. In a general Linux system, The keycodes LINUX_KEY_HOME and
+// LINUX_KEY_END are used for this purpose, but the goldfish keymap assigns
+// these keys to the different functionarities (launching the home app, ending
+// the current phone call)
+// 0x1c4 and 0x1c5 were choosen because they are not used in linux_keycodes.h,
+// and 0x1c0, 0x1c1, 0x1c2, 0x1c3 are used for the special keys for text
+// editing.
+#define ANDROID_KEY_MOVE_HOME 0x1c4
+#define ANDROID_KEY_MOVE_END 0x1c5

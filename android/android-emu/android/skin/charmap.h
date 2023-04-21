@@ -9,10 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-
 #pragma once
 
-#include "android/skin/keycode.h"         // Keycodes
 #include "android/skin/keycode-buffer.h"  // for SkinKeycodeBuffer
 #include "android/utils/compiler.h"       // for ANDROID_BEGIN_HEADER, ANDRO...
 

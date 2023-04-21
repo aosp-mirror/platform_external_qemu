@@ -40,12 +40,20 @@ class Toolchain:
         "darwin-aarch64": "toolchain-darwin-aarch64.cmake",
     }
 
+    DISTRIBUTION = {
+        "windows-x86_64": "windows",
+        "linux-x86_64": "linux",
+        "darwin-x86_64": "darwin",
+        "linux-aarch64": "linux_aarch64",
+        "darwin-aarch64": "darwin_aarch64",
+    }
+
     def __init__(self, aosp: Path, target: str):
         self.target = self._infer_target(target)
         self.aosp = Path(aosp)
 
     def _infer_target(self, target):
-        """Infers the full target name given the potential partial target name.
+        """Infers the full target name  given the potential partial target name.
 
         A complete target name looks like: ${OS}_{$AARCH} where
         OS = [windows, linux, darwin] and AARCH = [aarch64, x86_64]
@@ -106,6 +114,9 @@ class Toolchain:
             raise Exception(f"Target {target} is not supported.")
 
         return target
+
+    def distribution(self) -> str:
+        return self.DISTRIBUTION[self.target]
 
     def cmake_toolchain(self) -> str:
         """Returns the path to the cmake toolchain file."""

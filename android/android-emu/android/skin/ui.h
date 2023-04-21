@@ -140,7 +140,7 @@ void skin_ui_reset_title(SkinUI* ui);
 bool skin_ui_is_trackball_active(SkinUI* ui);
 
 // Switches to the next skin layout.
-void skin_ui_select_next_layout();
+void skin_ui_select_next_layout(SkinUI* ui);
 
 // Rotates to the specific orientation.
 bool skin_ui_rotate(SkinUI* ui, SkinRotation rotation);

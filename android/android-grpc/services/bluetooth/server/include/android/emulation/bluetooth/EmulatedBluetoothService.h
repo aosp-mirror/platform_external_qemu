@@ -15,12 +15,6 @@
 #include "emulated_bluetooth.grpc.pb.h"  // for EmulatedBluetoothService
 
 namespace android {
-namespace base {
-class Looper;
-}  // namespace base
-namespace bluetooth {
-class Rootcanal;
-}  // namespace bluetooth
 
 namespace emulation {
 namespace bluetooth {
@@ -29,9 +23,7 @@ using AsyncEmulatedBluetoothService = EmulatedBluetoothService::CallbackService;
 
 // Initializes the EmulatedBluetooth gRPC service endpoint,
 // backed by rootcanal and provided looper.
-EmulatedBluetoothService::Service* getEmulatedBluetoothService(
-        android::bluetooth::Rootcanal* rootcanal,
-        base::Looper* looper);
+EmulatedBluetoothService::Service* getEmulatedBluetoothService();
 
 }  // namespace bluetooth
 }  // namespace emulation

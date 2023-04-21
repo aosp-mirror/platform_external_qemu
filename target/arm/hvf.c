@@ -1443,7 +1443,7 @@ static void hvf_handle_mmio(CPUState* cpu) {
     DPRINTF("%s: done\n", __func__);
 }
 
-static void hvf_handle_guest_abort(CPUState* cpu, uint32_t ec) {
+void hvf_handle_guest_abort(CPUState* cpu, uint32_t ec) {
     DPRINTF("%s: call (not implemented)\n", __func__);
     // TODO: 4K page guest on a 16K page host
     static const uint32_t k_page_shift = 12;
@@ -1488,7 +1488,7 @@ static void hvf_handle_guest_abort(CPUState* cpu, uint32_t ec) {
         DPRINTF("No overlap slot found for this fault, is MMIO\n");
         if (is_iabt) {
             DPRINTF("Prefetch abort on i/o address (not implemented)\n");
-            abort();
+            return;
         }
 
 
@@ -1517,7 +1517,7 @@ static void hvf_handle_guest_debug(CPUState* cpu, uint32_t ec) {
     abort();
 }
 
-static void hvf_handle_exception(CPUState* cpu) {
+void hvf_handle_exception(CPUState* cpu) {
     // Sync up our register values.
     hvf_get_registers(cpu);
 

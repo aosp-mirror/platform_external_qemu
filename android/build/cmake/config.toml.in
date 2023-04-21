@@ -1,35 +1,57 @@
 # This is a cargo configuration that will make sure
 # all the crates are internal only.
 
+[net]
+offline = true
+
 [patch.crates-io]
 aho-corasick = { path = "${AOSP_ROOT}/external/rust/crates/aho-corasick" }
+anyhow = { path = "${AOSP_ROOT}/external/rust/crates/anyhow" }
+argh = { path = "${AOSP_ROOT}/external/rust/crates/argh" }
+argh_derive = { path = "${AOSP_ROOT}/external/rust/crates/argh_derive" }
+argh_shared = { path = "${AOSP_ROOT}/external/rust/crates/argh_shared" }
 atty = { path = "${AOSP_ROOT}/external/rust/crates/atty" }
 bindgen = { path = "${AOSP_ROOT}/external/rust/crates/bindgen" }
 bitflags = { path = "${AOSP_ROOT}/external/rust/crates/bitflags" }
 bytes = { path = "${AOSP_ROOT}/external/rust/crates/bytes" }
 cexpr = { path = "${AOSP_ROOT}/external/rust/crates/cexpr" }
 cfg-if = { path = "${AOSP_ROOT}/external/rust/crates/cfg-if" }
+chrono = { path = "${AOSP_ROOT}/external/rust/crates/chrono" }
 clang-sys = { path = "${AOSP_ROOT}/external/rust/crates/clang-sys" }
 clap = { path = "${AOSP_ROOT}/external/rust/crates/clap" }
 clap_derive = { path = "${AOSP_ROOT}/external/rust/crates/clap_derive" }
 clap_lex = { path = "${AOSP_ROOT}/external/rust/crates/clap_lex" }
 codespan-reporting = { path = "${AOSP_ROOT}/external/rust/crates/codespan-reporting" }
+crossbeam-channel = { path = "${AOSP_ROOT}/external/rust/crates/crossbeam-channel" }
+crossbeam-deque = { path = "${AOSP_ROOT}/external/rust/crates/crossbeam-deque" }
+crossbeam-epoch = { path = "${AOSP_ROOT}/external/rust/crates/crossbeam-epoch" }
+crossbeam-utils = { path = "${AOSP_ROOT}/external/rust/crates/crossbeam-utils" }
 cxx = { path = "${AOSP_ROOT}/external/rust/crates/cxx" }
 either = { path = "${AOSP_ROOT}/external/rust/crates/either" }
 env_logger = { path = "${AOSP_ROOT}/external/rust/crates/env_logger" }
+fastrand = { path = "${AOSP_ROOT}/external/rust/crates/fastrand" }
+futures-core = { path = "${AOSP_ROOT}/external/rust/crates/futures-core" }
+futures-sink = { path = "${AOSP_ROOT}/external/rust/crates/futures-sink" }
 getrandom = { path = "${AOSP_ROOT}/external/rust/crates/getrandom" }
+glam = { path = "${AOSP_ROOT}/external/rust/crates/glam" }
 glob = { path = "${AOSP_ROOT}/external/rust/crates/glob" }
 hashbrown = { path = "${AOSP_ROOT}/external/rust/crates/hashbrown" }
 heck = { path = "${AOSP_ROOT}/external/rust/crates/heck" }
+hex = { path = "${AOSP_ROOT}/external/rust/crates/hex" }
 indexmap = { path = "${AOSP_ROOT}/external/rust/crates/indexmap" }
+instant = { path = "${AOSP_ROOT}/external/rust/crates/instant" }
+itoa = { path = "${AOSP_ROOT}/external/rust/crates/itoa" }
 lazy_static = { path = "${AOSP_ROOT}/external/rust/crates/lazy_static" }
 lazycell = { path = "${AOSP_ROOT}/external/rust/crates/lazycell" }
 libc = { path = "${AOSP_ROOT}/external/rust/crates/libc" }
 libloading = { path = "${AOSP_ROOT}/external/rust/crates/libloading" }
 log = { path = "${AOSP_ROOT}/external/rust/crates/log" }
 memchr = { path = "${AOSP_ROOT}/external/rust/crates/memchr" }
+memoffset = { path = "${AOSP_ROOT}/external/rust/crates/memoffset" }
 minimal-lexical = { path = "${AOSP_ROOT}/external/rust/crates/minimal-lexical" }
+mio = { path = "${AOSP_ROOT}/external/rust/crates/mio" }
 nom = { path = "${AOSP_ROOT}/external/rust/crates/nom" }
+num_cpus = { path = "${AOSP_ROOT}/external/rust/crates/num_cpus" }
 num-bigint = { path = "${AOSP_ROOT}/external/rust/crates/num-bigint" }
 num-derive = { path = "${AOSP_ROOT}/external/rust/crates/num-derive" }
 num-integer = { path = "${AOSP_ROOT}/external/rust/crates/num-integer" }
@@ -38,6 +60,11 @@ once_cell = { path = "${AOSP_ROOT}/external/rust/crates/once_cell" }
 os_str_bytes = { path = "${AOSP_ROOT}/external/rust/crates/os_str_bytes" }
 paste = { path = "${AOSP_ROOT}/external/rust/crates/paste" }
 peeking_take_while = { path = "${AOSP_ROOT}/external/rust/crates/peeking_take_while" }
+pest = { path = "${AOSP_ROOT}/external/rust/crates/pest" }
+pest_derive = { path = "${AOSP_ROOT}/external/rust/crates/pest_derive" }
+pest_generator = { path = "${AOSP_ROOT}/external/rust/crates/pest_generator" }
+pest_meta = { path = "${AOSP_ROOT}/external/rust/crates/pest_meta" }
+pica = { path = "${AOSP_ROOT}/external/rust/crates/pica" }
 pin-project-lite = { path = "${AOSP_ROOT}/external/rust/crates/pin-project-lite" }
 pin-utils = { path = "${AOSP_ROOT}/external/rust/crates/pin-utils" }
 ppv-lite86 = { path = "${AOSP_ROOT}/external/rust/crates/ppv-lite86" }
@@ -45,25 +72,49 @@ proc-macro-error = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro-error"
 proc-macro-error-attr = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro-error-attr" }
 proc-macro2 = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro2" }
 protobuf = { path = "${AOSP_ROOT}/external/rust/crates/protobuf" }
+protobuf-codegen = { path = "${AOSP_ROOT}/external/rust/crates/protobuf-codegen" }
+protobuf-json-mapping = { path = "${AOSP_ROOT}/external/rust/crates/protobuf-json-mapping" }
+protobuf-support = { path = "${AOSP_ROOT}/external/rust/crates/protobuf-support" }
 quote = { path = "${AOSP_ROOT}/external/rust/crates/quote" }
 rand = { path = "${AOSP_ROOT}/external/rust/crates/rand" }
 rand_chacha = { path = "${AOSP_ROOT}/external/rust/crates/rand_chacha" }
 rand_core = { path = "${AOSP_ROOT}/external/rust/crates/rand_core" }
+rayon = { path = "${AOSP_ROOT}/external/rust/crates/rayon" }
+rayon-core = { path = "${AOSP_ROOT}/external/rust/crates/rayon-core" }
 regex = { path = "${AOSP_ROOT}/external/rust/crates/regex" }
 regex-syntax = { path = "${AOSP_ROOT}/external/rust/crates/regex-syntax" }
 rustc-hash = { path = "${AOSP_ROOT}/external/rust/crates/rustc-hash" }
+ryu = { path = "${AOSP_ROOT}/external/rust/crates/ryu" }
 same-file = { path = "${AOSP_ROOT}/external/rust/crates/same-file" }
+scopeguard = { path = "${AOSP_ROOT}/external/rust/crates/scopeguard" }
+serde = { path = "${AOSP_ROOT}/external/rust/crates/serde" }
+serde_derive = { path = "${AOSP_ROOT}/external/rust/crates/serde_derive" }
+serde_json = { path = "${AOSP_ROOT}/external/rust/crates/serde_json" }
 shlex = { path = "${AOSP_ROOT}/external/rust/crates/shlex" }
+socket2 = { path = "${AOSP_ROOT}/external/rust/crates/socket2" }
 syn = { path = "${AOSP_ROOT}/external/rust/crates/syn" }
 termcolor = { path = "${AOSP_ROOT}/external/rust/crates/termcolor" }
 textwrap = { path = "${AOSP_ROOT}/external/rust/crates/textwrap" }
 thiserror = { path = "${AOSP_ROOT}/external/rust/crates/thiserror" }
 thiserror-impl = { path = "${AOSP_ROOT}/external/rust/crates/thiserror-impl" }
 tokio = { path = "${AOSP_ROOT}/external/rust/crates/tokio" }
+tokio-macros = { path = "${AOSP_ROOT}/external/rust/crates/tokio-macros" }
+tokio-stream = { path = "${AOSP_ROOT}/external/rust/crates/tokio-stream" }
+tokio-util = { path = "${AOSP_ROOT}/external/rust/crates/tokio-util" }
+ucd-trie = { path = "${AOSP_ROOT}/external/rust/crates/ucd-trie" }
 unicode-ident = { path = "${AOSP_ROOT}/external/rust/crates/unicode-ident" }
 unicode-width = { path = "${AOSP_ROOT}/external/rust/crates/unicode-width" }
 walkdir = { path = "${AOSP_ROOT}/external/rust/crates/walkdir" }
 which = { path = "${AOSP_ROOT}/external/rust/crates/which" }
+
+# Patch crates-io with dummy crates for dev dependencies
+# that are actually not required for building crates and not
+# added to the vendored crates.
+hermit-abi = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/hermit-abi" }
+redox_syscall = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/redox_syscall" }
+sha2 = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/sha2" }
+tempfile = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/tempfile" }
+windows-sys = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/windows-sys" }
 
 # You will have to process this with the cmake configure_file command
 # and bin place it in the RUST_root
@@ -73,4 +124,3 @@ directory = "${VENDOR_CRATES}"
 [source.crates-io]
 replace-with = "systembt"
 local-registry = "/nonexistent"
-

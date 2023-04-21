@@ -38,5 +38,6 @@ target_include_directories(
 android_target_include_directories(libevent linux PUBLIC ${LIBEVENT_ROOT}/linux)
 android_target_include_directories(libevent darwin PUBLIC ${LIBEVENT_ROOT}/mac)
 target_compile_options(libevent PRIVATE -Wno-implicit-function-declaration
+                                        -Wno-deprecated-non-prototype
                                         -Wno-int-conversion)
 target_compile_definitions(libevent PRIVATE -DHAVE_CONFIG_H=1)

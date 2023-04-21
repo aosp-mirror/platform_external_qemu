@@ -34,7 +34,6 @@ from aemu.tasks.unit_tests import AccelerationCheckTask, CTestTask, CoverageRepo
 from aemu.tasks.emugen_test import EmugenTestTask
 from aemu.tasks.kill_netsimd import KillNetsimdTask
 from aemu.tasks.package_samples import PackageSamplesTask
-from aemu.tasks.fix_cargo import FixCargoTask
 from aemu.util.simple_feature_parser import FeatureParser
 
 
@@ -50,7 +49,6 @@ def get_tasks(args) -> List[BuildTask]:
     run_tests = not Toolchain(args.aosp, args.target).is_crosscompile()
     tasks = [
         KillNetsimdTask(),
-        FixCargoTask(args.aosp).enable(False),
         # A task can be disabled, or explicitly enabled by calling
         # .enable(False) <- Disable the task
         CleanTask(args.out),

@@ -1173,6 +1173,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .hostmemGetInfo = android_emulation_hostmem_get_info,
         .getRunState = qemu_get_runstate,
         .setDisplay = qemu_set_display,
+        .system_shutdown_request = [](QemuShutdownCause c){  qemu_system_shutdown_request((ShutdownCause)c); },
 };
 
 extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =

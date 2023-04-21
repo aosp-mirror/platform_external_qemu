@@ -1182,10 +1182,7 @@ static int startEmulatorWithMinConfig(int argc,
                                getConsoleAgents()->vm);
 
     RendererConfig rendererConfig;
-    configAndStartRenderer(avd, opts, hw, getConsoleAgents()->vm,
-                           getConsoleAgents()->emu,
-                           getConsoleAgents()->multi_display,
-                           uiPreferredGlesBackend, &rendererConfig);
+    configAndStartRenderer(uiPreferredGlesBackend, &rendererConfig);
 
     // Gpu configuration is set, now initialize the multi display, screen
     // recorder and screenshot callback
@@ -1693,7 +1690,8 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Early initializaion of the hostpad loop.
-    if (fc::isEnabled(fc::VirtioWifi)) {
+    if (fc::isEnabled(fc::VirtioWifi) &&
+            !getConsoleAgents()->settings->android_cmdLineOptions()->redirect_to_netsim) {
         auto* hostapd = android::emulation::HostapdController::getInstance();
         if (!hostapd->init(VERBOSE_CHECK(wifi)) || !hostapd->run()) {
             derror("Error: could not initialize hostpad event loop.");
@@ -2764,13 +2762,7 @@ extern "C" int main(int argc, char** argv) {
         dprint("Bluetooth requested by %s",
                feature_is_enabled(kFeature_BluetoothEmulation) ? "user"
                                                                : "guest");
-        args.add("-chardev");
-        if (opts->packet_streamer_endpoint) {
-            args.addFormat("netsim,id=bluetooth,path=foo");
-        } else {
-            dwarning("Using *DEPRECATED* rootcanal bluetooth emulation.");
-            args.addFormat("rootcanal,id=bluetooth");
-        }
+        args.add2("-chardev", "netsim,id=bluetooth");
         args.add2("-device", "virtserialport,chardev=bluetooth,name=bluetooth");
     }
 
@@ -3113,10 +3105,7 @@ extern "C" int main(int argc, char** argv) {
         }
 
         RendererConfig rendererConfig;
-        configAndStartRenderer(avd, opts, hw, getConsoleAgents()->vm,
-                               getConsoleAgents()->emu,
-                               getConsoleAgents()->multi_display,
-                               uiPreferredGlesBackend, &rendererConfig);
+        configAndStartRenderer(uiPreferredGlesBackend, &rendererConfig);
 
         // Gpu configuration is set, now initialize the multi display, screen
         // recorder and screenshot callback

@@ -36,6 +36,7 @@
 #include "android/skin/qt/gl-common.h"          // for createShader, CHECK_G...
 #include "android/skin/qt/logging-category.h"   // for emu
 #include "android/skin/qt/vector-text-font.h"   // for kVectorFontGlyphs
+#include "android/utils/debug.h"
 
 class QMouseEvent;
 class QWheelEvent;
@@ -348,7 +349,7 @@ void main() {
     gl->glGetProgramiv(mProgram, GL_LINK_STATUS, &compile_status);
 
     if (compile_status == GL_FALSE) {
-        qCWarning(emu, "Failed to link program");
+        dwarning("Failed to link program");
         return false;
     }
 

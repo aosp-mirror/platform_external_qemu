@@ -19,6 +19,7 @@
 
 #include <errno.h>
 #include <hardware/gralloc.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <cassert>
 

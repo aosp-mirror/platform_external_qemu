@@ -27,8 +27,7 @@
 #include "android/grpc/utils/EnumTranslate.h"
 #include "common.pb.h"
 #include "hci_packet.pb.h"
-#include "model/hci/h4_parser.h"
-#include "model/hci/hci_protocol.h"
+#include "h4_parser.h"
 #include "packet_streamer.pb.h"
 #include "startup.pb.h"
 

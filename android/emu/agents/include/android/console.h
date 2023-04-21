@@ -77,7 +77,6 @@ typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
     X(QAndroidVmOperations, vm)                 \
     X(QCarDataAgent, car)                       \
     X(QGrpcAgent, grpc)                         \
-    X(QAndroidHciAgent, rootcanal)              \
     X(QAndroidHwControlAgent, hw_control)       \
     X(QAndroidGlobalVarsAgent, settings)
 
