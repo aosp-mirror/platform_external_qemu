@@ -193,6 +193,11 @@ if(FEATURE_NETSIM)
   add_subdirectory(${AOSP_ROOT}/tools/netsim netsim)
   add_subdirectory(mynewt-nimble)
 
+  if(TARGET Rust::Rustc)
+    add_subdirectory(${AOSP_ROOT}/packages/modules/Bluetooth/tools/rootcanal
+                     rootcanal)
+  endif()
+
   if(DARWIN_AARCH64 AND NOT TARGET Rust::Rustc AND OPTION_RUST)
     message(STATUS "Cross compiling netsim to target Rosetta X86_64")
     include(ExternalProject)
