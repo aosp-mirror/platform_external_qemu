@@ -36,7 +36,7 @@ set(libslirp_src
   ${LIB_SLIRP_ROOT}/src/vmstate.c)
 
 # Generate the libslirp-version header.
-configure_file(${LIB_SLIRP_ROOT}/src/libslirp-version.h.in ${LIB_SLIRP_ROOT}/src/libslirp-version.h @SLIRP_VERSION_STRING)
+configure_file(${LIB_SLIRP_ROOT}/src/libslirp-version.h.in ${LIB_SLIRP_ROOT}/src/libslirp-version.h)
 
 android_add_library(
   TARGET libslirp
