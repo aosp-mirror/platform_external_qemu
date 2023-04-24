@@ -84,16 +84,31 @@ function(android_upload_symbols)
     endif()
   endif()
 
-  add_custom_command(
-    TARGET ${symbols_TARGET}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${symbols_DIRECTORY}
-    COMMAND dump_syms "$<TARGET_FILE:${symbols_TARGET}>" > ${DEST}
-    COMMAND ${UPLOAD_CMD}
-    COMMAND
-      "${Python_EXECUTABLE}"
-      "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
-      "-o" "${symbols_DIRECTORY}" "${DEST}"
-    COMMENT "Processing symbols for ${symbols_TARGET}"
-    VERBATIM DEPENDS sym_upload dump_syms)
+  if(APPLE)
+    add_custom_command(
+      TARGET ${symbols_TARGET}
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${symbols_DIRECTORY}
+      COMMAND dump_syms -d -m "$<TARGET_FILE:${symbols_TARGET}>" > ${DEST}
+      COMMAND ${UPLOAD_CMD}
+      COMMAND
+        "${Python_EXECUTABLE}"
+        "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
+        "-o" "${symbols_DIRECTORY}" "${DEST}"
+      COMMENT "Processing symbols for ${symbols_TARGET}"
+      VERBATIM DEPENDS sym_upload dump_syms)
+  else()
+    add_custom_command(
+      TARGET ${symbols_TARGET}
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${symbols_DIRECTORY}
+      COMMAND dump_syms "$<TARGET_FILE:${symbols_TARGET}>" > ${DEST}
+      COMMAND ${UPLOAD_CMD}
+      COMMAND
+        "${Python_EXECUTABLE}"
+        "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/symbol_processor.py"
+        "-o" "${symbols_DIRECTORY}" "${DEST}"
+      COMMENT "Processing symbols for ${symbols_TARGET}"
+      VERBATIM DEPENDS sym_upload dump_syms)
+  endif()
 endfunction()
