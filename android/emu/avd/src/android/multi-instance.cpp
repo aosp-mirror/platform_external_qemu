@@ -48,7 +48,7 @@ bool android::multiinstance::initInstanceShareMode(
         sMultiInstanceState->sharedFile =
             android::base::fsopen(multiInstanceLock, mode, shareMode);
         if (!sMultiInstanceState->sharedFile) {
-            dwarning("Another emualtor is still running, wait for a sec...");
+            dwarning("Another emulator is still running, wait for a sec...");
             base::Thread::sleepMs(1 * 1000);
         } else {
             break;
