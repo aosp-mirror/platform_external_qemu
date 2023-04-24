@@ -221,6 +221,10 @@ if(LINUX)
   target_include_directories(breakpad_common
                              PUBLIC ${ANDROID_QEMU2_TOP_DIR}/android)
   target_link_libraries(breakpad_common PRIVATE dl)
+  # We do not have the linux headers that specify EM_RISCV, see:
+  # https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/elf-em.h#L51
+  # For the proper kernel definitions.
+  target_compile_definitions(breakpad_common PRIVATE EM_RISCV=243)
 endif()
 
 android_target_link_libraries2(
@@ -311,7 +315,6 @@ android_add_library(
       processor/source_line_resolver_base.cc
       processor/stack_frame_cpu.cc
       processor/stack_frame_symbolizer.cc
-      processor/stackwalk_common.cc
       processor/stackwalk_common.cc
       processor/stackwalker.cc
       processor/stackwalker_address_list.cc
