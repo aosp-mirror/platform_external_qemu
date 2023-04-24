@@ -161,13 +161,6 @@ bool VirtioWifiForwarder::init() {
     mFdWatch->wantRead();
     mFdWatch->dontWantWrite();
 
-    if (mSlirp &&
-        !net_slirp_set_custom_slirp_output_callback(
-                mSlirp, &VirtioWifiForwarder::onRxPacketAvailable, this)) {
-        LOG(ERROR) << "Failed to initialize Wi-Fi: Unable to set slirp output "
-                      "callback.";
-        return false;
-    }
     if (mNicConf) {
         // init Qemu Nic
         static NetClientInfo info = {
