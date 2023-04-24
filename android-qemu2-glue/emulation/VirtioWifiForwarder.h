@@ -40,11 +40,11 @@ public:
             WifiService::OnReceiveCallback cb,
             WifiService::OnLinkStatusChangedCallback onLinkStatusChanged,
             WifiService::CanReceiveCallback canReceive,
-            NICConf* conf,
             WifiService::OnSentCallback onFrameSentCallback = {},
+            NICConf* conf = nullptr,
+            Slirp* slirp = nullptr,
             uint16_t serverPort = 0,
-            uint16_t clientPort = 0,
-            Slirp* slirp = nullptr);
+            uint16_t clientPort = 0);
     ~VirtioWifiForwarder();
     bool init() override;
     int send(const android::base::IOVector& iov) override;

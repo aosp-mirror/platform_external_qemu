@@ -220,9 +220,9 @@ std::unique_ptr<WifiService> Builder::build() {
     }
 
     return std::unique_ptr<WifiService>(new VirtioWifiForwarder(
-                mBssID.data(), sOnReceiveCallback, mOnLinkStatusChanged,
-                mCanReceive, mNicConf, mOnSentCallback, mServerPort,
-                mClientPort, slirp));
+            mBssID.data(), sOnReceiveCallback, mOnLinkStatusChanged,
+            mCanReceive, mOnSentCallback, mNicConf, slirp, mServerPort,
+            mClientPort));
 }
 
 }  // namespace qemu2
