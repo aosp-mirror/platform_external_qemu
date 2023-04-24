@@ -1183,6 +1183,7 @@ help_grpc(stralloc_t*  out)
     PRINTF(
     "  Enables the gRPC service to control the emulator.\n\n"
     "    <port> is the TCP port used to bind the gRPC service\n\n"
+    "  Note: You will have to explicitly turn on jwt authorization with the -grpc-use-jwt flag\n\n"
     "  The gRPC service will not be started if the port is not available on startup.\n\n");
 }
 
