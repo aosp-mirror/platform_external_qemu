@@ -28,6 +28,8 @@ class FrameBuffer;
 class OSWindow;
 class RenderThreadInfo;
 
+using gfxstream::gl::GLESv2Dispatch;
+
 namespace emugl {
 
 // Determines whether the host GPU should be used.

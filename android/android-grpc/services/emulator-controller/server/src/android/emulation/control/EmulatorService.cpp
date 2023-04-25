@@ -78,7 +78,7 @@
 #include "android/hw-sensors.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/Percentiles.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/physics/Physics.h"
 #include "android/recording/AvFormat.h"
 #include "android/skin/rect.h"
@@ -744,8 +744,8 @@ public:
 
         // TODO(jansen): Move to ScreenshotUtils.
         std::unique_ptr<EventWaiter> frameEvent;
-        std::unique_ptr<RaiiEventListener<emugl::Renderer,
-                                          emugl::FrameBufferChangeEvent>>
+        std::unique_ptr<RaiiEventListener<gfxstream::Renderer,
+                                          gfxstream::FrameBufferChangeEvent>>
                 frameListener;
         // Screenshots can come from either the gl renderer, or the guest.
         const auto& renderer = android_getOpenglesRenderer();
@@ -753,9 +753,9 @@ public:
             // Fast mode..
             frameEvent = std::make_unique<EventWaiter>();
             frameListener = std::make_unique<RaiiEventListener<
-                    emugl::Renderer, emugl::FrameBufferChangeEvent>>(
+                    gfxstream::Renderer, gfxstream::FrameBufferChangeEvent>>(
                     renderer.get(),
-                    [&](const emugl::FrameBufferChangeEvent state) {
+                    [&](const gfxstream::FrameBufferChangeEvent state) {
                         frameEvent->newEvent();
                     });
         } else {

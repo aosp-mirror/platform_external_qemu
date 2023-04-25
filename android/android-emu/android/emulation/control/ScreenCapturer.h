@@ -25,7 +25,7 @@
 #include "aemu/base/export.h"
 #include "android/skin/rect.h"        // for SkinRotation
 
-namespace emugl {
+namespace gfxstream {
 class Renderer;
 }
 
@@ -73,7 +73,7 @@ private:
 AEMU_EXPORT Image takeScreenshot(
         ImageFormat desiredFormat,
         SkinRotation rotation,
-        emugl::Renderer* renderer,
+        gfxstream::Renderer* renderer,
         std::function<void(int* w,
                            int* h,
                            int* lineSize,
@@ -92,7 +92,7 @@ AEMU_EXPORT bool captureScreenshot(const char* outputDirectoryPath,
 // (-gpu host, swiftshader_indirect, angle_indirect)
 // Otherwise loads texture from getFrameBuffer function. (-gpu guest)
 AEMU_EXPORT bool captureScreenshot(
-        emugl::Renderer* renderer,
+        gfxstream::Renderer* renderer,
         std::function<void(int* w,
                            int* h,
                            int* lineSize,

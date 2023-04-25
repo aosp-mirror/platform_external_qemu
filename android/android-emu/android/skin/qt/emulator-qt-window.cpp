@@ -51,7 +51,7 @@
 #include "android/skin/rect.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot/Snapshotter.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 #include "android/test/checkboot.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"

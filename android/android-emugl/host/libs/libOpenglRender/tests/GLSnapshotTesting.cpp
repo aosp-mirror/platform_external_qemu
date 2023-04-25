@@ -33,6 +33,7 @@
 
 namespace emugl {
 
+using namespace gfxstream::gl;
 using android::base::LazyInstance;
 using android::base::StdioStream;
 using android::snapshot::TextureLoader;

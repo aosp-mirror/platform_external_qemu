@@ -13,8 +13,8 @@
 // limitations under the License.
 #pragma once
 
-#include "OpenglRender/IOStream.h"
-#include "OpenglRender/RenderChannel.h"
+#include "render-utils/IOStream.h"
+#include "render-utils/RenderChannel.h"
 
 #include "aemu/base/ring_buffer.h"
 #include "host-common/address_space_graphics_types.h"
@@ -28,7 +28,7 @@ namespace emugl {
 // messages from a pair of ring buffers (to host and from host).  It also takes
 // a callback that does something when there are no available bytes to read in
 // the "to host" ring buffer.
-class RingStream final : public IOStream {
+class RingStream final : public gfxstream::IOStream {
 public:
     using OnUnavailableReadCallback = std::function<int()>;
     using GetPtrAndSizeCallback =
@@ -79,8 +79,8 @@ protected:
     std::vector<asg_type1_xfer> mType1Xfers;
     std::vector<asg_type2_xfer> mType2Xfers;
 
-    RenderChannel::Buffer mReadBuffer;
-    RenderChannel::Buffer mWriteBuffer;
+    gfxstream::RenderChannel::Buffer mReadBuffer;
+    gfxstream::RenderChannel::Buffer mWriteBuffer;
     size_t mReadBufferLeft = 0;
 
     size_t mXmits = 0;

@@ -22,7 +22,7 @@
 #include <utility>      // for pair
 #include <vector>       // for vector
 
-#include "OpenglRender/Renderer.h"                       // for RendererPtr
+#include "render-utils/Renderer.h"                       // for RendererPtr
 #include "android/CommonReportedInfo.h"                  // for setDetails
 #include "android/avd/info.h"                            // for avdInfo_getA...
 #include "android/avd/util.h"                            // for AVD_ANDROID_...
@@ -51,7 +51,7 @@
 #include "android/metrics/metrics.h"                     // for MetricsStopR...
 #include "host-common/opengl/emugl_config.h"                 // for emuglConfig_...
 #include "android/opengl/gpuinfo.h"                      // for GpuInfo, glo...
-#include "android/opengles.h"                            // for android_getO...
+#include "host-common/opengles.h"                            // for android_getO...
 #include "android/utils/debug.h"                         // for VERBOSE_PRINT
 #include "android/utils/file_data.h"                     // for (anonymous)
 #include "android/utils/file_io.h"                       // for android_stat
@@ -568,7 +568,7 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
     if (getConsoleAgents()->settings->hw()->hw_gpu_enabled) {
         fillGuestGlMetrics(event);
         if (openglAlive) {
-            const emugl::RendererPtr& renderer = android_getOpenglesRenderer();
+            const gfxstream::RendererPtr& renderer = android_getOpenglesRenderer();
             if (renderer) {
                 renderer->fillGLESUsages(event->mutable_emulator_details()
                                                  ->mutable_gles_usages());

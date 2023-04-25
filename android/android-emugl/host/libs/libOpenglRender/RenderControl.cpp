@@ -16,7 +16,7 @@
 
 #include "RenderControl.h"
 
-#include "DispatchTables.h"
+#include "OpenGLESDispatch/DispatchTables.h"
 #include "FbConfig.h"
 #include "FenceSync.h"
 #include "FrameBuffer.h"
@@ -46,6 +46,7 @@
 #include <atomic>
 #include <string_view>
 
+using namespace gfxstream::gl;
 using android::base::AutoLock;
 using android::base::Lock;
 using emugl::emugl_feature_is_enabled;

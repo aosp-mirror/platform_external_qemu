@@ -12,12 +12,16 @@
 
 #include "GLES3/gl3.h"  // for GLuint
 
+namespace gfxstream {
+namespace gl {
 struct GLESv2Dispatch;
+}  // namespace gl
+}  // namespace gfxstream
 
 // This is a 2D RGB texture that can be rendered to.
 class GLCanvas {
 public:
-    GLCanvas(int width, int height, const GLESv2Dispatch* gl_dispatch);
+    GLCanvas(int width, int height, const gfxstream::gl::GLESv2Dispatch* gl_dispatch);
     ~GLCanvas();
 
     // Width of the texture in pixels.
@@ -41,7 +45,7 @@ public:
 private:
     int mWidth;
     int mHeight;
-    const GLESv2Dispatch* mGLES2;
+    const gfxstream::gl::GLESv2Dispatch* mGLES2;
     GLuint mFramebuffer;
     GLuint mTargetTexture;
     GLuint mDepthBuffer;

@@ -16,7 +16,7 @@
 
 #include "GLESVersionDetector.h"
 
-#include "EGLDispatch.h"
+#include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "aemu/base/misc/StringUtils.h"
 
@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <string_view>
 
+using namespace gfxstream::gl;
 using android::base::c_str;
 using android::base::OsType;
 using android::base::System;

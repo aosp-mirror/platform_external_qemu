@@ -1,6 +1,6 @@
 !render_api
 
-%#include "OpenglRender/RenderLib.h"
+%#include "render-utils/RenderLib.h"
 %
 
 # Initializes the library and tries to load the corresponding EGL/GLES

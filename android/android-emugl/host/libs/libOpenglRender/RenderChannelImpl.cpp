@@ -25,6 +25,8 @@
 #define EMUGL_DEBUG_LEVEL 0
 #include "host-common/debug.h"
 
+using namespace gfxstream;
+
 namespace emugl {
 
 using Buffer = RenderChannel::Buffer;

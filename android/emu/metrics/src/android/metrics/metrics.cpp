@@ -32,7 +32,7 @@
 #include "android/metrics/StudioConfig.h"
 #include "host-common/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
 #include "android/utils/x86_cpuid.h"

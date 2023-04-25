@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+using namespace gfxstream::gl;
 using android::base::AutoLock;
 using android::base::StaticLock;
 

@@ -16,7 +16,7 @@
 #include "aemu/base/files/StdioStream.h"
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/TextureSaver.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 

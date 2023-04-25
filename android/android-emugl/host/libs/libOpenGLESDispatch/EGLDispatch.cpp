@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+namespace gfxstream {
+namespace gl {
 EGLDispatch s_egl;
 
 #define RENDER_EGL_LOAD_FIELD_STATIC(return_type, function_name, signature) \
@@ -46,3 +48,6 @@ bool init_egl_dispatch() {
     s_egl.initialized = true;
     return true;
 }
+
+}  // namespace gl
+}  // namespace gfxstream

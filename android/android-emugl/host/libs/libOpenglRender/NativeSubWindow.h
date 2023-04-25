@@ -16,7 +16,7 @@
 #ifndef NATIVE_SUB_WINDOW_H
 #define NATIVE_SUB_WINDOW_H
 
-#include "OpenglRender/render_api_platform_types.h"
+#include "render-utils/render_api_platform_types.h"
 
 #include <EGL/egl.h>
 

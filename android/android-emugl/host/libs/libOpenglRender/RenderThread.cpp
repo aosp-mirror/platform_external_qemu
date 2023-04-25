@@ -43,7 +43,9 @@
 
 #include <assert.h>
 
+using namespace gfxstream::gl;
 using android::base::AutoLock;
+using gfxstream::IOStream;
 
 namespace emugl {
 
@@ -315,7 +317,7 @@ intptr_t RenderThread::main() {
         return 0;
     }
 
-    ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
+    ChannelStream stream(mChannel, gfxstream::RenderChannel::Buffer::kSmallSize);
     IOStream* ioStream =
         mChannel ? (IOStream*)&stream : (IOStream*)mRingStream.get();
 

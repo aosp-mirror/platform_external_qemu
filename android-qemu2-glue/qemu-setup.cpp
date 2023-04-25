@@ -97,7 +97,7 @@ extern "C" {
 #include "android/emulation/virtio_vsock_device.h"
 #include "android/gpu_frame.h"
 #include "android/skin/winsys.h"
-#include "android/snapshot/interface.h"
+#include "snapshot/interface.h"
 #include "android/utils/Random.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"

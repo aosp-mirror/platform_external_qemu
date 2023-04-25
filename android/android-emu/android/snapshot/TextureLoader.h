@@ -22,7 +22,7 @@
 #include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "aemu/base/threads/Thread.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 
 #include <functional>
 #include <memory>

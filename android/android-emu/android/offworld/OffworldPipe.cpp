@@ -23,8 +23,8 @@
 #include "host-common/FeatureControl.h"
 #include "android/sensor_mock/SensorMockUtils.h"
 #include "android/snapshot/SnapshotAPI.h"
-#include "android/snapshot/common.h"
-#include "android/snapshot/interface.h"
+#include "snapshot/common.h"
+#include "snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/videoinjection/VideoInjectionController.h"
 

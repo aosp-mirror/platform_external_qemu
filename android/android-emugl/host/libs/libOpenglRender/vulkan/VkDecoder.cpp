@@ -36,7 +36,7 @@
 #include "host-common/GfxstreamFatalError.h"
 
 #include "FrameBuffer.h"
-#include "IOStream.h"
+#include "render-utils/IOStream.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 
@@ -81,7 +81,7 @@ public:
         m_threadTeardown = true;
     }
 
-    size_t decode(void* buf, size_t bufsize, IOStream* stream, const ProcessResources* processResources);
+    size_t decode(void* buf, size_t bufsize, gfxstream::IOStream* stream, const ProcessResources* processResources);
 
 private:
     bool m_logCalls;
@@ -112,12 +112,12 @@ void VkDecoder::onThreadTeardown() {
     mImpl->onThreadTeardown();
 }
 
-size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream, const ProcessResources* processResources) {
+size_t VkDecoder::decode(void* buf, size_t bufsize, gfxstream::IOStream* stream, const ProcessResources* processResources) {
     return mImpl->decode(buf, bufsize, stream, processResources);
 }
 
 // VkDecoder::Impl::decode to follow
-size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, const ProcessResources* processResources)
+size_t VkDecoder::Impl::decode(void* buf, size_t len, gfxstream::IOStream* ioStream, const ProcessResources* processResources)
 {
     if (len < 8) return 0;;
     bool queueSubmitWithCommandsEnabled = emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanQueueSubmitWithCommands);

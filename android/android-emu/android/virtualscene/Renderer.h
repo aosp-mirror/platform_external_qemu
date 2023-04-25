@@ -29,6 +29,8 @@
 #include <memory>
 #include <vector>
 
+using namespace gfxstream::gl;
+
 namespace android {
 namespace virtualscene {
 

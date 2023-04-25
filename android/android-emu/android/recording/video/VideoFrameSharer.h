@@ -20,7 +20,7 @@
 #include <memory>                              // for unique_ptr
 #include <string>                              // for string, basic_string
 #include "aemu/base/memory/SharedMemory.h"  // for SharedMemory
-#include "android/opengles.h"                  // for ReadPixelsFunc
+#include "host-common/opengles.h"                  // for ReadPixelsFunc
 
 namespace android {
 namespace recording {

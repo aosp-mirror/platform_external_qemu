@@ -25,6 +25,8 @@
 #include <memory>
 #include <vector>
 
+using gfxstream::gl::GLESv2Dispatch;
+
 namespace emugl {
 
 struct GlValues {

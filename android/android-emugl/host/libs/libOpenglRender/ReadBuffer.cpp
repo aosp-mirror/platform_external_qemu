@@ -40,7 +40,7 @@ void ReadBuffer::setNeededFreeTailSize(int size) {
     m_neededFreeTailSize = size;
 }
 
-int ReadBuffer::getData(IOStream* stream, int minSize) {
+int ReadBuffer::getData(gfxstream::IOStream* stream, int minSize) {
     assert(stream);
     assert(minSize > (int)m_validData);
 

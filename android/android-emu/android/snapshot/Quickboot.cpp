@@ -36,7 +36,7 @@
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
-#include "android/snapshot/interface.h"
+#include "snapshot/interface.h"
 #include "android/utils/debug.h"
 
 #include <cassert>

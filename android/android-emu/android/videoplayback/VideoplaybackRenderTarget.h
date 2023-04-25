@@ -27,7 +27,7 @@ namespace videoplayback {
 
 class VideoplaybackRenderTarget : public VideoPlayerRenderTarget {
 public:
-    VideoplaybackRenderTarget(const GLESv2Dispatch* gles2,
+    VideoplaybackRenderTarget(const gfxstream::gl::GLESv2Dispatch* gles2,
                               int width,
                               int height);
     void getRenderTargetSize(float sampleAspectRatio,
@@ -49,7 +49,7 @@ private:
     const unsigned char* mBuffer = nullptr;
     size_t mBufferLen = 0;
     FrameInfo mFrameInfo;
-    const GLESv2Dispatch* const mGles2;
+    const gfxstream::gl::GLESv2Dispatch* const mGles2;
     size_t mRenderWidth;
     size_t mRenderHeight;
     bool mInitialized = false;

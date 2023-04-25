@@ -25,7 +25,7 @@
 #include "android/snapshot/GapTracker.h"
 #include "android/snapshot/IncrementalStats.h"
 #include "android/snapshot/RamLoader.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 
 #include <array>
 #include <atomic>

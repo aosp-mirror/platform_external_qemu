@@ -17,6 +17,8 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"   // for GLESv2Dispatch
 #include "android/utils/debug.h"               // for derror
 
+using namespace gfxstream::gl;
+
 GLuint createShader(const GLESv2Dispatch* gles2,
                     GLint shader_type,
                     const char* shader_code) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLESv2Dispatch.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include <map>
 #include <string>
@@ -37,7 +37,7 @@ struct GLProgramState {
 
 class GLSnapshotState {
 public:
-    GLSnapshotState(const GLESv2Dispatch* gl);
+    GLSnapshotState(const gfxstream::gl::GLESv2Dispatch* gl);
     void save();
     void restore();
 
@@ -57,7 +57,7 @@ private:
 
     void getGlobalStateEnable(GLenum name);
 
-    const GLESv2Dispatch* mGL;
+    const gfxstream::gl::GLESv2Dispatch* mGL;
     GlobalStateMap mGlobals;
     GlobalEnables mEnables;
 

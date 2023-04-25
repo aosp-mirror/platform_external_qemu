@@ -21,6 +21,8 @@
 #include "host-common/AndroidAsyncMessagePipe.h"
 #include "offworld.pb.h"
 
+using namespace gfxstream::gl;
+
 namespace android {
 namespace videoplayback {
 

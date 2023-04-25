@@ -40,6 +40,7 @@
 #include <sys/time.h>
 #endif
 
+using namespace gfxstream::gl;
 using android::base::System;
 using android::base::StdioStream;
 using android::snapshot::TextureLoader;

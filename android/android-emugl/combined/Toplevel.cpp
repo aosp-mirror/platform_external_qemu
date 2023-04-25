@@ -24,6 +24,7 @@
 #include "host-common/MultiDisplay.h"
 #include "host-common/address_space_device.hpp"
 #include "host-common/globals.h"
+#include "host-common/misc.h"
 #include "android/emulation/control/AndroidAgentFactory.h"
 #include "host-common/multi_display_agent.h"
 #include "host-common/vm_operations.h"
@@ -33,7 +34,7 @@
 #include "host-common/FeatureControl.h"
 #include "host-common/opengl/emugl_config.h"
 #include "android/opengles-pipe.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "host-common/refcount-pipe.h"
 
 #include "AndroidBufferQueue.h"

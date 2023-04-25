@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "OpenglRender/render_api_types.h"
+#include "render-utils/render_api_types.h"
 
 #ifdef _MSC_VER
 # ifdef BUILDING_EMUGL_COMMON_SHARED
