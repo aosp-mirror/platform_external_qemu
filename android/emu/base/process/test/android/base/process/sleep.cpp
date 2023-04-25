@@ -17,28 +17,24 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include "absl/flags/flag.h"
+#include "absl/flags/parse.h"
+#include "absl/time/time.h"
 
 using namespace std::chrono_literals;
 
+ABSL_FLAG(absl::Duration,
+          sleep,
+          absl::Milliseconds(100),
+          "Time to sleep before exiting");
+ABSL_FLAG(int64_t, exit, 0, "The exit code to return");
+
+ABSL_FLAG(std::string, msg_std_out, "", "Message to output on stdout");
+ABSL_FLAG(std::string, msg_std_err, "", "Message to output on stderr");
 int main(int argc, char** argv) {
-    std::chrono::milliseconds sleep = 500ms;
-    int exit = 0;
-    std::string msg, err;
-    if (argc > 0 && argv[1] != nullptr) {
-        sleep = std::chrono::milliseconds(std::stoi(argv[1]));
-    }
-
-    if (argc > 1 && argv[2] != nullptr) {
-        exit = std::stoi(argv[2]);
-    }
-
-    if (argc > 2 && argv[3] != nullptr) {
-        msg = argv[3];
-    }
-
-    if (argc > 3 && argv[4] != nullptr) {
-        err = argv[4];
-    }
+    absl::ParseCommandLine(argc, argv);
+    std::string msg = absl::GetFlag(FLAGS_msg_std_out);
+    std::string err = absl::GetFlag(FLAGS_msg_std_err);
 
     if (!msg.empty()) {
         std::cout << msg;
@@ -50,7 +46,8 @@ int main(int argc, char** argv) {
         std::flush(std::cerr);
     }
 
-    std::this_thread::sleep_for(sleep);
-
-    return exit;
+    std::chrono::milliseconds time_in_ms =
+            absl::ToChronoMilliseconds(absl::GetFlag(FLAGS_sleep));
+    std::this_thread::sleep_for(time_in_ms);
+    return absl::GetFlag(FLAGS_exit);
 }

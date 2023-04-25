@@ -38,8 +38,12 @@
 #define DEBUG 0
 
 #if DEBUG >= 1
-#define DD(fmt, ...) \
-    printf("%s:%d %s| " fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define DD(fmt, ...)                                                    \
+    printf("%lld %s:%d %s| " fmt "\n",                                  \
+           std::chrono::duration_cast<std::chrono::milliseconds>(       \
+                   std::chrono::system_clock::now().time_since_epoch()) \
+                   .count(),                                            \
+           __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 #else
 #define DD(...) (void)0
 #endif
@@ -51,6 +55,11 @@
 #else
 #include <filesystem>
 #endif
+
+#ifndef _WIN32
+#include <fcntl.h>
+#include <unistd.h>
+#endif  // !_WIN32
 
 namespace android {
 namespace base {
@@ -171,11 +180,17 @@ private:
 class PosixProcess : public ObservableProcess {
 public:
     PosixProcess(Pid pid) : mDeamon(true) { mPid = pid; }
-    PosixProcess(bool deamon) { mDeamon = deamon; }
+    PosixProcess(bool deamon, bool inherit) : mDeamon(deamon) {
+        mInherit = inherit;
+    }
 
     ~PosixProcess() {
-        if (mActions)
+        if (mActions) {
             posix_spawn_file_actions_destroy(mActions);
+        }
+        if (mAttr) {
+            posix_spawnattr_destroy(mAttr);
+        }
         if (!mDeamon)
             PosixProcess::terminate();
     }
@@ -240,6 +255,30 @@ public:
 
     std::optional<Pid> createProcess(const CommandArguments& cmdline,
                                      bool captureOutput) override {
+        DD("%s to inheriting handles..", mInherit ? "yes" : "no");
+        if (!mInherit) {
+            mAttr = new posix_spawnattr_t;
+            if (posix_spawnattr_init(mAttr)) {
+                DD("Unable to initialize spawnattr..");
+                return std::nullopt;
+            }
+#ifdef __APPLE__
+            if (posix_spawnattr_setflags(mAttr, POSIX_SPAWN_CLOEXEC_DEFAULT)) {
+                DD("Failed to request CLOEXEC.");
+                return std::nullopt;
+            }
+#else
+            // We need to mark all file handles as close on exec.
+            int fdlimit = (int)sysconf(_SC_OPEN_MAX);
+            DD("Marking %d as close on exec", fdlimit);
+            for (int i = STDERR_FILENO + 1; i < fdlimit; i++) {
+                int f = ::fcntl(i, F_GETFD);
+                ::fcntl(i, F_SETFD, f | FD_CLOEXEC);
+            }
+            DD("Marked %d as close on exec -- done", fdlimit);
+#endif
+        }
+
         // Setup the arguments..
         std::vector<char*> args = toCharArray(cmdline);
 
@@ -264,7 +303,7 @@ public:
         }
 
         pid_t pid;
-        auto error_code = posix_spawnp(&pid, cmdline[0].c_str(), action, NULL,
+        auto error_code = posix_spawnp(&pid, cmdline[0].c_str(), action, mAttr,
                                        args.data(), environ);
         if (error_code) {
             derror("Unable to spawn process %s due to:, %s", cmdline[0].c_str(),
@@ -290,12 +329,13 @@ public:
     int mStdErrPipe[2];
     bool mDeamon{false};
     posix_spawn_file_actions_t* mActions{nullptr};
+    posix_spawnattr_t* mAttr{nullptr};
 };
 
-Command::ProcessFactory Command::sProcessFactory = [](CommandArguments args,
-                                                      bool deamon) {
-    return std::make_unique<PosixProcess>(deamon);
-};
+Command::ProcessFactory Command::sProcessFactory =
+        [](CommandArguments args, bool deamon, bool inherit) {
+            return std::make_unique<PosixProcess>(deamon, inherit);
+        };
 
 std::unique_ptr<Process> Process::fromPid(Pid pid) {
     return std::make_unique<PosixProcess>(pid);
