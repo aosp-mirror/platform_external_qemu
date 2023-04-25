@@ -118,11 +118,11 @@ VirtioWifiForwarder::VirtioWifiForwarder(
         WifiService::OnReceiveCallback cb,
         WifiService::OnLinkStatusChangedCallback onLinkStatusChanged,
         WifiService::CanReceiveCallback canReceive,
-        ::NICConf* conf,
         WifiService::OnSentCallback onFrameSentCallback,
+        ::NICConf* conf,
+        Slirp* slirp,
         uint16_t serverPort,
-        uint16_t clientPort,
-        Slirp* slirp)
+        uint16_t clientPort)
     : mBssID(MACARG(bssid)),
       mOnFrameAvailableCallback(std::move(cb)),
       mOnLinkStatusChanged(std::move(onLinkStatusChanged)),
@@ -130,9 +130,9 @@ VirtioWifiForwarder::VirtioWifiForwarder(
       mOnFrameSentCallback(std::move(onFrameSentCallback)),
       mLooper(ThreadLooper::get()),
       mNicConf(conf),
+      mSlirp(slirp),
       mServerPort(serverPort),
-      mClientPort(clientPort),
-      mSlirp(slirp) {}
+      mClientPort(clientPort) {}
 
 VirtioWifiForwarder::~VirtioWifiForwarder() {
     stop();
@@ -161,13 +161,6 @@ bool VirtioWifiForwarder::init() {
     mFdWatch->wantRead();
     mFdWatch->dontWantWrite();
 
-    if (mSlirp &&
-        !net_slirp_set_custom_slirp_output_callback(
-                mSlirp, &VirtioWifiForwarder::onRxPacketAvailable, this)) {
-        LOG(ERROR) << "Failed to initialize Wi-Fi: Unable to set slirp output "
-                      "callback.";
-        return false;
-    }
     if (mNicConf) {
         // init Qemu Nic
         static NetClientInfo info = {
