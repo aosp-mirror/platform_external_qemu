@@ -322,6 +322,17 @@ void VirtioWifiForwarder::onFrameSentCallback(NetClientState* nc,
     }
 }
 
+// QEMU NIC client will receive one ethernet packet at a time.
+ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
+                                                 const uint8_t* buf,
+                                                 size_t size) {
+    auto forwarder = static_cast<VirtioWifiForwarder*>(getInstance(nc));
+    if (!forwarder || size < ETH_HLEN || !forwarder->mHostapd->isRunning()) {
+        return -1;
+    }
+    return forwarder->onRxPacketAvailable(buf, size);
+}
+
 ssize_t VirtioWifiForwarder::sendToGuest(
         std::unique_ptr<Ieee80211Frame> frame) {
     GenericNetlinkMessage msg(GenericNetlinkMessage::NL_AUTO_PORT,
@@ -341,35 +352,22 @@ ssize_t VirtioWifiForwarder::sendToGuest(
     return mOnFrameAvailableCallback(msg.data(), msg.dataLen());
 }
 
-ssize_t VirtioWifiForwarder::onRxPacketAvailable(void* opaque,
-                                                 const uint8_t* buf,
+ssize_t VirtioWifiForwarder::onRxPacketAvailable(const uint8_t* buf,
                                                  size_t size) {
-    auto forwarder = static_cast<VirtioWifiForwarder*>(opaque);
-    if (!forwarder || size < ETH_HLEN || !forwarder->mHostapd->isRunning()) {
-        return -1;
-    }
-
     std::unique_ptr<Ieee80211Frame> frame =
-            Ieee80211Frame::buildFromEthernet(buf, size, forwarder->mBssID);
+            Ieee80211Frame::buildFromEthernet(buf, size, mBssID);
     if (frame == nullptr) {
         LOG(DEBUG) << "Unable to convert from Ethernet to Ieee80211.";
         return -1;
     }
     // encrypt will be no-op if cipher scheme is none.
-    if (!frame->encrypt(forwarder->mHostapd->getCipherScheme())) {
+    if (!frame->encrypt(mHostapd->getCipherScheme())) {
         LOG(ERROR) << "Unable to encrypt the IEEE80211 frame with CCMP.";
         return 0;
     }
     auto& info = frame->info();
-    info = forwarder->mFrameInfo;
-    return forwarder->sendToGuest(std::move(frame));
-}
-
-// QEMU NIC client will receive one ethernet packet at a time.
-ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
-                                                 const uint8_t* buf,
-                                                 size_t size) {
-    return VirtioWifiForwarder::onRxPacketAvailable(getInstance(nc), buf, size);
+    info = mFrameInfo;
+    return sendToGuest(std::move(frame));
 }
 
 void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
