@@ -52,10 +52,11 @@ public:
     void stop() override;
     NICState* getNic() override { return mNic; }
     android::network::MacAddress getStaMacAddr(const char* ssid) override;
-    static VirtioWifiForwarder* getInstance(NetClientState* nc);
     static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
     static const uint8_t kWifiForwardVersion = 0x02;
 private:
+#ifndef LIBSLIRP
+    static VirtioWifiForwarder* getInstance(NetClientState* nc);
     // Wrapper functions for passing C-sytle func ptr to struct NetClientInfo
     // defined in net/net.h
     static ssize_t onNICFrameAvailable(NetClientState* nc,
@@ -64,6 +65,7 @@ private:
     static int canReceive(NetClientState* nc);
     static void onLinkStatusChanged(NetClientState* nc);
     static void onFrameSentCallback(NetClientState*, ssize_t);
+#endif
     // Wrapper function for pass C-style func ptr to hostapd socket
     static void onHostApd(void* opaque, int fd, unsigned events);
     static const char* const kNicModel;

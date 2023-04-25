@@ -155,6 +155,7 @@ bool VirtioWifiForwarder::init() {
     mHostapdSock = ScopedSocket(fds[0]);
     mVirtIOSock = ScopedSocket(fds[1]);
     mHostapdSockInitSuccess = mHostapd->setDriverSocket(mHostapdSock);
+#ifndef LIBSLIRP
     //  Looper FdWatch and set callback functions
     mFdWatch = mLooper->createFdWatch(mVirtIOSock.get(),
                                       &VirtioWifiForwarder::onHostApd, this);
@@ -174,6 +175,7 @@ bool VirtioWifiForwarder::init() {
 
         mNic = qemu_new_nic(&info, mNicConf, kNicModel, kNicName, this);
     }
+#endif
     // init WifiFordPeer for P2P network.
     auto onData = [this](const uint8_t* data, size_t size) {
         return this->onRemoteData(data, size);
@@ -300,6 +302,7 @@ MacAddress VirtioWifiForwarder::getStaMacAddr(const char* ssid) {
         return MacAddress();
 }
 
+#ifndef LIBSLIRP
 VirtioWifiForwarder* VirtioWifiForwarder::getInstance(NetClientState* nc) {
     return static_cast<VirtioWifiForwarder*>(qemu_get_nic_opaque(nc));
 }
@@ -332,6 +335,7 @@ ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
     }
     return forwarder->onRxPacketAvailable(buf, size);
 }
+#endif
 
 ssize_t VirtioWifiForwarder::sendToGuest(
         std::unique_ptr<Ieee80211Frame> frame) {
@@ -497,13 +501,13 @@ int VirtioWifiForwarder::sendToNIC(
         return 0;
     }
 
-    // Send to QEMU Slirp stack. There are two code paths.
-    // When slirp instance is present, we can send the packet directly.
-    if (mSlirp) {
-        auto packet = frame->toEthernet();
-        slirp_input(mSlirp, packet.data(), packet.size());
-        return packet.size();
-    } else if (!mNic) {
+#ifdef LIBSLIRP
+    assert(mSlirp);
+    auto packet = frame->toEthernet();
+    slirp_input(mSlirp, packet.data(), packet.size());
+    return packet.size();
+#else
+    if (!mNic) {
         return 0;
     }
     int res;
@@ -520,6 +524,7 @@ int VirtioWifiForwarder::sendToNIC(
                                 outSg.size());
     }
     return res ? 0 : -EBUSY;
+#endif
 }
 
 std::unique_ptr<Ieee80211Frame> VirtioWifiForwarder::parseHwsimCmdFrame(
