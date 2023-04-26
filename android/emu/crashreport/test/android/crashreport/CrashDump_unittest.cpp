@@ -83,10 +83,8 @@ protected:
     void crash() {
         std::string executable = System::get()->findBundledExecutable(kCrashMe);
         dinfo("Running %s", executable.c_str());
-        auto proc = Command::create({executable}).execute();
-
-        // Let's give the crash handler some time to write to the database.
-        std::this_thread::sleep_for(1s);
+        auto proc = Command::create({executable}).inherit().execute();
+        proc->wait_for(500ms);
     }
 
     std::unique_ptr<CrashReportDatabase> mCrashdatabase;
@@ -102,11 +100,18 @@ TEST_F(CrashTest, crash_generates_minidump) {
 
     crash();
 
-    std::vector<CrashReportDatabase::Report> newReports;
-    std::vector<CrashReportDatabase::Report> newPendingReports;
-    mCrashdatabase->GetCompletedReports(&newReports);
-    mCrashdatabase->GetPendingReports(&newPendingReports);
-    auto after = newReports.size() + newPendingReports.size();
+    int after = 0;
+    auto start = std::chrono::high_resolution_clock::now();
+    do {
+        // Let's give the crash handler some time to write to the database.
+        std::this_thread::sleep_for(50ms);
+        std::vector<CrashReportDatabase::Report> newReports;
+        std::vector<CrashReportDatabase::Report> newPendingReports;
+        mCrashdatabase->GetCompletedReports(&newReports);
+        mCrashdatabase->GetPendingReports(&newPendingReports);
+        after = newReports.size() + newPendingReports.size();
+    } while (after <= before &&
+             std::chrono::high_resolution_clock::now() - start < 5s);
 
     EXPECT_GT(after, before)
             << "The database should have recorded an additional crash!";
