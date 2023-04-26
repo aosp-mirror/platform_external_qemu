@@ -39,6 +39,7 @@ namespace android {
 namespace qemu2 {
 
 using Builder = WifiService::Builder;
+static const uint8_t kBssID[] = {0x00, 0x13, 0x10, 0x85, 0xfe, 0x01};
 static const char* kNetwork = "10.0.2.0";
 static const char* kMask = "255.255.255.0";
 static const char* kHost = "10.0.2.2";
@@ -220,9 +221,9 @@ std::unique_ptr<WifiService> Builder::build() {
     }
 
     return std::unique_ptr<WifiService>(new VirtioWifiForwarder(
-            mBssID.data(), sOnReceiveCallback, mOnLinkStatusChanged,
-            mCanReceive, mOnSentCallback, mNicConf, slirp, mServerPort,
-            mClientPort));
+            mBssID.empty() ? kBssID : mBssID.data(), sOnReceiveCallback,
+            mOnLinkStatusChanged, mCanReceive, mOnSentCallback, mNicConf, slirp,
+            mServerPort, mClientPort));
 }
 
 }  // namespace qemu2
