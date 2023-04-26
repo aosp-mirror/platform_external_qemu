@@ -50,7 +50,6 @@ static constexpr size_t VIRTIO_WIFI_TX_QUEUE_DEFAULT_SIZE = 256;
 
 constexpr uint16_t VIRTIO_LINK_UP = 1;
 
-static const uint8_t kBssID[] = {0x00, 0x13, 0x10, 0x85, 0xfe, 0x01};
 static const uint8_t kMacAddr[] = {0x02, 0x15, 0xb2, 0x00, 0x00, 0x00};
 static const char kNicModel[] = "virtio-wifi-device";
 static const char kNicName[] = "virtio-wifi-device";
@@ -74,8 +73,6 @@ struct GlobalState {
                             .withRedirectToNetsim(opts->redirect_to_netsim)
                             .withHostapd(hostapd)
                             .withSlirp(slirpOpts)
-                            .withBssid(std::vector<uint8_t>(
-                                    kBssID, kBssID + sizeof(kBssID)))
                             .withNicConf(conf)
                             .withVerboseLogging(VERBOSE_CHECK(wifi))
                             .withOnReceiveCallback(
