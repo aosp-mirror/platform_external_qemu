@@ -270,13 +270,11 @@ bool qemu_android_emulation_early_setup() {
             new android::qemu::QemuAudioOutputEngine());
 
     auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
-    if (opts->packet_streamer_endpoint) {
-        std::string name = get_display_name();
-        register_netsim(to_string(opts->packet_streamer_endpoint),
-                        to_string(opts->rootcanal_default_commands_file),
-                        to_string(opts->rootcanal_controller_properties_file),
-                        name);
-    }
+    std::string name = get_display_name();
+    register_netsim(to_string(opts->packet_streamer_endpoint),
+                    to_string(opts->rootcanal_default_commands_file),
+                    to_string(opts->rootcanal_controller_properties_file),
+                    name);
     return true;
 }
 
