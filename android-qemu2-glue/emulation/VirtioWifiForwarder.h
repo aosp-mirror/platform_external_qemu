@@ -57,7 +57,9 @@ public:
     static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
     static const uint8_t kWifiForwardVersion = 0x02;
 private:
-#ifndef LIBSLIRP
+#ifdef LIBSLIRP
+    static void eloopSocketHandler(int sock, void* eloop_ctx, void* sock_ctx);
+#else
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
     // Wrapper functions for passing C-sytle func ptr to struct NetClientInfo
     // defined in net/net.h
