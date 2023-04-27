@@ -417,7 +417,7 @@ int qemu_setup_grpc() {
                "%d", &timeout) == 1) {
         builder.withIdleTimeout(std::chrono::seconds(timeout));
     }
-    bool useToken = getConsoleAgents()
+    bool useToken = !has_grpc_flag || getConsoleAgents()
                             ->settings->android_cmdLineOptions()
                             ->grpc_use_token;
 
