@@ -36,7 +36,7 @@ set(libslirp_src
   ${LIB_SLIRP_ROOT}/src/vmstate.c)
 
 # Generate the libslirp-version header.
-configure_file(${LIB_SLIRP_ROOT}/src/libslirp-version.h.in ${LIB_SLIRP_ROOT}/src/libslirp-version.h @SLIRP_VERSION_STRING)
+configure_file(${LIB_SLIRP_ROOT}/src/libslirp-version.h.in ${LIB_SLIRP_ROOT}/src/libslirp-version.h)
 
 android_add_library(
   TARGET libslirp
@@ -45,7 +45,6 @@ android_add_library(
     URL
     "https://android.googlesource.com/trusty/external/qemu-libslirp/+/refs/heads/emu-master-dev"
   REPO "${LIB_SLIRP_ROOT}"
-  NOTICE "REPO/NOTICE"
   LICENSE "BSD-3-Clause"
   SRC # cmake-format: sortable
       ${libslirp_src})
@@ -65,3 +64,4 @@ target_compile_options(libslirp PRIVATE -Wmissing-prototypes
                                         -Wundef
                                         -Wwrite-strings)
 
+target_include_directories(libslirp PUBLIC "${LIB_SLIRP_ROOT}/src/")

@@ -38,6 +38,7 @@
 
 using android::base::LazyInstance;
 using android::base::PathUtils;
+using android::base::pj;
 using android::base::System;
 
 namespace android {
@@ -57,9 +58,7 @@ const constexpr char kCrashpadHandler[] = "crashpad_handler";
 class CrashSystem {
 public:
     CrashSystem()
-        : mDatabasePath(android::base::pj(System::get()->getTempDir(),
-                                          kCrashpadDatabase)),
-          mClient(new crashpad::CrashpadClient()),
+        : mClient(new crashpad::CrashpadClient()),
           mConsentProvider(consentProvider()) {}
 
     // Gets a handle to single instance of crash reporter
@@ -80,8 +79,14 @@ public:
         if (handler_path.empty()) {
             dwarning("Crash handler not found, crash reporting disabled.");
         }
+        auto database_directory =
+                System::get()->envGet("ANDROID_EMU_CRASH_REPORTING_DATABASE");
+        database_directory = database_directory.empty()
+                       ? pj(System::get()->getTempDir(), kCrashpadDatabase)
+                       : database_directory;
+
         auto database_path = ::base::FilePath(
-                PathUtils::asUnicodePath(mDatabasePath.data()).c_str());
+                PathUtils::asUnicodePath(database_directory.c_str()).c_str());
         auto metrics_path = ::base::FilePath();
         auto annotations = std::map<std::string, std::string>{
                 {"prod", "AndroidEmulator"},
@@ -94,8 +99,8 @@ public:
         mInitialized = active && mDatabase;
 
         dinfo("Storing crashdata in: %s, detection is %s for process: %d",
-              mDatabasePath.c_str(), mInitialized ? "enabled" : "disabled",
-              android::base::System::get()->getCurrentProcessId());
+              database_directory.c_str(), mInitialized ? "enabled" : "disabled",
+              System::get()->getCurrentProcessId());
 
         if (mDatabase && mDatabase->GetSettings()) {
             mDatabase->GetSettings()->SetUploadsEnabled(false);
@@ -161,7 +166,6 @@ public:
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashSystem);
 
-    std::string mDatabasePath;
     std::unique_ptr<crashpad::CrashpadClient> mClient;
     std::unique_ptr<crashpad::CrashReportDatabase> mDatabase;
     std::unique_ptr<CrashConsent> mConsentProvider;
@@ -187,7 +191,7 @@ extern "C" {
 using android::crashreport::CrashSystem;
 
 bool crashhandler_init(int argc, char** argv) {
-    if (!android::base::System::get()->getEnableCrashReporting()) {
+    if (!System::get()->getEnableCrashReporting()) {
         dinfo("Crashreporting disabled, not reporting crashes.");
         return false;
     }

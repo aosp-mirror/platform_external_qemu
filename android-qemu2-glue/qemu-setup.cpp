@@ -351,9 +351,11 @@ int qemu_setup_grpc() {
 
     int grpc_start = android_serial_number_port + 3000;
     int grpc_end = grpc_start + 1000;
+    bool has_grpc_flag =
+            getConsoleAgents()->settings->android_cmdLineOptions()->grpc;
     std::string address = "[::1]";
 
-    if (getConsoleAgents()->settings->android_cmdLineOptions()->grpc &&
+    if (has_grpc_flag &&
         sscanf(getConsoleAgents()->settings->android_cmdLineOptions()->grpc,
                "%d", &grpc_start) == 1) {
         grpc_end = grpc_start + 1;
@@ -419,10 +421,7 @@ int qemu_setup_grpc() {
     }
     bool useToken = getConsoleAgents()
                             ->settings->android_cmdLineOptions()
-                            ->grpc_use_token ||
-                    getConsoleAgents()
-                            ->settings->android_cmdLineOptions()
-                            ->grpc_use_jwt;
+                            ->grpc_use_token;
 
     if (useToken) {
         const int of64Bytes = 64;
@@ -430,7 +429,8 @@ int qemu_setup_grpc() {
         builder.withAuthToken(token);
         props["grpc.token"] = token;
     }
-    if (getConsoleAgents()->settings->android_cmdLineOptions()->grpc_use_jwt) {
+    if (!has_grpc_flag ||
+        getConsoleAgents()->settings->android_cmdLineOptions()->grpc_use_jwt) {
         auto jwkDir = android::base::pj(
                 {android::ConfigDirs::getDiscoveryDirectory(),
                  std::to_string(
@@ -449,7 +449,7 @@ int qemu_setup_grpc() {
             dwarning(
                     "The emulator now requires a signed jwt token for gRPC "
                     "access! Use the -grpc flag if you really want an open "
-                    "grpc port");
+                    "unprotected grpc port");
         }
     }
 

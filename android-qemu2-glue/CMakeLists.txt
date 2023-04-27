@@ -4,15 +4,21 @@ android_add_library(
   TARGET android-wifi-service
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
-      emulation/NetsimWifiForwarder.cpp emulation/virtio-wifi.cpp
-      emulation/VirtioWifiForwarder.cpp emulation/WifiService.cpp)
+      emulation/NetsimWifiForwarder.cpp
+      emulation/VirtioWifiForwarder.cpp
+      emulation/WifiService.cpp)
 
 target_include_directories(android-wifi-service
-                           PRIVATE .. ../include ${ANDROID_AUTOGEN} ../slirp)
+                           PRIVATE .. ../include ${ANDROID_AUTOGEN})
+
+target_compile_definitions(android-wifi-service PUBLIC -DLIBSLIRP)
+
+android_target_compile_definitions(android-wifi-service windows PRIVATE "-DIOV_MAX=1")
 
 target_link_libraries(
   android-wifi-service
-  PRIVATE android-emu
+  PUBLIC android-emu
+  PRIVATE libslirp
           GLIB2::GLIB2
           ssl
           hostapd
@@ -58,7 +64,11 @@ set(android-qemu2-glue_src
     emulation/virtio-input-rotary.c
     emulation/virtio_vsock_device.cpp
     emulation/virtio_vsock_transport.cpp
+    emulation/virtio-wifi.cpp
+    emulation/NetsimWifiForwarder.cpp
     emulation/VirtioGpuTimelines.cpp
+    emulation/VirtioWifiForwarder.cpp
+    emulation/WifiService.cpp
     looper-qemu.cpp
     net-android.cpp
     proxy/slirp_proxy.cpp
@@ -121,7 +131,7 @@ target_link_libraries(
 target_link_libraries(
   libqemu2-glue
   PRIVATE android-emu
-          android-wifi-service
+          hostapd
           GLIB2::GLIB2
           PIXMAN::PIXMAN
           emulator-libdtb
