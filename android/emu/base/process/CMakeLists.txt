@@ -15,7 +15,7 @@ target_link_libraries(android-emu-base-process PRIVATE android-emu-base-headers)
 
 # We cannot run these tests, and they introduce additional dependencies
 # that require cross compiling as well, so we ignore these for now.
-if (NOT CROSSCOMPILING)
+if (NOT CROSSCOMPILING AND NOT NETSIM_EXT)
   android_add_test(
     TARGET android-emu-base-process_unittests
     SOURCE_DIR test
