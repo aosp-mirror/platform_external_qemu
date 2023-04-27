@@ -181,7 +181,12 @@ int EmulatorAdvertisement::garbageCollect() const {
             DD("Deleting %s", entry.c_str());
             collected++;
             // Emulator is not running, or unreachable.
-            System::get()->deleteFile(entry);
+            if (System::get()->pathIsFile(entry)) {
+                System::get()->deleteFile(entry);
+            }
+            if (System::get()->pathIsDir(entry)) {
+                path_delete_dir(entry.c_str());
+            }
         }
     }
 
