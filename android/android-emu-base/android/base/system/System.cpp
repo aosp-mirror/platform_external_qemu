@@ -1559,6 +1559,7 @@ public:
         if (enableCrashReporting.empty()) {
             return defaultValue;
         } else {
+            dinfo("Using crash reporting configuration from environment variable: ANDROID_EMU_ENABLE_CRASH_REPORTING=%s", enableCrashReporting.c_str());
             return parseBooleanValue(enableCrashReporting.c_str(), defaultValue);
         }
     }

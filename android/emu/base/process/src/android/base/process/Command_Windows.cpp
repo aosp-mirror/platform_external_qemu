@@ -172,6 +172,75 @@ std::string formatLastErr() {
     return "";
 }
 
+// From https://devblogs.microsoft.com/oldnewthing/20111216-00/?p=8873
+// Calls create process with explicitly inheriting the set of handles
+// that are in rgHandlesToInherit.
+// Note that you must poass bInheritHandles as true and
+// make sure to set the individual handle to inherit.
+BOOL CreateProcessWithExplicitHandles(
+        __in_opt LPCWSTR lpApplicationName,
+        __inout_opt LPWSTR lpCommandLine,
+        __in_opt LPSECURITY_ATTRIBUTES lpProcessAttributes,
+        __in_opt LPSECURITY_ATTRIBUTES lpThreadAttributes,
+        __in BOOL bInheritHandles,
+        __in DWORD dwCreationFlags,
+        __in_opt LPVOID lpEnvironment,
+        __in_opt LPCWSTR lpCurrentDirectory,
+        __in LPSTARTUPINFOW lpStartupInfo,
+        __out LPPROCESS_INFORMATION lpProcessInformation,
+        // here is the new stuff
+        __in DWORD cHandlesToInherit,
+        __in_ecount(cHandlesToInherit) HANDLE* rgHandlesToInherit) {
+    BOOL fSuccess;
+    BOOL fInitialized = FALSE;
+    SIZE_T size = 0;
+    LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList = NULL;
+    fSuccess = cHandlesToInherit < 0xFFFFFFFF / sizeof(HANDLE) &&
+               lpStartupInfo->cb == sizeof(*lpStartupInfo);
+    if (!fSuccess) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+    }
+    if (fSuccess) {
+        fSuccess = InitializeProcThreadAttributeList(NULL, 1, 0, &size) ||
+                   GetLastError() == ERROR_INSUFFICIENT_BUFFER;
+    }
+    if (fSuccess) {
+        lpAttributeList = reinterpret_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(
+                HeapAlloc(GetProcessHeap(), 0, size));
+        fSuccess = lpAttributeList != NULL;
+    }
+    if (fSuccess) {
+        fSuccess =
+                InitializeProcThreadAttributeList(lpAttributeList, 1, 0, &size);
+    }
+    if (fSuccess) {
+        fInitialized = TRUE;
+        fSuccess = UpdateProcThreadAttribute(
+                lpAttributeList, 0, PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
+                rgHandlesToInherit, cHandlesToInherit * sizeof(HANDLE), NULL,
+                NULL);
+    }
+    if (fSuccess) {
+        STARTUPINFOEXW info;
+        ZeroMemory(&info, sizeof(info));
+        info.StartupInfo = *lpStartupInfo;
+        info.StartupInfo.cb = sizeof(info);
+        info.lpAttributeList = lpAttributeList;
+
+        DD("Creating proc.");
+        fSuccess = CreateProcessW(
+                lpApplicationName, lpCommandLine, lpProcessAttributes,
+                lpThreadAttributes, bInheritHandles,
+                dwCreationFlags | EXTENDED_STARTUPINFO_PRESENT, lpEnvironment,
+                lpCurrentDirectory, &info.StartupInfo, lpProcessInformation);
+    }
+    if (fInitialized)
+        DeleteProcThreadAttributeList(lpAttributeList);
+    if (lpAttributeList)
+        HeapFree(GetProcessHeap(), 0, lpAttributeList);
+    return fSuccess;
+}
+
 struct WindwsPipe {
     ~WindwsPipe() {
         CloseHandle(oOverlap.hEvent);
@@ -193,8 +262,6 @@ struct WindwsPipe {
     }
 
     void flushToRingStreambuf() {
-        DD("Received: %s (%d)", std::string(pipe->chRead, pipe->cbRead).c_str(),
-           pipe->cbRead);
         int left = cbRead;
         auto write = chRead;
         while (left > 0 && buffer->capacity() > 0) {
@@ -427,7 +494,7 @@ public:
 
     virtual std::optional<Pid> createProcess(const CommandArguments& args,
                                              bool captureOutput) override {
-        STARTUPINFOW siStartInfo = {.cb = sizeof(STARTUPINFO)};
+        STARTUPINFOW siStartInfo = {.cb = sizeof(STARTUPINFOW)};
 
         if (captureOutput) {
             DD("Installing mPipes for stdout & stderr");
@@ -482,23 +549,40 @@ public:
         auto wCmdline = toWide(cmdline);
         LPWSTR szCmdline = (LPWSTR)wCmdline.c_str();
 
-        BOOL bSuccess =
-                CreateProcessW(NULL,
-                               szCmdline,  // command line
-                               NULL,       // process security attributes
-                               NULL,       // primary thread security attributes
-                               TRUE,       // handles are inherited
-                               0,          // creation flags
-                               NULL,       // use parent's environment
-                               NULL,       // use parent's current directory
-                               &siStartInfo,  // STARTUPINFO pointer
-                               &mProcInfo);   // receives PROCESS_INFORMATION
+        BOOL bSuccess;
+        if (mPipes.empty()) {
+            bSuccess =
+                    CreateProcessW(NULL,
+                                   szCmdline,  // command line
+                                   NULL,       // process security attributes
+                                   NULL,   // primary thread security attributes
+                                   FALSE,  // handles are NOT inherited
+                                   0,      // creation flags
+                                   NULL,   // use parent's environment
+                                   NULL,   // use parent's current directory
+                                   &siStartInfo,  // STARTUPINFO pointer
+                                   &mProcInfo);  // receives PROCESS_INFORMATION
+        } else {
+            std::vector<HANDLE> handles{mPipes[0]->hWrite, mPipes[1]->hWrite};
+            bSuccess = CreateProcessWithExplicitHandles(
+                    NULL,
+                    szCmdline,     // command line
+                    NULL,          // process security attributes
+                    NULL,          // primary thread security attributes
+                    TRUE,          // handles will be explicitly inherited
+                    0,             // creation flags
+                    NULL,          // use parent's environment
+                    NULL,          // use parent's current directory
+                    &siStartInfo,  // STARTUPINFO pointer
+                    &mProcInfo, handles.size(), handles.data());
+        }
+        DD("Create process: %d, %s", bSuccess, formatLastErr().c_str());
 
         // If an error occurs, exit the application.
-        if (!bSuccess)
+        if (!bSuccess) {
+            DD("Create process failed: %s", formatLastErr().c_str());
             return std::nullopt;
-        //                        "Create process failed:" +
-        //                        formatLastErr());
+        }
 
         // Close handles to the  mPipes no longer needed by the child
         // process. If they are not explicitly closed, there is no way

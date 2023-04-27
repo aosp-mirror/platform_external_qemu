@@ -22,6 +22,7 @@
 #include "aemu/base/StringFormat.h"
 
 #include "aemu/base/files/IniFile.h"
+#include "aemu/base/files/PathUtils.h"
 #include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
@@ -34,13 +35,13 @@
 #include "android/utils/system.h"
 #include "android/version.h"
 using android::base::IniFile;
+using android::base::PathUtils;
 using android::base::StringAppendFormat;
 using android::base::StringFormat;
 using android::base::System;
 using android::base::trim;
 using android::base::Version;
 using android::update_check::VersionExtractor;
-
 
 namespace android {
 namespace avd {
@@ -94,8 +95,10 @@ BugreportInfo::BugreportInfo() {
         auto cpuArch = avdInfo_getTargetCpuArch(getConsoleAgents()->settings->avdInfo());
         StringAppendFormat(&avdDetails, "CPU/ABI: %s\n", cpuArch);
         AFREE(cpuArch);
+        auto contentPath =
+                avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
         StringAppendFormat(&avdDetails, "Path: %s\n",
-                           avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()));
+                           PathUtils::canonicalPath(contentPath).c_str());
         auto tag = avdInfo_getTag(getConsoleAgents()->settings->avdInfo());
         StringAppendFormat(&avdDetails, "Target: %s (API level %d)\n", tag,
                            avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()));
