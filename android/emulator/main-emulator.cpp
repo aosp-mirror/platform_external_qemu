@@ -1133,11 +1133,6 @@ int main(int argc, char** argv) {
     if (!isHeadless) {
         /* Add <lib>/qt/ to the library search path. */
         androidQtSetupEnv(wantedBitness, progDir.data());
-    } else {
-        /* Disable crash reporter in headless mode, as the crash reporter
-         * itself depends on Qt
-         * TODO: Have a text-only crash reporter */
-        System::get()->envSet("ANDROID_EMU_ENABLE_CRASH_REPORTING", "0");
     }
 
 #ifdef _WIN32
