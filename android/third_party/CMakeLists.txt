@@ -313,3 +313,10 @@ android_license(
   LICENSE
     "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master/LICENSE"
 )
+# Used by gfxstream but has different license.
+android_license(
+  TARGET "libdrm_headers"
+  LIBNAME None
+  SPDX MIT
+  LICENSE "MIT"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/../libdrm/LICENSE")
