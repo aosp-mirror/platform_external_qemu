@@ -12,32 +12,34 @@ string(REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
 message(STATUS "Including zlib version: ${ZLIB_FULL_VERSION}")
 android_add_library(
   TARGET zlib
+  BAZEL "@zlib//:z"
+  INCLUDES "${ZLIB_SOURCE_DIR}"
   LICENSE NO_COPYRIGHT
-  SRC # cmake-format: sortable
-      ${ZLIB_SOURCE_DIR}/adler32.c
-      ${ZLIB_SOURCE_DIR}/compress.c
-      ${ZLIB_SOURCE_DIR}/crc32.c
-      ${ZLIB_SOURCE_DIR}/deflate.c
-      ${ZLIB_SOURCE_DIR}/gzclose.c
-      ${ZLIB_SOURCE_DIR}/gzlib.c
-      ${ZLIB_SOURCE_DIR}/gzread.c
-      ${ZLIB_SOURCE_DIR}/gzwrite.c
-      ${ZLIB_SOURCE_DIR}/infback.c
-      ${ZLIB_SOURCE_DIR}/inffast.c
-      ${ZLIB_SOURCE_DIR}/inflate.c
-      ${ZLIB_SOURCE_DIR}/inftrees.c
-      ${ZLIB_SOURCE_DIR}/trees.c
-      ${ZLIB_SOURCE_DIR}/uncompr.c
-      ${ZLIB_SOURCE_DIR}/zutil.c)
-target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
-                                       ${ZLIB_SOURCE_DIR})
+  SOURCE_DIR ${ZLIB_SOURCE_DIR}
+  SRC adler32.c
+      compress.c
+      crc32.c
+      deflate.c
+      gzclose.c
+      gzlib.c
+      gzread.c
+      gzwrite.c
+      infback.c
+      inffast.c
+      inflate.c
+      inftrees.c
+      trees.c
+      uncompr.c
+      zutil.c)
 
-android_target_compile_definitions(zlib linux-x86_64
-                                   PRIVATE -D_LARGEFILE64_SOURCE=1)
 android_target_compile_definitions(zlib darwin-x86_64
                                    PRIVATE -D_LARGEFILE64_SOURCE=1)
-target_compile_options(zlib PRIVATE -Wno-implicit-function-declaration
-                                    -Wno-deprecated-non-prototype)
+
+if(NOT OPTION_BAZEL)
+  target_compile_options(zlib PRIVATE -Wno-implicit-function-declaration
+                                      -Wno-deprecated-non-prototype)
+endif()
+
 android_target_compile_definitions(
   zlib windows_msvc-x86_64
   PRIVATE -DWIN32
