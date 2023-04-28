@@ -26,8 +26,8 @@
 #include "android-qemu2-glue/netsim/PacketProtocol.h"
 #include "android/grpc/utils/EnumTranslate.h"
 #include "common.pb.h"
-#include "hci_packet.pb.h"
 #include "h4_parser.h"
+#include "hci_packet.pb.h"
 #include "packet_streamer.pb.h"
 #include "startup.pb.h"
 
@@ -155,11 +155,13 @@ private:
         mPacketQueue.push_back(request);
     }
 
-    // This sequence should reset the Android Bluetooth stack.
-    static const uint8_t constexpr reset_sequence[] = {0x01, 0x03, 0x0c, 0x00};
+    // This is a HCI Hardware Error Event, which indicates a serious problem
+    // with the Bluetooth hardware. As a result, the Bluetooth stack should
+    // crash and restart.
+    static const uint8_t constexpr reset_sequence[] = {0x04, 0x10, 0x01, 0x42};
 
-    // External <-> Internal mapping. This makes sure the external gRPC representation
-    // is independent of what is used internally.
+    // External <-> Internal mapping. This makes sure the external gRPC
+    // representation is independent of what is used internally.
     static constexpr const std::tuple<HCIPacket::PacketType, PacketType>
             mPacketType[] = {
                     {HCIPacket::HCI_PACKET_UNSPECIFIED, PacketType::UNKNOWN},
