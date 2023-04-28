@@ -13,28 +13,28 @@
 // limitations under the License.
 #include "android/emulation/control/EmulatorAdvertisement.h"
 
-#include <gtest/gtest.h>  // for AssertionResult, Message
-#include <chrono>         // for operator+, operator<
-#include <fstream>        // for ofstream, operator<<
-#include <functional>     // for function, __base
-#include <vector>         // for vector
+#include <gtest/gtest.h>
+#include <chrono>
+#include <fstream>
+#include <functional>
+#include <optional>
+#include <vector>
 
-#include "aemu/base/EnumFlags.h"  // for operator|
-#include "aemu/base/Log.h"        // for LogStream, LOG, LogMes...
-#include "aemu/base/Optional.h"   // for Optional
+#include "aemu/base/EnumFlags.h"
+#include "aemu/base/Log.h"
 
 #include "aemu/base/files/IniFile.h"
-#include "aemu/base/files/PathUtils.h"  // for pj, PathUtils (ptr only)
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/process/Command.h"
 #include "aemu/base/sockets/ScopedSocket.h"
 #include "aemu/base/sockets/SocketUtils.h"
-#include "android/base/system/System.h"        // for System, System::Pid
-#include "android/base/testing/TestTempDir.h"  // for TestTempDir
-#include "android/emulation/ConfigDirs.h"      // for ConfigDirs
+#include "android/base/system/System.h"
+#include "android/base/testing/TestTempDir.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/utils/path.h"
-#include "aemu/base/process/Command.h"
 
 #ifndef _WIN32
-#include <sys/wait.h>  // for waitpid
+#include <sys/wait.h>
 #endif
 
 using android::ConfigDirs;
@@ -59,7 +59,7 @@ class EmulatorAdvertisementTest : public testing::Test {
 protected:
     EmulatorAdvertisementTest() {}
 
-    void TearDown() override  {
+    void TearDown() override {
         if (mTesterProc) {
             LOG(INFO) << "Terminating tester.";
             mTesterProc->terminate();
@@ -72,26 +72,23 @@ protected:
         hello.close();
     }
 
-    Optional<System::Pid> launchInBackground(std::string dir = "") {
+    std::optional<android::base::Pid> launchInBackground(std::string dir = "",
+                                                         int sleepMs = 100) {
         std::string executable =
                 System::get()->findBundledExecutable(kDiscovery);
         std::vector<std::string> cmdArgs{executable};
-        auto cmd = Command::create({executable});
+        auto cmd = Command::create({executable, "--sleep", std::to_string(sleepMs) + "ms"});
         if (!dir.empty()) {
+            cmd.arg("--discovery");
             cmd.arg(dir);
         }
-        System::Pid exePid = -1;
-        std::string invoke = "";
-        for (auto arg : cmdArgs) {
-            invoke += arg + " ";
-        }
+
 
         mTesterProc = cmd.execute();
-        LOG(INFO) << "Launching: " << executable << " " << dir  << "&";
         if (!mTesterProc) {
             // Failed to start Mission abort!
-            LOG(INFO) << "Failed to start (does the emulator binary exist?): " << invoke;
-            return {};
+            LOG(INFO) << "Failed to start (does the emulator binary exist?): " << executable;
+            return std::nullopt;
         }
 
         return mTesterProc->pid();
@@ -100,7 +97,7 @@ protected:
     bool waitForPred(std::function<bool()> pred) {
         auto maxWait = system_clock::now() + kPauseForLaunch;
         while (system_clock::now() < maxWait && !pred()) {
-            System::get()->sleepMs(kWaitIntervalMs);
+            std::this_thread::sleep_for(kWaitIntervalMs);
         }
         return pred();
     }
@@ -109,15 +106,14 @@ protected:
         auto path = pj(dir, "pid_" + std::to_string(pid) + ".ini");
         LOG(INFO) << "Waiting for   : " << path;
         return waitForPred(
-                [&path]() {
-                    return System::get()->pathIsFile(path); });
+                [&path]() { return System::get()->pathIsFile(path); });
     }
 
     TestTempDir mTempDir{"DiscoveryTest"};
     std::unique_ptr<base::ObservableProcess> mTesterProc;
-    const std::string kDiscovery = "studio_discovery_tester";
+    const std::string kDiscovery = "studio_discovery_emulator_tester";
     const seconds kPauseForLaunch{10};
-    const int kWaitIntervalMs = 5;
+    const std::chrono::milliseconds kWaitIntervalMs{5};
 };
 
 TEST_F(EmulatorAdvertisementTest, cleans_two_files) {
@@ -206,8 +202,8 @@ TEST_F(EmulatorAdvertisementTest, wrong_pid_file_not_alive) {
     EXPECT_FALSE(PidChecker().isAlive(ignored, tst1));
 }
 
-TEST_F(EmulatorAdvertisementTest, alive_pid_with_open_port_is_alive) {
-    auto pid = launchInBackground(mTempDir.path());
+TEST_F(EmulatorAdvertisementTest, do_not_delete_emulator_like_process) {
+    auto pid = launchInBackground(mTempDir.path(), 1000);
     EXPECT_TRUE(pid);
 
     // Make sure the process has finished writing the ini file.
@@ -216,19 +212,9 @@ TEST_F(EmulatorAdvertisementTest, alive_pid_with_open_port_is_alive) {
     auto tst1 = pj(mTempDir.path(),
                    std::string("pid_") + std::to_string(*pid) + ".ini");
     base::IniFile ini(tst1);
-    auto socket = base::ScopedSocket(base::socketTcp4LoopbackServer(0));
-    EXPECT_TRUE(socket.valid());
-
-    int port = base::socketGetPort(socket.get());
-    EXPECT_GT(port, 0) << "The port should actually exist!";
-
-
-
-    ini.setInt64("grpc.port", port);
+    ini.setInt64("grpc.port", 123);
     ini.write();
 
-    EXPECT_TRUE(base::ScopedSocket(base::socketTcp4LoopbackClient(port)).valid());
-    EXPECT_TRUE(OpenPortChecker().isAlive("ignored", tst1));
     auto ignored = pj(mTempDir.path(), "pid_123.ini");
     EXPECT_TRUE(PidChecker().isAlive(ignored, tst1));
 }

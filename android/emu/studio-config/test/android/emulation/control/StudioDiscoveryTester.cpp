@@ -13,36 +13,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <chrono>   // for microse...
-#include <cstdio>   // for fprintf
-#include <ratio>    // for ratio
-#include <string>   // for basic_s...
-#include <utility>  // for move
+#include <chrono>
+#include <cstdio>
+#include <memory>
+#include <ratio>
+#include <string>
+#include <thread>
+#include <utility>
 
+#include "absl/flags/flag.h"
+#include "absl/flags/parse.h"
+#include "absl/time/time.h"
 #include "aemu/base/Log.h"
-#include "android/utils/path.h"
-#include "android/base/system/System.h"                       // for System
 #include "android/emulation/control/EmulatorAdvertisement.h"
+#include "android/utils/path.h"
 
-using android::base::System;
-using android::emulation::control::EmulatorProperties;
 using android::emulation::control::EmulatorAdvertisement;
+using android::emulation::control::EmulatorProperties;
+
+ABSL_FLAG(absl::Duration,
+          sleep,
+          absl::Milliseconds(100),
+          "Time to sleep before exiting");
+ABSL_FLAG(std::string, discovery, "", "Path of discovery file");
 
 int main(int argc, char* argv[]) {
+    absl::ParseCommandLine(argc, argv);
+
     EmulatorProperties cfg({{"hello", "world"}});
     std::unique_ptr<EmulatorAdvertisement> discovery;
-    if (argc < 2) {
+    std::string path = absl::GetFlag(FLAGS_discovery);
+
+    if (path.empty()) {
         discovery = std::make_unique<EmulatorAdvertisement>(std::move(cfg));
         auto status = discovery->write();
-        LOG(INFO) <<  (status ? "Successfully Wrote: " : "Failed to write: ") << discovery->location();
+        LOG(INFO) << (status ? "Successfully Wrote: " : "Failed to write: ")
+                  << discovery->location();
     } else {
-        auto path = argv[1];
-        discovery = std::make_unique<EmulatorAdvertisement>(std::move(cfg), path);
+        discovery =
+                std::make_unique<EmulatorAdvertisement>(std::move(cfg), path);
         auto status = discovery->write();
-        LOG(INFO) <<  (status ? "Successfully Wrote: " : "Failed to write: ") << discovery->location();
+        LOG(INFO) << (status ? "Successfully Wrote: " : "Failed to write: ")
+                  << discovery->location();
     }
 
-    std::chrono::seconds awhile(300);
-    System::get()->sleepMs(std::chrono::milliseconds(awhile).count());
+    std::chrono::milliseconds time_in_ms =
+            absl::ToChronoMilliseconds(absl::GetFlag(FLAGS_sleep));
+    std::this_thread::sleep_for(time_in_ms);
     return 0;
 }
