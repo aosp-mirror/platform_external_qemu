@@ -23,6 +23,13 @@
 #include "android/base/system/System.h"  // for System
 #include "android/utils/debug.h"         // for VERBOSE_PRINT, VERBOSE_grpc
 
+// #define DEBUG 0
+/* set  for very verbose debugging */
+#ifndef DEBUG
+#define DD(...) (void)0
+#else
+#define DD(...) dinfo(__VA_ARGS__)
+#endif
 namespace android {
 namespace control {
 namespace interceptor {
@@ -64,22 +71,68 @@ static void printLog(const InvocationRecord& loginfo) {
     auto status_msg = kStatus[std::min<int>(
             static_cast<int>(loginfo.status.error_code()), 16)];
     VERBOSE_PRINT(grpc,
-                  "start: %" PRIu64 ", rcvTime: %" PRIu64 ", sndTime: %" PRIu64
-                  ", rcv: %" PRIu64 ", snd: %" PRIu64 ", %s %s, %s(%s) -> [%s]",
+                  "from: %s, start: %" PRIu64 ", rcvTime: %" PRIu64
+                  ", sndTime: %" PRIu64 ", rcv: %" PRIu64 ", snd: %" PRIu64
+                  ", rcv_cnt: %" PRIu64 ", snd_cnt: %" PRIu64
+                  ", %s %s, %s(%s) -> [%s]",
+                  loginfo.peer.c_str(),
                   loginfo.mTimestamps[InvocationRecord::kStartTimeIdx],
                   loginfo.rcvTime, loginfo.sndTime, loginfo.rcvBytes,
-                  loginfo.sndBytes, status_msg.c_str(),
-                  loginfo.status.error_message().c_str(),
+                  loginfo.sndBytes, loginfo.rcvMessages, loginfo.sndMessages,
+                  status_msg.c_str(), loginfo.status.error_message().c_str(),
                   loginfo.method.c_str(), loginfo.incoming.c_str(),
                   loginfo.response.c_str());
 };
 
 LoggingInterceptor::LoggingInterceptor(ServerRpcInfo* info,
                                        ReportingFunction reporter)
-    : mReporter(reporter) {
+    : mReporter(reporter), mServerInfo(info) {
     if (info) {
         mLoginfo.method = std::string(info->method()).substr(0, kMaxStringLen);
-        mLoginfo.type = info->type();
+        switch (info->type()) {
+            case ServerRpcInfo::Type::UNARY:
+                mLoginfo.type = CallType::UNARY;
+                break;
+            case ServerRpcInfo::Type::CLIENT_STREAMING:
+                mLoginfo.type = CallType::CLIENT_STREAMING;
+                break;
+            case ServerRpcInfo::Type::SERVER_STREAMING:
+                mLoginfo.type = CallType::SERVER_STREAMING;
+                break;
+            case ServerRpcInfo::Type::BIDI_STREAMING:
+                mLoginfo.type = CallType::BIDI_STREAMING;
+                break;
+        }
+        mLoginfo.direction = Direction::INCOMING;
+    }
+    mLoginfo.mTimestamps[InvocationRecord::kStartTimeIdx] =
+            base::System::get()->getUnixTimeUs();
+}
+
+LoggingInterceptor::LoggingInterceptor(ClientRpcInfo* info,
+                                       ReportingFunction reporter)
+    : mReporter(reporter), mClientInfo(info) {
+    if (info) {
+        mLoginfo.method = std::string(info->method()).substr(0, kMaxStringLen);
+        switch (info->type()) {
+            case ClientRpcInfo::Type::UNARY:
+                mLoginfo.type = CallType::UNARY;
+                break;
+            case ClientRpcInfo::Type::CLIENT_STREAMING:
+                mLoginfo.type = CallType::CLIENT_STREAMING;
+                break;
+            case ClientRpcInfo::Type::SERVER_STREAMING:
+                mLoginfo.type = CallType::SERVER_STREAMING;
+                break;
+            case ClientRpcInfo::Type::BIDI_STREAMING:
+                mLoginfo.type = CallType::BIDI_STREAMING;
+                break;
+            case ClientRpcInfo::Type::UNKNOWN:
+                mLoginfo.type = CallType::UNKNOWN;
+                break;
+        }
+        mLoginfo.direction = Direction::OUTGOING;
+        mLoginfo.peer = info->client_context()->peer();
     }
     mLoginfo.mTimestamps[InvocationRecord::kStartTimeIdx] =
             base::System::get()->getUnixTimeUs();
@@ -127,6 +180,7 @@ Phase: [POST_RECV_CLOSE]
  */
 void LoggingInterceptor::Intercept(InterceptorBatchMethods* methods) {
     auto ts = base::System::get()->getUnixTimeUs();
+    DD("Intercepting -- %d", ts);
 
     if (methods->QueryInterceptionHookPoint(
                 InterceptionHookPoints::POST_RECV_MESSAGE)) {
@@ -134,8 +188,8 @@ void LoggingInterceptor::Intercept(InterceptorBatchMethods* methods) {
         // of what is happening.. Increment the time spend on receiving
         // bytes..
         int selector = InvocationRecord::kStartTimeIdx;
-        if (mLoginfo.type == ServerRpcInfo::Type::CLIENT_STREAMING ||
-            mLoginfo.type == ServerRpcInfo::Type::BIDI_STREAMING)
+        if (mLoginfo.type == CallType::CLIENT_STREAMING ||
+            mLoginfo.type == CallType::BIDI_STREAMING)
             selector = static_cast<int>(
                     mLoginfo.rcvTime == 0
                             ? InterceptionHookPoints::POST_RECV_INITIAL_METADATA
@@ -160,6 +214,7 @@ void LoggingInterceptor::Intercept(InterceptorBatchMethods* methods) {
         // We just received a message from the client
         auto msg = reinterpret_cast<::google::protobuf::Message*>(
                 methods->GetRecvMessage());
+        mLoginfo.rcvMessages++;
         if (msg) {
             auto size = msg->SpaceUsed();
             if (size < kMaxProtobufMsgLogSize && mLoginfo.rcvBytes == 0) {
@@ -193,6 +248,7 @@ void LoggingInterceptor::Intercept(InterceptorBatchMethods* methods) {
         mLoginfo.sndTime += getTimeDiffUs(
                 mLoginfo, InterceptionHookPoints::PRE_SEND_MESSAGE,
                 InterceptionHookPoints::POST_SEND_MESSAGE);
+        mLoginfo.sndMessages++;
     }
 
     methods->Proceed();
@@ -203,6 +259,13 @@ LoggingInterceptorFactory::LoggingInterceptorFactory(ReportingFunction reporter)
 
 Interceptor* LoggingInterceptorFactory::CreateServerInterceptor(
         ServerRpcInfo* info) {
+    DD("Creating a server interceptor!");
+    return new LoggingInterceptor(info, mReporter);
+};
+
+Interceptor* LoggingInterceptorFactory::CreateClientInterceptor(
+        ClientRpcInfo* info) {
+    DD("Creating a client interceptor!");
     return new LoggingInterceptor(info, mReporter);
 };
 

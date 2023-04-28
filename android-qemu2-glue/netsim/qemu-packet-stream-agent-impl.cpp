@@ -17,6 +17,7 @@
 #include <new>
 #include <string>
 #include <thread>
+#include <unordered_set>
 #include <utility>
 
 #include "PacketProtocol.h"
@@ -71,6 +72,9 @@ static struct {
 
 using android::qemu2::PacketStreamChardev;
 using android::qemu2::PacketStreamerTransport;
+
+static std::unordered_set<PacketStreamChardev*> gActiveDevices;
+static std::mutex gActiveDevicesLock;
 
 #define TYPE_CHARDEV_NETSIM "chardev-netsim"
 #define NETSIM_CHARDEV(obj) \
@@ -143,6 +147,9 @@ static void netsim_chr_cleanup(Object* o) {
 
     // Constructed using placement new, so we will manually destruct it.
     netsim->transport.~weak_ptr();
+
+    const std::lock_guard<std::mutex> lock(gActiveDevicesLock);
+    gActiveDevices.erase(netsim);
 }
 
 static int netsim_chr_machine_done_hook(Chardev* chr) {
@@ -158,6 +165,9 @@ static void netsim_chr_init(Object* obj) {
     // Construct the std::weak_ptr member in the pre-allocated memory using
     // placement new
     new (&netsim->transport) std::weak_ptr<PacketStreamerTransport>();
+
+    const std::lock_guard<std::mutex> lock(gActiveDevicesLock);
+    gActiveDevices.insert(netsim);
 }
 
 static void char_netsim_class_init(ObjectClass* oc, void* data) {
@@ -175,6 +185,15 @@ static const TypeInfo char_netsim_type_info = {
         .instance_finalize = netsim_chr_cleanup,
         .class_init = char_netsim_class_init,
 };
+
+void close_netsim() {
+    const std::lock_guard<std::mutex> lock(gActiveDevicesLock);
+    for (auto device : gActiveDevices) {
+        if (auto transport = device->transport.lock()) {
+            transport->cancel();
+        }
+    }
+}
 
 void register_netsim(const std::string address,
                      const std::string rootcanal_default_commands_file,

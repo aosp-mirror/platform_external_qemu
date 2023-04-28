@@ -15,7 +15,8 @@ android_add_library(
   SOURCE_DIR
   src
   SRC android/emulation/control/utils/EmulatorGrpcClient.cpp
-  DEPS android-emu-base-headers android-emu-studio-config android-grpc-security)
+  DEPS android-emu-base-headers android-emu-metrics android-emu-studio-config
+       android-grpc-interceptors android-grpc-security)
 target_link_libraries(
   android-grpc-client PUBLIC android-emu-base android-emu-base-headers
                              android-grpc-endpoint grpc++)
