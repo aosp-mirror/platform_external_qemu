@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "OpenglRender/Renderer.h"
+#include "render-utils/Renderer.h"
 
 #include "RenderWindow.h"
 
@@ -21,7 +21,7 @@
 #include "aemu/base/synchronization/Lock.h"
 #include "aemu/base/synchronization/MessageChannel.h"
 #include "aemu/base/threads/FunctorThread.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 
 #include "RenderThread.h"
 
@@ -35,7 +35,7 @@ namespace android_studio {
 
 namespace emugl {
 
-class RendererImpl final : public Renderer {
+class RendererImpl final : public gfxstream::Renderer {
 public:
     RendererImpl();
     ~RendererImpl();
@@ -45,7 +45,7 @@ public:
     void finish() override;
 
 public:
-    RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
+    gfxstream::RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
 
     void* addressSpaceGraphicsConsumerCreate(
         struct asg_context,
@@ -117,12 +117,10 @@ public:
                       int displayId,
                       int desiredWidth,
                       int desiredHeight,
-                      SkinRotation desiredRotation,
-                      SkinRect rect) final;
+                      int desiredRotation,
+                      gfxstream::Rect rect) final;
 
-    void snapshotOperationCallback(
-            android::snapshot::Snapshotter::Operation op,
-            android::snapshot::Snapshotter::Stage stage) final;
+    void snapshotOperationCallback(int op, int stage) final;
 
     void addListener(FrameBufferChangeEventListener* listener) override;
     void removeListener(FrameBufferChangeEventListener* listener) override;

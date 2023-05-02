@@ -15,7 +15,7 @@
 
 #include "aemu/base/AlignedBuf.h"
 
-#include "render_api_platform_types.h"
+#include "render-utils/render_api_platform_types.h"
 
 #include <GLES3/gl31.h>
 

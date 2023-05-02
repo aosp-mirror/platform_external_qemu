@@ -28,7 +28,7 @@ class VideoplaybackVideoRenderer : public virtualscene::CameraRenderer {
  public:
   VideoplaybackVideoRenderer();
   ~VideoplaybackVideoRenderer();
-  bool initialize(const GLESv2Dispatch* gles2,
+  bool initialize(const gfxstream::gl::GLESv2Dispatch* gles2,
                   int width,
                   int height) override;
   void uninitialize() override;

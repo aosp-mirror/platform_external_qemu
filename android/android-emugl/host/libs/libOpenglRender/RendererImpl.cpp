@@ -17,6 +17,7 @@
 #include "RenderThread.h"
 
 #include "android/base/system/System.h"
+#include "android/snapshot/Snapshotter.h"
 #include "android/utils/debug.h"
 
 #include "emugl/common/OpenGLDispatchLoader.h"
@@ -30,6 +31,9 @@
 #include <utility>
 
 #include <assert.h>
+
+using namespace gfxstream;
+using namespace gfxstream::gl;
 
 namespace emugl {
 
@@ -397,13 +401,13 @@ int RendererImpl::getScreenshot(unsigned int nChannels,
                                 int displayId = 0,
                                 int desiredWidth = 0,
                                 int desiredHeight = 0,
-                                SkinRotation desiredRotation = SKIN_ROTATION_0,
-                                SkinRect rect = {{0, 0}, {0, 0}}) {
+                                int desiredRotation = SKIN_ROTATION_0,
+                                Rect rect = {{0, 0}, {0, 0}}) {
     auto fb = FrameBuffer::getFB();
     if (fb) {
         return fb->getScreenshot(nChannels, width, height, pixels, cPixels,
                                  displayId, desiredWidth, desiredHeight,
-                                 desiredRotation, rect);
+                                 static_cast<SkinRotation>(desiredRotation), {{rect.pos.x, rect.pos.y}, {rect.size.w, rect.size.h}});
     }
     *cPixels = 0;
     return -1;
@@ -719,11 +723,9 @@ struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {
     return &sVirtioGpuOps;
 }
 
-void RendererImpl::snapshotOperationCallback(
-        android::snapshot::Snapshotter::Operation op,
-        android::snapshot::Snapshotter::Stage stage) {
+void RendererImpl::snapshotOperationCallback(int op, int stage) {
     using namespace android::snapshot;
-    switch (op) {
+    switch (static_cast<Snapshotter::Operation>(op)) {
         case Snapshotter::Operation::Load:
             if (stage == Snapshotter::Stage::Start) {
 #ifdef SNAPSHOT_PROFILE

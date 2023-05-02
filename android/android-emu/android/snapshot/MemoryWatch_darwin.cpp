@@ -19,7 +19,7 @@
 #include "host-common/crash-handler.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "host-common/FeatureControl.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 #include "android/snapshot/MacSegvHandler.h"
 
 #include <signal.h>

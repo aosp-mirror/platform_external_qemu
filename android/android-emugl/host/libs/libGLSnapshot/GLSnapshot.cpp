@@ -17,6 +17,8 @@
 #define D(...)
 #endif
 
+using namespace gfxstream::gl;
+
 namespace GLSnapshot {
 
 GLSnapshotState::GLSnapshotState(const GLESv2Dispatch* gl) : mGL(gl) {

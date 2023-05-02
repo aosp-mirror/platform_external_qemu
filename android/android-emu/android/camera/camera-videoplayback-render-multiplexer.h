@@ -39,7 +39,11 @@
 #include "android/videoplayback/VideoplaybackRenderTarget.h"
 #include "offworld.pb.h"
 
+namespace gfxstream {
+namespace gl {
 struct GLESv2Dispatch;
+}  // namespace gl
+}  // namespace gfxstream
 
 using namespace android::base;
 typedef ::offworld::DatasetInfo DatasetInfo;
@@ -56,7 +60,7 @@ class RenderMultiplexer : public virtualscene::CameraRenderer {
 public:
     RenderMultiplexer() = default;
     ~RenderMultiplexer() = default;
-    bool initialize(const GLESv2Dispatch* gles2,
+    bool initialize(const gfxstream::gl::GLESv2Dispatch* gles2,
                     int width,
                     int height) override;
     void uninitialize() override;

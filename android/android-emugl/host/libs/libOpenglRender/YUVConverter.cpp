@@ -16,7 +16,7 @@
 
 #include "YUVConverter.h"
 
-#include "DispatchTables.h"
+#include "OpenGLESDispatch/DispatchTables.h"
 #include "emugl/common/feature_control.h"
 #include "host-common/feature_control.h"
 #include "host-common/misc.h"
@@ -40,6 +40,8 @@
 #else
 #define DDD(fmt, ...)
 #endif
+
+using namespace gfxstream::gl;
 
 enum YUVInterleaveDirection {
     YUVInterleaveDirectionVU = 0,

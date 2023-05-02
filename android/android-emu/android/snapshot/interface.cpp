@@ -9,13 +9,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/snapshot/interface.h"
+#include "snapshot/interface.h"
 
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/emulation/CpuAccelerator.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshotter.h"

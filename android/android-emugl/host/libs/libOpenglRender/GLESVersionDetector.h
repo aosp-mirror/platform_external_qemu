@@ -22,10 +22,10 @@
 
 #include <string>
 // Used to determine maximum supported GLES version.
-GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy);
+gfxstream::gl::GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy);
 
 // For determining whether or not to use core profile OpenGL.
 bool shouldEnableCoreProfile();
 
-std::string filterExtensionsBasedOnMaxVersion(GLESDispatchMaxVersion ver, const std::string& exts);
+std::string filterExtensionsBasedOnMaxVersion(gfxstream::gl::GLESDispatchMaxVersion ver, const std::string& exts);
 

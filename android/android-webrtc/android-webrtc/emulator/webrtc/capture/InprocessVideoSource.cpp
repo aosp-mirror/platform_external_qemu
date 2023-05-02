@@ -36,7 +36,7 @@
 #include "android/emulation/control/utils/EventWaiter.h"
 #include "android/emulation/control/utils/ScreenshotUtils.h"
 #include "android/gpu_frame.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "api/video/i420_buffer.h"  // for I420Buffer
 #include "libyuv/convert.h"         // for ConvertToI420
 #include "libyuv/rotate.h"          // for kRotate0
@@ -67,7 +67,7 @@ void InprocessVideoSource::captureFrames() {
 
     std::unique_ptr<EventWaiter> frameEvent;
     std::unique_ptr<
-            RaiiEventListener<emugl::Renderer, emugl::FrameBufferChangeEvent>>
+            RaiiEventListener<gfxstream::Renderer, gfxstream::FrameBufferChangeEvent>>
             frameListener;
     // Screenshots can come from either the gl renderer, or the guest.
     const auto& renderer = android_getOpenglesRenderer();
@@ -75,8 +75,8 @@ void InprocessVideoSource::captureFrames() {
         // Fast mode..
         frameEvent = std::make_unique<EventWaiter>();
         frameListener = std::make_unique<RaiiEventListener<
-                emugl::Renderer, emugl::FrameBufferChangeEvent>>(
-                renderer.get(), [&](const emugl::FrameBufferChangeEvent state) {
+                gfxstream::Renderer, gfxstream::FrameBufferChangeEvent>>(
+                renderer.get(), [&](const gfxstream::FrameBufferChangeEvent state) {
                     frameEvent->newEvent();
                 });
     } else {

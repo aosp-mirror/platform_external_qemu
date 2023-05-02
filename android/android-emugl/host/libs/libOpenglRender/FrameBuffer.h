@@ -20,8 +20,9 @@
 #include "aemu/base/threads/Thread.h"
 #include "aemu/base/threads/WorkerThread.h"
 #include "aemu/base/synchronization/MessageChannel.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 #include "aemu/base/EventNotificationSupport.h"
+#include "android/base/system/System.h"
 #include "render-utils/virtio_gpu_ops.h"
 
 #include "ColorBuffer.h"
@@ -36,8 +37,7 @@
 #include "VsyncThread.h"
 #include "WindowSurface.h"
 
-#include "OpenglRender/render_api.h"
-#include "OpenglRender/Renderer.h"
+#include "render-utils/Renderer.h"
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -144,7 +144,7 @@ struct FrameBufferCaps {
 // You can register a listener to be informed of FrameBufferChange events. The registered
 // callback will be invoked whenever a new frame has been made available. Listeners should
 // do as little as possible as the callback is on the render thread itself.
-class FrameBuffer :  public android::base::EventNotificationSupport<emugl::FrameBufferChangeEvent> {
+class FrameBuffer :  public android::base::EventNotificationSupport<gfxstream::FrameBufferChangeEvent> {
 public:
     // Initialize the global instance.
     // |width| and |height| are the dimensions of the emulator GPU display
@@ -217,7 +217,7 @@ public:
     // Set a callback that will be called each time the emulated GPU content
     // is updated. This can be relatively slow with host-based GPU emulation,
     // so only do this when you need to.
-    void setPostCallback(emugl::Renderer::OnPostCallback onPost,
+    void setPostCallback(gfxstream::Renderer::OnPostCallback onPost,
                          void* onPostContext,
                          uint32_t displayId,
                          bool useBgraReadback = false);
@@ -485,8 +485,8 @@ public:
     void ensureReadbackWorker();
 
     bool asyncReadbackSupported();
-    emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();
-    emugl::Renderer::FlushReadPixelPipeline getFlushReadPixelPipeline();
+    gfxstream::Renderer::ReadPixelsCallback getReadPixelsCallback();
+    gfxstream::Renderer::FlushReadPixelPipeline getFlushReadPixelPipeline();
 
     // Re-post the last ColorBuffer that was displayed through post().
     // This is useful if you detect that the sub-window content needs to
@@ -571,8 +571,8 @@ public:
     void lock();
     void unlock();
 
-    static void setMaxGLESVersion(GLESDispatchMaxVersion version);
-    static GLESDispatchMaxVersion getMaxGLESVersion();
+    static void setMaxGLESVersion(gfxstream::gl::GLESDispatchMaxVersion version);
+    static gfxstream::gl::GLESDispatchMaxVersion getMaxGLESVersion();
 
     float getDpr() const { return m_dpr; }
     int windowWidth() const { return m_windowWidth; }
@@ -724,7 +724,7 @@ private:
     bool postImpl(HandleType p_colorbuffer, bool needLockAndBind = true, bool repaint = false);
     void setGuestPostedAFrame() {
         m_guestPostedAFrame = true;
-        fireEvent({ emugl::FrameBufferChange::FrameReady,  mFrameNumber++ });
+        fireEvent({ gfxstream::FrameBufferChange::FrameReady,  mFrameNumber++ });
     }
     HandleType createColorBufferLocked(int p_width,
                                        int p_height,
@@ -836,7 +836,7 @@ private:
     bool m_guestPostedAFrame = false;
 
     struct onPost {
-        emugl::Renderer::OnPostCallback cb;
+        gfxstream::Renderer::OnPostCallback cb;
         void* context;
         uint32_t displayId;
         uint32_t width;

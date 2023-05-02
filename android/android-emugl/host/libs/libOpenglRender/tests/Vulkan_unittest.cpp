@@ -41,6 +41,7 @@ using android::base::Win32UnicodeString;
 #include <dlfcn.h>
 #endif
 
+using namespace gfxstream::gl;
 using android::base::arraySize;
 using android::base::pj;
 using android::base::TestSystem;

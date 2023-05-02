@@ -42,7 +42,9 @@ class BumpPool;
 
 
 class ProcessResources;
+namespace gfxstream {
 class IOStream;
+}  // namespace gfxstream
 
 class VkDecoder {
 public:
@@ -50,7 +52,7 @@ public:
     ~VkDecoder();
     void setForSnapshotLoad(bool forSnapshotLoad);
     void onThreadTeardown();
-    size_t decode(void* buf, size_t bufsize, IOStream* stream, const ProcessResources* processResources);
+    size_t decode(void* buf, size_t bufsize, gfxstream::IOStream* stream, const ProcessResources* processResources);
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

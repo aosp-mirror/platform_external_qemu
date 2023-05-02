@@ -28,6 +28,8 @@
 
 #include <assert.h>
 
+using namespace gfxstream::gl;
+
 RenderContext* RenderContext::create(EGLDisplay display,
                                      EGLConfig config,
                                      EGLContext sharedContext,

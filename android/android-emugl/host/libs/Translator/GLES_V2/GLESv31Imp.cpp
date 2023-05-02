@@ -743,3 +743,94 @@ GL_APICALL void GL_APIENTRY glGetTexLevelParameteriv(GLenum target, GLint level,
     }
 }
 
+
+GL_APICALL void GL_APIENTRY glTexBufferOES(GLenum target, GLenum internalformat, GLuint buffer) {
+    GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glTexBufferOES);
+    if (ctx->shareGroup().get()) {
+        const GLuint globalBufferName =
+            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+        ctx->dispatcher().glTexBufferOES(target, internalformat, globalBufferName);
+        TextureData* texData = getTextureTargetData(target);
+        texData->internalFormat = internalformat;
+        texData->makeDirty();
+    }
+}
+
+GL_APICALL void GL_APIENTRY glTexBufferEXT(GLenum target, GLenum internalformat, GLuint buffer) {
+    GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glTexBufferEXT);
+    if (ctx->shareGroup().get()) {
+        const GLuint globalBufferName =
+            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+        ctx->dispatcher().glTexBufferEXT(target, internalformat, globalBufferName);
+        TextureData* texData = getTextureTargetData(target);
+        texData->internalFormat = internalformat;
+        texData->makeDirty();
+    }
+}
+
+GL_APICALL void GL_APIENTRY glTexBufferRangeOES(GLenum target, GLenum internalformat, GLuint buffer,
+                                                GLintptr offset, GLsizeiptr size) {
+    GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glTexBufferRangeOES);
+    if (ctx->shareGroup().get()) {
+        const GLuint globalBufferName =
+            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+        ctx->dispatcher().glTexBufferRangeOES(target, internalformat, globalBufferName, offset, size);
+        TextureData* texData = getTextureTargetData(target);
+        texData->internalFormat = internalformat;
+        texData->makeDirty();
+    }
+}
+
+GL_APICALL void GL_APIENTRY glTexBufferRangeEXT(GLenum target, GLenum internalformat, GLuint buffer,
+                                                GLintptr offset, GLsizeiptr size) {
+    GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glTexBufferRangeEXT);
+    if (ctx->shareGroup().get()) {
+        const GLuint globalBufferName =
+            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+        ctx->dispatcher().glTexBufferRangeEXT(target, internalformat, globalBufferName, offset,size);
+        TextureData* texData = getTextureTargetData(target);
+        texData->internalFormat = internalformat;
+        texData->makeDirty();
+    }
+}
+
+GL_APICALL void GL_APIENTRY glDebugMessageControl(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint* ids, GLboolean enabled) {
+    GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glDebugMessageControl);
+    ctx->dispatcher().glDebugMessageControl(source, type, severity, count, ids, enabled);
+}
+
+GL_APICALL void GL_APIENTRY glDebugMessageInsert(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* buf) {
+    GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glDebugMessageInsert);
+    ctx->dispatcher().glDebugMessageInsert(source, type, id, severity, length, buf);
+}
+
+GL_APICALL void GL_APIENTRY glDebugMessageCallback(GLDEBUGPROC callback, const void* userParam) {
+    GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glDebugMessageCallback);
+    ctx->dispatcher().glDebugMessageCallback(callback, userParam);
+}
+
+GL_APICALL GLuint GL_APIENTRY glGetDebugMessageLog(GLuint count, GLsizei bufSize, GLenum* sources, GLenum* types, GLuint* ids, GLenum* severities, GLsizei* lengths, GLchar* messageLog) {
+    GET_CTX_V2_RET(0);
+    RET_AND_SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetDebugMessageLog, 0);
+    GLuint glGetDebugMessageLogRET = ctx->dispatcher().glGetDebugMessageLog(count, bufSize, sources, types, ids, severities, lengths, messageLog);
+    return glGetDebugMessageLogRET;
+}
+
+GL_APICALL void GL_APIENTRY glPushDebugGroup(GLenum source, GLuint id, GLsizei length, const GLchar* message) {
+    GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glPushDebugGroup);
+    ctx->dispatcher().glPushDebugGroup(source, id, length, message);
+}
+
+GL_APICALL void GL_APIENTRY glPopDebugGroup() {
+    GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glPopDebugGroup);
+    ctx->dispatcher().glPopDebugGroup();
+}

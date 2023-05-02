@@ -141,7 +141,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
                                                EGLStream stream,
                                                const void* textureLoader);
 EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
-EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
+EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable, EGLBoolean nullEgl);
 EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
 EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
 
@@ -150,6 +150,8 @@ EGLAPI EGLContext EGLAPIENTRY eglGetNativeContextANDROID(EGLDisplay, EGLContext)
 EGLAPI EGLImage EGLAPIENTRY eglGetNativeImageANDROID(EGLDisplay, EGLImage);
 EGLAPI EGLBoolean EGLAPIENTRY eglSetImageInfoANDROID(EGLDisplay, EGLImage, EGLint, EGLint, EGLint);
 EGLAPI EGLImage EGLAPIENTRY eglImportImageANDROID(EGLDisplay, EGLImage);
+
+EGLint eglDebugMessageControlKHR(EGLDEBUGPROCKHR callback, const EGLAttrib * attrib_list);
 
 } // namespace translator
 } // namespace egl
@@ -1727,8 +1729,12 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
     return true;
 }
 
-EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable) {
+EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable, EGLBoolean nullEgl) {
     MEM_TRACE("EMUGL");
+    // This is for vulkan native swapchain. Not going to implement it here as we are moving to
+    // vulkan-cereal.
+    // See https://android-review.googlesource.com/c/device/generic/vulkan-cereal/+/1796948
+    (void)nullEgl;
     EglGlobalInfo::setEgl2Egl(enable);
     EglGlobalInfo::setEgl2EglSyncSafeToUse(EGL_TRUE);
 }
@@ -1818,6 +1824,11 @@ EGLImage eglImportImageANDROID(EGLDisplay display, EGLImage nativeImage) {
 	img->isImported = true;
 	img->nativeImage = nativeImage;
     return dpy->addImageKHR(img);
+}
+
+EGLint eglDebugMessageControlKHR(EGLDEBUGPROCKHR callback, const EGLAttrib* attribs) {
+    // NOT IMPLEMENTED
+    return EGL_BAD_ATTRIBUTE;
 }
 
 static const GLint kAuxiliaryContextAttribsCompat[] = {

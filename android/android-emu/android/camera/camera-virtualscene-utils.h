@@ -21,7 +21,7 @@
 #include "aemu/base/Log.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "android/camera/camera-format-converters.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/virtualscene/VirtualSceneManager.h"
 #include "emugl/common/OpenGLDispatchLoader.h"
 
@@ -41,7 +41,7 @@ public:
     //                 |eglDisplay| must also be EGL_NO_DISPLAY.
     // |eglDisplay| - EGLDisplay handle, if |eglDispatch| is null, this must be
     //                set to EGL_NO_DISPLAY.
-    ScopedEglContext(const EGLDispatch* eglDispatch,
+    ScopedEglContext(const gfxstream::gl::EGLDispatch* eglDispatch,
                      const EGLDisplay eglDisplay)
         : mEglDispatch(eglDispatch), mEglDisplay(eglDisplay) {
         AASSERT((eglDispatch && eglDisplay != EGL_NO_DISPLAY) ||
@@ -69,7 +69,7 @@ public:
     bool isValid() const { return mEglDispatch; }
 
 private:
-    const EGLDispatch* mEglDispatch;
+    const gfxstream::gl::EGLDispatch* mEglDispatch;
     EGLDisplay mEglDisplay;
 };
 
@@ -78,7 +78,7 @@ class CameraRenderer {
 public:
     CameraRenderer() = default;
     virtual ~CameraRenderer() = default;
-    virtual bool initialize(const GLESv2Dispatch* gles2,
+    virtual bool initialize(const gfxstream::gl::GLESv2Dispatch* gles2,
                             int width,
                             int height) = 0;
     virtual void uninitialize() = 0;
@@ -134,8 +134,8 @@ private:
 
     // Dispatch tables for EGL and GLESv2 APIs. Note that these will be nullptr
     // if there was a problem when loading the host libraries.
-    const EGLDispatch* mEglDispatch = nullptr;
-    const GLESv2Dispatch* mGles2 = nullptr;
+    const gfxstream::gl::EGLDispatch* mEglDispatch = nullptr;
+    const gfxstream::gl::GLESv2Dispatch* mGles2 = nullptr;
 
     EGLDisplay mEglDisplay = EGL_NO_DISPLAY;
     EGLContext mEglContext = EGL_NO_CONTEXT;

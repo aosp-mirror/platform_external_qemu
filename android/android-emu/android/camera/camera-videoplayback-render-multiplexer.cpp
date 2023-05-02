@@ -27,6 +27,13 @@
 #include "android/console.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "offworld.pb.h"
+
+#ifdef _WIN32
+#undef ERROR
+#endif
+
+using namespace gfxstream::gl;
+
 namespace android {
 namespace videoplayback {
 

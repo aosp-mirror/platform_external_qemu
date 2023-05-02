@@ -16,6 +16,8 @@
 
 #include <gtest/gtest.h>
 
+using namespace gfxstream::gl;
+
 namespace emugl {
 
 TEST_F(GLTest, InitDestroy) {}

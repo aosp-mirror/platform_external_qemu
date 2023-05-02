@@ -18,8 +18,14 @@
 
 #include "OpenGLESDispatch/DispatchTables.h"
 
+using namespace gfxstream::gl;
+
+namespace gfxstream {
+namespace gl {
 GLESv1Dispatch s_gles1;
 GLESv2Dispatch s_gles2;
+}  // namespace gl
+}  // namespace gfxstream
 
 using android::base::LazyInstance;
 using emugl::LazyLoadedGLESv1Dispatch;

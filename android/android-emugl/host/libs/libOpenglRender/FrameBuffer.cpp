@@ -16,7 +16,7 @@
 
 #include "FrameBuffer.h"
 
-#include "DispatchTables.h"
+#include "OpenGLESDispatch/DispatchTables.h"
 #include "EglGlobalInfo.h"
 #include "GLESVersionDetector.h"
 #include "NativeSubWindow.h"
@@ -25,7 +25,7 @@
 #include "YUVConverter.h"
 #include "gles2_dec.h"
 
-#include "MediaNative.h"
+#include "render-utils/MediaNative.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "vulkan/VkCommonOperations.h"
@@ -55,6 +55,8 @@
 #include <string.h>
 #include <time.h>
 
+using namespace gfxstream;
+using namespace gfxstream::gl;
 using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Stream;
@@ -381,7 +383,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     if (s_egl.eglUseOsEglApi)
-        s_egl.eglUseOsEglApi(egl2egl);
+        s_egl.eglUseOsEglApi(egl2egl, EGL_FALSE);
     //
     // Initialize backend EGL display
     //
@@ -956,7 +958,7 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
 }
 
 void FrameBuffer::setPostCallback(
-        emugl::Renderer::OnPostCallback onPost,
+        Renderer::OnPostCallback onPost,
         void* onPostContext,
         uint32_t displayId,
         bool useBgraReadback) {
@@ -2668,12 +2670,12 @@ bool FrameBuffer::asyncReadbackSupported() {
     return m_asyncReadbackSupported;
 }
 
-emugl::Renderer::ReadPixelsCallback
+Renderer::ReadPixelsCallback
 FrameBuffer::getReadPixelsCallback() {
     return sFrameBuffer_ReadPixelsCallback;
 }
 
-emugl::Renderer::FlushReadPixelPipeline FrameBuffer::getFlushReadPixelPipeline() {
+Renderer::FlushReadPixelPipeline FrameBuffer::getFlushReadPixelPipeline() {
     return sFrameBuffer_FlushReadPixelPipeline;
 }
 

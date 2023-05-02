@@ -163,7 +163,7 @@ target_include_directories(OpenglRender_vulkan_cereal
 class IOStream;
 """
         encoderImplInclude = """
-#include "IOStream.h"
+#include "render-utils/IOStream.h"
 #include "Resources.h"
 #include "ResourceTracker.h"
 #include "Validation.h"
@@ -378,7 +378,7 @@ class BumpPool;
 #include "host-common/GfxstreamFatalError.h"
 
 #include "FrameBuffer.h"
-#include "IOStream.h"
+#include "render-utils/IOStream.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 

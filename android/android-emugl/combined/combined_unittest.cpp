@@ -19,7 +19,7 @@
 #include "android/base/system/System.h"
 #include "aemu/base/threads/FunctorThread.h"
 #include "aemu/base/Tracing.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/emulation/testing/TestDmaMap.h"
 #include "android/console.h"
 

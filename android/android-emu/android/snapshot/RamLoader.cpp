@@ -25,7 +25,7 @@
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
 #include "android/snapshot/PathUtils.h"
-#include "android/snapshot/interface.h"
+#include "snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/file_io.h"

@@ -25,7 +25,7 @@
 #include "aemu/base/async/ThreadLooper.h"    // for ThreadLooper
 #include "aemu/base/synchronization/Lock.h"  // for Lock, AutoLock
 #include "aemu/base/synchronization/MessageChannel.h"
-#include "android/opengles.h"  // for android_getFlushReadP...
+#include "host-common/opengles.h"  // for android_getFlushReadP...
 
 #ifdef _WIN32
 #undef ERROR

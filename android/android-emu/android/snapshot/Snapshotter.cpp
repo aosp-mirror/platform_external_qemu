@@ -41,7 +41,7 @@
 #include "android/snapshot/Saver.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
-#include "android/snapshot/interface.h"
+#include "snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"

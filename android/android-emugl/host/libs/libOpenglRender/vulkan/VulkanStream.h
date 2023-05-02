@@ -27,7 +27,9 @@
 
 #define E(fmt,...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
 
+namespace gfxstream {
 class IOStream;
+}  // namespace gfxstream
 
 namespace android {
 namespace base {
@@ -39,10 +41,10 @@ namespace goldfish_vk {
 
 class VulkanStream : public android::base::Stream {
 public:
-    VulkanStream(IOStream* stream);
+    VulkanStream(gfxstream::IOStream* stream);
     ~VulkanStream();
 
-    void setStream(IOStream* stream);
+    void setStream(gfxstream::IOStream* stream);
 
     // Returns whether the connection is valid.
     bool valid();
@@ -81,7 +83,7 @@ private:
     android::base::BumpPool mPool;
     size_t mWritePos = 0;
     std::vector<uint8_t> mWriteBuffer;
-    IOStream* mStream = nullptr;
+    gfxstream::IOStream* mStream = nullptr;
     DefaultHandleMapping mDefaultHandleMapping;
     VulkanHandleMapping* mCurrentHandleMapping;
     uint32_t mFeatureBits = 0;

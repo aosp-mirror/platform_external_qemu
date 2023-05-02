@@ -22,6 +22,9 @@
 
 #include <string.h>
 
+namespace gfxstream {
+namespace gl {
+
 // Returns functions from s_gles2/s_gles1, for use with static Translator.
 
 void* gles1_dispatch_get_proc_func_static(const char* name) {
@@ -45,3 +48,6 @@ void* gles2_dispatch_get_proc_func_static(const char* name) {
 
     return func;
 }
+
+}  // namespace gl
+}  // namespace gfxstream

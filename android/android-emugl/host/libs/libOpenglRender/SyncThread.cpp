@@ -50,6 +50,7 @@ static uint64_t curr_ms() {
 
 #endif
 
+using namespace gfxstream::gl;
 using android::base::LazyInstance;
 
 // The single global sync thread instance.

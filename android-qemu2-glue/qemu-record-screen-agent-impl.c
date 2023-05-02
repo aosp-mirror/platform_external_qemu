@@ -14,7 +14,7 @@
 
 #include "host-common/record_screen_agent.h"
 #include "android/emulator-window.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "host-common/screen-recorder.h"
 
 #include <stdbool.h>

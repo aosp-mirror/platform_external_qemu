@@ -15,7 +15,11 @@
 #include "GLES/gl.h"  // for GL_NO_ERROR, GLint, GLuint
 #include "android/utils/debug.h"
 
+namespace gfxstream {
+namespace gl {
 struct GLESv2Dispatch;
+}  // namespace gl
+}  // namespace gfxstream
 
 // Helper macro for checking error status and cleaning up.
 #define CHECK_GL_ERROR(error_msg) \
@@ -30,6 +34,6 @@ struct GLESv2Dispatch;
         return (retval); \
     }
 
-GLuint createShader(const GLESv2Dispatch* gles2,
+GLuint createShader(const gfxstream::gl::GLESv2Dispatch* gles2,
                     GLint shader_type,
                     const char* shader_code);

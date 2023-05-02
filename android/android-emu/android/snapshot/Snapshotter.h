@@ -14,7 +14,7 @@
 #include "aemu/base/Compiler.h"
 #include "aemu/base/Optional.h"
 #include "android/base/system/System.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 
 #include "host-common/vm_operations.h"
 #include "host-common/window_agent.h"

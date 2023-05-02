@@ -20,7 +20,7 @@
 #include "android/loadpng.h"
 #include "android/opengl/GLProcessPipe.h"
 #include "android/opengles-pipe.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/Saver.h"
 #include "android/snapshot/Snapshotter.h"
@@ -46,11 +46,11 @@
 #define DD(...) ((void)0)
 #endif
 
-using ChannelBuffer = emugl::RenderChannel::Buffer;
-using emugl::RenderChannel;
-using emugl::RenderChannelPtr;
-using ChannelState = emugl::RenderChannel::State;
-using IoResult = emugl::RenderChannel::IoResult;
+using ChannelBuffer = gfxstream::RenderChannel::Buffer;
+using gfxstream::RenderChannel;
+using gfxstream::RenderChannelPtr;
+using ChannelState = gfxstream::RenderChannel::State;
+using IoResult = gfxstream::RenderChannel::IoResult;
 using android::base::Stopwatch;
 using android::snapshot::Snapshotter;
 
@@ -175,7 +175,7 @@ public:
             return pipe;
         }
 
-        void writeScreenshot(emugl::Renderer& renderer) {
+        void writeScreenshot(gfxstream::Renderer& renderer) {
 #if SNAPSHOT_PROFILE > 1
             Stopwatch sw;
 #endif
@@ -247,7 +247,7 @@ public:
     // that everything went well.
     EmuglPipe(void* hwPipe,
               Service* service,
-              const emugl::RendererPtr& renderer,
+              const gfxstream::RendererPtr& renderer,
               android::base::Stream* loadStream = nullptr)
         : AndroidPipe(hwPipe, service) {
         bool isWorking = true;

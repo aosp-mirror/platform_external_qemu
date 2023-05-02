@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "OpenglRender/IOStream.h"
+#include "render-utils/IOStream.h"
 #include "RenderChannelImpl.h"
 
 #include <memory>
@@ -22,7 +22,7 @@ namespace emugl {
 
 // An IOStream instance that can be used by the host RenderThread to
 // wrap a RenderChannelImpl channel.
-class ChannelStream final : public IOStream {
+class ChannelStream final : public gfxstream::IOStream {
 public:
     ChannelStream(RenderChannelImpl* channel, size_t bufSize);
 
@@ -43,8 +43,8 @@ protected:
 
 private:
     RenderChannelImpl* mChannel;
-    RenderChannel::Buffer mWriteBuffer;
-    RenderChannel::Buffer mReadBuffer;
+    gfxstream::RenderChannel::Buffer mWriteBuffer;
+    gfxstream::RenderChannel::Buffer mReadBuffer;
     size_t mReadBufferLeft = 0;
 };
 

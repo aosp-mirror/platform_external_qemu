@@ -1,6 +1,6 @@
 !render_api
 
-%#include "render_api_platform_types.h"
+%#include "render-utils/render_api_platform_types.h"
 %#include <stdbool.h>
 %#include <stddef.h>
 %#include <stdint.h>
