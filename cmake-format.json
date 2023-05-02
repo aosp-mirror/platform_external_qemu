@@ -64,6 +64,15 @@
             "sortable": "True"
           }
         },
+        "INCLUDES": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "False"
+          }
+        },
         "TARGET": "*",
         "DLLEXPORT": "*",
         "ALIAS": "*",

@@ -1319,11 +1319,19 @@ help_waterfall(stralloc_t*  out)
 }
 
 static void
+help_grpc_ui(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the experimental gRPC based ui. This ui will make gRPC calls to accomplish tasks.\n\n");
+}
+
+
+static void
 help_share_vid(stralloc_t*  out)
 {
     PRINTF(
     "  Share the current video state in a shared memory region..\n\n"
-    "  A shared memory region will be created that is available under\n"
+    "  A πexshared memory region will be created that is available under\n"
     "  the handle videmulatorXXXX where XXXX is the port number of the emulator\n\n"
     "  For example:\n\n"
     "  -ports 6000,6001 -share-vid\n\n"

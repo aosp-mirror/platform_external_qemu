@@ -22,7 +22,7 @@
 #include "android/skin/backend-defs.h"
 #include "android/metrics/UiEventTracker.h"
 #include "android/skin/qt/angle-input-widget.h"     // for AngleInputWidget
-#include "android/skin/qt/emulator-qt-window.h"     // for EmulatorQtWindow
+// #include "android/skin/qt/emulator-qt-window.h"     // for EmulatorQtWindow
 #include "android/skin/qt/extended-pages/common.h"  // for getIconForCurrent...
 #include "android/skin/backend-defs.h"
 #include "multi-display-page.h"                     // for MultiDisplayPage

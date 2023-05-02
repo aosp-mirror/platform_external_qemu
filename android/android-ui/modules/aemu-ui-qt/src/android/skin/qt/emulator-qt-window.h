@@ -23,12 +23,12 @@
 #include "android/settings-agent.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"
-#include "android/skin/qt/car-cluster-window.h"
+// #include "android/skin/qt/car-cluster-window.h"
 #include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
-#include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
-#include "android/skin/qt/multi-display-widget.h"
+// #include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
+// #include "android/skin/qt/multi-display-widget.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
@@ -60,6 +60,11 @@ class EmulatorWindow;
 typedef struct SkinSurface SkinSurface;
 class SkinSurfaceBitmap;
 class SwipeGesture;
+
+class CarClusterWindow;
+class CarClusterConnector;
+class MultiDisplayWidget;
+
 
 using RunOnUiThreadFunc = std::function<void()>;
 Q_DECLARE_METATYPE(QPainter::CompositionMode);

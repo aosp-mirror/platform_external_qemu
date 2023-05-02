@@ -18,7 +18,7 @@ function(android_qt_lib)
   # Parse arguments
   set(options SHARED)
   set(oneValueArgs TARGET DLLEXPORT DLLENABLE ALIAS)
-  set(multiValueArgs SRC DEPS)
+  set(multiValueArgs SRC DEPS INCLUDES)
   cmake_parse_arguments(ext "${options}" "${oneValueArgs}" "${multiValueArgs}"
                         ${ARGN})
 
@@ -35,6 +35,9 @@ function(android_qt_lib)
                         SRC ${ext_SRC})
   endif()
 
+  if(ext_INCLUDES)
+    target_include_directories(${ext_TARGET} PUBLIC ${ext_INCLUDES})
+  endif()
   if(NOT "${ext_ALIAS}" STREQUAL "")
     set_property(GLOBAL APPEND PROPERTY ALIAS_LST
                                         "${ext_ALIAS}|${ext_TARGET}\n")
@@ -67,6 +70,9 @@ add_subdirectory(modules/aemu-ui-common)
 add_subdirectory(modules/aemu-ui-widgets)
 add_subdirectory(modules/aemu-ui-window)
 add_subdirectory(modules/aemu-ui-qt)
+add_subdirectory(modules/aemu-ext-pages)
+# Uncomment when ready.
+# add_subdirectory(modules/aemu-ext-pages-grpc)
 
 list(APPEND android-libui-testdata testdata/mp4/video.mp4)
 
@@ -132,8 +138,7 @@ if(WINDOWS_MSVC_X86_64)
   # duplicate main symbols when linking aemu-ui-qt (it used to work do to a
   # cmake linker quirk).
   android_add_library(
-    TARGET emulator-winqt-launcher LICENSE Apache-2.0
-    SOURCE_DIR src
+    TARGET emulator-winqt-launcher LICENSE Apache-2.0 SOURCE_DIR src
     SRC android/skin/qt/windows-qt-launcher.cpp)
   target_link_libraries(emulator-winqt-launcher PRIVATE android-emu-base)
 endif()

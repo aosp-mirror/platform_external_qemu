@@ -45,7 +45,6 @@
 #include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
 #include "android/console.h"                           // for getConsoleAgents()->settings->avdInfo()
 #include "android/metrics/UiEventTracker.h"            // for UiEventTracker
-#include "android/skin/qt/emulator-qt-window.h"        // for EmulatorQtWindow
 #include "android/skin/qt/error-dialog.h"              // for showErrorDialog
 #include "android/skin/qt/extended-pages/common.h"     // for getSelectedTheme
 #include "android/skin/qt/raised-material-button.h"    // for RaisedMaterial...
