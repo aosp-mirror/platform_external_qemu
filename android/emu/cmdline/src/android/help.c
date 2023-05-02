@@ -2167,6 +2167,11 @@ static void help_network_user_mode_options(stralloc_t* out) {
            "ipv6=off,host=10.4.4.7,dhcpstart=10.4.4.4\n\n");
 }
 
+static void help_adb_path(stralloc_t* out) {
+    PRINTF("Set a customized adb path. Emulator will use the provided adb "
+           "instead of automatically searching for an adb binary.\n\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

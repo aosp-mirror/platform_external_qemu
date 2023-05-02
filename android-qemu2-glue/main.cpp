@@ -37,6 +37,7 @@
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/USBAssist.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 #include "android/emulation/control/adb/adbkey.h"
 #include "android/emulation/control/automation_agent.h"
 #include "android/emulation/control/multi_display_agent.h"
@@ -2530,6 +2531,12 @@ extern "C" int main(int argc, char** argv) {
         skin_winsys_init_args(argc, argv);
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
+        }
+
+        if (opts->adb_path) {
+            auto adbInterface =
+                    android::emulation::AdbInterface::createGlobalOwnThread();
+            adbInterface->setCustomAdbPath(opts->adb_path);
         }
 
         // We have a UI, so we can ask for consent for existing crashreports
