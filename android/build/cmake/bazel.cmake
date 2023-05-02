@@ -64,8 +64,7 @@ function(android_add_bazel_lib)
     OUTPUT "${AOSP}/${BAZEL_TGT}"
     # Nasty workaround for the fact that ninja seems to be creating the
     # bazel-out directory see b/274180576 for details.
-    COMMAND [ ! -L "${BAZEL_OUT}" ] && [ -d "${BAZEL_OUT}" ] && rm -rf
-            ${BAZEL_OUT}
+    COMMAND sh -c "if [ ! -L ${BAZEL_OUT} ] && [ -d ${BAZEL_OUT} ] ; then rm -rf ${BAZEL_OUT} ; fi"
     COMMAND ${BAZEL_BIN} build "${bazel_BAZEL}"
     COMMENT "Compiling ${bazel_TARGET} with bazel"
     WORKING_DIRECTORY ${AOSP}
