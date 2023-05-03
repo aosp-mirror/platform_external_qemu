@@ -484,6 +484,8 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                             return true;
                         if (std::string::npos != view.find("Tablet"))
                             return true;
+                        if (std::string::npos != view.find("tablet"))
+                            return true;
                         return false;
                     };
                     if (myhw->hw_initialOrientation &&
