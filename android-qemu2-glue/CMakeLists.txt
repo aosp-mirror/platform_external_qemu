@@ -4,6 +4,7 @@ android_add_library(
   TARGET android-wifi-service
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
+      emulation/libslirp_driver.cpp
       emulation/NetsimWifiForwarder.cpp
       emulation/VirtioWifiForwarder.cpp
       emulation/WifiService.cpp)
