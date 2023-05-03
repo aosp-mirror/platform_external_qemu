@@ -2002,6 +2002,13 @@ message EmulatorStreamScreenshot {
 
 // Metrics for grpc invocations.
 message EmulatorGrpc {
+    enum GrpcConnection {
+        // An incoming call to the server
+        SERVER = 0;
+        // Client making a call
+        CLIENT = 1;
+    }
+
     // CRC32 digest of the fully-specified method name.
     optional uint32 call_id = 1;
     // Number of requests
@@ -2014,7 +2021,14 @@ message EmulatorGrpc {
     optional PercentileEstimator snd_bytes_estimate = 5;
     // Duration of the total request time in milliseconds.
     optional PercentileEstimator duration = 6;
+    // Number of messages received
+    optional PercentileEstimator rcv = 7;
+    // Number of messages send
+    optional PercentileEstimator snd = 8;
+    // Type of connection
+    optional GrpcConnection type = 9;
 }
+
 // Metrics related to the Emulator.
 message EmulatorDetails {
     // Cpu architecture of the guest.
