@@ -63,8 +63,6 @@
 #include "android/version.h"
 #include "host-common/opengl/emugl_config.h"
 
-#include "android/skin/winsys.h"
-
 #ifdef __linux__
 #include <fcntl.h>
 #if defined(__aarch64__)

@@ -62,6 +62,7 @@ android_add_library(
        breakpad_processor
        crashpad_client
        emulator-libui
+       ui::widgets
        Qt${QT_VERSION_MAJOR}::Widgets)
 target_compile_definitions(android-emu-crashreport-consent-ui
                            PRIVATE AEMU_CRASH_EXPORTS PUBLIC AEMU_CRASH_SHARED)

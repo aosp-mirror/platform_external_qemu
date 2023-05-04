@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <chrono>
+#include <thread>
 
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/logging/CLog.h"

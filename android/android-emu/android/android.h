@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "android/skin/rect.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
