@@ -20,13 +20,15 @@
 #include "android-qemu2-glue/qemu-setup.h"
 #include "android/emulation/HostapdController.h"
 #include "android/utils/debug.h"
+#ifdef LIBSLIRP
+#include "android-qemu2-glue/emulation/libslirp_driver.h"
+#endif
 
 using android::network::MacAddress;
 
 extern "C" {
 #include "qemu/osdep.h"
 #include "net/slirp.h"
-#include "slirp/libslirp.h"
 }
 
 #ifdef _WIN32
@@ -51,80 +53,17 @@ static const char* kHost6 = "fec0::2";
 static const char* kDns6 = "fec0::3";
 
 static WifiService::OnReceiveCallback sOnReceiveCallback = nullptr;
-
-static Slirp* initializeSlirp(SlirpOptions opts) {
-    if (opts.disabled) {
-        return nullptr;
+#ifdef LIBSLIRP
+static std::weak_ptr<VirtioWifiForwarder> sVirtioWifiWeakPtr;
+static ssize_t libslirp_send_packet(const void* pkt, size_t pkt_len) {
+    if (auto virtioWifi = sVirtioWifiWeakPtr.lock()) {
+        return virtioWifi->onRxPacketAvailable((const uint8_t*)pkt, pkt_len);
+    } else {
+        dwarning("libslirp: virtio wifi forwarder is null.\n");
+        return 0;
     }
-
-    struct in_addr net;
-    struct in_addr mask;
-    struct in_addr host;
-    struct in_addr dhcp;
-    struct in_addr dns;
-    struct in6_addr ip6_prefix;
-    struct in6_addr ip6_host;
-    struct in6_addr ip6_dns;
-    int vprefix6_len = opts.vprefixLen ? opts.vprefixLen : kPrefix6Len;
-    if (!inet_pton(AF_INET, opts.vnet.empty() ? kNetwork : opts.vnet.c_str(),
-                   &net)) {
-        LOG(DEBUG) << "Failed to parse Slirp IPv4 vnet: " << opts.vnet
-                   << ", use default option: " << kNetwork;
-        inet_pton(AF_INET, kNetwork, &net);
-    }
-    if (!inet_pton(AF_INET, opts.vmask.empty() ? kMask : opts.vmask.c_str(),
-                   &mask)) {
-        LOG(DEBUG) << "Failed to parse Slirp IPv4 vmask: " << opts.vmask
-                   << ", use default option: " << kMask;
-        inet_pton(AF_INET, kMask, &mask);
-    }
-    if (!inet_pton(AF_INET, opts.vhost.empty() ? kHost : opts.vhost.c_str(),
-                   &host)) {
-        LOG(DEBUG) << "Failed to parse Slirp IPv4 vhost: " << opts.vhost
-                   << ", use default option: " << kHost;
-        inet_pton(AF_INET, kHost, &host);
-    }
-    if (!inet_pton(AF_INET,
-                   opts.dhcpstart.empty() ? kDhcp : opts.dhcpstart.c_str(),
-                   &dhcp)) {
-        LOG(DEBUG) << "Failed to parse Slirp IPv4 dhcp start: "
-                   << opts.dhcpstart << ", use default option: " << kDhcp;
-        inet_pton(AF_INET, kDhcp, &dhcp);
-    }
-    if (!inet_pton(AF_INET, opts.dns.empty() ? kDns : opts.dns.c_str(), &dns)) {
-        LOG(DEBUG) << "Failed to parse Slirp IPv4 dns: " << opts.dns
-                   << ", use default option: " << kDns;
-        inet_pton(AF_INET, kDns, &dns);
-    }
-
-    if (!inet_pton(AF_INET6,
-                   opts.vprefix6.empty() ? kPrefix6 : opts.vprefix6.c_str(),
-                   &ip6_prefix)) {
-        LOG(DEBUG) << "Failed to parse Slirp IPv6 vprefix: " << opts.vprefix6
-                   << ", use default option: " << kPrefix6;
-        inet_pton(AF_INET6, kPrefix6, &ip6_prefix);
-    }
-
-    if (!inet_pton(AF_INET6, opts.vhost6.empty() ? kHost6 : opts.vhost6.c_str(),
-                   &ip6_host)) {
-        LOG(DEBUG) << "Failed to parse Slirp IPv6 vhost: " << opts.vhost6
-                   << ", use default option: " << kHost6;
-        inet_pton(AF_INET6, kHost6, &ip6_host);
-    }
-
-    if (!inet_pton(AF_INET6, opts.dns6.empty() ? kDns6 : opts.dns6.c_str(),
-                   &ip6_dns)) {
-        LOG(DEBUG) << "Failed to parse Slirp IPv6 dns: " << opts.dns6
-                   << ", use default option: " << kDns6;
-        inet_pton(AF_INET6, kHost6, &ip6_dns);
-    }
-    Slirp* s = static_cast<Slirp*>(net_slirp_init_custom_slirp_state(
-            opts.restricted, opts.ipv4, net, mask, host, opts.ipv6, ip6_prefix,
-            vprefix6_len, ip6_host, opts.vhostname.c_str(),
-            opts.tftpath.c_str(), opts.bootfile.c_str(), dhcp, dns, ip6_dns,
-            nullptr /*vdnssearch*/));
-    return s;
 }
+#endif
 
 Builder::Builder() = default;
 
@@ -213,17 +152,46 @@ std::shared_ptr<WifiService> Builder::build() {
                                                       mCanReceive));
     }
 
-    Slirp* slirp = initializeSlirp(mSlirpOpts);
+    Slirp* slirp = nullptr;
+#ifdef LIBSLIRP
+    if (!mSlirpOpts.disabled) {
+        slirp = libslirp_init(
+                libslirp_send_packet, mSlirpOpts.restricted, mSlirpOpts.ipv4,
+                mSlirpOpts.vnet.empty() ? nullptr : mSlirpOpts.vnet.c_str(),
+                mSlirpOpts.vhost.empty() ? nullptr : mSlirpOpts.vhost.c_str(),
+                mSlirpOpts.ipv6,
+                mSlirpOpts.vprefix6.empty() ? nullptr
+                                            : mSlirpOpts.vprefix6.c_str(),
+                mSlirpOpts.vprefixLen,
+                mSlirpOpts.vhost6.empty() ? nullptr : mSlirpOpts.vhost6.c_str(),
+                mSlirpOpts.vhostname.empty() ? nullptr
+                                             : mSlirpOpts.vhostname.c_str(),
+                mSlirpOpts.tftpath.empty() ? nullptr
+                                           : mSlirpOpts.tftpath.c_str(),
+                mSlirpOpts.bootfile.empty() ? nullptr
+                                            : mSlirpOpts.bootfile.c_str(),
+                mSlirpOpts.dhcpstart.empty() ? nullptr
+                                             : mSlirpOpts.dhcpstart.c_str(),
+                mSlirpOpts.dns.empty() ? nullptr : mSlirpOpts.dns.c_str(),
+                mSlirpOpts.dns6.empty() ? nullptr : mSlirpOpts.dns6.c_str(),
+                nullptr /* dnssearch */, nullptr /* vdomainname */,
+                nullptr /* tftp_server_name */);
+    }
+#endif
 
     if (!mSlirpOpts.disabled && !slirp) {
         LOG(ERROR) << "Failed to initialize WiFi service: Slirp initialization "
                       "failure.";
         return nullptr;
     }
+
     auto virtioWifi = std::make_shared<VirtioWifiForwarder>(
             mBssID.empty() ? kBssID : mBssID.data(), sOnReceiveCallback,
             mOnLinkStatusChanged, mCanReceive, mOnSentCallback, mNicConf, slirp,
             mServerPort, mClientPort);
+#ifdef LIBSLIRP
+    sVirtioWifiWeakPtr = virtioWifi;
+#endif
     return std::static_pointer_cast<WifiService>(virtioWifi);
 }
 
