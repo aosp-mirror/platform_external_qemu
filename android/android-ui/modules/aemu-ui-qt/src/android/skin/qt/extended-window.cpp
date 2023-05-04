@@ -72,6 +72,7 @@
 #include "android/skin/qt/extended-pages/tv-remote-page.h"
 #include "android/skin/qt/extended-pages/virtual-sensors-page.h"
 #include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/extended-page-factory.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
@@ -115,6 +116,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
 
     mExtendedUi->setupUi(this);
+    ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_SNAPSHOT);
     // mExtendedUi->stackedWidget->addWidget(new SnapshotPage(mExtendedUi->stackedWidget));
     mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);

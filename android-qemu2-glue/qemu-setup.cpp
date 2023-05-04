@@ -94,6 +94,7 @@ extern "C" {
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/stats/EmulatorStats.h"
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"
 #include "android/emulation/virtio_vsock_device.h"
 #include "android/gpu_frame.h"
 #include "android/skin/winsys.h"
@@ -491,6 +492,9 @@ int qemu_setup_grpc() {
                                             ->settings->android_cmdLineOptions()
                                             ->grpc_tls_ca;
         }
+
+        bool connect = android::emulation::control::EmulatorGrpcClient::me()->hasOpenChannel();
+        assert(connect);
     }
 
     bool userWantsGrpc =
@@ -512,6 +516,7 @@ int qemu_setup_grpc() {
                "requested.");
         exit(1);
     }
+
 
     advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
     advertiser->garbageCollect();
