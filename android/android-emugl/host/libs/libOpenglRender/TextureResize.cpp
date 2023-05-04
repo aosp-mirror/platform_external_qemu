@@ -16,7 +16,7 @@
 
 #include "TextureResize.h"
 
-#include "DispatchTables.h"
+#include "OpenGLESDispatch/DispatchTables.h"
 #include "FrameBuffer.h"
 #include "android/utils/debug.h"
 
@@ -35,6 +35,8 @@
 #define ERR(...)  fprintf(stderr, __VA_ARGS__)
 #define V(...)  VERBOSE_PRINT(gles,__VA_ARGS__)
 #define MAX_FACTOR_POWER 4
+
+using namespace gfxstream::gl;
 
 static const char kCommonShaderSource[] =
     "precision mediump float;\n"

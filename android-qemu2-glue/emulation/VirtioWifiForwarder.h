@@ -52,10 +52,14 @@ public:
     void stop() override;
     NICState* getNic() override { return mNic; }
     android::network::MacAddress getStaMacAddr(const char* ssid) override;
+    ssize_t onRxPacketAvailable(const uint8_t* buf, size_t size);
+
     static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
     static const uint8_t kWifiForwardVersion = 0x02;
 private:
-#ifndef LIBSLIRP
+#ifdef LIBSLIRP
+    static void eloopSocketHandler(int sock, void* eloop_ctx, void* sock_ctx);
+#else
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
     // Wrapper functions for passing C-sytle func ptr to struct NetClientInfo
     // defined in net/net.h
@@ -70,7 +74,6 @@ private:
     static void onHostApd(void* opaque, int fd, unsigned events);
     static const char* const kNicModel;
     static const char* const kNicName;
-    ssize_t onRxPacketAvailable(const uint8_t* buf, size_t size);
     ssize_t sendToGuest(
             std::unique_ptr<android::network::Ieee80211Frame> frame);
     void resetBeaconTask();

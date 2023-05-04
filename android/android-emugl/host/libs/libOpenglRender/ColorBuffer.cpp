@@ -19,7 +19,7 @@
 #include "aemu/base/memory/ScopedPtr.h"
 #include "aemu/base/Tracing.h"
 
-#include "DispatchTables.h"
+#include "OpenGLESDispatch/DispatchTables.h"
 #include "GLcommon/GLutils.h"
 #include "RenderThreadInfo.h"
 #include "TextureDraw.h"
@@ -47,6 +47,8 @@
 #else
 #define DEBUG_CB_FBO 1
 #endif
+
+using namespace gfxstream::gl;
 
 namespace {
 

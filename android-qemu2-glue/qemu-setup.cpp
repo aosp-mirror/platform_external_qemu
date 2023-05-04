@@ -97,7 +97,7 @@ extern "C" {
 #include "android/emulation/virtio_vsock_device.h"
 #include "android/gpu_frame.h"
 #include "android/skin/winsys.h"
-#include "android/snapshot/interface.h"
+#include "snapshot/interface.h"
 #include "android/utils/Random.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -270,13 +270,11 @@ bool qemu_android_emulation_early_setup() {
             new android::qemu::QemuAudioOutputEngine());
 
     auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
-    if (opts->packet_streamer_endpoint) {
-        std::string name = get_display_name();
-        register_netsim(to_string(opts->packet_streamer_endpoint),
-                        to_string(opts->rootcanal_default_commands_file),
-                        to_string(opts->rootcanal_controller_properties_file),
-                        name);
-    }
+    std::string name = get_display_name();
+    register_netsim(to_string(opts->packet_streamer_endpoint),
+                    to_string(opts->rootcanal_default_commands_file),
+                    to_string(opts->rootcanal_controller_properties_file),
+                    name);
     return true;
 }
 
@@ -419,7 +417,7 @@ int qemu_setup_grpc() {
                "%d", &timeout) == 1) {
         builder.withIdleTimeout(std::chrono::seconds(timeout));
     }
-    bool useToken = getConsoleAgents()
+    bool useToken = !has_grpc_flag || getConsoleAgents()
                             ->settings->android_cmdLineOptions()
                             ->grpc_use_token;
 
@@ -634,6 +632,10 @@ void qemu_android_emulation_teardown() {
         grpcService->stop();
         grpcService = nullptr;
     }
+
+    // Let's manually disconnect netsim so we can collect metrics etc..
+    close_netsim();
+
     android::base::disableTracing();
     if (advertiser)
         advertiser->remove();

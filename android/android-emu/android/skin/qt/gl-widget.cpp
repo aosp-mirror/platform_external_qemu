@@ -10,7 +10,7 @@
 
 #include "android/skin/qt/gl-widget.h"
 
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 
 #include <qloggingcategory.h>                   // for qCWarning
 #include <qnamespace.h>                         // for WA_DontCreateNativeAn...
@@ -28,6 +28,8 @@
 #include "android/skin/qt/gl-texture-draw.h"    // for TextureDraw
 #include "android/utils/debug.h"
 #include "emugl/common/OpenGLDispatchLoader.h"  // for LazyLoadedEGLDispatch
+
+using namespace gfxstream::gl;
 
 class QPaintEvent;
 class QResizeEvent;

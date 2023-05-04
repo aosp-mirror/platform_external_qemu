@@ -21,7 +21,7 @@
 #include "aemu/base/containers/CircularBuffer.h"  // for CircularBuffer
 #include "android/base/system/System.h"              // for System, System::...
 #include "host-common/Features.h"         // for Feature
-#include "android/snapshot/common.h"                 // for FailureReason
+#include "snapshot/common.h"                 // for FailureReason
 #include "snapshot.pb.h"                             // for SaveStats, Confi...
 
 namespace android {

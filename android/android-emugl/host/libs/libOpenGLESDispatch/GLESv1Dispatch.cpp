@@ -26,6 +26,9 @@
 
 #include "emugl/common/shared_library.h"
 
+namespace gfxstream {
+namespace gl {
+
 #define DEBUG 0
 
 #if DEBUG
@@ -42,7 +45,6 @@ static emugl::SharedLibrary *s_gles1_lib = NULL;
 // An unimplemented function which prints out an error message.
 // To make it consistent with the guest, all GLES1 functions not supported by
 // the guest driver should be redirected to this function.
-
 void gles1_unimplemented() {
     fprintf(stderr, "Called unimplemented GLESv1 API\n");
 }
@@ -146,3 +148,6 @@ void *gles1_dispatch_get_proc_func(const char *name, void *userData)
     }
     return func;
 }
+
+}  // namespace gl
+}  // namespace gfxstream

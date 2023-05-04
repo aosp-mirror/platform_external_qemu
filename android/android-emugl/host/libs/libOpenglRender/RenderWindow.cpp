@@ -87,7 +87,7 @@ struct RenderWindowMessage {
 
         // CMD_SET_POST_CALLBACK
         struct {
-            emugl::Renderer::OnPostCallback on_post;
+            gfxstream::Renderer::OnPostCallback on_post;
             void* on_post_context;
             uint32_t on_post_displayId;
             bool use_bgra_readback;
@@ -506,7 +506,7 @@ bool RenderWindow::getHardwareStrings(const char** vendor,
     return true;
 }
 
-void RenderWindow::setPostCallback(emugl::Renderer::OnPostCallback onPost,
+void RenderWindow::setPostCallback(gfxstream::Renderer::OnPostCallback onPost,
                                    void* onPostContext,
                                    uint32_t displayId,
                                    bool useBgraReadback) {
@@ -526,20 +526,20 @@ bool RenderWindow::asyncReadbackSupported() {
     return FrameBuffer::getFB()->asyncReadbackSupported();
 }
 
-emugl::Renderer::ReadPixelsCallback RenderWindow::getReadPixelsCallback() {
+gfxstream::Renderer::ReadPixelsCallback RenderWindow::getReadPixelsCallback() {
     D("Entering\n");
     return FrameBuffer::getFB()->getReadPixelsCallback();
 }
 
- void RenderWindow::addListener(emugl::Renderer::FrameBufferChangeEventListener* listener) {
+ void RenderWindow::addListener(gfxstream::Renderer::FrameBufferChangeEventListener* listener) {
     FrameBuffer::getFB()->addListener(listener);
  }
 
-void RenderWindow::removeListener(emugl::Renderer::FrameBufferChangeEventListener* listener) {
+void RenderWindow::removeListener(gfxstream::Renderer::FrameBufferChangeEventListener* listener) {
     FrameBuffer::getFB()->removeListener(listener);
 }
 
-emugl::Renderer::FlushReadPixelPipeline
+gfxstream::Renderer::FlushReadPixelPipeline
 RenderWindow::getFlushReadPixelPipeline() {
     return FrameBuffer::getFB()->getFlushReadPixelPipeline();
 }

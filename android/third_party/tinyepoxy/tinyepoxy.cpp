@@ -20,6 +20,8 @@
 #include "OpenGLESDispatch/gles_functions.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+using namespace gfxstream::gl;
+
 static const GLESv2Dispatch* s_gles2;
 static int s_gles2_version;
 
@@ -67,7 +69,6 @@ STUB(glClampColor)
 STUB(glClipPlane)
 STUB(glColorMaskIndexedEXT)
 STUB(glCompressedTexSubImage1D)
-STUB(glDebugMessageCallback)
 STUB(glDepthRangeIndexed)
 STUB(glDisableClientState)
 STUB(glDisableIndexedEXT)

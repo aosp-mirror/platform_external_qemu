@@ -16,6 +16,8 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
 #include "android/skin/qt/gl-common.h"        // for CHECK_GL_ERROR
 
+using namespace gfxstream::gl;
+
 GLCanvas::GLCanvas(int w, int h, const GLESv2Dispatch* gl_dispatch) :
         // Note that width and height must be powers of 2 to comply with
         // GLES 2.0

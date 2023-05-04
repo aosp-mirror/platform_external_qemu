@@ -13,7 +13,7 @@
 // limitations under the License.
 #include "VulkanStream.h"
 
-#include "IOStream.h"
+#include "render-utils/IOStream.h"
 
 #include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_extension_structs.h"
@@ -32,10 +32,10 @@ using android::base::arraySize;
 
 namespace goldfish_vk {
 
-class TestStream : public IOStream {
+class TestStream : public gfxstream::IOStream {
 public:
     static constexpr size_t kBufSize = 1024;
-    TestStream() : IOStream(kBufSize) { }
+    TestStream() : gfxstream::IOStream(kBufSize) { }
 protected:
 
     void* getDmaForReading(uint64_t guest_paddr) override { return nullptr; }

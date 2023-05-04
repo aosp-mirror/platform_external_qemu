@@ -18,6 +18,12 @@
 
 #define VIRTUALSCENE_PIXEL_FORMAT V4L2_PIX_FMT_RGB32
 
+#ifdef _WIN32
+#undef ERROR
+#endif
+
+using namespace gfxstream::gl;
+
 namespace android {
 namespace virtualscene {
 

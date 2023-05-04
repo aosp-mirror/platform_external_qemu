@@ -295,7 +295,7 @@ IOStream abstraction:
 
 The "IOStream" is a very simple abstract class used to send byte messages
 both in the guest and host. It is defined through a shared header under
-$EMUGL/host/include/OpenglRender/IOStream.h
+$EMUGL/host/include/render-utils/IOStream.h
 
 Note that despite the path, this header is included by *both* host and guest
 source code. The main idea around IOStream's design is that to send a message,

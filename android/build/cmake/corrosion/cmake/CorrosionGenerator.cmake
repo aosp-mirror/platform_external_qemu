@@ -399,6 +399,10 @@ function(_generator_add_config_info manifest ix is_multi_config config_type)
             TARGET ${target_name}
             PROPERTY ${imported_location} "${binary_root}/${exe_name}"
         )
+        set_property(
+            TARGET ${target_name}
+            PROPERTY EXECUTABLE_PATH "${binary_root}/${exe_name}"
+        )
     else()
         message(FATAL_ERROR "unknown target type")
     endif()

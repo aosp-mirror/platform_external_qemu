@@ -24,8 +24,13 @@
 #include "android/console.h"
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/hw-sensors.h"                       // for ANDROID_SENSOR_...
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/physics/GlmHelpers.h"  // for vecNearEqual
+
+#ifdef _WIN32
+#undef ERROR
+#endif
+
 namespace android {
 namespace emulation {
 namespace control {
@@ -167,7 +172,8 @@ bool ScreenshotUtils::getScreenshot(int displayId,
         unsigned int bpp = (format == ImageFormat::RGB888 ? 3 : 4);
         return renderer.get()->getScreenshot(
                        bpp, finalWidth, finalHeight, pixels, cPixels, displayId,
-                       desiredWidth, desiredHeight, desiredRotation, rect) == 0;
+                       desiredWidth, desiredHeight, desiredRotation,
+                       {{rect.pos.x, rect.pos.y}, {rect.size.w, rect.size.h}}) == 0;
     } else {
         // oh, oh slow path.
         android::emulation::Image img = android::emulation::takeScreenshot(

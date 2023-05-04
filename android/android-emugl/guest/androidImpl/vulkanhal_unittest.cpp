@@ -32,8 +32,8 @@
 #include "android/base/system/System.h"
 #include "aemu/base/threads/FunctorThread.h"
 #include "aemu/base/Tracing.h"
-#include "android/opengles.h"
-#include "android/snapshot/interface.h"
+#include "host-common/opengles.h"
+#include "snapshot/interface.h"
 
 #include "OpenglSystemCommon/HostConnection.h"
 #include "OpenglSystemCommon/ProcessPipe.h"

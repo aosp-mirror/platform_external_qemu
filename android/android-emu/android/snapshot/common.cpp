@@ -9,10 +9,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 #include "host-common/FeatureControl.h"
 #include "android/console.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 
 #include <errno.h>
 

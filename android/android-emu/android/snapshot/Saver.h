@@ -15,7 +15,7 @@
 #include "aemu/base/Optional.h"
 
 #include "android/base/system/System.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 #include "android/snapshot/RamSaver.h"
 #include "android/snapshot/Snapshot.h"
 

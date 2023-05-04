@@ -185,6 +185,30 @@ GL_APICALL void GL_APIENTRY glTexStorageMem3DMultisampleEXT(GLenum target, GLsiz
 GL_APICALL void GL_APIENTRY glBufferStorageMemEXT(GLenum target, GLsizeiptr size, GLuint memory, GLuint64 offset);
 GL_APICALL void GL_APIENTRY glTexParameteriHOST(GLenum target, GLenum pname, GLint param);
  
+// GL_OES_texture_buffer
+GL_APICALL void GL_APIENTRY glTexBufferOES(GLenum target, GLenum internalformat, GLuint buffer);
+GL_APICALL void GL_APIENTRY glTexBufferRangeOES(GLenum target, GLenum internalformat, GLuint buffer,
+                                                GLintptr offset, GLsizeiptr size);
+
+// GL_EXT_texture_buffer
+GL_APICALL void GL_APIENTRY glTexBufferEXT(GLenum target, GLenum internalformat, GLuint buffer);
+GL_APICALL void GL_APIENTRY glTexBufferRangeEXT(GLenum target, GLenum internalformat, GLuint buffer,
+                                                GLintptr offset, GLsizeiptr size);
+
+// GL_EXT_draw_buffers_indexed
+GL_APICALL void GL_APIENTRY glTexBufferOES(GLenum target, GLenum internalFormat, GLuint buffer);
+GL_APICALL void GL_APIENTRY glTexBufferRangeOES(GLenum target, GLenum internalFormat, GLuint buffer, GLintptr offset, GLsizeiptr size);
+GL_APICALL void GL_APIENTRY glTexBufferEXT(GLenum target, GLenum internalFormat, GLuint buffer);
+GL_APICALL void GL_APIENTRY glTexBufferRangeEXT(GLenum target, GLenum internalFormat, GLuint buffer, GLintptr offset, GLsizeiptr size);
+GL_APICALL void GL_APIENTRY glEnableiEXT(GLenum cap, GLuint index);
+GL_APICALL void GL_APIENTRY glDisableiEXT(GLenum cap, GLuint index);
+GL_APICALL void GL_APIENTRY glBlendEquationiEXT(GLuint index, GLenum mode);
+GL_APICALL void GL_APIENTRY glBlendEquationSeparateiEXT(GLuint index, GLenum modeRGB, GLenum modeAlpha);
+GL_APICALL void GL_APIENTRY glBlendFunciEXT(GLuint index, GLenum sfactor, GLenum dfactor);
+GL_APICALL void GL_APIENTRY glBlendFuncSeparateiEXT(GLuint index, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha);
+GL_APICALL void GL_APIENTRY glColorMaskiEXT(GLuint index, GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
+GL_APICALL GLboolean GL_APIENTRY glIsEnablediEXT(GLenum cap, GLuint index);
+
 // Not included: direct-state-access, 1D function pointers
 
 // GL_EXT_semaphore
@@ -201,6 +225,21 @@ GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBuf
 // Utility to get global names
 GL_APICALL GLuint GL_APIENTRY glGetGlobalTexName(GLuint localName);
 GL_APICALL void  GL_APIENTRY glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid* pixels);
+
+GL_APICALL void GL_APIENTRY glDebugMessageControlKHR(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint* ids, GLboolean enabled);
+GL_APICALL void GL_APIENTRY glDebugMessageInsertKHR(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* buf);
+GL_APICALL void GL_APIENTRY glDebugMessageCallbackKHR(GLDEBUGPROCKHR callback, const void* userdata);
+GL_APICALL GLuint GL_APIENTRY glGetDebugMessageLogKHR(GLuint count, GLsizei size, GLenum* sources, GLenum* types, GLuint* ids, GLenum* severities, GLsizei* lengths, GLchar* log);
+GL_APICALL void GL_APIENTRY glPushDebugGroupKHR(GLenum source, GLuint id, GLsizei length, const GLchar* message);
+GL_APICALL void GL_APIENTRY glPopDebugGroupKHR(void);
+
+GL_APICALL void GL_APIENTRY glDebugMessageControl(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint* ids, GLboolean enabled);
+GL_APICALL void GL_APIENTRY glDebugMessageInsert(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* buf);
+GL_APICALL void GL_APIENTRY glDebugMessageCallback(GLDEBUGPROC callback, const void* userdata);
+GL_APICALL GLuint GL_APIENTRY glGetDebugMessageLog(GLuint count, GLsizei size, GLenum* sources, GLenum* types, GLuint* ids, GLenum* severities, GLsizei* lengths, GLchar* log);
+GL_APICALL void GL_APIENTRY glPushDebugGroup(GLenum source, GLuint id, GLsizei length, const GLchar* message);
+GL_APICALL void GL_APIENTRY glPopDebugGroup(void);
+
 
 } // namespace gles2
 } // namespace translator
@@ -302,6 +341,30 @@ static __translatorMustCastToProperFunctionPointerType getProcAddressGles2(const
         (*s_gles2Extensions)["glSignalSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glSignalSemaphoreEXT);
         (*s_gles2Extensions)["glGetGlobalTexName"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGetGlobalTexName);
         (*s_gles2Extensions)["glGetTexImage"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGetTexImage);
+        (*s_gles2Extensions)["glDebugMessageControlKHR"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDebugMessageControlKHR);
+        (*s_gles2Extensions)["glDebugMessageInsertKHR"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDebugMessageInsertKHR);
+        (*s_gles2Extensions)["glDebugMessageCallbackKHR"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDebugMessageCallbackKHR);
+        (*s_gles2Extensions)["glGetDebugMessageLogKHR"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGetDebugMessageLogKHR);
+        (*s_gles2Extensions)["glPushDebugGroupKHR"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glPushDebugGroupKHR);
+        (*s_gles2Extensions)["glPopDebugGroupKHR"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glPopDebugGroupKHR);
+        (*s_gles2Extensions)["glDebugMessageControl"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDebugMessageControl);
+        (*s_gles2Extensions)["glDebugMessageCallback"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDebugMessageCallback);
+        (*s_gles2Extensions)["glDebugMessageInsert"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDebugMessageInsert);
+        (*s_gles2Extensions)["glGetDebugMessageLog"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGetDebugMessageLog);
+        (*s_gles2Extensions)["glPushDebugGroup"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glPushDebugGroup);
+        (*s_gles2Extensions)["glPopDebugGroup"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glPopDebugGroup);
+        (*s_gles2Extensions)["glTexBufferOES"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glTexBufferOES);
+        (*s_gles2Extensions)["glTexBufferRangeOES"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glTexBufferRangeOES);
+        (*s_gles2Extensions)["glTexBufferEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glTexBufferEXT);
+        (*s_gles2Extensions)["glTexBufferRangeEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glTexBufferRangeEXT);
+        (*s_gles2Extensions)["glEnableiEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glEnableiEXT);
+        (*s_gles2Extensions)["glDisableiEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDisableiEXT);
+        (*s_gles2Extensions)["glBlendEquationiEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glBlendEquationiEXT);
+        (*s_gles2Extensions)["glBlendEquationSeparateiEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glBlendEquationSeparateiEXT);
+        (*s_gles2Extensions)["glBlendFunciEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glBlendFunciEXT);
+        (*s_gles2Extensions)["glBlendFuncSeparateiEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glBlendFuncSeparateiEXT);
+        (*s_gles2Extensions)["glColorMaskiEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glColorMaskiEXT);
+        (*s_gles2Extensions)["glIsEnablediEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glIsEnablediEXT);
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_gles2Extensions->find(procName);
@@ -3728,6 +3791,36 @@ GL_APICALL void  GL_APIENTRY glGetTexImage(GLenum target, GLint level, GLenum fo
         format = getCoreProfileEmulatedFormat(format);
     }
     ctx->dispatcher().glGetTexImage(target,level,format,type,pixels);
+}
+
+GL_APICALL void GL_APIENTRY glDebugMessageControlKHR(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint* ids, GLboolean enabled) {
+    GET_CTX_V2();
+    ctx->dispatcher().glDebugMessageControlKHR(source, type, severity, count, ids, enabled);
+}
+
+GL_APICALL void GL_APIENTRY glDebugMessageInsertKHR(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* buf) {
+    GET_CTX_V2();
+    ctx->dispatcher().glDebugMessageInsertKHR(source, type, id, severity, length, buf);
+}
+
+GL_APICALL void GL_APIENTRY glDebugMessageCallbackKHR(GLDEBUGPROCKHR callback, const void* userdata) {
+    GET_CTX_V2();
+    ctx->dispatcher().glDebugMessageCallbackKHR(callback, userdata);
+}
+
+GL_APICALL GLuint GL_APIENTRY glGetDebugMessageLogKHR(GLuint count, GLsizei size, GLenum* sources, GLenum* types, GLuint* ids, GLenum* severities, GLsizei* lengths, GLchar* log) {
+    GET_CTX_V2_RET(0);
+    return ctx->dispatcher().glGetDebugMessageLogKHR(count, size, sources, types, ids, severities, lengths, log);
+}
+
+GL_APICALL void GL_APIENTRY glPushDebugGroupKHR(GLenum source, GLuint id, GLsizei length, const GLchar* message) {
+    GET_CTX_V2();
+    ctx->dispatcher().glPushDebugGroupKHR(source, id, length, message);
+}
+
+GL_APICALL void GL_APIENTRY glPopDebugGroupKHR(void) {
+    GET_CTX_V2();
+    ctx->dispatcher().glPopDebugGroupKHR();
 }
 
 GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels){

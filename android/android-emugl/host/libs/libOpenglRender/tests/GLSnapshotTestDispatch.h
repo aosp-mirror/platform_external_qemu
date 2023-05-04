@@ -18,6 +18,8 @@
 
 #include "android/base/testing/TestSystem.h"
 
+using gfxstream::gl::GLESv2Dispatch;
+
 namespace emugl {
 
 // Global dispatch object with functions overridden for snapshot testing

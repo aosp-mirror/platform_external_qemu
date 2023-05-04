@@ -17,7 +17,7 @@
 #pragma once
 
 #include "aemu/base/containers/HybridComponentManager.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 #include "emugl/common/mutex.h"
 #include "GLcommon/GLBackgroundLoader.h"
 #include "GLcommon/NamedObject.h"

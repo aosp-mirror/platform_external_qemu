@@ -31,6 +31,8 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/DispatchTables.h"
 
+using namespace gfxstream;
+
 namespace emugl {
 
 void RenderLibImpl::setRenderer(SelectedRenderer renderer) {

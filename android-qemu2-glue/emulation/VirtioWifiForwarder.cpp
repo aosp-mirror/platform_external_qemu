@@ -55,8 +55,12 @@ extern "C" {
 #include "net/net.h"
 #include "common/ieee802_11_defs.h"
 #include "drivers/driver_virtio_wifi.h"
+#ifdef LIBSLIRP
+#include "libslirp.h"
+#include "utils/eloop.h"
+#else
 #include "net/slirp.h"
-#include "slirp/libslirp.h"
+#endif
 }  // extern "C"
 
 // Conflicts with Log.h
@@ -155,7 +159,12 @@ bool VirtioWifiForwarder::init() {
     mHostapdSock = ScopedSocket(fds[0]);
     mVirtIOSock = ScopedSocket(fds[1]);
     mHostapdSockInitSuccess = mHostapd->setDriverSocket(mHostapdSock);
-#ifndef LIBSLIRP
+
+#ifdef LIBSLIRP
+    eloop_register_read_sock(mVirtIOSock.get(),
+                             VirtioWifiForwarder::eloopSocketHandler, nullptr,
+                             this);
+#else
     //  Looper FdWatch and set callback functions
     mFdWatch = mLooper->createFdWatch(mVirtIOSock.get(),
                                       &VirtioWifiForwarder::onHostApd, this);
@@ -286,6 +295,9 @@ void VirtioWifiForwarder::stop() {
     mBeaconTask.clear();
     mNic = nullptr;
     mSlirp = nullptr;
+#ifdef LIBSLIRP
+    eloop_unregister_read_sock(mVirtIOSock.get());
+#endif
     if (mHostapd) {
         mHostapd->terminate();
     }
@@ -302,7 +314,14 @@ MacAddress VirtioWifiForwarder::getStaMacAddr(const char* ssid) {
         return MacAddress();
 }
 
-#ifndef LIBSLIRP
+#ifdef LIBSLIRP
+void VirtioWifiForwarder::eloopSocketHandler(int sock,
+                                             void* eloop_ctx,
+                                             void* sock_ctx) {
+    VirtioWifiForwarder::onHostApd(sock_ctx, sock,
+                                   android::base::Looper::FdWatch::kEventRead);
+}
+#else
 VirtioWifiForwarder* VirtioWifiForwarder::getInstance(NetClientState* nc) {
     return static_cast<VirtioWifiForwarder*>(qemu_get_nic_opaque(nc));
 }

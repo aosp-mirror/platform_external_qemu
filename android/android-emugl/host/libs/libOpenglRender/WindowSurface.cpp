@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
+using namespace gfxstream::gl;
 
 WindowSurface::WindowSurface(EGLDisplay display,
                              EGLConfig config,

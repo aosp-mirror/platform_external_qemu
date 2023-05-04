@@ -14,15 +14,15 @@
 // limitations under the License.
 #include "android/emulation/control/interceptor/MetricsInterceptor.h"
 
-#include <grpcpp/grpcpp.h>                          // for ServerRpcInfo
-#include <stdint.h>                                 // for uint32_t, uint8_t
-#include <zlib.h>                                   // for crc32
-#include <functional>                               // for __base
+#include <grpcpp/grpcpp.h>  // for ServerRpcInfo
+#include <stdint.h>         // for uint32_t, uint8_t
+#include <zlib.h>           // for crc32
+#include <functional>       // for __base
 
-#include "aemu/base/Log.h"                       // for LogStream, LOG
-#include "aemu/base/memory/LazyInstance.h"       // for LazyInstance, LAZ...
-#include "android/metrics/MetricsReporter.h"        // for MetricsReporter
-#include "studio_stats.pb.h"  // for EmulatorGrpc, And...
+#include "aemu/base/Log.h"                    // for LogStream, LOG
+#include "aemu/base/memory/LazyInstance.h"    // for LazyInstance, LAZ...
+#include "android/metrics/MetricsReporter.h"  // for MetricsReporter
+#include "studio_stats.pb.h"                  // for EmulatorGrpc, And...
 
 namespace android {
 namespace control {
@@ -42,20 +42,27 @@ static base::LazyInstance<InvocationMetrics> sInvocationMetrics =
 void InvocationMetrics::record(const InvocationRecord& invocation) {
     AutoLock lock(mLock);
     bool registerCallback = mMetrics.count(invocation.method) == 0;
-    MethodMetrics& metrics = mMetrics[invocation.method];
 
+    MethodMetrics& metrics = (invocation.direction == Direction::INCOMING)
+                                     ? mMetrics[invocation.method]
+                                     : mClientMetrics[invocation.method];
+
+    metrics.direction = invocation.direction;
     // To minimize data transfer we only collect send/receive for non unary
     // requests.
-    if (invocation.type == ServerRpcInfo::Type::CLIENT_STREAMING ||
-        invocation.type == ServerRpcInfo::Type::BIDI_STREAMING) {
+    if (invocation.type == CallType::CLIENT_STREAMING ||
+        invocation.type == CallType::BIDI_STREAMING) {
         metrics.recvBytes.addSample(invocation.rcvBytes);
     }
-    if (invocation.type == ServerRpcInfo::Type::SERVER_STREAMING ||
-        invocation.type == ServerRpcInfo::Type::BIDI_STREAMING) {
+    if (invocation.type == CallType::SERVER_STREAMING ||
+        invocation.type == CallType::BIDI_STREAMING) {
         metrics.sndBytes.addSample(invocation.sndBytes);
     }
 
     metrics.duration.addSample(((double)invocation.duration) / 1000);
+    metrics.recvMsg.addSample(invocation.rcvMessages);
+    metrics.sendMsg.addSample(invocation.sndMessages);
+
     if (invocation.status.error_code() == 0) {
         metrics.success++;
     } else {
@@ -78,13 +85,18 @@ void InvocationMetrics::reportMetric(const std::string& name,
                 grpc->set_call_id(crc);
                 grpc->set_requests(metric.success + metric.fail);
                 grpc->set_failures(metric.fail);
+                grpc->set_type(metric.direction == Direction::INCOMING
+                                       ? EmulatorGrpc::SERVER
+                                       : EmulatorGrpc::CLIENT);
                 metric.recvBytes.fillMetricsEvent(
                         grpc->mutable_rcv_bytes_estimate());
                 metric.sndBytes.fillMetricsEvent(
                         grpc->mutable_snd_bytes_estimate());
+                metric.sendMsg.fillMetricsEvent(grpc->mutable_snd());
+                metric.recvMsg.fillMetricsEvent(grpc->mutable_rcv());
                 metric.duration.fillMetricsEvent(grpc->mutable_duration());
                 LOG(DEBUG) << "Sending metric [" << name
-                             << "]: " << grpc->ShortDebugString();
+                           << "]: " << grpc->ShortDebugString();
             });
 }
 

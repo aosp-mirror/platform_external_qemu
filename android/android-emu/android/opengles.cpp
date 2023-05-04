@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 
 #include "aemu/base/CpuUsage.h"
 #include "aemu/base/GLObjectCounter.h"
@@ -40,7 +40,7 @@
 #include "android/utils/path.h"
 #include "config-host.h"
 
-#include "OpenglRender/render_api_functions.h"
+#include "render-utils/render_api_functions.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
@@ -64,6 +64,7 @@
     android_opengl_logger_write(fmt "\n", ##__VA_ARGS__); \
 } while(0);
 
+using namespace gfxstream::gl;
 using android::base::pj;
 using android::base::System;
 using android::emulation::asg::AddressSpaceGraphicsContext;
@@ -111,8 +112,8 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
 static bool sOpenglLoggerInitialized = false;
 static bool sRendererUsesSubWindow = false;
 static bool sEgl2egl = false;
-static emugl::RenderLibPtr sRenderLib = nullptr;
-static emugl::RendererPtr sRenderer = nullptr;
+static gfxstream::RenderLibPtr sRenderLib = nullptr;
+static gfxstream::RendererPtr sRenderer = nullptr;
 
 static const EGLDispatch* sEgl = nullptr;
 static const GLESv2Dispatch* sGlesv2 = nullptr;
@@ -293,7 +294,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     android::snapshot::Snapshotter::get().addOperationCallback(
             [](android::snapshot::Snapshotter::Operation op,
                android::snapshot::Snapshotter::Stage stage) {
-                sRenderer->snapshotOperationCallback(op, stage);
+                sRenderer->snapshotOperationCallback(static_cast<int>(op), static_cast<int>(stage));
             });
 
     android::emulation::registerOnLastRefCallback(
@@ -436,8 +437,7 @@ void android_getOpenglesHardwareStrings(char** vendor,
         return;
     }
 
-    const emugl::Renderer::HardwareStrings strings =
-            sRenderer->getHardwareStrings();
+    auto strings = sRenderer->getHardwareStrings();
     D("OpenGL Vendor=[%s]", strings.vendor.c_str());
     D("OpenGL Renderer=[%s]", strings.renderer.c_str());
     D("OpenGL Version=[%s]", strings.version.c_str());
@@ -481,7 +481,7 @@ android_finishOpenglesRenderer()
     }
 }
 
-static emugl::RenderOpt sOpt;
+static gfxstream::RenderOpt sOpt;
 static int sWidth, sHeight;
 static int sNewWidth, sNewHeight;
 
@@ -574,7 +574,7 @@ bool android_screenShot(const char* dirname, uint32_t displayId)
     return false;
 }
 
-const emugl::RendererPtr& android_getOpenglesRenderer() {
+const gfxstream::RendererPtr& android_getOpenglesRenderer() {
     return sRenderer;
 }
 

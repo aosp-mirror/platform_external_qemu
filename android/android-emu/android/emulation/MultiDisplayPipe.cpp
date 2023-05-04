@@ -14,9 +14,10 @@
 * limitations under the License.
 */
 
+#include "aemu/base/logging/Log.h"
 #include "host-common/MultiDisplayPipe.h"
 #include "host-common/MultiDisplay.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 
 namespace android {
 

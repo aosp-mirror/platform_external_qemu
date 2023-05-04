@@ -4,7 +4,7 @@
 #ifndef GUARD_foo_encoder_context_t
 #define GUARD_foo_encoder_context_t
 
-#include "IOStream.h"
+#include "render-utils/IOStream.h"
 #include "ChecksumCalculator.h"
 #include "foo_client_context.h"
 

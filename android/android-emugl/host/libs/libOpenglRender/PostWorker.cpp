@@ -18,7 +18,7 @@
 #include <thread>
 
 #include "ColorBuffer.h"
-#include "DispatchTables.h"
+#include "OpenGLESDispatch/DispatchTables.h"
 #include "FrameBuffer.h"
 #include "RenderThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
@@ -32,6 +32,8 @@
 #else
 #define DD(fmt, ...) (void)0
 #endif
+
+using namespace gfxstream::gl;
 
 static void sDefaultRunOnUiThread(UiUpdateFunc f, void* data, bool wait) {
     (void)f;

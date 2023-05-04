@@ -13,7 +13,7 @@
 // limitations under the License.
 #include "VulkanStream.h"
 
-#include "IOStream.h"
+#include "render-utils/IOStream.h"
 
 #include "aemu/base/BumpPool.h"
 #include "host-common/GfxstreamFatalError.h"
@@ -32,7 +32,7 @@ using emugl::FatalError;
 
 namespace goldfish_vk {
 
-VulkanStream::VulkanStream(IOStream *stream) : mStream(stream) {
+VulkanStream::VulkanStream(gfxstream::IOStream *stream) : mStream(stream) {
     unsetHandleMapping();
 
     if (emugl_feature_is_enabled(android::featurecontrol::VulkanNullOptionalStrings)) {
@@ -48,7 +48,7 @@ VulkanStream::VulkanStream(IOStream *stream) : mStream(stream) {
 
 VulkanStream::~VulkanStream() = default;
 
-void VulkanStream::setStream(IOStream* stream) {
+void VulkanStream::setStream(gfxstream::IOStream* stream) {
     mStream = stream;
 }
 

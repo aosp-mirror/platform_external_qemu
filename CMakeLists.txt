@@ -58,6 +58,7 @@ include(prebuilts)
 include(qemu2-src-gen)
 
 set(OPTION_RUST TRUE CACHE BOOL "Enable all rust dependencies.")
+set(OPTION_BAZEL TRUE CACHE BOOL "Enable bazel compilation (Linux only).")
 set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
 set(OPTION_TRACE
     "nop"

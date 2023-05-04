@@ -43,14 +43,17 @@ public:
 
 // Liveness checker that tries to load the discovery file
 // and tries to see if any of the declared ports are accessible
+//
+/// NOTE: this can be very slow, so best not to use it.
 class OpenPortChecker : public EmulatorLivenessStrategy {
 public:
     bool isAlive(std::string myFile, std::string discoveryFile) const override;
 };
 
 // Liveness checker that tries to load the discovery file
-// and tries to see that the pid exists and port is open.
-class PidChecker : public OpenPortChecker {
+// and tries to see that the pid exists and has the proper name
+// (i.e. contains: "emulator", or "qemu-system-")
+class PidChecker : public EmulatorLivenessStrategy {
 public:
     bool isAlive(std::string myFile, std::string discoveryFile) const override;
 };
@@ -107,6 +110,7 @@ public:
 private:
     DISALLOW_COPY_AND_ASSIGN(EmulatorAdvertisement);
 
+    void eraseMe();
     EmulatorProperties mStudioConfig;
     std::string mSharedDirectory;
     std::unique_ptr<EmulatorLivenessStrategy> mLivenessChecker;

@@ -18,12 +18,14 @@
 #include <string.h>                           // for memcpy
 
 #include "ColorBuffer.h"                      // for ColorBuffer
-#include "DispatchTables.h"                   // for s_gles2
+#include "OpenGLESDispatch/DispatchTables.h"                   // for s_gles2
 #include "FbConfig.h"                         // for FbConfig, FbConfigList
 #include "FrameBuffer.h"                      // for FrameBuffer
 #include "OpenGLESDispatch/EGLDispatch.h"     // for EGLDispatch, s_egl
 #include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
 #include "host-common/misc.h"                // for getGlesVersion
+
+using namespace gfxstream::gl;
 
 ReadbackWorker::recordDisplay::recordDisplay(uint32_t displayId, uint32_t w, uint32_t h)
     : mBufferSize(4 * w * h /* RGBA8 (4 bpp) */),

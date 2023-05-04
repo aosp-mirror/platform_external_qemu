@@ -19,6 +19,8 @@
 
 #include "Standalone.h"
 
+using namespace gfxstream::gl;
+
 namespace emugl {
 
 static bool sDisplayNeedsInit = true;
@@ -27,7 +29,7 @@ EGLDisplay getDisplay() {
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
 
     if (sDisplayNeedsInit) {
-        egl->eglUseOsEglApi(!shouldUseHostGpu());
+        egl->eglUseOsEglApi(!shouldUseHostGpu(), EGL_FALSE);
     }
 
     EGLDisplay dpy = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);

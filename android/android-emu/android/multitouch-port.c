@@ -21,7 +21,7 @@
 #include "android/hw-events.h"
 #include "android/jpeg-compress.h"
 #include "android/multitouch-screen.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/sdk-controller-socket.h"
 #include "android/skin/charmap.h"
 #include "android/utils/debug.h"
