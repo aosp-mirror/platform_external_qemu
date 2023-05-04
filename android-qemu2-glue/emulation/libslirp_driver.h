@@ -20,6 +20,9 @@ namespace android {
 namespace qemu2 {
 
 using slirp_rx_callback = std::function<ssize_t(const uint8_t*, size_t)>;
+
+void libslirp_main_loop_wait(bool nonblocking);
+
 Slirp* libslirp_init(slirp_rx_callback callback,
                      int restricted,
                      bool ipv4,
