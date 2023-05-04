@@ -189,7 +189,7 @@ Builder& Builder::withOnLinkStatusChangedCallback(
     return *this;
 }
 
-std::unique_ptr<WifiService> Builder::build() {
+std::shared_ptr<WifiService> Builder::build() {
     if (!mHostapdOpts.disabled) {
         bool success = false;
         auto* hostapd = android::emulation::HostapdController::getInstance();
@@ -208,8 +208,9 @@ std::unique_ptr<WifiService> Builder::build() {
     }
 
     if (mRedirectToNetsim) {
-        return std::unique_ptr<WifiService>(
-                new NetsimWifiForwarder(sOnReceiveCallback, mCanReceive));
+        return std::static_pointer_cast<WifiService>(
+                std::make_shared<NetsimWifiForwarder>(sOnReceiveCallback,
+                                                      mCanReceive));
     }
 
     Slirp* slirp = initializeSlirp(mSlirpOpts);
@@ -219,11 +220,11 @@ std::unique_ptr<WifiService> Builder::build() {
                       "failure.";
         return nullptr;
     }
-
-    return std::unique_ptr<WifiService>(new VirtioWifiForwarder(
+    auto virtioWifi = std::make_shared<VirtioWifiForwarder>(
             mBssID.empty() ? kBssID : mBssID.data(), sOnReceiveCallback,
             mOnLinkStatusChanged, mCanReceive, mOnSentCallback, mNicConf, slirp,
-            mServerPort, mClientPort));
+            mServerPort, mClientPort);
+    return std::static_pointer_cast<WifiService>(virtioWifi);
 }
 
 }  // namespace qemu2
