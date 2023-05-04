@@ -15,11 +15,10 @@
 #ifndef ANDROID_EMUGL_LIBRENDER_RENDER_WINDOW_H
 #define ANDROID_EMUGL_LIBRENDER_RENDER_WINDOW_H
 
-#include "OpenglRender/render_api.h"
-
 #include "aemu/base/synchronization/MessageChannel.h"
 #include "aemu/base/threads/FunctorThread.h"
 #include "emugl/common/thread.h"
+#include "render-utils/Renderer.h"
 
 class RenderWindowChannel;
 struct RenderWindowMessage;
@@ -79,14 +78,14 @@ public:
     // Specify a function that will be called everytime a new frame is
     // displayed. This is relatively slow but allows one to capture the
     // output.
-    void setPostCallback(emugl::Renderer::OnPostCallback onPost,
+    void setPostCallback(gfxstream::Renderer::OnPostCallback onPost,
                          void* onPostContext,
                          uint32_t displayId,
                          bool useBgraReadback = false);
 
     bool asyncReadbackSupported();
-    emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();
-    emugl::Renderer::FlushReadPixelPipeline getFlushReadPixelPipeline();
+    gfxstream::Renderer::ReadPixelsCallback getReadPixelsCallback();
+    gfxstream::Renderer::FlushReadPixelPipeline getFlushReadPixelPipeline();
 
     // Start displaying the emulated framebuffer using a sub-window of a
     // parent |window| id. |wx|, |wy|, |ww| and |wh| are the position
@@ -144,8 +143,8 @@ public:
 
     void setPaused(bool paused);
 
-    void addListener(emugl::Renderer::FrameBufferChangeEventListener* listener);
-    void removeListener(emugl::Renderer::FrameBufferChangeEventListener* listener);
+    void addListener(gfxstream::Renderer::FrameBufferChangeEventListener* listener);
+    void removeListener(gfxstream::Renderer::FrameBufferChangeEventListener* listener);
 
     void setVsyncHz(int vsyncHz);
     void setDisplayConfigs(int configId, int w, int h, int dpiX, int dpiY);

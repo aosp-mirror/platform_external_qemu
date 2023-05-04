@@ -1,6 +1,7 @@
 set(ANDROID_EMUGL_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(GOLDFISH_EMUGL_DIR
     ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/goldfish-opengl/)
+set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
 
 # We start of defining an interface library that defines all the compiler
 # settings we wish to use for all libs. please keep this at a bare minimum!
@@ -10,10 +11,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(emugl_base INTERFACE "-DEMUGL_DEBUG=1")
 endif()
 
-if(NOT OPTION_GFXSTREAM_BACKEND)
-  # To prevent header collisions in emu/base and hardware/google/aemu/base
-  target_link_libraries(emugl_base INTERFACE android-emu-base-headers)
-endif()
+target_link_libraries(emugl_base INTERFACE android-emu-base-headers qemu-host-common-headers)
 # Compile emugen for the current host.
 android_compile_for_host(emugen ${CMAKE_CURRENT_LIST_DIR}/host/tools/emugen
                          EMUGEN_EXE)

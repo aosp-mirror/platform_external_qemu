@@ -40,9 +40,16 @@ struct MethodMetrics {
     // Duration of the total call length.
     Percentiles duration{32, {0.9}};
 
+    // Messages received
+    Percentiles recvMsg{32, {0.9}};
+
+    // Messages send
+    Percentiles sendMsg{32, {0.9}};
+
+    Direction direction;
+
     // Number of requests for which Status::OK is true.
     int success;
-
     int fail;
 };
 
@@ -57,6 +64,7 @@ public:
 private:
     void reportMetric(const std::string& name, const MethodMetrics& metric);
     std::unordered_map<std::string, MethodMetrics> mMetrics;
+    std::unordered_map<std::string, MethodMetrics> mClientMetrics;
     Lock mLock;
 };
 

@@ -1000,7 +1000,7 @@ void GLEScmContext::frustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloa
     if (m_coreProfileEngine) {
         core().frustumf(left, right, bottom, top, zNear, zFar);
     } else {
-        dispatcher().glFrustum(left,right,bottom,top,zNear,zFar);
+        dispatcher().glFrustumf(left,right,bottom,top,zNear,zFar);
     }
 }
 

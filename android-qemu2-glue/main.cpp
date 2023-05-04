@@ -50,12 +50,12 @@
 #include "android/main-kernel-parameters.h"
 #include "android/multi-instance.h"
 #include "android/opengl/gpuinfo.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/process_setup.h"
 #include "android/session_phase_reporter.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/check_snapshot_loadable.h"
-#include "android/snapshot/interface.h"
+#include "snapshot/interface.h"
 #include "android/userspace-boot-properties.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -2796,8 +2796,11 @@ extern "C" int main(int argc, char** argv) {
             args.add("-device");
             args.add("virtio-serial,ioeventfd=off");
             args.add("-chardev");
+            // Bug: b/215231636
+            // Re-connect to tcp socket every 10s until success and do not
+            // abort emulator due to connection failure.
             args.addFormat(
-                    "socket,port=%d,host=%s,nowait,nodelay,%s,id="
+                    "socket,port=%d,host=%s,nowait,nodelay,reconnect=10,%s,id="
                     "modem",
                     modem_simulator_guest_port, isIpv4 ? "127.0.0.1" : "::1",
                     isIpv4 ? "ipv4" : "ipv6");

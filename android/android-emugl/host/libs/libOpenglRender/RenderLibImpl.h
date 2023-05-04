@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "OpenglRender/RenderLib.h"
+#include "render-utils/RenderLib.h"
 
 #include "aemu/base/Compiler.h"
 #include "host-common/vm_operations.h"
@@ -23,7 +23,7 @@
 
 namespace emugl {
 
-class RenderLibImpl final : public RenderLib {
+class RenderLibImpl final : public gfxstream::RenderLib {
 public:
     RenderLibImpl() = default;
 
@@ -55,20 +55,20 @@ public:
     virtual void setGrallocImplementation(
             GrallocImplementation gralloc) override;
 
-    virtual bool getOpt(RenderOpt* opt) override;
+    virtual bool getOpt(gfxstream::RenderOpt* opt) override;
 
-    virtual RendererPtr initRenderer(int width,
+    virtual gfxstream::RendererPtr initRenderer(int width,
                                      int height,
                                      bool useSubWindow,
                                      bool egl2egl) override;
 
-    OnLastColorBufferRef getOnLastColorBufferRef() override;
+    gfxstream::OnLastColorBufferRef getOnLastColorBufferRef() override;
 
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderLibImpl);
 
 private:
-    std::weak_ptr<Renderer> mRenderer;
+    std::weak_ptr<gfxstream::Renderer> mRenderer;
 };
 
 }  // namespace emugl

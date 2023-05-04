@@ -50,7 +50,7 @@
 #include "android/snapshot/Icebox.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/SnapshotUtils.h"
-#include "android/snapshot/interface.h"
+#include "snapshot/interface.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
 #include "android/utils/bufprint.h"

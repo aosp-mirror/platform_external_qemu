@@ -9,7 +9,11 @@
 #include "android/metrics/StudioConfig.h"           // for UpdateChannel
 #include "android/utils/debug.h"                    // for dfatal
 
+namespace gfxstream {
+namespace gl {
 struct GLESv2Dispatch;
+}  // namespace gl
+}  // namespace gfxstream
 
 void crashhandler_die(const char* message) {
     dfatal("%s: fatal: %s", __func__, message);
@@ -72,6 +76,6 @@ CpuAccelerator GetCurrentCpuAccelerator() {
 
 } // namespace android
 
-void tinyepoxy_init(const GLESv2Dispatch* gles, int version) {
+void tinyepoxy_init(const gfxstream::gl::GLESv2Dispatch* gles, int version) {
     (void)gles;
 }

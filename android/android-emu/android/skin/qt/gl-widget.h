@@ -25,9 +25,14 @@ class QScreen;
 class QShowEvent;
 class QWidget;
 class TextureDraw;
-struct EGLDispatch;
 struct EGLState;
+
+namespace gfxstream {
+namespace gl {
+struct EGLDispatch;
 struct GLESv2Dispatch;
+}  // namespace gl
+}  // namespace gfxstream
 
 // Helper class used to perform EGL/GLESv2 rendering inside a Qt widget.
 // Relies on EmuGL's OpenGLESDispatch library to access the correct set of
@@ -56,8 +61,8 @@ private slots:
 protected:
     // Dispatch tables for EGL and GLESv2 APIs. Note that these will be nullptr
     // if there was a problem when loading the host libraries.
-    const EGLDispatch* mEGL;
-    const GLESv2Dispatch* mGLES2;
+    const gfxstream::gl::EGLDispatch* mEGL;
+    const gfxstream::gl::GLESv2Dispatch* mGLES2;
 
     // Called the first time a frame needs to be rendered by the widget.
     // This will always happen before the first repaintGL() or resizeGL()

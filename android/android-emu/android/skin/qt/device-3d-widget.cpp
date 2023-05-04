@@ -35,7 +35,7 @@
 #include "host-common/hw-config.h"
 #include "android/console.h"                          // for QAndroidSensors...
 #include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/physics/GlmHelpers.h"  // for fromEulerAnglesXYZ
 #include "android/physics/Physics.h"     // for PARAMETER_VALUE...
 #include "android/skin/EmulatorSkin.h"
@@ -44,6 +44,7 @@
 #include "android/skin/qt/wavefront-obj-parser.h"  // for parseWavefrontOBJ
 #include "android/utils/debug.h"
 
+using namespace gfxstream::gl;
 using android::base::System;
 
 class QMouseEvent;

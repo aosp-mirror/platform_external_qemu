@@ -16,7 +16,7 @@
 
 #include "emugl/common/logging.h"
 
-#include "OpenglRender/render_api_types.h"
+#include "render-utils/render_api_types.h"
 
 namespace emugl {
 

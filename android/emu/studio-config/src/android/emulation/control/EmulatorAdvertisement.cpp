@@ -13,27 +13,26 @@
 // limitations under the License.
 #include "android/emulation/control/EmulatorAdvertisement.h"
 
-#include <stdint.h>          // for int64_t
-#include <stdio.h>           // for sscanf
-#include <sys/stat.h>        // for chmod
-#include <fstream>           // for operator<<, basic_ofs...
-#include <initializer_list>  // for initializer_list
-#include <utility>           // for move
-#include <vector>            // for vector, __vector_base...
+#include <stdint.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <chrono>
+#include <fstream>
+#include <initializer_list>
+#include <utility>
+#include <vector>
 
-#include "aemu/base/Log.h"           // for LOG, LogMessage
-#include "aemu/base/StringFormat.h"  // for StringFormat
-
-#include "aemu/base/files/IniFile.h"    // for IniFile
-#include "aemu/base/files/PathUtils.h"  // for pj, PathUtils
+#include "aemu/base/Log.h"
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/files/IniFile.h"
+#include "aemu/base/files/PathUtils.h"
 #include "aemu/base/logging/LogSeverity.h"
 #include "aemu/base/process/Process.h"
-
-#include "aemu/base/sockets/ScopedSocket.h"  // for ScopedSocket
-#include "aemu/base/sockets/SocketUtils.h"   // for socketTcp4LoopbackClient
-#include "android/base/system/System.h"      // for System, System::Pid
-#include "android/emulation/ConfigDirs.h"    // for ConfigDirs
-#include "android/utils/path.h"              // path_mkdir_if_needed
+#include "aemu/base/sockets/ScopedSocket.h"
+#include "aemu/base/sockets/SocketUtils.h"
+#include "android/base/system/System.h"
+#include "android/emulation/ConfigDirs.h"
+#include "android/utils/path.h"
 
 namespace android {
 namespace emulation {
@@ -45,12 +44,11 @@ namespace control {
 #define DD(...) (void)0
 #else
 #include "android/utils/debug.h"
-
 #define DD(...) dinfo(__VA_ARGS__);
-
 #endif
 
 using android::base::PathUtils;
+using android::base::Process;
 using android::base::System;
 static const char* location_format = "pid_%d.ini";
 
@@ -61,7 +59,7 @@ static bool isMe(std::string discoveryFile) {
         // Not a discovery file..
         return false;
     }
-    return pid == android::base::Process::me()->pid();
+    return pid == Process::me()->pid();
 }
 
 static bool canConnectToPort(int64_t port) {
@@ -125,19 +123,47 @@ bool PidChecker::isAlive(std::string myFile, std::string discoveryFile) const {
     // Check to see if the process is alive
     std::string entry(PathUtils::decompose(discoveryFile).back());
     int pid = 0;
-    if (sscanf(entry.c_str(), location_format, &pid) != 1) {
-        // Not a discovery file..
-        return false;
+    if (System::get()->pathIsFile(discoveryFile)) {
+        if (sscanf(entry.c_str(), location_format, &pid) != 1) {
+            // Not a discovery file..
+            return false;
+        }
     }
 
-    auto proc = android::base::Process::fromPid(pid);
+    if (System::get()->pathIsDir(discoveryFile)) {
+        if (sscanf(entry.c_str(), "%d", &pid) != 1) {
+            // Not a discovery dir..
+            return false;
+        }
+    }
+
+    DD("Checking liveness of %d", pid);
+    DD("I'm an emulator proc, my name is: %s (%d)",
+       Process::me()->exe().c_str(), Process::me()->pid());
+
+    // Maybe it is me, i'm alive!
+    if (Process::me()->pid() == pid) {
+        return true;
+    }
+
+    auto proc = Process::fromPid(pid);
     if (!proc) {
         // tsk tsk process is not alive.
         DD("pid: %d is not alive", pid);
         return false;
     }
 
-    return OpenPortChecker::isAlive(myFile, discoveryFile);
+    auto name = proc->exe();
+    if (name.find("emulator") != std::string::npos ||
+        name.find("qemu-system-") != std::string::npos) {
+        // It's a qemu or emulator process.. Let's keep it alive.
+        DD("%s is an emulator process, so the pid file is alive.",
+           name.c_str());
+        return true;
+    }
+
+    DD("No idea what %s is.. you are dead.", name.c_str());
+    return false;
 }
 
 EmulatorAdvertisement::EmulatorAdvertisement(
@@ -170,9 +196,25 @@ EmulatorAdvertisement::EmulatorAdvertisement(
 
 EmulatorAdvertisement::~EmulatorAdvertisement() {
     garbageCollect();
+    eraseMe();
+}
+
+void EmulatorAdvertisement::eraseMe() {
+    if (System::get()->pathIsFile(location())) {
+        DD("Deleting my discovery file %s", location().c_str());
+        System::get()->deleteFile(location());
+    }
+    auto pid_dir = android::base::pj(mSharedDirectory,
+                                     std::to_string(Process::me()->pid()));
+    if (System::get()->pathIsDir(pid_dir)) {
+        DD("Deleting my pid dir %s", pid_dir.c_str());
+        path_delete_dir(pid_dir.c_str());
+    }
 }
 
 int EmulatorAdvertisement::garbageCollect() const {
+    auto start = std::chrono::high_resolution_clock::now();
+    DD("Starting garbage collection of advertisement.");
     int collected = 0;
     for (const auto& entry :
          System::get()->scanDirEntries(mSharedDirectory, true)) {
@@ -181,10 +223,17 @@ int EmulatorAdvertisement::garbageCollect() const {
             DD("Deleting %s", entry.c_str());
             collected++;
             // Emulator is not running, or unreachable.
-            System::get()->deleteFile(entry);
+            if (System::get()->pathIsFile(entry)) {
+                System::get()->deleteFile(entry);
+            }
+            if (System::get()->pathIsDir(entry)) {
+                path_delete_dir(entry.c_str());
+            }
         }
     }
-
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now() - start);
+    DD("It took %lld ms to collect %d leftovers", duration.count(), collected);
     return collected;
 }
 

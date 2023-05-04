@@ -14,7 +14,7 @@
 
 #include "TextureDraw.h"
 
-#include "DispatchTables.h"
+#include "OpenGLESDispatch/DispatchTables.h"
 
 #include "host-common/crash_reporter.h"
 
@@ -23,6 +23,8 @@
 #include <string.h>
 #include <stdio.h>
 #define ERR(...)  fprintf(stderr, __VA_ARGS__)
+
+using namespace gfxstream::gl;
 
 namespace {
 

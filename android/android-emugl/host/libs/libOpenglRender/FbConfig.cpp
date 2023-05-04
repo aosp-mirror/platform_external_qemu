@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include <string.h>
 
+using namespace gfxstream::gl;
+
 namespace {
 
 #define E(...)  fprintf(stderr, __VA_ARGS__)

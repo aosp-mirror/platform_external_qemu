@@ -216,6 +216,7 @@ if(FEATURE_NETSIM)
         "-DBREAKPAD_API_URL=${BREAKPAD_API_URL}"
         "-DANDROID_SYMBOL_DIR=${ANDROID_SYMBOL_DIR}"
         "-DPython_EXECUTABLE=${Python_EXECUTABLE}"
+        "-DNETSIM_EXT=TRUE"
       BUILD_BYPRODUCTS "${NETSIM_CROSS_DIR}/netsim;${NETSIM_CROSS_DIR}/netsimd"
       LOG_BUILD TRUE
       LOG_INSTALL TRUE
@@ -313,3 +314,10 @@ android_license(
   LICENSE
     "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master/LICENSE"
 )
+# Used by gfxstream but has different license.
+android_license(
+  TARGET "libdrm_headers"
+  LIBNAME None
+  SPDX MIT
+  LICENSE "MIT"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/../libdrm/LICENSE")

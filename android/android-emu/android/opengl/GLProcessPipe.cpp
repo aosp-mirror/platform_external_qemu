@@ -12,9 +12,10 @@
 #include "host-common/AndroidPipe.h"
 #include "aemu/base/synchronization/Lock.h"
 
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include <assert.h>
 #include <atomic>
+#include <cstring>
 #include <memory>
 #include <unordered_set>
 

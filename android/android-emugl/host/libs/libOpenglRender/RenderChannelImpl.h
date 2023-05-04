@@ -14,7 +14,7 @@
 #pragma once
 
 #include "aemu/base/containers/BufferQueue.h"
-#include "OpenglRender/RenderChannel.h"
+#include "render-utils/RenderChannel.h"
 #include "RendererImpl.h"
 
 namespace emugl {
@@ -26,7 +26,7 @@ using android::base::BufferQueue;
 // Implementation of the RenderChannel interface that connects a guest
 // client thread (really an AndroidPipe implementation) to a host
 // RenderThread instance.
-class RenderChannelImpl final : public RenderChannel {
+class RenderChannelImpl final : public gfxstream::RenderChannel {
 public:
     explicit RenderChannelImpl(android::base::Stream* loadStream = nullptr);
     ~RenderChannelImpl();

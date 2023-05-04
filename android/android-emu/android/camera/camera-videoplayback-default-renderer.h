@@ -35,7 +35,7 @@ class DefaultFrameRenderer : public virtualscene::CameraRenderer {
  public:
   DefaultFrameRenderer();
   ~DefaultFrameRenderer();
-  bool initialize(const GLESv2Dispatch* gles2,
+  bool initialize(const gfxstream::gl::GLESv2Dispatch* gles2,
                   int width,
                   int height) override;
   void uninitialize() override;

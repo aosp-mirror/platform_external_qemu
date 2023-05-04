@@ -15,7 +15,7 @@
 */
 #pragma once
 #include "aemu/base/files/Stream.h"
-#include "OpenglRender/IOStream.h"
+#include "render-utils/IOStream.h"
 
 namespace emugl {
 
@@ -25,7 +25,7 @@ public:
     ~ReadBuffer();
 
     void setNeededFreeTailSize(int size);
-    int getData(IOStream *stream, int minSize); // get fresh data from the stream
+    int getData(gfxstream::IOStream *stream, int minSize); // get fresh data from the stream
     unsigned char *buf() { return m_readPtr; } // return the next read location
     size_t validData() { return m_validData; } // return the amount of valid data in readptr
     void consume(size_t amount); // notify that 'amount' data has been consumed;

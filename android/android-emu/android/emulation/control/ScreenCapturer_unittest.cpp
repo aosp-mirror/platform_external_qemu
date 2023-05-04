@@ -14,8 +14,8 @@
 
 #include "android/emulation/control/ScreenCapturer.h"
 
-#include "OpenglRender/RenderChannel.h"
-#include "OpenglRender/Renderer.h"
+#include "render-utils/RenderChannel.h"
+#include "render-utils/Renderer.h"
 #include "aemu/base/Compiler.h"
 #include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
@@ -138,11 +138,11 @@ protected:
     }
 };
 
-class MockRenderer : public emugl::Renderer {
+class MockRenderer : public gfxstream::Renderer {
 public:
     MockRenderer(bool hasValidScreenshot)
         : mHasValidScreenshot(hasValidScreenshot) { }
-    emugl::RenderChannelPtr createRenderChannel(
+    gfxstream::RenderChannelPtr createRenderChannel(
             android::base::Stream* loadStream = nullptr) {
         return nullptr;
     }
@@ -245,8 +245,8 @@ public:
                       int displayId = 0,
                       int desiredWidth = 0,
                       int desiredHeight = 0,
-                      SkinRotation desiredRotation = SKIN_ROTATION_0,
-                      SkinRect rect = {{0, 0}, {0, 0}}) {
+                      int desiredRotation = SKIN_ROTATION_0,
+                      gfxstream::Rect rect = {{0, 0}, {0, 0}}) {
         if (mHasValidScreenshot) {
             bool useSnipping = (rect.size.w != 0 && rect.size.h != 0);
             if (useSnipping) {
@@ -277,9 +277,7 @@ public:
         return 0;
     }
 
-    void snapshotOperationCallback(
-            android::snapshot::Snapshotter::Operation op,
-            android::snapshot::Snapshotter::Stage stage) {}
+    void snapshotOperationCallback(int op, int stage) {}
 
     void addListener(FrameBufferChangeEventListener* listener) override {};
     void removeListener(FrameBufferChangeEventListener* listener)  override {};

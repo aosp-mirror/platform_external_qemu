@@ -24,7 +24,7 @@
 #include <string_view>
 #include <vector>   // for vector
 
-#include "OpenglRender/Renderer.h"                    // for Renderer
+#include "render-utils/Renderer.h"                    // for Renderer
 #include "aemu/base/Log.h"                         // for LOG, LogMessage
 #include "aemu/base/files/PathUtils.h"             // for PathUtils
 #include "android/base/system/System.h"               // for System
@@ -33,7 +33,7 @@
 #include "host-common/window_agent.h"   // for QAndroidEmulato...
 #include "android/emulator-window.h"                  // for emulator_window...
 #include "android/loadpng.h"                          // for savepng, write_...
-#include "android/opengles.h"                         // for android_getOpen...
+#include "host-common/opengles.h"                         // for android_getOpen...
 #include "android/utils/string.h"                     // for str_ends_with
 #include "android/utils/debug.h"
 #include "observation.pb.h"                           // for Observation
@@ -67,7 +67,7 @@ bool captureScreenshot(const char* outputDirectoryPath,
 Image takeScreenshot(
         ImageFormat desiredFormat,
         SkinRotation rotation,
-        emugl::Renderer* renderer,
+        gfxstream::Renderer* renderer,
         std::function<void(int* w,
                            int* h,
                            int* lineSize,
@@ -91,11 +91,11 @@ Image takeScreenshot(
         if (renderer->getScreenshot(nChannels, &width, &height,
                                     pixelBuffer.data(), &cPixels, displayId,
                                     desiredWidth, desiredHeight, rotation,
-                                    rect) != 0) {
+                                    {{rect.pos.x, rect.pos.y}, {rect.size.w, rect.size.h}}) != 0) {
             pixelBuffer.resize(cPixels);
             renderer->getScreenshot(
                     nChannels, &width, &height, pixelBuffer.data(), &cPixels,
-                    displayId, desiredWidth, desiredHeight, rotation, rect);
+                    displayId, desiredWidth, desiredHeight, rotation, {{rect.pos.x, rect.pos.y}, {rect.size.w, rect.size.h}});
         }
     } else {  // when -gpu guest is used.
         unsigned char* pixels = nullptr;
@@ -209,7 +209,7 @@ Image takeScreenshot(
 }
 
 bool captureScreenshot(
-        emugl::Renderer* renderer,
+        gfxstream::Renderer* renderer,
         std::function<void(int* w,
                            int* h,
                            int* lineSize,

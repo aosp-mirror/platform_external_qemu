@@ -27,7 +27,7 @@ namespace emugl {
 struct LazyLoadedGLESv1Dispatch {
     // Return pointer to global GLESv1Dispatch instance, or nullptr if there
     // was an error when trying to initialize/load the library.
-    static const GLESv1Dispatch* get();
+    static const gfxstream::gl::GLESv1Dispatch* get();
 
     LazyLoadedGLESv1Dispatch();
 
@@ -38,7 +38,7 @@ private:
 struct LazyLoadedGLESv2Dispatch {
     // Return pointer to global GLESv2Dispatch instance, or nullptr if there
     // was an error when trying to initialize/load the library.
-    static const GLESv2Dispatch* get();
+    static const gfxstream::gl::GLESv2Dispatch* get();
 
     LazyLoadedGLESv2Dispatch();
 
@@ -51,7 +51,7 @@ private:
 struct LazyLoadedEGLDispatch {
     // Return pointer to EGLDispatch table, or nullptr if there was
     // an error when trying to initialize/load the library.
-    static const EGLDispatch* get();
+    static const gfxstream::gl::EGLDispatch* get();
 
     LazyLoadedEGLDispatch();
 

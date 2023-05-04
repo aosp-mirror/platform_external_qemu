@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include "OpenglRender/render_api.h"
+#include "render-utils/render_api.h"
 
 #include "emugl/common/OpenGLDispatchLoader.h"
 #include "emugl/common/logging.h"
@@ -22,6 +22,10 @@
 
 #include <memory>
 
-RENDER_APICALL emugl::RenderLibPtr RENDER_APIENTRY initLibrary() {
-    return emugl::RenderLibPtr(new emugl::RenderLibImpl());
+namespace gfxstream {
+
+RENDER_APICALL RenderLibPtr RENDER_APIENTRY initLibrary() {
+    return RenderLibPtr(new emugl::RenderLibImpl());
 }
+
+}  // namespace gfxstream

@@ -24,6 +24,8 @@
 
 #include "emugl/common/shared_library.h"
 
+using namespace gfxstream::gl;
+
 static emugl::SharedLibrary *s_gles2_lib = NULL;
 
 #define DEFAULT_GLES_V2_LIB EMUGL_LIBNAME("GLES_V2_translator")
@@ -31,6 +33,9 @@ static emugl::SharedLibrary *s_gles2_lib = NULL;
 // An unimplemented function which prints out an error message.
 // To make it consistent with the guest, all GLES2 functions not supported by
 // the driver should be redirected to this function.
+
+namespace gfxstream {
+namespace gl {
 
 void gles2_unimplemented() {
     fprintf(stderr, "Called unimplemented GLES API\n");
@@ -75,3 +80,6 @@ void *gles2_dispatch_get_proc_func(const char *name, void *userData)
     }
     return func;
 }
+
+}  // namespace gl
+}  // namespace gfxstream

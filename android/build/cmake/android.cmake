@@ -17,6 +17,7 @@ endif()
 
 set(INCLUDE_ANDROID_CMAKE 1)
 
+include(bazel)
 include(prebuilts)
 include(symbols)
 
@@ -83,6 +84,7 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
           "-DBREAKPAD_API_KEY=${BREAKPAD_API_KEY}"
           "-DBREAKPAD_API_URL=${BREAKPAD_API_URL}"
           "-DOPTION_TEST_LOGS=${OPTION_TEST_LOGS}"
+          "-DOPTION_BAZEL=FALSE"
           "-DANDROID_SYMBOL_DIR=${ANDROID_SYMBOL_DIR}"
           "-DPython_EXECUTABLE=${Python_EXECUTABLE}"
         BUILD_BYPRODUCTS ${BUILD_PRODUCT}
@@ -580,6 +582,8 @@ endfunction()
 # ``SHARED``  Option indicating that this is a shared library.
 # ``ALIAS``   The library is an alias for another
 # ``TARGET``  The library/executable target. For example emulatory-libyuv
+# ``BAZEL``   The bazel target name for example "@zlib//:z", or none if this is not a bazel target
+# ``INCLUDES`` The public includes that should be added
 # ``LIBNAME`` Public library name, this is how it is known in the world. For example libyuv.
 # ``SRC``     List of source files to be compiled, part of every target.
 # ``LINUX``   List of source files to be compiled if the current target is LINUX_X86_64
@@ -594,10 +598,19 @@ endfunction()
 # ~~~
 function(android_add_library)
   set(options SHARED)
-  set(oneValueArgs TARGET ALIAS)
-  set(multiValueArgs DEPS)
+  set(oneValueArgs TARGET ALIAS BAZEL)
+  set(multiValueArgs DEPS INCLUDES)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
+
+  # Check if this is a bazel target, if so, we will compile it with
+  if(LINUX_X86_64 AND OPTION_BAZEL AND DEFINED build_BAZEL)
+    android_add_bazel_lib(TARGET ${build_TARGET} BAZEL ${build_BAZEL} INCLUDE
+                          ${build_INCLUDES})
+    _register_target(${ARGN})
+    return()
+  endif()
+
   if(${build_SHARED})
     add_library(${build_TARGET} SHARED "")
   elseif((DEFINED build_ALIAS))
@@ -659,6 +672,10 @@ function(android_add_library)
           "ln -sf $<TARGET_FILE_DIR:${build_TARGET}>/${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/$<TARGET_LINKER_FILE_NAME:${build_TARGET}> ${CMAKE_SHARED_LIBRARY_PREFIX}$<TARGET_LINKER_FILE_NAME:${build_TARGET}>"
       )
     endif()
+  endif()
+
+  if(build_INCLUDES)
+    target_include_directories(${build_TARGET} PUBLIC ${build_INCLUDES})
   endif()
 endfunction()
 

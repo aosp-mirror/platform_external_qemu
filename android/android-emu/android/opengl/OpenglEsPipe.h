@@ -13,7 +13,7 @@
 #include "aemu/base/Compiler.h"
 #include "host-common/AndroidPipe.h"
 
-#include "OpenglRender/RenderChannel.h"
+#include "render-utils/RenderChannel.h"
 
 namespace android {
 namespace opengl {

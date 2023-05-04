@@ -24,7 +24,7 @@
 #include "host-common/feature_control.h"
 #include "host-common/hw-config.h"
 #include "android/console.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "studio_stats.pb.h"
 
 #include <map>

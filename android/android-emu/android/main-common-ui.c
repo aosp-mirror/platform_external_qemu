@@ -29,7 +29,7 @@
 #include "android/emulation/control/globals_agent.h"
 #include "android/emulator-window.h"
 #include "android/main-emugl.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/resource.h"
 #include "android/skin/image.h"
 #include "android/skin/rect.h"

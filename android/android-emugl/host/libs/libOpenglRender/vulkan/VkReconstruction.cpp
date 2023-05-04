@@ -16,7 +16,7 @@
 #include "aemu/base/containers/EntityManager.h"
 
 #include "FrameBuffer.h"
-#include "IOStream.h"
+#include "render-utils/IOStream.h"
 #include "VkDecoder.h"
 
 #include <unordered_map>
@@ -177,9 +177,9 @@ void VkReconstruction::save(android::base::Stream* stream) {
     android::base::saveBufferRaw(stream, (char*)(apiTraceBuffer.data()), apiTraceBuffer.size());
 }
 
-class TrivialStream : public IOStream {
+class TrivialStream : public gfxstream::IOStream {
 public:
-    TrivialStream() : IOStream(4) { }
+    TrivialStream() : gfxstream::IOStream(4) { }
 
     void* allocBuffer(size_t minSize) {
         size_t allocSize = (m_bufsize < minSize ? minSize : m_bufsize);

@@ -434,7 +434,10 @@ public:
     }
 
     WinProcess() {}
-    WinProcess(bool deamon) { mDeamon = deamon; }
+    WinProcess(bool deamon, bool inherit) {
+        mDeamon = deamon;
+        mInherit = inherit;
+    }
     WinProcess(HANDLE hProcess) { setHandle(hProcess); }
 
     void setHandle(HANDLE hProcess) {
@@ -550,19 +553,22 @@ public:
         LPWSTR szCmdline = (LPWSTR)wCmdline.c_str();
 
         BOOL bSuccess;
-        if (mPipes.empty()) {
+        if (mInherit || mPipes.empty()) {
+            DD("CreateProcessW(%s)", mInherit ? "Inherit handles" : "Do not inherit");
             bSuccess =
                     CreateProcessW(NULL,
                                    szCmdline,  // command line
                                    NULL,       // process security attributes
-                                   NULL,   // primary thread security attributes
-                                   FALSE,  // handles are NOT inherited
-                                   0,      // creation flags
-                                   NULL,   // use parent's environment
-                                   NULL,   // use parent's current directory
+                                   NULL,  // primary thread security attributes
+                                   mInherit,  // handles could be inherited
+                                   0,         // creation flags
+                                   NULL,      // use parent's environment
+                                   NULL,      // use parent's current directory
                                    &siStartInfo,  // STARTUPINFO pointer
                                    &mProcInfo);  // receives PROCESS_INFORMATION
         } else {
+            assert(!mInherit);
+            // We explicitly inherit our pipes.
             std::vector<HANDLE> handles{mPipes[0]->hWrite, mPipes[1]->hWrite};
             bSuccess = CreateProcessWithExplicitHandles(
                     NULL,
@@ -631,10 +637,10 @@ private:
     std::vector<std::unique_ptr<WindwsPipe>> mPipes;
 };
 
-Command::ProcessFactory Command::sProcessFactory = [](CommandArguments args,
-                                                      bool deamon) {
-    return std::make_unique<WinProcess>(deamon);
-};
+Command::ProcessFactory Command::sProcessFactory =
+        [](CommandArguments args, bool deamon, bool inherit) {
+            return std::make_unique<WinProcess>(deamon, inherit);
+        };
 
 std::unique_ptr<Process> Process::fromPid(Pid pid) {
     ScopedFileHandle hProc(

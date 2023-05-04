@@ -20,7 +20,7 @@
 #include "aemu/base/export.h"
 #include "aemu/base/files/StdioStream.h"
 #include "android/base/system/System.h"
-#include "android/snapshot/common.h"
+#include "snapshot/common.h"
 
 #include <functional>
 #include <vector>

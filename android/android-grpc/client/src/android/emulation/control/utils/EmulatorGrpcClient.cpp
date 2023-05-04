@@ -27,9 +27,11 @@
 
 #include "aemu/base/files/IniFile.h"    // for IniFile
 #include "aemu/base/files/PathUtils.h"  // for Path...
-#include "android/emulation/control/EmulatorAdvertisement.h"
-#include "android/emulation/control/secure/BasicTokenAuth.h"  // for Basi...
 #include "aemu/base/logging/CLog.h"
+#include "android/emulation/control/EmulatorAdvertisement.h"
+#include "android/emulation/control/interceptor/LoggingInterceptor.h"
+#include "android/emulation/control/interceptor/MetricsInterceptor.h"
+#include "android/emulation/control/secure/BasicTokenAuth.h"  // for Basi...
 #include "grpc/grpc_security_constants.h"                     // for LOCA...
 #include "grpc/impl/codegen/connectivity_state.h"             // for GRPC...
 #include "grpc/impl/codegen/gpr_types.h"                      // for gpr_...
@@ -38,6 +40,8 @@
 #include "grpcpp/security/credentials.h"                      // for Meta...
 #include "grpcpp/support/channel_arguments.h"                 // for Chan...
 
+using android::control::interceptor::MetricsInterceptorFactory;
+using android::control::interceptor::StdOutLoggingInterceptorFactory;
 namespace android {
 namespace emulation {
 namespace control {
@@ -103,8 +107,8 @@ bool EmulatorGrpcClient::hasOpenChannel(bool tryConnect) {
         bool connect = mChannel->WaitForConnected(waitUntil);
         double time = Stopwatch::sec(sw.elapsedUs());
         // VERBOSE_PRINT(grpc, "%s to emulator: %s, after %f us",
-        //               connect ? "Connected" : "Not connected", mAddress.c_str(),
-        //               time);
+        //               connect ? "Connected" : "Not connected",
+        //               mAddress.c_str(), time);
     }
     auto state = mChannel->GetState(tryConnect);
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
@@ -133,9 +137,19 @@ EmulatorGrpcClient::EmulatorGrpcClient(const std::string_view address,
         call_creds = grpc::SslCredentials(sslOpts);
     }
 
+    std::vector<std::unique_ptr<
+            grpc::experimental::ClientInterceptorFactoryInterface>>
+            interceptors;
+    if (VERBOSE_CHECK(grpc)) {
+        interceptors.push_back(std::unique_ptr<StdOutLoggingInterceptorFactory>(
+                new StdOutLoggingInterceptorFactory()));
+    }
+    interceptors.emplace_back(std::make_unique<MetricsInterceptorFactory>());
+
     grpc::ChannelArguments maxSize;
     maxSize.SetMaxReceiveMessageSize(-1);
-    mChannel = grpc::CreateCustomChannel(mAddress, call_creds, maxSize);
+    mChannel = grpc::experimental::CreateCustomChannelWithInterceptors(
+            mAddress, call_creds, maxSize, std::move(interceptors));
 }
 
 EmulatorGrpcClient::EmulatorGrpcClient(const Endpoint& dest)
@@ -158,6 +172,7 @@ std::unique_ptr<grpc::ClientContext> EmulatorGrpcClient::newContext() {
     if (mCredentials) {
         ctx->set_credentials(mCredentials);
     }
+
     return ctx;
 }
 
@@ -170,11 +185,20 @@ bool EmulatorGrpcClient::initializeChannel() {
     }
     mAddress = "localhost:" + iniFile.getString("grpc.port", "8554");
 
+    std::vector<std::unique_ptr<
+            grpc::experimental::ClientInterceptorFactoryInterface>>
+            interceptors;
+    if (VERBOSE_CHECK(grpc)) {
+        interceptors.push_back(std::unique_ptr<StdOutLoggingInterceptorFactory>(
+                new StdOutLoggingInterceptorFactory()));
+    }
+
+    interceptors.emplace_back(std::make_unique<MetricsInterceptorFactory>());
     grpc::ChannelArguments maxSize;
     maxSize.SetMaxReceiveMessageSize(-1);
-    mChannel = grpc::CreateCustomChannel(
+    mChannel = grpc::experimental::CreateCustomChannelWithInterceptors(
             mAddress, ::grpc::experimental::LocalCredentials(LOCAL_TCP),
-            maxSize);
+            maxSize, std::move(interceptors));
 
     // Install token authenticator if needed.
     if (iniFile.hasKey("grpc.token")) {

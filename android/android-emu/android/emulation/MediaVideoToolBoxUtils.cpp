@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "host-common/MediaVideoToolBoxUtils.h"
-#include "OpenglRender/MediaNative.h"
+#include "render-utils/MediaNative.h"
 
 #define MEDIA_VTB_DEBUG 0
 

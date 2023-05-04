@@ -19,3 +19,5 @@ void register_netsim(
         const std::string rootcanal_default_commands_file,
         const std::string rootcanal_controller_properties_file,
         const std::string host_id);
+
+void close_netsim();

@@ -55,11 +55,27 @@
         "SHARED"
       ],
       "kwargs": {
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-          "TARGET": "*",
-          "DLLEXPORT": "*",
-          "DLLENABLE": "*",
-          "DEPS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "False" } }
+        "SRC": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
+        "TARGET": "*",
+        "DLLEXPORT": "*",
+        "DLLENABLE": "*",
+        "DEPS": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "False"
+          }
+        }
       }
     },
     "android_validate_sha": {
@@ -77,7 +93,7 @@
         "TARGET": "*"
       }
     },
-  "android_flex_compile": {
+    "android_flex_compile": {
       "flags": [],
       "kwargs": {
         "SOURCE_DIR": "*",
@@ -196,11 +212,21 @@
       "kwargs": {
         "TARGET": "*",
         "ALIAS": "*",
+        "BAZEL": "*",
         "LIBNAME": "*",
         "REPO": "*",
         "LICENSE": "*",
         "REPO_DIR": "*",
         "NOTICE": "*",
+        "INCLUDES": {
+          "pargs": {
+            "nargs": "*",
+            "tags": [
+              "file-list"
+            ],
+            "sortable": "True"
+          }
+        },
         "DARWIN": {
           "pargs": {
             "nargs": "*",

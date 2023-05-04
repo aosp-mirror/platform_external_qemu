@@ -89,8 +89,6 @@ def get_tasks(args) -> List[BuildTask]:
             AccelerationCheckTask(args.out).enable(run_tests),
             EmugenTestTask(args.aosp, args.out).enable(run_tests).enable(False),
             GenEntriesTestTask(args.aosp, args.out),
-            # Enable the integration tests by default once they are stable enough
-            IntegrationTestTask(args.aosp, args.out, args.dist).enable(False),
             CoverageReportTask(aosp=args.aosp, destination=args.out).enable(run_tests),
             PackageSamplesTask(
                 args.aosp, args.out, args.dist, args.target, args.sdk_build_number
@@ -103,6 +101,8 @@ def get_tasks(args) -> List[BuildTask]:
                 sdk_build_number=args.sdk_build_number,
                 configuration=args.config,
             ).enable(args.dist is not None),
+            # Enable the integration tests by default once they are stable enough
+            IntegrationTestTask(args.aosp,args.target, args.out, args.dist).enable(False),
         ]
     return tasks
 

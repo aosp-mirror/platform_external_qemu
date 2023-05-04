@@ -28,6 +28,8 @@
 #include <GLES2/gl2.h>
 #include <GLES3/gl31.h>
 
+using gfxstream::gl::GLESv2Dispatch;
+
 namespace emugl {
 
 // Dimensions for test surface

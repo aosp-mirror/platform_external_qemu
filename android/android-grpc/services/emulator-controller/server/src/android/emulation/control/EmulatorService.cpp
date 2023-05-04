@@ -78,7 +78,7 @@
 #include "android/hw-sensors.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/Percentiles.h"
-#include "android/opengles.h"
+#include "host-common/opengles.h"
 #include "android/physics/Physics.h"
 #include "android/recording/AvFormat.h"
 #include "android/skin/rect.h"
@@ -744,8 +744,8 @@ public:
 
         // TODO(jansen): Move to ScreenshotUtils.
         std::unique_ptr<EventWaiter> frameEvent;
-        std::unique_ptr<RaiiEventListener<emugl::Renderer,
-                                          emugl::FrameBufferChangeEvent>>
+        std::unique_ptr<RaiiEventListener<gfxstream::Renderer,
+                                          gfxstream::FrameBufferChangeEvent>>
                 frameListener;
         // Screenshots can come from either the gl renderer, or the guest.
         const auto& renderer = android_getOpenglesRenderer();
@@ -753,9 +753,9 @@ public:
             // Fast mode..
             frameEvent = std::make_unique<EventWaiter>();
             frameListener = std::make_unique<RaiiEventListener<
-                    emugl::Renderer, emugl::FrameBufferChangeEvent>>(
+                    gfxstream::Renderer, gfxstream::FrameBufferChangeEvent>>(
                     renderer.get(),
-                    [&](const emugl::FrameBufferChangeEvent state) {
+                    [&](const gfxstream::FrameBufferChangeEvent state) {
                         frameEvent->newEvent();
                     });
         } else {
@@ -1080,14 +1080,7 @@ public:
         return Status::OK;
     }
 
-    Status getDisplayConfigurations(ServerContext* context,
-                                    const ::google::protobuf::Empty* request,
-                                    DisplayConfigurations* reply) override {
-        if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
-            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          "The multi-display feature is not available", "");
-        }
-
+    void fillDisplayConfigurations(DisplayConfigurations* reply) {
         uint32_t width, height, dpi, flags;
         bool enabled;
         for (int i = 0; i <= MultiDisplay::s_maxNumMultiDisplay; i++) {
@@ -1105,6 +1098,17 @@ public:
 
         reply->set_maxdisplays(android::MultiDisplay::s_maxNumMultiDisplay);
         reply->set_userconfigurable(avdInfo_maxMultiDisplayEntries());
+    }
+
+    Status getDisplayConfigurations(ServerContext* context,
+                                    const ::google::protobuf::Empty* request,
+                                    DisplayConfigurations* reply) override {
+        if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "The multi-display feature is not available", "");
+        }
+        fillDisplayConfigurations(reply);
+
         return Status::OK;
     }
 
@@ -1349,11 +1353,19 @@ public:
 
     Notification getCameraNotificationEvent() {
         Notification reply;
+        auto camera = reply.mutable_cameranotification();
+
+        // Camera is currently always associated with display 0
+        camera->set_display(0);
         if (mCamera.isConnected()) {
             reply.set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
+            camera->set_active(true);
         } else {
             reply.set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
+            camera->set_active(false);
         }
+
+        assert(reply.has_cameranotification());
         return reply;
     }
 
@@ -1382,23 +1394,27 @@ public:
                     notifier.newEvent();
                 });
 
-        RaiiEventListener<MultiDisplay, android::DisplayChangeEvent>
-                displayListener(
-                        MultiDisplay::getInstance(),
-                        [&](const android::DisplayChangeEvent state) {
-                            if (state.change ==
-                                DisplayChange::DisplayTransactionCompleted) {
-                                Notification display;
-                                display.set_event(
-                                        Notification::
-                                                DISPLAY_CONFIGURATIONS_CHANGED_UI);
+        RaiiEventListener<MultiDisplay, android::DisplayChangeEvent> displayListener(
+                MultiDisplay::getInstance(),
+                [&](const android::DisplayChangeEvent state) {
+                    if (state.change ==
+                        DisplayChange::DisplayTransactionCompleted) {
+                        Notification display;
+                        display.set_event(
+                                Notification::
+                                        DISPLAY_CONFIGURATIONS_CHANGED_UI);
 
-                                std::lock_guard<std::mutex> lock(
-                                        notificationLock);
-                                activeNotifications.push_back(display);
-                                notifier.newEvent();
-                            }
-                        });
+                        auto displayNotification =
+                                display.mutable_displayconfigurationschangednotification();
+                        fillDisplayConfigurations(
+                                displayNotification
+                                        ->mutable_displayconfigurations());
+
+                        std::lock_guard<std::mutex> lock(notificationLock);
+                        activeNotifications.push_back(display);
+                        notifier.newEvent();
+                    }
+                });
 
         // And deliver the events as they come in.
         while (clientAvailable) {

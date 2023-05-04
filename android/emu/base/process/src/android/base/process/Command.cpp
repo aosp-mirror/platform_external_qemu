@@ -142,6 +142,11 @@ Command& Command::asDeamon() {
     return *this;
 }
 
+Command& Command::inherit() {
+    mInherit = true;
+    return *this;
+}
+
 Command Command::create(std::vector<std::string> programWithArgs) {
     return Command(programWithArgs);
 }
@@ -149,9 +154,9 @@ Command Command::create(std::vector<std::string> programWithArgs) {
 std::unique_ptr<ObservableProcess> Command::execute() {
     std::unique_ptr<ObservableProcess> proc;
     if (sTestFactory) {
-        [[unlikely]] proc = sTestFactory(mArgs, mDeamon);
+        [[unlikely]] proc = sTestFactory(mArgs, mDeamon, mInherit);
     } else {
-        proc = sProcessFactory(mArgs, mDeamon);
+        proc = sProcessFactory(mArgs, mDeamon, mInherit);
     }
 
     // Connect I/O
@@ -185,6 +190,7 @@ std::unique_ptr<ObservableProcess> Command::execute() {
 
     return proc;
 }
+
 
 void Command::setTestProcessFactory(ProcessFactory factory) {
     sTestFactory = factory;

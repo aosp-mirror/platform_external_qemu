@@ -1218,3 +1218,43 @@ GL_APICALL void GL_APIENTRY glCopyTexSubImage3D(GLenum target, GLint level, GLin
     ctx->dispatcher().glCopyTexSubImage3D(target, level, xoffset, yoffset, zoffset, x, y, width, height);
 }
 
+GL_APICALL void GL_APIENTRY glEnableiEXT(GLenum cap, GLuint index)
+{
+    // NOT IMPLEMENTED
+}
+GL_APICALL void GL_APIENTRY glDisableiEXT(GLenum cap, GLuint index)
+{
+    // NOT IMPLEMENTED
+}
+
+GL_APICALL void GL_APIENTRY glBlendEquationiEXT(GLuint buf, GLenum mode)
+{
+    // NOT IMPLEMENTED
+}
+
+GL_APICALL void GL_APIENTRY glBlendEquationSeparateiEXT(GLuint buf, GLenum modeRGB, GLenum modeAlpha)
+{
+    // NOT IMPLEMENTED
+}
+
+GL_APICALL void GL_APIENTRY glBlendFunciEXT(GLuint buf, GLenum sfactor, GLenum dfactor)
+{
+    // NOT IMPLEMENTED
+}
+
+GL_APICALL void GL_APIENTRY glBlendFuncSeparateiEXT(GLuint buf, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha)
+{
+    // NOT IMPLEMENTED
+}
+
+GL_APICALL void GL_APIENTRY glColorMaskiEXT(GLuint buf, GLboolean red, GLboolean green,
+    GLboolean blue, GLboolean alpha)
+{
+    // NOT IMPLEMENTED
+}
+
+GL_APICALL GLboolean GL_APIENTRY glIsEnablediEXT(GLenum cap, GLuint index) {
+    // NOT IMPLEMENTED
+    return GL_FALSE;
+}
+
