@@ -63,6 +63,7 @@
 #include "host-common/crash-handler.h"
 #include "host-common/multi_display_agent.h"
 #include "host-common/opengl/emugl_config.h"
+#include "host-common/MultiDisplay.h"
 #include "studio_stats.pb.h"
 
 #define DEBUG 1
@@ -3662,7 +3663,16 @@ bool EmulatorQtWindow::addMultiDisplayWindow(uint32_t id,
             // create qt window for the 1st time.
             mMultiDisplayWindow[id].reset(new MultiDisplayWidget(w, h, id));
             char title[16];
-            snprintf(title, 16, "Display %d", id);
+            uint32_t tId;
+            if (id >= android::MultiDisplay::s_displayIdInternalBegin &&
+                    id < android::MultiDisplay::s_maxNumMultiDisplay) {
+                // displayIds created by rcCommands
+                tId = id - android::MultiDisplay::s_displayIdInternalBegin + 1;
+            } else {
+                tId = id;
+            }
+            LOG(INFO) << "DisplayId: " << id << ", Title: " << tId;
+            snprintf(title, 16, "Display %d", tId);
             mMultiDisplayWindow[id]->setWindowTitle(title);
             QRect geoTool = mToolWindow->geometry();
             mMultiDisplayWindow[id]->move(
