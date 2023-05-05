@@ -1,0 +1,264 @@
+.route-container, .route-container-collapsed {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: auto;
+    width: 100%;
+    background-color: #5087ec;
+    overflow: hidden;
+    transition: transform 0.5s ease-in-out;
+    transform: scaleY(1);
+    transform-origin: top;
+    z-index: 2;
+}
+
+.route-container-collapsed {
+    transform: scaleY(0);
+}
+
+.transportation-options-container {
+    padding-top: 8px;
+    padding-bottom: 4px;
+}
+
+.transportation-options-spacer {
+    width: 38px;
+    height: 24px;
+    color: transparent;
+}
+
+.round-icon, .round-icon-selected {
+    color: #b9cff7;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.round-icon:hover {
+    background-color: #3d69cf;
+}
+
+.round-icon-selected {
+    color: white;
+    background-color: #3d69cf;
+}
+
+.close-icon {
+    color: white;
+    position: relative;
+    float: right;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    padding: 8px 4px 8px 8px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.waypoints-container {
+    display: flex;
+    padding-left: 16px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.waypoints-icons-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.waypoint-addresses-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding-top: 2px;
+    margin-left: 12px;
+}
+
+.waypoint-address-input {
+    color: rgba(255, 255, 255, 0.87);
+    background-color: transparent;
+    margin-bottom: 18px;
+    font-family: 'Roboto';
+    font-size: 15px;
+    font-weight: 400;
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.60);
+    padding-bottom: 5px;
+    direction: ltr;
+    display: inline-block;
+}
+
+.waypoint-address-input::placeholder {
+    color: rgba(255, 255, 255, 0.60);
+    opacity: 0.7;
+    font-weight: 300;
+}
+
+.waypoint-address-input:focus {
+    outline: none;
+}
+
+.widget-directions-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.start-dot-icon {
+    color: white;
+    text-align: center;
+    font-size: 12px;
+    height: 14px;
+    width: 24px;
+    margin-top: 8px;
+}
+
+.waypoints-icon {
+    color: rgba(255, 255, 255, 0.50);
+    height: 24px;
+}
+
+.end-marker-icon {
+    color: white;
+    text-align: center;
+    font-size: 18px;
+    width: 24px;
+}
+
+.add-destination-icon {
+    color: white;
+    text-align: center;
+    margin-top: 16px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.add-destination-icon::after {
+    content: "add_circle_outline";
+}
+
+.add-destination-icon:hover::after {
+    content: "add_circle";
+}
+
+.add-destination-label {
+    color: rgba(255, 255, 255, 0.50);
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    padding-top: 0px;
+    padding-bottom: 4px;
+}
+
+.waypoints-reverse-container {
+    display: inline-block;
+    vertical-align: top;
+    justify-content: center;
+    flex-direction: column;
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 18px;
+}
+
+.reverse-icon {
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 30px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.50);
+}
+
+.reverse-icon:hover {
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.destination-remove-icon {
+    width: 24px;
+    height: 42px;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
+
+.action-buttons-container {
+    background-color: #3d69cf;
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+}
+
+.common-button {
+    display: flex;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: white;
+    height: 100%;
+    white-space: nowrap;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.common-button[disabled='true'] {
+    opacity: 0;
+}
+
+.save-route-button {
+    width: 150px;
+    float: right;
+}
+
+.search-results-container {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+}
+
+.search-result-item-container {
+    display: flex;
+    height: 36px;
+    align-items: center;
+    padding-left: 20px;
+    padding-right: 10px;
+    cursor: pointer;
+}
+
+.search-result-item-container:hover {
+    background-color: #f0f0f0;
+}
+
+.search-result-item-container:hover .search-result-item-icon {
+    color: #d9503f;
+}
+
+.search-result-item-icon {
+    color: #a8a8a8;
+    padding-right: 12px;
+}
+
+.search-result-item-icon::after {
+    content: "place";
+}
+
+.search-result-item-name {
+    font-family: Roboto;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-result-item-address {
+    margin-left: 4px;
+    font-family: Roboto;
+    font-size: 12px;
+    font-weight: 300;
+    color: #8c8c8c;
+}

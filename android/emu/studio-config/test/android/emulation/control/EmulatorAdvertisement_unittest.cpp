@@ -18,6 +18,7 @@
 #include <fstream>
 #include <functional>
 #include <optional>
+#include <thread>
 #include <vector>
 
 #include "aemu/base/EnumFlags.h"
@@ -77,17 +78,18 @@ protected:
         std::string executable =
                 System::get()->findBundledExecutable(kDiscovery);
         std::vector<std::string> cmdArgs{executable};
-        auto cmd = Command::create({executable, "--sleep", std::to_string(sleepMs) + "ms"});
+        auto cmd = Command::create(
+                {executable, "--sleep", std::to_string(sleepMs) + "ms"});
         if (!dir.empty()) {
             cmd.arg("--discovery");
             cmd.arg(dir);
         }
 
-
         mTesterProc = cmd.execute();
         if (!mTesterProc) {
             // Failed to start Mission abort!
-            LOG(INFO) << "Failed to start (does the emulator binary exist?): " << executable;
+            LOG(INFO) << "Failed to start (does the emulator binary exist?): "
+                      << executable;
             return std::nullopt;
         }
 

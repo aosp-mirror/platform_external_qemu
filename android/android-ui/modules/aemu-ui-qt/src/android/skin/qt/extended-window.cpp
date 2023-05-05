@@ -113,7 +113,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
     QSettings settings;
 
+
     mExtendedUi->setupUi(this);
+    // mExtendedUi->stackedWidget->addWidget(new SnapshotPage(mExtendedUi->stackedWidget));
     mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
@@ -234,7 +236,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
         !android_foldable_rollable_configured() && !resizableEnabled() &&
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_TV &&
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_WEAR &&
-        (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_ANDROID_AUTO 
+        (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_ANDROID_AUTO
                 || android::automotive::isMultiDisplaySupported(
                     getConsoleAgents()->settings->avdInfo()))) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);

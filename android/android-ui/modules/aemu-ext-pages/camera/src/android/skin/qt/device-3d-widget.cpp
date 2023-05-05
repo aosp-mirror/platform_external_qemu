@@ -10,40 +10,40 @@
 
 #include "android/skin/qt/device-3d-widget.h"
 
-#include <assert.h>            // for assert
-#include <qimage.h>            // for QImage::Format_...
-#include <qiodevice.h>         // for operator|, QIOD...
-#include <qloggingcategory.h>  // for qCWarning
-#include <qnamespace.h>        // for ClickFocus
+#include <assert.h>
+#include <qimage.h>
+#include <qiodevice.h>
+#include <qloggingcategory.h>
+#include <qnamespace.h>
 
 #include <QBitmap>
-#include <QByteArray>   // for QByteArray
-#include <QFile>        // for QFile
-#include <QImage>       // for QImage
-#include <QMouseEvent>  // for QMouseEvent
+#include <QByteArray>
+#include <QFile>
+#include <QImage>
+#include <QMouseEvent>
 #include <QPixmap>
-#include <QPoint>                  // for QPoint
-#include <QTextStream>             // for QTextStream
-#include <QWheelEvent>             // for QWheelEvent
-#include <algorithm>               // for max, min
-#include <glm/gtc/quaternion.hpp>  // for tquat
-#include <vector>                  // for vector
+#include <QPoint>
+#include <QTextStream>
+#include <QWheelEvent>
+#include <algorithm>
+#include <glm/gtc/quaternion.hpp>
+#include <vector>
 
-#include "android/skin/backend-defs.h"
-#include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "aemu/base/files/PathUtils.h"
-#include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
-#include "host-common/hw-config.h"
-#include "android/console.h"                          // for QAndroidSensors...
-#include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
-#include "host-common/opengles.h"
-#include "android/physics/GlmHelpers.h"  // for fromEulerAnglesXYZ
-#include "android/physics/Physics.h"     // for PARAMETER_VALUE...
+#include "android/base/system/System.h"
+#include "android/console.h"
+#include "android/emulation/control/sensors_agent.h"
+#include "android/hw-sensors.h"
+#include "android/physics/GlmHelpers.h"
+#include "android/physics/Physics.h"
 #include "android/skin/EmulatorSkin.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/gl-common.h"             // for createShader
-#include "android/skin/qt/wavefront-obj-parser.h"  // for parseWavefrontOBJ
+#include "android/skin/backend-defs.h"
+#include "android/skin/qt/gl-common.h"
+#include "android/skin/qt/wavefront-obj-parser.h"
 #include "android/utils/debug.h"
+#include "host-common/hw-config.h"
+#include "host-common/opengles.h"
 
 using namespace gfxstream::gl;
 using android::base::System;
@@ -63,10 +63,10 @@ static glm::vec3 clampPosition(glm::vec3 position) {
 static constexpr int kAnimationIntervalMs = 33;
 
 Device3DWidget::Device3DWidget(QWidget* parent)
-    : GLWidget(parent), mUseAbstractDevice(
-        android_foldable_hinge_configured()
-        || android_foldable_rollable_configured()
-        || android_is_automotive()) {
+    : GLWidget(parent),
+      mUseAbstractDevice(android_foldable_hinge_configured() ||
+                         android_foldable_rollable_configured() ||
+                         android_is_automotive()) {
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
 
@@ -255,9 +255,8 @@ bool Device3DWidget::initModel() {
         // Load the model and set up buffers.
         std::vector<float> model_vertex_data;
         std::vector<GLuint> indices;
-        QFile model_file(android_is_automotive()
-            ? ":/car-model/model.obj"
-            : ":/phone-model/model.obj");
+        QFile model_file(android_is_automotive() ? ":/car-model/model.obj"
+                                                 : ":/phone-model/model.obj");
         if (model_file.open(QFile::ReadOnly)) {
             QTextStream file_stream(&model_file);
             if (!parseWavefrontOBJ(file_stream, model_vertex_data, indices)) {
@@ -299,9 +298,11 @@ bool Device3DWidget::initAbstractDeviceHingeModel(
     // std::vector<GLuint> indices;
     bool hSplit = (type == ANDROID_FOLDABLE_HORIZONTAL_SPLIT) ? true : false;
     int32_t displayW =
-            hSplit ? getConsoleAgents()->settings->hw()->hw_lcd_width : getConsoleAgents()->settings->hw()->hw_lcd_height;
+            hSplit ? getConsoleAgents()->settings->hw()->hw_lcd_width
+                   : getConsoleAgents()->settings->hw()->hw_lcd_height;
     int32_t displayH =
-            hSplit ? getConsoleAgents()->settings->hw()->hw_lcd_height : getConsoleAgents()->settings->hw()->hw_lcd_width;
+            hSplit ? getConsoleAgents()->settings->hw()->hw_lcd_height
+                   : getConsoleAgents()->settings->hw()->hw_lcd_width;
     int32_t centerX = displayW / 2;
     int32_t centerY = displayH / 2;
     if (!hSplit) {
@@ -477,10 +478,10 @@ bool Device3DWidget::initAbstractDeviceRollModel() {
     // std::vector<GLuint> indices;
     struct FoldableConfig config = mFoldableState.config;
     bool hRoll = config.type == ANDROID_FOLDABLE_HORIZONTAL_ROLL ? true : false;
-    int displayW =
-            hRoll ? getConsoleAgents()->settings->hw()->hw_lcd_width : getConsoleAgents()->settings->hw()->hw_lcd_height;
-    int displayH =
-            hRoll ? getConsoleAgents()->settings->hw()->hw_lcd_height : getConsoleAgents()->settings->hw()->hw_lcd_width;
+    int displayW = hRoll ? getConsoleAgents()->settings->hw()->hw_lcd_width
+                         : getConsoleAgents()->settings->hw()->hw_lcd_height;
+    int displayH = hRoll ? getConsoleAgents()->settings->hw()->hw_lcd_height
+                         : getConsoleAgents()->settings->hw()->hw_lcd_width;
 
     struct RollableParameters* p = config.rollableParams;
     // sort the rolls by rolling area low to high
@@ -655,6 +656,7 @@ static bool getVisibleArea(const QPixmap* pixMap, QRect& rect) {
 }
 
 GLuint Device3DWidget::createSkinTexture() {
+    // getConsoleAgents()->emu->getEmulatorWindow()
     const auto pixMap = EmulatorSkin::getInstance()->getSkinPixmap();
     if (pixMap != nullptr) {
         QRect rect;

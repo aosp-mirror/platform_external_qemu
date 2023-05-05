@@ -248,6 +248,7 @@ OPT_FLAG(grpc_use_jwt, "Use a signed JWT token for gRPC authentication. (default
 OPT_PARAM(grpc_allowlist, "<file>", "Use a custom allow list for gRPC authentication.")
 OPT_PARAM(idle_grpc_timeout, "<timeout>", "Terminate the emulator if there is no gRPC activity within <timeout> seconds.")
 OPT_PARAM(waterfall, "<mode>", "Mode in which to run waterfall.")
+OPT_FLAG(grpc_ui, "Use the experimental gRPRC ui.")
 
 #ifdef ANDROID_WEBRTC
 OPT_PARAM(turncfg, "cmd", "Command to execute to obtain turn configuration for the webrtc connection.")
