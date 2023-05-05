@@ -1367,16 +1367,6 @@ help_rootcanal_controller_properties_file(stralloc_t*  out)
     );
 }
 
-
-static void
-help_rootcanal_default_commands_file(stralloc_t*  out)
-{
-    PRINTF(
-    "  Loads the test commands on launch. \n\n"
-    "  This is not officially supported, and is for internal testing only. \n\n"
-    );
-}
-
 static void
 help_rootcanal_no_mesh(stralloc_t*  out)
 {
