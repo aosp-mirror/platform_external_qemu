@@ -106,7 +106,7 @@ NetsimWifiForwarder::~NetsimWifiForwarder() {
 }
 
 bool NetsimWifiForwarder::init() {
-    auto channel = netsim::packet::CreateChannel("", "");
+    auto channel = netsim::packet::CreateChannel("");
     if (!channel) {
         LOG(WARNING) << "Unable to establish gRPC connection with netsim.";
         return false;

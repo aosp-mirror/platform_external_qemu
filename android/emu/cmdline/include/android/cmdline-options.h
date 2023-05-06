@@ -256,7 +256,6 @@ OPT_PARAM(dump_audio, "<file>", "Dump audio to apointed file for the webrtc conn
 #endif
 
 OPT_PARAM(rootcanal_controller_properties_file, "<file>", "Rootcanal controller_properties.json file.")
-OPT_PARAM(rootcanal_default_commands_file, "<file>", "Rootcanal commands file to run on launch.")
 OPT_PARAM(packet_streamer_endpoint, "<uri>", "Use the provided packet streamer endpoint when present.")
 
 OPT_PARAM(multidisplay, "index width height dpi flag", "config multiple displays.")
