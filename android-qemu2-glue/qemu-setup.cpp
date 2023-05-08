@@ -336,6 +336,8 @@ int qemu_setup_grpc() {
 
     auto avdInfo = getConsoleAgents()->settings->avdInfo();
     auto contentPath = avdInfo_getContentPath(avdInfo);
+    const std::string canonical_contentPath =
+            contentPath ? PathUtils::canonicalPath(contentPath) : "";
     EmulatorProperties props{
             {"port.serial", std::to_string(android_serial_number_port)},
             {"emulator.build", EMULATOR_BUILD_STRING},
@@ -343,7 +345,7 @@ int qemu_setup_grpc() {
             {"port.adb", std::to_string(android_adb_port)},
             {"avd.name", displayName},
             {"avd.id", avdInfo_getId(getConsoleAgents()->settings->avdInfo())},
-            {"avd.dir", contentPath ? contentPath : ""},
+            {"avd.dir", canonical_contentPath.c_str()},
             {"cmdline", getConsoleAgents()->settings->android_cmdLine()}};
 
     int grpc_start = android_serial_number_port + 3000;
