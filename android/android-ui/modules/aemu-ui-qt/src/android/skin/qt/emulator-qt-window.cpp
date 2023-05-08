@@ -477,11 +477,15 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     qRegisterMetaType<Ui::OverlayMessageType>();
     qRegisterMetaType<Ui::OverlayChildWidget::DismissFunc>();
 
+    int displayW = getConsoleAgents()->settings->hw()->hw_lcd_width;
+    int displayH = getConsoleAgents()->settings->hw()->hw_lcd_height;
+    SkinRotation landscapeOrientation = displayW >= displayH ? SKIN_ROTATION_0 : SKIN_ROTATION_90;
+    SkinRotation portraitOrientation = displayH > displayW ? SKIN_ROTATION_0 : SKIN_ROTATION_90;
     mOrientation =
             !strcmp(getConsoleAgents()->settings->hw()->hw_initialOrientation,
                     "landscape")
-                    ? SKIN_ROTATION_270
-                    : SKIN_ROTATION_0;
+                    ? landscapeOrientation
+                    : portraitOrientation;
 
     android::base::ThreadLooper::setLooper(mLooper, true);
 
@@ -2515,7 +2519,22 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
         int displayYFolded;
         android_foldable_get_folded_area(nullptr, nullptr, &displayXFolded,
                                          &displayYFolded);
-        switch (mOrientation) {
+        // mOrientation is defined in terms of lcd width/height, so we need to reverse it if
+        // the folded state has the dimensions defined in the opposite orientation.
+        SkinRotation foldedOrientation = mOrientation;
+        if ((displayX > displayY && displayXFolded < displayYFolded)  // landscape vs portrait
+            || (displayX < displayY && displayXFolded > displayYFolded)) { // portrait vs landscape
+            switch (mOrientation) {
+                case SKIN_ROTATION_180:
+                case SKIN_ROTATION_0:
+                    foldedOrientation = SKIN_ROTATION_0;
+                    break;
+                default:
+                    foldedOrientation = SKIN_ROTATION_90;
+                    break;
+            }
+        }
+        switch (foldedOrientation) {
             default:
             case SKIN_ROTATION_180:
             case SKIN_ROTATION_0:
