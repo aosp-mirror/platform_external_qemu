@@ -2313,8 +2313,11 @@ extern "C" int main(int argc, char** argv) {
             args.add("-device");
             args.add("virtio-serial,ioeventfd=off");
             args.add("-chardev");
+            // Bug: b/215231636
+            // Re-connect to tcp socket every 10s until success and do not
+            // abort emulator due to connection failure.
             args.addFormat(
-                    "socket,port=%d,host=%s,nowait,nodelay,%s,id="
+                    "socket,port=%d,host=%s,nowait,nodelay,reconnect=10,%s,id="
                     "modem",
                     modem_simulator_guest_port, isIpv4 ? "127.0.0.1" : "::1",
                     isIpv4 ? "ipv4" : "ipv6");
