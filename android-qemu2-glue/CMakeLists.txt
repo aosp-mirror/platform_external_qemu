@@ -29,7 +29,6 @@ set(android-qemu2-glue_src
     emulation/charpipe.c
     emulation/goldfish_sync.cpp
     emulation/serial_line.cpp
-    emulation/virtio-goldfish-pipe.cpp
     emulation/virtio-input-multi-touch.c
     emulation/virtio-input-rotary.c
     emulation/virtio_vsock_device.cpp
@@ -72,9 +71,16 @@ set(android-qemu2-glue_src
     telephony/modem_init.c
     utils/stream.cpp)
 
+if(OPTION_GFXSTREAM_BACKEND)
+  set(android-qemu2-virtio_src emulation/virtio-gpu-gfxstream-renderer.cpp)
+else()
+  set(android-qemu2-virtio_src emulation/virtio-goldfish-pipe.cpp)
+endif()
+
 android_add_library(
   TARGET libqemu2-glue LICENSE Apache-2.0 SRC # cmake-format: sortable
-                                              ${android-qemu2-glue_src})
+                                              ${android-qemu2-glue_src}
+                                              ${android-qemu2-virtio_src})
 
 target_include_directories(
   libqemu2-glue

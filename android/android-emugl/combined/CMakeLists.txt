@@ -141,6 +141,8 @@ if(OPTION_GFXSTREAM_BACKEND)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_C_STANDARD 11)
 
+    set(CONFIG_AEMU TRUE CACHE BOOL "Enable aemu-specific code in vulkan-cereal")
+
     if (APPLE)
         add_compile_definitions(VK_USE_PLATFORM_MACOS_MVK)
     elseif(UNIX)
