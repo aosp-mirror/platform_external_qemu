@@ -1105,11 +1105,23 @@ static int addMultitouchFinger(int idOfTouchPoint, SkinWindow* const data) {
     return -1;
 }
 
-static void add_mouse_event(SkinWindow* window, int32_t rel_x, int32_t rel_y) {
-    uint32_t id = 0;
+static void skin_window_map_to_scale(SkinWindow* window, int* x, int* y) {
+    getConsoleAgents()->surface->skin_surface_reverse_map(window->surface, x, y);
+}
+
+static void add_mouse_event(SkinWindow* window, const SkinEventMouseData* mouse, int button_pressed) {
+    if (!window->mouse.tracking) {
+        return;
+    }
+    int32_t x, y;
+    x = mouse->xrel;
+    y = mouse->yrel;
+    window->mouse.button_pressed = button_pressed;
+    skin_window_map_to_scale(window, &x, &y);
+
+    const uint32_t id = 0;
     // TODO(liyl): handle multi-display and display rotation.
-    window->win_funcs->mouse_event(rel_x, rel_y, window->mouse.button_pressed,
-                                   id);
+    window->win_funcs->mouse_event(x, y, window->mouse.button_pressed, id);
 }
 
 static void add_mouse_wheel_event(SkinWindow* window,
@@ -2163,10 +2175,6 @@ void skin_window_redraw(SkinWindow* window, SkinRect* rect) {
     }
 }
 
-static void skin_window_map_to_scale(SkinWindow* window, int* x, int* y) {
-    getConsoleAgents()->surface->skin_surface_reverse_map(window->surface, x, y);
-}
-
 void skin_window_process_touch_event(SkinWindow* window, SkinEvent* ev) {
     Button* button;
     int mx, my;
@@ -2408,16 +2416,7 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
                window->finger.pos.y, window->finger.inside);
 #endif
             if (feature_is_enabled(kFeature_VirtioMouse)) {
-                if (mouse->tracking) {
-                    // update button state
-                    mouse->button_pressed |= 1 << (ev->u.mouse.button);
-
-                    int32_t rel_x = ev->u.mouse.xrel;
-                    int32_t rel_y = ev->u.mouse.yrel;
-                    skin_window_map_to_scale(window, &rel_x, &rel_y);
-
-                    add_mouse_event(window, rel_x, rel_y);
-                }
+                add_mouse_event(window, &ev->u.mouse, mouse->button_pressed | 1 << (ev->u.mouse.button));
             } else if (finger->inside) {
                 // The click is inside the touch screen
                 finger->tracking = 1;
@@ -2530,16 +2529,7 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
                 skin_window_move_mouse(window, finger, mx, my);
             } else if (feature_is_enabled(kFeature_VirtioMouse)) {
                 skin_window_move_mouse(window, finger, mx, my);
-                if (mouse->tracking) {
-                    // update button state
-                    mouse->button_pressed &= ~(1 << (ev->u.mouse.button));
-
-                    int32_t rel_x = ev->u.mouse.xrel;
-                    int32_t rel_y = ev->u.mouse.yrel;
-                    skin_window_map_to_scale(window, &rel_x, &rel_y);
-
-                    add_mouse_event(window, rel_x, rel_y);
-                }
+                add_mouse_event(window, &ev->u.mouse, mouse->button_pressed & ~(1 << ev->u.mouse.button));
             } else if (finger->tracking) {
                 skin_window_move_mouse(window, finger, mx, my);
                 finger->tracking = 0;
@@ -2583,13 +2573,7 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
             if (!window->button.pressed) {
                 skin_window_move_mouse(window, finger, mx, my);
                 if (feature_is_enabled(kFeature_VirtioMouse)) {
-                    if (mouse->tracking) {
-                        int32_t rel_x = ev->u.mouse.xrel;
-                        int32_t rel_y = ev->u.mouse.yrel;
-                        skin_window_map_to_scale(window, &rel_x, &rel_y);
-
-                        add_mouse_event(window, rel_x, rel_y);
-                    }
+                    add_mouse_event(window, &ev->u.mouse, mouse->button_pressed);
                 } else if (finger->tracking) {
                     add_finger_event(window, finger, finger->pos.x,
                                      finger->pos.y, button_state, displayId);
