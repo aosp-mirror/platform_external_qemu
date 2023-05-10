@@ -3863,6 +3863,8 @@ SkinEventType EmulatorQtWindow::translateMouseEventType(
             if ((type == kEventMouseButtonDown) && (button == buttons)) {
                 mMouseTouchState = TouchState::TOUCHING;
                 newType = kEventMouseButtonDown;
+            } else if (android::featurecontrol::isEnabled(android::featurecontrol::VirtioTablet)) {
+                newType = kEventMouseMotion;
             } else {
                 newType = kEventMouseButtonUp;
             }
