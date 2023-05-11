@@ -1,36 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
 
-android_add_library(
-  TARGET android-wifi-service
-  LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      emulation/libslirp_driver.cpp
-      emulation/NetsimWifiForwarder.cpp
-      emulation/VirtioWifiForwarder.cpp
-      emulation/WifiService.cpp)
-
-target_include_directories(android-wifi-service
-                           PRIVATE .. ../include ${ANDROID_AUTOGEN})
-
-target_compile_definitions(android-wifi-service PUBLIC -DLIBSLIRP)
-
-android_target_compile_definitions(android-wifi-service windows PRIVATE "-DIOV_MAX=1")
-
-target_link_libraries(
-  android-wifi-service
-  PUBLIC android-emu
-  PRIVATE libslirp
-          GLIB2::GLIB2
-          ssl
-          hostapd
-          android-grpc-services-stack
-          android-grpc-client
-          android-emu-grpc-utils
-          qemu-host-common-headers
-          packet-streamer-client-lib
-          packet-streamer-proto-lib
-          protobuf::libprotobuf)
-
 # Generate the VirtioGpuTimelines flatbuffers header
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/VirtioGpuTimelines_generated.h
@@ -66,7 +35,7 @@ set(android-qemu2-glue_src
     emulation/virtio_vsock_device.cpp
     emulation/virtio_vsock_transport.cpp
     emulation/virtio-wifi.cpp
-    emulation/NetsimWifiForwarder.cpp
+    netsim/NetsimWifiForwarder.cpp
     emulation/VirtioGpuTimelines.cpp
     emulation/VirtioWifiForwarder.cpp
     emulation/WifiService.cpp
