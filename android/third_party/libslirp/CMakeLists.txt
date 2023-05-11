@@ -55,8 +55,8 @@ target_link_libraries(
 android_target_link_libraries(
   libslirp windows PUBLIC ws2_32::ws2_32 iphlpapi::iphlpapi)
 
-target_compile_definitions(libslirp PRIVATE "-DG_LOG_DOMAIN=\"Slirp\""
-                                            "-DBUILDING_LIBSLIRP")
+target_compile_definitions(libslirp PUBLIC -DBUILDING_LIBSLIRP)
+
 
 target_compile_options(libslirp PRIVATE -Wmissing-prototypes
                                         -Wstrict-prototypes
