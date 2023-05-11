@@ -456,19 +456,6 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                     adbInterface->enqueueCommand({ "shell", "settings", "put",
                                                    "global", "display_features",
                                                    hingeArea });
-                    // Send rotate request to guest after boot complete if orientation does not
-                    // match width/height.
-                    auto myhw = getConsoleAgents()->settings->hw();
-                    if (myhw) {
-                        bool isLcdLandscape = myhw->hw_lcd_width >= myhw->hw_lcd_height;
-                        if (myhw->hw_initialOrientation) {
-                            bool isOrientationLandscape = std::string_view(myhw->hw_initialOrientation)
-                                    == std::string_view("landscape");
-                            if (isOrientationLandscape != isLcdLandscape) {
-                                getConsoleAgents()->emu->rotate90Clockwise();
-                            }
-                        }
-                    }
                 }
             }
             // Sync folded area and LID open/close for foldable hinge/rollable/legacyFold
