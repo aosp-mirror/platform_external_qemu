@@ -81,9 +81,10 @@ public:
         }
         auto database_directory =
                 System::get()->envGet("ANDROID_EMU_CRASH_REPORTING_DATABASE");
-        database_directory = database_directory.empty()
-                       ? pj(System::get()->getTempDir(), kCrashpadDatabase)
-                       : database_directory;
+        database_directory =
+                database_directory.empty()
+                        ? pj(System::get()->getTempDir(), kCrashpadDatabase)
+                        : database_directory;
 
         auto database_path = ::base::FilePath(
                 PathUtils::asUnicodePath(database_directory.c_str()).c_str());
@@ -138,14 +139,22 @@ public:
 
         for (const auto& report : reports) {
             if (!report.uploaded) {
-                if (mConsentProvider->requestConsent(report)) {
-                    mDatabase->RequestUpload(report.uuid);
-                    dinfo("Consent given for uploading crashreport %s to %s",
-                          report.uuid.ToString().c_str(), CrashURL);
-                } else {
-                    dinfo("No consent for crashreport %s, deleting.",
-                          report.uuid.ToString().c_str());
-                    toRemove.push_back(report.uuid);
+                auto status = mConsentProvider->requestConsent(report);
+                switch (status) {
+                    case CrashConsent::ReportAction::UPLOAD_REMOVE:
+                        mDatabase->RequestUpload(report.uuid);
+                        dinfo("Consent given for uploading crashreport %s to "
+                              "%s",
+                              report.uuid.ToString().c_str(), CrashURL);
+                        break;
+                    case CrashConsent::ReportAction::REMOVE:
+                        dinfo("No consent for crashreport %s, deleting.",
+                              report.uuid.ToString().c_str());
+                        toRemove.push_back(report.uuid);
+                        break;
+                    case CrashConsent::ReportAction::UNDECIDED_KEEP:
+                        dinfo("Failed to get consent, keeping %s for now.", report.id.c_str());
+                        break;
                 }
             } else {
                 toRemove.push_back(report.uuid);
