@@ -288,7 +288,10 @@ std::unique_ptr<AllowList> loadAllowlist(std::string path) {
     }
 
     dinfo("Using security allow list from: %s", path.c_str());
-    return AllowList::fromStream(emulator_access);
+    auto list = AllowList::fromStream(emulator_access);
+    list->setSource(path);
+
+    return list;
 }
 
 std::unique_ptr<EmulatorControllerService> Builder::build() {

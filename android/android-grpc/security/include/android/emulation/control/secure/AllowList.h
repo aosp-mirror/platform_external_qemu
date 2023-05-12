@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 
+#include <string>
 #include <iosfwd>
 #include <memory>
 #include <string_view>
@@ -55,6 +56,13 @@ public:
     // result in an allow list that denies everything to everyone.
     static std::unique_ptr<AllowList> fromStream(
             std::istream& jsonWithComments);
+
+    std::string getSource() { return mSource; }
+
+    void setSource(std::string src) { mSource = src; }
+
+private:
+    std::string mSource;
 };
 
 // Nobody can do anything. Reject everyone.

@@ -13,21 +13,23 @@
 // limitations under the License.
 #include "android/emulation/control/secure/JwtTokenAuth.h"
 
-#include <fstream>     // for ofstream, operator<<
-#include <functional>  // for __base
-#include <utility>     // for move
+#include <algorithm>
+#include <fstream>
+#include <functional>
+#include <utility>
 
-#include "absl/strings/string_view.h"  // for string_view
+#include "absl/strings/string_view.h"
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/misc/StringUtils.h"  // for EndsWith
-#include "android/utils/debug.h"         // for derror
-#include "tink/config/tink_config.h"     // for TinkConfig
+#include "aemu/base/misc/StringUtils.h"
+#include "android/emulation/control/secure/AuthErrorFactory.h"
+#include "android/utils/debug.h"
+#include "tink/config/tink_config.h"
 #include "tink/jwt/jwk_set_converter.h"
-#include "tink/jwt/jwt_public_key_verify.h"  // for JwtPublicKeyVerify
-#include "tink/jwt/jwt_signature_config.h"   // for JwtSignatureRegister
-#include "tink/jwt/jwt_validator.h"          // for JwtValidatorBuilder
-#include "tink/util/status.h"                // for Status
-#include "tink/util/statusor.h"              // for StatusOr
+#include "tink/jwt/jwt_public_key_verify.h"
+#include "tink/jwt/jwt_signature_config.h"
+#include "tink/jwt/jwt_validator.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 // #define DEBUG 1
 
@@ -101,22 +103,27 @@ void JwtTokenAuth::updateKeysetHandle(
     }
 }
 
-absl::Status JwtTokenAuth::isTokenValid(grpc::string_ref url,
-                                        grpc::string_ref token) {
-    // Unprotected?
-    std::string_view path(url.data(), url.length());
-    if (!allowList()->requiresAuthentication(path)) {
-        return absl::OkStatus();
+bool JwtTokenAuth::canHandleToken(std::string_view token) {
+    constexpr auto offset = DEFAULT_BEARER.size();
+    if (token.size() <= offset) {
+        return false;
     }
 
+    // See https://datatracker.ietf.org/doc/html/rfc7519#section-3
+    // Base64url(JOSE Header) + '.' + Base64url(claims) + '.' +
+    // Base64url(signature)
+    return std::count(token.begin(), token.end(), '.') == 2;
+}
+
+absl::Status JwtTokenAuth::isTokenValid(std::string_view path,
+                                        std::string_view token) {
     if (!mTinkInitialized.ok()) {
         return mTinkInitialized;
     }
 
     constexpr auto offset = DEFAULT_BEARER.size();
     if (token.size() <= offset) {
-        return absl::PermissionDeniedError(
-                "Invalid token header, missing BEARER.");
+        return AuthErrorFactory::authErrorInvalidHeader(token, DEFAULT_BEARER);
     }
 
     auto actual_token =
@@ -124,9 +131,7 @@ absl::Status JwtTokenAuth::isTokenValid(grpc::string_ref url,
 
     const std::lock_guard<std::mutex> lock(mKeyhandleAccess);
     if (!mActiveKeyset) {
-        return absl::NotFoundError(
-                "No active keyset, rejecting all tokens. Did you provide your "
-                "public key?");
+        return AuthErrorFactory::authErrorNoKeySet(mDirectoryObserver->observes());
     }
     auto verify =
             mActiveKeyset->template GetPrimitive<tink::JwtPublicKeyVerify>();
@@ -148,10 +153,9 @@ absl::Status JwtTokenAuth::isTokenValid(grpc::string_ref url,
         return validator.status();
     }
 
-    auto verified_jwt = (*verify)->VerifyAndDecode(
-            actual_token, *validator);
+    auto verified_jwt = (*verify)->VerifyAndDecode(actual_token, *validator);
 
-    // Bad token?
+    // Bad token, this means we have no way of doing anything useful.
     if (!verified_jwt.ok()) {
         DD("Bad token!: %s", verified_jwt.status().error_message().c_str());
         return verified_jwt.status();
@@ -159,7 +163,7 @@ absl::Status JwtTokenAuth::isTokenValid(grpc::string_ref url,
 
     auto iss = verified_jwt->GetIssuer();
     if (!iss.ok()) {
-        return absl::PermissionDeniedError("iss is not present.");
+        return AuthErrorFactory::authErrorMissingIss(path);
     }
 
     // Green list, no need to validate aud..
@@ -169,14 +173,15 @@ absl::Status JwtTokenAuth::isTokenValid(grpc::string_ref url,
 
     // On the block list, go away!
     if (allowList()->isRed(*iss, path)) {
-        return absl::PermissionDeniedError("Access is blocked by access list");
+        return AuthErrorFactory::authErrorNotOnAllowList(
+                *iss, path, allowList()->getSource());
     }
 
     auto audiences = verified_jwt->GetAudiences();
     if (!audiences.ok()) {
         DD("Token validator error: %s",
            audiences.status().error_message().c_str());
-        return absl::PermissionDeniedError("aud is not present.");
+        return AuthErrorFactory::authErrorMissingAud(*iss, path);
     }
 
     for (const auto& aud : audiences.value()) {
@@ -185,9 +190,7 @@ absl::Status JwtTokenAuth::isTokenValid(grpc::string_ref url,
         }
     }
 
-    return absl::PermissionDeniedError(
-            "Access denied, does you aud claim include: " +
-            std::string(path) + " ?");
+    return AuthErrorFactory::authErrorMissingClaim(*iss, path);
 }
 
 }  // namespace control
