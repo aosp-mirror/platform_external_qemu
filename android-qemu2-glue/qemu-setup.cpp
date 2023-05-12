@@ -493,6 +493,7 @@ int qemu_setup_grpc() {
                                             ->grpc_tls_ca;
         }
 
+        android::emulation::control::EmulatorGrpcClient::configureMe(grpcService->description());
         bool connect = android::emulation::control::EmulatorGrpcClient::me()->hasOpenChannel();
         assert(connect);
     }

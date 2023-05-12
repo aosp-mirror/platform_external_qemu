@@ -67,6 +67,9 @@ public:
     // Returns a connection to the current emulator
     static std::shared_ptr<EmulatorGrpcClient> me();
 
+    // Configure the "me" singleton based upon the endpoint definition
+    static void configureMe(const remote::Endpoint& endpoint);
+
 protected:
     bool initializeChannel();
 

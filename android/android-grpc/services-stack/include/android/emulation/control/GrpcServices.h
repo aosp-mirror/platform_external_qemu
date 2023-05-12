@@ -21,6 +21,8 @@
 #include "android/console.h"                     // for AndroidConsoleAgents
 #include "grpcpp/impl/codegen/service_type.h"    // IWYU pragma: keep
 #include "grpcpp/security/server_credentials.h"  // for ServerCredentials
+#include "grpc_endpoint_description.pb.h"
+
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -50,6 +52,10 @@ public:
 
     // Block and wait until the server is completed.
     virtual void wait() = 0;
+
+    // A complete description of the endpoint, this can be used
+    // to establish a direct connection to this server.
+    virtual remote::Endpoint description() = 0;
 };
 
 // A Factory class that is capable of constructing a proper gRPC service that
