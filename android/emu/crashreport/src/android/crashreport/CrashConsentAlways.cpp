@@ -21,8 +21,9 @@ class CrashConsentProviderAlways : public CrashConsent {
 public:
     ~CrashConsentProviderAlways() override = default;
     Consent consentRequired() override { return Consent::ALWAYS; }
-    bool requestConsent(const CrashReportDatabase::Report& report) override {
-        return false;
+    ReportAction requestConsent(
+            const CrashReportDatabase::Report& report) override {
+        return ReportAction::UPLOAD_REMOVE;
     }
 };
 

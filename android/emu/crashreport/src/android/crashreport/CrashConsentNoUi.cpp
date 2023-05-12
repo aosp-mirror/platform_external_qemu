@@ -30,15 +30,19 @@ public:
         return options->metrics_collection ? Consent::ALWAYS : Consent::NEVER;
     }
 
-    bool requestConsent(const CrashReportDatabase::Report& report) override {
+    ReportAction requestConsent(
+            const CrashReportDatabase::Report& report) override {
         // If we have no ui, we will provide crash reports if the
         // metrics collection was allowed.
-        auto options = getConsoleAgents()->settings->android_cmdLineOptions();
-        if (options && options->metrics_collection) {
-            return options->metrics_collection;
+        if (getConsoleAgents()->settings) {
+            auto options =
+                    getConsoleAgents()->settings->android_cmdLineOptions();
+            if (options && options->metrics_collection) {
+                return options->metrics_collection ? ReportAction::UPLOAD_REMOVE
+                                                   : ReportAction::REMOVE;
+            }
         }
-
-        return false;
+        return ReportAction::REMOVE;
     }
 };
 
