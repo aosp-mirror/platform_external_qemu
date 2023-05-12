@@ -2395,6 +2395,7 @@ static int convertKeyCode(int sym) {
             KK(Backslash, BACKSLASH),
             KK(Semicolon, SEMICOLON),
             KK(Apostrophe, APOSTROPHE),
+            KK(Delete, DELETE),
     };
     const size_t kConvertSize = sizeof(kConvert) / sizeof(kConvert[0]);
     size_t nn;
