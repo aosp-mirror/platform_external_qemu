@@ -159,14 +159,16 @@ keymaster_error_t RsaKeyFactory::UpdateImportKeyDescription(const AuthorizationS
 
     updated_description->Reinitialize(key_description);
 
-    *public_exponent = BN_get_word(rsa_key->e);
-    if (*public_exponent == 0xffffffffL)
-        return KM_ERROR_INVALID_KEY_BLOB;
-    if (!updated_description->GetTagValue(TAG_RSA_PUBLIC_EXPONENT, public_exponent))
+    uint64_t e;
+    if (!BN_get_u64(RSA_get0_e(rsa_key.get()), &e)) return KM_ERROR_INVALID_KEY_BLOB;
+    if (!updated_description->GetTagValue(TAG_RSA_PUBLIC_EXPONENT, public_exponent)) {
+        *public_exponent = e;
         updated_description->push_back(TAG_RSA_PUBLIC_EXPONENT, *public_exponent);
-    if (*public_exponent != BN_get_word(rsa_key->e)) {
-        LOG_E("Imported public exponent (%u) does not match specified public exponent (%u)",
-              *public_exponent, BN_get_word(rsa_key->e));
+    }
+    if (*public_exponent != e) {
+        LOG_E("Imported public exponent (%" PRIu64 ") does not match specified "
+              "public exponent (%" PRIu64 ")",
+              *public_exponent, e);
         return KM_ERROR_IMPORT_PARAMETER_MISMATCH;
     }
 
