@@ -8,26 +8,26 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/skin/qt/extended-pages/battery-page.h"
+#include "android/skin/qt/extended-pages/battery-page-grpc.h"
 
-#include <qsettings.h>  // for QSettings::IniF...
-#include <qstring.h>    // for operator+
+#include <QComboBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QSettings>
+#include <QSlider>
+#include <QVariant>
 
-#include <QComboBox>  // for QComboBox
-#include <QLabel>     // for QLabel
-#include <QLineEdit>  // for QLineEdit
-#include <QSettings>  // for QSettings
-#include <QSlider>    // for QSlider
-#include <QVariant>   // for QVariant
-
-#include "android/avd/info.h"                         // for avdInfo_getApiL...
-#include "android/avd/util.h"                         // for path_getAvdCont...
-#include "android/emulation/control/battery_agent.h"  // for BatteryHealth
-#include "android/console.h"                          // for android_hw, and...
+#include "android/avd/info.h"
+#include "android/avd/util.h"
+#include "android/console.h"
+#include "android/emulation/control/battery_agent.h"
 #include "android/metrics/UiEventTracker.h"
-#include "android/skin/qt/qt-settings.h"  // for PER_AVD_SETTING...
-#include "ui_battery-page.h"              // for BatteryPage
+#include "android/skin/qt/qt-settings.h"
 #include "android/utils/debug.h"
+#include "ui_battery-page-grpc.h"
+
+using android::emulation::control::EmulatorGrpcClient;
+using ::google::protobuf::Empty;
 
 #define DEBUG 0
 /* set  >1 for very verbose debugging */
@@ -37,11 +37,10 @@
 #define DD(...) dinfo(__VA_ARGS__)
 #endif
 
-class QComboBox;
-class QWidget;
-
-// Must be protected by the BQL!
-static const QAndroidBatteryAgent* sBatteryAgent = nullptr;
+namespace android {
+namespace emulation {
+namespace grpc {
+namespace ui {
 
 static void saveChargeLevel(int chargeLevel);
 static void saveCharger(BatteryCharger charger);
@@ -52,6 +51,9 @@ static int getSavedChargeLevel();
 static BatteryCharger getSavedCharger();
 static BatteryHealth getSavedHealth();
 static BatteryStatus getSavedStatus();
+
+static void saveBatteryState(BatteryState state);
+static BatteryState loadBatteryState();
 
 #define STATE(p) \
     case (p):    \
@@ -99,13 +101,13 @@ static std::string translate_idx(BatteryStatus value) {
     return s.substr(8);
 }
 
-BatteryPage::BatteryPage(QWidget* parent)
+BatteryPageGrpc::BatteryPageGrpc(QWidget* parent)
     : QWidget(parent),
-      mUi(new Ui::BatteryPage()),
+      mUi(new Ui::BatteryPageGrpc()),
       mDropDownTracker(new UiEventTracker(
               android_studio::EmulatorUiEvent::OPTION_SELECTED,
-              android_studio::EmulatorUiEvent::EXTENDED_BATTERY_TAB)) {
-    DD("Creating the battery page!");
+              android_studio::EmulatorUiEvent::EXTENDED_BATTERY_TAB)),
+      mEmulatorControl(EmulatorGrpcClient::me()) {
     mUi->setupUi(this);
     populateListBox(mUi->bat_chargerBox,
                     {
@@ -135,6 +137,7 @@ BatteryPage::BatteryPage(QWidget* parent)
                     });
 
     if (getConsoleAgents()->settings->hw()->hw_battery) {
+        mState = loadBatteryState();
         // Update the UI with the saved values
         int chargeLevel = getSavedChargeLevel();
 
@@ -171,42 +174,31 @@ BatteryPage::BatteryPage(QWidget* parent)
     }
 }
 
-// static
-void BatteryPage::setBatteryAgent(const QAndroidBatteryAgent* agent) {
-    DD("Setting battery agent to %p", agent);
-    if (!getConsoleAgents()->settings->hw()->hw_battery) {
-        DD("No battery..");
-        // This device has no battery. Ignore the agent.
-        return;
-    }
-
-    // The VM lock is needed because the battery agent touches the
-    // goldfish battery virtual device explicitly
-    sBatteryAgent = agent;
-
-    DD("Init: %p", agent);
-
-    if (sBatteryAgent) {
-        // Send the current settings to the device
-        if (sBatteryAgent->setChargeLevel) {
-            sBatteryAgent->setChargeLevel(getSavedChargeLevel());
-        }
-
-        if (sBatteryAgent->setCharger) {
-            sBatteryAgent->setCharger(getSavedCharger());
-        }
-
-        if (sBatteryAgent->health) {
-            sBatteryAgent->setHealth(getSavedHealth());
-        }
-
-        if (sBatteryAgent->setStatus) {
-            sBatteryAgent->setStatus(getSavedStatus());
-        }
+static void failureLogger(absl::StatusOr<Empty*> status) {
+    if (!status.ok()) {
+        dwarning("Failed to set battery due: %s",
+                 status.status().message().data());
     }
 }
+static void saveBatteryState(BatteryState state) {
+    saveChargeLevel(state.chargelevel());
+    saveCharger((BatteryCharger)state.charger());
+    saveHealth((BatteryHealth)state.health());
+    saveStatus((BatteryStatus)state.status());
+}
 
-void BatteryPage::populateListBox(
+static BatteryState loadBatteryState() {
+    BatteryState state;
+    state.set_hasbattery(true);
+    state.set_ispresent(true);
+    state.set_chargelevel(getSavedChargeLevel());
+    state.set_charger((BatteryState::BatteryCharger)getSavedCharger());
+    state.set_health((BatteryState::BatteryHealth)getSavedHealth());
+    state.set_status((BatteryState::BatteryStatus)getSavedStatus());
+    return state;
+}
+
+void BatteryPageGrpc::populateListBox(
         QComboBox* list,
         std::initializer_list<std::pair<int, const char*>> associations) {
     list->clear();
@@ -215,62 +207,55 @@ void BatteryPage::populateListBox(
     }
 }
 
-void BatteryPage::on_bat_chargerBox_activated(int index) {
+void BatteryPageGrpc::on_bat_chargerBox_activated(int index) {
     BatteryCharger bCharger = static_cast<BatteryCharger>(
             mUi->bat_statusBox->itemData(index).toInt());
 
-    saveCharger(bCharger);
-
     if (bCharger >= 0 && bCharger < BATTERY_CHARGER_NUM_ENTRIES) {
-        if (sBatteryAgent && sBatteryAgent->setCharger) {
-            sBatteryAgent->setCharger(bCharger);
-            mDropDownTracker->increment(translate_idx(bCharger));
-        }
+        saveCharger(bCharger);
+        mState.set_charger((BatteryState::BatteryCharger)bCharger);
+        mDropDownTracker->increment(translate_idx(bCharger));
+        mEmulatorControl.setBattery(mState, failureLogger);
     }
 }
 
-void BatteryPage::on_bat_levelSlider_valueChanged(int value) {
+void BatteryPageGrpc::on_bat_levelSlider_valueChanged(int value) {
     // Update the text output
     mUi->bat_chargeLevelText->setText(QString::number(value) + "%");
     mDropDownTracker->increment("LEVEL_SLIDER");
     saveChargeLevel(value);
-
-    if (sBatteryAgent && sBatteryAgent->setChargeLevel) {
-        sBatteryAgent->setChargeLevel(value);
-    }
+    mState.set_chargelevel(value);
+    mEmulatorControl.setBattery(mState, failureLogger);
 }
 
-void BatteryPage::on_bat_healthBox_activated(int index) {
+void BatteryPageGrpc::on_bat_healthBox_activated(int index) {
     BatteryHealth bHealth = static_cast<BatteryHealth>(
             mUi->bat_healthBox->itemData(index).toInt());
 
-    saveHealth(bHealth);
-
     if (bHealth >= 0 && bHealth < BATTERY_HEALTH_NUM_ENTRIES) {
-        if (sBatteryAgent && sBatteryAgent->setHealth) {
-            sBatteryAgent->setHealth(bHealth);
-            mDropDownTracker->increment(translate_idx(bHealth));
-        }
+        saveHealth(bHealth);
+        mDropDownTracker->increment(translate_idx(bHealth));
+        mState.set_health((BatteryState::BatteryHealth)bHealth);
+        mEmulatorControl.setBattery(mState, failureLogger);
     }
 }
 
-void BatteryPage::on_bat_statusBox_activated(int index) {
+void BatteryPageGrpc::on_bat_statusBox_activated(int index) {
     BatteryStatus bStatus = static_cast<BatteryStatus>(
             mUi->bat_statusBox->itemData(index).toInt());
 
-    saveStatus(bStatus);
-
     if (bStatus >= 0 && bStatus < BATTERY_STATUS_NUM_ENTRIES) {
-        if (sBatteryAgent && sBatteryAgent->setStatus) {
-            sBatteryAgent->setStatus(bStatus);
-            mDropDownTracker->increment(translate_idx(bStatus));
-        }
+        saveStatus(bStatus);
+        mDropDownTracker->increment(translate_idx(bStatus));
+        mState.set_status((BatteryState::BatteryStatus)bStatus);
+        mEmulatorControl.setBattery(mState, failureLogger);
     }
 }
 
 static void saveChargeLevel(int chargeLevel) {
     int level = std::max<int>(1, chargeLevel);
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -285,7 +270,8 @@ static void saveChargeLevel(int chargeLevel) {
 }
 
 static void saveCharger(BatteryCharger charger) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -300,7 +286,8 @@ static void saveCharger(BatteryCharger charger) {
 }
 
 static void saveHealth(BatteryHealth health) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -315,7 +302,8 @@ static void saveHealth(BatteryHealth health) {
 }
 
 static void saveStatus(BatteryStatus status) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -330,29 +318,36 @@ static void saveStatus(BatteryStatus status) {
 }
 
 static int getSavedChargeLevel() {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        return std::max<int>(avdSpecificSettings
-                .value(Ui::Settings::PER_AVD_BATTERY_CHARGE_LEVEL, 100)
-                .toInt(), 1);
+        return std::max<int>(
+                avdSpecificSettings
+                        .value(Ui::Settings::PER_AVD_BATTERY_CHARGE_LEVEL, 100)
+                        .toInt(),
+                1);
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
-        return std::max<int>(settings.value(Ui::Settings::BATTERY_CHARGE_LEVEL, 100).toInt(), 1);
+        return std::max<int>(
+                settings.value(Ui::Settings::BATTERY_CHARGE_LEVEL, 100).toInt(),
+                1);
     }
 }
 
 static BatteryCharger getSavedCharger() {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
 
-        int noMiscPipe = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) < 26;
+        int noMiscPipe = avdInfo_getApiLevel(
+                                 getConsoleAgents()->settings->avdInfo()) < 26;
 
         BatteryCharger defaultCharger = BATTERY_CHARGER_NONE;
 
@@ -376,7 +371,8 @@ static BatteryCharger getSavedCharger() {
 }
 
 static BatteryHealth getSavedHealth() {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -400,7 +396,8 @@ static BatteryStatus getSavedStatus() {
                                                  ? BATTERY_STATUS_CHARGING
                                                  : BATTERY_STATUS_NOT_CHARGING;
 
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -417,3 +414,7 @@ static BatteryStatus getSavedStatus() {
                 .toInt();
     }
 }
+}  // namespace ui
+}  // namespace grpc
+}  // namespace emulation
+}  // namespace android

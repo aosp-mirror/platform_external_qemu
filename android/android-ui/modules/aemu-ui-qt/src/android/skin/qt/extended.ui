@@ -66,7 +66,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="LocationPage" name="location_page"/>
    <widget class="MultiDisplayPage" name="multiDisplayPage"/>
    <widget class="CellularPage" name="cellular_page"/>
-   <widget class="BatteryPage" name="batteryPage"/>
+   <widget class="QWidget" name="batteryPage"/>
    <widget class="CameraPage" name="cameraPage"/>
    <widget class="TelephonyPage" name="telephonyPage"/>
    <widget class="DPadPage" name="dpadPage"/>

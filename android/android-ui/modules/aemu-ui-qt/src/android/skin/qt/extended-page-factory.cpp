@@ -14,60 +14,30 @@
  * limitations under the License.
  */
 #include "android/skin/qt/extended-page-factory.h"
-#include "aemu/base/LayoutResolver.h"           // for resolveLayout
-#include "aemu/base/Log.h"                      // for LogStreamVoi...
-#include "aemu/base/files/Stream.h"             // for Stream
-#include "aemu/base/files/StreamSerializing.h"  // for loadCollection
-#include "android/avd/info.h"
-#include "android/cmdline-option.h"  // for android_cmdL...
+
+#include "android/cmdline-option.h"
 #include "android/console.h"
-#include "android/console.h"                             // for android_hw
-#include "android/emulation/AutoDisplays.h"              // For AutoDisplays...
-#include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
-#include "android/emulation/resizable_display_config.h"
-#include "android/emulator-window.h"  // for emulator_win...
-#include "android/hw-sensors.h"       // for android_fold...
-#include "android/skin/file.h"        // for SkinLayout
+#include "android/skin/qt/extended-pages/battery-page-grpc.h"
+#include "android/skin/qt/extended-pages/battery-page.h"
 #include "android/skin/qt/extended-pages/snapshot-page-grpc.h"
-#include "android/skin/rect.h"             // for SKIN_ROTATION_0
-#include "host-common/FeatureControl.h"    // for isEnabled
-#include "host-common/Features.h"          // for MultiDisplay
-#include "host-common/MultiDisplayPipe.h"  // for MultiDisplay...
-#include "host-common/hw-config.h"
-#include "host-common/screen-recorder.h"  // for RecorderStates
+#include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "ui_extended.h"
 
-void ExtendedPageFactory::construct(Ui::ExtendedControls* ui,
-                                    ExtendedWindowPane window)
+#define DEBUG 2
+/* set  >1 for very verbose debugging */
+#if DEBUG <= 1
+#define DD(...) (void)0
+#else
+#define DD(...) dinfo(__VA_ARGS__)
+#endif
 
-{
-    bool grpc = getConsoleAgents()->settings->android_cmdLineOptions()->grpc_ui;
+using android::emulation::grpc::ui::BatteryPageGrpc;;
+using android::emulation::grpc::ui::SnapshotPageGrpc;
+// using
 
-    switch (window) {
-        case PANE_IDX_SNAPSHOT: {
-            if (grpc) {
-                auto snapshotPage =
-                        new android::emulation::grpc::ui::SnapshotPageGrpc();
-
-                ui->snapshotPage = replaceWidget(
-                        ui->stackedWidget, ui->snapshotPage, snapshotPage);
-                snapshotPage->enableConnections();
-            } else {
-                auto snapshotPage = new SnapshotPage();
-                ui->snapshotPage = replaceWidget(
-                        ui->stackedWidget, ui->snapshotPage, snapshotPage);
-            }
-            break;
-        }
-        default:
-            // Nothing
-            break;
-    }
-}
-
-QWidget* ExtendedPageFactory::replaceWidget(QStackedWidget* stackedWidget,
-                                            QWidget* page,
-                                            QWidget* replacement) {
+QWidget* replaceWidget(QStackedWidget* stackedWidget,
+                       QWidget* page,
+                       QWidget* replacement) {
     // Get the index of the location page widget in the stacked widget
     int pageIndex = stackedWidget->indexOf(page);
 
@@ -75,4 +45,169 @@ QWidget* ExtendedPageFactory::replaceWidget(QStackedWidget* stackedWidget,
     stackedWidget->removeWidget(page);
     stackedWidget->insertWidget(pageIndex, replacement);
     return replacement;
+}
+
+static void constructDefault(Ui::ExtendedControls* ui,
+                             ExtendedWindowPane window) {
+    switch (window) {
+        case PANE_IDX_UNKNOWN:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_LOCATION:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_MULTIDISPLAY:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_CELLULAR:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_BATTERY:
+            ui->batteryPage = replaceWidget(ui->stackedWidget, ui->batteryPage,
+                                            new BatteryPage());
+            break;
+        case PANE_IDX_CAMERA:
+            // ui->cameraPage = replaceWidget(ui->stackedWidget, ui->cameraPage,
+            //                                new CameraPage());
+            break;
+        case PANE_IDX_TELEPHONE:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_DPAD:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_TV_REMOTE:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_ROTARY:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_MICROPHONE:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_FINGER:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_VIRT_SENSORS:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_SNAPSHOT:
+            ui->snapshotPage = replaceWidget(
+                    ui->stackedWidget, ui->snapshotPage, new SnapshotPage());
+            break;
+        case PANE_IDX_BUGREPORT:
+            // ui->bugreportPage = replaceWidget(
+            //         ui->stackedWidget, ui->bugreportPage, new BugreportPage());
+            break;
+        case PANE_IDX_RECORD:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_GOOGLE_PLAY:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_SETTINGS:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_HELP:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_CAR:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_CAR_ROTARY:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_SENSOR_REPLAY:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+    }
+}
+
+static void constructGrpc(Ui::ExtendedControls* ui, ExtendedWindowPane window) {
+    switch (window) {
+        case PANE_IDX_UNKNOWN:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_LOCATION:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_MULTIDISPLAY:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_CELLULAR:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_BATTERY:
+            ui->batteryPage = replaceWidget(ui->stackedWidget, ui->batteryPage,
+                                            new BatteryPageGrpc());
+            break;
+        case PANE_IDX_CAMERA:
+            // ui->cameraPage = replaceWidget(ui->stackedWidget, ui->cameraPage,
+            //                                new CameraPageGrpc());
+            break;
+        case PANE_IDX_TELEPHONE:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_DPAD:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_TV_REMOTE:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_ROTARY:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_MICROPHONE:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_FINGER:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_VIRT_SENSORS:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_SNAPSHOT:
+            ui->snapshotPage =
+                    replaceWidget(ui->stackedWidget, ui->snapshotPage,
+                                  new SnapshotPageGrpc());
+            break;
+        case PANE_IDX_BUGREPORT:
+            // ui->bugreportPage =
+            //         replaceWidget(ui->stackedWidget, ui->bugreportPage,
+            //                       new BugreportPageGrpc());
+            break;
+        case PANE_IDX_RECORD:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_GOOGLE_PLAY:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_SETTINGS:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_HELP:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_CAR:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_CAR_ROTARY:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+        case PANE_IDX_SENSOR_REPLAY:
+            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            break;
+    }
+}
+
+void ExtendedPageFactory::construct(Ui::ExtendedControls* ui,
+                                    ExtendedWindowPane window) {
+    bool grpc = getConsoleAgents()->settings->android_cmdLineOptions()->grpc_ui;
+    if (grpc) {
+        DD("Constucting gRPC component for %d", window);
+        return constructGrpc(ui, window);
+    }
+
+    DD("Constucting default component for %d", window);
+    return constructDefault(ui, window);
 }

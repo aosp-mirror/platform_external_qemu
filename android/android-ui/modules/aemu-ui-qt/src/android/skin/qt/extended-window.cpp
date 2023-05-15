@@ -116,8 +116,6 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
 
     mExtendedUi->setupUi(this);
-    ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_SNAPSHOT);
-    // mExtendedUi->stackedWidget->addWidget(new SnapshotPage(mExtendedUi->stackedWidget));
     mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
@@ -702,6 +700,11 @@ void ExtendedWindow::disablePinchToZoom(bool disabled) {
 
 void ExtendedWindow::showEvent(QShowEvent* e) {
     if (mFirstShowEvent && !e->spontaneous()) {
+
+        // Create the proper objects.
+        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_SNAPSHOT);
+        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BATTERY);
+
         bool moved = false;
         if (getConsoleAgents()
                     ->settings->android_cmdLineOptions()

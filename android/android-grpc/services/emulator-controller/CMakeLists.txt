@@ -5,4 +5,5 @@ android_grpc_service_lib(
 # Lets distribute the proto file
 install(FILES proto/emulator_controller.proto DESTINATION lib)
 
+add_subdirectory(client)
 add_subdirectory(server)

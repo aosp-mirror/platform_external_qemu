@@ -39,7 +39,9 @@
                 // Interaction with extended controls.
                 "/android.emulation.control.UiController/.*",
                 // Snapshot related functions
-                "/android.emulation.control.*"
+                "/android.emulation.control.SnapshotService/.*",
+                // Incubating services
+                "/android.emulation.control.incubating.*"
             ]
         },
         {
