@@ -45,6 +45,25 @@ void SimpleEmulatorControlClient::setBattery(BatteryState state,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
+void SimpleEmulatorControlClient::getScreenshot(ImageFormat format,
+                                                OnCompleted<Image> onDone) {
+    auto [request, response, context] =
+            createGrpcRequestContext<ImageFormat, Image>(mClient);
+    request->CopyFrom(format);
+    mService->async()->getScreenshot(
+            context, request, response,
+            grpcCallCompletionHandler(context, request, response, onDone));
+}
+
+void SimpleEmulatorControlClient::getStatus(
+        OnCompleted<EmulatorStatus> onDone) {
+    auto [request, response, context] =
+            createGrpcRequestContext<Empty, EmulatorStatus>(mClient);
+    mService->async()->getStatus(
+            context, request, response,
+            grpcCallCompletionHandler(context, request, response, onDone));
+}
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

@@ -56,6 +56,22 @@ public:
     void setBattery(BatteryState state, OnCompleted<Empty> onDone);
 
     /**
+     * @brief Asynchronously gets an individual screenshot in the desired format.
+     *
+     * @param format The desired image format.
+     * @param onDone The callback to be invoked when the operation completes.
+     */
+    void getScreenshot(ImageFormat format, OnCompleted<Image> onDone);
+
+
+    /**
+     * @brief Asynchronously gets status of the emulator
+     *
+     * @param onDone The callback to be invoked when the operation completes.
+     */
+    void getStatus(OnCompleted<EmulatorStatus> onDone);
+
+    /**
      * Maps an `absl::StatusOr<T*>` to an `absl::StatusOr<T>`.
      *
      * @tparam T The type of object to map.

@@ -76,7 +76,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="FingerPage" name="finger_page"/>
    <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
    <widget class="QWidget" name="snapshotPage"/>
-   <widget class="BugreportPage" name="bugreportPage"/>
+   <widget class="QWidget" name="bugreportPage"/>
    <widget class="RecordAndPlaybackPage" name="recordAndPlaybackPage"/>
    <widget class="GooglePlayPage" name="googlePlayPage"/>
    <widget class="SettingsPage" name="settingsPage"/>

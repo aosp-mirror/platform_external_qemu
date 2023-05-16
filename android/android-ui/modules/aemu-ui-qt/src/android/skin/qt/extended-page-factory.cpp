@@ -15,10 +15,12 @@
  */
 #include "android/skin/qt/extended-page-factory.h"
 
-#include "android/cmdline-option.h"
 #include "android/console.h"
+#include "android/cmdline-option.h"
 #include "android/skin/qt/extended-pages/battery-page-grpc.h"
 #include "android/skin/qt/extended-pages/battery-page.h"
+#include "android/skin/qt/extended-pages/bug-report-page-grpc.h"
+#include "android/skin/qt/extended-pages/bug-report-page.h"
 #include "android/skin/qt/extended-pages/snapshot-page-grpc.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "ui_extended.h"
@@ -31,7 +33,8 @@
 #define DD(...) dinfo(__VA_ARGS__)
 #endif
 
-using android::emulation::grpc::ui::BatteryPageGrpc;;
+using android::emulation::grpc::ui::BatteryPageGrpc;
+using android::emulation::grpc::ui::BugreportPageGrpc;
 using android::emulation::grpc::ui::SnapshotPageGrpc;
 // using
 
@@ -96,8 +99,8 @@ static void constructDefault(Ui::ExtendedControls* ui,
                     ui->stackedWidget, ui->snapshotPage, new SnapshotPage());
             break;
         case PANE_IDX_BUGREPORT:
-            // ui->bugreportPage = replaceWidget(
-            //         ui->stackedWidget, ui->bugreportPage, new BugreportPage());
+            ui->bugreportPage = replaceWidget(
+                    ui->stackedWidget, ui->bugreportPage, new BugreportPage());
             break;
         case PANE_IDX_RECORD:
             // replaceWidget(ui->stackedWidget, ui->, new xx());
@@ -172,9 +175,9 @@ static void constructGrpc(Ui::ExtendedControls* ui, ExtendedWindowPane window) {
                                   new SnapshotPageGrpc());
             break;
         case PANE_IDX_BUGREPORT:
-            // ui->bugreportPage =
-            //         replaceWidget(ui->stackedWidget, ui->bugreportPage,
-            //                       new BugreportPageGrpc());
+            ui->bugreportPage =
+                    replaceWidget(ui->stackedWidget, ui->bugreportPage,
+                                  new BugreportPageGrpc());
             break;
         case PANE_IDX_RECORD:
             // replaceWidget(ui->stackedWidget, ui->, new xx());

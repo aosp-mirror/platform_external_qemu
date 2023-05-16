@@ -8,6 +8,7 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
+
 #pragma once
 
 #include <stddef.h>
@@ -20,28 +21,47 @@
 #include "aemu/base/async/RecurrentTask.h"
 #include "android/avd/BugreportInfo.h"
 #include "android/emulation/control/adb/AdbInterface.h"
+#include "android/emulation/control/utils/SimpleEmulatorControlClient.h"
 #include "android/skin/qt/themed-widget.h"
 #include "host-common/qt_ui_defs.h"
 
 
 namespace android {
+namespace emulation {
+namespace control {
+class Image;
+}  // namespace control
+}  // namespace emulation
+
 namespace metrics {
 class UiEventTracker;
 }  // namespace metrics
 }  // namespace android
 
 using android::metrics::UiEventTracker;
-class DeviceDetailPage;
+using android::emulation::control::SimpleEmulatorControlClient;
+using android::emulation::control::Image;
+
 namespace Ui {
-class BugreportPage;
+class BugreportPageGrpc;
 }  // namespace Ui
 
-class BugreportPage : public ThemedWidget {
+namespace android {
+namespace emulation {
+namespace grpc {
+namespace ui {
+
+
+constexpr int kDefaultUnknownAPILevel = 1000;
+
+class DeviceDetailPage;
+
+class BugreportPageGrpc : public ThemedWidget {
     Q_OBJECT
 
 public:
-    explicit BugreportPage(QWidget* parent = 0);
-    ~BugreportPage();
+    explicit BugreportPageGrpc(QWidget* parent = 0);
+    ~BugreportPageGrpc();
     void setAdbInterface(android::emulation::AdbInterface* adb);
     void showEvent(QShowEvent* event) override;
     void updateTheme() override;
@@ -56,12 +76,19 @@ public:
         bool bugreportSavedSucceed;
     };
 
+signals:
+    void imageLoaded();
+
 private slots:
     void on_bug_saveButton_clicked();
     void on_bug_sendToGoogle_clicked();
     void on_bug_bugReportCheckBox_clicked();
+    void on_imageLoaded();
 
 private:
+
+
+    void getBootStatus();
     void refreshContents();
     void loadAdbBugreport();
     void loadAdbLogcat();
@@ -78,12 +105,17 @@ private:
     std::string generateUniqueBugreportName();
     android::emulation::AdbInterface* mAdb = nullptr;
     std::unique_ptr<DeviceDetailPage> mDeviceDetail;
-    std::unique_ptr<Ui::BugreportPage> mUi;
+    std::unique_ptr<Ui::BugreportPageGrpc> mUi;
     std::shared_ptr<UiEventTracker> mBugTracker;
     SavingStates mSavingStates;
     android::avd::BugreportInfo mReportingFields;
     std::string mReproSteps;
     android::emulation::AdbCommandPtr mAdbBugreport;
     android::emulation::AdbCommandPtr mAdbLogcat;
+    SimpleEmulatorControlClient mEmulatorControl;
     android::base::RecurrentTask mTask;
+    bool mBooted{false};
+    int mApiLevel{kDefaultUnknownAPILevel};
+    std::string mDeviceName{"UNKNOWN_DEVICE"};
 };
+}}}}

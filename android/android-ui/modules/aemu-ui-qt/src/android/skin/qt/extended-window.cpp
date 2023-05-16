@@ -126,10 +126,6 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
 
-    if (getConsoleAgents()->settings->android_qemu_mode()) {
-        mExtendedUi->bugreportPage->setAdbInterface(
-                mEmulatorWindow->getAdbInterface());
-    }
 
     if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO &&
         android::featurecontrol::isEnabled(
@@ -674,7 +670,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     mExtendedUi->rotaryInputPage->updateTheme();
     mExtendedUi->location_page->updateTheme();
     mExtendedUi->multiDisplayPage->updateTheme(styleString);
-    mExtendedUi->bugreportPage->updateTheme();
+    reinterpret_cast<ThemedWidget*>(mExtendedUi->bugreportPage)->updateTheme();
     mExtendedUi->recordAndPlaybackPage->updateTheme();
 
     // Force a re-draw to make the new style take effect
@@ -704,6 +700,7 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
         // Create the proper objects.
         ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_SNAPSHOT);
         ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BATTERY);
+        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BUGREPORT);
 
         bool moved = false;
         if (getConsoleAgents()

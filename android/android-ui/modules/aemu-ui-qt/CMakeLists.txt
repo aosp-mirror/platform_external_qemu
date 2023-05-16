@@ -64,6 +64,7 @@ android_qt_lib(
        ext-page-battery
        ext-page-battery-grpc
        ext-page-bugreport
+       ext-page-bugreport-grpc
        ext-page-camera
        ext-page-car
        ext-page-cellular

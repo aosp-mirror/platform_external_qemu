@@ -8,7 +8,8 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/skin/qt/extended-pages/bug-report-page.h"
+
+#include "android/skin/qt/extended-pages/bug-report-page-grpc.h"
 
 #include <QtConcurrent/qtconcurrentrun.h>
 #include <time.h>
@@ -35,16 +36,17 @@
 #include <string_view>
 #include <vector>
 
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/strings/string_view.h"
 #include "aemu/base/StringFormat.h"
 #include "aemu/base/Uri.h"
 #include "aemu/base/Uuid.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/files/PathUtils.h"
-#include "android/avd/info.h"
+#include "aemu/base/logging/CLog.h"
 #include "android/base/system/System.h"
-#include "android/console.h"
-#include "android/emulation/control/ScreenCapturer.h"
-#include "android/emulation/control/globals_agent.h"
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"
 #include "android/metrics/UiEventTracker.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
@@ -52,8 +54,9 @@
 #include "android/skin/qt/raised-material-button.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/utils/path.h"
+#include "emulator_controller.pb.h"
 #include "studio_stats.pb.h"
-#include "ui_bug-report-page.h"
+#include "ui_bug-report-page-grpc.h"
 
 using android::base::PathUtils;
 using android::base::RecurrentTask;
@@ -65,8 +68,16 @@ using android::base::Uri;
 using android::base::Uuid;
 using android::emulation::AdbInterface;
 using android::emulation::OptionalAdbCommandResult;
+using android::emulation::control::EmulatorGrpcClient;
+using android::emulation::control::EmulatorStatus;
+using android::emulation::control::Image;
+using android::emulation::control::ImageFormat;
 
-static const int kDefaultUnknownAPILevel = 1000;
+namespace android {
+namespace emulation {
+namespace grpc {
+namespace ui {
+
 static const int kReproStepsCharacterLimit = 2000;
 static const System::Duration kAdbCommandTimeoutMs = System::kInfinite;
 static const System::Duration kTaskInterval = 1000;  // ms
@@ -98,28 +109,28 @@ public:
     }
 };
 
-BugreportPage::BugreportPage(QWidget* parent)
+BugreportPageGrpc::BugreportPageGrpc(QWidget* parent)
     : ThemedWidget(parent),
-      mUi(new Ui::BugreportPage),
+      mUi(new Ui::BugreportPageGrpc),
       mBugTracker(new UiEventTracker(
               android_studio::EmulatorUiEvent::BUTTON_PRESS,
               android_studio::EmulatorUiEvent::EXTENDED_BUG_TAB)),
+      mEmulatorControl(EmulatorGrpcClient::me()),
       // A recurrent task to refresh and load data only after device boots up.
       mTask(
               ThreadLooper::get(),
               [this]() {
-                  if (getConsoleAgents()->settings->guest_boot_completed()) {
+                  getBootStatus();
+                  if (mBooted) {
                       refreshContents();
                       return false;
                   } else {
+                      getBootStatus();
                       return true;
                   }
               },
-              kTaskInterval) {
-    if (getConsoleAgents()->settings->android_qemu_mode()) {
-        setAdbInterface(
-                android::emulation::AdbInterface::createGlobalOwnThread());
-    }
+              kTaskInterval),
+      mAdb(android::emulation::AdbInterface::createGlobalOwnThread()) {
     mUi->setupUi(this);
     mUi->bug_deviceLabel->installEventFilter(this);
     mUi->bug_emulatorVersionLabel->setText(QString::fromStdString(
@@ -137,10 +148,10 @@ BugreportPage::BugreportPage(QWidget* parent)
     mDeviceDetail.reset(new DeviceDetailPage(
             QString::fromStdString(mReportingFields.avdDetails), this));
     mUi->bug_sendToGoogle->setIcon(getIconForCurrentTheme("open_in_browser"));
+    connect(this, SIGNAL(imageLoaded()), this, SLOT(on_imageLoaded()));
 }
 
-BugreportPage::~BugreportPage() {
-    // Stop the async timer;
+BugreportPageGrpc::~BugreportPageGrpc() {
     if (mTask.inFlight()) {
         mTask.stopAsync();
     }
@@ -163,11 +174,30 @@ BugreportPage::~BugreportPage() {
     }
 }
 
-void BugreportPage::setAdbInterface(AdbInterface* adb) {
+void BugreportPageGrpc::setAdbInterface(AdbInterface* adb) {
     mAdb = adb;
 }
 
-void BugreportPage::updateTheme() {
+void BugreportPageGrpc::getBootStatus() {
+    mEmulatorControl.getStatus([this](absl::StatusOr<EmulatorStatus*> status) {
+        if (!status.ok()) {
+            return;
+        }
+
+        auto info = status.value();
+        mBooted = info->booted();
+        for (const auto& entry : info->hardwareconfig().entry()) {
+            if (entry.key() == "avd.api_level") {
+                mApiLevel = std::stoi(entry.value());
+            }
+            if (entry.key() == "AvdId") {
+                mDeviceName = entry.value();
+            }
+        }
+    });
+}
+
+void BugreportPageGrpc::updateTheme() {
     SettingsTheme theme = getSelectedTheme();
     QMovie* movie = new QMovie(this);
     movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
@@ -183,7 +213,7 @@ void BugreportPage::updateTheme() {
     mUi->bug_sendToGoogle->setIcon(getIconForCurrentTheme("open_in_browser"));
 }
 
-void BugreportPage::showEvent(QShowEvent* event) {
+void BugreportPageGrpc::showEvent(QShowEvent* event) {
     // Override stylesheet for QPlainTextEdit[readOnly=true]
     SettingsTheme theme = getSelectedTheme();
     mUi->bug_bugReportTextEdit->setStyleSheet(
@@ -197,7 +227,58 @@ void BugreportPage::showEvent(QShowEvent* event) {
         mTask.start();
 }
 
-void BugreportPage::refreshContents() {
+void BugreportPageGrpc::on_imageLoaded() {
+    if (System::get()->pathIsFile(mSavingStates.screenshotFilePath) &&
+        System::get()->pathCanRead(mSavingStates.screenshotFilePath)) {
+        QPixmap image(mSavingStates.screenshotFilePath.c_str());
+        int height = mUi->bug_screenshotImage->height();
+        int width = mUi->bug_screenshotImage->width();
+        mUi->bug_screenshotImage->setPixmap(
+                image.scaled(width, height, Qt::KeepAspectRatio));
+    } else {
+        // TODO(wdu) Better error handling for failed screen capture
+        // operation
+        mUi->bug_screenshotImage->setText(
+                tr("There was an error while capturing the "
+                   "screenshot."));
+    }
+}
+
+void BugreportPageGrpc::loadScreenshotImage() {
+    // Delete previously taken screenshot if it exists
+    if (System::get()->pathIsFile(mSavingStates.screenshotFilePath)) {
+        System::get()->deleteFile(mSavingStates.screenshotFilePath);
+        mSavingStates.screenshotFilePath.clear();
+    }
+
+    ImageFormat fmt;
+    fmt.set_format(ImageFormat::PNG);
+    mEmulatorControl.getScreenshot(fmt, [this](absl::StatusOr<Image*> status) {
+        if (!status.ok()) {
+            dwarning("Failed to obtain screenshot: %s",
+                     status.status().message().data());
+            return;
+        }
+        mSavingStates.screenshotFilePath =
+                PathUtils::join(System::get()->getTempDir(), "screenshot.png");
+        std::ofstream screenShotFile(
+                PathUtils::asUnicodePath(
+                        mSavingStates.screenshotFilePath.c_str())
+                        .c_str(),
+                std::ios_base::out | std::ios_base::binary);
+
+        if (!screenShotFile.is_open() || !screenShotFile.good()) {
+            dwarning("Failed to save screenshot to %s. ",
+                     mSavingStates.screenshotFilePath.c_str());
+            return;
+        }
+
+        screenShotFile << status.value()->image();
+        emit(imageLoaded());
+    });
+}
+
+void BugreportPageGrpc::refreshContents() {
     // clean up the content loaded from last time.
     mUi->bug_bugReportTextEdit->clear();
     mUi->bug_reproStepsTextEdit->clear();
@@ -224,13 +305,13 @@ void BugreportPage::refreshContents() {
     }
 }
 
-void BugreportPage::enableInput(bool enabled) {
+void BugreportPageGrpc::enableInput(bool enabled) {
     SettingsTheme theme = getSelectedTheme();
     setButtonEnabled(mUi->bug_sendToGoogle, theme, enabled);
     setButtonEnabled(mUi->bug_saveButton, theme, enabled);
 }
 
-void BugreportPage::showSpinningWheelAnimation(bool enabled) {
+void BugreportPageGrpc::showSpinningWheelAnimation(bool enabled) {
     if (!mUi->bug_circularSpinner->movie()) {
         SettingsTheme theme = getSelectedTheme();
         QMovie* movie = new QMovie(this);
@@ -252,7 +333,7 @@ void BugreportPage::showSpinningWheelAnimation(bool enabled) {
     }
 }
 
-void BugreportPage::on_bug_bugReportCheckBox_clicked() {
+void BugreportPageGrpc::on_bug_bugReportCheckBox_clicked() {
     if (mUi->bug_bugReportCheckBox->isChecked()) {
         if (mAdbBugreport && mAdbBugreport->inFlight()) {
             showSpinningWheelAnimation(true);
@@ -264,7 +345,7 @@ void BugreportPage::on_bug_bugReportCheckBox_clicked() {
     }
 }
 
-void BugreportPage::on_bug_saveButton_clicked() {
+void BugreportPageGrpc::on_bug_saveButton_clicked() {
     mBugTracker->increment("ON_SAVE");
     QString dirName = QString::fromStdString(mSavingStates.saveLocation);
     dirName = QFileDialog::getExistingDirectory(
@@ -276,11 +357,11 @@ void BugreportPage::on_bug_saveButton_clicked() {
 
     enableInput(false);
 #if QT_VERSION >= 0x060000
-    QFuture<bool> future = QtConcurrent::run(&BugreportPage::saveBugReportTo,
-                                             this, savingPath);
+    QFuture<bool> future = QtConcurrent::run(
+            &BugreportPageGrpc::saveBugReportTo, this, savingPath);
 #else
     QFuture<bool> future = QtConcurrent::run(
-            this, &BugreportPage::saveBugReportTo, savingPath);
+            this, &BugreportPageGrpc::saveBugReportTo, savingPath);
 #endif  // QT_VERSION
     mSavingStates.bugreportSavedSucceed = future.result();
     enableInput(true);
@@ -292,7 +373,7 @@ void BugreportPage::on_bug_saveButton_clicked() {
     }
 }
 
-void BugreportPage::on_bug_sendToGoogle_clicked() {
+void BugreportPageGrpc::on_bug_sendToGoogle_clicked() {
     mBugTracker->increment("ON_SEND");
     if (!mSavingStates.bugreportSavedSucceed) {
         on_bug_saveButton_clicked();
@@ -300,10 +381,10 @@ void BugreportPage::on_bug_sendToGoogle_clicked() {
     // launch the issue tracker in a separate thread
 #if QT_VERSION >= 0x060000
     QFuture<bool> future =
-            QtConcurrent::run(&BugreportPage::launchIssueTracker, this);
+            QtConcurrent::run(&BugreportPageGrpc::launchIssueTracker, this);
 #else
     QFuture<bool> future =
-            QtConcurrent::run(this, &BugreportPage::launchIssueTracker);
+            QtConcurrent::run(this, &BugreportPageGrpc::launchIssueTracker);
 #endif  // QT_VERSION
     bool success = future.result();
     if (!success) {
@@ -314,7 +395,7 @@ void BugreportPage::on_bug_sendToGoogle_clicked() {
     }
 }
 
-bool BugreportPage::saveBugReportTo(std::string_view savingPath) {
+bool BugreportPageGrpc::saveBugReportTo(std::string_view savingPath) {
     if (savingPath.empty()) {
         return false;
     }
@@ -365,7 +446,7 @@ bool BugreportPage::saveBugReportTo(std::string_view savingPath) {
     return true;
 }
 
-bool BugreportPage::launchIssueTracker() {
+bool BugreportPageGrpc::launchIssueTracker() {
     QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
     reproSteps.truncate(kReproStepsCharacterLimit);
     mReproSteps = reproSteps.toStdString();
@@ -379,7 +460,7 @@ bool BugreportPage::launchIssueTracker() {
     return url.isValid() && QDesktopServices::openUrl(url);
 }
 
-void BugreportPage::loadAdbBugreport() {
+void BugreportPageGrpc::loadAdbBugreport() {
     // Avoid generating adb bugreport multiple times while in execution.
     if (mAdbBugreport && mAdbBugreport->inFlight())
         return;
@@ -400,15 +481,10 @@ void BugreportPage::loadAdbBugreport() {
     // platform/frameworks/native/cmds/dumpstate/bugreport-format.md
     // Issue different command args given the API level
 
-    int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
     bool isNougatOrHigher =
-            (apiLevel != kDefaultUnknownAPILevel && apiLevel > 23);
-    if (apiLevel == kDefaultUnknownAPILevel &&
-        avdInfo_isMarshmallowOrHigher(
-                getConsoleAgents()->settings->avdInfo())) {
-        isNougatOrHigher = true;
-    }
+            (mApiLevel != kDefaultUnknownAPILevel && mApiLevel > 23);
 
+    // Only 0.7% is below N.
     if (isNougatOrHigher)
         filePath.append(".zip");
     else
@@ -445,7 +521,8 @@ void BugreportPage::loadAdbBugreport() {
                         // TODO(wdu) Better error handling for failed adb
                         // bugreport generation
                         showErrorDialog(
-                                tr("Bug report interrupted by snapshot load? "
+                                tr("Bug report interrupted by snapshot "
+                                   "load? "
                                    "There was an error while generating "
                                    "adb bugreport"),
                                 tr("Bug Report"));
@@ -455,7 +532,7 @@ void BugreportPage::loadAdbBugreport() {
             kAdbCommandTimeoutMs, wantOutput);
 }
 
-void BugreportPage::loadAdbLogcat() {
+void BugreportPageGrpc::loadAdbLogcat() {
     // Avoid generating adb logcat multiple times while in execution.
     if (mAdbLogcat && mAdbLogcat->inFlight()) {
         return;
@@ -464,9 +541,8 @@ void BugreportPage::loadAdbLogcat() {
     if (!mAdb)
         return;
     // After apiLevel 19, buffer "all" become available
-    int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
     mAdbLogcat = mAdb->runAdbCommand(
-            (apiLevel != kDefaultUnknownAPILevel && apiLevel > 19)
+            (mApiLevel != kDefaultUnknownAPILevel && mApiLevel > 19)
                     ? std::vector<std::string>{"logcat", "-b", "all", "-d"}
                     : std::vector<std::string>{"logcat", "-b", "events", "-b",
                                                "main", "-b", "radio", "-b",
@@ -475,8 +551,9 @@ void BugreportPage::loadAdbLogcat() {
                 mAdbLogcat.reset();
                 if (!result || result->exit_code || !result->output) {
                     runOnEmuUiThread([this] {
-                        mUi->bug_bugReportTextEdit->setPlainText(tr(
-                                "There was an error while loading adb logcat"));
+                        mUi->bug_bugReportTextEdit->setPlainText(
+                                tr("There was an error while loading adb "
+                                   "logcat"));
                     });
                 } else {
                     std::string s(
@@ -491,37 +568,9 @@ void BugreportPage::loadAdbLogcat() {
             kAdbCommandTimeoutMs, true);
 }
 
-void BugreportPage::loadScreenshotImage() {
-    // Delete previously taken screenshot if it exists
-    if (System::get()->pathIsFile(mSavingStates.screenshotFilePath)) {
-        System::get()->deleteFile(mSavingStates.screenshotFilePath);
-        mSavingStates.screenshotFilePath.clear();
-    }
-    mSavingStates.screenshotSucceed = false;
-    if (android::emulation::captureScreenshot(
-                System::get()->getTempDir().c_str(),
-                &mSavingStates.screenshotFilePath)) {
-        if (System::get()->pathIsFile(mSavingStates.screenshotFilePath) &&
-            System::get()->pathCanRead(mSavingStates.screenshotFilePath)) {
-            mSavingStates.screenshotSucceed = true;
-            QPixmap image(mSavingStates.screenshotFilePath.c_str());
-            int height = mUi->bug_screenshotImage->height();
-            int width = mUi->bug_screenshotImage->width();
-            mUi->bug_screenshotImage->setPixmap(
-                    image.scaled(width, height, Qt::KeepAspectRatio));
-        }
-    } else {
-        // TODO(wdu) Better error handling for failed screen capture
-        // operation
-        mUi->bug_screenshotImage->setText(
-                tr("There was an error while capturing the "
-                   "screenshot."));
-    }
-}
-
-bool BugreportPage::saveToFile(std::string_view filePath,
-                               const char* content,
-                               size_t length) {
+bool BugreportPageGrpc::saveToFile(std::string_view filePath,
+                                   const char* content,
+                                   size_t length) {
     std::ofstream outFile(PathUtils::asUnicodePath(filePath.data()).c_str(),
                           std::ios_base::out | std::ios_base::binary);
     if (!outFile.is_open() || !outFile.good())
@@ -531,7 +580,7 @@ bool BugreportPage::saveToFile(std::string_view filePath,
     return true;
 }
 
-bool BugreportPage::eventFilter(QObject* object, QEvent* event) {
+bool BugreportPageGrpc::eventFilter(QObject* object, QEvent* event) {
     if (event->type() == QEvent::MouseButtonPress) {
         if (mDeviceDetail.get()) {
             mDeviceDetail->show();
@@ -543,13 +592,14 @@ bool BugreportPage::eventFilter(QObject* object, QEvent* event) {
     }
 }
 
-std::string BugreportPage::generateUniqueBugreportName() {
-    const char* deviceName =
-            avdInfo_getName(getConsoleAgents()->settings->avdInfo());
+std::string BugreportPageGrpc::generateUniqueBugreportName() {
     time_t now = System::get()->getUnixTime();
     char date[80];
     strftime(date, sizeof(date), "%Y-%m-%d-%H-%M-%S", localtime(&now));
-    return StringFormat("bugreport-%s-%s-%s",
-                        deviceName ? deviceName : "UNKNOWN_DEVICE", date,
+    return StringFormat("bugreport-%s-%s-%s", mDeviceName, date,
                         Uuid::generate().toString());
 }
+}  // namespace ui
+}  // namespace grpc
+}  // namespace emulation
+}  // namespace android
