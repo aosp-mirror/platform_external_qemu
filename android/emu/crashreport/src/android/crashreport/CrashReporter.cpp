@@ -13,31 +13,32 @@
 // limitations under the License.
 #include "android/crashreport/CrashReporter.h"
 
-#include <stdarg.h>  // for va_list, va_...
-#include <stdio.h>   // for vsnprintf
-#include <stdlib.h>  // for abort
-#include <fstream>   // for basic_filebuf
-#include <map>       // for map
-#include <ostream>   // for operator<<
-#include <string>    // for basic_string
-#include <utility>   // for move
-#include <vector>    // for vector<>::it...
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fstream>
+#include <map>
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include "aemu/base/files/PathUtils.h"                   // for pj, PathUtils
-#include "aemu/base/memory/LazyInstance.h"               // for LazyInstance
-#include "android/base/system/System.h"                  // for System
-#include "android/console.h"                             // for getConsoleAg...
-#include "android/crashreport/SimpleStringAnnotation.h"  // for SimpleString...
-#include "android/emulation/control/globals_agent.h"     // for QAndroidGlob...
-#include "android/utils/debug.h"                         // for dinfo, derror
-#include "android/version.h"                             // for EMULATOR_FUL...
-#include "client/annotation.h"                           // for Annotation
-#include "client/crash_report_database.h"                // for CrashReportD...
-#include "client/crashpad_client.h"                      // for CrashpadClient
-#include "client/settings.h"                             // for Settings
-#include "host-common/crash-handler.h"                   // for crashhandler...
-#include "mini_chromium/base/files/file_path.h"          // for FilePath
-#include "util/misc/uuid.h"                              // for UUID
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "android/base/system/System.h"
+#include "android/console.h"
+#include "android/crashreport/SimpleStringAnnotation.h"
+#include "android/emulation/control/globals_agent.h"
+#include "android/utils/debug.h"
+#include "android/version.h"
+#include "base/files/file_path.h"
+#include "client/annotation.h"
+#include "client/crash_report_database.h"
+#include "client/crashpad_client.h"
+#include "client/settings.h"
+#include "host-common/crash-handler.h"
+#include "mini_chromium/base/files/file_path.h"
+#include "util/misc/uuid.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -49,19 +50,29 @@ using android::base::c_str;
 using android::base::LazyInstance;
 using android::base::PathUtils;
 using android::base::System;
+using base::FilePath;
 
 namespace android {
 namespace crashreport {
 
 const constexpr char kCrashOnExitFileName[] = "crash-on-exit";
+const constexpr char kCrashpadDatabase[] =
+        "emu-crash-" EMULATOR_VERSION_STRING_SHORT ".db";
 
 using DefaultStringAnnotation = crashpad::StringAnnotation<1024>;
 LazyInstance<CrashReporter> sCrashReporter = LAZY_INSTANCE_INIT;
 
 CrashReporter::CrashReporter() {}
 
-void CrashReporter::initialize() {
+FilePath CrashReporter::databaseDirectory() {
+    auto crashDatabasePath =
+            android::base::pj(System::get()->getTempDir(), kCrashpadDatabase);
+    return FilePath(PathUtils::asUnicodePath(crashDatabasePath.data()).c_str());
+}
+
+bool CrashReporter::initialize() {
     mInitialized = true;
+    return true;
 }
 
 void CrashReporter::AppendDump(const char* message) {
