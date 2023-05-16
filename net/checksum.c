@@ -18,6 +18,7 @@
 #include "qemu/osdep.h"
 #include "net/checksum.h"
 #include "net/eth.h"
+#include "qemu/log.h"
 
 uint32_t net_checksum_add_cont(int len, uint8_t *buf, int seq)
 {
@@ -47,21 +48,56 @@ uint16_t net_checksum_finish(uint32_t sum)
 }
 
 uint16_t net_checksum_tcpudp(uint16_t length, uint16_t proto,
-                             uint8_t *addrs, uint8_t *buf)
+                             uint8_t *addrs, uint8_t *buf,
+                             uint8_t addr_len)
 {
     uint32_t sum = 0;
 
     sum += net_checksum_add(length, buf);         // payload
-    sum += net_checksum_add(8, addrs);            // src + dst address
+    sum += net_checksum_add(addr_len << 1, addrs);// src + dst address
     sum += proto + length;                        // protocol & length
     return net_checksum_finish(sum);
 }
 
+static void net_checksum_ipv4(struct ip_header *ip, int csum_flag)
+{
+    uint16_t csum;
+
+    /* Calculate IP checksum */
+    if (csum_flag & CSUM_IP) {
+        stw_he_p(&ip->ip_sum, 0);
+        csum = net_raw_checksum((uint8_t *)ip, IP_HDR_GET_LEN(ip));
+        stw_be_p(&ip->ip_sum, csum);
+    }
+
+    if (IP4_IS_FRAGMENT(ip)) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+            "%s: fragmented IP packet!", __func__);
+    }
+}
+
+/* returns payload length. */
+static uint16_t net_payload_length_ipv4(struct ip_header *ip)
+{
+    return lduw_be_p(&ip->ip_len) - sizeof(struct ip_header);
+}
+
+/* returns payload length. */
+static uint16_t net_payload_length_ipv6(struct ip6_header *ip)
+{
+    return lduw_be_p(&ip->ip6_plen);
+}
+
 void net_checksum_calculate(uint8_t *data, int length, int csum_flag)
 {
-    int mac_hdr_len, ip_len;
+    int mac_hdr_len, ip_version;
     struct ip_header *ip;
+    struct ip6_header *ip6;
+    uint16_t ip_len;
     uint16_t csum;
+    uint8_t ip_p, addr_len;
+    uint8_t *ip_src;
+    uint8_t *ip_nxt;
 
     /*
      * Note: We cannot assume "data" is aligned, so the all code uses
@@ -102,39 +138,39 @@ void net_checksum_calculate(uint8_t *data, int length, int csum_flag)
     }
 
     ip = (struct ip_header *)(data + mac_hdr_len);
+    ip_version = IP_HEADER_VERSION(ip);
 
-    if (IP_HEADER_VERSION(ip) != IP_HEADER_VERSION_4) {
-        return; /* not IPv4 */
-    }
-
-    /* Calculate IP checksum */
-    if (csum_flag & CSUM_IP) {
-        stw_he_p(&ip->ip_sum, 0);
-        csum = net_raw_checksum((uint8_t *)ip, IP_HDR_GET_LEN(ip));
-        stw_be_p(&ip->ip_sum, csum);
-    }
-
-    if (IP4_IS_FRAGMENT(ip)) {
-        return; /* a fragmented IP packet */
-    }
-
-    ip_len = lduw_be_p(&ip->ip_len);
-
-    /* Last, check that we have enough data for the all IP frame */
-    if (length < ip_len) {
+    switch (ip_version) {
+    case IP_HEADER_VERSION_4:
+        net_checksum_ipv4(ip, csum_flag);
+        ip_len = net_payload_length_ipv4(ip);
+        ip_p = ip->ip_p;
+        ip_src = (uint8_t *)&ip->ip_src;
+        ip_nxt = (uint8_t *)(ip + 1);
+        addr_len = 4;
+        break;
+    case IP_HEADER_VERSION_6:
+        ip6 = (struct ip6_header *)ip;
+        ip_len = net_payload_length_ipv6(ip6);
+        ip_p = ip6->ip6_nxt;
+        ip_src = (uint8_t *)&ip6->ip6_src;
+        ip_nxt = (uint8_t *)(ip6 + 1);
+        addr_len = 16;
+        break;
+    default:
+        qemu_log_mask(LOG_GUEST_ERROR,
+            "%s: Unknown IP version: %d", __func__, ip_version);
         return;
     }
 
-    ip_len -= IP_HDR_GET_LEN(ip);
-
-    switch (ip->ip_p) {
+    switch (ip_p) {
     case IP_PROTO_TCP:
     {
         if (!(csum_flag & CSUM_TCP)) {
             return;
         }
 
-        tcp_header *tcp = (tcp_header *)(ip + 1);
+        tcp_header *tcp = (tcp_header *)(ip_nxt);
 
         if (ip_len < sizeof(tcp_header)) {
             return;
@@ -143,9 +179,8 @@ void net_checksum_calculate(uint8_t *data, int length, int csum_flag)
         /* Set csum to 0 */
         stw_he_p(&tcp->th_sum, 0);
 
-        csum = net_checksum_tcpudp(ip_len, ip->ip_p,
-                                   (uint8_t *)&ip->ip_src,
-                                   (uint8_t *)tcp);
+        csum = net_checksum_tcpudp(ip_len, ip_p, ip_src,
+                                   (uint8_t *)tcp, addr_len);
 
         /* Store computed csum */
         stw_be_p(&tcp->th_sum, csum);
@@ -158,7 +193,7 @@ void net_checksum_calculate(uint8_t *data, int length, int csum_flag)
             return;
         }
 
-        udp_header *udp = (udp_header *)(ip + 1);
+        udp_header *udp = (udp_header *)(ip_nxt);
 
         if (ip_len < sizeof(udp_header)) {
             return;
@@ -167,9 +202,8 @@ void net_checksum_calculate(uint8_t *data, int length, int csum_flag)
         /* Set csum to 0 */
         stw_he_p(&udp->uh_sum, 0);
 
-        csum = net_checksum_tcpudp(ip_len, ip->ip_p,
-                                   (uint8_t *)&ip->ip_src,
-                                   (uint8_t *)udp);
+        csum = net_checksum_tcpudp(ip_len, ip_p, ip_src,
+                                   (uint8_t *)udp, addr_len);
 
         /* Store computed csum */
         stw_be_p(&udp->uh_sum, csum);
