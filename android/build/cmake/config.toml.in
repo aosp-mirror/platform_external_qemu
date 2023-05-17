@@ -68,6 +68,7 @@ pica = { path = "${AOSP_ROOT}/external/rust/crates/pica" }
 pin-project-lite = { path = "${AOSP_ROOT}/external/rust/crates/pin-project-lite" }
 pin-utils = { path = "${AOSP_ROOT}/external/rust/crates/pin-utils" }
 ppv-lite86 = { path = "${AOSP_ROOT}/external/rust/crates/ppv-lite86" }
+prettyplease = { path = "${AOSP_ROOT}/external/rust/crates/prettyplease" }
 proc-macro-error = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro-error" }
 proc-macro-error-attr = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro-error-attr" }
 proc-macro2 = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro2" }
