@@ -16,23 +16,27 @@
 
 #include <cassert>
 #include <functional>
-#include <iosfwd>  // for string, ostream
+#include <iosfwd>
 #include <memory>
 #include <ostream>
 #include <string>
 #include <unordered_map>
-#include <vector>  // for vector
+#include <vector>
 
-#include "aemu/base/Compiler.h"                    // for DISALLOW_COPY_A...
-#include "android/crashreport/AnnotationStreambuf.h"  // for DefaultAnnotati...
-#include "android/crashreport/CrashConsent.h"         // for CrashConsent
-#include "android/crashreport/HangDetector.h"         // for HangDetector
-#include "host-common/crash-handler.h"        // for ANDROID_NORETURN
-#include "client/annotation.h"                        // for Annotation
+#include "aemu/base/Compiler.h"
+#include "android/crashreport/AnnotationStreambuf.h"
+#include "android/crashreport/CrashConsent.h"
+#include "android/crashreport/HangDetector.h"
+#include "base/files/file_path.h"
+#include "client/annotation.h"
+#include "host-common/crash-handler.h"
+
 
 namespace crashpad {
 class Annotation;
 }  // namespace crashpad
+
+using base::FilePath;
 
 namespace android {
 namespace crashreport {
@@ -100,6 +104,8 @@ public:
     HangDetector& hangDetector();
 
     bool active() const { return mInitialized; }
+
+    static FilePath databaseDirectory();
 
 private:
     // Include the |message| as an annotation

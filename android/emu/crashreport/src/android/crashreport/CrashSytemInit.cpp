@@ -49,9 +49,6 @@ constexpr char CrashURL[] = "https://clients2.google.com/cr/report";
 #else
 constexpr char CrashURL[] = "https://clients2.google.com/cr/staging_report";
 #endif
-
-const constexpr char kCrashpadDatabase[] = "emu-crash.db";
-
 // The crashpad handler binary, as shipped with the emulator.
 const constexpr char kCrashpadHandler[] = "crashpad_handler";
 
@@ -81,13 +78,13 @@ public:
         }
         auto database_directory =
                 System::get()->envGet("ANDROID_EMU_CRASH_REPORTING_DATABASE");
-        database_directory =
+        auto database_path =
                 database_directory.empty()
-                        ? pj(System::get()->getTempDir(), kCrashpadDatabase)
-                        : database_directory;
+                        ? CrashReporter::databaseDirectory()
+                        : ::base::FilePath(PathUtils::asUnicodePath(
+                                                   database_directory.c_str())
+                                                   .c_str());
 
-        auto database_path = ::base::FilePath(
-                PathUtils::asUnicodePath(database_directory.c_str()).c_str());
         auto metrics_path = ::base::FilePath();
         auto annotations = std::map<std::string, std::string>{
                 {"prod", "AndroidEmulator"},
@@ -153,7 +150,8 @@ public:
                         toRemove.push_back(report.uuid);
                         break;
                     case CrashConsent::ReportAction::UNDECIDED_KEEP:
-                        dinfo("Failed to get consent, keeping %s for now.", report.id.c_str());
+                        dinfo("Failed to get consent, keeping %s for now.",
+                              report.id.c_str());
                         break;
                 }
             } else {
