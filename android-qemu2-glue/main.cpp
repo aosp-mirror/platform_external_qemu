@@ -49,13 +49,12 @@
 #include "android/main-common.h"
 #include "android/main-kernel-parameters.h"
 #include "android/multi-instance.h"
+#include "android/network/wifi.h"
 #include "android/opengl/gpuinfo.h"
-#include "host-common/opengles.h"
 #include "android/process_setup.h"
 #include "android/session_phase_reporter.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/check_snapshot_loadable.h"
-#include "snapshot/interface.h"
 #include "android/userspace-boot-properties.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -79,9 +78,11 @@
 #include "host-common/hw-config.h"
 #include "host-common/multi_display_agent.h"
 #include "host-common/opengl/emugl_config.h"
+#include "host-common/opengles.h"
 #include "host-common/screen-recorder.h"
 #include "host-common/vm_operations.h"
 #include "host-common/window_agent.h"
+#include "snapshot/interface.h"
 
 #include "android/skin/winsys.h"
 
@@ -3269,6 +3270,24 @@ extern "C" int main(int argc, char** argv) {
         cuttlefish::stop_android_modem_simulator();
         process_late_teardown();
         return 0;
+    }
+    if (opts->wifi_mac_address) {
+        using android::snapshot::Snapshotter;
+        std::string mac_address = opts->wifi_mac_address;
+        Snapshotter::get().addOperationCallback(
+                [mac_address](Snapshotter::Operation op,
+                              Snapshotter::Stage stage) {
+                    if (stage == Snapshotter::Stage::End &&
+                        op == Snapshotter::Operation::Load) {
+                        if (android_wifi_set_mac_address(mac_address.c_str())) {
+                            derror("Failed to set wifi mac address to %s\n",
+                                   mac_address.c_str());
+                        } else {
+                            dinfo("Setting wifi mac address to %s\n",
+                                  mac_address.c_str());
+                        }
+                    }
+                });
     }
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),

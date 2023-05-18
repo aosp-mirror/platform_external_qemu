@@ -349,6 +349,11 @@ OPT_FLAG(xts, "Use android64-xts CPU profile instead of the default one")
 
 OPT_FLAG(redirect_to_netsim, "Forward network traffic to the netsim process via gRPC. ")
 
+OPT_PARAM(wifi_mac_address,
+          "<mac address>",
+          "Override the mac address of the wlan0 interface in AVD. This option "
+          "only applies to situation where AVD is loaded from snapshot using "
+          "read-only mode. Example: -wifi-mac-address 00:11:22:33:44:55.")
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

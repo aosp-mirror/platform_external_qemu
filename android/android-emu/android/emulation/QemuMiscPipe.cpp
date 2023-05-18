@@ -510,7 +510,6 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                              "set-ignore-orientation-request", "true"});
                 }
             }
-
             if (getConsoleAgents()->settings->language()->changing_language_country_locale) {
                 dinfo("Changing language, country or locale...");
                 auto language = getConsoleAgents()->settings->language();

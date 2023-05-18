@@ -33,4 +33,8 @@ int android_wifi_add_ssid(const char* ssid, const char* password);
 // usual.
 int android_wifi_set_ssid_block_on(const char* ssid, bool blocked);
 
+// Override the mac address of the wlan0 interface in AVD by using the shell cmd
+// `ip link set dev wlan0 |mac_addr|`. The command requires adb root access in
+// order to work properly.
+int android_wifi_set_mac_address(const char* mac_addr);
 ANDROID_END_HEADER
