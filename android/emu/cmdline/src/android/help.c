@@ -2265,6 +2265,14 @@ static void help_redirect_to_netsim(stralloc_t* out) {
            " netsim process which is a full stack network service. By default,"
            " Emulator will use its own in process network stack.\n\n");
 }
+
+static void help_wifi_mac_address(stralloc_t* out) {
+    PRINTF(" Override the mac address of the wlan0 interface in AVD. "
+           " This option only applies to situation where AVD is loaded "
+           " from snapshot using read-only mode."
+           " Example: -wifi-mac-address 00:11:22:33:44:55 \n\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

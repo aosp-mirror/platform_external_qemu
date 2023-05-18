@@ -12,13 +12,15 @@
 #include "android/network/wifi.h"
 
 #include "android/emulation/HostapdController.h"
-#include "host-common/FeatureControl.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 #include "android/network/NetworkPipe.h"
 #include "android/utils/debug.h"
+#include "host-common/FeatureControl.h"
 
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <regex>
 
 namespace fc = android::featurecontrol;
 using android::emulation::HostapdController;
@@ -64,3 +66,27 @@ int android_wifi_set_ssid_block_on(const char* ssid, bool blocked) {
     return send_command("wifi %s %s\n", blocked ? "block" : "unblock", ssid);
 }
 
+extern "C" int android_wifi_set_mac_address(const char* mac_addr) {
+    if (!mac_addr)
+        return -1;
+    std::regex regex("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$");
+    if (!std::regex_match(mac_addr, regex)) {
+        dwarning("%s: Mac address is invalid: %s.\n", __func__, mac_addr);
+        return -1;
+    }
+    auto adbInterface = android::emulation::AdbInterface::getGlobal();
+    if (!adbInterface) {
+        dwarning("%s: No adb binary found, cannot set the wifi mac address.\n",
+                 __func__);
+        return -1;
+    }
+    adbInterface->enqueueCommand(
+            {"shell", "su", "0", "ip", "link", "set", "dev", "wlan0", "down"});
+    adbInterface->enqueueCommand({"shell", "su", "0", "ip", "link", "set",
+                                  "dev", "wlan0", "address", mac_addr});
+    adbInterface->enqueueCommand(
+            {"shell", "su", "0", "ip", "link", "set", "wlan0", "up"});
+    adbInterface->enqueueCommand({"shell", "su", "0", "svc", "wifi", "enable"});
+    adbInterface->enqueueCommand({"shell", "su", "0", "pkill", "dhcpclient"});
+    return 0;
+}
