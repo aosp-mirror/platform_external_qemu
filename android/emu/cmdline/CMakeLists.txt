@@ -4,9 +4,8 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR src
   SRC android/cmdline-option.cpp android/emulation/bufprint_config_dirs.cpp
-      android/emulation/ParameterList.cpp android/help.c
-      android/network/constants.c
-  DEPS android-emu-base android-emu-base-headers android-emu-files)
+      android/help.c android/network/constants.c
+  DEPS android-emu-base android-emu-base-headers android-emu-files android-emu-utils)
 target_include_directories(
   android-emu-cmdline
   PRIVATE src

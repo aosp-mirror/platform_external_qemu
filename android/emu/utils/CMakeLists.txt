@@ -4,7 +4,8 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR
   src
-  SRC android/skin/rect.c
+  SRC android/emulation/ParameterList.cpp
+      android/skin/rect.c
       android/utils/assert.c
       android/utils/async.cpp
       android/utils/cbuffer.c
@@ -17,6 +18,7 @@ android_add_library(
       android/utils/iolooper.cpp
       android/utils/ipaddr.cpp
       android/utils/lineinput.c
+      android/utils/lock.cpp
       android/utils/Random.cpp
       android/utils/reflist.c
       android/utils/refset.c
