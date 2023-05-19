@@ -130,8 +130,7 @@ static void virgl_cmd_context_create(VirtIOGPU *g,
                                     cc.debug_name);
 
 #ifdef CONFIG_STREAM_RENDERER
-    stream_renderer_context_create(cc.hdr.ctx_id, cc.nlen, cc.debug_name,
-                                               0 /* TODO(joshuaduong): does this need to be set? */);
+    stream_renderer_context_create(cc.hdr.ctx_id, cc.nlen, cc.debug_name, cc.context_init);
 #else
     g->virgl->virgl_renderer_context_create(cc.hdr.ctx_id, cc.nlen,
                                   cc.debug_name);
@@ -712,10 +711,6 @@ void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
 {
     VIRTIO_GPU_FILL_CMD(cmd->cmd_hdr);
 
-    cmd->waiting = g->renderer_blocked;
-    if (cmd->waiting) {
-        return;
-    }
 #ifdef CONFIG_STREAM_RENDERER
 #else
     g->virgl->virgl_renderer_force_ctx_0();
@@ -810,11 +805,11 @@ void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
 
     trace_virtio_gpu_fence_ctrl(cmd->cmd_hdr.fence_id, cmd->cmd_hdr.type);
 #ifdef CONFIG_STREAM_RENDERER
-    struct stream_renderer_fence fence;
+    struct stream_renderer_fence fence = {0};
     fence.flags = cmd->cmd_hdr.flags;
     fence.fence_id = cmd->cmd_hdr.fence_id;
     fence.ctx_id = cmd->cmd_hdr.ctx_id;
-    fence.ring_idx = 0;
+    fence.ring_idx = cmd->cmd_hdr.ring_idx;
     stream_renderer_create_fence(&fence);
 #else
     g->virgl->virgl_renderer_create_fence(cmd->cmd_hdr.fence_id, cmd->cmd_hdr.type);
@@ -926,24 +921,6 @@ static void virtio_gpu_print_stats(void *opaque)
     timer_mod(g->print_stats, qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + 1000);
 }
 
-static void virtio_gpu_fence_poll(void *opaque)
-{
-    VirtIOGPU *g = opaque;
-
-#ifndef CONFIG_STREAM_RENDERER
-    g->virgl->virgl_renderer_poll();
-#endif  // CONFIG_STREAM_RENDERER
-    virtio_gpu_process_cmdq(g);
-    if (!QTAILQ_EMPTY(&g->cmdq) || !QTAILQ_EMPTY(&g->fenceq)) {
-        timer_mod(g->fence_poll, qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + 10);
-    }
-}
-
-void virtio_gpu_virgl_fence_poll(VirtIOGPU *g)
-{
-    virtio_gpu_fence_poll(g);
-}
-
 void virtio_gpu_virgl_reset(VirtIOGPU *g)
 {
     int i;
@@ -976,10 +953,65 @@ void virtio_gpu_gl_block(void *opaque, bool block)
 }
 
 #ifdef CONFIG_STREAM_RENDERER
+struct stream_renderer_aio_data {
+    VirtIOGPU *g;
+    struct stream_renderer_fence fence;
+};
+
+static void
+stream_renderer_aio_cb(void *opaque)
+{
+    struct stream_renderer_aio_data *data =  (struct stream_renderer_aio_data *)opaque;
+    VirtIOGPU *g = data->g;
+    struct stream_renderer_fence fence_data = data->fence;
+    struct virtio_gpu_ctrl_command *cmd, *tmp;
+
+    uint32_t signaled_ctx_specific = fence_data.flags &
+                                     STREAM_RENDERER_FLAG_FENCE_RING_IDX;
+
+    // TODO(joshuaduong): In theory, we shouldn't need ctrl_return_lock because we schedule this
+    // callback on the main thread. But somehow CtsGraphicsTestCases are hanging without this lock.
+    // Need to figure out the cause and remove this lock if possible.
+    qemu_rec_mutex_lock(&g->ctrl_return_lock);
+    QTAILQ_FOREACH_SAFE(cmd, &g->fenceq, next, tmp) {
+        /*
+         * Due to context specific timelines.
+         */
+        uint32_t target_ctx_specific = cmd->cmd_hdr.flags &
+                                       STREAM_RENDERER_FLAG_FENCE_RING_IDX;
+
+        if (signaled_ctx_specific != target_ctx_specific) {
+            continue;
+        }
+
+        if (signaled_ctx_specific &&
+           (cmd->cmd_hdr.ring_idx != fence_data.ring_idx)) {
+            continue;
+        }
+
+        if (cmd->cmd_hdr.fence_id > fence_data.fence_id) {
+            continue;
+        }
+
+        trace_virtio_gpu_fence_resp(cmd->cmd_hdr.fence_id);
+        virtio_gpu_ctrl_response_nodata(g, cmd, VIRTIO_GPU_RESP_OK_NODATA);
+        QTAILQ_REMOVE(&g->fenceq, cmd, next);
+        g_free(cmd);
+    }
+
+    g_free(data);
+    qemu_rec_mutex_lock(&g->ctrl_return_lock);
+}
+
 static void stream_renderer_write_fence(void* opaque,
                                         struct stream_renderer_fence* fence_data) {
-    VirtIOGPU *g = opaque;
-    g->gpu_3d_cbs->write_fence(opaque, fence_data->fence_id);
+    struct stream_renderer_aio_data *data;
+    VirtIOGPU *g = (VirtIOGPU *)opaque;
+
+    data = g_new0(struct stream_renderer_aio_data, 1);
+    data->g = g;
+    data->fence = *fence_data;
+    aio_bh_schedule_oneshot(g->ctx, stream_renderer_aio_cb, (void *)data);
 }
 #endif  // CONFIG_STREAM_RENDERER
 int virtio_gpu_virgl_init(VirtIOGPU *g)
@@ -994,6 +1026,7 @@ int virtio_gpu_virgl_init(VirtIOGPU *g)
         {STREAM_RENDERER_SKIP_OPENGLES_INIT, 1},
     };
     ret = stream_renderer_init(&params[0], 4);
+    g->ctx = qemu_get_aio_context();
 #else
     ret = g->virgl->virgl_renderer_init(
         g, 0, g->gpu_3d_cbs ? g->gpu_3d_cbs : &standard_3d_cbs);
@@ -1001,9 +1034,6 @@ int virtio_gpu_virgl_init(VirtIOGPU *g)
     if (ret != 0) {
         return ret;
     }
-
-    g->fence_poll = timer_new_ms(QEMU_CLOCK_VIRTUAL,
-                                 virtio_gpu_fence_poll, g);
 
     if (virtio_gpu_stats_enabled(g->conf)) {
         g->print_stats = timer_new_ms(QEMU_CLOCK_VIRTUAL,
