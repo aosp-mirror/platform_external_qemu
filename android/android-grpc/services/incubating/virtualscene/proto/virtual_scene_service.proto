@@ -1,0 +1,72 @@
+// Copyright (C) 2023 The Android Open Source Project
+//
+// Licensed under the Apache License= ; Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing= ; software
+// distributed under the License is distributed on an "AS IS" BASIS= ;
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND= ; either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Note that if you add/remove methods in this file you must update
+// the metrics sql as well ./android/scripts/gen-grpc-sql.py
+//
+// Please group deleted methods in a block including the date (MM/DD/YY)
+// it was removed. This enables us to easily keep metrics around after removal
+//
+// List of deleted methods
+// rpc iWasDeleted (03/12/12)
+// ...
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.android.emulation.control.incubating";
+
+package android.emulation.control.incubating;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+service VirtualSceneService {
+    rpc setPoster(Poster) returns (Poster);
+
+    rpc listPosters(google.protobuf.Empty) returns (PosterList);
+
+    rpc setAnimationState(AnimationState) returns (AnimationState);
+
+    rpc getAnimationState(google.protobuf.Empty) returns (AnimationState);
+};
+
+
+message Poster {
+    // Name of the poster position, such as "wall" or "table".
+    string name = 1;
+
+    // The image bytes either PNG or JPEG, or none if no new image
+    // is being loaded.
+    google.protobuf.BytesValue image = 2;
+
+    // Optional filename.
+    google.protobuf.StringValue file_name = 3;
+
+    // The poster position's minimum width, in meters.
+    float minWidth = 4;
+
+    // The poster position's maximum width, in meters.
+    float maxWidth = 5;
+
+    //  The poster scale, a value between 0 and 1.
+    float scale = 6;
+}
+
+message PosterList {
+    repeated Poster posters = 1;
+}
+
+message AnimationState {
+    bool tvOn = 1;
+}
