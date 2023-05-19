@@ -85,6 +85,8 @@ public:
     // Stops observing the directory. No new events will be delivered.
     void stop();
 
+    // The path that is being observed.
+    Path observes() { return mJwkPath; }
 private:
     static bool acceptJwkExtOnly(Path path);
     void fileChangeHandler(FileSystemWatcher::WatcherChangeType change,

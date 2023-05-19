@@ -24,25 +24,30 @@ namespace android {
 namespace emulation {
 namespace control {
 
-// The BasicTokenAuth class is an AuthMetadataProcess that will look
-// for a particular header and will validate the token inside the header.
-//
-// Subclasses should implement the isTokenValid method to decide whether
-// or not the given token is valid.
-//
-// Headers will not be removed, and only the first matching header will
-// be used to validate correctness.
-//
-// Make sure to use lower-case headers. The gRPC engine will reject headers that
-// are not conform to the HTTP/2 standard, with an UNAVAILABLE status.
+/**
+ * @brief An implementation of AuthMetadataProcessor that validates a token in a
+ * specified header.
+ *
+ * The BasicTokenAuth class is an implementation of AuthMetadataProcessor that
+ * is designed to search for a specific headerand validate the token contained
+ * in it. Subclasses must implement the isTokenValid method to determine whether
+ * the token is valid or not. The first matching header will be used for
+ * validation, and headers will not be removed.
+ *
+ * Note that headers must be in lowercase, as the gRPC engine rejects headers
+ * that do not conform to the HTTP/2 standard.
+ *
+ * @see grpc::AuthMetadataProcessor
+ */
 class BasicTokenAuth : public grpc::AuthMetadataProcessor {
 public:
-    // Creates a AuthMetadataProcesser that looks for the given
-    // header and removes the given prefix before invoking
-    // the isTokenValid call.
-    //
-    // |header| The header to look for
-    // |list| The allow list to use.
+    /**
+     * Creates a AuthMetadataProcesser that looks for the given header and
+     * removes the given prefix before invoking the isTokenValid call.
+     *
+     * @param header The header to look for.
+     * @param list The allow list to use.
+     */
     BasicTokenAuth(std::string header, AllowList* list);
     virtual ~BasicTokenAuth();
 
@@ -62,8 +67,13 @@ public:
 
     // This method should return `absl::OkStatus()` in case of success, or
     // provide a more detailed explanation of the validation faluire.
-    virtual absl::Status isTokenValid(grpc::string_ref path,
-                                      grpc::string_ref token) = 0;
+    virtual absl::Status isTokenValid(std::string_view path,
+                                      std::string_view token) = 0;
+
+    virtual bool canHandleToken(std::string_view token) { return false; }
+
+    // The name of this validator.
+    virtual std::string name() = 0;
 
     // Note that the header should be in lower case (gRPC uses HTTP/2)
     //
@@ -80,6 +90,7 @@ public:
     const static inline std::string PATH{":path"};
 
     AllowList* allowList() { return mAllowList; }
+
 private:
     AllowList* mAllowList{&noAccess};
     std::string mHeader;
@@ -97,10 +108,15 @@ class StaticTokenAuth : public BasicTokenAuth {
 public:
     StaticTokenAuth(std::string token, std::string iss, AllowList* list);
     ~StaticTokenAuth() = default;
-    absl::Status isTokenValid(grpc::string_ref path,
-                              grpc::string_ref token) override;
+
+    bool canHandleToken(std::string_view token) override;
+
+    absl::Status isTokenValid(std::string_view path,
+                              std::string_view token) override;
 
     const static inline std::string DEFAULT_BEARER{"Bearer "};
+
+    std::string name() override { return "StaticTokenAuth"; }
 
 private:
     std::string mStaticToken;
@@ -117,12 +133,18 @@ class AnyTokenAuth : public BasicTokenAuth {
 public:
     AnyTokenAuth(std::vector<std::unique_ptr<BasicTokenAuth>> validators,
                  AllowList* list);
+    AnyTokenAuth(std::vector<BasicTokenAuth*> validators, AllowList* list);
     ~AnyTokenAuth() = default;
-    absl::Status isTokenValid(grpc::string_ref path,
-                              grpc::string_ref token) override;
+
+    bool canHandleToken(std::string_view token) override;
+    absl::Status isTokenValid(std::string_view path,
+                              std::string_view token) override;
+
+    std::string name() override { return "AnyTokenAuth"; }
 
 private:
-    std::vector<std::unique_ptr<BasicTokenAuth>> mValidators;
+    std::vector<BasicTokenAuth*> mValidators;
+    std::vector<std::unique_ptr<BasicTokenAuth>> mUniqueValidators;
 };
 }  // namespace control
 }  // namespace emulation

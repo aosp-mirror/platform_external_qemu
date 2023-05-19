@@ -83,7 +83,7 @@ DOM_KEY_MAP_DECLARATION {
   //          Key                     Enum                      Value
   DOM_KEY_MAP("ShiftLevel5",          SHIFT_LEVEL5,             0x0111),
 
-  // Non-standard value representing a latching-modifier key in ui::KeyEvent.
+  // Non-standard value representing a latching-modifier key in aemu-KeyEvent.
   // This is present on some keyboard layouts (Latvian, Tibetan, Cameroon),
   // and applies the modifier to the next (non-modifier) key.
   // These events are consumed internally and not exposed to the web,

@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "android/multitouch-screen.h"
 
-
+#include "android/skin/linux_keycodes.h"
 #include "android/skin/generic-event-buffer.h"
 #include "android/skin/linux_keycodes.h"
 #include "android/console.h"  /* for android_hw */
@@ -26,7 +25,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
-
+#include "android/skin/generic-event-buffer.h"
 #include <assert.h>
 #include <stdint.h>
 

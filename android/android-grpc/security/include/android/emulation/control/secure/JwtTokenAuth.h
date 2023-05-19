@@ -47,12 +47,15 @@ using Path = std::string;
 // The 'exp' field is not yet expired.
 class JwtTokenAuth : public BasicTokenAuth {
 public:
-    JwtTokenAuth(Path jwksPath,
-                 Path jwksLoadedPath,
-                 AllowList* list);
+    JwtTokenAuth(Path jwksPath, Path jwksLoadedPath, AllowList* list);
     ~JwtTokenAuth() = default;
-    absl::Status isTokenValid(grpc::string_ref path,
-                              grpc::string_ref token) override;
+
+    bool canHandleToken(std::string_view token) override;
+
+    absl::Status isTokenValid(std::string_view path,
+                              std::string_view token) override;
+
+    std::string name() override { return "JwtTokenAuth"; }
 
 private:
     void updateKeysetHandle(

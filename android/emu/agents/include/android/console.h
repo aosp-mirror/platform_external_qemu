@@ -42,6 +42,7 @@ extern int min_config_qemu_mode;
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/virtual_scene_agent.h"
+#include "android/emulation/control/surface_agent.h"
 #include "host-common/vm_operations.h"
 #include "host-common/window_agent.h"
 #include "android/utils/compiler.h"
@@ -78,7 +79,8 @@ typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
     X(QCarDataAgent, car)                       \
     X(QGrpcAgent, grpc)                         \
     X(QAndroidHwControlAgent, hw_control)       \
-    X(QAndroidGlobalVarsAgent, settings)
+    X(QAndroidGlobalVarsAgent, settings)        \
+    X(QAndroidSurfaceAgent, surface)
 
 // A structure used to group pointers to all agent interfaces used by the
 // Android console.

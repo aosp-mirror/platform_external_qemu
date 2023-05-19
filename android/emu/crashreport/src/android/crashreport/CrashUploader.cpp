@@ -25,6 +25,7 @@
 
 #include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/crashreport/CrashReporter.h"
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "client/crash_report_database.h"
@@ -76,6 +77,7 @@ struct Options {
 
 using android::base::PathUtils;
 using android::base::System;
+using android::crashreport::CrashReporter;
 using crashpad::CrashReportDatabase;
 using crashpad::FileOffset;
 using crashpad::FileReader;
@@ -97,7 +99,13 @@ using google_breakpad::SimpleSymbolSupplier;
 #define CRASHURL "https://clients2.google.com/cr/staging_report"
 #endif
 
-const constexpr char kCrashpadDatabase[] = "emu-crash.db";
+#ifdef _WIN32
+#define standard_out std::wcout
+#define standard_err std::wcerr
+#else
+#define standard_out std::cout
+#define standard_err std::cerr
+#endif
 
 // The crashpad handler binary, as shipped with the emulator.
 const constexpr char kCrashpadHandler[] = "crashpad_handler";
@@ -151,11 +159,21 @@ bool PrintMinidumpProcess(const Options& options) {
 }  // namespace
 
 static void Usage(int argc, const char* argv[], bool error) {
+    auto dir = CrashReporter::databaseDirectory();
     fprintf(error ? stderr : stdout,
             "Usage: %s [options] \n"
             "\n"
             "List, upload and examine emulator related crashdumps.\n"
-            "\n"
+            "The database can be found here:\n", argv[0]);
+
+    if (error) {
+        standard_err << dir.value();
+    } else {
+        standard_out << dir.value();
+    }
+
+    fprintf(error ? stderr : stdout,
+            "\n\n"
             "Options:\n"
             "\n"
             "  -l                                      List local crash "
@@ -170,30 +188,19 @@ static void Usage(int argc, const char* argv[], bool error) {
             "minidump file\n"
             "  -m (implies -d)                         Output in "
             "machine-readable format\n"
-            "  -s (implies -d)                         Output stack contents\n",
-            argv[0]);
+            "  -s (implies -d)                         Output stack contents\n");
 }
 
 std::unique_ptr<CrashReportDatabase> InitializeCrashDatabase() {
-    auto crashDatabasePath =
-            android::base::pj(System::get()->getTempDir(), kCrashpadDatabase);
-    auto handler_path = ::base::FilePath(
-            PathUtils::asUnicodePath(
-                    System::get()
-                            ->findBundledExecutable(kCrashpadHandler)
-                            .data())
-                    .c_str());
-
-    android::base::pj(System::get()->getTempDir(), kCrashpadDatabase);
-    auto database_path = ::base::FilePath(
-            PathUtils::asUnicodePath(crashDatabasePath.data()).c_str());
+    auto database_path = CrashReporter::databaseDirectory();
 
     std::unique_ptr<CrashReportDatabase> crashDatabase;
     for (int i = 0; !crashDatabase && i < 5; i++) {
         crashDatabase =
                 crashpad::CrashReportDatabase::Initialize(database_path);
         if (!crashDatabase) {
-            fprintf(stderr, "Unable to obtain crashdatabase, retrying in 1 second.\n");
+            fprintf(stderr,
+                    "Unable to obtain crashdatabase, retrying in 1 second.\n");
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
@@ -215,11 +222,7 @@ static bool ListCrashReports(
     reports.insert(reports.end(), pendingReports.begin(), pendingReports.end());
 
     for (const auto& report : reports) {
-#ifdef _WIN32
-        std::wcout << report.file_path.value() << std::endl;
-#else
-        std::cout << report.file_path.value() << std::endl;
-#endif
+        standard_out << report.file_path.value() << std::endl;
     }
 
     return true;

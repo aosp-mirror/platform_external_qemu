@@ -66,7 +66,6 @@ extern "C" {
 // Global netsim configuration.
 static struct {
     std::string name;
-    std::string default_commands_file;
     std::string controller_properties_file;
 } gNetsimConfiguration;
 
@@ -97,11 +96,10 @@ static int netsim_chr_write(Chardev* chr, const uint8_t* buf, int len) {
 }
 
 static void netsim_chr_connect(PacketStreamChardev* netsim) {
-    // TODO(jansene): The default_commands_file, and controller_properties_file
-    // could be defined as properties on the chardev, v.s. injected here.
+    // TODO(jansene): The controller_properties_file could be defined as
+    // properties on the chardev, v.s. injected here.
     auto channelFactory = []() {
         return netsim::packet::CreateChannel(
-                gNetsimConfiguration.default_commands_file,
                 gNetsimConfiguration.controller_properties_file);
     };
 
@@ -196,13 +194,10 @@ void close_netsim() {
 }
 
 void register_netsim(const std::string address,
-                     const std::string rootcanal_default_commands_file,
                      const std::string rootcanal_controller_properties_file,
                      const std::string name) {
     netsim::packet::SetPacketStreamEndpoint(address);
     gNetsimConfiguration.name = name;
-    gNetsimConfiguration.default_commands_file =
-            rootcanal_default_commands_file;
     gNetsimConfiguration.controller_properties_file =
             rootcanal_controller_properties_file;
 }

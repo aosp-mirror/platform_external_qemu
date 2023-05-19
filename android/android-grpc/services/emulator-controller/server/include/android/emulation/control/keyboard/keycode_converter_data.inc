@@ -20,7 +20,7 @@
 
 // General notes:
 //
-//  This table provides the definition of ui::DomCode (UI Events |code|) values
+//  This table provides the definition of aemu-DomCode (UI Events |code|) values
 //  as well as mapping between scan codes and DomCode. Some entries have no
 //  defined scan codes; these are present only to allow those UI Events |code|
 //  strings to be represented by DomCode. A few have a null code; these define

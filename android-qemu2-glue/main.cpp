@@ -83,7 +83,6 @@
 #include "host-common/vm_operations.h"
 #include "host-common/window_agent.h"
 
-#include "android/skin/qt/init-qt.h"
 #include "android/skin/winsys.h"
 
 #include "config-target.h"

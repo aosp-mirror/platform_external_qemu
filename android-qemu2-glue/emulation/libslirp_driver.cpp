@@ -34,6 +34,121 @@ static slirp_rx_callback s_rx_callback = nullptr;
 static Slirp* s_slirp = nullptr;
 static GArray* s_gpollfds;
 
+/* Transition function to convert a nanosecond timeout to ms
+ * This is used where a system does not support ppoll
+ */
+static int libslirp_timeout_ns_to_ms(int64_t ns)
+{
+    int64_t ms;
+    if (ns < 0) {
+        return -1;
+    }
+
+    if (!ns) {
+        return 0;
+    }
+
+    /* Always round up, because it's better to wait too long than to wait too
+     * little and effectively busy-wait
+     */
+    ms = DIV_ROUND_UP(ns, SCALE_MS);
+
+    /* To avoid overflow problems, limit this to 2^31, i.e. approx 25 days */
+    if (ms > static_cast<int64_t>(INT32_MAX)) {
+        ms = INT32_MAX;
+    }
+
+    return (int) ms;
+}
+
+static int libslirp_poll_ns(GPollFD *fds, guint nfds, int64_t timeout)
+{
+#ifdef __linux__
+    if (timeout < 0) {
+        return ppoll((struct pollfd *)fds, nfds, NULL, NULL);
+    } else {
+        struct timespec ts;
+        int64_t tvsec = timeout / 1000000000LL;
+        /* Avoid possibly overflowing and specifying a negative number of
+         * seconds, which would turn a very long timeout into a busy-wait.
+         */
+        if (tvsec > static_cast<int64_t>(INT32_MAX)) {
+            tvsec = INT32_MAX;
+        }
+        ts.tv_sec = tvsec;
+        ts.tv_nsec = timeout % 1000000000LL;
+        return ppoll((struct pollfd *)fds, nfds, &ts, NULL);
+    }
+#else
+    return g_poll(fds, nfds, libslirp_timeout_ns_to_ms(timeout));
+#endif
+}
+
+static int libslirp_poll_to_gio(int events)
+{
+    int ret = 0;
+
+    if (events & SLIRP_POLL_IN) {
+        ret |= G_IO_IN;
+    }
+    if (events & SLIRP_POLL_OUT) {
+        ret |= G_IO_OUT;
+    }
+    if (events & SLIRP_POLL_PRI) {
+        ret |= G_IO_PRI;
+    }
+    if (events & SLIRP_POLL_ERR) {
+        ret |= G_IO_ERR;
+    }
+    if (events & SLIRP_POLL_HUP) {
+        ret |= G_IO_HUP;
+    }
+
+    return ret;
+}
+
+static int libslirp_add_poll(int fd, int events, void *opaque)
+{
+    GArray *pollfds = static_cast<GArray *>(opaque);
+    GPollFD pfd = {
+        .fd = fd,
+        .events = static_cast<gushort>(libslirp_poll_to_gio(events)),
+    };
+    int idx = pollfds->len;
+    g_array_append_val(pollfds, pfd);
+    return idx;
+}
+
+static int libslirp_gio_to_poll(int events)
+{
+    int ret = 0;
+
+    if (events & G_IO_IN) {
+        ret |= SLIRP_POLL_IN;
+    }
+    if (events & G_IO_OUT) {
+        ret |= SLIRP_POLL_OUT;
+    }
+    if (events & G_IO_PRI) {
+        ret |= SLIRP_POLL_PRI;
+    }
+    if (events & G_IO_ERR) {
+        ret |= SLIRP_POLL_ERR;
+    }
+    if (events & G_IO_HUP) {
+        ret |= SLIRP_POLL_HUP;
+    }
+
+    return ret;
+}
+
+static int libslirp_get_revents(int idx, void *opaque)
+{
+    GArray *pollfds = static_cast<GArray *>(opaque);
+
+    return libslirp_gio_to_poll(g_array_index(pollfds, GPollFD, idx).revents);
+}
+
 static int get_str_sep(char* buf, int buf_size, const char** pp, int sep) {
     const char *p, *p1;
     int len;
@@ -125,6 +240,31 @@ static const SlirpCb slirp_cb = {
         .init_completed = libslirp_init_completed,
         .timer_new_opaque = libslirp_timer_new_opaque,
 };
+
+void libslirp_main_loop_wait(bool nonblocking) {
+    int ret;
+    uint32_t timeout = UINT32_MAX;
+    int64_t timeout_ns;
+
+    if (nonblocking) {
+        timeout = 0;
+    }
+
+    /* poll any events */
+    g_array_set_size(s_gpollfds, 0); /* reset for new iteration */
+
+    slirp_pollfds_fill(s_slirp, &timeout,
+                        libslirp_add_poll, s_gpollfds);
+    if (timeout == UINT32_MAX) {
+        timeout_ns = -1;
+    } else {
+        timeout_ns =
+                static_cast<uint64_t>(timeout) * static_cast<int64_t>(SCALE_MS);
+    }
+    ret = libslirp_poll_ns((GPollFD *)s_gpollfds->data, s_gpollfds->len, timeout_ns);
+    slirp_pollfds_poll(s_slirp, ret < 0,
+                           libslirp_get_revents, s_gpollfds);
+}
 
 Slirp* libslirp_init(slirp_rx_callback rx_callback,
                      int restricted,

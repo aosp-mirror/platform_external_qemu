@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="styles/stylesheet_template.css">styles/stylesheet_template.css</file>
+        <file alias="styles/fonts_stylesheet_template.css">styles/fonts_stylesheet_template.css</file>
+        <file alias="html/location-point.html">html/location-point.html</file>
+        <file alias="html/location-route.html">html/location-route.html</file>
+        <file alias="html/js/qwebchannel.js">../../../html/js/qwebchannel.js</file>
+        <file alias="html/css/location.css">html/css/location.css</file>
+        <file alias="html/css/common.css">html/css/common.css</file>
+        <file alias="html/css/location-panel.css">html/css/location-panel.css</file>
+        <file alias="html/css/route-panel.css">html/css/route-panel.css</file>
+        <file alias="html/css/search-box.css">html/css/search-box.css</file>
+        <file alias="html/js/autocompleter.js">html/js/autocompleter.js</file>
+        <file alias="html/js/common.js">html/js/common.js</file>
+        <file alias="html/js/event-bus.js">html/js/event-bus.js</file>
+        <file alias="html/js/geocoder.js">html/js/geocoder.js</file>
+        <file alias="html/js/location-panel-controller.js">html/js/location-panel-controller.js</file>
+        <file alias="html/js/map-controller.js">html/js/map-controller.js</file>
+        <file alias="html/js/map-manager.js">html/js/map-manager.js</file>
+        <file alias="html/js/route-model.js">html/js/route-model.js</file>
+        <file alias="html/js/route-panel-controller.js">html/js/route-panel-controller.js</file>
+        <file alias="html/js/route-viewmodel.js">html/js/route-viewmodel.js</file>
+        <file alias="html/js/route.js">html/js/route.js</file>
+        <file alias="html/js/search-box-controller.js">html/js/search-box-controller.js</file>
+        <file alias="html/js/location-loader.js">html/js/location-loader.js</file>
+        <file alias="html/js/location-mock-web-channel.js">html/js/location-mock-web-channel.js</file>
+        <file alias="html/js/location-point-overlay.js">html/js/location-point-overlay.js</file>
+        <file alias="html/js/location-point.js">html/js/location-point.js</file>
+        <file alias="html/js/location-routes.js">html/js/location-routes.js</file>
+        <file alias="html/js/location-search-box.js">html/js/location-search-box.js</file>
+    </qresource>
+</RCC>

@@ -60,6 +60,9 @@
       "program": "${workspaceFolder}/build/emulator",
       "args": [
         "@33",
+        "-gpu",
+        "swiftshader_indirect".
+        "-no-window"
       ],
       "cwd": "${workspaceFolder}/build",
       "stopAtEntry": false,

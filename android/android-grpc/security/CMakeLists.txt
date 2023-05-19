@@ -4,6 +4,7 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR src
   SRC android/emulation/control/secure/AllowList.cpp
+      android/emulation/control/secure/AuthErrorFactory.cpp
       android/emulation/control/secure/BasicTokenAuth.cpp
       android/emulation/control/secure/JwkDirectoryObserver.cpp
       android/emulation/control/secure/JwkKeyLoader.cpp
@@ -35,9 +36,10 @@ android_add_test(
   TARGET android-grpc-security_unittests
   SOURCE_DIR test
   SRC android/emulation/control/secure/AllowList_unittest.cpp
+      android/emulation/control/secure/AuthErrorFactory_unittest.cpp
       android/emulation/control/secure/JwkDirectoryObserver_unittest.cpp
-      android/emulation/control/secure/JwtTokenAuth_unittest.cpp
       android/emulation/control/secure/JwkKeyLoader_unittest.cpp
+      android/emulation/control/secure/JwtTokenAuth_unittest.cpp
   DEPS android-emu-base android-grpc-security gmock_main grpc++
        tink::jwt::jwt_key_templates tink::jwt::jwt_signature_config)
 

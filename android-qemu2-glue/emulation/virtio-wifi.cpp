@@ -88,14 +88,14 @@ struct GlobalState {
             if (opts->wifi_server_port) {
                 builder.withServerPort(std::stoi(opts->wifi_server_port));
             }
-            wifiService.reset(builder.build().release());
+            wifiService = builder.build();
             return wifiService->init();
         } else {
             return true;
         }
     }
     int macPrefix = 0;
-    std::unique_ptr<WifiService> wifiService = nullptr;
+    std::shared_ptr<WifiService> wifiService;
     VirtIOWifi* wifi = nullptr;
 };
 
