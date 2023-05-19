@@ -27,8 +27,9 @@ android_add_library(
        android-emu-min-avd
        android-emu-utils
        android-hw-config
-       webrtc-yuv
-       gtest)
+       gtest
+       ui::common
+       webrtc-yuv)
 target_include_directories(android-emu-launch PRIVATE .)
 target_compile_options(android-emu-launch PRIVATE -Wno-extern-c-compat)
 target_compile_definitions(android-emu-launch PRIVATE AEMU_MIN AEMU_LAUNCHER)
@@ -112,13 +113,10 @@ set(android-emu-common
     android/emulation/VpxFrameParser.cpp
     android/emulation/VpxPingInfoParser.cpp
     android/error-messages.cpp
-    android/framebuffer.c
-    android/gpu_frame.cpp
     android/jdwp/JdwpProxy.cpp
     android/jpeg-compress.c
     android/kernel/kernel_utils.cpp
     android/loadpng.c
-    android/main-emugl.cpp
     android/main-help.cpp
     android/main-kernel-parameters.cpp
     android/metrics/DependentMetrics.cpp
@@ -135,9 +133,6 @@ set(android-emu-common
     android/network/WifiForwardPeer.cpp
     android/network/WifiForwardPipe.cpp
     android/network/WifiForwardServer.cpp
-    android/opengl/emugl_config.cpp
-    android/opengl/EmuglBackendList.cpp
-    android/opengl/EmuglBackendScanner.cpp
     android/opengl/GLProcessPipe.cpp
     android/opengl/GpuFrameBridge.cpp
     android/opengl/logger.cpp
@@ -145,7 +140,6 @@ set(android-emu-common
     android/opengles.cpp
     android/process_setup.cpp
     android/qemu-tcpdump.c
-    android/resource.c
     android/sensor_mock/SensorMockUtils.cpp
     android/sensor_replay/sensor_session_playback.cpp
     android/shaper.c
@@ -190,7 +184,6 @@ set(android_emu_dependent_src
     android/camera/camera-virtualscene-utils.cpp
     android/camera/camera-virtualscene.cpp
     android/console.cpp
-    android/emulation/control/ScreenCapturer.cpp
     android/emulation/FakeRotatingCameraSensor.cpp
     android/emulation/HostMemoryService.cpp
     android/emulation/QemuMiscPipe.cpp
@@ -209,7 +202,6 @@ set(android_emu_dependent_src
     android/sensors-port.c
     android/snapshot/Icebox.cpp
     android/snapshot/SnapshotAPI.cpp
-    android/test/checkboot.cpp
     android/videoinjection/VideoInjectionController.cpp
     android/videoplayback/VideoplaybackRenderTarget.cpp
     android/virtualscene/MeshSceneObject.cpp
@@ -290,12 +282,14 @@ target_link_libraries(
          emulator-libkeymaster3
          emulator-murmurhash
          emulator-tinyepoxy
+         aemu-recording
          webrtc-yuv
          android-emu-curl
          picosha2
          # Protobuf dependencies
          android-emu-protos
          protobuf::libprotobuf
+         qemu-host-common-headers
          # Prebuilt libraries
          android-net
          android-emu-base
@@ -310,6 +304,10 @@ target_link_libraries(
          android-emu-agents
          android-emu-utils
          absl::strings
+         ui::common
+         ui::window
+         aemu-gl-init
+         aemu-recording
   PRIVATE android-emu-protobuf)
 
 target_link_libraries(android-emu PRIVATE hostapd)
@@ -391,11 +389,11 @@ android_target_compile_definitions(
 target_compile_definitions(android-emu PRIVATE "-D_LIBCPP_VERSION=__GLIBCPP__")
 
 if(WEBRTC)
-  target_compile_definitions(android-emu PUBLIC -DANDROID_WEBRTC)
+  target_compile_definitions(android-emu PUBLIC ANDROID_WEBRTC)
 endif()
 
 if(OPTION_GFXSTREAM_BACKEND)
-  target_compile_definitions(android-emu PUBLIC -DAEMU_GFXSTREAM_BACKEND=1)
+  target_compile_definitions(android-emu PUBLIC AEMU_GFXSTREAM_BACKEND=1)
 endif()
 
 # The dependent target os specific sources, they are pretty much the same as
@@ -416,7 +414,6 @@ android_add_library(
       android/emulation/AudioOutputEngine.cpp
       android/emulation/ComponentVersion.cpp
       android/emulation/control/FilePusher.cpp
-      android/emulation/control/ScreenCapturer.cpp
       android/emulation/DmaMap.cpp
       android/emulation/GoldfishDma.cpp
       android/emulation/hostdevices/HostAddressSpace.cpp
@@ -424,13 +421,8 @@ android_add_library(
       android/emulation/HostmemIdMapping.cpp
       android/emulation/SetupParameters.cpp
       android/error-messages.cpp
-      android/framebuffer.c
-      android/gpu_frame.cpp
       android/kernel/kernel_utils.cpp
       android/loadpng.c
-      android/opengl/emugl_config.cpp
-      android/opengl/EmuglBackendList.cpp
-      android/opengl/EmuglBackendScanner.cpp
       android/opengl/GLProcessPipe.cpp
       android/opengl/GpuFrameBridge.cpp
       android/opengl/logger.cpp
@@ -485,11 +477,14 @@ target_link_libraries(
          android-emu-adb-interface
          android-emu-sockets
          android-emu-hardware
-         qemu-host-common-headers
          # Protobuf dependencies
          android-emu-protos
          protobuf::libprotobuf
+         qemu-host-common-headers
          # Prebuilt libraries
+         ui::common
+         ui::window
+         aemu-gl-init
          png
          lz4
          zlib
@@ -590,7 +585,7 @@ target_compile_definitions(
           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 if(WEBRTC)
-  target_compile_definitions(android-emu-shared PUBLIC -DANDROID_WEBRTC)
+  target_compile_definitions(android-emu-shared PUBLIC ANDROID_WEBRTC)
   android_install_shared(android-emu-shared)
 endif()
 
@@ -613,8 +608,8 @@ android_add_library(
       android/emulation/testing/MockAndroidMultiDisplayAgent.cpp
       android/emulation/testing/MockAndroidVmOperations.cpp)
 if(NOT WINDOWS_MSVC_X86_64)
- target_compile_options(android-emu-test-launcher
-                               PRIVATE -O0 -Wno-invalid-constexpr)
+  target_compile_options(android-emu-test-launcher
+                         PRIVATE -O0 -Wno-invalid-constexpr)
 endif()
 
 target_link_libraries(
@@ -646,7 +641,6 @@ if(NOT LINUX_AARCH64)
       android/emulation/control/ApkInstaller_unittest.cpp
       android/emulation/control/FilePusher_unittest.cpp
       android/emulation/control/GooglePlayServices_unittest.cpp
-      android/emulation/control/ScreenCapturer_unittest.cpp
       android/emulation/DmaMap_unittest.cpp
       android/emulation/hostdevices/HostAddressSpace_unittest.cpp
       android/emulation/hostdevices/HostGoldfishPipe_unittest.cpp
@@ -666,9 +660,6 @@ if(NOT LINUX_AARCH64)
       android/network/MacAddress_unittest.cpp
       android/network/WifiForwardPeer_unittest.cpp
       android/offworld/OffworldPipe_unittest.cpp
-      android/opengl/emugl_config_unittest.cpp
-      android/opengl/EmuglBackendList_unittest.cpp
-      android/opengl/EmuglBackendScanner_unittest.cpp
       android/opengl/GpuFrameBridge_unittest.cpp
       android/physics/AmbientEnvironment_unittest.cpp
       android/physics/BodyModel_unittest.cpp

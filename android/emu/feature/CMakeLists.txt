@@ -38,6 +38,7 @@ target_compile_options(android-emu-feature PRIVATE "-Wno-extern-c-compat")
 if(WINDOWS_MSVC_X86_64)
   # TODO(jansene): Remove once crash reporting is pulled out.
   target_include_directories(android-emu-feature PRIVATE ../../android-emu)
+  target_link_libraries(android-emu-feature PRIVATE d3d9::d3d9)
 endif()
 android_add_library(
   TARGET android-emu-feature-test

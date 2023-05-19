@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <title>Android Emulator Location UI V2</title>
+  <link rel="stylesheet" href="css/location.css">
+  <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="js/location-mock-web-channel.js"></script>
+  <script src="js/location-point-overlay.js"></script>
+  <script src="js/location-search-box.js"></script>
+  <script src="js/location-point.js"></script>
+</head>
+
+<body>
+  <div id="search-container" class="search-container mdc-ripple-surface">
+    <input id="search-input" class="search-input" type="text" placeholder="Search">
+    <div id="search-spinner" class="spinner-container">
+      <div class="spinner"></div>
+    </div>
+    <div id="search-icon" class="search-icon material-icons">search</div>
+  </div>
+  <div id="map"></div>
+  <div id="pointOverlay" class="pointOverlaySlideOut">
+    <div id="upperPanel" class="upperPointOverlayPanel">
+      <div id="pointTitle" class="title">Port Authority Bus Terminal, NY</div>
+      <div id="pointSubtitle" class="subtitle">40.134832, -74.832453, 14.34</div>
+    </div>
+    <div id="lowerPanel" class="lowerPointOverlayPanel">
+      <div class="spacer-horizontal"></div>
+      <div class="common-button mdc-ripple-surface" onclick="savePoint()">
+        SAVE POINT
+      </div>
+    </div>
+  </div>
+  <script src="js/location-loader.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=YOUR_API_KEY&callback=initMap" async
+    defer></script>
+</body>
+
+</html>

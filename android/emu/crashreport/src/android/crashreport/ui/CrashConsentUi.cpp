@@ -26,9 +26,9 @@
 
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/ScopedPtr.h"
+#include "android/base/system/System.h"
 #include "android/cmdline-definitions.h"
 #include "android/console.h"
-#include "host-common/constants.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
 #include "android/crashreport/ui/UserSuggestions.h"
 #include "android/emulation/control/globals_agent.h"
@@ -42,6 +42,7 @@
 #include "google_breakpad/processor/minidump_processor.h"
 #include "google_breakpad/processor/process_result.h"
 #include "google_breakpad/processor/process_state.h"
+#include "host-common/constants.h"
 #include "mini_chromium/base/files/file_path.h"
 #include "processor/stackwalk_common.h"
 
@@ -53,12 +54,18 @@ public:
     CrashConsentProvider() {}
 
     Consent consentRequired() override {
-        // We explicitly accepted that sharing data with google is ok through
-        // a command line param, no need to ask for approval.
-        auto options = getConsoleAgents()->settings->android_cmdLineOptions();
-        if (options && options->metrics_collection) {
-            dinfo("Metrics collection flag is present, enabling crash uploads.")
-            return Consent::ALWAYS;
+        if (getConsoleAgents()->settings) {
+            // We explicitly accepted that sharing data with google is ok
+            // through
+            // a command line param, no need to ask for approval.
+
+            auto options =
+                    getConsoleAgents()->settings->android_cmdLineOptions();
+            if (options && options->metrics_collection) {
+                dinfo("Metrics collection flag is present, enabling crash "
+                      "uploads.");
+                return Consent::ALWAYS;
+            }
         }
 
         QSettings settings;
@@ -67,18 +74,29 @@ public:
                         .toInt());
     }
 
-    bool requestConsent(const CrashReportDatabase::Report& report) override {
+    CrashConsent::ReportAction requestConsent(
+            const CrashReportDatabase::Report& report) override {
         auto shouldAsk = consentRequired();
-        if (shouldAsk != Consent::ASK) {
-            return shouldAsk == Consent::ALWAYS;
+        if (shouldAsk == Consent::ALWAYS) {
+            return ReportAction::UPLOAD_REMOVE;
         }
 
         auto file_path = report.file_path.value();
         std::ifstream dump_file(file_path, std::ios::in | std::ios::binary);
 
-        google_breakpad::ProcessState processState;
-        google_breakpad::BasicSourceLineResolver lineResolver;
+        if (dump_file.bad()) {
+            dinfo("Report file %s not accessible.", file_path.c_str());
+            return ReportAction::UNDECIDED_KEEP;
+        }
+
+        return processDumpfile(dump_file);
+    }
+
+private:
+    CrashConsent::ReportAction processDumpfile(std::ifstream& dump_file) {
         google_breakpad::Minidump dump(dump_file);
+        google_breakpad::BasicSourceLineResolver lineResolver;
+        google_breakpad::ProcessState processState;
         google_breakpad::MinidumpProcessor minidump_processor(nullptr,
                                                               &lineResolver);
 
@@ -86,15 +104,23 @@ public:
         if (!dump.Read()) {
             dwarning("Minidump %s could not be read, ignoring.",
                      dump.path().c_str());
-            return false;
+            return ReportAction::UNDECIDED_KEEP;
         }
         if (minidump_processor.Process(&dump, &processState) !=
             google_breakpad::PROCESS_OK) {
             dwarning("Minidump %s could not be processed, ignoring.",
                      dump.path().c_str());
-            return false;
+            return ReportAction::REMOVE;
         }
 
+        return (showDialog(dump, lineResolver, processState)
+                        ? ReportAction::UPLOAD_REMOVE
+                        : ReportAction::REMOVE);
+    }
+
+    bool showDialog(google_breakpad::Minidump& dump,
+                    google_breakpad::BasicSourceLineResolver& lineResolver,
+                    google_breakpad::ProcessState& processState) {
         auto crashpad_info = dump.GetCrashpadInfo();
         auto module_annotations = crashpad_info->module_annotations();
         std::string hw_ini = "";
@@ -107,16 +133,16 @@ public:
                 hw_ini = it->second;
             }
         }
+
         UserSuggestions suggestions(&processState);
         auto readableReport = formatReportAsString(processState, &lineResolver,
                                                    crashpad_info);
 
         ConfirmDialog msgBox(nullptr, suggestions, readableReport, hw_ini);
         msgBox.show();
-        return msgBox.exec() == ConfirmDialog::Accepted;
+        return (msgBox.exec() == ConfirmDialog::Accepted);
     }
 
-private:
     std::string formatReportAsString(
             const google_breakpad::ProcessState& processState,
             google_breakpad::BasicSourceLineResolver* lineResolver,
@@ -139,16 +165,15 @@ private:
             return errmsg;
         }
         google_breakpad::SetPrintStream(fp);
-        google_breakpad::PrintProcessState(processState, true, /*output_requesting_thread_only=*/false, lineResolver);
+        google_breakpad::PrintProcessState(
+                processState, true, /*output_requesting_thread_only=*/false,
+                lineResolver);
         crashpadInfo->Print(fp);
 
         fprintf(fp, "thread requested=%d\n", processState.requesting_thread());
         fclose(fp);
 
-        std::string report(readFile(reportFile));
-
-        // Add annotations??
-        return report;
+        return readFile(reportFile);
     }
 
     std::string readFile(std::string_view path) {

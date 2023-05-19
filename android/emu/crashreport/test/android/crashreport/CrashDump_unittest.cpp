@@ -11,18 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#include <gtest/gtest.h>
 #include <chrono>
+#include <thread>
 
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/logging/CLog.h"
 #include "aemu/base/process/Command.h"
 #include "android/base/system/System.h"
-
+#include "android/crashreport/CrashReporter.h"
 #include "client/crash_report_database.h"
 #include "client/settings.h"
-
-#include <gtest/gtest.h>
 
 using android::base::Command;
 using android::base::PathUtils;
@@ -35,6 +34,7 @@ const constexpr char kCrashpadDatabase[] = "emu-crash.db";
 // The crashpad handler binary, as shipped with the emulator.
 const constexpr char kCrashpadHandler[] = "crashpad_handler";
 const std::string kCrashMe = "crash-me";
+using android::crashreport::CrashReporter;
 
 class CrashTest : public ::testing::Test {
 protected:
@@ -68,10 +68,7 @@ protected:
                                 ->findBundledExecutable(kCrashpadHandler)
                                 .data())
                         .c_str());
-
-        android::base::pj(System::get()->getTempDir(), kCrashpadDatabase);
-        auto database_path = ::base::FilePath(
-                PathUtils::asUnicodePath(crashDatabasePath.data()).c_str());
+        auto database_path = CrashReporter::databaseDirectory();
         auto crashDatabase =
                 crashpad::CrashReportDatabase::Initialize(database_path);
 

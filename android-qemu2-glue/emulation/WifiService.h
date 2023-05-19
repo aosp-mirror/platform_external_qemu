@@ -136,7 +136,7 @@ public:
             WifiService::OnLinkStatusChangedCallback cb);
     // Returns the fully configured and running service, or nullptr if
     // construction failed.
-    std::unique_ptr<WifiService> build();
+    std::shared_ptr<WifiService> build();
 
 private:
     bool mRedirectToNetsim = false;

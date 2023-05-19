@@ -253,7 +253,7 @@ int ble_hci_grpc_open_connection() {
         netsim::packet::SetPacketStreamEndpoint(address);
     }
 
-    auto channel = netsim::packet::CreateChannel("", "");
+    auto channel = netsim::packet::CreateChannel("");
     sTransportStub = PacketStreamer::NewStub(channel);
 
     sTransport = std::make_unique<HciTransport>();

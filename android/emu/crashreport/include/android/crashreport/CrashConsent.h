@@ -29,9 +29,10 @@ class AEMU_CRASH_API CrashConsent {
 public:
     virtual ~CrashConsent() = default;
     enum class Consent { ASK = 0, ALWAYS = 1, NEVER = 2 };
+    enum class ReportAction { UNDECIDED_KEEP = 0, UPLOAD_REMOVE = 1,  REMOVE = 2};
 
     virtual Consent consentRequired() = 0;
-    virtual bool requestConsent(const CrashReportDatabase::Report& report) = 0;
+    virtual ReportAction requestConsent(const CrashReportDatabase::Report& report) = 0;
 };
 
 // Factory that produces a consent provider

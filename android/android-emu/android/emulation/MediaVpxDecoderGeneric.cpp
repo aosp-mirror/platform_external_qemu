@@ -13,11 +13,11 @@
 // limitations under the License.
 #include "host-common/MediaVpxDecoderGeneric.h"
 #include "android/base/system/System.h"
+#include "android/utils/debug.h"
 #include "host-common/MediaFfmpegVideoHelper.h"
 #include "host-common/MediaVpxVideoHelper.h"
 #include "host-common/VpxFrameParser.h"
-#include "android/main-emugl.h"
-#include "android/utils/debug.h"
+#include "host-common/opengl/emugl_config.h"
 
 #ifndef __APPLE__
 // for Linux and Window, Cuvid is available
@@ -258,7 +258,7 @@ void MediaVpxDecoderGeneric::sendMetadata(void* ptr) {
 
     if (!isValid) {
         VPX_DPRINT("%s %d invalid values in sendMetadata %p, ignore.\n",
-                    __func__, __LINE__, ptr);
+                   __func__, __LINE__, ptr);
         return;
     }
     std::swap(mMetadata, param);
@@ -315,20 +315,19 @@ void MediaVpxDecoderGeneric::getImage(void* ptr) {
     if (mParser.version() == 200) {
         VPX_DPRINT("calling rendering to host side color buffer with id %d",
                    param.hostColorBufferId);
-        if (mUseGpuTexture && pFrame->texture[0] > 0 && pFrame->texture[1] > 0) {
+        if (mUseGpuTexture && pFrame->texture[0] > 0 &&
+            pFrame->texture[1] > 0) {
             VPX_DPRINT(
                     "calling rendering to host side color buffer with id %d "
                     "(gpu texture mode: textures %u %u)",
-                    param.hostColorBufferId,
-                    pFrame->texture[0],
+                    param.hostColorBufferId, pFrame->texture[0],
                     pFrame->texture[1]);
             mRenderer.renderToHostColorBufferWithTextures(
                     param.hostColorBufferId, pFrame->width, pFrame->height,
                     TextureFrame{pFrame->texture[0], pFrame->texture[1]});
         } else {
-            VPX_DPRINT(
-                    "calling rendering to host side color buffer with id %d",
-                    param.hostColorBufferId);
+            VPX_DPRINT("calling rendering to host side color buffer with id %d",
+                       param.hostColorBufferId);
             mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
                                               pFrame->width, pFrame->height,
                                               pFrame->data.data(), &mMetadata);
@@ -381,7 +380,7 @@ void MediaVpxDecoderGeneric::oneShotDecode(const uint8_t* data,
         if (!success) {
             break;
         }
-        }
+    }
 }
 
 bool MediaVpxDecoderGeneric::load(base::Stream* stream) {

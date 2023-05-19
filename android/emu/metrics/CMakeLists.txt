@@ -65,6 +65,7 @@ target_link_libraries(
           android-emu-agents
           qemu-host-common-headers
           protobuf::libprotobuf
+          ui::common
   PUBLIC android-emu-files android-emu-studio-config)
 
 target_compile_definitions(android-emu-metrics PRIVATE AEMU_METRICS_EXPORTS=1)

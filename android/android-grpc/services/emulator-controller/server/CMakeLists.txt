@@ -13,11 +13,12 @@ android_add_library(
       android/emulation/control/utils/AudioUtils.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp
       android/emulation/control/utils/SharedMemoryLibrary.cpp
-  DEPS android-emu
+  DEPS ui::gl-bridge
+       android-emu
        android-emu-base-headers
        android-emu-base-streams
-       android-grpc-event-waiter
        android-emu-tracing
+       android-grpc-event-waiter
        android-grpc-interceptors
        qemu-host-common-headers)
 target_link_libraries(emulator_controller-server-impl
