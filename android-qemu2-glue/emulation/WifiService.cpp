@@ -27,7 +27,6 @@
 using android::network::MacAddress;
 
 extern "C" {
-#include "qemu/osdep.h"
 #include "net/slirp.h"
 }
 
