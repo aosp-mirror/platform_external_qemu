@@ -24,8 +24,8 @@ android_qt_lib(
       android/skin/qt/emulator-overlay.cpp
       android/skin/qt/emulator-qt-window.cpp
       android/skin/qt/event-qt.cpp
-      android/skin/qt/extended-window.cpp
       android/skin/qt/extended-page-factory.cpp
+      android/skin/qt/extended-window.cpp
       android/skin/qt/extended.ui
       android/skin/qt/FramelessDetector.cpp
       android/skin/qt/init-qt.cpp
@@ -66,6 +66,7 @@ android_qt_lib(
        ext-page-bugreport
        ext-page-bugreport-grpc
        ext-page-camera
+       ext-page-camera-grpc
        ext-page-car
        ext-page-cellular
        ext-page-display

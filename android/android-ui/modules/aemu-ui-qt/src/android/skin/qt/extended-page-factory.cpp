@@ -15,12 +15,14 @@
  */
 #include "android/skin/qt/extended-page-factory.h"
 
-#include "android/console.h"
 #include "android/cmdline-option.h"
+#include "android/console.h"
 #include "android/skin/qt/extended-pages/battery-page-grpc.h"
 #include "android/skin/qt/extended-pages/battery-page.h"
 #include "android/skin/qt/extended-pages/bug-report-page-grpc.h"
 #include "android/skin/qt/extended-pages/bug-report-page.h"
+#include "android/skin/qt/extended-pages/camera-page-grpc.h"
+#include "android/skin/qt/extended-pages/camera-page.h"
 #include "android/skin/qt/extended-pages/snapshot-page-grpc.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "ui_extended.h"
@@ -70,8 +72,8 @@ static void constructDefault(Ui::ExtendedControls* ui,
                                             new BatteryPage());
             break;
         case PANE_IDX_CAMERA:
-            // ui->cameraPage = replaceWidget(ui->stackedWidget, ui->cameraPage,
-            //                                new CameraPage());
+            ui->cameraPage = replaceWidget(ui->stackedWidget, ui->cameraPage,
+                                           new CameraPage());
             break;
         case PANE_IDX_TELEPHONE:
             // replaceWidget(ui->stackedWidget, ui->, new xx());
@@ -145,8 +147,8 @@ static void constructGrpc(Ui::ExtendedControls* ui, ExtendedWindowPane window) {
                                             new BatteryPageGrpc());
             break;
         case PANE_IDX_CAMERA:
-            // ui->cameraPage = replaceWidget(ui->stackedWidget, ui->cameraPage,
-            //                                new CameraPageGrpc());
+            ui->cameraPage = replaceWidget(ui->stackedWidget, ui->cameraPage,
+                                           new CameraPageGrpc());
             break;
         case PANE_IDX_TELEPHONE:
             // replaceWidget(ui->stackedWidget, ui->, new xx());

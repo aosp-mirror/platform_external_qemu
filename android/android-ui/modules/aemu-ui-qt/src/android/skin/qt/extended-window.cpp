@@ -116,6 +116,8 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
 
     mExtendedUi->setupUi(this);
+
+
     mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
@@ -701,6 +703,7 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
         ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_SNAPSHOT);
         ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BATTERY);
         ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BUGREPORT);
+        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_CAMERA);
 
         bool moved = false;
         if (getConsoleAgents()
