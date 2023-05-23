@@ -82,8 +82,11 @@ public:
                                const CellInfo* request,
                                CellInfo* response) override {
         android::RecursiveScopedVmLock vmlock;
-        mConsoleAgents->cellular->setStandard(EnumTranslate::translate(
-                mCellStandardMap, request->cell_standard()));
+
+        if (request->cell_standard() != CellInfo::CELL_STANDARD_UNKNOWN) {
+            mConsoleAgents->cellular->setStandard(EnumTranslate::translate(
+                    mCellStandardMap, request->cell_standard()));
+        }
 
         if (request->cell_signal_strength().has_level()) {
             mConsoleAgents->cellular->setSignalStrengthProfile(
@@ -94,6 +97,16 @@ public:
         if (request->cell_signal_strength().has_rssi()) {
             mConsoleAgents->cellular->setSignalStrength(
                     request->cell_signal_strength().rssi());
+        }
+
+        if (request->cell_status_data() != CellInfo::CELL_STATUS_UNKNOWN) {
+            mConsoleAgents->cellular->setDataStatus(EnumTranslate::translate(
+                    mCellStatusMap, request->cell_status_data()));
+        }
+
+        if (request->cell_status_voice() != CellInfo::CELL_STATUS_UNKNOWN) {
+            mConsoleAgents->cellular->setVoiceStatus(EnumTranslate::translate(
+                    mCellStatusMap, request->cell_status_voice()));
         }
 
         if (request->cell_identity().has_operatoralphalong()) {
@@ -120,7 +133,10 @@ public:
                                              .length());
         }
 
-        mConsoleAgents->cellular->setSimPresent(request->sim_present());
+        if (request->sim_status() != CellInfo::CELL_SIM_STATUS_UNKNOWN) {
+            mConsoleAgents->cellular->setSimPresent(
+                    request->sim_status() == CellInfo::CELL_SIM_STATUS_PRESENT);
+        }
 
         return ::grpc::Status::OK;
     }
@@ -147,10 +163,18 @@ public:
 
         if (feature_is_enabled(kFeature_ModemSimulator)) {
             auto state = amodem_get_voice_registration_vx(mModem);
-            response->set_cell_status(EnumTranslate::translate(
+            response->set_cell_status_voice(EnumTranslate::translate(
+                    mCellStatusRegistrationMap, state));
+
+            state = amodem_get_data_registration_vx(mModem);
+            response->set_cell_status_data(EnumTranslate::translate(
                     mCellStatusRegistrationMap, state));
         }
-        response->set_sim_present(amodem_get_sim(mModem));
+        if (amodem_get_sim(mModem)) {
+            response->set_sim_status(CellInfo::CELL_SIM_STATUS_PRESENT);
+        } else {
+            response->set_sim_status(CellInfo::CELL_SIM_STATUS_NOT_PRESENT);
+        }
 
         return ::grpc::Status::OK;
     }

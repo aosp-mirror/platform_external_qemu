@@ -69,6 +69,7 @@ android_qt_lib(
        ext-page-camera-grpc
        ext-page-car
        ext-page-cellular
+       ext-page-cellular-grpc
        ext-page-display
        ext-page-dpad
        ext-page-finger

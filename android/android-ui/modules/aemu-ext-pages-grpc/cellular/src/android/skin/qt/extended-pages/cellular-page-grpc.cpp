@@ -8,28 +8,27 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/skin/qt/extended-pages/cellular-page.h"
+#include "android/skin/qt/extended-pages/cellular-page-grpc.h"
 
-#include <qsettings.h>  // for QSettings::Ini...
-#include <qstring.h>    // for operator+
+#include <QComboBox>
+#include <QSettings>
+#include <QString>
+#include <QVariant>
 
-#include <QComboBox>  // for QComboBox
-#include <QSettings>  // for QSettings
-#include <QVariant>   // for QVariant
-
-#include "android/avd/util.h"                          // for path_getAvdCon...
-#include "host-common/VmLock.h"                  // for RecursiveScope...
-#include "android/emulation/control/cellular_agent.h"  // for QAndroidCellul...
-#include "android/emulator-window.h"                   // for emulator_windo...
-#include "android/console.h"                           // for android_hw
-#include "android/utils/debug.h"
-#include "android/main-common.h"                       // for emulator_has_n...
-#include "android/metrics/UiEventTracker.h"
-#include "android/skin/qt/qt-settings.h"  // for PER_AVD_SETTIN...
-#include "ui_cellular-page.h"             // for CellularPage
+#include "android/avd/util.h"
 #include "android/console.h"
+#include "android/emulation/control/cellular_agent.h"
+#include "android/emulator-window.h"
+#include "android/main-common.h"
+#include "android/metrics/UiEventTracker.h"
+#include "android/skin/qt/qt-settings.h"
+#include "android/utils/debug.h"
 
-class QWidget;
+#include "absl/status/statusor.h"
+#include "host-common/VmLock.h"
+#include "ui_cellular-page-grpc.h"
+
+using android::emulation::control::incubating::CellSignalStrength;
 
 // Must be protected by the BQL!
 static const QAndroidCellularAgent* sCellularAgent = nullptr;
@@ -49,7 +48,6 @@ static int getSavedVoiceStatus();
         s = #p;  \
         break;
 
-
 static std::string translate_idx(CellularStatus value) {
     std::string s = "";
     switch (value) {
@@ -59,7 +57,8 @@ static std::string translate_idx(CellularStatus value) {
         STATE(Cellular_Stat_Denied);
         STATE(Cellular_Stat_Unregistered);
         default:
-            derror("%s: Unseen value for cellular status: 0x%x", __func__, value);
+            derror("%s: Unseen value for cellular status: 0x%x", __func__,
+                   value);
             return "Unknown";
     }
     // Chop off "Cellular_"
@@ -79,7 +78,8 @@ static std::string translate_idx(CellularStandard value) {
         STATE(Cellular_Std_full);
         STATE(Cellular_Std_5G);
         default:
-            derror("%s: Unseen value for cellular standasrd: 0x%x", __func__, value);
+            derror("%s: Unseen value for cellular standasrd: 0x%x", __func__,
+                   value);
             return "Unknown";
     }
     // Chop off "Cellular_"
@@ -95,7 +95,8 @@ static std::string translate_idx(CellularSignal value) {
         STATE(Cellular_Signal_Good);
         STATE(Cellular_Signal_Great);
         default:
-            derror("%s: Unseen value for cellular signal: 0x%x", __func__, value);
+            derror("%s: Unseen value for cellular signal: 0x%x", __func__,
+                   value);
             return "Unknown";
     }
     // Chop off "Cellular_"
@@ -111,14 +112,14 @@ static std::string translate_idx(CellularMeterStatus value) {
     return s;
 }
 
-CellularPage::CellularPage(QWidget* parent)
+CellularPageGrpc::CellularPageGrpc(QWidget* parent)
     : QWidget(parent),
-      mUi(new Ui::CellularPage()),
+      mUi(new Ui::CellularPageGrpc()),
+      mModemClient(android::emulation::control::EmulatorGrpcClient::me()),
       mDropDownTracker(new UiEventTracker(
               android_studio::EmulatorUiEvent::OPTION_SELECTED,
               android_studio::EmulatorUiEvent::EXTENDED_CELLULAR_TAB)) {
     mUi->setupUi(this);
-    CellularPage::setCellularAgent(getConsoleAgents()->cellular);
 
     // Restore previous setting values to the UI widgets
 
@@ -139,20 +140,51 @@ CellularPage::CellularPage(QWidget* parent)
             getSavedMeterStatus());  // always metered
 }
 
-// static
-void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
-    if (!agent)
-        return;
+void CellularPageGrpc::on_cell_standardBox_currentIndexChanged(int index) {
+    saveNetworkType(index);
+    // Network type
+    mCurrentState.set_cell_standard((CellInfo::CellStandard)(index + 1));
+    updateCellState();
+}
 
-    android::RecursiveScopedVmLock vmlock;
+void CellularPageGrpc::on_cell_voiceStatusBox_currentIndexChanged(int index) {
+    saveVoiceStatus(index);
+    mCurrentState.set_cell_status_voice((CellInfo::CellStatus)(index + 1));
+    updateCellState();
+}
 
-    sCellularAgent = agent;
+void CellularPageGrpc::on_cell_meterStatusBox_currentIndexChanged(int index) {
+    saveMeterStatus(index);
+    loadCellState();
+    updateCellState();
+}
 
+void CellularPageGrpc::on_cell_dataStatusBox_currentIndexChanged(int index) {
+    saveDataStatus(index);
+    mCurrentState.set_cell_status_data((CellInfo::CellStatus)(index + 1));
+    updateCellState();
+}
+
+void CellularPageGrpc::on_cell_signalStatusBox_currentIndexChanged(int index) {
+    saveSignalStrength(index);
+    mCurrentState.mutable_cell_signal_strength()->set_level(
+            (CellSignalStrength::CellSignalLevel)index);
+
+    updateCellState();
+}
+
+void CellularPageGrpc::updateCellState() {
+    mModemClient.setCellInfo(mCurrentState, [](auto _ignored) {});
+}
+
+void CellularPageGrpc::loadCellState() {
+    auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
     // Network parameters
+    bool has_network_options =
+            (opts->netspeed && (opts->netspeed[0] != '\0')) ||
+            (opts->netdelay && (opts->netdelay[0] != '\0')) || opts->netfast;
 
-    if (emulator_has_network_option) {
-        // The user specified network parameters on the command line.
-        // Do not override the command-line values.
+    if (has_network_options) {
         return;
     }
 
@@ -160,86 +192,20 @@ void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
     // to the device.
 
     // Network type
-    if (sCellularAgent->setStandard) {
-        sCellularAgent->setStandard((CellularStandard)getSavedNetworkType());
-    }
+    mCurrentState.set_cell_standard(
+            (CellInfo::CellStandard)getSavedNetworkType());
 
     // Signal strength
-    if (sCellularAgent->setSignalStrengthProfile) {
-        sCellularAgent->setSignalStrengthProfile(
-                (CellularSignal)getSavedSignalStrength());
-    }
+    mCurrentState.mutable_cell_signal_strength()->set_level(
+            (CellSignalStrength::CellSignalLevel)getSavedSignalStrength());
 
     // Voice status
-    if (sCellularAgent->setVoiceStatus) {
-        sCellularAgent->setVoiceStatus((CellularStatus)getSavedVoiceStatus());
-    }
-
-    // Data status
-    if (sCellularAgent->setDataStatus) {
-        sCellularAgent->setDataStatus((CellularStatus)getSavedDataStatus());
-    }
-
-    // Meter status
-    if (sCellularAgent->setMeterStatus) {
-        sCellularAgent->setMeterStatus(
-                (CellularMeterStatus)getSavedMeterStatus());
-    }
-}
-
-void CellularPage::on_cell_standardBox_currentIndexChanged(int index) {
-    saveNetworkType(index);
-
-    android::RecursiveScopedVmLock vmlock;
-    if (sCellularAgent && sCellularAgent->setStandard) {
-        CellularStandard cStandard = (CellularStandard)index;
-        sCellularAgent->setStandard(cStandard);
-        mDropDownTracker->increment(translate_idx(cStandard));
-    }
-}
-
-void CellularPage::on_cell_voiceStatusBox_currentIndexChanged(int index) {
-    saveVoiceStatus(index);
-
-    android::RecursiveScopedVmLock vmlock;
-    if (sCellularAgent && sCellularAgent->setVoiceStatus) {
-        CellularStatus vStatus = (CellularStatus)index;
-        sCellularAgent->setVoiceStatus(vStatus);
-        mDropDownTracker->increment(translate_idx(vStatus) + "_VOICE");
-    }
-}
-
-void CellularPage::on_cell_meterStatusBox_currentIndexChanged(int index) {
-    saveMeterStatus(index);
-
-    android::RecursiveScopedVmLock vmlock;
-    if (sCellularAgent && sCellularAgent->setMeterStatus) {
-        CellularMeterStatus mStatus = (CellularMeterStatus)index;
-        sCellularAgent->setMeterStatus(mStatus);
-        mDropDownTracker->increment(translate_idx(mStatus));
-    }
-}
-
-void CellularPage::on_cell_dataStatusBox_currentIndexChanged(int index) {
-    saveDataStatus(index);
-
-    android::RecursiveScopedVmLock vmlock;
-    if (sCellularAgent && sCellularAgent->setDataStatus) {
-        CellularStatus dStatus = (CellularStatus)index;
-        sCellularAgent->setDataStatus(dStatus);
-        mDropDownTracker->increment(translate_idx(dStatus) + "_DATA");
-    }
-}
-
-void CellularPage::on_cell_signalStatusBox_currentIndexChanged(int index) {
-    saveSignalStrength(index);
-
-    android::RecursiveScopedVmLock vmlock;
-    if (sCellularAgent && sCellularAgent->setSignalStrengthProfile) {
-        CellularSignal signal = (CellularSignal)index;
-        sCellularAgent->setSignalStrengthProfile(signal);
-        mDropDownTracker->increment(translate_idx(signal));
-    }
+    mCurrentState.set_cell_status_voice(
+            (CellInfo::CellStatus)getSavedVoiceStatus());
+    mCurrentState.set_cell_status_data(
+            (CellInfo::CellStatus)getSavedDataStatus());
+    mCurrentState.set_cell_meter_status(
+            (CellInfo::CellMeterStatus)getSavedMeterStatus());
 }
 
 //////////////
@@ -247,7 +213,8 @@ void CellularPage::on_cell_signalStatusBox_currentIndexChanged(int index) {
 // Local static functions to save and retrieve settings
 
 static void saveDataStatus(int status) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -262,7 +229,8 @@ static void saveDataStatus(int status) {
 }
 
 static void saveNetworkType(int type) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -277,7 +245,8 @@ static void saveNetworkType(int type) {
 }
 
 static void saveSignalStrength(int strength) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -292,7 +261,8 @@ static void saveSignalStrength(int strength) {
 }
 
 static void saveVoiceStatus(int status) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -307,7 +277,8 @@ static void saveVoiceStatus(int status) {
 }
 
 static void saveMeterStatus(int status) {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -322,7 +293,8 @@ static void saveMeterStatus(int status) {
 }
 
 static int getSavedMeterStatus() {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -341,45 +313,52 @@ static int getSavedMeterStatus() {
 }
 
 static int getSavedDataStatus() {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
         return avdSpecificSettings
-                .value(Ui::Settings::PER_AVD_CELLULAR_DATA_STATUS,
-                       Cellular_Stat_Home)
-                .toInt();
+                       .value(Ui::Settings::PER_AVD_CELLULAR_DATA_STATUS,
+                              Cellular_Stat_Home)
+                       .toInt() +
+               1;
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
-        return settings
-                .value(Ui::Settings::CELLULAR_DATA_STATUS, Cellular_Stat_Home)
-                .toInt();
+        return settings.value(Ui::Settings::CELLULAR_DATA_STATUS,
+                              Cellular_Stat_Home)
+                       .toInt() +
+               1;
     }
 }
 
 static int getSavedNetworkType() {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
         return avdSpecificSettings
-                .value(Ui::Settings::PER_AVD_CELLULAR_NETWORK_TYPE,
-                       Cellular_Std_full)
-                .toInt();
+                       .value(Ui::Settings::PER_AVD_CELLULAR_NETWORK_TYPE,
+                              Cellular_Std_full)
+                       .toInt() +
+               1;
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
-        return settings
-                .value(Ui::Settings::CELLULAR_NETWORK_TYPE, Cellular_Std_full)
-                .toInt();
+        return settings.value(Ui::Settings::CELLULAR_NETWORK_TYPE,
+                              Cellular_Std_full)
+                       .toInt() +
+               1;
     }
 }
 
 static int getSavedSignalStrength() {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -399,20 +378,23 @@ static int getSavedSignalStrength() {
 }
 
 static int getSavedVoiceStatus() {
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
         return avdSpecificSettings
-                .value(Ui::Settings::PER_AVD_CELLULAR_VOICE_STATUS,
-                       Cellular_Stat_Home)
-                .toInt();
+                       .value(Ui::Settings::PER_AVD_CELLULAR_VOICE_STATUS,
+                              Cellular_Stat_Home)
+                       .toInt() +
+               1;
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
-        return settings
-                .value(Ui::Settings::CELLULAR_VOICE_STATUS, Cellular_Stat_Home)
-                .toInt();
+        return settings.value(Ui::Settings::CELLULAR_VOICE_STATUS,
+                              Cellular_Stat_Home)
+                       .toInt() +
+               1;
     }
 }

@@ -23,6 +23,8 @@
 #include "android/skin/qt/extended-pages/bug-report-page.h"
 #include "android/skin/qt/extended-pages/camera-page-grpc.h"
 #include "android/skin/qt/extended-pages/camera-page.h"
+#include "android/skin/qt/extended-pages/cellular-page-grpc.h"
+#include "android/skin/qt/extended-pages/cellular-page.h"
 #include "android/skin/qt/extended-pages/snapshot-page-grpc.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "ui_extended.h"
@@ -65,7 +67,8 @@ static void constructDefault(Ui::ExtendedControls* ui,
             // replaceWidget(ui->stackedWidget, ui->, new xx());
             break;
         case PANE_IDX_CELLULAR:
-            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            ui->cellular_page = replaceWidget(
+                    ui->stackedWidget, ui->cellular_page, new CellularPage());
             break;
         case PANE_IDX_BATTERY:
             ui->batteryPage = replaceWidget(ui->stackedWidget, ui->batteryPage,
@@ -140,7 +143,9 @@ static void constructGrpc(Ui::ExtendedControls* ui, ExtendedWindowPane window) {
             // replaceWidget(ui->stackedWidget, ui->, new xx());
             break;
         case PANE_IDX_CELLULAR:
-            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            ui->cellular_page =
+                    replaceWidget(ui->stackedWidget, ui->cellular_page,
+                                  new CellularPageGrpc());
             break;
         case PANE_IDX_BATTERY:
             ui->batteryPage = replaceWidget(ui->stackedWidget, ui->batteryPage,
