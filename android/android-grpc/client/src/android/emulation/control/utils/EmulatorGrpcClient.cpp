@@ -40,6 +40,14 @@
 #include "grpcpp/security/credentials.h"                      // for Meta...
 #include "grpcpp/support/channel_arguments.h"                 // for Chan...
 
+#define DEBUG 0
+/* set  >1 for very verbose debugging */
+#if DEBUG <= 1
+#define DD(...) (void)0
+#else
+#define DD(...) dinfo(__VA_ARGS__)
+#endif
+
 using android::control::interceptor::MetricsInterceptorFactory;
 using android::control::interceptor::StdOutLoggingInterceptorFactory;
 namespace android {
@@ -47,6 +55,15 @@ namespace emulation {
 namespace control {
 using android::base::PathUtils;
 using android::base::Stopwatch;
+
+static bool startsWith(const std::string& str, const std::string& prefix) {
+    return str.compare(0, prefix.size(), prefix) == 0;
+}
+
+static bool isLocalhost(const std::string& ipAddress) {
+    return startsWith(ipAddress, "127.0.0.1") || startsWith(ipAddress, "::1") ||
+           startsWith(ipAddress, "localhost");
+}
 
 // A plugin that inserts the basic auth headers into a gRPC request
 // if needed.
@@ -84,8 +101,11 @@ public:
             grpc::string_ref method_name,
             const grpc::AuthContext& channel_auth_context,
             std::multimap<grpc::string, grpc::string>* metadata) override {
-        for (const auto& v : mHeaders)
+        for (const auto& v : mHeaders) {
+            DD("Header key: %s", v.first.c_str());
+            DD("Header val: %s", v.second.c_str());
             metadata->insert(std::make_pair(v.first, v.second));
+        }
         return grpc::Status::OK;
     }
 
@@ -106,9 +126,8 @@ bool EmulatorGrpcClient::hasOpenChannel(bool tryConnect) {
                                       gpr_time_from_seconds(5, GPR_TIMESPAN));
         bool connect = mChannel->WaitForConnected(waitUntil);
         double time = Stopwatch::sec(sw.elapsedUs());
-        // VERBOSE_PRINT(grpc, "%s to emulator: %s, after %f us",
-        //               connect ? "Connected" : "Not connected",
-        //               mAddress.c_str(), time);
+        DD("%s to emulator: %s, after %f us",
+           connect ? "Connected" : "Not connected", mAddress.c_str(), time);
     }
     auto state = mChannel->GetState(tryConnect);
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
@@ -126,9 +145,19 @@ EmulatorGrpcClient::EmulatorGrpcClient(const std::string_view address,
                                        const std::string_view key,
                                        const std::string_view cer)
     : mAddress(address) {
-    std::shared_ptr<grpc::ChannelCredentials> call_creds =
-            ::grpc::InsecureChannelCredentials();
+    DD("Address: %s", mAddress.c_str());
+    std::shared_ptr<grpc::ChannelCredentials> call_creds;
+    if (isLocalhost(mAddress)) {
+        call_creds = ::grpc::experimental::LocalCredentials(LOCAL_TCP);
+    } else {
+        call_creds = ::grpc::InsecureChannelCredentials();
+    }
+
     if (!ca.empty() && !key.empty() && !cer.empty()) {
+        DD("Using tls with");
+        DD("ca: %s", ca.data());
+        DD("key: %s", key.data());
+        DD("cer: %s", cer.data());
         // Client will use the server cert as the ca authority.
         grpc::SslCredentialsOptions sslOpts;
         sslOpts.pem_root_certs = readFile(ca);
@@ -160,6 +189,8 @@ EmulatorGrpcClient::EmulatorGrpcClient(const Endpoint& dest)
     if (!dest.required_headers().empty()) {
         HeaderMap map;
         for (const auto& header : dest.required_headers()) {
+            DD("Adding header: %s, %s", header.key().c_str(),
+               header.value().c_str());
             map[header.key()] = header.value();
         }
         mCredentials = grpc::MetadataCredentialsFromPlugin(
@@ -241,6 +272,11 @@ std::shared_ptr<EmulatorGrpcClient> EmulatorGrpcClient::me() {
     auto discovery = EmulatorAdvertisement({}).location();
     sMe = std::make_shared<EmulatorGrpcClient>(discovery);
     return sMe;
+}
+
+void EmulatorGrpcClient::configureMe(const remote::Endpoint& endpoint) {
+    std::lock_guard<std::mutex> guard(sMeLock);
+    sMe = std::make_shared<EmulatorGrpcClient>(endpoint);
 }
 }  // namespace control
 }  // namespace emulation

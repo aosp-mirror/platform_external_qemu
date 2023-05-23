@@ -35,42 +35,11 @@
             // Can access the following set of methods, even if the AUD claim for
             // the given method is *NOT* present.
             "allowed": [
-                "/android.emulation.control.EmulatorController/closeExtendedControls",
-                "/android.emulation.control.EmulatorController/getClipboard",
-                "/android.emulation.control.EmulatorController/getDisplayConfigurations",
-                "/android.emulation.control.EmulatorController/getPhysicalModel",
-                "/android.emulation.control.EmulatorController/getScreenshot",
-                "/android.emulation.control.EmulatorController/getStatus",
-                "/android.emulation.control.EmulatorController/getVmState",
-                "/android.emulation.control.EmulatorController/injectAudio",
-                "/android.emulation.control.EmulatorController/injectWheel",
-                "/android.emulation.control.EmulatorController/rotateVirtualSceneCamera",
-                "/android.emulation.control.EmulatorController/sendKey",
-                "/android.emulation.control.EmulatorController/sendMouse",
-                "/android.emulation.control.EmulatorController/sendTouch",
-                "/android.emulation.control.EmulatorController/setClipboard",
-                "/android.emulation.control.EmulatorController/setDisplayConfigurations",
-                "/android.emulation.control.EmulatorController/setDisplayMode",
-                "/android.emulation.control.EmulatorController/setPhysicalModel",
-                "/android.emulation.control.EmulatorController/setVirtualSceneCameraVelocity",
-                "/android.emulation.control.EmulatorController/setVmState",
-                "/android.emulation.control.EmulatorController/showExtendedControls",
-                "/android.emulation.control.EmulatorController/streamClipboard",
-                "/android.emulation.control.EmulatorController/streamNotification",
-                "/android.emulation.control.EmulatorController/streamScreenshot",
+                "/android.emulation.control.EmulatorController/.*",
                 // Interaction with extended controls.
-                "/android.emulation.control.UiController/setUiTheme",
-                "/android.emulation.control.UiController/showExtendedControls",
-                "/android.emulation.control.UiController/closeExtendedControls",
+                "/android.emulation.control.UiController/.*",
                 // Snapshot related functions
-                "/android.emulation.control.SnapshotService/DeleteSnapshot",
-                "/android.emulation.control.SnapshotService/ListSnapshots",
-                "/android.emulation.control.SnapshotService/LoadSnapshot",
-                "/android.emulation.control.SnapshotService/PushSnapshot",
-                "/android.emulation.control.SnapshotService/SaveSnapshot",
-                // Icebox.
-                "/android.emulation.control.SnapshotService/PullSnapshot",
-                "/android.emulation.control.SnapshotService/TrackProcess"
+                "/android.emulation.control.*"
             ]
         },
         {
