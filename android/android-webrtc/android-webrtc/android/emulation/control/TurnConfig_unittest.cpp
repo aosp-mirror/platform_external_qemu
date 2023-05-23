@@ -35,6 +35,36 @@ static std::string VALID_TURN_CFG = R"#(
 }
 )#";
 
+static std::string VALID_TURN_TWILIO_CFG = R"#(
+{
+   "username":"dc2d2894d5a9023620c467b0e71cfa6a35457e6679785ed6ae9856fe5bdfa269",
+   "ice_servers":[
+      {
+         "urls":"stun:global.stun.twilio.com:3478"
+      },
+      {
+         "username":"dc2d2894d5a9023620c467b0e71cfa6a35457e6679785ed6ae9856fe5bdfa269",
+         "credential":"tE2DajzSJwnsSbc123",
+         "urls":"turn:global.turn.twilio.com:3478?transport=udp"
+      },
+      {
+         "username":"dc2d2894d5a9023620c467b0e71cfa6a35457e6679785ed6ae9856fe5bdfa269",
+         "credential":"tE2DajzSJwnsSbc123",
+         "urls":"turn:global.turn.twilio.com:3478?transport=tcp"
+      },
+      {
+         "username":"dc2d2894d5a9023620c467b0e71cfa6a35457e6679785ed6ae9856fe5bdfa269",
+         "credential":"tE2DajzSJwnsSbc123",
+         "urls":"turn:global.turn.twilio.com:443?transport=tcp"
+      }
+   ],
+   "date_updated":"Fri, 01 May 2020 01:42:57 +0000",
+   "account_sid":"ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+   "ttl":"86400",
+   "date_created":"Fri, 01 May 2020 01:42:57 +0000",
+   "password":"tE2DajzSJwnsSbc123"
+})#";
+
 std::string NO_ICE = R"#(
 {
 }
@@ -57,6 +87,13 @@ TEST(TurnConfig, Valid) {
     TurnConfig cfg("printf '" + VALID_TURN_CFG + "'");
     EXPECT_TRUE(cfg.validCommand());
 }
+
+
+TEST(TurnConfig, ValidTwilio) {
+    TurnConfig cfg("printf '" + VALID_TURN_TWILIO_CFG + "'");
+    EXPECT_TRUE(cfg.validCommand());
+}
+
 
 TEST(TurnConfig, EmptyIsValid) {
     TurnConfig cfg("");
@@ -81,23 +118,15 @@ TEST(TurnConfig, MissingIce) {
 
 TEST(TurnConfig, ProducesTurn) {
     TurnConfig cfg("printf '" + VALID_TURN_CFG + "'");
-    json expect = R"#(
-                    {
-                    "iceServers":[
-                        {
-                            "urls":"stun:stun.services.mozilla.com",
-                            "username":"louis@mozilla.com",
-                            "credential":"webrtcdemo"
-                        },
-                        {
-                            "urls":[
-                                "stun:stun.example.com",
-                                "stun:stun-1.example.com"
-                            ]
-                        }
-                    ]
-                    }
-                )#"_json;
+    json expect = json::parse(VALID_TURN_CFG);
+    auto snippet = cfg.getConfig();
+    EXPECT_EQ(expect, snippet);
+}
+
+
+TEST(TurnConfig, ProducesTwilioTurn) {
+    TurnConfig cfg("printf '" + VALID_TURN_TWILIO_CFG + "'");
+    json expect = json::parse(VALID_TURN_TWILIO_CFG);
     auto snippet = cfg.getConfig();
     EXPECT_EQ(expect, snippet);
 }

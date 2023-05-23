@@ -14,9 +14,9 @@
 #include "android/emulation/control/TurnConfig.h"
 
 #include "aemu/base/Log.h"
-#include "aemu/base/Optional.h"        // for Optional
-#include "aemu/base/ProcessControl.h"  // for parseEscapedLaunchString
-#include "android/base/system/System.h"   // for System, System::ProcessExit...
+#include "aemu/base/Optional.h"          // for Optional
+#include "aemu/base/ProcessControl.h"    // for parseEscapedLaunchString
+#include "android/base/system/System.h"  // for System, System::ProcessExit...
 
 namespace android {
 namespace emulation {
@@ -28,6 +28,11 @@ bool TurnConfig::producesValidTurn(std::string cmd) {
     return TurnConfig(cmd).validCommand();
 }
 
+static bool hasIceServers(json config) {
+    return !config.is_discarded() &&
+           (config.count("iceServers") || config.count("ice_servers"));
+}
+
 TurnConfig::TurnConfig(std::string cmd)
     : mTurnCmd(android::base::parseEscapedLaunchString(cmd)) {}
 
@@ -37,8 +42,8 @@ int TurnConfig::getMaxTurnCfgTime() {
     if (!str.empty()) {
         if (sscanf(str.c_str(), "%d", &res) == 1) {
             LOG(DEBUG) << "TurnCFG: Use max turn config time from "
-                            "ANDROID_EMU_MAX_TURNCFG_TIME: "
-                         << str << " ms";
+                          "ANDROID_EMU_MAX_TURNCFG_TIME: "
+                       << str << " ms";
         } else {
             LOG(WARNING) << "TurnCFG: Failed to parse max turn config time: "
                          << str;
@@ -56,7 +61,7 @@ json TurnConfig::getConfig() {
                 mTurnCmd, getMaxTurnCfgTime(), &exitCode);
         if (exitCode == 0 && turn) {
             json config = json::parse(*turn, nullptr, false);
-            if (!config.is_discarded() && config.count("iceServers")) {
+            if (hasIceServers(config)) {
                 turnConfig = config;
             } else {
                 LOG(ERROR) << "Unusable turn config: " << turn;
@@ -84,11 +89,13 @@ bool TurnConfig::validCommand() {
     if (turn) {
         json config = json::parse(*turn, nullptr, false);
         if (exitCode == 0 && !config.is_discarded()) {
-            if (config.count("iceServers")) {
+            if (hasIceServers(config)) {
                 LOG(INFO) << "TurnCFG: Turn command produces valid json.";
                 return true;
             } else {
-                LOG(ERROR) << "TurnCFG: JSON is missing iceServers.";
+                LOG(ERROR) << "TurnCFG: JSON is missing iceServers/ice_servers "
+                              "tag, received:"
+                           << config;
             }
         } else {
             if (exitCode != 0) {
