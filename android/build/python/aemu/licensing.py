@@ -244,7 +244,7 @@ class Licensing(object):
         """Generates a csv file that can be used to export docker files."""
         csv = (
             "External Library Name, Link to License, License Name, Binaries "
-            "using the license.\n"
+            "using the license, URL\n"
         )
         for lic in self.licenses():
             if not lic.is_internal():
