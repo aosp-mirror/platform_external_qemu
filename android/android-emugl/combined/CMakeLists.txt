@@ -20,7 +20,7 @@ function(add_opengl_dependencies TGT)
 endfunction()
 
 if(OPTION_GFXSTREAM_BACKEND)
-    set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+    set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream)
     set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
     set(ANGLE_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../external/angle)
 
@@ -237,10 +237,10 @@ if(OPTION_GFXSTREAM_BACKEND)
         gfxstream_egl_headers)
    android_license(TARGET "${GFXSTREAM_DEPENDENCIES}"
                    LIBNAME gfxstream
-                   URL "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master"
+                   URL "https://android.googlesource.com/platform/hardware/google/gfxstream/+/refs/heads/master"
                    SPDX Apache-2.0
-                   LOCAL "${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal/LICENSE"
-                   LICENSE "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master/LICENSE")
+                   LOCAL "${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream/LICENSE"
+                   LICENSE "https://android.googlesource.com/platform/hardware/google/gfxstream/+/refs/heads/master/LICENSE")
 endif()
 
 # TODO(joshuaduong): Make it work for gfxstream build.
