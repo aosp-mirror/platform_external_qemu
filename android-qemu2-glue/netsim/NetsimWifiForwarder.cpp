@@ -9,7 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android-qemu2-glue/emulation/NetsimWifiForwarder.h"
+#include "android-qemu2-glue/netsim/NetsimWifiForwarder.h"
 
 #include "aemu/base/Log.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
