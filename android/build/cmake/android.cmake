@@ -84,7 +84,7 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
           "-DBREAKPAD_API_KEY=${BREAKPAD_API_KEY}"
           "-DBREAKPAD_API_URL=${BREAKPAD_API_URL}"
           "-DOPTION_TEST_LOGS=${OPTION_TEST_LOGS}"
-          "-DOPTION_BAZEL=FALSE"
+          "-DOPTION_BAZEL=TRUE"
           "-DANDROID_SYMBOL_DIR=${ANDROID_SYMBOL_DIR}"
           "-DPython_EXECUTABLE=${Python_EXECUTABLE}"
           "-DCLANG_COMPILER_VERSION=${CLANG_COMPILER_VERSION}"
@@ -606,7 +606,7 @@ function(android_add_library)
                         "${multiValueArgs}" ${ARGN})
 
   # Check if this is a bazel target, if so, we will compile it with
-  if(LINUX_X86_64 AND OPTION_BAZEL AND DEFINED build_BAZEL)
+  if(OPTION_BAZEL AND DEFINED build_BAZEL AND NOT WINDOWS_MSVC_X86_64 AND NOT LINUX_AARCH64)
     android_add_bazel_lib(TARGET ${build_TARGET} BAZEL ${build_BAZEL} INCLUDE
                           ${build_INCLUDES})
     _register_target(${ARGN})

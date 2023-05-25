@@ -21,8 +21,24 @@ endif()
 set(INCLUDE_ANDROID_BAZEL 1)
 
 get_filename_component(AOSP "${CMAKE_CURRENT_LIST_DIR}/../../../../.." ABSOLUTE)
-get_filename_component(BAZEL_BIN "${AOSP}/prebuilts/bazel/linux-x86_64/bazel"
-                       ABSOLUTE)
+if(LINUX_X86_64)
+  set(BAZEL_PLATFORM "linux_x64")
+  get_filename_component(BAZEL_BIN "${AOSP}/prebuilts/bazel/linux-x86_64/bazel"
+                         ABSOLUTE)
+elseif(DARWIN_X86_64)
+  # Bazel is a fat binary, so both arm + x86
+
+  set(BAZEL_PLATFORM "macos_x64")
+  get_filename_component(BAZEL_BIN
+                         "${AOSP}/prebuilts/bazel/darwin-x86_64/bazel" ABSOLUTE)
+elseif(DARWIN_AARCH64)
+  # Bazel is a fat binary, so both arm + x86
+  set(BAZEL_PLATFORM "macos_aarch64")
+  get_filename_component(BAZEL_BIN
+                         "${AOSP}/prebuilts/bazel/darwin-x86_64/bazel" ABSOLUTE)
+  # Force bazel to not run under rosetta so we can rely on auto platform detection
+  set(BAZEL_BIN /usr/bin/arch -arm64 ${BAZEL_BIN})
+endif()
 
 set(BAZEL_OUTPUT_BASE ${AOSP})
 # set(BAZEL_BIN ${BAZEL_BIN} --output_base=${BAZEL_OUTPUT_BASE}) # use build dir
@@ -38,8 +54,10 @@ set(BAZEL_OUT "${BAZEL_OUTPUT_BASE}/bazel-out")
 # ``INCLUDES`` The public includes that should be added
 # ~~~
 function(android_add_bazel_lib)
-  if(NOT LINUX_X86_64)
-    message(FATAL_ERROR "We only support bazel compilation under linux.")
+  if(WINDOWS_X86_64 OR LINUX_AARCH64)
+    message(
+      FATAL_ERROR
+        "We only support bazel compilation under linux x64 and darwin.")
   endif()
   set(options)
   set(oneValueArgs TARGET BAZEL)
@@ -64,7 +82,9 @@ function(android_add_bazel_lib)
     OUTPUT "${AOSP}/${BAZEL_TGT}"
     # Nasty workaround for the fact that ninja seems to be creating the
     # bazel-out directory see b/274180576 for details.
-    COMMAND sh -c "if [ ! -L ${BAZEL_OUT} ] && [ -d ${BAZEL_OUT} ] ; then rm -rf ${BAZEL_OUT} ; fi"
+    COMMAND
+      sh -c
+      "if [ ! -L ${BAZEL_OUT} ] && [ -d ${BAZEL_OUT} ] ; then rm -rf ${BAZEL_OUT} ; fi"
     COMMAND ${BAZEL_BIN} build "${bazel_BAZEL}"
     COMMENT "Compiling ${bazel_TARGET} with bazel"
     WORKING_DIRECTORY ${AOSP}
