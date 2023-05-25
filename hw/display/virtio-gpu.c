@@ -132,7 +132,11 @@ static void update_cursor_data_virgl(VirtIOGPU *g,
     uint32_t pixels, *data;
 
 #ifdef CONFIG_VIRGL
+#ifdef CONFIG_STREAM_RENDERER
+    // NOT IMPLEMENTED
+#else
     data = g->virgl->virgl_renderer_get_cursor_data(resource_id, &width, &height);
+#endif
 #else
     data = virgl_renderer_get_cursor_data(resource_id, &width, &height);
 #endif
@@ -1125,7 +1129,11 @@ static int virtio_gpu_save(QEMUFile *f, void *opaque, size_t size,
         // load, the renderer state and host pointers backing blob resources
         // need to be restored first before the ram slots corresponding to the
         // blob resources themselves.
+#ifdef CONFIG_STREAM_RENDERER
+    // NOT IMPLEMENTED
+#else
         g->virgl->virgl_renderer_save_snapshot(f);
+#endif  // CONFIG_STREAM_RENDERER
         virtio_gpu_save_ram_slots(f, g);
     }
 #endif
@@ -1164,7 +1172,11 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
 
 #ifdef CONFIG_VIRGL
     if (virtio_gpu_virgl_enabled(g->conf)) {
+#ifdef CONFIG_STREAM_RENDERER
+    // NOT IMPLEMENTED
+#else
         g->virgl->virgl_renderer_load_snapshot(f);
+#endif  // CONFIG_STREAM_RENDERER
         virtio_gpu_load_ram_slots(f, g);
     }
 #endif
@@ -1328,10 +1340,13 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
     }
 
 #ifdef CONFIG_ANDROID
+    goldfish_virtio_init();
     g->use_virgl_renderer = true;
     g->conf.flags |= (1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
     g->virgl_as_proxy = true;
+#ifndef CONFIG_STREAM_RENDERER
     g->virgl = get_goldfish_pipe_virgl_renderer_virtio_interface();
+#endif  // !CONFIG_STREAM_RENDERER
     g->gpu_3d_cbs = &proxy_3d_cbs;
     virgl_as_proxy = true;
 #else

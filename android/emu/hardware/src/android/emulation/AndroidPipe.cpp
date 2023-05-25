@@ -679,7 +679,8 @@ void* android_pipe_guest_open(void* hwpipe) {
 void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags) {
     CHECK_VM_STATE_LOCK();
     DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
-    auto pipe = android::sGlobals->connectorService.create(hwpipe, nullptr, (AndroidPipeFlags)0);
+    auto pipe = android::sGlobals->connectorService.create(hwpipe, nullptr,
+            (AndroidPipeFlags)flags);
     pipe->setFlags((AndroidPipeFlags)flags);
     return pipe;
 }
