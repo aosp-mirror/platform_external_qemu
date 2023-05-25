@@ -35,6 +35,7 @@ target_compile_options(android-webrtc PUBLIC -Wno-inconsistent-missing-override)
 target_link_libraries(
   android-webrtc
   PUBLIC nlohmann_json::nlohmann_json
+         android-emu
   PRIVATE protobuf::libprotobuf
           grpc++
           emulator_controller-server-impl
@@ -49,7 +50,6 @@ target_link_libraries(
           webrtc_api_video_codecs_builtin_video_decoder_factory
           webrtc_api_video_codecs_builtin_video_encoder_factory
           ui::gl-bridge
-          android-emu
           Threads::Threads)
 
 android_install_shared(android-webrtc)

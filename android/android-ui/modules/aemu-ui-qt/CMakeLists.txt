@@ -37,6 +37,7 @@ android_qt_lib(
       android/skin/qt/emulator-qt-window.cpp
       android/skin/qt/event-qt.cpp
       android/skin/qt/extended-window.cpp
+      android/skin/qt/extended-page-factory.cpp
       android/skin/qt/extended.ui
       android/skin/qt/FramelessDetector.cpp
       android/skin/qt/init-qt.cpp
@@ -89,6 +90,7 @@ android_qt_lib(
        ext-page-sensor-replay
        ext-page-settings
        ext-page-snapshot
+       ext-page-snapshot-grpc
        ext-page-telephony
        ext-page-tv-remote
        protobuf::libprotobuf

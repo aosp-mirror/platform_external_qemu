@@ -94,10 +94,10 @@ extern "C" {
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/stats/EmulatorStats.h"
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"
 #include "android/emulation/virtio_vsock_device.h"
 #include "android/gpu_frame.h"
 #include "android/skin/winsys.h"
-#include "snapshot/interface.h"
 #include "android/utils/Random.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -109,7 +109,9 @@ extern "C" {
 #include "host-common/crash-handler.h"
 #include "host-common/feature_control.h"
 #include "host-common/record_screen_agent.h"
+#include "snapshot/interface.h"
 #include "snapshot_service.grpc.pb.h"
+#include "util/log.h"
 
 #ifdef ANDROID_WEBRTC
 #include "android/emulation/control/RtcService.h"
@@ -207,6 +209,13 @@ extern "C" void rng_random_generic_read_random_bytes(void* buf, int size) {
 }
 
 bool qemu_android_emulation_early_setup() {
+    // Inject the logging method for netsim
+    netsim::setBtsLogSink([](auto prio, auto file, auto line, auto msg) {
+        if (VERBOSE_CHECK(bluetooth)) {
+            __emu_log_print((LogSeverity)prio, file, line, msg, nullptr);
+        }
+    });
+
     // Ensure that the looper is set for the main thread and for any
     // future thread created by QEMU.
     qemu_looper_setForThread();
@@ -418,9 +427,10 @@ int qemu_setup_grpc() {
                "%d", &timeout) == 1) {
         builder.withIdleTimeout(std::chrono::seconds(timeout));
     }
-    bool useToken = !has_grpc_flag || getConsoleAgents()
-                            ->settings->android_cmdLineOptions()
-                            ->grpc_use_token;
+    bool useToken =
+            !has_grpc_flag || getConsoleAgents()
+                                      ->settings->android_cmdLineOptions()
+                                      ->grpc_use_token;
 
     if (useToken) {
         const int of64Bytes = 64;
@@ -491,6 +501,10 @@ int qemu_setup_grpc() {
                                             ->settings->android_cmdLineOptions()
                                             ->grpc_tls_ca;
         }
+
+        android::emulation::control::EmulatorGrpcClient::configureMe(grpcService->description());
+        bool connect = android::emulation::control::EmulatorGrpcClient::me()->hasOpenChannel();
+        assert(connect);
     }
 
     bool userWantsGrpc =
@@ -508,10 +522,12 @@ int qemu_setup_grpc() {
                     ->settings->android_cmdLineOptions()
                     ->grpc_use_token;
     if (!grpcService && userWantsGrpc) {
-        derror("Failed to start grpc service, even though it was explicitly "
+        derror("Failed to start grpc service, even though it was "
+               "explicitly "
                "requested.");
         exit(1);
     }
+
 
     advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
     advertiser->garbageCollect();
@@ -627,9 +643,9 @@ void qemu_android_emulation_teardown() {
     androidSnapshot_finalize();
     android_emulation_teardown();
     if (grpcService) {
-        // Explicitly cleanup resources. We do not want to do this at program
-        // exit as we may be holding on to loopers, which threads have likely
-        // been destroyed at that point.
+        // Explicitly cleanup resources. We do not want to do this at
+        // program exit as we may be holding on to loopers, which threads
+        // have likely been destroyed at that point.
         grpcService->stop();
         grpcService = nullptr;
     }

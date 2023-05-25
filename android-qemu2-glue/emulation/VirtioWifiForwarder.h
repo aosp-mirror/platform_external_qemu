@@ -51,7 +51,9 @@ public:
     int recv(android::base::IOVector& iov) override;
     void stop() override;
     NICState* getNic() override { return mNic; }
+#ifndef LIBSLIRP
     android::network::MacAddress getStaMacAddr(const char* ssid) override;
+#endif
     ssize_t onRxPacketAvailable(const uint8_t* buf, size_t size);
 
     static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;

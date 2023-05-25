@@ -178,14 +178,13 @@ target_compile_definitions(
 android_target_compile_definitions(hostapd windows PRIVATE
                                    -DCONFIG_NATIVE_WINDOWS)
 
-if(NOT BUILDING_FOR_AARCH64)
-  target_compile_options(hostapd PRIVATE -Wall
-                                         -Werror
-                                         -Wno-error-deprecated-declarations
-                                         -Wno-unused-but-set-variable
-                                         -Wno-unused-parameter
-                                         -Wno-unused-variable
-                                         -Wno-macro-redefined)
+if(NOT LINUX_AARCH64)
+target_compile_options(hostapd PRIVATE -Wall
+                                       -Werror
+                                       -Wno-unused-but-set-variable
+                                       -Wno-unused-parameter
+                                       -Wno-unused-variable
+                                       -Wno-macro-redefined)
 endif()
 
-target_link_libraries(hostapd PUBLIC ssl android-emu)
+target_link_libraries(hostapd PUBLIC ssl android-emu-base android-emu-utils)

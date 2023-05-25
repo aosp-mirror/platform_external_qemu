@@ -12,7 +12,8 @@ argh_derive = { path = "${AOSP_ROOT}/external/rust/crates/argh_derive" }
 argh_shared = { path = "${AOSP_ROOT}/external/rust/crates/argh_shared" }
 atty = { path = "${AOSP_ROOT}/external/rust/crates/atty" }
 bindgen = { path = "${AOSP_ROOT}/external/rust/crates/bindgen" }
-bitflags = { path = "${AOSP_ROOT}/external/rust/crates/bitflags" }
+bitflags = { path = "${AOSP_ROOT}/external/rust/crates/bitflags", package = "bitflags" }
+bitflags1 = { path = "${AOSP_ROOT}/external/rust/crates/bitflags/1.3.2", package = "bitflags" }
 bytes = { path = "${AOSP_ROOT}/external/rust/crates/bytes" }
 cexpr = { path = "${AOSP_ROOT}/external/rust/crates/cexpr" }
 cfg-if = { path = "${AOSP_ROOT}/external/rust/crates/cfg-if" }

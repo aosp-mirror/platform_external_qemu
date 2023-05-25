@@ -85,20 +85,25 @@ public:
             int port,
             std::vector<std::shared_ptr<Service>> services,
             std::unique_ptr<AllowList> allowlist,
-            grpc::Server* server)
+            grpc::Server* server,
+            remote::Endpoint description)
         : mPort(port),
           mRegisteredServices(services),
           mAllowList(std::move(allowlist)),
-          mServer(server) {}
+          mServer(server),
+          mEndpoint(description) {}
 
     int port() override { return mPort; }
 
     void wait() override { mServer->Wait(); }
 
+    remote::Endpoint description() override { return mEndpoint; }
+
 private:
     std::unique_ptr<grpc::Server> mServer;
     std::unique_ptr<AllowList> mAllowList;
     std::vector<std::shared_ptr<Service>> mRegisteredServices;
+    remote::Endpoint mEndpoint;
     int mPort;
     int queueidx = 0;
     std::string mCert;
@@ -313,6 +318,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         return nullptr;
     }
 
+    remote::Endpoint endpoint;
     if (!mCredentials) {
         if (mBindAddress == "localhost" || mBindAddress == "[::1]") {
             mCredentials = LocalServerCredentials(LOCAL_TCP);
@@ -336,6 +342,9 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         if (!mAuthToken.empty()) {
             anyauth.emplace_back(std::make_unique<StaticTokenAuth>(
                     mAuthToken, "android-studio", allowList.get()));
+            auto header = endpoint.add_required_headers();
+            header->set_key("authorization");
+            header->set_value("Bearer " + mAuthToken);
         }
         if (!mJwkPath.empty()) {
             anyauth.emplace_back(std::make_unique<JwtTokenAuth>(
@@ -389,12 +398,14 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     if (!service)
         return nullptr;
 
+    endpoint.set_target(server_address);
+
     LOG(INFO) << "Started GRPC server at " << server_address.c_str()
               << ", security: " << mSecurity << ", auth: " << mAuthMode;
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(mPort, std::move(mServices),
                                               std::move(allowList),
-                                              service.release()));
+                                              service.release(), endpoint));
 }
 }  // namespace control
 }  // namespace emulation

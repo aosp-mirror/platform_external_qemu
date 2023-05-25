@@ -27,9 +27,8 @@ android_add_library(
       android/utils/file_data.c
       android/utils/filelock.cpp
       android/utils/ini.cpp
-      android/utils/lock.cpp
       android/utils/property_file.c
-  DEPS android-emu-base android-emu-base-headers android-hw-config emulator-libext4_utils)
+  DEPS android-emu-base android-emu-base-headers android-hw-config emulator-libext4_utils android-emu-utils)
 target_include_directories(
   android-emu-files PUBLIC include
   PRIVATE src ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)

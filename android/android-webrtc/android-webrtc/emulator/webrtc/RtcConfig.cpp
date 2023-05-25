@@ -52,8 +52,19 @@ PeerConnectionInterface::RTCConfiguration RtcConfig::parse(
         json rtcConfiguration) {
     PeerConnectionInterface::RTCConfiguration configuration;
 
+    json iceServers;
+    // This is what you will get from the google turn sever
     if (rtcConfiguration.count("iceServers")) {
-        auto iceServers = rtcConfiguration["iceServers"];
+        iceServers = rtcConfiguration["iceServers"];
+    }
+
+    // This is what you will get from twilio
+    // See: https://www.twilio.com/docs/stun-turn
+    if (rtcConfiguration.count("ice_servers")) {
+        iceServers = rtcConfiguration["ice_servers"];
+    }
+
+    if (!iceServers.empty()) {
         for (const auto& iceServer : iceServers) {
             configuration.servers.push_back(parseIce(iceServer));
         }

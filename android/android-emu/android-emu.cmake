@@ -86,7 +86,6 @@ set(android-emu-common
     android/emulation/H264PingInfoParser.cpp
     android/emulation/HevcNaluParser.cpp
     android/emulation/HevcPingInfoParser.cpp
-    android/emulation/HostapdController.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/hostdevices/HostGoldfishPipe.cpp
     android/emulation/HostmemIdMapping.cpp
@@ -123,16 +122,9 @@ set(android-emu-common
     android/metrics/PerfStatReporter.cpp
     android/multitouch-port.c
     android/multitouch-screen.c
-    android/network/control.cpp
-    android/network/GenericNetlinkMessage.cpp
     android/network/globals.c
-    android/network/Ieee80211Frame.cpp
-    android/network/NetworkPipe.cpp
+    android/network/control.cpp
     android/network/wifi.cpp
-    android/network/WifiForwardClient.cpp
-    android/network/WifiForwardPeer.cpp
-    android/network/WifiForwardPipe.cpp
-    android/network/WifiForwardServer.cpp
     android/opengl/GLProcessPipe.cpp
     android/opengl/GpuFrameBridge.cpp
     android/opengl/logger.cpp
@@ -262,6 +254,7 @@ target_link_libraries(
          android-emu-files
          android-emu-feature
          android-emu-metrics
+         android-emu-net
          android-emu-proxy
          android-emu-cmdline
          android-emu-base
@@ -309,8 +302,6 @@ target_link_libraries(
          aemu-gl-init
          aemu-recording
   PRIVATE android-emu-protobuf)
-
-target_link_libraries(android-emu PRIVATE hostapd)
 
 target_link_libraries(android-emu PRIVATE modem_simulator_lib gnss_proxy_lib)
 target_link_libraries(android-emu PUBLIC modem_simulator_lib gnss_proxy_lib)
