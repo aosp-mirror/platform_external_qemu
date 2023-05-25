@@ -32,6 +32,83 @@ function(get_rust_version RET_VAL)
 endfunction()
 
 # ~~~
+# ! function(create_windows_linker_script RET_VAL) : Returns path to a windows linker script
+#
+# We are using the x86_64-pc-windows-gnu target, which will invoke the linger "mingw" style
+# Luckilly we can creat a wrapper that will call clang.exe with a set of additional flags
+# that will make it all succeed.
+#
+# Note: This epxects that the CMAKE_CXX_COMPILER has already been properly configured
+# and is pointing to clang
+#
+# ~~~
+function(create_windows_linker_script)
+  internal_get_env_cache(WINDOWS_LINK_SCRIPT)
+  internal_get_env_cache(RUST_LINK_PATH)
+  if("${WINDOWS_LINK_SCRIPT}" STREQUAL "")
+
+    get_clang_version(CLANG_VER)
+    get_filename_component(
+      CLANG_DIR
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/clang/host/windows-x86/${CLANG_VER}"
+      ABSOLUTE)
+    get_filename_component(
+      CLANG_LINUX_DIR
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/clang/host/linux-x86/${CLANG_VER}"
+      ABSOLUTE)
+    get_filename_component(
+      MINGW_DIR
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8"
+      ABSOLUTE)
+
+    set(TOOLCHAIN "${PROJECT_BINARY_DIR}/toolchain")
+    file(MAKE_DIRECTORY ${TOOLCHAIN})
+    set(TOOLCHAIN "${PROJECT_BINARY_DIR}/toolchain")
+    file(MAKE_DIRECTORY ${TOOLCHAIN})
+    file(MAKE_DIRECTORY ${TOOLCHAIN}/lib)
+
+    # Construct the -L parameters for clang.exe using the LIB environment
+    # variable This should be available since we should be in an msvc shell.
+    string(REPLACE ";" "\" -L\"" LIB_PARAMS "$ENV{LIB}")
+    set(LIB_PARAMS "\"-L${LIB_PARAMS}\"")
+
+    file(
+      WRITE ${TOOLCHAIN}/ld-emu.cmd
+      "${CLANG_DIR}/bin/clang.exe ^
+      --target=x86_64-pc-windows-gnu ^
+      --sysroot=${MINGW_DIR}/x86_64-w64-mingw32 ^
+      -B${MINGW_DIR}/lib/gcc/x86_64-w64-mingw32/4.8.3 ^
+      -L${MINGW_DIR}/lib/gcc/x86_64-w64-mingw32/4.8.3 ^
+      -L${MINGW_DIR}/x86_64-w64-mingw32/lib64 ^
+      -L${CLANG_DIR}/lib -Wl,-mllvm,--relocation-model=pic ^
+      -fuse-ld=lld ^
+      -L${LIB_PARAMS} ^
+      %*")
+    execute_process(
+      COMMAND
+        python
+        "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/util/mingw_to_msvc_lib.py"
+        ${MINGW_DIR}/lib/gcc/x86_64-w64-mingw32/4.8.3/libgcc_eh.a
+        ${TOOLCHAIN}/lib/gcc_eh.lib)
+    execute_process(
+      COMMAND
+        python
+        "${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/util/mingw_to_msvc_lib.py"
+        ${MINGW_DIR}/x86_64-w64-mingw32/lib64/libpthread.a
+        ${TOOLCHAIN}/lib/pthread.lib)
+
+    string(REPLACE "/" "\\" RUST_LINK_PATH
+                   "${PROJECT_BINARY_DIR}/toolchain/lib")
+
+
+    internal_set_env_cache(WINDOWS_LINK_SCRIPT "${TOOLCHAIN}/ld-emu.cmd")
+    internal_set_env_cache(RUST_LINK_PATH "${RUST_LINK_PATH}")
+  endif()
+  set(WINDOWS_LINK_SCRIPT "${WINDOWS_LINK_SCRIPT}" PARENT_SCOPE)
+  set(RUST_LINK_PATH "${RUST_LINK_PATH}" PARENT_SCOPE)
+  message(STATUS "Created ${WINDOWS_LINK_SCRIPT}, with path ${RUST_LINK_PATH} for linking")
+endfunction()
+# ~~~
 # ! enable_vendorized_crates : writes a cargo crate config in the ${Rust_ROOT}!
 #
 # This writes a config.toml that informs rust to use vendorized crates from the
@@ -89,18 +166,14 @@ function(configure_rust)
     set(Rust_CARGO ${cfg_COMPILER_ROOT}/cargo PARENT_SCOPE)
     internal_set_env_cache(Rust_CARGO "${RUST_COMPILER_ROOT}/cargo")
   else()
-    if(WIN32)
-      message(STATUS "Using default system rust compiler.")
-    else()
-      message(
-        FATAL_ERROR
-          "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-          "The rust directory ${cfg_COMPILER_ROOT} does not exist. If the compiler version has changed you must "
-          "update the function `get_rust_version` in the file ${CMAKE_CURRENT_LIST_FILE} to return the proper version.\n"
-          "You will also need to upgrade the windows build bots to use the new rust toolchain. \n"
-          "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n"
-      )
-    endif()
+    message(
+      FATAL_ERROR
+        "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
+        "The rust directory ${cfg_COMPILER_ROOT} does not exist. If the compiler version has changed you must "
+        "update the function `get_rust_version` in the file ${CMAKE_CURRENT_LIST_FILE} to return the proper version.\n"
+        "You will also need to upgrade the windows build bots to use the new rust toolchain. \n"
+        "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n"
+    )
   endif()
 
   if(cfg_VENDOR_CRATES)
@@ -136,24 +209,12 @@ function(ensure_rust_version_is_compliant)
     )
   endif()
   if(NOT Rust_VERSION VERSION_EQUAL EXPECTED_VERSION)
-    if(WIN32)
-      # We don't want to break the windows build bots immediately, instead will
-      # create a warning
-      message(
-        WARNING
-          "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-          "Expected version rust compiler to provide: ${EXPECTED_VERSION}, not ${Rust_VERSION}, \n"
-          "please update ${Rust_COMPILER} to the expected version: ${EXPECTED_VERSION} \n"
-          "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n"
-      )
-    else()
-      message(
-        FATAL_ERROR
-          "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-          "Expected version rust compiler to provide: ${EXPECTED_VERSION}, not ${Rust_VERSION}, \n"
-          "please update ${Rust_COMPILER} to the expected version: ${EXPECTED_VERSION} \n"
-          "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n"
-      )
-    endif()
+    message(
+      FATAL_ERROR
+        "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
+        "Expected version rust compiler to provide: ${EXPECTED_VERSION}, not ${Rust_VERSION}, \n"
+        "please update ${Rust_COMPILER} to the expected version: ${EXPECTED_VERSION} \n"
+        "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n"
+    )
   endif()
 endfunction()
