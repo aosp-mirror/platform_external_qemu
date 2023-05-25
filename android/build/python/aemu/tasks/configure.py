@@ -108,7 +108,7 @@ class ConfigureTask(BuildTask):
             self.add_option("OPTION_ASAN", ",".join(sanitizer))
 
         if gfxstream_only:
-            self.cmake_cmd.append(aosp / "device" / "generic" / "vulkan-cereal")
+            self.cmake_cmd.append(aosp / "hardware" / "google" / "gfxstream")
         else:
             self.cmake_cmd.append(aosp / "external" / "qemu")
 

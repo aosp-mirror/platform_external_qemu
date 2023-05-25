@@ -232,7 +232,7 @@ endif()
 
 # gfxstream, aemu-common modules
 set(GFXSTREAM_REPO_ROOT
-    ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+    ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream)
 set(ENABLE_VKCEREAL_TESTS ON)
 function(discover_gfxstream_internal_targets result subdir)
   if(CMAKE_VERSION VERSION_LESS "3.7.0")
@@ -283,7 +283,7 @@ add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../gfxstream-protocols
 # Include hardware/google/aemu project
 set(AEMU_COMMON_BUILD_CONFIG "qemu-android" CACHE STRING "")
 set(GFXSTREAM_REPO_ROOT
-    ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+    ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream)
 set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
 set(GFXSTREAM_PROTOCOLS_DIR
     ${ANDROID_QEMU2_TOP_DIR}/../../external/gfxstream-protocols)
@@ -308,11 +308,11 @@ set(GFXSTREAM_DEPENDENCIES ${GFXSTREAM_INTERNAL_TARGETS} angle_common
 android_license(
   TARGET "${GFXSTREAM_DEPENDENCIES}"
   LIBNAME gfxstream
-  URL "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master"
+  URL "https://android.googlesource.com/platform/hardware/google/gfxstream/+/refs/heads/master"
   SPDX Apache-2.0
-  LOCAL "${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal/LICENSE"
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream/LICENSE"
   LICENSE
-    "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master/LICENSE"
+    "https://android.googlesource.com/platform/hardware/google/gfxstream/+/refs/heads/master/LICENSE"
 )
 # Used by gfxstream but has different license.
 android_license(
