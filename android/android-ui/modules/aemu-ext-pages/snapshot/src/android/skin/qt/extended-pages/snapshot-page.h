@@ -11,7 +11,6 @@
 #pragma once
 
 #include <qglobal.h>                      // for qint64, qreal
-#include <qmetatype.h>                    // for Q_DECLARE_METATYPE
 #include <qobjectdefs.h>                  // for slots, Q_OBJECT, signals
 #include <QGraphicsScene>                 // for QGraphicsScene
 #include <QRect>                          // for QRect
@@ -21,6 +20,7 @@
 #include <memory>                         // for unique_ptr
 
 #include "android/skin/qt/qt-settings.h"  // for SaveSnapshotOnExit
+#include "android/skin/qt/common_settings.h"
 #include "ui_snapshot-page.h"             // for SnapshotPage
 
 namespace android {
@@ -43,8 +43,6 @@ class QWidget;
 namespace emulator_snapshot {
 class Snapshot;
 }  // namespace emulator_snapshot
-
-Q_DECLARE_METATYPE(Ui::Settings::SaveSnapshotOnExit);
 
 class SnapshotPage : public QWidget
 {

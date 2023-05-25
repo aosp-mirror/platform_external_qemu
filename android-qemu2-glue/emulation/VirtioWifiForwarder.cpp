@@ -51,14 +51,14 @@ using android::network::WifiForwardPeer;
 using android::network::WifiForwardServer;
 
 extern "C" {
-#include "qemu/osdep.h"
-#include "net/net.h"
 #include "common/ieee802_11_defs.h"
 #include "drivers/driver_virtio_wifi.h"
 #ifdef LIBSLIRP
 #include "libslirp.h"
 #include "utils/eloop.h"
 #else
+#include "qemu/osdep.h"
+#include "net/net.h"
 #include "net/slirp.h"
 #endif
 }  // extern "C"
@@ -307,13 +307,6 @@ void VirtioWifiForwarder::stop() {
     }
 }
 
-MacAddress VirtioWifiForwarder::getStaMacAddr(const char* ssid) {
-    if (!mHostapd->getSsid().compare(ssid))
-        return mFrameInfo.mTransmitter;
-    else
-        return MacAddress();
-}
-
 #ifdef LIBSLIRP
 void VirtioWifiForwarder::eloopSocketHandler(int sock,
                                              void* eloop_ctx,
@@ -322,6 +315,14 @@ void VirtioWifiForwarder::eloopSocketHandler(int sock,
                                    android::base::Looper::FdWatch::kEventRead);
 }
 #else
+
+MacAddress VirtioWifiForwarder::getStaMacAddr(const char* ssid) {
+    if (!mHostapd->getSsid().compare(ssid))
+        return mFrameInfo.mTransmitter;
+    else
+        return MacAddress();
+}
+
 VirtioWifiForwarder* VirtioWifiForwarder::getInstance(NetClientState* nc) {
     return static_cast<VirtioWifiForwarder*>(qemu_get_nic_opaque(nc));
 }

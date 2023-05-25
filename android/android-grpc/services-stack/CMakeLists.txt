@@ -2,7 +2,9 @@
 android_add_library(
   TARGET android-grpc-services-stack LICENSE Apache-2.0 SOURCE_DIR src
   SRC android/emulation/control/GrpcServices.cpp
-      android/emulation/control/utils/GrpcAndroidLogAdapter.cpp)
+      android/emulation/control/utils/GrpcAndroidLogAdapter.cpp
+  DEPS android-grpc-endpoint)
+
 target_include_directories(android-grpc-services-stack PRIVATE src
                            PUBLIC include)
 

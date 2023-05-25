@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android-qemu2-glue/emulation/libslirp_driver.h"
+#include "android-qemu2-glue/netsim/libslirp_driver.h"
 
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"

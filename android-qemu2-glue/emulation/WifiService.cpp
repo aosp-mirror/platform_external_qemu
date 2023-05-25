@@ -15,19 +15,19 @@
 #include "android-qemu2-glue/emulation/WifiService.h"
 
 #include "aemu/base/Log.h"
-#include "android-qemu2-glue/emulation/NetsimWifiForwarder.h"
 #include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
 #include "android-qemu2-glue/qemu-setup.h"
 #include "android/emulation/HostapdController.h"
 #include "android/utils/debug.h"
 #ifdef LIBSLIRP
-#include "android-qemu2-glue/emulation/libslirp_driver.h"
+#include "android-qemu2-glue/netsim/libslirp_driver.h"
+#else
+#include "android-qemu2-glue/netsim/NetsimWifiForwarder.h"
 #endif
 
 using android::network::MacAddress;
 
 extern "C" {
-#include "qemu/osdep.h"
 #include "net/slirp.h"
 }
 
@@ -146,12 +146,6 @@ std::shared_ptr<WifiService> Builder::build() {
         }
     }
 
-    if (mRedirectToNetsim) {
-        return std::static_pointer_cast<WifiService>(
-                std::make_shared<NetsimWifiForwarder>(sOnReceiveCallback,
-                                                      mCanReceive));
-    }
-
     Slirp* slirp = nullptr;
 #ifdef LIBSLIRP
     if (!mSlirpOpts.disabled) {
@@ -176,6 +170,12 @@ std::shared_ptr<WifiService> Builder::build() {
                 mSlirpOpts.dns6.empty() ? nullptr : mSlirpOpts.dns6.c_str(),
                 nullptr /* dnssearch */, nullptr /* vdomainname */,
                 nullptr /* tftp_server_name */);
+    }
+#else
+    if (mRedirectToNetsim) {
+        return std::static_pointer_cast<WifiService>(
+                std::make_shared<NetsimWifiForwarder>(sOnReceiveCallback,
+                                                      mCanReceive));
     }
 #endif
 

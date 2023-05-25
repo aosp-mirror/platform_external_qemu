@@ -199,7 +199,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/renderdoc ${GFXSTREAM_PREFIX}-third-party-renderdoc)
     add_subdirectory(${GFXSTREAM_REPO_ROOT}/utils ${GFXSTREAM_PREFIX}-utils)
-    add_subdirectory(${GFXSTREAM_REPO_ROOT}/stream-servers ${GFXSTREAM_PREFIX}-stream-servers)
+    add_subdirectory(${GFXSTREAM_REPO_ROOT}/host ${GFXSTREAM_PREFIX}-stream-servers)
     target_link_libraries(
         GLES_V2_translator_static PRIVATE ANGLE::ANGLE
     )

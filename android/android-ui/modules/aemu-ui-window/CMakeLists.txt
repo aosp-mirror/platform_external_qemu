@@ -22,6 +22,7 @@ android_qt_lib(
        android-emu-sockets
        android-emu-telephony
        android-emu-utils
+       android-emu-net
        android-hw-config
        qemu-host-common-headers
        aemu-gl-init
