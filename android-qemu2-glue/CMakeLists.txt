@@ -11,6 +11,8 @@ add_custom_target(
   virtio_gpu_timelines_fbs_header ALL
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/VirtioGpuTimelines_generated.h)
 
+add_subdirectory(netsim)
+
 set(android-qemu2-glue_src
     android_qemud.cpp
     audio-capturer.cpp
