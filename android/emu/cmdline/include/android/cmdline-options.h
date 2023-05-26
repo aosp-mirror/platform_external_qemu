@@ -354,6 +354,9 @@ OPT_PARAM(wifi_mac_address,
           "Override the mac address of the wlan0 interface in AVD. This option "
           "only applies to situation where AVD is loaded from snapshot using "
           "read-only mode. Example: -wifi-mac-address 00:11:22:33:44:55.")
+
+OPT_FLAG(no_ethernet, "Disable virtual Ethernet interface en0. This option is only effective when feature VirtioWifi is used.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

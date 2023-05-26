@@ -2649,49 +2649,54 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Network
-    args.add("-netdev");
-    if (opts->net_tap) {
-        const char* upScript =
-                opts->net_tap_script_up ? opts->net_tap_script_up : "no";
-        const char* downScript =
-                opts->net_tap_script_down ? opts->net_tap_script_down : "no";
-        args.addFormat("tap,id=mynet,script=%s,downscript=%s,ifname=%s",
-                       upScript, downScript, opts->net_tap);
-    } else if (opts->net_socket) {
-        args.addFormat("socket,id=mynet,%s", opts->net_socket);
-     }
+
+    if (feature_is_enabled(kFeature_VirtioWifi) && opts->no_ethernet) {
+        dinfo("Do not initialize netdev virtio-net because option no-ethernet is provided.");
+    } else {
+        args.add("-netdev");
+        if (opts->net_tap) {
+            const char* upScript =
+                    opts->net_tap_script_up ? opts->net_tap_script_up : "no";
+            const char* downScript =
+                    opts->net_tap_script_down ? opts->net_tap_script_down : "no";
+            args.addFormat("tap,id=mynet,script=%s,downscript=%s,ifname=%s",
+                           upScript, downScript, opts->net_tap);
+        } else if (opts->net_socket) {
+            args.addFormat("socket,id=mynet,%s", opts->net_socket);
+         }
 #if defined(__APPLE__)
-    else if (opts->vmnet_bridged) {
-        args.addFormat("vmnet-bridged,id=mynet,ifname=%s%s",
-                           opts->vmnet_bridged, opts->vmnet_isolated ? ",isolated=on" : "");
-    } else if (opts->vmnet_shared) {
-        if(opts->vmnet_start_address && opts->vmnet_end_address && opts->vmnet_subnet_mask) {
-            args.addFormat("vmnet-shared,id=mynet,start-address=%s,end-address=%s,subnet-mask=%s%s",
-                           opts->vmnet_start_address, opts->vmnet_end_address, opts->vmnet_subnet_mask,
-                           opts->vmnet_isolated ? ",isolated=on" : "");
-        } else {
-            args.addFormat("vmnet-shared,id=mynet%s",
-                           opts->vmnet_isolated ? ",isolated=on" : "");
+        else if (opts->vmnet_bridged) {
+            args.addFormat("vmnet-bridged,id=mynet,ifname=%s%s",
+                               opts->vmnet_bridged, opts->vmnet_isolated ? ",isolated=on" : "");
+        } else if (opts->vmnet_shared) {
+            if(opts->vmnet_start_address && opts->vmnet_end_address && opts->vmnet_subnet_mask) {
+                args.addFormat("vmnet-shared,id=mynet,start-address=%s,end-address=%s,subnet-mask=%s%s",
+                               opts->vmnet_start_address, opts->vmnet_end_address, opts->vmnet_subnet_mask,
+                               opts->vmnet_isolated ? ",isolated=on" : "");
+            } else {
+                args.addFormat("vmnet-shared,id=mynet%s",
+                               opts->vmnet_isolated ? ",isolated=on" : "");
+            }
         }
-    }
 #endif
-    else {
-        if (opts->net_tap_script_up) {
-            dwarning("-net-tap-script-up ignored without -net-tap option");
+        else {
+            if (opts->net_tap_script_up) {
+                dwarning("-net-tap-script-up ignored without -net-tap option");
+            }
+            if (opts->net_tap_script_down) {
+                dwarning("-net-tap-script-down ignored without -net-tap option");
+            }
+            if (opts->network_user_mode_options &&
+                android_validate_user_mode_networking_option(
+                        opts->network_user_mode_options)) {
+                args.addFormat("user,id=mynet,%s", opts->network_user_mode_options);
+            } else {
+                args.add("user,id=mynet");
+            }
         }
-        if (opts->net_tap_script_down) {
-            dwarning("-net-tap-script-down ignored without -net-tap option");
-        }
-        if (opts->network_user_mode_options &&
-            android_validate_user_mode_networking_option(
-                    opts->network_user_mode_options)) {
-            args.addFormat("user,id=mynet,%s", opts->network_user_mode_options);
-        } else {
-            args.add("user,id=mynet");
-        }
+        args.add("-device");
+        args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
     }
-    args.add("-device");
-    args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
     const bool createVirtconsoles =
             opts->virtio_console || fc::isEnabled(fc::VirtconsoleLogcat);
