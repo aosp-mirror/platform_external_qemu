@@ -13,7 +13,7 @@
 edition = "2018"
 rust-version = "1.60"
 name = "cxx-build"
-version = "1.0.92"
+version = "1.0.94"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 exclude = ["build.rs"]
 description = "C++ code generator for integrating `cxx` crate into a Cargo build."
@@ -58,7 +58,7 @@ default-features = false
 version = "1.0"
 
 [dependencies.syn]
-version = "1.0.95"
+version = "2.0.1"
 features = [
     "parsing",
     "printing",
