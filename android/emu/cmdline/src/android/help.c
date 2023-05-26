@@ -2273,6 +2273,12 @@ static void help_wifi_mac_address(stralloc_t* out) {
            " Example: -wifi-mac-address 00:11:22:33:44:55 \n\n");
 }
 
+static void help_no_ethernet(stralloc_t* out) {
+    PRINTF(" Disable the virtual Ethernet interface en0 in AVD. "
+           " This option is only effective when feature VirtioWifi is "
+           " used. Otherwise, this option is a no-op. \n\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
