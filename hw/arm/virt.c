@@ -1764,6 +1764,10 @@ static void virt_2_12_instance_init(Object *obj)
                                     NULL);
     /* Default GIC type is v2 */
     vms->gic_version = 2;
+#if defined(__linux__) && defined(__aarch64__)
+    /* Default GIC type is host: use the same version as the host */
+    vms->gic_version = 0;
+#endif
     object_property_add_str(obj, "gic-version", virt_get_gic_version,
                         virt_set_gic_version, NULL);
     object_property_set_description(obj, "gic-version",
