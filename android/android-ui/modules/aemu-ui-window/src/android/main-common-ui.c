@@ -316,7 +316,7 @@ bool configAndStartRenderer(enum WinsysPreferredGlesBackend uiPreferredBackend,
         crashhandler_append_message_format(
                 "Deciding if GLDirectMem/Vulkan should be enabled. "
                 "Selected renderer: %d "
-                "API level: %d host GPU blacklisted? %d\n",
+                "API level: %d host GPU on the denylist? %d\n",
                 config_out->selectedRenderer, api_level,
                 hostGpuVulkanBlacklisted);
         switch (config_out->selectedRenderer) {
