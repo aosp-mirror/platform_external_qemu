@@ -75,6 +75,7 @@ public:
                         .c_str());
         if (handler_path.empty()) {
             dwarning("Crash handler not found, crash reporting disabled.");
+            return false;
         }
         auto database_directory =
                 System::get()->envGet("ANDROID_EMU_CRASH_REPORTING_DATABASE");
