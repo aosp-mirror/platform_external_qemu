@@ -188,7 +188,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     endif()
 
     set(GFXSTREAM_PREFIX "gfxstream")
-    set(GFXSTREAM_PROTOCOLS_DIR ${ANDROID_QEMU2_TOP_DIR}/../../external/gfxstream-protocols)
+    set(GFXSTREAM_PROTOCOLS_DIR ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream)
 
     set(EXTRA_SUBDIR_TEST_INCLUDE_FILES)
     # Third party dependencies
@@ -208,7 +208,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     # Protocols and associated code generators######################################
 
-    add_subdirectory(${GFXSTREAM_REPO_ROOT}/protocols ${GFXSTREAM_PREFIX}-protocols)
+    add_subdirectory(${GFXSTREAM_REPO_ROOT}/codegen ${GFXSTREAM_PREFIX}-codegen)
 
     # Fake Android guest#########################3##################################
 
