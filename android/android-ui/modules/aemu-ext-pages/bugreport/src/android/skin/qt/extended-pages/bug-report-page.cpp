@@ -8,53 +8,52 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
 #include "android/skin/qt/extended-pages/bug-report-page.h"
 
-#include <QtConcurrent/qtconcurrentrun.h>              // for run
-#include <QtCore/qglobal.h>                            // for Q_NULLPTR
+#include <QtConcurrent/qtconcurrentrun.h>
+#include <time.h>
+#include <QCheckBox>
+#include <QCloseEvent>
+#include <QDesktopServices>
+#include <QEvent>
+#include <QFileDialog>
+#include <QFontMetrics>
+#include <QFrame>
+#include <QFuture>
+#include <QLabel>
+#include <QMovie>
+#include <QPixmap>
+#include <QPlainTextEdit>
+#include <QPushButton>
+#include <QThread>
+#include <QUrl>
 #include <QVBoxLayout>
-#include <time.h>                                      // for localtime, str...
-#include <QCheckBox>                                   // for QCheckBox
-#include <QDesktopServices>                            // for QDesktopServices
-#include <QEvent>                                      // for QEvent, QEvent...
-#include <QFileDialog>                                 // for QFileDialog
-#include <QFontMetrics>                                // for QFontMetrics
-#include <QFuture>                                     // for QFuture, QFutu...
-#include <QLabel>                                      // for QLabel
-#include <QMessageBox>                                 // for QMessageBox
-#include <QMovie>                                      // for QMovie
-#include <QPixmap>                                     // for QPixmap
-#include <QPlainTextEdit>                              // for QPlainTextEdit
-#include <QPushButton>                                 // for QPushButton
-#include <QUrl>                                        // for QUrl
-#include <QtCore>                                      // for QHash, ElideRight
-#include <fstream>                                     // for ofstream, ios_...
-#include <functional>                                  // for __base
-#include <iterator>                                    // for istreambuf_ite...
+#include <QWidget>
+#include <QtCore>
+#include <fstream>
+#include <iterator>
 #include <string_view>
-#include <vector>                                      // for vector
+#include <vector>
 
-#include "android/avd/info.h"                          // for avdInfo_getApi...
-#include "aemu/base/StringFormat.h"                 // for StringFormat
-#include "aemu/base/Uri.h"                          // for Uri
-#include "aemu/base/Uuid.h"                         // for Uuid
-#include "aemu/base/async/ThreadLooper.h"           // for ThreadLooper
-#include "aemu/base/files/PathUtils.h"              // for PathUtils
-#include "android/base/system/System.h"                // for System, System...
-#include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
-#include "android/console.h"                           // for getConsoleAgents()->settings->avdInfo()
-#include "android/metrics/UiEventTracker.h"            // for UiEventTracker
-#include "android/skin/qt/error-dialog.h"              // for showErrorDialog
-#include "android/skin/qt/extended-pages/common.h"     // for getSelectedTheme
-#include "android/skin/qt/raised-material-button.h"    // for RaisedMaterial...
-#include "android/skin/qt/stylesheet.h"                // for stylesheetValues
-#include "android/utils/path.h"                        // for path_copy_file
-#include "studio_stats.pb.h"                           // for EmulatorUiEvent
-#include "ui_bug-report-page.h"                        // for BugreportPage
+#include "aemu/base/StringFormat.h"
+#include "aemu/base/Uri.h"
+#include "aemu/base/Uuid.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/PathUtils.h"
+#include "android/avd/info.h"
+#include "android/base/system/System.h"
+#include "android/console.h"
+#include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/globals_agent.h"
+#include "android/metrics/UiEventTracker.h"
+#include "android/skin/qt/error-dialog.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/function-runner.h"
-
-class QShowEvent;
+#include "android/skin/qt/raised-material-button.h"
+#include "android/skin/qt/stylesheet.h"
+#include "android/utils/path.h"
+#include "studio_stats.pb.h"
+#include "ui_bug-report-page.h"
 
 using android::base::PathUtils;
 using android::base::RecurrentTask;
@@ -66,7 +65,6 @@ using android::base::Uri;
 using android::base::Uuid;
 using android::emulation::AdbInterface;
 using android::emulation::OptionalAdbCommandResult;
-
 
 static const int kDefaultUnknownAPILevel = 1000;
 static const int kReproStepsCharacterLimit = 2000;
@@ -101,7 +99,7 @@ public:
 };
 
 BugreportPage::BugreportPage(QWidget* parent)
-    : QWidget(parent),
+    : ThemedWidget(parent),
       mUi(new Ui::BugreportPage),
       mBugTracker(new UiEventTracker(
               android_studio::EmulatorUiEvent::BUTTON_PRESS,
@@ -118,6 +116,10 @@ BugreportPage::BugreportPage(QWidget* parent)
                   }
               },
               kTaskInterval) {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
+        setAdbInterface(
+                android::emulation::AdbInterface::createGlobalOwnThread());
+    }
     mUi->setupUi(this);
     mUi->bug_deviceLabel->installEventFilter(this);
     mUi->bug_emulatorVersionLabel->setText(QString::fromStdString(
@@ -330,15 +332,19 @@ bool BugreportPage::saveBugReportTo(std::string_view savingPath) {
         } else {
             bugreportBaseName = "bugreport.txt";
         }
-        path_copy_file(PathUtils::join(savingPath.data(), bugreportBaseName.data()).c_str(),
-                       mSavingStates.adbBugreportFilePath.c_str());
+        path_copy_file(
+                PathUtils::join(savingPath.data(), bugreportBaseName.data())
+                        .c_str(),
+                mSavingStates.adbBugreportFilePath.c_str());
     }
 
     if (mUi->bug_screenshotCheckBox->isChecked() &&
         mSavingStates.screenshotSucceed) {
         std::string_view screenshotBaseName = "screenshot.png";
-        path_copy_file(PathUtils::join(savingPath.data(), screenshotBaseName.data()).c_str(),
-                       mSavingStates.screenshotFilePath.c_str());
+        path_copy_file(
+                PathUtils::join(savingPath.data(), screenshotBaseName.data())
+                        .c_str(),
+                mSavingStates.screenshotFilePath.c_str());
     }
 
     if (!mReportingFields.avdDetails.empty()) {
@@ -398,7 +404,8 @@ void BugreportPage::loadAdbBugreport() {
     bool isNougatOrHigher =
             (apiLevel != kDefaultUnknownAPILevel && apiLevel > 23);
     if (apiLevel == kDefaultUnknownAPILevel &&
-        avdInfo_isMarshmallowOrHigher(getConsoleAgents()->settings->avdInfo())) {
+        avdInfo_isMarshmallowOrHigher(
+                getConsoleAgents()->settings->avdInfo())) {
         isNougatOrHigher = true;
     }
 
@@ -537,7 +544,8 @@ bool BugreportPage::eventFilter(QObject* object, QEvent* event) {
 }
 
 std::string BugreportPage::generateUniqueBugreportName() {
-    const char* deviceName = avdInfo_getName(getConsoleAgents()->settings->avdInfo());
+    const char* deviceName =
+            avdInfo_getName(getConsoleAgents()->settings->avdInfo());
     time_t now = System::get()->getUnixTime();
     char date[80];
     strftime(date, sizeof(date), "%Y-%m-%d-%H-%M-%S", localtime(&now));

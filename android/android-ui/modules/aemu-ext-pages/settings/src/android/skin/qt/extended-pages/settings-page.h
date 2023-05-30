@@ -15,8 +15,7 @@
 #include <QString>                   // for QString
 #include <QWidget>                   // for QWidget
 #include <memory>                    // for unique_ptr, shared_ptr
-
-#include "android/settings-agent.h"  // for SettingsTheme
+#include "host-common/qt_ui_defs.h"
 
 namespace android {
 namespace metrics {

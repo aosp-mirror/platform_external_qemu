@@ -86,6 +86,7 @@ extern "C" {
 #include "android/emulation/control/EmulatorService.h"
 #include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/UiController.h"
+#include "android/emulation/control/virtualscene/VirtualSceneService.h"
 #include "android/emulation/control/adb/AdbService.h"
 #include "android/emulation/control/incubating/CarService.h"
 #include "android/emulation/control/incubating/ModemService.h"
@@ -387,6 +388,7 @@ int qemu_setup_grpc() {
             getConsoleAgents());
     auto bluetooth =
             android::emulation::bluetooth::getEmulatedBluetoothService();
+    auto virtualScene = android::emulation::control::incubating::getVirtualSceneService();
     auto builder =
             EmulatorControllerService::Builder()
                     .withConsoleAgents(getConsoleAgents())
@@ -414,6 +416,7 @@ int qemu_setup_grpc() {
                     .withService(stats)
                     .withService(car)
                     .withService(sensor)
+                    .withService(virtualScene)
                     .withSecureService(adb)
                     .withService(bluetooth);
 

@@ -8,22 +8,21 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
 #pragma once
 
-#include <stddef.h>                                      // for size_t
-#include <QObject>                                       // for Q_OBJECT, slots
-#include <QString>                                       // for QString
-#include <QWidget>                                       // for QWidget
-#include <memory>                                        // for shared_ptr
-#include <string>                                        // for string
+#include <stddef.h>
+#include <QString>
+#include <QWidget>
+#include <memory>
+#include <string>
 #include <string_view>
 
-#include "android/avd/BugreportInfo.h"                   // for BugreportInfo
+#include "aemu/base/async/RecurrentTask.h"
+#include "android/avd/BugreportInfo.h"
+#include "android/emulation/control/adb/AdbInterface.h"
+#include "android/skin/qt/themed-widget.h"
+#include "host-common/qt_ui_defs.h"
 
-#include "aemu/base/async/RecurrentTask.h"            // for RecurrentTask
-#include "android/emulation/control/adb/AdbInterface.h"  // for AdbCommandPtr
-#include "android/settings-agent.h"                      // for SettingsTheme
 
 namespace android {
 namespace metrics {
@@ -32,16 +31,12 @@ class UiEventTracker;
 }  // namespace android
 
 using android::metrics::UiEventTracker;
-class QEvent;
 class DeviceDetailPage;
-class QObject;
-class QShowEvent;
-
 namespace Ui {
 class BugreportPage;
 }  // namespace Ui
 
-class BugreportPage : public QWidget {
+class BugreportPage : public ThemedWidget {
     Q_OBJECT
 
 public:
@@ -49,7 +44,7 @@ public:
     ~BugreportPage();
     void setAdbInterface(android::emulation::AdbInterface* adb);
     void showEvent(QShowEvent* event) override;
-    void updateTheme();
+    void updateTheme() override;
 
     struct SavingStates {
         std::string saveLocation;

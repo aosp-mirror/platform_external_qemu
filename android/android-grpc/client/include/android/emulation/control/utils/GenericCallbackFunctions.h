@@ -32,7 +32,7 @@ using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
  * @return The equivalent Abseil status object.
  */
 static absl::Status ConvertGrpcStatusToAbseilStatus(
-        const grpc::Status& grpc_status) {
+        const ::grpc::Status& grpc_status) {
     return absl::Status(static_cast<absl::StatusCode>(grpc_status.error_code()),
                         grpc_status.error_message());
 }

@@ -1,15 +1,3 @@
-# android_qt_lib(
-#   TARGET ext-page-snapshot-grpc
-#   SRC android/skin/qt/extended-pages-grpc/snapshot-page-grpc.cpp
-#       android/skin/qt/extended-pages-grpc/snapshot-page-grpc.ui
-#   DEPS android-emu
-#        qemu-host-common-headers
-#        Qt${QT_VERSION_MAJOR}::Core
-#        Qt${QT_VERSION_MAJOR}::Widgets
-#        snapshot-service-client
-#        ui::gl-qt-bridge
-#        ui::widgets)
-
 android_qt_lib(
   TARGET aemu-ui-qt-base
   ALIAS emulator-libui LICENSE Apache-2.0
@@ -36,8 +24,8 @@ android_qt_lib(
       android/skin/qt/emulator-overlay.cpp
       android/skin/qt/emulator-qt-window.cpp
       android/skin/qt/event-qt.cpp
-      android/skin/qt/extended-window.cpp
       android/skin/qt/extended-page-factory.cpp
+      android/skin/qt/extended-window.cpp
       android/skin/qt/extended.ui
       android/skin/qt/FramelessDetector.cpp
       android/skin/qt/init-qt.cpp
@@ -74,8 +62,11 @@ android_qt_lib(
        android-emu-protobuf
        android-hw-config
        ext-page-battery
+       ext-page-battery-grpc
        ext-page-bugreport
+       ext-page-bugreport-grpc
        ext-page-camera
+       ext-page-camera-grpc
        ext-page-car
        ext-page-cellular
        ext-page-display
