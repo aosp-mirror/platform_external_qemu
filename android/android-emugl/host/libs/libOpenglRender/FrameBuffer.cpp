@@ -378,8 +378,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             }
             bool enableAstcLdrEmulation = emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanAstcLdrEmulation);
             goldfish_vk::setEnableAstcLdrEmulation(vkEmu, enableAstcLdrEmulation);
+            fb->m_glRenderer =
+                    std::string(vkEmu->deviceInfo.physdevProps.deviceName);
         }
-        fb->m_glRenderer = std::string(vkEmu->deviceInfo.physdevProps.deviceName);
     }
 
     if (s_egl.eglUseOsEglApi)
