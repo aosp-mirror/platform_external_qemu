@@ -589,7 +589,7 @@ USB_KEYMAP_DECLARATION {
 
   // EVDEV Codes for phones
   //            USB     evdev    XKB     Win     Mac   Code
-  // Note, non printable should be added to android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp as well
+  // Note, non printable should be added to android/android-grpc/android/emulation/control/keyboard/KeyEventSender.cpp as well
   // otherwise the Dom translation will fail.
   USB_KEYMAP(0x0c0224, 0x009e, 0x0000, 0x0000, 0xffff, "GoBack", GO_BACK),  // AC Back in usb
   USB_KEYMAP(0x0c01aa, 0x0066, 0x006e, 0xe047, 0x0073, "GoHome", GO_HOME), // Same as AL Desktop ("Home" in android)

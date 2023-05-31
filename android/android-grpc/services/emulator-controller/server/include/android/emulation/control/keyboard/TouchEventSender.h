@@ -1,45 +1,49 @@
-
-#include <unordered_set>      // for unordered_set
-#include <unordered_map>      // for unordered_map
-#include "android/console.h"  // for AndroidConsoleAgents
+// Copyright (C) 2023 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#pragma once
 #include <chrono>
+#include <unordered_map>
+
+#include "android/emulation/control/keyboard/EventSender.h"
+#include "emulator_controller.pb.h"
 
 namespace android {
-namespace base {
-class Looper;
-}  // namespace base
-
 namespace emulation {
 namespace control {
-class TouchEvent;
 
-using base::Looper;
-
-// Class that sends touch events on the current looper.
-class TouchEventSender {
+// Class that sends Touch events on the current looper.
+class TouchEventSender : public EventSender<TouchEvent> {
 public:
-    TouchEventSender(const AndroidConsoleAgents* const consoleAgents);
-    ~TouchEventSender();
-    bool send(const TouchEvent* request);
-    bool sendOnThisThread(const TouchEvent* request);
+    TouchEventSender(const AndroidConsoleAgents* const consoleAgents)
+        : EventSender<TouchEvent>(consoleAgents){};
+    ~TouchEventSender() = default;
+
+protected:
+    void doSend(const TouchEvent touch) override;
 
 private:
-    void doSend(const TouchEvent touch);
     int pickNextSlot();
-
-    const AndroidConsoleAgents* const mAgents;
 
     // Set of active slots..
     std::unordered_set<int> mUsedSlots;
 
-     // Maps external touch id --> linux slot
+    // Maps external touch id --> linux slot
     std::unordered_map<int, int> mIdMap;
 
     // Last time external touch id was used, we use this to expunge
     // dangling events
     std::unordered_map<int, std::chrono::seconds> mIdLastUsedEpoch;
-
-    Looper* mLooper;
 
     // We expire touch events after 120 seconds. This means that if
     // a given id has not received any updates in 120 seconds it will

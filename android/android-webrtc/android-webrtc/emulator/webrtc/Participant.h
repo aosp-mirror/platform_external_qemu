@@ -24,7 +24,7 @@
 #include <unordered_map>                    // for unordered_map
 
 #include "android/console.h"
-#include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
+#include "android/emulation/control/keyboard/KeyEventSender.h"
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "emulator/webrtc/RtcConnection.h"  // for json, RtcConnection (ptr ...
 #include "nlohmann/json.hpp"                // for json
@@ -83,7 +83,7 @@ public:
 private:
     const AndroidConsoleAgents* mAgents;
 
-    android::emulation::control::keyboard::EmulatorKeyEventSender
+    android::emulation::control::keyboard::KeyEventSender
             mKeyEventSender;
     android::emulation::control::TouchEventSender mTouchEventSender;
     scoped_refptr<::webrtc::DataChannelInterface> mChannel;
