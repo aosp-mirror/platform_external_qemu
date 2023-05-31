@@ -278,15 +278,15 @@ target_include_directories(gfxstream_egl_headers
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/gl-host-common
                  ${GFXSTREAM_PREFIX}-gl-host-common)
 # Include external/gfxstream-protocols project
-add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../gfxstream-protocols
-                 gfxstream-protocols)
+add_subdirectory(${GFXSTREAM_REPO_ROOT}/common
+                 ${GFXSTREAM_PREFIX}-common)
 # Include hardware/google/aemu project
 set(AEMU_COMMON_BUILD_CONFIG "qemu-android" CACHE STRING "")
 set(GFXSTREAM_REPO_ROOT
     ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream)
-set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
 set(GFXSTREAM_PROTOCOLS_DIR
-    ${ANDROID_QEMU2_TOP_DIR}/../../external/gfxstream-protocols)
+    ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream)
+set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu
                  aemu_common)
 if(ENABLE_VKCEREAL_TESTS)
