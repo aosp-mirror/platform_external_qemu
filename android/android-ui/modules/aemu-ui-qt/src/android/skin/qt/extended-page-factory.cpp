@@ -25,6 +25,8 @@
 #include "android/skin/qt/extended-pages/camera-page.h"
 #include "android/skin/qt/extended-pages/cellular-page-grpc.h"
 #include "android/skin/qt/extended-pages/cellular-page.h"
+#include "android/skin/qt/extended-pages/finger-page-grpc.h"
+#include "android/skin/qt/extended-pages/finger-page.h"
 #include "android/skin/qt/extended-pages/snapshot-page-grpc.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "ui_extended.h"
@@ -94,7 +96,7 @@ static void constructDefault(Ui::ExtendedControls* ui,
             // replaceWidget(ui->stackedWidget, ui->, new xx());
             break;
         case PANE_IDX_FINGER:
-            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            replaceWidget(ui->stackedWidget, ui->finger_page, new FingerPage());
             break;
         case PANE_IDX_VIRT_SENSORS:
             // replaceWidget(ui->stackedWidget, ui->, new xx());
@@ -171,7 +173,7 @@ static void constructGrpc(Ui::ExtendedControls* ui, ExtendedWindowPane window) {
             // replaceWidget(ui->stackedWidget, ui->, new xx());
             break;
         case PANE_IDX_FINGER:
-            // replaceWidget(ui->stackedWidget, ui->, new xx());
+            replaceWidget(ui->stackedWidget, ui->finger_page, new FingerPageGrpc());
             break;
         case PANE_IDX_VIRT_SENSORS:
             // replaceWidget(ui->stackedWidget, ui->, new xx());

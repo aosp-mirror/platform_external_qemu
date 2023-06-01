@@ -711,6 +711,7 @@ void ExtendedWindow::overrideUiObjects() {
     ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BUGREPORT);
     ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_CAMERA);
     ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_CELLULAR);
+    ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_FINGER);
 
     mExtendedInitialized = true;
 }

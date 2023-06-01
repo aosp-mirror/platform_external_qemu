@@ -73,7 +73,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="TvRemotePage" name="tvRemotePage"/>
    <widget class="RotaryInputPage" name="rotaryInputPage"/>
    <widget class="MicrophonePage" name="microphonePage"/>
-   <widget class="FingerPage" name="finger_page"/>
+   <widget class="QWidget" name="finger_page"/>
    <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
    <widget class="QWidget" name="snapshotPage"/>
    <widget class="QWidget" name="bugreportPage"/>

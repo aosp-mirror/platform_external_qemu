@@ -73,6 +73,7 @@ android_qt_lib(
        ext-page-display
        ext-page-dpad
        ext-page-finger
+       ext-page-finger-grpc
        ext-page-google-play
        ext-page-help
        ext-page-location-ui
