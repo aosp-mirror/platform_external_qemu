@@ -24,7 +24,7 @@
 
 #if DEBUG
 #include "android/utils/debug.h"
-#define D(...) VERBOSE_PRINT(surface, __VA_ARGS__)
+#define D(...) VERBOSE_PRINT(keys, __VA_ARGS__)
 #else
 #define D(...) ((void)0)
 #endif

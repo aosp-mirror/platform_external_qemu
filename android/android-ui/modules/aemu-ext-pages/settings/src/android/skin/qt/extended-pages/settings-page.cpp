@@ -120,6 +120,45 @@ bool SettingsPage::getPauseAvdWhenMinimized() {
     return pause;
 }
 
+static void saveEnforceKeycodeForwarding(bool force) {
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(
+                Ui::Settings::PER_AVD_ENFORCE_KEYCODE_FORWARDING, force);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::PER_AVD_ENFORCE_KEYCODE_FORWARDING,
+                          force);
+    }
+}
+
+bool SettingsPage::getEnforceKeycodeForwarding() {
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
+    bool value = false;
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        value = avdSpecificSettings
+                        .value(Ui::Settings::PER_AVD_ENFORCE_KEYCODE_FORWARDING,
+                               false)
+                        .toBool();
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        value = settings.value(Ui::Settings::PER_AVD_ENFORCE_KEYCODE_FORWARDING,
+                               false)
+                        .toInt();
+    }
+    return value;
+}
+
 SettingsPage::SettingsPage(QWidget* parent)
     : QWidget(parent),
       mAdb(nullptr),
@@ -383,6 +422,12 @@ SettingsPage::SettingsPage(QWidget* parent)
     mUi->set_disablePinchToZoom->setChecked(disablePinchToZoom);
     on_set_disablePinchToZoom_toggled(disablePinchToZoom);
 
+    if (!getConsoleAgents()
+                 ->settings->android_cmdLineOptions()
+                 ->qt_hide_window) {
+        const auto enforceKeycodeForwarding = getEnforceKeycodeForwarding();
+        on_set_enforceKeycodeForwarding_toggled(enforceKeycodeForwarding);
+    }
     // Connect the tab signaling
     connect(mUi->set_tabs, SIGNAL(currentChanged(int)), this,
             SLOT(on_tabChanged()));
@@ -798,6 +843,16 @@ void SettingsPage::on_set_disablePinchToZoom_toggled(bool checked) {
     emit disablePinchToZoomChanged(checked);
 }
 
+void SettingsPage::on_set_enforceKeycodeForwarding_toggled(bool checked) {
+    if (checked) {
+        dinfo("Enforce emulator to use the keycode forwarding feature. Host "
+              "keyboard events will be translated directly to linux keycode "
+              "and sent to guest AVD as is.");
+    }
+    saveEnforceKeycodeForwarding(checked);
+    getConsoleAgents()->settings->set_keycode_forwarding(checked);
+}
+
 void SettingsPage::disableForEmbeddedEmulator() {
     if (getConsoleAgents()
                 ->settings->android_cmdLineOptions()
@@ -805,5 +860,7 @@ void SettingsPage::disableForEmbeddedEmulator() {
         for (auto* w : {mUi->general_tab, mUi->proxy_tab}) {
             mUi->set_tabs->removeTab(mUi->set_tabs->indexOf(w));
         }
+        mUi->set_enforceKeycodeForwardingTitle->hide();
+        mUi->set_enforceKeycodeForwarding->hide();
     }
 }

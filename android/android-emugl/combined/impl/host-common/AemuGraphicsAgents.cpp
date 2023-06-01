@@ -100,7 +100,7 @@ static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
                             language || country || locale;
                 },
         .inject_userConfig = [](AUserConfig* config) { s_userConfig = config; },
-        .set_keycode_forwading =
+        .set_keycode_forwarding =
                 [](bool enabled) { sKeyCodeForwarding = enabled; },
         .inject_AvdInfo = [](AvdInfo* avd) { sAndroid_avdInfo = avd; },
 
