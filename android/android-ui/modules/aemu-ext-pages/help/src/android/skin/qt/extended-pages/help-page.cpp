@@ -52,8 +52,8 @@ static const char DOCS_URL[] =
         "http://developer.android.com/r/studio-ui/emulator.html";
 
 static const char SEND_FEEDBACK_URL[] =
-        "https://issuetracker.google.com/issues/"
-        "new?component=192727&description=%s&&template=872501";
+        "https://issuetracker.google.com/issues/new"
+        "?component=192708&description=%s&template=840533";
 
 static const char FEATURE_REQUEST_TEMPLATE[] =
         R"(Feature Request:
