@@ -1,12 +1,18 @@
 #ifndef VIRTIO_GOLDFISH_PIPE
 #define VIRTIO_GOLDFISH_PIPE
 
+#ifdef CONFIG_STREAM_RENDERER
+
+#include "render-utils/virtio-gpu-gfxstream-renderer.h"
+#include "render-utils/virtio-gpu-gfxstream-renderer-unstable.h"
+
+#else
+
 /* An override of virtio-gpu-3d (virgl) that runs goldfish pipe.  One could
  * implement an actual virtio goldfish pipe, but this hijacking of virgl  is
  * done in order to avoid any guest kernel changes. */
 
 #include <virglrenderer.h>
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,6 +35,7 @@ void virtio_goldfish_pipe_reset(void* hwpipe, void* hostpipe);
 #else
 #define VG_EXPORT __attribute__((visibility("default")))
 #endif
+
 
 VG_EXPORT int pipe_virgl_renderer_init(void *cookie,
                                        int flags,
@@ -131,4 +138,16 @@ enum RendererFlags {
     GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB = 1 << 23,
 };
 
+#endif  // CONFIG_STREAM_RENDERER
+
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+int goldfish_virtio_init(void);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
+#endif  // VIRTIO_GOLDFISH_PIPE

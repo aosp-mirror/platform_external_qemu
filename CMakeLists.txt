@@ -678,6 +678,10 @@ target_compile_definitions(
             "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION" "${TRACE_CONFIG}")
 target_compile_definitions(android-qemu-deps INTERFACE # Enable VIRGL
                                                        "-DCONFIG_VIRGL")
+if (OPTION_GFXSTREAM_BACKEND)
+  target_compile_definitions(android-qemu-deps INTERFACE # Enable gfxstream stream renderer
+                                                         "-DCONFIG_STREAM_RENDERER")
+endif()
 
 target_compile_options(
   android-qemu-deps

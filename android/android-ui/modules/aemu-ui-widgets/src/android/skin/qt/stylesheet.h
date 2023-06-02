@@ -11,7 +11,8 @@
 
 #pragma once
 
-#include "android/settings-agent.h"  // for SettingsTheme
+#include "host-common/qt_ui_defs.h"
+
 
 class QString;
 template <class Key, class T> class QHash;

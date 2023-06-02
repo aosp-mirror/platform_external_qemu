@@ -428,7 +428,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_unix_pipes_init();
     android_init_opengles_pipe();
 
-    if (getConsoleAgents()->settings->android_qemu_mode()) {
+    if (fc::isEnabled(fc::Minigbm)) {
+        android_opengles_pipe_set_recv_mode(2 /* virtio-gpu*/);
+    } else if (getConsoleAgents()->settings->android_qemu_mode()) {
         android_opengles_pipe_set_recv_mode(0 /* android */);
     } else {
         android_opengles_pipe_set_recv_mode(1 /* fuchsia */);

@@ -1,7 +1,7 @@
 set(ANDROID_EMUGL_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(GOLDFISH_EMUGL_DIR
     ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/goldfish-opengl/)
-set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal)
+set(GFXSTREAM_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream)
 
 # We start of defining an interface library that defines all the compiler
 # settings we wish to use for all libs. please keep this at a bare minimum!

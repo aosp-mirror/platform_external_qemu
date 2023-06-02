@@ -74,6 +74,8 @@ using android::emulation::asg::ConsumerCallbacks;
 /* Name of the GLES rendering library we're going to use */
 #ifdef AEMU_GFXSTREAM_BACKEND
 #define RENDERER_LIB_NAME "libgfxstream_backend"
+
+static void (*gfxstream_android_setOpenglesRenderer)(gfxstream::RendererPtr* ptr) = NULL;
 #else
 #define RENDERER_LIB_NAME "libOpenglRender"
 #endif  // AEMU_GFXSTREAM_BACKEND
@@ -106,6 +108,24 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
     LIST_RENDER_API_FUNCTIONS(FUNCTION_)
 #undef FUNCTION_
 
+#ifdef AEMU_GFXSTREAM_BACKEND
+#define LIST_GFXSTREAM_MISC_FUNCTIONS(X) \
+        X(void, android_setOpenglesRenderer, (gfxstream::RendererPtr*), ()) \
+
+#define FUNCTION_(ret, name, sig, params) \
+    symbol = adynamicLibrary_findSymbol(rendererLib, #name, &error); \
+    if (symbol != NULL) { \
+        using type = ret(sig); \
+        gfxstream_##name = (type*)symbol; \
+    } else { \
+        E("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
+        free(error); \
+        return -1; \
+    }
+    LIST_GFXSTREAM_MISC_FUNCTIONS(FUNCTION_)
+#undef LIST_GFXSTREAM_MISC_FUNCTIONS
+#undef FUNCTION_
+#endif  // AEMU_GFXSTREAM_BACKEND
     return 0;
 }
 
@@ -283,6 +303,9 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
                                 android::base::MemoryTracker::get());
 
     sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
+#ifdef AEMU_GFXSTREAM_BACKEND
+    gfxstream_android_setOpenglesRenderer(&sRenderer);
+#endif  // AEMU_GFXSTREAM_BACKEND
 
     sEgl = (const EGLDispatch *)sRenderer->getEglDispatch();
     sGlesv2 = (const GLESv2Dispatch *)sRenderer->getGles2Dispatch();
@@ -570,9 +593,15 @@ bool android_screenShot(const char* dirname, uint32_t displayId)
     return false;
 }
 
+extern "C" {
 const gfxstream::RendererPtr& android_getOpenglesRenderer() {
     return sRenderer;
 }
+
+void android_setOpenglesRenderer(gfxstream::RendererPtr* ptr) {
+    sRenderer = *ptr;
+}
+}  // extern "C"
 
 void android_onGuestGraphicsProcessCreate(uint64_t puid) {
     if (sRenderer) {

@@ -1110,20 +1110,12 @@ static void skin_window_map_to_scale(SkinWindow* window, int* x, int* y) {
 }
 
 static void add_mouse_event(SkinWindow* window, const SkinEventMouseData* mouse, int button_pressed) {
-    int32_t x, y;
-    if (feature_is_enabled(kFeature_VirtioMouse)) {
-        if (!window->mouse.tracking) {
-            return;
-        }
-        x = mouse->xrel;
-        y = mouse->yrel;
-    } else if (feature_is_enabled(kFeature_VirtioTablet)) {
-        x = mouse->x;
-        y = mouse->y;
-    } else {
+    if (!window->mouse.tracking) {
         return;
     }
-
+    int32_t x, y;
+    x = mouse->xrel;
+    y = mouse->yrel;
     window->mouse.button_pressed = button_pressed;
     skin_window_map_to_scale(window, &x, &y);
 
@@ -2423,7 +2415,7 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
                ev->u.mouse.x, ev->u.mouse.y, window->finger.pos.x,
                window->finger.pos.y, window->finger.inside);
 #endif
-            if (feature_is_enabled(kFeature_VirtioMouse) || feature_is_enabled(kFeature_VirtioTablet)) {
+            if (feature_is_enabled(kFeature_VirtioMouse)) {
                 add_mouse_event(window, &ev->u.mouse, mouse->button_pressed | 1 << (ev->u.mouse.button));
             } else if (finger->inside) {
                 // The click is inside the touch screen
@@ -2535,7 +2527,7 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
                 window->button.pressed = NULL;
                 window->button.hover = NULL;
                 skin_window_move_mouse(window, finger, mx, my);
-            } else if (feature_is_enabled(kFeature_VirtioMouse) || feature_is_enabled(kFeature_VirtioTablet)) {
+            } else if (feature_is_enabled(kFeature_VirtioMouse)) {
                 skin_window_move_mouse(window, finger, mx, my);
                 add_mouse_event(window, &ev->u.mouse, mouse->button_pressed & ~(1 << ev->u.mouse.button));
             } else if (finger->tracking) {
@@ -2580,7 +2572,7 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
             skin_window_map_to_scale(window, &mx, &my);
             if (!window->button.pressed) {
                 skin_window_move_mouse(window, finger, mx, my);
-                if (feature_is_enabled(kFeature_VirtioMouse) || feature_is_enabled(kFeature_VirtioTablet)) {
+                if (feature_is_enabled(kFeature_VirtioMouse)) {
                     add_mouse_event(window, &ev->u.mouse, mouse->button_pressed);
                 } else if (finger->tracking) {
                     add_finger_event(window, finger, finger->pos.x,
