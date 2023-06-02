@@ -85,7 +85,12 @@ public:
             m_uniqueId = loadStream->getBe64();
             m_hasData = (loadStream->getByte() != 0);
         } else {
-            m_uniqueId = ++s_headId;
+            if (flags & ANDROID_PIPE_VIRTIO_GPU_BIT) {
+                m_uniqueId = (uint64_t)(uintptr_t)hwPipe;
+                s_headId = m_uniqueId;
+            } else {
+                m_uniqueId = ++s_headId;
+            }
         }
         AutoLock lock(sRegistry.lock);
         sRegistry.ids.insert(m_uniqueId);

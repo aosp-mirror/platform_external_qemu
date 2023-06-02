@@ -59,10 +59,11 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/emulator",
       "args": [
-        "@33",
+        "@32",
         "-gpu",
-        "swiftshader_indirect".
-        "-no-window"
+        "swiftshader_indirect", "-no-snapshot",
+        "-grpc", "8554",
+        "-grpc-ui"
       ],
       "cwd": "${workspaceFolder}/build",
       "stopAtEntry": false,

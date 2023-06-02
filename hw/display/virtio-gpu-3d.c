@@ -32,7 +32,11 @@ static void virgl_cmd_create_resource_2d(VirtIOGPU *g,
                                          struct virtio_gpu_ctrl_command *cmd)
 {
     struct virtio_gpu_resource_create_2d c2d;
+#ifdef CONFIG_STREAM_RENDERER
+    struct stream_renderer_resource_create_args args;
+#else
     struct virgl_renderer_resource_create_args args;
+#endif  // CONFIG_STREAM_RENDERER
 
     VIRTIO_GPU_FILL_CMD(c2d);
     trace_virtio_gpu_cmd_res_create_2d(c2d.resource_id, c2d.format,
@@ -48,14 +52,22 @@ static void virgl_cmd_create_resource_2d(VirtIOGPU *g,
     args.last_level = 0;
     args.nr_samples = 0;
     args.flags = VIRTIO_GPU_RESOURCE_FLAG_Y_0_TOP;
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_resource_create(&args, NULL, 0);
+#else
     g->virgl->virgl_renderer_resource_create(&args, NULL, 0);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 static void virgl_cmd_create_resource_3d(VirtIOGPU *g,
                                          struct virtio_gpu_ctrl_command *cmd)
 {
     struct virtio_gpu_resource_create_3d c3d;
+#ifdef CONFIG_STREAM_RENDERER
+    struct stream_renderer_resource_create_args args;
+#else
     struct virgl_renderer_resource_create_args args;
+#endif  // CONFIG_STREAM_RENDERER
 
     VIRTIO_GPU_FILL_CMD(c3d);
     trace_virtio_gpu_cmd_res_create_3d(c3d.resource_id, c3d.format,
@@ -72,7 +84,11 @@ static void virgl_cmd_create_resource_3d(VirtIOGPU *g,
     args.last_level = c3d.last_level;
     args.nr_samples = c3d.nr_samples;
     args.flags = c3d.flags;
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_resource_create(&args, NULL, 0);
+#else
     g->virgl->virgl_renderer_resource_create(&args, NULL, 0);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 static void virgl_cmd_resource_unref(VirtIOGPU *g,
@@ -85,13 +101,23 @@ static void virgl_cmd_resource_unref(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(unref);
     trace_virtio_gpu_cmd_res_unref(unref.resource_id);
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_resource_detach_iov(unref.resource_id,
+                                       &res_iovs,
+                                       &num_iovs);
+#else
     g->virgl->virgl_renderer_resource_detach_iov(unref.resource_id,
                                        &res_iovs,
                                        &num_iovs);
+#endif  // CONFIG_STREAM_RENDERER
     if (res_iovs != NULL && num_iovs != 0) {
         virtio_gpu_cleanup_mapping_iov(res_iovs, num_iovs);
     }
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_resource_unref(unref.resource_id);
+#else
     g->virgl->virgl_renderer_resource_unref(unref.resource_id);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 static void virgl_cmd_context_create(VirtIOGPU *g,
@@ -103,8 +129,12 @@ static void virgl_cmd_context_create(VirtIOGPU *g,
     trace_virtio_gpu_cmd_ctx_create(cc.hdr.ctx_id,
                                     cc.debug_name);
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_context_create(cc.hdr.ctx_id, cc.nlen, cc.debug_name, cc.context_init);
+#else
     g->virgl->virgl_renderer_context_create(cc.hdr.ctx_id, cc.nlen,
                                   cc.debug_name);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 static void virgl_cmd_context_destroy(VirtIOGPU *g,
@@ -115,7 +145,11 @@ static void virgl_cmd_context_destroy(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(cd);
     trace_virtio_gpu_cmd_ctx_destroy(cd.hdr.ctx_id);
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_context_destroy(cd.hdr.ctx_id);
+#else
     g->virgl->virgl_renderer_context_destroy(cd.hdr.ctx_id);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 static void virtio_gpu_rect_update(VirtIOGPU *g, int idx, int x, int y,
@@ -144,9 +178,13 @@ static void virgl_cmd_resource_flush(VirtIOGPU *g,
         virtio_gpu_rect_update(g, i, rf.r.x, rf.r.y, rf.r.width, rf.r.height);
 #ifdef CONFIG_ANDROID
         if (i == 0)
+#ifdef CONFIG_STREAM_RENDERER
+          stream_renderer_flush(rf.resource_id);
+#else
           stream_renderer_flush_resource_and_readback(rf.resource_id, rf.r.x, rf.r.y,
                                                       rf.r.width, rf.r.height,
                                                       NULL, 0);
+#endif  // CONFIG_STREAM_RENDERER
 #endif
     }
 }
@@ -155,7 +193,11 @@ static void virgl_cmd_set_scanout(VirtIOGPU *g,
                                   struct virtio_gpu_ctrl_command *cmd)
 {
     struct virtio_gpu_set_scanout ss;
+#ifdef CONFIG_STREAM_RENDERER
+    struct stream_renderer_resource_info info;
+#else
     struct virgl_renderer_resource_info info;
+#endif  // CONFIG_STREAM_RENDERER
     int ret;
 
     VIRTIO_GPU_FILL_CMD(ss);
@@ -172,7 +214,11 @@ static void virgl_cmd_set_scanout(VirtIOGPU *g,
     memset(&info, 0, sizeof(info));
 
     if (ss.resource_id && ss.r.width && ss.r.height) {
+#ifdef CONFIG_STREAM_RENDERER
+        ret = stream_renderer_resource_get_info(ss.resource_id, &info);
+#else
         ret = g->virgl->virgl_renderer_resource_get_info(ss.resource_id, &info);
+#endif  // CONFIG_STREAM_RENDERER
         if (ret == -1) {
             qemu_log_mask(LOG_GUEST_ERROR,
                           "%s: illegal resource specified %d\n",
@@ -182,7 +228,10 @@ static void virgl_cmd_set_scanout(VirtIOGPU *g,
         }
         qemu_console_resize(g->scanout[ss.scanout_id].con,
                             ss.r.width, ss.r.height);
+#ifdef CONFIG_STREAM_RENDERER
+#else
         g->virgl->virgl_renderer_force_ctx_0();
+#endif  // CONFIG_STREAM_RENDERER
         if (!g->virgl_as_proxy) dpy_gl_scanout_texture(g->scanout[ss.scanout_id].con, info.tex_id,
                                info.flags & 1 /* FIXME: Y_0_TOP */,
                                info.width, info.height,
@@ -223,7 +272,11 @@ static void virgl_cmd_submit_3d(VirtIOGPU *g,
         g->stats.bytes_3d += cs.size;
     }
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_submit_cmd(buf, cs.hdr.ctx_id, cs.size / 4);
+#else
     g->virgl->virgl_renderer_submit_cmd(buf, cs.hdr.ctx_id, cs.size / 4);
+#endif  // CONFIG_STREAM_RENDERER
 
 out:
     g_free(buf);
@@ -245,6 +298,15 @@ static void virgl_cmd_transfer_to_host_2d(VirtIOGPU *g,
     box.h = t2d.r.height;
     box.d = 1;
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_transfer_write_iov(t2d.resource_id,
+                                      0,
+                                      0,
+                                      0,
+                                      0,
+                                      (struct stream_renderer_box *)&box,
+                                      t2d.offset, NULL, 0);
+#else
     g->virgl->virgl_renderer_transfer_write_iov(t2d.resource_id,
                                       0,
                                       0,
@@ -252,6 +314,7 @@ static void virgl_cmd_transfer_to_host_2d(VirtIOGPU *g,
                                       0,
                                       (struct virgl_box *)&box,
                                       t2d.offset, NULL, 0);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 static void virgl_cmd_transfer_to_host_3d(VirtIOGPU *g,
@@ -262,6 +325,15 @@ static void virgl_cmd_transfer_to_host_3d(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(t3d);
     trace_virtio_gpu_cmd_res_xfer_toh_3d(t3d.resource_id);
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_transfer_write_iov(t3d.resource_id,
+                                      t3d.hdr.ctx_id,
+                                      t3d.level,
+                                      t3d.stride,
+                                      t3d.layer_stride,
+                                      (struct stream_renderer_box *)&t3d.box,
+                                      t3d.offset, NULL, 0);
+#else
     g->virgl->virgl_renderer_transfer_write_iov(t3d.resource_id,
                                       t3d.hdr.ctx_id,
                                       t3d.level,
@@ -269,6 +341,7 @@ static void virgl_cmd_transfer_to_host_3d(VirtIOGPU *g,
                                       t3d.layer_stride,
                                       (struct virgl_box *)&t3d.box,
                                       t3d.offset, NULL, 0);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 static void
@@ -280,6 +353,15 @@ virgl_cmd_transfer_from_host_3d(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(tf3d);
     trace_virtio_gpu_cmd_res_xfer_fromh_3d(tf3d.resource_id);
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_transfer_read_iov(tf3d.resource_id,
+                                     tf3d.hdr.ctx_id,
+                                     tf3d.level,
+                                     tf3d.stride,
+                                     tf3d.layer_stride,
+                                     (struct stream_renderer_box *)&tf3d.box,
+                                     tf3d.offset, NULL, 0);
+#else
     g->virgl->virgl_renderer_transfer_read_iov(tf3d.resource_id,
                                      tf3d.hdr.ctx_id,
                                      tf3d.level,
@@ -287,6 +369,7 @@ virgl_cmd_transfer_from_host_3d(VirtIOGPU *g,
                                      tf3d.layer_stride,
                                      (struct virgl_box *)&tf3d.box,
                                      tf3d.offset, NULL, 0);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 
@@ -307,8 +390,13 @@ static void virgl_resource_attach_backing(VirtIOGPU *g,
         return;
     }
 
+#ifdef CONFIG_STREAM_RENDERER
+    // TODO(joshuaduong): For snapshots, need to save guest physical address here
+    ret = stream_renderer_resource_attach_iov(att_rb.resource_id, res_iovs, att_rb.nr_entries);
+#else
     ret = g->virgl->virgl_renderer_resource_attach_iov_with_addrs(att_rb.resource_id,
                                              res_iovs, att_rb.nr_entries, addrs);
+#endif  // CONFIG_STREAM_RENDERER
 
     if (ret != 0)
         virtio_gpu_cleanup_mapping_iov(res_iovs, att_rb.nr_entries);
@@ -324,9 +412,15 @@ static void virgl_resource_detach_backing(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(detach_rb);
     trace_virtio_gpu_cmd_res_back_detach(detach_rb.resource_id);
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_resource_detach_iov(detach_rb.resource_id,
+                                       &res_iovs,
+                                       &num_iovs);
+#else
     g->virgl->virgl_renderer_resource_detach_iov(detach_rb.resource_id,
                                        &res_iovs,
                                        &num_iovs);
+#endif  // CONFIG_STREAM_RENDERER
     if (res_iovs == NULL || num_iovs == 0) {
         return;
     }
@@ -343,7 +437,11 @@ static void virgl_cmd_ctx_attach_resource(VirtIOGPU *g,
     trace_virtio_gpu_cmd_ctx_res_attach(att_res.hdr.ctx_id,
                                         att_res.resource_id);
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_ctx_attach_resource(att_res.hdr.ctx_id, att_res.resource_id);
+#else
     g->virgl->virgl_renderer_ctx_attach_resource(att_res.hdr.ctx_id, att_res.resource_id);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 static void virgl_cmd_ctx_detach_resource(VirtIOGPU *g,
@@ -355,7 +453,11 @@ static void virgl_cmd_ctx_detach_resource(VirtIOGPU *g,
     trace_virtio_gpu_cmd_ctx_res_detach(det_res.hdr.ctx_id,
                                         det_res.resource_id);
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_ctx_detach_resource(det_res.hdr.ctx_id, det_res.resource_id);
+#else
     g->virgl->virgl_renderer_ctx_detach_resource(det_res.hdr.ctx_id, det_res.resource_id);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 static void virgl_cmd_get_capset_info(VirtIOGPU *g,
@@ -369,14 +471,28 @@ static void virgl_cmd_get_capset_info(VirtIOGPU *g,
     memset(&resp, 0, sizeof(resp));
     if (info.capset_index == 0) {
         resp.capset_id = VIRTIO_GPU_CAPSET_VIRGL;
+#ifdef CONFIG_STREAM_RENDERER
+        resp.capset_id = 0;
+        resp.capset_max_version = 0;
+        stream_renderer_get_cap_set(resp.capset_id,
+                                   &resp.capset_max_version,
+                                   &resp.capset_max_size);
+#else
         g->virgl->virgl_renderer_get_cap_set(resp.capset_id,
                                    &resp.capset_max_version,
                                    &resp.capset_max_size);
+#endif  // CONFIG_STREAM_RENDERER
     } else if (info.capset_index == 1) {
         resp.capset_id = VIRTIO_GPU_CAPSET_VIRGL2;
+#ifdef CONFIG_STREAM_RENDERER
+        stream_renderer_get_cap_set(resp.capset_id,
+                                   &resp.capset_max_version,
+                                   &resp.capset_max_size);
+#else
         g->virgl->virgl_renderer_get_cap_set(resp.capset_id,
                                    &resp.capset_max_version,
                                    &resp.capset_max_size);
+#endif  // CONFIG_STREAM_RENDERER
     } else {
         resp.capset_max_version = 0;
         resp.capset_max_size = 0;
@@ -393,8 +509,19 @@ static void virgl_cmd_get_capset(VirtIOGPU *g,
     uint32_t max_ver = 0, max_size = 0;
     VIRTIO_GPU_FILL_CMD(gc);
 
+#ifdef CONFIG_STREAM_RENDERER
+    // stream_renderer capset is not compatible with virgl capset (b/282011056).
+    if (gc.capset_id != 0) {
+        fprintf(stderr, "stream_renderer virgl_capset=%u not supported\n", gc.capset_id);
+        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
+        return;
+    }
+    stream_renderer_get_cap_set(gc.capset_id, &max_ver,
+                               &max_size);
+#else
     g->virgl->virgl_renderer_get_cap_set(gc.capset_id, &max_ver,
                                &max_size);
+#endif  // CONFIG_STREAM_RENDERER
     if (!max_size) {
         cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
         return;
@@ -402,9 +529,15 @@ static void virgl_cmd_get_capset(VirtIOGPU *g,
 
     resp = g_malloc0(sizeof(*resp) + max_size);
     resp->hdr.type = VIRTIO_GPU_RESP_OK_CAPSET;
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_fill_caps(gc.capset_id,
+                             gc.capset_version,
+                             (void *)resp->capset_data);
+#else
     g->virgl->virgl_renderer_fill_caps(gc.capset_id,
                              gc.capset_version,
                              (void *)resp->capset_data);
+#endif  // CONFIG_STREAM_RENDERER
     virtio_gpu_ctrl_response(g, cmd, &resp->hdr, sizeof(*resp) + max_size);
     g_free(resp);
 }
@@ -415,9 +548,25 @@ static void virgl_cmd_resource_create_blob(VirtIOGPU *g,
     struct virtio_gpu_resource_create_blob cb;
     VIRTIO_GPU_FILL_CMD(cb);
 
+#ifdef CONFIG_STREAM_RENDERER
+    struct stream_renderer_create_blob cblob;
+    cblob.blob_mem = cb.blob_mem;
+    cblob.blob_flags = cb.blob_flags;
+    cblob.blob_id = cb.blob_id;
+    cblob.size = cb.size;
+
+    stream_renderer_create_blob(
+        cb.hdr.ctx_id,
+        cb.resource_id,
+        &cblob,
+        NULL /* iovecs */,
+        0 /* num_iovs */,
+        NULL /* handle */);
+#else
     g->virgl->virgl_renderer_resource_create_v2(
         cb.resource_id,
         cb.blob_id);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 #define VIRTIO_GPU_MAX_RAM_SLOTS 2048
@@ -506,7 +655,11 @@ static void virgl_cmd_resource_map(VirtIOGPU *g,
     uint64_t size;
     uint64_t offset = m.offset;
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_resource_map(m.resource_id, &hva, &size);
+#else
     g->virgl->virgl_renderer_resource_map(m.resource_id, &hva, &size);
+#endif  // CONFIG_STREAM_RENDERER
 
     if (!hva || !size) {
         fprintf(stderr, "%s: failed for resource %u\n", __func__, m.resource_id);
@@ -546,7 +699,11 @@ static void virgl_cmd_resource_unmap(VirtIOGPU *g,
         &g->host_coherent_memory,
         u.resource_id);
 
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_resource_unmap(u.resource_id);
+#else
     g->virgl->virgl_renderer_resource_unmap(u.resource_id);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
@@ -554,11 +711,10 @@ void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
 {
     VIRTIO_GPU_FILL_CMD(cmd->cmd_hdr);
 
-    cmd->waiting = g->renderer_blocked;
-    if (cmd->waiting) {
-        return;
-    }
+#ifdef CONFIG_STREAM_RENDERER
+#else
     g->virgl->virgl_renderer_force_ctx_0();
+#endif  // CONFIG_STREAM_RENDERER
     switch (cmd->cmd_hdr.type) {
     case VIRTIO_GPU_CMD_CTX_CREATE:
         virgl_cmd_context_create(g, cmd);
@@ -648,7 +804,16 @@ void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
     }
 
     trace_virtio_gpu_fence_ctrl(cmd->cmd_hdr.fence_id, cmd->cmd_hdr.type);
+#ifdef CONFIG_STREAM_RENDERER
+    struct stream_renderer_fence fence = {0};
+    fence.flags = cmd->cmd_hdr.flags;
+    fence.fence_id = cmd->cmd_hdr.fence_id;
+    fence.ctx_id = cmd->cmd_hdr.ctx_id;
+    fence.ring_idx = cmd->cmd_hdr.ring_idx;
+    stream_renderer_create_fence(&fence);
+#else
     g->virgl->virgl_renderer_create_fence(cmd->cmd_hdr.fence_id, cmd->cmd_hdr.type);
+#endif  // CONFIG_STREAM_RENDERER
 }
 
 void virgl_write_fence(void *opaque, uint32_t fence)
@@ -756,22 +921,6 @@ static void virtio_gpu_print_stats(void *opaque)
     timer_mod(g->print_stats, qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + 1000);
 }
 
-static void virtio_gpu_fence_poll(void *opaque)
-{
-    VirtIOGPU *g = opaque;
-
-    g->virgl->virgl_renderer_poll();
-    virtio_gpu_process_cmdq(g);
-    if (!QTAILQ_EMPTY(&g->cmdq) || !QTAILQ_EMPTY(&g->fenceq)) {
-        timer_mod(g->fence_poll, qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + 10);
-    }
-}
-
-void virtio_gpu_virgl_fence_poll(VirtIOGPU *g)
-{
-    virtio_gpu_fence_poll(g);
-}
-
 void virtio_gpu_virgl_reset(VirtIOGPU *g)
 {
     int i;
@@ -803,18 +952,88 @@ void virtio_gpu_gl_block(void *opaque, bool block)
     }
 }
 
+#ifdef CONFIG_STREAM_RENDERER
+struct stream_renderer_aio_data {
+    VirtIOGPU *g;
+    struct stream_renderer_fence fence;
+};
+
+static void
+stream_renderer_aio_cb(void *opaque)
+{
+    struct stream_renderer_aio_data *data =  (struct stream_renderer_aio_data *)opaque;
+    VirtIOGPU *g = data->g;
+    struct stream_renderer_fence fence_data = data->fence;
+    struct virtio_gpu_ctrl_command *cmd, *tmp;
+
+    uint32_t signaled_ctx_specific = fence_data.flags &
+                                     STREAM_RENDERER_FLAG_FENCE_RING_IDX;
+
+    // TODO(joshuaduong): In theory, we shouldn't need ctrl_return_lock because we schedule this
+    // callback on the main thread. But somehow CtsGraphicsTestCases are hanging without this lock.
+    // Need to figure out the cause and remove this lock if possible.
+    qemu_rec_mutex_lock(&g->ctrl_return_lock);
+    QTAILQ_FOREACH_SAFE(cmd, &g->fenceq, next, tmp) {
+        /*
+         * Due to context specific timelines.
+         */
+        uint32_t target_ctx_specific = cmd->cmd_hdr.flags &
+                                       STREAM_RENDERER_FLAG_FENCE_RING_IDX;
+
+        if (signaled_ctx_specific != target_ctx_specific) {
+            continue;
+        }
+
+        if (signaled_ctx_specific &&
+           (cmd->cmd_hdr.ring_idx != fence_data.ring_idx)) {
+            continue;
+        }
+
+        if (cmd->cmd_hdr.fence_id > fence_data.fence_id) {
+            continue;
+        }
+
+        trace_virtio_gpu_fence_resp(cmd->cmd_hdr.fence_id);
+        virtio_gpu_ctrl_response_nodata(g, cmd, VIRTIO_GPU_RESP_OK_NODATA);
+        QTAILQ_REMOVE(&g->fenceq, cmd, next);
+        g_free(cmd);
+    }
+
+    g_free(data);
+    qemu_rec_mutex_lock(&g->ctrl_return_lock);
+}
+
+static void stream_renderer_write_fence(void* opaque,
+                                        struct stream_renderer_fence* fence_data) {
+    struct stream_renderer_aio_data *data;
+    VirtIOGPU *g = (VirtIOGPU *)opaque;
+
+    data = g_new0(struct stream_renderer_aio_data, 1);
+    data->g = g;
+    data->fence = *fence_data;
+    aio_bh_schedule_oneshot(g->ctx, stream_renderer_aio_cb, (void *)data);
+}
+#endif  // CONFIG_STREAM_RENDERER
 int virtio_gpu_virgl_init(VirtIOGPU *g)
 {
     int ret;
 
+#ifdef CONFIG_STREAM_RENDERER
+    struct stream_renderer_param params[] = {
+        {STREAM_RENDERER_PARAM_USER_DATA, (uintptr_t)(g)},
+        {STREAM_RENDERER_PARAM_RENDERER_FLAGS, 0},
+        {STREAM_RENDERER_PARAM_FENCE_CALLBACK, (uintptr_t)(&stream_renderer_write_fence)},
+        {STREAM_RENDERER_SKIP_OPENGLES_INIT, 1},
+    };
+    ret = stream_renderer_init(&params[0], 4);
+    g->ctx = qemu_get_aio_context();
+#else
     ret = g->virgl->virgl_renderer_init(
         g, 0, g->gpu_3d_cbs ? g->gpu_3d_cbs : &standard_3d_cbs);
+#endif  // CONFIG_STREAM_RENDERER
     if (ret != 0) {
         return ret;
     }
-
-    g->fence_poll = timer_new_ms(QEMU_CLOCK_VIRTUAL,
-                                 virtio_gpu_fence_poll, g);
 
     if (virtio_gpu_stats_enabled(g->conf)) {
         g->print_stats = timer_new_ms(QEMU_CLOCK_VIRTUAL,
@@ -827,9 +1046,15 @@ int virtio_gpu_virgl_init(VirtIOGPU *g)
 int virtio_gpu_virgl_get_num_capsets(VirtIOGPU *g)
 {
     uint32_t capset2_max_ver, capset2_max_size;
+#ifdef CONFIG_STREAM_RENDERER
+    stream_renderer_get_cap_set(VIRTIO_GPU_CAPSET_VIRGL2,
+                              &capset2_max_ver,
+                              &capset2_max_size);
+#else
     g->virgl->virgl_renderer_get_cap_set(VIRTIO_GPU_CAPSET_VIRGL2,
                               &capset2_max_ver,
                               &capset2_max_size);
+#endif  // CONFIG_STREAM_RENDERER
 
     return capset2_max_ver ? 2 : 1;
 }
@@ -878,7 +1103,11 @@ void virtio_gpu_load_ram_slots(void* qemufile, VirtIOGPU* g) {
         void* hva;
         uint64_t size;
 
+#ifdef CONFIG_STREAM_RENDERER
+        stream_renderer_resource_map(table->slots[i].resource_id, &hva, &size);
+#else
         g->virgl->virgl_renderer_resource_map(table->slots[i].resource_id, &hva, &size);
+#endif  // CONFIG_STREAM_RENDERER
 
         if (size != table->slots[i].size) {
             fprintf(stderr, "%s: resource %u: fatal: size in renderer (0x%llx) did not match slot size (0x%llx)\n", __func__,

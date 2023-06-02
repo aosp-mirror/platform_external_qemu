@@ -339,9 +339,12 @@ SnapshotPageGrpc::SnapshotPageGrpc(QWidget* parent, bool standAlone)
     }
     qRegisterMetaType<Ui::Settings::SaveSnapshotOnExit>();
     sInstance = this;
+
+    enableConnections();
 }
 
 void SnapshotPageGrpc::enableConnections() {
+    // TODO: We need to use QVariants here, otherwise they might now work on linux
     connect(this, SIGNAL(deleteCompleted()), this,
             SLOT(slot_snapshotDeleteCompleted()));
     connect(this, SIGNAL(loadCompleted(PackageData)), this,

@@ -116,8 +116,8 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
 
     mExtendedUi->setupUi(this);
-    ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_SNAPSHOT);
-    // mExtendedUi->stackedWidget->addWidget(new SnapshotPage(mExtendedUi->stackedWidget));
+
+
     mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
@@ -128,10 +128,6 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
 
-    if (getConsoleAgents()->settings->android_qemu_mode()) {
-        mExtendedUi->bugreportPage->setAdbInterface(
-                mEmulatorWindow->getAdbInterface());
-    }
 
     if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO &&
         android::featurecontrol::isEnabled(
@@ -676,7 +672,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     mExtendedUi->rotaryInputPage->updateTheme();
     mExtendedUi->location_page->updateTheme();
     mExtendedUi->multiDisplayPage->updateTheme(styleString);
-    mExtendedUi->bugreportPage->updateTheme();
+    reinterpret_cast<ThemedWidget*>(mExtendedUi->bugreportPage)->updateTheme();
     mExtendedUi->recordAndPlaybackPage->updateTheme();
 
     // Force a re-draw to make the new style take effect
@@ -702,6 +698,13 @@ void ExtendedWindow::disablePinchToZoom(bool disabled) {
 
 void ExtendedWindow::showEvent(QShowEvent* e) {
     if (mFirstShowEvent && !e->spontaneous()) {
+
+        // Create the proper objects.
+        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_SNAPSHOT);
+        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BATTERY);
+        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BUGREPORT);
+        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_CAMERA);
+
         bool moved = false;
         if (getConsoleAgents()
                     ->settings->android_cmdLineOptions()

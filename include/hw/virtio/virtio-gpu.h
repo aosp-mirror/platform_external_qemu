@@ -67,6 +67,7 @@ enum virtio_gpu_conf_flags {
     VIRTIO_GPU_FLAG_VIRGL_ENABLED = 1,
     VIRTIO_GPU_FLAG_STATS_ENABLED,
     VIRTIO_GPU_FLAG_EDID_ENABLED,
+    VIRTIO_GPU_FLAG_CONTEXT_INIT_ENABLED,
 };
 
 #define virtio_gpu_virgl_enabled(_cfg) \
@@ -75,6 +76,9 @@ enum virtio_gpu_conf_flags {
     (_cfg.flags & (1 << VIRTIO_GPU_FLAG_STATS_ENABLED))
 #define virtio_gpu_edid_enabled(_cfg) \
     (_cfg.flags & (1 << VIRTIO_GPU_FLAG_EDID_ENABLED))
+#define virtio_gpu_context_init_enabled(_cfg) \
+    (_cfg.flags & (1 << VIRTIO_GPU_FLAG_CONTEXT_INIT_ENABLED))
+
 
 struct virtio_gpu_conf {
     uint64_t max_hostmem;
@@ -125,6 +129,7 @@ typedef struct VirtIOGPU {
     int renderer_blocked;
     QEMUTimer *fence_poll;
     QEMUTimer *print_stats;
+    QemuRecMutex ctrl_return_lock;
 
     uint32_t inflight;
     struct {
@@ -138,7 +143,11 @@ typedef struct VirtIOGPU {
 
 #ifdef CONFIG_VIRGL
     bool virgl_as_proxy;
+#ifdef CONFIG_STREAM_RENDERER
+    AioContext *ctx;
+#else
     struct virgl_renderer_virtio_interface* virgl;
+#endif  // !CONFIG_STREAM_RENDERER
     struct virgl_renderer_callbacks* gpu_3d_cbs;
 #endif
     MemoryRegion host_coherent_memory;

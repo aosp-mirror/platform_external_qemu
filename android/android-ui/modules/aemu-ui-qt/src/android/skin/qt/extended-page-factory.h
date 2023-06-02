@@ -15,18 +15,12 @@
  * limitations under the License.
  */
 #pragma once
-#include <QStackedWidget>
-#include <QWidget>
 #include "host-common/qt_ui_defs.h"
+
 namespace Ui {
 class ExtendedControls;
 }
-
 class ExtendedPageFactory {
 public:
     static void construct(Ui::ExtendedControls* ui, ExtendedWindowPane window);
-
-    static QWidget* replaceWidget(QStackedWidget* stackedWidget,
-                                  QWidget* page,
-                                  QWidget* replacement);
 };

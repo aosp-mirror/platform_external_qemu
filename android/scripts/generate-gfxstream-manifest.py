@@ -26,7 +26,6 @@ as_proj_list = (int(sys.argv[2]) == 1) if len(sys.argv) > 2 else True
 # Don't need to check out the entire emulator repo to build gfxstream
 min_projects = set([
   "device/generic/goldfish-opengl",
-  "device/generic/vulkan-cereal",
   "platform/external/angle",
   "platform/external/astc-codec",
   "platform/external/boringssl",
@@ -48,6 +47,7 @@ min_projects = set([
   "platform/external/tinyobjloader",
   "platform/external/nasm",
   "platform/external/zlib",
+  "platform/hardware/google/gfxstream",
   "platform/prebuilts/android-emulator-build/common",
   "platform/prebuilts/android-emulator-build/curl",
   "platform/prebuilts/android-emulator-build/mesa",

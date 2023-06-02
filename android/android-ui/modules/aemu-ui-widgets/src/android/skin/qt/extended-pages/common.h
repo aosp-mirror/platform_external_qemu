@@ -8,12 +8,11 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
+#pragma once
 #include <QColor>                    // for QColor
 #include <QIcon>                     // for QIcon
 #include <QString>                   // for QString
-
-#include "android/settings-agent.h"  // for SettingsTheme
+#include "host-common/qt_ui_defs.h"
 
 class QColor;
 class QFrame;

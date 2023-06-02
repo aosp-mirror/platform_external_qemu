@@ -545,11 +545,26 @@ public:
                        ::google::protobuf::Empty* reply) override {
         WheelEvent event;
         auto agent = mAgents->user_event;
+        auto settings = mAgents->settings;
+        bool inputDeviceHasRotary =
+            feature_is_enabled(kFeature_VirtioInput) &&
+            (settings->hw()->hw_rotaryInput ||
+             (settings->avdInfo() &&
+              avdInfo_getAvdFlavor(settings->avdInfo()) == AVD_WEAR));
         while (reader->Read(&event)) {
-            android::base::ThreadLooper::runOnMainLooper([agent, event]() {
-                agent->sendMouseWheelEvent(event.dx(), event.dy(),
-                                           event.display());
-            });
+            android::base::ThreadLooper::runOnMainLooper(
+                    [agent, event, inputDeviceHasRotary]() {
+                        if (inputDeviceHasRotary) {
+                            // dy() is pre-multiplied by 120 (pixels to scroll per click),
+                            // and we need the rotation angle (15 per wheel click), so we
+                            // need to scale by (15 / 120) == 1/8.
+                            agent->sendRotaryEvent(event.dy() / 8);
+                        }
+                        else {
+                            agent->sendMouseWheelEvent(event.dx(), event.dy(),
+                                    event.display());
+                        }
+                    });
         }
         return Status::OK;
     }

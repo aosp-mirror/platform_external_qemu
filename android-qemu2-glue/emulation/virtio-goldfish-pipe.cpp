@@ -2170,4 +2170,5 @@ void virtio_goldfish_pipe_reset(void *pipe, void *host_pipe) {
     sRenderer->resetPipe((GoldfishHwPipe*)pipe, (GoldfishHostPipe*)host_pipe);
 }
 
+int goldfish_virtio_init(void) { return 0; }
 } // extern "C"

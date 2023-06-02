@@ -48,7 +48,6 @@ virtio_gpu_ctrl_hdr_bswap(struct virtio_gpu_ctrl_hdr *hdr)
     le32_to_cpus(&hdr->flags);
     le64_to_cpus(&hdr->fence_id);
     le32_to_cpus(&hdr->ctx_id);
-    le32_to_cpus(&hdr->padding);
 }
 
 static void virtio_gpu_bswap_32(void *ptr,
@@ -132,7 +131,11 @@ static void update_cursor_data_virgl(VirtIOGPU *g,
     uint32_t pixels, *data;
 
 #ifdef CONFIG_VIRGL
+#ifdef CONFIG_STREAM_RENDERER
+    // NOT IMPLEMENTED
+#else
     data = g->virgl->virgl_renderer_get_cursor_data(resource_id, &width, &height);
+#endif
 #else
     data = virgl_renderer_get_cursor_data(resource_id, &width, &height);
 #endif
@@ -223,6 +226,10 @@ static uint64_t virtio_gpu_get_features(VirtIODevice *vdev, uint64_t features,
     if (virtio_gpu_edid_enabled(g->conf)) {
         features |= (1 << VIRTIO_GPU_F_EDID);
     }
+    if (virtio_gpu_context_init_enabled(g->conf)) {
+        features |= (1 << VIRTIO_GPU_F_CONTEXT_INIT);
+    }
+
     return features;
 }
 
@@ -925,11 +932,12 @@ void virtio_gpu_process_cmdq(VirtIOGPU *g)
 
     while (!QTAILQ_EMPTY(&g->cmdq)) {
         cmd = QTAILQ_FIRST(&g->cmdq);
-
         /* process command */
+        qemu_rec_mutex_lock(&g->ctrl_return_lock);
         VIRGL(g, virtio_gpu_virgl_process_cmd, virtio_gpu_simple_process_cmd,
               g, cmd);
         if (cmd->waiting) {
+            qemu_rec_mutex_unlock(&g->ctrl_return_lock);
             break;
         }
         QTAILQ_REMOVE(&g->cmdq, cmd, next);
@@ -949,6 +957,7 @@ void virtio_gpu_process_cmdq(VirtIOGPU *g)
         } else {
             g_free(cmd);
         }
+        qemu_rec_mutex_unlock(&g->ctrl_return_lock);
     }
 }
 
@@ -981,12 +990,6 @@ static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq)
     }
 
     virtio_gpu_process_cmdq(g);
-
-#ifdef CONFIG_VIRGL
-    if (g->use_virgl_renderer) {
-        virtio_gpu_virgl_fence_poll(g);
-    }
-#endif
 }
 
 static void virtio_gpu_ctrl_bh(void *opaque)
@@ -1125,7 +1128,11 @@ static int virtio_gpu_save(QEMUFile *f, void *opaque, size_t size,
         // load, the renderer state and host pointers backing blob resources
         // need to be restored first before the ram slots corresponding to the
         // blob resources themselves.
+#ifdef CONFIG_STREAM_RENDERER
+    // NOT IMPLEMENTED
+#else
         g->virgl->virgl_renderer_save_snapshot(f);
+#endif  // CONFIG_STREAM_RENDERER
         virtio_gpu_save_ram_slots(f, g);
     }
 #endif
@@ -1164,7 +1171,11 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
 
 #ifdef CONFIG_VIRGL
     if (virtio_gpu_virgl_enabled(g->conf)) {
+#ifdef CONFIG_STREAM_RENDERER
+    // NOT IMPLEMENTED
+#else
         g->virgl->virgl_renderer_load_snapshot(f);
+#endif  // CONFIG_STREAM_RENDERER
         virtio_gpu_load_ram_slots(f, g);
     }
 #endif
@@ -1328,10 +1339,14 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
     }
 
 #ifdef CONFIG_ANDROID
+    goldfish_virtio_init();
     g->use_virgl_renderer = true;
     g->conf.flags |= (1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
+    g->conf.flags |= (1 << VIRTIO_GPU_FLAG_CONTEXT_INIT_ENABLED);
     g->virgl_as_proxy = true;
+#ifndef CONFIG_STREAM_RENDERER
     g->virgl = get_goldfish_pipe_virgl_renderer_virtio_interface();
+#endif  // !CONFIG_STREAM_RENDERER
     g->gpu_3d_cbs = &proxy_3d_cbs;
     virgl_as_proxy = true;
 #else
@@ -1366,6 +1381,7 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
     QTAILQ_INIT(&g->reslist);
     QTAILQ_INIT(&g->cmdq);
     QTAILQ_INIT(&g->fenceq);
+    qemu_rec_mutex_init(&g->ctrl_return_lock);
 
     g->enabled_output_bitmask = 1;
     g->qdev = qdev;
@@ -1382,6 +1398,9 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
 static void virtio_gpu_device_unrealize(DeviceState *qdev, Error **errp)
 {
     VirtIOGPU *g = VIRTIO_GPU(qdev);
+
+    qemu_rec_mutex_destroy(&g->ctrl_return_lock);
+
     if (g->migration_blocker) {
         migrate_del_blocker(g->migration_blocker);
         error_free(g->migration_blocker);
