@@ -637,7 +637,7 @@ static const struct {
         {31, "S", "12.0 (S) - API 31"},
         {32, "Sv2", "12.0 (S) - API 32"},
         {33, "Tiramisu", "13.0 (T) - API 33"},
-        {34, "UpsideDownCake", "UpsideDownCake Preview"},
+        {34, "UpsideDownCake", "14.0 (U) - API 34"},
 };
 
 const char* avdInfo_getApiDessertName(int apiLevel) {
