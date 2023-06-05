@@ -523,6 +523,8 @@ bool Quickboot::saveAvdToSystemImageSnapshotsLocalDir() {
     std::set<std::string> filesToSkip;
     filesToSkip.insert("source.properties");
     filesToSkip.insert("multiinstance.lock");
+    filesToSkip.insert("sdcard.img");
+    filesToSkip.insert("sdcard.img.qcow2");
     filesToSkip.insert("hardware-qemu.ini.lock");
     std::vector<std::string> filesFailed;
     if (-1 == path_copy_dir_ex(destDir.c_str(), srcDir.c_str(), &filesToSkip)) {
