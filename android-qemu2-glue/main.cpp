@@ -1378,8 +1378,8 @@ static void fixAvdConfig(std::string avdDir,
                         hw->firstboot_downloaded_path);
     configIni.setString("firstboot.local.path", hw->firstboot_local_path);
     configIni.setString("skin.path", skinPath);
-    configIni.setString("gpu.mode", gpuMode);
-    configIni.setString("gpu.enabled", gpuEnabled);
+    configIni.setString("hw.gpu.mode", gpuMode);
+    configIni.setString("hw.gpu.enabled", gpuEnabled);
     configIni.writeIfChanged();
 }
 
@@ -2152,9 +2152,9 @@ extern "C" int main(int argc, char** argv) {
                 const std::string orgDisplayName = getKeyFromConfigFile(
                         orgConfigFile, "avd.ini.displayname", avdName);
                 const std::string orgGpuMode = getKeyFromConfigFile(
-                        orgConfigFile, "gpu.mode", avdName);
+                        orgConfigFile, "hw.gpu.mode", "yes");
                 const std::string orgGpuEnabled = getKeyFromConfigFile(
-                        orgConfigFile, "gpu.enabled", avdName);
+                        orgConfigFile, "hw.gpu.enabled", "auto");
                 std::set<std::string> skipSet;
 
                 const auto compatibleCheckResult =
