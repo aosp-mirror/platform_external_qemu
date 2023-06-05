@@ -1072,6 +1072,14 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     /** SD CARD PARTITION */
 
+    if (feature_is_enabled(kFeature_DownloadableSnapshot)) {
+        if (hw->hw_sdCard) {
+            hw->hw_sdCard = false;
+            dinfo("Disabling SD Card suppor due to DownloadableSnapshot "
+                  "feature");
+        }
+    }
+
     if (!hw->hw_sdCard) {
         /* No SD Card emulation, so -sdcard will be ignored */
         if (opts->sdcard) {
