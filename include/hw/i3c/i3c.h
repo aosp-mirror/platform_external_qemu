@@ -143,6 +143,7 @@ struct I3CTarget {
     I3CCCC curr_ccc;
     uint8_t ccc_byte_offset;
     bool in_ccc;
+    bool in_test_mode;
 };
 
 struct I3CNode {

@@ -22,6 +22,12 @@
 #include "hw/hotplug.h"
 #include "hw/qdev-properties.h"
 
+/*
+ * In test mode (enabled by ENTTM CCC) we're supposed to send a random PID
+ * during ENTDAA, so we'll just send "QEMU".
+ */
+#define TEST_MODE_PROVISIONED_ID 0x0000554d4551ULL
+
 static Property i3c_props[] = {
     DEFINE_PROP_UINT8("static-address", struct I3CTarget, static_address, 0),
     DEFINE_PROP_UINT8("dcr", struct I3CTarget, dcr, 0),
@@ -309,6 +315,17 @@ static int i3c_target_handle_ccc_write(I3CTarget *t, const uint8_t *data,
             *num_sent = 1;
         }
         break;
+    case I3C_CCC_ENTTM:
+        /*
+         * If there are still more to look at, the next byte is the test mode
+         * byte.
+         */
+        if (*num_sent != num_to_send) {
+            /* Enter test mode if the byte is non-zero. Otherwise exit. */
+            t->in_test_mode = !!data[*num_sent];
+            ++*num_sent;
+        }
+        break;
     /* Ignore other CCCs it's better to handle on a device-by-device basis. */
     default:
         break;
@@ -380,15 +397,21 @@ static int i3c_target_handle_ccc_read(I3CTarget *t, uint8_t *data,
 {
     I3CTargetClass *tc = I3C_TARGET_GET_CLASS(t);
     uint8_t read_count = 0;
+    uint64_t pid;
 
     switch (t->curr_ccc) {
     case I3C_CCC_ENTDAA:
+        if (t->in_test_mode) {
+            pid = TEST_MODE_PROVISIONED_ID;
+        } else {
+            pid = t->pid;
+        }
         /* Return the 6-byte PID, followed by BCR then DCR. */
         while (t->ccc_byte_offset < 6) {
             if (read_count >= num_to_read) {
                 break;
             }
-            data[read_count] = (t->pid >> (t->ccc_byte_offset * 8)) & 0xff;
+            data[read_count] = (pid >> (t->ccc_byte_offset * 8)) & 0xff;
             t->ccc_byte_offset++;
             read_count++;
         }
