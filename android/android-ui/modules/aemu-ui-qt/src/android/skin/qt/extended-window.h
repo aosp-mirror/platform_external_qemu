@@ -82,6 +82,9 @@ public:
             VirtualSceneControlWindow* virtualSceneWindow);
 
     VirtualSensorsPage* getVirtualSensorsPage();
+
+    void overrideUiObjects();
+
 private slots:
     void switchFrameAlways(bool showFrame);
     void switchOnTop(bool isOntop);
@@ -136,4 +139,5 @@ private:
     std::condition_variable mCvVisible;
     std::mutex mMutexVisible;
     bool mVisible{false};
+    bool mExtendedInitialized{false};
 };
