@@ -105,11 +105,12 @@ bool Switchboard::connect(std::string identity, std::string turnConfig) {
                    << turnConfig;
         return false;
     }
-    return connect(std::move(identity), j["ice_servers"]);
+    return connect(std::move(identity), j);
 }
 
 bool Switchboard::connect(std::string identity, json turnConfig) {
     LOG(DEBUG) << "Connecting: " << identity;
+    LOG(DEBUG) << "With turnConfig: " << turnConfig.dump();
     mMapLock.lockRead();
     if (mId.find(identity) == mId.end()) {
         mMapLock.unlockRead();
