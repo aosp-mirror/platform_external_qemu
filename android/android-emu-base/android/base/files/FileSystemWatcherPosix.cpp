@@ -8,9 +8,12 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
+#include <errno.h>        // for errno
+#include <fcntl.h>        // for fcntl, open, F_GET...
 #include <limits.h>       // for PATH_MAX
 #include <stdint.h>       // for uint8_t
 #include <sys/inotify.h>  // for inotify_event, ino...
+#include <sys/select.h>
 #include <unistd.h>       // for close, read
 #include <atomic>         // for atomic_bool
 #include <functional>     // for function
@@ -22,6 +25,8 @@
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/synchronization/Event.h"  // for Event
 #include "android/base/system/System.h"
+#include "android/utils/debug.h"  // for derror
+#include "android/utils/system.h"
 
 #define DEBUG 0
 
@@ -54,25 +59,42 @@ public:
         std::thread watcher([this] { watchForChanges(); });
         mWatcherThread = std::move(watcher);
         mStarted.wait();
-        return mNotifyFd != 0;
+        return mNotifyFd != 0 && mPipe[0] != -1;
     }
 
     void stop() override {
         bool expected = true;
         if (mRunning.compare_exchange_strong(expected, false)) {
             DD("Closing watchers");
+            write(mPipe[1], "x", 1);
             close(mNotifyFd);
             mWatcherThread.join();
         }
     }
 
 private:
+    void wait_for_fd_events() {
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(mPipe[0], &readfds);
+        FD_SET(mNotifyFd, &readfds);
+        select(std::max(mPipe[0], mNotifyFd) + 1, &readfds, nullptr, nullptr,
+               nullptr);
+    }
     bool watchForChanges() {
         mNotifyFd = inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
         if (mNotifyFd < 1) {
             mStarted.signal();
             return false;
         }
+
+        if (pipe(mPipe) != 0 || (fcntl(mPipe[0], F_SETFL, O_NONBLOCK) < 0)) {
+            derror("Unable to open pipe: %s", strerror(errno));
+            mPipe[0] = -1;
+            mPipe[1] = -1;
+            mStarted.signal();
+            return false;
+        };
 
         // Note, this will not work for filenames longer than 256 chars, this
         // does not include the path.
@@ -94,6 +116,8 @@ private:
         mStarted.signal();
         while (mRunning) {
             uint8_t buffer[EVENT_BUFFER];
+
+            wait_for_fd_events();
 
             int length = read(mNotifyFd, buffer, sizeof(buffer));
             DD("Read %d bytes", length);
@@ -118,6 +142,8 @@ private:
         }
 
         DD("Exit loop");
+        close(mPipe[0]);
+        close(mPipe[1]);
         return true;
     }
 
@@ -125,7 +151,8 @@ private:
     std::atomic_bool mRunning{false};
     std::thread mWatcherThread;
     Event mStarted;
-    int mNotifyFd;
+    int mNotifyFd{0};
+    int mPipe[2] = {-1, -1};
 };
 
 std::unique_ptr<FileSystemWatcher> FileSystemWatcher::getFileSystemWatcher(

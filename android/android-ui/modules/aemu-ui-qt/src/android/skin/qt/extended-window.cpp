@@ -651,6 +651,10 @@ void ExtendedWindow::switchOnTop(bool isOnTop) {
 }
 
 void ExtendedWindow::switchToTheme(SettingsTheme theme) {
+    if (!mExtendedInitialized) {
+        overrideUiObjects();
+    }
+
     // Switch to the icon images that are appropriate for this theme.
     adjustAllButtonsForTheme(theme);
 
@@ -696,14 +700,25 @@ void ExtendedWindow::disablePinchToZoom(bool disabled) {
     mEmulatorWindow->setDisablePinchToZoom(disabled);
 }
 
-void ExtendedWindow::showEvent(QShowEvent* e) {
-    if (mFirstShowEvent && !e->spontaneous()) {
+void ExtendedWindow::overrideUiObjects() {
+    if (mExtendedInitialized) {
+        return;
+    }
 
-        // Create the proper objects.
-        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_SNAPSHOT);
-        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BATTERY);
-        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BUGREPORT);
-        ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_CAMERA);
+    // Create the proper objects.
+    ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_SNAPSHOT);
+    ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BATTERY);
+    ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BUGREPORT);
+    ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_CAMERA);
+    mExtendedInitialized = true;
+}
+
+void ExtendedWindow::showEvent(QShowEvent* e) {
+    if (!mExtendedInitialized) {
+        overrideUiObjects();
+    }
+
+    if (mFirstShowEvent && !e->spontaneous()) {
 
         bool moved = false;
         if (getConsoleAgents()
