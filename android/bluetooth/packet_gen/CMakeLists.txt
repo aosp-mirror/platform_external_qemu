@@ -96,7 +96,6 @@ android_add_executable(
       fields/variable_length_struct_field.cc
       fields/vector_field.cc
       gen_cpp.cc
-      gen_rust.cc
       main.cc
       packet_def.cc
       packet_dependency.cc
