@@ -99,7 +99,7 @@ if(NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
     add_subdirectory(guest)
   endif()
   # TODO: enable it on mac
-  if (NOT (OPTION_GFXSTREAM_BACKEND AND APPLE))
+  if (NOT (OPTION_GFXSTREAM_BACKEND) AND NOT (APPLE))
     add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../../device/generic/goldfish-opengl
                      goldfish-opengl)
   endif()
