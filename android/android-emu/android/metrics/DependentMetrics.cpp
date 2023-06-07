@@ -623,10 +623,14 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
         android::CommonReportedInfo::setDetails(&forCommonInfoDetails);
     }
 
-    // Whether we are running with standalone metrics
-    if (getConsoleAgents()
-                ->settings->android_cmdLineOptions()
-                ->metrics_collection) {
+    // Check for a set of files that exist in the container environment
+    bool isContainer =
+            System::get()->pathExists("/android/sdk/launch-emulator.sh") &&
+            System::get()->pathExists("/tmp/pulseverbose.log");
+
+    if (isContainer && getConsoleAgents()
+                               ->settings->android_cmdLineOptions()
+                               ->metrics_collection) {
         event->mutable_emulator_details()
                 ->mutable_used_features()
                 ->set_launch_type(android_studio::EmulatorFeatures::CONTAINER);

@@ -76,6 +76,7 @@ using android::emulation::asg::ConsumerCallbacks;
 #define RENDERER_LIB_NAME "libgfxstream_backend"
 
 static void (*gfxstream_android_setOpenglesRenderer)(gfxstream::RendererPtr* ptr) = NULL;
+static void (*gfxstream_android_stopOpenglesRenderer)(bool wait) = NULL;
 #else
 #define RENDERER_LIB_NAME "libOpenglRender"
 #endif  // AEMU_GFXSTREAM_BACKEND
@@ -111,6 +112,7 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
 #ifdef AEMU_GFXSTREAM_BACKEND
 #define LIST_GFXSTREAM_MISC_FUNCTIONS(X) \
         X(void, android_setOpenglesRenderer, (gfxstream::RendererPtr*), ()) \
+        X(void, android_stopOpenglesRenderer, (bool), ()) \
 
 #define FUNCTION_(ret, name, sig, params) \
     symbol = adynamicLibrary_findSymbol(rendererLib, #name, &error); \
@@ -487,6 +489,12 @@ android_stopOpenglesRenderer(bool wait)
         sRenderer->stop(wait);
         if (wait) {
             sRenderer.reset();
+#ifdef AEMU_GFXSTREAM_BACKEND
+            if (gfxstream_android_stopOpenglesRenderer) {
+                gfxstream_android_stopOpenglesRenderer(wait);
+            }
+#endif  // AEMU_GFXSTREAM_BACKEND
+
             android_stop_opengl_logger();
         }
     }

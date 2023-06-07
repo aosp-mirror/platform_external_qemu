@@ -1072,6 +1072,14 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     /** SD CARD PARTITION */
 
+    if (feature_is_enabled(kFeature_DownloadableSnapshot)) {
+        if (hw->hw_sdCard) {
+            hw->hw_sdCard = false;
+            dinfo("Disabling SD Card suppor due to DownloadableSnapshot "
+                  "feature");
+        }
+    }
+
     if (!hw->hw_sdCard) {
         /* No SD Card emulation, so -sdcard will be ignored */
         if (opts->sdcard) {
@@ -1201,6 +1209,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             ((long long)(hw->hw_lcd_width) * (long long)(hw->hw_lcd_height)) >=
             3LL * 1000LL * 1000LL;
 
+    if (avdInfo_getApiLevel(avd) >= 34) {
+        minRam = 2560;  // 2.5G is required for U and up, to avoid kswapd eating
+                        // cpus
+    }
     if (avdInfo_getApiLevel(avd) >= 33 && (isFoldable || isLargeScreen)) {
         minRam = 3072; // 3G is required for U and up, to avoid kswapd eating cpus
         D("foldable or large screen devices with api >=33 is set to have "

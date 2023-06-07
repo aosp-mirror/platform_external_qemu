@@ -430,14 +430,6 @@ static bool creatUserDataExt4Img(AndroidHwConfig* hw,
     }
 }
 
-static void createSdCard(std::string sdcardFilePath, int size) {
-    char buf[1024];
-    snprintf(buf, sizeof(buf), "%d", size);
-    auto mksdcard = System::get()->findBundledExecutable("mksdcard");
-    auto res = System::get()->runCommandWithResult(
-            {mksdcard, buf, sdcardFilePath});
-}
-
 static void replaceDefaultPath(AvdInfo* avd,
                                const char* proposedPath,
                                std::string& defaultPath) {
@@ -1339,7 +1331,7 @@ static bool checkConfigIniCompatible(std::string srcConfig,
     std::unordered_set<std::string> important{
             "abi.type",     "hw.cpu.arch", "hw.lcd.density", "hw.lcd.height",
             "hw.lcd.width", "skin.name",   "hw.camera.back", "hw.camera.front",
-            "hw.sdCard",    "hw.keyboard", "hw.arc"};
+            "hw.keyboard",  "hw.arc"};
     for (auto&& key : srcConfigIni) {
         if (important.count(key) == 0) {
             continue;  // not important, ignore
@@ -1378,8 +1370,8 @@ static void fixAvdConfig(std::string avdDir,
                         hw->firstboot_downloaded_path);
     configIni.setString("firstboot.local.path", hw->firstboot_local_path);
     configIni.setString("skin.path", skinPath);
-    configIni.setString("gpu.mode", gpuMode);
-    configIni.setString("gpu.enabled", gpuEnabled);
+    configIni.setString("hw.gpu.mode", gpuMode);
+    configIni.setString("hw.gpu.enabled", gpuEnabled);
     configIni.writeIfChanged();
 }
 
@@ -2138,12 +2130,6 @@ extern "C" int main(int argc, char** argv) {
                 IniFile orgSrcConfigIni(
                         PathUtils::join(s_AvdFolder, "config.ini"));
                 orgSrcConfigIni.read();
-                std::string orgSdcardPath =
-                        PathUtils::join(s_AvdFolder, "sdcard.img");
-                uint64_t sdcard_size = 0;
-                if (path_exists(orgSdcardPath.c_str())) {
-                    path_get_size(orgSdcardPath.c_str(), &sdcard_size);
-                }
 
                 const std::string orgConfigFile =
                         PathUtils::join(std::string(s_AvdFolder), "config.ini");
@@ -2152,9 +2138,9 @@ extern "C" int main(int argc, char** argv) {
                 const std::string orgDisplayName = getKeyFromConfigFile(
                         orgConfigFile, "avd.ini.displayname", avdName);
                 const std::string orgGpuMode = getKeyFromConfigFile(
-                        orgConfigFile, "gpu.mode", avdName);
+                        orgConfigFile, "hw.gpu.mode", "yes");
                 const std::string orgGpuEnabled = getKeyFromConfigFile(
-                        orgConfigFile, "gpu.enabled", avdName);
+                        orgConfigFile, "hw.gpu.enabled", "auto");
                 std::set<std::string> skipSet;
 
                 const auto compatibleCheckResult =
@@ -2207,12 +2193,6 @@ extern "C" int main(int argc, char** argv) {
                         path_mkdir_if_needed(s_AvdFolder, 0777);
                         // create config.ini
                         orgSrcConfigIni.write();
-                        // create sdcard.img if applicable
-                        if (sdcard_size > 0) {
-                            createSdCard(std::string(PathUtils::join(
-                                                 s_AvdFolder, "sdcard.img")),
-                                         static_cast<int>(sdcard_size));
-                        }
                         startFromScratch = true;
                     } else {
                         if (opts->no_snapshot_load) {

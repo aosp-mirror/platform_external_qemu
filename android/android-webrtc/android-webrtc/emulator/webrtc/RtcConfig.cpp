@@ -13,6 +13,8 @@
 // limitations under the License.
 #include "emulator/webrtc/RtcConfig.h"
 
+#include "aemu/base/Log.h"
+
 #include <stdint.h>          // for uint8_t
 #include <initializer_list>  // for initializer_list
 #include <vector>            // for vector
@@ -68,6 +70,8 @@ PeerConnectionInterface::RTCConfiguration RtcConfig::parse(
         for (const auto& iceServer : iceServers) {
             configuration.servers.push_back(parseIce(iceServer));
         }
+    } else {
+        LOG(WARNING) << "RtcConfig iceServers is empty.";
     }
 
     // Modern webrtc with multiple audio & video channels.
