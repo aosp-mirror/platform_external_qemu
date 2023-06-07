@@ -1531,7 +1531,13 @@ extern "C" int main(int argc, char** argv) {
     qemu_android_init_http_proxy_ops();
 
     // Make the console agents available.
-    injectQemuConsoleAgents("");
+    const char* factory = "";
+    for(int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "-debug-events") == 0) {
+            factory = "debug";
+        }
+    }
+    injectQemuConsoleAgents(factory);
 
 #ifdef CONFIG_HEADLESS
     getConsoleAgents()->settings->set_host_emulator_is_headless(true);

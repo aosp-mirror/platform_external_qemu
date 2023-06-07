@@ -155,7 +155,7 @@ using android::emulation::AndroidLoggingConsoleFactory;
 
 void injectQemuConsoleAgents(const char* factory) {
     injectConsoleAgents(QemuAndroidConsoleAgentFactory());
-    if (VERBOSE_CHECK(events)) {
+    if (strcmp("debug", factory) == 0) {
         LOG(INFO) << "-- Injecting logging agents for user events.";
         injectConsoleAgents(AndroidLoggingConsoleFactory());
     }
