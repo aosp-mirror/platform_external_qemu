@@ -19,7 +19,7 @@
 #include "host-common/MultiDisplay.h"                 // for MultiDisp...
 #include "host-common/multi_display_agent.h"  // for QAndroidM...
 
-std::map<uint32_t, android::MultiDisplayInfo> mMultiDisplay;
+static std::map<uint32_t, android::MultiDisplayInfo> mMultiDisplay;
 static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
         .notifyDisplayChanges = []() {
             return true;
