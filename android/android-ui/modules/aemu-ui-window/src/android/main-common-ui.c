@@ -86,7 +86,7 @@ bool emulator_parseInputCommandLineOptions(AndroidOptions* opts) {
 #ifndef CONFIG_HEADLESS
     if (opts->use_keycode_forwarding ||
         feature_is_enabled(kFeature_KeycodeForwarding)) {
-        getConsoleAgents()->settings->set_keycode_forwading(true);
+        getConsoleAgents()->settings->set_keycode_forwarding(true);
     }
 
     // Set keyboard layout for Android only.
@@ -103,7 +103,7 @@ bool emulator_parseInputCommandLineOptions(AndroidOptions* opts) {
             D("No matching Android keyboard layout for %s. Fall back to host "
               "translation.",
               cur_keyboard_layout);
-            getConsoleAgents()->settings->set_keycode_forwading(false);
+            getConsoleAgents()->settings->set_keycode_forwarding(false);
 #endif
         }
     }

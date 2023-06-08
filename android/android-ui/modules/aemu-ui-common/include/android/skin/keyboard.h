@@ -25,7 +25,6 @@ typedef void (*SkinKeyEventFunc)( void*  opaque, SkinKeyCode  code, int  down );
 extern SkinKeyboard* skin_keyboard_create(const char* kcm_file_path,
                                           SkinRotation dpad_rotation,
                                           SkinKeyCodeFlushFunc keycode_flush,
-                                          bool with_key_forwarding,
                                           bool hw_arc);
 
 extern void           skin_keyboard_free( SkinKeyboard*  keyboard );

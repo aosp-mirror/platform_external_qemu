@@ -44,7 +44,6 @@ struct SkinKeyboard {
 
     SkinKeycodeBuffer keycodes[1];
 
-    bool use_keycode_forwarding;
     bool hw_arc;
 };
 
@@ -278,7 +277,7 @@ void skin_keyboard_process_event(SkinKeyboard* kb, SkinEvent* ev, int down) {
             mod = sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, 0, 0, 1);
         }
 
-        if (!kb->use_keycode_forwarding) {
+        if (!getConsoleAgents()->settings->use_keycode_forwarding()) {
             // TODO(digit): For each Unicode value in the input text.
             const uint8_t* text = ev->u.text.text;
             const uint8_t* end = text + sizeof(ev->u.text.text);
@@ -397,13 +396,11 @@ static SkinKeyboard* skin_keyboard_create_from_charmap_name(
         const char* charmap_name,
         SkinRotation dpad_rotation,
         SkinKeyCodeFlushFunc keycode_flush,
-        bool with_key_forwarding,
         bool hw_arc) {
     SkinKeyboard* kb;
 
     ANEW0(kb);
 
-    kb->use_keycode_forwarding = with_key_forwarding;
     kb->hw_arc = hw_arc;
     kb->charmap = skin_charmap_get_by_name(charmap_name);
     if (!kb->charmap) {
@@ -422,7 +419,6 @@ static SkinKeyboard* skin_keyboard_create_from_charmap_name(
 SkinKeyboard* skin_keyboard_create(const char* kcm_file_path,
                                    SkinRotation dpad_rotation,
                                    SkinKeyCodeFlushFunc keycode_flush,
-                                   bool with_key_forwarding,
                                    bool hw_arc) {
     const char* charmap_name = DEFAULT_ANDROID_CHARMAP;
     char cmap_buff[SKIN_CHARMAP_NAME_SIZE];
@@ -432,7 +428,7 @@ SkinKeyboard* skin_keyboard_create(const char* kcm_file_path,
         charmap_name = cmap_buff;
     }
     return skin_keyboard_create_from_charmap_name(charmap_name, dpad_rotation,
-                                                  keycode_flush, with_key_forwarding, hw_arc);
+                                                  keycode_flush, hw_arc);
 }
 
 void skin_keyboard_free(SkinKeyboard* keyboard) {
