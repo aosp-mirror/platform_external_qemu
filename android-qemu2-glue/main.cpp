@@ -1092,13 +1092,23 @@ static int startEmulatorWithMinConfig(int argc,
     {
         // Should enable OpenGL ES 3.x?
         if (skin_winsys_get_preferred_gles_apilevel() ==
+            WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+            fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, false);
+        }
+
+        if (skin_winsys_get_preferred_gles_apilevel() ==
             WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
             fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, true);
         }
 
-        if (skin_winsys_get_preferred_gles_apilevel() ==
-            WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
-            fc::setEnabledOverride(fc::GLESDynamicVersion, false);
+        if (apiLevel >= 31) {
+            if (skin_winsys_get_preferred_gles_apilevel() ==
+                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+                dwarning("API level %d requires OpenGL ES 3.0+, attempting to"
+                    " turn on OpenGL ES 3.0/3.1", apiLevel);
+            }
+            // API 31 needs GLES 3.0+ to boot
+            fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, true);
         }
 
         if (fc::isEnabled(fc::ForceANGLE)) {
@@ -2590,13 +2600,23 @@ extern "C" int main(int argc, char** argv) {
             if (skin_winsys_get_preferred_gles_apilevel() ==
                         WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT ||
                 System::get()->getProgramBitness() == 32) {
-                fc::setEnabledOverride(fc::GLESDynamicVersion, false);
+                fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, false);
             }
 
             // In build environment, enable gles3 if possible
             if (avdInfo_inAndroidBuild(avd)) {
                 fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion,
                                                      true);
+            }
+
+            // API 31 needs GLES 3.0+ to boot
+            if (apiLevel >= 31) {
+                if (skin_winsys_get_preferred_gles_apilevel() ==
+                    WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+                    dwarning("API level %d requires OpenGL ES 3.0+, attempting to"
+                        " turn on OpenGL ES 3.0/3.1", apiLevel);
+                }
+                fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, true);
             }
 
 #ifdef __linux__
