@@ -430,7 +430,7 @@ void ExtendedWindow::sendMetricsOnShutDown() {
 void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
     if (agentPtr) {
         BatteryPage::setBatteryAgent(agentPtr->battery);
-        CellularPage::setCellularAgent(agentPtr->cellular);
+        //CellularPage::setCellularAgent(agentPtr->cellular);
         FingerPage::setFingerAgent(agentPtr->finger);
         if (!getConsoleAgents()
                      ->settings->android_cmdLineOptions()
@@ -710,6 +710,9 @@ void ExtendedWindow::overrideUiObjects() {
     ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BATTERY);
     ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_BUGREPORT);
     ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_CAMERA);
+    ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_CELLULAR);
+    ExtendedPageFactory::construct(mExtendedUi.get(), PANE_IDX_FINGER);
+
     mExtendedInitialized = true;
 }
 
@@ -719,7 +722,6 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
     }
 
     if (mFirstShowEvent && !e->spontaneous()) {
-
         bool moved = false;
         if (getConsoleAgents()
                     ->settings->android_cmdLineOptions()

@@ -11,15 +11,14 @@
 
 #pragma once
 
-#include <qobjectdefs.h>       // for Q_OBJECT, slots
-#include <QString>             // for QString
-#include <QWidget>             // for QWidget
-#include <memory>              // for unique_ptr
+#include <QObject>
+#include <QString>
+#include <QWidget>
+#include <memory>
 
-#include "ui_cellular-page.h"  // for CellularPage
+#include "android/emulation/control/utils/SimpleModemClient.h"
+#include "ui_cellular-page-grpc.h"
 
-class QObject;
-class QWidget;
 struct QAndroidCellularAgent;
 
 namespace android {
@@ -28,16 +27,18 @@ class UiEventTracker;
 }  // namespace metrics
 }  // namespace android
 
+using android::emulation::control::SimpleModemClient;
 using android::metrics::UiEventTracker;
+using android::emulation::control::incubating::CellInfo;
 
-class CellularPage : public QWidget
-{
+class CellularPageGrpc : public QWidget {
     Q_OBJECT
 
 public:
-    explicit CellularPage(QWidget *parent = nullptr);
-    static bool simIsPresent(); // Returns true if the user wants a SIM present,
-                                // considering both command line and UI.
+    explicit CellularPageGrpc(QWidget* parent = nullptr);
+    static bool
+    simIsPresent();  // Returns true if the user wants a SIM present,
+                     // considering both command line and UI.
 
 private slots:
     void on_cell_dataStatusBox_currentIndexChanged(int index);
@@ -49,8 +50,11 @@ private slots:
     // TODO: Implement Network delay setting
     // http://developer.android.com/tools/devices/emulator.html#netdelay
 private:
-    static void setCellularAgent(const QAndroidCellularAgent* agent);
+    void loadCellState();
+    void updateCellState();
 
-    std::unique_ptr<Ui::CellularPage> mUi;
+    std::unique_ptr<Ui::CellularPageGrpc> mUi;
     std::shared_ptr<UiEventTracker> mDropDownTracker;
+    SimpleModemClient mModemClient;
+    CellInfo mCurrentState;
 };
