@@ -1193,7 +1193,11 @@ static int startEmulatorWithMinConfig(int argc,
     /* Disable the GLAsyncSwap for ANGLE so far */
     bool shouldDisableAsyncSwap =
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
-            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9 ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE_INDIRECT ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9_INDIRECT;
     // Features to disable or enable depending on rendering backend
     // and gpu make/model/version
 #if defined(__APPLE__) && defined(__aarch64__)
@@ -1651,7 +1655,6 @@ extern "C" int main(int argc, char** argv) {
             for (int i = 0; i < args.size(); i++) {
                 dinfo("%s: arg: %s", __func__, args[i].c_str());
             }
-
             // Skip the translation of command-line options and jump
             // straight to qemu_main().
             enter_qemu_main_loop(args.size(), args.array());
@@ -3113,7 +3116,11 @@ extern "C" int main(int argc, char** argv) {
         /* Disable the GLAsyncSwap for ANGLE so far */
         bool shouldDisableAsyncSwap =
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
-                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9 ||
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER ||
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE_INDIRECT ||
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9_INDIRECT;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
 #if defined(__APPLE__) && defined(__aarch64__)
