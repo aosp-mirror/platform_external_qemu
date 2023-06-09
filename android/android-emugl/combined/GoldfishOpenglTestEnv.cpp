@@ -566,6 +566,9 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 GoldfishOpenglTestEnv::~GoldfishOpenglTestEnv() {
     AndroidPipe::Service::resetAll();
     android_stopOpenglesRenderer(true);
+    if (snapshotStream) {
+        delete snapshotStream;
+    }
     sTestEnv = nullptr;
 }
 
