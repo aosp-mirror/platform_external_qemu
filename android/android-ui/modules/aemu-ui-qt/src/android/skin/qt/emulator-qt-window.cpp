@@ -146,7 +146,6 @@ using android::emulation::ApkInstaller;
 using android::emulation::FilePusher;
 using android::virtualscene::TextureUtils;
 using std::string;
-using android::emulation::grpc::ui::SnapshotPageGrpc;
 
 using std::vector;
 

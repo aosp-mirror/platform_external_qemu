@@ -30,11 +30,6 @@ using android::emulation::control::BatteryState;
 using android::emulation::control::SimpleEmulatorControlClient;
 using android::metrics::UiEventTracker;
 
-namespace android {
-namespace emulation {
-namespace grpc {
-namespace ui {
-
 class BatteryPageGrpc : public QWidget {
     Q_OBJECT
 
@@ -59,7 +54,3 @@ private:
     BatteryState mState;
     std::shared_ptr<UiEventTracker> mDropDownTracker;
 };
-}  // namespace ui
-}  // namespace grpc
-}  // namespace emulation
-}  // namespace android

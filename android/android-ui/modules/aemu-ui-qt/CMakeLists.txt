@@ -24,7 +24,8 @@ android_qt_lib(
       android/skin/qt/emulator-overlay.cpp
       android/skin/qt/emulator-qt-window.cpp
       android/skin/qt/event-qt.cpp
-      android/skin/qt/extended-page-factory.cpp
+      android/skin/qt/extended-window-grpc.cpp
+      android/skin/qt/extended-window-grpc.ui
       android/skin/qt/extended-window.cpp
       android/skin/qt/extended.ui
       android/skin/qt/FramelessDetector.cpp

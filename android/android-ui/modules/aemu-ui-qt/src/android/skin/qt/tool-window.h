@@ -12,42 +12,42 @@
 
 #pragma once
 
-#include "android/hw-sensors.h"
+#include <stdint.h>
+#include <memory>
+#include <string>
+
+#include <QCloseEvent>
+#include <QFrame>
+#include <QHideEvent>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QPaintEvent>
+#include <QRect>
+#include <QString>
+#include <QWidget>
+
+#include "aemu/base/Compiler.h"
 #include "aemu/base/containers/CircularBuffer.h"
 #include "aemu/base/memory/OnDemand.h"
-#include "aemu/base/synchronization/Lock.h"
 #include "aemu/base/synchronization/ConditionVariable.h"
+#include "aemu/base/synchronization/Lock.h"
 #include "aemu/base/threads/WorkerThread.h"
-#include "android/skin/event.h"
-#include "android/skin/qt/extended-window-styles.h"
-#include "android/skin/qt/extended-window.h"
+#include "android/emulation/resizable_display_config.h"
+#include "android/skin/qt/extended-window-base.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/resizable-dialog.h"
 #include "android/skin/qt/shortcut-key-store.h"
-#include "android/skin/qt/size-tweaker.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
 #include "android/skin/qt/virtualscene-control-window.h"
-#include "android/utils/compiler.h"
+#include "android/ui-emu-agent.h"
+#include "host-common/qt_ui_defs.h"
 
-
-#include <QFrame>
-#include <QKeyEvent>
-#include <QString>
-#include <QTimer>
-#include <QWidget>
-
-#include <memory>
-
-class EmulatorQtWindow;
-class ExtendedWindow;
 class PostureSelectionDialog;
-class ResizableDialog;
 
 namespace Ui {
-    class ToolControls;
+class ToolControls;
 }
-
 
 class ToolWindow : public QFrame {
     Q_OBJECT
@@ -57,18 +57,25 @@ class ToolWindow : public QFrame {
             std::weak_ptr<android::qt::UserActionsCounter>;
 
     template <typename T>
-    class WindowHolder final {
+    class WindowHolder {
         DISALLOW_COPY_AND_ASSIGN(WindowHolder);
-        using OnCreatedCallback = void (ToolWindow::*)(T*);
 
     public:
+        using OnCreatedCallback = void (ToolWindow::*)(T*);
+
         WindowHolder(ToolWindow* tw, OnCreatedCallback onCreated);
         ~WindowHolder();
         T* operator->() const { return mWindow; }
         T* get() const { return mWindow; }
 
-    private:
-        T* const mWindow;
+    protected:
+        WindowHolder() = default;
+        T* mWindow;
+    };
+
+    class ExtendedWindowHolder : public WindowHolder<ExtendedBaseWindow> {
+    public:
+        ExtendedWindowHolder(ToolWindow* tw, OnCreatedCallback onCreated);
     };
 
 public:
@@ -113,14 +120,12 @@ public:
 
     // The designers want a gap between the main emulator
     // window and the tool bar. This is how big that gap is.
-    static const int TOOL_GAP_FRAMED    = 0;
+    static const int TOOL_GAP_FRAMED = 0;
     static const int TOOL_GAP_FRAMELESS = 4;
 
     bool shouldClose();
 
-    bool clipboardSharingSupported() const {
-        return mClipboardSupported;
-    }
+    bool clipboardSharingSupported() const { return mClipboardSupported; }
     void forwardKeyToEmulator(uint32_t keycode, bool down);
     void touchExtendedWindow();
     // Handle a full key press (down + up) in a single call.
@@ -149,14 +154,12 @@ private:
 
     void stopExtendedWindowCreation();
 
-    void onExtendedWindowCreated(ExtendedWindow* extendedWindow);
+    void onExtendedWindowCreated(ExtendedBaseWindow* extendedWindow);
     void onVirtualSceneWindowCreated(
             VirtualSceneControlWindow* virtualSceneWindow);
     void setupSubwindow(QWidget* window);
 
-    bool isExiting() const {
-        return mIsExiting;
-    }
+    bool isExiting() const { return mIsExiting; }
     bool askWhetherToSaveSnapshot();
     void resizableChangeIcon(PresetEmulatorSizeType type);
 
@@ -169,9 +172,9 @@ private:
     virtual void hideEvent(QHideEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
-    android::base::MemberOnDemandT<WindowHolder<ExtendedWindow>,
+    android::base::MemberOnDemandT<ExtendedWindowHolder,
                                    ToolWindow*,
-                                   void (ToolWindow::*)(ExtendedWindow*)>
+                                   void (ToolWindow::*)(ExtendedBaseWindow*)>
             mExtendedWindow;
     android::base::MemberOnDemandT<WindowHolder<VirtualSceneControlWindow>,
                                    ToolWindow*,
@@ -209,8 +212,10 @@ private:
         enum FoldableSyncToAndroidOp op;
         int x, y, width, height;
     };
-    android::base::WorkerThread<FoldableSyncToAndroidItem> mFoldableSyncToAndroid;
-    android::base::WorkerProcessingResult foldableSyncToAndroidItemFunction(const FoldableSyncToAndroidItem& item);
+    android::base::WorkerThread<FoldableSyncToAndroidItem>
+            mFoldableSyncToAndroid;
+    android::base::WorkerProcessingResult foldableSyncToAndroidItemFunction(
+            const FoldableSyncToAndroidItem& item);
     android::base::Lock mLock;
     android::base::ConditionVariable mCv;
     bool mFoldableSyncToAndroidSuccess;

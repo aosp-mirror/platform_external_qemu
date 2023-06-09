@@ -46,11 +46,6 @@ using android::metrics::UiEventTracker;
 using android::emulation::control::SnapshotDetails;
 using PackageData = absl::StatusOr<std::string>;
 
-namespace android {
-namespace emulation {
-namespace grpc {
-namespace ui {
-
 class SnapshotPageGrpc : public QWidget {
     Q_OBJECT
 public:
@@ -142,7 +137,3 @@ private:
     SimpleSnapshotServiceClient mSnapshotService;
     QGraphicsScene mPreviewScene;  // Used to render the preview screenshot
 };
-}  // namespace ui
-}  // namespace grpc
-}  // namespace emulation
-}  // namespace android
