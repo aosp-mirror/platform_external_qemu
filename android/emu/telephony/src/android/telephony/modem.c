@@ -2712,7 +2712,6 @@ handleSignalStrength( const char*  cmd, AModem  modem )
       amodem_addTimeUpdate(modem);
       modem->snapshotTimeUpdateRequested = 0;
     } else if (wakeup_from_sleep()) {
-        amodem_addTimeUpdate(modem);
         amodem_addPhysChanCfgUpdate( modem );
     } else if (firstSignalStrengthRequest) {
         firstSignalStrengthRequest = false;
