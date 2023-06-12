@@ -25,7 +25,7 @@ target_compile_options(nimble_bridge PRIVATE -Wno-c99-designator)
 
 android_license(
   TARGET "nimble_bluetooth"
-  LIBNAME mynewt-nmble
+  LIBNAME mynewt-nimble
   SPDX "Apache=2.0"
   LICENSE
     "https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/third_party/mynewt-nimble/LICENSE"
