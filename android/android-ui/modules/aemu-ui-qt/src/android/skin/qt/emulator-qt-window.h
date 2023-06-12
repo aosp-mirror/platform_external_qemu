@@ -425,7 +425,6 @@ public slots:
 
     void onScreenConfigChanged();
     void onScreenChanged(QScreen* newScreen);
-    void onApplicationStateChanged(Qt::ApplicationState state);
     bool event(QEvent* ev) override;  // Used to resume the MV on un-minimize
 
 public:

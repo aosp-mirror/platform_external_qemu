@@ -186,6 +186,7 @@ int main(int argc, char **argv)
 #include "android/snapshot.h"
 #include "snapshot/interface.h"
 #include "android/telephony/modem_driver.h"
+#include "android_modem_v2.h"
 #include "android/ui-emu-agent.h"
 #include "android/update-check/update_check.h"
 #include "android/utils/async.h"
@@ -2120,6 +2121,22 @@ void qemu_system_debug_request(void)
     qemu_notify_event();
 }
 
+#ifdef CONFIG_ANDROID
+static time_t s_android_last_signal_time = 0;
+static time_t k_time_update_threshold = 60; // seconds
+static bool wakeup_from_sleep() {
+    // it has not called once yet
+    if (s_android_last_signal_time == 0) {
+        return false;
+    }
+    // heuristics: if the main loop has not been updated
+    // for 1 minute, we assume it is caused by host sleep
+    time_t now = time(NULL);
+    const bool wakeup_from_sleep = (now > s_android_last_signal_time + k_time_update_threshold);
+    return wakeup_from_sleep;
+}
+#endif
+
 static bool main_loop_should_exit(void)
 {
     RunState r;
@@ -2131,6 +2148,14 @@ static bool main_loop_should_exit(void)
     if (qemu_suspend_requested()) {
         qemu_system_suspend();
     }
+#ifdef CONFIG_ANDROID
+    if (wakeup_from_sleep()) {
+        // bug: b/257097404 Update Android system time via simualted modem
+        // when the host OS wakes up from sleep.
+        amodem_update_time(getConsoleAgents()->telephony->getModem());
+    }
+    s_android_last_signal_time = time(NULL);
+#endif
     request = qemu_shutdown_requested();
     if (request) {
 #ifdef CONFIG_ANDROID
