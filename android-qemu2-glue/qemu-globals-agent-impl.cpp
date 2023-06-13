@@ -17,7 +17,7 @@
 #include "android/emulation/control/globals_agent.h"
 #include "android/utils/debug.h"
 
-AndroidOptions* sAndroid_cmdLineOptions;
+AndroidOptions* sAndroid_cmdLineOptions = nullptr;
 
 AvdInfo* sAndroid_avdInfo = nullptr;
 AndroidHwConfig s_hwConfig = {0};

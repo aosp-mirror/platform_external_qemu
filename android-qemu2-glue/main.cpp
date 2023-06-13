@@ -162,6 +162,8 @@ static bool is_linux = false;
 
 namespace {
 
+AndroidOptions sOpts[1];
+
 enum ImageType {
     IMAGE_TYPE_SYSTEM = 0,
     IMAGE_TYPE_CACHE,
@@ -1537,7 +1539,6 @@ extern "C" int main(int argc, char** argv) {
     const char* executable = argv[0];
     android::ParameterList args = {executable};
     AvdInfo* avd;
-    AndroidOptions opts[1];
     int exitStatus = 0;
 
     gAndroidProxyCB->ProxySet = qemu_android_setup_http_proxy;
@@ -1565,6 +1566,7 @@ extern "C" int main(int argc, char** argv) {
     getConsoleAgents()->settings->inject_android_cmdLine(
             android::base::createEscapedLaunchString(argc, argv).c_str());
 
+    AndroidOptions* opts = &sOpts[0];
     AndroidHwConfig* hw = getConsoleAgents()->settings->hw();
     if (!emulator_parseCommonCommandLineOptions(&argc, &argv,
                                                 kTarget.androidArch,
