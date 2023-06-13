@@ -1518,8 +1518,6 @@ void EmulatorQtWindow::show() {
 
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
                      &EmulatorQtWindow::onScreenChanged);
-    QObject::connect(qGuiApp, &QGuiApplication::applicationStateChanged, this,
-                     &EmulatorQtWindow::onApplicationStateChanged);
 #if QT_VERSION >= 0x060000
     QObject::connect(qGuiApp, &QGuiApplication::primaryScreenChanged, this,
                      &EmulatorQtWindow::onScreenConfigChanged);
@@ -2221,10 +2219,6 @@ void EmulatorQtWindow::onScreenConfigChanged() {
         queueSkinEvent(createSkinEvent(kEventScreenChanged));
         mCurrentScreen = newScreen;
     }
-}
-
-void EmulatorQtWindow::onApplicationStateChanged(Qt::ApplicationState state) {
-    TelephonyPage::updateModemTime();
 }
 
 void EmulatorQtWindow::showEvent(QShowEvent* event) {
