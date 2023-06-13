@@ -634,9 +634,15 @@ private:
                     // we do not have a vendor image to mount
                     return {};
                 }
-                vendorImagePath = std::string(
-                        avdInfo_getVendorImagePath(m_avd)
-                                ?: avdInfo_getVendorInitImagePath(m_avd));
+                {
+                    std::unique_ptr<char, void(*)(void*)> avdVendorImagePath(
+                            avdInfo_getVendorImagePath(m_avd), free);
+                    std::unique_ptr<char, void(*)(void*)> vendorInitImagePath(
+                            avdInfo_getVendorInitImagePath(m_avd), free);
+                    vendorImagePath = std::string(
+                            avdVendorImagePath.get()
+                                    ?: vendorInitImagePath.get());
+                }
                 if (writable) {
                     const char* systemDir = avdInfo_getContentPath(m_avd);
                     allocatedPath.reset(path_join(
@@ -3171,12 +3177,16 @@ extern "C" int main(int argc, char** argv) {
         if (feature_is_enabled(kFeature_PlayStoreImage) ||
             !android_op_writable_system ||
             feature_is_enabled(kFeature_DynamicPartition)) {
+            std::unique_ptr<char, void(*)(void*)> verifiedBootParamsPath(
+                    avdInfo_getVerifiedBootParamsPath(avd), free);
             android::verifiedboot::getParametersFromFile(
-                    avdInfo_getVerifiedBootParamsPath(avd),  // NULL here is OK
+                    verifiedBootParamsPath.get(),  // NULL here is OK
                     &verified_boot_params);
             if (feature_is_enabled(kFeature_DynamicPartition)) {
                 std::string boot_dev("androidboot.boot_devices=");
-                boot_dev.append(avdInfo_getDynamicPartitionBootDevice(avd));
+                std::unique_ptr<char, void(*)(void*)> dynamicPartitionBootDevice(
+                        avdInfo_getDynamicPartitionBootDevice(avd), free);
+                boot_dev.append(dynamicPartitionBootDevice.get());
                 verified_boot_params.push_back(boot_dev);
             }
             if (android_op_writable_system) {
