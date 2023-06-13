@@ -147,16 +147,21 @@ void generateAvdWithDefaults(std::string_view avdName,
     std::string skinDir =
         pj({sdkRootPath.data(), "skins", "nexus_5x"});
 
+    auto cWrapSdkHomePath = c_str(sdkHomePath);
+    auto cWrapAndroidTarget = c_str(androidTarget);
+    auto cWrapAvdName = c_str(avdName);
+    auto cWrapAbi = c_str(abi);
+
     AvdGenerateInfo genInfo = {
         // sdk home dir, target
-        c_str(sdkHomePath),
-        c_str(androidTarget),
+        cWrapSdkHomePath,
+        cWrapAndroidTarget,
 
         // config.ini
-        /* AvdId */ c_str(avdName),
+        /* AvdId */ cWrapAvdName,
         /* PlayStore.enabled */ "false",
-        /* abi.type */ c_str(abi),
-        /* avd.ini.displayname */ c_str(avdName),
+        /* abi.type */ cWrapAbi,
+        /* avd.ini.displayname */ cWrapAvdName,
         /* avd.ini.encoding */ "UTF-8",
         /* disk.dataPartition.size */ "1M",
         /* fastboot.chosenSnapshotFile */ "",
