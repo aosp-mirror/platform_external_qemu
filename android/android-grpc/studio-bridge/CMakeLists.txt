@@ -1,7 +1,7 @@
 set(studio-bridge_src
     ${EMULATOR_GRPC_SRC}
     android/emulation/control/EmulatorService.cpp
-    android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
+    android/emulation/control/keyboard/KeyEventSender.cpp
     android/emulation/control/GrpcServices.cpp
     android/emulation/control/waterfall/BstrStreambuf.cpp
     android/emulation/control/waterfall/SocketStreambuf.cpp
