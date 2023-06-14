@@ -1598,9 +1598,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
         // Device has no frame update reported. Use cached preview frame.
         // Convert preview frame format to video frame format.
         if (convert_frame(cc->preview_frame, V4L2_PIX_FMT_RGB32,
-                      cc->preview_frame_size,
-                      cc->width, cc->height,
-                      &frame, 1.0f, 1.0f, 1.0f, 1.0f)) {
+                          cc->preview_frame_size, cc->width, cc->height, &frame,
+                          1.0f, 1.0f, 1.0f, 1.0f, "front", 1)) {
             E("%s: Unable to obtain first video frame from the camera '%s'",
                 __FUNCTION__, cc->device_name);
             _qemu_client_reply_ko(qc, "Unable to obtain video frame from the camera");
@@ -1817,10 +1816,8 @@ _camera_client_query_frame_v1(CameraClient* cc, QemudClient* qc, const char* par
     if (repeat == 1 && cc->frames_cached) {
         frame.framebuffers_count = 1;
         if (convert_frame(cc->frame_cache.data(), cc->pixel_format,
-                          cc->frame_cache_size,
-                          cc->width, cc->height,
-                          &frame,
-                          1.0f, 1.0f, 1.0f, 1.0f)) {
+                          cc->frame_cache_size, cc->width, cc->height, &frame,
+                          1.0f, 1.0f, 1.0f, 1.0f, "front", 1)) {
             E("%s: Unable to obtain first video frame from the camera '%s'",
                 __FUNCTION__, cc->device_name);
             _qemu_client_reply_ko(qc, "Unable to obtain video frame from the camera");

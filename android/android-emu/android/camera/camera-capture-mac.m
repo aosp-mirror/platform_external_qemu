@@ -470,7 +470,7 @@ FourCCToInternal(uint32_t cm_pix_format)
         res = convert_frame(scale_output.data, pixel_format,
                             scale_output.rowBytes * scale_output.height,
                             desired_width, desired_height, result_frame,
-                            r_scale, g_scale, b_scale, exp_comp);
+                            r_scale, g_scale, b_scale, exp_comp, "front", 1);
     } else if (current_frame != nil) {
         E("%s: Unable to obtain framebuffer", __func__);
         res = -1;

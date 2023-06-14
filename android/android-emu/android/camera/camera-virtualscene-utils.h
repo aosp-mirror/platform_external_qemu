@@ -109,7 +109,9 @@ public:
                   float rScale,
                   float gScale,
                   float bScale,
-                  float expComp);
+                  float expComp,
+                  const char* direction,
+                  int orientation);
 
 private:
     // Initialize EGL, returns false on failure.
