@@ -111,14 +111,16 @@ int camera_virtualscene_read_frame(CameraDevice* ccd,
                                    float r_scale,
                                    float g_scale,
                                    float b_scale,
-                                   float exp_comp) {
+                                   float exp_comp,
+                                   const char* direction) {
     RenderedCameraDevice* cd = toRenderedCameraDevice(ccd);
     if (!cd) {
         E("%s: Invalid camera device descriptor", __FUNCTION__);
         return -1;
     }
 
-    return cd->readFrame(result_frame, r_scale, g_scale, b_scale, exp_comp);
+    return cd->readFrame(result_frame, r_scale, g_scale, b_scale, exp_comp,
+                         direction, get_coarse_orientation());
 }
 
 void camera_virtualscene_close(CameraDevice* ccd) {

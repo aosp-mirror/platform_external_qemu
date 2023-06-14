@@ -129,7 +129,8 @@ int camera_videoplayback_read_frame(CameraDevice* ccd,
                                     float r_scale,
                                     float g_scale,
                                     float b_scale,
-                                    float exp_comp) {
+                                    float exp_comp,
+                                    const char* direction) {
     VideoPlaybackCameraDevice* cd = toVideoPlaybackCameraDevice(ccd);
     if (!cd) {
         E("%s: Invalid camera device descriptor", __FUNCTION__);
@@ -137,7 +138,8 @@ int camera_videoplayback_read_frame(CameraDevice* ccd,
     }
 
     return cd->getMultiplexedCameraDevice()->readFrame(
-        result_frame, r_scale, g_scale, b_scale, exp_comp);
+            result_frame, r_scale, g_scale, b_scale, exp_comp, direction,
+            get_coarse_orientation());
 }
 
 void camera_videoplayback_close(CameraDevice* ccd) {
