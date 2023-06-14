@@ -64,6 +64,15 @@ static constexpr uint32_t kSupportedDestinationFormats[] = {
         V4L2_PIX_FMT_NV21,   V4L2_PIX_FMT_RGB32,  V4L2_PIX_FMT_RGB24,
 };
 
+// V4L2_PIX_FMT_NV12 conversion is not supported.
+static constexpr uint32_t kSupportedRotationFormats[] = {
+        V4L2_PIX_FMT_YUV420,
+        V4L2_PIX_FMT_YVU420,
+        V4L2_PIX_FMT_NV21,
+        V4L2_PIX_FMT_RGB32,
+        V4L2_PIX_FMT_RGB24,
+};
+
 enum class FramebufferCompare { Default, IgnoreEdges };
 
 struct FramebufferSizeParam {
@@ -194,6 +203,41 @@ static std::vector<uint8_t> generateFramebuffer(uint32_t format,
     return dest;
 }
 
+// Generate a framebuffer filled with gradience (in rgb) and converted
+// to the target colorspace.
+static std::vector<uint8_t> generateGradientFramebuffer(uint32_t format,
+                                                        int width,
+                                                        int height) {
+    uint32_t argbColor;
+    uint8_t* rgbPtr = reinterpret_cast<uint8_t*>(&argbColor);
+
+    const size_t srcSize = bufferSize(V4L2_PIX_FMT_ARGB32, width, height);
+    const size_t destSize = bufferSize(format, width, height);
+    std::vector<uint8_t> src(srcSize);
+    std::vector<uint8_t> dest(destSize);
+
+    // Fill src with the argbColor
+    uint32_t* src32 = reinterpret_cast<uint32_t*>(src.data());
+    for (size_t i = 0; i < srcSize / 4; ++i) {
+        unsigned char c = i % 256;
+        src32[i] = c << 24 | c << 16 | c << 8 | c;
+    }
+
+    ClientFrameBuffer framebuffer = {};
+    framebuffer.pixel_format = format;
+    framebuffer.framebuffer = dest.data();
+
+    EXPECT_EQ(0, convert_frame_slow(src.data(), V4L2_PIX_FMT_ARGB32, src.size(),
+                                    width, height, &framebuffer, 1,
+                                    kDefaultColorScale, kDefaultColorScale,
+                                    kDefaultColorScale, kDefaultExpComp))
+            << "convert_frame_slow, source="
+            << fourccToString(V4L2_PIX_FMT_ARGB32)
+            << " dest=" << fourccToString(format);
+
+    return dest;
+}
+
 static void compareSumOfSquaredDifferences(const std::vector<uint8_t>& src,
                                            const std::vector<uint8_t>& dest,
                                            double threshold) {
@@ -210,6 +254,20 @@ static void compareSumOfSquaredDifferences(const std::vector<uint8_t>& src,
         // Fall back to standard EXPECT_EQ for better error output.
         ASSERT_EQ(src, dest);
     }
+}
+
+static void expectDifferent(const std::vector<uint8_t>& src,
+                            const std::vector<uint8_t>& dest,
+                            double threshold) {
+    ASSERT_EQ(src.size(), dest.size());
+
+    double sum = 0.0;
+    for (size_t i = 0; i < src.size(); ++i) {
+        double diff = static_cast<double>(src[i]) - dest[i];
+        sum += diff * diff;
+    }
+
+    EXPECT_GE(sum, threshold * src.size());
 }
 
 class ConvertWithSize : public testing::TestWithParam<FramebufferSizeParam> {};
@@ -272,13 +330,104 @@ TEST_P(ConvertWithSize, FastPathIdentity) {
         resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
 
         EXPECT_EQ(0, convert_frame_fast(src.data(), format, src.size(),
-                                        param.width, param.height,
-                                        &resultFrame, kDefaultExpComp));
+                                        param.width, param.height, &resultFrame,
+                                        kDefaultExpComp, 0));
 
         compareSumOfSquaredDifferences(src, dest, param.getThreshold());
 
         if (HasFatalFailure()) {
             return;
+        }
+    }
+
+    free(stagingFramebuffer);
+}
+
+TEST_P(ConvertWithSize, FastPathRotate) {
+    const FramebufferSizeParam param = GetParam();
+    if (param.options == FramebufferCompare::IgnoreEdges) {
+        GTEST_SKIP() << "Skip large error threshold";
+    }
+    uint8_t* stagingFramebuffer = nullptr;
+    size_t stagingFramebufferSize = 0;
+
+    for (uint32_t format : kSupportedRotationFormats) {
+        std::vector<uint8_t> src =
+                generateGradientFramebuffer(format, param.width, param.height);
+        for (int rotation = 0; rotation < 4; rotation++) {
+            SCOPED_TRACE(testing::Message()
+                         << "source=" << fourccToString(format)
+                         << " dest=" << fourccToString(format)
+                         << " rotation=" << rotation * 90);
+
+            int rotatedWidth;
+            int rotatedHeight;
+            if (rotation == 0 || rotation == 2) {
+                rotatedWidth = param.width;
+                rotatedHeight = param.height;
+            } else {
+                rotatedWidth = param.height;
+                rotatedHeight = param.width;
+            }
+            const size_t rotatedSize =
+                    bufferSize(format, rotatedWidth, rotatedHeight);
+            std::vector<uint8_t> rotated(rotatedSize);
+
+            ClientFrameBuffer framebuffer = {};
+            framebuffer.pixel_format = format;
+            framebuffer.framebuffer = rotated.data();
+            framebuffer.width = param.width;
+            framebuffer.height = param.height;
+
+            ClientFrame rotatedFrame = {};
+            rotatedFrame.framebuffers = &framebuffer;
+            rotatedFrame.framebuffers_count = 1;
+            rotatedFrame.staging_framebuffer = &stagingFramebuffer;
+            rotatedFrame.staging_framebuffer_size = &stagingFramebufferSize;
+
+            EXPECT_EQ(0, convert_frame_fast(src.data(), format, src.size(),
+                                            param.width, param.height,
+                                            &rotatedFrame, kDefaultExpComp,
+                                            rotation));
+
+            if (rotation == 0) {
+                compareSumOfSquaredDifferences(src, rotated,
+                                               param.getThreshold());
+            } else {
+                expectDifferent(src, rotated, param.getThreshold());
+            }
+
+            const size_t destSize =
+                    bufferSize(format, param.width, param.height);
+            std::vector<uint8_t> dest(destSize);
+
+            ClientFrameBuffer dest_framebuffer = {};
+            dest_framebuffer.pixel_format = format;
+            dest_framebuffer.framebuffer = dest.data();
+            dest_framebuffer.width = param.width;
+            dest_framebuffer.height = param.height;
+
+            ClientFrame destFrame = {};
+            destFrame.framebuffers = &dest_framebuffer;
+            destFrame.framebuffers_count = 1;
+            destFrame.staging_framebuffer = &stagingFramebuffer;
+            destFrame.staging_framebuffer_size = &stagingFramebufferSize;
+
+            // Rotate it back, it should be almost the same for square
+            // framebuffers.
+            EXPECT_EQ(0, convert_frame_fast(
+                                 rotated.data(), format, rotated.size(),
+                                 rotatedWidth, rotatedHeight, &destFrame,
+                                 kDefaultExpComp, (4 - rotation) % 4));
+
+            if (param.width == param.height) {
+                // Need a bigger threshold
+                compareSumOfSquaredDifferences(src, dest, param.getThresholdForResize());
+            }
+
+            if (HasFatalFailure()) {
+                return;
+            }
         }
     }
 
@@ -320,8 +469,8 @@ TEST_P(ConvertWithSize, Resize) {
         resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
 
         EXPECT_EQ(0, convert_frame_fast(src.data(), format, src.size(),
-                                        param.width, param.height,
-                                        &resultFrame, kDefaultExpComp));
+                                        param.width, param.height, &resultFrame,
+                                        kDefaultExpComp, 0));
 
         memset(stagingFramebuffer, 0, stagingFramebufferSize);
 
@@ -329,11 +478,11 @@ TEST_P(ConvertWithSize, Resize) {
         framebuffer.width = param.width;
         framebuffer.height = param.height;
 
-        EXPECT_EQ(0, convert_frame_fast(
-                             intermediate.data(), format, intermediate.size(),
-                             param.width / kScaleAmount,
-                             param.height / kScaleAmount,
-                             &resultFrame, kDefaultExpComp));
+        EXPECT_EQ(0, convert_frame_fast(intermediate.data(), format,
+                                        intermediate.size(),
+                                        param.width / kScaleAmount,
+                                        param.height / kScaleAmount,
+                                        &resultFrame, kDefaultExpComp, 0));
 
         compareSumOfSquaredDifferences(src, dest,
                                        param.getThresholdForResize());
@@ -381,7 +530,8 @@ TEST_P(ConvertWithSize, SourceToDest) {
             EXPECT_EQ(0, convert_frame(src.data(), src_format, src.size(),
                                        param.width, param.height, &resultFrame,
                                        kDefaultColorScale, kDefaultColorScale,
-                                       kDefaultColorScale, kDefaultExpComp));
+                                       kDefaultColorScale, kDefaultExpComp,
+                                       "front", 1));
 
             std::vector<uint8_t> destBaseline(destSize);
             ClientFrameBuffer baselineFramebuffer = {};
@@ -462,10 +612,11 @@ TEST_P(FrameModifiers, ExpComp) {
             resultFrame.staging_framebuffer = &stagingFramebuffer;
             resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
 
-            EXPECT_EQ(0, convert_frame(src.data(), src_format, src.size(),
-                                       kWidth, kHeight, &resultFrame,
-                                       kDefaultColorScale, kDefaultColorScale,
-                                       kDefaultColorScale, expComp));
+            EXPECT_EQ(0,
+                      convert_frame(src.data(), src_format, src.size(), kWidth,
+                                    kHeight, &resultFrame, kDefaultColorScale,
+                                    kDefaultColorScale, kDefaultColorScale,
+                                    expComp, "front", 1));
 
             std::vector<uint8_t> destBaseline(destSize);
             ClientFrameBuffer baselineFramebuffer = {};

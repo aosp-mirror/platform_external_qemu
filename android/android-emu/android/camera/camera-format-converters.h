@@ -107,7 +107,8 @@ extern int convert_frame_fast(const void* src_frame,
                               int src_width,
                               int src_height,
                               ClientFrame* result_frame,
-                              float exp_comp);
+                              float exp_comp,
+                              int rotation);
 
 /* Converts a frame into multiple framebuffers.
  *
@@ -127,9 +128,11 @@ extern int convert_frame_fast(const void* src_frame,
  *                   where to convert the frame.
  *  |r_scale|, |g_scale|, |_scale| - White balance scale.
  *  |exp_comp| - Exposure compensation.
+ *  |direction| - "front" or "back", camera direction.
+ *  |orientation| - Rotation of the device, see get_coarse_orientation();
  * Return:
  *  0 on success, or non-zero value on failure.
-*/
+ */
 extern int convert_frame(const void* src_frame,
                          uint32_t pixel_format,
                          size_t framebuffer_size,
@@ -139,6 +142,8 @@ extern int convert_frame(const void* src_frame,
                          float r_scale,
                          float g_scale,
                          float b_scale,
-                         float exp_comp);
+                         float exp_comp,
+                         const char* direction,
+                         int orientation);
 
 ANDROID_END_HEADER

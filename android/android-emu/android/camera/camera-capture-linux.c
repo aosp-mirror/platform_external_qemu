@@ -891,8 +891,9 @@ camera_device_start_capturing(CameraDevice* ccd,
         _camera_device_reset(cd);
         return -1;
     }
-    memcpy(&cd->actual_pixel_format, &fmt.fmt.pix, sizeof(struct v4l2_pix_format));
 
+    memcpy(&cd->actual_pixel_format, &fmt.fmt.pix,
+           sizeof(struct v4l2_pix_format));
     /*
      * Lets initialize frame buffers, and see what kind of I/O we're going to
      * use to retrieve frames.
@@ -992,7 +993,8 @@ int camera_device_read_frame(CameraDevice* ccd,
                              float r_scale,
                              float g_scale,
                              float b_scale,
-                             float exp_comp) {
+                             float exp_comp,
+                             const char* direction) {
     LinuxCameraDevice* cd;
 
     /* Sanity checks. */
@@ -1033,7 +1035,8 @@ int camera_device_read_frame(CameraDevice* ccd,
                              cd->actual_pixel_format.sizeimage,
                              cd->actual_pixel_format.width,
                              cd->actual_pixel_format.height, result_frame,
-                             r_scale, g_scale, b_scale, exp_comp);
+                             r_scale, g_scale, b_scale, exp_comp, direction,
+                             get_coarse_orientation());
     } else {
         /* Dequeue next buffer from the device. */
         struct v4l2_buffer buf;
@@ -1061,7 +1064,8 @@ int camera_device_read_frame(CameraDevice* ccd,
                             cd->actual_pixel_format.sizeimage,
                             cd->actual_pixel_format.width,
                             cd->actual_pixel_format.height, result_frame,
-                            r_scale, g_scale, b_scale, exp_comp);
+                            r_scale, g_scale, b_scale, exp_comp, direction,
+                            get_coarse_orientation());
 
         /* Requeue the buffer back to the device. */
         if (_xioctl(cd->handle, VIDIOC_QBUF, &buf) < 0) {

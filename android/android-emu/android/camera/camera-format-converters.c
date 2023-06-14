@@ -1929,66 +1929,82 @@ bool resize_staging(ClientFrame* result_frame, size_t required) {
 int convert_to_i420(const void* src_frame,
                     uint32_t pixel_format,
                     size_t framebuffer_size,
-                    int width,
-                    int height,
-                    YUVInfo info,
+                    int src_width,
+                    int src_height,
+                    int dst_width,
+                    int dst_height,
+                    int rotation,
+                    YUVInfo src_info,
+                    YUVInfo dst_info,
                     ClientFrame* result_frame) {
-    const size_t staging_size = info.y_size + 2 * info.u_or_v_size;
+    const size_t staging_size = dst_info.y_size + 2 * dst_info.u_or_v_size;
 
     uint8_t* y_staging = *result_frame->staging_framebuffer;
-    uint8_t* u_staging = y_staging + info.y_size;
-    uint8_t* v_staging = u_staging + info.u_or_v_size;
+    uint8_t* u_staging = y_staging + dst_info.y_size;
+    uint8_t* v_staging = u_staging + dst_info.u_or_v_size;
 
-    int result = 0;
-    if (pixel_format == V4L2_PIX_FMT_YUV420) {
+    if (pixel_format == V4L2_PIX_FMT_YUV420 && rotation == 0) {
         memcpy(y_staging, src_frame, staging_size);
-    } else if (pixel_format == V4L2_PIX_FMT_YVU420) {
+    } else if (pixel_format == V4L2_PIX_FMT_YVU420 && rotation == 0) {
         // YVU420 is 16-byte aligned, but there is no way to specify alignment
         // with ConvertToI420; manually convert it to YUV420 (swapping U and V)
         // with libyuv's I420Copy.
         const uint8_t* src_y = src_frame;
-        const uint8_t* src_v = src_y + info.y_size;
-        const uint8_t* src_u = src_v + info.u_or_v_size;
+        const uint8_t* src_v = src_y + src_info.y_size;
+        const uint8_t* src_u = src_v + src_info.u_or_v_size;
 
-        result = I420Copy(src_y,               // src_y
-                          info.y_stride,       // src_stride_y
-                          src_u,               // src_u
-                          info.u_or_v_stride,  // src_stride_u
-                          src_v,               // src_v
-                          info.u_or_v_stride,  // src_stride_v
-                          y_staging,           // dst_y
-                          info.y_stride,       // dst_stride_y
-                          u_staging,           // dst_u
-                          info.u_or_v_stride,  // dst_stride_u
-                          v_staging,           // dst_v
-                          info.u_or_v_stride,  // dst_stride_v
-                          width,               // width
-                          height);             // height
+        int result = I420Copy(src_y,                   // src_y
+                              src_info.y_stride,       // src_stride_y
+                              src_u,                   // src_u
+                              src_info.u_or_v_stride,  // src_stride_u
+                              src_v,                   // src_v
+                              src_info.u_or_v_stride,  // src_stride_v
+                              y_staging,               // dst_y
+                              src_info.y_stride,       // dst_stride_y
+                              u_staging,               // dst_u
+                              src_info.u_or_v_stride,  // dst_stride_u
+                              v_staging,               // dst_v
+                              src_info.u_or_v_stride,  // dst_stride_v
+                              src_width,               // width
+                              src_height);             // height
+        if (result != 0) {
+            W("%s: I420Copy failed with format %.4s, error %d", __FUNCTION__,
+                (const char*)(&pixel_format), result);
+            return -1;
+        }
     } else {
         const uint32_t src_format = pixel_format_to_libyuv(pixel_format);
+        int crop_width;
+        int crop_height;
+        if (rotation == 90 || rotation == 270) {
+            crop_width = dst_height;
+            crop_height = dst_width;
+        } else {
+            crop_width = dst_width;
+            crop_height = dst_height;
+        }
 
-        result = ConvertToI420(src_frame,           // src_frame
-                               framebuffer_size,    // src_size
-                               y_staging,           // dst_y
-                               info.y_stride,       // dst_stride_y
-                               u_staging,           // dst_u
-                               info.u_or_v_stride,  // dst_stride_u
-                               v_staging,           // dst_v
-                               info.u_or_v_stride,  // dst_stride_v
-                               0,                   // crop_x
-                               0,                   // crop_y
-                               width,               // src_width
-                               height,              // src_height
-                               width,               // crop_width
-                               height,              // crop_height
-                               kRotate0,            // rotation
-                               src_format);         // format
-    }
-
-    if (result != 0) {
-        W("%s: Could not convert to %.4s to I420, error %d", __FUNCTION__,
-          (const char*)(&pixel_format), result);
-        return -1;
+        int result = ConvertToI420(src_frame,               // src_frame
+                                   framebuffer_size,        // src_size
+                                   y_staging,               // dst_y
+                                   dst_info.y_stride,       // dst_stride_y
+                                   u_staging,               // dst_u
+                                   dst_info.u_or_v_stride,  // dst_stride_u
+                                   v_staging,               // dst_v
+                                   dst_info.u_or_v_stride,  // dst_stride_v
+                                   0,                       // crop_x
+                                   0,                       // crop_y
+                                   src_width,               // src_width
+                                   src_height,              // src_height
+                                   crop_width,              // crop_width
+                                   crop_height,             // crop_height
+                                   rotation,                // rotation
+                                   src_format);             // format
+        if (result != 0) {
+            W("%s: Could not convert from %.4s to I420, error %d", __FUNCTION__,
+                (const char*)(&pixel_format), result);
+            return -1;
+        }
     }
 
     return 0;
@@ -2000,41 +2016,68 @@ int convert_frame_fast(const void* src_frame,
                        int src_width,
                        int src_height,
                        ClientFrame* result_frame,
-                       float exp_comp) {
+                       float exp_comp,
+                       int rotation) {
     int n;
     for (n = 0; n < result_frame->framebuffers_count; ++n) {
+        YUVInfo src_info = get_yuv_info(src_width, src_height);
         int result_width = result_frame->framebuffers[n].width;
         int result_height = result_frame->framebuffers[n].height;
-        const bool has_resize =
-            (src_width != result_width || src_height != result_height);
-        YUVInfo src_info = get_yuv_info(src_width, src_height);
+        int rotated_width = 0;
+        int rotated_height = 0;
+        if (rotation == 1 || rotation == 3) {
+            // Require rotation and cropping.
+            // We want to crop as little as possible.
+            if (src_height * result_height > src_width * result_width) {
+                rotated_height = src_width;
+                rotated_width = rotated_height * result_width / result_height;
+            } else {
+                rotated_width = src_height;
+                rotated_height = rotated_width * result_height / result_width;
+            }
+        } else {
+            if (src_width * result_height > src_height * result_width) {
+                // Source aspect ratio is larger than result aspect ratio,
+                // thus crop the width.
+                rotated_height = src_height;
+                rotated_width = rotated_height * result_width / result_height;
+            } else {
+                // Otherwise, crop the height.
+                rotated_width = src_width;
+                rotated_height = rotated_width * result_height / result_width;
+            }
+        }
+        YUVInfo rotated_info = get_yuv_info(rotated_width, rotated_height);
+        size_t rotated_size =
+                rotated_info.y_size + 2 * rotated_info.u_or_v_size;
         YUVInfo result_info = get_yuv_info(result_width, result_height);
-        size_t src_size = src_info.y_size + 2 * src_info.u_or_v_size;
         const size_t result_size =
             result_info.y_size + 2 * result_info.u_or_v_size;
+        const bool has_resize = (rotated_width != result_width ||
+                                 rotated_height != result_height);
         const size_t required_staging_size =
-            src_size + (has_resize ? result_size : 0);
-
+                rotated_size + (has_resize ? result_size : 0);
         if (!resize_staging(result_frame, required_staging_size)) {
             D("%s: Failed to resize the camera staging buffer", __FUNCTION__);
             return -1;
         }
-
         // Convert to I420, the intermediate format required for libyuv.
         int result = convert_to_i420(src_frame, pixel_format, framebuffer_size,
-                                     src_width, src_height, src_info, result_frame);
+                                     src_width, src_height, rotated_width,
+                                     rotated_height, rotation * 90, src_info,
+                                     rotated_info, result_frame);
         if (result != 0) {
             W("%s: Failed to convert the camera frame", __FUNCTION__);
             return result;
         }
-
+        src_info = rotated_info;
         uint8_t* src_y = *result_frame->staging_framebuffer;
         uint8_t* src_u = src_y + src_info.y_size;
         uint8_t* src_v = src_u + src_info.u_or_v_size;
 
         // If there is a resize, resize to the destination size.
         if (has_resize) {
-            uint8_t* dest_y = *result_frame->staging_framebuffer + src_size;
+            uint8_t* dest_y = *result_frame->staging_framebuffer + rotated_size;
             uint8_t* dest_u = dest_y + result_info.y_size;
             uint8_t* dest_v = dest_u + result_info.u_or_v_size;
 
@@ -2044,8 +2087,8 @@ int convert_frame_fast(const void* src_frame,
                                src_info.u_or_v_stride,     // src_stride_u
                                src_v,                      // src_v
                                src_info.u_or_v_stride,     // src_stride_v
-                               src_width,                  // src_width
-                               src_height,                 // src_height
+                               rotated_width,              // rotated_width
+                               rotated_height,             // rotated_height
                                dest_y,                     // dst_y
                                result_info.y_stride,       // dst_stride_y
                                dest_u,                     // dst_u
@@ -2065,8 +2108,8 @@ int convert_frame_fast(const void* src_frame,
             src_u = dest_u;
             src_v = dest_v;
             src_info = result_info;
-            src_size = result_size;
         }
+        size_t src_size = result_size;
 
         // Apply exposure compensation.
         if (exp_comp != 1.0f) {
@@ -2144,7 +2187,9 @@ int convert_frame(const void* src_frame,
                   float r_scale,
                   float g_scale,
                   float b_scale,
-                  float exp_comp) {
+                  float exp_comp,
+                  const char* direction,
+                  int orientation) {
     const PIXFormat* src_desc = get_pixel_format_descriptor(pixel_format);
     if (src_desc == NULL) {
         E("%s: Source pixel format %.4s is unknown", __FUNCTION__,
@@ -2152,20 +2197,25 @@ int convert_frame(const void* src_frame,
         return -1;
     }
 
+    int rotation = 0 == strcmp("back", direction) ? (7 - orientation) % 4
+                                                  : (3 + orientation) % 4;
+
     // Enable a fast-path with libyuv if the white-balance no-ops.
     if (r_scale == 1.0f && g_scale == 1.0f && b_scale == 1.0f &&
         libyuv_supported(src_desc, result_frame)) {
         if (convert_frame_fast(src_frame, pixel_format, framebuffer_size, width,
-                               height, result_frame, exp_comp) == 0) {
-            // Successful conversion!
+                               height, result_frame, exp_comp, rotation) == 0) {
             return 0;
         }
     }
 
     // Fast path preconditions were not met or conversion failed, fall back to
     // the slow path.
-    return convert_frame_slow(src_frame, pixel_format, framebuffer_size, width,
-                              height, result_frame->framebuffers,
-                              result_frame->framebuffers_count, r_scale,
-                              g_scale, b_scale, exp_comp);
+    // Note that this does not rotate the frames properly.
+    // BUG: 260913366
+    int res = convert_frame_slow(src_frame, pixel_format, framebuffer_size,
+                                 width, height, result_frame->framebuffers,
+                                 result_frame->framebuffers_count, r_scale,
+                                 g_scale, b_scale, exp_comp);
+    return res;
 }
