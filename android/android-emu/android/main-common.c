@@ -1212,6 +1212,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         }
     }
 
+    if (avdInfo_getApiLevel(avd) >= 33) {
+        hw->userdata_useQcow2 = true;
+    }
+
     // enforce CDD minimums
     int minRam = 32;
     bool isFoldable = android_foldable_any_folded_area_configured() ||
