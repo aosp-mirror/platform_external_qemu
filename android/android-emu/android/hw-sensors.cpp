@@ -1061,6 +1061,31 @@ extern int android_sensors_set_coarse_orientation(
     return 0;
 }
 
+/* Get the coarse orientation value */
+extern AndroidCoarseOrientation android_sensors_get_coarse_orientation() {
+    android_hw_sensors_init(NULL);
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    float* rotation[] = {&x, &y, &z};
+    android_sensors_get(ANDROID_SENSOR_ACCELERATION, rotation, 3);
+
+    bool needRotateImage = false;
+    if (fabs(x) < fabs(y)) {
+        if (y < 0) {
+            return ANDROID_COARSE_REVERSE_PORTRAIT;
+        } else {
+            return ANDROID_COARSE_PORTRAIT;
+        }
+    } else {
+        if (x < 0) {
+            return ANDROID_COARSE_REVERSE_LANDSCAPE;
+        } else {
+            return ANDROID_COARSE_LANDSCAPE;
+        }
+    }
+}
+
 /* Get sensor name from sensor id */
 extern const char* android_sensors_get_name_from_id(int sensor_id) {
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)

@@ -129,7 +129,8 @@ int camera_videoplayback_read_frame(CameraDevice* ccd,
                                     float r_scale,
                                     float g_scale,
                                     float b_scale,
-                                    float exp_comp) {
+                                    float exp_comp,
+                                    const char* direction) {
     VideoPlaybackCameraDevice* cd = toVideoPlaybackCameraDevice(ccd);
     if (!cd) {
         E("%s: Invalid camera device descriptor", __FUNCTION__);

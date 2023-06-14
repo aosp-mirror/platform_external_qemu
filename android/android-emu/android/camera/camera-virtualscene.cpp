@@ -111,7 +111,8 @@ int camera_virtualscene_read_frame(CameraDevice* ccd,
                                    float r_scale,
                                    float g_scale,
                                    float b_scale,
-                                   float exp_comp) {
+                                   float exp_comp,
+                                   const char* direction) {
     RenderedCameraDevice* cd = toRenderedCameraDevice(ccd);
     if (!cd) {
         E("%s: Invalid camera device descriptor", __FUNCTION__);

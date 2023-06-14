@@ -461,6 +461,8 @@ _camera_service_init(CameraServiceDesc* csd)
     /* Enumerate camera devices connected to the host. */
     memset(csd->camera_info, 0, sizeof(CameraInfo) * MAX_CAMERA);
     csd->camera_count = 0;
+    set_coarse_orientation_getter(
+        (GetCoarseOrientation)android_sensors_get_coarse_orientation);
 
     if (androidHwConfig_hasVirtualSceneCamera(getConsoleAgents()->settings->hw())) {
         /* Set up virtual scene camera emulation. */
@@ -779,7 +781,8 @@ struct CameraClient
                       float r_scale,
                       float g_scale,
                       float b_scale,
-                      float exp_comp);
+                      float exp_comp,
+                      const char* direction);
     void (*close)(CameraDevice* cd);
 
     /* Buffer allocated for video frames.
@@ -1555,7 +1558,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
             looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
 
     repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
-                            exp_comp);
+                            exp_comp, cc->camera_info->direction);
 
     /* Note that there is no (known) way how to wait on next frame being
      * available, so we could dequeue frame buffer from the device only when we
@@ -1573,7 +1576,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
         /* Sleep for 10 millisec before repeating the attempt. */
         _camera_sleep(10);
         repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
-                                exp_comp);
+                                exp_comp, cc->camera_info->direction);
         D("wait 10ms and read again\n");
     }
     if (repeat == 1 && !cc->frames_cached) {
@@ -1768,7 +1771,7 @@ _camera_client_query_frame_v1(CameraClient* cc, QemudClient* qc, const char* par
             looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
 
     repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
-                            exp_comp);
+                            exp_comp, cc->camera_info->direction);
 
     /* Note that there is no (known) way how to wait on next frame being
      * available, so we could dequeue frame buffer from the device only when we
@@ -1793,7 +1796,7 @@ _camera_client_query_frame_v1(CameraClient* cc, QemudClient* qc, const char* par
             cc->frame_cache.resize(cc->frame_cache_size);
         }
         repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
-                                exp_comp);
+                                exp_comp, cc->camera_info->direction);
     }
     if (repeat == 1 && !cc->frames_cached) {
         /* Waited too long for the first frame. */

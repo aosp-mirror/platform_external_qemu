@@ -65,3 +65,17 @@ void camera_info_copy(CameraInfo* ci, const CameraInfo* from) {
         ci->in_use = from->in_use;
     }
 }
+
+static GetCoarseOrientation sGetCoarseOrientation = nullptr;
+
+void set_coarse_orientation_getter(GetCoarseOrientation getCoarseOrientation) {
+    sGetCoarseOrientation = getCoarseOrientation;
+}
+
+int get_coarse_orientation() {
+    if (!sGetCoarseOrientation) {
+        VERBOSE_PRINT(camera, "WARNING: getCoarseOrientation not set");
+        return 0;
+    }
+    return sGetCoarseOrientation();
+}
