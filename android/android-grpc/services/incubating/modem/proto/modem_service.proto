@@ -30,7 +30,6 @@ package android.emulation.control.incubating;
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 
-
 // A Modem service allows you to interact with the
 // emulated modem. The emulated modem can be used
 // to receive sms, phone calls, and to modify the
@@ -104,7 +103,6 @@ message CellIdentity {
     // empty (not set) if unknown.
     google.protobuf.StringValue operatorAlphaLong = 1;
 
-
     // The short alpha tag associated with the current scan result (may be
     // the operator name string or extended operator name string). May be
     // empty (not set) if unknown.
@@ -134,6 +132,18 @@ message CellInfo {
         CELL_STATUS_UNREGISTERED = 5;
     };
 
+    enum CellMeterStatus {
+        CELL_METER_STATUS_UNKNOWN = 0;
+        CELL_METER_STATUS_METERED = 1;
+        CELL_METER_STATUS_TEMPORARILY_NOT_METERED = 2;
+    };
+
+    enum CellSimStatus {
+        CELL_SIM_STATUS_UNKNOWN = 0;
+        CELL_SIM_STATUS_NOT_PRESENT = 1;
+        CELL_SIM_STATUS_PRESENT = 2;
+    };
+
     // The connection status of this cell.
     // [INPUT ONLY]: Currently unable to read the active cell standard.
     CellStandard cell_standard = 1;
@@ -141,16 +151,21 @@ message CellInfo {
     // The identity of this cell.
     CellIdentity cell_identity = 2;
 
-    // Status
-    // Note: might not be available for older API levels.
-    CellStatus cell_status = 3;
+    // Voice status
+    CellStatus cell_status_voice = 3;
+
+    // Data status
+    CellStatus cell_status_data = 4;
 
     // The signal strength of this cell
     // [INPUT ONLY]: Currently unable to read the signal strength.
-    CellSignalStrength cell_signal_strength = 4;
+    CellSignalStrength cell_signal_strength = 5;
 
-    // True if a sim is present
-    bool sim_present = 5;
+    // Metering status
+    CellMeterStatus cell_meter_status = 6;
+
+    // Status of the sim
+    CellSimStatus sim_status = 7;
 };
 
 message CallResult {

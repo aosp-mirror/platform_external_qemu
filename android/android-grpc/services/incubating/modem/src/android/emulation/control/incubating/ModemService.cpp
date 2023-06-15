@@ -57,7 +57,6 @@ extern "C" {
 static void telephony_callback(void* userData, int numActiveCalls);
 }
 
-
 using PhoneEventStream = GenericEventStreamWriter<PhoneEvent>;
 
 static bool isValidPhoneNr(std::string number) {
@@ -121,7 +120,12 @@ public:
                                              .length());
         }
 
-        mConsoleAgents->cellular->setSimPresent(request->sim_present());
+        if (request->cell_status_voice() != CellInfo::)
+
+        if (request->sim_status() != CellInfo::CELL_SIM_STATUS_UNKNOWN) {
+            mConsoleAgents->cellular->setSimPresent(
+                    ((int)request->sim_status()) - 1);
+        }
 
         return ::grpc::Status::OK;
     }
@@ -151,7 +155,11 @@ public:
             response->set_cell_status(EnumTranslate::translate(
                     mCellStatusRegistrationMap, state));
         }
-        response->set_sim_present(amodem_get_sim(mModem));
+        if (amodem_get_sim(mMomdem)) {
+            response->set_sim_status(CellInfo::CELL_SIM_STATUS_PRESENT);
+        } else {
+            response->set_sim_status(CellInfo::CELL_SIM_STATUS_NOT_PRESENT);
+        }
 
         return ::grpc::Status::OK;
     }
@@ -346,7 +354,9 @@ public:
             ::android::emulation::control::incubating::PhoneEvent>*
     streamEvents(::grpc::CallbackServerContext* /*context*/,
                  const ::google::protobuf::Empty* /*request*/) override {
-        dwarning("Hijacking the telephone callback, you will see reduced functionality in the Qt UI.");
+        dwarning(
+                "Hijacking the telephone callback, you will see reduced "
+                "functionality in the Qt UI.");
         mTelephonyAgent->setNotifyCallback(telephony_callback, (void*)this);
         return new PhoneEventStream(&s_activeCallListeners);
     }

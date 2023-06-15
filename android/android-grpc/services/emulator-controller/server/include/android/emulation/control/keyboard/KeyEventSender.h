@@ -1,19 +1,28 @@
-#include <stdint.h>                                      // for uint32_t
-#include <cstddef>                                       // for offsetof
-#include <string>                                        // for string
-#include <vector>                                        // for vector
+// Copyright (C) 2023 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#pragma once
+#include <stdint.h>
+#include <cstddef>
+#include <string>
+#include <vector>
 
-#include "aemu/base/containers/BufferQueue.h"         // for BufferQueue
-#include "android/console.h"                             // for AndroidConso...
-#include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
-#include "emulator_controller.pb.h"                      // for KeyboardEvent
-
+#include "aemu/base/containers/BufferQueue.h"
+#include "android/emulation/control/keyboard/EventSender.h"
+#include "android/emulation/control/keyboard/dom_key.h"
+#include "emulator_controller.pb.h"
 
 namespace android {
-namespace base {
-class Looper;
-}  // namespace base
-
 namespace emulation {
 namespace control {
 namespace keyboard {
@@ -69,16 +78,17 @@ struct DomKeyMapEntry {
 #undef DOM_KEY_UNI
 
 using KeyEventQueue = base::BufferQueue<KeyboardEvent>;
-
-class EmulatorKeyEventSender {
+// Class that sends Mouse events on the current looper.
+class KeyEventSender : public EventSender<KeyboardEvent> {
 public:
-    EmulatorKeyEventSender(const AndroidConsoleAgents* const consoleAgents);
-    ~EmulatorKeyEventSender();
-    void send(const KeyboardEvent* request);
-    void sendOnThisThread(const KeyboardEvent* request);
+    KeyEventSender(const AndroidConsoleAgents* const consoleAgents)
+        : EventSender<KeyboardEvent>(consoleAgents){};
+    ~KeyEventSender() = default;
+
+protected:
+    void doSend(const KeyboardEvent request) override;
 
 private:
-    void doSend(const KeyboardEvent* request);
     void sendKeyCode(int32_t code,
                      const KeyboardEvent::KeyCodeType codeType,
                      const KeyboardEvent::KeyEventType eventType);
@@ -95,16 +105,14 @@ private:
     // Translates a string with one or more Utf8 characters to a sequence of
     // evdev values.
     std::vector<uint32_t> convertUtf8ToEvDev(const std::string& utf8str);
-    std::vector<uint32_t> convertUtf8ToEvDev(const char* utf8, const size_t cnt);
+    std::vector<uint32_t> convertUtf8ToEvDev(const char* utf8,
+                                             const size_t cnt);
     void sendUtf8String(const std::string& keys);
 
     int mOffset[KeyboardEvent::KeyCodeType_MAX + 1] = {
             offsetof(KeycodeMapEntry, usb), offsetof(KeycodeMapEntry, evdev),
             offsetof(KeycodeMapEntry, xkb), offsetof(KeycodeMapEntry, win),
             offsetof(KeycodeMapEntry, mac)};
-
-    const AndroidConsoleAgents* const mAgents;
-    base::Looper* mLooper;
 };
 
 }  // namespace keyboard

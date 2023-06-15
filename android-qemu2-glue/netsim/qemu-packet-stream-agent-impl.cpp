@@ -194,12 +194,9 @@ void close_netsim() {
 }
 
 void register_netsim(const std::string address,
-                     const std::string rootcanal_controller_properties_file,
                      const std::string name) {
     netsim::packet::SetPacketStreamEndpoint(address);
     gNetsimConfiguration.name = name;
-    gNetsimConfiguration.controller_properties_file =
-            rootcanal_controller_properties_file;
 }
 
 static void register_types(void) {

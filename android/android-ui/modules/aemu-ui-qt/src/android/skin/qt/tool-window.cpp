@@ -10,108 +10,94 @@
  ** GNU General Public License for more details.
  */
 
-#ifdef _MSC_VER
-#define WIN32_LEAN_AND_MEAN
-#endif
+#include "android/skin/qt/tool-window.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <cassert>
+#include <istream>
+#include <memory>
+#include <string>
+#include <string_view>
 
-#include <QtCore/qglobal.h>  // for Q_OS_MAC
-#include <qapplication.h>    // for QApplicatio...
-#include <qcoreevent.h>      // for QEvent::Key...
-#include <qkeysequence.h>    // for QKeySequenc...
-#include <qmessagebox.h>     // for operator|
-#include <qnamespace.h>      // for AlignCenter
-#include <qobjectdefs.h>     // for SIGNAL, SLOT
-#include <qsettings.h>       // for QSettings::...
-#include <qstring.h>         // for operator+
-#include <stdint.h>          // for int64_t
-#include <stdio.h>           // for sprintf
-#include <QApplication>      // for QApplication
-#include <QByteArray>        // for QByteArray
-#include <QClipboard>        // for QClipboard
-#include <QCloseEvent>       // for QCloseEvent
-#if QT_VERSION >= 0x060000
-#include <QWindow>  // for QWindow
-#else
-#include <QDesktopWidget>   // for QDesktopWidget
-#endif                      // QT_VERSION
-#include <QEvent>           // for QEvent
-#include <QFlags>           // for QFlags
-#include <QFrame>           // for QFrame
-#include <QGuiApplication>  // for QGuiApplica...
-#include <QHBoxLayout>      // for QHBoxLayout
-#include <QKeyEvent>        // for QKeyEvent
-#include <QKeySequence>     // for QKeySequence
-#include <QList>            // for QList
-#include <QMessageBox>      // for QMessageBox
-#include <QPainter>         // for QPainter
-#include <QPen>             // for QPen
-#include <QPushButton>      // for QPushButton
-#include <QRect>            // for QRect
-#include <QScreen>          // for QScreen
-#include <QSettings>        // for QSettings
-#include <QSignalBlocker>   // for QSignalBlocker
-#include <QString>          // for QString
-#include <QTextStream>      // for QTextStream
-#include <QVBoxLayout>      // for QVBoxLayout
-#include <QVariant>         // for QVariant
-#include <QVector>          // for QVector
-#include <QWidget>          // for QWidget
-#include <cassert>          // for assert
-#include <functional>       // for __base
-#include <memory>           // for unique_ptr
-#include <string>           // for string
-#include <tuple>            // for tuple
+#include <QAbstractButton>
+#include <QApplication>
+#include <QByteArray>
+#include <QClipboard>
+#include <QCloseEvent>
+#include <QEvent>
+#include <QFlags>
+#include <QFrame>
+#include <QGuiApplication>
+#include <QHBoxLayout>
+#include <QKeyEvent>
+#include <QKeySequence>
+#include <QList>
+#include <QMessageBox>
+#include <QPainter>
+#include <QPen>
+#include <QPushButton>
+#include <QRect>
+#include <QScreen>
+#include <QSettings>
+#include <QSignalBlocker>
+#include <QString>
+#include <QTextStream>
+#include <QTimer>
+#include <QVBoxLayout>
+#include <QVariant>
+#include <QVector>
+#include <QWidget>
+#include <QtCore>
 
-#include "android/avd/info.h"                            // for avdInfo_get...
-#include "android/avd/util.h"                            // for path_getAvd...
-#include "aemu/base/Log.h"                            // for LogMessage
-#include "aemu/base/memory/OnDemand.h"                // for OnDemand
-#include "android/base/system/System.h"                  // for System
-#include "android/cmdline-option.h"                      // for AndroidOptions
-#include "android/emulation/control/adb/AdbInterface.h"  // for OptionalAdb...
-#include "android/emulation/control/clipboard_agent.h"   // for QAndroidCli...
-#include "android/emulator-window.h"                     // for emulator_wi...
-#include "host-common/FeatureControl.h"       // for isEnabled
-#include "host-common/Features.h"             // for QuickbootFi...
-#include "host-common/hw-config-helper.h"
-#include "android/console.h"                             // for android_hw
-#include "android/hw-events.h"                           // for EV_SW, EV_SYN
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
+#include "aemu/base/logging/LogSeverity.h"
+#include "aemu/base/memory/OnDemand.h"
+#include "android/avd/info.h"
+#include "android/avd/util.h"
+#include "android/base/system/System.h"
+#include "android/console.h"
+#include "android/emulation/control/adb/AdbInterface.h"
+#include "android/emulation/control/clipboard_agent.h"
+#include "android/emulation/control/sensors_agent.h"
+#include "android/emulator-window.h"
+#include "android/hw-events.h"
 #include "android/hw-sensors.h"
-#include "android/metrics/MetricsReporter.h"         // for MetricsRepo...
-#include "android/metrics/MetricsWriter.h"           // for android_studio
-#include "android/settings-agent.h"                  // for SettingsTheme
-#include "android/skin/android_keycodes.h"           // for KEY_APPSWITCH
-#include "android/skin/event.h"                      // for SkinEvent
-#include "android/skin/linux_keycodes.h"             // for LINUX_KEY_BACK
-#include "android/skin/qt/emulator-qt-window.h"      // for EmulatorQtW...
-#include "android/skin/qt/extended-pages/common.h"   // for adjustAllBu...
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/MetricsWriter.h"
+#include "android/physics/Physics.h"
+#include "android/skin/android_keycodes.h"
+#include "android/skin/event.h"
+#include "android/skin/linux_keycodes.h"
+#include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/virtual-sensors-page.h"
-#include "android/skin/qt/extended-window-styles.h"  // for PANE_IDX_BA...
-#include "android/skin/qt/extended-window.h"         // for ExtendedWindow
-#include "android/skin/qt/posture-selection-dialog.h"  // for PostureSelectionDialog
-#include "android/skin/qt/qt-settings.h"               // for SaveSnapsho...
-#include "android/skin/qt/qt-ui-commands.h"            // for QtUICommand
-#include "android/skin/qt/stylesheet.h"                // for stylesheetF...
-#include "android/skin/qt/tool-window.h"               // for ToolWindow
-#include "android/skin/qt/ui-event-recorder.h"         // for UIEventReco...
-#include "android/skin/qt/user-actions-counter.h"      // for UserActions...
-#include "android/skin/qt/virtualscene-control-window.h"  // for VirtualScen...
-#include "snapshot/common.h"                      // for kDefaultBoo...
-#include "snapshot/interface.h"                   // for androidSnap...
-#include "android/ui-emu-agent.h"                         // for UiEmuAgent
-#include "android/utils/debug.h"                          // for VERBOSE_fol...
-#include "android/utils/system.h"                         // for get_uptime_ms
-#include "studio_stats.pb.h"                              // for EmulatorSna...
-#include "ui_tools.h"                                     // for ToolControls
+#include "android/skin/qt/extended-window-grpc.h"
+#include "android/skin/qt/extended-window.h"
+#include "android/skin/qt/posture-selection-dialog.h"
+#include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/qt-ui-commands.h"
+#include "android/skin/qt/stylesheet.h"
+#include "android/skin/qt/virtualscene-control-window.h"
+#include "android/ui-emu-agent.h"
+#include "android/utils/debug.h"
+#include "android/utils/system.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/Features.h"
+#include "host-common/hw-config-helper.h"
+#include "host-common/screen-recorder.h"
+#include "host-common/window_agent.h"
+#include "snapshot/common.h"
+#include "snapshot/interface.h"
+#include "studio_stats.pb.h"
+#include "ui_tools.h"
 
-class QCloseEvent;
-class QHideEvent;
-class QKeyEvent;
-class QMouseEvent;
-class QPaintEvent;
-class QPushButton;
-class QScreen;
-class QWidget;
+#if QT_VERSION >= 0x060000
+#include <QWindow>
+#else
+#include <QDesktopWidget>
+#endif  // QT_VERSION
+
 #if QT_VERSION >= 0x060000
 #else
 template <typename T>
@@ -152,9 +138,21 @@ ToolWindow::WindowHolder<T>::~WindowHolder() {
     mWindow->deleteLater();
 }
 
+ToolWindow::ExtendedWindowHolder::ExtendedWindowHolder(
+        ToolWindow* tw,
+        OnCreatedCallback onCreated) {
+    bool grpc = getConsoleAgents()->settings->android_cmdLineOptions()->grpc_ui;
+    if (grpc) {
+        dwarning("Using experimental gRPC UI, not yet stable!");
+        mWindow = new ExtendedWindowGrpc(tw->mEmulatorWindow, tw);
+    } else {
+        mWindow = new ExtendedWindow(tw->mEmulatorWindow, tw);
+    }
+    (tw->*onCreated)(mWindow);
+}
+
 const UiEmuAgent* ToolWindow::sUiEmuAgent = nullptr;
 static ToolWindow* sToolWindow = nullptr;
-
 
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
@@ -191,8 +189,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
     if (android_foldable_any_folded_area_configured() ||
-        android_foldable_hinge_configured() ||
-        resizableEnabled()) {
+        android_foldable_hinge_configured() || resizableEnabled()) {
         mToolsUi->zoom_button->hide();
         mToolsUi->zoom_button->setEnabled(false);
     }
@@ -228,13 +225,13 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+O     OVERVIEW\n"
             "Ctrl+Backspace BACK\n";
 
-    if (!getConsoleAgents()->settings->avdInfo()
-        || avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_WEAR) {
+    if (!getConsoleAgents()->settings->avdInfo() ||
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) !=
+                AVD_WEAR) {
         default_shortcuts += "Ctrl+=     VOLUME_UP\n";
         default_shortcuts += "Ctrl+-     VOLUME_DOWN\n";
         default_shortcuts += "Ctrl+Left ROTATE_LEFT\n";
         default_shortcuts += "Ctrl+Right ROTATE_RIGHT\n";
-
     }
 
     if (!android_foldable_any_folded_area_configured() &&
@@ -246,7 +243,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         default_shortcuts += "Ctrl+Down ZOOM_OUT\n";
     }
     if (fc::isEnabled(fc::PlayStoreImage) &&
-	getConsoleAgents()->settings->hw()->PlayStore_enabled) {
+        getConsoleAgents()->settings->hw()->PlayStore_enabled) {
         default_shortcuts += "Ctrl+Shift+G SHOW_PANE_GPLAY\n";
     }
     if (fc::isEnabled(fc::ScreenRecording)) {
@@ -254,16 +251,21 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     }
 
     if (getConsoleAgents()->settings->avdInfo()) {
-        if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
-            if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28) {
+        if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+            AVD_WEAR) {
+            if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >=
+                28) {
                 default_shortcuts += "Ctrl+Shift+O WEAR_1\n";
                 default_shortcuts += "Ctrl+Shift+T TILT\n";
                 default_shortcuts += "Ctrl+Shift+E PALM\n";
             }
-            if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) > 28) {
+            if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >
+                28) {
                 default_shortcuts += "Ctrl+Shift+I WEAR_2\n";
             }
-        } else if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
+        } else if (avdInfo_getAvdFlavor(
+                           getConsoleAgents()->settings->avdInfo()) ==
+                   AVD_ANDROID_AUTO) {
             default_shortcuts += "Ctrl+Shift+T SHOW_PANE_CAR\n";
             default_shortcuts += "Ctrl+Shift+O SHOW_PANE_CAR_ROTARY\n";
             default_shortcuts += "Ctrl+Shift+I SHOW_PANE_SENSOR_REPLAY\n";
@@ -280,14 +282,18 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
-    if (fc::isEnabled(fc::TvRemote) && getConsoleAgents()->settings->avdInfo() &&
-        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV) {
+    if (fc::isEnabled(fc::TvRemote) &&
+        getConsoleAgents()->settings->avdInfo() &&
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                AVD_TV) {
         default_shortcuts += "Ctrl+Shift+D SHOW_PANE_TV_REMOTE\n";
     } else {
         default_shortcuts += "Ctrl+Shift+D SHOW_PANE_DPAD\n";
     }
 
-    if (!getConsoleAgents()->settings->avdInfo() || avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_TV) {
+    if (!getConsoleAgents()->settings->avdInfo() ||
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) !=
+                AVD_TV) {
         default_shortcuts +=
                 "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
                 "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
@@ -342,7 +348,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->tablet_mode_button->setHidden(true);
     }
 
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+        AVD_TV) {
         // Android TV should not rotate
         // TODO: emulate VESA mounts for use with
         // vertically scrolling arcade games
@@ -350,7 +357,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->next_layout_button->setHidden(true);
     }
 
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+        AVD_WEAR) {
         // Wear OS shouldn't get rotate nor volume up/down buttons.
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
@@ -358,7 +366,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->volume_down_button->setHidden(true);
     }
 
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR &&
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                AVD_WEAR &&
         avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28) {
         // Use new button layout for >= API 28 wear emulators
         mToolsUi->overview_button->setHidden(true);
@@ -368,7 +377,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->controlsLayout->removeWidget(mToolsUi->back_button);
         mToolsUi->controlsLayout->insertWidget(0, mToolsUi->back_button);
 
-        if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) == 28) {
+        if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) ==
+            28) {
             mToolsUi->wear_button_2->setHidden(true);
         }
     } else {
@@ -378,7 +388,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->tilt_button->setHidden(true);
     }
 
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+        AVD_ANDROID_AUTO) {
         // Android Auto doesn't support rotate, home, back, recent
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
@@ -386,7 +397,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->overview_button->setHidden(true);
     }
 
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_DESKTOP) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+        AVD_DESKTOP) {
         // Desktop device does not rotate
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
@@ -436,16 +448,19 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     }
 
     sToolWindow = this;
+    skin_winsys_touch_qt_extended_virtual_sensors();
 }
 
 ToolWindow::~ToolWindow() {
-    mFoldableSyncToAndroid.enqueue({ SEND_EXIT, });
+    mFoldableSyncToAndroid.enqueue({
+            SEND_EXIT,
+    });
     mFoldableSyncToAndroid.join();
 }
 
 void ToolWindow::updateFoldableButtonVisibility() {
     mToolsUi->change_posture_button->setEnabled(
-        android_foldable_hinge_enabled());
+            android_foldable_hinge_enabled());
     if (mExtendedWindow.hasInstance()) {
         mExtendedWindow.get()->getVirtualSensorsPage()->updateHingeSensorUI();
     }
@@ -496,7 +511,7 @@ void ToolWindow::showVirtualSceneControls(bool show) {
     mVirtualSceneControlWindow.get()->setActiveForCamera(show);
 }
 
-void ToolWindow::onExtendedWindowCreated(ExtendedWindow* extendedWindow) {
+void ToolWindow::onExtendedWindowCreated(ExtendedBaseWindow* extendedWindow) {
     if (auto userActionsCounter = mUserActionsCounter.lock()) {
         userActionsCounter->startCountingForExtendedWindow(extendedWindow);
     }
@@ -1091,10 +1106,6 @@ bool ToolWindow::isExtendedWindowVisible() {
 }
 
 void ToolWindow::closeExtendedWindow() {
-    // If user is clicking the 'x' button like crazy, we may get multiple
-    // close events here, so make sure the function doesn't screw the state for
-    // a next call.
-    ExtendedWindow::shutDown();
     mExtendedWindow.clear();
 }
 
@@ -1130,10 +1141,12 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
 // static
 void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     sUiEmuAgent = agentPtr;
+    // This is crazy expensive!
     ExtendedWindow::setAgent(agentPtr);
     VirtualSceneControlWindow::setAgent(agentPtr);
 
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (!avdPath) {
         // Can't find the setting!
         return;
@@ -1153,14 +1166,17 @@ void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     // settings page is initialized.
     switch (saveOnExitChoice) {
         case SaveSnapshotOnExit::Always:
-            getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags &=
+                    !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExit::Ask:
             // If we can't ask, we'll treat ASK the same as ALWAYS.
-            getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags &=
+                    !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExit::Never:
-            getConsoleAgents()->settings->avdParams()->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags |=
+                    AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         default:
             break;
@@ -1181,8 +1197,10 @@ void ToolWindow::setClipboardCallbacks(const UiEmuAgent* agPtr) {
         agPtr->clipboard->registerGuestClipboardCallback(
                 [](void* context, const uint8_t* data, size_t size) {
                     LOG(DEBUG) << "Clipboard update, guest->host, value='"
-                        << std::string_view(reinterpret_cast<const char*>(data), size)
-                        << "'";
+                               << std::string_view(
+                                          reinterpret_cast<const char*>(data),
+                                          size)
+                               << "'";
 
                     auto self = static_cast<ToolWindow*>(context);
                     emit self->guestClipboardChanged(
@@ -1217,7 +1235,8 @@ void ToolWindow::on_back_button_released() {
 bool ToolWindow::askWhetherToSaveSnapshot() {
     mAskedWhetherToSaveSnapshot = true;
     // Check the UI setting
-    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    const char* avdPath = path_getAvdContentPath(
+            getConsoleAgents()->settings->hw()->avd_name);
     if (!avdPath) {
         // Can't find the setting! Assume it's not ASK: just return;
         return true;
@@ -1293,7 +1312,8 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
 
     // ten seconds
     constexpr int timeout = 10000;
-    QTimer::singleShot(timeout, (msgBox.button(QMessageBox::Yes)), SLOT(animateClick()));
+    QTimer::singleShot(timeout, (msgBox.button(QMessageBox::Yes)),
+                       SLOT(animateClick()));
     int selection = msgBox.exec();
 
     int64_t endTime = get_uptime_ms();
@@ -1323,14 +1343,16 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
                                   ->mutable_snapshot_ui_counts();
             counts->set_quickboot_ask_yes(1 + counts->quickboot_ask_yes());
         });
-        getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+        getConsoleAgents()->settings->avdParams()->flags &=
+                !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
     } else {
         MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
             auto counts = event->mutable_emulator_details()
                                   ->mutable_snapshot_ui_counts();
             counts->set_quickboot_ask_no(1 + counts->quickboot_ask_no());
         });
-        getConsoleAgents()->settings->avdParams()->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+        getConsoleAgents()->settings->avdParams()->flags |=
+                AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
     }
     return true;
 }
@@ -1358,7 +1380,8 @@ void ToolWindow::on_close_button_clicked() {
         // This counts as us asking and having the user say "don't save"
         mExtendedWindow.get()->sendMetricsOnShutDown();
         mAskedWhetherToSaveSnapshot = true;
-        getConsoleAgents()->settings->avdParams()->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+        getConsoleAgents()->settings->avdParams()->flags |=
+                AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
         parentWidget()->close();
 
         return;
@@ -1544,20 +1567,24 @@ static bool isPaneEnabled(ExtendedWindowPane pane) {
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+        AVD_ANDROID_AUTO) {
         if (pane == PANE_IDX_DPAD || pane == PANE_IDX_BATTERY ||
             pane == PANE_IDX_FINGER || pane == PANE_IDX_CAMERA ||
             pane == PANE_IDX_MULTIDISPLAY) {
             return;
         }
     }
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV ||
-        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                AVD_TV ||
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                AVD_WEAR) {
         if (pane == PANE_IDX_MULTIDISPLAY) {
             return;
         }
     }
-    if (!androidHwConfig_hasVirtualSceneCamera(getConsoleAgents()->settings->hw()) &&
+    if (!androidHwConfig_hasVirtualSceneCamera(
+                getConsoleAgents()->settings->hw()) &&
         pane == PANE_IDX_CAMERA) {
         return;
     }
@@ -1642,8 +1669,10 @@ void ToolWindow::enableCloseButton() {
 }
 
 void ToolWindow::hideRotationButton(bool hide) {
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV ||
-        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO ||
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                AVD_TV ||
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                AVD_ANDROID_AUTO ||
         getConsoleAgents()->settings->hw()->hw_arc) {
         // already hide, do not bother its settings
         return;

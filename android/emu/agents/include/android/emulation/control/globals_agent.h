@@ -112,7 +112,7 @@ typedef struct QAndroidGlobalVarsAgent {
                             char* /*locale*/);
 
     void (*inject_userConfig)(AUserConfig* /*config*/);
-    void (*set_keycode_forwading)(bool /*enabled */);
+    void (*set_keycode_forwarding)(bool /*enabled */);
     void (*inject_AvdInfo)(AvdInfo*);
 
     // /* this indicates that guest has mounted data partition */

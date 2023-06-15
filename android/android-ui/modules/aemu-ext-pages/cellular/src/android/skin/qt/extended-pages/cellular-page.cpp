@@ -118,6 +118,7 @@ CellularPage::CellularPage(QWidget* parent)
               android_studio::EmulatorUiEvent::OPTION_SELECTED,
               android_studio::EmulatorUiEvent::EXTENDED_CELLULAR_TAB)) {
     mUi->setupUi(this);
+    CellularPage::setCellularAgent(getConsoleAgents()->cellular);
 
     // Restore previous setting values to the UI widgets
 

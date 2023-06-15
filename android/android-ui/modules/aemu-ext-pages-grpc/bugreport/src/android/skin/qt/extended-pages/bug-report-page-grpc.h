@@ -25,7 +25,6 @@
 #include "android/skin/qt/themed-widget.h"
 #include "host-common/qt_ui_defs.h"
 
-
 namespace android {
 namespace emulation {
 namespace control {
@@ -38,19 +37,13 @@ class UiEventTracker;
 }  // namespace metrics
 }  // namespace android
 
-using android::metrics::UiEventTracker;
-using android::emulation::control::SimpleEmulatorControlClient;
 using android::emulation::control::Image;
+using android::emulation::control::SimpleEmulatorControlClient;
+using android::metrics::UiEventTracker;
 
 namespace Ui {
 class BugreportPageGrpc;
 }  // namespace Ui
-
-namespace android {
-namespace emulation {
-namespace grpc {
-namespace ui {
-
 
 constexpr int kDefaultUnknownAPILevel = 1000;
 
@@ -86,8 +79,6 @@ private slots:
     void on_imageLoaded();
 
 private:
-
-
     void getBootStatus();
     void refreshContents();
     void loadAdbBugreport();
@@ -118,4 +109,3 @@ private:
     int mApiLevel{kDefaultUnknownAPILevel};
     std::string mDeviceName{"UNKNOWN_DEVICE"};
 };
-}}}}

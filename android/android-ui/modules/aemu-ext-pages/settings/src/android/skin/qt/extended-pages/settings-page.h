@@ -49,7 +49,7 @@ public:
     void setAdbInterface(android::emulation::AdbInterface* adb);
     static void setHttpProxyAgent(const QAndroidHttpProxyAgent* agent);
     static bool getPauseAvdWhenMinimized();
-
+    static bool getEnforceKeycodeForwarding();
 public slots:
     void setHaveClipboardSharing(bool haveSharing);
     void setUiTheme(SettingsTheme theme);
@@ -102,6 +102,7 @@ private slots:
     void on_set_clipboardSharing_toggled(bool checked);
     void on_set_disableMouseWheel_toggled(bool checked);
     void on_set_disablePinchToZoom_toggled(bool checked);
+    void on_set_enforceKeycodeForwarding_toggled(bool checked);
     void on_set_pauseAvdWhenMinimized_toggled(bool checked);
 
 private:

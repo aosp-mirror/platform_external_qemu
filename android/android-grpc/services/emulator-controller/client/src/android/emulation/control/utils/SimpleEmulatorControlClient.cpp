@@ -64,6 +64,16 @@ void SimpleEmulatorControlClient::getStatus(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
+void SimpleEmulatorControlClient::sendFingerprint(Fingerprint finger,
+                                                  OnCompleted<Empty> onDone) {
+    auto [request, response, context] =
+            createGrpcRequestContext<Fingerprint, Empty>(mClient);
+    request->CopyFrom(finger);
+    mService->async()->sendFingerprint(
+            context, request, response,
+            grpcCallCompletionHandler(context, request, response, onDone));
+}
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

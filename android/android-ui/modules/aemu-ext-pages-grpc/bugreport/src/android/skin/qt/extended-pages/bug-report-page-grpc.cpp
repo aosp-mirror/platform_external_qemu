@@ -73,11 +73,6 @@ using android::emulation::control::EmulatorStatus;
 using android::emulation::control::Image;
 using android::emulation::control::ImageFormat;
 
-namespace android {
-namespace emulation {
-namespace grpc {
-namespace ui {
-
 static const int kReproStepsCharacterLimit = 2000;
 static const System::Duration kAdbCommandTimeoutMs = System::kInfinite;
 static const System::Duration kTaskInterval = 1000;  // ms
@@ -599,7 +594,3 @@ std::string BugreportPageGrpc::generateUniqueBugreportName() {
     return StringFormat("bugreport-%s-%s-%s", mDeviceName, date,
                         Uuid::generate().toString());
 }
-}  // namespace ui
-}  // namespace grpc
-}  // namespace emulation
-}  // namespace android

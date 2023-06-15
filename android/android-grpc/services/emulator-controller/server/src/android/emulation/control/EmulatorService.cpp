@@ -62,8 +62,10 @@
 #include "android/emulation/control/clipboard/Clipboard.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
-#include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
+#include "android/emulation/control/keyboard/KeyEventSender.h"
+#include "android/emulation/control/keyboard/MouseEventSender.h"
 #include "android/emulation/control/keyboard/TouchEventSender.h"
+#include "android/emulation/control/keyboard/WheelEventSender.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/LogcatParser.h"
 #include "android/emulation/control/sensors_agent.h"
@@ -75,10 +77,10 @@
 #include "android/emulation/control/utils/SharedMemoryLibrary.h"
 #include "android/emulation/resizable_display_config.h"
 #include "android/gpu_frame.h"
+#include "android/grpc/utils/SimpleAsyncGrpc.h"
 #include "android/hw-sensors.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/Percentiles.h"
-#include "host-common/opengles.h"
 #include "android/physics/Physics.h"
 #include "android/recording/AvFormat.h"
 #include "android/skin/rect.h"
@@ -96,6 +98,7 @@
 #include "host-common/display_agent.h"
 #include "host-common/feature_control.h"
 #include "host-common/multi_display_agent.h"
+#include "host-common/opengles.h"
 #include "host-common/vm_operations.h"
 #include "host-common/window_agent.h"
 #include "studio_stats.pb.h"
@@ -127,13 +130,18 @@ namespace emulation {
 namespace control {
 
 // Logic and data behind the server's behavior.
-class EmulatorControllerImpl final : public EmulatorController::Service {
+class EmulatorControllerImpl final
+    : public EmulatorController::WithCallbackMethod_streamInputEvent<
+              EmulatorController::WithCallbackMethod_injectWheel<
+                      EmulatorController::Service>> {
 public:
     EmulatorControllerImpl(const AndroidConsoleAgents* agents)
         : mAgents(agents),
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
+          mMouseEventSender(agents),
           mTouchEventSender(agents),
+          mWheelEventSender(agents),
           mCamera(agents->sensors),
           mClipboard(Clipboard::getClipboard(agents->clipboard)),
           mLooper(android::base::ThreadLooper::get()) {
@@ -496,77 +504,56 @@ public:
     }
 
     Status sendKey(ServerContext* context,
-                   const KeyboardEvent* requestPtr,
+                   const KeyboardEvent* request,
                    ::google::protobuf::Empty* reply) override {
-        KeyboardEvent request = *requestPtr;
-        android::base::ThreadLooper::runOnMainLooper([this, request]() {
-            mKeyEventSender.sendOnThisThread(&request);
-        });
+        mKeyEventSender.send(*request);
         return Status::OK;
     }
 
     Status sendMouse(ServerContext* context,
-                     const MouseEvent* requestPtr,
+                     const MouseEvent* request,
                      ::google::protobuf::Empty* reply) override {
-        MouseEvent request = *requestPtr;
-        auto agent = mAgents->user_event;
-
-        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
-            int buttonsState = request.buttons();
-            // Keep sync the condition with |user_event_mouse| in
-            // qemu-user-event-agent-impl.c
-            if (feature_is_enabled(kFeature_VirtioInput) &&
-                !feature_is_enabled(kFeature_VirtioMouse) &&
-                !feature_is_enabled(kFeature_VirtioTablet)) {
-                // Mask bits except for the first bit, because they are not
-                // indicating mouse buttons for touch operations. (Instead
-                // they are used for control flag like pause touch synching.)
-                buttonsState &= 1;
-            }
-            agent->sendMouseEvent(request.x(), request.y(), 0, buttonsState,
-                                  request.display());
-        });
-
+        mMouseEventSender.send(*request);
         return Status::OK;
     }
 
     Status sendTouch(ServerContext* context,
-                     const TouchEvent* requestPtr,
+                     const TouchEvent* request,
                      ::google::protobuf::Empty* reply) override {
-        TouchEvent request = *requestPtr;
-        android::base::ThreadLooper::runOnMainLooper([this, request]() {
-            mTouchEventSender.sendOnThisThread(&request);
-        });
+        mTouchEventSender.send(*request);
         return Status::OK;
     }
 
-    Status injectWheel(ServerContext* context,
-                       ::grpc::ServerReader<WheelEvent>* reader,
-                       ::google::protobuf::Empty* reply) override {
-        WheelEvent event;
-        auto agent = mAgents->user_event;
-        auto settings = mAgents->settings;
-        bool inputDeviceHasRotary =
-            feature_is_enabled(kFeature_VirtioInput) &&
-            (settings->hw()->hw_rotaryInput ||
-             (settings->avdInfo() &&
-              avdInfo_getAvdFlavor(settings->avdInfo()) == AVD_WEAR));
-        while (reader->Read(&event)) {
-            android::base::ThreadLooper::runOnMainLooper(
-                    [agent, event, inputDeviceHasRotary]() {
-                        if (inputDeviceHasRotary) {
-                            // dy() is pre-multiplied by 120 (pixels to scroll per click),
-                            // and we need the rotation angle (15 per wheel click), so we
-                            // need to scale by (15 / 120) == 1/8.
-                            agent->sendRotaryEvent(event.dy() / 8);
-                        }
-                        else {
-                            agent->sendMouseWheelEvent(event.dx(), event.dy(),
-                                    event.display());
-                        }
-                    });
-        }
-        return Status::OK;
+    virtual ::grpc::ServerReadReactor<WheelEvent>* injectWheel(
+            ::grpc::CallbackServerContext* /*context*/,
+            ::google::protobuf::Empty* /*response*/) override {
+        return new SimpleServerLambdaReader<WheelEvent>(
+                [this](auto request) { mWheelEventSender.send(*request); });
+    }
+
+    virtual ::grpc::ServerReadReactor<InputEvent>* streamInputEvent(
+            ::grpc::CallbackServerContext* /*context*/,
+            ::google::protobuf::Empty* /*response*/) override {
+        SimpleServerLambdaReader<InputEvent>* eventReader =
+                new SimpleServerLambdaReader<InputEvent>(
+                        [this, &eventReader](auto request) {
+                            if (request->has_key_event()) {
+                                mKeyEventSender.send(request->key_event());
+                            } else if (request->has_mouse_event()) {
+                                mMouseEventSender.send(request->mouse_event());
+                            } else if (request->has_touch_event()) {
+                                mTouchEventSender.send(request->touch_event());
+                            } else {
+                                // Mark the stream as completed, this will result in
+                                // setting that status and scheduling of a completion
+                                // (onDone) event the async queue.
+                                eventReader->Finish(Status(
+                                        ::grpc::StatusCode::INVALID_ARGUMENT,
+                                        "Missing key, mouse or touch event."));
+                            }
+                        });
+        // Note that the event reader will delete itself on completion of the request.
+        return eventReader;
     }
 
     Status getStatus(ServerContext* context,
@@ -658,9 +645,9 @@ public:
             clientAlive = !context->IsCancelled() && reader->Read(&pkt);
         }
 
-        // The circular buffer contains at most audioQueueTime ms of samples,
-        // We need to deliver those before disconnecting the audio stack to
-        // guarantee we deliver all the samples.
+        // The circular buffer contains at most audioQueueTime ms of
+        // samples, We need to deliver those before disconnecting the audio
+        // stack to guarantee we deliver all the samples.
         const char silence[512] = {0};
         size_t toWrite = aos.capacity();
         auto timeout = std::chrono::system_clock::now() + audioQueueTime;
@@ -678,8 +665,8 @@ public:
     Status streamAudio(ServerContext* context,
                        const AudioFormat* request,
                        ServerWriter<AudioPacket>* writer) override {
-        // The source number of samples per audio frame in Qemu, 512 samples is
-        // fixed
+        // The source number of samples per audio frame in Qemu, 512 samples
+        // is fixed
         constexpr int kSrcNumSamples = 512;
 
         // Translate external settings to internal qemu settings.
@@ -786,10 +773,11 @@ public:
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(125);
 
             // The next call will return the number of frames that are
-            // available. 0 means no frame was made available in the given time
-            // interval. Since this is a synchronous call we want to wait at
-            // most kTimeToWaitForFrame so we can check if the client is still
-            // there. (All clients get disconnected on emulator shutdown).
+            // available. 0 means no frame was made available in the given
+            // time interval. Since this is a synchronous call we want to
+            // wait at most kTimeToWaitForFrame so we can check if the
+            // client is still there. (All clients get disconnected on
+            // emulator shutdown).
             auto arrived = frameEvent->next(kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
                 AEMU_SCOPED_TRACE("streamScreenshot::frame");
@@ -800,18 +788,18 @@ public:
                     return status;
                 }
 
-                // The invariant that the pixel buffer does not decrease should
-                // hold. Clients likely rely on the buffer size to match the
-                // actual number of available pixels.
+                // The invariant that the pixel buffer does not decrease
+                // should hold. Clients likely rely on the buffer size to
+                // match the actual number of available pixels.
                 assert(reply.image().size() >= cPixels);
                 cPixels = reply.image().size();
 
                 reply.set_seq(frame);
-                // We send the first empty frame, after that we wait for frames
-                // to come, or until the client gives up on us. So for a screen
-                // that comes in and out the client will see this timeline: (0
-                // is empty frame. F is frame) [0, ... <nothing> ..., F1, F2,
-                // F3, 0, ...<nothing>... ]
+                // We send the first empty frame, after that we wait for
+                // frames to come, or until the client gives up on us. So
+                // for a screen that comes in and out the client will see
+                // this timeline: (0 is empty frame. F is frame) [0, ...
+                // <nothing> ..., F1, F2, F3, 0, ...<nothing>... ]
                 bool emptyFrame = reply.format().width() == 0;
                 if (!context->IsCancelled() &&
                     (!lastFrameWasEmpty || !emptyFrame)) {
@@ -839,7 +827,8 @@ public:
                         screenshot->set_size(size);
                         screenshot->set_frames(frame);
                         // We care about median, 95%, and 100%.
-                        // (max enables us to calculate # of dropped frames.)
+                        // (max enables us to calculate # of dropped
+                        // frames.)
                         perfEstimator.fillMetricsEvent(
                                 screenshot->mutable_delivery_delay(),
                                 {0.5, 0.95, 1.0});
@@ -858,9 +847,9 @@ public:
                 request->display(), nullptr, nullptr, &width, &height, nullptr,
                 nullptr, &enabled);
 
-        // b/248394093 Initialize the value of width and height to the default
-        // hw settings regardless of the display ID when multi display agent
-        // doesn't work.
+        // b/248394093 Initialize the value of width and height to the
+        // default hw settings regardless of the display ID when multi
+        // display agent doesn't work.
         if (!multiDisplayQueryWorks) {
             width = getConsoleAgents()->settings->hw()->hw_lcd_width;
             height = getConsoleAgents()->settings->hw()->hw_lcd_height;
@@ -923,8 +912,9 @@ public:
             }
         }
 
-        // Depending on the rotation state width and height need to be reversed.
-        // as our apsect ration depends on how we are holding our phone..
+        // Depending on the rotation state width and height need to be
+        // reversed. as our apsect ration depends on how we are holding our
+        // phone..
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(width, height);
@@ -941,8 +931,8 @@ public:
         // Calculate width and height, keeping aspect ratio in mind.
         int newWidth, newHeight;
         if (isFolded) {
-            // When screen is folded, resize based on the aspect ratio of the
-            // folded screen instead of full screen.
+            // When screen is folded, resize based on the aspect ratio of
+            // the folded screen instead of full screen.
             int newFoldedWidth, newFoldedHeight;
             std::tie(newFoldedWidth, newFoldedHeight) =
                     ScreenshotUtils::resizeKeepAspectRatio(
@@ -960,8 +950,8 @@ public:
                             width, height, desiredWidth, desiredHeight);
         }
 
-        // The screenshot produces a rotated result and will just simply flip
-        // width and height.
+        // The screenshot produces a rotated result and will just simply
+        // flip width and height.
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(newWidth, newHeight);
@@ -971,8 +961,8 @@ public:
             }
         }
 
-        // This is an expensive operation, that frequently can get cancelled, so
-        // check availability of the client first.
+        // This is an expensive operation, that frequently can get
+        // cancelled, so check availability of the client first.
         if (context->IsCancelled()) {
             return Status::CANCELLED;
         }
@@ -983,15 +973,15 @@ public:
                      ImageFormat_ImgFormat::ImageFormat_ImgFormat_PNG;
         android::emulation::Image img(
                 0, 0, 0, android::emulation::ImageFormat::RGB888, {});
-        // For png format, only make one getScreenshot call because the cPixels
-        // value can change for each call.
+        // For png format, only make one getScreenshot call because the
+        // cPixels value can change for each call.
         if (isPNG) {
             img = ScreenshotUtils::getScreenshot(
                     request->display(), request->format(), rotation, newWidth,
                     newHeight, &width, &height, rect);
             cPixels = img.getPixelCount();
-        } else {  // Let's make a fast call to learn how many pixels we need to
-                  // reserve.
+        } else {  // Let's make a fast call to learn how many pixels we need
+                  // to reserve.
 
             ScreenshotUtils::getScreenshot(
                     request->display(), request->format(), rotation, newWidth,
@@ -1028,10 +1018,10 @@ public:
         } else {
             // Make sure the image field has a string that is large enough.
             // Usually there are 2 cases:
-            // - A single screenshot is requested, we need to allocate a buffer
-            // of sufficient size
-            // - The first screenshot in a series is requested and we need to
-            // allocate the first frame.
+            // - A single screenshot is requested, we need to allocate a
+            // buffer of sufficient size
+            // - The first screenshot in a series is requested and we need
+            // to allocate the first frame.
             if (reply->mutable_image()->size() != cPixels) {
                 LOG(DEBUG) << "Allocation of string object. "
                            << reply->mutable_image()->size() << " < "
@@ -1056,8 +1046,9 @@ public:
         // Update format information with the retrieved width, height.
         format->set_height(height);
         format->set_width(width);
-        VERBOSE_PRINT(grpc, "Screenshot %dx%d, pixels: %d in %d us.", width,
-                      height, cPixels, sw.elapsedUs());
+        VERBOSE_PRINT(grpc, "Screenshot %dx%d (%s), pixels: %d in %d us.", width,
+                      height, rotation_reply->ShortDebugString().c_str(),
+                      cPixels, sw.elapsedUs());
 
         return Status::OK;
     }
@@ -1138,7 +1129,8 @@ public:
     Status setDisplayConfigurations(ServerContext* context,
                                     const DisplayConfigurations* request,
                                     DisplayConfigurations* reply) override {
-        // Check preconditions, do we have multi display and no duplicate ids?
+        // Check preconditions, do we have multi display and no duplicate
+        // ids?
         if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
             return Status(::grpc::StatusCode::FAILED_PRECONDITION,
                           "The multi-display feature is not available", "");
@@ -1197,14 +1189,14 @@ public:
                     });
 
             if (unchanged != std::end(existingDisplays)) {
-                // We are trying to change a display outside the set [1,3], or
-                // we are trying to update a display with the exact same
+                // We are trying to change a display outside the set [1,3],
+                // or we are trying to update a display with the exact same
                 // configuration.
                 continue;
             }
 
-            // TODO(jansene): This can result in UI messages if invalid values
-            // are presented.
+            // TODO(jansene): This can result in UI messages if invalid
+            // values are presented.
             if (mAgents->multi_display->setMultiDisplay(
                         display.display(), -1, -1, display.width(),
                         display.height(), display.dpi(), display.flags(),
@@ -1392,7 +1384,8 @@ public:
             clientAvailable = writer->Write(getCameraNotificationEvent());
         }
 
-        // The event waiter will be unlocked when a change event is received.
+        // The event waiter will be unlocked when a change event is
+        // received.
         EventWaiter notifier;
         int eventCount = 0;
         enum class EventTypes { CameraEvent, DisplayEvent };
@@ -1434,8 +1427,8 @@ public:
         // And deliver the events as they come in.
         while (clientAvailable) {
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
-            // This will not block if events came in while we were processing
-            // them below.
+            // This will not block if events came in while we were
+            // processing them below.
             auto arrived = notifier.next(eventCount, kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
                 eventCount += arrived;
@@ -1491,8 +1484,10 @@ public:
 
 private:
     const AndroidConsoleAgents* mAgents;
-    keyboard::EmulatorKeyEventSender mKeyEventSender;
+    keyboard::KeyEventSender mKeyEventSender;
+    MouseEventSender mMouseEventSender;
     TouchEventSender mTouchEventSender;
+    WheelEventSender mWheelEventSender;
     SharedMemoryLibrary mSharedMemoryLibrary;
     EventWaiter mNotificationWaiter;
 

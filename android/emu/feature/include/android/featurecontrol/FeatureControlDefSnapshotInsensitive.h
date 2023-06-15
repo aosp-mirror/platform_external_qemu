@@ -42,4 +42,6 @@ FEATURE_CONTROL_ITEM(QuickbootFileBacked)
 FEATURE_CONTROL_ITEM(OffworldDisableSecurity)
 FEATURE_CONTROL_ITEM(MacroUi)
 FEATURE_CONTROL_ITEM(IpDisconnectOnLoad)
+
+FEATURE_CONTROL_ITEM(GLAsyncSwap)
 // No guest feature flags seem safe to snapshot.

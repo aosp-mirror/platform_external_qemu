@@ -21,7 +21,7 @@
 #include <utility>
 
 #include "aemu/base/ArraySize.h"
-#include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
+#include "android/emulation/control/keyboard/KeyEventSender.h"
 #include "benchmark/benchmark.h"
 
 // Results will vary pending optimization. List is never worse

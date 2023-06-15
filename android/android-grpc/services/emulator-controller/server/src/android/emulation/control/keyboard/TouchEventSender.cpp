@@ -5,8 +5,8 @@
 
 #include "aemu/base/Log.h"  // for LogStream, LOG
 
-#include "aemu/base/async/Looper.h"                   // for Looper
-#include "aemu/base/async/ThreadLooper.h"             // for ThreadLooper
+#include "aemu/base/async/Looper.h"                      // for Looper
+#include "aemu/base/async/ThreadLooper.h"                // for ThreadLooper
 #include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
 #include "android/hw-events.h"                           // for EV_ABS, EV_SYN
 #include "android/multitouch-screen.h"                   // for MTS_*
@@ -22,27 +22,6 @@ namespace control {
 #define EV_ABS_MIN 0x0000
 #define EV_ABS_MAX 0x7FFF
 
-TouchEventSender::TouchEventSender(
-        const AndroidConsoleAgents* const consoleAgents)
-    : mAgents(consoleAgents) {
-    mLooper = android::base::ThreadLooper::get();
-}
-
-TouchEventSender::~TouchEventSender(){};
-
-bool TouchEventSender::send(const TouchEvent* request) {
-    // Send the event on the background looper.
-    TouchEvent event = *request;
-    mLooper->scheduleCallback([this, event]() { this->doSend(event); });
-    return true;
-}
-
-bool TouchEventSender::sendOnThisThread(const TouchEvent* request) {
-    // Send the event on the current thread, not the background looper.
-    TouchEvent event = *request;
-    doSend(event);
-    return true;
-}
 
 // Scales an axis to the proper EVDEV value..
 static int scaleAxis(int value, int min_in, int max_in) {
@@ -143,8 +122,7 @@ void TouchEventSender::doSend(const TouchEvent request) {
                     {EV_ABS, LINUX_ABS_MT_TRACKING_ID, slot, displayId});
             mUsedSlots.insert(slot);
             mIdMap[touch.identifier()] = slot;
-            LOG(DEBUG) << "Registering " << touch.identifier() << " ->"
-                         << slot;
+            LOG(DEBUG) << "Registering " << touch.identifier() << " ->" << slot;
         }
 
         // Scale to proper evdev values.

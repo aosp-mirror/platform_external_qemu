@@ -90,12 +90,15 @@ service EmulatorController {
 
     // Send a keyboard event. Translating the event.
     rpc sendKey(KeyboardEvent) returns (google.protobuf.Empty) {}
-
     // Send touch/mouse events. Note that mouse events can be simulated
     // by touch events.
     rpc sendTouch(TouchEvent) returns (google.protobuf.Empty) {}
     rpc sendMouse(MouseEvent) returns (google.protobuf.Empty) {}
     rpc injectWheel(stream WheelEvent) returns (google.protobuf.Empty) {}
+
+    // Stream a series of input events to the emulator, the events will
+    // arrive in order.
+    rpc streamInputEvent(stream InputEvent) returns (google.protobuf.Empty) {}
 
     // Make a phone call.
     rpc sendPhone(PhoneCall) returns (PhoneResponse) {}
@@ -779,6 +782,15 @@ message KeyboardEvent {
     // better suited for transferring large quantities of text.
     string text = 5;
 }
+
+// An input event that can be delivered to the emulator.
+message InputEvent {
+    oneof type {
+        KeyboardEvent key_event = 1;
+        TouchEvent touch_event = 2;
+        MouseEvent mouse_event = 3;
+    }
+};
 
 message Fingerprint {
     // True when the fingprint is touched.

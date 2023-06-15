@@ -203,9 +203,7 @@ void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
         case DataChannelLabel::keyboard: {
             android::emulation::control::KeyboardEvent keyEvent;
             keyEvent.ParseFromArray(buffer.data.data(), buffer.size());
-            android::base::ThreadLooper::runOnMainLooper([this, keyEvent]() {
-                mKeyEventSender.sendOnThisThread(&keyEvent);
-            });
+            mKeyEventSender.send(keyEvent);
             break;
         }
         case DataChannelLabel::mouse: {
@@ -222,9 +220,7 @@ void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
         case DataChannelLabel::touch: {
             android::emulation::control::TouchEvent touchEvent;
             touchEvent.ParseFromArray(buffer.data.data(), buffer.size());
-            android::base::ThreadLooper::runOnMainLooper([this, touchEvent]() {
-                mTouchEventSender.sendOnThisThread(&touchEvent);
-            });
+            mTouchEventSender.send(touchEvent);
             break;
         }
         case DataChannelLabel::adb: {

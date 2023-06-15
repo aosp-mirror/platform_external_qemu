@@ -366,22 +366,6 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 }
             }
 
-            // If we allowed host audio, don't revoke
-            // microphone perms.
-            if (getConsoleAgents()->vm->isRealAudioAllowed()) {
-                dinfo("Not revoking microphone permissions "
-                       "for Google App.");
-                return;
-            } else {
-                dinfo("Revoking microphone permissions "
-                       "for Google App.");
-            }
-
-            adbInterface->enqueueCommand(
-                { "shell", "pm", "revoke",
-                  "com.google.android.googlequicksearchbox",
-                  "android.permission.RECORD_AUDIO" });
-
             miscPipeSetAndroidOverlay(adbInterface);
 
             if (restart_when_stalled > 0 && num_watchdog == 0) {
