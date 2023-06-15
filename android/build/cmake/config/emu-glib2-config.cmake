@@ -18,7 +18,7 @@ set(GLIB2_INCLUDE_DIR
 set(GLIB2_INCLUDE_DIRS ${GLIB2_INCLUDE_DIR})
 
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
-  set(GLIB2_LIBRARIES -lglib-2.0 -liconv -lintl "-framework CoreServices"
+  set(GLIB2_LIBRARIES -lglib-2.0 ${PREBUILT_ROOT}/lib/libiconv.a -lintl "-framework CoreServices"
                       -L${PREBUILT_ROOT}/lib)
 elseif(WINDOWS_MSVC_X86_64)
   set(GLIB2_LIBRARIES ${PREBUILT_ROOT}/lib/libglib-2.0.lib ole32::ole32 ws2_32::ws2_32)
