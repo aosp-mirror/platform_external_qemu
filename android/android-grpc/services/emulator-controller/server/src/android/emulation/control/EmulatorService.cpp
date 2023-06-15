@@ -536,7 +536,7 @@ public:
             ::google::protobuf::Empty* /*response*/) override {
         SimpleServerLambdaReader<InputEvent>* eventReader =
                 new SimpleServerLambdaReader<InputEvent>(
-                        [this, eventReader](auto request) {
+                        [this, &eventReader](auto request) {
                             if (request->has_key_event()) {
                                 mKeyEventSender.send(request->key_event());
                             } else if (request->has_mouse_event()) {
