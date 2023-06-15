@@ -874,44 +874,30 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
      *
      * If the phone is completely vertical, rotating it will not do anything !
      */
-    if (VERBOSE_CHECK(rotation)) {
-        dprint( "setCoarseOrientation - HwSensors %p", h);
-    }
+    VERBOSE_INFO(rotation, "setCoarseOrientation - HwSensors %p", h);
     std::vector<float> rotation;
     switch (orient) {
         case ANDROID_COARSE_PORTRAIT:
-            if (VERBOSE_CHECK(rotation)) {
-                dprint( "Setting coarse orientation to portrait");
-            }
+            VERBOSE_INFO(rotation, "Setting coarse orientation to portrait");
             rotation = {-tilt_degrees, 0.f, 0.f};
             break;
 
         case ANDROID_COARSE_REVERSE_LANDSCAPE:
-            if (VERBOSE_CHECK(rotation)) {
-                dprint(
-                        "Setting coarse orientation to reverse landscape");
-            }
+            VERBOSE_INFO(rotation, "Setting coarse orientation to reverse landscape");
             rotation = {0.f, -tilt_degrees, -90.f};
             break;
 
         case ANDROID_COARSE_REVERSE_PORTRAIT:
-            if (VERBOSE_CHECK(rotation)) {
-                dprint(
-                        "Setting coarse orientation to reverse portrait");
-            }
+            VERBOSE_INFO(rotation, "Setting coarse orientation to reverse portrait");
             rotation = {tilt_degrees, 0.f, 180.f};
             break;
 
         case ANDROID_COARSE_LANDSCAPE:
-            if (VERBOSE_CHECK(rotation)) {
-                dprint( "Setting coarse orientation to landscape");
-            }
+            VERBOSE_INFO(rotation, "Setting coarse orientation to landscape");
             rotation = {0.f, tilt_degrees, 90.f};
             break;
         default:
-            if (VERBOSE_CHECK(rotation)) {
-                dprint( "Invalid orientation");
-            }
+            VERBOSE_INFO(rotation, "Invalid orientation");
             return;
     }
 

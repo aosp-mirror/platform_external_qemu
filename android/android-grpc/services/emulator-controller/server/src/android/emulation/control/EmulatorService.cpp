@@ -1046,8 +1046,9 @@ public:
         // Update format information with the retrieved width, height.
         format->set_height(height);
         format->set_width(width);
-        VERBOSE_PRINT(grpc, "Screenshot %dx%d, pixels: %d in %d us.", width,
-                      height, cPixels, sw.elapsedUs());
+        VERBOSE_PRINT(grpc, "Screenshot %dx%d (%s), pixels: %d in %d us.", width,
+                      height, rotation_reply->ShortDebugString().c_str(),
+                      cPixels, sw.elapsedUs());
 
         return Status::OK;
     }

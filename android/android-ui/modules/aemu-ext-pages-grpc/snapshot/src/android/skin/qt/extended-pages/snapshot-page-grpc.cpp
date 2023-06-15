@@ -108,7 +108,6 @@ using Ui::Settings::SaveSnapshotOnExitUiOrder;
 #endif
 using namespace android::base;
 using namespace android::snapshot;
-using android::emulation::grpc::ui::SnapshotPageGrpc;
 
 namespace pb = android_studio;
 namespace fc = android::featurecontrol;

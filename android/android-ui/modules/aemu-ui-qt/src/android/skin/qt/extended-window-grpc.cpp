@@ -10,7 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/skin/qt/extended-window.h"
+#include "android/skin/qt/extended-window-grpc.h"
 
 #include <assert.h>
 #include <QApplication>
@@ -46,27 +46,18 @@
 #include "android/hw-sensors.h"
 #include "android/metrics/UiEventTracker.h"
 #include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/extended-pages/battery-page.h"
-#include "android/skin/qt/extended-pages/bug-report-page.h"
-#include "android/skin/qt/extended-pages/camera-page.h"
-#include "android/skin/qt/extended-pages/car-data-page.h"
+#include "android/skin/qt/extended-pages/bug-report-page-grpc.h"
 #include "android/skin/qt/extended-pages/car-rotary-page.h"
-#include "android/skin/qt/extended-pages/cellular-page.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/dpad-page.h"
-#include "android/skin/qt/extended-pages/finger-page.h"
 #include "android/skin/qt/extended-pages/google-play-page.h"
 #include "android/skin/qt/extended-pages/help-page.h"
 #include "android/skin/qt/extended-pages/location-page.h"
 #include "android/skin/qt/extended-pages/microphone-page.h"
 #include "android/skin/qt/extended-pages/multi-display-page.h"
 #include "android/skin/qt/extended-pages/record-and-playback-page.h"
-#include "android/skin/qt/extended-pages/record-macro-page.h"
-#include "android/skin/qt/extended-pages/record-screen-page.h"
 #include "android/skin/qt/extended-pages/rotary-input-page.h"
-#include "android/skin/qt/extended-pages/sensor-replay-page.h"
 #include "android/skin/qt/extended-pages/settings-page.h"
-#include "android/skin/qt/extended-pages/telephony-page.h"
 #include "android/skin/qt/extended-pages/tv-remote-page.h"
 #include "android/skin/qt/extended-pages/virtual-sensors-page.h"
 #include "android/skin/qt/qt-settings.h"
@@ -80,13 +71,13 @@
 #include "host-common/hw-config-helper.h"
 #include "host-common/multi_display_agent.h"
 #include "studio_stats.pb.h"
-#include "ui_extended.h"
+#include "ui_extended-window-grpc.h"
 
-ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
+ExtendedWindowGrpc::ExtendedWindowGrpc(EmulatorQtWindow* eW, ToolWindow* tW)
     : ExtendedBaseWindow(),
       mEmulatorWindow(eW),
       mToolWindow(tW),
-      mExtendedUi(new Ui::ExtendedControls),
+      mExtendedUi(new Ui::ExtendedControlsGrpc),
       mSizeTweaker(this),
       mSidebarButtons(this),
       mPaneInvocationTracker(new UiEventTracker(
@@ -104,7 +95,6 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 #endif
 
     QSettings settings;
-
     mExtendedUi->setupUi(this);
     mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
@@ -115,6 +105,11 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
+
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
+        mExtendedUi->bugreportPage->setAdbInterface(
+                mEmulatorWindow->getAdbInterface());
+    }
 
     if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
                 AVD_ANDROID_AUTO &&
@@ -189,7 +184,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     };
     // clang-format on
 
-    setObjectName("ExtendedControls");
+    setObjectName("ExtendedControlsGrpc");
     // Use different title for Embedded Emuator in Studio.
     if (getConsoleAgents()
                 ->settings->android_cmdLineOptions()
@@ -363,7 +358,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
             SettingsPage::getPauseAvdWhenMinimized());
 }
 
-ExtendedWindow::~ExtendedWindow() {
+ExtendedWindowGrpc::~ExtendedWindowGrpc() {
     mExtendedUi->location_page->requestStopLoadingGeoData();
     if (getConsoleAgents()
                 ->settings->android_cmdLineOptions()
@@ -376,7 +371,7 @@ ExtendedWindow::~ExtendedWindow() {
     }
 }
 
-VirtualSensorsPage* ExtendedWindow::getVirtualSensorsPage() {
+VirtualSensorsPage* ExtendedWindowGrpc::getVirtualSensorsPage() {
     return mExtendedUi->virtualSensorsPage;
 }
 
@@ -420,38 +415,12 @@ static std::string translate_idx(ExtendedWindowPane value) {
     return s.replace(4, 4, "");
 }
 
-void ExtendedWindow::sendMetricsOnShutDown() {
+void ExtendedWindowGrpc::sendMetricsOnShutDown() {
     mExtendedUi->location_page->sendMetrics();
     mExtendedUi->multiDisplayPage->sendMetrics();
 }
 
-// static
-void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
-    if (agentPtr) {
-        BatteryPage::setBatteryAgent(agentPtr->battery);
-        CellularPage::setCellularAgent(agentPtr->cellular);
-        FingerPage::setFingerAgent(agentPtr->finger);
-        if (!getConsoleAgents()
-                     ->settings->android_cmdLineOptions()
-                     ->no_location_ui) {
-            LocationPage::setLocationAgent(agentPtr->location);
-        }
-        SettingsPage::setHttpProxyAgent(agentPtr->proxy);
-        TelephonyPage::setTelephonyAgent(agentPtr->telephony);
-        CameraPage::setVirtualSceneAgent(agentPtr->virtualScene);
-        VirtualSensorsPage::setSensorsAgent(agentPtr->sensors);
-        RecordMacroPage::setAutomationAgent(agentPtr->automation);
-        RecordScreenPage::setRecordScreenAgent(agentPtr->record);
-        if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
-            CarDataPage::setCarDataAgent(agentPtr->car);
-            SensorReplayPage::setAgent(agentPtr->car, agentPtr->location,
-                                       agentPtr->sensors);
-        }
-    }
-}
-
-
-void ExtendedWindow::show() {
+void ExtendedWindowGrpc::show() {
     // bug: 183660415
     // As reported in KDE desktop environment, a minimize button is shown and
     // we need to show minimized window differently.
@@ -460,7 +429,7 @@ void ExtendedWindow::show() {
     } else {
         QFrame::show();
     }
-    mExtendedWindowWasShown = true;
+    mExtendedWindowGrpcWasShown = true;
 
     // Verify that the extended pane is fully visible (otherwise it may be
     // impossible for the user to move it)
@@ -504,12 +473,12 @@ void ExtendedWindow::show() {
     }
 }
 
-void ExtendedWindow::showPane(ExtendedWindowPane pane) {
+void ExtendedWindowGrpc::showPane(ExtendedWindowPane pane) {
     show();
     adjustTabs(pane);
 }
 
-void ExtendedWindow::connectVirtualSceneWindow(
+void ExtendedWindowGrpc::connectVirtualSceneWindow(
         VirtualSceneControlWindow* virtualSceneWindow) {
     connect(virtualSceneWindow, SIGNAL(virtualSceneControlsEngaged(bool)),
             mExtendedUi->virtualSensorsPage,
@@ -534,30 +503,30 @@ void ExtendedWindow::connectVirtualSceneWindow(
             SLOT(showMacroRecordPage()));
 }
 
-void ExtendedWindow::closeEvent(QCloseEvent* e) {
+void ExtendedWindowGrpc::closeEvent(QCloseEvent* e) {
     // Merely hide the window the widget is closed, do not destroy state.
     e->ignore();
     hide();
 }
 
-void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
+void ExtendedWindowGrpc::keyPressEvent(QKeyEvent* e) {
     mToolWindow->handleQtKeyEvent(e, QtKeyEventSource::ExtendedWindow);
 }
 
 // Tab buttons. Each raises its stacked pane to the top.
-void ExtendedWindow::on_batteryButton_clicked() {
+void ExtendedWindowGrpc::on_batteryButton_clicked() {
     adjustTabs(PANE_IDX_BATTERY);
 }
-void ExtendedWindow::on_cameraButton_clicked() {
+void ExtendedWindowGrpc::on_cameraButton_clicked() {
     adjustTabs(PANE_IDX_CAMERA);
 }
-void ExtendedWindow::on_bugreportButton_clicked() {
+void ExtendedWindowGrpc::on_bugreportButton_clicked() {
     adjustTabs(PANE_IDX_BUGREPORT);
 }
-void ExtendedWindow::on_cellularButton_clicked() {
+void ExtendedWindowGrpc::on_cellularButton_clicked() {
     adjustTabs(PANE_IDX_CELLULAR);
 }
-void ExtendedWindow::on_dpadButton_clicked() {
+void ExtendedWindowGrpc::on_dpadButton_clicked() {
     if (android::featurecontrol::isEnabled(android::featurecontrol::TvRemote) &&
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
                 AVD_TV) {
@@ -566,59 +535,59 @@ void ExtendedWindow::on_dpadButton_clicked() {
         adjustTabs(PANE_IDX_DPAD);
     }
 }
-void ExtendedWindow::on_displaysButton_clicked() {
+void ExtendedWindowGrpc::on_displaysButton_clicked() {
     adjustTabs(PANE_IDX_MULTIDISPLAY);
 }
-void ExtendedWindow::on_rotaryInputButton_clicked() {
+void ExtendedWindowGrpc::on_rotaryInputButton_clicked() {
     adjustTabs(PANE_IDX_ROTARY);
 }
-void ExtendedWindow::on_fingerButton_clicked() {
+void ExtendedWindowGrpc::on_fingerButton_clicked() {
     adjustTabs(PANE_IDX_FINGER);
 }
-void ExtendedWindow::on_helpButton_clicked() {
+void ExtendedWindowGrpc::on_helpButton_clicked() {
     adjustTabs(PANE_IDX_HELP);
 }
-void ExtendedWindow::on_locationButton_clicked() {
+void ExtendedWindowGrpc::on_locationButton_clicked() {
     adjustTabs(PANE_IDX_LOCATION);
 }
-void ExtendedWindow::on_microphoneButton_clicked() {
+void ExtendedWindowGrpc::on_microphoneButton_clicked() {
     adjustTabs(PANE_IDX_MICROPHONE);
 }
-void ExtendedWindow::on_settingsButton_clicked() {
+void ExtendedWindowGrpc::on_settingsButton_clicked() {
     adjustTabs(PANE_IDX_SETTINGS);
 }
-void ExtendedWindow::on_telephoneButton_clicked() {
+void ExtendedWindowGrpc::on_telephoneButton_clicked() {
     adjustTabs(PANE_IDX_TELEPHONE);
 }
-void ExtendedWindow::on_virtSensorsButton_clicked() {
+void ExtendedWindowGrpc::on_virtSensorsButton_clicked() {
     adjustTabs(PANE_IDX_VIRT_SENSORS);
 }
-void ExtendedWindow::on_snapshotButton_clicked() {
+void ExtendedWindowGrpc::on_snapshotButton_clicked() {
     adjustTabs(PANE_IDX_SNAPSHOT);
 }
-void ExtendedWindow::on_recordButton_clicked() {
+void ExtendedWindowGrpc::on_recordButton_clicked() {
     adjustTabs(PANE_IDX_RECORD);
 }
-void ExtendedWindow::on_googlePlayButton_clicked() {
+void ExtendedWindowGrpc::on_googlePlayButton_clicked() {
     adjustTabs(PANE_IDX_GOOGLE_PLAY);
 }
-void ExtendedWindow::on_carDataButton_clicked() {
+void ExtendedWindowGrpc::on_carDataButton_clicked() {
     adjustTabs(PANE_IDX_CAR);
 }
-void ExtendedWindow::on_carRotaryButton_clicked() {
+void ExtendedWindowGrpc::on_carRotaryButton_clicked() {
     adjustTabs(PANE_IDX_CAR_ROTARY);
 }
-void ExtendedWindow::on_sensorReplayButton_clicked() {
+void ExtendedWindowGrpc::on_sensorReplayButton_clicked() {
     adjustTabs(PANE_IDX_SENSOR_REPLAY);
 }
 
-void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
+void ExtendedWindowGrpc::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);
     if (it == mPaneButtonMap.end()) {
         return;
     }
 
-    if (mExtendedWindowWasShown &&
+    if (mExtendedWindowGrpcWasShown &&
         mExtendedUi->stackedWidget->currentIndex() != thisIndex) {
         mPaneInvocationTracker->increment(translate_idx(thisIndex));
     }
@@ -628,11 +597,11 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
 }
 
-void ExtendedWindow::switchFrameAlways(bool showFrame) {
+void ExtendedWindowGrpc::switchFrameAlways(bool showFrame) {
     mEmulatorWindow->setFrameAlways(showFrame);
 }
 
-void ExtendedWindow::switchOnTop(bool isOnTop) {
+void ExtendedWindowGrpc::switchOnTop(bool isOnTop) {
     if (getConsoleAgents()
                 ->settings->android_cmdLineOptions()
                 ->qt_hide_window) {
@@ -642,7 +611,7 @@ void ExtendedWindow::switchOnTop(bool isOnTop) {
     mToolWindow->notifySwitchOnTop();
 }
 
-void ExtendedWindow::switchToTheme(SettingsTheme theme) {
+void ExtendedWindowGrpc::switchToTheme(SettingsTheme theme) {
     // Switch to the icon images that are appropriate for this theme.
     adjustAllButtonsForTheme(theme);
 
@@ -676,19 +645,19 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     adjustTabs(PANE_IDX_SETTINGS);
 }
 
-void ExtendedWindow::disableMouseWheel(bool disabled) {
+void ExtendedWindowGrpc::disableMouseWheel(bool disabled) {
     mEmulatorWindow->setIgnoreWheelEvent(disabled);
 }
 
-void ExtendedWindow::pauseAvdWhenMinimized(bool pause) {
+void ExtendedWindowGrpc::pauseAvdWhenMinimized(bool pause) {
     mEmulatorWindow->setPauseAvdWhenMinimized(pause);
 }
 
-void ExtendedWindow::disablePinchToZoom(bool disabled) {
+void ExtendedWindowGrpc::disablePinchToZoom(bool disabled) {
     mEmulatorWindow->setDisablePinchToZoom(disabled);
 }
 
-void ExtendedWindow::showEvent(QShowEvent* e) {
+void ExtendedWindowGrpc::showEvent(QShowEvent* e) {
     if (mFirstShowEvent && !e->spontaneous()) {
         bool moved = false;
         if (getConsoleAgents()
@@ -754,7 +723,7 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
     mCvVisible.notify_all();
 }
 
-void ExtendedWindow::hideEvent(QHideEvent* e) {
+void ExtendedWindowGrpc::hideEvent(QHideEvent* e) {
     QFrame::hideEvent(e);
     {
         std::lock_guard<std::mutex> lk(mMutexVisible);
@@ -763,17 +732,17 @@ void ExtendedWindow::hideEvent(QHideEvent* e) {
     mCvVisible.notify_all();
 }
 
-void ExtendedWindow::waitForVisibility(bool visible) {
+void ExtendedWindowGrpc::waitForVisibility(bool visible) {
     std::unique_lock lk(mMutexVisible);
     mCvVisible.wait(lk, [&] { return visible == mVisible; });
 }
-void ExtendedWindow::showMacroRecordPage() {
+void ExtendedWindowGrpc::showMacroRecordPage() {
     show();
     on_recordButton_clicked();
     mExtendedUi->recordAndPlaybackPage->focusMacroRecordTab();
 }
 
-void ExtendedWindow::hideRotationButtons() {
+void ExtendedWindowGrpc::hideRotationButtons() {
     mExtendedUi->virtualSensorsPage->hideRotationButtons(
             mToolWindow->getUiEmuAgent()
                     ->multiDisplay->isMultiDisplayEnabled());

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ExtendedControls</class>
- <widget class="QFrame" name="ExtendedControls">
+ <class>ExtendedControlsGrpc</class>
+ <widget class="QFrame" name="ExtendedControlsGrpc">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -65,18 +65,18 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <widget class="LocationPage" name="location_page"/>
    <widget class="MultiDisplayPage" name="multiDisplayPage"/>
-   <widget class="CellularPage" name="cellular_page"/>
-   <widget class="BatteryPage" name="batteryPage"/>
-   <widget class="CameraPage" name="cameraPage"/>
+   <widget class="CellularPageGrpc" name="cellular_page"/>
+   <widget class="BatteryPageGrpc" name="batteryPage"/>
+   <widget class="CameraPageGrpc" name="cameraPage"/>
    <widget class="TelephonyPage" name="telephonyPage"/>
    <widget class="DPadPage" name="dpadPage"/>
    <widget class="TvRemotePage" name="tvRemotePage"/>
    <widget class="RotaryInputPage" name="rotaryInputPage"/>
    <widget class="MicrophonePage" name="microphonePage"/>
-   <widget class="FingerPage" name="finger_page"/>
+   <widget class="FingerPageGrpc" name="finger_page"/>
    <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
-   <widget class="SnapshotPage" name="snapshotPage"/>
-   <widget class="BugreportPage" name="bugreportPage"/>
+   <widget class="SnapshotPageGrpc" name="snapshotPage"/>
+   <widget class="BugreportPageGrpc" name="bugreportPage"/>
    <widget class="RecordAndPlaybackPage" name="recordAndPlaybackPage"/>
    <widget class="GooglePlayPage" name="googlePlayPage"/>
    <widget class="SettingsPage" name="settingsPage"/>
@@ -1343,21 +1343,21 @@ padding: 10px 0px 10px 16px;</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>CellularPage</class>
+   <class>CellularPageGrpc</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/cellular-page.h</header>
+   <header>android/skin/qt/extended-pages/cellular-page-grpc.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>BatteryPage</class>
+   <class>BatteryPageGrpc</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/battery-page.h</header>
+   <header>android/skin/qt/extended-pages/battery-page-grpc.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>BugreportPage</class>
+   <class>BugreportPageGrpc</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/bug-report-page.h</header>
+   <header>android/skin/qt/extended-pages/bug-report-page-grpc.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1367,9 +1367,9 @@ padding: 10px 0px 10px 16px;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>FingerPage</class>
+   <class>FingerPageGrpc</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/finger-page.h</header>
+   <header>android/skin/qt/extended-pages/finger-page-grpc.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1421,9 +1421,9 @@ padding: 10px 0px 10px 16px;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>CameraPage</class>
+   <class>CameraPageGrpc</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/camera-page.h</header>
+   <header>android/skin/qt/extended-pages/camera-page-grpc.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1463,9 +1463,9 @@ padding: 10px 0px 10px 16px;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>SnapshotPage</class>
+   <class>SnapshotPageGrpc</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/snapshot-page.h</header>
+   <header>android/skin/qt/extended-pages/snapshot-page-grpc.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
