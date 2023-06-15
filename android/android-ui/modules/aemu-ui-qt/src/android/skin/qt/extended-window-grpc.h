@@ -13,7 +13,6 @@
 // limitations under the License.
 #pragma once
 #include <QButtonGroup>                              // for QButtonGroup
-#include <QByteArrayData>
 #include <QString>                                   // for QString
 #include <condition_variable>
 #include <map>                                       // for map
