@@ -158,6 +158,8 @@ constexpr char PER_AVD_CELLULAR_METER_STATUS[]    = "perAvd/cell/meter_status";
 constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
 
 constexpr char PER_AVD_PAUSE_AVD_WHEN_MINIMIZED[] = "perAvd/set/pauseAvdWhenMinimized";
+constexpr char PER_AVD_ENFORCE_KEYCODE_FORWARDING[] =
+        "perAvd/set/enforceKeycodeForwarding";
 
 constexpr char PER_AVD_RESIZABLE_SIZE[]     = "perAvd/resizable/size";
 }  // namespace Settings

@@ -1200,6 +1200,22 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     bool host_is_32_bit = sizeof(void*) == 4;
     bool limit_is_4gb = (guest_is_32_bit || host_is_32_bit);
 
+    // bug: 277897783
+    if (android_foldable_hinge_configured()) {
+        int height_in_config = hw->hw_displayRegion_0_1_height;
+        if (height_in_config > hw->hw_lcd_height) {
+            hw->hw_displayRegion_0_1_height = hw->hw_lcd_height;
+            dwarning(
+                    "folded height %d is larger than lcd height %d, reduced to "
+                    "lcd height.",
+                    height_in_config, hw->hw_lcd_height);
+        }
+    }
+
+    if (avdInfo_getApiLevel(avd) >= 33) {
+        hw->userdata_useQcow2 = true;
+    }
+
     // enforce CDD minimums
     int minRam = 32;
     bool isFoldable = android_foldable_any_folded_area_configured() ||

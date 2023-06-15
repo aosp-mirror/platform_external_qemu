@@ -9,25 +9,19 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  */
-
 #pragma once
-
-#include <qobjectdefs.h>                             // for Q_OBJECT, slots
 #include <QButtonGroup>                              // for QButtonGroup
-#include <QFrame>                                    // for QFrame
 #include <QString>                                   // for QString
+#include <condition_variable>
 #include <map>                                       // for map
 #include <memory>                                    // for shared_ptr, uniq...
 #include <mutex>
-#include <condition_variable>
 
-#include "android/settings-agent.h"                  // for SettingsTheme
-#include "android/skin/qt/extended-window-styles.h"  // for ExtendedWindowPane
+#include "android/skin/qt/extended-window-base.h"
 #include "android/skin/qt/qt-ui-commands.h"          // for QtUICommand
 #include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
 #include "android/ui-emu-agent.h"                    // for UiEmuAgent
 #include "host-common/qt_ui_defs.h"
-
 
 class EmulatorQtWindow;
 class QCloseEvent;
@@ -53,7 +47,7 @@ namespace Ui {
     class ExtendedControls;
 }
 
-class ExtendedWindow : public QFrame
+class ExtendedWindow : public ExtendedBaseWindow
 {
     Q_OBJECT
 
@@ -63,28 +57,19 @@ public:
     ~ExtendedWindow();
 
     static void setAgent(const UiEmuAgent* agentPtr);
-    // Some pages on the extended window perform actions even if the UI
-    // is not created.
-    // In this case the dtor is not called when the Emulator exits, so
-    // someone needs to call 'shutdown' to let us know we should stop
-    // those actions.
-    static void shutDown();
-    void sendMetricsOnShutDown();
+    void sendMetricsOnShutDown() override;
 
-    void show();
-    void showPane(ExtendedWindowPane pane);
+    void show() override;
+    void showPane(ExtendedWindowPane pane) override;
 
     // Wait until this component has reached the visibility
     // state.
-    void waitForVisibility(bool visible);
+    void waitForVisibility(bool visible) override;
 
     void connectVirtualSceneWindow(
-            VirtualSceneControlWindow* virtualSceneWindow);
+            VirtualSceneControlWindow* virtualSceneWindow) override;
 
-    VirtualSensorsPage* getVirtualSensorsPage();
-
-    void overrideUiObjects();
-
+    VirtualSensorsPage* getVirtualSensorsPage() override;
 private slots:
     void switchFrameAlways(bool showFrame);
     void switchOnTop(bool isOntop);
@@ -139,5 +124,4 @@ private:
     std::condition_variable mCvVisible;
     std::mutex mMutexVisible;
     bool mVisible{false};
-    bool mExtendedInitialized{false};
 };

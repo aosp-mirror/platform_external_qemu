@@ -1150,13 +1150,23 @@ static int startEmulatorWithMinConfig(int argc,
     {
         // Should enable OpenGL ES 3.x?
         if (skin_winsys_get_preferred_gles_apilevel() ==
+            WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+            fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, false);
+        }
+
+        if (skin_winsys_get_preferred_gles_apilevel() ==
             WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
             fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, true);
         }
 
-        if (skin_winsys_get_preferred_gles_apilevel() ==
-            WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
-            fc::setEnabledOverride(fc::GLESDynamicVersion, false);
+        if (apiLevel >= 31) {
+            if (skin_winsys_get_preferred_gles_apilevel() ==
+                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+                dwarning("API level %d requires OpenGL ES 3.0+, attempting to"
+                    " turn on OpenGL ES 3.0/3.1", apiLevel);
+            }
+            // API 31 needs GLES 3.0+ to boot
+            fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, true);
         }
 
         if (fc::isEnabled(fc::ForceANGLE)) {
@@ -1193,7 +1203,11 @@ static int startEmulatorWithMinConfig(int argc,
     /* Disable the GLAsyncSwap for ANGLE so far */
     bool shouldDisableAsyncSwap =
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
-            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9 ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE_INDIRECT ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9_INDIRECT;
     // Features to disable or enable depending on rendering backend
     // and gpu make/model/version
 #if defined(__APPLE__) && defined(__aarch64__)
@@ -1531,7 +1545,13 @@ extern "C" int main(int argc, char** argv) {
     qemu_android_init_http_proxy_ops();
 
     // Make the console agents available.
-    injectQemuConsoleAgents("");
+    const char* factory = "";
+    for(int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "-debug-events") == 0) {
+            factory = "debug";
+        }
+    }
+    injectQemuConsoleAgents(factory);
 
 #ifdef CONFIG_HEADLESS
     getConsoleAgents()->settings->set_host_emulator_is_headless(true);
@@ -1651,7 +1671,6 @@ extern "C" int main(int argc, char** argv) {
             for (int i = 0; i < args.size(); i++) {
                 dinfo("%s: arg: %s", __func__, args[i].c_str());
             }
-
             // Skip the translation of command-line options and jump
             // straight to qemu_main().
             enter_qemu_main_loop(args.size(), args.array());
@@ -3064,13 +3083,23 @@ extern "C" int main(int argc, char** argv) {
             if (skin_winsys_get_preferred_gles_apilevel() ==
                         WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT ||
                 System::get()->getProgramBitness() == 32) {
-                fc::setEnabledOverride(fc::GLESDynamicVersion, false);
+                fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, false);
             }
 
             // In build environment, enable gles3 if possible
             if (avdInfo_inAndroidBuild(avd)) {
                 fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion,
                                                      true);
+            }
+
+            // API 31 needs GLES 3.0+ to boot
+            if (apiLevel >= 31) {
+                if (skin_winsys_get_preferred_gles_apilevel() ==
+                    WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+                    dwarning("API level %d requires OpenGL ES 3.0+, attempting to"
+                        " turn on OpenGL ES 3.0/3.1", apiLevel);
+                }
+                fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, true);
             }
 
 #ifdef __linux__
@@ -3113,7 +3142,11 @@ extern "C" int main(int argc, char** argv) {
         /* Disable the GLAsyncSwap for ANGLE so far */
         bool shouldDisableAsyncSwap =
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
-                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9 ||
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER ||
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE_INDIRECT ||
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9_INDIRECT;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
 #if defined(__APPLE__) && defined(__aarch64__)

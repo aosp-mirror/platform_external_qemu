@@ -1,21 +1,35 @@
-#include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 
-#include <assert.h>  // for assert
+// Copyright (C) 2023 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#include "android/emulation/control/keyboard/KeyEventSender.h"
 
-#include <cstdint>     // for uint32_t
-#include <functional>  // for __base
-#include <string>      // for string, oper...
-#include <vector>      // for vector
+#include <assert.h>
 
-#include "aemu/base/ArraySize.h"                      // for ARRAY_SIZE
-#include "aemu/base/async/Looper.h"                   // for Looper
-#include "aemu/base/async/ThreadLooper.h"             // for ThreadLooper
-#include "android/console.h"                             // for AndroidConso...
-#include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
-#include "android/emulation/control/libui_agent.h"       // for LibuiKeyCode...
-#include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
-#include "android/utils/utf8_utils.h"                    // for android_utf8...
-#include "emulator_controller.pb.h"                      // for KeyboardEvent
+#include <cstdint>
+#include <functional>
+#include <string>
+#include <vector>
+
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "android/console.h"
+#include "android/emulation/control/keyboard/dom_key.h"
+#include "android/emulation/control/libui_agent.h"
+#include "android/emulation/control/user_event_agent.h"
+#include "android/utils/utf8_utils.h"
+#include "emulator_controller.pb.h"
 
 /* set to 1 for very verbose debugging */
 #define DEBUG 0
@@ -208,15 +222,8 @@ const size_t kDomKeyMapEntries = ARRAY_SIZE(dom_key_map);
 const size_t kKeycodeMapEntries = ARRAY_SIZE(usb_keycode_map);
 const size_t kNonPrintableCodeEntries = ARRAY_SIZE(kNonPrintableCodeMap);
 
-EmulatorKeyEventSender::EmulatorKeyEventSender(
-        const AndroidConsoleAgents* const consoleAgents)
-    : mAgents(consoleAgents) {
-    mLooper = android::base::ThreadLooper::get();
-}
 
-EmulatorKeyEventSender::~EmulatorKeyEventSender() {}
-
-void EmulatorKeyEventSender::sendKeyCode(
+void KeyEventSender::sendKeyCode(
         int32_t code,
         const KeyboardEvent::KeyCodeType codeType,
         const KeyboardEvent::KeyEventType eventType) {
@@ -233,21 +240,12 @@ void EmulatorKeyEventSender::sendKeyCode(
     }
 }  // namespace keyboard
 
-void EmulatorKeyEventSender::send(const KeyboardEvent* request) {
-    auto event = KeyboardEvent(*request);
-    mLooper->createTask([=]() { doSend(&event); });
-}
 
-void EmulatorKeyEventSender::sendOnThisThread(const KeyboardEvent* request) {
-    auto event = KeyboardEvent(*request);
-    doSend(&event);
-}
-
-void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
-    if (request->key().size() > 0) {
-        keyboard::DomKey domkey = browserKeyToDomKey(request->key());
+void KeyEventSender::doSend(const KeyboardEvent request) {
+    if (request.key().size() > 0) {
+        keyboard::DomKey domkey = browserKeyToDomKey(request.key());
         DD("%s -> domKey: %d, as Non printable: %d",
-           request->ShortDebugString().c_str(), (int)domkey,
+           request.ShortDebugString().c_str(), (int)domkey,
            (int)domKeyAsNonPrintableDomCode(domkey));
 
         if (domkey != keyboard::DomKey::NONE) {
@@ -256,12 +254,12 @@ void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
             std::vector<uint32_t> evdevs;
             if (code == keyboard::DomCode::NONE) {
                 auto evdevs = convertUtf8ToEvDev(domkey.ToUtf8());
-                auto eventType = request->eventtype();
+                auto eventType = request.eventtype();
                 if (eventType == KeyboardEvent::keydown ||
                     eventType == KeyboardEvent::keypress) {
                     for (auto evdev : evdevs) {
                         DD("Down %s -> evdev 0x%x",
-                           request->ShortDebugString().c_str(), evdev | 0x400);
+                           request.ShortDebugString().c_str(), evdev | 0x400);
                         mAgents->user_event->sendKeyCode(evdev | 0x400);
                     }
                 }
@@ -269,30 +267,30 @@ void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
                     eventType == KeyboardEvent::keypress) {
                     for (auto evdev : evdevs) {
                         DD("Up %s -> evdev 0x%x",
-                           request->ShortDebugString().c_str(), evdev);
+                           request.ShortDebugString().c_str(), evdev);
                         mAgents->user_event->sendKeyCode(evdev);
                     }
                 }
             } else {
                 // Nope we have to send the domcode..
                 sendKeyCode(domCodeToEvDevKeycode(code), KeyboardEvent::Evdev,
-                            request->eventtype());
+                            request.eventtype());
             }
         }
     }
-    if (request->text().size() > 0) {
-        sendUtf8String(request->text());
+    if (request.text().size() > 0) {
+        sendUtf8String(request.text());
     }
 
-    if (request->keycode() > 0) {
-        DD("keycode: %d, codetype:%d, eventtype:%d", request->keycode(),
-           request->codetype(), request->eventtype());
-        sendKeyCode(request->keycode(), request->codetype(),
-                    request->eventtype());
+    if (request.keycode() > 0) {
+        DD("keycode: %d, codetype:%d, eventtype:%d", request.keycode(),
+           request.codetype(), request.eventtype());
+        sendKeyCode(request.keycode(), request.codetype(),
+                    request.eventtype());
     }
 }
 
-void EmulatorKeyEventSender::sendUtf8String(const std::string& utf8) {
+void KeyEventSender::sendUtf8String(const std::string& utf8) {
     DD("sendUtf8String: %s", utf8.c_str());
     // We need to convert every individual character to a sequence of evdev
     // events. This is due to the fact that a single character can be
@@ -330,7 +328,7 @@ void EmulatorKeyEventSender::sendUtf8String(const std::string& utf8) {
     }
 }
 
-DomCode EmulatorKeyEventSender::domKeyAsNonPrintableDomCode(DomKey key) {
+DomCode KeyEventSender::domKeyAsNonPrintableDomCode(DomKey key) {
     for (size_t i = 0; i < kNonPrintableCodeEntries; ++i) {
         if (kNonPrintableCodeMap[i].dom_key == key) {
             return kNonPrintableCodeMap[i].dom_code;
@@ -339,7 +337,7 @@ DomCode EmulatorKeyEventSender::domKeyAsNonPrintableDomCode(DomKey key) {
     return DomCode::NONE;
 }
 
-uint32_t EmulatorKeyEventSender::domCodeToEvDevKeycode(DomCode key) {
+uint32_t KeyEventSender::domCodeToEvDevKeycode(DomCode key) {
     for (size_t i = 0; i < kKeycodeMapEntries; ++i) {
         if (usb_keycode_map[i].id == key) {
             return usb_keycode_map[i].evdev;
@@ -348,12 +346,12 @@ uint32_t EmulatorKeyEventSender::domCodeToEvDevKeycode(DomCode key) {
     return 0;
 }
 
-std::vector<uint32_t> EmulatorKeyEventSender::convertUtf8ToEvDev(
+std::vector<uint32_t> KeyEventSender::convertUtf8ToEvDev(
         const std::string& utf8) {
     return convertUtf8ToEvDev((const char*)utf8.c_str(), utf8.size());
 }
 
-std::vector<uint32_t> EmulatorKeyEventSender::convertUtf8ToEvDev(
+std::vector<uint32_t> KeyEventSender::convertUtf8ToEvDev(
         const char* utf8,
         const size_t cnt) {
     std::vector<uint32_t> evdevs;
@@ -373,7 +371,7 @@ std::vector<uint32_t> EmulatorKeyEventSender::convertUtf8ToEvDev(
     return evdevs;
 }
 
-uint32_t EmulatorKeyEventSender::convertToEvDev(
+uint32_t KeyEventSender::convertToEvDev(
         uint32_t from,
         KeyboardEvent::KeyCodeType source) {
     if (source == KeyboardEvent::Evdev) {
@@ -390,7 +388,7 @@ uint32_t EmulatorKeyEventSender::convertToEvDev(
     return 0;
 }
 
-DomKey EmulatorKeyEventSender::browserKeyToDomKey(std::string key) {
+DomKey KeyEventSender::browserKeyToDomKey(std::string key) {
     if (key.empty()) {
         return DomKey::NONE;
     }

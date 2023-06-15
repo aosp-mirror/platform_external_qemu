@@ -37,12 +37,7 @@ using namespace incubating;
 using ::google::protobuf::Empty;
 
 /**
- * @brief A client for interacting with the Snapshot Service.
- *
- * The Simple Snapshot Service allows clients to create, load, save, update, and
- * delete snapshots, as well as list all snapshots and load their screenshots.
- * This class provides methods for asynchronously invoking these operations
- * through gRPC.
+ * @brief A client for interacting with the modem Service.
  *
  * @tparam T The type of object that the OnCompleted callback will receive.
  */
@@ -59,6 +54,9 @@ public:
     void updateCall(Call call, OnCompleted<Call> onDone);
     void deleteCall(Call call, OnCompleted<Empty> onDone);
     void updateTime(OnCompleted<::google::protobuf::Empty> onDone);
+
+    void setCellInfo(CellInfo info, OnCompleted<CellInfo> onDone);
+    void getCellInfo(OnCompleted<CellInfo> onDone);
 
 private:
     std::shared_ptr<EmulatorGrpcClient> mClient;

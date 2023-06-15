@@ -122,11 +122,9 @@ static __attribute__((always_inline)) void start_switch_fiber(CoroutineAction ac
                                void *new_fiber)
 {
 #ifdef CONFIG_ASAN
-    if (action == COROUTINE_TERMINATE) {
-        __sanitizer_start_switch_fiber(
-            action == COROUTINE_TERMINATE ? NULL : fake_stack_save,
-            bottom, size);
-    }
+    __sanitizer_start_switch_fiber(
+        action == COROUTINE_TERMINATE ? NULL : fake_stack_save,
+        bottom, size);
 #endif
 #ifdef CONFIG_TSAN
     void* curr_fiber =

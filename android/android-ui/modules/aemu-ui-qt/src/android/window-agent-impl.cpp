@@ -12,29 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "host-common/window_agent.h"
+#include <assert.h>
+#include <math.h>
+#include <stdint.h>
+#include <QSemaphore>
+#include <QString>
+#include <array>
+#include <initializer_list>
+#include <mutex>
+#include <string>
+#include <utility>
 
+#include "aemu/base/logging/CLog.h"
 #include "aemu/base/threads/Thread.h"
+#include "android/cmdline-definitions.h"
 #include "android/console.h"
+#include "android/emulation/control/globals_agent.h"
+#include "android/emulation/control/sensors_agent.h"
+#include "android/emulation/resizable_display_config.h"
 #include "android/emulator-window.h"
 #include "android/hw-sensors.h"
-#include "android/recording/video/player/VideoPlayer.h"
-#include "android/recording/video/player/VideoPlayerNotifier.h"
+#include "android/skin/qt/OverlayMessageCenter.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/qt-ui-commands.h"
+#include "android/skin/qt/tool-window.h"
 #include "android/skin/winsys.h"
 #include "android/user-config.h"
-#include "android/utils/debug.h"
+#include "glm/detail/func_geometric.hpp"
+#include "glm/detail/type_vec.hpp"
+#include "glm/detail/type_vec3.hpp"
 #include "host-common/MultiDisplay.h"
-#include "host-common/hw-config.h"
+#include "host-common/misc.h"
+#include "host-common/qt_ui_defs.h"
+#include "host-common/window_agent.h"
 
-#include <QSemaphore>
 /* set >0 for very verbose debugging */
-#define DEBUG 1
+// #define DEBUG 1
 #ifndef DEBUG
 #define DD(...) (void)0
 #else
 #define DD(fmt, ...) \
-    printf("window-agent-impl: %s:%d| " fmt, __func__, __LINE__, ##__VA_ARGS__)
+    dinfo("window-agent-impl: %s:%d| " fmt, __func__, __LINE__, ##__VA_ARGS__)
 #endif
 
 // Set this to true if you wish to enable debugging of the window position.
@@ -55,6 +73,33 @@ static_assert(WINDOW_MESSAGE_OK == int(Ui::OverlayMessageType::Ok),
 static bool gUserSettingIsDontSaveSnapshot = true;
 static QSemaphore gWindowPosSemaphore;
 
+static SkinRotation getRotation() {
+    const QAndroidSensorsAgent* sensorsAgent = getConsoleAgents()->sensors;
+    if (!sensorsAgent)
+        return SKIN_ROTATION_0;
+    sensorsAgent->advanceTime();
+    glm::vec3 device_accelerometer;
+    auto out = {&device_accelerometer.x, &device_accelerometer.y,
+                &device_accelerometer.z};
+    sensorsAgent->getSensor(ANDROID_SENSOR_ACCELERATION, out.begin(),
+                            out.size());
+    glm::vec3 normalized_accelerometer = glm::normalize(device_accelerometer);
+
+    static const std::array<std::pair<glm::vec3, SkinRotation>, 4> directions{
+            std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f), SKIN_ROTATION_0),
+            std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f), SKIN_ROTATION_90),
+            std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f), SKIN_ROTATION_180),
+            std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f), SKIN_ROTATION_270)};
+    SkinRotation coarse_orientation = SKIN_ROTATION_0;
+    for (const auto& v : directions) {
+        if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) < 0.1f) {
+            coarse_orientation = v.second;
+            break;
+        }
+    }
+    return coarse_orientation;
+}
+
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
         .rotate90Clockwise =
@@ -69,15 +114,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return false;
                 },
         .rotate = emulator_window_rotate,
-        .getRotation = []() -> int {
-            EmulatorWindow* window = emulator_window_get();
-            if (!window)
-                return SKIN_ROTATION_0;
-            SkinLayout* layout = emulator_window_get_layout(window);
-            if (!layout)
-                return SKIN_ROTATION_0;
-            return layout->orientation;
-        },
+        .getRotation = []() -> int { return getRotation(); },
         .showMessage =
                 [](const char* message, WindowMessageType type, int timeoutMs) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
@@ -327,18 +364,17 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                     return false;
                 },
-        .getLayout = []() {
-            SkinLayout* layout = nullptr;
-            auto win = emulator_window_get();
-            if (win) {
-                layout = emulator_window_get_layout(win);
-            }
-            return (void*) layout;
-        },
-        .getWindowPosition =
-                [](int* x, int* y) {
-                        skin_winsys_get_window_pos(x, y);
+        .getLayout =
+                []() {
+                    SkinLayout* layout = nullptr;
+                    auto win = emulator_window_get();
+                    if (win) {
+                        layout = emulator_window_get_layout(win);
+                    }
+                    return (void*)layout;
                 },
+        .getWindowPosition = [](int* x,
+                                int* y) { skin_winsys_get_window_pos(x, y); },
         .hasWindow = [] { return true; },
         .userSettingIsDontSaveSnapshot =
                 []() { return gUserSettingIsDontSaveSnapshot; },

@@ -37,11 +37,6 @@ using ::google::protobuf::Empty;
 #define DD(...) dinfo(__VA_ARGS__)
 #endif
 
-namespace android {
-namespace emulation {
-namespace grpc {
-namespace ui {
-
 static void saveChargeLevel(int chargeLevel);
 static void saveCharger(BatteryCharger charger);
 static void saveHealth(BatteryHealth health);
@@ -414,7 +409,3 @@ static BatteryStatus getSavedStatus() {
                 .toInt();
     }
 }
-}  // namespace ui
-}  // namespace grpc
-}  // namespace emulation
-}  // namespace android

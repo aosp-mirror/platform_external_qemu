@@ -36,6 +36,7 @@
 
 #include "aemu/base/logging/Log.h"
 #include "android/utils/debug.h"
+#include "android/avd/info.h"                       // for avdInfo_getApiLevel
 #include "android/console.h"                        // for android_hw
 #include "android/settings-agent.h"                 // for SettingsTheme
 #include "android/skin/event.h"                     // for SkinEvent, (anony...
@@ -208,12 +209,21 @@ void TvRemotePage::onDashboardButtonPressed() {
 }
 
 void TvRemotePage::onProgramGuideButtonPressed() {
+    int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
+
+    std::string live_tv_provider = "";
+    if (apiLevel < 34) { // Android 13/TM and below.
+        live_tv_provider = "com.google.android.tv/com.android.tv.MainActivity";
+    } else {
+        live_tv_provider = "com.android.tv/com.android.tv.MainActivity";
+    }
+
     std::vector<std::string> adb_command = {
         "shell",
         "am",
         "start",
         "-n",
-        "com.google.android.tv/com.android.tv.MainActivity"
+        live_tv_provider
     };
     std::string command_tag = "Open Live Channels";
 

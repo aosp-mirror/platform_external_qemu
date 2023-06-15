@@ -86,11 +86,11 @@ void ObservableProcess::runOverseer() {
 
 std::future_status ObservableProcess::wait_for(
         const std::chrono::milliseconds timeout_duration) const {
+    std::unique_lock<std::mutex> lk(mOverseerMutex);
     if (!mOverseerActive) {
         return wait_for_kernel(timeout_duration);
     }
 
-    std::unique_lock<std::mutex> lk(mOverseerMutex);
     if (!mOverseerCv.wait_for(lk, timeout_duration,
                               [&] { return !mOverseerActive; }))
         return std::future_status::timeout;

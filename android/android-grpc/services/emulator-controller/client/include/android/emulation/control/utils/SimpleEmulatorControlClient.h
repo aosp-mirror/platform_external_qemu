@@ -72,6 +72,13 @@ public:
     void getStatus(OnCompleted<EmulatorStatus> onDone);
 
     /**
+     * @brief  Simulate a touch event on the finger print sensor.
+     *
+     * @param onDone The callback to be invoked when the operation completes.
+     */
+    void sendFingerprint(Fingerprint finger, OnCompleted<Empty> onDone);
+
+    /**
      * Maps an `absl::StatusOr<T*>` to an `absl::StatusOr<T>`.
      *
      * @tparam T The type of object to map.

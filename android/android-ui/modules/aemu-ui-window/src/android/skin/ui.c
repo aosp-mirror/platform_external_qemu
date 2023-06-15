@@ -89,11 +89,10 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
     ui->ui_funcs = ui_funcs;
     ui->ui_params = ui_params[0];
 
-    ui->keyboard = skin_keyboard_create(ui->ui_params.keyboard_charmap,
-                                        ui->layout->dpad_rotation,
-                                        ui_funcs->keyboard_flush,
-                                       getConsoleAgents()->settings->use_keycode_forwarding(),
-                                       getConsoleAgents()->settings->hw()->hw_arc);
+    ui->keyboard = skin_keyboard_create(
+            ui->ui_params.keyboard_charmap, ui->layout->dpad_rotation,
+            ui_funcs->keyboard_flush,
+            getConsoleAgents()->settings->hw()->hw_arc);
     ui->generic_events =
             skin_generic_event_create(ui_funcs->generic_event_flush);
     ui->window = NULL;

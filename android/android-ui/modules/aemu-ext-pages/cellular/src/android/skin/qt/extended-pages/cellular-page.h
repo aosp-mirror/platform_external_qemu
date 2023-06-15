@@ -36,9 +36,9 @@ class CellularPage : public QWidget
 
 public:
     explicit CellularPage(QWidget *parent = nullptr);
-    static void setCellularAgent(const QAndroidCellularAgent* agent);
     static bool simIsPresent(); // Returns true if the user wants a SIM present,
                                 // considering both command line and UI.
+    static void setCellularAgent(const QAndroidCellularAgent* agent);
 
 private slots:
     void on_cell_dataStatusBox_currentIndexChanged(int index);
@@ -50,6 +50,7 @@ private slots:
     // TODO: Implement Network delay setting
     // http://developer.android.com/tools/devices/emulator.html#netdelay
 private:
+
     std::unique_ptr<Ui::CellularPage> mUi;
     std::shared_ptr<UiEventTracker> mDropDownTracker;
 };

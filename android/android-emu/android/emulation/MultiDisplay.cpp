@@ -372,6 +372,7 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
     mMultiDisplay.emplace(*displayId, MultiDisplayInfo());
     LOG(DEBUG) << "create display " << *displayId;
     fireEvent(DisplayChangeEvent{DisplayChange::DisplayAdded, *displayId});
+    notifyDisplayChanges();
     return 0;
 }
 

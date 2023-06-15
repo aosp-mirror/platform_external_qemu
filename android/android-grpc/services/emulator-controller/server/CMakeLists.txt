@@ -1,26 +1,27 @@
 android_add_library(
   TARGET emulator_controller-server-impl
   LICENSE Apache-2.0
-  SOURCE_DIR
-  src
+  SOURCE_DIR src
   SRC android/emulation/control/audio/AudioStream.cpp
       android/emulation/control/camera/VirtualSceneCamera.cpp
       android/emulation/control/clipboard/Clipboard.cpp
       android/emulation/control/EmulatorService.cpp
-      android/emulation/control/keyboard/EmulatorKeyEventSender.cpp
+      android/emulation/control/keyboard/KeyEventSender.cpp
+      android/emulation/control/keyboard/MouseEventSender.cpp
       android/emulation/control/keyboard/TouchEventSender.cpp
+      android/emulation/control/keyboard/WheelEventSender.cpp
       android/emulation/control/logcat/LogcatParser.cpp
       android/emulation/control/utils/AudioUtils.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp
       android/emulation/control/utils/SharedMemoryLibrary.cpp
-  DEPS ui::gl-bridge
-       android-emu
+  DEPS android-emu
        android-emu-base-headers
        android-emu-base-streams
        android-emu-tracing
        android-grpc-event-waiter
        android-grpc-interceptors
-       qemu-host-common-headers)
+       qemu-host-common-headers
+       ui::gl-bridge)
 target_link_libraries(emulator_controller-server-impl
                       PUBLIC emulator_controller-service)
 target_include_directories(emulator_controller-server-impl PUBLIC include

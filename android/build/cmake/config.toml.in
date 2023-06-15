@@ -76,6 +76,7 @@ proc-macro2 = { path = "${AOSP_ROOT}/external/rust/crates/proc-macro2" }
 protobuf = { path = "${AOSP_ROOT}/external/rust/crates/protobuf" }
 protobuf-codegen = { path = "${AOSP_ROOT}/external/rust/crates/protobuf-codegen" }
 protobuf-json-mapping = { path = "${AOSP_ROOT}/external/rust/crates/protobuf-json-mapping" }
+protobuf-parse = { path = "${AOSP_ROOT}/external/rust/crates/protobuf-parse" }
 protobuf-support = { path = "${AOSP_ROOT}/external/rust/crates/protobuf-support" }
 quote = { path = "${AOSP_ROOT}/external/rust/crates/quote" }
 rand = { path = "${AOSP_ROOT}/external/rust/crates/rand" }

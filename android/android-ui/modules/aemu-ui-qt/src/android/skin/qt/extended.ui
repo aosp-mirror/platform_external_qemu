@@ -66,8 +66,8 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="LocationPage" name="location_page"/>
    <widget class="MultiDisplayPage" name="multiDisplayPage"/>
    <widget class="CellularPage" name="cellular_page"/>
-   <widget class="QWidget" name="batteryPage"/>
-   <widget class="QWidget" name="cameraPage"/>
+   <widget class="BatteryPage" name="batteryPage"/>
+   <widget class="CameraPage" name="cameraPage"/>
    <widget class="TelephonyPage" name="telephonyPage"/>
    <widget class="DPadPage" name="dpadPage"/>
    <widget class="TvRemotePage" name="tvRemotePage"/>
@@ -75,8 +75,8 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="MicrophonePage" name="microphonePage"/>
    <widget class="FingerPage" name="finger_page"/>
    <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
-   <widget class="QWidget" name="snapshotPage"/>
-   <widget class="QWidget" name="bugreportPage"/>
+   <widget class="SnapshotPage" name="snapshotPage"/>
+   <widget class="BugreportPage" name="bugreportPage"/>
    <widget class="RecordAndPlaybackPage" name="recordAndPlaybackPage"/>
    <widget class="GooglePlayPage" name="googlePlayPage"/>
    <widget class="SettingsPage" name="settingsPage"/>
