@@ -36,3 +36,5 @@ typedef struct AspeedI3CState {
     DWI3C devices[ASPEED_I3C_NR_DEVICES];
 } AspeedI3CState;
 #endif /* ASPEED_I3C_H */
+
+I3CBus *aspeed_i3c_get_bus(AspeedI3CState *s, uint8_t bus_num);
