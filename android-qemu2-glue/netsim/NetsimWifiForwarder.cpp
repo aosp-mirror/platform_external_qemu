@@ -14,7 +14,7 @@
 #include "aemu/base/Log.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
 #include "backend/packet_streamer_client.h"
-#include "packet_streamer.grpc.pb.h"
+#include "netsim/packet_streamer.grpc.pb.h"
 
 #include <assert.h>            // for assert
 #include <grpcpp/grpcpp.h>     // for Clie...

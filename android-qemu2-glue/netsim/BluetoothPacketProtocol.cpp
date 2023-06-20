@@ -25,11 +25,11 @@
 #include "aemu/base/logging/CLog.h"
 #include "android-qemu2-glue/netsim/PacketProtocol.h"
 #include "android/grpc/utils/EnumTranslate.h"
-#include "common.pb.h"
 #include "h4_parser.h"
-#include "hci_packet.pb.h"
-#include "packet_streamer.pb.h"
-#include "startup.pb.h"
+#include "netsim/common.pb.h"
+#include "netsim/hci_packet.pb.h"
+#include "netsim/packet_streamer.pb.h"
+#include "netsim/startup.pb.h"
 
 namespace android {
 namespace qemu2 {
