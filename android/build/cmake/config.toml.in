@@ -114,6 +114,7 @@ which = { path = "${AOSP_ROOT}/external/rust/crates/which" }
 # Patch crates-io with dummy crates for dev dependencies
 # that are actually not required for building crates and not
 # added to the vendored crates.
+googletest = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/googletest" }
 hermit-abi = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/hermit-abi" }
 redox_syscall = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/redox_syscall" }
 remove_dir_all = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/remove_dir_all" }
