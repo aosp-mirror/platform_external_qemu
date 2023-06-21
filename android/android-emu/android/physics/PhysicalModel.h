@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "aemu/base/EventNotificationSupport.h"  // for EventNotifi...
 #include "android/hw-sensors.h"
 #include "android/physics/Physics.h"
 #include "android/utils/compiler.h"
@@ -173,5 +174,8 @@ bool physicalModel_foldableisFolded(PhysicalModel* model);
 bool physicalModel_getFoldedArea(PhysicalModel* model, int* x, int* y, int* w, int* h);
 
 bool physicalModel_isLoadingSnapshot(PhysicalModel* model);
+
+android::base::EventNotificationSupport<FoldablePostures>*
+physicalModel_getPostureListener(PhysicalModel* model);
 
 ANDROID_END_HEADER
