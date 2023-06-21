@@ -99,6 +99,11 @@ struct ext2_group_desc {
 	u16 bg_checksum;
 };
 
+struct data_extents_node {
+	u8* addr;
+	struct data_extents_node* next;
+};
+
 struct fs_aux_info {
 	struct ext4_super_block *sb;
 	struct ext4_super_block **backup_sb;
@@ -115,6 +120,12 @@ struct fs_aux_info {
 	u32 blocks_per_ind;
 	u32 blocks_per_dind;
 	u32 blocks_per_tind;
+	u32 *resize_dind_block_data;
+	u32 *resize_ind_block_data;
+	u8 *sb_alloc;
+	struct data_extents_node data_extents;
+	struct data_extents_node* last_data_extent;
+
 };
 
 extern struct fs_info info;

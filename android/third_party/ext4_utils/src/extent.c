@@ -51,6 +51,10 @@ static u8 *extent_create_backing(struct block_allocation *alloc,
 		backing_len -= len;
 	}
 
+	aux_info.last_data_extent->addr = data;
+	aux_info.last_data_extent->next = calloc(sizeof(struct data_extents_node), 1);
+	aux_info.last_data_extent = aux_info.last_data_extent->next;
+
 	return data;
 }
 
