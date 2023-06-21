@@ -26,6 +26,11 @@ set(INCLUDE_SYMBOLS_CMAKE 1)
 # * API_KEY: The API key to use for uploading symbols.
 # * URI: The URI of the server to upload the symbols to.
 function(android_upload_symbols)
+  if (OPTION_ASAN)
+    message(STATUS "Santizer is enabled. Skipping symbol upload")
+    return()
+  endif()
+
   # Parse arguments
   set(options)
   set(oneValueArgs TARGET API_KEY DIRECTORY URI)
