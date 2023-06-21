@@ -128,6 +128,15 @@ struct I3CTargetClass {
      */
     int (*handle_ccc_write)(I3CTarget *s, const uint8_t *data,
                             uint32_t num_to_send, uint32_t *num_sent);
+
+    /*
+     * Matches and adds the candidate if the address matches the candidate's
+     * address.
+     * Returns true if the address matched, or if this was a broadcast, and
+     * updates the device list. Otherwise returns false.
+     */
+    bool (*target_match)(I3CTarget *candidate, uint8_t address, bool broadcast,
+                         bool in_entdaa);
 };
 
 struct I3CTarget {
@@ -229,7 +238,7 @@ bool i3c_scan_bus(I3CBus *bus, uint8_t address);
 int i3c_do_entdaa(I3CBus *bus, uint8_t address, uint64_t *pid, uint8_t *bcr,
                   uint8_t *dcr);
 int i3c_start_device_transfer(I3CTarget *dev, int send_length);
-bool i3c_target_match(I3CBus *bus, I3CTarget *target, uint8_t address);
+bool i3c_target_match_and_add(I3CBus *bus, I3CTarget *target, uint8_t address);
 int i3c_target_send_ibi(I3CTarget *t, uint8_t addr, bool is_recv);
 int i3c_target_send_ibi_bytes(I3CTarget *t, uint8_t data);
 int i3c_target_ibi_finish(I3CTarget *t, uint8_t data);

@@ -87,40 +87,45 @@ bool i3c_bus_busy(I3CBus *bus)
     return !QLIST_EMPTY(&bus->current_devs);
 }
 
-bool i3c_target_match(I3CBus *bus, I3CTarget *target, uint8_t address)
+static bool i3c_target_match(I3CTarget *candidate, uint8_t address,
+                             bool broadcast, bool in_entdaa)
 {
     /* Once a target has a dynamic address, it only responds to that. */
-    uint8_t targ_addr = target->address ? target->address :
-                                          target->static_address;
+    uint8_t targ_addr = candidate->address ? candidate->address :
+                                             candidate->static_address;
 
-    if (bus->in_entdaa) {
+    if (in_entdaa) {
         if (address != I3C_BROADCAST) {
             qemu_log_mask(LOG_GUEST_ERROR, "%s: I3C Address 0x%.2x sent during "
                           "ENTDAA instead of a broadcast address\n",
-                          object_get_canonical_path(OBJECT(bus)), address);
-                return false;
+                          object_get_canonical_path(OBJECT(candidate)),
+                                                    address);
+            return false;
         }
 
         /*
          * Targets should only ACK ENTDAA broadcasts if they have no dynamic
          * address.
          */
-        if (target->address == 0) {
-            I3CNode *node = g_new(struct I3CNode, 1);
-            node->target = target;
-            QLIST_INSERT_HEAD(&bus->current_devs, node, next);
-        }
-        return target->address == 0;
+        return candidate->address == 0;
     }
 
-    if ((targ_addr == address) || bus->broadcast) {
+    /* Return if our addresses match, or if it's a broadcast. */
+    return targ_addr == address || broadcast;
+}
+
+bool i3c_target_match_and_add(I3CBus *bus, I3CTarget *target, uint8_t address)
+{
+    I3CTargetClass *tc = I3C_TARGET_GET_CLASS(target);
+    bool matched = tc->target_match(target, address, bus->broadcast,
+                                    bus->in_entdaa);
+
+    if (matched) {
         I3CNode *node = g_new(struct I3CNode, 1);
         node->target = target;
         QLIST_INSERT_HEAD(&bus->current_devs, node, next);
-        return true;
     }
-
-    return false;
+    return matched;
 }
 
 bool i3c_scan_bus(I3CBus *bus, uint8_t address)
@@ -138,7 +143,7 @@ bool i3c_scan_bus(I3CBus *bus, uint8_t address)
         DeviceState *qdev = child->child;
         I3CTarget *target = I3C_TARGET(qdev);
 
-        if (i3c_target_match(bus, target, address)) {
+        if (i3c_target_match_and_add(bus, target, address)) {
             return true;
         }
     }
@@ -646,9 +651,11 @@ I2CSlave *legacy_i2c_device_create_simple(I3CBus *bus, const char *name,
 static void i3c_target_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *k = DEVICE_CLASS(klass);
+    I3CTargetClass *sc = I3C_TARGET_CLASS(klass);
     set_bit(DEVICE_CATEGORY_MISC, k->categories);
     k->bus_type = TYPE_I3C_BUS;
     device_class_set_props(k, i3c_props);
+    sc->target_match = i3c_target_match;
 }
 
 static const TypeInfo i3c_target_type_info = {
