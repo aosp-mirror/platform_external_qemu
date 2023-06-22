@@ -42,6 +42,12 @@ void* InitializeSignalStackAndStart(StartParams* params) {
 
 extern "C" {
 
+#ifndef __has_feature
+#define __has_feature(feature) 0
+#endif
+
+#if not defined(__SANITIZE_THREAD__) && not __has_feature(thread_sanitizer)
+
 __attribute__((visibility("default"))) int pthread_create(
     pthread_t* thread,
     const pthread_attr_t* attr,
@@ -68,5 +74,7 @@ __attribute__((visibility("default"))) int pthread_create(
   }
   return result;
 }
+
+#endif
 
 }  // extern "C"

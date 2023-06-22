@@ -110,6 +110,7 @@ android_target_dependency(emulator linux TCMALLOC_OS_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64
                           GLIB2_WINDOWS_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64 MSVC_DEPENDENCIES)
+android_target_dependency(emulator all NETSIM_GUI_STATIC)
 # And install them for a release.
 # TODO(b/141205876): prebuilt executables are losing their execute permission on
 # installation. Once this issue is fixed, remove all of these
