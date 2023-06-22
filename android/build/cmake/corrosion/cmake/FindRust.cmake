@@ -40,7 +40,7 @@ else()
     execute_process(
         COMMAND
             ${CMAKE_COMMAND} -E env
-                RUSTUP_FORCE_ARG0=rustup
+                RUSTUP_FORCE_ARG0=rustup PATH=${RUST_PATH}
             ${_Rust_COMPILER_TEST} --version
         OUTPUT_VARIABLE _RUSTC_VERSION_RAW
     )
@@ -86,6 +86,7 @@ endforeach()
 if (_RESOLVE_RUSTUP_TOOLCHAINS)
     execute_process(
         COMMAND
+            ${CMAKE_COMMAND} -E env PATH=${RUST_PATH}
             ${Rust_RUSTUP} toolchain list --verbose
         OUTPUT_VARIABLE _TOOLCHAINS_RAW
     )
@@ -126,6 +127,7 @@ if (_RESOLVE_RUSTUP_TOOLCHAINS)
         # If the precise toolchain wasn't found, try appending the default host
         execute_process(
             COMMAND
+                ${CMAKE_COMMAND} -E env PATH=${RUST_PATH}
                 ${Rust_RUSTUP} show
             OUTPUT_VARIABLE _SHOW_RAW
         )
@@ -212,7 +214,8 @@ set(CARGO_RUST_FLAGS_RELWITHDEBINFO -g CACHE STRING
     "Flags to pass to rustc in RelWithDebInfo Configuration")
 
 execute_process(
-    COMMAND ${Rust_CARGO_CACHED} --version --verbose
+    COMMAND  ${CMAKE_COMMAND} -E env PATH=${RUST_PATH}
+    ${Rust_CARGO_CACHED} --version --verbose
     OUTPUT_VARIABLE _CARGO_VERSION_RAW)
 
 if (_CARGO_VERSION_RAW MATCHES "cargo ([0-9]+)\\.([0-9]+)\\.([0-9]+)")
@@ -233,7 +236,10 @@ else()
 endif()
 
 execute_process(
-    COMMAND ${Rust_COMPILER_CACHED} --version --verbose
+    COMMAND
+    ${CMAKE_COMMAND} -E env PATH=${RUST_PATH}
+    ${Rust_COMPILER_CACHED} --version --verbose
+    COMMAND_ECHO STDOUT
     OUTPUT_VARIABLE _RUSTC_VERSION_RAW)
 
 if (_RUSTC_VERSION_RAW MATCHES "rustc ([0-9]+)\\.([0-9]+)\\.([0-9]+)(-nightly)?")

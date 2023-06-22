@@ -11,6 +11,7 @@ function(_cargo_metadata out manifest)
         COMMAND
             ${CMAKE_COMMAND} -E env
                 CARGO_BUILD_RUSTC=${RUSTC_EXECUTABLE}
+                PATH=${RUST_PATH}
                 ${CARGO_EXECUTABLE}
                     metadata
                         --manifest-path ${manifest}
