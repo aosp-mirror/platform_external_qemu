@@ -2962,10 +2962,17 @@ bool EmulatorQtWindow::hasFrame() const {
         return true;
     }
     // Probably frameless. But framed if there's no skin.
-    char *skinName, *skinDir;
+    char *skinName = nullptr, *skinDir = nullptr;
     avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName,
                         &skinDir);
-    return (skinDir == NULL);
+    bool hasFrame = (skinDir == NULL);
+    if (skinName) {
+        free(skinName);
+    }
+    if (skinDir) {
+        free(skinDir);
+    }
+    return hasFrame;
 }
 
 bool EmulatorQtWindow::isInZoomMode() const {

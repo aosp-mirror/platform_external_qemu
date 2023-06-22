@@ -1985,6 +1985,8 @@ void avdInfo_replaceMultiDisplayInConfigIni(AvdInfo* i,
     char* iniPath = _avdInfo_getContentFilePath(i, CORE_CONFIG_INI);
     if (iniPath && write)
         iniFile_saveToFile(i->configIni, iniPath);
+    if (iniPath)
+        AFREE(iniPath);
 }
 
 bool avdInfo_skinHasOverlay(const char* skinName) {
