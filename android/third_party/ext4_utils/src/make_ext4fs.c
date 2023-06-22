@@ -303,6 +303,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		struct dentry *tmp = calloc(entries + 1, sizeof(struct dentry));
 		memset(tmp, 0, sizeof(struct dentry));
 		memcpy(tmp + 1, dentries, entries * sizeof(struct dentry));
+		free(dentries);
 		dentries = tmp;
 
 		dentries[0].filename = strdup("lost+found");
@@ -639,6 +640,7 @@ int make_ext4fs_internal(int fd, const char *_directory,
 		printf("    Reserved block group size: %d\n", info.bg_desc_reserve_blocks);
 	}
 
+	aux_info.last_data_extent = &(aux_info.data_extents);
 
 	ext4_sparse_file = sparse_file_new(info.block_size, info.len);
 
@@ -701,6 +703,23 @@ int make_ext4fs_internal(int fd, const char *_directory,
 
 	sparse_file_destroy(ext4_sparse_file);
 	ext4_sparse_file = NULL;
+	block_allocator_free();
+	{
+		struct data_extents_node *curr = &(aux_info.data_extents);
+		if (curr->addr) {
+			free(curr->addr);
+		}
+		curr = curr->next;
+
+		while (curr != NULL) {
+			if (curr->addr) {
+				free(curr->addr);
+			}
+			void* prev = curr;
+			curr = curr->next;
+			free(prev);
+		}
+	}
 	ext4_free_fs_aux_info();
 	free(mountpoint);
 	free(directory);

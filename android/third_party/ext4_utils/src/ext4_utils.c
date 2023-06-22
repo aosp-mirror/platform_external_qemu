@@ -142,8 +142,13 @@ void ext4_free_fs_aux_info()
 			free(aux_info.backup_sb[i]);
 	}
 	free(aux_info.sb);
+	free(aux_info.backup_sb);
 	free(aux_info.bg_desc);
-	free(aux_info.jsb);
+	if (aux_info.sb_alloc) {
+		free(aux_info.sb_alloc);
+	}
+	free(aux_info.resize_dind_block_data);
+	free(aux_info.resize_ind_block_data);
 }
 
 /* Fill in the superblock memory buffer based on the filesystem parameters */
@@ -261,6 +266,7 @@ void ext4_queue_sb(void)
 	 */
 	if (info.block_size > 1024) {
 		u8 *buf = calloc(info.block_size, 1);
+		aux_info.sb_alloc = buf;
 		memcpy(buf + 1024, (u8*)aux_info.sb, 1024);
 		sparse_file_add_data(ext4_sparse_file, buf, info.block_size, 0);
 	} else {
