@@ -89,6 +89,8 @@ class ConfigureTask(BuildTask):
         ).add_option("OPTION_SDK_TOOLS_BUILD_NUMBER", build_number).add_option(
             "Python_EXECUTABLE", sys.executable
         )
+        self.add_option("CLANG_COMPILER_VERSION", self.toolchain.clang_version())
+        self.add_option("RUST_COMPILER_VERSION", self.toolchain.rust_version())
 
         if webengine:
             self.with_webengine()

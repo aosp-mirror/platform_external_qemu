@@ -23,7 +23,7 @@
 # Gets the desired clang version used by the various toolchains. Update this if
 # you need to change the compiler
 function(get_clang_version RET_VAL)
-  set(${RET_VAL} "clang-r487747c" PARENT_SCOPE)
+  set(${RET_VAL} "${CLANG_COMPILER_VERSION}" PARENT_SCOPE)
 endfunction()
 
 # This invokes the toolchain generator HOST The host to use PARAM1, PARAM2
