@@ -13,8 +13,9 @@
 // limitations under the License.
 #pragma once
 
-#include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
 #include "android-qemu2-glue/emulation/WifiService.h"
+
+typedef struct Slirp Slirp;
 
 namespace android {
 namespace qemu2 {

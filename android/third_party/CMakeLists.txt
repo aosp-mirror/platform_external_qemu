@@ -216,6 +216,8 @@ if(FEATURE_NETSIM)
         "-DBREAKPAD_API_URL=${BREAKPAD_API_URL}"
         "-DANDROID_SYMBOL_DIR=${ANDROID_SYMBOL_DIR}"
         "-DPython_EXECUTABLE=${Python_EXECUTABLE}"
+        "-DCLANG_COMPILER_VERSION=${CLANG_COMPILER_VERSION}"
+        "-DRUST_COMPILER_VERSION=${RUST_COMPILER_VERSION}"
         "-DNETSIM_EXT=TRUE"
       BUILD_BYPRODUCTS "${NETSIM_CROSS_DIR}/netsim;${NETSIM_CROSS_DIR}/netsimd"
       LOG_BUILD TRUE
@@ -226,6 +228,34 @@ if(FEATURE_NETSIM)
     install(PROGRAMS ${NETSIM_CROSS_DIR}/netsim ${NETSIM_CROSS_DIR}/netsimd
             DESTINATION .)
   endif()
+
+  # Add netsim-ui into objs
+  set(NETSIM_GUI_STATIC
+    ${AOSP_ROOT}/tools/netsim/ui/dist/index.html>netsim-ui/index.html;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/dev.html>netsim-ui/dev.html;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/assets/grid-background.svg>netsim-ui/assets/grid-background.svg;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/assets/hexagonal-background.png>netsim-ui/assets/hexagonal-background.png;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/assets/netsim-logo-b.svg>netsim-ui/assets/netsim-logo-b.svg;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/assets/netsim-logo.svg>netsim-ui/assets/netsim-logo.svg;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/assets/polar-background.svg>netsim-ui/assets/polar-background.svg;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/cube-sprite.js>netsim-ui/js/cube-sprite.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/customize-map-button.js>netsim-ui/js/customize-map-button.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-dragzone.js>netsim-ui/js/device-dragzone.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-dropzone.js>netsim-ui/js/device-dropzone.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-info.js>netsim-ui/js/device-info.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-list.js>netsim-ui/js/device-list.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-map.js>netsim-ui/js/device-map.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-observer.js>netsim-ui/js/device-observer.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/license-info.js>netsim-ui/js/license-info.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/model.js>netsim-ui/js/model.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/navigation-bar.js>netsim-ui/js/navigation-bar.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/netsim-app.js>netsim-ui/js/netsim-app.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/packet-info.js>netsim-ui/js/packet-info.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/pyramid-sprite.js>netsim-ui/js/pyramid-sprite.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/node_modules/tslib/tslib.es6.js>netsim-ui/node_modules/tslib/tslib.es6.js;
+    PARENT_SCOPE
+  )
+  android_license(TARGET "NETSIM_GUI_STATIC" LIBNAME None SPDX None LICENSE None LOCAL None)
 else()
   message(STATUS "Netsim is not enabled.")
 endif()

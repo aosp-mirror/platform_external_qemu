@@ -96,6 +96,7 @@ serde_json = { path = "${AOSP_ROOT}/external/rust/crates/serde_json" }
 shlex = { path = "${AOSP_ROOT}/external/rust/crates/shlex" }
 socket2 = { path = "${AOSP_ROOT}/external/rust/crates/socket2" }
 syn = { path = "${AOSP_ROOT}/external/rust/crates/syn" }
+tempfile = { path = "${AOSP_ROOT}/external/rust/crates/tempfile" }
 termcolor = { path = "${AOSP_ROOT}/external/rust/crates/termcolor" }
 textwrap = { path = "${AOSP_ROOT}/external/rust/crates/textwrap" }
 thiserror = { path = "${AOSP_ROOT}/external/rust/crates/thiserror" }
@@ -113,10 +114,11 @@ which = { path = "${AOSP_ROOT}/external/rust/crates/which" }
 # Patch crates-io with dummy crates for dev dependencies
 # that are actually not required for building crates and not
 # added to the vendored crates.
+googletest = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/googletest" }
 hermit-abi = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/hermit-abi" }
 redox_syscall = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/redox_syscall" }
+remove_dir_all = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/remove_dir_all" }
 sha2 = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/sha2" }
-tempfile = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/tempfile" }
 windows-sys = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/windows-sys" }
 
 # You will have to process this with the cmake configure_file command

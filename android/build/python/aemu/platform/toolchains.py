@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import json
 import platform
 import re
 from pathlib import Path
@@ -51,6 +52,13 @@ class Toolchain:
     def __init__(self, aosp: Path, target: str):
         self.target = self._infer_target(target)
         self.aosp = Path(aosp)
+
+        with open(
+            self.aosp / "external" / "qemu" / "android" / "build" / "toolchains.json",
+            encoding="utf-8",
+        ) as f:
+            self.versions = json.load(f)
+
 
     def _infer_target(self, target):
         """Infers the full target name  given the potential partial target name.
@@ -129,6 +137,14 @@ class Toolchain:
             / "cmake"
             / self.AVAILABLE[self.target]
         )
+
+    def clang_version(self) -> str:
+        """Returns the clang compiler version, as specified in the toolchain.json file"""
+        return self.versions["clang"]
+
+    def rust_version(self) -> str:
+        """Returns the clang compiler version, as specified in the toolchain.json file"""
+        return self.versions["rust"]
 
     def is_crosscompile(self) -> bool:
         """True if the given target needs to be cross compiled.
