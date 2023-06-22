@@ -28,6 +28,11 @@
 #define DW_I3C_CONTROLLER_OFFSET 0x2000
 #define I3C(x) (ASPEED_I3C_BASE + DW_I3C_CONTROLLER_OFFSET + ((x) * 0x1000))
 #define TARGET_ADDR 0x10
+/*
+ * Offset into the TARGET_MATCH request that contains the address sent on the
+ * bus.
+ */
+#define TARGET_MATCH_REQ_ADDR_OFFSET 0
 
 #define DW_I3C_RX_QUEUE_CAPACITY 0x40
 
@@ -284,51 +289,11 @@ static void assert_good_resp(uint32_t base)
     g_assert(resp.err == DW_I3C_RESP_QUEUE_ERR_NONE);
 }
 
-static void read_data(uint8_t *data, size_t len)
-{
-    ssize_t ret;
-    size_t len_read = 0;
-
-    while (len_read < len) {
-        ret = read(fd, &data[len_read], len);
-        g_assert(ret != -1);
-        len_read += ret;
-    }
-}
-
-static void remote_i3c_read_and_verify(const uint8_t *expected_data, size_t len)
-{
-    g_autofree uint8_t *data_read = g_new0(uint8_t, len);
-
-    read_data(data_read, len);
-    g_assert(memcmp(data_read, expected_data, len) == 0);
-}
-
 static void add_targets_to_bus(uint32_t base)
 {
-    /* Arbitrary large enough size. */
-    uint8_t remote_target_expected_data[8];
-
     /* Send SATAASA to the remote target. */
     aspeed_i3c_send_ccc(base, I3C_CCC_SETAASA);
-    /*
-     * Verify everything is good.
-     * The remote target should receive:
-     * - an I3C_START event
-     * - the size of the CCC packet as a LE uint32
-     * - the CCC
-     * - then an I3C_STOP event.
-     * The controller should have a good response in the queue.
-     */
     assert_good_resp(base);
-    remote_target_expected_data[0] = REMOTE_I3C_START_SEND;
-    remote_target_expected_data[1] = REMOTE_I3C_HANDLE_CCC_WRITE;
-    uint32_t *p32 = (uint32_t *)&remote_target_expected_data[2];
-    *p32 = htole32(1);
-    remote_target_expected_data[6] = I3C_CCC_SETAASA;
-    remote_target_expected_data[7] = REMOTE_I3C_STOP;
-    remote_i3c_read_and_verify(remote_target_expected_data, 8);
-
     /*
      * Populate the device table. On a real system we would either:
      * - populate the table and send ENTDAA, then probe the addresses to see who
@@ -352,54 +317,17 @@ static void send_and_verify(uint32_t i3c_base, const uint32_t *data, size_t len)
      * length of the packet, and the data packet itself.
      */
     uint32_t data_size = len * sizeof(*data);
-    size_t expected_data_len = data_size + 7;
+    size_t expected_data_len = data_size + 6;
     g_autofree uint8_t *remote_target_expected_data = g_new0(uint8_t,
                                                              expected_data_len);
-    remote_target_expected_data[0] = REMOTE_I3C_START_SEND;
-    remote_target_expected_data[1] = REMOTE_I3C_SEND;
-    uint32_t *p32 = (uint32_t *)&remote_target_expected_data[2];
+    remote_target_expected_data[0] = REMOTE_I3C_SEND;
+    uint32_t *p32 = (uint32_t *)&remote_target_expected_data[1];
     *p32 = htole32(data_size);
-    memcpy(&remote_target_expected_data[6], data, data_size);
-    remote_target_expected_data[data_size + 6] = REMOTE_I3C_STOP;
+    memcpy(&remote_target_expected_data[5], data, data_size);
+    remote_target_expected_data[data_size + 5] = REMOTE_I3C_STOP;
 
     aspeed_i3c_send(i3c_base, 0, data, len);
     assert_good_resp(i3c_base);
-    remote_i3c_read_and_verify(remote_target_expected_data, expected_data_len);
-}
-
-/* Remote target RX, e.g. controller -> target. */
-static void test_remote_i3c_rx(gconstpointer test_data)
-{
-    uint32_t controller_num = *(uint32_t *)test_data;
-    uint32_t i3c_base = I3C(controller_num);
-    /*
-     * The Aspeed controller expects data in 32-bit words, so make this 32-bits.
-     */
-    const uint32_t data[] = {7, 6, 5, 4, 3, 2, 1, 0};
-    /* Enable the controller. */
-    aspeed_i3c_enable(i3c_base);
-    /*
-     * Tell the target to use its static address as its dynamic address, and
-     * populate the device table.
-     */
-    add_targets_to_bus(i3c_base);
-    /* Now we can test sending data to the target. */
-    send_and_verify(i3c_base, data, ARRAY_SIZE(data));
-}
-
-static void read_and_verify(uint32_t i3c_base, const uint8_t *data, size_t len)
-{
-    g_autofree uint8_t *data_received = g_new0(uint8_t, len);
-
-    /* Send the I3C recv request. */
-    aspeed_i3c_recv(i3c_base, 0, data_received, len);
-    /*
-     * Verify everything is okay. Anything on the remote I3C protocol level is
-     * handled by the remote target thread. We just need to check that we
-     * received what we expected.
-     */
-    assert_good_resp(i3c_base);
-    g_assert(memcmp(data_received, data, len) == 0);
 }
 
 static void *remote_target_thread(void *arg)
@@ -407,13 +335,17 @@ static void *remote_target_thread(void *arg)
     uint8_t byte;
     uint32_t bytes_to_send;
     uint32_t bytes_to_send_le;
+    uint32_t bytes_to_recv;
+    uint32_t bytes_to_recv_le;
+    uint8_t match_target_req[2];
+    uint8_t data_recv[255]; /* Arbitrary size. */
     const uint8_t *data = (const uint8_t *)arg;
 
     /* Loop forever reading and parsing incoming data. */
     while (1) {
         /*
          * We can error out during program teardown due to the socket closing,
-         * so don't assert.
+         * s don't assert.
          * If this has a proper error during test, the main thread will error
          * due to the target thread (this one) not sending anything.
          */
@@ -422,9 +354,29 @@ static void *remote_target_thread(void *arg)
         }
 
         switch (byte) {
+        case REMOTE_I3C_RX_ACK:
         case REMOTE_I3C_START_RECV:
+        case REMOTE_I3C_START_SEND:
         case REMOTE_I3C_STOP:
             /* Don't care, do nothing. */
+            break;
+        case REMOTE_I3C_HANDLE_CCC_WRITE:
+            /* Read in the number of bytes the CCC has. */
+            g_assert(read(fd, &bytes_to_recv_le, sizeof(bytes_to_recv_le)) ==
+                          sizeof(bytes_to_recv_le));
+            bytes_to_recv = le32toh(bytes_to_recv_le);
+            /* Read the CCC and do nothing with it. */
+            g_assert(read(fd, data_recv, bytes_to_recv) == bytes_to_recv);
+            break;
+        case REMOTE_I3C_SEND:
+            /* Read in the number of bytes the controller is sending us. */
+            g_assert(read(fd, &bytes_to_recv_le, sizeof(bytes_to_recv_le)) ==
+                          sizeof(bytes_to_recv_le));
+            bytes_to_recv = le32toh(bytes_to_recv_le);
+
+            /* Read the data from the controller and verify it. */
+            g_assert(read(fd, data_recv, bytes_to_recv) == bytes_to_recv);
+            g_assert(memcmp(data_recv, data, bytes_to_recv) == 0);
             break;
         case REMOTE_I3C_RECV:
             /* Read in the number of bytes the controller wants. */
@@ -442,6 +394,27 @@ static void *remote_target_thread(void *arg)
                      sizeof(bytes_to_send_le));
             g_assert(write(fd, data, bytes_to_send) == bytes_to_send);
             break;
+        case REMOTE_I3C_TARGET_MATCH:
+            /* Read in the 3-byte MATCH_TARGET request. */
+            if (read(fd, match_target_req, sizeof(match_target_req)) !=
+                sizeof(match_target_req)) {
+                printf("Errno after read: %d\n", errno);
+            }
+            /* Check the address we got. */
+            if (match_target_req[TARGET_MATCH_REQ_ADDR_OFFSET] !=
+                I3C_BROADCAST &&
+                match_target_req[TARGET_MATCH_REQ_ADDR_OFFSET] !=
+                TARGET_ADDR) {
+                    g_printerr("Controller tried to match to unknown address "
+                               "0x%.2x\n",
+                                match_target_req[TARGET_MATCH_REQ_ADDR_OFFSET]);
+                    g_assert_not_reached();
+            }
+
+            /* ACK the match. */
+            byte = true;
+            g_assert(write(fd, &byte, sizeof(byte)) == sizeof(byte));
+            break;
         default:
             g_printerr("Remote target received unknown byte 0x%.2x\n", byte);
             g_assert_not_reached();
@@ -449,6 +422,45 @@ static void *remote_target_thread(void *arg)
     }
 
     return NULL;
+}
+
+/* Remote target RX, e.g. controller -> target. */
+static void test_remote_i3c_rx(gconstpointer test_data)
+{
+    uint32_t controller_num = *(uint32_t *)test_data;
+    uint32_t i3c_base = I3C(controller_num);
+    GThread *target_thread;
+    /*
+     * The Aspeed controller expects data in 32-bit words, so make this 32-bits.
+     */
+    const uint32_t data[] = {7, 6, 5, 4, 3, 2, 1, 0};
+    /* Enable the controller. */
+    aspeed_i3c_enable(i3c_base);
+    /*
+     * Tell the target to use its static address as its dynamic address, and
+     * populate the device table.
+     */
+    target_thread = g_thread_new("remote-target", remote_target_thread,
+                                 (uint8_t *)data);
+    add_targets_to_bus(i3c_base);
+    /* Now we can test sending data to the target. */
+    send_and_verify(i3c_base, data, ARRAY_SIZE(data));
+    g_thread_join(target_thread);
+}
+
+static void read_and_verify(uint32_t i3c_base, const uint8_t *data, size_t len)
+{
+    g_autofree uint8_t *data_received = g_new0(uint8_t, len);
+
+    /* Send the I3C recv request. */
+    aspeed_i3c_recv(i3c_base, 0, data_received, len);
+    /*
+     * Verify everything is okay. Anything on the remote I3C protocol level is
+     * handled by the remote target thread. We just need to check that we
+     * received what we expected.
+     */
+    assert_good_resp(i3c_base);
+    g_assert(memcmp(data_received, data, len) == 0);
 }
 
 /* Remote target TX, e.g. target -> controller. */
@@ -465,6 +477,7 @@ static void test_remote_i3c_tx(gconstpointer test_data)
      * Tell the target to use its static address as its dynamic address, and
      * populate the device table.
      */
+    target_thread = g_thread_new("remote-target", remote_target_thread, data);
     add_targets_to_bus(i3c_base);
 
     /*
@@ -474,7 +487,6 @@ static void test_remote_i3c_tx(gconstpointer test_data)
      * us), so we need to make a separate thread for the remote target to send
      * data to the controller.
      */
-    target_thread = g_thread_new("remote-target", remote_target_thread, data);
     read_and_verify(i3c_base, data, ARRAY_SIZE(data));
     g_thread_join(target_thread);
 }
@@ -556,13 +568,17 @@ static void test_remote_i3c_ibi(gconstpointer test_data)
     uint32_t controller_num = *(uint32_t *)test_data;
     uint32_t i3c_base = I3C(controller_num);
     uint32_t data = 0xaa55cc33;
+    GThread *target_thread;
+
     /* Enable the controller. */
     aspeed_i3c_enable(i3c_base);
     /*
      * Tell the target to use its static address as its dynamic address, and
      * populate the device table.
      */
+    target_thread = g_thread_new("remote-target", remote_target_thread, &data);
     add_targets_to_bus(i3c_base);
+    g_thread_join(target_thread);
 
     /*
      * To test IBIing, we will:

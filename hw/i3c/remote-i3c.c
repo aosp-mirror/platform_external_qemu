@@ -181,6 +181,39 @@ static int remote_i3c_handle_ccc_write(I3CTarget *t, const uint8_t *data,
     return 0;
 }
 
+static bool remote_i3c_target_match(I3CTarget *t, uint8_t address,
+                                    bool broadcast, bool in_entdaa)
+{
+    RemoteI3C *i3c = REMOTE_I3C(t);
+    uint8_t request[3];
+    uint8_t matched;
+
+    /*
+     * If we have a transfer buffered, send it out before we do target matching
+     * for the next transaction.
+     */
+    if (remote_i3c_tx_in_progress(i3c)) {
+        remote_i3c_chr_send_bytes(i3c);
+    }
+
+    /*
+     * Request format is 3 bytes:
+     * - byte 0 is the request type
+     * - byte 1 is the address being matched against
+     * - byte 2 is if the bus is in ENTDAA
+     */
+    request[0] = REMOTE_I3C_TARGET_MATCH;
+    request[1] = address;
+    request[2] = in_entdaa;
+    qemu_chr_fe_write_all(&i3c->chr, request, sizeof(request));
+    /*
+     * The response is 1 byte and is non-zero if the remote target matched the
+     * address, or zero if the target did not match.
+     */
+    qemu_chr_fe_read_all(&i3c->chr, &matched, sizeof(matched));
+    return !!matched;
+}
+
 static int remote_i3c_event(I3CTarget *t, enum I3CEvent event)
 {
     RemoteI3C *i3c = REMOTE_I3C(t);
@@ -449,6 +482,7 @@ static void remote_i3c_class_init(ObjectClass *klass, void *data)
     k->event = &remote_i3c_event;
     k->handle_ccc_read = &remote_i3c_handle_ccc_read;
     k->handle_ccc_write = &remote_i3c_handle_ccc_write;
+    k->target_match = &remote_i3c_target_match;
     device_class_set_props(dc, remote_i3c_props);
     dc->realize = remote_i3c_realize;
 }
