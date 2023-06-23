@@ -174,8 +174,8 @@ static void fillProtoMemUsage(
     memUsageProto->set_total_phys_memory(rawMemUsage.total_phys_memory);
     memUsageProto->set_total_page_file(rawMemUsage.total_page_file);
     if (getConsoleAgents()->settings->hw()->hw_ramSize) {
-        memUsageProto->set_total_guest_memory(getConsoleAgents()->settings->hw()->hw_ramSize * 1024 *
-                                              1024);
+        memUsageProto->set_total_guest_memory(
+                (uint64_t)getConsoleAgents()->settings->hw()->hw_ramSize * 1024 * 1024);
     }
     D("MemoryReport: uptime: %" PRIu64
       ", Res/ResMax/Virt/VirtMax: "
