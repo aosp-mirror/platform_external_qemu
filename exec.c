@@ -3766,7 +3766,9 @@ static inline void cpu_physical_memory_write_rom_internal(AddressSpace *as,
             }
         }
         len -= l;
-        buf += l;
+        if (buf) {
+            buf += l;
+        }
         addr += l;
     }
     rcu_read_unlock();
