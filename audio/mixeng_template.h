@@ -76,7 +76,7 @@ static inline int64_t glue (conv_, ET) (IN_T v)
 {
     IN_T nv = ENDIAN_CONVERT (v);
 #ifdef SIGNED
-    return ((int64_t) nv) << (32 - SHIFT);
+    return (int64_t)(((uint64_t) nv) << (32 - SHIFT));
 #else
     return ((int64_t) nv - HALF) << (32 - SHIFT);
 #endif

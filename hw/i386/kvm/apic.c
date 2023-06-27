@@ -42,7 +42,7 @@ static void kvm_put_apic_state(APICCommonState *s, struct kvm_lapic_state *kapic
     }
     kvm_apic_set_reg(kapic, 0x8, s->tpr);
     kvm_apic_set_reg(kapic, 0xd, s->log_dest << 24);
-    kvm_apic_set_reg(kapic, 0xe, s->dest_mode << 28 | 0x0fffffff);
+    kvm_apic_set_reg(kapic, 0xe, (uint32_t)s->dest_mode << 28 | 0x0fffffff);
     kvm_apic_set_reg(kapic, 0xf, s->spurious_vec);
     for (i = 0; i < 8; i++) {
         kvm_apic_set_reg(kapic, 0x10 + i, s->isr[i]);

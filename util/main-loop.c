@@ -198,12 +198,14 @@ static void glib_pollfds_fill(int64_t *cur_timeout)
     glib_pollfds_idx = gpollfds->len;
     n = glib_n_poll_fds;
     do {
-        GPollFD *pfds;
+        GPollFD *pfds = NULL;
         glib_n_poll_fds = n;
         g_array_set_size(gpollfds, glib_pollfds_idx + glib_n_poll_fds);
-        pfds = &g_array_index(gpollfds, GPollFD, glib_pollfds_idx);
+        if (gpollfds->data) {
+            pfds = &g_array_index(gpollfds, GPollFD, glib_pollfds_idx);
+        }
         n = g_main_context_query(context, max_priority, &timeout, pfds,
-                                 glib_n_poll_fds);
+                                glib_n_poll_fds);
     } while (n != glib_n_poll_fds);
 
     if (timeout < 0) {

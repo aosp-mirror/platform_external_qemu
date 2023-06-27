@@ -1009,7 +1009,7 @@ static int ram_save_page(RAMState *rs, PageSearchStatus *pss, bool last_stage)
     RAMBlock *block = pss->block;
     ram_addr_t offset = pss->page << TARGET_PAGE_BITS;
 
-    p = block->host + offset;
+    p = block->host ? block->host + offset : NULL;
     trace_ram_save_page(block->idstr, (uint64_t)offset, p);
 
     /* In doubt sent page as normal */
