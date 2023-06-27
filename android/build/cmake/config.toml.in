@@ -14,7 +14,6 @@ atty = { path = "${AOSP_ROOT}/external/rust/crates/atty" }
 bindgen = { path = "${AOSP_ROOT}/external/rust/crates/bindgen" }
 bitflags = { path = "${AOSP_ROOT}/external/rust/crates/bitflags", package = "bitflags" }
 bitflags1 = { path = "${AOSP_ROOT}/external/rust/crates/bitflags/1.3.2", package = "bitflags" }
-byteorder = { path = "${AOSP_ROOT}/external/rust/crates/byteorder" }
 bytes = { path = "${AOSP_ROOT}/external/rust/crates/bytes" }
 cexpr = { path = "${AOSP_ROOT}/external/rust/crates/cexpr" }
 cfg-if = { path = "${AOSP_ROOT}/external/rust/crates/cfg-if" }
@@ -29,7 +28,6 @@ crossbeam-deque = { path = "${AOSP_ROOT}/external/rust/crates/crossbeam-deque" }
 crossbeam-epoch = { path = "${AOSP_ROOT}/external/rust/crates/crossbeam-epoch" }
 crossbeam-utils = { path = "${AOSP_ROOT}/external/rust/crates/crossbeam-utils" }
 cxx = { path = "${AOSP_ROOT}/external/rust/crates/cxx" }
-data-encoding = { path = "${AOSP_ROOT}/external/rust/crates/data-encoding" }
 either = { path = "${AOSP_ROOT}/external/rust/crates/either" }
 env_logger = { path = "${AOSP_ROOT}/external/rust/crates/env_logger" }
 fastrand = { path = "${AOSP_ROOT}/external/rust/crates/fastrand" }
@@ -107,11 +105,9 @@ tokio = { path = "${AOSP_ROOT}/external/rust/crates/tokio" }
 tokio-macros = { path = "${AOSP_ROOT}/external/rust/crates/tokio-macros" }
 tokio-stream = { path = "${AOSP_ROOT}/external/rust/crates/tokio-stream" }
 tokio-util = { path = "${AOSP_ROOT}/external/rust/crates/tokio-util" }
-tungstenite = { path = "${AOSP_ROOT}/external/rust/crates/tungstenite" }
 ucd-trie = { path = "${AOSP_ROOT}/external/rust/crates/ucd-trie" }
 unicode-ident = { path = "${AOSP_ROOT}/external/rust/crates/unicode-ident" }
 unicode-width = { path = "${AOSP_ROOT}/external/rust/crates/unicode-width" }
-utf-8 = { path = "${AOSP_ROOT}/external/rust/crates/utf-8" }
 walkdir = { path = "${AOSP_ROOT}/external/rust/crates/walkdir" }
 which = { path = "${AOSP_ROOT}/external/rust/crates/which" }
 
