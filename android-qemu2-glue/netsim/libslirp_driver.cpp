@@ -14,8 +14,14 @@
 
 #include "android-qemu2-glue/netsim/libslirp_driver.h"
 
+#include "aemu/base/ArraySize.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
+#include "android/utils/system.h"
+
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
 
 extern "C" {
 #include "libslirp.h"
@@ -61,6 +67,57 @@ static int libslirp_timeout_ns_to_ms(int64_t ns)
     return (int) ms;
 }
 
+#ifdef _WIN32
+// Invariant: pollfds and fds always have the same length
+static int pollfds_fill(GArray* pollfds, WSAPOLLFD* fds) {
+    int i;
+    int sockets_count = 0;
+    for (i = 0; i < pollfds->len; i++) {
+        GPollFD* pfd = &g_array_index(pollfds, GPollFD, i);
+        int events = pfd->events;
+        fds[i].events = 0;
+        if (events & G_IO_IN) {
+            fds[i].events |= POLLRDNORM;
+        }
+        if (events & G_IO_OUT) {
+            fds[i].events |= POLLOUT;
+        }
+        if (events & G_IO_PRI) {
+            fds[i].events |= POLLRDBAND;
+        }
+
+        if (fds[i].events == 0) {
+            fds[i].fd = INVALID_SOCKET;  // ignore this one
+        } else {
+            ++sockets_count;
+            fds[i].fd = pfd->fd;
+        }
+    }
+    return sockets_count;
+}
+
+// Invariant: pollfds and fds always have the same length
+static void pollfds_poll(GArray* pollfds, const WSAPOLLFD* fds) {
+    int i;
+    for (i = 0; i < pollfds->len; i++) {
+        GPollFD* pfd = &g_array_index(pollfds, GPollFD, i);
+        int revents = 0;
+        if (fds[i].fd != INVALID_SOCKET) {
+            if (fds[i].revents & (POLLRDNORM | POLLERR | POLLHUP)) {
+                revents |= G_IO_IN;
+            }
+            if (fds[i].revents & POLLWRNORM) {
+                revents |= G_IO_OUT;
+            }
+            if (fds[i].revents & (POLLERR | POLLHUP | POLLPRI | POLLRDBAND)) {
+                revents |= G_IO_PRI;
+            }
+        }
+        pfd->revents = revents & pfd->events;
+    }
+}
+#endif
+
 static int libslirp_poll_ns(GPollFD *fds, guint nfds, int64_t timeout)
 {
 #ifdef __linux__
@@ -79,6 +136,21 @@ static int libslirp_poll_ns(GPollFD *fds, guint nfds, int64_t timeout)
         ts.tv_nsec = timeout % 1000000000LL;
         return ppoll((struct pollfd *)fds, nfds, &ts, NULL);
     }
+#elif defined(_WIN32)
+    int poll_ret = 0;
+    WSAPOLLFD* wsa_fds = static_cast<WSAPOLLFD*>(
+            android_alloc0(sizeof(WSAPOLLFD) * s_gpollfds->len));
+    int polled_count = pollfds_fill(s_gpollfds, wsa_fds);
+    if (polled_count > 0) {
+        poll_ret = WSAPoll(wsa_fds, s_gpollfds->len, 0);
+        if (poll_ret != 0) {
+            timeout = 0;
+        }
+        if (poll_ret > 0) {
+            pollfds_poll(s_gpollfds, wsa_fds);
+        }
+    }
+    return poll_ret;
 #else
     return g_poll(fds, nfds, libslirp_timeout_ns_to_ms(timeout));
 #endif
@@ -249,10 +321,9 @@ void libslirp_main_loop_wait(bool nonblocking) {
     if (nonblocking) {
         timeout = 0;
     }
-
-    /* poll any events */
-    g_array_set_size(s_gpollfds, 0); /* reset for new iteration */
-
+    /* Reset for new iteration */
+    g_array_set_size(s_gpollfds, 0);
+    /* Add fds to s_gpollfds for polling*/
     slirp_pollfds_fill(s_slirp, &timeout,
                         libslirp_add_poll, s_gpollfds);
     if (timeout == UINT32_MAX) {
@@ -262,6 +333,7 @@ void libslirp_main_loop_wait(bool nonblocking) {
                 static_cast<uint64_t>(timeout) * static_cast<int64_t>(SCALE_MS);
     }
     ret = libslirp_poll_ns((GPollFD *)s_gpollfds->data, s_gpollfds->len, timeout_ns);
+    /* Perform I/O when sockets are ready */
     slirp_pollfds_poll(s_slirp, ret < 0,
                            libslirp_get_revents, s_gpollfds);
 }
