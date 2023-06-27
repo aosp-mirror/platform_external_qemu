@@ -311,10 +311,10 @@ AR_OPTIONS=\$1
 OTHER_OPTIONS=\${@:2}
 case \$AR_OPTIONS in
     *c*)
-        libtool -static -o \$OTHER_OPTIONS
+        /usr/bin/libtool -static -o \$OTHER_OPTIONS
         ;;
     *v*)
-        libtool -static -o \$OTHER_OPTIONS
+        /usr/bin/libtool -static -o \$OTHER_OPTIONS
         ;;
     *)
         /usr/bin/ar \$AR_OPTIONS \$OTHER_OPTIONS
