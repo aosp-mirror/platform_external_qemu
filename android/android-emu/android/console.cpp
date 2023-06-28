@@ -2087,7 +2087,7 @@ static int do_battery_present(ControlClient client, char* args) {
             return 0;
         }
         if (strcasecmp(args, "false") == 0) {
-            client->global->battery_agent->setIsBatteryPresent(true);
+            client->global->battery_agent->setIsBatteryPresent(false);
             return 0;
         }
     }
