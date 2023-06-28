@@ -20,7 +20,7 @@
 
 #include "aemu/base/logging/CLog.h"
 #include "android-qemu2-glue/netsim/PacketProtocol.h"
-#include "startup.pb.h"
+#include "netsim/startup.pb.h"
 
 namespace android {
 namespace qemu2 {
