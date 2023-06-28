@@ -95,9 +95,10 @@ void GooglePlayPage::queryPlayVersions() {
 void GooglePlayPage::bootCompletionPropertyDone(
         GooglePlayServices::Result result,
         std::string_view outString) {
-    runOnEmuUiThread([this, result, outString] {
-        if (result == GooglePlayServices::Result::Success && !outString.empty() &&
-            outString[0] == '1') {
+    std::string out(outString);
+    runOnEmuUiThread([this, result, out] {
+        if (result == GooglePlayServices::Result::Success && !out.empty() &&
+            out[0] == '1') {
             // TODO: remove this once we have android properties to wait on.
             mTimer.disconnect();
             QObject::connect(&mTimer, &QTimer::timeout, this,

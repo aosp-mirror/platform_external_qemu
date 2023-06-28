@@ -2162,9 +2162,11 @@ void skin_window_redraw(SkinWindow* window, SkinRect* rect) {
 
         {
             Button* button = layout->buttons;
-            Button* end = button + layout->num_buttons;
-            for (; button < end; button++)
-                button_redraw(button, rect, window->surface);
+            if (button) {
+                Button* end = button + layout->num_buttons;
+                for (; button < end; button++)
+                    button_redraw(button, rect, window->surface);
+            }
         }
 
         if (window->ball.tracking)
