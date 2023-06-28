@@ -227,7 +227,7 @@ struct FlatRange {
 typedef struct AddressSpaceOps AddressSpaceOps;
 
 #define FOR_EACH_FLAT_RANGE(var, view)          \
-    for (var = (view)->ranges; var < (view)->ranges + (view)->nr; ++var)
+    for (var = (view)->ranges; (view)->ranges && var < (view)->ranges + (view)->nr; ++var)
 
 static inline MemoryRegionSection
 section_from_flat_range(FlatRange *fr, FlatView *fv)

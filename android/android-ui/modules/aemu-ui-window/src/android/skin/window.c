@@ -885,7 +885,7 @@ typedef struct Layout {
 #define LAYOUT_LOOP_BUTTONS(layout, button)                      \
     do {                                                         \
         Button* __button = (layout)->buttons;                    \
-        Button* __button_end = __button + (layout)->num_buttons; \
+        Button* __button_end = __button ? __button + (layout)->num_buttons : NULL; \
         for (; __button < __button_end; __button++) {            \
             Button* button = __button;
 
