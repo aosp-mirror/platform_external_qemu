@@ -936,6 +936,10 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_ACCELERATION].enabled = true;
     }
 
+    if (getConsoleAgents()->settings->hw()->hw_accelerometer_uncalibrated) {
+        h->sensors[ANDROID_SENSOR_ACCELERATION_UNCALIBRATED].enabled = true;
+    }
+
     if (getConsoleAgents()->settings->hw()->hw_gyroscope) {
         h->sensors[ANDROID_SENSOR_GYROSCOPE].enabled = true;
     }
@@ -1463,6 +1467,14 @@ bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h) {
 
 bool android_foldable_rollable_configured() {
     return (getConsoleAgents()->settings->hw()->hw_sensor_roll && getConsoleAgents()->settings->hw()->hw_sensor_roll_count > 0);
+}
+
+bool android_is_automotive() {
+    if (getConsoleAgents()->settings->android_qemu_mode()) {
+        AvdFlavor flavor = avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo());
+        return flavor == AVD_ANDROID_AUTO;
+    }
+    return false;
 }
 
 bool android_hw_sensors_is_loading_snapshot() {

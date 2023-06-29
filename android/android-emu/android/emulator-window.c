@@ -361,10 +361,15 @@ static void emulator_window_setup(EmulatorWindow* emulator) {
     // Set the coarse orientation of the modeled device to match the skin
     // layout at startup by default.
     const SkinLayout* layout = skin_ui_get_current_layout(emulator->ui);
-    // Historically, the AVD starts up with the screen mostly
-    // vertical, but tilted back 4.75 degrees. Retain that
-    // initial orientation.
-    emulator_window_set_device_coarse_orientation(layout->orientation, 4.75f);
+
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) !=
+        AVD_ANDROID_AUTO) {
+        // Historically, the AVD starts up with the screen mostly
+        // vertical, but tilted back 4.75 degrees. Retain that
+        // initial orientation.
+        emulator_window_set_device_coarse_orientation(layout->orientation,
+                                                      4.75f);
+    }
 
     if (emulator->onion) {
         skin_ui_set_onion(emulator->ui, emulator->onion,

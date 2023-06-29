@@ -89,6 +89,11 @@ public:
     void setCurrentTime(int64_t time_ns);
 
     /*
+     * Sets the current gravity of the PhysicalModel simulation.
+     */
+    void setGravity(float x, float y, float z);
+
+    /*
      * Replays a PhysicalModelEvent onto the current PhysicalModel state.
      */
     void replayEvent(const pb::PhysicalModelEvent& event);
@@ -526,6 +531,11 @@ void PhysicalModelImpl::setCurrentTime(int64_t time_ns) {
     }
 }
 
+void PhysicalModelImpl::setGravity(float x, float y, float z) {
+    mAmbientEnvironment.setGravity(glm::vec3(x, y, z),
+                                   PHYSICAL_INTERPOLATION_STEP);
+}
+
 void PhysicalModelImpl::replayEvent(const pb::PhysicalModelEvent& event) {
     switch (fromProto(event.type())) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
@@ -762,6 +772,19 @@ void PhysicalModelImpl::setTargetInternalWristTilt(float value,
     targetStateChanged();
 }
 
+void PhysicalModelImpl::setTargetInternalAccelerometerUncalibrated(vec3, PhysicalInterpolation) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        // Not supported to set the uncalibrated accelerometer value.
+    }
+    targetStateChanged();
+}
+
+vec3 PhysicalModelImpl::getParameterAccelerometerUncalibrated(ParameterValueType) const {
+    return fromGlm(mInertialModel.getAcceleration());
+}
+
 vec3 PhysicalModelImpl::getParameterPosition(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -926,6 +949,12 @@ vec3 PhysicalModelImpl::getPhysicalAccelerometer() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
                    (mInertialModel.getAcceleration() -
                     mAmbientEnvironment.getGravity()));
+}
+
+vec3 PhysicalModelImpl::getPhysicalAccelerometerUncalibrated() const {
+    // Same values for the calibrated and uncalibrated accelerometer
+    // Bias will be added to the balues on the guest side.
+    return getPhysicalAccelerometer();
 }
 
 vec3 PhysicalModelImpl::getPhysicalGyroscope() const {
@@ -1519,6 +1548,13 @@ void physicalModel_setCurrentTime(PhysicalModel* model, int64_t time_ns) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->setCurrentTime(time_ns);
+    }
+}
+
+void physicalModel_setGravity(PhysicalModel* model, float x, float y, float z) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        impl->setGravity(x, y, z);
     }
 }
 
