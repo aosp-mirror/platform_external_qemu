@@ -362,6 +362,7 @@ TEST(PhysicalModel, SaveLoadStateSimple) {
 
 static constexpr vec3 kVecZero = {0.f, 0.f, 0.f};
 static constexpr vec3 kAccelOverride = {1.f, 2.f, 3.f};
+static constexpr vec3 kAccelUncalibratedOverride = {1.f, 2.f, 3.f};
 static constexpr vec3 kGyroOverride = {4.f, 5.f, 6.f};
 static constexpr vec3 kMagnetometerOverride = {7.f, 8.f, 9.f};
 static constexpr vec3 kOrientationOverride = {10.f, 11.f, 12.f};
@@ -418,6 +419,8 @@ static void applyOverrides(PhysicalModel* model) {
             model, kMagneticUncalibratedOverride);
     physicalModel_overrideGyroscopeUncalibrated(model,
                                                 kGyroUncalibratedOverride);
+    physicalModel_overrideAccelerometerUncalibrated(model,
+                                                kAccelUncalibratedOverride);
 }
 
 TEST(PhysicalModel, SaveLoadOverrides) {
