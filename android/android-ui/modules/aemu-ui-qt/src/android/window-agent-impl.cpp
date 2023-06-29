@@ -265,11 +265,15 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return false;
                 },
         .getMonitorRect = [](uint32_t* w, uint32_t* h) -> bool {
-            if (const auto win = EmulatorQtWindow::getInstance()) {
-                return win->getMonitorRect(w, h);
-            } else {
-                return false;
+            SkinRect rect{0};
+            skin_winsys_get_monitor_rect(&rect);
+            if (w) {
+                *w = rect.size.w;
             }
+            if (h) {
+                *h = rect.size.h;
+            }
+            return true;
         },
         .moveExtendedWindow =
                 [](uint32_t x, uint32_t y, int horizontal, int vertical) {

@@ -38,7 +38,7 @@ void aehd_put_apic_state(DeviceState *dev, struct aehd_lapic_state *aapic)
     aehd_apic_set_reg(aapic, 0x2, s->id << 24);
     aehd_apic_set_reg(aapic, 0x8, s->tpr);
     aehd_apic_set_reg(aapic, 0xd, s->log_dest << 24);
-    aehd_apic_set_reg(aapic, 0xe, s->dest_mode << 28 | 0x0fffffff);
+    aehd_apic_set_reg(aapic, 0xe, (uint32_t)s->dest_mode << 28 | 0x0fffffff);
     aehd_apic_set_reg(aapic, 0xf, s->spurious_vec);
     for (i = 0; i < 8; i++) {
         aehd_apic_set_reg(aapic, 0x10 + i, s->isr[i]);

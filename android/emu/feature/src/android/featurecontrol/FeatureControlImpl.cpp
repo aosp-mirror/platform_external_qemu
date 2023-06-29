@@ -316,6 +316,7 @@ FeatureControlImpl::FeatureControlImpl() {
                 getConsoleAgents()->settings->avdInfo());
         if (gname) {
             defaultIniGuestName = gname;
+            free((void*)gname);
         }
     }
     std::string userIniHostName = base::PathUtils::join(

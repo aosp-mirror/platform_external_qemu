@@ -242,10 +242,6 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
 
 extern void skin_winsys_get_monitor_rect(SkinRect* rect) {
     D("skin_winsys_get_monitor_rect: begin\n");
-    bool haveScreenRect = false;
-    D("skin_winsys_get_monitor_rect: get Qt window\n");
-    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
-    D("skin_winsys_get_monitor_rect: get Qt window (done)\n");
     // Qt method of getting screen dimensions is unreliable.
     // Use platform-specific queries.
     if (!rect)

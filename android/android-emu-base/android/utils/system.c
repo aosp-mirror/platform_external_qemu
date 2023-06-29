@@ -118,7 +118,9 @@ void*
 _android_array_alloc0( size_t  itemSize, size_t  count )
 {
     void*  block = _android_array_alloc(itemSize, count);
-    memset(block, 0, itemSize*count);
+    if (block) {
+        memset(block, 0, itemSize*count);
+    }
     return block;
 }
 

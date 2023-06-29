@@ -885,7 +885,7 @@ typedef struct Layout {
 #define LAYOUT_LOOP_BUTTONS(layout, button)                      \
     do {                                                         \
         Button* __button = (layout)->buttons;                    \
-        Button* __button_end = __button + (layout)->num_buttons; \
+        Button* __button_end = __button ? __button + (layout)->num_buttons : NULL; \
         for (; __button < __button_end; __button++) {            \
             Button* button = __button;
 
@@ -2162,9 +2162,11 @@ void skin_window_redraw(SkinWindow* window, SkinRect* rect) {
 
         {
             Button* button = layout->buttons;
-            Button* end = button + layout->num_buttons;
-            for (; button < end; button++)
-                button_redraw(button, rect, window->surface);
+            if (button) {
+                Button* end = button + layout->num_buttons;
+                for (; button < end; button++)
+                    button_redraw(button, rect, window->surface);
+            }
         }
 
         if (window->ball.tracking)

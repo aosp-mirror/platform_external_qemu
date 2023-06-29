@@ -20,9 +20,13 @@ typedef struct Slirp Slirp;
 namespace android {
 namespace qemu2 {
 
-using slirp_rx_callback = std::function<ssize_t(const uint8_t*, size_t)>;
-
+// The event loop function that will wait on the I/O event for the sockets
+// created by lisblirp. When I/O event is available, the function will invoke
+// the libslirp interface slirp_pollfds_poll() for performing actual I/O.
+// This implementation will be moved to netsimd eventually.
 void libslirp_main_loop_wait(bool nonblocking);
+
+using slirp_rx_callback = std::function<ssize_t(const uint8_t*, size_t)>;
 
 Slirp* libslirp_init(slirp_rx_callback callback,
                      int restricted,

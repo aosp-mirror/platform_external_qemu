@@ -14,8 +14,8 @@
 #pragma once
 #include <vector>
 #include "backend/packet_streamer_client.h"
-#include "packet_streamer.grpc.pb.h"
-#include "startup.pb.h"
+#include "netsim/packet_streamer.grpc.pb.h"
+#include "netsim/startup.pb.h"
 
 using netsim::packet::PacketRequest;
 using netsim::packet::PacketResponse;

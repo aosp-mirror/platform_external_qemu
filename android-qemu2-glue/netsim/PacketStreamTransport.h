@@ -23,8 +23,8 @@
 #include "PacketProtocol.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
 #include "grpcpp/grpcpp.h"
-#include "packet_streamer.grpc.pb.h"
-#include "packet_streamer.pb.h"
+#include "netsim/packet_streamer.grpc.pb.h"
+#include "netsim/packet_streamer.pb.h"
 
 // clang-format off
 // IWYU pragma: begin_keep
