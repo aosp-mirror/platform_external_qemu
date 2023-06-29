@@ -480,6 +480,9 @@ void inode_attach_resize(struct ext4_inode *inode,
 	inode->osd2.linux2.l_i_blocks_high = blocks >> 32;
 	inode->i_size_lo = size;
 	inode->i_size_high = size >> 32;
+
+	aux_info.resize_dind_block_data = dind_block_data;
+	aux_info.resize_ind_block_data = ind_block_data;
 }
 
 /* Allocates enough blocks to hold len bytes, with backing_len bytes in a data

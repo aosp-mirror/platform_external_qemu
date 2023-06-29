@@ -269,8 +269,10 @@ void goldfish_events_set_bits(GoldfishEvDevState *s, int type, int bitl, int bit
             goldfish_evdev_unlock(s);
             return;
         }
-        memcpy(bits, s->ev_bits[type].bits, s->ev_bits[type].len);
-        g_free(s->ev_bits[type].bits);
+        if (s->ev_bits[type].bits) {
+            memcpy(bits, s->ev_bits[type].bits, s->ev_bits[type].len);
+            g_free(s->ev_bits[type].bits);
+        }
         s->ev_bits[type].bits = bits;
         s->ev_bits[type].len = ih + 1;
     } else {

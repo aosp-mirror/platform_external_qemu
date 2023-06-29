@@ -59,28 +59,21 @@ if(WIN32)
         COMMAND
           "${CLANG_CL}"
           "${ANDROID_QEMU2_TOP_DIR}/android/build/win/flattenrsp.cpp"
-          "/DCLANG_CL=${CLANG_CL}"
-          "/DCCACHE=${OPTION_CCACHE}"
-          "/DUNICODE"
-          "/O2"
-          "/std:c++17"
-          "/Fe:${CMAKE_BINARY_DIR}/cc.exe"
+          "/DCLANG_CL=${CLANG_CL}" "/DCCACHE=${OPTION_CCACHE}" "/DUNICODE" "/O2"
+          "/std:c++17" "/Fe:${CMAKE_BINARY_DIR}/cc.exe" COMMAND_ECHO STDOUT
         OUTPUT_VARIABLE STD_OUT
         ERROR_VARIABLE STD_ERR
         RESULT_VARIABLE ERR_CODE)
-      if (ERR_CODE)
-         # Try again but set vcvars64.bat first
-         execute_process(
+      if(ERR_CODE)
+        # Try again but set vcvars64.bat first
+        execute_process(
           COMMAND
-            "cmd" "/c" "$ENV{VSINSTALLDIR}\\VC\\Auxiliary\\Build\\vcvars64.bat" "&&"
-            "${CLANG_CL}"
+            "cmd" "/c" "$ENV{VSINSTALLDIR}//VC//Auxiliary//Build//vcvars64.bat"
+            "&&" "${CLANG_CL}"
             "${ANDROID_QEMU2_TOP_DIR}/android/build/win/flattenrsp.cpp"
-            "/DCLANG_CL=${CLANG_CL}"
-            "/DCCACHE=${OPTION_CCACHE}"
-            "/DUNICODE"
-            "/O2"
-            "/std:c++17"
-            "/Fe:${CMAKE_BINARY_DIR}/cc.exe"
+            "/DCLANG_CL=${CLANG_CL}" "/DCCACHE=${OPTION_CCACHE}" "/DUNICODE"
+            "/O2" "/std:c++17" "/Fe:${CMAKE_BINARY_DIR}/cc.exe" COMMAND_ECHO
+            STDOUT COMMAND_ERROR_IS_FATAL ANY
           OUTPUT_VARIABLE STD_OUT
           ERROR_VARIABLE STD_ERR)
       endif()
@@ -167,7 +160,28 @@ set(ANDROID_ASM_TYPE win64)
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 
 # Uncomment this once we have a rust toolchain for msvc in AOSP
-# get_rust_version(RUST_VER)
-# configure_rust(COMPILER_ROOT "${AOSP_ROOT}/prebuilts/rust/windows-x86/${RUST_VER}/bin")
-set(Rust_CARGO_TARGET "x86_64-pc-windows-msvc")
-set(OPTION_ENABLE_SYSTEM_RUST TRUE CACHE BOOL "Forcing the system rust compiler on windows")
+get_rust_version(RUST_VER)
+set(RUST_PATH
+    "${AOSP_ROOT}\\prebuilts\\gcc\\linux-x86\\host\\x86_64-w64-mingw32-4.8\\x86_64-w64-mingw32\\lib\\\;${AOSP_ROOT}\\prebuilts\\gcc\\linux-x86\\host\\x86_64-w64-mingw32-4.8\\x86_64-w64-mingw32\\bin"
+)
+
+string(REPLACE "/" "\\" RUST_PATH "${RUST_PATH}")
+configure_rust(COMPILER_ROOT
+               "${AOSP_ROOT}/prebuilts/rust/windows-x86/${RUST_VER}/bin")
+create_windows_linker_script()
+set(Rust_CARGO_TARGET "x86_64-pc-windows-gnu")
+set(Rust_CARGO_LINKER_FLAGS
+    "--config target.x86_64-pc-windows-gnu.linker=\\\"${WINDOWS_LINK_SCRIPT}\\\""
+)
+
+# Make sure we add our created libraries to the default link path, and make sure
+# We always explicitly link against gcc_eh.lib to pick up the stack handling from rust.
+set(CMAKE_EXE_LINKER_FLAGS
+    "${CMAKE_EXE_LINKER_FLAGS} /LIBPATH:${RUST_LINK_PATH} ${RUST_LINK_PATH}\\gcc_eh.lib"
+)
+set(CMAKE_MODULE_LINKER_FLAGS
+    "${CMAKE_MODULE_LINKER_FLAGS} /LIBPATH:${RUST_LINK_PATH} ${RUST_LINK_PATH}\\gcc_eh.lib"
+)
+set(CMAKE_SHARED_LINKER_FLAGS
+    "${CMAKE_SHARED_LINKER_FLAGS} /LIBPATH:${RUST_LINK_PATH} ${RUST_LINK_PATH}\\gcc_eh.lib"
+)

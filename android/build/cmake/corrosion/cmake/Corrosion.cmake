@@ -47,6 +47,7 @@ set(_CORR_PROP_NO_DEFAULT_FEATURES CORROSION_NO_DEFAULT_FEATURES CACHE INTERNAL 
 set(_CORR_PROP_ENV_VARS CORROSION_ENVIRONMENT_VARIABLES CACHE INTERNAL "")
 set(_CORR_PROP_HOST_BUILD CORROSION_USE_HOST_BUILD CACHE INTERNAL "")
 
+
 function(_add_cargo_build)
     set(options "")
     set(one_value_args PACKAGE TARGET MANIFEST_PATH PROFILE HAS_TESTS)
@@ -164,6 +165,11 @@ function(_add_cargo_build)
 
     set(corrosion_link_args "$<${if_not_host_build_condition}:${corrosion_link_args}>")
     set(cargo_target_option "$<IF:${if_not_host_build_condition},--target=${_CORROSION_RUST_CARGO_TARGET},--target=${_CORROSION_RUST_CARGO_HOST_TARGET}>")
+
+    if (Rust_CARGO_LINKER_FLAGS)
+        list(APPEND cargo_target_option ${Rust_CARGO_LINKER_FLAGS})
+    endif()
+
     set(target_artifact_dir "$<IF:${if_not_host_build_condition},${_CORROSION_RUST_CARGO_TARGET},${_CORROSION_RUST_CARGO_HOST_TARGET}>")
 
     # Rust will add `-lSystem` as a flag for the linker on macOS. Adding the -L flag via RUSTFLAGS only fixes the
@@ -200,8 +206,6 @@ function(_add_cargo_build)
         list(APPEND features_args --features ${feature})
     endforeach()
 
-    set(corrosion_cc_rs_flags)
-
     if(CMAKE_C_COMPILER AND _CORROSION_RUST_CARGO_TARGET_UNDERSCORE)
         # This variable is read by cc-rs (often used in build scripts) to determine the c-compiler.
         # It can still be overridden if the user sets the non underscore variant via the environment variables
@@ -218,6 +222,14 @@ function(_add_cargo_build)
     if(DEFINED ENV{CXX})
         list(APPEND corrosion_cc_rs_flags "HOST_CXX=$ENV{CXX}")
     endif()
+
+    if (WIN32)
+        # We need archiving in Rust so lets add it
+        list(APPEND corrosion_cc_rs_flags "AR_${_CORROSION_RUST_CARGO_TARGET_UNDERSCORE}=${CLANG_DIR}/bin/llvm-ar")
+    else()
+        list(APPEND corrosion_cc_rs_flags "AR_${_CORROSION_RUST_CARGO_TARGET_UNDERSCORE}=${CMAKE_AR}")
+    endif()
+
     # Since we instruct cc-rs to use the compiler found by CMake, it is likely one that requires also
     # specifying the target sysroot to use. CMake's generator makes sure to pass --sysroot with
     # CMAKE_OSX_SYSROOT. Fortunately the compilers Apple ships also respect the SDKROOT environment
@@ -262,6 +274,7 @@ function(_add_cargo_build)
                 cargo-gen_test_${target_name}  ALL
                 COMMAND echo ${CMAKE_COMMAND} -E env
                     ${build_env_variable_genex} ${rustflags_genex_test}
+                    PATH="${RUST_PATH}"
                     ${cargo_target_linker} ${corrosion_cc_rs_flags}
                     ${cargo_library_path} CORROSION_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
                     RUSTC_WRAPPER="${_CORROSION_RUSTC_WRAPPER}"
@@ -318,6 +331,7 @@ function(_add_cargo_build)
             ${cargo_target_linker}
             ${corrosion_cc_rs_flags}
             ${cargo_library_path}
+            PATH=${RUST_PATH}
             RUSTC_WRAPPER="${_CORROSION_RUSTC_WRAPPER}"
             CORROSION_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
             CARGO_BUILD_RUSTC="${_CORROSION_RUSTC}"
@@ -329,6 +343,7 @@ function(_add_cargo_build)
             ${features_args}
             ${all_features_arg}
             ${no_default_features_arg}
+
             # Target specific features added via corrosion_set_features().
             ${features_genex}
             --package ${package_name}
@@ -350,6 +365,7 @@ function(_add_cargo_build)
     add_custom_target(
         cargo-clean_${target_name}
         COMMAND
+            ${CMAKE_COMMAND} -E env PATH="${RUST_PATH}"
             $<TARGET_FILE:Rust::Cargo> clean --target ${_CORROSION_RUST_CARGO_TARGET}
             -p ${package_name} --manifest-path ${path_to_toml}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${build_dir}

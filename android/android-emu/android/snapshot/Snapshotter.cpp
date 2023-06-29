@@ -13,6 +13,7 @@
 
 #include "host-common/hw-config.h"
 #include "android/avd/info.h"
+#include "aemu/base/Log.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/Stopwatch.h"
@@ -1063,12 +1064,11 @@ void androidSnapshot_initialize(
             auto prettyVersion = Version(version.component<Version::kMajor>(),
                                          version.component<Version::kMinor>(),
                                          version.component<Version::kMicro>());
-            VERBOSE_PRINT(init,
-                          "Disabling snapshot boot - need Android Studio %s "
-                          " but found %s",
-                          kMinStudioVersion.toString().c_str(),
-                          prettyVersion.toString().c_str());
-            setEnabledOverride(android::featurecontrol::FastSnapshotV1, false);
+            LOG(WARNING) << "Snapshot boot requires Android Studio "
+                         << kMinStudioVersion.toString()
+                         << " but found "
+                         << prettyVersion.toString()
+                         << ". It might not work well with Android Studio.";
         }
     }
 #endif

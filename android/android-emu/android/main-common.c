@@ -724,7 +724,8 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     if (opts->ramdisk) {
         str_reset(&hw->disk_ramdisk_path, opts->ramdisk);
     } else if (!hw->disk_ramdisk_path[0]) {
-        str_reset_nocopy(&hw->disk_ramdisk_path, avdInfo_getRamdiskPath(avd));
+        char* ramdiskPath = avdInfo_getRamdiskPath(avd);
+        str_reset_nocopy(&hw->disk_ramdisk_path, ramdiskPath);
         D("autoconfig: -ramdisk %s", hw->disk_ramdisk_path);
     }
 
@@ -995,6 +996,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         str_reset(&hw->disk_dataPartition_path, dataImage);
         if (opts->wipe_data) {
             str_reset(&hw->disk_dataPartition_initPath, initImage);
+            free(initImage);
         } else {
             str_reset_null(&hw->disk_dataPartition_initPath);
         }
