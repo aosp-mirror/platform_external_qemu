@@ -30,6 +30,8 @@ message ParameterValue {
 }
 
 message PhysicalModelEvent {
+    // The following list of sensors should be kept in sync with PHYSICAL_PARAMETERS_LIST in
+    // hw-sensor.h
     enum ParameterType {
         POSITION = 0;
         ROTATION = 1;
@@ -51,6 +53,7 @@ message PhysicalModelEvent {
         HEART_RATE = 17;
         RGBC_LIGHT = 18;
         WRIST_TILT = 19;
+        ROTATION_UNCALIBRATED = 20;
     }
 
     optional ParameterType type = 1;
@@ -84,6 +87,7 @@ message SensorOverrideEvent {
         HEART_RATE = 14;
         RGBC_LIGHT = 15;
         WRIST_TILT = 16;
+        ACCELERATION_UNCALIBRATED = 17;
     }
 
     optional Sensor sensor = 1;
