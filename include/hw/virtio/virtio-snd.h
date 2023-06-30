@@ -42,6 +42,7 @@ enum {
     VIRTIO_PCM_STREAM_STATE_RUNNING
 };
 
+// These buffers are in the kernel format
 struct VirtIOSoundVqRingBufferItem {
     VirtQueueElement *el;
     int pos;
@@ -56,6 +57,7 @@ struct VirtIOSoundVqRingBuffer {
     uint16_t w;
 };
 
+// This buffer is in the QEMU audio format (to use directly with AUD_xyz calls).
 struct VirtIOSoundPcmRingBuffer {
     uint8_t *buf;
     uint32_t capacity;
@@ -78,8 +80,8 @@ struct VirtIOSoundPCMStream {
         void *raw;
     } voice;
     int64_t start_timestamp;
-    VirtIOSoundVqRingBuffer pcm_buf;
-    VirtIOSoundPcmRingBuffer raw_pcm_buf;
+    VirtIOSoundVqRingBuffer kpcm_buf;   // kernel
+    VirtIOSoundPcmRingBuffer qpcm_buf;  // qemu
     QemuMutex mtx;
 
     uint64_t frames_consumed;
