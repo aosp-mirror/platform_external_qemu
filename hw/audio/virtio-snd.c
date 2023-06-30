@@ -2113,7 +2113,7 @@ static int vmstate_VirtIOSound_post_xyz(void *opaque) {
     }
 
     virtio_snd_handle_tx_impl(snd, snd->tx_vq);
-    virtio_snd_handle_rx_impl(snd, snd->tx_vq);
+    virtio_snd_handle_rx_impl(snd, snd->rx_vq);
 
     for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
         VirtIOSoundPCMStream *stream = &snd->streams[i];
