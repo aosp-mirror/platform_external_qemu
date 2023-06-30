@@ -370,7 +370,7 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
         case android::featurecontrol::OnDemandSnapshotLoad:
             return android_studio::EmulatorFeatureFlagState::
                     ON_DEMAND_SNAPSHOT_LOAD;
-        case android::featurecontrol::Feature_n_items:
+        case android::featurecontrol::Feature_unknown:
             return android_studio::EmulatorFeatureFlagState::
                     EMULATOR_FEATURE_FLAG_UNSPECIFIED;
         case android::featurecontrol::WifiConfigurable:
