@@ -1673,6 +1673,8 @@ void ToolWindow::hideRotationButton(bool hide) {
                 AVD_TV ||
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
                 AVD_ANDROID_AUTO ||
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                AVD_DESKTOP ||
         getConsoleAgents()->settings->hw()->hw_arc) {
         // already hide, do not bother its settings
         return;
