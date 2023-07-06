@@ -21,7 +21,7 @@ void FeatureControlTest::SetUp() {
     mUserIniGuestFilePath =
             mTempDir->makeSubPath("userSettingsGuest.ini").c_str();
 
-#define FEATURE_CONTROL_ITEM(item) \
+#define FEATURE_CONTROL_ITEM(item, idx) \
     #item " = on\n"
     mAllOnIni =
 #include "host-common/FeatureControlDefHost.h"
@@ -29,33 +29,33 @@ void FeatureControlTest::SetUp() {
     ;
 #undef FEATURE_CONTROL_ITEM
 
-#define FEATURE_CONTROL_ITEM(item) #item " = on\n"
+#define FEATURE_CONTROL_ITEM(item, idx) #item " = on\n"
     mAllOnIniGuestOnly =
 #include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
-#define FEATURE_CONTROL_ITEM(item) #item " = off\n"
+#define FEATURE_CONTROL_ITEM(item, idx) #item " = off\n"
     mAllOffIni =
 #include "host-common/FeatureControlDefHost.h"
 #include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
-#define FEATURE_CONTROL_ITEM(item) #item " = off\n"
+#define FEATURE_CONTROL_ITEM(item, idx) #item " = off\n"
     mAllOffIniGuestOnly =
 #include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
-#define FEATURE_CONTROL_ITEM(item) #item " = default\n"
+#define FEATURE_CONTROL_ITEM(item, idx) #item " = default\n"
     mAllDefaultIni =
 #include "host-common/FeatureControlDefHost.h"
 #include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
-#define FEATURE_CONTROL_ITEM(item) #item " = default\n"
+#define FEATURE_CONTROL_ITEM(item, idx) #item " = default\n"
     mAllDefaultIniGuestOnly =
 #include "host-common/FeatureControlDefGuest.h"
     ;

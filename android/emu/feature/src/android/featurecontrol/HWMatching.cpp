@@ -339,7 +339,7 @@ std::vector<FeatureAction> matchFeaturePatterns(
 static void doFeatureAction(const FeatureAction& action) {
     Feature feature = stringToFeature(action.name);
 
-    if (stringToFeature(action.name) == Feature::Feature_n_items) {
+    if (stringToFeature(action.name) == Feature::Feature_unknown) {
         D("Unknown feature action.");
         return;
     }

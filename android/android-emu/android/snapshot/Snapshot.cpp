@@ -282,35 +282,55 @@ bool Snapshot::isCompatibleWithCurrentFeatures() {
     return verifyFeatureFlags(mSnapshotPb.config());
 }
 
-bool Snapshot::verifyFeatureFlags(const pb::Config& config) {
-    auto enabledFeatures = fc::getEnabled();
+static bool featureSetsEqual(
+        const std::unordered_set<Feature>& snapshotFeatures,
+        const std::unordered_set<Feature>& emulatorFeatures) {
+    // We uset set1 subset set2 && set2 subset set1 algorithm
+    // Mainly so we can inform the user (or debuggers) which feature is
+    // required, but now missing.
+    // Note that sets are fixed size and very small, so we are not concerned about
+    // performance.
 
-    enabledFeatures.erase(
-            std::remove_if(enabledFeatures.begin(), enabledFeatures.end(),
-                           isFeatureSnapshotInsensitive),
-            enabledFeatures.end());
-
-    // need a conversion from int to Feature here
-    std::vector<Feature> configFeatures;
-
-    for (auto it = config.enabled_features().begin();
-         it != config.enabled_features().end(); ++it) {
-        configFeatures.push_back((Feature)(*it));
+    // snapshot \subset emulatorFeatures
+    for (const auto& element : snapshotFeatures) {
+        if (emulatorFeatures.find(element) == emulatorFeatures.end()) {
+            derror("The snapshot requires the feature: %d, which the emulator "
+                   "does not support",
+                   element);
+            return false;
+        }
     }
 
-    configFeatures.erase(
-            std::remove_if(configFeatures.begin(), configFeatures.end(),
-                           isFeatureSnapshotInsensitive),
-            configFeatures.end());
-
-    if (int(enabledFeatures.size()) != configFeatures.size() ||
-        !std::equal(configFeatures.begin(), configFeatures.end(),
-                    enabledFeatures.begin(),
-                    [](int l, Feature r) { return int(l) == r; })) {
-        return false;
+    // emulatorFeatures \subset snapshot
+    for (const auto& element : emulatorFeatures) {
+        if (snapshotFeatures.find(element) == snapshotFeatures.end()) {
+            derror("The emulator has the feature: %d, which is missing in the "
+                   "snapshot", element);
+            return false;
+        }
     }
 
     return true;
+}
+
+bool Snapshot::verifyFeatureFlags(const pb::Config& config) {
+    auto enabled = fc::getEnabled();
+    enabled.erase(
+            std::remove_if(enabled.begin(), enabled.end(),
+                           isFeatureSnapshotInsensitive),
+            enabled.end());
+
+    auto emulatorFeatures = std::unordered_set<Feature>(enabled.begin(), enabled.end());
+
+    std::unordered_set<Feature> snapshotFeatures;
+    for (auto it = config.enabled_features().begin();
+         it != config.enabled_features().end(); ++it) {
+        Feature f = static_cast<Feature>(*it);
+        if (!isFeatureSnapshotInsensitive(f))
+            snapshotFeatures.insert(f);
+    }
+
+    return featureSetsEqual(snapshotFeatures, emulatorFeatures);
 }
 
 bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
@@ -388,7 +408,7 @@ struct {
 static constexpr int kVersionBase = 81;
 static_assert(kVersionBase < (1 << 20), "Base version number is too high.");
 
-#define FEATURE_CONTROL_ITEM(item) + 1
+#define FEATURE_CONTROL_ITEM(item, idx) + 1
 
 // 0 + 1 + 1 + 1 (+ 1) for each item in feature control
 static constexpr int kFeatureOffset = 0

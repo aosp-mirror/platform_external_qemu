@@ -83,6 +83,7 @@ public:
     static Feature fromString(std::string_view str);
     static std::string_view toString(Feature feature);
 
+    std::vector<Feature> getAllFeatures(bool sorted = false) const;
     std::vector<Feature> getEnabledNonOverride() const;
     std::vector<Feature> getEnabledOverride() const;
     std::vector<Feature> getDisabledOverride() const;
@@ -106,8 +107,8 @@ public:
         bool isOverridden = false;
     };
 private:
-    FeatureOption mFeatures[Feature_n_items] = {};
-    FeatureOption mGuestTriedEnabledFeatures[Feature_n_items] = {};
+    std::unordered_map<Feature, FeatureOption> mFeatures = {};
+    std::unordered_map<Feature, FeatureOption> mGuestTriedEnabledFeatures = {};
     void initEnabledDefault(Feature feature, bool isEnabled);
     void setGuestTriedEnable(Feature feature);
 
