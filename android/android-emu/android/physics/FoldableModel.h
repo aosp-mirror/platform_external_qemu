@@ -19,6 +19,7 @@
 #include <vector>
 #include <mutex>
 
+#include "aemu/base/EventNotificationSupport.h"  // for EventNotifi...
 #include "android/hw-sensors.h"
 #include "android/physics/Physics.h"
 
@@ -27,6 +28,10 @@ namespace physics {
 
 class FoldableModel {
 public:
+    class PostureListener
+        : public base::EventNotificationSupport<FoldablePostures> {
+        friend class FoldableModel;
+    };
     FoldableModel();
 
     // called by physical model to set hinge angle.
@@ -63,6 +68,9 @@ public:
     bool getFoldedArea(int* x, int* y, int* w, int* h);
 
     static void sendPostureToSystem(enum FoldablePostures p);
+
+    PostureListener* getPostureListener() { return &mPostureListener; }
+
 private:
     void initPostures();
     void initFoldableHinge();
@@ -72,6 +80,7 @@ private:
 
     FoldableState mState;
     std::vector<struct AnglesToPosture> mAnglesToPostures;
+    PostureListener mPostureListener;
 };
 
 }  // namespace physics

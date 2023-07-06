@@ -118,6 +118,7 @@ void FoldableModel::initFoldableHinge() {
         mState.config.supportedFoldablePostures[POSTURE_HALF_OPENED] = false;
         mState.config.supportedFoldablePostures[POSTURE_FLIPPED] = false;
         mState.config.supportedFoldablePostures[POSTURE_TENT] = false;
+        mPostureListener.fireEvent(mState.currentPosture);
         return;
     }
 
@@ -395,6 +396,7 @@ void FoldableModel::initPostures() {
             }
         }
         mState.currentPosture = calculatePosture();
+        mPostureListener.fireEvent(mState.currentPosture);
     }
 }
 
@@ -430,6 +432,7 @@ void FoldableModel::setHingeAngle(uint32_t hingeIndex,
             sendPostureToSystem(p);
             updateFoldablePostureIndicator();
         }
+        mPostureListener.fireEvent(p);
     }
 }
 
@@ -445,10 +448,14 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode,
         (android_foldable_hinge_configured() ||
          android_foldable_rollable_configured() ||
          android_foldable_any_folded_area_configured())) {
+        bool needUpdate = mState.currentPosture != p;
         mState.currentPosture = p;
         lock.unlock();
         sendPostureToSystem(p);
         updateFoldablePostureIndicator();
+        if (needUpdate) {
+            mPostureListener.fireEvent(p);
+        }
         return;
     }
 
@@ -481,6 +488,7 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode,
     lock.unlock();
     sendPostureToSystem(p);
     updateFoldablePostureIndicator();
+    mPostureListener.fireEvent(p);
 }
 
 void FoldableModel::setRollable(uint32_t index,
@@ -507,6 +515,7 @@ void FoldableModel::setRollable(uint32_t index,
             lock.unlock();
             updateFoldablePostureIndicator();
         }
+        mPostureListener.fireEvent(p);
     }
 }
 

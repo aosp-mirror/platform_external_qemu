@@ -1376,6 +1376,15 @@ public:
         return reply;
     }
 
+    Notification getPostureNotificationEvent(FoldablePostures posture) {
+        Notification reply;
+        reply.mutable_posture()->set_value(
+                static_cast<
+                        ::android::emulation::control::Posture_PostureValue>(
+                        posture));
+        return reply;
+    }
+
     Status streamNotification(ServerContext* context,
                               const Empty* request,
                               ServerWriter<Notification>* writer) override {
@@ -1383,12 +1392,17 @@ public:
         if (clientAvailable) {
             clientAvailable = writer->Write(getCameraNotificationEvent());
         }
+        if (clientAvailable) {
+            clientAvailable = writer->Write(
+                    getPostureNotificationEvent(static_cast<FoldablePostures>(
+                            android_foldable_get_posture())));
+        }
 
         // The event waiter will be unlocked when a change event is
         // received.
         EventWaiter notifier;
         int eventCount = 0;
-        enum class EventTypes { CameraEvent, DisplayEvent };
+        enum class EventTypes { CameraEvent, DisplayEvent, PostureEvent };
 
         // This is the set of notifications that need to be delivered.
         std::vector<Notification> activeNotifications;
@@ -1423,6 +1437,19 @@ public:
                         notifier.newEvent();
                     }
                 });
+
+        RaiiEventListener<base::EventNotificationSupport<FoldablePostures>,
+                          FoldablePostures>
+                foldableListener(
+                        static_cast<base::EventNotificationSupport<
+                                FoldablePostures>*>(
+                                android_get_posture_listener()),
+                        [&](auto state) {
+                            std::lock_guard<std::mutex> lock(notificationLock);
+                            activeNotifications.push_back(
+                                    getPostureNotificationEvent(state));
+                            notifier.newEvent();
+                        });
 
         // And deliver the events as they come in.
         while (clientAvailable) {
