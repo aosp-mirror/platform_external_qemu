@@ -681,11 +681,9 @@ static bool virtio_snd_stream_start_locked(VirtIOSoundPCMStream *stream) {
     }
 
     if (is_output_stream(stream)) {
-        SWVoiceOut *voice = stream->voice.out;
-        AUD_set_active_out(voice, 1);
+        AUD_set_active_out(stream->voice.out, 1);
     } else {
-        SWVoiceIn *voice = stream->voice.in;
-        AUD_set_active_in(voice, 1);
+        AUD_set_active_in(stream->voice.in, 1);
     }
 
     stream->start_timestamp = qemu_clock_get_us(QEMU_CLOCK_VIRTUAL_RT);
