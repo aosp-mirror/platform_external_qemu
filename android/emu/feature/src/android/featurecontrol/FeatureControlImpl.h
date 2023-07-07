@@ -11,15 +11,19 @@
 
 #pragma once
 
-#include "host-common/Features.h"
-
 #include <ostream>
+#include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
+
+#include "host-common/Features.h"
 
 namespace android {
 
-namespace base { class IniFile; }
+namespace base {
+class IniFile;
+}  // namespace base
 
 namespace featurecontrol {
 

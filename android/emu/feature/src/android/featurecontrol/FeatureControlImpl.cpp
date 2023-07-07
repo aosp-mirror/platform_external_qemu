@@ -11,11 +11,22 @@
 
 #include "android/featurecontrol/FeatureControlImpl.h"
 
+#include <stdlib.h>
+#include <strings.h>
+#include <algorithm>
+#include <ostream>
+#include <set>
+#include <string_view>
+#include <unordered_set>
+#include <utility>
+
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
-#include "aemu/base/Log.h"
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
+#include "aemu/base/logging/LogSeverity.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/memory/ScopedPtr.h"
 #include "android/avd/info.h"
@@ -25,18 +36,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/utils/debug.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/system.h"
 #include "host-common/hw-config.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <algorithm>
-#include <memory>
-#include <ostream>
-#include <set>
-#include <string_view>
-#include <unordered_set>
 
 using android::base::ScopedCPtr;
 
@@ -165,6 +165,7 @@ void FeatureControlImpl::init(const std::string& defaultIniHostPath,
 #define FEATURE_CONTROL_ITEM(item, idx) \
     initHostFeatureAndParseDefault(defaultIniHost, item, #item);
 #include "host-common/FeatureControlDefHost.h"
+
 #undef FEATURE_CONTROL_ITEM
 
         // Initialize guest features
@@ -450,7 +451,6 @@ std::string_view FeatureControlImpl::toString(Feature feature) {
 
     return "UnknownFeature";
 }
-
 
 void FeatureControlImpl::initEnabledDefault(Feature feature, bool isEnabled) {
     FeatureOption& currFeature = mFeatures[feature];
