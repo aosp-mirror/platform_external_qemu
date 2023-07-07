@@ -10,7 +10,13 @@
 // GNU General Public License for more details.
 
 #include "host-common/feature_control.h"
+
+#include <string>
+#include <unordered_map>
+#include <utility>
+
 #include "host-common/FeatureControl.h"
+#include "host-common/Features.h"
 
 void feature_initialize() {
     android::featurecontrol::initialize();
@@ -56,8 +62,9 @@ const char* feature_name(Feature feature) {
     static const std::unordered_map<Feature, std::string>* const sFeatureNames = [] {
            return new std::unordered_map<Feature, std::string>{
 #define FEATURE_CONTROL_ITEM(item, idx) { kFeature_##item, #item},
-#include "host-common/FeatureControlDefHost.h"
 #include "host-common/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefHost.h"
+
 #undef FEATURE_CONTROL_ITEM
         };
     }();
