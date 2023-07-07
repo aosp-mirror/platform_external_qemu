@@ -1518,7 +1518,10 @@ message EmulatorFeatureFlagState {
         EXTERNAL_BLOB = 98;
         DOWNLOADABLE_SNAPSHOT = 99;
         SYSTEM_BLOB = 100;
-        // Next tag: 101
+        NETSIMWEBUI = 101;
+        NETSIMCLIUI = 102;
+        WIFIPACKETSTREAM = 103;
+        // Next tag: 104
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

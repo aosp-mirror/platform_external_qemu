@@ -420,7 +420,11 @@ static constexpr int kFeatureOffset = 0
 
 static_assert(kFeatureOffset < 1024, "Too many features to include in the feature offset component of the snapshot version");
 
-static constexpr int kVersion = (kVersionBase << 10) + kFeatureOffset;
+// static constexpr int kVersion = (kVersionBase << 10) + kFeatureOffset;
+
+// We currently hardcode the kVersion as we are in the process of migrating
+// To a different versioning scheme see: b/287119326
+static constexpr int kVersion = 83037;
 static constexpr int kMaxSaveStatsHistory = 10;
 
 std::string Snapshot::dataDir(const char* name) {
