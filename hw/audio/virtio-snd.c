@@ -1478,7 +1478,7 @@ static void stream_out_cb(void *opaque, int avail) {
     }
 }
 
-static bool virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
+static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
     VirtIOSoundVqRingBufferItem item;
     struct virtio_snd_pcm_xfer xfer;
     VirtIOSoundPCMStream *stream;
@@ -1510,7 +1510,6 @@ static bool virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     }
 
     qemu_mutex_unlock(&stream->mtx);
-    return true;
 }
 
 static VirtQueue *stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
@@ -1621,7 +1620,7 @@ static void stream_in_cb(void *opaque, int avail) {
     }
 }
 
-static bool virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
+static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
     VirtIOSoundVqRingBufferItem item;
     struct virtio_snd_pcm_xfer xfer;
     VirtIOSoundPCMStream *stream;
@@ -1651,7 +1650,6 @@ static bool virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     }
 
     qemu_mutex_unlock(&stream->mtx);
-    return true;
 }
 
 static bool virtio_snd_stream_prepare_vars(VirtIOSoundPCMStream *stream) {
@@ -1900,7 +1898,7 @@ incomplete_request:
 static void virtio_snd_handle_ctl(VirtIODevice *vdev, VirtQueue *vq) {
     VirtIOSound *snd = VIRTIO_SND(vdev);
 
-    while (virtio_queue_ready(vq)) {
+    while (true) {
         VirtQueueElement *e = (VirtQueueElement *)virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (e) {
             vq_consume_element(vq, e, virtio_snd_process_ctl(e, snd));
@@ -1918,47 +1916,35 @@ static void virtio_snd_handle_event(VirtIODevice *vdev, VirtQueue *vq) {
 }
 
 /* device <- driver */
-static bool virtio_snd_handle_tx_impl(VirtIOSound *snd, VirtQueue *vq) {
-    bool need_notify = false;
+static void virtio_snd_handle_tx(VirtIODevice *vdev, VirtQueue *vq) {
+    VirtIOSound *snd = VIRTIO_SND(vdev);
 
-    while (virtio_queue_ready(vq)) {
+    while (true) {
         VirtQueueElement *e = (VirtQueueElement *)virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (e) {
-            need_notify = !virtio_snd_process_tx(vq, e, snd) || need_notify;
+            virtio_snd_process_tx(vq, e, snd);
         } else {
             break;
         }
     }
 
-    return need_notify;
-}
-
-static void virtio_snd_handle_tx(VirtIODevice *vdev, VirtQueue *vq) {
-    if (virtio_snd_handle_tx_impl(VIRTIO_SND(vdev), vq)) {
-        virtio_notify(vdev, vq);
-    }
+    virtio_notify(vdev, vq);
 }
 
 /* device -> driver */
-static bool virtio_snd_handle_rx_impl(VirtIOSound *snd, VirtQueue *vq) {
-    bool need_notify = false;
+static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
+    VirtIOSound *snd = VIRTIO_SND(vdev);
 
-    while (virtio_queue_ready(vq)) {
+    while (true) {
         VirtQueueElement *e = (VirtQueueElement *)virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (e) {
-            need_notify = !virtio_snd_process_rx(vq, e, snd) || need_notify;
+            virtio_snd_process_rx(vq, e, snd);
         } else {
             break;
         }
     }
 
-    return need_notify;
-}
-
-static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
-    if (virtio_snd_handle_rx_impl(VIRTIO_SND(vdev), vq)) {
-        virtio_notify(vdev, vq);
-    }
+    virtio_notify(vdev, vq);
 }
 
 static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
@@ -2110,8 +2096,8 @@ static int vmstate_VirtIOSound_post_xyz(void *opaque) {
         }
     }
 
-    virtio_snd_handle_tx_impl(snd, snd->tx_vq);
-    virtio_snd_handle_rx_impl(snd, snd->rx_vq);
+    virtio_snd_handle_tx(&snd->parent, snd->tx_vq);
+    virtio_snd_handle_rx(&snd->parent, snd->rx_vq);
 
     for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
         VirtIOSoundPCMStream *stream = &snd->streams[i];
