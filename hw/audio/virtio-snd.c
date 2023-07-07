@@ -1508,7 +1508,7 @@ static bool virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     if (vq_ring_buffer_push(&stream->kpcm_buf, &item)) {
         update_output_latency_bytes(stream, item.size - item.pos);
     } else {
-        ABORT("ring_buffer_push");
+        ABORT("vq_ring_buffer_push");
     }
 
     qemu_mutex_unlock(&stream->mtx);
