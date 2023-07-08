@@ -44,7 +44,7 @@ extern "C" {
 // IWYU pragma: end_keep
 // clang-format on
 
-#define DEBUG 2
+// #define DEBUG 2
 /* set  for very verbose debugging */
 #ifndef DEBUG
 #define DD(...) (void)0
