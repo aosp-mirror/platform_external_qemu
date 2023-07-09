@@ -1744,8 +1744,6 @@ static uint32_t
 virtio_snd_process_ctl_pcm_start_impl(unsigned stream_id, VirtIOSound* snd) {
     VirtIOSoundPCMStream *stream;
     uint32_t r;
-    uint32_t period_bytes = 0;
-    bool is_output = false;
 
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         return FAILURE(VIRTIO_SND_S_BAD_MSG);
@@ -1765,17 +1763,11 @@ virtio_snd_process_ctl_pcm_start_impl(unsigned stream_id, VirtIOSound* snd) {
         goto done;
     }
 
-    is_output = is_output_stream(stream);
-    period_bytes = stream->period_bytes;
     stream->state = VIRTIO_PCM_STREAM_STATE_RUNNING;
     r = VIRTIO_SND_S_OK;
 
 done:
     qemu_mutex_unlock(&stream->mtx);
-
-    if (is_output && (period_bytes > 0)) {
-        stream_out_cb(stream, period_bytes * 2);
-    }
 
     return r;
 }
