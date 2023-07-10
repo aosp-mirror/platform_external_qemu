@@ -175,6 +175,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
     const char* deviceStateProp;
     const char* qemuCpuVulkanVersionProp;
     const char* emulatorCircularProp;
+    const char* autoRotateProp;
 
     namespace fc = android::featurecontrol;
     if (fc::isEnabled(fc::AndroidbootProps) ||
@@ -211,6 +212,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         deviceStateProp = "androidboot.qemu.device_state";
         qemuCpuVulkanVersionProp = "androidboot.qemu.cpuvulkan.version";
         emulatorCircularProp = "androidboot.emulator.circular";
+        autoRotateProp = "androidboot.qemu.autorotate";
     } else {
         androidbootVerityMode = nullptr;
         checkjniProp = "android.checkjni";
@@ -242,6 +244,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         deviceStateProp = "qemu.device_state";
         qemuCpuVulkanVersionProp = nullptr;
         emulatorCircularProp = "ro.emulator.circular";
+        autoRotateProp = "qemu.autorotate";
     }
 
     std::vector<std::pair<std::string, std::string>> params;
@@ -434,6 +437,10 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
 
     if (resizableEnabled()) {
         params.push_back({qemuDisplaySettingsXmlProp, "resizable"});
+    }
+
+    if (android_foldable_hinge_configured()) {
+        params.push_back({autoRotateProp, "1"});
     }
 
     if (isQemu2) {
