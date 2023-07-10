@@ -40,6 +40,7 @@
 #include "qemu/id.h"
 #include "qemu/coroutine.h"
 #include "qemu/yank.h"
+#include "trace.h"
 
 #include "chardev-internal.h"
 
@@ -420,11 +421,24 @@ QemuOpts *qemu_chr_parse_compat(const char *label, const char *filename,
         strstart(filename, "telnet:", &p) ||
         strstart(filename, "tn3270:", &p) ||
         strstart(filename, "websocket:", &p)) {
-        if (sscanf(p, "%64[^:]:%32[^,]%n", host, port, &pos) < 2) {
-            host[0] = 0;
-            if (sscanf(p, ":%32[^,]%n", port, &pos) < 1)
-                goto fail;
+        if (p[0] == '[') {
+            /* IPv6 guestfwd */
+            if (sscanf(p, "[%64[^]]]:%32[^,]%n", host, port, &pos) < 2) {
+                host[0] = 0;
+                if (sscanf(p, "[]:%32[^,]%n", port, &pos) < 1) {
+                    goto fail;
+                }
+            }
         }
+        else {
+            /* IPv4 guestfwd */
+            if (sscanf(p, "%64[^:]:%32[^,]%n", host, port, &pos) < 2) {
+                host[0] = 0;
+                if (sscanf(p, ":%32[^,]%n", port, &pos) < 1)
+                    goto fail;
+            }
+        }
+        trace_char_tcp_parse(host, port);
         qemu_opt_set(opts, "backend", "socket", &error_abort);
         qemu_opt_set(opts, "host", host, &error_abort);
         qemu_opt_set(opts, "port", port, &error_abort);

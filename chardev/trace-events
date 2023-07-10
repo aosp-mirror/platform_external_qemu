@@ -17,3 +17,5 @@ spice_vmc_register_interface(void *scd) "spice vmc registered interface %p"
 spice_vmc_unregister_interface(void *scd) "spice vmc unregistered interface %p"
 spice_vmc_event(int event) "spice vmc event %d"
 
+# char.c
+char_tcp_parse(char *host, char *port) "char_tcp_parse: host:%s port:%s"
