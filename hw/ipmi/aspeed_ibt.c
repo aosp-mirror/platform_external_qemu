@@ -228,6 +228,10 @@ static void aspeed_ibt_set_ipmi_handler(IPMIInterface *ii, IPMICore *h)
     ibt->handler = h;
 }
 
+static void aspeed_ibt_set_atn(struct IPMIInterface *s, int val, int irq)
+{
+}
+
 static const MemoryRegionOps aspeed_ibt_ops = {
     .read = aspeed_ibt_read,
     .write = aspeed_ibt_write,
@@ -294,6 +298,7 @@ static void aspeed_ibt_class_init(ObjectClass *klass, void *data)
     iic->handle_msg = aspeed_ibt_handle_msg;
     iic->get_backend_data = aspeed_ibt_backend_data;
     iic->set_ipmi_handler = aspeed_ibt_set_ipmi_handler;
+    iic->set_atn = aspeed_ibt_set_atn;
 }
 
 static const TypeInfo aspeed_ibt_info[] = {
