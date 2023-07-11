@@ -12,6 +12,7 @@
 #include "android-qemu2-glue/netsim/NetsimWifiForwarder.h"
 
 #include "aemu/base/logging/CLog.h"
+#include "android/emulation/HostapdController.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
 #include "backend/packet_streamer_client.h"
 #include "netsim/packet_streamer.grpc.pb.h"
@@ -141,6 +142,9 @@ bool NetsimWifiForwarder::init() {
     initial_request.mutable_initial_info()->mutable_chip()->set_kind(
         netsim::common::ChipKind::WIFI);
     sTransport->Write(initial_request);
+    auto* hostapd = android::emulation::HostapdController::getInstance();
+    if (hostapd)
+        hostapd->terminate();
     dinfo("Registered as Netsim WiFi");
     return true;
 }
@@ -159,7 +163,8 @@ int NetsimWifiForwarder::send(const android::base::IOVector& iov) {
 }
 
 void NetsimWifiForwarder::stop() {
-    sTransport->cancel();
+    if (sTransport != nullptr)
+        sTransport->cancel();
 }
 
 int NetsimWifiForwarder::recv(android::base::IOVector& iov) {
