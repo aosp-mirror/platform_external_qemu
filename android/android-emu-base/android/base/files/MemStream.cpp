@@ -27,6 +27,9 @@ MemStream::MemStream(int reserveSize) {
 MemStream::MemStream(Buffer&& data) : mData(std::move(data)) {}
 
 ssize_t MemStream::read(void* buffer, size_t size) {
+    if (!buffer) {
+        return 0;
+    }
     const auto sizeToRead = std::min<int>(size, readSize());
     memcpy(buffer, mData.data() + mReadPos, sizeToRead);
     mReadPos += sizeToRead;
@@ -34,6 +37,9 @@ ssize_t MemStream::read(void* buffer, size_t size) {
 }
 
 ssize_t MemStream::write(const void* buffer, size_t size) {
+    if (!buffer) {
+        return 0;
+    }
     mData.insert(mData.end(), (const char*)buffer, (const char*)buffer + size);
     return size;
 }
