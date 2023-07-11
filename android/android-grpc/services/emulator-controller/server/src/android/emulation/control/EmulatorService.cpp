@@ -31,6 +31,7 @@
 #include <memory>
 #include <mutex>
 #include <new>
+#include <optional>
 #include <ratio>
 #include <set>
 #include <string>
@@ -1376,7 +1377,19 @@ public:
         return reply;
     }
 
-    Notification getPostureNotificationEvent(FoldablePostures posture) {
+    std::optional<Notification> getPostureNotificationEvent(
+            FoldablePostures posture) {
+        static_assert((int)POSTURE_MAX ==
+                      ::android::emulation::control::Posture_PostureValue::
+                              Posture_PostureValue_POSTURE_MAX);
+
+        if (posture == POSTURE_UNKNOWN || posture == POSTURE_MAX) {
+            LOG(ERROR) << "Received bad foldable posture when trying to send "
+                          "gRPC notification, posture "
+                          "value: "
+                       << posture;
+            return std::nullopt;
+        }
         Notification reply;
         reply.mutable_posture()->set_value(
                 static_cast<
@@ -1393,9 +1406,12 @@ public:
             clientAvailable = writer->Write(getCameraNotificationEvent());
         }
         if (clientAvailable) {
-            clientAvailable = writer->Write(
-                    getPostureNotificationEvent(static_cast<FoldablePostures>(
-                            android_foldable_get_posture())));
+            int posture = android_foldable_get_posture();
+            auto event = getPostureNotificationEvent(
+                    static_cast<FoldablePostures>(posture));
+            if (event.has_value()) {
+                clientAvailable = writer->Write(event.value());
+            }
         }
 
         // The event waiter will be unlocked when a change event is
@@ -1445,9 +1461,12 @@ public:
                                 FoldablePostures>*>(
                                 android_get_posture_listener()),
                         [&](auto state) {
+                            auto event = getPostureNotificationEvent(state);
+                            if (!event.has_value()) {
+                                return;
+                            }
                             std::lock_guard<std::mutex> lock(notificationLock);
-                            activeNotifications.push_back(
-                                    getPostureNotificationEvent(state));
+                            activeNotifications.push_back(event.value());
                             notifier.newEvent();
                         });
 
