@@ -45,7 +45,6 @@ enum {
 // These buffers are in the kernel format
 struct VirtIOSoundVqRingBufferItem {
     VirtQueueElement *el;
-    int pos;
     int size;
 };
 
@@ -79,15 +78,14 @@ struct VirtIOSoundPCMStream {
         SWVoiceOut *out;
         void *raw;
     } voice;
-    int64_t start_timestamp;
+    QEMUTimer vq_irq_timer;             // lives between start-stop
+    int64_t next_vq_irq_us;
     VirtIOSoundVqRingBuffer kpcm_buf;   // kernel
     VirtIOSoundPcmRingBuffer qpcm_buf;  // qemu
     QemuMutex mtx;
 
-    uint64_t frames_consumed;
-    uint32_t period_frames;
-    int32_t latency_bytes;
-    uint32_t freq_hz;
+    uint32_t period_us;
+    uint16_t period_frames;
     uint16_t aud_format;
     uint8_t id;
     uint8_t driver_frame_size;
