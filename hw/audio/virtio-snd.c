@@ -57,7 +57,7 @@ static void log_failure(const char *tag, const char *func, int line, const char 
 
 #define ABORT(why) do { log_failure("FATAL", __func__, __LINE__, why); abort(); } while (false)
 
-#if 1
+#if 0
 #define FAILURE(X) (log_failure("ERROR", __func__, __LINE__, #X), X)
 #define ASSERT(X) if (!(X)) { log_failure("FATAL", __func__, __LINE__, #X); abort(); }
 #else
