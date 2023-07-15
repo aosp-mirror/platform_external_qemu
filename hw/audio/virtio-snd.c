@@ -59,9 +59,11 @@ static void log_failure(const char *tag, const char *func, int line, const char 
 #if 0
 #define FAILURE(X) (log_failure("ERROR", __func__, __LINE__, #X), X)
 #define ASSERT(X) if (!(X)) { log_failure("FATAL", __func__, __LINE__, #X); abort(); }
+#define DEBUG(X) X
 #else
 #define FAILURE(X) (X)
 #define ASSERT(X)
+#define DEBUG(X)
 #endif
 
 union VirtIOSoundCtlRequest {
@@ -373,7 +375,12 @@ static VirtIOSoundVqRingBufferItem *vq_ring_buffer_top(VirtIOSoundVqRingBuffer *
     ASSERT(rb->size <= rb->capacity);
     ASSERT(rb->r < rb->capacity);
 
-    return rb->size ? &rb->buf[rb->r] : NULL;
+    if (rb->size > 0) {
+        ASSERT(rb->buf[rb->r].el != NULL);
+        return &rb->buf[rb->r];
+    } else {
+        return NULL;
+    }
 }
 
 static void vq_ring_buffer_pop(VirtIOSoundVqRingBuffer *rb) {
@@ -383,6 +390,7 @@ static void vq_ring_buffer_pop(VirtIOSoundVqRingBuffer *rb) {
     ASSERT(rb->size <= rb->capacity);
     ASSERT(rb->r < rb->capacity);
 
+    DEBUG(rb->buf[rb->r].el = NULL);
     rb->r = (rb->r + 1) % rb->capacity;
     rb->size = rb->size - 1;
 }
