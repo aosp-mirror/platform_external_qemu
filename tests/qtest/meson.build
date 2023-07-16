@@ -253,6 +253,7 @@ qos_test_ss.add(
   'max16600-test.c',
   'max20730-test.c',
   'max34451-test.c',
+  'max31760-test.c',
   'max31790_fan_ctrl-test.c',
   'megasas-test.c',
   'ne2000-test.c',
