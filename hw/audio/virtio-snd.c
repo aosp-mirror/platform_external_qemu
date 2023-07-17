@@ -704,13 +704,11 @@ static bool virtio_snd_stream_prepare_locked(VirtIOSoundPCMStream *stream) {
     return true;
 }
 
-static void virtio_snd_stream_unprepare_out_locked(VirtIOSoundPCMStream *stream) {
-    VirtIOSoundVqRingBuffer *kpcm_buf = &stream->kpcm_buf;
-    VirtIOSound *snd = stream->snd;
-    VirtQueue *tx_vq = snd->tx_vq;
-
+static void virtio_snd_stream_flush_vq_locked(VirtIOSoundPCMStream *stream,
+                                              VirtQueue *vq) {
     const int kernel_latency_bytes =
         stream->qpcm_buf.size / stream->aud_frame_size * stream->driver_frame_size;
+    VirtIOSoundVqRingBuffer *kpcm_buf = &stream->kpcm_buf;
 
     while (true) {
         VirtIOSoundVqRingBufferItem *item = vq_ring_buffer_top(kpcm_buf);
@@ -718,7 +716,7 @@ static void virtio_snd_stream_unprepare_out_locked(VirtIOSoundPCMStream *stream)
             VirtQueueElement *e = item->el;
 
             vq_consume_element(
-                tx_vq, e,
+                vq, e,
                 el_send_pcm_status(e, 0, VIRTIO_SND_S_OK, kernel_latency_bytes));
             vq_ring_buffer_pop(kpcm_buf);
         } else {
@@ -726,41 +724,12 @@ static void virtio_snd_stream_unprepare_out_locked(VirtIOSoundPCMStream *stream)
         }
     }
 
-    virtio_notify(&snd->parent, tx_vq);
-}
-
-static void virtio_snd_stream_unprepare_in_locked(VirtIOSoundPCMStream *stream) {
-    VirtIOSoundVqRingBuffer *kpcm_buf = &stream->kpcm_buf;
-    VirtIOSound *snd = stream->snd;
-    VirtQueue *rx_vq = snd->rx_vq;
-    const int period_bytes = stream->period_bytes;
-
-    const int kernel_latency_bytes =
-        stream->qpcm_buf.size / stream->aud_frame_size * stream->driver_frame_size;
-
-    while (true) {
-        VirtIOSoundVqRingBufferItem *item = vq_ring_buffer_top(kpcm_buf);
-        if (item) {
-            VirtQueueElement *e = item->el;
-
-            vq_consume_element(
-                rx_vq, e,
-                el_send_pcm_status(e, 0, VIRTIO_SND_S_OK, kernel_latency_bytes));
-            vq_ring_buffer_pop(kpcm_buf);
-        } else {
-            break;
-        }
-    }
-
-    virtio_notify(&snd->parent, rx_vq);
+    virtio_notify(&stream->snd->parent, vq);
 }
 
 static void virtio_snd_stream_unprepare_locked(VirtIOSoundPCMStream *stream) {
-    if (is_output_stream(stream)) {
-        virtio_snd_stream_unprepare_out_locked(stream);
-    } else {
-        virtio_snd_stream_unprepare_in_locked(stream);
-    }
+    virtio_snd_stream_flush_vq_locked(stream, is_output_stream(stream) ?
+                                      stream->snd->tx_vq : stream->snd->rx_vq);
     virtio_snd_voice_close(stream);
     vq_ring_buffer_free(&stream->kpcm_buf);
     pcm_ring_buffer_free(&stream->qpcm_buf);
