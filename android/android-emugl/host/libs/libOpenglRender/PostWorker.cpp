@@ -149,6 +149,23 @@ void PostWorker::postImpl(HandleType cbHandle) {
                     start_id = id;
                     continue;
                 }
+                switch ((int)zRot / 90) {
+                    case 1:
+                        // this should be the rotated w and rotated h
+                        rotation = HWC_TRANSFORM_ROT_270;
+                        std::swap(w, h);
+                        break;
+                    case 2:
+                        rotation = HWC_TRANSFORM_ROT_180;
+                        break;
+                    case 3:
+                        rotation = HWC_TRANSFORM_ROT_90;
+                        std::swap(w, h);
+                        // this should be the rotated w and rotated h
+                        break;
+                    default:;
+                        rotation = (hwc_transform_t)0;
+                }
                 ComposeLayer l;
                 hwc_rect_t displayArea = { .left = (int)x,
                                            .top = (int)y,
@@ -312,6 +329,22 @@ void PostWorker::composev2Impl(ComposeDevice_v2* p) {
                                                                 nullptr,
                                                                 nullptr,
                                                                 nullptr);
+    {
+        hwc_transform_t rotation = (hwc_transform_t)0;
+        int zRot = mFb->getZrot();
+        switch ((int)zRot / 90) {
+            case 1:
+                rotation = HWC_TRANSFORM_ROT_270;
+                break;
+            case 2:
+                rotation = HWC_TRANSFORM_ROT_180;
+                break;
+            case 3:
+                rotation = HWC_TRANSFORM_ROT_90;
+                break;
+            default:;
+        }
+    }
     s_gles2.glViewport(0, 0, w, h);
     if (!m_composeFbo) {
         s_gles2.glGenFramebuffers(1, &m_composeFbo);

@@ -2055,8 +2055,14 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
         return;
     }
     if (surface != mBackingSurface) {
+        if (mBackingSurface) {
+            QSize backingSize = mBackingSurface->bitmap->size();
+        }
         mBackingBitmapChanged = true;
         mBackingSurface = surface;
+        if (mBackingSurface) {
+            QSize backingSize = mBackingSurface->bitmap->size();
+        }
     }
 
     showNormal();
@@ -3510,6 +3516,27 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
         }
     }
 
+    if (mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled()) {
+        {
+            uint32_t w = 0;
+            uint32_t h = 0;
+            mToolWindow->getUiEmuAgent()->multiDisplay->getCombinedDisplaySize(
+                    &w, &h);
+            resizeAndChangeAspectRatio(0, 0, w, h);
+        }
+
+        mToolWindow->getUiEmuAgent()->multiDisplay->performRotation(rot);
+
+        {
+            // note: this is the initial w and h, not rotated at all
+            uint32_t w = 0;
+            uint32_t h = 0;
+            mToolWindow->getUiEmuAgent()->multiDisplay->getCombinedDisplaySize(
+                    &w, &h);
+            resizeAndChangeAspectRatio(0, 0, w, h, true);
+        }
+    }
+
 #ifdef __APPLE__
     // To fix issues when resizing + linking against macos sdk 11.
     SkinEvent* changeEvent = new SkinEvent();
@@ -3634,7 +3661,6 @@ void EmulatorQtWindow::setNoSkin() {
             event->type = kEventSetNoSkin;
             skin_event_add(event);
         }
-        mToolWindow->hideRotationButton(true);
         setFrameAlways(true);
     });
 }
