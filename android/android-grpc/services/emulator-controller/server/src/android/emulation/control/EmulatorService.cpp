@@ -31,6 +31,7 @@
 #include <memory>
 #include <mutex>
 #include <new>
+#include <optional>
 #include <ratio>
 #include <set>
 #include <string>
@@ -1376,6 +1377,27 @@ public:
         return reply;
     }
 
+    std::optional<Notification> getPostureNotificationEvent(
+            FoldablePostures posture) {
+        static_assert((int)POSTURE_MAX ==
+                      ::android::emulation::control::Posture_PostureValue::
+                              Posture_PostureValue_POSTURE_MAX);
+
+        if (posture == POSTURE_UNKNOWN || posture == POSTURE_MAX) {
+            LOG(ERROR) << "Received bad foldable posture when trying to send "
+                          "gRPC notification, posture "
+                          "value: "
+                       << posture;
+            return std::nullopt;
+        }
+        Notification reply;
+        reply.mutable_posture()->set_value(
+                static_cast<
+                        ::android::emulation::control::Posture_PostureValue>(
+                        posture));
+        return reply;
+    }
+
     Status streamNotification(ServerContext* context,
                               const Empty* request,
                               ServerWriter<Notification>* writer) override {
@@ -1383,12 +1405,20 @@ public:
         if (clientAvailable) {
             clientAvailable = writer->Write(getCameraNotificationEvent());
         }
+        if (clientAvailable) {
+            int posture = android_foldable_get_posture();
+            auto event = getPostureNotificationEvent(
+                    static_cast<FoldablePostures>(posture));
+            if (event.has_value()) {
+                clientAvailable = writer->Write(event.value());
+            }
+        }
 
         // The event waiter will be unlocked when a change event is
         // received.
         EventWaiter notifier;
         int eventCount = 0;
-        enum class EventTypes { CameraEvent, DisplayEvent };
+        enum class EventTypes { CameraEvent, DisplayEvent, PostureEvent };
 
         // This is the set of notifications that need to be delivered.
         std::vector<Notification> activeNotifications;
@@ -1423,6 +1453,22 @@ public:
                         notifier.newEvent();
                     }
                 });
+
+        RaiiEventListener<base::EventNotificationSupport<FoldablePostures>,
+                          FoldablePostures>
+                foldableListener(
+                        static_cast<base::EventNotificationSupport<
+                                FoldablePostures>*>(
+                                android_get_posture_listener()),
+                        [&](auto state) {
+                            auto event = getPostureNotificationEvent(state);
+                            if (!event.has_value()) {
+                                return;
+                            }
+                            std::lock_guard<std::mutex> lock(notificationLock);
+                            activeNotifications.push_back(event.value());
+                            notifier.newEvent();
+                        });
 
         // And deliver the events as they come in.
         while (clientAvailable) {

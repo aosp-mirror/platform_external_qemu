@@ -493,8 +493,6 @@ private:
     CarClusterWindow* mCarClusterWindow;
     CarClusterConnector* mCarClusterConnector;
 
-    EmulatorContainer mContainer;
-    EmulatorOverlay mOverlay;
     QRect mDeviceGeometry;
 
     bool mMouseGrabbed = false;
@@ -623,6 +621,9 @@ private:
     int tiltToRotation(int xTiltDeg, int yTiltDeg);
     int penOrientation(int rotation);
     std::map<uint32_t, std::unique_ptr<MultiDisplayWidget>> mMultiDisplayWindow;
+    // Putting these last because they both are constructed using *this pointer.
+    EmulatorContainer mContainer;
+    EmulatorOverlay mOverlay;
 };
 
 class SkinSurfaceBitmap {

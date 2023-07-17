@@ -12,6 +12,7 @@
 #include "host-common/FeatureControl.h"
 
 #include "android/featurecontrol/FeatureControlImpl.h"
+#include "host-common/Features.h"
 
 namespace android {
 namespace featurecontrol {

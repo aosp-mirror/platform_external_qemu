@@ -27,6 +27,8 @@
 #include "aemu/base/logging/CLog.h"
 #include "android/utils/debug.h"
 #include "backend/packet_streamer_client.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/feature_control.h"
 #include "netsim.h"
 
 // clang-format off
@@ -98,9 +100,14 @@ static int netsim_chr_write(Chardev* chr, const uint8_t* buf, int len) {
 static void netsim_chr_connect(PacketStreamChardev* netsim) {
     // TODO(jansene): The controller_properties_file could be defined as
     // properties on the chardev, v.s. injected here.
+
     auto channelFactory = []() {
-        return netsim::packet::CreateChannel(
-                gNetsimConfiguration.controller_properties_file);
+        netsim::packet::NetsimdOptions options {
+            .no_cli_ui = !feature_is_enabled(kFeature_NetsimCliUi),
+            .no_web_ui = !feature_is_enabled(kFeature_NetsimWebUi),
+        };
+        DD("Producing channel: no_cli_ui: %d, no_web_ui %d", options.no_cli_ui, options.no_web_ui);
+        return netsim::packet::CreateChannel(options);
     };
 
     auto protocol = android::qemu2::getPacketProtocol(

@@ -4,15 +4,15 @@ extern "C" {
 }
 #endif
 #include "aemu/base/Log.h"
-#include "android/telephony/sysdeps.h"
-#include "host-common/VmLock.h"
 #include "android-qemu2-glue/emulation/WifiService.h"
 #include "android-qemu2-glue/utils/stream.h"
 #include "android/cmdline-definitions.h"  // for AndroidOptions
 #include "android/console.h"
+#include "android/emulation/HostapdController.h"
 #include "android/network/Ieee80211Frame.h"
 #include "android/telephony/sysdeps.h"
 #include "android/utils/debug.h"
+#include "host-common/VmLock.h"
 
 extern "C" {
 #include "android-qemu2-glue/emulation/virtio-wifi.h"
@@ -89,7 +89,17 @@ struct GlobalState {
                 builder.withServerPort(std::stoi(opts->wifi_server_port));
             }
             wifiService = builder.build();
-            return wifiService->init();
+            bool res = wifiService->init();
+            if (!res && opts->redirect_to_netsim) {
+                LOG(WARNING) << "Failed to init netsim WiFi, fall back to "
+                                "previous network stack.";
+                builder.withRedirectToNetsim(false);
+                wifiService = builder.build();
+                return wifiService->init();
+            } else {
+                LOG(DEBUG) << "Successfully initialized netsim WiFi.";
+                return res;
+            }
         } else {
             return true;
         }

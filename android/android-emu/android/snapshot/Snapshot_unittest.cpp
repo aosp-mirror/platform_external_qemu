@@ -12,10 +12,12 @@
 #include "android/snapshot/Snapshot.h"
 
 #include "android/featurecontrol/testing/FeatureControlTest.h"
+#include "host-common/Features.h"
 
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <unordered_set>
 
 namespace android {
 namespace snapshot {
@@ -39,7 +41,6 @@ protected:
 private:
     std::string mConfigPath;
 };
-
 
 // Checks that the current set of features is saved and loaded
 // correctly when saving the snapshot protobuf.
@@ -81,10 +82,10 @@ TEST_F(SnapshotFeatureControlTest, checkSensitiveFeatures) {
 
     reload();
 
-    for (int i = 0; i < fc::Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : android::featurecontrol::allFeatures()) {
 
-        if (Snapshot::isFeatureSnapshotInsensitive(feature)) continue;
+        if (Snapshot::isFeatureSnapshotInsensitive(feature))
+            continue;
 
         fc::setEnabledOverride(feature, false);
         bool failDisabled = !mSnapshot->isCompatibleWithCurrentFeatures();
@@ -95,5 +96,5 @@ TEST_F(SnapshotFeatureControlTest, checkSensitiveFeatures) {
     }
 }
 
-} // namespace snapshot
-} // namespace android
+}  // namespace snapshot
+}  // namespace android

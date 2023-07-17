@@ -33,8 +33,7 @@ TEST_F(FeatureControlTest, overrideSetting) {
     writeUserIniGuest(mAllDefaultIniGuestOnly);
     loadAllIni();
     using namespace featurecontrol;
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : allFeatures()) {
         setEnabledOverride(feature, true);
         EXPECT_TRUE(isEnabled(feature));
         setEnabledOverride(feature, false);
@@ -49,8 +48,7 @@ TEST_F(FeatureControlTest, resetToDefault) {
     writeUserIniGuest(mAllDefaultIniGuestOnly);
     loadAllIni();
     using namespace featurecontrol;
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : allFeatures()) {
         bool defaultVal = isEnabled(feature);
         setEnabledOverride(feature, true);
         resetEnabledToDefault(feature);
@@ -68,16 +66,14 @@ TEST_F(FeatureControlTest, readDefaultSettings) {
     writeDefaultIniHost(mAllOnIni);
     writeDefaultIniGuest(mAllOnIniGuestOnly);
     loadAllIni();
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : allFeatures()) {
         EXPECT_TRUE(isEnabled(feature));
     }
 
     writeDefaultIniHost(mAllOffIni);
     writeDefaultIniGuest(mAllOffIniGuestOnly);
     loadAllIni();
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : allFeatures()) {
         EXPECT_FALSE(isEnabled(feature));
     }
 }
@@ -87,18 +83,16 @@ TEST_F(FeatureControlTest, readDefaultSettingsWithNoUserSettings) {
     writeDefaultIniGuest(mAllOnIniGuestOnly);
     FeatureControlImpl::get().init(mDefaultIniHostFilePath,
                                    mDefaultIniGuestFilePath, "", "");
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
-        EXPECT_TRUE(isEnabled(feature));
+    for (const auto feature : allFeatures()) {
+        EXPECT_TRUE(isEnabled(feature)) << FeatureControlImpl::toString(feature) << " is not enabled.";
     }
 
     writeDefaultIniHost(mAllOffIni);
     writeDefaultIniGuest(mAllOffIniGuestOnly);
     FeatureControlImpl::get().init(mDefaultIniHostFilePath,
                                    mDefaultIniGuestFilePath, "", "");
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
-        EXPECT_FALSE(isEnabled(feature));
+    for (const auto feature : allFeatures()) {
+        EXPECT_FALSE(isEnabled(feature))  << FeatureControlImpl::toString(feature) << " is enabled.";
     }
 }
 
@@ -108,12 +102,12 @@ TEST_F(FeatureControlTest, readDefaultSettingsHostGuestDifferent) {
     FeatureControlImpl::get().init(mDefaultIniHostFilePath,
                                    mDefaultIniGuestFilePath, "", "");
 
-#define FEATURE_CONTROL_ITEM(item) EXPECT_TRUE(isEnabled(item));
+#define FEATURE_CONTROL_ITEM(item, idx) EXPECT_TRUE(isEnabled(item));
 #include "host-common/FeatureControlDefHost.h"
     ;
 #undef FEATURE_CONTROL_ITEM
 
-#define FEATURE_CONTROL_ITEM(item) EXPECT_FALSE(isEnabled(item));
+#define FEATURE_CONTROL_ITEM(item, idx) EXPECT_FALSE(isEnabled(item));
 #include "host-common/FeatureControlDefGuest.h"
     ;
 #undef FEATURE_CONTROL_ITEM
@@ -122,8 +116,7 @@ TEST_F(FeatureControlTest, readDefaultSettingsHostGuestDifferent) {
     writeDefaultIniGuest(mAllOnIni);
     FeatureControlImpl::get().init(mDefaultIniHostFilePath,
                                    mDefaultIniGuestFilePath, "", "");
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : allFeatures()) {
         EXPECT_FALSE(isEnabled(feature));
     }
 }
@@ -135,29 +128,27 @@ TEST_F(FeatureControlTest, readUserSettings) {
     writeUserIniHost(mAllOnIni);
     writeUserIniGuest(mAllOnIniGuestOnly);
     loadAllIni();
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : allFeatures()) {
         EXPECT_TRUE(isEnabled(feature));
     }
 
     writeUserIniHost(mAllOffIni);
     writeUserIniGuest(mAllOffIniGuestOnly);
     loadAllIni();
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : allFeatures()) {
         EXPECT_FALSE(isEnabled(feature));
     }
 }
 
 TEST_F(FeatureControlTest, stringConversion) {
-#define FEATURE_CONTROL_ITEM(item)           \
+#define FEATURE_CONTROL_ITEM(item, idx)           \
     EXPECT_EQ(item, stringToFeature(#item)); \
     EXPECT_STREQ(#item, FeatureControlImpl::toString(item).data());
 #include "host-common/FeatureControlDefGuest.h"
 #include "host-common/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
-    EXPECT_EQ(Feature_n_items,
+    EXPECT_EQ(Feature_unknown,
               stringToFeature("somefeaturethatshouldneverexist"));
 }
 
@@ -165,8 +156,7 @@ TEST_F(FeatureControlTest, setNonOverriden) {
     writeDefaultIniHost(mAllOnIni);
     writeDefaultIniGuest(mAllOnIniGuestOnly);
     loadAllIni();
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : allFeatures()) {
         EXPECT_TRUE(isEnabled(feature));
         EXPECT_FALSE(isOverridden(feature));
     }
@@ -189,8 +179,7 @@ TEST_F(FeatureControlTest, setNonOverridenGuestFeatureGuestOn) {
     writeDefaultIniHost(mAllOffIni);
     writeDefaultIniGuest(mAllOnIniGuestOnly);
     loadAllIni();
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : allFeatures()) {
         EXPECT_FALSE(isEnabled(feature));
         EXPECT_FALSE(isOverridden(feature));
         setIfNotOverridenOrGuestDisabled(feature, true);
@@ -202,15 +191,14 @@ TEST_F(FeatureControlTest, setNonOverridenGuestFeatureGuestOff) {
     writeDefaultIniHost(mAllOffIni);
     writeDefaultIniGuest(mAllOffIniGuestOnly);
     loadAllIni();
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+    for (const auto feature : allFeatures()) {
         EXPECT_FALSE(isEnabled(feature));
         EXPECT_FALSE(isOverridden(feature));
         setIfNotOverridenOrGuestDisabled(feature, true);
         if (isGuestFeature(feature)) {
-            EXPECT_FALSE(isEnabled(feature));
+            EXPECT_FALSE(isEnabled(feature)) << FeatureControlImpl::toString(feature) << " is not enabled.";
         } else {
-            EXPECT_TRUE(isEnabled(feature));
+            EXPECT_TRUE(isEnabled(feature)) << FeatureControlImpl::toString(feature) << " is  enabled.";
         }
     }
 }
@@ -377,6 +365,9 @@ Feature: 'VirtioSndCard' (89), value: 0, default: 0, is overridden: 0
 Feature: 'VirtioTablet' (90), value: 0, default: 0, is overridden: 0
 Feature: 'VsockSnapshotLoadFixed_b231345789' (91), value: 0, default: 0, is overridden: 0
 Feature: 'DownloadableSnapshot' (92), value: 0, default: 0, is overridden: 0
+Feature: 'NetsimWebUi' (93), value: 0, default: 0, is overridden: 0
+Feature: 'NetsimCliUi' (94), value: 0, default: 0, is overridden: 0
+Feature: 'WiFiPacketStream' (95), value: 0, default: 0, is overridden: 0
 )#";
     EXPECT_EQ(feature_list, ss.str());
 }

@@ -11,35 +11,34 @@
 
 #include "android/featurecontrol/FeatureControlImpl.h"
 
+#include <stdlib.h>
+#include <strings.h>
+#include <algorithm>
+#include <ostream>
+#include <set>
+#include <string_view>
+#include <unordered_set>
+#include <utility>
+
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
-#include "host-common/hw-config.h"
-#include "android/avd/info.h"
-#include "aemu/base/Log.h"
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
+#include "aemu/base/logging/LogSeverity.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/memory/ScopedPtr.h"
+#include "android/avd/info.h"
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/utils/debug.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/system.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <algorithm>
-#include <memory>
-#include <ostream>
-#include <set>
-#include <string_view>
-#include <unordered_set>
+#include "host-common/hw-config.h"
 
 using android::base::ScopedCPtr;
-
 
 enum IniSetting { ON, OFF, DEFAULT, NULLVAL, ERR };
 static constexpr char kIniSettingNull[] = "null";
@@ -48,7 +47,7 @@ static constexpr char kIniSettingDefault[] = "default";
 static android::base::LazyInstance<android::featurecontrol::FeatureControlImpl>
         s_featureControl = LAZY_INSTANCE_INIT;
 
-#define FEATURE_CONTROL_ITEM(item) #item,
+#define FEATURE_CONTROL_ITEM(item, idx) #item,
 static const std::unordered_set<std::string> kExpectedGuestFeatures = {
 #include "host-common/FeatureControlDefGuest.h"
 };
@@ -158,14 +157,15 @@ void FeatureControlImpl::init(const std::string& defaultIniHostPath,
                               const std::string& defaultIniGuestPath,
                               const std::string& userIniHostPath,
                               const std::string& userIniGuestPath) {
-    memset(mGuestTriedEnabledFeatures, 0,
-           sizeof(FeatureOption) * Feature_n_items);
     base::IniFile defaultIniHost(defaultIniHostPath);
+    mFeatures.clear();
+    mGuestTriedEnabledFeatures.clear();
     if (defaultIniHost.read()) {
         // Initialize host only features
-#define FEATURE_CONTROL_ITEM(item) \
+#define FEATURE_CONTROL_ITEM(item, idx) \
     initHostFeatureAndParseDefault(defaultIniHost, item, #item);
 #include "host-common/FeatureControlDefHost.h"
+
 #undef FEATURE_CONTROL_ITEM
 
         // Initialize guest features
@@ -187,19 +187,19 @@ void FeatureControlImpl::init(const std::string& defaultIniHostPath,
                             "the feature(s): %s",
                             missing.c_str());
                 }
-#define FEATURE_CONTROL_ITEM(item)                                         \
+#define FEATURE_CONTROL_ITEM(item, idx)                                    \
     initGuestFeatureAndParseDefault(defaultIniHost, defaultIniGuest, item, \
                                     #item);
 #include "host-common/FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
             }
         } else {
-#define FEATURE_CONTROL_ITEM(item) initEnabledDefault(item, false);
+#define FEATURE_CONTROL_ITEM(item, idx) initEnabledDefault(item, false);
 #include "host-common/FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
         }
     } else {
-#define FEATURE_CONTROL_ITEM(item) initEnabledDefault(item, false);
+#define FEATURE_CONTROL_ITEM(item, idx) initEnabledDefault(item, false);
 #include "host-common/FeatureControlDefGuest.h"
 #include "host-common/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
@@ -209,7 +209,7 @@ void FeatureControlImpl::init(const std::string& defaultIniHostPath,
     if (base::System::get()->pathCanRead(userIniHostPath)) {
         base::IniFile userIni(userIniHostPath);
         if (userIni.read()) {
-#define FEATURE_CONTROL_ITEM(item) \
+#define FEATURE_CONTROL_ITEM(item, idx) \
     loadUserOverrideFeature(userIni, item, #item);
 #include "host-common/FeatureControlDefGuest.h"
 #include "host-common/FeatureControlDefHost.h"
@@ -219,7 +219,7 @@ void FeatureControlImpl::init(const std::string& defaultIniHostPath,
     if (base::System::get()->pathCanRead(userIniGuestPath)) {
         base::IniFile userIni(userIniGuestPath);
         if (userIni.read()) {
-#define FEATURE_CONTROL_ITEM(item) \
+#define FEATURE_CONTROL_ITEM(item, idx) \
     loadUserOverrideFeature(userIni, item, #item);
 #include "host-common/FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
@@ -252,9 +252,6 @@ void FeatureControlImpl::init(const std::string& defaultIniHostPath,
 }
 
 void FeatureControlImpl::initNoFiles() {
-    memset(mGuestTriedEnabledFeatures, 0,
-           sizeof(FeatureOption) * Feature_n_items);
-
     // Apply overrides from the hw config.
     if (getConsoleAgents()->settings->hw()->hw_featureflags) {
         parseAndApplyOverrides(
@@ -288,7 +285,21 @@ void FeatureControlImpl::create() {
     (void)s_featureControl.get();
 }
 
-FeatureControlImpl::FeatureControlImpl() {
+FeatureControlImpl::FeatureControlImpl()
+    : mFeatures({
+#define FEATURE_CONTROL_ITEM(item, idx) {item, FeatureOption({.name = item})},
+#include "host-common/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefHost.h"
+#undef FEATURE_CONTROL_ITEM
+      }),
+      mGuestTriedEnabledFeatures({
+#define FEATURE_CONTROL_ITEM(item, idx) {item,  FeatureOption({.name = item})},
+#include "host-common/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefHost.h"
+#undef FEATURE_CONTROL_ITEM
+      })
+
+{
     if (base::System::getEnvironmentVariable("ANDROID_EMU_SANDBOX") == "1") {
         initNoFiles();
         return;
@@ -340,8 +351,9 @@ std::ostream& operator<<(std::ostream& os,
 }
 
 void FeatureControlImpl::writeFeaturesToStream(std::ostream& os) const {
-    for (const FeatureOption& opt : mFeatures) {
-        os << opt << std::endl;
+    for (const auto val : getAllFeatures(true)) {
+        auto it = mFeatures.find(val);
+        os << it->second << std::endl;
     }
 }
 
@@ -350,7 +362,12 @@ FeatureControlImpl& FeatureControlImpl::get() {
 }
 
 bool FeatureControlImpl::isEnabled(Feature feature) const {
-    return mFeatures[feature].currentVal;
+    const auto it = mFeatures.find(feature);
+    if (it == mFeatures.end()) {
+        dwarning("FeatureControl is requesting a non existing feature.");
+        return false;
+    }
+    return it->second.currentVal;
 }
 
 void FeatureControlImpl::setEnabledOverride(Feature feature, bool isEnabled) {
@@ -366,13 +383,17 @@ void FeatureControlImpl::resetEnabledToDefault(Feature feature) {
 }
 
 bool FeatureControlImpl::isOverridden(Feature feature) const {
-    const FeatureOption& currFeature = mFeatures[feature];
-    return currFeature.isOverridden;
+    const auto it = mFeatures.find(feature);
+    if (it == mFeatures.end()) {
+        dwarning("FeatureControl is requesting a non existing feature.");
+        return false;
+    }
+    return it->second.isOverridden;
 }
 
 bool FeatureControlImpl::isGuestFeature(Feature feature) const {
-#define FEATURE_CONTROL_ITEM(item) \
-    if (feature == Feature::item)  \
+#define FEATURE_CONTROL_ITEM(item, idx) \
+    if (feature == Feature::item)       \
         return true;
 #include "host-common/FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
@@ -380,7 +401,12 @@ bool FeatureControlImpl::isGuestFeature(Feature feature) const {
 }
 
 bool FeatureControlImpl::isEnabledByGuest(Feature feature) const {
-    return mGuestTriedEnabledFeatures[feature].currentVal;
+    const auto it = mGuestTriedEnabledFeatures.find(feature);
+    if (it == mGuestTriedEnabledFeatures.end()) {
+        dwarning("FeatureControl is requesting a non existing feature.");
+        return false;
+    }
+    return it->second.currentVal;
 }
 
 void FeatureControlImpl::setIfNotOverriden(Feature feature, bool isEnabled) {
@@ -405,19 +431,19 @@ void FeatureControlImpl::setIfNotOverridenOrGuestDisabled(Feature feature,
 }
 
 Feature FeatureControlImpl::fromString(std::string_view str) {
-#define FEATURE_CONTROL_ITEM(item) \
-    if (str == #item)              \
+#define FEATURE_CONTROL_ITEM(item, idx) \
+    if (str == #item)                   \
         return item;
 #include "host-common/FeatureControlDefGuest.h"
 #include "host-common/FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
-    return Feature::Feature_n_items;
+    return Feature::Feature_unknown;
 }
 
 std::string_view FeatureControlImpl::toString(Feature feature) {
-#define FEATURE_CONTROL_ITEM(item) \
-    if (feature == Feature::item)  \
+#define FEATURE_CONTROL_ITEM(item, idx) \
+    if (feature == Feature::item)       \
         return #item;
 #include "host-common/FeatureControlDefGuest.h"
 #include "host-common/FeatureControlDefHost.h"
@@ -452,7 +478,7 @@ void FeatureControlImpl::parseAndApplyOverrides(std::string_view overrides) {
         auto itEnd = std::find(it, overrides.end(), ',');
         if (it != itEnd) {
             auto feature = fromString(std::string_view(&*it, (itEnd - it)));
-            if (feature == Feature::Feature_n_items) {
+            if (feature == Feature::Feature_unknown) {
                 dwarning("[FeatureControl] Bad feature name: '%s'",
                          std::string(it, itEnd).c_str());
             } else {
@@ -468,59 +494,55 @@ void FeatureControlImpl::parseAndApplyOverrides(std::string_view overrides) {
     }
 }
 
+std::vector<Feature> FeatureControlImpl::getAllFeatures(bool sorted) const {
+    std::vector<Feature> res;
+    for (const auto [key, val] : mFeatures) {
+        res.push_back(key);
+    }
+    if (sorted) {
+        std::sort(res.begin(), res.end(),
+                  [](Feature a, Feature b) { return (int)a < (int)b; });
+    }
+    return res;
+}
+
 std::vector<Feature> FeatureControlImpl::getEnabledNonOverride() const {
     std::vector<Feature> res;
-
-#define FEATURE_CONTROL_ITEM(feature)  \
-    if (mFeatures[feature].defaultVal) \
-        res.push_back(feature);
-
-#include "host-common/FeatureControlDefGuest.h"
-#include "host-common/FeatureControlDefHost.h"
-#undef FEATURE_CONTROL_ITEM
-
+    for (const auto [key, val] : mFeatures) {
+        if (val.defaultVal) {
+            res.push_back(key);
+        }
+    }
     return res;
 }
 
 std::vector<Feature> FeatureControlImpl::getEnabledOverride() const {
     std::vector<Feature> res;
-
-#define FEATURE_CONTROL_ITEM(feature)                                     \
-    if (mFeatures[feature].isOverridden && mFeatures[feature].currentVal) \
-        res.push_back(feature);
-
-#include "host-common/FeatureControlDefGuest.h"
-#include "host-common/FeatureControlDefHost.h"
-#undef FEATURE_CONTROL_ITEM
-
+    for (const auto [key, val] : mFeatures) {
+        if (val.isOverridden && val.currentVal) {
+            res.push_back(key);
+        }
+    }
     return res;
 }
 
 std::vector<Feature> FeatureControlImpl::getDisabledOverride() const {
     std::vector<Feature> res;
-
-#define FEATURE_CONTROL_ITEM(feature)                                      \
-    if (mFeatures[feature].isOverridden && !mFeatures[feature].currentVal) \
-        res.push_back(feature);
-
-#include "host-common/FeatureControlDefGuest.h"
-#include "host-common/FeatureControlDefHost.h"
-#undef FEATURE_CONTROL_ITEM
-
+    for (const auto [key, val] : mFeatures) {
+        if (val.isOverridden && !val.currentVal) {
+            res.push_back(key);
+        }
+    }
     return res;
 }
 
 std::vector<Feature> FeatureControlImpl::getEnabled() const {
     std::vector<Feature> res;
-
-#define FEATURE_CONTROL_ITEM(feature)  \
-    if (mFeatures[feature].currentVal) \
-        res.push_back(feature);
-
-#include "host-common/FeatureControlDefGuest.h"
-#include "host-common/FeatureControlDefHost.h"
-#undef FEATURE_CONTROL_ITEM
-
+    for (const auto [key, val] : mFeatures) {
+        if (val.currentVal) {
+            res.push_back(key);
+        }
+    }
     return res;
 }
 }  // namespace featurecontrol
