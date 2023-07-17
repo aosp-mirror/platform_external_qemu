@@ -59,9 +59,11 @@ static void log_failure(const char *tag, const char *func, int line, const char 
 #if 0
 #define FAILURE(X) (log_failure("ERROR", __func__, __LINE__, #X), X)
 #define ASSERT(X) if (!(X)) { log_failure("FATAL", __func__, __LINE__, #X); abort(); }
+#define DEBUG(X) X
 #else
 #define FAILURE(X) (X)
 #define ASSERT(X)
+#define DEBUG(X)
 #endif
 
 union VirtIOSoundCtlRequest {
@@ -286,23 +288,15 @@ static size_t el_send_status(VirtQueueElement *e, unsigned status) {
     return el_send_data(e, &data, sizeof(data));
 }
 
-static size_t el_send_pcm_status(VirtQueueElement *e, unsigned status, unsigned latency_bytes) {
-    const struct virtio_snd_pcm_status data = {
-        .status = status,
-        .latency_bytes = latency_bytes,
-    };
-    return el_send_data(e, &data, sizeof(data));
-}
-
-static unsigned el_send_pcm_rx_status(VirtQueueElement *e, unsigned period_bytes,
-                                      unsigned status, unsigned latency_bytes) {
+static size_t el_send_pcm_status(VirtQueueElement *e, size_t offset,
+                                 unsigned status, unsigned latency_bytes) {
     const struct virtio_snd_pcm_status data = {
         .status = status,
         .latency_bytes = latency_bytes,
     };
 
-    iov_from_buf(e->in_sg, e->in_num, period_bytes, &data, sizeof(data));
-    return period_bytes + sizeof(data);
+    iov_from_buf(e->in_sg, e->in_num, offset, &data, sizeof(data));
+    return offset + sizeof(data);
 }
 
 static void vq_ring_buffer_init(VirtIOSoundVqRingBuffer *rb) {
@@ -373,7 +367,12 @@ static VirtIOSoundVqRingBufferItem *vq_ring_buffer_top(VirtIOSoundVqRingBuffer *
     ASSERT(rb->size <= rb->capacity);
     ASSERT(rb->r < rb->capacity);
 
-    return rb->size ? &rb->buf[rb->r] : NULL;
+    if (rb->size > 0) {
+        ASSERT(rb->buf[rb->r].el != NULL);
+        return &rb->buf[rb->r];
+    } else {
+        return NULL;
+    }
 }
 
 static void vq_ring_buffer_pop(VirtIOSoundVqRingBuffer *rb) {
@@ -383,6 +382,7 @@ static void vq_ring_buffer_pop(VirtIOSoundVqRingBuffer *rb) {
     ASSERT(rb->size <= rb->capacity);
     ASSERT(rb->r < rb->capacity);
 
+    DEBUG(rb->buf[rb->r].el = NULL);
     rb->r = (rb->r + 1) % rb->capacity;
     rb->size = rb->size - 1;
 }
@@ -719,8 +719,7 @@ static void virtio_snd_stream_unprepare_out_locked(VirtIOSoundPCMStream *stream)
 
             vq_consume_element(
                 tx_vq, e,
-                el_send_pcm_status(e, VIRTIO_SND_S_OK, kernel_latency_bytes));
-
+                el_send_pcm_status(e, 0, VIRTIO_SND_S_OK, kernel_latency_bytes));
             vq_ring_buffer_pop(kpcm_buf);
         } else {
             break;
@@ -744,9 +743,9 @@ static void virtio_snd_stream_unprepare_in_locked(VirtIOSoundPCMStream *stream) 
         if (item) {
             VirtQueueElement *e = item->el;
 
-            const size_t size = el_send_pcm_rx_status(
-                e, 0, VIRTIO_SND_S_OK, kernel_latency_bytes);
-            vq_consume_element(rx_vq, e, size);
+            vq_consume_element(
+                rx_vq, e,
+                el_send_pcm_status(e, 0, VIRTIO_SND_S_OK, kernel_latency_bytes));
             vq_ring_buffer_pop(kpcm_buf);
         } else {
             break;
@@ -1341,7 +1340,7 @@ static bool virtio_snd_stream_kpcm_to_qpcm_locked(VirtIOSoundPCMStream *stream) 
 
     vq_consume_element(
         stream->snd->tx_vq, e,
-        el_send_pcm_status(e, VIRTIO_SND_S_OK,
+        el_send_pcm_status(e, 0, VIRTIO_SND_S_OK,
                            stream->qpcm_buf.size / aud_fs * driver_fs));
     vq_ring_buffer_pop(&stream->kpcm_buf);
     return true;
@@ -1428,7 +1427,7 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
     iov_to_buf(e->out_sg, e->out_num, 0, &xfer, sizeof(xfer));
     if (xfer.stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
-        vq_consume_element(vq, e, el_send_pcm_status(e, VIRTIO_SND_S_BAD_MSG, 0));
+        vq_consume_element(vq, e, el_send_pcm_status(e, 0, VIRTIO_SND_S_BAD_MSG, 0));
         return;
     }
 
@@ -1503,8 +1502,8 @@ static bool virtio_snd_stream_qpcm_to_kpcm_locked(VirtIOSoundPCMStream *stream) 
 
     vq_consume_element(
         stream->snd->rx_vq, e,
-        el_send_pcm_rx_status(e, pos, VIRTIO_SND_S_OK,
-                              stream->qpcm_buf.size / aud_fs * driver_fs));
+        el_send_pcm_status(e, pos, VIRTIO_SND_S_OK,
+                           stream->qpcm_buf.size / aud_fs * driver_fs));
     vq_ring_buffer_pop(&stream->kpcm_buf);
     return true;
 }
@@ -1578,7 +1577,7 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
     iov_to_buf(e->out_sg, e->out_num, 0, &xfer, sizeof(xfer));
     if (xfer.stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
-        vq_consume_element(vq, e, el_send_pcm_rx_status(e, 0, VIRTIO_SND_S_BAD_MSG, 0));
+        vq_consume_element(vq, e, el_send_pcm_status(e, 0, VIRTIO_SND_S_BAD_MSG, 0));
         return;
     }
 
