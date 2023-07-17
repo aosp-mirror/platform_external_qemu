@@ -328,7 +328,6 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             }
         }
         getConsoleAgents()->settings->set_guest_boot_completed(true);
-
         if (getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut > 0) {
             getConsoleAgents()->vm->vmShutdown();
         } else {
@@ -594,4 +593,8 @@ extern "C" int is_restart_when_stalled(void) {
 
 extern "C" void signal_system_reset_was_requested(void) {
   s_reset_request_uptime_ms = get_uptime_ms();
+}
+
+extern "C" int64_t get_uptime_since_reset(void) {
+  return s_reset_request_uptime_ms;
 }

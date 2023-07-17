@@ -26,7 +26,7 @@ namespace control {
 
 // EventChangeSupport which can use optional values for the event.
 class NotificationEventChangeSupport : public EventChangeSupport<Notification> {
-    public:
+public:
     void fireEvent(std::optional<Notification> event) {
         if (event.has_value()) {
             EventChangeSupport<Notification>::fireEvent(*event);
@@ -64,6 +64,7 @@ public:
     // Notifies client of the following changes:
     //
     // - Virtual scene camera status change.
+    // - Boot complete status change.
     // - Display configuration changes from extended ui. This will only be fired
     //   if the user makes modifications the extended displays through the
     //   extended control tab.
@@ -80,6 +81,7 @@ private:
     std::optional<Notification> getCameraNotificationEvent();
     std::optional<Notification> getPostureNotificationEvent();
     std::optional<Notification> getDisplayNotificationEvent();
+    std::optional<Notification> getBootedNotificationEvent();
 
     NotificationEventChangeSupport mNotificationListeners;
     VirtualSceneCamera* mCamera;

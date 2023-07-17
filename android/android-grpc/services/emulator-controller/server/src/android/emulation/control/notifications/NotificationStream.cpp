@@ -18,6 +18,7 @@
 
 #include "aemu/base/EventNotificationSupport.h"
 #include "android/avd/info.h"
+#include "android/emulation/control/BootCompletionHandler.h"
 #include "android/hw-sensors.h"
 #include "android/utils/debug.h"
 #include "host-common/MultiDisplay.h"
@@ -66,6 +67,20 @@ std::optional<Notification> NotificationStream::getDisplayNotificationEvent() {
     displayConfig->set_userconfigurable(avdInfo_maxMultiDisplayEntries());
 
     DD("Display notification event: %s", event.ShortDebugString().c_str());
+    return event;
+}
+
+std::optional<Notification> NotificationStream::getBootedNotificationEvent() {
+    Notification event;
+    if (!BootCompletionHandler::get()->hasBooted()) {
+        DD("Not yet booted");
+        return std::nullopt;
+    }
+
+    auto eventDetails = event.mutable_booted();
+    eventDetails->set_time(BootCompletionHandler::get()->bootTime().count());
+
+    DD("Booted notification event: %s", event.ShortDebugString().c_str());
     return event;
 }
 
@@ -120,7 +135,7 @@ NotificationStreamWriter* NotificationStream::notificationStream() {
     auto stream = new NotificationStreamWriter(&mNotificationListeners);
     stream->eventArrived(getCameraNotificationEvent());
     stream->eventArrived(getPostureNotificationEvent());
-    // stream->eventArrived(getDisplayNotificationEvent());
+    stream->eventArrived(getBootedNotificationEvent());
     return stream;
 }
 
@@ -142,6 +157,9 @@ void NotificationStream::registerListeners() {
                     android_get_posture_listener());
     foldableListener->registerOnce([&](auto state) {
         mNotificationListeners.fireEvent(getPostureNotificationEvent());
+    });
+    BootCompletionHandler::get()->registerOnce([&](auto completed) {
+        mNotificationListeners.fireEvent(getBootedNotificationEvent());
     });
 }
 }  // namespace control
