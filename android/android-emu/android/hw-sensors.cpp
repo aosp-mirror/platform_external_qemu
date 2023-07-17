@@ -1492,3 +1492,7 @@ bool android_hw_sensors_is_loading_snapshot() {
 bool android_heart_rate_sensor_configured(){
   return getConsoleAgents()->settings->hw()->hw_sensors_heart_rate;
 }
+
+void* android_get_posture_listener() {
+  return physicalModel_getPostureListener(android_physical_model_instance());
+}

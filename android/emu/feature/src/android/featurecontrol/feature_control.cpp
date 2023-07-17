@@ -10,7 +10,13 @@
 // GNU General Public License for more details.
 
 #include "host-common/feature_control.h"
+
+#include <string>
+#include <unordered_map>
+#include <utility>
+
 #include "host-common/FeatureControl.h"
+#include "host-common/Features.h"
 
 void feature_initialize() {
     android::featurecontrol::initialize();
@@ -53,18 +59,20 @@ void feature_update_from_server() {
 }
 
 const char* feature_name(Feature feature) {
-    static const std::vector<std::string>* const sFeatureNames = [] {
-        return new std::vector<std::string>{
-#define FEATURE_CONTROL_ITEM(item) #item,
-#include "host-common/FeatureControlDefHost.h"
+    static const std::unordered_map<Feature, std::string>* const sFeatureNames = [] {
+           return new std::unordered_map<Feature, std::string>{
+#define FEATURE_CONTROL_ITEM(item, idx) { kFeature_##item, #item},
 #include "host-common/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefHost.h"
+
 #undef FEATURE_CONTROL_ITEM
         };
     }();
 
-    if (feature >= sFeatureNames->size()) {
+    auto it = sFeatureNames->find(feature);
+    if (it == sFeatureNames->end()) {
         return "InvalidFeature";
     }
 
-    return (*sFeatureNames)[feature].c_str();
+    return it->second.c_str();
 }

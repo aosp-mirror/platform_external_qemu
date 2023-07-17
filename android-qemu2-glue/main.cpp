@@ -1709,8 +1709,7 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Early initializaion of the hostpad loop.
-    if (fc::isEnabled(fc::VirtioWifi) &&
-            !getConsoleAgents()->settings->android_cmdLineOptions()->redirect_to_netsim) {
+    if (fc::isEnabled(fc::VirtioWifi)) {
         auto* hostapd = android::emulation::HostapdController::getInstance();
         if (!hostapd->init(VERBOSE_CHECK(wifi)) || !hostapd->run()) {
             derror("Error: could not initialize hostpad event loop.");

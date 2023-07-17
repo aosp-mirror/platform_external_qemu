@@ -221,6 +221,12 @@ public:
     }
 
     bool isLoadingSnapshot = false;
+
+    android::base::EventNotificationSupport<FoldablePostures>*
+    getPostureListener() {
+        return mFoldableModel.getPostureListener();
+    }
+
 private:
     /*
      * Sets the target value for the given physical parameter that the physical
@@ -1771,4 +1777,13 @@ bool physicalModel_isLoadingSnapshot(PhysicalModel* model) {
         return impl->isLoadingSnapshot;
     }
     return false;
+}
+
+android::base::EventNotificationSupport<FoldablePostures>*
+physicalModel_getPostureListener(PhysicalModel* model) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        return impl->getPostureListener();
+    }
+    return nullptr;
 }

@@ -32,14 +32,7 @@ android_add_library(
       uncompr.c
       zutil.c)
 
-android_target_compile_definitions(zlib darwin-x86_64
-                                   PRIVATE -D_LARGEFILE64_SOURCE=1)
-
-if(NOT OPTION_BAZEL)
-  target_compile_options(zlib PRIVATE -Wno-implicit-function-declaration
-                                      -Wno-deprecated-non-prototype)
-endif()
-
+# Note that this is the only non-bazel target.
 android_target_compile_definitions(
   zlib windows_msvc-x86_64
   PRIVATE -DWIN32

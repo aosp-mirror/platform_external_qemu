@@ -10,30 +10,30 @@
 // GNU General Public License for more details.
 #include "android/metrics/DependentMetrics.h"
 
-#include <stdlib.h>     // for free
-#include <sys/stat.h>   // for stat, st_mtime
-#include <cstdint>      // for int64_t, uin...
-#include <functional>   // for __base
-#include <iosfwd>       // for string
-#include <memory>       // for shared_ptr
-#include <string>       // for basic_string
+#include <stdlib.h>    // for free
+#include <sys/stat.h>  // for stat, st_mtime
+#include <cstdint>     // for int64_t, uin...
+#include <functional>  // for __base
+#include <iosfwd>      // for string
+#include <memory>      // for shared_ptr
+#include <string>      // for basic_string
 #include <string_view>
 #include <type_traits>  // for remove_extent_t
 #include <utility>      // for pair
 #include <vector>       // for vector
 
-#include "render-utils/Renderer.h"                       // for RendererPtr
-#include "android/CommonReportedInfo.h"                  // for setDetails
-#include "android/avd/info.h"                            // for avdInfo_getA...
-#include "android/avd/util.h"                            // for AVD_ANDROID_...
-#include "aemu/base/Optional.h"                       // for Optional
-#include "aemu/base/StringFormat.h"                   // for StringFormat
+#include "aemu/base/Optional.h"          // for Optional
+#include "aemu/base/StringFormat.h"      // for StringFormat
+#include "android/CommonReportedInfo.h"  // for setDetails
+#include "android/avd/info.h"            // for avdInfo_getA...
+#include "android/avd/util.h"            // for AVD_ANDROID_...
+#include "render-utils/Renderer.h"       // for RendererPtr
 
-#include "aemu/base/Uuid.h"                           // for Uuid
-#include "aemu/base/async/ThreadLooper.h"             // for ThreadLooper
-#include "aemu/base/files/IniFile.h"                  // for IniFile
-#include "aemu/base/files/PathUtils.h"                // for PathUtils
-#include "aemu/base/memory/ScopedPtr.h"               // for ScopedCPtr
+#include "aemu/base/Uuid.h"                              // for Uuid
+#include "aemu/base/async/ThreadLooper.h"                // for ThreadLooper
+#include "aemu/base/files/IniFile.h"                     // for IniFile
+#include "aemu/base/files/PathUtils.h"                   // for PathUtils
+#include "aemu/base/memory/ScopedPtr.h"                  // for ScopedCPtr
 #include "android/base/system/System.h"                  // for System, Syst...
 #include "android/cmdline-definitions.h"                 // for AndroidOptions
 #include "android/console.h"                             // for getConsoleAg...
@@ -41,21 +41,21 @@
 #include "android/emulation/CpuAccelerator.h"            // for GetCpuInfo
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/emulation/control/globals_agent.h"     // for QAndroidGlob...
-#include "host-common/FeatureControl.h"       // for getDisabledO...
-#include "host-common/Features.h"             // for Feature, Pla...
 #include "android/metrics/MetricsEngine.h"               // for MetricsEngine
 #include "android/metrics/MetricsReporter.h"             // for MetricsReporter
 #include "android/metrics/PerfStatReporter.h"            // for PerfStatRepo...
 #include "android/metrics/PeriodicReporter.h"            // for PeriodicRepo...
 #include "android/metrics/StudioConfig.h"                // for UpdateChannel
 #include "android/metrics/metrics.h"                     // for MetricsStopR...
-#include "host-common/opengl/emugl_config.h"                 // for emuglConfig_...
 #include "android/opengl/gpuinfo.h"                      // for GpuInfo, glo...
-#include "host-common/opengles.h"                            // for android_getO...
 #include "android/utils/debug.h"                         // for VERBOSE_PRINT
 #include "android/utils/file_data.h"                     // for (anonymous)
 #include "android/utils/file_io.h"                       // for android_stat
 #include "android/utils/x86_cpuid.h"                     // for android_get_...
+#include "host-common/FeatureControl.h"                  // for getDisabledO...
+#include "host-common/Features.h"                        // for Feature, Pla...
+#include "host-common/opengl/emugl_config.h"             // for emuglConfig_...
+#include "host-common/opengles.h"                        // for android_getO...
 #include "studio_stats.pb.h"                             // for EmulatorFeat...
 
 using android::base::Optional;
@@ -163,13 +163,12 @@ static Optional<int64_t> getAvdCreationTimeSec(AvdInfo* avd) {
                     System::get()->pathCreationTime(avdContentPath)) {
             return *createTime / 1000000;
         }
-        // We were either unable to get the creation time, or this is Linux/really
-        // old Mac and the system libs don't support creation times at all. Let's
-        // use modification time for some rarely updated file in the avd,
-        // e.g. <content_path>/data directory, or the root .ini.
-        if (!android_stat(
-                    PathUtils::join(avdContentPath, "data").c_str(),
-                    &st)) {
+        // We were either unable to get the creation time, or this is
+        // Linux/really old Mac and the system libs don't support creation times
+        // at all. Let's use modification time for some rarely updated file in
+        // the avd, e.g. <content_path>/data directory, or the root .ini.
+        if (!android_stat(PathUtils::join(avdContentPath, "data").c_str(),
+                          &st)) {
             return st.st_mtime;
         }
     }
@@ -222,7 +221,8 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
 
     auto eventAvdInfo = event->mutable_emulator_details()->mutable_avd_info();
     // AVD name is a user-generated data, so won't report it.
-    eventAvdInfo->set_api_level(avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()));
+    eventAvdInfo->set_api_level(
+            avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()));
     eventAvdInfo->set_image_kind(
             avdInfo_isUserBuild(getConsoleAgents()->settings->avdInfo()) &&
                             isEnabled(android::featurecontrol::PlayStoreImage)
@@ -235,18 +235,21 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
                     ? android_studio::EmulatorAvdInfo::AOSP_ATD
                     : android_studio::EmulatorAvdInfo::AOSP);
 
-    eventAvdInfo->set_arch(toClearcutLogGuestArch(getConsoleAgents()->settings->hw()->hw_cpu_arch));
+    eventAvdInfo->set_arch(toClearcutLogGuestArch(
+            getConsoleAgents()->settings->hw()->hw_cpu_arch));
     if (avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo())) {
         // no real AVD, so no creation times or file infos.
         return;
     }
 
-    if (auto creationTime = getAvdCreationTimeSec(getConsoleAgents()->settings->avdInfo())) {
+    if (auto creationTime = getAvdCreationTimeSec(
+                getConsoleAgents()->settings->avdInfo())) {
         eventAvdInfo->set_creation_timestamp(*creationTime);
         VERBOSE_PRINT(metrics, "AVD creation timestamp %ld", *creationTime);
     }
 
-    const auto buildProps = avdInfo_getBuildProperties(getConsoleAgents()->settings->avdInfo());
+    const auto buildProps =
+            avdInfo_getBuildProperties(getConsoleAgents()->settings->avdInfo());
     android::base::IniFile ini((const char*)buildProps->data, buildProps->size);
     if (const int64_t buildTimestamp = ini.getInt64("ro.build.date.utc", 0)) {
         eventAvdInfo->set_build_timestamp(buildTimestamp);
@@ -267,8 +270,12 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
             eventAvdInfo, android_studio::EmulatorAvdFile::SYSTEM,
             (getConsoleAgents()->settings->hw()->disk_systemPartition_path &&
              getConsoleAgents()->settings->hw()->disk_systemPartition_path[0])
-                    ? getConsoleAgents()->settings->hw()->disk_systemPartition_path
-                    : getConsoleAgents()->settings->hw()->disk_systemPartition_initPath,
+                    ? getConsoleAgents()
+                              ->settings->hw()
+                              ->disk_systemPartition_path
+                    : getConsoleAgents()
+                              ->settings->hw()
+                              ->disk_systemPartition_initPath,
             (getConsoleAgents()->settings->android_cmdLineOptions()->system ||
              getConsoleAgents()->settings->android_cmdLineOptions()->sysdir));
     fillAvdFileInfo(
@@ -277,8 +284,8 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
             getConsoleAgents()->settings->android_cmdLineOptions()->ramdisk !=
                     nullptr);
 
-    eventAvdInfo->add_properties(
-            toClearcutLogAvdProperty(avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo())));
+    eventAvdInfo->add_properties(toClearcutLogAvdProperty(
+            avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo())));
 }
 
 // Update this (and the proto) whenever feature flags change.
@@ -370,7 +377,7 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
         case android::featurecontrol::OnDemandSnapshotLoad:
             return android_studio::EmulatorFeatureFlagState::
                     ON_DEMAND_SNAPSHOT_LOAD;
-        case android::featurecontrol::Feature_n_items:
+        case android::featurecontrol::Feature_unknown:
             return android_studio::EmulatorFeatureFlagState::
                     EMULATOR_FEATURE_FLAG_UNSPECIFIED;
         case android::featurecontrol::WifiConfigurable:
@@ -487,22 +494,33 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
         case android::featurecontrol::VirtioTablet:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_TABLET;
         case android::featurecontrol::VulkanNativeSwapchain:
-            return android_studio::EmulatorFeatureFlagState::VULKAN_NATIVE_SWAPCHAIN;
+            return android_studio::EmulatorFeatureFlagState::
+                    VULKAN_NATIVE_SWAPCHAIN;
         case android::featurecontrol::VirtioGpuFenceContexts:
-            return android_studio::EmulatorFeatureFlagState::VIRTIO_GPU_FENCE_CONTEXTS;
+            return android_studio::EmulatorFeatureFlagState::
+                    VIRTIO_GPU_FENCE_CONTEXTS;
         case android::featurecontrol::VsockSnapshotLoadFixed_b231345789:
             return android_studio::EmulatorFeatureFlagState::
                     VSOCK_SNAPSHOT_LOAD_FIXED_B231345789;
         case android::featurecontrol::VulkanAstcLdrEmulation:
-            return android_studio::EmulatorFeatureFlagState::VULKAN_ASTC_LDR_EMULATION;
+            return android_studio::EmulatorFeatureFlagState::
+                    VULKAN_ASTC_LDR_EMULATION;
         case android::featurecontrol::VulkanYcbcrEmulation:
-            return android_studio::EmulatorFeatureFlagState::VULKAN_YCBCR_EMULATION;
+            return android_studio::EmulatorFeatureFlagState::
+                    VULKAN_YCBCR_EMULATION;
         case android::featurecontrol::VulkanEtc2Emulation:
-            return android_studio::EmulatorFeatureFlagState::VULKAN_ETC2_EMULATION;
+            return android_studio::EmulatorFeatureFlagState::
+                    VULKAN_ETC2_EMULATION;
         case android::featurecontrol::ExternalBlob:
             return android_studio::EmulatorFeatureFlagState::EXTERNAL_BLOB;
         case android::featurecontrol::SystemBlob:
             return android_studio::EmulatorFeatureFlagState::SYSTEM_BLOB;
+        case android::featurecontrol::NetsimWebUi:
+            return android_studio::EmulatorFeatureFlagState::NETSIMWEBUI;
+        case android::featurecontrol::NetsimCliUi:
+            return android_studio::EmulatorFeatureFlagState::NETSIMCLIUI;
+        case android::featurecontrol::WiFiPacketStream:
+            return android_studio::EmulatorFeatureFlagState::WIFIPACKETSTREAM;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
@@ -545,8 +563,8 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
     event->mutable_emulator_details()->set_session_phase(
             android_studio::EmulatorDetails::RUNNING_GENERAL);
     event->mutable_emulator_details()->set_is_opengl_alive(openglAlive);
-    event->mutable_emulator_details()->set_guest_arch(
-            toClearcutLogGuestArch(getConsoleAgents()->settings->hw()->hw_cpu_arch));
+    event->mutable_emulator_details()->set_guest_arch(toClearcutLogGuestArch(
+            getConsoleAgents()->settings->hw()->hw_cpu_arch));
     event->mutable_emulator_details()->set_guest_api_level(
             avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()));
 
@@ -559,8 +577,8 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
     fillFeatureFlagState(event);
 
     event->mutable_emulator_details()->set_renderer(
-            toClearcutLogEmulatorRenderer(
-                    emuglConfig_get_renderer(getConsoleAgents()->settings->hw()->hw_gpu_mode)));
+            toClearcutLogEmulatorRenderer(emuglConfig_get_renderer(
+                    getConsoleAgents()->settings->hw()->hw_gpu_mode)));
 
     event->mutable_emulator_details()->set_guest_gpu_enabled(
             getConsoleAgents()->settings->hw()->hw_gpu_enabled);
@@ -568,7 +586,8 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
     if (getConsoleAgents()->settings->hw()->hw_gpu_enabled) {
         fillGuestGlMetrics(event);
         if (openglAlive) {
-            const gfxstream::RendererPtr& renderer = android_getOpenglesRenderer();
+            const gfxstream::RendererPtr& renderer =
+                    android_getOpenglesRenderer();
             if (renderer) {
                 renderer->fillGLESUsages(event->mutable_emulator_details()
                                                  ->mutable_gles_usages());
@@ -674,8 +693,8 @@ bool android_metrics_start(const char* emulatorVersion,
     PeriodicReporter::get().addTask(
             5 * 60 * 1000,  // reporting period
             [](android_studio::AndroidStudioEvent* event) {
-                // uptime fields are always filled for all events, so there's
-                // nothing to do here.
+                // uptime fields are always filled for all events, so
+                // there's nothing to do here.
                 return true;
             });
     // Collect PerfStats metrics every 5 seconds.

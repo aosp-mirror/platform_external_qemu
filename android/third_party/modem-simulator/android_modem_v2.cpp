@@ -12,6 +12,9 @@
 
 #include "android_modem_v2.h"
 
+#include "android/emulation/control/adb/AdbInterface.h"
+#include "android/utils/debug.h"
+
 #include <functional>
 #include <mutex>
 #include <thread>
@@ -77,7 +80,18 @@ void amodem_update_time(AModem modem) {
 }
 
 int amodem_update_phone_number(AModem modem, const char* number) {
-    return s_modem->set_phone_number(modem, number);
+    auto adbInterface = android::emulation::AdbInterface::getGlobal();
+    if (!adbInterface) {
+        dwarning("%s: No adb binary found, cannot set the phone number.\n",
+                 __func__);
+        return -1;
+    }
+    int res = s_modem->set_phone_number(modem, number);
+    adbInterface->enqueueCommand(
+            {"shell", "cmd", "connectivity", "airplane-mode", "enable"});
+    adbInterface->enqueueCommand(
+            {"shell", "cmd", "connectivity", "airplane-mode", "disable"});
+    return res;
 }
 
 void amodem_set_data_registration_vx(AModem modem, ARegistrationState state) {

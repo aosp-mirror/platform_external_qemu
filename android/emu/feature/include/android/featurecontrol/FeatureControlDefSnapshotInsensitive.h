@@ -45,3 +45,9 @@ FEATURE_CONTROL_ITEM(IpDisconnectOnLoad)
 
 FEATURE_CONTROL_ITEM(GLAsyncSwap)
 // No guest feature flags seem safe to snapshot.
+// Netsim related features, they are independent of the snapshot
+// as they control how the UI behaves, or who delivers the functionalit
+FEATURE_CONTROL_ITEM(NetsimWebUi)
+FEATURE_CONTROL_ITEM(NetsimCliUi)
+FEATURE_CONTROL_ITEM(WiFiPacketStream)
+
