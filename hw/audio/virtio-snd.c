@@ -73,6 +73,12 @@ union VirtIOSoundCtlRequest {
     struct virtio_snd_pcm_hdr r4;
 };
 
+// We don't want to insert zeroes because a predefined pattern will be
+// easier to see in the waveform.
+static void fill_silence(int16_t* buf, size_t sz) {
+    for (sz /= sizeof(*buf); sz > 0; --sz, ++buf) { *buf = (sz & 15) - 8; }
+}
+
 /*
  * aaaaaaa bbbbb cccc
  *               frequency (VIRTIO_SND_PCM_RATE_x)
@@ -1349,8 +1355,9 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
             ASSERT(stream->qpcm_buf.size == 0);
             if (min_write_sz > 0) {
                 int16_t scratch[AUD_SCRATCH_SIZE];
-                memset(scratch, 0, MIN(sizeof(scratch), min_write_sz));
 
+                // Insert `min_write_sz` bytes of silence.
+                fill_silence(scratch, MIN(sizeof(scratch), min_write_sz));
                 do {
                     const int to_write_sz =
                         MIN(sizeof(scratch), min_write_sz) / aud_fs * aud_fs;
@@ -1458,9 +1465,8 @@ static bool virtio_snd_stream_qpcm_to_kpcm_locked(VirtIOSoundPCMStream *stream) 
             ASSERT(stream->qpcm_buf.size == 0);
             ASSERT(ksize > 0);
 
-            // insert `ksize` bytes of silence
-            memset(scratch, 0, MIN(sizeof(scratch), ksize));
-
+            // Insert `ksize` bytes of silence.
+            fill_silence(scratch, MIN(sizeof(scratch), ksize));
             do {
                 const int dst_size = MIN(sizeof(scratch), ksize);
                 iov_from_buf(e->in_sg, e->in_num, pos, scratch, dst_size);
