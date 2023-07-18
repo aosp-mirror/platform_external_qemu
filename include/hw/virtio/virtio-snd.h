@@ -90,6 +90,7 @@ struct VirtIOSoundPCMStream {
     uint8_t id;
     uint8_t driver_frame_size;
     uint8_t aud_frame_size;
+    uint8_t n_periods;
 };
 
 typedef struct VirtIOSound {

@@ -44,7 +44,6 @@
 #define RING_BUFFER_BAD_R                           22222
 #define RING_BUFFER_BAD_W                           33333
 
-#define VIRTIO_SND_QPCM_CAPACITY_MS                 50
 #define AUD_SCRATCH_SIZE                            (800 * VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS)
 
 #define GLUE(A, B) A##B
@@ -678,6 +677,7 @@ static bool virtio_snd_stream_prepare_locked(VirtIOSoundPCMStream *stream) {
     ASSERT(freq_hz > 0);
     stream->driver_frame_size = format16_get_frame_size(guest_format);
     ASSERT(stream->driver_frame_size > 0);
+    stream->n_periods = n_periods.quot;
     const int period_frames = stream->period_bytes / stream->driver_frame_size;
     ASSERT(period_frames > 0);
     stream->period_frames = period_frames;
@@ -688,14 +688,12 @@ static bool virtio_snd_stream_prepare_locked(VirtIOSoundPCMStream *stream) {
         return FAILURE(false);
     }
 
-    const int qpcm_buf_frames =
-        MAX(freq_hz * VIRTIO_SND_QPCM_CAPACITY_MS / 1000, period_frames * 3);
-
-    ASSERT(qpcm_buf_frames > 0);
+    ASSERT(stream->n_periods > 0);
     ASSERT(stream->aud_frame_size > 0);
 
     if (!pcm_ring_buffer_alloc(&stream->qpcm_buf,
-                               qpcm_buf_frames * stream->aud_frame_size)) {
+                               (stream->n_periods + 1) * period_frames
+                                   * stream->aud_frame_size)) {
         virtio_snd_voice_close(stream);
         vq_ring_buffer_free(&stream->kpcm_buf);
         return FAILURE(false);
@@ -1273,13 +1271,20 @@ static int convert_channels(const int16_t *buffer_in, const int in_sz,
 }
 
 static bool virtio_snd_stream_kpcm_to_qpcm_locked(VirtIOSoundPCMStream *stream) {
+    const int aud_fs = stream->aud_frame_size;
+    ASSERT(aud_fs > 0);
+    const int period_frames = stream->period_frames;
+    ASSERT(period_frames > 0);
+
+    if (stream->qpcm_buf.size >= (stream->n_periods * period_frames * aud_fs)) {
+        return false;
+    }
+
     VirtIOSoundVqRingBufferItem *item = vq_ring_buffer_top(&stream->kpcm_buf);
     if (!item) {
         return FAILURE(false);
     }
 
-    const int aud_fs = stream->aud_frame_size;
-    ASSERT(aud_fs > 0);
     const int driver_fs = stream->driver_frame_size;
     ASSERT(driver_fs > 0);
     int16_t scratch[AUD_SCRATCH_SIZE];
@@ -1289,7 +1294,7 @@ static bool virtio_snd_stream_kpcm_to_qpcm_locked(VirtIOSoundPCMStream *stream) 
     ASSERT(e != NULL);
 
     int pos = sizeof(struct virtio_snd_pcm_xfer);
-    int qsize = stream->period_frames * aud_fs;
+    int qsize = period_frames * aud_fs;
     ASSERT(qsize > 0);
     while (qsize > 0) {
         int dst_sz;
@@ -1323,7 +1328,7 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     ASSERT(aud_fs > 0);
     ASSERT((avail % aud_fs) == 0);
     ASSERT(stream->period_frames > 0);
-    int min_write_sz = MIN(avail, MAX(stream->period_frames / 32, 4) * aud_fs);
+    int min_write_sz = MIN(avail, MAX(stream->period_frames / 16, 4) * aud_fs);
 
     while (avail > 0) {
         int size;
