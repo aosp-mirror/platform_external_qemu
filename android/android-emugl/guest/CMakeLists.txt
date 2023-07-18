@@ -106,8 +106,8 @@ if(NOT BUILDING_FOR_AARCH64)
     PRIVATE ${ANDROID_EMUGL_DIR}/host/include ${ANDROID_EMUGL_DIR}/combined
             ${ANDROID_EMUGL_DIR}/guest/grallocusage
             ${GOLDFISH_EMUGL_DIR}/shared/OpenglCodecCommon
-            ${GOLDFISH_EMUGL_DIR}/system
-            ${GOLDFISH_EMUGL_DIR}/system/renderControl_enc
+            ${GFXSTREAM_REPO_ROOT}/guest
+            ${GFXSTREAM_REPO_ROOT}/guest/renderControl_enc
             ${GFXSTREAM_REPO_ROOT}/include/render-utils)
   target_link_libraries(vulkanhal_unittests PRIVATE grallocusage aemugraphics
                         PRIVATE android-emu-test-launcher)
