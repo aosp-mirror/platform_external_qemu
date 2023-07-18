@@ -13,6 +13,7 @@
 #include "android_modem_v2.h"
 
 #include "android/emulation/control/adb/AdbInterface.h"
+#include "android/telephony/phone_number.h"
 #include "android/utils/debug.h"
 
 #include <functional>
@@ -80,13 +81,21 @@ void amodem_update_time(AModem modem) {
 }
 
 int amodem_update_phone_number(AModem modem, const char* number) {
+    char phone_number[16];
+    int ret = validate_and_parse_phone_number(number, phone_number);
+    if (ret) {
+        dwarning("%s: bad phone number format: %s , use digits, # and + only\n",
+                 __func__, number);
+        return -1;
+    }
+
     auto adbInterface = android::emulation::AdbInterface::getGlobal();
     if (!adbInterface) {
         dwarning("%s: No adb binary found, cannot set the phone number.\n",
                  __func__);
         return -1;
     }
-    int res = s_modem->set_phone_number(modem, number);
+    int res = s_modem->set_phone_number(modem, phone_number);
     adbInterface->enqueueCommand(
             {"shell", "cmd", "connectivity", "airplane-mode", "enable"});
     adbInterface->enqueueCommand(
