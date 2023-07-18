@@ -477,11 +477,6 @@ int main(int argc, char** argv) {
     /* Set MESA_RGB_VISUAL to something that will work on Linux */
     System::get()->envSet("MESA_RGB_VISUAL", "TrueColor 24");
 
-    /* Set LIBGL_DRI3_DISABLE to work around an issue with newer intel drivers 
-     * b/277806574
-     */
-    System::get()->envSet("LIBGL_DRI3_DISABLE", "1");
-
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
      */
