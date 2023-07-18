@@ -162,6 +162,7 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
             return 0;
         },
         .isMultiDisplayWindow = []() { return false; },
+        .performRotation = [](int rot) { },
 };
 extern "C" const QAndroidMultiDisplayAgent* const
         gMockQAndroidMultiDisplayAgent = &sMultiDisplayAgent;
