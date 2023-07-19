@@ -569,9 +569,8 @@ static bool virtio_snd_voice_open(VirtIOSoundPCMStream *stream,
 
     if (is_output_stream(stream)) {
         if (stream->snd->enable_output_prop) {
-            for (as.nchannels = VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS;
-                 as.nchannels >= VIRTIO_SND_PCM_NUM_MIN_CHANNELS;
-                 --as.nchannels) {
+            for (as.nchannels = MIN(as.nchannels, VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS);
+                 as.nchannels > 0; --as.nchannels) {
 
                 stream->voice.out = AUD_open_out(&stream->snd->card,
                                                  NULL,
@@ -588,9 +587,8 @@ static bool virtio_snd_voice_open(VirtIOSoundPCMStream *stream,
         }
     } else {
         if (stream->snd->enable_input_prop) {
-            for (as.nchannels = VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS;
-                 as.nchannels >= VIRTIO_SND_PCM_NUM_MIN_CHANNELS;
-                 --as.nchannels) {
+            for (as.nchannels = MIN(as.nchannels, VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS);
+                 as.nchannels > 0; --as.nchannels) {
                 stream->voice.in = AUD_open_in(&stream->snd->card,
                                                NULL,
                                                g_stream_name[stream->id],
