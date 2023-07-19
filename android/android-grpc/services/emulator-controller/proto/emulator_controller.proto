@@ -1258,7 +1258,14 @@ message Notification {
         DisplayConfigurationsChangedNotification
                 displayConfigurationsChangedNotification = 3;
         Posture posture = 4;
+        BootCompletedNotication booted = 5;
     }
+}
+
+message BootCompletedNotication {
+    // The time in milliseconds it took for the boot to complete.
+    // Note that this value can be 0 when you are loading from a snapshot.
+    int32 time = 1;
 }
 
 // Fired when the virtual scene camera is activated or deactivated and also in
