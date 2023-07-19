@@ -362,7 +362,7 @@ if(NOT OPTION_GFXSTREAM_BACKEND AND NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
     SRC # cmake-format: sortable
         ${GFXSTREAM_REPO_ROOT}/guest/vulkan_enc/vulkan_enc_unittests.cpp)
   target_include_directories(vulkan_enc_unittests
-                             PRIVATE ${GOLDFISH_EMUGL_DIR}/android-emu)
+                             PRIVATE ${GFXSTREAM_REPO_ROOT}/guest/android-emu)
   target_link_libraries(vulkan_enc_unittests PUBLIC vulkan_enc androidemu gtest
                                                     gtest_main)
 endif()
