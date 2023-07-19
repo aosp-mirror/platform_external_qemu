@@ -106,7 +106,7 @@ if((NOT WINDOWS) AND (NOT DARWIN_AARCH64))
   android_add_library(
     TARGET boringssl_test_support NODISTRIBUTE SRC # cmake-format: sortable
                                                    ${test_support_sources})
-  target_link_libraries(boringssl_test_support PRIVATE ssl)
+  target_link_libraries(boringssl_test_support PRIVATE ssl gmock_main)
   android_add_test(TARGET boringssl_ssl_unittests SRC # cmake-format: sortable
                                                       ${ssl_test_sources})
   target_link_libraries(boringssl_ssl_unittests PRIVATE gmock_main ssl crypto
