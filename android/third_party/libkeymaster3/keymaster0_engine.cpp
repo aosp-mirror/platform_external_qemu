@@ -176,10 +176,14 @@ RSA* Keymaster0Engine::BlobToRsaKey(const KeymasterKeyBlob& blob) const {
     unique_ptr<RSA, RSA_Delete> public_rsa(EVP_PKEY_get1_RSA(pkey.get()));
     if (!public_rsa)
         return nullptr;
-    rsa->n = BN_dup(public_rsa->n);
-    rsa->e = BN_dup(public_rsa->e);
-    if (!rsa->n || !rsa->e)
+    BIGNUM_Ptr n(BN_dup(RSA_get0_n(public_rsa.get())));
+    BIGNUM_Ptr e(BN_dup(RSA_get0_e(public_rsa.get())));
+    if (!n || !e || !RSA_set0_key(rsa.get(), n.get(), e.get(), /*d=*/nullptr))
         return nullptr;
+
+    // RSA_set0_key takes ownership on success.
+    (void)n.release();
+    (void)e.release();
 
     return rsa.release();
 }
@@ -293,7 +297,7 @@ EVP_PKEY* Keymaster0Engine::GetKeymaster0PublicKey(const KeymasterKeyBlob& blob)
 static bool data_too_large_for_public_modulus(const uint8_t* data, size_t len, const RSA* rsa) {
     unique_ptr<BIGNUM, BIGNUM_Delete> input_as_bn(
         BN_bin2bn(data, len, nullptr /* allocate result */));
-    return input_as_bn && BN_ucmp(input_as_bn.get(), rsa->n) >= 0;
+    return input_as_bn && BN_ucmp(input_as_bn.get(), RSA_get0_n(rsa)) >= 0;
 }
 
 int Keymaster0Engine::RsaPrivateTransform(RSA* rsa, uint8_t* out, const uint8_t* in,
