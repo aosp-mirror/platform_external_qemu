@@ -105,8 +105,8 @@ if(NOT BUILDING_FOR_AARCH64)
     vulkanhal_unittests
     PRIVATE ${ANDROID_EMUGL_DIR}/host/include ${ANDROID_EMUGL_DIR}/combined
             ${ANDROID_EMUGL_DIR}/guest/grallocusage
-            ${GOLDFISH_EMUGL_DIR}/shared/OpenglCodecCommon
             ${GFXSTREAM_REPO_ROOT}/guest
+            ${GFXSTREAM_REPO_ROOT}/guest/OpenglCodecCommon
             ${GFXSTREAM_REPO_ROOT}/guest/renderControl_enc
             ${GFXSTREAM_REPO_ROOT}/include/render-utils)
   target_link_libraries(vulkanhal_unittests PRIVATE grallocusage aemugraphics
