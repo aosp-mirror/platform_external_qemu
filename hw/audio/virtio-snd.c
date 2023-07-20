@@ -73,10 +73,10 @@ union VirtIOSoundCtlRequest {
     struct virtio_snd_pcm_hdr r4;
 };
 
-// We don't want to insert zeroes because a predefined pattern will be
-// easier to see in the waveform.
+// We don't want to insert zeroes because a predefined pattern (meander: +2, -2)
+// will be easier to see in the waveform (for debugging purposes).
 static void fill_silence(int16_t* buf, size_t sz) {
-    for (sz /= sizeof(*buf); sz > 0; --sz, ++buf) { *buf = (sz & 15) - 8; }
+    for (sz /= sizeof(*buf); sz > 0; --sz, ++buf) { *buf = ((sz & 8) >> 1) - 2; }
 }
 
 /*
