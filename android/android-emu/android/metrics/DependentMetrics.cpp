@@ -217,7 +217,7 @@ toClearcutLogAvdProperty(AvdFlavor flavor) {
 }
 
 static android_studio::EmulatorAvdInfo::EmulatorDeviceName getDeviceName() {
-    const char* id = avdInfo_getId(getConsoleAgents()->settings->avdInfo());
+    const char* id = getConsoleAgents()->settings->hw()->hw_device_name;
     if (0 == strcmp(id, "resizable")) {
         return android_studio::EmulatorAvdInfo::RESIZABLE;
     }
