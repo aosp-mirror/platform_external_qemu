@@ -91,7 +91,7 @@ void EditableSliderWidget::setValue(double value, bool emit_signal) {
         mSlider.setValue(static_cast<int>(mValue * mSteps));
     }
 
-    if (mLineEditFocused) {
+    if (mLineEditFocused && !mCouldUpdateTextValueWhenFocused) {
         mValueChangeIgnored = true;
     } else {
         mLineEdit.setText(QString("%1").arg(mValue, 0, 'f', mPrecision, '0'));
