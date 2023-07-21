@@ -316,6 +316,7 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
 
     if (isPortrait) {
         if (isNormalOrder) {
+            // this is rotation 0
             AutoLock lock(mLock);
             uint32_t totalH, pos_x, pos_y, w, h;
             getCombinedDisplaySizeLocked(nullptr, &totalH);
@@ -338,6 +339,7 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
                 }
             }
         } else {
+            // this is rotation 180
             // origin of incoming x and y from QT is at right-bottom
             // positive x is pointing to west;
             // positive y is ponting to north
@@ -356,7 +358,6 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
                 w = iter.second.width;
                 h = iter.second.height;
                 if ((normal_x - pos_x) < w && (*y - pos_y) < h) {
-                    *y = *y - pos_y;
                     *x = *x - currXoffset;
                     *displayId = iter.first;
                     return true;
@@ -366,6 +367,7 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
         }
     } else {  // landscape mode, rotated
         if (isNormalOrder) {
+            // this is rotation 270
             AutoLock lock(mLock);
             uint32_t totalH, pos_x, pos_y, w, h;
             getCombinedDisplaySizeLocked(nullptr, &totalH);
@@ -390,6 +392,7 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
                 currYoffset += h;
             }
         } else {
+            // this is rotation 90
             // origin is at upper right corner
             // x points south, y points west
             // display 0 at the top
@@ -403,6 +406,7 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
                 }
                 w = iter.second.width;
                 h = iter.second.height;
+                const auto delta_w = totalW - w;
                 pos_x = iter.second.pos_x;
                 pos_y = iter.second.pos_y;
                 const auto normal_x = totalH - *x;  // this is points to north
@@ -411,6 +415,7 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
                 if ((normal_x - pos_y) < h && (normal_y - pos_x) < w &&
                     (normal_y - pos_x) >= 0) {
                     *x = *x - currYoffset;
+                    *y -= delta_w;
                     *displayId = iter.first;
                     return true;
                 }
