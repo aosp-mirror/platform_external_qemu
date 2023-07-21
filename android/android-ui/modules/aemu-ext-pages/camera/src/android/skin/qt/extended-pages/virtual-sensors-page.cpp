@@ -94,6 +94,9 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
                                    false);
     mUi->positionZSlider->setRange(Device3DWidget::MinZ, Device3DWidget::MaxZ,
                                    false);
+    mUi->hinge0Slider->setCouldUpdateTextValueWhenFocused(true);
+    mUi->hinge1Slider->setCouldUpdateTextValueWhenFocused(true);
+    mUi->hinge2Slider->setCouldUpdateTextValueWhenFocused(true);
     updateHingeSensorUI();
     setupRollableUI();
     setupRgbcLightUI();

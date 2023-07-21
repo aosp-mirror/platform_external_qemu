@@ -94,6 +94,9 @@ public:
     // Hides min and max labels
     void setLabelHidden();
 
+    void setCouldUpdateTextValueWhenFocused(bool couldUpdate) {
+        mCouldUpdateTextValueWhenFocused = couldUpdate;
+    }
 protected:
     bool eventFilter(QObject*, QEvent*) override;
 
@@ -132,5 +135,6 @@ private:
     bool mValueChangeIgnored = false;
     QString mLineEditOriginalValue;
     bool mLineEditFocused = false;
+    bool mCouldUpdateTextValueWhenFocused = false;
 };
 
