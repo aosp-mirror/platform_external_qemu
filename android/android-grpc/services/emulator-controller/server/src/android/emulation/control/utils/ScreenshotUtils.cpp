@@ -86,7 +86,6 @@ SkinRotation ScreenshotUtils::translate(Rotation_SkinRotation x) {
 
 Rotation_SkinRotation ScreenshotUtils::deriveRotation(
         const QAndroidSensorsAgent* sensorAgent) {
-    glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
     glm::vec3 device_accelerometer;
     auto out = {&device_accelerometer.x, &device_accelerometer.y,
                 &device_accelerometer.z};
@@ -94,24 +93,17 @@ Rotation_SkinRotation ScreenshotUtils::deriveRotation(
                            out.size());
 
     glm::vec3 normalized_accelerometer = glm::normalize(device_accelerometer);
-
-    static const std::array<std::pair<glm::vec3, Rotation_SkinRotation>, 4>
-            directions{std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f),
-                                      Rotation::PORTRAIT),
-                       std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f),
-                                      Rotation::LANDSCAPE),
-                       std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f),
-                                      Rotation::REVERSE_PORTRAIT),
-                       std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f),
-                                      Rotation::REVERSE_LANDSCAPE)};
-    auto coarse_orientation = Rotation::PORTRAIT;
-    for (const auto& v : directions) {
-        if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) < 0.1f) {
-            coarse_orientation = v.second;
-            break;
-        }
+    const float cos45 = sqrtf(2.0f) / 2.0f;
+    if (normalized_accelerometer.y > cos45) {
+        return Rotation::PORTRAIT;
     }
-    return coarse_orientation;
+    if (normalized_accelerometer.y < -cos45) {
+        return Rotation::REVERSE_PORTRAIT;
+    }
+    if (normalized_accelerometer.x > 0) {
+        return Rotation::LANDSCAPE;
+    }
+    return Rotation::REVERSE_LANDSCAPE;
 }
 
 std::tuple<int, int> ScreenshotUtils::resizeKeepAspectRatio(
