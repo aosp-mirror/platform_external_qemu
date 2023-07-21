@@ -635,6 +635,8 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::NETSIMCLIUI;
         case android::featurecontrol::WiFiPacketStream:
             return android_studio::EmulatorFeatureFlagState::WIFIPACKETSTREAM;
+        case android::featurecontrol::SupportPixelFold:
+            return android_studio::EmulatorFeatureFlagState::SUPPORT_PIXEL_FOLD;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
