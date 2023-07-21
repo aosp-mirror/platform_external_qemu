@@ -1562,7 +1562,8 @@ message EmulatorFeatureFlagState {
         NETSIMWEBUI = 101;
         NETSIMCLIUI = 102;
         WIFIPACKETSTREAM = 103;
-        // Next tag: 104
+        SUPPORT_PIXEL_FOLD = 104;
+        // Next tag: 105
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
