@@ -248,7 +248,7 @@ if(FEATURE_NETSIM)
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-map.js>netsim-ui/js/device-map.js;
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-observer.js>netsim-ui/js/device-observer.js;
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/license-info.js>netsim-ui/js/license-info.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/model.js>netsim-ui/js/model.js;
+    ${AOSP_ROOT}/tools/netsim/ui/dist/js/netsim/model.js>netsim-ui/js/netsim/model.js;
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/navigation-bar.js>netsim-ui/js/navigation-bar.js;
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/netsim-app.js>netsim-ui/js/netsim-app.js;
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/packet-info.js>netsim-ui/js/packet-info.js;
