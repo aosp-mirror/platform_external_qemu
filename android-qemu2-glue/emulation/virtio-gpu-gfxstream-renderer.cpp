@@ -115,8 +115,8 @@ VG_EXPORT void stream_renderer_context_destroy(uint32_t handle) {
     s_render.stream_renderer_context_destroy(handle);
 }
 
-VG_EXPORT int stream_renderer_submit_cmd(void* buffer, int ctx_id, int dwordCount) {
-    return s_render.stream_renderer_submit_cmd(buffer, ctx_id, dwordCount);
+VG_EXPORT int stream_renderer_submit_cmd(struct stream_renderer_command *cmd) {
+    return s_render.stream_renderer_submit_cmd(cmd);
 }
 
 VG_EXPORT int stream_renderer_transfer_read_iov(uint32_t handle, uint32_t ctx_id, uint32_t level,
