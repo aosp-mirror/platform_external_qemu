@@ -2713,6 +2713,7 @@ handleSignalStrength( const char*  cmd, AModem  modem )
       modem->snapshotTimeUpdateRequested = 0;
     } else if (wakeup_from_sleep()) {
         amodem_addPhysChanCfgUpdate( modem );
+        amodem_addTimeUpdate(modem);
     } else if (firstSignalStrengthRequest) {
         firstSignalStrengthRequest = false;
         amodem_addTimeUpdate(modem);
