@@ -13,6 +13,7 @@
 # limitations under the License.
 import shutil
 import logging
+import os
 import platform
 from pathlib import Path
 
@@ -63,6 +64,8 @@ class IntegrationTestTask(BuildTask):
             / "test_embedded"
             / "run_tests.py"
         )
+        self.build_target = os.environ.get("BUILD_TARGET_NAME", "")
+        self.build_target_opt = ["--build_target", self.build_target] if self.build_target else []
 
     def run_from_dist(self, py):
         """Runs the integration tests from the distribution directory."""
@@ -74,7 +77,7 @@ class IntegrationTestTask(BuildTask):
                 "--logdir",
                 self.logdir,
                 "--failures_as_errors",
-            ]
+            ] + self.build_target_opt
         )
 
     def run_from_build(self, py):
@@ -99,7 +102,7 @@ class IntegrationTestTask(BuildTask):
                 "--logdir",
                 self.logdir,
                 "--failures_as_errors",
-            ]
+            ] + self.build_target_opt
         )
 
     def do_run(self):
