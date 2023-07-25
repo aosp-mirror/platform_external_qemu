@@ -295,11 +295,14 @@ public:
 
             posix_spawn_file_actions_addclose(action, mStdOutPipe[0]);
             posix_spawn_file_actions_addclose(action, mStdErrPipe[0]);
-            posix_spawn_file_actions_adddup2(action, mStdOutPipe[1], 1);
-            posix_spawn_file_actions_adddup2(action, mStdErrPipe[1], 2);
+            posix_spawn_file_actions_adddup2(action, mStdOutPipe[1], STDOUT_FILENO);
+            posix_spawn_file_actions_adddup2(action, mStdErrPipe[1], STDERR_FILENO);
 
             posix_spawn_file_actions_addclose(action, mStdOutPipe[1]);
             posix_spawn_file_actions_addclose(action, mStdErrPipe[1]);
+        } else {
+            posix_spawn_file_actions_addopen(action, STDOUT_FILENO, "/dev/null", O_WRONLY, 0644);
+            posix_spawn_file_actions_addopen(action, STDERR_FILENO, "/dev/null", O_WRONLY, 0644);
         }
 
         pid_t pid;
