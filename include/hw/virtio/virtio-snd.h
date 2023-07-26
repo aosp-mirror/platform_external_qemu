@@ -103,6 +103,9 @@ typedef struct VirtIOSound {
     VirtQueue *tx_vq;
     VirtQueue *rx_vq;
     QEMUSoundCard card;
+#ifdef __linux__
+    SWVoiceIn *linux_mic_workaround;  // b/292115117
+#endif  // __linux__
     bool enable_input_prop;
     bool enable_output_prop;
 } VirtIOSound;

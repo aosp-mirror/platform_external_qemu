@@ -1810,12 +1810,34 @@ static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
     virtio_notify(vdev, vq);
 }
 
+#ifdef __linux__
+static void linux_mic_workaround_in_cb(void *unused1, int unused2) {}
+#endif  // __linux__
+
 static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
     VirtIOSound *snd = VIRTIO_SND(dev);
     VirtIODevice *vdev = &snd->parent;
     int i;
 
     AUD_register_card(TYPE_VIRTIO_SND, &snd->card);
+#ifdef __linux__
+    if (snd->enable_input_prop) {
+        struct audsettings as = {
+            .freq = 8000,
+            .nchannels = 1,
+            .fmt = AUD_FMT_S16,
+            .endianness = AUDIO_HOST_ENDIANNESS,
+        };
+
+        // It does not make sense, but on linux we have to open the microphone
+        // very early to make it working. On other platform we open it only when
+        // the guest asks for it, see b/292115117.
+        // Probably will not be required once we upgrade QEMU.
+        snd->linux_mic_workaround =
+            AUD_open_in(&snd->card, NULL, "linux_mic_workaround", NULL,
+                        &linux_mic_workaround_in_cb, &as);
+    }
+#endif  // __linux__
 
     virtio_init(vdev, TYPE_VIRTIO_SND, VIRTIO_ID_SOUND,
                 sizeof(struct virtio_snd_config));
@@ -1852,6 +1874,11 @@ static void virtio_snd_device_unrealize(DeviceState *dev, Error **errp) {
     virtio_del_queue(vdev, VIRTIO_SND_QUEUE_CTL);
     virtio_cleanup(vdev);
 
+#ifdef __linux__
+    if (snd->linux_mic_workaround) {
+        AUD_close_in(&snd->card, snd->linux_mic_workaround);
+    }
+#endif  // __linux__
     AUD_remove_card(&snd->card);
 }
 
