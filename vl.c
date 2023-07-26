@@ -5630,9 +5630,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
      * (2) CONFIG_SLIRP not set, in which case the implicit "-net nic"
      * sets up a nic that isn't connected to anything.
      */
-    if (!default_net && !getConsoleAgents()
-                             ->settings->android_cmdLineOptions()
-                             ->redirect_to_netsim) {
+    if (!default_net && !feature_is_enabled(kFeature_WiFiPacketStream)) {
         net_check_clients();
     }
 

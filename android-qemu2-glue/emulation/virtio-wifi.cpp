@@ -13,6 +13,7 @@ extern "C" {
 #include "android/telephony/sysdeps.h"
 #include "android/utils/debug.h"
 #include "host-common/VmLock.h"
+#include "host-common/feature_control.h"
 
 extern "C" {
 #include "android-qemu2-glue/emulation/virtio-wifi.h"
@@ -64,13 +65,15 @@ static void virtio_wifi_tx_complete(size_t queue_index);
 struct GlobalState {
     bool initWifiService(NICConf* conf) {
         if (!wifiService) {
+            bool preferWifiPacketStream =
+                    feature_is_enabled(kFeature_WiFiPacketStream);
             auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
             // Do not initialize hostapd and slirp inside Wifi Servic.
             HostapdOptions hostapd = {.disabled = true};
             SlirpOptions slirpOpts = {.disabled = true};
             auto builder =
                     WifiService::Builder()
-                            .withRedirectToNetsim(opts->redirect_to_netsim)
+                            .withRedirectToNetsim(preferWifiPacketStream)
                             .withHostapd(hostapd)
                             .withSlirp(slirpOpts)
                             .withNicConf(conf)
@@ -90,8 +93,9 @@ struct GlobalState {
             }
             wifiService = builder.build();
             bool res = wifiService->init();
-            if (!res && opts->redirect_to_netsim) {
-                LOG(WARNING) << "Failed to init netsim WiFi, fall back to "
+            if (!res && preferWifiPacketStream) {
+                LOG(WARNING) << "Failed to init netsim Wifi packet stream, "
+                                "fall back to "
                                 "previous network stack.";
                 builder.withRedirectToNetsim(false);
                 wifiService = builder.build();
