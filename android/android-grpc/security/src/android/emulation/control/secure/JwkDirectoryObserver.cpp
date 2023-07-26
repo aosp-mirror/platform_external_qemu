@@ -82,7 +82,7 @@ void JwkDirectoryObserver::scanJwkPath() {
     for (auto strPath : System::get()->scanDirEntries(mJwkPath.c_str(), true)) {
         auto status = mLoadedKeys.add(strPath);
         if (!status.ok()) {
-            derror("Failed add jwk key: %s, due to: %s, access will be "
+            dwarning("Failed add jwk key: %s, due to: %s, access will be "
                    "denied to this provider and the file deleted.",
                    strPath.c_str(), status.message().data());
             System::get()->deleteFile(strPath);
@@ -119,7 +119,7 @@ void JwkDirectoryObserver::fileChangeHandler(
             auto status = mLoadedKeys.addWithRetryForEmpty(
                     path, 8, std::chrono::milliseconds(125));
             if (!status.ok()) {
-                derror("Failed add jwk key: %s, due to: %s, access will be "
+                dwarning("Failed add jwk key: %s, due to: %s, access will be "
                        "denied to this provider and the file deleted.",
                        path.c_str(), status.message().data());
                 System::get()->deleteFile(path);
