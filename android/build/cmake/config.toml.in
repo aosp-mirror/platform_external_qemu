@@ -33,6 +33,7 @@ data-encoding = { path = "${AOSP_ROOT}/external/rust/crates/data-encoding" }
 either = { path = "${AOSP_ROOT}/external/rust/crates/either" }
 env_logger = { path = "${AOSP_ROOT}/external/rust/crates/env_logger" }
 fastrand = { path = "${AOSP_ROOT}/external/rust/crates/fastrand" }
+fnv = { path = "${AOSP_ROOT}/external/rust/crates/fnv" }
 futures-core = { path = "${AOSP_ROOT}/external/rust/crates/futures-core" }
 futures-sink = { path = "${AOSP_ROOT}/external/rust/crates/futures-sink" }
 getrandom = { path = "${AOSP_ROOT}/external/rust/crates/getrandom" }
@@ -41,6 +42,8 @@ glob = { path = "${AOSP_ROOT}/external/rust/crates/glob" }
 hashbrown = { path = "${AOSP_ROOT}/external/rust/crates/hashbrown" }
 heck = { path = "${AOSP_ROOT}/external/rust/crates/heck" }
 hex = { path = "${AOSP_ROOT}/external/rust/crates/hex" }
+http = { path = "${AOSP_ROOT}/external/rust/crates/http" }
+httparse = { path = "${AOSP_ROOT}/external/rust/crates/httparse" }
 indexmap = { path = "${AOSP_ROOT}/external/rust/crates/indexmap" }
 instant = { path = "${AOSP_ROOT}/external/rust/crates/instant" }
 itoa = { path = "${AOSP_ROOT}/external/rust/crates/itoa" }
