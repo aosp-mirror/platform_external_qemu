@@ -45,7 +45,6 @@ enum {
 // These buffers are in the kernel format
 struct VirtIOSoundVqRingBufferItem {
     VirtQueueElement *el;
-    int size;
 };
 
 struct VirtIOSoundVqRingBuffer {

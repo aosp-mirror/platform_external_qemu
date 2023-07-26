@@ -1413,7 +1413,6 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     VirtIOSoundPCMStream *stream = &snd->streams[xfer.stream_id];
     VirtIOSoundVqRingBufferItem item;
     item.el = e;
-    item.size = req_size;
 
     qemu_mutex_lock(&stream->mtx);
     if (!vq_ring_buffer_push(&stream->kpcm_buf, &item)) {
@@ -1562,7 +1561,6 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     VirtIOSoundPCMStream *stream = &snd->streams[xfer.stream_id];
     VirtIOSoundVqRingBufferItem item;
     item.el = e;
-    item.size = req_size;  /* not used in RX but convinient for snapshots */
 
     qemu_mutex_lock(&stream->mtx);
     if (!vq_ring_buffer_push(&stream->kpcm_buf, &item)) {
@@ -1916,24 +1914,6 @@ static const Property virtio_snd_properties[] = {
     DEFINE_PROP_END_OF_LIST(),
 };
 
-static void virtio_snd_unpop_pcm_buf_back_to_vq(VirtIOSound *snd,
-                                                VirtIOSoundPCMStream *stream) {
-    const bool is_output = is_output_stream(stream);
-    VirtQueue *vq = is_output ? snd->tx_vq : snd->rx_vq;
-    VirtIOSoundVqRingBuffer *kpcm_buf = &stream->kpcm_buf;
-    const unsigned capacity = kpcm_buf->capacity;
-    const unsigned capacity1 = capacity - 1;
-
-    while (kpcm_buf->size > 0) {
-        const unsigned i = (kpcm_buf->w + capacity1) % capacity;
-        VirtIOSoundVqRingBufferItem *const item = &kpcm_buf->buf[i];
-
-        virtqueue_unpop(vq, item->el, item->size);
-        kpcm_buf->w = i;
-        --kpcm_buf->size;
-    }
-}
-
 static int vmstate_VirtIOSound_pre_xyz(void *opaque) {
     VirtIOSound *snd = (VirtIOSound *)opaque;
     unsigned i;
@@ -1947,8 +1927,7 @@ static int vmstate_VirtIOSound_pre_xyz(void *opaque) {
             /* fallthrough */
 
         case VIRTIO_PCM_STREAM_STATE_PREPARED:
-            virtio_snd_unpop_pcm_buf_back_to_vq(snd, stream);
-            vq_ring_buffer_free(&stream->kpcm_buf);
+            virtio_snd_stream_unprepare_locked(stream);
             /* fallthrough */
 
         case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
