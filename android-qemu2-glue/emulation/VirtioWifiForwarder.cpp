@@ -201,6 +201,7 @@ bool VirtioWifiForwarder::init() {
     }
     resetBeaconTask();
     mBeaconTask->start();
+    LOG(DEBUG) << "Successfully initialized Wi-Fi";
     return true;
 }
 

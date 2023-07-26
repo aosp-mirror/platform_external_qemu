@@ -101,7 +101,6 @@ struct GlobalState {
                 wifiService = builder.build();
                 return wifiService->init();
             } else {
-                LOG(DEBUG) << "Successfully initialized netsim WiFi.";
                 return res;
             }
         } else {

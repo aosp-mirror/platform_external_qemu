@@ -145,7 +145,7 @@ bool NetsimWifiForwarder::init() {
     auto* hostapd = android::emulation::HostapdController::getInstance();
     if (hostapd)
         hostapd->terminate();
-    dinfo("Registered as Netsim WiFi");
+    dinfo("Successfully initialized netsim WiFi");
     return true;
 }
 
