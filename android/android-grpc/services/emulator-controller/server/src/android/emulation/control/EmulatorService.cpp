@@ -860,7 +860,7 @@ public:
             height = getConsoleAgents()
                              ->settings->hw()
                              ->hw_displayRegion_0_1_height;
-            myDisplayId = 6;
+            myDisplayId = android_foldable_pixel_fold_second_display_id();
         }
 
         if (!enabled) {

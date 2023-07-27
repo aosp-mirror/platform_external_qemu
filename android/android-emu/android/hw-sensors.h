@@ -376,6 +376,7 @@ int android_foldable_get_posture();
 int android_foldable_get_state(struct FoldableState* state);
 bool android_foldable_hinge_configured();
 bool android_foldable_is_pixel_fold();
+int android_foldable_pixel_fold_second_display_id();
 bool android_foldable_hinge_enabled();
 bool android_foldable_any_folded_area_configured();
 bool android_foldable_folded_area_configured(int area);
