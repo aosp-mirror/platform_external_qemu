@@ -9,6 +9,7 @@ android_add_library(
   DEPS android-emu-base
        android-emu-base-headers
        android-emu-crashreport
+       android-emu-crashreport-uploader
        android-emu-files
        android-emu-utils
        crashpad_client
@@ -62,8 +63,8 @@ android_add_library(
        breakpad_processor
        crashpad_client
        emulator-libui
-       ui::widgets
-       Qt${QT_VERSION_MAJOR}::Widgets)
+       Qt${QT_VERSION_MAJOR}::Widgets
+       ui::widgets)
 target_compile_definitions(android-emu-crashreport-consent-ui
                            PRIVATE AEMU_CRASH_EXPORTS PUBLIC AEMU_CRASH_SHARED)
 target_include_directories(android-emu-crashreport-consent-ui PRIVATE src
@@ -115,14 +116,27 @@ target_compile_definitions(android-emu-crashreport-consent-always
 target_include_directories(android-emu-crashreport-consent-always PRIVATE src
                            PUBLIC include)
 
+android_add_library(
+  TARGET android-emu-crashreport-uploader
+  # SHARED # Used to test if you can compile this stand alone.
+  LICENSE Apache-2.0
+  SOURCE_DIR
+  src
+  SRC android/crashreport/CrashUploader.cpp
+  DEPS android-emu-crashreport crashpad_handler_handler crashpad_snapshot)
+
 android_add_executable(
   TARGET crashreport INSTALL .
   LICENSE Apache-2.0 SOURCE_DIR
   src
-  SRC android/crashreport/CrashUploader.cpp
-  DEPS android-emu-base-headers android-emu-crashreport
-       android-emu-crashreport-consent-always breakpad_common
-       breakpad_processor crashpad_handler_handler)
+  SRC android/crashreport/CrashUploadTool.cpp
+  DEPS android-emu-base-headers
+       android-emu-crashreport
+       android-emu-crashreport-consent-always
+       android-emu-crashreport-uploader
+       breakpad_common
+       breakpad_processor
+       crashpad_handler_handler)
 add_dependencies(crashreport crashpad_handler)
 
 android_add_executable(

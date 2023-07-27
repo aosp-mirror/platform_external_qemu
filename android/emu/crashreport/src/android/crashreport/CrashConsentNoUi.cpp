@@ -14,6 +14,7 @@
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/crashreport/CrashConsent.h"
+#include "android/utils/debug.h"
 
 namespace android {
 namespace crashreport {
@@ -43,6 +44,11 @@ public:
             }
         }
         return ReportAction::REMOVE;
+    }
+
+    void reportCompleted(const CrashReportDatabase::Report& report) override {
+        dinfo("Report %s is available remotely as: %s.",
+              report.uuid.ToString().c_str(), report.id.c_str());
     }
 };
 

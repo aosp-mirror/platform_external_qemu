@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #pragma once
+#include <cstdio>
 #include "android/crashreport/crash-export.h"
 #include "client/crash_report_database.h"
 
@@ -29,15 +30,22 @@ class AEMU_CRASH_API CrashConsent {
 public:
     virtual ~CrashConsent() = default;
     enum class Consent { ASK = 0, ALWAYS = 1, NEVER = 2 };
-    enum class ReportAction { UNDECIDED_KEEP = 0, UPLOAD_REMOVE = 1,  REMOVE = 2};
-
+    enum class ReportAction {
+        UNDECIDED_KEEP = 0,
+        UPLOAD_REMOVE = 1,
+        REMOVE = 2
+    };
     virtual Consent consentRequired() = 0;
-    virtual ReportAction requestConsent(const CrashReportDatabase::Report& report) = 0;
+    virtual ReportAction requestConsent(
+            const CrashReportDatabase::Report& report) = 0;
+    virtual void reportCompleted(const CrashReportDatabase::Report& report) {
+        printf("Report %s is available remotely as: %s.\n",
+              report.uuid.ToString().c_str(), report.id.c_str());
+    }
 };
 
 // Factory that produces a consent provider
 AEMU_CRASH_API CrashConsent* consentProvider();
-
 
 // Inject a crash consent provider into the active crash system.
 // This will re-initialize the crash system if it has already been initialized.
