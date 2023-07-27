@@ -526,7 +526,6 @@ float FoldableModel::getHingeAngle(
         return 0.0f;
     if (hingeIndex >= mState.config.numHinges)
         return 0.0f;
-
     return parameterValueType == PARAMETER_VALUE_TYPE_DEFAULT
                    ? mState.config.hingeParams[hingeIndex].defaultDegrees
                    : mState.currentHingeDegrees[hingeIndex];
@@ -539,6 +538,11 @@ float FoldableModel::getPosture(ParameterValueType parameterValueType) const {
 }
 
 void FoldableModel::sendPostureToSystem(enum FoldablePostures p) {
+    const bool pixel_fold = android_foldable_is_pixel_fold();
+    if (pixel_fold) {
+        D("no need to send posture to pixel_fold device");
+        return;
+    }
     auto adbInterface = emulation::AdbInterface::getGlobal();
     if (!adbInterface) {
         W("No adb binary found, cannot perform %s", __func__);
@@ -548,7 +552,7 @@ void FoldableModel::sendPostureToSystem(enum FoldablePostures p) {
         case POSTURE_CLOSED:
             [[fallthrough]];
         case POSTURE_FLIPPED:
-            D("%s %d sending ignore orientation true \n", __func__, __LINE__);
+            D("%s %d sending ignore orientation false\n", __func__, __LINE__);
             adbInterface->enqueueCommand({"shell", "cmd", "window",
                                           "set-ignore-orientation-request",
                                           "false"});
@@ -558,7 +562,7 @@ void FoldableModel::sendPostureToSystem(enum FoldablePostures p) {
         case POSTURE_OPENED:
             [[fallthrough]];
         case POSTURE_TENT:
-            D("%s %d sending ignore orientation false\n", __func__, __LINE__);
+            D("%s %d sending ignore orientation true\n", __func__, __LINE__);
             adbInterface->enqueueCommand({"shell", "cmd", "window",
                                           "set-ignore-orientation-request",
                                           "true"});

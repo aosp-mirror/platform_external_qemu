@@ -1203,7 +1203,8 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     bool limit_is_4gb = (guest_is_32_bit || host_is_32_bit);
 
     // bug: 277897783
-    if (android_foldable_hinge_configured()) {
+    const bool not_pixel_fold = !android_foldable_is_pixel_fold();
+    if (android_foldable_hinge_configured() && not_pixel_fold) {
         int height_in_config = hw->hw_displayRegion_0_1_height;
         if (height_in_config > hw->hw_lcd_height) {
             hw->hw_displayRegion_0_1_height = hw->hw_lcd_height;

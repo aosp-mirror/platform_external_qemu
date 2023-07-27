@@ -3505,7 +3505,8 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     event->u.layout_rotation.rotation = rot;
     queueSkinEvent(event);
 
-    if (android_foldable_is_folded()) {
+    const bool not_pixel_fold = !android_foldable_is_pixel_fold();
+    if (not_pixel_fold && android_foldable_is_folded()) {
         resizeAndChangeAspectRatio(true);
     }
 

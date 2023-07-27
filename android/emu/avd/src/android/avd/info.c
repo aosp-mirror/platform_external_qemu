@@ -1998,10 +1998,11 @@ bool avdInfo_skinHasOverlay(const char* skinName) {
         !strncmp(skinName, "pixel_6",
                  strlen("pixel_6")) || /* include pixel 6a, 6, pro etc */
         !strcmp(skinName, "pixel_5") ||
-        !strcmp(skinName, "pixel_4") || !strcmp(skinName, "pixel_4a") ||
-        !strcmp(skinName, "pixel_4_xl") || !strcmp(skinName, "pixel_3") ||
-        !strcmp(skinName, "pixel_3a") || !strcmp(skinName, "pixel_3_xl") ||
-        !strcmp(skinName, "pixel_3a_xl") || !strcmp(skinName, "pixel_2_xl")) {
+        !strcmp(skinName, "pixel_fold") || !strcmp(skinName, "pixel_4") ||
+        !strcmp(skinName, "pixel_4a") || !strcmp(skinName, "pixel_4_xl") ||
+        !strcmp(skinName, "pixel_3") || !strcmp(skinName, "pixel_3a") ||
+        !strcmp(skinName, "pixel_3_xl") || !strcmp(skinName, "pixel_3a_xl") ||
+        !strcmp(skinName, "pixel_2_xl")) {
         return true;
     }
     return false;
