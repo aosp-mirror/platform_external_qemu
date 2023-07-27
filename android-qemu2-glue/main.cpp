@@ -340,6 +340,49 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
     return 0;
 }
 
+static void updateDataSystemSubdirectory(const char* dataDirectory,
+                                         const char* srcDir,
+                                         const char* srcFileName) {
+    constexpr int kDirFilePerm = 02750;
+    // dir and file names are the same
+    const char* destFileName = srcFileName;
+    const char* destDir = srcDir;
+
+    std::string pixelFoldFullPath =
+            PathUtils::join(dataDirectory, "misc", "pixel_fold");
+    std::string srcFileFullPath =
+            srcDir ? PathUtils::join(pixelFoldFullPath, srcDir, srcFileName)
+                   : PathUtils::join(pixelFoldFullPath, srcFileName);
+
+    std::string destDirFullPath =
+            destDir ? PathUtils::join(dataDirectory, "system", destDir)
+                    : PathUtils::join(dataDirectory, "system");
+    std::string destFileFullPath =
+            PathUtils::join(destDirFullPath, destFileName);
+    if (!path_exists(srcFileFullPath.c_str())) {
+        dwarning("Could not locate file: %s", srcFileFullPath.c_str());
+        return;
+    }
+    dprint("copy %s to %s", srcFileFullPath.c_str(),
+             destFileFullPath.c_str());
+    path_mkdir_if_needed(destDirFullPath.c_str(), kDirFilePerm);
+    path_copy_file(destFileFullPath.c_str(), srcFileFullPath.c_str());
+    android_chmod(destFileFullPath.c_str(), 0640);
+}
+
+static void prepareSkinConfig(AndroidHwConfig* hw, const char* dataDirectory) {
+    if (hw->hw_device_name && "pixel_fold" == std::string(hw->hw_device_name)) {
+        // copy the /data/misc/pixel_fold/{display_settings.xml, devicestate/
+        // and displayconfig/} to /data/system/
+        updateDataSystemSubdirectory(dataDirectory, "devicestate",
+                                     "device_state_configuration.xml");
+        updateDataSystemSubdirectory(dataDirectory, "displayconfig",
+                                     "display_layout_configuration.xml");
+        updateDataSystemSubdirectory(dataDirectory, nullptr,
+                                     "display_settings.xml");
+    }
+}
+
 static void prepareDisplaySettingXml(AndroidHwConfig* hw,
                                      const char* destDirectory) {
     if (!strcmp(hw->display_settings_xml, "")) {
@@ -506,6 +549,9 @@ static int createUserData(AvdInfo* avd,
         D("Creating ext4 userdata partition: %s", dataPath);
         prepareDataFolder(dataPath, initDir.get());
         prepareDisplaySettingXml(hw, dataPath);
+        if (feature_is_enabled(kFeature_SupportPixelFold)) {
+            prepareSkinConfig(hw, dataPath);
+        }
 
         needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
         path_delete_dir(dataPath);

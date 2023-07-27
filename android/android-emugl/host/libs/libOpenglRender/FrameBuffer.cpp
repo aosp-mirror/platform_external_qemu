@@ -2913,7 +2913,7 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer, bool needPost) {
         memcpy(composeCmd.composeBuffer.data(), buffer, bufferSize);
         composeCmd.cmd = PostCmd::Compose;
         sendPostWorkerCmd(composeCmd);
-        if (p2->displayId == 0 && needPost) {
+        if (needPost) {
             post(p2->targetHandle, false);
         }
         return true;

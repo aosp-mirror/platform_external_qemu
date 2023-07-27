@@ -42,7 +42,8 @@ using android::base::splitTokens;
 using android::base::StringFormat;
 
 std::string getDeviceStateString(const AndroidHwConfig* hw) {
-    if (android_foldable_hinge_configured()) {
+    const bool not_pixel_fold = !android_foldable_is_pixel_fold();
+    if (android_foldable_hinge_configured() && not_pixel_fold) {
         int numHinges = hw->hw_sensor_hinge_count;
         if (numHinges < 0 || numHinges > ANDROID_FOLDABLE_MAX_HINGES) {
             derror("Incorrect hinge count %d", hw->hw_sensor_hinge_count);
@@ -176,6 +177,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
     const char* qemuCpuVulkanVersionProp;
     const char* emulatorCircularProp;
     const char* autoRotateProp;
+    const char* qemuExternalDisplays;
 
     namespace fc = android::featurecontrol;
     if (fc::isEnabled(fc::AndroidbootProps) ||
@@ -213,6 +215,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         qemuCpuVulkanVersionProp = "androidboot.qemu.cpuvulkan.version";
         emulatorCircularProp = "androidboot.emulator.circular";
         autoRotateProp = "androidboot.qemu.autorotate";
+        qemuExternalDisplays = "androidboot.qemu.external.displays";
     } else {
         androidbootVerityMode = nullptr;
         checkjniProp = "android.checkjni";
@@ -245,6 +248,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         qemuCpuVulkanVersionProp = nullptr;
         emulatorCircularProp = "ro.emulator.circular";
         autoRotateProp = "qemu.autorotate";
+        qemuExternalDisplays = "qemu.external.displays";
     }
 
     std::vector<std::pair<std::string, std::string>> params;
@@ -455,6 +459,21 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         params.push_back({qemuHwcodecAvcdecProp, "2"});
         params.push_back({qemuHwcodecHevcdecProp, "2"});
         params.push_back({qemuHwcodecVpxdecProp, "2"});
+    }
+
+    if (fc::isEnabled(fc::SupportPixelFold)) {
+        if (android_foldable_hinge_configured() &&
+            android_foldable_is_pixel_fold()) {
+            int width{0}, height{0};
+            width = hw->hw_displayRegion_0_1_width;
+            height = hw->hw_displayRegion_0_1_height;
+            dinfo("Configuring second built-in display with width %d and "
+                  "height %d for pixel_fold device",
+                  width, height);
+            std::string display_list = StringFormat("1,%d,%d,%d,0", width,
+                                                    height, hw->hw_lcd_density);
+            params.push_back({qemuExternalDisplays, display_list});
+        }
     }
 
     if (isQemu2) {

@@ -1330,6 +1330,10 @@ bool android_foldable_hinge_configured() {
     return (getConsoleAgents()->settings->hw()->hw_sensor_hinge && getConsoleAgents()->settings->hw()->hw_sensor_hinge_count > 0);
 }
 
+bool android_foldable_is_pixel_fold() {
+    const auto devname = getConsoleAgents()->settings->hw()->hw_device_name;
+    return (devname && "pixel_fold" == std::string(devname));
+}
 // We still need to discuss how to support foldable for secondary displays
 bool android_foldable_hinge_enabled() {
     return ((android_foldable_hinge_configured() ||

@@ -1139,8 +1139,9 @@ static void generate_touch_event(FingerState* finger,
                                  uint32_t display_id) {
     unsigned posX = *x;
     unsigned posY = *y;
+    const bool not_pixel_fold = !android_foldable_is_pixel_fold();
     if (finger->display) {
-        if (android_foldable_is_folded()) {
+        if (android_foldable_is_folded() && not_pixel_fold) {
             int fx, fy, fw, fh;
             android_foldable_get_folded_area(&fx, &fy, &fw, &fh);
             switch (finger->display->rotation) {
@@ -1184,8 +1185,9 @@ static void add_finger_event(SkinWindow* window,
     unsigned posX = x;
     unsigned posY = y;
 
+    const bool not_pixel_fold = !android_foldable_is_pixel_fold();
     if (finger->display) {
-        if (android_foldable_is_folded()) {
+        if (android_foldable_is_folded() && not_pixel_fold) {
             int fx, fy, fw, fh;
             android_foldable_get_folded_area(&fx, &fy, &fw, &fh);
             switch (finger->display->rotation) {
@@ -1228,8 +1230,9 @@ static void add_pen_event(SkinWindow* window,
     unsigned posY = y;
     uint32_t id = 0;
 
+    const bool not_pixel_fold = !android_foldable_is_pixel_fold();
     if (pen->display) {
-        if (android_foldable_is_folded()) {
+        if (android_foldable_is_folded() && not_pixel_fold) {
             int fx, fy, fw, fh;
             android_foldable_get_folded_area(&fx, &fy, &fw, &fh);
             switch (pen->display->rotation) {

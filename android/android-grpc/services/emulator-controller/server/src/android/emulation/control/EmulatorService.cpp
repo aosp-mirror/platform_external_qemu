@@ -848,6 +848,21 @@ public:
             height = getConsoleAgents()->settings->hw()->hw_lcd_height;
         }
 
+        int myDisplayId = -1;
+        const bool is_pixel_fold = android_foldable_is_pixel_fold();
+        const bool not_pixel_fold = !is_pixel_fold;
+        bool isFolded = android_foldable_is_folded();
+
+        if (is_pixel_fold && isFolded) {
+            width = getConsoleAgents()
+                            ->settings->hw()
+                            ->hw_displayRegion_0_1_width;
+            height = getConsoleAgents()
+                             ->settings->hw()
+                             ->hw_displayRegion_0_1_height;
+            myDisplayId = 6;
+        }
+
         if (!enabled) {
             return Status(
                     ::grpc::StatusCode::INVALID_ARGUMENT,
@@ -855,11 +870,10 @@ public:
                     "");
         }
 
-        bool isFolded = android_foldable_is_folded();
         // The folded screen is represented as a rectangle within the full
         // screen.
         SkinRect rect = {{0, 0}, {0, 0}};
-        if (isFolded) {
+        if (not_pixel_fold && isFolded) {
             android_foldable_get_folded_area(&rect.pos.x, &rect.pos.y,
                                              &rect.size.w, &rect.size.h);
             auto foldedDisplay =
@@ -911,7 +925,7 @@ public:
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(width, height);
-            if (isFolded) {
+            if (not_pixel_fold && isFolded) {
                 std::swap(rect.pos.x, rect.pos.y);
                 std::swap(rect.size.w, rect.size.h);
             }
@@ -923,7 +937,7 @@ public:
 
         // Calculate width and height, keeping aspect ratio in mind.
         int newWidth, newHeight;
-        if (isFolded) {
+        if (not_pixel_fold && isFolded) {
             // When screen is folded, resize based on the aspect ratio of
             // the folded screen instead of full screen.
             int newFoldedWidth, newFoldedHeight;
@@ -948,7 +962,7 @@ public:
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(newWidth, newHeight);
-            if (isFolded) {
+            if (not_pixel_fold && isFolded) {
                 std::swap(rect.pos.x, rect.pos.y);
                 std::swap(rect.size.w, rect.size.h);
             }
@@ -970,15 +984,17 @@ public:
         // cPixels value can change for each call.
         if (isPNG) {
             img = ScreenshotUtils::getScreenshot(
-                    request->display(), request->format(), rotation, newWidth,
-                    newHeight, &width, &height, rect);
+                    myDisplayId >= 0 ? myDisplayId : request->display(),
+                    request->format(), rotation, newWidth, newHeight, &width,
+                    &height, rect);
             cPixels = img.getPixelCount();
         } else {  // Let's make a fast call to learn how many pixels we need
                   // to reserve.
 
             ScreenshotUtils::getScreenshot(
-                    request->display(), request->format(), rotation, newWidth,
-                    newHeight, pixels, &cPixels, &width, &height, rect);
+                    myDisplayId >= 0 ? myDisplayId : request->display(),
+                    request->format(), rotation, newWidth, newHeight, pixels,
+                    &cPixels, &width, &height, rect);
         }
 
         auto format = reply->mutable_format();
@@ -1093,6 +1109,9 @@ public:
                 cfg->set_display(i);
                 cfg->set_flags(flags);
             }
+            const bool is_pixel_fold = android_foldable_is_pixel_fold();
+            if (is_pixel_fold)
+                break;
         }
 
         reply->set_maxdisplays(android::MultiDisplay::s_maxNumMultiDisplay);
