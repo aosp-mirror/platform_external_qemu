@@ -2188,7 +2188,16 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    if (!android::emulation::captureScreenshot(savePath.toStdString().c_str())) {
+    int displayId = 0;
+    const bool pixel_fold = android_foldable_is_pixel_fold();
+    if (pixel_fold) {
+        if (android_foldable_is_folded()) {
+            displayId = android_foldable_pixel_fold_second_display_id();
+        }
+    }
+
+    if (!android::emulation::captureScreenshot(savePath.toStdString().c_str(),
+                                               nullptr, displayId)) {
         showErrorDialog(tr("Screenshot failed"), tr("Screenshot"));
     } else {
         // Display the flash animation immediately as feedback - if it fails, an
@@ -2196,7 +2205,6 @@ void EmulatorQtWindow::screenshot() {
         mOverlay.showAsFlash();
     }
 }
-
 void EmulatorQtWindow::slot_installCanceled() {
     if (mApkInstallCommand && mApkInstallCommand->inFlight()) {
         mApkInstallCommand->cancel();
