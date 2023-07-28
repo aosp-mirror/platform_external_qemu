@@ -60,6 +60,11 @@ std::optional<Notification> NotificationStream::getDisplayNotificationEvent() {
             cfg->set_dpi(dpi);
             cfg->set_display(i);
             cfg->set_flags(flags);
+
+            const bool is_pixel_fold = android_foldable_is_pixel_fold();
+            if (is_pixel_fold)
+                break;
+
         }
     }
 
