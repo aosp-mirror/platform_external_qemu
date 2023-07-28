@@ -58,10 +58,12 @@ static void log_failure(const char *tag, const char *func, int line, const char 
 #if 0
 #define FAILURE(X) (log_failure("ERROR", __func__, __LINE__, #X), X)
 #define ASSERT(X) if (!(X)) { log_failure("FATAL", __func__, __LINE__, #X); abort(); }
+#define DPRINTF(FMT, ...) fprintf(stderr, "%s:%d " FMT "\n", __func__, __LINE__, __VA_ARGS__)
 #define DEBUG(X) X
 #else
 #define FAILURE(X) (X)
 #define ASSERT(X)
+#define DPRINTF(FMT, ...)
 #define DEBUG(X)
 #endif
 
@@ -319,6 +321,7 @@ static bool vq_ring_buffer_alloc(VirtIOSoundVqRingBuffer *rb, const size_t capac
     ASSERT(rb);
     ASSERT(!rb->buf);
     ASSERT(!rb->capacity);
+    DPRINTF("rb=%p capacity=%zu", rb, capacity);
 
     rb->buf = g_new0(VirtIOSoundVqRingBufferItem, capacity);
     if (!rb->buf) {
@@ -338,6 +341,7 @@ static void vq_ring_buffer_free(VirtIOSoundVqRingBuffer *rb) {
     ASSERT(!rb->size);
     ASSERT(rb->r == rb->w);
     ASSERT(rb->buf);
+    DPRINTF("rb=%p", rb);
 
     g_free(rb->buf);
     vq_ring_buffer_init(rb);
@@ -406,6 +410,7 @@ static bool pcm_ring_buffer_alloc(VirtIOSoundPcmRingBuffer *rb, const size_t cap
     ASSERT(rb);
     ASSERT(!rb->buf);
     ASSERT(!rb->capacity);
+    DPRINTF("rb=%p capacity=%zu", rb, capacity);
 
     rb->buf = g_new0(uint8_t, capacity);
     if (!rb->buf) {
@@ -423,6 +428,8 @@ static bool pcm_ring_buffer_alloc(VirtIOSoundPcmRingBuffer *rb, const size_t cap
 static void pcm_ring_buffer_free(VirtIOSoundPcmRingBuffer *rb) {
     ASSERT(rb);
     ASSERT(rb->buf);
+    DPRINTF("rb=%p", rb);
+
     g_free(rb->buf);
     pcm_ring_buffer_init(rb);
 }
@@ -786,6 +793,7 @@ virtio_snd_process_ctl_jack_info(VirtQueueElement *e,
                                  const struct virtio_snd_query_info* req,
                                  VirtIOSound* snd) {
     if (req->size == sizeof(struct virtio_snd_jack_info)) {
+        DPRINTF("req={start_id=%u, count=%u}", req->start_id, req->count);
         if ((req->count <= VIRTIO_SND_NUM_JACKS)
                 && ((req->start_id + req->count) <= VIRTIO_SND_NUM_JACKS)
                 && ((req->start_id + req->count) > req->start_id)) {
@@ -810,6 +818,7 @@ virtio_snd_process_ctl_pcm_info(VirtQueueElement *e,
                                 const struct virtio_snd_query_info* req,
                                 VirtIOSound* snd) {
     if (req->size == sizeof(struct virtio_snd_pcm_info)) {
+        DPRINTF("req={start_id=%u, count=%u}", req->start_id, req->count);
         if ((req->count <= VIRTIO_SND_NUM_PCM_STREAMS)
                 && ((req->start_id + req->count) <= VIRTIO_SND_NUM_PCM_STREAMS)
                 && ((req->start_id + req->count) > req->start_id)) {
@@ -826,6 +835,9 @@ static uint32_t
 virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_params* req,
                                            VirtIOSound* snd) {
     const unsigned stream_id = req->hdr.stream_id;
+    DPRINTF("req={stream_id=%u, buffer_bytes=%u, period_bytes=%u, features=0x%08X, "
+            "channels=%u, format=%u, rate=%u}", stream_id, req->buffer_bytes,
+            req->period_bytes, req->features, req->channels, req->format, req->rate);
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
@@ -1571,6 +1583,7 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
 static uint32_t
 virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
+    DPRINTF("stream_id=%u", stream_id);
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
@@ -1604,6 +1617,7 @@ done:
 
 static uint32_t
 virtio_snd_process_ctl_pcm_release_impl(unsigned stream_id, VirtIOSound* snd) {
+    DPRINTF("stream_id=%u", stream_id);
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
@@ -1624,6 +1638,7 @@ virtio_snd_process_ctl_pcm_release_impl(unsigned stream_id, VirtIOSound* snd) {
 
 static uint32_t
 virtio_snd_process_ctl_pcm_start_impl(unsigned stream_id, VirtIOSound* snd) {
+    DPRINTF("stream_id=%u", stream_id);
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
@@ -1646,6 +1661,7 @@ virtio_snd_process_ctl_pcm_start_impl(unsigned stream_id, VirtIOSound* snd) {
 
 static uint32_t
 virtio_snd_process_ctl_pcm_stop_impl(unsigned stream_id, VirtIOSound* snd) {
+    DPRINTF("stream_id=%u", stream_id);
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         return FAILURE(VIRTIO_SND_S_BAD_MSG);
     }
@@ -1706,6 +1722,7 @@ virtio_snd_process_ctl_chmap_info(VirtQueueElement *e,
                                   const struct virtio_snd_query_info* req,
                                   VirtIOSound* snd) {
     if (req->size == sizeof(struct virtio_snd_chmap_info)) {
+        DPRINTF("req={start_id=%u, count=%u}", req->start_id, req->count);
         if ((req->count <= VIRTIO_SND_NUM_CHMAPS)
                 && ((req->start_id + req->count) <= VIRTIO_SND_NUM_CHMAPS)
                 && ((req->start_id + req->count) > req->start_id)) {
@@ -1814,6 +1831,7 @@ static void linux_mic_workaround_in_cb(void *unused1, int unused2) {}
 
 static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
     VirtIOSound *snd = VIRTIO_SND(dev);
+    DPRINTF("snd=%p", snd);
     VirtIODevice *vdev = &snd->parent;
     int i;
 
@@ -1857,6 +1875,7 @@ static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
 
 static void virtio_snd_device_unrealize(DeviceState *dev, Error **errp) {
     VirtIOSound *snd = VIRTIO_SND(dev);
+    DPRINTF("snd=%p", snd);
     VirtIODevice *vdev = &snd->parent;
     unsigned i;
 
@@ -1896,6 +1915,10 @@ static void virtio_snd_get_config(VirtIODevice *vdev, uint8_t *raw) {
 
 static void virtio_snd_set_status(VirtIODevice *vdev, const uint8_t status) {
     VirtIOSound *snd = VIRTIO_SND(vdev);
+
+    if (status & VIRTIO_CONFIG_S_FAILED) {
+        DPRINTF("%s", "VIRTIO_CONFIG_S_FAILED");
+    }
 
     for (unsigned i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
         VirtIOSoundPCMStream *stream = &snd->streams[i];
