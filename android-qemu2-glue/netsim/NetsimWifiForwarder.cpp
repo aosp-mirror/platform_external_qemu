@@ -11,11 +11,13 @@
 */
 #include "android-qemu2-glue/netsim/NetsimWifiForwarder.h"
 
+
 #include "aemu/base/logging/CLog.h"
 #include "android/emulation/HostapdController.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
 #include "backend/packet_streamer_client.h"
 #include "netsim/packet_streamer.grpc.pb.h"
+#include "netsim.h"
 
 #include <assert.h>            // for assert
 #include <grpcpp/grpcpp.h>     // for Clie...
@@ -139,6 +141,7 @@ bool NetsimWifiForwarder::init() {
     sTransport->startCall(sTransportStub.get());
 
     PacketRequest initial_request;
+    initial_request.mutable_initial_info()->set_name(get_netsim_device_name());
     initial_request.mutable_initial_info()->mutable_chip()->set_kind(
         netsim::common::ChipKind::WIFI);
     sTransport->Write(initial_request);

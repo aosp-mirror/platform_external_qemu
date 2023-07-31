@@ -200,6 +200,10 @@ void close_netsim() {
     }
 }
 
+const std::string get_netsim_device_name() {
+    return gNetsimConfiguration.name;
+}
+
 void register_netsim(const std::string address,
                      const std::string name) {
     netsim::packet::SetPacketStreamEndpoint(address);
