@@ -534,7 +534,7 @@ static VirtIOSoundPCMStream *g_input_stream = NULL;
 
 static SWVoiceIn *virtio_snd_set_voice_in(SWVoiceIn *voice) {
     if (g_input_stream) {
-        struct audsettings as = virtio_snd_unpack_format(g_input_stream->aud_format);
+        struct audsettings as = virtio_snd_unpack_format(g_input_stream->host_format);
 
         g_input_stream->voice.in = AUD_open_in(&g_input_stream->snd->card,
                                                voice,
@@ -558,10 +558,10 @@ static void virtio_snd_stream_set_aud_format(VirtIOSoundPCMStream *stream,
                                              const uint16_t format16_fmt_freq) {
     const unsigned fmt = format16_get_format(format16_fmt_freq);
     const unsigned freq = format16_get_freq(format16_fmt_freq);
-    const uint16_t aud_format = VIRTIO_SND_PACK_FORMAT16(nchannels, fmt, freq);
+    const uint16_t host_format = VIRTIO_SND_PACK_FORMAT16(nchannels, fmt, freq);
 
-    stream->aud_format = aud_format;
-    stream->aud_frame_size = format16_get_frame_size(aud_format);
+    stream->host_format = host_format;
+    stream->host_frame_size = format16_get_frame_size(host_format);
 }
 
 static bool virtio_snd_voice_open(VirtIOSoundPCMStream *stream,
@@ -628,7 +628,7 @@ static void virtio_snd_voice_close(VirtIOSoundPCMStream *stream) {
     }
 
     stream->voice.raw = NULL;
-    stream->aud_format = VIRTIO_SND_FORMAT16_BAD;
+    stream->host_format = VIRTIO_SND_FORMAT16_BAD;
 }
 
 static void virtio_snd_stream_init(const unsigned stream_id,
@@ -639,14 +639,14 @@ static void virtio_snd_stream_init(const unsigned stream_id,
     stream->id = stream_id;
     stream->snd = snd;
     stream->voice.raw = NULL;
-    stream->aud_format = VIRTIO_SND_FORMAT16_BAD;
-    vq_ring_buffer_init(&stream->kpcm_buf);
-    pcm_ring_buffer_init(&stream->qpcm_buf);
+    stream->host_format = VIRTIO_SND_FORMAT16_BAD;
+    vq_ring_buffer_init(&stream->gpcm_buf);
+    pcm_ring_buffer_init(&stream->hpcm_buf);
     qemu_mutex_init(&stream->mtx);
     stream->state = VIRTIO_PCM_STREAM_STATE_DISABLED;
 }
 
-static bool virtio_snd_stream_kpcm_to_qpcm_locked(VirtIOSoundPCMStream *stream);
+static bool virtio_snd_stream_gpcm_to_hpcm_locked(VirtIOSoundPCMStream *stream);
 static void virtio_snd_stream_output_irq(void* opaque);
 static void virtio_snd_stream_input_irq(void* opaque);
 
@@ -654,7 +654,7 @@ static void virtio_snd_stream_start_locked(VirtIOSoundPCMStream *stream) {
     if (is_output_stream(stream)) {
         timer_init_us(&stream->vq_irq_timer, QEMU_CLOCK_VIRTUAL_RT,
                       &virtio_snd_stream_output_irq, stream);
-        virtio_snd_stream_kpcm_to_qpcm_locked(stream);  // prefill
+        virtio_snd_stream_gpcm_to_hpcm_locked(stream);  // prefill
     } else {
         timer_init_us(&stream->vq_irq_timer, QEMU_CLOCK_VIRTUAL_RT,
                       &virtio_snd_stream_input_irq, stream);
@@ -686,27 +686,27 @@ static bool virtio_snd_stream_prepare_locked(VirtIOSoundPCMStream *stream) {
 
     const int freq_hz = format16_get_freq_hz(guest_format);
     ASSERT(freq_hz > 0);
-    stream->driver_frame_size = format16_get_frame_size(guest_format);
-    ASSERT(stream->driver_frame_size > 0);
+    stream->guest_frame_size = format16_get_frame_size(guest_format);
+    ASSERT(stream->guest_frame_size > 0);
     stream->n_periods = n_periods.quot;
-    const int period_frames = stream->period_bytes / stream->driver_frame_size;
+    const int period_frames = stream->period_bytes / stream->guest_frame_size;
     ASSERT(period_frames > 0);
     stream->period_frames = period_frames;
     stream->period_us = 1000000LL * period_frames / freq_hz;
 
-    if (!vq_ring_buffer_alloc(&stream->kpcm_buf, n_periods.quot)) {
+    if (!vq_ring_buffer_alloc(&stream->gpcm_buf, n_periods.quot)) {
         virtio_snd_voice_close(stream);
         return FAILURE(false);
     }
 
     ASSERT(stream->n_periods > 0);
-    ASSERT(stream->aud_frame_size > 0);
+    ASSERT(stream->host_frame_size > 0);
 
-    if (!pcm_ring_buffer_alloc(&stream->qpcm_buf,
+    if (!pcm_ring_buffer_alloc(&stream->hpcm_buf,
                                (stream->n_periods + 1) * period_frames
-                                   * stream->aud_frame_size)) {
+                                   * stream->host_frame_size)) {
         virtio_snd_voice_close(stream);
-        vq_ring_buffer_free(&stream->kpcm_buf);
+        vq_ring_buffer_free(&stream->gpcm_buf);
         return FAILURE(false);
     }
 
@@ -715,19 +715,19 @@ static bool virtio_snd_stream_prepare_locked(VirtIOSoundPCMStream *stream) {
 
 static void virtio_snd_stream_flush_vq_locked(VirtIOSoundPCMStream *stream,
                                               VirtQueue *vq) {
-    const int kernel_latency_bytes =
-        stream->qpcm_buf.size / stream->aud_frame_size * stream->driver_frame_size;
-    VirtIOSoundVqRingBuffer *kpcm_buf = &stream->kpcm_buf;
+    const int guest_latency_bytes =
+        stream->hpcm_buf.size / stream->host_frame_size * stream->guest_frame_size;
+    VirtIOSoundVqRingBuffer *gpcm_buf = &stream->gpcm_buf;
 
     while (true) {
-        VirtIOSoundVqRingBufferItem *item = vq_ring_buffer_top(kpcm_buf);
+        VirtIOSoundVqRingBufferItem *item = vq_ring_buffer_top(gpcm_buf);
         if (item) {
             VirtQueueElement *e = item->el;
 
             vq_consume_element(
                 vq, e,
-                el_send_pcm_status(e, 0, VIRTIO_SND_S_OK, kernel_latency_bytes));
-            vq_ring_buffer_pop(kpcm_buf);
+                el_send_pcm_status(e, 0, VIRTIO_SND_S_OK, guest_latency_bytes));
+            vq_ring_buffer_pop(gpcm_buf);
         } else {
             break;
         }
@@ -740,8 +740,8 @@ static void virtio_snd_stream_unprepare_locked(VirtIOSoundPCMStream *stream) {
     virtio_snd_stream_flush_vq_locked(stream, is_output_stream(stream) ?
                                       stream->snd->tx_vq : stream->snd->rx_vq);
     virtio_snd_voice_close(stream);
-    vq_ring_buffer_free(&stream->kpcm_buf);
-    pcm_ring_buffer_free(&stream->qpcm_buf);
+    vq_ring_buffer_free(&stream->gpcm_buf);
+    pcm_ring_buffer_free(&stream->hpcm_buf);
 }
 
 static void virtio_snd_stream_enable(VirtIOSoundPCMStream *stream) {
@@ -1286,53 +1286,53 @@ static int convert_channels(const int16_t *buffer_in, const int in_sz,
     }
 }
 
-static bool virtio_snd_stream_kpcm_to_qpcm_locked(VirtIOSoundPCMStream *stream) {
-    const int aud_fs = stream->aud_frame_size;
-    ASSERT(aud_fs > 0);
+static bool virtio_snd_stream_gpcm_to_hpcm_locked(VirtIOSoundPCMStream *stream) {
+    const int host_fs = stream->host_frame_size;
+    ASSERT(host_fs > 0);
     const int period_frames = stream->period_frames;
     ASSERT(period_frames > 0);
 
-    if (stream->qpcm_buf.size >= (stream->n_periods * period_frames * aud_fs)) {
+    if (stream->hpcm_buf.size >= (stream->n_periods * period_frames * host_fs)) {
         return false;
     }
 
-    VirtIOSoundVqRingBufferItem *item = vq_ring_buffer_top(&stream->kpcm_buf);
+    VirtIOSoundVqRingBufferItem *item = vq_ring_buffer_top(&stream->gpcm_buf);
     if (!item) {
         return FAILURE(false);
     }
 
-    const int driver_fs = stream->driver_frame_size;
-    ASSERT(driver_fs > 0);
+    const int guest_fs = stream->guest_frame_size;
+    ASSERT(guest_fs > 0);
     int16_t scratch[AUD_SCRATCH_SIZE];
-    const int max_dst_chunk_size = sizeof(scratch) / driver_fs * aud_fs;
+    const int max_dst_chunk_size = sizeof(scratch) / guest_fs * host_fs;
 
     VirtQueueElement *const e = item->el;
     ASSERT(e != NULL);
 
     int pos = sizeof(struct virtio_snd_pcm_xfer);
-    int qsize = period_frames * aud_fs;
-    ASSERT(qsize > 0);
-    while (qsize > 0) {
+    int hsize = period_frames * host_fs;
+    ASSERT(hsize > 0);
+    while (hsize > 0) {
         int dst_sz;
-        void *dst = pcm_ring_buffer_get_produce_chunk(&stream->qpcm_buf, qsize, &dst_sz);
+        void *dst = pcm_ring_buffer_get_produce_chunk(&stream->hpcm_buf, hsize, &dst_sz);
         ASSERT(dst != NULL);
         dst_sz = MIN(dst_sz, max_dst_chunk_size);
         ASSERT(dst_sz > 0);
-        const int src_sz = dst_sz / aud_fs * driver_fs;
+        const int src_sz = dst_sz / host_fs * guest_fs;
         ASSERT(src_sz > 0);
 
         iov_to_buf(e->out_sg, e->out_num, pos, scratch, src_sz);
-        convert_channels(scratch, src_sz, driver_fs, aud_fs, (int16_t *)dst);
-        pcm_ring_buffer_produce(&stream->qpcm_buf, dst_sz);
+        convert_channels(scratch, src_sz, guest_fs, host_fs, (int16_t *)dst);
+        pcm_ring_buffer_produce(&stream->hpcm_buf, dst_sz);
         pos += src_sz;
-        qsize -= dst_sz;
+        hsize -= dst_sz;
     }
 
     vq_consume_element(
         stream->snd->tx_vq, e,
         el_send_pcm_status(e, 0, VIRTIO_SND_S_OK,
-                           stream->qpcm_buf.size / aud_fs * driver_fs));
-    vq_ring_buffer_pop(&stream->kpcm_buf);
+                           stream->hpcm_buf.size / host_fs * guest_fs));
+    vq_ring_buffer_pop(&stream->gpcm_buf);
     return true;
 }
 
@@ -1340,29 +1340,29 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     ASSERT(avail > 0);
     SWVoiceOut *const voice = stream->voice.out;
     ASSERT(voice != NULL);
-    const int aud_fs = stream->aud_frame_size;
-    ASSERT(aud_fs > 0);
-    ASSERT((avail % aud_fs) == 0);
+    const int host_fs = stream->host_frame_size;
+    ASSERT(host_fs > 0);
+    ASSERT((avail % host_fs) == 0);
     ASSERT(stream->period_frames > 0);
-    int min_write_sz = MIN(avail, MAX(stream->period_frames / 16, 4) * aud_fs);
+    int min_write_sz = MIN(avail, MAX(stream->period_frames / 16, 4) * host_fs);
 
     while (avail > 0) {
         int size;
-        void *data = pcm_ring_buffer_get_consume_chunk(&stream->qpcm_buf, &size);
+        void *data = pcm_ring_buffer_get_consume_chunk(&stream->hpcm_buf, &size);
         if (size > 0) {
-            ASSERT((size % aud_fs) == 0);
+            ASSERT((size % host_fs) == 0);
             const int to_write_sz = MIN(size, avail);
             const int written_sz = AUD_write(voice, data, to_write_sz);
             if (written_sz > 0) {
-                ASSERT((written_sz % aud_fs) == 0);
-                pcm_ring_buffer_consume(&stream->qpcm_buf, written_sz);
+                ASSERT((written_sz % host_fs) == 0);
+                pcm_ring_buffer_consume(&stream->hpcm_buf, written_sz);
                 avail -= written_sz;
                 min_write_sz -= written_sz;
             } else {
                 return;
             }
         } else {
-            ASSERT(stream->qpcm_buf.size == 0);
+            ASSERT(stream->hpcm_buf.size == 0);
             if (min_write_sz > 0) {
                 int16_t scratch[AUD_SCRATCH_SIZE];
 
@@ -1370,10 +1370,10 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
                 fill_silence(scratch, MIN(sizeof(scratch), min_write_sz));
                 do {
                     const int to_write_sz =
-                        MIN(sizeof(scratch), min_write_sz) / aud_fs * aud_fs;
+                        MIN(sizeof(scratch), min_write_sz) / host_fs * host_fs;
                     const int written_sz = AUD_write(voice, scratch, to_write_sz);
                     if (written_sz > 0) {
-                        ASSERT((written_sz % aud_fs) == 0);
+                        ASSERT((written_sz % host_fs) == 0);
                         min_write_sz -= written_sz;
                     } else {
                         return;
@@ -1391,7 +1391,7 @@ static void virtio_snd_stream_output_irq(void *opaque) {
     qemu_mutex_lock(&stream->mtx);
     if (stream->state == VIRTIO_PCM_STREAM_STATE_RUNNING) {
         stream->next_vq_irq_us +=
-            virtio_snd_stream_kpcm_to_qpcm_locked(stream) ?
+            virtio_snd_stream_gpcm_to_hpcm_locked(stream) ?
                 stream->period_us : (stream->period_us / 4);
         timer_mod(&stream->vq_irq_timer, stream->next_vq_irq_us);
         virtio_notify(&stream->snd->parent, stream->snd->tx_vq);
@@ -1427,61 +1427,61 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     item.el = e;
 
     qemu_mutex_lock(&stream->mtx);
-    if (!vq_ring_buffer_push(&stream->kpcm_buf, &item)) {
+    if (!vq_ring_buffer_push(&stream->gpcm_buf, &item)) {
         ABORT("vq_ring_buffer_push");
     }
     qemu_mutex_unlock(&stream->mtx);
 }
 
-static bool virtio_snd_stream_qpcm_to_kpcm_locked(VirtIOSoundPCMStream *stream) {
-    VirtIOSoundVqRingBufferItem *item = vq_ring_buffer_top(&stream->kpcm_buf);
+static bool virtio_snd_stream_hpcm_to_gpcm_locked(VirtIOSoundPCMStream *stream) {
+    VirtIOSoundVqRingBufferItem *item = vq_ring_buffer_top(&stream->gpcm_buf);
     if (!item) {
         return FAILURE(false);
     }
 
-    const int aud_fs = stream->aud_frame_size;
-    ASSERT(aud_fs > 0);
-    const int driver_fs = stream->driver_frame_size;
-    ASSERT(driver_fs > 0);
+    const int host_fs = stream->host_frame_size;
+    ASSERT(host_fs > 0);
+    const int guest_fs = stream->guest_frame_size;
+    ASSERT(guest_fs > 0);
     int16_t scratch[AUD_SCRATCH_SIZE];
     const int max_src_chunk_size =
-        MIN(stream->period_frames, sizeof(scratch) / driver_fs) * aud_fs;
-    ASSERT(max_src_chunk_size >= aud_fs);
+        MIN(stream->period_frames, sizeof(scratch) / guest_fs) * host_fs;
+    ASSERT(max_src_chunk_size >= host_fs);
 
     VirtQueueElement *e = item->el;
     ASSERT(e != NULL);
 
     int pos = 0;
-    int ksize = stream->period_bytes;
-    ASSERT(ksize > 0);
-    while (ksize > 0) {
+    int gsize = stream->period_bytes;
+    ASSERT(gsize > 0);
+    while (gsize > 0) {
         int src_size;
-        const void *src = pcm_ring_buffer_get_consume_chunk(&stream->qpcm_buf, &src_size);
+        const void *src = pcm_ring_buffer_get_consume_chunk(&stream->hpcm_buf, &src_size);
         if (src_size > 0) {
-            ASSERT((src_size % aud_fs) == 0);
+            ASSERT((src_size % host_fs) == 0);
             src_size = MIN(MIN(src_size, max_src_chunk_size),
-                           ksize / driver_fs * aud_fs);
+                           gsize / guest_fs * host_fs);
             ASSERT(src_size > 0);
             const int dst_size = convert_channels(src, src_size,
-                                                  aud_fs, driver_fs, scratch);
+                                                  host_fs, guest_fs, scratch);
             ASSERT(dst_size > 0);
-            ASSERT((dst_size % driver_fs) == 0);
+            ASSERT((dst_size % guest_fs) == 0);
             iov_from_buf(e->in_sg, e->in_num, pos, scratch, dst_size);
-            pcm_ring_buffer_consume(&stream->qpcm_buf, src_size);
+            pcm_ring_buffer_consume(&stream->hpcm_buf, src_size);
             pos += dst_size;
-            ksize -= dst_size;
+            gsize -= dst_size;
         } else {
-            ASSERT(stream->qpcm_buf.size == 0);
-            ASSERT(ksize > 0);
+            ASSERT(stream->hpcm_buf.size == 0);
+            ASSERT(gsize > 0);
 
-            // Insert `ksize` bytes of silence.
-            fill_silence(scratch, MIN(sizeof(scratch), ksize));
+            // Insert `gsize` bytes of silence.
+            fill_silence(scratch, MIN(sizeof(scratch), gsize));
             do {
-                const int dst_size = MIN(sizeof(scratch), ksize);
+                const int dst_size = MIN(sizeof(scratch), gsize);
                 iov_from_buf(e->in_sg, e->in_num, pos, scratch, dst_size);
                 pos += dst_size;
-                ksize -= dst_size;
-            } while (ksize > 0);
+                gsize -= dst_size;
+            } while (gsize > 0);
 
             break;
         }
@@ -1492,20 +1492,20 @@ static bool virtio_snd_stream_qpcm_to_kpcm_locked(VirtIOSoundPCMStream *stream) 
     vq_consume_element(
         stream->snd->rx_vq, e,
         el_send_pcm_status(e, pos, VIRTIO_SND_S_OK,
-                           stream->qpcm_buf.size / aud_fs * driver_fs));
-    vq_ring_buffer_pop(&stream->kpcm_buf);
+                           stream->hpcm_buf.size / host_fs * guest_fs));
+    vq_ring_buffer_pop(&stream->gpcm_buf);
     return true;
 }
 
 static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     ASSERT(avail > 0);
-    const int aud_fs = stream->aud_frame_size;
-    ASSERT(aud_fs > 0);
-    ASSERT((avail % aud_fs) == 0);
-    ASSERT(stream->qpcm_buf.capacity > 0);
+    const int host_fs = stream->host_frame_size;
+    ASSERT(host_fs > 0);
+    ASSERT((avail % host_fs) == 0);
+    ASSERT(stream->hpcm_buf.capacity > 0);
     int16_t scratch[AUD_SCRATCH_SIZE];
-    const int max_read_size = MIN(sizeof(scratch) / aud_fs * aud_fs,
-                                  stream->qpcm_buf.capacity);
+    const int max_read_size = MIN(sizeof(scratch) / host_fs * host_fs,
+                                  stream->hpcm_buf.capacity);
 
     SWVoiceIn *const voice = stream->voice.in;
     ASSERT(voice != NULL);
@@ -1514,16 +1514,16 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
         int src_sz = AUD_read(voice, scratch, MIN(avail, max_read_size));
         if (src_sz > 0) {
             avail -= src_sz;
-            ASSERT((src_sz % aud_fs) == 0);
+            ASSERT((src_sz % host_fs) == 0);
             const uint8_t* src = (const uint8_t*)(&scratch[0]);
 
             while (src_sz > 0) {
                 int dst_sz;
-                void *dst = pcm_ring_buffer_get_produce_chunk(&stream->qpcm_buf,
+                void *dst = pcm_ring_buffer_get_produce_chunk(&stream->hpcm_buf,
                                                               src_sz, &dst_sz);
                 dst_sz = MIN(dst_sz, src_sz);
                 memcpy(dst, src, dst_sz);
-                pcm_ring_buffer_produce(&stream->qpcm_buf, dst_sz);
+                pcm_ring_buffer_produce(&stream->hpcm_buf, dst_sz);
                 src += dst_sz;
                 src_sz -= dst_sz;
             }
@@ -1539,7 +1539,7 @@ static void virtio_snd_stream_input_irq(void* opaque) {
     qemu_mutex_lock(&stream->mtx);
     if (stream->state == VIRTIO_PCM_STREAM_STATE_RUNNING) {
         stream->next_vq_irq_us +=
-            virtio_snd_stream_qpcm_to_kpcm_locked(stream) ?
+            virtio_snd_stream_hpcm_to_gpcm_locked(stream) ?
                 stream->period_us : (stream->period_us / 4);
         timer_mod(&stream->vq_irq_timer, stream->next_vq_irq_us);
         virtio_notify(&stream->snd->parent, stream->snd->rx_vq);
@@ -1575,7 +1575,7 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     item.el = e;
 
     qemu_mutex_lock(&stream->mtx);
-    if (!vq_ring_buffer_push(&stream->kpcm_buf, &item)) {
+    if (!vq_ring_buffer_push(&stream->gpcm_buf, &item)) {
         ABORT("ring_buffer_push");
     }
     qemu_mutex_unlock(&stream->mtx);
