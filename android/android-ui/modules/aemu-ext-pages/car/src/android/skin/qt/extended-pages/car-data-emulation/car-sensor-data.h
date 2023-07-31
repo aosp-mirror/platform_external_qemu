@@ -120,6 +120,7 @@ private:
     int getIndexFromVehicleGear(int gear);
     void parseEventsFromJsonFile(QString jsonPath);
     void updateCarSpeedText(int speed);
+    void updateCarSpeedSlider(int speed);
 
     // Vhal replay
     std::unique_ptr<emulator::VhalEventLoaderThread> mVhalEventLoader;
