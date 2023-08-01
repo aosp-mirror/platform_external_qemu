@@ -11,6 +11,7 @@
 #pragma once
 
 #include "android/utils/compiler.h"
+#include <stdint.h>
 
 ANDROID_BEGIN_HEADER
 
@@ -18,6 +19,7 @@ void android_init_qemu_misc_pipe(void);
 int get_guest_heart_beat_count(void);
 void set_restart_when_stalled(void);
 void signal_system_reset_was_requested(void);
+int64_t get_uptime_since_reset(void);
 
 ANDROID_END_HEADER
 

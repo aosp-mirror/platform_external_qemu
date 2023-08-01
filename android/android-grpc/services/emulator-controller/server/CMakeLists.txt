@@ -1,7 +1,8 @@
 android_add_library(
   TARGET emulator_controller-server-impl
   LICENSE Apache-2.0
-  SOURCE_DIR src
+  SOURCE_DIR
+  src
   SRC android/emulation/control/audio/AudioStream.cpp
       android/emulation/control/camera/VirtualSceneCamera.cpp
       android/emulation/control/clipboard/Clipboard.cpp
@@ -11,6 +12,7 @@ android_add_library(
       android/emulation/control/keyboard/TouchEventSender.cpp
       android/emulation/control/keyboard/WheelEventSender.cpp
       android/emulation/control/logcat/LogcatParser.cpp
+      android/emulation/control/notifications/NotificationStream.cpp
       android/emulation/control/utils/AudioUtils.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp
       android/emulation/control/utils/SharedMemoryLibrary.cpp

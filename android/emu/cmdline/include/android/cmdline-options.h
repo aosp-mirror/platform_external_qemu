@@ -346,8 +346,6 @@ OPT_FLAG(hotplug_multi_display, "Use the HAL hotplug display to implement multiD
 
 OPT_FLAG(xts, "Use android64-xts CPU profile instead of the default one")
 
-OPT_FLAG(redirect_to_netsim, "Forward network traffic to the netsim process via gRPC. ")
-
 OPT_PARAM(wifi_mac_address,
           "<mac address>",
           "Override the mac address of the wlan0 interface in AVD. This option "

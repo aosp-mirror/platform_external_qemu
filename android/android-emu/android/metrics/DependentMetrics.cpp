@@ -216,6 +216,119 @@ toClearcutLogAvdProperty(AvdFlavor flavor) {
     return android_studio::EmulatorAvdInfo::UNKNOWN_EMULATOR_AVD_FLAG;
 }
 
+static android_studio::EmulatorAvdInfo::EmulatorDeviceName getDeviceName() {
+    const char* id = getConsoleAgents()->settings->hw()->hw_device_name;
+    if (0 == strcmp(id, "resizable")) {
+        return android_studio::EmulatorAvdInfo::RESIZABLE;
+    }
+    if (0 == strcmp(id, "7.6in Foldable")) {
+        return android_studio::EmulatorAvdInfo::FOLDABLE_7_6_IN;
+    }
+    if (0 == strcmp(id, "small_phone")) {
+        return android_studio::EmulatorAvdInfo::SMALL_PHONE;
+    }
+    if (0 == strcmp(id, "medium_phone")) {
+        return android_studio::EmulatorAvdInfo::MEDIUM_PHONE;
+    }
+    if (0 == strcmp(id, "medium_tablet")) {
+        return android_studio::EmulatorAvdInfo::MEDIUM_TABLET;
+    }
+    if (0 == strcmp(id, "pixel_c")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_C;
+    }
+    if (0 == strcmp(id, "pixel")) {
+        return android_studio::EmulatorAvdInfo::PIXEL;
+    }
+    if (0 == strcmp(id, "pixel_xl")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_XL;
+    }
+    if (0 == strcmp(id, "pixel_2")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_2;
+    }
+    if (0 == strcmp(id, "pixel_2_xl")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_2_XL;
+    }
+    if (0 == strcmp(id, "pixel_3")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_3;
+    }
+    if (0 == strcmp(id, "pixel_3_xl")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_3_XL;
+    }
+    if (0 == strcmp(id, "pixel_3a")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_3A;
+    }
+    if (0 == strcmp(id, "pixel_3a_xl")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_3A_XL;
+    }
+    if (0 == strcmp(id, "pixel_4")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_4;
+    }
+    if (0 == strcmp(id, "pixel_4_xl")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_4_XL;
+    }
+    if (0 == strcmp(id, "pixel_4a")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_4A;
+    }
+    if (0 == strcmp(id, "pixel_5")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_5;
+    }
+    if (0 == strcmp(id, "pixel_6")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_6;
+    }
+    if (0 == strcmp(id, "pixel_6_pro")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_6_PRO;
+    }
+    if (0 == strcmp(id, "pixel_6a")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_6A;
+    }
+    if (0 == strcmp(id, "pixel_7_pro")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_7_PRO;
+    }
+    if (0 == strcmp(id, "pixel_7")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_7;
+    }
+    if (0 == strcmp(id, "pixel_fold")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_FOLD;
+    }
+    if (0 == strcmp(id, "pixel_tablet")) {
+        return android_studio::EmulatorAvdInfo::PIXEL_TABLET;
+    }
+    if (0 == strcmp(id, "automotive_1024p_landscape")) {
+        return android_studio::EmulatorAvdInfo::AUTOMOTIVE_1024P_LANDSCAPE;
+    }
+    if (0 == strcmp(id, "desktop_small")) {
+        return android_studio::EmulatorAvdInfo::DESKTOP_SMALL;
+    }
+    if (0 == strcmp(id, "desktop_medium")) {
+        return android_studio::EmulatorAvdInfo::DESKTOP_MEDIUM;
+    }
+    if (0 == strcmp(id, "desktop_large")) {
+        return android_studio::EmulatorAvdInfo::DESKTOP_LARGE;
+    }
+    if (0 == strcmp(id, "tv_4k")) {
+        return android_studio::EmulatorAvdInfo::TV_4K;
+    }
+    if (0 == strcmp(id, "tv_1080p")) {
+        return android_studio::EmulatorAvdInfo::TV_1080P;
+    }
+    if (0 == strcmp(id, "tv_720p")) {
+        return android_studio::EmulatorAvdInfo::TV_720P;
+    }
+    if (0 == strcmp(id, "wearos_large_round")) {
+        return android_studio::EmulatorAvdInfo::WEAROS_LARGE_ROUND;
+    }
+    if (0 == strcmp(id, "wearos_small_round")) {
+        return android_studio::EmulatorAvdInfo::WEAROS_SMALL_ROUND;
+    }
+    if (0 == strcmp(id, "wearos_rect")) {
+        return android_studio::EmulatorAvdInfo::WEAROS_RECT;
+    }
+    if (0 == strcmp(id, "wearos_square")) {
+        return android_studio::EmulatorAvdInfo::WEAROS_SQUARE;
+    }
+    return android_studio::EmulatorAvdInfo::UNKNOWN_EMULATOR_DEVICE_NAME;
+}
+
 static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
     VERBOSE_PRINT(metrics, "Filling AVD metrics");
 
@@ -260,6 +373,7 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
         buildId = ini.getString("ro.build.display.id", "");
     }
     eventAvdInfo->set_build_id(buildId);
+    eventAvdInfo->set_device_name(getDeviceName());
 
     fillAvdFileInfo(
             eventAvdInfo, android_studio::EmulatorAvdFile::KERNEL,
@@ -521,6 +635,8 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::NETSIMCLIUI;
         case android::featurecontrol::WiFiPacketStream:
             return android_studio::EmulatorFeatureFlagState::WIFIPACKETSTREAM;
+        case android::featurecontrol::SupportPixelFold:
+            return android_studio::EmulatorFeatureFlagState::SUPPORT_PIXEL_FOLD;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;

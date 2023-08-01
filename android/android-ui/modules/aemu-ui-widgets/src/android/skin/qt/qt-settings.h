@@ -73,6 +73,10 @@ constexpr char CELLULAR_VOICE_STATUS[]    = "cell/voice_status";
 constexpr char CELLULAR_METER_STATUS[]    = "cell/meter_status";
 constexpr char CELLULAR_DATA_STATUS[]     = "cell/data_status";
 
+constexpr char MIC_INSERTED[]         = "mic/inserted";
+constexpr char MIC_AVAILABLE[]        = "mic/available";
+constexpr char MIC_ALLOW_READ_AUDIO[] = "mic/allow_real_audio";
+
 constexpr char CRASHREPORT_PREFERENCE[] = "set/crashReportPreference";
 enum CRASHREPORT_PREFERENCE_VALUE {
     CRASHREPORT_PREFERENCE_ASK = 0,
@@ -156,6 +160,10 @@ constexpr char PER_AVD_CELLULAR_SIGNAL_STRENGTH[] = "perAvd/cell/signal_strength
 constexpr char PER_AVD_CELLULAR_VOICE_STATUS[]    = "perAvd/cell/voice_status";
 constexpr char PER_AVD_CELLULAR_METER_STATUS[]    = "perAvd/cell/meter_status";
 constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
+
+constexpr char PER_AVD_MIC_INSERTED[]         = "perAvd/mic/inserted";
+constexpr char PER_AVD_MIC_AVAILABLE[]        = "perAvd/mic/available";
+constexpr char PER_AVD_MIC_ALLOW_READ_AUDIO[] = "perAvd/mic/allow_real_audio";
 
 constexpr char PER_AVD_PAUSE_AVD_WHEN_MINIMIZED[] = "perAvd/set/pauseAvdWhenMinimized";
 constexpr char PER_AVD_ENFORCE_KEYCODE_FORWARDING[] =

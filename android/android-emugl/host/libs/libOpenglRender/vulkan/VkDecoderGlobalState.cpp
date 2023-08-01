@@ -102,7 +102,7 @@ kEmulatedExtensions[] = {
     "VK_EXT_device_memory_report",
 };
 
-static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 1, 0);
+static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 3, 0);
 static constexpr uint32_t kMinVersion = VK_MAKE_VERSION(1, 0, 0);
 
 #define DEFINE_BOXED_HANDLE_TYPE_TAG(type) \

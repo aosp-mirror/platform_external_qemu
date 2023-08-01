@@ -77,6 +77,7 @@ set(android-emu-common
     android/emulation/ComponentVersion.cpp
     android/emulation/control/AgentLogger.cpp
     android/emulation/control/ApkInstaller.cpp
+    android/emulation/control/BootCompletionHandler.cpp
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
     android/emulation/control/ServiceUtils.cpp

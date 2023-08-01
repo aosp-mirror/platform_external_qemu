@@ -181,6 +181,12 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                 return false;
             }
         },
+        .performRotation = [](int rot) {
+            auto instance = MultiDisplay::getInstance();
+            if (instance) {
+                instance->performRotation(rot);
+            }
+        },
 };
 
 extern "C" const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent = &sMultiDisplayAgent;

@@ -374,8 +374,9 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
             mMultiDisplay[displayId].cb = colorBuffer;
             return 0;
         },
-        .isMultiDisplayWindow = []() { return false; }};
-
+        .isMultiDisplayWindow = []() { return false; },
+        .performRotation = [](int rot) { },
+    };
 static bool sIsFolded = false;
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {

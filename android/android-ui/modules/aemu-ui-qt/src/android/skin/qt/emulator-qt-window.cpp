@@ -2055,8 +2055,14 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
         return;
     }
     if (surface != mBackingSurface) {
+        if (mBackingSurface) {
+            QSize backingSize = mBackingSurface->bitmap->size();
+        }
         mBackingBitmapChanged = true;
         mBackingSurface = surface;
+        if (mBackingSurface) {
+            QSize backingSize = mBackingSurface->bitmap->size();
+        }
     }
 
     showNormal();
@@ -2182,7 +2188,16 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    if (!android::emulation::captureScreenshot(savePath.toStdString().c_str())) {
+    int displayId = 0;
+    const bool pixel_fold = android_foldable_is_pixel_fold();
+    if (pixel_fold) {
+        if (android_foldable_is_folded()) {
+            displayId = android_foldable_pixel_fold_second_display_id();
+        }
+    }
+
+    if (!android::emulation::captureScreenshot(savePath.toStdString().c_str(),
+                                               nullptr, displayId)) {
         showErrorDialog(tr("Screenshot failed"), tr("Screenshot"));
     } else {
         // Display the flash animation immediately as feedback - if it fails, an
@@ -2190,7 +2205,6 @@ void EmulatorQtWindow::screenshot() {
         mOverlay.showAsFlash();
     }
 }
-
 void EmulatorQtWindow::slot_installCanceled() {
     if (mApkInstallCommand && mApkInstallCommand->inFlight()) {
         mApkInstallCommand->cancel();
@@ -3499,7 +3513,8 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     event->u.layout_rotation.rotation = rot;
     queueSkinEvent(event);
 
-    if (android_foldable_is_folded()) {
+    const bool not_pixel_fold = !android_foldable_is_pixel_fold();
+    if (not_pixel_fold && android_foldable_is_folded()) {
         resizeAndChangeAspectRatio(true);
     }
 
@@ -3507,6 +3522,27 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
         PresetEmulatorSizeInfo info;
         if (getResizableConfig(getResizableActiveConfigId(), &info)) {
             resizeAndChangeAspectRatio(0, 0, info.width, info.height);
+        }
+    }
+
+    if (mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled()) {
+        {
+            uint32_t w = 0;
+            uint32_t h = 0;
+            mToolWindow->getUiEmuAgent()->multiDisplay->getCombinedDisplaySize(
+                    &w, &h);
+            resizeAndChangeAspectRatio(0, 0, w, h);
+        }
+
+        mToolWindow->getUiEmuAgent()->multiDisplay->performRotation(rot);
+
+        {
+            // note: this is the initial w and h, not rotated at all
+            uint32_t w = 0;
+            uint32_t h = 0;
+            mToolWindow->getUiEmuAgent()->multiDisplay->getCombinedDisplaySize(
+                    &w, &h);
+            resizeAndChangeAspectRatio(0, 0, w, h, true);
         }
     }
 
@@ -3634,7 +3670,6 @@ void EmulatorQtWindow::setNoSkin() {
             event->type = kEventSetNoSkin;
             skin_event_add(event);
         }
-        mToolWindow->hideRotationButton(true);
         setFrameAlways(true);
     });
 }

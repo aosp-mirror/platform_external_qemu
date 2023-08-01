@@ -14,7 +14,9 @@
 #pragma once
 #include <mutex>
 #include <unordered_set>
+
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
+#include "google/protobuf/util/message_differencer.h"
 
 #define DEBUG_EVT 0
 
@@ -228,7 +230,7 @@ public:
      * Destroys the GenericEventStreamWriter and unregisters itself as an
      * event listener from the ChangeSupport instance.
      */
-    ~GenericEventStreamWriter() {
+    virtual ~GenericEventStreamWriter() {
         DD_EVT("Deleted %p", this);
         mListener->removeListener(this);
     }
@@ -265,6 +267,48 @@ public:
 
 private:
     ChangeSupport* mListener;
+};
+
+/**
+ * A template class that provides an implementation of a gRPC server event
+ * stream writer for events of type T. It inherits from GenericEventStreamWriter<T>
+ * and is designed to be used as an event stream writer in
+ * a gRPC server. You would mainly use this one if your underlying event mechanism
+ * produces spurious events. I.e. your event stream looks something like this:
+ *
+ * A, A, B, B, B, C, C, ...
+ *
+ * But you would like to deliver only A, B, C to your clients.
+ *
+ * @tparam T The type of events that this event stream writer can write to the
+ * client.
+ */
+template <class T>
+class UniqueEventStreamWriter : public GenericEventStreamWriter<T> {
+    using ChangeSupport = EventChangeSupport<T>;
+
+public:
+    UniqueEventStreamWriter(ChangeSupport* listener)
+        : GenericEventStreamWriter<T>(listener) {}
+    virtual ~UniqueEventStreamWriter() = default;
+
+    /**
+     * An EventStreamWriter that will filter out duplicate events.
+     *
+     * @param event The event of type T that has arrived and needs to be written
+     *        to the client.
+     */
+    void eventArrived(const T event) override {
+        const std::lock_guard<std::mutex> lock(mEventLock);
+        if (!google::protobuf::util::MessageDifferencer::Equals(event,
+                                                                mLastEvent)) {
+            mLastEvent = event;
+            GenericEventStreamWriter<T>::Write(event);
+        }
+    };
+
+    T mLastEvent;
+    std::mutex mEventLock;
 };
 
 }  // namespace control

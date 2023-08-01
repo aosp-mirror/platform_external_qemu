@@ -240,17 +240,22 @@ void miscPipeSetAndroidOverlay(emulation::AdbInterface* adbInterface) {
         char* skinName = nullptr;
         char* skinDir = nullptr;
         avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
-        if (avdInfo_skinHasOverlay(skinName)) {
+        auto myhw = getConsoleAgents()->settings->hw();
+        const char* const overlayName = avdInfo_skinHasOverlay(skinName)
+                                                ? skinName
+                                                : myhw->hw_device_name;
+        if (avdInfo_skinHasOverlay(overlayName)) {
             std::string androidOverlay("com.android.internal.emulation.");
             std::string systemUIOverlay("com.android.systemui.emulation.");
-            androidOverlay += skinName;
-            systemUIOverlay += skinName;
+            androidOverlay += overlayName;
+            systemUIOverlay += overlayName;
             adbInterface->enqueueCommand({ "shell", "cmd", "overlay",
                                            "enable-exclusive", "--category",
                                            androidOverlay.c_str() });
             adbInterface->enqueueCommand({ "shell", "cmd", "overlay",
                                            "enable-exclusive", "--category",
                                            systemUIOverlay.c_str() });
+            dprint("applying overlayName %s\n", overlayName);
             AFREE(skinName);
             AFREE(skinDir);
             return;
@@ -328,7 +333,6 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             }
         }
         getConsoleAgents()->settings->set_guest_boot_completed(true);
-
         if (getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut > 0) {
             getConsoleAgents()->vm->vmShutdown();
         } else {
@@ -414,8 +418,10 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                          ".MultiDisplayServiceReceiver"});
             }
 
-            // Foldable hinge area and posture update. Called when cold boot or Android reboot itself
-            if (android_foldable_hinge_configured()) {
+            // Foldable hinge area and posture update. Called when cold boot or
+            // Android reboot itself note: this does not apply to pixel_fold
+            const bool not_pixel_fold = !android_foldable_is_pixel_fold();
+            if (android_foldable_hinge_configured() && not_pixel_fold) {
                 int xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_xOffset;
                 int yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_yOffset;
                 int width = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_width;
@@ -594,4 +600,8 @@ extern "C" int is_restart_when_stalled(void) {
 
 extern "C" void signal_system_reset_was_requested(void) {
   s_reset_request_uptime_ms = get_uptime_ms();
+}
+
+extern "C" int64_t get_uptime_since_reset(void) {
+  return s_reset_request_uptime_ms;
 }

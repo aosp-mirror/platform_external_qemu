@@ -19,15 +19,16 @@
 #include <sys/time.h>
 #endif
 
+#include <assert.h>
 #include <grpcpp/grpcpp.h>
 #include <stdio.h>
 #include <string.h>
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstdint>
-#include <functional>
+#include <initializer_list>
 #include <iostream>
-#include <iterator>
 #include <memory>
 #include <mutex>
 #include <new>
@@ -36,23 +37,22 @@
 #include <set>
 #include <string>
 #include <tuple>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include "aemu/base/EventNotificationSupport.h"
-#include "aemu/base/Log.h"
-#include "aemu/base/Optional.h"
 #include "aemu/base/Stopwatch.h"
 #include "aemu/base/Tracing.h"
+#include "aemu/base/async/Looper.h"
 #include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/logging/Log.h"
+#include "aemu/base/logging/LogSeverity.h"
+#include "aemu/base/memory/ScopedPtr.h"
 #include "aemu/base/memory/SharedMemory.h"
 #include "aemu/base/streams/RingStreambuf.h"
-#include "aemu/base/synchronization/MessageChannel.h"
 #include "android/avd/info.h"
 #include "android/base/system/System.h"
-#include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/ScreenCapturer.h"
@@ -62,6 +62,7 @@
 #include "android/emulation/control/camera/VirtualSceneCamera.h"
 #include "android/emulation/control/clipboard/Clipboard.h"
 #include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/hw_control_agent.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/keyboard/KeyEventSender.h"
 #include "android/emulation/control/keyboard/MouseEventSender.h"
@@ -69,9 +70,9 @@
 #include "android/emulation/control/keyboard/WheelEventSender.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/LogcatParser.h"
+#include "android/emulation/control/notifications/NotificationStream.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
-#include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/utils/AudioUtils.h"
 #include "android/emulation/control/utils/EventWaiter.h"
 #include "android/emulation/control/utils/ScreenshotUtils.h"
@@ -83,10 +84,10 @@
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/Percentiles.h"
 #include "android/physics/Physics.h"
-#include "android/recording/AvFormat.h"
 #include "android/skin/rect.h"
 #include "android/skin/winsys.h"
 #include "android/telephony/gsm.h"
+#include "android/telephony/modem.h"
 #include "android/telephony/sms.h"
 #include "android/utils/debug.h"
 #include "android/version.h"
@@ -96,25 +97,12 @@
 #include "host-common/FeatureControl.h"
 #include "host-common/Features.h"
 #include "host-common/MultiDisplay.h"
-#include "host-common/display_agent.h"
-#include "host-common/feature_control.h"
-#include "host-common/multi_display_agent.h"
+#include "host-common/hw-config.h"
+#include "host-common/misc.h"
 #include "host-common/opengles.h"
 #include "host-common/vm_operations.h"
-#include "host-common/window_agent.h"
+#include "render-utils/Renderer.h"
 #include "studio_stats.pb.h"
-
-namespace android {
-namespace base {
-class Looper;
-}  // namespace base
-}  // namespace android
-
-namespace google {
-namespace protobuf {
-class Empty;
-}  // namespace protobuf
-}  // namespace google
 
 using grpc::ServerContext;
 using grpc::ServerWriter;
@@ -132,9 +120,10 @@ namespace control {
 
 // Logic and data behind the server's behavior.
 class EmulatorControllerImpl final
-    : public EmulatorController::WithCallbackMethod_streamInputEvent<
-              EmulatorController::WithCallbackMethod_injectWheel<
-                      EmulatorController::Service>> {
+    : public EmulatorController::WithCallbackMethod_streamNotification<
+              EmulatorController::WithCallbackMethod_streamInputEvent<
+                      EmulatorController::WithCallbackMethod_injectWheel<
+                              EmulatorController::Service>>> {
 public:
     EmulatorControllerImpl(const AndroidConsoleAgents* agents)
         : mAgents(agents),
@@ -145,7 +134,8 @@ public:
           mWheelEventSender(agents),
           mCamera(agents->sensors),
           mClipboard(Clipboard::getClipboard(agents->clipboard)),
-          mLooper(android::base::ThreadLooper::get()) {
+          mLooper(android::base::ThreadLooper::get()),
+          mNotificationStream(&mCamera, agents) {
         // the logcat pipe will take ownership of the created stream, and writes
         // to our buffer.
         LogcatPipe::registerStream(new std::ostream(&mLogcatBuffer));
@@ -176,9 +166,9 @@ public:
         LogMessage log;
         log.set_next(request->start());
         do {
-            // When streaming, block at most 5 seconds before sending any status
-            // This also makes sure we check that the clients is still around at
-            // least once every 5 seconds.
+            // When streaming, block at most 5 seconds before sending any
+            // status This also makes sure we check that the clients is
+            // still around at least once every 5 seconds.
             auto message =
                     mLogcatBuffer.bufferAtOffset(log.next(), k5SecondsWait);
             if (request->sort() == LogMessage::Parsed) {
@@ -545,15 +535,17 @@ public:
                             } else if (request->has_touch_event()) {
                                 mTouchEventSender.send(request->touch_event());
                             } else {
-                                // Mark the stream as completed, this will result in
-                                // setting that status and scheduling of a completion
-                                // (onDone) event the async queue.
+                                // Mark the stream as completed, this will
+                                // result in setting that status and scheduling
+                                // of a completion (onDone) event the async
+                                // queue.
                                 eventReader->Finish(Status(
                                         ::grpc::StatusCode::INVALID_ARGUMENT,
                                         "Missing key, mouse or touch event."));
                             }
                         });
-        // Note that the event reader will delete itself on completion of the request.
+        // Note that the event reader will delete itself on completion of
+        // the request.
         return eventReader;
     }
 
@@ -856,6 +848,21 @@ public:
             height = getConsoleAgents()->settings->hw()->hw_lcd_height;
         }
 
+        int myDisplayId = -1;
+        const bool is_pixel_fold = android_foldable_is_pixel_fold();
+        const bool not_pixel_fold = !is_pixel_fold;
+        bool isFolded = android_foldable_is_folded();
+
+        if (is_pixel_fold && isFolded) {
+            width = getConsoleAgents()
+                            ->settings->hw()
+                            ->hw_displayRegion_0_1_width;
+            height = getConsoleAgents()
+                             ->settings->hw()
+                             ->hw_displayRegion_0_1_height;
+            myDisplayId = android_foldable_pixel_fold_second_display_id();
+        }
+
         if (!enabled) {
             return Status(
                     ::grpc::StatusCode::INVALID_ARGUMENT,
@@ -863,11 +870,10 @@ public:
                     "");
         }
 
-        bool isFolded = android_foldable_is_folded();
         // The folded screen is represented as a rectangle within the full
         // screen.
         SkinRect rect = {{0, 0}, {0, 0}};
-        if (isFolded) {
+        if (not_pixel_fold && isFolded) {
             android_foldable_get_folded_area(&rect.pos.x, &rect.pos.y,
                                              &rect.size.w, &rect.size.h);
             auto foldedDisplay =
@@ -919,7 +925,7 @@ public:
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(width, height);
-            if (isFolded) {
+            if (not_pixel_fold && isFolded) {
                 std::swap(rect.pos.x, rect.pos.y);
                 std::swap(rect.size.w, rect.size.h);
             }
@@ -931,7 +937,7 @@ public:
 
         // Calculate width and height, keeping aspect ratio in mind.
         int newWidth, newHeight;
-        if (isFolded) {
+        if (not_pixel_fold && isFolded) {
             // When screen is folded, resize based on the aspect ratio of
             // the folded screen instead of full screen.
             int newFoldedWidth, newFoldedHeight;
@@ -956,7 +962,7 @@ public:
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(newWidth, newHeight);
-            if (isFolded) {
+            if (not_pixel_fold && isFolded) {
                 std::swap(rect.pos.x, rect.pos.y);
                 std::swap(rect.size.w, rect.size.h);
             }
@@ -978,15 +984,17 @@ public:
         // cPixels value can change for each call.
         if (isPNG) {
             img = ScreenshotUtils::getScreenshot(
-                    request->display(), request->format(), rotation, newWidth,
-                    newHeight, &width, &height, rect);
+                    myDisplayId >= 0 ? myDisplayId : request->display(),
+                    request->format(), rotation, newWidth, newHeight, &width,
+                    &height, rect);
             cPixels = img.getPixelCount();
         } else {  // Let's make a fast call to learn how many pixels we need
                   // to reserve.
 
             ScreenshotUtils::getScreenshot(
-                    request->display(), request->format(), rotation, newWidth,
-                    newHeight, pixels, &cPixels, &width, &height, rect);
+                    myDisplayId >= 0 ? myDisplayId : request->display(),
+                    request->format(), rotation, newWidth, newHeight, pixels,
+                    &cPixels, &width, &height, rect);
         }
 
         auto format = reply->mutable_format();
@@ -1047,8 +1055,8 @@ public:
         // Update format information with the retrieved width, height.
         format->set_height(height);
         format->set_width(width);
-        VERBOSE_PRINT(grpc, "Screenshot %dx%d (%s), pixels: %d in %d us.", width,
-                      height, rotation_reply->ShortDebugString().c_str(),
+        VERBOSE_PRINT(grpc, "Screenshot %dx%d (%s), pixels: %d in %d us.",
+                      width, height, rotation_reply->ShortDebugString().c_str(),
                       cPixels, sw.elapsedUs());
 
         return Status::OK;
@@ -1090,7 +1098,7 @@ public:
     void fillDisplayConfigurations(DisplayConfigurations* reply) {
         uint32_t width, height, dpi, flags;
         bool enabled;
-        for (int i = 0; i <= MultiDisplay::s_maxNumMultiDisplay; i++) {
+        for (int i = 0; i < MultiDisplay::s_maxNumMultiDisplay; i++) {
             if (mAgents->multi_display->getMultiDisplay(i, nullptr, nullptr,
                                                         &width, &height, &dpi,
                                                         &flags, &enabled)) {
@@ -1101,6 +1109,9 @@ public:
                 cfg->set_display(i);
                 cfg->set_flags(flags);
             }
+            const bool is_pixel_fold = android_foldable_is_pixel_fold();
+            if (is_pixel_fold)
+                break;
         }
 
         reply->set_maxdisplays(android::MultiDisplay::s_maxNumMultiDisplay);
@@ -1359,144 +1370,10 @@ public:
         return Status::OK;
     }
 
-    Notification getCameraNotificationEvent() {
-        Notification reply;
-        auto camera = reply.mutable_cameranotification();
-
-        // Camera is currently always associated with display 0
-        camera->set_display(0);
-        if (mCamera.isConnected()) {
-            reply.set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
-            camera->set_active(true);
-        } else {
-            reply.set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
-            camera->set_active(false);
-        }
-
-        assert(reply.has_cameranotification());
-        return reply;
-    }
-
-    std::optional<Notification> getPostureNotificationEvent(
-            FoldablePostures posture) {
-        static_assert((int)POSTURE_MAX ==
-                      ::android::emulation::control::Posture_PostureValue::
-                              Posture_PostureValue_POSTURE_MAX);
-
-        if (posture == POSTURE_UNKNOWN || posture == POSTURE_MAX) {
-            LOG(ERROR) << "Received bad foldable posture when trying to send "
-                          "gRPC notification, posture "
-                          "value: "
-                       << posture;
-            return std::nullopt;
-        }
-        Notification reply;
-        reply.mutable_posture()->set_value(
-                static_cast<
-                        ::android::emulation::control::Posture_PostureValue>(
-                        posture));
-        return reply;
-    }
-
-    Status streamNotification(ServerContext* context,
-                              const Empty* request,
-                              ServerWriter<Notification>* writer) override {
-        bool clientAvailable = !context->IsCancelled();
-        if (clientAvailable) {
-            clientAvailable = writer->Write(getCameraNotificationEvent());
-        }
-        if (clientAvailable) {
-            int posture = android_foldable_get_posture();
-            auto event = getPostureNotificationEvent(
-                    static_cast<FoldablePostures>(posture));
-            if (event.has_value()) {
-                clientAvailable = writer->Write(event.value());
-            }
-        }
-
-        // The event waiter will be unlocked when a change event is
-        // received.
-        EventWaiter notifier;
-        int eventCount = 0;
-        enum class EventTypes { CameraEvent, DisplayEvent, PostureEvent };
-
-        // This is the set of notifications that need to be delivered.
-        std::vector<Notification> activeNotifications;
-        std::mutex notificationLock;
-
-        // Register temporary listeners for multi display & camera changes.
-        RaiiEventListener<VirtualSceneCamera, bool> cameraListener(
-                &mCamera, [&](auto state) {
-                    std::lock_guard<std::mutex> lock(notificationLock);
-                    activeNotifications.push_back(getCameraNotificationEvent());
-                    notifier.newEvent();
-                });
-
-        RaiiEventListener<MultiDisplay, android::DisplayChangeEvent> displayListener(
-                MultiDisplay::getInstance(),
-                [&](const android::DisplayChangeEvent state) {
-                    if (state.change ==
-                        DisplayChange::DisplayTransactionCompleted) {
-                        Notification display;
-                        display.set_event(
-                                Notification::
-                                        DISPLAY_CONFIGURATIONS_CHANGED_UI);
-
-                        auto displayNotification =
-                                display.mutable_displayconfigurationschangednotification();
-                        fillDisplayConfigurations(
-                                displayNotification
-                                        ->mutable_displayconfigurations());
-
-                        std::lock_guard<std::mutex> lock(notificationLock);
-                        activeNotifications.push_back(display);
-                        notifier.newEvent();
-                    }
-                });
-
-        RaiiEventListener<base::EventNotificationSupport<FoldablePostures>,
-                          FoldablePostures>
-                foldableListener(
-                        static_cast<base::EventNotificationSupport<
-                                FoldablePostures>*>(
-                                android_get_posture_listener()),
-                        [&](auto state) {
-                            auto event = getPostureNotificationEvent(state);
-                            if (!event.has_value()) {
-                                return;
-                            }
-                            std::lock_guard<std::mutex> lock(notificationLock);
-                            activeNotifications.push_back(event.value());
-                            notifier.newEvent();
-                        });
-
-        // And deliver the events as they come in.
-        while (clientAvailable) {
-            const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
-            // This will not block if events came in while we were
-            // processing them below.
-            auto arrived = notifier.next(eventCount, kTimeToWaitForFrame);
-            if (arrived > 0 && !context->IsCancelled()) {
-                eventCount += arrived;
-                // We now have a non empty set of events we have to deliver.
-                std::vector<Notification> current;
-                {
-                    // Make sure we deliver events only once.
-                    std::lock_guard<std::mutex> lock(notificationLock);
-                    std::swap(current, activeNotifications);
-                }
-
-                // Deliver each individual event.
-                for (const auto& event : current) {
-                    clientAvailable = writer->Write(event);
-                    if (!clientAvailable) {
-                        break;
-                    }
-                }
-            }
-            clientAvailable = !context->IsCancelled() && clientAvailable;
-        }
-        return Status::OK;
+    ::grpc::ServerWriteReactor<Notification>* streamNotification(
+            ::grpc::CallbackServerContext* /*context*/,
+            const ::google::protobuf::Empty* /*request*/) override {
+        return mNotificationStream.notificationStream();
     }
 
     Status rotateVirtualSceneCamera(ServerContext* context,
@@ -1536,6 +1413,7 @@ private:
     WheelEventSender mWheelEventSender;
     SharedMemoryLibrary mSharedMemoryLibrary;
     EventWaiter mNotificationWaiter;
+    NotificationStream mNotificationStream;
 
     VirtualSceneCamera mCamera;
     Clipboard* mClipboard;
