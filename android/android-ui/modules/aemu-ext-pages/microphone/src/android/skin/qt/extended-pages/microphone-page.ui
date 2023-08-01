@@ -203,7 +203,7 @@
     </rect>
    </property>
    <property name="accessibleDescription">
-    <string>Virtual headset plug inserted</string>
+    <string>Virtual microphone uses host audio input</string>
    </property>
    <property name="iconSize">
     <size>
