@@ -23,9 +23,74 @@
 #include "android/skin/event.h"                       // for SkinEvent, Skin...
 #include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
 #include "android/skin/qt/extended-pages/common.h"    // for getSelectedTheme
+#include "android/skin/qt/qt-settings.h"              // for PER_AVD_SETTIN...
 #include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
 #include "studio_stats.pb.h"                          // for EmulatorUiEvent
 
+namespace {
+QString getAvdSettingsFile() {
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
+    if (avdPath) {
+        return QString(avdPath) + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+    } else {
+        return {};
+    }
+}
+
+QVariant getSavedSetting(const char* avdSpecificKey, const char* globalKey,
+                         const QVariant& defaultValue) {
+    const QString avdSettingsFile = getAvdSettingsFile();
+    if (avdSettingsFile.isEmpty()) {
+        QSettings settings;
+        return settings.value(globalKey, defaultValue);
+    } else {
+        QSettings settings(avdSettingsFile, QSettings::IniFormat);
+        return settings.value(avdSpecificKey, defaultValue);
+    }
+}
+
+void saveSetting(const char* avdSpecificKey, const char* globalKey,
+                 const QVariant& value) {
+    const QString avdSettingsFile = getAvdSettingsFile();
+    if (avdSettingsFile.isEmpty()) {
+        QSettings settings;
+        settings.setValue(globalKey, value);
+    } else {
+        QSettings settings(avdSettingsFile, QSettings::IniFormat);
+        settings.setValue(avdSpecificKey, value);
+    }
+}
+
+bool getSavedMicInserted() {
+    return getSavedSetting(Ui::Settings::PER_AVD_MIC_INSERTED,
+                           Ui::Settings::MIC_INSERTED, false).toBool();
+}
+
+void saveHasMicInserted(const bool value) {
+    saveSetting(Ui::Settings::PER_AVD_MIC_INSERTED,
+                Ui::Settings::MIC_INSERTED, value);
+}
+
+bool getSavedHasMic() {
+    return getSavedSetting(Ui::Settings::PER_AVD_MIC_AVAILABLE,
+                           Ui::Settings::MIC_AVAILABLE, false).toBool();
+}
+
+void saveHasMic(const bool value) {
+    saveSetting(Ui::Settings::PER_AVD_MIC_AVAILABLE,
+                Ui::Settings::MIC_AVAILABLE, value);
+}
+
+bool getSavedMicAllowRealAudio() {
+    return getSavedSetting(Ui::Settings::PER_AVD_MIC_ALLOW_READ_AUDIO,
+                           Ui::Settings::MIC_ALLOW_READ_AUDIO, false).toBool();
+}
+
+void saveMicAllowRealAudio(const bool value) {
+    saveSetting(Ui::Settings::PER_AVD_MIC_ALLOW_READ_AUDIO,
+                Ui::Settings::MIC_ALLOW_READ_AUDIO, value);
+}
+}  // namespace
 
 MicrophonePage::MicrophonePage(QWidget* parent)
     : QWidget(parent),
@@ -35,6 +100,10 @@ MicrophonePage::MicrophonePage(QWidget* parent)
               android_studio::EmulatorUiEvent::EXTENDED_MIC_TAB)),
       mEmulatorWindow(nullptr) {
     mUi->setupUi(this);
+
+    mUi->mic_inserted->setCheckState(getSavedMicInserted() ? Qt::Checked : Qt::Unchecked);
+    mUi->mic_hasMic->setCheckState(getSavedHasMic() ? Qt::Checked : Qt::Unchecked);
+    mUi->mic_allowRealAudio->setCheckState(getSavedMicAllowRealAudio() ? Qt::Checked : Qt::Unchecked);
 
     // The Hook button is not functional yet.
     // Hide it for now.
@@ -53,6 +122,8 @@ MicrophonePage::MicrophonePage(QWidget* parent)
 }
 
 void MicrophonePage::on_mic_hasMic_toggled(bool checked) {
+    saveHasMic(checked);
+
     if (mUi->mic_inserted->isChecked()) {
         // The headset is inserted, give our new microphone
         // status to the device.
@@ -71,6 +142,8 @@ void MicrophonePage::on_mic_hookButton_released() {
 }
 
 void MicrophonePage::on_mic_inserted_toggled(bool checked) {
+    saveHasMicInserted(checked);
+
     // Enable or disable the subordinate controls
     mUi->mic_hasMic->setEnabled(checked);
     setButtonEnabled(mUi->mic_voiceAssistButton, getSelectedTheme(), checked);
@@ -96,6 +169,7 @@ void MicrophonePage::on_mic_inserted_toggled(bool checked) {
 }
 
 void MicrophonePage::on_mic_allowRealAudio_toggled(bool checked) {
+    saveMicAllowRealAudio(checked);
     getConsoleAgents()->vm->allowRealAudio(checked);
 }
 
