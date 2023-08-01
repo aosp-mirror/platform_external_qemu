@@ -885,31 +885,20 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
                         break;
                     default:;
                 }
-                if (android_foldable_is_folded()) {
-                    int xOffset, yOffset, width, height;
-                    if (android_foldable_get_folded_area(&xOffset, &yOffset,
-                                                         &width, &height)) {
-                        mEmulatorWindow->resizeAndChangeAspectRatio(true);
-                        if (android_foldable_rollable_configured()) {
-                            // rollable has up to 3 folded-areas, need guarntee
-                            // the folded-area are updated in window manager
-                            // before sending LID_CLOSE
-                            mFoldableSyncToAndroid.enqueue({
-                                    SEND_LID_OPEN,
-                            });
-                            mFoldableSyncToAndroid.enqueue({SEND_AREA, xOffset,
-                                                            yOffset, width,
-                                                            height});
-                            mFoldableSyncToAndroid.enqueue({CONFIRM_AREA,
-                                                            xOffset, yOffset,
-                                                            width, height});
-                        } else {
-                            // hinge or legacy foldable has only one folded
-                            // area. Once configured, no need to configure
-                            // again. Unless explicitly required, e.g., in case
-                            // of rebooting Android itselft only.
-                            if (!mFoldableSyncToAndroidSuccess ||
-                                extra == "confirmFoldedArea") {
+                const bool not_pixel_fold = !android_foldable_is_pixel_fold();
+                if (not_pixel_fold) {
+                    if (android_foldable_is_folded()) {
+                        int xOffset, yOffset, width, height;
+                        if (android_foldable_get_folded_area(&xOffset, &yOffset,
+                                                             &width, &height)) {
+                            mEmulatorWindow->resizeAndChangeAspectRatio(true);
+                            if (android_foldable_rollable_configured()) {
+                                // rollable has up to 3 folded-areas, need
+                                // guarntee the folded-area are updated in
+                                // window manager before sending LID_CLOSE
+                                mFoldableSyncToAndroid.enqueue({
+                                        SEND_LID_OPEN,
+                                });
                                 mFoldableSyncToAndroid.enqueue(
                                         {SEND_AREA, xOffset, yOffset, width,
                                          height});
@@ -917,17 +906,31 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
                                         {CONFIRM_AREA, xOffset, yOffset, width,
                                          height});
                             } else {
-                                mFoldableSyncToAndroid.enqueue({
-                                        SEND_LID_CLOSE,
-                                });
+                                // hinge or legacy foldable has only one folded
+                                // area. Once configured, no need to configure
+                                // again. Unless explicitly required, e.g., in
+                                // case of rebooting Android itselft only.
+                                if (!mFoldableSyncToAndroidSuccess ||
+                                    extra == "confirmFoldedArea") {
+                                    mFoldableSyncToAndroid.enqueue(
+                                            {SEND_AREA, xOffset, yOffset, width,
+                                             height});
+                                    mFoldableSyncToAndroid.enqueue(
+                                            {CONFIRM_AREA, xOffset, yOffset,
+                                             width, height});
+                                } else {
+                                    mFoldableSyncToAndroid.enqueue({
+                                            SEND_LID_CLOSE,
+                                    });
+                                }
                             }
                         }
+                    } else {
+                        mEmulatorWindow->resizeAndChangeAspectRatio(false);
+                        mFoldableSyncToAndroid.enqueue({
+                                SEND_LID_OPEN,
+                        });
                     }
-                } else {
-                    mEmulatorWindow->resizeAndChangeAspectRatio(false);
-                    mFoldableSyncToAndroid.enqueue({
-                            SEND_LID_OPEN,
-                    });
                 }
             }
 

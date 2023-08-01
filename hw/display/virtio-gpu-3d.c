@@ -273,7 +273,12 @@ static void virgl_cmd_submit_3d(VirtIOGPU *g,
     }
 
 #ifdef CONFIG_STREAM_RENDERER
-    stream_renderer_submit_cmd(buf, cs.hdr.ctx_id, cs.size / 4);
+    struct stream_renderer_command submit_cmd;
+    memset(&submit_cmd, 0, sizeof(struct stream_renderer_command));
+    submit_cmd.ctx_id = cs.hdr.ctx_id;
+    submit_cmd.cmd = (uint8_t*)buf;
+    submit_cmd.cmd_size = cs.size;
+    stream_renderer_submit_cmd(&submit_cmd);
 #else
     g->virgl->virgl_renderer_submit_cmd(buf, cs.hdr.ctx_id, cs.size / 4);
 #endif  // CONFIG_STREAM_RENDERER

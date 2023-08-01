@@ -1223,8 +1223,7 @@ static void mute_microphone_S16_1(int16_t *a, int frames) {
     }
 
     while (frames > 0) {
-        int16_t v = (frames >> 3) & 31 - 16;
-        v += !v;
+        const int16_t v = ((frames >> 3) & 15) - 8;
         *a = v; ++a;
         *a = v; ++a;
         *a = v; ++a;
@@ -1241,13 +1240,12 @@ static void mute_microphone_S32_1(int32_t *a, int frames) {
     int rem = frames % 8;
     frames -= rem;
     while (rem > 0) {
-        *a = rem; ++a;
+        *a = rem << 16; ++a;
         --rem;
     }
 
     while (frames > 0) {
-        int32_t v = (frames >> 3) & 31 - 16;
-        v += !v;
+        const int32_t v = (((frames >> 3) & 15) - 8) * 65536;
         *a = v; ++a;
         *a = v; ++a;
         *a = v; ++a;
@@ -1270,8 +1268,7 @@ static void mute_microphone_S16_2(int16_t *a, int frames) {
     }
 
     while (frames > 0) {
-        int16_t v = (frames >> 3) & 31 - 16;
-        v += !v;
+        const int16_t v = ((frames >> 3) & 15) - 8;
         *a = v; ++a;
         *a = v; ++a;
         *a = v; ++a;
@@ -1296,14 +1293,14 @@ static void mute_microphone_S32_2(int32_t *a, int frames) {
     int rem = frames % 8;
     frames -= rem;
     while (rem > 0) {
-        *a = rem; ++a;
-        *a = rem; ++a;
+        const int rem16 = rem << 16;
+        *a = rem16; ++a;
+        *a = rem16; ++a;
         --rem;
     }
 
     while (frames > 0) {
-        int32_t v = (frames >> 3) & 31 - 16;
-        v += !v;
+        const int32_t v = (((frames >> 3) & 15) - 8) * 65536;
         *a = v; ++a;
         *a = v; ++a;
         *a = v; ++a;

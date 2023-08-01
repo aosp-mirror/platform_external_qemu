@@ -428,6 +428,8 @@ void ExtendedWindow::sendMetricsOnShutDown() {
 // static
 void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
     if (agentPtr) {
+        // Warning! This can be very expensive operations as some of these
+        // calls have very expensive side effects!
         BatteryPage::setBatteryAgent(agentPtr->battery);
         CellularPage::setCellularAgent(agentPtr->cellular);
         FingerPage::setFingerAgent(agentPtr->finger);

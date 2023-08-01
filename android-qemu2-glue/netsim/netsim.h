@@ -18,4 +18,6 @@ void register_netsim(
         const std::string address,
         const std::string host_id);
 
+const std::string get_netsim_device_name();
+
 void close_netsim();

@@ -111,6 +111,10 @@ public:
     // while waiting.
     void triggerBlockedWaitNoTimeline(FenceSync* fenceSync);
 
+    // This increments the timeline after the QSRI completes.
+    void triggerWaitVkQsri(VkImage vkImage, uint64_t timeline);
+
+
     // For use with virtio-gpu and async fence completion callback. This is async like triggerWait, but takes a fence completion callback instead of incrementing some timeline directly.
     void triggerWaitWithCompletionCallback(FenceSync* fenceSync, FenceCompletionCallback);
     void triggerWaitVkWithCompletionCallback(VkFence fenceHandle, FenceCompletionCallback);

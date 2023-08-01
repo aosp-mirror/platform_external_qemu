@@ -1388,6 +1388,45 @@ message EmulatorAvdInfo {
         CHROMEOS = 10;
         // Next tag: 11
     }
+    enum EmulatorDeviceName {
+        UNKNOWN_EMULATOR_DEVICE_NAME = 0;
+        RESIZABLE = 1;
+        FOLDABLE_7_6_IN = 2;
+        SMALL_PHONE = 3;
+        MEDIUM_PHONE = 4;
+        MEDIUM_TABLET = 5;
+        PIXEL_C = 6;
+        PIXEL = 7;
+        PIXEL_XL = 8;
+        PIXEL_2 = 9;
+        PIXEL_2_XL = 10;
+        PIXEL_3 = 11;
+        PIXEL_3_XL = 12;
+        PIXEL_3A = 13;
+        PIXEL_3A_XL = 14;
+        PIXEL_4 = 15;
+        PIXEL_4_XL = 16;
+        PIXEL_4A = 17;
+        PIXEL_5 = 18;
+        PIXEL_6 = 19;
+        PIXEL_6_PRO = 20;
+        PIXEL_6A = 21;
+        PIXEL_7_PRO = 22;
+        PIXEL_7 = 23;
+        PIXEL_FOLD = 24;
+        PIXEL_TABLET = 25;
+        AUTOMOTIVE_1024P_LANDSCAPE = 26;
+        DESKTOP_SMALL = 27;
+        DESKTOP_MEDIUM = 28;
+        DESKTOP_LARGE = 29;
+        TV_4K = 30;
+        TV_1080P = 31;
+        TV_720P = 32;
+        WEAROS_LARGE_ROUND = 33;
+        WEAROS_SMALL_ROUND = 34;
+        WEAROS_RECT = 35;
+        WEAROS_SQUARE = 36;
+    }
     // Name of the AVD. Deprecated as it could potentially contain PII.
     optional string name = 1 [deprecated = true];
     // Api level (23 = M, 24 = N, ...)
@@ -1409,6 +1448,8 @@ message EmulatorAvdInfo {
     // Collection of other AVD properties, mostly relating to flavor
     // (TV vs phone vs Auto, etc)
     repeated EmulatorAvdProperty properties = 9;
+    // Device name of the AVD (for example, PIXEL_2)
+    optional EmulatorDeviceName device_name = 10;
 }
 
 // State of emulator feature flags, including
@@ -1521,7 +1562,8 @@ message EmulatorFeatureFlagState {
         NETSIMWEBUI = 101;
         NETSIMCLIUI = 102;
         WIFIPACKETSTREAM = 103;
-        // Next tag: 104
+        SUPPORT_PIXEL_FOLD = 104;
+        // Next tag: 105
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

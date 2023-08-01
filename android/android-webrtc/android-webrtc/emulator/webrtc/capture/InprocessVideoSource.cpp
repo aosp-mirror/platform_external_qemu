@@ -140,15 +140,26 @@ void InprocessVideoSource::captureFrames() {
                                                  out.begin(), out.size(),
                                                  PARAMETER_VALUE_TYPE_CURRENT);*/
             auto rotation = ScreenshotUtils::deriveRotation(agent->sensors);
-            if (rotation == Rotation::LANDSCAPE ||
-                rotation == Rotation::REVERSE_LANDSCAPE) {
-                std::swap(width, height);
-            }
 
+            uint32_t desiredWidth = (rotation == Rotation::LANDSCAPE ||
+                                     rotation == Rotation::REVERSE_LANDSCAPE)
+                                            ? height
+                                            : width;
+            uint32_t desiredHeight = (rotation == Rotation::LANDSCAPE ||
+                                      rotation == Rotation::REVERSE_LANDSCAPE)
+                                             ? width
+                                             : height;
+            // Bug (b/289238759)
+            // When the AVD is rotated, create a new I420Buffer that uses the
+            // newly swapped width and height.
+            if (desiredWidth == mI420Buffer->height() && desiredHeight == mI420Buffer->width()) {
+                mI420Buffer = ::webrtc::I420Buffer::Create(desiredWidth, desiredHeight);
+            }
             android::emulation::Image img = takeScreenshot(
                     ImageFormat::RGB888, ScreenshotUtils::translate(rotation),
                     renderer.get(), agent->display->getFrameBuffer, mDisplayId,
                     width, height, rect);
+
             uint8_t* data = img.getPixelBuf();
             auto cData = img.getPixelCount();
             auto converted = libyuv::ConvertToI420(

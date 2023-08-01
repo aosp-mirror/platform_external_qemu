@@ -296,7 +296,7 @@ if(NOT OPTION_GFXSTREAM_BACKEND AND NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
   target_include_directories(
     emugl_combined_unittests
     PRIVATE ${GOLDFISH_EMUGL_DIR}/host/include/libOpenglRender
-            ${GOLDFISH_EMUGL_DIR}/system/include
+            ${GFXSTREAM_REPO_ROOT}/guest/include
             ${ANDROID_EMUGL_DIR}/guest/androidImpl)
 
   # These are usually nops, but some code generators will not automatically
@@ -360,9 +360,9 @@ if(NOT OPTION_GFXSTREAM_BACKEND AND NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
   android_add_test(
     TARGET vulkan_enc_unittests
     SRC # cmake-format: sortable
-        ${GOLDFISH_EMUGL_DIR}/system/vulkan_enc/vulkan_enc_unittests.cpp)
+        ${GFXSTREAM_REPO_ROOT}/guest/vulkan_enc/vulkan_enc_unittests.cpp)
   target_include_directories(vulkan_enc_unittests
-                             PRIVATE ${GOLDFISH_EMUGL_DIR}/android-emu)
+                             PRIVATE ${GFXSTREAM_REPO_ROOT}/guest/android-emu)
   target_link_libraries(vulkan_enc_unittests PUBLIC vulkan_enc androidemu gtest
                                                     gtest_main)
 endif()

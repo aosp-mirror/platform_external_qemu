@@ -101,7 +101,29 @@ static const char* formatConsent(CrashConsent::Consent c) {
     return translate[static_cast<int>(c)];
 }
 
+static void enableSignalTermination() {
+#ifdef __APPLE__
+    // We will not get crash reports without the signals below enabled.
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGTERM);
+    sigaddset(&set, SIGHUP);
+    sigaddset(&set, SIGFPE);
+    sigaddset(&set, SIGINT);
+    sigaddset(&set, SIGSEGV);
+    sigaddset(&set, SIGABRT);
+    sigaddset(&set, SIGILL);
+    int result = pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
+    if (result != 0) {
+        dwarning("Could not set thread sigmask: %d", result);
+    }
+#endif
+}
+
 void CrashReporter::GenerateDumpAndDie(const char* message) {
+    // Make sure we can actually register a crash on this thread.
+    enableSignalTermination();
+
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
     // any other I know about has its flaws:

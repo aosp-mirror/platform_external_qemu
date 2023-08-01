@@ -623,7 +623,7 @@ void qemu_file_reset_rate_limit(QEMUFile *f)
 
 static unsigned int swap_endianness_16(unsigned short v)
 {
-    return ((v & 0xff00) >> 8) | (v << 8);
+    return ((v & 0xff00) >> 8) | ((v & 0xff) << 8);
 }
 
 static unsigned int swap_endianness_32(unsigned int v)

@@ -206,6 +206,10 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
         }
         return false;
     }
+    const bool needSwapWandH =
+            (mMultiDisplay[id].rotation == SKIN_ROTATION_90 ||
+             mMultiDisplay[id].rotation == SKIN_ROTATION_270);
+
     if (x) {
         *x = mMultiDisplay[id].pos_x;
     }
@@ -213,10 +217,10 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
         *y = mMultiDisplay[id].pos_y;
     }
     if (w) {
-        *w = mMultiDisplay[id].width;
+        *w = needSwapWandH ? mMultiDisplay[id].height : mMultiDisplay[id].width;
     }
     if (h) {
-        *h = mMultiDisplay[id].height;
+        *h = needSwapWandH ? mMultiDisplay[id].width : mMultiDisplay[id].height;
     }
     if (dpi) {
         *dpi = mMultiDisplay[id].dpi;
@@ -260,6 +264,8 @@ bool MultiDisplay::getNextMultiDisplay(int32_t start_id,
     if (i == mMultiDisplay.end()) {
         return false;
     } else {
+        const bool needSwapWandH = (i->second.rotation == SKIN_ROTATION_90 ||
+                                    i->second.rotation == SKIN_ROTATION_270);
         if (id) {
             *id = i->first;
         }
@@ -270,10 +276,10 @@ bool MultiDisplay::getNextMultiDisplay(int32_t start_id,
             *y = i->second.pos_y;
         }
         if (w) {
-            *w = i->second.width;
+            *w = needSwapWandH ? i->second.height : i->second.width;
         }
         if (h) {
-            *h = i->second.height;
+            *h = needSwapWandH ? i->second.width : i->second.height;
         }
         if (dpi) {
             *dpi = i->second.dpi;
@@ -295,25 +301,126 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
         *displayId = 0;
         return true;
     }
-    AutoLock lock(mLock);
-    uint32_t totalH, pos_x, pos_y, w, h;
-    getCombinedDisplaySizeLocked(nullptr, &totalH);
-    for (const auto iter : mMultiDisplay) {
-        if (iter.first != 0 && iter.second.cb == 0) {
-            continue;
+    bool isPortrait = true;
+    bool isNormalOrder = true;
+    SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
+    if (layout) {
+        auto rotation = layout->orientation;
+        if (rotation == SKIN_ROTATION_90 || rotation == SKIN_ROTATION_270) {
+            isPortrait = false;
         }
-        // QT window uses the top left corner as the origin.
-        // So we need to transform the (x, y) coordinates from
-        // bottom left corner to top left corner.
-        pos_x = iter.second.pos_x;
-        pos_y = totalH - iter.second.height - iter.second.pos_y;
-        w = iter.second.width;
-        h = iter.second.height;
-        if ((*x - pos_x) < w && (*y - pos_y) < h) {
-            *x = *x - pos_x;
-            *y = *y - pos_y;
-            *displayId = iter.first;
-            return true;
+        if (rotation == SKIN_ROTATION_90 || rotation == SKIN_ROTATION_180) {
+            isNormalOrder = false;
+        }
+    }
+
+    if (isPortrait) {
+        if (isNormalOrder) {
+            // this is rotation 0
+            AutoLock lock(mLock);
+            uint32_t totalH, pos_x, pos_y, w, h;
+            getCombinedDisplaySizeLocked(nullptr, &totalH);
+            for (const auto iter : mMultiDisplay) {
+                if (iter.first != 0 && iter.second.cb == 0) {
+                    continue;
+                }
+                // QT window uses the top left corner as the origin.
+                // So we need to transform the (x, y) coordinates from
+                // bottom left corner to top left corner.
+                pos_x = iter.second.pos_x;
+                pos_y = totalH - iter.second.height - iter.second.pos_y;
+                w = iter.second.width;
+                h = iter.second.height;
+                if ((*x - pos_x) < w && (*y - pos_y) < h) {
+                    *x = *x - pos_x;
+                    *y = *y - pos_y;
+                    *displayId = iter.first;
+                    return true;
+                }
+            }
+        } else {
+            // this is rotation 180
+            // origin of incoming x and y from QT is at right-bottom
+            // positive x is pointing to west;
+            // positive y is ponting to north
+            // display 0 is at right most
+            AutoLock lock(mLock);
+            uint32_t totalH, totalW, pos_x, pos_y, w, h;
+            getCombinedDisplaySizeLocked(&totalW, &totalH);
+            uint32_t currXoffset = 0;
+            for (const auto iter : mMultiDisplay) {
+                if (iter.first != 0 && iter.second.cb == 0) {
+                    continue;
+                }
+                const auto normal_x = totalW - *x;  // this is points to east
+                pos_x = iter.second.pos_x;
+                pos_y = totalH - iter.second.height - iter.second.pos_y;
+                w = iter.second.width;
+                h = iter.second.height;
+                if ((normal_x - pos_x) < w && (*y - pos_y) < h) {
+                    *x = *x - currXoffset;
+                    *displayId = iter.first;
+                    return true;
+                }
+                currXoffset += w;
+            }
+        }
+    } else {  // landscape mode, rotated
+        if (isNormalOrder) {
+            // this is rotation 270
+            AutoLock lock(mLock);
+            uint32_t totalH, pos_x, pos_y, w, h;
+            getCombinedDisplaySizeLocked(nullptr, &totalH);
+            uint32_t currYoffset = 0;
+            for (const auto iter : mMultiDisplay) {
+                if (iter.first != 0 && iter.second.cb == 0) {
+                    continue;
+                }
+                w = iter.second.width;
+                h = iter.second.height;
+                pos_x = iter.second.pos_x;
+                pos_y = iter.second.pos_y;
+                uint32_t dispId = iter.first;
+                if ((*x - pos_y) < h && (*y - pos_x) < w && (*y - pos_x) >= 0) {
+                    auto myy = *x - pos_y;
+                    auto myx = *y - pos_x;
+                    *y = myx;
+                    *x = myy;
+                    *displayId = iter.first;
+                    return true;
+                }
+                currYoffset += h;
+            }
+        } else {
+            // this is rotation 90
+            // origin is at upper right corner
+            // x points south, y points west
+            // display 0 at the top
+            AutoLock lock(mLock);
+            uint32_t totalH, totalW, pos_x, pos_y, w, h;
+            getCombinedDisplaySizeLocked(&totalW, &totalH);
+            uint32_t currYoffset = 0;
+            for (const auto iter : mMultiDisplay) {
+                if (iter.first != 0 && iter.second.cb == 0) {
+                    continue;
+                }
+                w = iter.second.width;
+                h = iter.second.height;
+                const auto delta_w = totalW - w;
+                pos_x = iter.second.pos_x;
+                pos_y = iter.second.pos_y;
+                const auto normal_x = totalH - *x;  // this is points to north
+                const auto normal_y = totalW - *y;  // this is points to north
+                uint32_t dispId = iter.first;
+                if ((normal_x - pos_y) < h && (normal_y - pos_x) < w &&
+                    (normal_y - pos_x) >= 0) {
+                    *x = *x - currYoffset;
+                    *y -= delta_w;
+                    *displayId = iter.first;
+                    return true;
+                }
+                currYoffset += h;
+            }
         }
     }
     return false;
@@ -434,8 +541,18 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
                                  uint32_t dpi,
                                  uint32_t flag) {
     bool UIUpdate = false;
+    bool rotationChanged = false;
     bool checkRecording = false;
     uint32_t width, height;
+    int32_t current_rotation = 0;
+
+    SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
+    if (layout) {
+        current_rotation = layout->orientation;
+        if (current_rotation != mRotation) {
+            rotationChanged = true;
+        }
+    }
     if (mGuestMode) {
         return -1;
     }
@@ -452,10 +569,13 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
         }
         mMultiDisplay[displayId].width = w;
         mMultiDisplay[displayId].height = h;
+        mMultiDisplay[displayId].originalWidth = w;
+        mMultiDisplay[displayId].originalHeight = h;
         mMultiDisplay[displayId].dpi = dpi;
         mMultiDisplay[displayId].flag = flag;
         mMultiDisplay[displayId].pos_x = x;
         mMultiDisplay[displayId].pos_y = y;
+        mMultiDisplay[displayId].rotation = current_rotation;
         if (mMultiDisplay[displayId].cb != 0) {
             if (!isMultiDisplayWindow()) {
                 if (x == -1 && y == -1) {
@@ -486,6 +606,86 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
 
     fireEvent(DisplayChangeEvent{DisplayChange::DisplayChanged, displayId});
     return 0;
+}
+
+void MultiDisplay::performRotation(int mOrientation) {
+    const bool pileUp = (mOrientation == SKIN_ROTATION_90 ||
+                         mOrientation == SKIN_ROTATION_270);
+    const bool normalOrder = (mOrientation == SKIN_ROTATION_0 ||
+                              mOrientation == SKIN_ROTATION_270);
+    // set up the multidisplay windows x,y, w and h
+    {
+        AutoLock lock(mLock);
+        if (normalOrder) {
+            int pos_x, pos_y;
+            uint32_t width, height, id, dpi, flag;
+            uint32_t total_w = 0;
+            uint32_t total_h = 0;
+            for (auto& it : mMultiDisplay) {
+                id = it.first;
+                pos_x = it.second.pos_x;
+                pos_y = it.second.pos_y;
+                width = it.second.originalWidth;
+                height = it.second.originalHeight;
+                // stack upward
+                if (pileUp) {
+                    pos_x = 0;
+                    pos_y = total_h;
+                    std::swap(width, height);
+                    total_h += height;
+                } else {
+                    pos_x = total_w;
+                    pos_y = 0;
+                    total_w += width;
+                    // std::swap(pos_x, pos_y);
+                }
+                it.second.width = width;
+                it.second.height = height;
+                it.second.pos_x = pos_x;
+                it.second.pos_y = pos_y;
+                it.second.rotation = mOrientation;
+            }
+        } else {
+            int pos_x, pos_y;
+            uint32_t width, height, id, dpi, flag;
+            uint32_t total_w = 0;
+            uint32_t total_h = 0;
+            for (auto& it : mMultiDisplay) {
+                width = it.second.originalWidth;
+                height = it.second.originalHeight;
+                if (pileUp) {
+                    std::swap(width, height);
+                    total_h += height;
+                } else {
+                    total_w += width;
+                }
+            }
+            for (auto& it : mMultiDisplay) {
+                id = it.first;
+                pos_x = it.second.pos_x;
+                pos_y = it.second.pos_y;
+                width = it.second.originalWidth;
+                height = it.second.originalHeight;
+                // stack upward
+                if (pileUp) {
+                    std::swap(width, height);
+                    total_h -= height;
+                    pos_x = 0;
+                    pos_y = total_h;
+                } else {
+                    total_w -= width;
+                    pos_x = total_w;
+                    pos_y = 0;
+                    // std::swap(pos_x, pos_y);
+                }
+                it.second.width = width;
+                it.second.height = height;
+                it.second.pos_x = pos_x;
+                it.second.pos_y = pos_y;
+                it.second.rotation = mOrientation;
+            }
+        }
+    }
 }
 
 int MultiDisplay::getDisplayPose(uint32_t displayId,

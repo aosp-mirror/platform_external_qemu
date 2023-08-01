@@ -8,14 +8,20 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
 #include <cassert>
 #include <string>
-#include "host-common/hw-config.h"
 #include "android/avd/info.h"
+#include "android/base/system/System.h"
 #include "android/cmdline-definitions.h"
+#include "android/emulation/QemuMiscPipe.h"
+#include "android/emulation/control/BootCompletionHandler.h"
 #include "android/emulation/control/globals_agent.h"
 #include "android/utils/debug.h"
+#include "host-common/hw-config.h"
+
+using android::base::System;
+using android::emulation::control::BootCompletionHandler;
+using std::chrono::milliseconds;
 
 AndroidOptions* sAndroid_cmdLineOptions = nullptr;
 
@@ -110,9 +116,20 @@ static const QAndroidGlobalVarsAgent globalVarsAgent = {
         // /* this indicates that guest has boot completed */
         .set_guest_boot_completed =
                 [](bool guest_boot_completed) {
-                    s_guest_boot_completed = guest_boot_completed;
-                },
+                    milliseconds bootTimeInMs = milliseconds(0);
 
+                    if (guest_boot_completed) {
+                        bootTimeInMs = milliseconds(System::get()
+                                                            ->getProcessTimes()
+                                                            .wallClockMs) -
+                                       milliseconds(get_uptime_since_reset());
+                    }
+
+                    s_guest_boot_completed = guest_boot_completed;
+                    BootCompletionHandler::get()->setBootTime(bootTimeInMs);
+                    BootCompletionHandler::get()->signalBootChange(
+                            s_guest_boot_completed);
+                },
         .set_arm_snapshot_save_completed =
                 [](bool arm_snapshot_save_completed) {
                     s_arm_snapshot_save_completed = arm_snapshot_save_completed;

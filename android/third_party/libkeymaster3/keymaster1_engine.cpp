@@ -162,12 +162,15 @@ RSA* Keymaster1Engine::BuildRsaKey(const KeymasterKeyBlob& blob,
         return nullptr;
     }
 
-    rsa->n = BN_dup(public_rsa->n);
-    rsa->e = BN_dup(public_rsa->e);
-    if (!rsa->n || !rsa->e) {
+    BIGNUM_Ptr n(BN_dup(RSA_get0_n(public_rsa.get())));
+    BIGNUM_Ptr e(BN_dup(RSA_get0_e(public_rsa.get())));
+    if (!n || !e || !RSA_set0_key(rsa.get(), n.get(), e.get(), /*d=*/nullptr)) {
         *error = TranslateLastOpenSslError();
         return nullptr;
     }
+    // RSA_set0_key takes ownership on success.
+    (void)n.release();
+    (void)e.release();
 
     *error = KM_ERROR_OK;
     return rsa.release();

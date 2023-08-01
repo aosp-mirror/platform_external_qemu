@@ -396,12 +396,12 @@
         <rect>
          <x>10</x>
          <y>0</y>
-         <width>45</width>
+         <width>80</width>
          <height>15</height>
         </rect>
        </property>
        <property name="text">
-        <string>Posture</string>
+        <string>Fold state</string>
        </property>
       </widget>
       <widget class="QLabel" name="lbl_currentPosture">
@@ -409,12 +409,12 @@
         <rect>
          <x>10</x>
          <y>60</y>
-         <width>121</width>
+         <width>80</width>
          <height>16</height>
         </rect>
        </property>
        <property name="text">
-        <string>Current posture:</string>
+        <string>Fold state:</string>
        </property>
        <property name="textFormat">
         <enum>Qt::AutoText</enum>
@@ -426,7 +426,7 @@
       <widget class="QLabel" name="lbl_currentPostureValue">
        <property name="geometry">
         <rect>
-         <x>104</x>
+         <x>72</x>
          <y>60</y>
          <width>121</width>
          <height>16</height>

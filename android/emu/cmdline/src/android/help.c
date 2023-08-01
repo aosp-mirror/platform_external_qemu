@@ -2253,12 +2253,6 @@ static void help_xts(stralloc_t* out) {
     PRINTF(" Turn on tweaks made for running xTS.\n\n");
 }
 
-static void help_redirect_to_netsim(stralloc_t* out) {
-    PRINTF(" All WiFi network traffic will be redirected to the external "
-           " netsim process which is a full stack network service. By default,"
-           " Emulator will use its own in process network stack.\n\n");
-}
-
 static void help_wifi_mac_address(stralloc_t* out) {
     PRINTF(" Override the mac address of the wlan0 interface in AVD. "
            " This option only applies to situation where AVD is loaded "

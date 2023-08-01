@@ -47,7 +47,9 @@ android_add_library(
   REPO "${LIB_SLIRP_ROOT}"
   LICENSE "BSD-3-Clause"
   SRC # cmake-format: sortable
-      ${libslirp_src})
+      ${libslirp_src}
+  LINUX ${LIB_SLIRP_ROOT}/src/ip_icmp_ping.c
+  DARWIN ${LIB_SLIRP_ROOT}/src/ip_icmp_ping.c)
 
 target_link_libraries(
   libslirp PUBLIC GLIB2::GLIB2)

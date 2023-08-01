@@ -17,6 +17,36 @@
 #include <mutex>
 #include <queue>
 #include <type_traits>
+#include <utility>
+
+// Selects a type from a pack of types based on the provided index
+template <std::size_t Index, typename... Args>
+struct Select {
+    // Calculates the index of the last available type in the pack
+    static constexpr std::size_t LastIndex = sizeof...(Args) - 1;
+
+    // Selects the type at the specified index from the pack of types
+    // If the index is out of range, the last available type is selected
+    using type =
+            typename std::tuple_element<(Index < sizeof...(Args) ? Index
+                                                                 : LastIndex),
+                                        std::tuple<Args...>>::type;
+};
+
+// Specialization for template types with a pack of template arguments
+template <std::size_t Index,
+          template <typename...>
+          class Template,
+          typename... Args>
+struct Select<Index, Template<Args...>> {
+    // Recursively selects the type at the specified index from the pack of
+    // template arguments
+    using type = typename Select<Index, Args...>::type;
+};
+
+// Convenient type alias for the selected type
+template <std::size_t Index, typename T>
+using Select_t = typename Select<Index, T>::type;
 
 // A simple reader reactor, use this if you want to read
 // a stream of data.
@@ -25,10 +55,18 @@
 // if a message cannot be read (i.e. OnReadDone is not ok)
 //
 // T can be a Server or Client Reactor..
-template <typename T, typename R>
+//
+// Note for a client you must explicitly call StartRead once
+// you create the reader object.
+template <typename T>
 class WithSimpleReader : public T {
 public:
     using is_server = std::is_base_of<grpc::internal::ServerReactor, T>;
+
+    // We select index 0, or index 1 in case of Bi-directional reactors.
+    // I.e. T<X,Y,...> --> Y
+    // T<X> --> X
+    using R = Select_t<1, T>;
 
     WithSimpleReader() {
         if constexpr (is_server::value) {
@@ -66,7 +104,7 @@ private:
 // if a message cannot be read (i.e. OnReadDone is not ok)
 template <typename R>
 class SimpleServerLambdaReader
-    : public WithSimpleReader<grpc::ServerReadReactor<R>, R> {
+    : public WithSimpleReader<grpc::ServerReadReactor<R>> {
     using ReadCallback = std::function<void(const R*)>;
     using OnDoneCallback = std::function<void()>;
 
@@ -94,7 +132,6 @@ private:
 //
 // For example:
 //
-//
 // grpc::ClientContext* context = mClient->newContext().release();
 // static google::protobuf::Empty empty;
 // auto read = new SimpleClientLambdaReader<PhoneEvent>(
@@ -111,7 +148,7 @@ private:
 // read->StartCall();
 template <typename R>
 class SimpleClientLambdaReader
-    : public WithSimpleReader<grpc::ClientReadReactor<R>, R> {
+    : public WithSimpleReader<grpc::ClientReadReactor<R>> {
     using ReadCallback = std::function<void(const R*)>;
     using OnDoneCallback = std::function<void(::grpc::Status)>;
 
@@ -139,11 +176,11 @@ private:
 // - You will not be notified when the object is written.
 // - The queue will also grow on forever.. Your write speed should not be
 //   higher than what gRPC can actually push out on the wire.
-template <typename T, typename W>
+template <typename T>
 class WithSimpleQueueWriter : public T {
 public:
-    // TODO(jansene): Auto derive W
-    // using W = typename grpc_write_signature<T>::write_type;
+    // We always select index 0 of the T<X,...>
+    using W = Select_t<0, T>;
 
     void OnWriteDone(bool ok) override {
         {
@@ -179,22 +216,21 @@ private:
     bool mWriting{false};
 };
 
-// A bidi serverstream constructed from a simple reader and queuewriter.
+// A bi directional serverstream constructed from a simple reader and
+// queuewriter.
 template <typename R, typename W>
-using SimpleServerBidiStream = WithSimpleQueueWriter<
-        WithSimpleReader<grpc::ServerBidiReactor<R, W>, R>,
-        W>;
+using SimpleServerBidiStream =
+        WithSimpleQueueWriter<WithSimpleReader<grpc::ServerBidiReactor<R, W>>>;
+
 // A simple server reader
 template <typename R>
-using SimpleServerReader = WithSimpleReader<grpc::ServerReadReactor<R>, R>;
+using SimpleServerReader = WithSimpleReader<grpc::ServerReadReactor<R>>;
 
 // A simple server writer
 template <typename W>
-using SimpleServerWriter =
-        WithSimpleQueueWriter<grpc::ServerWriteReactor<W>, W>;
+using SimpleServerWriter = WithSimpleQueueWriter<grpc::ServerWriteReactor<W>>;
 
 // A client bidi stream
 template <typename R, typename W>
-using SimpleClientBidiStream = WithSimpleQueueWriter<
-        WithSimpleReader<grpc::ClientBidiReactor<W, R>, R>,
-        W>;
+using SimpleClientBidiStream =
+        WithSimpleQueueWriter<WithSimpleReader<grpc::ClientBidiReactor<W, R>>>;
