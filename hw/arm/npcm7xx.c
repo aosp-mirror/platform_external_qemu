@@ -16,6 +16,7 @@
 
 #include "qemu/osdep.h"
 
+#include "chardev/char.h"
 #include "hw/arm/boot.h"
 #include "hw/arm/npcm7xx.h"
 #include "hw/char/serial.h"
@@ -24,7 +25,9 @@
 #include "hw/qdev-clock.h"
 #include "hw/qdev-properties.h"
 #include "qapi/error.h"
+#include "qemu/error-report.h"
 #include "qemu/units.h"
+#include "qom/object.h"
 #include "sysemu/sysemu.h"
 
 /*
@@ -497,6 +500,7 @@ static void npcm7xx_realize(DeviceState *dev, Error **errp)
     NPCM7xxState *s = NPCM7XX(dev);
     NPCM7xxClass *nc = NPCM7XX_GET_CLASS(s);
     int i;
+    Chardev *chardev = qemu_chr_find("pci0");
 
     if (memory_region_size(s->dram) > NPCM7XX_DRAM_SZ) {
         error_setg(errp, "%s: NPCM7xx cannot address more than %" PRIu64
@@ -772,6 +776,11 @@ static void npcm7xx_realize(DeviceState *dev, Error **errp)
     }
 
     /* PCI Mailbox. Cannot fail */
+    if (chardev) {
+        qdev_prop_set_chr(DEVICE(&s->pci_mbox), "chardev", chardev);
+    } else {
+        warn_report("PCI Mailbox does not have a chardev backend.");
+    }
     sysbus_realize(SYS_BUS_DEVICE(&s->pci_mbox), &error_abort);
     sysbus_mmio_map(SYS_BUS_DEVICE(&s->pci_mbox), 0, NPCM7XX_PCI_MBOX_BA);
     sysbus_mmio_map(SYS_BUS_DEVICE(&s->pci_mbox), 1,
