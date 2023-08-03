@@ -122,6 +122,12 @@ void CarSensorData::updateCarSpeedText(int speed) {
     mUi->car_speedLabel->setText(QString::number(speed));
 }
 
+void CarSensorData::updateCarSpeedSlider(int speed) {
+    bool lastState = mUi->car_speedSlider->blockSignals(true);
+    mUi->car_speedSlider->setValue(speed);
+    mUi->car_speedSlider->blockSignals(lastState);
+}
+
 void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
     float speedMetersPerSecond =
             (float)speed *
@@ -190,6 +196,12 @@ void CarSensorData::on_comboBox_ignition_currentIndexChanged(int index) {
 }
 
 void CarSensorData::on_comboBox_gear_currentIndexChanged(int index) {
+    // Set speed to 0 when setting gear to P
+    if (sComboBoxGearValues[index] == VehicleGear::GEAR_PARK) {
+        on_car_speedSlider_valueChanged(0);
+        updateCarSpeedSlider(0);
+    }
+
     sendGearChangeMsg(static_cast<int32_t>(sComboBoxGearValues[index]),
                       mUi->comboBox_gear->currentText().toStdString());
 }
@@ -285,9 +297,7 @@ void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
                                  ? MILES_PER_HOUR_TO_METERS_PER_SEC
                                  : KILOMETERS_PER_HOUR_TO_METERS_PER_SEC));
                 if (speed != mUi->car_speedSlider->value()) {
-                    bool lastState = mUi->car_speedSlider->blockSignals(true);
-                    mUi->car_speedSlider->setValue(speed);
-                    mUi->car_speedSlider->blockSignals(lastState);
+                    updateCarSpeedSlider(speed);
                     updateCarSpeedText(speed);
                 }
                 break;
