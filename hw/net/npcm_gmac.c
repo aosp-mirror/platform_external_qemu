@@ -813,6 +813,7 @@ static void npcm_gmac_write(void *opaque, hwaddr offset,
         if (v & NPCM_DMA_CONTROL_START_STOP_RX) {
             gmac_dma_set_state(gmac, NPCM_DMA_STATUS_RX_PROCESS_STATE_SHIFT,
                 NPCM_DMA_STATUS_RX_RUNNING_WAITING_STATE);
+            qemu_flush_queued_packets(qemu_get_queue(gmac->nic));
         } else {
             gmac_dma_set_state(gmac, NPCM_DMA_STATUS_RX_PROCESS_STATE_SHIFT,
                 NPCM_DMA_STATUS_RX_STOPPED_STATE);
