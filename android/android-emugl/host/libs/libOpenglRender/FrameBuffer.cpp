@@ -40,6 +40,7 @@
 #include "aemu/base/memory/MemoryTracker.h"
 #include "aemu/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/hw-sensors.h"
 #include "android/utils/debug.h"
 #include "host-common/GfxstreamFatalError.h"
 
@@ -2905,6 +2906,9 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer, bool needPost) {
 
         if (p2->displayId != 0) {
             setDisplayColorBuffer(p2->displayId, p2->targetHandle);
+            if (android_is_automotive()) {
+                needPost = false;
+            }
         }
         AutoLock mutex(m_lock);
         Post composeCmd;
