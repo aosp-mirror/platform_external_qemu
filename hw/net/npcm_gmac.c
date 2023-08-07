@@ -26,6 +26,7 @@
 #include "linux/if_ether.h"
 #include "migration/vmstate.h"
 #include "net/checksum.h"
+#include "net/net.h"
 #include "qemu/cutils.h"
 #include "qemu/log.h"
 #include "qemu/units.h"
@@ -364,7 +365,7 @@ static ssize_t gmac_receive(NetClientState *nc, const uint8_t *buf, size_t len)
         gmac_dma_set_state(gmac, NPCM_DMA_STATUS_RX_PROCESS_STATE_SHIFT,
             NPCM_DMA_STATUS_RX_SUSPENDED_STATE);
         gmac_update_irq(gmac);
-        return -1;
+        return len;
     }
     /* step 3 */
     /*
@@ -830,6 +831,12 @@ static void npcm_gmac_write(void *opaque, hwaddr offset,
         }
         /* for W1C bits, implement W1C */
         gmac->regs[offset / sizeof(uint32_t)] &= ~NPCM_DMA_STATUS_W1C_MASK(v);
+        if (v & NPCM_DMA_STATUS_RU) {
+            /* Clearing RU bit indicates descriptor is owned by DMA again. */
+            gmac_dma_set_state(gmac, NPCM_DMA_STATUS_RX_PROCESS_STATE_SHIFT,
+                NPCM_DMA_STATUS_RX_RUNNING_WAITING_STATE);
+            qemu_flush_queued_packets(qemu_get_queue(gmac->nic));
+        }
         break;
 
     default:
