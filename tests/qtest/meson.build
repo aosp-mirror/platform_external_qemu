@@ -265,6 +265,7 @@ qos_test_ss.add(
   'pcnet-test.c',
   'sdhci-test.c',
   'spapr-phb-test.c',
+  'tda387xx-test.c',
   'tmp105-test.c',
   'emc141x-test.c',
   'tmp_sbtsi-test.c',

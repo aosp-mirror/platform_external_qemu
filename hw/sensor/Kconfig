@@ -72,3 +72,8 @@ config MAX20730
 config DELTA_U50SU8P167
     bool
     depends on I2C
+
+config TDA387XX
+    bool
+    depends on I2C
+    default y if I2C_DEVICES
