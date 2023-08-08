@@ -214,22 +214,7 @@ int main(int argc, char **argv)
 
 /////////////////////////////////////////////////////////////
 
-#define  LCD_DENSITY_LDPI      120
-#define  LCD_DENSITY_140       140
 #define  LCD_DENSITY_MDPI      160
-#define  LCD_DENSITY_180       180
-#define  LCD_DENSITY_200       200
-#define  LCD_DENSITY_TVDPI     213
-#define  LCD_DENSITY_HDPI      240
-#define  LCD_DENSITY_280DPI    280
-#define  LCD_DENSITY_XHDPI     320
-#define  LCD_DENSITY_340DPI    340
-#define  LCD_DENSITY_360DPI    360
-#define  LCD_DENSITY_400DPI    400
-#define  LCD_DENSITY_420DPI    420
-#define  LCD_DENSITY_XXHDPI    480
-#define  LCD_DENSITY_560DPI    560
-#define  LCD_DENSITY_XXXHDPI   640
 
 extern bool android_op_wipe_data;
 
@@ -4557,30 +4542,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 break;
             case QEMU_OPTION_lcd_density:
                 lcd_density = strtol(optarg, (char **) &optarg, 10);
-                switch (lcd_density) {
-                    case LCD_DENSITY_LDPI:
-                    case LCD_DENSITY_140:
-                    case LCD_DENSITY_MDPI:
-                    case LCD_DENSITY_180:
-                    case LCD_DENSITY_200:
-                    case LCD_DENSITY_TVDPI:
-                    case LCD_DENSITY_HDPI:
-                    case LCD_DENSITY_280DPI:
-                    case LCD_DENSITY_XHDPI:
-                    case LCD_DENSITY_340DPI:
-                    case LCD_DENSITY_360DPI:
-                    case LCD_DENSITY_400DPI:
-                    case LCD_DENSITY_420DPI:
-                    case LCD_DENSITY_440DPI:
-                    case LCD_DENSITY_XXHDPI:
-                    case LCD_DENSITY_560DPI:
-                    case LCD_DENSITY_XXXHDPI:
-                        break;
-                    default:
-                        fprintf(stderr, "WARNING: qemu: Bad LCD density: %d. Available densities are: "
-                                "120, 140, 160, 180, 213, 240, 280, "
-                                "320, 340, 360, 400, 420, 440, 480, 560, 640.\n",
-                                lcd_density);
+                if (lcd_density <= 0) {
+                    fprintf(stderr, "WARNING: Bad LCD density: %d, using %d instead\n",
+                            lcd_density, LCD_DENSITY_MDPI);
+                    lcd_density = LCD_DENSITY_MDPI;
+                } else if (lcd_density > 10000) {
+                    fprintf(stderr, "WARNING: LCD density is too high: %d\n",
+                            lcd_density);
                 }
                 break;
             case QEMU_OPTION_dns_server:
