@@ -832,6 +832,10 @@ bool MultiDisplay::isMultiDisplayWindow() {
     return getConsoleAgents()->settings->hw()->hw_multi_display_window;
 }
 
+bool MultiDisplay::isPixelFold() {
+    return android_foldable_is_pixel_fold();
+}
+
 /*
  * Given that there are at most 11 displays, we can iterate through all possible
  * ways of showing each display in either the first row or the second row. It is
