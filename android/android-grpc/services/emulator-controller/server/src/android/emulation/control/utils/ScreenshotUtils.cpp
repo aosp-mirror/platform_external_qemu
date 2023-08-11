@@ -24,8 +24,9 @@
 #include "android/console.h"
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/hw-sensors.h"                       // for ANDROID_SENSOR_...
+#include "android/physics/GlmHelpers.h"               // for vecNearEqual
+#include "host-common/hw-config.h"
 #include "host-common/opengles.h"
-#include "android/physics/GlmHelpers.h"  // for vecNearEqual
 
 #ifdef _WIN32
 #undef ERROR
@@ -92,18 +93,23 @@ Rotation_SkinRotation ScreenshotUtils::deriveRotation(
     sensorAgent->getSensor(ANDROID_SENSOR_ACCELERATION, out.begin(),
                            out.size());
 
+    Rotation_SkinRotation rotation = Rotation::REVERSE_LANDSCAPE;
     glm::vec3 normalized_accelerometer = glm::normalize(device_accelerometer);
     const float cos45 = sqrtf(2.0f) / 2.0f;
     if (normalized_accelerometer.y > cos45) {
-        return Rotation::PORTRAIT;
+        rotation = Rotation::PORTRAIT;
+    } else if (normalized_accelerometer.y < -cos45) {
+        rotation = Rotation::REVERSE_PORTRAIT;
+    } else if (normalized_accelerometer.x > 0) {
+        rotation = Rotation::LANDSCAPE;
     }
-    if (normalized_accelerometer.y < -cos45) {
-        return Rotation::REVERSE_PORTRAIT;
+    if (0 ==
+        strcmp("landscape",
+               getConsoleAgents()->settings->hw()->hw_initialOrientation)) {
+        rotation = static_cast<Rotation_SkinRotation>(
+                (static_cast<int>(rotation) + 1) % 4);
     }
-    if (normalized_accelerometer.x > 0) {
-        return Rotation::LANDSCAPE;
-    }
-    return Rotation::REVERSE_LANDSCAPE;
+    return rotation;
 }
 
 std::tuple<int, int> ScreenshotUtils::resizeKeepAspectRatio(
