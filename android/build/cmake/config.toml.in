@@ -29,6 +29,7 @@ crossbeam-deque = { path = "${AOSP_ROOT}/external/rust/crates/crossbeam-deque" }
 crossbeam-epoch = { path = "${AOSP_ROOT}/external/rust/crates/crossbeam-epoch" }
 crossbeam-utils = { path = "${AOSP_ROOT}/external/rust/crates/crossbeam-utils" }
 cxx = { path = "${AOSP_ROOT}/external/rust/crates/cxx" }
+cxx-build = { path = "${AOSP_ROOT}/external/rust/crates/cxx/gen/build" }
 data-encoding = { path = "${AOSP_ROOT}/external/rust/crates/data-encoding" }
 either = { path = "${AOSP_ROOT}/external/rust/crates/either" }
 env_logger = { path = "${AOSP_ROOT}/external/rust/crates/env_logger" }
