@@ -608,14 +608,18 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
     return 0;
 }
 
-void MultiDisplay::performRotation(int mOrientation) {
+void MultiDisplay::performRotation(int rot) {
+    AutoLock lock(mLock);
+    performRotationLocked(rot);
+}
+
+void MultiDisplay::performRotationLocked(int mOrientation) {
     const bool pileUp = (mOrientation == SKIN_ROTATION_90 ||
                          mOrientation == SKIN_ROTATION_270);
     const bool normalOrder = (mOrientation == SKIN_ROTATION_0 ||
                               mOrientation == SKIN_ROTATION_270);
     // set up the multidisplay windows x,y, w and h
     {
-        AutoLock lock(mLock);
         if (normalOrder) {
             int pos_x, pos_y;
             uint32_t width, height, id, dpi, flag;
@@ -837,46 +841,15 @@ bool MultiDisplay::isPixelFold() {
 }
 
 /*
- * Given that there are at most 11 displays, we can iterate through all possible
- * ways of showing each display in either the first row or the second row. It is
- * also possible to have an empty row. The best combination is to satisfy the
- * following two criteria: 1, The combined rectangle which contains all the
- * displays should have an aspect ratio that is close to the monitor's aspect
- * ratio. 2, The width of the first row should be close to the width of the
- * second row.
- *
- * Important detail of implementations: the x and y offsets saved in
- * mMultiDisplay use the bottom-left corner as origin. This coordinates will
- * be used by glviewport() in Postworker.cpp. However, the x and y offsets saved
- * by invoking setUIMultiDisplay() will be using top-left corner as origin.
- * Thus, input coordinates willl be calculated correctly when mouse events are
- * captured by QT window.
- *
- * TODO: We assume all displays pos_x/pos_y is adjustable here. This may
- * overwrite the specified pos_x/pos_y in setDisplayPos();
+ * Just use simple way to make it work in multidisplay+rotation
  */
 void MultiDisplay::recomputeLayoutLocked() {
-    uint32_t monitorWidth, monitorHeight;
-    double monitorAspectRatio = 1.0;
-    if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
-        dwarning(
-                "Unable to get monitor width and height, using default "
-                "ratio of 1.0");
-    } else {
-        monitorAspectRatio = (double)monitorHeight / (double)monitorWidth;
+    SkinRotation rotation = SKIN_ROTATION_0;
+    SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
+    if (layout) {
+        rotation = layout->orientation;
     }
-    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
-    for (const auto& iter : mMultiDisplay) {
-        if (iter.first == 0 || iter.second.cb != 0) {
-            rectangles[iter.first] =
-                    std::make_pair(iter.second.width, iter.second.height);
-        }
-    }
-    for (const auto& iter :
-         android::base::resolveLayout(rectangles, monitorAspectRatio)) {
-        mMultiDisplay[iter.first].pos_x = iter.second.first;
-        mMultiDisplay[iter.first].pos_y = iter.second.second;
-    }
+    performRotationLocked(rotation);
 }
 
 bool MultiDisplay::multiDisplayParamValidate(uint32_t id,
