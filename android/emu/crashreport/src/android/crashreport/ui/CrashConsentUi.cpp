@@ -13,7 +13,9 @@
 // limitations under the License.
 #include "android/crashreport/CrashConsent.h"
 
+#include <qobjectdefs.h>
 #include <stdio.h>
+#include <QMessageBox>
 #include <QSettings>
 #include <fstream>
 #include <map>
@@ -90,6 +92,30 @@ public:
         }
 
         return processDumpfile(dump_file);
+    }
+
+    void reportCompleted(const CrashReportDatabase::Report& report) override {
+        dinfo("Report %s is available remotely as: %s.",
+              report.uuid.ToString().c_str(), report.id.c_str());
+
+        // Show a modal dialog with the report information.
+        auto showFunc = [](void* data) {
+            std::string* report_id = reinterpret_cast<std::string*>(data);
+            QMessageBox msgbox(nullptr);
+            msgbox.setWindowTitle("Crash Report Submitted");
+            msgbox.setText("Thank you for submitting a crash report.");
+            std::string msg =
+                    "If you would like to contact us for further information, "
+                    "use the following report id: \n\n" +
+                    *report_id;
+            msgbox.setInformativeText(msg.c_str());
+            msgbox.setTextInteractionFlags(Qt::TextSelectableByMouse);
+            msgbox.exec();
+            delete report_id;
+        };
+
+        getConsoleAgents()->emu->runOnUiThread(
+                showFunc, new std::string(report.id), false);
     }
 
 private:
