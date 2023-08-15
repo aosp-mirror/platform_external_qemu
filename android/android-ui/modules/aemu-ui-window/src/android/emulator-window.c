@@ -457,8 +457,17 @@ void emulator_window_set_no_skin() {
                 emulator->layout_file->parts->display);
         emulator->layout_file_skin = emulator->layout_file;
     }
+
+    // we have already set no skin, do nothing; this can happen
+    // with multidisplay
+    if (emulator->layout_file == emulator->layout_file_no_skin) {
+        return;
+    }
     emulator->layout_file = emulator->layout_file_no_skin;
-    skin_ui_update_and_rotate(emulator->ui, emulator->layout_file, 0);
+    const SkinRotation currentRotation =
+            qemulator->uiEmuAgent->window->getRotation();
+    skin_ui_update_and_rotate(emulator->ui, emulator->layout_file,
+                              currentRotation);
 }
 
 void emulator_window_restore_skin() {
@@ -467,7 +476,10 @@ void emulator_window_restore_skin() {
         return;
     }
     emulator->layout_file = emulator->layout_file_skin;
-    skin_ui_update_and_rotate(emulator->ui, emulator->layout_file, 0);
+    const SkinRotation currentRotation =
+            qemulator->uiEmuAgent->window->getRotation();
+    skin_ui_update_and_rotate(emulator->ui, emulator->layout_file,
+                              currentRotation);
 }
 
 int emulator_window_init(EmulatorWindow* emulator,
