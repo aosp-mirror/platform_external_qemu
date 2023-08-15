@@ -150,7 +150,6 @@ static void gmac_phy_set_link(NPCMGMACState *s, bool active)
 static bool gmac_can_receive(NetClientState *nc)
 {
     NPCMGMACState *gmac = NPCM_GMAC(qemu_get_nic_opaque(nc));
-    uint32_t rx_state;
 
     /* If GMAC receive is disabled. */
     if (!(gmac->regs[R_NPCM_GMAC_MAC_CONFIG] & NPCM_GMAC_MAC_CONFIG_RX_EN)) {
@@ -161,15 +160,6 @@ static bool gmac_can_receive(NetClientState *nc)
     if (!(gmac->regs[R_NPCM_DMA_CONTROL] & NPCM_DMA_CONTROL_START_STOP_RX)) {
         return false;
     }
-
-    /* If GMAC RX is in stopped or suspended state. */
-    rx_state = extract32(gmac->regs[R_NPCM_DMA_STATUS],
-                         NPCM_DMA_STATUS_RX_PROCESS_STATE_SHIFT, 3);
-    if (rx_state == NPCM_DMA_STATUS_RX_STOPPED_STATE ||
-        rx_state == NPCM_DMA_STATUS_RX_SUSPENDED_STATE) {
-        return false;
-    }
-
     return true;
 }
 
