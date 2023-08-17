@@ -931,6 +931,11 @@ static void dw_i3c_reset(DeviceState *dev)
                      s->cfg.dev_addr_table_pointer);
     ARRAY_FIELD_DP32(s->regs, DEVICE_ADDR_TABLE_POINTER, DEPTH,
                      s->cfg.dev_addr_table_depth);
+    ARRAY_FIELD_DP32(s->regs, DEV_CHAR_TABLE_POINTER,
+                     P_DEV_CHAR_TABLE_START_ADDR,
+                     s->cfg.dev_char_table_pointer);
+    ARRAY_FIELD_DP32(s->regs, DEV_CHAR_TABLE_POINTER, DEV_CHAR_TABLE_DEPTH,
+                     s->cfg.dev_char_table_depth);
 
     dw_i3c_cmd_queue_reset(s);
     dw_i3c_resp_queue_reset(s);
@@ -1414,9 +1419,15 @@ static void dw_i3c_update_char_table(DWI3C *s, uint8_t offset, uint64_t pid,
         return;
     }
 
-    /* Each char table index is 128 bits apart. */
-    uint16_t dev_index = R_DEVICE_CHARACTERISTIC_TABLE_LOC1 + offset *
-                                                            sizeof(uint32_t);
+    /*
+     * Each device offset is 128 bits apart in the table, since each device gets
+     * 4 * 32-bits of entries in the table.
+     * / sizeof(uint32_t) because we're indexing into our 32-bit reg array.
+     */
+    uint16_t dev_index = (ARRAY_FIELD_EX32(s->regs, DEV_CHAR_TABLE_POINTER,
+                                          P_DEV_CHAR_TABLE_START_ADDR) /
+                                          sizeof(uint32_t)) +
+                                          (offset * sizeof(uint32_t));
     s->regs[dev_index] = pid & 0xffffffff;
     pid >>= 32;
     s->regs[dev_index + 1] = FIELD_DP32(s->regs[dev_index + 1],
@@ -1771,6 +1782,10 @@ static Property dw_i3c_properties[] = {
                        cfg.dev_addr_table_pointer, 0x280),
     DEFINE_PROP_UINT16("dev-addr-table-depth", DWI3C,
                        cfg.dev_addr_table_depth, 0x08),
+    DEFINE_PROP_UINT16("dev-char-table-pointer", DWI3C,
+                       cfg.dev_char_table_pointer, 0x200),
+    DEFINE_PROP_UINT16("dev-char-table-depth", DWI3C,
+                       cfg.dev_char_table_depth, 0x20),
     DEFINE_PROP_END_OF_LIST(),
 };
 

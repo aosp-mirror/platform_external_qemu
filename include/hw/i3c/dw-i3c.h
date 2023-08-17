@@ -191,6 +191,8 @@ typedef struct DWI3C {
         uint8_t num_addressable_devices;
         uint16_t dev_addr_table_pointer;
         uint16_t dev_addr_table_depth;
+        uint16_t dev_char_table_pointer;
+        uint16_t dev_char_table_depth;
     } cfg;
     uint32_t regs[DW_I3C_NR_REGS];
 } DWI3C;
