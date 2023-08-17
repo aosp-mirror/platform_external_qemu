@@ -40,7 +40,7 @@ REG32(DEVICE_ADDR,                  0x04)
     FIELD(DEVICE_ADDR, DYNAMIC_ADDR,        16, 7)
     FIELD(DEVICE_ADDR, DYNAMIC_ADDR_VALID,  15, 1)
 REG32(HW_CAPABILITY,                0x08)
-    FIELD(HW_CAPABILITY, ENTDAA,  0, 1)
+    FIELD(HW_CAPABILITY, DEVICE_ROLE_CONFIG,  0, 2)
     FIELD(HW_CAPABILITY, HDR_DDR, 3, 1)
     FIELD(HW_CAPABILITY, HDR_TS,  4, 1)
 REG32(COMMAND_QUEUE_PORT,           0x0c)
@@ -282,7 +282,8 @@ REG32(DEVICE_ADDR_TABLE_LOC1, 0x280)
 static void dw_i3c_cmd_queue_execute(DWI3C *s);
 
 static const uint32_t dw_i3c_resets[DW_I3C_NR_REGS] = {
-    [R_HW_CAPABILITY]               = 0x000e00bf,
+    /* Target mode is not supported, don't advertise it for now. */
+    [R_HW_CAPABILITY]               = 0x000e00b9,
     [R_QUEUE_THLD_CTRL]             = 0x01000101,
     [R_DATA_BUFFER_THLD_CTRL]       = 0x01010100,
     [R_SLV_EVENT_CTRL]              = 0x0000000b,
@@ -347,11 +348,6 @@ static const uint32_t dw_i3c_ro[DW_I3C_NR_REGS] = {
     [R_EXTENDED_CAPABILITY]         = 0xffffffff,
     [R_SLAVE_CONFIG]                = 0xffffffff,
 };
-
-static inline bool dw_i3c_has_entdaa(DWI3C *s)
-{
-    return ARRAY_FIELD_EX32(s->regs, HW_CAPABILITY, ENTDAA);
-}
 
 static inline bool dw_i3c_has_hdr_ts(DWI3C *s)
 {
@@ -1436,12 +1432,6 @@ static void dw_i3c_addr_assign_cmd(DWI3C *s, DWI3CAddrAssignCmd cmd)
 {
     uint8_t i = 0;
     uint8_t err = DW_I3C_RESP_QUEUE_ERR_NONE;
-
-    if (!dw_i3c_has_entdaa(s)) {
-        qemu_log_mask(LOG_GUEST_ERROR, "%s: ENTDAA is not supported\n",
-                      object_get_canonical_path(OBJECT(s)));
-        return;
-    }
 
     /* Tell everyone to ENTDAA. If these error, no one is on the bus. */
     if (dw_i3c_send_start(s, I3C_BROADCAST, /*is_recv=*/false,
