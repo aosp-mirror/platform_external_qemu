@@ -1032,7 +1032,7 @@ print_info () {
             if [ "$BUILD_HOST" = "linux" -a "$BUILD_ARCH" = "aarch64" ]; then
                 printf "%s\n" "/usr/aarch64-linux-gnu/lib/libstdc++.so.6"
             else
-                printf "%s\n" "$CLANG_DIR/lib/libc++.so.1"
+                printf "%s\n" "$CLANG_DIR/lib/libc++.so"
             fi
             ;;
         libasan-dir)
