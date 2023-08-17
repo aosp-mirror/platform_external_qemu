@@ -1497,8 +1497,10 @@ void EmulatorQtWindow::showMinimized() {
 
     Qt::WindowFlags flags = mContainer.windowFlags();
 #ifdef __linux__
-    flags &= ~FRAME_WINDOW_FLAGS_MASK;
-    flags |= FRAMED_WINDOW_FLAGS;
+//    b/282895205, temporarily remove the follow hacks
+//    as newer linux desktop behave differently
+//    flags &= ~FRAME_WINDOW_FLAGS_MASK;
+//    flags |= FRAMED_WINDOW_FLAGS;
 #else   // __APPLE__
     if (hasFrame()) {
         flags |= Qt::NoDropShadowWindowHint;
@@ -1511,6 +1513,12 @@ void EmulatorQtWindow::showMinimized() {
 
 #endif  // !_WIN32
     mContainer.showMinimized();
+
+#ifdef __linux__
+    // need to call toowindow hide again
+    mToolWindow->hide();
+#endif  // __linux__
+
     mWindowIsMinimized = true;
 
     if (mPauseAvdWhenMinimized) {
