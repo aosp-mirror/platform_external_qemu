@@ -530,7 +530,9 @@ static inline void dw_i3c_ctrl_w(DWI3C *s, uint32_t val)
 
 static inline bool dw_i3c_target_is_i2c(DWI3C *s, uint16_t offset)
 {
-    uint16_t dev_index = R_DEVICE_ADDR_TABLE_LOC1 + offset;
+    /* / sizeof(uint32_t) because we're indexing into our 32-bit reg array. */
+    uint16_t dev_index = (ARRAY_FIELD_EX32(s->regs, DEVICE_ADDR_TABLE_POINTER,
+                                          ADDR) / sizeof(uint32_t)) + offset;
     return FIELD_EX32(s->regs[dev_index], DEVICE_ADDR_TABLE_LOC1,
                    LEGACY_I2C_DEVICE);
 }
@@ -544,7 +546,9 @@ static uint8_t dw_i3c_target_addr(DWI3C *s, uint16_t offset)
         return 0;
     }
 
-    uint16_t dev_index = R_DEVICE_ADDR_TABLE_LOC1 + offset;
+    /* / sizeof(uint32_t) because we're indexing into our 32-bit reg array. */
+    uint16_t dev_index = (ARRAY_FIELD_EX32(s->regs, DEVICE_ADDR_TABLE_POINTER,
+                                          ADDR) / sizeof(uint32_t)) + offset;
     /* I2C devices use a static address. */
     if (dw_i3c_target_is_i2c(s, offset)) {
         return FIELD_EX32(s->regs[dev_index], DEVICE_ADDR_TABLE_LOC1,
@@ -614,7 +618,9 @@ static int dw_i3c_handle_ctlr_req(DWI3C *s, uint8_t addr)
         return -1;
     }
 
-    table_offset += R_DEVICE_ADDR_TABLE_LOC1;
+    /* / sizeof(uint32_t) because we're indexing into our 32-bit reg array. */
+    table_offset += (ARRAY_FIELD_EX32(s->regs, DEVICE_ADDR_TABLE_POINTER,
+                                      ADDR) / sizeof(uint32_t));
     if (FIELD_EX32(s->regs[table_offset], DEVICE_ADDR_TABLE_LOC1, MR_REJECT)) {
         s->ibi_data.ibi_queue_status = FIELD_DP32(s->ibi_data.ibi_queue_status,
                                                   IBI_QUEUE_STATUS,
@@ -641,7 +647,9 @@ static int dw_i3c_handle_targ_irq(DWI3C *s, uint8_t addr)
         return -1;
     }
 
-    table_offset += R_DEVICE_ADDR_TABLE_LOC1;
+    /* / sizeof(uint32_t) because we're indexing into our 32-bit reg array. */
+    table_offset += (ARRAY_FIELD_EX32(s->regs, DEVICE_ADDR_TABLE_POINTER,
+                                      ADDR) / sizeof(uint32_t));
     if (FIELD_EX32(s->regs[table_offset], DEVICE_ADDR_TABLE_LOC1, SIR_REJECT)) {
         s->ibi_data.ibi_queue_status = FIELD_DP32(s->ibi_data.ibi_queue_status,
                                                   IBI_QUEUE_STATUS,
@@ -915,6 +923,15 @@ static void dw_i3c_reset(DeviceState *dev)
     trace_dw_i3c_reset(s->cfg.id);
 
     memcpy(s->regs, dw_i3c_resets, sizeof(s->regs));
+    /*
+     * The user config for these may differ from our resets array, set them
+     * manually.
+     */
+    ARRAY_FIELD_DP32(s->regs, DEVICE_ADDR_TABLE_POINTER, ADDR,
+                     s->cfg.dev_addr_table_pointer);
+    ARRAY_FIELD_DP32(s->regs, DEVICE_ADDR_TABLE_POINTER, DEPTH,
+                     s->cfg.dev_addr_table_depth);
+
     dw_i3c_cmd_queue_reset(s);
     dw_i3c_resp_queue_reset(s);
     dw_i3c_ibi_queue_reset(s);
@@ -1750,6 +1767,10 @@ static Property dw_i3c_properties[] = {
                       cfg.ibi_queue_capacity_bytes, 0x10),
     DEFINE_PROP_UINT8("num-addressable-devices", DWI3C,
                       cfg.num_addressable_devices, 8),
+    DEFINE_PROP_UINT16("dev-addr-table-pointer", DWI3C,
+                       cfg.dev_addr_table_pointer, 0x280),
+    DEFINE_PROP_UINT16("dev-addr-table-depth", DWI3C,
+                       cfg.dev_addr_table_depth, 0x08),
     DEFINE_PROP_END_OF_LIST(),
 };
 

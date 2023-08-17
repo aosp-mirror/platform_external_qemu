@@ -19,7 +19,11 @@
 #define TYPE_DW_I3C "dw.i3c"
 OBJECT_DECLARE_SIMPLE_TYPE(DWI3C, DW_I3C)
 
-#define DW_I3C_NR_REGS (0x300 >> 2)
+/*
+ * Sufficiently large enough to handle configurations with large device address
+ * tables.
+ */
+#define DW_I3C_NR_REGS (0x1000 >> 2)
 
 /* From datasheet. */
 #define DW_I3C_CMD_ATTR_TRANSFER_CMD 0
@@ -185,6 +189,8 @@ typedef struct DWI3C {
         uint16_t tx_rx_queue_capacity_bytes;
         uint8_t ibi_queue_capacity_bytes;
         uint8_t num_addressable_devices;
+        uint16_t dev_addr_table_pointer;
+        uint16_t dev_addr_table_depth;
     } cfg;
     uint32_t regs[DW_I3C_NR_REGS];
 } DWI3C;
