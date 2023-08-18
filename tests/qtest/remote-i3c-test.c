@@ -510,7 +510,7 @@ static void remote_i3c_ibi(const uint32_t *data, uint32_t len)
 
     ibi_req[0] = REMOTE_I3C_IBI;
     ibi_req[1] = TARGET_ADDR;
-    ibi_req[2] = 0; /* RnW = 0 to make this a target interrupt request. */
+    ibi_req[2] = 1; /* RnW = 1 to make this a target interrupt request. */
     len_le = htole32(len);
     memcpy(&ibi_req[3], &len_le, sizeof(len_le));
     memcpy(&ibi_req[7], data, len);
@@ -534,9 +534,9 @@ static void aspeed_i3c_read_ibi_and_verify(uint32_t i3c_base,
      */
     g_assert(ibi_buf_lvl == 1 + len);
     uint32_t ibi_status = readl(i3c_base + A_IBI_QUEUE_STATUS);
-    /* IBI_ID is target address << 1 | RnW bit (which is 0) */
+    /* IBI_ID is target address << 1 | RnW bit (which is 1) */
     g_assert(FIELD_EX32(ibi_status, IBI_QUEUE_STATUS, IBI_ID) ==
-             (TARGET_ADDR << 1));
+             ((TARGET_ADDR << 1) | 1));
     /* IBI data length in the register is stored in bytes. */
     uint32_t ibi_data_len = FIELD_EX32(ibi_status, IBI_QUEUE_STATUS,
                                        IBI_DATA_LEN);
