@@ -240,7 +240,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .updateUIMultiDisplayPage =
                 [](uint32_t id) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
-                        win->updateUIMultiDisplayPage(id);
+                        win->runOnUiThread(
+                                [win, id]() { win->updateUIMultiDisplayPage(id); });
                     }
                 },
         .addMultiDisplayWindow =

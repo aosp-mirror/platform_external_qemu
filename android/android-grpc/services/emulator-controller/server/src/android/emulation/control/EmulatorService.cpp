@@ -1131,11 +1131,16 @@ public:
     }
 
     void deleteDisplay(int displayId) {
-        if (displayId != 0 &&
-            mAgents->multi_display->setMultiDisplay(displayId, -1, -1, 0, 0, 0,
-                                                    0, false) >= 0) {
-            mAgents->emu->updateUIMultiDisplayPage(displayId);
-        }
+        if (displayId == 0)
+            return;
+
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [displayId, this]() {
+                    if ( mAgents->multi_display->setMultiDisplay(displayId, -1, -1, 0, 0, 0,
+                                                                 0, false) >= 0) {
+                        mAgents->emu->updateUIMultiDisplayPage(displayId);
+                    }
+                });
     }
 
     Status setDisplayConfigurations(ServerContext* context,
@@ -1211,12 +1216,15 @@ public:
                 continue;
             }
 
-            // TODO(jansene): This can result in UI messages if invalid
-            // values are presented.
-            if (mAgents->multi_display->setMultiDisplay(
-                        display.display(), -1, -1, display.width(),
-                        display.height(), display.dpi(), display.flags(),
-                        true) < 0) {
+            int updated = -1;
+            android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                    [&updated, &display, this]() {
+                        updated = mAgents->multi_display->setMultiDisplay(
+                                display.display(), -1, -1, display.width(),
+                                display.height(), display.dpi(),
+                                display.flags(), true);
+                    });
+            if (updated < 0) {
                 // oh, oh, failure.
                 failureDisplay = display.display();
                 break;
@@ -1226,6 +1234,7 @@ public:
                          display.display(), display.width(), display.height(),
                          display.dpi(), display.flags());
             updatedDisplays.insert(display.display());
+
             mAgents->emu->updateUIMultiDisplayPage(display.display());
         }
 
@@ -1237,10 +1246,18 @@ public:
                 if (updatedDisplays.erase(display.display()) == 0) {
                     continue;
                 }
-                if (mAgents->multi_display->setMultiDisplay(
-                            display.display(), -1, -1, display.width(),
-                            display.height(), display.dpi(), display.flags(),
-                            true) >= 0) {
+                int updated = -1;
+                android::base::ThreadLooper::
+                        runOnMainLooperAndWaitForCompletion([&updated,
+                                                             &display,
+                                                             this]() {
+                            updated = mAgents->multi_display->setMultiDisplay(
+                                    display.display(), -1, -1, display.width(),
+                                    display.height(), display.dpi(),
+                                    display.flags(), true);
+                        });
+
+                if (updated >= 0) {
                     mAgents->emu->updateUIMultiDisplayPage(display.display());
                 };
             }
