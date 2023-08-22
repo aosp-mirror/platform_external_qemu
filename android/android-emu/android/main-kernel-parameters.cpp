@@ -63,7 +63,7 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
     // Disable apic timer check. b/33963880
     params.add("no_timer_check");
 
-    if (kernelVersion >= KERNEL_VERSION_5_10_103) {
+    if (kernelVersion >= KERNEL_VERSION_5_4_0) {
         params.add("8250.nr_uarts=1");  // disabled by default for security reasons
     }
 
