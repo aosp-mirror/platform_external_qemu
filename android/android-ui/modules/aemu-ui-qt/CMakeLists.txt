@@ -72,6 +72,7 @@ android_qt_lib(
        ext-page-cellular
        ext-page-cellular-grpc
        ext-page-display
+       ext-page-display-grpc
        ext-page-dpad
        ext-page-finger
        ext-page-finger-grpc

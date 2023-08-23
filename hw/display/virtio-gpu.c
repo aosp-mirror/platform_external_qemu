@@ -933,11 +933,9 @@ void virtio_gpu_process_cmdq(VirtIOGPU *g)
     while (!QTAILQ_EMPTY(&g->cmdq)) {
         cmd = QTAILQ_FIRST(&g->cmdq);
         /* process command */
-        qemu_rec_mutex_lock(&g->ctrl_return_lock);
         VIRGL(g, virtio_gpu_virgl_process_cmd, virtio_gpu_simple_process_cmd,
               g, cmd);
         if (cmd->waiting) {
-            qemu_rec_mutex_unlock(&g->ctrl_return_lock);
             break;
         }
         QTAILQ_REMOVE(&g->cmdq, cmd, next);
@@ -957,7 +955,6 @@ void virtio_gpu_process_cmdq(VirtIOGPU *g)
         } else {
             g_free(cmd);
         }
-        qemu_rec_mutex_unlock(&g->ctrl_return_lock);
     }
 }
 
@@ -1381,7 +1378,6 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
     QTAILQ_INIT(&g->reslist);
     QTAILQ_INIT(&g->cmdq);
     QTAILQ_INIT(&g->fenceq);
-    qemu_rec_mutex_init(&g->ctrl_return_lock);
 
     g->enabled_output_bitmask = 1;
     g->qdev = qdev;
@@ -1398,8 +1394,6 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
 static void virtio_gpu_device_unrealize(DeviceState *qdev, Error **errp)
 {
     VirtIOGPU *g = VIRTIO_GPU(qdev);
-
-    qemu_rec_mutex_destroy(&g->ctrl_return_lock);
 
     if (g->migration_blocker) {
         migrate_del_blocker(g->migration_blocker);

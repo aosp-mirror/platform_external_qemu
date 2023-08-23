@@ -54,7 +54,7 @@
 #include "android/skin/qt/extended-pages/help-page.h"
 #include "android/skin/qt/extended-pages/location-page.h"
 #include "android/skin/qt/extended-pages/microphone-page.h"
-#include "android/skin/qt/extended-pages/multi-display-page.h"
+#include "android/skin/qt/extended-pages/multi-display-page-grpc.h"
 #include "android/skin/qt/extended-pages/record-and-playback-page.h"
 #include "android/skin/qt/extended-pages/rotary-input-page.h"
 #include "android/skin/qt/extended-pages/settings-page.h"

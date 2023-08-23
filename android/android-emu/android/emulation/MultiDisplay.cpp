@@ -206,10 +206,6 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
         }
         return false;
     }
-    const bool needSwapWandH =
-            (mMultiDisplay[id].rotation == SKIN_ROTATION_90 ||
-             mMultiDisplay[id].rotation == SKIN_ROTATION_270);
-
     if (x) {
         *x = mMultiDisplay[id].pos_x;
     }
@@ -217,10 +213,10 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
         *y = mMultiDisplay[id].pos_y;
     }
     if (w) {
-        *w = needSwapWandH ? mMultiDisplay[id].height : mMultiDisplay[id].width;
+        *w = mMultiDisplay[id].originalWidth;
     }
     if (h) {
-        *h = needSwapWandH ? mMultiDisplay[id].width : mMultiDisplay[id].height;
+        *h = mMultiDisplay[id].originalHeight;
     }
     if (dpi) {
         *dpi = mMultiDisplay[id].dpi;
@@ -264,8 +260,6 @@ bool MultiDisplay::getNextMultiDisplay(int32_t start_id,
     if (i == mMultiDisplay.end()) {
         return false;
     } else {
-        const bool needSwapWandH = (i->second.rotation == SKIN_ROTATION_90 ||
-                                    i->second.rotation == SKIN_ROTATION_270);
         if (id) {
             *id = i->first;
         }
@@ -276,10 +270,10 @@ bool MultiDisplay::getNextMultiDisplay(int32_t start_id,
             *y = i->second.pos_y;
         }
         if (w) {
-            *w = needSwapWandH ? i->second.height : i->second.width;
+            *w = i->second.originalWidth;
         }
         if (h) {
-            *h = needSwapWandH ? i->second.width : i->second.height;
+            *h = i->second.originalHeight;
         }
         if (dpi) {
             *dpi = i->second.dpi;

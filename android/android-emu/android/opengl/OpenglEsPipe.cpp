@@ -412,12 +412,10 @@ public:
 
                     static constexpr android::base::System::Duration kBlockReportIntervalUs = 1000000ULL;
 
-                    auto currUs = android::base::System::get()->getHighResTimeUs();
 
                     const RenderChannel::Duration kBlockAtMostUs = 10000;
                     auto currTime = android::base::System::get()->getUnixTimeUs();
                     auto result = mChannel->readBefore(&mDataForReading, currTime + kBlockAtMostUs);
-                    auto nextUs = android::base::System::get()->getHighResTimeUs();
 
                     if (result != IoResult::Ok) {
                         DD("%s: tryRead() failed with %d", __func__, (int)result);
@@ -459,6 +457,10 @@ public:
         return len;
     }
 
+    virtual void waitGuestRecv() const override {
+        mChannel->waitUntilReadable();
+    }
+
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
                             int numBuffers,
                             void** newPipePtr) override {
@@ -493,6 +495,10 @@ public:
         }
 
         return count;
+    }
+
+    virtual void waitGuestSend() const override {
+        mChannel->waitUntilWritable();
     }
 
     virtual void onGuestWantWakeOn(int flags) override {

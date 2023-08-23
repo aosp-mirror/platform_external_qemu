@@ -26,6 +26,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef _MSC_VER
+typedef SSIZE_T ssize_t;
+#endif
+
 #include <memory>
 #include <string>
 
@@ -111,8 +115,8 @@ public:
 
     cuttlefish::FileInstance& operator*() { return *value_; }
 
-    int WriteAll(const std::string& buffer);
-    int ReadExact(std::string& buffer);
+    ssize_t WriteAll(const std::string& buffer);
+    ssize_t ReadExact(std::string& buffer);
 
     int getFd() const { return value_->getFd(); }
 
