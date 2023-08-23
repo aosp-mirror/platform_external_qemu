@@ -228,6 +228,7 @@ public:
 
     android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
+    bool isWindowMinimized() const { return mWindowIsMinimized; }
     ToolWindow* toolWindow() const;
     CarClusterWindow* carClusterWindow() const;
     CarClusterConnector* carClusterConnector() const;

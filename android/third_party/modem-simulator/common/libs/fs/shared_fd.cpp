@@ -101,11 +101,11 @@ void CheckMarked(fd_set* in_out_mask, SharedFDSet* in_out_set) {
     }
 }
 
-int ReadExact(SharedFD fd, std::string* buffer) {
+ssize_t ReadExact(SharedFD fd, std::string* buffer) {
     return fd.ReadExact(*buffer);
 }
 
-int SharedFD::ReadExact(std::string& buffer) {
+ssize_t SharedFD::ReadExact(std::string& buffer) {
     int socket = value_->fd_;
     auto buf = static_cast<char*>(buffer.data());
     size_t bufferLen = buffer.size();
@@ -133,11 +133,11 @@ int SharedFD::ReadExact(std::string& buffer) {
     }
 }
 
-int WriteAll(SharedFD fd, const std::string& buffer) {
+ssize_t WriteAll(SharedFD fd, const std::string& buffer) {
     return fd.WriteAll(buffer);
 }
 
-int SharedFD::WriteAll(const std::string& buffer) {
+ssize_t SharedFD::WriteAll(const std::string& buffer) {
     bool success = android::base::socketSendAll(value_->fd_, buffer.data(),
                                                 buffer.size());
     if (success) {

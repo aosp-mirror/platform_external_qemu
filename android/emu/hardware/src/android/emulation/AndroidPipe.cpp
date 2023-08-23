@@ -844,6 +844,14 @@ int android_pipe_guest_recv(void* internalPipe,
     return pipe->onGuestRecv(buffers, numBuffers);
 }
 
+void android_pipe_wait_guest_recv(void* internalPipe) {
+    CHECK_VM_STATE_LOCK();
+    auto pipe = static_cast<AndroidPipe*>(internalPipe);
+    VmLock::get()->unlock();
+    pipe->waitGuestRecv();
+    VmLock::get()->lock();
+}
+
 int android_pipe_guest_send(void** internalPipe,
                             const AndroidPipeBuffer* buffers,
                             int numBuffers) {
@@ -852,6 +860,14 @@ int android_pipe_guest_send(void** internalPipe,
     // Note that pipe may be deleted during this call, so it's not safe to
     // access pipe after this point.
     return pipe->onGuestSend(buffers, numBuffers, internalPipe);
+}
+
+void android_pipe_wait_guest_send(void* internalPipe) {
+    CHECK_VM_STATE_LOCK();
+    auto pipe = static_cast<AndroidPipe*>(internalPipe);
+    VmLock::get()->unlock();
+    pipe->waitGuestSend();
+    VmLock::get()->lock();
 }
 
 void android_pipe_guest_wake_on(void* internalPipe, unsigned wakes) {

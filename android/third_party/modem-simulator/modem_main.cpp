@@ -28,6 +28,7 @@
 #include "android/utils/system.h"
 #include "android/utils/timezone.h"
 // from cuttlefish modem-simulator library
+#include "common/libs/fs/shared_select.h"
 #include "modem_simulator.h"
 
 // Conflicts with Log.h
@@ -475,7 +476,7 @@ int start_android_modem_simulator_detached(int modem_simulator_port,
             auto modem_simulator =
                     std::make_shared<cuttlefish::ModemSimulator>(modem_id);
             auto channel_monitor = std::make_unique<cuttlefish::ChannelMonitor>(
-                    modem_simulator.get(), fd);
+                    *(modem_simulator.get()), fd);
 
             if (s_channel_monitor == nullptr) {
                 s_channel_monitor = channel_monitor.get();
