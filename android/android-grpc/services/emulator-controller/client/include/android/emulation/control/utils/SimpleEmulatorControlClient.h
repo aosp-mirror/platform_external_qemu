@@ -31,7 +31,9 @@ using ::google::protobuf::Empty;
 
 template <typename T>
 using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
-
+using OnFinished = std::function<void(absl::Status)>;
+template <typename T>
+using OnEvent = std::function<void(const T*)>;
 /**
  * @brief A client for interacting with the Snapshot Service.
  *
@@ -56,13 +58,13 @@ public:
     void setBattery(BatteryState state, OnCompleted<Empty> onDone);
 
     /**
-     * @brief Asynchronously gets an individual screenshot in the desired format.
+     * @brief Asynchronously gets an individual screenshot in the desired
+     * format.
      *
      * @param format The desired image format.
      * @param onDone The callback to be invoked when the operation completes.
      */
     void getScreenshot(ImageFormat format, OnCompleted<Image> onDone);
-
 
     /**
      * @brief Asynchronously gets status of the emulator
@@ -77,6 +79,25 @@ public:
      * @param onDone The callback to be invoked when the operation completes.
      */
     void sendFingerprint(Fingerprint finger, OnCompleted<Empty> onDone);
+
+    /**
+     * @brief Asynchronously gets the display configuration of the emulator
+     *
+     * @param onDone The callback to be invoked when the operation completes.
+     */
+    void getDisplayConfigurations(OnCompleted<DisplayConfigurations> onDone);
+
+    /**
+     * @brief Asynchronously sets the display configuration of the emulator
+     * @param state The display configuration to set
+     * @param onDone The callback to be invoked when the operation completes.
+     */
+    void setDisplayConfigurations(DisplayConfigurations state,
+                                  OnCompleted<DisplayConfigurations> onDone);
+
+    // Receive notifications from the emulator
+    void receiveEmulatorNotificationEvents(OnEvent<Notification> incoming,
+                                           OnFinished onDone);
 
     /**
      * Maps an `absl::StatusOr<T*>` to an `absl::StatusOr<T>`.
