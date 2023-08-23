@@ -373,10 +373,7 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
 // Linux when the window is re-shown. We know this show event is from being
 // un-minimized because the minimized button flag is present.
 #ifdef __linux__
-        Qt::WindowFlags flags = windowFlags();
-        if (flags & Qt::WindowMinimizeButtonHint) {
-            setWindowFlags(flags & ~Qt::WindowMinimizeButtonHint);
-
+        if (!mEmulatorWindow->isWindowMinimized()) {
             // Changing window flags requires re-showing this window to ensure
             // the flags are appropriately changed.
             showNormal();
@@ -385,10 +382,15 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
             // may not happen for a minute (when the clock changes), so force a
             // redraw after re-showing the window.
             mEmulatorWindow->queueSkinEvent(createSkinEvent(kEventForceRedraw));
+            mEmulatorWindow->toolWindow()->show();
+            mEmulatorWindow->toolWindow()->dockMainWindow();
         }
-#endif  // __linux__
+
+#else   // __linux__
+
         mEmulatorWindow->toolWindow()->show();
         mEmulatorWindow->toolWindow()->dockMainWindow();
+#endif  // !__linux__
         if (mModalOverlay) {
             mModalOverlay->showNormal();
         }
