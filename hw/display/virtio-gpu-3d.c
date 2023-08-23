@@ -974,10 +974,6 @@ stream_renderer_aio_cb(void *opaque)
     uint32_t signaled_ctx_specific = fence_data.flags &
                                      STREAM_RENDERER_FLAG_FENCE_RING_IDX;
 
-    // TODO(joshuaduong): In theory, we shouldn't need ctrl_return_lock because we schedule this
-    // callback on the main thread. But somehow CtsGraphicsTestCases are hanging without this lock.
-    // Need to figure out the cause and remove this lock if possible.
-    qemu_rec_mutex_lock(&g->ctrl_return_lock);
     QTAILQ_FOREACH_SAFE(cmd, &g->fenceq, next, tmp) {
         /*
          * Due to context specific timelines.
@@ -1005,7 +1001,6 @@ stream_renderer_aio_cb(void *opaque)
     }
 
     g_free(data);
-    qemu_rec_mutex_lock(&g->ctrl_return_lock);
 }
 
 static void stream_renderer_write_fence(void* opaque,
