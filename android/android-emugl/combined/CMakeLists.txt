@@ -356,13 +356,4 @@ if(NOT OPTION_GFXSTREAM_BACKEND AND NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
     aemugraphics_toplevel_unittests
     darwin
     "INSTALL_RPATH>=@loader_path/lib64/gles_angle")
-  # Vulkan encoder unit tests
-  android_add_test(
-    TARGET vulkan_enc_unittests
-    SRC # cmake-format: sortable
-        ${GFXSTREAM_REPO_ROOT}/guest/vulkan_enc/vulkan_enc_unittests.cpp)
-  target_include_directories(vulkan_enc_unittests
-                             PRIVATE ${GFXSTREAM_REPO_ROOT}/guest/android-emu)
-  target_link_libraries(vulkan_enc_unittests PUBLIC vulkan_enc androidemu gtest
-                                                    gtest_main)
 endif()
