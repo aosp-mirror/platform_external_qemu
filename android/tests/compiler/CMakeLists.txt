@@ -19,5 +19,5 @@ target_include_directories(
           ${ANDROID_AUTOGEN}/tcg)
 
 target_link_libraries(win_clang_unittests PRIVATE android-qemu-deps gmock_main
-                                                  GLIB2::GLIB2)
+                                                  glib2)
 target_compile_definitions(win_clang_unittests PRIVATE -DNEED_CPU_H)

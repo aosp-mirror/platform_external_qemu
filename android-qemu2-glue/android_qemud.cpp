@@ -15,6 +15,7 @@
 #include "android/hw-qemud.h"
 #include "android-qemu2-glue/utils/stream.h"
 
+#include <glib.h>
 extern "C" {
 #include "qemu/osdep.h"
 #include "qemu-common.h"

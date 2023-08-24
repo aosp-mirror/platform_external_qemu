@@ -606,9 +606,9 @@ android_target_compile_definitions(
     "-DNTDDI_VERSION=NTDDI_WIN10_RS2"
     "-D_WIN32_WINNT=_WIN32_WINNT_WIN10")
 
-android_target_link_libraries(libchrome linux-x86_64 PRIVATE GLIB2::GLIB2
+android_target_link_libraries(libchrome linux-x86_64 PRIVATE glib2
                                                              symbolize libevent)
-android_target_link_libraries(libchrome linux-aarch64 PRIVATE GLIB2::GLIB2
+android_target_link_libraries(libchrome linux-aarch64 PRIVATE glib2
                                                              symbolize libevent -ldl)
 
 android_target_link_libraries(

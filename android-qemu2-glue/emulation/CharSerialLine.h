@@ -13,6 +13,8 @@
 
 #include "aemu/base/Compiler.h"
 #include "android/emulation/SerialLine.h"
+#include <glib.h>
+
 extern "C" {
   #include "qemu/osdep.h"
   #include "chardev/char-fe.h"

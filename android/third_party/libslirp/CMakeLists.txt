@@ -52,7 +52,7 @@ android_add_library(
   DARWIN ${LIB_SLIRP_ROOT}/src/ip_icmp_ping.c)
 
 target_link_libraries(
-  libslirp PUBLIC GLIB2::GLIB2)
+  libslirp PUBLIC glib2)
 
 android_target_link_libraries(
   libslirp windows PUBLIC ws2_32::ws2_32 iphlpapi::iphlpapi)

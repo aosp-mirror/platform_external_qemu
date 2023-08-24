@@ -1,6 +1,7 @@
+#include <glib.h>
+
 extern "C" {
 #include "compiler_tests.h"
-#include <glib.h>
 #include <glib/gprintf.h>
 }
 #include "gtest/gtest.h"
