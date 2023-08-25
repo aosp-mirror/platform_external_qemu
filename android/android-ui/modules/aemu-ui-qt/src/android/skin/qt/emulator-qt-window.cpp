@@ -2602,7 +2602,7 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
                 break;
         }
     }
-    setDisplayRegion(0, 0, backingSize.width(), backingSize.height());
+    setDisplayRegionAndUpdate(0, 0, backingSize.width(), backingSize.height());
     simulateSetScale(std::max(.2, (double)scale));
     QRect containerGeo = mContainer.geometry();
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(),
