@@ -175,7 +175,8 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
                                       "com.android.emulator.multidisplay.START",
                                       "-n",
                                       "com.android.emulator.multidisplay/"
-                                      ".MultiDisplayServiceReceiver"});
+                                      ".MultiDisplayServiceReceiver",
+                                      "--user 0"});
 
         MultiDisplayPipe* pipe = MultiDisplayPipe::getInstance();
         if (pipe) {
