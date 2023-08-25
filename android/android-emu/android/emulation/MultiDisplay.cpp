@@ -297,6 +297,17 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
         *displayId = 0;
         return true;
     }
+
+    if (android_foldable_is_pixel_fold()) {
+        if (android_foldable_is_folded()) {
+            *displayId = android_foldable_pixel_fold_second_display_id();
+        } else {
+            constexpr int primary_display_id = 0;
+            *displayId = primary_display_id;
+        }
+        return true;
+    }
+
     bool isPortrait = true;
     bool isNormalOrder = true;
     SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
@@ -610,6 +621,18 @@ void MultiDisplay::performRotation(int rot) {
 }
 
 void MultiDisplay::performRotationLocked(int mOrientation) {
+
+    if (android_foldable_is_pixel_fold()) {
+        mMultiDisplay[0].pos_x = 0;
+        mMultiDisplay[0].pos_y = 0;
+        mMultiDisplay[0].rotation = mOrientation;
+
+        mMultiDisplay[6].pos_x = 0;
+        mMultiDisplay[6].pos_y = 0;
+        mMultiDisplay[6].rotation = mOrientation;
+        return;
+    }
+
     const bool pileUp = (mOrientation == SKIN_ROTATION_90 ||
                          mOrientation == SKIN_ROTATION_270);
     const bool normalOrder = (mOrientation == SKIN_ROTATION_0 ||
@@ -806,10 +829,22 @@ bool MultiDisplay::notifyDisplayChanges() {
 void MultiDisplay::getCombinedDisplaySizeLocked(uint32_t* w, uint32_t* h) {
     uint32_t total_h = 0;
     uint32_t total_w = 0;
-    for (const auto& iter : mMultiDisplay) {
-        if (iter.first == 0 || iter.second.cb != 0) {
-            total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
-            total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+    if (android_foldable_is_pixel_fold()) {
+        constexpr int primary_display_id = 0;
+        const int secondary_display_id = android_foldable_pixel_fold_second_display_id();
+        if (android_foldable_is_folded()) {
+            total_w = mMultiDisplay[secondary_display_id].width;
+            total_h = mMultiDisplay[secondary_display_id].height;
+        } else {
+            total_w = mMultiDisplay[primary_display_id].width;
+            total_h = mMultiDisplay[primary_display_id].height;
+        }
+    } else {
+        for (const auto& iter : mMultiDisplay) {
+            if (iter.first == 0 || iter.second.cb != 0) {
+                total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
+                total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+            }
         }
     }
     if (h)
