@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -207,6 +207,7 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
         }
         return false;
     }
+
     if (x) {
         *x = mMultiDisplay[id].pos_x;
     }
@@ -214,10 +215,10 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
         *y = mMultiDisplay[id].pos_y;
     }
     if (w) {
-        *w = mMultiDisplay[id].originalWidth;
+        *w = mMultiDisplay[id].width;
     }
     if (h) {
-        *h = mMultiDisplay[id].originalHeight;
+        *h = mMultiDisplay[id].height;
     }
     if (dpi) {
         *dpi = mMultiDisplay[id].dpi;
@@ -271,10 +272,10 @@ bool MultiDisplay::getNextMultiDisplay(int32_t start_id,
             *y = i->second.pos_y;
         }
         if (w) {
-            *w = i->second.originalWidth;
+            *w = i->second.width;
         }
         if (h) {
-            *h = i->second.originalHeight;
+            *h = i->second.height;
         }
         if (dpi) {
             *dpi = i->second.dpi;
