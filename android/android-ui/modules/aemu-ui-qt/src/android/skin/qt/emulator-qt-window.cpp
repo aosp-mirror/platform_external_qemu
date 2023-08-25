@@ -3522,7 +3522,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     queueSkinEvent(event);
 
     const bool not_pixel_fold = !android_foldable_is_pixel_fold();
-    if (not_pixel_fold && android_foldable_is_folded()) {
+    if (android_foldable_is_folded()) {
         resizeAndChangeAspectRatio(true);
     }
 
@@ -3533,7 +3533,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
         }
     }
 
-    if (mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled()) {
+    if (not_pixel_fold && mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled()) {
         {
             uint32_t w = 0;
             uint32_t h = 0;
