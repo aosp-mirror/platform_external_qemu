@@ -109,7 +109,8 @@ void PostWorker::postImpl(HandleType cbHandle) {
     float dx = px * fx;
     float dy = py * fy;
 
-    if (emugl::get_emugl_multi_display_operations().isMultiDisplayEnabled()) {
+    const bool not_pixel_fold = !(emugl::get_emugl_multi_display_operations().isPixelFold());
+    if (not_pixel_fold && emugl::get_emugl_multi_display_operations().isMultiDisplayEnabled()) {
         if (emugl::get_emugl_multi_display_operations().isMultiDisplayWindow()) {
             uint32_t start_id = 0, id, c;
             bool paintMultiDisplayWindow = false;
@@ -131,7 +132,6 @@ void PostWorker::postImpl(HandleType cbHandle) {
             cb->postWithOverlay(zRot, dx, dy);
         }
         else {
-            const bool is_pixel_fold = emugl::get_emugl_multi_display_operations().isPixelFold();
             uint32_t combinedW, combinedH;
             emugl::get_emugl_multi_display_operations().getCombinedDisplaySize(&combinedW, &combinedH);
             mFb->getTextureDraw()->prepareForDrawLayer();
@@ -149,21 +149,6 @@ void PostWorker::postImpl(HandleType cbHandle) {
                 if (multiDisplayCb == nullptr) {
                     start_id = id;
                     continue;
-                }
-                if (is_pixel_fold) {
-                    if (emugl::get_emugl_window_operations().isFolded()) {
-                        // folded, ignore the primary display
-                        if (id == 0) {
-                            start_id = id;
-                            continue;
-                        }
-                    } else {
-                        // unfolded, ignore the second display
-                        if (id > 0) {
-                            start_id = id;
-                            continue;
-                        }
-                    }
                 }
                 switch ((int)zRot / 90) {
                     case 1:
