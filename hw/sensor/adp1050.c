@@ -9,6 +9,7 @@
 #include "hw/i2c/pmbus_device.h"
 #include "migration/vmstate.h"
 #include "qapi/error.h"
+#include "qapi/visitor.h"
 #include "qemu/log.h"
 
 #define TYPE_ADP1050 "adp1050"
@@ -47,6 +48,45 @@ static void adp1050_exit_reset(Object *obj)
     pmdev->pages[0].operation = DEFAULT_OPERATION;
 }
 
+static void adp1050_get(Object *obj, Visitor *v, const char *name, void *opaque,
+                        Error **errp)
+{
+    uint32_t value;
+    PMBusDevice *pmdev = PMBUS_DEVICE(obj);
+    PMBusVoutMode *mode = (PMBusVoutMode *)&pmdev->pages[0].vout_mode;
+
+    if (strcmp(name, "vout") == 0) {
+        value = pmbus_linear_mode2data(*(uint16_t *)opaque, mode->exp);
+    } else {
+        value = *(uint16_t *)opaque;
+    }
+
+    value *= 1000; /* use milliunits for qmp */
+    visit_type_uint32(v, name, &value, errp);
+}
+
+static void adp1050_set(Object *obj, Visitor *v, const char *name, void *opaque,
+                        Error **errp)
+{
+    uint16_t *internal = opaque;
+    uint32_t value;
+    PMBusDevice *pmdev = PMBUS_DEVICE(obj);
+    PMBusVoutMode *mode = (PMBusVoutMode *)&pmdev->pages[0].vout_mode;
+
+    if (!visit_type_uint32(v, name, &value, errp)) {
+        return;
+    }
+
+    /* use milliunits for qmp */
+    value /= 1000;
+    if (strcmp(name, "vout") == 0) {
+        *internal = pmbus_data2linear_mode(value, mode->exp);
+    } else {
+        *internal = value;
+    }
+    pmbus_check_limits(pmdev);
+}
+
 static const VMStateDescription vmstate_adp1050 = {
     .name = TYPE_ADP1050,
     .version_id = 0,
@@ -64,6 +104,14 @@ static void adp1050_init(Object *obj)
                          PB_HAS_IIN | PB_HAS_TEMPERATURE | PB_HAS_MFR_INFO;
 
     pmbus_page_config(pmdev, 0, psu_flags);
+    object_property_add(obj, "vin", "uint32", adp1050_get, adp1050_set,
+                        NULL, &pmdev->pages[0].read_vin);
+    object_property_add(obj, "iin", "uint32", adp1050_get, adp1050_set,
+                        NULL, &pmdev->pages[0].read_iin);
+    object_property_add(obj, "vout", "uint32", adp1050_get, adp1050_set,
+                        NULL, &pmdev->pages[0].read_vout);
+    object_property_add(obj, "temperature", "uint32", adp1050_get, adp1050_set,
+                        NULL, &pmdev->pages[0].read_temperature_1);
 }
 
 static void adp1050_class_init(ObjectClass *klass, void *data)
