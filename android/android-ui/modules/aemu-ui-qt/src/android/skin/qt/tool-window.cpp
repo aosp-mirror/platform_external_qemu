@@ -885,10 +885,8 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
                         break;
                     default:;
                 }
-                const bool is_pixel_fold = android_foldable_is_pixel_fold();
-                if (is_pixel_fold) {
-                    mEmulatorWindow->resizeAndChangeAspectRatio(android_foldable_is_folded());
-                } else {
+                const bool not_pixel_fold = !android_foldable_is_pixel_fold();
+                if (not_pixel_fold) {
                     if (android_foldable_is_folded()) {
                         int xOffset, yOffset, width, height;
                         if (android_foldable_get_folded_area(&xOffset, &yOffset,
