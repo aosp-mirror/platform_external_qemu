@@ -1,0 +1,78 @@
+// Copyright (C) 2022 The Android Open Source Project
+//
+// Licensed under the Apache License= ; Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing= ; software
+// distributed under the License is distributed on an "AS IS" BASIS= ;
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND= ; either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Note that if you add/remove methods in this file you must update
+// the metrics sql as well ./android/scripts/gen-grpc-sql.py
+//
+// Please group deleted methods in a block including the date (MM/DD/YY)
+// it was removed. This enables us to easily keep metrics around after removal
+//
+// List of deleted methods
+// rpc iWasDeleted (03/12/12)
+// ...
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.android.emulation.control.incubating";
+
+package android.emulation.control.incubating;
+import "google/protobuf/empty.proto";
+
+// The AvdService can be used to inspect and retrieve general
+// information about the running avd
+service AvdService {
+    // Get general information about the running avd.
+    rpc getAvdInfo(google.protobuf.Empty) returns (AvdInfo);
+}
+
+message AvdInfo {
+    enum AVD_FLAVOR {
+        AVD_FLAVOR_UNSPECIFIED = 0;
+        AVD_FLAVOR_PHONE = 1;
+        AVD_FLAVOR_TV = 2;
+        AVD_FLAVOR_WEAR = 3;
+        AVD_FLAVOR_ANDROID_AUTO = 4;
+        AVD_FLAVOR_DESKTOP = 5;
+        AVD_FLAVOR_OTHER = 255;
+    };
+
+    // The name of the Android Virtual Device
+    string name = 1;
+    // The device ID, which can be different from the AVD name
+    // depending on multiple instances or the specific use case.
+    string id = 2;
+    // Return the target API level for this AVD.
+    // Note: This can be some ridiculously large
+    // value (e.g. 1000) if this value cannot be properly
+    // determined (e.g. you're using an AVD from a preview SDK)
+    int32 api_level = 3;
+    // Return the target string originated from rootIni.
+    string target = 4;
+    // the "dessert name" associated with the API level
+    string desert = 5;
+    // Return the full version name associated with the API level
+    string full_api_name = 6;
+    // True if the avd is on google api
+    bool google_apis = 7;
+    // True if the AVD is a user build.
+    bool user_build = 8;
+    // true if the AVD is an Automated Test Device.
+    bool atd = 9;
+    // The flavor of this avd
+    AVD_FLAVOR flavor = 10;
+    // Maximum number of supported multi display entries in an avd.
+    int32 max_display_entries = 11;
+    // The target CPU architecture for this AVD.
+    string target_cpu_arch = 12;
+}
