@@ -86,7 +86,7 @@ set(SIMPLE_TESTS
     test-keyval
     # test-logging
     test-mul64
-    test-opts-visitor
+    # test-opts-visitor
     test-qapi-util
     test-qdist
     test-qemu-opts

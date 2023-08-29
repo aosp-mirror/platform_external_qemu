@@ -11,7 +11,7 @@
 */
 
 #pragma once
-
+#include <glib.h>
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>

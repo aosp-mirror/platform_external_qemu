@@ -21,7 +21,7 @@ target_link_libraries(
          android-emu-net
   PRIVATE
          libslirp
-         GLIB2::GLIB2
+         glib2
          ssl
          hostapd
          android-emu-base-headers)
