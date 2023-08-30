@@ -25,6 +25,8 @@
 #include "android/base/system/System.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/Uploader.h"
+#include "base/files/file_path.h"
+#include "client/annotation.h"
 #include "client/crash_report_database.h"
 #include "client/settings.h"
 #include "common/using_std_string.h"
@@ -37,6 +39,7 @@
 #include "processor/simple_symbol_supplier.h"
 #include "processor/stackwalk_common.h"
 #include "snapshot/minidump/process_snapshot_minidump.h"
+#include "tools/tool_support.h"
 #include "util/file/file_io.h"
 #include "util/file/file_reader.h"
 #include "util/misc/uuid.h"
@@ -140,6 +143,71 @@ bool PrintMinidumpProcess(const Options& options) {
     } else {
         PrintProcessState(process_state, options.output_stack_contents,
                           /*output_requesting_thread_only=*/false, &resolver);
+    }
+
+    FileReader reader;
+    if (!reader.Open(base::FilePath(
+                crashpad::ToolSupport::CommandLineArgumentToFilePathStringType(
+                        options.minidump_file)))) {
+        // Very unlikely we've already read the file before
+        fprintf(stderr, "Minidump %s could not be read", dump.path().c_str());
+        return false;
+    }
+
+    // Next we are going to dump the annotations
+    ProcessSnapshotMinidump snapshot;
+    if (!snapshot.Initialize(&reader)) {
+        fprintf(stderr, "Failed to initialize annotation parser");
+        return false;
+    }
+
+    for (const crashpad::ModuleSnapshot* module : snapshot.Modules()) {
+        // Let's not print empty records
+        if (module->AnnotationsSimpleMap().size() == 0 &&
+            module->AnnotationsVector().size() == 0 &&
+            module->AnnotationObjects().size() == 0) {
+            continue;
+        }
+
+        printf("Module: %s\n", module->Name().c_str());
+        if (module->AnnotationsSimpleMap().size() > 0) {
+            printf("  Simple Annotations\n");
+            for (const auto& kv : module->AnnotationsSimpleMap()) {
+                printf("    simple_annotations[\"%s\"] = %s\n",
+                       kv.first.c_str(), kv.second.c_str());
+            }
+        }
+
+        if (module->AnnotationsVector().size() > 0) {
+            printf("  Vectored Annotations\n");
+            int index = 0;
+            for (const std::string& annotation : module->AnnotationsVector()) {
+                printf("    vectored_annotations[%d] = %s\n", index,
+                       annotation.c_str());
+                index++;
+            }
+        }
+
+        if (module->AnnotationObjects().size() > 0) {
+            printf("  Annotation Objects\n");
+            for (const crashpad::AnnotationSnapshot& annotation :
+                 module->AnnotationObjects()) {
+                printf("    annotation_objects[\"%s\"] = ",
+                       annotation.name.c_str());
+                if (annotation.type !=
+                    static_cast<uint16_t>(
+                            crashpad::Annotation::Type::kString)) {
+                    printf("<non-string value, not printing>\n");
+                    continue;
+                }
+
+                std::string value(
+                        reinterpret_cast<const char*>(annotation.value.data()),
+                        annotation.value.size());
+
+                printf("%s\n", value.c_str());
+            }
+        }
     }
 
     return true;
