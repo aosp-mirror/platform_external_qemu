@@ -75,10 +75,6 @@ public:
     // |replace| - replace all the data with the same name instead of appending
     void attachData(std::string name, std::string data, bool replace = false);
 
-    // Same as attachData, but for binary data, so there is no text processing.
-    void attachBinaryData(std::string name,
-                          std::string data,
-                          bool replace = true);
 
     // To make it easier to diagnose general issues,
     // have a function to append to the dump message file

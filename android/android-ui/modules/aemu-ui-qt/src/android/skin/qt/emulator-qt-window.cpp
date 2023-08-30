@@ -1665,7 +1665,7 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
         }
 
         // pass the QEMU main thread's arguments into the crash handler
-        std::string arguments = "===== QEMU main loop arguments =====\n";
+        std::string arguments = "";
         for (int i = 0; i < argc; ++i) {
             // Check for null in argv
             if (!argv[i]) {
