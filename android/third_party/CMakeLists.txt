@@ -18,6 +18,8 @@ if(CROSSCOMPILE)
   set(OPTION_ASTC_TESTS OFF CACHE BOOL "No tests astc when cross-compiling"
                                   FORCE)
 endif()
+
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../glib/glib glib)
 # Include astc-codec as a subproject.
 
 # astc-codec defines CMAKE_CXX_STANDARD=11, which won't work with msvc. We did

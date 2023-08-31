@@ -39,6 +39,76 @@ from aemu.proto.ui_controller_service_pb2_grpc import UiControllerStub
 from aemu.proto.waterfall_pb2_grpc import WaterfallStub
 
 
+def _safe_kill(process: psutil.Process) -> bool:
+    """Tries to kill the given process
+
+    Args:
+        process (psutil.Process): The process to be terminated
+
+    Returns:
+        bool: True if the process is no longer alive.
+    """
+    status = psutil.STATUS_DEAD
+    try:
+        status = process.status()
+        process.name()  # Retrieve name if possible.
+    except Exception as e:
+        # Process has left, or we might have been unable to get additional info.
+        logging.debug("Unable to get status, process dead? %s", e)
+
+    if status == psutil.STATUS_ZOMBIE:
+        # confirm that the zombie process has been reaped
+        try:
+            # the process is a zombie, so we need to wait for the parent to reap it
+            parent_pid = process.ppid()
+            parent = psutil.Process(parent_pid)
+
+            # wait for the parent to reap the zombie process
+            parent.wait(timeout=1)
+        except Exception as err:
+            # well, well, well.. Someone just disappeared on us..
+            # or we failed to wait out the reaping. It will get
+            # cleaned up later on
+            logging.info("Failed to reap zombie, ignoring %s", err)
+
+        if not psutil.pid_exists(process.pid):
+            logging.info("Process %s has been reaped.", process)
+
+    # Step 1, be nice.
+    try:
+        logging.debug("Terminate %s", process)
+        process.terminate()
+    except Exception as e:
+        # Process might be gone, or we could not send terminate.
+        logging.debug("Failed to terminate %s due to %s", process, e)
+
+    try:
+        process.wait(timeout=3)
+    except psutil.TimeoutExpired:
+        logging.debug("Force kill %s", process)
+        process.kill()
+
+    if not psutil.pid_exists(process.pid):
+        logging.info("Successfully terminated: %s", process)
+
+    return not psutil.pid_exists(process.pid)
+
+
+def _kill_process_tree(process: psutil.Process) -> None:
+    """
+    Kills the process tree rooted at the given process.
+
+    Args:
+        process: The root process of the process tree to kill.
+    """
+    children = process.children()
+    for child in children:
+        logging.debug("Found child %s, terminating..", child)
+        _kill_process_tree(child)
+
+    _safe_kill(process)
+
+
 class BasicEmulatorDescription(dict):
     """A description of an emulator you can connect to using gRPC."""
 
@@ -275,7 +345,7 @@ class EmulatorDescription(BasicEmulatorDescription):
             logging.error(
                 "Emulator did not shutdown gracefully, terminating. (%s)", expired
             )
-            proc.terminate()
+            _kill_process_tree(proc)
 
         return not self.is_alive()
 
