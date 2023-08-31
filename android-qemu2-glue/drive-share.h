@@ -13,6 +13,7 @@
 
 #include "android/utils/compiler.h"
 #include "android/avd/info.h"
+#include <glib.h>
 
 ANDROID_BEGIN_HEADER
 
