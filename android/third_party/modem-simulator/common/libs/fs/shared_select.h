@@ -69,6 +69,8 @@ int Select(SharedFDSet* read_set,
            SharedFDSet* error_set,
            struct timeval* timeout);
 
+/* changed to ssize_t from int */
+
 ssize_t ReadExact(SharedFD fd, std::string* buffer);
 ssize_t WriteAll(SharedFD fd, const std::string& buffer);
 }  // namespace cuttlefish
