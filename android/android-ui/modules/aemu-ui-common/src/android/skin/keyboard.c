@@ -19,7 +19,7 @@
 #include "host-common/hw-config.h"
 #include "android/console.h"                         // for android_hw
 #include "host-common/feature_control.h"  // for feature_is_enabled
-#include "android/skin/android_keycodes.h"           // for KEY_APPSWITCH
+#include "android/skin/android_keycodes.h"           // for ANDROID_KEY_*
 #include "android/skin/charmap.h"                    // for skin_charmap_get...
 #include "android/skin/keycode-buffer.h"             // for skin_keycode_buf...
 #include "android/skin/keycode.h"                    // for skin_key_pair_to...
@@ -177,7 +177,7 @@ static int map_cros_key(int* code) {
     case LINUX_KEY_HOME:
         *code = LINUX_KEY_LEFTMETA;
         return 0;
-    case KEY_APPSWITCH:
+    case ANDROID_KEY_APPSWITCH:
         *code = LINUX_KEY_F5;
         return 0;
     case LINUX_KEY_GREEN:
@@ -354,7 +354,6 @@ void skin_keyboard_process_event(SkinKeyboard* kb, SkinEvent* ev, int down) {
         case kKeyCodeCapLeft:
         case kKeyCodeCapRight:
         case kKeyCodeSym:
-        case KEY_APPSWITCH:
         case LINUX_KEY_PLAYPAUSE:
         case LINUX_KEY_BACK:
         case LINUX_KEY_POWER:
@@ -371,10 +370,11 @@ void skin_keyboard_process_event(SkinKeyboard* kb, SkinEvent* ev, int down) {
         case LINUX_KEY_HEADSETHOOK:
         case LINUX_KEY_SEND:
         case LINUX_KEY_DELETE:
-        case KEY_STEM_1:
-        case KEY_STEM_2:
-        case KEY_STEM_3:
-        case KEY_STEM_PRIMARY:
+        case ANDROID_KEY_APPSWITCH:
+        case ANDROID_KEY_STEM_1:
+        case ANDROID_KEY_STEM_2:
+        case ANDROID_KEY_STEM_3:
+        case ANDROID_KEY_STEM_PRIMARY:
             skin_keyboard_add_key_event(kb, keycode, down);
             skin_keyboard_flush(kb);
             break;
