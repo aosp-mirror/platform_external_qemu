@@ -252,10 +252,19 @@ static void impl_skin_surface_get_scaled_rect(SkinSurface* surface,
     int original_w = surface->bitmap->size().width();
     int original_h = surface->bitmap->size().height();
 
+    if (w <= 0 || h <= 0) {
+        return;
+    }
+
     if (w == original_w && h == original_h) {
         to->pos = from->pos;
         to->size = from->size;
         return;
+    }
+
+    if (original_h <= 0 || original_w <= 0) {
+        original_w = w;
+        original_h = h;
     }
 
     to->pos.x = from->pos.x * w / original_w;
