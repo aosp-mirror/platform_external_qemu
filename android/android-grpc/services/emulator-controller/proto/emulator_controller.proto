@@ -789,7 +789,31 @@ message InputEvent {
         KeyboardEvent key_event = 1;
         TouchEvent touch_event = 2;
         MouseEvent mouse_event = 3;
+        AndroidEvent android_event = 4;
     }
+};
+
+// The android input event system is a framework for handling input from a
+// variety of devices by generating events that describe changes in the
+// state of the devices and forwarding them to user space applications.
+//
+// An AndroidEvents will be delivered directly to the kernel as is.
+message AndroidEvent {
+    // The type of the event. The types of the event are specified
+    // by the android kernel. Some examples are:
+    // EV_SYN, EV_KEY, EV_SW, etc..
+    // The exact definitions can be found in the input.h header file.
+    int32 type = 1;
+
+    // The actual code to be send to the kernel. The actual meaning
+    // of the code depends on the type definition.
+    int32 code = 2;
+
+    // The actual value of the event.
+    int32 value = 3;
+
+    // The display id associated with this input event.
+    int32 display = 4;
 };
 
 message Fingerprint {

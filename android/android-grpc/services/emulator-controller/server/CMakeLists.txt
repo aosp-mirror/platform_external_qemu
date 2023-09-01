@@ -7,6 +7,7 @@ android_add_library(
       android/emulation/control/camera/VirtualSceneCamera.cpp
       android/emulation/control/clipboard/Clipboard.cpp
       android/emulation/control/EmulatorService.cpp
+      android/emulation/control/keyboard/AndroidEventSender.cpp
       android/emulation/control/keyboard/KeyEventSender.cpp
       android/emulation/control/keyboard/MouseEventSender.cpp
       android/emulation/control/keyboard/TouchEventSender.cpp
