@@ -265,7 +265,7 @@ public:
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
     void panHorizontal(bool left);
     void panVertical(bool up);
-    SkinEvent* createSkinEvent(SkinEventType type);
+    static SkinEvent* createSkinEvent(SkinEventType type);
     void queueSkinEvent(SkinEvent* event);
     void recenterFocusPoint();
     void saveZoomPoints(const QPoint& focus, const QPoint& viewportFocus);
