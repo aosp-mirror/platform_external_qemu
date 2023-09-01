@@ -809,16 +809,16 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
             forwardKeyToEmulator(LINUX_KEY_BACK, down);
             break;
         case QtUICommand::OVERVIEW:
-            forwardKeyToEmulator(KEY_APPSWITCH, down);
+            forwardKeyToEmulator(ANDROID_KEY_APPSWITCH, down);
             break;
         case QtUICommand::WEAR_1:
-            forwardKeyToEmulator(KEY_HOME, down);
+            forwardKeyToEmulator(LINUX_KEY_HOME, down);
             break;
         case QtUICommand::WEAR_2:
-            forwardKeyToEmulator(KEY_POWER, down);
+            forwardKeyToEmulator(LINUX_KEY_POWER, down);
             break;
         case QtUICommand::PALM:
-            forwardKeyToEmulator(KEY_SLEEP, down);
+            forwardKeyToEmulator(LINUX_KEY_SLEEP, down);
             break;
         case QtUICommand::TILT:
             if (down) {

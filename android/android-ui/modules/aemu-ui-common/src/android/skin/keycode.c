@@ -152,7 +152,7 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     _KEYSYM1_ANDROID_(APPSWITCH)
 
 #define _KEYSYM_(x, y) {LINUX_KEY_##x, #y},
-#define _KEYSYM_ANDROID_(x, y) {KEY_##x, #y},
+#define _KEYSYM_ANDROID_(x, y) {ANDROID_KEY_##x, #y},
 static const struct { int  _sym; const char*  _str; }  keysym_names[] =
 {
     _KEYSYM_LIST
