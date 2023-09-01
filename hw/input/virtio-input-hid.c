@@ -91,33 +91,23 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
     VirtIOInputHID *vhid = VIRTIO_INPUT_HID(dev);
     VirtIOInput *vinput = VIRTIO_INPUT(dev);
     virtio_input_event event;
-    int linux_keycode;
-    InputKeyEvent *key;
     InputMoveEvent *move;
     InputBtnEvent *btn;
 
     switch (evt->type) {
-    case INPUT_EVENT_KIND_KEY:
-        key = evt->u.key.data;
-        // On AEMU (Android Emulator), we get the keycode from Qt
-        // where we already converted it to a linux keycode.
-        // That means |linux_keycode| (previously |qcode|)
-        // here is a linux keycode already.
-        linux_keycode = qemu_input_key_value_to_qcode(key->key);
-        // On AEMU (Android Emulator), certain keycodes such as
-        // ANDROID_KEY_APPSWITCH is unmapped in qemu_input_map_linux_to_qcode.
-        // Thus, we skip the mapping check.
-
-        if (linux_keycode < qemu_input_map_linux_to_qcode_len) {
-            event.type = cpu_to_le16(EV_KEY);
-            event.code = cpu_to_le16(linux_keycode);
-            event.value = cpu_to_le32(key->down ? 1 : 0);
-            virtio_input_send(vinput, &event);
-        } else {
-            if (key->down) {
-                D("%s: out of bounds key: %d [%s]", __func__, linux_keycode,
-                  KeyCode_str(linux_keycode));
-           }
+    case INPUT_EVENT_KIND_KEY: {
+            const InputKeyEvent *key = evt->u.key.data;
+            const int qcode = qemu_input_key_value_to_qcode(key->key);
+            if (qcode != Q_KEY_CODE_UNMAPPED) {
+                event.type = cpu_to_le16(EV_KEY);
+                event.code = cpu_to_le16(qcode);
+                event.value = cpu_to_le32(key->down ? 1 : 0);
+                virtio_input_send(vinput, &event);
+            } else {
+                if (key->down) {
+                    D("%s: unmapped key: [%s]", __func__, KeyCode_str(key->key));
+               }
+            }
         }
         break;
     case INPUT_EVENT_KIND_BTN:
@@ -159,7 +149,7 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
         virtio_input_send(vinput, &event);
         break;
     default:
-        /* keep gcc happy */
+        D("%s: unexpected event type: %d", __func__, evt->type);
         break;
     }
 }
