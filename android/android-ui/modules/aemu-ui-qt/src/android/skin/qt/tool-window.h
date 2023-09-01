@@ -102,7 +102,7 @@ public:
         return &mShortcutKeyStore;
     }
 
-    bool handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source);
+    bool handleQtKeyEvent(const QKeyEvent& event, QtKeyEventSource source);
     void reportMouseButtonDown();
 
     bool isExtendedWindowFocused();
