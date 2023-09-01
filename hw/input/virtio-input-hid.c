@@ -291,8 +291,9 @@ static void virtio_keyboard_init(Object *obj)
     VirtIOInput *vinput = VIRTIO_INPUT(obj);
     vhid->handler = &virtio_keyboard_handler;
     virtio_input_init_config(vinput, virtio_keyboard_config);
+
     // Mandatory android keys. Reference hw/input/goldfish_events.c
-    const guint16 mandatory_android_keys[] = {
+    static const guint16 mandatory_android_keys[] = {
         LINUX_KEY_HOME, LINUX_KEY_BACK, LINUX_KEY_SEND, LINUX_KEY_END,
         LINUX_KEY_SOFT1, LINUX_KEY_VOLUMEUP, LINUX_KEY_VOLUMEDOWN,
         LINUX_KEY_SOFT2, LINUX_KEY_POWER, LINUX_KEY_SEARCH, LINUX_KEY_SLEEP,
@@ -301,16 +302,18 @@ static void virtio_keyboard_init(Object *obj)
         ANDROID_KEY_MOVE_END, LINUX_KEY_CENTER,
         // equivalent to LINUX_KEY_GRAVE in Android system qwerty.kl
         LINUX_KEY_GREEN};
+
     const size_t android_keycodes_len =
         sizeof(mandatory_android_keys) / sizeof(mandatory_android_keys[0]) +
         qemu_input_map_qcode_to_linux_len;
+
     guint16 *android_keycodes =
-        malloc(android_keycodes_len * sizeof(qemu_input_map_qcode_to_linux[0]));
-    memmove(android_keycodes, qemu_input_map_qcode_to_linux,
-            qemu_input_map_qcode_to_linux_len *
-                sizeof(qemu_input_map_qcode_to_linux[0]));
-    memmove(android_keycodes + qemu_input_map_qcode_to_linux_len,
+        malloc(android_keycodes_len * sizeof(*android_keycodes));
+    memcpy(android_keycodes, qemu_input_map_qcode_to_linux,
+           qemu_input_map_qcode_to_linux_len * sizeof(*android_keycodes));
+    memcpy(&android_keycodes[qemu_input_map_qcode_to_linux_len],
             mandatory_android_keys, sizeof(mandatory_android_keys));
+
     virtio_input_key_config(vinput, android_keycodes, android_keycodes_len);
     free(android_keycodes);
 }
