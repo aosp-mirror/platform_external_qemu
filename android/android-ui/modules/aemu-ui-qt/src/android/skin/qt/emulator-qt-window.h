@@ -47,8 +47,10 @@
 #include <QTabletEvent>
 #include <QWidget>
 
+#include <deque>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -265,8 +267,8 @@ public:
     void handleKeyEvent(SkinEventType type, const QKeyEvent& event);
     void panHorizontal(bool left);
     void panVertical(bool up);
-    static SkinEvent* createSkinEvent(SkinEventType type);
-    void queueSkinEvent(SkinEvent* event);
+    static SkinEvent createSkinEvent(SkinEventType type);
+    void queueSkinEvent(SkinEvent event);
     void recenterFocusPoint();
     void saveZoomPoints(const QPoint& focus, const QPoint& viewportFocus);
     void scaleDown();
@@ -483,8 +485,8 @@ private:
     QPixmap mScaledBackingImage;
     bool mBackingBitmapChanged = true;
 
-    QQueue<SkinEvent*> mSkinEventQueue;
-    android::base::Lock mSkinEventQueueLock;
+    std::deque<SkinEvent> mSkinEventQueue;
+    std::mutex mSkinEventQueueMtx;
 
     // Snapshot state
     bool mShouldShowSnapshotModalOverlay = false;

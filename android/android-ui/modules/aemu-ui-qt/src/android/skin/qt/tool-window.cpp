@@ -841,9 +841,9 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
             break;
         case QtUICommand::TOGGLE_TRACKBALL:
             if (down) {
-                SkinEvent* skin_event = new SkinEvent();
-                skin_event->type = kEventToggleTrackball;
-                mEmulatorWindow->queueSkinEvent(skin_event);
+                SkinEvent skin_event;
+                skin_event.type = kEventToggleTrackball;
+                mEmulatorWindow->queueSkinEvent(std::move(skin_event));
             }
             break;
         case QtUICommand::CHANGE_FOLDABLE_POSTURE:
@@ -1002,10 +1002,10 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
 
     LOG(INFO) << "Resizable: change to new size: " << newSize;
     resizableChangeIcon(newSize);
-    SkinEvent* skin_event = new SkinEvent();
-    skin_event->type = kEventSetDisplayActiveConfig;
-    skin_event->u.display_active_config = static_cast<int>(newSize);
-    mEmulatorWindow->queueSkinEvent(skin_event);
+    SkinEvent skin_event;
+    skin_event.type = kEventSetDisplayActiveConfig;
+    skin_event.u.display_active_config = static_cast<int>(newSize);
+    mEmulatorWindow->queueSkinEvent(std::move(skin_event));
     mEmulatorWindow->resizeAndChangeAspectRatio(0, 0, info.width, info.height);
     sUiEmuAgent->window->showMessage(updateMsg.c_str(), WINDOW_MESSAGE_GENERIC,
                                      3000);
@@ -1044,21 +1044,21 @@ void ToolWindow::forwardGenericEventToEmulator(int type, int code, int value) {
         return;
     }
 
-    SkinEvent* skin_event = new SkinEvent();
-    skin_event->type = kEventGeneric;
-    SkinEventGenericData& genericData = skin_event->u.generic_event;
+    SkinEvent skin_event;
+    skin_event.type = kEventGeneric;
+    SkinEventGenericData& genericData = skin_event.u.generic_event;
     genericData.type = type;
     genericData.code = code;
     genericData.value = value;
-    emuQtWindow->queueSkinEvent(skin_event);
+    emuQtWindow->queueSkinEvent(std::move(skin_event));
 }
 
 void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
-    SkinEvent* skin_event = new SkinEvent();
-    skin_event->type = down ? kEventKeyDown : kEventKeyUp;
-    skin_event->u.key.keycode = keycode;
-    skin_event->u.key.mod = 0;
-    mEmulatorWindow->queueSkinEvent(skin_event);
+    SkinEvent skin_event;
+    skin_event.type = down ? kEventKeyDown : kEventKeyUp;
+    skin_event.u.key.keycode = keycode;
+    skin_event.u.key.mod = 0;
+    mEmulatorWindow->queueSkinEvent(std::move(skin_event));
 }
 
 bool ToolWindow::handleQtKeyEvent(const QKeyEvent& event, QtKeyEventSource source) {
