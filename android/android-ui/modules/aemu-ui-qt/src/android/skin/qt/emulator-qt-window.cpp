@@ -1054,11 +1054,11 @@ void EmulatorQtWindow::dropEvent(QDropEvent* event) {
 }
 
 void EmulatorQtWindow::keyPressEvent(QKeyEvent* event) {
-    handleKeyEvent(kEventKeyDown, event);
+    handleKeyEvent(kEventKeyDown, *event);
 }
 
 void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
-    handleKeyEvent(kEventKeyUp, event);
+    handleKeyEvent(kEventKeyUp, *event);
 
     // If we enabled trackball mode, tell Qt to always forward mouse movement
     // events. Otherwise, Qt will forward them only when a button is pressed.
@@ -2737,16 +2737,16 @@ void EmulatorQtWindow::handleMouseWheelEvent(int delta,
 }
 
 void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
-                                                 QKeyEvent* event) {
+                                                 const QKeyEvent& event) {
     SkinEvent* skin_event = createSkinEvent(type);
     SkinEventKeyData& keyData = skin_event->u.key;
-    keyData.keycode = convertKeyCode(event->key());
+    keyData.keycode = convertKeyCode(event.key());
     if (keyData.keycode == -1) {
-        D("Failed to convert key for event key %d", event->key());
+        D("Failed to convert key for event key %d", event.key());
         delete skin_event;
         return;
     }
-    Qt::KeyboardModifiers modifiers = event->modifiers();
+    Qt::KeyboardModifiers modifiers = event.modifiers();
     if (modifiers & Qt::ShiftModifier)
         keyData.mod |= kKeyModLShift;
     if (modifiers & Qt::ControlModifier)
@@ -2757,11 +2757,11 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
     queueSkinEvent(skin_event);
 }
 
-void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
+void EmulatorQtWindow::handleKeyEvent(SkinEventType type, const QKeyEvent& event) {
     // TODO(liyl): Make this shortcut configurable instead of hard-coding it
     // inside the code.
-    if (event->key() == Qt::Key_R &&
-        event->modifiers() == Qt::ControlModifier && type == kEventKeyDown) {
+    if (event.key() == Qt::Key_R &&
+        event.modifiers() == Qt::ControlModifier && type == kEventKeyDown) {
         D("%s: mouse released\n", __func__);
         releaseMouse();
 
@@ -2772,7 +2772,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
     }
 
     if (!mForwardShortcutsToDevice && mInZoomMode) {
-        if (event->key() == Qt::Key_Control) {
+        if (event.key() == Qt::Key_Control) {
             if (type == kEventKeyUp) {
                 raise();
                 mOverlay.showForZoomUserHidden();
@@ -2781,16 +2781,16 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
     }
 
     if (!mForwardShortcutsToDevice && !mInZoomMode &&
-        event->key() == Qt::Key_Control &&
-        (event->modifiers() == Qt::ControlModifier ||
-         event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))) {
+        event.key() == Qt::Key_Control &&
+        (event.modifiers() == Qt::ControlModifier ||
+         event.modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))) {
         if (type == kEventKeyDown && !mDisablePinchToZoom) {
             if (mToolWindow->getUiEmuAgent()
                         ->multiDisplay->isMultiDisplayEnabled() == false) {
                 raise();
                 D("%s: Using default display for multi touch\n", __FUNCTION__);
                 mOverlay.showForMultitouch(
-                        event->modifiers() == Qt::ControlModifier,
+                        event.modifiers() == Qt::ControlModifier,
                         deviceGeometry().center());
             } else {
                 QPoint mousePosition = mapFromGlobal(QCursor::pos());
@@ -2814,7 +2814,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
                         D("%s: using display %d for multi touch\n",
                           __FUNCTION__, id);
                         mOverlay.showForMultitouch(
-                                event->modifiers() == Qt::ControlModifier,
+                                event.modifiers() == Qt::ControlModifier,
                                 r.center());
                         break;
                     }
@@ -2833,8 +2833,8 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
 
     if (mForwardShortcutsToDevice || !qtEvent) {
         forwardKeyEventToEmulator(type, event);
-        if (type == kEventKeyDown && event->text().length() > 0) {
-            Qt::KeyboardModifiers mods = event->modifiers();
+        if (type == kEventKeyDown && event.text().length() > 0) {
+            Qt::KeyboardModifiers mods = event.modifiers();
             mods &= ~(Qt::ShiftModifier | Qt::KeypadModifier);
             if (mods == 0) {
                 // The key event generated text without Ctrl, Alt, etc.
@@ -2842,7 +2842,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
                 SkinEvent* skin_event = createSkinEvent(kEventTextInput);
                 skin_event->u.text.down = false;
                 strncpy((char*)skin_event->u.text.text,
-                        (const char*)event->text().toUtf8().constData(),
+                        (const char*)event.text().toUtf8().constData(),
                         sizeof(skin_event->u.text.text) - 1);
                 // Ensure the event's text is 0-terminated
                 skin_event->u.text.text[sizeof(skin_event->u.text.text) - 1] =

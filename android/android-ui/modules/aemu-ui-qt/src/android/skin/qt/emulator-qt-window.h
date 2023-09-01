@@ -262,7 +262,7 @@ public:
                         const QTabletEvent* event,
                         bool skipSync = false);
     void handleMouseWheelEvent(int delta, Qt::Orientation orientation);
-    void handleKeyEvent(SkinEventType type, QKeyEvent* event);
+    void handleKeyEvent(SkinEventType type, const QKeyEvent& event);
     void panHorizontal(bool left);
     void panVertical(bool up);
     static SkinEvent* createSkinEvent(SkinEventType type);
@@ -456,7 +456,7 @@ private:
     bool mouseInside();
     SkinMouseButtonType getSkinMouseButton(const QMouseEvent* event) const;
 
-    void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
+    void forwardKeyEventToEmulator(SkinEventType type, const QKeyEvent& event);
     void forwardGenericEventToEmulator(int type, int code, int value);
 
     void maskWindowFrame();

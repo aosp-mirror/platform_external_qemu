@@ -1061,7 +1061,7 @@ void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
     mEmulatorWindow->queueSkinEvent(skin_event);
 }
 
-bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
+bool ToolWindow::handleQtKeyEvent(const QKeyEvent& event, QtKeyEventSource source) {
     // See if this key is handled by the virtual scene control window first.
     if (mVirtualSceneControlWindow.hasInstance() &&
         mVirtualSceneControlWindow.get()->isActive()) {
@@ -1073,13 +1073,13 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
     // We don't care about the keypad modifier for anything, and it gets added
     // to the arrow keys of OSX by default, so remove it.
 #if QT_VERSION >= 0x060000
-    QKeySequence event_key_sequence(event->key() |
-                                    (event->modifiers() & ~Qt::KeypadModifier));
+    QKeySequence event_key_sequence(event.key() |
+                                    (event.modifiers() & ~Qt::KeypadModifier));
 #else
-    QKeySequence event_key_sequence(event->key() +
-                                    (event->modifiers() & ~Qt::KeypadModifier));
+    QKeySequence event_key_sequence(event.key() +
+                                    (event.modifiers() & ~Qt::KeypadModifier));
 #endif  // QT_VERSION
-    bool down = event->type() == QEvent::KeyPress;
+    bool down = event.type() == QEvent::KeyPress;
     bool h = mShortcutKeyStore.handle(event_key_sequence,
                                       [this, down](QtUICommand cmd) {
                                           if (down) {

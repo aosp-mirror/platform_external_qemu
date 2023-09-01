@@ -62,7 +62,7 @@ public:
     virtual ~VirtualSceneControlWindow();
 
     void dockMainWindow();
-    bool handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source);
+    bool handleQtKeyEvent(const QKeyEvent& event, QtKeyEventSource source);
     void updateTheme(const QString& styleSheet);
 
     void setWidth(int width);

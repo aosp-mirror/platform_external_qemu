@@ -326,10 +326,10 @@ bool MultiDisplayWidget::event(QEvent* ev) {
 
 void MultiDisplayWidget::keyPressEvent(QKeyEvent* event) {
     auto win = EmulatorQtWindow::getInstance();
-    win->handleKeyEvent(kEventKeyDown, event);
+    win->handleKeyEvent(kEventKeyDown, *event);
 }
 
 void MultiDisplayWidget::keyReleaseEvent(QKeyEvent* event) {
     auto win = EmulatorQtWindow::getInstance();
-    win->handleKeyEvent(kEventKeyUp, event);
+    win->handleKeyEvent(kEventKeyUp, *event);
 }
