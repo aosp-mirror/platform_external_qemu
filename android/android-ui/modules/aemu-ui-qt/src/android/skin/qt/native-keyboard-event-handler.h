@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include "android/skin/event.h"
 #include "android/utils/compiler.h"
 
@@ -29,7 +31,7 @@ public:
         int eventType;
     };
     static NativeKeyboardEventHandler* getInstance();
-    SkinEvent* handleKeyEvent(NativeKeyboardEventHandler::KeyEvent event);
+    std::optional<SkinEvent> handleKeyEvent(NativeKeyboardEventHandler::KeyEvent event);
     virtual int translateModifierState(int keycode, int modifiers) = 0;
 };
 

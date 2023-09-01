@@ -194,25 +194,25 @@ static android::base::LazyInstance<WindowsKeyboardEventHandler> sInstance =
 
 #endif
 
-SkinEvent* NativeKeyboardEventHandler::handleKeyEvent(
+std::optional<SkinEvent> NativeKeyboardEventHandler::handleKeyEvent(
         NativeKeyboardEventHandler::KeyEvent keyEv) {
     D("Raw scancode %d modifiers 0x%x", keyEv.scancode, keyEv.modifiers);
     int scancode = keyEv.scancode;
     int modifiers = keyEv.modifiers;
     int linuxKeycode = skin_native_scancode_to_linux(scancode);
     if (linuxKeycode == 0 || skin_keycode_is_modifier(linuxKeycode)) {
-        return nullptr;
+        return std::nullopt;
     }
 
-    SkinEvent* skinEvent =
+    SkinEvent skinEvent =
             EmulatorQtWindow::getInstance()->createSkinEvent(kEventTextInput);
-    SkinEventTextInputData& textInputData = skinEvent->u.text;
+    SkinEventTextInputData& textInputData = skinEvent.u.text;
     textInputData.keycode = linuxKeycode;
     textInputData.mod =
             translateModifierState(textInputData.keycode, modifiers);
 
     D("Processed keycode %d modifiers 0x%x", textInputData.keycode,
-      skinEvent->u.text.mod);
+      skinEvent.u.text.mod);
     return skinEvent;
 }
 

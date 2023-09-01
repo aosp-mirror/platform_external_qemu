@@ -103,12 +103,12 @@ public:
                         inputEv.scancode = keyEv->detail;
                         inputEv.modifiers = keyEv->state;
                         inputEv.eventType = kEventKeyDown;
-                        SkinEvent* event =
+                        std::optional<SkinEvent> maybeEvent =
                                 NativeKeyboardEventHandler::getInstance()
                                         ->handleKeyEvent(inputEv);
-                        if (event)
+                        if (maybeEvent.has_value())
                             EmulatorQtWindow::getInstance()->queueSkinEvent(
-                                    event);
+                                    std::move(maybeEvent.value()));
                     }
                 }
             }
@@ -155,12 +155,12 @@ public:
                         NativeKeyboardEventHandler::KeyEvent keyEv;
                         keyEv.scancode = scancode;
                         keyEv.eventType = kEventKeyDown;
-                        SkinEvent* event =
+                        std::optional<SkinEvent> maybeEvent =
                                 NativeKeyboardEventHandler::getInstance()
                                         ->handleKeyEvent(keyEv);
-                        if (event) {
+                        if (maybeEvent.has_value()) {
                             EmulatorQtWindow::getInstance()->queueSkinEvent(
-                                    event);
+                                    std::move(maybeEvent.value()));
                         }
                     }
                 }

@@ -60,10 +60,10 @@ void RotaryInputPage::onValueChanged(const int value) {
     int delta = dialDeltaToRotaryInputDelta(value, mValue);
     VERBOSE_PRINT(keys, "Rotary input value change: %d", delta);
     if (mEmulatorWindow) {
-        SkinEvent* skin_event = new SkinEvent();
-        skin_event->type = kEventRotaryInput;
-        skin_event->u.rotary_input.delta = delta;
-        mEmulatorWindow->queueSkinEvent(skin_event);
+        SkinEvent skin_event;
+        skin_event.type = kEventRotaryInput;
+        skin_event.u.rotary_input.delta = delta;
+        mEmulatorWindow->queueSkinEvent(std::move(skin_event));
     }
 
     mValue = value;
