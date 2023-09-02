@@ -22,12 +22,10 @@
 #include "ui/input-keymap-xorgxquartz-to-qcode.c"
 #include "ui/input-keymap-xorgxwin-to-qcode.c"
 
-int qemu_input_linux_to_qcode(unsigned int lnx)
+int qemu_input_linux_to_qcode(unsigned int i)
 {
-    if (lnx >= qemu_input_map_linux_to_qcode_len) {
-        return 0;
-    }
-    return qemu_input_map_linux_to_qcode[lnx];
+    return (i < qemu_input_map_linux_to_qcode_len) ?
+        qemu_input_map_linux_to_qcode[i] : Q_KEY_CODE_UNMAPPED;
 }
 
 int qemu_input_key_value_to_number(const KeyValue *value)
@@ -43,12 +41,10 @@ int qemu_input_key_value_to_number(const KeyValue *value)
     }
 }
 
-int qemu_input_key_number_to_qcode(unsigned int nr)
+int qemu_input_key_number_to_qcode(unsigned int i)
 {
-    if (nr >= qemu_input_map_qnum_to_qcode_len) {
-        return 0;
-    }
-    return qemu_input_map_qnum_to_qcode[nr];
+    return (i < qemu_input_map_qnum_to_qcode_len) ?
+        qemu_input_map_qnum_to_qcode[i] : Q_KEY_CODE_UNMAPPED;
 }
 
 int qemu_input_key_value_to_qcode(const KeyValue *value)
