@@ -50,11 +50,13 @@ bool NativeEventFilter::nativeEventFilter(const QByteArray& eventType,
                         ev.scancode = keycode;
                         ev.modifiers = [event modifierFlags];
                         ev.eventType = kEventKeyDown;
-                        SkinEvent* event =
+
+                        std::optional<SkinEvent> maybeEvent =
                                 NativeKeyboardEventHandler::getInstance()
                                         ->handleKeyEvent(ev);
-                        if (event)
-                            emuWindow->queueSkinEvent(event);
+                        if (maybeEvent.has_value())
+                            emuWindow->queueSkinEvent(
+                                    std::move(maybeEvent.value()));
                     }
                 }
             }
