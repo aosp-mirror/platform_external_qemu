@@ -64,7 +64,7 @@ font-family: &quot;Roboto&quot;</string>
     <number>0</number>
    </property>
    <widget class="LocationPage" name="location_page"/>
-   <widget class="MultiDisplayPage" name="multiDisplayPage"/>
+   <widget class="MultiDisplayPageGrpc" name="multiDisplayPage"/>
    <widget class="CellularPageGrpc" name="cellular_page"/>
    <widget class="BatteryPageGrpc" name="batteryPage"/>
    <widget class="CameraPageGrpc" name="cameraPage"/>
@@ -1415,9 +1415,9 @@ padding: 10px 0px 10px 16px;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MultiDisplayPage</class>
+   <class>MultiDisplayPageGrpc</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/multi-display-page.h</header>
+   <header>android/skin/qt/extended-pages/multi-display-page-grpc.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

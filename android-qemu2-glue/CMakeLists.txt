@@ -112,7 +112,7 @@ target_link_libraries(
   libqemu2-glue
   PRIVATE android-emu
           hostapd
-          GLIB2::GLIB2
+          glib2
           PIXMAN::PIXMAN
           emulator-libdtb
           android-emu-gps
@@ -136,7 +136,7 @@ target_include_directories(libqemu2-glue-vm-operations
                            PRIVATE .. ../include ${ANDROID_AUTOGEN})
 target_link_libraries(
   libqemu2-glue-vm-operations
-  PRIVATE android-emu android-emu-base-headers GLIB2::GLIB2 android-hw-config
+  PRIVATE android-emu android-emu-base-headers glib2 android-hw-config
           nlohmann_json::nlohmann_json PIXMAN::PIXMAN)
 
 android_add_test(TARGET libqemu2-glue_unittests

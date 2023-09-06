@@ -48,10 +48,6 @@ struct QTestState
 static GHookList abrt_hooks;
 static struct sigaction sigact_old;
 
-#define g_assert_no_errno(ret) do { \
-    g_assert_cmpint(ret, !=, -1); \
-} while (0)
-
 static int qtest_query_target_endianness(QTestState *s);
 
 static int init_socket(const char *socket_path)

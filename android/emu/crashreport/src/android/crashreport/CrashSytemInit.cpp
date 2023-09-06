@@ -11,20 +11,24 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <fstream>  // for string
-#include <map>      // for map
-#include <memory>   // for unique_ptr
-#include <string>   // for basic_string, operator<
-#include <vector>   // for vector<>::iterator
+#include <functional>
+#include <map>     // for map
+#include <memory>  // for unique_ptr
+#include <string>  // for basic_string, operator<
+#include <thread>
+#include <vector>  // for vector<>::iterator
 
-#include "aemu/base/Compiler.h"                  // for DISALLOW_COPY_AND_ASSIGN
-#include "aemu/base/files/PathUtils.h"           // for pj, PathUtils
-#include "aemu/base/logging/CLog.h"              // for dinfo, dwarning
-#include "aemu/base/memory/LazyInstance.h"       // for LazyInstance, LAZY_IN...
-#include "android/base/system/System.h"          // for System
-#include "android/crashreport/CrashConsent.h"    // for CrashReportDatabase
-#include "android/crashreport/CrashReporter.h"   // for CrashReporter
-#include "android/crashreport/HangDetector.h"    // for HangDetector
+#include "aemu/base/Compiler.h"  // for DISALLOW_COPY_AND_ASSIGN
+#include "aemu/base/async/RecurrentTask.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/files/PathUtils.h"          // for pj, PathUtils
+#include "aemu/base/logging/CLog.h"             // for dinfo, dwarning
+#include "aemu/base/memory/LazyInstance.h"      // for LazyInstance, LAZY_IN...
+#include "android/base/system/System.h"         // for System
+#include "android/crashreport/CrashConsent.h"   // for CrashReportDatabase
+#include "android/crashreport/CrashReporter.h"  // for CrashReporter
+#include "android/crashreport/HangDetector.h"   // for HangDetector
+#include "android/crashreport/Uploader.h"
 #include "android/version.h"                     // for EMULATOR_FULL_VERSION...
 #include "client/crash_report_database.h"        // for CrashReportDatabase::...
 #include "client/crashpad_client.h"              // for CrashpadClient
@@ -39,7 +43,9 @@
 using android::base::LazyInstance;
 using android::base::PathUtils;
 using android::base::pj;
+using android::base::RecurrentTask;
 using android::base::System;
+using crashpad::CrashReportDatabase;
 
 namespace android {
 namespace crashreport {
@@ -94,7 +100,7 @@ public:
                                             metrics_path, CrashURL, annotations,
                                             {"--no-rate-limit"}, true, false);
 
-        mDatabase = crashpad::CrashReportDatabase::Initialize(database_path);
+        mDatabase = CrashReportDatabase::Initialize(database_path);
         mInitialized = active && mDatabase;
 
         dinfo("Storing crashdata in: %s, detection is %s for process: %d",
@@ -128,8 +134,8 @@ public:
 
         // Get consent for any report that was not yet uploaded.
         std::vector<crashpad::UUID> toRemove;
-        std::vector<crashpad::CrashReportDatabase::Report> reports;
-        std::vector<crashpad::CrashReportDatabase::Report> pendingReports;
+        std::vector<CrashReportDatabase::Report> reports;
+        std::vector<CrashReportDatabase::Report> pendingReports;
         mDatabase->GetCompletedReports(&reports);
         mDatabase->GetPendingReports(&pendingReports);
         reports.insert(reports.end(), pendingReports.begin(),
@@ -139,12 +145,12 @@ public:
             if (!report.uploaded) {
                 auto status = mConsentProvider->requestConsent(report);
                 switch (status) {
-                    case CrashConsent::ReportAction::UPLOAD_REMOVE:
-                        mDatabase->RequestUpload(report.uuid);
-                        dinfo("Consent given for uploading crashreport %s to "
-                              "%s",
-                              report.uuid.ToString().c_str(), CrashURL);
+                    case CrashConsent::ReportAction::UPLOAD_REMOVE: {
+                        std::thread upload(
+                                [this, report]() { processReport(report); });
+                        upload.detach();
                         break;
+                    }
                     case CrashConsent::ReportAction::REMOVE:
                         dinfo("No consent for crashreport %s, deleting.",
                               report.uuid.ToString().c_str());
@@ -157,13 +163,7 @@ public:
                 }
             } else {
                 toRemove.push_back(report.uuid);
-                dinfo("Report %s is available remotely as: %s, deleting.",
-                      report.uuid.ToString().c_str(), report.id.c_str());
             }
-        }
-
-        for (const auto& remove : toRemove) {
-            mDatabase->DeleteReport(remove);
         }
     }
 
@@ -172,10 +172,47 @@ public:
     }
 
 private:
+    void processReport(const CrashReportDatabase::Report& report) {
+        using namespace std::chrono_literals;
+        std::vector<std::chrono::seconds> backoff{0s,  2s,  4s,   8s,  16s,
+                                                  32s, 64s, 128s, 256s};
+        auto status = UploadResult::kSuccess;
+        auto wait = backoff.begin();
+
+        mDatabase->GetSettings()->SetUploadsEnabled(true);
+        mDatabase->RequestUpload(report.uuid);
+        CrashReportDatabase::Report updatedReport;
+
+        do {
+            std::this_thread::sleep_for(*wait);
+            mDatabase->LookUpCrashReport(report.uuid, &updatedReport);
+            dinfo("Attempting to send crashreport %s to "
+                  "%s",
+                  updatedReport.uuid.ToString().c_str(), CrashURL);
+            if (!updatedReport.uploaded) {
+                status = ProcessPendingReport(mDatabase.get(), report);
+            } else {
+                status = UploadResult::kSuccess;
+            }
+            ++wait;
+        } while (status == UploadResult::kRetry && wait != backoff.end());
+
+        if (status == UploadResult::kSuccess) {
+            // We should have a report id, fetch it!
+
+            if (mDatabase->LookUpCrashReport(report.uuid, &updatedReport) ==
+                CrashReportDatabase::OperationStatus::kNoError) {
+                mConsentProvider->reportCompleted(updatedReport);
+            }
+        } else {
+            dwarning("Failed to send report..");
+        }
+    }
+
     DISALLOW_COPY_AND_ASSIGN(CrashSystem);
 
     std::unique_ptr<crashpad::CrashpadClient> mClient;
-    std::unique_ptr<crashpad::CrashReportDatabase> mDatabase;
+    std::unique_ptr<CrashReportDatabase> mDatabase;
     std::unique_ptr<CrashConsent> mConsentProvider;
     bool mInitialized{false};
 };

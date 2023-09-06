@@ -1497,8 +1497,10 @@ void EmulatorQtWindow::showMinimized() {
 
     Qt::WindowFlags flags = mContainer.windowFlags();
 #ifdef __linux__
-    flags &= ~FRAME_WINDOW_FLAGS_MASK;
-    flags |= FRAMED_WINDOW_FLAGS;
+//    b/282895205, temporarily remove the follow hacks
+//    as newer linux desktop behave differently
+//    flags &= ~FRAME_WINDOW_FLAGS_MASK;
+//    flags |= FRAMED_WINDOW_FLAGS;
 #else   // __APPLE__
     if (hasFrame()) {
         flags |= Qt::NoDropShadowWindowHint;
@@ -1511,6 +1513,12 @@ void EmulatorQtWindow::showMinimized() {
 
 #endif  // !_WIN32
     mContainer.showMinimized();
+
+#ifdef __linux__
+    // need to call toowindow hide again
+    mToolWindow->hide();
+#endif  // __linux__
+
     mWindowIsMinimized = true;
 
     if (mPauseAvdWhenMinimized) {
@@ -2594,7 +2602,7 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
                 break;
         }
     }
-    setDisplayRegion(0, 0, backingSize.width(), backingSize.height());
+    setDisplayRegionAndUpdate(0, 0, backingSize.width(), backingSize.height());
     simulateSetScale(std::max(.2, (double)scale));
     QRect containerGeo = mContainer.geometry();
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(),
@@ -3514,7 +3522,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     queueSkinEvent(event);
 
     const bool not_pixel_fold = !android_foldable_is_pixel_fold();
-    if (not_pixel_fold && android_foldable_is_folded()) {
+    if (android_foldable_is_folded()) {
         resizeAndChangeAspectRatio(true);
     }
 
@@ -3525,7 +3533,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
         }
     }
 
-    if (mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled()) {
+    if (not_pixel_fold && mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled()) {
         {
             uint32_t w = 0;
             uint32_t h = 0;

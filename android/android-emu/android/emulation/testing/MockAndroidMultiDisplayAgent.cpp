@@ -163,6 +163,7 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
         },
         .isMultiDisplayWindow = []() { return false; },
         .performRotation = [](int rot) { },
+        .isPixelFold = []() { return false; },
 };
 extern "C" const QAndroidMultiDisplayAgent* const
         gMockQAndroidMultiDisplayAgent = &sMultiDisplayAgent;

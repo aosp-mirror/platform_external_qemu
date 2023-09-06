@@ -63,6 +63,8 @@ class Licensing(object):
         "m",
         "dl",
         "pthread",
+        "c",
+        "iconv",
         "Threads::Threads",
         "rt",
         "X11",

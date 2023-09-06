@@ -19,7 +19,7 @@ android_add_library(
   DEPS android-emu
        android-emu-base
        android-emu-base-headers
-       GLIB2::GLIB2
+       glib2
        gnss_proxy_service
        grpc++
        modem_simulator_lib

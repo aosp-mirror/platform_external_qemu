@@ -371,6 +371,8 @@ bool Device3DWidget::initAbstractDeviceHingeModel(
             8,  9,  10, 9,  11, 10, 12, 13, 14, 13, 15, 14,
             16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22,
     };
+    const bool is_pixel_fold = android_foldable_is_pixel_fold();
+
     // Construct a cuboid for each segment.
     for (uint32_t idx = 0, j = 0; idx < mDisplaySegments.size(); idx++) {
         const auto i = mDisplaySegments[idx];
@@ -407,10 +409,19 @@ bool Device3DWidget::initAbstractDeviceHingeModel(
                     l, t, 0.0, 0.0, 0.0, +1.0, ul, ub,
                     r, t, 0.0, 0.0, 0.0, +1.0, ul, ut,
             };
+
+            if (is_pixel_fold) {
+                ul = 0.0f;
+                ub = 0.0f;
+                ut = 1.0f;
+                ur = 1.0f;
+            }
+
             attribBack = {
                     l,   b,    -d, 0.0, 0.0, -1.0, ul, ub,  // back
-                    r,   b,    -d, 0.0, 0.0, -1.0, ul, ut,  l,   t,    -d, 0.0,
-                    0.0, -1.0, ur, ub,  r,   t,    -d, 0.0, 0.0, -1.0, ur, ut,
+                    r,   b,    -d, 0.0, 0.0, -1.0, ul, ut,
+                    l,   t,    -d, 0.0, 0.0, -1.0, ur, ub,
+                    r,   t,    -d, 0.0, 0.0, -1.0, ur, ut,
             };
         }
         std::vector<float> attribCommon =
@@ -1012,6 +1023,7 @@ void Device3DWidget::repaintGL() {
         struct AndroidVirtioGpuOps* ops = android_getVirtioGpuOps();
         ops->bind_color_buffer_to_texture(ops->get_last_posted_color_buffer());
         i = 0;
+        const bool is_pixel_fold = android_foldable_is_pixel_fold();
         for (auto iter : mDisplaySegments) {
             if (iter.t == iter.b) {
                 continue;
@@ -1041,6 +1053,10 @@ void Device3DWidget::repaintGL() {
                     mGLES2->glDrawElements(
                             GL_TRIANGLES, 6, GL_UNSIGNED_INT,
                             (void*)((i * 36 + 6) * sizeof(GLuint)));
+                    if (is_pixel_fold) {
+                        // only draw the first front panel
+                        break;
+                    }
                 } else {
                     mGLES2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
                                            (void*)(i * 36 * sizeof(GLuint)));

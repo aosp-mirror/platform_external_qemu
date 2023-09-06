@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=46.1.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# [tool.setuptools_scm]
+# # For smarter version schemes and other configuration options,
+# # check out https://github.com/pypa/setuptools_scm
+# version_scheme = "no-guess-dev"
+[project]
+name = "bisect"
+authors = [{ name = "Erwin Jansen", email = "jansene@google.com" }]
+license = { file = "LICENSE.TXT" }
+readme = "README.md"
+version = "0.0.1"
+classifiers = ["Topic :: Software Development"]
+
+
+dependencies = [
+    "google-api-python-client", "oauth2client",
+    "importlib-metadata; python_version<'3.8'",
+]
+
+[project.optional-dependencies]
+tests = [
+    "pytest==7.1.3",
+    "pytest-mock",
+    "mock==4.0.3",
+]
+
+[project.scripts]
+emu-bisect = "aemu.main:main"
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--import-mode=importlib"]
+tests = ["pytest==7.1.3", "pytest_mock==3.8.2"]

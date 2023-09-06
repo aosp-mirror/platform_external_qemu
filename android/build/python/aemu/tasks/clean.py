@@ -21,12 +21,17 @@ from aemu.tasks.build_task import BuildTask
 class CleanTask(BuildTask):
     """Deletes the destination directory."""
 
-    def __init__(self, destination: Path) -> None:
+    def __init__(self, destination: Path, aosp: Path) -> None:
         super().__init__()
         self.destination = Path(destination)
+        self.bazel = Path(aosp)
 
     def do_run(self) -> None:
         if self.destination.exists():
             logging.info("Cleaning %s", self.destination)
             shutil.rmtree(self.destination, ignore_errors=True)
+        for bazel in self.bazel.glob("bazel*"):
+            logging.info("Cleaning %s", bazel)
+            shutil.rmtree(bazel, ignore_errors=True)
+
         self.destination.mkdir(parents=True, exist_ok=True)

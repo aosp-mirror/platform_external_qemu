@@ -17,6 +17,7 @@
 #include "android/telephony/modem_driver.h"
 #include "android/shaper.h"
 #include "android/tcpdump.h"
+#include <glib.h>
 
 extern "C" {
 #include "qemu/osdep.h"
