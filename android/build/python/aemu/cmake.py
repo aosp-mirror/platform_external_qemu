@@ -32,7 +32,6 @@ from aemu.tasks.gen_entries import GenEntriesTestTask
 from aemu.tasks.integration_tests import IntegrationTestTask
 from aemu.tasks.unit_tests import AccelerationCheckTask, CTestTask, CoverageReportTask
 from aemu.tasks.emugen_test import EmugenTestTask
-from aemu.tasks.kill_netsimd import KillNetsimdTask
 from aemu.tasks.package_samples import PackageSamplesTask
 from aemu.util.simple_feature_parser import FeatureParser
 
@@ -48,10 +47,9 @@ def get_tasks(args) -> List[BuildTask]:
     """
     run_tests = not Toolchain(args.aosp, args.target).is_crosscompile()
     tasks = [
-        KillNetsimdTask(),
         # A task can be disabled, or explicitly enabled by calling
         # .enable(False) <- Disable the task
-        CleanTask(args.out),
+        CleanTask(destination=args.out, aosp=args.aosp),
         ConfigureTask(
             aosp=args.aosp,
             target=args.target,
@@ -85,7 +83,6 @@ def get_tasks(args) -> List[BuildTask]:
                 with_gfx_stream=args.gfxstream or args.gfxstream_only,
                 distribution_directory=args.dist,
             ).enable(run_tests),
-            KillNetsimdTask().enable(run_tests),
             AccelerationCheckTask(args.out).enable(run_tests),
             EmugenTestTask(args.aosp, args.out).enable(run_tests).enable(False),
             GenEntriesTestTask(args.aosp, args.out),
@@ -102,7 +99,9 @@ def get_tasks(args) -> List[BuildTask]:
                 configuration=args.config,
             ).enable(args.dist is not None),
             # Enable the integration tests by default once they are stable enough
-            IntegrationTestTask(args.aosp,args.target, args.out, args.dist).enable(False),
+            IntegrationTestTask(args.aosp, args.target, args.out, args.dist).enable(
+                False
+            ),
         ]
     return tasks
 

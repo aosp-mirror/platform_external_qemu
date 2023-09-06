@@ -30,7 +30,7 @@
 //    on par with singla wait for fewer than 64 fds (about 5% slower)
 // 4. G_WIN32_MSG_HANDLE is not handled, as it does not happen on emulator
 //
-
+#include <glib.h>
 extern "C" {
 #include <windows.h>
 

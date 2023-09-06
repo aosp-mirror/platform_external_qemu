@@ -65,7 +65,9 @@ class IntegrationTestTask(BuildTask):
             / "run_tests.py"
         )
         self.build_target = os.environ.get("BUILD_TARGET_NAME", "")
-        self.build_target_opt = ["--build_target", self.build_target] if self.build_target else []
+        self.build_target_opt = (
+            ["--build_target", self.build_target] if self.build_target else []
+        )
 
     def run_from_dist(self, py):
         """Runs the integration tests from the distribution directory."""
@@ -76,8 +78,11 @@ class IntegrationTestTask(BuildTask):
                 self.dist,
                 "--logdir",
                 self.logdir,
+                "--test_suite",
+                "presubmit_emulator_test_suite",
                 "--failures_as_errors",
-            ] + self.build_target_opt
+            ]
+            + self.build_target_opt
         )
 
     def run_from_build(self, py):
@@ -99,10 +104,13 @@ class IntegrationTestTask(BuildTask):
                 emulator_dir / "emulator",
                 "--symbols",
                 self.build_directory / "build" / "symbols",
+                "--test_suite",
+                "presubmit_emulator_test_suite",
                 "--logdir",
                 self.logdir,
                 "--failures_as_errors",
-            ] + self.build_target_opt
+            ]
+            + self.build_target_opt
         )
 
     def do_run(self):

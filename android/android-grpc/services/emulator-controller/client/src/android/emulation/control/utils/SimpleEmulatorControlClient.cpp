@@ -64,6 +64,41 @@ void SimpleEmulatorControlClient::getStatus(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
+void SimpleEmulatorControlClient::getDisplayConfigurations(
+        OnCompleted<DisplayConfigurations> onDone) {
+    auto [request, response, context] =
+            createGrpcRequestContext<Empty, DisplayConfigurations>(mClient);
+    mService->async()->getDisplayConfigurations(
+            context, request, response,
+            grpcCallCompletionHandler(context, request, response, onDone));
+}
+
+void SimpleEmulatorControlClient::setDisplayConfigurations(
+        DisplayConfigurations state,
+        OnCompleted<DisplayConfigurations> onDone) {
+    auto [request, response, context] =
+            createGrpcRequestContext<DisplayConfigurations,
+                                     DisplayConfigurations>(mClient);
+    request->CopyFrom(state);
+    mService->async()->setDisplayConfigurations(
+            context, request, response,
+            grpcCallCompletionHandler(context, request, response, onDone));
+}
+
+void SimpleEmulatorControlClient::receiveEmulatorNotificationEvents(OnEvent<Notification> incoming,
+                                           OnFinished onDone) {
+    grpc::ClientContext* context = mClient->newContext().release();
+    static google::protobuf::Empty empty;
+    auto read = new SimpleClientLambdaReader<Notification>(
+            incoming, [onDone, context](auto status) {
+                onDone(ConvertGrpcStatusToAbseilStatus(status));
+                delete context;
+            });
+    mService->async()->streamNotification(context, &empty, read);
+    read->StartRead();
+    read->StartCall();
+}
+
 void SimpleEmulatorControlClient::sendFingerprint(Fingerprint finger,
                                                   OnCompleted<Empty> onDone) {
     auto [request, response, context] =

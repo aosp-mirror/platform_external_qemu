@@ -23,7 +23,7 @@
 #include "android/utils/debug.h"
 #include "host-common/MultiDisplay.h"
 
-#define DEBUG 2
+#define DEBUG 0
 /* set  for very verbose debugging */
 #ifndef DEBUG
 #define DD(...) (void)0
@@ -50,10 +50,15 @@ std::optional<Notification> NotificationStream::getDisplayNotificationEvent() {
     for (int i = 0; i < MultiDisplay::s_maxNumMultiDisplay; i++) {
         uint32_t width = 0, height = 0, dpi = 0, flags = 0;
         bool enabled = false;
-        if (mAgents->multi_display->getMultiDisplay(i, nullptr, nullptr, &width,
+        bool receivedDisplayStatus = mAgents->multi_display->getMultiDisplay(i, nullptr, nullptr, &width,
                                                     &height, &dpi, &flags,
-                                                    &enabled) &&
-            enabled && width != 0 && height != 0) {
+                                                    &enabled);
+
+        // Workaround for the fact that MultiDisplay is currently not atomic.
+        // This will make sure we will not include partially created/configured displays
+        // in the event (See b/290831895).
+        bool isPartiallyCreatedEvent = width == 0 && height == 0 && dpi == 0;
+        if (receivedDisplayStatus && !isPartiallyCreatedEvent) {
             auto cfg = displayConfig->add_displays();
             cfg->set_width(width);
             cfg->set_height(height);

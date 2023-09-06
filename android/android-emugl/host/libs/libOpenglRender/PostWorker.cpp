@@ -109,7 +109,8 @@ void PostWorker::postImpl(HandleType cbHandle) {
     float dx = px * fx;
     float dy = py * fy;
 
-    if (emugl::get_emugl_multi_display_operations().isMultiDisplayEnabled()) {
+    const bool not_pixel_fold = !(emugl::get_emugl_multi_display_operations().isPixelFold());
+    if (not_pixel_fold && emugl::get_emugl_multi_display_operations().isMultiDisplayEnabled()) {
         if (emugl::get_emugl_multi_display_operations().isMultiDisplayWindow()) {
             uint32_t start_id = 0, id, c;
             bool paintMultiDisplayWindow = false;

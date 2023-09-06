@@ -37,6 +37,10 @@
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
+#include "host-common/FeatureControl.h"
+
+namespace fc = android::featurecontrol;
+
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -1332,7 +1336,7 @@ bool android_foldable_hinge_configured() {
 
 bool android_foldable_is_pixel_fold() {
     const auto devname = getConsoleAgents()->settings->hw()->hw_device_name;
-    return (devname && "pixel_fold" == std::string(devname));
+    return (devname && "pixel_fold" == std::string(devname) && fc::isEnabled(fc::SupportPixelFold));
 }
 
 int android_foldable_pixel_fold_second_display_id() {

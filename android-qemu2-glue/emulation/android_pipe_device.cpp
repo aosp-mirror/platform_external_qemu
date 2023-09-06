@@ -151,6 +151,10 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
                     hostPipe, reinterpret_cast<AndroidPipeBuffer*>(buffers),
                     numBuffers);
         },
+        // wait_guest_recv()
+        [](GoldfishHostPipe* hostPipe) {
+            android_pipe_wait_guest_recv(hostPipe);
+        },
         // guest_send()
         [](GoldfishHostPipe** hostPipe,
            const GoldfishPipeBuffer* buffers,
@@ -159,6 +163,10 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
                     reinterpret_cast<void**>(hostPipe),
                     reinterpret_cast<const AndroidPipeBuffer*>(buffers),
                     numBuffers);
+        },
+        // wait_guest_send()
+        [](GoldfishHostPipe* hostPipe) {
+            android_pipe_wait_guest_send(hostPipe);
         },
         // guest_wake_on()
         [](GoldfishHostPipe* hostPipe, GoldfishPipeWakeFlags wakeFlags) {

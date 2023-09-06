@@ -730,7 +730,7 @@ if(NOT WINDOWS_MSVC_X86_64)
 endif()
 
 # Make sure we make our dependent libraries available.
-target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN
+target_link_libraries(android-qemu-deps INTERFACE glib2 PIXMAN::PIXMAN
                                                   zlib android-emu-tracing)
 
 target_link_libraries(android-qemu-deps INTERFACE virglrenderer-headers qemu-host-common-headers)

@@ -187,6 +187,14 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                 instance->performRotation(rot);
             }
         },
+        .isPixelFold = []() -> bool {
+            auto instance = MultiDisplay::getInstance();
+            if (instance) {
+                return instance->isPixelFold();
+            } else {
+                return false;
+            }
+        },
 };
 
 extern "C" const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent = &sMultiDisplayAgent;

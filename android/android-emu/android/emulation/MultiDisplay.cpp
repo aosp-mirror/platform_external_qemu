@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -175,7 +175,8 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
                                       "com.android.emulator.multidisplay.START",
                                       "-n",
                                       "com.android.emulator.multidisplay/"
-                                      ".MultiDisplayServiceReceiver"});
+                                      ".MultiDisplayServiceReceiver",
+                                      "--user 0"});
 
         MultiDisplayPipe* pipe = MultiDisplayPipe::getInstance();
         if (pipe) {
@@ -206,9 +207,6 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
         }
         return false;
     }
-    const bool needSwapWandH =
-            (mMultiDisplay[id].rotation == SKIN_ROTATION_90 ||
-             mMultiDisplay[id].rotation == SKIN_ROTATION_270);
 
     if (x) {
         *x = mMultiDisplay[id].pos_x;
@@ -217,10 +215,10 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
         *y = mMultiDisplay[id].pos_y;
     }
     if (w) {
-        *w = needSwapWandH ? mMultiDisplay[id].height : mMultiDisplay[id].width;
+        *w = mMultiDisplay[id].width;
     }
     if (h) {
-        *h = needSwapWandH ? mMultiDisplay[id].width : mMultiDisplay[id].height;
+        *h = mMultiDisplay[id].height;
     }
     if (dpi) {
         *dpi = mMultiDisplay[id].dpi;
@@ -264,8 +262,6 @@ bool MultiDisplay::getNextMultiDisplay(int32_t start_id,
     if (i == mMultiDisplay.end()) {
         return false;
     } else {
-        const bool needSwapWandH = (i->second.rotation == SKIN_ROTATION_90 ||
-                                    i->second.rotation == SKIN_ROTATION_270);
         if (id) {
             *id = i->first;
         }
@@ -276,10 +272,10 @@ bool MultiDisplay::getNextMultiDisplay(int32_t start_id,
             *y = i->second.pos_y;
         }
         if (w) {
-            *w = needSwapWandH ? i->second.height : i->second.width;
+            *w = i->second.width;
         }
         if (h) {
-            *h = needSwapWandH ? i->second.width : i->second.height;
+            *h = i->second.height;
         }
         if (dpi) {
             *dpi = i->second.dpi;
@@ -301,6 +297,17 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
         *displayId = 0;
         return true;
     }
+
+    if (android_foldable_is_pixel_fold()) {
+        if (android_foldable_is_folded()) {
+            *displayId = android_foldable_pixel_fold_second_display_id();
+        } else {
+            constexpr int primary_display_id = 0;
+            *displayId = primary_display_id;
+        }
+        return true;
+    }
+
     bool isPortrait = true;
     bool isNormalOrder = true;
     SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
@@ -608,14 +615,30 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
     return 0;
 }
 
-void MultiDisplay::performRotation(int mOrientation) {
+void MultiDisplay::performRotation(int rot) {
+    AutoLock lock(mLock);
+    performRotationLocked(rot);
+}
+
+void MultiDisplay::performRotationLocked(int mOrientation) {
+
+    if (android_foldable_is_pixel_fold()) {
+        mMultiDisplay[0].pos_x = 0;
+        mMultiDisplay[0].pos_y = 0;
+        mMultiDisplay[0].rotation = mOrientation;
+
+        mMultiDisplay[6].pos_x = 0;
+        mMultiDisplay[6].pos_y = 0;
+        mMultiDisplay[6].rotation = mOrientation;
+        return;
+    }
+
     const bool pileUp = (mOrientation == SKIN_ROTATION_90 ||
                          mOrientation == SKIN_ROTATION_270);
     const bool normalOrder = (mOrientation == SKIN_ROTATION_0 ||
                               mOrientation == SKIN_ROTATION_270);
     // set up the multidisplay windows x,y, w and h
     {
-        AutoLock lock(mLock);
         if (normalOrder) {
             int pos_x, pos_y;
             uint32_t width, height, id, dpi, flag;
@@ -806,10 +829,22 @@ bool MultiDisplay::notifyDisplayChanges() {
 void MultiDisplay::getCombinedDisplaySizeLocked(uint32_t* w, uint32_t* h) {
     uint32_t total_h = 0;
     uint32_t total_w = 0;
-    for (const auto& iter : mMultiDisplay) {
-        if (iter.first == 0 || iter.second.cb != 0) {
-            total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
-            total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+    if (android_foldable_is_pixel_fold()) {
+        constexpr int primary_display_id = 0;
+        const int secondary_display_id = android_foldable_pixel_fold_second_display_id();
+        if (android_foldable_is_folded()) {
+            total_w = mMultiDisplay[secondary_display_id].width;
+            total_h = mMultiDisplay[secondary_display_id].height;
+        } else {
+            total_w = mMultiDisplay[primary_display_id].width;
+            total_h = mMultiDisplay[primary_display_id].height;
+        }
+    } else {
+        for (const auto& iter : mMultiDisplay) {
+            if (iter.first == 0 || iter.second.cb != 0) {
+                total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
+                total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+            }
         }
     }
     if (h)
@@ -832,47 +867,20 @@ bool MultiDisplay::isMultiDisplayWindow() {
     return getConsoleAgents()->settings->hw()->hw_multi_display_window;
 }
 
+bool MultiDisplay::isPixelFold() {
+    return android_foldable_is_pixel_fold();
+}
+
 /*
- * Given that there are at most 11 displays, we can iterate through all possible
- * ways of showing each display in either the first row or the second row. It is
- * also possible to have an empty row. The best combination is to satisfy the
- * following two criteria: 1, The combined rectangle which contains all the
- * displays should have an aspect ratio that is close to the monitor's aspect
- * ratio. 2, The width of the first row should be close to the width of the
- * second row.
- *
- * Important detail of implementations: the x and y offsets saved in
- * mMultiDisplay use the bottom-left corner as origin. This coordinates will
- * be used by glviewport() in Postworker.cpp. However, the x and y offsets saved
- * by invoking setUIMultiDisplay() will be using top-left corner as origin.
- * Thus, input coordinates willl be calculated correctly when mouse events are
- * captured by QT window.
- *
- * TODO: We assume all displays pos_x/pos_y is adjustable here. This may
- * overwrite the specified pos_x/pos_y in setDisplayPos();
+ * Just use simple way to make it work in multidisplay+rotation
  */
 void MultiDisplay::recomputeLayoutLocked() {
-    uint32_t monitorWidth, monitorHeight;
-    double monitorAspectRatio = 1.0;
-    if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
-        dwarning(
-                "Unable to get monitor width and height, using default "
-                "ratio of 1.0");
-    } else {
-        monitorAspectRatio = (double)monitorHeight / (double)monitorWidth;
+    SkinRotation rotation = SKIN_ROTATION_0;
+    SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
+    if (layout) {
+        rotation = layout->orientation;
     }
-    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
-    for (const auto& iter : mMultiDisplay) {
-        if (iter.first == 0 || iter.second.cb != 0) {
-            rectangles[iter.first] =
-                    std::make_pair(iter.second.width, iter.second.height);
-        }
-    }
-    for (const auto& iter :
-         android::base::resolveLayout(rectangles, monitorAspectRatio)) {
-        mMultiDisplay[iter.first].pos_x = iter.second.first;
-        mMultiDisplay[iter.first].pos_y = iter.second.second;
-    }
+    performRotationLocked(rotation);
 }
 
 bool MultiDisplay::multiDisplayParamValidate(uint32_t id,

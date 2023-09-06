@@ -1131,11 +1131,16 @@ public:
     }
 
     void deleteDisplay(int displayId) {
-        if (displayId != 0 &&
-            mAgents->multi_display->setMultiDisplay(displayId, -1, -1, 0, 0, 0,
-                                                    0, false) >= 0) {
-            mAgents->emu->updateUIMultiDisplayPage(displayId);
-        }
+        if (displayId == 0)
+            return;
+
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [displayId, this]() {
+                    if ( mAgents->multi_display->setMultiDisplay(displayId, -1, -1, 0, 0, 0,
+                                                                 0, false) >= 0) {
+                        mAgents->emu->updateUIMultiDisplayPage(displayId);
+                    }
+                });
     }
 
     Status setDisplayConfigurations(ServerContext* context,
@@ -1203,22 +1208,33 @@ public:
             if (unchanged != std::end(existingDisplays)) {
                 // We are trying to change a display outside the set [1,3],
                 // or we are trying to update a display with the exact same
-                // configuration.
+                // configuration, however we do not want to delete it, as it
+                // is unchanged..
+                VERBOSE_INFO(grpc, "Display: %d is unchanged.",
+                             display.display());
+                updatedDisplays.insert(display.display());
                 continue;
             }
 
-            // TODO(jansene): This can result in UI messages if invalid
-            // values are presented.
-            if (mAgents->multi_display->setMultiDisplay(
-                        display.display(), -1, -1, display.width(),
-                        display.height(), display.dpi(), display.flags(),
-                        true) < 0) {
+            int updated = -1;
+            android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                    [&updated, &display, this]() {
+                        updated = mAgents->multi_display->setMultiDisplay(
+                                display.display(), -1, -1, display.width(),
+                                display.height(), display.dpi(),
+                                display.flags(), true);
+                    });
+            if (updated < 0) {
                 // oh, oh, failure.
                 failureDisplay = display.display();
                 break;
             };
 
+            VERBOSE_INFO(grpc, "Updated display: %d, to %dx%d (%d), flags: %d",
+                         display.display(), display.width(), display.height(),
+                         display.dpi(), display.flags());
             updatedDisplays.insert(display.display());
+
             mAgents->emu->updateUIMultiDisplayPage(display.display());
         }
 
@@ -1230,10 +1246,18 @@ public:
                 if (updatedDisplays.erase(display.display()) == 0) {
                     continue;
                 }
-                if (mAgents->multi_display->setMultiDisplay(
-                            display.display(), -1, -1, display.width(),
-                            display.height(), display.dpi(), display.flags(),
-                            true) >= 0) {
+                int updated = -1;
+                android::base::ThreadLooper::
+                        runOnMainLooperAndWaitForCompletion([&updated,
+                                                             &display,
+                                                             this]() {
+                            updated = mAgents->multi_display->setMultiDisplay(
+                                    display.display(), -1, -1, display.width(),
+                                    display.height(), display.dpi(),
+                                    display.flags(), true);
+                        });
+
+                if (updated >= 0) {
                     mAgents->emu->updateUIMultiDisplayPage(display.display());
                 };
             }
@@ -1253,6 +1277,7 @@ public:
         // Delete displays we don't want.
         for (const auto& display : previousState.displays()) {
             if (updatedDisplays.count(display.display()) == 0) {
+                VERBOSE_INFO(grpc, "Deleting display: %d", display.display());
                 deleteDisplay(display.display());
             }
         }

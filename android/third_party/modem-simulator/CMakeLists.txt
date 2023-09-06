@@ -36,7 +36,7 @@ android_add_library(
       tinyxml2/tinyxml2.cpp)
 
 target_link_libraries(modem_simulator_lib PRIVATE android-emu android-emu-base-headers
-                      android-emu-utils GLIB2::GLIB2)
+                      android-emu-utils glib2)
 target_include_directories(
   modem_simulator_lib
   PUBLIC ${MODEM_SIMULATOR_ROOT}/

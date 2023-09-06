@@ -18,6 +18,8 @@ if(CROSSCOMPILE)
   set(OPTION_ASTC_TESTS OFF CACHE BOOL "No tests astc when cross-compiling"
                                   FORCE)
 endif()
+
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../glib/glib glib)
 # Include astc-codec as a subproject.
 
 # astc-codec defines CMAKE_CXX_STANDARD=11, which won't work with msvc. We did
@@ -190,13 +192,12 @@ endif()
 
 if(FEATURE_NETSIM)
   set(EXTERNAL_QEMU ${ANDROID_QEMU2_TOP_DIR})
-  add_subdirectory(${AOSP_ROOT}/tools/netsim netsim)
-  add_subdirectory(mynewt-nimble)
-
   if(TARGET Rust::Rustc)
     add_subdirectory(${AOSP_ROOT}/packages/modules/Bluetooth/tools/rootcanal
                      rootcanal)
   endif()
+  add_subdirectory(${AOSP_ROOT}/tools/netsim netsim)
+  add_subdirectory(mynewt-nimble)
 
   if(DARWIN_AARCH64 AND NOT TARGET Rust::Rustc AND OPTION_RUST)
     message(STATUS "Cross compiling netsim to target Rosetta X86_64")

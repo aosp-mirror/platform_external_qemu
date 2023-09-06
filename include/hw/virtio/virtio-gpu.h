@@ -129,7 +129,6 @@ typedef struct VirtIOGPU {
     int renderer_blocked;
     QEMUTimer *fence_poll;
     QEMUTimer *print_stats;
-    QemuRecMutex ctrl_return_lock;
 
     uint32_t inflight;
     struct {
