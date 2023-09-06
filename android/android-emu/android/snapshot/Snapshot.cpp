@@ -68,6 +68,12 @@
 
 #define ALLOW_CHANGE_RENDERER
 
+#ifdef AEMU_GFXSTREAM_BACKEND
+static constexpr bool HAS_GFXSTREAM = true;
+#else
+static constexpr bool HAS_GFXSTREAM = false;
+#endif
+
 using android::base::c_str;
 using android::base::endsWith;
 using android::base::IniFile;
@@ -581,6 +587,9 @@ bool Snapshot::save() {
         buildId = ini.getString("ro.build.display.id", "");
     }
     mSnapshotPb.set_system_image_build_id(buildId);
+
+    dinfo("Saving with gfxstream=%d", HAS_GFXSTREAM);
+    mSnapshotPb.set_gfxstream(HAS_GFXSTREAM);
     return writeSnapshotToDisk();
 }
 
@@ -777,6 +786,16 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
 
 const bool Snapshot::checkValid(bool writeFailure) {
     if (!preload()) {
+        return false;
+    }
+
+    bool is_gfxstream_snapshot = mSnapshotPb.has_gfxstream() ? mSnapshotPb.gfxstream() : false;
+    if (is_gfxstream_snapshot != HAS_GFXSTREAM) {
+        dwarning("snapshot was created with gfxstream=%d, but this emulator has gfxstream=%d\n",
+                is_gfxstream_snapshot, HAS_GFXSTREAM);
+        if (writeFailure) {
+            saveFailure(FailureReason::ConfigMismatchRenderer);
+        }
         return false;
     }
 
