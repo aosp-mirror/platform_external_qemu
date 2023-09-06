@@ -343,6 +343,8 @@ void FoldableModel::initPostures() {
         mState.config.supportedFoldablePostures[i] = false;
     }
 
+    const bool is_pixel_fold = android_foldable_is_pixel_fold();
+
     std::string postureList(getConsoleAgents()->settings->hw()->hw_sensor_posture_list);
     std::string postureValues(
             isHinge ? getConsoleAgents()->settings->hw()->hw_sensor_hinge_angles_posture_definitions
@@ -382,6 +384,16 @@ void FoldableModel::initPostures() {
                             valuesToPosture.angles[j].default_value = std::stof(values[2]);
                         } else {
                             valuesToPosture.angles[j].default_value = (left + right) / 2.0f;
+                        }
+                        //bug: 296191671
+                        // pixel_fold has fold (0), half (1) and open (2)
+                        // default to 0, 90 and 180, instead of 15, 90 and 165
+                        if (is_pixel_fold) {
+                            if (i == 0) {
+                                valuesToPosture.angles[j].default_value = left;
+                            } else if (i == 2) {
+                                valuesToPosture.angles[j].default_value = right;
+                            }
                         }
                     }
                 }
