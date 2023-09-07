@@ -54,9 +54,8 @@ void SimpleCarClient::receiveCarEvents(OnEvent<CarEvent> incoming,
     grpc::ClientContext* context = mClient->newContext().release();
     static google::protobuf::Empty empty;
     auto read = new SimpleClientLambdaReader<CarEvent>(
-            incoming, [onDone, context](auto status) {
+            incoming, context, [onDone](auto status) {
                 onDone(ConvertGrpcStatusToAbseilStatus(status));
-                delete context;
             });
     mService->async()->receiveCarEvents(context, &empty, read);
     read->StartRead();

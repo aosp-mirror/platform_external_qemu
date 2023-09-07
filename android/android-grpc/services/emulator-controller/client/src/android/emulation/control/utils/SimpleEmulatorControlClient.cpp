@@ -90,9 +90,8 @@ void SimpleEmulatorControlClient::receiveEmulatorNotificationEvents(OnEvent<Noti
     grpc::ClientContext* context = mClient->newContext().release();
     static google::protobuf::Empty empty;
     auto read = new SimpleClientLambdaReader<Notification>(
-            incoming, [onDone, context](auto status) {
+            incoming, context, [onDone](auto status) {
                 onDone(ConvertGrpcStatusToAbseilStatus(status));
-                delete context;
             });
     mService->async()->streamNotification(context, &empty, read);
     read->StartRead();
@@ -107,6 +106,26 @@ void SimpleEmulatorControlClient::sendFingerprint(Fingerprint finger,
     mService->async()->sendFingerprint(
             context, request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
+}
+
+void SimpleEmulatorControlClient::sendKey(KeyboardEvent key,
+                                          OnCompleted<Empty> onDone) {
+    auto [request, response, context] =
+            createGrpcRequestContext<KeyboardEvent, Empty>(mClient);
+    request->CopyFrom(key);
+    mService->async()->sendKey(
+            context, request, response,
+            grpcCallCompletionHandler(context, request, response, onDone));
+}
+
+std::unique_ptr<SimpleClientWriter<InputEvent>>
+SimpleEmulatorControlClient::streamInputEvent() {
+    static Empty empty;
+    auto context = mClient->newContext();
+    auto writer = std::make_unique<SimpleClientWriter<InputEvent>>(std::move(context));
+    mService->async()->streamInputEvent(writer->context(), &empty,
+                                        writer.get());
+    return writer;
 }
 
 }  // namespace control

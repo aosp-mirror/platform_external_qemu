@@ -20,6 +20,7 @@
 
 #include "absl/status/statusor.h"
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"
+#include "android/grpc/utils/SimpleAsyncGrpc.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
 
@@ -81,6 +82,16 @@ public:
     void sendFingerprint(Fingerprint finger, OnCompleted<Empty> onDone);
 
     /**
+     * @brief  Sends a keyboard event to the emulator.
+     * beware that events can arrive out of order. Use the streaming variant
+     * if you deliver events at a rapid pace.
+     *
+     * @param key The keyboard event to send
+     * @param onDone The callback to be invoked when the operation completes.
+     */
+    void sendKey(KeyboardEvent key, OnCompleted<Empty> onDone);
+
+    /**
      * @brief Asynchronously gets the display configuration of the emulator
      *
      * @param onDone The callback to be invoked when the operation completes.
@@ -98,6 +109,8 @@ public:
     // Receive notifications from the emulator
     void receiveEmulatorNotificationEvents(OnEvent<Notification> incoming,
                                            OnFinished onDone);
+
+    std::unique_ptr<SimpleClientWriter<InputEvent>> streamInputEvent();
 
     /**
      * Maps an `absl::StatusOr<T*>` to an `absl::StatusOr<T>`.
