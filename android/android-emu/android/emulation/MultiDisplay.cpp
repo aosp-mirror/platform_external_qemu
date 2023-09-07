@@ -623,13 +623,18 @@ void MultiDisplay::performRotation(int rot) {
 void MultiDisplay::performRotationLocked(int mOrientation) {
 
     if (android_foldable_is_pixel_fold()) {
-        mMultiDisplay[0].pos_x = 0;
-        mMultiDisplay[0].pos_y = 0;
-        mMultiDisplay[0].rotation = mOrientation;
+        constexpr int primary_display_id = 0;
+        const int secondary_display_id = android_foldable_pixel_fold_second_display_id();
+        const bool second_display_exists = (mMultiDisplay.find(secondary_display_id) != mMultiDisplay.end());
+        mMultiDisplay[primary_display_id].pos_x = 0;
+        mMultiDisplay[primary_display_id].pos_y = 0;
+        mMultiDisplay[primary_display_id].rotation = mOrientation;
 
-        mMultiDisplay[6].pos_x = 0;
-        mMultiDisplay[6].pos_y = 0;
-        mMultiDisplay[6].rotation = mOrientation;
+        if (second_display_exists) {
+            mMultiDisplay[secondary_display_id].pos_x = 0;
+            mMultiDisplay[secondary_display_id].pos_y = 0;
+            mMultiDisplay[secondary_display_id].rotation = mOrientation;
+        }
         return;
     }
 
@@ -832,7 +837,8 @@ void MultiDisplay::getCombinedDisplaySizeLocked(uint32_t* w, uint32_t* h) {
     if (android_foldable_is_pixel_fold()) {
         constexpr int primary_display_id = 0;
         const int secondary_display_id = android_foldable_pixel_fold_second_display_id();
-        if (android_foldable_is_folded()) {
+        const bool second_display_exists = (mMultiDisplay.find(secondary_display_id) != mMultiDisplay.end());
+        if (android_foldable_is_folded() && second_display_exists) {
             total_w = mMultiDisplay[secondary_display_id].width;
             total_h = mMultiDisplay[secondary_display_id].height;
         } else {
