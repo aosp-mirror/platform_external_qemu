@@ -106,6 +106,7 @@ if(NOT BUILDING_FOR_AARCH64)
     PRIVATE ${ANDROID_EMUGL_DIR}/host/include ${ANDROID_EMUGL_DIR}/combined
             ${ANDROID_EMUGL_DIR}/guest/grallocusage
             ${GFXSTREAM_REPO_ROOT}/guest
+            ${GFXSTREAM_REPO_ROOT}/guest/platform/include
             ${GFXSTREAM_REPO_ROOT}/guest/OpenglCodecCommon
             ${GFXSTREAM_REPO_ROOT}/guest/renderControl_enc
             ${GFXSTREAM_REPO_ROOT}/include/render-utils)
