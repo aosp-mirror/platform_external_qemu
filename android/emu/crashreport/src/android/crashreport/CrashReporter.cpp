@@ -23,6 +23,7 @@
 #include <utility>
 #include <vector>
 
+#include <cmath>
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
@@ -153,15 +154,42 @@ void CrashReporter::passDumpMessage(const char* message) {
 void CrashReporter::attachData(std::string name,
                                std::string data,
                                bool replace) {
-    auto annotation = std::make_unique<SimpleStringAnnotation<256>>(name, data);
-    mAnnotations.push_back(std::move(annotation));
-}
 
-void CrashReporter::attachBinaryData(std::string name,
-                                     std::string data,
-                                     bool replace) {
-    dwarning("Binary data cannot be attached to a crash, ignoring %s",
-             name.c_str());
+    // Let's figure out how many bytes we need in our annotations.
+    // We will bucketize by power of 2. We take the floor because
+    // 2<<1 == 2^2, 2<<2 == 2^3, ..., etc..
+    int shift = floor(log2(data.size()));
+
+    std::unique_ptr<crashpad::Annotation> annotation;
+    // Sadly we have to do some pseudo switching to minimize the use of
+    // space in our minidump.
+    if (shift <= 5)
+        // 2<<5 == 2^6 == 64
+        annotation = std::make_unique<SimpleStringAnnotation<2<<5>>(name, data);
+    if (shift == 6)
+        annotation = std::make_unique<SimpleStringAnnotation<2<<6>>(name, data);
+    if (shift == 7)
+        annotation = std::make_unique<SimpleStringAnnotation<2<<7>>(name, data);
+    if (shift == 8)
+        annotation = std::make_unique<SimpleStringAnnotation<2<<8>>(name, data);
+    if (shift == 9)
+        annotation = std::make_unique<SimpleStringAnnotation<2<<9>>(name, data);
+    if (shift == 10)
+        annotation = std::make_unique<SimpleStringAnnotation<2<<10>>(name, data);
+    if (shift == 11)
+        annotation = std::make_unique<SimpleStringAnnotation<2<<11>>(name, data);
+    if (shift == 12)
+        annotation = std::make_unique<SimpleStringAnnotation<2<<12>>(name, data);
+    if (shift >= 13) {
+        annotation = std::make_unique<SimpleStringAnnotation<2<<13>>(name, data);
+        if (data.size() > 2<<13)
+            dwarning(
+                    "Crash annotation is very large (%d), only 16384 bytes "
+                    "will be recorded, %d bytes are lost.",
+                    data.size(), data.size() - (2<<13));
+    }
+
+    mAnnotations.push_back(std::move(annotation));
 }
 
 }  // namespace crashreport

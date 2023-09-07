@@ -34,6 +34,7 @@ QtLogger* QtLogger::get() {
 
 void QtLogger::write(const char* fmt, ...) {
     wchar_t buf[kBufferLen] = {};
+    char cbuf[kBufferLen * 2] = {};
     std::vector<wchar_t> wfmt(strlen(fmt) + 1);
     mbstowcs(wfmt.data(), fmt, wfmt.size());
     va_list ap;
@@ -42,5 +43,7 @@ void QtLogger::write(const char* fmt, ...) {
     va_end(ap);
 
     dinfo("%S", buf);
-    mFileHandle << buf << std::endl;
+
+    wcstombs(cbuf, buf, std::size(cbuf));
+    mFileHandle << std::string(cbuf) << std::endl;
 }
