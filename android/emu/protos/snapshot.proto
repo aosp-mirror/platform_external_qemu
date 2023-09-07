@@ -152,4 +152,7 @@ message Snapshot {
 
     // System image build ID
     optional string system_image_build_id = 19;
+
+    // True if emulator was built with gfxstream backend
+    optional bool gfxstream = 20;
 }
