@@ -18,14 +18,19 @@
 #include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
 #include "android/console.h"                          // for getConsoleAgents
 #include "host-common/vm_operations.h"  // for QAndroidVmOpera...
+#include "android/emulation/control/adb/AdbInterface.h"
 #include "android/hw-events.h"                        // for EV_KEY, EV_SW
 #include "android/metrics/UiEventTracker.h"           // for UiEventTracker
+#include "android/skin/keycode.h"                     // for kKeyCodeAssist
 #include "android/skin/event.h"                       // for SkinEvent, Skin...
 #include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
 #include "android/skin/qt/extended-pages/common.h"    // for getSelectedTheme
 #include "android/skin/qt/qt-settings.h"              // for PER_AVD_SETTIN...
 #include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
 #include "studio_stats.pb.h"                          // for EmulatorUiEvent
+
+#include "host-common/FeatureControl.h"
+#include "host-common/feature_control.h"
 
 namespace {
 QString getAvdSettingsFile() {
@@ -92,13 +97,16 @@ void saveMicAllowRealAudio(const bool value) {
 }
 }  // namespace
 
+namespace fc = android::featurecontrol;
+
 MicrophonePage::MicrophonePage(QWidget* parent)
     : QWidget(parent),
       mUi(new Ui::MicrophonePage()),
              mMicTracker(new UiEventTracker(
               android_studio::EmulatorUiEvent::BUTTON_PRESS,
               android_studio::EmulatorUiEvent::EXTENDED_MIC_TAB)),
-      mEmulatorWindow(nullptr) {
+      mEmulatorWindow(nullptr),
+      mDeviceKeyboardHasAssistKey(fc::isEnabled(fc::DeviceKeyboardHasAssistKey)) {
     mUi->setupUi(this);
 
     mUi->mic_inserted->setCheckState(getSavedMicInserted() ? Qt::Checked : Qt::Unchecked);
@@ -174,11 +182,21 @@ void MicrophonePage::on_mic_allowRealAudio_toggled(bool checked) {
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_pressed() {
-    forwardKeyToEmulator(KEY_VOICECOMMAND, true);
+    if (mDeviceKeyboardHasAssistKey) {
+        forwardKeyToEmulator(kKeyCodeAssist, true);
+    }
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_released() {
-    forwardKeyToEmulator(KEY_VOICECOMMAND, false);
+    if (mDeviceKeyboardHasAssistKey) {
+        forwardKeyToEmulator(kKeyCodeAssist, false);
+    } else {
+        // for devices without KEYCODE_ASSIST in the .kl file, send it via adb
+        auto adbInterface = android::emulation::AdbInterface::getGlobal();
+        if (adbInterface) {
+            adbInterface->enqueueCommand({"shell", "input", "keyevent", "KEYCODE_ASSIST"});
+        }
+    }
 }
 
 void MicrophonePage::setEmulatorWindow(EmulatorQtWindow* eW) {
