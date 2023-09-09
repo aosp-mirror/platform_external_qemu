@@ -44,6 +44,8 @@ typedef struct SkinWindowFuncs {
                          bool deleteExisting);
     void (*opengles_setTranslation)(float px, float py);
     void (*opengles_redraw)(void);
+    int (*net_speed)(void);
+    int (*net_delay)(void);
 } SkinWindowFuncs;
 
 /* Note: if scale is <= 0, we interpret this as 'auto-detect'.

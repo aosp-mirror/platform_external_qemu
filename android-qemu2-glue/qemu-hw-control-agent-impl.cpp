@@ -24,9 +24,15 @@ uint32_t get_brightness(const char* light_name) {
     return android_hw_control_get_brightness(light_name);
 }
 
+void set_callbacks(void* opaque,
+                                         const AndroidHwControlFuncs* funcs) {
+    android_hw_control_set(opaque, funcs);
+}
+
 const QAndroidHwControlAgent sQAndroidHwControlAgent = {
         .setBrightness = set_brightness,
         .getBrightness = get_brightness,
+        .setCallbacks = set_callbacks,
 };
 
 }  // namespace
