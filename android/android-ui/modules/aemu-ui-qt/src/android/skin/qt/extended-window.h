@@ -78,7 +78,6 @@ private slots:
     void disablePinchToZoom(bool disabled);
     void pauseAvdWhenMinimized(bool pause);
     void showMacroRecordPage();
-    void hideRotationButtons();
 
     // Master tabs
     void on_batteryButton_clicked();
