@@ -225,7 +225,7 @@ void crashhandler_die(const char* message) {
         derror("%s: fatal: %s", __func__, message);
         reporter->GenerateDumpAndDie(message);
     } else {
-        dfatal("Emulator: exiting becase of the internal error '%s'", message);
+        dfatal("Emulator: exiting because of the internal error '%s'", message);
         _exit(1);
     }
 }
