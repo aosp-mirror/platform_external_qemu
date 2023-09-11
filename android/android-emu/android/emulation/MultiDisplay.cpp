@@ -867,12 +867,21 @@ void MultiDisplay::getCombinedDisplaySizeLocked(uint32_t* w, uint32_t* h) {
         const int secondary_display_id = android_foldable_pixel_fold_second_display_id();
         const bool second_display_exists = (mMultiDisplay.find(secondary_display_id) != mMultiDisplay.end());
         if (android_foldable_is_folded() && second_display_exists) {
-            total_w = mMultiDisplay[secondary_display_id].width;
-            total_h = mMultiDisplay[secondary_display_id].height;
+            total_w = mMultiDisplay[secondary_display_id].originalWidth;
+            total_h = mMultiDisplay[secondary_display_id].originalHeight;
         } else {
-            total_w = mMultiDisplay[primary_display_id].width;
-            total_h = mMultiDisplay[primary_display_id].height;
+            total_w = mMultiDisplay[primary_display_id].originalWidth;
+            total_h = mMultiDisplay[primary_display_id].originalHeight;
         }
+        SkinRotation rotation = SKIN_ROTATION_0;
+        SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
+        if (layout) {
+            rotation = layout->orientation;
+        }
+        if (rotation == SKIN_ROTATION_90 || rotation == SKIN_ROTATION_270) {
+            std::swap(total_w, total_h);
+        }
+
     } else {
         for (const auto& iter : mMultiDisplay) {
             if (iter.first == 0 || iter.second.cb != 0) {
