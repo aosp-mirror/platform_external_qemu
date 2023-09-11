@@ -35,4 +35,4 @@ extern void skin_enable_mouse_tracking(bool enable) {
     (void)enable;
 }
 
-extern void skin_event_add(SkinEvent* event) { }
+extern void skin_event_add(SkinEvent event) { }

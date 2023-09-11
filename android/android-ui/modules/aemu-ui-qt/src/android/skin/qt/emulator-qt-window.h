@@ -47,8 +47,10 @@
 #include <QTabletEvent>
 #include <QWidget>
 
+#include <deque>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -262,11 +264,11 @@ public:
                         const QTabletEvent* event,
                         bool skipSync = false);
     void handleMouseWheelEvent(int delta, Qt::Orientation orientation);
-    void handleKeyEvent(SkinEventType type, QKeyEvent* event);
+    void handleKeyEvent(SkinEventType type, const QKeyEvent& event);
     void panHorizontal(bool left);
     void panVertical(bool up);
-    SkinEvent* createSkinEvent(SkinEventType type);
-    void queueSkinEvent(SkinEvent* event);
+    static SkinEvent createSkinEvent(SkinEventType type);
+    void queueSkinEvent(SkinEvent event);
     void recenterFocusPoint();
     void saveZoomPoints(const QPoint& focus, const QPoint& viewportFocus);
     void scaleDown();
@@ -456,7 +458,7 @@ private:
     bool mouseInside();
     SkinMouseButtonType getSkinMouseButton(const QMouseEvent* event) const;
 
-    void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
+    void forwardKeyEventToEmulator(SkinEventType type, const QKeyEvent& event);
     void forwardGenericEventToEmulator(int type, int code, int value);
 
     void maskWindowFrame();
@@ -483,8 +485,8 @@ private:
     QPixmap mScaledBackingImage;
     bool mBackingBitmapChanged = true;
 
-    QQueue<SkinEvent*> mSkinEventQueue;
-    android::base::Lock mSkinEventQueueLock;
+    std::deque<SkinEvent> mSkinEventQueue;
+    std::mutex mSkinEventQueueMtx;
 
     // Snapshot state
     bool mShouldShowSnapshotModalOverlay = false;

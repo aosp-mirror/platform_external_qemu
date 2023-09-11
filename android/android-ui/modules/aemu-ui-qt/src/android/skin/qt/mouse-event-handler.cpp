@@ -31,20 +31,20 @@ void MouseEventHandler::handleMouseEvent(SkinEventType type,
                                         uint32_t displayId) {
 #endif  // QT_VERSION
 
-    SkinEvent* skin_event = createSkinEvent(type);
-    skin_event->u.mouse.button = button;
-    skin_event->u.mouse.skip_sync = skipSync;
-    skin_event->u.mouse.x = pos.x();
-    skin_event->u.mouse.y = pos.y();
-    skin_event->u.mouse.x_global = gPos.x();
-    skin_event->u.mouse.y_global = gPos.y();
+    SkinEvent skin_event = createSkinEvent(type);
+    skin_event.u.mouse.button = button;
+    skin_event.u.mouse.skip_sync = skipSync;
+    skin_event.u.mouse.x = pos.x();
+    skin_event.u.mouse.y = pos.y();
+    skin_event.u.mouse.x_global = gPos.x();
+    skin_event.u.mouse.y_global = gPos.y();
 
-    skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
-    skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
-    skin_event->u.mouse.display_id = displayId;
+    skin_event.u.mouse.xrel = pos.x() - mPrevMousePosition.x();
+    skin_event.u.mouse.yrel = pos.y() - mPrevMousePosition.y();
+    skin_event.u.mouse.display_id = displayId;
     mPrevMousePosition = pos;
     auto win = EmulatorQtWindow::getInstance();
-    win->queueSkinEvent(skin_event);
+    win->queueSkinEvent(std::move(skin_event));
 }
 
 // State machine that translates the mouse event types based on button states
@@ -99,8 +99,8 @@ SkinMouseButtonType MouseEventHandler::getSkinMouseButton(
     }
 }
 
-SkinEvent* MouseEventHandler::createSkinEvent(SkinEventType type) {
-    SkinEvent* skin_event = new SkinEvent();
-    skin_event->type = type;
+SkinEvent MouseEventHandler::createSkinEvent(SkinEventType type) {
+    SkinEvent skin_event;
+    skin_event.type = type;
     return skin_event;
 }

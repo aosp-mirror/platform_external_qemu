@@ -116,6 +116,7 @@
 #endif
 #endif
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <string>
@@ -1054,11 +1055,11 @@ void EmulatorQtWindow::dropEvent(QDropEvent* event) {
 }
 
 void EmulatorQtWindow::keyPressEvent(QKeyEvent* event) {
-    handleKeyEvent(kEventKeyDown, event);
+    handleKeyEvent(kEventKeyDown, *event);
 }
 
 void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
-    handleKeyEvent(kEventKeyUp, event);
+    handleKeyEvent(kEventKeyUp, *event);
 
     // If we enabled trackball mode, tell Qt to always forward mouse movement
     // events. Otherwise, Qt will forward them only when a button is pressed.
@@ -1172,8 +1173,7 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
         D("%s: mouse grabbed\n", __func__);
         grabMouse(QCursor(Qt::CursorShape::BlankCursor));
 
-        SkinEvent* skin_event = createSkinEvent(kEventMouseStartTracking);
-        queueSkinEvent(skin_event);
+        queueSkinEvent(createSkinEvent(kEventMouseStartTracking));
 
         mMouseGrabbed = true;
     }
@@ -1377,16 +1377,16 @@ void EmulatorQtWindow::maskWindowFrame() {
         mHardRefreshCountDown = 5;
         mPreviouslyFramed = haveFrame;
     }
-    SkinEvent* event = new SkinEvent();
+    SkinEventType eventType;
     if (mHardRefreshCountDown == 0) {
         D("%s: kEventWindowChanged", __FUNCTION__);
-        event->type = kEventWindowChanged;
+        eventType = kEventWindowChanged;
     } else {
         D("%s: kEventScreenChanged", __FUNCTION__);
-        event->type = kEventScreenChanged;
+        eventType = kEventScreenChanged;
         mHardRefreshCountDown--;
     }
-    queueSkinEvent(event);
+    queueSkinEvent(createSkinEvent(eventType));
 }
 
 void EmulatorQtWindow::paintEvent(QPaintEvent*) {
@@ -1469,9 +1469,9 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways) {
     }
 
     D("%s: kEventScreenChanged", __FUNCTION__);
-    SkinEvent* event = new SkinEvent();
-    event->type = kEventScreenChanged;
-    queueSkinEvent(event);
+    SkinEvent event;
+    event.type = kEventScreenChanged;
+    queueSkinEvent(std::move(event));
 }
 
 void EmulatorQtWindow::setIgnoreWheelEvent(bool ignore) {
@@ -1542,45 +1542,43 @@ void EmulatorQtWindow::handleTouchPoints(const QTouchEvent& touch,
         }
     }
     for (auto const& elem : touch.touchPoints()) {
-        SkinEvent* skin_event = nullptr;
+        SkinEvent skin_event;
         bool eventSet = false;
         if (elem.state() == Qt::TouchPointPressed) {
             skin_event = createSkinEvent(kEventTouchBegin);
-            skin_event->type = kEventTouchBegin;
             eventSet = true;
         } else if (elem.state() == Qt::TouchPointMoved) {
             skin_event = createSkinEvent(kEventTouchUpdate);
-            skin_event->type = kEventTouchUpdate;
             eventSet = true;
         } else if (elem.state() == Qt::TouchPointReleased) {
             skin_event = createSkinEvent(kEventTouchEnd);
-            skin_event->type = kEventTouchEnd;
             eventSet = true;
         }
         if (eventSet) {
             bool lasElementFound = false;
-            skin_event->u.multi_touch_point.x = elem.pos().x();
-            skin_event->u.multi_touch_point.y = elem.pos().y();
-            skin_event->u.multi_touch_point.x_global = elem.screenPos().x();
-            skin_event->u.multi_touch_point.y_global = elem.screenPos().y();
-            skin_event->u.multi_touch_point.id = elem.id();
-            skin_event->u.multi_touch_point.pressure =
+            skin_event.u.multi_touch_point.x = elem.pos().x();
+            skin_event.u.multi_touch_point.y = elem.pos().y();
+            skin_event.u.multi_touch_point.x_global = elem.screenPos().x();
+            skin_event.u.multi_touch_point.y_global = elem.screenPos().y();
+            skin_event.u.multi_touch_point.id = elem.id();
+            skin_event.u.multi_touch_point.pressure =
                     (int)(elem.pressure() * MTS_PRESSURE_RANGE_MAX);
-            skin_event->u.multi_touch_point.touch_minor =
+            skin_event.u.multi_touch_point.touch_minor =
                     std::min(elem.ellipseDiameters().rheight(),
                              elem.ellipseDiameters().rwidth());
-            skin_event->u.multi_touch_point.touch_major =
+            skin_event.u.multi_touch_point.touch_major =
                     std::max(elem.ellipseDiameters().rheight(),
                              elem.ellipseDiameters().rwidth());
-            skin_event->u.multi_touch_point.orientation = elem.rotation();
+            skin_event.u.multi_touch_point.orientation = elem.rotation();
             if (nrOfPoints == lastValidTouchPointIndex) {
-                skin_event->u.multi_touch_point.skip_sync = false;
+                skin_event.u.multi_touch_point.skip_sync = false;
                 lasElementFound = true;
             } else {
-                skin_event->u.multi_touch_point.skip_sync = true;
+                skin_event.u.multi_touch_point.skip_sync = true;
             }
-            skin_event->u.multi_touch_point.display_id = displayId;
-            queueSkinEvent(skin_event);
+            skin_event.u.multi_touch_point.display_id = displayId;
+
+            queueSkinEvent(std::move(skin_event));
             if (lasElementFound) {
                 break;
             }
@@ -1647,9 +1645,7 @@ bool EmulatorQtWindow::event(QEvent* ev) {
 
         // Trigger a ScreenChanged event so the device
         // screen will refresh immediately
-        SkinEvent* event = new SkinEvent();
-        event->type = kEventScreenChanged;
-        queueSkinEvent(event);
+        queueSkinEvent(createSkinEvent(kEventScreenChanged));
 #endif  // !_WIN32
     }
 
@@ -1873,52 +1869,53 @@ void EmulatorQtWindow::slot_isWindowOffScreen(bool* out_value,
 }
 
 void EmulatorQtWindow::pollEvent(SkinEvent* event, bool* hasEvent) {
-    android::base::AutoLock lock(mSkinEventQueueLock);
-    if (mSkinEventQueue.isEmpty()) {
-        lock.unlock();
+    std::unique_lock<std::mutex> lock(mSkinEventQueueMtx);
+    if (mSkinEventQueue.empty()) {
         *hasEvent = false;
     } else {
-        SkinEvent* newEvent = mSkinEventQueue.dequeue();
-        lock.unlock();
+        *event = mSkinEventQueue.front();
+        mSkinEventQueue.pop_front();
         *hasEvent = true;
-
-        memcpy(event, newEvent, sizeof(SkinEvent));
-        delete newEvent;
     }
 }
 
-void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
+void EmulatorQtWindow::queueSkinEvent(SkinEvent event) {
+    const auto eventType = event.type;
     const auto rotationEventLayout =
-            event->type == kEventLayoutRotate
-                    ? makeOptional(event->u.layout_rotation.rotation)
-                    : kNullopt;
+        (eventType == kEventLayoutRotate)
+            ? makeOptional(event.u.layout_rotation.rotation)
+            : kNullopt;
 
-    android::base::AutoLock lock(mSkinEventQueueLock);
-    const bool firstEvent = mSkinEventQueue.isEmpty();
+    const std::lock_guard<std::mutex> lock(mSkinEventQueueMtx);
+    const bool firstEvent = mSkinEventQueue.empty();
 
     // For the following events, only the "last" example of said event
     // matters, so ensure that there is only one of them in the queue at a
     // time. Additionaly the screen changed event processing is very slow,
     // so let's not generate too many of them.
     bool replaced = false;
-    const auto type = event->type;
-    if (type == kEventScrollBarChanged || type == kEventZoomedWindowResized ||
-        type == kEventScreenChanged) {
-        for (int i = 0; i < mSkinEventQueue.size(); i++) {
-            if (mSkinEventQueue.at(i)->type == type) {
-                SkinEvent* toDelete = mSkinEventQueue.at(i);
-                mSkinEventQueue.replace(i, event);
-                lock.unlock();
-                delete toDelete;
+
+    switch (eventType) {
+    case kEventScrollBarChanged:
+    case kEventZoomedWindowResized:
+    case kEventScreenChanged: {
+            const auto i = std::find_if(mSkinEventQueue.begin(), mSkinEventQueue.end(),
+                                        [eventType](const SkinEvent& ev){
+                                            return ev.type == eventType;
+                                        });
+            if (i != mSkinEventQueue.end()) {
+                *i = std::move(event);
                 replaced = true;
-                break;
             }
         }
+        break;
+
+    default:
+        break;
     }
 
     if (!replaced) {
-        mSkinEventQueue.enqueue(event);
-        lock.unlock();
+        mSkinEventQueue.push_back(std::move(event));
     }
 
     const auto uiAgent = mToolWindow->getUiEmuAgent();
@@ -2461,9 +2458,9 @@ static int convertKeyCode(int sym) {
     return -1;
 }
 
-SkinEvent* EmulatorQtWindow::createSkinEvent(SkinEventType type) {
-    SkinEvent* skin_event = new SkinEvent();
-    skin_event->type = type;
+SkinEvent EmulatorQtWindow::createSkinEvent(SkinEventType type) {
+    SkinEvent skin_event;
+    skin_event.type = type;
     return skin_event;
 }
 
@@ -2518,9 +2515,7 @@ void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
     maskWindowFrame();
 #ifdef __APPLE__
     // To fix issues when resizing + linking against macos sdk 11.
-    SkinEvent* changeEvent = new SkinEvent();
-    changeEvent->type = kEventScreenChanged;
-    queueSkinEvent(changeEvent);
+    queueSkinEvent(createSkinEvent(kEventScreenChanged));
 #endif
 }
 
@@ -2677,20 +2672,20 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
         mToolWindow->reportMouseButtonDown();
     }
 
-    SkinEvent* skin_event = createSkinEvent(type);
-    skin_event->u.mouse.button = button;
-    skin_event->u.mouse.skip_sync = skipSync;
-    skin_event->u.mouse.x = pos.x();
-    skin_event->u.mouse.y = pos.y();
-    skin_event->u.mouse.x_global = gPos.x();
-    skin_event->u.mouse.y_global = gPos.y();
+    SkinEvent skin_event = createSkinEvent(type);
+    skin_event.u.mouse.button = button;
+    skin_event.u.mouse.skip_sync = skipSync;
+    skin_event.u.mouse.x = pos.x();
+    skin_event.u.mouse.y = pos.y();
+    skin_event.u.mouse.x_global = gPos.x();
+    skin_event.u.mouse.y_global = gPos.y();
 
-    skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
-    skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
-    skin_event->u.mouse.display_id = 0;
+    skin_event.u.mouse.xrel = pos.x() - mPrevMousePosition.x();
+    skin_event.u.mouse.yrel = pos.y() - mPrevMousePosition.y();
+    skin_event.u.mouse.display_id = 0;
     mPrevMousePosition = pos;
 
-    queueSkinEvent(skin_event);
+    queueSkinEvent(std::move(skin_event));
 }
 
 // Stores all the information of a pen event and
@@ -2698,55 +2693,54 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
 void EmulatorQtWindow::handlePenEvent(SkinEventType type,
                                       const QTabletEvent* event,
                                       bool skipSync) {
-    SkinEvent* skin_event = createSkinEvent(type);
-    skin_event->u.pen.tracking_id = event->uniqueId();
-    skin_event->u.pen.pressure =
+    SkinEvent skin_event = createSkinEvent(type);
+    skin_event.u.pen.tracking_id = event->uniqueId();
+    skin_event.u.pen.pressure =
             (int)(event->pressure() * MTS_PRESSURE_RANGE_MAX);
-    skin_event->u.pen.orientation =
+    skin_event.u.pen.orientation =
             penOrientation(tiltToRotation(event->xTilt(), event->yTilt()));
-    skin_event->u.pen.button_pressed =
+    skin_event.u.pen.button_pressed =
             ((event->buttons() & Qt::RightButton) == Qt::RightButton);
 #if QT_VERSION >= 0x060000
-    skin_event->u.pen.rubber_pointer =
+    skin_event.u.pen.rubber_pointer =
             (event->pointerType() == QPointingDevice::PointerType::Eraser);
 #else
-    skin_event->u.pen.rubber_pointer =
+    skin_event.u.pen.rubber_pointer =
             (event->pointerType() == QTabletEvent::Eraser);
 #endif  // QT_VERSION
-    skin_event->u.pen.x = event->pos().x();
-    skin_event->u.pen.y = event->pos().y();
-    skin_event->u.pen.x_global = event->globalPos().x();
-    skin_event->u.pen.y_global = event->globalPos().y();
-    skin_event->u.pen.skip_sync = skipSync;
+    skin_event.u.pen.x = event->pos().x();
+    skin_event.u.pen.y = event->pos().y();
+    skin_event.u.pen.x_global = event->globalPos().x();
+    skin_event.u.pen.y_global = event->globalPos().y();
+    skin_event.u.pen.skip_sync = skipSync;
 
-    queueSkinEvent(skin_event);
+    queueSkinEvent(std::move(skin_event));
 }
 
 void EmulatorQtWindow::handleMouseWheelEvent(int delta,
                                              Qt::Orientation orientation) {
-    SkinEvent* skin_event = createSkinEvent(kEventMouseWheel);
-    skin_event->u.wheel.x_delta = 0;
-    skin_event->u.wheel.y_delta = 0;
+    SkinEvent skin_event = createSkinEvent(kEventMouseWheel);
+    skin_event.u.wheel.x_delta = 0;
+    skin_event.u.wheel.y_delta = 0;
     if (orientation == Qt::Horizontal) {
-        skin_event->u.wheel.x_delta = delta;
+        skin_event.u.wheel.x_delta = delta;
     } else {
-        skin_event->u.wheel.y_delta = delta;
+        skin_event.u.wheel.y_delta = delta;
     }
 
-    queueSkinEvent(skin_event);
+    queueSkinEvent(std::move(skin_event));
 }
 
 void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
-                                                 QKeyEvent* event) {
-    SkinEvent* skin_event = createSkinEvent(type);
-    SkinEventKeyData& keyData = skin_event->u.key;
-    keyData.keycode = convertKeyCode(event->key());
+                                                 const QKeyEvent& event) {
+    SkinEvent skin_event = createSkinEvent(type);
+    SkinEventKeyData& keyData = skin_event.u.key;
+    keyData.keycode = convertKeyCode(event.key());
     if (keyData.keycode == -1) {
-        D("Failed to convert key for event key %d", event->key());
-        delete skin_event;
+        D("Failed to convert key for event key %d", event.key());
         return;
     }
-    Qt::KeyboardModifiers modifiers = event->modifiers();
+    Qt::KeyboardModifiers modifiers = event.modifiers();
     if (modifiers & Qt::ShiftModifier)
         keyData.mod |= kKeyModLShift;
     if (modifiers & Qt::ControlModifier)
@@ -2754,25 +2748,24 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
     if (modifiers & Qt::AltModifier)
         keyData.mod |= kKeyModLAlt;
 
-    queueSkinEvent(skin_event);
+    queueSkinEvent(std::move(skin_event));
 }
 
-void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
+void EmulatorQtWindow::handleKeyEvent(SkinEventType type, const QKeyEvent& event) {
     // TODO(liyl): Make this shortcut configurable instead of hard-coding it
     // inside the code.
-    if (event->key() == Qt::Key_R &&
-        event->modifiers() == Qt::ControlModifier && type == kEventKeyDown) {
+    if (event.key() == Qt::Key_R &&
+        event.modifiers() == Qt::ControlModifier && type == kEventKeyDown) {
         D("%s: mouse released\n", __func__);
         releaseMouse();
 
-        SkinEvent* skin_event = createSkinEvent(kEventMouseStopTracking);
-        queueSkinEvent(skin_event);
+        queueSkinEvent(createSkinEvent(kEventMouseStopTracking));
 
         mMouseGrabbed = false;
     }
 
     if (!mForwardShortcutsToDevice && mInZoomMode) {
-        if (event->key() == Qt::Key_Control) {
+        if (event.key() == Qt::Key_Control) {
             if (type == kEventKeyUp) {
                 raise();
                 mOverlay.showForZoomUserHidden();
@@ -2781,16 +2774,16 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
     }
 
     if (!mForwardShortcutsToDevice && !mInZoomMode &&
-        event->key() == Qt::Key_Control &&
-        (event->modifiers() == Qt::ControlModifier ||
-         event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))) {
+        event.key() == Qt::Key_Control &&
+        (event.modifiers() == Qt::ControlModifier ||
+         event.modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))) {
         if (type == kEventKeyDown && !mDisablePinchToZoom) {
             if (mToolWindow->getUiEmuAgent()
                         ->multiDisplay->isMultiDisplayEnabled() == false) {
                 raise();
                 D("%s: Using default display for multi touch\n", __FUNCTION__);
                 mOverlay.showForMultitouch(
-                        event->modifiers() == Qt::ControlModifier,
+                        event.modifiers() == Qt::ControlModifier,
                         deviceGeometry().center());
             } else {
                 QPoint mousePosition = mapFromGlobal(QCursor::pos());
@@ -2814,7 +2807,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
                         D("%s: using display %d for multi touch\n",
                           __FUNCTION__, id);
                         mOverlay.showForMultitouch(
-                                event->modifiers() == Qt::ControlModifier,
+                                event.modifiers() == Qt::ControlModifier,
                                 r.center());
                         break;
                     }
@@ -2833,69 +2826,68 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
 
     if (mForwardShortcutsToDevice || !qtEvent) {
         forwardKeyEventToEmulator(type, event);
-        if (type == kEventKeyDown && event->text().length() > 0) {
-            Qt::KeyboardModifiers mods = event->modifiers();
+        if (type == kEventKeyDown && event.text().length() > 0) {
+            Qt::KeyboardModifiers mods = event.modifiers();
             mods &= ~(Qt::ShiftModifier | Qt::KeypadModifier);
             if (mods == 0) {
                 // The key event generated text without Ctrl, Alt, etc.
                 // Send an additional TextInput event to the emulator.
-                SkinEvent* skin_event = createSkinEvent(kEventTextInput);
-                skin_event->u.text.down = false;
-                strncpy((char*)skin_event->u.text.text,
-                        (const char*)event->text().toUtf8().constData(),
-                        sizeof(skin_event->u.text.text) - 1);
+                SkinEvent skin_event = createSkinEvent(kEventTextInput);
+                skin_event.u.text.down = false;
+                strncpy((char*)skin_event.u.text.text,
+                        (const char*)event.text().toUtf8().constData(),
+                        sizeof(skin_event.u.text.text) - 1);
                 // Ensure the event's text is 0-terminated
-                skin_event->u.text.text[sizeof(skin_event->u.text.text) - 1] =
-                        0;
-                queueSkinEvent(skin_event);
+                skin_event.u.text.text[sizeof(skin_event.u.text.text) - 1] = 0;
+                queueSkinEvent(std::move(skin_event));
             }
         }
     }
 }
 
 void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers) {
-    SkinEvent* event = createSkinEvent(kEventKeyDown);
-    event->u.key.keycode = keyCode;
-    event->u.key.mod = modifiers;
-    queueSkinEvent(event);
+    SkinEvent event = createSkinEvent(kEventKeyDown);
+    event.u.key.keycode = keyCode;
+    event.u.key.mod = modifiers;
+    queueSkinEvent(std::move(event));
 
     event = createSkinEvent(kEventKeyUp);
-    event->u.key.keycode = keyCode;
-    event->u.key.mod = modifiers;
-    queueSkinEvent(event);
+    event.u.key.keycode = keyCode;
+    event.u.key.mod = modifiers;
+    queueSkinEvent(std::move(event));
 }
 
 void EmulatorQtWindow::simulateScrollBarChanged(int x, int y) {
-    SkinEvent* event = createSkinEvent(kEventScrollBarChanged);
-    event->u.scroll.x = x;
-    event->u.scroll.xmax = mContainer.horizontalScrollBar()->maximum();
-    event->u.scroll.y = y;
-    event->u.scroll.ymax = mContainer.verticalScrollBar()->maximum();
-    queueSkinEvent(event);
+    SkinEvent event = createSkinEvent(kEventScrollBarChanged);
+    event.u.scroll.x = x;
+    event.u.scroll.xmax = mContainer.horizontalScrollBar()->maximum();
+    event.u.scroll.y = y;
+    event.u.scroll.ymax = mContainer.verticalScrollBar()->maximum();
+    queueSkinEvent(std::move(event));
 }
 
 void EmulatorQtWindow::setDisplayRegion(int xOffset,
                                         int yOffset,
                                         int width,
                                         int height) {
-    SkinEvent* event = createSkinEvent(kEventSetDisplayRegion);
-    event->u.display_region.xOffset = xOffset;
-    event->u.display_region.yOffset = yOffset;
-    event->u.display_region.width = width;
-    event->u.display_region.height = height;
-    queueSkinEvent(event);
+    SkinEvent event = createSkinEvent(kEventSetDisplayRegion);
+    event.u.display_region.xOffset = xOffset;
+    event.u.display_region.yOffset = yOffset;
+    event.u.display_region.width = width;
+    event.u.display_region.height = height;
+    queueSkinEvent(std::move(event));
 }
 
 void EmulatorQtWindow::setDisplayRegionAndUpdate(int xOffset,
                                                  int yOffset,
                                                  int width,
                                                  int height) {
-    SkinEvent* event = createSkinEvent(kEventSetDisplayRegionAndUpdate);
-    event->u.display_region.xOffset = xOffset;
-    event->u.display_region.yOffset = yOffset;
-    event->u.display_region.width = width;
-    event->u.display_region.height = height;
-    queueSkinEvent(event);
+    SkinEvent event = createSkinEvent(kEventSetDisplayRegionAndUpdate);
+    event.u.display_region.xOffset = xOffset;
+    event.u.display_region.yOffset = yOffset;
+    event.u.display_region.width = width;
+    event.u.display_region.height = height;
+    queueSkinEvent(std::move(event));
 }
 
 void EmulatorQtWindow::simulateSetScale(double scale) {
@@ -2908,9 +2900,9 @@ void EmulatorQtWindow::simulateSetScale(double scale) {
     // Reset our local copy of zoom factor
     mZoomFactor = 1.0;
 
-    SkinEvent* event = createSkinEvent(kEventSetScale);
-    event->u.window.scale = scale;
-    queueSkinEvent(event);
+    SkinEvent event = createSkinEvent(kEventSetScale);
+    event.u.window.scale = scale;
+    queueSkinEvent(std::move(event));
 }
 
 void EmulatorQtWindow::simulateSetZoom(double zoom) {
@@ -2932,22 +2924,22 @@ void EmulatorQtWindow::simulateSetZoom(double zoom) {
 
     QSize viewport = mContainer.viewportSize();
 
-    SkinEvent* event = createSkinEvent(kEventSetZoom);
-    event->u.window.x = viewport.width();
-    event->u.window.y = viewport.height();
+    SkinEvent event = createSkinEvent(kEventSetZoom);
+    event.u.window.x = viewport.width();
+    event.u.window.y = viewport.height();
 
     QScrollBar* horizontal = mContainer.horizontalScrollBar();
-    event->u.window.scroll_h =
+    event.u.window.scroll_h =
             horizontal->isVisible() ? horizontal->height() : 0;
-    event->u.window.scale = zoom;
-    queueSkinEvent(event);
+    event.u.window.scale = zoom;
+    queueSkinEvent(std::move(event));
 }
 
 void EmulatorQtWindow::simulateWindowMoved(const QPoint& pos) {
-    SkinEvent* event = createSkinEvent(kEventWindowMoved);
-    event->u.window.x = pos.x();
-    event->u.window.y = pos.y();
-    queueSkinEvent(event);
+    SkinEvent event = createSkinEvent(kEventWindowMoved);
+    event.u.window.x = pos.x();
+    event.u.window.y = pos.y();
+    queueSkinEvent(std::move(event));
 
     mOverlay.move(mContainer.mapToGlobal(QPoint()));
 }
@@ -2958,15 +2950,15 @@ void EmulatorQtWindow::simulateZoomedWindowResized(const QSize& size) {
         return;
     }
 
-    SkinEvent* event = createSkinEvent(kEventZoomedWindowResized);
+    SkinEvent event = createSkinEvent(kEventZoomedWindowResized);
     QScrollBar* horizontal = mContainer.horizontalScrollBar();
-    event->u.scroll.x = horizontal->value();
-    event->u.scroll.y = mContainer.verticalScrollBar()->value();
-    event->u.scroll.xmax = size.width();
-    event->u.scroll.ymax = size.height();
-    event->u.scroll.scroll_h =
+    event.u.scroll.x = horizontal->value();
+    event.u.scroll.y = mContainer.verticalScrollBar()->value();
+    event.u.scroll.xmax = size.width();
+    event.u.scroll.ymax = size.height();
+    event.u.scroll.scroll_h =
             horizontal->isVisible() ? horizontal->height() : 0;
-    queueSkinEvent(event);
+    queueSkinEvent(std::move(event));
 }
 
 void EmulatorQtWindow::setForwardShortcutsToDevice(int index) {
@@ -3304,13 +3296,13 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
         handleMouseWheelEvent(event->delta(), event->orientation());
 #endif  // QT_VERSION
     } else if (inputDeviceHasRotary) {
-        SkinEvent* skin_event = createSkinEvent(kEventRotaryInput);
+        SkinEvent skin_event = createSkinEvent(kEventRotaryInput);
 #if QT_VERSION >= 0x060000
-        skin_event->u.rotary_input.delta = event->angleDelta().y() / 8;
+        skin_event.u.rotary_input.delta = event->angleDelta().y() / 8;
 #else
-        skin_event->u.rotary_input.delta = event->delta() / 8;
+        skin_event.u.rotary_input.delta = event->delta() / 8;
 #endif  // QT_VERSION
-        queueSkinEvent(skin_event);
+        queueSkinEvent(std::move(skin_event));
     } else {
 #if QT_VERSION >= 0x060000
         // For most mice, 1 wheel click = 15 degrees
@@ -3517,9 +3509,11 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     mOrientation = rot;
     mContainer.prepareForRotation();
 
-    SkinEvent* event = createSkinEvent(kEventLayoutRotate);
-    event->u.layout_rotation.rotation = rot;
-    queueSkinEvent(event);
+    {
+        SkinEvent event = createSkinEvent(kEventLayoutRotate);
+        event.u.layout_rotation.rotation = rot;
+        queueSkinEvent(std::move(event));
+    }
 
     const bool not_pixel_fold = !android_foldable_is_pixel_fold();
     if (android_foldable_is_folded()) {
@@ -3555,10 +3549,12 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     }
 
 #ifdef __APPLE__
-    // To fix issues when resizing + linking against macos sdk 11.
-    SkinEvent* changeEvent = new SkinEvent();
-    changeEvent->type = kEventScreenChanged;
-    queueSkinEvent(changeEvent);
+    {
+        // To fix issues when resizing + linking against macos sdk 11.
+        SkinEvent changeEvent;
+        changeEvent.type = kEventScreenChanged;
+        queueSkinEvent(std::move(changeEvent));
+    }
 #endif
 }
 
@@ -3674,9 +3670,7 @@ void EmulatorQtWindow::setNoSkin() {
         AFREE(skinDir);
 
         if (skinDir != NULL) {
-            SkinEvent* event = new SkinEvent();
-            event->type = kEventSetNoSkin;
-            skin_event_add(event);
+            skin_event_add(createSkinEvent(kEventSetNoSkin));
         }
         setFrameAlways(true);
     });
@@ -3691,9 +3685,7 @@ void EmulatorQtWindow::restoreSkin() {
         AFREE(skinDir);
 
         if (skinDir != NULL) {
-            SkinEvent* event = new SkinEvent();
-            event->type = kEventRestoreSkin;
-            skin_event_add(event);
+            skin_event_add(createSkinEvent(kEventRestoreSkin));
         }
         mToolWindow->hideRotationButton(false);
         setFrameAlways(false);
@@ -3714,7 +3706,7 @@ bool EmulatorQtWindow::addMultiDisplayWindow(uint32_t id,
                                              bool add,
                                              uint32_t w,
                                              uint32_t h) {
-    SkinEvent* skin_event = nullptr;
+    SkinEvent skin_event;
     if (add) {
         QRect windowGeo = this->geometry();
         if (!mBackingSurface) {
@@ -3722,9 +3714,9 @@ bool EmulatorQtWindow::addMultiDisplayWindow(uint32_t id,
             return false;
         }
         skin_event = createSkinEvent(kEventAddDisplay);
-        skin_event->u.add_display.width = w;
-        skin_event->u.add_display.height = h;
-        skin_event->u.add_display.id = id;
+        skin_event.u.add_display.width = w;
+        skin_event.u.add_display.height = h;
+        skin_event.u.add_display.id = id;
         QSize backingSize = mBackingSurface->bitmap->size();
         float scale = (float)windowGeo.width() / (float)backingSize.width();
         if (mMultiDisplayWindow[id] == nullptr) {
@@ -3753,13 +3745,13 @@ bool EmulatorQtWindow::addMultiDisplayWindow(uint32_t id,
         mMultiDisplayWindow[id]->show();
     } else {
         skin_event = createSkinEvent(kEventRemoveDisplay);
-        skin_event->u.remove_display.id = id;
+        skin_event.u.remove_display.id = id;
         auto iter = mMultiDisplayWindow.find(id);
         if (iter != mMultiDisplayWindow.end()) {
             mMultiDisplayWindow.erase(iter);
         }
     }
-    queueSkinEvent(skin_event);
+    queueSkinEvent(std::move(skin_event));
     return true;
 }
 
