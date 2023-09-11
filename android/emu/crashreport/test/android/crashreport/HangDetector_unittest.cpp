@@ -18,15 +18,12 @@
 #include <gtest/gtest.h>  // for SuiteApiR...
 #include <stdio.h>        // for printf
 
-#include "android/avd/info.h"                               // for AvdInfo
-#include "aemu/base/Debug.h"                             // for IsDebugge...
-#include "aemu/base/Log.h"                               // for base
+#include "aemu/base/Debug.h"  // for IsDebugge...
+#include "aemu/base/Log.h"    // for base
 
 #include <string_view>
 
-#include "aemu/base/async/ThreadLooper.h"                // for ThreadLooper
-#include "android/cmdline-definitions.h"                    // for AndroidOp...
-#include "android/console.h"                                // for getConsol...
+#include "aemu/base/async/ThreadLooper.h"                   // for ThreadLooper
 #include "android/emulation/control/AndroidAgentFactory.h"  // for injectCon...
 #include "android/emulation/control/globals_agent.h"        // for QAndroidG...
 #include "android/utils/debug.h"                            // for dinfo
@@ -42,31 +39,32 @@ public:
     HangDetectorTest()
         : mHangDetector(
                   [this](std::string_view msg) {
-                      android::base::AutoLock lock(mLock);
+                      std::unique_lock<std::mutex> l(mLock);
                       mHangDetected = true;
-                      mHangCondition.signalAndUnlock(&lock);
+                      mHangCondition.notify_one();
                   },
                   {
-                          .hangLoopIterationTimeoutMs = 100,
-                          .taskProcessingTimeoutMs = 10,
-                          .hangCheckTimeoutMs = 10,
+                          .hangLoopIterationTimeout = std::chrono::milliseconds(100),
+                          .hangCheckTimeout = std::chrono::milliseconds(10),
                   }) {}
 
     void TearDown() override { mHangDetector.stop(); }
 
     void waitUntilUnlocked() {
-        android::base::AutoLock lock(mLock);
-        auto waitUntil = System::get()->getUnixTimeUs() + kMaxBlockingTimeUs;
-        while (!mHangDetected && System::get()->getUnixTimeUs() < waitUntil) {
-            mHangCondition.timedWait(&mLock, waitUntil);
+        std::unique_lock<std::mutex> l(mLock);
+        auto waitUntil = std::chrono::high_resolution_clock::now() +
+                kMaxBlockingTime;
+        while (!mHangDetected &&
+               std::chrono::high_resolution_clock::now() < waitUntil) {
+            mHangCondition.wait_until(l, waitUntil);
         }
         EXPECT_TRUE(mHangDetected);
     }
 
 protected:
-    const System::Duration kMaxBlockingTimeUs = 30 * 1000 * 1000;
-    Lock mLock;
-    android::base::ConditionVariable mHangCondition;
+    const std::chrono::seconds kMaxBlockingTime = std::chrono::seconds(30);
+    std::mutex mLock;
+    std::condition_variable mHangCondition;
     bool mHangDetected{false};
     HangDetector mHangDetector;
 };

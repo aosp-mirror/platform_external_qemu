@@ -31,7 +31,6 @@ android_add_library(
       android/crashreport/detectors/CrashDetectors.cpp
       android/crashreport/HangDetector.cpp
   DEPS android-emu-agents
-       android-emu-avd
        android-emu-base
        android-emu-cmdline
        android-emu-files
@@ -152,6 +151,7 @@ android_add_test(
   TARGET android-emu-crashreport-testing
   SRC android/crashreport//CrashDump_unittest.cpp
       android/crashreport/detectors/CrashDetectors_unittest.cpp
+      android/crashreport/HangDetector_unittest.cpp
   SOURCE_DIR test
   DEPS android-emu-agents
        android-emu-base
