@@ -24,6 +24,7 @@
 #include "aemu/base/files/PathUtils.h"          // for pj, PathUtils
 #include "aemu/base/logging/CLog.h"             // for dinfo, dwarning
 #include "aemu/base/memory/LazyInstance.h"      // for LazyInstance, LAZY_IN...
+#include "aemu/base/system/Win32UnicodeString.h"
 #include "android/base/system/System.h"         // for System
 #include "android/crashreport/CrashConsent.h"   // for CrashReportDatabase
 #include "android/crashreport/CrashReporter.h"  // for CrashReporter
@@ -35,7 +36,7 @@
 #include "client/settings.h"                     // for Settings
 #include "mini_chromium/base/files/file_path.h"  // for FilePath
 #include "util/misc/uuid.h"                      // for UUID
-
+                                                 //
 #ifdef _WIN32
 #include <io.h>
 #endif
@@ -103,8 +104,14 @@ public:
         mDatabase = CrashReportDatabase::Initialize(database_path);
         mInitialized = active && mDatabase;
 
+#ifdef _WIN32
+        android::base::Win32UnicodeString wstr(database_path.value().c_str());
+        std::string message = wstr.toString();
+#else
+        std::string message = database_path.value();
+#endif
         dinfo("Storing crashdata in: %s, detection is %s for process: %d",
-              database_directory.c_str(), mInitialized ? "enabled" : "disabled",
+              message.c_str(), mInitialized ? "enabled" : "disabled",
               System::get()->getCurrentProcessId());
 
         if (mDatabase && mDatabase->GetSettings()) {
