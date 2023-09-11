@@ -809,16 +809,16 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
             forwardKeyToEmulator(LINUX_KEY_BACK, down);
             break;
         case QtUICommand::OVERVIEW:
-            forwardKeyToEmulator(KEY_APPSWITCH, down);
+            forwardKeyToEmulator(ANDROID_KEY_APPSWITCH, down);
             break;
         case QtUICommand::WEAR_1:
-            forwardKeyToEmulator(KEY_HOME, down);
+            forwardKeyToEmulator(LINUX_KEY_HOME, down);
             break;
         case QtUICommand::WEAR_2:
-            forwardKeyToEmulator(KEY_POWER, down);
+            forwardKeyToEmulator(LINUX_KEY_POWER, down);
             break;
         case QtUICommand::PALM:
-            forwardKeyToEmulator(KEY_SLEEP, down);
+            forwardKeyToEmulator(LINUX_KEY_SLEEP, down);
             break;
         case QtUICommand::TILT:
             if (down) {
@@ -841,9 +841,9 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
             break;
         case QtUICommand::TOGGLE_TRACKBALL:
             if (down) {
-                SkinEvent* skin_event = new SkinEvent();
-                skin_event->type = kEventToggleTrackball;
-                mEmulatorWindow->queueSkinEvent(skin_event);
+                SkinEvent skin_event;
+                skin_event.type = kEventToggleTrackball;
+                mEmulatorWindow->queueSkinEvent(std::move(skin_event));
             }
             break;
         case QtUICommand::CHANGE_FOLDABLE_POSTURE:
@@ -1002,10 +1002,10 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
 
     LOG(INFO) << "Resizable: change to new size: " << newSize;
     resizableChangeIcon(newSize);
-    SkinEvent* skin_event = new SkinEvent();
-    skin_event->type = kEventSetDisplayActiveConfig;
-    skin_event->u.display_active_config = static_cast<int>(newSize);
-    mEmulatorWindow->queueSkinEvent(skin_event);
+    SkinEvent skin_event;
+    skin_event.type = kEventSetDisplayActiveConfig;
+    skin_event.u.display_active_config = static_cast<int>(newSize);
+    mEmulatorWindow->queueSkinEvent(std::move(skin_event));
     mEmulatorWindow->resizeAndChangeAspectRatio(0, 0, info.width, info.height);
     sUiEmuAgent->window->showMessage(updateMsg.c_str(), WINDOW_MESSAGE_GENERIC,
                                      3000);
@@ -1044,24 +1044,24 @@ void ToolWindow::forwardGenericEventToEmulator(int type, int code, int value) {
         return;
     }
 
-    SkinEvent* skin_event = new SkinEvent();
-    skin_event->type = kEventGeneric;
-    SkinEventGenericData& genericData = skin_event->u.generic_event;
+    SkinEvent skin_event;
+    skin_event.type = kEventGeneric;
+    SkinEventGenericData& genericData = skin_event.u.generic_event;
     genericData.type = type;
     genericData.code = code;
     genericData.value = value;
-    emuQtWindow->queueSkinEvent(skin_event);
+    emuQtWindow->queueSkinEvent(std::move(skin_event));
 }
 
 void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
-    SkinEvent* skin_event = new SkinEvent();
-    skin_event->type = down ? kEventKeyDown : kEventKeyUp;
-    skin_event->u.key.keycode = keycode;
-    skin_event->u.key.mod = 0;
-    mEmulatorWindow->queueSkinEvent(skin_event);
+    SkinEvent skin_event;
+    skin_event.type = down ? kEventKeyDown : kEventKeyUp;
+    skin_event.u.key.keycode = keycode;
+    skin_event.u.key.mod = 0;
+    mEmulatorWindow->queueSkinEvent(std::move(skin_event));
 }
 
-bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
+bool ToolWindow::handleQtKeyEvent(const QKeyEvent& event, QtKeyEventSource source) {
     // See if this key is handled by the virtual scene control window first.
     if (mVirtualSceneControlWindow.hasInstance() &&
         mVirtualSceneControlWindow.get()->isActive()) {
@@ -1073,13 +1073,13 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
     // We don't care about the keypad modifier for anything, and it gets added
     // to the arrow keys of OSX by default, so remove it.
 #if QT_VERSION >= 0x060000
-    QKeySequence event_key_sequence(event->key() |
-                                    (event->modifiers() & ~Qt::KeypadModifier));
+    QKeySequence event_key_sequence(event.key() |
+                                    (event.modifiers() & ~Qt::KeypadModifier));
 #else
-    QKeySequence event_key_sequence(event->key() +
-                                    (event->modifiers() & ~Qt::KeypadModifier));
+    QKeySequence event_key_sequence(event.key() +
+                                    (event.modifiers() & ~Qt::KeypadModifier));
 #endif  // QT_VERSION
-    bool down = event->type() == QEvent::KeyPress;
+    bool down = event.type() == QEvent::KeyPress;
     bool h = mShortcutKeyStore.handle(event_key_sequence,
                                       [this, down](QtUICommand cmd) {
                                           if (down) {

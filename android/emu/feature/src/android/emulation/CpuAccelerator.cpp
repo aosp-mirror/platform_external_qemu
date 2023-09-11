@@ -903,11 +903,9 @@ AndroidCpuAcceleration ProbeAEHDCpu(std::string* status) {
         cpu_vendor_type == VENDOR_ID_INTEL &&
                 !android_get_x86_cpuid_vmx_support()) {
         status->assign(
-                "Android Emulator requires an %s processor with virtualization "
+                "Android Emulator requires an Intel/AMD processor with virtualization "
                 "extension support.  "
-                "(Virtualization extension is not supported)",
-                (System::get()->envGet("AEHD_ENABLE_INTEL") == "1") ? "Intel/AMD"
-                                                                   : "AMD");
+                "(Virtualization extension is not supported)");
         return ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
     }
 

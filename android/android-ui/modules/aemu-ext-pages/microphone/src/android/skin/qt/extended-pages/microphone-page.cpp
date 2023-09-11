@@ -189,21 +189,21 @@ void MicrophonePage::forwardGenericEventToEmulator(int type,
                                                    int code,
                                                    int value) {
     if (mEmulatorWindow) {
-        SkinEvent* skin_event = new SkinEvent();
-        skin_event->type = kEventGeneric;
-        SkinEventGenericData& genericData = skin_event->u.generic_event;
+        SkinEvent skin_event;
+        skin_event.type = kEventGeneric;
+        SkinEventGenericData& genericData = skin_event.u.generic_event;
         genericData.type = type;
         genericData.code = code;
         genericData.value = value;
 
-        mEmulatorWindow->queueSkinEvent(skin_event);
+        mEmulatorWindow->queueSkinEvent(std::move(skin_event));
     }
 }
 
 void MicrophonePage::forwardKeyToEmulator(uint32_t keycode, bool down) {
-    SkinEvent* skin_event = new SkinEvent();
-    skin_event->type = down ? kEventKeyDown : kEventKeyUp;
-    skin_event->u.key.keycode = keycode;
-    skin_event->u.key.mod = 0;
-    mEmulatorWindow->queueSkinEvent(skin_event);
+    SkinEvent skin_event;
+    skin_event.type = down ? kEventKeyDown : kEventKeyUp;
+    skin_event.u.key.keycode = keycode;
+    skin_event.u.key.mod = 0;
+    mEmulatorWindow->queueSkinEvent(std::move(skin_event));
 }

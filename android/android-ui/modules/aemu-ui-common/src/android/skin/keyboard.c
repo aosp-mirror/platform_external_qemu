@@ -19,7 +19,7 @@
 #include "host-common/hw-config.h"
 #include "android/console.h"                         // for android_hw
 #include "host-common/feature_control.h"  // for feature_is_enabled
-#include "android/skin/android_keycodes.h"           // for KEY_APPSWITCH
+#include "android/skin/android_keycodes.h"           // for ANDROID_KEY_*
 #include "android/skin/charmap.h"                    // for skin_charmap_get...
 #include "android/skin/keycode-buffer.h"             // for skin_keycode_buf...
 #include "android/skin/keycode.h"                    // for skin_key_pair_to...
@@ -159,28 +159,34 @@ static int map_cros_key(int* code) {
      * linux_to_qcode in ui/input-linux.c maps linux key to qcode
      * qcode_to_number in ui/input-keymap.c maps qcode to "number"
      */
-    if ((*code >= LINUX_KEY_F1 && *code <= LINUX_KEY_F10) ||
-        *code == LINUX_KEY_ESC || *code == LINUX_KEY_TAB ||
-        *code == LINUX_KEY_UP || *code == LINUX_KEY_DOWN ||
-        *code == LINUX_KEY_LEFT || *code == LINUX_KEY_RIGHT ||
-        *code == LINUX_KEY_VOLUMEUP || *code == LINUX_KEY_VOLUMEDOWN)
+    switch (*code) {
+    case LINUX_KEY_F1...LINUX_KEY_F10:
+    case LINUX_KEY_ESC:
+    case LINUX_KEY_TAB:
+    case LINUX_KEY_UP:
+    case LINUX_KEY_DOWN:
+    case LINUX_KEY_LEFT:
+    case LINUX_KEY_RIGHT:
+    case LINUX_KEY_VOLUMEUP:
+    case LINUX_KEY_VOLUMEDOWN:
         return 0;
 
-    switch (*code) {
-        case LINUX_KEY_BACK:
-            *code = LINUX_KEY_F1;
-            return 0;
-        case LINUX_KEY_HOME:
-            *code = LINUX_KEY_LEFTMETA;
-            return 0;
-        case KEY_APPSWITCH:
-            *code = LINUX_KEY_F5;
-            return 0;
-        case LINUX_KEY_GREEN:
-            *code = LINUX_KEY_GRAVE;
-            return 0;
+    case LINUX_KEY_BACK:
+        *code = LINUX_KEY_F1;
+        return 0;
+    case LINUX_KEY_HOME:
+        *code = LINUX_KEY_LEFTMETA;
+        return 0;
+    case ANDROID_KEY_APPSWITCH:
+        *code = LINUX_KEY_F5;
+        return 0;
+    case LINUX_KEY_GREEN:
+        *code = LINUX_KEY_GRAVE;
+        return 0;
+
+    default:
+        return -1;
     }
-    return -1;
 }
 
 /* This funcion is used to track the modifier key status and keep it sync
@@ -318,7 +324,7 @@ void skin_keyboard_process_event(SkinKeyboard* kb, SkinEvent* ev, int down) {
         skin_keyboard_flush(kb);
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
         int keycode = ev->u.key.keycode;
-        int mod = ev->u.key.mod;
+        const int mod = ev->u.key.mod;
 
         if (kb->hw_arc) {
             sync_modifier_key(LINUX_KEY_LEFTALT, kb, keycode, mod, down);
@@ -332,42 +338,51 @@ void skin_keyboard_process_event(SkinKeyboard* kb, SkinEvent* ev, int down) {
         }
 
         /* first, try the keyboard-mode-independent keys */
-        int code = skin_keyboard_key_to_code(kb, keycode, mod, down);
+        const int code = skin_keyboard_key_to_code(kb, keycode, mod, down);
         if (code == 0) {
             return;
         }
-        if ((int)code > 0) {
+        if (code > 0) {
             skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;
         }
 
-        code = keycode;
-
-        if (code == kKeyCodeAltLeft || code == kKeyCodeAltRight ||
-            code == kKeyCodeCapLeft || code == kKeyCodeCapRight ||
-            code == kKeyCodeSym) {
-            skin_keyboard_add_key_event(kb, code, down);
+        switch (keycode) {
+        case kKeyCodeAltLeft:
+        case kKeyCodeAltRight:
+        case kKeyCodeCapLeft:
+        case kKeyCodeCapRight:
+        case kKeyCodeSym:
+        case LINUX_KEY_PLAYPAUSE:
+        case LINUX_KEY_BACK:
+        case LINUX_KEY_POWER:
+        case LINUX_KEY_BACKSPACE:
+        case LINUX_KEY_SOFT1:
+        case LINUX_KEY_CENTER:
+        case LINUX_KEY_REWIND:
+        case LINUX_KEY_ENTER:
+        case LINUX_KEY_VOLUMEDOWN:
+        case LINUX_KEY_FASTFORWARD:
+        case LINUX_KEY_VOLUMEUP:
+        case LINUX_KEY_HOME:
+        case LINUX_KEY_SLEEP:
+        case LINUX_KEY_HEADSETHOOK:
+        case LINUX_KEY_SEND:
+        case LINUX_KEY_DELETE:
+        case ANDROID_KEY_APPSWITCH:
+        case ANDROID_KEY_STEM_1:
+        case ANDROID_KEY_STEM_2:
+        case ANDROID_KEY_STEM_3:
+        case ANDROID_KEY_STEM_PRIMARY:
+            skin_keyboard_add_key_event(kb, keycode, down);
             skin_keyboard_flush(kb);
-            return;
-        }
+            break;
 
-        if (code == KEY_APPSWITCH || code == LINUX_KEY_PLAYPAUSE ||
-            code == LINUX_KEY_BACK || code == LINUX_KEY_POWER ||
-            code == LINUX_KEY_BACKSPACE || code == LINUX_KEY_SOFT1 ||
-            code == LINUX_KEY_CENTER || code == LINUX_KEY_REWIND ||
-            code == LINUX_KEY_ENTER || code == LINUX_KEY_VOLUMEDOWN ||
-            code == LINUX_KEY_FASTFORWARD || code == LINUX_KEY_VOLUMEUP ||
-            code == LINUX_KEY_HOME || code == LINUX_KEY_SLEEP ||
-            code == LINUX_KEY_HEADSETHOOK || code == LINUX_KEY_SEND ||
-            code == LINUX_KEY_DELETE ||
-            code == KEY_STEM_1 || code == KEY_STEM_2 || code == KEY_STEM_3 ||
-            code == KEY_STEM_PRIMARY) {
-            skin_keyboard_add_key_event(kb, code, down);
-            skin_keyboard_flush(kb);
-            return;
+        default:
+            D("ignoring keycode %d", keycode);
+            break;
         }
-        D("ignoring keycode %d", keycode);
     }
 }
 
