@@ -16,8 +16,8 @@
 #include "audio/audio.h"
 
 #define VIRTIO_SND_NUM_JACKS           2    /* speaker, mic */
-#define VIRTIO_SND_NUM_PCM_TX_STREAMS  1    /* driver -> device */
-#define VIRTIO_SND_NUM_PCM_RX_STREAMS  1    /* device -> driver */
+#define VIRTIO_SND_NUM_PCM_TX_STREAMS  4    /* driver -> device */
+#define VIRTIO_SND_NUM_PCM_RX_STREAMS  2    /* device -> driver */
 #define VIRTIO_SND_NUM_PCM_STREAMS     (VIRTIO_SND_NUM_PCM_TX_STREAMS + VIRTIO_SND_NUM_PCM_RX_STREAMS)
 #define VIRTIO_SND_NUM_CHMAPS          2    /* output, input */
 
@@ -65,9 +65,11 @@ struct VirtIOSoundPcmRingBuffer {
 };
 
 struct VirtIOSoundPCMStream {
-    uint32_t buffer_bytes;
-    uint32_t period_bytes;
+    VirtIOSoundVqRingBuffer gpcm_buf;   // in guest format, fully saved
+    VirtIOSoundPcmRingBuffer hpcm_buf;  // in host format, partially saved
     uint16_t guest_format;
+    uint16_t period_frames;
+    uint8_t n_periods;
     uint8_t state;
 
     /* not saved to snapshots */
@@ -79,17 +81,13 @@ struct VirtIOSoundPCMStream {
     } voice;
     QEMUTimer vq_irq_timer;             // lives between start-stop
     int64_t next_vq_irq_us;
-    VirtIOSoundVqRingBuffer gpcm_buf;   // in guest format
-    VirtIOSoundPcmRingBuffer hpcm_buf;  // in host format
     QemuMutex mtx;
 
     uint32_t period_us;
-    uint16_t period_frames;
     uint16_t host_format;
     uint8_t id;
     uint8_t guest_frame_size;
     uint8_t host_frame_size;
-    uint8_t n_periods;
 };
 
 typedef struct VirtIOSound {
