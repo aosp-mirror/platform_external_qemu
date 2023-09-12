@@ -266,6 +266,10 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         params.push_back({"androidboot.hardwareegl", "angle"});
     }
 
+    if (fc::isEnabled(fc::Vulkan)) {
+        params.push_back({"androidboot.hardware.vulkan", "ranchu"});
+    }
+
     if (serialno) {
         params.push_back({"androidboot.serialno", serialno});
     }
