@@ -79,16 +79,16 @@ struct VirtIOSoundPCMStream {
     } voice;
     QEMUTimer vq_irq_timer;             // lives between start-stop
     int64_t next_vq_irq_us;
-    VirtIOSoundVqRingBuffer kpcm_buf;   // kernel
-    VirtIOSoundPcmRingBuffer qpcm_buf;  // qemu
+    VirtIOSoundVqRingBuffer gpcm_buf;   // in guest format
+    VirtIOSoundPcmRingBuffer hpcm_buf;  // in host format
     QemuMutex mtx;
 
     uint32_t period_us;
     uint16_t period_frames;
-    uint16_t aud_format;
+    uint16_t host_format;
     uint8_t id;
-    uint8_t driver_frame_size;
-    uint8_t aud_frame_size;
+    uint8_t guest_frame_size;
+    uint8_t host_frame_size;
     uint8_t n_periods;
 };
 
