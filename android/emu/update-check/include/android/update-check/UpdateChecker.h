@@ -11,23 +11,19 @@
 
 #pragma once
 
-#include "aemu/base/Optional.h"
-
-#include "aemu/base/threads/Thread.h"
 #include "aemu/base/Version.h"
+#include "aemu/base/threads/Thread.h"
 #include "android/update-check/IVersionExtractor.h"
 
+#include <chrono>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
 
-#include <time.h>
-
 namespace android {
 namespace update_check {
-
-
 
 // Set of interfaces for the operations UpdateChecker performs:
 //  IDataLoader - download the xml manifest from the Web site
@@ -48,8 +44,8 @@ public:
     virtual ~ITimeStorage() = default;
 
     virtual bool lock() = 0;
-    virtual time_t getTime(const std::string& key) = 0;
-    virtual void setTime(const std::string& key, time_t time) = 0;
+    virtual std::chrono::seconds getTime(const std::string& key) = 0;
+    virtual void setTime(const std::string& key, std::chrono::seconds time) = 0;
 };
 
 class INewerVersionReporter {
@@ -78,15 +74,13 @@ public:
 class UpdateChecker {
 public:
     using VersionInfo =
-        std::pair<android::base::Version, android::studio::UpdateChannel>;
-
-    template <class T>
-    using Optional = android::base::Optional<T>;
+            std::pair<android::base::Version, android::studio::UpdateChannel>;
 
     // |coreVersion| is the application's core version (e.g. qemu2 2.2.0)
     //      'nullptr' means 'don't send any emulator-specific information in the
     //      request, just check the version
     explicit UpdateChecker(const char* coreVersion = nullptr);
+    virtual ~UpdateChecker() = default;
 
     bool init();
 
@@ -94,7 +88,9 @@ public:
 
     bool runAsyncCheck();
 
-    Optional<VersionInfo> getLatestVersion();
+    std::optional<VersionInfo> getLatestVersion();
+
+    virtual std::chrono::seconds currentTimeSinceEpoch() const = 0;
 
 protected:
     // constructor for tests
@@ -110,6 +106,16 @@ private:
     std::unique_ptr<IDataLoader> mDataLoader;
     std::unique_ptr<ITimeStorage> mTimeStorage;
     std::unique_ptr<INewerVersionReporter> mReporter;
+};
+
+class SystemClockUpdateChecker : public UpdateChecker {
+public:
+    explicit SystemClockUpdateChecker(const char* coreVersion = nullptr)
+        : UpdateChecker(coreVersion){};
+    std::chrono::seconds currentTimeSinceEpoch() const override {
+        return std::chrono::duration_cast<std::chrono::seconds>(
+                std::chrono::system_clock::now().time_since_epoch());
+    }
 };
 
 }  // namespace update_check
