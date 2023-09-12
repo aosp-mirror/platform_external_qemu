@@ -857,7 +857,9 @@ static X86CPUDefinition builtin_x86_defs[] = {
             CPUID_MTRR | CPUID_CLFLUSH | CPUID_MCA |
             CPUID_PSE36,
         .features[FEAT_1_ECX] =
+#ifdef __linux__
             CPUID_EXT_TSC_DEADLINE_TIMER |
+#endif
             CPUID_EXT_POPCNT | CPUID_EXT_SSE42 | CPUID_EXT_SSE41 |
             CPUID_EXT_CX16 | CPUID_EXT_SSSE3 | CPUID_EXT_SSE3,
         .features[FEAT_8000_0001_EDX] =
@@ -886,7 +888,9 @@ static X86CPUDefinition builtin_x86_defs[] = {
             CPUID_MTRR | CPUID_CLFLUSH | CPUID_MCA |
             CPUID_PSE36 | CPUID_FXSR,
         .features[FEAT_1_ECX] =
+#ifdef __linux__
             CPUID_EXT_TSC_DEADLINE_TIMER |
+#endif
             CPUID_EXT_POPCNT | CPUID_EXT_SSE42 | CPUID_EXT_SSE41 |
             CPUID_EXT_CX16 | CPUID_EXT_SSSE3 | CPUID_EXT_SSE3 |
             CPUID_EXT_AES | CPUID_EXT_PCLMULQDQ | CPUID_EXT_XSAVE |
