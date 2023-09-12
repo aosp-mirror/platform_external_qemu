@@ -55,13 +55,14 @@ class AvdImpl final : public AvdService::Service {
 public:
     AvdImpl(QemuAvdInfo* avd) {
         char full_name[256];
+        const char* tmp;
         static_assert(std::size(full_name) == 256);
 
-        mAvd.set_name(avdInfo_getName(avd));
-        mAvd.set_id(avdInfo_getId(avd));
+        mAvd.set_name((tmp = avdInfo_getName(avd)) ? tmp : "");
+        mAvd.set_id((tmp = avdInfo_getId(avd)) ? tmp : "");
         mAvd.set_api_level(avdInfo_getApiLevel(avd));
-        mAvd.set_target(avdInfo_getTarget(avd));
-        mAvd.set_desert(avdInfo_getApiDessertName(mAvd.api_level()));
+        mAvd.set_target((tmp = avdInfo_getTarget(avd)) ? tmp : "");
+        mAvd.set_desert((tmp = avdInfo_getApiDessertName(mAvd.api_level())) ? tmp : "");
 
         avdInfo_getFullApiName(mAvd.api_level(), full_name,
                                std::size(full_name));
@@ -72,7 +73,7 @@ public:
         mAvd.set_flavor(static_cast<AvdInfo_AVD_FLAVOR>(
                 (int)avdInfo_getAvdFlavor(avd) + 1));
         mAvd.set_max_display_entries(avdInfo_maxMultiDisplayEntries());
-        mAvd.set_target_cpu_arch(avdInfo_getTargetCpuArch(avd));
+        mAvd.set_target_cpu_arch((tmp = avdInfo_getTargetCpuArch(avd)) ? tmp : "");
     }
 
     ::grpc::Status getAvdInfo(
