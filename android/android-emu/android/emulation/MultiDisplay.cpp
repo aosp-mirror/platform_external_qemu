@@ -58,6 +58,12 @@ using android::base::AutoLock;
 #define DD(...) dinfo(__VA_ARGS__)
 #endif
 
+#if MULTI_DISPLAY_DEBUG >= 3
+#define D(fmt, ...) fprintf(stderr, "%s %d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#else
+#define D(...) (void)0
+#endif
+
 namespace android {
 
 static MultiDisplay* sMultiDisplay = nullptr;
@@ -215,10 +221,10 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
         *y = mMultiDisplay[id].pos_y;
     }
     if (w) {
-        *w = mMultiDisplay[id].width;
+        *w = mMultiDisplay[id].originalWidth;
     }
     if (h) {
-        *h = mMultiDisplay[id].height;
+        *h = mMultiDisplay[id].originalHeight;
     }
     if (dpi) {
         *dpi = mMultiDisplay[id].dpi;
@@ -272,10 +278,10 @@ bool MultiDisplay::getNextMultiDisplay(int32_t start_id,
             *y = i->second.pos_y;
         }
         if (w) {
-            *w = i->second.width;
+            *w = i->second.originalWidth;
         }
         if (h) {
-            *h = i->second.height;
+            *h = i->second.originalHeight;
         }
         if (dpi) {
             *dpi = i->second.dpi;
@@ -321,6 +327,7 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
         }
     }
 
+    D("input x %d y %d\n", *x, *y);
     if (isPortrait) {
         if (isNormalOrder) {
             // this is rotation 0
@@ -364,9 +371,12 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
                 pos_y = totalH - iter.second.height - iter.second.pos_y;
                 w = iter.second.width;
                 h = iter.second.height;
-                if ((normal_x - pos_x) < w && (*y - pos_y) < h) {
+                const auto delta = totalH - iter.second.height;
+                if ((normal_x - pos_x) < w && (*y - delta) <= h && (*y -delta) >=0) {
                     *x = *x - currXoffset;
                     *displayId = iter.first;
+                    *y = *y - delta;
+                    D("display %d x %d y %d\n\n", *displayId, *x, *y);
                     return true;
                 }
                 currXoffset += w;
@@ -623,13 +633,18 @@ void MultiDisplay::performRotation(int rot) {
 void MultiDisplay::performRotationLocked(int mOrientation) {
 
     if (android_foldable_is_pixel_fold()) {
-        mMultiDisplay[0].pos_x = 0;
-        mMultiDisplay[0].pos_y = 0;
-        mMultiDisplay[0].rotation = mOrientation;
+        constexpr int primary_display_id = 0;
+        const int secondary_display_id = android_foldable_pixel_fold_second_display_id();
+        const bool second_display_exists = (mMultiDisplay.find(secondary_display_id) != mMultiDisplay.end());
+        mMultiDisplay[primary_display_id].pos_x = 0;
+        mMultiDisplay[primary_display_id].pos_y = 0;
+        mMultiDisplay[primary_display_id].rotation = mOrientation;
 
-        mMultiDisplay[6].pos_x = 0;
-        mMultiDisplay[6].pos_y = 0;
-        mMultiDisplay[6].rotation = mOrientation;
+        if (second_display_exists) {
+            mMultiDisplay[secondary_display_id].pos_x = 0;
+            mMultiDisplay[secondary_display_id].pos_y = 0;
+            mMultiDisplay[secondary_display_id].rotation = mOrientation;
+        }
         return;
     }
 
@@ -640,10 +655,19 @@ void MultiDisplay::performRotationLocked(int mOrientation) {
     // set up the multidisplay windows x,y, w and h
     {
         if (normalOrder) {
+            D("normal order orientation is %d\n", mOrientation);
             int pos_x, pos_y;
             uint32_t width, height, id, dpi, flag;
             uint32_t total_w = 0;
             uint32_t total_h = 0;
+            for (auto& it : mMultiDisplay) {
+                width = it.second.originalWidth;
+                height = it.second.originalHeight;
+                if (pileUp) {
+                    std::swap(width, height);
+                    total_w = std::max(total_w, width);
+                }
+            }
             for (auto& it : mMultiDisplay) {
                 id = it.first;
                 pos_x = it.second.pos_x;
@@ -652,11 +676,13 @@ void MultiDisplay::performRotationLocked(int mOrientation) {
                 height = it.second.originalHeight;
                 // stack upward
                 if (pileUp) {
-                    pos_x = 0;
+                    D("pile up %d\n", mOrientation);
                     pos_y = total_h;
                     std::swap(width, height);
                     total_h += height;
+                    pos_x = total_w - width;
                 } else {
+                    D("not pile up %d\n", mOrientation);
                     pos_x = total_w;
                     pos_y = 0;
                     total_w += width;
@@ -667,8 +693,10 @@ void MultiDisplay::performRotationLocked(int mOrientation) {
                 it.second.pos_x = pos_x;
                 it.second.pos_y = pos_y;
                 it.second.rotation = mOrientation;
+                D("display id %d x %d y %d w %d h %d\n", id, pos_x, pos_y, width, height);
             }
         } else {
+            D("not normal order orientation is %d\n", mOrientation);
             int pos_x, pos_y;
             uint32_t width, height, id, dpi, flag;
             uint32_t total_w = 0;
@@ -681,6 +709,7 @@ void MultiDisplay::performRotationLocked(int mOrientation) {
                     total_h += height;
                 } else {
                     total_w += width;
+                    total_h = std::max(height, total_h);
                 }
             }
             for (auto& it : mMultiDisplay) {
@@ -691,14 +720,16 @@ void MultiDisplay::performRotationLocked(int mOrientation) {
                 height = it.second.originalHeight;
                 // stack upward
                 if (pileUp) {
+                    D("pile up %d\n", mOrientation);
                     std::swap(width, height);
                     total_h -= height;
                     pos_x = 0;
                     pos_y = total_h;
                 } else {
+                    D("not pile up %d\n", mOrientation);
                     total_w -= width;
                     pos_x = total_w;
-                    pos_y = 0;
+                    pos_y = total_h - height;
                     // std::swap(pos_x, pos_y);
                 }
                 it.second.width = width;
@@ -706,6 +737,7 @@ void MultiDisplay::performRotationLocked(int mOrientation) {
                 it.second.pos_x = pos_x;
                 it.second.pos_y = pos_y;
                 it.second.rotation = mOrientation;
+                D("display id %d x %d y %d w %d h %d\n", id, pos_x, pos_y, width, height);
             }
         }
     }
@@ -818,6 +850,7 @@ int MultiDisplay::getColorBufferDisplay(uint32_t colorBuffer,
 void MultiDisplay::getCombinedDisplaySize(uint32_t* w, uint32_t* h) {
     AutoLock lock(mLock);
     getCombinedDisplaySizeLocked(w, h);
+    D("combined w %d h %d\n", *w, *h);
 }
 
 bool MultiDisplay::notifyDisplayChanges() {
@@ -832,13 +865,23 @@ void MultiDisplay::getCombinedDisplaySizeLocked(uint32_t* w, uint32_t* h) {
     if (android_foldable_is_pixel_fold()) {
         constexpr int primary_display_id = 0;
         const int secondary_display_id = android_foldable_pixel_fold_second_display_id();
-        if (android_foldable_is_folded()) {
-            total_w = mMultiDisplay[secondary_display_id].width;
-            total_h = mMultiDisplay[secondary_display_id].height;
+        const bool second_display_exists = (mMultiDisplay.find(secondary_display_id) != mMultiDisplay.end());
+        if (android_foldable_is_folded() && second_display_exists) {
+            total_w = mMultiDisplay[secondary_display_id].originalWidth;
+            total_h = mMultiDisplay[secondary_display_id].originalHeight;
         } else {
-            total_w = mMultiDisplay[primary_display_id].width;
-            total_h = mMultiDisplay[primary_display_id].height;
+            total_w = mMultiDisplay[primary_display_id].originalWidth;
+            total_h = mMultiDisplay[primary_display_id].originalHeight;
         }
+        SkinRotation rotation = SKIN_ROTATION_0;
+        SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
+        if (layout) {
+            rotation = layout->orientation;
+        }
+        if (rotation == SKIN_ROTATION_90 || rotation == SKIN_ROTATION_270) {
+            std::swap(total_w, total_h);
+        }
+
     } else {
         for (const auto& iter : mMultiDisplay) {
             if (iter.first == 0 || iter.second.cb != 0) {

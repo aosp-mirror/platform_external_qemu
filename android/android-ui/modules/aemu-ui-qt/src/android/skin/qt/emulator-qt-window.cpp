@@ -1643,8 +1643,12 @@ bool EmulatorQtWindow::event(QEvent* ev) {
         }
 #endif
         mContainer.setWindowFlags(flags);
-        show();
 
+#if defined(__APPLE__) && defined(__aarch64__)
+        // skip the extra show
+#else
+        show();
+#endif
         // Trigger a ScreenChanged event so the device
         // screen will refresh immediately
         SkinEvent* event = new SkinEvent();
