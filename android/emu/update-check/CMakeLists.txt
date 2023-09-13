@@ -8,14 +8,13 @@ android_add_library(
   SRC android/update-check/UpdateChecker.cpp
       android/update-check/VersionExtractor.cpp
   DEPS android-emu-agents
-       android-emu-avd
        android-emu-base
        android-emu-base-headers
        android-emu-curl
        android-emu-files
        android-emu-studio-config
        android-emu-utils
-       android-hw-config
+      #  android-hw-config
        LibXml2::LibXml2)
 target_include_directories(
   android-emu-update-check

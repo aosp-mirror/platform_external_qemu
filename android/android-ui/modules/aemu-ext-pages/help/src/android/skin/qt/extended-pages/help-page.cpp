@@ -227,7 +227,7 @@ static const char* updateChannelName(android::studio::UpdateChannel channel) {
 
 void LatestVersionLoadTask::run() {
     // Get latest version that is available online
-    android::update_check::UpdateChecker upCheck;
+    android::update_check::SystemClockUpdateChecker upCheck;
     const auto latestVersion = upCheck.getLatestVersion();
     QString latestVerString;
     if (!latestVersion) {
