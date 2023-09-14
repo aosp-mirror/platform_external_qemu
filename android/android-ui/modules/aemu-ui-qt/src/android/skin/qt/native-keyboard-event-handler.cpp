@@ -204,8 +204,7 @@ std::optional<SkinEvent> NativeKeyboardEventHandler::handleKeyEvent(
         return std::nullopt;
     }
 
-    SkinEvent skinEvent =
-            EmulatorQtWindow::getInstance()->createSkinEvent(kEventTextInput);
+    SkinEvent skinEvent = createSkinEvent(kEventTextInput);
     SkinEventTextInputData& textInputData = skinEvent.u.text;
     textInputData.keycode = linuxKeycode;
     textInputData.mod =

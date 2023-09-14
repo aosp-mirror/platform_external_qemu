@@ -98,9 +98,3 @@ SkinMouseButtonType MouseEventHandler::getSkinMouseButton(
         return kMouseButtonLeft;
     }
 }
-
-SkinEvent MouseEventHandler::createSkinEvent(SkinEventType type) {
-    SkinEvent skin_event;
-    skin_event.type = type;
-    return skin_event;
-}

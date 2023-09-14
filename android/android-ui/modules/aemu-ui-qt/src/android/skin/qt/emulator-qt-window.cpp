@@ -1469,9 +1469,7 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways) {
     }
 
     D("%s: kEventScreenChanged", __FUNCTION__);
-    SkinEvent event;
-    event.type = kEventScreenChanged;
-    queueSkinEvent(std::move(event));
+    queueSkinEvent(createSkinEvent(kEventScreenChanged));
 }
 
 void EmulatorQtWindow::setIgnoreWheelEvent(bool ignore) {
@@ -2460,12 +2458,6 @@ static int convertKeyCode(int sym) {
         }
     }
     return -1;
-}
-
-SkinEvent EmulatorQtWindow::createSkinEvent(SkinEventType type) {
-    SkinEvent skin_event;
-    skin_event.type = type;
-    return skin_event;
 }
 
 void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
@@ -3555,9 +3547,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
 #ifdef __APPLE__
     {
         // To fix issues when resizing + linking against macos sdk 11.
-        SkinEvent changeEvent;
-        changeEvent.type = kEventScreenChanged;
-        queueSkinEvent(std::move(changeEvent));
+        queueSkinEvent(createSkinEvent(kEventScreenChanged));
     }
 #endif
 }
