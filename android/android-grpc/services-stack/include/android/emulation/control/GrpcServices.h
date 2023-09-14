@@ -48,14 +48,14 @@ public:
     virtual void stop() = 0;
 
     // The port that the gRPC service is available on.
-    virtual int port() = 0;
+    virtual int port() const = 0;
 
     // Block and wait until the server is completed.
     virtual void wait() = 0;
 
     // A complete description of the endpoint, this can be used
     // to establish a direct connection to this server.
-    virtual remote::Endpoint description() = 0;
+    virtual const remote::Endpoint& description() const = 0;
 };
 
 // A Factory class that is capable of constructing a proper gRPC service that
