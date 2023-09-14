@@ -14,6 +14,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "android/skin/rect.h"
 
@@ -209,6 +210,8 @@ typedef struct SkinEvent {
         SkinEventRemoveDisplay remove_display;
     } u;
 } SkinEvent;
+
+SkinEvent createSkinEvent(SkinEventType t);
 
 // Poll for incoming input events. On success, return true and sets |*event|.
 // On failure, i.e. if there are no events, return false.
