@@ -36,43 +36,76 @@ service AvdService {
     rpc getAvdInfo(google.protobuf.Empty) returns (AvdInfo);
 }
 
-message AvdInfo {
-    enum AVD_FLAVOR {
-        AVD_FLAVOR_UNSPECIFIED = 0;
-        AVD_FLAVOR_PHONE = 1;
-        AVD_FLAVOR_TV = 2;
-        AVD_FLAVOR_WEAR = 3;
-        AVD_FLAVOR_ANDROID_AUTO = 4;
-        AVD_FLAVOR_DESKTOP = 5;
-        AVD_FLAVOR_OTHER = 255;
-    };
+enum AvdFlavor {
+    AVD_FLAVOR_UNSPECIFIED = 0;
+    AVD_FLAVOR_PHONE = 1;
+    AVD_FLAVOR_TV = 2;
+    AVD_FLAVOR_WEAR = 3;
+    AVD_FLAVOR_ANDROID_AUTO = 4;
+    AVD_FLAVOR_DESKTOP = 5;
+    AVD_FLAVOR_OTHER = 255;
+}
 
-    // The name of the Android Virtual Device
-    string name = 1;
-    // The device ID, which can be different from the AVD name
-    // depending on multiple instances or the specific use case.
-    string id = 2;
-    // Return the target API level for this AVD.
-    // Note: This can be some ridiculously large
-    // value (e.g. 1000) if this value cannot be properly
-    // determined (e.g. you're using an AVD from a preview SDK)
-    int32 api_level = 3;
-    // Return the target string originated from rootIni.
-    string target = 4;
-    // the "dessert name" associated with the API level
-    string desert = 5;
-    // Return the full version name associated with the API level
-    string full_api_name = 6;
-    // True if the avd is on google api
-    bool google_apis = 7;
-    // True if the AVD is a user build.
-    bool user_build = 8;
-    // true if the AVD is an Automated Test Device.
-    bool atd = 9;
-    // The flavor of this avd
-    AVD_FLAVOR flavor = 10;
-    // Maximum number of supported multi display entries in an avd.
-    int32 max_display_entries = 11;
-    // The target CPU architecture for this AVD.
-    string target_cpu_arch = 12;
+enum ImageState {
+    IMAGE_STATE_UNSPECIFIED = 0;
+    IMAGE_STATE_READONLY = 1;     /* unlocked */
+    IMAGE_STATE_MUSTLOCK = 2;     /* must be locked */
+    IMAGE_STATE_LOCKED = 3;       /* locked */
+    IMAGE_STATE_LOCKED_EMPTY = 4; /* locked and empty */
+    IMAGE_STATE_TEMPORARY = 5;    /* copied to temp file (no lock needed) */
+}
+
+message AvdInfo {
+    // for the Android build system case
+    bool in_android_build = 1;
+    string android_out = 2;
+    string android_build_root = 3;
+    string target_arch = 4;
+    string target_abi = 5;
+    string acpi_ini_path = 6;
+    string target = 7;  // The target string in rootIni.
+
+    // for the normal virtual device case
+    string device_name = 8;
+    string device_id = 9;
+    string sdk_root_path = 10;
+    repeated string search_paths = 11;
+    string content_path = 12;
+
+    // These two might not be needed.
+    string root_ini_path = 13;          // UNUSED?
+    map<string, string> root_ini = 14;  // UNUSED?
+
+    // virtual device's config.ini, NULL if missing
+    map<string, string> config_ini = 15;
+    map<string, string> skin_hardware_ini = 16;  // skin-specific hardware.ini
+
+    // for both
+    int32 api_level = 17;
+    int32 incremental_version = 18;
+
+    // For preview releases where we don't know the exact API level this flag
+    // indicates that at least we know it's M+ (for some code that needs to
+    // select either legacy or modern operation mode.
+    bool is_marshmallow_or_higher = 19;
+    bool is_google_apis = 20;
+    bool is_user_build = 21;
+    bool is_atd = 22;
+    AvdFlavor flavor = 23;
+    string skin_name = 24;               // skin name
+    string skin_dir_path = 25;           // skin directory
+    string core_hardware_ini_path = 26;  // core hardware.ini path
+    string snapshot_lock_path = 27;      // core snapshot.lock path
+    string multi_instance_lock_path = 28;
+
+    string build_properties = 29;  // build.prop file
+    string boot_properties = 30;   // boot.prop file
+
+    // image files
+    repeated string image_paths = 31;
+    repeated ImageState image_states = 32;
+
+    // skip checks
+    bool no_checks = 33;
+    string sysdir = 34;
 }

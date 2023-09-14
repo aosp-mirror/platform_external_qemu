@@ -29,6 +29,7 @@
 #include "android/utils/property_file.h"
 #include "android/utils/string.h"
 #include "android/utils/tempfile.h"
+#include "android/avd/avd-info.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -107,59 +108,6 @@ typedef enum {
     IMAGE_STATE_LOCKED_EMPTY, /* locked and empty */
     IMAGE_STATE_TEMPORARY,    /* copied to temp file (no lock needed) */
 } AvdImageState;
-
-struct AvdInfo {
-    /* for the Android build system case */
-    char inAndroidBuild;
-    char* androidOut;
-    char* androidBuildRoot;
-    char* targetArch;
-    char* targetAbi;
-    char* acpiIniPath;
-    char* target;  // The target string in rootIni.
-
-    /* for the normal virtual device case */
-    char* deviceName;
-    char* deviceId;
-    char* sdkRootPath;
-    char* searchPaths[MAX_SEARCH_PATHS];
-    int numSearchPaths;
-    char* contentPath;
-    char* rootIniPath;
-    CIniFile* rootIni;   /* root <foo>.ini file, empty if missing */
-    CIniFile* configIni; /* virtual device's config.ini, NULL if missing */
-    CIniFile* skinHardwareIni; /* skin-specific hardware.ini */
-
-    /* for both */
-    int apiLevel;
-    int incrementalVersion;
-
-    /* For preview releases where we don't know the exact API level this flag
-     * indicates that at least we know it's M+ (for some code that needs to
-     * select either legacy or modern operation mode.
-     */
-    bool isMarshmallowOrHigher;
-    bool isGoogleApis;
-    bool isUserBuild;
-    bool isAtd;
-    AvdFlavor flavor;
-    char* skinName;            /* skin name */
-    char* skinDirPath;         /* skin directory */
-    char* coreHardwareIniPath; /* core hardware.ini path */
-    char* snapshotLockPath;    /* core snapshot.lock path */
-    char* multiInstanceLockPath;
-
-    FileData buildProperties[1]; /* build.prop file */
-    FileData bootProperties[1];  /* boot.prop file */
-
-    /* image files */
-    char* imagePath[AVD_IMAGE_MAX];
-    char imageState[AVD_IMAGE_MAX];
-
-    /* skip checks */
-    bool noChecks;
-    const char* sysdir;
-};
 
 void avdInfo_free(AvdInfo* i) {
     if (i) {
@@ -706,7 +654,7 @@ static char* _avdInfo_getContentFilePath(const AvdInfo* i,
 }
 
 /* find and parse the config.ini file from the content directory */
-static int _avdInfo_getConfigIni(AvdInfo* i) {
+int _avdInfo_getConfigIni(AvdInfo* i) {
     char* iniPath = _avdInfo_getContentFilePath(i, CORE_CONFIG_INI);
 
     /* Allow non-existing config.ini */
@@ -1000,7 +948,7 @@ void avdInfo_setAvdId(AvdInfo* i, const char* avdId) {
  *****/
 
 /* Read a hardware.ini if it is located in the skin directory */
-static int _avdInfo_getBuildSkinHardwareIni(AvdInfo* i) {
+int _avdInfo_getBuildSkinHardwareIni(AvdInfo* i) {
     char* skinName;
     char* skinDirPath;
 
