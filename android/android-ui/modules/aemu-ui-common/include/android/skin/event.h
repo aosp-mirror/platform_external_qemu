@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
 #include "android/skin/rect.h"
 
@@ -129,6 +128,7 @@ typedef struct {
 typedef struct {
     int x_delta;
     int y_delta;
+    uint32_t display_id;
 } SkinEventWheelData;
 
 typedef struct {
