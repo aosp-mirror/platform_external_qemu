@@ -3298,8 +3298,12 @@ static int is_opengl_alive = 1;
 
 static void android_check_for_updates()
 {
-    if (getConsoleAgents()->settings->android_qemu_mode()) {
-        android_checkForUpdates(QEMU_CORE_VERSION);
+    bool inAndroidBuild =
+            !getConsoleAgents()->settings->avdInfo() ||
+            avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo());
+
+    if (getConsoleAgents()->settings->android_qemu_mode() && !inAndroidBuild) {
+            android_checkForUpdates(QEMU_CORE_VERSION);
     }
 }
 

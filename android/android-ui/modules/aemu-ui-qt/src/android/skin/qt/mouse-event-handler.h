@@ -43,7 +43,6 @@ public:
                                           Qt::MouseButtons buttons);
     SkinMouseButtonType getSkinMouseButton(const QMouseEvent* event) const;
 private:
-    static SkinEvent createSkinEvent(SkinEventType type);
     TouchState mMouseTouchState;
     QPoint mPrevMousePosition;
 };

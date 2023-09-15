@@ -10,32 +10,35 @@
 // GNU General Public License for more details.
 #include "android/update-check/VersionExtractor.h"
 
-#include "aemu/base/ArraySize.h"
-#include "aemu/base/Compiler.h"
-#include "aemu/base/containers/Lookup.h"
-#include "aemu/base/memory/ScopedPtr.h"
-#include "aemu/base/Optional.h"
-#include "android/utils/debug.h"
-#include "android/version.h"
-#include "config-host.h"
-
+#include <errno.h>
+#include <libxml/globals.h>
+#include <libxml/parser.h>
 #include <libxml/tree.h>
-
+#include <libxml/xmlstring.h>
+#include <libxml/xmlversion.h>
+#include <stdlib.h>
+#include <string.h>
 #include <algorithm>
-#include <iterator>
 #include <limits>
 #include <memory>
+#include <string>
 #include <string_view>
+#include <tuple>
 #include <unordered_map>
+#include <utility>
+#include <optional>
+#include <algorithm>
 
-#include <errno.h>
-#include <stdlib.h>
+#include "aemu/base/Version.h"
+#include "aemu/base/containers/Lookup.h"
+#include "aemu/base/logging/CLog.h"
+#include "android/metrics/StudioConfig.h"
+#include "android/version.h"
 
 namespace android {
 namespace update_check {
 
 using android::base::findOrDefault;
-using android::base::Optional;
 using android::base::Version;
 using android::studio::UpdateChannel;
 
@@ -57,7 +60,7 @@ struct DeleteXmlObject {
 template <class T>
 using xmlAutoPtr = std::unique_ptr<T, DeleteXmlObject>;
 
-static Optional<Version::ComponentType> parseInt(const xmlChar* str,
+static std::optional<Version::ComponentType> parseInt(const xmlChar* str,
                                                  const char* stopChars = "") {
     if (!str) {
         return {};
@@ -90,7 +93,7 @@ static const xmlChar* getContent(xmlNodePtr node) {
 }
 
 static std::pair<Version, std::string> parseVersion(xmlNodePtr node) {
-    Optional<Version::ComponentType> major, minor, micro, build;
+    std::optional<Version::ComponentType> major, minor, micro, build;
     xmlNodePtr revNode = nullptr;
     std::string channelName;
 
@@ -101,7 +104,7 @@ static std::pair<Version, std::string> parseVersion(xmlNodePtr node) {
             // the comment with build number has a string "bid:<build>"
             const auto buildStr = xmlStrstr(child->content, BAD_CAST "bid:");
             if (buildStr) {
-                build = parseInt(buildStr + STRING_LITERAL_LENGTH("bid:"),
+                build = parseInt(buildStr + std::size("bid:") - 1,
                                  ", \r\n\t");
             }
         } else if (child->type == XML_ELEMENT_NODE &&
@@ -140,7 +143,7 @@ static std::pair<Version, std::string> parseVersion(xmlNodePtr node) {
         return {};
     }
 
-    return {Version(*major, *minor, *micro, build.valueOr(0)),
+    return {Version(*major, *minor, *micro, build.value_or(0)),
             std::move(channelName)};
 }
 

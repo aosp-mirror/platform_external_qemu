@@ -109,8 +109,7 @@ void DPadPage::toggleButtonPressed(
     const SkinKeyCode key_code,
     const bool pressed) {
     if (mEmulatorWindow) {
-        SkinEvent skin_event;
-        skin_event.type = pressed ? kEventKeyDown : kEventKeyUp;
+        SkinEvent skin_event = createSkinEvent(pressed ? kEventKeyDown : kEventKeyUp);
         skin_event.u.key.keycode = key_code;
         skin_event.u.key.mod = 0;
         mEmulatorWindow->queueSkinEvent(std::move(skin_event));

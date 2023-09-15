@@ -130,8 +130,7 @@ void TvRemotePage::toggleButtonEvent(QPushButton* button,
                                      const SkinKeyCode key_code,
                                      const SkinEventType event_type) {
     if (mEmulatorWindow) {
-        SkinEvent skin_event;
-        skin_event.type = event_type;
+        SkinEvent skin_event = createSkinEvent(event_type);
         skin_event.u.key.keycode = key_code;
         skin_event.u.key.mod = 0;
         mEmulatorWindow->queueSkinEvent(std::move(skin_event));

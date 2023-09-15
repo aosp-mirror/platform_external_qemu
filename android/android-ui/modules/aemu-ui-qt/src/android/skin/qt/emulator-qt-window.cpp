@@ -1469,9 +1469,7 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways) {
     }
 
     D("%s: kEventScreenChanged", __FUNCTION__);
-    SkinEvent event;
-    event.type = kEventScreenChanged;
-    queueSkinEvent(std::move(event));
+    queueSkinEvent(createSkinEvent(kEventScreenChanged));
 }
 
 void EmulatorQtWindow::setIgnoreWheelEvent(bool ignore) {
@@ -1641,8 +1639,12 @@ bool EmulatorQtWindow::event(QEvent* ev) {
         }
 #endif
         mContainer.setWindowFlags(flags);
-        show();
 
+#if defined(__APPLE__) && defined(__aarch64__)
+        // skip the extra show
+#else
+        show();
+#endif
         // Trigger a ScreenChanged event so the device
         // screen will refresh immediately
         queueSkinEvent(createSkinEvent(kEventScreenChanged));
@@ -1661,7 +1663,7 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
         }
 
         // pass the QEMU main thread's arguments into the crash handler
-        std::string arguments = "===== QEMU main loop arguments =====\n";
+        std::string arguments = "";
         for (int i = 0; i < argc; ++i) {
             // Check for null in argv
             if (!argv[i]) {
@@ -2458,12 +2460,6 @@ static int convertKeyCode(int sym) {
     return -1;
 }
 
-SkinEvent EmulatorQtWindow::createSkinEvent(SkinEventType type) {
-    SkinEvent skin_event;
-    skin_event.type = type;
-    return skin_event;
-}
-
 void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
     if (mClosed) {
         return;
@@ -2722,6 +2718,7 @@ void EmulatorQtWindow::handleMouseWheelEvent(int delta,
     SkinEvent skin_event = createSkinEvent(kEventMouseWheel);
     skin_event.u.wheel.x_delta = 0;
     skin_event.u.wheel.y_delta = 0;
+    skin_event.u.wheel.display_id = 0;
     if (orientation == Qt::Horizontal) {
         skin_event.u.wheel.x_delta = delta;
     } else {
@@ -3551,9 +3548,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
 #ifdef __APPLE__
     {
         // To fix issues when resizing + linking against macos sdk 11.
-        SkinEvent changeEvent;
-        changeEvent.type = kEventScreenChanged;
-        queueSkinEvent(std::move(changeEvent));
+        queueSkinEvent(createSkinEvent(kEventScreenChanged));
     }
 #endif
 }

@@ -64,8 +64,10 @@
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/hw_control_agent.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
+#include "android/emulation/control/keyboard/AndroidEventSender.h"
 #include "android/emulation/control/keyboard/KeyEventSender.h"
 #include "android/emulation/control/keyboard/MouseEventSender.h"
+#include "android/emulation/control/keyboard/PenEventSender.h"
 #include "android/emulation/control/keyboard/TouchEventSender.h"
 #include "android/emulation/control/keyboard/WheelEventSender.h"
 #include "android/emulation/control/location_agent.h"
@@ -129,7 +131,9 @@ public:
         : mAgents(agents),
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
+          mAndroidEventSender(agents),
           mMouseEventSender(agents),
+          mPenEventSender(agents),
           mTouchEventSender(agents),
           mWheelEventSender(agents),
           mCamera(agents->sensors),
@@ -534,6 +538,10 @@ public:
                                 mMouseEventSender.send(request->mouse_event());
                             } else if (request->has_touch_event()) {
                                 mTouchEventSender.send(request->touch_event());
+                            } else if (request->has_android_event()) {
+                                mAndroidEventSender.send(request->android_event());
+                            } else if (request->has_pen_event()) {
+                                mPenEventSender.send(request->pen_event());
                             } else {
                                 // Mark the stream as completed, this will
                                 // result in setting that status and scheduling
@@ -541,7 +549,7 @@ public:
                                 // queue.
                                 eventReader->Finish(Status(
                                         ::grpc::StatusCode::INVALID_ARGUMENT,
-                                        "Missing key, mouse or touch event."));
+                                        "Missing key, mouse, touch or android event."));
                             }
                         });
         // Note that the event reader will delete itself on completion of
@@ -999,6 +1007,7 @@ public:
 
         auto format = reply->mutable_format();
         format->set_format(request->format());
+        format->set_display(myDisplayId >= 0 ? myDisplayId : request->display());
 
         auto rotation_reply = format->mutable_rotation();
         rotation_reply->set_xaxis(xaxis);
@@ -1434,7 +1443,9 @@ private:
     const AndroidConsoleAgents* mAgents;
     keyboard::KeyEventSender mKeyEventSender;
     MouseEventSender mMouseEventSender;
+    PenEventSender mPenEventSender;
     TouchEventSender mTouchEventSender;
+    AndroidEventSender mAndroidEventSender;
     WheelEventSender mWheelEventSender;
     SharedMemoryLibrary mSharedMemoryLibrary;
     EventWaiter mNotificationWaiter;
