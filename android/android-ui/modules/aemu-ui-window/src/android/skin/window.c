@@ -89,6 +89,28 @@ static void background_redraw(Background* back,
     }
 }
 
+static uint32_t get_skin_event_display_id(const SkinEvent* ev) {
+    switch (ev->type) {
+        case kEventMouseButtonDown:
+        case kEventMouseButtonUp:
+        case kEventMouseMotion:
+        case kEventMouseStartTracking:
+        case kEventMouseStopTracking:
+            return ev->u.mouse.display_id;
+
+        case kEventMouseWheel:
+            return ev->u.wheel.display_id;
+
+        case kEventTouchBegin:
+        case kEventTouchUpdate:
+        case kEventTouchEnd:
+            return ev->u.multi_touch_point.display_id;
+
+        default:
+            return 0;
+    }
+}
+
 typedef struct SubDisplay {
     struct SubDisplay* next;
     SkinRect rect;
@@ -2374,9 +2396,9 @@ void skin_window_process_touch_event(SkinWindow* window, SkinEvent* ev) {
 }
 
 void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
+    const uint32_t displayId = get_skin_event_display_id(ev);
     Button* button;
     int mx, my;
-    uint32_t displayId = ev->u.mouse.display_id;
     // This button state set will still be interpreted correctly for
     // single-touch, which only uses the first bit.
     int button_state = multitouch_create_buttons_state(

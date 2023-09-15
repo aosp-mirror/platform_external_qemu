@@ -2718,6 +2718,7 @@ void EmulatorQtWindow::handleMouseWheelEvent(int delta,
     SkinEvent skin_event = createSkinEvent(kEventMouseWheel);
     skin_event.u.wheel.x_delta = 0;
     skin_event.u.wheel.y_delta = 0;
+    skin_event.u.wheel.display_id = 0;
     if (orientation == Qt::Horizontal) {
         skin_event.u.wheel.x_delta = delta;
     } else {
