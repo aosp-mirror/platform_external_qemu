@@ -88,13 +88,17 @@ using android::base::RunOptions;
 using android::base::ScopedCPtr;
 using android::base::System;
 
+// -verbose does not work on launcher anymore
+// so use one local static to enable verbose
+// print in launcher
+static bool s_enable_verbose_launcher = false;
 
 #define DEBUG 1
 
 #if DEBUG
 #define D(...)                  \
     do {                        \
-        if (android_verbose)    \
+        if (s_enable_verbose_launcher || android_verbose)    \
             dinfo(__VA_ARGS__); \
     } while (0)
 #else
@@ -417,6 +421,10 @@ int main(int argc, char** argv) {
         }
 #endif
 #endif
+        if (!strcmp(opt, "-verbose")) {
+            s_enable_verbose_launcher = true;
+            continue;
+        }
 
         if (!strcmp(opt, "-qemu-top-dir") && nn + 1 < argc) {
             qemu_top_dir = argv[nn + 1];
@@ -1146,7 +1154,7 @@ int main(int argc, char** argv) {
     }
 #endif
 
-    if (android_verbose) {
+    if (s_enable_verbose_launcher || android_verbose) {
         int i;
         dprint("emulator: Running :%s", emulatorPath);
         for (i = 0; i < argc; i++) {

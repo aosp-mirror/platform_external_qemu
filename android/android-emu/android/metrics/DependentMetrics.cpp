@@ -637,6 +637,8 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::WIFIPACKETSTREAM;
         case android::featurecontrol::SupportPixelFold:
             return android_studio::EmulatorFeatureFlagState::SUPPORT_PIXEL_FOLD;
+        case android::featurecontrol::DeviceKeyboardHasAssistKey:
+            return android_studio::EmulatorFeatureFlagState::DEVICE_KEYBOARD_HAS_ASSIST_KEY;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;

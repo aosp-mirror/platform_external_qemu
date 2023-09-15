@@ -161,8 +161,6 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
             SIGNAL(ensureVirtualSceneWindowCreated()), mToolWindow,
             SLOT(ensureVirtualSceneWindowCreated()));
 
-    connect(mExtendedUi->virtualSensorsPage, SIGNAL(windowVisible()), this,
-            SLOT(hideRotationButtons()));
     // clang-format off
     mPaneButtonMap = {
         {PANE_IDX_CAR,           mExtendedUi->carDataButton},
@@ -775,8 +773,3 @@ void ExtendedWindow::showMacroRecordPage() {
     mExtendedUi->recordAndPlaybackPage->focusMacroRecordTab();
 }
 
-void ExtendedWindow::hideRotationButtons() {
-    mExtendedUi->virtualSensorsPage->hideRotationButtons(
-            mToolWindow->getUiEmuAgent()
-                    ->multiDisplay->isMultiDisplayEnabled());
-}

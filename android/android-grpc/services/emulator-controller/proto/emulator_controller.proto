@@ -628,6 +628,21 @@ message Touch {
     }
 
     EventExpiration expiration = 7;
+
+    // The orientation of the contact, if any.
+    int32 orientation = 8;
+}
+
+// A Pen is similar to a touch, with the addition
+// of button and rubber information.
+message Pen {
+    Touch location = 1;
+
+    // True if the button is pressed or not
+    bool button_pressed = 2;
+
+    // True if it is a rubber pointer.
+    bool rubber_pointer = 3;
 }
 
 // A TouchEvent contains a list of Touch objects that are in contact with
@@ -643,9 +658,15 @@ message TouchEvent {
 
     // The display device where the touch event occurred.
     // Omitting or using the value 0 indicates the main display.
-    //
-    // Touch events cannot be send to displays other than 0, due to
-    // https://issuetracker.google.com/issues/150699691
+    int32 display = 2;
+}
+
+message PenEvent {
+    // The list of Pen objects, note that these do not need to be unique
+    repeated Pen events = 1;
+
+    // The display device where the pen event occurred.
+    // Omitting or using the value 0 indicates the main display.
     int32 display = 2;
 }
 
@@ -789,7 +810,32 @@ message InputEvent {
         KeyboardEvent key_event = 1;
         TouchEvent touch_event = 2;
         MouseEvent mouse_event = 3;
+        AndroidEvent android_event = 4;
+        PenEvent pen_event = 5;
     }
+};
+
+// The android input event system is a framework for handling input from a
+// variety of devices by generating events that describe changes in the
+// state of the devices and forwarding them to user space applications.
+//
+// An AndroidEvents will be delivered directly to the kernel as is.
+message AndroidEvent {
+    // The type of the event. The types of the event are specified
+    // by the android kernel. Some examples are:
+    // EV_SYN, EV_KEY, EV_SW, etc..
+    // The exact definitions can be found in the input.h header file.
+    int32 type = 1;
+
+    // The actual code to be send to the kernel. The actual meaning
+    // of the code depends on the type definition.
+    int32 code = 2;
+
+    // The actual value of the event.
+    int32 value = 3;
+
+    // The display id associated with this input event.
+    int32 display = 4;
 };
 
 message Fingerprint {

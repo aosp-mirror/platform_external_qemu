@@ -508,6 +508,28 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
             android_car_cluster_init();
             android_car_physics_init();
         }
+
+        // Store the avd flavor
+        switch (flavor) {
+            case AVD_PHONE:
+                crashhandler_add_string("AVD_FLAVOR", "AVD_PHONE");
+                break;
+            case AVD_TV:
+                crashhandler_add_string("AVD_FLAVOR", "AVD_TV");
+                break;
+            case AVD_WEAR:
+                crashhandler_add_string("AVD_FLAVOR", "AVD_WEAR");
+                break;
+            case AVD_ANDROID_AUTO:
+                crashhandler_add_string("AVD_FLAVOR", "AVD_ANDROID_AUTO");
+                break;
+            case AVD_DESKTOP:
+                crashhandler_add_string("AVD_FLAVOR", "AVD_DESKTOP");
+                break;
+            case AVD_OTHER:
+                crashhandler_add_string("AVD_FLAVOR", "AVD_OTHER");
+                break;
+        };
     }
 
     /* for TV/Wear/... and anything that does not use ril, this is needed

@@ -54,4 +54,5 @@ private:
     std::unique_ptr<Ui::MicrophonePage> mUi;
     std::shared_ptr<UiEventTracker> mMicTracker;
     EmulatorQtWindow* mEmulatorWindow;
+    const bool mDeviceKeyboardHasAssistKey;
 };

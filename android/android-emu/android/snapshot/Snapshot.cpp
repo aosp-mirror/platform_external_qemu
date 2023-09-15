@@ -68,6 +68,12 @@
 
 #define ALLOW_CHANGE_RENDERER
 
+#ifdef AEMU_GFXSTREAM_BACKEND
+static constexpr bool HAS_GFXSTREAM = true;
+#else
+static constexpr bool HAS_GFXSTREAM = false;
+#endif
+
 using android::base::c_str;
 using android::base::endsWith;
 using android::base::IniFile;
@@ -404,8 +410,9 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
+#if 1
 // Calculate snapshot version based on a base version plus featurecontrol-derived integer.
-static constexpr int kVersionBase = 81;
+static constexpr int kVersionBase = 82;
 static_assert(kVersionBase < (1 << 20), "Base version number is too high.");
 
 #define FEATURE_CONTROL_ITEM(item, idx) + 1
@@ -418,13 +425,17 @@ static constexpr int kFeatureOffset = 0
 
 #undef FEATURE_CONTROL_ITEM
 
-static_assert(kFeatureOffset < 1024, "Too many features to include in the feature offset component of the snapshot version");
+static_assert(kFeatureOffset < 1024, "Too many features to include in the feature "
+                                     "offset component of the snapshot version");
+static constexpr int kVersion = (kVersionBase << 10) + kFeatureOffset;
 
-// static constexpr int kVersion = (kVersionBase << 10) + kFeatureOffset;
-
+#else
 // We currently hardcode the kVersion as we are in the process of migrating
 // To a different versioning scheme see: b/287119326
+#error Consider updating the line below
 static constexpr int kVersion = 83037;
+#endif
+
 static constexpr int kMaxSaveStatsHistory = 10;
 
 std::string Snapshot::dataDir(const char* name) {
@@ -581,6 +592,9 @@ bool Snapshot::save() {
         buildId = ini.getString("ro.build.display.id", "");
     }
     mSnapshotPb.set_system_image_build_id(buildId);
+
+    dinfo("Saving with gfxstream=%d", HAS_GFXSTREAM);
+    mSnapshotPb.set_gfxstream(HAS_GFXSTREAM);
     return writeSnapshotToDisk();
 }
 
@@ -777,6 +791,16 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
 
 const bool Snapshot::checkValid(bool writeFailure) {
     if (!preload()) {
+        return false;
+    }
+
+    bool is_gfxstream_snapshot = mSnapshotPb.has_gfxstream() ? mSnapshotPb.gfxstream() : false;
+    if (is_gfxstream_snapshot != HAS_GFXSTREAM) {
+        dwarning("snapshot was created with gfxstream=%d, but this emulator has gfxstream=%d\n",
+                is_gfxstream_snapshot, HAS_GFXSTREAM);
+        if (writeFailure) {
+            saveFailure(FailureReason::ConfigMismatchRenderer);
+        }
         return false;
     }
 

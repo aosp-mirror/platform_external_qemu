@@ -80,13 +80,14 @@ typedef struct {
 } SkinEventGenericData;
 
 typedef struct {
-    uint8_t text[32];
-    bool down;
     int32_t keycode;
     int32_t mod;
+    uint8_t text[32];
+    bool down;
 } SkinEventTextInputData;
 
 typedef struct {
+    uint32_t display_id;
     int x;
     int y;
     int xrel;
@@ -95,15 +96,14 @@ typedef struct {
     int y_global;
     int button;
     bool skip_sync;
-    uint32_t display_id;
 } SkinEventMouseData;
 
 typedef struct {
+    int64_t tracking_id;
     int x;
     int y;
     int x_global;
     int y_global;
-    int64_t tracking_id;
     int pressure;
     int orientation;
     bool button_pressed;
@@ -112,6 +112,7 @@ typedef struct {
 } SkinEventPenData;
 
 typedef struct {
+    uint32_t display_id;
     int id;
     int pressure;
     int orientation;
@@ -122,10 +123,10 @@ typedef struct {
     int touch_major;
     int touch_minor;
     bool skip_sync;
-    uint32_t display_id;
 } SkinEventTouchData;
 
 typedef struct {
+    uint32_t display_id;
     int x_delta;
     int y_delta;
 } SkinEventWheelData;
@@ -151,10 +152,10 @@ typedef struct {
 } SkinEventMultiDisplay;
 
 typedef struct {
+    double scale;
     int x; // Send current window coordinates to maintain window location
     int y;
     int scroll_h; // Height of the horizontal scrollbar, needed for OSX
-    double scale;
 } SkinEventWindowData;
 
 typedef struct {
@@ -188,7 +189,6 @@ typedef struct {
 } SkinEventRemoveDisplay;
 
 typedef struct SkinEvent {
-    SkinEventType type;
     union {
         SkinEventKeyData key;
         SkinEventGenericData generic_event;
@@ -208,7 +208,10 @@ typedef struct SkinEvent {
         SkinEventAddDisplay add_display;
         SkinEventRemoveDisplay remove_display;
     } u;
+    SkinEventType type;
 } SkinEvent;
+
+SkinEvent createSkinEvent(SkinEventType t);
 
 // Poll for incoming input events. On success, return true and sets |*event|.
 // On failure, i.e. if there are no events, return false.

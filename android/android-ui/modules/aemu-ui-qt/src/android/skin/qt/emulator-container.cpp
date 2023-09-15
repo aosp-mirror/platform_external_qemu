@@ -183,17 +183,6 @@ bool EmulatorContainer::event(QEvent* e) {
     return QScrollArea::event(e);
 }
 
-#if defined(__linux__)
-// All callers to this function are currently under __linux__ so
-// we needs an ifdef to avoid a "defined but not used" build failure
-// on other platforms.
-static SkinEvent createSkinEvent(SkinEventType t) {
-    SkinEvent e;
-    e.type = t;
-    return e;
-}
-#endif
-
 void EmulatorContainer::changeEvent(QEvent* event) {
     switch (event->type()) {
         case QEvent::WindowStateChange:

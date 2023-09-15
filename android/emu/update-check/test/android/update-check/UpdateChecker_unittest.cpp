@@ -10,10 +10,10 @@
 // GNU General Public License for more details.
 
 #include "android/update-check/UpdateChecker.h"
-#include "android/update-check/VersionExtractor.h"
 #include "aemu/base/Optional.h"
-#include "android/base/testing/TestSystem.h"
 #include "aemu/base/Version.h"
+#include "android/base/testing/TestSystem.h"
+#include "android/update-check/VersionExtractor.h"
 
 #include <gtest/gtest.h>
 
@@ -26,6 +26,9 @@ namespace update_check {
 using android::base::Version;
 using android::studio::UpdateChannel;
 
+#include <chrono>
+
+// Define a custo
 class MockVersionExtractor : public IVersionExtractor {
 public:
     virtual Versions extractVersions(std::string_view data) const override {
@@ -74,13 +77,14 @@ public:
         return mLockResult;
     }
 
-    virtual time_t getTime(const std::string& key) override {
+    virtual std::chrono::seconds getTime(const std::string& key) override {
         EXPECT_STREQ(mKeyParam.c_str(), key.c_str());
         ++mGetTimeCallCount;
         return mGetTimeResult;
     }
 
-    virtual void setTime(const std::string& key, time_t time) override {
+    virtual void setTime(const std::string& key,
+                         std::chrono::seconds time) override {
         EXPECT_STREQ(mKeyParam.c_str(), key.c_str());
         ++mSetTimeCallCount;
         EXPECT_EQ(mSetTimeParam, time);
@@ -90,8 +94,8 @@ public:
     int mGetTimeCallCount = 0;
     int mSetTimeCallCount = 0;
     bool mLockResult = false;
-    time_t mGetTimeResult = 0;
-    time_t mSetTimeParam = 0;
+    std::chrono::seconds mGetTimeResult{0};
+    std::chrono::seconds mSetTimeParam{0};
     std::string mKeyParam;
 };
 
@@ -117,6 +121,9 @@ public:
                       INewerVersionReporter* reporter)
         : UpdateChecker(extractor, loader, storage, reporter) {}
 
+    std::chrono::seconds currentTimeSinceEpoch() const override { return mEpochTime; }
+
+    std::chrono::seconds mEpochTime{0};
     // make it public for testing
     using UpdateChecker::asyncWorker;
 };
@@ -158,8 +165,8 @@ TEST(UpdateChecker, needsCheck) {
     // set last check time and current time to be close enough -
     // no new check is needed
     test.mTimeStorage->mKeyParam = test.mDataLoader->mUniqueDataKey = "key";
-    test.mTimeStorage->mGetTimeResult = time_t(1);
-    test.mSystem.setUnixTime(time_t(2));
+    test.mTimeStorage->mGetTimeResult = std::chrono::seconds(1);
+    test.mUC->mEpochTime = std::chrono::seconds(2);
 
     EXPECT_FALSE(test.mUC->needsCheck());
     EXPECT_EQ(1, test.mDataLoader->mGetUniqueDataKeyCallCount);
@@ -167,7 +174,7 @@ TEST(UpdateChecker, needsCheck) {
 
     /////////////////////////////////////////////////////////////////////
     // now set the current time to require the check (+one year from the epoch)
-    test.mSystem.setUnixTime(time_t(365 * 24 * 60 * 60));
+    test.mUC->mEpochTime = std::chrono::hours(24 * 365);
     EXPECT_TRUE(test.mUC->needsCheck());
     EXPECT_EQ(2, test.mTimeStorage->mGetTimeCallCount);
 }
@@ -196,9 +203,9 @@ TEST(UpdateChecker, DISABLED_asyncWorker) {
             test.mVersionExtractor->mExtractVersionDataParam = "test";
     test.mVersionExtractor->mExtractVersionResult = Version(1, 0, 0);
     test.mVersionExtractor->mGetCurrentVersionResult = Version(1, 0, 0);
-    test.mSystem.setUnixTime(time_t(1));
+    test.mUC->mEpochTime = std::chrono::seconds(1);
     test.mTimeStorage->mKeyParam = test.mDataLoader->mUniqueDataKey = "key";
-    test.mTimeStorage->mSetTimeParam = time_t(1);
+    test.mTimeStorage->mSetTimeParam = std::chrono::seconds(1);
 
     test.mUC->asyncWorker();
     EXPECT_EQ(1, test.mDataLoader->mLoadCallCount);

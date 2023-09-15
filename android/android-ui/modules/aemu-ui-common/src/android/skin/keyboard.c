@@ -371,10 +371,11 @@ void skin_keyboard_process_event(SkinKeyboard* kb, SkinEvent* ev, int down) {
         case LINUX_KEY_SEND:
         case LINUX_KEY_DELETE:
         case ANDROID_KEY_APPSWITCH:
+        case ANDROID_KEY_STEM_PRIMARY:
         case ANDROID_KEY_STEM_1:
         case ANDROID_KEY_STEM_2:
         case ANDROID_KEY_STEM_3:
-        case ANDROID_KEY_STEM_PRIMARY:
+        case ANDROID_KEY_ASSIST:
             skin_keyboard_add_key_event(kb, keycode, down);
             skin_keyboard_flush(kb);
             break;

@@ -236,7 +236,7 @@ static void Usage(int argc, const char* argv[], bool error) {
             "\n"
             "  -l                                      List local crash "
             "reports\n"
-            "  -u                                      Upload and delete local "
+            "  -u                                      Upload local "
             "crash report(s) to " CRASHURL
             "\n"
             "  -e                                      Erase local crash "

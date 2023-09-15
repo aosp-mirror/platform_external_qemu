@@ -60,7 +60,15 @@ static glm::vec3 clampPosition(glm::vec3 position) {
                                 Device3DWidget::MaxZ));
 }
 
+// reduce the animation interval from 33ms to 330ms
+// to reduce cpu usage, it is still reasonably responsive
+// bug: 299824177
+
+#if defined(__aarch64__) && defined(__APPLE__)
+static constexpr int kAnimationIntervalMs = 330;
+#else
 static constexpr int kAnimationIntervalMs = 33;
+#endif
 
 Device3DWidget::Device3DWidget(QWidget* parent)
     : GLWidget(parent),
@@ -71,8 +79,9 @@ Device3DWidget::Device3DWidget(QWidget* parent)
     setFocusPolicy(Qt::ClickFocus);
 
     if (mUseAbstractDevice) {
-        connect(&mAnimationTimer, SIGNAL(timeout()), this, SLOT(animate()));
+        mAnimationTimer.setTimerType(Qt::PreciseTimer);
         mAnimationTimer.setInterval(kAnimationIntervalMs);
+        connect(&mAnimationTimer, SIGNAL(timeout()), this, SLOT(animate()));
     }
 }
 
