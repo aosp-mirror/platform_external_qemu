@@ -1007,6 +1007,7 @@ public:
 
         auto format = reply->mutable_format();
         format->set_format(request->format());
+        format->set_display(myDisplayId >= 0 ? myDisplayId : request->display());
 
         auto rotation_reply = format->mutable_rotation();
         rotation_reply->set_xaxis(xaxis);
