@@ -86,18 +86,20 @@ extern "C" {
 #include "android/emulation/control/EmulatorService.h"
 #include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/UiController.h"
-#include "android/emulation/control/virtualscene/VirtualSceneService.h"
 #include "android/emulation/control/adb/AdbService.h"
 #include "android/emulation/control/incubating/AvdService.h"
 #include "android/emulation/control/incubating/CarService.h"
 #include "android/emulation/control/incubating/ModemService.h"
-#include "android/emulation/control/incubating/SensorService.h"
 #include "android/emulation/control/incubating/ScreenRecordingService.h"
+#include "android/emulation/control/incubating/SensorService.h"
+#include "android/emulation/control/interceptor/LoggingInterceptor.h"
+#include "android/emulation/control/interceptor/MetricsInterceptor.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"
+#include "android/emulation/control/virtualscene/VirtualSceneService.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/stats/EmulatorStats.h"
-#include "android/emulation/control/utils/EmulatorGrcpClient.h"
 #include "android/emulation/virtio_vsock_device.h"
 #include "android/gpu_frame.h"
 #include "android/skin/winsys.h"
@@ -141,9 +143,12 @@ extern char* op_http_proxy;
 using android::DmaMap;
 using android::VmLock;
 using android::base::PathUtils;
+using android::control::interceptor::MetricsInterceptorFactory;
+using android::control::interceptor::StdOutLoggingInterceptorFactory;
 using android::emulation::control::EmulatorAdvertisement;
 using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::EmulatorProperties;
+using android::emulation::control::InterceptorFactories;
 
 std::string get_display_name();
 
@@ -388,8 +393,11 @@ int qemu_setup_grpc() {
             getConsoleAgents());
     auto bluetooth =
             android::emulation::bluetooth::getEmulatedBluetoothService();
-    auto virtualScene = android::emulation::control::incubating::getVirtualSceneService();
-    auto screenRecorder =android::emulation::control::incubating::getScreenRecordingService(getConsoleAgents());
+    auto virtualScene =
+            android::emulation::control::incubating::getVirtualSceneService();
+    auto screenRecorder =
+            android::emulation::control::incubating::getScreenRecordingService(
+                    getConsoleAgents());
     auto avd = android::emulation::control::incubating::getAvdService(
             getConsoleAgents());
     auto builder =
@@ -510,8 +518,24 @@ int qemu_setup_grpc() {
                                             ->grpc_tls_ca;
         }
 
-        android::emulation::control::EmulatorGrpcClient::configureMe(grpcService->description());
-        bool connect = android::emulation::control::EmulatorGrpcClient::me()->hasOpenChannel();
+        android::emulation::control::EmulatorGrpcClient::Builder builder;
+
+        if (VERBOSE_CHECK(grpc)) {
+            builder.withInterceptor(new StdOutLoggingInterceptorFactory());
+        }
+        auto status = builder.withInterceptor(new MetricsInterceptorFactory())
+                              .withEndpoint(grpcService->description())
+                              .build();
+
+        if (status.ok()) {
+            android::emulation::control::EmulatorGrpcClient::configureMe(
+                    std::move(status.value()));
+        } else {
+            derror("Failed to setup local gRPC connection %s",
+                   status.status().message().data());
+        }
+        bool connect = android::emulation::control::EmulatorGrpcClient::me()
+                               ->hasOpenChannel();
         assert(connect);
     }
 
@@ -535,7 +559,6 @@ int qemu_setup_grpc() {
                "requested.");
         exit(1);
     }
-
 
     advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
     advertiser->garbageCollect();

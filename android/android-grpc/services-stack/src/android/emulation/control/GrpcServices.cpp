@@ -93,11 +93,11 @@ public:
           mServer(server),
           mEndpoint(description) {}
 
-    int port() override { return mPort; }
+    int port() const override { return mPort; }
 
     void wait() override { mServer->Wait(); }
 
-    remote::Endpoint description() override { return mEndpoint; }
+    const remote::Endpoint& description() const override { return mEndpoint; }
 
 private:
     std::unique_ptr<grpc::Server> mServer;

@@ -17,46 +17,50 @@
  * under the License.
  */
 
-#include <chrono>                                                // for oper...
-#include <fstream>                                               // for fstream
-#include <memory>                                                // for uniq...
-#include <optional>                                              // for opti...
-#include <string>                                                // for string
-#include <thread>                                                // for slee...
-#include <utility>                                               // for move
-#include <vector>                                                // for vector
+#include <chrono>    // for oper...
+#include <fstream>   // for fstream
+#include <memory>    // for uniq...
+#include <optional>  // for opti...
+#include <string>    // for string
+#include <thread>    // for slee...
+#include <utility>   // for move
+#include <vector>    // for vector
 
-#include "RequestForwarder.h"                                    // for Requ...
+#include "RequestForwarder.h"          // for Requ...
+#include "absl/flags/flag.h"           // for Fast...
+#include "absl/flags/parse.h"          // for Pars...
+#include "absl/status/status.h"        // for Status
+#include "absl/strings/string_view.h"  // for stri...
 #include "host-common/hw-config.h"
-#include "absl/flags/flag.h"                                     // for Fast...
-#include "absl/flags/parse.h"                                    // for Pars...
-#include "absl/status/status.h"                                  // for Status
-#include "absl/strings/string_view.h"                            // for stri...
 
-#include "aemu/base/files/PathUtils.h"                        // for Path...
+#include "aemu/base/files/PathUtils.h"                           // for Path...
 #include "android/emulation/control/EmulatorAdvertisement.h"     // for Emul...
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emul...
 #include "android/utils/debug.h"                                 // for dinfo
 #include "emulated_bluetooth_device.pb.h"                        // for Gatt...
-// #include "emulator_controller.pb.h"                              // for control
+// #include "emulator_controller.pb.h"                              // for
+// control
 
 ABSL_FLAG(std::string,
           with_device_proto,
           "",
-          "Path to a device configuration proto file describing the emulated device.");
+          "Path to a device configuration proto file describing the emulated "
+          "device.");
 
 ABSL_FLAG(std::string,
           with_hci_transport,
           "",
-          "Path to a emulator endpoint configuration proto file hosting the HCI transport.");
+          "Path to a emulator endpoint configuration proto file hosting the "
+          "HCI transport.");
 
 using namespace android::emulation::bluetooth;
 using namespace android::emulation::control;
 using android::base::PathUtils;
 
 std::optional<GattDevice> loadFromProto(std::string_view pathToEndpointProto) {
-    std::fstream input(PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str(),
-                       std::ios::in | std::ios::binary);
+    std::fstream input(
+            PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str(),
+            std::ios::in | std::ios::binary);
     GattDevice device;
     if (!input) {
         derror("File %s not found",
@@ -74,9 +78,14 @@ std::optional<GattDevice> loadFromProto(std::string_view pathToEndpointProto) {
 std::unique_ptr<EmulatorGrpcClient> findFirstEmulator() {
     auto emulators = EmulatorAdvertisement({}).discoverRunningEmulators();
     for (const auto& discovered : emulators) {
-        auto client = std::make_unique<EmulatorGrpcClient>(discovered);
-        if (client->hasOpenChannel()) {
-            return client;
+        auto client = EmulatorGrpcClient::Builder()
+                              .withDiscoveryFile(discovered)
+                              .build();
+        if (client.ok()) {
+            return std::move(client.value());
+        } else {
+            dwarning("Failed to configure connection: %s",
+                     client.status().message().data());
         }
     }
     return nullptr;
@@ -90,18 +99,18 @@ int main(int argc, char** argv) {
         dfatal("No valid protobuf configutation provided");
     }
 
-    std::unique_ptr<EmulatorGrpcClient> maybeClient =
+    auto maybeClient =
             EmulatorGrpcClient::loadFromProto(
                     absl::GetFlag(FLAGS_with_hci_transport));
-    while (!maybeClient) {
+    while (!maybeClient.ok()) {
         using namespace std::chrono_literals;
         dinfo("Waiting for first emulator..");
         std::this_thread::sleep_for(1s);
         maybeClient = findFirstEmulator();
     }
 
-    auto device = RequestForwarder::registerDevice(std::move(definition.value()),
-                                                std::move(maybeClient));
+    auto device = RequestForwarder::registerDevice(
+            std::move(definition.value()), std::move(maybeClient.value()));
 
     auto status = device->initialize();
     if (status.ok()) {
