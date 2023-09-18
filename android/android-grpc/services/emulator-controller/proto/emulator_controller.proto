@@ -57,6 +57,9 @@ service EmulatorController {
             returns (stream PhysicalModelValue) {}
 
     // Atomically set/get the current primary clipboard data.
+    // Note that a call to setClipboard will result in an immediate
+    // event for those who made a call to streamClipboard and are
+    // on a different channel than the one used to set the clipboard.
     rpc setClipboard(ClipData) returns (google.protobuf.Empty) {}
     rpc getClipboard(google.protobuf.Empty) returns (ClipData) {}
 
