@@ -1305,6 +1305,7 @@ message Notification {
                 displayConfigurationsChangedNotification = 3;
         Posture posture = 4;
         BootCompletedNotication booted = 5;
+        BrightnessValue brightness = 6;
     }
 }
 
