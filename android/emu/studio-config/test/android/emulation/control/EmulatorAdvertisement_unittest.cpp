@@ -56,6 +56,17 @@ namespace android {
 namespace emulation {
 namespace control {
 
+class AliveTest : public EmulatorLivenessStrategy {
+public:
+    AliveTest(bool alive) : mAlive(alive) {}
+    bool isAlive(std::string myFile, std::string discoveryFile) const override {
+        return mAlive;
+    }
+
+private:
+    bool mAlive;
+};
+
 class EmulatorAdvertisementTest : public testing::Test {
 protected:
     EmulatorAdvertisementTest() {}
@@ -279,6 +290,25 @@ TEST_F(EmulatorAdvertisementTest, open_port_different_file_is_dead) {
     ini2.write();
 
     EXPECT_FALSE(OpenPortChecker().isAlive(tst1, tst2));
+}
+
+TEST_F(EmulatorAdvertisementTest, discover_props) {
+    EmulatorAdvertisement tst({{"c", "d"}}, mTempDir.path(),
+                              std::make_unique<AliveTest>(true));
+    tst.write();
+
+    auto tst1 = pj(mTempDir.path(), "tst1.ini");
+    auto tst2 = pj(mTempDir.path(), "tst2.ini");
+    base::IniFile ini(tst1);
+    base::IniFile ini2(tst2);
+
+    ini.setString("Foo", "bar");
+    ini2.setString("hello", "world");
+
+    ini.write();
+    ini2.write();
+
+    EXPECT_EQ(tst.discoverEmulatorWithProperties({{"hello", "world"}}), tst2);
 }
 
 TEST_F(EmulatorAdvertisementTest, DISABLED_pid_file_is_cleaned_in_shared_dir) {
