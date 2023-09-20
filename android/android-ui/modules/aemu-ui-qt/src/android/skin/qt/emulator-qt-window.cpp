@@ -1640,7 +1640,7 @@ bool EmulatorQtWindow::event(QEvent* ev) {
 #endif
         mContainer.setWindowFlags(flags);
 
-#if defined(__APPLE__) && defined(__aarch64__)
+#if defined(__APPLE__)
         // skip the extra show
 #else
         show();
