@@ -24,7 +24,10 @@
 #include "PacketStreamTransport.h"
 #include "aemu/base/logging/CLog.h"
 #include "android-qemu2-glue/netsim/PacketProtocol.h"
+#include "android/avd/info.h"
+#include "android/console.h"
 #include "android/grpc/utils/EnumTranslate.h"
+#include "android/utils/debug.h"
 #include "h4_parser.h"
 #include "netsim/common.pb.h"
 #include "netsim/hci_packet.pb.h"
@@ -57,6 +60,26 @@ namespace qemu2 {
 
 using netsim::packet::HCIPacket;
 
+static void apply_le_workaround_if_needed(ChipInfo* info) {
+    // We have some older Google Play store images, that we cannot
+    // update, that rely on particular bluetooth hardware behavior.
+    // See also b/293901745, b/288717403
+    auto build =
+            avdInfo_getBuildProperties(getConsoleAgents()->settings->avdInfo());
+    std::string props((char*)build->data, build->size);
+    auto idx = props.find("ro.system.build.id=TE1A.220922");
+    if (idx != std::string::npos) {
+        VERBOSE_INFO(bluetooth,
+                     "Explicitly disabling le_connected_isochronous stream feature!");
+        info->mutable_chip()
+                ->mutable_bt_properties()
+                ->mutable_features()
+                ->set_le_connected_isochronous_stream(false);
+    } else {
+        VERBOSE_INFO(bluetooth, "Not applying mutable features.");
+    }
+}
+
 // The protocol for /dev/vhci <-> PacketStreamer
 class BluetoothPacketProtocol : public PacketProtocol {
 public:
@@ -72,6 +95,7 @@ public:
         auto info = std::make_unique<ChipInfo>();
         info->set_name(mName);
         info->mutable_chip()->set_kind(netsim::common::ChipKind::BLUETOOTH);
+        apply_le_workaround_if_needed(info.get());
         return info;
     }
 
