@@ -29,7 +29,6 @@
 #include "android/emulation/control/globals_agent.h"
 #include "android/emulator-window.h"
 #include "android/main-emugl.h"
-#include "host-common/opengles.h"
 #include "android/resource.h"
 #include "android/skin/image.h"
 #include "android/skin/rect.h"
@@ -44,6 +43,7 @@
 #include "host-common/misc.h"
 #include "host-common/multi_display_agent.h"
 #include "host-common/opengl/emugl_config.h"
+#include "host-common/opengles.h"
 #include "host-common/vm_operations.h"
 
 #define D(...)                   \
@@ -309,6 +309,14 @@ bool configAndStartRenderer(enum WinsysPreferredGlesBackend uiPreferredBackend,
         bool shouldEnableGLDirectMem = api_level >= 29;
 #if defined(__aarch64__) && defined(__APPLE__)
         // b/273985153
+        shouldEnableGLDirectMem = false;
+#endif
+#if !defined(_WIN32) && !defined(__APPLE__)
+        // b/225541819
+        // Disable GLDirectMem for Linux. We cannot pass certain
+        // types of GPU memory from guest->host. This will result in
+        // a crash. There is a KVM fix, but it will not show up for
+        // a (large) number of kernel versions. See the bug for details.
         shouldEnableGLDirectMem = false;
 #endif
         bool shouldEnableVulkan = true;
