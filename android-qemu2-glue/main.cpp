@@ -2555,10 +2555,6 @@ extern "C" int main(int argc, char** argv) {
 #else
         args.add("-enable-kvm");
 #endif
-        if (hw->hw_cpu_ncore > 1) {
-            args.add("-smp");
-            args.addFormat("cores=%d", hw->hw_cpu_ncore);
-        }
     } else {
         dwarning("kvm is not enabled on this aarch64 host.");
     }
@@ -2578,29 +2574,29 @@ extern "C" int main(int argc, char** argv) {
         hw->hw_cpu_ncore = 1;
     }
 
-    if (hw->hw_cpu_ncore > 1) {
-        args.add("-smp");
-
-        if (hw->hw_cpu_ncore > 6) {
-            dwarning(
-                    "Emualtor does not support more than 6 cores. Number of cores "
-                    "set to 6");
-            hw->hw_cpu_ncore = 6;
-        }
-        args.addFormat("cores=%d", hw->hw_cpu_ncore);
-
 #ifdef __APPLE__
-        // macOS emulator is super slow on machines with less
-        // than 6 logical cores.
-        if (System::get()->getCpuCoreCount() < 6) {
-            dwarning(
-                    "Running on a system with less than 6 logical cores. "
-                    "Setting number of virtual cores to 1");
-            hw->hw_cpu_ncore = 1;
-        }
+    // macOS emulator is super slow on machines with less
+    // than 6 logical cores.
+    if (System::get()->getCpuCoreCount() < 6) {
+        dwarning(
+                "Running on a system with less than 6 logical cores. "
+                "Setting number of virtual cores to 1");
+        hw->hw_cpu_ncore = 1;
+    }
 #endif
+
+    if (hw->hw_cpu_ncore > 6) {
+        dwarning(
+                "Emualtor does not support more than 6 cores. Number of cores "
+                "set to 6");
+        hw->hw_cpu_ncore = 6;
     }
 #endif  // !TARGET_X86_64 && !TARGET_I386
+
+    if (hw->hw_cpu_ncore > 1) {
+        args.add("-smp");
+        args.addFormat("cores=%d", hw->hw_cpu_ncore);
+    }
 
     // Memory size
     args.add("-m");
