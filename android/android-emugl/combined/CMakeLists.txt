@@ -2,6 +2,8 @@
 prebuilt(ANGLE)
 prebuilt(VULKAN)
 
+add_definitions("-DAEMU_BUILD")
+
 function(add_opengl_dependencies TGT)
     android_target_dependency(${TGT} windows SWIFTSHADER_DEPENDENCIES)
     # b/257077718 Linux presubmit is flaky with SwANGLE
