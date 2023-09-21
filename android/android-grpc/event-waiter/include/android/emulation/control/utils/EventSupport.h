@@ -196,23 +196,60 @@ private:
     std::unordered_set<EventListener<void>*> mListeners;
 };
 
+
 /**
- * A template class that provides an implementation of a gRPC server event
- * stream writer for events of type T. It inherits from SimpleServerWriter<T>
- * and EventListener<T>, and is designed to be used as an event stream writer in
- * a gRPC server.
+ * GenericEventHandler is a class for handling events of type T as an event
+ * listener. It uses a policy class named EventPolicy to define the behavior of
+ * handling events.
  *
- * @tparam T The type of events that this event stream writer can write to the
- * client.
+ * @tparam T The type of events to be handled.
+ * @tparam EventPolicy The policy class responsible for handling events.
  */
 template <class T>
-class GenericEventStreamWriter : public SimpleServerWriter<T>,
-                                 public EventListener<T> {
+class GenericEventHandler : public EventListener<T> {
     using ChangeSupport = EventChangeSupport<T>;
 
 public:
     /**
-     * Constructs a new GenericEventStreamWriter with the specified listener.
+     * Constructs a new GenericEventHandler with the specified listener.
+     * The listener is used to subscribe to and receive events of type T.
+     *
+     * @param listener A pointer to the ChangeSupport instance that will handle
+     *        event subscriptions and event notifications.
+     */
+    GenericEventHandler(ChangeSupport* listener) : mListener(listener) {
+        DD_EVT("Created %p", this);
+        mListener->addListener(this);
+    }
+
+    /**
+     * Destroys the GenericEventHandler and unregisters itself as an event
+     * listener from the ChangeSupport instance.
+     */
+    ~GenericEventHandler() {
+        DD_EVT("Deleted %p", this);
+        mListener->removeListener(this);
+    }
+
+private:
+    ChangeSupport* mListener;
+};
+
+/**
+ * BaseEventStreamWriter is a class for writing events of type T to a gRPC
+ * stream while also acting as an event listener for event notifications. It
+ * uses EventWriterPolicy to define the behavior of writing events.
+ *
+ * @tparam T The type of events to be written to the gRPC stream.
+ */
+template <class T, class Event>
+class BaseEventStreamWriter : public SimpleServerWriter<T>,
+                              public GenericEventHandler<Event> {
+public:
+    using ChangeSupport = EventChangeSupport<Event>;
+
+    /**
+     * Constructs a new GenericEventWriter with the specified listener.
      * The listener is used to subscribe to and receive events of type T.
      *
      * Events that are received will be forwarded and written to the gRPC
@@ -221,60 +258,64 @@ public:
      * @param listener A pointer to the ChangeSupport instance that will handle
      *        event subscriptions and event notifications.
      */
-    GenericEventStreamWriter(ChangeSupport* listener) : mListener(listener) {
-        DD_EVT("Created %p", this);
-        mListener->addListener(this);
-    }
+    BaseEventStreamWriter(ChangeSupport* listener)
+        : GenericEventHandler<Event>(listener) {}
+
+    virtual ~BaseEventStreamWriter() = default;
 
     /**
-     * Destroys the GenericEventStreamWriter and unregisters itself as an
-     * event listener from the ChangeSupport instance.
+     * Overrides the GenericEventHandler<T, EventWriterPolicy>::OnDone() method
+     * to delete the GenericEventWriter instance when the client is done reading
+     * the event stream.
      */
-    virtual ~GenericEventStreamWriter() {
-        DD_EVT("Deleted %p", this);
-        mListener->removeListener(this);
-    }
+    void OnDone() override { delete this; }
 
     /**
-     * Overrides the EventListener<T>::eventArrived() method to write an
-     * event of type T to the client using the SimpleServerWriter<T>::Write()
-     * method.
-     *
-     * @param event The event of type T that has arrived and needs to be written
-     *        to the client.
-     */
-    void eventArrived(const T event) override {
-        DD_EVT("Writing %p, %s", this, event.ShortDebugString().c_str());
-        SimpleServerWriter<T>::Write(event);
-    };
-
-    /**
-     * Overrides the SimpleServerWriter<T>::OnDone() method to delete the
-     * GenericEventStreamWriter instance when the client is done reading the
-     * event stream.
-     */
-    void OnDone() override { delete this; };
-
-    /**
-     * Overrides the SimpleServerWriter<T>::OnCancel() method to inform the
-     * parent we want to Cancel this connection. This should result in a
-     * callback to OnDone, which will do the final cleanup.
+     * Overrides the GenericEventHandler<T, EventWriterPolicy>::OnCancel()
+     * method to inform the parent we want to Cancel this connection. This
+     * should result in a callback to OnDone, which will do the final cleanup.
      */
     void OnCancel() override {
         DD_EVT("Cancelled %p", this);
         grpc::ServerWriteReactor<T>::Finish(grpc::Status::CANCELLED);
     }
 
-private:
-    ChangeSupport* mListener;
+};
+
+// template<class T>
+// using GenericEventStreamWriter = BaseEventStreamWriter<T, T>
+
+template <class T>
+class GenericEventStreamWriter
+    : public BaseEventStreamWriter<T, T> {
+    using ChangeSupport = EventChangeSupport<T>;
+public:
+    GenericEventStreamWriter(ChangeSupport* listener)
+        : BaseEventStreamWriter<T, T>(listener) {}
+
+    virtual ~GenericEventStreamWriter() = default;
+
+
+    /**
+     * Overrides the EventListener<T>::eventArrived() method to handle an
+     * event of type T using the EventPolicy class.
+     *
+     * @param event The event of type T that has arrived and needs to be
+     * handled.
+     */
+    void eventArrived(const T event) override {
+        DD_EVT("Handling %p, %s", this, event.ShortDebugString().c_str());
+        SimpleServerWriter<T>::Write(event);
+    };
 };
 
 /**
  * A template class that provides an implementation of a gRPC server event
- * stream writer for events of type T. It inherits from GenericEventStreamWriter<T>
- * and is designed to be used as an event stream writer in
- * a gRPC server. You would mainly use this one if your underlying event mechanism
- * produces spurious events. I.e. your event stream looks something like this:
+ * stream writer for events of type T. It inherits from
+ * GenericEventStreamWriter<T> and is designed to be used as an event stream
+ * writer in a gRPC server. You would mainly use this one if your underlying
+ * event mechanism produces spurious events. I.e. your event stream looks
+ * something like this:
  *
  * A, A, B, B, B, C, C, ...
  *
