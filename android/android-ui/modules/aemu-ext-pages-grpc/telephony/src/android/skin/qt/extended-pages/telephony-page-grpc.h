@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include <QByteArrayData>
+#include <QByteArray>
 #include <QEvent>         // for QEvent
 #include <QString>        // for QString
 #include <QValidator>     // for QValidator
