@@ -17,6 +17,7 @@ import json
 import googleapiclient.http
 import googleapiclient.discovery
 from oauth2client.client import AccessTokenCredentials
+from tqdm import tqdm
 import subprocess
 from getpass import getuser
 import shutil
@@ -103,7 +104,9 @@ Pass the generated token in using the --token option.
                 % (branch, build_target, json.dumps(response))
             )
 
-    def list_builds(self, branch, target, buildId=None, results=40, success=True):
+    def list_builds(
+        self, branch, target, buildId=None, endBuildId=None, results=None, success=True
+    ):
         """Returns a list of build ids that meets the criteria.
 
         Args:
@@ -111,22 +114,43 @@ Pass the generated token in using the --token option.
             branch: the branch
             target: the target
             results: The max number of builds to fetch.
+            endBuildId: The latest buildId in the range, or none if we should use results
             success: look for successful or failed builds.
         Returns:
             A build id
         """
-        result = (
-            self.service.build()
-            .list(
-                buildType="submitted",
-                branch=branch,
-                target=target,
-                buildId=buildId,
-                successful=success,
-                maxResults=results,
-            )
-            .execute()
+        logging.debug(
+            f'Listing submitted builds buildType="submitted", branch={branch}, target={target}, buildId={buildId}, successful={success}, maxResults={results}'
         )
+        if endBuildId:
+            result = (
+                self.service.build()
+                .list(
+                    buildType="submitted",
+                    branch=branch,
+                    target=target,
+                    startBuildId=buildId,
+                    endBuildId=endBuildId,
+                    successful=success,
+                    maxResults=results,
+                )
+                .execute()
+            )
+        else:
+            result = (
+                self.service.build()
+                .list(
+                    buildType="submitted",
+                    branch=branch,
+                    target=target,
+                    buildId=buildId,
+                    successful=success,
+                    maxResults=results,
+                )
+                .execute()
+            )
+
+        logging.debug("Server response: %s", result)
         builds = result.get("builds", [])
         if not builds:
             return None
@@ -171,12 +195,23 @@ Pass the generated token in using the --token option.
         raise_if_none(build_target, "build_target")
         raise_if_none(artifact, "artifact")
 
+        request = self.service.buildartifact().get(
+            buildId=bid, target=build_target, attemptId="latest", resourceId=artifact
+        )
+        response = request.execute()
+        total_size = int(response.get("size", 0))
+
         request = self.service.buildartifact().get_media(
             buildId=bid, target=build_target, attemptId="latest", resourceId=artifact
         )
 
-        with io.FileIO(dst, mode="wb") as fh:
-            downloader = googleapiclient.http.MediaIoBaseDownload(fh, request)
-            done = False
-            while not done:
-                _, done = downloader.next_chunk(num_retries=3)
+        with tqdm(
+            total=total_size, unit="B", unit_scale=True, unit_divisor=1024, miniters=1
+        ) as progress_bar:
+            with io.FileIO(dst, mode="wb") as fh:
+                downloader = googleapiclient.http.MediaIoBaseDownload(fh, request)
+                done = False
+                while not done:
+                    status, done = downloader.next_chunk(num_retries=3)
+                    if status:
+                        progress_bar.update(status.resumable_progress - progress_bar.n)
