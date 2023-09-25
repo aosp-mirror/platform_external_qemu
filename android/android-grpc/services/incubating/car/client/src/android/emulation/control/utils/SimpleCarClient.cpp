@@ -45,19 +45,19 @@ void SimpleCarClient::sendCarEventAsync(incubating::CarEvent event) {
 
     static OnCompleted<Empty> nop = [](auto ignored) {};
     mService->async()->sendCarEvent(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, nop));
 }
 
 void SimpleCarClient::receiveCarEvents(OnEvent<CarEvent> incoming,
                                        OnFinished onDone) {
-    grpc::ClientContext* context = mClient->newContext().release();
+    auto context = mClient->newContext();
     static google::protobuf::Empty empty;
     auto read = new SimpleClientLambdaReader<CarEvent>(
             incoming, context, [onDone](auto status) {
                 onDone(ConvertGrpcStatusToAbseilStatus(status));
             });
-    mService->async()->receiveCarEvents(context, &empty, read);
+    mService->async()->receiveCarEvents(context.get(), &empty, read);
     read->StartRead();
     read->StartCall();
 }

@@ -58,7 +58,7 @@ void SimpleAvdClient::getAvdInfoAsync(OnCompleted<AvdInfo> onDone) {
     // If for some reason we don't have a sync implementation (mocks)
     // we will transform the sync call to an async one.
     mService->async()->getAvdInfo(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response,
                                       cacheForward));
 }

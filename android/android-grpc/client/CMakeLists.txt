@@ -20,3 +20,8 @@ target_link_libraries(
   android-grpc-client PUBLIC android-emu-base android-emu-base-headers
                              absl::statusor android-grpc-endpoint grpc++)
 target_include_directories(android-grpc-client PUBLIC include PRIVATE src)
+
+android_add_test(
+  TARGET android-grpc-client_unittest SOURCE_DIR test
+  SRC android/emulation/control/utils/LibraryTest.cpp
+  DEPS android-grpc-client gmock_main)
