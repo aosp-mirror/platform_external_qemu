@@ -10,7 +10,7 @@ android_add_library(
        android-emu-base
        android-emu-base-headers
        android-emu-files
-       android-emu-grpc-utils
+       android-grpc-utils
        android-grpc-event-waiter
        android-hw-config
        qemu-host-common-headers)

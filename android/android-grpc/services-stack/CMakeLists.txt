@@ -56,7 +56,7 @@ android_add_library(
       android/emulation/control/test/TestEchoService.cpp)
 target_link_libraries(
   android-grpc-test-services
-  PUBLIC android-grpc-services-stack grpc++ android-emu-grpc-utils
+  PUBLIC android-grpc-services-stack grpc++ android-grpc-utils
          android-grpc-event-waiter android-grpc-testing-services android-emu)
 target_include_directories(android-grpc-test-services PUBLIC test)
 

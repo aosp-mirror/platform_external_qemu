@@ -29,7 +29,7 @@ target_link_libraries(
   PRIVATE _nimble_os_abstraction_headers
           android-emu-base-headers
           android-emu-base-logging
-          android-emu-grpc-utils
+          android-grpc-utils
           grpc++
           packet-streamer-client-lib
           packet-streamer-proto-lib

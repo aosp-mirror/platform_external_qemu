@@ -6,7 +6,7 @@ android_add_library(
   SOURCE_DIR
   src
   SRC android/emulation/control/utils/SimpleModemClient.cpp
-  DEPS android-emu-base-headers android-emu-grpc-utils)
+  DEPS android-emu-base-headers android-grpc-utils)
 target_include_directories(modem-service-client PUBLIC include PRIVATE src)
 target_link_libraries(modem-service-client PUBLIC modem-service
                                                   android-grpc-client)

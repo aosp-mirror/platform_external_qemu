@@ -11,4 +11,4 @@ target_include_directories(emulator_controller-service-client PUBLIC include
                            PRIVATE src)
 target_link_libraries(
   emulator_controller-service-client
-  PUBLIC emulator_controller-service android-emu-grpc-utils android-grpc-client)
+  PUBLIC emulator_controller-service android-grpc-utils android-grpc-client)

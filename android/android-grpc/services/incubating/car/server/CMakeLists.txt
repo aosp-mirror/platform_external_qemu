@@ -9,7 +9,7 @@ android_add_library(
   DEPS android-emu-agents
        android-emu-base
        android-emu-feature
-       android-emu-grpc-utils
+       android-grpc-utils
        android-grpc-event-waiter
        car-service
        qemu-host-common-headers)
