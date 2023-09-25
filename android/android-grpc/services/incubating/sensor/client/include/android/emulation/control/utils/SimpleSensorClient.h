@@ -39,12 +39,17 @@ using ::google::protobuf::Empty;
 
 class SimpleSensorClient {
 public:
-    explicit SimpleSensorClient(std::shared_ptr<EmulatorGrpcClient> client)
-        : mClient(client), mService(client->stub<SensorService>()) {}
+    explicit SimpleSensorClient(std::shared_ptr<EmulatorGrpcClient> client,
+                                SensorService::StubInterface* service = nullptr)
+        : mClient(client), mService(service) {
+        if (!service) {
+            mService = client->stub<SensorService>();
+        }
+    }
 
 private:
     std::shared_ptr<EmulatorGrpcClient> mClient;
-    std::unique_ptr<SensorService::Stub> mService;
+    std::unique_ptr<SensorService::StubInterface> mService;
 };
 
 }  // namespace control

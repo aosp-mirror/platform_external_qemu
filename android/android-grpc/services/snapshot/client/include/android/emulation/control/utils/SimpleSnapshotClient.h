@@ -43,8 +43,13 @@ using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
 class SimpleSnapshotServiceClient {
 public:
     explicit SimpleSnapshotServiceClient(
-            std::shared_ptr<EmulatorGrpcClient> client)
-        : mClient(client), mService(client->stub<SnapshotService>()) {}
+            std::shared_ptr<EmulatorGrpcClient> client,
+            SnapshotService::StubInterface* service = nullptr)
+        : mClient(client), mService(service) {
+        if (!service) {
+            mService = client->stub<SnapshotService>();
+        }
+    }
 
     /**
      * @brief Asynchronously retrieves a list of all snapshots.
@@ -135,7 +140,8 @@ public:
      *        The callback takes an absl::StatusOr<std::string*> parameter that
      *        contains either the result screenshot data or an error status.
      */
-    void GetScreenshotAsync(std::string id, OnCompleted<SnapshotScreenshotFile> onDone);
+    void GetScreenshotAsync(std::string id,
+                            OnCompleted<SnapshotScreenshotFile> onDone);
 
     /**
      * Maps an `absl::StatusOr<T*>` to an `absl::StatusOr<T>`.
@@ -153,7 +159,8 @@ public:
      * not OK.
      */
     template <typename T, typename R>
-    static absl::StatusOr<R> fmap(absl::StatusOr<T> status_or_ptr, std::function<R(T)> fn) {
+    static absl::StatusOr<R> fmap(absl::StatusOr<T> status_or_ptr,
+                                  std::function<R(T)> fn) {
         static_assert(std::is_base_of<google::protobuf::Message, T>::value,
                       "T must be a subclass of Message");
         if (!status_or_ptr.ok()) {
@@ -164,8 +171,7 @@ public:
 
 private:
     std::shared_ptr<EmulatorGrpcClient> mClient;
-    std::unique_ptr<android::emulation::control::SnapshotService::Stub>
-            mService;
+    std::unique_ptr<SnapshotService::StubInterface> mService;
 };
 
 }  // namespace control

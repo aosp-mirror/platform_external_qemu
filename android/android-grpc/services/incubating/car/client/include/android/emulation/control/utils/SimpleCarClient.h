@@ -35,13 +35,16 @@ template <typename T>
 using OnEvent = std::function<void(const T*)>;
 using namespace incubating;
 using ::google::protobuf::Empty;
-using ::google::protobuf::Empty;
 
 class SimpleCarClient {
 public:
-    explicit SimpleCarClient(std::shared_ptr<EmulatorGrpcClient> client)
-        : mClient(client), mService(client->stub<CarService>()) {}
-
+    explicit SimpleCarClient(std::shared_ptr<EmulatorGrpcClient> client,
+                             CarService::StubInterface* service = nullptr)
+        : mClient(client), mService(service) {
+        if (!service) {
+            mService = client->stub<CarService>();
+        }
+    }
 
     // Best effort to send the car event to the other side.
     void sendCarEventAsync(incubating::CarEvent event);
@@ -49,10 +52,9 @@ public:
     // Receive events from the car hal over the given callbacks.
     void receiveCarEvents(OnEvent<CarEvent> incoming, OnFinished onDone);
 
-
 private:
     std::shared_ptr<EmulatorGrpcClient> mClient;
-    std::unique_ptr<CarService::Stub> mService;
+    std::unique_ptr<CarService::StubInterface> mService;
 };
 
 }  // namespace control

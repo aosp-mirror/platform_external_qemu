@@ -42,13 +42,18 @@ using ::google::protobuf::Empty;
 class SimpleScreenRecordingClient {
 public:
     explicit SimpleScreenRecordingClient(
-            std::shared_ptr<EmulatorGrpcClient> client)
-        : mClient(client), mService(client->stub<ScreenRecording>()) {}
+            std::shared_ptr<EmulatorGrpcClient> client,
+            ScreenRecording::StubInterface* service = nullptr)
+        : mClient(client), mService(service) {
+        if (!service) {
+            mService = client->stub<ScreenRecording>();
+        }
+    }
 
     // TODO(jansene): Add methods when needed.
 private:
     std::shared_ptr<EmulatorGrpcClient> mClient;
-    std::unique_ptr<ScreenRecording::Stub> mService;
+    std::unique_ptr<ScreenRecording::StubInterface> mService;
 };
 
 }  // namespace control
