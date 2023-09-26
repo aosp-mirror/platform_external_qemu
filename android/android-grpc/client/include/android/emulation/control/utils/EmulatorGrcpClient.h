@@ -22,6 +22,7 @@
 
 #include "absl/status/statusor.h"
 #include "aemu/base/logging/CLog.h"
+#include "android/emulation/control/utils/Library.h"
 #include "grpc_endpoint_description.pb.h"
 
 namespace android {
@@ -56,7 +57,12 @@ public:
         return T::NewStub(mChannel);
     }
 
-    std::unique_ptr<grpc::ClientContext> newContext();
+    // A client context will be tracked, so it is possible to cancel
+    // all active connections made from this client.
+    std::shared_ptr<grpc::ClientContext> newContext();
+
+    // This will call TryCancel on all activeContexts.
+    void cancelAll();
     virtual bool hasOpenChannel(bool tryConnect = true);
     std::string address() const { return mEndpoint.target(); }
 
@@ -76,8 +82,10 @@ protected:
 
 private:
     Endpoint mEndpoint;
+    Library<::grpc::ClientContext> mActiveContexts;
     std::shared_ptr<::grpc::Channel> mChannel;
     std::shared_ptr<grpc::CallCredentials> mCredentials;
+
 };
 
 class EmulatorTestClient : public EmulatorGrpcClient {

@@ -56,7 +56,7 @@ public:
 
 private:
     RemoteConnection* mConnection;
-    std::unique_ptr<grpc::ClientContext> mContext;
+    std::shared_ptr<grpc::ClientContext> mContext;
     CharacteristicValueResponse mIncoming;
     CharacteristicValueRequest mRequest;
 

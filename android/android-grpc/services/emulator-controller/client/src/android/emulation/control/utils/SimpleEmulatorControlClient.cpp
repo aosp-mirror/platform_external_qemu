@@ -41,7 +41,7 @@ void SimpleEmulatorControlClient::setBattery(BatteryState state,
             createGrpcRequestContext<BatteryState, Empty>(mClient);
     request->CopyFrom(state);
     mService->async()->setBattery(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -51,7 +51,7 @@ void SimpleEmulatorControlClient::getScreenshot(ImageFormat format,
             createGrpcRequestContext<ImageFormat, Image>(mClient);
     request->CopyFrom(format);
     mService->async()->getScreenshot(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -60,7 +60,7 @@ void SimpleEmulatorControlClient::getStatus(
     auto [request, response, context] =
             createGrpcRequestContext<Empty, EmulatorStatus>(mClient);
     mService->async()->getStatus(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -69,7 +69,7 @@ void SimpleEmulatorControlClient::getDisplayConfigurations(
     auto [request, response, context] =
             createGrpcRequestContext<Empty, DisplayConfigurations>(mClient);
     mService->async()->getDisplayConfigurations(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -81,19 +81,19 @@ void SimpleEmulatorControlClient::setDisplayConfigurations(
                                      DisplayConfigurations>(mClient);
     request->CopyFrom(state);
     mService->async()->setDisplayConfigurations(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
 void SimpleEmulatorControlClient::receiveEmulatorNotificationEvents(OnEvent<Notification> incoming,
                                            OnFinished onDone) {
-    grpc::ClientContext* context = mClient->newContext().release();
+    auto context = mClient->newContext();
     static google::protobuf::Empty empty;
     auto read = new SimpleClientLambdaReader<Notification>(
             incoming, context, [onDone](auto status) {
                 onDone(ConvertGrpcStatusToAbseilStatus(status));
             });
-    mService->async()->streamNotification(context, &empty, read);
+    mService->async()->streamNotification(context.get(), &empty, read);
     read->StartRead();
     read->StartCall();
 }
@@ -104,7 +104,7 @@ void SimpleEmulatorControlClient::sendFingerprint(Fingerprint finger,
             createGrpcRequestContext<Fingerprint, Empty>(mClient);
     request->CopyFrom(finger);
     mService->async()->sendFingerprint(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -114,7 +114,7 @@ void SimpleEmulatorControlClient::sendKey(KeyboardEvent key,
             createGrpcRequestContext<KeyboardEvent, Empty>(mClient);
     request->CopyFrom(key);
     mService->async()->sendKey(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
