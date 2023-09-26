@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "aemu/base/files/IniFile.h"
 #include "android/avd/avd-info.h"
@@ -29,23 +30,45 @@ namespace control {
 using android::emulation::control::incubating::MockAvdServiceStub;
 using namespace testing;
 
-using QemuAvdInfo = ::AvdInfo;
+class MyAvdServiceStub : public AvdService::StubInterface {
+public:
+    ::grpc::Status getAvdInfo(
+            ::grpc::ClientContext* context,
+            const ::google::protobuf::Empty& request,
+            ::android::emulation::control::incubating::AvdInfo* response)
+            override {
+        response->CopyFrom(mAvdInfo);
+        return ::grpc::Status::OK;
+    }
+
+    ::grpc::ClientAsyncResponseReaderInterface<
+            ::android::emulation::control::incubating::AvdInfo>*
+    AsyncgetAvdInfoRaw(::grpc::ClientContext* context,
+                       const ::google::protobuf::Empty& request,
+                       ::grpc::CompletionQueue* cq) override {
+        return nullptr;
+    }
+    ::grpc::ClientAsyncResponseReaderInterface<
+            ::android::emulation::control::incubating::AvdInfo>*
+    PrepareAsyncgetAvdInfoRaw(::grpc::ClientContext* context,
+                              const ::google::protobuf::Empty& request,
+                              ::grpc::CompletionQueue* cq) override {
+        return nullptr;
+    }
+
+    ::android::emulation::control::incubating::AvdInfo mAvdInfo;
+};
 
 class AvdGrpcTest : public Test {
     void SetUp() override {
-        mMock = new MockAvdServiceStub();
+        mMock = new MyAvdServiceStub();
         mClient = std::make_unique<SimpleAvdClient>(mTest, mMock);
     }
 
 public:
-    void SetupStubCall(AvdInfo response) {
-        EXPECT_CALL(*mMock, getAvdInfo(_, _, _))
-                .Times(AtLeast(1))
-                .WillOnce(DoAll(SetArgPointee<2>(response),
-                                Return(grpc::Status::OK)));
-    }
+    void SetupStubCall(AvdInfo response) { mMock->mAvdInfo.CopyFrom(response); }
 
-    MockAvdServiceStub* mMock;
+    MyAvdServiceStub* mMock;
     std::unique_ptr<SimpleAvdClient> mClient;
     std::shared_ptr<EmulatorTestClient> mTest =
             std::make_shared<EmulatorTestClient>();
@@ -57,6 +80,7 @@ TEST_F(AvdGrpcTest, target_will_be_set) {
 
     SetupStubCall(response);
     auto info = avdInfo_from_grpc(mClient.get());
+    EXPECT_TRUE(info != nullptr);
     EXPECT_STREQ(avdInfo_getName(info), response.device_name().c_str());
     avdInfo_free(info);
 }
@@ -66,7 +90,8 @@ TEST_F(AvdGrpcTest, sets_target_arch) {
     response.set_target_arch("Foo");
 
     SetupStubCall(response);
-    QemuAvdInfo* info = avdInfo_from_grpc(mClient.get());
+    auto info = avdInfo_from_grpc(mClient.get());
+    EXPECT_TRUE(info != nullptr);
     EXPECT_STREQ(info->targetArch, response.target_arch().c_str());
     avdInfo_free(info);
 }
@@ -78,7 +103,8 @@ TEST_F(AvdGrpcTest, sets_acpi_ini_path) {
     // SetupStubCall function should be modified to take the AvdInfo response.
     SetupStubCall(response);
 
-    QemuAvdInfo* info = avdInfo_from_grpc(mClient.get());
+    auto info = avdInfo_from_grpc(mClient.get());
+    EXPECT_TRUE(info != nullptr);
     EXPECT_STREQ(info->acpiIniPath, response.acpi_ini_path().c_str());
     avdInfo_free(info);
 }
@@ -88,7 +114,8 @@ TEST_F(AvdGrpcTest, sets_device_name) {
     response.set_device_name("MyDevice");
 
     SetupStubCall(response);
-    QemuAvdInfo* info = avdInfo_from_grpc(mClient.get());
+    auto info = avdInfo_from_grpc(mClient.get());
+    EXPECT_TRUE(info != nullptr);
     EXPECT_STREQ(info->deviceName, response.device_name().c_str());
     avdInfo_free(info);
 }
@@ -98,7 +125,8 @@ TEST_F(AvdGrpcTest, sets_api_level) {
     response.set_api_level(30);
     SetupStubCall(response);
 
-    QemuAvdInfo* info = avdInfo_from_grpc(mClient.get());
+    auto info = avdInfo_from_grpc(mClient.get());
+    EXPECT_TRUE(info != nullptr);
     EXPECT_EQ(info->apiLevel, response.api_level());
     avdInfo_free(info);
 }
@@ -109,7 +137,8 @@ TEST_F(AvdGrpcTest, sets_boot_properties) {
     response.set_boot_properties(boot);
     SetupStubCall(response);
 
-    QemuAvdInfo* info = avdInfo_from_grpc(mClient.get());
+    auto info = avdInfo_from_grpc(mClient.get());
+    EXPECT_TRUE(info != nullptr);
     EXPECT_EQ(info->bootProperties->size, boot.size());
 
     auto props = std::string((char*)info->bootProperties->data,

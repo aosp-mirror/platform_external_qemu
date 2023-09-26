@@ -16,6 +16,7 @@
 #include <fstream>
 #include <future>
 #include <mutex>
+#include <cstring>
 #include "aemu/base/Uuid.h"
 #include "aemu/base/files/PathUtils.h"
 #include "android/avd/avd-info.h"
@@ -56,6 +57,14 @@ static std::string generate_tmp_cfg(
     return configFile;
 }
 
+static char* stringCopy(std::string str) {
+  // Create a new character array to store the copied string.
+  char* newString = (char*) malloc(str.size() + 1);
+  memcpy(newString, str.c_str(), str.size());
+  newString[str.size()] = '\0';
+  return newString;
+}
+
 AvdInfo* avdInfo_from_grpc(SimpleAvdClient* client) {
     AvdInfo* avd;
     auto info = client->getAvdInfo();
@@ -67,26 +76,26 @@ AvdInfo* avdInfo_from_grpc(SimpleAvdClient* client) {
 
     ANEW0(avd);
 
-    avd->androidOut = ASTRDUP(info->android_out().c_str());
-    avd->androidBuildRoot = ASTRDUP(info->android_build_root().c_str());
-    avd->targetArch = ASTRDUP(info->target_arch().c_str());
-    avd->targetAbi = ASTRDUP(info->target_abi().c_str());
-    avd->acpiIniPath = ASTRDUP(info->acpi_ini_path().c_str());
-    avd->target = ASTRDUP(info->target().c_str());
+    avd->androidOut = stringCopy(info->android_out());
+    avd->androidBuildRoot = stringCopy(info->android_build_root());
+    avd->targetArch = stringCopy(info->target_arch());
+    avd->targetAbi = stringCopy(info->target_abi());
+    avd->acpiIniPath = stringCopy(info->acpi_ini_path());
+    avd->target = stringCopy(info->target());
 
-    avd->deviceName = ASTRDUP(info->device_name().c_str());
-    avd->deviceId = ASTRDUP(info->device_id().c_str());
-    avd->sdkRootPath = ASTRDUP(info->sdk_root_path().c_str());
+    avd->deviceName = stringCopy(info->device_name());
+    avd->deviceId = stringCopy(info->device_id());
+    avd->sdkRootPath = stringCopy(info->sdk_root_path());
 
     int i = 0;
     for (const auto& searchPath : info->search_paths()) {
         // Do something with the search path.
-        avd->searchPaths[i] = ASTRDUP(searchPath.c_str());
+        avd->searchPaths[i] = stringCopy(searchPath);
     }
     avd->numSearchPaths = i;
 
-    avd->contentPath = ASTRDUP(info->content_path().c_str());
-    avd->rootIniPath = ASTRDUP(info->root_ini_path().c_str());
+    avd->contentPath = stringCopy(info->content_path());
+    avd->rootIniPath = stringCopy(info->root_ini_path());
 
     // Setup the CINI files.
     // Could also use generate_tmp_cfg(avd->root_ini());
@@ -101,16 +110,16 @@ AvdInfo* avdInfo_from_grpc(SimpleAvdClient* client) {
     avd->isAtd = info->is_atd();
     avd->flavor = static_cast<AvdFlavor>((int)info->flavor() - 1);
 
-    avd->skinName = ASTRDUP(info->skin_name().c_str());
-    avd->skinDirPath = ASTRDUP(info->skin_dir_path().c_str());
-    avd->coreHardwareIniPath = ASTRDUP(info->core_hardware_ini_path().c_str());
-    avd->snapshotLockPath = ASTRDUP(info->snapshot_lock_path().c_str());
+    avd->skinName = stringCopy(info->skin_name());
+    avd->skinDirPath = stringCopy(info->skin_dir_path());
+    avd->coreHardwareIniPath = stringCopy(info->core_hardware_ini_path());
+    avd->snapshotLockPath = stringCopy(info->snapshot_lock_path());
     avd->multiInstanceLockPath =
-            ASTRDUP(info->multi_instance_lock_path().c_str());
+            stringCopy(info->multi_instance_lock_path());
 
     // ownership will transfer
     auto len = info->build_properties().size();
-    void* copy = malloc(len);
+    auto copy = malloc(len);
     memcpy(copy, info->build_properties().c_str(), len);
     fileData_initFromMemory(avd->buildProperties, copy, len);
 
@@ -122,7 +131,7 @@ AvdInfo* avdInfo_from_grpc(SimpleAvdClient* client) {
     i = 0;
     for (const auto& path : info->image_paths()) {
         // Do something with the search path.
-        avd->imagePath[i] = ASTRDUP(path.c_str());
+        avd->imagePath[i] = stringCopy(path);
     }
     i = 0;
     for (const auto& state : info->image_states()) {
@@ -130,6 +139,6 @@ AvdInfo* avdInfo_from_grpc(SimpleAvdClient* client) {
         avd->imageState[i] = (char)state - 1;
     }
 
-    avd->sysdir = ASTRDUP(info->sysdir().c_str());
+    avd->sysdir = stringCopy(info->sysdir());
     return avd;
 }
