@@ -50,13 +50,12 @@ std::optional<Notification> NotificationStream::getDisplayNotificationEvent() {
     for (int i = 0; i < MultiDisplay::s_maxNumMultiDisplay; i++) {
         uint32_t width = 0, height = 0, dpi = 0, flags = 0;
         bool enabled = false;
-        bool receivedDisplayStatus = mAgents->multi_display->getMultiDisplay(i, nullptr, nullptr, &width,
-                                                    &height, &dpi, &flags,
-                                                    &enabled);
+        bool receivedDisplayStatus = mAgents->multi_display->getMultiDisplay(
+                i, nullptr, nullptr, &width, &height, &dpi, &flags, &enabled);
 
         // Workaround for the fact that MultiDisplay is currently not atomic.
-        // This will make sure we will not include partially created/configured displays
-        // in the event (See b/290831895).
+        // This will make sure we will not include partially created/configured
+        // displays in the event (See b/290831895).
         bool isPartiallyCreatedEvent = width == 0 && height == 0 && dpi == 0;
         if (receivedDisplayStatus && !isPartiallyCreatedEvent) {
             auto cfg = displayConfig->add_displays();
@@ -69,7 +68,6 @@ std::optional<Notification> NotificationStream::getDisplayNotificationEvent() {
             const bool is_pixel_fold = android_foldable_is_pixel_fold();
             if (is_pixel_fold)
                 break;
-
         }
     }
 
@@ -149,11 +147,39 @@ NotificationStreamWriter* NotificationStream::notificationStream() {
     return stream;
 }
 
+static void brightness_forwarder(void* opaque,
+                                 const char* light,
+                                 int brightness) {
+    NotificationEventChangeSupport* notificationListeners =
+            reinterpret_cast<NotificationEventChangeSupport*>(opaque);
+    Notification event;
+    auto bv = event.mutable_brightness();
+
+    std::string name = light;
+    if (name == "lcd_backlight") {
+        bv->set_target(BrightnessValue::LCD);
+    } else if (name == "keyboard_backlight") {
+        bv->set_target(BrightnessValue::KEYBOARD);
+    } else if (name == "button_backlight") {
+        bv->set_target(BrightnessValue::BUTTON);
+    }
+
+    bv->set_value(brightness);
+    notificationListeners->fireEvent(event);
+}
+
 void NotificationStream::registerListeners() {
     // Register event listeners.
     mCamera->registerOnce([&](auto state) {
         mNotificationListeners.fireEvent(getCameraNotificationEvent());
     });
+
+    // TODO(jansene): This assumes we close down the event handler system after
+    // qemu stops!
+    const static AndroidHwControlFuncs sCallbacks = {
+            .light_brightness = brightness_forwarder};
+    mAgents->hw_control->setCallbacks(&mNotificationListeners, &sCallbacks);
+
     MultiDisplay::getInstance()->registerOnce(
             [&](const android::DisplayChangeEvent state) {
                 DD("Displaychange event: %d", state.change);

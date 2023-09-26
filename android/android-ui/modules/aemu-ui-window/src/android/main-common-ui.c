@@ -11,27 +11,22 @@
 */
 #include "android/main-common-ui.h"
 
-#ifdef __APPLE__
-#include <ApplicationServices/ApplicationServices.h>
-#endif
-
 #include <assert.h>
-#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 
 #include "aemu/base/gl_object_counter.h"
 #include "aemu/base/logging/CLog.h"
 #include "android/avd/util.h"
-#include "android/boot-properties.h"
 #include "android/console.h"
 #include "android/emulation/control/globals_agent.h"
 #include "android/emulator-window.h"
 #include "android/main-emugl.h"
-#include "host-common/opengles.h"
 #include "android/resource.h"
 #include "android/skin/image.h"
+#include "android/skin/keyboard.h"
 #include "android/skin/rect.h"
 #include "android/skin/user-config.h"
 #include "android/skin/winsys.h"
@@ -44,7 +39,12 @@
 #include "host-common/misc.h"
 #include "host-common/multi_display_agent.h"
 #include "host-common/opengl/emugl_config.h"
+#include "host-common/opengles.h"
 #include "host-common/vm_operations.h"
+
+#ifdef __APPLE__
+#include <ApplicationServices/ApplicationServices.h>
+#endif
 
 #define D(...)                   \
     do {                         \
@@ -65,6 +65,7 @@ bool emulator_initMinimalSkinConfig(int lcd_width,
                                     const SkinRect* rect,
                                     AUserConfig** userConfig_out);
 
+void boot_property_add_qemu_keyboard_layout(const char* value);
 /***********************************************************************/
 /***********************************************************************/
 /*****                                                             *****/

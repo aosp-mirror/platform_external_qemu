@@ -62,6 +62,7 @@ android_qt_lib(
        android-emu-location
        android-emu-protobuf
        android-hw-config
+       aemu-ui-headless  # Yes! The QT ui depends on the headless one..
        ext-page-battery
        ext-page-battery-grpc
        ext-page-bugreport

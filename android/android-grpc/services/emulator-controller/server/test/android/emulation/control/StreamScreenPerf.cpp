@@ -123,9 +123,12 @@ uint32_t pollForPixelChange(const ImageFormat format,
 std::unique_ptr<EmulatorGrpcClient> sclient = nullptr;
 
 EmulatorGrpcClient* getClient() {
-    if (!sclient)
-        sclient = std::make_unique<EmulatorGrpcClient>("localhost:8554", "", "",
-                                                       "");
+    if (!sclient) {
+        Endpoint destination;
+        destination.set_target("localhost:8554");
+        EmulatorGrpcClient::Builder builder;
+        sclient = builder.withEndpoint(destination).build().value();
+    }
 
     if (!sclient->hasOpenChannel()) {
         dfatal("Unable to open gRPC channel to the emulator.");

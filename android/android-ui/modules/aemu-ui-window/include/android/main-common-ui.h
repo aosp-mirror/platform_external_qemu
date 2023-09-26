@@ -14,12 +14,12 @@
 
 #include <stdbool.h>                      // for bool
 
-#include "aemu/base/c_header.h"
 #include "android/avd/info.h"             // for AvdInfo
 #include "android/cmdline-definitions.h"  // for AndroidOptions
-#include "android/skin/winsys.h"
+#include "android/skin/backend-defs.h"
 #include "android/ui-emu-agent.h"         // for UiEmuAgent
 #include "android/utils/aconfig-file.h"   // for AConfig
+#include "android/utils/compiler.h"
 #include "host-common/hw-config.h"        // for AndroidHwConfig
 #include "host-common/opengl/emugl_config.h"  // for AndroidGlesEmulationMode
 

@@ -14,15 +14,15 @@
 
 #include <stdbool.h>                            // for bool
 
-#include "android/cmdline-option.h"             // for AndroidOptions
-#include "host-common/screen-recorder.h"  // for RecordingInfo, Record...
+#include "aemu/base/c_header.h"
+#include "android/cmdline-definitions.h"
 #include "android/skin/file.h"                  // for SkinFile, SkinLayout
 #include "android/skin/image.h"                 // for SkinImage
-#include "android/skin/rect.h"                  // for SkinRotation
 #include "android/skin/ui.h"                    // for SkinUI
 #include "android/ui-emu-agent.h"               // for UiEmuAgent
 #include "android/utils/aconfig-file.h"         // for AConfig
-#include "android/utils/compiler.h"             // for ANDROID_BEGIN_HEADER
+#include "host-common/misc.h"
+#include "host-common/screen-recorder.h"  // for RecordingInfo, Record...
 
 ANDROID_BEGIN_HEADER
 

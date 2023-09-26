@@ -13,11 +13,8 @@
 #pragma once
 
 #include <stdbool.h>
+
 #include "android/utils/compiler.h"
-#include "android/utils/aconfig-file.h"
-#include "host-common/hw-config.h"
-#include "android/cmdline-option.h"
-#include <stdbool.h>
 
 ANDROID_BEGIN_HEADER
 
@@ -34,6 +31,8 @@ void user_config_get_window_pos(int* window_x, int* window_y);
 
 AConfig* get_skin_config(void);
 const char* get_skin_path(void);
+const char* android_skin_net_speed(void);
+const char* android_skin_net_delay(void);
 
 /* Find the skin corresponding to our options, and return an AConfig pointer
  * and the base path to load skin data from

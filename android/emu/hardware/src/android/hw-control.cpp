@@ -22,22 +22,21 @@
 //
 #include "android/hw-control.h"
 
-#include "host-common/hw-config.h"
-#include "aemu/base/Log.h"
-#include "android/emulation/android_qemud.h"
-#include "android/console.h"
-#include "android/utils/debug.h"
-#include "android/utils/misc.h"
-#include "aemu/base/utils/stream.h"
-
 #include <cerrno>
-#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
+
+#include "aemu/base/utils/stream.h"
+#include "android/emulation/android_qemud.h"
+#include "android/utils/debug.h"
 
 #define D(...) VERBOSE_PRINT(hw_control, __VA_ARGS__)
 
@@ -94,6 +93,7 @@ class HwControl {
 public:
     explicit HwControl(void* client = nullptr,
                        AndroidHwControlFuncs clientFuncs = {});
+
     void setClient(void* client, AndroidHwControlFuncs clientFuncs);
     void onQuery(std::string_view msg, HwControlClient* client);
 
@@ -103,20 +103,23 @@ public:
 
 private:
     QemudService* mService = nullptr;
-    void* mClient = nullptr;
-    AndroidHwControlFuncs mClientFuncs = {};
     HwControlState mHwState = {};
+
+    std::vector<std::pair<void*, AndroidHwControlFuncs>> mClientCallbacks;
+    std::unique_ptr<std::mutex> mClientCallbacksLock;
 };
 
 HwControl::HwControl(void* client, AndroidHwControlFuncs clientFuncs)
-    : mClient(client), mClientFuncs(clientFuncs) {
+    : mClientCallbacksLock(std::make_unique<std::mutex>()) {
     mService = qemud_service_register("hw-control", 0, this,
                                       _hw_control_qemud_connect, NULL, NULL);
+    if (client != nullptr)
+        mClientCallbacks.push_back({client, clientFuncs});
 }
 
 void HwControl::setClient(void* client, AndroidHwControlFuncs clientFuncs) {
-    mClient = client;
-    mClientFuncs = clientFuncs;
+    std::lock_guard<std::mutex> guard(*mClientCallbacksLock);
+    mClientCallbacks.push_back({client, clientFuncs});
 }
 
 void HwControl::onQuery(std::string_view msg, HwControlClient* client) {
@@ -159,8 +162,11 @@ void HwControl::setBrightness(const std::string& name, uint8_t value) {
         return;
     }
 
-    if (mClientFuncs.light_brightness != nullptr) {
-        mClientFuncs.light_brightness(mClient, name.c_str(), value);
+    std::lock_guard<std::mutex> guard(*mClientCallbacksLock);
+    for (const auto [client, funcs] : mClientCallbacks) {
+        if (funcs.light_brightness != nullptr) {
+            funcs.light_brightness(client, name.c_str(), value);
+        }
     }
 }
 
@@ -171,7 +177,8 @@ void HwControl::setBrightness(std::string_view args) {
         errno = 0;
         uint64_t value = strtoul(valueStr.c_str(), nullptr, /*base=*/10);
         if (errno != 0) {
-            D("%s: invalid power:light:brightness value: \"%s\", errno = %d",
+            D("%s: invalid power:light:brightness value: \"%s\", errno = "
+              "%d",
               __func__, valueStr.c_str(), errno);
             return;
         }

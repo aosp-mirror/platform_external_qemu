@@ -41,8 +41,13 @@ static void nimble_sync_cb() {
 }
 
 RequestForwarder::RequestForwarder(const GattDevice& device)
-    : mClient(device.endpoint()), mProfile(device.profile(), this) {
+    : mProfile(device.profile(), this) {
     mDevice.CopyFrom(device);
+    mClient = EmulatorGrpcClient::Builder()
+                      .withEndpoint(device.endpoint())
+                      .build()
+                      .value();
+
     std::string pid =
             std::to_string(android::base::System::get()->getCurrentProcessId());
     mMyId.set_identity(pid);
@@ -51,7 +56,6 @@ RequestForwarder::RequestForwarder(const GattDevice& device)
 RequestForwarder* RequestForwarder::registerDevice(
         GattDevice device,
         std::unique_ptr<EmulatorGrpcClient> hci_transport) {
-
     // Initialize OS
     sysinit();
 
@@ -64,7 +68,7 @@ RequestForwarder* RequestForwarder::registerDevice(
 }
 
 void RequestForwarder::start() {
-    while (mRunning && mClient.hasOpenChannel()) {
+    while (mRunning && mClient->hasOpenChannel()) {
         os_eventq_run(os_eventq_dflt_get());
     }
 }
@@ -80,7 +84,7 @@ void RequestForwarder::onSync() {
 }
 
 absl::Status RequestForwarder::initialize() {
-    if (!mClient.hasOpenChannel()) {
+    if (!mClient->hasOpenChannel()) {
         return absl::Status(absl::StatusCode::kInternal,
                             "Unable to connect to endpoint.");
     }
@@ -162,7 +166,7 @@ int RequestForwarder::handleConnect(ble_gap_event* event) {
     } else {
         // Notify client..
         mConnections[event->connect.conn_handle] =
-                std::make_unique<RemoteConnection>(&mClient, mMyId,
+                std::make_unique<RemoteConnection>(mClient.get(), mMyId,
                                                    event->connect.conn_handle);
     }
 
