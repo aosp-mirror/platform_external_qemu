@@ -17,9 +17,30 @@
 
 ANDROID_BEGIN_HEADER
 
+// a callback function called when the system wants to change the brightness
+// of a given light. 'light' is a string which can be one of:
+// 'lcd_backlight', 'button_backlight' or 'Keyboard_backlight'
+//
+// brightness is an integer (acceptable range are 0..255), however the
+// default is around 105, and we probably don't want to dim the emulator's
+// output at that level.
+//
+typedef void (*AndroidHwLightBrightnessFunc)(void* opaque,
+                                             const char* light,
+                                             int brightness);
+
+// used to record a hw control 'client'
+typedef struct {
+    AndroidHwLightBrightnessFunc light_brightness;
+} AndroidHwControlFuncs;
+
 typedef struct QAndroidHwControlAgent {
     void (*setBrightness)(const char* light_name, uint32_t brightness);
     uint32_t (*getBrightness)(const char* light_name);
+
+    // used to register a new hw-control back-end
+    void (*setCallbacks)(void* opaque, const AndroidHwControlFuncs* funcs);
+
 } QAndroidHwControlAgent;
 
 ANDROID_END_HEADER

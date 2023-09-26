@@ -12,31 +12,31 @@
 
 #include "android/skin/qt/emulator-no-qt-no-window.h"
 
-#include <stdint.h>  // for uint32_t
-#include <stdio.h>   // for fprintf
-#include <string.h>  // for memcpy
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #ifdef CONFIG_POSIX
-#include <pthread.h>  // for pthread_c...
+#include <pthread.h>
 #endif
-#include <string>  // for string
+#include <string>
 
-#include "android/avd/info.h"                               // for avdInfo_r...
-#include "aemu/base/async/Looper.h"                      // for Looper
-#include "aemu/base/async/ThreadLooper.h"                // for ThreadLooper
-#include "aemu/base/memory/LazyInstance.h"               // for LazyInstance
-#include "android/console.h"                                // for getConsol...
-#include "host-common/crash-handler.h"              // for crashhand...
-#include "android/emulation/control/adb/AdbInterface.h"     // for OptionalA...
-#include "host-common/multi_display_agent.h"  // for QAndroidM...
-#include "android/emulation/control/user_event_agent.h"     // for QAndroidU...
-#include "host-common/vm_operations.h"        // for QEMU_SHUT...
-#include "host-common/FeatureControl.h"          // for isEnabled
-#include "host-common/Features.h"                // for FastSnaps.
-#include "android/hw-events.h"                              // for EV_SW
-#include "android/metrics/DependentMetrics.h"               // for android_m...
-#include "android/test/checkboot.h"                         // for android_t...
-#include "android/utils/debug.h"                            // for derror
-#include "android/utils/filelock.h"                         // for filelock_...
+#include "android/avd/info.h"
+#include "aemu/base/async/Looper.h"
+#include "aemu/base/async/ThreadLooper.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "android/console.h"
+#include "host-common/crash-handler.h"
+#include "android/emulation/control/adb/AdbInterface.h"
+#include "host-common/multi_display_agent.h"
+#include "android/emulation/control/user_event_agent.h"
+#include "host-common/vm_operations.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/Features.h"
+#include "android/hw-events.h"
+#include "android/metrics/DependentMetrics.h"
+#include "android/test/checkboot.h"
+#include "android/utils/debug.h"
+#include "android/utils/filelock.h"
 
 #define DEBUG 0
 

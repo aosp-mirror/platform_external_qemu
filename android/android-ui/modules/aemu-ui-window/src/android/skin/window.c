@@ -2415,7 +2415,7 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
     } else {
         finger = aintMap_get(window->multi_display_fingers, displayId);
         if (!finger) {
-            derror("ERROR: display with id %u is not found.\n", displayId);
+            dwarning("display with id %u is not found.\n", displayId);
             return;
         }
     }

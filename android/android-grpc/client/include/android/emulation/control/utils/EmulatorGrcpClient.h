@@ -13,13 +13,14 @@
 // limitations under the License.
 #pragma once
 
-#include <grpcpp/grpcpp.h>  // for ClientContext
+#include <grpcpp/grpcpp.h>
 
-#include <memory>       // for unique_ptr
-#include <optional>     // for optional
-#include <string>       // for string
-#include <string_view>  // for string_view
+#include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
 
+#include "absl/status/statusor.h"
 #include "aemu/base/logging/CLog.h"
 #include "grpc_endpoint_description.pb.h"
 
@@ -28,6 +29,9 @@ namespace emulation {
 namespace control {
 
 using ::android::emulation::remote::Endpoint;
+using grpc::experimental::ClientInterceptorFactoryInterface;
+using InterceptorFactory = std::unique_ptr<ClientInterceptorFactoryInterface>;
+using InterceptorFactories = std::vector<InterceptorFactory>;
 
 // An EmulatorGrpcClient manages the configuration to the emulator grpc
 // endpoint. Through this method you can get a properly configured stub, and
@@ -37,46 +41,63 @@ using ::android::emulation::remote::Endpoint;
 // by providing it a set of SSL credentials if you wish to use tls.
 class EmulatorGrpcClient {
 public:
-    explicit EmulatorGrpcClient(const std::string_view discovery_file)
-        : mDiscoveryFile(discovery_file){};
-    EmulatorGrpcClient(const std::string_view address,
-                       const std::string_view ca,
-                       const std::string_view key,
-                       const std::string_view cer);
-    EmulatorGrpcClient(const Endpoint& dest);
-    ~EmulatorGrpcClient() = default;
+    class Builder;
+    friend class Builder;
+
+    virtual ~EmulatorGrpcClient() = default;
 
     template <class T>
     auto stub() {
         if (!hasOpenChannel()) {
-            dwarning(
-                    "A gRPC channel to %s discovered by %s is not (yet?) open.",
-                    mAddress.c_str(), mDiscoveryFile.c_str());
+            dwarning("A gRPC channel to %s is not (yet?) open.",
+                     address().c_str());
         }
 
         return T::NewStub(mChannel);
     }
 
     std::unique_ptr<grpc::ClientContext> newContext();
-    bool hasOpenChannel(bool tryConnect = true);
-    std::string address() const { return mAddress; }
+    virtual bool hasOpenChannel(bool tryConnect = true);
+    std::string address() const { return mEndpoint.target(); }
 
-    static std::unique_ptr<EmulatorGrpcClient> loadFromProto(
-            std::string_view patToEndpointProto);
+    static absl::StatusOr<std::unique_ptr<EmulatorGrpcClient>> loadFromProto(
+            std::string_view patToEndpointProto,
+            InterceptorFactories factory = {});
 
     // Returns a connection to the current emulator
     static std::shared_ptr<EmulatorGrpcClient> me();
 
     // Configure the "me" singleton based upon the endpoint definition
-    static void configureMe(const remote::Endpoint& endpoint);
+    static void configureMe(std::unique_ptr<EmulatorGrpcClient> me);
 
 protected:
-    bool initializeChannel();
+    EmulatorGrpcClient() = default;
+    EmulatorGrpcClient(Endpoint dest, InterceptorFactories factories);
 
+private:
+    Endpoint mEndpoint;
     std::shared_ptr<::grpc::Channel> mChannel;
     std::shared_ptr<grpc::CallCredentials> mCredentials;
-    std::string mDiscoveryFile;
-    std::string mAddress;
+};
+
+class EmulatorTestClient : public EmulatorGrpcClient {
+public:
+    EmulatorTestClient() {}
+    bool hasOpenChannel(bool tryConnect = true) override { return true; }
+};
+
+class EmulatorGrpcClient::Builder {
+public:
+    Builder& withInterceptor(ClientInterceptorFactoryInterface* factory);
+    Builder& withInterceptors(InterceptorFactories factories);
+    Builder& withDiscoveryFile(std::string discovery_file);
+    Builder& withEndpoint(const Endpoint& destination);
+    absl::StatusOr<std::unique_ptr<EmulatorGrpcClient>> build();
+
+private:
+    absl::Status mStatus{absl::OkStatus()};
+    InterceptorFactories mFactories;
+    Endpoint mDestination;
 };
 
 }  // namespace control

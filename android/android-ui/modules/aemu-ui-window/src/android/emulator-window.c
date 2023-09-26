@@ -12,38 +12,34 @@
 
 #include "android/emulator-window.h"
 
-#include <assert.h>  // for assert
-#include <stdio.h>   // for snprintf
-#include <stdlib.h>  // for NULL, calloc
-#include <string.h>  // for strcmp
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "android/android.h"         // for android_base...
-#include "host-common/hw-config.h"   // for androidHwCon...
-#include "host-common/hw-config-helper.h"
-#include "android/avd/info.h"        // for avdInfo_getName
-#include "android/cmdline-option.h"  // for android_cmdLineOptions
-#include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
-#include "host-common/vm_operations.h"     // for QEMU_SHUTDOW...
-#include "host-common/window_agent.h"      // for EmulatorWindow
+#include "aemu/base/logging/CLog.h"
+#include "android/android.h"
+#include "android/avd/info.h"
+#include "android/avd/util.h"
+#include "android/console.h"
+#include "android/emulation/control/cellular_agent.h"
+#include "android/emulation/control/globals_agent.h"
+#include "android/emulation/control/hw_control_agent.h"
+#include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/resizable_display_config.h"
-#include "host-common/feature_control.h"
-#include "android/framebuffer.h"                // for QFrameBuffer
-#include "android/console.h"                    // for android_hw
-#include "android/hw-control.h"                 // for android_hw_c...
-#include "android/hw-sensors.h"                 // for android_sens...
-#include "android/network/globals.h"            // for android_net_...
-#include "host-common/opengles.h"                   // for android_redr...
-#include "android/skin/event.h"                 // for SkinEventType
-#include "android/skin/generic-event-buffer.h"  // for SkinGenericE...
-#include "android/skin/keycode.h"               // for SkinKeyCode
-#include "android/skin/trackball.h"             // for SkinTrackBal...
-#include "android/skin/window.h"                // for SkinWindowFuncs
-#include "android/skin/winsys.h"                // for skin_winsys_...
-#include "android/telephony/modem.h"            // for amodem_set_d...
-#include "android/telephony/modem_driver.h"     // for android_modem
-#include "android/ui-emu-agent.h"               // for UiEmuAgent
-#include "android/utils/debug.h"                // for dprint, dwar...
-#include "android/utils/looper.h"               // for looper_getFo...
+#include "android/hw-sensors.h"
+#include "android/network/globals.h"
+#include "android/skin/keycode.h"
+#include "android/skin/trackball.h"
+#include "android/skin/window.h"
+#include "android/skin/winsys.h"
+#include "android/ui-emu-agent.h"
+#include "android/utils/debug.h"
+#include "host-common/display_agent.h"
+#include "host-common/hw-config-helper.h"
+#include "host-common/opengles.h"
+#include "host-common/vm_operations.h"
+#include "host-common/window_agent.h"
 
 #define D(...)                   \
     do {                         \
@@ -73,7 +69,7 @@ static void write_window_name(char* buff,
                               size_t buff_len,
                               int base_port,
                               const char* avd_name) {
-    char* product_name = qemulator->opts->fuchsia ? "Fuchsia" : "Android";
+    const char* product_name = qemulator->opts->fuchsia ? "Fuchsia" : "Android";
     snprintf(buff, buff_len, "%s Emulator - %s:%d", product_name, avd_name,
              base_port);
 }
@@ -81,7 +77,7 @@ static void write_window_name(char* buff,
 static void emulator_window_light_brightness(void* opaque,
                                              const char* light,
                                              int value) {
-    EmulatorWindow* emulator = opaque;
+    EmulatorWindow* emulator = (EmulatorWindow*) opaque;
 
     VERBOSE_PRINT(hw_control, "%s: light='%s' value=%d ui=%p", __FUNCTION__,
                   light, value, emulator->ui);
@@ -158,10 +154,10 @@ static void emulator_window_set_device_orientation(SkinRotation rotation) {
 
 static bool emulator_window_network_toggle(void) {
     android_net_disable = !android_net_disable;
-    if (android_modem) {
-        amodem_set_data_registration(
-                android_modem, android_net_disable ? A_REGISTRATION_UNREGISTERED
-                                                   : A_REGISTRATION_HOME);
+    if (getConsoleAgents()->cellular) {
+        getConsoleAgents()->cellular->setDataStatus(
+                android_net_disable ? Cellular_Stat_Unregistered
+                                    : Cellular_Stat_Home);
     }
     return !android_net_disable;
 }
@@ -528,8 +524,7 @@ int emulator_window_init(EmulatorWindow* emulator,
     /* initialize hardware control support */
     AndroidHwControlFuncs funcs;
     funcs.light_brightness = emulator_window_light_brightness;
-    android_hw_control_set(emulator, &funcs);
-
+    getConsoleAgents()->hw_control->setCallbacks(emulator, &funcs);
     return 0;
 }
 

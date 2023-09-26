@@ -80,7 +80,7 @@ private:
     bool mRunning{true};
     uint8_t mAddrType{0};
     GattDevice mDevice;
-    EmulatorGrpcClient mClient;
+    std::unique_ptr<EmulatorGrpcClient> mClient;
     CallbackIdentifier mMyId;
     std::unordered_map<uint16_t, std::unique_ptr<RemoteConnection>>
             mConnections;

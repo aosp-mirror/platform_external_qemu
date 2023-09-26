@@ -12,44 +12,27 @@
 */
 #include "android/skin/user-config.h"
 
-#include <assert.h>
 #include <ctype.h>
-#include <fcntl.h>
-#include <signal.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
+#include <string.h>
 
-#ifdef __APPLE__
-#include <ApplicationServices/ApplicationServices.h>
-#endif
-
-#include "android/avd/util.h"
-#include "android/boot-properties.h"
-#include "android/cmdline-option.h"
+#include "aemu/base/logging/CLog.h"
+#include "android/avd/info.h"
+#include "android/cmdline-definitions.h"
 #include "android/console.h"
-#include "android/emulation/bufprint_config_dirs.h"
-#include "android/emulator-window.h"
-#include "host-common/feature_control.h"
-#include "android/framebuffer.h"
-#include "android/main-common.h"
-#include "android/resource.h"
+#include "android/emulation/control/globals_agent.h"
 #include "android/skin/charmap.h"
-#include "android/skin/file.h"
-#include "android/skin/image.h"
-#include "android/skin/keyboard.h"
+#include "android/skin/rect.h"
 #include "android/skin/resource.h"
-#include "android/skin/trackball.h"
-#include "android/skin/window.h"
-#include "android/skin/winsys.h"
 #include "android/user-config.h"
+#include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
-#include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 #include "android/utils/string.h"
+#include "host-common/hw-config.h"
 
 
 #define D(...)                   \
@@ -80,8 +63,15 @@ static AConfig* s_skinConfig = NULL;
 static char* s_skinPath = NULL;
 static int s_deviceLcdWidth = 0;
 static int s_deviceLcdHeight = 0;
+const char* s_android_skin_net_speed = NULL;
+const char* s_android_skin_net_delay = NULL;
 
-int use_keycode_forwarding = 0;
+const char* android_skin_net_speed(void) {
+return s_android_skin_net_speed;
+}
+const char* android_skin_net_delay(void) {
+return s_android_skin_net_delay;
+}
 
 AConfig* get_skin_config(void) {
     return s_skinConfig;
@@ -154,8 +144,8 @@ void create_minimal_skin_config(int lcd_width,
      * skin */
     n = aconfig_find(root, "network");
     if (n != NULL) {
-        android_skin_net_speed = aconfig_str(n, "speed", 0);
-        android_skin_net_delay = aconfig_str(n, "delay", 0);
+        s_android_skin_net_speed = aconfig_str(n, "speed", 0);
+        s_android_skin_net_delay = aconfig_str(n, "delay", 0);
     }
 
     /* extract framebuffer information from the skin.
@@ -365,8 +355,8 @@ FOUND_SKIN:
      * skin */
     n = aconfig_find(root, "network");
     if (n != NULL) {
-        android_skin_net_speed = aconfig_str(n, "speed", 0);
-        android_skin_net_delay = aconfig_str(n, "delay", 0);
+        s_android_skin_net_speed = aconfig_str(n, "speed", 0);
+        s_android_skin_net_delay = aconfig_str(n, "delay", 0);
     }
 
     /* extract framebuffer information from the skin.

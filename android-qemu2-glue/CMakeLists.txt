@@ -79,10 +79,8 @@ else()
   set(android-qemu2-virtio_src emulation/virtio-goldfish-pipe.cpp)
 endif()
 
-android_add_library(
-  TARGET libqemu2-glue LICENSE Apache-2.0 SRC # cmake-format: sortable
-                                              ${android-qemu2-glue_src}
-                                              ${android-qemu2-virtio_src})
+android_add_library(TARGET libqemu2-glue LICENSE Apache-2.0
+                    SRC ${android-qemu2-glue_src} ${android-qemu2-virtio_src})
 
 target_include_directories(
   libqemu2-glue
@@ -95,8 +93,8 @@ target_include_directories(
           ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(
-  libqemu2-glue
-  PRIVATE android-grpc-services-stack ui::gl-bridge)
+  libqemu2-glue PRIVATE android-grpc-services-stack ui::gl-bridge
+                        android-grpc-interceptors)
 
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
