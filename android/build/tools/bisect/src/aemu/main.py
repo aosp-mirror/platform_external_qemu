@@ -31,18 +31,65 @@ class CustomFormatter(
     pass
 
 
+def find_builds_in_range(ab_client, branch, target, start, end):
+    if start < end:
+      raise ValueError(f"Starting build {start} should be higher than the end build {end}, maybe swap them?")
+    # So the build api does [start, end> meaning that the end
+    # will not be included, so we are first going to find the build
+    # that comes after end.
+    build_end = int(end) - 1
+
+
+    # Now we are going to grow our set, until we have the build range
+    # we want to work with, note we assume start exists.. We will error
+    # out later on if it does not
+    build_ids = {start}
+    last_size = 0
+    while end not in build_ids and last_size != len(build_ids):
+        last_size = len(build_ids)
+        start = min(build_ids)
+        build_ids.update([int(x) for x in ab_client.list_builds(branch, target, start, build_end, 512)] or [])
+        logging.debug("Grew set from %s to %s", last_size, len(build_ids))
+
+    if end not in build_ids:
+        raise ValueError(f"Unable to find build {end}")
+
+    return build_ids
+
+
 def do_bisect(args, destination_dir):
     ab_client = AndroidBuildClient(args.token)
 
     def run_shell_cmd(bid):
         return invoke_shell_with_artifact(
-            ab_client, destination_dir, args.build_target, args.artifact, args.cmd, bid
+            ab_client, destination_dir, args.build_target, args.artifact, args.cmd, bid, args.unzip
         )
 
-    build_ids = ab_client.list_builds(
-        args.branch, args.build_target, args.bid, args.num
-    )
-    bisect(build_ids, run_shell_cmd)
+    start = args.start
+    if not start:
+      start = max(args.good, args.bad)
+
+    if args.good or args.bad:
+      end = min(args.good, args.bad)
+    else:
+      end = args.end
+
+    if end:
+        build_ids = find_builds_in_range(
+            ab_client, args.branch, args.build_target, start, end
+        )
+    else:
+        build_ids = ab_client.list_builds(
+            args.branch, args.build_target, start, None, args.num
+        )
+
+    if not build_ids or len(build_ids) < 2:
+        raise ValueError(
+            f"Did not retrieve enough build ids to bisect, retrieved: {build_ids}"
+        )
+
+    build_ids = sorted(build_ids, reverse=True)
+    bisect(build_ids, run_shell_cmd, good=args.good, bad=args.bad)
 
 
 def main():
@@ -71,6 +118,17 @@ def main():
         Example invocation on Mac OS, where the environment variable TOKEN contains a valid oauth token.
 
         emu-bisect --num 2 --artifact sdk-repo-darwin_aarch64-emulator-{bid}.zip --build_target emulator-mac_aarch64_gfxstream  --token $TOKEN  'read -p "Is $X OK? (y/n): " ok < /dev/tty;  [[ "$ok" == "y" ]]'
+
+        If your token expires halfway during the bisect (if it is long running) you can restart it where you left off by using the --good, and --bad flags.
+
+        For example you might see this on the log
+
+        bisect: iteration 7 of 9 or 10, 10308137, not ok - (10289643) - 10271065, ok
+
+        You can now continue by:
+
+        emu-bisect --bad 10308137 --good 10271065
+
         """,
     )
     parser.add_argument(
@@ -91,13 +149,22 @@ def main():
         help="go/ab branch",
     )
     parser.add_argument(
-        "--num",
-        type=int,
-        default=40,
-        help="Max number of build ids to check",
+        "--start", type=int, help="Starting build id to check, or None to use the latest"
     )
     parser.add_argument(
-        "--bid", type=str, help="Starting build id to check, or None to use the latest"
+        "--end", type=int, help="Ending build id to check, omit to only use --num"
+    )
+    parser.add_argument(
+        "--good", type=int, help="Build id to mark as good, or None to detect"
+    )
+    parser.add_argument(
+        "--bad", type=int, help="Build id to mark as bad, or None to detect"
+    )
+    parser.add_argument(
+        "--num",
+        type=int,
+        default=1024,
+        help="Max number of build ids to check",
     )
 
     parser.add_argument(
@@ -111,6 +178,12 @@ def main():
         default="sdk-repo-linux-emulator-{bid}.zip",
         type=str,
         help="go/ab target artifact. The string {bid} will be replaced by the build id.",
+    )
+    parser.add_argument(
+        "--unzip",
+        default=False,
+        type=str,
+        help="Unzip the obtained artifact.",
     )
     parser.add_argument(
         "cmd",
@@ -127,6 +200,12 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if args.good and (args.start or args.end):
+      raise ValueError("--good cannot be used with start and end.")
+
+    if args.bad and (args.start or args.end):
+      raise ValueError("--bad cannot be used with start and end.")
 
     lvl = logging.DEBUG if args.verbose else logging.INFO
     configure_logging(lvl)

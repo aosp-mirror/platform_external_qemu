@@ -14,6 +14,7 @@
 
 from aemu.android_build_client import AndroidBuildClient
 from pathlib import Path
+from tqdm import tqdm
 import logging
 import zipfile
 import subprocess
@@ -62,7 +63,7 @@ def fetch_artifact(
     if location.exists():
         logging.warning("%s already exists, not downloading again.", location)
     else:
-        logging.debug("Fetching: %s/%s/%s -> %s", bid, build_target, artifact, location)
+        logging.info("Fetching: %s/%s/%s -> %s", bid, build_target, artifact, location)
         go_ab_service.fetch_bits(location, bid, build_target, artifact=artifact)
 
     return location
@@ -74,7 +75,8 @@ def invoke_shell_with_artifact(
     build_target: str,
     artifact,
     cmd: str,
-    bid: str,
+    bid: int,
+    unzip: bool,
 ) -> bool:
     """Invokes the given shell command after fetching and unzipping the received artifact
 
@@ -84,23 +86,37 @@ def invoke_shell_with_artifact(
         build_target (str): build target, for example: emulator-linux_x64
         artifact (str): The artifact, can contain 'bid' that for build id. For example: sdk-repo-linux-emulator-{bid}.zip
         cmd (str): The command to execute. This will be passed to "sh -c"
-        bid (str): The build id (usually a number) to fetch
+        bid (int): The build id (usually a number) to fetch
 
     Returns:
         bool: True if this artificat is ok, False otherwise.
     """
     assert dest.is_dir(), "Destination is not a directory"
-    location = fetch_artifact(go_ab_service, dest, build_target, artifact, bid)
+    location = fetch_artifact(
+        go_ab_service, dest, build_target, artifact, bid
+    ).absolute()
     env = os.environ.copy()
-    env["X"] = bid
-    env["ARTIFACT_LOCATION"] = str(location.absolute())
+    env["X"] = str(bid)
+    env["ARTIFACT_LOCATION"] = str(location)
 
     # Unzip the artifact to a temporary location, if it is a zip file.
-    if zipfile.is_zipfile(location):
-        with TemporaryDirectory() as tmp_dir:
-            with ZipFileWithAttr(location) as zip_file:
-                zip_file.extractall(tmp_dir)
-                env["ARTIFACT_UNZIP_DIR"] = str(tmp_dir)
-                return subprocess.run(["sh", "-c", cmd], env=env).returncode == 0
+    if zipfile.is_zipfile(location) and unzip:
+        tmp_dir = dest / bid
+        logging.info("Unzipping %s -> %s", location, tmp_dir)
+        with ZipFileWithAttr(location) as zip_ref:
+            # Get a list of all the files in the zip file
+            file_list = zip_ref.namelist()
+
+            # Create a progress bar using tqdm
+            with tqdm(total=len(file_list), unit="file") as progress_bar:
+                # Extract each file from the zip archive
+                for file_name in file_list:
+                    zip_ref.extract(file_name, tmp_dir)
+                    progress_bar.update(1)
+        env["ARTIFACT_UNZIP_DIR"] = str(tmp_dir)
+        logging.info("Running %s", cmd)
+        return subprocess.run(["sh", "-c", cmd], env=env).returncode == 0
+    elif unzip:
+        logging.warning("The artifact %s is not a valid zipfile", location)
 
     return subprocess.run(["sh", "-c", cmd], env=env).returncode == 0
