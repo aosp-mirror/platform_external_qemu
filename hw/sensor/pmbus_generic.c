@@ -11,12 +11,14 @@
 #include "qapi/error.h"
 #include "qapi/visitor.h"
 #include "qemu/log.h"
+#include "qom/object.h"
 
 #define TYPE_PMBUS_GENERIC "pmbus-generic"
 OBJECT_DECLARE_SIMPLE_TYPE(PMBusGenericState, PMBUS_GENERIC)
 
 #define DEFAULT_OPERATION       0x80
 #define DEFAULT_CAPABILITY      0x20
+#define PB_GENERIC_NUM_PAGES    (PB_MAX_PAGES + 1)
 
 typedef struct PMBusGenericState {
     PMBusDevice parent;
@@ -45,7 +47,7 @@ static void pmbus_generic_exit_reset(Object *obj)
 
     pmdev->capability = DEFAULT_CAPABILITY;
 
-    for (int i = 0; i < PB_MAX_PAGES; i++) {
+    for (int i = 0; i < PB_GENERIC_NUM_PAGES; i++) {
         pmdev->pages[i].operation = DEFAULT_OPERATION;
         /* TODO: set any registers with expected non-zero defaults */
     }
@@ -100,6 +102,8 @@ static void pmbus_generic_set8(Object *obj, Visitor *v, const char *name,
 
     if (!visit_type_uint8(v, name, &value, errp)) {
         return;
+    } else if (strcmp(name, "num_pages") == 0) {
+        *internal = value < PB_GENERIC_NUM_PAGES ? value : PB_GENERIC_NUM_PAGES;
     } else {
         *internal = value;
     }
@@ -118,7 +122,8 @@ static void pmbus_generic_init(Object *obj)
                       PB_HAS_EOUT | PB_HAS_POUT_RATING | PB_HAS_PIN_RATING |
                       PB_HAS_TEMPERATURE | PB_HAS_TEMP2 | PB_HAS_TEMP3 |
                       PB_HAS_TEMP_RATING | PB_HAS_FAN | PB_HAS_MFR_INFO;
-    for (int i = 0; i <= PB_MAX_PAGES; i++) {
+
+    for (int i = 0; i < PB_GENERIC_NUM_PAGES; i++) {
         pmbus_page_config(pmdev, i, flags);
 
         object_property_add(obj, "operation[*]", "uint8",
@@ -566,6 +571,10 @@ static void pmbus_generic_init(Object *obj)
                             &pmdev->pages[i].mfr_max_temp_3);
 
     }
+
+    object_property_add(obj, "num_pages", "uint8",
+                        pmbus_generic_get8, pmbus_generic_set8,
+                        NULL, &pmdev->num_pages);
 }
 
 static void pmbus_generic_class_init(ObjectClass *klass, void *data)
@@ -578,7 +587,7 @@ static void pmbus_generic_class_init(ObjectClass *klass, void *data)
     dc->vmsd = &vmstate_pmbus_generic;
     k->write_data = pmbus_generic_write_data;
     k->receive_byte = pmbus_generic_read_byte;
-    k->device_num_pages = PB_MAX_PAGES + 1;
+    k->device_num_pages = PB_GENERIC_NUM_PAGES;
     rc->phases.exit = pmbus_generic_exit_reset;
 }
 
