@@ -43,6 +43,7 @@
 #include "aemu/base/ProcessControl.h"
 
 #include "aemu/base/Version.h"
+#include "aemu/base/Debug.h"
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/ScopedPtr.h"
@@ -401,6 +402,16 @@ int main(int argc, char** argv) {
     bool checkLoadable = false;
     bool use_virtio_console = false;
     LoggingFlags logFlags = kLogEnableDuplicateFilter;
+
+    if (1) {
+        const char* debugger = getenv("ANDROID_EMULATOR_WAIT_FOR_LAUNCHER_DEBUGGER");
+        if (debugger != NULL && *debugger && *debugger != '0') {
+            fprintf(stderr, "Waiting for a debugger to attach to emulator pid %d\n",
+                    static_cast<int>(System::get()->getCurrentProcessId()));
+            android::base::WaitForDebugger();
+            fprintf(stderr, "Debugger has attached, resuming\n");
+        }
+    }
 
     if (handle_kill_command(argc, argv)) {
         return 0;
