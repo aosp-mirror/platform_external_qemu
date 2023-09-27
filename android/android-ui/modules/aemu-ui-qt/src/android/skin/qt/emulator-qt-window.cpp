@@ -2646,6 +2646,16 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x,
     QRect containerGeo = mContainer.geometry();
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(),
                            windowGeo.width(), windowGeo.height());
+
+    const bool not_pixel_fold = !android_foldable_is_pixel_fold();
+    const bool has_skin = !hasFrame();
+    if (has_skin && not_pixel_fold) {
+        // when it has skin, need to trigger an event to repaint skin
+        // bug: 302006657
+        SkinEvent* event = createSkinEvent(kEventLayoutRotate);
+        event->u.layout_rotation.rotation = mOrientation;
+        queueSkinEvent(event);
+    }
 }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
