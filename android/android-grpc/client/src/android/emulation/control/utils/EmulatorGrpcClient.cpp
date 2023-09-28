@@ -176,13 +176,17 @@ EmulatorGrpcClient::EmulatorGrpcClient(Endpoint dest,
             address, call_creds, maxSize, std::move(interceptors));
 }
 
-std::unique_ptr<grpc::ClientContext> EmulatorGrpcClient::newContext() {
-    auto ctx = std::make_unique<grpc::ClientContext>();
+std::shared_ptr<grpc::ClientContext> EmulatorGrpcClient::newContext() {
+    auto ctx = mActiveContexts.acquire();
     if (mCredentials) {
         ctx->set_credentials(mCredentials);
     }
 
     return ctx;
+}
+
+void EmulatorGrpcClient::cancelAll() {
+    mActiveContexts.forEach([](auto context){ context->TryCancel(); });
 }
 
 absl::StatusOr<std::unique_ptr<EmulatorGrpcClient>>

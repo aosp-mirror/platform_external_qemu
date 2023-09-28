@@ -13,46 +13,54 @@
 // limitations under the License.
 #pragma once
 
-#include <stddef.h>                                       // for size_t
-#include <stdint.h>                                       // for uint8_t
-#include <string>                                         // for string, bas...
+#include <grpcpp/grpcpp.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <mutex>
+#include <string>
 
-#include "android/emulation/control/clipboard_agent.h"    // for QAndroidCli...
-#include "android/emulation/control/utils/EventWaiter.h"  // for EventWaiter
-#include "aemu/base/synchronization/Lock.h"
+#include "android/emulation/control/clipboard_agent.h"
+#include "android/emulation/control/utils/EventSupport.h"
+#include "emulator_controller.pb.h"
 
 namespace android {
 namespace emulation {
 namespace control {
+
+struct ClipboardEvent {
+    std::string source;
+    ClipData data;
+};
 
 // Contains a set of convenience methods to assist with interacting
 // with the emulator clipboard.
 //
 // The Clipboard will register a callback with the android agent and
 // will update itself accordingly.
-class Clipboard {
+class Clipboard : public EventChangeSupport<ClipboardEvent> {
 public:
     // Send the clipboard data to the emulator.
-    void sendContents(const std::string& clipdata);
+    void sendContents(const std::string& clipdata,
+                      const ::grpc::ServerContextBase* from);
 
     // Retrieves the current clipboard state
     std::string getCurrentContents();
 
-    // Gets the event waiter that can be used to wait for new
-    // clipboard updates.
-    EventWaiter* eventWaiter();
-
     // Gets the clipboard singleton that will register with the given agent.
     // Note: For unit tests only the first registered agent will be used.
     static Clipboard* getClipboard(const QAndroidClipboardAgent* clipAgent);
-private:
 
+    grpc::ServerWriteReactor<ClipData>* eventWriter(
+            ::grpc::CallbackServerContext* context);
+
+private:
     Clipboard(const QAndroidClipboardAgent* clipAgent);
-    static void guestClipboardCallback(void* context, const uint8_t* data, size_t size);
+    static void guestClipboardCallback(void* context,
+                                       const uint8_t* data,
+                                       size_t size);
     std::string mContents;
     const QAndroidClipboardAgent* mClipAgent;
-    EventWaiter mEventWaiter;
-    android::base::Lock mContentsLock;
+    std::mutex mContentsLock;
 };
 
 }  // namespace control

@@ -37,7 +37,7 @@ namespace control {
 
 using ::google::protobuf::Empty;
 
-void SimpleAvdClient::getAvdInfo(OnCompleted<AvdInfo> onDone) {
+void SimpleAvdClient::getAvdInfoAsync(OnCompleted<AvdInfo> onDone) {
     if (mLoaded) {
         onDone(&mCachedInfo);
         return;
@@ -54,10 +54,29 @@ void SimpleAvdClient::getAvdInfo(OnCompleted<AvdInfo> onDone) {
 
     auto [request, response, context] =
             createGrpcRequestContext<Empty, AvdInfo>(mClient);
+
+    // If for some reason we don't have a sync implementation (mocks)
+    // we will transform the sync call to an async one.
     mService->async()->getAvdInfo(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response,
                                       cacheForward));
+}
+
+absl::StatusOr<AvdInfo> SimpleAvdClient::getAvdInfo() {
+    if (mLoaded) {
+        return mCachedInfo;
+    }
+
+    auto context = mClient->newContext();
+    Empty empty;
+    auto status = ConvertGrpcStatusToAbseilStatus(
+            mService->getAvdInfo(context.get(), empty, &mCachedInfo));
+    if (status.ok()) {
+        return mCachedInfo;
+    }
+
+    return status;
 }
 
 }  // namespace control

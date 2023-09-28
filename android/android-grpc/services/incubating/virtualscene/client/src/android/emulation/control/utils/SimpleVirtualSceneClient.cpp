@@ -32,7 +32,7 @@ void SimpleVirtualSceneServiceClient::listPostersAsync(
     auto [request, response, context] =
             createGrpcRequestContext<Empty, PosterList>(mClient);
     mService->async()->listPosters(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -43,7 +43,7 @@ void SimpleVirtualSceneServiceClient::setPosterAsync(
             createGrpcRequestContext<Poster, Poster>(mClient);
     request->CopyFrom(poster);
     mService->async()->setPoster(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -54,7 +54,7 @@ void SimpleVirtualSceneServiceClient::setAnimationState(
             createGrpcRequestContext<AnimationState, AnimationState>(mClient);
     request->CopyFrom(state);
     mService->async()->setAnimationState(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 void SimpleVirtualSceneServiceClient::getAnimationState(
@@ -62,7 +62,7 @@ void SimpleVirtualSceneServiceClient::getAnimationState(
     auto [request, response, context] =
             createGrpcRequestContext<Empty, AnimationState>(mClient);
     mService->async()->getAnimationState(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 

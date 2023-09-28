@@ -17,7 +17,6 @@
 
 #include "android/avd/util.h"
 #include "android/console.h"
-#include "android/emulation/control/cellular_agent.h"
 #include "android/emulator-window.h"
 #include "android/main-common.h"
 #include "android/metrics/UiEventTracker.h"
@@ -30,8 +29,6 @@
 
 using android::emulation::control::incubating::CellSignalStrength;
 
-// Must be protected by the BQL!
-static const QAndroidCellularAgent* sCellularAgent = nullptr;
 static void saveDataStatus(int status);
 static void saveNetworkType(int type);
 static void saveSignalStrength(int strength);

@@ -43,7 +43,7 @@ void SimpleModemClient::receiveSmsAsync(SmsMessage message,
             createGrpcRequestContext<SmsMessage, Empty>(mClient);
     request->CopyFrom(message);
     mService->async()->receiveSms(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -52,7 +52,7 @@ void SimpleModemClient::createCall(Call call, OnCompleted<Call> onDone) {
             createGrpcRequestContext<Call, Call>(mClient);
     request->CopyFrom(call);
     mService->async()->createCall(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -61,7 +61,7 @@ void SimpleModemClient::updateCall(Call call, OnCompleted<Call> onDone) {
             createGrpcRequestContext<Call, Call>(mClient);
     request->CopyFrom(call);
     mService->async()->updateCall(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -70,7 +70,7 @@ void SimpleModemClient::deleteCall(Call call, OnCompleted<Empty> onDone) {
             createGrpcRequestContext<Call, Empty>(mClient);
     request->CopyFrom(call);
     mService->async()->deleteCall(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -79,7 +79,7 @@ void SimpleModemClient::updateTime(
     auto [request, response, context] =
             createGrpcRequestContext<Empty, Empty>(mClient);
     mService->async()->updateClock(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -89,7 +89,7 @@ void SimpleModemClient::setCellInfo(CellInfo info,
             createGrpcRequestContext<CellInfo, CellInfo>(mClient);
     request->CopyFrom(info);
     mService->async()->setCellInfo(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
@@ -97,19 +97,19 @@ void SimpleModemClient::getCellInfo(OnCompleted<CellInfo> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Empty, CellInfo>(mClient);
     mService->async()->getCellInfo(
-            context, request, response,
+            context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
 void SimpleModemClient::receivePhoneEvents(OnEvent<PhoneEvent> incoming,
                                            OnFinished onDone) {
-    grpc::ClientContext* context = mClient->newContext().release();
+    auto context = mClient->newContext();
     static google::protobuf::Empty empty;
     auto read = new SimpleClientLambdaReader<PhoneEvent>(
             incoming, context, [onDone](auto status) {
                 onDone(ConvertGrpcStatusToAbseilStatus(status));
             });
-    mService->async()->receivePhoneEvents(context, &empty, read);
+    mService->async()->receivePhoneEvents(context.get(), &empty, read);
     read->StartRead();
     read->StartCall();
 }

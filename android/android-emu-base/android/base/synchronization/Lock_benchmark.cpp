@@ -56,7 +56,7 @@ static BaseLockContention sBaseContention;
 
 void BM_BaseLock_Contention(benchmark::State& state) {
     static BaseLockContention contention;
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         contention.counter = 0;
     }
     while (state.KeepRunning()) {
@@ -78,7 +78,7 @@ struct StdMutexContention {
 
 void BM_StdMutex_Contention(benchmark::State& state) {
     static StdMutexContention contention;
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         contention.counter = 0;
     }
     while (state.KeepRunning()) {

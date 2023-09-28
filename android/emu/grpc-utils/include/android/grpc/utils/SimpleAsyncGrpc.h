@@ -155,7 +155,7 @@ class SimpleClientLambdaReader
 public:
     SimpleClientLambdaReader(
             ReadCallback readFn,
-            grpc::ClientContext* context,
+            std::shared_ptr<grpc::ClientContext> context,
             OnDoneCallback doneFn = [](auto s) {})
         : mReadFn(readFn), mContext(context), mDoneFn(doneFn) {}
 
@@ -169,7 +169,7 @@ public:
 private:
     ReadCallback mReadFn;
     OnDoneCallback mDoneFn;
-    std::unique_ptr<grpc::ClientContext> mContext;
+    std::shared_ptr<grpc::ClientContext> mContext;
 };
 
 // A simple async writer where objects will be placed in a queue and written
@@ -222,14 +222,13 @@ template <typename W>
 class SimpleClientWriter
     : public WithSimpleQueueWriter<grpc::ClientWriteReactor<W>> {
 public:
-    SimpleClientWriter(::grpc::ClientContext* context) : mContext(context) {}
-    SimpleClientWriter(std::unique_ptr<::grpc::ClientContext>&& context)
+    SimpleClientWriter(std::shared_ptr<::grpc::ClientContext> context)
         : mContext(std::move(context)) {}
 
     ::grpc::ClientContext* context() { return mContext.get(); }
 
 private:
-    std::unique_ptr<::grpc::ClientContext> mContext;
+    std::shared_ptr<::grpc::ClientContext> mContext;
 };
 // A bi directional serverstream constructed from a simple reader and
 // queuewriter.

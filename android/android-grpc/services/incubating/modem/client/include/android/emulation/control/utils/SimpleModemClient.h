@@ -43,8 +43,13 @@ using ::google::protobuf::Empty;
  */
 class SimpleModemClient {
 public:
-    explicit SimpleModemClient(std::shared_ptr<EmulatorGrpcClient> client)
-        : mClient(client), mService(client->stub<Modem>()) {}
+    explicit SimpleModemClient(std::shared_ptr<EmulatorGrpcClient> client,
+                               Modem::StubInterface* service = nullptr)
+        : mClient(client), mService(service) {
+        if (!service) {
+            mService = client->stub<Modem>();
+        }
+    }
 
     void receiveSmsAsync(incubating::SmsMessage message,
                          OnCompleted<::google::protobuf::Empty> onDone);
@@ -60,7 +65,7 @@ public:
 
 private:
     std::shared_ptr<EmulatorGrpcClient> mClient;
-    std::unique_ptr<Modem::Stub> mService;
+    std::unique_ptr<Modem::StubInterface> mService;
 };
 
 }  // namespace control

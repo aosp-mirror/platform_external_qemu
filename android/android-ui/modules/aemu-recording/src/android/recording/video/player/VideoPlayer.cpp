@@ -966,7 +966,10 @@ void VideoPlayerImpl::refreshFrame(double* remaining_time) {
     if (mAudioStreamIdx != -1) {
         double time = av_gettime_relative() / 1000000.0;
         if (this->mForceRefresh || this->mLastVisibleTime + rdftspeed < time) {
-            displayVideoFrame(mVideoFrameQueue->peek());
+            auto* f = mVideoFrameQueue->peekReadableNoWait();
+            if (f) {
+                displayVideoFrame(f);
+            }
             this->mLastVisibleTime = time;
         }
         *remaining_time = FFMIN(*remaining_time,

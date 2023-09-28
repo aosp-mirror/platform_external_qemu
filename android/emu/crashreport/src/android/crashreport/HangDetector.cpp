@@ -11,16 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "android/crashreport/HangDetector.h"
 
-#include "android/avd/info.h"
 #include "aemu/base/Debug.h"
-#include "aemu/base/Optional.h"
 #include "aemu/base/StringFormat.h"
 #include "android/console.h"
 #include "android/utils/debug.h"
 
+#include <chrono>
+#include <optional>
 #include <utility>
 
 namespace android {
@@ -31,8 +30,8 @@ class HangDetector::LooperWatcher {
 
 public:
     LooperWatcher(base::Looper* looper,
-                  base::System::Duration hangTimeoutMs,
-                  base::System::Duration hangCheckTimeoutMs);
+                  std::chrono::milliseconds hangTimeout,
+                  std::chrono::milliseconds hangCheckTimeout);
     ~LooperWatcher();
 
     LooperWatcher(LooperWatcher&&) = default;
@@ -49,10 +48,10 @@ private:
     std::unique_ptr<base::Looper::Task> mTask;
     bool mIsTaskRunning = false;
 
-    base::Optional<base::System::Duration> mLastCheckTimeUs;
-    const base::System::Duration mTimeoutMs;
-    const base::System::Duration mHangCheckTimeoutMs;
-    std::unique_ptr<base::Lock> mLock{new base::Lock()};
+    std::chrono::high_resolution_clock::time_point mLastCheckTime;
+    const std::chrono::milliseconds mTimeout;
+    const std::chrono::milliseconds mhangCheckTimeout;
+    std::unique_ptr<std::mutex> mLock{new std::mutex()};
 
     static constexpr int kMaxHangCount = 2;
     int mHangCount = 0;
@@ -60,11 +59,11 @@ private:
 
 HangDetector::LooperWatcher::LooperWatcher(
         base::Looper* looper,
-        base::System::Duration hangTimeoutMs,
-        base::System::Duration hangCheckTimeoutMs)
+        std::chrono::milliseconds hangTimeout,
+        std::chrono::milliseconds hangCheckTimeout)
     : mLooper(looper),
-      mTimeoutMs(hangTimeoutMs),
-      mHangCheckTimeoutMs(hangCheckTimeoutMs) {}
+      mTimeout(hangTimeout),
+      mhangCheckTimeout(hangCheckTimeout) {}
 
 HangDetector::LooperWatcher::~LooperWatcher() {
     if (mTask) {
@@ -73,41 +72,44 @@ HangDetector::LooperWatcher::~LooperWatcher() {
 }
 
 void HangDetector::LooperWatcher::startHangCheck() {
-    base::AutoLock l(*mLock);
+    std::unique_lock<std::mutex> l(*mLock);
 
     startHangCheckLocked();
 }
 
 void HangDetector::LooperWatcher::cancelHangCheck() {
-    base::AutoLock l(*mLock);
+    std::unique_lock<std::mutex> l(*mLock);
 
     if (mTask) {
         mTask->cancel();
     }
     mIsTaskRunning = false;
-    mLastCheckTimeUs = base::System::get()->getUnixTimeUs();
+    mLastCheckTime = std::chrono::high_resolution_clock::now();
 }
 
 void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
-    base::AutoLock l(*mLock);
+    std::unique_lock<std::mutex> l(*mLock);
 
-    const auto now = base::System::get()->getUnixTimeUs();
+    const auto now = std::chrono::high_resolution_clock::now();
     if (mIsTaskRunning) {
         // Heuristic: If the looper watcher itself took much longer than
-        // mTimeoutMs to fire again, it's possible there was a system-wide
+        // mTimeout to fire again, it's possible there was a system-wide
         // sleep. In this case, don't count that as hanging.
-        const auto timeSystemLiveAndHanging =
-                *mLastCheckTimeUs + mTimeoutMs * 1000;
+        // Note that we are using std::chrono to make sure all the durations
+        // are scaled appropriately.
+        const auto timeSystemLiveAndHanging = mLastCheckTime + mTimeout;
         const auto timeSystemSleepedPastHangTimeout =
-                *mLastCheckTimeUs + 2 * mTimeoutMs * 1000;
+                mLastCheckTime + 2 * mTimeout;
         if (now > timeSystemLiveAndHanging &&
             now < timeSystemSleepedPastHangTimeout) {
+            std::chrono::milliseconds timePassed =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(
+                            now - mLastCheckTime);
             const auto message = base::StringFormat(
                     "detected a hanging thread '%s'. No response for %d ms",
-                    mLooper->name().data(),
-                    static_cast<int>((now - *mLastCheckTimeUs) / 1000));
+                    mLooper->name().data(), timePassed.count());
             ++mHangCount;
-            l.unlock();
+            mLock->unlock();
 
             derror("%s%s", message.c_str(),
                    android::base::IsDebuggerAttached()
@@ -123,7 +125,7 @@ void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
                 startHangCheckLocked();
             }
         }
-    } else if (now > mLastCheckTimeUs.valueOr(0) + mHangCheckTimeoutMs * 1000) {
+    } else if (now > mLastCheckTime + mhangCheckTimeout) {
         mHangCount = 0;
         startHangCheckLocked();
     }
@@ -135,11 +137,11 @@ void HangDetector::LooperWatcher::startHangCheckLocked() {
     }
     mTask->schedule();
     mIsTaskRunning = true;
-    mLastCheckTimeUs = base::System::get()->getUnixTimeUs();
+    mLastCheckTime = std::chrono::high_resolution_clock::now();
 }
 
 void HangDetector::LooperWatcher::taskComplete() {
-    base::AutoLock l(*mLock);
+    std::unique_lock<std::mutex> l(*mLock);
     mIsTaskRunning = false;
 }
 
@@ -154,17 +156,18 @@ HangDetector::~HangDetector() {
     stop();
 }
 
-void HangDetector::addWatchedLooper(base::Looper* looper) {
-    base::AutoLock lock(mLock);
-    mLoopers.emplace_back(new LooperWatcher(looper, hangTimeoutMs(),
-                                            mTiming.hangCheckTimeoutMs));
+void HangDetector::addWatchedLooper(base::Looper* looper,
+                                    std::chrono::milliseconds taskTimeout) {
+    std::unique_lock<std::mutex> l(mLock);
+    mLoopers.emplace_back(
+            new LooperWatcher(looper, taskTimeout, mTiming.hangCheckTimeout));
     if (!mPaused && !mStopping) {
         mLoopers.back()->startHangCheck();
     }
 }
 
 void HangDetector::pause(bool paused) {
-    base::AutoLock lock(mLock);
+    std::unique_lock<std::mutex> l(mLock);
     if (paused) {
         mPaused++;
     } else {
@@ -177,43 +180,42 @@ void HangDetector::pause(bool paused) {
             lw->cancelHangCheck();
         }
     } else if (mPaused == 0) {
-        mWorkerThreadCv.signalAndUnlock(&lock);
+        mWorkerThreadCv.notify_one();
     }
 }
 
 void HangDetector::stop() {
     {
-        base::AutoLock lock(mLock);
+        std::unique_lock<std::mutex> l(mLock);
         for (auto&& lw : mLoopers) {
             lw->cancelHangCheck();
         }
         mStopping = true;
-        mWorkerThreadCv.signalAndUnlock(&lock);
+        mWorkerThreadCv.notify_one();
     }
     mWorkerThread.wait();
 }
 
 void HangDetector::workerThread() {
     auto nextDeadline = [this]() {
-        return base::System::get()->getUnixTimeUs() +
-               mTiming.hangLoopIterationTimeoutMs * 1000;
+        return std::chrono::high_resolution_clock::now() +
+               mTiming.hangLoopIterationTimeout;
     };
-    base::AutoLock lock(mLock);
+    std::unique_lock<std::mutex> l(mLock);
     for (;;) {
-        auto waitUntilUs = nextDeadline();
+        auto waitUntil = nextDeadline();
 
         while (!mStopping &&
-               (base::System::get()->getUnixTimeUs() < waitUntilUs ||
+               (std::chrono::high_resolution_clock::now() < waitUntil ||
                 mPaused)) {
-            mWorkerThreadCv.timedWait(&mLock, waitUntilUs);
-            auto nowUs = base::System::get()->getUnixTimeUs();
-            const int64_t waitedTooLongUs =
-                    waitUntilUs + mTiming.hangLoopIterationTimeoutMs * 1000;
+            mWorkerThreadCv.wait_until(l, waitUntil);
+            auto nowUs = std::chrono::high_resolution_clock::now();
+            auto waitedTooLongUs = waitUntil + mTiming.hangLoopIterationTimeout;
             if (mPaused || nowUs >= waitedTooLongUs) {
                 // If paused, or the condition variable wait
                 // took much longer than the hang loop iteration
                 // timeout, avoid spinning.
-                waitUntilUs = nextDeadline();
+                waitUntil = nextDeadline();
             }
         }
         if (mStopping) {
@@ -246,7 +248,7 @@ void HangDetector::workerThread() {
 }
 HangDetector& HangDetector::addPredicateCheck(HangPredicate&& predicate,
                                               std::string&& msg) {
-    base::AutoLock lock(mLock);
+    std::unique_lock<std::mutex> l(mLock);
     mPredicates.emplace_back(
             std::make_pair(std::move(predicate), std::move(msg)));
     return *this;
@@ -255,25 +257,12 @@ HangDetector& HangDetector::addPredicateCheck(HangPredicate&& predicate,
 HangDetector& HangDetector::addPredicateCheck(StatefulHangdetector* detector,
                                               std::string&& msg) {
     {
-        base::AutoLock lock(mLock);
+        std::unique_lock<std::mutex> l(mLock);
         mRegistered.push_back(std::unique_ptr<StatefulHangdetector>(detector));
     }
     HangPredicate pred = [detector] { return detector->check(); };
     return addPredicateCheck([detector] { return detector->check(); },
                              std::move(msg));
-}
-
-base::System::Duration HangDetector::hangTimeoutMs() {
-    // x86 and x64 run pretty fast, but other types of images could be really
-    // slow - so let's have a longer timeout for those.
-    // Note that getConsoleAgents()->settings->avdInfo() is not set in unit
-    // tests.
-    if (getConsoleAgents()->settings->avdInfo() &&
-        avdInfo_is_x86ish(getConsoleAgents()->settings->avdInfo())) {
-        return mTiming.taskProcessingTimeoutMs;
-    }
-    // something around 100 seconds should be fine.
-    return mTiming.taskProcessingTimeoutMs * 7;
 }
 
 }  // namespace crashreport

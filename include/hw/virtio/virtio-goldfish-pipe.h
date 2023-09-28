@@ -3,8 +3,8 @@
 
 #ifdef CONFIG_STREAM_RENDERER
 
-#include "render-utils/virtio-gpu-gfxstream-renderer.h"
-#include "render-utils/virtio-gpu-gfxstream-renderer-unstable.h"
+#include "gfxstream/virtio-gpu-gfxstream-renderer.h"
+#include "gfxstream/virtio-gpu-gfxstream-renderer-unstable.h"
 
 #else
 

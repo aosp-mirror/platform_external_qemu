@@ -14,7 +14,7 @@ and you would like to find out which build introduced this. You can
 run the following:
 
      . ./configure.sh
-     emu-bisect -num 1024 '${ARTIFACT_UNZIP_DIR}/emulator/emulator @my_avd -qt-hide-window -no-snapshot -grpc-use-token; read -p "Is $X OK? (y/n): " ok < /dev/tty;  [[ "$ok" == "y" ]]'
+     emu-bisect --unzip --num 1024 '${ARTIFACT_UNZIP_DIR}/emulator/emulator @my_avd -qt-hide-window -no-snapshot -grpc-use-token; read -p "Is $X OK? (y/n): " ok < /dev/tty;  [[ "$ok" == "y" ]]'
 
 This will do a bisection of the last 1024 emulator builds and run the given command. Once the emulator shuts down you will have to reply y/n to indicate
 if the issue was pressent. Once the bisection is completed the tool will output something like this:
@@ -23,6 +23,8 @@ if the issue was pressent. Once the bisection is completed the tool will output 
      10517925, ok
 
 Containing the first bad build, and the last good build.
+
+Launch `emu-bisect --help` to get detailed usage information and examples
 
 ## Detailed usage
 
@@ -34,7 +36,7 @@ Next we will do a binary search over all these ids to figure out which build id 
 - Download the artifact, if it has not been downloaded already
 - Unzip the artifact if it is a zipfile.
 - Execute the shell command. The following environment variables will be set:
-  - ARTIFACT_UNZIP_DIR variable to the directory of the unzipped artifact, if the artifact was a zip file.
+  - ARTIFACT_UNZIP_DIR variable to the directory of the unzipped artifact, if the artifact was a zip file and you passed in the --unzip flag
   - ARTIFACT_LOCATION variable containling the location of the downloaded artifact.
   - X the current build id under consideration.
 

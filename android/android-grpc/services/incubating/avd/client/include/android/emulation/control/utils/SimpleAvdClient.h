@@ -36,16 +36,25 @@ using ::google::protobuf::Empty;
 
 class SimpleAvdClient {
 public:
-    explicit SimpleAvdClient(std::shared_ptr<EmulatorGrpcClient> client)
-        : mClient(client), mService(client->stub<AvdService>()) {}
+    explicit SimpleAvdClient(std::shared_ptr<EmulatorGrpcClient> client,
+                             AvdService::StubInterface* service = nullptr)
+        : mClient(client), mService(service) {
+        if (!service) {
+            mService = client->stub<AvdService>();
+        }
+    }
 
     // Get the avd info from the emulator, caching the value once it has
     // been received.
-    void getAvdInfo(OnCompleted<AvdInfo> status);
+    void getAvdInfoAsync(OnCompleted<AvdInfo> status);
+
+    // Get the avd info from the emulator, caching the value once it has
+    // been received.
+    absl::StatusOr<AvdInfo> getAvdInfo();
 
 private:
     std::shared_ptr<EmulatorGrpcClient> mClient;
-    std::unique_ptr<AvdService::Stub> mService;
+    std::unique_ptr<AvdService::StubInterface> mService;
     std::atomic_bool mLoaded;
     AvdInfo mCachedInfo;
 };

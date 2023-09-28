@@ -25,6 +25,7 @@ namespace control {
 template <typename T>
 using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
 
+
 /**
  * Convert a gRPC status object to an Abseil status object.
  *
@@ -53,12 +54,12 @@ using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
  * a unique_ptr to the client context object.
  */
 template <class Request, class Response>
-std::tuple<Request*, Response*, grpc::ClientContext*> createGrpcRequestContext(
+std::tuple<Request*, Response*, std::shared_ptr<grpc::ClientContext>> createGrpcRequestContext(
         const std::shared_ptr<EmulatorGrpcClient>& client) {
     auto request = new Request();
     auto response = new Response();
     auto context = client->newContext();
-    return std::make_tuple(request, response, context.release());
+    return std::make_tuple(request, response, std::move(context));
 }
 
 /**
@@ -84,7 +85,7 @@ std::tuple<Request*, Response*, grpc::ClientContext*> createGrpcRequestContext(
 
 template <class Request, class Response>
 std::function<void(::grpc::Status)> grpcCallCompletionHandler(
-        grpc::ClientContext* context,
+        std::shared_ptr<grpc::ClientContext> context,
         Request* request,
         Response* response,
         OnCompleted<Response> onDone) {
@@ -102,7 +103,6 @@ std::function<void(::grpc::Status)> grpcCallCompletionHandler(
         }
 
         // Cleanup the resources used by the gRPC call.
-        delete context;
         delete request;
         delete response;
     };
