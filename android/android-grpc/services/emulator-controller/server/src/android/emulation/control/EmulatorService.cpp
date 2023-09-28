@@ -122,10 +122,11 @@ namespace control {
 
 // Logic and data behind the server's behavior.
 class EmulatorControllerImpl final
-    : public EmulatorController::WithCallbackMethod_streamNotification<
+    : public EmulatorController::WithCallbackMethod_streamClipboard<
+    EmulatorController::WithCallbackMethod_streamNotification<
               EmulatorController::WithCallbackMethod_streamInputEvent<
                       EmulatorController::WithCallbackMethod_injectWheel<
-                              EmulatorController::Service>>> {
+                              EmulatorController::Service>>>> {
 public:
     EmulatorControllerImpl(const AndroidConsoleAgents* agents)
         : mAgents(agents),
@@ -319,7 +320,7 @@ public:
                         const ClipData* clipData,
                         ::google::protobuf::Empty* reply) override {
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
-                [=]() { mClipboard->sendContents(clipData->text()); });
+                [=]() { mClipboard->sendContents(clipData->text(), context); });
         return Status::OK;
     }
 
@@ -330,29 +331,11 @@ public:
         return Status::OK;
     }
 
-    Status streamClipboard(ServerContext* context,
-                           const ::google::protobuf::Empty* empty,
-                           ServerWriter<ClipData>* writer) override {
-        ClipData reply;
-        bool clientAvailable = !context->IsCancelled();
 
-        if (clientAvailable) {
-            reply.set_text(mClipboard->getCurrentContents());
-            clientAvailable = writer->Write(reply);
-        }
-
-        int frame = 0;
-        while (clientAvailable) {
-            const auto kTimeToWaitForFrame = std::chrono::milliseconds(125);
-            auto arrived = mClipboard->eventWaiter()->next(kTimeToWaitForFrame);
-            if (arrived > 0 && !context->IsCancelled()) {
-                reply.set_text(mClipboard->getCurrentContents());
-                frame += arrived;
-                clientAvailable = writer->Write(reply);
-            }
-            clientAvailable = !context->IsCancelled() && clientAvailable;
-        }
-        return Status::OK;
+    ::grpc::ServerWriteReactor<ClipData>* streamClipboard(
+            ::grpc::CallbackServerContext* context,
+            const ::google::protobuf::Empty* /*request*/) override {
+        return mClipboard->eventWriter(context);
     }
 
     Status setSensor(ServerContext* context,

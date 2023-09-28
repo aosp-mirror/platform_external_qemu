@@ -73,10 +73,7 @@ public:
     ModemImpl(const AndroidConsoleAgents* agents)
         : mConsoleAgents(agents),
           mModem(agents->telephony->getModem()),
-          mTelephonyAgent(agents->telephony) {
-        // android::RecursiveScopedVmLock vmlock;
-        mTelephonyAgent->setNotifyCallback(telephony_callback, (void*)this);
-    }
+          mTelephonyAgent(agents->telephony) {}
 
     ::grpc::Status setCellInfo(::grpc::ServerContext* context,
                                const CellInfo* request,
@@ -369,6 +366,10 @@ public:
             ::android::emulation::control::incubating::PhoneEvent>*
     receivePhoneEvents(::grpc::CallbackServerContext* /*context*/,
                        const ::google::protobuf::Empty* /*request*/) override {
+        dwarning(
+                "Telephony agent callback has been overridden, the QT ui will "
+                "no longer receive phone events.");
+        mTelephonyAgent->setNotifyCallback(telephony_callback, (void*)this);
         return new PhoneEventStream(&s_activeCallListeners);
     }
 

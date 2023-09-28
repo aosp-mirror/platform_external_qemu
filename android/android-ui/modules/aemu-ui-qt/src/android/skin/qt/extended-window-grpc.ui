@@ -68,7 +68,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="CellularPageGrpc" name="cellular_page"/>
    <widget class="BatteryPageGrpc" name="batteryPage"/>
    <widget class="CameraPageGrpc" name="cameraPage"/>
-   <widget class="TelephonyPage" name="telephonyPage"/>
+   <widget class="TelephonyPageGrpc" name="telephonyPage"/>
    <widget class="DPadPage" name="dpadPage"/>
    <widget class="TvRemotePage" name="tvRemotePage"/>
    <widget class="RotaryInputPage" name="rotaryInputPage"/>
@@ -1361,9 +1361,9 @@ padding: 10px 0px 10px 16px;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>TelephonyPage</class>
+   <class>TelephonyPageGrpc</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/telephony-page.h</header>
+   <header>android/skin/qt/extended-pages/telephony-page-grpc.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

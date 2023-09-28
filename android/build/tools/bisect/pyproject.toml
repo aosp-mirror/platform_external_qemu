@@ -16,7 +16,7 @@ classifiers = ["Topic :: Software Development"]
 
 
 dependencies = [
-    "google-api-python-client", "oauth2client",
+    "google-api-python-client", "oauth2client", "tqdm",
     "importlib-metadata; python_version<'3.8'",
 ]
 

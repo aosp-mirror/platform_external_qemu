@@ -48,8 +48,13 @@ using OnEvent = std::function<void(const T*)>;
 class SimpleEmulatorControlClient {
 public:
     explicit SimpleEmulatorControlClient(
-            std::shared_ptr<EmulatorGrpcClient> client)
-        : mClient(client), mService(client->stub<EmulatorController>()) {}
+            std::shared_ptr<EmulatorGrpcClient> client,
+            EmulatorController::StubInterface* service = nullptr)
+        : mClient(client), mService(service) {
+        if (!service) {
+            mService = client->stub<EmulatorController>();
+        }
+    }
 
     /**
      * @brief Asynchronously sets the battery state
@@ -140,8 +145,7 @@ public:
 
 private:
     std::shared_ptr<EmulatorGrpcClient> mClient;
-    std::unique_ptr<android::emulation::control::EmulatorController::Stub>
-            mService;
+    std::unique_ptr<EmulatorController::StubInterface> mService;
 };
 
 }  // namespace control

@@ -43,8 +43,13 @@ using android::emulation::control::incubating::VirtualSceneService;
 class SimpleVirtualSceneServiceClient {
 public:
     explicit SimpleVirtualSceneServiceClient(
-            std::shared_ptr<EmulatorGrpcClient> client)
-        : mClient(client), mService(client->stub<VirtualSceneService>()) {}
+            std::shared_ptr<EmulatorGrpcClient> client,
+            VirtualSceneService::StubInterface* service = nullptr)
+        : mClient(client), mService(service) {
+        if (!service) {
+            mService = client->stub<VirtualSceneService>();
+        }
+    }
 
     void listPostersAsync(OnCompleted<PosterList> onDone);
     void setPosterAsync(Poster poster, OnCompleted<Poster> onDone);
@@ -55,7 +60,7 @@ public:
 
 private:
     std::shared_ptr<EmulatorGrpcClient> mClient;
-    std::unique_ptr<VirtualSceneService::Stub> mService;
+    std::unique_ptr<VirtualSceneService::StubInterface> mService;
 };
 
 }  // namespace control

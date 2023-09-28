@@ -90,6 +90,8 @@ typedef enum {
  */
 typedef struct AvdInfo  AvdInfo;
 
+
+
 /* various flags used when creating an AvdInfo object */
 typedef enum {
     /* use to force a data wipe */

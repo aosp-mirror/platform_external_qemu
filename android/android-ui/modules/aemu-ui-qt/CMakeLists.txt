@@ -88,6 +88,7 @@ android_qt_lib(
        ext-page-snapshot
        ext-page-snapshot-grpc
        ext-page-telephony
+       ext-page-telephony-grpc
        ext-page-tv-remote
        protobuf::libprotobuf
        qemu-host-common-headers

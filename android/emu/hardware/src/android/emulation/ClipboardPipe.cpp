@@ -11,15 +11,17 @@
 
 #include "android/emulation/ClipboardPipe.h"
 
-#include <string.h>                            // for memcpy, size_t
-#include <algorithm>                           // for min
-#include <cassert>                             // for assert
-#include <type_traits>                         // for swap
-#include <utility>                             // for move
+#include <string.h>
+#include <algorithm>
+#include <cassert>
+#include <string>
+#include <type_traits>
+#include <utility>
 
-#include "aemu/base/memory/LazyInstance.h"  // for LazyInstance
 #include "aemu/base/logging/Log.h"
-#include "android/clipboard-pipe.h"            // for android_init_clipboard...
+#include "aemu/base/memory/LazyInstance.h"
+#include "android/clipboard-pipe.h"
+#include "android/utils/debug.h"
 
 namespace android {
 namespace emulation {
@@ -137,6 +139,10 @@ int ClipboardPipe::onGuestSend(const AndroidPipeBuffer* buffers,
     int result = processOperation(OperationType::ReadFromGuest,
                                   &mGuestReadState, buffers, numBuffers);
     if (mGuestReadState.isFinished()) {
+        VERBOSE_INFO(keys, "ClipboardPipe fire event: %s ",
+                     std::string((char*)mGuestReadState.buffer.data(),
+                                 mGuestReadState.processedBytes)
+                             .c_str());
         base::AutoLock cbLock(sInstance->callbackLock);
         for (const auto& callback : sInstance->guestClipboardCallbacks) {
             callback(mGuestReadState.buffer.data(),
@@ -152,7 +158,8 @@ void ClipboardPipe::setEnabled(bool enabled) {
 }
 
 void registerClipboardPipeService() {
-    android::AndroidPipe::Service::add(std::make_unique<ClipboardPipe::Service>());
+    android::AndroidPipe::Service::add(
+            std::make_unique<ClipboardPipe::Service>());
 }
 
 void ClipboardPipe::registerGuestClipboardCallback(
@@ -179,9 +186,8 @@ void ClipboardPipe::setGuestClipboardContents(const uint8_t* buf, size_t len) {
         return;  // who cares.
     }
 
-    LOG(DEBUG) << "Clipboard update, host->guest, value='"
-        << std::string_view(reinterpret_cast<const char*>(buf), len)
-        << "'";
+    VERBOSE_INFO(keys, "ClipboardPipe update, host->guest: '%s'",
+                 std::string((char*)buf, len).c_str());
 
     mGuestWriteState.queueContents(buf, len);
     wakeGuestIfNeeded();
@@ -191,7 +197,8 @@ void ClipboardPipe::setGuestClipboardContents(const uint8_t* buf, size_t len) {
 
 ClipboardPipe::Service::Service() : AndroidPipe::Service("clipboard") {}
 
-AndroidPipe* ClipboardPipe::Service::create(void* hwPipe, const char* args,
+AndroidPipe* ClipboardPipe::Service::create(void* hwPipe,
+                                            const char* args,
                                             enum AndroidPipeFlags flags) {
     const auto pipe = new ClipboardPipe(hwPipe, this);
     {

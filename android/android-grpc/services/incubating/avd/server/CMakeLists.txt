@@ -8,6 +8,7 @@ android_add_library(
   SRC android/emulation/control/incubating/AvdService.cpp
   DEPS android-emu-agents
        android-emu-avd
+       android-emu-avd-grpc
        android-emu-base
        android-emu-feature
        android-emu-files

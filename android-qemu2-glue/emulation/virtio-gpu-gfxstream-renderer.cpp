@@ -19,8 +19,9 @@ extern "C" {
 #include "android/utils/dll.h"
 #include "qemu/osdep.h"
 #include "host-common/goldfish_pipe.h"
-#include "render-utils/virtio-gpu-gfxstream-renderer.h"
-#include "render-utils/virtio-gpu-gfxstream-renderer-unstable.h"
+#include "gfxstream/virtio-gpu-gfxstream-renderer.h"
+#include "gfxstream/virtio-gpu-gfxstream-renderer-goldfish.h"
+#include "gfxstream/virtio-gpu-gfxstream-renderer-unstable.h"
 }  // extern "C"
 
 #define RENDERER_LIB_NAME "libgfxstream_backend"
