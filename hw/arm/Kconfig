@@ -508,6 +508,7 @@ config NPCM7XX
     select MAX_16600
     select MAX31790
     select PL310  # cache controller
+    select NPCM_PCIERC
     select PMBUS
     select SERIAL
     select SSI
@@ -515,7 +516,6 @@ config NPCM7XX
     select PCA954X
     select MAX20730
     select PECI
-    select NPCM_PCIERC
 
 config NPCM8XX
     bool
