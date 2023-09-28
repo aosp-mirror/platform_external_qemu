@@ -478,11 +478,20 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     qRegisterMetaType<Ui::OverlayMessageType>();
     qRegisterMetaType<Ui::OverlayChildWidget::DismissFunc>();
 
-    mOrientation =
-            !strcmp(getConsoleAgents()->settings->hw()->hw_initialOrientation,
-                    "landscape")
-                    ? SKIN_ROTATION_270
-                    : SKIN_ROTATION_0;
+    auto myhw = getConsoleAgents()->settings->hw();
+    if (myhw->hw_device_name && !strncmp("pixel_tablet", myhw->hw_device_name,
+                                         strlen("pixel_tablet"))) {
+        mOrientation = !strcmp(myhw->hw_initialOrientation, "landscape")
+                               ? SKIN_ROTATION_0
+                               : SKIN_ROTATION_270;
+    } else {
+        mOrientation = !strcmp(getConsoleAgents()
+                                       ->settings->hw()
+                                       ->hw_initialOrientation,
+                               "landscape")
+                               ? SKIN_ROTATION_270
+                               : SKIN_ROTATION_0;
+    }
 
     android::base::ThreadLooper::setLooper(mLooper, true);
 
@@ -993,6 +1002,24 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
 
 void EmulatorQtWindow::queueQuitEvent() {
     queueSkinEvent(createSkinEvent(kEventQuit));
+}
+
+void EmulatorQtWindow::refreshSkin() {
+    const bool pixel_fold = android_foldable_is_pixel_fold();
+    if (pixel_fold) {
+        // for now, ignore this for pixel fold
+        // TODO: enable it, need to check display id
+        // and pass that to event.
+        return;
+    }
+    const bool has_skin = !hasFrame();
+    if (has_skin) {
+        // when it has skin, need to trigger an event to repaint skin
+        // bug: 302006657
+        SkinEvent* event = createSkinEvent(kEventLayoutRotate);
+        event->u.layout_rotation.rotation = mOrientation;
+        queueSkinEvent(event);
+    }
 }
 
 void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent* event) {
@@ -2646,16 +2673,7 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x,
     QRect containerGeo = mContainer.geometry();
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(),
                            windowGeo.width(), windowGeo.height());
-
-    const bool not_pixel_fold = !android_foldable_is_pixel_fold();
-    const bool has_skin = !hasFrame();
-    if (has_skin && not_pixel_fold) {
-        // when it has skin, need to trigger an event to repaint skin
-        // bug: 302006657
-        SkinEvent* event = createSkinEvent(kEventLayoutRotate);
-        event->u.layout_rotation.rotation = mOrientation;
-        queueSkinEvent(event);
-    }
+    refreshSkin();
 }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
