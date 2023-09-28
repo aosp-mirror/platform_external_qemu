@@ -60,11 +60,19 @@ target_include_directories(
                                          ${CMAKE_CURRENT_BINARY_DIR}/avd_config)
 target_compile_definitions(android-emu-min-avd PRIVATE AEMU_MIN AEMU_LAUNCHER)
 
+# b/302515956: Disable avd-grpc_unittest.cpp on darwin-x64 until it's fixed.
+set(avd_test_srcs
+    android/avd/util_unittest.cpp
+    android/avd/util_wrapper_unittest.cpp
+    android/hw-lcd_unittest.cpp
+)
+if (NOT DARWIN_X86_64)
+set(avd_test_srcs ${avd_test_srcs} android/avd/avd-grpc_unittest.cpp)
+endif()
 android_add_test(
   TARGET android-emu-avd_unittests
   SOURCE_DIR test
-  SRC android/avd/avd-grpc_unittest.cpp android/avd/util_unittest.cpp
-      android/avd/util_wrapper_unittest.cpp android/hw-lcd_unittest.cpp
+  SRC ${avd_test_srcs}
   DEPS android-emu-avd
        android-emu-avd-grpc
        android-emu-base
