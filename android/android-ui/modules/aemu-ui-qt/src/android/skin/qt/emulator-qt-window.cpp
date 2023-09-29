@@ -2459,6 +2459,13 @@ static int convertKeyCode(int sym) {
     };
     const size_t kConvertSize = sizeof(kConvert) / sizeof(kConvert[0]);
     size_t nn;
+    // BUG: 286512287
+    // KEY_ENTER is not recognized by Android TV system image as
+    // what we expect it to be. Use KEY_CENTER instead.
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+            AVD_TV && sym == Qt::Key_Return) {
+        return LINUX_KEY_CENTER;
+    }
     for (nn = 0; nn < kConvertSize; ++nn) {
         if (sym == kConvert[nn].qt_sym) {
             return kConvert[nn].keycode;
