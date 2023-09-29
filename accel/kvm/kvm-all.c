@@ -1975,6 +1975,37 @@ static void kvm_eat_signals(CPUState *cpu)
     } while (sigismember(&chkset, SIG_IPI));
 }
 
+static void cpu_efault_print(CPUState *cpu)
+{
+    struct kvm_run *run = cpu->kvm_run;
+    FILE *map_file = NULL;
+    char line[256];
+    void *hva = NULL;
+    bool found = false;
+
+    fprintf(stderr, "---------- Start of EFAULT Debugging Info ----------\n");
+    fprintf(stderr, "faulting guest physical address 0x%016llx\n", run->addr.gpa);
+    hva = kvm_gpa2hva(run->addr.gpa, &found);
+    if (found)
+        fprintf(stderr, "Found host virtual address of the faulting gpa 0x%016llx\n", (__u64)hva);
+
+    fprintf(stderr, "Printing /proc/self/maps...\n");
+    map_file = fopen("/proc/self/maps", "r");
+    if (!map_file) {
+        fprintf(stderr, "Cannot open /proc/self/maps. Nothing is printed.\n");
+	goto end_print;
+    }
+
+    while (fgets(line, 256, map_file) != NULL) {
+        fprintf(stderr, "%s", line);
+    }
+
+    fclose(map_file);
+
+ end_print:
+    fprintf(stderr, "---------- End of EFAULT Debugging Info ----------\n");
+}
+
 int kvm_cpu_exec(CPUState *cpu)
 {
     struct kvm_run *run = cpu->kvm_run;
@@ -2037,6 +2068,8 @@ int kvm_cpu_exec(CPUState *cpu)
             }
             fprintf(stderr, "error: kvm run failed %s\n",
                     strerror(-run_ret));
+            if (run_ret == -EFAULT && run->exit_reason == KVM_EXIT_EFAULT)
+                cpu_efault_print(cpu);
 #ifdef TARGET_PPC
             if (run_ret == -EBUSY) {
                 fprintf(stderr,
