@@ -69,6 +69,7 @@ extern "C" {
 static struct {
     std::string name;
     std::string controller_properties_file;
+    netsim::packet::NetsimdOptions options;
 } gNetsimConfiguration;
 
 using android::qemu2::PacketStreamChardev;
@@ -102,12 +103,7 @@ static void netsim_chr_connect(PacketStreamChardev* netsim) {
     // properties on the chardev, v.s. injected here.
 
     auto channelFactory = []() {
-        netsim::packet::NetsimdOptions options {
-            .no_cli_ui = !feature_is_enabled(kFeature_NetsimCliUi),
-            .no_web_ui = !feature_is_enabled(kFeature_NetsimWebUi),
-        };
-        DD("Producing channel: no_cli_ui: %d, no_web_ui %d", options.no_cli_ui, options.no_web_ui);
-        return netsim::packet::CreateChannel(options);
+        return netsim::packet::CreateChannel(gNetsimConfiguration.options);
     };
 
     auto protocol = android::qemu2::getPacketProtocol(
@@ -204,9 +200,23 @@ const std::string get_netsim_device_name() {
     return gNetsimConfiguration.name;
 }
 
+netsim::packet::NetsimdOptions get_netsim_options() {
+    return gNetsimConfiguration.options;
+}
+
 void register_netsim(const std::string address,
-                     const std::string name) {
+                     const std::string name,
+                     const std::string netsim_args) {
     netsim::packet::SetPacketStreamEndpoint(address);
+    gNetsimConfiguration.options = {
+            .no_cli_ui = !feature_is_enabled(kFeature_NetsimCliUi),
+            .no_web_ui = !feature_is_enabled(kFeature_NetsimWebUi),
+            .netsim_args = netsim_args,
+    };
+    DD("Producing channel: no_cli_ui: %d, no_web_ui %d, netsim_args %s",
+       gNetsimConfiguration.options.no_cli_ui,
+       gNetsimConfiguration.options.no_web_ui,
+       gNetsimConfiguration.options.netsim_args.c_str());
     gNetsimConfiguration.name = name;
 }
 
