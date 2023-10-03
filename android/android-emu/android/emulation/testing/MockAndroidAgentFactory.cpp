@@ -20,7 +20,7 @@
 #include "android/avd/info.h"             // for AvdInfo, (anonymous) (ptr o...
 #include "android/cmdline-definitions.h"  // for AndroidOptions, (anonymous)...
 #include "android/utils/debug.h"          // for dinfo
-#include "gtest/gtest_pred_impl.h"        // for InitGoogleTest, RUN_ALL_TESTS
+#include "gtest/gtest.h"                  // for InitGoogleTest, RUN_ALL_TESTS
 
 struct AvdInfo;
 
