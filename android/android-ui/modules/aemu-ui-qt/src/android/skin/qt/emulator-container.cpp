@@ -464,6 +464,7 @@ void EmulatorContainer::slot_resizeDone() {
     // yet.
     if (numHeldMouseButtons() == 0) {
         mEmulatorWindow->doResize(this->size());
+        mEmulatorWindow->refreshSkin();
     } else {
         startResizeTimer();
     }
