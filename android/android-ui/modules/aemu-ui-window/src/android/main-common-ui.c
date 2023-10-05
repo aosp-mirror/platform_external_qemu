@@ -312,6 +312,14 @@ bool configAndStartRenderer(enum WinsysPreferredGlesBackend uiPreferredBackend,
         // b/273985153
         shouldEnableGLDirectMem = false;
 #endif
+#if !defined(_WIN32) && !defined(__APPLE__)
+        // b/225541819
+        // Disable GLDirectMem for Linux. We cannot pass certain
+        // types of GPU memory from guest->host. This will result in
+        // a crash. There is a KVM fix, but it will not show up for
+        // a (large) number of kernel versions. See the bug for details.
+        shouldEnableGLDirectMem = false;
+#endif
         bool shouldEnableVulkan = true;
 
         crashhandler_append_message_format(
