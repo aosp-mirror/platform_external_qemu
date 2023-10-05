@@ -18,6 +18,7 @@
  */
 #include "qemu/osdep.h"
 #include <sys/shm.h>
+#include <linux/mman.h>
 #include "trace.h"
 #include "exec/log.h"
 #include "qemu.h"

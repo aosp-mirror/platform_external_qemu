@@ -98,6 +98,7 @@
 #include <linux/soundcard.h>
 #include <linux/kd.h>
 #include <linux/mtio.h>
+#include <linux/mman.h>
 #include <linux/fs.h>
 #include <linux/fd.h>
 #if defined(CONFIG_FIEMAP)
