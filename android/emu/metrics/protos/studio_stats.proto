@@ -1426,6 +1426,9 @@ message EmulatorAvdInfo {
         WEAROS_SMALL_ROUND = 34;
         WEAROS_RECT = 35;
         WEAROS_SQUARE = 36;
+        PIXEL_7A = 37;
+        PIXEL_8 = 38;
+        PIXEL_8_PRO = 39;
     }
     // Name of the AVD. Deprecated as it could potentially contain PII.
     optional string name = 1 [deprecated = true];
