@@ -257,6 +257,8 @@ OPT_PARAM(dump_audio, "<file>", "Dump audio to apointed file for the webrtc conn
 
 OPT_PARAM(packet_streamer_endpoint, "<uri>", "Use the provided packet streamer endpoint when present.")
 
+OPT_PARAM(netsim_args, "<arg1> [<arg2> ...]", "Additional netsim arguments.")
+
 OPT_PARAM(multidisplay, "index width height dpi flag", "config multiple displays.")
 
 OPT_PARAM(google_maps_key, "<API key>", "API key to use with the Google Maps GUI.")
