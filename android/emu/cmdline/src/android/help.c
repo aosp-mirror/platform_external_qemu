@@ -1396,8 +1396,21 @@ help_packet_streamer_endpoint(stralloc_t*  out)
     );
 }
 
+static void
+help_netsim_args(stralloc_t*  out)
+{
+    PRINTF(
+    "  Specify additional netsim arguments to pass to netsim instance.\n\n"
 
+    "  Separates arguments by space if there are multiple flags. Valid examples are:\n"
+    "    --pcap\n"
+    "    \"--pcap --hci-port 12345\"\n"
+    "    \"--pcap --hci-port=12345\"\n\n"
 
+    "  Run `netsimd --help` to list all the avaiable flags.\n"
+    "  The netsimd binary should be located at the same folder as the emulator binary.\n\n"
+    );
+}
 
 static void
 help_onion(stralloc_t*  out)

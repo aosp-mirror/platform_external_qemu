@@ -130,7 +130,7 @@ NetsimWifiForwarder::~NetsimWifiForwarder() {
 }
 
 bool NetsimWifiForwarder::init() {
-    auto channel = netsim::packet::CreateChannel("");
+    auto channel = netsim::packet::CreateChannel(get_netsim_options());
     if (!channel) {
         dwarning("Unable to establish gRPC connection with netsim.");
         return false;

@@ -14,10 +14,14 @@
 #pragma once
 #include <string>
 
-void register_netsim(
-        const std::string address,
-        const std::string host_id);
+#include "backend/packet_streamer_client.h"
+
+void register_netsim(const std::string address,
+                     const std::string host_id,
+                     const std::string netsim_args);
 
 const std::string get_netsim_device_name();
+
+netsim::packet::NetsimdOptions get_netsim_options();
 
 void close_netsim();
