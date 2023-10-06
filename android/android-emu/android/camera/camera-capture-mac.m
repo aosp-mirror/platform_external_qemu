@@ -103,14 +103,16 @@ FourCCToInternal(uint32_t cm_pix_format)
     dispatch_queue_t output_queue;
     /* Current framebuffer. */
     CVPixelBufferRef              current_frame;
-    /* Desired frame width */
-    int                           desired_width;
-    /* Desired frame height */
-    int                           desired_height;
-    /* Scratch buffer to hold imgs of desired rotation. */
-    void*                         desired_rotated_frame;
-    /* Scratch buffer to hold imgs of desired width and height. */
-    void*                         desired_scaled_frame;
+
+    /* output dimensions */
+    uint32_t                      desired_width;
+    uint32_t                      desired_height;
+
+    /* scratch for cropping */
+    void*                         cropped_frame_scratch;
+    uint32_t                      cropped_frame_width;
+    uint32_t                      cropped_frame_height;
+    uint32_t                      cropped_frame_bpr;
 }
 
 /* Initializes MacCamera instance.
@@ -180,8 +182,12 @@ FourCCToInternal(uint32_t cm_pix_format)
         return nil;
     }
     success = false;
-    desired_rotated_frame = nil;
-    desired_scaled_frame = nil;
+    desired_width = 0;
+    desired_height = 0;
+    cropped_frame_scratch = nil;
+    cropped_frame_width = 0;
+    cropped_frame_height = 0;
+    cropped_frame_bpr = 0;
 
     /* Create capture session. */
     capture_session = [[AVCaptureSession alloc] init];
@@ -271,27 +277,23 @@ FourCCToInternal(uint32_t cm_pix_format)
             current_frame = nil;
         }
 
-        if (desired_scaled_frame != nil) {
-            free(desired_scaled_frame);
-            desired_scaled_frame = nil;
+        if (cropped_frame_scratch) {
+           free(cropped_frame_scratch);
         }
 
-        if (desired_rotated_frame != nil) {
-            free(desired_rotated_frame);
-            desired_rotated_frame = nil;
-        }
+        cropped_frame_scratch = nil;
+        cropped_frame_width = 0;
+        cropped_frame_height = 0;
     }
 }
 
 - (int)start_capturing:(int)width:(int)height
 {
-    D("%s: call. start capture session\n", __func__);
+    D("%s: call. start capture session, WxH=%dx%d\n", __func__, width, height);
 
     @synchronized (self) {
-        current_frame = nil;
         desired_width = width;
         desired_height = height;
-        desired_scaled_frame = realloc(desired_scaled_frame, 4 * desired_width * desired_height);
     }
 
     if (![capture_session isRunning]) {
@@ -327,156 +329,95 @@ FourCCToInternal(uint32_t cm_pix_format)
         (float)b_scale:
         (float)exp_comp:
         (const char*)direction {
-    int res = -1;
-
-
-    const void* pixels = nil;
-    vImage_Buffer scale_output;
-    uint32_t pixel_format;
-    int frame_width, frame_height, srcBpr, srcBpp, frame_size;
-
     /* Frames are pushed by macOS in another thread.
      * So we need a protection here. */
     @synchronized (self)
     {
         if (current_frame != nil) {
+            int res;
+            uint32_t src_pixel_format;
+            uint32_t src_width;
+            uint32_t src_height;
+            uint32_t src_bpr;
+            AndroidCoarseOrientation orientation;
+
             /* Collect frame info. */
-            pixel_format =
-                FourCCToInternal(CVPixelBufferGetPixelFormatType(current_frame));
-            frame_width = CVPixelBufferGetWidth(current_frame);
-            frame_height = CVPixelBufferGetHeight(current_frame);
-            srcBpr = CVPixelBufferGetBytesPerRow(current_frame);
-            srcBpp = 4;
-            frame_size = srcBpr * frame_height;
-
-            D("%s: w h %d %d bytes %zu\n", __func__, frame_width, frame_height, frame_size);
-
-            /* Get framebuffer pointer. */
-            D("%s: lock base addr\n", __func__);
             CVPixelBufferLockBaseAddress(current_frame, 0);
+            const void* const src_pixels = CVPixelBufferGetBaseAddress(current_frame);
+            if (src_pixels != nil) {
+                src_pixel_format = FourCCToInternal(CVPixelBufferGetPixelFormatType(current_frame));
+                src_width = CVPixelBufferGetWidth(current_frame);
+                src_height = CVPixelBufferGetHeight(current_frame);
+                src_bpr = CVPixelBufferGetBytesPerRow(current_frame);
+                orientation = get_coarse_orientation();
 
-            D("%s: get pixels base addr\n", __func__);
-            pixels = CVPixelBufferGetBaseAddress(current_frame);
+                {
+                    uint32_t desired_width1;
+                    uint32_t desired_height1;
 
-            if (pixels != nil) {
-                D("%s: convert frame\n", __func__);
-                vImage_Buffer rotate_input;
-                rotate_input.width = frame_width;
-                rotate_input.height = frame_height;
-                rotate_input.rowBytes = srcBpr;
-                rotate_input.data = pixels;
-
-                vImage_Buffer rotate_output;
-                AndroidCoarseOrientation orientation
-                        = get_coarse_orientation();
-                switch (orientation) {
+                    switch (orientation) {
                     case ANDROID_COARSE_PORTRAIT:
                     case ANDROID_COARSE_REVERSE_PORTRAIT:
-                        // Swap width and height
-                        frame_height ^= frame_width;
-                        frame_width ^= frame_height;
-                        frame_height ^= frame_width;
-
-                        srcBpr = srcBpp * frame_width;
+                        desired_width1 = desired_height;
+                        desired_height1 = desired_width;
                         break;
-                    case ANDROID_COARSE_LANDSCAPE:
-                    case ANDROID_COARSE_REVERSE_LANDSCAPE:
+                    default:
+                        desired_width1 = desired_width;
+                        desired_height1 = desired_height;
                         break;
-                }
-                rotate_output.width = frame_width;
-                rotate_output.height = frame_height;
-                rotate_output.rowBytes = srcBpr;
-                if (desired_rotated_frame == nil) {
-                    desired_rotated_frame = realloc(desired_rotated_frame,
-                            4 * frame_width * frame_height);
-                }
-                rotate_output.data = desired_rotated_frame;
+                    }
 
-                vImage_Error err = 0;
-                UInt8 backColor[] = {0, 0, 0, 0};
-                // Front and back camera has different rotations
-                int rotation = 0 == strcmp("back", direction) ?
-                    (1 + orientation) % 4:
-                    (5 - orientation) % 4;
-                err = vImageRotate90_ARGB8888(&rotate_input, &rotate_output,
-                            rotation, backColor, 0);
-
-                if (err != kvImageNoError) {
-                    E("%s: error in scale: 0x%x\n", __func__, err);
-                }
-                // AVFoundation doesn't provide pre-scaled output.
-                // Scale it here, using the Accelerate framework.
-                // Also needs to be the correct aspect ratio,
-                // so do a centered crop so that aspect ratios match.
-                float currAspect = ((float)frame_width) / ((float)frame_height);
-                float desiredAspect = ((float)desired_width) / ((float)desired_height);
-                bool shrinkHoriz = false;
-                int cropX0, cropY0, cropW, cropH;
-                uintptr_t start = 0;
-
-                shrinkHoriz = desiredAspect < currAspect;
-
-                if (shrinkHoriz) {
-                    cropW = (desiredAspect / currAspect) * frame_width;
-                    cropH = frame_height;
-
-                    cropX0 = (frame_width - cropW) / 2;
-                    cropY0 = 0;
-
-                    start = srcBpp * cropX0;
-                } else {
-                    cropW = frame_width;
-                    cropH = (currAspect / desiredAspect) * frame_height;
-
-                    cropX0 = 0;
-                    cropY0 = (frame_height - cropH) / 2;
-
-                    start = srcBpr * cropY0;
+                    if (cropped_frame_height != desired_height1 || cropped_frame_width != desired_width1 || !cropped_frame_scratch) {
+                        cropped_frame_width = desired_width1;
+                        cropped_frame_height = desired_height1;
+                        cropped_frame_bpr = cropped_frame_width * sizeof(uint32_t);
+                        cropped_frame_scratch = realloc(cropped_frame_scratch, cropped_frame_bpr * cropped_frame_height);
+                    }
                 }
 
-                vImage_Buffer scale_input;
-                scale_input.width = cropW;
-                scale_input.height = cropH;
-                scale_input.rowBytes = srcBpr;
-                scale_input.data = ((char*)desired_rotated_frame) + start;
+                const uint32_t effective_crop_width = MIN(cropped_frame_width, src_width);
+                const uint32_t effective_crop_bpr = effective_crop_width * sizeof(uint32_t);
+                const uint32_t effective_crop_height = MIN(cropped_frame_height, src_height);
+                const uint32_t half_blank_rows = (cropped_frame_height - effective_crop_height) / 2;
+                const uint32_t half_blank_col_pixels = (cropped_frame_width - effective_crop_width) / 2 * sizeof(uint32_t);
 
-                const int dstBpp = 4; // ARGB8888
-                scale_output.width = desired_width;
-                scale_output.height = desired_height;
-                scale_output.rowBytes = dstBpp * desired_width;
-                scale_output.data = desired_scaled_frame;
+                const uint8_t* src_pixels8 = (const uint8_t*)src_pixels +
+                        (src_height - effective_crop_height) * src_bpr +
+                        (src_width - effective_crop_width) / 2 * sizeof(uint32_t);
+                uint8_t* dst_pixels8 = (const uint8_t*)cropped_frame_scratch +
+                        half_blank_rows * cropped_frame_bpr;
 
-                D("%s:  image scale %d %d -> %d %d\n",
-                        __func__, frame_width, frame_height, desired_width, desired_height);
-
-                err = vImageScale_ARGB8888(&scale_input, &scale_output, NULL, 0);
-                if (err != kvImageNoError) {
-                    E("%s: error in scale: 0x%x\n", __func__, err);
+                memset(cropped_frame_scratch, 0, half_blank_rows * cropped_frame_bpr);
+                for (unsigned n = effective_crop_height; n > 0; --n, src_pixels8 += src_bpr) {
+                    memset(dst_pixels8, 0, half_blank_col_pixels);
+                    dst_pixels8 += half_blank_col_pixels;
+                    memcpy(dst_pixels8, src_pixels8, effective_crop_bpr);
+                    dst_pixels8 += effective_crop_bpr;
+                    memset(dst_pixels8, 0, half_blank_col_pixels);
+                    dst_pixels8 += half_blank_col_pixels;
                 }
-                CVPixelBufferUnlockBaseAddress(current_frame, 0);
-                // unlock everything early here because we have already copied to
-                // the rescaled buffer.
+                memset(dst_pixels8, 0, half_blank_rows * cropped_frame_bpr);
+
+                res = 0;
+            } else {
+                res = -1;
             }
 
+            CVPixelBufferUnlockBaseAddress(current_frame, 0);
+
+            if (!res) {
+                res = convert_frame(cropped_frame_scratch, src_pixel_format,
+                           cropped_frame_bpr * cropped_frame_height,
+                           cropped_frame_width, cropped_frame_height, result_frame,
+                           r_scale, g_scale, b_scale, exp_comp, direction, orientation);
+            }
+
+            return res;
         } else {
             /* First frame didn't come in just yet. Let the caller repeat. */
-            res = 1;
+            return 1;
         }
-
     }
-
-    if (pixels != nil) {
-        /* Convert framebuffer. */
-        res = convert_frame(scale_output.data, pixel_format,
-                            scale_output.rowBytes * scale_output.height,
-                            desired_width, desired_height, result_frame,
-                            r_scale, g_scale, b_scale, exp_comp, "front", 1);
-    } else if (current_frame != nil) {
-        E("%s: Unable to obtain framebuffer", __func__);
-        res = -1;
-    }
-
-    return res;
 }
 
 @end
