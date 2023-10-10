@@ -685,6 +685,7 @@ void qemu_android_emulation_teardown() {
         grpcService = nullptr;
     }
 
+    advertiser->remove();
     // Let's manually disconnect netsim so we can collect metrics etc..
     close_netsim();
 

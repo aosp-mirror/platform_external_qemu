@@ -1,21 +1,21 @@
 #include "android/emulation/control/WebRtcBridge.h"
 
-#include <nlohmann/json.hpp>                    // for json, basic_json<>::v...
-#include <stdio.h>                              // for sscanf
-#include <chrono>                               // for operator+, seconds
-#include <memory>                               // for shared_ptr, shared_pt...
-#include <ostream>                              // for operator<<, ostream
-#include <utility>                              // for move
-#include <vector>                               // for vector
+#include <stdio.h>            // for sscanf
+#include <chrono>             // for operator+, seconds
+#include <memory>             // for shared_ptr, shared_pt...
+#include <nlohmann/json.hpp>  // for json, basic_json<>::v...
+#include <ostream>            // for operator<<, ostream
+#include <utility>            // for move
+#include <vector>             // for vector
 
 #include "aemu/base/Log.h"                   // for LogStreamVoidify, LOG
 #include "aemu/base/Optional.h"              // for Optional
 #include "aemu/base/async/AsyncSocket.h"     // for AsyncSocket
 #include "aemu/base/sockets/ScopedSocket.h"  // for ScopedSocket
 #include "aemu/base/sockets/SocketUtils.h"   // for socketGetPort, socket...
-#include "android/base/system/System.h"         // for System, System::Pid
-#include "android/emulation/ConfigDirs.h"       // for ConfigDirs
-
+#include "android/base/system/System.h"      // for System, System::Pid
+#include "android/emulation/ConfigDirs.h"    // for ConfigDirs
+#include "android/emulation/control/EmulatorAdvertisement.h"
 namespace android {
 namespace base {
 class AsyncSocketAdapter;
@@ -285,7 +285,7 @@ static Optional<System::Pid> launchInBackground(std::string executable,
                                      "--logdir",
                                      System::get()->getTempDir(),
                                      "--discovery",
-                                     ConfigDirs::getCurrentDiscoveryPath(),
+                                     EmulatorAdvertisement({}).location(),
                                      "--port",
                                      std::to_string(port),
                                      "--adb",
@@ -312,7 +312,8 @@ static Optional<System::Pid> launchInBackground(std::string executable,
     return bridgePid;
 }
 
-Optional<System::Pid> WebRtcBridge::launch(int port, int adbPort,
+Optional<System::Pid> WebRtcBridge::launch(int port,
+                                           int adbPort,
                                            std::string turnConfig) {
     std::string executable =
             System::get()->findBundledExecutable(kVideoBridgeExe);
@@ -340,8 +341,7 @@ bool WebRtcBridge::start() {
         return false;
     }
 
-    Optional<System::Pid> bridgePid =
-            launch(mVideoBridgePort, 0, mTurnConfig);
+    Optional<System::Pid> bridgePid = launch(mVideoBridgePort, 0, mTurnConfig);
 
     if (!bridgePid.hasValue()) {
         LOG(ERROR) << "WebRTC bridge disabled";
