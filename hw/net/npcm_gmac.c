@@ -444,7 +444,7 @@ static ssize_t gmac_receive(NetClientState *nc, const uint8_t *buf, size_t len)
             }
 
             /* step 6 */
-            if (rx_desc.rdes0 & RX_DESC_RDES0_OWN) {
+            if (!(rx_desc.rdes0 & RX_DESC_RDES0_OWN)) {
                 if (!(gmac->regs[R_NPCM_DMA_CONTROL] & \
                      NPCM_DMA_CONTROL_FLUSH_MASK)) {
                     rx_desc.rdes0 |= RX_DESC_RDES0_DESC_ERR_MASK;
