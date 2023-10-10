@@ -271,7 +271,7 @@ static int gmac_rx_transfer_frame_to_buffer(uint32_t rx_buf_len,
                                             uint32_t *left_frame,
                                             uint32_t rx_buf_addr,
                                             bool *eof_transferred,
-                                            const uint8_t *frame_ptr,
+                                            const uint8_t **frame_ptr,
                                             uint16_t *transferred)
 {
     uint32_t to_transfer;
@@ -289,13 +289,13 @@ static int gmac_rx_transfer_frame_to_buffer(uint32_t rx_buf_len,
 
     /* write frame part to memory */
     if (dma_memory_write(&address_space_memory, (uint64_t) rx_buf_addr,
-                         frame_ptr, to_transfer, MEMTXATTRS_UNSPECIFIED))
+                         *frame_ptr, to_transfer, MEMTXATTRS_UNSPECIFIED))
     {
         return -1;
     }
 
     /* update frame pointer and size of whats left of frame */
-    frame_ptr += to_transfer;
+    *frame_ptr += to_transfer;
     *left_frame -= to_transfer;
     *transferred += to_transfer;
 
@@ -386,7 +386,7 @@ static ssize_t gmac_receive(NetClientState *nc, const uint8_t *buf, size_t len)
         rx_buf_addr = rx_desc.rdes2;
         gmac->regs[R_NPCM_DMA_CUR_RX_BUF_ADDR] = rx_buf_addr;
         gmac_rx_transfer_frame_to_buffer(rx_buf_len, &left_frame, rx_buf_addr,
-                                         &eof_transferred, frame_ptr,
+                                         &eof_transferred, &frame_ptr,
                                          &transferred);
 
         trace_npcm_gmac_packet_receiving_buffer(DEVICE(gmac)->canonical_path,
@@ -400,7 +400,7 @@ static ssize_t gmac_receive(NetClientState *nc, const uint8_t *buf, size_t len)
             gmac->regs[R_NPCM_DMA_CUR_RX_BUF_ADDR] = rx_buf_addr;
             gmac_rx_transfer_frame_to_buffer(rx_buf_len, &left_frame,
                                              rx_buf_addr, &eof_transferred,
-                                             frame_ptr, &transferred);
+                                             &frame_ptr, &transferred);
             trace_npcm_gmac_packet_receiving_buffer( \
                                                 DEVICE(gmac)->canonical_path,
                                                 rx_buf_len, rx_buf_addr);
