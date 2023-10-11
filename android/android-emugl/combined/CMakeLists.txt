@@ -26,8 +26,13 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     set(BUILD_STANDALONE OFF)
     if(NOT LINUX_AARCH64)
-    set(ENABLE_VKCEREAL_TESTS ON)
+        set(ENABLE_VKCEREAL_TESTS ON)
     endif()
+
+    if(NOT LINUX_AARCH64)
+        set(ASTC_CPU_DECODING ON)
+    endif()
+
     function(discover_gfxstream_internal_targets result subdir)
         if(CMAKE_VERSION VERSION_LESS "3.7.0")
             message(

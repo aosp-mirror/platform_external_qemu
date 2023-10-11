@@ -111,6 +111,7 @@ int ChannelStream::writeFully(const void* buf, size_t len) {
 const unsigned char *ChannelStream::readFully( void *buf, size_t len) {
     GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
         << "not intended for use with ChannelStream";
+    return nullptr;
 }
 
 void ChannelStream::onSave(android::base::Stream* stream) {
