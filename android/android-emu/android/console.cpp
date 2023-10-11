@@ -3788,19 +3788,19 @@ static int do_screenrecord_start(ControlClient client, char* args) {
 
 static int do_screenrecord_stop(ControlClient client, char* args) {
     switch (client->global->record_agent->getRecorderState().state) {
+        case RECORDER_STARTING:
         case RECORDER_RECORDING:
             break;
-        case RECORDER_STOPPED:
-            control_write(client, "KO: No recording has been started.\r\n");
-            return -1;
         default:
-            control_write(client,
-                          "KO: Recording already in process of stopping.\r\n");
-            return -1;
+            control_write(client, "OK: recording is already stopped.\r\n");
+            return 0;
     }
 
     D(("Stopping the recording ...\n"));
-    client->global->record_agent->stopRecording();
+    if (!client->global->record_agent->stopRecording()) {
+        control_write(client, "KO: Failed to stop the recording.\r\n");
+        return -1;
+    }
 
     return 0;
 }
