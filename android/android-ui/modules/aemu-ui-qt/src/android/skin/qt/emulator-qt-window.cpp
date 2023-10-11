@@ -2515,6 +2515,15 @@ void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
     int originalWidth = mBackingSurface->bitmap->size().width();
     int originalHeight = mBackingSurface->bitmap->size().height();
 
+    if (android_foldable_is_pixel_fold() && android_foldable_is_folded()) {
+        auto hw = getConsoleAgents()->settings->hw();
+        auto xoriginalWidth = hw->hw_displayRegion_0_1_width;
+        auto xoriginalHeight = hw->hw_displayRegion_0_1_height;
+        if (xoriginalHeight != originalHeight ||
+            xoriginalWidth != originalWidth)
+            return;
+    }
+
     auto newSize = QSize(originalWidth, originalHeight)
                            .scaled(size, Qt::KeepAspectRatio);
 
