@@ -31,10 +31,8 @@
 
 #import <Accelerate/Accelerate.h>
 #import <AVFoundation/AVFoundation.h>
-#import <Cocoa/Cocoa.h>
-#import <CoreAudio/CoreAudio.h>
-
-#include <dispatch/queue.h>
+#include <dispatch/dispatch.h>
+#include <os/lock.h>
 
 /* Converts CoreVideo pixel format to our internal FOURCC value for
  * conversion to the right guest format. */
@@ -72,8 +70,8 @@ FourCCToInternal(uint32_t cm_pix_format)
       D("%s: is kCVPixelFormatType_422YpCbCr8Planar/BiPlanarVideoRange\n", __func__);
       return V4L2_PIX_FMT_YVU420;
 
-    case 'yuvs':  // kCVPixelFormatType_422YpCbCr8_yuvs - undeclared?
-      D("%s: is yuvs?????????\n", __func__);
+    case kCVPixelFormatType_422YpCbCr8_yuvs:
+      D("%s: is kCVPixelFormatType_422YpCbCr8_yuvs\n", __func__);
       return V4L2_PIX_FMT_YUYV;
 
     default:
@@ -87,42 +85,39 @@ FourCCToInternal(uint32_t cm_pix_format)
  ******************************************************************************/
 
 /* Encapsulates a camera device on MacOS */
-@interface MacCamera : NSObject<AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate> {
-    /* Capture session. */
-    AVCaptureSession*             capture_session;
-    /* Capture connection. */
-    AVCaptureConnection*          capture_connection;
-    /* Camera capture device. */
-    /* NOTE: do NOT release capture_device */
-    /* Releasing t causes a crash on exit. */
-    AVCaptureDevice*              capture_device;
-    /* Input device registered with the capture session. */
-    AVCaptureDeviceInput*         input_device;
-    /* Output device registered with the capture session. */
-    AVCaptureVideoDataOutput*  output_device;
-    dispatch_queue_t output_queue;
-    /* Current framebuffer. */
-    CVPixelBufferRef              current_frame;
 
-    /* output dimensions */
-    uint32_t                      desired_width;
-    uint32_t                      desired_height;
+typedef enum {
+  kMacCameraForward,
+  kMacCameraBackward
+} MacCameraDirection;
 
-    /* scratch for cropping */
-    void*                         cropped_frame_scratch;
-    uint32_t                      cropped_frame_width;
-    uint32_t                      cropped_frame_height;
-    uint32_t                      cropped_frame_bpr;
+/* Encapsulates a camera device on MacOS */
+@interface MacCamera : NSObject<AVCaptureVideoDataOutputSampleBufferDelegate> {
+  AVCaptureSession *captureSession_;
+  int desiredWidth_;
+  int desiredHeight_;
+  MacCameraDirection cameraDirection_;
+
+  // rotateInputBuffer_, scaleInputBuffer_ and scaleOutputTempBuffer_ are
+  // guarded by outputQueue_.
+  dispatch_queue_t outputQueue_;
+  vImage_Buffer rotateInputBuffer_;
+  vImage_Buffer scaleInputBuffer_;
+  void *scaleOutputTempBuffer_;
+
+  // scaleOutputBuffer_ is guarded byscaleOutputBufferLock_ and is used both
+  // on the outputQueue_ and accessed from the hypervisor thread.
+  os_unfair_lock scaleOutputBufferLock_;
+  vImage_Buffer scaleOutputBuffer_;
 }
 
 /* Initializes MacCamera instance.
  * Return:
  *  Pointer to initialized instance on success, or nil on failure.
  */
-- (MacCamera*)init:(const char*)name;
-
-/* Undoes 'init' */
-- (void)free;
+- (instancetype)initWithName:(const char*)name NS_DESIGNATED_INITIALIZER;
+- (instancetype)init NS_UNAVAILABLE;
+- (void)dealloc;
 
 /* Starts capturing video frames.
  * Param:
@@ -130,7 +125,9 @@ FourCCToInternal(uint32_t cm_pix_format)
  * Return:
  *  0 on success, or !=0 on failure.
  */
-- (int)start_capturing:(int)width:(int)height;
+- (int)startCapturingWidth:(int)width
+                    height:(int)height
+                 direction:(const char *)direction;
 
 /* Captures a frame from the camera device.
  * Param:
@@ -142,302 +139,333 @@ FourCCToInternal(uint32_t cm_pix_format)
  *  in the device. The client should respond to this value by repeating the
  *  read, rather than reporting an error.
  */
-- (int)read_frame:
-    (ClientFrame*)result_frame:
-    (int)fbs_num:
-    (float)r_scale:
-    (float)g_scale:
-    (float)b_scale:
-    (float)exp_comp:
-    (const char*)direction;
+- (int)readFrame:(ClientFrame*)resultFrame
+          rScale:(float)rScale
+          gScale:(float)gScale
+          bScale:(float)bScale
+         expComp:(float)expComp;
 
 @end
 
 @implementation MacCamera
 
-- (MacCamera*)init:(const char*)name
-{
-    NSError *error;
-    BOOL success;
+- (instancetype)initWithName:(const char*)name {
+  if (!(self = [super init])) {
+    return nil;
+  }
+  scaleOutputBufferLock_ = OS_UNFAIR_LOCK_INIT;
+  AVCaptureDevice *captureDevice;
 
-    /* Obtain the capture device, make sure it's not used by another
-     * application, and open it. */
-    if (name == nil || *name  == '\0') {
-        capture_device =
-            [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-    }
-    else {
-        NSString *deviceName = [NSString stringWithFormat:@"%s", name];
-        capture_device = [AVCaptureDevice deviceWithUniqueID:deviceName];
-    }
-    if (capture_device == nil) {
-        E("There are no available video devices found.");
-        [self release];
-        return nil;
-    }
-    if ([capture_device isInUseByAnotherApplication]) {
-        E("Default camera device is in use by another application.");
-        capture_device = nil;
-        [self release];
-        return nil;
-    }
-    success = false;
-    desired_width = 0;
-    desired_height = 0;
-    cropped_frame_scratch = nil;
-    cropped_frame_width = 0;
-    cropped_frame_height = 0;
-    cropped_frame_bpr = 0;
+  /* Obtain the capture device, make sure it's not used by another
+   * application, and open it. */
+  if (name == NULL || *name  == '\0') {
+    captureDevice =
+        [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+  } else {
+    NSString *deviceName = [NSString stringWithFormat:@"%s", name];
+    captureDevice = [AVCaptureDevice deviceWithUniqueID:deviceName];
+  }
+  if (!captureDevice) {
+    E("There are no available video devices found.");
+    [self release];
+    return nil;
+  }
+  if ([captureDevice isInUseByAnotherApplication]) {
+    E("Default camera device is in use by another application.");
+    [self release];
+    return nil;
+  }
 
-    /* Create capture session. */
-    capture_session = [[AVCaptureSession alloc] init];
-    if (capture_session == nil) {
-        E("Unable to create capure session.");
-        [self free];
-        [self release];
-        return nil;
-    } else {
-        D("%s: successfully created capture session\n", __func__);
-    }
+  /* Create capture session. */
+  captureSession_ = [[AVCaptureSession alloc] init];
+  if (!captureSession_) {
+    E("Unable to create capure session.");
+    [self release];
+    return nil;
+  } else {
+    D("%s: successfully created capture session\n", __func__);
+  }
 
-    /* Create an input device and register it with the capture session. */
-    NSError *videoDeviceError = nil;
-    input_device = [[AVCaptureDeviceInput alloc] initWithDevice:capture_device error:&videoDeviceError];
-    if ([capture_session canAddInput:input_device]) {
-        [capture_session addInput:input_device];
-        D("%s: successfully added capture input device\n", __func__);
-    } else {
-        E("%s: cannot add camera capture input device\n", __func__);
-        [self release];
-        return nil;
-    }
+  /* Create an input device and register it with the capture session. */
+  NSError *videoDeviceError;
+  AVCaptureDeviceInput *input_device =
+      [[[AVCaptureDeviceInput alloc] initWithDevice:captureDevice
+                                              error:&videoDeviceError]
+       autorelease];
+  if ([captureSession_ canAddInput:input_device]) {
+    [captureSession_ addInput:input_device];
+    D("%s: successfully added capture input device\n", __func__);
+  } else {
+    E("%s: cannot add camera capture input device (%s)\n", __func__,
+      [[videoDeviceError localizedDescription] UTF8String]);
+    [self release];
+    return nil;
+  }
 
-    /* Create an output device and register it with the capture session. */
-    output_queue = dispatch_queue_create("com.google.goldfish.mac.camera.capture",
-                                         DISPATCH_QUEUE_SERIAL );
-    output_device = [[AVCaptureVideoDataOutput alloc] init];
-    output_device.videoSettings = @{
-        (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32ARGB),
-    };
-    [output_device setSampleBufferDelegate:self queue:output_queue];
-    output_device.alwaysDiscardsLateVideoFrames = YES;
+  /* Create an output device and register it with the capture session. */
+  outputQueue_ = dispatch_queue_create("com.google.goldfish.mac.camera.capture",
+                                       DISPATCH_QUEUE_SERIAL);
+  AVCaptureVideoDataOutput *outputDevice =
+      [[[AVCaptureVideoDataOutput alloc] init] autorelease];
+  outputDevice.videoSettings = @{
+    (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32ARGB),
+  };
+  [outputDevice setSampleBufferDelegate:self queue:outputQueue_];
+  outputDevice.alwaysDiscardsLateVideoFrames = YES;
 
-    if ([capture_session canAddOutput:output_device] ) {
-        [capture_session addOutput:output_device];
-        D("%s: added video out\n", __func__);
-    } else {
-        D("%s: could not add video out\n", __func__);
-        [self release];
-        return nil;
-    }
-
-    capture_connection = [output_device connectionWithMediaType:AVMediaTypeVideo];
-
-    return self;
+  if ([captureSession_ canAddOutput:outputDevice] ) {
+    [captureSession_ addOutput:outputDevice];
+    D("%s: added video out\n", __func__);
+  } else {
+    D("%s: could not add video out\n", __func__);
+    [self release];
+    return nil;
+  }
+  return self;
 }
 
-- (void)free
-{
-    /* Uninitialize capture session. */
-    if (capture_session != nil) {
-        /* Make sure that capturing is stopped. */
-        if ([capture_session isRunning]) {
-            [capture_session stopRunning];
-        }
-        /* Detach input and output devices from the session. */
-        if (input_device != nil) {
-            [capture_session removeInput:input_device];
-            [input_device release];
-            input_device = nil;
-        }
-        if (output_device != nil) {
-            [capture_session removeOutput:output_device];
-            [output_device release];
-            output_device = nil;
-        }
-        /* Destroy capture session. */
-        [capture_session release];
-        capture_session = nil;
-    }
-
-    /* Uninitialize capture device. */
-    if (capture_device != nil) {
-        /* Make sure device is not opened. */
-        if ([capture_device isOpen]) {
-            [capture_device close];
-        }
-        capture_device = nil;
-    }
-
-    @synchronized (self)
-    {
-        /* Release current framebuffer. */
-        if (current_frame != nil) {
-            CVBufferRelease(current_frame);
-            current_frame = nil;
-        }
-
-        if (cropped_frame_scratch) {
-           free(cropped_frame_scratch);
-        }
-
-        cropped_frame_scratch = nil;
-        cropped_frame_width = 0;
-        cropped_frame_height = 0;
-    }
+- (void)dealloc {
+  [captureSession_ stopRunning];
+  [captureSession_ release];
+  dispatch_release(outputQueue_);
+  free(rotateInputBuffer_.data);
+  free(scaleInputBuffer_.data);
+  free(scaleOutputBuffer_.data);
+  free(scaleOutputTempBuffer_);
+  [super dealloc];
 }
 
-- (int)start_capturing:(int)width:(int)height
-{
-    D("%s: call. start capture session, WxH=%dx%d\n", __func__, width, height);
+- (int)startCapturingWidth:(int)width
+                    height:(int)height
+                 direction:(const char*)direction {
+  D("%s: call. start capture session\n", __func__);
+  desiredWidth_ = width;
+  desiredHeight_ = height;
 
-    @synchronized (self) {
-        desired_width = width;
-        desired_height = height;
-    }
+  cameraDirection_ = (strcmp("back", direction) == 0
+                      ? kMacCameraBackward : kMacCameraForward);
 
-    if (![capture_session isRunning]) {
-        [capture_session startRunning];
-    }
-    return 0;
+  if (![captureSession_ isRunning]) {
+    [captureSession_ startRunning];
+  }
+  return 0;
 }
 
-- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
-{
-    D("%s: call\n", __func__);
+- (void)captureOutput:(AVCaptureOutput *)captureOutput
+didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+       fromConnection:(AVCaptureConnection *)connection {
+  D("%s: call\n", __func__);
+  // We do all of this work in this method instead of in
+  // readFrame:rScale:gScale:bScale:expComp: because there is an issue in
+  // macOS 14.0 (23A344) where vImage functions can't be run on a hypervisor
+  // thread.
+  // FB13254074.
+  CVImageBufferRef workingFrame = CMSampleBufferGetImageBuffer(sampleBuffer);
+  static vImage_CGImageFormat desiredFormat = {
+    .bitsPerComponent = 8,
+    .bitsPerPixel = 32,
+    .colorSpace = nil,
+    .bitmapInfo =
+    (CGBitmapInfo)(kCGImageByteOrder32Big | kCGImageAlphaNoneSkipFirst),
+    .version = 0,
+    .decode = nil,
+    .renderingIntent = kCGRenderingIntentDefault
+  };
 
-    if ( connection == capture_connection ) {
-        @synchronized (self) {
-
-            CVPixelBufferRef to_release;
-            CVBufferRetain(sampleBuffer);
-
-            to_release = current_frame;
-            current_frame = CMSampleBufferGetImageBuffer( sampleBuffer );
-
-            CVBufferRelease(to_release);
-
-            D("%s: is correct capture connection\n", __func__);
-        }
+  AndroidCoarseOrientation orientation = get_coarse_orientation();
+  vImage_Error error;
+  if (orientation == ANDROID_COARSE_PORTRAIT ||
+      orientation == ANDROID_COARSE_REVERSE_PORTRAIT) {
+    vImage_Flags flags =
+        rotateInputBuffer_.data != NULL ? kvImageNoAllocate : kvImageNoFlags;
+    error = vImageBuffer_InitWithCVPixelBuffer(&rotateInputBuffer_,
+                                               &desiredFormat, workingFrame,
+                                               nil, nil, flags);
+    if (error != kvImageNoError) {
+      E("%s: error in allocate rotateInputBuffer_: %ld\n", __func__, error);
+      return;
     }
+    if (scaleInputBuffer_.data &&
+        (scaleInputBuffer_.width != rotateInputBuffer_.height ||
+         scaleInputBuffer_.height != rotateInputBuffer_.width)) {
+      // Sizes have changed. Rebuild our buffers.
+      free(scaleInputBuffer_.data);
+      scaleInputBuffer_.data = NULL;
+    }
+    if (!scaleInputBuffer_.data) {
+      error = vImageBuffer_Init(&scaleInputBuffer_, rotateInputBuffer_.width,
+                                rotateInputBuffer_.height, 32, kvImageNoFlags);
+      if (error != kvImageNoError) {
+        E("%s: error in allocate scaleInputBuffer_: %ld\n", __func__, error);
+        return;
+      }
+    }
+    const Pixel_8888 backColor = {0, 0, 0, 0};
+    int rotation = (cameraDirection_ ==  kMacCameraBackward ?
+                    (1 + orientation) % 4 :
+                    (5 - orientation) % 4);
+    error = vImageRotate90_ARGB8888(&rotateInputBuffer_, &scaleInputBuffer_,
+                                    rotation, backColor, kvImageNoFlags);
+    if (error != kvImageNoError) {
+      E("%s: error in rotate: %ld\n", __func__, error);
+      return;
+    }
+  } else {
+    if (scaleInputBuffer_.data &&
+        (scaleInputBuffer_.width != desiredWidth_ ||
+         scaleInputBuffer_.height != desiredHeight_)) {
+      // Sizes have changed. Rebuild our buffers.
+      free(scaleInputBuffer_.data);
+      scaleInputBuffer_.data = NULL;
+    }
+    vImage_Flags flags =
+        scaleInputBuffer_.data != NULL ? kvImageNoAllocate : kvImageNoFlags;
+    error = vImageBuffer_InitWithCVPixelBuffer(&scaleInputBuffer_,
+                                               &desiredFormat, workingFrame,
+                                               nil, nil, flags);
+    if (error != kvImageNoError) {
+      E("%s: error in allocate scaleInputBuffer_: %ld\n", __func__, error);
+      return;
+    }
+  }
+  // AVFoundation doesn't provide pre-scaled output.
+  // Scale it here, using the Accelerate framework.
+  // Also needs to be the correct aspect ratio,
+  // so do a centered crop so that aspect ratios match.
+  CGSize size = vImageBuffer_GetSize(&scaleInputBuffer_);
+  float frameWidth = size.width;
+  float frameHeight = size.height;
+  float currAspect = frameWidth / frameHeight;
+  float desiredAspect = ((float)desiredWidth_) / ((float)desiredHeight_);
+  int cropX0, cropY0, cropW, cropH;
+
+  BOOL shrinkHoriz = desiredAspect < currAspect;
+
+  if (shrinkHoriz) {
+    cropW = (desiredAspect / currAspect) * frameWidth;
+    cropH = frameHeight;
+
+    cropX0 = (frameWidth - cropW) / 2;
+    cropY0 = 0;
+  } else {
+    cropW = frameWidth;
+    cropH = (currAspect / desiredAspect) * frameHeight;
+
+    cropX0 = 0;
+    cropY0 = (frameHeight - cropH) / 2;
+  }
+
+  vImage_Buffer croppedBuffer = scaleInputBuffer_;
+  croppedBuffer.data += (cropY0 * croppedBuffer.rowBytes) + cropX0 * 4;
+  croppedBuffer.width = cropW;
+  croppedBuffer.height = cropH;
+
+  os_unfair_lock_lock(&scaleOutputBufferLock_);
+  if (scaleOutputBuffer_.height != desiredHeight_ ||
+      scaleOutputBuffer_.width != desiredWidth_) {
+    // Sizes have changed. Rebuild our buffers.
+    free(scaleOutputBuffer_.data);
+    scaleOutputBuffer_.data = NULL;
+    free(scaleOutputTempBuffer_);
+    scaleOutputTempBuffer_ = NULL;
+  }
+  if (!scaleOutputBuffer_.data) {
+    vImage_Error error = vImageBuffer_Init(&scaleOutputBuffer_,
+                                           desiredHeight_,
+                                           desiredWidth_, 32,
+                                           kvImageNoFlags);
+    if (error != kvImageNoError) {
+      E("%s: error in allocate scaleOutputBuffer_: %ld\n", __func__, error);
+      os_unfair_lock_unlock(&scaleOutputBufferLock_);
+      return;
+    }
+    ssize_t bufferSize = vImageScale_ARGB8888(&croppedBuffer,
+                                              &scaleOutputBuffer_,
+                                              NULL,
+                                              kvImageGetTempBufferSize);
+    // We are okay with scaleOutputTempBuffer_ being NULL.
+    // If that happens then it is likely that the vImageScale_ARGB8888 below
+    // will fail.
+    scaleOutputTempBuffer_ = malloc(bufferSize);
+  }
+  error = vImageScale_ARGB8888(&croppedBuffer,
+                               &scaleOutputBuffer_,
+                               scaleOutputTempBuffer_,
+                               kvImageNoFlags);
+  os_unfair_lock_unlock(&scaleOutputBufferLock_);
+  if (error != kvImageNoError) {
+    E("%s: error in scale: %ld\n", __func__, error);
+    return;
+  }
 }
 
-- (int)read_frame:
-        (ClientFrame*)result_frame:
-        (float)r_scale:
-        (float)g_scale:
-        (float)b_scale:
-        (float)exp_comp:
-        (const char*)direction {
-    /* Frames are pushed by macOS in another thread.
-     * So we need a protection here. */
-    @synchronized (self)
-    {
-        if (current_frame != nil) {
-            int res;
-            uint32_t src_pixel_format;
-            uint32_t src_width;
-            uint32_t src_height;
-            uint32_t src_bpr;
-            AndroidCoarseOrientation orientation;
+- (int)readFrame:(ClientFrame*)resultFrame
+          rScale:(float)rScale
+          gScale:(float)gScale
+          bScale:(float)bScale
+         expComp:(float)expComp {
+  D("%s: call\n", __func__);
 
-            /* Collect frame info. */
-            CVPixelBufferLockBaseAddress(current_frame, 0);
-            const void* const src_pixels = CVPixelBufferGetBaseAddress(current_frame);
-            if (src_pixels != nil) {
-                src_pixel_format = FourCCToInternal(CVPixelBufferGetPixelFormatType(current_frame));
-                src_width = CVPixelBufferGetWidth(current_frame);
-                src_height = CVPixelBufferGetHeight(current_frame);
-                src_bpr = CVPixelBufferGetBytesPerRow(current_frame);
-                orientation = get_coarse_orientation();
+  int res = 1;
+  // Grab the buffer out of scaleOutputBuffer_ and assign scaleOutputBuffer_
+  // height to 0, which will cause the other thread to allocate new memory
+  // if it needs to. Note that we use "height" as our flag instead of just
+  // using scaleOutputBuffer_.data because we need scaleOutputTempBuffer_ to
+  // be freed as well on the other thread if it executes.
+  os_unfair_lock_lock(&scaleOutputBufferLock_);
+  vImage_Buffer localBuffer = scaleOutputBuffer_;
+  scaleOutputBuffer_.height = 0;
+  scaleOutputBuffer_.data = NULL;
+  os_unfair_lock_unlock(&scaleOutputBufferLock_);
 
-                {
-                    uint32_t desired_width1;
-                    uint32_t desired_height1;
+  if (localBuffer.data != NULL) {
+    // TODO(dmaclach): This call probably does way more work than it needs
+    // to, and we could probably do a lot of it above in a more Apple Silicon
+    // optimized manner.
+    res = convert_frame(localBuffer.data, V4L2_PIX_FMT_ARGB32,
+                        localBuffer.rowBytes * localBuffer.height,
+                        localBuffer.width, localBuffer.height, resultFrame,
+                        rScale, gScale, bScale, expComp, "front", 1);
 
-                    switch (orientation) {
-                    case ANDROID_COARSE_PORTRAIT:
-                    case ANDROID_COARSE_REVERSE_PORTRAIT:
-                        desired_width1 = desired_height;
-                        desired_height1 = desired_width;
-                        break;
-                    default:
-                        desired_width1 = desired_width;
-                        desired_height1 = desired_height;
-                        break;
-                    }
-
-                    if (cropped_frame_height != desired_height1 || cropped_frame_width != desired_width1 || !cropped_frame_scratch) {
-                        cropped_frame_width = desired_width1;
-                        cropped_frame_height = desired_height1;
-                        cropped_frame_bpr = cropped_frame_width * sizeof(uint32_t);
-                        cropped_frame_scratch = realloc(cropped_frame_scratch, cropped_frame_bpr * cropped_frame_height);
-                    }
-                }
-
-                const uint32_t effective_crop_width = MIN(cropped_frame_width, src_width);
-                const uint32_t effective_crop_bpr = effective_crop_width * sizeof(uint32_t);
-                const uint32_t effective_crop_height = MIN(cropped_frame_height, src_height);
-                const uint32_t half_blank_rows = (cropped_frame_height - effective_crop_height) / 2;
-                const uint32_t half_blank_col_pixels = (cropped_frame_width - effective_crop_width) / 2 * sizeof(uint32_t);
-
-                const uint8_t* src_pixels8 = (const uint8_t*)src_pixels +
-                        (src_height - effective_crop_height) * src_bpr +
-                        (src_width - effective_crop_width) / 2 * sizeof(uint32_t);
-                uint8_t* dst_pixels8 = (const uint8_t*)cropped_frame_scratch +
-                        half_blank_rows * cropped_frame_bpr;
-
-                memset(cropped_frame_scratch, 0, half_blank_rows * cropped_frame_bpr);
-                for (unsigned n = effective_crop_height; n > 0; --n, src_pixels8 += src_bpr) {
-                    memset(dst_pixels8, 0, half_blank_col_pixels);
-                    dst_pixels8 += half_blank_col_pixels;
-                    memcpy(dst_pixels8, src_pixels8, effective_crop_bpr);
-                    dst_pixels8 += effective_crop_bpr;
-                    memset(dst_pixels8, 0, half_blank_col_pixels);
-                    dst_pixels8 += half_blank_col_pixels;
-                }
-                memset(dst_pixels8, 0, half_blank_rows * cropped_frame_bpr);
-
-                res = 0;
-            } else {
-                res = -1;
-            }
-
-            CVPixelBufferUnlockBaseAddress(current_frame, 0);
-
-            if (!res) {
-                res = convert_frame(cropped_frame_scratch, src_pixel_format,
-                           cropped_frame_bpr * cropped_frame_height,
-                           cropped_frame_width, cropped_frame_height, result_frame,
-                           r_scale, g_scale, b_scale, exp_comp, direction, orientation);
-            }
-
-            return res;
-        } else {
-            /* First frame didn't come in just yet. Let the caller repeat. */
-            return 1;
-        }
+    // Check and see if scaleOutputBuffer_.height has been updated on the
+    // other thread. If not, we will just put the buffer back now that we are
+    // done with it and save an extra allocation on the other thread.
+    BOOL freeLocalBuffer = YES;
+    os_unfair_lock_lock(&scaleOutputBufferLock_);
+    if (scaleOutputBuffer_.height == 0) {
+      scaleOutputBuffer_.height = localBuffer.height;
+      scaleOutputBuffer_.data = localBuffer.data;
+      freeLocalBuffer = NO;
     }
+    os_unfair_lock_unlock(&scaleOutputBufferLock_);
+    if (freeLocalBuffer) {
+      // The other thread allocated more data, so we now own this pointer and
+      // have to dispose it.
+      free(localBuffer.data);
+    }
+  }
+
+  return res;
 }
 
 @end
+
 /*******************************************************************************
  *                     CameraDevice routines
  ******************************************************************************/
 
-typedef struct MacCameraDevice MacCameraDevice;
 /* MacOS-specific camera device descriptor. */
-struct MacCameraDevice {
-    /* Common camera device descriptor. */
-    CameraDevice  header;
-    /* Actual camera device object. */
-    MacCamera*    device;
-    char* device_name;
-    int input_channel;
-    int started;
-    int frame_width;
-    int frame_height;
-};
+typedef struct MacCameraDevice {
+  /* Common camera device descriptor. */
+  CameraDevice  header;
+  /* Actual camera device object. */
+  MacCamera*    device;
+  char* device_name;
+  int input_channel;
+  int started;
+  int frame_width;
+  int frame_height;
+} MacCameraDevice;
 
 /* Allocates an instance of MacCameraDevice structure.
  * Return:
@@ -448,14 +476,14 @@ struct MacCameraDevice {
 static MacCameraDevice*
 _camera_device_alloc(void)
 {
-    MacCameraDevice* cd = (MacCameraDevice*)malloc(sizeof(MacCameraDevice));
-    if (cd != NULL) {
-        memset(cd, 0, sizeof(MacCameraDevice));
-        cd->header.opaque = cd;
-    } else {
-        E("%s: Unable to allocate MacCameraDevice instance", __FUNCTION__);
-    }
-    return cd;
+  MacCameraDevice* cd = (MacCameraDevice*)malloc(sizeof(MacCameraDevice));
+  if (cd != NULL) {
+    memset(cd, 0, sizeof(MacCameraDevice));
+    cd->header.opaque = cd;
+  } else {
+    E("%s: Unable to allocate MacCameraDevice instance", __FUNCTION__);
+  }
+  return cd;
 }
 
 /* Uninitializes and frees MacCameraDevice descriptor.
@@ -465,18 +493,13 @@ _camera_device_alloc(void)
 static void
 _camera_device_free(MacCameraDevice* cd)
 {
-    if (cd != NULL) {
-        if (cd->device != NULL) {
-            [cd->device release];
-            cd->device = nil;
-        }
-        if (cd->device_name != nil) {
-            free(cd->device_name);
-        }
-        AFREE(cd);
-    } else {
-        W("%s: No descriptor", __FUNCTION__);
-    }
+  if (cd != NULL) {
+    [cd->device release];
+    free(cd->device_name);
+    AFREE(cd);
+  } else {
+    W("%s: No descriptor", __FUNCTION__);
+  }
 }
 
 /* Resets camera device after capturing.
@@ -486,11 +509,11 @@ _camera_device_free(MacCameraDevice* cd)
 static void
 _camera_device_reset(MacCameraDevice* cd)
 {
-    if (cd != NULL && cd->device) {
-        [cd->device free];
-        cd->device = [cd->device init:cd->device_name];
-        cd->started = 0;
-    }
+  if (cd != NULL && cd->device) {
+    [cd->device release];
+    cd->device = [[MacCamera alloc] initWithName:cd->device_name];
+    cd->started = 0;
+  }
 }
 
 /*******************************************************************************
@@ -500,23 +523,23 @@ _camera_device_reset(MacCameraDevice* cd)
 CameraDevice*
 camera_device_open(const char* name, int inp_channel)
 {
-    MacCameraDevice* mcd;
+  MacCameraDevice* mcd;
 
-    mcd = _camera_device_alloc();
-    if (mcd == NULL) {
-        E("%s: Unable to allocate MacCameraDevice instance", __FUNCTION__);
-        return NULL;
-    }
-    mcd->device_name = ASTRDUP(name);
-    mcd->device = [[MacCamera alloc] init:name];
-    if (mcd->device == nil) {
-        E("%s: Unable to initialize camera device.", __FUNCTION__);
-        _camera_device_free(mcd);
-        return NULL;
-    } else {
-        D("%s: successfuly initialized camera device\n", __func__);
-    }
-    return &mcd->header;
+  mcd = _camera_device_alloc();
+  if (mcd == NULL) {
+    E("%s: Unable to allocate MacCameraDevice instance", __FUNCTION__);
+    return NULL;
+  }
+  mcd->device_name = ASTRDUP(name);
+  mcd->device = [[MacCamera alloc] initWithName:name];
+  if (!mcd->device) {
+    E("%s: Unable to initialize camera device.", __FUNCTION__);
+    _camera_device_free(mcd);
+    return NULL;
+  } else {
+    D("%s: successfuly initialized camera device\n", __func__);
+  }
+  return &mcd->header;
 }
 
 int
@@ -525,46 +548,46 @@ camera_device_start_capturing(CameraDevice* cd,
                               int frame_width,
                               int frame_height)
 {
-    MacCameraDevice* mcd;
+  MacCameraDevice* mcd;
 
-    /* Sanity checks. */
-    if (cd == NULL || cd->opaque == NULL) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
-        return -1;
-    }
-    mcd = (MacCameraDevice*)cd->opaque;
-    if (mcd->device == nil) {
-        E("%s: Camera device is not opened", __FUNCTION__);
-        return -1;
-    }
+  /* Sanity checks. */
+  if (cd == NULL || cd->opaque == NULL) {
+    E("%s: Invalid camera device descriptor", __FUNCTION__);
+    return -1;
+  }
+  mcd = (MacCameraDevice*)cd->opaque;
+  if (!mcd->device) {
+    E("%s: Camera device is not opened", __FUNCTION__);
+    return -1;
+  }
 
-    D("%s: w h %d %d\n", __func__, frame_width, frame_height);
+  D("%s: w h %d %d\n", __func__, frame_width, frame_height);
 
-    mcd->frame_width = frame_width;
-    mcd->frame_height = frame_height;
-    return 0;
+  mcd->frame_width = frame_width;
+  mcd->frame_height = frame_height;
+  return 0;
 }
 
 int
 camera_device_stop_capturing(CameraDevice* cd)
 {
-    MacCameraDevice* mcd;
+  MacCameraDevice* mcd;
 
-    /* Sanity checks. */
-    if (cd == NULL || cd->opaque == NULL) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
-        return -1;
-    }
-    mcd = (MacCameraDevice*)cd->opaque;
-    if (mcd->device == nil) {
-        E("%s: Camera device is not opened", __FUNCTION__);
-        return -1;
-    }
+  /* Sanity checks. */
+  if (cd == NULL || cd->opaque == NULL) {
+    E("%s: Invalid camera device descriptor", __FUNCTION__);
+    return -1;
+  }
+  mcd = (MacCameraDevice*)cd->opaque;
+  if (!mcd->device) {
+    E("%s: Camera device is not opened", __FUNCTION__);
+    return -1;
+  }
 
-    /* Reset capture settings, so next call to capture can set its own. */
-    _camera_device_reset(mcd);
+  /* Reset capture settings, so next call to capture can set its own. */
+  _camera_device_reset(mcd);
 
-    return 0;
+  return 0;
 }
 
 int camera_device_read_frame(CameraDevice* cd,
@@ -574,101 +597,103 @@ int camera_device_read_frame(CameraDevice* cd,
                              float b_scale,
                              float exp_comp,
                              const char* direction) {
-    MacCameraDevice* mcd;
+  MacCameraDevice* mcd;
 
-    /* Sanity checks. */
-    if (cd == NULL || cd->opaque == NULL) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
-        return -1;
-    }
-    mcd = (MacCameraDevice*)cd->opaque;
-    if (mcd->device == nil) {
-        E("%s: Camera device is not opened", __FUNCTION__);
-        return -1;
-    }
+  /* Sanity checks. */
+  if (cd == NULL || cd->opaque == NULL) {
+    E("%s: Invalid camera device descriptor", __FUNCTION__);
+    return -1;
+  }
+  mcd = (MacCameraDevice*)cd->opaque;
+  if (!mcd->device) {
+    E("%s: Camera device is not opened", __FUNCTION__);
+    return -1;
+  }
 
-    if (!mcd->started) {
-        int result = [mcd->device start_capturing:mcd->frame_width:mcd->frame_height];
-        if (result) return -1;
-        mcd->started = 1;
-    }
-    return [mcd->device read_frame:
-                      result_frame:
-                           r_scale:
-                           g_scale:
-                           b_scale:
-                           exp_comp:
-                           direction];
+  if (!mcd->started) {
+    int result = [mcd->device startCapturingWidth:mcd->frame_width
+                                           height:mcd->frame_height
+                                        direction:direction];
+    if (result) return -1;
+    mcd->started = 1;
+  }
+  return [mcd->device readFrame:result_frame
+                         rScale:r_scale
+                         gScale:g_scale
+                         bScale:b_scale
+                        expComp:exp_comp];
 }
 
 void
 camera_device_close(CameraDevice* cd)
 {
-    /* Sanity checks. */
-    if (cd == NULL || cd->opaque == NULL) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
-    } else {
-        _camera_device_free((MacCameraDevice*)cd->opaque);
-    }
+  /* Sanity checks. */
+  if (cd == NULL || cd->opaque == NULL) {
+    E("%s: Invalid camera device descriptor", __FUNCTION__);
+  } else {
+    _camera_device_free((MacCameraDevice*)cd->opaque);
+  }
 }
 
 int camera_enumerate_devices(CameraInfo* cis, int max) {
-    /* Array containing emulated webcam frame dimensions
-     * expected by framework. */
-    static const CameraFrameDim _emulate_dims[] = {
-            /* Emulates 640x480 frame. */
-            {640, 480},
-            /* Emulates 352x288 frame (required by camera framework). */
-            {352, 288},
-            /* Emulates 320x240 frame (required by camera framework). */
-            {320, 240},
-            /* Emulates 176x144 frame (required by camera framework). */
-            {176, 144},
-            /* Emulates 1280x720 frame (required by camera framework). */
-            {1280, 720},
-            /* Emulates 1280x960 frame. */
-            {1280, 960}};
+  /* Array containing emulated webcam frame dimensions
+   * expected by framework. */
+  static const CameraFrameDim _emulate_dims[] = {
+    /* Emulates 640x480 frame. */
+    {640, 480},
+    /* Emulates 352x288 frame (required by camera framework). */
+    {352, 288},
+    /* Emulates 320x240 frame (required by camera framework). */
+    {320, 240},
+    /* Emulates 176x144 frame (required by camera framework). */
+    {176, 144},
+    /* Emulates 1280x720 frame (required by camera framework). */
+    {1280, 720},
+    /* Emulates 1280x960 frame. */
+    {1280, 960}};
 
-    NSArray *videoDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-    if (videoDevices == nil) {
-        E("No web cameras are connected to the host.");
-        return 0;
+  NSArray *videoDevices =
+      [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+  if (!videoDevices) {
+    E("No web cameras are connected to the host.");
+    return 0;
+  }
+  int found = 0;
+  for (AVCaptureDevice *videoDevice in videoDevices) {
+    for(AVCaptureDeviceFormat *vFormat in [videoDevice formats]) {
+      CMFormatDescriptionRef description = vFormat.formatDescription;
+      cis[found].pixel_format =
+          FourCCToInternal(CMFormatDescriptionGetMediaSubType(description));
+      if (cis[found].pixel_format) break;
     }
-    int found = 0;
-    for (AVCaptureDevice *videoDevice in videoDevices) {
-        for(AVCaptureDeviceFormat *vFormat in [videoDevice formats]) {
-            CMFormatDescriptionRef description= vFormat.formatDescription;
-            cis[found].pixel_format = FourCCToInternal(CMFormatDescriptionGetMediaSubType(description));
-            if (cis[found].pixel_format) break;
-        }
-        if (cis[found].pixel_format == 0) {
-            /* Unsupported pixel format. */
-            E("Pixel format reported by the camera device is unsupported");
-            continue;
-        }
+    if (cis[found].pixel_format == 0) {
+      /* Unsupported pixel format. */
+      E("Pixel format reported by the camera device is unsupported");
+      continue;
+    }
 
-        /* Initialize camera info structure. */
-        cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(_emulate_dims));
-        if (cis[found].frame_sizes != NULL) {
-            char user_name[24];
-            char *device_name = [[videoDevice uniqueID] UTF8String];
-            snprintf(user_name, sizeof(user_name), "webcam%d", found);
-            cis[found].frame_sizes_num = sizeof(_emulate_dims) / sizeof(*_emulate_dims);
-            memcpy(cis[found].frame_sizes, _emulate_dims, sizeof(_emulate_dims));
-            cis[found].device_name = ASTRDUP(device_name);
-            cis[found].inp_channel = 0;
-            cis[found].display_name = ASTRDUP(user_name);
-            cis[found].in_use = 0;
-            found++;
-            if (found == max) {
-                W("Number of Cameras exceeds max limit %d", max);
-                return found;
-            }
-            D("Found Video Device %s id %s for %s", [[videoDevice manufacturer] UTF8String], device_name, user_name);
-        } else {
-            E("Unable to allocate memory for camera information.");
-            return 0;
-        }
+    /* Initialize camera info structure. */
+    cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(_emulate_dims));
+    if (cis[found].frame_sizes != NULL) {
+      char *user_name;
+      char *device_name = [[videoDevice uniqueID] UTF8String];
+      asprintf(&user_name, "webcam%d", found);
+      cis[found].frame_sizes_num = sizeof(_emulate_dims) / sizeof(*_emulate_dims);
+      memcpy(cis[found].frame_sizes, _emulate_dims, sizeof(_emulate_dims));
+      cis[found].device_name = ASTRDUP(device_name);
+      cis[found].inp_channel = 0;
+      cis[found].display_name = user_name;
+      cis[found].in_use = 0;
+      found++;
+      if (found == max) {
+        W("Number of Cameras exceeds max limit %d", max);
+        return found;
+      }
+      D("Found Video Device %s id %s for %s", [[videoDevice manufacturer] UTF8String], device_name, user_name);
+    } else {
+      E("Unable to allocate memory for camera information.");
+      return 0;
     }
-    return found;
+  }
+  return found;
 }
