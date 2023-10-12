@@ -28,7 +28,10 @@
 # \argn: The variable that will hold the expected rust version.
 # ~~~
 function(get_rust_version RET_VAL)
-  set(${RET_VAL} ${RUST_COMPILER_VERSION} PARENT_SCOPE)
+  file(READ "${ANDROID_QEMU2_TOP_DIR}/android/build/toolchains.json" TOOLCHAIN_JSON_STRING)
+  string(JSON RUST_VERSION GET ${TOOLCHAIN_JSON_STRING} ${IDX} rust)
+  # message(FATAL_ERROR "${RUST_VERSION} == ${RUST_COMPILER_VERSION}")
+  set(${RET_VAL} ${RUST_VERSION} PARENT_SCOPE)
 endfunction()
 
 # ~~~
