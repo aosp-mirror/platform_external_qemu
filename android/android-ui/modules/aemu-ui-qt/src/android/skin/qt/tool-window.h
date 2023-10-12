@@ -148,8 +148,6 @@ signals:
     void themeChanged(SettingsTheme theme);
 
 private:
-    bool eventFilter(QObject* o, QEvent* event) override;
-    void remaskButtons();
     static void forwardGenericEventToEmulator(int type, int code, int value);
     void handleUICommand(QtUICommand cmd, bool down, std::string extra = "");
     void ensureExtendedWindowExists();
