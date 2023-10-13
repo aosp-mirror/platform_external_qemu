@@ -352,6 +352,7 @@ static ssize_t gmac_receive(NetClientState *nc, const uint8_t *buf, size_t len)
                       "RX Descriptor @ 0x%x is owned by software\n",
                       desc_addr);
         gmac->regs[R_NPCM_DMA_STATUS] |= NPCM_DMA_STATUS_RU;
+        gmac->regs[R_NPCM_DMA_STATUS] |= NPCM_DMA_STATUS_RI;
         gmac_dma_set_state(gmac, NPCM_DMA_STATUS_RX_PROCESS_STATE_SHIFT,
             NPCM_DMA_STATUS_RX_SUSPENDED_STATE);
         gmac_update_irq(gmac);
@@ -365,8 +366,8 @@ static ssize_t gmac_receive(NetClientState *nc, const uint8_t *buf, size_t len)
     trace_npcm_gmac_debug_desc_data(DEVICE(gmac)->canonical_path, &rx_desc,
                                     rx_desc.rdes0, rx_desc.rdes1, rx_desc.rdes2,
                                     rx_desc.rdes3);
-    /* Set FS in first descriptor */
-    rx_desc.rdes0 |= RX_DESC_RDES0_FIRST_DESC_MASK;
+    /* Clear rdes0 for the incoming descriptor and set FS in first descriptor.*/
+    rx_desc.rdes0 = RX_DESC_RDES0_FIRST_DESC_MASK;
 
     gmac_dma_set_state(gmac, NPCM_DMA_STATUS_RX_PROCESS_STATE_SHIFT,
         NPCM_DMA_STATUS_RX_RUNNING_TRANSFERRING_STATE);
@@ -451,6 +452,8 @@ static ssize_t gmac_receive(NetClientState *nc, const uint8_t *buf, size_t len)
                 }
                 eof_transferred = true;
             }
+            /* Clear rdes0 for the incoming descriptor */
+            rx_desc.rdes0 = 0;
         }
     }
     gmac_dma_set_state(gmac, NPCM_DMA_STATUS_RX_PROCESS_STATE_SHIFT,
