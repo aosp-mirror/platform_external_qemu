@@ -21,6 +21,7 @@
 
 #include <QAbstractButton>
 #include <QApplication>
+#include <QBitmap>
 #include <QByteArray>
 #include <QClipboard>
 #include <QCloseEvent>
@@ -449,6 +450,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 
     sToolWindow = this;
     skin_winsys_touch_qt_extended_virtual_sensors();
+
+    remaskButtons();
+    installEventFilter(this);
 }
 
 ToolWindow::~ToolWindow() {
@@ -1800,4 +1804,34 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(
             return WorkerProcessingResult::Stop;
     }
     return WorkerProcessingResult::Continue;
+}
+
+void ToolWindow::remaskButtons() {
+    for (QPushButton* button : findChildren<QPushButton*>()) {
+        const QString icon_name = button->property("themeIconName").toString();
+        if (!icon_name.isNull()) {
+            double dpr = 1.0;
+#ifndef Q_OS_MAC
+            int screen_num = QApplication::desktop()->screenNumber(this);
+            if (screen_num >= 0 &&
+                screen_num < QApplication::screens().size()) {
+                QScreen* scr = QApplication::screens().at(screen_num);
+                dpr = scr->logicalDotsPerInch() / SizeTweaker::BaselineDpi;
+            }
+#endif
+            const QSize icon_size = button->property("iconSize").toSize();
+            const QSize min_size = button->property("minimumSize").toSize();
+            button->setMinimumSize(min_size * dpr);
+            button->setIconSize(icon_size * dpr);
+        }
+    }
+}
+
+bool ToolWindow::eventFilter(QObject* o, QEvent* event) {
+    if (event->type() == QEvent::ScreenChangeInternal) {
+        // When moved across screens, masks on buttons need to
+        // be adjusted according to screen density.
+        remaskButtons();
+    }
+    return QFrame::eventFilter(o, event);
 }
