@@ -338,6 +338,12 @@ public:
     virtual Optional<Duration> pathModificationTime(
             std::string_view path) const = 0;
 
+    // whether the path is on ext4 filesystem, instead of btrfs, xfs etc
+    // mainly for linux, bug: 265653158, where users reported slowness
+    // of guest system (too much disk io) due to filebacked quick boot
+    // enabled on btrfs and xfs etc
+    virtual bool pathFileSystemIsExt4(std::string_view path) const = 0;
+
     virtual Optional<DiskKind> pathDiskKind(std::string_view path) = 0;
     virtual Optional<DiskKind> diskKind(int fd) = 0;
 
@@ -545,6 +551,7 @@ protected:
     static bool pathCanWriteInternal(std::string_view path);
     static bool pathCanExecInternal(std::string_view path);
     static bool pathIsQcow2Internal(std::string_view path);
+    static bool pathFileSystemIsExt4Internal(std::string_view path);
     static bool pathIsExt4Internal(std::string_view path);
     static int pathOpenInternal(const char *filename, int oflag, int pmode);
     static bool deleteFileInternal(std::string_view path);
