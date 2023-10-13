@@ -210,7 +210,7 @@ function(ensure_rust_version_is_compliant)
   endif()
   if(NOT Rust_VERSION VERSION_EQUAL EXPECTED_VERSION)
     message(
-      FATAL_ERROR
+      WARNING
         "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
         "Expected version rust compiler to provide: ${EXPECTED_VERSION}, not ${Rust_VERSION}, \n"
         "please update ${Rust_COMPILER} to the expected version: ${EXPECTED_VERSION} \n"
