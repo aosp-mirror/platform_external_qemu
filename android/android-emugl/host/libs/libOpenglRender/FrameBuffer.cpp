@@ -2758,13 +2758,25 @@ int FrameBuffer::getScreenshot(unsigned int nChannels,
         *cPixels = 0;
         return -1;
     }
-    emugl::get_emugl_multi_display_operations().getDisplayColorBuffer(displayId,
-                                                                      &cb);
+
+    if (w == 0 || h == 0) {
+        LOG(WARNING) << "The call getMultiDisplay reports that display: "
+                     << displayId << " has size " << w << "x" << h
+                     << ", which implies 0 pixels are available.";
+    }
+
     if (displayId == 0) {
         cb = m_lastPostedColorBuffer;
+    } else {
+        emugl::get_emugl_multi_display_operations().getDisplayColorBuffer(
+                displayId, &cb);
     }
+
     ColorBufferMap::iterator c(m_colorbuffers.find(cb));
     if (c == m_colorbuffers.end()) {
+        LOG(ERROR) << "Color buffer " << cb << " for " << displayId
+                   << " cannot be found in map of " << m_colorbuffers.size()
+                   << " buffers.";
         *width = 0;
         *height = 0;
         *cPixels = 0;
@@ -2795,6 +2807,11 @@ int FrameBuffer::getScreenshot(unsigned int nChannels,
     if (useSnipping) {
         *width = rect.size.w;
         *height = rect.size.h;
+
+        if (rect.size.w == 0 || rect.size.h == 0) {
+            LOG(WARNING) << "Snipped an empty rectangle: " << rect.size.w << "x"
+                         << rect.size.h;
+        }
     } else {
         *width = screenWidth;
         *height = screenHeight;
