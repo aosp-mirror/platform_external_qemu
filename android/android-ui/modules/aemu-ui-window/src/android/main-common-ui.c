@@ -24,6 +24,7 @@
 #include "android/emulation/control/globals_agent.h"
 #include "android/emulator-window.h"
 #include "android/main-emugl.h"
+#include "host-common/opengles.h"
 #include "android/resource.h"
 #include "android/skin/image.h"
 #include "android/skin/keyboard.h"
@@ -39,7 +40,6 @@
 #include "host-common/misc.h"
 #include "host-common/multi_display_agent.h"
 #include "host-common/opengl/emugl_config.h"
-#include "host-common/opengles.h"
 #include "host-common/vm_operations.h"
 
 #ifdef __APPLE__

@@ -49,7 +49,7 @@
 
 using android::base::AutoLock;
 
-#define MULTI_DISPLAY_DEBUG 2
+#define MULTI_DISPLAY_DEBUG 1
 
 /* set  >1 for very verbose debugging */
 #if MULTI_DISPLAY_DEBUG <= 1
@@ -813,7 +813,7 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
             mWindowAgent->setUIDisplayRegion(0, 0, width, height, true);
         }
     }
-    LOG(DEBUG) << "setDisplayColorBuffer " << displayId << " cb "
+    LOG(VERBOSE) << "setDisplayColorBuffer " << displayId << " cb "
                << colorBuffer;
     return 0;
 }

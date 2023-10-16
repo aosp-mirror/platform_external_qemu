@@ -24,21 +24,19 @@
 #include "android/console.h"
 #include "android/console_internal.h"
 
+#include "aemu/base/ProcessControl.h"
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/misc/StringUtils.h"
 #include "android/android.h"
 #include "android/automation/AutomationController.h"
 #include "android/avd/BugreportInfo.h"
 #include "android/avd/info.h"
-#include "aemu/base/ProcessControl.h"
-
-#include "aemu/base/files/PathUtils.h"
-#include "aemu/base/misc/StringUtils.h"
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
-#include "host-common/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/QemuMiscPipe.h"
+#include "android/emulation/control/EmulatorAdvertisement.h"
 #include "android/emulator-window.h"
-#include "host-common/FeatureControl.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
 #include "android/network/constants.h"
@@ -50,7 +48,6 @@
 #include "android/snapshot/Icebox.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/SnapshotUtils.h"
-#include "snapshot/interface.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
 #include "android/utils/bufprint.h"
@@ -64,6 +61,9 @@
 #include "android/utils/string.h"
 #include "android/utils/utf8_utils.h"
 #include "android_modem_v2.h"
+#include "host-common/FeatureControl.h"
+#include "host-common/crash-handler.h"
+#include "snapshot/interface.h"
 
 #include "config-host.h"
 
@@ -2805,8 +2805,7 @@ static int do_avd_discoverypath(ControlClient client, char* args) {
         return 0;
     }
 
-    auto discoveryPath = android::ConfigDirs::getCurrentDiscoveryPath();
-
+    auto discoveryPath = android::emulation::control::EmulatorAdvertisement({}).location();
     control_write(client, "%s\r\n", discoveryPath.c_str());
     return 0;
 }
@@ -3789,19 +3788,19 @@ static int do_screenrecord_start(ControlClient client, char* args) {
 
 static int do_screenrecord_stop(ControlClient client, char* args) {
     switch (client->global->record_agent->getRecorderState().state) {
+        case RECORDER_STARTING:
         case RECORDER_RECORDING:
             break;
-        case RECORDER_STOPPED:
-            control_write(client, "KO: No recording has been started.\r\n");
-            return -1;
         default:
-            control_write(client,
-                          "KO: Recording already in process of stopping.\r\n");
-            return -1;
+            control_write(client, "OK: recording is already stopped.\r\n");
+            return 0;
     }
 
     D(("Stopping the recording ...\n"));
-    client->global->record_agent->stopRecording();
+    if (!client->global->record_agent->stopRecording()) {
+        control_write(client, "KO: Failed to stop the recording.\r\n");
+        return -1;
+    }
 
     return 0;
 }

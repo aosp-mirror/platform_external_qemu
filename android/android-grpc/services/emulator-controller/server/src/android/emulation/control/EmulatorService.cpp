@@ -123,10 +123,11 @@ namespace control {
 // Logic and data behind the server's behavior.
 class EmulatorControllerImpl final
     : public EmulatorController::WithCallbackMethod_streamClipboard<
-    EmulatorController::WithCallbackMethod_streamNotification<
-              EmulatorController::WithCallbackMethod_streamInputEvent<
-                      EmulatorController::WithCallbackMethod_injectWheel<
-                              EmulatorController::Service>>>> {
+              EmulatorController::WithCallbackMethod_streamNotification<
+                      EmulatorController::WithCallbackMethod_streamInputEvent<
+                              EmulatorController::
+                                      WithCallbackMethod_injectWheel<
+                                              EmulatorController::Service>>>> {
 public:
     EmulatorControllerImpl(const AndroidConsoleAgents* agents)
         : mAgents(agents),
@@ -331,7 +332,6 @@ public:
         return Status::OK;
     }
 
-
     ::grpc::ServerWriteReactor<ClipData>* streamClipboard(
             ::grpc::CallbackServerContext* context,
             const ::google::protobuf::Empty* /*request*/) override {
@@ -513,28 +513,28 @@ public:
             ::grpc::CallbackServerContext* /*context*/,
             ::google::protobuf::Empty* /*response*/) override {
         SimpleServerLambdaReader<InputEvent>* eventReader =
-                new SimpleServerLambdaReader<InputEvent>(
-                        [this, &eventReader](auto request) {
-                            if (request->has_key_event()) {
-                                mKeyEventSender.send(request->key_event());
-                            } else if (request->has_mouse_event()) {
-                                mMouseEventSender.send(request->mouse_event());
-                            } else if (request->has_touch_event()) {
-                                mTouchEventSender.send(request->touch_event());
-                            } else if (request->has_android_event()) {
-                                mAndroidEventSender.send(request->android_event());
-                            } else if (request->has_pen_event()) {
-                                mPenEventSender.send(request->pen_event());
-                            } else {
-                                // Mark the stream as completed, this will
-                                // result in setting that status and scheduling
-                                // of a completion (onDone) event the async
-                                // queue.
-                                eventReader->Finish(Status(
-                                        ::grpc::StatusCode::INVALID_ARGUMENT,
-                                        "Missing key, mouse, touch or android event."));
-                            }
-                        });
+                new SimpleServerLambdaReader<InputEvent>([this, &eventReader](
+                                                                 auto request) {
+                    if (request->has_key_event()) {
+                        mKeyEventSender.send(request->key_event());
+                    } else if (request->has_mouse_event()) {
+                        mMouseEventSender.send(request->mouse_event());
+                    } else if (request->has_touch_event()) {
+                        mTouchEventSender.send(request->touch_event());
+                    } else if (request->has_android_event()) {
+                        mAndroidEventSender.send(request->android_event());
+                    } else if (request->has_pen_event()) {
+                        mPenEventSender.send(request->pen_event());
+                    } else {
+                        // Mark the stream as completed, this will
+                        // result in setting that status and scheduling
+                        // of a completion (onDone) event the async
+                        // queue.
+                        eventReader->Finish(Status(
+                                ::grpc::StatusCode::INVALID_ARGUMENT,
+                                "Missing key, mouse, touch or android event."));
+                    }
+                });
         // Note that the event reader will delete itself on completion of
         // the request.
         return eventReader;
@@ -990,7 +990,8 @@ public:
 
         auto format = reply->mutable_format();
         format->set_format(request->format());
-        format->set_display(myDisplayId >= 0 ? myDisplayId : request->display());
+        format->set_display(myDisplayId >= 0 ? myDisplayId
+                                             : request->display());
 
         auto rotation_reply = format->mutable_rotation();
         rotation_reply->set_xaxis(xaxis);
@@ -1128,8 +1129,8 @@ public:
 
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
                 [displayId, this]() {
-                    if ( mAgents->multi_display->setMultiDisplay(displayId, -1, -1, 0, 0, 0,
-                                                                 0, false) >= 0) {
+                    if (mAgents->multi_display->setMultiDisplay(
+                                displayId, -1, -1, 0, 0, 0, 0, false) >= 0) {
                         mAgents->emu->updateUIMultiDisplayPage(displayId);
                     }
                 });
@@ -1240,8 +1241,7 @@ public:
                 }
                 int updated = -1;
                 android::base::ThreadLooper::
-                        runOnMainLooperAndWaitForCompletion([&updated,
-                                                             &display,
+                        runOnMainLooperAndWaitForCompletion([&updated, &display,
                                                              this]() {
                             updated = mAgents->multi_display->setMultiDisplay(
                                     display.display(), -1, -1, display.width(),
@@ -1274,6 +1274,10 @@ public:
             }
         }
 
+        // Make sure third-party subscribers are notfied of a display change
+        // event.
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [this]() { mAgents->multi_display->notifyDisplayChanges(); });
         // Get the actual status and return it.
         return getDisplayConfigurations(context, nullptr, reply);
     }

@@ -22,7 +22,7 @@
 
 int android_http_proxy_setup(const char* http_proxy, bool verbose) {
     if (!http_proxy) {
-        VERBOSE_DPRINT(init, "Not using any http proxy");
+        VERBOSE_DPRINT(proxy, "Not using any http proxy");
         return PROXY_ERR_OK;
     }
 
@@ -40,7 +40,7 @@ int android_http_proxy_setup(const char* http_proxy, bool verbose) {
 
     std::string proxy = result.mServerAddress.toString();
     int proxyPort = result.mServerPort;
-    VERBOSE_DPRINT(init, "setting up http proxy: proxy=%s port=%d",
+    VERBOSE_DPRINT(proxy, "setting up http proxy: proxy=%s port=%d",
                    proxy.c_str(), proxyPort);
 
     /* Check that we can connect to the proxy in the next second.

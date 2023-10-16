@@ -20,6 +20,16 @@
 #include <sys/vfs.h>
 #endif
 
+#if defined(__linux__)
+typedef int (*MallocHook_MunmapReplacement)(const void* ptr, size_t size,
+                                            int* result);
+typedef int (*MallocHook_MmapReplacement)(const void* start, size_t size,
+                                          int protection, int flags, int fd,
+                                          off_t offset, void** result);
+
+extern int MallocHook_SetMunmapReplacement(MallocHook_MunmapReplacement hook);
+extern int MallocHook_SetMmapReplacement(MallocHook_MmapReplacement hook);
+#endif
 #ifdef _WIN32
 static uint64_t windowsGetFilePageSize() {
     SYSTEM_INFO sysinfo;
@@ -106,6 +116,41 @@ size_t qemu_mempath_getpagesize(const char *mem_path)
 #endif
 }
 
+#if defined(__linux__)
+static void* s_protected_address_start = NULL;
+static void* s_protected_address_end = NULL;
+
+// we need this to work around a bug in tcmalloc that insists we have
+// mmapreplacement. The following just says it will leave everything to
+// the system mmap.
+static int MmapReplacement(const void* start, size_t size, int protection,
+                           int flags, int fd, off_t offset, void** result) {
+    return false;
+}
+
+static int MunmapReplacement(const void* ptr, size_t size, int* result) {
+    if (!s_protected_address_start || !s_protected_address_end) {
+        return false;
+    }
+    if (ptr) {
+        long* myptr = (long*)ptr;
+        long* my_start = (long*)s_protected_address_start;
+        long* my_end = (long*)s_protected_address_end;
+        if (myptr < my_start || myptr >= my_end) {
+            return false;
+        } else {
+            fprintf(stderr,
+                    "WARNING: cannnot unmap ptr %p as it is in the protected "
+                    "range from %p to %p\n",
+                    ptr, s_protected_address_start, s_protected_address_end);
+            *result = 0;
+            return true;
+        }
+    }
+    return false;
+}
+#endif
+
 void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
 {
 #ifndef _WIN32
@@ -136,6 +181,19 @@ void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
         return MAP_FAILED;
     }
 
+#if defined(__linux__)
+    // bug: 225541819
+    // there are some un-intended munmap from gl threads that
+    // punches hole in the guest address space, leading to kvm
+    // error: Bad Address, this is to mitigate that problem
+    if (size >= 0x40000000) {
+        // bigger than 1G, protect it from un-intended munmap
+        s_protected_address_start = ptr;
+        s_protected_address_end = ptr + total;
+        MallocHook_SetMmapReplacement(&MmapReplacement);
+        MallocHook_SetMunmapReplacement(&MunmapReplacement);
+    }
+#endif
     assert(is_power_of_2(align));
     /* Always align to host page size */
     assert(align >= getpagesize());
@@ -202,6 +260,16 @@ void qemu_ram_munmap(void *ptr, size_t size)
 #ifndef _WIN32
     if (ptr) {
         /* Unmap both the RAM block and the guard page */
+#if defined(__linux__)
+        {
+            long* myptr = (long*)ptr;
+            if (myptr >= (long*)s_protected_address_start &&
+                myptr < (long*)s_protected_address_end) {
+              s_protected_address_start = NULL;
+              s_protected_address_end = NULL;
+            }
+        }
+#endif
         munmap(ptr, size + getpagesize());
     }
 #else

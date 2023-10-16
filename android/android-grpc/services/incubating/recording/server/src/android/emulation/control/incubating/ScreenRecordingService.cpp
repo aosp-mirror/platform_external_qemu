@@ -93,6 +93,7 @@ public:
         mActiveRecording.opaque = &mActiveRecording;
 
         if (!mRecordAgent->startRecording(&mActiveRecording)) {
+            mActiveRecording = {0};
             return ::grpc::Status(
                     grpc::StatusCode::INTERNAL,
                     "The recorder failed to start the recording.");
@@ -140,7 +141,7 @@ public:
 private:
     const QAndroidRecordScreenAgent* mRecordAgent;
 
-    ::RecordingInfo mActiveRecording;
+    ::RecordingInfo mActiveRecording{0};
     std::string mFileName;
 };
 

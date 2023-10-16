@@ -31,29 +31,39 @@ class CustomFormatter(
     pass
 
 
-def find_builds_in_range(ab_client, branch, target, start, end):
-    if start < end:
-      raise ValueError(f"Starting build {start} should be higher than the end build {end}, maybe swap them?")
+def find_builds_in_range(ab_client, branch, target, start, end, num=8192):
+    if end and start < end:
+        raise ValueError(
+            f"Starting build {start} should be higher than the end build {end}, maybe swap them?"
+        )
     # So the build api does [start, end> meaning that the end
     # will not be included, so we are first going to find the build
     # that comes after end.
-    build_end = int(end) - 1
-
+    build_end = int(end) - 1 if end else 100
 
     # Now we are going to grow our set, until we have the build range
     # we want to work with, note we assume start exists.. We will error
     # out later on if it does not
     build_ids = {start}
     last_size = 0
-    while end not in build_ids and last_size != len(build_ids):
+    while ((end and end not in build_ids) or len(build_ids) < num) and last_size != len(
+        build_ids
+    ):
         last_size = len(build_ids)
         start = min(build_ids)
-        build_ids.update([int(x) for x in ab_client.list_builds(branch, target, start, build_end, 512)] or [])
+        build_ids.update(
+            [
+                int(x)
+                for x in ab_client.list_builds(branch, target, start, build_end, 512)
+            ]
+            or []
+        )
         logging.debug("Grew set from %s to %s", last_size, len(build_ids))
 
-    if end not in build_ids:
+    if end and end not in build_ids:
         raise ValueError(f"Unable to find build {end}")
 
+    logging.debug("Found [%s]", ",".join([str(x) for x in build_ids]))
     return build_ids
 
 
@@ -62,25 +72,32 @@ def do_bisect(args, destination_dir):
 
     def run_shell_cmd(bid):
         return invoke_shell_with_artifact(
-            ab_client, destination_dir, args.build_target, args.artifact, args.cmd, bid, args.unzip
+            ab_client,
+            destination_dir,
+            args.build_target,
+            args.artifact,
+            args.cmd,
+            bid,
+            args.unzip,
+            args.overwrite,
         )
 
     start = args.start
     if not start:
-      start = max(args.good, args.bad)
+        start = max(args.good, args.bad)
 
     if args.good or args.bad:
-      end = min(args.good, args.bad)
+        end = min(args.good, args.bad)
     else:
-      end = args.end
+        end = args.end
 
     if end:
         build_ids = find_builds_in_range(
             ab_client, args.branch, args.build_target, start, end
         )
     else:
-        build_ids = ab_client.list_builds(
-            args.branch, args.build_target, start, None, args.num
+        build_ids = find_builds_in_range(
+            ab_client, args.branch, args.build_target, start, None, args.num
         )
 
     if not build_ids or len(build_ids) < 2:
@@ -149,7 +166,9 @@ def main():
         help="go/ab branch",
     )
     parser.add_argument(
-        "--start", type=int, help="Starting build id to check, or None to use the latest"
+        "--start",
+        type=int,
+        help="Starting build id to check, or None to use the latest",
     )
     parser.add_argument(
         "--end", type=int, help="Ending build id to check, omit to only use --num"
@@ -191,6 +210,14 @@ def main():
         help="Command to execute for the given build. Information about the build is passed through environment variables.",
     )
     parser.add_argument(
+        "-o",
+        "--overwrite",
+        dest="overwrite",
+        default=False,
+        action="store_true",
+        help="Overwrite previously downloaded artifact",
+    )
+    parser.add_argument(
         "-v",
         "--verbose",
         dest="verbose",
@@ -202,10 +229,10 @@ def main():
     args = parser.parse_args()
 
     if args.good and (args.start or args.end):
-      raise ValueError("--good cannot be used with start and end.")
+        raise ValueError("--good cannot be used with start and end.")
 
     if args.bad and (args.start or args.end):
-      raise ValueError("--bad cannot be used with start and end.")
+        raise ValueError("--bad cannot be used with start and end.")
 
     lvl = logging.DEBUG if args.verbose else logging.INFO
     configure_logging(lvl)

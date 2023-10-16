@@ -15,10 +15,23 @@
 #include <qcoreevent.h>                                  // for QEvent (ptr only)
 #include <qstring.h>                                     // for operator+, operat...
 
+#include <QAbstractButton>                               // for QAbstractButton
 #include <QBitmap>                                       // for QBitmap
-#include <QEvent>                                        // for QEvent
-#include <QPixmap>                                       // for QPixmap
-#include <QPushButton>                                   // for QPushButton
+#if QT_VERSION >= 0x060000
+#else
+#include <QDesktopWidget>                                // for QDesktopWidget
+#endif
+#include <QEvent>       // for QEvent
+#include <QHash>        // for QHash
+#include <QIcon>        // for QIcon
+#include <QLabel>       // for QLabel
+#include <QList>        // for QList
+#include <QPixmap>      // for QPixmap
+#include <QPushButton>  // for QPushButton
+#include <QScreen>      // for QSettings
+#include <QSettings>    // for QSettings
+#include <QSize>        // for QSize
+#include <QVariant>     // for QVariant
 
 #include "android/skin/backend-defs.h"
 #include "android/base/system/System.h"                  // for System
@@ -210,12 +223,33 @@ void CarRotaryPage::remaskButtons() {
     for (QPushButton* button : findChildren<QPushButton*>()) {
         const QString icon_name = button->property("themeIconName").toString();
         if (!icon_name.isNull()) {
-            QPixmap pixmap(":/dark/" + icon_name);
+            // Mask the button to only its non-transparent pixels
+            // (Note we care only about the shape of the button
+            //  here, so :/dark/ and :/light/ are equivalent.)
+            //
+            // Caution: This requires that the button icon be displayed
+            //          at its natural size.
+            const QPixmap mask_pixmap(":/light/" + icon_name);
+
+            // HACK: On windows/linux, on normal-density screens,
+            // and on OS X with retina display,
+            // the mask will end up being too big for the button, so it needs
+            // to be scaled down.
+            double dpr = 1;
+#ifndef Q_OS_MAC
+            int screen_num = QApplication::desktop()->screenNumber(this);
+            if (screen_num >= 0 &&
+                screen_num < QApplication::screens().size()) {
+                QScreen* scr = QApplication::screens().at(screen_num);
+                dpr = scr->logicalDotsPerInch() / SizeTweaker::BaselineDpi;
+            }
+#endif
 #if QT_VERSION >= 0x060000
-            button->setMask(QBitmap::fromPixmap(pixmap.mask().scaled(button->size())));
+            button->setMask(QBitmap::fromPixmap(
+                    mask_pixmap.mask().scaled(button->size() * dpr)));
 #else
-            button->setMask(pixmap.mask().scaled(button->size()));
-#endif  // QT_VERSION
+            button->setMask(mask_pixmap.mask().scaled(button->size() * dpr));
+#endif
             button->setStyleSheet("border: none;");
         }
     }

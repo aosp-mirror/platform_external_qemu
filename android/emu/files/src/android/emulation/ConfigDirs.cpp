@@ -45,16 +45,6 @@ static const char kAndroidSubDir[] = ".android";
 // Subdirectory for AVD data files.
 static const char kAvdSubDir[] = "avd";
 
-// Current discovery path
-class DiscoveryPathState {
-public:
-    Lock lock;
-    std::string path;
-};
-
-static LazyInstance<DiscoveryPathState> sDiscoveryPathState =
-        LAZY_INSTANCE_INIT;
-
 // static
 auto ConfigDirs::getUserDirectory() -> std::string {
     System* system = System::get();
@@ -357,14 +347,6 @@ auto ConfigDirs::getDiscoveryDirectory() -> std::string {
     return recomposed;
 }
 
-void ConfigDirs::setCurrentDiscoveryPath(const std::string_view& path) {
-    AutoLock lock(sDiscoveryPathState->lock);
-    sDiscoveryPathState->path = path;
-}
 
-auto ConfigDirs::getCurrentDiscoveryPath() -> std::string {
-    AutoLock lock(sDiscoveryPathState->lock);
-    return sDiscoveryPathState->path;
-}
 
 }  // namespace android
