@@ -44,10 +44,14 @@ def bisect(elements, callback_fn, good=None, bad=None):
     """
     low = Invocation(elements, 0, Invocation.UNKNOWN)
     high = Invocation(elements, len(elements) - 1, Invocation.UNKNOWN)
-    if low.element() == good: low.status = Invocation.OK
-    if high.element() == good: high.status = Invocation.OK
-    if low.element() == bad: low.status = Invocation.NOT_OK
-    if high.element() == bad: high.status = Invocation.NOT_OK
+    if low.element() == good:
+        low.status = Invocation.OK
+    if high.element() == good:
+        high.status = Invocation.OK
+    if low.element() == bad:
+        low.status = Invocation.NOT_OK
+    if high.element() == bad:
+        high.status = Invocation.NOT_OK
 
     failure, success = bisect_recur(elements, low, high, callback_fn, 0)
     logging.info("%s", failure)
