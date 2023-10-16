@@ -163,6 +163,34 @@ TEST_F(EmulatorAdvertisementTest, delete_removes_file) {
     EXPECT_FALSE(System::get()->pathExists(testCfg.location()));
 }
 
+TEST_F(EmulatorAdvertisementTest, delete_removes_directory) {
+    EmulatorAdvertisement testCfg({{"hello", "world"}}, mTempDir.path());
+
+    testCfg.write();
+    EXPECT_TRUE(System::get()->pathExists(testCfg.location()));
+
+    auto pidDir = std::to_string(base::Process::me()->pid());
+    auto pidPath = mTempDir.makeSubPath(pidDir);
+
+    EXPECT_TRUE(mTempDir.makeSubDir(pidDir));
+    EXPECT_TRUE(System::get()->pathExists(pidPath))
+            << pidPath << " does not exist";
+
+    auto testFile = pj(pidPath, "test.txt");
+
+    std::ofstream tmp(testFile);
+    EXPECT_TRUE(tmp.is_open());
+
+    tmp << "Hello world\n";
+    tmp.close();
+
+    EXPECT_TRUE(System::get()->pathExists(testFile))
+            << testFile << " does not exist";
+    testCfg.remove();
+    EXPECT_FALSE(System::get()->pathExists(testCfg.location()));
+    EXPECT_FALSE(System::get()->pathExists(testFile));
+}
+
 TEST_F(EmulatorAdvertisementTest, system_wide_share_file_exists) {
     EmulatorAdvertisement testCfg({{"hello", "world"}}, mTempDir.path());
     testCfg.write();

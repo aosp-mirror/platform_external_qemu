@@ -610,13 +610,14 @@ static void* pcm_ring_buffer_get_produce_chunk(VirtIOSoundPcmRingBuffer *rb,
     ASSERT(rb->w < rb->capacity);
     ASSERT(room_size >= 0);
 
-    room_size = MIN(room_size, rb->capacity);
-
     const int capacity = rb->capacity;
+    room_size = MIN(room_size, capacity);
+
     const int to_drop = room_size - (capacity - rb->size);
     if (to_drop > 0) {
         ASSERT(to_drop <= rb->size);
-        rb->r = (rb->r + to_drop) % rb->capacity;
+        DPRINTF("rb=%p room_size=%d to_drop=%d", rb, room_size, to_drop);
+        rb->r = (rb->r + to_drop) % capacity;
         rb->size -= to_drop;
     }
 
@@ -625,7 +626,7 @@ static void* pcm_ring_buffer_get_produce_chunk(VirtIOSoundPcmRingBuffer *rb,
     const int w = rb->w;
 
     if (w >= r) {
-        *chunk_sz = MIN(room_size, MIN(rb->capacity - w, left));
+        *chunk_sz = MIN(room_size, MIN(capacity - w, left));
     } else {
         *chunk_sz = MIN(room_size, MIN(r - w, left));
     }
@@ -1569,6 +1570,8 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
             ASSERT(stream->hpcm_buf.size == 0);
             if (min_write_sz > 0) {
                 int16_t scratch[AUD_SCRATCH_SIZE];
+                DPRINTF("inserting %d frames of silence, state=%s",
+                        min_write_sz / host_fs, stream_state_str(stream->state));
 
                 // Insert `min_write_sz` bytes of silence.
                 fill_silence(scratch, MIN(sizeof(scratch), min_write_sz));
@@ -1681,6 +1684,7 @@ static bool virtio_snd_stream_hpcm_to_gpcm_locked(VirtIOSoundPCMStream *stream) 
         } else {
             ASSERT(stream->hpcm_buf.size == 0);
             ASSERT(gsize > 0);
+            DPRINTF("inserting %d frames of silence", gsize / guest_fs);
 
             // Insert `gsize` bytes of silence.
             fill_silence(scratch, MIN(sizeof(scratch), gsize));

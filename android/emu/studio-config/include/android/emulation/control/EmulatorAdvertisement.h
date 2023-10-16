@@ -110,7 +110,6 @@ public:
 private:
     DISALLOW_COPY_AND_ASSIGN(EmulatorAdvertisement);
 
-    void eraseMe();
     EmulatorProperties mStudioConfig;
     std::string mSharedDirectory;
     std::unique_ptr<EmulatorLivenessStrategy> mLivenessChecker;

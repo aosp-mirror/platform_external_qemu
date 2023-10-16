@@ -196,21 +196,8 @@ EmulatorAdvertisement::EmulatorAdvertisement(
 
 EmulatorAdvertisement::~EmulatorAdvertisement() {
     garbageCollect();
-    eraseMe();
 }
 
-void EmulatorAdvertisement::eraseMe() {
-    if (System::get()->pathIsFile(location())) {
-        DD("Deleting my discovery file %s", location().c_str());
-        System::get()->deleteFile(location());
-    }
-    auto pid_dir = android::base::pj(mSharedDirectory,
-                                     std::to_string(Process::me()->pid()));
-    if (System::get()->pathIsDir(pid_dir)) {
-        DD("Deleting my pid dir %s", pid_dir.c_str());
-        path_delete_dir(pid_dir.c_str());
-    }
-}
 
 int EmulatorAdvertisement::garbageCollect() const {
     auto start = std::chrono::high_resolution_clock::now();
@@ -253,13 +240,18 @@ std::vector<std::string> EmulatorAdvertisement::discoverRunningEmulators() {
 
 void EmulatorAdvertisement::remove() const {
     System::get()->deleteFile(location());
+    auto pid_dir = android::base::pj(mSharedDirectory,
+                                     std::to_string(Process::me()->pid()));
+    if (System::get()->pathIsDir(pid_dir)) {
+        DD("Deleting my pid dir %s", pid_dir.c_str());
+        path_delete_dir(pid_dir.c_str());
+    }
 }
 
 std::string EmulatorAdvertisement::location() const {
     auto pid = System::get()->getCurrentProcessId();
     std::string pidfile = android::base::StringFormat(location_format, pid);
     std::string result = android::base::pj(mSharedDirectory, pidfile);
-    android::ConfigDirs::setCurrentDiscoveryPath(result);
     return result;
 }
 
