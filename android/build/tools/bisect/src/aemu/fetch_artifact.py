@@ -43,6 +43,7 @@ def fetch_artifact(
     build_target: str,
     artifact: str,
     bid: str,
+    overwrite: bool,
 ):
     """Fetches an artifact from go/ab to the given destination
 
@@ -60,7 +61,11 @@ def fetch_artifact(
     artifact = artifact.format(bid=bid)
     location = destination / artifact
 
-    if location.exists():
+    if not location.parent.exists():
+        logging.info("Creating directory: %s", location.parent)
+        location.parent.mkdir(parents=True)
+
+    if location.exists() and not overwrite:
         logging.warning("%s already exists, not downloading again.", location)
     else:
         logging.info("Fetching: %s/%s/%s -> %s", bid, build_target, artifact, location)
@@ -77,6 +82,7 @@ def invoke_shell_with_artifact(
     cmd: str,
     bid: int,
     unzip: bool,
+    overwrite: bool,
 ) -> bool:
     """Invokes the given shell command after fetching and unzipping the received artifact
 
@@ -87,13 +93,14 @@ def invoke_shell_with_artifact(
         artifact (str): The artifact, can contain 'bid' that for build id. For example: sdk-repo-linux-emulator-{bid}.zip
         cmd (str): The command to execute. This will be passed to "sh -c"
         bid (int): The build id (usually a number) to fetch
+        overwrite (bool): True if an existing artifact should be overwritten
 
     Returns:
         bool: True if this artificat is ok, False otherwise.
     """
     assert dest.is_dir(), "Destination is not a directory"
     location = fetch_artifact(
-        go_ab_service, dest, build_target, artifact, bid
+        go_ab_service, dest, build_target, artifact, bid, overwrite
     ).absolute()
     env = os.environ.copy()
     env["X"] = str(bid)
