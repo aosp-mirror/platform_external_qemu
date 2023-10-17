@@ -118,7 +118,7 @@ target_link_libraries(
           ssl
           flatbuffers
           qemu-host-common-headers
-          android-emu-grpc-utils
+          android-grpc-utils
           grpc++
           packet-streamer-client-lib
           packet-streamer-proto-lib

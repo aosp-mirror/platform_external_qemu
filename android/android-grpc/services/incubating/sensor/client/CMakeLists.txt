@@ -6,7 +6,7 @@ android_add_library(
   SOURCE_DIR
   src
   SRC android/emulation/control/utils/SimpleSensorClient.cpp
-  DEPS android-emu-base-headers android-emu-grpc-utils)
+  DEPS android-emu-base-headers android-grpc-utils)
 target_include_directories(sensor-service-client PUBLIC include PRIVATE src)
 target_link_libraries(sensor-service-client PUBLIC sensor-service
                                           android-grpc-client)
