@@ -27,8 +27,9 @@ if(OPTION_GFXSTREAM_BACKEND)
     set(ANGLE_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../external/angle)
 
     set(BUILD_STANDALONE OFF)
+    if(NOT LINUX_AARCH64)
     set(ENABLE_VKCEREAL_TESTS ON)
-
+    endif()
     function(discover_gfxstream_internal_targets result subdir)
         if(CMAKE_VERSION VERSION_LESS "3.7.0")
             message(
@@ -220,10 +221,12 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     include(${GFXSTREAM_REPO_ROOT}/cmake/SetSubdirectorProperties.cmake)
 
-    add_opengl_dependencies(gfxstream_backend_unittests)
-    add_opengl_dependencies(Vulkan_unittests)
-    add_opengl_dependencies(OpenglRender_unittests)
-    add_opengl_dependencies(OpenglRender_snapshot_unittests)
+    if(NOT LINUX_AARCH64)
+        add_opengl_dependencies(gfxstream_backend_unittests)
+        add_opengl_dependencies(Vulkan_unittests)
+        add_opengl_dependencies(OpenglRender_unittests)
+        add_opengl_dependencies(OpenglRender_snapshot_unittests)
+    endif()
 
     get_directory_property(GFXSTREAM_SUBDIRS SUBDIRECTORIES)
     foreach(GFXSTREAM_SUBDIR IN LISTS GFXSTREAM_SUBDIRS)
