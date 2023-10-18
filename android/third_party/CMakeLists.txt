@@ -229,6 +229,7 @@ if(FEATURE_NETSIM)
       INSTALL_COMMAND "")
     install(PROGRAMS ${NETSIM_CROSS_DIR}/netsim ${NETSIM_CROSS_DIR}/netsimd
             DESTINATION .)
+    install(FILES ${NETSIM_CROSS_DIR}/glib2/libglib2_darwin-x86_64.dylib DESTINATION lib64)
   endif()
 
   # Add netsim-ui into objs
