@@ -464,6 +464,7 @@ private:
 
     void maskWindowFrame();
     bool hasFrame() const;
+    bool hasSkin() const;
 
     void runAdbInstall(const QString& path);
     void installDone(android::emulation::ApkInstaller::Result result,
