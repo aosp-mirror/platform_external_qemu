@@ -358,6 +358,7 @@ if(LINUX_X86_64)
   add_c_flag("-fno-limit-debug-info")
 elseif(LINUX_AARCH64)
   set(ANDROID_NASM_TYPE elf64)
+  add_c_flag("-fpermissive")
 elseif(WINDOWS_MSVC_X86_64)
   # And the asm type if we are compiling with yasm
   set(ANDROID_NASM_TYPE win64)

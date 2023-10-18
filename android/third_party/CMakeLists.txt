@@ -265,7 +265,9 @@ endif()
 # gfxstream, aemu-common modules
 set(GFXSTREAM_REPO_ROOT
     ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream)
-set(ENABLE_VKCEREAL_TESTS ON)
+if(NOT LINUX_AARCH64)
+    set(ENABLE_VKCEREAL_TESTS ON)
+endif()
 function(discover_gfxstream_internal_targets result subdir)
   if(CMAKE_VERSION VERSION_LESS "3.7.0")
     message(
