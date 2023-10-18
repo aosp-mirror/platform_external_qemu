@@ -358,6 +358,7 @@ int RingStream::writeFully(const void* buf, size_t len) {
 
 const unsigned char *RingStream::readFully( void *buf, size_t len) {
     GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER)) << "not intended for use with RingStream";
+    return nullptr;
 }
 
 void RingStream::onSave(android::base::Stream* stream) {
