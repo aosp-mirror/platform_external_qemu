@@ -2601,6 +2601,9 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
                 skin_window_move_mouse(window, finger, mx, my);
                 if (feature_is_enabled(kFeature_VirtioMouse)) {
                     add_mouse_event(window, &ev->u.mouse, mouse->button_pressed);
+                } else if (feature_is_enabled(kFeature_VirtioTablet)) {
+                    add_finger_event(window, finger, finger->pos.x,
+                                     finger->pos.y, finger->tracking, displayId);
                 } else if (finger->tracking) {
                     add_finger_event(window, finger, finger->pos.x,
                                      finger->pos.y, button_state, displayId);
