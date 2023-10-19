@@ -484,6 +484,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         mOrientation = !strcmp(myhw->hw_initialOrientation, "landscape")
                                ? SKIN_ROTATION_0
                                : SKIN_ROTATION_270;
+    } else if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+        AVD_TV) {
+        mOrientation = SKIN_ROTATION_0;
     } else {
         mOrientation = !strcmp(getConsoleAgents()
                                        ->settings->hw()
