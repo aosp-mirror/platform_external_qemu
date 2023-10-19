@@ -456,6 +456,7 @@ android_add_library(
 target_link_libraries(
   android-emu-shared
   PUBLIC android-emu-base
+         android-emu
          android-emu-base-headers
          android-emu-avd
          android-emu-agents

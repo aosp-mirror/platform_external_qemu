@@ -415,7 +415,8 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                         {"shell", "am", "broadcast", "-a",
                          "com.android.emulator.multidisplay.START", "-n",
                          "com.android.emulator.multidisplay/"
-                         ".MultiDisplayServiceReceiver"});
+                         ".MultiDisplayServiceReceiver",
+                         "--user 0"});
             }
 
             // Foldable hinge area and posture update. Called when cold boot or
