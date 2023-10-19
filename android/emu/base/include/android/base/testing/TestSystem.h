@@ -247,6 +247,10 @@ public:
         return pathIsQcow2Internal(toTempRoot(path));
     }
 
+    virtual bool pathFileSystemIsExt4(std::string_view path) const override {
+        return pathFileSystemIsExt4Internal(toTempRoot(path));
+    }
+
     virtual bool pathIsExt4(std::string_view path) const override {
         return pathIsExt4Internal(toTempRoot(path));
     }

@@ -1911,6 +1911,20 @@ extern "C" int main(int argc, char** argv) {
 #endif
                 }
             }
+#ifdef __linux__
+            const bool isExt4Filesystem =
+                    System::get()->pathFileSystemIsExt4(contentPath);
+            if (!isExt4Filesystem) {
+                dwarning(
+                        "File System is not ext4, disable QuickbootFileBacked "
+                        "feature");
+                feature_set_if_not_overridden(kFeature_QuickbootFileBacked,
+                                              false /* disabled */);
+            } else {
+                dprint("File System is ext4, do not disable "
+                       "QuickbootFileBacked feature");
+            }
+#endif
 #ifdef __APPLE__
             auto numCores = System::get()->getCpuCoreCount();
             if (numCores < 8) {
