@@ -17,6 +17,7 @@
 #include "aemu/base/files/StreamSerializing.h"
 #include "aemu/base/threads/FunctorThread.h"
 #include "android/console.h"
+#include "android/hw-sensors.h"
 #include "android/loadpng.h"
 #include "android/opengl/GLProcessPipe.h"
 #include "android/opengles-pipe.h"
@@ -203,10 +204,14 @@ public:
             unsigned int height;
             size_t cPixels = 0;
 
+            int displayId = 0;
+            if (android_foldable_is_pixel_fold() && android_foldable_is_folded()) {
+                displayId = android_foldable_pixel_fold_second_display_id();
+            }
             // Fetch size of buffer.
-            renderer.getScreenshot(nChannels, &width, &height, nullptr, &cPixels);
+            renderer.getScreenshot(nChannels, &width, &height, nullptr, &cPixels, displayId);
             std::vector<unsigned char> pixels(cPixels);
-            renderer.getScreenshot(nChannels, &width, &height, pixels.data(), &cPixels);
+            renderer.getScreenshot(nChannels, &width, &height, pixels.data(), &cPixels, displayId);
 #if SNAPSHOT_PROFILE > 1
             printf("Screenshot load texture time %lld ms\n",
                    (long long)(sw.elapsedUs() / 1000));
