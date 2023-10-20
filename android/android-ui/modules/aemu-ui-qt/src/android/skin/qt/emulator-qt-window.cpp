@@ -1015,7 +1015,7 @@ void EmulatorQtWindow::refreshSkin() {
         // and pass that to event.
         return;
     }
-    const bool has_skin = !hasFrame();
+    const bool has_skin = hasSkin();
     if (has_skin) {
         // when it has skin, need to trigger an event to repaint skin
         // bug: 302006657
@@ -3030,21 +3030,25 @@ void EmulatorQtWindow::slot_runOnUiThread(RunOnUiThreadFunc f,
     f();
 }
 
-bool EmulatorQtWindow::hasFrame() const {
-    if (mFrameAlways || mInZoomMode) {
-        return true;
-    }
-    // Probably frameless. But framed if there's no skin.
+bool EmulatorQtWindow::hasSkin() const {
     char *skinName = nullptr, *skinDir = nullptr;
     avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName,
                         &skinDir);
-    bool hasFrame = (skinDir == NULL);
+    bool hasSkin = (skinDir != NULL);
     if (skinName) {
         free(skinName);
     }
     if (skinDir) {
         free(skinDir);
     }
+    return hasSkin;
+}
+
+bool EmulatorQtWindow::hasFrame() const {
+    if (mFrameAlways || mInZoomMode) {
+        return true;
+    }
+    bool hasFrame = !hasSkin();
     return hasFrame;
 }
 
