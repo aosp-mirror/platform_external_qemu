@@ -11,7 +11,6 @@
  */
 
 #include "android/skin/EmulatorSkin.h"
-
 #include <string.h>
 #include <QDir>
 #include <QImage>
@@ -30,6 +29,15 @@ using android::base::PathUtils;
 
 static LazyInstance<EmulatorSkin> sEmulatorSkin = LAZY_INSTANCE_INIT;
 
+EmulatorSkin::EmulatorSkin() {
+    getSkinPixmap();
+    if (mRawSkinPixmap == nullptr) {
+        int displayX = getConsoleAgents()->settings->hw()->hw_lcd_width;
+        int displayY = getConsoleAgents()->settings->hw()->hw_lcd_height;
+        mSkinPixmapIsPortrait = displayX <= displayY;
+    }
+}
+
 EmulatorSkin* EmulatorSkin::getInstance() {
     return sEmulatorSkin.ptr();
 }
@@ -42,10 +50,13 @@ std::shared_ptr<QPixmap> EmulatorSkin::getSkinPixmap() {
 
     // We need to read the skin image.
     // Where is the skin?
-    char* skinName;
-    char* skinDir;
+    char* skinName = nullptr;
+    char* skinDir = nullptr;
     avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName,
                         &skinDir);
+    if (!skinName || !skinDir) {
+        return nullptr;
+    }
     // Parse the 'layout' file in the skin directory
     QString layoutPath = PathUtils::join(skinDir, skinName, "layout").c_str();
     AConfig* skinConfig = aconfig_node("", "");
@@ -64,7 +75,9 @@ std::shared_ptr<QPixmap> EmulatorSkin::getSkinPixmap() {
             continue;
         skinFileName = aconfig_str(backgroundNode, "image", nullptr);
         if (skinFileName != nullptr && skinFileName[0] != '\0') {
-            mSkinPixmapIsPortrait = !strcmp(partNode->name, "portrait");
+            // note, part name is not reliable way to tell the orientation
+            // need to check actual size
+            // mSkinPixmapIsPortrait = !strcmp(partNode->name, "portrait");
             break;
         }
     }
@@ -80,6 +93,7 @@ std::shared_ptr<QPixmap> EmulatorSkin::getSkinPixmap() {
     // the display. To avoid masking off the display, we replace the alpha
     // vaule of these pixels as 255 (opage).
     QImage img(skinPath);
+    mSkinPixmapIsPortrait = img.width() <= img.height();
     for (int row = 0; row < img.height(); row++) {
         int left = -1, right = -1;
         for (int col = 0; col < img.width(); col++) {
