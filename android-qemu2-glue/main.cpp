@@ -2538,8 +2538,8 @@ extern "C" int main(int argc, char** argv) {
     }
 #endif  // _WIN32
 #else   // !TARGET_X86_64 && !TARGET_I386
-    args.add2("-machine", "type=virt");
 #if defined(__aarch64__)
+    args.add2("-machine", "type=virt");
     char* accel_status = NULL;
     CpuAccelMode accel_mode = ACCEL_AUTO;
     const bool accel_ok =
@@ -2558,7 +2558,9 @@ extern "C" int main(int argc, char** argv) {
     } else {
         dwarning("kvm is not enabled on this aarch64 host.");
     }
-#endif  // __aarch64__
+#else
+    args.add2("-machine", "type=ranchu");
+#endif
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
