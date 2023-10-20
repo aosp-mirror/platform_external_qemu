@@ -530,7 +530,6 @@ static void gmac_try_send_next_packet(NPCMGMACState *gmac)
     while (true) {
         gmac_dma_set_state(gmac, NPCM_DMA_STATUS_TX_PROCESS_STATE_SHIFT,
             NPCM_DMA_STATUS_TX_RUNNING_FETCHING_STATE);
-        trace_npcm_gmac_packet_transmit(DEVICE(gmac)->canonical_path, length);
         if (gmac_read_tx_desc(desc_addr, &tx_desc)) {
             qemu_log_mask(LOG_GUEST_ERROR, "TX Descriptor @ 0x%x can't be read\n",
                           desc_addr);
