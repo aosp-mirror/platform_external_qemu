@@ -479,22 +479,19 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     qRegisterMetaType<Ui::OverlayMessageType>();
     qRegisterMetaType<Ui::OverlayChildWidget::DismissFunc>();
 
-    auto myhw = getConsoleAgents()->settings->hw();
-    if (myhw->hw_device_name && !strncmp("pixel_tablet", myhw->hw_device_name,
-                                         strlen("pixel_tablet"))) {
-        mOrientation = !strcmp(myhw->hw_initialOrientation, "landscape")
-                               ? SKIN_ROTATION_0
-                               : SKIN_ROTATION_270;
-    } else if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
-        AVD_TV) {
-        mOrientation = SKIN_ROTATION_0;
-    } else {
-        mOrientation = !strcmp(getConsoleAgents()
-                                       ->settings->hw()
-                                       ->hw_initialOrientation,
+    if (EmulatorSkin::getInstance()->isPortrait()) {
+        mOrientation = !strcasecmp(getConsoleAgents()
+                ->settings->hw() ->hw_initialOrientation,
                                "landscape")
                                ? SKIN_ROTATION_270
                                : SKIN_ROTATION_0;
+    } else {
+        // landscape
+        mOrientation = !strcasecmp(getConsoleAgents()
+                ->settings->hw() ->hw_initialOrientation,
+                               "landscape")
+                               ? SKIN_ROTATION_0
+                               : SKIN_ROTATION_90;
     }
 
     android::base::ThreadLooper::setLooper(mLooper, true);
@@ -1323,8 +1320,8 @@ void EmulatorQtWindow::maskWindowFrame() {
             // Rotate the skin to match the emulator window
             QTransform rotater;
             // Set the native rotation of the skin image
-            int rotationAmount =
-                    EmulatorSkin::getInstance()->isPortrait() ? 0 : 90;
+
+            int rotationAmount = 0;
             // Adjust for user-initiated rotation
             switch (mOrientation) {
                 case SKIN_ROTATION_0:
