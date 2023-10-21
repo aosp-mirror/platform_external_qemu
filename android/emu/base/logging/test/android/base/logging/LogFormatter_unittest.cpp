@@ -14,7 +14,7 @@
 
 #include "aemu/base/logging/LogSeverity.h"  // for LogSeverity, EMULATOR_...
 #include "gtest/gtest.h"                       // for Message
-  
+
 namespace android {
 namespace base {
 
@@ -115,6 +115,8 @@ TEST(LogFormatter, DuplicateVerboseFormatterMatchesRegex) {
     }
 }
 
+
+
 TEST(LogFormatter, DuplicateDoesNotLogALine) {
     NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
     LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
@@ -146,6 +148,25 @@ TEST(LogFormatter, DuplicatTripleLogsALine) {
             "INFO    | Hello World (3x)\n"
             "INFO    | x",
             ndlf.LogFormatter::format(lg, "x"));
+}
+
+
+TEST(LogFormatter, DuplicateLogShouldNotCrash) {
+    NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
+    LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+    ASSERT_EQ("INFO    | Hello World%s",
+              ndlf.LogFormatter::format(lg, "%.*s", 13, "Hello World%s"));
+}
+
+TEST(LogFormatter, DuplicateLogWithLongStringShouldNotCrash) {
+    NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
+    std::string hello="Hello World%s";
+    for(int i = 0; i < 8; i++) {
+        hello = hello + hello;
+    }
+    LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+     ASSERT_EQ("INFO    | Hello World%s",
+              ndlf.LogFormatter::format(lg, "%.*s", 13, "Hello World%s"));
 }
 
 TEST(LogFormatter, DuplicatTripleWithDiffLocationLogsALine) {
