@@ -148,6 +148,12 @@ typedef struct SkinFile {
         }                          \
     } while (0);
 
+extern SkinFile* skin_file_create_with_width_height_bpp(
+        int width,
+        int height,
+        int bpp,
+        const SkinFramebufferFuncs* fb_funcs);
+
 extern SkinFile* skin_file_create_from_aconfig(
         const AConfig* aconfig,
         const char* basepath,
