@@ -9,7 +9,7 @@ android_add_library(
        android-emu-agents
        android-emu-base
        android-emu-feature
-       android-emu-grpc-utils
+       android-grpc-utils
        android-grpc-event-waiter
        qemu-host-common-headers
        sensor-service)

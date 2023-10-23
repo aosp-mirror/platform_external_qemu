@@ -6,7 +6,7 @@ android_add_library(
   SOURCE_DIR
   src
   SRC android/emulation/control/utils/SimpleAvdClient.cpp
-  DEPS android-emu-base-headers android-emu-grpc-utils)
+  DEPS android-emu-base-headers android-grpc-utils)
 target_include_directories(avd-service-client PUBLIC include PRIVATE src)
 target_link_libraries(avd-service-client PUBLIC avd-service
                                           android-grpc-client)
