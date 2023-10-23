@@ -262,7 +262,7 @@ Builder& Builder::withDiscoveryFile(std::string discovery_file) {
         auto token = iniFile.getString("grpc.token", "");
         auto basicTokenAuth = mDestination.add_required_headers();
         basicTokenAuth->set_key(BasicTokenAuth::DEFAULT_HEADER);
-        basicTokenAuth->set_value("Basic " + token);
+        basicTokenAuth->set_value("Bearer " + token);
     }
     mDestination.set_target("localhost:" +
                             iniFile.getString("grpc.port", "8554"));
