@@ -316,8 +316,8 @@ AdbGuestPipe::AdbGuestPipe(void* mHwPipe,
                            AdbHostAgent* hostAgent,
                            android::base::Stream* stream)
     : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent),
-    mReceivedMesg(AdbMessageSniffer::create("HOST==>GUEST",  getConsoleAgents()->settings->hw()->test_monitorAdb, &std::cout)),
-    mSendingMesg(AdbMessageSniffer::create("HOST<==GUEST",  getConsoleAgents()->settings->hw()->test_monitorAdb, &std::cout)) {
+    mReceivedMesg(AdbMessageSniffer::create("HOST==>GUEST",  getConsoleAgents()->settings->hw()->test_monitorAdb)),
+    mSendingMesg(AdbMessageSniffer::create("HOST<==GUEST",  getConsoleAgents()->settings->hw()->test_monitorAdb)) {
     mPlayStoreImage = android::featurecontrol::isEnabled(
             android::featurecontrol::PlayStoreImage);
     if (!stream) {

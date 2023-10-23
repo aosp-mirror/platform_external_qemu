@@ -88,10 +88,23 @@ Message writeMsg(std::string msg) {
     return addMessage(AdbWireMessage::A_WRTE, 1, 1, msg);
 }
 
-class AdbMessageSnifferTest : public ::testing::Test {
+class AdbMessageSnifferTest : public ::testing::Test,
+                              public android::base::testing::LogOutput {
 public:
-    AdbMessageSnifferTest()
-        : mSniffer(AdbMessageSniffer::create("Test", 2, &mOutput)) {}
+    AdbMessageSnifferTest() : mSniffer(AdbMessageSniffer::create("Test", 2)) {
+       mSavedOutput = ::android::base::testing::LogOutput::setNewOutput(this);
+    }
+~AdbMessageSnifferTest() {
+        ::android::base::testing::LogOutput::setNewOutput(mSavedOutput);
+}
+
+    void SetUp() override { mOutput.clear(); }
+
+    virtual void logMessage(const android::base::LogParams& params,
+                            const char* message,
+                            size_t message_len) {
+        mOutput << std::string(message, message_len);
+    }
 
     void sendMessage(Message msg) {
         AndroidPipeBuffer buffer;
@@ -116,12 +129,31 @@ public:
 protected:
     std::stringstream mOutput;
     std::unique_ptr<AdbMessageSniffer> mSniffer;
+    ::android::base::testing::LogOutput* mSavedOutput;
 };
+
+TEST_F(AdbMessageSnifferTest, use_log_stream) {
+    mSniffer = std::unique_ptr<AdbMessageSniffer>(
+            AdbMessageSniffer::create("Test", 0));
+
+    sendMessage(connectMsg());
+    const std::vector<std::string> shellMsgs{
+            "shell:exit",
+            "shell:getprop",
+            "shell:cat /sys/class/power_supply/*/capacity",
+            "framebuffer",
+            "shell_v2,raw:exit",
+            "shell_v2,raw:getprop",
+            "shell_v2,raw:cat /sys/class/power_supply/*/capacity"};
+    for (auto cmd : shellMsgs) {
+        sendMessage(openMsg(cmd));
+    }
+}
 
 TEST_F(AdbMessageSnifferTest, nolog_on_level_0) {
     // Nothing should happen.
     mSniffer = std::unique_ptr<AdbMessageSniffer>(
-            AdbMessageSniffer::create("Test", 0, &mOutput));
+            AdbMessageSniffer::create("Test", 0));
 
     sendMessage(connectMsg());
     sendMessage(smallMsg());
@@ -156,7 +188,7 @@ TEST_F(AdbMessageSnifferTest, invalid_magic_stops_logging) {
     // The invalid packet should trip up the sniffer, and stop it from logging
     // things.
     EXPECT_EQ(mOutput.str(),
-              "Test Received invalid packet.. Disabling logging.\n");
+              "Test Received invalid packet.. Disabling logging.");
 }
 
 TEST_F(AdbMessageSnifferTest, shell_commands_do_not_heartbeat) {
@@ -200,7 +232,7 @@ TEST_F(AdbMessageSnifferTest, invalid_length_stops_logging) {
     // The invalid packet should trip up the sniffer, and stop it from logging
     // things.
     EXPECT_EQ(mOutput.str(),
-              "Test Received invalid packet.. Disabling logging.\n");
+              "Test Received invalid packet.. Disabling logging.");
 }
 
 TEST_F(AdbMessageSnifferTest, single_byte_no_crash) {
