@@ -185,8 +185,9 @@ std::shared_ptr<grpc::ClientContext> EmulatorGrpcClient::newContext() {
     return ctx;
 }
 
-void EmulatorGrpcClient::cancelAll() {
+void EmulatorGrpcClient::cancelAll(std::chrono::milliseconds maxWait) {
     mActiveContexts.forEach([](auto context){ context->TryCancel(); });
+    mActiveContexts.waitUntilLibraryIsClear(maxWait);
 }
 
 absl::StatusOr<std::unique_ptr<EmulatorGrpcClient>>
