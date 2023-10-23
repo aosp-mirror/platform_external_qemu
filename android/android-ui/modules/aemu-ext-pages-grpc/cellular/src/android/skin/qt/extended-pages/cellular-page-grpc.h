@@ -16,7 +16,7 @@
 #include <QWidget>
 #include <memory>
 
-#include "android/emulation/control/utils/SimpleModemClient.h"
+#include "android/emulation/control/utils/ModemClient.h"
 #include "ui_cellular-page-grpc.h"
 
 struct QAndroidCellularAgent;
@@ -27,7 +27,7 @@ class UiEventTracker;
 }  // namespace metrics
 }  // namespace android
 
-using android::emulation::control::SimpleModemClient;
+using android::emulation::control::ModemClient;
 using android::metrics::UiEventTracker;
 using android::emulation::control::incubating::CellInfo;
 
@@ -55,6 +55,6 @@ private:
 
     std::unique_ptr<Ui::CellularPageGrpc> mUi;
     std::shared_ptr<UiEventTracker> mDropDownTracker;
-    SimpleModemClient mModemClient;
+    ModemClient mModemClient;
     CellInfo mCurrentState;
 };

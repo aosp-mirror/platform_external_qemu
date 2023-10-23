@@ -23,7 +23,7 @@
 #include "android/avd/info-grpc.h"
 #include "android/avd/info.h"
 #include "android/base/system/System.h"
-#include "android/emulation/control/utils/SimpleAvdClient.h"
+#include "android/emulation/control/utils/AvdClient.h"
 #include "android/utils/system.h"
 
 using android::base::PathUtils;
@@ -65,7 +65,7 @@ static char* stringCopy(std::string str) {
   return newString;
 }
 
-AvdInfo* avdInfo_from_grpc(SimpleAvdClient* client) {
+AvdInfo* avdInfo_from_grpc(AvdClient* client) {
     AvdInfo* avd;
     auto info = client->getAvdInfo();
     if (!info.ok()) {

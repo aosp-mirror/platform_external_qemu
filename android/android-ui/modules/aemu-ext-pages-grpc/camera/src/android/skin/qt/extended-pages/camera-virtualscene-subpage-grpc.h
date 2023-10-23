@@ -15,7 +15,7 @@
 #include <QWidget>                           // for QWidget
 #include <memory>                            // for shared_ptr, unique_ptr
 
-#include "android/emulation/control/utils/SimpleVirtualSceneClient.h"
+#include "android/emulation/control/utils/VirtualSceneClient.h"
 #include "ui_camera-virtualscene-subpage-grpc.h"  // for CameraVirtualSceneSubpageGrpc
 
 
@@ -25,7 +25,7 @@ class UiEventTracker;
 }  // namespace metrics
 }  // namespace android
 
-using android::emulation::control::SimpleVirtualSceneServiceClient;
+using android::emulation::control::VirtualSceneServiceClient;
 
 
 using android::metrics::UiEventTracker;
@@ -61,5 +61,5 @@ private:
     std::shared_ptr<UiEventTracker> mCameraTracker;
     bool mHasBeenShown = false;
     bool mHadFirstInteraction = false;
-    SimpleVirtualSceneServiceClient mServiceClient;
+    VirtualSceneServiceClient mServiceClient;
 };

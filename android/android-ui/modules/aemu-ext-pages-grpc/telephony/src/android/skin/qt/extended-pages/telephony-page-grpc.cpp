@@ -107,7 +107,7 @@ void TelephonyPageGrpc::on_tel_startEndButton_clicked() {
                 QRegularExpression("[^+0-9]"));
 
         mActiveCall.set_number(cleanNumber.toStdString());
-        mModemClient.createCall(
+        mModemClient.createCallAsync(
                 mActiveCall, [this](absl::StatusOr<Call*> status) {
                     if (!status.ok()) {
                         emit(errorMessage(
@@ -122,7 +122,7 @@ void TelephonyPageGrpc::on_tel_startEndButton_clicked() {
     } else {
         // End a call
         // Update the state and the UI buttons
-        mModemClient.deleteCall(mActiveCall, [this](auto status) {
+        mModemClient.deleteCallAsync(mActiveCall, [this](auto status) {
             if (!status.ok()) {
                 emit(errorMessage(tr(status.status().message().data())));
                 return;
@@ -196,7 +196,7 @@ void TelephonyPageGrpc::on_tel_holdCallButton_clicked() {
         case Call::CALL_STATE_ACTIVE:
             // Active --> On hold
             mActiveCall.set_state(Call::CALL_STATE_HELD);
-            mModemClient.updateCall(
+            mModemClient.updateCallAsync(
                     mActiveCall, [this](absl::StatusOr<Call*> status) {
                         if (!status.ok()) {
                             emit(errorMessage(
@@ -209,7 +209,7 @@ void TelephonyPageGrpc::on_tel_holdCallButton_clicked() {
         case Call::CALL_STATE_HELD:
             // On hold --> Active
             mActiveCall.set_state(Call::CALL_STATE_ACTIVE);
-            mModemClient.updateCall(
+            mModemClient.updateCallAsync(
                     mActiveCall, [this](absl::StatusOr<Call*> status) {
                         if (!status.ok()) {
                             emit(errorMessage(

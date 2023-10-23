@@ -40,9 +40,9 @@ using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
  *
  * @tparam T The type of object that the OnCompleted callback will receive.
  */
-class SimpleSnapshotServiceClient {
+class SnapshotServiceClient {
 public:
-    explicit SimpleSnapshotServiceClient(
+    explicit SnapshotServiceClient(
             std::shared_ptr<EmulatorGrpcClient> client,
             SnapshotService::StubInterface* service = nullptr)
         : mClient(client), mService(service) {

@@ -11,14 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/utils/SimpleModemClient.h"
+#include "android/emulation/control/utils/ModemClient.h"
 
-#include <assert.h>
-#include <grpcpp/grpcpp.h>
-#include <string>
-
-#include "absl/status/status.h"
-#include "aemu/base/logging/CLog.h"
 #include "android/emulation/control/utils/GenericCallbackFunctions.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
 
@@ -37,7 +31,7 @@ namespace control {
 
 using ::google::protobuf::Empty;
 
-void SimpleModemClient::receiveSmsAsync(SmsMessage message,
+void ModemClient::receiveSmsAsync(SmsMessage message,
                                         OnCompleted<Empty> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<SmsMessage, Empty>(mClient);
@@ -47,7 +41,7 @@ void SimpleModemClient::receiveSmsAsync(SmsMessage message,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleModemClient::createCall(Call call, OnCompleted<Call> onDone) {
+void ModemClient::createCallAsync(Call call, OnCompleted<Call> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Call, Call>(mClient);
     request->CopyFrom(call);
@@ -56,7 +50,7 @@ void SimpleModemClient::createCall(Call call, OnCompleted<Call> onDone) {
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleModemClient::updateCall(Call call, OnCompleted<Call> onDone) {
+void ModemClient::updateCallAsync(Call call, OnCompleted<Call> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Call, Call>(mClient);
     request->CopyFrom(call);
@@ -65,7 +59,7 @@ void SimpleModemClient::updateCall(Call call, OnCompleted<Call> onDone) {
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleModemClient::deleteCall(Call call, OnCompleted<Empty> onDone) {
+void ModemClient::deleteCallAsync(Call call, OnCompleted<Empty> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Call, Empty>(mClient);
     request->CopyFrom(call);
@@ -74,7 +68,7 @@ void SimpleModemClient::deleteCall(Call call, OnCompleted<Empty> onDone) {
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleModemClient::updateTime(
+void ModemClient::updateTimeAsync(
         OnCompleted<::google::protobuf::Empty> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Empty, Empty>(mClient);
@@ -83,7 +77,7 @@ void SimpleModemClient::updateTime(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleModemClient::setCellInfo(CellInfo info,
+void ModemClient::setCellInfoAsync(CellInfo info,
                                     OnCompleted<CellInfo> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<CellInfo, CellInfo>(mClient);
@@ -93,7 +87,7 @@ void SimpleModemClient::setCellInfo(CellInfo info,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleModemClient::getCellInfo(OnCompleted<CellInfo> onDone) {
+void ModemClient::getCellInfoAsync(OnCompleted<CellInfo> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Empty, CellInfo>(mClient);
     mService->async()->getCellInfo(
@@ -101,12 +95,13 @@ void SimpleModemClient::getCellInfo(OnCompleted<CellInfo> onDone) {
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleModemClient::receivePhoneEvents(OnEvent<PhoneEvent> incoming,
+void ModemClient::receivePhoneEvents(OnEvent<PhoneEvent> incoming,
                                            OnFinished onDone) {
     auto context = mClient->newContext();
     static google::protobuf::Empty empty;
     auto read = new SimpleClientLambdaReader<PhoneEvent>(
-            incoming, context, [onDone](auto status) {
+            context, incoming,
+            [onDone](auto status) {
                 onDone(ConvertGrpcStatusToAbseilStatus(status));
             });
     mService->async()->receivePhoneEvents(context.get(), &empty, read);

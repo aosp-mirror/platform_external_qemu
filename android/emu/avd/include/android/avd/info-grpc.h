@@ -13,9 +13,9 @@
 // limitations under the License.
 #pragma once
 #include "android/avd/info.h"
-#include "android/emulation/control/utils/SimpleAvdClient.h"
+#include "android/emulation/control/utils/AvdClient.h"
 
-using android::emulation::control::SimpleAvdClient;
+using android::emulation::control::AvdClient;
 
 /* Obtains the avd information from a remote emulator service. */
-AvdInfo* avdInfo_from_grpc(SimpleAvdClient* client);
+AvdInfo* avdInfo_from_grpc(AvdClient* client);

@@ -11,14 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/utils/SimpleEmulatorControlClient.h"
+#include "android/emulation/control/utils/EmulatorControlClient.h"
 
 #include <grpcpp/grpcpp.h>
-#include <tuple>
+#include <utility>
 
 #include "absl/status/status.h"
-#include "absl/strings/string_view.h"
-#include "aemu/base/logging/CLog.h"
 #include "android/emulation/control/utils/GenericCallbackFunctions.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
 
@@ -34,8 +32,8 @@ namespace android {
 namespace emulation {
 namespace control {
 
-void SimpleEmulatorControlClient::setBattery(BatteryState state,
-                                             OnCompleted<Empty> onDone) {
+void EmulatorControlClient::setBatteryAsync(BatteryState state,
+                                                 OnCompleted<Empty> onDone) {
     DD("setBattery %s", state.ShortDebugString().c_str());
     auto [request, response, context] =
             createGrpcRequestContext<BatteryState, Empty>(mClient);
@@ -45,8 +43,8 @@ void SimpleEmulatorControlClient::setBattery(BatteryState state,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleEmulatorControlClient::getScreenshot(ImageFormat format,
-                                                OnCompleted<Image> onDone) {
+void EmulatorControlClient::getScreenshotAsync(ImageFormat format,
+                                                    OnCompleted<Image> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<ImageFormat, Image>(mClient);
     request->CopyFrom(format);
@@ -55,7 +53,7 @@ void SimpleEmulatorControlClient::getScreenshot(ImageFormat format,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleEmulatorControlClient::getStatus(
+void EmulatorControlClient::getStatusAsync(
         OnCompleted<EmulatorStatus> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Empty, EmulatorStatus>(mClient);
@@ -64,7 +62,7 @@ void SimpleEmulatorControlClient::getStatus(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleEmulatorControlClient::getDisplayConfigurations(
+void EmulatorControlClient::getDisplayConfigurationsAsync(
         OnCompleted<DisplayConfigurations> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Empty, DisplayConfigurations>(mClient);
@@ -73,7 +71,7 @@ void SimpleEmulatorControlClient::getDisplayConfigurations(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleEmulatorControlClient::setDisplayConfigurations(
+void EmulatorControlClient::setDisplayConfigurationsAsync(
         DisplayConfigurations state,
         OnCompleted<DisplayConfigurations> onDone) {
     auto [request, response, context] =
@@ -85,12 +83,13 @@ void SimpleEmulatorControlClient::setDisplayConfigurations(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleEmulatorControlClient::receiveEmulatorNotificationEvents(OnEvent<Notification> incoming,
-                                           OnFinished onDone) {
+void EmulatorControlClient::registerNotificationListener(
+        OnEvent<Notification> incoming,
+        OnFinished onDone) {
     auto context = mClient->newContext();
     static google::protobuf::Empty empty;
     auto read = new SimpleClientLambdaReader<Notification>(
-            incoming, context, [onDone](auto status) {
+            context, incoming, [onDone](auto status) {
                 onDone(ConvertGrpcStatusToAbseilStatus(status));
             });
     mService->async()->streamNotification(context.get(), &empty, read);
@@ -98,8 +97,9 @@ void SimpleEmulatorControlClient::receiveEmulatorNotificationEvents(OnEvent<Noti
     read->StartCall();
 }
 
-void SimpleEmulatorControlClient::sendFingerprint(Fingerprint finger,
-                                                  OnCompleted<Empty> onDone) {
+void EmulatorControlClient::sendFingerprintAsync(
+        Fingerprint finger,
+        OnCompleted<Empty> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Fingerprint, Empty>(mClient);
     request->CopyFrom(finger);
@@ -108,24 +108,71 @@ void SimpleEmulatorControlClient::sendFingerprint(Fingerprint finger,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleEmulatorControlClient::sendKey(KeyboardEvent key,
-                                          OnCompleted<Empty> onDone) {
+void EmulatorControlClient::setVmStateAsync(VmRunState state,
+                                            OnCompleted<Empty> onDone) {
     auto [request, response, context] =
-            createGrpcRequestContext<KeyboardEvent, Empty>(mClient);
-    request->CopyFrom(key);
-    mService->async()->sendKey(
+            createGrpcRequestContext<VmRunState, Empty>(mClient);
+    request->CopyFrom(state);
+    mService->async()->setVmState(
             context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-std::unique_ptr<SimpleClientWriter<InputEvent>>
-SimpleEmulatorControlClient::streamInputEvent() {
+void EmulatorControlClient::setClipboardAsync(std::string state,
+                                              OnCompleted<Empty> onDone) {
+    auto [request, response, context] =
+            createGrpcRequestContext<ClipData, Empty>(mClient);
+    request->set_text(state);
+    mService->async()->setClipboard(
+            context.get(), request, response,
+            grpcCallCompletionHandler(context, request, response, onDone));
+}
+
+void EmulatorControlClient::setBrightnessAsync(BrightnessValue bv,
+                                               OnCompleted<Empty> onDone) {
+    auto [request, response, context] =
+            createGrpcRequestContext<BrightnessValue, Empty>(mClient);
+    request->CopyFrom(bv);
+    mService->async()->setBrightness(
+            context.get(), request, response,
+            grpcCallCompletionHandler(context, request, response, onDone));
+}
+
+void EmulatorControlClient::setGpsAsync(GpsState gps,
+                                        OnCompleted<Empty> onDone) {
+    auto [request, response, context] =
+            createGrpcRequestContext<GpsState, Empty>(mClient);
+    request->CopyFrom(gps);
+    mService->async()->setGps(
+            context.get(), request, response,
+            grpcCallCompletionHandler(context, request, response, onDone));
+}
+
+absl::StatusOr<GpsState> EmulatorControlClient::getGps() {
+    GpsState response;
+    Empty empty;
+    auto context = mClient->newContext();
+    auto grpcStatus = mService->getGps(context.get(), empty, &response);
+    if (!grpcStatus.ok()) {
+        return ConvertGrpcStatusToAbseilStatus(grpcStatus);
+    }
+
+    return response;
+}
+
+std::shared_ptr<SimpleClientWriter<InputEvent>>
+EmulatorControlClient::asyncInputEventWriter() {
+    std::lock_guard<std::mutex> lock(mInputWriterAccess);
+    if (mInputEventWriter)
+        return mInputEventWriter;
+
     static Empty empty;
     auto context = mClient->newContext();
-    auto writer = std::make_unique<SimpleClientWriter<InputEvent>>(std::move(context));
-    mService->async()->streamInputEvent(writer->context(), &empty,
-                                        writer.get());
-    return writer;
+    mInputEventWriter = std::make_shared<SimpleClientWriter<InputEvent>>(
+            std::move(context));
+    mService->async()->streamInputEvent(mInputEventWriter->context(), &empty,
+                                        mInputEventWriter.get());
+    return mInputEventWriter;
 }
 
 }  // namespace control

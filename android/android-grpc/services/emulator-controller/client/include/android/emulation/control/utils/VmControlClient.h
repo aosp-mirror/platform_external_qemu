@@ -15,41 +15,40 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 #include <type_traits>
 
-#include "absl/status/status.h"
-#include "absl/status/statusor.h"
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"
-#include "google/protobuf/empty.pb.h"
-#include "sensor_service.grpc.pb.h"
-#include "sensor_service.pb.h"
+#include "android/grpc/utils/SimpleAsyncGrpc.h"
+#include "emulator_controller.grpc.pb.h"
+#include "emulator_controller.pb.h"
 
 namespace android {
 namespace emulation {
 namespace control {
 
-template <typename T>
-using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
-using OnFinished = std::function<void(absl::Status)>;
-
-template <typename T>
-using OnEvent = std::function<void(const T*)>;
-using namespace incubating;
-using ::google::protobuf::Empty;
-
-class SimpleSensorClient {
+class VmControlClient {
 public:
-    explicit SimpleSensorClient(std::shared_ptr<EmulatorGrpcClient> client,
-                                SensorService::StubInterface* service = nullptr)
+    explicit VmControlClient(
+            std::shared_ptr<EmulatorGrpcClient> client,
+            EmulatorController::StubInterface* service = nullptr)
         : mClient(client), mService(service) {
         if (!service) {
-            mService = client->stub<SensorService>();
+            mService = client->stub<EmulatorController>();
         }
     }
 
+    bool start();
+    bool stop();
+    void reset();
+    void shutdown();
+    bool pause();
+    bool resume();
+    bool isRunning();
+
 private:
     std::shared_ptr<EmulatorGrpcClient> mClient;
-    std::unique_ptr<SensorService::StubInterface> mService;
+    std::unique_ptr<EmulatorController::StubInterface> mService;
 };
 
 }  // namespace control
