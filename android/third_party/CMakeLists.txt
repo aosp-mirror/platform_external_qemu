@@ -266,7 +266,9 @@ endif()
 # gfxstream, aemu-common modules
 set(GFXSTREAM_REPO_ROOT
     ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream)
-set(ENABLE_VKCEREAL_TESTS ON)
+if(NOT LINUX_AARCH64)
+    set(ENABLE_VKCEREAL_TESTS ON)
+endif()
 function(discover_gfxstream_internal_targets result subdir)
   if(CMAKE_VERSION VERSION_LESS "3.7.0")
     message(
@@ -322,6 +324,20 @@ set(GFXSTREAM_PROTOCOLS_DIR
 set(AEMU_COMMON_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu)
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/aemu
                  aemu_common)
+if(NOT LINUX_AARCH64)
+  set(ASTC_CPU_DECODING ON)
+  set(DECOMPRESSOR ON)
+  set(CLI OFF)
+  if(DARWIN_AARCH64)
+    set(ASTCDEC_LIB_NAME astcdec-native-static)
+  else()
+    set(ISA_AVX2 ON)
+    set(ASTCDEC_LIB_NAME astcdec-avx2-static)
+  endif()
+  add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/astc-encoder
+                  ${ASTCDEC_LIB_NAME})
+endif()
+
 if(ENABLE_VKCEREAL_TESTS)
   set(AEMU_COMMON_TESTS aemu-base_unittests aemu-host-common_unittests)
   foreach(TST ${AEMU_COMMON_TESTS})
@@ -337,7 +353,7 @@ foreach(GFXSTREAM_SUBDIR IN LISTS GFXSTREAM_SUBDIRS)
                                       ${GFXSTREAM_SUBDIR})
 endforeach()
 set(GFXSTREAM_DEPENDENCIES ${GFXSTREAM_INTERNAL_TARGETS} angle_common
-                           angle_shader_translator renderdoc)
+                           angle_shader_translator renderdoc ${ASTCDEC_LIB_NAME})
 android_license(
   TARGET "${GFXSTREAM_DEPENDENCIES}"
   LIBNAME gfxstream

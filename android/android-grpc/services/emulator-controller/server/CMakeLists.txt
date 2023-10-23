@@ -24,6 +24,7 @@ android_add_library(
        android-emu-tracing
        android-grpc-event-waiter
        android-grpc-interceptors
+       android-grpc-utils
        qemu-host-common-headers
        ui::gl-bridge)
 target_link_libraries(emulator_controller-server-impl

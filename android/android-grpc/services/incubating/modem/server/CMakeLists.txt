@@ -11,7 +11,7 @@ android_add_library(
        android-emu-base-headers
        android-emu-feature
        android-emu-files
-       android-emu-grpc-utils
+       android-grpc-utils
        android-emu-telephony
        android-grpc-event-waiter
        modem_simulator_lib

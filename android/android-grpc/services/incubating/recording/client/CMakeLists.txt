@@ -6,7 +6,7 @@ android_add_library(
   SOURCE_DIR
   src
   SRC android/emulation/control/utils/SimpleScreenRecordingClient.cpp
-  DEPS android-emu-base-headers android-emu-grpc-utils)
+  DEPS android-emu-base-headers android-grpc-utils)
 target_include_directories(screen-recording-service-client PUBLIC include PRIVATE src)
 target_link_libraries(screen-recording-service-client PUBLIC screen-recording-service
                                                   android-grpc-client)

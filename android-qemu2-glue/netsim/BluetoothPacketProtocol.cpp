@@ -67,7 +67,7 @@ static void apply_le_workaround_if_needed(ChipInfo* info) {
     auto build =
             avdInfo_getBuildProperties(getConsoleAgents()->settings->avdInfo());
     std::string props((char*)build->data, build->size);
-    auto idx = props.find("ro.system.build.id=TE1A.220922");
+    auto idx = props.find("ro.build.version.sdk=33");
     if (idx != std::string::npos) {
         VERBOSE_INFO(bluetooth,
                      "Explicitly disabling le_connected_isochronous stream feature!");
