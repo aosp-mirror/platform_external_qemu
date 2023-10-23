@@ -450,6 +450,26 @@ static int emulator_window_framebuffer_get_depth(void* opaque) {
     return fb->bits_per_pixel;
 }
 
+static const SkinFramebufferFuncs skin_fb_funcs = {
+        .create_framebuffer = &emulator_window_framebuffer_create,
+        .free_framebuffer = &emulator_window_framebuffer_free,
+        .get_pixels = &emulator_window_framebuffer_get_pixels,
+        .get_depth = &emulator_window_framebuffer_get_depth,
+};
+
+void emulator_window_set_folded_skin() {
+    EmulatorWindow* emulator = emulator_window_get();
+
+    if (emulator->layout_file == emulator->layout_file_folded_skin) {
+        return;
+    }
+    emulator->layout_file = emulator->layout_file_folded_skin;
+    const SkinRotation currentRotation =
+            qemulator->uiEmuAgent->window->getRotation();
+    skin_ui_update_and_rotate(emulator->ui, emulator->layout_file,
+                              currentRotation);
+}
+
 void emulator_window_set_no_skin() {
     EmulatorWindow* emulator = emulator_window_get();
     if (emulator->layout_file_no_skin == NULL) {
@@ -489,13 +509,6 @@ int emulator_window_init(EmulatorWindow* emulator,
                          int y,
                          const AndroidOptions* opts,
                          const UiEmuAgent* uiEmuAgent) {
-    static const SkinFramebufferFuncs skin_fb_funcs = {
-            .create_framebuffer = &emulator_window_framebuffer_create,
-            .free_framebuffer = &emulator_window_framebuffer_free,
-            .get_pixels = &emulator_window_framebuffer_get_pixels,
-            .get_depth = &emulator_window_framebuffer_get_depth,
-    };
-
     emulator->aconfig = aconfig;
 
     // if not building for a gui-less window, create a skin layout file,
@@ -504,6 +517,19 @@ int emulator_window_init(EmulatorWindow* emulator,
         emulator->layout_file = skin_file_create_from_aconfig(aconfig, basepath,
                                                               &skin_fb_funcs,
                                                               getConsoleAgents()->settings->hw()->hw_lcd_depth);
+    }
+
+    const bool is_pixel_fold = android_foldable_is_pixel_fold();
+    if (is_pixel_fold && emulator->layout_file_folded_skin == NULL) {
+        int width =
+                getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_width;
+        int height =
+                getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_height;
+        int bpp = getConsoleAgents()->settings->hw()->hw_lcd_depth;
+        emulator->layout_file_folded_skin =
+                skin_file_create_with_width_height_bpp(width, height, bpp,
+                                                       &skin_fb_funcs);
+        emulator->layout_file_skin = emulator->layout_file;
     }
 
     emulator->ui = NULL;

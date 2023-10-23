@@ -58,6 +58,7 @@ typedef enum {
     kEventSetDisplayActiveConfig,
     kEventAddDisplay,
     kEventRemoveDisplay,
+    kEventSetFoldedSkin,
 } SkinEventType;
 
 // The numeric values represent the bit positions in the button state

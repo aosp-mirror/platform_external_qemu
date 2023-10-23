@@ -1006,14 +1006,9 @@ void EmulatorQtWindow::queueQuitEvent() {
 
 void EmulatorQtWindow::refreshSkin() {
     const bool pixel_fold = android_foldable_is_pixel_fold();
-    if (pixel_fold) {
-        // for now, ignore this for pixel fold
-        // TODO: enable it, need to check display id
-        // and pass that to event.
-        return;
-    }
     const bool has_skin = hasSkin();
-    if (has_skin) {
+
+    if (pixel_fold || has_skin) {
         // when it has skin, need to trigger an event to repaint skin
         // bug: 302006657
         SkinEvent* event = createSkinEvent(kEventLayoutRotate);
@@ -2515,15 +2510,6 @@ void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
     int originalWidth = mBackingSurface->bitmap->size().width();
     int originalHeight = mBackingSurface->bitmap->size().height();
 
-    if (android_foldable_is_pixel_fold() && android_foldable_is_folded()) {
-        auto hw = getConsoleAgents()->settings->hw();
-        auto xoriginalWidth = hw->hw_displayRegion_0_1_width;
-        auto xoriginalHeight = hw->hw_displayRegion_0_1_height;
-        if (xoriginalHeight != originalHeight ||
-            xoriginalWidth != originalWidth)
-            return;
-    }
-
     auto newSize = QSize(originalWidth, originalHeight)
                            .scaled(size, Qt::KeepAspectRatio);
 
@@ -2578,6 +2564,17 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
                      "backing surface not ready, cancel window adjustment");
         return;
     }
+
+    const bool is_pixel_fold = android_foldable_is_pixel_fold();
+    if (is_pixel_fold) {
+        if (isFolded) {
+            setFoldedSkin();
+        } else {
+            restoreSkin();
+        }
+        return;
+    }
+
     QSize backingSize = mBackingSurface->bitmap->size();
     float scale = (float)windowGeo.width() / (float)backingSize.width();
     int displayX = getConsoleAgents()->settings->hw()->hw_lcd_width;
@@ -3032,6 +3029,9 @@ bool EmulatorQtWindow::hasSkin() const {
     avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName,
                         &skinDir);
     bool hasSkin = (skinDir != NULL);
+    if (mSkinRemoved) {
+        hasSkin = false;
+    }
     if (skinName) {
         free(skinName);
     }
@@ -3717,19 +3717,28 @@ bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
     return true;
 }
 
+void EmulatorQtWindow::setFoldedSkin() {
+    runOnUiThread([this]() {
+        SkinEvent* event = new SkinEvent();
+        event->type = kEventSetFoldedSkin;
+        skin_event_add(event);
+    });
+}
+
 void EmulatorQtWindow::setNoSkin() {
     runOnUiThread([this]() {
         char *skinName, *skinDir;
         avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName,
                             &skinDir);
-        AFREE(skinName);
-        AFREE(skinDir);
 
         if (skinDir != NULL) {
             SkinEvent* event = new SkinEvent();
             event->type = kEventSetNoSkin;
             skin_event_add(event);
+            mSkinRemoved = true;
         }
+        AFREE(skinName);
+        AFREE(skinDir);
         setFrameAlways(true);
     });
 }
@@ -3739,14 +3748,18 @@ void EmulatorQtWindow::restoreSkin() {
         char *skinName, *skinDir;
         avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName,
                             &skinDir);
-        AFREE(skinName);
-        AFREE(skinDir);
 
-        if (skinDir != NULL) {
+        // always restore for pixel fold, as the skin w and h
+        // changed
+        const bool pixel_fold = android_foldable_is_pixel_fold();
+        if (pixel_fold || skinDir != NULL) {
             SkinEvent* event = new SkinEvent();
             event->type = kEventRestoreSkin;
             skin_event_add(event);
+            mSkinRemoved = false;
         }
+        AFREE(skinName);
+        AFREE(skinDir);
         mToolWindow->hideRotationButton(false);
         setFrameAlways(false);
     });
