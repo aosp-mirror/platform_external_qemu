@@ -90,6 +90,11 @@ androidHwConfig_init( AndroidHwConfig*  config,
     if (apiLevel >= 12) {
         config->hw_keyboard_lid = 0;
     }
+
+    if (config->hw_initialOrientation) {
+        free(config->hw_initialOrientation);
+        config->hw_initialOrientation = strdup("natural");
+    }
 }
 
 int androidHwConfig_read(AndroidHwConfig* config, CIniFile* ini) {
@@ -131,6 +136,22 @@ int androidHwConfig_read(AndroidHwConfig* config, CIniFile* ini) {
         if (p < end) {
             config->android_avd_home = ASTRDUP(temp);
         }
+    }
+
+    /* Bug: 307296354
+       when config.ini does not specify orientation, set it to natural
+       orientation: for phone, it is still portrait, for tablet landscape
+    */
+    if (config->hw_initialOrientation &&
+        !strcasecmp(config->hw_initialOrientation, "natural")) {
+        free(config->hw_initialOrientation);
+        if (config->hw_lcd_width > config->hw_lcd_height) {
+            config->hw_initialOrientation = strdup("landscape");
+        } else {
+            config->hw_initialOrientation = strdup("portrait");
+        }
+        dinfo("Changing default hw.initialOrientation to %s\n",
+              config->hw_initialOrientation);
     }
 
     return 0;
