@@ -342,7 +342,7 @@ static SkinPart* skin_part_create_from_v1(
     part->name = root->name;
 
     node = aconfig_find_const(root, "background");
-    if (node)
+    if (node && basepath)
         skin_background_init_from(part->background, node, basepath);
 
     node = aconfig_find_const(root, "display");
@@ -350,7 +350,7 @@ static SkinPart* skin_part_create_from_v1(
         skin_display_init_from(part->display, node, fb_funcs, bpp);
 
     node = aconfig_find_const(root, "button");
-    if (node) {
+    if (node && basepath) {
         for (node = node->first_child; node != NULL; node = node->next)
         {
             SkinButton*  button = skin_button_create_from(
@@ -986,6 +986,20 @@ static int skin_file_load_from_v2(SkinFile* file,
 
     file->version = 2;
     return 0;
+}
+
+SkinFile* skin_file_create_with_width_height_bpp(
+        int width,
+        int height,
+        int bpp,
+        const SkinFramebufferFuncs* fb_funcs) {
+    char tmp[1024];
+    AConfig* root;
+    root = aconfig_node("", "");
+    snprintf(tmp, sizeof tmp, "display {\n  width %d\n  height %d\n bpp %d}\n",
+             width, height, bpp);
+    aconfig_load(root, strdup(tmp));
+    return skin_file_create_from_aconfig(root, NULL, fb_funcs, bpp);
 }
 
 SkinFile* skin_file_create_from_aconfig(const AConfig* aconfig,

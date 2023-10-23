@@ -321,6 +321,7 @@ public:
                            uint32_t flag);
     bool getMonitorRect(uint32_t* width, uint32_t* height);
     void setNoSkin();
+    void setFoldedSkin();
     void restoreSkin();
     bool multiDisplayParamValidate(uint32_t id,
                                    uint32_t w,
@@ -595,6 +596,7 @@ private:
     std::unique_ptr<SwipeGesture> mSwipeGesture;
     bool mStartedAdbStopProcess;
 
+    bool mSkinRemoved{false};
     bool mFrameAlways;  // true = no floating emulator
     bool mPreviouslyFramed = false;
     bool mHaveBeenFrameless;
