@@ -121,6 +121,7 @@ void InprocessVideoSource::captureFrames() {
                     .set_timestamp_us(rtc::TimeMicros())
                     .set_rotation(::webrtc::kVideoRotation_0)
                     .build();
+    bool sendFirstFrame = true;
     while (mCaptureVideo == true) {
         // The next call will return the number of frames that are
         // available. 0 means no frame was made available in the given time
@@ -128,7 +129,8 @@ void InprocessVideoSource::captureFrames() {
         // most kTimeToWaitForFrame so we can check if the client is still
         // there. (All clients get disconnected on emulator shutdown).
         auto arrived = frameEvent->next(kTimeToWaitForFrame);
-        if (arrived > 0 && mCaptureVideo == true) {
+        if (sendFirstFrame || (arrived > 0 && mCaptureVideo == true)) {
+            sendFirstFrame = false;
             // TODO (wdu@) Add foldable support.
             SkinRect rect = {{0, 0}, {0, 0}};
             float xaxis = 0, yaxis = 0, zaxis = 0;
