@@ -210,7 +210,7 @@ void BatteryPageGrpc::on_bat_chargerBox_activated(int index) {
         saveCharger(bCharger);
         mState.set_charger((BatteryState::BatteryCharger)bCharger);
         mDropDownTracker->increment(translate_idx(bCharger));
-        mEmulatorControl.setBattery(mState, failureLogger);
+        mEmulatorControl.setBatteryAsync(mState, failureLogger);
     }
 }
 
@@ -220,7 +220,7 @@ void BatteryPageGrpc::on_bat_levelSlider_valueChanged(int value) {
     mDropDownTracker->increment("LEVEL_SLIDER");
     saveChargeLevel(value);
     mState.set_chargelevel(value);
-    mEmulatorControl.setBattery(mState, failureLogger);
+    mEmulatorControl.setBatteryAsync(mState, failureLogger);
 }
 
 void BatteryPageGrpc::on_bat_healthBox_activated(int index) {
@@ -231,7 +231,7 @@ void BatteryPageGrpc::on_bat_healthBox_activated(int index) {
         saveHealth(bHealth);
         mDropDownTracker->increment(translate_idx(bHealth));
         mState.set_health((BatteryState::BatteryHealth)bHealth);
-        mEmulatorControl.setBattery(mState, failureLogger);
+        mEmulatorControl.setBatteryAsync(mState, failureLogger);
     }
 }
 
@@ -243,7 +243,7 @@ void BatteryPageGrpc::on_bat_statusBox_activated(int index) {
         saveStatus(bStatus);
         mDropDownTracker->increment(translate_idx(bStatus));
         mState.set_status((BatteryState::BatteryStatus)bStatus);
-        mEmulatorControl.setBattery(mState, failureLogger);
+        mEmulatorControl.setBatteryAsync(mState, failureLogger);
     }
 }
 

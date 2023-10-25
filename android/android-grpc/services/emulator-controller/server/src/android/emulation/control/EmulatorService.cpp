@@ -471,28 +471,31 @@ public:
             ::grpc::CallbackServerContext* /*context*/,
             ::google::protobuf::Empty* /*response*/) override {
         SimpleServerLambdaReader<InputEvent>* eventReader =
-                new SimpleServerLambdaReader<InputEvent>([this, &eventReader](
-                                                                 auto request) {
-                    if (request->has_key_event()) {
-                        mKeyEventSender.send(request->key_event());
-                    } else if (request->has_mouse_event()) {
-                        mMouseEventSender.send(request->mouse_event());
-                    } else if (request->has_touch_event()) {
-                        mTouchEventSender.send(request->touch_event());
-                    } else if (request->has_android_event()) {
-                        mAndroidEventSender.send(request->android_event());
-                    } else if (request->has_pen_event()) {
-                        mPenEventSender.send(request->pen_event());
-                    } else {
-                        // Mark the stream as completed, this will
-                        // result in setting that status and scheduling
-                        // of a completion (onDone) event the async
-                        // queue.
-                        eventReader->Finish(Status(
-                                ::grpc::StatusCode::INVALID_ARGUMENT,
-                                "Missing key, mouse, touch or android event."));
-                    }
-                });
+                new SimpleServerLambdaReader<InputEvent>(
+                        [this, &eventReader](auto request) {
+                            VERBOSE_INFO(keys, "InputEvent: %s", request->ShortDebugString().c_str());
+                            if (request->has_key_event()) {
+                                mKeyEventSender.send(request->key_event());
+                            } else if (request->has_mouse_event()) {
+                                mMouseEventSender.send(request->mouse_event());
+                            } else if (request->has_touch_event()) {
+                                mTouchEventSender.send(request->touch_event());
+                            } else if (request->has_android_event()) {
+                                mAndroidEventSender.send(request->android_event());
+                            } else if (request->has_pen_event()) {
+                                mPenEventSender.send(request->pen_event());
+                            } else if (request->has_wheel_event()) {
+                                mWheelEventSender.send(request->wheel_event());
+                            } else {
+                                // Mark the stream as completed, this will
+                                // result in setting that status and scheduling
+                                // of a completion (onDone) event the async
+                                // queue.
+                                eventReader->Finish(Status(
+                                        ::grpc::StatusCode::INVALID_ARGUMENT,
+                                        "Unknown event, is the emulator out of date?."));
+                            }
+                        });
         // Note that the event reader will delete itself on completion of
         // the request.
         return eventReader;
@@ -1252,30 +1255,40 @@ public:
 
         // These need to happen on the qemu looper as these transitions
         // will require io locks.
-        android::base::ThreadLooper::runOnMainLooper(
-                [state = request->state(), vm = mAgents->vm]() {
-                    switch (state) {
-                        case VmRunState::RESET:
-                            vm->vmReset();
-                            break;
-                        case VmRunState::SHUTDOWN:
-                            skin_winsys_quit_request();
-                            break;
-                        case VmRunState::TERMINATE: {
-                            LOG(INFO) << "Terminating the emulator.";
-                            auto pid = System::get()->getCurrentProcessId();
-                            System::get()->killProcess(pid);
-                        }; break;
-                        case VmRunState::PAUSED:
-                            vm->vmPause();
-                            break;
-                        case VmRunState::RUNNING:
-                            vm->vmResume();
-                            break;
-                        default:
-                            break;
-                    };
-                });
+        android::base::ThreadLooper::runOnMainLooper([state = request->state(),
+                                                      vm = mAgents->vm,
+                                                      ui = mAgents->libui]() {
+            switch (state) {
+                case VmRunState::RESET:
+                    vm->vmReset();
+                    break;
+                case VmRunState::SHUTDOWN:
+                    skin_winsys_quit_request();
+                    break;
+                case VmRunState::TERMINATE: {
+                    LOG(INFO) << "Terminating the emulator.";
+                    auto pid = System::get()->getCurrentProcessId();
+                    System::get()->killProcess(pid);
+                }; break;
+                case VmRunState::PAUSED:
+                    vm->vmPause();
+                    break;
+                case VmRunState::RUNNING:
+                    vm->vmResume();
+                    break;
+                case VmRunState::RESTART:
+                    ui->requestRestart(0, "External gRPC request");
+                    break;
+                case VmRunState::START:
+                    vm->vmStart();
+                    break;
+                case VmRunState::STOP:
+                    vm->vmStop();
+                    break;
+                default:
+                    break;
+            };
+        });
 
         return Status::OK;
     }

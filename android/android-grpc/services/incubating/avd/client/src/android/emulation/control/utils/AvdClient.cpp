@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/utils/SimpleAvdClient.h"
+#include "android/emulation/control/utils/AvdClient.h"
 
 #include <grpcpp/grpcpp.h>
 #include <tuple>
@@ -37,7 +37,7 @@ namespace control {
 
 using ::google::protobuf::Empty;
 
-void SimpleAvdClient::getAvdInfoAsync(OnCompleted<AvdInfo> onDone) {
+void AvdClient::getAvdInfoAsync(OnCompleted<AvdInfo> onDone) {
     if (mLoaded) {
         onDone(&mCachedInfo);
         return;
@@ -63,7 +63,7 @@ void SimpleAvdClient::getAvdInfoAsync(OnCompleted<AvdInfo> onDone) {
                                       cacheForward));
 }
 
-absl::StatusOr<AvdInfo> SimpleAvdClient::getAvdInfo() {
+absl::StatusOr<AvdInfo> AvdClient::getAvdInfo() {
     if (mLoaded) {
         return mCachedInfo;
     }

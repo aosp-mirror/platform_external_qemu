@@ -298,6 +298,12 @@ message VmRunState {
         // Guest experienced some error state, you cannot transition to this
         // state.
         INTERNAL_ERROR = 10;
+        // Completely restart the emulator.
+        RESTART = 11;
+        // Resume a stopped emulator
+        START = 12;
+        // Stop (pause) a running emulator
+        STOP = 13;
     }
 
     RunState state = 1;
@@ -813,6 +819,7 @@ message InputEvent {
         MouseEvent mouse_event = 3;
         AndroidEvent android_event = 4;
         PenEvent pen_event = 5;
+        WheelEvent wheel_event = 6;
     }
 };
 

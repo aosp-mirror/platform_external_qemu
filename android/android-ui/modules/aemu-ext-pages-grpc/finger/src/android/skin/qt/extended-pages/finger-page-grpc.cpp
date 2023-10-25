@@ -77,12 +77,12 @@ void FingerPageGrpc::on_finger_touchButton_pressed() {
     Fingerprint fp;
     fp.set_istouching(true);
     fp.set_touchid(fingerID);
-    mEmulatorControl.sendFingerprint(fp, [](auto _ignored) {});
+    mEmulatorControl.sendFingerprintAsync(fp);
 }
 
 void FingerPageGrpc::on_finger_touchButton_released() {
     Fingerprint fp;
     fp.set_istouching(false);
     fp.set_touchid(0);
-    mEmulatorControl.sendFingerprint(fp, [](auto _ignored) {});
+    mEmulatorControl.sendFingerprintAsync(fp);
 }

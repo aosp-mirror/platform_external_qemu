@@ -67,7 +67,6 @@ service Modem {
     //   - INVALID_ARGUMENT: The text message contains invalid characters
     //   - INVALID_ARGUMENT: The encoded message contains invalid hex values
     //   - INVALID_ARGUMENT: Trying to receive both text and encoded message.
-
     rpc receiveSms(SmsMessage) returns (google.protobuf.Empty);
 
     // Update the modem clock.  This will likely disappear

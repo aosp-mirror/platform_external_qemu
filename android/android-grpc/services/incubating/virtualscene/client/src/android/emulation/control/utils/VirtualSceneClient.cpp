@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/utils/SimpleVirtualSceneClient.h"
+#include "android/emulation/control/utils/VirtualSceneClient.h"
 
 #include <grpcpp/grpcpp.h>
 #include <tuple>
@@ -27,7 +27,7 @@ using google::protobuf::Empty;
 namespace android {
 namespace emulation {
 namespace control {
-void SimpleVirtualSceneServiceClient::listPostersAsync(
+void VirtualSceneServiceClient::listPostersAsync(
         OnCompleted<PosterList> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Empty, PosterList>(mClient);
@@ -36,7 +36,7 @@ void SimpleVirtualSceneServiceClient::listPostersAsync(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleVirtualSceneServiceClient::setPosterAsync(
+void VirtualSceneServiceClient::setPosterAsync(
         Poster poster,
         OnCompleted<Poster> onDone) {
     auto [request, response, context] =
@@ -47,7 +47,7 @@ void SimpleVirtualSceneServiceClient::setPosterAsync(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleVirtualSceneServiceClient::setAnimationState(
+void VirtualSceneServiceClient::setAnimationStateAsync(
         AnimationState state,
         OnCompleted<AnimationState> onDone) {
     auto [request, response, context] =
@@ -57,7 +57,7 @@ void SimpleVirtualSceneServiceClient::setAnimationState(
             context.get(), request, response,
             grpcCallCompletionHandler(context, request, response, onDone));
 }
-void SimpleVirtualSceneServiceClient::getAnimationState(
+void VirtualSceneServiceClient::getAnimationStateAsync(
         OnCompleted<AnimationState> onDone) {
     auto [request, response, context] =
             createGrpcRequestContext<Empty, AnimationState>(mClient);

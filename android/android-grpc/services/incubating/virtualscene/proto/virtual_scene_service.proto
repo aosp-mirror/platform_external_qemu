@@ -32,14 +32,35 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 
 service VirtualSceneService {
+    /**
+     * Set the poster for a specific position in the virtual scene.
+     * @param The poster details including name, image, filename, width, and scale.
+     * @return The updated poster details.
+     */
     rpc setPoster(Poster) returns (Poster);
 
+    /**
+     * List all the posters currently set in the virtual scene.
+     * @param Empty request.
+     * @return The list of posters with their respective details.
+     */
     rpc listPosters(google.protobuf.Empty) returns (PosterList);
 
+    /**
+     * Set the animation state of the virtual scene.
+     * @param The new animation state, such as turning the TV on or off.
+     * @return The updated animation state.
+     */
     rpc setAnimationState(AnimationState) returns (AnimationState);
 
+    /**
+     * Get the current animation state of the virtual scene.
+     * @param Empty request.
+     * @return The current animation state, including whether the TV is on or off.
+     */
     rpc getAnimationState(google.protobuf.Empty) returns (AnimationState);
 };
+
 
 
 message Poster {

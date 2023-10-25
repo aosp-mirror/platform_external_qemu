@@ -21,7 +21,7 @@
 #include <string>
 #include <unordered_map>
 #include "aemu/base/EventNotificationSupport.h"
-#include "android/emulation/control/utils/SimpleEmulatorControlClient.h"
+#include "android/emulation/control/utils/EmulatorControlClient.h"
 #include "host-common/window_agent.h"
 #include "ui_multi-display-page-grpc.h"
 
@@ -40,7 +40,7 @@ class UiEventTracker;
 }  // namespace android
 
 using android::emulation::control::DisplayConfigurations;
-using android::emulation::control::SimpleEmulatorControlClient;
+using android::emulation::control::EmulatorControlClient;
 using android::metrics::UiEventTracker;
 
 Q_DECLARE_METATYPE(DisplayConfigurations)
@@ -76,7 +76,7 @@ private:
     std::unordered_map<int, std::unique_ptr<MultiDisplayItemGrpc>>
             mItem;  // Display_id, item.
     std::shared_ptr<UiEventTracker> mApplyChangesTracker;
-    SimpleEmulatorControlClient mServiceClient;
+    EmulatorControlClient mServiceClient;
 
     int mSecondaryItemCount = 0;
     bool mNoRecompute;

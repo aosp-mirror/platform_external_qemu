@@ -5,7 +5,7 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR
   src
-  SRC android/emulation/control/utils/SimpleSensorClient.cpp
+  SRC android/emulation/control/utils/SensorClient.cpp
   DEPS android-emu-base-headers android-grpc-utils)
 target_include_directories(sensor-service-client PUBLIC include PRIVATE src)
 target_link_libraries(sensor-service-client PUBLIC sensor-service

@@ -11,16 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/utils/SimpleCarClient.h"
+#include "android/emulation/control/utils/CarClient.h"
 
-#include <grpcpp/grpcpp.h>
-#include <tuple>
-
-#include "absl/status/status.h"
-#include "absl/strings/string_view.h"
-#include "aemu/base/logging/CLog.h"
 #include "android/emulation/control/utils/GenericCallbackFunctions.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
+#include "google/protobuf/empty.pb.h"
 
 namespace android {
 namespace emulation {
@@ -37,7 +32,7 @@ namespace control {
 
 using ::google::protobuf::Empty;
 
-void SimpleCarClient::sendCarEventAsync(incubating::CarEvent event) {
+void CarClient::sendCarEventAsync(incubating::CarEvent event) {
     // TODO(jansene): Should we use a single "permanent" stream?
     auto [request, response, context] =
             createGrpcRequestContext<incubating::CarEvent, Empty>(mClient);
@@ -49,12 +44,12 @@ void SimpleCarClient::sendCarEventAsync(incubating::CarEvent event) {
             grpcCallCompletionHandler(context, request, response, nop));
 }
 
-void SimpleCarClient::receiveCarEvents(OnEvent<CarEvent> incoming,
+void CarClient::receiveCarEvents(OnEvent<CarEvent> incoming,
                                        OnFinished onDone) {
     auto context = mClient->newContext();
     static google::protobuf::Empty empty;
     auto read = new SimpleClientLambdaReader<CarEvent>(
-            incoming, context, [onDone](auto status) {
+            context, incoming, [onDone](auto status) {
                 onDone(ConvertGrpcStatusToAbseilStatus(status));
             });
     mService->async()->receiveCarEvents(context.get(), &empty, read);
