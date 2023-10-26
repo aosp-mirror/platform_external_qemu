@@ -1574,6 +1574,21 @@ static char* _findQemuInformationalOption(int qemu_argc, char** qemu_argv) {
     return NULL;
 }
 
+static void apply_skin_quirks(AvdInfo* avd) {
+    // quirks time for all skins
+    // apply some foldable quirks
+    if (android_foldable_is_pixel_fold()) {
+        char* skinName;
+        char* skinDir;
+        avdInfo_getSkinInfo(avd, &skinName, &skinDir);
+        if (!strcmp(skinName, "pixel_fold")) {
+            // it is always unfolded to start with
+            avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
+                                   "unfolded");
+        }
+    }
+}
+
 bool emulator_parseCommonCommandLineOptions(int* p_argc,
                                             char*** p_argv,
                                             const char* targetArch,
@@ -1779,6 +1794,9 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         str_reset_nocopy(&opts->skindir, skinDir);
         D("autoconfig: -skindir %s", opts->skindir);
     }
+
+    apply_skin_quirks(avd);
+
     /* update the avd hw config from this new skin */
     avdInfo_getSkinHardwareIni(avd, opts->skin, opts->skindir);
 
