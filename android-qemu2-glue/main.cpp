@@ -1813,6 +1813,18 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
+    // quirk for pixel-fold
+    // make sure skin is lcdwidth x lcdheight for now
+    if (hw->hw_device_name && "pixel_fold" == std::string(hw->hw_device_name)) {
+        if (opts->skin && isdigit(opts->skin[0])) {
+            char tmp[64];
+            snprintf(tmp, sizeof(tmp), "%dx%d\n", hw->hw_lcd_width,
+                     hw->hw_lcd_height);
+            opts->skin = strdup(tmp);
+            dprint("pixel fold skin %s\n", opts->skin);
+        }
+    }
+
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
     }

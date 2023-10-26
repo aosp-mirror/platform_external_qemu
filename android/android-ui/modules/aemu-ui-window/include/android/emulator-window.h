@@ -37,6 +37,7 @@ typedef struct EmulatorWindow {
     SkinFile*      layout_file;
     SkinFile*      layout_file_skin;
     SkinFile*      layout_file_no_skin;
+    SkinFile* layout_file_folded_skin;
     int            win_x;
     int            win_y;
     SkinUI*        ui;
@@ -103,6 +104,8 @@ RecorderStates emulator_window_recorder_state_get(void);
 void emulator_window_set_screen_mask(int width, int height, const unsigned char* rgbaData);
 
 void emulator_window_set_no_skin();
+
+void emulator_window_set_folded_skin();
 
 void emulator_window_restore_skin();
 

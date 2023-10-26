@@ -35,6 +35,7 @@
 #include "aemu/base/files/PathUtils.h"
 #include "host-common/record_screen_agent.h"
 #include "android/console.h"
+#include "android/hw-sensors.h"
 #include "android/recording/GifConverter.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
@@ -292,6 +293,9 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
             info.fileName = mTmpFilePath.c_str();
             info.cb = &onRecordingStatusChanged;
             info.opaque = this;
+            if (android_foldable_is_pixel_fold() && android_foldable_is_folded()) {
+                info.displayId = android_foldable_pixel_fold_second_display_id();
+            }
             if (!sRecordScreenAgent->startRecordingAsync(&info)) {
                 QString errStr =
                         tr("Failed to start the recording. If you are "
