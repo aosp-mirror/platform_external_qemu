@@ -1597,6 +1597,7 @@ void avdInfo_getSkinInfo(const AvdInfo* i, char** pSkinName, char** pSkinDir) {
      */
     if (i->configIni != NULL) {
         skinPath = iniFile_getString(i->configIni, SKIN_PATH, NULL);
+        skinName = iniFile_getString(i->configIni, SKIN_NAME, NULL);
         if (skinPath != NULL) {
             /* If this skin name is magic or a direct directory path
              * we have our result right here.
@@ -1606,14 +1607,25 @@ void avdInfo_getSkinInfo(const AvdInfo* i, char** pSkinName, char** pSkinDir) {
                 AFREE(skinPath);
                 return;
             }
+            /* quirk for foldable: it has folded/ and unfolded/ subdir */
+            if (skinName && !strcmp(skinName, "pixel_fold")) {
+                p = bufprint(temp, end, "%s" PATH_SEP "unfolded", skinPath);
+                skinPath = strdup(temp);
+                /* try one more time */
+                if (_getSkinPathFromName(skinPath, i->sdkRootPath, pSkinName,
+                                         pSkinDir)) {
+                    iniFile_setString(i->configIni, SKIN_PATH, temp);
+                    iniFile_setString(i->configIni, SKIN_NAME, *pSkinName);
+                    AFREE(skinPath);
+                    return;
+                }
+            }
         }
 
         /* The SKIN_PATH entry was not valid, so look at SKIN_NAME */
         D("Warning: " CORE_CONFIG_INI " contains invalid %s entry: %s",
           SKIN_PATH, skinPath);
         AFREE(skinPath);
-
-        skinName = iniFile_getString(i->configIni, SKIN_NAME, NULL);
     }
 
     if (skinName == NULL) {
@@ -1877,6 +1889,37 @@ void avdInfo_setCustomCoreHwIniPath(AvdInfo* info, const char* path) {
 
 int avdInfo_maxMultiDisplayEntries() {
     return 3;
+}
+
+void avdInfo_setCurrentSkin(AvdInfo* i, const char* newSkin) {
+    // absolute skin
+    if (path_is_absolute(newSkin)) {
+        iniFile_setString(i->configIni, SKIN_PATH, newSkin);
+        return;
+    }
+
+    // relative skin
+    char* skinName;
+    char* skinDirPath;
+
+    avdInfo_getSkinInfo(i, &skinName, &skinDirPath);
+    if (skinDirPath == NULL) {
+        return;
+    }
+
+    // get rid of the trailing path separate
+    while(*skinDirPath) {
+        if (skinDirPath[strlen(skinDirPath) - 1] == PATH_SEP_C) {
+            skinDirPath[strlen(skinDirPath) - 1] = 0;
+        } else {
+            break;
+        }
+    }
+
+    char temp[PATH_MAX];
+    snprintf(temp, sizeof(temp), "%s" PATH_SEP "%s", skinDirPath, newSkin);
+
+    iniFile_setString(i->configIni, SKIN_PATH, temp);
 }
 
 void avdInfo_replaceMultiDisplayInConfigIni(AvdInfo* i,

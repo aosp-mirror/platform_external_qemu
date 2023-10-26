@@ -22,6 +22,8 @@ public:
 
     EmulatorSkin();
 
+    void reset();
+
     static EmulatorSkin* getInstance();
 
 private:

@@ -35,6 +35,7 @@
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/debug.h"
+#include "android/utils/path.h"
 #include "host-common/display_agent.h"
 #include "host-common/hw-config-helper.h"
 #include "host-common/opengles.h"
@@ -462,11 +463,18 @@ void emulator_window_set_folded_skin() {
     emulator->layout_file = emulator->layout_file_folded_skin;
     const SkinRotation currentRotation =
             qemulator->uiEmuAgent->window->getRotation();
+    const bool is_pixel_fold = android_foldable_is_pixel_fold();
+    if (is_pixel_fold) {
+        android_setOpenglesScreenMask(emulator_screen_mask.width,
+                                      emulator_screen_mask.height,
+                                      emulator_screen_mask.rgbaData);
+    }
     skin_ui_update_and_rotate(emulator->ui, emulator->layout_file,
                               currentRotation);
 }
 
 void emulator_window_set_no_skin() {
+    return;
     EmulatorWindow* emulator = emulator_window_get();
     if (emulator->layout_file_no_skin == NULL) {
         emulator->layout_file_no_skin = skin_file_create_from_display_v1(
@@ -494,6 +502,12 @@ void emulator_window_restore_skin() {
     emulator->layout_file = emulator->layout_file_skin;
     const SkinRotation currentRotation =
             qemulator->uiEmuAgent->window->getRotation();
+    const bool is_pixel_fold = android_foldable_is_pixel_fold();
+    if (is_pixel_fold) {
+        android_setOpenglesScreenMask(emulator_screen_mask.width,
+                                      emulator_screen_mask.height,
+                                      emulator_screen_mask.rgbaData);
+    }
     skin_ui_update_and_rotate(emulator->ui, emulator->layout_file,
                               currentRotation);
 }
@@ -516,15 +530,54 @@ int emulator_window_init(EmulatorWindow* emulator,
     }
 
     const bool is_pixel_fold = android_foldable_is_pixel_fold();
-    if (is_pixel_fold && emulator->layout_file_folded_skin == NULL) {
-        int width =
-                getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_width;
-        int height =
-                getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_height;
+    if (is_pixel_fold) {
+        char* skinName = NULL;
+        char* skinDir = NULL;
+        avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName,
+                            &skinDir);
         int bpp = getConsoleAgents()->settings->hw()->hw_lcd_depth;
-        emulator->layout_file_folded_skin =
-                skin_file_create_with_width_height_bpp(width, height, bpp,
-                                                       &skin_fb_funcs);
+        if (opts->skindir) {
+            skinName = NULL;
+            skinDir = NULL;
+            avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(),
+                                &skinName, &skinDir);
+            if (skinName && skinDir) {
+                // set to folded
+                avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
+                                       "folded");
+                avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(),
+                                    &skinName, &skinDir);
+                AConfig* root = aconfig_node("", "");
+                char temp[PATH_MAX];
+                snprintf(temp, sizeof(temp),
+                         "%s" PATH_SEP "%s" PATH_SEP "layout", skinDir,
+                         skinName);
+                char* foldedlayout = strdup(temp);
+                aconfig_load_file(root, foldedlayout);
+                snprintf(temp, sizeof(temp), "%s" PATH_SEP "%s", skinDir,
+                         skinName);
+                emulator->layout_file_folded_skin =
+                        skin_file_create_from_aconfig(root, temp,
+                                                      &skin_fb_funcs, bpp);
+                // recover to unfolded
+                avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
+                                       "unfolded");
+                avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(),
+                                    &skinName, &skinDir);
+                free(foldedlayout);
+            }
+        }
+        if (emulator->layout_file_folded_skin == NULL) {
+            int width = getConsoleAgents()
+                                ->settings->hw()
+                                ->hw_displayRegion_0_1_width;
+            int height = getConsoleAgents()
+                                 ->settings->hw()
+                                 ->hw_displayRegion_0_1_height;
+            emulator->layout_file_folded_skin =
+                    skin_file_create_with_width_height_bpp(width, height, bpp,
+                                                           &skin_fb_funcs);
+        }
         emulator->layout_file_skin = emulator->layout_file;
     }
 
