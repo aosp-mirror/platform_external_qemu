@@ -452,7 +452,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     skin_winsys_touch_qt_extended_virtual_sensors();
 
     remaskButtons();
-    installEventFilter(this);
+    const int screen_count =  QGuiApplication::screens().size();
+    if (screen_count == 1) {
+        installEventFilter(this);
+    }
 }
 
 ToolWindow::~ToolWindow() {
