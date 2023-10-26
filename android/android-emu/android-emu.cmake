@@ -184,7 +184,6 @@ set(android_emu_dependent_src
     android/hw-sensors.cpp
     android/userspace-boot-properties.cpp
     android/main-common.c
-    android/main-qemu-parameters.cpp
     android/offworld/OffworldPipe.cpp
     android/physics/AmbientEnvironment.cpp
     android/physics/BodyModel.cpp
