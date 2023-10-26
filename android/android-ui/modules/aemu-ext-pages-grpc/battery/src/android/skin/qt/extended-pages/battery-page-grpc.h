@@ -17,7 +17,7 @@
 #include <memory>            // for unique_ptr
 #include <utility>           // for pair
 
-#include "android/emulation/control/utils/SimpleEmulatorControlClient.h"
+#include "android/emulation/control/utils/EmulatorControlClient.h"
 #include "ui_battery-page-grpc.h"  // for BatteryPageGrpc
 
 namespace android {
@@ -27,7 +27,7 @@ class UiEventTracker;
 }  // namespace android
 
 using android::emulation::control::BatteryState;
-using android::emulation::control::SimpleEmulatorControlClient;
+using android::emulation::control::EmulatorControlClient;
 using android::metrics::UiEventTracker;
 
 class BatteryPageGrpc : public QWidget {
@@ -50,7 +50,7 @@ private:
 
 private:
     std::unique_ptr<Ui::BatteryPageGrpc> mUi;
-    SimpleEmulatorControlClient mEmulatorControl;
+    EmulatorControlClient mEmulatorControl;
     BatteryState mState;
     std::shared_ptr<UiEventTracker> mDropDownTracker;
 };

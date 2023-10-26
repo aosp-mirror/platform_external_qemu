@@ -18,7 +18,7 @@
 #include "android/avd/info-grpc.h"
 #include "android/avd/info.h"
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"
-#include "android/emulation/control/utils/SimpleAvdClient.h"
+#include "android/emulation/control/utils/AvdClient.h"
 #include "avd_service_mock.grpc.pb.h"
 
 #include "android/base/testing/TestSystem.h"
@@ -62,14 +62,14 @@ public:
 class AvdGrpcTest : public Test {
     void SetUp() override {
         mMock = new MyAvdServiceStub();
-        mClient = std::make_unique<SimpleAvdClient>(mTest, mMock);
+        mClient = std::make_unique<AvdClient>(mTest, mMock);
     }
 
 public:
     void SetupStubCall(AvdInfo response) { mMock->mAvdInfo.CopyFrom(response); }
 
     MyAvdServiceStub* mMock;
-    std::unique_ptr<SimpleAvdClient> mClient;
+    std::unique_ptr<AvdClient> mClient;
     std::shared_ptr<EmulatorTestClient> mTest =
             std::make_shared<EmulatorTestClient>();
 };

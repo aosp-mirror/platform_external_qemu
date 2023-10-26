@@ -65,7 +65,7 @@ static SkinLayout* skin_file_select_layout(SkinLayout* layouts,
     if (!layout_name) return layouts;
     SkinLayout* currLayout = layouts;
     while (currLayout) {
-        if (currLayout->name && !strcmp(currLayout->name, layout_name)) {
+        if (currLayout->name && !strcasecmp(currLayout->name, layout_name)) {
             return currLayout;
         }
         currLayout = currLayout->next;
@@ -461,6 +461,9 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
         case kEventSetNoSkin:
             emulator_window_set_no_skin();
+            break;
+        case kEventSetFoldedSkin:
+            emulator_window_set_folded_skin();
             break;
         case kEventRestoreSkin:
             emulator_window_restore_skin();

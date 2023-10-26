@@ -20,10 +20,10 @@
 
 #include "ui_finger-page-grpc.h"
 
-#include "android/emulation/control/utils/SimpleEmulatorControlClient.h"
+#include "android/emulation/control/utils/EmulatorControlClient.h"
 #include "android/metrics/UiEventTracker.h"
 
-using android::emulation::control::SimpleEmulatorControlClient;
+using android::emulation::control::EmulatorControlClient;
 using android::metrics::UiEventTracker;
 
 class FingerPageGrpc : public QWidget {
@@ -39,5 +39,5 @@ private slots:
 private:
     std::unique_ptr<Ui::FingerPageGrpc> mUi;
     std::shared_ptr<UiEventTracker> mFingerTracker;
-    SimpleEmulatorControlClient mEmulatorControl;
+    EmulatorControlClient mEmulatorControl;
 };

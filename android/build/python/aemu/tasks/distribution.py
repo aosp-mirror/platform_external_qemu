@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+import os
 import re
 import shutil
 import zipfile
@@ -111,6 +112,22 @@ class DistributionTask(BuildTask):
             dist_cov_name = dist_cov_dir / "lcov"
             logging.info("Copying %s ==> %s", src_cov_name, dist_cov_name)
             shutil.copy(src_cov_name, dist_cov_name)
+
+        # Copy test utility files to test_utils/
+        if "windows" in self.data["target"]:
+            exe_suffix = ".exe"
+        else:
+            exe_suffix = ""
+        src_test_utils = [
+            Path(self.build_dir) / "nimble_blehr{}".format(exe_suffix)
+        ]
+        dist_test_utils_dir = self.dist_dir / "test_utils"
+        dist_test_utils_dir.mkdir(exist_ok=True, parents=True)
+        for f in src_test_utils:
+            if f.is_file():
+                dist_file = dist_test_utils_dir / os.path.basename(f)
+                logging.info("Copying %s ==> %s", f, dist_file)
+                shutil.copy(f, dist_file)
 
         # Let's find the set of
         zip_set = self.zip_sets[self.data["config"]]

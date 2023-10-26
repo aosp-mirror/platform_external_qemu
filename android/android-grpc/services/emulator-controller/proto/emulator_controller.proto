@@ -179,15 +179,13 @@ service EmulatorController {
     // already.
     rpc injectAudio(stream AudioPacket) returns (google.protobuf.Empty) {}
 
-    // Returns the last 128Kb of logcat output from the emulator
-    // Note that parsed logcat messages are only available after L (Api >23).
-    // it is possible that the logcat buffer gets overwritten, or falls behind.
-    rpc getLogcat(LogMessage) returns (LogMessage) {}
+    // Deprecated, please use the streamLogcat method instead.
+    rpc getLogcat(LogMessage) returns (LogMessage) {
+        option deprecated = true;
+    }
 
-    // Streams the logcat output from the emulator. The first call
-    // can retrieve up to 128Kb. This call will not return.
+    // Streams the logcat output from the emulator.
     // Note that parsed logcat messages are only available after L (Api >23)
-    // it is possible that the logcat buffer gets overwritten, or falls behind.
     rpc streamLogcat(LogMessage) returns (stream LogMessage) {}
 
     // Transition the virtual machine to the desired state. Note that
@@ -300,6 +298,12 @@ message VmRunState {
         // Guest experienced some error state, you cannot transition to this
         // state.
         INTERNAL_ERROR = 10;
+        // Completely restart the emulator.
+        RESTART = 11;
+        // Resume a stopped emulator
+        START = 12;
+        // Stop (pause) a running emulator
+        STOP = 13;
     }
 
     RunState state = 1;
@@ -480,11 +484,11 @@ message LogMessage {
     // should match the start parameter sent with the request. If the serial
     // console output exceeds the size of the buffer, older output will be
     // overwritten by newer content and the start values will be mismatched.
-    int64 start = 2;
+    int64 start = 2 [deprecated = true];
     //[Output Only] The position of the next byte of content from the serial
     // console output. Use this value in the next request as the start
     // parameter.
-    int64 next = 3;
+    int64 next = 3 [deprecated = true];
 
     // Set the sort of response you are interested it in.
     // It the type is "Parsed" the entries field will contain the parsed
@@ -815,6 +819,7 @@ message InputEvent {
         MouseEvent mouse_event = 3;
         AndroidEvent android_event = 4;
         PenEvent pen_event = 5;
+        WheelEvent wheel_event = 6;
     }
 };
 

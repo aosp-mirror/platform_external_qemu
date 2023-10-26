@@ -20,7 +20,7 @@
 #include <QWidget>        // for QWidget
 #include <memory>         // for unique_ptr
 
-#include "android/emulation/control/utils/SimpleModemClient.h"
+#include "android/emulation/control/utils/ModemClient.h"
 #include "modem_service.pb.h"
 
 class QObject;
@@ -35,7 +35,7 @@ namespace Ui {
 class TelephonyPageGrpc;
 }  // namespace Ui
 
-using android::emulation::control::SimpleModemClient;
+using android::emulation::control::ModemClient;
 using android::emulation::control::incubating::Call;
 using android::metrics::UiEventTracker;
 class TelephonyPageGrpc : public QWidget {
@@ -80,6 +80,6 @@ private:
     std::unique_ptr<Ui::TelephonyPageGrpc> mUi;
     std::shared_ptr<UiEventTracker> mPhoneTracker;
     Call mActiveCall;
-    SimpleModemClient mModemClient;
+    ModemClient mModemClient;
     QEvent::Type mCustomEventType;
 };

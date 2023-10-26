@@ -46,6 +46,7 @@
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/globals_agent.h"
 #include "android/metrics/UiEventTracker.h"
+#include "android/hw-sensors.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/function-runner.h"
@@ -497,10 +498,14 @@ void BugreportPage::loadScreenshotImage() {
         System::get()->deleteFile(mSavingStates.screenshotFilePath);
         mSavingStates.screenshotFilePath.clear();
     }
+    int displayId = 0;
+    if (android_foldable_is_pixel_fold() && android_foldable_is_folded()) {
+        displayId = android_foldable_pixel_fold_second_display_id();
+    }
     mSavingStates.screenshotSucceed = false;
     if (android::emulation::captureScreenshot(
                 System::get()->getTempDir().c_str(),
-                &mSavingStates.screenshotFilePath)) {
+                &mSavingStates.screenshotFilePath, displayId)) {
         if (System::get()->pathIsFile(mSavingStates.screenshotFilePath) &&
             System::get()->pathCanRead(mSavingStates.screenshotFilePath)) {
             mSavingStates.screenshotSucceed = true;

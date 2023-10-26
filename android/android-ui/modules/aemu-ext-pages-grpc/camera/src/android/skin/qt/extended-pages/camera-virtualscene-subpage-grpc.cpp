@@ -92,7 +92,7 @@ void CameraVirtualSceneSubpageGrpc::on_toggleTV_toggled(bool value) {
     // Update the scene.
     AnimationState animation;
     animation.set_tvon(value);
-    mServiceClient.setAnimationState(animation, [](auto ignored) {});
+    mServiceClient.setAnimationStateAsync(animation, [](auto ignored) {});
 }
 
 void CameraVirtualSceneSubpageGrpc::reportInteraction() {
@@ -203,7 +203,7 @@ void CameraVirtualSceneSubpageGrpc::loadUi() {
                 }
             });
 
-    mServiceClient.getAnimationState(
+    mServiceClient.getAnimationStateAsync(
             [this](absl::StatusOr<AnimationState*> animation) {
                 if (!animation.ok()) {
                     return;
@@ -288,5 +288,5 @@ void CameraVirtualSceneSubpageGrpc::loadInitialSettings() {
     // Set animation state.
     AnimationState animation;
     animation.set_tvon(savedAnimationState);
-    mServiceClient.setAnimationState(animation, [](auto ignored) {});
+    mServiceClient.setAnimationStateAsync(animation, [](auto ignored) {});
 }

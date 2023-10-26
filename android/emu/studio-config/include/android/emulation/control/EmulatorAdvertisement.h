@@ -107,6 +107,10 @@ public:
     // Discovers all the advertisement files of active emulators, excluding us.
     std::vector<std::string> discoverRunningEmulators();
 
+    // Discovers the first advertisment file of active emulators that
+    // has the set of props available.
+    std::string discoverEmulatorWithProperties(EmulatorProperties props);
+
 private:
     DISALLOW_COPY_AND_ASSIGN(EmulatorAdvertisement);
 

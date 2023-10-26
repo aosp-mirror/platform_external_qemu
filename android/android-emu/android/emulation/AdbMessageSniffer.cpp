@@ -13,15 +13,19 @@
 
 #include "aemu/base/ArraySize.h"
 #include "aemu/base/logging/Log.h"
-#include "host-common/AndroidPipe.h"
 #include "android/console.h"
+#include "host-common/AndroidPipe.h"
 
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include "android/utils/debug.h"
 
 static std::atomic<int> host_cts_heart_beat_count{};
 
@@ -52,7 +56,8 @@ public:
     // |name| The prefix printed for each log message.
     // |level| The requested logging level, only level > 1 will use resources.
     // |oStream| Stream to which to log the messages.
-    AdbMessageSnifferImpl(const char* name, int level, std::ostream* oStream);
+    AdbMessageSnifferImpl(const char* name,
+                          int level);
     ~AdbMessageSnifferImpl() override;
 
     void read(const AndroidPipeBuffer* /*buffers*/,
@@ -60,6 +65,30 @@ public:
               int count) override;
 
 private:
+    /**
+     * @brief Constructs a debug string representation of a buffer.
+     *
+     * @param buf The character buffer to be converted to a debug string.
+     * @param len The length of the buffer.
+     * @return std::string A string containing the debug representation of the
+     * buffer.
+     */
+    std::string DD_BUF(const uint8_t* buf, int len) const {
+        constexpr int MAX_STR_LEN = 256;
+        std::ostringstream oss;
+        for (int x = 0; x < std::min(len, MAX_STR_LEN); x++) {
+            if (oss.str().size() > MAX_STR_LEN) break;
+            if (isprint(buf[x]))
+                oss << (char)buf[x];
+            else
+                oss << "[" << std::hex << std::setw(2) << std::setfill('0')
+                    << (0xff & static_cast<unsigned int>(buf[x])) << "]";
+        }
+        if (oss.str().size() > MAX_STR_LEN)
+            oss << "...";
+        return oss.str();
+    }
+
     apacket mPacket;
     int mState;
     uint8_t* mCurrPos;
@@ -68,7 +97,6 @@ private:
     uint8_t* mBufferP;
     const std::string mName;
     int mLevel;
-    std::ostream* mLogStream;
 
     std::unordered_set<unsigned> mDummyShellArg0;
 
@@ -92,9 +120,8 @@ private:
 };
 
 AdbMessageSniffer* AdbMessageSniffer::create(const char* name,
-                                             int level,
-                                             std::ostream* oStream) {
-    return new AdbMessageSnifferImpl(name, level, oStream);
+                                             int level) {
+    return new AdbMessageSnifferImpl(name, level);
 }
 
 // the following definition is defined in system/core/adb
@@ -114,9 +141,8 @@ AdbMessageSniffer* AdbMessageSniffer::create(const char* name,
 constexpr size_t MAX_ADB_MESSAGE_PAYLOAD = 1024 * 1024;
 
 AdbMessageSnifferImpl::AdbMessageSnifferImpl(const char* name,
-                                             int level,
-                                             std::ostream* oStream)
-    : mName(name), mLevel(level), mLogStream(oStream) {
+                                             int level)
+    : mName(name), mLevel(level) {
     memset(&mPacket, 0, sizeof(apacket));
     startNewMessage();
 }
@@ -138,6 +164,11 @@ void AdbMessageSnifferImpl::readToBuffer(const AndroidPipeBuffer* buffers,
     for (int i = 0; i < numBuffers; ++i) {
         uint8_t* data = buffers[i].data;
         int dataSize = buffers[i].size;
+
+        if (mLevel >= 3) {
+              LOG(INFO) << mName << " raw: " << DD_BUF(data, dataSize);
+        }
+
         if (count < dataSize) {
             memcpy(mBufferP, data, count);
             return;
@@ -177,8 +208,7 @@ int AdbMessageSnifferImpl::readHeader(int dataSize) {
     }
     copyFromBuffer(need);
     if (!packetSeemsValid()) {
-        *mLogStream << mName
-                    << " Received invalid packet.. Disabling logging.\n";
+        LOG(INFO) << mName << " Received invalid packet.. Disabling logging.";
         mLevel = 0;
         return -1;
     }
@@ -199,8 +229,8 @@ void AdbMessageSnifferImpl::updateCtsHeartBeatCount() {
         if (!checkForDummyShellCommand()) {
             host_cts_heart_beat_count += 1;
             if (mLevel >= 2) {
-                *mLogStream << "emulator: cts heartbeat "
-                            << host_cts_heart_beat_count.load() << std::endl;
+                LOG(INFO) << "emulator: cts heartbeat "
+                            << host_cts_heart_beat_count.load();
             }
         }
     }
@@ -306,20 +336,7 @@ void AdbMessageSnifferImpl::printPayload() const {
         return;
     }
     const uint8_t* data = mPacket.data;
-    for (int i = 0; i < length; ++i) {
-        if (i % 1024 == 0) {
-            *mLogStream << mName << " ";
-        }
-        int ch = data[i];
-        if (isprint(ch) != 0) {
-            *mLogStream << static_cast<char>(ch);
-        } else {
-            auto flags = mLogStream->flags();
-            *mLogStream << "[0x" << std::hex << ch << "]";
-            mLogStream->flags(flags);
-        }
-    }
-    *mLogStream << "\n";
+    LOG(INFO) << mName << " " << DD_BUF(data, length);
 }
 
 const char* AdbMessageSnifferImpl::getCommandName(unsigned code) const {
@@ -356,9 +373,9 @@ void AdbMessageSnifferImpl::printMessage() const {
         return;
     }
 
-    *mLogStream << mName << " command: " << getCommandName(msg.command)
+    LOG(INFO) << mName << " command: " << getCommandName(msg.command)
                 << ", arg0: " << msg.arg0 << ", arg1: " << msg.arg1
-                << ", data length:" << msg.data_length << "\n";
+                << ", data length:" << msg.data_length;
 }
 
 void AdbMessageSnifferImpl::startNewMessage() {

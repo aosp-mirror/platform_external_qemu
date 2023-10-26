@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-
 #include <atomic>
 #include <functional>
 #include <memory>
 #include <string>
 #include <type_traits>
 
-#include "absl/status/statusor.h"
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"
+#include "android/emulation/control/utils/GenericCallbackFunctions.h"
 #include "avd_service.grpc.pb.h"
 #include "avd_service.pb.h"
 
@@ -28,28 +27,42 @@ namespace android {
 namespace emulation {
 namespace control {
 
-template <typename T>
-using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
-
 using namespace incubating;
-using ::google::protobuf::Empty;
-
-class SimpleAvdClient {
+/**
+ * @brief A client for interacting with the AVD (Android Virtual Device) service.
+ *
+ * The AVD service provides information about the Android Virtual Device (AVD)
+ * that is currently running in the emulator instance. This class provides methods
+ * for retrieving AVD information, both asynchronously and synchronously.
+ */
+class AvdClient {
 public:
-    explicit SimpleAvdClient(std::shared_ptr<EmulatorGrpcClient> client,
-                             AvdService::StubInterface* service = nullptr)
+    explicit AvdClient(std::shared_ptr<EmulatorGrpcClient> client,
+                         AvdService::StubInterface* service = nullptr)
         : mClient(client), mService(service) {
         if (!service) {
             mService = client->stub<AvdService>();
         }
     }
 
-    // Get the avd info from the emulator, caching the value once it has
-    // been received.
-    void getAvdInfoAsync(OnCompleted<AvdInfo> status);
+    /**
+     * @brief Asynchronously retrieves the AVD information from the emulator.
+     *
+     * The retrieved AVD information is cached once it has been received.
+     *
+     * @param onDone The callback to be invoked when the operation completes.
+     *               The callback receives an `AvdInfo` object containing the AVD information.
+     */
+    void getAvdInfoAsync(OnCompleted<AvdInfo> onDone);
 
-    // Get the avd info from the emulator, caching the value once it has
-    // been received.
+    /**
+     * @brief Synchronously retrieves the AVD information from the emulator.
+     *
+     * The retrieved AVD information is cached once it has been received.
+     *
+     * @return An `absl::StatusOr<AvdInfo>` object containing the AVD information.
+     *         If an error occurs, the status will be non-OK and the `AvdInfo` object will be empty.
+     */
     absl::StatusOr<AvdInfo> getAvdInfo();
 
 private:

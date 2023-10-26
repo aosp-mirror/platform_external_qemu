@@ -830,6 +830,14 @@ static void mouse_state_reset(MouseState* mouse) {
 }
 
 typedef struct {
+    uint32_t button_pressed;
+} TabletState;
+
+static void tablet_state_reset(TabletState* tablet) {
+    tablet-> button_pressed = 0u;
+}
+
+typedef struct {
     Button* pressed;
     Button* hover;
 } ButtonState;
@@ -1060,6 +1068,7 @@ struct SkinWindow {
     AIntMap* multi_display_fingers;
     MouseState mouse;
     ButtonState button;
+    TabletState tablet;
     BallState ball;
     bool use_emugl_subwindow;
 
@@ -1981,6 +1990,7 @@ static int skin_window_reset_internal(SkinWindow* window, SkinLayout* slayout) {
     button_state_reset(&window->button);
     ball_state_reset(&window->ball, window);
     mouse_state_reset(&window->mouse);
+    tablet_state_reset(&window->tablet);
 
     skin_window_redraw(window, NULL);
 
@@ -2447,8 +2457,14 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
             } else if (finger->inside) {
                 // The click is inside the touch screen
                 finger->tracking = 1;
-                add_finger_event(window, finger, finger->pos.x, finger->pos.y,
-                                 button_state, displayId);
+                if (feature_is_enabled(kFeature_VirtioTablet)) {
+                    window->tablet.button_pressed = window->tablet.button_pressed | 1 << (ev->u.mouse.button);
+                    add_finger_event(window, finger, finger->pos.x, finger->pos.y,
+                                     window->tablet.button_pressed, displayId);
+                } else {
+                    add_finger_event(window, finger, finger->pos.x, finger->pos.y,
+                                     button_state, displayId);
+                }
             } else if (!multitouch_should_skip_sync(button_state) &&
                        !multitouch_is_second_finger(button_state)) {
                 // This is a single click outside the touch screen
@@ -2560,8 +2576,14 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
             } else if (finger->tracking) {
                 skin_window_move_mouse(window, finger, mx, my);
                 finger->tracking = 0;
-                add_finger_event(window, finger, finger->pos.x, finger->pos.y,
-                                 button_state, displayId);
+                if (feature_is_enabled(kFeature_VirtioTablet)) {
+                    window->tablet.button_pressed = window->tablet.button_pressed & ~(1 << ev->u.mouse.button);
+                    add_finger_event(window, finger, finger->pos.x, finger->pos.y,
+                                     window->tablet.button_pressed, displayId);
+                } else {
+                    add_finger_event(window, finger, finger->pos.x, finger->pos.y,
+                                     button_state, displayId);
+                }
             }
             break;
 
@@ -2601,6 +2623,9 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
                 skin_window_move_mouse(window, finger, mx, my);
                 if (feature_is_enabled(kFeature_VirtioMouse)) {
                     add_mouse_event(window, &ev->u.mouse, mouse->button_pressed);
+                } else if (feature_is_enabled(kFeature_VirtioTablet)) {
+                    add_finger_event(window, finger, finger->pos.x,
+                                     finger->pos.y, window->tablet.button_pressed, displayId);
                 } else if (finger->tracking) {
                     add_finger_event(window, finger, finger->pos.x,
                                      finger->pos.y, button_state, displayId);

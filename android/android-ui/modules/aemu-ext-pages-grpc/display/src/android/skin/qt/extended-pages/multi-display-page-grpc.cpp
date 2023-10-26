@@ -113,7 +113,7 @@ MultiDisplayPageGrpc::MultiDisplayPageGrpc(QWidget* parent)
 
     mUi->verticalLayout_5->setAlignment(Qt::AlignTop);
 
-    mServiceClient.getDisplayConfigurations([&](auto status) {
+    mServiceClient.getDisplayConfigurationsAsync([&](auto status) {
         if (status.ok()) {
             {
                 DisplayConfigurations newConfig = *status.value();
@@ -122,7 +122,7 @@ MultiDisplayPageGrpc::MultiDisplayPageGrpc(QWidget* parent)
         }
     });
 
-    mServiceClient.receiveEmulatorNotificationEvents(
+    mServiceClient.registerNotificationListener(
             [&](const Notification* notification) {
                 if (notification
                             ->has_displayconfigurationschangednotification()) {
@@ -266,7 +266,7 @@ void MultiDisplayPageGrpc::on_applyChanges_clicked() {
     }
 
     DD("Setting configuration to %s", updated.ShortDebugString().c_str());
-    mServiceClient.setDisplayConfigurations(updated, [&](auto status) {
+    mServiceClient.setDisplayConfigurationsAsync(updated, [&](auto status) {
         if (!status.ok()) {
             {
                 std::string msg =

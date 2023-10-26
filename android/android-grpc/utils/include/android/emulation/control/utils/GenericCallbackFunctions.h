@@ -17,15 +17,20 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "aemu/base/logging/CLog.h"
-
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"
+#include "google/protobuf/empty.pb.h"
 namespace android {
 namespace emulation {
 namespace control {
 
 template <typename T>
 using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
+using OnFinished = std::function<void(absl::Status)>;
+template <typename T>
+using OnEvent = std::function<void(const T*)>;
 
-
+using ::google::protobuf::Empty;
+static OnCompleted<Empty> nothing = [](absl::StatusOr<Empty*> _ignored) {};
 /**
  * Convert a gRPC status object to an Abseil status object.
  *
@@ -37,9 +42,6 @@ static absl::Status ConvertGrpcStatusToAbseilStatus(
     return absl::Status(static_cast<absl::StatusCode>(grpc_status.error_code()),
                         grpc_status.error_message());
 }
-
-template <typename T>
-using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
 
 /**
  * Creates a new gRPC request and client context for the given
@@ -54,8 +56,8 @@ using OnCompleted = std::function<void(absl::StatusOr<T*>)>;
  * a unique_ptr to the client context object.
  */
 template <class Request, class Response>
-std::tuple<Request*, Response*, std::shared_ptr<grpc::ClientContext>> createGrpcRequestContext(
-        const std::shared_ptr<EmulatorGrpcClient>& client) {
+std::tuple<Request*, Response*, std::shared_ptr<grpc::ClientContext>>
+createGrpcRequestContext(const std::shared_ptr<EmulatorGrpcClient>& client) {
     auto request = new Request();
     auto response = new Response();
     auto context = client->newContext();
@@ -107,7 +109,6 @@ std::function<void(::grpc::Status)> grpcCallCompletionHandler(
         delete response;
     };
 }
-
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

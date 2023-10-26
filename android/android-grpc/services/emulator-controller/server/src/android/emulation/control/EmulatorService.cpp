@@ -50,7 +50,6 @@
 #include "aemu/base/logging/LogSeverity.h"
 #include "aemu/base/memory/ScopedPtr.h"
 #include "aemu/base/memory/SharedMemory.h"
-#include "aemu/base/streams/RingStreambuf.h"
 #include "android/avd/info.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
@@ -72,6 +71,7 @@
 #include "android/emulation/control/keyboard/WheelEventSender.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/LogcatParser.h"
+#include "android/emulation/control/logcat/LogcatStream.h"
 #include "android/emulation/control/notifications/NotificationStream.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
@@ -106,15 +106,13 @@
 #include "render-utils/Renderer.h"
 #include "studio_stats.pb.h"
 
-using grpc::ServerContext;
-using grpc::ServerWriter;
-using grpc::Status;
+using ::google::protobuf::Empty;
+using ::grpc::ServerContext;
+using ::grpc::ServerWriter;
+using ::grpc::Status;
 using namespace android::base;
 using namespace android::control::interceptor;
 using namespace std::chrono_literals;
-using ::google::protobuf::Empty;
-using namespace std::chrono_literals;
-using android::base::streams::RingStreambuf;
 
 namespace android {
 namespace emulation {
@@ -122,16 +120,17 @@ namespace control {
 
 // Logic and data behind the server's behavior.
 class EmulatorControllerImpl final
-    : public EmulatorController::WithCallbackMethod_streamClipboard<
-              EmulatorController::WithCallbackMethod_streamNotification<
-                      EmulatorController::WithCallbackMethod_streamInputEvent<
-                              EmulatorController::
-                                      WithCallbackMethod_injectWheel<
-                                              EmulatorController::Service>>>> {
+    : public EmulatorController::WithCallbackMethod_streamLogcat<
+              EmulatorController::WithCallbackMethod_streamClipboard<
+                      EmulatorController::WithCallbackMethod_streamNotification<
+                              EmulatorController::WithCallbackMethod_streamInputEvent<
+                                      EmulatorController::
+                                              WithCallbackMethod_injectWheel<
+                                                      EmulatorController::
+                                                              Service>>>>> {
 public:
     EmulatorControllerImpl(const AndroidConsoleAgents* agents)
         : mAgents(agents),
-          mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
           mAndroidEventSender(agents),
           mMouseEventSender(agents),
@@ -141,57 +140,16 @@ public:
           mCamera(agents->sensors),
           mClipboard(Clipboard::getClipboard(agents->clipboard)),
           mLooper(android::base::ThreadLooper::get()),
-          mNotificationStream(&mCamera, agents) {
-        // the logcat pipe will take ownership of the created stream, and writes
-        // to our buffer.
-        LogcatPipe::registerStream(new std::ostream(&mLogcatBuffer));
-    }
+          mNotificationStream(&mCamera, agents) {}
 
-    Status getLogcat(ServerContext* context,
-                     const LogMessage* request,
-                     LogMessage* reply) override {
-        auto message = mLogcatBuffer.bufferAtOffset(request->start(), kNoWait);
-        if (request->sort() == LogMessage::Parsed) {
-            auto parsed = LogcatParser::parseLines(message.second);
-            reply->set_start(message.first);
-            for (auto entry : parsed.second) {
-                *reply->add_entries() = entry;
-            }
-            reply->set_next(message.first + parsed.first);
-        } else {
-            reply->set_start(message.first);
-            reply->set_contents(message.second);
-            reply->set_next(message.first + message.second.size());
-        }
-        return Status::OK;
-    }
-
-    Status streamLogcat(ServerContext* context,
-                        const LogMessage* request,
-                        ServerWriter<LogMessage>* writer) override {
-        LogMessage log;
-        log.set_next(request->start());
-        do {
-            // When streaming, block at most 5 seconds before sending any
-            // status This also makes sure we check that the clients is
-            // still around at least once every 5 seconds.
-            auto message =
-                    mLogcatBuffer.bufferAtOffset(log.next(), k5SecondsWait);
-            if (request->sort() == LogMessage::Parsed) {
-                auto parsed = LogcatParser::parseLines(message.second);
-                log.clear_entries();
-                log.set_start(message.first);
-                for (auto entry : parsed.second) {
-                    *log.add_entries() = entry;
-                }
-                log.set_next(message.first + parsed.first);
-            } else {
-                log.set_start(message.first);
-                log.set_contents(message.second);
-                log.set_next(message.first + message.second.size());
-            }
-        } while (writer->Write(log));
-        return Status::OK;
+    virtual ::grpc::ServerWriteReactor<
+            ::android::emulation::control::LogMessage>*
+    streamLogcat(
+            ::grpc::CallbackServerContext* /*context*/,
+            const ::android::emulation::control::LogMessage* request) override {
+        auto stream =
+                new LogcatEventStreamWriter(&AdbLogcat::instance(), *request);
+        return stream;
     }
 
     Status setBattery(ServerContext* context,
@@ -513,28 +471,31 @@ public:
             ::grpc::CallbackServerContext* /*context*/,
             ::google::protobuf::Empty* /*response*/) override {
         SimpleServerLambdaReader<InputEvent>* eventReader =
-                new SimpleServerLambdaReader<InputEvent>([this, &eventReader](
-                                                                 auto request) {
-                    if (request->has_key_event()) {
-                        mKeyEventSender.send(request->key_event());
-                    } else if (request->has_mouse_event()) {
-                        mMouseEventSender.send(request->mouse_event());
-                    } else if (request->has_touch_event()) {
-                        mTouchEventSender.send(request->touch_event());
-                    } else if (request->has_android_event()) {
-                        mAndroidEventSender.send(request->android_event());
-                    } else if (request->has_pen_event()) {
-                        mPenEventSender.send(request->pen_event());
-                    } else {
-                        // Mark the stream as completed, this will
-                        // result in setting that status and scheduling
-                        // of a completion (onDone) event the async
-                        // queue.
-                        eventReader->Finish(Status(
-                                ::grpc::StatusCode::INVALID_ARGUMENT,
-                                "Missing key, mouse, touch or android event."));
-                    }
-                });
+                new SimpleServerLambdaReader<InputEvent>(
+                        [this, &eventReader](auto request) {
+                            VERBOSE_INFO(keys, "InputEvent: %s", request->ShortDebugString().c_str());
+                            if (request->has_key_event()) {
+                                mKeyEventSender.send(request->key_event());
+                            } else if (request->has_mouse_event()) {
+                                mMouseEventSender.send(request->mouse_event());
+                            } else if (request->has_touch_event()) {
+                                mTouchEventSender.send(request->touch_event());
+                            } else if (request->has_android_event()) {
+                                mAndroidEventSender.send(request->android_event());
+                            } else if (request->has_pen_event()) {
+                                mPenEventSender.send(request->pen_event());
+                            } else if (request->has_wheel_event()) {
+                                mWheelEventSender.send(request->wheel_event());
+                            } else {
+                                // Mark the stream as completed, this will
+                                // result in setting that status and scheduling
+                                // of a completion (onDone) event the async
+                                // queue.
+                                eventReader->Finish(Status(
+                                        ::grpc::StatusCode::INVALID_ARGUMENT,
+                                        "Unknown event, is the emulator out of date?."));
+                            }
+                        });
         // Note that the event reader will delete itself on completion of
         // the request.
         return eventReader;
@@ -988,7 +949,9 @@ public:
         }
 
         if (width == 0 || height == 0) {
-            dwarning("Received an empty screenshot, clients usually do not expect this.");
+            dwarning(
+                    "Received an empty screenshot, clients usually do not "
+                    "expect this.");
         }
 
         auto format = reply->mutable_format();
@@ -1292,30 +1255,40 @@ public:
 
         // These need to happen on the qemu looper as these transitions
         // will require io locks.
-        android::base::ThreadLooper::runOnMainLooper(
-                [state = request->state(), vm = mAgents->vm]() {
-                    switch (state) {
-                        case VmRunState::RESET:
-                            vm->vmReset();
-                            break;
-                        case VmRunState::SHUTDOWN:
-                            skin_winsys_quit_request();
-                            break;
-                        case VmRunState::TERMINATE: {
-                            LOG(INFO) << "Terminating the emulator.";
-                            auto pid = System::get()->getCurrentProcessId();
-                            System::get()->killProcess(pid);
-                        }; break;
-                        case VmRunState::PAUSED:
-                            vm->vmPause();
-                            break;
-                        case VmRunState::RUNNING:
-                            vm->vmResume();
-                            break;
-                        default:
-                            break;
-                    };
-                });
+        android::base::ThreadLooper::runOnMainLooper([state = request->state(),
+                                                      vm = mAgents->vm,
+                                                      ui = mAgents->libui]() {
+            switch (state) {
+                case VmRunState::RESET:
+                    vm->vmReset();
+                    break;
+                case VmRunState::SHUTDOWN:
+                    skin_winsys_quit_request();
+                    break;
+                case VmRunState::TERMINATE: {
+                    LOG(INFO) << "Terminating the emulator.";
+                    auto pid = System::get()->getCurrentProcessId();
+                    System::get()->killProcess(pid);
+                }; break;
+                case VmRunState::PAUSED:
+                    vm->vmPause();
+                    break;
+                case VmRunState::RUNNING:
+                    vm->vmResume();
+                    break;
+                case VmRunState::RESTART:
+                    ui->requestRestart(0, "External gRPC request");
+                    break;
+                case VmRunState::START:
+                    vm->vmStart();
+                    break;
+                case VmRunState::STOP:
+                    vm->vmStop();
+                    break;
+                default:
+                    break;
+            };
+        });
 
         return Status::OK;
     }
@@ -1444,8 +1417,6 @@ private:
     VirtualSceneCamera mCamera;
     Clipboard* mClipboard;
     Looper* mLooper;
-    RingStreambuf
-            mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
     std::atomic_int8_t mInjectAudioCount{0};  // # of active inject audio.
     static constexpr uint32_t k128KB = (128 * 1024) - 1;

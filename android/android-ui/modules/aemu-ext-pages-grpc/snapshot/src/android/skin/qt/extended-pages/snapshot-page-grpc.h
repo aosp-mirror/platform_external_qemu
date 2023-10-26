@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "android/emulation/control/utils/SimpleSnapshotClient.h"
+#include "android/emulation/control/utils/SnapshotClient.h"
 #include "android/skin/qt/qt-settings.h"
 #include "snapshot_service.pb.h"
 #include "ui_snapshot-page-grpc.h"
@@ -40,7 +40,7 @@ class UiEventTracker;
 }  // namespace metrics
 }  // namespace android
 
-using android::emulation::control::SimpleSnapshotServiceClient;
+using android::emulation::control::SnapshotServiceClient;
 using android::emulation::control::SnapshotPackage;
 using android::metrics::UiEventTracker;
 using android::emulation::control::SnapshotDetails;
@@ -134,6 +134,6 @@ private:
             "";  // Used to provide our output in stand-alone mode
     std::unique_ptr<Ui::SnapshotPageGrpc> mUi;
     std::shared_ptr<UiEventTracker> mSnapshotTracker;
-    SimpleSnapshotServiceClient mSnapshotService;
+    SnapshotServiceClient mSnapshotService;
     QGraphicsScene mPreviewScene;  // Used to render the preview screenshot
 };
