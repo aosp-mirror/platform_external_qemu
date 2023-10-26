@@ -478,7 +478,6 @@ void emulator_window_set_folded_skin() {
 }
 
 void emulator_window_set_no_skin() {
-    return;
     EmulatorWindow* emulator = emulator_window_get();
     if (emulator->layout_file_no_skin == NULL) {
         emulator->layout_file_no_skin = skin_file_create_from_display_v1(
