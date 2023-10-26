@@ -174,7 +174,7 @@ void BugreportPageGrpc::setAdbInterface(AdbInterface* adb) {
 }
 
 void BugreportPageGrpc::getBootStatus() {
-    mEmulatorControl.getStatus([this](absl::StatusOr<EmulatorStatus*> status) {
+    mEmulatorControl.getStatusAsync([this](absl::StatusOr<EmulatorStatus*> status) {
         if (!status.ok()) {
             return;
         }
@@ -248,7 +248,7 @@ void BugreportPageGrpc::loadScreenshotImage() {
 
     ImageFormat fmt;
     fmt.set_format(ImageFormat::PNG);
-    mEmulatorControl.getScreenshot(fmt, [this](absl::StatusOr<Image*> status) {
+    mEmulatorControl.getScreenshotAsync(fmt, [this](absl::StatusOr<Image*> status) {
         if (!status.ok()) {
             dwarning("Failed to obtain screenshot: %s",
                      status.status().message().data());

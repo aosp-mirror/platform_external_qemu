@@ -67,9 +67,9 @@ namespace emulation {
 namespace {
 
 struct VsockAdbProxy : public AdbVsockPipe::Proxy {
-    VsockAdbProxy(const int snifferLogLevel, std::ostream* oStream)
-        : mReceivedMesg(AdbMessageSniffer::create("HOST==>GUEST",  snifferLogLevel, oStream))
-        , mSendingMesg(AdbMessageSniffer::create("HOST<==GUEST",  snifferLogLevel, oStream))
+    VsockAdbProxy(const int snifferLogLevel)
+        : mReceivedMesg(AdbMessageSniffer::create("HOST==>GUEST",  snifferLogLevel))
+        , mSendingMesg(AdbMessageSniffer::create("HOST<==GUEST",  snifferLogLevel))
     {}
 
     AdbPortType portType() const override { return AdbPortType::RegularAdb; }
@@ -499,7 +499,7 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
 
     switch (portType) {
     case AdbPortType::RegularAdb:
-        mProxy = std::make_unique<VsockAdbProxy>(getConsoleAgents()->settings->hw()->test_monitorAdb, &std::cout);
+        mProxy = std::make_unique<VsockAdbProxy>(getConsoleAgents()->settings->hw()->test_monitorAdb);
         break;
 
     case AdbPortType::Jdwp:

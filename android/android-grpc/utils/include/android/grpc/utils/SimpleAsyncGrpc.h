@@ -14,6 +14,7 @@
 #pragma once
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/support/client_callback.h>
+#include <functional>
 #include <mutex>
 #include <queue>
 #include <type_traits>
@@ -154,10 +155,10 @@ class SimpleClientLambdaReader
 
 public:
     SimpleClientLambdaReader(
-            ReadCallback readFn,
             std::shared_ptr<grpc::ClientContext> context,
+            ReadCallback readFn,
             OnDoneCallback doneFn = [](auto s) {})
-        : mReadFn(readFn), mContext(context), mDoneFn(doneFn) {}
+        : mReadFn(readFn), mContext(std::move(context)), mDoneFn(doneFn) {}
 
     virtual void Read(const R* read) override { mReadFn(read); }
 
@@ -165,6 +166,8 @@ public:
         mDoneFn(status);
         delete this;
     }
+
+    virtual void TryCancel() { mContext->TryCancel(); }
 
 private:
     ReadCallback mReadFn;

@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 #pragma once
-#include <ostream>
+#include "aemu/base/logging/Log.h"
 
 class AndroidPipeBuffer;
 namespace android {
@@ -22,12 +22,12 @@ namespace emulation {
 class AdbMessageSniffer {
 public:
     struct amessage {
-        unsigned command;     /* command identifier constant      */
-        unsigned arg0;        /* first argument                   */
-        unsigned arg1;        /* second argument                  */
-        unsigned data_length; /* length of payload (0 is allowed) */
-        unsigned data_check;  /* checksum of data payload         */
-        unsigned magic;       /* command ^ 0xffffffff             */
+        uint32_t command;     /* command identifier constant      */
+        uint32_t arg0;        /* first argument                   */
+        uint32_t arg1;        /* second argument                  */
+        uint32_t data_length; /* length of payload (0 is allowed) */
+        uint32_t data_check;  /* checksum of data payload         */
+        uint32_t magic;       /* command ^ 0xffffffff             */
     };
 
     virtual ~AdbMessageSniffer() = default;
@@ -38,8 +38,8 @@ public:
     // |level| The requested logging level, only level > 0 will use resources.
     // |oStream| Stream to which to log the messages.
     static AdbMessageSniffer* create(const char* name,
-                                     int level,
-                                     std::ostream* oStream);
+                                     int level);
+
 };
 
 }  // namespace emulation

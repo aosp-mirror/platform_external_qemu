@@ -237,6 +237,23 @@ std::vector<std::string> EmulatorAdvertisement::discoverRunningEmulators() {
 
     return discovered;
 }
+std::string EmulatorAdvertisement::discoverEmulatorWithProperties(
+        EmulatorProperties props) {
+    for (const auto& discoveryFile : discoverRunningEmulators()) {
+        base::IniFile ini(discoveryFile);
+        if (!ini.read())
+            continue;
+
+        bool match = true;
+        for (const auto [key, val] : props) {
+            match = match && ini.hasKey(key) && ini.getString(key, "") == val;
+        }
+        if (match)
+            return discoveryFile;
+    }
+
+    return "";
+}
 
 void EmulatorAdvertisement::remove() const {
     System::get()->deleteFile(location());

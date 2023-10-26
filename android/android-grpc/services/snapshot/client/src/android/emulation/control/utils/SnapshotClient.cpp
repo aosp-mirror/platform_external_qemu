@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/utils/SimpleSnapshotClient.h"
+#include "android/emulation/control/utils/SnapshotClient.h"
 
 #include <grpcpp/grpcpp.h>
 #include <tuple>
@@ -26,7 +26,7 @@ namespace android {
 namespace emulation {
 namespace control {
 
-void SimpleSnapshotServiceClient::ListSnapshotsAsync(
+void SnapshotServiceClient::ListSnapshotsAsync(
         SnapshotFilter filter,
         OnCompleted<SnapshotList> onDone) {
     auto [request, response, context] =
@@ -37,14 +37,14 @@ void SimpleSnapshotServiceClient::ListSnapshotsAsync(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleSnapshotServiceClient::ListAllSnapshotsAsync(
+void SnapshotServiceClient::ListAllSnapshotsAsync(
         OnCompleted<SnapshotList> onDone) {
     SnapshotFilter filter;
     filter.set_statusfilter(SnapshotFilter::All);
     ListSnapshotsAsync(filter, onDone);
 }
 
-void SimpleSnapshotServiceClient::DeleteSnapshotAsync(
+void SnapshotServiceClient::DeleteSnapshotAsync(
         std::string id,
         OnCompleted<SnapshotPackage> onDone) {
     auto [request, response, context] =
@@ -55,7 +55,7 @@ void SimpleSnapshotServiceClient::DeleteSnapshotAsync(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleSnapshotServiceClient::SaveSnapshotAsync(
+void SnapshotServiceClient::SaveSnapshotAsync(
         std::string id,
         OnCompleted<SnapshotPackage> onDone) {
     auto [request, response, context] =
@@ -67,7 +67,7 @@ void SimpleSnapshotServiceClient::SaveSnapshotAsync(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleSnapshotServiceClient::LoadSnapshotAsync(
+void SnapshotServiceClient::LoadSnapshotAsync(
         std::string id,
         OnCompleted<SnapshotPackage> onDone) {
     auto [request, response, context] =
@@ -79,7 +79,7 @@ void SimpleSnapshotServiceClient::LoadSnapshotAsync(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleSnapshotServiceClient::UpdateSnapshotAsync(
+void SnapshotServiceClient::UpdateSnapshotAsync(
         SnapshotUpdateDescription details,
         OnCompleted<SnapshotDetails> onDone) {
     auto [request, response, context] =
@@ -91,7 +91,7 @@ void SimpleSnapshotServiceClient::UpdateSnapshotAsync(
             grpcCallCompletionHandler(context, request, response, onDone));
 }
 
-void SimpleSnapshotServiceClient::GetScreenshotAsync(
+void SnapshotServiceClient::GetScreenshotAsync(
         std::string id,
         OnCompleted<SnapshotScreenshotFile> onDone) {
     auto [request, response, context] =

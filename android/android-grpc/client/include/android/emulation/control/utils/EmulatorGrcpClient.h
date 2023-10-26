@@ -62,7 +62,7 @@ public:
     std::shared_ptr<grpc::ClientContext> newContext();
 
     // This will call TryCancel on all activeContexts.
-    void cancelAll();
+    void cancelAll(std::chrono::milliseconds maxWait = std::chrono::seconds(1));
     virtual bool hasOpenChannel(bool tryConnect = true);
     std::string address() const { return mEndpoint.target(); }
 

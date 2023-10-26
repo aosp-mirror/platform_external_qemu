@@ -215,18 +215,21 @@ const struct NonPrintableCodeEntry {
         {DomCode::GO_HOME, DomKey::GO_HOME},        // Same as HOME
         {DomCode::APP_SWITCH, DomKey::APP_SWITCH},  // "Overview"
         // {DomCode::CAMERA, DomKey::CAMERA},          // Camera
-        {DomCode::SLEEP, DomKey::STANDBY},        // Sleep
+        {DomCode::SLEEP, DomKey::STANDBY},  // Sleep
 };
 
 const size_t kDomKeyMapEntries = ARRAY_SIZE(dom_key_map);
 const size_t kKeycodeMapEntries = ARRAY_SIZE(usb_keycode_map);
 const size_t kNonPrintableCodeEntries = ARRAY_SIZE(kNonPrintableCodeMap);
 
+void KeyEventSender::sendKeyCode(int32_t code,
+                                 const KeyboardEvent::KeyCodeType codeType,
+                                 const KeyboardEvent::KeyEventType eventType) {
+    if (codeType == KeyboardEvent::Evdev) {
+        mAgents->user_event->sendKeyCode(code);
+        return;
+    }
 
-void KeyEventSender::sendKeyCode(
-        int32_t code,
-        const KeyboardEvent::KeyCodeType codeType,
-        const KeyboardEvent::KeyEventType eventType) {
     uint32_t evdev = convertToEvDev(code, codeType);
     if (eventType == KeyboardEvent::keydown ||
         eventType == KeyboardEvent::keypress) {
@@ -240,8 +243,11 @@ void KeyEventSender::sendKeyCode(
     }
 }  // namespace keyboard
 
-
 void KeyEventSender::doSend(const KeyboardEvent request) {
+    if (request.codetype() == KeyboardEvent::Evdev) {
+        mAgents->user_event->sendKeyCode(request.keycode());
+        return;
+    }
     if (request.key().size() > 0) {
         keyboard::DomKey domkey = browserKeyToDomKey(request.key());
         DD("%s -> domKey: %d, as Non printable: %d",
@@ -285,8 +291,7 @@ void KeyEventSender::doSend(const KeyboardEvent request) {
     if (request.keycode() > 0) {
         DD("keycode: %d, codetype:%d, eventtype:%d", request.keycode(),
            request.codetype(), request.eventtype());
-        sendKeyCode(request.keycode(), request.codetype(),
-                    request.eventtype());
+        sendKeyCode(request.keycode(), request.codetype(), request.eventtype());
     }
 }
 
@@ -351,9 +356,8 @@ std::vector<uint32_t> KeyEventSender::convertUtf8ToEvDev(
     return convertUtf8ToEvDev((const char*)utf8.c_str(), utf8.size());
 }
 
-std::vector<uint32_t> KeyEventSender::convertUtf8ToEvDev(
-        const char* utf8,
-        const size_t cnt) {
+std::vector<uint32_t> KeyEventSender::convertUtf8ToEvDev(const char* utf8,
+                                                         const size_t cnt) {
     std::vector<uint32_t> evdevs;
     mAgents->libui->convertUtf8ToKeyCodeEvents(
             (const uint8_t*)utf8, cnt,
@@ -371,9 +375,8 @@ std::vector<uint32_t> KeyEventSender::convertUtf8ToEvDev(
     return evdevs;
 }
 
-uint32_t KeyEventSender::convertToEvDev(
-        uint32_t from,
-        KeyboardEvent::KeyCodeType source) {
+uint32_t KeyEventSender::convertToEvDev(uint32_t from,
+                                        KeyboardEvent::KeyCodeType source) {
     if (source == KeyboardEvent::Evdev) {
         return from;
     }

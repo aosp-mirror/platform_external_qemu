@@ -5,7 +5,8 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR
   src
-  SRC android/emulation/control/utils/SimpleEmulatorControlClient.cpp
+  SRC android/emulation/control/utils/EmulatorControlClient.cpp
+      android/emulation/control/utils/VmControlClient.cpp
   DEPS android-emu-base-headers)
 target_include_directories(emulator_controller-service-client PUBLIC include
                            PRIVATE src)

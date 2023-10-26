@@ -51,14 +51,27 @@ service SensorService {
     // sets the value. The value will eventually be set, an immediate
     // get might not read the value that has just been set.
     // This can result in an event if it changes an existing physical value.
-    rpc setPhysicalModel(PhysicalModelValue) returns (google.protobuf.Empty)
-    ;
+    rpc setPhysicalModel(PhysicalModelValue) returns (google.protobuf.Empty);
     rpc getPhysicalModel(PhysicalModelValue) returns (PhysicalModelValue);
 
     // Receive a message whenever the physical model value subscribed to changes
     // Note that you can receive spurious events.  (i.e the same event 2x)
     rpc receivePhysicalModelEvents(PhysicalModelValue)
             returns (stream PhysicalModelValue);
+
+    rpc receivePhysicalStateEvents(google.protobuf.Empty)
+            returns (stream PhysicalStateEvent);
+}
+
+message PhysicalStateEvent {
+    enum StateEvent {
+        STATE_EVENT_UNDEFINED = 0;
+        STATE_TARGET_STATE_CHANGED = 1;
+        STATE_PHYSICAL_STATE_CHANGING = 2;
+        STATE_PHYSICAL_STATE_STABILIZED = 3;
+    }
+
+    StateEvent event = 1;
 }
 
 message ParameterValue {
@@ -70,10 +83,10 @@ message SensorValue {
     enum SensorState {
         SENSOR_STATE_UNDEFINED = 0;
         SENSOR_STATE_OK = 1;
+        SENSOR_STATE_UNKNOWN = 2;   // Unknown sensor (should not happen)
+        SENSOR_STATE_DISABLED = 3;  // Sensor is disabled.
         SENSOR_STATE_NO_SERVICE =
-                -3;  // qemud service is not available/initiated.
-        SENSOR_STATE_DISABLED = -2;  // Sensor is disabled.
-        SENSOR_STATE_UNKNOWN = -1;   // Unknown sensor (should not happen)
+                4;  // qemud service is not available/initiated.
     }
 
     // These are the various sensors that can be available in an emulated
@@ -137,10 +150,9 @@ message PhysicalModelValue {
     enum PhysicalState {
         PHYSICAL_STATE_UNSPECIFIED = 0;
         PHYSICAL_STATE_VALUE_OK = 1;
+        PHYSICAL_STATE_UNKNOWN = 2;  // Unknown sensor (should not happen)
         PHYSICAL_STATE_VALUE_NO_SERVICE =
-                -3;  // qemud service is not available/initiated.
-        PHYSICAL_STATE_VALUE_DISABLED = -2;  // Sensor is disabled.
-        PHYSICAL_STATE_UNKNOWN = -1;  // Unknown sensor (should not happen)
+                3;  // qemud service is not available/initiated.
     }
 
     // Details on the sensors documentation can be found here:
@@ -148,6 +160,7 @@ message PhysicalModelValue {
     // The types must follow the order defined in
     // "external/qemu/android/hw-sensors.h"
     enum PhysicalType {
+        // Indicates all in case of events.
         PHYSICAL_TYPE_UNSPECIFIED = 0;
         PHYSICAL_TYPE_POSITION = 1;
 
@@ -198,6 +211,20 @@ message PhysicalModelValue {
         // Wrist tilt gesture (1 = gaze, 0 = ungaze)
         PHYSICAL_TYPE_WRIST_TILT = 20;
     }
+
+    enum Interpolation {
+        INTERPOLATION_UNSPECIFIED = 0;
+        INTERPOLATION_SMOOTH = 1;
+        INTERPOLATION_STEP = 2;
+    }
+
+    enum ParameterValueType {
+        PARAMETER_VALUE_TYPE_UNSPECIFIED = 0;
+        PARAMETER_VALUE_TYPE_TARGET = 1;
+        PARAMETER_VALUE_TYPE_CURRENT = 2;
+        PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION = 3;
+        PARAMETER_VALUE_TYPE_DEFAULT = 4;
+    }
     PhysicalType target = 1;
 
     // [Output Only]
@@ -205,4 +232,8 @@ message PhysicalModelValue {
 
     // Value interpretation depends on sensor.
     ParameterValue value = 3;
+
+    Interpolation interpolation = 4;
+
+    ParameterValueType value_type = 5;
 }

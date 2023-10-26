@@ -171,7 +171,7 @@ void CellularPageGrpc::on_cell_signalStatusBox_currentIndexChanged(int index) {
 }
 
 void CellularPageGrpc::updateCellState() {
-    mModemClient.setCellInfo(mCurrentState, [](auto _ignored) {});
+    mModemClient.setCellInfoAsync(mCurrentState, [](auto _ignored) {});
 }
 
 void CellularPageGrpc::loadCellState() {

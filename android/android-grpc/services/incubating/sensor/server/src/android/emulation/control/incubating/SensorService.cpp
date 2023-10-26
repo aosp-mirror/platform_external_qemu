@@ -57,8 +57,11 @@ using SensorEventStream = GenericEventStreamWriter<SensorValue>;
 using PhysicalModelValueEventStream =
         GenericEventStreamWriter<PhysicalModelValue>;
 
+using PhysicalStateEventStream = GenericEventStreamWriter<PhysicalStateEvent>;
+
 using SensorEventSupport = EventChangeSupport<SensorValue>;
 using PhysicalModelEventSupport = EventChangeSupport<PhysicalModelValue>;
+using PhysicalStateEventSupport = EventChangeSupport<PhysicalStateEvent>;
 
 using google::protobuf::Empty;
 using ::grpc::CallbackServerContext;
@@ -66,9 +69,10 @@ using ::grpc::ServerContext;
 using ::grpc::Status;
 
 class SensorImpl final
-    : public SensorService::WithCallbackMethod_receivePhysicalModelEvents<
-              SensorService::WithCallbackMethod_receiveSensorEvents<
-                      SensorService::Service>> {
+    : public SensorService::WithCallbackMethod_receivePhysicalStateEvents<
+              SensorService::WithCallbackMethod_receivePhysicalModelEvents<
+                      SensorService::WithCallbackMethod_receiveSensorEvents<
+                              SensorService::Service>>> {
 public:
     SensorImpl(const AndroidConsoleAgents* agents)
         : mConsoleAgents(agents), mSensorAgent(agents->sensors) {
@@ -103,6 +107,16 @@ public:
         // Send out current state.
         event->eventArrived(latest);
         return event;
+    }
+
+    virtual ::grpc::ServerWriteReactor<PhysicalStateEvent>*
+    receivePhysicalStateEvents(::grpc::CallbackServerContext* context,
+                               const Empty* request) override {
+        dwarning(
+                "Hijacking the physical state agent. You will likely see "
+                "reduced functionality in the virtual sensors UI");
+        mSensorAgent->setPhysicalStateAgent(&mQAndroidPhysicalStateAgent);
+        return new PhysicalStateEventStream(&mPhysicalEventListeners);
     }
 
     virtual ::grpc::ServerWriteReactor<SensorValue>* receiveSensorEvents(
@@ -153,7 +167,13 @@ public:
         for (size_t i = 0; i < size; i++) {
             value->add_data(val[i]);
         }
-        reply->set_status(static_cast<SensorValue::SensorState>(state + 1));
+
+        if (state >= 0) {
+            reply->set_status(static_cast<SensorValue::SensorState>(state + 1));
+        } else {
+            reply->set_status(
+                    static_cast<SensorValue::SensorState>(abs(state) + 1));
+        }
         reply->set_target(request->target());
         return ::grpc::Status::OK;
     }
@@ -179,7 +199,7 @@ public:
                             (int)physicalValue.target() - 1,
                             physicalValue.value().data().data(),
                             physicalValue.value().data().size(),
-                            PhysicalInterpolation::PHYSICAL_INTERPOLATION_STEP);
+                            abs(((int)physicalValue.interpolation()) - 1));
                 });
         return Status::OK;
     }
@@ -198,14 +218,20 @@ public:
 
         int state = mSensorAgent->getPhysicalParameter(
                 (int)request->target() - 1, out.data(), out.size(),
-                PARAMETER_VALUE_TYPE_CURRENT);
+                abs((int)request->value_type() - 1));
 
         auto value = reply->mutable_value();
         for (size_t i = 0; i < val.size(); i++) {
             value->add_data(val[i]);
         }
-        reply->set_status(
-                static_cast<PhysicalModelValue::PhysicalState>(state + 1));
+
+        if (state >= 0) {
+            reply->set_status(
+                    static_cast<PhysicalModelValue::PhysicalState>(state + 1));
+        } else {
+            reply->set_status(static_cast<PhysicalModelValue::PhysicalState>(
+                    abs(state) + 1));
+        }
         reply->set_target(request->target());
         return Status::OK;
     }
@@ -228,6 +254,10 @@ private:
     void broadcastUpdates() {
         std::lock_guard guard(mStateAccess);
 
+        PhysicalStateEvent pev;
+        pev.set_event(PhysicalStateEvent::STATE_PHYSICAL_STATE_STABILIZED);
+        mPhysicalEventListeners.fireEvent(pev);
+
         // We will only send out an event if a sensor
         // value has changed.
 
@@ -241,6 +271,9 @@ private:
                 VERBOSE_INFO(grpc, "Broadcasting: %s",
                              sensorLatest.ShortDebugString().c_str());
                 mSensorListeners[key].fireEvent(sensorLatest);
+                // TODO(jansne): All?
+                // mSensorListeners[SensorValue::SENSOR_SENSOR_TYPE_UNSPECIFIED]
+                //         .fireEvent(sensorLatest);
             }
         }
 
@@ -254,18 +287,33 @@ private:
                 VERBOSE_INFO(grpc, "Broadcasting: %s",
                              physicalLatest.ShortDebugString().c_str());
                 mPhysicalListeners[key].fireEvent(physicalLatest);
+                // TODO(jansne): All?
+                // mPhysicalListeners
+                //         [PhysicalModelValue::PHYSICAL_TYPE_UNSPECIFIED]
+                //                 .fireEvent(physicalLatest);
             }
         }
     }
 
     void static onTargetStateChanged(void* context) {
-        // Ignored for now..
         DD("onTargetStateChanged.");
+
+        if (context != nullptr) {
+            SensorImpl* service = reinterpret_cast<SensorImpl*>(context);
+            PhysicalStateEvent pev;
+            pev.set_event(PhysicalStateEvent::STATE_TARGET_STATE_CHANGED);
+            service->mPhysicalEventListeners.fireEvent(pev);
+        }
     }
 
     void static onPhysicalStateChanging(void* context) {
-        // Ignored for now..
         DD("onPhysicalStateChanging.");
+        if (context != nullptr) {
+            SensorImpl* service = reinterpret_cast<SensorImpl*>(context);
+            PhysicalStateEvent pev;
+            pev.set_event(PhysicalStateEvent::STATE_PHYSICAL_STATE_CHANGING);
+            service->mPhysicalEventListeners.fireEvent(pev);
+        }
     }
 
     void static onPhysicalStateStabilized(void* context) {
@@ -289,6 +337,8 @@ private:
     std::unordered_map<PhysicalModelValue::PhysicalType,
                        PhysicalModelEventSupport>
             mPhysicalListeners;
+
+    PhysicalStateEventSupport mPhysicalEventListeners;
 
     std::unordered_map<SensorValue::SensorType, ParameterValue>
             mLastKnownSensorState;

@@ -20,6 +20,8 @@ public:
 
     bool isPortrait() { return mSkinPixmapIsPortrait; };
 
+    EmulatorSkin();
+
     static EmulatorSkin* getInstance();
 
 private:

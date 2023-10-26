@@ -21,7 +21,7 @@
 #include "aemu/base/async/RecurrentTask.h"
 #include "android/avd/BugreportInfo.h"
 #include "android/emulation/control/adb/AdbInterface.h"
-#include "android/emulation/control/utils/SimpleEmulatorControlClient.h"
+#include "android/emulation/control/utils/EmulatorControlClient.h"
 #include "android/skin/qt/themed-widget.h"
 #include "host-common/qt_ui_defs.h"
 
@@ -38,7 +38,7 @@ class UiEventTracker;
 }  // namespace android
 
 using android::emulation::control::Image;
-using android::emulation::control::SimpleEmulatorControlClient;
+using android::emulation::control::EmulatorControlClient;
 using android::metrics::UiEventTracker;
 
 namespace Ui {
@@ -103,7 +103,7 @@ private:
     std::string mReproSteps;
     android::emulation::AdbCommandPtr mAdbBugreport;
     android::emulation::AdbCommandPtr mAdbLogcat;
-    SimpleEmulatorControlClient mEmulatorControl;
+    EmulatorControlClient mEmulatorControl;
     android::base::RecurrentTask mTask;
     bool mBooted{false};
     int mApiLevel{kDefaultUnknownAPILevel};
