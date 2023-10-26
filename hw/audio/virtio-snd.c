@@ -1810,7 +1810,7 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
     switch (stream->state) {
     case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
         if (!virtio_snd_stream_prepare_locked(stream)) {
-            r = FAILURE(VIRTIO_SND_S_BAD_MSG);
+            r = FAILURE(VIRTIO_SND_S_IO_ERR);
             goto done;
         }
         stream->state = VIRTIO_PCM_STREAM_STATE_PREPARED;
