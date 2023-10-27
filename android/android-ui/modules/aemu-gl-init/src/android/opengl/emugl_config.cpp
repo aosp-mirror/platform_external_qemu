@@ -479,9 +479,6 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 
     if (config->use_host_vulkan) {
         system->envSet("ANDROID_EMU_VK_ICD", NULL);
-#ifdef __APPLE__
-        system->envSet("ANDROID_EMU_VK_ICD", "moltenvk");
-#endif
     } else
 #ifndef __APPLE__
     // Default to swiftshader vk on mac
