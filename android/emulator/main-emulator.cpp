@@ -36,14 +36,14 @@
 #ifndef _WIN32
 #include "android/HostHwInfo.h"
 #endif
+#include "aemu/base/ArraySize.h"
+#include "aemu/base/ProcessControl.h"
 #include "android/avd/info.h"
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
-#include "aemu/base/ArraySize.h"
-#include "aemu/base/ProcessControl.h"
 
-#include "aemu/base/Version.h"
 #include "aemu/base/Debug.h"
+#include "aemu/base/Version.h"
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/ScopedPtr.h"
@@ -97,10 +97,10 @@ static bool s_enable_verbose_launcher = false;
 #define DEBUG 1
 
 #if DEBUG
-#define D(...)                  \
-    do {                        \
-        if (s_enable_verbose_launcher || android_verbose)    \
-            dinfo(__VA_ARGS__); \
+#define D(...)                         \
+    do {                               \
+        if (s_enable_verbose_launcher) \
+            dinfo(__VA_ARGS__);        \
     } while (0)
 #else
 #define D(...) \
@@ -183,7 +183,8 @@ static void delete_files(const std::string_view file_dir,
                          const std::string_view files_to_delete[],
                          unsigned int num_files) {
     for (unsigned int i = 0; i < num_files; ++i) {
-        std::string file = PathUtils::join(file_dir.data(), files_to_delete[i].data());
+        std::string file =
+                PathUtils::join(file_dir.data(), files_to_delete[i].data());
         APosixStatus ret;
         if (path_is_dir(file.c_str())) {
             ret = path_delete_dir(file.c_str());
@@ -315,13 +316,14 @@ static void setupCpuAffinity(
 static void doLauncherTest(const char* launcherTestArg);
 
 bool handle_kill_command(int argc, char** argv) {
-    if (argc < 3) return false;
+    if (argc < 3)
+        return false;
     bool hasKill = false;
     bool hasSleep = false;
     bool hasLockFile = false;
     int killPid = 0;
     int sleepSecond = 0;
-    const char* lockfilename=NULL;
+    const char* lockfilename = NULL;
     for (int nn = 1; nn < argc; nn++) {
         const char* opt = argv[nn];
         if (!strcmp(opt, "-kill")) {
@@ -341,12 +343,11 @@ bool handle_kill_command(int argc, char** argv) {
             }
             continue;
         }
-
     }
 
     if (hasKill) {
         if (hasSleep) {
-            for(int i=0; i < sleepSecond; ++i) {
+            for (int i = 0; i < sleepSecond; ++i) {
                 const bool isAlive = System::get()->isPidAlive(killPid);
                 if (isAlive) {
                     System::get()->sleepMs(1000);
@@ -408,9 +409,11 @@ int main(int argc, char** argv) {
     LoggingFlags logFlags = kLogEnableDuplicateFilter;
 
     if (1) {
-        const char* debugger = getenv("ANDROID_EMULATOR_WAIT_FOR_LAUNCHER_DEBUGGER");
+        const char* debugger =
+                getenv("ANDROID_EMULATOR_WAIT_FOR_LAUNCHER_DEBUGGER");
         if (debugger != NULL && *debugger && *debugger != '0') {
-            fprintf(stderr, "Waiting for a debugger to attach to emulator pid %d\n",
+            fprintf(stderr,
+                    "Waiting for a debugger to attach to emulator pid %d\n",
                     static_cast<int>(System::get()->getCurrentProcessId()));
             android::base::WaitForDebugger();
             fprintf(stderr, "Debugger has attached, resuming\n");
@@ -723,13 +726,11 @@ int main(int argc, char** argv) {
         }
 
         if (!strcmp(opt, "-log-detailed") || !strcmp(opt, "-debug-log")) {
-            logFlags = static_cast<LoggingFlags>(logFlags |
-                                                 kLogEnableVerbose);
+            logFlags = static_cast<LoggingFlags>(logFlags | kLogEnableVerbose);
         }
 
         if (!strcmp(opt, "-debug-time")) {
-            logFlags = static_cast<LoggingFlags>(logFlags |
-                                                 kLogEnableTime);
+            logFlags = static_cast<LoggingFlags>(logFlags | kLogEnableTime);
         }
     }
 
@@ -1165,7 +1166,7 @@ int main(int argc, char** argv) {
     }
 #endif
 
-    if (s_enable_verbose_launcher || android_verbose) {
+    if (s_enable_verbose_launcher) {
         int i;
         dprint("emulator: Running :%s", emulatorPath);
         for (i = 0; i < argc; i++) {

@@ -86,7 +86,7 @@ auto android_createExt4ImageFromDir(const char* dstFilePath,
                                     const char* mountpoint) -> int {
     int ret =
             ::make_ext4fs_from_dir(dstFilePath, srcDirectory, size, mountpoint,
-                                   nullptr, android_verbose != 0U ? 1 : -1);
+                                   nullptr, verbose_check_any() ? 1 : -1);
     if (ret < 0) {
         EXT4_ERROR << "Failed to create ext4 image at: " << dstFilePath;
     }
