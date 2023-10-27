@@ -508,8 +508,13 @@ TEST(EmuglConfig, initWithSwiftshaderCheckVulkanEnvVar) {
                     &config, true, "auto", NULL, 0, true, false, false,
                     WINSYS_GLESBACKEND_PREFERENCE_AUTO, true));
         emuglConfig_setupEnv(&config);
+#ifdef __APPLE__
+        EXPECT_STREQ("moltenvk",
+                System::get()->envGet("ANDROID_EMU_VK_ICD").c_str());
+#else
         EXPECT_STREQ("",
                 System::get()->envGet("ANDROID_EMU_VK_ICD").c_str());
+#endif
     }
 }
 
