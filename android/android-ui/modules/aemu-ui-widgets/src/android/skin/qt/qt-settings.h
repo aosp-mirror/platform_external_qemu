@@ -40,7 +40,6 @@ constexpr char SHOW_GPU_WARNING[] = "showGpuWarning";
 constexpr char SHOW_VIRTUALSCENE_INFO[] = "showVirtualSceneInfo";
 #ifdef _WIN32
 constexpr char SHOW_VGK_WARNING[] = "showVgkWarning";
-constexpr char SHOW_HAXM_WARNING[] = "showHaxmWarning";
 #endif
 constexpr char SHOW_NESTED_WARNING[] = "showNestedWarning";
 

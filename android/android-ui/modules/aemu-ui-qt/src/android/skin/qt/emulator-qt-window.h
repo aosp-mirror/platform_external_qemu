@@ -347,7 +347,6 @@ private slots:
     void slot_adbWarningMessageAccepted();
 #ifdef _WIN32
     void slot_vgkWarningMessageAccepted();
-    void slot_haxmWarningMessageAccepted();
 #endif
     void slot_nestedWarningMessageAccepted();
     void slot_blit(SkinSurfaceBitmap* src,
@@ -456,7 +455,6 @@ private:
     void showGpuWarning();
 #ifdef _WIN32
     void checkVgkAndWarn();
-    void checkHaxmAndWarn();
 #endif
     void checkNestedAndWarn();
 
@@ -553,7 +551,6 @@ private:
     OnDemandMessageBox mAdbWarningBox;
 #ifdef _WIN32
     OnDemandMessageBox mVgkWarningBox;
-    OnDemandMessageBox mHaxmWarningBox;
 #endif
     OnDemandMessageBox mNestedWarningBox;
 
