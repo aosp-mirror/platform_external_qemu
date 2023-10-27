@@ -18,3 +18,7 @@ config REMOTE_I3C
 
 config DW_I3C
     bool
+
+config SVC_I3C
+    select I3C
+    bool
