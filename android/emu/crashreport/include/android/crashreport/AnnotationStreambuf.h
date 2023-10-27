@@ -41,12 +41,16 @@ public:
 
 protected:
     std::streamsize xsputn(const char* s, std::streamsize n) override {
-        std::memcpy(pptr(), s, n);
-        pbump(n);
+        std::streamsize available = pptr() - pbase();
+        std::streamsize to_copy = std::min(n, available);
+        if (available <= 0) {
+            return 0;  // No space left in the buffer
+        }
+        std::memcpy(pptr(), s, static_cast<std::size_t>(to_copy));
+        pbump(static_cast<int>(to_copy));
 
-        // Update the annotation size.
         SetSize(pptr() - pbase());
-        return n;
+        return to_copy;
     };
 
     int_type overflow(int_type ch) override { return traits_type::eof(); }
