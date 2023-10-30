@@ -13,6 +13,7 @@
 #include "hw/registerfields.h"
 #include "hw/qdev-properties.h"
 #include "qapi/error.h"
+#include "trace.h"
 #include "hw/i3c/i3c.h"
 #include "hw/i3c/svc-i3c.h"
 #include "hw/irq.h"
@@ -133,6 +134,13 @@ REG32(MWMSG_SDR, 0xd0)
 REG32(MRMSG_SDR, 0xd4)
     FIELD(MRMSG_SDR, DATA, 0, 16)
 
+static const uint32_t svc_i3c_resets[SVC_I3C_NR_REGS] = {
+    [R_MCONFIG] =   0x00000030,
+    [R_MSTATUS] =   0x00001000,
+    [R_MDMACTRL] =  0x00000010,
+    [R_MDATACTRL] = 0x80000030,
+};
+
 static uint64_t svc_i3c_read(void *opaque, hwaddr offset, unsigned size)
 {
     return 0;
@@ -155,6 +163,13 @@ static int svc_i3c_ibi_finish(I3CBus *bus)
 
 static void svc_i3c_enter_reset(Object *obj, ResetType type)
 {
+    SVCI3C *s = SVC_I3C(obj);
+
+    for (size_t i = 0; i < ARRAY_SIZE(s->regs); i++) {
+        s->regs[i] = svc_i3c_resets[i];
+    }
+
+    trace_svc_i3c_reset(object_get_canonical_path(obj));
 }
 
 static void svc_i3c_write(void *opaque, hwaddr offset, uint64_t value,
