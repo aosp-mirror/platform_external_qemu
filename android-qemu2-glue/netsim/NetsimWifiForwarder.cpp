@@ -11,7 +11,7 @@
 */
 #include "android-qemu2-glue/netsim/NetsimWifiForwarder.h"
 
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/emulation/HostapdController.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
 #include "android/network/GenericNetlinkMessage.h"

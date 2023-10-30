@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "host-common/address_space_device.h"
 #include "host-common/AddressSpaceService.h"
 #include "host-common/address_space_graphics.h"

@@ -14,7 +14,7 @@
 #include "aemu/base/Pool.h"
 
 #include "aemu/base/AlignedBuf.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 
 #include <vector>
 

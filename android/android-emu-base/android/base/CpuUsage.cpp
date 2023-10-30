@@ -19,7 +19,7 @@
 #include <sstream>
 
 #include "aemu/base/async/Looper.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/synchronization/ConditionVariable.h"
 #include "aemu/base/synchronization/Lock.h"

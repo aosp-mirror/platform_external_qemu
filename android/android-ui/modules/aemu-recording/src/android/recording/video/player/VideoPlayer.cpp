@@ -40,7 +40,7 @@
 #include <string>
 #include <utility>
 
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/LogSeverity.h"
 #include "aemu/base/synchronization/ConditionVariable.h"

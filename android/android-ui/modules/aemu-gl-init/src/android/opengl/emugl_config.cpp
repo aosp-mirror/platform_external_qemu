@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "aemu/base/StringFormat.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/opengl/EmuglBackendList.h"
@@ -450,7 +450,7 @@ bool emuglConfig_init(EmuglConfig* config,
             }
 
             D("%s: Error: [%s]\n", __func__, error.c_str());
-            derror("%s: %s", __func__, error.c_str());
+            derror("%s: %s", __func__, error);
 
             config->enabled = false;
             gpu_mode = "error";

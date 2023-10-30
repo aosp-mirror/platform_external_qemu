@@ -18,7 +18,7 @@
 
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/emulation/control/utils/GenericCallbackFunctions.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
 

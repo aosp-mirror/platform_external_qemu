@@ -19,7 +19,7 @@
 #include "aemu/base/EintrWrapper.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/files/ScopedFd.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/memory/ScopedPtr.h"
 #include "aemu/base/misc/FileUtils.h"
@@ -1563,7 +1563,7 @@ public:
         if (enableCrashReporting.empty()) {
             return defaultValue;
         } else {
-            dinfo("Using crash reporting configuration from environment variable: ANDROID_EMU_ENABLE_CRASH_REPORTING=%s", enableCrashReporting.c_str());
+            dinfo("Using crash reporting configuration from environment variable: ANDROID_EMU_ENABLE_CRASH_REPORTING=%s", enableCrashReporting);
             return parseBooleanValue(enableCrashReporting.c_str(), defaultValue);
         }
     }
@@ -3070,7 +3070,7 @@ void System::deleteTempDir() {
 #ifdef __linux__
     dinfo("Temp directory deletion not supported on Linux. Skipping.");
 #else // !__linux__
-    dinfo("Checking if path is safe for deletion: %s", tempDir.c_str());
+    dinfo("Checking if path is safe for deletion: %s", tempDir);
 
     if (!looksLikeTempDir(tempDir)) {
         dwarning("%s does not look like a standard temp directory.",

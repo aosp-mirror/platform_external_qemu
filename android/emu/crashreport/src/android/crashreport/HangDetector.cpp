@@ -111,7 +111,7 @@ void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
             ++mHangCount;
             mLock->unlock();
 
-            derror("%s%s", message.c_str(),
+            derror("%s%s", message,
                    android::base::IsDebuggerAttached()
                            ? ", ignored (debugger attached)"
                            : "");
@@ -235,7 +235,7 @@ void HangDetector::workerThread() {
                         "Failed hang detection predicate: '%s'",
                         predicate.second);
 
-                derror("%s%s", message.c_str(),
+                derror("%s%s", message,
                        android::base::IsDebuggerAttached()
                                ? ", ignored (debugger attached)"
                                : "");

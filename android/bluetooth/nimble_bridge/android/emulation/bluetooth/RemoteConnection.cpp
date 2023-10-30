@@ -18,6 +18,7 @@
 #include <stdint.h>         // for uint...
 #include <utility>          // for move
 
+#include "aemu/base/Log.h"
 #include "absl/strings/string_view.h"                            // for stri...
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emul...
 #include "android/emulation/bluetooth/nimble/TypeTranslator.h"   // for look...
@@ -146,8 +147,8 @@ void RemoteConnection::notifyConnectionState(
 
     if (!grpcStatus.ok()) {
         // Failure!
-        derror("Failed to report %s due to %s", csc.ShortDebugString().c_str(),
-               grpcStatus.error_message().c_str());
+        derror("Failed to report %s due to %s", csc.ShortDebugString(),
+               grpcStatus.error_message());
     }
 }
 

@@ -172,7 +172,7 @@ bool HostapdController::setSsid(std::string ssid, std::string password) {
     FILE* fp = android_fopen(mConfigFile.c_str(), "w");
     if (!android::writeStringToFile(fileno(fp),
                                     buildHostapdConfig(mSsid, mPassword))) {
-        derror("Failed to write to config file: %s", mConfigFile.c_str());
+        derror("Failed to write to config file: %s", mConfigFile);
     }
     fclose(fp);
     if (socketSend(mCtrlSock2.get(), VIRTIO_WIFI_CTRL_CMD_RELOAD_CONFIG,

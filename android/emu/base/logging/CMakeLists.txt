@@ -1,16 +1,12 @@
 android_add_library(
-  TARGET android-emu-base-logging
-  SHARED
-  LICENSE Apache-2.0
-  SOURCE_DIR
-  src
+  TARGET android-emu-base-logging SHARED LICENSE Apache-2.0 SOURCE_DIR src
   SRC android/base/logging/Log.cpp android/base/logging/LogConfiguration.cpp
-      android/base/logging/LogFormatter.cpp
-  DEPS absl::str_format android-emu-base-headers)
+      android/base/logging/LogFormatter.cpp DEPS android-emu-base-headers)
 
 target_compile_definitions(android-emu-base-logging PRIVATE LOGGING_API_SHARED)
 target_include_directories(android-emu-base-logging PRIVATE src)
-target_link_libraries(android-emu-base-logging PRIVATE android-emu-base-headers)
+target_link_libraries(android-emu-base-logging PUBLIC absl::str_format
+                      PRIVATE android-emu-base-headers)
 android_install_shared_library(TARGET android-emu-base-logging
                                DUPLICATE_FOR_WINDOWS)
 

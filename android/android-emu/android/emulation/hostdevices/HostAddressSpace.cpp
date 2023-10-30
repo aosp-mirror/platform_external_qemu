@@ -15,7 +15,7 @@
 #include "android/emulation/hostdevices/HostAddressSpace.h"
 
 #include "aemu/base/SubAllocator.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/synchronization/Lock.h"
 #include "host-common/address_space_device.h"

@@ -121,7 +121,7 @@ static std::shared_ptr<RSA> read_key_file(const std::string& file) {
 }
 
 static bool generate_key(const std::string& file) {
-    VERBOSE_PRINT(init, "generate_key(%s)...", file.c_str());
+    VERBOSE_PRINT(init, "generate_key(%s)...", file);
 
     mode_t old_mask;
     FILE* f = nullptr;

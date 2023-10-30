@@ -31,7 +31,7 @@
 
 #include "aemu/base/Version.h"
 #include "aemu/base/containers/Lookup.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/version.h"
 

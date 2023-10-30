@@ -16,7 +16,7 @@
 
 #include "android/emulation/resizable_display_config.h"
 #include "aemu/base/Log.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/misc/StringUtils.h"
 #include "android/console.h"

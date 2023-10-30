@@ -33,19 +33,15 @@
 
 using android::base::LogParams;
 using android::base::NoDuplicateLinesFormatter;
-using android::base::setMinLogLevel;
 using android::base::LogFormatter;
 using android::base::SimpleLogFormatter;
 using android::base::VerboseLogFormatter;
+using android::base::GoogleLogFormatter;
 
 inline std::string call_format(LogFormatter& formatter,
                         const LogParams& lg,
-                        const char* fmt,
-                        ...) {
-    va_list args;
-    va_start(args, fmt);
-    std::string formatted_string = formatter.format(lg, fmt, args);
-    va_end(args);
+                        const char* fmt) {
+    std::string formatted_string = formatter.format(lg, fmt);
     return formatted_string;
 }
 
@@ -112,7 +108,7 @@ void BM_FMT_SimpleLogFormatter(benchmark::State& state) {
     SimpleLogFormatter sf;
     while (state.KeepRunning()) {
         LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
-          call_format(sf, lg, "%s", "Hello World");
+          call_format(sf, lg, "Hello World");
     }
 }
 
@@ -120,15 +116,24 @@ void BM_FMT_VerboseLogFormatter(benchmark::State& state) {
     VerboseLogFormatter sf;
     while (state.KeepRunning()) {
         LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
-          call_format(sf, lg, "%s", "Hello World");
+          call_format(sf, lg, "Hello World");
     }
 }
+
+void BM_FMT_GoogleLogFormatter(benchmark::State& state) {
+    GoogleLogFormatter sf;
+    while (state.KeepRunning()) {
+        LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+          call_format(sf, lg, "Hello World");
+    }
+}
+
 
 void BM_FMT_DuplicateLogFormatter(benchmark::State& state) {
     NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
     while (state.KeepRunning()) {
         LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
-        call_format(ndlf, lg, "%s", "Hello World");
+        call_format(ndlf, lg, "Hello World");
     }
 }
 
@@ -137,7 +142,7 @@ void BM_FMT_DuplicateLogFormatterNoDupes(benchmark::State& state) {
     int i = 0;
     while (state.KeepRunning()) {
         LogParams lg = {"filename.c", i++, EMULATOR_LOG_INFO};
-        call_format(ndlf, lg, "%s", "Hello World");
+        call_format(ndlf, lg, "Hello World");
     }
 }
 
@@ -147,7 +152,7 @@ void BM_FMT_DuplicateLogFormatterNoDupesStr(benchmark::State& state) {
     while (state.KeepRunning()) {
         LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
         i++;
-        call_format(ndlf, lg, "%s", i % 2 == 0 ? "Hello World" : "Hello Friend");
+        call_format(ndlf, lg, i % 2 == 0 ? "Hello World" : "Hello Friend");
     }
 }
 
@@ -159,8 +164,8 @@ void BM_FMT_AbslStringFormat(benchmark::State& state) {
     while (state.KeepRunning()) {
         LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
         auto res = absl::StrFormat(format_string,
-                                     call_format(sf, lg, "%s", "Hello World"), i++,
-                                     call_format(sf, lg, "%s", "Hello World"));
+                                     call_format(sf, lg, "Hello World"), i++,
+                                     call_format(sf, lg, "Hello World"));
     }
 }
 
@@ -170,8 +175,8 @@ void BM_FMT_AndroidStringFormat(benchmark::State& state) {
     while (state.KeepRunning()) {
         LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
         auto res = absl::StrFormat("%s (%dx)\n%s",
-                                     call_format(sf, lg, "%s", "Hello World"), i++,
-                                     call_format(sf, lg, "%s", "Hello World"));
+                                     call_format(sf, lg, "Hello World"), i++,
+                                     call_format(sf, lg, "Hello World"));
     }
 }
 
@@ -180,14 +185,15 @@ void BM_FMT_StringConcatFormat(benchmark::State& state) {
     int i = 0;
     while (state.KeepRunning()) {
         LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
-        auto res =   call_format(sf, lg, "%s", "Hello World") + "(" +
+        auto res =   call_format(sf, lg, "Hello World") + "(" +
                    std::to_string(i++) + "x)\n" +
-                     call_format(sf, lg, "%s", "Hello World");
+                     call_format(sf, lg, "Hello World");
     }
 }
 
 BENCHMARK(BM_FMT_SimpleLogFormatter);
 BENCHMARK(BM_FMT_VerboseLogFormatter);
+BENCHMARK(BM_FMT_GoogleLogFormatter);
 BENCHMARK(BM_FMT_DuplicateLogFormatter);
 BENCHMARK(BM_FMT_DuplicateLogFormatterNoDupes);
 BENCHMARK(BM_FMT_DuplicateLogFormatterNoDupesStr);
