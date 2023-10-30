@@ -55,3 +55,4 @@ mock_target_do_ibi(uint8_t address, bool is_recv) "I3C mock target IBI with addr
 
 # svc-i3c.c
 svc_i3c_reset(char *device) "%s: reset"
+svc_i3c_write(char *device, uint64_t offset, uint32_t data) "%s: write: offset 0x%.8" PRIx64 " data 0x%.8" PRIx32

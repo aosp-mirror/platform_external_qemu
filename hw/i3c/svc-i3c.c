@@ -141,6 +141,26 @@ static const uint32_t svc_i3c_resets[SVC_I3C_NR_REGS] = {
     [R_MDATACTRL] = 0x80000030,
 };
 
+static const uint32_t svc_i3c_ro[SVC_I3C_NR_REGS] = {
+    [R_MSTATUS]    = 0x0e0000b4,
+    [R_MCTRL]      = 0xff000080,
+    [R_MSTATUS]    = 0xfff7d8ff,
+    [R_MINTSET]    = 0xfff740ff,
+    [R_MINTCLR]    = 0xfff740ff,
+    [R_MINTMASKED] = 0xffffffff,
+    [R_MERRWARN]   = 0xff70f9e3,
+    [R_MDMACTRL]   = 0xffffffc0,
+    [R_MDATACTRL]  = 0xffffff00,
+    [R_MWDATAB]    = 0xfffefe00,
+    [R_MWDATABE]   = 0xffffff00,
+    [R_MWDATAH]    = 0xfffe0000,
+    [R_MWDATAHE]   = 0xffff0000,
+    [R_MRDATAB]    = 0xffffff00,
+    [R_MRDATAH]    = 0xffff0000,
+    [R_MWMSG_SDR]  = 0xffff0000,
+    [R_MRMSG_SDR]  = 0xffff0000,
+};
+
 static uint64_t svc_i3c_read(void *opaque, hwaddr offset, unsigned size)
 {
     return 0;
@@ -175,6 +195,17 @@ static void svc_i3c_enter_reset(Object *obj, ResetType type)
 static void svc_i3c_write(void *opaque, hwaddr offset, uint64_t value,
                          unsigned size)
 {
+    SVCI3C *s = SVC_I3C(opaque);
+    uint32_t addr = offset >> 2;
+    uint32_t val32 = (uint32_t)value;
+
+    val32 &= ~svc_i3c_ro[addr];
+    trace_svc_i3c_write(object_get_canonical_path(OBJECT(s)), offset, val32);
+    switch (addr) {
+    default:
+        s->regs[addr] = val32;
+        break;
+    }
 }
 
 static const MemoryRegionOps svc_i3c_ops = {
