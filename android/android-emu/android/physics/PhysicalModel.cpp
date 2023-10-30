@@ -1420,7 +1420,7 @@ int PhysicalModelImpl::recordGroundTruth(const char* filename) {
     if (!filename) {
         E("%s: Must specify filename for writing.  Physical Motion will not be "
           "recorded.",
-          __FUNCTION__, filename);
+          __FUNCTION__);
         return -1;
     }
 

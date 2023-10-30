@@ -80,7 +80,7 @@ auto androidQtSetupEnv(int bitness, const char* emulatorDir) -> bool {
     } else {
         existing = std::string(freetypePath);
     }
-    VERBOSE_PRINT(init, "Setting LD_PRELOAD to %s", existing.c_str());
+    VERBOSE_PRINT(init, "Setting LD_PRELOAD to %s", existing);
     system->envSet("LD_PRELOAD", existing.c_str());
 #endif
 

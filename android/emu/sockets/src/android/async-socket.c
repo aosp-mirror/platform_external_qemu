@@ -280,7 +280,7 @@ _on_async_socket_io_timed_out(void* opaque, LoopTimer* timer)
     AsyncSocket* const as = asio->as;
     char tmp[256];
 
-    D("ASocket %s: %s I/O with deadline %lld has timed out at %lld",
+    D("ASocket %s: %s I/O with deadline %ld has timed out at %ld",
       _async_socket_string(as, tmp, sizeof(tmp)), asio->is_io_read ? "READ" : "WRITE",
       asio->deadline, async_socket_deadline(as, 0));
 

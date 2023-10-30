@@ -18,7 +18,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android-qemu2-glue/netsim/PacketProtocol.h"
 #include "netsim/startup.pb.h"
 

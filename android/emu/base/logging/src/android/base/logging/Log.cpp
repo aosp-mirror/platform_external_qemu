@@ -17,7 +17,7 @@
 #include <string_view>
 
 #include "absl/strings/str_format.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/LogFormatter.h"
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -26,15 +26,13 @@
 
 #define ENABLE_THREAD_ID 0
 
-
-
-namespace android {
-namespace base {
-
-namespace {
+using android::base::LogFormatter;
+using android::base::LogParams;
+using android::base::SimpleLogFormatter;
+using android::base::testing::LogOutput;
 
 // The current log output.
-testing::LogOutput* gLogOutput = nullptr;
+LogOutput* gLogOutput = nullptr;
 
 bool gDcheckLevel = false;
 LogSeverity gMinLogLevel = EMULATOR_LOG_INFO;
@@ -42,23 +40,13 @@ LogSeverity gMinLogLevel = EMULATOR_LOG_INFO;
 SimpleLogFormatter defaultFormatter;
 LogFormatter* gFormatter = &defaultFormatter;
 
-extern "C" void __emu_log_print(LogSeverity prio,
-                                const char* file,
-                                int line,
-                                const char* fmt,
-                                ...) {
+void write_log_line(LogSeverity prio, const std::string& msg) {
     FILE* fp = prio >= LOG_SEVERITY_FROM(WARNING) ? stderr : stdout;
-
-    va_list args;
-    va_start(args, fmt);
-    std::string msg = gFormatter->format({file, line, prio}, fmt, args);
-    va_end(args);
-
     if (!msg.empty()) {
-        if (msg.back() == '\n') {
-            absl::FPrintF(fp, "%s", msg);
-        } else {
-            absl::FPrintF(fp, "%s\n", msg);
+        fwrite(msg.c_str(), 1, msg.size(), fp);
+        if (msg.back() != '\n') {
+            constexpr char newline = '\n';
+            fwrite(&newline, sizeof(newline), 1, fp);
         }
     }
 
@@ -68,18 +56,45 @@ extern "C" void __emu_log_print(LogSeverity prio,
     }
 }
 
+void __emu_log_print_str(LogSeverity prio,
+                         const char* file,
+                         int line,
+                         const std::string& msg) {
+    write_log_line(prio, gFormatter->format({file, line, prio},
+                                                      msg));
+}
+
+LOGGING_API extern "C" void __emu_log_print(LogSeverity prio,
+                                const char* file,
+                                int line,
+                                const char* fmt,
+                                ...) {
+    const int bufferSize = 2048;  // 2KB buffer size
+    char buffer[bufferSize];
+    va_list args;
+    va_start(args, fmt);
+    int size = vsnprintf(buffer, bufferSize, fmt, args);
+    va_end(args);
+    auto logline = std::string(buffer, size);
+
+    write_log_line(prio, gFormatter->format({file, line, prio}, logline));
+}
+
 void logMessage(const LogParams& params,
                 const char* message,
                 size_t messageLen) {
     if (gLogOutput) {
         gLogOutput->logMessage(params, message, messageLen);
     } else {
-        __emu_log_print(params.severity, params.file, params.lineno, "%.*s",
-                        messageLen, message);
+        __emu_log_print_str(params.severity, params.file, params.lineno,
+                            std::string(message, messageLen));
     }
 }
 
-}  // namespace
+namespace android {
+namespace base {
+
+namespace {}  // namespace
 
 // DCHECK level.
 
@@ -95,11 +110,11 @@ bool setDcheckLevel(bool enabled) {
 
 // LogSeverity
 
-extern  "C" LogSeverity getMinLogLevel() {
+extern "C" LogSeverity getMinLogLevel() {
     return gMinLogLevel;
 }
 
-extern  "C"  void setMinLogLevel(LogSeverity level) {
+extern "C" void setMinLogLevel(LogSeverity level) {
     gMinLogLevel = level;
 }
 

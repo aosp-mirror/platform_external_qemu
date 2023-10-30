@@ -129,7 +129,8 @@ android_add_executable(
   LICENSE Apache-2.0 SOURCE_DIR
   src
   SRC android/crashreport/CrashUploadTool.cpp
-  DEPS android-emu-base-headers
+  DEPS android-emu-base
+       android-emu-base-logging
        android-emu-crashreport
        android-emu-crashreport-consent-always
        android-emu-crashreport-uploader

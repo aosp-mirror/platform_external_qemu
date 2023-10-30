@@ -11,11 +11,10 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include "android/filesystems/partition_types.h"
 #include "android/utils/compiler.h"
-
-#include <stdbool.h>
-#include <stdint.h>
 
 ANDROID_BEGIN_HEADER
 

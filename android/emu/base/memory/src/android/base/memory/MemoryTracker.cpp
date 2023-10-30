@@ -29,7 +29,7 @@
 #include <vector>
 #endif
 
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 
 using android::base::LazyInstance;
 

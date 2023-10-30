@@ -20,7 +20,7 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
@@ -78,7 +78,7 @@ bool JwkDirectoryObserver::start() {
 
 void JwkDirectoryObserver::scanJwkPath() {
     mLoadedKeys.clear();
-    dinfo("Scanning %s for jwk keys.", mJwkPath.c_str());
+    dinfo("Scanning %s for jwk keys.", mJwkPath);
     for (auto strPath : System::get()->scanDirEntries(mJwkPath.c_str(), true)) {
         auto status = mLoadedKeys.add(strPath);
         if (!status.ok()) {
@@ -102,10 +102,10 @@ void JwkDirectoryObserver::stop() {
 void JwkDirectoryObserver::fileChangeHandler(
         FileSystemWatcher::WatcherChangeType change,
         Path path) {
-    DD("Filechange handler %d for %s", change, path.c_str());
+    DD("Filechange handler %d for %s", change, path);
     if (!mPathFilter(path)) {
         // Ignore files of the given type.
-        DD("Ignoring %s", path.c_str());
+        DD("Ignoring %s", path);
         return;
     }
 
@@ -113,7 +113,7 @@ void JwkDirectoryObserver::fileChangeHandler(
         case FileSystemWatcher::WatcherChangeType::Created:
             [[fallthrough]];
         case FileSystemWatcher::WatcherChangeType::Changed: {
-            DD("Changed/Created event for: %s", path.c_str());
+            DD("Changed/Created event for: %s", path);
 
             // Wait at most 1 second for non-empty files
             auto status = mLoadedKeys.addWithRetryForEmpty(
@@ -121,27 +121,27 @@ void JwkDirectoryObserver::fileChangeHandler(
             if (!status.ok()) {
                 dwarning("Failed add jwk key: %s, due to: %s, access will be "
                        "denied to this provider and the file deleted.",
-                       path.c_str(), status.message().data());
+                       path, status.message());
                 System::get()->deleteFile(path);
                 return;
             }
             VERBOSE_INFO(grpc,
                          "Added JSON Web Key Sets from %s, %d keys loaded",
-                         path.c_str(), mLoadedKeys.size());
+                         path, mLoadedKeys.size());
             break;
         }
         case FileSystemWatcher::WatcherChangeType::Deleted:
-            DD("Deleted %s", path.c_str());
+            DD("Deleted %s", path);
             auto status = mLoadedKeys.remove(path);
             if (!status.ok()) {
                 // This usually means it is already deleted.
-                derror("Failed to remove jwk key: %s, due to: %s", path.c_str(),
-                       status.message().data());
+                derror("Failed to remove jwk key: %s, due to: %s", path,
+                       status.message());
                 return;
             }
             VERBOSE_INFO(grpc,
                          "Removed JSON Web Key Sets from %s, %d keys loaded",
-                         path.c_str(), mLoadedKeys.size());
+                         path, mLoadedKeys.size());
     };
 
     notifyKeysetUpdated();

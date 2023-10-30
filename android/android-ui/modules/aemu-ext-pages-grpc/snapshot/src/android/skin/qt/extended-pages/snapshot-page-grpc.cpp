@@ -58,7 +58,7 @@
 
 #include "aemu/base/ProcessControl.h"
 #include "aemu/base/TypeTraits.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/avd/info.h"
 #include "android/avd/util.h"
 #include "android/base/system/System.h"
