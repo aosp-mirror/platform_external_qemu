@@ -525,6 +525,8 @@ config NPCM8XX
     select UNIMP
     select NPCM_PCIERC
     select CMIS
+    select I3C
+    select SVC_I3C
 
 config FSL_IMX25
     bool

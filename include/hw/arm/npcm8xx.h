@@ -22,6 +22,7 @@
 #include "hw/cpu/cluster.h"
 #include "hw/gpio/npcm7xx_gpio.h"
 #include "hw/i2c/npcm_smbus.h"
+#include "hw/i3c/svc-i3c.h"
 #include "hw/ipmi/npcm7xx_kcs.h"
 #include "hw/intc/arm_gic_common.h"
 #include "hw/mem/npcm7xx_mc.h"
@@ -110,6 +111,7 @@ typedef struct NPCM8xxState {
     NPCM7xxSDHCIState   mmc;
     NPCM7xxPECIState    peci;
     NPCMPCIERCState     pcierc;
+    SVCI3C              i3c[6];
 } NPCM8xxState;
 
 typedef struct NPCM8xxClass {

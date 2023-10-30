@@ -174,6 +174,12 @@ enum NPCM8xxInterrupt {
     NPCM8XX_UART4_IRQ,
     NPCM8XX_UART5_IRQ,
     NPCM8XX_UART6_IRQ,
+    NPCM8XX_I3C0_IRQ            = 224,
+    NPCM8XX_I3C1_IRQ,
+    NPCM8XX_I3C2_IRQ,
+    NPCM8XX_I3C3_IRQ,
+    NPCM8XX_I3C4_IRQ,
+    NPCM8XX_I3C5_IRQ,
 };
 
 /* Total number of GIC interrupts, including internal Cortex-A35 interrupts. */
@@ -294,6 +300,16 @@ static const hwaddr npcm8xx_ohci_addr[] = {
 static const hwaddr npcm8xx_pci_mbox_addr[] = {
     0xf0848000,
     0xf0868000,
+};
+
+/* Register base addresses for each I3C module. */
+static const hwaddr npcm8xx_i3c_addr[] = {
+    0xfff10000,
+    0xfff11000,
+    0xfff12000,
+    0xfff13000,
+    0xfff14000,
+    0xfff15000,
 };
 
 static const struct {
@@ -483,6 +499,10 @@ static void npcm8xx_init(Object *obj)
     object_initialize_child(obj, "mmc", &s->mmc, TYPE_NPCM7XX_SDHCI);
     object_initialize_child(obj, "peci", &s->peci, TYPE_NPCM7XX_PECI);
     object_initialize_child(obj, "pcierc", &s->pcierc, TYPE_NPCM_PCIERC);
+
+    for (i = 0; i < ARRAY_SIZE(s->i3c); i++) {
+        object_initialize_child(obj, "i3c[*]", &s->i3c[i], TYPE_SVC_I3C);
+    }
 }
 
 static void npcm8xx_realize(DeviceState *dev, Error **errp)
@@ -811,6 +831,16 @@ static void npcm8xx_realize(DeviceState *dev, Error **errp)
     sysbus_connect_irq(SYS_BUS_DEVICE(&s->pcierc), 0,
                        npcm8xx_irq(s, NPCM8XX_PCIE_RC_IRQ));
 
+    /* I3C */
+    for (i = 0; i < ARRAY_SIZE(s->i3c); i++) {
+        object_property_set_int(OBJECT(&s->i3c[i]), "device-id", i,
+                                &error_abort);
+        sysbus_realize(SYS_BUS_DEVICE(&s->i3c[i]), &error_abort);
+        sysbus_mmio_map(SYS_BUS_DEVICE(&s->i3c[i]), 0, npcm8xx_i3c_addr[i]);
+        sysbus_connect_irq(SYS_BUS_DEVICE(&s->i3c[i]), 0,
+                           npcm8xx_irq(s, NPCM8XX_I3C0_IRQ + i));
+    }
+
     create_unimplemented_device("npcm8xx.shm",          0xc0001000,   4 * KiB);
     create_unimplemented_device("npcm8xx.gicextra",     0xdfffa000,  24 * KiB);
     create_unimplemented_device("npcm8xx.vdmx",         0xe0800000,   4 * KiB);
@@ -857,12 +887,6 @@ static void npcm8xx_realize(DeviceState *dev, Error **errp)
     create_unimplemented_device("npcm8xx.aes",          0xf0858000,   4 * KiB);
     create_unimplemented_device("npcm8xx.des",          0xf0859000,   4 * KiB);
     create_unimplemented_device("npcm8xx.sha",          0xf085a000,   4 * KiB);
-    create_unimplemented_device("npcm8xx.i3c0",         0xfff10000,   4 * KiB);
-    create_unimplemented_device("npcm8xx.i3c1",         0xfff11000,   4 * KiB);
-    create_unimplemented_device("npcm8xx.i3c2",         0xfff12000,   4 * KiB);
-    create_unimplemented_device("npcm8xx.i3c3",         0xfff13000,   4 * KiB);
-    create_unimplemented_device("npcm8xx.i3c4",         0xfff14000,   4 * KiB);
-    create_unimplemented_device("npcm8xx.i3c5",         0xfff15000,   4 * KiB);
     create_unimplemented_device("npcm8xx.spixcs0",      0xf8000000,  16 * MiB);
     create_unimplemented_device("npcm8xx.spixcs1",      0xf9000000,  16 * MiB);
     create_unimplemented_device("npcm8xx.spix",         0xfb001000,   4 * KiB);
