@@ -171,7 +171,10 @@ static void svc_i3c_update_irq(SVCI3C *s)
 
 static uint64_t svc_i3c_read(void *opaque, hwaddr offset, unsigned size)
 {
-    return 0;
+    SVCI3C *s = SVC_I3C(opaque);
+    uint32_t addr = offset >> 2;
+
+    return s->regs[addr];
 }
 
 static int svc_i3c_ibi_handle(I3CBus *bus, uint8_t addr, bool is_recv)
