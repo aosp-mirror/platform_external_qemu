@@ -21,7 +21,8 @@ int X11ErrorHandler::s_lastErrorCode = 0;
 // static
 android::base::Lock X11ErrorHandler::s_lock;
 
-X11ErrorHandler::X11ErrorHandler(EGLNativeDisplayType dpy) {
+X11ErrorHandler::X11ErrorHandler(EGLNativeDisplayType dpy):
+    m_dpy(dpy) {
     android::base::AutoLock mutex(s_lock);
     XSync(dpy,False);
     s_lastErrorCode = 0;
@@ -30,6 +31,7 @@ X11ErrorHandler::X11ErrorHandler(EGLNativeDisplayType dpy) {
 
 X11ErrorHandler::~X11ErrorHandler() {
     android::base::AutoLock mutex(s_lock);
+    XSync(m_dpy, False);
     XSetErrorHandler(m_oldErrorHandler);
     s_lastErrorCode = 0;
 }

@@ -28,6 +28,7 @@ public:
     int getLastError() const { return s_lastErrorCode; }
 
 private:
+    EGLNativeDisplayType m_dpy;
     static int s_lastErrorCode;
     int (*m_oldErrorHandler)(Display *, XErrorEvent *) = nullptr;
     static android::base::Lock s_lock;
