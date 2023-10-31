@@ -126,7 +126,7 @@ static void dumpPerfStats() {
     auto usage = System::get()->getMemUsage();
     std::string memoryStats =
             emugl::getMemoryTracker()
-                    ? emugl::getMemoryTracker()->printUsage(android_verbose)
+                    ? emugl::getMemoryTracker()->printUsage(get_verbosity_mask())
                     : "";
     auto cpuUsage = emugl::getCpuUsage();
     std::string lastStats =

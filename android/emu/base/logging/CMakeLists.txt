@@ -1,19 +1,25 @@
 android_add_library(
-  TARGET android-emu-base-logging # SHARED # Testing only
+  TARGET android-emu-base-logging
+  SHARED
   LICENSE Apache-2.0
-  SOURCE_DIR src
+  SOURCE_DIR
+  src
   SRC android/base/logging/Log.cpp android/base/logging/LogConfiguration.cpp
       android/base/logging/LogFormatter.cpp
-  DEPS absl::str_format
-       android-emu-base-headers)
+  DEPS absl::str_format android-emu-base-headers)
 
+target_compile_definitions(android-emu-base-logging PRIVATE LOGGING_API_SHARED)
 target_include_directories(android-emu-base-logging PRIVATE src)
 target_link_libraries(android-emu-base-logging PRIVATE android-emu-base-headers)
+android_install_shared_library(TARGET android-emu-base-logging
+                               DUPLICATE_FOR_WINDOWS)
 
 android_add_test(
   TARGET android-emu-base-logging_unittests
-  SOURCE_DIR test
-  SRC android/base/logging/Log_unittest.cpp
-      android/base/logging/LogFormatter_unittest.cpp
-  DEPS android-emu-base-headers android-emu-base-logging gmock_main)
+  SOURCE_DIR .
+  SRC src/android/base/logging/LogFormatter.cpp
+      test/android/base/logging/Log_unittest.cpp
+      test/android/base/logging/LogFormatter_unittest.cpp
+  DEPS absl::str_format android-emu-base-headers android-emu-base-logging
+       gmock_main)
 target_include_directories(android-emu-base-logging_unittests PRIVATE src)

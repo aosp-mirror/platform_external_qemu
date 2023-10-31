@@ -8,24 +8,25 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
 #include "aemu/base/logging/Log.h"
 
-#include <stdarg.h>                             // for va_end, va_start
-#include <stdio.h>                              // for size_t, fflush, vsnpr...
-#include <string.h>                             // for memcpy, strerror
-#include <cstdlib>                              // for abort
-#include <string_view>                          // for string_view
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <cstdlib>
+#include <string_view>
 
-#include "absl/strings/str_format.h"            // for FPrintF
-#include "aemu/base/logging/CLog.h"          // for __emu_log_print
-#include "aemu/base/logging/LogFormatter.h"  // for SimpleLogFormatter
+#include "absl/strings/str_format.h"
+#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/LogFormatter.h"
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
 #endif
 
 #define ENABLE_THREAD_ID 0
+
+
 
 namespace android {
 namespace base {
@@ -94,12 +95,16 @@ bool setDcheckLevel(bool enabled) {
 
 // LogSeverity
 
-LogSeverity getMinLogLevel() {
+extern  "C" LogSeverity getMinLogLevel() {
     return gMinLogLevel;
 }
 
-void setMinLogLevel(LogSeverity level) {
+extern  "C"  void setMinLogLevel(LogSeverity level) {
     gMinLogLevel = level;
+}
+
+LogSeverity minLogLevel() {
+    return gMinLogLevel;
 }
 
 void setLogFormatter(LogFormatter* fmt) {
@@ -118,7 +123,7 @@ LogString::LogString(const char* fmt, ...) {
         va_end(args);
         if (ret >= 0 && static_cast<size_t>(ret) < capacity) {
             break;
-}
+        }
         capacity *= 2;
     }
 }
@@ -137,8 +142,7 @@ std::ostream& operator<<(std::ostream& stream,
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream,
-                         const std::string_view& str) {
+std::ostream& operator<<(std::ostream& stream, const std::string_view& str) {
     if (!str.empty()) {
         stream.write(str.data(), str.size());
     }

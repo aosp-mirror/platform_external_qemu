@@ -286,10 +286,10 @@ bool android_parse_debug_tags_option(const char* opt, bool parse_as_suffix) {
                 result = true;
                 if (remove) {
                     base_disable_verbose_logs();
-                    android_verbose = 0;
+                    set_verbosity_mask(0);
                 } else {
                     base_enable_verbose_logs();
-                    android_verbose = ~0;
+                    set_verbosity_mask(~0);
                 }
             } else {
                 char  temp[32];
@@ -311,9 +311,9 @@ bool android_parse_debug_tags_option(const char* opt, bool parse_as_suffix) {
                 } else {
                     result = true;
                     if (remove)
-                        android_verbose &= ~mask;
+                        set_verbosity_mask(get_verbosity_mask() & ~mask);
                     else
-                        android_verbose |= mask;
+                        set_verbosity_mask(get_verbosity_mask() | mask);
                 }
             }
         }

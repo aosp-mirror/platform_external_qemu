@@ -27,7 +27,7 @@ target_include_directories(
 android_target_properties(
   emugl_common linux
   "LINK_FLAGS<=-Wl,-rpath,'$COMMON'  -Wl,--disable-new-dtags")
-android_install_shared(emugl_common)
+android_install_shared_library(TARGET emugl_common)
 
 android_add_library(TARGET emugl_test_shared_library SHARED LICENSE Apache-2.0
                     SRC testing/test_shared_library.cpp)
