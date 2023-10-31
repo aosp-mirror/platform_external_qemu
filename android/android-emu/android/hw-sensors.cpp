@@ -1335,6 +1335,9 @@ bool android_foldable_hinge_configured() {
 }
 
 bool android_foldable_is_pixel_fold() {
+    if (resizableEnabled34()) {
+        return true;
+    }
     const auto devname = getConsoleAgents()->settings->hw()->hw_device_name;
     return (devname && "pixel_fold" == std::string(devname) && fc::isEnabled(fc::SupportPixelFold));
 }

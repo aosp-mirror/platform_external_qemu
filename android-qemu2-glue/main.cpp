@@ -371,7 +371,7 @@ static void updateDataSystemSubdirectory(const char* dataDirectory,
 }
 
 static void prepareSkinConfig(AndroidHwConfig* hw, const char* dataDirectory) {
-    if (hw->hw_device_name && "pixel_fold" == std::string(hw->hw_device_name)) {
+    if (android_foldable_is_pixel_fold()) {
         // copy the /data/misc/pixel_fold/{display_settings.xml, devicestate/
         // and displayconfig/} to /data/system/
         updateDataSystemSubdirectory(dataDirectory, "devicestate",
@@ -1815,7 +1815,7 @@ extern "C" int main(int argc, char** argv) {
 
     // quirk for pixel-fold
     // make sure skin is lcdwidth x lcdheight for now
-    if (hw->hw_device_name && "pixel_fold" == std::string(hw->hw_device_name)) {
+    if (android_foldable_is_pixel_fold()) {
         if (opts->skin && isdigit(opts->skin[0])) {
             char tmp[64];
             snprintf(tmp, sizeof(tmp), "%dx%d\n", hw->hw_lcd_width,

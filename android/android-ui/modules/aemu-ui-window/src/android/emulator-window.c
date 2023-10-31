@@ -493,6 +493,22 @@ void emulator_window_set_no_skin() {
                               currentRotation);
 }
 
+void emulator_window_set_skin(int skinIndex) {
+    if (skinIndex < 0 || skinIndex >= PRESET_SIZE_MAX) {
+        dwarning("invalid skin number %d\n", skinIndex);
+        return;
+    }
+    EmulatorWindow* emulator = emulator_window_get();
+    if (emulator->layout_file_resizable_skins[skinIndex] == NULL) {
+        return;
+    }
+    emulator->layout_file = emulator->layout_file_resizable_skins[skinIndex];
+    const SkinRotation currentRotation =
+            qemulator->uiEmuAgent->window->getRotation();
+    skin_ui_update_and_rotate(emulator->ui, emulator->layout_file,
+                              currentRotation);
+}
+
 void emulator_window_restore_skin() {
     EmulatorWindow* emulator = emulator_window_get();
     if (emulator->layout_file_skin == NULL) {
@@ -578,6 +594,22 @@ int emulator_window_init(EmulatorWindow* emulator,
                                                            &skin_fb_funcs);
         }
         emulator->layout_file_skin = emulator->layout_file;
+    }
+
+    if (resizableEnabled34()) {
+        for (int i = 0; i < PRESET_SIZE_MAX; ++i) {
+            struct PresetEmulatorSizeInfo myinfo;
+            if (getResizableConfig(i, &myinfo)) {
+                emulator->layout_file_resizable_skins[i] =
+                        skin_file_create_with_width_height_bpp(
+                                myinfo.width, myinfo.height, myinfo.dpi,
+                                &skin_fb_funcs);
+            } else {
+                emulator->layout_file_resizable_skins[i] = NULL;
+            }
+        }
+        emulator->layout_file_skin =
+                emulator->layout_file_resizable_skins[PRESET_SIZE_UNFOLDED];
     }
 
     emulator->ui = NULL;

@@ -2557,7 +2557,14 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
         if (isFolded) {
             setFoldedSkin();
         } else {
-            restoreSkin();
+            if(resizableEnabled34()) {
+                PresetEmulatorSizeType activeConfig = getResizableActiveConfigId();
+                if (activeConfig == 1) {
+                    restoreSkin();
+                }
+            } else {
+                restoreSkin();
+            }
         }
         return;
     }
