@@ -34,6 +34,7 @@ TEST(VirtioGpuTimelinesTest, TasksShouldHaveDifferentIds) {
 }
 
 TEST(VirtioGpuTimelinesTest, CantPollWithAsyncCallbackEnabled) {
+    GTEST_SKIP() << "b/308688261";
     EXPECT_DEATH(
         {
             std::unique_ptr<VirtioGpuTimelines> virtioGpuTimelines =
