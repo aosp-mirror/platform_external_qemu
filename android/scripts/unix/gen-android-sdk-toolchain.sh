@@ -17,7 +17,6 @@
 
 shell_import utils/aosp_dir.shi
 shell_import utils/option_parser.shi
-
 PROGRAM_PARAMETERS="<install-dir>"
 
 PROGRAM_DESCRIPTION=\
@@ -186,6 +185,7 @@ gen_wrapper_program ()
     local FLAGS=""
     local POST_FLAGS=""
     local DST_PROG="$PROG"
+    log2 "gen_wrapper_program [$PROG] src:$SRC_PREFIX pre:$DST_PREFIX dst:$DST_FILE, [$5]"
     case $PROG in
       cc|gcc|cpp|clang)
           FLAGS=$FLAGS" $EXTRA_CFLAGS"
@@ -206,6 +206,7 @@ gen_wrapper_program ()
 
     # Redirect gcc -> clang if we are using clang.
     if [ "$CLANG_BINDIR" ]; then
+        log2 "${CLANG_BINDIR} check $PROG"
         CLANG_BINDIR=${CLANG_BINDIR%/}
         case $PROG in
            cc|gcc|clang)
@@ -406,6 +407,8 @@ gen_wrapper_toolchain () {
     local DST_DIR="$3"
     local CLANG_BINDIR="$4"
     local PROG
+
+    log2 "gen_wrapper_toolchain src_prefix: $1, dst_prefix: $2, dst_dir: $3, clang_bindir: $4"
     case "$CURRENT_HOST" in
         windows_msvc*)
           local COMPILERS="cc gcc clang c++ cl g++ clang++ cpp ld clang-tidy ar as ranlib strings nm objdump objcopy link lib rc windres"
@@ -467,7 +470,7 @@ gen_wrapper_toolchain () {
     fi
 
     for PROG in $PROGRAMS; do
-        gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
+        gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR" "$CLANG_BINDIR"
     done
 
     # Setup additional host specific things
@@ -782,13 +785,7 @@ fetch_dependencies_msvc() {
 }
 
 prepare_build_for_darwin_aarch64() {
-    # Use system clang
-    CLANG_BINDIR=
-    CLANG_DIR=
-    GNU_CONFIG_HOST=
-    CLANG_VERSION=
-    SYSROOT="/"
-
+    CLANG_BINDIR=$PREBUILT_TOOLCHAIN_DIR/bin
     OSX_VERSION=$(sw_vers -productVersion)
     OSX_DEPLOYMENT_TARGET=10.16
     OSX_SDK_SUPPORTED="10.11 10.12 10.13 10.14 10.15 10.16 11.0 11.1 11.2 11.3 11.4 11.5 11.6 12.0 12.1 12.3 13.0 13.1 13.3 14.0"
@@ -835,9 +832,7 @@ prepare_build_for_darwin_aarch64() {
     EXTRA_CFLAGS="$common_FLAGS -B/usr/bin"
     EXTRA_CXXFLAGS="$common_FLAGS -B/usr/bin"
     var_append EXTRA_CXXFLAGS "-stdlib=libc++"
-    var_append EXTRA_CXXFLAGS "--std=c++17"
     EXTRA_LDFLAGS="$common_FLAGS"
-    DST_PREFIX=
 }
 
 get_clang_version() {
