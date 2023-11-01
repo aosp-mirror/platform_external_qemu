@@ -620,7 +620,6 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
 endif()
 
 prebuilt(GLIB2)
-prebuilt(FDT)
 prebuilt(PIXMAN)
 prebuilt(VIRGLRENDERER)
 if(NOT DARWIN_AARCH64)
@@ -917,7 +916,7 @@ android_add_library(
   NOTICE "REPO/LICENSE"
   SRC # cmake-format: sortable
       ${libqemuutil_generated_sources} ${libqemuutil_sources})
-target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
+target_link_libraries(libqemu2-util PRIVATE android-qemu-deps fdt)
 android_target_link_libraries(libqemu2-util windows
                               PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
 target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
