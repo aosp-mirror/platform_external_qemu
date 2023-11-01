@@ -63,6 +63,7 @@
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/version.h"
 #include "host-common/opengl/emugl_config.h"
+#include "android/crashreport/crash-initializer.h"
 
 #ifdef __linux__
 #include <fcntl.h>
@@ -385,6 +386,7 @@ android::base::Version getRequiredEmulatorVersion(
 
 /* Main routine */
 int main(int argc, char** argv) {
+    crashhandler_init(argc, argv);
     const char* avdName = NULL;
     const char* avdArch = NULL;
     const char* engine = NULL;
