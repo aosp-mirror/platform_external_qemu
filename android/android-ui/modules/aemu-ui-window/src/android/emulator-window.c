@@ -19,6 +19,7 @@
 
 #include "android/android.h"         // for android_base...
 #include "android/avd/info.h"        // for avdInfo_getName
+#include "android/avd/keys.h"
 #include "android/cmdline-option.h"  // for android_cmdLineOptions
 #include "android/console.h"         // for android_hw
 #include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
@@ -563,7 +564,7 @@ int emulator_window_init(EmulatorWindow* emulator,
             if (skinName && skinDir) {
                 // set to folded
                 avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
-                                       "folded");
+                                       PIXEL_FOLD_CLOSED_SKIN_NAME);
                 avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(),
                                     &skinName, &skinDir);
                 AConfig* root = aconfig_node("", "");
@@ -580,7 +581,7 @@ int emulator_window_init(EmulatorWindow* emulator,
                                                       &skin_fb_funcs, bpp);
                 // recover to unfolded
                 avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
-                                       "unfolded");
+                                       PIXEL_FOLD_DEFAULT_SKIN_NAME);
                 avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(),
                                     &skinName, &skinDir);
                 free(foldedlayout);
