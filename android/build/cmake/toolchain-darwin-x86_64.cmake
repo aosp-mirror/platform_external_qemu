@@ -15,12 +15,11 @@
 # The toolchain files get processed multiple times during compile detection keep these files simple, and do not setup
 # libraries or anything else. merely tags, compiler toolchain and flags should be set here.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-include(toolchain)
-include(toolchain-rust)
-
 get_filename_component(AOSP_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../.."
                        ABSOLUTE)
 set(ANDROID_QEMU2_TOP_DIR "${AOSP_ROOT}/external/qemu")
+include(toolchain)
+include(toolchain-rust)
 
 # First we setup all the tags.
 toolchain_configure_tags("darwin-x86_64")

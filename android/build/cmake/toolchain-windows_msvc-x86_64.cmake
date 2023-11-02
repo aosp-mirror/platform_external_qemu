@@ -20,12 +20,12 @@ get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 # cmake will look for WinMSVCCrossCompile in Platform/WinMSVCCrossCompile.cmake
 list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}/Modules")
-include(toolchain)
-include(toolchain-rust)
-
 get_filename_component(AOSP_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../.."
                        ABSOLUTE)
 set(ANDROID_QEMU2_TOP_DIR "${AOSP_ROOT}/external/qemu")
+include(toolchain)
+include(toolchain-rust)
+
 
 # First we setup all the tags.
 toolchain_configure_tags("windows_msvc-x86_64")

@@ -23,7 +23,11 @@
 # Gets the desired clang version used by the various toolchains. Update this if
 # you need to change the compiler
 function(get_clang_version RET_VAL)
-  set(${RET_VAL} "${CLANG_COMPILER_VERSION}" PARENT_SCOPE)
+  file(READ "${ANDROID_QEMU2_TOP_DIR}/android/build/toolchains.json"
+       TOOLCHAIN_JSON_STRING)
+  string(JSON CLANG_VERSION GET ${TOOLCHAIN_JSON_STRING} ${IDX} clang)
+  # message(FATAL_ERROR "${CLANG_VERSION} == ${CLANG_COMPILER_VERSION}")
+  set(${RET_VAL} ${CLANG_VERSION} PARENT_SCOPE)
 endfunction()
 
 # This invokes the toolchain generator HOST The host to use PARAM1, PARAM2
@@ -117,10 +121,10 @@ function(get_osxcross_settings TARGET_OS)
   internal_get_env_cache(OSXCROSS_SDK)
   internal_get_env_cache(OSXCROSS_TARGET_DIR)
   if("${OSXCROSS_SDK}" STREQUAL "")
-      toolchain_cmd("${TARGET_OS}" "--print=OSXCROSS_SDK" "unused")
-      internal_set_env_cache(OSXCROSS_SDK "${STD_OUT}")
-      toolchain_cmd("${TARGET_OS}" "--print=OSXCROSS_TARGET_DIR" "unused")
-      internal_set_env_cache(OSXCROSS_TARGET_DIR "${STD_OUT}")
+    toolchain_cmd("${TARGET_OS}" "--print=OSXCROSS_SDK" "unused")
+    internal_set_env_cache(OSXCROSS_SDK "${STD_OUT}")
+    toolchain_cmd("${TARGET_OS}" "--print=OSXCROSS_TARGET_DIR" "unused")
+    internal_set_env_cache(OSXCROSS_TARGET_DIR "${STD_OUT}")
   endif()
   set(OSXCROSS_SDK "${OSXCROSS_SDK}" PARENT_SCOPE)
   set(OSXCROSS_TARGET_DIR "${OSXCROSS_TARGET_DIR}" PARENT_SCOPE)
@@ -175,11 +179,13 @@ function(_get_host_tag RET_VAL)
   if(APPLE)
     # arm/x86?
     execute_process(COMMAND uname -m OUTPUT_VARIABLE CPU_ARCH)
-    # cmake is currently ran under rosetta, which set CPU_ARCH above to x86, even on m1 machines.
-    execute_process(COMMAND sysctl -n sysctl.proc_translated
-                    OUTPUT_VARIABLE IS_ARM_TRANSLATED
-                    RESULT_VARIABLE SYSCTL_RESULT)
-    if(CPU_ARCH MATCHES ".*x86_64.*" AND NOT (SYSCTL_RESULT EQUAL 0 AND IS_ARM_TRANSLATED MATCHES "1*"))
+    # cmake is currently ran under rosetta, which set CPU_ARCH above to x86,
+    # even on m1 machines.
+    execute_process(
+      COMMAND sysctl -n sysctl.proc_translated OUTPUT_VARIABLE IS_ARM_TRANSLATED
+      RESULT_VARIABLE SYSCTL_RESULT)
+    if(CPU_ARCH MATCHES ".*x86_64.*"
+       AND NOT (SYSCTL_RESULT EQUAL 0 AND IS_ARM_TRANSLATED MATCHES "1*"))
       set(${RET_VAL} "darwin-x86_64" PARENT_SCOPE)
     else()
       set(${RET_VAL} "darwin-aarch64" PARENT_SCOPE)

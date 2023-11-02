@@ -52,7 +52,7 @@ target_link_libraries(
           ui::gl-bridge
           Threads::Threads)
 
-android_install_shared(android-webrtc)
+android_install_shared_library(TARGET android-webrtc)
 if(NOT LINUX_AARCH64)
   android_add_test(
     TARGET android-webrtc_unittest

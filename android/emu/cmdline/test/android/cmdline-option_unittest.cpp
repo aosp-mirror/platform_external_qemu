@@ -145,18 +145,18 @@ TEST(CmdLineOptions, parseDebug) {
 
     // Make sure the android_verbose debug flags are restored even if any test
     // case fails.
-    auto oldFlags = android_verbose;
+    auto oldFlags = get_verbosity_mask();
     auto restoreFlags = android::base::makeCustomScopedPtr(&oldFlags,
-        [](const uint64_t* oldFlags) { android_verbose = *oldFlags; });
+        [](const uint64_t* oldFlags) { set_verbosity_mask(*oldFlags); });
 
     for (const auto& data : kData) {
-        android_verbose = data.initialFlags;
+        set_verbosity_mask(data.initialFlags);
         bool result = android_parse_debug_tags_option(data.option,
                                                       data.parseAsSuffix);
         EXPECT_EQ(data.expectedResult, result)
                 << "Failed on test case: ("
                 << (data.option ? data.option : "null") << ")";
-        EXPECT_EQ(data.parsedFlags, android_verbose)
+        EXPECT_EQ(data.parsedFlags, get_verbosity_mask())
                 << "Failed on test case: ("
                 << (data.option ? data.option : "null") << ")";
     }

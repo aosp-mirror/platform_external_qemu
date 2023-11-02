@@ -217,7 +217,40 @@ void updateAndroidDisplayConfigPath(enum PresetEmulatorSizeType id) {
     android::emulation::sResizableConfig->updateAndroidDisplayConfigPath(id);
 }
 
+bool resizableEnabled34() {
+    const char* pconfigs =
+            getConsoleAgents()->settings->hw()->hw_resizable_configs;
+    if (!pconfigs) {
+        return false;
+    }
+
+    std::string configStr(pconfigs);
+    if (configStr.empty()) {
+        return false;
+    }
+
+    if(!feature_is_enabled(kFeature_HWCMultiConfigs)) {
+        return false;
+    }
+
+    if(!feature_is_enabled(kFeature_SupportPixelFold)) {
+        return false;
+    }
+    return true;
+}
+
+const char* getResizableOverlayName() {
+    if (resizableEnabled34()) {
+        return "pixel_fold";
+    } else {
+        return NULL;
+    }
+}
+
 bool resizableEnabled() {
+    if (resizableEnabled34()) {
+        return true;
+    }
     return getConsoleAgents()->settings->hw()->hw_device_name &&
            !strcmp(getConsoleAgents()->settings->hw()->hw_device_name, "resizable") &&
            feature_is_enabled(kFeature_HWCMultiConfigs);

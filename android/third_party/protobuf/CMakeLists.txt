@@ -132,5 +132,5 @@ android_license(TARGET "libprotobuf" LIBNAME protobuf SPDX "BSD-3-Clause"
                 LICENSE "BSD-3-Clause" LOCAL "${protobuf_SOURCE_DIR}/NOTICE")
 
 if(protobuf_BUILD_SHARED_LIBS)
-  android_install_shared(libprotobuf)
+  android_install_shared_library(TARGET libprotobuf)
 endif()

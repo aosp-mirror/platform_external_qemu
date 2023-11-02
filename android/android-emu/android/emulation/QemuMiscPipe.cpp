@@ -241,9 +241,12 @@ void miscPipeSetAndroidOverlay(emulation::AdbInterface* adbInterface) {
         char* skinDir = nullptr;
         avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
         auto myhw = getConsoleAgents()->settings->hw();
-        const char* const overlayName = avdInfo_skinHasOverlay(skinName)
-                                                ? skinName
-                                                : myhw->hw_device_name;
+        const char* overlayName = avdInfo_skinHasOverlay(skinName)
+                                          ? skinName
+                                          : myhw->hw_device_name;
+        if (resizableEnabled34()) {
+            overlayName = getResizableOverlayName();
+        }
         if (avdInfo_skinHasOverlay(overlayName)) {
             std::string androidOverlay("com.android.internal.emulation.");
             std::string systemUIOverlay("com.android.systemui.emulation.");
