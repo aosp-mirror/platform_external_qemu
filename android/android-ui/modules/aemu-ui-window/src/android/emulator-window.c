@@ -20,6 +20,7 @@
 #include "aemu/base/logging/CLog.h"
 #include "android/android.h"
 #include "android/avd/info.h"
+#include "android/avd/keys.h"
 #include "android/avd/util.h"
 #include "android/console.h"
 #include "android/emulation/control/cellular_agent.h"
@@ -559,7 +560,7 @@ int emulator_window_init(EmulatorWindow* emulator,
             if (skinName && skinDir) {
                 // set to folded
                 avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
-                                       "folded");
+                                       PIXEL_FOLD_CLOSED_SKIN_NAME);
                 avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(),
                                     &skinName, &skinDir);
                 AConfig* root = aconfig_node("", "");
@@ -576,7 +577,7 @@ int emulator_window_init(EmulatorWindow* emulator,
                                                       &skin_fb_funcs, bpp);
                 // recover to unfolded
                 avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
-                                       "unfolded");
+                                       PIXEL_FOLD_DEFAULT_SKIN_NAME);
                 avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(),
                                     &skinName, &skinDir);
                 free(foldedlayout);
