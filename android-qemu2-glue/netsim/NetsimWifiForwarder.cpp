@@ -11,13 +11,14 @@
 */
 #include "android-qemu2-glue/netsim/NetsimWifiForwarder.h"
 
-
 #include "aemu/base/logging/CLog.h"
 #include "android/emulation/HostapdController.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
+#include "android/network/GenericNetlinkMessage.h"
+#include "android/network/mac80211_hwsim.h"
 #include "backend/packet_streamer_client.h"
-#include "netsim/packet_streamer.grpc.pb.h"
 #include "netsim.h"
+#include "netsim/packet_streamer.grpc.pb.h"
 
 #include <assert.h>            // for assert
 #include <grpcpp/grpcpp.h>     // for Clie...
@@ -31,6 +32,7 @@
 #include <vector>  // for vector
 
 using namespace grpc;
+using android::network::GenericNetlinkMessage;
 using android::network::MacAddress;
 using netsim::packet::PacketRequest;
 using netsim::packet::PacketResponse;
@@ -156,13 +158,15 @@ int NetsimWifiForwarder::send(const android::base::IOVector& iov) {
     if (!sTransport) {
         return 0;
     }
+    // Filter out spurious garbage data from the guest.
+    const GenericNetlinkMessage msg(iov);
+    if (msg.genericNetlinkHeader()->cmd != HWSIM_CMD_FRAME) {
+        return 0;
+    }
     PacketRequest toSend;
-    size_t size = iov.summedLength();
-    std::string data(size, 0);
-    iov.copyTo(data.data(), 0, size);
-    toSend.set_packet(std::move(data));
+    toSend.set_packet(std::string(msg.data(), msg.data() + msg.dataLen()));
     sTransport->Write(toSend);
-    return size;
+    return msg.dataLen();
 }
 
 void NetsimWifiForwarder::stop() {
