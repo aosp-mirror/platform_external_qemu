@@ -1659,9 +1659,9 @@ void avdInfo_getSkinInfo(const AvdInfo* i, char** pSkinName, char** pSkinDir) {
                 AFREE(skinPath);
                 return;
             }
-            /* quirk for foldable: it has folded/ and unfolded/ subdir */
+            /* quirk for foldable: it has closed/ and default/ subdir */
             if (skinName && !strcmp(skinName, "pixel_fold")) {
-                p = bufprint(temp, end, "%s" PATH_SEP "unfolded", skinPath);
+                p = bufprint(temp, end, "%s" PATH_SEP PIXEL_FOLD_DEFAULT_SKIN_NAME, skinPath);
                 skinPath = strdup(temp);
                 /* try one more time */
                 if (_getSkinPathFromName(skinPath, i->sdkRootPath, pSkinName,
