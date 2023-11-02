@@ -7,4 +7,4 @@ endif()
 
 target_include_directories(image_converter PRIVATE .
                                                    ${CMAKE_CURRENT_BINARY_DIR})
-android_install_shared(image_converter)
+android_install_shared_library(TARGET image_converter)

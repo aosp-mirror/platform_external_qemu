@@ -750,6 +750,9 @@ OperationStatus Snapshotter::prepareForSaving(const char* name) {
 }
 
 OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
+#ifndef AEMU_MIN
+    CrashReporter::get()->hangDetector().pause(true);
+#endif
     mLastSaveDuration = android::base::kNullopt;
     mLastSaveUptimeMs =
         System::Duration(System::get()->getProcessTimes().wallClockMs);
@@ -774,6 +777,9 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
     }
 
     mLastSaveDuration.emplace(sw.elapsedUs() / 1000);
+#ifndef AEMU_MIN
+    CrashReporter::get()->hangDetector().pause(false);
+#endif
     // In unit tests, we don't have a saver, so trivially succeed.
     return mSaver ? mSaver->status() : OperationStatus::Ok;
 }

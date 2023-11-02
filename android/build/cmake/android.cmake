@@ -606,7 +606,8 @@ function(android_add_library)
                         "${multiValueArgs}" ${ARGN})
 
   # Check if this is a bazel target, if so, we will compile it with
-  if(OPTION_BAZEL AND DEFINED build_BAZEL AND NOT WINDOWS_MSVC_X86_64 AND NOT LINUX_AARCH64)
+  if(OPTION_BAZEL AND DEFINED build_BAZEL AND NOT WINDOWS_MSVC_X86_64
+     AND NOT LINUX_AARCH64)
     android_add_bazel_lib(TARGET ${build_TARGET} BAZEL ${build_BAZEL} INCLUDE
                           ${build_INCLUDES})
     _register_target(${ARGN})
@@ -1683,15 +1684,32 @@ function(android_install_exe TGT DST)
     )
   endif()
 endfunction()
+
+# Deprecated, use android_install_shared_library instead as it can handle windows corner cases.
+function(android_install_shared TGT)
+  android_install_shared_library(TARGET ${TGT})
+endfunction()
+
 # Installs the given shared library. The shared library will end up in ../lib64
 # Symbols will be extracted during build, and uploaded during install.
-function(android_install_shared TGT)
+function(android_install_shared_library)
+  set(options DUPLICATE_FOR_WINDOWS)
+  set(oneValueArgs TARGET)
+  cmake_parse_arguments(inst "${options}" "${oneValueArgs}" "${multiValueArgs}"
+                        ${ARGN})
+
   # We don't want windows to binplace dlls in the exe dir
-  install(TARGETS ${TGT} RUNTIME DESTINATION lib64 LIBRARY DESTINATION lib64)
+  install(TARGETS ${inst_TARGET} RUNTIME DESTINATION lib64
+          LIBRARY DESTINATION lib64)
+  if(${inst_DUPLICATE_FOR_WINDOWS} AND WINDOWS_MSVC_X86_64)
+    message(STATUS "Windows requires installing ${inst_TARGET} in runtime as well")
+    install(TARGETS ${inst_TARGET} RUNTIME DESTINATION . LIBRARY DESTINATION .)
+  endif()
   android_upload_symbols(
-    TARGET ${TGT} DIRECTORY ${ANDROID_SYMBOL_DIR} API_KEY "${BREAKPAD_API_KEY}"
-    URI "${BREAKPAD_API_URL}")
-  android_install_license(${TGT} ${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
+    TARGET ${inst_TARGET} DIRECTORY ${ANDROID_SYMBOL_DIR}
+    API_KEY "${BREAKPAD_API_KEY}" URI "${BREAKPAD_API_URL}")
+  android_install_license(${inst_TARGET}
+                          ${inst_TARGET}${CMAKE_SHARED_LIBRARY_SUFFIX})
   # Account for lib prefix when signing
   android_sign(
     INSTALL
@@ -1708,8 +1726,8 @@ function(android_install_shared TGT)
   # Binplace for unit tests
   if(WINDOWS_MSVC_X86_64)
     add_custom_command(
-      TARGET ${TGT} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${TGT}>"
+      TARGET ${inst_TARGET} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${inst_TARGET}>"
               "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
   endif()
 endfunction()

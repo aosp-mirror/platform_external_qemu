@@ -60,6 +60,7 @@ if(OPTION_ASTC_TESTS)
   endforeach()
 endif()
 
+add_subdirectory(dtc)
 add_subdirectory(libusb)
 add_subdirectory(zlib)
 add_subdirectory(protobuf)

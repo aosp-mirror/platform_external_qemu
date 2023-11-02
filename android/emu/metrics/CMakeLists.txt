@@ -78,7 +78,7 @@ target_include_directories(
     src ${ANDROID_QEMU2_TOP_DIR}/android/android-emu
     ${CMAKE_CURRENT_BINARY_DIR}
     ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG})
-android_install_shared(android-emu-metrics)
+android_install_shared_library(TARGET android-emu-metrics)
 
 if(NOT LINUX_AARCH64)
   android_add_test(

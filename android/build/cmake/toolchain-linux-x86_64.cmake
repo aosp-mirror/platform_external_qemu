@@ -19,10 +19,11 @@
 # Note! This file can get included many times, so we use some tricks to Only
 # calculate the settings once.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-include(toolchain)
-include(toolchain-rust)
 get_filename_component(AOSP_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../.."
                        ABSOLUTE)
+set(ANDROID_QEMU2_TOP_DIR "${AOSP_ROOT}/external/qemu")
+include(toolchain)
+include(toolchain-rust)
 set(ANDROID_QEMU2_TOP_DIR "${AOSP_ROOT}/external/qemu")
 
 # First we setup all the tags and configure the toolchain

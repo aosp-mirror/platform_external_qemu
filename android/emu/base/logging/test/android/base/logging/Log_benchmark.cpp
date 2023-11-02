@@ -58,7 +58,7 @@ void BM_LG_QLog_simple_string(benchmark::State& state) {
 
 void BM_LG_VLog_simple_string_off(benchmark::State& state) {
     setMinLogLevel(EMULATOR_LOG_INFO);
-    android_verbose = 0;
+    set_verbosity_mask(0);
     while (state.KeepRunning()) {
         VLOG(virtualscene) << "Hello virtual world!";
     }

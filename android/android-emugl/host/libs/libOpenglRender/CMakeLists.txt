@@ -147,7 +147,7 @@ android_target_link_libraries(OpenglRender linux-x86_64
 android_target_link_libraries(
   OpenglRender darwin PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 android_target_link_libraries(OpenglRender darwin PUBLIC "-framework IOSurface")
-android_install_shared(OpenglRender)
+android_install_shared_library(TARGET OpenglRender)
 
 android_target_properties(
   OpenglRender linux "LINK_FLAGS<=-Wl,-rpath,'$ORIGIN'  -Wl,--disable-new-dtags")
@@ -159,7 +159,7 @@ if(LINUX_AARCH64)
     TARGET StubXlib SHARED LICENSE Apache-2.0 SRC # cmake-format: sortable
                                                   stub/StubXlib.cpp)
 
-  android_install_shared(StubXlib)
+  android_install_shared_library(TARGET StubXlib)
 endif()
 
 if(NOT LINUX_AARCH64)

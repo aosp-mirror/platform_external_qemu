@@ -415,7 +415,7 @@ int qemu_setup_grpc() {
                                     getConsoleAgents()
                                             ->settings->android_cmdLineOptions()
                                             ->grpc_tls_ca)
-                    .withVerboseLogging(android_verbose)
+                    .withVerboseLogging(verbose_check_any())
                     .withAllowList(getConsoleAgents()
                                            ->settings->android_cmdLineOptions()
                                            ->grpc_allowlist)

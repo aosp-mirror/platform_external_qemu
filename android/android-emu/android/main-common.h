@@ -114,30 +114,6 @@ typedef enum {
     ACCEL_WHPX = 6,
 } CpuAccelMode;
 
-// TODO: the accelerator should not be assumed only based on the
-// platform. More than one may be available for each platform.
-#ifdef __linux__
-static const char kAccelerator[] = "KVM";
-static const char kEnableAccelerator[] = "-enable-kvm";
-static const char kDisableAccelerator[] = "-disable-kvm";
-#else
-#ifdef _WIN32
-static const char kAccelerator[] = "Windows Hypervisor Platform (WHPX)";
-static const char kEnableAccelerator[] = "-enable-whpx";
-static const char kDisableAccelerator[] = "-disable-whpx";
-static const char kAcceleratorHAX[] = "Intel HAXM";
-static const char kEnableAcceleratorHAX[] = "-enable-hax";
-static const char kDisableAcceleratorHAX[] = "-disable-hax";
-#else
-static const char kAccelerator[] = "Intel HAXM";
-static const char kEnableAccelerator[] = "-enable-hax";
-static const char kDisableAccelerator[] = "-disable-hax";
-static const char kAcceleratorHVF[] = "Apple Hypervisor.framework";
-static const char kEnableAcceleratorHVF[] = "-enable-hvf";
-static const char kDisableAcceleratorHVF[] = "-disable-hvf";
-#endif
-#endif
-
 /*
  * Param:
  *  opts - Options passed to the main()

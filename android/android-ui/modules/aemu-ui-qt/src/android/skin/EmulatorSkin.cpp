@@ -29,13 +29,18 @@ using android::base::PathUtils;
 
 static LazyInstance<EmulatorSkin> sEmulatorSkin = LAZY_INSTANCE_INIT;
 
-EmulatorSkin::EmulatorSkin() {
+void EmulatorSkin::reset() {
+    mRawSkinPixmap.reset();
     getSkinPixmap();
     if (mRawSkinPixmap == nullptr) {
         int displayX = getConsoleAgents()->settings->hw()->hw_lcd_width;
         int displayY = getConsoleAgents()->settings->hw()->hw_lcd_height;
         mSkinPixmapIsPortrait = displayX <= displayY;
     }
+}
+
+EmulatorSkin::EmulatorSkin() {
+    reset();
 }
 
 EmulatorSkin* EmulatorSkin::getInstance() {

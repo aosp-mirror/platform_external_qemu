@@ -34,7 +34,7 @@ target_link_libraries(android-emu-agents PUBLIC android-emu-agents-headers
 
 target_compile_options(android-emu-agents PRIVATE "-Wno-extern-c-compat")
 target_compile_definitions(android-emu-agents PRIVATE "CONSOLE_EXPORTS")
-android_install_shared(android-emu-agents)
+android_install_shared_library(TARGET android-emu-agents)
 
 android_add_test(
   TARGET android-emu-agents_unittests
