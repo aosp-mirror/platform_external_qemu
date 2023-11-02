@@ -19,11 +19,12 @@
 #include "aemu/base/logging/CLog.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/misc/StringUtils.h"
+#include "android/console.h"
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/metrics/MetricsReporter.h"
+#include "host-common/MultiDisplayPipe.h"
 #include "host-common/feature_control.h"
 #include "host-common/hw-config.h"
-#include "android/console.h"
 #include "host-common/opengles.h"
 #include "studio_stats.pb.h"
 
@@ -141,10 +142,15 @@ public:
 
         // SurfaceFlinger index the configId in reverse order.
         int sfConfigId = PRESET_SIZE_MAX - 1 - configId;
-        // Tell SurfaceFlinger to change display mode to sConfigId.
         std::string cmd = "su 0 service call SurfaceFlinger 1035 i32 " +
                           std::to_string(sfConfigId);
-        adbInterface->enqueueCommand({"shell", cmd});
+        // Tell SurfaceFlinger to change display mode to sfConfigId.
+        if (feature_is_enabled(kFeature_PlayStoreImage)) {
+            // on user build, su 0 won't work, try multidisplay
+            setDisplay(sfConfigId);
+        } else {
+            adbInterface->enqueueCommand({"shell", cmd});
+        }
         // window manager dpi
         cmd = "wm density " + std::to_string(mConfigs[configId].dpi);
         adbInterface->enqueueCommand({"shell", cmd});
@@ -161,6 +167,34 @@ public:
             return true;
         }
         return false;
+    }
+
+    void setDisplay(int sfConfigId) {
+        // Service in guest has already started through QemuMiscPipe when
+        // bootCompleted. But this service may be killed, e.g., Android low
+        // memory. Send broadcast again to guarantee servce running.
+        // P.S. guest Service has check to avoid duplication.
+        auto adbInterface = emulation::AdbInterface::getGlobal();
+        if (!adbInterface) {
+            derror("Adb unavailable, not starting multidisplay "
+                   "service in android. Please install adb and restart the "
+                   "emulator. Multi display might not work as expected.");
+            return;
+        }
+        adbInterface->enqueueCommand({"shell", "am", "broadcast", "-a",
+                                      "com.android.emulator.multidisplay.START",
+                                      "-n",
+                                      "com.android.emulator.multidisplay/"
+                                      ".MultiDisplayServiceReceiver",
+                                      "--user 0"});
+
+        MultiDisplayPipe* pipe = MultiDisplayPipe::getInstance();
+        if (pipe) {
+            std::vector<uint8_t> data;
+            pipe->fillData(data, sfConfigId, -1, -1, -1, 0, 0x10);
+            LOG(DEBUG) << "MultiDisplayPipe send " << sfConfigId;
+            pipe->send(std::move(data));
+        }
     }
 
     void registerMetrics() {
