@@ -1900,8 +1900,14 @@ void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i,
         return;
     iniFile_setInt64(i->configIni, "disk.dataPartition.size", sizeBytes);
 
+    // don't change other config.ini values, just change the partition size
     char* iniPath = _avdInfo_getContentFilePath(i, CORE_CONFIG_INI);
-    iniFile_saveToFile(i->configIni, iniPath);
+    struct CIniFile* oldconfig = iniFile_newFromFile(iniPath);
+    iniFile_setInt64(oldconfig, "disk.dataPartition.size", sizeBytes);
+
+    iniFile_saveToFile(oldconfig, iniPath);
+
+    iniFile_free(oldconfig);
 }
 
 bool avdInfo_isMarshmallowOrHigher(AvdInfo* i) {
