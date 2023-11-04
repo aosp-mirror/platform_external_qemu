@@ -27,7 +27,7 @@
 #include "qemu/osdep.h"
 #include "qemu/log.h"
 #include "net/slirp.h"
-
+#include "trace.h"
 
 #if defined(CONFIG_SMBD_COMMAND)
 #include <pwd.h>
@@ -1143,22 +1143,10 @@ static int guestfwd_can_read(void *opaque)
     return slirp_socket_can_recv(fwd->slirp, fwd->server, fwd->port);
 }
 
-static int guestfwd_can_readx(void *opaque)
-{
-    struct GuestFwd *fwd = opaque;
-    return slirp_socket_can_recvx(fwd->slirp, &fwd->server_v6, fwd->port);
-}
-
 static void guestfwd_read(void *opaque, const uint8_t *buf, int size)
 {
     struct GuestFwd *fwd = opaque;
     slirp_socket_recv(fwd->slirp, fwd->server, fwd->port, buf, size);
-}
-
-static void guestfwd_readx(void *opaque, const uint8_t *buf, int size)
-{
-    struct GuestFwd *fwd = opaque;
-    slirp_socket_recvx(fwd->slirp, &fwd->server_v6, fwd->port, buf, size);
 }
 
 static ssize_t guestfwd_write(const void *buf, size_t len, void *chr)
@@ -1170,12 +1158,15 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str, Error **errp)
 {
     struct in_addr server = { .s_addr = 0 };
     struct in6_addr server_v6 = IN6ADDR_ANY_INIT;
-    struct GuestFwd *fwd;
+    struct in6_addr target_v6 = IN6ADDR_ANY_INIT;
+    struct GuestFwd *fwd = NULL;
     const char *p;
     char buf[128];
     char *end;
     int port;
+    int target_port;
     bool v6_only = false;
+    char addrstr[INET6_ADDRSTRLEN];
 
     p = config_str;
     if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
@@ -1193,6 +1184,7 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str, Error **errp)
     if (p[0] == '[') {
         v6_only = true;
     }
+
     if (v6_only == true) {
         p++;
         if (get_str_sep(buf, sizeof(buf), &p, ']') < 0) {
@@ -1203,6 +1195,42 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str, Error **errp)
         }
         /* Skip the `:` */
         p++;
+        /* Parse the server port */
+        if (get_str_sep(buf, sizeof(buf), &p, '-') < 0) {
+            goto fail_syntax;
+        }
+        port = strtol(buf, &end, 10);
+        if (*end != '\0' || port < 1 || port > 65535) {
+            goto fail_syntax;
+        }
+
+        inet_ntop(AF_INET6, &server_v6, addrstr, INET6_ADDRSTRLEN);
+        trace_slirp_guestfwd_parse(addrstr, port);
+
+        /*
+         * Skip the "tcp:[", leaving the tcp here to make it consistent with
+         * the IPv4 syntax.
+         */
+        p = p + 5;
+        /* Parse the target address */
+        if (get_str_sep(buf, sizeof(buf), &p, ']') < 0) {
+            goto fail_syntax;
+        }
+        if (buf[0] != '\0' && !inet_pton(AF_INET6, buf, &target_v6)) {
+            goto fail_syntax;
+        }
+        /* Skip the `:` */
+        p++;
+        /* Parse the target port, until the end of line */
+        if (get_str_sep(buf, sizeof(buf), &p, '\0') < 0) {
+            goto fail_syntax;
+        }
+        target_port = strtol(buf, &end, 10);
+        if (*end != '\0' || target_port < 1 || port > 65535) {
+            goto fail_syntax;
+        }
+        inet_ntop(AF_INET6, &target_v6, addrstr, INET6_ADDRSTRLEN);
+        trace_slirp_guestfwd_parse(addrstr, target_port);
     } else {
         if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
             goto fail_syntax;
@@ -1210,51 +1238,45 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str, Error **errp)
         if (buf[0] != '\0' && !inet_aton(buf, &server)) {
             goto fail_syntax;
         }
+        if (get_str_sep(buf, sizeof(buf), &p, '-') < 0) {
+            goto fail_syntax;
+        }
+        port = strtol(buf, &end, 10);
+        if (*end != '\0' || port < 1 || port > 65535) {
+            goto fail_syntax;
+        }
     }
-    if (get_str_sep(buf, sizeof(buf), &p, '-') < 0) {
-        goto fail_syntax;
-    }
-    port = strtol(buf, &end, 10);
-    if (*end != '\0' || port < 1 || port > 65535) {
-        goto fail_syntax;
-    }
-
     snprintf(buf, sizeof(buf), "guestfwd.tcp.%d", port);
 
     if (g_str_has_prefix(p, "cmd:")) {
-        /*
-         * TODO: support IPv6 in add_exec.
-         *       needs change in slirp side.
-         */
         if (slirp_add_exec(s->slirp, &p[4], &server, port) < 0) {
             error_setg(errp, "Conflicting/invalid host:port in guest "
                        "forwarding rule '%s'", config_str);
             return -1;
         }
     } else {
-        Error *err = NULL;
-        /*
-         * FIXME: sure we want to support implicit
-         * muxed monitors here?
-         */
-        Chardev *chr = qemu_chr_new_mux_mon(buf, p, NULL);
-
-        if (!chr) {
-            error_setg(errp, "Could not open guest forwarding device '%s'",
-                       buf);
-            return -1;
-        }
-
-        fwd = g_new(struct GuestFwd, 1);
-        qemu_chr_fe_init(&fwd->hd, chr, &err);
-        if (err) {
-            error_propagate(errp, err);
-            object_unparent(OBJECT(chr));
-            g_free(fwd);
-            return -1;
-        }
-
         if (!v6_only) {
+            Error *err = NULL;
+            /*
+             * FIXME: sure we want to support implicit
+             * muxed monitors here?
+             */
+            Chardev *chr = qemu_chr_new_mux_mon(buf, p, NULL);
+
+            if (!chr) {
+                error_setg(errp, "Could not open guest forwarding device '%s'",
+                           buf);
+                return -1;
+            }
+
+            fwd = g_new(struct GuestFwd, 1);
+            qemu_chr_fe_init(&fwd->hd, chr, &err);
+            if (err) {
+                error_propagate(errp, err);
+                object_unparent(OBJECT(chr));
+                g_free(fwd);
+                return -1;
+            }
             if (slirp_add_guestfwd(s->slirp, guestfwd_write, &fwd->hd,
                                    &server, port) < 0) {
                 goto fail_parsing;
@@ -1264,19 +1286,16 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str, Error **errp)
             fwd->slirp = s->slirp;
             qemu_chr_fe_set_handlers(&fwd->hd, guestfwd_can_read, guestfwd_read,
                                      NULL, NULL, fwd, NULL, true);
+            s->fwd = g_slist_append(s->fwd, fwd);
         } else {
-            if (slirp_add_guestxfwd(s->slirp, guestfwd_write, &fwd->hd,
-                                   &server_v6, port) < 0) {
+            /*
+             * Parse target v6, we do not use char-socket backend, like the v4.
+             */
+            if (slirp_add_guestxfwd_new(s->slirp, &server_v6, port, &target_v6,
+                                    target_port) < 0) {
                 goto fail_parsing;
             }
-            fwd->server_v6 = server_v6;
-            fwd->port = port;
-            fwd->slirp = s->slirp;
-            qemu_chr_fe_set_handlers(&fwd->hd, guestfwd_can_readx, guestfwd_readx,
-                                     NULL, NULL, fwd, NULL, true);
         }
-
-        s->fwd = g_slist_append(s->fwd, fwd);
     }
     return 0;
 
@@ -1287,8 +1306,10 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str, Error **errp)
  fail_parsing:
     error_setg(errp, "Conflicting/invalid host:port in guest "
               "forwarding rule '%s'", config_str);
-    qemu_chr_fe_deinit(&fwd->hd, true);
-    g_free(fwd);
+    if (fwd) {
+        qemu_chr_fe_deinit(&fwd->hd, true);
+        g_free(fwd);
+    }
     return -1;
 }
 
