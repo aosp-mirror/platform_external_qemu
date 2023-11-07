@@ -712,6 +712,12 @@ public:
                     &gpu_register_shared_memory_callback,
                     &gpu_unregister_shared_memory_callback);
         }
+
+        std::unique_ptr<EventWaiter> sensorEvent;
+        sensorEvent = std::make_unique<EventWaiter>(
+                &android_hw_sensors_register_callback,
+                &android_hw_sensors_unregister_callback);
+
         // Track percentiles, and report if we have seen at least 32 frames.
         metrics::Percentiles perfEstimator(32, {0.5, 0.95});
         while (clientAvailable) {
@@ -723,11 +729,16 @@ public:
             // wait at most kTimeToWaitForFrame so we can check if the
             // client is still there. (All clients get disconnected on
             // emulator shutdown).
-            auto arrived = frameEvent->next(kTimeToWaitForFrame);
-            if (arrived > 0 && !context->IsCancelled()) {
-                AEMU_SCOPED_TRACE("streamScreenshot::frame");
-                frame += arrived;
-                Stopwatch sw;
+            auto framesArrived = frameEvent->next(kTimeToWaitForFrame);
+
+            // Also check for sensor change events, and send a new frame
+            // if needed. It is possible for the sensor state to change
+            // without a new frame being rendered.
+            auto sensorsChanged = sensorEvent->next(std::chrono::milliseconds(0));
+
+            if ((framesArrived || sensorsChanged) && !context->IsCancelled()) {
+                AEMU_SCOPED_TRACE("streamScreenshot::frame\r\n");
+                frame += framesArrived;                Stopwatch sw;
                 auto status = getScreenshot(context, request, &reply);
                 if (!status.ok()) {
                     return status;

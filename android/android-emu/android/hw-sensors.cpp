@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+#include "aemu/base/async/CallbackRegistry.h"
+#include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/misc/StringUtils.h"
 #include "aemu/base/utils/stream.h"
 #include "android/automation/AutomationController.h"
@@ -198,6 +200,9 @@ struct HwSensorClient {
     uint32_t enabledMask;
     int32_t delay_ms;
 };
+
+static android::base::LazyInstance<android::base::CallbackRegistry>
+        sSensorChangeCallbackReg = LAZY_INSTANCE_INIT;
 
 static void _hwSensorClient_free(HwSensorClient* cl) {
     /* remove from sensors's list */
@@ -747,6 +752,8 @@ static void _hwSensors_setPhysicalParameterValue(HwSensors* h,
             assert(false);  // should never happen
             break;
     }
+
+    sSensorChangeCallbackReg->invokeCallbacks();
 }
 
 /* get the value of the physical parameter */
@@ -1512,4 +1519,12 @@ bool android_heart_rate_sensor_configured(){
 
 void* android_get_posture_listener() {
   return physicalModel_getPostureListener(android_physical_model_instance());
+}
+
+void android_hw_sensors_register_callback(HwSensorChangedCallback callback, void* opaque) {
+    sSensorChangeCallbackReg->registerCallback(callback, opaque);
+}
+
+void android_hw_sensors_unregister_callback(void* opaque) {
+    sSensorChangeCallbackReg->unregisterCallback(opaque);
 }
