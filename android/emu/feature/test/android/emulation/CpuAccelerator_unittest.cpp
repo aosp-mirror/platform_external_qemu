@@ -88,47 +88,6 @@ TEST(CpuAccelerator, GetCpuInfo) {
 
 #ifdef __APPLE__
 
-TEST(cpuAcceleratorGetHaxVersion, Test) {
-    const char* kext_dir[] = {
-        "this-directory-does-not-exist",
-        "android", // this directory exists but doesn't contain the file
-        "android/android-emu/android/emulation",
-    };
-
-    // this is a real version from from HAXM 1.2.1
-    ASSERT_EQ(0x01020001, cpuAcceleratorGetHaxVersion(kext_dir, 3, "CpuAccelerator_unittest.dat2"));
-
-    // this is a real version from from HAXM 1.1.4
-    const char* version_file = "CpuAccelerator_unittest.dat";
-
-    ASSERT_EQ(0x01010004, cpuAcceleratorGetHaxVersion(kext_dir, 3, version_file));
-
-    // only looking in the first directory, won't be found
-    ASSERT_EQ(0, cpuAcceleratorGetHaxVersion(kext_dir, 1, version_file));
-
-    // the second directory will be found but the version file will be missing
-    ASSERT_EQ(-1, cpuAcceleratorGetHaxVersion(kext_dir, 2, version_file));
-
-    // this file will have "VERSION=" but not a valid number following it
-    ASSERT_EQ(-1, cpuAcceleratorGetHaxVersion(kext_dir, 3, "CpuAccelerator_unittest.cpp"));
-}
-
-TEST(cpuAcceleratorParseVersionScript, Test) {
-    ASSERT_EQ(0x01020004, cpuAcceleratorParseVersionScript("VERSION=1.2.4"));
-    ASSERT_EQ(0x0203000a, cpuAcceleratorParseVersionScript("VERSION=2.3.10\r"));
-    ASSERT_EQ(0x04010000, cpuAcceleratorParseVersionScript("VERSION=4.1"));
-    ASSERT_EQ(0x03000000, cpuAcceleratorParseVersionScript("VERSION=3\n"));
-    ASSERT_EQ(0x7fffffff, cpuAcceleratorParseVersionScript("VERSION=127.255.65535"));
-    ASSERT_EQ(-1, cpuAcceleratorParseVersionScript("VERSION=.1"));
-    ASSERT_EQ(-1, cpuAcceleratorParseVersionScript("VERSION=128.0.0"));
-    ASSERT_EQ(-1, cpuAcceleratorParseVersionScript("VERSION=0"));
-    ASSERT_EQ(-1, cpuAcceleratorParseVersionScript("VERSION=1.256.3"));
-    ASSERT_EQ(-1, cpuAcceleratorParseVersionScript("VERSION=1.2.65536"));
-    ASSERT_EQ(-1, cpuAcceleratorParseVersionScript("VERSION=\n"));
-    ASSERT_EQ(-1, cpuAcceleratorParseVersionScript("asdf"));
-    ASSERT_EQ(-1, cpuAcceleratorParseVersionScript(""));
-}
-
 TEST(CpuAccelerator, GetMacOSVersionOnMac) {
     std::string osVersionStr = System::get()->getOsName();
 

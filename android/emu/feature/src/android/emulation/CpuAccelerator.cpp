@@ -67,24 +67,16 @@
 
 #ifdef __linux__
 #define HAVE_KVM 1
-#define HAVE_HAX 0
-#elif defined(_WIN32) || defined(__APPLE__)
-#define HAVE_KVM 0
-#define HAVE_HAX 1
 
-#if defined(_WIN32)
+#elif defined(_WIN32)
 #define HAVE_WHPX 1
 #define HAVE_AEHD 1
-#else
-#define HAVE_WHPX 0
-#define HAVE_AEHD 0
-#endif
+#define HAVE_HAX 1
 
-#if defined(__APPLE__)
+#elif defined(__APPLE__)
 #define HAVE_HVF 1
 #ifdef __arm64__
 #define APPLE_SILICON 1
-#endif
 #endif
 
 #else
@@ -370,112 +362,6 @@ std::string cpuAcceleratorFormatVersion(int32_t version) {
     return buf;
 }
 
-#ifdef __APPLE__
-
-}  // namespace
-
-int32_t cpuAcceleratorParseVersionScript(const std::string& version_script) {
-    int32_t result = 0;
-    const char ver[] = "VERSION=";
-    const size_t ver_len = sizeof(ver) - 1U;
-
-    size_t offset = version_script.find(ver);
-    if (offset == std::string::npos) {
-        return -1;
-    }
-    const char* pos = version_script.c_str() + ver_len;
-
-    const int kValueCountMax = 3;  // support 3 numbers max major.minor.rev
-    const int bit_offset[kValueCountMax] = {24, 16, 0};
-    const int value_max[kValueCountMax] = {127, 255, 65535};
-    for (int i = 0; i < kValueCountMax; i++) {
-        const char* end = pos;
-        unsigned long value = strtoul(pos, const_cast<char**>(&end), 10);
-        if (pos == end) {
-            // no number was found, error if there was not at least one.
-            if (i == 0) {
-                result = -1;
-            }
-            break;
-        }
-
-        if (value > value_max[i]) {
-            // invalid number was found
-            return -1;
-        }
-
-        result |= (value << bit_offset[i]);
-
-        if (*end == '.') {
-            // skip delimiter
-            end += 1;
-        } else {
-            // we're done parsing
-            break;
-        }
-        // advance to next number
-        pos = end;
-    }
-    // 0 is an invalid version number.
-    if (result == 0) {
-        result = -1;
-    }
-    return result;
-}
-
-int32_t cpuAcceleratorGetHaxVersion(const char* kext_dir[],
-                                    const size_t kext_dir_count,
-                                    const char* version_file) {
-    bool found_haxm_kext = false;
-
-    for (size_t i = 0; i < kext_dir_count; i++) {
-        struct stat s;
-        int err = android_stat(kext_dir[i], &s);
-        if (err < 0 || !S_ISDIR(s.st_mode)) {
-            // dir not found
-            continue;
-        }
-        // At this point, we're certain that haxm is installed,
-        // but might be broken
-        found_haxm_kext = true;
-
-        std::string version_file_abs =
-                std::string(kext_dir[i]) + "/" + version_file;
-        FileData fd;
-        if (fileData_initFromFile(&fd, version_file_abs.c_str()) < 0) {
-            // let's try the next directory, just in case
-            continue;
-        }
-
-        // File data contains a bash variable assignment
-        // e.g. "VERSION=1.1.4"
-        std::string version_script(fd.data, fd.data + fd.size);
-        int32_t result = cpuAcceleratorParseVersionScript(version_script);
-        if (result == 0) {
-            // This function uses a return value of zero to indicate "not
-            // installed"
-            // So I'm declaring version "0.0.0" to be invalid
-            result = -1;
-        }
-        if (result <= -1) {
-            // let's try the next directory, just in case
-            continue;
-        }
-        return result;
-    }
-
-    if (found_haxm_kext) {
-        // found haxm kext but couldn't parse version file
-        return -1;
-    }
-    // not installed
-    return 0;
-}
-
-namespace {
-
-#endif  // __APPLE__
-
 // Version numbers for the HAX kernel module.
 // |compat_version| is the minimum API version supported by the module.
 // |current_version| is its current API version.
@@ -521,8 +407,6 @@ AndroidCpuAcceleration ProbeHaxCpu(std::string* status) {
 /////
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
-
-#if defined(_WIN32)
 
 #include "android/base/system/System.h"
 
@@ -675,145 +559,7 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
                cpuAcceleratorFormatVersion(haxm_installer_version).c_str());
     return ANDROID_CPU_ACCELERATION_READY;
 }
-
-#elif defined(__APPLE__)
-
-using android::base::System;
-Version currentMacOSVersion(std::string* status) {
-    std::string osProductVersion = System::get()->getOsName();
-    return parseMacOSVersionString(osProductVersion, status);
-}
-
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
-/////
-/////  Darwin HAX support.
-/////
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
-
-// An IOCTL command number used to retrieve the HAX kernel module version.
-#define HAX_IOCTL_VERSION _IOWR(0, 0x20, HaxModuleVersion)
-
-// The minimum API version supported by the Android emulator.
-#define HAX_MIN_VERSION 3  // 6.0.0
-
-AndroidCpuAcceleration ProbeHAX(std::string* status) {
-    AndroidCpuAcceleration cpu = ProbeHaxCpu(status);
-    if (cpu != ANDROID_CPU_ACCELERATION_READY) {
-        return cpu;
-    }
-
-    const char* kext_dir[] = {
-            "/Library/Extensions/intelhaxm.kext",         // current
-            "/System/Library/Extensions/intelhaxm.kext",  // old
-    };
-    size_t kext_dir_count = sizeof(kext_dir) / sizeof(kext_dir[0]);
-
-    const char* version_file = "Contents/Resources/support.txt";
-    int32_t version =
-            cpuAcceleratorGetHaxVersion(kext_dir, kext_dir_count, version_file);
-    if (version == 0) {
-        status->assign("HAXM is not installed on this machine");
-        return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
-    }
-
-    // Don't fail early with HAXM_INSTALLER_VERSION_MINIMUM_APPLE,
-    // otherwise the user will see a lot of unhelpful vcpu shutdown
-    // requests and register dumps.
-    if (version < HAXM_INSTALLER_VERSION_MINIMUM) {
-        // HAXM was found but version number was too old or missing
-        StringAppendFormat(
-                status, "HAXM must be updated (version %s < %s).",
-                cpuAcceleratorFormatVersion(version),
-                cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM));
-        return ANDROID_CPU_ACCELERATION_ACCEL_OBSOLETE;
-    }
-
-    // 1) Check that /dev/HAX exists.
-    if (::android_access("/dev/HAX", F_OK)) {
-        status->assign(
-                "HAXM is not installed on this machine (/dev/HAX is missing).");
-        return ANDROID_CPU_ACCELERATION_DEV_NOT_FOUND;
-    }
-
-    // 2) Check that /dev/HAX can be opened.
-    if (::android_access("/dev/HAX", R_OK)) {
-        status->assign(
-                "This user doesn't have permission to use HAX (/dev/HAX).");
-        return ANDROID_CPU_ACCELERATION_DEV_PERMISSION;
-    }
-
-    // 3) Open the file.
-    ScopedFd fd(open("/dev/HAX", O_RDWR));
-    if (!fd.valid()) {
-        status->assign("Could not open /dev/HAX: ");
-        status->append(strerror(errno));
-
-        auto ver = currentMacOSVersion(status);
-        if (!(ver < Version(10, 13, 0))) {
-            fprintf(stderr,
-                    "It seems you have macOS 10.13 High Sierra or later."
-                    "You will need HAXM 6.2.1+ and may need to specifically "
-                    "approve the HAXM kernel extension for install. "
-                    "See "
-                    "https://developer.apple.com/library/content/technotes/"
-                    "tn2459/_index.html\n");
-        }
-
-        return ANDROID_CPU_ACCELERATION_DEV_OPEN_FAILED;
-    }
-
-    // 4) Extract HAX version number.
-    status->clear();
-
-    HaxModuleVersion hax_version;
-    if (::ioctl(fd.get(), HAX_IOCTL_VERSION, &hax_version) < 0) {
-        StringAppendFormat(status, "Could not extract HAX version: %s",
-                           strerror(errno));
-        return ANDROID_CPU_ACCELERATION_DEV_IOCTL_FAILED;
-    }
-
-    if (hax_version.current_version < hax_version.compat_version) {
-        StringAppendFormat(
-                status,
-                "Malformed HAX version numbers (current=%d, compat=%d)\n",
-                hax_version.current_version, hax_version.compat_version);
-        return ANDROID_CPU_ACCELERATION_DEV_OBSOLETE;
-    }
-
-    // 5) Compare to minimum supported version.
-
-    if (hax_version.current_version < HAX_MIN_VERSION) {
-        StringAppendFormat(
-                status, "HAX API version too old: %d (expected at least %d)\n",
-                hax_version.current_version, HAX_MIN_VERSION);
-        return ANDROID_CPU_ACCELERATION_DEV_OBSOLETE;
-    }
-
-    // 6) Profit!
-    StringAppendFormat(status, "HAXM version %s (%d) is installed and usable.",
-                       cpuAcceleratorFormatVersion(version),
-                       hax_version.current_version);
-    GlobalState* g = &gGlobals;
-    ::snprintf(g->version, sizeof(g->version), "%s",
-               cpuAcceleratorFormatVersion(version).c_str());
-
-    // Check if < HAXM_INSTALLER_VERSION_MINIMUM_APPLE for best Mac
-    // compatibility.
-    if (version < HAXM_INSTALLER_VERSION_MINIMUM_APPLE) {
-        dwarning(
-                "HAXM %s is installed. "
-                "Please install HAXM >= %s to fix compatibility "
-                "issues on Mac.",
-                cpuAcceleratorFormatVersion(version).c_str(),
-                cpuAcceleratorFormatVersion(
-                        HAXM_INSTALLER_VERSION_MINIMUM_APPLE)
-                        .c_str());
-    }
-
-    return ANDROID_CPU_ACCELERATION_READY;
-}
+#endif  // HAVE_HAX
 
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
@@ -824,6 +570,12 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
 /////////////////////////////////////////////////////////////////////////
 
 #if HAVE_HVF
+
+using android::base::System;
+Version currentMacOSVersion(std::string* status) {
+    std::string osProductVersion = System::get()->getOsName();
+    return parseMacOSVersionString(osProductVersion, status);
+}
 
 AndroidCpuAcceleration ProbeHVF(std::string* status) {
     status->clear();
@@ -840,12 +592,7 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
     }
 
 #ifndef APPLE_SILICON
-    // Need same virtualization features as required by HAXM.
-    if (ProbeHaxCpu(status) != ANDROID_CPU_ACCELERATION_READY) {
-        return res;
-    }
-
-    // Also need EPT and UG
+    // HVF need EPT and UG
     if (!android::hasModernX86VirtualizationFeatures()) {
         status->assign(
                 "CPU doesn't support EPT and/or UG features "
@@ -866,12 +613,6 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
     return res;
 }
 #endif  // HAVE_HVF
-
-#else  // !_WIN32 && !__APPLE__
-#error "Unsupported HAX host platform"
-#endif  // !_WIN32 && !__APPLE__
-
-#endif  // HAVE_HAX
 
 // Windows AEHD hypervisor support
 
@@ -1081,8 +822,8 @@ CpuAccelerator GetCurrentCpuAccelerator() {
                     status_code = status_code_HAX;
                 }
             }
-        }
 #endif
+        }
 #endif
 
 #if HAVE_HVF
