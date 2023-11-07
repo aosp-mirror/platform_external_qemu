@@ -109,6 +109,12 @@ def get_tasks(args) -> List[BuildTask]:
 def main(args):
     logging.info("cmake.py %s", " ".join(sys.argv[1:]))
 
+    if args.prebuilts is not None:
+        logging.info("Building the prebuilts [{}]".format(args.prebuilts))
+        from aemu.prebuilts import buildPrebuilts
+        buildPrebuilts(args)
+        return
+
     if args.feature_list:
         FeatureParser(
             Path(args.aosp) / "external" / "qemu" / "CMakeLists.txt"
@@ -218,6 +224,14 @@ def launch():
         dest="gfxstream_only",
         action="store_true",
         help="Build only gfxstream libs/tests",
+    )
+    parser.add_argument(
+        "--prebuilts",
+        dest="prebuilts",
+        action="store",
+        nargs="*",
+        help=("Builds the specified prebuilts (i.e. --prebuilts qt ffmpeg), or all prebuilts if no "
+              "argument is provided"),
     )
     parser.add_argument(
         "--verbose",
