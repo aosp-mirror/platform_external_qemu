@@ -33,12 +33,14 @@ struct PresetEmulatorSizeInfo {
 };
 
 bool resizableEnabled();
+bool resizableEnabled34();
 void resizableInit();
 bool getResizableConfig(enum PresetEmulatorSizeType id,
                         struct PresetEmulatorSizeInfo* info);
 enum PresetEmulatorSizeType getResizableActiveConfigId();
 void setResizableActiveConfigId(enum PresetEmulatorSizeType id);
 void updateAndroidDisplayConfigPath(enum PresetEmulatorSizeType id);
+const char* getResizableOverlayName();
 
 ANDROID_END_HEADER
 #endif

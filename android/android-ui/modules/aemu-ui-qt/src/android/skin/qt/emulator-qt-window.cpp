@@ -2570,7 +2570,14 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
         if (isFolded) {
             setFoldedSkin();
         } else {
-            restoreSkin();
+            if(resizableEnabled34()) {
+                PresetEmulatorSizeType activeConfig = getResizableActiveConfigId();
+                if (activeConfig == 1) {
+                    restoreSkin();
+                }
+            } else {
+                restoreSkin();
+            }
         }
         return;
     }
@@ -3574,7 +3581,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     queueSkinEvent(event);
 
     const bool not_pixel_fold = !android_foldable_is_pixel_fold();
-    if (android_foldable_is_folded()) {
+    if (not_pixel_fold && android_foldable_is_folded()) {
         resizeAndChangeAspectRatio(true);
     }
 
@@ -3718,6 +3725,12 @@ bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
 }
 
 void EmulatorQtWindow::setFoldedSkin() {
+    if (hasSkin()) {
+        avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
+                               "folded");
+        ScreenMask::loadMask();
+        EmulatorSkin::getInstance()->reset();
+    }
     runOnUiThread([this]() {
         SkinEvent* event = new SkinEvent();
         event->type = kEventSetFoldedSkin;
@@ -3726,6 +3739,9 @@ void EmulatorQtWindow::setFoldedSkin() {
 }
 
 void EmulatorQtWindow::setNoSkin() {
+    if (android_foldable_is_pixel_fold()) {
+        return;
+    }
     runOnUiThread([this]() {
         char *skinName, *skinDir;
         avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName,
@@ -3744,6 +3760,12 @@ void EmulatorQtWindow::setNoSkin() {
 }
 
 void EmulatorQtWindow::restoreSkin() {
+    if (android_foldable_is_pixel_fold() && hasSkin()) {
+        avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
+                               "unfolded");
+        EmulatorSkin::getInstance()->reset();
+        ScreenMask::loadMask();
+    }
     runOnUiThread([this]() {
         char *skinName, *skinDir;
         avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName,
