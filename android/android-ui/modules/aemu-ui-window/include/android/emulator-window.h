@@ -32,12 +32,15 @@ typedef struct EmulatorScreenMask {
     const unsigned char* rgbaData;
 } EmulatorScreenMask;
 
+#define MY_PRESET_SIZE_MAX 4
+
 typedef struct EmulatorWindow {
     const AConfig* aconfig;
     SkinFile*      layout_file;
     SkinFile*      layout_file_skin;
     SkinFile*      layout_file_no_skin;
     SkinFile* layout_file_folded_skin;
+    SkinFile* layout_file_resizable_skins[MY_PRESET_SIZE_MAX];
     int            win_x;
     int            win_y;
     SkinUI*        ui;
@@ -106,6 +109,7 @@ void emulator_window_set_screen_mask(int width, int height, const unsigned char*
 void emulator_window_set_no_skin();
 
 void emulator_window_set_folded_skin();
+void emulator_window_set_skin(int skinIndex);
 
 void emulator_window_restore_skin();
 

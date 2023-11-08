@@ -26,6 +26,7 @@ const uint8_t MultiDisplayPipe::ADD = 1;
 const uint8_t MultiDisplayPipe::DEL = 2;
 const uint8_t MultiDisplayPipe::QUERY = 3;
 const uint8_t MultiDisplayPipe::BIND = 4;
+const uint8_t MultiDisplayPipe::SET_DISPLAY = 0x10;
 const uint8_t MultiDisplayPipe::MAX_DISPLAYS = 10;
 
 MultiDisplayPipe::MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
@@ -92,6 +93,25 @@ void MultiDisplayPipe::fillData(std::vector<uint8_t>& data, uint32_t id, uint32_
     } else {
         data.push_back(DEL);
     }
+    for (int i = 0; i < sizeof(input); i++) {
+        data.push_back(p[i]);
+    }
+}
+
+void MultiDisplayPipe::fillData(std::vector<uint8_t>& data,
+                                uint32_t id,
+                                uint32_t w,
+                                uint32_t h,
+                                uint32_t dpi,
+                                uint32_t flag,
+                                int mode) {
+    uint32_t input[] = {id, w, h, dpi, flag};
+    uint8_t* p = (uint8_t*)input;
+    if (mode != SET_DISPLAY && mode != ADD && mode != DEL) {
+        derror("invalid mode %d", mode);
+        return;
+    }
+    data.push_back(mode);
     for (int i = 0; i < sizeof(input); i++) {
         data.push_back(p[i]);
     }

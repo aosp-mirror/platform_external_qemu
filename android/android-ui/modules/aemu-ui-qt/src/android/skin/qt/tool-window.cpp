@@ -452,7 +452,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     skin_winsys_touch_qt_extended_virtual_sensors();
 
     remaskButtons();
-    installEventFilter(this);
+    const int screen_count =  QGuiApplication::screens().size();
+    if (screen_count == 1) {
+        installEventFilter(this);
+    }
 }
 
 ToolWindow::~ToolWindow() {
@@ -1000,8 +1003,8 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
             break;
         default:;
     }
-    updateMsg += std::to_string(info.width * 160 / info.dpi) + " x " +
-                 std::to_string(info.height * 160 / info.dpi) + " dp\n" +
+    updateMsg += std::to_string(info.width) + " x " +
+                 std::to_string(info.height) + " dp\n" +
                  std::to_string(info.dpi) + " dpi";
 
     LOG(INFO) << "Resizable: change to new size: " << newSize;
@@ -1010,10 +1013,23 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
     skin_event->type = kEventSetDisplayActiveConfig;
     skin_event->u.display_active_config = static_cast<int>(newSize);
     mEmulatorWindow->queueSkinEvent(skin_event);
-    mEmulatorWindow->resizeAndChangeAspectRatio(0, 0, info.width, info.height);
+    if (!resizableEnabled34()) {
+        mEmulatorWindow->resizeAndChangeAspectRatio(0, 0, info.width,
+                                                    info.height);
+    }
     sUiEmuAgent->window->showMessage(updateMsg.c_str(), WINDOW_MESSAGE_GENERIC,
                                      3000);
-    updateFoldableButtonVisibility();
+    if (resizableEnabled34()) {
+        mToolsUi->change_posture_button->setEnabled(newSize ==
+                                                    PRESET_SIZE_UNFOLDED);
+        if (mExtendedWindow.hasInstance()) {
+            mExtendedWindow.get()
+                    ->getVirtualSensorsPage()
+                    ->updateHingeSensorUI();
+        }
+    } else {
+        updateFoldableButtonVisibility();
+    }
 }
 
 void ToolWindow::resizableChangeIcon(PresetEmulatorSizeType type) {
