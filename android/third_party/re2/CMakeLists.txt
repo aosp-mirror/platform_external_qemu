@@ -7,25 +7,24 @@ option(RE2_USE_ICU "build against ICU for full Unicode properties support" OFF)
 # For historical reasons, this is just "USEPCRE", not "RE2_USE_PCRE".
 option(USEPCRE "build against PCRE for testing and benchmarking" OFF)
 
-# See https://groups.google.com/g/re2-dev/c/P6_NM0YIWvA for details.
-# This has no effect unless RE2 is being built for an Apple platform
-# such as macOS or iOS.
+# See https://groups.google.com/g/re2-dev/c/P6_NM0YIWvA for details. This has no
+# effect unless RE2 is being built for an Apple platform such as macOS or iOS.
 option(RE2_BUILD_FRAMEWORK "build RE2 as a framework" OFF)
 
 set(EXTRA_TARGET_LINK_LIBRARIES)
+set(RE2_SOURCE_DIR ${AOSP_ROOT}/external/regex-re2)
 
 android_add_library(
   TARGET re2
   LIBNAME
     re2
-  URL
-    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/third_party/re2/"
-  REPO "${ANDROID_QEMU2_TOP_DIR}"
+    URL
+    "https://android.googlesource.com/platform/external/regex-re2/+/refs/heads/main"
+  SOURCE_DIR "${RE2_SOURCE_DIR}"
   LICENSE
-    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/third_party/re2/LICENSE"
+    "https://android.googlesource.com/platform/external/regex-re2/+/refs/heads/main/LICENSE"
   LICENSE "BSD-3-Clause"
-  SRC re2/bitmap256.cc
-      re2/bitstate.cc
+  SRC re2/bitstate.cc
       re2/compile.cc
       re2/dfa.cc
       re2/filtered_re2.cc
@@ -47,7 +46,7 @@ android_add_library(
       re2/unicode_groups.cc
       util/rune.cc
       util/strutil.cc)
-target_include_directories(re2 PUBLIC .)
+target_include_directories(re2 PUBLIC "${ANDROID_QEMU2_TOP_DIR}/../regex-re2")
 add_library(re2::re2 ALIAS re2)
 
 if(WINDOWS_MSVC_X86_64)
@@ -71,10 +70,9 @@ if(WINDOWS_MSVC_X86_64)
 endif()
 
 if(APPLE AND RE2_BUILD_FRAMEWORK)
-  set_target_properties(re2 PROPERTIES
-    FRAMEWORK TRUE
-    FRAMEWORK_VERSION A
-    MACOSX_FRAMEWORK_IDENTIFIER com.googlesource.code.re2)
+  set_target_properties(
+    re2 PROPERTIES FRAMEWORK TRUE FRAMEWORK_VERSION A
+                   MACOSX_FRAMEWORK_IDENTIFIER com.googlesource.code.re2)
 endif()
 
 if(UNIX)
@@ -93,6 +91,7 @@ endif()
 android_add_library(
   TARGET testing
   NODISTRIBUTE
+  SOURCE_DIR "${RE2_SOURCE_DIR}"
   SRC re2/testing/backtrack.cc
       re2/testing/dump.cc
       re2/testing/exhaustive_tester.cc
@@ -119,7 +118,6 @@ set(TEST_TARGETS
     simplify_test
     string_generator_test
     dfa_test
-
     # These tests can take a looong time, so lets not run them.. (>180s)
     # exhaustive1_test exhaustive2_test exhaustive3_test exhaustive_test
     # random_test
@@ -128,7 +126,8 @@ set(TEST_TARGETS
 set(BENCHMARK_TARGETS regexp_benchmark)
 
 foreach(target ${TEST_TARGETS})
-  android_add_test(TARGET ${target} SRC re2/testing/${target}.cc util/test.cc)
+  android_add_test(TARGET ${target} SOURCE_DIR "${RE2_SOURCE_DIR}"
+                   SRC re2/testing/${target}.cc util/test.cc)
   target_link_libraries(${target} PRIVATE testing
                                           ${EXTRA_TARGET_LINK_LIBRARIES})
 endforeach()
