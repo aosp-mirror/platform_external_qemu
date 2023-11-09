@@ -11,34 +11,47 @@
  *
  */
 
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0600
-#endif
-
 #include "qemu/osdep.h"
-#include "qemu-common.h"
-#include "qemu/abort.h"
 #include "qemu/thread.h"
-#include "qemu/thread_local.h"
 #include "qemu/notify.h"
-#include "sysemu/sysemu.h"
+#include "qemu-thread-common.h"
 #include <process.h>
 
 static bool name_threads;
 
-static QemuThreadSetupFunc thread_setup_func;
+typedef HRESULT (WINAPI *pSetThreadDescription) (HANDLE hThread,
+                                                 PCWSTR lpThreadDescription);
+static pSetThreadDescription SetThreadDescriptionFunc;
+static HMODULE kernel32_module;
 
-void qemu_thread_register_setup_callback(QemuThreadSetupFunc setup_func)
+static bool load_set_thread_description(void)
 {
-    thread_setup_func = setup_func;
+    static gsize _init_once = 0;
+
+    if (g_once_init_enter(&_init_once)) {
+        kernel32_module = LoadLibrary("kernel32.dll");
+        if (kernel32_module) {
+            SetThreadDescriptionFunc =
+                (pSetThreadDescription)GetProcAddress(kernel32_module,
+                                                      "SetThreadDescription");
+            if (!SetThreadDescriptionFunc) {
+                FreeLibrary(kernel32_module);
+            }
+        }
+        g_once_init_leave(&_init_once, 1);
+    }
+
+    return !!SetThreadDescriptionFunc;
 }
 
 void qemu_thread_naming(bool enable)
 {
-    /* But note we don't actually name them on Windows yet */
     name_threads = enable;
 
-    fprintf(stderr, "qemu: thread naming not supported on this host\n");
+    if (enable && !load_set_thread_description()) {
+        fprintf(stderr, "qemu: thread naming not supported on this host\n");
+        name_threads = false;
+    }
 }
 
 static void error_exit(int err, const char *msg)
@@ -47,13 +60,15 @@ static void error_exit(int err, const char *msg)
 
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
                   NULL, err, 0, (LPTSTR)&pstr, 2, NULL);
-    qemu_abort("qemu: %s: %s\n", msg, pstr);
+    fprintf(stderr, "qemu: %s: %s\n", msg, pstr);
+    LocalFree(pstr);
+    abort();
 }
 
 void qemu_mutex_init(QemuMutex *mutex)
 {
     InitializeSRWLock(&mutex->lock);
-    mutex->initialized = true;
+    qemu_mutex_post_init(mutex);
 }
 
 void qemu_mutex_destroy(QemuMutex *mutex)
@@ -66,7 +81,9 @@ void qemu_mutex_destroy(QemuMutex *mutex)
 void qemu_mutex_lock_impl(QemuMutex *mutex, const char *file, const int line)
 {
     assert(mutex->initialized);
+    qemu_mutex_pre_lock(mutex, file, line);
     AcquireSRWLockExclusive(&mutex->lock);
+    qemu_mutex_post_lock(mutex, file, line);
 }
 
 int qemu_mutex_trylock_impl(QemuMutex *mutex, const char *file, const int line)
@@ -76,6 +93,7 @@ int qemu_mutex_trylock_impl(QemuMutex *mutex, const char *file, const int line)
     assert(mutex->initialized);
     owned = TryAcquireSRWLockExclusive(&mutex->lock);
     if (owned) {
+        qemu_mutex_post_lock(mutex, file, line);
         return 0;
     }
     return -EBUSY;
@@ -84,6 +102,7 @@ int qemu_mutex_trylock_impl(QemuMutex *mutex, const char *file, const int line)
 void qemu_mutex_unlock_impl(QemuMutex *mutex, const char *file, const int line)
 {
     assert(mutex->initialized);
+    qemu_mutex_pre_unlock(mutex, file, line);
     ReleaseSRWLockExclusive(&mutex->lock);
 }
 
@@ -100,19 +119,19 @@ void qemu_rec_mutex_destroy(QemuRecMutex *mutex)
     DeleteCriticalSection(&mutex->lock);
 }
 
-void qemu_rec_mutex_lock(QemuRecMutex *mutex)
+void qemu_rec_mutex_lock_impl(QemuRecMutex *mutex, const char *file, int line)
 {
     assert(mutex->initialized);
     EnterCriticalSection(&mutex->lock);
 }
 
-int qemu_rec_mutex_trylock(QemuRecMutex *mutex)
+int qemu_rec_mutex_trylock_impl(QemuRecMutex *mutex, const char *file, int line)
 {
     assert(mutex->initialized);
     return !TryEnterCriticalSection(&mutex->lock);
 }
 
-void qemu_rec_mutex_unlock(QemuRecMutex *mutex)
+void qemu_rec_mutex_unlock_impl(QemuRecMutex *mutex, const char *file, int line)
 {
     assert(mutex->initialized);
     LeaveCriticalSection(&mutex->lock);
@@ -147,7 +166,26 @@ void qemu_cond_broadcast(QemuCond *cond)
 void qemu_cond_wait_impl(QemuCond *cond, QemuMutex *mutex, const char *file, const int line)
 {
     assert(cond->initialized);
+    qemu_mutex_pre_unlock(mutex, file, line);
     SleepConditionVariableSRW(&cond->var, &mutex->lock, INFINITE, 0);
+    qemu_mutex_post_lock(mutex, file, line);
+}
+
+bool qemu_cond_timedwait_impl(QemuCond *cond, QemuMutex *mutex, int ms,
+                              const char *file, const int line)
+{
+    int rc = 0;
+
+    assert(cond->initialized);
+    trace_qemu_mutex_unlock(mutex, file, line);
+    if (!SleepConditionVariableSRW(&cond->var, &mutex->lock, ms, 0)) {
+        rc = GetLastError();
+    }
+    trace_qemu_mutex_locked(mutex, file, line);
+    if (rc && rc != ERROR_TIMEOUT) {
+        error_exit(rc, __func__);
+    }
+    return rc != ERROR_TIMEOUT;
 }
 
 void qemu_sem_init(QemuSemaphore *sem, int init)
@@ -234,12 +272,20 @@ void qemu_event_destroy(QemuEvent *ev)
 void qemu_event_set(QemuEvent *ev)
 {
     assert(ev->initialized);
-    /* qemu_event_set has release semantics, but because it *loads*
+
+    /*
+     * Pairs with both qemu_event_reset() and qemu_event_wait().
+     *
+     * qemu_event_set has release semantics, but because it *loads*
      * ev->value we need a full memory barrier here.
      */
     smp_mb();
-    if (atomic_read(&ev->value) != EV_SET) {
-        if (atomic_xchg(&ev->value, EV_SET) == EV_BUSY) {
+    if (qatomic_read(&ev->value) != EV_SET) {
+        int old = qatomic_xchg(&ev->value, EV_SET);
+
+        /* Pairs with memory barrier after ResetEvent.  */
+        smp_mb__after_rmw();
+        if (old == EV_BUSY) {
             /* There were waiters, wake them up.  */
             SetEvent(ev->event);
         }
@@ -248,17 +294,19 @@ void qemu_event_set(QemuEvent *ev)
 
 void qemu_event_reset(QemuEvent *ev)
 {
-    unsigned value;
-
     assert(ev->initialized);
-    value = atomic_read(&ev->value);
-    smp_mb_acquire();
-    if (value == EV_SET) {
-        /* If there was a concurrent reset (or even reset+wait),
-         * do nothing.  Otherwise change EV_SET->EV_FREE.
-         */
-        atomic_or(&ev->value, EV_FREE);
-    }
+
+    /*
+     * If there was a concurrent reset (or even reset+wait),
+     * do nothing.  Otherwise change EV_SET->EV_FREE.
+     */
+    qatomic_or(&ev->value, EV_FREE);
+
+    /*
+     * Order reset before checking the condition in the caller.
+     * Pairs with the first memory barrier in qemu_event_set().
+     */
+    smp_mb__after_rmw();
 }
 
 void qemu_event_wait(QemuEvent *ev)
@@ -266,29 +314,49 @@ void qemu_event_wait(QemuEvent *ev)
     unsigned value;
 
     assert(ev->initialized);
-    value = atomic_read(&ev->value);
-    smp_mb_acquire();
+
+    /*
+     * qemu_event_wait must synchronize with qemu_event_set even if it does
+     * not go down the slow path, so this load-acquire is needed that
+     * synchronizes with the first memory barrier in qemu_event_set().
+     *
+     * If we do go down the slow path, there is no requirement at all: we
+     * might miss a qemu_event_set() here but ultimately the memory barrier in
+     * qemu_futex_wait() will ensure the check is done correctly.
+     */
+    value = qatomic_load_acquire(&ev->value);
     if (value != EV_SET) {
         if (value == EV_FREE) {
-            /* qemu_event_set is not yet going to call SetEvent, but we are
-             * going to do another check for EV_SET below when setting EV_BUSY.
-             * At that point it is safe to call WaitForSingleObject.
+            /*
+             * Here the underlying kernel event is reset, but qemu_event_set is
+             * not yet going to call SetEvent.  However, there will be another
+             * check for EV_SET below when setting EV_BUSY.  At that point it
+             * is safe to call WaitForSingleObject.
              */
             ResetEvent(ev->event);
 
-            /* Tell qemu_event_set that there are waiters.  No need to retry
-             * because there cannot be a concurent busy->free transition.
-             * After the CAS, the event will be either set or busy.
+            /*
+             * It is not clear whether ResetEvent provides this barrier; kernel
+             * APIs (KeResetEvent/KeClearEvent) do not.  Better safe than sorry!
              */
-            if (atomic_cmpxchg(&ev->value, EV_FREE, EV_BUSY) == EV_SET) {
-                value = EV_SET;
-            } else {
-                value = EV_BUSY;
+            smp_mb();
+
+            /*
+             * Leave the event reset and tell qemu_event_set that there are
+             * waiters.  No need to retry, because there cannot be a concurrent
+             * busy->free transition.  After the CAS, the event will be either
+             * set or busy.
+             */
+            if (qatomic_cmpxchg(&ev->value, EV_FREE, EV_BUSY) == EV_SET) {
+                return;
             }
         }
-        if (value == EV_BUSY) {
-            WaitForSingleObject(ev->event, INFINITE);
-        }
+
+        /*
+         * ev->value is now EV_BUSY.  Since we didn't observe EV_SET,
+         * qemu_event_set() must observe EV_BUSY and call SetEvent().
+         */
+        WaitForSingleObject(ev->event, INFINITE);
     }
 }
 
@@ -302,18 +370,29 @@ struct QemuThreadData {
     /* Only used for joinable threads. */
     bool              exited;
     void             *ret;
-    QemuMutex         mtx;
+    CRITICAL_SECTION  cs;
 };
 
-static QEMU_THREAD_LOCAL_DECLARE(QemuThreadData*, qemu_thread_data);
+static bool atexit_registered;
+static NotifierList main_thread_exit;
+
+static __thread QemuThreadData *qemu_thread_data;
+
+static void run_main_thread_exit(void)
+{
+    notifier_list_notify(&main_thread_exit, NULL);
+}
 
 void qemu_thread_atexit_add(Notifier *notifier)
 {
-    QemuThreadData* thread_data = QEMU_THREAD_LOCAL_GET(qemu_thread_data);
-    if (!thread_data) {
-        qemu_add_exit_notifier(notifier);
+    if (!qemu_thread_data) {
+        if (!atexit_registered) {
+            atexit_registered = true;
+            atexit(run_main_thread_exit);
+        }
+        notifier_list_add(&main_thread_exit, notifier);
     } else {
-        notifier_list_add(&thread_data->exit, notifier);
+        notifier_list_add(&qemu_thread_data->exit, notifier);
     }
 }
 
@@ -328,25 +407,21 @@ static unsigned __stdcall win32_start_routine(void *arg)
     void *(*start_routine)(void *) = data->start_routine;
     void *thread_arg = data->arg;
 
-    QEMU_THREAD_LOCAL_SET(qemu_thread_data, data);
-
-    if (thread_setup_func)
-        (*thread_setup_func)();
-
+    qemu_thread_data = data;
     qemu_thread_exit(start_routine(thread_arg));
     abort();
 }
 
 void qemu_thread_exit(void *arg)
 {
-    QemuThreadData *data = QEMU_THREAD_LOCAL_GET(qemu_thread_data);
+    QemuThreadData *data = qemu_thread_data;
 
     notifier_list_notify(&data->exit, NULL);
     if (data->mode == QEMU_THREAD_JOINABLE) {
         data->ret = arg;
-        qemu_mutex_lock(&data->mtx);
+        EnterCriticalSection(&data->cs);
         data->exited = true;
-        qemu_mutex_unlock(&data->mtx);
+        LeaveCriticalSection(&data->cs);
     } else {
         g_free(data);
     }
@@ -377,9 +452,28 @@ void *qemu_thread_join(QemuThread *thread)
         CloseHandle(handle);
     }
     ret = data->ret;
-    qemu_mutex_destroy(&data->mtx);
+    DeleteCriticalSection(&data->cs);
     g_free(data);
     return ret;
+}
+
+static bool set_thread_description(HANDLE h, const char *name)
+{
+    HRESULT hr;
+    g_autofree wchar_t *namew = NULL;
+
+    if (!load_set_thread_description()) {
+        return false;
+    }
+
+    namew = g_utf8_to_utf16(name, -1, NULL, NULL, NULL);
+    if (!namew) {
+        return false;
+    }
+
+    hr = SetThreadDescriptionFunc(h, namew);
+
+    return SUCCEEDED(hr);
 }
 
 void qemu_thread_create(QemuThread *thread, const char *name,
@@ -397,7 +491,7 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     notifier_list_init(&data->exit);
 
     if (data->mode != QEMU_THREAD_DETACHED) {
-        qemu_mutex_init(&data->mtx);
+        InitializeCriticalSection(&data->cs);
     }
 
     hThread = (HANDLE) _beginthreadex(NULL, 0, win32_start_routine,
@@ -405,13 +499,29 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     if (!hThread) {
         error_exit(GetLastError(), __func__);
     }
+    if (name_threads && name && !set_thread_description(hThread, name)) {
+        fprintf(stderr, "qemu: failed to set thread description: %s\n", name);
+    }
     CloseHandle(hThread);
+
     thread->data = data;
+}
+
+int qemu_thread_set_affinity(QemuThread *thread, unsigned long *host_cpus,
+                             unsigned long nbits)
+{
+    return -ENOSYS;
+}
+
+int qemu_thread_get_affinity(QemuThread *thread, unsigned long **host_cpus,
+                             unsigned long *nbits)
+{
+    return -ENOSYS;
 }
 
 void qemu_thread_get_self(QemuThread *thread)
 {
-    thread->data = QEMU_THREAD_LOCAL_GET(qemu_thread_data);
+    thread->data = qemu_thread_data;
     thread->tid = GetCurrentThreadId();
 }
 
@@ -425,14 +535,14 @@ HANDLE qemu_thread_get_handle(QemuThread *thread)
         return NULL;
     }
 
-    qemu_mutex_lock(&data->mtx);
+    EnterCriticalSection(&data->cs);
     if (!data->exited) {
         handle = OpenThread(SYNCHRONIZE | THREAD_SUSPEND_RESUME |
                             THREAD_SET_CONTEXT, FALSE, thread->tid);
     } else {
         handle = NULL;
     }
-    qemu_mutex_unlock(&data->mtx);
+    LeaveCriticalSection(&data->cs);
     return handle;
 }
 

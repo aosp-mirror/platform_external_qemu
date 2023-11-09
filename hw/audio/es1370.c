@@ -27,11 +27,13 @@
 #define SILENT_ES1370
 
 #include "qemu/osdep.h"
-#include "hw/hw.h"
 #include "hw/audio/soundhw.h"
 #include "audio/audio.h"
-#include "hw/pci/pci.h"
+#include "hw/pci/pci_device.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 #include "sysemu/dma.h"
+#include "qom/object.h"
 
 /* Missing stuff:
    SCTRL_P[12](END|ST)INC
@@ -254,6 +256,9 @@ static void print_sctl (uint32_t val)
 #define lwarn(...)
 #endif
 
+#define TYPE_ES1370 "ES1370"
+OBJECT_DECLARE_SIMPLE_TYPE(ES1370State, ES1370)
+
 struct chan {
     uint32_t shift;
     uint32_t leftover;
@@ -262,7 +267,7 @@ struct chan {
     uint32_t frame_cnt;
 };
 
-typedef struct ES1370State {
+struct ES1370State {
     PCIDevice dev;
     QEMUSoundCard card;
     MemoryRegion io;
@@ -275,7 +280,7 @@ typedef struct ES1370State {
     uint32_t mempage;
     uint32_t codec;
     uint32_t sctl;
-} ES1370State;
+};
 
 struct chan_bits {
     uint32_t ctl_en;
@@ -288,10 +293,6 @@ struct chan_bits {
     void (*calc_freq) (ES1370State *s, uint32_t ctl,
                        uint32_t *old_freq, uint32_t *new_freq);
 };
-
-#define TYPE_ES1370 "ES1370"
-#define ES1370(obj) \
-    OBJECT_CHECK(ES1370State, (obj), TYPE_ES1370)
 
 static void es1370_dac1_calc_freq (ES1370State *s, uint32_t ctl,
                                    uint32_t *old_freq, uint32_t *new_freq);
@@ -414,14 +415,14 @@ static void es1370_update_voices (ES1370State *s, uint32_t ctl, uint32_t sctl)
                     i,
                     new_freq,
                     1 << (new_fmt & 1),
-                    (new_fmt & 2) ? AUD_FMT_S16 : AUD_FMT_U8,
+                    (new_fmt & 2) ? AUDIO_FORMAT_S16 : AUDIO_FORMAT_U8,
                     d->shift);
             if (new_freq) {
                 struct audsettings as;
 
                 as.freq = new_freq;
                 as.nchannels = 1 << (new_fmt & 1);
-                as.fmt = (new_fmt & 2) ? AUD_FMT_S16 : AUD_FMT_U8;
+                as.fmt = (new_fmt & 2) ? AUDIO_FORMAT_S16 : AUDIO_FORMAT_U8;
                 as.endianness = 0;
 
                 if (i == ADC_CHANNEL) {
@@ -474,82 +475,7 @@ static inline uint32_t es1370_fixup (ES1370State *s, uint32_t addr)
     return addr;
 }
 
-static void es1370_writeb(void *opaque, uint32_t addr, uint32_t val)
-{
-    ES1370State *s = opaque;
-    uint32_t shift, mask;
-
-    addr = es1370_fixup (s, addr);
-
-    switch (addr) {
-    case ES1370_REG_CONTROL:
-    case ES1370_REG_CONTROL + 1:
-    case ES1370_REG_CONTROL + 2:
-    case ES1370_REG_CONTROL + 3:
-        shift = (addr - ES1370_REG_CONTROL) << 3;
-        mask = 0xff << shift;
-        val = (s->ctl & ~mask) | ((val & 0xff) << shift);
-        es1370_update_voices (s, val, s->sctl);
-        print_ctl (val);
-        break;
-    case ES1370_REG_MEMPAGE:
-        s->mempage = val;
-        break;
-    case ES1370_REG_SERIAL_CONTROL:
-    case ES1370_REG_SERIAL_CONTROL + 1:
-    case ES1370_REG_SERIAL_CONTROL + 2:
-    case ES1370_REG_SERIAL_CONTROL + 3:
-        shift = (addr - ES1370_REG_SERIAL_CONTROL) << 3;
-        mask = 0xff << shift;
-        val = (s->sctl & ~mask) | ((val & 0xff) << shift);
-        es1370_maybe_lower_irq (s, val);
-        es1370_update_voices (s, s->ctl, val);
-        print_sctl (val);
-        break;
-    default:
-        lwarn ("writeb %#x <- %#x\n", addr, val);
-        break;
-    }
-}
-
-static void es1370_writew(void *opaque, uint32_t addr, uint32_t val)
-{
-    ES1370State *s = opaque;
-    addr = es1370_fixup (s, addr);
-    uint32_t shift, mask;
-    struct chan *d = &s->chan[0];
-
-    switch (addr) {
-    case ES1370_REG_CODEC:
-        dolog ("ignored codec write address %#x, data %#x\n",
-               (val >> 8) & 0xff, val & 0xff);
-        s->codec = val;
-        break;
-
-    case ES1370_REG_CONTROL:
-    case ES1370_REG_CONTROL + 2:
-        shift = (addr != ES1370_REG_CONTROL) << 4;
-        mask = 0xffff << shift;
-        val = (s->ctl & ~mask) | ((val & 0xffff) << shift);
-        es1370_update_voices (s, val, s->sctl);
-        print_ctl (val);
-        break;
-
-    case ES1370_REG_ADC_SCOUNT:
-        d++;
-    case ES1370_REG_DAC2_SCOUNT:
-        d++;
-    case ES1370_REG_DAC1_SCOUNT:
-        d->scount = (d->scount & ~0xffff) | (val & 0xffff);
-        break;
-
-    default:
-        lwarn ("writew %#x <- %#x\n", addr, val);
-        break;
-    }
-}
-
-static void es1370_writel(void *opaque, uint32_t addr, uint32_t val)
+static void es1370_write(void *opaque, hwaddr addr, uint64_t val, unsigned size)
 {
     ES1370State *s = opaque;
     struct chan *d = &s->chan[0];
@@ -572,21 +498,22 @@ static void es1370_writel(void *opaque, uint32_t addr, uint32_t val)
         print_sctl (val);
         break;
 
-    case ES1370_REG_ADC_SCOUNT:
-        d++;
-    case ES1370_REG_DAC2_SCOUNT:
-        d++;
     case ES1370_REG_DAC1_SCOUNT:
+    case ES1370_REG_DAC2_SCOUNT:
+    case ES1370_REG_ADC_SCOUNT:
+        d += (addr - ES1370_REG_DAC1_SCOUNT) >> 2;
         d->scount = (val & 0xffff) | (d->scount & ~0xffff);
         ldebug ("chan %td CURR_SAMP_CT %d, SAMP_CT %d\n",
                 d - &s->chan[0], val >> 16, (val & 0xffff));
         break;
 
     case ES1370_REG_ADC_FRAMEADR:
-        d++;
-    case ES1370_REG_DAC2_FRAMEADR:
-        d++;
+        d += 2;
+        goto frameadr;
     case ES1370_REG_DAC1_FRAMEADR:
+    case ES1370_REG_DAC2_FRAMEADR:
+        d += (addr - ES1370_REG_DAC1_FRAMEADR) >> 3;
+    frameadr:
         d->frame_addr = val;
         ldebug ("chan %td frame address %#x\n", d - &s->chan[0], val);
         break;
@@ -599,10 +526,12 @@ static void es1370_writel(void *opaque, uint32_t addr, uint32_t val)
         break;
 
     case ES1370_REG_ADC_FRAMECNT:
-        d++;
-    case ES1370_REG_DAC2_FRAMECNT:
-        d++;
+        d += 2;
+        goto framecnt;
     case ES1370_REG_DAC1_FRAMECNT:
+    case ES1370_REG_DAC2_FRAMECNT:
+        d += (addr - ES1370_REG_DAC1_FRAMECNT) >> 3;
+    framecnt:
         d->frame_cnt = val;
         d->leftover = 0;
         ldebug ("chan %td frame count %d, buffer size %d\n",
@@ -615,84 +544,7 @@ static void es1370_writel(void *opaque, uint32_t addr, uint32_t val)
     }
 }
 
-static uint32_t es1370_readb(void *opaque, uint32_t addr)
-{
-    ES1370State *s = opaque;
-    uint32_t val;
-
-    addr = es1370_fixup (s, addr);
-
-    switch (addr) {
-    case 0x1b:                  /* Legacy */
-        lwarn ("Attempt to read from legacy register\n");
-        val = 5;
-        break;
-    case ES1370_REG_MEMPAGE:
-        val = s->mempage;
-        break;
-    case ES1370_REG_CONTROL + 0:
-    case ES1370_REG_CONTROL + 1:
-    case ES1370_REG_CONTROL + 2:
-    case ES1370_REG_CONTROL + 3:
-        val = s->ctl >> ((addr - ES1370_REG_CONTROL) << 3);
-        break;
-    case ES1370_REG_STATUS + 0:
-    case ES1370_REG_STATUS + 1:
-    case ES1370_REG_STATUS + 2:
-    case ES1370_REG_STATUS + 3:
-        val = s->status >> ((addr - ES1370_REG_STATUS) << 3);
-        break;
-    default:
-        val = ~0;
-        lwarn ("readb %#x -> %#x\n", addr, val);
-        break;
-    }
-    return val;
-}
-
-static uint32_t es1370_readw(void *opaque, uint32_t addr)
-{
-    ES1370State *s = opaque;
-    struct chan *d = &s->chan[0];
-    uint32_t val;
-
-    addr = es1370_fixup (s, addr);
-
-    switch (addr) {
-    case ES1370_REG_ADC_SCOUNT + 2:
-        d++;
-    case ES1370_REG_DAC2_SCOUNT + 2:
-        d++;
-    case ES1370_REG_DAC1_SCOUNT + 2:
-        val = d->scount >> 16;
-        break;
-
-    case ES1370_REG_ADC_FRAMECNT:
-        d++;
-    case ES1370_REG_DAC2_FRAMECNT:
-        d++;
-    case ES1370_REG_DAC1_FRAMECNT:
-        val = d->frame_cnt & 0xffff;
-        break;
-
-    case ES1370_REG_ADC_FRAMECNT + 2:
-        d++;
-    case ES1370_REG_DAC2_FRAMECNT + 2:
-        d++;
-    case ES1370_REG_DAC1_FRAMECNT + 2:
-        val = d->frame_cnt >> 16;
-        break;
-
-    default:
-        val = ~0;
-        lwarn ("readw %#x -> %#x\n", addr, val);
-        break;
-    }
-
-    return val;
-}
-
-static uint32_t es1370_readl(void *opaque, uint32_t addr)
+static uint64_t es1370_read(void *opaque, hwaddr addr, unsigned size)
 {
     ES1370State *s = opaque;
     uint32_t val;
@@ -717,11 +569,10 @@ static uint32_t es1370_readl(void *opaque, uint32_t addr)
         val = s->sctl;
         break;
 
-    case ES1370_REG_ADC_SCOUNT:
-        d++;
-    case ES1370_REG_DAC2_SCOUNT:
-        d++;
     case ES1370_REG_DAC1_SCOUNT:
+    case ES1370_REG_DAC2_SCOUNT:
+    case ES1370_REG_ADC_SCOUNT:
+        d += (addr - ES1370_REG_DAC1_SCOUNT) >> 2;
         val = d->scount;
 #ifdef DEBUG_ES1370
         {
@@ -736,10 +587,12 @@ static uint32_t es1370_readl(void *opaque, uint32_t addr)
         break;
 
     case ES1370_REG_ADC_FRAMECNT:
-        d++;
-    case ES1370_REG_DAC2_FRAMECNT:
-        d++;
+        d += 2;
+        goto framecnt;
     case ES1370_REG_DAC1_FRAMECNT:
+    case ES1370_REG_DAC2_FRAMECNT:
+        d += (addr - ES1370_REG_DAC1_FRAMECNT) >> 3;
+    framecnt:
         val = d->frame_cnt;
 #ifdef DEBUG_ES1370
         {
@@ -754,10 +607,12 @@ static uint32_t es1370_readl(void *opaque, uint32_t addr)
         break;
 
     case ES1370_REG_ADC_FRAMEADR:
-        d++;
-    case ES1370_REG_DAC2_FRAMEADR:
-        d++;
+        d += 2;
+        goto frameadr;
     case ES1370_REG_DAC1_FRAMEADR:
+    case ES1370_REG_DAC2_FRAMEADR:
+        d += (addr - ES1370_REG_DAC1_FRAMEADR) >> 3;
+    frameadr:
         val = d->frame_addr;
         break;
 
@@ -788,18 +643,21 @@ static void es1370_transfer_audio (ES1370State *s, struct chan *d, int loop_sel,
     int csc_bytes = (csc + 1) << d->shift;
     int cnt = d->frame_cnt >> 16;
     int size = d->frame_cnt & 0xffff;
+    if (size < cnt) {
+        return;
+    }
     int left = ((size - cnt + 1) << 2) + d->leftover;
     int transferred = 0;
-    int temp = audio_MIN (max, audio_MIN (left, csc_bytes));
+    int temp = MIN (max, MIN (left, csc_bytes));
     int index = d - &s->chan[0];
 
     addr += (cnt << 2) + d->leftover;
 
     if (index == ADC_CHANNEL) {
-        while (temp) {
+        while (temp > 0) {
             int acquired, to_copy;
 
-            to_copy = audio_MIN ((size_t) temp, sizeof (tmpbuf));
+            to_copy = MIN ((size_t) temp, sizeof (tmpbuf));
             acquired = AUD_read (s->adc_voice, tmpbuf, to_copy);
             if (!acquired)
                 break;
@@ -814,10 +672,10 @@ static void es1370_transfer_audio (ES1370State *s, struct chan *d, int loop_sel,
     else {
         SWVoiceOut *voice = s->dac_voice[index];
 
-        while (temp) {
+        while (temp > 0) {
             int copied, to_copy;
 
-            to_copy = audio_MIN ((size_t) temp, sizeof (tmpbuf));
+            to_copy = MIN ((size_t) temp, sizeof (tmpbuf));
             pci_dma_read (&s->dev, addr, tmpbuf, to_copy);
             copied = AUD_write (voice, tmpbuf, to_copy);
             if (!copied)
@@ -908,42 +766,15 @@ static void es1370_adc_callback (void *opaque, int avail)
     es1370_run_channel (s, ADC_CHANNEL, avail);
 }
 
-static uint64_t es1370_read(void *opaque, hwaddr addr,
-                            unsigned size)
-{
-    switch (size) {
-    case 1:
-        return es1370_readb(opaque, addr);
-    case 2:
-        return es1370_readw(opaque, addr);
-    case 4:
-        return es1370_readl(opaque, addr);
-    default:
-        return -1;
-    }
-}
-
-static void es1370_write(void *opaque, hwaddr addr, uint64_t val,
-                      unsigned size)
-{
-    switch (size) {
-    case 1:
-        es1370_writeb(opaque, addr, val);
-        break;
-    case 2:
-        es1370_writew(opaque, addr, val);
-        break;
-    case 4:
-        es1370_writel(opaque, addr, val);
-        break;
-    }
-}
-
 static const MemoryRegionOps es1370_io_ops = {
     .read = es1370_read,
     .write = es1370_write,
-    .impl = {
+    .valid = {
         .min_access_size = 1,
+        .max_access_size = 4,
+    },
+    .impl = {
+        .min_access_size = 4,
         .max_access_size = 4,
     },
     .endianness = DEVICE_LITTLE_ENDIAN,
@@ -1012,7 +843,8 @@ static const VMStateDescription vmstate_es1370 = {
 
 static void es1370_on_reset(DeviceState *dev)
 {
-    ES1370State *s = container_of(dev, ES1370State, dev.qdev);
+    ES1370State *s = ES1370(dev);
+
     es1370_reset (s);
 }
 
@@ -1053,11 +885,10 @@ static void es1370_exit(PCIDevice *dev)
     AUD_remove_card(&s->card);
 }
 
-static int es1370_init (PCIBus *bus)
-{
-    pci_create_simple (bus, -1, TYPE_ES1370);
-    return 0;
-}
+static Property es1370_properties[] = {
+    DEFINE_AUDIO_PROPERTIES(ES1370State, card),
+    DEFINE_PROP_END_OF_LIST(),
+};
 
 static void es1370_class_init (ObjectClass *klass, void *data)
 {
@@ -1075,6 +906,7 @@ static void es1370_class_init (ObjectClass *klass, void *data)
     dc->desc = "ENSONIQ AudioPCI ES1370";
     dc->vmsd = &vmstate_es1370;
     dc->reset = es1370_on_reset;
+    device_class_set_props(dc, es1370_properties);
 }
 
 static const TypeInfo es1370_info = {
@@ -1091,8 +923,8 @@ static const TypeInfo es1370_info = {
 static void es1370_register_types (void)
 {
     type_register_static (&es1370_info);
-    pci_register_soundhw("es1370", "ENSONIQ AudioPCI ES1370", es1370_init);
+    deprecated_register_soundhw("es1370", "ENSONIQ AudioPCI ES1370",
+                                0, TYPE_ES1370);
 }
 
 type_init (es1370_register_types)
-

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Test for configuring cache modes of arbitrary nodes (requires O_DIRECT)
 #
@@ -24,13 +24,12 @@ owner=kwolf@redhat.com
 seq=`basename $0`
 echo "QA output created by $seq"
 
-here=`pwd`
 status=1	# failure is the default!
 
 _cleanup()
 {
     _cleanup_test_img
-    rm -f $TEST_IMG.snap
+    _rm_test_img "$TEST_IMG.snap"
 }
 trap "_cleanup; exit \$status" 0 1 2 3 15
 
@@ -40,13 +39,12 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
 
 _supported_fmt qcow2
 _supported_proto file
-_supported_os Linux
 
 # We test all cache modes anyway, but O_DIRECT needs to be supported
 _default_cache_mode none
 _supported_cache_modes none directsync
 
-function do_run_qemu()
+do_run_qemu()
 {
     echo Testing: "$@"
     (
@@ -60,7 +58,7 @@ function do_run_qemu()
     echo
 }
 
-function run_qemu()
+run_qemu()
 {
     do_run_qemu "$@" 2>&1 | _filter_testdir | _filter_qemu | _filter_hmp
 }
@@ -69,7 +67,7 @@ size=128M
 
 TEST_IMG="$TEST_IMG.base" _make_test_img $size
 TEST_IMG="$TEST_IMG.snap" _make_test_img $size
-_make_test_img -b "$TEST_IMG.base" $size
+_make_test_img -b "$TEST_IMG.base" $size -F $IMGFMT
 
 echo
 echo === Simple test for all cache modes ===
@@ -89,7 +87,7 @@ echo
 files="if=none,file=$TEST_IMG,backing.file.filename=$TEST_IMG.base"
 ids="node-name=image,backing.node-name=backing,backing.file.node-name=backing-file,file.node-name=file"
 
-function check_cache_all()
+check_cache_all()
 {
     # cache.direct is supposed to be inherited by both bs->file and
     # bs->backing
@@ -232,7 +230,7 @@ drv_bk="if=none,file=json:{'driver':'$IMGFMT',,'file':'backing-file',,'node-name
 drv_file="if=none,driver=file,filename=$TEST_IMG,node-name=file"
 drv_img="if=none,id=blk,file=json:{'driver':'$IMGFMT',,'file':'file',,'backing':'backing',,'node-name':'image'}"
 
-function check_cache_all_separate()
+check_cache_all_separate()
 {
     # Check cache.direct
 
@@ -351,6 +349,35 @@ info block backing
 info block backing-file"
 
 echo "$hmp_cmds" | run_qemu -drive "$files","$ids" | grep "Cache"
+
+echo
+echo "--- Alignment after changing O_DIRECT ---"
+echo
+
+# Directly test the protocol level: Can unaligned requests succeed even if
+# O_DIRECT was only enabled through a reopen and vice versa?
+
+# Ensure image size is a multiple of the sector size (required for O_DIRECT)
+$QEMU_IMG create -f file "$TEST_IMG" 1M | _filter_img_create
+
+# And write some data (not strictly necessary, but it feels better to actually
+# have something to be read)
+$QEMU_IO -f file -c 'write 0 4096' "$TEST_IMG" | _filter_qemu_io
+
+$QEMU_IO --cache=writeback -f file $TEST_IMG <<EOF | _filter_qemu_io
+read 42 42
+reopen -o cache.direct=on
+read 42 42
+reopen -o cache.direct=off
+read 42 42
+EOF
+$QEMU_IO --cache=none -f file $TEST_IMG <<EOF | _filter_qemu_io
+read 42 42
+reopen -o cache.direct=off
+read 42 42
+reopen -o cache.direct=on
+read 42 42
+EOF
 
 # success, all done
 echo "*** done"

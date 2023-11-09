@@ -1,14 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Dump the contents of a recorded execution stream
 #
-#  Copyright (c) 2017 Alex BennÃ©e <alex.bennee@linaro.org>
+#  Copyright (c) 2017 Alex Bennée <alex.bennee@linaro.org>
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
-# version 2 of the License, or (at your option) any later version.
+# version 2.1 of the License, or (at your option) any later version.
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -89,9 +89,9 @@ def call_decode(table, index, dumpfile):
     "Search decode table for next step"
     decoder = next((d for d in table if d.eid == index), None)
     if not decoder:
-        print "Could not decode index: %d" % (index)
-        print "Entry is: %s" % (decoder)
-        print "Decode Table is:\n%s" % (table)
+        print("Could not decode index: %d" % (index))
+        print("Entry is: %s" % (decoder))
+        print("Decode Table is:\n%s" % (table))
         return False
     else:
         return decoder.fn(decoder.eid, decoder.name, dumpfile)
@@ -103,23 +103,23 @@ def print_event(eid, name, string=None, event_count=None):
         event_count = replay_state.event_count
 
     if string:
-        print "%d:%s(%d) %s" % (event_count, name, eid, string)
+        print("%d:%s(%d) %s" % (event_count, name, eid, string))
     else:
-        print "%d:%s(%d)" % (event_count, name, eid)
+        print("%d:%s(%d)" % (event_count, name, eid))
 
 
 # Decoders for each event type
 
 def decode_unimp(eid, name, _unused_dumpfile):
     "Unimplimented decoder, will trigger exit"
-    print "%s not handled - will now stop" % (name)
+    print("%s not handled - will now stop" % (name))
     return False
 
 # Checkpoint decoder
 def swallow_async_qword(eid, name, dumpfile):
     "Swallow a qword of data without looking at it"
     step_id = read_qword(dumpfile)
-    print "  %s(%d) @ %d" % (name, eid, step_id)
+    print("  %s(%d) @ %d" % (name, eid, step_id))
     return True
 
 async_decode_table = [ Decoder(0, "REPLAY_ASYNC_EVENT_BH", swallow_async_qword),
@@ -139,8 +139,8 @@ def decode_async(eid, name, dumpfile):
     async_event_checkpoint = read_byte(dumpfile)
 
     if async_event_checkpoint != replay_state.current_checkpoint:
-        print "  mismatch between checkpoint %d and async data %d" % (
-            replay_state.current_checkpoint, async_event_checkpoint)
+        print("  mismatch between checkpoint %d and async data %d" % (
+            replay_state.current_checkpoint, async_event_checkpoint))
         return True
 
     return call_decode(async_decode_table, async_event_kind, dumpfile)
@@ -283,7 +283,7 @@ def decode_file(filename):
     version = read_dword(dumpfile)
     junk = read_qword(dumpfile)
 
-    print "HEADER: version 0x%x" % (version)
+    print("HEADER: version 0x%x" % (version))
 
     if version == 0xe02007:
         event_decode_table = v7_event_table

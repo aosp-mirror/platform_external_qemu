@@ -16,12 +16,14 @@
 
 #include "qemu/bitmap.h"
 #include "cpu_features_def.h"
+#include "target/s390x/gen-features.h"
 
 /* CPU features are announced via different ways */
 typedef enum {
     S390_FEAT_TYPE_STFL,
     S390_FEAT_TYPE_SCLP_CONF_CHAR,
     S390_FEAT_TYPE_SCLP_CONF_CHAR_EXT,
+    S390_FEAT_TYPE_SCLP_FAC134,
     S390_FEAT_TYPE_SCLP_CPU,
     S390_FEAT_TYPE_MISC,
     S390_FEAT_TYPE_PLO,
@@ -38,6 +40,9 @@ typedef enum {
     S390_FEAT_TYPE_PCC,
     S390_FEAT_TYPE_PPNO,
     S390_FEAT_TYPE_KMA,
+    S390_FEAT_TYPE_KDSA,
+    S390_FEAT_TYPE_SORTL,
+    S390_FEAT_TYPE_DFLTCC,
 } S390FeatType;
 
 /* Definition of a CPU feature */
@@ -64,24 +69,6 @@ void s390_add_from_feat_block(S390FeatBitmap features, S390FeatType type,
 void s390_feat_bitmap_to_ascii(const S390FeatBitmap features, void *opaque,
                                void (*fn)(const char *name, void *opaque));
 
-/* static groups that will never change */
-typedef enum {
-    S390_FEAT_GROUP_PLO,
-    S390_FEAT_GROUP_TOD_CLOCK_STEERING,
-    S390_FEAT_GROUP_GEN13_PTFF_ENH,
-    S390_FEAT_GROUP_MSA,
-    S390_FEAT_GROUP_MSA_EXT_1,
-    S390_FEAT_GROUP_MSA_EXT_2,
-    S390_FEAT_GROUP_MSA_EXT_3,
-    S390_FEAT_GROUP_MSA_EXT_4,
-    S390_FEAT_GROUP_MSA_EXT_5,
-    S390_FEAT_GROUP_MSA_EXT_6,
-    S390_FEAT_GROUP_MSA_EXT_7,
-    S390_FEAT_GROUP_MSA_EXT_8,
-    S390_FEAT_GROUP_MULTIPLE_EPOCH_PTFF,
-    S390_FEAT_GROUP_MAX,
-} S390FeatGroup;
-
 /* Definition of a CPU feature group */
 typedef struct {
     const char *name;       /* name exposed to the user */
@@ -94,6 +81,10 @@ const S390FeatGroupDef *s390_feat_group_def(S390FeatGroup group);
 
 #define BE_BIT_NR(BIT) (BIT ^ (BITS_PER_LONG - 1))
 
+static inline void clear_be_bit(unsigned int bit_nr, uint8_t *array)
+{
+    array[bit_nr / 8] &= ~(0x80 >> (bit_nr % 8));
+}
 static inline void set_be_bit(unsigned int bit_nr, uint8_t *array)
 {
     array[bit_nr / 8] |= 0x80 >> (bit_nr % 8);

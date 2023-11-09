@@ -22,16 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
-#include "hw/hw.h"
-#include "hw/ppc/mac.h"
-#include "hw/input/adb.h"
-#include "hw/misc/mos6522.h"
+#include "hw/irq.h"
+#include "hw/qdev-properties.h"
+#include "migration/vmstate.h"
 #include "hw/misc/macio/cuda.h"
 #include "qemu/timer.h"
-#include "sysemu/sysemu.h"
+#include "sysemu/runstate.h"
+#include "sysemu/rtc.h"
+#include "qapi/error.h"
 #include "qemu/cutils.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
 #include "trace.h"
 
 /* Bits in B data register: all active low */
@@ -65,7 +68,7 @@ static void cuda_receive_packet_from_host(CUDAState *s,
 static uint64_t cuda_get_counter_value(MOS6522State *s, MOS6522Timer *ti)
 {
     MOS6522CUDAState *mcs = container_of(s, MOS6522CUDAState, parent_obj);
-    CUDAState *cs = mcs->cuda;
+    CUDAState *cs = container_of(mcs, CUDAState, mos6522_cuda);
 
     /* Reverse of the tb calculation algorithm that Mac OS X uses on bootup */
     uint64_t tb_diff = muldiv64(qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL),
@@ -78,7 +81,7 @@ static uint64_t cuda_get_counter_value(MOS6522State *s, MOS6522Timer *ti)
 static uint64_t cuda_get_load_time(MOS6522State *s, MOS6522Timer *ti)
 {
     MOS6522CUDAState *mcs = container_of(s, MOS6522CUDAState, parent_obj);
-    CUDAState *cs = mcs->cuda;
+    CUDAState *cs = container_of(mcs, CUDAState, mos6522_cuda);
 
     uint64_t load_time = muldiv64(qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL),
                                   cs->tb_frequency, NANOSECONDS_PER_SECOND);
@@ -88,25 +91,16 @@ static uint64_t cuda_get_load_time(MOS6522State *s, MOS6522Timer *ti)
 static void cuda_set_sr_int(void *opaque)
 {
     CUDAState *s = opaque;
-    MOS6522CUDAState *mcs = s->mos6522_cuda;
+    MOS6522CUDAState *mcs = &s->mos6522_cuda;
     MOS6522State *ms = MOS6522(mcs);
-    MOS6522DeviceClass *mdc = MOS6522_DEVICE_GET_CLASS(ms);
+    qemu_irq irq = qdev_get_gpio_in(DEVICE(ms), SR_INT_BIT);
 
-    mdc->set_sr_int(ms);
+    qemu_set_irq(irq, 1);
 }
 
 static void cuda_delay_set_sr_int(CUDAState *s)
 {
-    MOS6522CUDAState *mcs = s->mos6522_cuda;
-    MOS6522State *ms = MOS6522(mcs);
-    MOS6522DeviceClass *mdc = MOS6522_DEVICE_GET_CLASS(ms);
     int64_t expire;
-
-    if (ms->dirb == 0xff || s->sr_delay_ns == 0) {
-        /* Disabled or not in Mac OS, fire the IRQ directly */
-        mdc->set_sr_int(ms);
-        return;
-    }
 
     trace_cuda_delay_set_sr_int();
 
@@ -117,8 +111,9 @@ static void cuda_delay_set_sr_int(CUDAState *s)
 /* NOTE: TIP and TREQ are negated */
 static void cuda_update(CUDAState *s)
 {
-    MOS6522CUDAState *mcs = s->mos6522_cuda;
+    MOS6522CUDAState *mcs = &s->mos6522_cuda;
     MOS6522State *ms = MOS6522(mcs);
+    ADBBusState *adb_bus = &s->adb_bus;
     int packet_received, len;
 
     packet_received = 0;
@@ -129,6 +124,9 @@ static void cuda_update(CUDAState *s)
             /* data output */
             if ((ms->b & (TACK | TIP)) != (s->last_b & (TACK | TIP))) {
                 if (s->data_out_index < sizeof(s->data_out)) {
+                    if (s->data_out_index == 0) {
+                        adb_autopoll_block(adb_bus);
+                    }
                     trace_cuda_data_send(ms->sr);
                     s->data_out[s->data_out_index++] = ms->sr;
                     cuda_delay_set_sr_int(s);
@@ -143,6 +141,7 @@ static void cuda_update(CUDAState *s)
                     /* indicate end of transfer */
                     if (s->data_in_index >= s->data_in_size) {
                         ms->b = (ms->b | TREQ);
+                        adb_autopoll_unblock(adb_bus);
                     }
                     cuda_delay_set_sr_int(s);
                 }
@@ -204,17 +203,16 @@ static void cuda_send_packet_to_host(CUDAState *s,
 static void cuda_adb_poll(void *opaque)
 {
     CUDAState *s = opaque;
+    ADBBusState *adb_bus = &s->adb_bus;
     uint8_t obuf[ADB_MAX_OUT_LEN + 2];
     int olen;
 
-    olen = adb_poll(&s->adb_bus, obuf + 2, s->adb_poll_mask);
+    olen = adb_poll(adb_bus, obuf + 2, adb_bus->autopoll_mask);
     if (olen > 0) {
         obuf[0] = ADB_PACKET;
         obuf[1] = 0x40; /* polled data */
         cuda_send_packet_to_host(s, obuf, olen + 2);
     }
-    timer_mod(s->adb_poll_timer, qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) +
-              (NANOSECONDS_PER_SECOND / (1000 / s->autopoll_rate_ms)));
 }
 
 /* description of commands */
@@ -230,23 +228,16 @@ static bool cuda_cmd_autopoll(CUDAState *s,
                               const uint8_t *in_data, int in_len,
                               uint8_t *out_data, int *out_len)
 {
-    int autopoll;
+    ADBBusState *adb_bus = &s->adb_bus;
+    bool autopoll;
 
     if (in_len != 1) {
         return false;
     }
 
-    autopoll = (in_data[0] != 0);
-    if (autopoll != s->autopoll) {
-        s->autopoll = autopoll;
-        if (autopoll) {
-            timer_mod(s->adb_poll_timer,
-                      qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) +
-                      (NANOSECONDS_PER_SECOND / (1000 / s->autopoll_rate_ms)));
-        } else {
-            timer_del(s->adb_poll_timer);
-        }
-    }
+    autopoll = (in_data[0] != 0) ? true : false;
+
+    adb_set_autopoll_enabled(adb_bus, autopoll);
     return true;
 }
 
@@ -254,6 +245,8 @@ static bool cuda_cmd_set_autorate(CUDAState *s,
                                   const uint8_t *in_data, int in_len,
                                   uint8_t *out_data, int *out_len)
 {
+    ADBBusState *adb_bus = &s->adb_bus;
+
     if (in_len != 1) {
         return false;
     }
@@ -264,12 +257,7 @@ static bool cuda_cmd_set_autorate(CUDAState *s,
         return false;
     }
 
-    s->autopoll_rate_ms = in_data[0];
-    if (s->autopoll) {
-        timer_mod(s->adb_poll_timer,
-                  qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) +
-                  (NANOSECONDS_PER_SECOND / (1000 / s->autopoll_rate_ms)));
-    }
+    adb_set_autopoll_rate_ms(adb_bus, in_data[0]);
     return true;
 }
 
@@ -277,11 +265,16 @@ static bool cuda_cmd_set_device_list(CUDAState *s,
                                      const uint8_t *in_data, int in_len,
                                      uint8_t *out_data, int *out_len)
 {
+    ADBBusState *adb_bus = &s->adb_bus;
+    uint16_t mask;
+
     if (in_len != 2) {
         return false;
     }
 
-    s->adb_poll_mask = (((uint16_t)in_data[0]) << 8) | in_data[1];
+    mask = (((uint16_t)in_data[0]) << 8) | in_data[1];
+
+    adb_set_autopoll_mask(adb_bus, mask);
     return true;
 }
 
@@ -462,7 +455,7 @@ static void cuda_receive_packet_from_host(CUDAState *s,
 static uint64_t mos6522_cuda_read(void *opaque, hwaddr addr, unsigned size)
 {
     CUDAState *s = opaque;
-    MOS6522CUDAState *mcs = s->mos6522_cuda;
+    MOS6522CUDAState *mcs = &s->mos6522_cuda;
     MOS6522State *ms = MOS6522(mcs);
 
     addr = (addr >> 9) & 0xf;
@@ -473,7 +466,7 @@ static void mos6522_cuda_write(void *opaque, hwaddr addr, uint64_t val,
                                unsigned size)
 {
     CUDAState *s = opaque;
-    MOS6522CUDAState *mcs = s->mos6522_cuda;
+    MOS6522CUDAState *mcs = &s->mos6522_cuda;
     MOS6522State *ms = MOS6522(mcs);
 
     addr = (addr >> 9) & 0xf;
@@ -492,21 +485,19 @@ static const MemoryRegionOps mos6522_cuda_ops = {
 
 static const VMStateDescription vmstate_cuda = {
     .name = "cuda",
-    .version_id = 4,
-    .minimum_version_id = 4,
+    .version_id = 6,
+    .minimum_version_id = 6,
     .fields = (VMStateField[]) {
+        VMSTATE_STRUCT(mos6522_cuda.parent_obj, CUDAState, 0, vmstate_mos6522,
+                       MOS6522State),
         VMSTATE_UINT8(last_b, CUDAState),
         VMSTATE_UINT8(last_acr, CUDAState),
         VMSTATE_INT32(data_in_size, CUDAState),
         VMSTATE_INT32(data_in_index, CUDAState),
         VMSTATE_INT32(data_out_index, CUDAState),
-        VMSTATE_UINT8(autopoll, CUDAState),
-        VMSTATE_UINT8(autopoll_rate_ms, CUDAState),
-        VMSTATE_UINT16(adb_poll_mask, CUDAState),
         VMSTATE_BUFFER(data_in, CUDAState),
         VMSTATE_BUFFER(data_out, CUDAState),
         VMSTATE_UINT32(tick_offset, CUDAState),
-        VMSTATE_TIMER_PTR(adb_poll_timer, CUDAState),
         VMSTATE_TIMER_PTR(sr_delay_timer, CUDAState),
         VMSTATE_END_OF_LIST()
     }
@@ -515,40 +506,37 @@ static const VMStateDescription vmstate_cuda = {
 static void cuda_reset(DeviceState *dev)
 {
     CUDAState *s = CUDA(dev);
+    ADBBusState *adb_bus = &s->adb_bus;
 
     s->data_in_size = 0;
     s->data_in_index = 0;
     s->data_out_index = 0;
-    s->autopoll = 0;
+
+    adb_set_autopoll_enabled(adb_bus, false);
 }
 
 static void cuda_realize(DeviceState *dev, Error **errp)
 {
     CUDAState *s = CUDA(dev);
     SysBusDevice *sbd;
-    MOS6522State *ms;
-    DeviceState *d;
+    ADBBusState *adb_bus = &s->adb_bus;
     struct tm tm;
 
-    d = qdev_create(NULL, TYPE_MOS6522_CUDA);
-    object_property_set_link(OBJECT(d), OBJECT(s), "cuda", errp);
-    qdev_init_nofail(d);
-    s->mos6522_cuda = MOS6522_CUDA(d);
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->mos6522_cuda), errp)) {
+        return;
+    }
 
     /* Pass IRQ from 6522 */
-    ms = MOS6522(d);
     sbd = SYS_BUS_DEVICE(s);
-    sysbus_pass_irq(sbd, SYS_BUS_DEVICE(ms));
+    sysbus_pass_irq(sbd, SYS_BUS_DEVICE(&s->mos6522_cuda));
 
     qemu_get_timedate(&tm, 0);
     s->tick_offset = (uint32_t)mktimegm(&tm) + RTC_OFFSET;
 
     s->sr_delay_timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, cuda_set_sr_int, s);
-    s->sr_delay_ns = 300 * SCALE_US;
+    s->sr_delay_ns = 20 * SCALE_US;
 
-    s->adb_poll_timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, cuda_adb_poll, s);
-    s->adb_poll_mask = 0xffff;
-    s->autopoll_rate_ms = 20;
+    adb_register_autopoll_callback(adb_bus, cuda_adb_poll, s);
 }
 
 static void cuda_init(Object *obj)
@@ -556,11 +544,14 @@ static void cuda_init(Object *obj)
     CUDAState *s = CUDA(obj);
     SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
 
+    object_initialize_child(obj, "mos6522-cuda", &s->mos6522_cuda,
+                            TYPE_MOS6522_CUDA);
+
     memory_region_init_io(&s->mem, obj, &mos6522_cuda_ops, s, "cuda", 0x2000);
     sysbus_init_mmio(sbd, &s->mem);
 
-    qbus_create_inplace(&s->adb_bus, sizeof(s->adb_bus), TYPE_ADB_BUS,
-                        DEVICE(obj), "adb.0");
+    qbus_init(&s->adb_bus, sizeof(s->adb_bus), TYPE_ADB_BUS,
+              DEVICE(obj), "adb.0");
 }
 
 static Property cuda_properties[] = {
@@ -575,7 +566,7 @@ static void cuda_class_init(ObjectClass *oc, void *data)
     dc->realize = cuda_realize;
     dc->reset = cuda_reset;
     dc->vmsd = &vmstate_cuda;
-    dc->props = cuda_properties;
+    device_class_set_props(dc, cuda_properties);
     set_bit(DEVICE_CATEGORY_BRIDGE, dc->categories);
 }
 
@@ -590,37 +581,31 @@ static const TypeInfo cuda_type_info = {
 static void mos6522_cuda_portB_write(MOS6522State *s)
 {
     MOS6522CUDAState *mcs = container_of(s, MOS6522CUDAState, parent_obj);
+    CUDAState *cs = container_of(mcs, CUDAState, mos6522_cuda);
 
-    cuda_update(mcs->cuda);
+    cuda_update(cs);
 }
 
-static void mos6522_cuda_realize(DeviceState *dev, Error **errp)
+static void mos6522_cuda_reset_hold(Object *obj)
 {
-    MOS6522State *ms = MOS6522(dev);
-    MOS6522DeviceClass *mdc = MOS6522_DEVICE_GET_CLASS(ms);
+    MOS6522State *ms = MOS6522(obj);
+    MOS6522DeviceClass *mdc = MOS6522_GET_CLASS(ms);
 
-    mdc->parent_realize(dev, errp);
+    if (mdc->parent_phases.hold) {
+        mdc->parent_phases.hold(obj);
+    }
 
     ms->timers[0].frequency = CUDA_TIMER_FREQ;
     ms->timers[1].frequency = (SCALE_US * 6000) / 4700;
 }
 
-static void mos6522_cuda_init(Object *obj)
-{
-    MOS6522CUDAState *s = MOS6522_CUDA(obj);
-
-    object_property_add_link(obj, "cuda", TYPE_CUDA,
-                             (Object **) &s->cuda,
-                             qdev_prop_allow_set_link_before_realize,
-                             0, NULL);
-}
-
 static void mos6522_cuda_class_init(ObjectClass *oc, void *data)
 {
-    DeviceClass *dc = DEVICE_CLASS(oc);
-    MOS6522DeviceClass *mdc = MOS6522_DEVICE_CLASS(oc);
+    ResettableClass *rc = RESETTABLE_CLASS(oc);
+    MOS6522DeviceClass *mdc = MOS6522_CLASS(oc);
 
-    dc->realize = mos6522_cuda_realize;
+    resettable_class_set_parent_phases(rc, NULL, mos6522_cuda_reset_hold,
+                                       NULL, &mdc->parent_phases);
     mdc->portB_write = mos6522_cuda_portB_write;
     mdc->get_timer1_counter_value = cuda_get_counter_value;
     mdc->get_timer2_counter_value = cuda_get_counter_value;
@@ -632,7 +617,6 @@ static const TypeInfo mos6522_cuda_type_info = {
     .name = TYPE_MOS6522_CUDA,
     .parent = TYPE_MOS6522,
     .instance_size = sizeof(MOS6522CUDAState),
-    .instance_init = mos6522_cuda_init,
     .class_init = mos6522_cuda_class_init,
 };
 

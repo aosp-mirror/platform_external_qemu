@@ -13,6 +13,7 @@
 
 #include "qemu/osdep.h"
 #include "hw/ppc/spapr_ovec.h"
+#include "migration/vmstate.h"
 #include "qemu/bitmap.h"
 #include "exec/address-spaces.h"
 #include "qemu/error-report.h"
@@ -26,7 +27,7 @@
  * allows us to more safely make assumptions about the bitmap size and
  * simplify the calling code somewhat
  */
-struct sPAPROptionVector {
+struct SpaprOptionVector {
     unsigned long *bitmap;
     int32_t bitmap_size; /* only used for migration */
 };
@@ -36,25 +37,25 @@ const VMStateDescription vmstate_spapr_ovec = {
     .version_id = 1,
     .minimum_version_id = 1,
     .fields = (VMStateField[]) {
-        VMSTATE_BITMAP(bitmap, sPAPROptionVector, 1, bitmap_size),
+        VMSTATE_BITMAP(bitmap, SpaprOptionVector, 1, bitmap_size),
         VMSTATE_END_OF_LIST()
     }
 };
 
-sPAPROptionVector *spapr_ovec_new(void)
+SpaprOptionVector *spapr_ovec_new(void)
 {
-    sPAPROptionVector *ov;
+    SpaprOptionVector *ov;
 
-    ov = g_new0(sPAPROptionVector, 1);
+    ov = g_new0(SpaprOptionVector, 1);
     ov->bitmap = bitmap_new(OV_MAXBITS);
     ov->bitmap_size = OV_MAXBITS;
 
     return ov;
 }
 
-sPAPROptionVector *spapr_ovec_clone(sPAPROptionVector *ov_orig)
+SpaprOptionVector *spapr_ovec_clone(SpaprOptionVector *ov_orig)
 {
-    sPAPROptionVector *ov;
+    SpaprOptionVector *ov;
 
     g_assert(ov_orig);
 
@@ -64,9 +65,9 @@ sPAPROptionVector *spapr_ovec_clone(sPAPROptionVector *ov_orig)
     return ov;
 }
 
-void spapr_ovec_intersect(sPAPROptionVector *ov,
-                          sPAPROptionVector *ov1,
-                          sPAPROptionVector *ov2)
+void spapr_ovec_intersect(SpaprOptionVector *ov,
+                          SpaprOptionVector *ov1,
+                          SpaprOptionVector *ov2)
 {
     g_assert(ov);
     g_assert(ov1);
@@ -75,34 +76,24 @@ void spapr_ovec_intersect(sPAPROptionVector *ov,
     bitmap_and(ov->bitmap, ov1->bitmap, ov2->bitmap, OV_MAXBITS);
 }
 
-/* returns true if options bits were removed, false otherwise */
-bool spapr_ovec_diff(sPAPROptionVector *ov,
-                     sPAPROptionVector *ov_old,
-                     sPAPROptionVector *ov_new)
+/* returns true if ov1 has a subset of bits in ov2 */
+bool spapr_ovec_subset(SpaprOptionVector *ov1, SpaprOptionVector *ov2)
 {
-    unsigned long *change_mask = bitmap_new(OV_MAXBITS);
-    unsigned long *removed_bits = bitmap_new(OV_MAXBITS);
-    bool bits_were_removed = false;
+    unsigned long *tmp = bitmap_new(OV_MAXBITS);
+    bool result;
 
-    g_assert(ov);
-    g_assert(ov_old);
-    g_assert(ov_new);
+    g_assert(ov1);
+    g_assert(ov2);
 
-    bitmap_xor(change_mask, ov_old->bitmap, ov_new->bitmap, OV_MAXBITS);
-    bitmap_and(ov->bitmap, ov_new->bitmap, change_mask, OV_MAXBITS);
-    bitmap_and(removed_bits, ov_old->bitmap, change_mask, OV_MAXBITS);
+    bitmap_andnot(tmp, ov1->bitmap, ov2->bitmap, OV_MAXBITS);
+    result = bitmap_empty(tmp, OV_MAXBITS);
 
-    if (!bitmap_empty(removed_bits, OV_MAXBITS)) {
-        bits_were_removed = true;
-    }
+    g_free(tmp);
 
-    g_free(change_mask);
-    g_free(removed_bits);
-
-    return bits_were_removed;
+    return result;
 }
 
-void spapr_ovec_cleanup(sPAPROptionVector *ov)
+void spapr_ovec_cleanup(SpaprOptionVector *ov)
 {
     if (ov) {
         g_free(ov->bitmap);
@@ -110,28 +101,35 @@ void spapr_ovec_cleanup(sPAPROptionVector *ov)
     }
 }
 
-void spapr_ovec_set(sPAPROptionVector *ov, long bitnr)
+void spapr_ovec_set(SpaprOptionVector *ov, long bitnr)
 {
     g_assert(ov);
-    g_assert_cmpint(bitnr, <, OV_MAXBITS);
+    g_assert(bitnr < OV_MAXBITS);
 
     set_bit(bitnr, ov->bitmap);
 }
 
-void spapr_ovec_clear(sPAPROptionVector *ov, long bitnr)
+void spapr_ovec_clear(SpaprOptionVector *ov, long bitnr)
 {
     g_assert(ov);
-    g_assert_cmpint(bitnr, <, OV_MAXBITS);
+    g_assert(bitnr < OV_MAXBITS);
 
     clear_bit(bitnr, ov->bitmap);
 }
 
-bool spapr_ovec_test(sPAPROptionVector *ov, long bitnr)
+bool spapr_ovec_test(SpaprOptionVector *ov, long bitnr)
 {
     g_assert(ov);
-    g_assert_cmpint(bitnr, <, OV_MAXBITS);
+    g_assert(bitnr < OV_MAXBITS);
 
     return test_bit(bitnr, ov->bitmap) ? true : false;
+}
+
+bool spapr_ovec_empty(SpaprOptionVector *ov)
+{
+    g_assert(ov);
+
+    return bitmap_empty(ov->bitmap, OV_MAXBITS);
 }
 
 static void guest_byte_to_bitmap(uint8_t entry, unsigned long *bitmap,
@@ -178,15 +176,15 @@ static target_ulong vector_addr(target_ulong table_addr, int vector)
     return table_addr;
 }
 
-sPAPROptionVector *spapr_ovec_parse_vector(target_ulong table_addr, int vector)
+SpaprOptionVector *spapr_ovec_parse_vector(target_ulong table_addr, int vector)
 {
-    sPAPROptionVector *ov;
+    SpaprOptionVector *ov;
     target_ulong addr;
     uint16_t vector_len;
     int i;
 
     g_assert(table_addr);
-    g_assert_cmpint(vector, >=, 1); /* vector numbering starts at 1 */
+    g_assert(vector >= 1);      /* vector numbering starts at 1 */
 
     addr = vector_addr(table_addr, vector);
     if (!addr) {
@@ -195,7 +193,7 @@ sPAPROptionVector *spapr_ovec_parse_vector(target_ulong table_addr, int vector)
     }
 
     vector_len = ldub_phys(&address_space_memory, addr++) + 1;
-    g_assert_cmpint(vector_len, <=, OV_MAXBYTES);
+    g_assert(vector_len <= OV_MAXBYTES);
     ov = spapr_ovec_new();
 
     for (i = 0; i < vector_len; i++) {
@@ -209,8 +207,8 @@ sPAPROptionVector *spapr_ovec_parse_vector(target_ulong table_addr, int vector)
     return ov;
 }
 
-int spapr_ovec_populate_dt(void *fdt, int fdt_offset,
-                           sPAPROptionVector *ov, const char *name)
+int spapr_dt_ovec(void *fdt, int fdt_offset,
+                  SpaprOptionVector *ov, const char *name)
 {
     uint8_t vec[OV_MAXBYTES + 1];
     uint16_t vec_len;
@@ -225,7 +223,7 @@ int spapr_ovec_populate_dt(void *fdt, int fdt_offset,
      * encoding/sizing expected in ibm,client-architecture-support
      */
     vec_len = (lastbit == OV_MAXBITS) ? 1 : lastbit / BITS_PER_BYTE + 1;
-    g_assert_cmpint(vec_len, <=, OV_MAXBYTES);
+    g_assert(vec_len <= OV_MAXBYTES);
     /* guest expects vector len encoded as vec_len - 1, since the length byte
      * is assumed and not included, and the first byte of the vector
      * is assumed as well

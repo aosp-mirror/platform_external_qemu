@@ -21,15 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
-#include "qemu-common.h"
 #include "cpu.h"
-#include "hw/hw.h"
 #include "hw/ppc/ppc.h"
 #include "qemu/timer.h"
-#include "sysemu/sysemu.h"
-#include "hw/timer/m48t59.h"
-#include "qemu/log.h"
+#include "sysemu/reset.h"
+#include "sysemu/runstate.h"
 #include "hw/loader.h"
 #include "kvm_ppc.h"
 
@@ -250,7 +248,7 @@ static void booke_wdt_cb(void *opaque)
 
 void store_booke_tsr(CPUPPCState *env, target_ulong val)
 {
-    PowerPCCPU *cpu = ppc_env_get_cpu(env);
+    PowerPCCPU *cpu = env_archcpu(env);
     ppc_tb_t *tb_env = env->tb_env;
     booke_timer_t *booke_timer = tb_env->opaque;
 
@@ -278,7 +276,7 @@ void store_booke_tsr(CPUPPCState *env, target_ulong val)
 
 void store_booke_tcr(CPUPPCState *env, target_ulong val)
 {
-    PowerPCCPU *cpu = ppc_env_get_cpu(env);
+    PowerPCCPU *cpu = env_archcpu(env);
     ppc_tb_t *tb_env = env->tb_env;
     booke_timer_t *booke_timer = tb_env->opaque;
 
@@ -318,7 +316,7 @@ static void ppc_booke_timer_reset_handle(void *opaque)
  * action will be taken. To avoid this we always clear the watchdog state when
  * state changes to running.
  */
-static void cpu_state_change_handler(void *opaque, int running, RunState state)
+static void cpu_state_change_handler(void *opaque, bool running, RunState state)
 {
     PowerPCCPU *cpu = opaque;
     CPUPPCState *env = &cpu->env;
@@ -339,8 +337,8 @@ void ppc_booke_timers_init(PowerPCCPU *cpu, uint32_t freq, uint32_t flags)
     booke_timer_t *booke_timer;
     int ret = 0;
 
-    tb_env      = g_malloc0(sizeof(ppc_tb_t));
-    booke_timer = g_malloc0(sizeof(booke_timer_t));
+    tb_env      = g_new0(ppc_tb_t, 1);
+    booke_timer = g_new0(booke_timer_t, 1);
 
     cpu->env.tb_env = tb_env;
     tb_env->flags = flags | PPC_TIMER_BOOKE | PPC_DECR_ZERO_TRIGGERED;

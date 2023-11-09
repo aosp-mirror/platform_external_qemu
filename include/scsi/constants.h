@@ -20,8 +20,8 @@
  * the scsi code for linux.
  */
 
-#ifndef BLOCK_SCSI_H
-#define BLOCK_SCSI_H
+#ifndef SCSI_CONSTANTS_H
+#define SCSI_CONSTANTS_H
 
 /*
  *      SCSI opcodes
@@ -212,18 +212,20 @@
 #define TYPE_ROM            0x05
 #define TYPE_SCANNER        0x06
 #define TYPE_MOD            0x07    /* Magneto-optical disk -
-				     * - treated as TYPE_DISK */
+                                     * - treated as TYPE_DISK */
 #define TYPE_MEDIUM_CHANGER 0x08
 #define TYPE_STORAGE_ARRAY  0x0c    /* Storage array device */
 #define TYPE_ENCLOSURE      0x0d    /* Enclosure Services Device */
 #define TYPE_RBC            0x0e    /* Simplified Direct-Access Device */
 #define TYPE_OSD            0x11    /* Object-storage Device */
+#define TYPE_ZBC            0x14    /* Host-managed Zoned SCSI Device */
 #define TYPE_WLUN           0x1e    /* Well known LUN */
 #define TYPE_NOT_PRESENT    0x1f
 #define TYPE_INACTIVE       0x20
 #define TYPE_NO_LUN         0x7f
 
 /* Mode page codes for mode sense/set */
+#define MODE_PAGE_VENDOR_SPECIFIC             0x00
 #define MODE_PAGE_R_W_ERROR                   0x01
 #define MODE_PAGE_HD_GEOMETRY                 0x04
 #define MODE_PAGE_FLEXIBLE_DISK_GEOMETRY      0x05
@@ -233,6 +235,7 @@
 #define MODE_PAGE_FAULT_FAIL                  0x1c
 #define MODE_PAGE_TO_PROTECT                  0x1d
 #define MODE_PAGE_CAPABILITIES                0x2a
+#define MODE_PAGE_APPLE_VENDOR                0x30
 #define MODE_PAGE_ALLS                        0x3f
 /* Not in Mt. Fuji, but in ATAPI 2.6 -- deprecated now in favor
  * of MODE_PAGE_SENSE_POWER */
@@ -310,5 +313,9 @@
 #define MMC_PROFILE_HDDVD_R_DL          0x0058
 #define MMC_PROFILE_HDDVD_RW_DL         0x005A
 #define MMC_PROFILE_INVALID             0xFFFF
+
+#define XCOPY_DESC_OFFSET 16
+#define IDENT_DESCR_TGT_DESCR_SIZE 32
+#define XCOPY_BLK2BLK_SEG_DESC_SIZE 28
 
 #endif

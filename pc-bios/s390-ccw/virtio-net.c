@@ -14,13 +14,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef _MSC_VER
 #include <unistd.h>
-#endif
 #include <sys/socket.h>
 #include <ethernet.h>
 #include "s390-ccw.h"
 #include "virtio.h"
+#include "s390-time.h"
+#include "helper.h"
 
 #ifndef DEBUG_VIRTIO_NET
 #define DEBUG_VIRTIO_NET 0

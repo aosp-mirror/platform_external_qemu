@@ -24,123 +24,47 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * The implementation of g_poll (functions poll_rest, g_poll) at the end of
- * this file are based on code from GNOME glib-2 and use a different license,
- * see the license comment there.
  */
 
 #include "qemu/osdep.h"
 #include <windows.h>
 #include "qapi/error.h"
-#include "sysemu/sysemu.h"
 #include "qemu/main-loop.h"
 #include "trace.h"
 #include "qemu/sockets.h"
 #include "qemu/cutils.h"
+#include "qemu/error-report.h"
+#include <malloc.h>
 
-/* this must come after including "trace.h" */
-#include <shlobj.h>
-#include <psapi.h>
-
-void *qemu_oom_check(void *ptr)
+static int get_allocation_granularity(void)
 {
-    if (ptr == NULL) {
-        fprintf(stderr, "Failed to allocate memory: %lu\n", GetLastError());
-        abort();
-    }
-    return ptr;
+    SYSTEM_INFO system_info;
+
+    GetSystemInfo(&system_info);
+    return system_info.dwAllocationGranularity;
 }
 
-void *qemu_try_memalign(size_t alignment, size_t size)
+void *qemu_anon_ram_alloc(size_t size, uint64_t *align, bool shared,
+                          bool noreserve)
 {
     void *ptr;
 
-    if (!size) {
-        abort();
-    }
-    ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
-    trace_qemu_memalign(alignment, size, ptr);
-    return ptr;
-}
-
-void *qemu_memalign(size_t alignment, size_t size)
-{
-    return qemu_oom_check(qemu_try_memalign(alignment, size));
-}
-
-bool insufficientMemMessage = false;
-
-void *qemu_anon_ram_alloc(size_t size, uint64_t *align, bool shared)
-{
-    void *ptr;
-
-    /* FIXME: this is not exactly optimal solution since VirtualAlloc
-       has 64Kb granularity, but at least it guarantees us that the
-       memory is page aligned. */
-    ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
-
-    // On failure, check the commit size.
-    if (!ptr) {
-        bool notEnoughCommit = false;
-        bool shouldTryAgain = false;
-        SIZE_T commitTotalBytes, commitLimitBytes;
-        const double oneMbBytes = 1048576.0;
-        const double safetyFactor = 1.2;
-        double totalMb, limitMb, neededMb, remainingMb;
-
-        PERFORMANCE_INFORMATION pi = { sizeof(pi) };
-
-        if (!GetPerformanceInfo(&pi, sizeof(pi))) {
-            fprintf(stderr, "ERROR: GetPerformanceInfo() failed.\n");
-            return ptr;
-        }
-
-        commitTotalBytes = pi.PageSize * pi.CommitTotal;
-        commitLimitBytes = pi.PageSize * pi.CommitLimit;
-
-        totalMb = commitTotalBytes / oneMbBytes;
-        limitMb = commitLimitBytes / oneMbBytes;
-        neededMb = size / oneMbBytes;
-        remainingMb = limitMb - totalMb;
-
-        if (neededMb * 1.2 > limitMb - totalMb) {
-            fprintf(stderr,
-                "ERROR: Insufficient RAM free for launching emulator.\n"
-                "Please free up memory (close other programs and files),\n"
-                "or decrease the AVD RAM size and try again.\n"
-                "Stats:\n"
-                "    Currently committed: %f MB\n"
-                "    Commit limit: %f MB\n"
-                "    Remaining: %f MB\n"
-                "    Needed: %f MB\n"
-                "For more info, see the Emulator Troubleshooting website:\n"
-                "https://developer.android.com/studio/run/emulator-troubleshooting#windows_free_ram_and_commit_charge\n"
-                "under \"Windows: Free RAM and commit charge\".",
-                totalMb,
-                limitMb,
-                remainingMb,
-                neededMb);
-            insufficientMemMessage = true;
-            return ptr;
-        } else {
-            // Maybe things cleared up. Try again.
-            ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
-            trace_qemu_anon_ram_alloc(size, ptr);
-            return ptr;
-        }
+    if (noreserve) {
+        /*
+         * We need a MEM_COMMIT before accessing any memory in a MEM_RESERVE
+         * area; we cannot easily mimic POSIX MAP_NORESERVE semantics.
+         */
+        error_report("Skipping reservation of swap space is not supported.");
+        return NULL;
     }
 
+    ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
     trace_qemu_anon_ram_alloc(size, ptr);
-    return ptr;
-}
 
-void qemu_vfree(void *ptr)
-{
-    trace_qemu_vfree(ptr);
-    if (ptr) {
-        VirtualFree(ptr, 0, MEM_RELEASE);
+    if (ptr && align) {
+        *align = MAX(get_allocation_granularity(), getpagesize());
     }
+    return ptr;
 }
 
 void qemu_anon_ram_free(void *ptr, size_t size)
@@ -151,7 +75,7 @@ void qemu_anon_ram_free(void *ptr, size_t size)
     }
 }
 
-#ifndef CONFIG_LOCALTIME_R
+#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
 /* FIXME: add proper locking */
 struct tm *gmtime_r(const time_t *timep, struct tm *result)
 {
@@ -175,32 +99,7 @@ struct tm *localtime_r(const time_t *timep, struct tm *result)
     }
     return p;
 }
-#endif /* CONFIG_LOCALTIME_R */
-
-void qemu_set_block(int fd)
-{
-    unsigned long opt = 0;
-    WSAEventSelect(fd, NULL, 0);
-    ioctlsocket(fd, FIONBIO, &opt);
-}
-
-void qemu_set_nonblock(int fd)
-{
-    unsigned long opt = 1;
-    ioctlsocket(fd, FIONBIO, &opt);
-    qemu_fd_register(fd);
-}
-
-int socket_set_fast_reuse(int fd)
-{
-    /* Enabling the reuse of an endpoint that was used by a socket still in
-     * TIME_WAIT state is usually performed by setting SO_REUSEADDR. On Windows
-     * fast reuse is the default and SO_REUSEADDR does strange things. So we
-     * don't have to do anything here. More info can be found at:
-     * http://msdn.microsoft.com/en-us/library/windows/desktop/ms740621.aspx */
-    return 0;
-}
-
+#endif /* _POSIX_THREAD_SAFE_FUNCTIONS */
 
 static int socket_error(void)
 {
@@ -278,6 +177,37 @@ static int socket_error(void)
     }
 }
 
+void qemu_socket_set_block(int fd)
+{
+    unsigned long opt = 0;
+    qemu_socket_unselect(fd, NULL);
+    ioctlsocket(fd, FIONBIO, &opt);
+}
+
+int qemu_socket_try_set_nonblock(int fd)
+{
+    unsigned long opt = 1;
+    if (ioctlsocket(fd, FIONBIO, &opt) != NO_ERROR) {
+        return -socket_error();
+    }
+    return 0;
+}
+
+void qemu_socket_set_nonblock(int fd)
+{
+    (void)qemu_socket_try_set_nonblock(fd);
+}
+
+int socket_set_fast_reuse(int fd)
+{
+    /* Enabling the reuse of an endpoint that was used by a socket still in
+     * TIME_WAIT state is usually performed by setting SO_REUSEADDR. On Windows
+     * fast reuse is the default and SO_REUSEADDR does strange things. So we
+     * don't have to do anything here. More info can be found at:
+     * http://msdn.microsoft.com/en-us/library/windows/desktop/ms740621.aspx */
+    return 0;
+}
+
 int inet_aton(const char *cp, struct in_addr *ia)
 {
     uint32_t addr = inet_addr(cp);
@@ -292,50 +222,19 @@ void qemu_set_cloexec(int fd)
 {
 }
 
-/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosec units */
-#define _W32_FT_OFFSET (116444736000000000ULL)
-
-#ifdef _MSC_VER
-int qemu_gettimeofday(struct timeval* tp)
-#else
-int qemu_gettimeofday(qemu_timeval* tp)
-#endif
-{
-    union {
-        unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
-        FILETIME ft;
-    } _now;
-
-    if (tp) {
-        GetSystemTimeAsFileTime(&_now.ft);
-        tp->tv_usec = (long)((_now.ns100 / 10ULL) % 1000000ULL);
-        tp->tv_sec = (long)((_now.ns100 - _W32_FT_OFFSET) / 10000000ULL);
-    }
-    /* Always return 0 as per Open Group Base Specifications Issue 6.
-       Do not set errno on error.  */
-    return 0;
-}
-
 int qemu_get_thread_id(void)
 {
     return GetCurrentThreadId();
 }
 
 char *
-qemu_get_local_state_pathname(const char *relative_pathname)
+qemu_get_local_state_dir(void)
 {
-    HRESULT result;
-    char base_path[MAX_PATH+1] = "";
+    const char * const *data_dirs = g_get_system_data_dirs();
 
-    result = SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL,
-                             /* SHGFP_TYPE_CURRENT */ 0, base_path);
-    if (result != S_OK) {
-        /* misconfigured environment */
-        g_critical("CSIDL_COMMON_APPDATA unavailable: %ld", (long)result);
-        abort();
-    }
-    return g_strdup_printf("%s" G_DIR_SEPARATOR_S "%s", base_path,
-                           relative_pathname);
+    g_assert(data_dirs && data_dirs[0]);
+
+    return g_strdup(data_dirs[0]);
 }
 
 void qemu_set_tty_echo(int fd, bool echo)
@@ -357,241 +256,6 @@ void qemu_set_tty_echo(int fd, bool echo)
     }
 }
 
-static char exec_dir[PATH_MAX];
-
-void qemu_init_exec_dir(const char *argv0)
-{
-
-    char *p;
-    char buf[MAX_PATH];
-    DWORD len;
-
-    len = win32GetModuleFileName(NULL, buf, sizeof(buf) - 1);
-    if (len == 0) {
-        return;
-    }
-
-    buf[len] = 0;
-    p = buf + len - 1;
-    while (p != buf && *p != '\\') {
-        p--;
-    }
-    *p = 0;
-    if (access(buf, R_OK) == 0) {
-        pstrcpy(exec_dir, sizeof(exec_dir), buf);
-    }
-}
-
-char *qemu_get_exec_dir(void)
-{
-    return g_strdup(exec_dir);
-}
-
-#if !GLIB_CHECK_VERSION(2, 50, 0)
-/*
- * The original implementation of g_poll from glib has a problem on Windows
- * when using timeouts < 10 ms.
- *
- * Whenever g_poll is called with timeout < 10 ms, it does a quick poll instead
- * of wait. This causes significant performance degradation of QEMU.
- *
- * The following code is a copy of the original code from glib/gpoll.c
- * (glib commit 20f4d1820b8d4d0fc4447188e33efffd6d4a88d8 from 2014-02-19).
- * Some debug code was removed and the code was reformatted.
- * All other code modifications are marked with 'QEMU'.
- */
-
-/*
- * gpoll.c: poll(2) abstraction
- * Copyright 1998 Owen Taylor
- * Copyright 2008 Red Hat, Inc.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, see <http://www.gnu.org/licenses/>.
- */
-
-static int poll_rest(gboolean poll_msgs, HANDLE *handles, gint nhandles,
-                     GPollFD *fds, guint nfds, gint timeout)
-{
-    DWORD ready;
-    GPollFD *f;
-    int recursed_result;
-
-    if (poll_msgs) {
-        /* Wait for either messages or handles
-         * -> Use MsgWaitForMultipleObjectsEx
-         */
-        ready = MsgWaitForMultipleObjectsEx(nhandles, handles, timeout,
-                                            QS_ALLINPUT, MWMO_ALERTABLE);
-
-        if (ready == WAIT_FAILED) {
-            gchar *emsg = g_win32_error_message(GetLastError());
-            g_warning("MsgWaitForMultipleObjectsEx failed: %s", emsg);
-            g_free(emsg);
-        }
-    } else if (nhandles == 0) {
-        /* No handles to wait for, just the timeout */
-        if (timeout == INFINITE) {
-            ready = WAIT_FAILED;
-        } else {
-            SleepEx(timeout, TRUE);
-            ready = WAIT_TIMEOUT;
-        }
-    } else {
-        /* Wait for just handles
-         * -> Use WaitForMultipleObjectsEx
-         */
-        ready =
-            WaitForMultipleObjectsEx(nhandles, handles, FALSE, timeout, TRUE);
-        if (ready == WAIT_FAILED) {
-            gchar *emsg = g_win32_error_message(GetLastError());
-            g_warning("WaitForMultipleObjectsEx failed: %s", emsg);
-            g_free(emsg);
-        }
-    }
-
-    if (ready == WAIT_FAILED) {
-        return -1;
-    } else if (ready == WAIT_TIMEOUT || ready == WAIT_IO_COMPLETION) {
-        return 0;
-    } else if (poll_msgs && ready == WAIT_OBJECT_0 + nhandles) {
-        for (f = fds; f < &fds[nfds]; ++f) {
-            if (f->fd == G_WIN32_MSG_HANDLE && f->events & G_IO_IN) {
-                f->revents |= G_IO_IN;
-            }
-        }
-
-        /* If we have a timeout, or no handles to poll, be satisfied
-         * with just noticing we have messages waiting.
-         */
-        if (timeout != 0 || nhandles == 0) {
-            return 1;
-        }
-
-        /* If no timeout and handles to poll, recurse to poll them,
-         * too.
-         */
-        recursed_result = poll_rest(FALSE, handles, nhandles, fds, nfds, 0);
-        return (recursed_result == -1) ? -1 : 1 + recursed_result;
-    } else if (/* QEMU: removed the following unneeded statement which causes
-                * a compiler warning: ready >= WAIT_OBJECT_0 && */
-               ready < WAIT_OBJECT_0 + nhandles) {
-        for (f = fds; f < &fds[nfds]; ++f) {
-            if ((HANDLE) f->fd == handles[ready - WAIT_OBJECT_0]) {
-                f->revents = f->events;
-            }
-        }
-
-        /* If no timeout and polling several handles, recurse to poll
-         * the rest of them.
-         */
-        if (timeout == 0 && nhandles > 1) {
-            /* Remove the handle that fired */
-            int i;
-            for (i = ready - WAIT_OBJECT_0 + 1; i < nhandles; i++) {
-                handles[i-1] = handles[i];
-            }
-            nhandles--;
-            recursed_result = poll_rest(FALSE, handles, nhandles, fds, nfds, 0);
-            return (recursed_result == -1) ? -1 : 1 + recursed_result;
-        }
-        return 1;
-    }
-
-    return 0;
-}
-
-extern int win32_wait_for_objects(GPollFD *fds, guint nfds, gint timeout);
-
-gint g_poll(GPollFD *fds, guint nfds, gint timeout)
-{
-    HANDLE handles[MAXIMUM_WAIT_OBJECTS];
-    gboolean poll_msgs = FALSE;
-    GPollFD *f;
-    gint nhandles = 0;
-    int retval;
-
-    for (f = fds; f < &fds[nfds]; ++f) {
-        if (f->fd == G_WIN32_MSG_HANDLE && (f->events & G_IO_IN)) {
-            poll_msgs = TRUE;
-        } else if (f->fd > 0) {
-            /* Don't add the same handle several times into the array, as
-             * docs say that is not allowed, even if it actually does seem
-             * to work.
-             */
-            gint i;
-
-            for (i = 0; i < nhandles; i++) {
-                if (handles[i] == (HANDLE) f->fd) {
-                    break;
-                }
-            }
-
-            if (i == nhandles) {
-                if (nhandles == MAXIMUM_WAIT_OBJECTS) {
-                    return win32_wait_for_objects(fds, nfds, timeout);
-                } else {
-                    handles[nhandles++] = (HANDLE) f->fd;
-                }
-            }
-        }
-    }
-
-    for (f = fds; f < &fds[nfds]; ++f) {
-        f->revents = 0;
-    }
-
-    if (timeout == -1) {
-        timeout = INFINITE;
-    }
-
-    /* Polling for several things? */
-    if (nhandles > 1 || (nhandles > 0 && poll_msgs)) {
-        /* First check if one or several of them are immediately
-         * available
-         */
-        retval = poll_rest(poll_msgs, handles, nhandles, fds, nfds, 0);
-
-        /* If not, and we have a significant timeout, poll again with
-         * timeout then. Note that this will return indication for only
-         * one event, or only for messages. We ignore timeouts less than
-         * ten milliseconds as they are mostly pointless on Windows, the
-         * MsgWaitForMultipleObjectsEx() call will timeout right away
-         * anyway.
-         *
-         * Modification for QEMU: replaced timeout >= 10 by timeout > 0.
-         */
-        if (retval == 0 && (timeout == INFINITE || timeout > 0)) {
-            retval = poll_rest(poll_msgs, handles, nhandles,
-                               fds, nfds, timeout);
-        }
-    } else {
-        /* Just polling for one thing, so no need to check first if
-         * available immediately
-         */
-        retval = poll_rest(poll_msgs, handles, nhandles, fds, nfds, timeout);
-    }
-
-    if (retval == -1) {
-        for (f = fds; f < &fds[nfds]; ++f) {
-            f->revents = 0;
-        }
-    }
-
-    return retval;
-}
-#endif
-
 int getpagesize(void)
 {
     SYSTEM_INFO system_info;
@@ -600,18 +264,17 @@ int getpagesize(void)
     return system_info.dwPageSize;
 }
 
-void os_mem_prealloc(int fd, char *area, size_t memory, int smp_cpus,
-                     Error **errp)
+void qemu_prealloc_mem(int fd, char *area, size_t sz, int max_threads,
+                       ThreadContext *tc, Error **errp)
 {
     int i;
-    size_t pagesize = getpagesize();
+    size_t pagesize = qemu_real_host_page_size();
 
-    memory = (memory + pagesize - 1) & -pagesize;
-    for (i = 0; i < memory / pagesize; i++) {
+    sz = (sz + pagesize - 1) & -pagesize;
+    for (i = 0; i < sz / pagesize; i++) {
         memset(area + pagesize * i, 0, 1);
     }
 }
-
 
 char *qemu_get_pid_name(pid_t pid)
 {
@@ -620,23 +283,161 @@ char *qemu_get_pid_name(pid_t pid)
 }
 
 
-pid_t qemu_fork(Error **errp)
+bool qemu_socket_select(int sockfd, WSAEVENT hEventObject,
+                        long lNetworkEvents, Error **errp)
 {
-    errno = ENOSYS;
-    error_setg_errno(errp, errno,
-                     "cannot fork child process");
-    return -1;
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (errp == NULL) {
+        errp = &error_warn;
+    }
+
+    if (s == INVALID_SOCKET) {
+        error_setg(errp, "invalid socket fd=%d", sockfd);
+        return false;
+    }
+
+    if (WSAEventSelect(s, hEventObject, lNetworkEvents) != 0) {
+        error_setg_win32(errp, WSAGetLastError(), "failed to WSAEventSelect()");
+        return false;
+    }
+
+    return true;
 }
 
+bool qemu_socket_unselect(int sockfd, Error **errp)
+{
+    return qemu_socket_select(sockfd, NULL, 0, errp);
+}
+
+int qemu_socketpair(int domain, int type, int protocol, int sv[2])
+{
+    struct sockaddr_un addr = {
+        0,
+    };
+    socklen_t socklen;
+    int listener = -1;
+    int client = -1;
+    int server = -1;
+    g_autofree char *path = NULL;
+    int tmpfd;
+    u_long arg;
+    int ret = -1;
+
+    g_return_val_if_fail(sv != NULL, -1);
+
+    addr.sun_family = AF_UNIX;
+    socklen = sizeof(addr);
+
+    tmpfd = g_file_open_tmp(NULL, &path, NULL);
+    if (tmpfd == -1 || !path) {
+        errno = EACCES;
+        goto out;
+    }
+
+    close(tmpfd);
+
+    if (strlen(path) >= sizeof(addr.sun_path)) {
+        errno = EINVAL;
+        goto out;
+    }
+
+    strncpy(addr.sun_path, path, sizeof(addr.sun_path) - 1);
+
+    listener = socket(domain, type, protocol);
+    if (listener == -1) {
+        goto out;
+    }
+
+    if (DeleteFile(path) == 0 && GetLastError() != ERROR_FILE_NOT_FOUND) {
+        errno = EACCES;
+        goto out;
+    }
+    g_clear_pointer(&path, g_free);
+
+    if (bind(listener, (struct sockaddr *)&addr, socklen) == -1) {
+        goto out;
+    }
+
+    if (listen(listener, 1) == -1) {
+        goto out;
+    }
+
+    client = socket(domain, type, protocol);
+    if (client == -1) {
+        goto out;
+    }
+
+    arg = 1;
+    if (ioctlsocket(client, FIONBIO, &arg) != NO_ERROR) {
+        goto out;
+    }
+
+    if (connect(client, (struct sockaddr *)&addr, socklen) == -1 &&
+        WSAGetLastError() != WSAEWOULDBLOCK) {
+        goto out;
+    }
+
+    server = accept(listener, NULL, NULL);
+    if (server == -1) {
+        goto out;
+    }
+
+    arg = 0;
+    if (ioctlsocket(client, FIONBIO, &arg) != NO_ERROR) {
+        goto out;
+    }
+
+    arg = 0;
+    if (ioctlsocket(client, SIO_AF_UNIX_GETPEERPID, &arg) != NO_ERROR) {
+        goto out;
+    }
+
+    if (arg != GetCurrentProcessId()) {
+        errno = EPERM;
+        goto out;
+    }
+
+    sv[0] = server;
+    server = -1;
+    sv[1] = client;
+    client = -1;
+    ret = 0;
+
+out:
+    if (listener != -1) {
+        close(listener);
+    }
+    if (client != -1) {
+        close(client);
+    }
+    if (server != -1) {
+        close(server);
+    }
+    if (path) {
+        DeleteFile(path);
+    }
+    return ret;
+}
 
 #undef connect
 int qemu_connect_wrap(int sockfd, const struct sockaddr *addr,
                       socklen_t addrlen)
 {
     int ret;
-    ret = connect(sockfd, addr, addrlen);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = connect(s, addr, addrlen);
     if (ret < 0) {
-        errno = socket_error();
+        if (WSAGetLastError() == WSAEWOULDBLOCK) {
+            errno = EINPROGRESS;
+        } else {
+            errno = socket_error();
+        }
     }
     return ret;
 }
@@ -646,7 +447,13 @@ int qemu_connect_wrap(int sockfd, const struct sockaddr *addr,
 int qemu_listen_wrap(int sockfd, int backlog)
 {
     int ret;
-    ret = listen(sockfd, backlog);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = listen(s, backlog);
     if (ret < 0) {
         errno = socket_error();
     }
@@ -659,10 +466,89 @@ int qemu_bind_wrap(int sockfd, const struct sockaddr *addr,
                    socklen_t addrlen)
 {
     int ret;
-    ret = bind(sockfd, addr, addrlen);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = bind(s, addr, addrlen);
     if (ret < 0) {
         errno = socket_error();
     }
+    return ret;
+}
+
+EXCEPTION_DISPOSITION
+win32_close_exception_handler(struct _EXCEPTION_RECORD *exception_record,
+                              void *registration, struct _CONTEXT *context,
+                              void *dispatcher)
+{
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+#undef close
+int qemu_close_socket_osfhandle(int fd)
+{
+    SOCKET s = _get_osfhandle(fd);
+    DWORD flags = 0;
+
+    /*
+     * If we were to just call _close on the descriptor, it would close the
+     * HANDLE, but it wouldn't free any of the resources associated to the
+     * SOCKET, and we can't call _close after calling closesocket, because
+     * closesocket has already closed the HANDLE, and _close would attempt to
+     * close the HANDLE again, resulting in a double free. We can however
+     * protect the HANDLE from actually being closed long enough to close the
+     * file descriptor, then close the socket itself.
+     */
+    if (!GetHandleInformation((HANDLE)s, &flags)) {
+        errno = EACCES;
+        return -1;
+    }
+
+    if (!SetHandleInformation((HANDLE)s, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE)) {
+        errno = EACCES;
+        return -1;
+    }
+
+    __try1(win32_close_exception_handler) {
+        /*
+         * close() returns EBADF since we PROTECT_FROM_CLOSE the underlying
+         * handle, but the FD is actually freed
+         */
+        if (close(fd) < 0 && errno != EBADF) {
+            return -1;
+        }
+    }
+    __except1 {
+    }
+
+    if (!SetHandleInformation((HANDLE)s, flags, flags)) {
+        errno = EACCES;
+        return -1;
+    }
+
+    return 0;
+}
+
+int qemu_close_wrap(int fd)
+{
+    SOCKET s = INVALID_SOCKET;
+    int ret = -1;
+
+    if (!fd_is_socket(fd)) {
+        return close(fd);
+    }
+
+    s = _get_osfhandle(fd);
+    qemu_close_socket_osfhandle(fd);
+
+    ret = closesocket(s);
+    if (ret < 0) {
+        errno = socket_error();
+    }
+
     return ret;
 }
 
@@ -670,12 +556,23 @@ int qemu_bind_wrap(int sockfd, const struct sockaddr *addr,
 #undef socket
 int qemu_socket_wrap(int domain, int type, int protocol)
 {
-    int ret;
-    ret = socket(domain, type, protocol);
-    if (ret < 0) {
+    SOCKET s;
+    int fd;
+
+    s = socket(domain, type, protocol);
+    if (s == -1) {
         errno = socket_error();
+        return -1;
     }
-    return ret;
+
+    fd = _open_osfhandle(s, _O_BINARY);
+    if (fd < 0) {
+        closesocket(s);
+        /* _open_osfhandle may not set errno, and closesocket() may override it */
+        errno = ENOMEM;
+    }
+
+    return fd;
 }
 
 
@@ -683,12 +580,27 @@ int qemu_socket_wrap(int domain, int type, int protocol)
 int qemu_accept_wrap(int sockfd, struct sockaddr *addr,
                      socklen_t *addrlen)
 {
-    int ret;
-    ret = accept(sockfd, addr, addrlen);
-    if (ret < 0) {
-        errno = socket_error();
+    int fd;
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
     }
-    return ret;
+
+    s = accept(s, addr, addrlen);
+    if (s == -1) {
+        errno = socket_error();
+        return -1;
+    }
+
+    fd = _open_osfhandle(s, _O_BINARY);
+    if (fd < 0) {
+        closesocket(s);
+        /* _open_osfhandle may not set errno, and closesocket() may override it */
+        errno = ENOMEM;
+    }
+
+    return fd;
 }
 
 
@@ -696,7 +608,13 @@ int qemu_accept_wrap(int sockfd, struct sockaddr *addr,
 int qemu_shutdown_wrap(int sockfd, int how)
 {
     int ret;
-    ret = shutdown(sockfd, how);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = shutdown(s, how);
     if (ret < 0) {
         errno = socket_error();
     }
@@ -708,19 +626,13 @@ int qemu_shutdown_wrap(int sockfd, int how)
 int qemu_ioctlsocket_wrap(int fd, int req, void *val)
 {
     int ret;
-    ret = ioctlsocket(fd, req, val);
-    if (ret < 0) {
-        errno = socket_error();
+    SOCKET s = _get_osfhandle(fd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
     }
-    return ret;
-}
 
-
-#undef closesocket
-int qemu_closesocket_wrap(int fd)
-{
-    int ret;
-    ret = closesocket(fd);
+    ret = ioctlsocket(s, req, val);
     if (ret < 0) {
         errno = socket_error();
     }
@@ -733,7 +645,13 @@ int qemu_getsockopt_wrap(int sockfd, int level, int optname,
                          void *optval, socklen_t *optlen)
 {
     int ret;
-    ret = getsockopt(sockfd, level, optname, optval, optlen);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = getsockopt(s, level, optname, optval, optlen);
     if (ret < 0) {
         errno = socket_error();
     }
@@ -746,7 +664,13 @@ int qemu_setsockopt_wrap(int sockfd, int level, int optname,
                          const void *optval, socklen_t optlen)
 {
     int ret;
-    ret = setsockopt(sockfd, level, optname, optval, optlen);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = setsockopt(s, level, optname, optval, optlen);
     if (ret < 0) {
         errno = socket_error();
     }
@@ -759,7 +683,13 @@ int qemu_getpeername_wrap(int sockfd, struct sockaddr *addr,
                           socklen_t *addrlen)
 {
     int ret;
-    ret = getpeername(sockfd, addr, addrlen);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = getpeername(s, addr, addrlen);
     if (ret < 0) {
         errno = socket_error();
     }
@@ -772,7 +702,13 @@ int qemu_getsockname_wrap(int sockfd, struct sockaddr *addr,
                           socklen_t *addrlen)
 {
     int ret;
-    ret = getsockname(sockfd, addr, addrlen);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = getsockname(s, addr, addrlen);
     if (ret < 0) {
         errno = socket_error();
     }
@@ -784,7 +720,13 @@ int qemu_getsockname_wrap(int sockfd, struct sockaddr *addr,
 ssize_t qemu_send_wrap(int sockfd, const void *buf, size_t len, int flags)
 {
     int ret;
-    ret = send(sockfd, buf, len, flags);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = send(s, buf, len, flags);
     if (ret < 0) {
         errno = socket_error();
     }
@@ -797,7 +739,13 @@ ssize_t qemu_sendto_wrap(int sockfd, const void *buf, size_t len, int flags,
                          const struct sockaddr *addr, socklen_t addrlen)
 {
     int ret;
-    ret = sendto(sockfd, buf, len, flags, addr, addrlen);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = sendto(s, buf, len, flags, addr, addrlen);
     if (ret < 0) {
         errno = socket_error();
     }
@@ -809,7 +757,13 @@ ssize_t qemu_sendto_wrap(int sockfd, const void *buf, size_t len, int flags,
 ssize_t qemu_recv_wrap(int sockfd, void *buf, size_t len, int flags)
 {
     int ret;
-    ret = recv(sockfd, buf, len, flags);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = recv(s, buf, len, flags);
     if (ret < 0) {
         errno = socket_error();
     }
@@ -822,511 +776,96 @@ ssize_t qemu_recvfrom_wrap(int sockfd, void *buf, size_t len, int flags,
                            struct sockaddr *addr, socklen_t *addrlen)
 {
     int ret;
-    ret = recvfrom(sockfd, buf, len, flags, addr, addrlen);
+    SOCKET s = _get_osfhandle(sockfd);
+
+    if (s == INVALID_SOCKET) {
+        return -1;
+    }
+
+    ret = recvfrom(s, buf, len, flags, addr, addrlen);
     if (ret < 0) {
         errno = socket_error();
     }
     return ret;
 }
 
-int qemu_stat(const char* path, struct stat* st)
+bool qemu_write_pidfile(const char *filename, Error **errp)
 {
-    return win32_stat(path, st);
+    char buffer[128];
+    int len;
+    HANDLE file;
+    OVERLAPPED overlap;
+    BOOL ret;
+    memset(&overlap, 0, sizeof(overlap));
+
+    file = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+                      OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (file == INVALID_HANDLE_VALUE) {
+        error_setg(errp, "Failed to create PID file");
+        return false;
+    }
+    len = snprintf(buffer, sizeof(buffer), FMT_pid "\n", (pid_t)getpid());
+    ret = WriteFile(file, (LPCVOID)buffer, (DWORD)len,
+                    NULL, &overlap);
+    CloseHandle(file);
+    if (ret == 0) {
+        error_setg(errp, "Failed to write PID file");
+        return false;
+    }
+    return true;
 }
 
-int qemu_lstat(const char* path, struct stat* st)
+size_t qemu_get_host_physmem(void)
 {
-    return win32_lstat(path, st);
-}
+    MEMORYSTATUSEX statex;
+    statex.dwLength = sizeof(statex);
 
-#ifdef _MSC_VER
-
-#ifdef USE_QEMU_GETOPT
-
-int opterr = 1;      /* if error message should be printed */
-int optind = 1;      /* index into parent argv vector */
-int optopt = '?';    /* character checked for validity */
-char* optarg = NULL; /* argument associated with option */
-
-#define PRINT_ERROR ((opterr) && (*options != ':'))
-
-#define FLAG_PERMUTE 0x01  /* permute non-options to the end of argv */
-#define FLAG_ALLARGS 0x02  /* treat non-options as args to option "-1" */
-#define FLAG_LONGONLY 0x04 /* operate as getopt_long_only */
-
-/* return values */
-#define BADCH (int)'?'
-#define BADARG ((*options == ':') ? (int)':' : (int)'?')
-#define INORDER (int)1
-
-#define __progname __argv[0]
-#define EMSG ""
-
-static int getopt_internal(int,
-                           char* const*,
-                           const char*,
-                           const struct option*,
-                           int*,
-                           int);
-static int parse_long_options(char* const*,
-                              const char*,
-                              const struct option*,
-                              int*,
-                              int);
-static int gcd(int, int);
-static void permute_args(int, int, int, char* const*);
-
-static char* place = EMSG; /* option letter processing */
-
-static int nonopt_start = -1; /* first non option argument (for permute) */
-static int nonopt_end = -1;   /* first option after non options (for permute) */
-
-/* Error messages */
-static const char recargchar[] = "option requires an argument -- %c";
-static const char recargstring[] = "option requires an argument -- %s";
-static const char ambig[] = "ambiguous option -- %.*s";
-static const char noarg[] = "option doesn't take an argument -- %.*s";
-static const char illoptchar[] = "unknown option -- %c";
-static const char illoptstring[] = "unknown option -- %s";
-
-static void _vwarnx(const char* fmt, va_list ap) {
-    (void)fprintf(stderr, "%s: ", __progname);
-    if (fmt != NULL)
-        (void)vfprintf(stderr, fmt, ap);
-    (void)fprintf(stderr, "\n");
-}
-
-static void warnx(const char* fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    _vwarnx(fmt, ap);
-    va_end(ap);
-}
-
-/*
- * Compute the greatest common divisor of a and b.
- */
-static int gcd(int a, int b) {
-    int c;
-
-    c = a % b;
-    while (c != 0) {
-        a = b;
-        b = c;
-        c = a % b;
+    if (GlobalMemoryStatusEx(&statex)) {
+        return statex.ullTotalPhys;
     }
-
-    return (b);
+    return 0;
 }
 
-/*
- * Exchange the block from nonopt_start to nonopt_end with the block
- * from nonopt_end to opt_end (keeping the same order of arguments
- * in each block).
- */
-static void permute_args(int panonopt_start,
-                         int panonopt_end,
-                         int opt_end,
-                         char* const* nargv) {
-    int cstart, cyclelen, i, j, ncycle, nnonopts, nopts, pos;
-    char* swap;
-
-    /*
-     * compute lengths of blocks and number and size of cycles
+int qemu_msync(void *addr, size_t length, int fd)
+{
+    /**
+     * Perform the sync based on the file descriptor
+     * The sync range will most probably be wider than the one
+     * requested - but it will still get the job done
      */
-    nnonopts = panonopt_end - panonopt_start;
-    nopts = opt_end - panonopt_end;
-    ncycle = gcd(nnonopts, nopts);
-    cyclelen = (opt_end - panonopt_start) / ncycle;
-
-    for (i = 0; i < ncycle; i++) {
-        cstart = panonopt_end + i;
-        pos = cstart;
-        for (j = 0; j < cyclelen; j++) {
-            if (pos >= panonopt_end)
-                pos -= nnonopts;
-            else
-                pos += nopts;
-            swap = nargv[pos];
-            /* LINTED const cast */
-            ((char**)nargv)[pos] = nargv[cstart];
-            /* LINTED const cast */
-            ((char**)nargv)[cstart] = swap;
-        }
-    }
+    return qemu_fdatasync(fd);
 }
 
-/*
- * parse_long_options --
- *	Parse long options in argc/argv argument vector.
- * Returns -1 if short_too is set and the option does not match long_options.
- */
-static int parse_long_options(char* const* nargv,
-                              const char* options,
-                              const struct option* long_options,
-                              int* idx,
-                              int short_too) {
-    char *current_argv, *has_equal;
-    size_t current_argv_len;
-    int i, ambiguous, match;
+void *qemu_win32_map_alloc(size_t size, HANDLE *h, Error **errp)
+{
+    void *bits;
 
-#define IDENTICAL_INTERPRETATION(_x, _y)                         \
-    (long_options[(_x)].has_arg == long_options[(_y)].has_arg && \
-     long_options[(_x)].flag == long_options[(_y)].flag &&       \
-     long_options[(_x)].val == long_options[(_y)].val)
+    trace_win32_map_alloc(size);
 
-    current_argv = place;
-    match = -1;
-    ambiguous = 0;
-
-    optind++;
-
-    if ((has_equal = strchr(current_argv, '=')) != NULL) {
-        /* argument found (--option=arg) */
-        current_argv_len = has_equal - current_argv;
-        has_equal++;
-    } else
-        current_argv_len = strlen(current_argv);
-
-    for (i = 0; long_options[i].name; i++) {
-        /* find matching long option */
-        if (strncmp(current_argv, long_options[i].name, current_argv_len))
-            continue;
-
-        if (strlen(long_options[i].name) == current_argv_len) {
-            /* exact match */
-            match = i;
-            ambiguous = 0;
-            break;
-        }
-        /*
-         * If this is a known short option, don't allow
-         * a partial match of a single character.
-         */
-        if (short_too && current_argv_len == 1)
-            continue;
-
-        if (match == -1) /* partial match */
-            match = i;
-        else if (!IDENTICAL_INTERPRETATION(i, match))
-            ambiguous = 1;
+    *h = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0,
+                          size, NULL);
+    if (*h == NULL) {
+        error_setg_win32(errp, GetLastError(), "Failed to CreateFileMapping");
+        return NULL;
     }
-    if (ambiguous) {
-        /* ambiguous abbreviation */
-        if (PRINT_ERROR)
-            warnx(ambig, (int)current_argv_len, current_argv);
-        optopt = 0;
-        return (BADCH);
+
+    bits = MapViewOfFile(*h, FILE_MAP_ALL_ACCESS, 0, 0, size);
+    if (bits == NULL) {
+        error_setg_win32(errp, GetLastError(), "Failed to MapViewOfFile");
+        CloseHandle(*h);
+        return NULL;
     }
-    if (match != -1) { /* option found */
-        if (long_options[match].has_arg == no_argument && has_equal) {
-            if (PRINT_ERROR)
-                warnx(noarg, (int)current_argv_len, current_argv);
-            /*
-             * XXX: GNU sets optopt to val regardless of flag
-             */
-            if (long_options[match].flag == NULL)
-                optopt = long_options[match].val;
-            else
-                optopt = 0;
-            return (BADARG);
-        }
-        if (long_options[match].has_arg == required_argument ||
-            long_options[match].has_arg == optional_argument) {
-            if (has_equal)
-                optarg = has_equal;
-            else if (long_options[match].has_arg == required_argument) {
-                /*
-                 * optional argument doesn't use next nargv
-                 */
-                optarg = nargv[optind++];
-            }
-        }
-        if ((long_options[match].has_arg == required_argument) &&
-            (optarg == NULL)) {
-            /*
-             * Missing argument; leading ':' indicates no error
-             * should be generated.
-             */
-            if (PRINT_ERROR)
-                warnx(recargstring, current_argv);
-            /*
-             * XXX: GNU sets optopt to val regardless of flag
-             */
-            if (long_options[match].flag == NULL)
-                optopt = long_options[match].val;
-            else
-                optopt = 0;
-            --optind;
-            return (BADARG);
-        }
-    } else { /* unknown option */
-        if (short_too) {
-            --optind;
-            return (-1);
-        }
-        if (PRINT_ERROR)
-            warnx(illoptstring, current_argv);
-        optopt = 0;
-        return (BADCH);
-    }
-    if (idx)
-        *idx = match;
-    if (long_options[match].flag) {
-        *long_options[match].flag = long_options[match].val;
-        return (0);
-    } else
-        return (long_options[match].val);
-#undef IDENTICAL_INTERPRETATION
+
+    return bits;
 }
 
-/*
- * getopt_internal --
- *	Parse argc/argv argument vector.  Called by user level routines.
- */
-static int getopt_internal(int nargc,
-                           char* const* nargv,
-                           const char* options,
-                           const struct option* long_options,
-                           int* idx,
-                           int flags) {
-    char* oli; /* option letter list index */
-    int optchar, short_too;
-    static int posixly_correct = -1;
+void qemu_win32_map_free(void *ptr, HANDLE h, Error **errp)
+{
+    trace_win32_map_free(ptr, h);
 
-    if (options == NULL)
-        return (-1);
-
-    if (optind == 0)
-        optind = 1;
-
-    /*
-     * Disable GNU extensions if POSIXLY_CORRECT is set or options
-     * string begins with a '+'.
-     *
-     * CV, 2009-12-14: Check POSIXLY_CORRECT anew if optind == 0 or
-     *                 optreset != 0 for GNU compatibility.
-     */
-    if (posixly_correct == -1)
-        posixly_correct = (getenv("POSIXLY_CORRECT") != NULL);
-    if (*options == '-')
-        flags |= FLAG_ALLARGS;
-    else if (posixly_correct || *options == '+')
-        flags &= ~FLAG_PERMUTE;
-    if (*options == '+' || *options == '-')
-        options++;
-
-    optarg = NULL;
-start:
-    if (!*place) {             /* update scanning pointer */
-        if (optind >= nargc) { /* end of argument vector */
-            place = EMSG;
-            if (nonopt_end != -1) {
-                /* do permutation, if we have to */
-                permute_args(nonopt_start, nonopt_end, optind, nargv);
-                optind -= nonopt_end - nonopt_start;
-            } else if (nonopt_start != -1) {
-                /*
-                 * If we skipped non-options, set optind
-                 * to the first of them.
-                 */
-                optind = nonopt_start;
-            }
-            nonopt_start = nonopt_end = -1;
-            return (-1);
-        }
-        if (*(place = nargv[optind]) != '-' ||
-            (place[1] == '\0' && strchr(options, '-') == NULL)) {
-            place = EMSG; /* found non-option */
-            if (flags & FLAG_ALLARGS) {
-                /*
-                 * GNU extension:
-                 * return non-option as argument to option 1
-                 */
-                optarg = nargv[optind++];
-                return (INORDER);
-            }
-            if (!(flags & FLAG_PERMUTE)) {
-                /*
-                 * If no permutation wanted, stop parsing
-                 * at first non-option.
-                 */
-                return (-1);
-            }
-            /* do permutation */
-            if (nonopt_start == -1)
-                nonopt_start = optind;
-            else if (nonopt_end != -1) {
-                permute_args(nonopt_start, nonopt_end, optind, nargv);
-                nonopt_start = optind - (nonopt_end - nonopt_start);
-                nonopt_end = -1;
-            }
-            optind++;
-            /* process next argument */
-            goto start;
-        }
-        if (nonopt_start != -1 && nonopt_end == -1)
-            nonopt_end = optind;
-
-        /*
-         * If we have "-" do nothing, if "--" we are done.
-         */
-        if (place[1] != '\0' && *++place == '-' && place[1] == '\0') {
-            optind++;
-            place = EMSG;
-            /*
-             * We found an option (--), so if we skipped
-             * non-options, we have to permute.
-             */
-            if (nonopt_end != -1) {
-                permute_args(nonopt_start, nonopt_end, optind, nargv);
-                optind -= nonopt_end - nonopt_start;
-            }
-            nonopt_start = nonopt_end = -1;
-            return (-1);
-        }
+    if (UnmapViewOfFile(ptr) == 0) {
+        error_setg_win32(errp, GetLastError(), "Failed to UnmapViewOfFile");
     }
-
-    /*
-     * Check long options if:
-     *  1) we were passed some
-     *  2) the arg is not just "-"
-     *  3) either the arg starts with -- we are getopt_long_only()
-     */
-    if (long_options != NULL && place != nargv[optind] &&
-        (*place == '-' || (flags & FLAG_LONGONLY))) {
-        short_too = 0;
-        if (*place == '-')
-            place++; /* --foo long option */
-        else if (*place != ':' && strchr(options, *place) != NULL)
-            short_too = 1; /* could be short option too */
-
-        optchar = parse_long_options(nargv, options, long_options, idx,
-                                     short_too);
-        if (optchar != -1) {
-            place = EMSG;
-            return (optchar);
-        }
-    }
-
-    if ((optchar = (int)*place++) == (int)':' ||
-        (optchar == (int)'-' && *place != '\0') ||
-        (oli = strchr(options, optchar)) == NULL) {
-        /*
-         * If the user specified "-" and  '-' isn't listed in
-         * options, return -1 (non-option) as per POSIX.
-         * Otherwise, it is an unknown option character (or ':').
-         */
-        if (optchar == (int)'-' && *place == '\0')
-            return (-1);
-        if (!*place)
-            ++optind;
-        if (PRINT_ERROR)
-            warnx(illoptchar, optchar);
-        optopt = optchar;
-        return (BADCH);
-    }
-    if (long_options != NULL && optchar == 'W' && oli[1] == ';') {
-        /* -W long-option */
-        if (*place) /* no space */
-            /* NOTHING */;
-        else if (++optind >= nargc) { /* no arg */
-            place = EMSG;
-            if (PRINT_ERROR)
-                warnx(recargchar, optchar);
-            optopt = optchar;
-            return (BADARG);
-        } else /* white space */
-            place = nargv[optind];
-        optchar = parse_long_options(nargv, options, long_options, idx, 0);
-        place = EMSG;
-        return (optchar);
-    }
-    if (*++oli != ':') { /* doesn't take argument */
-        if (!*place)
-            ++optind;
-    } else { /* takes (optional) argument */
-        optarg = NULL;
-        if (*place) /* no white space */
-            optarg = place;
-        else if (oli[1] != ':') {    /* arg not optional */
-            if (++optind >= nargc) { /* no arg */
-                place = EMSG;
-                if (PRINT_ERROR)
-                    warnx(recargchar, optchar);
-                optopt = optchar;
-                return (BADARG);
-            } else
-                optarg = nargv[optind];
-        }
-        place = EMSG;
-        ++optind;
-    }
-    /* dump back option letter */
-    return (optchar);
+    CloseHandle(h);
 }
-
-/*
- * getopt --
- *	Parse argc/argv argument vector.
- *
- * [eventually this will replace the BSD getopt]
- */
-#ifndef _MSC_VER
-int getopt(int nargc, char* const* nargv, const char* options) {
-    /*
-     * We don't pass FLAG_PERMUTE to getopt_internal() since
-     * the BSD getopt(3) (unlike GNU) has never done this.
-     *
-     * Furthermore, since many privileged programs call getopt()
-     * before dropping privileges it makes sense to keep things
-     * as simple (and bug-free) as possible.
-     */
-    return (getopt_internal(nargc, nargv, options, NULL, NULL, 0));
-}
-#endif
-
-/*
- * getopt_long --
- *	Parse argc/argv argument vector.
- */
-int getopt_long(int nargc,
-                char* const* nargv,
-                const char* options,
-                const struct option* long_options,
-                int* idx) {
-    return (getopt_internal(nargc, nargv, options, long_options, idx,
-                            FLAG_PERMUTE));
-}
-
-/*
- * getopt_long_only --
- *	Parse argc/argv argument vector.
- */
-int getopt_long_only(int nargc,
-                     char* const* nargv,
-                     const char* options,
-                     const struct option* long_options,
-                     int* idx) {
-    return (getopt_internal(nargc, nargv, options, long_options, idx,
-                            FLAG_PERMUTE | FLAG_LONGONLY));
-}
-
-#endif  // USE_QEMU_GETOPT
-
-int qemu_mkstemp(char* t) {
-    int len = strlen(t) + 1;
-    errno_t err = _mktemp_s(t, len);
-
-    if (err != 0) {
-        return -1;
-    }
-
-    wchar_t* wt = g_utf8_to_utf16(t, -1, NULL, NULL, NULL);
-    int fd = _wsopen(wt, _O_RDWR | _O_CREAT | _O_EXCL | _O_BINARY, _SH_DENYRW,
-                  _S_IREAD | _S_IWRITE);
-    g_free(wt);
-    return fd;
-}
-
-#endif  // _MSC_VER

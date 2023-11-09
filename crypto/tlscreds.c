@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,7 +20,9 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "crypto/tlscredspriv.h"
+#include "qapi-types-crypto.h"
+#include "qemu/module.h"
+#include "tlscredspriv.h"
 #include "trace.h"
 
 #define DH_BITS 2048
@@ -112,7 +114,7 @@ qcrypto_tls_creds_get_path(QCryptoTLSCreds *creds,
 
     *cred = g_strdup_printf("%s/%s", creds->dir, filename);
 
-    if (qemu_stat(*cred, &sb) < 0) {
+    if (stat(*cred, &sb) < 0) {
         if (errno == ENOENT && !required) {
             ret = 0;
         } else {
@@ -225,22 +227,18 @@ qcrypto_tls_creds_class_init(ObjectClass *oc, void *data)
 {
     object_class_property_add_bool(oc, "verify-peer",
                                    qcrypto_tls_creds_prop_get_verify,
-                                   qcrypto_tls_creds_prop_set_verify,
-                                   NULL);
+                                   qcrypto_tls_creds_prop_set_verify);
     object_class_property_add_str(oc, "dir",
                                   qcrypto_tls_creds_prop_get_dir,
-                                  qcrypto_tls_creds_prop_set_dir,
-                                  NULL);
+                                  qcrypto_tls_creds_prop_set_dir);
     object_class_property_add_enum(oc, "endpoint",
                                    "QCryptoTLSCredsEndpoint",
                                    &QCryptoTLSCredsEndpoint_lookup,
                                    qcrypto_tls_creds_prop_get_endpoint,
-                                   qcrypto_tls_creds_prop_set_endpoint,
-                                   NULL);
+                                   qcrypto_tls_creds_prop_set_endpoint);
     object_class_property_add_str(oc, "priority",
                                   qcrypto_tls_creds_prop_get_priority,
-                                  qcrypto_tls_creds_prop_set_priority,
-                                  NULL);
+                                  qcrypto_tls_creds_prop_set_priority);
 }
 
 
@@ -262,6 +260,17 @@ qcrypto_tls_creds_finalize(Object *obj)
     g_free(creds->priority);
 }
 
+bool qcrypto_tls_creds_check_endpoint(QCryptoTLSCreds *creds,
+                                      QCryptoTLSCredsEndpoint endpoint,
+                                      Error **errp)
+{
+    if (creds->endpoint != endpoint) {
+        error_setg(errp, "Expected TLS credentials for a %s endpoint",
+                   QCryptoTLSCredsEndpoint_str(endpoint));
+        return false;
+    }
+    return true;
+}
 
 static const TypeInfo qcrypto_tls_creds_info = {
     .parent = TYPE_OBJECT,

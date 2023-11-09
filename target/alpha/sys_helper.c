@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,7 +20,9 @@
 #include "qemu/osdep.h"
 #include "cpu.h"
 #include "exec/exec-all.h"
+#include "exec/tb-flush.h"
 #include "exec/helper-proto.h"
+#include "sysemu/runstate.h"
 #include "sysemu/sysemu.h"
 #include "qemu/timer.h"
 
@@ -44,17 +46,17 @@ uint64_t helper_load_pcc(CPUAlphaState *env)
 #ifndef CONFIG_USER_ONLY
 void helper_tbia(CPUAlphaState *env)
 {
-    tlb_flush(CPU(alpha_env_get_cpu(env)));
+    tlb_flush(env_cpu(env));
 }
 
 void helper_tbis(CPUAlphaState *env, uint64_t p)
 {
-    tlb_flush_page(CPU(alpha_env_get_cpu(env)), p);
+    tlb_flush_page(env_cpu(env), p);
 }
 
 void helper_tb_flush(CPUAlphaState *env)
 {
-    tb_flush(CPU(alpha_env_get_cpu(env)));
+    tb_flush(env_cpu(env));
 }
 
 void helper_halt(uint64_t restart)
@@ -78,7 +80,7 @@ uint64_t helper_get_walltime(void)
 
 void helper_set_alarm(CPUAlphaState *env, uint64_t expire)
 {
-    AlphaCPU *cpu = alpha_env_get_cpu(env);
+    AlphaCPU *cpu = env_archcpu(env);
 
     if (expire) {
         env->alarm_expire = expire;

@@ -31,7 +31,7 @@ int nbd_drop(QIOChannel *ioc, size_t size, Error **errp)
     buffer = sizeof(small) >= size ? small : g_malloc(MIN(65536, size));
     while (size > 0) {
         ssize_t count = MIN(65536, size);
-        ret = nbd_read(ioc, buffer, MIN(65536, size), errp);
+        ret = nbd_read(ioc, buffer, MIN(65536, size), NULL, errp);
 
         if (ret < 0) {
             goto cleanup;
@@ -148,6 +148,8 @@ const char *nbd_cmd_lookup(uint16_t cmd)
         return "flush";
     case NBD_CMD_TRIM:
         return "trim";
+    case NBD_CMD_CACHE:
+        return "cache";
     case NBD_CMD_WRITE_ZEROES:
         return "write zeroes";
     case NBD_CMD_BLOCK_STATUS:
@@ -199,6 +201,8 @@ const char *nbd_err_lookup(int err)
         return "ENOSPC";
     case NBD_EOVERFLOW:
         return "EOVERFLOW";
+    case NBD_ENOTSUP:
+        return "ENOTSUP";
     case NBD_ESHUTDOWN:
         return "ESHUTDOWN";
     default:
@@ -229,6 +233,9 @@ int nbd_errno_to_system_errno(int err)
     case NBD_EOVERFLOW:
         ret = EOVERFLOW;
         break;
+    case NBD_ENOTSUP:
+        ret = ENOTSUP;
+        break;
     case NBD_ESHUTDOWN:
         ret = ESHUTDOWN;
         break;
@@ -240,4 +247,21 @@ int nbd_errno_to_system_errno(int err)
         break;
     }
     return ret;
+}
+
+
+const char *nbd_mode_lookup(NBDMode mode)
+{
+    switch (mode) {
+    case NBD_MODE_OLDSTYLE:
+        return "oldstyle";
+    case NBD_MODE_EXPORT_NAME:
+        return "export name only";
+    case NBD_MODE_SIMPLE:
+        return "simple headers";
+    case NBD_MODE_STRUCTURED:
+        return "structured replies";
+    default:
+        return "<unknown>";
+    }
 }

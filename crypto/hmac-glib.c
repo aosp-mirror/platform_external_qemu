@@ -17,19 +17,11 @@
 #include "crypto/hmac.h"
 #include "hmacpriv.h"
 
-/* Support for HMAC Algos has been added in GLib 2.30 */
-#if GLIB_CHECK_VERSION(2, 30, 0)
-
 static int qcrypto_hmac_alg_map[QCRYPTO_HASH_ALG__MAX] = {
     [QCRYPTO_HASH_ALG_MD5] = G_CHECKSUM_MD5,
     [QCRYPTO_HASH_ALG_SHA1] = G_CHECKSUM_SHA1,
     [QCRYPTO_HASH_ALG_SHA256] = G_CHECKSUM_SHA256,
-/* Support for HMAC SHA-512 in GLib 2.42 */
-#if GLIB_CHECK_VERSION(2, 42, 0)
     [QCRYPTO_HASH_ALG_SHA512] = G_CHECKSUM_SHA512,
-#else
-    [QCRYPTO_HASH_ALG_SHA512] = -1,
-#endif
     [QCRYPTO_HASH_ALG_SHA224] = -1,
     [QCRYPTO_HASH_ALG_SHA384] = -1,
     [QCRYPTO_HASH_ALG_RIPEMD160] = -1,
@@ -125,39 +117,6 @@ qcrypto_glib_hmac_bytesv(QCryptoHmac *hmac,
 
     return 0;
 }
-
-#else
-
-bool qcrypto_hmac_supports(QCryptoHashAlgorithm alg)
-{
-    return false;
-}
-
-void *qcrypto_hmac_ctx_new(QCryptoHashAlgorithm alg,
-                           const uint8_t *key, size_t nkey,
-                           Error **errp)
-{
-    return NULL;
-}
-
-static void
-qcrypto_glib_hmac_ctx_free(QCryptoHmac *hmac)
-{
-    return;
-}
-
-static int
-qcrypto_glib_hmac_bytesv(QCryptoHmac *hmac,
-                         const struct iovec *iov,
-                         size_t niov,
-                         uint8_t **result,
-                         size_t *resultlen,
-                         Error **errp)
-{
-    return -1;
-}
-
-#endif
 
 QCryptoHmacDriver qcrypto_hmac_lib_driver = {
     .hmac_bytesv = qcrypto_glib_hmac_bytesv,

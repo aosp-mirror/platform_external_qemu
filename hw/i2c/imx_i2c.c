@@ -20,8 +20,11 @@
 
 #include "qemu/osdep.h"
 #include "hw/i2c/imx_i2c.h"
+#include "hw/irq.h"
+#include "migration/vmstate.h"
 #include "hw/i2c/i2c.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
 
 #ifndef DEBUG_IMX_I2C
 #define DEBUG_IMX_I2C 0
@@ -120,7 +123,7 @@ static uint64_t imx_i2c_read(void *opaque, hwaddr offset,
         value = s->i2dr_read;
 
         if (imx_i2c_is_master(s)) {
-            int ret = 0xff;
+            uint8_t ret = 0xff;
 
             if (s->address == ADDR_RESET) {
                 /* something is wrong as the address is not set */
@@ -133,15 +136,7 @@ static uint64_t imx_i2c_read(void *opaque, hwaddr offset,
             } else {
                 /* get the next byte */
                 ret = i2c_recv(s->bus);
-
-                if (ret >= 0) {
-                    imx_i2c_raise_interrupt(s);
-                } else {
-                    qemu_log_mask(LOG_GUEST_ERROR, "[%s]%s: read failed "
-                                  "for device 0x%02x\n", TYPE_IMX_I2C,
-                                  __func__, s->address);
-                    ret = 0xff;
-                }
+                imx_i2c_raise_interrupt(s);
             }
 
             s->i2dr_read = ret;
@@ -176,7 +171,7 @@ static void imx_i2c_write(void *opaque, hwaddr offset,
     switch (offset) {
     case IADR_ADDR:
         s->iadr = value & IADR_MASK;
-        /* i2c_set_slave_address(s->bus, (uint8_t)s->iadr); */
+        /* i2c_slave_set_address(s->bus, (uint8_t)s->iadr); */
         break;
     case IFDR_ADDR:
         s->ifdr = value & IFDR_MASK;
@@ -310,7 +305,7 @@ static void imx_i2c_realize(DeviceState *dev, Error **errp)
                           IMX_I2C_MEM_SIZE);
     sysbus_init_mmio(SYS_BUS_DEVICE(dev), &s->iomem);
     sysbus_init_irq(SYS_BUS_DEVICE(dev), &s->irq);
-    s->bus = i2c_init_bus(DEVICE(dev), NULL);
+    s->bus = i2c_init_bus(dev, NULL);
 }
 
 static void imx_i2c_class_init(ObjectClass *klass, void *data)

@@ -16,6 +16,7 @@
 #include "trace/control.h"
 #include "trace/simple.h"
 #include "qemu/error-report.h"
+#include "qemu/qemu-print.h"
 
 /** Trace file header event ID, picked to avoid conflict with real event IDs */
 #define HEADER_EVENT_ID (~(uint64_t)0)
@@ -36,9 +37,9 @@
  * Trace records are written out by a dedicated thread.  The thread waits for
  * records to become available, writes them out, and then waits again.
  */
-static CompatGMutex trace_lock;
-static CompatGCond trace_available_cond;
-static CompatGCond trace_empty_cond;
+static GMutex trace_lock;
+static GCond trace_available_cond;
+static GCond trace_empty_cond;
 
 static bool trace_available;
 static bool trace_writeout_enabled;
@@ -169,9 +170,9 @@ static gpointer writeout_thread(gpointer opaque)
         wait_for_trace_records_available();
 
         if (g_atomic_int_get(&dropped_events)) {
-            dropped.rec.event = DROPPED_EVENT_ID,
+            dropped.rec.event = DROPPED_EVENT_ID;
             dropped.rec.timestamp_ns = get_clock();
-            dropped.rec.length = sizeof(TraceRecord) + sizeof(uint64_t),
+            dropped.rec.length = sizeof(TraceRecord) + sizeof(uint64_t);
             dropped.rec.pid = trace_pid;
             do {
                 dropped_count = g_atomic_int_get(&dropped_events);
@@ -279,14 +280,12 @@ void trace_record_finish(TraceBufferRecord *rec)
     }
 }
 
-static int st_write_event_mapping(void)
+static int st_write_event_mapping(TraceEventIter *iter)
 {
     uint64_t type = TRACE_RECORD_TYPE_MAPPING;
-    TraceEventIter iter;
     TraceEvent *ev;
 
-    trace_event_iter_init(&iter, NULL);
-    while ((ev = trace_event_iter_next(&iter)) != NULL) {
+    while ((ev = trace_event_iter_next(iter)) != NULL) {
         uint64_t id = trace_event_get_id(ev);
         const char *name = trace_event_get_name(ev);
         uint32_t len = strlen(name);
@@ -301,10 +300,18 @@ static int st_write_event_mapping(void)
     return 0;
 }
 
-void st_set_trace_file_enabled(bool enable)
+/**
+ * Enable / disable tracing, return whether it was enabled.
+ *
+ * @enable: enable if %true, else disable.
+ */
+bool st_set_trace_file_enabled(bool enable)
 {
+    TraceEventIter iter;
+    bool was_enabled = trace_fp;
+
     if (enable == !!trace_fp) {
-        return; /* no change */
+        return was_enabled;     /* no change */
     }
 
     /* Halt trace writeout */
@@ -322,14 +329,15 @@ void st_set_trace_file_enabled(bool enable)
 
         trace_fp = fopen(trace_file_name, "wb");
         if (!trace_fp) {
-            return;
+            return was_enabled;
         }
 
+        trace_event_iter_init_all(&iter);
         if (fwrite(&header, sizeof header, 1, trace_fp) != 1 ||
-            st_write_event_mapping() < 0) {
+            st_write_event_mapping(&iter) < 0) {
             fclose(trace_fp);
             trace_fp = NULL;
-            return;
+            return was_enabled;
         }
 
         /* Resume trace writeout */
@@ -339,6 +347,7 @@ void st_set_trace_file_enabled(bool enable)
         fclose(trace_fp);
         trace_fp = NULL;
     }
+    return was_enabled;
 }
 
 /**
@@ -349,24 +358,24 @@ void st_set_trace_file_enabled(bool enable)
  */
 void st_set_trace_file(const char *file)
 {
-    st_set_trace_file_enabled(false);
+    bool saved_enable = st_set_trace_file_enabled(false);
 
     g_free(trace_file_name);
 
     if (!file) {
         /* Type cast needed for Windows where getpid() returns an int. */
-        trace_file_name = g_strdup_printf("trace-"  FMT_pid, (pid_t)getpid());
+        trace_file_name = g_strdup_printf(CONFIG_TRACE_FILE "-" FMT_pid, (pid_t)getpid());
     } else {
         trace_file_name = g_strdup_printf("%s", file);
     }
 
-    st_set_trace_file_enabled(true);
+    st_set_trace_file_enabled(saved_enable);
 }
 
-void st_print_trace_file_status(FILE *stream, int (*stream_printf)(FILE *stream, const char *fmt, ...))
+void st_print_trace_file_status(void)
 {
-    stream_printf(stream, "Trace file \"%s\" %s.\n",
-                  trace_file_name, trace_fp ? "on" : "off");
+    qemu_printf("Trace file \"%s\" %s.\n",
+                trace_file_name, trace_fp ? "on" : "off");
 }
 
 void st_flush_trace_buffer(void)
@@ -412,4 +421,16 @@ bool st_init(void)
 
     atexit(st_flush_trace_buffer);
     return true;
+}
+
+void st_init_group(size_t group)
+{
+    TraceEventIter iter;
+
+    if (!trace_writeout_enabled) {
+        return;
+    }
+
+    trace_event_iter_init_group(&iter, group);
+    st_write_event_mapping(&iter);
 }

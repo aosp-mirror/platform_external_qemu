@@ -8,7 +8,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,9 +21,10 @@
 
 #include "qemu/osdep.h"
 #include "hw/platform-bus.h"
-#include "exec/address-spaces.h"
+#include "hw/qdev-properties.h"
+#include "qapi/error.h"
 #include "qemu/error-report.h"
-#include "sysemu/sysemu.h"
+#include "qemu/module.h"
 
 
 /*
@@ -63,9 +64,8 @@ hwaddr platform_bus_get_mmio_addr(PlatformBusDevice *pbus, SysBusDevice *sbdev,
         return -1;
     }
 
-    parent_mr = object_property_get_link(OBJECT(sbdev_mr), "container", NULL);
-
-    assert(parent_mr);
+    parent_mr = object_property_get_link(OBJECT(sbdev_mr), "container",
+                                         &error_abort);
     if (parent_mr != pbus_mr_obj) {
         /* MMIO region is not mapped on platform bus */
         return -1;
@@ -103,7 +103,6 @@ static void plaform_bus_refresh_irqs(PlatformBusDevice *pbus)
 {
     bitmap_zero(pbus->used_irqs, pbus->num_irqs);
     foreach_dynamic_sysbus_device(platform_bus_count_irqs, pbus);
-    pbus->done_gathering = true;
 }
 
 static void platform_bus_map_irq(PlatformBusDevice *pbus, SysBusDevice *sbdev,
@@ -163,12 +162,11 @@ static void platform_bus_map_mmio(PlatformBusDevice *pbus, SysBusDevice *sbdev,
 }
 
 /*
- * For each sysbus device, look for unassigned IRQ lines as well as
- * unassociated MMIO regions. Connect them to the platform bus if available.
+ * Look for unassigned IRQ lines as well as unassociated MMIO regions.
+ * Connect them to the platform bus if available.
  */
-static void link_sysbus_device(SysBusDevice *sbdev, void *opaque)
+void platform_bus_link_device(PlatformBusDevice *pbus, SysBusDevice *sbdev)
 {
-    PlatformBusDevice *pbus = opaque;
     int i;
 
     for (i = 0; sysbus_has_irq(sbdev, i); i++) {
@@ -180,19 +178,6 @@ static void link_sysbus_device(SysBusDevice *sbdev, void *opaque)
     }
 }
 
-static void platform_bus_init_notify(Notifier *notifier, void *data)
-{
-    PlatformBusDevice *pb = container_of(notifier, PlatformBusDevice, notifier);
-
-    /*
-     * Generate a bitmap of used IRQ lines, as the user might have specified
-     * them on the command line.
-     */
-    plaform_bus_refresh_irqs(pb);
-
-    foreach_dynamic_sysbus_device(link_sysbus_device, pb);
-}
-
 static void platform_bus_realize(DeviceState *dev, Error **errp)
 {
     PlatformBusDevice *pbus;
@@ -202,7 +187,8 @@ static void platform_bus_realize(DeviceState *dev, Error **errp)
     d = SYS_BUS_DEVICE(dev);
     pbus = PLATFORM_BUS_DEVICE(dev);
 
-    memory_region_init(&pbus->mmio, NULL, "platform bus", pbus->mmio_size);
+    memory_region_init(&pbus->mmio, OBJECT(dev), "platform bus",
+                       pbus->mmio_size);
     sysbus_init_mmio(d, &pbus->mmio);
 
     pbus->used_irqs = bitmap_new(pbus->num_irqs);
@@ -211,12 +197,8 @@ static void platform_bus_realize(DeviceState *dev, Error **errp)
         sysbus_init_irq(d, &pbus->irqs[i]);
     }
 
-    /*
-     * Register notifier that allows us to gather dangling devices once the
-     * machine is completely assembled
-     */
-    pbus->notifier.notify = platform_bus_init_notify;
-    qemu_add_machine_init_done_notifier(&pbus->notifier);
+    /* some devices might be initialized before so update used IRQs map */
+    plaform_bus_refresh_irqs(pbus);
 }
 
 static Property platform_bus_properties[] = {
@@ -230,7 +212,7 @@ static void platform_bus_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
 
     dc->realize = platform_bus_realize;
-    dc->props = platform_bus_properties;
+    device_class_set_props(dc, platform_bus_properties);
 }
 
 static const TypeInfo platform_bus_info = {

@@ -3,31 +3,24 @@
 
 /* Devices attached directly to the main system bus.  */
 
-#include "hw/qdev.h"
+#include "hw/qdev-core.h"
 #include "exec/memory.h"
+#include "qom/object.h"
 
 #define QDEV_MAX_MMIO 32
 #define QDEV_MAX_PIO 32
 
 #define TYPE_SYSTEM_BUS "System"
-#define SYSTEM_BUS(obj) OBJECT_CHECK(BusState, (obj), TYPE_SYSTEM_BUS)
+DECLARE_INSTANCE_CHECKER(BusState, SYSTEM_BUS,
+                         TYPE_SYSTEM_BUS)
 
-typedef struct SysBusDevice SysBusDevice;
 
 #define TYPE_SYS_BUS_DEVICE "sys-bus-device"
-#define SYS_BUS_DEVICE(obj) \
-     OBJECT_CHECK(SysBusDevice, (obj), TYPE_SYS_BUS_DEVICE)
-#define SYS_BUS_DEVICE_CLASS(klass) \
-     OBJECT_CLASS_CHECK(SysBusDeviceClass, (klass), TYPE_SYS_BUS_DEVICE)
-#define SYS_BUS_DEVICE_GET_CLASS(obj) \
-     OBJECT_GET_CLASS(SysBusDeviceClass, (obj), TYPE_SYS_BUS_DEVICE)
+OBJECT_DECLARE_TYPE(SysBusDevice, SysBusDeviceClass,
+                    SYS_BUS_DEVICE)
 
 /**
  * SysBusDeviceClass:
- * @init: Callback function invoked when the #DeviceState.realized property
- * is changed to %true. Deprecated, new types inheriting directly from
- * TYPE_SYS_BUS_DEVICE should use #DeviceClass.realize instead, new leaf
- * types should consult their respective parent type.
  *
  * SysBusDeviceClass is not overriding #DeviceClass.realize, so derived
  * classes overriding it are not required to invoke its implementation.
@@ -35,12 +28,9 @@ typedef struct SysBusDevice SysBusDevice;
 
 #define SYSBUS_DEVICE_GPIO_IRQ "sysbus-irq"
 
-typedef struct SysBusDeviceClass {
+struct SysBusDeviceClass {
     /*< private >*/
     DeviceClass parent_class;
-    /*< public >*/
-
-    int (*init)(SysBusDevice *dev);
 
     /*
      * Let the sysbus device format its own non-PIO, non-MMIO unit address.
@@ -59,7 +49,7 @@ typedef struct SysBusDeviceClass {
      */
     char *(*explicit_ofw_unit_address)(const SysBusDevice *dev);
     void (*connect_irq_notifier)(SysBusDevice *dev, qemu_irq irq);
-} SysBusDeviceClass;
+};
 
 struct SysBusDevice {
     /*< private >*/
@@ -92,9 +82,13 @@ qemu_irq sysbus_get_connected_irq(SysBusDevice *dev, int n);
 void sysbus_mmio_map(SysBusDevice *dev, int n, hwaddr addr);
 void sysbus_mmio_map_overlap(SysBusDevice *dev, int n, hwaddr addr,
                              int priority);
+void sysbus_mmio_unmap(SysBusDevice *dev, int n);
 void sysbus_add_io(SysBusDevice *dev, hwaddr addr,
                    MemoryRegion *mem);
 MemoryRegion *sysbus_address_space(SysBusDevice *dev);
+
+bool sysbus_realize(SysBusDevice *dev, Error **errp);
+bool sysbus_realize_and_unref(SysBusDevice *dev, Error **errp);
 
 /* Call func for every dynamically created sysbus device in the system */
 void foreach_dynamic_sysbus_device(FindSysbusDeviceFunc *func, void *opaque);
@@ -102,20 +96,12 @@ void foreach_dynamic_sysbus_device(FindSysbusDeviceFunc *func, void *opaque);
 /* Legacy helper function for creating devices.  */
 DeviceState *sysbus_create_varargs(const char *name,
                                  hwaddr addr, ...);
-DeviceState *sysbus_try_create_varargs(const char *name,
-                                       hwaddr addr, ...);
+
 static inline DeviceState *sysbus_create_simple(const char *name,
                                               hwaddr addr,
                                               qemu_irq irq)
 {
     return sysbus_create_varargs(name, addr, irq, NULL);
-}
-
-static inline DeviceState *sysbus_try_create_simple(const char *name,
-                                                    hwaddr addr,
-                                                    qemu_irq irq)
-{
-    return sysbus_try_create_varargs(name, addr, irq, NULL);
 }
 
 #endif /* HW_SYSBUS_H */

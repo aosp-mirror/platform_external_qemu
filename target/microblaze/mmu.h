@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,6 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifndef TARGET_MICROBLAZE_MMU_H
+#define TARGET_MICROBLAZE_MMU_H
+
+#include "cpu.h"
 
 #define MMU_R_PID    0
 #define MMU_R_ZPR    1
@@ -28,7 +33,7 @@
 #define RAM_TAG      0
 
 /* Tag portion */
-#define TLB_EPN_MASK          0xFFFFFC00 /* Effective Page Number */
+#define TLB_EPN_MASK          MAKE_64BIT_MASK(10, 64 - 10)
 #define TLB_PAGESZ_MASK       0x00000380
 #define TLB_PAGESZ(x)         (((x) & 0x7) << 7)
 #define PAGESZ_1K             0
@@ -42,7 +47,7 @@
 #define TLB_VALID             0x00000040 /* Entry is valid */
 
 /* Data portion */
-#define TLB_RPN_MASK          0xFFFFFC00 /* Real Page Number */
+#define TLB_RPN_MASK          MAKE_64BIT_MASK(10, 64 - 10)
 #define TLB_PERM_MASK         0x00000300
 #define TLB_EX                0x00000200 /* Instruction execution allowed */
 #define TLB_WR                0x00000100 /* Writes permitted */
@@ -54,24 +59,22 @@
 #define TLB_M                 0x00000002 /* Memory is coherent */
 #define TLB_G                 0x00000001 /* Memory is guarded from prefetch */
 
+/* TLBX  */
+#define R_TBLX_MISS_SHIFT 31
+#define R_TBLX_MISS_MASK (1U << R_TBLX_MISS_SHIFT)
+
 #define TLB_ENTRIES    64
 
-struct microblaze_mmu
-{
+typedef struct {
     /* Data and tag brams.  */
-    uint32_t rams[2][TLB_ENTRIES];
+    uint64_t rams[2][TLB_ENTRIES];
     /* We keep a separate ram for the tids to avoid the 48 bit tag width.  */
     uint8_t tids[TLB_ENTRIES];
     /* Control flops.  */
-    uint32_t regs[8];
+    uint32_t regs[3];
+} MicroBlazeMMU;
 
-    int c_mmu;
-    int c_mmu_tlb_access;
-    int c_mmu_zones;
-};
-
-struct microblaze_mmu_lookup
-{
+typedef struct {
     uint32_t paddr;
     uint32_t vaddr;
     unsigned int size;
@@ -80,11 +83,12 @@ struct microblaze_mmu_lookup
     enum {
         ERR_PROT, ERR_MISS, ERR_HIT
     } err;
-};
+} MicroBlazeMMULookup;
 
-unsigned int mmu_translate(struct microblaze_mmu *mmu,
-                           struct microblaze_mmu_lookup *lu,
-                           target_ulong vaddr, int rw, int mmu_idx);
-uint32_t mmu_read(CPUMBState *env, uint32_t rn);
-void mmu_write(CPUMBState *env, uint32_t rn, uint32_t v);
-void mmu_init(struct microblaze_mmu *mmu);
+unsigned int mmu_translate(MicroBlazeCPU *cpu, MicroBlazeMMULookup *lu,
+                           target_ulong vaddr, MMUAccessType rw, int mmu_idx);
+uint32_t mmu_read(CPUMBState *env, bool ea, uint32_t rn);
+void mmu_write(CPUMBState *env, bool ea, uint32_t rn, uint32_t v);
+void mmu_init(MicroBlazeMMU *mmu);
+
+#endif

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Compares vmstate information stored in JSON format, obtained from
 # the -dump-vmstate QEMU command.
@@ -40,7 +40,7 @@ def check_fields_match(name, s_field, d_field):
         return True
 
     # Some fields changed names between qemu versions.  This list
-    # is used to whitelist such changes in each section / description.
+    # is used to allow such changes in each section / description.
     changed_names = {
         'apic': ['timer', 'timer_expiry'],
         'e1000': ['dev', 'parent_obj'],
@@ -134,6 +134,11 @@ def exists_in_substruct(fields, item):
     return check_fields_match(fields["Description"]["name"],
                               substruct_fields[0]["field"], item)
 
+def size_total(entry):
+    size = entry["size"]
+    if "num" not in entry:
+        return size
+    return size * entry["num"]
 
 def check_fields(src_fields, dest_fields, desc, sec):
     # This function checks for all the fields in a section.  If some
@@ -157,7 +162,7 @@ def check_fields(src_fields, dest_fields, desc, sec):
     while True:
         if advance_src:
             try:
-                s_item = s_iter.next()
+                s_item = next(s_iter)
             except StopIteration:
                 if s_iter_list == []:
                     break
@@ -172,14 +177,14 @@ def check_fields(src_fields, dest_fields, desc, sec):
 
         if advance_dest:
             try:
-                d_item = d_iter.next()
+                d_item = next(d_iter)
             except StopIteration:
                 if d_iter_list == []:
                     # We were not in a substruct
-                    print "Section \"" + sec + "\",",
-                    print "Description " + "\"" + desc + "\":",
-                    print "expected field \"" + s_item["field"] + "\",",
-                    print "while dest has no further fields"
+                    print("Section \"" + sec + "\",", end=' ')
+                    print("Description " + "\"" + desc + "\":", end=' ')
+                    print("expected field \"" + s_item["field"] + "\",", end=' ')
+                    print("while dest has no further fields")
                     bump_taint()
                     break
 
@@ -197,10 +202,10 @@ def check_fields(src_fields, dest_fields, desc, sec):
                     advance_dest = True
                     continue
                 if unused_count < 0:
-                    print "Section \"" + sec + "\",",
-                    print "Description \"" + desc + "\":",
-                    print "unused size mismatch near \"",
-                    print s_item["field"] + "\""
+                    print("Section \"" + sec + "\",", end=' ')
+                    print("Description \"" + desc + "\":", end=' ')
+                    print("unused size mismatch near \"", end=' ')
+                    print(s_item["field"] + "\"")
                     bump_taint()
                     break
                 continue
@@ -211,10 +216,10 @@ def check_fields(src_fields, dest_fields, desc, sec):
                     advance_src = True
                     continue
                 if unused_count < 0:
-                    print "Section \"" + sec + "\",",
-                    print "Description \"" + desc + "\":",
-                    print "unused size mismatch near \"",
-                    print d_item["field"] + "\""
+                    print("Section \"" + sec + "\",", end=' ')
+                    print("Description \"" + desc + "\":", end=' ')
+                    print("unused size mismatch near \"", end=' ')
+                    print(d_item["field"] + "\"")
                     bump_taint()
                     break
                 continue
@@ -249,23 +254,25 @@ def check_fields(src_fields, dest_fields, desc, sec):
                 continue
 
             if s_item["field"] == "unused" or d_item["field"] == "unused":
-                if s_item["size"] == d_item["size"]:
+                s_size = size_total(s_item)
+                d_size = size_total(d_item)
+                if s_size == d_size:
                     continue
 
                 if d_item["field"] == "unused":
                     advance_dest = False
-                    unused_count = d_item["size"] - s_item["size"]
+                    unused_count = d_size - s_size;
                     continue
 
                 if s_item["field"] == "unused":
                     advance_src = False
-                    unused_count = s_item["size"] - d_item["size"]
+                    unused_count = s_size - d_size
                     continue
 
-            print "Section \"" + sec + "\",",
-            print "Description \"" + desc + "\":",
-            print "expected field \"" + s_item["field"] + "\",",
-            print "got \"" + d_item["field"] + "\"; skipping rest"
+            print("Section \"" + sec + "\",", end=' ')
+            print("Description \"" + desc + "\":", end=' ')
+            print("expected field \"" + s_item["field"] + "\",", end=' ')
+            print("got \"" + d_item["field"] + "\"; skipping rest")
             bump_taint()
             break
 
@@ -289,8 +296,8 @@ def check_subsections(src_sub, dest_sub, desc, sec):
             check_descriptions(s_item, d_item, sec)
 
         if not found:
-            print "Section \"" + sec + "\", Description \"" + desc + "\":",
-            print "Subsection \"" + s_item["name"] + "\" not found"
+            print("Section \"" + sec + "\", Description \"" + desc + "\":", end=' ')
+            print("Subsection \"" + s_item["name"] + "\" not found")
             bump_taint()
 
 
@@ -299,8 +306,8 @@ def check_description_in_list(s_item, d_item, sec, desc):
         return
 
     if not "Description" in d_item:
-        print "Section \"" + sec + "\", Description \"" + desc + "\",",
-        print "Field \"" + s_item["field"] + "\": missing description"
+        print("Section \"" + sec + "\", Description \"" + desc + "\",", end=' ')
+        print("Field \"" + s_item["field"] + "\": missing description")
         bump_taint()
         return
 
@@ -311,17 +318,17 @@ def check_descriptions(src_desc, dest_desc, sec):
     check_version(src_desc, dest_desc, sec, src_desc["name"])
 
     if not check_fields_match(sec, src_desc["name"], dest_desc["name"]):
-        print "Section \"" + sec + "\":",
-        print "Description \"" + src_desc["name"] + "\"",
-        print "missing, got \"" + dest_desc["name"] + "\" instead; skipping"
+        print("Section \"" + sec + "\":", end=' ')
+        print("Description \"" + src_desc["name"] + "\"", end=' ')
+        print("missing, got \"" + dest_desc["name"] + "\" instead; skipping")
         bump_taint()
         return
 
     for f in src_desc:
         if not f in dest_desc:
-            print "Section \"" + sec + "\"",
-            print "Description \"" + src_desc["name"] + "\":",
-            print "Entry \"" + f + "\" missing"
+            print("Section \"" + sec + "\"", end=' ')
+            print("Description \"" + src_desc["name"] + "\":", end=' ')
+            print("Entry \"" + f + "\" missing")
             bump_taint()
             continue
 
@@ -334,49 +341,50 @@ def check_descriptions(src_desc, dest_desc, sec):
 
 def check_version(s, d, sec, desc=None):
     if s["version_id"] > d["version_id"]:
-        print "Section \"" + sec + "\"",
+        print("Section \"" + sec + "\"", end=' ')
         if desc:
-            print "Description \"" + desc + "\":",
-        print "version error:", s["version_id"], ">", d["version_id"]
+            print("Description \"" + desc + "\":", end=' ')
+        print("version error:", s["version_id"], ">", d["version_id"])
         bump_taint()
 
     if not "minimum_version_id" in d:
         return
 
     if s["version_id"] < d["minimum_version_id"]:
-        print "Section \"" + sec + "\"",
+        print("Section \"" + sec + "\"", end=' ')
         if desc:
-            print "Description \"" + desc + "\":",
-            print "minimum version error:", s["version_id"], "<",
-            print d["minimum_version_id"]
+            print("Description \"" + desc + "\":", end=' ')
+            print("minimum version error:", s["version_id"], "<", end=' ')
+            print(d["minimum_version_id"])
             bump_taint()
 
 
 def check_size(s, d, sec, desc=None, field=None):
     if s["size"] != d["size"]:
-        print "Section \"" + sec + "\"",
+        print("Section \"" + sec + "\"", end=' ')
         if desc:
-            print "Description \"" + desc + "\"",
+            print("Description \"" + desc + "\"", end=' ')
         if field:
-            print "Field \"" + field + "\"",
-        print "size mismatch:", s["size"], ",", d["size"]
+            print("Field \"" + field + "\"", end=' ')
+        print("size mismatch:", s["size"], ",", d["size"])
         bump_taint()
 
 
 def check_machine_type(s, d):
     if s["Name"] != d["Name"]:
-        print "Warning: checking incompatible machine types:",
-        print "\"" + s["Name"] + "\", \"" + d["Name"] + "\""
-    return
+        print("Warning: checking incompatible machine types:", end=' ')
+        print("\"" + s["Name"] + "\", \"" + d["Name"] + "\"")
 
 
 def main():
     help_text = "Parse JSON-formatted vmstate dumps from QEMU in files SRC and DEST.  Checks whether migration from SRC to DEST QEMU versions would break based on the VMSTATE information contained within the JSON outputs.  The JSON output is created from a QEMU invocation with the -dump-vmstate parameter and a filename argument to it.  Other parameters to QEMU do not matter, except the -M (machine type) parameter."
 
     parser = argparse.ArgumentParser(description=help_text)
-    parser.add_argument('-s', '--src', type=file, required=True,
+    parser.add_argument('-s', '--src', type=argparse.FileType('r'),
+                        required=True,
                         help='json dump from src qemu')
-    parser.add_argument('-d', '--dest', type=file, required=True,
+    parser.add_argument('-d', '--dest', type=argparse.FileType('r'),
+                        required=True,
                         help='json dump from dest qemu')
     parser.add_argument('--reverse', required=False, default=False,
                         action='store_true',
@@ -400,7 +408,7 @@ def main():
             # doesn't exist in dest.
             dest_sec = get_changed_sec_name(sec)
             if not dest_sec in dest_data:
-                print "Section \"" + sec + "\" does not exist in dest"
+                print("Section \"" + sec + "\" does not exist in dest")
                 bump_taint()
                 continue
 
@@ -415,8 +423,8 @@ def main():
 
         for entry in s:
             if not entry in d:
-                print "Section \"" + sec + "\": Entry \"" + entry + "\"",
-                print "missing"
+                print("Section \"" + sec + "\": Entry \"" + entry + "\"", end=' ')
+                print("missing")
                 bump_taint()
                 continue
 

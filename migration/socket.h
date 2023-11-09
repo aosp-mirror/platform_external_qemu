@@ -16,13 +16,16 @@
 
 #ifndef QEMU_MIGRATION_SOCKET_H
 #define QEMU_MIGRATION_SOCKET_H
-void tcp_start_incoming_migration(const char *host_port, Error **errp);
 
-void tcp_start_outgoing_migration(MigrationState *s, const char *host_port,
-                                  Error **errp);
+#include "io/channel.h"
+#include "io/task.h"
 
-void unix_start_incoming_migration(const char *path, Error **errp);
+void socket_send_channel_create(QIOTaskFunc f, void *data);
+QIOChannel *socket_send_channel_create_sync(Error **errp);
+int socket_send_channel_destroy(QIOChannel *send);
 
-void unix_start_outgoing_migration(MigrationState *s, const char *path,
-                                   Error **errp);
+void socket_start_incoming_migration(const char *str, Error **errp);
+
+void socket_start_outgoing_migration(MigrationState *s, const char *str,
+                                     Error **errp);
 #endif

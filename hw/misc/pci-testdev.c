@@ -17,11 +17,14 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "qemu/osdep.h"
-#include "hw/hw.h"
-#include "hw/pci/pci.h"
+#include "hw/pci/pci_device.h"
+#include "hw/qdev-properties.h"
 #include "qemu/event_notifier.h"
+#include "qemu/module.h"
 #include "sysemu/kvm.h"
+#include "qom/object.h"
 
 typedef struct PCITestDevHdr {
     uint8_t test;
@@ -76,7 +79,7 @@ enum {
 #define IOTEST_ACCESS_TYPE uint8_t
 #define IOTEST_ACCESS_WIDTH (sizeof(uint8_t))
 
-typedef struct PCITestDevState {
+struct PCITestDevState {
     /*< private >*/
     PCIDevice parent_obj;
     /*< public >*/
@@ -85,12 +88,14 @@ typedef struct PCITestDevState {
     MemoryRegion portio;
     IOTest *tests;
     int current;
-} PCITestDevState;
+
+    uint64_t membar_size;
+    MemoryRegion membar;
+};
 
 #define TYPE_PCI_TEST_DEV "pci-testdev"
 
-#define PCI_TEST_DEV(obj) \
-    OBJECT_CHECK(PCITestDevState, (obj), TYPE_PCI_TEST_DEV)
+OBJECT_DECLARE_SIMPLE_TYPE(PCITestDevState, PCI_TEST_DEV)
 
 #define IOTEST_IS_MEM(i) (strcmp(IOTEST_TYPE(i), "portio"))
 #define IOTEST_REGION(d, i) (IOTEST_IS_MEM(i) ?  &(d)->mmio : &(d)->portio)
@@ -253,6 +258,16 @@ static void pci_testdev_realize(PCIDevice *pci_dev, Error **errp)
     pci_register_bar(pci_dev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &d->mmio);
     pci_register_bar(pci_dev, 1, PCI_BASE_ADDRESS_SPACE_IO, &d->portio);
 
+    if (d->membar_size) {
+        memory_region_init(&d->membar, OBJECT(d), "pci-testdev-membar",
+                           d->membar_size);
+        pci_register_bar(pci_dev, 2,
+                         PCI_BASE_ADDRESS_SPACE_MEMORY |
+                         PCI_BASE_ADDRESS_MEM_PREFETCH |
+                         PCI_BASE_ADDRESS_MEM_TYPE_64,
+                         &d->membar);
+    }
+
     d->current = -1;
     d->tests = g_malloc0(IOTEST_MAX * sizeof *d->tests);
     for (i = 0; i < IOTEST_MAX; ++i) {
@@ -279,7 +294,6 @@ static void pci_testdev_realize(PCIDevice *pci_dev, Error **errp)
         }
         r = event_notifier_init(&test->notifier, 0);
         assert(r >= 0);
-        (void)r;
         test->hasnotifier = true;
     }
 }
@@ -306,6 +320,11 @@ static void qdev_pci_testdev_reset(DeviceState *dev)
     pci_testdev_reset(d);
 }
 
+static Property pci_testdev_properties[] = {
+    DEFINE_PROP_SIZE("membar", PCITestDevState, membar_size, 0),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
 static void pci_testdev_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
@@ -320,6 +339,7 @@ static void pci_testdev_class_init(ObjectClass *klass, void *data)
     dc->desc = "PCI Test Device";
     set_bit(DEVICE_CATEGORY_MISC, dc->categories);
     dc->reset = qdev_pci_testdev_reset;
+    device_class_set_props(dc, pci_testdev_properties);
 }
 
 static const TypeInfo pci_testdev_info = {

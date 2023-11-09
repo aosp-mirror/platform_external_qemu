@@ -1,7 +1,7 @@
 QA output created by 195
 Formatting 'TEST_DIR/t.IMGFMT.base', fmt=IMGFMT size=67108864
-Formatting 'TEST_DIR/t.IMGFMT.mid', fmt=IMGFMT size=67108864 backing_file=TEST_DIR/t.IMGFMT.base
-Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864 backing_file=TEST_DIR/t.IMGFMT.mid
+Formatting 'TEST_DIR/t.IMGFMT.mid', fmt=IMGFMT size=67108864 backing_file=TEST_DIR/t.IMGFMT.base backing_fmt=IMGFMT
+Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864 backing_file=TEST_DIR/t.IMGFMT.mid backing_fmt=IMGFMT
 
 Change backing file of mid (opened read-only)
 
@@ -28,20 +28,21 @@ Testing: -drive if=none,file=TEST_DIR/t.IMGFMT,backing.node-name=mid
     },
     "event": "SHUTDOWN",
     "data": {
-        "guest": false
+        "guest": false,
+        "reason": "host-qmp-quit"
     }
 }
 
 image: TEST_DIR/t.IMGFMT.mid
 file format: IMGFMT
-virtual size: 64M (67108864 bytes)
+virtual size: 64 MiB (67108864 bytes)
 cluster_size: 65536
 backing file: /dev/null
 backing file format: IMGFMT
 
 Change backing file of top (opened writable)
 
-Formatting 'TEST_DIR/t.IMGFMT.mid', fmt=IMGFMT size=67108864 backing_file=TEST_DIR/t.IMGFMT.base
+Formatting 'TEST_DIR/t.IMGFMT.mid', fmt=IMGFMT size=67108864 backing_file=TEST_DIR/t.IMGFMT.base backing_fmt=IMGFMT
 Testing: -drive if=none,file=TEST_DIR/t.IMGFMT,node-name=top
 {
     QMP_VERSION
@@ -65,13 +66,14 @@ Testing: -drive if=none,file=TEST_DIR/t.IMGFMT,node-name=top
     },
     "event": "SHUTDOWN",
     "data": {
-        "guest": false
+        "guest": false,
+        "reason": "host-qmp-quit"
     }
 }
 
 image: TEST_DIR/t.IMGFMT
 file format: IMGFMT
-virtual size: 64M (67108864 bytes)
+virtual size: 64 MiB (67108864 bytes)
 cluster_size: 65536
 backing file: /dev/null
 backing file format: IMGFMT

@@ -23,26 +23,18 @@
  */
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "qemu-common.h"
 #include "trace.h"
+#include "block/block-io.h"
 #include "block/block_int.h"
 #include "block/blockjob.h"
+#include "block/dirty-bitmap.h"
+#include "qemu/main-loop.h"
 
-/**
- * A BdrvDirtyBitmap can be in three possible states:
- * (1) successor is NULL and disabled is false: full r/w mode
- * (2) successor is NULL and disabled is true: read only mode ("disabled")
- * (3) successor is set: frozen mode.
- *     A frozen bitmap cannot be renamed, deleted, anonymized, cleared, set,
- *     or enabled. A frozen bitmap can only abdicate() or reclaim().
- */
 struct BdrvDirtyBitmap {
-    QemuMutex *mutex;
+    BlockDriverState *bs;
     HBitmap *bitmap;            /* Dirty bitmap implementation */
-    HBitmap *meta;              /* Meta dirty bitmap */
-    bool qmp_locked;            /* Bitmap is locked, it can't be modified
-                                   through QMP */
-    BdrvDirtyBitmap *successor; /* Anonymous child; implies frozen status */
+    bool busy;                  /* Bitmap is busy, it can't be used via QMP */
+    BdrvDirtyBitmap *successor; /* Anonymous child, if any. */
     char *name;                 /* Optional non-empty unique ID */
     int64_t size;               /* Size of the bitmap, in bytes */
     bool disabled;              /* Bitmap is disabled. It ignores all writes to
@@ -55,6 +47,12 @@ struct BdrvDirtyBitmap {
                                    and this bitmap must remain unchanged while
                                    this flag is set. */
     bool persistent;            /* bitmap must be saved to owner disk image */
+    bool inconsistent;          /* bitmap is persistent, but inconsistent.
+                                   It cannot be used at all in any way, except
+                                   a QMP user can remove it. */
+    bool skip_store;            /* We are either migrating or deleting this
+                                 * bitmap; it should not be stored on the next
+                                 * inactivation. */
     QLIST_ENTRY(BdrvDirtyBitmap) list;
 };
 
@@ -75,12 +73,12 @@ static inline void bdrv_dirty_bitmaps_unlock(BlockDriverState *bs)
 
 void bdrv_dirty_bitmap_lock(BdrvDirtyBitmap *bitmap)
 {
-    qemu_mutex_lock(bitmap->mutex);
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
 }
 
 void bdrv_dirty_bitmap_unlock(BdrvDirtyBitmap *bitmap)
 {
-    qemu_mutex_unlock(bitmap->mutex);
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
 }
 
 /* Called with BQL or dirty_bitmap lock taken.  */
@@ -98,15 +96,6 @@ BdrvDirtyBitmap *bdrv_find_dirty_bitmap(BlockDriverState *bs, const char *name)
 }
 
 /* Called with BQL taken.  */
-void bdrv_dirty_bitmap_make_anon(BdrvDirtyBitmap *bitmap)
-{
-    assert(!bdrv_dirty_bitmap_frozen(bitmap));
-    g_free(bitmap->name);
-    bitmap->name = NULL;
-    bitmap->persistent = false;
-}
-
-/* Called with BQL taken.  */
 BdrvDirtyBitmap *bdrv_create_dirty_bitmap(BlockDriverState *bs,
                                           uint32_t granularity,
                                           const char *name,
@@ -117,9 +106,15 @@ BdrvDirtyBitmap *bdrv_create_dirty_bitmap(BlockDriverState *bs,
 
     assert(is_power_of_2(granularity) && granularity >= BDRV_SECTOR_SIZE);
 
-    if (name && bdrv_find_dirty_bitmap(bs, name)) {
-        error_setg(errp, "Bitmap already exists: %s", name);
-        return NULL;
+    if (name) {
+        if (bdrv_find_dirty_bitmap(bs, name)) {
+            error_setg(errp, "Bitmap already exists: %s", name);
+            return NULL;
+        }
+        if (strlen(name) > BDRV_BITMAP_MAX_NAME_SIZE) {
+            error_setg(errp, "Bitmap name too long: %s", name);
+            return NULL;
+        }
     }
     bitmap_size = bdrv_getlength(bs);
     if (bitmap_size < 0) {
@@ -128,7 +123,7 @@ BdrvDirtyBitmap *bdrv_create_dirty_bitmap(BlockDriverState *bs,
         return NULL;
     }
     bitmap = g_new0(BdrvDirtyBitmap, 1);
-    bitmap->mutex = &bs->dirty_bitmap_mutex;
+    bitmap->bs = bs;
     bitmap->bitmap = hbitmap_alloc(bitmap_size, ctz32(granularity));
     bitmap->size = bitmap_size;
     bitmap->name = g_strdup(name);
@@ -137,36 +132,6 @@ BdrvDirtyBitmap *bdrv_create_dirty_bitmap(BlockDriverState *bs,
     QLIST_INSERT_HEAD(&bs->dirty_bitmaps, bitmap, list);
     bdrv_dirty_bitmaps_unlock(bs);
     return bitmap;
-}
-
-/* bdrv_create_meta_dirty_bitmap
- *
- * Create a meta dirty bitmap that tracks the changes of bits in @bitmap. I.e.
- * when a dirty status bit in @bitmap is changed (either from reset to set or
- * the other way around), its respective meta dirty bitmap bit will be marked
- * dirty as well.
- *
- * @bitmap: the block dirty bitmap for which to create a meta dirty bitmap.
- * @chunk_size: how many bytes of bitmap data does each bit in the meta bitmap
- * track.
- */
-void bdrv_create_meta_dirty_bitmap(BdrvDirtyBitmap *bitmap,
-                                   int chunk_size)
-{
-    assert(!bitmap->meta);
-    qemu_mutex_lock(bitmap->mutex);
-    bitmap->meta = hbitmap_create_meta(bitmap->bitmap,
-                                       chunk_size * BITS_PER_BYTE);
-    qemu_mutex_unlock(bitmap->mutex);
-}
-
-void bdrv_release_meta_dirty_bitmap(BdrvDirtyBitmap *bitmap)
-{
-    assert(bitmap->meta);
-    qemu_mutex_lock(bitmap->mutex);
-    hbitmap_free_meta(bitmap->bitmap);
-    bitmap->meta = NULL;
-    qemu_mutex_unlock(bitmap->mutex);
 }
 
 int64_t bdrv_dirty_bitmap_size(const BdrvDirtyBitmap *bitmap)
@@ -180,127 +145,124 @@ const char *bdrv_dirty_bitmap_name(const BdrvDirtyBitmap *bitmap)
 }
 
 /* Called with BQL taken.  */
-bool bdrv_dirty_bitmap_frozen(BdrvDirtyBitmap *bitmap)
+bool bdrv_dirty_bitmap_has_successor(BdrvDirtyBitmap *bitmap)
 {
     return bitmap->successor;
 }
 
-void bdrv_dirty_bitmap_set_qmp_locked(BdrvDirtyBitmap *bitmap, bool qmp_locked)
+static bool bdrv_dirty_bitmap_busy(const BdrvDirtyBitmap *bitmap)
 {
-    qemu_mutex_lock(bitmap->mutex);
-    bitmap->qmp_locked = qmp_locked;
-    qemu_mutex_unlock(bitmap->mutex);
+    return bitmap->busy;
 }
 
-bool bdrv_dirty_bitmap_qmp_locked(BdrvDirtyBitmap *bitmap)
+void bdrv_dirty_bitmap_set_busy(BdrvDirtyBitmap *bitmap, bool busy)
 {
-    return bitmap->qmp_locked;
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
+    bitmap->busy = busy;
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
 }
 
 /* Called with BQL taken.  */
 bool bdrv_dirty_bitmap_enabled(BdrvDirtyBitmap *bitmap)
 {
-    return !(bitmap->disabled || bitmap->successor);
+    return !bitmap->disabled;
 }
 
 /* Called with BQL taken.  */
-DirtyBitmapStatus bdrv_dirty_bitmap_status(BdrvDirtyBitmap *bitmap)
+static bool bdrv_dirty_bitmap_recording(BdrvDirtyBitmap *bitmap)
 {
-    if (bdrv_dirty_bitmap_frozen(bitmap)) {
-        return DIRTY_BITMAP_STATUS_FROZEN;
-    } else if (bdrv_dirty_bitmap_qmp_locked(bitmap)) {
-        return DIRTY_BITMAP_STATUS_LOCKED;
-    } else if (!bdrv_dirty_bitmap_enabled(bitmap)) {
-        return DIRTY_BITMAP_STATUS_DISABLED;
-    } else {
-        return DIRTY_BITMAP_STATUS_ACTIVE;
+    return !bitmap->disabled || (bitmap->successor &&
+                                 !bitmap->successor->disabled);
+}
+
+int bdrv_dirty_bitmap_check(const BdrvDirtyBitmap *bitmap, uint32_t flags,
+                            Error **errp)
+{
+    if ((flags & BDRV_BITMAP_BUSY) && bdrv_dirty_bitmap_busy(bitmap)) {
+        error_setg(errp, "Bitmap '%s' is currently in use by another"
+                   " operation and cannot be used", bitmap->name);
+        return -1;
     }
+
+    if ((flags & BDRV_BITMAP_RO) && bdrv_dirty_bitmap_readonly(bitmap)) {
+        error_setg(errp, "Bitmap '%s' is readonly and cannot be modified",
+                   bitmap->name);
+        return -1;
+    }
+
+    if ((flags & BDRV_BITMAP_INCONSISTENT) &&
+        bdrv_dirty_bitmap_inconsistent(bitmap)) {
+        error_setg(errp, "Bitmap '%s' is inconsistent and cannot be used",
+                   bitmap->name);
+        error_append_hint(errp, "Try block-dirty-bitmap-remove to delete"
+                          " this bitmap from disk\n");
+        return -1;
+    }
+
+    return 0;
 }
 
 /**
  * Create a successor bitmap destined to replace this bitmap after an operation.
- * Requires that the bitmap is not frozen and has no successor.
+ * Requires that the bitmap is not marked busy and has no successor.
+ * The successor will be enabled if the parent bitmap was.
  * Called with BQL taken.
  */
-int bdrv_dirty_bitmap_create_successor(BlockDriverState *bs,
-                                       BdrvDirtyBitmap *bitmap, Error **errp)
+int bdrv_dirty_bitmap_create_successor(BdrvDirtyBitmap *bitmap, Error **errp)
 {
     uint64_t granularity;
     BdrvDirtyBitmap *child;
 
-    if (bdrv_dirty_bitmap_frozen(bitmap)) {
-        error_setg(errp, "Cannot create a successor for a bitmap that is "
-                   "currently frozen");
+    if (bdrv_dirty_bitmap_check(bitmap, BDRV_BITMAP_BUSY, errp)) {
         return -1;
     }
-    assert(!bitmap->successor);
+    if (bdrv_dirty_bitmap_has_successor(bitmap)) {
+        error_setg(errp, "Cannot create a successor for a bitmap that already "
+                   "has one");
+        return -1;
+    }
 
     /* Create an anonymous successor */
     granularity = bdrv_dirty_bitmap_granularity(bitmap);
-    child = bdrv_create_dirty_bitmap(bs, granularity, NULL, errp);
+    child = bdrv_create_dirty_bitmap(bitmap->bs, granularity, NULL, errp);
     if (!child) {
         return -1;
     }
 
     /* Successor will be on or off based on our current state. */
     child->disabled = bitmap->disabled;
+    bitmap->disabled = true;
 
-    /* Install the successor and freeze the parent */
+    /* Install the successor and mark the parent as busy */
     bitmap->successor = child;
+    bitmap->busy = true;
     return 0;
+}
+
+void bdrv_enable_dirty_bitmap_locked(BdrvDirtyBitmap *bitmap)
+{
+    bitmap->disabled = false;
 }
 
 /* Called with BQL taken. */
 void bdrv_dirty_bitmap_enable_successor(BdrvDirtyBitmap *bitmap)
 {
-    qemu_mutex_lock(bitmap->mutex);
-    bdrv_enable_dirty_bitmap(bitmap->successor);
-    qemu_mutex_unlock(bitmap->mutex);
+    assert(bitmap->bs == bitmap->successor->bs);
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
+    bdrv_enable_dirty_bitmap_locked(bitmap->successor);
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
 }
 
-/* Called within bdrv_dirty_bitmap_lock..unlock */
-static void bdrv_do_release_matching_dirty_bitmap_locked(
-    BlockDriverState *bs, BdrvDirtyBitmap *bitmap,
-    bool (*cond)(BdrvDirtyBitmap *bitmap))
+/* Called within bdrv_dirty_bitmap_lock..unlock and with BQL taken.  */
+static void bdrv_release_dirty_bitmap_locked(BdrvDirtyBitmap *bitmap)
 {
-    BdrvDirtyBitmap *bm, *next;
-
-    QLIST_FOREACH_SAFE(bm, &bs->dirty_bitmaps, list, next) {
-        if ((!bitmap || bm == bitmap) && (!cond || cond(bm))) {
-            assert(!bm->active_iterators);
-            assert(!bdrv_dirty_bitmap_frozen(bm));
-            assert(!bm->meta);
-            QLIST_REMOVE(bm, list);
-            hbitmap_free(bm->bitmap);
-            g_free(bm->name);
-            g_free(bm);
-
-            if (bitmap) {
-                return;
-            }
-        }
-    }
-
-    if (bitmap) {
-        abort();
-    }
-}
-
-/* Called with BQL taken.  */
-static void bdrv_do_release_matching_dirty_bitmap(
-    BlockDriverState *bs, BdrvDirtyBitmap *bitmap,
-    bool (*cond)(BdrvDirtyBitmap *bitmap))
-{
-    bdrv_dirty_bitmaps_lock(bs);
-    bdrv_do_release_matching_dirty_bitmap_locked(bs, bitmap, cond);
-    bdrv_dirty_bitmaps_unlock(bs);
-}
-
-/* Called within bdrv_dirty_bitmap_lock..unlock */
-static void bdrv_release_dirty_bitmap_locked(BlockDriverState *bs,
-                                             BdrvDirtyBitmap *bitmap)
-{
-    bdrv_do_release_matching_dirty_bitmap_locked(bs, bitmap, NULL);
+    assert(!bitmap->active_iterators);
+    assert(!bdrv_dirty_bitmap_busy(bitmap));
+    assert(!bdrv_dirty_bitmap_has_successor(bitmap));
+    QLIST_REMOVE(bitmap, list);
+    hbitmap_free(bitmap->bitmap);
+    g_free(bitmap->name);
+    g_free(bitmap);
 }
 
 /**
@@ -308,8 +270,7 @@ static void bdrv_release_dirty_bitmap_locked(BlockDriverState *bs,
  * delete the old bitmap, and return a handle to the new bitmap.
  * Called with BQL taken.
  */
-BdrvDirtyBitmap *bdrv_dirty_bitmap_abdicate(BlockDriverState *bs,
-                                            BdrvDirtyBitmap *bitmap,
+BdrvDirtyBitmap *bdrv_dirty_bitmap_abdicate(BdrvDirtyBitmap *bitmap,
                                             Error **errp)
 {
     char *name;
@@ -327,7 +288,8 @@ BdrvDirtyBitmap *bdrv_dirty_bitmap_abdicate(BlockDriverState *bs,
     bitmap->successor = NULL;
     successor->persistent = bitmap->persistent;
     bitmap->persistent = false;
-    bdrv_release_dirty_bitmap(bs, bitmap);
+    bitmap->busy = false;
+    bdrv_release_dirty_bitmap(bitmap);
 
     return successor;
 }
@@ -335,11 +297,11 @@ BdrvDirtyBitmap *bdrv_dirty_bitmap_abdicate(BlockDriverState *bs,
 /**
  * In cases of failure where we can no longer safely delete the parent,
  * we may wish to re-join the parent and child/successor.
- * The merged parent will be un-frozen, but not explicitly re-enabled.
+ * The merged parent will be marked as not busy.
+ * The marged parent will be enabled if and only if the successor was enabled.
  * Called within bdrv_dirty_bitmap_lock..unlock and with BQL taken.
  */
-BdrvDirtyBitmap *bdrv_reclaim_dirty_bitmap_locked(BlockDriverState *bs,
-                                                  BdrvDirtyBitmap *parent,
+BdrvDirtyBitmap *bdrv_reclaim_dirty_bitmap_locked(BdrvDirtyBitmap *parent,
                                                   Error **errp)
 {
     BdrvDirtyBitmap *successor = parent->successor;
@@ -349,26 +311,25 @@ BdrvDirtyBitmap *bdrv_reclaim_dirty_bitmap_locked(BlockDriverState *bs,
         return NULL;
     }
 
-    if (!hbitmap_merge(parent->bitmap, successor->bitmap)) {
-        error_setg(errp, "Merging of parent and successor bitmap failed");
-        return NULL;
-    }
-    bdrv_release_dirty_bitmap_locked(bs, successor);
+    hbitmap_merge(parent->bitmap, successor->bitmap, parent->bitmap);
+
+    parent->disabled = successor->disabled;
+    parent->busy = false;
+    bdrv_release_dirty_bitmap_locked(successor);
     parent->successor = NULL;
 
     return parent;
 }
 
 /* Called with BQL taken. */
-BdrvDirtyBitmap *bdrv_reclaim_dirty_bitmap(BlockDriverState *bs,
-                                           BdrvDirtyBitmap *parent,
+BdrvDirtyBitmap *bdrv_reclaim_dirty_bitmap(BdrvDirtyBitmap *parent,
                                            Error **errp)
 {
     BdrvDirtyBitmap *ret;
 
-    qemu_mutex_lock(parent->mutex);
-    ret = bdrv_reclaim_dirty_bitmap_locked(bs, parent, errp);
-    qemu_mutex_unlock(parent->mutex);
+    bdrv_dirty_bitmaps_lock(parent->bs);
+    ret = bdrv_reclaim_dirty_bitmap_locked(parent, errp);
+    bdrv_dirty_bitmaps_unlock(parent->bs);
 
     return ret;
 }
@@ -383,7 +344,8 @@ void bdrv_dirty_bitmap_truncate(BlockDriverState *bs, int64_t bytes)
 
     bdrv_dirty_bitmaps_lock(bs);
     QLIST_FOREACH(bitmap, &bs->dirty_bitmaps, list) {
-        assert(!bdrv_dirty_bitmap_frozen(bitmap));
+        assert(!bdrv_dirty_bitmap_busy(bitmap));
+        assert(!bdrv_dirty_bitmap_has_successor(bitmap));
         assert(!bitmap->active_iterators);
         hbitmap_truncate(bitmap->bitmap, bytes);
         bitmap->size = bytes;
@@ -391,38 +353,33 @@ void bdrv_dirty_bitmap_truncate(BlockDriverState *bs, int64_t bytes)
     bdrv_dirty_bitmaps_unlock(bs);
 }
 
-static bool bdrv_dirty_bitmap_has_name(BdrvDirtyBitmap *bitmap)
-{
-    return !!bdrv_dirty_bitmap_name(bitmap);
-}
-
 /* Called with BQL taken.  */
-void bdrv_release_dirty_bitmap(BlockDriverState *bs, BdrvDirtyBitmap *bitmap)
+void bdrv_release_dirty_bitmap(BdrvDirtyBitmap *bitmap)
 {
-    bdrv_do_release_matching_dirty_bitmap(bs, bitmap, NULL);
+    BlockDriverState *bs = bitmap->bs;
+
+    bdrv_dirty_bitmaps_lock(bs);
+    bdrv_release_dirty_bitmap_locked(bitmap);
+    bdrv_dirty_bitmaps_unlock(bs);
 }
 
 /**
  * Release all named dirty bitmaps attached to a BDS (for use in bdrv_close()).
- * There must not be any frozen bitmaps attached.
+ * There must not be any busy bitmaps attached.
  * This function does not remove persistent bitmaps from the storage.
  * Called with BQL taken.
  */
 void bdrv_release_named_dirty_bitmaps(BlockDriverState *bs)
 {
-    bdrv_do_release_matching_dirty_bitmap(bs, NULL, bdrv_dirty_bitmap_has_name);
-}
+    BdrvDirtyBitmap *bm, *next;
 
-/**
- * Release all persistent dirty bitmaps attached to a BDS (for use in
- * bdrv_inactivate_recurse()).
- * There must not be any frozen bitmaps attached.
- * This function does not remove persistent bitmaps from the storage.
- */
-void bdrv_release_persistent_dirty_bitmaps(BlockDriverState *bs)
-{
-    bdrv_do_release_matching_dirty_bitmap(bs, NULL,
-                                          bdrv_dirty_bitmap_get_persistance);
+    bdrv_dirty_bitmaps_lock(bs);
+    QLIST_FOREACH_SAFE(bm, &bs->dirty_bitmaps, list, next) {
+        if (bdrv_dirty_bitmap_name(bm)) {
+            bdrv_release_dirty_bitmap_locked(bm);
+        }
+    }
+    bdrv_dirty_bitmaps_unlock(bs);
 }
 
 /**
@@ -433,47 +390,84 @@ void bdrv_release_persistent_dirty_bitmaps(BlockDriverState *bs)
  * not fail.
  * This function doesn't release corresponding BdrvDirtyBitmap.
  */
-void bdrv_remove_persistent_dirty_bitmap(BlockDriverState *bs,
-                                         const char *name,
-                                         Error **errp)
+int coroutine_fn
+bdrv_co_remove_persistent_dirty_bitmap(BlockDriverState *bs, const char *name,
+                                       Error **errp)
 {
-    if (bs->drv && bs->drv->bdrv_remove_persistent_dirty_bitmap) {
-        bs->drv->bdrv_remove_persistent_dirty_bitmap(bs, name, errp);
+    assert_bdrv_graph_readable();
+    if (bs->drv && bs->drv->bdrv_co_remove_persistent_dirty_bitmap) {
+        return bs->drv->bdrv_co_remove_persistent_dirty_bitmap(bs, name, errp);
     }
+
+    return 0;
 }
 
-/* Called with BQL taken.  */
+bool
+bdrv_supports_persistent_dirty_bitmap(BlockDriverState *bs)
+{
+    if (bs->drv && bs->drv->bdrv_supports_persistent_dirty_bitmap) {
+        return bs->drv->bdrv_supports_persistent_dirty_bitmap(bs);
+    }
+    return false;
+}
+
+bool coroutine_fn
+bdrv_co_can_store_new_dirty_bitmap(BlockDriverState *bs, const char *name,
+                                   uint32_t granularity, Error **errp)
+{
+    BlockDriver *drv = bs->drv;
+    assert_bdrv_graph_readable();
+
+    if (!drv) {
+        error_setg_errno(errp, ENOMEDIUM,
+                         "Can't store persistent bitmaps to %s",
+                         bdrv_get_device_or_node_name(bs));
+        return false;
+    }
+
+    if (!drv->bdrv_co_can_store_new_dirty_bitmap) {
+        error_setg_errno(errp, ENOTSUP,
+                         "Can't store persistent bitmaps to %s",
+                         bdrv_get_device_or_node_name(bs));
+        return false;
+    }
+
+    return drv->bdrv_co_can_store_new_dirty_bitmap(bs, name, granularity, errp);
+}
+
 void bdrv_disable_dirty_bitmap(BdrvDirtyBitmap *bitmap)
 {
-    assert(!bdrv_dirty_bitmap_frozen(bitmap));
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
     bitmap->disabled = true;
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
 }
 
-/* Called with BQL taken.  */
 void bdrv_enable_dirty_bitmap(BdrvDirtyBitmap *bitmap)
 {
-    assert(!bdrv_dirty_bitmap_frozen(bitmap));
-    bitmap->disabled = false;
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
+    bdrv_enable_dirty_bitmap_locked(bitmap);
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
 }
 
 BlockDirtyInfoList *bdrv_query_dirty_bitmaps(BlockDriverState *bs)
 {
     BdrvDirtyBitmap *bm;
     BlockDirtyInfoList *list = NULL;
-    BlockDirtyInfoList **plist = &list;
+    BlockDirtyInfoList **tail = &list;
 
     bdrv_dirty_bitmaps_lock(bs);
     QLIST_FOREACH(bm, &bs->dirty_bitmaps, list) {
         BlockDirtyInfo *info = g_new0(BlockDirtyInfo, 1);
-        BlockDirtyInfoList *entry = g_new0(BlockDirtyInfoList, 1);
+
         info->count = bdrv_get_dirty_count(bm);
         info->granularity = bdrv_dirty_bitmap_granularity(bm);
-        info->has_name = !!bm->name;
         info->name = g_strdup(bm->name);
-        info->status = bdrv_dirty_bitmap_status(bm);
-        entry->value = info;
-        *plist = entry;
-        plist = &entry->next;
+        info->recording = bdrv_dirty_bitmap_recording(bm);
+        info->busy = bdrv_dirty_bitmap_busy(bm);
+        info->persistent = bm->persistent;
+        info->has_inconsistent = bm->inconsistent;
+        info->inconsistent = bm->inconsistent;
+        QAPI_LIST_APPEND(tail, info);
     }
     bdrv_dirty_bitmaps_unlock(bs);
 
@@ -481,14 +475,19 @@ BlockDirtyInfoList *bdrv_query_dirty_bitmaps(BlockDriverState *bs)
 }
 
 /* Called within bdrv_dirty_bitmap_lock..unlock */
-bool bdrv_get_dirty_locked(BlockDriverState *bs, BdrvDirtyBitmap *bitmap,
-                           int64_t offset)
+bool bdrv_dirty_bitmap_get_locked(BdrvDirtyBitmap *bitmap, int64_t offset)
 {
-    if (bitmap) {
-        return hbitmap_get(bitmap->bitmap, offset);
-    } else {
-        return false;
-    }
+    return hbitmap_get(bitmap->bitmap, offset);
+}
+
+bool bdrv_dirty_bitmap_get(BdrvDirtyBitmap *bitmap, int64_t offset)
+{
+    bool ret;
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
+    ret = bdrv_dirty_bitmap_get_locked(bitmap, offset);
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
+
+    return ret;
 }
 
 /**
@@ -525,15 +524,6 @@ BdrvDirtyBitmapIter *bdrv_dirty_iter_new(BdrvDirtyBitmap *bitmap)
     return iter;
 }
 
-BdrvDirtyBitmapIter *bdrv_dirty_meta_iter_new(BdrvDirtyBitmap *bitmap)
-{
-    BdrvDirtyBitmapIter *iter = g_new(BdrvDirtyBitmapIter, 1);
-    hbitmap_iter_init(&iter->hbi, bitmap->meta, 0);
-    iter->bitmap = bitmap;
-    bitmap->active_iterators++;
-    return iter;
-}
-
 void bdrv_dirty_iter_free(BdrvDirtyBitmapIter *iter)
 {
     if (!iter) {
@@ -553,7 +543,6 @@ int64_t bdrv_dirty_iter_next(BdrvDirtyBitmapIter *iter)
 void bdrv_set_dirty_bitmap_locked(BdrvDirtyBitmap *bitmap,
                                   int64_t offset, int64_t bytes)
 {
-    assert(bdrv_dirty_bitmap_enabled(bitmap));
     assert(!bdrv_dirty_bitmap_readonly(bitmap));
     hbitmap_set(bitmap->bitmap, offset, bytes);
 }
@@ -561,16 +550,15 @@ void bdrv_set_dirty_bitmap_locked(BdrvDirtyBitmap *bitmap,
 void bdrv_set_dirty_bitmap(BdrvDirtyBitmap *bitmap,
                            int64_t offset, int64_t bytes)
 {
-    bdrv_dirty_bitmap_lock(bitmap);
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
     bdrv_set_dirty_bitmap_locked(bitmap, offset, bytes);
-    bdrv_dirty_bitmap_unlock(bitmap);
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
 }
 
 /* Called within bdrv_dirty_bitmap_lock..unlock */
 void bdrv_reset_dirty_bitmap_locked(BdrvDirtyBitmap *bitmap,
                                     int64_t offset, int64_t bytes)
 {
-    assert(bdrv_dirty_bitmap_enabled(bitmap));
     assert(!bdrv_dirty_bitmap_readonly(bitmap));
     hbitmap_reset(bitmap->bitmap, offset, bytes);
 }
@@ -578,16 +566,16 @@ void bdrv_reset_dirty_bitmap_locked(BdrvDirtyBitmap *bitmap,
 void bdrv_reset_dirty_bitmap(BdrvDirtyBitmap *bitmap,
                              int64_t offset, int64_t bytes)
 {
-    bdrv_dirty_bitmap_lock(bitmap);
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
     bdrv_reset_dirty_bitmap_locked(bitmap, offset, bytes);
-    bdrv_dirty_bitmap_unlock(bitmap);
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
 }
 
 void bdrv_clear_dirty_bitmap(BdrvDirtyBitmap *bitmap, HBitmap **out)
 {
-    assert(bdrv_dirty_bitmap_enabled(bitmap));
+    IO_CODE();
     assert(!bdrv_dirty_bitmap_readonly(bitmap));
-    bdrv_dirty_bitmap_lock(bitmap);
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
     if (!out) {
         hbitmap_reset_all(bitmap->bitmap);
     } else {
@@ -596,15 +584,15 @@ void bdrv_clear_dirty_bitmap(BdrvDirtyBitmap *bitmap, HBitmap **out)
                                        hbitmap_granularity(backup));
         *out = backup;
     }
-    bdrv_dirty_bitmap_unlock(bitmap);
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
 }
 
-void bdrv_undo_clear_dirty_bitmap(BdrvDirtyBitmap *bitmap, HBitmap *in)
+void bdrv_restore_dirty_bitmap(BdrvDirtyBitmap *bitmap, HBitmap *backup)
 {
     HBitmap *tmp = bitmap->bitmap;
-    assert(bdrv_dirty_bitmap_enabled(bitmap));
     assert(!bdrv_dirty_bitmap_readonly(bitmap));
-    bitmap->bitmap = in;
+    GLOBAL_STATE_CODE();
+    bitmap->bitmap = backup;
     hbitmap_free(tmp);
 }
 
@@ -618,6 +606,19 @@ uint64_t bdrv_dirty_bitmap_serialization_align(const BdrvDirtyBitmap *bitmap)
 {
     return hbitmap_serialization_align(bitmap->bitmap);
 }
+
+/* Return the disk size covered by a chunk of serialized bitmap data. */
+uint64_t bdrv_dirty_bitmap_serialization_coverage(int serialized_chunk_size,
+                                                  const BdrvDirtyBitmap *bitmap)
+{
+    uint64_t granularity = bdrv_dirty_bitmap_granularity(bitmap);
+    uint64_t limit = granularity * (serialized_chunk_size << 3);
+
+    assert(QEMU_IS_ALIGNED(limit,
+                           bdrv_dirty_bitmap_serialization_align(bitmap)));
+    return limit;
+}
+
 
 void bdrv_dirty_bitmap_serialize_part(const BdrvDirtyBitmap *bitmap,
                                       uint8_t *buf, uint64_t offset,
@@ -655,6 +656,7 @@ void bdrv_dirty_bitmap_deserialize_finish(BdrvDirtyBitmap *bitmap)
 void bdrv_set_dirty(BlockDriverState *bs, int64_t offset, int64_t bytes)
 {
     BdrvDirtyBitmap *bitmap;
+    IO_CODE();
 
     if (QLIST_EMPTY(&bs->dirty_bitmaps)) {
         return;
@@ -684,11 +686,6 @@ int64_t bdrv_get_dirty_count(BdrvDirtyBitmap *bitmap)
     return hbitmap_count(bitmap->bitmap);
 }
 
-int64_t bdrv_get_meta_dirty_count(BdrvDirtyBitmap *bitmap)
-{
-    return hbitmap_count(bitmap->meta);
-}
-
 bool bdrv_dirty_bitmap_readonly(const BdrvDirtyBitmap *bitmap)
 {
     return bitmap->readonly;
@@ -697,9 +694,9 @@ bool bdrv_dirty_bitmap_readonly(const BdrvDirtyBitmap *bitmap)
 /* Called with BQL taken. */
 void bdrv_dirty_bitmap_set_readonly(BdrvDirtyBitmap *bitmap, bool value)
 {
-    qemu_mutex_lock(bitmap->mutex);
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
     bitmap->readonly = value;
-    qemu_mutex_unlock(bitmap->mutex);
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
 }
 
 bool bdrv_has_readonly_bitmaps(BlockDriverState *bs)
@@ -714,24 +711,12 @@ bool bdrv_has_readonly_bitmaps(BlockDriverState *bs)
     return false;
 }
 
-/* Called with BQL taken. */
-void bdrv_dirty_bitmap_set_persistance(BdrvDirtyBitmap *bitmap, bool persistent)
-{
-    qemu_mutex_lock(bitmap->mutex);
-    bitmap->persistent = persistent;
-    qemu_mutex_unlock(bitmap->mutex);
-}
-
-bool bdrv_dirty_bitmap_get_persistance(BdrvDirtyBitmap *bitmap)
-{
-    return bitmap->persistent;
-}
-
-bool bdrv_has_changed_persistent_bitmaps(BlockDriverState *bs)
+bool bdrv_has_named_bitmaps(BlockDriverState *bs)
 {
     BdrvDirtyBitmap *bm;
+
     QLIST_FOREACH(bm, &bs->dirty_bitmaps, list) {
-        if (bm->persistent && !bm->readonly) {
+        if (bdrv_dirty_bitmap_name(bm)) {
             return true;
         }
     }
@@ -739,11 +724,50 @@ bool bdrv_has_changed_persistent_bitmaps(BlockDriverState *bs)
     return false;
 }
 
-BdrvDirtyBitmap *bdrv_dirty_bitmap_next(BlockDriverState *bs,
-                                        BdrvDirtyBitmap *bitmap)
+/* Called with BQL taken. */
+void bdrv_dirty_bitmap_set_persistence(BdrvDirtyBitmap *bitmap, bool persistent)
 {
-    return bitmap == NULL ? QLIST_FIRST(&bs->dirty_bitmaps) :
-                            QLIST_NEXT(bitmap, list);
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
+    bitmap->persistent = persistent;
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
+}
+
+/* Called with BQL taken. */
+void bdrv_dirty_bitmap_set_inconsistent(BdrvDirtyBitmap *bitmap)
+{
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
+    assert(bitmap->persistent == true);
+    bitmap->inconsistent = true;
+    bitmap->disabled = true;
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
+}
+
+/* Called with BQL taken. */
+void bdrv_dirty_bitmap_skip_store(BdrvDirtyBitmap *bitmap, bool skip)
+{
+    bdrv_dirty_bitmaps_lock(bitmap->bs);
+    bitmap->skip_store = skip;
+    bdrv_dirty_bitmaps_unlock(bitmap->bs);
+}
+
+bool bdrv_dirty_bitmap_get_persistence(BdrvDirtyBitmap *bitmap)
+{
+    return bitmap->persistent && !bitmap->skip_store;
+}
+
+bool bdrv_dirty_bitmap_inconsistent(const BdrvDirtyBitmap *bitmap)
+{
+    return bitmap->inconsistent;
+}
+
+BdrvDirtyBitmap *bdrv_dirty_bitmap_first(BlockDriverState *bs)
+{
+    return QLIST_FIRST(&bs->dirty_bitmaps);
+}
+
+BdrvDirtyBitmap *bdrv_dirty_bitmap_next(BdrvDirtyBitmap *bitmap)
+{
+    return QLIST_NEXT(bitmap, list);
 }
 
 char *bdrv_dirty_bitmap_sha256(const BdrvDirtyBitmap *bitmap, Error **errp)
@@ -751,7 +775,116 @@ char *bdrv_dirty_bitmap_sha256(const BdrvDirtyBitmap *bitmap, Error **errp)
     return hbitmap_sha256(bitmap->bitmap, errp);
 }
 
-int64_t bdrv_dirty_bitmap_next_zero(BdrvDirtyBitmap *bitmap, uint64_t offset)
+int64_t bdrv_dirty_bitmap_next_dirty(BdrvDirtyBitmap *bitmap, int64_t offset,
+                                     int64_t bytes)
 {
-    return hbitmap_next_zero(bitmap->bitmap, offset);
+    return hbitmap_next_dirty(bitmap->bitmap, offset, bytes);
+}
+
+int64_t bdrv_dirty_bitmap_next_zero(BdrvDirtyBitmap *bitmap, int64_t offset,
+                                    int64_t bytes)
+{
+    return hbitmap_next_zero(bitmap->bitmap, offset, bytes);
+}
+
+bool bdrv_dirty_bitmap_next_dirty_area(BdrvDirtyBitmap *bitmap,
+        int64_t start, int64_t end, int64_t max_dirty_count,
+        int64_t *dirty_start, int64_t *dirty_count)
+{
+    return hbitmap_next_dirty_area(bitmap->bitmap, start, end, max_dirty_count,
+                                   dirty_start, dirty_count);
+}
+
+bool bdrv_dirty_bitmap_status(BdrvDirtyBitmap *bitmap, int64_t offset,
+                              int64_t bytes, int64_t *count)
+{
+    return hbitmap_status(bitmap->bitmap, offset, bytes, count);
+}
+
+/**
+ * bdrv_merge_dirty_bitmap: merge src into dest.
+ * Ensures permissions on bitmaps are reasonable; use for public API.
+ *
+ * @backup: If provided, make a copy of dest here prior to merge.
+ *
+ * Returns true on success, false on failure. In case of failure bitmaps are
+ * untouched.
+ */
+bool bdrv_merge_dirty_bitmap(BdrvDirtyBitmap *dest, const BdrvDirtyBitmap *src,
+                             HBitmap **backup, Error **errp)
+{
+    bool ret = false;
+
+    bdrv_dirty_bitmaps_lock(dest->bs);
+    if (src->bs != dest->bs) {
+        bdrv_dirty_bitmaps_lock(src->bs);
+    }
+
+    if (bdrv_dirty_bitmap_check(dest, BDRV_BITMAP_DEFAULT, errp)) {
+        goto out;
+    }
+
+    if (bdrv_dirty_bitmap_check(src, BDRV_BITMAP_ALLOW_RO, errp)) {
+        goto out;
+    }
+
+    if (bdrv_dirty_bitmap_size(src) != bdrv_dirty_bitmap_size(dest)) {
+        error_setg(errp, "Bitmaps are of different sizes (destination size is %"
+                   PRId64 ", source size is %" PRId64 ") and can't be merged",
+                   bdrv_dirty_bitmap_size(dest), bdrv_dirty_bitmap_size(src));
+        goto out;
+    }
+
+    bdrv_dirty_bitmap_merge_internal(dest, src, backup, false);
+    ret = true;
+
+out:
+    bdrv_dirty_bitmaps_unlock(dest->bs);
+    if (src->bs != dest->bs) {
+        bdrv_dirty_bitmaps_unlock(src->bs);
+    }
+
+    return ret;
+}
+
+/**
+ * bdrv_dirty_bitmap_merge_internal: merge src into dest.
+ * Does NOT check bitmap permissions; not suitable for use as public API.
+ * @dest, @src and @backup (if not NULL) must have same size.
+ *
+ * @backup: If provided, make a copy of dest here prior to merge.
+ * @lock: If true, lock and unlock bitmaps on the way in/out.
+ */
+void bdrv_dirty_bitmap_merge_internal(BdrvDirtyBitmap *dest,
+                                      const BdrvDirtyBitmap *src,
+                                      HBitmap **backup,
+                                      bool lock)
+{
+    IO_CODE();
+
+    assert(!bdrv_dirty_bitmap_readonly(dest));
+    assert(!bdrv_dirty_bitmap_inconsistent(dest));
+    assert(!bdrv_dirty_bitmap_inconsistent(src));
+
+    if (lock) {
+        bdrv_dirty_bitmaps_lock(dest->bs);
+        if (src->bs != dest->bs) {
+            bdrv_dirty_bitmaps_lock(src->bs);
+        }
+    }
+
+    if (backup) {
+        *backup = dest->bitmap;
+        dest->bitmap = hbitmap_alloc(dest->size, hbitmap_granularity(*backup));
+        hbitmap_merge(*backup, src->bitmap, dest->bitmap);
+    } else {
+        hbitmap_merge(dest->bitmap, src->bitmap, dest->bitmap);
+    }
+
+    if (lock) {
+        bdrv_dirty_bitmaps_unlock(dest->bs);
+        if (src->bs != dest->bs) {
+            bdrv_dirty_bitmaps_unlock(src->bs);
+        }
+    }
 }

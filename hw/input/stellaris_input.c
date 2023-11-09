@@ -6,9 +6,11 @@
  *
  * This code is licensed under the GPL.
  */
+
 #include "qemu/osdep.h"
-#include "hw/hw.h"
-#include "hw/devices.h"
+#include "hw/input/gamepad.h"
+#include "hw/irq.h"
+#include "migration/vmstate.h"
 #include "ui/console.h"
 
 typedef struct {
@@ -60,12 +62,14 @@ static const VMStateDescription vmstate_stellaris_button = {
 
 static const VMStateDescription vmstate_stellaris_gamepad = {
     .name = "stellaris_gamepad",
-    .version_id = 1,
-    .minimum_version_id = 1,
+    .version_id = 2,
+    .minimum_version_id = 2,
     .fields = (VMStateField[]) {
         VMSTATE_INT32(extension, gamepad_state),
-        VMSTATE_STRUCT_VARRAY_INT32(buttons, gamepad_state, num_buttons, 0,
-                              vmstate_stellaris_button, gamepad_button),
+        VMSTATE_STRUCT_VARRAY_POINTER_INT32(buttons, gamepad_state,
+                                            num_buttons,
+                                            vmstate_stellaris_button,
+                                            gamepad_button),
         VMSTATE_END_OF_LIST()
     }
 };
@@ -84,5 +88,6 @@ void stellaris_gamepad_init(int n, qemu_irq *irq, const int *keycode)
     }
     s->num_buttons = n;
     qemu_add_kbd_event_handler(stellaris_gamepad_put_key, s);
-    vmstate_register(NULL, -1, &vmstate_stellaris_gamepad, s);
+    vmstate_register(NULL, VMSTATE_INSTANCE_ID_ANY,
+                     &vmstate_stellaris_gamepad, s);
 }

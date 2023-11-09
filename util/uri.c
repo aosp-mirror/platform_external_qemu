@@ -43,8 +43,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+ * License along with this library. If not, see <https://www.gnu.org/licenses/>.
  *
  * Authors:
  *    Richard W.M. Jones <rjones@redhat.com>
@@ -52,6 +51,7 @@
  */
 
 #include "qemu/osdep.h"
+#include "qemu/cutils.h"
 
 #include "qemu/uri.h"
 
@@ -1065,10 +1065,7 @@ URI *uri_parse_raw(const char *str, int raw)
  */
 URI *uri_new(void)
 {
-    URI *ret;
-
-    ret = g_new0(URI, 1);
-    return ret;
+    return g_new0(URI, 1);
 }
 
 /**
@@ -1342,7 +1339,7 @@ static void uri_clean(URI *uri)
 
 /**
  * uri_free:
- * @uri:  pointer to an URI
+ * @uri:  pointer to an URI, NULL is ignored
  *
  * Free up the URI struct
  */
@@ -1941,15 +1938,9 @@ step_7:
     val = uri_to_string(res);
 
 done:
-    if (ref != NULL) {
-        uri_free(ref);
-    }
-    if (bas != NULL) {
-        uri_free(bas);
-    }
-    if (res != NULL) {
-        uri_free(res);
-    }
+    uri_free(ref);
+    uri_free(bas);
+    uri_free(res);
     return val;
 }
 
@@ -2192,12 +2183,8 @@ done:
     if (remove_path != 0) {
         ref->path = NULL;
     }
-    if (ref != NULL) {
-        uri_free(ref);
-    }
-    if (bas != NULL) {
-        uri_free(bas);
-    }
+    uri_free(ref);
+    uri_free(bas);
 
     return val;
 }
@@ -2269,10 +2256,7 @@ struct QueryParams *query_params_parse(const char *query)
         /* Find the next separator, or end of the string. */
         end = strchr(query, '&');
         if (!end) {
-            end = strchr(query, ';');
-        }
-        if (!end) {
-            end = query + strlen(query);
+            end = qemu_strchrnul(query, ';');
         }
 
         /* Find the first '=' character between here and end. */

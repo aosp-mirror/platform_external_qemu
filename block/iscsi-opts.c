@@ -23,8 +23,8 @@
  */
 
 #include "qemu/osdep.h"
-#include "qemu-common.h"
 #include "qemu/config-file.h"
+#include "qemu/module.h"
 #include "qemu/option.h"
 
 static QemuOptsList qemu_iscsi_opts = {
@@ -68,3 +68,4 @@ static void iscsi_block_opts_init(void)
 }
 
 block_init(iscsi_block_opts_init);
+module_opts("iscsi");

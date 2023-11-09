@@ -8,7 +8,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,34 +22,29 @@
 #include "qemu/osdep.h"
 #include "qemu/error-report.h"
 #include "qapi/error.h"
-#include "hw/hw.h"
+#include "qapi/visitor.h"
 #include "qemu/log.h"
-#include "sysemu/sysemu.h"
-#include "hw/boards.h"
 #include "hw/loader.h"
 #include "elf.h"
 #include "hw/sysbus.h"
 #include "sysemu/kvm.h"
 #include "sysemu/device_tree.h"
 #include "kvm_ppc.h"
+#include "migration/vmstate.h"
 
 #include "hw/ppc/spapr.h"
 #include "hw/ppc/spapr_vio.h"
-#include "hw/ppc/xics.h"
 #include "hw/ppc/fdt.h"
 #include "trace.h"
 
 #include <libfdt.h>
 
-static Property spapr_vio_props[] = {
-    DEFINE_PROP_UINT32("irq", VIOsPAPRDevice, irq, 0), \
-    DEFINE_PROP_END_OF_LIST(),
-};
+#define SPAPR_VIO_REG_BASE 0x71000000
 
 static char *spapr_vio_get_dev_name(DeviceState *qdev)
 {
-    VIOsPAPRDevice *dev = VIO_SPAPR_DEVICE(qdev);
-    VIOsPAPRDeviceClass *pc = VIO_SPAPR_DEVICE_GET_CLASS(dev);
+    SpaprVioDevice *dev = VIO_SPAPR_DEVICE(qdev);
+    SpaprVioDeviceClass *pc = VIO_SPAPR_DEVICE_GET_CLASS(dev);
 
     /* Device tree style name device@reg */
     return g_strdup_printf("%s@%x", pc->dt_name, dev->reg);
@@ -67,16 +62,16 @@ static const TypeInfo spapr_vio_bus_info = {
     .name = TYPE_SPAPR_VIO_BUS,
     .parent = TYPE_BUS,
     .class_init = spapr_vio_bus_class_init,
-    .instance_size = sizeof(VIOsPAPRBus),
+    .instance_size = sizeof(SpaprVioBus),
 };
 
-VIOsPAPRDevice *spapr_vio_find_by_reg(VIOsPAPRBus *bus, uint32_t reg)
+SpaprVioDevice *spapr_vio_find_by_reg(SpaprVioBus *bus, uint32_t reg)
 {
     BusChild *kid;
-    VIOsPAPRDevice *dev = NULL;
+    SpaprVioDevice *dev = NULL;
 
     QTAILQ_FOREACH(kid, &bus->bus.children, sibling) {
-        dev = (VIOsPAPRDevice *)kid->child;
+        dev = (SpaprVioDevice *)kid->child;
         if (dev->reg == reg) {
             return dev;
         }
@@ -85,12 +80,13 @@ VIOsPAPRDevice *spapr_vio_find_by_reg(VIOsPAPRBus *bus, uint32_t reg)
     return NULL;
 }
 
-static int vio_make_devnode(VIOsPAPRDevice *dev,
+static int vio_make_devnode(SpaprVioDevice *dev,
                             void *fdt)
 {
-    VIOsPAPRDeviceClass *pc = VIO_SPAPR_DEVICE_GET_CLASS(dev);
+    SpaprVioDeviceClass *pc = VIO_SPAPR_DEVICE_GET_CLASS(dev);
     int vdevice_off, node_off, ret;
     char *dt_name;
+    const char *dt_compatible;
 
     vdevice_off = fdt_path_offset(fdt, "/vdevice");
     if (vdevice_off < 0) {
@@ -117,9 +113,15 @@ static int vio_make_devnode(VIOsPAPRDevice *dev,
         }
     }
 
-    if (pc->dt_compatible) {
+    if (pc->get_dt_compatible) {
+        dt_compatible = pc->get_dt_compatible(dev);
+    } else {
+        dt_compatible = pc->dt_compatible;
+    }
+
+    if (dt_compatible) {
         ret = fdt_setprop_string(fdt, node_off, "compatible",
-                                 pc->dt_compatible);
+                                 dt_compatible);
         if (ret < 0) {
             return ret;
         }
@@ -128,7 +130,7 @@ static int vio_make_devnode(VIOsPAPRDevice *dev,
     if (dev->irq) {
         uint32_t ints_prop[2];
 
-        spapr_dt_xics_irq(ints_prop, dev->irq, false);
+        spapr_dt_irq(ints_prop, dev->irq, false);
         ret = fdt_setprop(fdt, node_off, "interrupts", ints_prop,
                           sizeof(ints_prop));
         if (ret < 0) {
@@ -154,13 +156,13 @@ static int vio_make_devnode(VIOsPAPRDevice *dev,
 /*
  * CRQ handling
  */
-static target_ulong h_reg_crq(PowerPCCPU *cpu, sPAPRMachineState *spapr,
+static target_ulong h_reg_crq(PowerPCCPU *cpu, SpaprMachineState *spapr,
                               target_ulong opcode, target_ulong *args)
 {
     target_ulong reg = args[0];
     target_ulong queue_addr = args[1];
     target_ulong queue_len = args[2];
-    VIOsPAPRDevice *dev = spapr_vio_find_by_reg(spapr->vio_bus, reg);
+    SpaprVioDevice *dev = spapr_vio_find_by_reg(spapr->vio_bus, reg);
 
     if (!dev) {
         hcall_dprintf("Unit 0x" TARGET_FMT_lx " does not exist\n", reg);
@@ -199,7 +201,7 @@ static target_ulong h_reg_crq(PowerPCCPU *cpu, sPAPRMachineState *spapr,
     return H_SUCCESS;
 }
 
-static target_ulong free_crq(VIOsPAPRDevice *dev)
+static target_ulong free_crq(SpaprVioDevice *dev)
 {
     dev->crq.qladdr = 0;
     dev->crq.qsize = 0;
@@ -210,11 +212,11 @@ static target_ulong free_crq(VIOsPAPRDevice *dev)
     return H_SUCCESS;
 }
 
-static target_ulong h_free_crq(PowerPCCPU *cpu, sPAPRMachineState *spapr,
+static target_ulong h_free_crq(PowerPCCPU *cpu, SpaprMachineState *spapr,
                                target_ulong opcode, target_ulong *args)
 {
     target_ulong reg = args[0];
-    VIOsPAPRDevice *dev = spapr_vio_find_by_reg(spapr->vio_bus, reg);
+    SpaprVioDevice *dev = spapr_vio_find_by_reg(spapr->vio_bus, reg);
 
     if (!dev) {
         hcall_dprintf("Unit 0x" TARGET_FMT_lx " does not exist\n", reg);
@@ -224,13 +226,13 @@ static target_ulong h_free_crq(PowerPCCPU *cpu, sPAPRMachineState *spapr,
     return free_crq(dev);
 }
 
-static target_ulong h_send_crq(PowerPCCPU *cpu, sPAPRMachineState *spapr,
+static target_ulong h_send_crq(PowerPCCPU *cpu, SpaprMachineState *spapr,
                                target_ulong opcode, target_ulong *args)
 {
     target_ulong reg = args[0];
     target_ulong msg_hi = args[1];
     target_ulong msg_lo = args[2];
-    VIOsPAPRDevice *dev = spapr_vio_find_by_reg(spapr->vio_bus, reg);
+    SpaprVioDevice *dev = spapr_vio_find_by_reg(spapr->vio_bus, reg);
     uint64_t crq_mangle[2];
 
     if (!dev) {
@@ -247,11 +249,11 @@ static target_ulong h_send_crq(PowerPCCPU *cpu, sPAPRMachineState *spapr,
     return H_HARDWARE;
 }
 
-static target_ulong h_enable_crq(PowerPCCPU *cpu, sPAPRMachineState *spapr,
+static target_ulong h_enable_crq(PowerPCCPU *cpu, SpaprMachineState *spapr,
                                  target_ulong opcode, target_ulong *args)
 {
     target_ulong reg = args[0];
-    VIOsPAPRDevice *dev = spapr_vio_find_by_reg(spapr->vio_bus, reg);
+    SpaprVioDevice *dev = spapr_vio_find_by_reg(spapr->vio_bus, reg);
 
     if (!dev) {
         hcall_dprintf("Unit 0x" TARGET_FMT_lx " does not exist\n", reg);
@@ -262,7 +264,7 @@ static target_ulong h_enable_crq(PowerPCCPU *cpu, sPAPRMachineState *spapr,
 }
 
 /* Returns negative error, 0 success, or positive: queue full */
-int spapr_vio_send_crq(VIOsPAPRDevice *dev, uint8_t *crq)
+int spapr_vio_send_crq(SpaprVioDevice *dev, uint8_t *crq)
 {
     int rc;
     uint8_t byte;
@@ -297,7 +299,7 @@ int spapr_vio_send_crq(VIOsPAPRDevice *dev, uint8_t *crq)
     dev->crq.qnext = (dev->crq.qnext + 16) % dev->crq.qsize;
 
     if (dev->signal_state & 1) {
-        qemu_irq_pulse(spapr_vio_qirq(dev));
+        spapr_vio_irq_pulse(dev);
     }
 
     return 0;
@@ -305,15 +307,15 @@ int spapr_vio_send_crq(VIOsPAPRDevice *dev, uint8_t *crq)
 
 /* "quiesce" handling */
 
-static void spapr_vio_quiesce_one(VIOsPAPRDevice *dev)
+static void spapr_vio_quiesce_one(SpaprVioDevice *dev)
 {
     if (dev->tcet) {
-        device_reset(DEVICE(dev->tcet));
+        device_cold_reset(DEVICE(dev->tcet));
     }
     free_crq(dev);
 }
 
-void spapr_vio_set_bypass(VIOsPAPRDevice *dev, bool bypass)
+void spapr_vio_set_bypass(SpaprVioDevice *dev, bool bypass)
 {
     if (!dev->tcet) {
         return;
@@ -325,13 +327,13 @@ void spapr_vio_set_bypass(VIOsPAPRDevice *dev, bool bypass)
     dev->tcet->bypass = bypass;
 }
 
-static void rtas_set_tce_bypass(PowerPCCPU *cpu, sPAPRMachineState *spapr,
+static void rtas_set_tce_bypass(PowerPCCPU *cpu, SpaprMachineState *spapr,
                                 uint32_t token,
                                 uint32_t nargs, target_ulong args,
                                 uint32_t nret, target_ulong rets)
 {
-    VIOsPAPRBus *bus = spapr->vio_bus;
-    VIOsPAPRDevice *dev;
+    SpaprVioBus *bus = spapr->vio_bus;
+    SpaprVioDevice *dev;
     uint32_t unit, enable;
 
     if (nargs != 2) {
@@ -356,14 +358,14 @@ static void rtas_set_tce_bypass(PowerPCCPU *cpu, sPAPRMachineState *spapr,
     rtas_st(rets, 0, RTAS_OUT_SUCCESS);
 }
 
-static void rtas_quiesce(PowerPCCPU *cpu, sPAPRMachineState *spapr,
+static void rtas_quiesce(PowerPCCPU *cpu, SpaprMachineState *spapr,
                          uint32_t token,
                          uint32_t nargs, target_ulong args,
                          uint32_t nret, target_ulong rets)
 {
-    VIOsPAPRBus *bus = spapr->vio_bus;
+    SpaprVioBus *bus = spapr->vio_bus;
     BusChild *kid;
-    VIOsPAPRDevice *dev = NULL;
+    SpaprVioDevice *dev = NULL;
 
     if (nargs != 0) {
         rtas_st(rets, 0, RTAS_OUT_PARAM_ERROR);
@@ -371,18 +373,18 @@ static void rtas_quiesce(PowerPCCPU *cpu, sPAPRMachineState *spapr,
     }
 
     QTAILQ_FOREACH(kid, &bus->bus.children, sibling) {
-        dev = (VIOsPAPRDevice *)kid->child;
+        dev = (SpaprVioDevice *)kid->child;
         spapr_vio_quiesce_one(dev);
     }
 
     rtas_st(rets, 0, RTAS_OUT_SUCCESS);
 }
 
-static VIOsPAPRDevice *reg_conflict(VIOsPAPRDevice *dev)
+static SpaprVioDevice *reg_conflict(SpaprVioDevice *dev)
 {
-    VIOsPAPRBus *bus = SPAPR_VIO_BUS(dev->qdev.parent_bus);
+    SpaprVioBus *bus = SPAPR_VIO_BUS(dev->qdev.parent_bus);
     BusChild *kid;
-    VIOsPAPRDevice *other;
+    SpaprVioDevice *other;
 
     /*
      * Check for a device other than the given one which is already
@@ -402,8 +404,8 @@ static VIOsPAPRDevice *reg_conflict(VIOsPAPRDevice *dev)
 
 static void spapr_vio_busdev_reset(DeviceState *qdev)
 {
-    VIOsPAPRDevice *dev = VIO_SPAPR_DEVICE(qdev);
-    VIOsPAPRDeviceClass *pc = VIO_SPAPR_DEVICE_GET_CLASS(dev);
+    SpaprVioDevice *dev = VIO_SPAPR_DEVICE(qdev);
+    SpaprVioDeviceClass *pc = VIO_SPAPR_DEVICE_GET_CLASS(dev);
 
     /* Shut down the request queue and TCEs if necessary */
     spapr_vio_quiesce_one(dev);
@@ -416,13 +418,61 @@ static void spapr_vio_busdev_reset(DeviceState *qdev)
     }
 }
 
+/*
+ * The register property of a VIO device is defined in libvirt using
+ * 0x1000 as a base register number plus a 0x1000 increment. For the
+ * VIO tty device, the base number is changed to 0x30000000. QEMU uses
+ * a base register number of 0x71000000 and then a simple increment.
+ *
+ * The formula below tries to compute a unique index number from the
+ * register value that will be used to define the IRQ number of the
+ * VIO device.
+ *
+ * A maximum of 256 VIO devices is covered. Collisions are possible
+ * but they will be detected when the IRQ is claimed.
+ */
+static inline uint32_t spapr_vio_reg_to_irq(uint32_t reg)
+{
+    uint32_t irq;
+
+    if (reg >= SPAPR_VIO_REG_BASE) {
+        /*
+         * VIO device register values when allocated by QEMU. For
+         * these, we simply mask the high bits to fit the overall
+         * range: [0x00 - 0xff].
+         *
+         * The nvram VIO device (reg=0x71000000) is a static device of
+         * the pseries machine and so is always allocated by QEMU. Its
+         * IRQ number is 0x0.
+         */
+        irq = reg & 0xff;
+
+    } else if (reg >= 0x30000000) {
+        /*
+         * VIO tty devices register values, when allocated by libvirt,
+         * are mapped in range [0xf0 - 0xff], gives us a maximum of 16
+         * vtys.
+         */
+        irq = 0xf0 | ((reg >> 12) & 0xf);
+
+    } else {
+        /*
+         * Other VIO devices register values, when allocated by
+         * libvirt, should be mapped in range [0x00 - 0xef]. Conflicts
+         * will be detected when IRQ is claimed.
+         */
+        irq = (reg >> 12) & 0xff;
+    }
+
+    return SPAPR_IRQ_VIO | irq;
+}
+
 static void spapr_vio_busdev_realize(DeviceState *qdev, Error **errp)
 {
-    sPAPRMachineState *spapr = SPAPR_MACHINE(qdev_get_machine());
-    VIOsPAPRDevice *dev = (VIOsPAPRDevice *)qdev;
-    VIOsPAPRDeviceClass *pc = VIO_SPAPR_DEVICE_GET_CLASS(dev);
+    SpaprMachineState *spapr = SPAPR_MACHINE(qdev_get_machine());
+    SpaprVioDevice *dev = (SpaprVioDevice *)qdev;
+    SpaprVioDeviceClass *pc = VIO_SPAPR_DEVICE_GET_CLASS(dev);
     char *id;
-    Error *local_err = NULL;
 
     if (dev->reg != -1) {
         /*
@@ -431,7 +481,7 @@ static void spapr_vio_busdev_realize(DeviceState *qdev, Error **errp)
          * rather than using spapr_vio_find_by_reg() because sdev
          * itself is already in the list.
          */
-        VIOsPAPRDevice *other = reg_conflict(dev);
+        SpaprVioDevice *other = reg_conflict(dev);
 
         if (other) {
             error_setg(errp, "%s and %s devices conflict at address %#x",
@@ -442,7 +492,7 @@ static void spapr_vio_busdev_realize(DeviceState *qdev, Error **errp)
         }
     } else {
         /* Need to assign an address */
-        VIOsPAPRBus *bus = SPAPR_VIO_BUS(dev->qdev.parent_bus);
+        SpaprVioBus *bus = SPAPR_VIO_BUS(dev->qdev.parent_bus);
 
         do {
             dev->reg = bus->next_reg++;
@@ -455,9 +505,18 @@ static void spapr_vio_busdev_realize(DeviceState *qdev, Error **errp)
         dev->qdev.id = id;
     }
 
-    dev->irq = spapr_irq_alloc(spapr, dev->irq, false, &local_err);
-    if (local_err) {
-        error_propagate(errp, local_err);
+    dev->irq = spapr_vio_reg_to_irq(dev->reg);
+
+    if (SPAPR_MACHINE_GET_CLASS(spapr)->legacy_irq_allocation) {
+        int irq = spapr_irq_findone(spapr, errp);
+
+        if (irq < 0) {
+            return;
+        }
+        dev->irq = irq;
+    }
+
+    if (spapr_irq_claim(spapr, dev->irq, false, errp) < 0) {
         return;
     }
 
@@ -465,10 +524,10 @@ static void spapr_vio_busdev_realize(DeviceState *qdev, Error **errp)
         uint32_t liobn = SPAPR_VIO_LIOBN(dev->reg);
 
         memory_region_init(&dev->mrroot, OBJECT(dev), "iommu-spapr-root",
-                           ram_size);
+                           MACHINE(spapr)->ram_size);
         memory_region_init_alias(&dev->mrbypass, OBJECT(dev),
                                  "iommu-spapr-bypass", get_system_memory(),
-                                 0, ram_size);
+                                 0, MACHINE(spapr)->ram_size);
         memory_region_add_subregion_overlap(&dev->mrroot, 0, &dev->mrbypass, 1);
         address_space_init(&dev->as, &dev->mrroot, qdev->id);
 
@@ -483,14 +542,14 @@ static void spapr_vio_busdev_realize(DeviceState *qdev, Error **errp)
     pc->realize(dev, errp);
 }
 
-static target_ulong h_vio_signal(PowerPCCPU *cpu, sPAPRMachineState *spapr,
+static target_ulong h_vio_signal(PowerPCCPU *cpu, SpaprMachineState *spapr,
                                  target_ulong opcode,
                                  target_ulong *args)
 {
     target_ulong reg = args[0];
     target_ulong mode = args[1];
-    VIOsPAPRDevice *dev = spapr_vio_find_by_reg(spapr->vio_bus, reg);
-    VIOsPAPRDeviceClass *pc;
+    SpaprVioDevice *dev = spapr_vio_find_by_reg(spapr->vio_bus, reg);
+    SpaprVioDeviceClass *pc;
 
     if (!dev) {
         return H_PARAMETER;
@@ -507,20 +566,20 @@ static target_ulong h_vio_signal(PowerPCCPU *cpu, sPAPRMachineState *spapr,
     return H_SUCCESS;
 }
 
-VIOsPAPRBus *spapr_vio_bus_init(void)
+SpaprVioBus *spapr_vio_bus_init(void)
 {
-    VIOsPAPRBus *bus;
+    SpaprVioBus *bus;
     BusState *qbus;
     DeviceState *dev;
 
     /* Create bridge device */
-    dev = qdev_create(NULL, TYPE_SPAPR_VIO_BRIDGE);
-    qdev_init_nofail(dev);
+    dev = qdev_new(TYPE_SPAPR_VIO_BRIDGE);
+    sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &error_fatal);
 
     /* Create bus on bridge device */
-    qbus = qbus_create(TYPE_SPAPR_VIO_BUS, dev, "spapr-vio");
+    qbus = qbus_new(TYPE_SPAPR_VIO_BUS, dev, "spapr-vio");
     bus = SPAPR_VIO_BUS(qbus);
-    bus->next_reg = 0x71000000;
+    bus->next_reg = SPAPR_VIO_REG_BASE;
 
     /* hcall-vio */
     spapr_register_hypercall(H_VIO_SIGNAL, h_vio_signal);
@@ -558,14 +617,14 @@ const VMStateDescription vmstate_spapr_vio = {
     .minimum_version_id = 1,
     .fields = (VMStateField[]) {
         /* Sanity check */
-        VMSTATE_UINT32_EQUAL(reg, VIOsPAPRDevice, NULL),
-        VMSTATE_UINT32_EQUAL(irq, VIOsPAPRDevice, NULL),
+        VMSTATE_UINT32_EQUAL(reg, SpaprVioDevice, NULL),
+        VMSTATE_UINT32_EQUAL(irq, SpaprVioDevice, NULL),
 
         /* General VIO device state */
-        VMSTATE_UINT64(signal_state, VIOsPAPRDevice),
-        VMSTATE_UINT64(crq.qladdr, VIOsPAPRDevice),
-        VMSTATE_UINT32(crq.qsize, VIOsPAPRDevice),
-        VMSTATE_UINT32(crq.qnext, VIOsPAPRDevice),
+        VMSTATE_UINT64(signal_state, SpaprVioDevice),
+        VMSTATE_UINT64(crq.qladdr, SpaprVioDevice),
+        VMSTATE_UINT32(crq.qsize, SpaprVioDevice),
+        VMSTATE_UINT32(crq.qnext, SpaprVioDevice),
 
         VMSTATE_END_OF_LIST()
     },
@@ -577,15 +636,14 @@ static void vio_spapr_device_class_init(ObjectClass *klass, void *data)
     k->realize = spapr_vio_busdev_realize;
     k->reset = spapr_vio_busdev_reset;
     k->bus_type = TYPE_SPAPR_VIO_BUS;
-    k->props = spapr_vio_props;
 }
 
 static const TypeInfo spapr_vio_type_info = {
     .name = TYPE_VIO_SPAPR_DEVICE,
     .parent = TYPE_DEVICE,
-    .instance_size = sizeof(VIOsPAPRDevice),
+    .instance_size = sizeof(SpaprVioDevice),
     .abstract = true,
-    .class_size = sizeof(VIOsPAPRDeviceClass),
+    .class_size = sizeof(SpaprVioDeviceClass),
     .class_init = vio_spapr_device_class_init,
 };
 
@@ -600,10 +658,10 @@ type_init(spapr_vio_register_types)
 
 static int compare_reg(const void *p1, const void *p2)
 {
-    VIOsPAPRDevice const *dev1, *dev2;
+    SpaprVioDevice const *dev1, *dev2;
 
-    dev1 = (VIOsPAPRDevice *)*(DeviceState **)p1;
-    dev2 = (VIOsPAPRDevice *)*(DeviceState **)p2;
+    dev1 = (SpaprVioDevice *)*(DeviceState **)p1;
+    dev2 = (SpaprVioDevice *)*(DeviceState **)p2;
 
     if (dev1->reg < dev2->reg) {
         return -1;
@@ -616,7 +674,7 @@ static int compare_reg(const void *p1, const void *p2)
     return 1;
 }
 
-void spapr_dt_vdevice(VIOsPAPRBus *bus, void *fdt)
+void spapr_dt_vdevice(SpaprVioBus *bus, void *fdt)
 {
     DeviceState *qdev, **qdevs;
     BusChild *kid;
@@ -639,7 +697,7 @@ void spapr_dt_vdevice(VIOsPAPRBus *bus, void *fdt)
     }
 
     /* Copy out into an array of pointers */
-    qdevs = g_malloc(sizeof(qdev) * num);
+    qdevs = g_new(DeviceState *, num);
     num = 0;
     QTAILQ_FOREACH(kid, &bus->bus.children, sibling) {
         qdevs[num++] = kid->child;
@@ -651,8 +709,8 @@ void spapr_dt_vdevice(VIOsPAPRBus *bus, void *fdt)
     /* Hack alert. Give the devices to libfdt in reverse order, we happen
      * to know that will mean they are in forward order in the tree. */
     for (i = num - 1; i >= 0; i--) {
-        VIOsPAPRDevice *dev = (VIOsPAPRDevice *)(qdevs[i]);
-        VIOsPAPRDeviceClass *vdc = VIO_SPAPR_DEVICE_GET_CLASS(dev);
+        SpaprVioDevice *dev = (SpaprVioDevice *)(qdevs[i]);
+        SpaprVioDeviceClass *vdc = VIO_SPAPR_DEVICE_GET_CLASS(dev);
 
         ret = vio_make_devnode(dev, fdt);
         if (ret < 0) {
@@ -665,10 +723,10 @@ void spapr_dt_vdevice(VIOsPAPRBus *bus, void *fdt)
     g_free(qdevs);
 }
 
-gchar *spapr_vio_stdout_path(VIOsPAPRBus *bus)
+gchar *spapr_vio_stdout_path(SpaprVioBus *bus)
 {
-    VIOsPAPRDevice *dev;
-    char *name, *path;
+    SpaprVioDevice *dev;
+    g_autofree char *name = NULL;
 
     dev = spapr_vty_get_default(bus);
     if (!dev) {
@@ -676,8 +734,6 @@ gchar *spapr_vio_stdout_path(VIOsPAPRBus *bus)
     }
 
     name = spapr_vio_get_dev_name(DEVICE(dev));
-    path = g_strdup_printf("/vdevice/%s", name);
 
-    g_free(name);
-    return path;
+    return g_strdup_printf("/vdevice/%s", name);
 }

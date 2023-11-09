@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,9 +20,6 @@
 
 #ifndef QIO_TASK_H
 #define QIO_TASK_H
-
-#include "qemu-common.h"
-#include "qom/object.h"
 
 typedef struct QIOTask QIOTask;
 
@@ -120,7 +117,7 @@ typedef void (*QIOTaskWorker)(QIOTask *task,
  *   gboolean myobject_operation_timer(gpointer opaque)
  *   {
  *      QIOTask *task = QIO_TASK(opaque);
- *      Error *err;*
+ *      Error *err = NULL;
  *
  *      ...check something important...
  *       if (err) {
@@ -232,13 +229,40 @@ QIOTask *qio_task_new(Object *source,
  *
  * Run a task in a background thread. When @worker
  * returns it will call qio_task_complete() in
- * the event thread context that provided.
+ * the thread that is running the main loop associated
+ * with @context.
  */
 void qio_task_run_in_thread(QIOTask *task,
                             QIOTaskWorker worker,
                             gpointer opaque,
                             GDestroyNotify destroy,
                             GMainContext *context);
+
+
+/**
+ * qio_task_wait_thread:
+ * @task: the task struct
+ *
+ * Wait for completion of a task that was previously
+ * invoked using qio_task_run_in_thread. This MUST
+ * ONLY be invoked if the task has not already
+ * completed, since after the completion callback
+ * is invoked, @task will have been freed.
+ *
+ * To avoid racing with execution of the completion
+ * callback provided with qio_task_new, this method
+ * MUST ONLY be invoked from the thread that is
+ * running the main loop associated with @context
+ * parameter to qio_task_run_in_thread.
+ *
+ * When the thread has completed, the completion
+ * callback provided to qio_task_new will be invoked.
+ * When that callback returns @task will be freed,
+ * so @task must not be referenced after this
+ * method completes.
+ */
+void qio_task_wait_thread(QIOTask *task);
+
 
 /**
  * qio_task_complete:

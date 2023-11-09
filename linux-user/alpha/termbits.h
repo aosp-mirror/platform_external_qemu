@@ -1,3 +1,6 @@
+#ifndef LINUX_USER_ALPHA_TERMBITS_H
+#define LINUX_USER_ALPHA_TERMBITS_H
+
 typedef unsigned char	target_cc_t;
 typedef unsigned int	target_speed_t;
 typedef unsigned int	target_tcflag_t;
@@ -156,6 +159,7 @@ struct target_termios {
 #define TARGET_FLUSHO	0x00800000
 #define TARGET_PENDIN	0x20000000
 #define TARGET_IEXTEN	0x00000400
+#define TARGET_EXTPROC  0x10000000
 
 #define TARGET_FIOCLEX		TARGET_IO('f', 1)
 #define TARGET_FIONCLEX	TARGET_IO('f', 2)
@@ -263,3 +267,5 @@ struct target_termios {
 #define TARGET_TIOCGICOUNT	0x545D	/* read serial port inline interrupt counts */
 #define TARGET_TIOCGHAYESESP	0x545E  /* Get Hayes ESP configuration */
 #define TARGET_TIOCSHAYESESP	0x545F  /* Set Hayes ESP configuration */
+
+#endif

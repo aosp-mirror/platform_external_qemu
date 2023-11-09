@@ -36,6 +36,9 @@
 #include "qemu/osdep.h"
 
 #include "qemu.h"
+#include "user-internals.h"
+#include "loader.h"
+#include "user-mmap.h"
 #include "flat.h"
 #include "target_flat.h"
 
@@ -224,8 +227,9 @@ static int decompress_exec(
 		ret = bprm->file->f_op->read(bprm->file, buf, LBUFSIZE, &fpos);
 		if (ret <= 0)
 			break;
-		if (ret >= (unsigned long) -4096)
+                if (is_error(ret)) {
 			break;
+                }
 		len -= ret;
 
 		strm.next_in = buf;
@@ -283,8 +287,7 @@ calc_reloc(abi_ulong r, struct lib_info *p, int curid, int internalp)
                     "in same module (%d != %d)\n",
                     (unsigned) r, curid, id);
             goto failed;
-        } else if ( ! p[id].loaded &&
-                    load_flat_shared_library(id, p) > (unsigned long) -4096) {
+        } else if (!p[id].loaded && is_error(load_flat_shared_library(id, p))) {
             fprintf(stderr, "BINFMT_FLAT: failed to load library %d\n", id);
             goto failed;
         }
@@ -442,6 +445,12 @@ static int load_flat_file(struct linux_binprm * bprm,
     indx_len = (indx_len + 15) & ~(abi_ulong)15;
 
     /*
+     * Allocate the address space.
+     */
+    probe_guest_base(bprm->filename, 0,
+                     text_len + data_len + extra + indx_len - 1);
+
+    /*
      * there are a couple of cases here,  the separate code/data
      * case,  and then the fully copied to RAM case which lumps
      * it all together.
@@ -523,9 +532,10 @@ static int load_flat_file(struct linux_binprm * bprm,
                 fpos = 0;
                 result = bprm->file->f_op->read(bprm->file,
                                 (char *) textpos, text_len, &fpos);
-                if (result < (unsigned long) -4096)
+                if (!is_error(result)) {
                         result = decompress_exec(bprm, text_len, (char *) datapos,
                                          data_len + (relocs * sizeof(unsigned long)), 0);
+                }
         }
         else
 #endif
@@ -661,7 +671,7 @@ static int load_flat_file(struct linux_binprm * bprm,
     }
 
     /* zero the BSS.  */
-    memset(g2h(datapos + data_len), 0, bss_len);
+    memset(g2h_untagged(datapos + data_len), 0, bss_len);
 
     return 0;
 }
@@ -693,8 +703,9 @@ static int load_flat_shared_library(int id, struct lib_info *libs)
 
 	res = prepare_binprm(&bprm);
 
-	if (res <= (unsigned long)-4096)
+        if (!is_error(res)) {
 		res = load_flat_file(&bprm, libs, id, NULL);
+        }
 	if (bprm.file) {
 		allow_write_access(bprm.file);
 		fput(bprm.file);
@@ -737,8 +748,9 @@ int load_flt_binary(struct linux_binprm *bprm, struct image_info *info)
 
 
     res = load_flat_file(bprm, libinfo, 0, &stack_len);
-    if (res > (unsigned long)-4096)
+    if (is_error(res)) {
             return res;
+    }
 
     /* Update data segment pointers for all libraries */
     for (i=0; i<MAX_SHARED_LIBS; i++) {
@@ -768,10 +780,10 @@ int load_flt_binary(struct linux_binprm *bprm, struct image_info *info)
     /* Enforce final stack alignment of 16 bytes.  This is sufficient
        for all current targets, and excess alignment is harmless.  */
     stack_len = bprm->envc + bprm->argc + 2;
-    stack_len += 3;	/* argc, arvg, argp */
+    stack_len += flat_argvp_envp_on_stack() ? 2 : 0; /* arvg, argp */
+    stack_len += 1; /* argc */
     stack_len *= sizeof(abi_ulong);
-    if ((sp + stack_len) & 15)
-        sp -= 16 - ((sp + stack_len) & 15);
+    sp -= (sp - stack_len) & 15;
     sp = loader_build_argptr(bprm->envc, bprm->argc, sp, p,
                              flat_argvp_envp_on_stack());
 
@@ -785,7 +797,7 @@ int load_flt_binary(struct linux_binprm *bprm, struct image_info *info)
 #error here
     for (i = MAX_SHARED_LIBS-1; i>0; i--) {
             if (libinfo[i].loaded) {
-                    /* Push previos first to call address */
+                    /* Push previous first to call address */
                     --sp;
                     if (put_user_ual(start_addr, sp))
                         return -EFAULT;
@@ -796,10 +808,10 @@ int load_flt_binary(struct linux_binprm *bprm, struct image_info *info)
 
     /* Stash our initial stack pointer into the mm structure */
     info->start_code = libinfo[0].start_code;
-    info->end_code = libinfo[0].start_code = libinfo[0].text_len;
+    info->end_code = libinfo[0].start_code + libinfo[0].text_len;
     info->start_data = libinfo[0].start_data;
     info->end_data = libinfo[0].end_data;
-    info->start_brk = libinfo[0].start_brk;
+    info->brk = libinfo[0].start_brk;
     info->start_stack = sp;
     info->stack_limit = libinfo[0].start_brk;
     info->entry = start_addr;

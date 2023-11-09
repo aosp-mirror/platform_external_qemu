@@ -17,8 +17,11 @@
  * License along with this library; if not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>
  */
-#ifndef MMU_NIOS2_H
-#define MMU_NIOS2_H
+
+#ifndef NIOS2_MMU_H
+#define NIOS2_MMU_H
+
+#include "cpu.h"
 
 typedef struct Nios2TLBEntry {
     target_ulong tag;
@@ -43,8 +46,7 @@ void mmu_flip_um(CPUNios2State *env, unsigned int um);
 unsigned int mmu_translate(CPUNios2State *env,
                            Nios2MMULookup *lu,
                            target_ulong vaddr, int rw, int mmu_idx);
-void mmu_read_debug(CPUNios2State *env, uint32_t rn);
 void mmu_write(CPUNios2State *env, uint32_t rn, uint32_t v);
 void mmu_init(CPUNios2State *env);
 
-#endif /* MMU_NIOS2_H */
+#endif /* NIOS2_MMU_H */

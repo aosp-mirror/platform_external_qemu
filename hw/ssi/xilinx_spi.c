@@ -26,11 +26,14 @@
 
 #include "qemu/osdep.h"
 #include "hw/sysbus.h"
-#include "sysemu/sysemu.h"
-#include "qemu/log.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 #include "qemu/fifo8.h"
 
+#include "hw/irq.h"
+#include "hw/qdev-properties.h"
 #include "hw/ssi/ssi.h"
+#include "qom/object.h"
 
 #ifdef XILINX_SPI_ERR_DEBUG
 #define DB_PRINT(...) do { \
@@ -75,9 +78,9 @@
 #define FIFO_CAPACITY 256
 
 #define TYPE_XILINX_SPI "xlnx.xps-spi"
-#define XILINX_SPI(obj) OBJECT_CHECK(XilinxSPI, (obj), TYPE_XILINX_SPI)
+OBJECT_DECLARE_SIMPLE_TYPE(XilinxSPI, XILINX_SPI)
 
-typedef struct XilinxSPI {
+struct XilinxSPI {
     SysBusDevice parent_obj;
 
     MemoryRegion mmio;
@@ -94,7 +97,7 @@ typedef struct XilinxSPI {
     Fifo8 tx_fifo;
 
     uint32_t regs[R_MAX];
-} XilinxSPI;
+};
 
 static void txfifo_reset(XilinxSPI *s)
 {
@@ -138,7 +141,7 @@ static void xlx_spi_update_irq(XilinxSPI *s)
        irq chain unless things really changed.  */
     if (pending != s->irqline) {
         s->irqline = pending;
-        DB_PRINT("irq_change of state %d ISR:%x IER:%X\n",
+        DB_PRINT("irq_change of state %u ISR:%x IER:%X\n",
                     pending, s->regs[R_IPISR], s->regs[R_IPIER]);
         qemu_set_irq(s->irq, pending);
     }
@@ -153,6 +156,7 @@ static void xlx_spi_do_reset(XilinxSPI *s)
     txfifo_reset(s);
 
     s->regs[R_SPISSR] = ~0;
+    s->regs[R_SPICR] = R_SPICR_MTI;
     xlx_spi_update_irq(s);
     xlx_spi_update_cs(s);
 }
@@ -229,7 +233,7 @@ spi_read(void *opaque, hwaddr addr, unsigned int size)
         break;
 
     }
-    DB_PRINT("addr=" TARGET_FMT_plx " = %x\n", addr * 4, r);
+    DB_PRINT("addr=" HWADDR_FMT_plx " = %x\n", addr * 4, r);
     xlx_spi_update_irq(s);
     return r;
 }
@@ -241,7 +245,7 @@ spi_write(void *opaque, hwaddr addr,
     XilinxSPI *s = opaque;
     uint32_t value = val64;
 
-    DB_PRINT("addr=" TARGET_FMT_plx " = %x\n", addr, value);
+    DB_PRINT("addr=" HWADDR_FMT_plx " = %x\n", addr, value);
     addr >>= 2;
     switch (addr) {
     case R_SRR:
@@ -319,9 +323,9 @@ static const MemoryRegionOps spi_ops = {
     }
 };
 
-static int xilinx_spi_init(SysBusDevice *sbd)
+static void xilinx_spi_realize(DeviceState *dev, Error **errp)
 {
-    DeviceState *dev = DEVICE(sbd);
+    SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
     XilinxSPI *s = XILINX_SPI(dev);
     int i;
 
@@ -331,7 +335,6 @@ static int xilinx_spi_init(SysBusDevice *sbd)
 
     sysbus_init_irq(sbd, &s->irq);
     s->cs_lines = g_new0(qemu_irq, s->num_cs);
-    ssi_auto_connect_slaves(dev, s->cs_lines, s->spi);
     for (i = 0; i < s->num_cs; ++i) {
         sysbus_init_irq(sbd, &s->cs_lines[i]);
     }
@@ -344,8 +347,6 @@ static int xilinx_spi_init(SysBusDevice *sbd)
 
     fifo8_create(&s->tx_fifo, FIFO_CAPACITY);
     fifo8_create(&s->rx_fifo, FIFO_CAPACITY);
-
-    return 0;
 }
 
 static const VMStateDescription vmstate_xilinx_spi = {
@@ -368,11 +369,10 @@ static Property xilinx_spi_properties[] = {
 static void xilinx_spi_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
-    SysBusDeviceClass *k = SYS_BUS_DEVICE_CLASS(klass);
 
-    k->init = xilinx_spi_init;
+    dc->realize = xilinx_spi_realize;
     dc->reset = xlx_spi_reset;
-    dc->props = xilinx_spi_properties;
+    device_class_set_props(dc, xilinx_spi_properties);
     dc->vmsd = &vmstate_xilinx_spi;
 }
 

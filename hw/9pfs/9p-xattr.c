@@ -11,6 +11,11 @@
  *
  */
 
+/*
+ * Not so fast! You might want to read the 9p developer docs first:
+ * https://wiki.qemu.org/Documentation/9p
+ */
+
 #include "qemu/osdep.h"
 #include "9p.h"
 #include "fsdev/file-op-9p.h"
@@ -58,17 +63,6 @@ ssize_t pt_listxattr(FsContext *ctx, const char *path,
     /* no need for strncpy: name_size is strlen(name)+1 */
     memcpy(value, name, name_size);
     return name_size;
-}
-
-static ssize_t flistxattrat_nofollow(int dirfd, const char *filename,
-                                     char *list, size_t size)
-{
-    char *proc_path = g_strdup_printf("/proc/self/fd/%d/%s", dirfd, filename);
-    int ret;
-
-    ret = llistxattr(proc_path, list, size);
-    g_free(proc_path);
-    return ret;
 }
 
 /*
@@ -196,17 +190,6 @@ ssize_t pt_getxattr(FsContext *ctx, const char *path, const char *name,
     return local_getxattr_nofollow(ctx, path, name, value, size);
 }
 
-int fsetxattrat_nofollow(int dirfd, const char *filename, const char *name,
-                         void *value, size_t size, int flags)
-{
-    char *proc_path = g_strdup_printf("/proc/self/fd/%d/%s", dirfd, filename);
-    int ret;
-
-    ret = lsetxattr(proc_path, name, value, size, flags);
-    g_free(proc_path);
-    return ret;
-}
-
 ssize_t local_setxattr_nofollow(FsContext *ctx, const char *path,
                                 const char *name, void *value, size_t size,
                                 int flags)
@@ -233,17 +216,6 @@ int pt_setxattr(FsContext *ctx, const char *path, const char *name, void *value,
                 size_t size, int flags)
 {
     return local_setxattr_nofollow(ctx, path, name, value, size, flags);
-}
-
-static ssize_t fremovexattrat_nofollow(int dirfd, const char *filename,
-                                       const char *name)
-{
-    char *proc_path = g_strdup_printf("/proc/self/fd/%d/%s", dirfd, filename);
-    int ret;
-
-    ret = lremovexattr(proc_path, name);
-    g_free(proc_path);
-    return ret;
 }
 
 ssize_t local_removexattr_nofollow(FsContext *ctx, const char *path,

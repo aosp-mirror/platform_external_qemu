@@ -27,43 +27,12 @@
 
 #include "exec/ioport.h"
 #include "exec/memory.h"
-#include "ui/console.h"
+
+#include "hw/display/bochs-vbe.h"
+#include "hw/acpi/acpi_aml_interface.h"
 
 #define ST01_V_RETRACE      0x08
 #define ST01_DISP_ENABLE    0x01
-
-#define VBE_DISPI_MAX_XRES              16000
-#define VBE_DISPI_MAX_YRES              12000
-#define VBE_DISPI_MAX_BPP               32
-
-#define VBE_DISPI_INDEX_ID              0x0
-#define VBE_DISPI_INDEX_XRES            0x1
-#define VBE_DISPI_INDEX_YRES            0x2
-#define VBE_DISPI_INDEX_BPP             0x3
-#define VBE_DISPI_INDEX_ENABLE          0x4
-#define VBE_DISPI_INDEX_BANK            0x5
-#define VBE_DISPI_INDEX_VIRT_WIDTH      0x6
-#define VBE_DISPI_INDEX_VIRT_HEIGHT     0x7
-#define VBE_DISPI_INDEX_X_OFFSET        0x8
-#define VBE_DISPI_INDEX_Y_OFFSET        0x9
-#define VBE_DISPI_INDEX_NB              0xa /* size of vbe_regs[] */
-#define VBE_DISPI_INDEX_VIDEO_MEMORY_64K 0xa /* read-only, not in vbe_regs */
-
-#define VBE_DISPI_ID0                   0xB0C0
-#define VBE_DISPI_ID1                   0xB0C1
-#define VBE_DISPI_ID2                   0xB0C2
-#define VBE_DISPI_ID3                   0xB0C3
-#define VBE_DISPI_ID4                   0xB0C4
-#define VBE_DISPI_ID5                   0xB0C5
-
-#define VBE_DISPI_DISABLED              0x00
-#define VBE_DISPI_ENABLED               0x01
-#define VBE_DISPI_GETCAPS               0x02
-#define VBE_DISPI_8BIT_DAC              0x20
-#define VBE_DISPI_LFB_ENABLED           0x40
-#define VBE_DISPI_NOCLEARMEM            0x80
-
-#define VBE_DISPI_LFB_PHYSICAL_ADDRESS  0xE0000000
 
 #define CH_ATTR_SIZE (160 * 100)
 #define VGA_MAX_HEIGHT 2048
@@ -91,7 +60,6 @@ typedef struct VGACommonState {
     MemoryRegion *legacy_address_space;
     uint8_t *vram_ptr;
     MemoryRegion vram;
-    MemoryRegion vram_vbe;
     uint32_t vram_size;
     uint32_t vram_size_mb; /* property */
     uint32_t vbe_size;
@@ -137,7 +105,6 @@ typedef struct VGACommonState {
     uint32_t vbe_start_addr;
     uint32_t vbe_line_offset;
     uint32_t vbe_bank_mask;
-    int vbe_mapped;
     /* display refresh support */
     QemuConsole *con;
     uint32_t font_offsets[2];
@@ -164,6 +131,7 @@ typedef struct VGACommonState {
     bool full_update_gfx;
     bool big_endian_fb;
     bool default_endian_fb;
+    bool global_vmstate;
     /* hardware mouse cursor support */
     uint32_t invalidated_y_table[VGA_MAX_HEIGHT / 32];
     uint32_t hw_cursor_x;
@@ -188,7 +156,7 @@ static inline int c6_to_8(int v)
     return (v << 2) | (b << 1) | b;
 }
 
-void vga_common_init(VGACommonState *s, Object *obj, bool global_vmstate);
+bool vga_common_init(VGACommonState *s, Object *obj, Error **errp);
 void vga_init(VGACommonState *s, Object *obj, MemoryRegion *address_space,
               MemoryRegion *address_space_io, bool init_vga_ports);
 MemoryRegion *vga_init_io(VGACommonState *s, Object *obj,
@@ -196,7 +164,6 @@ MemoryRegion *vga_init_io(VGACommonState *s, Object *obj,
                           const MemoryRegionPortio **vbe_ports);
 void vga_common_reset(VGACommonState *s);
 
-void vga_sync_dirty_bitmap(VGACommonState *s);
 void vga_dirty_log_start(VGACommonState *s);
 void vga_dirty_log_stop(VGACommonState *s);
 
@@ -209,7 +176,6 @@ void vga_invalidate_scanlines(VGACommonState *s, int y1, int y2);
 
 int vga_ioport_invalid(VGACommonState *s, uint32_t addr);
 
-void vga_init_vbe(VGACommonState *s, Object *obj, MemoryRegion *address_space);
 uint32_t vbe_ioport_read_data(void *opaque, uint32_t addr);
 void vbe_ioport_write_index(void *opaque, uint32_t addr, uint32_t val);
 void vbe_ioport_write_data(void *opaque, uint32_t addr, uint32_t val);
@@ -224,8 +190,10 @@ extern const MemoryRegionOps vga_mem_ops;
 
 /* vga-pci.c */
 void pci_std_vga_mmio_region_init(VGACommonState *s,
+                                  Object *owner,
                                   MemoryRegion *parent,
                                   MemoryRegion *subs,
-                                  bool qext);
+                                  bool qext, bool edid);
 
+void build_vga_aml(AcpiDevAmlIf *adev, Aml *scope);
 #endif

@@ -15,38 +15,46 @@
 #ifndef HW_PL011_H
 #define HW_PL011_H
 
-static inline DeviceState *pl011_create(hwaddr addr,
-                                        qemu_irq irq,
-                                        Chardev *chr)
-{
-    DeviceState *dev;
-    SysBusDevice *s;
+#include "hw/sysbus.h"
+#include "chardev/char-fe.h"
+#include "qom/object.h"
 
-    dev = qdev_create(NULL, "pl011");
-    s = SYS_BUS_DEVICE(dev);
-    qdev_prop_set_chr(dev, "chardev", chr);
-    qdev_init_nofail(dev);
-    sysbus_mmio_map(s, 0, addr);
-    sysbus_connect_irq(s, 0, irq);
+#define TYPE_PL011 "pl011"
+OBJECT_DECLARE_SIMPLE_TYPE(PL011State, PL011)
 
-    return dev;
-}
+/* This shares the same struct (and cast macro) as the base pl011 device */
+#define TYPE_PL011_LUMINARY "pl011_luminary"
 
-static inline DeviceState *pl011_luminary_create(hwaddr addr,
-                                                 qemu_irq irq,
-                                                 Chardev *chr)
-{
-    DeviceState *dev;
-    SysBusDevice *s;
+/* Depth of UART FIFO in bytes, when FIFO mode is enabled (else depth == 1) */
+#define PL011_FIFO_DEPTH 16
 
-    dev = qdev_create(NULL, "pl011_luminary");
-    s = SYS_BUS_DEVICE(dev);
-    qdev_prop_set_chr(dev, "chardev", chr);
-    qdev_init_nofail(dev);
-    sysbus_mmio_map(s, 0, addr);
-    sysbus_connect_irq(s, 0, irq);
+struct PL011State {
+    SysBusDevice parent_obj;
 
-    return dev;
-}
+    MemoryRegion iomem;
+    uint32_t readbuff;
+    uint32_t flags;
+    uint32_t lcr;
+    uint32_t rsr;
+    uint32_t cr;
+    uint32_t dmacr;
+    uint32_t int_enabled;
+    uint32_t int_level;
+    uint32_t read_fifo[PL011_FIFO_DEPTH];
+    uint32_t ilpr;
+    uint32_t ibrd;
+    uint32_t fbrd;
+    uint32_t ifl;
+    int read_pos;
+    int read_count;
+    int read_trigger;
+    CharBackend chr;
+    qemu_irq irq[6];
+    Clock *clk;
+    bool migrate_clk;
+    const unsigned char *id;
+};
+
+DeviceState *pl011_create(hwaddr addr, qemu_irq irq, Chardev *chr);
 
 #endif

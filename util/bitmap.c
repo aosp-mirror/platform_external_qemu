@@ -190,7 +190,7 @@ void bitmap_set_atomic(unsigned long *map, long start, long nr)
 
     /* First word */
     if (nr - bits_to_set > 0) {
-        atomic_or(p, mask_to_set);
+        qatomic_or(p, mask_to_set);
         nr -= bits_to_set;
         bits_to_set = BITS_PER_LONG;
         mask_to_set = ~0UL;
@@ -209,9 +209,9 @@ void bitmap_set_atomic(unsigned long *map, long start, long nr)
     /* Last word */
     if (nr) {
         mask_to_set &= BITMAP_LAST_WORD_MASK(size);
-        atomic_or(p, mask_to_set);
+        qatomic_or(p, mask_to_set);
     } else {
-        /* If we avoided the full barrier in atomic_or(), issue a
+        /* If we avoided the full barrier in qatomic_or(), issue a
          * barrier to account for the assignments in the while loop.
          */
         smp_mb();
@@ -240,6 +240,51 @@ void bitmap_clear(unsigned long *map, long start, long nr)
     }
 }
 
+bool bitmap_test_and_clear(unsigned long *map, long start, long nr)
+{
+    unsigned long *p = map + BIT_WORD(start);
+    const long size = start + nr;
+    int bits_to_clear = BITS_PER_LONG - (start % BITS_PER_LONG);
+    unsigned long mask_to_clear = BITMAP_FIRST_WORD_MASK(start);
+    bool dirty = false;
+
+    assert(start >= 0 && nr >= 0);
+
+    /* First word */
+    if (nr - bits_to_clear > 0) {
+        if ((*p) & mask_to_clear) {
+            dirty = true;
+        }
+        *p &= ~mask_to_clear;
+        nr -= bits_to_clear;
+        bits_to_clear = BITS_PER_LONG;
+        p++;
+    }
+
+    /* Full words */
+    if (bits_to_clear == BITS_PER_LONG) {
+        while (nr >= BITS_PER_LONG) {
+            if (*p) {
+                dirty = true;
+                *p = 0;
+            }
+            nr -= BITS_PER_LONG;
+            p++;
+        }
+    }
+
+    /* Last word */
+    if (nr) {
+        mask_to_clear &= BITMAP_LAST_WORD_MASK(size);
+        if ((*p) & mask_to_clear) {
+            dirty = true;
+        }
+        *p &= ~mask_to_clear;
+    }
+
+    return dirty;
+}
+
 bool bitmap_test_and_clear_atomic(unsigned long *map, long start, long nr)
 {
     unsigned long *p = map + BIT_WORD(start);
@@ -253,7 +298,7 @@ bool bitmap_test_and_clear_atomic(unsigned long *map, long start, long nr)
 
     /* First word */
     if (nr - bits_to_clear > 0) {
-        old_bits = atomic_fetch_and(p, ~mask_to_clear);
+        old_bits = qatomic_fetch_and(p, ~mask_to_clear);
         dirty |= old_bits & mask_to_clear;
         nr -= bits_to_clear;
         bits_to_clear = BITS_PER_LONG;
@@ -265,7 +310,7 @@ bool bitmap_test_and_clear_atomic(unsigned long *map, long start, long nr)
     if (bits_to_clear == BITS_PER_LONG) {
         while (nr >= BITS_PER_LONG) {
             if (*p) {
-                old_bits = atomic_xchg(p, 0);
+                old_bits = qatomic_xchg(p, 0);
                 dirty |= old_bits;
             }
             nr -= BITS_PER_LONG;
@@ -276,7 +321,7 @@ bool bitmap_test_and_clear_atomic(unsigned long *map, long start, long nr)
     /* Last word */
     if (nr) {
         mask_to_clear &= BITMAP_LAST_WORD_MASK(size);
-        old_bits = atomic_fetch_and(p, ~mask_to_clear);
+        old_bits = qatomic_fetch_and(p, ~mask_to_clear);
         dirty |= old_bits & mask_to_clear;
     } else {
         if (!dirty) {
@@ -291,7 +336,7 @@ void bitmap_copy_and_clear_atomic(unsigned long *dst, unsigned long *src,
                                   long nr)
 {
     while (nr > 0) {
-        *dst = atomic_xchg(src, 0);
+        *dst = qatomic_xchg(src, 0);
         dst++;
         src++;
         nr -= BITS_PER_LONG;
@@ -376,7 +421,7 @@ static void bitmap_to_from_le(unsigned long *dst,
 {
     long len = BITS_TO_LONGS(nbits);
 
-#ifdef HOST_WORDS_BIGENDIAN
+#if HOST_BIG_ENDIAN
     long index;
 
     for (index = 0; index < len; index++) {
@@ -401,4 +446,89 @@ void bitmap_to_le(unsigned long *dst, const unsigned long *src,
                   long nbits)
 {
     bitmap_to_from_le(dst, src, nbits);
+}
+
+/*
+ * Copy "src" bitmap with a positive offset and put it into the "dst"
+ * bitmap.  The caller needs to make sure the bitmap size of "src"
+ * is bigger than (shift + nbits).
+ */
+void bitmap_copy_with_src_offset(unsigned long *dst, const unsigned long *src,
+                                 unsigned long shift, unsigned long nbits)
+{
+    unsigned long left_mask, right_mask, last_mask;
+
+    /* Proper shift src pointer to the first word to copy from */
+    src += BIT_WORD(shift);
+    shift %= BITS_PER_LONG;
+
+    if (!shift) {
+        /* Fast path */
+        bitmap_copy(dst, src, nbits);
+        return;
+    }
+
+    right_mask = (1ul << shift) - 1;
+    left_mask = ~right_mask;
+
+    while (nbits >= BITS_PER_LONG) {
+        *dst = (*src & left_mask) >> shift;
+        *dst |= (src[1] & right_mask) << (BITS_PER_LONG - shift);
+        dst++;
+        src++;
+        nbits -= BITS_PER_LONG;
+    }
+
+    if (nbits > BITS_PER_LONG - shift) {
+        *dst = (*src & left_mask) >> shift;
+        nbits -= BITS_PER_LONG - shift;
+        last_mask = (1ul << nbits) - 1;
+        *dst |= (src[1] & last_mask) << (BITS_PER_LONG - shift);
+    } else if (nbits) {
+        last_mask = (1ul << nbits) - 1;
+        *dst = (*src >> shift) & last_mask;
+    }
+}
+
+/*
+ * Copy "src" bitmap into the "dst" bitmap with an offset in the
+ * "dst".  The caller needs to make sure the bitmap size of "dst" is
+ * bigger than (shift + nbits).
+ */
+void bitmap_copy_with_dst_offset(unsigned long *dst, const unsigned long *src,
+                                 unsigned long shift, unsigned long nbits)
+{
+    unsigned long left_mask, right_mask, last_mask;
+
+    /* Proper shift dst pointer to the first word to copy from */
+    dst += BIT_WORD(shift);
+    shift %= BITS_PER_LONG;
+
+    if (!shift) {
+        /* Fast path */
+        bitmap_copy(dst, src, nbits);
+        return;
+    }
+
+    right_mask = (1ul << (BITS_PER_LONG - shift)) - 1;
+    left_mask = ~right_mask;
+
+    *dst &= (1ul << shift) - 1;
+    while (nbits >= BITS_PER_LONG) {
+        *dst |= (*src & right_mask) << shift;
+        dst[1] = (*src & left_mask) >> (BITS_PER_LONG - shift);
+        dst++;
+        src++;
+        nbits -= BITS_PER_LONG;
+    }
+
+    if (nbits > BITS_PER_LONG - shift) {
+        *dst |= (*src & right_mask) << shift;
+        nbits -= BITS_PER_LONG - shift;
+        last_mask = ((1ul << nbits) - 1) << (BITS_PER_LONG - shift);
+        dst[1] = (*src & last_mask) >> (BITS_PER_LONG - shift);
+    } else if (nbits) {
+        last_mask = (1ul << nbits) - 1;
+        *dst |= (*src & last_mask) << shift;
+    }
 }

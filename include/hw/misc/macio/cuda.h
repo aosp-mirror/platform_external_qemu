@@ -26,6 +26,10 @@
 #ifndef CUDA_H
 #define CUDA_H
 
+#include "hw/input/adb.h"
+#include "hw/misc/mos6522.h"
+#include "qom/object.h"
+
 /* CUDA commands (2nd byte) */
 #define CUDA_WARM_START                0x0
 #define CUDA_AUTOPOLL                  0x1
@@ -54,20 +58,28 @@
 #define CUDA_TIMER_TICKLE              0x24
 #define CUDA_COMBINED_FORMAT_IIC       0x25
 
+
+/* MOS6522 CUDA */
+struct MOS6522CUDAState {
+    /*< private >*/
+    MOS6522State parent_obj;
+};
+
+#define TYPE_MOS6522_CUDA "mos6522-cuda"
+OBJECT_DECLARE_SIMPLE_TYPE(MOS6522CUDAState, MOS6522_CUDA)
+
 /* Cuda */
 #define TYPE_CUDA "cuda"
-#define CUDA(obj) OBJECT_CHECK(CUDAState, (obj), TYPE_CUDA)
+OBJECT_DECLARE_SIMPLE_TYPE(CUDAState, CUDA)
 
-typedef struct MOS6522CUDAState MOS6522CUDAState;
-
-typedef struct CUDAState {
+struct CUDAState {
     /*< private >*/
     SysBusDevice parent_obj;
     /*< public >*/
     MemoryRegion mem;
 
     ADBBusState adb_bus;
-    MOS6522CUDAState *mos6522_cuda;
+    MOS6522CUDAState mos6522_cuda;
 
     uint32_t tick_offset;
     uint64_t tb_frequency;
@@ -84,24 +96,8 @@ typedef struct CUDAState {
     int data_out_index;
 
     qemu_irq irq;
-    uint16_t adb_poll_mask;
-    uint8_t autopoll_rate_ms;
-    uint8_t autopoll;
     uint8_t data_in[128];
     uint8_t data_out[16];
-    QEMUTimer *adb_poll_timer;
-} CUDAState;
-
-/* MOS6522 CUDA */
-struct MOS6522CUDAState {
-    /*< private >*/
-    MOS6522State parent_obj;
-
-    CUDAState *cuda;
 };
-
-#define TYPE_MOS6522_CUDA "mos6522-cuda"
-#define MOS6522_CUDA(obj) OBJECT_CHECK(MOS6522CUDAState, (obj), \
-                                       TYPE_MOS6522_CUDA)
 
 #endif /* CUDA_H */

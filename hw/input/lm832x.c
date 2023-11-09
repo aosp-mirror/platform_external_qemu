@@ -19,15 +19,18 @@
  */
 
 #include "qemu/osdep.h"
-#include "hw/hw.h"
+#include "hw/input/lm832x.h"
 #include "hw/i2c/i2c.h"
+#include "hw/irq.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 #include "qemu/timer.h"
 #include "ui/console.h"
+#include "qom/object.h"
 
-#define TYPE_LM8323 "lm8323"
-#define LM8323(obj) OBJECT_CHECK(LM823KbdState, (obj), TYPE_LM8323)
+OBJECT_DECLARE_SIMPLE_TYPE(LM823KbdState, LM8323)
 
-typedef struct {
+struct LM823KbdState {
     I2CSlave parent_obj;
 
     uint8_t i2c_dir;
@@ -66,11 +69,11 @@ typedef struct {
 
     struct {
         uint16_t file[256];
-	uint8_t faddr;
+        uint8_t faddr;
         uint8_t addr[3];
         QEMUTimer *tm[3];
     } pwm;
-} LM823KbdState;
+};
 
 #define INT_KEYPAD		(1 << 0)
 #define INT_ERROR		(1 << 3)
@@ -91,8 +94,10 @@ static void lm_kbd_gpio_update(LM823KbdState *s)
 {
 }
 
-static void lm_kbd_reset(LM823KbdState *s)
+static void lm_kbd_reset(DeviceState *dev)
 {
+    LM823KbdState *s = LM8323(dev);
+
     s->config = 0x80;
     s->status = INT_NOINIT;
     s->acttime = 125;
@@ -270,7 +275,7 @@ static void lm_kbd_write(LM823KbdState *s, int reg, int byte, uint8_t value)
 
     case LM832x_CMD_RESET:
         if (value == 0xaa)
-            lm_kbd_reset(s);
+            lm_kbd_reset(DEVICE(s));
         else
             lm_kbd_error(s, ERR_BADPAR);
         s->reg = LM832x_GENERAL_ERROR;
@@ -401,7 +406,7 @@ static int lm_i2c_event(I2CSlave *i2c, enum i2c_event event)
     return 0;
 }
 
-static int lm_i2c_rx(I2CSlave *i2c)
+static uint8_t lm_i2c_rx(I2CSlave *i2c)
 {
     LM823KbdState *s = LM8323(i2c);
 
@@ -464,20 +469,15 @@ static const VMStateDescription vmstate_lm_kbd = {
 };
 
 
-static int lm8323_init(I2CSlave *i2c)
+static void lm8323_realize(DeviceState *dev, Error **errp)
 {
-    LM823KbdState *s = LM8323(i2c);
+    LM823KbdState *s = LM8323(dev);
 
     s->model = 0x8323;
     s->pwm.tm[0] = timer_new_ns(QEMU_CLOCK_VIRTUAL, lm_kbd_pwm0_tick, s);
     s->pwm.tm[1] = timer_new_ns(QEMU_CLOCK_VIRTUAL, lm_kbd_pwm1_tick, s);
     s->pwm.tm[2] = timer_new_ns(QEMU_CLOCK_VIRTUAL, lm_kbd_pwm2_tick, s);
-    qdev_init_gpio_out(DEVICE(i2c), &s->nirq, 1);
-
-    lm_kbd_reset(s);
-
-    qemu_register_reset((void *) lm_kbd_reset, s);
-    return 0;
+    qdev_init_gpio_out(dev, &s->nirq, 1);
 }
 
 void lm832x_key_event(DeviceState *dev, int key, int state)
@@ -505,7 +505,8 @@ static void lm8323_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
     I2CSlaveClass *k = I2C_SLAVE_CLASS(klass);
 
-    k->init = lm8323_init;
+    dc->reset = lm_kbd_reset;
+    dc->realize = lm8323_realize;
     k->event = lm_i2c_event;
     k->recv = lm_i2c_rx;
     k->send = lm_i2c_tx;

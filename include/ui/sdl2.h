@@ -5,15 +5,32 @@
 #undef WIN32_LEAN_AND_MEAN
 
 #include <SDL.h>
+
+/* with Alpine / muslc SDL headers pull in directfb headers
+ * which in turn trigger warning about redundant decls for
+ * direct_waitqueue_deinit.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+
 #include <SDL_syswm.h>
 
+#pragma GCC diagnostic pop
+
+#ifdef CONFIG_SDL_IMAGE
+# include <SDL_image.h>
+#endif
+
+#include "ui/kbd-state.h"
 #ifdef CONFIG_OPENGL
 # include "ui/egl-helpers.h"
 #endif
 
 struct sdl2_console {
+    DisplayGLCtx dgc;
     DisplayChangeListener dcl;
     DisplaySurface *surface;
+    DisplayOptions *opts;
     SDL_Texture *texture;
     SDL_Window *real_window;
     SDL_Renderer *real_renderer;
@@ -26,6 +43,7 @@ struct sdl2_console {
     int idle_counter;
     int ignore_hotkeys;
     SDL_GLContext winctx;
+    QKbdState *kbd;
 #ifdef CONFIG_OPENGL
     QemuGLShader *gls;
     egl_fb guest_fb;
@@ -40,7 +58,6 @@ void sdl2_window_destroy(struct sdl2_console *scon);
 void sdl2_window_resize(struct sdl2_console *scon);
 void sdl2_poll_events(struct sdl2_console *scon);
 
-void sdl2_reset_keys(struct sdl2_console *scon);
 void sdl2_process_key(struct sdl2_console *scon,
                       SDL_KeyboardEvent *ev);
 
@@ -60,12 +77,11 @@ void sdl2_gl_switch(DisplayChangeListener *dcl,
 void sdl2_gl_refresh(DisplayChangeListener *dcl);
 void sdl2_gl_redraw(struct sdl2_console *scon);
 
-QEMUGLContext sdl2_gl_create_context(DisplayChangeListener *dcl,
+QEMUGLContext sdl2_gl_create_context(DisplayGLCtx *dgc,
                                      QEMUGLParams *params);
-void sdl2_gl_destroy_context(DisplayChangeListener *dcl, QEMUGLContext ctx);
-int sdl2_gl_make_context_current(DisplayChangeListener *dcl,
+void sdl2_gl_destroy_context(DisplayGLCtx *dgc, QEMUGLContext ctx);
+int sdl2_gl_make_context_current(DisplayGLCtx *dgc,
                                  QEMUGLContext ctx);
-QEMUGLContext sdl2_gl_get_current_context(DisplayChangeListener *dcl);
 
 void sdl2_gl_scanout_disable(DisplayChangeListener *dcl);
 void sdl2_gl_scanout_texture(DisplayChangeListener *dcl,
@@ -74,7 +90,8 @@ void sdl2_gl_scanout_texture(DisplayChangeListener *dcl,
                              uint32_t backing_width,
                              uint32_t backing_height,
                              uint32_t x, uint32_t y,
-                             uint32_t w, uint32_t h);
+                             uint32_t w, uint32_t h,
+                             void *d3d_tex2d);
 void sdl2_gl_scanout_flush(DisplayChangeListener *dcl,
                            uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 

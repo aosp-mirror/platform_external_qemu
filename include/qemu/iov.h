@@ -43,8 +43,8 @@ iov_from_buf(const struct iovec *iov, unsigned int iov_cnt,
 {
     if (__builtin_constant_p(bytes) && iov_cnt &&
         offset <= iov[0].iov_len && bytes <= iov[0].iov_len - offset) {
-      memcpy((char *)iov[0].iov_base + offset, buf, bytes);
-      return bytes;
+        memcpy(iov[0].iov_base + offset, buf, bytes);
+        return bytes;
     } else {
         return iov_from_buf_full(iov, iov_cnt, offset, buf, bytes);
     }
@@ -56,8 +56,8 @@ iov_to_buf(const struct iovec *iov, const unsigned int iov_cnt,
 {
     if (__builtin_constant_p(bytes) && iov_cnt &&
         offset <= iov[0].iov_len && bytes <= iov[0].iov_len - offset) {
-      memcpy(buf, (char *)iov[0].iov_base + offset, bytes);
-      return bytes;
+        memcpy(buf, iov[0].iov_base + offset, bytes);
+        return bytes;
     } else {
         return iov_to_buf_full(iov, iov_cnt, offset, buf, bytes);
     }
@@ -130,22 +130,111 @@ size_t iov_discard_front(struct iovec **iov, unsigned int *iov_cnt,
 size_t iov_discard_back(struct iovec *iov, unsigned int *iov_cnt,
                         size_t bytes);
 
+/* Information needed to undo an iov_discard_*() operation */
+typedef struct {
+    struct iovec *modified_iov;
+    struct iovec orig;
+} IOVDiscardUndo;
+
+/*
+ * Undo an iov_discard_front_undoable() or iov_discard_back_undoable()
+ * operation. If multiple operations are made then each one needs a separate
+ * IOVDiscardUndo and iov_discard_undo() must be called in the reverse order
+ * that the operations were made.
+ */
+void iov_discard_undo(IOVDiscardUndo *undo);
+
+/*
+ * Undoable versions of iov_discard_front() and iov_discard_back(). Use
+ * iov_discard_undo() to reset to the state before the discard operations.
+ */
+size_t iov_discard_front_undoable(struct iovec **iov, unsigned int *iov_cnt,
+                                  size_t bytes, IOVDiscardUndo *undo);
+size_t iov_discard_back_undoable(struct iovec *iov, unsigned int *iov_cnt,
+                                 size_t bytes, IOVDiscardUndo *undo);
+
 typedef struct QEMUIOVector {
     struct iovec *iov;
     int niov;
-    int nalloc;
-    size_t size;
+
+    /*
+     * For external @iov (qemu_iovec_init_external()) or allocated @iov
+     * (qemu_iovec_init()), @size is the cumulative size of iovecs and
+     * @local_iov is invalid and unused.
+     *
+     * For embedded @iov (QEMU_IOVEC_INIT_BUF() or qemu_iovec_init_buf()),
+     * @iov is equal to &@local_iov, and @size is valid, as it has same
+     * offset and type as @local_iov.iov_len, which is guaranteed by
+     * static assertion below.
+     *
+     * @nalloc is always valid and is -1 both for embedded and external
+     * cases. It is included in the union only to ensure the padding prior
+     * to the @size field will not result in a 0-length array.
+     */
+    union {
+        struct {
+            int nalloc;
+            struct iovec local_iov;
+        };
+        struct {
+            char __pad[sizeof(int) + offsetof(struct iovec, iov_len)];
+            size_t size;
+        };
+    };
 } QEMUIOVector;
+
+QEMU_BUILD_BUG_ON(offsetof(QEMUIOVector, size) !=
+                  offsetof(QEMUIOVector, local_iov.iov_len));
+
+#define QEMU_IOVEC_INIT_BUF(self, buf, len)              \
+{                                                        \
+    .iov = &(self).local_iov,                            \
+    .niov = 1,                                           \
+    .nalloc = -1,                                        \
+    .local_iov = {                                       \
+        .iov_base = (void *)(buf), /* cast away const */ \
+        .iov_len = (len),                                \
+    },                                                   \
+}
+
+/*
+ * qemu_iovec_init_buf
+ *
+ * Initialize embedded QEMUIOVector.
+ *
+ * Note: "const" is used over @buf pointer to make it simple to pass
+ * const pointers, appearing in read functions. Then this "const" is
+ * cast away by QEMU_IOVEC_INIT_BUF().
+ */
+static inline void qemu_iovec_init_buf(QEMUIOVector *qiov,
+                                       const void *buf, size_t len)
+{
+    *qiov = (QEMUIOVector) QEMU_IOVEC_INIT_BUF(*qiov, buf, len);
+}
+
+static inline void *qemu_iovec_buf(QEMUIOVector *qiov)
+{
+    /* Only supports embedded iov */
+    assert(qiov->nalloc == -1 && qiov->iov == &qiov->local_iov);
+
+    return qiov->local_iov.iov_base;
+}
 
 void qemu_iovec_init(QEMUIOVector *qiov, int alloc_hint);
 void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov);
+void qemu_iovec_init_slice(QEMUIOVector *qiov, QEMUIOVector *source,
+                           size_t offset, size_t len);
+struct iovec *qemu_iovec_slice(QEMUIOVector *qiov,
+                               size_t offset, size_t len,
+                               size_t *head, size_t *tail, int *niov);
+int qemu_iovec_subvec_niov(QEMUIOVector *qiov, size_t offset, size_t len);
 void qemu_iovec_add(QEMUIOVector *qiov, void *base, size_t len);
 void qemu_iovec_concat(QEMUIOVector *dst,
                        QEMUIOVector *src, size_t soffset, size_t sbytes);
 size_t qemu_iovec_concat_iov(QEMUIOVector *dst,
                              struct iovec *src_iov, unsigned int src_cnt,
                              size_t soffset, size_t sbytes);
-bool qemu_iovec_is_zero(QEMUIOVector *qiov);
+bool qemu_iovec_is_zero(QEMUIOVector *qiov, size_t qiov_offeset, size_t bytes);
 void qemu_iovec_destroy(QEMUIOVector *qiov);
 void qemu_iovec_reset(QEMUIOVector *qiov);
 size_t qemu_iovec_to_buf(QEMUIOVector *qiov, size_t offset,

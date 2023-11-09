@@ -11,17 +11,36 @@
 # or (at your option) any later version. See the COPYING file in
 # the top-level directory.
 
-requires()
+# This might be set by ENV of a docker container... it is always
+# overriden by TARGET_LIST if the user sets it. We special case
+# "none" to allow for other options like --disable-tcg to restrict the
+# builds we eventually do.
+if test "$DEF_TARGET_LIST" = "none"; then
+    DEF_TARGET_LIST=""
+else
+    DEF_TARGET_LIST=${DEF_TARGET_LIST:-"x86_64-softmmu,aarch64-softmmu"}
+fi
+
+requires_binary()
 {
+    found=0
     for c in $@; do
-        if ! echo "$FEATURES" | grep -wq -e "$c"; then
-            echo "Prerequisite '$c' not present, skip"
-            exit 0
-        fi
+        for d in /bin /usr/bin /usr/local/bin
+        do
+            if test -f "$d/$c"
+            then
+                found=1
+            fi
+        done
     done
+    if test "$found" != "1"
+    then
+        echo "Prerequisite '$c' not present, skip"
+        exit 0
+    fi
 }
 
-build_qemu()
+configure_qemu()
 {
     config_opts="--enable-werror \
                  ${TARGET_LIST:+--target-list=${TARGET_LIST}} \
@@ -32,7 +51,24 @@ build_qemu()
     echo $config_opts
     $QEMU_SRC/configure $config_opts || \
         { cat config.log && test_fail "Failed to run 'configure'"; }
+}
+
+build_qemu()
+{
+    configure_qemu $@
     make $MAKEFLAGS
+}
+
+check_qemu()
+{
+    # default to make check unless the caller specifies
+    if [ $# = 0 ]; then
+        INVOCATION="${TEST_COMMAND:-make $MAKEFLAGS check}"
+    else
+        INVOCATION="make $MAKEFLAGS $@"
+    fi
+
+    $INVOCATION
 }
 
 test_fail()

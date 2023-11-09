@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# group: rw quick
 #
 # Test that snapshots move the throttling configuration to the active
 # layer
@@ -53,9 +54,9 @@ class TestLiveSnapshot(iotests.QMPTestCase):
                 self.assertEqual(r['iops'], self.iops)
                 self.assertEqual(r['iops_size'], self.iops_size)
             else:
-                self.assertFalse(r.has_key('group'))
+                self.assertFalse('group' in r)
                 self.assertEqual(r['iops'], 0)
-                self.assertFalse(r.has_key('iops_size'))
+                self.assertFalse('iops_size' in r)
 
     def testSnapshot(self):
         self.checkConfig('base')
@@ -67,4 +68,5 @@ class TestLiveSnapshot(iotests.QMPTestCase):
         self.checkConfig('target')
 
 if __name__ == '__main__':
-    iotests.main(supported_fmts=['qcow2'])
+    iotests.main(supported_fmts=['qcow2'],
+                 supported_protocols=['file'])

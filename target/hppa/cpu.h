@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,27 +20,9 @@
 #ifndef HPPA_CPU_H
 #define HPPA_CPU_H
 
-#include "qemu-common.h"
 #include "cpu-qom.h"
-
-#ifdef TARGET_HPPA64
-#define TARGET_LONG_BITS            64
-#define TARGET_VIRT_ADDR_SPACE_BITS 64
-#define TARGET_REGISTER_BITS        64
-#define TARGET_PHYS_ADDR_SPACE_BITS 64
-#elif defined(CONFIG_USER_ONLY)
-#define TARGET_LONG_BITS            32
-#define TARGET_VIRT_ADDR_SPACE_BITS 32
-#define TARGET_REGISTER_BITS        32
-#define TARGET_PHYS_ADDR_SPACE_BITS 32
-#else
-/* In order to form the GVA from space:offset,
-   we need a 64-bit virtual address space.  */
-#define TARGET_LONG_BITS            64
-#define TARGET_VIRT_ADDR_SPACE_BITS 64
-#define TARGET_REGISTER_BITS        32
-#define TARGET_PHYS_ADDR_SPACE_BITS 32
-#endif
+#include "exec/cpu-defs.h"
+#include "qemu/cpu-float.h"
 
 /* PA-RISC 1.x processors have a strong memory model.  */
 /* ??? While we do not yet implement PA-RISC 2.0, those processors have
@@ -48,20 +30,12 @@
    basis.  It's probably easier to fall back to a strong memory model.  */
 #define TCG_GUEST_DEFAULT_MO        TCG_MO_ALL
 
-#define CPUArchState struct CPUHPPAState
-
-#include "exec/cpu-defs.h"
-
-#define TARGET_PAGE_BITS 12
-
-#define ALIGNED_ONLY
-#define NB_MMU_MODES     5
 #define MMU_KERNEL_IDX   0
 #define MMU_USER_IDX     3
 #define MMU_PHYS_IDX     4
 #define TARGET_INSN_START_EXTRA_WORDS 1
 
-/* Hardware exceptions, interupts, faults, and traps.  */
+/* Hardware exceptions, interrupts, faults, and traps.  */
 #define EXCP_HPMC                1  /* high priority machine check */
 #define EXCP_POWER_FAIL          2
 #define EXCP_RC                  3  /* recovery counter */
@@ -95,6 +69,11 @@
 /* Exceptions for linux-user emulation.  */
 #define EXCP_SYSCALL             30
 #define EXCP_SYSCALL_LWS         31
+
+/* Emulated hardware TOC button */
+#define EXCP_TOC                 32 /* TOC = Transfer of control (NMI) */
+
+#define CPU_INTERRUPT_NMI       CPU_INTERRUPT_TGT_EXT_3         /* TOC */
 
 /* Taken from Linux kernel: arch/parisc/include/asm/psw.h */
 #define PSW_I            0x00000001
@@ -143,6 +122,10 @@
 #endif
 
 #define CR_RC            0
+#define CR_PID1          8
+#define CR_PID2          9
+#define CR_PID3          12
+#define CR_PID4          13
 #define CR_SCRCCR        10
 #define CR_SAR           11
 #define CR_IVA           14
@@ -155,8 +138,6 @@
 #define CR_IOR           21
 #define CR_IPSW          22
 #define CR_EIRR          23
-
-typedef struct CPUHPPAState CPUHPPAState;
 
 #if TARGET_REGISTER_BITS == 32
 typedef uint32_t target_ureg;
@@ -186,7 +167,10 @@ typedef struct {
     unsigned access_id : 16;
 } hppa_tlb_entry;
 
-struct CPUHPPAState {
+typedef struct CPUArchState {
+    target_ureg iaoq_f;      /* front */
+    target_ureg iaoq_b;      /* back, aka next instruction */
+
     target_ureg gr[32];
     uint64_t fr[32];
     uint64_t sr[8];          /* stored shifted into place for gva */
@@ -205,8 +189,6 @@ struct CPUHPPAState {
     target_ureg psw_cb;      /* in least significant bit of next nibble */
     target_ureg psw_cb_msb;  /* boolean */
 
-    target_ureg iaoq_f;      /* front */
-    target_ureg iaoq_b;      /* back, aka next instruction */
     uint64_t iasq_f;
     uint64_t iasq_b;
 
@@ -217,15 +199,15 @@ struct CPUHPPAState {
     target_ureg cr_back[2];  /* back of cr17/cr18 */
     target_ureg shadow[7];   /* shadow registers */
 
-    /* Those resources are used only in QEMU core */
-    CPU_COMMON
-
     /* ??? The number of entries isn't specified by the architecture.  */
+#define HPPA_TLB_ENTRIES        256
+#define HPPA_BTLB_ENTRIES       0
+
     /* ??? Implement a unified itlb/dtlb for the moment.  */
     /* ??? We should use a more intelligent data structure.  */
-    hppa_tlb_entry tlb[256];
+    hppa_tlb_entry tlb[HPPA_TLB_ENTRIES];
     uint32_t tlb_last;
-};
+} CPUHPPAState;
 
 /**
  * HPPACPU:
@@ -233,22 +215,15 @@ struct CPUHPPAState {
  *
  * An HPPA CPU.
  */
-struct HPPACPU {
+struct ArchCPU {
     /*< private >*/
     CPUState parent_obj;
     /*< public >*/
 
+    CPUNegativeOffsetState neg;
     CPUHPPAState env;
     QEMUTimer *alarm_timer;
 };
-
-static inline HPPACPU *hppa_env_get_cpu(CPUHPPAState *env)
-{
-    return container_of(env, HPPACPU, env);
-}
-
-#define ENV_GET_CPU(e)  CPU(hppa_env_get_cpu(e))
-#define ENV_OFFSET      offsetof(HPPACPU, env)
 
 #include "exec/cpu-all.h"
 
@@ -268,8 +243,6 @@ void hppa_translate_init(void);
 
 #define CPU_RESOLVING_TYPE TYPE_HPPA_CPU
 
-void hppa_cpu_list(FILE *f, fprintf_function cpu_fprintf);
-
 static inline target_ulong hppa_form_gva_psw(target_ureg psw, uint64_t spc,
                                              target_ureg off)
 {
@@ -287,26 +260,28 @@ static inline target_ulong hppa_form_gva(CPUHPPAState *env, uint64_t spc,
     return hppa_form_gva_psw(env->psw, spc, off);
 }
 
-/* Since PSW_{I,CB} will never need to be in tb->flags, reuse them.
+/*
+ * Since PSW_{I,CB} will never need to be in tb->flags, reuse them.
  * TB_FLAG_SR_SAME indicates that SR4 through SR7 all contain the
  * same value.
  */
 #define TB_FLAG_SR_SAME     PSW_I
 #define TB_FLAG_PRIV_SHIFT  8
+#define TB_FLAG_UNALIGN     0x400
 
-static inline void cpu_get_tb_cpu_state(CPUHPPAState *env, target_ulong *pc,
-                                        target_ulong *cs_base,
-                                        uint32_t *pflags)
+static inline void cpu_get_tb_cpu_state(CPUHPPAState *env, vaddr *pc,
+                                        uint64_t *cs_base, uint32_t *pflags)
 {
     uint32_t flags = env->psw_n * PSW_N;
 
     /* TB lookup assumes that PC contains the complete virtual address.
        If we leave space+offset separate, we'll get ITLB misses to an
        incomplete virtual address.  This also means that we must separate
-       out current cpu priviledge from the low bits of IAOQ_F.  */
+       out current cpu privilege from the low bits of IAOQ_F.  */
 #ifdef CONFIG_USER_ONLY
     *pc = env->iaoq_f & -4;
     *cs_base = env->iaoq_b & -4;
+    flags |= TB_FLAG_UNALIGN * !env_cpu(env)->prctl_unalign_sigbus;
 #else
     /* ??? E, T, H, L, B, P bits need to be here, when implemented.  */
     flags |= env->psw & (PSW_W | PSW_C | PSW_D);
@@ -341,26 +316,29 @@ target_ureg cpu_hppa_get_psw(CPUHPPAState *env);
 void cpu_hppa_put_psw(CPUHPPAState *env, target_ureg);
 void cpu_hppa_loaded_fr0(CPUHPPAState *env);
 
-#define cpu_signal_handler cpu_hppa_signal_handler
+#ifdef CONFIG_USER_ONLY
+static inline void cpu_hppa_change_prot_id(CPUHPPAState *env) { }
+#else
+void cpu_hppa_change_prot_id(CPUHPPAState *env);
+#endif
 
-int cpu_hppa_signal_handler(int host_signum, void *pinfo, void *puc);
-hwaddr hppa_cpu_get_phys_page_debug(CPUState *cs, vaddr addr);
-int hppa_cpu_gdb_read_register(CPUState *cpu, uint8_t *buf, int reg);
+int hppa_cpu_gdb_read_register(CPUState *cpu, GByteArray *buf, int reg);
 int hppa_cpu_gdb_write_register(CPUState *cpu, uint8_t *buf, int reg);
+void hppa_cpu_dump_state(CPUState *cs, FILE *f, int);
+#ifndef CONFIG_USER_ONLY
+hwaddr hppa_cpu_get_phys_page_debug(CPUState *cs, vaddr addr);
+bool hppa_cpu_tlb_fill(CPUState *cs, vaddr address, int size,
+                       MMUAccessType access_type, int mmu_idx,
+                       bool probe, uintptr_t retaddr);
 void hppa_cpu_do_interrupt(CPUState *cpu);
 bool hppa_cpu_exec_interrupt(CPUState *cpu, int int_req);
-void hppa_cpu_dump_state(CPUState *cs, FILE *f, fprintf_function, int);
-#ifdef CONFIG_USER_ONLY
-int hppa_cpu_handle_mmu_fault(CPUState *cpu, vaddr address, int size,
-                              int rw, int midx);
-#else
 int hppa_get_physical_address(CPUHPPAState *env, vaddr addr, int mmu_idx,
                               int type, hwaddr *pphys, int *pprot);
 extern const MemoryRegionOps hppa_io_eir_ops;
-extern const struct VMStateDescription vmstate_hppa_cpu;
+extern const VMStateDescription vmstate_hppa_cpu;
 void hppa_cpu_alarm_timer(void *);
 int hppa_artype_for_page(CPUHPPAState *env, target_ulong vaddr);
 #endif
-void QEMU_NORETURN hppa_dynamic_excp(CPUHPPAState *env, int excp, uintptr_t ra);
+G_NORETURN void hppa_dynamic_excp(CPUHPPAState *env, int excp, uintptr_t ra);
 
 #endif /* HPPA_CPU_H */

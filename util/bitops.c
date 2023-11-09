@@ -18,7 +18,7 @@
  * Find the next set bit in a memory region.
  */
 unsigned long find_next_bit(const unsigned long *addr, unsigned long size,
-			    unsigned long offset)
+                            unsigned long offset)
 {
     const unsigned long *p = addr + BIT_WORD(offset);
     unsigned long result = offset & ~(BITS_PER_LONG-1);
@@ -71,8 +71,8 @@ unsigned long find_next_bit(const unsigned long *addr, unsigned long size,
 
 found_first:
     tmp &= (~0UL >> (BITS_PER_LONG - size));
-    if (tmp == 0UL) {		/* Are any bits set? */
-        return result + size;	/* Nope. */
+    if (tmp == 0UL) {           /* Are any bits set? */
+        return result + size;   /* Nope. */
     }
 found_middle:
     return result + ctzl(tmp);
@@ -83,7 +83,7 @@ found_middle:
  * Linus' asm-alpha/bitops.h.
  */
 unsigned long find_next_zero_bit(const unsigned long *addr, unsigned long size,
-				 unsigned long offset)
+                                 unsigned long offset)
 {
     const unsigned long *p = addr + BIT_WORD(offset);
     unsigned long result = offset & ~(BITS_PER_LONG-1);
@@ -120,8 +120,8 @@ unsigned long find_next_zero_bit(const unsigned long *addr, unsigned long size,
 
 found_first:
     tmp |= ~0UL << size;
-    if (tmp == ~0UL) {	/* Are any bits zero? */
-        return result + size;	/* Nope. */
+    if (tmp == ~0UL) {          /* Are any bits zero? */
+        return result + size;   /* Nope. */
     }
 found_middle:
     return result + ctzl(~tmp);

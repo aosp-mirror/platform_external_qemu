@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,15 +19,47 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
+#include "qemu/qemu-print.h"
 #include "cpu.h"
-#include "qemu-common.h"
 #include "exec/exec-all.h"
+#include "fpu/softfloat-helpers.h"
+#include "tcg/tcg.h"
 
 static void openrisc_cpu_set_pc(CPUState *cs, vaddr value)
 {
     OpenRISCCPU *cpu = OPENRISC_CPU(cs);
 
     cpu->env.pc = value;
+    cpu->env.dflag = 0;
+}
+
+static vaddr openrisc_cpu_get_pc(CPUState *cs)
+{
+    OpenRISCCPU *cpu = OPENRISC_CPU(cs);
+
+    return cpu->env.pc;
+}
+
+static void openrisc_cpu_synchronize_from_tb(CPUState *cs,
+                                             const TranslationBlock *tb)
+{
+    OpenRISCCPU *cpu = OPENRISC_CPU(cs);
+
+    tcg_debug_assert(!(cs->tcg_cflags & CF_PCREL));
+    cpu->env.pc = tb->pc;
+}
+
+static void openrisc_restore_state_to_opc(CPUState *cs,
+                                          const TranslationBlock *tb,
+                                          const uint64_t *data)
+{
+    OpenRISCCPU *cpu = OPENRISC_CPU(cs);
+
+    cpu->env.pc = data[0];
+    cpu->env.dflag = data[1] & 1;
+    if (data[1] & 2) {
+        cpu->env.ppc = cpu->env.pc - 4;
+    }
 }
 
 static bool openrisc_cpu_has_work(CPUState *cs)
@@ -36,13 +68,20 @@ static bool openrisc_cpu_has_work(CPUState *cs)
                                     CPU_INTERRUPT_TIMER);
 }
 
-/* CPUClass::reset() */
-static void openrisc_cpu_reset(CPUState *s)
+static void openrisc_disas_set_info(CPUState *cpu, disassemble_info *info)
 {
+    info->print_insn = print_insn_or1k;
+}
+
+static void openrisc_cpu_reset_hold(Object *obj)
+{
+    CPUState *s = CPU(obj);
     OpenRISCCPU *cpu = OPENRISC_CPU(s);
     OpenRISCCPUClass *occ = OPENRISC_CPU_GET_CLASS(cpu);
 
-    occ->parent_reset(s);
+    if (occ->parent_phases.hold) {
+        occ->parent_phases.hold(obj);
+    }
 
     memset(&cpu->env, 0, offsetof(CPUOpenRISCState, end_reset_fields));
 
@@ -50,11 +89,10 @@ static void openrisc_cpu_reset(CPUState *s)
     cpu->env.sr = SR_FO | SR_SM;
     cpu->env.lock_addr = -1;
     s->exception_index = -1;
+    cpu_set_fpcsr(&cpu->env, 0);
 
-    cpu->env.upr = UPR_UP | UPR_DMP | UPR_IMP | UPR_PICP | UPR_TTP |
-                   UPR_PMP;
-    cpu->env.dmmucfgr = (DMMUCFGR_NTW & (0 << 2)) | (DMMUCFGR_NTS & (6 << 2));
-    cpu->env.immucfgr = (IMMUCFGR_NTW & (0 << 2)) | (IMMUCFGR_NTS & (6 << 2));
+    set_float_detect_tininess(float_tininess_before_rounding,
+                              &cpu->env.fp_status);
 
 #ifndef CONFIG_USER_ONLY
     cpu->env.picmr = 0x00000000;
@@ -63,6 +101,33 @@ static void openrisc_cpu_reset(CPUState *s)
     cpu->env.ttmr = 0x00000000;
 #endif
 }
+
+#ifndef CONFIG_USER_ONLY
+static void openrisc_cpu_set_irq(void *opaque, int irq, int level)
+{
+    OpenRISCCPU *cpu = (OpenRISCCPU *)opaque;
+    CPUState *cs = CPU(cpu);
+    uint32_t irq_bit;
+
+    if (irq > 31 || irq < 0) {
+        return;
+    }
+
+    irq_bit = 1U << irq;
+
+    if (level) {
+        cpu->env.picsr |= irq_bit;
+    } else {
+        cpu->env.picsr &= ~irq_bit;
+    }
+
+    if (cpu->env.picsr & cpu->env.picmr) {
+        cpu_interrupt(cs, CPU_INTERRUPT_HARD);
+    } else {
+        cpu_reset_interrupt(cs, CPU_INTERRUPT_HARD);
+    }
+}
+#endif
 
 static void openrisc_cpu_realizefn(DeviceState *dev, Error **errp)
 {
@@ -84,13 +149,12 @@ static void openrisc_cpu_realizefn(DeviceState *dev, Error **errp)
 
 static void openrisc_cpu_initfn(Object *obj)
 {
-    CPUState *cs = CPU(obj);
     OpenRISCCPU *cpu = OPENRISC_CPU(obj);
 
-    cs->env_ptr = &cpu->env;
+    cpu_set_cpustate_pointers(cpu);
 
 #ifndef CONFIG_USER_ONLY
-    cpu_openrisc_mmu_init(cpu);
+    qdev_init_gpio_in_named(DEVICE(cpu), openrisc_cpu_set_irq, "IRQ", NR_IRQS);
 #endif
 }
 
@@ -115,44 +179,85 @@ static void or1200_initfn(Object *obj)
 {
     OpenRISCCPU *cpu = OPENRISC_CPU(obj);
 
+    cpu->env.vr = 0x13000008;
+    cpu->env.upr = UPR_UP | UPR_DMP | UPR_IMP | UPR_PICP | UPR_TTP | UPR_PMP;
     cpu->env.cpucfgr = CPUCFGR_NSGF | CPUCFGR_OB32S | CPUCFGR_OF32S |
                        CPUCFGR_EVBARP;
+
+    /* 1Way, TLB_SIZE entries.  */
+    cpu->env.dmmucfgr = (DMMUCFGR_NTW & (0 << 2))
+                      | (DMMUCFGR_NTS & (ctz32(TLB_SIZE) << 2));
+    cpu->env.immucfgr = (IMMUCFGR_NTW & (0 << 2))
+                      | (IMMUCFGR_NTS & (ctz32(TLB_SIZE) << 2));
 }
 
 static void openrisc_any_initfn(Object *obj)
 {
     OpenRISCCPU *cpu = OPENRISC_CPU(obj);
 
-    cpu->env.cpucfgr = CPUCFGR_NSGF | CPUCFGR_OB32S | CPUCFGR_EVBARP;
+    cpu->env.vr = 0x13000040;   /* Obsolete VER + UVRP for new SPRs */
+    cpu->env.vr2 = 0;           /* No version specific id */
+    cpu->env.avr = 0x01030000;  /* Architecture v1.3 */
+
+    cpu->env.upr = UPR_UP | UPR_DMP | UPR_IMP | UPR_PICP | UPR_TTP | UPR_PMP;
+    cpu->env.cpucfgr = CPUCFGR_NSGF | CPUCFGR_OB32S | CPUCFGR_OF32S |
+                       CPUCFGR_AVRP | CPUCFGR_EVBARP | CPUCFGR_OF64A32S;
+
+    /* 1Way, TLB_SIZE entries.  */
+    cpu->env.dmmucfgr = (DMMUCFGR_NTW & (0 << 2))
+                      | (DMMUCFGR_NTS & (ctz32(TLB_SIZE) << 2));
+    cpu->env.immucfgr = (IMMUCFGR_NTW & (0 << 2))
+                      | (IMMUCFGR_NTS & (ctz32(TLB_SIZE) << 2));
 }
+
+#ifndef CONFIG_USER_ONLY
+#include "hw/core/sysemu-cpu-ops.h"
+
+static const struct SysemuCPUOps openrisc_sysemu_ops = {
+    .get_phys_page_debug = openrisc_cpu_get_phys_page_debug,
+};
+#endif
+
+#include "hw/core/tcg-cpu-ops.h"
+
+static const struct TCGCPUOps openrisc_tcg_ops = {
+    .initialize = openrisc_translate_init,
+    .synchronize_from_tb = openrisc_cpu_synchronize_from_tb,
+    .restore_state_to_opc = openrisc_restore_state_to_opc,
+
+#ifndef CONFIG_USER_ONLY
+    .tlb_fill = openrisc_cpu_tlb_fill,
+    .cpu_exec_interrupt = openrisc_cpu_exec_interrupt,
+    .do_interrupt = openrisc_cpu_do_interrupt,
+#endif /* !CONFIG_USER_ONLY */
+};
 
 static void openrisc_cpu_class_init(ObjectClass *oc, void *data)
 {
     OpenRISCCPUClass *occ = OPENRISC_CPU_CLASS(oc);
     CPUClass *cc = CPU_CLASS(occ);
     DeviceClass *dc = DEVICE_CLASS(oc);
+    ResettableClass *rc = RESETTABLE_CLASS(oc);
 
     device_class_set_parent_realize(dc, openrisc_cpu_realizefn,
                                     &occ->parent_realize);
-    occ->parent_reset = cc->reset;
-    cc->reset = openrisc_cpu_reset;
+    resettable_class_set_parent_phases(rc, NULL, openrisc_cpu_reset_hold, NULL,
+                                       &occ->parent_phases);
 
     cc->class_by_name = openrisc_cpu_class_by_name;
     cc->has_work = openrisc_cpu_has_work;
-    cc->do_interrupt = openrisc_cpu_do_interrupt;
-    cc->cpu_exec_interrupt = openrisc_cpu_exec_interrupt;
     cc->dump_state = openrisc_cpu_dump_state;
     cc->set_pc = openrisc_cpu_set_pc;
+    cc->get_pc = openrisc_cpu_get_pc;
     cc->gdb_read_register = openrisc_cpu_gdb_read_register;
     cc->gdb_write_register = openrisc_cpu_gdb_write_register;
-#ifdef CONFIG_USER_ONLY
-    cc->handle_mmu_fault = openrisc_cpu_handle_mmu_fault;
-#else
-    cc->get_phys_page_debug = openrisc_cpu_get_phys_page_debug;
+#ifndef CONFIG_USER_ONLY
     dc->vmsd = &vmstate_openrisc_cpu;
+    cc->sysemu_ops = &openrisc_sysemu_ops;
 #endif
     cc->gdb_num_core_regs = 32 + 3;
-    cc->tcg_initialize = openrisc_translate_init;
+    cc->disas_set_info = openrisc_disas_set_info;
+    cc->tcg_ops = &openrisc_tcg_ops;
 }
 
 /* Sort alphabetically by type name, except for "any". */
@@ -176,30 +281,24 @@ static gint openrisc_cpu_list_compare(gconstpointer a, gconstpointer b)
 static void openrisc_cpu_list_entry(gpointer data, gpointer user_data)
 {
     ObjectClass *oc = data;
-    CPUListState *s = user_data;
     const char *typename;
     char *name;
 
     typename = object_class_get_name(oc);
     name = g_strndup(typename,
                      strlen(typename) - strlen("-" TYPE_OPENRISC_CPU));
-    (*s->cpu_fprintf)(s->file, "  %s\n",
-                      name);
+    qemu_printf("  %s\n", name);
     g_free(name);
 }
 
-void cpu_openrisc_list(FILE *f, fprintf_function cpu_fprintf)
+void cpu_openrisc_list(void)
 {
-    CPUListState s = {
-        .file = f,
-        .cpu_fprintf = cpu_fprintf,
-    };
     GSList *list;
 
     list = object_class_get_list(TYPE_OPENRISC_CPU, false);
     list = g_slist_sort(list, openrisc_cpu_list_compare);
-    (*cpu_fprintf)(f, "Available CPUs:\n");
-    g_slist_foreach(list, openrisc_cpu_list_entry, &s);
+    qemu_printf("Available CPUs:\n");
+    g_slist_foreach(list, openrisc_cpu_list_entry, NULL);
     g_slist_free(list);
 }
 

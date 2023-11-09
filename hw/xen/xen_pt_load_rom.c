@@ -3,14 +3,8 @@
  */
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "hw/hw.h"
-#include "hw/i386/pc.h"
 #include "qemu/error-report.h"
-#include "ui/console.h"
 #include "hw/loader.h"
-#include "monitor/monitor.h"
-#include "qemu/range.h"
-#include "sysemu/sysemu.h"
 #include "hw/pci/pci.h"
 #include "xen_pt.h"
 
@@ -19,7 +13,7 @@
  * load the corresponding ROM data to RAM. If an error occurs while loading an
  * option ROM, we just ignore that option ROM and continue with the next one.
  */
-void *pci_assign_dev_load_option_rom(PCIDevice *dev, struct Object *owner,
+void *pci_assign_dev_load_option_rom(PCIDevice *dev,
                                      int *size, unsigned int domain,
                                      unsigned int bus, unsigned int slot,
                                      unsigned int function)
@@ -29,6 +23,7 @@ void *pci_assign_dev_load_option_rom(PCIDevice *dev, struct Object *owner,
     uint8_t val;
     struct stat st;
     void *ptr = NULL;
+    Object *owner = OBJECT(dev);
 
     /* If loading ROM from file, pci handles it */
     if (dev->romfile || !dev->rom_bar) {
@@ -58,11 +53,20 @@ void *pci_assign_dev_load_option_rom(PCIDevice *dev, struct Object *owner,
     }
     fseek(fp, 0, SEEK_SET);
 
+    if (dev->romsize != -1) {
+        if (st.st_size > dev->romsize) {
+            error_report("ROM BAR \"%s\" (%ld bytes) is too large for ROM size %u",
+                         rom_file, (long) st.st_size, dev->romsize);
+            goto close_rom;
+        }
+    } else {
+        dev->romsize = st.st_size;
+    }
+
     snprintf(name, sizeof(name), "%s.rom", object_get_typename(owner));
-    memory_region_init_ram_nomigrate(&dev->rom, owner, name, st.st_size, &error_abort);
-    vmstate_register_ram(&dev->rom, &dev->qdev);
+    memory_region_init_ram(&dev->rom, owner, name, dev->romsize, &error_abort);
     ptr = memory_region_get_ram_ptr(&dev->rom);
-    memset(ptr, 0xff, st.st_size);
+    memset(ptr, 0xff, dev->romsize);
 
     if (!fread(ptr, 1, st.st_size, fp)) {
         error_report("pci-assign: Cannot read from host %s", rom_file);

@@ -19,21 +19,19 @@
 
 #include "qemu/osdep.h"
 #include <linux/vfio.h>
-#include "qemu-common.h"
-#include "cpu.h"
 #include "hw/ppc/spapr.h"
 #include "hw/pci-host/spapr.h"
 #include "hw/pci/msix.h"
+#include "hw/pci/pci_device.h"
 #include "hw/vfio/vfio.h"
 #include "qemu/error-report.h"
-#include "sysemu/qtest.h"
 
-bool spapr_phb_eeh_available(sPAPRPHBState *sphb)
+bool spapr_phb_eeh_available(SpaprPhbState *sphb)
 {
     return vfio_eeh_as_ok(&sphb->iommu_as);
 }
 
-static void spapr_phb_vfio_eeh_reenable(sPAPRPHBState *sphb)
+static void spapr_phb_vfio_eeh_reenable(SpaprPhbState *sphb)
 {
     vfio_eeh_as_op(&sphb->iommu_as, VFIO_EEH_PE_ENABLE);
 }
@@ -49,7 +47,17 @@ void spapr_phb_vfio_reset(DeviceState *qdev)
     spapr_phb_vfio_eeh_reenable(SPAPR_PCI_HOST_BRIDGE(qdev));
 }
 
-int spapr_phb_vfio_eeh_set_option(sPAPRPHBState *sphb,
+static void spapr_eeh_pci_find_device(PCIBus *bus, PCIDevice *pdev,
+                                      void *opaque)
+{
+    bool *found = opaque;
+
+    if (object_dynamic_cast(OBJECT(pdev), "vfio-pci")) {
+        *found = true;
+    }
+}
+
+int spapr_phb_vfio_eeh_set_option(SpaprPhbState *sphb,
                                   unsigned int addr, int option)
 {
     uint32_t op;
@@ -61,17 +69,33 @@ int spapr_phb_vfio_eeh_set_option(sPAPRPHBState *sphb,
         break;
     case RTAS_EEH_ENABLE: {
         PCIHostState *phb;
-        PCIDevice *pdev;
+        bool found = false;
 
         /*
-         * The EEH functionality is enabled on basis of PCI device,
-         * instead of PE. We need check the validity of the PCI
-         * device address.
+         * The EEH functionality is enabled per sphb level instead of
+         * per PCI device. We have already identified this specific sphb
+         * based on buid passed as argument to ibm,set-eeh-option rtas
+         * call. Now we just need to check the validity of the PCI
+         * pass-through devices (vfio-pci) under this sphb bus.
+         * We have already validated that all the devices under this sphb
+         * are from same iommu group (within same PE) before comming here.
+         *
+         * Prior to linux commit 98ba956f6a389 ("powerpc/pseries/eeh:
+         * Rework device EEH PE determination") kernel would call
+         * eeh-set-option for each device in the PE using the device's
+         * config_address as the argument rather than the PE address.
+         * Hence if we check validity of supplied config_addr whether
+         * it matches to this PHB will cause issues with older kernel
+         * versions v5.9 and older. If we return an error from
+         * eeh-set-option when the argument isn't a valid PE address
+         * then older kernels (v5.9 and older) will interpret that as
+         * EEH not being supported.
          */
         phb = PCI_HOST_BRIDGE(sphb);
-        pdev = pci_find_device(phb->bus,
-                               (addr >> 16) & 0xFF, (addr >> 8) & 0xFF);
-        if (!pdev || !object_dynamic_cast(OBJECT(pdev), "vfio-pci")) {
+        pci_for_each_device(phb->bus, (addr >> 16) & 0xFF,
+                            spapr_eeh_pci_find_device, &found);
+
+        if (!found) {
             return RTAS_OUT_PARAM_ERROR;
         }
 
@@ -96,7 +120,7 @@ int spapr_phb_vfio_eeh_set_option(sPAPRPHBState *sphb,
     return RTAS_OUT_SUCCESS;
 }
 
-int spapr_phb_vfio_eeh_get_state(sPAPRPHBState *sphb, int *state)
+int spapr_phb_vfio_eeh_get_state(SpaprPhbState *sphb, int *state)
 {
     int ret;
 
@@ -141,18 +165,18 @@ static void spapr_phb_vfio_eeh_clear_dev_msix(PCIBus *bus,
 
 static void spapr_phb_vfio_eeh_clear_bus_msix(PCIBus *bus, void *opaque)
 {
-       pci_for_each_device(bus, pci_bus_num(bus),
-                           spapr_phb_vfio_eeh_clear_dev_msix, NULL);
+       pci_for_each_device_under_bus(bus, spapr_phb_vfio_eeh_clear_dev_msix,
+                                     NULL);
 }
 
-static void spapr_phb_vfio_eeh_pre_reset(sPAPRPHBState *sphb)
+static void spapr_phb_vfio_eeh_pre_reset(SpaprPhbState *sphb)
 {
        PCIHostState *phb = PCI_HOST_BRIDGE(sphb);
 
        pci_for_each_bus(phb->bus, spapr_phb_vfio_eeh_clear_bus_msix, NULL);
 }
 
-int spapr_phb_vfio_eeh_reset(sPAPRPHBState *sphb, int option)
+int spapr_phb_vfio_eeh_reset(SpaprPhbState *sphb, int option)
 {
     uint32_t op;
     int ret;
@@ -181,7 +205,7 @@ int spapr_phb_vfio_eeh_reset(sPAPRPHBState *sphb, int option)
     return RTAS_OUT_SUCCESS;
 }
 
-int spapr_phb_vfio_eeh_configure(sPAPRPHBState *sphb)
+int spapr_phb_vfio_eeh_configure(SpaprPhbState *sphb)
 {
     int ret;
 

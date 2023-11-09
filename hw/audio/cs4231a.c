@@ -21,14 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
-#include "hw/hw.h"
 #include "hw/audio/soundhw.h"
 #include "audio/audio.h"
+#include "hw/irq.h"
 #include "hw/isa/isa.h"
-#include "hw/qdev.h"
+#include "hw/qdev-properties.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 #include "qemu/timer.h"
 #include "qapi/error.h"
+#include "qom/object.h"
 
 /*
   Missing features:
@@ -59,9 +63,11 @@ static struct {
 #define CS_DREGS 32
 
 #define TYPE_CS4231A "cs4231a"
-#define CS4231A(obj) OBJECT_CHECK (CSState, (obj), TYPE_CS4231A)
+typedef struct CSState CSState;
+DECLARE_INSTANCE_CHECKER(CSState, CS4231A,
+                         TYPE_CS4231A)
 
-typedef struct CSState {
+struct CSState {
     ISADevice dev;
     QEMUSoundCard card;
     MemoryRegion ioports;
@@ -78,8 +84,8 @@ typedef struct CSState {
     int transferred;
     int aci_counter;
     SWVoiceOut *voice;
-    int16_t *tab;
-} CSState;
+    const int16_t *tab;
+};
 
 #define MODE2 (1 << 6)
 #define MCE (1 << 6)
@@ -136,13 +142,13 @@ enum {
     Capture_Lower_Base_Count
 };
 
-static int freqs[2][8] = {
+static const int freqs[2][8] = {
     { 8000, 16000, 27420, 32000,    -1,    -1, 48000, 9000 },
     { 5510, 11025, 18900, 22050, 37800, 44100, 33075, 6620 }
 };
 
 /* Tables courtesy http://hazelware.luggle.com/tutorials/mulawcompression.html */
-static int16_t MuLawDecompressTable[256] =
+static const int16_t MuLawDecompressTable[256] =
 {
      -32124,-31100,-30076,-29052,-28028,-27004,-25980,-24956,
      -23932,-22908,-21884,-20860,-19836,-18812,-17788,-16764,
@@ -178,7 +184,7 @@ static int16_t MuLawDecompressTable[256] =
          56,    48,    40,    32,    24,    16,     8,     0
 };
 
-static int16_t ALawDecompressTable[256] =
+static const int16_t ALawDecompressTable[256] =
 {
      -5504, -5248, -6016, -5760, -4480, -4224, -4992, -4736,
      -7552, -7296, -8064, -7808, -6528, -6272, -7040, -6784,
@@ -288,7 +294,7 @@ static void cs_reset_voices (CSState *s, uint32_t val)
 
     switch ((val >> 5) & ((s->dregs[MODE_And_ID] & MODE2) ? 7 : 3)) {
     case 0:
-        as.fmt = AUD_FMT_U8;
+        as.fmt = AUDIO_FORMAT_U8;
         s->shift = as.nchannels == 2;
         break;
 
@@ -298,15 +304,16 @@ static void cs_reset_voices (CSState *s, uint32_t val)
     case 3:
         s->tab = ALawDecompressTable;
     x_law:
-        as.fmt = AUD_FMT_S16;
+        as.fmt = AUDIO_FORMAT_S16;
         as.endianness = AUDIO_HOST_ENDIANNESS;
         s->shift = as.nchannels == 2;
         break;
 
     case 6:
         as.endianness = 1;
+        /* fall through */
     case 2:
-        as.fmt = AUD_FMT_S16;
+        as.fmt = AUDIO_FORMAT_S16;
         s->shift = as.nchannels;
         break;
 
@@ -532,7 +539,7 @@ static int cs_write_audio (CSState *s, int nchan, int dma_pos,
         int copied;
         size_t to_copy;
 
-        to_copy = audio_MIN (temp, left);
+        to_copy = MIN (temp, left);
         if (to_copy > sizeof (tmpbuf)) {
             to_copy = sizeof (tmpbuf);
         }
@@ -575,7 +582,7 @@ static int cs_dma_read (void *opaque, int nchan, int dma_pos, int dma_len)
         till = (s->dregs[Playback_Lower_Base_Count]
             | (s->dregs[Playback_Upper_Base_Count] << 8)) << s->shift;
         till -= s->transferred;
-        copy = audio_MIN (till, copy);
+        copy = MIN (till, copy);
     }
 
     if ((copy <= 0) || (dma_len <= 0)) {
@@ -661,16 +668,17 @@ static void cs4231a_initfn (Object *obj)
 static void cs4231a_realizefn (DeviceState *dev, Error **errp)
 {
     ISADevice *d = ISA_DEVICE (dev);
+    ISABus *bus = isa_bus_from_device(d);
     CSState *s = CS4231A (dev);
     IsaDmaClass *k;
 
-    s->isa_dma = isa_get_dma(isa_bus_from_device(d), s->dma);
+    s->isa_dma = isa_bus_get_dma(bus, s->dma);
     if (!s->isa_dma) {
         error_setg(errp, "ISA controller does not support DMA");
         return;
     }
 
-    isa_init_irq(d, &s->pic, s->irq);
+    s->pic = isa_bus_get_irq(bus, s->irq);
     k = ISADMA_GET_CLASS(s->isa_dma);
     k->register_channel(s->isa_dma, s->dma, cs_dma_read, s);
 
@@ -679,13 +687,8 @@ static void cs4231a_realizefn (DeviceState *dev, Error **errp)
     AUD_register_card ("cs4231a", &s->card);
 }
 
-static int cs4231a_init (ISABus *bus)
-{
-    isa_create_simple (bus, TYPE_CS4231A);
-    return 0;
-}
-
 static Property cs4231a_properties[] = {
+    DEFINE_AUDIO_PROPERTIES(CSState, card),
     DEFINE_PROP_UINT32 ("iobase",  CSState, port, 0x534),
     DEFINE_PROP_UINT32 ("irq",     CSState, irq,  9),
     DEFINE_PROP_UINT32 ("dma",     CSState, dma,  3),
@@ -701,7 +704,7 @@ static void cs4231a_class_initfn (ObjectClass *klass, void *data)
     set_bit(DEVICE_CATEGORY_SOUND, dc->categories);
     dc->desc = "Crystal Semiconductor CS4231A";
     dc->vmsd = &vmstate_cs4231a;
-    dc->props = cs4231a_properties;
+    device_class_set_props(dc, cs4231a_properties);
 }
 
 static const TypeInfo cs4231a_info = {
@@ -715,7 +718,7 @@ static const TypeInfo cs4231a_info = {
 static void cs4231a_register_types (void)
 {
     type_register_static (&cs4231a_info);
-    isa_register_soundhw("cs4231a", "CS4231A", cs4231a_init);
+    deprecated_register_soundhw("cs4231a", "CS4231A", 1, TYPE_CS4231A);
 }
 
 type_init (cs4231a_register_types)

@@ -29,49 +29,9 @@
 
 void hmp_hostfwd_add(Monitor *mon, const QDict *qdict);
 void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict);
-void hmp_ipv6_hostfwd_add(Monitor *mon, const QDict *qdict);
-void hmp_ipv6_hostfwd_remove(Monitor *mon, const QDict *qdict);
-
-int net_slirp_redir(const char *redir_str);
-
-int net_slirp_smb(const char *exported_dir);
 
 void hmp_info_usernet(Monitor *mon, const QDict *qdict);
 
-/* Functions to be called by |out_send| and |in_send| implementations below */
-/* |opaque| is the result of net_slirp_set_shapers(). */
-void net_slirp_output_raw(void *opaque, const uint8_t *pkt, int pkt_len);
-void net_slirp_receive_raw(void* opaque, const uint8_t *buf, size_t size);
-
-/* Return a Slirp instance, or NULL if the network stack is not initialized */
-void* net_slirp_state(void);
-
-typedef void (*SlirpShaperSendFunc)(void* opaque, const void* data, int len, void* slirp_state);
-
-void net_slirp_set_shapers(void* out_opaque,
-                            SlirpShaperSendFunc out_send,
-                            void* in_opaque,
-                            SlirpShaperSendFunc in_send);
-
-void net_slirp_init_custom_dns_servers(const struct sockaddr_storage* dns,
-                                   int dns_count);
-
-/* Callback functions to be invoked when new packets are arriving from the
- * specified Slirp instance*/
-typedef ssize_t (*SlirpReceiveCallbackFunc)(void *opaque, const uint8_t *pkt,
-                                            size_t pkt_len);
-
-int net_slirp_set_custom_slirp_output_callback(void *slirp,
-                                               SlirpReceiveCallbackFunc cb,
-                                               void *opaque);
-
-void *net_slirp_init_custom_slirp_state(
-    int restricted, bool in_enabled, struct in_addr vnetwork,
-    struct in_addr vnetmask, struct in_addr vhost, bool in6_enabled,
-    struct in6_addr vprefix_addr6, uint8_t vprefix_len, struct in6_addr vhost6,
-    const char *vhostname, const char *tftp_path, const char *bootfile,
-    struct in_addr vdhcp_start, struct in_addr vnameserver,
-    struct in6_addr vnameserver6, const char **vdnssearch);
 #endif
 
 #endif /* QEMU_NET_SLIRP_H */

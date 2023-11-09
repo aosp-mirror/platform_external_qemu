@@ -26,54 +26,119 @@
 #ifndef MACIO_H
 #define MACIO_H
 
+#include "hw/char/escc.h"
+#include "hw/pci/pci_device.h"
+#include "hw/ide/internal.h"
 #include "hw/intc/heathrow_pic.h"
 #include "hw/misc/macio/cuda.h"
+#include "hw/misc/macio/gpio.h"
+#include "hw/misc/macio/pmu.h"
+#include "hw/nvram/mac_nvram.h"
 #include "hw/ppc/mac_dbdma.h"
 #include "hw/ppc/openpic.h"
+#include "qom/object.h"
+
+/* Old World IRQs */
+#define OLDWORLD_CUDA_IRQ      0x12
+#define OLDWORLD_ESCCB_IRQ     0x10
+#define OLDWORLD_ESCCA_IRQ     0xf
+#define OLDWORLD_IDE0_IRQ      0xd
+#define OLDWORLD_IDE0_DMA_IRQ  0x2
+#define OLDWORLD_IDE1_IRQ      0xe
+#define OLDWORLD_IDE1_DMA_IRQ  0x3
+
+/* New World IRQs */
+#define NEWWORLD_CUDA_IRQ      0x19
+#define NEWWORLD_PMU_IRQ       0x19
+#define NEWWORLD_ESCCB_IRQ     0x24
+#define NEWWORLD_ESCCA_IRQ     0x25
+#define NEWWORLD_IDE0_IRQ      0xd
+#define NEWWORLD_IDE0_DMA_IRQ  0x2
+#define NEWWORLD_IDE1_IRQ      0xe
+#define NEWWORLD_IDE1_DMA_IRQ  0x3
+#define NEWWORLD_EXTING_GPIO1  0x2f
+#define NEWWORLD_EXTING_GPIO9  0x37
+
+/* MacIO virtual bus */
+#define TYPE_MACIO_BUS "macio-bus"
+OBJECT_DECLARE_SIMPLE_TYPE(MacIOBusState, MACIO_BUS)
+
+struct MacIOBusState {
+    /*< private >*/
+    BusState parent_obj;
+};
+
+/* MacIO IDE */
+#define TYPE_MACIO_IDE "macio-ide"
+OBJECT_DECLARE_SIMPLE_TYPE(MACIOIDEState, MACIO_IDE)
+
+struct MACIOIDEState {
+    /*< private >*/
+    SysBusDevice parent_obj;
+    /*< public >*/
+    uint32_t addr;
+    uint32_t channel;
+    qemu_irq real_ide_irq;
+    qemu_irq real_dma_irq;
+    qemu_irq ide_irq;
+    qemu_irq dma_irq;
+
+    MemoryRegion mem;
+    IDEBus bus;
+    IDEDMA dma;
+    void *dbdma;
+    bool dma_active;
+    uint32_t timing_reg;
+    uint32_t irq_reg;
+};
+
+void macio_ide_init_drives(MACIOIDEState *ide, DriveInfo **hd_table);
+void macio_ide_register_dma(MACIOIDEState *ide);
 
 #define TYPE_MACIO "macio"
-#define MACIO(obj) OBJECT_CHECK(MacIOState, (obj), TYPE_MACIO)
+OBJECT_DECLARE_SIMPLE_TYPE(MacIOState, MACIO)
 
-typedef struct MacIOState {
+struct MacIOState {
     /*< private >*/
     PCIDevice parent;
     /*< public >*/
 
+    MacIOBusState macio_bus;
     MemoryRegion bar;
     CUDAState cuda;
+    PMUState pmu;
     DBDMAState dbdma;
     ESCCState escc;
     uint64_t frequency;
-} MacIOState;
+};
 
 #define TYPE_OLDWORLD_MACIO "macio-oldworld"
-#define OLDWORLD_MACIO(obj) \
-    OBJECT_CHECK(OldWorldMacIOState, (obj), TYPE_OLDWORLD_MACIO)
+OBJECT_DECLARE_SIMPLE_TYPE(OldWorldMacIOState, OLDWORLD_MACIO)
 
-typedef struct OldWorldMacIOState {
+struct OldWorldMacIOState {
     /*< private >*/
     MacIOState parent_obj;
     /*< public >*/
 
-    HeathrowState *pic;
-    qemu_irq irqs[7];
+    HeathrowState pic;
 
     MacIONVRAMState nvram;
     MACIOIDEState ide[2];
-} OldWorldMacIOState;
+};
 
 #define TYPE_NEWWORLD_MACIO "macio-newworld"
-#define NEWWORLD_MACIO(obj) \
-    OBJECT_CHECK(NewWorldMacIOState, (obj), TYPE_NEWWORLD_MACIO)
+OBJECT_DECLARE_SIMPLE_TYPE(NewWorldMacIOState, NEWWORLD_MACIO)
 
-typedef struct NewWorldMacIOState {
+struct NewWorldMacIOState {
     /*< private >*/
     MacIOState parent_obj;
     /*< public >*/
 
-    OpenPICState *pic;
-    qemu_irq irqs[7];
+    bool has_pmu;
+    bool has_adb;
+    OpenPICState pic;
     MACIOIDEState ide[2];
-} NewWorldMacIOState;
+    MacIOGPIOState gpio;
+};
 
 #endif /* MACIO_H */

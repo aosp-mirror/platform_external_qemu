@@ -28,19 +28,22 @@
 #include "hw/sysbus.h"
 #include "hw/pci/pci.h"
 #include "hw/pci/pci_host.h"
+#include "hw/qdev-properties.h"
 #include "hw/pci/pci_bridge.h"
 #include "hw/pci/pci_bus.h"
+#include "hw/irq.h"
 #include "hw/pci-bridge/simba.h"
 #include "hw/pci-host/sabre.h"
-#include "sysemu/sysemu.h"
-#include "exec/address-spaces.h"
+#include "qapi/error.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
+#include "sysemu/runstate.h"
 #include "trace.h"
 
 /*
  * Chipset docs:
  * PBM: "UltraSPARC IIi User's Manual",
- * http://www.sun.com/processors/manuals/805-0087.pdf
+ * https://web.archive.org/web/20030403110020/http://www.sun.com/processors/manuals/805-0087.pdf
  */
 
 #define PBM_PCI_IMR_MASK    0x7fffffff
@@ -116,7 +119,7 @@ static void sabre_config_write(void *opaque, hwaddr addr,
 
     trace_sabre_config_write(addr, val);
 
-    switch (addr & 0xffff) {
+    switch (addr) {
     case 0x30 ... 0x4f: /* DMA error registers */
         /* XXX: not implemented yet */
         break;
@@ -191,32 +194,25 @@ static uint64_t sabre_config_read(void *opaque,
                                   hwaddr addr, unsigned size)
 {
     SabreState *s = opaque;
-    uint32_t val;
+    uint32_t val = 0;
 
-    switch (addr & 0xffff) {
+    switch (addr) {
     case 0x30 ... 0x4f: /* DMA error registers */
-        val = 0;
         /* XXX: not implemented yet */
         break;
     case 0xc00 ... 0xc3f: /* PCI interrupt control */
         if (addr & 4) {
             val = s->pci_irq_map[(addr & 0x3f) >> 3];
-        } else {
-            val = 0;
         }
         break;
     case 0x1000 ... 0x107f: /* OBIO interrupt control */
         if (addr & 4) {
             val = s->obio_irq_map[(addr & 0xff) >> 3];
-        } else {
-            val = 0;
         }
         break;
     case 0x1080 ... 0x108f: /* PCI bus error */
         if (addr & 4) {
             val = s->pci_err_irq_map[(addr & 0xf) >> 3];
-        } else {
-            val = 0;
         }
         break;
     case 0x2000 ... 0x202f: /* PCI control */
@@ -225,8 +221,6 @@ static uint64_t sabre_config_read(void *opaque,
     case 0xf020 ... 0xf027: /* Reset control */
         if (addr & 4) {
             val = s->reset_control;
-        } else {
-            val = 0;
         }
         break;
     case 0x5000 ... 0x51cf: /* PIO/DMA diagnostics */
@@ -235,7 +229,6 @@ static uint64_t sabre_config_read(void *opaque,
     case 0xf000 ... 0xf01f: /* FFB config, memory control */
         /* we don't care */
     default:
-        val = 0;
         break;
     }
     trace_sabre_config_read(addr, val);
@@ -334,104 +327,7 @@ static void pci_sabre_set_irq(void *opaque, int irq_num, int level)
 
 static void sabre_reset(DeviceState *d)
 {
-    /*
-     * command register:
-     * According to PCI bridge spec, after reset
-     *   bus master bit is off
-     *   memory space enable bit is off
-     * According to manual (805-1251.pdf).
-     *   the reset value should be zero unless the boot pin is tied high
-     *   (which is true) and thus it should be PCI_COMMAND_MEMORY.
-     */
-    PBMPCIBridge *br = PBM_PCI_BRIDGE(dev);
-
-    pci_bridge_initfn(dev, TYPE_PCI_BUS);
-
-    pci_set_word(dev->config + PCI_COMMAND, PCI_COMMAND_MEMORY);
-    pci_set_word(dev->config + PCI_STATUS,
-                 PCI_STATUS_FAST_BACK | PCI_STATUS_66MHZ |
-                 PCI_STATUS_DEVSEL_MEDIUM);
-
-    /* Allow 32-bit IO addresses */
-    pci_set_word(dev->config + PCI_IO_BASE, PCI_IO_RANGE_TYPE_32);
-    pci_set_word(dev->config + PCI_IO_LIMIT, PCI_IO_RANGE_TYPE_32);
-    pci_set_word(dev->wmask + PCI_IO_BASE_UPPER16, 0xffff);
-    pci_set_word(dev->wmask + PCI_IO_LIMIT_UPPER16, 0xffff);
-
-    pci_bridge_update_mappings(PCI_BRIDGE(br));
-}
-
-PCIBus *pci_apb_init(hwaddr special_base,
-                     hwaddr mem_base,
-                     qemu_irq *ivec_irqs, PCIBus **busA, PCIBus **busB,
-                     qemu_irq **pbm_irqs)
-{
-    DeviceState *dev;
-    SysBusDevice *s;
-    PCIHostState *phb;
-    APBState *d;
-    IOMMUState *is;
-    PCIDevice *pci_dev;
-    PCIBridge *br;
-
-    /* Ultrasparc PBM main bus */
-    dev = qdev_create(NULL, TYPE_APB);
-    d = APB_DEVICE(dev);
-    phb = PCI_HOST_BRIDGE(dev);
-    phb->bus = pci_register_root_bus(DEVICE(phb), "pci",
-                                     pci_apb_set_irq, pci_apb_map_irq, d,
-                                     &d->pci_mmio,
-                                     &d->pci_ioport,
-                                     0, 32, TYPE_PCI_BUS);
-    qdev_init_nofail(dev);
-    s = SYS_BUS_DEVICE(dev);
-    /* apb_config */
-    sysbus_mmio_map(s, 0, special_base);
-    /* PCI configuration space */
-    sysbus_mmio_map(s, 1, special_base + 0x1000000ULL);
-    /* pci_ioport */
-    sysbus_mmio_map(s, 2, special_base + 0x2000000ULL);
-
-    memory_region_init(&d->pci_mmio, OBJECT(s), "pci-mmio", 0x100000000ULL);
-    memory_region_add_subregion(get_system_memory(), mem_base, &d->pci_mmio);
-
-    *pbm_irqs = d->pbm_irqs;
-    d->ivec_irqs = ivec_irqs;
-
-    pci_create_simple(phb->bus, 0, "pbm-pci");
-
-    /* APB IOMMU */
-    is = &d->iommu;
-    memset(is, 0, sizeof(IOMMUState));
-
-    memory_region_init_iommu(&is->iommu, sizeof(is->iommu),
-                             TYPE_APB_IOMMU_MEMORY_REGION, OBJECT(dev),
-                             "iommu-apb", UINT64_MAX);
-    address_space_init(&is->iommu_as, MEMORY_REGION(&is->iommu), "pbm-as");
-    pci_setup_iommu(phb->bus, pbm_pci_dma_iommu, is);
-
-    /* APB secondary busses */
-    pci_dev = pci_create_multifunction(phb->bus, PCI_DEVFN(1, 0), true,
-                                   TYPE_PBM_PCI_BRIDGE);
-    br = PCI_BRIDGE(pci_dev);
-    pci_bridge_map_irq(br, "pciB", pci_pbm_map_irq);
-    qdev_init_nofail(&pci_dev->qdev);
-    *busB = pci_bridge_get_sec_bus(br);
-
-    pci_dev = pci_create_multifunction(phb->bus, PCI_DEVFN(1, 1), true,
-                                   TYPE_PBM_PCI_BRIDGE);
-    br = PCI_BRIDGE(pci_dev);
-    pci_bridge_map_irq(br, "pciA", pci_pbm_map_irq);
-    qdev_prop_set_bit(DEVICE(pci_dev), "busA", true);
-    qdev_init_nofail(&pci_dev->qdev);
-    *busA = pci_bridge_get_sec_bus(br);
-
-    return phb->bus;
-}
-
-static void pci_pbm_reset(DeviceState *d)
-{
-    APBState *s = APB_DEVICE(d);
+    SabreState *s = SABRE(d);
     PCIDevice *pci_dev;
     unsigned int i;
     uint16_t cmd;
@@ -469,17 +365,9 @@ static const MemoryRegionOps pci_config_ops = {
 
 static void sabre_realize(DeviceState *dev, Error **errp)
 {
-    SabreState *s = SABRE_DEVICE(dev);
+    SabreState *s = SABRE(dev);
     PCIHostState *phb = PCI_HOST_BRIDGE(dev);
-    SysBusDevice *sbd = SYS_BUS_DEVICE(s);
     PCIDevice *pci_dev;
-
-    /* sabre_config */
-    sysbus_mmio_map(sbd, 0, s->special_base);
-    /* PCI configuration space */
-    sysbus_mmio_map(sbd, 1, s->special_base + 0x1000000ULL);
-    /* pci_ioport */
-    sysbus_mmio_map(sbd, 2, s->special_base + 0x2000000ULL);
 
     memory_region_init(&s->pci_mmio, OBJECT(s), "pci-mmio", 0x100000000ULL);
     memory_region_add_subregion(get_system_memory(), s->mem_base,
@@ -489,7 +377,7 @@ static void sabre_realize(DeviceState *dev, Error **errp)
                                      pci_sabre_set_irq, pci_sabre_map_irq, s,
                                      &s->pci_mmio,
                                      &s->pci_ioport,
-                                     0, 32, TYPE_PCI_BUS);
+                                     0, 0x40, TYPE_PCI_BUS);
 
     pci_create_simple(phb->bus, 0, TYPE_SABRE_PCI_DEVICE);
 
@@ -499,22 +387,20 @@ static void sabre_realize(DeviceState *dev, Error **errp)
     pci_setup_iommu(phb->bus, sabre_pci_dma_iommu, s->iommu);
 
     /* APB secondary busses */
-    pci_dev = pci_create_multifunction(phb->bus, PCI_DEVFN(1, 0), true,
-                                       TYPE_SIMBA_PCI_BRIDGE);
+    pci_dev = pci_new_multifunction(PCI_DEVFN(1, 0), TYPE_SIMBA_PCI_BRIDGE);
     s->bridgeB = PCI_BRIDGE(pci_dev);
     pci_bridge_map_irq(s->bridgeB, "pciB", pci_simbaB_map_irq);
-    qdev_init_nofail(&pci_dev->qdev);
+    pci_realize_and_unref(pci_dev, phb->bus, &error_fatal);
 
-    pci_dev = pci_create_multifunction(phb->bus, PCI_DEVFN(1, 1), true,
-                                       TYPE_SIMBA_PCI_BRIDGE);
+    pci_dev = pci_new_multifunction(PCI_DEVFN(1, 1), TYPE_SIMBA_PCI_BRIDGE);
     s->bridgeA = PCI_BRIDGE(pci_dev);
     pci_bridge_map_irq(s->bridgeA, "pciA", pci_simbaA_map_irq);
-    qdev_init_nofail(&pci_dev->qdev);
+    pci_realize_and_unref(pci_dev, phb->bus, &error_fatal);
 }
 
 static void sabre_init(Object *obj)
 {
-    SabreState *s = SABRE_DEVICE(obj);
+    SabreState *s = SABRE(obj);
     SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
     unsigned int i;
 
@@ -536,7 +422,7 @@ static void sabre_init(Object *obj)
     object_property_add_link(obj, "iommu", TYPE_SUN4U_IOMMU,
                              (Object **) &s->iommu,
                              qdev_prop_allow_set_link_before_realize,
-                             0, NULL);
+                             0);
 
     /* sabre_config */
     memory_region_init_io(&s->sabre_config, OBJECT(s), &sabre_config_ops, s,
@@ -593,6 +479,15 @@ static const TypeInfo sabre_pci_info = {
     },
 };
 
+static char *sabre_ofw_unit_address(const SysBusDevice *dev)
+{
+    SabreState *s = SABRE(dev);
+
+    return g_strdup_printf("%x,%x",
+               (uint32_t)((s->special_base >> 32) & 0xffffffff),
+               (uint32_t)(s->special_base & 0xffffffff));
+}
+
 static Property sabre_properties[] = {
     DEFINE_PROP_UINT64("special-base", SabreState, special_base, 0),
     DEFINE_PROP_UINT64("mem-base", SabreState, mem_base, 0),
@@ -602,11 +497,14 @@ static Property sabre_properties[] = {
 static void sabre_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
+    SysBusDeviceClass *sbc = SYS_BUS_DEVICE_CLASS(klass);
 
     dc->realize = sabre_realize;
     dc->reset = sabre_reset;
-    dc->props = sabre_properties;
+    device_class_set_props(dc, sabre_properties);
     set_bit(DEVICE_CATEGORY_BRIDGE, dc->categories);
+    dc->fw_name = "pci";
+    sbc->explicit_ofw_unit_address = sabre_ofw_unit_address;
 }
 
 static const TypeInfo sabre_info = {

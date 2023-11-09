@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,18 +17,20 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>
  */
 #include "qemu/osdep.h"
-#include "qemu-common.h"
-#include "cpu.h"
 #include "qemu/thread.h"
+#include "qemu/error-report.h"
 #include "hw/i386/apic_internal.h"
 #include "hw/i386/apic.h"
-#include "hw/i386/ioapic.h"
+#include "hw/intc/ioapic.h"
+#include "hw/intc/i8259.h"
+#include "hw/intc/kvm_irqcount.h"
 #include "hw/pci/msi.h"
 #include "qemu/host-utils.h"
+#include "sysemu/kvm.h"
 #include "trace.h"
-#include "hw/i386/pc.h"
 #include "hw/i386/apic-msidef.h"
 #include "qapi/error.h"
+#include "qom/object.h"
 
 #define MAX_APICS 255
 #define MAX_APIC_WORDS 8
@@ -40,8 +42,9 @@
 static APICCommonState *local_apics[MAX_APICS + 1];
 
 #define TYPE_APIC "apic"
-#define APIC(obj) \
-    OBJECT_CHECK(APICCommonState, (obj), TYPE_APIC)
+/*This is reusing the APICCommonState typedef from APIC_COMMON */
+DECLARE_INSTANCE_CHECKER(APICCommonState, APIC,
+                         TYPE_APIC)
 
 static void apic_set_irq(APICCommonState *s, int vector_num, int trigger_mode);
 static void apic_update_irq(APICCommonState *s);
@@ -122,9 +125,10 @@ static void apic_sync_vapic(APICCommonState *s, int sync_type)
         }
         vapic_state.irr = vector & 0xff;
 
-        cpu_physical_memory_write_rom(&address_space_memory,
-                                      s->vapic_paddr + start,
-                                      ((void *)&vapic_state) + start, length);
+        address_space_write_rom(&address_space_memory,
+                                s->vapic_paddr + start,
+                                MEMTXATTRS_UNSPECIFIED,
+                                ((void *)&vapic_state) + start, length);
     }
 }
 
@@ -305,6 +309,18 @@ static void apic_set_tpr(APICCommonState *s, uint8_t val)
     }
 }
 
+int apic_get_highest_priority_irr(DeviceState *dev)
+{
+    APICCommonState *s;
+
+    if (!dev) {
+        /* no interrupts */
+        return -1;
+    }
+    s = APIC_COMMON(dev);
+    return get_highest_priority_int(s->irr);
+}
+
 static uint8_t apic_get_tpr(APICCommonState *s)
 {
     apic_sync_vapic(s, SYNC_FROM_VAPIC);
@@ -385,7 +401,7 @@ void apic_poll_irq(DeviceState *dev)
 
 static void apic_set_irq(APICCommonState *s, int vector_num, int trigger_mode)
 {
-    apic_report_irq_delivered(!apic_get_bit(s->irr, vector_num));
+    kvm_report_irq_delivered(!apic_get_bit(s->irr, vector_num));
 
     apic_set_bit(s->irr, vector_num);
     if (trigger_mode)
@@ -429,7 +445,7 @@ static int apic_find_dest(uint8_t dest)
 
     for (i = 0; i < MAX_APICS; i++) {
         apic = local_apics[i];
-	if (apic && apic->id == dest)
+        if (apic && apic->id == dest)
             return i;
         if (!apic)
             break;
@@ -598,27 +614,9 @@ int apic_accept_pic_intr(DeviceState *dev)
 
     if ((s->apicbase & MSR_IA32_APICBASE_ENABLE) == 0 ||
         (lvt0 & APIC_LVT_MASKED) == 0)
-        return 1;
+        return isa_pic != NULL;
 
     return 0;
-}
-
-static uint32_t apic_get_current_count(APICCommonState *s)
-{
-    int64_t d;
-    uint32_t val;
-    d = (qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) - s->initial_count_load_time) >>
-        s->count_shift;
-    if (s->lvt[APIC_LVT_TIMER] & APIC_LVT_TIMER_PERIODIC) {
-        /* periodic */
-        val = s->initial_count - (d % ((uint64_t)s->initial_count + 1));
-    } else {
-        if (d >= s->initial_count)
-            val = 0;
-        else
-            val = s->initial_count - d;
-    }
-    return val;
 }
 
 static void apic_timer_update(APICCommonState *s, int64_t current_time)
@@ -638,30 +636,16 @@ static void apic_timer(void *opaque)
     apic_timer_update(s, s->next_time);
 }
 
-static uint32_t apic_mem_readb(void *opaque, hwaddr addr)
-{
-    return 0;
-}
-
-static uint32_t apic_mem_readw(void *opaque, hwaddr addr)
-{
-    return 0;
-}
-
-static void apic_mem_writeb(void *opaque, hwaddr addr, uint32_t val)
-{
-}
-
-static void apic_mem_writew(void *opaque, hwaddr addr, uint32_t val)
-{
-}
-
-static uint32_t apic_mem_readl(void *opaque, hwaddr addr)
+static uint64_t apic_mem_read(void *opaque, hwaddr addr, unsigned size)
 {
     DeviceState *dev;
     APICCommonState *s;
     uint32_t val;
     int index;
+
+    if (size < 4) {
+        return 0;
+    }
 
     dev = cpu_get_current_apic();
     if (!dev) {
@@ -753,11 +737,17 @@ static void apic_send_msi(MSIMessage *msi)
     apic_deliver_irq(dest, dest_mode, delivery, vector, trigger_mode);
 }
 
-static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
+static void apic_mem_write(void *opaque, hwaddr addr, uint64_t val,
+                           unsigned size)
 {
     DeviceState *dev;
     APICCommonState *s;
     int index = (addr >> 4) & 0xff;
+
+    if (size < 4) {
+        return;
+    }
+
     if (addr > 0xfff || !index) {
         /* MSI and MMIO APIC are at the same memory location,
          * but actually not on the global bus: MSI is on PCI bus
@@ -868,10 +858,12 @@ static void apic_post_load(APICCommonState *s)
 }
 
 static const MemoryRegionOps apic_io_ops = {
-    .old_mmio = {
-        .read = { apic_mem_readb, apic_mem_readw, apic_mem_readl, },
-        .write = { apic_mem_writeb, apic_mem_writew, apic_mem_writel, },
-    },
+    .read = apic_mem_read,
+    .write = apic_mem_write,
+    .impl.min_access_size = 1,
+    .impl.max_access_size = 4,
+    .valid.min_access_size = 1,
+    .valid.max_access_size = 4,
     .endianness = DEVICE_NATIVE_ENDIAN,
 };
 
@@ -885,8 +877,20 @@ static void apic_realize(DeviceState *dev, Error **errp)
         return;
     }
 
+    if (kvm_enabled()) {
+        warn_report("Userspace local APIC is deprecated for KVM.");
+        warn_report("Do not use kernel-irqchip except for the -M isapc machine type.");
+    }
+
     memory_region_init_io(&s->io_memory, OBJECT(s), &apic_io_ops, s, "apic-msi",
                           APIC_SPACE_SIZE);
+
+    /*
+     * apic-msi's apic_mem_write can call into ioapic_eoi_broadcast, which can
+     * write back to apic-msi. As such mark the apic-msi region re-entrancy
+     * safe.
+     */
+    s->io_memory.disable_reentrancy_guard = true;
 
     s->timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, apic_timer, s);
     local_apics[s->id] = s;
@@ -894,11 +898,10 @@ static void apic_realize(DeviceState *dev, Error **errp)
     msi_nonbroken = true;
 }
 
-static void apic_unrealize(DeviceState *dev, Error **errp)
+static void apic_unrealize(DeviceState *dev)
 {
     APICCommonState *s = APIC(dev);
 
-    timer_del(s->timer);
     timer_free(s->timer);
     local_apics[s->id] = NULL;
 }

@@ -11,11 +11,15 @@
 
 #include "qemu/osdep.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
 #include "qapi/error.h"
 #include "trace.h"
 #include "hw/sysbus.h"
+#include "migration/vmstate.h"
 #include "hw/registerfields.h"
+#include "hw/irq.h"
 #include "hw/misc/tz-ppc.h"
+#include "hw/qdev-properties.h"
 
 static void tz_ppc_update_irq(TZPPC *s)
 {
@@ -181,6 +185,35 @@ static const MemoryRegionOps tz_ppc_ops = {
     .endianness = DEVICE_LITTLE_ENDIAN,
 };
 
+static bool tz_ppc_dummy_accepts(void *opaque, hwaddr addr,
+                                 unsigned size, bool is_write,
+                                 MemTxAttrs attrs)
+{
+    /*
+     * Board code should never map the upstream end of an unused port,
+     * so we should never try to make a memory access to it.
+     */
+    g_assert_not_reached();
+}
+
+static uint64_t tz_ppc_dummy_read(void *opaque, hwaddr addr, unsigned size)
+{
+    g_assert_not_reached();
+}
+
+static void tz_ppc_dummy_write(void *opaque, hwaddr addr,
+                                        uint64_t data, unsigned size)
+{
+    g_assert_not_reached();
+}
+
+static const MemoryRegionOps tz_ppc_dummy_ops = {
+    /* define r/w methods to avoid assert failure in memory_region_init_io */
+    .read = tz_ppc_dummy_read,
+    .write = tz_ppc_dummy_write,
+    .valid.accepts = tz_ppc_dummy_accepts,
+};
+
 static void tz_ppc_reset(DeviceState *dev)
 {
     TZPPC *s = TZ_PPC(dev);
@@ -210,16 +243,33 @@ static void tz_ppc_realize(DeviceState *dev, Error **errp)
     SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
     TZPPC *s = TZ_PPC(dev);
     int i;
+    int max_port = 0;
 
     /* We can't create the upstream end of the port until realize,
      * as we don't know the size of the MR used as the downstream until then.
      */
     for (i = 0; i < TZ_NUM_PORTS; i++) {
+        if (s->port[i].downstream) {
+            max_port = i;
+        }
+    }
+
+    for (i = 0; i <= max_port; i++) {
         TZPPCPort *port = &s->port[i];
         char *name;
         uint64_t size;
 
         if (!port->downstream) {
+            /*
+             * Create dummy sysbus MMIO region so the sysbus region
+             * numbering doesn't get out of sync with the port numbers.
+             * The size is entirely arbitrary.
+             */
+            name = g_strdup_printf("tz-ppc-dummy-port[%d]", i);
+            memory_region_init_io(&port->upstream, obj, &tz_ppc_dummy_ops,
+                                  port, name, 0x10000);
+            sysbus_init_mmio(sbd, &port->upstream);
+            g_free(name);
             continue;
         }
 
@@ -283,7 +333,7 @@ static void tz_ppc_class_init(ObjectClass *klass, void *data)
     dc->realize = tz_ppc_realize;
     dc->vmsd = &tz_ppc_vmstate;
     dc->reset = tz_ppc_reset;
-    dc->props = tz_ppc_properties;
+    device_class_set_props(dc, tz_ppc_properties);
 }
 
 static const TypeInfo tz_ppc_info = {

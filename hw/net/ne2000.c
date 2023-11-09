@@ -21,106 +21,105 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
-#include "hw/pci/pci.h"
 #include "net/eth.h"
+#include "qemu/module.h"
+#include "exec/memory.h"
+#include "hw/irq.h"
+#include "migration/vmstate.h"
 #include "ne2000.h"
-#include "sysemu/sysemu.h"
+#include "trace.h"
 
 /* debug NE2000 card */
 //#define DEBUG_NE2000
 
 #define MAX_ETH_FRAME_SIZE 1514
 
-#define E8390_CMD	0x00  /* The command register (for all pages) */
+#define E8390_CMD       0x00    /* The command register (for all pages) */
 /* Page 0 register offsets. */
-#define EN0_CLDALO	0x01	/* Low byte of current local dma addr  RD */
-#define EN0_STARTPG	0x01	/* Starting page of ring bfr WR */
-#define EN0_CLDAHI	0x02	/* High byte of current local dma addr  RD */
-#define EN0_STOPPG	0x02	/* Ending page +1 of ring bfr WR */
-#define EN0_BOUNDARY	0x03	/* Boundary page of ring bfr RD WR */
-#define EN0_TSR		0x04	/* Transmit status reg RD */
-#define EN0_TPSR	0x04	/* Transmit starting page WR */
-#define EN0_NCR		0x05	/* Number of collision reg RD */
-#define EN0_TCNTLO	0x05	/* Low  byte of tx byte count WR */
-#define EN0_FIFO	0x06	/* FIFO RD */
-#define EN0_TCNTHI	0x06	/* High byte of tx byte count WR */
-#define EN0_ISR		0x07	/* Interrupt status reg RD WR */
-#define EN0_CRDALO	0x08	/* low byte of current remote dma address RD */
-#define EN0_RSARLO	0x08	/* Remote start address reg 0 */
-#define EN0_CRDAHI	0x09	/* high byte, current remote dma address RD */
-#define EN0_RSARHI	0x09	/* Remote start address reg 1 */
-#define EN0_RCNTLO	0x0a	/* Remote byte count reg WR */
-#define EN0_RTL8029ID0	0x0a	/* Realtek ID byte #1 RD */
-#define EN0_RCNTHI	0x0b	/* Remote byte count reg WR */
-#define EN0_RTL8029ID1	0x0b	/* Realtek ID byte #2 RD */
-#define EN0_RSR		0x0c	/* rx status reg RD */
-#define EN0_RXCR	0x0c	/* RX configuration reg WR */
-#define EN0_TXCR	0x0d	/* TX configuration reg WR */
-#define EN0_COUNTER0	0x0d	/* Rcv alignment error counter RD */
-#define EN0_DCFG	0x0e	/* Data configuration reg WR */
-#define EN0_COUNTER1	0x0e	/* Rcv CRC error counter RD */
-#define EN0_IMR		0x0f	/* Interrupt mask reg WR */
-#define EN0_COUNTER2	0x0f	/* Rcv missed frame error counter RD */
+#define EN0_CLDALO      0x01    /* Low byte of current local dma addr  RD */
+#define EN0_STARTPG     0x01    /* Starting page of ring bfr WR */
+#define EN0_CLDAHI      0x02    /* High byte of current local dma addr  RD */
+#define EN0_STOPPG      0x02    /* Ending page +1 of ring bfr WR */
+#define EN0_BOUNDARY    0x03    /* Boundary page of ring bfr RD WR */
+#define EN0_TSR         0x04    /* Transmit status reg RD */
+#define EN0_TPSR        0x04    /* Transmit starting page WR */
+#define EN0_NCR         0x05    /* Number of collision reg RD */
+#define EN0_TCNTLO      0x05    /* Low  byte of tx byte count WR */
+#define EN0_FIFO        0x06    /* FIFO RD */
+#define EN0_TCNTHI      0x06    /* High byte of tx byte count WR */
+#define EN0_ISR         0x07    /* Interrupt status reg RD WR */
+#define EN0_CRDALO      0x08    /* low byte of current remote dma address RD */
+#define EN0_RSARLO      0x08    /* Remote start address reg 0 */
+#define EN0_CRDAHI      0x09    /* high byte, current remote dma address RD */
+#define EN0_RSARHI      0x09    /* Remote start address reg 1 */
+#define EN0_RCNTLO      0x0a    /* Remote byte count reg WR */
+#define EN0_RTL8029ID0  0x0a    /* Realtek ID byte #1 RD */
+#define EN0_RCNTHI      0x0b    /* Remote byte count reg WR */
+#define EN0_RTL8029ID1  0x0b    /* Realtek ID byte #2 RD */
+#define EN0_RSR         0x0c    /* rx status reg RD */
+#define EN0_RXCR        0x0c    /* RX configuration reg WR */
+#define EN0_TXCR        0x0d    /* TX configuration reg WR */
+#define EN0_COUNTER0    0x0d    /* Rcv alignment error counter RD */
+#define EN0_DCFG        0x0e    /* Data configuration reg WR */
+#define EN0_COUNTER1    0x0e    /* Rcv CRC error counter RD */
+#define EN0_IMR         0x0f    /* Interrupt mask reg WR */
+#define EN0_COUNTER2    0x0f    /* Rcv missed frame error counter RD */
 
 #define EN1_PHYS        0x11
 #define EN1_CURPAG      0x17
 #define EN1_MULT        0x18
 
-#define EN2_STARTPG	0x21	/* Starting page of ring bfr RD */
-#define EN2_STOPPG	0x22	/* Ending page +1 of ring bfr RD */
+#define EN2_STARTPG     0x21    /* Starting page of ring bfr RD */
+#define EN2_STOPPG      0x22    /* Ending page +1 of ring bfr RD */
 
-#define EN3_CONFIG0	0x33
-#define EN3_CONFIG1	0x34
-#define EN3_CONFIG2	0x35
-#define EN3_CONFIG3	0x36
+#define EN3_CONFIG0     0x33
+#define EN3_CONFIG1     0x34
+#define EN3_CONFIG2     0x35
+#define EN3_CONFIG3     0x36
 
 /*  Register accessed at EN_CMD, the 8390 base addr.  */
-#define E8390_STOP	0x01	/* Stop and reset the chip */
-#define E8390_START	0x02	/* Start the chip, clear reset */
-#define E8390_TRANS	0x04	/* Transmit a frame */
-#define E8390_RREAD	0x08	/* Remote read */
-#define E8390_RWRITE	0x10	/* Remote write  */
-#define E8390_NODMA	0x20	/* Remote DMA */
-#define E8390_PAGE0	0x00	/* Select page chip registers */
-#define E8390_PAGE1	0x40	/* using the two high-order bits */
-#define E8390_PAGE2	0x80	/* Page 3 is invalid. */
+#define E8390_STOP      0x01    /* Stop and reset the chip */
+#define E8390_START     0x02    /* Start the chip, clear reset */
+#define E8390_TRANS     0x04    /* Transmit a frame */
+#define E8390_RREAD     0x08    /* Remote read */
+#define E8390_RWRITE    0x10    /* Remote write  */
+#define E8390_NODMA     0x20    /* Remote DMA */
+#define E8390_PAGE0     0x00    /* Select page chip registers */
+#define E8390_PAGE1     0x40    /* using the two high-order bits */
+#define E8390_PAGE2     0x80    /* Page 3 is invalid. */
 
 /* Bits in EN0_ISR - Interrupt status register */
-#define ENISR_RX	0x01	/* Receiver, no error */
-#define ENISR_TX	0x02	/* Transmitter, no error */
-#define ENISR_RX_ERR	0x04	/* Receiver, with error */
-#define ENISR_TX_ERR	0x08	/* Transmitter, with error */
-#define ENISR_OVER	0x10	/* Receiver overwrote the ring */
-#define ENISR_COUNTERS	0x20	/* Counters need emptying */
-#define ENISR_RDC	0x40	/* remote dma complete */
-#define ENISR_RESET	0x80	/* Reset completed */
-#define ENISR_ALL	0x3f	/* Interrupts we will enable */
+#define ENISR_RX        0x01    /* Receiver, no error */
+#define ENISR_TX        0x02    /* Transmitter, no error */
+#define ENISR_RX_ERR    0x04    /* Receiver, with error */
+#define ENISR_TX_ERR    0x08    /* Transmitter, with error */
+#define ENISR_OVER      0x10    /* Receiver overwrote the ring */
+#define ENISR_COUNTERS  0x20    /* Counters need emptying */
+#define ENISR_RDC       0x40    /* remote dma complete */
+#define ENISR_RESET     0x80    /* Reset completed */
+#define ENISR_ALL       0x3f    /* Interrupts we will enable */
 
 /* Bits in received packet status byte and EN0_RSR*/
-#define ENRSR_RXOK	0x01	/* Received a good packet */
-#define ENRSR_CRC	0x02	/* CRC error */
-#define ENRSR_FAE	0x04	/* frame alignment error */
-#define ENRSR_FO	0x08	/* FIFO overrun */
-#define ENRSR_MPA	0x10	/* missed pkt */
-#define ENRSR_PHY	0x20	/* physical/multicast address */
-#define ENRSR_DIS	0x40	/* receiver disable. set in monitor mode */
-#define ENRSR_DEF	0x80	/* deferring */
+#define ENRSR_RXOK      0x01    /* Received a good packet */
+#define ENRSR_CRC       0x02    /* CRC error */
+#define ENRSR_FAE       0x04    /* frame alignment error */
+#define ENRSR_FO        0x08    /* FIFO overrun */
+#define ENRSR_MPA       0x10    /* missed pkt */
+#define ENRSR_PHY       0x20    /* physical/multicast address */
+#define ENRSR_DIS       0x40    /* receiver disable. set in monitor mode */
+#define ENRSR_DEF       0x80    /* deferring */
 
 /* Transmitted packet status, EN0_TSR. */
-#define ENTSR_PTX 0x01	/* Packet transmitted without error */
-#define ENTSR_ND  0x02	/* The transmit wasn't deferred. */
-#define ENTSR_COL 0x04	/* The transmit collided at least once. */
+#define ENTSR_PTX 0x01  /* Packet transmitted without error */
+#define ENTSR_ND  0x02  /* The transmit wasn't deferred. */
+#define ENTSR_COL 0x04  /* The transmit collided at least once. */
 #define ENTSR_ABT 0x08  /* The transmit collided 16 times, and was deferred. */
-#define ENTSR_CRS 0x10	/* The carrier sense was lost. */
+#define ENTSR_CRS 0x10  /* The carrier sense was lost. */
 #define ENTSR_FU  0x20  /* A "FIFO underrun" occurred during transmit. */
-#define ENTSR_CDH 0x40	/* The collision detect "heartbeat" signal was lost. */
+#define ENTSR_CDH 0x40  /* The collision detect "heartbeat" signal was lost. */
 #define ENTSR_OWC 0x80  /* There was an out-of-window collision. */
-
-typedef struct PCINE2000State {
-    PCIDevice dev;
-    NE2000State ne2000;
-} PCINE2000State;
 
 void ne2000_reset(NE2000State *s)
 {
@@ -144,7 +143,7 @@ static void ne2000_update_irq(NE2000State *s)
     isr = (s->isr & s->imr) & 0x7f;
 #if defined(DEBUG_NE2000)
     printf("NE2000: Set IRQ to %d (%02x %02x)\n",
-	   isr ? 1 : 0, s->isr, s->imr);
+           isr ? 1 : 0, s->isr, s->imr);
 #endif
     qemu_set_irq(s->irq, (isr != 0));
 }
@@ -168,20 +167,17 @@ static int ne2000_buffer_full(NE2000State *s)
     return 0;
 }
 
-#define MIN_BUF_SIZE 60
-
 ssize_t ne2000_receive(NetClientState *nc, const uint8_t *buf, size_t size_)
 {
     NE2000State *s = qemu_get_nic_opaque(nc);
-    int size = size_;
+    size_t size = size_;
     uint8_t *p;
     unsigned int total_len, next, avail, len, index, mcast_idx;
-    uint8_t buf1[60];
     static const uint8_t broadcast_macaddr[6] =
         { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
 #if defined(DEBUG_NE2000)
-    printf("NE2000: received len=%d\n", size);
+    printf("NE2000: received len=%zu\n", size);
 #endif
 
     if (s->cmd & E8390_STOP || ne2000_buffer_full(s))
@@ -212,15 +208,6 @@ ssize_t ne2000_receive(NetClientState *nc, const uint8_t *buf, size_t size_)
         } else {
             return size;
         }
-    }
-
-
-    /* if too small buffer, then expand it */
-    if (size < MIN_BUF_SIZE) {
-        memcpy(buf1, buf, size);
-        memset(buf1 + size, 0, MIN_BUF_SIZE - size);
-        buf = buf1;
-        size = MIN_BUF_SIZE;
     }
 
     index = s->curpag << 8;
@@ -276,9 +263,7 @@ static void ne2000_ioport_write(void *opaque, uint32_t addr, uint32_t val)
     int offset, page, index;
 
     addr &= 0xf;
-#ifdef DEBUG_NE2000
-    printf("NE2000: write addr=0x%x val=0x%02x\n", addr, val);
-#endif
+    trace_ne2000_ioport_write(addr, val);
     if (addr == E8390_CMD) {
         /* control register */
         s->cmd = val;
@@ -397,12 +382,12 @@ static uint32_t ne2000_ioport_read(void *opaque, uint32_t addr)
         case EN0_ISR:
             ret = s->isr;
             break;
-	case EN0_RSARLO:
-	    ret = s->rsar & 0x00ff;
-	    break;
-	case EN0_RSARHI:
-	    ret = s->rsar >> 8;
-	    break;
+        case EN0_RSARLO:
+            ret = s->rsar & 0x00ff;
+            break;
+        case EN0_RSARHI:
+            ret = s->rsar >> 8;
+            break;
         case EN1_PHYS ... EN1_PHYS + 5:
             ret = s->phys[offset - EN1_PHYS];
             break;
@@ -421,29 +406,27 @@ static uint32_t ne2000_ioport_read(void *opaque, uint32_t addr)
         case EN2_STOPPG:
             ret = s->stop >> 8;
             break;
-	case EN0_RTL8029ID0:
-	    ret = 0x50;
-	    break;
-	case EN0_RTL8029ID1:
-	    ret = 0x43;
-	    break;
-	case EN3_CONFIG0:
-	    ret = 0;		/* 10baseT media */
-	    break;
-	case EN3_CONFIG2:
-	    ret = 0x40;		/* 10baseT active */
-	    break;
-	case EN3_CONFIG3:
-	    ret = 0x40;		/* Full duplex */
-	    break;
+        case EN0_RTL8029ID0:
+            ret = 0x50;
+            break;
+        case EN0_RTL8029ID1:
+            ret = 0x43;
+            break;
+        case EN3_CONFIG0:
+            ret = 0;          /* 10baseT media */
+            break;
+        case EN3_CONFIG2:
+            ret = 0x40;       /* 10baseT active */
+            break;
+        case EN3_CONFIG3:
+            ret = 0x40;       /* Full duplex */
+            break;
         default:
             ret = 0x00;
             break;
         }
     }
-#ifdef DEBUG_NE2000
-    printf("NE2000: read addr=0x%x val=%02x\n", addr, ret);
-#endif
+    trace_ne2000_ioport_read(addr, ret);
     return ret;
 }
 
@@ -647,34 +630,28 @@ const VMStateDescription vmstate_ne2000 = {
     }
 };
 
-static const VMStateDescription vmstate_pci_ne2000 = {
-    .name = "ne2000",
-    .version_id = 3,
-    .minimum_version_id = 3,
-    .fields = (VMStateField[]) {
-        VMSTATE_PCI_DEVICE(dev, PCINE2000State),
-        VMSTATE_STRUCT(ne2000, PCINE2000State, 0, vmstate_ne2000, NE2000State),
-        VMSTATE_END_OF_LIST()
-    }
-};
-
 static uint64_t ne2000_read(void *opaque, hwaddr addr,
                             unsigned size)
 {
     NE2000State *s = opaque;
+    uint64_t val;
 
     if (addr < 0x10 && size == 1) {
-        return ne2000_ioport_read(s, addr);
+        val = ne2000_ioport_read(s, addr);
     } else if (addr == 0x10) {
         if (size <= 2) {
-            return ne2000_asic_ioport_read(s, addr);
+            val = ne2000_asic_ioport_read(s, addr);
         } else {
-            return ne2000_asic_ioport_readl(s, addr);
+            val = ne2000_asic_ioport_readl(s, addr);
         }
     } else if (addr == 0x1f && size == 1) {
-        return ne2000_reset_ioport_read(s, addr);
+        val = ne2000_reset_ioport_read(s, addr);
+    } else {
+        val = ((uint64_t)1 << (size * 8)) - 1;
     }
-    return ((uint64_t)1 << (size * 8)) - 1;
+    trace_ne2000_read(addr, val);
+
+    return val;
 }
 
 static void ne2000_write(void *opaque, hwaddr addr,
@@ -682,6 +659,7 @@ static void ne2000_write(void *opaque, hwaddr addr,
 {
     NE2000State *s = opaque;
 
+    trace_ne2000_write(addr, data);
     if (addr < 0x10 && size == 1) {
         ne2000_ioport_write(s, addr, data);
     } else if (addr == 0x10) {
@@ -708,91 +686,3 @@ void ne2000_setup_io(NE2000State *s, DeviceState *dev, unsigned size)
 {
     memory_region_init_io(&s->io, OBJECT(dev), &ne2000_ops, s, "ne2000", size);
 }
-
-static NetClientInfo net_ne2000_info = {
-    .type = NET_CLIENT_DRIVER_NIC,
-    .size = sizeof(NICState),
-    .receive = ne2000_receive,
-};
-
-static void pci_ne2000_realize(PCIDevice *pci_dev, Error **errp)
-{
-    PCINE2000State *d = DO_UPCAST(PCINE2000State, dev, pci_dev);
-    NE2000State *s;
-    uint8_t *pci_conf;
-
-    pci_conf = d->dev.config;
-    pci_conf[PCI_INTERRUPT_PIN] = 1; /* interrupt pin A */
-
-    s = &d->ne2000;
-    ne2000_setup_io(s, DEVICE(pci_dev), 0x100);
-    pci_register_bar(&d->dev, 0, PCI_BASE_ADDRESS_SPACE_IO, &s->io);
-    s->irq = pci_allocate_irq(&d->dev);
-
-    qemu_macaddr_default_if_unset(&s->c.macaddr);
-    ne2000_reset(s);
-
-    s->nic = qemu_new_nic(&net_ne2000_info, &s->c,
-                          object_get_typename(OBJECT(pci_dev)), pci_dev->qdev.id, s);
-    qemu_format_nic_info_str(qemu_get_queue(s->nic), s->c.macaddr.a);
-}
-
-static void pci_ne2000_exit(PCIDevice *pci_dev)
-{
-    PCINE2000State *d = DO_UPCAST(PCINE2000State, dev, pci_dev);
-    NE2000State *s = &d->ne2000;
-
-    qemu_del_nic(s->nic);
-    qemu_free_irq(s->irq);
-}
-
-static void ne2000_instance_init(Object *obj)
-{
-    PCIDevice *pci_dev = PCI_DEVICE(obj);
-    PCINE2000State *d = DO_UPCAST(PCINE2000State, dev, pci_dev);
-    NE2000State *s = &d->ne2000;
-
-    device_add_bootindex_property(obj, &s->c.bootindex,
-                                  "bootindex", "/ethernet-phy@0",
-                                  &pci_dev->qdev, NULL);
-}
-
-static Property ne2000_properties[] = {
-    DEFINE_NIC_PROPERTIES(PCINE2000State, ne2000.c),
-    DEFINE_PROP_END_OF_LIST(),
-};
-
-static void ne2000_class_init(ObjectClass *klass, void *data)
-{
-    DeviceClass *dc = DEVICE_CLASS(klass);
-    PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
-
-    k->realize = pci_ne2000_realize;
-    k->exit = pci_ne2000_exit;
-    k->romfile = "efi-ne2k_pci.rom",
-    k->vendor_id = PCI_VENDOR_ID_REALTEK;
-    k->device_id = PCI_DEVICE_ID_REALTEK_8029;
-    k->class_id = PCI_CLASS_NETWORK_ETHERNET;
-    dc->vmsd = &vmstate_pci_ne2000;
-    dc->props = ne2000_properties;
-    set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
-}
-
-static const TypeInfo ne2000_info = {
-    .name          = "ne2k_pci",
-    .parent        = TYPE_PCI_DEVICE,
-    .instance_size = sizeof(PCINE2000State),
-    .class_init    = ne2000_class_init,
-    .instance_init = ne2000_instance_init,
-    .interfaces = (InterfaceInfo[]) {
-        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
-        { },
-    },
-};
-
-static void ne2000_register_types(void)
-{
-    type_register_static(&ne2000_info);
-}
-
-type_init(ne2000_register_types)

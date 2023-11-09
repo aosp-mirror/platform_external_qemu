@@ -31,16 +31,18 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "hw/hw.h"
-#include "hw/pci/pci.h"
+#include "qemu/module.h"
+#include "hw/pci/pci_device.h"
+#include "hw/qdev-properties.h"
+#include "migration/vmstate.h"
 #include "trace.h"
+#include "qom/object.h"
 
 #define TYPE_XEN_PV_DEVICE  "xen-pvdevice"
 
-#define XEN_PV_DEVICE(obj) \
-     OBJECT_CHECK(XenPVDevice, (obj), TYPE_XEN_PV_DEVICE)
+OBJECT_DECLARE_SIMPLE_TYPE(XenPVDevice, XEN_PV_DEVICE)
 
-typedef struct XenPVDevice {
+struct XenPVDevice {
     /*< private >*/
     PCIDevice       parent_obj;
     /*< public >*/
@@ -49,7 +51,7 @@ typedef struct XenPVDevice {
     uint8_t         revision;
     uint32_t        size;
     MemoryRegion    mmio;
-} XenPVDevice;
+};
 
 static uint64_t xen_pv_mmio_read(void *opaque, hwaddr addr,
                                  unsigned size)
@@ -69,6 +71,16 @@ static const MemoryRegionOps xen_pv_mmio_ops = {
     .read = &xen_pv_mmio_read,
     .write = &xen_pv_mmio_write,
     .endianness = DEVICE_LITTLE_ENDIAN,
+};
+
+static const VMStateDescription vmstate_xen_pvdevice = {
+    .name = "xen-pvdevice",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .fields = (VMStateField[]) {
+        VMSTATE_PCI_DEVICE(parent_obj, XenPVDevice),
+        VMSTATE_END_OF_LIST()
+    }
 };
 
 static void xen_pv_realize(PCIDevice *pci_dev, Error **errp)
@@ -119,7 +131,8 @@ static void xen_pv_class_init(ObjectClass *klass, void *data)
     k->realize = xen_pv_realize;
     k->class_id = PCI_CLASS_SYSTEM_OTHER;
     dc->desc = "Xen PV Device";
-    dc->props = xen_pv_props;
+    device_class_set_props(dc, xen_pv_props);
+    dc->vmsd = &vmstate_xen_pvdevice;
 }
 
 static const TypeInfo xen_pv_type_info = {

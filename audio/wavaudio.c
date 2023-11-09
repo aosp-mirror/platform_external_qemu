@@ -21,182 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
 #include "qemu/host-utils.h"
+#include "qemu/module.h"
 #include "qemu/timer.h"
+#include "qapi/opts-visitor.h"
 #include "audio.h"
 
 #define AUDIO_CAP "wav"
 #include "audio_int.h"
 
-
-extern bool qemu_wav_audio_rewind_input_wave();
-
-typedef struct WAVVoiceIn {
-    HWVoiceIn hw;
-    FILE *infp;
-    int64_t old_ticks;
-    void *pcm_buf;
-} WAVVoiceIn;
-
 typedef struct WAVVoiceOut {
     HWVoiceOut hw;
     FILE *f;
-    int64_t old_ticks;
-    void *pcm_buf;
+    RateCtl rate;
     int total_samples;
 } WAVVoiceOut;
 
-typedef struct {
-    struct audsettings settings;
-    const char *in_wav_path;
-    const char *wav_path;
-} WAVConf;
-
-static int wav_init_in(HWVoiceIn *hw, struct audsettings *as, void *drv_opaque)
-{
-    WAVVoiceIn *wavin = (WAVVoiceIn *) hw;
-    WAVConf *conf = drv_opaque;
-    struct audsettings wav_as = conf->settings;
-    wav_as.endianness = 0;
-    audio_pcm_init_info (&hw->info, &wav_as);
-
-    hw->samples = 1024;
-    wavin->pcm_buf = audio_calloc(__func__, hw->samples, 1 << hw->info.shift);
-    if (!wavin->pcm_buf) {
-        dolog ("Could not allocate buffer (%d bytes)\n",
-               hw->samples << hw->info.shift);
-        return -1;
-    }
-
-    wavin->infp = fopen (conf->in_wav_path, "rb");
-    if (!wavin->infp) {
-        dolog ("Failed to open wave file `%s'\nReason: %s\n",
-               conf->in_wav_path, strerror (errno));
-        g_free (wavin->pcm_buf);
-        wavin->pcm_buf = NULL;
-        return -1;
-    }
-
-    // discard the header
-    fseek(wavin->infp, 44, SEEK_SET);
-
-    return 0;
-}
-
-static void wav_fini_in (HWVoiceIn *hw)
-{
-    WAVVoiceIn *wavin = (WAVVoiceIn *) hw;
-    if (wavin->infp) {
-        fclose(wavin->infp);
-        wavin->infp = NULL;
-    }
-    g_free (wavin->pcm_buf);
-    wavin->pcm_buf = NULL;
-}
-
-static int wav_run_in (HWVoiceIn *hw)
-{
-    WAVVoiceIn *wavin = (WAVVoiceIn *) hw;
-    int live = audio_pcm_hw_get_live_in (hw);
-    int dead = hw->samples - live;
-    int samples = 0;
-
-    if (dead) {
-        int64_t now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
-        int64_t ticks = now - wavin->old_ticks;
-        int64_t bytes =
-            muldiv64(ticks, hw->info.bytes_per_second, NANOSECONDS_PER_SECOND);
-
-        wavin->old_ticks = now;
-        bytes = audio_MIN (bytes, INT_MAX);
-        samples = bytes >> hw->info.shift;
-        samples = audio_MIN (samples, dead);
-    }
-
-    if (!wavin->infp) {
-        return samples;
-    }
-
-    int to_grab = samples;
-    int wpos = hw->wpos;
-    while (to_grab) {
-        int chunk = audio_MIN (to_grab, hw->samples - wpos);
-        void *buf = advance(wavin->pcm_buf, wpos);
-
-#ifdef ANDROID_IO
-        if (qemu_wav_audio_rewind_input_wave()) {
-            fseek(wavin->infp, 44, SEEK_SET);
-        }
-#endif
-
-        if(fread(buf, chunk << hw->info.shift, 1, wavin->infp) != 1) {
-            // reached EOF, rewind
-            fseek(wavin->infp, 44, SEEK_SET);
-            fread(buf, chunk << hw->info.shift, 1, wavin->infp);
-        }
-
-        hw->conv(hw->conv_buf + wpos, buf, chunk);
-        wpos = (wpos + chunk) % hw->samples;
-        to_grab -= chunk;
-    }
-    hw->wpos = wpos;
-
-    return samples;
-}
-
-static int wav_run_out (HWVoiceOut *hw, int live)
+static size_t wav_write_out(HWVoiceOut *hw, void *buf, size_t len)
 {
     WAVVoiceOut *wav = (WAVVoiceOut *) hw;
-    int rpos, decr, samples;
-    uint8_t *dst;
-    struct st_sample *src;
-    int64_t now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
-    int64_t ticks = now - wav->old_ticks;
-    int64_t bytes =
-        muldiv64(ticks, hw->info.bytes_per_second, NANOSECONDS_PER_SECOND);
+    int64_t bytes = audio_rate_get_bytes(&wav->rate, &hw->info, len);
+    assert(bytes % hw->info.bytes_per_frame == 0);
 
-    if (bytes > INT_MAX) {
-        samples = INT_MAX >> hw->info.shift;
-    }
-    else {
-        samples = bytes >> hw->info.shift;
+    if (bytes && fwrite(buf, bytes, 1, wav->f) != 1) {
+        dolog("wav_write_out: fwrite of %" PRId64 " bytes failed\nReason: %s\n",
+              bytes, strerror(errno));
     }
 
-    wav->old_ticks = now;
-    decr = audio_MIN (live, samples);
-    samples = decr;
-    rpos = hw->rpos;
-    while (samples) {
-        int left_till_end_samples = hw->samples - rpos;
-        int convert_samples = audio_MIN (samples, left_till_end_samples);
-
-        src = hw->mix_buf + rpos;
-        dst = advance (wav->pcm_buf, rpos << hw->info.shift);
-
-        hw->clip (dst, src, convert_samples);
-        if (fwrite (dst, convert_samples << hw->info.shift, 1, wav->f) != 1) {
-            dolog ("wav_run_out: fwrite of %d bytes failed\nReaons: %s\n",
-                   convert_samples << hw->info.shift, strerror (errno));
-        }
-
-        rpos = (rpos + convert_samples) % hw->samples;
-        samples -= convert_samples;
-        wav->total_samples += convert_samples;
-    }
-
-    hw->rpos = rpos;
-    return decr;
-}
-
-static int wav_read_in (SWVoiceIn *sw, void *buf, int len)
-{
-    return audio_pcm_sw_read (sw, buf, len);
-}
-
-static int wav_write_out (SWVoiceOut *sw, void *buf, int len)
-{
-    return audio_pcm_sw_write (sw, buf, len);
+    wav->total_samples += bytes / hw->info.bytes_per_frame;
+    return bytes;
 }
 
 /* VICE code: Store number as little endian. */
@@ -220,25 +75,30 @@ static int wav_init_out(HWVoiceOut *hw, struct audsettings *as,
         0x02, 0x00, 0x44, 0xac, 0x00, 0x00, 0x10, 0xb1, 0x02, 0x00, 0x04,
         0x00, 0x10, 0x00, 0x64, 0x61, 0x74, 0x61, 0x00, 0x00, 0x00, 0x00
     };
-    WAVConf *conf = drv_opaque;
-    struct audsettings wav_as = conf->settings;
+    Audiodev *dev = drv_opaque;
+    AudiodevWavOptions *wopts = &dev->u.wav;
+    struct audsettings wav_as = audiodev_to_audsettings(dev->u.wav.out);
+    const char *wav_path = wopts->path ?: "qemu.wav";
 
     stereo = wav_as.nchannels == 2;
     switch (wav_as.fmt) {
-    case AUD_FMT_S8:
-    case AUD_FMT_U8:
+    case AUDIO_FORMAT_S8:
+    case AUDIO_FORMAT_U8:
         bits16 = 0;
         break;
 
-    case AUD_FMT_S16:
-    case AUD_FMT_U16:
+    case AUDIO_FORMAT_S16:
+    case AUDIO_FORMAT_U16:
         bits16 = 1;
         break;
 
-    case AUD_FMT_S32:
-    case AUD_FMT_U32:
+    case AUDIO_FORMAT_S32:
+    case AUDIO_FORMAT_U32:
         dolog ("WAVE files can not handle 32bit formats\n");
         return -1;
+
+    default:
+        abort();
     }
 
     hdr[34] = bits16 ? 0x10 : 0x08;
@@ -247,24 +107,15 @@ static int wav_init_out(HWVoiceOut *hw, struct audsettings *as,
     audio_pcm_init_info (&hw->info, &wav_as);
 
     hw->samples = 1024;
-    wav->pcm_buf = audio_calloc(__func__, hw->samples, 1 << hw->info.shift);
-    if (!wav->pcm_buf) {
-        dolog ("Could not allocate buffer (%d bytes)\n",
-               hw->samples << hw->info.shift);
-        return -1;
-    }
-
     le_store (hdr + 22, hw->info.nchannels, 2);
     le_store (hdr + 24, hw->info.freq, 4);
     le_store (hdr + 28, hw->info.freq << (bits16 + stereo), 4);
     le_store (hdr + 32, 1 << (bits16 + stereo), 2);
 
-    wav->f = fopen (conf->wav_path, "wb");
+    wav->f = fopen(wav_path, "wb");
     if (!wav->f) {
         dolog ("Failed to open wave file `%s'\nReason: %s\n",
-               conf->wav_path, strerror (errno));
-        g_free (wav->pcm_buf);
-        wav->pcm_buf = NULL;
+               wav_path, strerror(errno));
         return -1;
     }
 
@@ -273,6 +124,8 @@ static int wav_init_out(HWVoiceOut *hw, struct audsettings *as,
                strerror(errno));
         return -1;
     }
+
+    audio_rate_start(&wav->rate);
     return 0;
 }
 
@@ -281,7 +134,7 @@ static void wav_fini_out (HWVoiceOut *hw)
     WAVVoiceOut *wav = (WAVVoiceOut *) hw;
     uint8_t rlen[4];
     uint8_t dlen[4];
-    uint32_t datalen = wav->total_samples << hw->info.shift;
+    uint32_t datalen = wav->total_samples * hw->info.bytes_per_frame;
     uint32_t rifflen = datalen + 36;
 
     if (!wav->f) {
@@ -318,106 +171,48 @@ static void wav_fini_out (HWVoiceOut *hw)
                wav->f, strerror (errno));
     }
     wav->f = NULL;
-
-    g_free (wav->pcm_buf);
-    wav->pcm_buf = NULL;
 }
 
-static int wav_ctl_in (HWVoiceIn *hw, int cmd, ...)
+static void wav_enable_out(HWVoiceOut *hw, bool enable)
 {
-    (void) hw;
-    (void) cmd;
-    return 0;
+    WAVVoiceOut *wav = (WAVVoiceOut *) hw;
+
+    if (enable) {
+        audio_rate_start(&wav->rate);
+    }
 }
 
-static int wav_ctl_out (HWVoiceOut *hw, int cmd, ...)
+static void *wav_audio_init(Audiodev *dev)
 {
-    (void) hw;
-    (void) cmd;
-    return 0;
-}
-
-static WAVConf glob_conf = {
-    .settings.freq      = 44100,
-    .settings.nchannels = 2,
-    .settings.fmt       = AUD_FMT_S16,
-    .in_wav_path        = "qemu_in.wav",
-    .wav_path           = "qemu.wav"
-};
-
-static void *wav_audio_init (void)
-{
-    WAVConf *conf = g_malloc(sizeof(WAVConf));
-    *conf = glob_conf;
-    return conf;
+    assert(dev->driver == AUDIODEV_DRIVER_WAV);
+    return dev;
 }
 
 static void wav_audio_fini (void *opaque)
 {
     ldebug ("wav_fini");
-    g_free(opaque);
 }
-
-static struct audio_option wav_options[] = {
-    {
-        .name  = "FREQUENCY",
-        .tag   = AUD_OPT_INT,
-        .valp  = &glob_conf.settings.freq,
-        .descr = "Frequency"
-    },
-    {
-        .name  = "FORMAT",
-        .tag   = AUD_OPT_FMT,
-        .valp  = &glob_conf.settings.fmt,
-        .descr = "Format"
-    },
-    {
-        .name  = "DAC_FIXED_CHANNELS",
-        .tag   = AUD_OPT_INT,
-        .valp  = &glob_conf.settings.nchannels,
-        .descr = "Number of channels (1 - mono, 2 - stereo)"
-    },
-    {
-        .name  = "PATH",
-        .tag   = AUD_OPT_STR,
-        .valp  = &glob_conf.wav_path,
-        .descr = "Path to output wave file"
-    },
-    {
-        .name  = "IN_PATH",
-        .tag   = AUD_OPT_STR,
-        .valp  = &glob_conf.in_wav_path,
-        .descr = "Path to input wave file"
-    },
-    { /* End of list */ }
-};
 
 static struct audio_pcm_ops wav_pcm_ops = {
     .init_out = wav_init_out,
     .fini_out = wav_fini_out,
-    .run_out  = wav_run_out,
     .write    = wav_write_out,
-    .ctl_out  = wav_ctl_out,
-
-    .init_in  = wav_init_in,
-    .fini_in  = wav_fini_in,
-    .run_in   = wav_run_in,
-    .read     = wav_read_in,
-    .ctl_in   = wav_ctl_in
+    .buffer_get_free = audio_generic_buffer_get_free,
+    .run_buffer_out = audio_generic_run_buffer_out,
+    .enable_out = wav_enable_out,
 };
 
 static struct audio_driver wav_audio_driver = {
     .name           = "wav",
     .descr          = "WAV renderer http://wikipedia.org/wiki/WAV",
-    .options        = wav_options,
     .init           = wav_audio_init,
     .fini           = wav_audio_fini,
     .pcm_ops        = &wav_pcm_ops,
     .can_be_default = 0,
     .max_voices_out = 1,
-    .max_voices_in  = INT_MAX,
+    .max_voices_in  = 0,
     .voice_size_out = sizeof (WAVVoiceOut),
-    .voice_size_in  = sizeof (WAVVoiceIn),
+    .voice_size_in  = 0
 };
 
 static void register_audio_wav(void)

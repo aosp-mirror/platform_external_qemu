@@ -4,7 +4,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifndef TARGET_TRICORE_TRICORE_OPCODES_H
+#define TARGET_TRICORE_TRICORE_OPCODES_H
 
 /*
  * Opcode Masks for Tricore
@@ -427,7 +430,7 @@ enum {
     OPCM_32_ABS_STOREB_H                             = 0x25,
     OPC1_32_ABS_STOREQ                               = 0x65,
     OPC1_32_ABS_LD_Q                                 = 0x45,
-    OPC1_32_ABS_LEA                                  = 0xc5,
+    OPCM_32_ABS_LEA_LHA                              = 0xc5,
 /* ABSB Format */
     OPC1_32_ABSB_ST_T                                = 0xd5,
 /* B Format */
@@ -589,6 +592,13 @@ enum {
     OPC2_32_ABS_ST_B                             = 0x00,
     OPC2_32_ABS_ST_H                             = 0x02,
 };
+
+/* OPCM_32_ABS_LEA_LHA */
+enum {
+    OPC2_32_ABS_LEA                              = 0x00,
+    OPC2_32_ABS_LHA                              = 0x01,
+};
+
 /*
  * Bit Format
  */
@@ -875,6 +885,7 @@ enum {
     OPC2_32_RC_SHAS                              = 0x02,
     OPC2_32_RC_XNOR                              = 0x0d,
     OPC2_32_RC_XOR                               = 0x0c,
+    OPC2_32_RC_SHUFFLE                           = 0x07, /* v1.6.2 only */
 };
 /* OPCM_32_RC_ACCUMULATOR                           */
 enum {
@@ -1129,7 +1140,10 @@ enum {
     OPC2_32_RR_DVINIT_U                          = 0x0a,
     OPC2_32_RR_PARITY                            = 0x02,
     OPC2_32_RR_UNPACK                            = 0x08,
-    OPC2_32_RR_CRC32                             = 0x03,
+    OPC2_32_RR_CRC32                             = 0x03, /* CRC32B.W in 1.6.2 */
+    OPC2_32_RR_CRC32_B                           = 0x06, /* 1.6.2 only */
+    OPC2_32_RR_CRC32L_W                          = 0x07, /* 1.6.2 only */
+    OPC2_32_RR_POPCNT_W                          = 0x22, /* 1.6.2 only */
     OPC2_32_RR_DIV                               = 0x20,
     OPC2_32_RR_DIV_U                             = 0x21,
     OPC2_32_RR_MUL_F                             = 0x04,
@@ -1453,6 +1467,7 @@ enum {
 enum {
     OPC2_32_SYS_DEBUG                            = 0x04,
     OPC2_32_SYS_DISABLE                          = 0x0d,
+    OPC2_32_SYS_DISABLE_D                        = 0x0f, /* 1.6 up */
     OPC2_32_SYS_DSYNC                            = 0x12,
     OPC2_32_SYS_ENABLE                           = 0x0c,
     OPC2_32_SYS_ISYNC                            = 0x13,
@@ -1467,3 +1482,5 @@ enum {
     OPC2_32_SYS_RESTORE                          = 0x0e,
     OPC2_32_SYS_FRET                             = 0x03,
 };
+
+#endif

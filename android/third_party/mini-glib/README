@@ -1,6 +1,0 @@
-This is a tiny replacement for the GLib library that can be used when building
-the Android emulator.
-
-This may be replaced in the future by a full GLib source tree, but this
-introduces several subtle issues in the emulator build, which are better
-avoided for now.

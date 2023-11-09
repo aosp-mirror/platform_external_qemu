@@ -20,8 +20,9 @@
 #ifndef QEMU_I386_CPU_QOM_H
 #define QEMU_I386_CPU_QOM_H
 
-#include "qom/cpu.h"
+#include "hw/core/cpu.h"
 #include "qemu/notify.h"
+#include "qom/object.h"
 
 #ifdef TARGET_X86_64
 #define TYPE_X86_CPU "x86_64-cpu"
@@ -29,34 +30,23 @@
 #define TYPE_X86_CPU "i386-cpu"
 #endif
 
-#define X86_CPU_CLASS(klass) \
-    OBJECT_CLASS_CHECK(X86CPUClass, (klass), TYPE_X86_CPU)
-#define X86_CPU(obj) \
-    OBJECT_CHECK(X86CPU, (obj), TYPE_X86_CPU)
-#define X86_CPU_GET_CLASS(obj) \
-    OBJECT_GET_CLASS(X86CPUClass, (obj), TYPE_X86_CPU)
+OBJECT_DECLARE_CPU_TYPE(X86CPU, X86CPUClass, X86_CPU)
 
-/**
- * X86CPUDefinition:
- *
- * CPU model definition data that was not converted to QOM per-subclass
- * property defaults yet.
- */
-typedef struct X86CPUDefinition X86CPUDefinition;
+typedef struct X86CPUModel X86CPUModel;
 
 /**
  * X86CPUClass:
  * @cpu_def: CPU model definition
- * @kvm_required: Whether CPU model requires KVM to be enabled.
+ * @host_cpuid_required: Whether CPU model requires cpuid from host.
  * @ordering: Ordering on the "-cpu help" CPU model list.
  * @migration_safe: See CpuDefinitionInfo::migration_safe
  * @static_model: See CpuDefinitionInfo::static
  * @parent_realize: The parent class' realize handler.
- * @parent_reset: The parent class' reset handler.
+ * @parent_phases: The parent class' reset phase handlers.
  *
  * An x86 CPU model or family.
  */
-typedef struct X86CPUClass {
+struct X86CPUClass {
     /*< private >*/
     CPUClass parent_class;
     /*< public >*/
@@ -64,10 +54,9 @@ typedef struct X86CPUClass {
     /* CPU definition, automatically loaded by instance_init if not NULL.
      * Should be eventually replaced by subclass-specific property defaults.
      */
-    X86CPUDefinition *cpu_def;
+    X86CPUModel *model;
 
-    bool kvm_required;
-    bool aehd_required;
+    bool host_cpuid_required;
     int ordering;
     bool migration_safe;
     bool static_model;
@@ -78,9 +67,8 @@ typedef struct X86CPUClass {
 
     DeviceRealize parent_realize;
     DeviceUnrealize parent_unrealize;
-    void (*parent_reset)(CPUState *cpu);
-} X86CPUClass;
+    ResettablePhases parent_phases;
+};
 
-typedef struct X86CPU X86CPU;
 
 #endif

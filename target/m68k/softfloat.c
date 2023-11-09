@@ -14,7 +14,8 @@
  * the Softfloat-2a license unless specifically indicated otherwise.
  */
 
-/* Portions of this work are licensed under the terms of the GNU GPL,
+/*
+ * Portions of this work are licensed under the terms of the GNU GPL,
  * version 2 or later. See the COPYING file in the top-level directory.
  */
 
@@ -25,111 +26,30 @@
 
 #define pi_exp      0x4000
 #define piby2_exp   0x3FFF
-#define pi_sig      LIT64(0xc90fdaa22168c235)
+#define pi_sig      UINT64_C(0xc90fdaa22168c235)
 
 static floatx80 propagateFloatx80NaNOneArg(floatx80 a, float_status *status)
 {
     if (floatx80_is_signaling_nan(a, status)) {
         float_raise(float_flag_invalid, status);
+        a = floatx80_silence_nan(a, status);
     }
 
     if (status->default_nan_mode) {
         return floatx80_default_nan(status);
     }
 
-    return floatx80_maybe_silence_nan(a, status);
+    return a;
 }
 
-/*----------------------------------------------------------------------------
- | Returns the modulo remainder of the extended double-precision floating-point
- | value `a' with respect to the corresponding value `b'.
- *----------------------------------------------------------------------------*/
-
-floatx80 floatx80_mod(floatx80 a, floatx80 b, float_status *status)
-{
-    flag aSign, zSign;
-    int32_t aExp, bExp, expDiff;
-    uint64_t aSig0, aSig1, bSig;
-    uint64_t qTemp, term0, term1;
-
-    aSig0 = extractFloatx80Frac(a);
-    aExp = extractFloatx80Exp(a);
-    aSign = extractFloatx80Sign(a);
-    bSig = extractFloatx80Frac(b);
-    bExp = extractFloatx80Exp(b);
-
-    if (aExp == 0x7FFF) {
-        if ((uint64_t) (aSig0 << 1)
-            || ((bExp == 0x7FFF) && (uint64_t) (bSig << 1))) {
-            return propagateFloatx80NaN(a, b, status);
-        }
-        goto invalid;
-    }
-    if (bExp == 0x7FFF) {
-        if ((uint64_t) (bSig << 1)) {
-            return propagateFloatx80NaN(a, b, status);
-        }
-        return a;
-    }
-    if (bExp == 0) {
-        if (bSig == 0) {
-        invalid:
-            float_raise(float_flag_invalid, status);
-            return floatx80_default_nan(status);
-        }
-        normalizeFloatx80Subnormal(bSig, &bExp, &bSig);
-    }
-    if (aExp == 0) {
-        if ((uint64_t) (aSig0 << 1) == 0) {
-            return a;
-        }
-        normalizeFloatx80Subnormal(aSig0, &aExp, &aSig0);
-    }
-    bSig |= LIT64(0x8000000000000000);
-    zSign = aSign;
-    expDiff = aExp - bExp;
-    aSig1 = 0;
-    if (expDiff < 0) {
-        return a;
-    }
-    qTemp = (bSig <= aSig0);
-    if (qTemp) {
-        aSig0 -= bSig;
-    }
-    expDiff -= 64;
-    while (0 < expDiff) {
-        qTemp = estimateDiv128To64(aSig0, aSig1, bSig);
-        qTemp = (2 < qTemp) ? qTemp - 2 : 0;
-        mul64To128(bSig, qTemp, &term0, &term1);
-        sub128(aSig0, aSig1, term0, term1, &aSig0, &aSig1);
-        shortShift128Left(aSig0, aSig1, 62, &aSig0, &aSig1);
-    }
-    expDiff += 64;
-    if (0 < expDiff) {
-        qTemp = estimateDiv128To64(aSig0, aSig1, bSig);
-        qTemp = (2 < qTemp) ? qTemp - 2 : 0;
-        qTemp >>= 64 - expDiff;
-        mul64To128(bSig, qTemp << (64 - expDiff), &term0, &term1);
-        sub128(aSig0, aSig1, term0, term1, &aSig0, &aSig1);
-        shortShift128Left(0, bSig, 64 - expDiff, &term0, &term1);
-        while (le128(term0, term1, aSig0, aSig1)) {
-            ++qTemp;
-            sub128(aSig0, aSig1, term0, term1, &aSig0, &aSig1);
-        }
-    }
-    return
-        normalizeRoundAndPackFloatx80(
-            80, zSign, bExp + expDiff, aSig0, aSig1, status);
-}
-
-/*----------------------------------------------------------------------------
- | Returns the mantissa of the extended double-precision floating-point
- | value `a'.
- *----------------------------------------------------------------------------*/
+/*
+ * Returns the mantissa of the extended double-precision floating-point
+ * value `a'.
+ */
 
 floatx80 floatx80_getman(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
@@ -156,14 +76,14 @@ floatx80 floatx80_getman(floatx80 a, float_status *status)
                                 0x3FFF, aSig, 0, status);
 }
 
-/*----------------------------------------------------------------------------
- | Returns the exponent of the extended double-precision floating-point
- | value `a' as an extended double-precision value.
- *----------------------------------------------------------------------------*/
+/*
+ * Returns the exponent of the extended double-precision floating-point
+ * value `a' as an extended double-precision value.
+ */
 
 floatx80 floatx80_getexp(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
@@ -189,17 +109,17 @@ floatx80 floatx80_getexp(floatx80 a, float_status *status)
     return int32_to_floatx80(aExp - 0x3FFF, status);
 }
 
-/*----------------------------------------------------------------------------
- | Scales extended double-precision floating-point value in operand `a' by
- | value `b'. The function truncates the value in the second operand 'b' to
- | an integral value and adds that value to the exponent of the operand 'a'.
- | The operation performed according to the IEC/IEEE Standard for Binary
- | Floating-Point Arithmetic.
- *----------------------------------------------------------------------------*/
+/*
+ * Scales extended double-precision floating-point value in operand `a' by
+ * value `b'. The function truncates the value in the second operand 'b' to
+ * an integral value and adds that value to the exponent of the operand 'a'.
+ * The operation performed according to the IEC/IEEE Standard for Binary
+ * Floating-Point Arithmetic.
+ */
 
 floatx80 floatx80_scale(floatx80 a, floatx80 b, float_status *status)
 {
-    flag aSign, bSign;
+    bool aSign, bSign;
     int32_t aExp, bExp, shiftCount;
     uint64_t aSig, bSig;
 
@@ -255,7 +175,7 @@ floatx80 floatx80_scale(floatx80 a, floatx80 b, float_status *status)
 
 floatx80 floatx80_move(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
@@ -280,34 +200,35 @@ floatx80 floatx80_move(floatx80 a, float_status *status)
                                 aExp, aSig, 0, status);
 }
 
-/*----------------------------------------------------------------------------
-| Algorithms for transcendental functions supported by MC68881 and MC68882
-| mathematical coprocessors. The functions are derived from FPSP library.
-*----------------------------------------------------------------------------*/
+/*
+ * Algorithms for transcendental functions supported by MC68881 and MC68882
+ * mathematical coprocessors. The functions are derived from FPSP library.
+ */
 
 #define one_exp     0x3FFF
-#define one_sig     LIT64(0x8000000000000000)
+#define one_sig     UINT64_C(0x8000000000000000)
 
-/*----------------------------------------------------------------------------
- | Function for compactifying extended double-precision floating point values.
- *----------------------------------------------------------------------------*/
+/*
+ * Function for compactifying extended double-precision floating point values.
+ */
 
 static int32_t floatx80_make_compact(int32_t aExp, uint64_t aSig)
 {
     return (aExp << 16) | (aSig >> 48);
 }
 
-/*----------------------------------------------------------------------------
- | Log base e of x plus 1
- *----------------------------------------------------------------------------*/
+/*
+ * Log base e of x plus 1
+ */
 
 floatx80 floatx80_lognp1(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig, fSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact, j, k;
     floatx80 fp0, fp1, fp2, fp3, f, logof2, klog2, saveu;
@@ -334,7 +255,8 @@ floatx80 floatx80_lognp1(floatx80 a, float_status *status)
     if (aSign && aExp >= one_exp) {
         if (aExp == one_exp && aSig == one_sig) {
             float_raise(float_flag_divbyzero, status);
-            packFloatx80(aSign, floatx80_infinity.high, floatx80_infinity.low);
+            return packFloatx80(aSign, floatx80_infinity.high,
+                                floatx80_infinity.low);
         }
         float_raise(float_flag_invalid, status);
         return floatx80_default_nan(status);
@@ -349,7 +271,7 @@ floatx80 floatx80_lognp1(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     compact = floatx80_make_compact(aExp, aSig);
 
@@ -369,7 +291,7 @@ floatx80 floatx80_lognp1(floatx80 a, float_status *status)
         k = aExp - 0x3FFF;
         fp1 = int32_to_floatx80(k, status);
 
-        fSig = (aSig & LIT64(0xFE00000000000000)) | LIT64(0x0100000000000000);
+        fSig = (aSig & UINT64_C(0xFE00000000000000)) | UINT64_C(0x0100000000000000);
         j = (fSig >> 56) & 0x7E; /* DISPLACEMENT FOR 1/F */
 
         f = packFloatx80(0, 0x3FFF, fSig); /* F */
@@ -380,7 +302,7 @@ floatx80 floatx80_lognp1(floatx80 a, float_status *status)
     lp1cont1:
         /* LP1CONT1 */
         fp0 = floatx80_mul(fp0, log_tbl[j], status); /* FP0 IS U = (Y-F)/F */
-        logof2 = packFloatx80(0, 0x3FFE, LIT64(0xB17217F7D1CF79AC));
+        logof2 = packFloatx80(0, 0x3FFE, UINT64_C(0xB17217F7D1CF79AC));
         klog2 = floatx80_mul(fp1, logof2, status); /* FP1 IS K*LOG2 */
         fp2 = floatx80_mul(fp0, fp0, status); /* FP2 IS V=U*U */
 
@@ -427,7 +349,7 @@ floatx80 floatx80_lognp1(floatx80 a, float_status *status)
     } else if (compact < 0x3FFEF07D || compact > 0x3FFF8841) {
         /* |X| < 1/16 or |X| > -1/16 */
         /* LP1CARE */
-        fSig = (aSig & LIT64(0xFE00000000000000)) | LIT64(0x0100000000000000);
+        fSig = (aSig & UINT64_C(0xFE00000000000000)) | UINT64_C(0x0100000000000000);
         f = packFloatx80(0, 0x3FFF, fSig); /* F */
         j = (fSig >> 56) & 0x7E; /* DISPLACEMENT FOR 1/F */
 
@@ -495,17 +417,18 @@ floatx80 floatx80_lognp1(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | Log base e
- *----------------------------------------------------------------------------*/
+/*
+ * Log base e
+ */
 
 floatx80 floatx80_logn(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig, fSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact, j, k, adjk;
     floatx80 fp0, fp1, fp2, fp3, f, logof2, klog2, saveu;
@@ -548,7 +471,7 @@ floatx80 floatx80_logn(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     compact = floatx80_make_compact(aExp, aSig);
 
@@ -558,7 +481,7 @@ floatx80 floatx80_logn(floatx80 a, float_status *status)
         k += adjk;
         fp1 = int32_to_floatx80(k, status);
 
-        fSig = (aSig & LIT64(0xFE00000000000000)) | LIT64(0x0100000000000000);
+        fSig = (aSig & UINT64_C(0xFE00000000000000)) | UINT64_C(0x0100000000000000);
         j = (fSig >> 56) & 0x7E; /* DISPLACEMENT FOR 1/F */
 
         f = packFloatx80(0, 0x3FFF, fSig); /* F */
@@ -568,7 +491,7 @@ floatx80 floatx80_logn(floatx80 a, float_status *status)
 
         /* LP1CONT1 */
         fp0 = floatx80_mul(fp0, log_tbl[j], status); /* FP0 IS U = (Y-F)/F */
-        logof2 = packFloatx80(0, 0x3FFE, LIT64(0xB17217F7D1CF79AC));
+        logof2 = packFloatx80(0, 0x3FFE, UINT64_C(0xB17217F7D1CF79AC));
         klog2 = floatx80_mul(fp1, logof2, status); /* FP1 IS K*LOG2 */
         fp2 = floatx80_mul(fp0, fp0, status); /* FP2 IS V=U*U */
 
@@ -663,17 +586,18 @@ floatx80 floatx80_logn(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | Log base 10
- *----------------------------------------------------------------------------*/
+/*
+ * Log base 10
+ */
 
 floatx80 floatx80_log10(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     floatx80 fp0, fp1;
 
@@ -705,10 +629,10 @@ floatx80 floatx80_log10(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     fp0 = floatx80_logn(a, status);
-    fp1 = packFloatx80(0, 0x3FFD, LIT64(0xDE5BD8A937287195)); /* INV_L10 */
+    fp1 = packFloatx80(0, 0x3FFD, UINT64_C(0xDE5BD8A937287195)); /* INV_L10 */
 
     status->float_rounding_mode = user_rnd_mode;
     status->floatx80_rounding_precision = user_rnd_prec;
@@ -720,17 +644,18 @@ floatx80 floatx80_log10(floatx80 a, float_status *status)
     return a;
 }
 
-/*----------------------------------------------------------------------------
- | Log base 2
- *----------------------------------------------------------------------------*/
+/*
+ * Log base 2
+ */
 
 floatx80 floatx80_log2(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     floatx80 fp0, fp1;
 
@@ -765,7 +690,7 @@ floatx80 floatx80_log2(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     if (aSig == one_sig) { /* X is 2^k */
         status->float_rounding_mode = user_rnd_mode;
@@ -774,7 +699,7 @@ floatx80 floatx80_log2(floatx80 a, float_status *status)
         a = int32_to_floatx80(aExp - 0x3FFF, status);
     } else {
         fp0 = floatx80_logn(a, status);
-        fp1 = packFloatx80(0, 0x3FFF, LIT64(0xB8AA3B295C17F0BC)); /* INV_L2 */
+        fp1 = packFloatx80(0, 0x3FFF, UINT64_C(0xB8AA3B295C17F0BC)); /* INV_L2 */
 
         status->float_rounding_mode = user_rnd_mode;
         status->floatx80_rounding_precision = user_rnd_prec;
@@ -787,21 +712,22 @@ floatx80 floatx80_log2(floatx80 a, float_status *status)
     return a;
 }
 
-/*----------------------------------------------------------------------------
- | e to x
- *----------------------------------------------------------------------------*/
+/*
+ * e to x
+ */
 
 floatx80 floatx80_etox(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact, n, j, k, m, m1;
     floatx80 fp0, fp1, fp2, fp3, l2, scale, adjscale;
-    flag adjflag;
+    bool adjflag;
 
     aSig = extractFloatx80Frac(a);
     aExp = extractFloatx80Exp(a);
@@ -825,7 +751,7 @@ floatx80 floatx80_etox(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     adjflag = 0;
 
@@ -845,7 +771,8 @@ floatx80 floatx80_etox(floatx80 a, float_status *status)
             j = n & 0x3F; /* J = N mod 64 */
             m = n / 64; /* NOTE: this is really arithmetic right shift by 6 */
             if (n < 0 && j) {
-                /* arithmetic right shift is division and
+                /*
+                 * arithmetic right shift is division and
                  * round towards minus infinity
                  */
                 m--;
@@ -857,7 +784,7 @@ floatx80 floatx80_etox(floatx80 a, float_status *status)
             fp0 = floatx80_mul(fp0, float32_to_floatx80(
                                make_float32(0xBC317218), status),
                                status); /* N * L1, L1 = lead(-log2/64) */
-            l2 = packFloatx80(0, 0x3FDC, LIT64(0x82E308654361C4C6));
+            l2 = packFloatx80(0, 0x3FDC, UINT64_C(0x82E308654361C4C6));
             fp2 = floatx80_mul(fp2, l2, status); /* N * L2, L1+L2 = -log2/64 */
             fp0 = floatx80_add(fp0, fp1, status); /* X + N*L1 */
             fp0 = floatx80_add(fp0, fp2, status); /* R */
@@ -970,17 +897,18 @@ floatx80 floatx80_etox(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | 2 to x
- *----------------------------------------------------------------------------*/
+/*
+ * 2 to x
+ */
 
 floatx80 floatx80_twotox(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact, n, j, l, m, m1;
     floatx80 fp0, fp1, fp2, fp3, adjfact, fact1, fact2;
@@ -1007,7 +935,7 @@ floatx80 floatx80_twotox(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     fp0 = a;
 
@@ -1048,14 +976,16 @@ floatx80 floatx80_twotox(floatx80 a, float_status *status)
         j = n & 0x3F;
         l = n / 64; /* NOTE: this is really arithmetic right shift by 6 */
         if (n < 0 && j) {
-            /* arithmetic right shift is division and
+            /*
+             * arithmetic right shift is division and
              * round towards minus infinity
              */
             l--;
         }
         m = l / 2; /* NOTE: this is really arithmetic right shift by 1 */
         if (l < 0 && (l & 1)) {
-            /* arithmetic right shift is division and
+            /*
+             * arithmetic right shift is division and
              * round towards minus infinity
              */
             m--;
@@ -1075,7 +1005,7 @@ floatx80 floatx80_twotox(floatx80 a, float_status *status)
                            make_float32(0x3C800000), status),
                            status); /* (1/64)*N */
         fp0 = floatx80_sub(fp0, fp1, status); /* X - (1/64)*INT(64 X) */
-        fp2 = packFloatx80(0, 0x3FFE, LIT64(0xB17217F7D1CF79AC)); /* LOG2 */
+        fp2 = packFloatx80(0, 0x3FFE, UINT64_C(0xB17217F7D1CF79AC)); /* LOG2 */
         fp0 = floatx80_mul(fp0, fp2, status); /* R */
 
         /* EXPR */
@@ -1118,17 +1048,18 @@ floatx80 floatx80_twotox(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | 10 to x
- *----------------------------------------------------------------------------*/
+/*
+ * 10 to x
+ */
 
 floatx80 floatx80_tentox(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact, n, j, l, m, m1;
     floatx80 fp0, fp1, fp2, fp3, adjfact, fact1, fact2;
@@ -1155,7 +1086,7 @@ floatx80 floatx80_tentox(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     fp0 = a;
 
@@ -1197,14 +1128,16 @@ floatx80 floatx80_tentox(floatx80 a, float_status *status)
         j = n & 0x3F;
         l = n / 64; /* NOTE: this is really arithmetic right shift by 6 */
         if (n < 0 && j) {
-            /* arithmetic right shift is division and
+            /*
+             * arithmetic right shift is division and
              * round towards minus infinity
              */
             l--;
         }
         m = l / 2; /* NOTE: this is really arithmetic right shift by 1 */
         if (l < 0 && (l & 1)) {
-            /* arithmetic right shift is division and
+            /*
+             * arithmetic right shift is division and
              * round towards minus infinity
              */
             m--;
@@ -1224,11 +1157,11 @@ floatx80 floatx80_tentox(floatx80 a, float_status *status)
         fp1 = floatx80_mul(fp1, float64_to_floatx80(
                            make_float64(0x3F734413509F8000), status),
                            status); /* N*(LOG2/64LOG10)_LEAD */
-        fp3 = packFloatx80(1, 0x3FCD, LIT64(0xC0219DC1DA994FD2));
+        fp3 = packFloatx80(1, 0x3FCD, UINT64_C(0xC0219DC1DA994FD2));
         fp2 = floatx80_mul(fp2, fp3, status); /* N*(LOG2/64LOG10)_TRAIL */
         fp0 = floatx80_sub(fp0, fp1, status); /* X - N L_LEAD */
         fp0 = floatx80_sub(fp0, fp2, status); /* X - N L_TRAIL */
-        fp2 = packFloatx80(0, 0x4000, LIT64(0x935D8DDDAAA8AC17)); /* LOG10 */
+        fp2 = packFloatx80(0, 0x4000, UINT64_C(0x935D8DDDAAA8AC17)); /* LOG10 */
         fp0 = floatx80_mul(fp0, fp2, status); /* R */
 
         /* EXPR */
@@ -1271,22 +1204,23 @@ floatx80 floatx80_tentox(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | Tangent
- *----------------------------------------------------------------------------*/
+/*
+ * Tangent
+ */
 
 floatx80 floatx80_tan(floatx80 a, float_status *status)
 {
-    flag aSign, xSign;
+    bool aSign, xSign;
     int32_t aExp, xExp;
     uint64_t aSig, xSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact, l, n, j;
     floatx80 fp0, fp1, fp2, fp3, fp4, fp5, invtwopi, twopi1, twopi2;
     float32 twoto63;
-    flag endflag;
+    bool endflag;
 
     aSig = extractFloatx80Frac(a);
     aExp = extractFloatx80Exp(a);
@@ -1307,7 +1241,7 @@ floatx80 floatx80_tan(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     compact = floatx80_make_compact(aExp, aSig);
 
@@ -1320,9 +1254,9 @@ floatx80 floatx80_tan(floatx80 a, float_status *status)
             fp1 = packFloatx80(0, 0, 0);
             if (compact == 0x7FFEFFFF) {
                 twopi1 = packFloatx80(aSign ^ 1, 0x7FFE,
-                                      LIT64(0xC90FDAA200000000));
+                                      UINT64_C(0xC90FDAA200000000));
                 twopi2 = packFloatx80(aSign ^ 1, 0x7FDC,
-                                      LIT64(0x85A308D300000000));
+                                      UINT64_C(0x85A308D300000000));
                 fp0 = floatx80_add(fp0, twopi1, status);
                 fp1 = fp0;
                 fp0 = floatx80_add(fp0, twopi2, status);
@@ -1335,15 +1269,15 @@ floatx80 floatx80_tan(floatx80 a, float_status *status)
             xExp -= 0x3FFF;
             if (xExp <= 28) {
                 l = 0;
-                endflag = 1;
+                endflag = true;
             } else {
                 l = xExp - 27;
-                endflag = 0;
+                endflag = false;
             }
             invtwopi = packFloatx80(0, 0x3FFE - l,
-                                    LIT64(0xA2F9836E4E44152A)); /* INVTWOPI */
-            twopi1 = packFloatx80(0, 0x3FFF + l, LIT64(0xC90FDAA200000000));
-            twopi2 = packFloatx80(0, 0x3FDD + l, LIT64(0x85A308D300000000));
+                                    UINT64_C(0xA2F9836E4E44152A)); /* INVTWOPI */
+            twopi1 = packFloatx80(0, 0x3FFF + l, UINT64_C(0xC90FDAA200000000));
+            twopi2 = packFloatx80(0, 0x3FDD + l, UINT64_C(0x85A308D300000000));
 
             /* SIGN(INARG)*2^63 IN SGL */
             twoto63 = packFloat32(xSign, 0xBE, 0);
@@ -1363,7 +1297,7 @@ floatx80 floatx80_tan(floatx80 a, float_status *status)
             fp1 = floatx80_sub(fp1, fp4, status); /* FP1 is a := r - p */
             fp0 = floatx80_add(fp0, fp1, status); /* FP0 is R := A+a */
 
-            if (endflag > 0) {
+            if (endflag) {
                 n = floatx80_to_int32(fp2, status);
                 goto tancont;
             }
@@ -1406,17 +1340,17 @@ floatx80 floatx80_tan(floatx80 a, float_status *status)
             fp3 = floatx80_add(fp3, float64_to_floatx80(
                                make_float64(0xBF346F59B39BA65F), status),
                                status); /* Q3+SQ4 */
-            fp4 = packFloatx80(0, 0x3FF6, LIT64(0xE073D3FC199C4A00));
+            fp4 = packFloatx80(0, 0x3FF6, UINT64_C(0xE073D3FC199C4A00));
             fp2 = floatx80_add(fp2, fp4, status); /* P2+SP3 */
             fp3 = floatx80_mul(fp3, fp0, status); /* S(Q3+SQ4) */
             fp2 = floatx80_mul(fp2, fp0, status); /* S(P2+SP3) */
-            fp4 = packFloatx80(0, 0x3FF9, LIT64(0xD23CD68415D95FA1));
+            fp4 = packFloatx80(0, 0x3FF9, UINT64_C(0xD23CD68415D95FA1));
             fp3 = floatx80_add(fp3, fp4, status); /* Q2+S(Q3+SQ4) */
-            fp4 = packFloatx80(1, 0x3FFC, LIT64(0x8895A6C5FB423BCA));
+            fp4 = packFloatx80(1, 0x3FFC, UINT64_C(0x8895A6C5FB423BCA));
             fp2 = floatx80_add(fp2, fp4, status); /* P1+S(P2+SP3) */
             fp3 = floatx80_mul(fp3, fp0, status); /* S(Q2+S(Q3+SQ4)) */
             fp2 = floatx80_mul(fp2, fp0, status); /* S(P1+S(P2+SP3)) */
-            fp4 = packFloatx80(1, 0x3FFD, LIT64(0xEEF57E0DA84BC8CE));
+            fp4 = packFloatx80(1, 0x3FFD, UINT64_C(0xEEF57E0DA84BC8CE));
             fp3 = floatx80_add(fp3, fp4, status); /* Q1+S(Q2+S(Q3+SQ4)) */
             fp2 = floatx80_mul(fp2, fp1, status); /* RS(P1+S(P2+SP3)) */
             fp0 = floatx80_mul(fp0, fp3, status); /* S(Q1+S(Q2+S(Q3+SQ4))) */
@@ -1450,17 +1384,17 @@ floatx80 floatx80_tan(floatx80 a, float_status *status)
             fp3 = floatx80_add(fp3, float64_to_floatx80(
                                make_float64(0xBF346F59B39BA65F), status),
                                status); /* Q3+SQ4 */
-            fp4 = packFloatx80(0, 0x3FF6, LIT64(0xE073D3FC199C4A00));
+            fp4 = packFloatx80(0, 0x3FF6, UINT64_C(0xE073D3FC199C4A00));
             fp2 = floatx80_add(fp2, fp4, status); /* P2+SP3 */
             fp3 = floatx80_mul(fp3, fp1, status); /* S(Q3+SQ4) */
             fp2 = floatx80_mul(fp2, fp1, status); /* S(P2+SP3) */
-            fp4 = packFloatx80(0, 0x3FF9, LIT64(0xD23CD68415D95FA1));
+            fp4 = packFloatx80(0, 0x3FF9, UINT64_C(0xD23CD68415D95FA1));
             fp3 = floatx80_add(fp3, fp4, status); /* Q2+S(Q3+SQ4) */
-            fp4 = packFloatx80(1, 0x3FFC, LIT64(0x8895A6C5FB423BCA));
+            fp4 = packFloatx80(1, 0x3FFC, UINT64_C(0x8895A6C5FB423BCA));
             fp2 = floatx80_add(fp2, fp4, status); /* P1+S(P2+SP3) */
             fp3 = floatx80_mul(fp3, fp1, status); /* S(Q2+S(Q3+SQ4)) */
             fp2 = floatx80_mul(fp2, fp1, status); /* S(P1+S(P2+SP3)) */
-            fp4 = packFloatx80(1, 0x3FFD, LIT64(0xEEF57E0DA84BC8CE));
+            fp4 = packFloatx80(1, 0x3FFD, UINT64_C(0xEEF57E0DA84BC8CE));
             fp3 = floatx80_add(fp3, fp4, status); /* Q1+S(Q2+S(Q3+SQ4)) */
             fp2 = floatx80_mul(fp2, fp0, status); /* RS(P1+S(P2+SP3)) */
             fp1 = floatx80_mul(fp1, fp3, status); /* S(Q1+S(Q2+S(Q3+SQ4))) */
@@ -1481,22 +1415,23 @@ floatx80 floatx80_tan(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | Sine
- *----------------------------------------------------------------------------*/
+/*
+ * Sine
+ */
 
 floatx80 floatx80_sin(floatx80 a, float_status *status)
 {
-    flag aSign, xSign;
+    bool aSign, xSign;
     int32_t aExp, xExp;
     uint64_t aSig, xSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact, l, n, j;
     floatx80 fp0, fp1, fp2, fp3, fp4, fp5, x, invtwopi, twopi1, twopi2;
     float32 posneg1, twoto63;
-    flag adjn, endflag;
+    bool endflag;
 
     aSig = extractFloatx80Frac(a);
     aExp = extractFloatx80Exp(a);
@@ -1514,12 +1449,10 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
         return packFloatx80(aSign, 0, 0);
     }
 
-    adjn = 0;
-
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     compact = floatx80_make_compact(aExp, aSig);
 
@@ -1532,9 +1465,9 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
             fp1 = packFloatx80(0, 0, 0);
             if (compact == 0x7FFEFFFF) {
                 twopi1 = packFloatx80(aSign ^ 1, 0x7FFE,
-                                      LIT64(0xC90FDAA200000000));
+                                      UINT64_C(0xC90FDAA200000000));
                 twopi2 = packFloatx80(aSign ^ 1, 0x7FDC,
-                                      LIT64(0x85A308D300000000));
+                                      UINT64_C(0x85A308D300000000));
                 fp0 = floatx80_add(fp0, twopi1, status);
                 fp1 = fp0;
                 fp0 = floatx80_add(fp0, twopi2, status);
@@ -1547,15 +1480,15 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
             xExp -= 0x3FFF;
             if (xExp <= 28) {
                 l = 0;
-                endflag = 1;
+                endflag = true;
             } else {
                 l = xExp - 27;
-                endflag = 0;
+                endflag = false;
             }
             invtwopi = packFloatx80(0, 0x3FFE - l,
-                                    LIT64(0xA2F9836E4E44152A)); /* INVTWOPI */
-            twopi1 = packFloatx80(0, 0x3FFF + l, LIT64(0xC90FDAA200000000));
-            twopi2 = packFloatx80(0, 0x3FDD + l, LIT64(0x85A308D300000000));
+                                    UINT64_C(0xA2F9836E4E44152A)); /* INVTWOPI */
+            twopi1 = packFloatx80(0, 0x3FFF + l, UINT64_C(0xC90FDAA200000000));
+            twopi2 = packFloatx80(0, 0x3FDD + l, UINT64_C(0x85A308D300000000));
 
             /* SIGN(INARG)*2^63 IN SGL */
             twoto63 = packFloat32(xSign, 0xBE, 0);
@@ -1575,7 +1508,7 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
             fp1 = floatx80_sub(fp1, fp4, status); /* FP1 is a := r - p */
             fp0 = floatx80_add(fp0, fp1, status); /* FP0 is R := A+a */
 
-            if (endflag > 0) {
+            if (endflag) {
                 n = floatx80_to_int32(fp2, status);
                 goto sincont;
             }
@@ -1590,14 +1523,8 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
             status->float_rounding_mode = user_rnd_mode;
             status->floatx80_rounding_precision = user_rnd_prec;
 
-            if (adjn) {
-                /* COSTINY */
-                a = floatx80_sub(fp0, float32_to_floatx80(
-                                 make_float32(0x00800000), status), status);
-            } else {
-                /* SINTINY */
-                a = floatx80_move(a, status);
-            }
+            /* SINTINY */
+            a = floatx80_move(a, status);
             float_raise(float_flag_inexact, status);
 
             return a;
@@ -1615,7 +1542,7 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
                            status); /* FP0 IS R = (X-Y1)-Y2 */
 
     sincont:
-        if ((n + adjn) & 1) {
+        if (n & 1) {
             /* COSPOLY */
             fp0 = floatx80_mul(fp0, fp0, status); /* FP0 IS S */
             fp1 = floatx80_mul(fp0, fp0, status); /* FP1 IS T */
@@ -1628,7 +1555,7 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
             xExp = extractFloatx80Exp(fp0);
             xSig = extractFloatx80Frac(fp0);
 
-            if (((n + adjn) >> 1) & 1) {
+            if ((n >> 1) & 1) {
                 xSign ^= 1;
                 posneg1 = make_float32(0xBF800000); /* -1 */
             } else {
@@ -1649,11 +1576,11 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
             fp2 = floatx80_add(fp2, float64_to_floatx80(
                                make_float64(0x3EFA01A01A01D423), status),
                                status); /* B4+T(B6+TB8) */
-            fp4 = packFloatx80(1, 0x3FF5, LIT64(0xB60B60B60B61D438));
+            fp4 = packFloatx80(1, 0x3FF5, UINT64_C(0xB60B60B60B61D438));
             fp3 = floatx80_add(fp3, fp4, status); /* B3+T(B5+TB7) */
             fp2 = floatx80_mul(fp2, fp1, status); /* T(B4+T(B6+TB8)) */
             fp1 = floatx80_mul(fp1, fp3, status); /* T(B3+T(B5+TB7)) */
-            fp4 = packFloatx80(0, 0x3FFA, LIT64(0xAAAAAAAAAAAAAB5E));
+            fp4 = packFloatx80(0, 0x3FFA, UINT64_C(0xAAAAAAAAAAAAAB5E));
             fp2 = floatx80_add(fp2, fp4, status); /* B2+T(B4+T(B6+TB8)) */
             fp1 = floatx80_add(fp1, float32_to_floatx80(
                                make_float32(0xBF000000), status),
@@ -1680,7 +1607,7 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
             xExp = extractFloatx80Exp(fp0);
             xSig = extractFloatx80Frac(fp0);
 
-            xSign ^= ((n + adjn) >> 1) & 1; /* X IS NOW R'= SGN*R */
+            xSign ^= (n >> 1) & 1; /* X IS NOW R'= SGN*R */
 
             fp0 = floatx80_mul(fp0, fp0, status); /* FP0 IS S */
             fp1 = floatx80_mul(fp0, fp0, status); /* FP1 IS T */
@@ -1701,11 +1628,11 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
             fp3 = floatx80_add(fp3, float64_to_floatx80(
                                make_float64(0xBF2A01A01A018B59), status),
                                status); /* A3+T(A5+TA7) */
-            fp4 = packFloatx80(0, 0x3FF8, LIT64(0x88888888888859AF));
+            fp4 = packFloatx80(0, 0x3FF8, UINT64_C(0x88888888888859AF));
             fp2 = floatx80_add(fp2, fp4, status); /* A2+T(A4+TA6) */
             fp1 = floatx80_mul(fp1, fp3, status); /* T(A3+T(A5+TA7)) */
             fp2 = floatx80_mul(fp2, fp0, status); /* S(A2+T(A4+TA6)) */
-            fp4 = packFloatx80(1, 0x3FFC, LIT64(0xAAAAAAAAAAAAAA99));
+            fp4 = packFloatx80(1, 0x3FFC, UINT64_C(0xAAAAAAAAAAAAAA99));
             fp1 = floatx80_add(fp1, fp4, status); /* A1+T(A3+T(A5+TA7)) */
             fp1 = floatx80_add(fp1, fp2,
                                status); /* [A1+T(A3+T(A5+TA7))]+
@@ -1728,22 +1655,23 @@ floatx80 floatx80_sin(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | Cosine
- *----------------------------------------------------------------------------*/
+/*
+ * Cosine
+ */
 
 floatx80 floatx80_cos(floatx80 a, float_status *status)
 {
-    flag aSign, xSign;
+    bool aSign, xSign;
     int32_t aExp, xExp;
     uint64_t aSig, xSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact, l, n, j;
     floatx80 fp0, fp1, fp2, fp3, fp4, fp5, x, invtwopi, twopi1, twopi2;
     float32 posneg1, twoto63;
-    flag adjn, endflag;
+    bool endflag;
 
     aSig = extractFloatx80Frac(a);
     aExp = extractFloatx80Exp(a);
@@ -1761,12 +1689,10 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
         return packFloatx80(0, one_exp, one_sig);
     }
 
-    adjn = 1;
-
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     compact = floatx80_make_compact(aExp, aSig);
 
@@ -1779,9 +1705,9 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
             fp1 = packFloatx80(0, 0, 0);
             if (compact == 0x7FFEFFFF) {
                 twopi1 = packFloatx80(aSign ^ 1, 0x7FFE,
-                                      LIT64(0xC90FDAA200000000));
+                                      UINT64_C(0xC90FDAA200000000));
                 twopi2 = packFloatx80(aSign ^ 1, 0x7FDC,
-                                      LIT64(0x85A308D300000000));
+                                      UINT64_C(0x85A308D300000000));
                 fp0 = floatx80_add(fp0, twopi1, status);
                 fp1 = fp0;
                 fp0 = floatx80_add(fp0, twopi2, status);
@@ -1794,15 +1720,15 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
             xExp -= 0x3FFF;
             if (xExp <= 28) {
                 l = 0;
-                endflag = 1;
+                endflag = true;
             } else {
                 l = xExp - 27;
-                endflag = 0;
+                endflag = false;
             }
             invtwopi = packFloatx80(0, 0x3FFE - l,
-                                    LIT64(0xA2F9836E4E44152A)); /* INVTWOPI */
-            twopi1 = packFloatx80(0, 0x3FFF + l, LIT64(0xC90FDAA200000000));
-            twopi2 = packFloatx80(0, 0x3FDD + l, LIT64(0x85A308D300000000));
+                                    UINT64_C(0xA2F9836E4E44152A)); /* INVTWOPI */
+            twopi1 = packFloatx80(0, 0x3FFF + l, UINT64_C(0xC90FDAA200000000));
+            twopi2 = packFloatx80(0, 0x3FDD + l, UINT64_C(0x85A308D300000000));
 
             /* SIGN(INARG)*2^63 IN SGL */
             twoto63 = packFloat32(xSign, 0xBE, 0);
@@ -1822,7 +1748,7 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
             fp1 = floatx80_sub(fp1, fp4, status); /* FP1 is a := r - p */
             fp0 = floatx80_add(fp0, fp1, status); /* FP0 is R := A+a */
 
-            if (endflag > 0) {
+            if (endflag) {
                 n = floatx80_to_int32(fp2, status);
                 goto sincont;
             }
@@ -1836,15 +1762,10 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
             status->float_rounding_mode = user_rnd_mode;
             status->floatx80_rounding_precision = user_rnd_prec;
 
-            if (adjn) {
-                /* COSTINY */
-                a = floatx80_sub(fp0, float32_to_floatx80(
-                                 make_float32(0x00800000), status),
-                                 status);
-            } else {
-                /* SINTINY */
-                a = floatx80_move(a, status);
-            }
+            /* COSTINY */
+            a = floatx80_sub(fp0, float32_to_floatx80(
+                             make_float32(0x00800000), status),
+                             status);
             float_raise(float_flag_inexact, status);
 
             return a;
@@ -1862,7 +1783,7 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
                            status); /* FP0 IS R = (X-Y1)-Y2 */
 
     sincont:
-        if ((n + adjn) & 1) {
+        if ((n + 1) & 1) {
             /* COSPOLY */
             fp0 = floatx80_mul(fp0, fp0, status); /* FP0 IS S */
             fp1 = floatx80_mul(fp0, fp0, status); /* FP1 IS T */
@@ -1875,7 +1796,7 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
             xExp = extractFloatx80Exp(fp0);
             xSig = extractFloatx80Frac(fp0);
 
-            if (((n + adjn) >> 1) & 1) {
+            if (((n + 1) >> 1) & 1) {
                 xSign ^= 1;
                 posneg1 = make_float32(0xBF800000); /* -1 */
             } else {
@@ -1896,11 +1817,11 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
             fp2 = floatx80_add(fp2, float64_to_floatx80(
                                make_float64(0x3EFA01A01A01D423), status),
                                status); /* B4+T(B6+TB8) */
-            fp4 = packFloatx80(1, 0x3FF5, LIT64(0xB60B60B60B61D438));
+            fp4 = packFloatx80(1, 0x3FF5, UINT64_C(0xB60B60B60B61D438));
             fp3 = floatx80_add(fp3, fp4, status); /* B3+T(B5+TB7) */
             fp2 = floatx80_mul(fp2, fp1, status); /* T(B4+T(B6+TB8)) */
             fp1 = floatx80_mul(fp1, fp3, status); /* T(B3+T(B5+TB7)) */
-            fp4 = packFloatx80(0, 0x3FFA, LIT64(0xAAAAAAAAAAAAAB5E));
+            fp4 = packFloatx80(0, 0x3FFA, UINT64_C(0xAAAAAAAAAAAAAB5E));
             fp2 = floatx80_add(fp2, fp4, status); /* B2+T(B4+T(B6+TB8)) */
             fp1 = floatx80_add(fp1, float32_to_floatx80(
                                make_float32(0xBF000000), status),
@@ -1926,7 +1847,7 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
             xExp = extractFloatx80Exp(fp0);
             xSig = extractFloatx80Frac(fp0);
 
-            xSign ^= ((n + adjn) >> 1) & 1; /* X IS NOW R'= SGN*R */
+            xSign ^= ((n + 1) >> 1) & 1; /* X IS NOW R'= SGN*R */
 
             fp0 = floatx80_mul(fp0, fp0, status); /* FP0 IS S */
             fp1 = floatx80_mul(fp0, fp0, status); /* FP1 IS T */
@@ -1947,11 +1868,11 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
             fp3 = floatx80_add(fp3, float64_to_floatx80(
                                make_float64(0xBF2A01A01A018B59), status),
                                status); /* A3+T(A5+TA7) */
-            fp4 = packFloatx80(0, 0x3FF8, LIT64(0x88888888888859AF));
+            fp4 = packFloatx80(0, 0x3FF8, UINT64_C(0x88888888888859AF));
             fp2 = floatx80_add(fp2, fp4, status); /* A2+T(A4+TA6) */
             fp1 = floatx80_mul(fp1, fp3, status); /* T(A3+T(A5+TA7)) */
             fp2 = floatx80_mul(fp2, fp0, status); /* S(A2+T(A4+TA6)) */
-            fp4 = packFloatx80(1, 0x3FFC, LIT64(0xAAAAAAAAAAAAAA99));
+            fp4 = packFloatx80(1, 0x3FFC, UINT64_C(0xAAAAAAAAAAAAAA99));
             fp1 = floatx80_add(fp1, fp4, status); /* A1+T(A3+T(A5+TA7)) */
             fp1 = floatx80_add(fp1, fp2, status);
                                     /* [A1+T(A3+T(A5+TA7))]+[S(A2+T(A4+TA6))] */
@@ -1972,17 +1893,18 @@ floatx80 floatx80_cos(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | Arc tangent
- *----------------------------------------------------------------------------*/
+/*
+ * Arc tangent
+ */
 
 floatx80 floatx80_atan(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact, tbl_index;
     floatx80 fp0, fp1, fp2, fp3, xsave;
@@ -2009,7 +1931,7 @@ floatx80 floatx80_atan(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     if (compact < 0x3FFB8000 || compact > 0x4002FFFF) {
         /* |X| >= 16 or |X| < 1/16 */
@@ -2120,8 +2042,8 @@ floatx80 floatx80_atan(floatx80 a, float_status *status)
             }
         }
     } else {
-        aSig &= LIT64(0xF800000000000000);
-        aSig |= LIT64(0x0400000000000000);
+        aSig &= UINT64_C(0xF800000000000000);
+        aSig |= UINT64_C(0x0400000000000000);
         xsave = packFloatx80(aSign, aExp, aSig); /* F */
         fp0 = a;
         fp1 = a; /* X */
@@ -2169,17 +2091,18 @@ floatx80 floatx80_atan(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | Arc sine
- *----------------------------------------------------------------------------*/
+/*
+ * Arc sine
+ */
 
 floatx80 floatx80_asin(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact;
     floatx80 fp0, fp1, fp2, one;
@@ -2213,7 +2136,7 @@ floatx80 floatx80_asin(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     one = packFloatx80(0, one_exp, one_sig);
     fp0 = a;
@@ -2234,17 +2157,18 @@ floatx80 floatx80_asin(floatx80 a, float_status *status)
     return a;
 }
 
-/*----------------------------------------------------------------------------
- | Arc cosine
- *----------------------------------------------------------------------------*/
+/*
+ * Arc cosine
+ */
 
 floatx80 floatx80_acos(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact;
     floatx80 fp0, fp1, one;
@@ -2282,7 +2206,7 @@ floatx80 floatx80_acos(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     one = packFloatx80(0, one_exp, one_sig);
     fp0 = a;
@@ -2303,17 +2227,18 @@ floatx80 floatx80_acos(floatx80 a, float_status *status)
     return a;
 }
 
-/*----------------------------------------------------------------------------
- | Hyperbolic arc tangent
- *----------------------------------------------------------------------------*/
+/*
+ * Hyperbolic arc tangent
+ */
 
 floatx80 floatx80_atanh(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact;
     floatx80 fp0, fp1, fp2, one;
@@ -2346,7 +2271,7 @@ floatx80 floatx80_atanh(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     one = packFloatx80(0, one_exp, one_sig);
     fp2 = packFloatx80(aSign, 0x3FFE, one_sig); /* SIGN(X) * (1/2) */
@@ -2368,17 +2293,18 @@ floatx80 floatx80_atanh(floatx80 a, float_status *status)
     return a;
 }
 
-/*----------------------------------------------------------------------------
- | e to x minus 1
- *----------------------------------------------------------------------------*/
+/*
+ * e to x minus 1
+ */
 
 floatx80 floatx80_etoxm1(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact, n, j, m, m1;
     floatx80 fp0, fp1, fp2, fp3, l2, sc, onebysc;
@@ -2405,7 +2331,7 @@ floatx80 floatx80_etoxm1(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     if (aExp >= 0x3FFD) { /* |X| >= 1/4 */
         compact = floatx80_make_compact(aExp, aSig);
@@ -2422,7 +2348,8 @@ floatx80 floatx80_etoxm1(floatx80 a, float_status *status)
             j = n & 0x3F; /* J = N mod 64 */
             m = n / 64; /* NOTE: this is really arithmetic right shift by 6 */
             if (n < 0 && j) {
-                /* arithmetic right shift is division and
+                /*
+                 * arithmetic right shift is division and
                  * round towards minus infinity
                  */
                 m--;
@@ -2435,7 +2362,7 @@ floatx80 floatx80_etoxm1(floatx80 a, float_status *status)
             fp0 = floatx80_mul(fp0, float32_to_floatx80(
                                make_float32(0xBC317218), status),
                                status); /* N * L1, L1 = lead(-log2/64) */
-            l2 = packFloatx80(0, 0x3FDC, LIT64(0x82E308654361C4C6));
+            l2 = packFloatx80(0, 0x3FDC, UINT64_C(0x82E308654361C4C6));
             fp2 = floatx80_mul(fp2, l2, status); /* N * L2, L1+L2 = -log2/64 */
             fp0 = floatx80_add(fp0, fp1, status); /* X + N*L1 */
             fp0 = floatx80_add(fp0, fp2, status); /* R */
@@ -2567,7 +2494,7 @@ floatx80 floatx80_etoxm1(floatx80 a, float_status *status)
             fp2 = floatx80_add(fp2, float64_to_floatx80(
                                make_float64(0x3FA5555555555555), status),
                                status); /* B3 */
-            fp3 = packFloatx80(0, 0x3FFC, LIT64(0xAAAAAAAAAAAAAAAB));
+            fp3 = packFloatx80(0, 0x3FFC, UINT64_C(0xAAAAAAAAAAAAAAAB));
             fp1 = floatx80_add(fp1, fp3, status); /* B2 */
             fp2 = floatx80_mul(fp2, fp0, status);
             fp1 = floatx80_mul(fp1, fp0, status);
@@ -2619,17 +2546,18 @@ floatx80 floatx80_etoxm1(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | Hyperbolic tangent
- *----------------------------------------------------------------------------*/
+/*
+ * Hyperbolic tangent
+ */
 
 floatx80 floatx80_tanh(floatx80 a, float_status *status)
 {
-    flag aSign, vSign;
+    bool aSign, vSign;
     int32_t aExp, vExp;
     uint64_t aSig, vSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact;
     floatx80 fp0, fp1;
@@ -2653,7 +2581,7 @@ floatx80 floatx80_tanh(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     compact = floatx80_make_compact(aExp, aSig);
 
@@ -2734,17 +2662,18 @@ floatx80 floatx80_tanh(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | Hyperbolic sine
- *----------------------------------------------------------------------------*/
+/*
+ * Hyperbolic sine
+ */
 
 floatx80 floatx80_sinh(floatx80 a, float_status *status)
 {
-    flag aSign;
+    bool aSign;
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact;
     floatx80 fp0, fp1, fp2;
@@ -2769,7 +2698,7 @@ floatx80 floatx80_sinh(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     compact = floatx80_make_compact(aExp, aSig);
 
@@ -2823,16 +2752,17 @@ floatx80 floatx80_sinh(floatx80 a, float_status *status)
     }
 }
 
-/*----------------------------------------------------------------------------
- | Hyperbolic cosine
- *----------------------------------------------------------------------------*/
+/*
+ * Hyperbolic cosine
+ */
 
 floatx80 floatx80_cosh(floatx80 a, float_status *status)
 {
     int32_t aExp;
     uint64_t aSig;
 
-    int8_t user_rnd_mode, user_rnd_prec;
+    FloatRoundMode user_rnd_mode;
+    FloatX80RoundPrec user_rnd_prec;
 
     int32_t compact;
     floatx80 fp0, fp1;
@@ -2855,7 +2785,7 @@ floatx80 floatx80_cosh(floatx80 a, float_status *status)
     user_rnd_mode = status->float_rounding_mode;
     user_rnd_prec = status->floatx80_rounding_precision;
     status->float_rounding_mode = float_round_nearest_even;
-    status->floatx80_rounding_precision = 80;
+    status->floatx80_rounding_precision = floatx80_precision_x;
 
     compact = floatx80_make_compact(aExp, aSig);
 

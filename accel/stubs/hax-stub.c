@@ -14,43 +14,11 @@
  */
 
 #include "qemu/osdep.h"
-#include "qemu-common.h"
-#include "cpu.h"
 #include "sysemu/hax.h"
 
-void* hax_gpa2hva(uint64_t gpa, bool* found)
-{
-    *found = false;
-    return NULL;
-}
-
-int hax_hva2gpa(void* hva, uint64_t length, int array_size,
-                uint64_t* gpa, uint64_t* size)
-{
-    return 0;
-}
-
-bool hax_gpa_protection_supported(void)
-{
-    return 0;
-}
-
-int hax_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags)
-{
-    return 0;
-}
+bool hax_allowed;
 
 int hax_sync_vcpus(void)
 {
     return 0;
-}
-
-int hax_init_vcpu(CPUState *cpu)
-{
-    return -ENOSYS;
-}
-
-int hax_smp_cpu_exec(CPUState *cpu)
-{
-    return -ENOSYS;
 }

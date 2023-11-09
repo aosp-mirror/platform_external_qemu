@@ -23,8 +23,12 @@
  */
 
 #include "qemu/osdep.h"
+#include "hw/irq.h"
+#include "hw/qdev-properties.h"
 #include "hw/sparc/sun4m_iommu.h"
 #include "hw/sysbus.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 #include "exec/address-spaces.h"
 #include "trace.h"
 
@@ -92,10 +96,10 @@
 #define IOMMU_AER_SBW       0x80000000    /* S-to-M asynchronous writes */
 #define IOMMU_AER_MASK      0x801f000f
 
-#define IOMMU_SBCFG0        (0x1010 >> 2) /* SBUS configration per-slot */
-#define IOMMU_SBCFG1        (0x1014 >> 2) /* SBUS configration per-slot */
-#define IOMMU_SBCFG2        (0x1018 >> 2) /* SBUS configration per-slot */
-#define IOMMU_SBCFG3        (0x101c >> 2) /* SBUS configration per-slot */
+#define IOMMU_SBCFG0        (0x1010 >> 2) /* SBUS configuration per-slot */
+#define IOMMU_SBCFG1        (0x1014 >> 2) /* SBUS configuration per-slot */
+#define IOMMU_SBCFG2        (0x1018 >> 2) /* SBUS configuration per-slot */
+#define IOMMU_SBCFG3        (0x101c >> 2) /* SBUS configuration per-slot */
 #define IOMMU_SBCFG_SAB30   0x00010000 /* Phys-address bit 30 when
                                           bypass enabled */
 #define IOMMU_SBCFG_BA16    0x00000004 /* Slave supports 16 byte bursts */
@@ -282,7 +286,8 @@ static void iommu_bad_addr(IOMMUState *s, hwaddr addr,
 /* Called from RCU critical section */
 static IOMMUTLBEntry sun4m_translate_iommu(IOMMUMemoryRegion *iommu,
                                            hwaddr addr,
-                                           IOMMUAccessFlags flags)
+                                           IOMMUAccessFlags flags,
+                                           int iommu_idx)
 {
     IOMMUState *is = container_of(iommu, IOMMUState, iommu);
     hwaddr page, pa;
@@ -374,7 +379,7 @@ static void iommu_class_init(ObjectClass *klass, void *data)
 
     dc->reset = iommu_reset;
     dc->vmsd = &vmstate_iommu;
-    dc->props = iommu_properties;
+    device_class_set_props(dc, iommu_properties);
 }
 
 static const TypeInfo iommu_info = {

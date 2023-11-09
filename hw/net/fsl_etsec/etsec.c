@@ -27,12 +27,16 @@
  */
 
 #include "qemu/osdep.h"
-#include "sysemu/sysemu.h"
 #include "hw/sysbus.h"
+#include "hw/irq.h"
+#include "hw/net/mii.h"
 #include "hw/ptimer.h"
+#include "hw/qdev-properties.h"
 #include "etsec.h"
 #include "registers.h"
+#include "qapi/error.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
 
 /* #define HEX_DUMP */
 /* #define DEBUG_REGISTER */
@@ -48,6 +52,28 @@ static const int debug_etsec;
         qemu_log(fmt , ## __VA_ARGS__);        \
     }                                          \
     } while (0)
+
+/* call after any change to IEVENT or IMASK */
+void etsec_update_irq(eTSEC *etsec)
+{
+    uint32_t ievent = etsec->regs[IEVENT].value;
+    uint32_t imask  = etsec->regs[IMASK].value;
+    uint32_t active = ievent & imask;
+
+    int tx  = !!(active & IEVENT_TX_MASK);
+    int rx  = !!(active & IEVENT_RX_MASK);
+    int err = !!(active & IEVENT_ERR_MASK);
+
+    DPRINTF("%s IRQ ievent=%"PRIx32" imask=%"PRIx32" %c%c%c",
+            __func__, ievent, imask,
+            tx  ? 'T' : '_',
+            rx  ? 'R' : '_',
+            err ? 'E' : '_');
+
+    qemu_set_irq(etsec->tx_irq, tx);
+    qemu_set_irq(etsec->rx_irq, rx);
+    qemu_set_irq(etsec->err_irq, err);
+}
 
 static uint64_t etsec_read(void *opaque, hwaddr addr, unsigned size)
 {
@@ -74,7 +100,7 @@ static uint64_t etsec_read(void *opaque, hwaddr addr, unsigned size)
         break;
     }
 
-    DPRINTF("Read  0x%08x @ 0x" TARGET_FMT_plx
+    DPRINTF("Read  0x%08x @ 0x" HWADDR_FMT_plx
             "                            : %s (%s)\n",
             ret, addr, reg->name, reg->desc);
 
@@ -139,31 +165,6 @@ static void write_rbasex(eTSEC          *etsec,
     etsec->regs[RBPTR0 + (reg_index - RBASE0)].value = value & ~0x7;
 }
 
-static void write_ievent(eTSEC          *etsec,
-                         eTSEC_Register *reg,
-                         uint32_t        reg_index,
-                         uint32_t        value)
-{
-    /* Write 1 to clear */
-    reg->value &= ~value;
-
-    if (!(reg->value & (IEVENT_TXF | IEVENT_TXF))) {
-        qemu_irq_lower(etsec->tx_irq);
-    }
-    if (!(reg->value & (IEVENT_RXF | IEVENT_RXF))) {
-        qemu_irq_lower(etsec->rx_irq);
-    }
-
-    if (!(reg->value & (IEVENT_MAG | IEVENT_GTSC | IEVENT_GRSC | IEVENT_TXC |
-                        IEVENT_RXC | IEVENT_BABR | IEVENT_BABT | IEVENT_LC |
-                        IEVENT_CRL | IEVENT_FGPI | IEVENT_FIR | IEVENT_FIQ |
-                        IEVENT_DPE | IEVENT_PERR | IEVENT_EBERR | IEVENT_TXE |
-                        IEVENT_XFUN | IEVENT_BSY | IEVENT_MSRO | IEVENT_MMRD |
-                        IEVENT_MMRW))) {
-        qemu_irq_lower(etsec->err_irq);
-    }
-}
-
 static void write_dmactrl(eTSEC          *etsec,
                           eTSEC_Register *reg,
                           uint32_t        reg_index,
@@ -178,9 +179,7 @@ static void write_dmactrl(eTSEC          *etsec,
         } else {
             /* Graceful receive stop now */
             etsec->regs[IEVENT].value |= IEVENT_GRSC;
-            if (etsec->regs[IMASK].value & IMASK_GRSCEN) {
-                qemu_irq_raise(etsec->err_irq);
-            }
+            etsec_update_irq(etsec);
         }
     }
 
@@ -191,17 +190,17 @@ static void write_dmactrl(eTSEC          *etsec,
         } else {
             /* Graceful transmit stop now */
             etsec->regs[IEVENT].value |= IEVENT_GTSC;
-            if (etsec->regs[IMASK].value & IMASK_GTSCEN) {
-                qemu_irq_raise(etsec->err_irq);
-            }
+            etsec_update_irq(etsec);
         }
     }
 
     if (!(value & DMACTRL_WOP)) {
         /* Start polling */
+        ptimer_transaction_begin(etsec->ptimer);
         ptimer_stop(etsec->ptimer);
         ptimer_set_count(etsec->ptimer, 1);
         ptimer_run(etsec->ptimer, 1);
+        ptimer_transaction_commit(etsec->ptimer);
     }
 }
 
@@ -222,7 +221,16 @@ static void etsec_write(void     *opaque,
 
     switch (reg_index) {
     case IEVENT:
-        write_ievent(etsec, reg, reg_index, value);
+        /* Write 1 to clear */
+        reg->value &= ~value;
+
+        etsec_update_irq(etsec);
+        break;
+
+    case IMASK:
+        reg->value = value;
+
+        etsec_update_irq(etsec);
         break;
 
     case DMACTRL:
@@ -269,7 +277,7 @@ static void etsec_write(void     *opaque,
         }
     }
 
-    DPRINTF("Write 0x%08x @ 0x" TARGET_FMT_plx
+    DPRINTF("Write 0x%08x @ 0x" HWADDR_FMT_plx
             " val:0x%08x->0x%08x : %s (%s)\n",
             (unsigned int)value, addr, before, reg->value,
             reg->name, reg->desc);
@@ -332,11 +340,13 @@ static void etsec_reset(DeviceState *d)
     etsec->rx_buffer_len = 0;
 
     etsec->phy_status =
-        MII_SR_EXTENDED_CAPS    | MII_SR_LINK_STATUS   | MII_SR_AUTONEG_CAPS  |
-        MII_SR_AUTONEG_COMPLETE | MII_SR_PREAMBLE_SUPPRESS |
-        MII_SR_EXTENDED_STATUS  | MII_SR_100T2_HD_CAPS | MII_SR_100T2_FD_CAPS |
-        MII_SR_10T_HD_CAPS      | MII_SR_10T_FD_CAPS   | MII_SR_100X_HD_CAPS  |
-        MII_SR_100X_FD_CAPS     | MII_SR_100T4_CAPS;
+        MII_BMSR_EXTCAP   | MII_BMSR_LINK_ST  | MII_BMSR_AUTONEG  |
+        MII_BMSR_AN_COMP  | MII_BMSR_MFPS     | MII_BMSR_EXTSTAT  |
+        MII_BMSR_100T2_HD | MII_BMSR_100T2_FD |
+        MII_BMSR_10T_HD   | MII_BMSR_10T_FD   |
+        MII_BMSR_100TX_HD | MII_BMSR_100TX_FD | MII_BMSR_100T4;
+
+    etsec_update_irq(etsec);
 }
 
 static ssize_t etsec_receive(NetClientState *nc,
@@ -348,7 +358,7 @@ static ssize_t etsec_receive(NetClientState *nc,
 
 #if defined(HEX_DUMP)
     fprintf(stderr, "%s receive size:%zd\n", nc->name, size);
-    qemu_hexdump((void *)buf, stderr, "", size);
+    qemu_hexdump(stderr, "", buf, size);
 #endif
     /* Flush is unnecessary as are already in receiving path */
     etsec->need_flush = false;
@@ -384,10 +394,10 @@ static void etsec_realize(DeviceState *dev, Error **errp)
                               object_get_typename(OBJECT(dev)), dev->id, etsec);
     qemu_format_nic_info_str(qemu_get_queue(etsec->nic), etsec->conf.macaddr.a);
 
-
-    etsec->bh     = qemu_bh_new(etsec_timer_hit, etsec);
-    etsec->ptimer = ptimer_init(etsec->bh, PTIMER_POLICY_DEFAULT);
+    etsec->ptimer = ptimer_init(etsec_timer_hit, etsec, PTIMER_POLICY_LEGACY);
+    ptimer_transaction_begin(etsec->ptimer);
     ptimer_set_freq(etsec->ptimer, 100);
+    ptimer_transaction_commit(etsec->ptimer);
 }
 
 static void etsec_instance_init(Object *obj)
@@ -415,13 +425,13 @@ static void etsec_class_init(ObjectClass *klass, void *data)
 
     dc->realize = etsec_realize;
     dc->reset = etsec_reset;
-    dc->props = etsec_properties;
+    device_class_set_props(dc, etsec_properties);
     /* Supported by ppce500 machine */
     dc->user_creatable = true;
 }
 
-static TypeInfo etsec_info = {
-    .name                  = "eTSEC",
+static const TypeInfo etsec_info = {
+    .name                  = TYPE_ETSEC_COMMON,
     .parent                = TYPE_SYS_BUS_DEVICE,
     .instance_size         = sizeof(eTSEC),
     .class_init            = etsec_class_init,
@@ -434,26 +444,3 @@ static void etsec_register_types(void)
 }
 
 type_init(etsec_register_types)
-
-DeviceState *etsec_create(hwaddr         base,
-                          MemoryRegion * mr,
-                          NICInfo      * nd,
-                          qemu_irq       tx_irq,
-                          qemu_irq       rx_irq,
-                          qemu_irq       err_irq)
-{
-    DeviceState *dev;
-
-    dev = qdev_create(NULL, "eTSEC");
-    qdev_set_nic_properties(dev, nd);
-    qdev_init_nofail(dev);
-
-    sysbus_connect_irq(SYS_BUS_DEVICE(dev), 0, tx_irq);
-    sysbus_connect_irq(SYS_BUS_DEVICE(dev), 1, rx_irq);
-    sysbus_connect_irq(SYS_BUS_DEVICE(dev), 2, err_irq);
-
-    memory_region_add_subregion(mr, base,
-                                SYS_BUS_DEVICE(dev)->mmio[0].memory);
-
-    return dev;
-}

@@ -10,7 +10,17 @@
  *
  * This work is licensed under the terms of the GNU GPL, version 2.  See
  * the COPYING file in the top-level directory.
- *
+ */
+
+/*
+ * Known shortcomings:
+ * - There is no manual page
+ * - The syntax of the ACL file is not documented anywhere
+ * - parse_acl_file() doesn't report fopen() failure properly, fails
+ *   to check ferror() after fgets() failure, arbitrarily truncates
+ *   long lines, handles whitespace inconsistently, error messages
+ *   don't point to the offending file and line, errors in included
+ *   files are reported, but otherwise ignored, ...
  */
 
 #include "qemu/osdep.h"
@@ -30,10 +40,11 @@
 #endif
 
 #include "qemu/queue.h"
+#include "qemu/cutils.h"
 
 #include "net/tap-linux.h"
 
-#ifdef CONFIG_LIBCAP
+#ifdef CONFIG_LIBCAP_NG
 #include <cap-ng.h>
 #endif
 
@@ -75,7 +86,7 @@ static int parse_acl_file(const char *filename, ACLList *acl_list)
         char *ptr = line;
         char *cmd, *arg, *argend;
 
-        while (isspace(*ptr)) {
+        while (g_ascii_isspace(*ptr)) {
             ptr++;
         }
 
@@ -92,22 +103,25 @@ static int parse_acl_file(const char *filename, ACLList *acl_list)
 
         if (arg == NULL) {
             fprintf(stderr, "Invalid config line:\n  %s\n", line);
-            fclose(f);
-            errno = EINVAL;
-            return -1;
+            goto err;
         }
 
         *arg = 0;
         arg++;
-        while (isspace(*arg)) {
+        while (g_ascii_isspace(*arg)) {
             arg++;
         }
 
         argend = arg + strlen(arg);
-        while (arg != argend && isspace(*(argend - 1))) {
+        while (arg != argend && g_ascii_isspace(*(argend - 1))) {
             argend--;
         }
         *argend = 0;
+
+        if (!g_str_equal(cmd, "include") && strlen(arg) >= IFNAMSIZ) {
+            fprintf(stderr, "name `%s' too long: %zu\n", arg, strlen(arg));
+            goto err;
+        }
 
         if (strcmp(cmd, "deny") == 0) {
             acl_rule = g_malloc(sizeof(*acl_rule));
@@ -132,15 +146,18 @@ static int parse_acl_file(const char *filename, ACLList *acl_list)
             parse_acl_file(arg, acl_list);
         } else {
             fprintf(stderr, "Unknown command `%s'\n", cmd);
-            fclose(f);
-            errno = EINVAL;
-            return -1;
+            goto err;
         }
     }
 
     fclose(f);
-
     return 0;
+
+err:
+    fclose(f);
+    errno = EINVAL;
+    return -1;
+
 }
 
 static bool has_vnet_hdr(int fd)
@@ -191,7 +208,7 @@ static int send_fd(int c, int fd)
     return sendmsg(c, &msg, 0);
 }
 
-#ifdef CONFIG_LIBCAP
+#ifdef CONFIG_LIBCAP_NG
 static int drop_privileges(void)
 {
     /* clear all capabilities */
@@ -229,8 +246,9 @@ int main(int argc, char **argv)
     ACLList acl_list;
     int access_allowed, access_denied;
     int ret = EXIT_SUCCESS;
+    g_autofree char *acl_file = NULL;
 
-#ifdef CONFIG_LIBCAP
+#ifdef CONFIG_LIBCAP_NG
     /* if we're run from an suid binary, immediately drop privileges preserving
      * cap_net_admin */
     if (geteuid() == 0 && getuid() != geteuid()) {
@@ -240,6 +258,8 @@ int main(int argc, char **argv)
         }
     }
 #endif
+
+    qemu_init_exec_dir(argv[0]);
 
     /* parse arguments */
     for (index = 1; index < argc; index++) {
@@ -259,12 +279,17 @@ int main(int argc, char **argv)
         usage();
         return EXIT_FAILURE;
     }
+    if (strlen(bridge) >= IFNAMSIZ) {
+        fprintf(stderr, "name `%s' too long: %zu\n", bridge, strlen(bridge));
+        return EXIT_FAILURE;
+    }
 
     /* parse default acl file */
     QSIMPLEQ_INIT(&acl_list);
-    if (parse_acl_file(DEFAULT_ACL_FILE, &acl_list) == -1) {
+    acl_file = get_relocated_path(DEFAULT_ACL_FILE);
+    if (parse_acl_file(acl_file, &acl_list) == -1) {
         fprintf(stderr, "failed to parse default acl file `%s'\n",
-                DEFAULT_ACL_FILE);
+                acl_file);
         ret = EXIT_FAILURE;
         goto cleanup;
     }

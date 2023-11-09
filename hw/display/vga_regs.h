@@ -4,9 +4,9 @@
  * Copyright 1999 Jeff Garzik <jgarzik@pobox.com>
  *
  * Copyright history from vga16fb.c:
- *	Copyright 1999 Ben Pfaff and Petr Vandrovec
- *	Based on VGA info at http://www.osdever.net/FreeVGA/home.htm
- *	Based on VESA framebuffer (c) 1998 Gerd Knorr
+ *  Copyright 1999 Ben Pfaff and Petr Vandrovec
+ *  Based on VGA info at http://www.osdever.net/FreeVGA/home.htm
+ *  Based on VESA framebuffer (c) 1998 Gerd Knorr
  *
  * This file is subject to the terms and conditions of the GNU General
  * Public License.  See the file COPYING in the main directory of this
@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef LINUX_VIDEO_VGA_H
-#define LINUX_VIDEO_VGA_H
+#ifndef HW_VGA_REGS_H
+#define HW_VGA_REGS_H
 
 /* Some of the code below is taken from SVGAlib.  The original,
    unmodified copyright notice for that code is below. */
@@ -156,4 +156,4 @@
 /* VGA graphics controller bit masks */
 #define VGA_GR06_GRAPHICS_MODE  0x01
 
-#endif /* LINUX_VIDEO_VGA_H */
+#endif /* HW_VGA_REGS_H */

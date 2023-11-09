@@ -8,20 +8,26 @@
  */
 
 #include "qemu/osdep.h"
-#include "hw/hw.h"
 #include "hw/isa/isa.h"
+#include "hw/qdev-properties.h"
+#include "qemu/module.h"
+#include "qom/object.h"
 
 #define TYPE_ISA_DEBUG_EXIT_DEVICE "isa-debug-exit"
-#define ISA_DEBUG_EXIT_DEVICE(obj) \
-     OBJECT_CHECK(ISADebugExitState, (obj), TYPE_ISA_DEBUG_EXIT_DEVICE)
+OBJECT_DECLARE_SIMPLE_TYPE(ISADebugExitState, ISA_DEBUG_EXIT_DEVICE)
 
-typedef struct ISADebugExitState {
+struct ISADebugExitState {
     ISADevice parent_obj;
 
     uint32_t iobase;
     uint32_t iosize;
     MemoryRegion io;
-} ISADebugExitState;
+};
+
+static uint64_t debug_exit_read(void *opaque, hwaddr addr, unsigned size)
+{
+    return 0;
+}
 
 static void debug_exit_write(void *opaque, hwaddr addr, uint64_t val,
                              unsigned width)
@@ -30,6 +36,7 @@ static void debug_exit_write(void *opaque, hwaddr addr, uint64_t val,
 }
 
 static const MemoryRegionOps debug_exit_ops = {
+    .read = debug_exit_read,
     .write = debug_exit_write,
     .valid.min_access_size = 1,
     .valid.max_access_size = 4,
@@ -58,7 +65,7 @@ static void debug_exit_class_initfn(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
 
     dc->realize = debug_exit_realizefn;
-    dc->props = debug_exit_properties;
+    device_class_set_props(dc, debug_exit_properties);
     set_bit(DEVICE_CATEGORY_MISC, dc->categories);
 }
 

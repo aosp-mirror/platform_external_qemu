@@ -12,6 +12,7 @@
 #include "clients.h"
 #include "net/vhost_net.h"
 #include "net/vhost-user.h"
+#include "hw/virtio/vhost-user.h"
 #include "chardev/char-fe.h"
 #include "qapi/error.h"
 #include "qapi/qapi-commands-net.h"
@@ -20,55 +21,66 @@
 #include "qemu/option.h"
 #include "trace.h"
 
-typedef struct VhostUserState {
+typedef struct NetVhostUserState {
     NetClientState nc;
     CharBackend chr; /* only queue index 0 */
+    VhostUserState *vhost_user;
     VHostNetState *vhost_net;
     guint watch;
     uint64_t acked_features;
     bool started;
-} VhostUserState;
+} NetVhostUserState;
 
 VHostNetState *vhost_user_get_vhost_net(NetClientState *nc)
 {
-    VhostUserState *s = DO_UPCAST(VhostUserState, nc, nc);
+    NetVhostUserState *s = DO_UPCAST(NetVhostUserState, nc, nc);
     assert(nc->info->type == NET_CLIENT_DRIVER_VHOST_USER);
     return s->vhost_net;
 }
 
 uint64_t vhost_user_get_acked_features(NetClientState *nc)
 {
-    VhostUserState *s = DO_UPCAST(VhostUserState, nc, nc);
+    NetVhostUserState *s = DO_UPCAST(NetVhostUserState, nc, nc);
     assert(nc->info->type == NET_CLIENT_DRIVER_VHOST_USER);
     return s->acked_features;
 }
 
+void vhost_user_save_acked_features(NetClientState *nc)
+{
+    NetVhostUserState *s;
+
+    s = DO_UPCAST(NetVhostUserState, nc, nc);
+    if (s->vhost_net) {
+        uint64_t features = vhost_net_get_acked_features(s->vhost_net);
+        if (features) {
+            s->acked_features = features;
+        }
+    }
+}
+
 static void vhost_user_stop(int queues, NetClientState *ncs[])
 {
-    VhostUserState *s;
     int i;
+    NetVhostUserState *s;
 
     for (i = 0; i < queues; i++) {
         assert(ncs[i]->info->type == NET_CLIENT_DRIVER_VHOST_USER);
 
-        s = DO_UPCAST(VhostUserState, nc, ncs[i]);
+        s = DO_UPCAST(NetVhostUserState, nc, ncs[i]);
 
         if (s->vhost_net) {
-            /* save acked features */
-            uint64_t features = vhost_net_get_acked_features(s->vhost_net);
-            if (features) {
-                s->acked_features = features;
-            }
+            vhost_user_save_acked_features(ncs[i]);
             vhost_net_cleanup(s->vhost_net);
         }
     }
 }
 
-static int vhost_user_start(int queues, NetClientState *ncs[], CharBackend *be)
+static int vhost_user_start(int queues, NetClientState *ncs[],
+                            VhostUserState *be)
 {
     VhostNetOptions options;
     struct vhost_net *net = NULL;
-    VhostUserState *s;
+    NetVhostUserState *s;
     int max_queues;
     int i;
 
@@ -77,11 +89,12 @@ static int vhost_user_start(int queues, NetClientState *ncs[], CharBackend *be)
     for (i = 0; i < queues; i++) {
         assert(ncs[i]->info->type == NET_CLIENT_DRIVER_VHOST_USER);
 
-        s = DO_UPCAST(VhostUserState, nc, ncs[i]);
+        s = DO_UPCAST(NetVhostUserState, nc, ncs[i]);
 
         options.net_backend = ncs[i];
         options.opaque      = be;
         options.busyloop_timeout = 0;
+        options.nvqs = 2;
         net = vhost_net_init(&options);
         if (!net) {
             error_report("failed to init vhost_net for queue %d", i);
@@ -123,7 +136,7 @@ static ssize_t vhost_user_receive(NetClientState *nc, const uint8_t *buf,
        without GUEST_ANNOUNCE capability.
      */
     if (size == 60) {
-        VhostUserState *s = DO_UPCAST(VhostUserState, nc, nc);
+        NetVhostUserState *s = DO_UPCAST(NetVhostUserState, nc, nc);
         int r;
         static int display_rarp_failure = 1;
         char mac_addr[6];
@@ -144,9 +157,9 @@ static ssize_t vhost_user_receive(NetClientState *nc, const uint8_t *buf,
     return size;
 }
 
-static void vhost_user_cleanup(NetClientState *nc)
+static void net_vhost_user_cleanup(NetClientState *nc)
 {
-    VhostUserState *s = DO_UPCAST(VhostUserState, nc, nc);
+    NetVhostUserState *s = DO_UPCAST(NetVhostUserState, nc, nc);
 
     if (s->vhost_net) {
         vhost_net_cleanup(s->vhost_net);
@@ -159,9 +172,25 @@ static void vhost_user_cleanup(NetClientState *nc)
             s->watch = 0;
         }
         qemu_chr_fe_deinit(&s->chr, true);
+        if (s->vhost_user) {
+            vhost_user_cleanup(s->vhost_user);
+            g_free(s->vhost_user);
+            s->vhost_user = NULL;
+        }
     }
 
     qemu_purge_queued_packets(nc);
+}
+
+static int vhost_user_set_vnet_endianness(NetClientState *nc,
+                                          bool enable)
+{
+    /* Nothing to do.  If the server supports
+     * VHOST_USER_PROTOCOL_F_CROSS_ENDIAN, it will get the
+     * vnet header endianness from there.  If it doesn't, negotiation
+     * fails.
+     */
+    return 0;
 }
 
 static bool vhost_user_has_vnet_hdr(NetClientState *nc)
@@ -178,44 +207,63 @@ static bool vhost_user_has_ufo(NetClientState *nc)
     return true;
 }
 
+static bool vhost_user_check_peer_type(NetClientState *nc, ObjectClass *oc,
+                                       Error **errp)
+{
+    const char *driver = object_class_get_name(oc);
+
+    if (!g_str_has_prefix(driver, "virtio-net-")) {
+        error_setg(errp, "vhost-user requires frontend driver virtio-net-*");
+        return false;
+    }
+
+    return true;
+}
+
 static NetClientInfo net_vhost_user_info = {
         .type = NET_CLIENT_DRIVER_VHOST_USER,
-        .size = sizeof(VhostUserState),
+        .size = sizeof(NetVhostUserState),
         .receive = vhost_user_receive,
-        .cleanup = vhost_user_cleanup,
+        .cleanup = net_vhost_user_cleanup,
         .has_vnet_hdr = vhost_user_has_vnet_hdr,
         .has_ufo = vhost_user_has_ufo,
+        .set_vnet_be = vhost_user_set_vnet_endianness,
+        .set_vnet_le = vhost_user_set_vnet_endianness,
+        .check_peer_type = vhost_user_check_peer_type,
 };
 
-static gboolean net_vhost_user_watch(GIOChannel *chan, GIOCondition cond,
-                                           void *opaque)
+static gboolean net_vhost_user_watch(void *do_not_use, GIOCondition cond,
+                                     void *opaque)
 {
-    VhostUserState *s = opaque;
+    NetVhostUserState *s = opaque;
 
     qemu_chr_fe_disconnect(&s->chr);
 
     return TRUE;
 }
 
-static void net_vhost_user_event(void *opaque, int event);
+static void net_vhost_user_event(void *opaque, QEMUChrEvent event);
 
 static void chr_closed_bh(void *opaque)
 {
     const char *name = opaque;
     NetClientState *ncs[MAX_QUEUE_NUM];
-    VhostUserState *s;
+    NetVhostUserState *s;
     Error *err = NULL;
-    int queues;
+    int queues, i;
 
     queues = qemu_find_net_clients_except(name, ncs,
                                           NET_CLIENT_DRIVER_NIC,
                                           MAX_QUEUE_NUM);
     assert(queues < MAX_QUEUE_NUM);
 
-    s = DO_UPCAST(VhostUserState, nc, ncs[0]);
+    s = DO_UPCAST(NetVhostUserState, nc, ncs[0]);
+
+    for (i = queues -1; i >= 0; i--) {
+        vhost_user_save_acked_features(ncs[i]);
+    }
 
     qmp_set_link(name, false, &err);
-    vhost_user_stop(queues, ncs);
 
     qemu_chr_fe_set_handlers(&s->chr, NULL, NULL, net_vhost_user_event,
                              NULL, opaque, NULL, true);
@@ -225,11 +273,11 @@ static void chr_closed_bh(void *opaque)
     }
 }
 
-static void net_vhost_user_event(void *opaque, int event)
+static void net_vhost_user_event(void *opaque, QEMUChrEvent event)
 {
     const char *name = opaque;
     NetClientState *ncs[MAX_QUEUE_NUM];
-    VhostUserState *s;
+    NetVhostUserState *s;
     Chardev *chr;
     Error *err = NULL;
     int queues;
@@ -239,12 +287,12 @@ static void net_vhost_user_event(void *opaque, int event)
                                           MAX_QUEUE_NUM);
     assert(queues < MAX_QUEUE_NUM);
 
-    s = DO_UPCAST(VhostUserState, nc, ncs[0]);
+    s = DO_UPCAST(NetVhostUserState, nc, ncs[0]);
     chr = qemu_chr_fe_get_driver(&s->chr);
     trace_vhost_user_event(chr->label, event);
     switch (event) {
     case CHR_EVENT_OPENED:
-        if (vhost_user_start(queues, ncs, &s->chr) < 0) {
+        if (vhost_user_start(queues, ncs, s->vhost_user) < 0) {
             qemu_chr_fe_disconnect(&s->chr);
             return;
         }
@@ -270,6 +318,11 @@ static void net_vhost_user_event(void *opaque, int event)
             aio_bh_schedule_oneshot(ctx, chr_closed_bh, opaque);
         }
         break;
+    case CHR_EVENT_BREAK:
+    case CHR_EVENT_MUX_IN:
+    case CHR_EVENT_MUX_OUT:
+        /* Ignore */
+        break;
     }
 
     if (err) {
@@ -283,33 +336,36 @@ static int net_vhost_user_init(NetClientState *peer, const char *device,
 {
     Error *err = NULL;
     NetClientState *nc, *nc0 = NULL;
-    VhostUserState *s;
+    NetVhostUserState *s = NULL;
+    VhostUserState *user;
     int i;
 
     assert(name);
     assert(queues > 0);
 
+    user = g_new0(struct VhostUserState, 1);
     for (i = 0; i < queues; i++) {
         nc = qemu_new_net_client(&net_vhost_user_info, peer, device, name);
-        snprintf(nc->info_str, sizeof(nc->info_str), "vhost-user%d to %s",
-                 i, chr->label);
+        qemu_set_info_str(nc, "vhost-user%d to %s", i, chr->label);
         nc->queue_index = i;
         if (!nc0) {
             nc0 = nc;
-            s = DO_UPCAST(VhostUserState, nc, nc);
-            if (!qemu_chr_fe_init(&s->chr, chr, &err)) {
+            s = DO_UPCAST(NetVhostUserState, nc, nc);
+            if (!qemu_chr_fe_init(&s->chr, chr, &err) ||
+                !vhost_user_init(user, &s->chr, &err)) {
                 error_report_err(err);
-                return -1;
+                goto err;
             }
         }
-
+        s = DO_UPCAST(NetVhostUserState, nc, nc);
+        s->vhost_user = user;
     }
 
-    s = DO_UPCAST(VhostUserState, nc, nc0);
+    s = DO_UPCAST(NetVhostUserState, nc, nc0);
     do {
         if (qemu_chr_fe_wait_connected(&s->chr, &err) < 0) {
             error_report_err(err);
-            return -1;
+            goto err;
         }
         qemu_chr_fe_set_handlers(&s->chr, NULL, NULL,
                                  net_vhost_user_event, NULL, nc0->name, NULL,
@@ -319,6 +375,20 @@ static int net_vhost_user_init(NetClientState *peer, const char *device,
     assert(s->vhost_net);
 
     return 0;
+
+err:
+    if (user) {
+        vhost_user_cleanup(user);
+        g_free(user);
+        if (s) {
+            s->vhost_user = NULL;
+        }
+    }
+    if (nc0) {
+        qemu_del_net_client(nc0);
+    }
+
+    return -1;
 }
 
 static Chardev *net_vhost_claim_chardev(
@@ -345,27 +415,6 @@ static Chardev *net_vhost_claim_chardev(
     return chr;
 }
 
-static int net_vhost_check_net(void *opaque, QemuOpts *opts, Error **errp)
-{
-    const char *name = opaque;
-    const char *driver, *netdev;
-
-    driver = qemu_opt_get(opts, "driver");
-    netdev = qemu_opt_get(opts, "netdev");
-
-    if (!driver || !netdev) {
-        return 0;
-    }
-
-    if (strcmp(netdev, name) == 0 &&
-        !g_str_has_prefix(driver, "virtio-net-")) {
-        error_setg(errp, "vhost-user requires frontend driver virtio-net-*");
-        return -1;
-    }
-
-    return 0;
-}
-
 int net_init_vhost_user(const Netdev *netdev, const char *name,
                         NetClientState *peer, Error **errp)
 {
@@ -378,12 +427,6 @@ int net_init_vhost_user(const Netdev *netdev, const char *name,
 
     chr = net_vhost_claim_chardev(vhost_user_opts, errp);
     if (!chr) {
-        return -1;
-    }
-
-    /* verify net frontend */
-    if (qemu_opts_foreach(qemu_find_opts("device"), net_vhost_check_net,
-                          (char *)name, errp)) {
         return -1;
     }
 

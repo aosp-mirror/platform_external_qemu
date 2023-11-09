@@ -19,7 +19,7 @@ typedef struct RAMBlockNotifier RAMBlockNotifier;
  *   rcu_read_lock();
  *
  *   DirtyMemoryBlocks *blocks =
- *       atomic_rcu_read(&ram_list.dirty_memory[DIRTY_MEMORY_MIGRATION]);
+ *       qatomic_rcu_read(&ram_list.dirty_memory[DIRTY_MEMORY_MIGRATION]);
  *
  *   ram_addr_t idx = (addr >> TARGET_PAGE_BITS) / DIRTY_MEMORY_BLOCK_SIZE;
  *   unsigned long *block = blocks.blocks[idx];
@@ -56,23 +56,30 @@ typedef struct RAMList {
 extern RAMList ram_list;
 
 /* Should be holding either ram_list.mutex, or the RCU lock. */
-#define  RAMBLOCK_FOREACH(block)  \
+#define  INTERNAL_RAMBLOCK_FOREACH(block)  \
     QLIST_FOREACH_RCU(block, &ram_list.blocks, next)
+/* Never use the INTERNAL_ version except for defining other macros */
+#define RAMBLOCK_FOREACH(block) INTERNAL_RAMBLOCK_FOREACH(block)
 
 void qemu_mutex_lock_ramlist(void);
 void qemu_mutex_unlock_ramlist(void);
 
 struct RAMBlockNotifier {
-    void (*ram_block_added)(RAMBlockNotifier *n, void *host, size_t size);
-    void (*ram_block_removed)(RAMBlockNotifier *n, void *host, size_t size);
+    void (*ram_block_added)(RAMBlockNotifier *n, void *host, size_t size,
+                            size_t max_size);
+    void (*ram_block_removed)(RAMBlockNotifier *n, void *host, size_t size,
+                              size_t max_size);
+    void (*ram_block_resized)(RAMBlockNotifier *n, void *host, size_t old_size,
+                              size_t new_size);
     QLIST_ENTRY(RAMBlockNotifier) next;
 };
 
 void ram_block_notifier_add(RAMBlockNotifier *n);
 void ram_block_notifier_remove(RAMBlockNotifier *n);
-void ram_block_notify_add(void *host, size_t size);
-void ram_block_notify_remove(void *host, size_t size);
+void ram_block_notify_add(void *host, size_t size, size_t max_size);
+void ram_block_notify_remove(void *host, size_t size, size_t max_size);
+void ram_block_notify_resize(void *host, size_t old_size, size_t new_size);
 
-void ram_block_dump(Monitor *mon);
+GString *ram_block_format(void);
 
 #endif /* RAMLIST_H */

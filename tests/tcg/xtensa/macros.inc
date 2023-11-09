@@ -3,7 +3,7 @@
 .macro test_suite name
 .data
 status: .word result
-result: .space 256
+result: .space 1024
 .text
 .global main
 .align 4
@@ -23,11 +23,14 @@ main:
     movi    a0, result
     sub     a2, a2, a0
     movi    a3, 0
-    loopnez a2, 1f
-    l8ui    a2, a0, 0
-    or      a3, a3, a2
-    addi    a0, a0, 1
+    beqz    a2, 2f
 1:
+    l32i    a1, a0, 0
+    or      a3, a3, a1
+    addi    a0, a0, 4
+    addi    a2, a2, -1
+    bnez    a2, 1b
+2:
     exit
 .endm
 
@@ -49,7 +52,9 @@ main:
 .endm
 
 .macro test name
-    //print test_\name
+#ifdef DEBUG
+    print test_\name
+#endif
     test_init
 test_\name:
 .global test_\name
@@ -60,7 +65,7 @@ test_\name:
     reset_ps
     movi    a2, status
     l32i    a3, a2, 0
-    addi    a3, a3, 1
+    addi    a3, a3, 4
     s32i    a3, a2, 0
 .endm
 
@@ -73,7 +78,10 @@ test_\name:
     movi    a2, status
     l32i    a2, a2, 0
     movi    a3, 1
-    s8i     a3, a2, 0
+    s32i    a3, a2, 0
+#ifdef DEBUG
+    print   failed
+#endif
     j       99f
 .endm
 
@@ -89,3 +97,26 @@ test_\name:
     movi    a3, \addr
     s32i    a3, a2, 0
 .endm
+
+.macro dump r
+#ifdef DEBUG
+.data
+.align 4
+1: .word 0
+.text
+    movi    a4, 1b
+    s32i    a2, a4, 0
+    movi    a2, 4
+    movi    a3, 1
+    movi    a5, 4
+    simcall
+    movi    a4, 1b
+    l32i    a2, a4, 0
+#endif
+.endm
+
+#define glue(a, b) _glue(a, b)
+#define _glue(a, b) a ## b
+
+#define glue3(a, b, c) _glue3(a, b, c)
+#define _glue3(a, b, c) a ## b ## c

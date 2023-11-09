@@ -17,18 +17,19 @@
 #include "io/channel.h"
 #include "io/channel-socket.h"
 #include "pr-helper.h"
+#include "qapi/qapi-events-block.h"
+#include "qemu/module.h"
 
 #include <scsi/sg.h>
+#include "qom/object.h"
 
 #define PR_MAX_RECONNECT_ATTEMPTS 5
 
 #define TYPE_PR_MANAGER_HELPER "pr-manager-helper"
 
-#define PR_MANAGER_HELPER(obj) \
-     OBJECT_CHECK(PRManagerHelper, (obj), \
-                  TYPE_PR_MANAGER_HELPER)
+OBJECT_DECLARE_SIMPLE_TYPE(PRManagerHelper, PR_MANAGER_HELPER)
 
-typedef struct PRManagerHelper {
+struct PRManagerHelper {
     /* <private> */
     PRManager parent;
 
@@ -36,7 +37,16 @@ typedef struct PRManagerHelper {
 
     QemuMutex lock;
     QIOChannel *ioc;
-} PRManagerHelper;
+};
+
+static void pr_manager_send_status_changed_event(PRManagerHelper *pr_mgr)
+{
+    const char *id = object_get_canonical_path_component(OBJECT(pr_mgr));
+
+    if (id) {
+        qapi_event_send_pr_manager_status_changed(id, !!pr_mgr->ioc);
+    }
+}
 
 /* Called with lock held.  */
 static int pr_manager_helper_read(PRManagerHelper *pr_mgr,
@@ -47,6 +57,7 @@ static int pr_manager_helper_read(PRManagerHelper *pr_mgr,
     if (r < 0) {
         object_unref(OBJECT(pr_mgr->ioc));
         pr_mgr->ioc = NULL;
+        pr_manager_send_status_changed_event(pr_mgr);
         return -EINVAL;
     }
 
@@ -66,11 +77,13 @@ static int pr_manager_helper_write(PRManagerHelper *pr_mgr,
         iov.iov_base = (void *)buf;
         iov.iov_len = sz;
         n_written = qio_channel_writev_full(QIO_CHANNEL(pr_mgr->ioc), &iov, 1,
-                                            nfds ? &fd : NULL, nfds, errp);
+                                            nfds ? &fd : NULL, nfds, 0, errp);
 
         if (n_written <= 0) {
             assert(n_written != QIO_CHANNEL_ERR_BLOCK);
             object_unref(OBJECT(pr_mgr->ioc));
+            pr_mgr->ioc = NULL;
+            pr_manager_send_status_changed_event(pr_mgr);
             return n_written < 0 ? -EINVAL : 0;
         }
 
@@ -112,7 +125,7 @@ static int pr_manager_helper_initialize(PRManagerHelper *pr_mgr,
     qio_channel_set_delay(QIO_CHANNEL(sioc), false);
     pr_mgr->ioc = QIO_CHANNEL(sioc);
 
-    /* A simple feature negotation protocol, even though there is
+    /* A simple feature negotiation protocol, even though there is
      * no optional feature right now.
      */
     r = pr_manager_helper_read(pr_mgr, &flags, sizeof(flags), errp);
@@ -126,6 +139,7 @@ static int pr_manager_helper_initialize(PRManagerHelper *pr_mgr,
         goto out_close;
     }
 
+    pr_manager_send_status_changed_event(pr_mgr);
     return 0;
 
 out_close:
@@ -234,6 +248,18 @@ out:
     return ret;
 }
 
+static bool pr_manager_helper_is_connected(PRManager *p)
+{
+    PRManagerHelper *pr_mgr = PR_MANAGER_HELPER(p);
+    bool result;
+
+    qemu_mutex_lock(&pr_mgr->lock);
+    result = (pr_mgr->ioc != NULL);
+    qemu_mutex_unlock(&pr_mgr->lock);
+
+    return result;
+}
+
 static void pr_manager_helper_complete(UserCreatable *uc, Error **errp)
 {
     PRManagerHelper *pr_mgr = PR_MANAGER_HELPER(uc);
@@ -279,10 +305,10 @@ static void pr_manager_helper_class_init(ObjectClass *klass,
     PRManagerClass *prmgr_klass = PR_MANAGER_CLASS(klass);
     UserCreatableClass *uc_klass = USER_CREATABLE_CLASS(klass);
 
-    object_class_property_add_str(klass, "path", get_path, set_path,
-                                  &error_abort);
+    object_class_property_add_str(klass, "path", get_path, set_path);
     uc_klass->complete = pr_manager_helper_complete;
     prmgr_klass->run = pr_manager_helper_run;
+    prmgr_klass->is_connected = pr_manager_helper_is_connected;
 }
 
 static const TypeInfo pr_manager_helper_info = {

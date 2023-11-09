@@ -18,7 +18,6 @@
  */
 
 #include "qemu/osdep.h"
-#include "hw/hw.h"
 #include "ui/console.h"
 #include "framebuffer.h"
 
@@ -94,7 +93,6 @@ void framebuffer_update_display(
     if (dest_row_pitch < 0) {
         dest -= dest_row_pitch * (rows - 1);
     }
-
     first = -1;
 
     addr += i * src_width;

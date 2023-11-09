@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# group: rw quick
 #
 # Test error code paths for invalid QED images
 #
@@ -27,7 +28,6 @@ owner=stefanha@redhat.com
 seq=`basename $0`
 echo "QA output created by $seq"
 
-here=`pwd`
 status=1	# failure is the default!
 
 _cleanup()

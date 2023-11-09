@@ -11,7 +11,7 @@
  */
 
 #include "qemu/osdep.h"
-#include "qemu-common.h"
+#include "qemu/ctype.h"
 #include "qemu/id.h"
 
 bool id_wellformed(const char *id)
@@ -34,6 +34,8 @@ bool id_wellformed(const char *id)
 static const char *const id_subsys_str[ID_MAX] = {
     [ID_QDEV]  = "qdev",
     [ID_BLOCK] = "block",
+    [ID_CHR] = "chr",
+    [ID_NET] = "net",
 };
 
 /*

@@ -9,6 +9,22 @@
 #
 # This work is licensed under the terms of the GNU GPL version 2.
 # See the COPYING file in the top-level directory.
+#
+# The script will copy the headers into two target folders:
+#
+# - linux-headers/ for files that are required for compiling for a
+#   Linux host.  Generally we have these so we can use kernel structs
+#   and defines that are more recent than the headers that might be
+#   installed on the host system.  Usually this script can do simple
+#   file copies for these headers.
+#
+# - include/standard-headers/ for files that are used for guest
+#   device emulation and are required on all hosts.  For instance, we
+#   get our definitions of the virtio structures from the Linux
+#   kernel headers, but we need those definitions regardless of which
+#   host OS we are building for.  This script has to be careful to
+#   sanitize the headers to remove any use of Linux-specifics such as
+#   types like "__u64".  This work is done in the cp_portable function.
 
 tmpdir=$(mktemp -d)
 linux="$1"
@@ -34,6 +50,7 @@ cp_portable() {
     if
         grep '#include' "$f" | grep -v -e 'linux/virtio' \
                                      -e 'linux/types' \
+                                     -e 'linux/ioctl' \
                                      -e 'stdint' \
                                      -e 'linux/if_ether' \
                                      -e 'input-event-codes' \
@@ -41,8 +58,10 @@ cp_portable() {
                                      -e 'pvrdma_verbs' \
                                      -e 'drm.h' \
                                      -e 'limits' \
+                                     -e 'linux/const' \
                                      -e 'linux/kernel' \
                                      -e 'linux/sysinfo' \
+                                     -e 'asm-generic/kvm_para' \
                                      > /dev/null
     then
         echo "Unexpected #include in input file $f".
@@ -50,7 +69,8 @@ cp_portable() {
     fi
 
     header=$(basename "$f");
-    sed -e 's/__u\([0-9][0-9]*\)/uint\1_t/g' \
+    sed -e 's/__aligned_u64/__u64 __attribute__((aligned(8)))/g' \
+        -e 's/__u\([0-9][0-9]*\)/uint\1_t/g' \
         -e 's/u\([0-9][0-9]*\)/uint\1_t/g' \
         -e 's/__s\([0-9][0-9]*\)/int\1_t/g' \
         -e 's/__le\([0-9][0-9]*\)/uint\1_t/g' \
@@ -63,6 +83,7 @@ cp_portable() {
         -e 's/__BITS_PER_LONG/HOST_LONG_BITS/' \
         -e '/\"drm.h\"/d' \
         -e '/sys\/ioctl.h/d' \
+        -e '/linux\/ioctl.h/d' \
         -e 's/SW_MAX/SW_MAX_/' \
         -e 's/atomic_t/int/' \
         -e 's/__kernel_long_t/long/' \
@@ -83,11 +104,6 @@ for arch in $ARCHLIST; do
         continue
     fi
 
-    # Blacklist architectures which have KVM headers but are actually dead
-    if [ "$arch" = "ia64" -o "$arch" = "mips" ]; then
-        continue
-    fi
-
     if [ "$arch" = x86 ]; then
         arch_var=SRCARCH
     else
@@ -98,11 +114,19 @@ for arch in $ARCHLIST; do
 
     rm -rf "$output/linux-headers/asm-$arch"
     mkdir -p "$output/linux-headers/asm-$arch"
-    for header in kvm.h kvm_para.h unistd.h; do
+    for header in kvm.h unistd.h bitsperlong.h mman.h; do
         cp "$tmpdir/include/asm/$header" "$output/linux-headers/asm-$arch"
     done
+
+    if [ $arch = mips ]; then
+        cp "$tmpdir/include/asm/sgidefs.h" "$output/linux-headers/asm-mips/"
+        cp "$tmpdir/include/asm/unistd_o32.h" "$output/linux-headers/asm-mips/"
+        cp "$tmpdir/include/asm/unistd_n32.h" "$output/linux-headers/asm-mips/"
+        cp "$tmpdir/include/asm/unistd_n64.h" "$output/linux-headers/asm-mips/"
+    fi
     if [ $arch = powerpc ]; then
-        cp "$tmpdir/include/asm/epapr_hcalls.h" "$output/linux-headers/asm-powerpc/"
+        cp "$tmpdir/include/asm/unistd_32.h" "$output/linux-headers/asm-powerpc/"
+        cp "$tmpdir/include/asm/unistd_64.h" "$output/linux-headers/asm-powerpc/"
     fi
 
     rm -rf "$output/include/standard-headers/asm-$arch"
@@ -117,50 +141,81 @@ for arch in $ARCHLIST; do
         cp "$tmpdir/include/asm/unistd-oabi.h" "$output/linux-headers/asm-arm/"
         cp "$tmpdir/include/asm/unistd-common.h" "$output/linux-headers/asm-arm/"
     fi
+    if [ $arch = arm64 ]; then
+        cp "$tmpdir/include/asm/sve_context.h" "$output/linux-headers/asm-arm64/"
+    fi
     if [ $arch = x86 ]; then
-        cat <<-EOF >"$output/include/standard-headers/asm-x86/hyperv.h"
-        /* this is a temporary placeholder until kvm_para.h stops including it */
-EOF
         cp "$tmpdir/include/asm/unistd_32.h" "$output/linux-headers/asm-x86/"
         cp "$tmpdir/include/asm/unistd_x32.h" "$output/linux-headers/asm-x86/"
         cp "$tmpdir/include/asm/unistd_64.h" "$output/linux-headers/asm-x86/"
+        cp_portable "$tmpdir/include/asm/kvm_para.h" "$output/include/standard-headers/asm-$arch"
+        # Remove everything except the macros from bootparam.h avoiding the
+        # unnecessary import of several video/ist/etc headers
+        sed -e '/__ASSEMBLY__/,/__ASSEMBLY__/d' \
+               "$tmpdir/include/asm/bootparam.h" > "$tmpdir/bootparam.h"
+        cp_portable "$tmpdir/bootparam.h" \
+                    "$output/include/standard-headers/asm-$arch"
     fi
 done
 
 rm -rf "$output/linux-headers/linux"
 mkdir -p "$output/linux-headers/linux"
-for header in kvm.h kvm_para.h vfio.h vfio_ccw.h vhost.h \
-              psci.h psp-sev.h userfaultfd.h; do
+for header in const.h stddef.h kvm.h vfio.h vfio_ccw.h vfio_zdev.h vhost.h \
+              psci.h psp-sev.h userfaultfd.h memfd.h mman.h nvme_ioctl.h vduse.h; do
     cp "$tmpdir/include/linux/$header" "$output/linux-headers/linux"
 done
+
 rm -rf "$output/linux-headers/asm-generic"
 mkdir -p "$output/linux-headers/asm-generic"
-for header in kvm_para.h; do
+for header in unistd.h bitsperlong.h mman-common.h mman.h hugetlb_encode.h; do
     cp "$tmpdir/include/asm-generic/$header" "$output/linux-headers/asm-generic"
 done
+
 if [ -L "$linux/source" ]; then
     cp "$linux/source/COPYING" "$output/linux-headers"
 else
     cp "$linux/COPYING" "$output/linux-headers"
 fi
 
-cat <<EOF >$output/linux-headers/asm-x86/hyperv.h
-#include "standard-headers/asm-x86/hyperv.h"
-EOF
+# Recent kernel sources split the copyright/license info into multiple
+# files, which we need to copy. This set of licenses is the set that
+# are referred to by SPDX lines in the headers we currently copy.
+# We don't copy the Documentation/process/license-rules.rst which
+# is also referred to by COPYING, since it's explanatory rather than license.
+if [ -d "$linux/LICENSES" ]; then
+    mkdir -p "$output/linux-headers/LICENSES/preferred" \
+             "$output/linux-headers/LICENSES/exceptions"
+    for l in preferred/GPL-2.0 preferred/BSD-2-Clause preferred/BSD-3-Clause \
+             exceptions/Linux-syscall-note; do
+        cp "$linux/LICENSES/$l" "$output/linux-headers/LICENSES/$l"
+    done
+fi
+
 cat <<EOF >$output/linux-headers/linux/virtio_config.h
 #include "standard-headers/linux/virtio_config.h"
 EOF
 cat <<EOF >$output/linux-headers/linux/virtio_ring.h
 #include "standard-headers/linux/virtio_ring.h"
 EOF
+cat <<EOF >$output/linux-headers/linux/vhost_types.h
+#include "standard-headers/linux/vhost_types.h"
+EOF
 
 rm -rf "$output/include/standard-headers/linux"
 mkdir -p "$output/include/standard-headers/linux"
-for i in "$tmpdir"/include/linux/*virtio*.h "$tmpdir/include/linux/input.h" \
+for i in "$tmpdir"/include/linux/*virtio*.h \
+         "$tmpdir/include/linux/qemu_fw_cfg.h" \
+         "$tmpdir/include/linux/fuse.h" \
+         "$tmpdir/include/linux/input.h" \
          "$tmpdir/include/linux/input-event-codes.h" \
+         "$tmpdir/include/linux/udmabuf.h" \
          "$tmpdir/include/linux/pci_regs.h" \
-         "$tmpdir/include/linux/ethtool.h" "$tmpdir/include/linux/kernel.h" \
-         "$tmpdir/include/linux/sysinfo.h"; do
+         "$tmpdir/include/linux/ethtool.h" \
+         "$tmpdir/include/linux/const.h" \
+         "$tmpdir/include/linux/kernel.h" \
+         "$tmpdir/include/linux/vhost_types.h" \
+         "$tmpdir/include/linux/sysinfo.h" \
+         "$tmpdir/include/misc/pvpanic.h"; do
     cp_portable "$i" "$output/include/standard-headers/linux"
 done
 mkdir -p "$output/include/standard-headers/drm"
@@ -180,8 +235,7 @@ sed  -e '1h;2,$H;$!d;g'  -e 's/[^};]*pvrdma[^(| ]*([^)]*);//g' \
     "$linux/drivers/infiniband/hw/vmw_pvrdma/pvrdma_verbs.h" > \
     "$tmp_pvrdma_verbs";
 
-for i in "$linux/drivers/infiniband/hw/vmw_pvrdma/pvrdma_ring.h" \
-         "$linux/drivers/infiniband/hw/vmw_pvrdma/pvrdma_dev_api.h" \
+for i in "$linux/drivers/infiniband/hw/vmw_pvrdma/pvrdma_dev_api.h" \
          "$tmp_pvrdma_verbs"; do \
     cp_portable "$i" \
          "$output/include/standard-headers/drivers/infiniband/hw/vmw_pvrdma/"

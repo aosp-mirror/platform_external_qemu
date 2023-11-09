@@ -33,13 +33,13 @@
  * This work is licensed under the terms of the GNU GPL, version 2 or later.
  * See the COPYING file in the top-level directory.
  */
-#ifndef _SPAPR_OVEC_H
-#define _SPAPR_OVEC_H
+
+#ifndef SPAPR_OVEC_H
+#define SPAPR_OVEC_H
 
 #include "cpu.h"
-#include "migration/vmstate.h"
 
-typedef struct sPAPROptionVector sPAPROptionVector;
+typedef struct SpaprOptionVector SpaprOptionVector;
 
 #define OV_BIT(byte, bit) ((byte - 1) * BITS_PER_BYTE + bit)
 
@@ -49,8 +49,10 @@ typedef struct sPAPROptionVector sPAPROptionVector;
 /* option vector 5 */
 #define OV5_DRCONF_MEMORY       OV_BIT(2, 2)
 #define OV5_FORM1_AFFINITY      OV_BIT(5, 0)
+#define OV5_FORM2_AFFINITY      OV_BIT(5, 2)
 #define OV5_HP_EVT              OV_BIT(6, 5)
 #define OV5_HPT_RESIZE          OV_BIT(6, 7)
+#define OV5_DRMEM_V2            OV_BIT(22, 0)
 #define OV5_XIVE_BOTH           OV_BIT(23, 0)
 #define OV5_XIVE_EXPLOIT        OV_BIT(23, 1) /* 1=exploitation 0=legacy */
 
@@ -60,23 +62,22 @@ typedef struct sPAPROptionVector sPAPROptionVector;
 #define OV5_MMU_RADIX_GTSE      OV_BIT(26, 1) /* Radix GTSE */
 
 /* interfaces */
-sPAPROptionVector *spapr_ovec_new(void);
-sPAPROptionVector *spapr_ovec_clone(sPAPROptionVector *ov_orig);
-void spapr_ovec_intersect(sPAPROptionVector *ov,
-                          sPAPROptionVector *ov1,
-                          sPAPROptionVector *ov2);
-bool spapr_ovec_diff(sPAPROptionVector *ov,
-                     sPAPROptionVector *ov_old,
-                     sPAPROptionVector *ov_new);
-void spapr_ovec_cleanup(sPAPROptionVector *ov);
-void spapr_ovec_set(sPAPROptionVector *ov, long bitnr);
-void spapr_ovec_clear(sPAPROptionVector *ov, long bitnr);
-bool spapr_ovec_test(sPAPROptionVector *ov, long bitnr);
-sPAPROptionVector *spapr_ovec_parse_vector(target_ulong table_addr, int vector);
-int spapr_ovec_populate_dt(void *fdt, int fdt_offset,
-                           sPAPROptionVector *ov, const char *name);
+SpaprOptionVector *spapr_ovec_new(void);
+SpaprOptionVector *spapr_ovec_clone(SpaprOptionVector *ov_orig);
+void spapr_ovec_intersect(SpaprOptionVector *ov,
+                          SpaprOptionVector *ov1,
+                          SpaprOptionVector *ov2);
+bool spapr_ovec_subset(SpaprOptionVector *ov1, SpaprOptionVector *ov2);
+void spapr_ovec_cleanup(SpaprOptionVector *ov);
+void spapr_ovec_set(SpaprOptionVector *ov, long bitnr);
+void spapr_ovec_clear(SpaprOptionVector *ov, long bitnr);
+bool spapr_ovec_test(SpaprOptionVector *ov, long bitnr);
+bool spapr_ovec_empty(SpaprOptionVector *ov);
+SpaprOptionVector *spapr_ovec_parse_vector(target_ulong table_addr, int vector);
+int spapr_dt_ovec(void *fdt, int fdt_offset,
+                  SpaprOptionVector *ov, const char *name);
 
 /* migration */
 extern const VMStateDescription vmstate_spapr_ovec;
 
-#endif /* !defined (_SPAPR_OVEC_H) */
+#endif /* SPAPR_OVEC_H */

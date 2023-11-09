@@ -6,49 +6,55 @@
  *               VA Linux Systems Japan K.K.
  * Copyright (C) 2012 Jason Baron <jbaron@redhat.com>
  *
- * This is based on acpi.c, but heavily rewritten.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License version 2 as published by the Free Software Foundation.
- *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, see <http://www.gnu.org/licenses/>
- *
- * Contributions after 2012-01-13 are licensed under the terms of the
- * GNU GPL, version 2 or (at your option) any later version.
- *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses/>
  */
+
 #include "qemu/osdep.h"
-#include "hw/hw.h"
+#include "qemu/range.h"
 #include "hw/i2c/pm_smbus.h"
 #include "hw/pci/pci.h"
-#include "sysemu/sysemu.h"
-#include "hw/i2c/i2c.h"
-#include "hw/i2c/smbus.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 
-#include "hw/i386/ich9.h"
+#include "hw/southbridge/ich9.h"
+#include "qom/object.h"
+#include "hw/acpi/acpi_aml_interface.h"
 
-#define ICH9_SMB_DEVICE(obj) \
-     OBJECT_CHECK(ICH9SMBState, (obj), TYPE_ICH9_SMB_DEVICE)
+OBJECT_DECLARE_SIMPLE_TYPE(ICH9SMBState, ICH9_SMB_DEVICE)
 
-typedef struct ICH9SMBState {
+struct ICH9SMBState {
     PCIDevice dev;
 
+    bool irq_enabled;
+
     PMSMBus smb;
-} ICH9SMBState;
+};
+
+static bool ich9_vmstate_need_smbus(void *opaque, int version_id)
+{
+    return pm_smbus_vmstate_needed();
+}
 
 static const VMStateDescription vmstate_ich9_smbus = {
     .name = "ich9_smb",
     .version_id = 1,
     .minimum_version_id = 1,
     .fields = (VMStateField[]) {
-        VMSTATE_PCI_DEVICE(dev, struct ICH9SMBState),
+        VMSTATE_PCI_DEVICE(dev, ICH9SMBState),
+        VMSTATE_BOOL_TEST(irq_enabled, ICH9SMBState, ich9_vmstate_need_smbus),
+        VMSTATE_STRUCT_TEST(smb, ICH9SMBState, ich9_vmstate_need_smbus, 1,
+                            pmsmb_vmstate, PMSMBus),
         VMSTATE_END_OF_LIST()
     }
 };
@@ -61,13 +67,29 @@ static void ich9_smbus_write_config(PCIDevice *d, uint32_t address,
     pci_default_write_config(d, address, val, len);
     if (range_covers_byte(address, len, ICH9_SMB_HOSTC)) {
         uint8_t hostc = s->dev.config[ICH9_SMB_HOSTC];
-        if ((hostc & ICH9_SMB_HOSTC_HST_EN) &&
-            !(hostc & ICH9_SMB_HOSTC_I2C_EN)) {
+        if (hostc & ICH9_SMB_HOSTC_HST_EN) {
             memory_region_set_enabled(&s->smb.io, true);
         } else {
             memory_region_set_enabled(&s->smb.io, false);
         }
+        s->smb.i2c_enable = (hostc & ICH9_SMB_HOSTC_I2C_EN) != 0;
+        if (hostc & ICH9_SMB_HOSTC_SSRESET) {
+            s->smb.reset(&s->smb);
+            s->dev.config[ICH9_SMB_HOSTC] &= ~ICH9_SMB_HOSTC_SSRESET;
+        }
     }
+}
+
+static void ich9_smb_set_irq(PMSMBus *pmsmb, bool enabled)
+{
+    ICH9SMBState *s = pmsmb->opaque;
+
+    if (enabled == s->irq_enabled) {
+        return;
+    }
+
+    s->irq_enabled = enabled;
+    pci_set_irq(&s->dev, enabled);
 }
 
 static void ich9_smbus_realize(PCIDevice *d, Error **errp)
@@ -80,15 +102,27 @@ static void ich9_smbus_realize(PCIDevice *d, Error **errp)
     pci_set_byte(d->config + ICH9_SMB_HOSTC, 0);
     /* TODO bar0, bar1: 64bit BAR support*/
 
-    pm_smbus_init(&d->qdev, &s->smb);
+    pm_smbus_init(&d->qdev, &s->smb, false);
     pci_register_bar(d, ICH9_SMB_SMB_BASE_BAR, PCI_BASE_ADDRESS_SPACE_IO,
                      &s->smb.io);
+
+    s->smb.set_irq = ich9_smb_set_irq;
+    s->smb.opaque = s;
+}
+
+static void build_ich9_smb_aml(AcpiDevAmlIf *adev, Aml *scope)
+{
+    ICH9SMBState *s = ICH9_SMB_DEVICE(adev);
+    BusState *bus = BUS(s->smb.smbus);
+
+    qbus_build_aml(bus, scope);
 }
 
 static void ich9_smb_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
     PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
+    AcpiDevAmlIfClass *adevc = ACPI_DEV_AML_IF_CLASS(klass);
 
     k->vendor_id = PCI_VENDOR_ID_INTEL;
     k->device_id = PCI_DEVICE_ID_INTEL_ICH9_6;
@@ -103,14 +137,7 @@ static void ich9_smb_class_init(ObjectClass *klass, void *data)
      * pc_q35_init()
      */
     dc->user_creatable = false;
-}
-
-I2CBus *ich9_smb_init(PCIBus *bus, int devfn, uint32_t smb_io_base)
-{
-    PCIDevice *d =
-        pci_create_simple_multifunction(bus, devfn, true, TYPE_ICH9_SMB_DEVICE);
-    ICH9SMBState *s = ICH9_SMB_DEVICE(d);
-    return s->smb.smbus;
+    adevc->build_dev_aml = build_ich9_smb_aml;
 }
 
 static const TypeInfo ich9_smb_info = {
@@ -120,6 +147,7 @@ static const TypeInfo ich9_smb_info = {
     .class_init = ich9_smb_class_init,
     .interfaces = (InterfaceInfo[]) {
         { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+        { TYPE_ACPI_DEV_AML_IF },
         { },
     },
 };

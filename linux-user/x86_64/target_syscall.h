@@ -12,7 +12,7 @@ struct target_pt_regs {
 	abi_ulong rbp;
 	abi_ulong rbx;
 /* arguments: non interrupts/non tracing syscalls only save up to here */
- 	abi_ulong r11;
+	abi_ulong r11;
 	abi_ulong r10;
 	abi_ulong r9;
 	abi_ulong r8;
@@ -100,8 +100,8 @@ struct target_msqid64_ds {
 #define TARGET_ARCH_SET_FS 0x1002
 #define TARGET_ARCH_GET_FS 0x1003
 #define TARGET_ARCH_GET_GS 0x1004
-#define TARGET_MINSIGSTKSZ 2048
-#define TARGET_MLOCKALL_MCL_CURRENT 1
-#define TARGET_MLOCKALL_MCL_FUTURE  2
+#define TARGET_MCL_CURRENT 1
+#define TARGET_MCL_FUTURE  2
+#define TARGET_MCL_ONFAULT 4
 
 #endif /* X86_64_TARGET_SYSCALL_H */

@@ -23,6 +23,7 @@
  */
 
 #include "qemu/osdep.h"
+#include "qemu/module.h"
 #include "qemu/option.h"
 #include "qemu/sockets.h"
 #include "qapi/error.h"
@@ -46,8 +47,10 @@ static bool stdio_echo_state;
 
 static void term_exit(void)
 {
-    tcsetattr(0, TCSANOW, &oldtty);
-    fcntl(0, F_SETFL, old_fd0_flags);
+    if (stdio_in_use) {
+        tcsetattr(0, TCSANOW, &oldtty);
+        fcntl(0, F_SETFL, old_fd0_flags);
+    }
 }
 
 static void qemu_chr_set_echo_stdio(Chardev *chr, bool echo)
@@ -100,7 +103,10 @@ static void qemu_chr_open_stdio(Chardev *chr,
     stdio_in_use = true;
     old_fd0_flags = fcntl(0, F_GETFL);
     tcgetattr(0, &oldtty);
-    qemu_set_nonblock(0);
+    if (!g_unix_set_fd_nonblocking(0, true, NULL)) {
+        error_setg_errno(errp, errno, "Failed to set FD nonblocking");
+        return;
+    }
     atexit(term_exit);
 
     memset(&act, 0, sizeof(act));
@@ -109,10 +115,8 @@ static void qemu_chr_open_stdio(Chardev *chr,
 
     qemu_chr_open_fd(chr, 0, 1);
 
-    if (opts->has_signal) {
-        stdio_allow_signal = opts->signal;
-    }
-    qemu_chr_set_echo_stdio(chr, opts->echo);
+    stdio_allow_signal = !opts->has_signal || opts->signal;
+    qemu_chr_set_echo_stdio(chr, false);
 }
 #endif
 
@@ -126,7 +130,6 @@ static void qemu_chr_parse_stdio(QemuOpts *opts, ChardevBackend *backend,
     qemu_chr_parse_common(opts, qapi_ChardevStdio_base(stdio));
     stdio->has_signal = true;
     stdio->signal = qemu_opt_get_bool(opts, "signal", true);
-    stdio->echo = qemu_opt_get_bool(opts, "echo", false);
 }
 
 static void char_stdio_class_init(ObjectClass *oc, void *data)

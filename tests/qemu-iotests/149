@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# group: rw sudo
 #
 # Copyright (C) 2016 Red Hat, Inc.
 #
@@ -78,7 +79,7 @@ class LUKSConfig(object):
 
     def first_password_base64(self):
         (pw, slot) = self.first_password()
-        return base64.b64encode(pw)
+        return base64.b64encode(pw.encode('ascii')).decode('ascii')
 
     def active_slots(self):
         slots = []
@@ -97,7 +98,8 @@ def verify_passwordless_sudo():
     proc = subprocess.Popen(args,
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
+                            stderr=subprocess.STDOUT,
+                            universal_newlines=True)
 
     msg = proc.communicate()[0]
 
@@ -115,7 +117,8 @@ def cryptsetup(args, password=None):
     proc = subprocess.Popen(fullargs,
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
+                            stderr=subprocess.STDOUT,
+                            universal_newlines=True)
 
     msg = proc.communicate(password)[0]
 
@@ -150,7 +153,7 @@ def cryptsetup_format(config):
 
     (password, slot) = config.first_password()
 
-    args = ["luksFormat"]
+    args = ["luksFormat", "--type", "luks1"]
     cipher = config.cipher + "-" + config.mode + "-" + config.ivgen
     if config.ivgen_hash is not None:
         cipher = cipher + ":" + config.ivgen_hash
@@ -227,6 +230,18 @@ def create_image(config, size_mb):
         fn.truncate(size_mb * 1024 * 1024)
 
 
+def check_cipher_support(config, output):
+    """Check the output of qemu-img or qemu-io for mention of the respective
+    cipher algorithm being unsupported, and if so, skip this test.
+    (Returns `output` for convenience.)"""
+
+    if 'Unsupported cipher algorithm' in output:
+        iotests.notrun('Unsupported cipher algorithm '
+                       f'{config.cipher}-{config.keylen}-{config.mode}; '
+                       'consider configuring qemu with a different crypto '
+                       'backend')
+    return output
+
 def qemu_img_create(config, size_mb):
     """Create and format a disk image with LUKS using qemu-img"""
 
@@ -250,7 +265,11 @@ def qemu_img_create(config, size_mb):
             "%dM" % size_mb]
 
     iotests.log("qemu-img " + " ".join(args), filters=[iotests.filter_test_dir])
-    iotests.log(iotests.qemu_img_pipe(*args), filters=[iotests.filter_test_dir])
+    try:
+        iotests.qemu_img(*args)
+    except subprocess.CalledProcessError as exc:
+        check_cipher_support(config, exc.output)
+        raise
 
 def qemu_io_image_args(config, dev=False):
     """Get the args for access an image or device with qemu-io"""
@@ -258,7 +277,7 @@ def qemu_io_image_args(config, dev=False):
     if dev:
         return [
             "--image-opts",
-            "driver=file,filename=%s" % config.device_path()]
+            "driver=host_device,filename=%s" % config.device_path()]
     else:
         return [
             "--object",
@@ -276,8 +295,9 @@ def qemu_io_write_pattern(config, pattern, offset_mb, size_mb, dev=False):
     args = ["-c", "write -P 0x%x %dM %dM" % (pattern, offset_mb, size_mb)]
     args.extend(qemu_io_image_args(config, dev))
     iotests.log("qemu-io " + " ".join(args), filters=[iotests.filter_test_dir])
-    iotests.log(iotests.qemu_io(*args), filters=[iotests.filter_test_dir,
-                                                 iotests.filter_qemu_io])
+    output = iotests.qemu_io(*args, check=False).stdout
+    iotests.log(check_cipher_support(config, output),
+                filters=[iotests.filter_test_dir, iotests.filter_qemu_io])
 
 
 def qemu_io_read_pattern(config, pattern, offset_mb, size_mb, dev=False):
@@ -288,8 +308,9 @@ def qemu_io_read_pattern(config, pattern, offset_mb, size_mb, dev=False):
     args = ["-c", "read -P 0x%x %dM %dM" % (pattern, offset_mb, size_mb)]
     args.extend(qemu_io_image_args(config, dev))
     iotests.log("qemu-io " + " ".join(args), filters=[iotests.filter_test_dir])
-    iotests.log(iotests.qemu_io(*args), filters=[iotests.filter_test_dir,
-                                                 iotests.filter_qemu_io])
+    output = iotests.qemu_io(*args, check=False).stdout
+    iotests.log(check_cipher_support(config, output),
+                filters=[iotests.filter_test_dir, iotests.filter_qemu_io])
 
 
 def test_once(config, qemu_img=False):
@@ -311,13 +332,13 @@ def test_once(config, qemu_img=False):
     image_size = 4 * oneTB
     if qemu_img:
         iotests.log("# Create image")
-        qemu_img_create(config, image_size / oneMB)
+        qemu_img_create(config, image_size // oneMB)
     else:
         iotests.log("# Create image")
-        create_image(config, image_size / oneMB)
+        create_image(config, image_size // oneMB)
 
     lowOffsetMB = 100
-    highOffsetMB = 3 * oneTB / oneMB
+    highOffsetMB = 3 * oneTB // oneMB
 
     try:
         if not qemu_img:
@@ -376,12 +397,11 @@ def test_once(config, qemu_img=False):
     finally:
         iotests.log("# Delete image")
         delete_image(config)
-        print
+        print()
 
 
 # Obviously we only work with the luks image format
-iotests.verify_image_format(supported_fmts=['luks'])
-iotests.verify_platform()
+iotests.script_initialize(supported_fmts=['luks'])
 
 # We need sudo in order to run cryptsetup to create
 # dm-crypt devices. This is safe to use on any

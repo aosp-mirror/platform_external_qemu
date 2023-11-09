@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,12 +23,13 @@
 
 #include "qapi/qapi-types-crypto.h"
 #include "qom/object.h"
+#include "crypto/secret_common.h"
 
 #define TYPE_QCRYPTO_SECRET "secret"
-#define QCRYPTO_SECRET(obj)                  \
-    OBJECT_CHECK(QCryptoSecret, (obj), TYPE_QCRYPTO_SECRET)
-
 typedef struct QCryptoSecret QCryptoSecret;
+DECLARE_INSTANCE_CHECKER(QCryptoSecret, QCRYPTO_SECRET,
+                         TYPE_QCRYPTO_SECRET)
+
 typedef struct QCryptoSecretClass QCryptoSecretClass;
 
 /**
@@ -119,29 +120,14 @@ typedef struct QCryptoSecretClass QCryptoSecretClass;
  */
 
 struct QCryptoSecret {
-    Object parent_obj;
-    uint8_t *rawdata;
-    size_t rawlen;
-    QCryptoSecretFormat format;
+    QCryptoSecretCommon parent_obj;
     char *data;
     char *file;
-    char *keyid;
-    char *iv;
 };
 
 
 struct QCryptoSecretClass {
-    ObjectClass parent_class;
+    QCryptoSecretCommonClass parent_class;
 };
-
-
-extern int qcrypto_secret_lookup(const char *secretid,
-                                 uint8_t **data,
-                                 size_t *datalen,
-                                 Error **errp);
-extern char *qcrypto_secret_lookup_as_utf8(const char *secretid,
-                                           Error **errp);
-extern char *qcrypto_secret_lookup_as_base64(const char *secretid,
-                                             Error **errp);
 
 #endif /* QCRYPTO_SECRET_H */

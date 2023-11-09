@@ -36,9 +36,12 @@
  */
 
 #include "qemu/osdep.h"
+#include "qemu/module.h"
 #include "qemu/timer.h"
 #include "hw/sparc/sparc32_dma.h"
+#include "migration/vmstate.h"
 #include "hw/net/lance.h"
+#include "hw/qdev-properties.h"
 #include "trace.h"
 #include "sysemu/sysemu.h"
 
@@ -97,9 +100,9 @@ static const VMStateDescription vmstate_lance = {
     }
 };
 
-static int lance_init(SysBusDevice *sbd)
+static void lance_realize(DeviceState *dev, Error **errp)
 {
-    DeviceState *dev = DEVICE(sbd);
+    SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
     SysBusPCNetState *d = SYSBUS_PCNET(dev);
     PCNetState *s = &d->state;
 
@@ -115,7 +118,6 @@ static int lance_init(SysBusDevice *sbd)
     s->phys_mem_read = ledma_memory_read;
     s->phys_mem_write = ledma_memory_write;
     pcnet_common_init(dev, s, &net_lance_info);
-    return 0;
 }
 
 static void lance_reset(DeviceState *dev)
@@ -132,11 +134,12 @@ static void lance_instance_init(Object *obj)
 
     device_add_bootindex_property(obj, &s->conf.bootindex,
                                   "bootindex", "/ethernet-phy@0",
-                                  DEVICE(obj), NULL);
+                                  DEVICE(obj));
 }
 
 static Property lance_properties[] = {
-    DEFINE_PROP_PTR("dma", SysBusPCNetState, state.dma_opaque),
+    DEFINE_PROP_LINK("dma", SysBusPCNetState, state.dma_opaque,
+                     TYPE_DEVICE, DeviceState *),
     DEFINE_NIC_PROPERTIES(SysBusPCNetState, state.conf),
     DEFINE_PROP_END_OF_LIST(),
 };
@@ -144,16 +147,13 @@ static Property lance_properties[] = {
 static void lance_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
-    SysBusDeviceClass *k = SYS_BUS_DEVICE_CLASS(klass);
 
-    k->init = lance_init;
+    dc->realize = lance_realize;
     set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
     dc->fw_name = "ethernet";
     dc->reset = lance_reset;
     dc->vmsd = &vmstate_lance;
-    dc->props = lance_properties;
-    /* Reason: pointer property "dma" */
-    dc->user_creatable = false;
+    device_class_set_props(dc, lance_properties);
 }
 
 static const TypeInfo lance_info = {

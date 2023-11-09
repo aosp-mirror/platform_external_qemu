@@ -15,7 +15,7 @@
 #define MEMORY_MAPPING_H
 
 #include "qemu/queue.h"
-#include "exec/memory.h"
+#include "exec/cpu-common.h"
 
 typedef struct GuestPhysBlock {
     /* visible to guest, reflects PCI hole, etc */
@@ -36,13 +36,13 @@ typedef struct GuestPhysBlock {
 /* point-in-time snapshot of guest-visible physical mappings */
 typedef struct GuestPhysBlockList {
     unsigned num;
-    QTAILQ_HEAD(GuestPhysBlockHead, GuestPhysBlock) head;
+    QTAILQ_HEAD(, GuestPhysBlock) head;
 } GuestPhysBlockList;
 
 /* The physical and virtual address in the memory mapping are contiguous. */
 typedef struct MemoryMapping {
     hwaddr phys_addr;
-    target_ulong virt_addr;
+    vaddr virt_addr;
     ram_addr_t length;
     QTAILQ_ENTRY(MemoryMapping) next;
 } MemoryMapping;

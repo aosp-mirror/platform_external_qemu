@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Analyse lock events and compute statistics
@@ -6,7 +6,6 @@
 # Author: Alex Bennée <alex.bennee@linaro.org>
 #
 
-import os
 import simpletrace
 import argparse
 import numpy as np
@@ -77,7 +76,7 @@ if __name__ == '__main__':
 
     # Now dump the individual lock stats
     for key, val in sorted(analyser.mutex_records.iteritems(),
-                           key=lambda (k,v): v["locks"]):
+                           key=lambda k_v: k_v[1]["locks"]):
         print ("Lock: %#x locks: %d, locked: %d, unlocked: %d" %
                (key, val["locks"], val["locked"], val["unlocked"]))
 

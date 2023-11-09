@@ -24,34 +24,39 @@
 #endif
 #include "qemu/osdep.h"
 #include <ucontext.h>
-#include "qemu-common.h"
 #include "qemu/coroutine_int.h"
+#include "qemu/coroutine-tls.h"
 
 #ifdef CONFIG_VALGRIND_H
 #include <valgrind/valgrind.h>
 #endif
 
-#if defined(__SANITIZE_ADDRESS__) || __has_feature(address_sanitizer)
+#ifdef QEMU_SANITIZE_ADDRESS
 #ifdef CONFIG_ASAN_IFACE_FIBER
 #define CONFIG_ASAN 1
 #include <sanitizer/asan_interface.h>
 #endif
 #endif
 
-#if defined(__SANITIZE_THREAD__) || __has_feature(thread_sanitizer)
-#define CONFIG_TSAN 1
+#ifdef CONFIG_TSAN
 #include <sanitizer/tsan_interface.h>
 #endif
-
 
 typedef struct {
     Coroutine base;
     void *stack;
     size_t stack_size;
+#ifdef CONFIG_SAFESTACK
+    /* Need an unsafe stack for each coroutine */
+    void *unsafe_stack;
+    size_t unsafe_stack_size;
+#endif
     sigjmp_buf env;
 
-    void* tsan_co_fiber;
-    void* tsan_caller_fiber;
+#ifdef CONFIG_TSAN
+    void *tsan_co_fiber;
+    void *tsan_caller_fiber;
+#endif
 
 #ifdef CONFIG_VALGRIND_H
     unsigned int valgrind_stack_id;
@@ -59,21 +64,11 @@ typedef struct {
 
 } CoroutineUContext;
 
-#define UC_DEBUG 0
-
-#if UC_DEBUG
-#include <pthread.h>
-#include <stdio.h>
-#define UC_TRACE(fmt,...) fprintf(stderr, "%s:%d:0x%lx:%p " fmt "\n", __func__, __LINE__, pthread_self(), __tsan_get_current_fiber(), ##__VA_ARGS__);
-#else
-#define UC_TRACE(fmt,...)
-#endif
-
 /**
  * Per-thread coroutine bookkeeping
  */
-static __thread CoroutineUContext leader;
-static __thread Coroutine *current;
+QEMU_DEFINE_STATIC_CO_TLS(Coroutine *, current);
+QEMU_DEFINE_STATIC_CO_TLS(CoroutineUContext, leader);
 
 /*
  * va_args to makecontext() must be type 'int', so passing
@@ -85,62 +80,75 @@ union cc_arg {
     int i[2];
 };
 
-static __attribute__((always_inline)) void on_new_fiber(CoroutineUContext* co) {
+/*
+ * QEMU_ALWAYS_INLINE only does so if __OPTIMIZE__, so we cannot use it.
+ * always_inline is required to avoid TSan runtime fatal errors.
+ */
+static inline __attribute__((always_inline))
+void on_new_fiber(CoroutineUContext *co)
+{
 #ifdef CONFIG_TSAN
-    co->tsan_co_fiber = __tsan_create_fiber(
-            0 /* flags: sync on switch */);
+    co->tsan_co_fiber = __tsan_create_fiber(0); /* flags: sync on switch */
     co->tsan_caller_fiber = __tsan_get_current_fiber();
-    UC_TRACE("Create new TSAN co fiber. co: %p co fiber: %p caller fiber: %p ",
-             co, co->tsan_co_fiber, co->tsan_caller_fiber);
 #endif
 }
 
-static __attribute__((always_inline)) void finish_switch_fiber(void *fake_stack_save)
+/* always_inline is required to avoid TSan runtime fatal errors. */
+static inline __attribute__((always_inline))
+void finish_switch_fiber(void *fake_stack_save)
 {
 #ifdef CONFIG_ASAN
+    CoroutineUContext *leaderp = get_ptr_leader();
     const void *bottom_old;
     size_t size_old;
 
     __sanitizer_finish_switch_fiber(fake_stack_save, &bottom_old, &size_old);
 
-    if (!leader.stack) {
-        leader.stack = (void *)bottom_old;
-        leader.stack_size = size_old;
+    if (!leaderp->stack) {
+        leaderp->stack = (void *)bottom_old;
+        leaderp->stack_size = size_old;
     }
 #endif
 #ifdef CONFIG_TSAN
     if (fake_stack_save) {
         __tsan_release(fake_stack_save);
-        __tsan_switch_to_fiber(fake_stack_save, 0 /* synchronize */);
+        __tsan_switch_to_fiber(fake_stack_save, 0);  /* 0=synchronize */
     }
 #endif
 }
 
-static __attribute__((always_inline)) void start_switch_fiber(CoroutineAction action,
-                               void **fake_stack_save,
-                               const void *bottom, size_t size,
-                               void *new_fiber)
+/* always_inline is required to avoid TSan runtime fatal errors. */
+static inline __attribute__((always_inline))
+void start_switch_fiber_asan(CoroutineAction action, void **fake_stack_save,
+                             const void *bottom, size_t size)
 {
 #ifdef CONFIG_ASAN
     __sanitizer_start_switch_fiber(
-        action == COROUTINE_TERMINATE ? NULL : fake_stack_save,
-        bottom, size);
+            action == COROUTINE_TERMINATE ? NULL : fake_stack_save,
+            bottom, size);
 #endif
+}
+
+/* always_inline is required to avoid TSan runtime fatal errors. */
+static inline __attribute__((always_inline))
+void start_switch_fiber_tsan(void **fake_stack_save,
+                             CoroutineUContext *co,
+                             bool caller)
+{
 #ifdef CONFIG_TSAN
-    void* curr_fiber =
-        __tsan_get_current_fiber();
+    void *new_fiber = caller ?
+                      co->tsan_caller_fiber :
+                      co->tsan_co_fiber;
+    void *curr_fiber = __tsan_get_current_fiber();
     __tsan_acquire(curr_fiber);
 
-    UC_TRACE("Current fiber: %p.", curr_fiber);
     *fake_stack_save = curr_fiber;
-    UC_TRACE("Switch to fiber %p", new_fiber);
-    __tsan_switch_to_fiber(new_fiber, 0 /* synchronize */);
+    __tsan_switch_to_fiber(new_fiber, 0);  /* 0=synchronize */
 #endif
 }
 
 static void coroutine_trampoline(int i0, int i1)
 {
-    UC_TRACE("Start trampoline");
     union cc_arg arg;
     CoroutineUContext *self;
     Coroutine *co;
@@ -155,31 +163,24 @@ static void coroutine_trampoline(int i0, int i1)
 
     /* Initialize longjmp environment and switch back the caller */
     if (!sigsetjmp(self->env, 0)) {
-        UC_TRACE("Current fiber: %p. Set co %p to env 0x%lx", __tsan_get_current_fiber(), self, (unsigned long)self->env);
-        start_switch_fiber(
-            COROUTINE_YIELD,
-            &fake_stack_save,
-            leader.stack,
-            leader.stack_size,
-            self->tsan_caller_fiber);
-        UC_TRACE("Jump to co %p caller fiber %p env 0x%lx", co, self->tsan_caller_fiber, *(unsigned long*)co->entry_arg);
+        CoroutineUContext *leaderp = get_ptr_leader();
+
+        start_switch_fiber_asan(COROUTINE_YIELD, &fake_stack_save,
+                                leaderp->stack, leaderp->stack_size);
+        start_switch_fiber_tsan(&fake_stack_save, self, true); /* true=caller */
         siglongjmp(*(sigjmp_buf *)co->entry_arg, 1);
     }
-
-    UC_TRACE("After first siglongjmp");
 
     finish_switch_fiber(fake_stack_save);
 
     while (true) {
         co->entry(co->entry_arg);
-        UC_TRACE("switch from co %p to caller co %p fiber %p\n", co, co->caller, self->tsan_caller_fiber);
         qemu_coroutine_switch(co, co->caller, COROUTINE_TERMINATE);
     }
 }
 
 Coroutine *qemu_coroutine_new(void)
 {
-    UC_TRACE("Start new coroutine");
     CoroutineUContext *co;
     ucontext_t old_uc, uc;
     sigjmp_buf old_env;
@@ -201,6 +202,10 @@ Coroutine *qemu_coroutine_new(void)
     co = g_malloc0(sizeof(*co));
     co->stack_size = COROUTINE_STACK_SIZE;
     co->stack = qemu_alloc_stack(&co->stack_size);
+#ifdef CONFIG_SAFESTACK
+    co->unsafe_stack_size = COROUTINE_STACK_SIZE;
+    co->unsafe_stack = qemu_alloc_stack(&co->unsafe_stack_size);
+#endif
     co->base.entry_arg = &old_env; /* stash away our jmp_buf */
 
     uc.uc_link = &old_uc;
@@ -221,10 +226,26 @@ Coroutine *qemu_coroutine_new(void)
 
     /* swapcontext() in, siglongjmp() back out */
     if (!sigsetjmp(old_env, 0)) {
-        start_switch_fiber(
-            COROUTINE_YIELD,
-            &fake_stack_save,
-            co->stack, co->stack_size, co->tsan_co_fiber);
+        start_switch_fiber_asan(COROUTINE_YIELD, &fake_stack_save, co->stack,
+                                co->stack_size);
+        start_switch_fiber_tsan(&fake_stack_save,
+                                co, false); /* false=not caller */
+
+#ifdef CONFIG_SAFESTACK
+        /*
+         * Before we swap the context, set the new unsafe stack
+         * The unsafe stack grows just like the normal stack, so start from
+         * the last usable location of the memory area.
+         * NOTE: we don't have to re-set the usp afterwards because we are
+         * coming back to this context through a siglongjmp.
+         * The compiler already wrapped the corresponding sigsetjmp call with
+         * code that saves the usp on the (safe) stack before the call, and
+         * restores it right after (which is where we return with siglongjmp).
+         */
+        void *usp = co->unsafe_stack + co->unsafe_stack_size;
+        __safestack_unsafe_stack_ptr = usp;
+#endif
+
         swapcontext(&old_uc, &uc);
     }
 
@@ -234,8 +255,8 @@ Coroutine *qemu_coroutine_new(void)
 }
 
 #ifdef CONFIG_VALGRIND_H
-#if defined(CONFIG_PRAGMA_DIAGNOSTIC_AVAILABLE) && !defined(__clang__)
 /* Work around an unused variable in the valgrind.h macro... */
+#if !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
@@ -243,14 +264,13 @@ static inline void valgrind_stack_deregister(CoroutineUContext *co)
 {
     VALGRIND_STACK_DEREGISTER(co->valgrind_stack_id);
 }
-#if defined(CONFIG_PRAGMA_DIAGNOSTIC_AVAILABLE) && !defined(__clang__)
+#if !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 #endif
 
 void qemu_coroutine_delete(Coroutine *co_)
 {
-    UC_TRACE("Nuking co %p from orbit", co_);
     CoroutineUContext *co = DO_UPCAST(CoroutineUContext, base, co_);
 
 #ifdef CONFIG_VALGRIND_H
@@ -258,6 +278,9 @@ void qemu_coroutine_delete(Coroutine *co_)
 #endif
 
     qemu_free_stack(co->stack, co->stack_size);
+#ifdef CONFIG_SAFESTACK
+    qemu_free_stack(co->unsafe_stack, co->unsafe_stack_size);
+#endif
     g_free(co);
 }
 
@@ -275,18 +298,17 @@ qemu_coroutine_switch(Coroutine *from_, Coroutine *to_,
 {
     CoroutineUContext *from = DO_UPCAST(CoroutineUContext, base, from_);
     CoroutineUContext *to = DO_UPCAST(CoroutineUContext, base, to_);
-    UC_TRACE("from to: %p %p uc: %p %p. fibers: %p %p caller fibers: %p %p\n",
-            from_, to_, from, to,
-            from->tsan_co_fiber, to->tsan_co_fiber,
-            from->tsan_caller_fiber, to->tsan_caller_fiber);
     int ret;
     void *fake_stack_save = NULL;
 
-    current = to_;
+    set_current(to_);
 
     ret = sigsetjmp(from->env, 0);
     if (ret == 0) {
-        start_switch_fiber(action, &fake_stack_save, to->stack, to->stack_size, to->tsan_co_fiber);
+        start_switch_fiber_asan(action, &fake_stack_save, to->stack,
+                                to->stack_size);
+        start_switch_fiber_tsan(&fake_stack_save,
+                                to, false); /* false=not caller */
         siglongjmp(to->env, action);
     }
 
@@ -297,19 +319,24 @@ qemu_coroutine_switch(Coroutine *from_, Coroutine *to_,
 
 Coroutine *qemu_coroutine_self(void)
 {
-    if (!current) {
-        current = &leader.base;
+    Coroutine *self = get_current();
+    CoroutineUContext *leaderp = get_ptr_leader();
+
+    if (!self) {
+        self = &leaderp->base;
+        set_current(self);
     }
 #ifdef CONFIG_TSAN
-    if (!leader.tsan_co_fiber) {
-        leader.tsan_co_fiber = __tsan_get_current_fiber();
-        UC_TRACE("For co %p set leader co fiber to %p", current, leader.tsan_co_fiber);
+    if (!leaderp->tsan_co_fiber) {
+        leaderp->tsan_co_fiber = __tsan_get_current_fiber();
     }
 #endif
-    return current;
+    return self;
 }
 
 bool qemu_in_coroutine(void)
 {
-    return current && current->caller;
+    Coroutine *self = get_current();
+
+    return self && self->caller;
 }

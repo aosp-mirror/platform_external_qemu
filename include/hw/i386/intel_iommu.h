@@ -21,16 +21,13 @@
 
 #ifndef INTEL_IOMMU_H
 #define INTEL_IOMMU_H
-#include "hw/qdev.h"
-#include "sysemu/dma.h"
+
 #include "hw/i386/x86-iommu.h"
-#include "hw/i386/ioapic.h"
-#include "hw/pci/msi.h"
-#include "hw/sysbus.h"
+#include "qemu/iova-tree.h"
+#include "qom/object.h"
 
 #define TYPE_INTEL_IOMMU_DEVICE "intel-iommu"
-#define INTEL_IOMMU_DEVICE(obj) \
-     OBJECT_CHECK(IntelIOMMUState, (obj), TYPE_INTEL_IOMMU_DEVICE)
+OBJECT_DECLARE_SIMPLE_TYPE(IntelIOMMUState, INTEL_IOMMU_DEVICE)
 
 #define TYPE_INTEL_IOMMU_MEMORY_REGION "intel-iommu-iommu-memory-region"
 
@@ -59,20 +56,24 @@
 
 typedef struct VTDContextEntry VTDContextEntry;
 typedef struct VTDContextCacheEntry VTDContextCacheEntry;
-typedef struct IntelIOMMUState IntelIOMMUState;
 typedef struct VTDAddressSpace VTDAddressSpace;
 typedef struct VTDIOTLBEntry VTDIOTLBEntry;
-typedef struct VTDBus VTDBus;
 typedef union VTD_IR_TableEntry VTD_IR_TableEntry;
 typedef union VTD_IR_MSIAddress VTD_IR_MSIAddress;
-typedef struct VTDIrq VTDIrq;
-typedef struct VTD_MSIMessage VTD_MSIMessage;
-typedef struct IntelIOMMUNotifierNode IntelIOMMUNotifierNode;
+typedef struct VTDPASIDDirEntry VTDPASIDDirEntry;
+typedef struct VTDPASIDEntry VTDPASIDEntry;
 
 /* Context-Entry */
 struct VTDContextEntry {
-    uint64_t lo;
-    uint64_t hi;
+    union {
+        struct {
+            uint64_t lo;
+            uint64_t hi;
+        };
+        struct {
+            uint64_t val[4];
+        };
+    };
 };
 
 struct VTDContextCacheEntry {
@@ -83,26 +84,74 @@ struct VTDContextCacheEntry {
     struct VTDContextEntry context_entry;
 };
 
+/* PASID Directory Entry */
+struct VTDPASIDDirEntry {
+    uint64_t val;
+};
+
+/* PASID Table Entry */
+struct VTDPASIDEntry {
+    uint64_t val[8];
+};
+
 struct VTDAddressSpace {
     PCIBus *bus;
     uint8_t devfn;
+    uint32_t pasid;
     AddressSpace as;
     IOMMUMemoryRegion iommu;
-    MemoryRegion root;
-    MemoryRegion sys_alias;
+    MemoryRegion root;          /* The root container of the device */
+    MemoryRegion nodmar;        /* The alias of shared nodmar MR */
     MemoryRegion iommu_ir;      /* Interrupt region: 0xfeeXXXXX */
+    MemoryRegion iommu_ir_fault; /* Interrupt region for catching fault */
     IntelIOMMUState *iommu_state;
     VTDContextCacheEntry context_cache_entry;
-};
-
-struct VTDBus {
-    PCIBus* bus;		/* A reference to the bus to provide translation for */
-    VTDAddressSpace *dev_as[0];	/* A table of VTDAddressSpace objects indexed by devfn */
+    QLIST_ENTRY(VTDAddressSpace) next;
+    /* Superset of notifier flags that this address space has */
+    IOMMUNotifierFlag notifier_flags;
+    /*
+     * @iova_tree traces mapped IOVA ranges.
+     *
+     * The tree is not needed if no MAP notifier is registered with current
+     * VTD address space, because all guest invalidate commands can be
+     * directly passed to the IOMMU UNMAP notifiers without any further
+     * reshuffling.
+     *
+     * The tree OTOH is required for MAP typed iommu notifiers for a few
+     * reasons.
+     *
+     * Firstly, there's no way to identify whether an PSI (Page Selective
+     * Invalidations) or DSI (Domain Selective Invalidations) event is an
+     * MAP or UNMAP event within the message itself.  Without having prior
+     * knowledge of existing state vIOMMU doesn't know whether it should
+     * notify MAP or UNMAP for a PSI message it received when caching mode
+     * is enabled (for MAP notifiers).
+     *
+     * Secondly, PSI messages received from guest driver can be enlarged in
+     * range, covers but not limited to what the guest driver wanted to
+     * invalidate.  When the range to invalidates gets bigger than the
+     * limit of a PSI message, it can even become a DSI which will
+     * invalidate the whole domain.  If the vIOMMU directly notifies the
+     * registered device with the unmodified range, it may confuse the
+     * registered drivers (e.g. vfio-pci) on either:
+     *
+     *   (1) Trying to map the same region more than once (for
+     *       VFIO_IOMMU_MAP_DMA, -EEXIST will trigger), or,
+     *
+     *   (2) Trying to UNMAP a range that is still partially mapped.
+     *
+     * That accuracy is not required for UNMAP-only notifiers, but it is a
+     * must-to-have for notifiers registered with MAP events, because the
+     * vIOMMU needs to make sure the shadow page table is always in sync
+     * with the guest IOMMU pgtables for a device.
+     */
+    IOVATree *iova_tree;
 };
 
 struct VTDIOTLBEntry {
     uint64_t gfn;
     uint16_t domain_id;
+    uint32_t pasid;
     uint64_t slpte;
     uint64_t mask;
     uint8_t access_flags;
@@ -128,38 +177,40 @@ enum {
 /* Interrupt Remapping Table Entry Definition */
 union VTD_IR_TableEntry {
     struct {
-#ifdef HOST_WORDS_BIGENDIAN
-        uint32_t __reserved_1:8;     /* Reserved 1 */
-        uint32_t vector:8;           /* Interrupt Vector */
-        uint32_t irte_mode:1;        /* IRTE Mode */
-        uint32_t __reserved_0:3;     /* Reserved 0 */
-        uint32_t __avail:4;          /* Available spaces for software */
-        uint32_t delivery_mode:3;    /* Delivery Mode */
-        uint32_t trigger_mode:1;     /* Trigger Mode */
-        uint32_t redir_hint:1;       /* Redirection Hint */
-        uint32_t dest_mode:1;        /* Destination Mode */
-        uint32_t fault_disable:1;    /* Fault Processing Disable */
-        uint32_t present:1;          /* Whether entry present/available */
+#if HOST_BIG_ENDIAN
+        uint64_t dest_id:32;         /* Destination ID */
+        uint64_t __reserved_1:8;     /* Reserved 1 */
+        uint64_t vector:8;           /* Interrupt Vector */
+        uint64_t irte_mode:1;        /* IRTE Mode */
+        uint64_t __reserved_0:3;     /* Reserved 0 */
+        uint64_t __avail:4;          /* Available spaces for software */
+        uint64_t delivery_mode:3;    /* Delivery Mode */
+        uint64_t trigger_mode:1;     /* Trigger Mode */
+        uint64_t redir_hint:1;       /* Redirection Hint */
+        uint64_t dest_mode:1;        /* Destination Mode */
+        uint64_t fault_disable:1;    /* Fault Processing Disable */
+        uint64_t present:1;          /* Whether entry present/available */
 #else
-        uint32_t present:1;          /* Whether entry present/available */
-        uint32_t fault_disable:1;    /* Fault Processing Disable */
-        uint32_t dest_mode:1;        /* Destination Mode */
-        uint32_t redir_hint:1;       /* Redirection Hint */
-        uint32_t trigger_mode:1;     /* Trigger Mode */
-        uint32_t delivery_mode:3;    /* Delivery Mode */
-        uint32_t __avail:4;          /* Available spaces for software */
-        uint32_t __reserved_0:3;     /* Reserved 0 */
-        uint32_t irte_mode:1;        /* IRTE Mode */
-        uint32_t vector:8;           /* Interrupt Vector */
-        uint32_t __reserved_1:8;     /* Reserved 1 */
+        uint64_t present:1;          /* Whether entry present/available */
+        uint64_t fault_disable:1;    /* Fault Processing Disable */
+        uint64_t dest_mode:1;        /* Destination Mode */
+        uint64_t redir_hint:1;       /* Redirection Hint */
+        uint64_t trigger_mode:1;     /* Trigger Mode */
+        uint64_t delivery_mode:3;    /* Delivery Mode */
+        uint64_t __avail:4;          /* Available spaces for software */
+        uint64_t __reserved_0:3;     /* Reserved 0 */
+        uint64_t irte_mode:1;        /* IRTE Mode */
+        uint64_t vector:8;           /* Interrupt Vector */
+        uint64_t __reserved_1:8;     /* Reserved 1 */
+        uint64_t dest_id:32;         /* Destination ID */
 #endif
-        uint32_t dest_id;            /* Destination ID */
-        uint16_t source_id;          /* Source-ID */
-#ifdef HOST_WORDS_BIGENDIAN
+#if HOST_BIG_ENDIAN
         uint64_t __reserved_2:44;    /* Reserved 2 */
         uint64_t sid_vtype:2;        /* Source-ID Validation Type */
         uint64_t sid_q:2;            /* Source-ID Qualifier */
+        uint64_t source_id:16;       /* Source-ID */
 #else
+        uint64_t source_id:16;       /* Source-ID */
         uint64_t sid_q:2;            /* Source-ID Qualifier */
         uint64_t sid_vtype:2;        /* Source-ID Validation Type */
         uint64_t __reserved_2:44;    /* Reserved 2 */
@@ -174,7 +225,7 @@ union VTD_IR_TableEntry {
 /* Programming format for MSI/MSI-X addresses */
 union VTD_IR_MSIAddress {
     struct {
-#ifdef HOST_WORDS_BIGENDIAN
+#if HOST_BIG_ENDIAN
         uint32_t __head:12;          /* Should always be: 0x0fee */
         uint32_t index_l:15;         /* Interrupt index bit 14-0 */
         uint32_t int_mode:1;         /* Interrupt format */
@@ -193,91 +244,35 @@ union VTD_IR_MSIAddress {
     uint32_t data;
 };
 
-/* Generic IRQ entry information */
-struct VTDIrq {
-    /* Used by both IOAPIC/MSI interrupt remapping */
-    uint8_t trigger_mode;
-    uint8_t vector;
-    uint8_t delivery_mode;
-    uint32_t dest;
-    uint8_t dest_mode;
-
-    /* only used by MSI interrupt remapping */
-    uint8_t redir_hint;
-    uint8_t msi_addr_last_bits;
-};
-
-struct VTD_MSIMessage {
-    union {
-        struct {
-#ifdef HOST_WORDS_BIGENDIAN
-            uint32_t __addr_head:12; /* 0xfee */
-            uint32_t dest:8;
-            uint32_t __reserved:8;
-            uint32_t redir_hint:1;
-            uint32_t dest_mode:1;
-            uint32_t __not_used:2;
-#else
-            uint32_t __not_used:2;
-            uint32_t dest_mode:1;
-            uint32_t redir_hint:1;
-            uint32_t __reserved:8;
-            uint32_t dest:8;
-            uint32_t __addr_head:12; /* 0xfee */
-#endif
-            uint32_t __addr_hi;
-        } QEMU_PACKED;
-        uint64_t msi_addr;
-    };
-    union {
-        struct {
-#ifdef HOST_WORDS_BIGENDIAN
-            uint16_t trigger_mode:1;
-            uint16_t level:1;
-            uint16_t __resved:3;
-            uint16_t delivery_mode:3;
-            uint16_t vector:8;
-#else
-            uint16_t vector:8;
-            uint16_t delivery_mode:3;
-            uint16_t __resved:3;
-            uint16_t level:1;
-            uint16_t trigger_mode:1;
-#endif
-            uint16_t __resved1;
-        } QEMU_PACKED;
-        uint32_t msi_data;
-    };
-};
-
 /* When IR is enabled, all MSI/MSI-X data bits should be zero */
 #define VTD_IR_MSI_DATA          (0)
-
-struct IntelIOMMUNotifierNode {
-    VTDAddressSpace *vtd_as;
-    QLIST_ENTRY(IntelIOMMUNotifierNode) next;
-};
 
 /* The iommu (DMAR) device state struct */
 struct IntelIOMMUState {
     X86IOMMUState x86_iommu;
     MemoryRegion csrmem;
+    MemoryRegion mr_nodmar;
+    MemoryRegion mr_ir;
+    MemoryRegion mr_sys_alias;
     uint8_t csr[DMAR_REG_SIZE];     /* register values */
     uint8_t wmask[DMAR_REG_SIZE];   /* R/W bytes */
     uint8_t w1cmask[DMAR_REG_SIZE]; /* RW1C(Write 1 to Clear) bytes */
     uint8_t womask[DMAR_REG_SIZE];  /* WO (write only - read returns 0) */
     uint32_t version;
 
-    bool caching_mode;          /* RO - is cap CM enabled? */
+    bool caching_mode;              /* RO - is cap CM enabled? */
+    bool scalable_mode;             /* RO - is Scalable Mode supported? */
+    bool snoop_control;             /* RO - is SNP filed supported? */
 
     dma_addr_t root;                /* Current root table pointer */
-    bool root_extended;             /* Type of root table (extended or not) */
+    bool root_scalable;             /* Type of root table (scalable or not) */
     bool dmar_enabled;              /* Set if DMA remapping is enabled */
 
     uint16_t iq_head;               /* Current invalidation queue head */
     uint16_t iq_tail;               /* Current invalidation queue tail */
     dma_addr_t iq;                  /* Current invalidation queue pointer */
     uint16_t iq_size;               /* IQ Size in number of entries */
+    bool iq_dw;                     /* IQ descriptor width 256bit or not */
     bool qi_enabled;                /* Set if the QI is enabled */
     uint8_t iq_last_desc_type;      /* The type of last completed descriptor */
 
@@ -292,10 +287,10 @@ struct IntelIOMMUState {
     uint32_t context_cache_gen;     /* Should be in [1,MAX] */
     GHashTable *iotlb;              /* IOTLB */
 
-    GHashTable *vtd_as_by_busptr;   /* VTDBus objects indexed by PCIBus* reference */
-    VTDBus *vtd_as_by_bus_num[VTD_PCI_BUS_MAX]; /* VTDBus objects indexed by bus number */
+    GHashTable *vtd_address_spaces;             /* VTD address spaces */
+    VTDAddressSpace *vtd_as_cache[VTD_PCI_BUS_MAX]; /* VTD address space cache */
     /* list of registered notifiers */
-    QLIST_HEAD(, IntelIOMMUNotifierNode) notifiers_list;
+    QLIST_HEAD(, VTDAddressSpace) vtd_as_with_notifiers;
 
     /* interrupt remapping */
     bool intr_enabled;              /* Whether guest enabled IR */
@@ -305,11 +300,21 @@ struct IntelIOMMUState {
     OnOffAuto intr_eim;             /* Toggle for EIM cabability */
     bool buggy_eim;                 /* Force buggy EIM unless eim=off */
     uint8_t aw_bits;                /* Host/IOVA address width (in bits) */
+    bool dma_drain;                 /* Whether DMA r/w draining enabled */
+    bool dma_translation;           /* Whether DMA translation supported */
+    bool pasid;                     /* Whether to support PASID */
+
+    /*
+     * Protects IOMMU states in general.  Currently it protects the
+     * per-IOMMU IOTLB cache, and context entry cache in VTDAddressSpace.
+     */
+    QemuMutex iommu_lock;
 };
 
 /* Find the VTD Address space associated with the given bus pointer,
  * create a new one if none exists
  */
-VTDAddressSpace *vtd_find_add_as(IntelIOMMUState *s, PCIBus *bus, int devfn);
+VTDAddressSpace *vtd_find_add_as(IntelIOMMUState *s, PCIBus *bus,
+                                 int devfn, unsigned int pasid);
 
 #endif

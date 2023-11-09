@@ -17,7 +17,7 @@
 #include "qapi/qmp/qnum.h"
 #include "qapi/qmp/qstring.h"
 #include "qemu/queue.h"
-#include "qemu-common.h"
+#include "qobject-internal.h"
 
 /**
  * qlist_new(): Create a new QList
@@ -35,20 +35,17 @@ QList *qlist_new(void)
     return qlist;
 }
 
-static void qlist_copy_elem(QObject *obj, void *opaque)
-{
-    QList *dst = opaque;
-
-    qobject_incref(obj);
-    qlist_append_obj(dst, obj);
-}
-
 QList *qlist_copy(QList *src)
 {
     QList *dst = qlist_new();
+    QListEntry *entry;
+    QObject *elt;
 
-    qlist_iter(src, qlist_copy_elem, dst);
-
+    QLIST_FOREACH_ENTRY(src, entry) {
+        elt = qlist_entry_obj(entry);
+        qobject_ref(elt);
+        qlist_append_obj(dst, elt);
+    }
     return dst;
 }
 
@@ -87,21 +84,6 @@ void qlist_append_null(QList *qlist)
     qlist_append(qlist, qnull());
 }
 
-/**
- * qlist_iter(): Iterate over all the list's stored values.
- *
- * This function allows the user to provide an iterator, which will be
- * called for each stored value in the list.
- */
-void qlist_iter(const QList *qlist,
-                void (*iter)(QObject *obj, void *opaque), void *opaque)
-{
-    QListEntry *entry;
-
-    QTAILQ_FOREACH(entry, &qlist->head, next)
-        iter(entry->value, opaque);
-}
-
 QObject *qlist_pop(QList *qlist)
 {
     QListEntry *entry;
@@ -138,16 +120,14 @@ int qlist_empty(const QList *qlist)
     return QTAILQ_EMPTY(&qlist->head);
 }
 
-static void qlist_size_iter(QObject *obj, void *opaque)
-{
-    size_t *count = opaque;
-    (*count)++;
-}
-
 size_t qlist_size(const QList *qlist)
 {
     size_t count = 0;
-    qlist_iter(qlist, qlist_size_iter, &count);
+    QListEntry *entry;
+
+    QLIST_FOREACH_ENTRY(qlist, entry) {
+        count++;
+    }
     return count;
 }
 
@@ -196,9 +176,14 @@ void qlist_destroy_obj(QObject *obj)
 
     QTAILQ_FOREACH_SAFE(entry, &qlist->head, next, next_entry) {
         QTAILQ_REMOVE(&qlist->head, entry, next);
-        qobject_decref(entry->value);
+        qobject_unref(entry->value);
         g_free(entry);
     }
 
     g_free(qlist);
+}
+
+void qlist_unref(QList *q)
+{
+    qobject_unref(q);
 }

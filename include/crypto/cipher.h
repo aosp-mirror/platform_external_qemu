@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,6 +24,7 @@
 #include "qapi/qapi-types-crypto.h"
 
 typedef struct QCryptoCipher QCryptoCipher;
+typedef struct QCryptoCipherDriver QCryptoCipherDriver;
 
 /* See also "QCryptoCipherAlgorithm" and "QCryptoCipherMode"
  * enums defined in qapi/crypto.json */
@@ -79,8 +80,7 @@ typedef struct QCryptoCipher QCryptoCipher;
 struct QCryptoCipher {
     QCryptoCipherAlgorithm alg;
     QCryptoCipherMode mode;
-    void *opaque;
-    void *driver;
+    const QCryptoCipherDriver *driver;
 };
 
 /**
@@ -169,6 +169,8 @@ QCryptoCipher *qcrypto_cipher_new(QCryptoCipherAlgorithm alg,
  * was previously allocated by qcrypto_cipher_new()
  */
 void qcrypto_cipher_free(QCryptoCipher *cipher);
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(QCryptoCipher, qcrypto_cipher_free)
 
 /**
  * qcrypto_cipher_encrypt:

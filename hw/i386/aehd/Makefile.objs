@@ -1,1 +1,0 @@
-obj-y += apic.o i8259.o ioapic.o

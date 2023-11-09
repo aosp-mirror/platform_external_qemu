@@ -9,12 +9,13 @@
  * your option) any later version. See the COPYING file in the top-level
  * directory.
  */
+
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "qemu/module.h"
-#include "cpu.h"
 #include "hw/s390x/css.h"
 #include "hw/s390x/css-bridge.h"
+#include "hw/qdev-properties.h"
 #include "hw/s390x/3270-ccw.h"
 
 /* Handle READ ccw commands from guest */
@@ -29,6 +30,9 @@ static int handle_payload_3270_read(EmulatedCcw3270Device *dev, CCW1 *ccw)
     }
 
     len = ck->read_payload_3270(dev);
+    if (len < 0) {
+        return len;
+    }
     ccw_dev->sch->curr_status.scsw.count = ccw->count - len;
 
     return 0;
@@ -48,7 +52,7 @@ static int handle_payload_3270_write(EmulatedCcw3270Device *dev, CCW1 *ccw)
     len = ck->write_payload_3270(dev, ccw->cmd_code);
 
     if (len <= 0) {
-        return -EIO;
+        return len ? len : -EIO;
     }
 
     ccw_dev->sch->curr_status.scsw.count = ccw->count - len;
@@ -78,13 +82,13 @@ static int emulated_ccw_3270_cb(SubchDev *sch, CCW1 ccw)
 
     if (rc == -EIO) {
         /* I/O error, specific devices generate specific conditions */
-        SCSW *s = &sch->curr_status.scsw;
+        SCHIB *schib = &sch->curr_status;
 
         sch->curr_status.scsw.dstat = SCSW_DSTAT_UNIT_CHECK;
         sch->sense_data[0] = 0x40;    /* intervention-req */
-        s->ctrl &= ~SCSW_ACTL_START_PEND;
-        s->ctrl &= ~SCSW_CTRL_MASK_STCTL;
-        s->ctrl |= SCSW_STCTL_PRIMARY | SCSW_STCTL_SECONDARY |
+        schib->scsw.ctrl &= ~SCSW_ACTL_START_PEND;
+        schib->scsw.ctrl &= ~SCSW_CTRL_MASK_STCTL;
+        schib->scsw.ctrl |= SCSW_STCTL_PRIMARY | SCSW_STCTL_SECONDARY |
                    SCSW_STCTL_ALERT | SCSW_STCTL_STATUS_PEND;
     }
 
@@ -98,13 +102,10 @@ static void emulated_ccw_3270_realize(DeviceState *ds, Error **errp)
     EmulatedCcw3270Class *ck = EMULATED_CCW_3270_GET_CLASS(dev);
     CcwDevice *cdev = CCW_DEVICE(ds);
     CCWDeviceClass *cdk = CCW_DEVICE_GET_CLASS(cdev);
-    DeviceState *parent = DEVICE(cdev);
-    BusState *qbus = qdev_get_parent_bus(parent);
-    VirtualCssBus *cbus = VIRTUAL_CSS_BUS(qbus);
     SubchDev *sch;
     Error *err = NULL;
 
-    sch = css_create_sch(cdev->devno, cbus->squash_mcss, errp);
+    sch = css_create_sch(cdev->devno, errp);
     if (!sch) {
         return;
     }
@@ -128,6 +129,7 @@ static void emulated_ccw_3270_realize(DeviceState *ds, Error **errp)
                                 EMULATED_CCW_3270_CHPID_TYPE);
     sch->do_subchannel_work = do_subchannel_work_virtual;
     sch->ccw_cb = emulated_ccw_3270_cb;
+    sch->irb_cb = build_irb_virtual;
 
     ck->init(dev, &err);
     if (err) {
@@ -156,8 +158,7 @@ static void emulated_ccw_3270_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
 
-    dc->props = emulated_ccw_3270_properties;
-    dc->bus_type = TYPE_VIRTUAL_CSS_BUS;
+    device_class_set_props(dc, emulated_ccw_3270_properties);
     dc->realize = emulated_ccw_3270_realize;
     dc->hotpluggable = false;
     set_bit(DEVICE_CATEGORY_DISPLAY, dc->categories);

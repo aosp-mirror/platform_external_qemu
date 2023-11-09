@@ -12,158 +12,81 @@
  */
 
 #include "qemu/osdep.h"
-#include "qemu-common.h"
+#include "qemu/units.h"
 #include "qemu/iov.h"
+#include "sysemu/cpus.h"
 #include "ui/console.h"
 #include "trace.h"
+#include "sysemu/dma.h"
+#include "sysemu/sysemu.h"
 #include "hw/virtio/virtio.h"
-#ifdef CONFIG_ANDROID
-#include "hw/virtio/virtio-goldfish-pipe.h"
-#endif
+#include "migration/qemu-file-types.h"
 #include "hw/virtio/virtio-gpu.h"
+#include "hw/virtio/virtio-gpu-bswap.h"
+#include "hw/virtio/virtio-gpu-pixman.h"
 #include "hw/virtio/virtio-bus.h"
-#include "hw/display/edid.h"
-#include "migration/blocker.h"
+#include "hw/qdev-properties.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
 #include "qapi/error.h"
+#include "qemu/error-report.h"
 
 #define VIRTIO_GPU_VM_VERSION 1
 
-#ifdef CONFIG_ANDROID
-static bool virgl_as_proxy = false;
-bool virtio_gpu_use_virgl_as_proxy() {
-    return virgl_as_proxy;
-}
-#endif
-
 static struct virtio_gpu_simple_resource*
 virtio_gpu_find_resource(VirtIOGPU *g, uint32_t resource_id);
+static struct virtio_gpu_simple_resource *
+virtio_gpu_find_check_resource(VirtIOGPU *g, uint32_t resource_id,
+                               bool require_backing,
+                               const char *caller, uint32_t *error);
 
-static void virtio_gpu_cleanup_mapping(struct virtio_gpu_simple_resource *res);
+static void virtio_gpu_cleanup_mapping(VirtIOGPU *g,
+                                       struct virtio_gpu_simple_resource *res);
+static void virtio_gpu_reset_bh(void *opaque);
 
-static void
-virtio_gpu_ctrl_hdr_bswap(struct virtio_gpu_ctrl_hdr *hdr)
-{
-    le32_to_cpus(&hdr->type);
-    le32_to_cpus(&hdr->flags);
-    le64_to_cpus(&hdr->fence_id);
-    le32_to_cpus(&hdr->ctx_id);
-}
-
-static void virtio_gpu_bswap_32(void *ptr,
-                                size_t size)
-{
-#ifdef HOST_WORDS_BIGENDIAN
-
-    size_t i;
-    struct virtio_gpu_ctrl_hdr *hdr = (struct virtio_gpu_ctrl_hdr *) ptr;
-
-    virtio_gpu_ctrl_hdr_bswap(hdr);
-
-    i = sizeof(struct virtio_gpu_ctrl_hdr);
-    while (i < size) {
-        le32_to_cpus((uint32_t *)(ptr + i));
-        i = i + sizeof(uint32_t);
-    }
-
-#endif
-}
-
-static void
-virtio_gpu_t2d_bswap(struct virtio_gpu_transfer_to_host_2d *t2d)
-{
-    virtio_gpu_ctrl_hdr_bswap(&t2d->hdr);
-    le32_to_cpus(&t2d->r.x);
-    le32_to_cpus(&t2d->r.y);
-    le32_to_cpus(&t2d->r.width);
-    le32_to_cpus(&t2d->r.height);
-    le64_to_cpus(&t2d->offset);
-    le32_to_cpus(&t2d->resource_id);
-    le32_to_cpus(&t2d->padding);
-}
-
-#ifdef CONFIG_VIRGL
-#include <virglrenderer.h>
-#define VIRGL(_g, _virgl, _simple, ...)                     \
-    do {                                                    \
-        if (_g->use_virgl_renderer) {                       \
-            _virgl(__VA_ARGS__);                            \
-        } else {                                            \
-            _simple(__VA_ARGS__);                           \
-        }                                                   \
-    } while (0)
-#else
-#define VIRGL(_g, _virgl, _simple, ...)                 \
-    do {                                                \
-        _simple(__VA_ARGS__);                           \
-    } while (0)
-#endif
-
-static void update_cursor_data_simple(VirtIOGPU *g,
-                                      struct virtio_gpu_scanout *s,
-                                      uint32_t resource_id)
+void virtio_gpu_update_cursor_data(VirtIOGPU *g,
+                                   struct virtio_gpu_scanout *s,
+                                   uint32_t resource_id)
 {
     struct virtio_gpu_simple_resource *res;
     uint32_t pixels;
+    void *data;
 
-    res = virtio_gpu_find_resource(g, resource_id);
+    res = virtio_gpu_find_check_resource(g, resource_id, false,
+                                         __func__, NULL);
     if (!res) {
         return;
     }
 
-    if (pixman_image_get_width(res->image)  != s->current_cursor->width ||
-        pixman_image_get_height(res->image) != s->current_cursor->height) {
-        return;
+    if (res->blob_size) {
+        if (res->blob_size < (s->current_cursor->width *
+                              s->current_cursor->height * 4)) {
+            return;
+        }
+        data = res->blob;
+    } else {
+        if (pixman_image_get_width(res->image)  != s->current_cursor->width ||
+            pixman_image_get_height(res->image) != s->current_cursor->height) {
+            return;
+        }
+        data = pixman_image_get_data(res->image);
     }
 
     pixels = s->current_cursor->width * s->current_cursor->height;
-    memcpy(s->current_cursor->data,
-           pixman_image_get_data(res->image),
+    memcpy(s->current_cursor->data, data,
            pixels * sizeof(uint32_t));
 }
-
-
-static void update_cursor_data_virgl(VirtIOGPU *g,
-                                     struct virtio_gpu_scanout *s,
-                                     uint32_t resource_id)
-{
-    uint32_t width, height;
-    uint32_t pixels, *data;
-
-#ifdef CONFIG_VIRGL
-#ifdef CONFIG_STREAM_RENDERER
-    // NOT IMPLEMENTED
-#else
-    data = g->virgl->virgl_renderer_get_cursor_data(resource_id, &width, &height);
-#endif
-#else
-    data = virgl_renderer_get_cursor_data(resource_id, &width, &height);
-#endif
-    if (!data) {
-        return;
-    }
-
-    if (width != s->current_cursor->width ||
-        height != s->current_cursor->height) {
-        free(data);
-        return;
-    }
-
-    pixels = s->current_cursor->width * s->current_cursor->height;
-    memcpy(s->current_cursor->data, data, pixels * sizeof(uint32_t));
-    free(data);
-}
-
 
 static void update_cursor(VirtIOGPU *g, struct virtio_gpu_update_cursor *cursor)
 {
     struct virtio_gpu_scanout *s;
+    VirtIOGPUClass *vgc = VIRTIO_GPU_GET_CLASS(g);
     bool move = cursor->hdr.type == VIRTIO_GPU_CMD_MOVE_CURSOR;
 
-    if (cursor->pos.scanout_id >= g->conf.max_outputs) {
+    if (cursor->pos.scanout_id >= g->parent_obj.conf.max_outputs) {
         return;
     }
-    s = &g->scanout[cursor->pos.scanout_id];
+    s = &g->parent_obj.scanout[cursor->pos.scanout_id];
 
     trace_virtio_gpu_update_cursor(cursor->pos.scanout_id,
                                    cursor->pos.x,
@@ -180,8 +103,7 @@ static void update_cursor(VirtIOGPU *g, struct virtio_gpu_update_cursor *cursor)
         s->current_cursor->hot_y = cursor->hot_y;
 
         if (cursor->resource_id > 0) {
-            VIRGL(g, update_cursor_data_virgl, update_cursor_data_simple,
-                  g, s, cursor->resource_id);
+            vgc->update_cursor_data(g, s, cursor->resource_id);
         }
         dpy_cursor_define(s->con, s->current_cursor);
 
@@ -192,64 +114,6 @@ static void update_cursor(VirtIOGPU *g, struct virtio_gpu_update_cursor *cursor)
     }
     dpy_mouse_set(s->con, cursor->pos.x, cursor->pos.y,
                   cursor->resource_id ? 1 : 0);
-}
-
-static void virtio_gpu_get_config(VirtIODevice *vdev, uint8_t *config)
-{
-    VirtIOGPU *g = VIRTIO_GPU(vdev);
-    memcpy(config, &g->virtio_config, sizeof(g->virtio_config));
-}
-
-static void virtio_gpu_set_config(VirtIODevice *vdev, const uint8_t *config)
-{
-    VirtIOGPU *g = VIRTIO_GPU(vdev);
-    struct virtio_gpu_config vgconfig;
-
-    memcpy(&vgconfig, config, sizeof(g->virtio_config));
-
-    if (vgconfig.events_clear) {
-        g->virtio_config.events_read &= ~vgconfig.events_clear;
-    }
-}
-
-static uint64_t virtio_gpu_get_features(VirtIODevice *vdev, uint64_t features,
-                                        Error **errp)
-{
-    VirtIOGPU *g = VIRTIO_GPU(vdev);
-
-    features |= (1ull << VIRTIO_F_VERSION_1);
-
-    if (virtio_gpu_virgl_enabled(g->conf)) {
-        features |= (1 << VIRTIO_GPU_F_VIRGL);
-        features |= (1 << VIRTIO_GPU_F_RESOURCE_BLOB);
-    }
-    if (virtio_gpu_edid_enabled(g->conf)) {
-        features |= (1 << VIRTIO_GPU_F_EDID);
-    }
-    if (virtio_gpu_context_init_enabled(g->conf)) {
-        features |= (1 << VIRTIO_GPU_F_CONTEXT_INIT);
-    }
-
-    return features;
-}
-
-static void virtio_gpu_set_features(VirtIODevice *vdev, uint64_t features)
-{
-    static const uint32_t virgl = (1 << VIRTIO_GPU_F_VIRGL);
-    VirtIOGPU *g = VIRTIO_GPU(vdev);
-
-    g->use_virgl_renderer = ((features & virgl) == virgl);
-    trace_virtio_gpu_features(g->use_virgl_renderer);
-
-    if (virtio_vdev_has_feature(vdev, VIRTIO_RING_F_EVENT_IDX)) {
-        fprintf(stderr, "%s: virtio gpu has eventidx\n", __func__);
-    }
-}
-
-static void virtio_gpu_notify_event(VirtIOGPU *g, uint32_t event_type)
-{
-    g->virtio_config.events_read |= event_type;
-    virtio_notify_config(&g->parent_obj);
 }
 
 static struct virtio_gpu_simple_resource *
@@ -263,6 +127,37 @@ virtio_gpu_find_resource(VirtIOGPU *g, uint32_t resource_id)
         }
     }
     return NULL;
+}
+
+static struct virtio_gpu_simple_resource *
+virtio_gpu_find_check_resource(VirtIOGPU *g, uint32_t resource_id,
+                               bool require_backing,
+                               const char *caller, uint32_t *error)
+{
+    struct virtio_gpu_simple_resource *res;
+
+    res = virtio_gpu_find_resource(g, resource_id);
+    if (!res) {
+        qemu_log_mask(LOG_GUEST_ERROR, "%s: invalid resource specified %d\n",
+                      caller, resource_id);
+        if (error) {
+            *error = VIRTIO_GPU_RESP_ERR_INVALID_RESOURCE_ID;
+        }
+        return NULL;
+    }
+
+    if (require_backing) {
+        if (!res->iov || (!res->image && !res->blob)) {
+            qemu_log_mask(LOG_GUEST_ERROR, "%s: no backing storage %d\n",
+                          caller, resource_id);
+            if (error) {
+                *error = VIRTIO_GPU_RESP_ERR_UNSPEC;
+            }
+            return NULL;
+        }
+    }
+
+    return res;
 }
 
 void virtio_gpu_ctrl_response(VirtIOGPU *g,
@@ -300,21 +195,6 @@ void virtio_gpu_ctrl_response_nodata(VirtIOGPU *g,
     virtio_gpu_ctrl_response(g, cmd, &resp, sizeof(resp));
 }
 
-static void
-virtio_gpu_fill_display_info(VirtIOGPU *g,
-                             struct virtio_gpu_resp_display_info *dpy_info)
-{
-    int i;
-
-    for (i = 0; i < g->conf.max_outputs; i++) {
-        if (g->enabled_output_bitmask & (1 << i)) {
-            dpy_info->pmodes[i].enabled = 1;
-            dpy_info->pmodes[i].r.width = cpu_to_le32(g->req_state[i].width);
-            dpy_info->pmodes[i].r.height = cpu_to_le32(g->req_state[i].height);
-        }
-    }
-}
-
 void virtio_gpu_get_display_info(VirtIOGPU *g,
                                  struct virtio_gpu_ctrl_command *cmd)
 {
@@ -323,33 +203,9 @@ void virtio_gpu_get_display_info(VirtIOGPU *g,
     trace_virtio_gpu_cmd_get_display_info();
     memset(&display_info, 0, sizeof(display_info));
     display_info.hdr.type = VIRTIO_GPU_RESP_OK_DISPLAY_INFO;
-    virtio_gpu_fill_display_info(g, &display_info);
+    virtio_gpu_base_fill_display_info(VIRTIO_GPU_BASE(g), &display_info);
     virtio_gpu_ctrl_response(g, cmd, &display_info.hdr,
                              sizeof(display_info));
-}
-
-static void
-virtio_gpu_generate_edid(VirtIOGPU *g, int scanout,
-                         struct virtio_gpu_resp_edid *edid)
-{
-    // QEMU define max scanout as 16, naming them from
-    // "EMU_display_0" to "EMU_display_f"
-    char name[] = "EMU_display_0";
-    if (scanout < 10) {
-        name[12] = '0' + scanout;
-    } else {
-        name[12] = 'a' + scanout - 10;
-    }
-    qemu_edid_info info = {
-        .vendor = "GGL",
-        .name = name,
-        .prefx = g->req_state[scanout].width,
-        .prefy = g->req_state[scanout].height,
-        .dpi = g->req_state[scanout].dpi,
-    };
-
-    edid->size = cpu_to_le32(sizeof(edid->edid));
-    qemu_edid_generate(edid->edid, sizeof(edid->edid), &info);
 }
 
 void virtio_gpu_get_edid(VirtIOGPU *g,
@@ -357,44 +213,21 @@ void virtio_gpu_get_edid(VirtIOGPU *g,
 {
     struct virtio_gpu_resp_edid edid;
     struct virtio_gpu_cmd_get_edid get_edid;
-
+    VirtIOGPUBase *b = VIRTIO_GPU_BASE(g);
 
     VIRTIO_GPU_FILL_CMD(get_edid);
     virtio_gpu_bswap_32(&get_edid, sizeof(get_edid));
 
-    if (get_edid.scanout >= g->conf.max_outputs) {
+    if (get_edid.scanout >= b->conf.max_outputs) {
         cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
         return;
     }
 
+    trace_virtio_gpu_cmd_get_edid(get_edid.scanout);
     memset(&edid, 0, sizeof(edid));
     edid.hdr.type = VIRTIO_GPU_RESP_OK_EDID;
-    virtio_gpu_generate_edid(g, get_edid.scanout, &edid);
+    virtio_gpu_base_generate_edid(VIRTIO_GPU_BASE(g), get_edid.scanout, &edid);
     virtio_gpu_ctrl_response(g, cmd, &edid.hdr, sizeof(edid));
-}
-
-static pixman_format_code_t get_pixman_format(uint32_t virtio_gpu_format)
-{
-    switch (virtio_gpu_format) {
-    case VIRTIO_GPU_FORMAT_B8G8R8X8_UNORM:
-        return PIXMAN_BE_b8g8r8x8;
-    case VIRTIO_GPU_FORMAT_B8G8R8A8_UNORM:
-        return PIXMAN_BE_b8g8r8a8;
-    case VIRTIO_GPU_FORMAT_X8R8G8B8_UNORM:
-        return PIXMAN_BE_x8r8g8b8;
-    case VIRTIO_GPU_FORMAT_A8R8G8B8_UNORM:
-        return PIXMAN_BE_a8r8g8b8;
-    case VIRTIO_GPU_FORMAT_R8G8B8X8_UNORM:
-        return PIXMAN_BE_r8g8b8x8;
-    case VIRTIO_GPU_FORMAT_R8G8B8A8_UNORM:
-        return PIXMAN_BE_r8g8b8a8;
-    case VIRTIO_GPU_FORMAT_X8B8G8R8_UNORM:
-        return PIXMAN_BE_x8b8g8r8;
-    case VIRTIO_GPU_FORMAT_A8B8G8R8_UNORM:
-        return PIXMAN_BE_a8b8g8r8;
-    default:
-        return 0;
-    }
 }
 
 static uint32_t calc_image_hostmem(pixman_format_code_t pformat,
@@ -403,10 +236,21 @@ static uint32_t calc_image_hostmem(pixman_format_code_t pformat,
     /* Copied from pixman/pixman-bits-image.c, skip integer overflow check.
      * pixman_image_create_bits will fail in case it overflow.
      */
+
     int bpp = PIXMAN_FORMAT_BPP(pformat);
     int stride = ((width * bpp + 0x1f) >> 5) * sizeof(uint32_t);
     return height * stride;
 }
+
+#ifdef WIN32
+static void
+win32_pixman_image_destroy(pixman_image_t *image, void *data)
+{
+    HANDLE handle = data;
+
+    qemu_win32_map_free(pixman_image_get_data(image), handle, &error_warn);
+}
+#endif
 
 static void virtio_gpu_resource_create_2d(VirtIOGPU *g,
                                           struct virtio_gpu_ctrl_command *cmd)
@@ -442,7 +286,7 @@ static void virtio_gpu_resource_create_2d(VirtIOGPU *g,
     res->format = c2d.format;
     res->resource_id = c2d.resource_id;
 
-    pformat = get_pixman_format(c2d.format);
+    pformat = virtio_gpu_get_pixman_format(c2d.format);
     if (!pformat) {
         qemu_log_mask(LOG_GUEST_ERROR,
                       "%s: host couldn't handle guest format %d\n",
@@ -453,13 +297,29 @@ static void virtio_gpu_resource_create_2d(VirtIOGPU *g,
     }
 
     res->hostmem = calc_image_hostmem(pformat, c2d.width, c2d.height);
-    if (res->hostmem + g->hostmem < g->conf.max_hostmem) {
-        res->image = pixman_image_create_bits(pformat,
-                                              c2d.width,
-                                              c2d.height,
-                                              NULL, 0);
+    if (res->hostmem + g->hostmem < g->conf_max_hostmem) {
+        void *bits = NULL;
+#ifdef WIN32
+        bits = qemu_win32_map_alloc(res->hostmem, &res->handle, &error_warn);
+        if (!bits) {
+            goto end;
+        }
+#endif
+        res->image = pixman_image_create_bits(
+            pformat,
+            c2d.width,
+            c2d.height,
+            bits, c2d.height ? res->hostmem / c2d.height : 0);
+#ifdef WIN32
+        if (res->image) {
+            pixman_image_set_destroy_function(res->image, win32_pixman_image_destroy, res->handle);
+        }
+#endif
     }
 
+#ifdef WIN32
+end:
+#endif
     if (!res->image) {
         qemu_log_mask(LOG_GUEST_ERROR,
                       "%s: resource creation failed %d %d %d\n",
@@ -473,11 +333,92 @@ static void virtio_gpu_resource_create_2d(VirtIOGPU *g,
     g->hostmem += res->hostmem;
 }
 
+static void virtio_gpu_resource_create_blob(VirtIOGPU *g,
+                                            struct virtio_gpu_ctrl_command *cmd)
+{
+    struct virtio_gpu_simple_resource *res;
+    struct virtio_gpu_resource_create_blob cblob;
+    int ret;
+
+    VIRTIO_GPU_FILL_CMD(cblob);
+    virtio_gpu_create_blob_bswap(&cblob);
+    trace_virtio_gpu_cmd_res_create_blob(cblob.resource_id, cblob.size);
+
+    if (cblob.resource_id == 0) {
+        qemu_log_mask(LOG_GUEST_ERROR, "%s: resource id 0 is not allowed\n",
+                      __func__);
+        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_RESOURCE_ID;
+        return;
+    }
+
+    if (cblob.blob_mem != VIRTIO_GPU_BLOB_MEM_GUEST &&
+        cblob.blob_flags != VIRTIO_GPU_BLOB_FLAG_USE_SHAREABLE) {
+        qemu_log_mask(LOG_GUEST_ERROR, "%s: invalid memory type\n",
+                      __func__);
+        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
+        return;
+    }
+
+    if (virtio_gpu_find_resource(g, cblob.resource_id)) {
+        qemu_log_mask(LOG_GUEST_ERROR, "%s: resource already exists %d\n",
+                      __func__, cblob.resource_id);
+        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_RESOURCE_ID;
+        return;
+    }
+
+    res = g_new0(struct virtio_gpu_simple_resource, 1);
+    res->resource_id = cblob.resource_id;
+    res->blob_size = cblob.size;
+
+    ret = virtio_gpu_create_mapping_iov(g, cblob.nr_entries, sizeof(cblob),
+                                        cmd, &res->addrs, &res->iov,
+                                        &res->iov_cnt);
+    if (ret != 0) {
+        cmd->error = VIRTIO_GPU_RESP_ERR_UNSPEC;
+        g_free(res);
+        return;
+    }
+
+    virtio_gpu_init_udmabuf(res);
+    QTAILQ_INSERT_HEAD(&g->reslist, res, next);
+}
+
+static void virtio_gpu_disable_scanout(VirtIOGPU *g, int scanout_id)
+{
+    struct virtio_gpu_scanout *scanout = &g->parent_obj.scanout[scanout_id];
+    struct virtio_gpu_simple_resource *res;
+
+    if (scanout->resource_id == 0) {
+        return;
+    }
+
+    res = virtio_gpu_find_resource(g, scanout->resource_id);
+    if (res) {
+        res->scanout_bitmask &= ~(1 << scanout_id);
+    }
+
+    dpy_gfx_replace_surface(scanout->con, NULL);
+    scanout->resource_id = 0;
+    scanout->ds = NULL;
+    scanout->width = 0;
+    scanout->height = 0;
+}
+
 static void virtio_gpu_resource_destroy(VirtIOGPU *g,
                                         struct virtio_gpu_simple_resource *res)
 {
-    pixman_image_unref(res->image);
-    virtio_gpu_cleanup_mapping(res);
+    int i;
+
+    if (res->scanout_bitmask) {
+        for (i = 0; i < g->parent_obj.conf.max_outputs; i++) {
+            if (res->scanout_bitmask & (1 << i)) {
+                virtio_gpu_disable_scanout(g, i);
+            }
+        }
+    }
+
+    qemu_pixman_image_unref(res->image);
+    virtio_gpu_cleanup_mapping(g, res);
     QTAILQ_REMOVE(&g->reslist, res, next);
     g->hostmem -= res->hostmem;
     g_free(res);
@@ -507,21 +448,19 @@ static void virtio_gpu_transfer_to_host_2d(VirtIOGPU *g,
                                            struct virtio_gpu_ctrl_command *cmd)
 {
     struct virtio_gpu_simple_resource *res;
-    int h;
+    int h, bpp;
     uint32_t src_offset, dst_offset, stride;
-    int bpp;
     pixman_format_code_t format;
     struct virtio_gpu_transfer_to_host_2d t2d;
+    void *img_data;
 
     VIRTIO_GPU_FILL_CMD(t2d);
     virtio_gpu_t2d_bswap(&t2d);
     trace_virtio_gpu_cmd_res_xfer_toh_2d(t2d.resource_id);
 
-    res = virtio_gpu_find_resource(g, t2d.resource_id);
-    if (!res || !res->iov) {
-        qemu_log_mask(LOG_GUEST_ERROR, "%s: illegal resource specified %d\n",
-                      __func__, t2d.resource_id);
-        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_RESOURCE_ID;
+    res = virtio_gpu_find_check_resource(g, t2d.resource_id, true,
+                                         __func__, &cmd->error);
+    if (!res || res->blob) {
         return;
     }
 
@@ -542,23 +481,23 @@ static void virtio_gpu_transfer_to_host_2d(VirtIOGPU *g,
     format = pixman_image_get_format(res->image);
     bpp = DIV_ROUND_UP(PIXMAN_FORMAT_BPP(format), 8);
     stride = pixman_image_get_stride(res->image);
+    img_data = pixman_image_get_data(res->image);
 
-    if (t2d.offset || t2d.r.x || t2d.r.y ||
-        t2d.r.width != pixman_image_get_width(res->image)) {
-        void *img_data = pixman_image_get_data(res->image);
+    if (t2d.r.x || t2d.r.width != pixman_image_get_width(res->image)) {
         for (h = 0; h < t2d.r.height; h++) {
             src_offset = t2d.offset + stride * h;
             dst_offset = (t2d.r.y + h) * stride + (t2d.r.x * bpp);
 
             iov_to_buf(res->iov, res->iov_cnt, src_offset,
-                       (uint8_t *)img_data
-                       + dst_offset, t2d.r.width * bpp);
+                       (uint8_t *)img_data + dst_offset,
+                       t2d.r.width * bpp);
         }
     } else {
-        iov_to_buf(res->iov, res->iov_cnt, 0,
-                   pixman_image_get_data(res->image),
-                   pixman_image_get_stride(res->image)
-                   * pixman_image_get_height(res->image));
+        src_offset = t2d.offset;
+        dst_offset = t2d.r.y * stride + t2d.r.x * bpp;
+        iov_to_buf(res->iov, res->iov_cnt, src_offset,
+                   (uint8_t *)img_data + dst_offset,
+                   stride * t2d.r.height);
     }
 }
 
@@ -567,7 +506,10 @@ static void virtio_gpu_resource_flush(VirtIOGPU *g,
 {
     struct virtio_gpu_simple_resource *res;
     struct virtio_gpu_resource_flush rf;
+    struct virtio_gpu_scanout *scanout;
     pixman_region16_t flush_region;
+    bool within_bounds = false;
+    bool update_submitted = false;
     int i;
 
     VIRTIO_GPU_FILL_CMD(rf);
@@ -575,20 +517,50 @@ static void virtio_gpu_resource_flush(VirtIOGPU *g,
     trace_virtio_gpu_cmd_res_flush(rf.resource_id,
                                    rf.r.width, rf.r.height, rf.r.x, rf.r.y);
 
-    res = virtio_gpu_find_resource(g, rf.resource_id);
+    res = virtio_gpu_find_check_resource(g, rf.resource_id, false,
+                                         __func__, &cmd->error);
     if (!res) {
-        qemu_log_mask(LOG_GUEST_ERROR, "%s: illegal resource specified %d\n",
-                      __func__, rf.resource_id);
-        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_RESOURCE_ID;
         return;
     }
 
-    if (rf.r.x > res->width ||
+    if (res->blob) {
+        for (i = 0; i < g->parent_obj.conf.max_outputs; i++) {
+            scanout = &g->parent_obj.scanout[i];
+            if (scanout->resource_id == res->resource_id &&
+                rf.r.x < scanout->x + scanout->width &&
+                rf.r.x + rf.r.width >= scanout->x &&
+                rf.r.y < scanout->y + scanout->height &&
+                rf.r.y + rf.r.height >= scanout->y) {
+                within_bounds = true;
+
+                if (console_has_gl(scanout->con)) {
+                    dpy_gl_update(scanout->con, 0, 0, scanout->width,
+                                  scanout->height);
+                    update_submitted = true;
+                }
+            }
+        }
+
+        if (update_submitted) {
+            return;
+        }
+        if (!within_bounds) {
+            qemu_log_mask(LOG_GUEST_ERROR, "%s: flush bounds outside scanouts"
+                          " bounds for flush %d: %d %d %d %d\n",
+                          __func__, rf.resource_id, rf.r.x, rf.r.y,
+                          rf.r.width, rf.r.height);
+            cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
+            return;
+        }
+    }
+
+    if (!res->blob &&
+        (rf.r.x > res->width ||
         rf.r.y > res->height ||
         rf.r.width > res->width ||
         rf.r.height > res->height ||
         rf.r.x + rf.r.width > res->width ||
-        rf.r.y + rf.r.height > res->height) {
+        rf.r.y + rf.r.height > res->height)) {
         qemu_log_mask(LOG_GUEST_ERROR, "%s: flush bounds outside resource"
                       " bounds for resource %d: %d %d %d %d vs %d %d\n",
                       __func__, rf.resource_id, rf.r.x, rf.r.y,
@@ -599,15 +571,14 @@ static void virtio_gpu_resource_flush(VirtIOGPU *g,
 
     pixman_region_init_rect(&flush_region,
                             rf.r.x, rf.r.y, rf.r.width, rf.r.height);
-    for (i = 0; i < g->conf.max_outputs; i++) {
-        struct virtio_gpu_scanout *scanout;
+    for (i = 0; i < g->parent_obj.conf.max_outputs; i++) {
         pixman_region16_t region, finalregion;
         pixman_box16_t *extents;
 
         if (!(res->scanout_bitmask & (1 << i))) {
             continue;
         }
-        scanout = &g->scanout[i];
+        scanout = &g->parent_obj.scanout[i];
 
         pixman_region_init(&finalregion);
         pixman_region_init_rect(&region, scanout->x, scanout->y,
@@ -617,7 +588,7 @@ static void virtio_gpu_resource_flush(VirtIOGPU *g,
         pixman_region_translate(&finalregion, -scanout->x, -scanout->y);
         extents = pixman_region_extents(&finalregion);
         /* work out the area we need to update for each console */
-        dpy_gfx_update(g->scanout[i].con,
+        dpy_gfx_update(g->parent_obj.scanout[i].con,
                        extents->x1, extents->y1,
                        extents->x2 - extents->x1,
                        extents->y2 - extents->y1);
@@ -633,14 +604,114 @@ static void virtio_unref_resource(pixman_image_t *image, void *data)
     pixman_image_unref(data);
 }
 
+static void virtio_gpu_update_scanout(VirtIOGPU *g,
+                                      uint32_t scanout_id,
+                                      struct virtio_gpu_simple_resource *res,
+                                      struct virtio_gpu_rect *r)
+{
+    struct virtio_gpu_simple_resource *ores;
+    struct virtio_gpu_scanout *scanout;
+
+    scanout = &g->parent_obj.scanout[scanout_id];
+    ores = virtio_gpu_find_resource(g, scanout->resource_id);
+    if (ores) {
+        ores->scanout_bitmask &= ~(1 << scanout_id);
+    }
+
+    res->scanout_bitmask |= (1 << scanout_id);
+    scanout->resource_id = res->resource_id;
+    scanout->x = r->x;
+    scanout->y = r->y;
+    scanout->width = r->width;
+    scanout->height = r->height;
+}
+
+static void virtio_gpu_do_set_scanout(VirtIOGPU *g,
+                                      uint32_t scanout_id,
+                                      struct virtio_gpu_framebuffer *fb,
+                                      struct virtio_gpu_simple_resource *res,
+                                      struct virtio_gpu_rect *r,
+                                      uint32_t *error)
+{
+    struct virtio_gpu_scanout *scanout;
+    uint8_t *data;
+
+    scanout = &g->parent_obj.scanout[scanout_id];
+
+    if (r->x > fb->width ||
+        r->y > fb->height ||
+        r->width < 16 ||
+        r->height < 16 ||
+        r->width > fb->width ||
+        r->height > fb->height ||
+        r->x + r->width > fb->width ||
+        r->y + r->height > fb->height) {
+        qemu_log_mask(LOG_GUEST_ERROR, "%s: illegal scanout %d bounds for"
+                      " resource %d, rect (%d,%d)+%d,%d, fb %d %d\n",
+                      __func__, scanout_id, res->resource_id,
+                      r->x, r->y, r->width, r->height,
+                      fb->width, fb->height);
+        *error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
+        return;
+    }
+
+    g->parent_obj.enable = 1;
+
+    if (res->blob) {
+        if (console_has_gl(scanout->con)) {
+            if (!virtio_gpu_update_dmabuf(g, scanout_id, res, fb, r)) {
+                virtio_gpu_update_scanout(g, scanout_id, res, r);
+            } else {
+                *error = VIRTIO_GPU_RESP_ERR_OUT_OF_MEMORY;
+            }
+            return;
+        }
+
+        data = res->blob;
+    } else {
+        data = (uint8_t *)pixman_image_get_data(res->image);
+    }
+
+    /* create a surface for this scanout */
+    if ((res->blob && !console_has_gl(scanout->con)) ||
+        !scanout->ds ||
+        surface_data(scanout->ds) != data + fb->offset ||
+        scanout->width != r->width ||
+        scanout->height != r->height) {
+        pixman_image_t *rect;
+        void *ptr = data + fb->offset;
+        rect = pixman_image_create_bits(fb->format, r->width, r->height,
+                                        ptr, fb->stride);
+
+        if (res->image) {
+            pixman_image_ref(res->image);
+            pixman_image_set_destroy_function(rect, virtio_unref_resource,
+                                              res->image);
+        }
+
+        /* realloc the surface ptr */
+        scanout->ds = qemu_create_displaysurface_pixman(rect);
+        if (!scanout->ds) {
+            *error = VIRTIO_GPU_RESP_ERR_UNSPEC;
+            return;
+        }
+#ifdef WIN32
+        qemu_displaysurface_win32_set_handle(scanout->ds, res->handle, fb->offset);
+#endif
+
+        pixman_image_unref(rect);
+        dpy_gfx_replace_surface(g->parent_obj.scanout[scanout_id].con,
+                                scanout->ds);
+    }
+
+    virtio_gpu_update_scanout(g, scanout_id, res, r);
+}
+
 static void virtio_gpu_set_scanout(VirtIOGPU *g,
                                    struct virtio_gpu_ctrl_command *cmd)
 {
     struct virtio_gpu_simple_resource *res;
-    struct virtio_gpu_scanout *scanout;
-    pixman_format_code_t format;
-    uint32_t offset;
-    int bpp;
+    struct virtio_gpu_framebuffer fb = { 0 };
     struct virtio_gpu_set_scanout ss;
 
     VIRTIO_GPU_FILL_CMD(ss);
@@ -648,112 +719,118 @@ static void virtio_gpu_set_scanout(VirtIOGPU *g,
     trace_virtio_gpu_cmd_set_scanout(ss.scanout_id, ss.resource_id,
                                      ss.r.width, ss.r.height, ss.r.x, ss.r.y);
 
-    if (ss.scanout_id >= g->conf.max_outputs) {
+    if (ss.scanout_id >= g->parent_obj.conf.max_outputs) {
         qemu_log_mask(LOG_GUEST_ERROR, "%s: illegal scanout id specified %d",
                       __func__, ss.scanout_id);
         cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_SCANOUT_ID;
         return;
     }
 
-    g->enable = 1;
     if (ss.resource_id == 0) {
-        scanout = &g->scanout[ss.scanout_id];
-        if (scanout->resource_id) {
-            res = virtio_gpu_find_resource(g, scanout->resource_id);
-            if (res) {
-                res->scanout_bitmask &= ~(1 << ss.scanout_id);
-            }
-        }
-        if (ss.scanout_id == 0) {
-            qemu_log_mask(LOG_GUEST_ERROR,
-                          "%s: illegal scanout id specified %d",
-                          __func__, ss.scanout_id);
-            cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_SCANOUT_ID;
-            return;
-        }
-        dpy_gfx_replace_surface(g->scanout[ss.scanout_id].con, NULL);
-        scanout->ds = NULL;
-        scanout->width = 0;
-        scanout->height = 0;
+        virtio_gpu_disable_scanout(g, ss.scanout_id);
         return;
     }
 
-    /* create a surface for this scanout */
-    res = virtio_gpu_find_resource(g, ss.resource_id);
+    res = virtio_gpu_find_check_resource(g, ss.resource_id, true,
+                                         __func__, &cmd->error);
     if (!res) {
-        qemu_log_mask(LOG_GUEST_ERROR, "%s: illegal resource specified %d\n",
-                      __func__, ss.resource_id);
-        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_RESOURCE_ID;
         return;
     }
 
-    if (ss.r.x > res->width ||
-        ss.r.y > res->height ||
-        ss.r.width > res->width ||
-        ss.r.height > res->height ||
-        ss.r.x + ss.r.width > res->width ||
-        ss.r.y + ss.r.height > res->height) {
-        qemu_log_mask(LOG_GUEST_ERROR, "%s: illegal scanout %d bounds for"
-                      " resource %d, (%d,%d)+%d,%d vs %d %d\n",
-                      __func__, ss.scanout_id, ss.resource_id, ss.r.x, ss.r.y,
-                      ss.r.width, ss.r.height, res->width, res->height);
+    fb.format = pixman_image_get_format(res->image);
+    fb.bytes_pp = DIV_ROUND_UP(PIXMAN_FORMAT_BPP(fb.format), 8);
+    fb.width  = pixman_image_get_width(res->image);
+    fb.height = pixman_image_get_height(res->image);
+    fb.stride = pixman_image_get_stride(res->image);
+    fb.offset = ss.r.x * fb.bytes_pp + ss.r.y * fb.stride;
+
+    virtio_gpu_do_set_scanout(g, ss.scanout_id,
+                              &fb, res, &ss.r, &cmd->error);
+}
+
+static void virtio_gpu_set_scanout_blob(VirtIOGPU *g,
+                                        struct virtio_gpu_ctrl_command *cmd)
+{
+    struct virtio_gpu_simple_resource *res;
+    struct virtio_gpu_framebuffer fb = { 0 };
+    struct virtio_gpu_set_scanout_blob ss;
+    uint64_t fbend;
+
+    VIRTIO_GPU_FILL_CMD(ss);
+    virtio_gpu_scanout_blob_bswap(&ss);
+    trace_virtio_gpu_cmd_set_scanout_blob(ss.scanout_id, ss.resource_id,
+                                          ss.r.width, ss.r.height, ss.r.x,
+                                          ss.r.y);
+
+    if (ss.scanout_id >= g->parent_obj.conf.max_outputs) {
+        qemu_log_mask(LOG_GUEST_ERROR, "%s: illegal scanout id specified %d",
+                      __func__, ss.scanout_id);
+        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_SCANOUT_ID;
+        return;
+    }
+
+    if (ss.resource_id == 0) {
+        virtio_gpu_disable_scanout(g, ss.scanout_id);
+        return;
+    }
+
+    res = virtio_gpu_find_check_resource(g, ss.resource_id, true,
+                                         __func__, &cmd->error);
+    if (!res) {
+        return;
+    }
+
+    fb.format = virtio_gpu_get_pixman_format(ss.format);
+    if (!fb.format) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "%s: host couldn't handle guest format %d\n",
+                      __func__, ss.format);
         cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
         return;
     }
 
-    scanout = &g->scanout[ss.scanout_id];
+    fb.bytes_pp = DIV_ROUND_UP(PIXMAN_FORMAT_BPP(fb.format), 8);
+    fb.width = ss.width;
+    fb.height = ss.height;
+    fb.stride = ss.strides[0];
+    fb.offset = ss.offsets[0] + ss.r.x * fb.bytes_pp + ss.r.y * fb.stride;
 
-    format = pixman_image_get_format(res->image);
-    bpp = DIV_ROUND_UP(PIXMAN_FORMAT_BPP(format), 8);
-    offset = (ss.r.x * bpp) + ss.r.y * pixman_image_get_stride(res->image);
-    if (!scanout->ds || surface_data(scanout->ds)
-        != ((uint8_t *)pixman_image_get_data(res->image) + offset) ||
-        scanout->width != ss.r.width ||
-        scanout->height != ss.r.height) {
-        pixman_image_t *rect;
-        void *ptr = (uint8_t *)pixman_image_get_data(res->image) + offset;
-        rect = pixman_image_create_bits(format, ss.r.width, ss.r.height, ptr,
-                                        pixman_image_get_stride(res->image));
-        pixman_image_ref(res->image);
-        pixman_image_set_destroy_function(rect, virtio_unref_resource,
-                                          res->image);
-        /* realloc the surface ptr */
-        scanout->ds = qemu_create_displaysurface_pixman(rect);
-        if (!scanout->ds) {
-            cmd->error = VIRTIO_GPU_RESP_ERR_UNSPEC;
-            return;
-        }
-        pixman_image_unref(rect);
-        dpy_gfx_replace_surface(g->scanout[ss.scanout_id].con, scanout->ds);
+    fbend = fb.offset;
+    fbend += fb.stride * (ss.r.height - 1);
+    fbend += fb.bytes_pp * ss.r.width;
+    if (fbend > res->blob_size) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "%s: fb end out of range\n",
+                      __func__);
+        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
+        return;
     }
 
-    res->scanout_bitmask |= (1 << ss.scanout_id);
-    scanout->resource_id = ss.resource_id;
-    scanout->x = ss.r.x;
-    scanout->y = ss.r.y;
-    scanout->width = ss.r.width;
-    scanout->height = ss.r.height;
+    virtio_gpu_do_set_scanout(g, ss.scanout_id,
+                              &fb, res, &ss.r, &cmd->error);
 }
 
-int virtio_gpu_create_mapping_iov(struct virtio_gpu_resource_attach_backing *ab,
+int virtio_gpu_create_mapping_iov(VirtIOGPU *g,
+                                  uint32_t nr_entries, uint32_t offset,
                                   struct virtio_gpu_ctrl_command *cmd,
-                                  uint64_t **addr, struct iovec **iov)
+                                  uint64_t **addr, struct iovec **iov,
+                                  uint32_t *niov)
 {
     struct virtio_gpu_mem_entry *ents;
     size_t esize, s;
-    int i;
+    int e, v;
 
-    if (ab->nr_entries > 16384) {
+    if (nr_entries > 16384) {
         qemu_log_mask(LOG_GUEST_ERROR,
                       "%s: nr_entries is too big (%d > 16384)\n",
-                      __func__, ab->nr_entries);
+                      __func__, nr_entries);
         return -1;
     }
 
-    esize = sizeof(*ents) * ab->nr_entries;
+    esize = sizeof(*ents) * nr_entries;
     ents = g_malloc(esize);
     s = iov_to_buf(cmd->elem.out_sg, cmd->elem.out_num,
-                   sizeof(*ab), ents, esize);
+                   offset, ents, esize);
     if (s != esize) {
         qemu_log_mask(LOG_GUEST_ERROR,
                       "%s: command data size incorrect %zu vs %zu\n",
@@ -762,55 +839,83 @@ int virtio_gpu_create_mapping_iov(struct virtio_gpu_resource_attach_backing *ab,
         return -1;
     }
 
-    *iov = g_malloc0(sizeof(struct iovec) * ab->nr_entries);
+    *iov = NULL;
     if (addr) {
-        *addr = g_malloc0(sizeof(uint64_t) * ab->nr_entries);
+        *addr = NULL;
     }
-    for (i = 0; i < ab->nr_entries; i++) {
-        uint64_t a = le64_to_cpu(ents[i].addr);
-        uint32_t l = le32_to_cpu(ents[i].length);
-        hwaddr len = l;
-        (*iov)[i].iov_len = l;
-        (*iov)[i].iov_base = cpu_physical_memory_map(a, &len, 1);
-        if (addr) {
-            (*addr)[i] = a;
-        }
-        if (!(*iov)[i].iov_base || len != l) {
-            qemu_log_mask(LOG_GUEST_ERROR, "%s: failed to map MMIO memory for"
-                          " resource %d element %d\n",
-                          __func__, ab->resource_id, i);
-            virtio_gpu_cleanup_mapping_iov(*iov, i);
-            g_free(ents);
-            *iov = NULL;
-            if (addr) {
-                g_free(*addr);
-                *addr = NULL;
+    for (e = 0, v = 0; e < nr_entries; e++) {
+        uint64_t a = le64_to_cpu(ents[e].addr);
+        uint32_t l = le32_to_cpu(ents[e].length);
+        hwaddr len;
+        void *map;
+
+        do {
+            len = l;
+            map = dma_memory_map(VIRTIO_DEVICE(g)->dma_as, a, &len,
+                                 DMA_DIRECTION_TO_DEVICE,
+                                 MEMTXATTRS_UNSPECIFIED);
+            if (!map) {
+                qemu_log_mask(LOG_GUEST_ERROR, "%s: failed to map MMIO memory for"
+                              " element %d\n", __func__, e);
+                virtio_gpu_cleanup_mapping_iov(g, *iov, v);
+                g_free(ents);
+                *iov = NULL;
+                if (addr) {
+                    g_free(*addr);
+                    *addr = NULL;
+                }
+                return -1;
             }
-            return -1;
-        }
+
+            if (!(v % 16)) {
+                *iov = g_renew(struct iovec, *iov, v + 16);
+                if (addr) {
+                    *addr = g_renew(uint64_t, *addr, v + 16);
+                }
+            }
+            (*iov)[v].iov_base = map;
+            (*iov)[v].iov_len = len;
+            if (addr) {
+                (*addr)[v] = a;
+            }
+
+            a += len;
+            l -= len;
+            v += 1;
+        } while (l > 0);
     }
+    *niov = v;
+
     g_free(ents);
     return 0;
 }
 
-void virtio_gpu_cleanup_mapping_iov(struct iovec *iov, uint32_t count)
+void virtio_gpu_cleanup_mapping_iov(VirtIOGPU *g,
+                                    struct iovec *iov, uint32_t count)
 {
     int i;
 
     for (i = 0; i < count; i++) {
-        cpu_physical_memory_unmap(iov[i].iov_base, iov[i].iov_len, 1,
-                                  iov[i].iov_len);
+        dma_memory_unmap(VIRTIO_DEVICE(g)->dma_as,
+                         iov[i].iov_base, iov[i].iov_len,
+                         DMA_DIRECTION_TO_DEVICE,
+                         iov[i].iov_len);
     }
     g_free(iov);
 }
 
-static void virtio_gpu_cleanup_mapping(struct virtio_gpu_simple_resource *res)
+static void virtio_gpu_cleanup_mapping(VirtIOGPU *g,
+                                       struct virtio_gpu_simple_resource *res)
 {
-    virtio_gpu_cleanup_mapping_iov(res->iov, res->iov_cnt);
+    virtio_gpu_cleanup_mapping_iov(g, res->iov, res->iov_cnt);
     res->iov = NULL;
     res->iov_cnt = 0;
     g_free(res->addrs);
     res->addrs = NULL;
+
+    if (res->blob) {
+        virtio_gpu_fini_udmabuf(res);
+    }
 }
 
 static void
@@ -838,13 +943,12 @@ virtio_gpu_resource_attach_backing(VirtIOGPU *g,
         return;
     }
 
-    ret = virtio_gpu_create_mapping_iov(&ab, cmd, &res->addrs, &res->iov);
+    ret = virtio_gpu_create_mapping_iov(g, ab.nr_entries, sizeof(ab), cmd,
+                                        &res->addrs, &res->iov, &res->iov_cnt);
     if (ret != 0) {
         cmd->error = VIRTIO_GPU_RESP_ERR_UNSPEC;
         return;
     }
-
-    res->iov_cnt = ab.nr_entries;
 }
 
 static void
@@ -858,18 +962,16 @@ virtio_gpu_resource_detach_backing(VirtIOGPU *g,
     virtio_gpu_bswap_32(&detach, sizeof(detach));
     trace_virtio_gpu_cmd_res_back_detach(detach.resource_id);
 
-    res = virtio_gpu_find_resource(g, detach.resource_id);
-    if (!res || !res->iov) {
-        qemu_log_mask(LOG_GUEST_ERROR, "%s: illegal resource specified %d\n",
-                      __func__, detach.resource_id);
-        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_RESOURCE_ID;
+    res = virtio_gpu_find_check_resource(g, detach.resource_id, true,
+                                         __func__, &cmd->error);
+    if (!res) {
         return;
     }
-    virtio_gpu_cleanup_mapping(res);
+    virtio_gpu_cleanup_mapping(g, res);
 }
 
-static void virtio_gpu_simple_process_cmd(VirtIOGPU *g,
-                                          struct virtio_gpu_ctrl_command *cmd)
+void virtio_gpu_simple_process_cmd(VirtIOGPU *g,
+                                   struct virtio_gpu_ctrl_command *cmd)
 {
     VIRTIO_GPU_FILL_CMD(cmd->cmd_hdr);
     virtio_gpu_ctrl_hdr_bswap(&cmd->cmd_hdr);
@@ -884,6 +986,13 @@ static void virtio_gpu_simple_process_cmd(VirtIOGPU *g,
     case VIRTIO_GPU_CMD_RESOURCE_CREATE_2D:
         virtio_gpu_resource_create_2d(g, cmd);
         break;
+    case VIRTIO_GPU_CMD_RESOURCE_CREATE_BLOB:
+        if (!virtio_gpu_blob_enabled(g->parent_obj.conf)) {
+            cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
+            break;
+        }
+        virtio_gpu_resource_create_blob(g, cmd);
+        break;
     case VIRTIO_GPU_CMD_RESOURCE_UNREF:
         virtio_gpu_resource_unref(g, cmd);
         break;
@@ -896,6 +1005,13 @@ static void virtio_gpu_simple_process_cmd(VirtIOGPU *g,
     case VIRTIO_GPU_CMD_SET_SCANOUT:
         virtio_gpu_set_scanout(g, cmd);
         break;
+    case VIRTIO_GPU_CMD_SET_SCANOUT_BLOB:
+        if (!virtio_gpu_blob_enabled(g->parent_obj.conf)) {
+            cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
+            break;
+        }
+        virtio_gpu_set_scanout_blob(g, cmd);
+        break;
     case VIRTIO_GPU_CMD_RESOURCE_ATTACH_BACKING:
         virtio_gpu_resource_attach_backing(g, cmd);
         break;
@@ -907,12 +1023,12 @@ static void virtio_gpu_simple_process_cmd(VirtIOGPU *g,
         break;
     }
     if (!cmd->finished) {
-        virtio_gpu_ctrl_response_nodata(g, cmd, cmd->error ? cmd->error :
-                                        VIRTIO_GPU_RESP_OK_NODATA);
+        if (!g->parent_obj.renderer_blocked) {
+            virtio_gpu_ctrl_response_nodata(g, cmd, cmd->error ? cmd->error :
+                                            VIRTIO_GPU_RESP_OK_NODATA);
+        }
     }
 }
-
-static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq);
 
 static void virtio_gpu_handle_ctrl_cb(VirtIODevice *vdev, VirtQueue *vq)
 {
@@ -929,24 +1045,31 @@ static void virtio_gpu_handle_cursor_cb(VirtIODevice *vdev, VirtQueue *vq)
 void virtio_gpu_process_cmdq(VirtIOGPU *g)
 {
     struct virtio_gpu_ctrl_command *cmd;
+    VirtIOGPUClass *vgc = VIRTIO_GPU_GET_CLASS(g);
 
+    if (g->processing_cmdq) {
+        return;
+    }
+    g->processing_cmdq = true;
     while (!QTAILQ_EMPTY(&g->cmdq)) {
         cmd = QTAILQ_FIRST(&g->cmdq);
-        /* process command */
-        VIRGL(g, virtio_gpu_virgl_process_cmd, virtio_gpu_simple_process_cmd,
-              g, cmd);
-        if (cmd->waiting) {
+
+        if (g->parent_obj.renderer_blocked) {
             break;
         }
+
+        /* process command */
+        vgc->process_cmd(g, cmd);
+
         QTAILQ_REMOVE(&g->cmdq, cmd, next);
-        if (virtio_gpu_stats_enabled(g->conf)) {
+        if (virtio_gpu_stats_enabled(g->parent_obj.conf)) {
             g->stats.requests++;
         }
 
         if (!cmd->finished) {
             QTAILQ_INSERT_TAIL(&g->fenceq, cmd, next);
             g->inflight++;
-            if (virtio_gpu_stats_enabled(g->conf)) {
+            if (virtio_gpu_stats_enabled(g->parent_obj.conf)) {
                 if (g->stats.max_inflight < g->inflight) {
                     g->stats.max_inflight = g->inflight;
                 }
@@ -956,6 +1079,31 @@ void virtio_gpu_process_cmdq(VirtIOGPU *g)
             g_free(cmd);
         }
     }
+    g->processing_cmdq = false;
+}
+
+static void virtio_gpu_process_fenceq(VirtIOGPU *g)
+{
+    struct virtio_gpu_ctrl_command *cmd, *tmp;
+
+    QTAILQ_FOREACH_SAFE(cmd, &g->fenceq, next, tmp) {
+        trace_virtio_gpu_fence_resp(cmd->cmd_hdr.fence_id);
+        virtio_gpu_ctrl_response_nodata(g, cmd, VIRTIO_GPU_RESP_OK_NODATA);
+        QTAILQ_REMOVE(&g->fenceq, cmd, next);
+        g_free(cmd);
+        g->inflight--;
+        if (virtio_gpu_stats_enabled(g->parent_obj.conf)) {
+            fprintf(stderr, "inflight: %3d (-)\r", g->inflight);
+        }
+    }
+}
+
+static void virtio_gpu_handle_gl_flushed(VirtIOGPUBase *b)
+{
+    VirtIOGPU *g = container_of(b, VirtIOGPU, parent_obj);
+
+    virtio_gpu_process_fenceq(g);
+    virtio_gpu_process_cmdq(g);
 }
 
 static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq)
@@ -967,22 +1115,12 @@ static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq)
         return;
     }
 
-#ifdef CONFIG_VIRGL
-    if (!g->renderer_inited && g->use_virgl_renderer) {
-        virtio_gpu_virgl_init(g);
-        g->renderer_inited = true;
-    }
-#endif
-
     cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
     while (cmd) {
-
         cmd->vq = vq;
         cmd->error = 0;
         cmd->finished = false;
-        cmd->waiting = false;
         QTAILQ_INSERT_TAIL(&g->cmdq, cmd, next);
-
         cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
     }
 
@@ -992,7 +1130,9 @@ static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq)
 static void virtio_gpu_ctrl_bh(void *opaque)
 {
     VirtIOGPU *g = opaque;
-    virtio_gpu_handle_ctrl(&g->parent_obj, g->ctrl_vq);
+    VirtIOGPUClass *vgc = VIRTIO_GPU_GET_CLASS(g);
+
+    vgc->handle_ctrl(&g->parent_obj.parent_obj, g->ctrl_vq);
 }
 
 static void virtio_gpu_handle_cursor(VirtIODevice *vdev, VirtQueue *vq)
@@ -1030,55 +1170,8 @@ static void virtio_gpu_handle_cursor(VirtIODevice *vdev, VirtQueue *vq)
 static void virtio_gpu_cursor_bh(void *opaque)
 {
     VirtIOGPU *g = opaque;
-    virtio_gpu_handle_cursor(&g->parent_obj, g->cursor_vq);
+    virtio_gpu_handle_cursor(&g->parent_obj.parent_obj, g->cursor_vq);
 }
-
-static void virtio_gpu_invalidate_display(void *opaque)
-{
-}
-
-static void virtio_gpu_update_display(void *opaque)
-{
-}
-
-static void virtio_gpu_text_update(void *opaque, console_ch_t *chardata)
-{
-}
-
-static int virtio_gpu_ui_info(void *opaque, uint32_t idx, QemuUIInfo *info)
-{
-    VirtIOGPU *g = opaque;
-
-    if (idx >= g->conf.max_outputs) {
-        return -1;
-    }
-
-    g->req_state[idx].x = info->xoff;
-    g->req_state[idx].y = info->yoff;
-    g->req_state[idx].width = info->width;
-    g->req_state[idx].height = info->height;
-    g->req_state[idx].dpi = info->dpi;
-
-    if (info->width && info->height) {
-        g->enabled_output_bitmask |= (1 << idx);
-    } else {
-        g->enabled_output_bitmask &= ~(1 << idx);
-    }
-
-    /* send event to guest */
-    virtio_gpu_notify_event(g, VIRTIO_GPU_EVENT_DISPLAY);
-    return 0;
-}
-
-const GraphicHwOps virtio_gpu_ops = {
-    .invalidate = virtio_gpu_invalidate_display,
-    .gfx_update = virtio_gpu_update_display,
-    .text_update = virtio_gpu_text_update,
-    .ui_info = virtio_gpu_ui_info,
-#ifdef CONFIG_VIRGL
-    .gl_block = virtio_gpu_gl_block,
-#endif
-};
 
 static const VMStateDescription vmstate_virtio_gpu_scanout = {
     .name = "virtio-gpu-one-scanout",
@@ -1102,10 +1195,11 @@ static const VMStateDescription vmstate_virtio_gpu_scanouts = {
     .name = "virtio-gpu-scanouts",
     .version_id = 1,
     .fields = (VMStateField[]) {
-        VMSTATE_INT32(enable, struct VirtIOGPU),
-        VMSTATE_UINT32_EQUAL(conf.max_outputs, struct VirtIOGPU, NULL),
-        VMSTATE_STRUCT_VARRAY_UINT32(scanout, struct VirtIOGPU,
-                                     conf.max_outputs, 1,
+        VMSTATE_INT32(parent_obj.enable, struct VirtIOGPU),
+        VMSTATE_UINT32_EQUAL(parent_obj.conf.max_outputs,
+                             struct VirtIOGPU, NULL),
+        VMSTATE_STRUCT_VARRAY_UINT32(parent_obj.scanout, struct VirtIOGPU,
+                                     parent_obj.conf.max_outputs, 1,
                                      vmstate_virtio_gpu_scanout,
                                      struct virtio_gpu_scanout),
         VMSTATE_END_OF_LIST()
@@ -1113,26 +1207,11 @@ static const VMStateDescription vmstate_virtio_gpu_scanouts = {
 };
 
 static int virtio_gpu_save(QEMUFile *f, void *opaque, size_t size,
-                           VMStateField *field, QJSON *vmdesc)
+                           const VMStateField *field, JSONWriter *vmdesc)
 {
     VirtIOGPU *g = opaque;
     struct virtio_gpu_simple_resource *res;
     int i;
-
-#ifdef CONFIG_VIRGL
-    if (virtio_gpu_virgl_enabled(g->conf)) {
-        // First save the renderer state, then the ram slots, because when we
-        // load, the renderer state and host pointers backing blob resources
-        // need to be restored first before the ram slots corresponding to the
-        // blob resources themselves.
-#ifdef CONFIG_STREAM_RENDERER
-    // NOT IMPLEMENTED
-#else
-        g->virgl->virgl_renderer_save_snapshot(f);
-#endif  // CONFIG_STREAM_RENDERER
-        virtio_gpu_save_ram_slots(f, g);
-    }
-#endif
 
     /* in 2d mode we should never find unprocessed commands here */
     assert(QTAILQ_EMPTY(&g->cmdq));
@@ -1156,29 +1235,24 @@ static int virtio_gpu_save(QEMUFile *f, void *opaque, size_t size,
 }
 
 static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
-                           VMStateField *field)
+                           const VMStateField *field)
 {
     VirtIOGPU *g = opaque;
     struct virtio_gpu_simple_resource *res;
     struct virtio_gpu_scanout *scanout;
     uint32_t resource_id, pformat;
+    void *bits = NULL;
     int i;
 
     g->hostmem = 0;
 
-#ifdef CONFIG_VIRGL
-    if (virtio_gpu_virgl_enabled(g->conf)) {
-#ifdef CONFIG_STREAM_RENDERER
-    // NOT IMPLEMENTED
-#else
-        g->virgl->virgl_renderer_load_snapshot(f);
-#endif  // CONFIG_STREAM_RENDERER
-        virtio_gpu_load_ram_slots(f, g);
-    }
-#endif
-
     resource_id = qemu_get_be32(f);
     while (resource_id != 0) {
+        res = virtio_gpu_find_resource(g, resource_id);
+        if (res) {
+            return -EINVAL;
+        }
+
         res = g_new0(struct virtio_gpu_simple_resource, 1);
         res->resource_id = resource_id;
         res->width = qemu_get_be32(f);
@@ -1187,20 +1261,29 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
         res->iov_cnt = qemu_get_be32(f);
 
         /* allocate */
-        pformat = get_pixman_format(res->format);
+        pformat = virtio_gpu_get_pixman_format(res->format);
         if (!pformat) {
-            g_free(res);
-            return -EINVAL;
-        }
-        res->image = pixman_image_create_bits(pformat,
-                                              res->width, res->height,
-                                              NULL, 0);
-        if (!res->image) {
             g_free(res);
             return -EINVAL;
         }
 
         res->hostmem = calc_image_hostmem(pformat, res->width, res->height);
+#ifdef WIN32
+        bits = qemu_win32_map_alloc(res->hostmem, &res->handle, &error_warn);
+        if (!bits) {
+            g_free(res);
+            return -EINVAL;
+        }
+#endif
+        res->image = pixman_image_create_bits(
+            pformat,
+            res->width, res->height,
+            bits, res->height ? res->hostmem / res->height : 0);
+        if (!res->image) {
+            g_free(res);
+            return -EINVAL;
+        }
+
 
         res->addrs = g_new(uint64_t, res->iov_cnt);
         res->iov = g_new(struct iovec, res->iov_cnt);
@@ -1217,16 +1300,22 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
         for (i = 0; i < res->iov_cnt; i++) {
             hwaddr len = res->iov[i].iov_len;
             res->iov[i].iov_base =
-                cpu_physical_memory_map(res->addrs[i], &len, 1);
+                dma_memory_map(VIRTIO_DEVICE(g)->dma_as, res->addrs[i], &len,
+                               DMA_DIRECTION_TO_DEVICE,
+                               MEMTXATTRS_UNSPECIFIED);
+
             if (!res->iov[i].iov_base || len != res->iov[i].iov_len) {
                 /* Clean up the half-a-mapping we just created... */
                 if (res->iov[i].iov_base) {
-                    cpu_physical_memory_unmap(res->iov[i].iov_base,
-                                              len, 0, 0);
+                    dma_memory_unmap(VIRTIO_DEVICE(g)->dma_as,
+                                     res->iov[i].iov_base,
+                                     len,
+                                     DMA_DIRECTION_TO_DEVICE,
+                                     0);
                 }
                 /* ...and the mappings for previous loop iterations */
                 res->iov_cnt = i;
-                virtio_gpu_cleanup_mapping(res);
+                virtio_gpu_cleanup_mapping(g, res);
                 pixman_image_unref(res->image);
                 g_free(res);
                 return -EINVAL;
@@ -1239,198 +1328,152 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
         resource_id = qemu_get_be32(f);
     }
 
-    /* load scanout state */
+    /* load & apply scanout state */
     vmstate_load_state(f, &vmstate_virtio_gpu_scanouts, g, 1);
+    for (i = 0; i < g->parent_obj.conf.max_outputs; i++) {
+        /* FIXME: should take scanout.r.{x,y} into account */
+        scanout = &g->parent_obj.scanout[i];
+        if (!scanout->resource_id) {
+            continue;
+        }
+        res = virtio_gpu_find_resource(g, scanout->resource_id);
+        if (!res) {
+            return -EINVAL;
+        }
+        scanout->ds = qemu_create_displaysurface_pixman(res->image);
+        if (!scanout->ds) {
+            return -EINVAL;
+        }
+#ifdef WIN32
+        qemu_displaysurface_win32_set_handle(scanout->ds, res->handle, 0);
+#endif
 
-    // TODO: Figure out why this hangs the emulator display and causes ANR in the current app.
-    // for (i = 0; i < g->conf.max_outputs; i++) {
-    //     scanout = &g->scanout[i];
-    //     if (!scanout->resource_id) {
-    //         continue;
-    //     }
-    //     res = virtio_gpu_find_resource(g, scanout->resource_id);
-    //     if (!res) {
-    //         return -EINVAL;
-    //     }
-    //     scanout->ds = qemu_create_displaysurface_pixman(res->image);
-    //     if (!scanout->ds) {
-    //         return -EINVAL;
-    //     }
-
-    //     dpy_gfx_replace_surface(scanout->con, scanout->ds);
-    //     dpy_gfx_update(scanout->con, 0, 0, scanout->width, scanout->height);
-    //     if (scanout->cursor.resource_id) {
-    //         update_cursor(g, &scanout->cursor);
-    //     }
-    //     res->scanout_bitmask |= (1 << i);
-    // }
+        dpy_gfx_replace_surface(scanout->con, scanout->ds);
+        dpy_gfx_update_full(scanout->con);
+        if (scanout->cursor.resource_id) {
+            update_cursor(g, &scanout->cursor);
+        }
+        res->scanout_bitmask |= (1 << i);
+    }
 
     return 0;
 }
 
-void proxy_virgl_write_fence(void *opaque, uint32_t fence) {
-    VirtIOGPU *g = opaque;
-    struct virtio_gpu_ctrl_command *cmd, *tmp;
-
-    QTAILQ_FOREACH_SAFE(cmd, &g->fenceq, next, tmp) {
-        /*
-         * the guest can end up emitting fences out of order
-         * so we should check all fenced cmds not just the first one.
-         */
-        if (cmd->cmd_hdr.fence_id > fence) {
-            continue;
-        }
-        trace_virtio_gpu_fence_resp(cmd->cmd_hdr.fence_id);
-        virtio_gpu_ctrl_response_nodata(g, cmd, VIRTIO_GPU_RESP_OK_NODATA);
-        QTAILQ_REMOVE(&g->fenceq, cmd, next);
-        g_free(cmd);
-        g->inflight--;
-        if (virtio_gpu_stats_enabled(g->conf)) {
-            fprintf(stderr, "inflight: %3d (-)\r", g->inflight);
-        }
-    }
-}
-
-#ifdef CONFIG_ANDROID
-static virgl_renderer_gl_context
-proxy_virgl_create_context(void *opaque, int scanout_idx,
-                     struct virgl_renderer_gl_ctx_param *params)
-{
-    return (virgl_renderer_gl_context)0;
-}
-
-static void proxy_virgl_destroy_context(
-    void *opaque, virgl_renderer_gl_context ctx) { }
-
-static int proxy_virgl_make_context_current(
-    void *opaque, int scanout_idx, virgl_renderer_gl_context ctx) { return 0; }
-
-static struct virgl_renderer_callbacks proxy_3d_cbs = {
-    .version             = 1,
-    .write_fence         = proxy_virgl_write_fence,
-    .create_gl_context   = proxy_virgl_create_context,
-    .destroy_gl_context  = proxy_virgl_destroy_context,
-    .make_current        = proxy_virgl_make_context_current,
-#ifdef VIRGL_RENDERER_UNSTABLE_APIS
-    .write_context_fence = NULL,
-#endif
-};
-#endif
-
-static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
+void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
 {
     VirtIODevice *vdev = VIRTIO_DEVICE(qdev);
     VirtIOGPU *g = VIRTIO_GPU(qdev);
-    bool have_virgl;
-    Error *local_err = NULL;
-    int i;
 
-    if (virtio_host_has_feature(vdev, VIRTIO_F_IOMMU_PLATFORM)) {
-        error_setg(errp, "virtio-gpu does not support vIOMMU yet");
+    if (virtio_gpu_blob_enabled(g->parent_obj.conf)) {
+        if (!virtio_gpu_have_udmabuf()) {
+            error_setg(errp, "cannot enable blob resources without udmabuf");
+            return;
+        }
+
+        if (virtio_gpu_virgl_enabled(g->parent_obj.conf)) {
+            error_setg(errp, "blobs and virgl are not compatible (yet)");
+            return;
+        }
+    }
+
+    if (!virtio_gpu_base_device_realize(qdev,
+                                        virtio_gpu_handle_ctrl_cb,
+                                        virtio_gpu_handle_cursor_cb,
+                                        errp)) {
         return;
     }
 
-    if (g->conf.max_outputs > VIRTIO_GPU_MAX_SCANOUTS) {
-        error_setg(errp, "invalid max_outputs > %d", VIRTIO_GPU_MAX_SCANOUTS);
-        return;
-    }
-
-#ifdef CONFIG_ANDROID
-    goldfish_virtio_init();
-    g->use_virgl_renderer = true;
-    g->conf.flags |= (1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
-    g->conf.flags |= (1 << VIRTIO_GPU_FLAG_CONTEXT_INIT_ENABLED);
-    g->virgl_as_proxy = true;
-#ifndef CONFIG_STREAM_RENDERER
-    g->virgl = get_goldfish_pipe_virgl_renderer_virtio_interface();
-#endif  // !CONFIG_STREAM_RENDERER
-    g->gpu_3d_cbs = &proxy_3d_cbs;
-    virgl_as_proxy = true;
-#else
-    g->use_virgl_renderer = false;
-#endif
-
-    g->config_size = sizeof(struct virtio_gpu_config);
-    g->virtio_config.num_scanouts = cpu_to_le32(g->conf.max_outputs);
-    virtio_init(VIRTIO_DEVICE(g), "virtio-gpu", VIRTIO_ID_GPU,
-                g->config_size);
-
-    g->req_state[0].width = g->conf.xres;
-    g->req_state[0].height = g->conf.yres;
-
-    if (virtio_gpu_virgl_enabled(g->conf)) {
-        /* use larger control queue in 3d mode */
-        g->ctrl_vq   = virtio_add_queue(vdev, 256, virtio_gpu_handle_ctrl_cb);
-        g->cursor_vq = virtio_add_queue(vdev, 16, virtio_gpu_handle_cursor_cb);
-
-#if defined(CONFIG_VIRGL)
-        g->virtio_config.num_capsets = virtio_gpu_virgl_get_num_capsets(g);
-#else
-        g->virtio_config.num_capsets = 0;
-#endif
-    } else {
-        g->ctrl_vq   = virtio_add_queue(vdev, 64, virtio_gpu_handle_ctrl_cb);
-        g->cursor_vq = virtio_add_queue(vdev, 16, virtio_gpu_handle_cursor_cb);
-    }
-
-    g->ctrl_bh = qemu_bh_new(virtio_gpu_ctrl_bh, g);
-    g->cursor_bh = qemu_bh_new(virtio_gpu_cursor_bh, g);
+    g->ctrl_vq = virtio_get_queue(vdev, 0);
+    g->cursor_vq = virtio_get_queue(vdev, 1);
+    g->ctrl_bh = qemu_bh_new_guarded(virtio_gpu_ctrl_bh, g,
+                                     &qdev->mem_reentrancy_guard);
+    g->cursor_bh = qemu_bh_new_guarded(virtio_gpu_cursor_bh, g,
+                                       &qdev->mem_reentrancy_guard);
+    g->reset_bh = qemu_bh_new(virtio_gpu_reset_bh, g);
+    qemu_cond_init(&g->reset_cond);
     QTAILQ_INIT(&g->reslist);
     QTAILQ_INIT(&g->cmdq);
     QTAILQ_INIT(&g->fenceq);
-
-    g->enabled_output_bitmask = 1;
-    g->qdev = qdev;
-
-    for (i = 0; i < g->conf.max_outputs; i++) {
-        g->scanout[i].con =
-            graphic_console_init(DEVICE(g), i, &virtio_gpu_ops, g);
-        if (i > 0) {
-            dpy_gfx_replace_surface(g->scanout[i].con, NULL);
-        }
-    }
 }
 
-static void virtio_gpu_device_unrealize(DeviceState *qdev, Error **errp)
+static void virtio_gpu_device_unrealize(DeviceState *qdev)
 {
     VirtIOGPU *g = VIRTIO_GPU(qdev);
 
-    if (g->migration_blocker) {
-        migrate_del_blocker(g->migration_blocker);
-        error_free(g->migration_blocker);
-    }
+    g_clear_pointer(&g->ctrl_bh, qemu_bh_delete);
+    g_clear_pointer(&g->cursor_bh, qemu_bh_delete);
+    g_clear_pointer(&g->reset_bh, qemu_bh_delete);
+    qemu_cond_destroy(&g->reset_cond);
+    virtio_gpu_base_device_unrealize(qdev);
 }
 
-static void virtio_gpu_instance_init(Object *obj)
+static void virtio_gpu_reset_bh(void *opaque)
 {
-}
-
-static void virtio_gpu_reset(VirtIODevice *vdev)
-{
-    VirtIOGPU *g = VIRTIO_GPU(vdev);
+    VirtIOGPU *g = VIRTIO_GPU(opaque);
     struct virtio_gpu_simple_resource *res, *tmp;
-    int i;
-
-    g->enable = 0;
+    int i = 0;
 
     QTAILQ_FOREACH_SAFE(res, &g->reslist, next, tmp) {
         virtio_gpu_resource_destroy(g, res);
     }
-    for (i = 0; i < g->conf.max_outputs; i++) {
-        g->scanout[i].resource_id = 0;
-        g->scanout[i].width = 0;
-        g->scanout[i].height = 0;
-        g->scanout[i].x = 0;
-        g->scanout[i].y = 0;
-        g->scanout[i].ds = NULL;
+
+    for (i = 0; i < g->parent_obj.conf.max_outputs; i++) {
+        dpy_gfx_replace_surface(g->parent_obj.scanout[i].con, NULL);
     }
 
-#ifdef CONFIG_VIRGL
-    if (g->use_virgl_renderer) {
-        // virtio_gpu_virgl_reset(g);
-        g->use_virgl_renderer = 0;
+    g->reset_finished = true;
+    qemu_cond_signal(&g->reset_cond);
+}
+
+void virtio_gpu_reset(VirtIODevice *vdev)
+{
+    VirtIOGPU *g = VIRTIO_GPU(vdev);
+    struct virtio_gpu_ctrl_command *cmd;
+
+    if (qemu_in_vcpu_thread()) {
+        g->reset_finished = false;
+        qemu_bh_schedule(g->reset_bh);
+        while (!g->reset_finished) {
+            qemu_cond_wait_iothread(&g->reset_cond);
+        }
+    } else {
+        virtio_gpu_reset_bh(g);
     }
-#endif
+
+    while (!QTAILQ_EMPTY(&g->cmdq)) {
+        cmd = QTAILQ_FIRST(&g->cmdq);
+        QTAILQ_REMOVE(&g->cmdq, cmd, next);
+        g_free(cmd);
+    }
+
+    while (!QTAILQ_EMPTY(&g->fenceq)) {
+        cmd = QTAILQ_FIRST(&g->fenceq);
+        QTAILQ_REMOVE(&g->fenceq, cmd, next);
+        g->inflight--;
+        g_free(cmd);
+    }
+
+    virtio_gpu_base_reset(VIRTIO_GPU_BASE(vdev));
+}
+
+static void
+virtio_gpu_get_config(VirtIODevice *vdev, uint8_t *config)
+{
+    VirtIOGPUBase *g = VIRTIO_GPU_BASE(vdev);
+
+    memcpy(config, &g->virtio_config, sizeof(g->virtio_config));
+}
+
+static void
+virtio_gpu_set_config(VirtIODevice *vdev, const uint8_t *config)
+{
+    VirtIOGPUBase *g = VIRTIO_GPU_BASE(vdev);
+    const struct virtio_gpu_config *vgconfig =
+        (const struct virtio_gpu_config *)config;
+
+    if (vgconfig->events_clear) {
+        g->virtio_config.events_read &= ~vgconfig->events_clear;
+    }
 }
 
 /*
@@ -1461,23 +1504,11 @@ static const VMStateDescription vmstate_virtio_gpu = {
 };
 
 static Property virtio_gpu_properties[] = {
-#ifdef CONFIG_ANDROID
-    DEFINE_PROP_UINT32("max_outputs", VirtIOGPU, conf.max_outputs, 11),
-#else
-    DEFINE_PROP_UINT32("max_outputs", VirtIOGPU, conf.max_outputs, 1),
-#endif
-    DEFINE_PROP_SIZE("max_hostmem", VirtIOGPU, conf.max_hostmem,
-                     256 * 1024 * 1024),
-#ifdef CONFIG_VIRGL
-    DEFINE_PROP_BIT("virgl", VirtIOGPU, conf.flags,
-                    VIRTIO_GPU_FLAG_VIRGL_ENABLED, true),
-    DEFINE_PROP_BIT("stats", VirtIOGPU, conf.flags,
-                    VIRTIO_GPU_FLAG_STATS_ENABLED, false),
-#endif
-    DEFINE_PROP_BIT("edid", VirtIOGPU, conf.flags,
-                    VIRTIO_GPU_FLAG_EDID_ENABLED, true),
-    DEFINE_PROP_UINT32("xres", VirtIOGPU, conf.xres, 280),
-    DEFINE_PROP_UINT32("yres", VirtIOGPU, conf.yres, 280),
+    VIRTIO_GPU_BASE_PROPERTIES(VirtIOGPU, parent_obj.conf),
+    DEFINE_PROP_SIZE("max_hostmem", VirtIOGPU, conf_max_hostmem,
+                     256 * MiB),
+    DEFINE_PROP_BIT("blob", VirtIOGPU, parent_obj.conf.flags,
+                    VIRTIO_GPU_FLAG_BLOB_ENABLED, false),
     DEFINE_PROP_END_OF_LIST(),
 };
 
@@ -1485,29 +1516,33 @@ static void virtio_gpu_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
     VirtioDeviceClass *vdc = VIRTIO_DEVICE_CLASS(klass);
+    VirtIOGPUClass *vgc = VIRTIO_GPU_CLASS(klass);
+    VirtIOGPUBaseClass *vgbc = &vgc->parent;
+
+    vgc->handle_ctrl = virtio_gpu_handle_ctrl;
+    vgc->process_cmd = virtio_gpu_simple_process_cmd;
+    vgc->update_cursor_data = virtio_gpu_update_cursor_data;
+    vgbc->gl_flushed = virtio_gpu_handle_gl_flushed;
 
     vdc->realize = virtio_gpu_device_realize;
     vdc->unrealize = virtio_gpu_device_unrealize;
+    vdc->reset = virtio_gpu_reset;
     vdc->get_config = virtio_gpu_get_config;
     vdc->set_config = virtio_gpu_set_config;
-    vdc->get_features = virtio_gpu_get_features;
-    vdc->set_features = virtio_gpu_set_features;
 
-    vdc->reset = virtio_gpu_reset;
-
-    set_bit(DEVICE_CATEGORY_DISPLAY, dc->categories);
-    dc->props = virtio_gpu_properties;
     dc->vmsd = &vmstate_virtio_gpu;
-    dc->hotpluggable = false;
+    device_class_set_props(dc, virtio_gpu_properties);
 }
 
 static const TypeInfo virtio_gpu_info = {
     .name = TYPE_VIRTIO_GPU,
-    .parent = TYPE_VIRTIO_DEVICE,
+    .parent = TYPE_VIRTIO_GPU_BASE,
     .instance_size = sizeof(VirtIOGPU),
-    .instance_init = virtio_gpu_instance_init,
+    .class_size = sizeof(VirtIOGPUClass),
     .class_init = virtio_gpu_class_init,
 };
+module_obj(TYPE_VIRTIO_GPU);
+module_kconfig(VIRTIO_GPU);
 
 static void virtio_register_types(void)
 {
@@ -1515,26 +1550,3 @@ static void virtio_register_types(void)
 }
 
 type_init(virtio_register_types)
-
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_ctrl_hdr)                != 24);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_update_cursor)           != 56);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_resource_unref)          != 32);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_resource_create_2d)      != 40);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_set_scanout)             != 48);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_resource_flush)          != 48);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_transfer_to_host_2d)     != 56);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_mem_entry)               != 16);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_resource_attach_backing) != 32);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_resource_detach_backing) != 32);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_resp_display_info)       != 408);
-
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_transfer_host_3d)        != 72);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_resource_create_3d)      != 72);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_ctx_create)              != 96);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_ctx_destroy)             != 24);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_ctx_resource)            != 32);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_cmd_submit)              != 32);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_get_capset_info)         != 32);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_resp_capset_info)        != 40);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_get_capset)              != 32);
-QEMU_BUILD_BUG_ON(sizeof(struct virtio_gpu_resp_capset)             != 24);

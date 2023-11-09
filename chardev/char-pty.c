@@ -21,34 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "qemu-common.h"
 #include "chardev/char.h"
 #include "io/channel-file.h"
 #include "qemu/sockets.h"
 #include "qemu/error-report.h"
+#include "qemu/module.h"
+#include "qemu/qemu-print.h"
 
 #include "chardev/char-io.h"
+#include "qom/object.h"
 
-#if defined(__linux__) || defined(__sun__) || defined(__FreeBSD__)      \
-    || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) \
-    || defined(__GLIBC__)
-
-typedef struct {
+struct PtyChardev {
     Chardev parent;
     QIOChannel *ioc;
     int read_bytes;
 
-    /* Protected by the Chardev chr_write_lock.  */
     int connected;
     GSource *timer_src;
-    GSource *open_source;
-} PtyChardev;
+};
+typedef struct PtyChardev PtyChardev;
 
-#define PTY_CHARDEV(obj) OBJECT_CHECK(PtyChardev, (obj), TYPE_CHARDEV_PTY)
+DECLARE_INSTANCE_CHECKER(PtyChardev, PTY_CHARDEV,
+                         TYPE_CHARDEV_PTY)
 
-static void pty_chr_update_read_handler_locked(Chardev *chr);
 static void pty_chr_state(Chardev *chr, int connected);
 
 static void pty_chr_timer_cancel(PtyChardev *s)
@@ -60,32 +58,19 @@ static void pty_chr_timer_cancel(PtyChardev *s)
     }
 }
 
-static void pty_chr_open_src_cancel(PtyChardev *s)
-{
-    if (s->open_source) {
-        g_source_destroy(s->open_source);
-        g_source_unref(s->open_source);
-        s->open_source = NULL;
-    }
-}
-
 static gboolean pty_chr_timer(gpointer opaque)
 {
     struct Chardev *chr = CHARDEV(opaque);
     PtyChardev *s = PTY_CHARDEV(opaque);
 
-    qemu_mutex_lock(&chr->chr_write_lock);
     pty_chr_timer_cancel(s);
-    pty_chr_open_src_cancel(s);
     if (!s->connected) {
         /* Next poll ... */
-        pty_chr_update_read_handler_locked(chr);
+        qemu_chr_be_update_read_handlers(chr, chr->gcontext);
     }
-    qemu_mutex_unlock(&chr->chr_write_lock);
     return FALSE;
 }
 
-/* Called with chr_write_lock held.  */
 static void pty_chr_rearm_timer(Chardev *chr, int ms)
 {
     PtyChardev *s = PTY_CHARDEV(chr);
@@ -98,8 +83,7 @@ static void pty_chr_rearm_timer(Chardev *chr, int ms)
     g_free(name);
 }
 
-/* Called with chr_write_lock held.  */
-static void pty_chr_update_read_handler_locked(Chardev *chr)
+static void pty_chr_update_read_handler(Chardev *chr)
 {
     PtyChardev *s = PTY_CHARDEV(chr);
     GPollFD pfd;
@@ -109,9 +93,7 @@ static void pty_chr_update_read_handler_locked(Chardev *chr)
     pfd.fd = fioc->fd;
     pfd.events = G_IO_OUT;
     pfd.revents = 0;
-    do {
-        rc = g_poll(&pfd, 1, 0);
-    } while (rc == -1 && errno == EINTR);
+    rc = RETRY_ON_EINTR(g_poll(&pfd, 1, 0));
     assert(rc >= 0);
 
     if (pfd.revents & G_IO_HUP) {
@@ -121,24 +103,12 @@ static void pty_chr_update_read_handler_locked(Chardev *chr)
     }
 }
 
-static void pty_chr_update_read_handler(Chardev *chr)
-{
-    qemu_mutex_lock(&chr->chr_write_lock);
-    pty_chr_update_read_handler_locked(chr);
-    qemu_mutex_unlock(&chr->chr_write_lock);
-}
-
-/* Called with chr_write_lock held.  */
 static int char_pty_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
     PtyChardev *s = PTY_CHARDEV(chr);
 
     if (!s->connected) {
-        /* guest sends data, check for (re-)connect */
-        pty_chr_update_read_handler_locked(chr);
-        if (!s->connected) {
-            return len;
-        }
+        return len;
     }
     return io_channel_send(s->ioc, buf, len);
 }
@@ -187,23 +157,11 @@ static gboolean pty_chr_read(QIOChannel *chan, GIOCondition cond, void *opaque)
     return TRUE;
 }
 
-static gboolean qemu_chr_be_generic_open_func(gpointer opaque)
-{
-    Chardev *chr = CHARDEV(opaque);
-    PtyChardev *s = PTY_CHARDEV(opaque);
-
-    s->open_source = NULL;
-    qemu_chr_be_event(chr, CHR_EVENT_OPENED);
-    return FALSE;
-}
-
-/* Called with chr_write_lock held.  */
 static void pty_chr_state(Chardev *chr, int connected)
 {
     PtyChardev *s = PTY_CHARDEV(chr);
 
     if (!connected) {
-        pty_chr_open_src_cancel(s);
         remove_fd_in_watch(chr);
         s->connected = 0;
         /* (re-)connect poll interval for idle guests: once per second.
@@ -213,13 +171,8 @@ static void pty_chr_state(Chardev *chr, int connected)
     } else {
         pty_chr_timer_cancel(s);
         if (!s->connected) {
-            g_assert(s->open_source == NULL);
-            s->open_source = g_idle_source_new();
             s->connected = 1;
-            g_source_set_callback(s->open_source,
-                                  qemu_chr_be_generic_open_func,
-                                  chr, NULL);
-            g_source_attach(s->open_source, chr->gcontext);
+            qemu_chr_be_event(chr, CHR_EVENT_OPENED);
         }
         if (!chr->gsource) {
             chr->gsource = io_add_watch_poll(chr, s->ioc,
@@ -235,12 +188,121 @@ static void char_pty_finalize(Object *obj)
     Chardev *chr = CHARDEV(obj);
     PtyChardev *s = PTY_CHARDEV(obj);
 
-    qemu_mutex_lock(&chr->chr_write_lock);
     pty_chr_state(chr, 0);
     object_unref(OBJECT(s->ioc));
     pty_chr_timer_cancel(s);
-    qemu_mutex_unlock(&chr->chr_write_lock);
     qemu_chr_be_event(chr, CHR_EVENT_CLOSED);
+}
+
+#if defined HAVE_PTY_H
+# include <pty.h>
+#elif defined CONFIG_BSD
+# include <termios.h>
+# if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
+#  include <libutil.h>
+# else
+#  include <util.h>
+# endif
+#elif defined CONFIG_SOLARIS
+# include <termios.h>
+# include <stropts.h>
+#else
+# include <termios.h>
+#endif
+
+#ifdef __sun__
+
+#if !defined(HAVE_OPENPTY)
+/* Once illumos has openpty(), this is going to be removed. */
+static int openpty(int *amaster, int *aslave, char *name,
+                   struct termios *termp, struct winsize *winp)
+{
+    const char *slave;
+    int mfd = -1, sfd = -1;
+
+    *amaster = *aslave = -1;
+
+    mfd = open("/dev/ptmx", O_RDWR | O_NOCTTY);
+    if (mfd < 0) {
+        goto err;
+    }
+
+    if (grantpt(mfd) == -1 || unlockpt(mfd) == -1) {
+        goto err;
+    }
+
+    if ((slave = ptsname(mfd)) == NULL) {
+        goto err;
+    }
+
+    if ((sfd = open(slave, O_RDONLY | O_NOCTTY)) == -1) {
+        goto err;
+    }
+
+    if (ioctl(sfd, I_PUSH, "ptem") == -1 ||
+        (termp != NULL && tcgetattr(sfd, termp) < 0)) {
+        goto err;
+    }
+
+    *amaster = mfd;
+    *aslave = sfd;
+
+    if (winp) {
+        ioctl(sfd, TIOCSWINSZ, winp);
+    }
+
+    return 0;
+
+err:
+    if (sfd != -1) {
+        close(sfd);
+    }
+    close(mfd);
+    return -1;
+}
+#endif
+
+static void cfmakeraw (struct termios *termios_p)
+{
+    termios_p->c_iflag &=
+        ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+    termios_p->c_oflag &= ~OPOST;
+    termios_p->c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+    termios_p->c_cflag &= ~(CSIZE | PARENB);
+    termios_p->c_cflag |= CS8;
+
+    termios_p->c_cc[VMIN] = 0;
+    termios_p->c_cc[VTIME] = 0;
+}
+#endif
+
+/* like openpty() but also makes it raw; return master fd */
+static int qemu_openpty_raw(int *aslave, char *pty_name)
+{
+    int amaster;
+    struct termios tty;
+#if defined(__OpenBSD__) || defined(__DragonFly__)
+    char pty_buf[PATH_MAX];
+#define q_ptsname(x) pty_buf
+#else
+    char *pty_buf = NULL;
+#define q_ptsname(x) ptsname(x)
+#endif
+
+    if (openpty(&amaster, aslave, pty_buf, NULL, NULL) < 0) {
+        return -1;
+    }
+
+    /* Set raw attributes on the pty. */
+    tcgetattr(*aslave, &tty);
+    cfmakeraw(&tty);
+    tcsetattr(*aslave, TCSAFLUSH, &tty);
+
+    if (pty_name) {
+        strcpy(pty_name, q_ptsname(amaster));
+    }
+
+    return amaster;
 }
 
 static void char_pty_open(Chardev *chr,
@@ -260,16 +322,19 @@ static void char_pty_open(Chardev *chr,
     }
 
     close(slave_fd);
-    qemu_set_nonblock(master_fd);
+    if (!g_unix_set_fd_nonblocking(master_fd, true, NULL)) {
+        error_setg_errno(errp, errno, "Failed to set FD nonblocking");
+        return;
+    }
 
     chr->filename = g_strdup_printf("pty:%s", pty_name);
-    error_report("char device redirected to %s (label %s)",
-                 pty_name, chr->label);
+    qemu_printf("char device redirected to %s (label %s)\n",
+                pty_name, chr->label);
 
     s = PTY_CHARDEV(chr);
     s->ioc = QIO_CHANNEL(qio_channel_file_new_fd(master_fd));
     name = g_strdup_printf("chardev-pty-%s", chr->label);
-    qio_channel_set_name(QIO_CHANNEL(s->ioc), name);
+    qio_channel_set_name(s->ioc, name);
     g_free(name);
     s->timer_src = NULL;
     *be_opened = false;
@@ -299,5 +364,3 @@ static void register_types(void)
 }
 
 type_init(register_types);
-
-#endif

@@ -15,8 +15,6 @@
 #include "qemu/osdep.h"
 #include "qapi/dealloc-visitor.h"
 #include "qapi/qmp/qnull.h"
-#include "qemu/queue.h"
-#include "qemu-common.h"
 #include "qapi/visitor-impl.h"
 
 struct QapiDeallocVisitor
@@ -24,9 +22,10 @@ struct QapiDeallocVisitor
     Visitor visitor;
 };
 
-static void qapi_dealloc_start_struct(Visitor *v, const char *name, void **obj,
+static bool qapi_dealloc_start_struct(Visitor *v, const char *name, void **obj,
                                       size_t unused, Error **errp)
 {
+    return true;
 }
 
 static void qapi_dealloc_end_struct(Visitor *v, void **obj)
@@ -36,12 +35,6 @@ static void qapi_dealloc_end_struct(Visitor *v, void **obj)
     }
 }
 
-static void qapi_dealloc_start_alternate(Visitor *v, const char *name,
-                                         GenericAlternate **obj, size_t size,
-                                         Error **errp)
-{
-}
-
 static void qapi_dealloc_end_alternate(Visitor *v, void **obj)
 {
     if (obj) {
@@ -49,10 +42,11 @@ static void qapi_dealloc_end_alternate(Visitor *v, void **obj)
     }
 }
 
-static void qapi_dealloc_start_list(Visitor *v, const char *name,
+static bool qapi_dealloc_start_list(Visitor *v, const char *name,
                                     GenericList **list, size_t size,
                                     Error **errp)
 {
+    return true;
 }
 
 static GenericList *qapi_dealloc_next_list(Visitor *v, GenericList *tail,
@@ -65,51 +59,57 @@ static GenericList *qapi_dealloc_next_list(Visitor *v, GenericList *tail,
 
 static void qapi_dealloc_end_list(Visitor *v, void **obj)
 {
-    (void)obj;
 }
 
-static void qapi_dealloc_type_str(Visitor *v, const char *name, char **obj,
+static bool qapi_dealloc_type_str(Visitor *v, const char *name, char **obj,
                                   Error **errp)
 {
     if (obj) {
         g_free(*obj);
     }
+    return true;
 }
 
-static void qapi_dealloc_type_int64(Visitor *v, const char *name, int64_t *obj,
+static bool qapi_dealloc_type_int64(Visitor *v, const char *name, int64_t *obj,
                                     Error **errp)
 {
+    return true;
 }
 
-static void qapi_dealloc_type_uint64(Visitor *v, const char *name,
+static bool qapi_dealloc_type_uint64(Visitor *v, const char *name,
                                      uint64_t *obj, Error **errp)
 {
+    return true;
 }
 
-static void qapi_dealloc_type_bool(Visitor *v, const char *name, bool *obj,
+static bool qapi_dealloc_type_bool(Visitor *v, const char *name, bool *obj,
                                    Error **errp)
 {
+    return true;
 }
 
-static void qapi_dealloc_type_number(Visitor *v, const char *name, double *obj,
+static bool qapi_dealloc_type_number(Visitor *v, const char *name, double *obj,
                                      Error **errp)
 {
+    return true;
 }
 
-static void qapi_dealloc_type_anything(Visitor *v, const char *name,
+static bool qapi_dealloc_type_anything(Visitor *v, const char *name,
                                        QObject **obj, Error **errp)
 {
     if (obj) {
-        qobject_decref(*obj);
+        qobject_unref(*obj);
     }
+    return true;
 }
 
-static void qapi_dealloc_type_null(Visitor *v, const char *name,
+static bool qapi_dealloc_type_null(Visitor *v, const char *name,
                                    QNull **obj, Error **errp)
 {
     if (obj) {
-        QDECREF(*obj);
+        qobject_unref(*obj);
     }
+    return true;
 }
 
 static void qapi_dealloc_free(Visitor *v)
@@ -126,7 +126,6 @@ Visitor *qapi_dealloc_visitor_new(void)
     v->visitor.type = VISITOR_DEALLOC;
     v->visitor.start_struct = qapi_dealloc_start_struct;
     v->visitor.end_struct = qapi_dealloc_end_struct;
-    v->visitor.start_alternate = qapi_dealloc_start_alternate;
     v->visitor.end_alternate = qapi_dealloc_end_alternate;
     v->visitor.start_list = qapi_dealloc_start_list;
     v->visitor.next_list = qapi_dealloc_next_list;

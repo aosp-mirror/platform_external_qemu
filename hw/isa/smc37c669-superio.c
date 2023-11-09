@@ -3,13 +3,14 @@
  *
  * Copyright (c) 2018 Philippe Mathieu-Daudé
  *
- * This code is licensed under the GNU GPLv2 and later.
+ * This work is licensed under the terms of the GNU GPL, version 2 or later.
  * See the COPYING file in the top-level directory.
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 #include "qemu/osdep.h"
 #include "hw/isa/superio.h"
+#include "qemu/module.h"
 
 /* UARTs (compatible with NS16450 or PC16550) */
 
@@ -37,7 +38,7 @@ static bool is_parallel_enabled(ISASuperIODevice *sio, uint8_t index)
 
 static uint16_t get_parallel_iobase(ISASuperIODevice *sio, uint8_t index)
 {
-    return 0x3bc;
+    return 0x378;
 }
 
 static unsigned int get_parallel_irq(ISASuperIODevice *sio, uint8_t index)

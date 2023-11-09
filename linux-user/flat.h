@@ -7,6 +7,9 @@
  * support uClinux flat-format executables.
  */
 
+#ifndef LINUX_USER_FLAT_H
+#define LINUX_USER_FLAT_H
+
 #define	FLAT_VERSION			0x00000004L
 
 #ifdef CONFIG_BINFMT_SHARED_FLAT
@@ -40,7 +43,7 @@ struct flat_hdr {
 	abi_ulong reloc_count;  /* Number of relocation records */
 	abi_ulong flags;
 	abi_ulong build_date;   /* When the program/library was built */
-	abi_ulong filler[5];    /* Reservered, set to zero */
+	abi_ulong filler[5];    /* Reserved, set to zero */
 };
 
 #define FLAT_FLAG_RAM    0x0001 /* load program entirely into RAM */
@@ -65,3 +68,5 @@ struct flat_hdr {
 #define OLD_FLAT_RELOC_TYPE_BSS		2
 
 #   	define OLD_FLAT_FLAG_RAM    0x1 /* load program entirely into RAM */
+
+#endif

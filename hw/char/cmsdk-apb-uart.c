@@ -17,13 +17,17 @@
 
 #include "qemu/osdep.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
 #include "qapi/error.h"
 #include "trace.h"
 #include "hw/sysbus.h"
+#include "migration/vmstate.h"
 #include "hw/registerfields.h"
 #include "chardev/char-fe.h"
 #include "chardev/char-serial.h"
 #include "hw/char/cmsdk-apb-uart.h"
+#include "hw/irq.h"
+#include "hw/qdev-properties-system.h"
 
 REG32(DATA, 0)
 REG32(STATE, 4)
@@ -157,6 +161,7 @@ static uint64_t uart_read(void *opaque, hwaddr offset, unsigned size)
         r = s->rxbuf;
         s->state &= ~R_STATE_RXFULL_MASK;
         cmsdk_apb_uart_update(s);
+        qemu_chr_fe_accept_input(&s->chr);
         break;
     case A_STATE:
         r = s->state;
@@ -186,7 +191,7 @@ static uint64_t uart_read(void *opaque, hwaddr offset, unsigned size)
 /* Try to send tx data, and arrange to be called back later if
  * we can't (ie the char backend is busy/blocking).
  */
-static gboolean uart_transmit(GIOChannel *chan, GIOCondition cond, void *opaque)
+static gboolean uart_transmit(void *do_not_use, GIOCondition cond, void *opaque)
 {
     CMSDKAPBUART *s = CMSDK_APB_UART(opaque);
     int ret;
@@ -385,7 +390,7 @@ static void cmsdk_apb_uart_class_init(ObjectClass *klass, void *data)
     dc->realize = cmsdk_apb_uart_realize;
     dc->vmsd = &cmsdk_apb_uart_vmstate;
     dc->reset = cmsdk_apb_uart_reset;
-    dc->props = cmsdk_apb_uart_properties;
+    device_class_set_props(dc, cmsdk_apb_uart_properties);
 }
 
 static const TypeInfo cmsdk_apb_uart_info = {

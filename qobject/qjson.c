@@ -13,42 +13,65 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "qapi/qmp/json-lexer.h"
 #include "qapi/qmp/json-parser.h"
-#include "qapi/qmp/json-streamer.h"
+#include "qapi/qmp/json-writer.h"
 #include "qapi/qmp/qjson.h"
 #include "qapi/qmp/qbool.h"
 #include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qlist.h"
 #include "qapi/qmp/qnum.h"
 #include "qapi/qmp/qstring.h"
-#include "qemu/unicode.h"
 
-typedef struct JSONParsingState
-{
+typedef struct JSONParsingState {
     JSONMessageParser parser;
-    va_list *ap;
     QObject *result;
     Error *err;
 } JSONParsingState;
 
-static void parse_json(JSONMessageParser *parser, GQueue *tokens)
+static void consume_json(void *opaque, QObject *json, Error *err)
 {
-    JSONParsingState *s = container_of(parser, JSONParsingState, parser);
+    JSONParsingState *s = opaque;
 
-    s->result = json_parser_parse_err(tokens, s->ap, &s->err);
+    assert(!json != !err);
+    assert(!s->result || !s->err);
+
+    if (s->result) {
+        qobject_unref(s->result);
+        s->result = NULL;
+        error_setg(&s->err, "Expecting at most one JSON value");
+    }
+    if (s->err) {
+        qobject_unref(json);
+        error_free(err);
+        return;
+    }
+    s->result = json;
+    s->err = err;
 }
 
-QObject *qobject_from_jsonv(const char *string, va_list *ap, Error **errp)
+/*
+ * Parse @string as JSON value.
+ * If @ap is non-null, interpolate %-escapes.
+ * Takes ownership of %p arguments.
+ * On success, return the JSON value.
+ * On failure, store an error through @errp and return NULL.
+ * Ownership of %p arguments becomes indeterminate then.  To avoid
+ * leaks, callers passing %p must terminate on error, e.g. by passing
+ * &error_abort.
+ */
+static QObject *qobject_from_jsonv(const char *string, va_list *ap,
+                                   Error **errp)
 {
     JSONParsingState state = {};
 
-    state.ap = ap;
-
-    json_message_parser_init(&state.parser, parse_json);
+    json_message_parser_init(&state.parser, consume_json, &state, ap);
     json_message_parser_feed(&state.parser, string, strlen(string));
     json_message_parser_flush(&state.parser);
     json_message_parser_destroy(&state.parser);
+
+    if (!state.result && !state.err) {
+        error_setg(&state.err, "Expecting a JSON value");
+    }
 
     error_propagate(errp, state.err);
     return state.result;
@@ -60,191 +83,134 @@ QObject *qobject_from_json(const char *string, Error **errp)
 }
 
 /*
- * IMPORTANT: This function aborts on error, thus it must not
- * be used with untrusted arguments.
+ * Parse @string as JSON value with %-escapes interpolated.
+ * Abort on error.  Do not use with untrusted @string.
+ * Return the resulting QObject.  It is never null.
  */
-QObject *qobject_from_jsonf(const char *string, ...)
+QObject *qobject_from_vjsonf_nofail(const char *string, va_list ap)
+{
+    va_list ap_copy;
+    QObject *obj;
+
+    /* va_copy() is needed when va_list is an array type */
+    va_copy(ap_copy, ap);
+    obj = qobject_from_jsonv(string, &ap_copy, &error_abort);
+    va_end(ap_copy);
+
+    assert(obj);
+    return obj;
+}
+
+/*
+ * Parse @string as JSON value with %-escapes interpolated.
+ * Abort on error.  Do not use with untrusted @string.
+ * Return the resulting QObject.  It is never null.
+ */
+QObject *qobject_from_jsonf_nofail(const char *string, ...)
 {
     QObject *obj;
     va_list ap;
 
     va_start(ap, string);
-    obj = qobject_from_jsonv(string, &ap, &error_abort);
+    obj = qobject_from_vjsonf_nofail(string, ap);
     va_end(ap);
 
-    assert(obj != NULL);
     return obj;
 }
 
-typedef struct ToJsonIterState
+/*
+ * Parse @string as JSON object with %-escapes interpolated.
+ * Abort on error.  Do not use with untrusted @string.
+ * Return the resulting QDict.  It is never null.
+ */
+QDict *qdict_from_vjsonf_nofail(const char *string, va_list ap)
 {
-    int indent;
-    int pretty;
-    int count;
-    QString *str;
-} ToJsonIterState;
+    QDict *qdict;
 
-static void to_json(const QObject *obj, QString *str, int pretty, int indent);
-
-static void to_json_dict_iter(const char *key, QObject *obj, void *opaque)
-{
-    ToJsonIterState *s = opaque;
-    QString *qkey;
-    int j;
-
-    if (s->count) {
-        qstring_append(s->str, s->pretty ? "," : ", ");
-    }
-
-    if (s->pretty) {
-        qstring_append(s->str, "\n");
-        for (j = 0 ; j < s->indent ; j++)
-            qstring_append(s->str, "    ");
-    }
-
-    qkey = qstring_from_str(key);
-    to_json(QOBJECT(qkey), s->str, s->pretty, s->indent);
-    QDECREF(qkey);
-
-    qstring_append(s->str, ": ");
-    to_json(obj, s->str, s->pretty, s->indent);
-    s->count++;
+    qdict = qobject_to(QDict, qobject_from_vjsonf_nofail(string, ap));
+    assert(qdict);
+    return qdict;
 }
 
-static void to_json_list_iter(QObject *obj, void *opaque)
+/*
+ * Parse @string as JSON object with %-escapes interpolated.
+ * Abort on error.  Do not use with untrusted @string.
+ * Return the resulting QDict.  It is never null.
+ */
+QDict *qdict_from_jsonf_nofail(const char *string, ...)
 {
-    ToJsonIterState *s = opaque;
-    int j;
+    QDict *qdict;
+    va_list ap;
 
-    if (s->count) {
-        qstring_append(s->str, s->pretty ? "," : ", ");
-    }
-
-    if (s->pretty) {
-        qstring_append(s->str, "\n");
-        for (j = 0 ; j < s->indent ; j++)
-            qstring_append(s->str, "    ");
-    }
-
-    to_json(obj, s->str, s->pretty, s->indent);
-    s->count++;
+    va_start(ap, string);
+    qdict = qdict_from_vjsonf_nofail(string, ap);
+    va_end(ap);
+    return qdict;
 }
 
-static void to_json(const QObject *obj, QString *str, int pretty, int indent)
+static void to_json(JSONWriter *writer, const char *name,
+                    const QObject *obj)
 {
     switch (qobject_type(obj)) {
     case QTYPE_QNULL:
-        qstring_append(str, "null");
+        json_writer_null(writer, name);
         break;
     case QTYPE_QNUM: {
         QNum *val = qobject_to(QNum, obj);
-        char *buffer = qnum_to_string(val);
-        qstring_append(str, buffer);
-        g_free(buffer);
+
+        switch (val->kind) {
+        case QNUM_I64:
+            json_writer_int64(writer, name, val->u.i64);
+            break;
+        case QNUM_U64:
+            json_writer_uint64(writer, name, val->u.u64);
+            break;
+        case QNUM_DOUBLE:
+            json_writer_double(writer, name, val->u.dbl);
+            break;
+        default:
+            abort();
+        }
         break;
     }
     case QTYPE_QSTRING: {
         QString *val = qobject_to(QString, obj);
-        const char *ptr;
-        int cp;
-        char buf[16];
-        char *end;
 
-        ptr = qstring_get_str(val);
-        qstring_append(str, "\"");
-
-        for (; *ptr; ptr = end) {
-            cp = mod_utf8_codepoint(ptr, 6, &end);
-            switch (cp) {
-            case '\"':
-                qstring_append(str, "\\\"");
-                break;
-            case '\\':
-                qstring_append(str, "\\\\");
-                break;
-            case '\b':
-                qstring_append(str, "\\b");
-                break;
-            case '\f':
-                qstring_append(str, "\\f");
-                break;
-            case '\n':
-                qstring_append(str, "\\n");
-                break;
-            case '\r':
-                qstring_append(str, "\\r");
-                break;
-            case '\t':
-                qstring_append(str, "\\t");
-                break;
-            default:
-                if (cp < 0) {
-                    cp = 0xFFFD; /* replacement character */
-                }
-                if (cp > 0xFFFF) {
-                    /* beyond BMP; need a surrogate pair */
-                    snprintf(buf, sizeof(buf), "\\u%04X\\u%04X",
-                             0xD800 + ((cp - 0x10000) >> 10),
-                             0xDC00 + ((cp - 0x10000) & 0x3FF));
-                } else if (cp < 0x20 || cp >= 0x7F) {
-                    snprintf(buf, sizeof(buf), "\\u%04X", cp);
-                } else {
-                    buf[0] = cp;
-                    buf[1] = 0;
-                }
-                qstring_append(str, buf);
-            }
-        };
-
-        qstring_append(str, "\"");
+        json_writer_str(writer, name, qstring_get_str(val));
         break;
     }
     case QTYPE_QDICT: {
-        ToJsonIterState s;
         QDict *val = qobject_to(QDict, obj);
+        const QDictEntry *entry;
 
-        s.count = 0;
-        s.str = str;
-        s.indent = indent + 1;
-        s.pretty = pretty;
-        qstring_append(str, "{");
-        qdict_iter(val, to_json_dict_iter, &s);
-        if (pretty) {
-            int j;
-            qstring_append(str, "\n");
-            for (j = 0 ; j < indent ; j++)
-                qstring_append(str, "    ");
+        json_writer_start_object(writer, name);
+
+        for (entry = qdict_first(val);
+             entry;
+             entry = qdict_next(val, entry)) {
+            to_json(writer, qdict_entry_key(entry), qdict_entry_value(entry));
         }
-        qstring_append(str, "}");
+
+        json_writer_end_object(writer);
         break;
     }
     case QTYPE_QLIST: {
-        ToJsonIterState s;
         QList *val = qobject_to(QList, obj);
+        QListEntry *entry;
 
-        s.count = 0;
-        s.str = str;
-        s.indent = indent + 1;
-        s.pretty = pretty;
-        qstring_append(str, "[");
-        qlist_iter(val, (void *)to_json_list_iter, &s);
-        if (pretty) {
-            int j;
-            qstring_append(str, "\n");
-            for (j = 0 ; j < indent ; j++)
-                qstring_append(str, "    ");
+        json_writer_start_array(writer, name);
+
+        QLIST_FOREACH_ENTRY(val, entry) {
+            to_json(writer, NULL, qlist_entry_obj(entry));
         }
-        qstring_append(str, "]");
+
+        json_writer_end_array(writer);
         break;
     }
     case QTYPE_QBOOL: {
         QBool *val = qobject_to(QBool, obj);
 
-        if (qbool_get_bool(val)) {
-            qstring_append(str, "true");
-        } else {
-            qstring_append(str, "false");
-        }
+        json_writer_bool(writer, name, qbool_get_bool(val));
         break;
     }
     default:
@@ -252,20 +218,15 @@ static void to_json(const QObject *obj, QString *str, int pretty, int indent)
     }
 }
 
-QString *qobject_to_json(const QObject *obj)
+GString *qobject_to_json_pretty(const QObject *obj, bool pretty)
 {
-    QString *str = qstring_new();
+    JSONWriter *writer = json_writer_new(pretty);
 
-    to_json(obj, str, 0, 0);
-
-    return str;
+    to_json(writer, NULL, obj);
+    return json_writer_get_and_free(writer);
 }
 
-QString *qobject_to_json_pretty(const QObject *obj)
+GString *qobject_to_json(const QObject *obj)
 {
-    QString *str = qstring_new();
-
-    to_json(obj, str, 1, 0);
-
-    return str;
+    return qobject_to_json_pretty(obj, false);
 }

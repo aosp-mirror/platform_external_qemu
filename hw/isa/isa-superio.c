@@ -5,19 +5,23 @@
  * Copyright (c) 2011-2012 Andreas Färber
  * Copyright (c) 2018 Philippe Mathieu-Daudé
  *
- * This code is licensed under the GNU GPLv2 and later.
+ * This work is licensed under the terms of the GNU GPL, version 2 or later.
  * See the COPYING file in the top-level directory.
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
+
 #include "qemu/osdep.h"
 #include "qemu/error-report.h"
+#include "qemu/module.h"
 #include "qapi/error.h"
-#include "sysemu/sysemu.h"
-#include "sysemu/block-backend.h"
 #include "sysemu/blockdev.h"
 #include "chardev/char.h"
+#include "hw/char/parallel.h"
+#include "hw/block/fdc.h"
 #include "hw/isa/superio.h"
+#include "hw/qdev-properties.h"
 #include "hw/input/i8042.h"
+#include "hw/char/parallel-isa.h"
 #include "hw/char/serial.h"
 #include "trace.h"
 
@@ -29,7 +33,7 @@ static void isa_superio_realize(DeviceState *dev, Error **errp)
     ISADevice *isa;
     DeviceState *d;
     Chardev *chr;
-    DriveInfo *drive;
+    DriveInfo *fd[MAX_FD];
     char *name;
     int i;
 
@@ -43,13 +47,13 @@ static void isa_superio_realize(DeviceState *dev, Error **errp)
         if (!k->parallel.is_enabled || k->parallel.is_enabled(sio, i)) {
             /* FIXME use a qdev chardev prop instead of parallel_hds[] */
             chr = parallel_hds[i];
-            if (chr == NULL || chr->be) {
+            if (chr == NULL) {
                 name = g_strdup_printf("discarding-parallel%d", i);
-                chr = qemu_chr_new(name, "null");
+                chr = qemu_chr_new(name, "null", NULL);
             } else {
                 name = g_strdup_printf("parallel%d", i);
             }
-            isa = isa_create(bus, "isa-parallel");
+            isa = isa_new(TYPE_ISA_PARALLEL);
             d = DEVICE(isa);
             qdev_prop_set_uint32(d, "index", i);
             if (k->parallel.get_iobase) {
@@ -60,15 +64,14 @@ static void isa_superio_realize(DeviceState *dev, Error **errp)
                 qdev_prop_set_uint32(d, "irq", k->parallel.get_irq(sio, i));
             }
             qdev_prop_set_chr(d, "chardev", chr);
-            qdev_init_nofail(d);
+            object_property_add_child(OBJECT(dev), name, OBJECT(isa));
+            isa_realize_and_unref(isa, bus, &error_fatal);
             sio->parallel[i] = isa;
             trace_superio_create_parallel(i,
                                           k->parallel.get_iobase ?
                                           k->parallel.get_iobase(sio, i) : -1,
                                           k->parallel.get_irq ?
                                           k->parallel.get_irq(sio, i) : -1);
-            object_property_add_child(OBJECT(dev), name,
-                                      OBJECT(sio->parallel[i]), NULL);
             g_free(name);
         }
     }
@@ -81,15 +84,15 @@ static void isa_superio_realize(DeviceState *dev, Error **errp)
             break;
         }
         if (!k->serial.is_enabled || k->serial.is_enabled(sio, i)) {
-            /* FIXME use a qdev chardev prop instead of serial_hds[] */
-            chr = serial_hds[i];
-            if (chr == NULL || chr->be) {
+            /* FIXME use a qdev chardev prop instead of serial_hd() */
+            chr = serial_hd(i);
+            if (chr == NULL) {
                 name = g_strdup_printf("discarding-serial%d", i);
-                chr = qemu_chr_new(name, "null");
+                chr = qemu_chr_new(name, "null", NULL);
             } else {
                 name = g_strdup_printf("serial%d", i);
             }
-            isa = isa_create(bus, TYPE_ISA_SERIAL);
+            isa = isa_new(TYPE_ISA_SERIAL);
             d = DEVICE(isa);
             qdev_prop_set_uint32(d, "index", i);
             if (k->serial.get_iobase) {
@@ -100,22 +103,21 @@ static void isa_superio_realize(DeviceState *dev, Error **errp)
                 qdev_prop_set_uint32(d, "irq", k->serial.get_irq(sio, i));
             }
             qdev_prop_set_chr(d, "chardev", chr);
-            qdev_init_nofail(d);
+            object_property_add_child(OBJECT(dev), name, OBJECT(isa));
+            isa_realize_and_unref(isa, bus, &error_fatal);
             sio->serial[i] = isa;
             trace_superio_create_serial(i,
                                         k->serial.get_iobase ?
                                         k->serial.get_iobase(sio, i) : -1,
                                         k->serial.get_irq ?
                                         k->serial.get_irq(sio, i) : -1);
-            object_property_add_child(OBJECT(dev), name,
-                                      OBJECT(sio->serial[0]), NULL);
             g_free(name);
         }
     }
 
     /* Floppy disc */
     if (!k->floppy.is_enabled || k->floppy.is_enabled(sio, 0)) {
-        isa = isa_create(bus, "isa-fdc");
+        isa = isa_new(TYPE_ISA_FDC);
         d = DEVICE(isa);
         if (k->floppy.get_iobase) {
             qdev_prop_set_uint32(d, "iobase", k->floppy.get_iobase(sio, 0));
@@ -124,18 +126,12 @@ static void isa_superio_realize(DeviceState *dev, Error **errp)
             qdev_prop_set_uint32(d, "irq", k->floppy.get_irq(sio, 0));
         }
         /* FIXME use a qdev drive property instead of drive_get() */
-        drive = drive_get(IF_FLOPPY, 0, 0);
-        if (drive != NULL) {
-            qdev_prop_set_drive(d, "driveA", blk_by_legacy_dinfo(drive),
-                                &error_fatal);
+        for (i = 0; i < MAX_FD; i++) {
+            fd[i] = drive_get(IF_FLOPPY, 0, i);
         }
-        /* FIXME use a qdev drive property instead of drive_get() */
-        drive = drive_get(IF_FLOPPY, 0, 1);
-        if (drive != NULL) {
-            qdev_prop_set_drive(d, "driveB", blk_by_legacy_dinfo(drive),
-                                &error_fatal);
-        }
-        qdev_init_nofail(d);
+        object_property_add_child(OBJECT(sio), "isa-fdc", OBJECT(isa));
+        isa_realize_and_unref(isa, bus, &error_fatal);
+        isa_fdc_init_drives(isa, fd);
         sio->floppy = isa;
         trace_superio_create_floppy(0,
                                     k->floppy.get_iobase ?
@@ -145,11 +141,14 @@ static void isa_superio_realize(DeviceState *dev, Error **errp)
     }
 
     /* Keyboard, mouse */
-    sio->kbc = isa_create_simple(bus, TYPE_I8042);
+    isa = isa_new(TYPE_I8042);
+    object_property_add_child(OBJECT(sio), TYPE_I8042, OBJECT(isa));
+    isa_realize_and_unref(isa, bus, &error_fatal);
+    sio->kbc = isa;
 
     /* IDE */
     if (k->ide.count && (!k->ide.is_enabled || k->ide.is_enabled(sio, 0))) {
-        isa = isa_create(bus, "isa-ide");
+        isa = isa_new("isa-ide");
         d = DEVICE(isa);
         if (k->ide.get_iobase) {
             qdev_prop_set_uint32(d, "iobase", k->ide.get_iobase(sio, 0));
@@ -160,7 +159,8 @@ static void isa_superio_realize(DeviceState *dev, Error **errp)
         if (k->ide.get_irq) {
             qdev_prop_set_uint32(d, "irq", k->ide.get_irq(sio, 0));
         }
-        qdev_init_nofail(d);
+        object_property_add_child(OBJECT(sio), "isa-ide", OBJECT(isa));
+        isa_realize_and_unref(isa, bus, &error_fatal);
         sio->ide = isa;
         trace_superio_create_ide(0,
                                  k->ide.get_iobase ?

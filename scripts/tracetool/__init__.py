@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -10,7 +9,7 @@ __copyright__  = "Copyright 2012-2017, Lluís Vilanova <vilanova@ac.upc.edu>"
 __license__    = "GPL version 2 or (at your option) any later version"
 
 __maintainer__ = "Stefan Hajnoczi"
-__email__      = "stefanha@linux.vnet.ibm.com"
+__email__      = "stefanha@redhat.com"
 
 
 import re
@@ -19,7 +18,6 @@ import weakref
 
 import tracetool.format
 import tracetool.backend
-import tracetool.transform
 
 
 def error_write(*lines):
@@ -32,6 +30,7 @@ def error(*lines):
     sys.exit(1)
 
 
+out_lineno = 1
 out_filename = '<none>'
 out_fobj = sys.stdout
 
@@ -43,15 +42,22 @@ def out_open(filename):
 def out(*lines, **kwargs):
     """Write a set of output lines.
 
-    You can use kwargs as a shorthand for mapping variables when formating all
+    You can use kwargs as a shorthand for mapping variables when formatting all
     the strings in lines.
 
-    The 'out_filename' kwarg is automatically added with the output filename.
+    The 'out_lineno' kwarg is automatically added to reflect the current output
+    file line number. The 'out_next_lineno' kwarg is also automatically added
+    with the next output line number. The 'out_filename' kwarg is automatically
+    added with the output filename.
     """
+    global out_lineno
     output = []
     for l in lines:
+        kwargs['out_lineno'] = out_lineno
+        kwargs['out_next_lineno'] = out_lineno + 1
         kwargs['out_filename'] = out_filename
         output.append(l % kwargs)
+        out_lineno += 1
 
     out_fobj.writelines("\n".join(output) + "\n")
 
@@ -67,8 +73,6 @@ ALLOWED_TYPES = [
     "bool",
     "unsigned",
     "signed",
-    "float",
-    "double",
     "int8_t",
     "uint8_t",
     "int16_t",
@@ -82,8 +86,6 @@ ALLOWED_TYPES = [
     "ssize_t",
     "uintptr_t",
     "ptrdiff_t",
-    # Magic substitution is done by tracetool
-    "TCGv",
 ]
 
 def validate_type(name):
@@ -95,7 +97,7 @@ def validate_type(name):
         if bit == "const":
             continue
         if bit not in ALLOWED_TYPES:
-            raise ValueError("Argument type '%s' is not in whitelist. "
+            raise ValueError("Argument type '%s' is not allowed. "
                              "Only standard C types and fixed size integer "
                              "types should be used. struct, union, and "
                              "other complex pointer types should be "
@@ -187,18 +189,6 @@ class Arguments:
         """List of argument names casted to their type."""
         return ["(%s)%s" % (type_, name) for type_, name in self._args]
 
-    def transform(self, *trans):
-        """Return a new Arguments instance with transformed types.
-
-        The types in the resulting Arguments instance are transformed according
-        to tracetool.transform.transform_type.
-        """
-        res = []
-        for type_, name in self._args:
-            res.append((tracetool.transform.transform_type(type_, *trans),
-                        name))
-        return Arguments(res)
-
 
 class Event(object):
     """Event description.
@@ -213,6 +203,10 @@ class Event(object):
         Properties of the event.
     args : Arguments
         The event arguments.
+    lineno : int
+        The line number in the input file.
+    filename : str
+        The path to the input file.
 
     """
 
@@ -223,9 +217,9 @@ class Event(object):
                       "(?:(?:(?P<fmt_trans>\".+),)?\s*(?P<fmt>\".+))?"
                       "\s*")
 
-    _VALID_PROPS = set(["disable", "tcg", "tcg-trans", "tcg-exec", "vcpu"])
+    _VALID_PROPS = set(["disable", "vcpu"])
 
-    def __init__(self, name, props, fmt, args, orig=None,
+    def __init__(self, name, props, fmt, args, lineno, filename, orig=None,
                  event_trans=None, event_exec=None):
         """
         Parameters
@@ -238,6 +232,10 @@ class Event(object):
             Event printing format string(s).
         args : Arguments
             Event arguments.
+        lineno : int
+            The line number in the input file.
+        filename : str
+            The path to the input file.
         orig : Event or None
             Original Event before transformation/generation.
         event_trans : Event or None
@@ -250,6 +248,8 @@ class Event(object):
         self.properties = props
         self.fmt = fmt
         self.args = args
+        self.lineno = int(lineno)
+        self.filename = str(filename)
         self.event_trans = event_trans
         self.event_exec = event_exec
 
@@ -271,16 +271,21 @@ class Event(object):
     def copy(self):
         """Create a new copy."""
         return Event(self.name, list(self.properties), self.fmt,
-                     self.args.copy(), self, self.event_trans, self.event_exec)
+                     self.args.copy(), self.lineno, self.filename,
+                     self, self.event_trans, self.event_exec)
 
     @staticmethod
-    def build(line_str):
+    def build(line_str, lineno, filename):
         """Build an Event instance from a string.
 
         Parameters
         ----------
         line_str : str
             Line describing the event.
+        lineno : int
+            Line number in input file.
+        filename : str
+            Path to input file.
         """
         m = Event._CRE.match(line_str)
         assert m is not None
@@ -290,20 +295,18 @@ class Event(object):
         props = groups["props"].split()
         fmt = groups["fmt"]
         fmt_trans = groups["fmt_trans"]
+        if fmt.find("%m") != -1 or fmt_trans.find("%m") != -1:
+            raise ValueError("Event format '%m' is forbidden, pass the error "
+                             "as an explicit trace argument")
+        if fmt.endswith(r'\n"'):
+            raise ValueError("Event format must not end with a newline "
+                             "character")
+
         if len(fmt_trans) > 0:
             fmt = [fmt_trans, fmt]
         args = Arguments.build(groups["args"])
 
-        if "tcg-trans" in props:
-            raise ValueError("Invalid property 'tcg-trans'")
-        if "tcg-exec" in props:
-            raise ValueError("Invalid property 'tcg-exec'")
-        if "tcg" not in props and not isinstance(fmt, str):
-            raise ValueError("Only events with 'tcg' property can have two format strings")
-        if "tcg" in props and isinstance(fmt, str):
-            raise ValueError("Events with 'tcg' property must have two format strings")
-
-        event = Event(name, props, fmt, args)
+        event = Event(name, props, fmt, args, lineno, filename)
 
         # add implicit arguments when using the 'vcpu' property
         import tracetool.vcpu
@@ -342,14 +345,6 @@ class Event(object):
             fmt = Event.QEMU_TRACE
         return fmt % {"name": self.name, "NAME": self.name.upper()}
 
-    def transform(self, *trans):
-        """Return a new Event with transformed Arguments."""
-        return Event(self.name,
-                     list(self.properties),
-                     self.fmt,
-                     self.args.transform(*trans),
-                     self)
-
 
 def read_events(fobj, fname):
     """Generate the output for the given (format, backends) pair.
@@ -366,45 +361,21 @@ def read_events(fobj, fname):
 
     events = []
     for lineno, line in enumerate(fobj, 1):
+        if line[-1] != '\n':
+            raise ValueError("%s does not end with a new line" % fname)
         if not line.strip():
             continue
         if line.lstrip().startswith('#'):
             continue
 
         try:
-            event = Event.build(line)
+            event = Event.build(line, lineno, fname)
         except ValueError as e:
             arg0 = 'Error at %s:%d: %s' % (fname, lineno, e.args[0])
             e.args = (arg0,) + e.args[1:]
             raise
 
-        # transform TCG-enabled events
-        if "tcg" not in event.properties:
-            events.append(event)
-        else:
-            event_trans = event.copy()
-            event_trans.name += "_trans"
-            event_trans.properties += ["tcg-trans"]
-            event_trans.fmt = event.fmt[0]
-            # ignore TCG arguments
-            args_trans = []
-            for atrans, aorig in zip(
-                    event_trans.transform(tracetool.transform.TCG_2_HOST).args,
-                    event.args):
-                if atrans == aorig:
-                    args_trans.append(atrans)
-            event_trans.args = Arguments(args_trans)
-
-            event_exec = event.copy()
-            event_exec.name += "_exec"
-            event_exec.properties += ["tcg-exec"]
-            event_exec.fmt = event.fmt[1]
-            event_exec.args = event_exec.args.transform(tracetool.transform.TCG_2_HOST)
-
-            new_event = [event_trans, event_exec]
-            event.event_trans, event.event_exec = new_event
-
-            events.extend(new_event)
+        events.append(event)
 
     return events
 
@@ -463,12 +434,12 @@ def generate(events, group, format, backends,
     import tracetool
 
     format = str(format)
-    if len(format) is 0:
+    if len(format) == 0:
         raise TracetoolError("format not set")
     if not tracetool.format.exists(format):
         raise TracetoolError("unknown format: %s" % format)
 
-    if len(backends) is 0:
+    if len(backends) == 0:
         raise TracetoolError("no backends specified")
     for backend in backends:
         if not tracetool.backend.exists(backend):

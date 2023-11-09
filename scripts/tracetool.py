@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -10,13 +10,11 @@ __copyright__  = "Copyright 2012-2014, Lluís Vilanova <vilanova@ac.upc.edu>"
 __license__    = "GPL version 2 or (at your option) any later version"
 
 __maintainer__ = "Stefan Hajnoczi"
-__email__      = "stefanha@linux.vnet.ibm.com"
+__email__      = "stefanha@redhat.com"
 
 
 import sys
 import getopt
-import os.path
-import re
 
 from tracetool import error_write, out, out_open
 import tracetool.backend

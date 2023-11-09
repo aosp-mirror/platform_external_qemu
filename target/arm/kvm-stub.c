@@ -10,27 +10,15 @@
  *
  */
 #include "qemu/osdep.h"
-#include "qemu-common.h"
 #include "cpu.h"
 #include "kvm_arm.h"
-#include "sysemu/kvm.h"
-
-void kvm_cpu_synchronize_pre_loadvm(CPUState *cpu)
-{
-}
 
 bool write_kvmstate_to_list(ARMCPU *cpu)
 {
-    abort();
+    g_assert_not_reached();
 }
 
 bool write_list_to_kvmstate(ARMCPU *cpu, int level)
 {
-    abort();
-}
-
-void* kvm_gpa2hva(uint64_t gpa, bool* found) {
-    (void)gpa;
-    *found = false;
-    return NULL;
+    g_assert_not_reached();
 }

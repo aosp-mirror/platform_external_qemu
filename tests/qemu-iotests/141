@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# group: rw auto quick
 #
 # Test case for ejecting BDSs with block jobs still running on them
 #
@@ -19,19 +20,20 @@
 #
 
 # creator
-owner=mreitz@redhat.com
+owner=hreitz@redhat.com
 
 seq="$(basename $0)"
 echo "QA output created by $seq"
 
-here="$PWD"
 status=1	# failure is the default!
 
 _cleanup()
 {
     _cleanup_qemu
     _cleanup_test_img
-    rm -f "$TEST_DIR"/{b,m,o}.$IMGFMT
+    for img in "$TEST_DIR"/{b,m,o}.$IMGFMT; do
+        _rm_test_img "$img"
+    done
 }
 trap "_cleanup; exit \$status" 0 1 2 3 15
 
@@ -59,16 +61,21 @@ test_blockjob()
               }}}" \
         'return'
 
+    # If "$2" is an event, we may or may not see it before the
+    # {"return": {}}.  Therefore, filter the {"return": {}} out both
+    # here and in the next command.  (Naturally, if we do not see it
+    # here, we will see it before the next command can be executed,
+    # so it will appear in the next _send_qemu_cmd's output.)
     _send_qemu_cmd $QEMU_HANDLE \
         "$1" \
         "$2" \
-        | _filter_img_create
+        | _filter_img_create | _filter_qmp_empty_return
 
     # We want this to return an error because the block job is still running
     _send_qemu_cmd $QEMU_HANDLE \
         "{'execute': 'blockdev-del',
           'arguments': {'node-name': 'drv0'}}" \
-        'error' | _filter_generated_node_ids
+        'error' | _filter_generated_node_ids | _filter_qmp_empty_return
 
     _send_qemu_cmd $QEMU_HANDLE \
         "{'execute': 'block-job-cancel',
@@ -83,8 +90,8 @@ test_blockjob()
 
 
 TEST_IMG="$TEST_DIR/b.$IMGFMT" _make_test_img 1M
-TEST_IMG="$TEST_DIR/m.$IMGFMT" _make_test_img -b "$TEST_DIR/b.$IMGFMT" 1M
-_make_test_img -b "$TEST_DIR/m.$IMGFMT" 1M
+TEST_IMG="$TEST_DIR/m.$IMGFMT" _make_test_img -b "$TEST_DIR/b.$IMGFMT" -F $IMGFMT 1M
+_make_test_img -b "$TEST_DIR/m.$IMGFMT" 1M -F $IMGFMT
 
 _launch_qemu -nodefaults
 
@@ -107,7 +114,7 @@ test_blockjob \
                     'format': '$IMGFMT',
                     'sync': 'none'}}" \
     'return' \
-    'BLOCK_JOB_CANCELLED'
+    '"status": "null"'
 
 echo
 echo '=== Testing drive-mirror ==='
@@ -124,7 +131,7 @@ test_blockjob \
                     'format': '$IMGFMT',
                     'sync': 'none'}}" \
     'BLOCK_JOB_READY' \
-    'BLOCK_JOB_COMPLETED'
+    '"status": "null"'
 
 echo
 echo '=== Testing active block-commit ==='
@@ -138,7 +145,7 @@ test_blockjob \
     "{'execute': 'block-commit',
       'arguments': {'job-id': 'job0', 'device': 'drv0'}}" \
     'BLOCK_JOB_READY' \
-    'BLOCK_JOB_COMPLETED'
+    '"status": "null"'
 
 echo
 echo '=== Testing non-active block-commit ==='
@@ -157,7 +164,7 @@ test_blockjob \
                     'top':    '$TEST_DIR/m.$IMGFMT',
                     'speed':  1}}" \
     'return' \
-    'BLOCK_JOB_CANCELLED'
+    '"status": "null"'
 
 echo
 echo '=== Testing block-stream ==='
@@ -170,8 +177,7 @@ echo
 $QEMU_IO -c 'write 0 1M' "$TEST_DIR/b.$IMGFMT" | _filter_qemu_io
 
 # With some data to stream (and @speed set to 1), block-stream will not complete
-# until we send the block-job-cancel command. Therefore, no event other than
-# BLOCK_JOB_CANCELLED will be emitted.
+# until we send the block-job-cancel command.
 
 test_blockjob \
     "{'execute': 'block-stream',
@@ -179,7 +185,7 @@ test_blockjob \
                     'device': 'drv0',
                     'speed': 1}}" \
     'return' \
-    'BLOCK_JOB_CANCELLED'
+    '"status": "null"'
 
 _cleanup_qemu
 

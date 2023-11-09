@@ -1,32 +1,9 @@
 # -*- Mode: Python -*-
+# vim: filetype=python
 
 ##
 # = Common data types
 ##
-
-##
-# @QapiErrorClass:
-#
-# QEMU error classes
-#
-# @GenericError: this is used for errors that don't require a specific error
-#                class. This should be the default case for most errors
-#
-# @CommandNotFound: the requested command has not been found
-#
-# @DeviceNotActive: a device has failed to be become active
-#
-# @DeviceNotFound: the requested device has not been found
-#
-# @KVMMissingCap: the requested operation can't be fulfilled because a
-#                 required KVM capability is missing
-#
-# Since: 1.2
-##
-{ 'enum': 'QapiErrorClass',
-  # Keep this in sync with ErrorClass in error.h
-  'data': [ 'GenericError', 'CommandNotFound',
-            'DeviceNotActive', 'DeviceNotFound', 'KVMMissingCap' ] }
 
 ##
 # @IoOperationType:
@@ -93,6 +70,7 @@
 # has a different meaning.
 #
 # @s: the string value
+#
 # @n: no string value
 #
 # Since: 2.10
@@ -126,3 +104,106 @@
 ##
 { 'enum': 'OffAutoPCIBAR',
   'data': [ 'off', 'auto', 'bar0', 'bar1', 'bar2', 'bar3', 'bar4', 'bar5' ] }
+
+##
+# @PCIELinkSpeed:
+#
+# An enumeration of PCIe link speeds in units of GT/s
+#
+# @2_5: 2.5GT/s
+#
+# @5: 5.0GT/s
+#
+# @8: 8.0GT/s
+#
+# @16: 16.0GT/s
+#
+# Since: 4.0
+##
+{ 'enum': 'PCIELinkSpeed',
+  'data': [ '2_5', '5', '8', '16' ] }
+
+##
+# @PCIELinkWidth:
+#
+# An enumeration of PCIe link width
+#
+# @1: x1
+#
+# @2: x2
+#
+# @4: x4
+#
+# @8: x8
+#
+# @12: x12
+#
+# @16: x16
+#
+# @32: x32
+#
+# Since: 4.0
+##
+{ 'enum': 'PCIELinkWidth',
+  'data': [ '1', '2', '4', '8', '12', '16', '32' ] }
+
+##
+# @HostMemPolicy:
+#
+# Host memory policy types
+#
+# @default: restore default policy, remove any nondefault policy
+#
+# @preferred: set the preferred host nodes for allocation
+#
+# @bind: a strict policy that restricts memory allocation to the host
+#     nodes specified
+#
+# @interleave: memory allocations are interleaved across the set of
+#     host nodes specified
+#
+# Since: 2.1
+##
+{ 'enum': 'HostMemPolicy',
+  'data': [ 'default', 'preferred', 'bind', 'interleave' ] }
+
+##
+# @NetFilterDirection:
+#
+# Indicates whether a netfilter is attached to a netdev's transmit
+# queue or receive queue or both.
+#
+# @all: the filter is attached both to the receive and the transmit
+#     queue of the netdev (default).
+#
+# @rx: the filter is attached to the receive queue of the netdev,
+#     where it will receive packets sent to the netdev.
+#
+# @tx: the filter is attached to the transmit queue of the netdev,
+#     where it will receive packets sent by the netdev.
+#
+# Since: 2.5
+##
+{ 'enum': 'NetFilterDirection',
+  'data': [ 'all', 'rx', 'tx' ] }
+
+##
+# @GrabToggleKeys:
+#
+# Keys to toggle input-linux between host and guest.
+#
+# Since: 4.0
+##
+{ 'enum': 'GrabToggleKeys',
+  'data': [ 'ctrl-ctrl', 'alt-alt', 'shift-shift','meta-meta', 'scrolllock',
+            'ctrl-scrolllock' ] }
+
+##
+# @HumanReadableText:
+#
+# @human-readable-text: Formatted output intended for humans.
+#
+# Since: 6.2
+##
+{ 'struct': 'HumanReadableText',
+  'data': { 'human-readable-text': 'str' } }

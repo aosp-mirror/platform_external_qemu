@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# group: auto
 #
 # Test floppy configuration
 #
@@ -24,14 +25,13 @@ owner=kwolf@redhat.com
 seq=`basename $0`
 echo "QA output created by $seq"
 
-here=`pwd`
 status=1	# failure is the default!
 
 _cleanup()
 {
-	_cleanup_test_img
-    rm -f "$TEST_IMG.2"
-    rm -f "$TEST_IMG.3"
+    _cleanup_test_img
+    _rm_test_img "$TEST_IMG.2"
+    _rm_test_img "$TEST_IMG.3"
 }
 trap "_cleanup; exit \$status" 0 1 2 3 15
 
@@ -47,7 +47,7 @@ if [ "$QEMU_DEFAULT_MACHINE" != "pc" ]; then
     _notrun "Requires a PC machine"
 fi
 
-function do_run_qemu()
+do_run_qemu()
 {
     (
         if ! test -t 0; then
@@ -56,11 +56,11 @@ function do_run_qemu()
             done
         fi
         echo quit
-    ) | $QEMU -machine accel=qtest -nographic -monitor stdio -serial none "$@"
+    ) | $QEMU -accel qtest -nographic -monitor stdio -serial none -vga none -nic none "$@"
     echo
 }
 
-function check_floppy_qtree()
+check_floppy_qtree()
 {
     echo
     echo Testing: "$@" | _filter_testdir
@@ -70,13 +70,14 @@ function check_floppy_qtree()
     #
     # Apply the sed filter to stdout only, but keep the stderr output and
     # filter the qemu program name in it.
-    echo "info qtree" |
+    printf "info qtree\ninfo block\n" |
     (QEMU_OPTIONS="" do_run_qemu "$@" |
-        sed -ne '/^          dev: isa-fdc/,/^          dev:/{x;p}' ) 2>&1 |
-    _filter_win32 | _filter_qemu
+	_filter_testdir |_filter_generated_node_ids | _filter_hmp |
+        sed -ne '/^          dev: isa-fdc/,/^          dev:/{x;p};/^[a-z][^ ]* (NODE_NAME):* /,/^(qemu)$/{p}') 2>&1 |
+    _filter_win32 | _filter_qemu | _filter_qom_path
 }
 
-function check_cache_mode()
+check_cache_mode()
 {
     echo "info block none0" |
     QEMU_OPTIONS="" do_run_qemu -drive if=none,file="$TEST_IMG" "$@" |
@@ -111,6 +112,7 @@ echo === Using -fda/-fdb options ===
 check_floppy_qtree -fda "$TEST_IMG"
 check_floppy_qtree -fdb "$TEST_IMG"
 check_floppy_qtree -fda "$TEST_IMG" -fdb "$TEST_IMG.2"
+check_floppy_qtree -fdb ""
 
 
 echo
@@ -120,15 +122,6 @@ echo === Using -drive options ===
 check_floppy_qtree -drive if=floppy,file="$TEST_IMG"
 check_floppy_qtree -drive if=floppy,file="$TEST_IMG",index=1
 check_floppy_qtree -drive if=floppy,file="$TEST_IMG" -drive if=floppy,file="$TEST_IMG.2",index=1
-
-echo
-echo
-echo === Using -drive if=none and -global ===
-
-check_floppy_qtree -drive if=none,file="$TEST_IMG" -global isa-fdc.driveA=none0
-check_floppy_qtree -drive if=none,file="$TEST_IMG" -global isa-fdc.driveB=none0
-check_floppy_qtree -drive if=none,file="$TEST_IMG" -drive if=none,file="$TEST_IMG.2" \
-                   -global isa-fdc.driveA=none0 -global isa-fdc.driveB=none1
 
 echo
 echo
@@ -143,13 +136,8 @@ echo
 echo
 echo === Mixing -fdX and -global ===
 
-# Working
-check_floppy_qtree -fda "$TEST_IMG" -drive if=none,file="$TEST_IMG.2" -global isa-fdc.driveB=none0
-check_floppy_qtree -fdb "$TEST_IMG" -drive if=none,file="$TEST_IMG.2" -global isa-fdc.driveA=none0
-
-# Conflicting (-fdX wins)
-check_floppy_qtree -fda "$TEST_IMG" -drive if=none,file="$TEST_IMG.2" -global isa-fdc.driveA=none0
-check_floppy_qtree -fdb "$TEST_IMG" -drive if=none,file="$TEST_IMG.2" -global isa-fdc.driveB=none0
+# Conflicting, -fdX wins
+check_floppy_qtree -fda "$TEST_IMG" -drive if=none,file="$TEST_IMG.2" -global floppy.drive=none0
 
 echo
 echo
@@ -182,21 +170,25 @@ echo
 echo === Mixing -global and -device ===
 
 # Working
-check_floppy_qtree -drive if=none,file="$TEST_IMG" -drive if=none,file="$TEST_IMG.2" \
-                   -global isa-fdc.driveA=none0 -device floppy,drive=none1
-check_floppy_qtree -drive if=none,file="$TEST_IMG" -drive if=none,file="$TEST_IMG.2" \
-                   -global isa-fdc.driveA=none0 -device floppy,drive=none1,unit=1
-
-check_floppy_qtree -drive if=none,file="$TEST_IMG" -drive if=none,file="$TEST_IMG.2" \
-                   -global isa-fdc.driveB=none0 -device floppy,drive=none1
-check_floppy_qtree -drive if=none,file="$TEST_IMG" -drive if=none,file="$TEST_IMG.2" \
-                   -global isa-fdc.driveB=none0 -device floppy,drive=none1,unit=0
+check_floppy_qtree -drive if=none,file="$TEST_IMG" \
+                   -global floppy.drive=none0 -device floppy,unit=0
 
 # Conflicting
 check_floppy_qtree -drive if=none,file="$TEST_IMG" -drive if=none,file="$TEST_IMG.2" \
-                   -global isa-fdc.driveA=none0 -device floppy,drive=none1,unit=0
-check_floppy_qtree -drive if=none,file="$TEST_IMG" -drive if=none,file="$TEST_IMG.2" \
-                   -global isa-fdc.driveB=none0 -device floppy,drive=none1,unit=1
+                   -global floppy.drive=none0 -device floppy,drive=none1,unit=0
+
+echo
+echo
+echo === Attempt to use drive twice ===
+
+# if=none
+check_floppy_qtree -drive if=none -device floppy,drive=none0 -device floppy -device floppy,drive=none0
+check_floppy_qtree -drive if=none -global floppy.drive=none0 -device floppy -device floppy
+# if=floppy
+check_floppy_qtree -fda "" -device floppy,drive=floppy0
+check_floppy_qtree -fda "" -global floppy.drive=floppy0
+# default if=floppy (not found, because it's created later)
+check_floppy_qtree -device floppy,drive=floppy0
 
 echo
 echo
@@ -206,7 +198,7 @@ echo === Too many floppy drives ===
 check_floppy_qtree -drive if=floppy,file="$TEST_IMG" \
                    -drive if=none,file="$TEST_IMG.2" \
                    -drive if=none,file="$TEST_IMG.3" \
-                   -global isa-fdc.driveB=none0 \
+                   -device floppy,drive=none0 \
                    -device floppy,drive=none1
 
 echo

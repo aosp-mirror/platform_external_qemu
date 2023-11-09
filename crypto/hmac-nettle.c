@@ -19,13 +19,16 @@
 #include <nettle/hmac.h>
 
 typedef void (*qcrypto_nettle_hmac_setkey)(void *ctx,
-              size_t key_length, const uint8_t *key);
+                                           size_t key_length,
+                                           const uint8_t *key);
 
 typedef void (*qcrypto_nettle_hmac_update)(void *ctx,
-              size_t length, const uint8_t *data);
+                                           size_t length,
+                                           const uint8_t *data);
 
 typedef void (*qcrypto_nettle_hmac_digest)(void *ctx,
-              size_t length, uint8_t *digest);
+                                           size_t length,
+                                           uint8_t *digest);
 
 typedef struct QCryptoHmacNettle QCryptoHmacNettle;
 struct QCryptoHmacNettle {
@@ -135,7 +138,7 @@ qcrypto_nettle_hmac_bytesv(QCryptoHmac *hmac,
                            Error **errp)
 {
     QCryptoHmacNettle *ctx;
-    int i;
+    size_t i;
 
     ctx = (QCryptoHmacNettle *)hmac->opaque;
 

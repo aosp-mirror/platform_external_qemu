@@ -22,7 +22,9 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
+#include "qemu/module.h"
 #include "hw/arm/digic.h"
+#include "hw/qdev-properties.h"
 #include "sysemu/sysemu.h"
 
 #define DIGIC4_TIMER_BASE(n)    (0xc0210000 + (n) * 0x100)
@@ -32,52 +34,35 @@
 static void digic_init(Object *obj)
 {
     DigicState *s = DIGIC(obj);
-    DeviceState *dev;
     int i;
 
-    object_initialize(&s->cpu, sizeof(s->cpu), "arm946-" TYPE_ARM_CPU);
-    object_property_add_child(obj, "cpu", OBJECT(&s->cpu), NULL);
+    object_initialize_child(obj, "cpu", &s->cpu, ARM_CPU_TYPE_NAME("arm946"));
 
     for (i = 0; i < DIGIC4_NB_TIMERS; i++) {
-#define DIGIC_TIMER_NAME_MLEN    11
-        char name[DIGIC_TIMER_NAME_MLEN];
-
-        object_initialize(&s->timer[i], sizeof(s->timer[i]), TYPE_DIGIC_TIMER);
-        dev = DEVICE(&s->timer[i]);
-        qdev_set_parent_bus(dev, sysbus_get_default());
-        snprintf(name, DIGIC_TIMER_NAME_MLEN, "timer[%d]", i);
-        object_property_add_child(obj, name, OBJECT(&s->timer[i]), NULL);
+        g_autofree char *name = g_strdup_printf("timer[%d]", i);
+        object_initialize_child(obj, name, &s->timer[i], TYPE_DIGIC_TIMER);
     }
 
-    object_initialize(&s->uart, sizeof(s->uart), TYPE_DIGIC_UART);
-    dev = DEVICE(&s->uart);
-    qdev_set_parent_bus(dev, sysbus_get_default());
-    object_property_add_child(obj, "uart", OBJECT(&s->uart), NULL);
+    object_initialize_child(obj, "uart", &s->uart, TYPE_DIGIC_UART);
 }
 
 static void digic_realize(DeviceState *dev, Error **errp)
 {
     DigicState *s = DIGIC(dev);
-    Error *err = NULL;
     SysBusDevice *sbd;
     int i;
 
-    object_property_set_bool(OBJECT(&s->cpu), true, "reset-hivecs", &err);
-    if (err != NULL) {
-        error_propagate(errp, err);
+    if (!object_property_set_bool(OBJECT(&s->cpu), "reset-hivecs", true,
+                                  errp)) {
         return;
     }
 
-    object_property_set_bool(OBJECT(&s->cpu), true, "realized", &err);
-    if (err != NULL) {
-        error_propagate(errp, err);
+    if (!qdev_realize(DEVICE(&s->cpu), NULL, errp)) {
         return;
     }
 
     for (i = 0; i < DIGIC4_NB_TIMERS; i++) {
-        object_property_set_bool(OBJECT(&s->timer[i]), true, "realized", &err);
-        if (err != NULL) {
-            error_propagate(errp, err);
+        if (!sysbus_realize(SYS_BUS_DEVICE(&s->timer[i]), errp)) {
             return;
         }
 
@@ -85,10 +70,8 @@ static void digic_realize(DeviceState *dev, Error **errp)
         sysbus_mmio_map(sbd, 0, DIGIC4_TIMER_BASE(i));
     }
 
-    qdev_prop_set_chr(DEVICE(&s->uart), "chardev", serial_hds[0]);
-    object_property_set_bool(OBJECT(&s->uart), true, "realized", &err);
-    if (err != NULL) {
-        error_propagate(errp, err);
+    qdev_prop_set_chr(DEVICE(&s->uart), "chardev", serial_hd(0));
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->uart), errp)) {
         return;
     }
 

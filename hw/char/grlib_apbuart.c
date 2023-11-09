@@ -1,7 +1,7 @@
 /*
  * QEMU GRLIB APB UART Emulator
  *
- * Copyright (c) 2010-2011 AdaCore
+ * Copyright (c) 2010-2019 AdaCore
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,16 @@
  */
 
 #include "qemu/osdep.h"
+#include "hw/irq.h"
+#include "hw/qdev-properties.h"
+#include "hw/qdev-properties-system.h"
+#include "hw/sparc/grlib.h"
 #include "hw/sysbus.h"
+#include "qemu/module.h"
 #include "chardev/char-fe.h"
 
 #include "trace.h"
+#include "qom/object.h"
 
 #define UART_REG_SIZE 20     /* Size of memory mapped registers */
 
@@ -68,11 +74,9 @@
 
 #define FIFO_LENGTH 1024
 
-#define TYPE_GRLIB_APB_UART "grlib,apbuart"
-#define GRLIB_APB_UART(obj) \
-    OBJECT_CHECK(UART, (obj), TYPE_GRLIB_APB_UART)
+OBJECT_DECLARE_SIMPLE_TYPE(UART, GRLIB_APB_UART)
 
-typedef struct UART {
+struct UART {
     SysBusDevice parent_obj;
 
     MemoryRegion iomem;
@@ -88,7 +92,7 @@ typedef struct UART {
     char buffer[FIFO_LENGTH];
     int  len;
     int  current;
-} UART;
+};
 
 static int uart_data_to_read(UART *uart)
 {
@@ -152,7 +156,7 @@ static void grlib_apbuart_receive(void *opaque, const uint8_t *buf, int size)
     }
 }
 
-static void grlib_apbuart_event(void *opaque, int event)
+static void grlib_apbuart_event(void *opaque, QEMUChrEvent event)
 {
     trace_grlib_apbuart_event(event);
 }
@@ -239,9 +243,10 @@ static const MemoryRegionOps grlib_apbuart_ops = {
     .endianness = DEVICE_NATIVE_ENDIAN,
 };
 
-static int grlib_apbuart_init(SysBusDevice *dev)
+static void grlib_apbuart_realize(DeviceState *dev, Error **errp)
 {
     UART *uart = GRLIB_APB_UART(dev);
+    SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
 
     qemu_chr_fe_set_handlers(&uart->chr,
                              grlib_apbuart_can_receive,
@@ -249,14 +254,12 @@ static int grlib_apbuart_init(SysBusDevice *dev)
                              grlib_apbuart_event,
                              NULL, uart, NULL, true);
 
-    sysbus_init_irq(dev, &uart->irq);
+    sysbus_init_irq(sbd, &uart->irq);
 
     memory_region_init_io(&uart->iomem, OBJECT(uart), &grlib_apbuart_ops, uart,
                           "uart", UART_REG_SIZE);
 
-    sysbus_init_mmio(dev, &uart->iomem);
-
-    return 0;
+    sysbus_init_mmio(sbd, &uart->iomem);
 }
 
 static void grlib_apbuart_reset(DeviceState *d)
@@ -280,11 +283,10 @@ static Property grlib_apbuart_properties[] = {
 static void grlib_apbuart_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
-    SysBusDeviceClass *k = SYS_BUS_DEVICE_CLASS(klass);
 
-    k->init = grlib_apbuart_init;
+    dc->realize = grlib_apbuart_realize;
     dc->reset = grlib_apbuart_reset;
-    dc->props = grlib_apbuart_properties;
+    device_class_set_props(dc, grlib_apbuart_properties);
 }
 
 static const TypeInfo grlib_apbuart_info = {

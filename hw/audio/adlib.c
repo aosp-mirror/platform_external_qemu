@@ -24,10 +24,12 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "hw/hw.h"
+#include "qemu/module.h"
 #include "hw/audio/soundhw.h"
 #include "audio/audio.h"
 #include "hw/isa/isa.h"
+#include "hw/qdev-properties.h"
+#include "qom/object.h"
 
 //#define DEBUG
 
@@ -50,9 +52,9 @@
 #define SHIFT 1
 
 #define TYPE_ADLIB "adlib"
-#define ADLIB(obj) OBJECT_CHECK(AdlibState, (obj), TYPE_ADLIB)
+OBJECT_DECLARE_SIMPLE_TYPE(AdlibState, ADLIB)
 
-typedef struct {
+struct AdlibState {
     ISADevice parent_obj;
 
     QEMUSoundCard card;
@@ -72,7 +74,7 @@ typedef struct {
     QEMUAudioTimeStamp ats;
     FM_OPL *opl;
     PortioList port_list;
-} AdlibState;
+};
 
 static void adlib_stop_opl_timer (AdlibState *s, size_t n)
 {
@@ -119,13 +121,10 @@ static void adlib_write(void *opaque, uint32_t nport, uint32_t val)
 static uint32_t adlib_read(void *opaque, uint32_t nport)
 {
     AdlibState *s = opaque;
-    uint8_t data;
     int a = nport & 3;
 
     adlib_kill_timers (s);
-    data = OPLRead (s->opl, a);
-
-    return data;
+    return OPLRead (s->opl, a);
 }
 
 static void timer_handler (void *opaque, int c, double interval_Sec)
@@ -187,14 +186,14 @@ static int write_audio (AdlibState *s, int samples)
 static void adlib_callback (void *opaque, int free)
 {
     AdlibState *s = opaque;
-    int samples, net = 0, to_play, written;
+    int samples, to_play, written;
 
     samples = free >> SHIFT;
     if (!(s->active && s->enabled) || !samples) {
         return;
     }
 
-    to_play = audio_MIN (s->left, samples);
+    to_play = MIN (s->left, samples);
     while (to_play) {
         written = write_audio (s, to_play);
 
@@ -209,7 +208,7 @@ static void adlib_callback (void *opaque, int free)
         }
     }
 
-    samples = audio_MIN (samples, s->samples - s->pos);
+    samples = MIN (samples, s->samples - s->pos);
     if (!samples) {
         return;
     }
@@ -220,7 +219,6 @@ static void adlib_callback (void *opaque, int free)
         written = write_audio (s, samples);
 
         if (written) {
-            net += written;
             samples -= written;
             s->pos = (s->pos + written) % s->samples;
         }
@@ -269,7 +267,7 @@ static void adlib_realizefn (DeviceState *dev, Error **errp)
 
     as.freq = s->freq;
     as.nchannels = SHIFT;
-    as.fmt = AUD_FMT_S16;
+    as.fmt = AUDIO_FORMAT_S16;
     as.endianness = AUDIO_HOST_ENDIANNESS;
 
     AUD_register_card ("adlib", &s->card);
@@ -298,6 +296,7 @@ static void adlib_realizefn (DeviceState *dev, Error **errp)
 }
 
 static Property adlib_properties[] = {
+    DEFINE_AUDIO_PROPERTIES(AdlibState, card),
     DEFINE_PROP_UINT32 ("iobase",  AdlibState, port, 0x220),
     DEFINE_PROP_UINT32 ("freq",    AdlibState, freq,  44100),
     DEFINE_PROP_END_OF_LIST (),
@@ -310,7 +309,7 @@ static void adlib_class_initfn (ObjectClass *klass, void *data)
     dc->realize = adlib_realizefn;
     set_bit(DEVICE_CATEGORY_SOUND, dc->categories);
     dc->desc = ADLIB_DESC;
-    dc->props = adlib_properties;
+    device_class_set_props(dc, adlib_properties);
 }
 
 static const TypeInfo adlib_info = {
@@ -320,16 +319,10 @@ static const TypeInfo adlib_info = {
     .class_init    = adlib_class_initfn,
 };
 
-static int Adlib_init (ISABus *bus)
-{
-    isa_create_simple (bus, TYPE_ADLIB);
-    return 0;
-}
-
 static void adlib_register_types (void)
 {
     type_register_static (&adlib_info);
-    isa_register_soundhw("adlib", ADLIB_DESC, Adlib_init);
+    deprecated_register_soundhw("adlib", ADLIB_DESC, 1, TYPE_ADLIB);
 }
 
 type_init (adlib_register_types)

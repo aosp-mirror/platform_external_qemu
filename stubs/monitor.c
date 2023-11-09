@@ -1,9 +1,7 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "qemu-common.h"
 #include "monitor/monitor.h"
-
-Monitor *cur_mon = NULL;
+#include "../monitor/monitor-internal.h"
 
 int monitor_get_fd(Monitor *mon, const char *name, Error **errp)
 {
@@ -11,6 +9,10 @@ int monitor_get_fd(Monitor *mon, const char *name, Error **errp)
     return -1;
 }
 
-void monitor_init(Chardev *chr, int flags)
+void monitor_init_hmp(Chardev *chr, bool use_readline, Error **errp)
+{
+}
+
+void monitor_fdsets_cleanup(void)
 {
 }

@@ -6,18 +6,24 @@
  * This code is licensed under the GPL version 2 or later. See the
  * COPYING file in the top-level directory.
  */
-#ifndef ASPEED_WDT_H
-#define ASPEED_WDT_H
 
+#ifndef WDT_ASPEED_H
+#define WDT_ASPEED_H
+
+#include "hw/misc/aspeed_scu.h"
 #include "hw/sysbus.h"
+#include "qom/object.h"
 
 #define TYPE_ASPEED_WDT "aspeed.wdt"
-#define ASPEED_WDT(obj) \
-    OBJECT_CHECK(AspeedWDTState, (obj), TYPE_ASPEED_WDT)
+OBJECT_DECLARE_TYPE(AspeedWDTState, AspeedWDTClass, ASPEED_WDT)
+#define TYPE_ASPEED_2400_WDT TYPE_ASPEED_WDT "-ast2400"
+#define TYPE_ASPEED_2500_WDT TYPE_ASPEED_WDT "-ast2500"
+#define TYPE_ASPEED_2600_WDT TYPE_ASPEED_WDT "-ast2600"
+#define TYPE_ASPEED_1030_WDT TYPE_ASPEED_WDT "-ast1030"
 
-#define ASPEED_WDT_REGS_MAX        (0x20 / 4)
+#define ASPEED_WDT_REGS_MAX        (0x30 / 4)
 
-typedef struct AspeedWDTState {
+struct AspeedWDTState {
     /*< private >*/
     SysBusDevice parent_obj;
     QEMUTimer *timer;
@@ -26,9 +32,22 @@ typedef struct AspeedWDTState {
     MemoryRegion iomem;
     uint32_t regs[ASPEED_WDT_REGS_MAX];
 
+    AspeedSCUState *scu;
     uint32_t pclk_freq;
-    uint32_t silicon_rev;
-    uint32_t ext_pulse_width_mask;
-} AspeedWDTState;
+};
 
-#endif  /* ASPEED_WDT_H */
+
+struct AspeedWDTClass {
+    SysBusDeviceClass parent_class;
+
+    uint32_t iosize;
+    uint32_t ext_pulse_width_mask;
+    uint32_t reset_ctrl_reg;
+    void (*reset_pulse)(AspeedWDTState *s, uint32_t property);
+    void (*wdt_reload)(AspeedWDTState *s);
+    uint64_t (*sanitize_ctrl)(uint64_t data);
+    uint32_t default_status;
+    uint32_t default_reload_value;
+};
+
+#endif /* WDT_ASPEED_H */

@@ -24,40 +24,26 @@
 
 #include "qemu/osdep.h"
 #include "qemu/error-report.h"
-#include "hw/hw.h"
 #include "hw/boards.h"
-#include "hw/xen/xen_backend.h"
-#include "xen_domainbuild.h"
+#include "hw/xen/xen-legacy-backend.h"
+#include "hw/xen/xen-bus.h"
 #include "sysemu/block-backend.h"
+#include "sysemu/sysemu.h"
 
 static void xen_init_pv(MachineState *machine)
 {
     DriveInfo *dinfo;
     int i;
 
+    setup_xen_backend_ops();
+
     /* Initialize backend core & drivers */
-    if (xen_be_init() != 0) {
-        error_report("%s: xen backend core setup failed", __func__);
-        exit(1);
-    }
+    xen_be_init();
 
     switch (xen_mode) {
     case XEN_ATTACH:
-        /* nothing to do, xend handles everything */
+        /* nothing to do, libxl handles everything */
         break;
-#ifdef CONFIG_XEN_PV_DOMAIN_BUILD
-    case XEN_CREATE: {
-        const char *kernel_filename = machine->kernel_filename;
-        const char *kernel_cmdline = machine->kernel_cmdline;
-        const char *initrd_filename = machine->initrd_filename;
-        if (xen_domain_build_pv(kernel_filename, initrd_filename,
-                                kernel_cmdline) < 0) {
-            error_report("xen pv domain creation failed");
-            exit(1);
-        }
-        break;
-    }
-#endif
     case XEN_EMULATE:
         error_report("xen emulation not implemented (yet)");
         exit(1);
@@ -68,14 +54,14 @@ static void xen_init_pv(MachineState *machine)
         break;
     }
 
-    xen_be_register_common();
     xen_be_register("vfb", &xen_framebuffer_ops);
     xen_be_register("qnic", &xen_netdev_ops);
 
     /* configure framebuffer */
-    if (xenfb_enabled) {
+    if (vga_interface_type == VGA_XENFB) {
         xen_config_dev_vfb(0, "vnc");
         xen_config_dev_vkbd(0);
+        vga_interface_created = true;
     }
 
     /* configure disks */
@@ -92,6 +78,8 @@ static void xen_init_pv(MachineState *machine)
             continue;
         xen_config_dev_nic(nd_table + i);
     }
+
+    xen_bus_init();
 
     /* config cleanup hook */
     atexit(xen_config_cleanup);

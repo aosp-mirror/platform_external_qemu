@@ -23,13 +23,12 @@
  */
 
 #include "qemu/osdep.h"
-#include "qemu-common.h"
 #include "cpu.h"
-#include "hw/hw.h"
 #include "hw/loader.h"
 #include "elf.h"
 #include "boot.h"
 #include "qemu/cutils.h"
+#include "sysemu/reset.h"
 
 static void main_cpu_reset(void *opaque)
 {
@@ -68,20 +67,21 @@ static uint64_t translate_kernel_address(void *opaque, uint64_t addr)
 void cris_load_image(CRISCPU *cpu, struct cris_load_info *li)
 {
     CPUCRISState *env = &cpu->env;
-    uint64_t entry, high;
+    uint64_t entry;
     int kcmdline_len;
     int image_size;
 
     env->load_info = li;
     /* Boots a kernel elf binary, os/linux-2.6/vmlinux from the axis 
        devboard SDK.  */
-    image_size = load_elf(li->image_filename, translate_kernel_address, NULL,
-                          &entry, NULL, &high, 0, EM_CRIS, 0, 0);
+    image_size = load_elf(li->image_filename, NULL,
+                          translate_kernel_address, NULL,
+                          &entry, NULL, NULL, NULL, 0, EM_CRIS, 0, 0);
     li->entry = entry;
     if (image_size < 0) {
         /* Takes a kimage from the axis devboard SDK.  */
         image_size = load_image_targphys(li->image_filename, 0x40004000,
-                                         ram_size);
+                                         li->ram_size);
         li->entry = 0x40004000;
     }
 

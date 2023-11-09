@@ -28,12 +28,12 @@
 #include "qemu/queue.h"
 #include "qemu/coroutine.h"
 
-#if defined(_WIN32) && !defined(_WIN64)
-    #define COROUTINE_STACK_SIZE (1 << 18)
-#else
-    #define COROUTINE_STACK_SIZE (1 << 20)
+#ifdef CONFIG_SAFESTACK
+/* Pointer to the unsafe stack, defined by the compiler */
+extern __thread void *__safestack_unsafe_stack_ptr;
 #endif
 
+#define COROUTINE_STACK_SIZE (1 << 20)
 
 typedef enum {
     COROUTINE_YIELD = 1,

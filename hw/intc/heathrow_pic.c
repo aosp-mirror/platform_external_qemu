@@ -22,10 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
-#include "hw/hw.h"
-#include "hw/ppc/mac.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 #include "hw/intc/heathrow_pic.h"
+#include "hw/irq.h"
 #include "trace.h"
 
 static inline int heathrow_check_irq(HeathrowPICState *pic)
@@ -172,27 +174,14 @@ static void heathrow_init(Object *obj)
     HeathrowState *s = HEATHROW(obj);
     SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
 
+    /* only 1 CPU */
+    qdev_init_gpio_out(DEVICE(obj), s->irqs, 1);
+
+    qdev_init_gpio_in(DEVICE(obj), heathrow_set_irq, HEATHROW_NUM_IRQS);
+
     memory_region_init_io(&s->mem, OBJECT(s), &heathrow_ops, s,
                           "heathrow-pic", 0x1000);
     sysbus_init_mmio(sbd, &s->mem);
-}
-
-DeviceState *heathrow_pic_init(int nb_cpus, qemu_irq **irqs,
-                               qemu_irq **pic_irqs)
-{
-    DeviceState *d;
-    HeathrowState *s;
-
-    d = qdev_create(NULL, TYPE_HEATHROW);
-    qdev_init_nofail(d);
-
-    s = HEATHROW(d);
-    /* only 1 CPU */
-    s->irqs = irqs[0];
-
-    *pic_irqs = qemu_allocate_irqs(heathrow_set_irq, s, HEATHROW_NUM_IRQS);
-
-    return d;
 }
 
 static void heathrow_class_init(ObjectClass *oc, void *data)

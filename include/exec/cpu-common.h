@@ -7,28 +7,42 @@
 #include "exec/hwaddr.h"
 #endif
 
-#include "qemu/bswap.h"
-#include "qemu/queue.h"
-#include "qemu/fprintf-fn.h"
-
 /**
- * CPUListState:
- * @cpu_fprintf: Print function.
- * @file: File to print to using @cpu_fprint.
- *
- * State commonly used for iterating over CPU models.
+ * vaddr:
+ * Type wide enough to contain any #target_ulong virtual address.
  */
-typedef struct CPUListState {
-    fprintf_function cpu_fprintf;
-    FILE *file;
-} CPUListState;
+typedef uint64_t vaddr;
+#define VADDR_PRId PRId64
+#define VADDR_PRIu PRIu64
+#define VADDR_PRIo PRIo64
+#define VADDR_PRIx PRIx64
+#define VADDR_PRIX PRIX64
+#define VADDR_MAX UINT64_MAX
 
-/* The CPU list lock nests outside tb_lock/tb_unlock.  */
+void cpu_exec_init_all(void);
+void cpu_exec_step_atomic(CPUState *cpu);
+
+/* Using intptr_t ensures that qemu_*_page_mask is sign-extended even
+ * when intptr_t is 32-bit and we are aligning a long long.
+ */
+extern uintptr_t qemu_host_page_size;
+extern intptr_t qemu_host_page_mask;
+
+#define HOST_PAGE_ALIGN(addr) ROUND_UP((addr), qemu_host_page_size)
+#define REAL_HOST_PAGE_ALIGN(addr) ROUND_UP((addr), qemu_real_host_page_size())
+
+/* The CPU list lock nests outside page_(un)lock or mmap_(un)lock */
+extern QemuMutex qemu_cpu_list_lock;
 void qemu_init_cpu_list(void);
 void cpu_list_lock(void);
 void cpu_list_unlock(void);
+unsigned int cpu_list_generation_id_get(void);
 
 void tcg_flush_softmmu_tlb(CPUState *cs);
+void tcg_flush_jmp_cache(CPUState *cs);
+
+void tcg_iommu_init_notifier_list(CPUState *cpu);
+void tcg_iommu_free_notifier_list(CPUState *cpu);
 
 #if !defined(CONFIG_USER_ONLY)
 
@@ -38,7 +52,7 @@ enum device_endian {
     DEVICE_LITTLE_ENDIAN,
 };
 
-#if defined(HOST_WORDS_BIGENDIAN)
+#if HOST_BIG_ENDIAN
 #define DEVICE_HOST_ENDIAN DEVICE_BIG_ENDIAN
 #else
 #define DEVICE_HOST_ENDIAN DEVICE_LITTLE_ENDIAN
@@ -55,55 +69,76 @@ typedef uintptr_t ram_addr_t;
 #  define RAM_ADDR_FMT "%" PRIxPTR
 #endif
 
-extern ram_addr_t ram_size;
-
 /* memory API */
-
-typedef void CPUWriteMemoryFunc(void *opaque, hwaddr addr, uint32_t value);
-typedef uint32_t CPUReadMemoryFunc(void *opaque, hwaddr addr);
 
 void qemu_ram_remap(ram_addr_t addr, ram_addr_t length);
 /* This should not be used by devices.  */
 ram_addr_t qemu_ram_addr_from_host(void *ptr);
+ram_addr_t qemu_ram_addr_from_host_nofail(void *ptr);
 RAMBlock *qemu_ram_block_by_name(const char *name);
 RAMBlock *qemu_ram_block_from_host(void *ptr, bool round_offset,
                                    ram_addr_t *offset);
 ram_addr_t qemu_ram_block_host_offset(RAMBlock *rb, void *host);
 void qemu_ram_set_idstr(RAMBlock *block, const char *name, DeviceState *dev);
 void qemu_ram_unset_idstr(RAMBlock *block);
-void qemu_ram_set_migrate(RAMBlock *block, bool migrate);
 const char *qemu_ram_get_idstr(RAMBlock *rb);
-bool qemu_ram_is_migrate(RAMBlock* rb);
+void *qemu_ram_get_host_addr(RAMBlock *rb);
+ram_addr_t qemu_ram_get_offset(RAMBlock *rb);
+ram_addr_t qemu_ram_get_used_length(RAMBlock *rb);
+ram_addr_t qemu_ram_get_max_length(RAMBlock *rb);
 bool qemu_ram_is_shared(RAMBlock *rb);
+bool qemu_ram_is_noreserve(RAMBlock *rb);
 bool qemu_ram_is_uf_zeroable(RAMBlock *rb);
 void qemu_ram_set_uf_zeroable(RAMBlock *rb);
+bool qemu_ram_is_migratable(RAMBlock *rb);
+void qemu_ram_set_migratable(RAMBlock *rb);
+void qemu_ram_unset_migratable(RAMBlock *rb);
+bool qemu_ram_is_named_file(RAMBlock *rb);
+int qemu_ram_get_fd(RAMBlock *rb);
 
 size_t qemu_ram_pagesize(RAMBlock *block);
 size_t qemu_ram_pagesize_largest(void);
 
-void cpu_physical_memory_rw(hwaddr addr, uint8_t *buf,
-                            int len, int is_write);
+/**
+ * cpu_address_space_init:
+ * @cpu: CPU to add this address space to
+ * @asidx: integer index of this address space
+ * @prefix: prefix to be used as name of address space
+ * @mr: the root memory region of address space
+ *
+ * Add the specified address space to the CPU's cpu_ases list.
+ * The address space added with @asidx 0 is the one used for the
+ * convenience pointer cpu->as.
+ * The target-specific code which registers ASes is responsible
+ * for defining what semantics address space 0, 1, 2, etc have.
+ *
+ * Before the first call to this function, the caller must set
+ * cpu->num_ases to the total number of address spaces it needs
+ * to support.
+ *
+ * Note that with KVM only one address space is supported.
+ */
+void cpu_address_space_init(CPUState *cpu, int asidx,
+                            const char *prefix, MemoryRegion *mr);
+
+void cpu_physical_memory_rw(hwaddr addr, void *buf,
+                            hwaddr len, bool is_write);
 static inline void cpu_physical_memory_read(hwaddr addr,
-                                            void *buf, int len)
+                                            void *buf, hwaddr len)
 {
-    cpu_physical_memory_rw(addr, (uint8_t*)buf, len, 0);
+    cpu_physical_memory_rw(addr, buf, len, false);
 }
 static inline void cpu_physical_memory_write(hwaddr addr,
-                                             const void *buf, int len)
+                                             const void *buf, hwaddr len)
 {
-    cpu_physical_memory_rw(addr, (uint8_t*)buf, len, 1);
+    cpu_physical_memory_rw(addr, (void *)buf, len, true);
 }
+void cpu_reloading_memory_map(void);
 void *cpu_physical_memory_map(hwaddr addr,
                               hwaddr *plen,
-                              int is_write);
+                              bool is_write);
 void cpu_physical_memory_unmap(void *buffer, hwaddr len,
-                               int is_write, hwaddr access_len);
-// Similar to cpu_physical_memory_map/unmap, but does not
-// cause a refcount change. Must be page aligned and
-// there must be at least one page serviceable from
-// |addr|.
-void *cpu_physical_memory_get_addr(hwaddr addr);
-
+                               bool is_write, hwaddr access_len);
 void cpu_register_map_client(QEMUBH *bh);
 void cpu_unregister_map_client(QEMUBH *bh);
 
@@ -116,33 +151,20 @@ bool cpu_physical_memory_is_io(hwaddr phys_addr);
  */
 void qemu_flush_coalesced_mmio_buffer(void);
 
-void cpu_physical_memory_write_rom(AddressSpace *as, hwaddr addr,
-                                   const uint8_t *buf, int len);
-void cpu_flush_icache_range(hwaddr start, int len);
+void cpu_flush_icache_range(hwaddr start, hwaddr len);
 
-extern struct MemoryRegion io_mem_rom;
-extern struct MemoryRegion io_mem_notdirty;
-
-typedef int (RAMBlockIterFunc)(const char *block_name, void *host_addr,
-    ram_addr_t offset, ram_addr_t length, void *opaque);
+typedef int (RAMBlockIterFunc)(RAMBlock *rb, void *opaque);
 
 int qemu_ram_foreach_block(RAMBlockIterFunc func, void *opaque);
 int ram_block_discard_range(RAMBlock *rb, uint64_t start, size_t length);
 
-typedef int (RAMBlockIterFuncWithFileInfo)(
-    const char *block_name,
-    void *host_addr,
-    ram_addr_t offset,
-    ram_addr_t length,
-    uint32_t flags,
-    const char* path,
-    bool readonly,
-    void *opaque);
-
-int qemu_ram_foreach_migrate_block_with_file_info(
-    RAMBlockIterFuncWithFileInfo func,
-    void *opaque);
-
 #endif
+
+/* Returns: 0 on success, -1 on error */
+int cpu_memory_rw_debug(CPUState *cpu, vaddr addr,
+                        void *ptr, size_t len, bool is_write);
+
+/* vl.c */
+void list_cpus(void);
 
 #endif /* CPU_COMMON_H */

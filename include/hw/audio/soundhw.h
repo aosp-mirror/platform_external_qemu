@@ -1,13 +1,13 @@
-#ifndef HW_AUDIO_H
-#define HW_AUDIO_H
-
-void isa_register_soundhw(const char *name, const char *descr,
-                          int (*init_isa)(ISABus *bus));
+#ifndef HW_SOUNDHW_H
+#define HW_SOUNDHW_H
 
 void pci_register_soundhw(const char *name, const char *descr,
-                          int (*init_pci)(PCIBus *bus, const char *arg));
+                          int (*init_pci)(PCIBus *bus, const char *audiodev));
+void deprecated_register_soundhw(const char *name, const char *descr,
+                                 int isa, const char *typename);
 
-bool soundhw_init(const char *arg);
-void select_soundhw(const char *dev, int len);
+void soundhw_init(void);
+void show_valid_soundhw(void);
+void select_soundhw(const char *optarg, const char *audiodev);
 
 #endif

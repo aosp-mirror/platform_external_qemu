@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Tool for running fuzz tests
 #
@@ -27,7 +27,7 @@ import shutil
 from itertools import count
 import time
 import getopt
-import StringIO
+import io
 import resource
 
 try:
@@ -36,9 +36,8 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print >>sys.stderr, \
-            "Warning: Module for JSON processing is not found.\n" \
-            "'--config' and '--command' options are not supported."
+        print("Warning: Module for JSON processing is not found.\n" \
+            "'--config' and '--command' options are not supported.", file=sys.stderr)
 
 # Backing file sizes in MB
 MAX_BACKING_FILE_SIZE = 10
@@ -80,7 +79,8 @@ def run_app(fd, q_args):
     devnull = open('/dev/null', 'r+')
     process = subprocess.Popen(q_args, stdin=devnull,
                                stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                               stderr=subprocess.PIPE,
+                               errors='replace')
     try:
         out, err = process.communicate()
         signal.alarm(0)
@@ -128,7 +128,7 @@ class TestEnv(object):
         if seed is not None:
             self.seed = seed
         else:
-            self.seed = str(random.randint(0, sys.maxint))
+            self.seed = str(random.randint(0, sys.maxsize))
         random.seed(self.seed)
 
         self.init_path = os.getcwd()
@@ -158,9 +158,8 @@ class TestEnv(object):
         try:
             os.makedirs(self.current_dir)
         except OSError as e:
-            print >>sys.stderr, \
-                "Error: The working directory '%s' cannot be used. Reason: %s"\
-                % (self.work_dir, e[1])
+            print("Error: The working directory '%s' cannot be used. Reason: %s"\
+                % (self.work_dir, e.strerror), file=sys.stderr)
             raise TestException
         self.log = open(os.path.join(self.current_dir, "test.log"), "w")
         self.parent_log = open(run_log, "a")
@@ -184,7 +183,7 @@ class TestEnv(object):
                                            MAX_BACKING_FILE_SIZE) * (1 << 20)
         cmd = self.qemu_img + ['create', '-f', backing_file_fmt,
                                backing_file_name, str(backing_file_size)]
-        temp_log = StringIO.StringIO()
+        temp_log = io.StringIO()
         retcode = run_app(temp_log, cmd)
         if retcode == 0:
             temp_log.close()
@@ -241,13 +240,13 @@ class TestEnv(object):
                            "Backing file: %s\n" \
                            % (self.seed, " ".join(current_cmd),
                               self.current_dir, backing_file_name)
-            temp_log = StringIO.StringIO()
+            temp_log = io.StringIO()
             try:
                 retcode = run_app(temp_log, current_cmd)
             except OSError as e:
                 multilog("%sError: Start of '%s' failed. Reason: %s\n\n"
                          % (test_summary, os.path.basename(current_cmd[0]),
-                            e[1]),
+                            e.strerror),
                          sys.stderr, self.log, self.parent_log)
                 raise TestException
 
@@ -277,7 +276,7 @@ class TestEnv(object):
 if __name__ == '__main__':
 
     def usage():
-        print """
+        print("""
         Usage: runner.py [OPTION...] TEST_DIR IMG_GENERATOR
 
         Set up test environment in TEST_DIR and run a test in it. A module for
@@ -326,7 +325,7 @@ if __name__ == '__main__':
 
         If '--config' argument is specified, fields not listed in
         the configuration array will not be fuzzed.
-        """
+        """)
 
     def run_test(test_id, seed, work_dir, run_log, cleanup, log_all,
                  command, fuzz_config):
@@ -357,8 +356,7 @@ if __name__ == '__main__':
                                        ['command=', 'help', 'seed=', 'config=',
                                         'keep_passed', 'verbose', 'duration='])
     except getopt.error as e:
-        print >>sys.stderr, \
-            "Error: %s\n\nTry 'runner.py --help' for more information" % e
+        print("Error: %s\n\nTry 'runner.py --help' for more information" % e, file=sys.stderr)
         sys.exit(1)
 
     command = None
@@ -375,9 +373,8 @@ if __name__ == '__main__':
             try:
                 command = json.loads(arg)
             except (TypeError, ValueError, NameError) as e:
-                print >>sys.stderr, \
-                    "Error: JSON array of test commands cannot be loaded.\n" \
-                    "Reason: %s" % e
+                print("Error: JSON array of test commands cannot be loaded.\n" \
+                    "Reason: %s" % e, file=sys.stderr)
                 sys.exit(1)
         elif opt in ('-k', '--keep_passed'):
             cleanup = False
@@ -391,15 +388,13 @@ if __name__ == '__main__':
             try:
                 config = json.loads(arg)
             except (TypeError, ValueError, NameError) as e:
-                print >>sys.stderr, \
-                    "Error: JSON array with the fuzzer configuration cannot" \
-                    " be loaded\nReason: %s" % e
+                print("Error: JSON array with the fuzzer configuration cannot" \
+                    " be loaded\nReason: %s" % e, file=sys.stderr)
                 sys.exit(1)
 
     if not len(args) == 2:
-        print >>sys.stderr, \
-            "Expected two parameters\nTry 'runner.py --help'" \
-            " for more information."
+        print("Expected two parameters\nTry 'runner.py --help'" \
+            " for more information.", file=sys.stderr)
         sys.exit(1)
 
     work_dir = os.path.realpath(args[0])
@@ -415,9 +410,8 @@ if __name__ == '__main__':
     try:
         image_generator = __import__(generator_name)
     except ImportError as e:
-        print >>sys.stderr, \
-            "Error: The image generator '%s' cannot be imported.\n" \
-            "Reason: %s" % (generator_name, e)
+        print("Error: The image generator '%s' cannot be imported.\n" \
+            "Reason: %s" % (generator_name, e), file=sys.stderr)
         sys.exit(1)
 
     # Enable core dumps
@@ -428,7 +422,7 @@ if __name__ == '__main__':
     test_id = count(1)
     while should_continue(duration, start_time):
         try:
-            run_test(str(test_id.next()), seed, work_dir, run_log, cleanup,
+            run_test(str(next(test_id)), seed, work_dir, run_log, cleanup,
                      log_all, command, config)
         except (KeyboardInterrupt, SystemExit):
             sys.exit(1)

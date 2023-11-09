@@ -1,7 +1,23 @@
 #ifndef QEMU_CUTILS_H
 #define QEMU_CUTILS_H
 
-#include "qemu/fprintf-fn.h"
+/*
+ * si_prefix:
+ * @exp10: exponent of 10, a multiple of 3 between -18 and 18 inclusive.
+ *
+ * Return a SI prefix (n, u, m, K, M, etc.) corresponding
+ * to the given exponent of 10.
+ */
+const char *si_prefix(unsigned int exp10);
+
+/*
+ * iec_binary_prefix:
+ * @exp2: exponent of 2, a multiple of 10 between 0 and 60 inclusive.
+ *
+ * Return an IEC binary prefix (Ki, Mi, etc.) corresponding
+ * to the given exponent of 2.
+ */
+const char *iec_binary_prefix(unsigned int exp2);
 
 /**
  * pstrcpy:
@@ -122,9 +138,15 @@ int qemu_strnlen(const char *s, int max_len);
  * Returns: the pointer originally in @input.
  */
 char *qemu_strsep(char **input, const char *delim);
+#ifdef HAVE_STRCHRNUL
+static inline const char *qemu_strchrnul(const char *s, int c)
+{
+    return strchrnul(s, c);
+}
+#else
+const char *qemu_strchrnul(const char *s, int c);
+#endif
 time_t mktimegm(struct tm *tm);
-int qemu_fdatasync(int fd);
-int fcntl_setfl(int fd, int flag);
 int qemu_parse_fd(const char *param);
 int qemu_strtoi(const char *nptr, const char **endptr, int base,
                 int *result);
@@ -138,21 +160,29 @@ int qemu_strtoi64(const char *nptr, const char **endptr, int base,
                   int64_t *result);
 int qemu_strtou64(const char *nptr, const char **endptr, int base,
                   uint64_t *result);
+int qemu_strtod(const char *nptr, const char **endptr, double *result);
+int qemu_strtod_finite(const char *nptr, const char **endptr, double *result);
 
-int parse_uint(const char *s, unsigned long long *value, char **endptr,
-               int base);
-int parse_uint_full(const char *s, unsigned long long *value, int base);
+int parse_uint(const char *s, const char **endptr, int base, uint64_t *value);
+int parse_uint_full(const char *s, int base, uint64_t *value);
 
-int qemu_strtosz(const char *nptr, char **end, uint64_t *result);
-int qemu_strtosz_MiB(const char *nptr, char **end, uint64_t *result);
-int qemu_strtosz_metric(const char *nptr, char **end, uint64_t *result);
+int qemu_strtosz(const char *nptr, const char **end, uint64_t *result);
+int qemu_strtosz_MiB(const char *nptr, const char **end, uint64_t *result);
+int qemu_strtosz_metric(const char *nptr, const char **end, uint64_t *result);
 
-#define K_BYTE     (1ULL << 10)
-#define M_BYTE     (1ULL << 20)
-#define G_BYTE     (1ULL << 30)
-#define T_BYTE     (1ULL << 40)
-#define P_BYTE     (1ULL << 50)
-#define E_BYTE     (1ULL << 60)
+char *size_to_str(uint64_t val);
+
+/**
+ * freq_to_str:
+ * @freq_hz: frequency to stringify
+ *
+ * Return human readable string for frequency @freq_hz.
+ * Use SI units like KHz, MHz, and so forth.
+ *
+ * The caller is responsible for releasing the value returned
+ * with g_free() after use.
+ */
+char *freq_to_str(uint64_t freq_hz);
 
 /* used to print char* safely */
 #define STR_OR_NULL(str) ((str) ? (str) : "null")
@@ -167,5 +197,74 @@ bool test_buffer_is_zero_next_accel(void);
 
 int uleb128_encode_small(uint8_t *out, uint32_t n);
 int uleb128_decode_small(const uint8_t *in, uint32_t *n);
+
+/**
+ * qemu_pstrcmp0:
+ * @str1: a non-NULL pointer to a C string (*str1 can be NULL)
+ * @str2: a non-NULL pointer to a C string (*str2 can be NULL)
+ *
+ * Compares *str1 and *str2 with g_strcmp0().
+ *
+ * Returns: an integer less than, equal to, or greater than zero, if
+ * *str1 is <, == or > than *str2.
+ */
+int qemu_pstrcmp0(const char **str1, const char **str2);
+
+/* Find program directory, and save it for later usage with
+ * qemu_get_exec_dir().
+ * Try OS specific API first, if not working, parse from argv0. */
+void qemu_init_exec_dir(const char *argv0);
+
+/* Get the saved exec dir.  */
+const char *qemu_get_exec_dir(void);
+
+/**
+ * get_relocated_path:
+ * @dir: the directory (typically a `CONFIG_*DIR` variable) to be relocated.
+ *
+ * Returns a path for @dir that uses the directory of the running executable
+ * as the prefix.
+ *
+ * When a directory named `qemu-bundle` exists in the directory of the running
+ * executable, the path to the directory will be prepended to @dir. For
+ * example, if the directory of the running executable is `/qemu/build` @dir
+ * is `/usr/share/qemu`, the result will be
+ * `/qemu/build/qemu-bundle/usr/share/qemu`. The directory is expected to exist
+ * in the build tree.
+ *
+ * Otherwise, the directory of the running executable will be used as the
+ * prefix and it appends the relative path from `bindir` to @dir. For example,
+ * if the directory of the running executable is `/opt/qemu/bin`, `bindir` is
+ * `/usr/bin` and @dir is `/usr/share/qemu`, the result will be
+ * `/opt/qemu/bin/../share/qemu`.
+ *
+ * The returned string should be freed by the caller.
+ */
+char *get_relocated_path(const char *dir);
+
+static inline const char *yes_no(bool b)
+{
+     return b ? "yes" : "no";
+}
+
+/*
+ * helper to parse debug environment variables
+ */
+int parse_debug_env(const char *name, int max, int initial);
+
+/*
+ * Hexdump a line of a byte buffer into a hexadecimal/ASCII buffer
+ */
+#define QEMU_HEXDUMP_LINE_BYTES 16 /* Number of bytes to dump */
+#define QEMU_HEXDUMP_LINE_LEN 75   /* Number of characters in line */
+void qemu_hexdump_line(char *line, unsigned int b, const void *bufptr,
+                       unsigned int len, bool ascii);
+
+/*
+ * Hexdump a buffer to a file. An optional string prefix is added to every line
+ */
+
+void qemu_hexdump(FILE *fp, const char *prefix,
+                  const void *bufptr, size_t size);
 
 #endif

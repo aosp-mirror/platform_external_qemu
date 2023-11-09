@@ -24,30 +24,25 @@
 /* Ported SDL 1.2 code to 2.0 by Dave Airlie. */
 
 #include "qemu/osdep.h"
-#include "qemu-common.h"
 #include "ui/console.h"
 #include "ui/input.h"
 #include "ui/sdl2.h"
-#include "sysemu/sysemu.h"
 
 void sdl2_2d_update(DisplayChangeListener *dcl,
                     int x, int y, int w, int h)
 {
     struct sdl2_console *scon = container_of(dcl, struct sdl2_console, dcl);
-    DisplaySurface *surf = qemu_console_surface(dcl->con);
+    DisplaySurface *surf = scon->surface;
     SDL_Rect rect;
-    size_t surface_data_offset = surface_bytes_per_pixel(surf) * x +
-                                 surface_stride(surf) * y;
-
+    size_t surface_data_offset;
     assert(!scon->opengl);
 
-    if (!surf) {
-        return;
-    }
     if (!scon->texture) {
         return;
     }
 
+    surface_data_offset = surface_bytes_per_pixel(surf) * x +
+                          surface_stride(surf) * y;
     rect.x = x;
     rect.y = y;
     rect.w = w;
@@ -77,7 +72,7 @@ void sdl2_2d_switch(DisplayChangeListener *dcl,
         scon->texture = NULL;
     }
 
-    if (!new_surface) {
+    if (is_placeholder(new_surface) && qemu_console_get_index(dcl->con)) {
         sdl2_window_destroy(scon);
         return;
     }
@@ -101,14 +96,23 @@ void sdl2_2d_switch(DisplayChangeListener *dcl,
     case PIXMAN_r5g6b5:
         format = SDL_PIXELFORMAT_RGB565;
         break;
+    case PIXMAN_a8r8g8b8:
     case PIXMAN_x8r8g8b8:
         format = SDL_PIXELFORMAT_ARGB8888;
         break;
+    case PIXMAN_a8b8g8r8:
+    case PIXMAN_x8b8g8r8:
+        format = SDL_PIXELFORMAT_ABGR8888;
+        break;
+    case PIXMAN_r8g8b8a8:
     case PIXMAN_r8g8b8x8:
         format = SDL_PIXELFORMAT_RGBA8888;
         break;
     case PIXMAN_b8g8r8x8:
         format = SDL_PIXELFORMAT_BGRX8888;
+        break;
+    case PIXMAN_b8g8r8a8:
+        format = SDL_PIXELFORMAT_BGRA8888;
         break;
     default:
         g_assert_not_reached();
@@ -149,7 +153,13 @@ bool sdl2_2d_check_format(DisplayChangeListener *dcl,
      * the native ones. Thes are the ones I have tested.
      */
     return (format == PIXMAN_x8r8g8b8 ||
+            format == PIXMAN_a8r8g8b8 ||
+            format == PIXMAN_a8b8g8r8 ||
+            format == PIXMAN_x8b8g8r8 ||
             format == PIXMAN_b8g8r8x8 ||
+            format == PIXMAN_b8g8r8a8 ||
+            format == PIXMAN_r8g8b8x8 ||
+            format == PIXMAN_r8g8b8a8 ||
             format == PIXMAN_x1r5g5b5 ||
             format == PIXMAN_r5g6b5);
 }

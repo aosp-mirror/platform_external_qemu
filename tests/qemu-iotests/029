@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# group: rw auto quick
 #
 # qcow2 internal snapshots/VM state tests
 #
@@ -24,12 +25,11 @@ owner=kwolf@redhat.com
 seq=`basename $0`
 echo "QA output created by $seq"
 
-here=`pwd`
 status=1	# failure is the default!
 
 _cleanup()
 {
-    rm -f $TEST_IMG.snap
+    _rm_test_img "$TEST_IMG.snap"
     _cleanup_test_img
 }
 trap "_cleanup; exit \$status" 0 1 2 3 15
@@ -42,10 +42,9 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
 # Any format supporting intenal snapshots
 _supported_fmt qcow2
 _supported_proto generic
-_unsupported_proto vxhs
-_supported_os Linux
-# Internal snapshots are (currently) impossible with refcount_bits=1
-_unsupported_imgopts 'refcount_bits=1[^0-9]'
+# Internal snapshots are (currently) impossible with refcount_bits=1,
+# and generally impossible with external data files
+_unsupported_imgopts 'refcount_bits=1[^0-9]' data_file
 
 offset_size=24
 offset_l1_size=36
@@ -92,7 +91,7 @@ _make_test_img 64M
 { $QEMU_IMG snapshot -c foo $TEST_IMG; } 2>&1 | _filter_qemu_io | _filter_testdir
 poke_file "$TEST_IMG" "$offset_size" "\x00\x00\x00\x00\x00\x00\x02\x00"
 poke_file "$TEST_IMG" "$offset_l1_size" "\x00\x00\x00\x01"
-{ $QEMU_IMG convert -s foo $TEST_IMG $TEST_IMG.snap; } 2>&1 | _filter_qemu_io | _filter_testdir
+{ $QEMU_IMG convert -l foo $TEST_IMG $TEST_IMG.snap; } 2>&1 | _filter_qemu_io | _filter_testdir
 
 
 # success, all done

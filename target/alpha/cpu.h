@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,38 +20,15 @@
 #ifndef ALPHA_CPU_H
 #define ALPHA_CPU_H
 
-#include "qemu-common.h"
 #include "cpu-qom.h"
-
-#define TARGET_LONG_BITS 64
-#define ALIGNED_ONLY
-
-#define CPUArchState struct CPUAlphaState
+#include "exec/cpu-defs.h"
+#include "qemu/cpu-float.h"
 
 /* Alpha processors have a weak memory model */
 #define TCG_GUEST_DEFAULT_MO      (0)
 
-#include "exec/cpu-defs.h"
-
 #define ICACHE_LINE_SIZE 32
 #define DCACHE_LINE_SIZE 32
-
-#define TARGET_PAGE_BITS 13
-
-#ifdef CONFIG_USER_ONLY
-/* ??? The kernel likes to give addresses in high memory.  If the host has
-   more virtual address space than the guest, this can lead to impossible
-   allocations.  Honor the long-standing assumption that only kernel addrs
-   are negative, but otherwise allow allocations anywhere.  This could lead
-   to tricky emulation problems for programs doing tagged addressing, but
-   that's far fewer than encounter the impossible allocation problem.  */
-#define TARGET_PHYS_ADDR_SPACE_BITS  63
-#define TARGET_VIRT_ADDR_SPACE_BITS  63
-#else
-/* ??? EV4 has 34 phys addr bits, EV5 has 40, EV6 has 44.  */
-#define TARGET_PHYS_ADDR_SPACE_BITS  44
-#define TARGET_VIRT_ADDR_SPACE_BITS  (30 + TARGET_PAGE_BITS)
-#endif
 
 /* Alpha major type */
 enum {
@@ -198,6 +175,8 @@ enum {
 #define SWCR_STATUS_DNO         (1U << 22)
 #define SWCR_STATUS_MASK        ((1U << 23) - (1U << 17))
 
+#define SWCR_STATUS_TO_EXCSUM_SHIFT  16
+
 #define SWCR_MASK  (SWCR_TRAP_ENABLE_MASK | SWCR_MAP_MASK | SWCR_STATUS_MASK)
 
 /* MMU modes definitions */
@@ -212,20 +191,14 @@ enum {
 
    That said, we're only emulating Unix PALcode, and not attempting VMS,
    so we don't need to implement Executive and Supervisor.  QEMU's own
-   PALcode cheats and usees the KSEG mapping for its code+data rather than
+   PALcode cheats and uses the KSEG mapping for its code+data rather than
    physical addresses.  */
 
-#define NB_MMU_MODES 3
-
-#define MMU_MODE0_SUFFIX _kernel
-#define MMU_MODE1_SUFFIX _user
 #define MMU_KERNEL_IDX   0
 #define MMU_USER_IDX     1
 #define MMU_PHYS_IDX     2
 
-typedef struct CPUAlphaState CPUAlphaState;
-
-struct CPUAlphaState {
+typedef struct CPUArchState {
     uint64_t ir[31];
     float64 fir[31];
     uint64_t pc;
@@ -235,6 +208,9 @@ struct CPUAlphaState {
 
     /* The FPCR, and disassembled portions thereof.  */
     uint32_t fpcr;
+#ifdef CONFIG_USER_ONLY
+    uint32_t swcr;
+#endif
     uint32_t fpcr_exc_enable;
     float_status fp_status;
     uint8_t fpcr_dyn_round;
@@ -269,15 +245,12 @@ struct CPUAlphaState {
     /* This alarm doesn't exist in real hardware; we wish it did.  */
     uint64_t alarm_expire;
 
-    /* Those resources are used only in QEMU core */
-    CPU_COMMON
-
     int error_code;
 
     uint32_t features;
     uint32_t amask;
     int implver;
-};
+} CPUAlphaState;
 
 /**
  * AlphaCPU:
@@ -285,44 +258,31 @@ struct CPUAlphaState {
  *
  * An Alpha CPU.
  */
-struct AlphaCPU {
+struct ArchCPU {
     /*< private >*/
     CPUState parent_obj;
     /*< public >*/
 
+    CPUNegativeOffsetState neg;
     CPUAlphaState env;
 
     /* This alarm doesn't exist in real hardware; we wish it did.  */
     QEMUTimer *alarm_timer;
 };
 
-static inline AlphaCPU *alpha_env_get_cpu(CPUAlphaState *env)
-{
-    return container_of(env, AlphaCPU, env);
-}
-
-#define ENV_GET_CPU(e) CPU(alpha_env_get_cpu(e))
-
-#define ENV_OFFSET offsetof(AlphaCPU, env)
 
 #ifndef CONFIG_USER_ONLY
-extern const struct VMStateDescription vmstate_alpha_cpu;
-#endif
+extern const VMStateDescription vmstate_alpha_cpu;
 
 void alpha_cpu_do_interrupt(CPUState *cpu);
 bool alpha_cpu_exec_interrupt(CPUState *cpu, int int_req);
-void alpha_cpu_dump_state(CPUState *cs, FILE *f, fprintf_function cpu_fprintf,
-                          int flags);
 hwaddr alpha_cpu_get_phys_page_debug(CPUState *cpu, vaddr addr);
-int alpha_cpu_gdb_read_register(CPUState *cpu, uint8_t *buf, int reg);
+#endif /* !CONFIG_USER_ONLY */
+void alpha_cpu_dump_state(CPUState *cs, FILE *f, int flags);
+int alpha_cpu_gdb_read_register(CPUState *cpu, GByteArray *buf, int reg);
 int alpha_cpu_gdb_write_register(CPUState *cpu, uint8_t *buf, int reg);
-void alpha_cpu_do_unaligned_access(CPUState *cpu, vaddr addr,
-                                   MMUAccessType access_type,
-                                   int mmu_idx, uintptr_t retaddr,
-                                   unsigned size);
 
 #define cpu_list alpha_cpu_list
-#define cpu_signal_handler cpu_alpha_signal_handler
 
 #include "exec/cpu-all.h"
 
@@ -402,7 +362,7 @@ enum {
    The Unix PALcode only uses bit 4.  */
 #define PS_USER_MODE  8u
 
-/* CPUAlphaState->flags constants.  These are layed out so that we
+/* CPUAlphaState->flags constants.  These are laid out so that we
    can set or reset the pieces individually by assigning to the byte,
    or manipulated as a whole.  */
 
@@ -418,6 +378,8 @@ enum {
 
 #define ENV_FLAG_TB_MASK \
     (ENV_FLAG_PAL_MODE | ENV_FLAG_PS_USER | ENV_FLAG_FEN)
+
+#define TB_FLAG_UNALIGN       (1u << 1)
 
 static inline int cpu_mmu_index(CPUAlphaState *env, bool ifetch)
 {
@@ -471,22 +433,28 @@ void alpha_translate_init(void);
 #define ALPHA_CPU_TYPE_NAME(model) model ALPHA_CPU_TYPE_SUFFIX
 #define CPU_RESOLVING_TYPE TYPE_ALPHA_CPU
 
-void alpha_cpu_list(FILE *f, fprintf_function cpu_fprintf);
-/* you can call this signal handler from your SIGBUS and SIGSEGV
-   signal handlers to inform the virtual CPU of exceptions. non zero
-   is returned if the signal was handled by the virtual CPU.  */
-int cpu_alpha_signal_handler(int host_signum, void *pinfo,
-                             void *puc);
-int alpha_cpu_handle_mmu_fault(CPUState *cpu, vaddr address, int size, int rw,
-                               int mmu_idx);
-void QEMU_NORETURN dynamic_excp(CPUAlphaState *, uintptr_t, int, int);
-void QEMU_NORETURN arith_excp(CPUAlphaState *, uintptr_t, int, uint64_t);
+void alpha_cpu_list(void);
+G_NORETURN void dynamic_excp(CPUAlphaState *, uintptr_t, int, int);
+G_NORETURN void arith_excp(CPUAlphaState *, uintptr_t, int, uint64_t);
 
 uint64_t cpu_alpha_load_fpcr (CPUAlphaState *env);
 void cpu_alpha_store_fpcr (CPUAlphaState *env, uint64_t val);
 uint64_t cpu_alpha_load_gr(CPUAlphaState *env, unsigned reg);
 void cpu_alpha_store_gr(CPUAlphaState *env, unsigned reg, uint64_t val);
-#ifndef CONFIG_USER_ONLY
+
+#ifdef CONFIG_USER_ONLY
+void alpha_cpu_record_sigsegv(CPUState *cs, vaddr address,
+                              MMUAccessType access_type,
+                              bool maperr, uintptr_t retaddr);
+void alpha_cpu_record_sigbus(CPUState *cs, vaddr address,
+                             MMUAccessType access_type, uintptr_t retaddr);
+#else
+bool alpha_cpu_tlb_fill(CPUState *cs, vaddr address, int size,
+                        MMUAccessType access_type, int mmu_idx,
+                        bool probe, uintptr_t retaddr);
+G_NORETURN void alpha_cpu_do_unaligned_access(CPUState *cpu, vaddr addr,
+                                              MMUAccessType access_type, int mmu_idx,
+                                              uintptr_t retaddr);
 void alpha_cpu_do_transaction_failed(CPUState *cs, hwaddr physaddr,
                                      vaddr addr, unsigned size,
                                      MMUAccessType access_type,
@@ -494,12 +462,52 @@ void alpha_cpu_do_transaction_failed(CPUState *cs, hwaddr physaddr,
                                      MemTxResult response, uintptr_t retaddr);
 #endif
 
-static inline void cpu_get_tb_cpu_state(CPUAlphaState *env, target_ulong *pc,
-                                        target_ulong *cs_base, uint32_t *pflags)
+static inline void cpu_get_tb_cpu_state(CPUAlphaState *env, vaddr *pc,
+                                        uint64_t *cs_base, uint32_t *pflags)
 {
     *pc = env->pc;
     *cs_base = 0;
     *pflags = env->flags & ENV_FLAG_TB_MASK;
+#ifdef CONFIG_USER_ONLY
+    *pflags |= TB_FLAG_UNALIGN * !env_cpu(env)->prctl_unalign_sigbus;
+#endif
 }
+
+#ifdef CONFIG_USER_ONLY
+/* Copied from linux ieee_swcr_to_fpcr.  */
+static inline uint64_t alpha_ieee_swcr_to_fpcr(uint64_t swcr)
+{
+    uint64_t fpcr = 0;
+
+    fpcr |= (swcr & SWCR_STATUS_MASK) << 35;
+    fpcr |= (swcr & SWCR_MAP_DMZ) << 36;
+    fpcr |= (~swcr & (SWCR_TRAP_ENABLE_INV
+                      | SWCR_TRAP_ENABLE_DZE
+                      | SWCR_TRAP_ENABLE_OVF)) << 48;
+    fpcr |= (~swcr & (SWCR_TRAP_ENABLE_UNF
+                      | SWCR_TRAP_ENABLE_INE)) << 57;
+    fpcr |= (swcr & SWCR_MAP_UMZ ? FPCR_UNDZ | FPCR_UNFD : 0);
+    fpcr |= (~swcr & SWCR_TRAP_ENABLE_DNO) << 41;
+
+    return fpcr;
+}
+
+/* Copied from linux ieee_fpcr_to_swcr.  */
+static inline uint64_t alpha_ieee_fpcr_to_swcr(uint64_t fpcr)
+{
+    uint64_t swcr = 0;
+
+    swcr |= (fpcr >> 35) & SWCR_STATUS_MASK;
+    swcr |= (fpcr >> 36) & SWCR_MAP_DMZ;
+    swcr |= (~fpcr >> 48) & (SWCR_TRAP_ENABLE_INV
+                             | SWCR_TRAP_ENABLE_DZE
+                             | SWCR_TRAP_ENABLE_OVF);
+    swcr |= (~fpcr >> 57) & (SWCR_TRAP_ENABLE_UNF | SWCR_TRAP_ENABLE_INE);
+    swcr |= (fpcr >> 47) & SWCR_MAP_UMZ;
+    swcr |= (~fpcr >> 41) & SWCR_TRAP_ENABLE_DNO;
+
+    return swcr;
+}
+#endif /* CONFIG_USER_ONLY */
 
 #endif /* ALPHA_CPU_H */

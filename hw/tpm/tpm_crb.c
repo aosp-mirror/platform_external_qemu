@@ -16,22 +16,23 @@
 
 #include "qemu/osdep.h"
 
-#include "qemu-common.h"
+#include "qemu/module.h"
 #include "qapi/error.h"
 #include "exec/address-spaces.h"
-
-#include "hw/qdev-core.h"
 #include "hw/qdev-properties.h"
 #include "hw/pci/pci_ids.h"
 #include "hw/acpi/tpm.h"
 #include "migration/vmstate.h"
 #include "sysemu/tpm_backend.h"
+#include "sysemu/tpm_util.h"
 #include "sysemu/reset.h"
-#include "tpm_int.h"
-#include "tpm_util.h"
+#include "sysemu/xen.h"
+#include "tpm_prop.h"
+#include "tpm_ppi.h"
 #include "trace.h"
+#include "qom/object.h"
 
-typedef struct CRBState {
+struct CRBState {
     DeviceState parent_obj;
 
     TPMBackend *tpmbe;
@@ -41,9 +42,14 @@ typedef struct CRBState {
     MemoryRegion cmdmem;
 
     size_t be_buffer_size;
-} CRBState;
 
-#define CRB(obj) OBJECT_CHECK(CRBState, (obj), TYPE_TPM_CRB)
+    bool ppi_enabled;
+    TPMPPI ppi;
+};
+typedef struct CRBState CRBState;
+
+DECLARE_INSTANCE_CHECKER(CRBState, CRB,
+                         TYPE_TPM_CRB)
 
 #define CRB_INTF_TYPE_CRB_ACTIVE 0b1
 #define CRB_INTF_VERSION_CRB 0b1
@@ -192,6 +198,7 @@ static void tpm_crb_request_completed(TPMIf *ti, int ret)
         ARRAY_FIELD_DP32(s->regs, CRB_CTRL_STS,
                          tpmSts, 1); /* fatal error */
     }
+    memory_region_set_dirty(&s->cmdmem, 0, CRB_CTRL_CMD_SIZE);
 }
 
 static enum TPMVersion tpm_crb_get_version(TPMIf *ti)
@@ -221,6 +228,7 @@ static const VMStateDescription vmstate_tpm_crb = {
 
 static Property tpm_crb_properties[] = {
     DEFINE_PROP_TPMBE("tpmdev", CRBState, tpmbe),
+    DEFINE_PROP_BOOL("ppi", CRBState, ppi_enabled, true),
     DEFINE_PROP_END_OF_LIST(),
 };
 
@@ -228,6 +236,9 @@ static void tpm_crb_reset(void *dev)
 {
     CRBState *s = CRB(dev);
 
+    if (s->ppi_enabled) {
+        tpm_ppi_reset(&s->ppi);
+    }
     tpm_backend_reset(s->tpmbe);
 
     memset(s->regs, 0, sizeof(s->regs));
@@ -265,7 +276,9 @@ static void tpm_crb_reset(void *dev)
     s->be_buffer_size = MIN(tpm_backend_get_buffer_size(s->tpmbe),
                             CRB_CTRL_CMD_SIZE);
 
-    tpm_backend_startup_tpm(s->tpmbe, s->be_buffer_size);
+    if (tpm_backend_startup_tpm(s->tpmbe, s->be_buffer_size) < 0) {
+        exit(1);
+    }
 }
 
 static void tpm_crb_realize(DeviceState *dev, Error **errp)
@@ -291,7 +304,16 @@ static void tpm_crb_realize(DeviceState *dev, Error **errp)
     memory_region_add_subregion(get_system_memory(),
         TPM_CRB_ADDR_BASE + sizeof(s->regs), &s->cmdmem);
 
-    qemu_register_reset(tpm_crb_reset, dev);
+    if (s->ppi_enabled) {
+        tpm_ppi_init(&s->ppi, get_system_memory(),
+                     TPM_PPI_ADDR_BASE, OBJECT(s));
+    }
+
+    if (xen_enabled()) {
+        tpm_crb_reset(dev);
+    } else {
+        qemu_register_reset(tpm_crb_reset, dev);
+    }
 }
 
 static void tpm_crb_class_init(ObjectClass *klass, void *data)
@@ -300,7 +322,7 @@ static void tpm_crb_class_init(ObjectClass *klass, void *data)
     TPMIfClass *tc = TPM_IF_CLASS(klass);
 
     dc->realize = tpm_crb_realize;
-    dc->props = tpm_crb_properties;
+    device_class_set_props(dc, tpm_crb_properties);
     dc->vmsd  = &vmstate_tpm_crb;
     dc->user_creatable = true;
     tc->model = TPM_MODEL_TPM_CRB;

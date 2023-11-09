@@ -1,4 +1,0 @@
-if(WINDOWS)
-  INSTALL(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ DESTINATION ./drivers
-          FILES_MATCHING PATTERN "*.bat"  PATTERN "*.inf" PATTERN "*.cat" PATTERN "*.sys")
-endif()

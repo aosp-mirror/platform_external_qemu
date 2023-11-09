@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # NBD server - fault injection utility
 #
 # Configuration file syntax:
@@ -47,7 +47,7 @@ import sys
 import socket
 import struct
 import collections
-import ConfigParser
+import configparser
 
 FAKE_DISK_SIZE = 8 * 1024 * 1024 * 1024 # 8 GB
 
@@ -85,7 +85,7 @@ def recvall(sock, bufsize):
             raise Exception('unexpected disconnect')
         chunks.append(chunk)
         received += len(chunk)
-    return ''.join(chunks)
+    return b''.join(chunks)
 
 class Rule(object):
     def __init__(self, name, event, io, when):
@@ -110,7 +110,9 @@ class FaultInjectionSocket(object):
         for rule in self.rules:
             if rule.match(event, io):
                 if rule.when == 0 or bufsize is None:
-                    print 'Closing connection on rule match %s' % rule.name
+                    print('Closing connection on rule match %s' % rule.name)
+                    self.sock.close()
+                    sys.stdout.flush()
                     sys.exit(0)
                 if rule.when != -1:
                     return rule.when
@@ -175,14 +177,14 @@ def handle_connection(conn, use_export):
         req = read_request(conn)
         if req.type == NBD_CMD_READ:
             write_reply(conn, 0, req.handle)
-            conn.send('\0' * req.len, event='data')
+            conn.send(b'\0' * req.len, event='data')
         elif req.type == NBD_CMD_WRITE:
             _ = conn.recv(req.len, event='data')
             write_reply(conn, 0, req.handle)
         elif req.type == NBD_CMD_DISC:
             break
         else:
-            print 'unrecognized command type %#02x' % req.type
+            print('unrecognized command type %#02x' % req.type)
             break
     conn.close()
 
@@ -223,9 +225,9 @@ def parse_config(config):
     return rules
 
 def load_rules(filename):
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     with open(filename, 'rt') as f:
-        config.readfp(f, filename)
+        config.read_file(f, filename)
     return parse_config(config)
 
 def open_socket(path):
@@ -242,7 +244,7 @@ def open_socket(path):
         sock = socket.socket(socket.AF_UNIX)
         sock.bind(path)
     sock.listen(0)
-    print 'Listening on %s' % path
+    print('Listening on %s' % path)
     sys.stdout.flush() # another process may be waiting, show message now
     return sock
 

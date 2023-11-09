@@ -2,37 +2,17 @@
 #include "trace.h"
 #include "ui/qemu-spice.h"
 #include "chardev/char.h"
+#include "chardev/spice.h"
 #include "qapi/error.h"
 #include "qemu/error-report.h"
+#include "qemu/module.h"
 #include "qemu/option.h"
-#include <spice.h>
 #include <spice/protocol.h>
-
-
-typedef struct SpiceChardev {
-    Chardev               parent;
-
-    SpiceCharDeviceInstance sin;
-    bool                  active;
-    bool                  blocked;
-    const uint8_t         *datapos;
-    int                   datalen;
-    QLIST_ENTRY(SpiceChardev) next;
-} SpiceChardev;
-
-#define TYPE_CHARDEV_SPICE "chardev-spice"
-#define TYPE_CHARDEV_SPICEVMC "chardev-spicevmc"
-#define TYPE_CHARDEV_SPICEPORT "chardev-spiceport"
-
-#define SPICE_CHARDEV(obj) OBJECT_CHECK(SpiceChardev, (obj), TYPE_CHARDEV_SPICE)
 
 typedef struct SpiceCharSource {
     GSource               source;
     SpiceChardev       *scd;
 } SpiceCharSource;
-
-static QLIST_HEAD(, SpiceChardev) spice_chars =
-    QLIST_HEAD_INITIALIZER(spice_chars);
 
 static int vmc_write(SpiceCharDeviceInstance *sin, const uint8_t *buf, int len)
 {
@@ -77,7 +57,6 @@ static int vmc_read(SpiceCharDeviceInstance *sin, uint8_t *buf, int len)
     return bytes;
 }
 
-#if SPICE_SERVER_VERSION >= 0x000c02
 static void vmc_event(SpiceCharDeviceInstance *sin, uint8_t event)
 {
     SpiceChardev *scd = container_of(sin, SpiceChardev, sin);
@@ -95,7 +74,6 @@ static void vmc_event(SpiceCharDeviceInstance *sin, uint8_t event)
     trace_spice_vmc_event(chr_event);
     qemu_chr_be_event(chr, chr_event);
 }
-#endif
 
 static void vmc_state(SpiceCharDeviceInstance *sin, int connected)
 {
@@ -119,12 +97,8 @@ static SpiceCharDeviceInterface vmc_interface = {
     .state              = vmc_state,
     .write              = vmc_write,
     .read               = vmc_read,
-#if SPICE_SERVER_VERSION >= 0x000c02
     .event              = vmc_event,
-#endif
-#if SPICE_SERVER_VERSION >= 0x000c06
     .flags              = SPICE_CHAR_DEVICE_NOTIFY_WRITABLE,
-#endif
 };
 
 
@@ -134,7 +108,7 @@ static void vmc_register_interface(SpiceChardev *scd)
         return;
     }
     scd->sin.base.sif = &vmc_interface.base;
-    qemu_spice_add_interface(&scd->sin.base);
+    qemu_spice.add_interface(&scd->sin.base);
     scd->active = true;
     trace_spice_vmc_register_interface(scd);
 }
@@ -152,8 +126,13 @@ static void vmc_unregister_interface(SpiceChardev *scd)
 static gboolean spice_char_source_prepare(GSource *source, gint *timeout)
 {
     SpiceCharSource *src = (SpiceCharSource *)source;
+    Chardev *chr = CHARDEV(src->scd);
 
     *timeout = -1;
+
+    if (!chr->be_open) {
+        return true;
+    }
 
     return !src->scd->blocked;
 }
@@ -161,6 +140,11 @@ static gboolean spice_char_source_prepare(GSource *source, gint *timeout)
 static gboolean spice_char_source_check(GSource *source)
 {
     SpiceCharSource *src = (SpiceCharSource *)source;
+    Chardev *chr = CHARDEV(src->scd);
+
+    if (!chr->be_open) {
+        return true;
+    }
 
     return !src->scd->blocked;
 }
@@ -168,9 +152,12 @@ static gboolean spice_char_source_check(GSource *source)
 static gboolean spice_char_source_dispatch(GSource *source,
     GSourceFunc callback, gpointer user_data)
 {
+    SpiceCharSource *src = (SpiceCharSource *)source;
+    Chardev *chr = CHARDEV(src->scd);
     GIOFunc func = (GIOFunc)callback;
+    GIOCondition cond = chr->be_open ? G_IO_OUT : G_IO_HUP;
 
-    return func(NULL, G_IO_OUT, user_data);
+    return func(NULL, cond, user_data);
 }
 
 static GSourceFuncs SpiceCharSourceFuncs = {
@@ -199,6 +186,12 @@ static int spice_chr_write(Chardev *chr, const uint8_t *buf, int len)
     int read_bytes;
 
     assert(s->datalen == 0);
+
+    if (!chr->be_open) {
+        trace_spice_chr_discard_write(len);
+        return len;
+    }
+
     s->datapos = buf;
     s->datalen = len;
     spice_server_char_device_wakeup(&s->sin);
@@ -218,14 +211,8 @@ static void char_spice_finalize(Object *obj)
 
     vmc_unregister_interface(s);
 
-    if (s->next.le_prev) {
-        QLIST_REMOVE(s, next);
-    }
-
     g_free((char *)s->sin.subtype);
-#if SPICE_SERVER_VERSION >= 0x000c02
     g_free((char *)s->sin.portname);
-#endif
 }
 
 static void spice_vmc_set_fe_open(struct Chardev *chr, int fe_open)
@@ -240,7 +227,6 @@ static void spice_vmc_set_fe_open(struct Chardev *chr, int fe_open)
 
 static void spice_port_set_fe_open(struct Chardev *chr, int fe_open)
 {
-#if SPICE_SERVER_VERSION >= 0x000c02
     SpiceChardev *s = SPICE_CHARDEV(chr);
 
     if (fe_open) {
@@ -248,7 +234,6 @@ static void spice_port_set_fe_open(struct Chardev *chr, int fe_open)
     } else {
         spice_server_port_event(&s->sin, SPICE_PORT_EVENT_CLOSED);
     }
-#endif
 }
 
 static void spice_chr_accept_input(struct Chardev *chr)
@@ -264,8 +249,6 @@ static void chr_open(Chardev *chr, const char *subtype)
 
     s->active = false;
     s->sin.subtype = g_strdup(subtype);
-
-    QLIST_INSERT_HEAD(&spice_chars, s, next);
 }
 
 static void qemu_chr_open_spice_vmc(Chardev *chr,
@@ -295,10 +278,15 @@ static void qemu_chr_open_spice_vmc(Chardev *chr,
     }
 
     *be_opened = false;
+#if SPICE_SERVER_VERSION < 0x000e02
+    /* Spice < 0.14.2 doesn't explicitly open smartcard chardev */
+    if (strcmp(type, "smartcard") == 0) {
+        *be_opened = true;
+    }
+#endif
     chr_open(chr, type);
 }
 
-#if SPICE_SERVER_VERSION >= 0x000c02
 static void qemu_chr_open_spice_port(Chardev *chr,
                                      ChardevBackend *backend,
                                      bool *be_opened,
@@ -313,25 +301,19 @@ static void qemu_chr_open_spice_port(Chardev *chr,
         return;
     }
 
+    if (!using_spice) {
+        error_setg(errp, "spice not enabled");
+        return;
+    }
+
     chr_open(chr, "port");
 
     *be_opened = false;
     s = SPICE_CHARDEV(chr);
     s->sin.portname = g_strdup(name);
-}
 
-void qemu_spice_register_ports(void)
-{
-    SpiceChardev *s;
-
-    QLIST_FOREACH(s, &spice_chars, next) {
-        if (s->sin.portname == NULL) {
-            continue;
-        }
-        vmc_register_interface(s);
-    }
+    vmc_register_interface(s);
 }
-#endif
 
 static void qemu_chr_parse_spice_vmc(QemuOpts *opts, ChardevBackend *backend,
                                      Error **errp)
@@ -382,6 +364,7 @@ static const TypeInfo char_spice_type_info = {
     .class_init = char_spice_class_init,
     .abstract = true,
 };
+module_obj(TYPE_CHARDEV_SPICE);
 
 static void char_spicevmc_class_init(ObjectClass *oc, void *data)
 {
@@ -397,6 +380,7 @@ static const TypeInfo char_spicevmc_type_info = {
     .parent = TYPE_CHARDEV_SPICE,
     .class_init = char_spicevmc_class_init,
 };
+module_obj(TYPE_CHARDEV_SPICEVMC);
 
 static void char_spiceport_class_init(ObjectClass *oc, void *data)
 {
@@ -412,6 +396,7 @@ static const TypeInfo char_spiceport_type_info = {
     .parent = TYPE_CHARDEV_SPICE,
     .class_init = char_spiceport_class_init,
 };
+module_obj(TYPE_CHARDEV_SPICEPORT);
 
 static void register_types(void)
 {
@@ -421,3 +406,5 @@ static void register_types(void)
 }
 
 type_init(register_types);
+
+module_dep("ui-spice-core");

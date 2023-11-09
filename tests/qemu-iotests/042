@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# group: rw auto quick
 #
 # Test qemu-img operation on zero size images
 #
@@ -24,7 +25,6 @@ owner=kwolf@redhat.com
 seq=`basename $0`
 echo "QA output created by $seq"
 
-here=`pwd`
 status=1	# failure is the default!
 
 _cleanup()
@@ -39,7 +39,6 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
 
 _supported_fmt qcow2 qed
 _supported_proto file
-_supported_os Linux
 
 echo
 echo "== Creating zero size image =="
@@ -66,8 +65,8 @@ _check_test_img
 echo
 echo "== Rebasing the image =="
 
-$QEMU_IMG rebase -u -b "$TEST_IMG.orig" "$TEST_IMG"
-$QEMU_IMG rebase -b "$TEST_IMG.orig" "$TEST_IMG"
+$QEMU_IMG rebase -u -b "$TEST_IMG.orig" -F $IMGFMT "$TEST_IMG"
+$QEMU_IMG rebase -b "$TEST_IMG.orig" -F $IMGFMT "$TEST_IMG"
 _check_test_img
 
 # success, all done

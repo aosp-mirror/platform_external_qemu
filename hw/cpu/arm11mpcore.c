@@ -9,9 +9,13 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
+#include "qemu/module.h"
 #include "hw/cpu/arm11mpcore.h"
 #include "hw/intc/realview_gic.h"
+#include "hw/irq.h"
+#include "hw/qdev-properties.h"
 
+#define ARM11MPCORE_NUM_GIC_PRIORITY_BITS    4
 
 static void mpcore_priv_set_irq(void *opaque, int irq, int level)
 {
@@ -72,20 +76,19 @@ static void mpcore_priv_realize(DeviceState *dev, Error **errp)
     DeviceState *gicdev = DEVICE(&s->gic);
     DeviceState *mptimerdev = DEVICE(&s->mptimer);
     DeviceState *wdtimerdev = DEVICE(&s->wdtimer);
-    Error *err = NULL;
 
     qdev_prop_set_uint32(scudev, "num-cpu", s->num_cpu);
-    object_property_set_bool(OBJECT(&s->scu), true, "realized", &err);
-    if (err != NULL) {
-        error_propagate(errp, err);
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->scu), errp)) {
         return;
     }
 
     qdev_prop_set_uint32(gicdev, "num-cpu", s->num_cpu);
     qdev_prop_set_uint32(gicdev, "num-irq", s->num_irq);
-    object_property_set_bool(OBJECT(&s->gic), true, "realized", &err);
-    if (err != NULL) {
-        error_propagate(errp, err);
+    qdev_prop_set_uint32(gicdev, "num-priority-bits",
+                         ARM11MPCORE_NUM_GIC_PRIORITY_BITS);
+
+
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->gic), errp)) {
         return;
     }
 
@@ -96,16 +99,12 @@ static void mpcore_priv_realize(DeviceState *dev, Error **errp)
     qdev_init_gpio_in(dev, mpcore_priv_set_irq, s->num_irq - 32);
 
     qdev_prop_set_uint32(mptimerdev, "num-cpu", s->num_cpu);
-    object_property_set_bool(OBJECT(&s->mptimer), true, "realized", &err);
-    if (err != NULL) {
-        error_propagate(errp, err);
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->mptimer), errp)) {
         return;
     }
 
     qdev_prop_set_uint32(wdtimerdev, "num-cpu", s->num_cpu);
-    object_property_set_bool(OBJECT(&s->wdtimer), true, "realized", &err);
-    if (err != NULL) {
-        error_propagate(errp, err);
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->wdtimer), errp)) {
         return;
     }
 
@@ -121,19 +120,15 @@ static void mpcore_priv_initfn(Object *obj)
                        "mpcore-priv-container", 0x2000);
     sysbus_init_mmio(sbd, &s->container);
 
-    object_initialize(&s->scu, sizeof(s->scu), TYPE_ARM11_SCU);
-    qdev_set_parent_bus(DEVICE(&s->scu), sysbus_get_default());
+    object_initialize_child(obj, "scu", &s->scu, TYPE_ARM11_SCU);
 
-    object_initialize(&s->gic, sizeof(s->gic), TYPE_ARM_GIC);
-    qdev_set_parent_bus(DEVICE(&s->gic), sysbus_get_default());
+    object_initialize_child(obj, "gic", &s->gic, TYPE_ARM_GIC);
     /* Request the legacy 11MPCore GIC behaviour: */
     qdev_prop_set_uint32(DEVICE(&s->gic), "revision", 0);
 
-    object_initialize(&s->mptimer, sizeof(s->mptimer), TYPE_ARM_MPTIMER);
-    qdev_set_parent_bus(DEVICE(&s->mptimer), sysbus_get_default());
+    object_initialize_child(obj, "mptimer", &s->mptimer, TYPE_ARM_MPTIMER);
 
-    object_initialize(&s->wdtimer, sizeof(s->wdtimer), TYPE_ARM_MPTIMER);
-    qdev_set_parent_bus(DEVICE(&s->wdtimer), sysbus_get_default());
+    object_initialize_child(obj, "wdtimer", &s->wdtimer, TYPE_ARM_MPTIMER);
 }
 
 static Property mpcore_priv_properties[] = {
@@ -155,7 +150,7 @@ static void mpcore_priv_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
 
     dc->realize = mpcore_priv_realize;
-    dc->props = mpcore_priv_properties;
+    device_class_set_props(dc, mpcore_priv_properties);
 }
 
 static const TypeInfo mpcore_priv_info = {

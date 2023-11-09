@@ -13,26 +13,39 @@
 
 use warnings;
 use strict;
+use File::Basename;
 
-my $buf = '';
+my @files = ();
+my $events = '';
 my %seen = ();
 
 sub out {
-    print $buf;
-    $buf = '';
+    print sort @files;
+    print $events;
+    @files = ();
+    $events = '';
     %seen = ();
 }
 
-while (<>) {
-    if (/^(disable )?([a-z_0-9]+)\(/) {
-        open GREP, '-|', 'git', 'grep', '-lw', "trace_$2"
+$#ARGV == 0 or die "usage: $0 FILE";
+my $in = $ARGV[0];
+my $dir = dirname($in);
+open(IN, $in) or die "open $in: $!";
+chdir($dir) or die "chdir $dir: $!";
+
+while (<IN>) {
+    if (/^(disable |(tcg) |(vcpu) )*([a-z_0-9]+)\(/i) {
+        my $pat = "trace_$4";
+        $pat .= '_tcg' if defined $2;
+        open GREP, '-|', 'git', 'grep', '-lw',
+	    defined $3 ? () : ('--max-depth', '1'),
+	    $pat
             or die "run git grep: $!";
-        my $fname;
-        while ($fname = <GREP>) {
+        while (my $fname = <GREP>) {
             chomp $fname;
             next if $seen{$fname} || $fname eq 'trace-events';
             $seen{$fname} = 1;
-            $buf = "# $fname\n" . $buf;
+            push @files, "# $fname\n";
         }
         unless (close GREP) {
             die "close git grep: $!"
@@ -45,7 +58,8 @@ while (<>) {
     } elsif (!/^#|^$/) {
         warn "unintelligible line";
     }
-    $buf .= $_;
+    $events .= $_;
 }
 
 out;
+close(IN) or die "close $in: $!";

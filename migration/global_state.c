@@ -13,6 +13,7 @@
 #include "qemu/osdep.h"
 #include "qemu/cutils.h"
 #include "qemu/error-report.h"
+#include "sysemu/runstate.h"
 #include "qapi/error.h"
 #include "migration.h"
 #include "migration/global_state.h"
@@ -28,22 +29,22 @@ typedef struct {
 
 static GlobalState global_state;
 
-int global_state_store(void)
+static void global_state_do_store(RunState state)
 {
-    if (!runstate_store((char *)global_state.runstate,
-                        sizeof(global_state.runstate))) {
-        error_report("runstate name too big: %s", global_state.runstate);
-        trace_migrate_state_too_big();
-        return -EINVAL;
-    }
-    return 0;
+    const char *state_str = RunState_str(state);
+    assert(strlen(state_str) < sizeof(global_state.runstate));
+    strpadcpy((char *)global_state.runstate, sizeof(global_state.runstate),
+              state_str, '\0');
+}
+
+void global_state_store(void)
+{
+    global_state_do_store(runstate_get());
 }
 
 void global_state_store_running(void)
 {
-    const char *state = RunState_str(RUN_STATE_RUNNING);
-    strncpy((char *)global_state.runstate,
-           state, sizeof(global_state.runstate));
+    global_state_do_store(RUN_STATE_RUNNING);
 }
 
 bool global_state_received(void)
@@ -88,6 +89,17 @@ static int global_state_post_load(void *opaque, int version_id)
     s->received = true;
     trace_migrate_global_state_post_load(runstate);
 
+    if (strnlen((char *)s->runstate,
+                sizeof(s->runstate)) == sizeof(s->runstate)) {
+        /*
+         * This condition should never happen during migration, because
+         * all runstate names are shorter than 100 bytes (the size of
+         * s->runstate). However, a malicious stream could overflow
+         * the qapi_enum_parse() call, so we force the last character
+         * to a NUL byte.
+         */
+        s->runstate[sizeof(s->runstate) - 1] = '\0';
+    }
     r = qapi_enum_parse(&RunState_lookup, runstate, -1, &local_err);
 
     if (r == -1) {
@@ -106,7 +118,8 @@ static int global_state_pre_save(void *opaque)
     GlobalState *s = opaque;
 
     trace_migrate_global_state_pre_save((char *)s->runstate);
-    s->size = strlen((char *)s->runstate) + 1;
+    s->size = strnlen((char *)s->runstate, sizeof(s->runstate)) + 1;
+    assert(s->size <= sizeof(s->runstate));
 
     return 0;
 }

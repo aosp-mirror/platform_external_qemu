@@ -24,18 +24,17 @@
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 
-#include "hw/hw.h"
 #include "net/net.h"
 #include "net/checksum.h"
 #include "net/util.h"
-#include "hw/xen/xen_backend.h"
+#include "hw/xen/xen-legacy-backend.h"
 
-#include <xen/io/netif.h>
+#include "hw/xen/interface/io/netif.h"
 
 /* ------------------------------------------------------------- */
 
 struct XenNetDev {
-    struct XenDevice      xendev;  /* must be first */
+    struct XenLegacyDevice      xendev;  /* must be first */
     char                  *mac;
     int                   tx_work;
     int                   tx_ring_ref;
@@ -146,7 +145,7 @@ static void net_tx_packets(struct XenNetDev *netdev)
                 continue;
             }
 
-            if ((txreq.offset + txreq.size) > XC_PAGE_SIZE) {
+            if ((txreq.offset + txreq.size) > XEN_PAGE_SIZE) {
                 xen_pv_printf(&netdev->xendev, 0, "error: page crossing\n");
                 net_tx_error(netdev, &txreq, rc);
                 continue;
@@ -160,9 +159,8 @@ static void net_tx_packets(struct XenNetDev *netdev)
                           (txreq.flags & NETTXF_more_data)      ? " more_data"      : "",
                           (txreq.flags & NETTXF_extra_info)     ? " extra_info"     : "");
 
-            page = xengnttab_map_grant_ref(netdev->xendev.gnttabdev,
-                                           netdev->xendev.dom,
-                                           txreq.gref, PROT_READ);
+            page = xen_be_map_grant_ref(&netdev->xendev, txreq.gref,
+                                        PROT_READ);
             if (page == NULL) {
                 xen_pv_printf(&netdev->xendev, 0,
                               "error: tx gref dereference failed (%d)\n",
@@ -173,17 +171,17 @@ static void net_tx_packets(struct XenNetDev *netdev)
             if (txreq.flags & NETTXF_csum_blank) {
                 /* have read-only mapping -> can't fill checksum in-place */
                 if (!tmpbuf) {
-                    tmpbuf = g_malloc(XC_PAGE_SIZE);
+                    tmpbuf = g_malloc(XEN_PAGE_SIZE);
                 }
                 memcpy(tmpbuf, page + txreq.offset, txreq.size);
-                net_checksum_calculate(tmpbuf, txreq.size);
+                net_checksum_calculate(tmpbuf, txreq.size, CSUM_ALL);
                 qemu_send_packet(qemu_get_queue(netdev->nic), tmpbuf,
                                  txreq.size);
             } else {
                 qemu_send_packet(qemu_get_queue(netdev->nic),
                                  page + txreq.offset, txreq.size);
             }
-            xengnttab_unmap(netdev->xendev.gnttabdev, page, 1);
+            xen_be_unmap_grant_ref(&netdev->xendev, page, txreq.gref);
             net_tx_response(netdev, &txreq, NETIF_RSP_OKAY);
         }
         if (!netdev->tx_work) {
@@ -245,18 +243,16 @@ static ssize_t net_rx_packet(NetClientState *nc, const uint8_t *buf, size_t size
     if (rc == rp || RING_REQUEST_CONS_OVERFLOW(&netdev->rx_ring, rc)) {
         return 0;
     }
-    if (size > XC_PAGE_SIZE - NET_IP_ALIGN) {
+    if (size > XEN_PAGE_SIZE - NET_IP_ALIGN) {
         xen_pv_printf(&netdev->xendev, 0, "packet too big (%lu > %ld)",
-                      (unsigned long)size, XC_PAGE_SIZE - NET_IP_ALIGN);
+                      (unsigned long)size, XEN_PAGE_SIZE - NET_IP_ALIGN);
         return -1;
     }
 
     memcpy(&rxreq, RING_GET_REQUEST(&netdev->rx_ring, rc), sizeof(rxreq));
     netdev->rx_ring.req_cons = ++rc;
 
-    page = xengnttab_map_grant_ref(netdev->xendev.gnttabdev,
-                                   netdev->xendev.dom,
-                                   rxreq.gref, PROT_WRITE);
+    page = xen_be_map_grant_ref(&netdev->xendev, rxreq.gref, PROT_WRITE);
     if (page == NULL) {
         xen_pv_printf(&netdev->xendev, 0,
                       "error: rx gref dereference failed (%d)\n",
@@ -265,7 +261,7 @@ static ssize_t net_rx_packet(NetClientState *nc, const uint8_t *buf, size_t size
         return -1;
     }
     memcpy(page + NET_IP_ALIGN, buf, size);
-    xengnttab_unmap(netdev->xendev.gnttabdev, page, 1);
+    xen_be_unmap_grant_ref(&netdev->xendev, page, rxreq.gref);
     net_rx_response(netdev, &rxreq, NETIF_RSP_OKAY, NET_IP_ALIGN, size, 0);
 
     return size;
@@ -279,7 +275,7 @@ static NetClientInfo net_xen_info = {
     .receive = net_rx_packet,
 };
 
-static int net_init(struct XenDevice *xendev)
+static int net_init(struct XenLegacyDevice *xendev)
 {
     struct XenNetDev *netdev = container_of(xendev, struct XenNetDev, xendev);
 
@@ -300,9 +296,8 @@ static int net_init(struct XenDevice *xendev)
     netdev->nic = qemu_new_nic(&net_xen_info, &netdev->conf,
                                "xen", NULL, netdev);
 
-    snprintf(qemu_get_queue(netdev->nic)->info_str,
-             sizeof(qemu_get_queue(netdev->nic)->info_str),
-             "nic: xenbus vif macaddr=%s", netdev->mac);
+    qemu_set_info_str(qemu_get_queue(netdev->nic),
+                      "nic: xenbus vif macaddr=%s", netdev->mac);
 
     /* fill info */
     xenstore_write_be_int(&netdev->xendev, "feature-rx-copy", 1);
@@ -311,7 +306,7 @@ static int net_init(struct XenDevice *xendev)
     return 0;
 }
 
-static int net_connect(struct XenDevice *xendev)
+static int net_connect(struct XenLegacyDevice *xendev)
 {
     struct XenNetDev *netdev = container_of(xendev, struct XenNetDev, xendev);
     int rx_copy;
@@ -338,24 +333,23 @@ static int net_connect(struct XenDevice *xendev)
         return -1;
     }
 
-    netdev->txs = xengnttab_map_grant_ref(netdev->xendev.gnttabdev,
-                                          netdev->xendev.dom,
-                                          netdev->tx_ring_ref,
-                                          PROT_READ | PROT_WRITE);
+    netdev->txs = xen_be_map_grant_ref(&netdev->xendev,
+                                       netdev->tx_ring_ref,
+                                       PROT_READ | PROT_WRITE);
     if (!netdev->txs) {
         return -1;
     }
-    netdev->rxs = xengnttab_map_grant_ref(netdev->xendev.gnttabdev,
-                                          netdev->xendev.dom,
-                                          netdev->rx_ring_ref,
-                                          PROT_READ | PROT_WRITE);
+    netdev->rxs = xen_be_map_grant_ref(&netdev->xendev,
+                                       netdev->rx_ring_ref,
+                                       PROT_READ | PROT_WRITE);
     if (!netdev->rxs) {
-        xengnttab_unmap(netdev->xendev.gnttabdev, netdev->txs, 1);
+        xen_be_unmap_grant_ref(&netdev->xendev, netdev->txs,
+                               netdev->tx_ring_ref);
         netdev->txs = NULL;
         return -1;
     }
-    BACK_RING_INIT(&netdev->tx_ring, netdev->txs, XC_PAGE_SIZE);
-    BACK_RING_INIT(&netdev->rx_ring, netdev->rxs, XC_PAGE_SIZE);
+    BACK_RING_INIT(&netdev->tx_ring, netdev->txs, XEN_PAGE_SIZE);
+    BACK_RING_INIT(&netdev->rx_ring, netdev->rxs, XEN_PAGE_SIZE);
 
     xen_be_bind_evtchn(&netdev->xendev);
 
@@ -368,30 +362,32 @@ static int net_connect(struct XenDevice *xendev)
     return 0;
 }
 
-static void net_disconnect(struct XenDevice *xendev)
+static void net_disconnect(struct XenLegacyDevice *xendev)
 {
     struct XenNetDev *netdev = container_of(xendev, struct XenNetDev, xendev);
 
     xen_pv_unbind_evtchn(&netdev->xendev);
 
     if (netdev->txs) {
-        xengnttab_unmap(netdev->xendev.gnttabdev, netdev->txs, 1);
+        xen_be_unmap_grant_ref(&netdev->xendev, netdev->txs,
+                               netdev->tx_ring_ref);
         netdev->txs = NULL;
     }
     if (netdev->rxs) {
-        xengnttab_unmap(netdev->xendev.gnttabdev, netdev->rxs, 1);
+        xen_be_unmap_grant_ref(&netdev->xendev, netdev->rxs,
+                               netdev->rx_ring_ref);
         netdev->rxs = NULL;
     }
 }
 
-static void net_event(struct XenDevice *xendev)
+static void net_event(struct XenLegacyDevice *xendev)
 {
     struct XenNetDev *netdev = container_of(xendev, struct XenNetDev, xendev);
     net_tx_packets(netdev);
     qemu_flush_queued_packets(qemu_get_queue(netdev->nic));
 }
 
-static int net_free(struct XenDevice *xendev)
+static int net_free(struct XenLegacyDevice *xendev)
 {
     struct XenNetDev *netdev = container_of(xendev, struct XenNetDev, xendev);
 

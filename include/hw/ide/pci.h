@@ -2,6 +2,8 @@
 #define HW_IDE_PCI_H
 
 #include "hw/ide/internal.h"
+#include "hw/pci/pci_device.h"
+#include "qom/object.h"
 
 #define BM_STATUS_DMAING 0x01
 #define BM_STATUS_ERROR  0x02
@@ -37,40 +39,30 @@ typedef struct BMDMAState {
     struct PCIIDEState *pci_dev;
 } BMDMAState;
 
-typedef struct CMD646BAR {
-    MemoryRegion cmd;
-    MemoryRegion data;
-    IDEBus *bus;
-    struct PCIIDEState *pci_dev;
-} CMD646BAR;
-
 #define TYPE_PCI_IDE "pci-ide"
-#define PCI_IDE(obj) OBJECT_CHECK(PCIIDEState, (obj), TYPE_PCI_IDE)
+OBJECT_DECLARE_SIMPLE_TYPE(PCIIDEState, PCI_IDE)
 
-typedef struct PCIIDEState {
+struct PCIIDEState {
     /*< private >*/
     PCIDevice parent_obj;
     /*< public >*/
 
     IDEBus bus[2];
     BMDMAState bmdma[2];
+    qemu_irq isa_irq[2];
     uint32_t secondary; /* used only for cmd646 */
     MemoryRegion bmdma_bar;
-    CMD646BAR cmd646_bar[2]; /* used only for cmd646 */
-} PCIIDEState;
-
-
-static inline IDEState *bmdma_active_if(BMDMAState *bmdma)
-{
-    assert(bmdma->bus->retry_unit != (uint8_t)-1);
-    return bmdma->bus->ifs + bmdma->bus->retry_unit;
-}
-
+    MemoryRegion cmd_bar[2];
+    MemoryRegion data_bar[2];
+};
 
 void bmdma_init(IDEBus *bus, BMDMAState *bm, PCIIDEState *d);
 void bmdma_cmd_writeb(BMDMAState *bm, uint32_t val);
+void bmdma_status_writeb(BMDMAState *bm, uint32_t val);
 extern MemoryRegionOps bmdma_addr_ioport_ops;
-void pci_ide_create_devs(PCIDevice *dev, DriveInfo **hd_table);
+void pci_ide_create_devs(PCIDevice *dev);
 
 extern const VMStateDescription vmstate_ide_pci;
+extern const MemoryRegionOps pci_ide_cmd_le_ops;
+extern const MemoryRegionOps pci_ide_data_le_ops;
 #endif

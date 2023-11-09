@@ -15,12 +15,16 @@
  */
 
 #include "qemu/osdep.h"
-#include "hw/hw.h"
+#include "hw/irq.h"
 #include "hw/ppc/e500-ccsr.h"
-#include "hw/pci/pci.h"
+#include "hw/qdev-properties.h"
+#include "migration/vmstate.h"
+#include "hw/pci/pci_device.h"
 #include "hw/pci/pci_host.h"
 #include "qemu/bswap.h"
+#include "qemu/module.h"
 #include "hw/pci-host/ppce500.h"
+#include "qom/object.h"
 
 #ifdef DEBUG_PCI
 #define pci_debug(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__)
@@ -88,8 +92,7 @@ struct pci_inbound {
 
 #define TYPE_PPC_E500_PCI_HOST_BRIDGE "e500-pcihost"
 
-#define PPC_E500_PCI_HOST_BRIDGE(obj) \
-    OBJECT_CHECK(PPCE500PCIState, (obj), TYPE_PPC_E500_PCI_HOST_BRIDGE)
+OBJECT_DECLARE_SIMPLE_TYPE(PPCE500PCIState, PPC_E500_PCI_HOST_BRIDGE)
 
 struct PPCE500PCIState {
     PCIHostState parent_obj;
@@ -111,8 +114,7 @@ struct PPCE500PCIState {
 };
 
 #define TYPE_PPC_E500_PCI_BRIDGE "e500-host-bridge"
-#define PPC_E500_PCI_BRIDGE(obj) \
-    OBJECT_CHECK(PPCE500PCIBridgeState, (obj), TYPE_PPC_E500_PCI_BRIDGE)
+OBJECT_DECLARE_SIMPLE_TYPE(PPCE500PCIBridgeState, PPC_E500_PCI_BRIDGE)
 
 struct PPCE500PCIBridgeState {
     /*< private >*/
@@ -122,8 +124,6 @@ struct PPCE500PCIBridgeState {
     MemoryRegion bar0;
 };
 
-typedef struct PPCE500PCIBridgeState PPCE500PCIBridgeState;
-typedef struct PPCE500PCIState PPCE500PCIState;
 
 static uint64_t pci_reg_read4(void *opaque, hwaddr addr,
                               unsigned size)
@@ -189,7 +189,7 @@ static uint64_t pci_reg_read4(void *opaque, hwaddr addr,
         break;
     }
 
-    pci_debug("%s: win:%lx(addr:" TARGET_FMT_plx ") -> value:%x\n", __func__,
+    pci_debug("%s: win:%lx(addr:" HWADDR_FMT_plx ") -> value:%x\n", __func__,
               win, addr, value);
     return value;
 }
@@ -268,7 +268,7 @@ static void pci_reg_write4(void *opaque, hwaddr addr,
 
     win = addr & 0xfe0;
 
-    pci_debug("%s: value:%x -> win:%lx(addr:" TARGET_FMT_plx ")\n",
+    pci_debug("%s: value:%x -> win:%lx(addr:" HWADDR_FMT_plx ")\n",
               __func__, (unsigned)value, win, addr);
 
     switch (win) {
@@ -342,7 +342,7 @@ static const MemoryRegionOps e500_pci_reg_ops = {
 
 static int mpc85xx_pci_map_irq(PCIDevice *pci_dev, int pin)
 {
-    int devno = pci_dev->devfn >> 3;
+    int devno = PCI_SLOT(pci_dev->devfn);
     int ret;
 
     ret = ppce500_pci_map_irq_slot(devno, pin);
@@ -415,7 +415,6 @@ static const VMStateDescription vmstate_ppce500_pci = {
     }
 };
 
-#include "exec/address-spaces.h"
 
 static void e500_pcihost_bridge_realize(PCIDevice *d, Error **errp)
 {
@@ -436,8 +435,9 @@ static AddressSpace *e500_pcihost_set_iommu(PCIBus *bus, void *opaque,
     return &s->bm_as;
 }
 
-static int e500_pcihost_initfn(SysBusDevice *dev)
+static void e500_pcihost_realize(DeviceState *dev, Error **errp)
 {
+    SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
     PCIHostState *h;
     PPCE500PCIState *s;
     PCIBus *b;
@@ -447,7 +447,7 @@ static int e500_pcihost_initfn(SysBusDevice *dev)
     s = PPC_E500_PCI_HOST_BRIDGE(dev);
 
     for (i = 0; i < ARRAY_SIZE(s->irq); i++) {
-        sysbus_init_irq(dev, &s->irq[i]);
+        sysbus_init_irq(sbd, &s->irq[i]);
     }
 
     for (i = 0; i < PCI_NUM_PINS; i++) {
@@ -460,7 +460,7 @@ static int e500_pcihost_initfn(SysBusDevice *dev)
     /* PIO lives at the bottom of our bus space */
     memory_region_add_subregion_overlap(&s->busmem, 0, &s->pio, -2);
 
-    b = pci_register_root_bus(DEVICE(dev), NULL, mpc85xx_pci_set_irq,
+    b = pci_register_root_bus(dev, NULL, mpc85xx_pci_set_irq,
                               mpc85xx_pci_map_irq, s, &s->busmem, &s->pio,
                               PCI_DEVFN(s->first_slot, 0), 4, TYPE_PCI_BUS);
     h->bus = b;
@@ -483,10 +483,8 @@ static int e500_pcihost_initfn(SysBusDevice *dev)
     memory_region_add_subregion(&s->container, PCIE500_CFGADDR, &h->conf_mem);
     memory_region_add_subregion(&s->container, PCIE500_CFGDATA, &h->data_mem);
     memory_region_add_subregion(&s->container, PCIE500_REG_BASE, &s->iomem);
-    sysbus_init_mmio(dev, &s->container);
+    sysbus_init_mmio(sbd, &s->container);
     pci_bus_set_route_irq_fn(b, e500_route_intx_pin_to_irq);
-
-    return 0;
 }
 
 static void e500_host_bridge_class_init(ObjectClass *klass, void *data)
@@ -507,7 +505,7 @@ static void e500_host_bridge_class_init(ObjectClass *klass, void *data)
 }
 
 static const TypeInfo e500_host_bridge_info = {
-    .name          = "e500-host-bridge",
+    .name          = TYPE_PPC_E500_PCI_BRIDGE,
     .parent        = TYPE_PCI_DEVICE,
     .instance_size = sizeof(PPCE500PCIBridgeState),
     .class_init    = e500_host_bridge_class_init,
@@ -526,11 +524,10 @@ static Property pcihost_properties[] = {
 static void e500_pcihost_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
-    SysBusDeviceClass *k = SYS_BUS_DEVICE_CLASS(klass);
 
-    k->init = e500_pcihost_initfn;
+    dc->realize = e500_pcihost_realize;
     set_bit(DEVICE_CATEGORY_BRIDGE, dc->categories);
-    dc->props = pcihost_properties;
+    device_class_set_props(dc, pcihost_properties);
     dc->vmsd = &vmstate_ppce500_pci;
 }
 

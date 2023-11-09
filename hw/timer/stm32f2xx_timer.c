@@ -23,8 +23,12 @@
  */
 
 #include "qemu/osdep.h"
+#include "hw/irq.h"
+#include "hw/qdev-properties.h"
 #include "hw/timer/stm32f2xx_timer.h"
+#include "migration/vmstate.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
 
 #ifndef STM_TIMER_ERR_DEBUG
 #define STM_TIMER_ERR_DEBUG 0
@@ -218,7 +222,6 @@ static void stm32f2xx_timer_write(void *opaque, hwaddr offset,
     case TIM_PSC:
         timer_val = stm32f2xx_ns_to_ticks(s, now) - s->tick_offset;
         s->tim_psc = value & 0xFFFF;
-        value = timer_val;
         break;
     case TIM_CNT:
         timer_val = value;
@@ -308,9 +311,13 @@ static void stm32f2xx_timer_init(Object *obj)
     sysbus_init_irq(SYS_BUS_DEVICE(obj), &s->irq);
 
     memory_region_init_io(&s->iomem, obj, &stm32f2xx_timer_ops, s,
-                          "stm32f2xx_timer", 0x4000);
+                          "stm32f2xx_timer", 0x400);
     sysbus_init_mmio(SYS_BUS_DEVICE(obj), &s->iomem);
+}
 
+static void stm32f2xx_timer_realize(DeviceState *dev, Error **errp)
+{
+    STM32F2XXTimerState *s = STM32F2XXTIMER(dev);
     s->timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, stm32f2xx_timer_interrupt, s);
 }
 
@@ -319,8 +326,9 @@ static void stm32f2xx_timer_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
 
     dc->reset = stm32f2xx_timer_reset;
-    dc->props = stm32f2xx_timer_properties;
+    device_class_set_props(dc, stm32f2xx_timer_properties);
     dc->vmsd = &vmstate_stm32f2xx_timer;
+    dc->realize = stm32f2xx_timer_realize;
 }
 
 static const TypeInfo stm32f2xx_timer_info = {

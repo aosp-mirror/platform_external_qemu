@@ -22,8 +22,10 @@
  * THE SOFTWARE.
  */
 
-#ifndef QEMU_FILE_H
-#define QEMU_FILE_H
+#ifndef MIGRATION_QEMU_FILE_TYPES_H
+#define MIGRATION_QEMU_FILE_TYPES_H
+
+int qemu_file_get_error(QEMUFile *f);
 
 void qemu_put_buffer(QEMUFile *f, const uint8_t *buf, size_t size);
 void qemu_put_byte(QEMUFile *f, int v);
@@ -33,7 +35,7 @@ void qemu_put_byte(QEMUFile *f, int v);
 void qemu_put_be16(QEMUFile *f, unsigned int v);
 void qemu_put_be32(QEMUFile *f, unsigned int v);
 void qemu_put_be64(QEMUFile *f, uint64_t v);
-size_t qemu_get_buffer(QEMUFile *f, uint8_t *buf, size_t size);
+size_t coroutine_mixed_fn qemu_get_buffer(QEMUFile *f, uint8_t *buf, size_t size);
 
 int qemu_get_byte(QEMUFile *f);
 
@@ -159,6 +161,20 @@ static inline void qemu_get_sbe64s(QEMUFile *f, int64_t *pv)
     qemu_get_be64s(f, (uint64_t *)pv);
 }
 
-int qemu_file_rate_limit(QEMUFile *f);
+size_t coroutine_mixed_fn qemu_get_counted_string(QEMUFile *f, char buf[256]);
+
+void qemu_put_counted_string(QEMUFile *f, const char *name);
+
+/**
+ * migration_rate_exceeded: Check if we have exceeded rate for this interval
+ *
+ * Checks if we have already transferred more data that we are allowed
+ * in the current interval.
+ *
+ * @f: QEMUFile used for main migration channel
+ *
+ * Returns if we should stop sending data for this interval.
+ */
+bool migration_rate_exceeded(QEMUFile *f);
 
 #endif

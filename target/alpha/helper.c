@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,25 +18,54 @@
  */
 
 #include "qemu/osdep.h"
-
+#include "qemu/log.h"
 #include "cpu.h"
 #include "exec/exec-all.h"
-#include "fpu/softfloat.h"
+#include "fpu/softfloat-types.h"
 #include "exec/helper-proto.h"
+#include "qemu/qemu-print.h"
 
 
 #define CONVERT_BIT(X, SRC, DST) \
     (SRC > DST ? (X) / (SRC / DST) & (DST) : ((X) & SRC) * (DST / SRC))
 
-uint64_t cpu_alpha_load_fpcr (CPUAlphaState *env)
+uint64_t cpu_alpha_load_fpcr(CPUAlphaState *env)
 {
     return (uint64_t)env->fpcr << 32;
 }
 
-void cpu_alpha_store_fpcr (CPUAlphaState *env, uint64_t val)
+void cpu_alpha_store_fpcr(CPUAlphaState *env, uint64_t val)
 {
+    static const uint8_t rm_map[] = {
+        [FPCR_DYN_NORMAL >> FPCR_DYN_SHIFT] = float_round_nearest_even,
+        [FPCR_DYN_CHOPPED >> FPCR_DYN_SHIFT] = float_round_to_zero,
+        [FPCR_DYN_MINUS >> FPCR_DYN_SHIFT] = float_round_down,
+        [FPCR_DYN_PLUS >> FPCR_DYN_SHIFT] = float_round_up,
+    };
+
     uint32_t fpcr = val >> 32;
     uint32_t t = 0;
+
+    /* Record the raw value before adjusting for linux-user.  */
+    env->fpcr = fpcr;
+
+#ifdef CONFIG_USER_ONLY
+    /*
+     * Override some of these bits with the contents of ENV->SWCR.
+     * In system mode, some of these would trap to the kernel, at
+     * which point the kernel's handler would emulate and apply
+     * the software exception mask.
+     */
+    uint32_t soft_fpcr = alpha_ieee_swcr_to_fpcr(env->swcr) >> 32;
+    fpcr |= soft_fpcr & (FPCR_STATUS_MASK | FPCR_DNZ);
+
+    /*
+     * The IOV exception is disabled by the kernel with SWCR_TRAP_ENABLE_INV,
+     * which got mapped by alpha_ieee_swcr_to_fpcr to FPCR_INVD.
+     * Add FPCR_IOV to fpcr_exc_enable so that it is handled identically.
+     */
+    t |= CONVERT_BIT(soft_fpcr, FPCR_INVD, FPCR_IOV);
+#endif
 
     t |= CONVERT_BIT(fpcr, FPCR_INED, FPCR_INE);
     t |= CONVERT_BIT(fpcr, FPCR_UNFD, FPCR_UNF);
@@ -44,28 +73,16 @@ void cpu_alpha_store_fpcr (CPUAlphaState *env, uint64_t val)
     t |= CONVERT_BIT(fpcr, FPCR_DZED, FPCR_DZE);
     t |= CONVERT_BIT(fpcr, FPCR_INVD, FPCR_INV);
 
-    env->fpcr = fpcr;
     env->fpcr_exc_enable = ~t & FPCR_STATUS_MASK;
 
-    switch (fpcr & FPCR_DYN_MASK) {
-    case FPCR_DYN_NORMAL:
-    default:
-        t = float_round_nearest_even;
-        break;
-    case FPCR_DYN_CHOPPED:
-        t = float_round_to_zero;
-        break;
-    case FPCR_DYN_MINUS:
-        t = float_round_down;
-        break;
-    case FPCR_DYN_PLUS:
-        t = float_round_up;
-        break;
-    }
-    env->fpcr_dyn_round = t;
-
-    env->fpcr_flush_to_zero = (fpcr & FPCR_UNFD) && (fpcr & FPCR_UNDZ);
+    env->fpcr_dyn_round = rm_map[(fpcr & FPCR_DYN_MASK) >> FPCR_DYN_SHIFT];
     env->fp_status.flush_inputs_to_zero = (fpcr & FPCR_DNZ) != 0;
+
+    t = (fpcr & FPCR_UNFD) && (fpcr & FPCR_UNDZ);
+#ifdef CONFIG_USER_ONLY
+    t |= (env->swcr & SWCR_MAP_UMZ) != 0;
+#endif
+    env->fpcr_flush_to_zero = t;
 }
 
 uint64_t helper_load_fpcr(CPUAlphaState *env)
@@ -103,14 +120,44 @@ void cpu_alpha_store_gr(CPUAlphaState *env, unsigned reg, uint64_t val)
 }
 
 #if defined(CONFIG_USER_ONLY)
-int alpha_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int size,
-                               int rw, int mmu_idx)
+void alpha_cpu_record_sigsegv(CPUState *cs, vaddr address,
+                              MMUAccessType access_type,
+                              bool maperr, uintptr_t retaddr)
 {
     AlphaCPU *cpu = ALPHA_CPU(cs);
+    target_ulong mmcsr, cause;
 
-    cs->exception_index = EXCP_MMFAULT;
+    /* Assuming !maperr, infer the missing protection. */
+    switch (access_type) {
+    case MMU_DATA_LOAD:
+        mmcsr = MM_K_FOR;
+        cause = 0;
+        break;
+    case MMU_DATA_STORE:
+        mmcsr = MM_K_FOW;
+        cause = 1;
+        break;
+    case MMU_INST_FETCH:
+        mmcsr = MM_K_FOE;
+        cause = -1;
+        break;
+    default:
+        g_assert_not_reached();
+    }
+    if (maperr) {
+        if (address < BIT_ULL(TARGET_VIRT_ADDR_SPACE_BITS - 1)) {
+            /* Userspace address, therefore page not mapped. */
+            mmcsr = MM_K_TNV;
+        } else {
+            /* Kernel or invalid address. */
+            mmcsr = MM_K_ACV;
+        }
+    }
+
+    /* Record the arguments that PALcode would give to the kernel. */
     cpu->env.trap_arg0 = address;
-    return 1;
+    cpu->env.trap_arg1 = mmcsr;
+    cpu->env.trap_arg2 = cause;
 }
 #else
 /* Returns the OSF/1 entMM failure indication, or -1 on success.  */
@@ -118,7 +165,7 @@ static int get_physical_address(CPUAlphaState *env, target_ulong addr,
                                 int prot_need, int mmu_idx,
                                 target_ulong *pphys, int *pprot)
 {
-    CPUState *cs = CPU(alpha_env_get_cpu(env));
+    CPUState *cs = env_cpu(env);
     target_long saddr = addr;
     target_ulong phys = 0;
     target_ulong L1pte, L2pte, L3pte;
@@ -247,28 +294,34 @@ hwaddr alpha_cpu_get_phys_page_debug(CPUState *cs, vaddr addr)
     return (fail >= 0 ? -1 : phys);
 }
 
-int alpha_cpu_handle_mmu_fault(CPUState *cs, vaddr addr, int size, int rw,
-                               int mmu_idx)
+bool alpha_cpu_tlb_fill(CPUState *cs, vaddr addr, int size,
+                        MMUAccessType access_type, int mmu_idx,
+                        bool probe, uintptr_t retaddr)
 {
     AlphaCPU *cpu = ALPHA_CPU(cs);
     CPUAlphaState *env = &cpu->env;
     target_ulong phys;
     int prot, fail;
 
-    fail = get_physical_address(env, addr, 1 << rw, mmu_idx, &phys, &prot);
+    fail = get_physical_address(env, addr, 1 << access_type,
+                                mmu_idx, &phys, &prot);
     if (unlikely(fail >= 0)) {
+        if (probe) {
+            return false;
+        }
         cs->exception_index = EXCP_MMFAULT;
         env->trap_arg0 = addr;
         env->trap_arg1 = fail;
-        env->trap_arg2 = (rw == 2 ? -1 : rw);
-        return 1;
+        env->trap_arg2 = (access_type == MMU_DATA_LOAD ? 0ull :
+                          access_type == MMU_DATA_STORE ? 1ull :
+                          /* access_type == MMU_INST_FETCH */ -1ull);
+        cpu_loop_exit_restore(cs, retaddr);
     }
 
     tlb_set_page(cs, addr & TARGET_PAGE_MASK, phys & TARGET_PAGE_MASK,
                  prot, mmu_idx, TARGET_PAGE_SIZE);
-    return 0;
+    return true;
 }
-#endif /* USER_ONLY */
 
 void alpha_cpu_do_interrupt(CPUState *cs)
 {
@@ -323,7 +376,6 @@ void alpha_cpu_do_interrupt(CPUState *cs)
 
     cs->exception_index = -1;
 
-#if !defined(CONFIG_USER_ONLY)
     switch (i) {
     case EXCP_RESET:
         i = 0x0000;
@@ -379,7 +431,6 @@ void alpha_cpu_do_interrupt(CPUState *cs)
 
     /* Switch to PALmode.  */
     env->flags |= ENV_FLAG_PAL_MODE;
-#endif /* !USER_ONLY */
 }
 
 bool alpha_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
@@ -426,46 +477,46 @@ bool alpha_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
     return false;
 }
 
-void alpha_cpu_dump_state(CPUState *cs, FILE *f, fprintf_function cpu_fprintf,
-                          int flags)
+#endif /* !CONFIG_USER_ONLY */
+
+void alpha_cpu_dump_state(CPUState *cs, FILE *f, int flags)
 {
-    static const char *linux_reg_names[] = {
-        "v0 ", "t0 ", "t1 ", "t2 ", "t3 ", "t4 ", "t5 ", "t6 ",
-        "t7 ", "s0 ", "s1 ", "s2 ", "s3 ", "s4 ", "s5 ", "fp ",
-        "a0 ", "a1 ", "a2 ", "a3 ", "a4 ", "a5 ", "t8 ", "t9 ",
-        "t10", "t11", "ra ", "t12", "at ", "gp ", "sp ", "zero",
+    static const char linux_reg_names[31][4] = {
+        "v0",  "t0",  "t1", "t2",  "t3", "t4", "t5", "t6",
+        "t7",  "s0",  "s1", "s2",  "s3", "s4", "s5", "fp",
+        "a0",  "a1",  "a2", "a3",  "a4", "a5", "t8", "t9",
+        "t10", "t11", "ra", "t12", "at", "gp", "sp"
     };
     AlphaCPU *cpu = ALPHA_CPU(cs);
     CPUAlphaState *env = &cpu->env;
     int i;
 
-    cpu_fprintf(f, "     PC  " TARGET_FMT_lx "      PS  %02x\n",
-                env->pc, extract32(env->flags, ENV_FLAG_PS_SHIFT, 8));
+    qemu_fprintf(f, "PC      " TARGET_FMT_lx " PS      %02x\n",
+                 env->pc, extract32(env->flags, ENV_FLAG_PS_SHIFT, 8));
     for (i = 0; i < 31; i++) {
-        cpu_fprintf(f, "IR%02d %s " TARGET_FMT_lx " ", i,
-                    linux_reg_names[i], cpu_alpha_load_gr(env, i));
-        if ((i % 3) == 2)
-            cpu_fprintf(f, "\n");
+        qemu_fprintf(f, "%-8s" TARGET_FMT_lx "%c",
+                     linux_reg_names[i], cpu_alpha_load_gr(env, i),
+                     (i % 3) == 2 ? '\n' : ' ');
     }
 
-    cpu_fprintf(f, "lock_a   " TARGET_FMT_lx " lock_v   " TARGET_FMT_lx "\n",
-                env->lock_addr, env->lock_value);
+    qemu_fprintf(f, "lock_a  " TARGET_FMT_lx " lock_v  " TARGET_FMT_lx "\n",
+                 env->lock_addr, env->lock_value);
 
-    for (i = 0; i < 31; i++) {
-        cpu_fprintf(f, "FIR%02d    " TARGET_FMT_lx " ", i,
-                    *((uint64_t *)(&env->fir[i])));
-        if ((i % 3) == 2)
-            cpu_fprintf(f, "\n");
+    if (flags & CPU_DUMP_FPU) {
+        for (i = 0; i < 31; i++) {
+            qemu_fprintf(f, "f%-7d%016" PRIx64 "%c", i, env->fir[i],
+                         (i % 3) == 2 ? '\n' : ' ');
+        }
+        qemu_fprintf(f, "fpcr    %016" PRIx64 "\n", cpu_alpha_load_fpcr(env));
     }
-    cpu_fprintf(f, "\n");
+    qemu_fprintf(f, "\n");
 }
 
 /* This should only be called from translate, via gen_excp.
    We expect that ENV->PC has already been updated.  */
-void QEMU_NORETURN helper_excp(CPUAlphaState *env, int excp, int error)
+G_NORETURN void helper_excp(CPUAlphaState *env, int excp, int error)
 {
-    AlphaCPU *cpu = alpha_env_get_cpu(env);
-    CPUState *cs = CPU(cpu);
+    CPUState *cs = env_cpu(env);
 
     cs->exception_index = excp;
     env->error_code = error;
@@ -473,24 +524,23 @@ void QEMU_NORETURN helper_excp(CPUAlphaState *env, int excp, int error)
 }
 
 /* This may be called from any of the helpers to set up EXCEPTION_INDEX.  */
-void QEMU_NORETURN dynamic_excp(CPUAlphaState *env, uintptr_t retaddr,
-                                int excp, int error)
+G_NORETURN void dynamic_excp(CPUAlphaState *env, uintptr_t retaddr,
+                             int excp, int error)
 {
-    AlphaCPU *cpu = alpha_env_get_cpu(env);
-    CPUState *cs = CPU(cpu);
+    CPUState *cs = env_cpu(env);
 
     cs->exception_index = excp;
     env->error_code = error;
     if (retaddr) {
-        cpu_restore_state(cs, retaddr, true);
+        cpu_restore_state(cs, retaddr);
         /* Floating-point exceptions (our only users) point to the next PC.  */
         env->pc += 4;
     }
     cpu_loop_exit(cs);
 }
 
-void QEMU_NORETURN arith_excp(CPUAlphaState *env, uintptr_t retaddr,
-                              int exc, uint64_t mask)
+G_NORETURN void arith_excp(CPUAlphaState *env, uintptr_t retaddr,
+                           int exc, uint64_t mask)
 {
     env->trap_arg0 = exc;
     env->trap_arg1 = mask;

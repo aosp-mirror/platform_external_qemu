@@ -9,9 +9,14 @@
  */
 
 #include "qemu/osdep.h"
+#include "qemu/units.h"
 #include "hw/ipack/ipack.h"
-#include "hw/pci/pci.h"
+#include "hw/irq.h"
+#include "hw/pci/pci_device.h"
+#include "migration/vmstate.h"
 #include "qemu/bitops.h"
+#include "qemu/module.h"
+#include "qom/object.h"
 
 /* #define DEBUG_TPCI */
 
@@ -50,7 +55,7 @@
 #define REG_STATUS    0x0C
 #define IP_N_FROM_REG(REG) ((REG) / 2 - 1)
 
-typedef struct {
+struct TPCI200State {
     PCIDevice dev;
     IPackBus bus;
     MemoryRegion mmio;
@@ -63,12 +68,11 @@ typedef struct {
     uint8_t ctrl[N_MODULES];
     uint16_t status;
     uint8_t int_set;
-} TPCI200State;
+};
 
 #define TYPE_TPCI200 "tpci200"
 
-#define TPCI200(obj) \
-    OBJECT_CHECK(TPCI200State, (obj), TYPE_TPCI200)
+OBJECT_DECLARE_SIMPLE_TYPE(TPCI200State, TPCI200)
 
 static const uint8_t local_config_regs[] = {
     0x00, 0xFF, 0xFF, 0x0F, 0x00, 0xFC, 0xFF, 0x0F, 0x00, 0x00, 0x00,
@@ -597,9 +601,9 @@ static void tpci200_realize(PCIDevice *pci_dev, Error **errp)
     memory_region_init_io(&s->las1, OBJECT(s), &tpci200_las1_ops,
                           s, "tpci200_las1", 1024);
     memory_region_init_io(&s->las2, OBJECT(s), &tpci200_las2_ops,
-                          s, "tpci200_las2", 1024*1024*32);
+                          s, "tpci200_las2", 32 * MiB);
     memory_region_init_io(&s->las3, OBJECT(s), &tpci200_las3_ops,
-                          s, "tpci200_las3", 1024*1024*16);
+                          s, "tpci200_las3", 16 * MiB);
     pci_register_bar(&s->dev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &s->mmio);
     pci_register_bar(&s->dev, 1, PCI_BASE_ADDRESS_SPACE_IO,     &s->io);
     pci_register_bar(&s->dev, 2, PCI_BASE_ADDRESS_SPACE_MEMORY, &s->las0);
@@ -607,8 +611,8 @@ static void tpci200_realize(PCIDevice *pci_dev, Error **errp)
     pci_register_bar(&s->dev, 4, PCI_BASE_ADDRESS_SPACE_MEMORY, &s->las2);
     pci_register_bar(&s->dev, 5, PCI_BASE_ADDRESS_SPACE_MEMORY, &s->las3);
 
-    ipack_bus_new_inplace(&s->bus, sizeof(s->bus), DEVICE(pci_dev), NULL,
-                          N_MODULES, tpci200_set_irq);
+    ipack_bus_init(&s->bus, sizeof(s->bus), DEVICE(pci_dev),
+                   N_MODULES, tpci200_set_irq);
 }
 
 static const VMStateDescription vmstate_tpci200 = {

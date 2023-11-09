@@ -1,9 +1,0 @@
-!render_api
-
-%#include "render-utils/RenderLib.h"
-%
-
-# Initializes the library and tries to load the corresponding EGL/GLES
-# translation libraries.
-# Returns either the library accessor smart pointer or null on failure.
-emugl::RenderLibPtr initLibrary(void);

@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,13 +20,13 @@
 #include "qemu/osdep.h"
 #include "cpu.h"
 #include "exec/exec-all.h"
+#include "qemu/timer.h"
 #include "qemu/host-utils.h"
 #include "exec/helper-proto.h"
-#include "sysemu/sysemu.h"
 
 void cpu_raise_exception_ra(CPUSPARCState *env, int tt, uintptr_t ra)
 {
-    CPUState *cs = CPU(sparc_env_get_cpu(env));
+    CPUState *cs = env_cpu(env);
 
     cs->exception_index = tt;
     cpu_loop_exit_restore(cs, ra);
@@ -34,7 +34,7 @@ void cpu_raise_exception_ra(CPUSPARCState *env, int tt, uintptr_t ra)
 
 void helper_raise_exception(CPUSPARCState *env, int tt)
 {
-    CPUState *cs = CPU(sparc_env_get_cpu(env));
+    CPUState *cs = env_cpu(env);
 
     cs->exception_index = tt;
     cpu_loop_exit(cs);
@@ -42,7 +42,7 @@ void helper_raise_exception(CPUSPARCState *env, int tt)
 
 void helper_debug(CPUSPARCState *env)
 {
-    CPUState *cs = CPU(sparc_env_get_cpu(env));
+    CPUState *cs = env_cpu(env);
 
     cs->exception_index = EXCP_DEBUG;
     cpu_loop_exit(cs);
@@ -67,7 +67,9 @@ uint64_t helper_tick_get_count(CPUSPARCState *env, void *opaque, int mem_idx)
 
     return cpu_tick_get_count(timer);
 #else
-    return 0;
+    /* In user-mode, QEMU_CLOCK_VIRTUAL doesn't exist.
+       Just pass through the host cpu clock ticks.  */
+    return cpu_get_host_ticks();
 #endif
 }
 
@@ -241,7 +243,7 @@ target_ulong helper_tsubcctv(CPUSPARCState *env, target_ulong src1,
 #ifndef TARGET_SPARC64
 void helper_power_down(CPUSPARCState *env)
 {
-    CPUState *cs = CPU(sparc_env_get_cpu(env));
+    CPUState *cs = env_cpu(env);
 
     cs->halted = 1;
     cs->exception_index = EXCP_HLT;

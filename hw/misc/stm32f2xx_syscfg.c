@@ -25,6 +25,7 @@
 #include "qemu/osdep.h"
 #include "hw/misc/stm32f2xx_syscfg.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
 
 #ifndef STM_SYSCFG_ERR_DEBUG
 #define STM_SYSCFG_ERR_DEBUG 0
@@ -131,8 +132,6 @@ static const MemoryRegionOps stm32f2xx_syscfg_ops = {
 static void stm32f2xx_syscfg_init(Object *obj)
 {
     STM32F2XXSyscfgState *s = STM32F2XX_SYSCFG(obj);
-
-    sysbus_init_irq(SYS_BUS_DEVICE(obj), &s->irq);
 
     memory_region_init_io(&s->mmio, obj, &stm32f2xx_syscfg_ops, s,
                           TYPE_STM32F2XX_SYSCFG, 0x400);

@@ -1,10 +1,8 @@
 #include "qemu/osdep.h"
-#include "qemu-common.h"
 #include "cpu.h"
-#include "hw/hw.h"
-#include "hw/boards.h"
 #include "qemu/error-report.h"
 #include "sysemu/kvm.h"
+#include "sysemu/tcg.h"
 #include "kvm_arm.h"
 #include "internals.h"
 #include "migration/cpu.h"
@@ -12,13 +10,14 @@
 static bool vfp_needed(void *opaque)
 {
     ARMCPU *cpu = opaque;
-    CPUARMState *env = &cpu->env;
 
-    return arm_feature(env, ARM_FEATURE_VFP);
+    return (arm_feature(&cpu->env, ARM_FEATURE_AARCH64)
+            ? cpu_isar_feature(aa64_fp_simd, cpu)
+            : cpu_isar_feature(aa32_vfp_simd, cpu));
 }
 
 static int get_fpscr(QEMUFile *f, void *opaque, size_t size,
-                     VMStateField *field)
+                     const VMStateField *field)
 {
     ARMCPU *cpu = opaque;
     CPUARMState *env = &cpu->env;
@@ -29,7 +28,7 @@ static int get_fpscr(QEMUFile *f, void *opaque, size_t size,
 }
 
 static int put_fpscr(QEMUFile *f, void *opaque, size_t size,
-                     VMStateField *field, QJSON *vmdesc)
+                     const VMStateField *field, JSONWriter *vmdesc)
 {
     ARMCPU *cpu = opaque;
     CPUARMState *env = &cpu->env;
@@ -131,9 +130,8 @@ static const VMStateDescription vmstate_iwmmxt = {
 static bool sve_needed(void *opaque)
 {
     ARMCPU *cpu = opaque;
-    CPUARMState *env = &cpu->env;
 
-    return arm_feature(env, ARM_FEATURE_SVE);
+    return cpu_isar_feature(aa64_sve, cpu);
 }
 
 /* The first two words of each Zreg is stored in VFP state.  */
@@ -170,7 +168,77 @@ static const VMStateDescription vmstate_sve = {
         VMSTATE_END_OF_LIST()
     }
 };
+
+static const VMStateDescription vmstate_vreg = {
+    .name = "vreg",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT64_ARRAY(d, ARMVectorReg, ARM_MAX_VQ * 2),
+        VMSTATE_END_OF_LIST()
+    }
+};
+
+static bool za_needed(void *opaque)
+{
+    ARMCPU *cpu = opaque;
+
+    /*
+     * When ZA storage is disabled, its contents are discarded.
+     * It will be zeroed when ZA storage is re-enabled.
+     */
+    return FIELD_EX64(cpu->env.svcr, SVCR, ZA);
+}
+
+static const VMStateDescription vmstate_za = {
+    .name = "cpu/sme",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .needed = za_needed,
+    .fields = (VMStateField[]) {
+        VMSTATE_STRUCT_ARRAY(env.zarray, ARMCPU, ARM_MAX_VQ * 16, 0,
+                             vmstate_vreg, ARMVectorReg),
+        VMSTATE_END_OF_LIST()
+    }
+};
 #endif /* AARCH64 */
+
+static bool serror_needed(void *opaque)
+{
+    ARMCPU *cpu = opaque;
+    CPUARMState *env = &cpu->env;
+
+    return env->serror.pending != 0;
+}
+
+static const VMStateDescription vmstate_serror = {
+    .name = "cpu/serror",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .needed = serror_needed,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT8(env.serror.pending, ARMCPU),
+        VMSTATE_UINT8(env.serror.has_esr, ARMCPU),
+        VMSTATE_UINT64(env.serror.esr, ARMCPU),
+        VMSTATE_END_OF_LIST()
+    }
+};
+
+static bool irq_line_state_needed(void *opaque)
+{
+    return true;
+}
+
+static const VMStateDescription vmstate_irq_line_state = {
+    .name = "cpu/irq-line-state",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .needed = irq_line_state_needed,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT32(env.irq_line_state, ARMCPU),
+        VMSTATE_END_OF_LIST()
+    }
+};
 
 static bool m_needed(void *opaque)
 {
@@ -184,6 +252,7 @@ static const VMStateDescription vmstate_m_faultmask_primask = {
     .name = "cpu/m/faultmask-primask",
     .version_id = 1,
     .minimum_version_id = 1,
+    .needed = m_needed,
     .fields = (VMStateField[]) {
         VMSTATE_UINT32(env.v7m.faultmask[M_REG_NS], ARMCPU),
         VMSTATE_UINT32(env.v7m.primask[M_REG_NS], ARMCPU),
@@ -230,6 +299,7 @@ static const VMStateDescription vmstate_m_scr = {
     .name = "cpu/m/scr",
     .version_id = 1,
     .minimum_version_id = 1,
+    .needed = m_needed,
     .fields = (VMStateField[]) {
         VMSTATE_UINT32(env.v7m.scr[M_REG_NS], ARMCPU),
         VMSTATE_END_OF_LIST()
@@ -240,6 +310,7 @@ static const VMStateDescription vmstate_m_other_sp = {
     .name = "cpu/m/other-sp",
     .version_id = 1,
     .minimum_version_id = 1,
+    .needed = m_needed,
     .fields = (VMStateField[]) {
         VMSTATE_UINT32(env.v7m.other_sp, ARMCPU),
         VMSTATE_END_OF_LIST()
@@ -264,6 +335,40 @@ static const VMStateDescription vmstate_m_v8m = {
         VMSTATE_UINT32_ARRAY(env.v7m.psplim, ARMCPU, M_REG_NUM_BANKS),
         VMSTATE_END_OF_LIST()
     }
+};
+
+static const VMStateDescription vmstate_m_fp = {
+    .name = "cpu/m/fp",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .needed = vfp_needed,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT32_ARRAY(env.v7m.fpcar, ARMCPU, M_REG_NUM_BANKS),
+        VMSTATE_UINT32_ARRAY(env.v7m.fpccr, ARMCPU, M_REG_NUM_BANKS),
+        VMSTATE_UINT32_ARRAY(env.v7m.fpdscr, ARMCPU, M_REG_NUM_BANKS),
+        VMSTATE_UINT32_ARRAY(env.v7m.cpacr, ARMCPU, M_REG_NUM_BANKS),
+        VMSTATE_UINT32(env.v7m.nsacr, ARMCPU),
+        VMSTATE_END_OF_LIST()
+    }
+};
+
+static bool mve_needed(void *opaque)
+{
+    ARMCPU *cpu = opaque;
+
+    return cpu_isar_feature(aa32_mve, cpu);
+}
+
+static const VMStateDescription vmstate_m_mve = {
+    .name = "cpu/m/mve",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .needed = mve_needed,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT32(env.v7m.vpr, ARMCPU),
+        VMSTATE_UINT32(env.v7m.ltpsize, ARMCPU),
+        VMSTATE_END_OF_LIST()
+    },
 };
 
 static const VMStateDescription vmstate_m = {
@@ -291,6 +396,8 @@ static const VMStateDescription vmstate_m = {
         &vmstate_m_scr,
         &vmstate_m_other_sp,
         &vmstate_m_v8m,
+        &vmstate_m_fp,
+        &vmstate_m_mve,
         NULL
     }
 };
@@ -381,6 +488,30 @@ static bool pmsav8_needed(void *opaque)
         arm_feature(env, ARM_FEATURE_V8);
 }
 
+static bool pmsav8r_needed(void *opaque)
+{
+    ARMCPU *cpu = opaque;
+    CPUARMState *env = &cpu->env;
+
+    return arm_feature(env, ARM_FEATURE_PMSA) &&
+        arm_feature(env, ARM_FEATURE_V8) &&
+        !arm_feature(env, ARM_FEATURE_M);
+}
+
+static const VMStateDescription vmstate_pmsav8r = {
+    .name = "cpu/pmsav8/pmsav8r",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .needed = pmsav8r_needed,
+    .fields = (VMStateField[]) {
+        VMSTATE_VARRAY_UINT32(env.pmsav8.hprbar, ARMCPU,
+                        pmsav8r_hdregion, 0, vmstate_info_uint32, uint32_t),
+        VMSTATE_VARRAY_UINT32(env.pmsav8.hprlar, ARMCPU,
+                        pmsav8r_hdregion, 0, vmstate_info_uint32, uint32_t),
+        VMSTATE_END_OF_LIST()
+    },
+};
+
 static const VMStateDescription vmstate_pmsav8 = {
     .name = "cpu/pmsav8",
     .version_id = 1,
@@ -394,6 +525,10 @@ static const VMStateDescription vmstate_pmsav8 = {
         VMSTATE_UINT32(env.pmsav8.mair0[M_REG_NS], ARMCPU),
         VMSTATE_UINT32(env.pmsav8.mair1[M_REG_NS], ARMCPU),
         VMSTATE_END_OF_LIST()
+    },
+    .subsections = (const VMStateDescription * []) {
+        &vmstate_pmsav8r,
+        NULL
     }
 };
 
@@ -464,7 +599,7 @@ static const VMStateDescription vmstate_m_security = {
 };
 
 static int get_cpsr(QEMUFile *f, void *opaque, size_t size,
-                    VMStateField *field)
+                    const VMStateField *field)
 {
     ARMCPU *cpu = opaque;
     CPUARMState *env = &cpu->env;
@@ -520,7 +655,7 @@ static int get_cpsr(QEMUFile *f, void *opaque, size_t size,
 }
 
 static int put_cpsr(QEMUFile *f, void *opaque, size_t size,
-                    VMStateField *field, QJSON *vmdesc)
+                    const VMStateField *field, JSONWriter *vmdesc)
 {
     ARMCPU *cpu = opaque;
     CPUARMState *env = &cpu->env;
@@ -546,7 +681,7 @@ static const VMStateInfo vmstate_cpsr = {
 };
 
 static int get_power(QEMUFile *f, void *opaque, size_t size,
-                    VMStateField *field)
+                    const VMStateField *field)
 {
     ARMCPU *cpu = opaque;
     bool powered_off = qemu_get_byte(f);
@@ -555,7 +690,7 @@ static int get_power(QEMUFile *f, void *opaque, size_t size,
 }
 
 static int put_power(QEMUFile *f, void *opaque, size_t size,
-                    VMStateField *field, QJSON *vmdesc)
+                    const VMStateField *field, JSONWriter *vmdesc)
 {
     ARMCPU *cpu = opaque;
 
@@ -581,15 +716,25 @@ static int cpu_pre_save(void *opaque)
 {
     ARMCPU *cpu = opaque;
 
+    if (!kvm_enabled()) {
+        pmu_op_start(&cpu->env);
+    }
+
     if (kvm_enabled()) {
         if (!write_kvmstate_to_list(cpu)) {
             /* This should never fail */
-            abort();
+            g_assert_not_reached();
         }
+
+        /*
+         * kvm_arm_cpu_pre_save() must be called after
+         * write_kvmstate_to_list()
+         */
+        kvm_arm_cpu_pre_save(cpu);
     } else {
-        if (!write_cpustate_to_list(cpu)) {
+        if (!write_cpustate_to_list(cpu, false)) {
             /* This should never fail. */
-            abort();
+            g_assert_not_reached();
         }
     }
 
@@ -602,10 +747,58 @@ static int cpu_pre_save(void *opaque)
     return 0;
 }
 
+static int cpu_post_save(void *opaque)
+{
+    ARMCPU *cpu = opaque;
+
+    if (!kvm_enabled()) {
+        pmu_op_finish(&cpu->env);
+    }
+
+    return 0;
+}
+
+static int cpu_pre_load(void *opaque)
+{
+    ARMCPU *cpu = opaque;
+    CPUARMState *env = &cpu->env;
+
+    /*
+     * Pre-initialize irq_line_state to a value that's never valid as
+     * real data, so cpu_post_load() can tell whether we've seen the
+     * irq-line-state subsection in the incoming migration state.
+     */
+    env->irq_line_state = UINT32_MAX;
+
+    if (!kvm_enabled()) {
+        pmu_op_start(&cpu->env);
+    }
+
+    return 0;
+}
+
 static int cpu_post_load(void *opaque, int version_id)
 {
     ARMCPU *cpu = opaque;
+    CPUARMState *env = &cpu->env;
     int i, v;
+
+    /*
+     * Handle migration compatibility from old QEMU which didn't
+     * send the irq-line-state subsection. A QEMU without it did not
+     * implement the HCR_EL2.{VI,VF} bits as generating interrupts,
+     * so for TCG the line state matches the bits set in cs->interrupt_request.
+     * For KVM the line state is not stored in cs->interrupt_request
+     * and so this will leave irq_line_state as 0, but this is OK because
+     * we only need to care about it for TCG.
+     */
+    if (env->irq_line_state == UINT32_MAX) {
+        CPUState *cs = CPU(cpu);
+
+        env->irq_line_state = cs->interrupt_request &
+            (CPU_INTERRUPT_HARD | CPU_INTERRUPT_FIQ |
+             CPU_INTERRUPT_VIRQ | CPU_INTERRUPT_VFIQ);
+    }
 
     /* Update the values list from the incoming migration data.
      * Anything in the incoming data which we don't know about is
@@ -640,14 +833,48 @@ static int cpu_post_load(void *opaque, int version_id)
          * we're using it.
          */
         write_list_to_cpustate(cpu);
+        kvm_arm_cpu_post_load(cpu);
     } else {
         if (!write_list_to_cpustate(cpu)) {
             return -1;
         }
     }
 
-    hw_breakpoint_update_all(cpu);
-    hw_watchpoint_update_all(cpu);
+    /*
+     * Misaligned thumb pc is architecturally impossible. Fail the
+     * incoming migration. For TCG it would trigger the assert in
+     * thumb_tr_translate_insn().
+     */
+    if (!is_a64(env) && env->thumb && (env->regs[15] & 1)) {
+        return -1;
+    }
+
+    if (tcg_enabled()) {
+        hw_breakpoint_update_all(cpu);
+        hw_watchpoint_update_all(cpu);
+    }
+
+    /*
+     * TCG gen_update_fp_context() relies on the invariant that
+     * FPDSCR.LTPSIZE is constant 4 for M-profile with the LOB extension;
+     * forbid bogus incoming data with some other value.
+     */
+    if (arm_feature(env, ARM_FEATURE_M) && cpu_isar_feature(aa32_lob, cpu)) {
+        if (extract32(env->v7m.fpdscr[M_REG_NS],
+                      FPCR_LTPSIZE_SHIFT, FPCR_LTPSIZE_LENGTH) != 4 ||
+            extract32(env->v7m.fpdscr[M_REG_S],
+                      FPCR_LTPSIZE_SHIFT, FPCR_LTPSIZE_LENGTH) != 4) {
+            return -1;
+        }
+    }
+
+    if (!kvm_enabled()) {
+        pmu_op_finish(&cpu->env);
+    }
+
+    if (tcg_enabled()) {
+        arm_rebuild_hflags(&cpu->env);
+    }
 
     return 0;
 }
@@ -657,6 +884,8 @@ const VMStateDescription vmstate_arm_cpu = {
     .version_id = 22,
     .minimum_version_id = 22,
     .pre_save = cpu_pre_save,
+    .post_save = cpu_post_save,
+    .pre_load = cpu_pre_load,
     .post_load = cpu_post_load,
     .fields = (VMStateField[]) {
         VMSTATE_UINT32_ARRAY(env.regs, ARMCPU, 16),
@@ -691,7 +920,7 @@ const VMStateDescription vmstate_arm_cpu = {
         VMSTATE_UINT64(env.exclusive_addr, ARMCPU),
         VMSTATE_UINT64(env.exclusive_val, ARMCPU),
         VMSTATE_UINT64(env.exclusive_high, ARMCPU),
-        VMSTATE_UINT64(env.features, ARMCPU),
+        VMSTATE_UNUSED(sizeof(uint64_t)),
         VMSTATE_UINT32(env.exception.syndrome, ARMCPU),
         VMSTATE_UINT32(env.exception.fsr, ARMCPU),
         VMSTATE_UINT64(env.exception.vaddress, ARMCPU),
@@ -722,7 +951,10 @@ const VMStateDescription vmstate_arm_cpu = {
         &vmstate_m_security,
 #ifdef TARGET_AARCH64
         &vmstate_sve,
+        &vmstate_za,
 #endif
+        &vmstate_serror,
+        &vmstate_irq_line_state,
         NULL
     }
 };

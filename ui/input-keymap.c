@@ -1,31 +1,33 @@
 #include "qemu/osdep.h"
-#include "sysemu/sysemu.h"
-#include "ui/keymaps.h"
+#include "keymaps.h"
 #include "ui/input.h"
 
 #include "standard-headers/linux/input.h"
 
-#include "ui/input-keymap-atset1-to-qcode.c"
-#include "ui/input-keymap-linux-to-qcode.c"
-#include "ui/input-keymap-qcode-to-atset1.c"
-#include "ui/input-keymap-qcode-to-atset2.c"
-#include "ui/input-keymap-qcode-to-atset3.c"
-#include "ui/input-keymap-qcode-to-linux.c"
-#include "ui/input-keymap-qcode-to-qnum.c"
-#include "ui/input-keymap-qcode-to-sun.c"
-#include "ui/input-keymap-qnum-to-qcode.c"
-#include "ui/input-keymap-usb-to-qcode.c"
-#include "ui/input-keymap-win32-to-qcode.c"
-#include "ui/input-keymap-x11-to-qcode.c"
-#include "ui/input-keymap-xorgevdev-to-qcode.c"
-#include "ui/input-keymap-xorgkbd-to-qcode.c"
-#include "ui/input-keymap-xorgxquartz-to-qcode.c"
-#include "ui/input-keymap-xorgxwin-to-qcode.c"
+#include "ui/input-keymap-atset1-to-qcode.c.inc"
+#include "ui/input-keymap-linux-to-qcode.c.inc"
+#include "ui/input-keymap-qcode-to-atset1.c.inc"
+#include "ui/input-keymap-qcode-to-atset2.c.inc"
+#include "ui/input-keymap-qcode-to-atset3.c.inc"
+#include "ui/input-keymap-qcode-to-linux.c.inc"
+#include "ui/input-keymap-qcode-to-qnum.c.inc"
+#include "ui/input-keymap-qcode-to-sun.c.inc"
+#include "ui/input-keymap-qnum-to-qcode.c.inc"
+#include "ui/input-keymap-usb-to-qcode.c.inc"
+#include "ui/input-keymap-win32-to-qcode.c.inc"
+#include "ui/input-keymap-x11-to-qcode.c.inc"
+#include "ui/input-keymap-xorgevdev-to-qcode.c.inc"
+#include "ui/input-keymap-xorgkbd-to-qcode.c.inc"
+#include "ui/input-keymap-xorgxquartz-to-qcode.c.inc"
+#include "ui/input-keymap-xorgxwin-to-qcode.c.inc"
+#include "ui/input-keymap-osx-to-qcode.c.inc"
 
-int qemu_input_linux_to_qcode(unsigned int i)
+int qemu_input_linux_to_qcode(unsigned int lnx)
 {
-    return (i < qemu_input_map_linux_to_qcode_len) ?
-        qemu_input_map_linux_to_qcode[i] : Q_KEY_CODE_UNMAPPED;
+    if (lnx >= qemu_input_map_linux_to_qcode_len) {
+        return 0;
+    }
+    return qemu_input_map_linux_to_qcode[lnx];
 }
 
 int qemu_input_key_value_to_number(const KeyValue *value)
@@ -41,10 +43,12 @@ int qemu_input_key_value_to_number(const KeyValue *value)
     }
 }
 
-int qemu_input_key_number_to_qcode(unsigned int i)
+int qemu_input_key_number_to_qcode(unsigned int nr)
 {
-    return (i < qemu_input_map_qnum_to_qcode_len) ?
-        qemu_input_map_qnum_to_qcode[i] : Q_KEY_CODE_UNMAPPED;
+    if (nr >= qemu_input_map_qnum_to_qcode_len) {
+        return 0;
+    }
+    return qemu_input_map_qnum_to_qcode[nr];
 }
 
 int qemu_input_key_value_to_qcode(const KeyValue *value)

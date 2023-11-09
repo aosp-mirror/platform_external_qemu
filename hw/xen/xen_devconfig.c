@@ -1,21 +1,21 @@
 #include "qemu/osdep.h"
-#include "hw/xen/xen_backend.h"
+#include "hw/xen/xen-legacy-backend.h"
 #include "qemu/option.h"
-#include "sysemu/block-backend.h"
 #include "sysemu/blockdev.h"
+#include "sysemu/sysemu.h"
 
 /* ------------------------------------------------------------- */
 
 static int xen_config_dev_dirs(const char *ftype, const char *btype, int vdev,
-			       char *fe, char *be, int len)
+                               char *fe, char *be, int len)
 {
     char *dom;
 
-    dom = xs_get_domain_path(xenstore, xen_domid);
+    dom = qemu_xen_xs_get_domain_path(xenstore, xen_domid);
     snprintf(fe, len, "%s/device/%s/%d", dom, ftype, vdev);
     free(dom);
 
-    dom = xs_get_domain_path(xenstore, 0);
+    dom = qemu_xen_xs_get_domain_path(xenstore, 0);
     snprintf(be, len, "%s/backend/%s/%d/%d", dom, btype, xen_domid, vdev);
     free(dom);
 

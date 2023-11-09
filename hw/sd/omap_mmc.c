@@ -1,6 +1,8 @@
 /*
  * OMAP on-chip MMC/SD host emulation.
  *
+ * Datasheet: TI Multimedia Card (MMC/SD/SDIO) Interface (SPRU765A)
+ *
  * Copyright (C) 2006-2007 Andrzej Zaborowski  <balrog@zabor.org>
  *
  * This program is free software; you can redistribute it and/or
@@ -16,10 +18,12 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "qemu/osdep.h"
-#include "hw/hw.h"
+#include "qemu/log.h"
+#include "hw/irq.h"
 #include "hw/arm/omap.h"
-#include "hw/sd/sd.h"
+#include "hw/sd/sdcard_legacy.h"
 
 struct omap_mmc_s {
     qemu_irq irq;
@@ -162,8 +166,7 @@ static void omap_mmc_command(struct omap_mmc_s *host, int cmd, int dir,
                 CID_CSD_OVERWRITE;
         if (host->sdio & (1 << 13))
             mask |= AKE_SEQ_ERROR;
-        rspstatus = (response[0] << 24) | (response[1] << 16) |
-                (response[2] << 8) | (response[3] << 0);
+        rspstatus = ldl_be_p(response);
         break;
 
     case sd_r2:
@@ -181,8 +184,7 @@ static void omap_mmc_command(struct omap_mmc_s *host, int cmd, int dir,
         }
         rsplen = 4;
 
-        rspstatus = (response[0] << 24) | (response[1] << 16) |
-                (response[2] << 8) | (response[3] << 0);
+        rspstatus = ldl_be_p(response);
         if (rspstatus & 0x80000000)
             host->status &= 0xe000;
         else
@@ -230,10 +232,10 @@ static void omap_mmc_transfer(struct omap_mmc_s *host)
             if (host->fifo_len > host->af_level)
                 break;
 
-            value = sd_read_data(host->card);
+            value = sd_read_byte(host->card);
             host->fifo[(host->fifo_start + host->fifo_len) & 31] = value;
             if (-- host->blen_counter) {
-                value = sd_read_data(host->card);
+                value = sd_read_byte(host->card);
                 host->fifo[(host->fifo_start + host->fifo_len) & 31] |=
                         value << 8;
                 host->blen_counter --;
@@ -245,10 +247,10 @@ static void omap_mmc_transfer(struct omap_mmc_s *host)
                 break;
 
             value = host->fifo[host->fifo_start] & 0xff;
-            sd_write_data(host->card, value);
+            sd_write_byte(host->card, value);
             if (-- host->blen_counter) {
                 value = host->fifo[host->fifo_start] >> 8;
-                sd_write_data(host->card, value);
+                sd_write_byte(host->card, value);
                 host->blen_counter --;
             }
 
@@ -279,6 +281,12 @@ static void omap_mmc_update(void *opaque)
     omap_mmc_interrupts_update(s);
 }
 
+static void omap_mmc_pseudo_reset(struct omap_mmc_s *host)
+{
+    host->status = 0;
+    host->fifo_len = 0;
+}
+
 void omap_mmc_reset(struct omap_mmc_s *host)
 {
     host->last_cmd = 0;
@@ -287,11 +295,9 @@ void omap_mmc_reset(struct omap_mmc_s *host)
     host->dw = 0;
     host->mode = 0;
     host->enable = 0;
-    host->status = 0;
     host->mask = 0;
     host->cto = 0;
     host->dto = 0;
-    host->fifo_len = 0;
     host->blen = 0;
     host->blen_counter = 0;
     host->nblk = 0;
@@ -306,18 +312,19 @@ void omap_mmc_reset(struct omap_mmc_s *host)
     qemu_set_irq(host->coverswitch, host->cdet_state);
     host->clkdiv = 0;
 
+    omap_mmc_pseudo_reset(host);
+
     /* Since we're still using the legacy SD API the card is not plugged
      * into any bus, and we must reset it manually. When omap_mmc is
      * QOMified this must move into the QOM reset function.
      */
-    device_reset(DEVICE(host->card));
+    device_cold_reset(DEVICE(host->card));
 }
 
-static uint64_t omap_mmc_read(void *opaque, hwaddr offset,
-                              unsigned size)
+static uint64_t omap_mmc_read(void *opaque, hwaddr offset, unsigned size)
 {
     uint16_t i;
-    struct omap_mmc_s *s = (struct omap_mmc_s *) opaque;
+    struct omap_mmc_s *s = opaque;
 
     if (size != 2) {
         return omap_badwidth_read16(opaque, offset);
@@ -410,7 +417,7 @@ static void omap_mmc_write(void *opaque, hwaddr offset,
                            uint64_t value, unsigned size)
 {
     int i;
-    struct omap_mmc_s *s = (struct omap_mmc_s *) opaque;
+    struct omap_mmc_s *s = opaque;
 
     if (size != 2) {
         omap_badwidth_write16(opaque, offset, value);
@@ -449,14 +456,18 @@ static void omap_mmc_write(void *opaque, hwaddr offset,
         s->enable = (value >> 11) & 1;
         s->be = (value >> 10) & 1;
         s->clkdiv = (value >> 0) & (s->rev >= 2 ? 0x3ff : 0xff);
-        if (s->mode != 0)
-            printf("SD mode %i unimplemented!\n", s->mode);
-        if (s->be != 0)
-            printf("SD FIFO byte sex unimplemented!\n");
+        if (s->mode != 0) {
+            qemu_log_mask(LOG_UNIMP,
+                          "omap_mmc_wr: mode #%i unimplemented\n", s->mode);
+        }
+        if (s->be != 0) {
+            qemu_log_mask(LOG_UNIMP,
+                          "omap_mmc_wr: Big Endian not implemented\n");
+        }
         if (s->dw != 0 && s->lines < 4)
             printf("4-bit SD bus enabled\n");
         if (!s->enable)
-            omap_mmc_reset(s);
+            omap_mmc_pseudo_reset(s);
         break;
 
     case 0x10:	/* MMC_STAT */
@@ -564,7 +575,7 @@ static const MemoryRegionOps omap_mmc_ops = {
 
 static void omap_mmc_cover_cb(void *opaque, int line, int level)
 {
-    struct omap_mmc_s *host = (struct omap_mmc_s *) opaque;
+    struct omap_mmc_s *host = opaque;
 
     if (!host->cdet_state && level) {
         host->status |= 0x0002;

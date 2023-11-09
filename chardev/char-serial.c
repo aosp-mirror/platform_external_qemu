@@ -23,6 +23,7 @@
  */
 
 #include "qemu/osdep.h"
+#include "qemu/module.h"
 #include "qemu/option.h"
 #include "qemu/sockets.h"
 #include "io/channel-file.h"
@@ -52,12 +53,12 @@ static void qmp_chardev_open_serial(Chardev *chr,
 
 #elif defined(__linux__) || defined(__sun__) || defined(__FreeBSD__)      \
     || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) \
-    || defined(__GLIBC__)
+    || defined(__GLIBC__) || defined(__APPLE__)
 
 static void tty_serial_init(int fd, int speed,
                             int parity, int data_bits, int stop_bits)
 {
-    struct termios tty;
+    struct termios tty = {0};
     speed_t spd;
 
 #if 0
@@ -139,7 +140,7 @@ static void tty_serial_init(int fd, int speed,
 
     tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP
                      | INLCR | IGNCR | ICRNL | IXON);
-    tty.c_oflag |= OPOST;
+    tty.c_oflag &= ~OPOST;
     tty.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
     tty.c_cflag &= ~(CSIZE | PARENB | PARODD | CRTSCTS | CSTOPB);
     switch (data_bits) {
@@ -265,11 +266,15 @@ static void qmp_chardev_open_serial(Chardev *chr,
     ChardevHostdev *serial = backend->u.serial.data;
     int fd;
 
-    fd = qmp_chardev_open_file_source(serial->device, O_RDWR, errp);
+    fd = qmp_chardev_open_file_source(serial->device, O_RDWR | O_NONBLOCK,
+                                      errp);
     if (fd < 0) {
         return;
     }
-    qemu_set_nonblock(fd);
+    if (!g_unix_set_fd_nonblocking(fd, true, NULL)) {
+        error_setg_errno(errp, errno, "Failed to set FD nonblocking");
+        return;
+    }
     tty_serial_init(fd, 115200, 'N', 8, 1);
 
     qemu_chr_open_fd(chr, fd, fd);

@@ -25,9 +25,13 @@
  */
 
 #include "qemu/osdep.h"
+#include "hw/irq.h"
+#include "hw/qdev-properties.h"
 #include "hw/sysbus.h"
-#include "qemu/log.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 #include "net/net.h"
+#include "qom/object.h"
 
 #ifdef DEBUG_XGMAC
 #define DEBUGF_BRK(message, args...) do { \
@@ -135,9 +139,9 @@ typedef struct RxTxStats {
 } RxTxStats;
 
 #define TYPE_XGMAC "xgmac"
-#define XGMAC(obj) OBJECT_CHECK(XgmacState, (obj), TYPE_XGMAC)
+OBJECT_DECLARE_SIMPLE_TYPE(XgmacState, XGMAC)
 
-typedef struct XgmacState {
+struct XgmacState {
     SysBusDevice parent_obj;
 
     MemoryRegion iomem;
@@ -149,7 +153,7 @@ typedef struct XgmacState {
 
     struct RxTxStats stats;
     uint32_t regs[R_MAX];
-} XgmacState;
+};
 
 static const VMStateDescription vmstate_rxtx_stats = {
     .name = "xgmac_stats",
@@ -216,21 +220,31 @@ static void xgmac_enet_send(XgmacState *s)
         }
         len = (bd.buffer1_size & 0xfff) + (bd.buffer2_size & 0xfff);
 
+        /*
+         * FIXME: these cases of malformed tx descriptors (bad sizes)
+         * should probably be reported back to the guest somehow
+         * rather than simply silently stopping processing, but we
+         * don't know what the hardware does in this situation.
+         * This will only happen for buggy guests anyway.
+         */
         if ((bd.buffer1_size & 0xfff) > 2048) {
             DEBUGF_BRK("qemu:%s:ERROR...ERROR...ERROR... -- "
                         "xgmac buffer 1 len on send > 2048 (0x%x)\n",
                          __func__, bd.buffer1_size & 0xfff);
+            break;
         }
         if ((bd.buffer2_size & 0xfff) != 0) {
             DEBUGF_BRK("qemu:%s:ERROR...ERROR...ERROR... -- "
                         "xgmac buffer 2 len on send != 0 (0x%x)\n",
                         __func__, bd.buffer2_size & 0xfff);
+            break;
         }
-        if (len >= sizeof(frame)) {
+        if (frame_size + len >= sizeof(frame)) {
             DEBUGF_BRK("qemu:%s: buffer overflow %d read into %zu "
-                        "buffer\n" , __func__, len, sizeof(frame));
+                        "buffer\n" , __func__, frame_size + len, sizeof(frame));
             DEBUGF_BRK("qemu:%s: buffer1.size=%d; buffer2.size=%d\n",
                         __func__, bd.buffer1_size, bd.buffer2_size);
+            break;
         }
 
         cpu_physical_memory_read(bd.buffer1_addr, ptr, len);
@@ -374,9 +388,9 @@ static NetClientInfo net_xgmac_enet_info = {
     .receive = eth_rx,
 };
 
-static int xgmac_enet_init(SysBusDevice *sbd)
+static void xgmac_enet_realize(DeviceState *dev, Error **errp)
 {
-    DeviceState *dev = DEVICE(sbd);
+    SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
     XgmacState *s = XGMAC(dev);
 
     memory_region_init_io(&s->iomem, OBJECT(s), &enet_mem_ops, s,
@@ -397,8 +411,6 @@ static int xgmac_enet_init(SysBusDevice *sbd)
                                  (s->conf.macaddr.a[2] << 16) |
                                  (s->conf.macaddr.a[1] << 8) |
                                   s->conf.macaddr.a[0];
-
-    return 0;
 }
 
 static Property xgmac_properties[] = {
@@ -408,12 +420,11 @@ static Property xgmac_properties[] = {
 
 static void xgmac_enet_class_init(ObjectClass *klass, void *data)
 {
-    SysBusDeviceClass *sbc = SYS_BUS_DEVICE_CLASS(klass);
     DeviceClass *dc = DEVICE_CLASS(klass);
 
-    sbc->init = xgmac_enet_init;
+    dc->realize = xgmac_enet_realize;
     dc->vmsd = &vmstate_xgmac;
-    dc->props = xgmac_properties;
+    device_class_set_props(dc, xgmac_properties);
 }
 
 static const TypeInfo xgmac_enet_info = {

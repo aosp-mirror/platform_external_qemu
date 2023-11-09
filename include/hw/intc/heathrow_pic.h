@@ -23,11 +23,14 @@
  * THE SOFTWARE.
  */
 
-#ifndef HEATHROW_H
-#define HEATHROW_H
+#ifndef HW_INTC_HEATHROW_PIC_H
+#define HW_INTC_HEATHROW_PIC_H
+
+#include "hw/sysbus.h"
+#include "qom/object.h"
 
 #define TYPE_HEATHROW "heathrow"
-#define HEATHROW(obj) OBJECT_CHECK(HeathrowState, (obj), TYPE_HEATHROW)
+OBJECT_DECLARE_SIMPLE_TYPE(HeathrowState, HEATHROW)
 
 typedef struct HeathrowPICState {
     uint32_t events;
@@ -36,14 +39,14 @@ typedef struct HeathrowPICState {
     uint32_t level_triggered;
 } HeathrowPICState;
 
-typedef struct HeathrowState {
+struct HeathrowState {
     SysBusDevice parent_obj;
 
     MemoryRegion mem;
     HeathrowPICState pics[2];
-    qemu_irq *irqs;
-} HeathrowState;
+    qemu_irq irqs[1];
+};
 
 #define HEATHROW_NUM_IRQS 64
 
-#endif /* HEATHROW_H */
+#endif /* HW_INTC_HEATHROW_PIC_H */

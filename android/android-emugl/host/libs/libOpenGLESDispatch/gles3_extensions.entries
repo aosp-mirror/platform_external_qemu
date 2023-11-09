@@ -1,6 +1,0 @@
-!gles3_extensions
-namespaces translator,gles2
-
-# GLES 3.x extensions
-void glVertexAttribIPointerWithDataSize(GLuint indx, GLint size, GLenum type, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
-void glPrimitiveRestartIndex(GLuint index);

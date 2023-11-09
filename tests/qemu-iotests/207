@@ -1,8 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env python3
+# group: rw
 #
 # Test ssh image creation
 #
 # Copyright (C) 2018 Red Hat, Inc.
+#
+# Creator/Owner: Kevin Wolf <kwolf@redhat.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,244 +21,289 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# creator
-owner=kwolf@redhat.com
+import iotests
+import subprocess
+import re
 
-seq=`basename $0`
-echo "QA output created by $seq"
+iotests.script_initialize(
+    supported_fmts=['raw'],
+    supported_protocols=['ssh'],
+)
 
-here=`pwd`
-status=1	# failure is the default!
+def filter_hash(qmsg):
+    def _filter(key, value):
+        if key == 'hash' and re.match('[0-9a-f]+', value):
+            return 'HASH'
+        return value
+    if isinstance(qmsg, str):
+        # Strip key type and fingerprint
+        p = r"\S+ (key fingerprint) '(md5|sha1|sha256):[0-9a-f]+'"
+        return re.sub(p, r"\1 '\2:HASH'", qmsg)
+    else:
+        return iotests.filter_qmp(qmsg, _filter)
 
-# get standard environment, filters and checks
-. ./common.rc
-. ./common.filter
+def blockdev_create(vm, options):
+    vm.blockdev_create(options, filters=[iotests.filter_qmp_testfiles, filter_hash])
 
-_supported_fmt raw
-_supported_proto ssh
-_supported_os Linux
+with iotests.FilePath('t.img') as disk_path, \
+     iotests.VM() as vm:
 
-function do_run_qemu()
-{
-    echo Testing: "$@"
-    $QEMU -nographic -qmp stdio -serial none "$@"
-    echo
-}
+    remote_path = iotests.remote_filename(disk_path)
 
-function run_qemu()
-{
-    do_run_qemu "$@" 2>&1 | _filter_testdir | _filter_qmp \
-                          | _filter_qemu | _filter_imgfmt \
-                          | _filter_actual_image_size
-}
+    #
+    # Successful image creation (defaults)
+    #
+    iotests.log("=== Successful image creation (defaults) ===")
+    iotests.log("")
 
-echo
-echo "=== Successful image creation (defaults) ==="
-echo
+    vm.launch()
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': disk_path,
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              }
+                          },
+                          'size': 4194304 })
+    vm.shutdown()
 
-run_qemu <<EOF
-{ "execute": "qmp_capabilities" }
-{ "execute": "x-blockdev-create",
-  "arguments": {
-      "driver": "ssh",
-      "location": {
-          "path": "$TEST_IMG_FILE",
-          "server": {
-              "host": "127.0.0.1",
-              "port": "22"
-          }
-      },
-      "size": 4194304
-  }
-}
-{ "execute": "quit" }
-EOF
+    iotests.img_info_log(remote_path)
+    iotests.log("")
+    iotests.img_info_log(disk_path)
 
-_img_info | _filter_img_info
-echo
-TEST_IMG=$TEST_IMG_FILE _img_info | _filter_img_info
+    #
+    # Test host-key-check options
+    #
+    iotests.log("=== Test host-key-check options ===")
+    iotests.log("")
 
-echo
-echo "=== Test host-key-check options ==="
-echo
+    iotests.log("--- no host key checking --")
+    iotests.log("")
 
-run_qemu <<EOF
-{ "execute": "qmp_capabilities" }
-{ "execute": "x-blockdev-create",
-  "arguments": {
-      "driver": "ssh",
-      "location": {
-          "path": "$TEST_IMG_FILE",
-          "server": {
-              "host": "127.0.0.1",
-              "port": "22"
-          },
-          "host-key-check": {
-              "mode": "none"
-          }
-      },
-      "size": 8388608
-  }
-}
-{ "execute": "quit" }
-EOF
+    vm.launch()
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': disk_path,
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              },
+                              'host-key-check': {
+                                  'mode': 'none'
+                              }
+                          },
+                          'size': 8388608 })
+    vm.shutdown()
 
-_img_info | _filter_img_info
+    iotests.img_info_log(remote_path)
 
-run_qemu <<EOF
-{ "execute": "qmp_capabilities" }
-{ "execute": "x-blockdev-create",
-  "arguments": {
-      "driver": "ssh",
-      "location": {
-          "path": "$TEST_IMG_FILE",
-          "server": {
-              "host": "127.0.0.1",
-              "port": "22"
-          },
-          "host-key-check": {
-              "mode": "known_hosts"
-          }
-      },
-      "size": 4194304
-  }
-}
-{ "execute": "quit" }
-EOF
+    iotests.log("--- known_hosts key checking --")
+    iotests.log("")
 
-_img_info | _filter_img_info
+    vm.launch()
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': disk_path,
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              },
+                              'host-key-check': {
+                                  'mode': 'known_hosts'
+                              }
+                          },
+                          'size': 4194304 })
+    vm.shutdown()
 
+    iotests.img_info_log(remote_path)
 
-key=$(ssh-keyscan -t rsa 127.0.0.1 2>/dev/null | grep -v "\\^#" |
-      cut -d" " -f3 | base64 -d | md5sum -b | cut -d" " -f1)
+    keys = subprocess.check_output(
+        'ssh-keyscan 127.0.0.1 2>/dev/null | grep -v "\\^#" | ' +
+        'cut -d" " -f3',
+        shell=True).rstrip().decode('ascii').split('\n')
 
-run_qemu <<EOF
-{ "execute": "qmp_capabilities" }
-{ "execute": "x-blockdev-create",
-  "arguments": {
-      "driver": "ssh",
-      "location": {
-          "path": "$TEST_IMG_FILE",
-          "server": {
-              "host": "127.0.0.1",
-              "port": "22"
-          },
-          "host-key-check": {
-              "mode": "hash",
-              "type": "md5",
-              "hash": "wrong"
-          }
-      },
-      "size": 8388608
-  }
-}
-{ "execute": "x-blockdev-create",
-  "arguments": {
-      "driver": "ssh",
-      "location": {
-          "path": "$TEST_IMG_FILE",
-          "server": {
-              "host": "127.0.0.1",
-              "port": "22"
-          },
-          "host-key-check": {
-              "mode": "hash",
-              "type": "md5",
-              "hash": "$key"
-          }
-      },
-      "size": 8388608
-  }
-}
-{ "execute": "quit" }
-EOF
+    # Mappings of base64 representations to digests
+    md5_keys = {}
+    sha1_keys = {}
+    sha256_keys = {}
 
-_img_info | _filter_img_info
+    for key in keys:
+        md5_keys[key] = subprocess.check_output(
+            'echo %s | base64 -d | md5sum -b | cut -d" " -f1' % key,
+            shell=True).rstrip().decode('ascii')
 
+        sha1_keys[key] = subprocess.check_output(
+            'echo %s | base64 -d | sha1sum -b | cut -d" " -f1' % key,
+            shell=True).rstrip().decode('ascii')
 
-key=$(ssh-keyscan -t rsa 127.0.0.1 2>/dev/null | grep -v "\\^#" |
-      cut -d" " -f3 | base64 -d | sha1sum -b | cut -d" " -f1)
+        sha256_keys[key] = subprocess.check_output(
+            'echo %s | base64 -d | sha256sum -b | cut -d" " -f1' % key,
+            shell=True).rstrip().decode('ascii')
 
-run_qemu <<EOF
-{ "execute": "qmp_capabilities" }
-{ "execute": "x-blockdev-create",
-  "arguments": {
-      "driver": "ssh",
-      "location": {
-          "path": "$TEST_IMG_FILE",
-          "server": {
-              "host": "127.0.0.1",
-              "port": "22"
-          },
-          "host-key-check": {
-              "mode": "hash",
-              "type": "sha1",
-              "hash": "wrong"
-          }
-      },
-      "size": 4194304
-  }
-}
-{ "execute": "x-blockdev-create",
-  "arguments": {
-      "driver": "ssh",
-      "location": {
-          "path": "$TEST_IMG_FILE",
-          "server": {
-              "host": "127.0.0.1",
-              "port": "22"
-          },
-          "host-key-check": {
-              "mode": "hash",
-              "type": "sha1",
-              "hash": "$key"
-          }
-      },
-      "size": 4194304
-  }
-}
-{ "execute": "quit" }
-EOF
+    vm.launch()
 
-_img_info | _filter_img_info
+    # Find correct key first
+    matching_key = None
+    for key in keys:
+        result = vm.qmp('blockdev-add',
+                        driver='ssh', node_name='node0', path=disk_path,
+                        server={
+                             'host': '127.0.0.1',
+                             'port': '22',
+                        }, host_key_check={
+                             'mode': 'hash',
+                             'type': 'md5',
+                             'hash': md5_keys[key],
+                        })
 
-echo
-echo "=== Invalid path and user ==="
-echo
+        if 'error' not in result:
+            vm.qmp('blockdev-del', node_name='node0')
+            matching_key = key
+            break
 
-run_qemu <<EOF
-{ "execute": "qmp_capabilities" }
-{ "execute": "x-blockdev-create",
-  "arguments": {
-      "driver": "ssh",
-      "location": {
-          "path": "/this/is/not/an/existing/path",
-          "server": {
-              "host": "127.0.0.1",
-              "port": "22"
-          }
-      },
-      "size": 4194304
-  }
-}
-{ "execute": "x-blockdev-create",
-  "arguments": {
-      "driver": "ssh",
-      "location": {
-          "path": "$TEST_IMG_FILE",
-          "user": "invalid user",
-          "server": {
-              "host": "127.0.0.1",
-              "port": "22"
-          }
-      },
-      "size": 4194304
-  }
-}
-{ "execute": "quit" }
-EOF
+    if matching_key is None:
+        vm.shutdown()
+        iotests.notrun('Did not find a key that fits 127.0.0.1')
 
-# success, all done
-echo "*** done"
-rm -f $seq.full
-status=0
+    iotests.log("--- explicit md5 key checking --")
+    iotests.log("")
+
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': disk_path,
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              },
+                              'host-key-check': {
+                                  'mode': 'hash',
+                                  'type': 'md5',
+                                  'hash': 'wrong',
+                              }
+                          },
+                          'size': 2097152 })
+
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': disk_path,
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              },
+                              'host-key-check': {
+                                  'mode': 'hash',
+                                  'type': 'md5',
+                                  'hash': md5_keys[matching_key],
+                              }
+                          },
+                          'size': 8388608 })
+    vm.shutdown()
+
+    iotests.img_info_log(remote_path)
+
+    iotests.log("--- explicit sha1 key checking --")
+    iotests.log("")
+
+    vm.launch()
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': disk_path,
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              },
+                              'host-key-check': {
+                                  'mode': 'hash',
+                                  'type': 'sha1',
+                                  'hash': 'wrong',
+                              }
+                          },
+                          'size': 2097152 })
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': disk_path,
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              },
+                              'host-key-check': {
+                                  'mode': 'hash',
+                                  'type': 'sha1',
+                                  'hash': sha1_keys[matching_key],
+                              }
+                          },
+                          'size': 4194304 })
+    vm.shutdown()
+
+    iotests.img_info_log(remote_path)
+
+    iotests.log("--- explicit sha256 key checking --")
+    iotests.log("")
+
+    vm.launch()
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': disk_path,
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              },
+                              'host-key-check': {
+                                  'mode': 'hash',
+                                  'type': 'sha256',
+                                  'hash': 'wrong',
+                              }
+                          },
+                          'size': 2097152 })
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': disk_path,
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              },
+                              'host-key-check': {
+                                  'mode': 'hash',
+                                  'type': 'sha256',
+                                  'hash': sha256_keys[matching_key],
+                              }
+                          },
+                          'size': 4194304 })
+    vm.shutdown()
+
+    iotests.img_info_log(remote_path)
+
+    #
+    # Invalid path and user
+    #
+    iotests.log("=== Invalid path and user ===")
+    iotests.log("")
+
+    vm.launch()
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': '/this/is/not/an/existing/path',
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              },
+                              'host-key-check': {
+                                  'mode': 'none'
+                              }
+                          },
+                          'size': 4194304 })
+    blockdev_create(vm, { 'driver': 'ssh',
+                          'location': {
+                              'path': disk_path,
+                              'user': 'invalid user',
+                              'server': {
+                                  'host': '127.0.0.1',
+                                  'port': '22'
+                              },
+                              'host-key-check': {
+                                  'mode': 'none'
+                              }
+                          },
+                          'size': 4194304 })
+    vm.shutdown()

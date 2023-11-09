@@ -18,12 +18,15 @@
  */
 
 #include "qemu/osdep.h"
-#include "hw/hw.h"
 #include "hw/pci/pci.h"
+#include "hw/qdev-properties.h"
 #include "intel-hda.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 #include "intel-hda-defs.h"
 #include "audio/audio.h"
-#include "audio/audio_forwarder.h"
+#include "trace.h"
+#include "qom/object.h"
 
 /* -------------------------------------------------------------------------- */
 
@@ -99,9 +102,9 @@ static void hda_codec_parse_fmt(uint32_t format, struct audsettings *as)
     }
 
     switch (format & AC_FMT_BITS_MASK) {
-    case AC_FMT_BITS_8:  as->fmt = AUD_FMT_S8;  break;
-    case AC_FMT_BITS_16: as->fmt = AUD_FMT_S16; break;
-    case AC_FMT_BITS_32: as->fmt = AUD_FMT_S32; break;
+    case AC_FMT_BITS_8:  as->fmt = AUDIO_FORMAT_S8;  break;
+    case AC_FMT_BITS_16: as->fmt = AUDIO_FORMAT_S16; break;
+    case AC_FMT_BITS_32: as->fmt = AUDIO_FORMAT_S32; break;
     }
 
     as->nchannels = ((format & AC_FMT_CHAN_MASK) >> AC_FMT_CHAN_SHIFT) + 1;
@@ -116,7 +119,7 @@ static void hda_codec_parse_fmt(uint32_t format, struct audsettings *as)
 
 #define QEMU_HDA_ID_VENDOR  0x1af4
 #define QEMU_HDA_PCM_FORMATS (AC_SUPPCM_BITS_16 |       \
-                              0x1ff /* 8 -> 96 kHz */)
+                              0x1fc /* 16 -> 96 kHz */)
 #define QEMU_HDA_AMP_NONE    (0)
 #define QEMU_HDA_AMP_STEPS   0x4a
 
@@ -127,18 +130,24 @@ static void hda_codec_parse_fmt(uint32_t format, struct audsettings *as)
 #define   PARAM nomixemu
 #include  "hda-codec-common.h"
 
+#define HDA_TIMER_TICKS (SCALE_MS)
+#define B_SIZE sizeof(st->buf)
+#define B_MASK (sizeof(st->buf) - 1)
+
 /* -------------------------------------------------------------------------- */
 
 static const char *fmt2name[] = {
-    [ AUD_FMT_U8  ] = "PCM-U8",
-    [ AUD_FMT_S8  ] = "PCM-S8",
-    [ AUD_FMT_U16 ] = "PCM-U16",
-    [ AUD_FMT_S16 ] = "PCM-S16",
-    [ AUD_FMT_U32 ] = "PCM-U32",
-    [ AUD_FMT_S32 ] = "PCM-S32",
+    [ AUDIO_FORMAT_U8  ] = "PCM-U8",
+    [ AUDIO_FORMAT_S8  ] = "PCM-S8",
+    [ AUDIO_FORMAT_U16 ] = "PCM-U16",
+    [ AUDIO_FORMAT_S16 ] = "PCM-S16",
+    [ AUDIO_FORMAT_U32 ] = "PCM-U32",
+    [ AUDIO_FORMAT_S32 ] = "PCM-S32",
 };
 
-typedef struct HDAAudioState HDAAudioState;
+#define TYPE_HDA_AUDIO "hda-audio"
+OBJECT_DECLARE_SIMPLE_TYPE(HDAAudioState, HDA_AUDIO)
+
 typedef struct HDAAudioStream HDAAudioStream;
 
 struct HDAAudioStream {
@@ -152,16 +161,17 @@ struct HDAAudioStream {
     bool mute_left, mute_right;
     struct audsettings as;
     union {
-        void *raw;
         SWVoiceIn *in;
         SWVoiceOut *out;
     } voice;
-    uint8_t buf[HDA_BUFFER_SIZE];
-    uint32_t bpos;
+    uint8_t compat_buf[HDA_BUFFER_SIZE];
+    uint32_t compat_bpos;
+    uint8_t buf[8192]; /* size must be power of two */
+    int64_t rpos;
+    int64_t wpos;
+    QEMUTimer *buft;
+    int64_t buft_start;
 };
-
-#define TYPE_HDA_AUDIO "hda-audio"
-#define HDA_AUDIO(obj) OBJECT_CHECK(HDAAudioState, (obj), TYPE_HDA_AUDIO)
 
 struct HDAAudioState {
     HDACodecDevice hda;
@@ -176,57 +186,220 @@ struct HDAAudioState {
     /* properties */
     uint32_t debug;
     bool     mixer;
-    bool     enable_input;
-    bool     enable_output;
+    bool     use_timer;
 };
+
+static inline int64_t hda_bytes_per_second(HDAAudioStream *st)
+{
+    return 2LL * st->as.nchannels * st->as.freq;
+}
+
+static inline void hda_timer_sync_adjust(HDAAudioStream *st, int64_t target_pos)
+{
+    int64_t limit = B_SIZE / 8;
+    int64_t corr = 0;
+
+    if (target_pos > limit) {
+        corr = HDA_TIMER_TICKS;
+    }
+    if (target_pos < -limit) {
+        corr = -HDA_TIMER_TICKS;
+    }
+    if (target_pos < -(2 * limit)) {
+        corr = -(4 * HDA_TIMER_TICKS);
+    }
+    if (corr == 0) {
+        return;
+    }
+
+    trace_hda_audio_adjust(st->node->name, target_pos);
+    st->buft_start += corr;
+}
+
+static void hda_audio_input_timer(void *opaque)
+{
+    HDAAudioStream *st = opaque;
+
+    int64_t now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+
+    int64_t buft_start = st->buft_start;
+    int64_t wpos = st->wpos;
+    int64_t rpos = st->rpos;
+
+    int64_t wanted_rpos = hda_bytes_per_second(st) * (now - buft_start)
+                          / NANOSECONDS_PER_SECOND;
+    wanted_rpos &= -4; /* IMPORTANT! clip to frames */
+
+    if (wanted_rpos <= rpos) {
+        /* we already transmitted the data */
+        goto out_timer;
+    }
+
+    int64_t to_transfer = MIN(wpos - rpos, wanted_rpos - rpos);
+    while (to_transfer) {
+        uint32_t start = (rpos & B_MASK);
+        uint32_t chunk = MIN(B_SIZE - start, to_transfer);
+        int rc = hda_codec_xfer(
+                &st->state->hda, st->stream, false, st->buf + start, chunk);
+        if (!rc) {
+            break;
+        }
+        rpos += chunk;
+        to_transfer -= chunk;
+        st->rpos += chunk;
+    }
+
+out_timer:
+
+    if (st->running) {
+        timer_mod_anticipate_ns(st->buft, now + HDA_TIMER_TICKS);
+    }
+}
 
 static void hda_audio_input_cb(void *opaque, int avail)
 {
     HDAAudioStream *st = opaque;
-    int recv = 0;
-    int len;
-    bool rc;
 
-    while (avail - recv >= sizeof(st->buf)) {
-        if (st->bpos != sizeof(st->buf)) {
-            len = AUD_read(st->voice.in, st->buf + st->bpos,
-                           sizeof(st->buf) - st->bpos);
-            st->bpos += len;
-            recv += len;
-            if (st->bpos != sizeof(st->buf)) {
-                break;
-            }
+    int64_t wpos = st->wpos;
+    int64_t rpos = st->rpos;
+
+    int64_t to_transfer = MIN(B_SIZE - (wpos - rpos), avail);
+
+    while (to_transfer) {
+        uint32_t start = (uint32_t) (wpos & B_MASK);
+        uint32_t chunk = (uint32_t) MIN(B_SIZE - start, to_transfer);
+        uint32_t read = AUD_read(st->voice.in, st->buf + start, chunk);
+        wpos += read;
+        to_transfer -= read;
+        st->wpos += read;
+        if (chunk != read) {
+            break;
         }
-        rc = hda_codec_xfer(&st->state->hda, st->stream, false,
-                            st->buf, sizeof(st->buf));
+    }
+
+    hda_timer_sync_adjust(st, -((wpos - rpos) - (B_SIZE >> 1)));
+}
+
+static void hda_audio_output_timer(void *opaque)
+{
+    HDAAudioStream *st = opaque;
+
+    int64_t now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+
+    int64_t buft_start = st->buft_start;
+    int64_t wpos = st->wpos;
+    int64_t rpos = st->rpos;
+
+    int64_t wanted_wpos = hda_bytes_per_second(st) * (now - buft_start)
+                          / NANOSECONDS_PER_SECOND;
+    wanted_wpos &= -4; /* IMPORTANT! clip to frames */
+
+    if (wanted_wpos <= wpos) {
+        /* we already received the data */
+        goto out_timer;
+    }
+
+    int64_t to_transfer = MIN(B_SIZE - (wpos - rpos), wanted_wpos - wpos);
+    while (to_transfer) {
+        uint32_t start = (wpos & B_MASK);
+        uint32_t chunk = MIN(B_SIZE - start, to_transfer);
+        int rc = hda_codec_xfer(
+                &st->state->hda, st->stream, true, st->buf + start, chunk);
         if (!rc) {
             break;
         }
-        st->bpos = 0;
+        wpos += chunk;
+        to_transfer -= chunk;
+        st->wpos += chunk;
+    }
+
+out_timer:
+
+    if (st->running) {
+        timer_mod_anticipate_ns(st->buft, now + HDA_TIMER_TICKS);
     }
 }
 
 static void hda_audio_output_cb(void *opaque, int avail)
 {
     HDAAudioStream *st = opaque;
+
+    int64_t wpos = st->wpos;
+    int64_t rpos = st->rpos;
+
+    int64_t to_transfer = MIN(wpos - rpos, avail);
+
+    if (wpos - rpos == B_SIZE) {
+        /* drop buffer, reset timer adjust */
+        st->rpos = 0;
+        st->wpos = 0;
+        st->buft_start = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+        trace_hda_audio_overrun(st->node->name);
+        return;
+    }
+
+    while (to_transfer) {
+        uint32_t start = (uint32_t) (rpos & B_MASK);
+        uint32_t chunk = (uint32_t) MIN(B_SIZE - start, to_transfer);
+        uint32_t written = AUD_write(st->voice.out, st->buf + start, chunk);
+        rpos += written;
+        to_transfer -= written;
+        st->rpos += written;
+        if (chunk != written) {
+            break;
+        }
+    }
+
+    hda_timer_sync_adjust(st, (wpos - rpos) - (B_SIZE >> 1));
+}
+
+static void hda_audio_compat_input_cb(void *opaque, int avail)
+{
+    HDAAudioStream *st = opaque;
+    int recv = 0;
+    int len;
+    bool rc;
+
+    while (avail - recv >= sizeof(st->compat_buf)) {
+        if (st->compat_bpos != sizeof(st->compat_buf)) {
+            len = AUD_read(st->voice.in, st->compat_buf + st->compat_bpos,
+                           sizeof(st->compat_buf) - st->compat_bpos);
+            st->compat_bpos += len;
+            recv += len;
+            if (st->compat_bpos != sizeof(st->compat_buf)) {
+                break;
+            }
+        }
+        rc = hda_codec_xfer(&st->state->hda, st->stream, false,
+                            st->compat_buf, sizeof(st->compat_buf));
+        if (!rc) {
+            break;
+        }
+        st->compat_bpos = 0;
+    }
+}
+
+static void hda_audio_compat_output_cb(void *opaque, int avail)
+{
+    HDAAudioStream *st = opaque;
     int sent = 0;
     int len;
     bool rc;
 
-    while (avail - sent >= sizeof(st->buf)) {
-        if (st->bpos == sizeof(st->buf)) {
+    while (avail - sent >= sizeof(st->compat_buf)) {
+        if (st->compat_bpos == sizeof(st->compat_buf)) {
             rc = hda_codec_xfer(&st->state->hda, st->stream, true,
-                                st->buf, sizeof(st->buf));
+                                st->compat_buf, sizeof(st->compat_buf));
             if (!rc) {
                 break;
             }
-            st->bpos = 0;
+            st->compat_bpos = 0;
         }
-        len = AUD_write(st->voice.out, st->buf + st->bpos,
-                        sizeof(st->buf) - st->bpos);
-        st->bpos += len;
+        len = AUD_write(st->voice.out, st->compat_buf + st->compat_bpos,
+                        sizeof(st->compat_buf) - st->compat_bpos);
+        st->compat_bpos += len;
         sent += len;
-        if (st->bpos != sizeof(st->buf)) {
+        if (st->compat_bpos != sizeof(st->compat_buf)) {
             break;
         }
     }
@@ -241,76 +414,85 @@ static void hda_audio_set_running(HDAAudioStream *st, bool running)
         return;
     }
     st->running = running;
-    dprint(st->state, 1, "%s: %s (stream %d)\n", st->node->name,
-           st->running ? "on" : "off", st->stream);
-    if (st->voice.raw) {
-        if (st->output) {
-            AUD_set_active_out(st->voice.out, st->running);
+    trace_hda_audio_running(st->node->name, st->stream, st->running);
+    if (st->state->use_timer) {
+        if (running) {
+            int64_t now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+            st->rpos = 0;
+            st->wpos = 0;
+            st->buft_start = now;
+            timer_mod_anticipate_ns(st->buft, now + HDA_TIMER_TICKS);
         } else {
-            AUD_set_active_in(st->voice.in, st->running);
+            timer_del(st->buft);
         }
+    }
+    if (st->output) {
+        AUD_set_active_out(st->voice.out, st->running);
+    } else {
+        AUD_set_active_in(st->voice.in, st->running);
     }
 }
 
 static void hda_audio_set_amp(HDAAudioStream *st)
 {
-    /* do not touch audio levels */
-}
+    bool muted;
+    uint32_t left, right;
 
-// AEMU
-// The hda-codec has a hard reference to the active open input device (voice.in), which means
-// 1. Only one input device can be active.
-// 2. We have no mechanism to attach a different input device once it has been configured.
-//
-// the functions below enable us to set and retrieve the active input device.
-static HDAAudioStream *g_stream = NULL;
-
-static SWVoiceIn* set_hda_voice_in(SWVoiceIn *voice)
-{
-    if (g_stream)
-    {
-        // TODO(jansene): We actually should reconfigure the stream
-        // to use the different harware settings
-        // hda_audio_command with AC_VERB_SET_STREAM_FORMAT
-        g_stream->voice.in = AUD_open_in(&g_stream->state->card, voice,
-                                         g_stream->node->name, g_stream,
-                                         hda_audio_input_cb, &g_stream->as);
-        return g_stream->voice.in;
-    }
-    return NULL;
-}
-static SWVoiceIn *get_hda_voice_in()
-{
-    return g_stream ? g_stream->voice.in : NULL;
-}
-// AEMU END
-
-static void hda_audio_setup(HDAAudioStream *st)
-{
     if (st->node == NULL) {
         return;
     }
 
-    dprint(st->state, 1, "%s: format: %d x %s @ %d Hz\n",
-           st->node->name, st->as.nchannels,
-           fmt2name[st->as.fmt], st->as.freq);
+    muted = st->mute_left && st->mute_right;
+    left  = st->mute_left  ? 0 : st->gain_left;
+    right = st->mute_right ? 0 : st->gain_right;
 
+    left = left * 255 / QEMU_HDA_AMP_STEPS;
+    right = right * 255 / QEMU_HDA_AMP_STEPS;
+
+    if (!st->state->mixer) {
+        return;
+    }
     if (st->output) {
-        if (st->state->enable_output) {
-            st->voice.out = AUD_open_out(&st->state->card, st->voice.out,
-                                         st->node->name, st,
-                                         hda_audio_output_cb, &st->as);
-        }
+        AUD_set_volume_out(st->voice.out, muted, left, right);
     } else {
-        if (st->state->enable_input) {
-            st->voice.in = AUD_open_in(&st->state->card, st->voice.in,
-                                       st->node->name, st,
-                                       hda_audio_input_cb, &st->as);
-            g_stream = st;
-        }
+        AUD_set_volume_in(st->voice.in, muted, left, right);
     }
 }
 
+static void hda_audio_setup(HDAAudioStream *st)
+{
+    bool use_timer = st->state->use_timer;
+    audio_callback_fn cb;
+
+    if (st->node == NULL) {
+        return;
+    }
+
+    trace_hda_audio_format(st->node->name, st->as.nchannels,
+                           fmt2name[st->as.fmt], st->as.freq);
+
+    if (st->output) {
+        if (use_timer) {
+            cb = hda_audio_output_cb;
+            st->buft = timer_new_ns(QEMU_CLOCK_VIRTUAL,
+                                    hda_audio_output_timer, st);
+        } else {
+            cb = hda_audio_compat_output_cb;
+        }
+        st->voice.out = AUD_open_out(&st->state->card, st->voice.out,
+                                     st->node->name, st, cb, &st->as);
+    } else {
+        if (use_timer) {
+            cb = hda_audio_input_cb;
+            st->buft = timer_new_ns(QEMU_CLOCK_VIRTUAL,
+                                    hda_audio_input_timer, st);
+        } else {
+            cb = hda_audio_compat_input_cb;
+        }
+        st->voice.in = AUD_open_in(&st->state->card, st->voice.in,
+                                   st->node->name, st, cb, &st->as);
+    }
+}
 
 static void hda_audio_command(HDACodecDevice *hda, uint32_t nid, uint32_t data)
 {
@@ -524,7 +706,7 @@ static int hda_audio_init(HDACodecDevice *hda, const struct desc_codec *desc)
                 /* unmute output by default */
                 st->gain_left = QEMU_HDA_AMP_STEPS;
                 st->gain_right = QEMU_HDA_AMP_STEPS;
-                st->bpos = sizeof(st->buf);
+                st->compat_bpos = sizeof(st->compat_buf);
                 st->output = true;
             } else {
                 st->output = false;
@@ -536,8 +718,6 @@ static int hda_audio_init(HDACodecDevice *hda, const struct desc_codec *desc)
             break;
         }
     }
-
-    audio_forwarder_register_card(&set_hda_voice_in, &get_hda_voice_in);
     return 0;
 }
 
@@ -547,20 +727,19 @@ static void hda_audio_exit(HDACodecDevice *hda)
     HDAAudioStream *st;
     int i;
 
-    audio_forwarder_register_card(NULL, NULL);
-
     dprint(a, 1, "%s\n", __func__);
     for (i = 0; i < ARRAY_SIZE(a->st); i++) {
         st = a->st + i;
         if (st->node == NULL) {
             continue;
         }
-        if (st->voice.raw) {
-            if (st->output) {
-                AUD_close_out(&a->card, st->voice.out);
-            } else {
-                AUD_close_in(&a->card, st->voice.in);
-            }
+        if (a->use_timer) {
+            timer_del(st->buft);
+        }
+        if (st->output) {
+            AUD_close_out(&a->card, st->voice.out);
+        } else {
+            AUD_close_in(&a->card, st->voice.in);
         }
     }
     AUD_remove_card(&a->card);
@@ -606,6 +785,26 @@ static void hda_audio_reset(DeviceState *dev)
     }
 }
 
+static bool vmstate_hda_audio_stream_buf_needed(void *opaque)
+{
+    HDAAudioStream *st = opaque;
+    return st->state && st->state->use_timer;
+}
+
+static const VMStateDescription vmstate_hda_audio_stream_buf = {
+    .name = "hda-audio-stream/buffer",
+    .version_id = 1,
+    .needed = vmstate_hda_audio_stream_buf_needed,
+    .fields = (VMStateField[]) {
+        VMSTATE_BUFFER(buf, HDAAudioStream),
+        VMSTATE_INT64(rpos, HDAAudioStream),
+        VMSTATE_INT64(wpos, HDAAudioStream),
+        VMSTATE_TIMER_PTR(buft, HDAAudioStream),
+        VMSTATE_INT64(buft_start, HDAAudioStream),
+        VMSTATE_END_OF_LIST()
+    }
+};
+
 static const VMStateDescription vmstate_hda_audio_stream = {
     .name = "hda-audio-stream",
     .version_id = 1,
@@ -617,9 +816,13 @@ static const VMStateDescription vmstate_hda_audio_stream = {
         VMSTATE_UINT32(gain_right, HDAAudioStream),
         VMSTATE_BOOL(mute_left, HDAAudioStream),
         VMSTATE_BOOL(mute_right, HDAAudioStream),
-        VMSTATE_UINT32(bpos, HDAAudioStream),
-        VMSTATE_BUFFER(buf, HDAAudioStream),
+        VMSTATE_UINT32(compat_bpos, HDAAudioStream),
+        VMSTATE_BUFFER(compat_buf, HDAAudioStream),
         VMSTATE_END_OF_LIST()
+    },
+    .subsections = (const VMStateDescription * []) {
+        &vmstate_hda_audio_stream_buf,
+        NULL
     }
 };
 
@@ -638,10 +841,10 @@ static const VMStateDescription vmstate_hda_audio = {
 };
 
 static Property hda_audio_properties[] = {
+    DEFINE_AUDIO_PROPERTIES(HDAAudioState, card),
     DEFINE_PROP_UINT32("debug", HDAAudioState, debug,   0),
     DEFINE_PROP_BOOL("mixer", HDAAudioState, mixer,  true),
-    DEFINE_PROP_BOOL("input", HDAAudioState, enable_input, true),
-    DEFINE_PROP_BOOL("output", HDAAudioState, enable_output, true),
+    DEFINE_PROP_BOOL("use-timer", HDAAudioState, use_timer,  true),
     DEFINE_PROP_END_OF_LIST(),
 };
 
@@ -689,12 +892,13 @@ static void hda_audio_base_class_init(ObjectClass *klass, void *data)
     set_bit(DEVICE_CATEGORY_SOUND, dc->categories);
     dc->reset = hda_audio_reset;
     dc->vmsd = &vmstate_hda_audio;
-    dc->props = hda_audio_properties;
+    device_class_set_props(dc, hda_audio_properties);
 }
 
 static const TypeInfo hda_audio_info = {
     .name          = TYPE_HDA_AUDIO,
     .parent        = TYPE_HDA_CODEC_DEVICE,
+    .instance_size = sizeof(HDAAudioState),
     .class_init    = hda_audio_base_class_init,
     .abstract      = true,
 };
@@ -711,7 +915,6 @@ static void hda_audio_output_class_init(ObjectClass *klass, void *data)
 static const TypeInfo hda_audio_output_info = {
     .name          = "hda-output",
     .parent        = TYPE_HDA_AUDIO,
-    .instance_size = sizeof(HDAAudioState),
     .class_init    = hda_audio_output_class_init,
 };
 
@@ -727,7 +930,6 @@ static void hda_audio_duplex_class_init(ObjectClass *klass, void *data)
 static const TypeInfo hda_audio_duplex_info = {
     .name          = "hda-duplex",
     .parent        = TYPE_HDA_AUDIO,
-    .instance_size = sizeof(HDAAudioState),
     .class_init    = hda_audio_duplex_class_init,
 };
 
@@ -743,7 +945,6 @@ static void hda_audio_micro_class_init(ObjectClass *klass, void *data)
 static const TypeInfo hda_audio_micro_info = {
     .name          = "hda-micro",
     .parent        = TYPE_HDA_AUDIO,
-    .instance_size = sizeof(HDAAudioState),
     .class_init    = hda_audio_micro_class_init,
 };
 

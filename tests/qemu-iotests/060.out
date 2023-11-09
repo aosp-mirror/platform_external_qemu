@@ -7,20 +7,22 @@ ERROR cluster 3 refcount=1 reference=3
 
 1 errors were found on the image.
 Data may be corrupted, or further writes to the image may corrupt it.
-incompatible_features     0x0
+incompatible_features     []
 qcow2: Marking image as corrupt: Preventing invalid write on metadata (overlaps with active L1 table); further corruption events will be suppressed
 write failed: Input/output error
-incompatible_features     0x2
+incompatible_features     [1]
 image: TEST_DIR/t.IMGFMT
 file format: IMGFMT
-virtual size: 64M (67108864 bytes)
+virtual size: 64 MiB (67108864 bytes)
 cluster_size: 65536
 Format specific information:
     compat: 1.1
+    compression type: COMPRESSION_TYPE
     lazy refcounts: false
     refcount bits: 16
     corrupt: true
-can't open device TEST_DIR/t.IMGFMT: IMGFMT: Image is corrupt; cannot be opened read/write
+    extended l2: false
+qemu-io: can't open device TEST_DIR/t.IMGFMT: IMGFMT: Image is corrupt; cannot be opened read/write
 no file open, try 'help open'
 read 512/512 bytes at offset 0
 512 bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
@@ -33,10 +35,10 @@ ERROR cluster 2 refcount=1 reference=2
 
 2 errors were found on the image.
 Data may be corrupted, or further writes to the image may corrupt it.
-incompatible_features     0x0
+incompatible_features     []
 qcow2: Marking image as corrupt: Preventing invalid write on metadata (overlaps with refcount block); further corruption events will be suppressed
 write failed: Input/output error
-incompatible_features     0x2
+incompatible_features     [1]
 ERROR refcount block 0 refcount=2
 ERROR cluster 2 refcount=1 reference=2
 Rebuilding refcount structure
@@ -49,10 +51,10 @@ The following inconsistencies were found and repaired:
 
 Double checking the fixed image now...
 No errors were found on the image.
-incompatible_features     0x0
+incompatible_features     []
 wrote 512/512 bytes at offset 0
 512 bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-incompatible_features     0x0
+incompatible_features     []
 
 === Testing cluster data reference into inactive L2 table ===
 
@@ -69,10 +71,10 @@ Data may be corrupted, or further writes to the image may corrupt it.
 
 1 leaked clusters were found on the image.
 This means waste of disk space, but no harm to data.
-incompatible_features     0x0
+incompatible_features     []
 qcow2: Marking image as corrupt: Preventing invalid write on metadata (overlaps with inactive L2 table); further corruption events will be suppressed
 write failed: Input/output error
-incompatible_features     0x2
+incompatible_features     [1]
 ERROR cluster 4 refcount=1 reference=2
 Leaked cluster 9 refcount=1 reference=0
 Repairing cluster 4 refcount=1 reference=2
@@ -85,10 +87,10 @@ The following inconsistencies were found and repaired:
 
 Double checking the fixed image now...
 No errors were found on the image.
-incompatible_features     0x0
+incompatible_features     []
 wrote 512/512 bytes at offset 0
 512 bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-incompatible_features     0x0
+incompatible_features     []
 read 512/512 bytes at offset 0
 512 bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 No errors were found on the image.
@@ -97,12 +99,13 @@ read 512/512 bytes at offset 0
 
 === Testing overlap while COW is in flight ===
 
-Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=1073741824
+Formatting 'TEST_DIR/t.IMGFMT.base', fmt=IMGFMT size=1073741824
+wrote 65536/65536 bytes at offset 0
+64 KiB, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=1073741824 backing_file=TEST_DIR/t.IMGFMT.base backing_fmt=IMGFMT
 wrote 65536/65536 bytes at offset 0
 64 KiB, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 wrote 65536/65536 bytes at offset 536870912
-64 KiB, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-discard 65536/65536 bytes at offset 0
 64 KiB, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 qcow2: Marking image as corrupt: Preventing invalid write on metadata (overlaps with active L2 table); further corruption events will be suppressed
 blkdebug: Suspended request '0'
@@ -129,7 +132,7 @@ Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864
 wrote 65536/65536 bytes at offset 0
 64 KiB, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 qcow2: Marking image as corrupt: L2 table offset 0x42a00 unaligned (L1 index: 0); further corruption events will be suppressed
-qemu-img: Error while amending options: Input/output error
+qemu-img: Failed to turn zero into data clusters: Input/output error
 
 === Testing unaligned L2 entry ===
 
@@ -145,7 +148,7 @@ Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864
 wrote 65536/65536 bytes at offset 0
 64 KiB, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 qcow2: Marking image as corrupt: Cluster allocation offset 0x52a00 unaligned (L2 offset: 0x40000, L2 index: 0); further corruption events will be suppressed
-qemu-img: Error while amending options: Input/output error
+qemu-img: Failed to turn zero into data clusters: Input/output error
 
 === Testing unaligned reftable entry ===
 
@@ -267,7 +270,7 @@ No errors were found on the image.
 === Testing zero refcount table size ===
 
 Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864
-can't open device TEST_DIR/t.IMGFMT: Image does not contain a reference count table
+qemu-io: can't open device TEST_DIR/t.IMGFMT: Image does not contain a reference count table
 ERROR cluster 0 refcount=0 reference=1
 ERROR cluster 3 refcount=0 reference=1
 Rebuilding refcount structure
@@ -296,7 +299,7 @@ Can't get refcount for cluster 2: Input/output error
 Can't get refcount for cluster 3: Input/output error
 Rebuilding refcount structure
 Repairing cluster 1 refcount=1 reference=0
-can't open device TEST_DIR/t.IMGFMT: Could not repair dirty image: Input/output error
+qemu-io: can't open device TEST_DIR/t.IMGFMT: Could not repair dirty image: Input/output error
 --- Repairing ---
 Leaked cluster 1 refcount=1 reference=0
 Repairing cluster 1 refcount=1 reference=0
@@ -318,7 +321,7 @@ discard 65536/65536 bytes at offset 0
 qcow2: Marking image as corrupt: Preallocated zero cluster offset 0x2a00 unaligned (guest offset: 0); further corruption events will be suppressed
 write failed: Input/output error
 --- Repairing ---
-Repairing offset=2a00: Preallocated zero cluster is not properly aligned; L2 entry corrupted.
+Repairing offset=2a00: Preallocated cluster is not properly aligned; L2 entry corrupted.
 The following inconsistencies were found and repaired:
 
     0 leaked clusters
@@ -364,10 +367,10 @@ Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864
 qcow2: Marking image as corrupt: Refblock at 0xffffff00000000 is not covered by the refcount structures; further corruption events will be suppressed
 qemu-img: Failed to discard unused refblocks: Input/output error
 --- Checking and retrying ---
-virtual size: 64M (67108864 bytes)
+virtual size: 64 MiB (67108864 bytes)
 No errors were found on the image.
 Image resized.
-virtual size: 32M (33554432 bytes)
+virtual size: 32 MiB (33554432 bytes)
 
 === Discarding a non-covered in-bounds refblock ===
 
@@ -375,10 +378,10 @@ Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864
 qcow2: Marking image as corrupt: Refblock at 0x1000000000 is not covered by the refcount structures; further corruption events will be suppressed
 qemu-img: Failed to discard unused refblocks: Input/output error
 --- Checking and retrying ---
-virtual size: 64M (67108864 bytes)
+virtual size: 64 MiB (67108864 bytes)
 No errors were found on the image.
 Image resized.
-virtual size: 32M (33554432 bytes)
+virtual size: 32 MiB (33554432 bytes)
 
 === Discarding a refblock covered by an unaligned refblock ===
 
@@ -419,5 +422,18 @@ QMP_VERSION
 write failed: Input/output error
 {"return": ""}
 {"return": {}}
-{"timestamp": {"seconds":  TIMESTAMP, "microseconds":  TIMESTAMP}, "event": "SHUTDOWN", "data": {"guest": false}}
+{"timestamp": {"seconds":  TIMESTAMP, "microseconds":  TIMESTAMP}, "event": "SHUTDOWN", "data": {"guest": false, "reason": "host-qmp-quit"}}
+
+=== Testing incoming inactive corrupted image ===
+
+Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864
+QMP_VERSION
+{"return": {}}
+qcow2: Image is corrupt: L2 table offset 0x2a2a2a00 unaligned (L1 index: 0); further non-fatal corruption events will be suppressed
+{"timestamp": {"seconds":  TIMESTAMP, "microseconds":  TIMESTAMP}, "event": "BLOCK_IMAGE_CORRUPTED", "data": {"device": "", "msg": "L2 table offset 0x2a2a2a00 unaligned (L1 index: 0)", "node-name": "drive", "fatal": false}}
+{"return": ""}
+{"return": {}}
+{"timestamp": {"seconds":  TIMESTAMP, "microseconds":  TIMESTAMP}, "event": "SHUTDOWN", "data": {"guest": false, "reason": "host-qmp-quit"}}
+
+    corrupt: false
 *** done

@@ -23,27 +23,30 @@
  */
 
 #include "qemu/osdep.h"
+#include "qemu/log.h"
 #include "net/slirp.h"
 
 
-#ifndef _WIN32
+#if defined(CONFIG_SMBD_COMMAND)
 #include <pwd.h>
 #include <sys/wait.h>
 #endif
+#include "net/eth.h"
 #include "net/net.h"
 #include "clients.h"
 #include "hub.h"
 #include "monitor/monitor.h"
-#include "qemu/abort.h"
 #include "qemu/error-report.h"
 #include "qemu/sockets.h"
-#include "slirp/libslirp.h"
-#include "slirp/ip6.h"
+#include <libslirp.h>
 #include "chardev/char-fe.h"
 #include "sysemu/sysemu.h"
 #include "qemu/cutils.h"
 #include "qapi/error.h"
 #include "qapi/qmp/qdict.h"
+#include "util.h"
+#include "migration/register.h"
+#include "migration/qemu-file-types.h"
 
 static int get_str_sep(char *buf, int buf_size, const char **pp, int sep)
 {
@@ -68,51 +71,40 @@ static int get_str_sep(char *buf, int buf_size, const char **pp, int sep)
 /* slirp network adapter */
 
 #define SLIRP_CFG_HOSTFWD 1
-#define SLIRP_CFG_LEGACY  2
-#define SLIRP_CFG_IPV6_HOSTFWD (1 << 2)
 
 struct slirp_config_str {
     struct slirp_config_str *next;
     int flags;
     char str[1024];
-    int legacy_format;
 };
 
-typedef struct SlirpShaper {
-    void* peer;
-    void (*send)(void *peer, const void *packet, int packet_len, void* slirp_state);
-} SlirpShaper;
+struct GuestFwd {
+    CharBackend hd;
+    struct in_addr server;
+    int port;
+    Slirp *slirp;
+};
 
 typedef struct SlirpState {
     NetClientState nc;
     QTAILQ_ENTRY(SlirpState) entry;
     Slirp *slirp;
+    Notifier poll_notifier;
     Notifier exit_notifier;
-    SlirpShaper shaper_out;
-    SlirpShaper shaper_in;
-    SlirpReceiveCallbackFunc recv_cb;
-    void *opaque;
-#ifndef _WIN32
+#if defined(CONFIG_SMBD_COMMAND)
     gchar *smb_dir;
 #endif
+    GSList *fwd;
 } SlirpState;
 
 static struct slirp_config_str *slirp_configs;
-const char *legacy_tftp_prefix;
-const char *legacy_bootp_filename;
-static QTAILQ_HEAD(slirp_stacks, SlirpState) slirp_stacks =
+static QTAILQ_HEAD(, SlirpState) slirp_stacks =
     QTAILQ_HEAD_INITIALIZER(slirp_stacks);
 
-static int slirp_hostfwd(SlirpState *s, const char *redir_str,
-                         int legacy_format, Error **errp);
-static int slirp_ipv6_hostfwd(SlirpState *s, const char *redir_str,
-                              int legacy_format, Error **errp);
-static int slirp_guestfwd(SlirpState *s, const char *config_str,
-                          int legacy_format, Error **errp);
+static int slirp_hostfwd(SlirpState *s, const char *redir_str, Error **errp);
+static int slirp_guestfwd(SlirpState *s, const char *config_str, Error **errp);
 
-#ifndef _WIN32
-static const char *legacy_smb_export;
-
+#if defined(CONFIG_SMBD_COMMAND)
 static int slirp_smb(SlirpState *s, const char *exported_dir,
                      struct in_addr vserver_addr, Error **errp);
 static void slirp_smb_cleanup(SlirpState *s);
@@ -120,44 +112,29 @@ static void slirp_smb_cleanup(SlirpState *s);
 static inline void slirp_smb_cleanup(SlirpState *s) { }
 #endif
 
-void net_slirp_output_raw(void *opaque, const uint8_t *pkt, int pkt_len)
+static ssize_t net_slirp_send_packet(const void *pkt, size_t pkt_len,
+                                     void *opaque)
 {
     SlirpState *s = opaque;
-    qemu_send_packet(&s->nc, pkt, pkt_len);
-}
+    uint8_t min_pkt[ETH_ZLEN];
+    size_t min_pktsz = sizeof(min_pkt);
 
-void slirp_output(void *opaque, const uint8_t *pkt, int pkt_len)
-{
-    SlirpState *s = opaque;
-    SlirpShaper* shaper = &s->shaper_out;
-
-    if (s->recv_cb) {
-        s->recv_cb(s->opaque, pkt, pkt_len);
-    } else {
-        if (shaper->send) {
-          shaper->send(shaper->peer, pkt, pkt_len, (void *)s);
-        } else {
-          net_slirp_output_raw(opaque, pkt, pkt_len);
+    if (net_peer_needs_padding(&s->nc)) {
+        if (eth_pad_short_frame(min_pkt, &min_pktsz, pkt, pkt_len)) {
+            pkt = min_pkt;
+            pkt_len = min_pktsz;
         }
     }
-}
 
-void net_slirp_receive_raw(void* opaque, const uint8_t *buf, size_t size)
-{
-    SlirpState *s = opaque;
-    slirp_input(s->slirp, buf, size);
+    return qemu_send_packet(&s->nc, pkt, pkt_len);
 }
 
 static ssize_t net_slirp_receive(NetClientState *nc, const uint8_t *buf, size_t size)
 {
     SlirpState *s = DO_UPCAST(SlirpState, nc, nc);
-    SlirpShaper *shaper = &s->shaper_in;
 
-    if (shaper->send) {
-        shaper->send(shaper->peer, buf, size, (void*)s);
-    } else {
-        net_slirp_receive_raw(s, buf, size);
-    }
+    slirp_input(s->slirp, buf, size);
+
     return size;
 }
 
@@ -167,10 +144,21 @@ static void slirp_smb_exit(Notifier *n, void *data)
     slirp_smb_cleanup(s);
 }
 
+static void slirp_free_fwd(gpointer data)
+{
+    struct GuestFwd *fwd = data;
+
+    qemu_chr_fe_deinit(&fwd->hd, true);
+    g_free(data);
+}
+
 static void net_slirp_cleanup(NetClientState *nc)
 {
     SlirpState *s = DO_UPCAST(SlirpState, nc, nc);
 
+    g_slist_free_full(s->fwd, slirp_free_fwd);
+    main_loop_poll_remove_notifier(&s->poll_notifier);
+    unregister_savevm(NULL, "slirp", s->slirp);
     slirp_cleanup(s->slirp);
     if (s->exit_notifier.notify) {
         qemu_remove_exit_notifier(&s->exit_notifier);
@@ -186,6 +174,247 @@ static NetClientInfo net_slirp_info = {
     .cleanup = net_slirp_cleanup,
 };
 
+static void net_slirp_guest_error(const char *msg, void *opaque)
+{
+    qemu_log_mask(LOG_GUEST_ERROR, "%s", msg);
+}
+
+static int64_t net_slirp_clock_get_ns(void *opaque)
+{
+    return qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+}
+
+typedef struct SlirpTimer SlirpTimer;
+struct SlirpTimer {
+    QEMUTimer timer;
+#if SLIRP_CHECK_VERSION(4,7,0)
+    Slirp *slirp;
+    SlirpTimerId id;
+    void *cb_opaque;
+#endif
+};
+
+#if SLIRP_CHECK_VERSION(4,7,0)
+static void net_slirp_init_completed(Slirp *slirp, void *opaque)
+{
+    SlirpState *s = opaque;
+    s->slirp = slirp;
+}
+
+static void net_slirp_timer_cb(void *opaque)
+{
+    SlirpTimer *t = opaque;
+    slirp_handle_timer(t->slirp, t->id, t->cb_opaque);
+}
+
+static void *net_slirp_timer_new_opaque(SlirpTimerId id,
+                                        void *cb_opaque, void *opaque)
+{
+    SlirpState *s = opaque;
+    SlirpTimer *t = g_new(SlirpTimer, 1);
+    t->slirp = s->slirp;
+    t->id = id;
+    t->cb_opaque = cb_opaque;
+    timer_init_full(&t->timer, NULL, QEMU_CLOCK_VIRTUAL,
+                    SCALE_MS, QEMU_TIMER_ATTR_EXTERNAL,
+                    net_slirp_timer_cb, t);
+    return t;
+}
+#else
+static void *net_slirp_timer_new(SlirpTimerCb cb,
+                                 void *cb_opaque, void *opaque)
+{
+    SlirpTimer *t = g_new(SlirpTimer, 1);
+    timer_init_full(&t->timer, NULL, QEMU_CLOCK_VIRTUAL,
+                    SCALE_MS, QEMU_TIMER_ATTR_EXTERNAL,
+                    cb, cb_opaque);
+    return t;
+}
+#endif
+
+static void net_slirp_timer_free(void *timer, void *opaque)
+{
+    SlirpTimer *t = timer;
+    timer_del(&t->timer);
+    g_free(t);
+}
+
+static void net_slirp_timer_mod(void *timer, int64_t expire_timer,
+                                void *opaque)
+{
+    SlirpTimer *t = timer;
+    timer_mod(&t->timer, expire_timer);
+}
+
+static void net_slirp_register_poll_fd(int fd, void *opaque)
+{
+#ifdef WIN32
+    AioContext *ctxt = qemu_get_aio_context();
+
+    if (WSAEventSelect(fd, event_notifier_get_handle(&ctxt->notifier),
+                       FD_READ | FD_ACCEPT | FD_CLOSE |
+                       FD_CONNECT | FD_WRITE | FD_OOB) != 0) {
+        error_setg_win32(&error_warn, WSAGetLastError(), "failed to WSAEventSelect()");
+    }
+#endif
+}
+
+static void net_slirp_unregister_poll_fd(int fd, void *opaque)
+{
+#ifdef WIN32
+    if (WSAEventSelect(fd, NULL, 0) != 0) {
+        error_setg_win32(&error_warn, WSAGetLastError(), "failed to WSAEventSelect()");
+    }
+#endif
+}
+
+static void net_slirp_notify(void *opaque)
+{
+    qemu_notify_event();
+}
+
+static const SlirpCb slirp_cb = {
+    .send_packet = net_slirp_send_packet,
+    .guest_error = net_slirp_guest_error,
+    .clock_get_ns = net_slirp_clock_get_ns,
+#if SLIRP_CHECK_VERSION(4,7,0)
+    .init_completed = net_slirp_init_completed,
+    .timer_new_opaque = net_slirp_timer_new_opaque,
+#else
+    .timer_new = net_slirp_timer_new,
+#endif
+    .timer_free = net_slirp_timer_free,
+    .timer_mod = net_slirp_timer_mod,
+    .register_poll_fd = net_slirp_register_poll_fd,
+    .unregister_poll_fd = net_slirp_unregister_poll_fd,
+    .notify = net_slirp_notify,
+};
+
+static int slirp_poll_to_gio(int events)
+{
+    int ret = 0;
+
+    if (events & SLIRP_POLL_IN) {
+        ret |= G_IO_IN;
+    }
+    if (events & SLIRP_POLL_OUT) {
+        ret |= G_IO_OUT;
+    }
+    if (events & SLIRP_POLL_PRI) {
+        ret |= G_IO_PRI;
+    }
+    if (events & SLIRP_POLL_ERR) {
+        ret |= G_IO_ERR;
+    }
+    if (events & SLIRP_POLL_HUP) {
+        ret |= G_IO_HUP;
+    }
+
+    return ret;
+}
+
+static int net_slirp_add_poll(int fd, int events, void *opaque)
+{
+    GArray *pollfds = opaque;
+    GPollFD pfd = {
+        .fd = fd,
+        .events = slirp_poll_to_gio(events),
+    };
+    int idx = pollfds->len;
+    g_array_append_val(pollfds, pfd);
+    return idx;
+}
+
+static int slirp_gio_to_poll(int events)
+{
+    int ret = 0;
+
+    if (events & G_IO_IN) {
+        ret |= SLIRP_POLL_IN;
+    }
+    if (events & G_IO_OUT) {
+        ret |= SLIRP_POLL_OUT;
+    }
+    if (events & G_IO_PRI) {
+        ret |= SLIRP_POLL_PRI;
+    }
+    if (events & G_IO_ERR) {
+        ret |= SLIRP_POLL_ERR;
+    }
+    if (events & G_IO_HUP) {
+        ret |= SLIRP_POLL_HUP;
+    }
+
+    return ret;
+}
+
+static int net_slirp_get_revents(int idx, void *opaque)
+{
+    GArray *pollfds = opaque;
+
+    return slirp_gio_to_poll(g_array_index(pollfds, GPollFD, idx).revents);
+}
+
+static void net_slirp_poll_notify(Notifier *notifier, void *data)
+{
+    MainLoopPoll *poll = data;
+    SlirpState *s = container_of(notifier, SlirpState, poll_notifier);
+
+    switch (poll->state) {
+    case MAIN_LOOP_POLL_FILL:
+        slirp_pollfds_fill(s->slirp, &poll->timeout,
+                           net_slirp_add_poll, poll->pollfds);
+        break;
+    case MAIN_LOOP_POLL_OK:
+    case MAIN_LOOP_POLL_ERR:
+        slirp_pollfds_poll(s->slirp, poll->state == MAIN_LOOP_POLL_ERR,
+                           net_slirp_get_revents, poll->pollfds);
+        break;
+    default:
+        g_assert_not_reached();
+    }
+}
+
+static ssize_t
+net_slirp_stream_read(void *buf, size_t size, void *opaque)
+{
+    QEMUFile *f = opaque;
+
+    return qemu_get_buffer(f, buf, size);
+}
+
+static ssize_t
+net_slirp_stream_write(const void *buf, size_t size, void *opaque)
+{
+    QEMUFile *f = opaque;
+
+    qemu_put_buffer(f, buf, size);
+    if (qemu_file_get_error(f)) {
+        return -1;
+    }
+
+    return size;
+}
+
+static int net_slirp_state_load(QEMUFile *f, void *opaque, int version_id)
+{
+    Slirp *slirp = opaque;
+
+    return slirp_state_load(slirp, version_id, net_slirp_stream_read, f);
+}
+
+static void net_slirp_state_save(QEMUFile *f, void *opaque)
+{
+    Slirp *slirp = opaque;
+
+    slirp_state_save(slirp, net_slirp_stream_write, f);
+}
+
+static SaveVMHandlers savevm_slirp_state = {
+    .save_state = net_slirp_state_save,
+    .load_state = net_slirp_state_load,
+};
+
 static int net_slirp_init(NetClientState *peer, const char *model,
                           const char *name, int restricted,
                           bool ipv4, const char *vnetwork, const char *vhost,
@@ -195,7 +424,9 @@ static int net_slirp_init(NetClientState *peer, const char *model,
                           const char *bootfile, const char *vdhcp_start,
                           const char *vnameserver, const char *vnameserver6,
                           const char *smb_export, const char *vsmbserver,
-                          const char **dnssearch, Error **errp)
+                          const char **dnssearch, const char *vdomainname,
+                          const char *tftp_server_name,
+                          Error **errp)
 {
     /* default settings according to historic slirp */
     struct in_addr net  = { .s_addr = htonl(0x0a000200) }; /* 10.0.2.0 */
@@ -206,9 +437,10 @@ static int net_slirp_init(NetClientState *peer, const char *model,
     struct in6_addr ip6_prefix;
     struct in6_addr ip6_host;
     struct in6_addr ip6_dns;
-#ifndef _WIN32
+#if defined(CONFIG_SMBD_COMMAND)
     struct in_addr smbsrv = { .s_addr = 0 };
 #endif
+    SlirpConfig cfg = { 0 };
     NetClientState *nc;
     SlirpState *s;
     char buf[20];
@@ -231,13 +463,6 @@ static int net_slirp_init(NetClientState *peer, const char *model,
         /* It doesn't make sense to disable both */
         error_setg(errp, "IPv4 and IPv6 disabled");
         return -1;
-    }
-
-    if (!tftp_export) {
-        tftp_export = legacy_tftp_prefix;
-    }
-    if (!bootfile) {
-        bootfile = legacy_bootp_filename;
     }
 
     if (vnetwork) {
@@ -301,7 +526,7 @@ static int net_slirp_init(NetClientState *peer, const char *model,
         error_setg(errp, "Failed to parse DNS");
         return -1;
     }
-    if ((dns.s_addr & mask.s_addr) != net.s_addr) {
+    if (restricted && (dns.s_addr & mask.s_addr) != net.s_addr) {
         error_setg(errp, "DNS doesn't belong to network");
         return -1;
     }
@@ -319,28 +544,17 @@ static int net_slirp_init(NetClientState *peer, const char *model,
         return -1;
     }
     if (dhcp.s_addr == host.s_addr || dhcp.s_addr == dns.s_addr) {
-        error_setg(errp, "DNS must be different from host and DNS");
+        error_setg(errp, "DHCP must be different from host and DNS");
         return -1;
     }
 
-#ifndef _WIN32
+#if defined(CONFIG_SMBD_COMMAND)
     if (vsmbserver && !inet_aton(vsmbserver, &smbsrv)) {
         error_setg(errp, "Failed to parse SMB address");
         return -1;
     }
 #endif
 
-#if defined(_WIN32) && (_WIN32_WINNT < 0x0600)
-    /* No inet_pton helper before Vista... */
-    if (vprefix6) {
-        /* Unsupported */
-        error_setg(errp, "IPv6 prefix not supported");
-        return -1;
-    }
-    memset(&ip6_prefix, 0, sizeof(ip6_prefix));
-    ip6_prefix.s6_addr[0] = 0xfe;
-    ip6_prefix.s6_addr[1] = 0xc0;
-#else
     if (!vprefix6) {
         vprefix6 = "fec0::";
     }
@@ -348,22 +562,18 @@ static int net_slirp_init(NetClientState *peer, const char *model,
         error_setg(errp, "Failed to parse IPv6 prefix");
         return -1;
     }
-#endif
 
     if (!vprefix6_len) {
         vprefix6_len = 64;
     }
     if (vprefix6_len < 0 || vprefix6_len > 126) {
         error_setg(errp,
-                   "Invalid prefix provided (prefix len must be in range 0-126");
+                   "Invalid IPv6 prefix provided "
+                   "(IPv6 prefix length must be between 0 and 126)");
         return -1;
     }
 
     if (vhost6) {
-#if defined(_WIN32) && (_WIN32_WINNT < 0x0600)
-        error_setg(errp, "IPv6 host not supported");
-        return -1;
-#else
         if (!inet_pton(AF_INET6, vhost6, &ip6_host)) {
             error_setg(errp, "Failed to parse IPv6 host");
             return -1;
@@ -372,68 +582,101 @@ static int net_slirp_init(NetClientState *peer, const char *model,
             error_setg(errp, "IPv6 Host doesn't belong to network");
             return -1;
         }
-#endif
     } else {
         ip6_host = ip6_prefix;
         ip6_host.s6_addr[15] |= 2;
     }
 
     if (vnameserver6) {
-#if defined(_WIN32) && (_WIN32_WINNT < 0x0600)
-        error_setg(errp, "IPv6 DNS not supported");
-        return -1;
-#else
         if (!inet_pton(AF_INET6, vnameserver6, &ip6_dns)) {
             error_setg(errp, "Failed to parse IPv6 DNS");
             return -1;
         }
-        if (!in6_equal_net(&ip6_prefix, &ip6_dns, vprefix6_len)) {
+        if (restricted && !in6_equal_net(&ip6_prefix, &ip6_dns, vprefix6_len)) {
             error_setg(errp, "IPv6 DNS doesn't belong to network");
             return -1;
         }
-#endif
     } else {
         ip6_dns = ip6_prefix;
         ip6_dns.s6_addr[15] |= 3;
     }
 
+    if (vdomainname && !*vdomainname) {
+        error_setg(errp, "'domainname' parameter cannot be empty");
+        return -1;
+    }
+
+    if (vdomainname && strlen(vdomainname) > 255) {
+        error_setg(errp, "'domainname' parameter cannot exceed 255 bytes");
+        return -1;
+    }
+
+    if (vhostname && strlen(vhostname) > 255) {
+        error_setg(errp, "'vhostname' parameter cannot exceed 255 bytes");
+        return -1;
+    }
+
+    if (tftp_server_name && strlen(tftp_server_name) > 255) {
+        error_setg(errp, "'tftp-server-name' parameter cannot exceed 255 bytes");
+        return -1;
+    }
 
     nc = qemu_new_net_client(&net_slirp_info, peer, model, name);
 
-    snprintf(nc->info_str, sizeof(nc->info_str),
-             "net=%s,restrict=%s", inet_ntoa(net),
-             restricted ? "on" : "off");
+    qemu_set_info_str(nc, "net=%s,restrict=%s", inet_ntoa(net),
+                      restricted ? "on" : "off");
 
     s = DO_UPCAST(SlirpState, nc, nc);
 
-    s->slirp = slirp_init(restricted, ipv4, net, mask, host,
-                          ipv6, ip6_prefix, vprefix6_len, ip6_host,
-                          vhostname, tftp_export, bootfile, dhcp,
-                          dns, ip6_dns, dnssearch, s);
+    cfg.version = SLIRP_CHECK_VERSION(4,7,0) ? 4 : 1;
+    cfg.restricted = restricted;
+    cfg.in_enabled = ipv4;
+    cfg.vnetwork = net;
+    cfg.vnetmask = mask;
+    cfg.vhost = host;
+    cfg.in6_enabled = ipv6;
+    cfg.vprefix_addr6 = ip6_prefix;
+    cfg.vprefix_len = vprefix6_len;
+    cfg.vhost6 = ip6_host;
+    cfg.vhostname = vhostname;
+    cfg.tftp_server_name = tftp_server_name;
+    cfg.tftp_path = tftp_export;
+    cfg.bootfile = bootfile;
+    cfg.vdhcp_start = dhcp;
+    cfg.vnameserver = dns;
+    cfg.vnameserver6 = ip6_dns;
+    cfg.vdnssearch = dnssearch;
+    cfg.vdomainname = vdomainname;
+    s->slirp = slirp_new(&cfg, &slirp_cb, s);
     QTAILQ_INSERT_TAIL(&slirp_stacks, s, entry);
+
+    /*
+     * Make sure the current bitstream version of slirp is 4, to avoid
+     * QEMU migration incompatibilities, if upstream slirp bumped the
+     * version.
+     *
+     * FIXME: use bitfields of features? teach libslirp to save with
+     * specific version?
+     */
+    g_assert(slirp_state_version() == 4);
+    register_savevm_live("slirp", 0, slirp_state_version(),
+                         &savevm_slirp_state, s->slirp);
+
+    s->poll_notifier.notify = net_slirp_poll_notify;
+    main_loop_poll_add_notifier(&s->poll_notifier);
 
     for (config = slirp_configs; config; config = config->next) {
         if (config->flags & SLIRP_CFG_HOSTFWD) {
-            if (slirp_hostfwd(s, config->str,
-                              config->flags & SLIRP_CFG_LEGACY, errp) < 0) {
-                goto error;
-            }
-        } else if (config->flags & SLIRP_CFG_IPV6_HOSTFWD) {
-            if (slirp_ipv6_hostfwd(s, config->str,
-                                   config->flags & SLIRP_CFG_LEGACY, errp) < 0) {
+            if (slirp_hostfwd(s, config->str, errp) < 0) {
                 goto error;
             }
         } else {
-            if (slirp_guestfwd(s, config->str,
-                               config->flags & SLIRP_CFG_LEGACY, errp) < 0) {
+            if (slirp_guestfwd(s, config->str, errp) < 0) {
                 goto error;
             }
         }
     }
-#ifndef _WIN32
-    if (!smb_export) {
-        smb_export = legacy_smb_export;
-    }
+#if defined(CONFIG_SMBD_COMMAND)
     if (smb_export) {
         if (slirp_smb(s, smb_export, smbsrv, errp) < 0) {
             goto error;
@@ -443,10 +686,6 @@ static int net_slirp_init(NetClientState *peer, const char *model,
 
     s->exit_notifier.notify = slirp_smb_exit;
     qemu_add_exit_notifier(&s->exit_notifier);
-
-    s->shaper_out.send = NULL;
-    s->shaper_in.send = NULL;
-    s->recv_cb = NULL;
     return 0;
 
 error:
@@ -454,23 +693,13 @@ error:
     return -1;
 }
 
-static SlirpState *slirp_lookup(Monitor *mon, const char *hub_id,
-                                const char *name)
+static SlirpState *slirp_lookup(Monitor *mon, const char *id)
 {
-    if (name) {
-        NetClientState *nc;
-        if (hub_id) {
-            nc = net_hub_find_client_by_name(strtol(hub_id, NULL, 0), name);
-            if (!nc) {
-                monitor_printf(mon, "unrecognized (vlan-id, stackname) pair\n");
-                return NULL;
-            }
-        } else {
-            nc = qemu_find_netdev(name);
-            if (!nc) {
-                monitor_printf(mon, "unrecognized netdev id '%s'\n", name);
-                return NULL;
-            }
+    if (id) {
+        NetClientState *nc = qemu_find_netdev(id);
+        if (!nc) {
+            monitor_printf(mon, "unrecognized netdev id '%s'\n", id);
+            return NULL;
         }
         if (strcmp(nc->model, "user")) {
             monitor_printf(mon, "invalid device specified\n");
@@ -486,12 +715,6 @@ static SlirpState *slirp_lookup(Monitor *mon, const char *hub_id,
     }
 }
 
-void *net_slirp_state(void)
-{
-    SlirpState *ss = slirp_lookup(NULL, NULL, NULL);
-    return ss ? ss->slirp : NULL;
-}
-
 void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict)
 {
     struct in_addr host_addr = { .s_addr = INADDR_ANY };
@@ -503,16 +726,12 @@ void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict)
     int err;
     const char *arg1 = qdict_get_str(qdict, "arg1");
     const char *arg2 = qdict_get_try_str(qdict, "arg2");
-    const char *arg3 = qdict_get_try_str(qdict, "arg3");
 
-    if (arg3) {
-        s = slirp_lookup(mon, arg1, arg2);
-        src_str = arg3;
-    } else if (arg2) {
-        s = slirp_lookup(mon, NULL, arg1);
+    if (arg2) {
+        s = slirp_lookup(mon, arg1);
         src_str = arg2;
     } else {
-        s = slirp_lookup(mon, NULL, NULL);
+        s = slirp_lookup(mon, NULL);
         src_str = arg1;
     }
     if (!s) {
@@ -539,7 +758,9 @@ void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict)
         goto fail_syntax;
     }
 
-    host_port = atoi(p);
+    if (qemu_strtoi(p, NULL, 10, &host_port)) {
+        goto fail_syntax;
+    }
 
     err = slirp_remove_hostfwd(s->slirp, is_udp, host_addr, host_port);
 
@@ -551,76 +772,7 @@ void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "invalid format\n");
 }
 
-void hmp_ipv6_hostfwd_remove(Monitor *mon, const QDict *qdict)
-{
-    struct in6_addr host_addr = in6addr_any;
-    int host_port;
-    char buf[256];
-    const char *src_str, *p;
-    SlirpState *s;
-    int is_udp = 0;
-    int err;
-    const char *arg1 = qdict_get_str(qdict, "arg1");
-    const char *arg2 = qdict_get_try_str(qdict, "arg2");
-    const char *arg3 = qdict_get_try_str(qdict, "arg3");
-
-    if (arg2) {
-        s = slirp_lookup(mon, arg1, arg2);
-        src_str = arg3;
-    } else {
-        s = slirp_lookup(mon, NULL, NULL);
-        src_str = arg1;
-    }
-    if (!s) {
-        return;
-    }
-
-    p = src_str;
-    if (!p || get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-        goto fail_syntax;
-    }
-
-    if (!strcmp(buf, "tcp") || buf[0] == '\0') {
-        is_udp = 0;
-    } else if (!strcmp(buf, "udp")) {
-        is_udp = 1;
-    } else {
-        goto fail_syntax;
-    }
-
-    if (*(p++) != '[') {
-        goto fail_syntax;
-    }
-
-    if (get_str_sep(buf, sizeof(buf), &p, ']') < 0) {
-        goto fail_syntax;
-    }
-
-    if (!inet_pton(AF_INET6, buf, &host_addr)) {
-        goto fail_syntax;
-    }
-
-    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-        goto fail_syntax;
-    }
-
-    if (qemu_strtoi(p, NULL, 10, &host_port) < 0) {
-        goto fail_syntax;
-    }
-
-    err = slirp_remove_ipv6_hostfwd(s->slirp, is_udp, host_addr, host_port);
-
-    monitor_printf(mon, "host forwarding rule for %s %s\n", src_str,
-                   err ? "not found" : "removed");
-    return;
-
- fail_syntax:
-    monitor_printf(mon, "invalid format\n");
-}
-
-
-static int slirp_hostfwd(SlirpState *s, const char *redir_str,
-                         int legacy_format, Error **errp)
+static int slirp_hostfwd(SlirpState *s, const char *redir_str, Error **errp)
 {
     struct in_addr host_addr = { .s_addr = INADDR_ANY };
     struct in_addr guest_addr = { .s_addr = 0 };
@@ -645,18 +797,16 @@ static int slirp_hostfwd(SlirpState *s, const char *redir_str,
         goto fail_syntax;
     }
 
-    if (!legacy_format) {
-        if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-            fail_reason = "Missing : separator";
-            goto fail_syntax;
-        }
-        if (buf[0] != '\0' && !inet_aton(buf, &host_addr)) {
-            fail_reason = "Bad host address";
-            goto fail_syntax;
-        }
+    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
+        fail_reason = "Missing : separator";
+        goto fail_syntax;
+    }
+    if (buf[0] != '\0' && !inet_aton(buf, &host_addr)) {
+        fail_reason = "Bad host address";
+        goto fail_syntax;
     }
 
-    if (get_str_sep(buf, sizeof(buf), &p, legacy_format ? ':' : '-') < 0) {
+    if (get_str_sep(buf, sizeof(buf), &p, '-') < 0) {
         fail_reason = "Bad host port separator";
         goto fail_syntax;
     }
@@ -695,196 +845,30 @@ static int slirp_hostfwd(SlirpState *s, const char *redir_str,
     return -1;
 }
 
-static int slirp_ipv6_hostfwd(SlirpState *s, const char *redir_str, int legacy_format,
-                              Error **errp)
-{
-    struct in6_addr host_addr = in6addr_any;
-    struct in6_addr guest_addr;
-    int host_port, guest_port;
-    const char *p;
-    char buf[256];
-    int is_udp;
-    const char *end;
-    const char *fail_reason = "Unknown reason";
-
-    memset(&guest_addr, 0, sizeof(guest_addr));
-
-    p = redir_str;
-    if (!p || get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-        fail_reason = "No : separators";
-        goto fail_syntax;
-    }
-    if (!strcmp(buf, "tcp") || buf[0] == '\0') {
-        is_udp = 0;
-    } else if (!strcmp(buf, "udp")) {
-        is_udp = 1;
-    } else {
-        fail_reason = "Bad protocol name";
-        goto fail_syntax;
-    }
-
-    if (*(p++) != '[') {
-        fail_reason = "IPv6 address must be enclosed in square brackets";
-        goto fail_syntax;
-    }
-
-    if (get_str_sep(buf, sizeof(buf), &p, ']') < 0) {
-        fail_reason = "IPv6 address must be enclosed in square brackets";
-        goto fail_syntax;
-    }
-
-    if (!inet_pton(AF_INET6, buf, &host_addr)) {
-        fail_reason = "Bad host address";
-        goto fail_syntax;
-    }
-
-    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0 ||
-        buf[0] != '\0') {
-        fail_reason = "Bad ipv6 address and port separator";
-        goto fail_syntax;
-    }
-
-    if (get_str_sep(buf, sizeof(buf), &p, '-') < 0) {
-        fail_reason = "Bad host port separator";
-        goto fail_syntax;
-    }
-
-    if (qemu_strtoi(buf, &end, 0, &host_port)) {
-        fail_reason = "Bad host port";
-        goto fail_syntax;
-    }
-
-    if (*end != '\0' || host_port < 0 || host_port > 65535) {
-        fail_reason = "Host port out of range";
-        goto fail_syntax;
-    }
-
-    if (*p == '\0') {
-        fail_reason = "Missing guest ipv6 address";
-        goto fail_syntax;
-    }
-
-    if (*(p++) != '[') {
-        fail_reason = "IPv6 address must be enclosed in square brackets";
-        goto fail_syntax;
-    }
-
-    if (get_str_sep(buf, sizeof(buf), &p,  ']') < 0) {
-        fail_reason = "IPv6 address must be enclosed in square brackets";
-        goto fail_syntax;
-    }
-
-    if (!inet_pton(AF_INET6, buf, &guest_addr)) {
-        fail_reason = "Bad guest address";
-        goto fail_syntax;
-    }
-
-    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0 || buf[0] != '\0') {
-        fail_reason = "Bad ipv6 address and port separator";
-        goto fail_syntax;
-    }
-
-    if (qemu_strtoi(p, &end, 0, &guest_port) < 0) {
-        fail_reason = "Bad guest port";
-        goto fail_syntax;
-    }
-
-    if (*end != '\0' || guest_port < 1 || guest_port > 65535) {
-        fail_reason = "Guest port number out of range";
-        goto fail_syntax;
-    }
-
-    if (slirp_add_ipv6_hostfwd(s->slirp, is_udp, host_addr, host_port,
-                               guest_addr, guest_port) < 0) {
-        error_report("could not set up host forwarding rule '%s'",
-                     redir_str);
-        return -1;
-    }
-    return 0;
-
- fail_syntax:
-    error_setg(errp, "Invalid host forwarding rule '%s' (%s)", redir_str,
-               fail_reason);
-    return -1;
-}
-
-
 void hmp_hostfwd_add(Monitor *mon, const QDict *qdict)
 {
     const char *redir_str;
     SlirpState *s;
     const char *arg1 = qdict_get_str(qdict, "arg1");
     const char *arg2 = qdict_get_try_str(qdict, "arg2");
-    const char *arg3 = qdict_get_try_str(qdict, "arg3");
-
-    if (arg3) {
-        s = slirp_lookup(mon, arg1, arg2);
-        redir_str = arg3;
-    } else if (arg2) {
-        s = slirp_lookup(mon, NULL, arg1);
-        redir_str = arg2;
-    } else {
-        s = slirp_lookup(mon, NULL, NULL);
-        redir_str = arg1;
-    }
-    if (s) {
-        Error *err = NULL;
-        if (slirp_hostfwd(s, redir_str, 0, &err) < 0) {
-            error_report_err(err);
-        }
-    }
-
-}
-
-void hmp_ipv6_hostfwd_add(Monitor *mon, const QDict *qdict)
-{
-    const char *redir_str;
-    SlirpState *s;
-    const char *arg1 = qdict_get_str(qdict, "arg1");
-    const char *arg2 = qdict_get_try_str(qdict, "arg2");
-    const char *arg3 = qdict_get_try_str(qdict, "arg3");
 
     if (arg2) {
-        s = slirp_lookup(mon, arg1, arg2);
-        redir_str = arg3;
-    } else if (arg2) {
-        s = slirp_lookup(mon, NULL, arg1);
+        s = slirp_lookup(mon, arg1);
         redir_str = arg2;
     } else {
-        s = slirp_lookup(mon, NULL, NULL);
+        s = slirp_lookup(mon, NULL);
         redir_str = arg1;
     }
     if (s) {
         Error *err = NULL;
-        if (slirp_ipv6_hostfwd(s, redir_str, 0, &err) < 0) {
+        if (slirp_hostfwd(s, redir_str, &err) < 0) {
             error_report_err(err);
         }
     }
+
 }
 
-int net_slirp_redir(const char *redir_str)
-{
-    struct slirp_config_str *config;
-    Error *err = NULL;
-    int res;
-
-    if (QTAILQ_EMPTY(&slirp_stacks)) {
-        config = g_malloc(sizeof(*config));
-        pstrcpy(config->str, sizeof(config->str), redir_str);
-        config->flags = SLIRP_CFG_HOSTFWD | SLIRP_CFG_LEGACY;
-        config->next = slirp_configs;
-        slirp_configs = config;
-        return 0;
-    }
-
-    res = slirp_hostfwd(QTAILQ_FIRST(&slirp_stacks), redir_str, 1, &err);
-    if (res < 0) {
-        error_report_err(err);
-    }
-    return res;
-}
-
-#ifndef _WIN32
+#if defined(CONFIG_SMBD_COMMAND)
 
 /* automatic user mode samba server configuration */
 static void slirp_smb_cleanup(SlirpState *s)
@@ -988,8 +972,8 @@ static int slirp_smb(SlirpState* s, const char *exported_dir,
              CONFIG_SMBD_COMMAND, s->smb_dir, smb_conf);
     g_free(smb_conf);
 
-    if (slirp_add_exec(s->slirp, 0, smb_cmdline, &vserver_addr, 139) < 0 ||
-        slirp_add_exec(s->slirp, 0, smb_cmdline, &vserver_addr, 445) < 0) {
+    if (slirp_add_exec(s->slirp, smb_cmdline, &vserver_addr, 139) < 0 ||
+        slirp_add_exec(s->slirp, smb_cmdline, &vserver_addr, 445) < 0) {
         slirp_smb_cleanup(s);
         g_free(smb_cmdline);
         error_setg(errp, "Conflicting/invalid smbserver address");
@@ -999,36 +983,7 @@ static int slirp_smb(SlirpState* s, const char *exported_dir,
     return 0;
 }
 
-/* automatic user mode samba server configuration (legacy interface) */
-int net_slirp_smb(const char *exported_dir)
-{
-    struct in_addr vserver_addr = { .s_addr = 0 };
-
-    if (legacy_smb_export) {
-        fprintf(stderr, "-smb given twice\n");
-        return -1;
-    }
-    legacy_smb_export = exported_dir;
-    if (!QTAILQ_EMPTY(&slirp_stacks)) {
-        Error *err = NULL;
-        int res = slirp_smb(QTAILQ_FIRST(&slirp_stacks), exported_dir,
-                            vserver_addr, &err);
-        if (res < 0) {
-            error_report_err(err);
-        }
-        return res;
-    }
-    return 0;
-}
-
-#endif /* !defined(_WIN32) */
-
-struct GuestFwd {
-    CharBackend hd;
-    struct in_addr server;
-    int port;
-    Slirp *slirp;
-};
+#endif /* defined(CONFIG_SMBD_COMMAND) */
 
 static int guestfwd_can_read(void *opaque)
 {
@@ -1042,9 +997,14 @@ static void guestfwd_read(void *opaque, const uint8_t *buf, int size)
     slirp_socket_recv(fwd->slirp, fwd->server, fwd->port, buf, size);
 }
 
-static int slirp_guestfwd(SlirpState *s, const char *config_str,
-                          int legacy_format, Error **errp)
+static ssize_t guestfwd_write(const void *buf, size_t len, void *chr)
 {
+    return qemu_chr_fe_write_all(chr, buf, len);
+}
+
+static int slirp_guestfwd(SlirpState *s, const char *config_str, Error **errp)
+{
+    /* TODO: IPv6 */
     struct in_addr server = { .s_addr = 0 };
     struct GuestFwd *fwd;
     const char *p;
@@ -1053,26 +1013,20 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str,
     int port;
 
     p = config_str;
-    if (legacy_format) {
-        if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-            goto fail_syntax;
-        }
-    } else {
-        if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-            goto fail_syntax;
-        }
-        if (strcmp(buf, "tcp") && buf[0] != '\0') {
-            goto fail_syntax;
-        }
-        if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-            goto fail_syntax;
-        }
-        if (buf[0] != '\0' && !inet_aton(buf, &server)) {
-            goto fail_syntax;
-        }
-        if (get_str_sep(buf, sizeof(buf), &p, '-') < 0) {
-            goto fail_syntax;
-        }
+    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
+        goto fail_syntax;
+    }
+    if (strcmp(buf, "tcp") && buf[0] != '\0') {
+        goto fail_syntax;
+    }
+    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
+        goto fail_syntax;
+    }
+    if (buf[0] != '\0' && !inet_aton(buf, &server)) {
+        goto fail_syntax;
+    }
+    if (get_str_sep(buf, sizeof(buf), &p, '-') < 0) {
+        goto fail_syntax;
     }
     port = strtol(buf, &end, 10);
     if (*end != '\0' || port < 1 || port > 65535) {
@@ -1081,15 +1035,19 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str,
 
     snprintf(buf, sizeof(buf), "guestfwd.tcp.%d", port);
 
-    if ((strlen(p) > 4) && !strncmp(p, "cmd:", 4)) {
-        if (slirp_add_exec(s->slirp, 0, &p[4], &server, port) < 0) {
+    if (g_str_has_prefix(p, "cmd:")) {
+        if (slirp_add_exec(s->slirp, &p[4], &server, port) < 0) {
             error_setg(errp, "Conflicting/invalid host:port in guest "
                        "forwarding rule '%s'", config_str);
             return -1;
         }
     } else {
         Error *err = NULL;
-        Chardev *chr = qemu_chr_new(buf, p);
+        /*
+         * FIXME: sure we want to support implicit
+         * muxed monitors here?
+         */
+        Chardev *chr = qemu_chr_new_mux_mon(buf, p, NULL);
 
         if (!chr) {
             error_setg(errp, "Could not open guest forwarding device '%s'",
@@ -1101,13 +1059,16 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str,
         qemu_chr_fe_init(&fwd->hd, chr, &err);
         if (err) {
             error_propagate(errp, err);
+            object_unparent(OBJECT(chr));
             g_free(fwd);
             return -1;
         }
 
-        if (slirp_add_exec(s->slirp, 3, &fwd->hd, &server, port) < 0) {
+        if (slirp_add_guestfwd(s->slirp, guestfwd_write, &fwd->hd,
+                               &server, port) < 0) {
             error_setg(errp, "Conflicting/invalid host:port in guest "
                        "forwarding rule '%s'", config_str);
+            qemu_chr_fe_deinit(&fwd->hd, true);
             g_free(fwd);
             return -1;
         }
@@ -1117,6 +1078,7 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str,
 
         qemu_chr_fe_set_handlers(&fwd->hd, guestfwd_can_read, guestfwd_read,
                                  NULL, NULL, fwd, NULL, true);
+        s->fwd = g_slist_append(s->fwd, fwd);
     }
     return 0;
 
@@ -1131,11 +1093,12 @@ void hmp_info_usernet(Monitor *mon, const QDict *qdict)
 
     QTAILQ_FOREACH(s, &slirp_stacks, entry) {
         int id;
-        bool got_vlan_id = net_hub_id_for_client(&s->nc, &id) == 0;
-        monitor_printf(mon, "VLAN %d (%s):\n",
-                       got_vlan_id ? id : -1,
-                       s->nc.name);
-        slirp_connection_info(s->slirp, mon);
+        bool got_hub_id = net_hub_id_for_client(&s->nc, &id) == 0;
+        char *info = slirp_connection_info(s->slirp);
+        monitor_printf(mon, "Hub %d (%s):\n%s",
+                       got_hub_id ? id : -1,
+                       s->nc.name, info);
+        g_free(info);
     }
 }
 
@@ -1202,8 +1165,8 @@ int net_init_slirp(const Netdev *netdev, const char *name,
         ipv6 = 0;
     }
 
-    vnet = user->has_net ? g_strdup(user->net) :
-           user->has_ip  ? g_strdup_printf("%s/24", user->ip) :
+    vnet = user->net ? g_strdup(user->net) :
+           user->ip  ? g_strdup_printf("%s/24", user->ip) :
            NULL;
 
     dnssearch = slirp_dnssearch(user->dnssearch);
@@ -1211,7 +1174,6 @@ int net_init_slirp(const Netdev *netdev, const char *name,
     /* all optional fields are initialized to "all bits zero" */
 
     net_init_slirp_configs(user->hostfwd, SLIRP_CFG_HOSTFWD);
-    net_init_slirp_configs(user->ipv6_hostfwd, SLIRP_CFG_IPV6_HOSTFWD);
     net_init_slirp_configs(user->guestfwd, 0);
 
     ret = net_slirp_init(peer, "user", name, user->q_restrict,
@@ -1220,7 +1182,8 @@ int net_init_slirp(const Netdev *netdev, const char *name,
                          user->ipv6_host, user->hostname, user->tftp,
                          user->bootfile, user->dhcpstart,
                          user->dns, user->ipv6_dns, user->smb,
-                         user->smbserver, dnssearch, errp);
+                         user->smbserver, dnssearch, user->domainname,
+                         user->tftp_server_name, errp);
 
     while (slirp_configs) {
         config = slirp_configs;
@@ -1232,99 +1195,4 @@ int net_init_slirp(const Netdev *netdev, const char *name,
     g_free(dnssearch);
 
     return ret;
-}
-
-int net_slirp_parse_legacy(QemuOptsList *opts_list, const char *optarg, int *ret)
-{
-    if (strcmp(opts_list->name, "net") != 0 ||
-        strncmp(optarg, "channel,", strlen("channel,")) != 0) {
-        return 0;
-    }
-
-    error_report("The '-net channel' option is deprecated. "
-                 "Please use '-netdev user,guestfwd=...' instead.");
-
-    /* handle legacy -net channel,port:chr */
-    optarg += strlen("channel,");
-
-    if (QTAILQ_EMPTY(&slirp_stacks)) {
-        struct slirp_config_str *config;
-
-        config = g_malloc(sizeof(*config));
-        pstrcpy(config->str, sizeof(config->str), optarg);
-        config->flags = SLIRP_CFG_LEGACY;
-        config->next = slirp_configs;
-        slirp_configs = config;
-        *ret = 0;
-    } else {
-        Error *err = NULL;
-        *ret = slirp_guestfwd(QTAILQ_FIRST(&slirp_stacks), optarg, 1, &err);
-        if (*ret < 0) {
-            error_report_err(err);
-        }
-    }
-
-    return 1;
-}
-
-void net_slirp_init_custom_dns_servers(const struct sockaddr_storage* dns,
-                                   int dns_count) {
-    SlirpState *s = NULL;
-    QTAILQ_FOREACH(s, &slirp_stacks, entry) {
-        if (!s || !s->slirp) {
-            qemu_abort("Trying to init custom DNS before slirp "
-                   "initialization\n");
-        }
-        slirp_init_custom_dns_servers(s->slirp, dns, dns_count);
-    }
-}
-
-void net_slirp_set_shapers(void* out_opaque,
-                            SlirpShaperSendFunc out_send,
-                            void* in_opaque,
-                            SlirpShaperSendFunc in_send)
-{
-    SlirpState *s = NULL;
-    QTAILQ_FOREACH(s, &slirp_stacks, entry) {
-        if (!s) {
-            qemu_abort("Trying to set network shapers before slirp "
-                   "initialization\n");
-        }
-        s->shaper_out.peer = out_opaque;
-        s->shaper_out.send = out_send;
-        s->shaper_in.peer = in_opaque;
-        s->shaper_in.send = in_send;
-    }
-}
-
-int net_slirp_set_custom_slirp_output_callback(void *slirp,
-                                               SlirpReceiveCallbackFunc cb,
-                                               void *opaque) {
-    SlirpState *s = NULL;
-    int found = 0;
-    if (!slirp) return found;
-    QTAILQ_FOREACH(s, &slirp_stacks, entry) {
-        if (!s || s->slirp != (Slirp *)slirp) {
-            continue;
-        }
-        found = 1;
-        s->recv_cb = cb;
-        s->opaque = opaque;
-    }
-    return found;
-}
-void *net_slirp_init_custom_slirp_state(
-    int restricted, bool in_enabled, struct in_addr vnetwork,
-    struct in_addr vnetmask, struct in_addr vhost, bool in6_enabled,
-    struct in6_addr vprefix_addr6, uint8_t vprefix_len, struct in6_addr vhost6,
-    const char *vhostname, const char *tftp_path, const char *bootfile,
-    struct in_addr vdhcp_start, struct in_addr vnameserver,
-    struct in6_addr vnameserver6, const char **vdnssearch) {
-    SlirpState* s = g_malloc0(sizeof(SlirpState));
-    s->slirp = slirp_init(restricted, in_enabled, vnetwork, vnetmask, vhost,
-                          in6_enabled, vprefix_addr6, vprefix_len, vhost6,
-                          vhostname, tftp_path, bootfile, vdhcp_start,
-                          vnameserver, vnameserver6, vdnssearch, s);
-    QTAILQ_INSERT_TAIL(&slirp_stacks, s, entry);
-    return s->slirp;
 }

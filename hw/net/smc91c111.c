@@ -9,18 +9,25 @@
 
 #include "qemu/osdep.h"
 #include "hw/sysbus.h"
+#include "migration/vmstate.h"
 #include "net/net.h"
-#include "hw/devices.h"
+#include "hw/irq.h"
+#include "hw/net/smc91c111.h"
+#include "hw/qdev-properties.h"
+#include "qapi/error.h"
+#include "qemu/log.h"
+#include "qemu/module.h"
 /* For crc32 */
 #include <zlib.h>
+#include "qom/object.h"
 
 /* Number of 2k memory pages available.  */
 #define NUM_PACKETS 4
 
 #define TYPE_SMC91C111 "smc91c111"
-#define SMC91C111(obj) OBJECT_CHECK(smc91c111_state, (obj), TYPE_SMC91C111)
+OBJECT_DECLARE_SIMPLE_TYPE(smc91c111_state, SMC91C111)
 
-typedef struct {
+struct smc91c111_state {
     SysBusDevice parent_obj;
 
     NICState *nic;
@@ -49,7 +56,7 @@ typedef struct {
     uint8_t int_level;
     uint8_t int_mask;
     MemoryRegion mmio;
-} smc91c111_state;
+};
 
 static const VMStateDescription vmstate_smc91c111 = {
     .name = "smc91c111",
@@ -125,16 +132,16 @@ static void smc91c111_update(smc91c111_state *s)
     qemu_set_irq(s->irq, level);
 }
 
-static int smc91c111_can_receive(smc91c111_state *s)
+static bool smc91c111_can_receive(smc91c111_state *s)
 {
     if ((s->rcr & RCR_RXEN) == 0 || (s->rcr & RCR_SOFT_RST)) {
-        return 1;
+        return true;
     }
     if (s->allocated == (1 << NUM_PACKETS) - 1 ||
         s->rx_fifo_len == NUM_PACKETS) {
-        return 0;
+        return false;
     }
-    return 1;
+    return true;
 }
 
 static inline void smc91c111_flush_queued_packets(smc91c111_state *s)
@@ -361,10 +368,14 @@ static void smc91c111_writeb(void *opaque, hwaddr offset,
             SET_HIGH(gpr, value);
             return;
         case 12: /* Control */
-            if (value & 1)
-                fprintf(stderr, "smc91c111:EEPROM store not implemented\n");
-            if (value & 2)
-                fprintf(stderr, "smc91c111:EEPROM reload not implemented\n");
+            if (value & 1) {
+                qemu_log_mask(LOG_UNIMP,
+                              "smc91c111: EEPROM store not implemented\n");
+            }
+            if (value & 2) {
+                qemu_log_mask(LOG_UNIMP,
+                              "smc91c111: EEPROM reload not implemented\n");
+            }
             value &= ~3;
             SET_LOW(ctr, value);
             return;
@@ -478,7 +489,9 @@ static void smc91c111_writeb(void *opaque, hwaddr offset,
         }
         break;
     }
-    hw_error("smc91c111_write: Bad reg %d:%x\n", s->bank, (int)offset);
+    qemu_log_mask(LOG_GUEST_ERROR, "smc91c111_write(bank:%d) Illegal register"
+                                   " 0x%" HWADDR_PRIx " = 0x%x\n",
+                  s->bank, offset, value);
 }
 
 static uint32_t smc91c111_readb(void *opaque, hwaddr offset)
@@ -621,44 +634,42 @@ static uint32_t smc91c111_readb(void *opaque, hwaddr offset)
         }
         break;
     }
-    hw_error("smc91c111_read: Bad reg %d:%x\n", s->bank, (int)offset);
+    qemu_log_mask(LOG_GUEST_ERROR, "smc91c111_read(bank:%d) Illegal register"
+                                   " 0x%" HWADDR_PRIx "\n",
+                  s->bank, offset);
     return 0;
 }
 
-static void smc91c111_writew(void *opaque, hwaddr offset,
-                             uint32_t value)
+static uint64_t smc91c111_readfn(void *opaque, hwaddr addr, unsigned size)
 {
-    smc91c111_writeb(opaque, offset, value & 0xff);
-    smc91c111_writeb(opaque, offset + 1, value >> 8);
+    int i;
+    uint32_t val = 0;
+
+    for (i = 0; i < size; i++) {
+        val |= smc91c111_readb(opaque, addr + i) << (i * 8);
+    }
+    return val;
 }
 
-static void smc91c111_writel(void *opaque, hwaddr offset,
-                             uint32_t value)
+static void smc91c111_writefn(void *opaque, hwaddr addr,
+                               uint64_t value, unsigned size)
 {
+    int i = 0;
+
     /* 32-bit writes to offset 0xc only actually write to the bank select
-       register (offset 0xe)  */
-    if (offset != 0xc)
-        smc91c111_writew(opaque, offset, value & 0xffff);
-    smc91c111_writew(opaque, offset + 2, value >> 16);
+     * register (offset 0xe), so skip the first two bytes we would write.
+     */
+    if (addr == 0xc && size == 4) {
+        i += 2;
+    }
+
+    for (; i < size; i++) {
+        smc91c111_writeb(opaque, addr + i,
+                         extract32(value, i * 8, 8));
+    }
 }
 
-static uint32_t smc91c111_readw(void *opaque, hwaddr offset)
-{
-    uint32_t val;
-    val = smc91c111_readb(opaque, offset);
-    val |= smc91c111_readb(opaque, offset + 1) << 8;
-    return val;
-}
-
-static uint32_t smc91c111_readl(void *opaque, hwaddr offset)
-{
-    uint32_t val;
-    val = smc91c111_readw(opaque, offset);
-    val |= smc91c111_readw(opaque, offset + 2) << 16;
-    return val;
-}
-
-static int smc91c111_can_receive_nc(NetClientState *nc)
+static bool smc91c111_can_receive_nc(NetClientState *nc)
 {
     smc91c111_state *s = qemu_get_nic_opaque(nc);
 
@@ -747,10 +758,10 @@ static const MemoryRegionOps smc91c111_mem_ops = {
     /* The special case for 32 bit writes to 0xc means we can't just
      * set .impl.min/max_access_size to 1, unfortunately
      */
-    .old_mmio = {
-        .read = { smc91c111_readb, smc91c111_readw, smc91c111_readl, },
-        .write = { smc91c111_writeb, smc91c111_writew, smc91c111_writel, },
-    },
+    .read = smc91c111_readfn,
+    .write = smc91c111_writefn,
+    .valid.min_access_size = 1,
+    .valid.max_access_size = 4,
     .endianness = DEVICE_NATIVE_ENDIAN,
 };
 
@@ -761,9 +772,9 @@ static NetClientInfo net_smc91c111_info = {
     .receive = smc91c111_receive,
 };
 
-static int smc91c111_init1(SysBusDevice *sbd)
+static void smc91c111_realize(DeviceState *dev, Error **errp)
 {
-    DeviceState *dev = DEVICE(sbd);
+    SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
     smc91c111_state *s = SMC91C111(dev);
 
     memory_region_init_io(&s->mmio, OBJECT(s), &smc91c111_mem_ops, s,
@@ -775,7 +786,6 @@ static int smc91c111_init1(SysBusDevice *sbd)
                           object_get_typename(OBJECT(dev)), dev->id, s);
     qemu_format_nic_info_str(qemu_get_queue(s->nic), s->conf.macaddr.a);
     /* ??? Save/restore.  */
-    return 0;
 }
 
 static Property smc91c111_properties[] = {
@@ -786,12 +796,11 @@ static Property smc91c111_properties[] = {
 static void smc91c111_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
-    SysBusDeviceClass *k = SYS_BUS_DEVICE_CLASS(klass);
 
-    k->init = smc91c111_init1;
+    dc->realize = smc91c111_realize;
     dc->reset = smc91c111_reset;
     dc->vmsd = &vmstate_smc91c111;
-    dc->props = smc91c111_properties;
+    device_class_set_props(dc, smc91c111_properties);
 }
 
 static const TypeInfo smc91c111_info = {
@@ -814,10 +823,10 @@ void smc91c111_init(NICInfo *nd, uint32_t base, qemu_irq irq)
     SysBusDevice *s;
 
     qemu_check_nic_model(nd, "smc91c111");
-    dev = qdev_create(NULL, TYPE_SMC91C111);
+    dev = qdev_new(TYPE_SMC91C111);
     qdev_set_nic_properties(dev, nd);
-    qdev_init_nofail(dev);
     s = SYS_BUS_DEVICE(dev);
+    sysbus_realize_and_unref(s, &error_fatal);
     sysbus_mmio_map(s, 0, base);
     sysbus_connect_irq(s, 0, irq);
 }

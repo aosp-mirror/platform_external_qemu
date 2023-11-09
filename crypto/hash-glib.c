@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,11 +30,7 @@ static int qcrypto_hash_alg_map[QCRYPTO_HASH_ALG__MAX] = {
     [QCRYPTO_HASH_ALG_SHA224] = -1,
     [QCRYPTO_HASH_ALG_SHA256] = G_CHECKSUM_SHA256,
     [QCRYPTO_HASH_ALG_SHA384] = -1,
-#if GLIB_CHECK_VERSION(2, 36, 0)
     [QCRYPTO_HASH_ALG_SHA512] = G_CHECKSUM_SHA512,
-#else
-    [QCRYPTO_HASH_ALG_SHA512] = -1,
-#endif
     [QCRYPTO_HASH_ALG_RIPEMD160] = -1,
 };
 

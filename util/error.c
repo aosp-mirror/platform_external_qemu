@@ -13,9 +13,7 @@
  */
 
 #include "qemu/osdep.h"
-#include "qemu/abort.h"
 #include "qapi/error.h"
-#include "qemu-common.h"
 #include "qemu/error-report.h"
 
 struct Error
@@ -29,30 +27,33 @@ struct Error
 
 Error *error_abort;
 Error *error_fatal;
-Error *error_during_init;
+Error *error_warn;
 
-static void error_handle_fatal(Error **errp, Error *err)
+static void error_handle(Error **errp, Error *err)
 {
     if (errp == &error_abort) {
-        if (qemu_abort_has_custom_handler()) {
-            qemu_abort("Unexpected error in %s() at %s:%d: %s\n",
-                    err->func, err->src, err->line,
-                    error_get_pretty(err));
-        }
         fprintf(stderr, "Unexpected error in %s() at %s:%d:\n",
                 err->func, err->src, err->line);
-        error_report_err(err);
+        error_report("%s", error_get_pretty(err));
+        if (err->hint) {
+            error_printf("%s", err->hint->str);
+        }
         abort();
     }
     if (errp == &error_fatal) {
-        if (qemu_abort_has_custom_handler()) {
-            qemu_abort("Fatal error: %s\n", error_get_pretty(err));
-        }
         error_report_err(err);
         exit(1);
     }
+    if (errp == &error_warn) {
+        warn_report_err(err);
+    } else if (errp && !*errp) {
+        *errp = err;
+    } else {
+        error_free(err);
+    }
 }
 
+G_GNUC_PRINTF(6, 0)
 static void error_setv(Error **errp,
                        const char *src, int line, const char *func,
                        ErrorClass err_class, const char *fmt, va_list ap,
@@ -78,8 +79,7 @@ static void error_setv(Error **errp,
     err->line = line;
     err->func = func;
 
-    error_handle_fatal(errp, err);
-    *errp = err;
+    error_handle(errp, err);
 
     errno = saved_errno;
 }
@@ -113,10 +113,6 @@ void error_setg_errno_internal(Error **errp,
     va_list ap;
     int saved_errno = errno;
 
-    if (errp == NULL) {
-        return;
-    }
-
     va_start(ap, fmt);
     error_setv(errp, src, line, func, ERROR_CLASS_GENERIC_ERROR, fmt, ap,
                os_errno != 0 ? strerror(os_errno) : NULL);
@@ -133,7 +129,7 @@ void error_setg_file_open_internal(Error **errp,
                               "Could not open '%s'", filename);
 }
 
-void error_vprepend(Error **errp, const char *fmt, va_list ap)
+void error_vprepend(Error *const *errp, const char *fmt, va_list ap)
 {
     GString *newmsg;
 
@@ -148,7 +144,7 @@ void error_vprepend(Error **errp, const char *fmt, va_list ap)
     (*errp)->msg = g_string_free(newmsg, 0);
 }
 
-void error_prepend(Error **errp, const char *fmt, ...)
+void error_prepend(Error *const *errp, const char *fmt, ...)
 {
     va_list ap;
 
@@ -157,7 +153,7 @@ void error_prepend(Error **errp, const char *fmt, ...)
     va_end(ap);
 }
 
-void error_append_hint(Error **errp, const char *fmt, ...)
+void error_append_hint(Error *const *errp, const char *fmt, ...)
 {
     va_list ap;
     int saved_errno = errno;
@@ -237,7 +233,7 @@ void error_report_err(Error *err)
 {
     error_report("%s", error_get_pretty(err));
     if (err->hint) {
-        error_printf_unless_qmp("%s", err->hint->str);
+        error_printf("%s", err->hint->str);
     }
     error_free(err);
 }
@@ -246,7 +242,7 @@ void warn_report_err(Error *err)
 {
     warn_report("%s", error_get_pretty(err));
     if (err->hint) {
-        error_printf_unless_qmp("%s", err->hint->str);
+        error_printf("%s", err->hint->str);
     }
     error_free(err);
 }
@@ -295,10 +291,18 @@ void error_propagate(Error **dst_errp, Error *local_err)
     if (!local_err) {
         return;
     }
-    error_handle_fatal(dst_errp, local_err);
+    error_handle(dst_errp, local_err);
+}
+
+void error_propagate_prepend(Error **dst_errp, Error *err,
+                             const char *fmt, ...)
+{
+    va_list ap;
+
     if (dst_errp && !*dst_errp) {
-        *dst_errp = local_err;
-    } else {
-        error_free(local_err);
-    }
+        va_start(ap, fmt);
+        error_vprepend(&err, fmt, ap);
+        va_end(ap);
+    } /* else error is being ignored, don't bother with prepending */
+    error_propagate(dst_errp, err);
 }

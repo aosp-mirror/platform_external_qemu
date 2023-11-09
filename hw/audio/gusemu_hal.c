@@ -32,7 +32,7 @@
 
 #define GUSregb(position) (*            (gusptr+(position)))
 #define GUSregw(position) (*(uint16_t *) (gusptr+(position)))
-#define GUSregd(position) (*(uint16_t *)(gusptr+(position)))
+#define GUSregd(position) (*(uint32_t *)(gusptr + (position)))
 
 /* size given in bytes */
 unsigned int gus_read(GUSEmuState * state, int port, int size)
@@ -261,6 +261,7 @@ void gus_write(GUSEmuState * state, int port, int size, unsigned int data)
             GUSregb(IRQStatReg2x6) = 0x10;
             GUS_irqrequest(state, state->gusirq, 1);
         }
+        /* fall through */
     case 0x20D:                /* SB2xCd no IRQ */
         GUSregb(SB2xCd) = (uint8_t) data;
         break;

@@ -13,13 +13,18 @@
 
 #include "qemu/osdep.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
 #include "sysemu/blockdev.h"
+#include "hw/irq.h"
 #include "hw/sd/bcm2835_sdhost.h"
+#include "migration/vmstate.h"
 #include "trace.h"
+#include "qom/object.h"
 
 #define TYPE_BCM2835_SDHOST_BUS "bcm2835-sdhost-bus"
-#define BCM2835_SDHOST_BUS(obj) \
-    OBJECT_CHECK(SDBus, (obj), TYPE_BCM2835_SDHOST_BUS)
+/* This is reusing the SDBus typedef from SD_BUS */
+DECLARE_INSTANCE_CHECKER(SDBus, BCM2835_SDHOST_BUS,
+                         TYPE_BCM2835_SDHOST_BUS)
 
 #define SDCMD  0x00 /* Command to SD card              - 16 R/W */
 #define SDARG  0x04 /* Argument to SD card             - 32 R/W */
@@ -118,8 +123,6 @@ static void bcm2835_sdhost_send_command(BCM2835SDHostState *s)
         goto error;
     }
     if (!(s->cmd & SDCMD_NO_RESPONSE)) {
-#define RWORD(n) (((uint32_t)rsp[n] << 24) | (rsp[n + 1] << 16) \
-                  | (rsp[n + 2] << 8) | rsp[n + 3])
         if (rlen == 0 || (rlen == 4 && (s->cmd & SDCMD_LONG_RESPONSE))) {
             goto error;
         }
@@ -127,15 +130,14 @@ static void bcm2835_sdhost_send_command(BCM2835SDHostState *s)
             goto error;
         }
         if (rlen == 4) {
-            s->rsp[0] = RWORD(0);
+            s->rsp[0] = ldl_be_p(&rsp[0]);
             s->rsp[1] = s->rsp[2] = s->rsp[3] = 0;
         } else {
-            s->rsp[0] = RWORD(12);
-            s->rsp[1] = RWORD(8);
-            s->rsp[2] = RWORD(4);
-            s->rsp[3] = RWORD(0);
+            s->rsp[0] = ldl_be_p(&rsp[12]);
+            s->rsp[1] = ldl_be_p(&rsp[8]);
+            s->rsp[2] = ldl_be_p(&rsp[4]);
+            s->rsp[3] = ldl_be_p(&rsp[0]);
         }
-#undef RWORD
     }
     /* We never really delay commands, so if this was a 'busywait' command
      * then we've completed it now and can raise the interrupt.
@@ -182,13 +184,15 @@ static void bcm2835_sdhost_fifo_run(BCM2835SDHostState *s)
     uint32_t value = 0;
     int n;
     int is_read;
+    int is_write;
 
     is_read = (s->cmd & SDCMD_READ_CMD) != 0;
-    if (s->datacnt != 0 && (!is_read || sdbus_data_ready(&s->sdbus))) {
+    is_write = (s->cmd & SDCMD_WRITE_CMD) != 0;
+    if (s->datacnt != 0 && (is_write || sdbus_data_ready(&s->sdbus))) {
         if (is_read) {
             n = 0;
             while (s->datacnt && s->fifo_len < BCM2835_SDHOST_FIFO_LEN) {
-                value |= (uint32_t)sdbus_read_data(&s->sdbus) << (n * 8);
+                value |= (uint32_t)sdbus_read_byte(&s->sdbus) << (n * 8);
                 s->datacnt--;
                 n++;
                 if (n == 4) {
@@ -204,8 +208,11 @@ static void bcm2835_sdhost_fifo_run(BCM2835SDHostState *s)
             if (n != 0) {
                 bcm2835_sdhost_fifo_push(s, value);
                 s->status |= SDHSTS_DATA_FLAG;
+                if (s->config & SDHCFG_DATA_IRPT_EN) {
+                    s->status |= SDHSTS_SDIO_IRPT;
+                }
             }
-        } else { /* write */
+        } else if (is_write) { /* write */
             n = 0;
             while (s->datacnt > 0 && (s->fifo_len > 0 || n > 0)) {
                 if (n == 0) {
@@ -218,7 +225,7 @@ static void bcm2835_sdhost_fifo_run(BCM2835SDHostState *s)
                 }
                 n--;
                 s->datacnt--;
-                sdbus_write_data(&s->sdbus, value & 0xff);
+                sdbus_write_byte(&s->sdbus, value & 0xff);
                 value >>= 8;
             }
         }
@@ -226,10 +233,17 @@ static void bcm2835_sdhost_fifo_run(BCM2835SDHostState *s)
             s->edm &= ~SDEDM_FSM_MASK;
             s->edm |= SDEDM_FSM_DATAMODE;
             trace_bcm2835_sdhost_edm_change("datacnt 0", s->edm);
-
-            if ((s->cmd & SDCMD_WRITE_CMD) &&
+        }
+        if (is_write) {
+            /* set block interrupt at end of each block transfer */
+            if (s->hbct && s->datacnt % s->hbct == 0 &&
                 (s->config & SDHCFG_BLOCK_IRPT_EN)) {
                 s->status |= SDHSTS_BLOCK_IRPT;
+            }
+            /* set data interrupt after each transfer */
+            s->status |= SDHSTS_DATA_FLAG;
+            if (s->config & SDHCFG_DATA_IRPT_EN) {
+                s->status |= SDHSTS_SDIO_IRPT;
             }
         }
     }
@@ -389,8 +403,8 @@ static void bcm2835_sdhost_init(Object *obj)
 {
     BCM2835SDHostState *s = BCM2835_SDHOST(obj);
 
-    qbus_create_inplace(&s->sdbus, sizeof(s->sdbus),
-                        TYPE_BCM2835_SDHOST_BUS, DEVICE(s), "sd-bus");
+    qbus_init(&s->sdbus, sizeof(s->sdbus),
+              TYPE_BCM2835_SDHOST_BUS, DEVICE(s), "sd-bus");
 
     memory_region_init_io(&s->iomem, obj, &bcm2835_sdhost_ops, s,
                           TYPE_BCM2835_SDHOST, 0x1000);
@@ -422,7 +436,7 @@ static void bcm2835_sdhost_class_init(ObjectClass *klass, void *data)
     dc->vmsd = &vmstate_bcm2835_sdhost;
 }
 
-static TypeInfo bcm2835_sdhost_info = {
+static const TypeInfo bcm2835_sdhost_info = {
     .name          = TYPE_BCM2835_SDHOST,
     .parent        = TYPE_SYS_BUS_DEVICE,
     .instance_size = sizeof(BCM2835SDHostState),

@@ -10,15 +10,16 @@
  * Contributions after 2012-01-13 are licensed under the terms of the
  * GNU GPL, version 2 or (at your option) any later version.
  */
+
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "qemu/host-utils.h"
-#include "hw/hw.h"
-#include "hw/devices.h"
+#include "hw/irq.h"
+#include "hw/display/tc6393xb.h"
+#include "exec/memory.h"
 #include "hw/block/flash.h"
 #include "ui/console.h"
 #include "ui/pixel_ops.h"
-#include "sysemu/block-backend.h"
 #include "sysemu/blockdev.h"
 
 #define IRQ_TC6393_NAND		0
@@ -138,11 +139,6 @@ struct TC6393xbState {
              blanked : 1;
 };
 
-qemu_irq *tc6393xb_gpio_in_get(TC6393xbState *s)
-{
-    return s->gpio_in;
-}
-
 static void tc6393xb_gpio_set(void *opaque, int line, int level)
 {
 //    TC6393xbState *s = opaque;
@@ -153,17 +149,6 @@ static void tc6393xb_gpio_set(void *opaque, int line, int level)
     }
 
     // FIXME: how does the chip reflect the GPIO input level change?
-}
-
-void tc6393xb_gpio_out_set(TC6393xbState *s, int line,
-                    qemu_irq handler)
-{
-    if (line >= TC6393XB_GPIOS) {
-        fprintf(stderr, "TC6393xb: no GPIO pin %d\n", line);
-        return;
-    }
-
-    s->handler[line] = handler;
 }
 
 static void tc6393xb_gpio_handler_update(TC6393xbState *s)
@@ -320,7 +305,7 @@ static void tc6393xb_scr_writeb(TC6393xbState *s, hwaddr addr, uint32_t value)
         SCR_REG_B(DEBUG);
     }
     fprintf(stderr, "tc6393xb_scr: unhandled write at %08x: %02x\n",
-					(uint32_t) addr, value & 0xff);
+                                        (uint32_t) addr, value & 0xff);
 }
 #undef SCR_REG_B
 #undef SCR_REG_W
@@ -359,7 +344,7 @@ static void tc6393xb_nand_cfg_writeb(TC6393xbState *s, hwaddr addr, uint32_t val
             return;
     }
     fprintf(stderr, "tc6393xb_nand_cfg: unhandled write at %08x: %02x\n",
-					(uint32_t) addr, value & 0xff);
+                                        (uint32_t) addr, value & 0xff);
 }
 
 static uint32_t tc6393xb_nand_readb(TC6393xbState *s, hwaddr addr) {
@@ -422,47 +407,31 @@ static void tc6393xb_nand_writeb(TC6393xbState *s, hwaddr addr, uint32_t value) 
             return;
     }
     fprintf(stderr, "tc6393xb_nand: unhandled write at %08x: %02x\n",
-					(uint32_t) addr, value & 0xff);
+                                        (uint32_t) addr, value & 0xff);
 }
-
-#define BITS 8
-#include "tc6393xb_template.h"
-#define BITS 15
-#include "tc6393xb_template.h"
-#define BITS 16
-#include "tc6393xb_template.h"
-#define BITS 24
-#include "tc6393xb_template.h"
-#define BITS 32
-#include "tc6393xb_template.h"
 
 static void tc6393xb_draw_graphic(TC6393xbState *s, int full_update)
 {
     DisplaySurface *surface = qemu_console_surface(s->con);
+    int i;
+    uint16_t *data_buffer;
+    uint8_t *data_display;
 
-    switch (surface_bits_per_pixel(surface)) {
-        case 8:
-            tc6393xb_draw_graphic8(s);
-            break;
-        case 15:
-            tc6393xb_draw_graphic15(s);
-            break;
-        case 16:
-            tc6393xb_draw_graphic16(s);
-            break;
-        case 24:
-            tc6393xb_draw_graphic24(s);
-            break;
-        case 32:
-            tc6393xb_draw_graphic32(s);
-            break;
-        default:
-            printf("tc6393xb: unknown depth %d\n",
-                   surface_bits_per_pixel(surface));
-            return;
+    data_buffer = s->vram_ptr;
+    data_display = surface_data(surface);
+    for (i = 0; i < s->scr_height; i++) {
+        int j;
+        for (j = 0; j < s->scr_width; j++, data_display += 4, data_buffer++) {
+            uint16_t color = *data_buffer;
+            uint32_t dest_color = rgb_to_pixel32(
+                           ((color & 0xf800) * 0x108) >> 11,
+                           ((color & 0x7e0) * 0x41) >> 9,
+                           ((color & 0x1f) * 0x21) >> 2
+                           );
+            *(uint32_t *)data_display = dest_color;
+        }
     }
-
-    dpy_gfx_update(s->con, 0, 0, s->scr_width, s->scr_height);
+    dpy_gfx_update_full(s->con);
 }
 
 static void tc6393xb_draw_blank(TC6393xbState *s, int full_update)
@@ -481,7 +450,7 @@ static void tc6393xb_draw_blank(TC6393xbState *s, int full_update)
         d += surface_stride(surface);
     }
 
-    dpy_gfx_update(s->con, 0, 0, s->scr_width, s->scr_height);
+    dpy_gfx_update_full(s->con);
 }
 
 static void tc6393xb_update_display(void *opaque)
@@ -571,7 +540,7 @@ TC6393xbState *tc6393xb_init(MemoryRegion *sysmem, uint32_t base, qemu_irq irq)
         },
     };
 
-    s = (TC6393xbState *) g_malloc0(sizeof(TC6393xbState));
+    s = g_new0(TC6393xbState, 1);
     s->irq = irq;
     s->gpio_in = qemu_allocate_irqs(tc6393xb_gpio_set, s, TC6393XB_GPIOS);
 

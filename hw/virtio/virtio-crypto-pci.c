@@ -11,13 +11,31 @@
  * top-level directory.
  *
  */
+
 #include "qemu/osdep.h"
 #include "hw/pci/pci.h"
+#include "hw/qdev-properties.h"
 #include "hw/virtio/virtio.h"
 #include "hw/virtio/virtio-bus.h"
 #include "hw/virtio/virtio-pci.h"
 #include "hw/virtio/virtio-crypto.h"
 #include "qapi/error.h"
+#include "qemu/module.h"
+#include "qom/object.h"
+
+typedef struct VirtIOCryptoPCI VirtIOCryptoPCI;
+
+/*
+ * virtio-crypto-pci: This extends VirtioPCIProxy.
+ */
+#define TYPE_VIRTIO_CRYPTO_PCI "virtio-crypto-pci"
+DECLARE_INSTANCE_CHECKER(VirtIOCryptoPCI, VIRTIO_CRYPTO_PCI,
+                         TYPE_VIRTIO_CRYPTO_PCI)
+
+struct VirtIOCryptoPCI {
+    VirtIOPCIProxy parent_obj;
+    VirtIOCrypto vdev;
+};
 
 static Property virtio_crypto_pci_properties[] = {
     DEFINE_PROP_BIT("ioeventfd", VirtIOPCIProxy, flags,
@@ -36,12 +54,10 @@ static void virtio_crypto_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
         return;
     }
 
-    qdev_set_parent_bus(vdev, BUS(&vpci_dev->bus));
     virtio_pci_force_virtio_1(vpci_dev);
-    object_property_set_bool(OBJECT(vdev), true, "realized", errp);
-    object_property_set_link(OBJECT(vcrypto),
-                 OBJECT(vcrypto->vdev.conf.cryptodev), "cryptodev",
-                 NULL);
+    if (!qdev_realize(vdev, BUS(&vpci_dev->bus), errp)) {
+        return;
+    }
 }
 
 static void virtio_crypto_pci_class_init(ObjectClass *klass, void *data)
@@ -52,7 +68,7 @@ static void virtio_crypto_pci_class_init(ObjectClass *klass, void *data)
 
     k->realize = virtio_crypto_pci_realize;
     set_bit(DEVICE_CATEGORY_MISC, dc->categories);
-    dc->props = virtio_crypto_pci_properties;
+    device_class_set_props(dc, virtio_crypto_pci_properties);
     pcidev_k->class_id = PCI_CLASS_OTHERS;
 }
 
@@ -64,9 +80,8 @@ static void virtio_crypto_initfn(Object *obj)
                                 TYPE_VIRTIO_CRYPTO);
 }
 
-static const TypeInfo virtio_crypto_pci_info = {
-    .name          = TYPE_VIRTIO_CRYPTO_PCI,
-    .parent        = TYPE_VIRTIO_PCI,
+static const VirtioPCIDeviceTypeInfo virtio_crypto_pci_info = {
+    .generic_name  = TYPE_VIRTIO_CRYPTO_PCI,
     .instance_size = sizeof(VirtIOCryptoPCI),
     .instance_init = virtio_crypto_initfn,
     .class_init    = virtio_crypto_pci_class_init,
@@ -74,6 +89,6 @@ static const TypeInfo virtio_crypto_pci_info = {
 
 static void virtio_crypto_pci_register_types(void)
 {
-    type_register_static(&virtio_crypto_pci_info);
+    virtio_pci_types_register(&virtio_crypto_pci_info);
 }
 type_init(virtio_crypto_pci_register_types)

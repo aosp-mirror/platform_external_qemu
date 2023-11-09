@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,42 +18,13 @@
  */
 
 #include "qemu/osdep.h"
-#include "qemu-common.h"
 #include "cpu.h"
-#include "hw/hw.h"
-#include "hw/boards.h"
 #include "migration/cpu.h"
-
-static int env_post_load(void *opaque, int version_id)
-{
-    CPUOpenRISCState *env = opaque;
-
-    /* Restore MMU handlers */
-    if (env->sr & SR_DME) {
-        env->tlb->cpu_openrisc_map_address_data =
-            &cpu_openrisc_get_phys_data;
-    } else {
-        env->tlb->cpu_openrisc_map_address_data =
-            &cpu_openrisc_get_phys_nommu;
-    }
-
-    if (env->sr & SR_IME) {
-        env->tlb->cpu_openrisc_map_address_code =
-            &cpu_openrisc_get_phys_code;
-    } else {
-        env->tlb->cpu_openrisc_map_address_code =
-            &cpu_openrisc_get_phys_nommu;
-    }
-
-
-    return 0;
-}
 
 static const VMStateDescription vmstate_tlb_entry = {
     .name = "tlb_entry",
     .version_id = 1,
     .minimum_version_id = 1,
-    .minimum_version_id_old = 1,
     .fields = (VMStateField[]) {
         VMSTATE_UINTTL(mr, OpenRISCTLBEntry),
         VMSTATE_UINTTL(tr, OpenRISCTLBEntry),
@@ -63,25 +34,19 @@ static const VMStateDescription vmstate_tlb_entry = {
 
 static const VMStateDescription vmstate_cpu_tlb = {
     .name = "cpu_tlb",
-    .version_id = 1,
-    .minimum_version_id = 1,
-    .minimum_version_id_old = 1,
+    .version_id = 2,
+    .minimum_version_id = 2,
     .fields = (VMStateField[]) {
-        VMSTATE_STRUCT_2DARRAY(itlb, CPUOpenRISCTLBContext,
-                             ITLB_WAYS, ITLB_SIZE, 0,
+        VMSTATE_STRUCT_ARRAY(itlb, CPUOpenRISCTLBContext, TLB_SIZE, 0,
                              vmstate_tlb_entry, OpenRISCTLBEntry),
-        VMSTATE_STRUCT_2DARRAY(dtlb, CPUOpenRISCTLBContext,
-                             DTLB_WAYS, DTLB_SIZE, 0,
+        VMSTATE_STRUCT_ARRAY(dtlb, CPUOpenRISCTLBContext, TLB_SIZE, 0,
                              vmstate_tlb_entry, OpenRISCTLBEntry),
         VMSTATE_END_OF_LIST()
     }
 };
 
-#define VMSTATE_CPU_TLB(_f, _s)                             \
-    VMSTATE_STRUCT_POINTER(_f, _s, vmstate_cpu_tlb, CPUOpenRISCTLBContext)
-
-
-static int get_sr(QEMUFile *f, void *opaque, size_t size, VMStateField *field)
+static int get_sr(QEMUFile *f, void *opaque, size_t size,
+                  const VMStateField *field)
 {
     CPUOpenRISCState *env = opaque;
     cpu_set_sr(env, qemu_get_be32(f));
@@ -89,7 +54,7 @@ static int get_sr(QEMUFile *f, void *opaque, size_t size, VMStateField *field)
 }
 
 static int put_sr(QEMUFile *f, void *opaque, size_t size,
-                  VMStateField *field, QJSON *vmdesc)
+                  const VMStateField *field, JSONWriter *vmdesc)
 {
     CPUOpenRISCState *env = opaque;
     qemu_put_be32(f, cpu_get_sr(env));
@@ -106,7 +71,6 @@ static const VMStateDescription vmstate_env = {
     .name = "env",
     .version_id = 6,
     .minimum_version_id = 6,
-    .post_load = env_post_load,
     .fields = (VMStateField[]) {
         VMSTATE_UINTTL_2DARRAY(shadow_gpr, CPUOpenRISCState, 16, 32),
         VMSTATE_UINTTL(pc, CPUOpenRISCState),
@@ -143,7 +107,8 @@ static const VMStateDescription vmstate_env = {
         VMSTATE_UINT32(fpcsr, CPUOpenRISCState),
         VMSTATE_UINT64(mac, CPUOpenRISCState),
 
-        VMSTATE_CPU_TLB(tlb, CPUOpenRISCState),
+        VMSTATE_STRUCT(tlb, CPUOpenRISCState, 1,
+                       vmstate_cpu_tlb, CPUOpenRISCTLBContext),
 
         VMSTATE_TIMER_PTR(timer, CPUOpenRISCState),
         VMSTATE_UINT32(ttmr, CPUOpenRISCState),
@@ -155,10 +120,21 @@ static const VMStateDescription vmstate_env = {
     }
 };
 
+static int cpu_post_load(void *opaque, int version_id)
+{
+    OpenRISCCPU *cpu = opaque;
+    CPUOpenRISCState *env = &cpu->env;
+
+    /* Update env->fp_status to match env->fpcsr.  */
+    cpu_set_fpcsr(env, env->fpcsr);
+    return 0;
+}
+
 const VMStateDescription vmstate_openrisc_cpu = {
     .name = "cpu",
     .version_id = 1,
     .minimum_version_id = 1,
+    .post_load = cpu_post_load,
     .fields = (VMStateField[]) {
         VMSTATE_CPU(),
         VMSTATE_STRUCT(env, OpenRISCCPU, 1, vmstate_env, CPUOpenRISCState),

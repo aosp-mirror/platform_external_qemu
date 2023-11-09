@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,6 +29,9 @@ void superh_cpu_do_unaligned_access(CPUState *cs, vaddr addr,
                                     MMUAccessType access_type,
                                     int mmu_idx, uintptr_t retaddr)
 {
+    CPUSH4State *env = cs->env_ptr;
+
+    env->tea = addr;
     switch (access_type) {
     case MMU_INST_FETCH:
     case MMU_DATA_LOAD:
@@ -37,20 +40,10 @@ void superh_cpu_do_unaligned_access(CPUState *cs, vaddr addr,
     case MMU_DATA_STORE:
         cs->exception_index = 0x100;
         break;
+    default:
+        g_assert_not_reached();
     }
     cpu_loop_exit_restore(cs, retaddr);
-}
-
-void tlb_fill(CPUState *cs, target_ulong addr, int size,
-              MMUAccessType access_type, int mmu_idx, uintptr_t retaddr)
-{
-    int ret;
-
-    ret = superh_cpu_handle_mmu_fault(cs, addr, size, access_type, mmu_idx);
-    if (ret) {
-        /* now we have a real cpu fault */
-        cpu_loop_exit_restore(cs, retaddr);
-    }
 }
 
 #endif
@@ -58,19 +51,17 @@ void tlb_fill(CPUState *cs, target_ulong addr, int size,
 void helper_ldtlb(CPUSH4State *env)
 {
 #ifdef CONFIG_USER_ONLY
-    SuperHCPU *cpu = sh_env_get_cpu(env);
-
-    /* XXXXX */
-    cpu_abort(CPU(cpu), "Unhandled ldtlb");
+    cpu_abort(env_cpu(env), "Unhandled ldtlb");
 #else
     cpu_load_tlb(env);
 #endif
 }
 
-static inline void QEMU_NORETURN raise_exception(CPUSH4State *env, int index,
-                                                 uintptr_t retaddr)
+static inline G_NORETURN
+void raise_exception(CPUSH4State *env, int index,
+                     uintptr_t retaddr)
 {
-    CPUState *cs = CPU(sh_env_get_cpu(env));
+    CPUState *cs = env_cpu(env);
 
     cs->exception_index = index;
     cpu_loop_exit_restore(cs, retaddr);
@@ -96,14 +87,9 @@ void helper_raise_slot_fpu_disable(CPUSH4State *env)
     raise_exception(env, 0x820, 0);
 }
 
-void helper_debug(CPUSH4State *env)
-{
-    raise_exception(env, EXCP_DEBUG, 0);
-}
-
 void helper_sleep(CPUSH4State *env)
 {
-    CPUState *cs = CPU(sh_env_get_cpu(env));
+    CPUState *cs = env_cpu(env);
 
     cs->halted = 1;
     env->in_sleep = 1;
@@ -119,7 +105,7 @@ void helper_trapa(CPUSH4State *env, uint32_t tra)
 void helper_exclusive(CPUSH4State *env)
 {
     /* We do not want cpu_restore_state to run.  */
-    cpu_loop_exit_atomic(ENV_GET_CPU(env), 0);
+    cpu_loop_exit_atomic(env_cpu(env), 0);
 }
 
 void helper_movcal(CPUSH4State *env, uint32_t address, uint32_t value)
@@ -413,9 +399,11 @@ float32 helper_fsrra_FT(CPUSH4State *env, float32 t0)
     /* "Approximate" 1/sqrt(x) via actual computation.  */
     t0 = float32_sqrt(t0, &env->fp_status);
     t0 = float32_div(float32_one, t0, &env->fp_status);
-    /* Since this is supposed to be an approximation, an imprecision
-       exception is required.  One supposes this also follows the usual
-       IEEE rule that other exceptions take precidence.  */
+    /*
+     * Since this is supposed to be an approximation, an imprecision
+     * exception is required.  One supposes this also follows the usual
+     * IEEE rule that other exceptions take precedence.
+     */
     if (get_float_exception_flags(&env->fp_status) == 0) {
         set_float_exception_flags(float_flag_inexact, &env->fp_status);
     }

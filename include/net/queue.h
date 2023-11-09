@@ -24,7 +24,6 @@
 #ifndef QEMU_NET_QUEUE_H
 #define QEMU_NET_QUEUE_H
 
-#include "qemu-common.h"
 
 typedef struct NetPacket NetPacket;
 typedef struct NetQueue NetQueue;
@@ -55,6 +54,14 @@ void qemu_net_queue_append_iov(NetQueue *queue,
                                NetPacketSent *sent_cb);
 
 void qemu_del_net_queue(NetQueue *queue);
+
+ssize_t qemu_net_queue_receive(NetQueue *queue,
+                               const uint8_t *data,
+                               size_t size);
+
+ssize_t qemu_net_queue_receive_iov(NetQueue *queue,
+                                   const struct iovec *iov,
+                                   int iovcnt);
 
 ssize_t qemu_net_queue_send(NetQueue *queue,
                             NetClientState *sender,

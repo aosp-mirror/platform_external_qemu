@@ -14,7 +14,8 @@
  * the Softfloat-2a license unless specifically indicated otherwise.
  */
 
-/* Portions of this work are licensed under the terms of the GNU GPL,
+/*
+ * Portions of this work are licensed under the terms of the GNU GPL,
  * version 2 or later. See the COPYING file in the top-level directory.
  */
 
@@ -22,7 +23,6 @@
 #define TARGET_M68K_SOFTFLOAT_H
 #include "fpu/softfloat.h"
 
-floatx80 floatx80_mod(floatx80 a, floatx80 b, float_status *status);
 floatx80 floatx80_getman(floatx80 a, float_status *status);
 floatx80 floatx80_getexp(floatx80 a, float_status *status);
 floatx80 floatx80_scale(floatx80 a, floatx80 b, float_status *status);

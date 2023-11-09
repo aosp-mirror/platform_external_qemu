@@ -1,11 +1,11 @@
 #ifndef HW_NE2000_H
 #define HW_NE2000_H
 
-#include "hw/hw.h"
+#include "qemu/units.h"
 #include "net/net.h"
 
-#define NE2000_PMEM_SIZE    (32*1024)
-#define NE2000_PMEM_START   (16*1024)
+#define NE2000_PMEM_SIZE    (32 * KiB)
+#define NE2000_PMEM_START   (16 * KiB)
 #define NE2000_PMEM_END     (NE2000_PMEM_SIZE+NE2000_PMEM_START)
 #define NE2000_MEM_SIZE     NE2000_PMEM_END
 

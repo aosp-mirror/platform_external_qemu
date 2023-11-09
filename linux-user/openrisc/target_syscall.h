@@ -1,35 +1,23 @@
 #ifndef OPENRISC_TARGET_SYSCALL_H
 #define OPENRISC_TARGET_SYSCALL_H
 
+/* Note that in linux/arch/openrisc/include/uapi/asm/ptrace.h,
+ * this is called user_regs_struct.  Given that this is what
+ * is used within struct sigcontext we need this definition.
+ * However, elfload.c wants this name.
+ */
 struct target_pt_regs {
-    union {
-        struct {
-            /* Named registers */
-            uint32_t sr;       /* Stored in place of r0 */
-            target_ulong sp;   /* r1 */
-        };
-        struct {
-            /* Old style */
-            target_ulong offset[2];
-            target_ulong gprs[30];
-        };
-        struct {
-            /* New style */
-            target_ulong gpr[32];
-        };
-    };
-    target_ulong pc;
-    target_ulong orig_gpr11;   /* For restarting system calls */
-    uint32_t syscallno;        /* Syscall number (used by strace) */
-    target_ulong dummy;     /* Cheap alignment fix */
+    abi_ulong gpr[32];
+    abi_ulong pc;
+    abi_ulong sr;
 };
 
 #define UNAME_MACHINE "openrisc"
 #define UNAME_MINIMUM_RELEASE "2.6.32"
 
-#define TARGET_MINSIGSTKSZ 2048
-#define TARGET_MLOCKALL_MCL_CURRENT 1
-#define TARGET_MLOCKALL_MCL_FUTURE  2
+#define TARGET_MCL_CURRENT 1
+#define TARGET_MCL_FUTURE  2
+#define TARGET_MCL_ONFAULT 4
 
 #define MMAP_SHIFT TARGET_PAGE_BITS
 

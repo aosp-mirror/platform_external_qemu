@@ -24,7 +24,11 @@
 
 #include "qemu/osdep.h"
 #include "hw/char/stm32f2xx_usart.h"
+#include "hw/irq.h"
+#include "hw/qdev-properties.h"
+#include "hw/qdev-properties-system.h"
 #include "qemu/log.h"
+#include "qemu/module.h"
 
 #ifndef STM_USART_ERR_DEBUG
 #define STM_USART_ERR_DEBUG 0
@@ -53,14 +57,13 @@ static void stm32f2xx_usart_receive(void *opaque, const uint8_t *buf, int size)
 {
     STM32F2XXUsartState *s = opaque;
 
-    s->usart_dr = *buf;
-
     if (!(s->usart_cr1 & USART_CR1_UE && s->usart_cr1 & USART_CR1_RE)) {
         /* USART not enabled - drop the chars */
         DB_PRINT("Dropping the chars\n");
         return;
     }
 
+    s->usart_dr = *buf;
     s->usart_sr |= USART_SR_RXNE;
 
     if (s->usart_cr1 & USART_CR1_RXNEIE) {
@@ -100,10 +103,11 @@ static uint64_t stm32f2xx_usart_read(void *opaque, hwaddr addr,
         return retvalue;
     case USART_DR:
         DB_PRINT("Value: 0x%" PRIx32 ", %c\n", s->usart_dr, (char) s->usart_dr);
+        retvalue = s->usart_dr & 0x3FF;
         s->usart_sr &= ~USART_SR_RXNE;
         qemu_chr_fe_accept_input(&s->chr);
         qemu_set_irq(s->irq, 0);
-        return s->usart_dr & 0x3FF;
+        return retvalue;
     case USART_BRR:
         return s->usart_brr;
     case USART_CR1:
@@ -202,7 +206,7 @@ static void stm32f2xx_usart_init(Object *obj)
     sysbus_init_irq(SYS_BUS_DEVICE(obj), &s->irq);
 
     memory_region_init_io(&s->mmio, obj, &stm32f2xx_usart_ops, s,
-                          TYPE_STM32F2XX_USART, 0x2000);
+                          TYPE_STM32F2XX_USART, 0x400);
     sysbus_init_mmio(SYS_BUS_DEVICE(obj), &s->mmio);
 }
 
@@ -220,7 +224,7 @@ static void stm32f2xx_usart_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
 
     dc->reset = stm32f2xx_usart_reset;
-    dc->props = stm32f2xx_usart_properties;
+    device_class_set_props(dc, stm32f2xx_usart_properties);
     dc->realize = stm32f2xx_usart_realize;
 }
 

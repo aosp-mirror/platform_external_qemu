@@ -22,113 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
-#include "hw/hw.h"
 #include "hw/pci/pci.h"
+#include "hw/qdev-properties.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 #include "hw/isa/isa.h"
-#include "sysemu/sysemu.h"
 #include "sysemu/dma.h"
+#include "sysemu/reset.h"
 
 #include "hw/ide/pci.h"
 #include "trace.h"
 
 /* CMD646 specific */
-#define CFR		0x50
-#define   CFR_INTR_CH0	0x04
-#define CNTRL		0x51
-#define   CNTRL_EN_CH0	0x04
-#define   CNTRL_EN_CH1	0x08
-#define ARTTIM23	0x57
-#define    ARTTIM23_INTR_CH1	0x10
-#define MRDMODE		0x71
-#define   MRDMODE_INTR_CH0	0x04
-#define   MRDMODE_INTR_CH1	0x08
-#define   MRDMODE_BLK_CH0	0x10
-#define   MRDMODE_BLK_CH1	0x20
-#define UDIDETCR0	0x73
-#define UDIDETCR1	0x7B
+#define CFR                  0x50
+#define   CFR_INTR_CH0       0x04
+#define CNTRL                0x51
+#define   CNTRL_EN_CH0       0x04
+#define   CNTRL_EN_CH1       0x08
+#define ARTTIM23             0x57
+#define    ARTTIM23_INTR_CH1 0x10
+#define MRDMODE              0x71
+#define   MRDMODE_INTR_CH0   0x04
+#define   MRDMODE_INTR_CH1   0x08
+#define   MRDMODE_BLK_CH0    0x10
+#define   MRDMODE_BLK_CH1    0x20
+#define UDIDETCR0            0x73
+#define UDIDETCR1            0x7B
 
 static void cmd646_update_irq(PCIDevice *pd);
-
-static uint64_t cmd646_cmd_read(void *opaque, hwaddr addr,
-                                unsigned size)
-{
-    CMD646BAR *cmd646bar = opaque;
-
-    if (addr != 2 || size != 1) {
-        return ((uint64_t)1 << (size * 8)) - 1;
-    }
-    return ide_status_read(cmd646bar->bus, addr + 2);
-}
-
-static void cmd646_cmd_write(void *opaque, hwaddr addr,
-                             uint64_t data, unsigned size)
-{
-    CMD646BAR *cmd646bar = opaque;
-
-    if (addr != 2 || size != 1) {
-        return;
-    }
-    ide_cmd_write(cmd646bar->bus, addr + 2, data);
-}
-
-static const MemoryRegionOps cmd646_cmd_ops = {
-    .read = cmd646_cmd_read,
-    .write = cmd646_cmd_write,
-    .endianness = DEVICE_LITTLE_ENDIAN,
-};
-
-static uint64_t cmd646_data_read(void *opaque, hwaddr addr,
-                                 unsigned size)
-{
-    CMD646BAR *cmd646bar = opaque;
-
-    if (size == 1) {
-        return ide_ioport_read(cmd646bar->bus, addr);
-    } else if (addr == 0) {
-        if (size == 2) {
-            return ide_data_readw(cmd646bar->bus, addr);
-        } else {
-            return ide_data_readl(cmd646bar->bus, addr);
-        }
-    }
-    return ((uint64_t)1 << (size * 8)) - 1;
-}
-
-static void cmd646_data_write(void *opaque, hwaddr addr,
-                             uint64_t data, unsigned size)
-{
-    CMD646BAR *cmd646bar = opaque;
-
-    if (size == 1) {
-        ide_ioport_write(cmd646bar->bus, addr, data);
-    } else if (addr == 0) {
-        if (size == 2) {
-            ide_data_writew(cmd646bar->bus, addr, data);
-        } else {
-            ide_data_writel(cmd646bar->bus, addr, data);
-        }
-    }
-}
-
-static const MemoryRegionOps cmd646_data_ops = {
-    .read = cmd646_data_read,
-    .write = cmd646_data_write,
-    .endianness = DEVICE_LITTLE_ENDIAN,
-};
-
-static void setup_cmd646_bar(PCIIDEState *d, int bus_num)
-{
-    IDEBus *bus = &d->bus[bus_num];
-    CMD646BAR *bar = &d->cmd646_bar[bus_num];
-
-    bar->bus = bus;
-    bar->pci_dev = d;
-    memory_region_init_io(&bar->cmd, OBJECT(d), &cmd646_cmd_ops, bar,
-                          "cmd646-cmd", 4);
-    memory_region_init_io(&bar->data, OBJECT(d), &cmd646_data_ops, bar,
-                          "cmd646-data", 8);
-}
 
 static void cmd646_update_dma_interrupts(PCIDevice *pd)
 {
@@ -221,7 +144,7 @@ static void bmdma_write(void *opaque, hwaddr addr,
         cmd646_update_irq(pci_dev);
         break;
     case 2:
-        bm->status = (val & 0x60) | (bm->status & 1) | (bm->status & ~val & 0x06);
+        bmdma_status_writeb(bm, val);
         break;
     case 3:
         if (bm == &bm->pci_dev->bmdma[0]) {
@@ -284,9 +207,9 @@ static void cmd646_set_irq(void *opaque, int channel, int level)
     cmd646_update_irq(pd);
 }
 
-static void cmd646_reset(void *opaque)
+static void cmd646_reset(DeviceState *dev)
 {
-    PCIIDEState *d = opaque;
+    PCIIDEState *d = PCI_IDE(dev);
     unsigned int i;
 
     for (i = 0; i < 2; i++) {
@@ -326,8 +249,8 @@ static void cmd646_pci_config_write(PCIDevice *d, uint32_t addr, uint32_t val,
 static void pci_cmd646_ide_realize(PCIDevice *dev, Error **errp)
 {
     PCIIDEState *d = PCI_IDE(dev);
+    DeviceState *ds = DEVICE(dev);
     uint8_t *pci_conf = dev->config;
-    qemu_irq *irq;
     int i;
 
     pci_conf[PCI_CLASS_PROG] = 0x8f;
@@ -346,30 +269,36 @@ static void pci_cmd646_ide_realize(PCIDevice *dev, Error **errp)
     dev->wmask[MRDMODE] = 0x0;
     dev->w1cmask[MRDMODE] = MRDMODE_INTR_CH0 | MRDMODE_INTR_CH1;
 
-    setup_cmd646_bar(d, 0);
-    setup_cmd646_bar(d, 1);
-    pci_register_bar(dev, 0, PCI_BASE_ADDRESS_SPACE_IO, &d->cmd646_bar[0].data);
-    pci_register_bar(dev, 1, PCI_BASE_ADDRESS_SPACE_IO, &d->cmd646_bar[0].cmd);
-    pci_register_bar(dev, 2, PCI_BASE_ADDRESS_SPACE_IO, &d->cmd646_bar[1].data);
-    pci_register_bar(dev, 3, PCI_BASE_ADDRESS_SPACE_IO, &d->cmd646_bar[1].cmd);
+    memory_region_init_io(&d->data_bar[0], OBJECT(d), &pci_ide_data_le_ops,
+                          &d->bus[0], "cmd646-data0", 8);
+    pci_register_bar(dev, 0, PCI_BASE_ADDRESS_SPACE_IO, &d->data_bar[0]);
+
+    memory_region_init_io(&d->cmd_bar[0], OBJECT(d), &pci_ide_cmd_le_ops,
+                          &d->bus[0], "cmd646-cmd0", 4);
+    pci_register_bar(dev, 1, PCI_BASE_ADDRESS_SPACE_IO, &d->cmd_bar[0]);
+
+    memory_region_init_io(&d->data_bar[1], OBJECT(d), &pci_ide_data_le_ops,
+                          &d->bus[1], "cmd646-data1", 8);
+    pci_register_bar(dev, 2, PCI_BASE_ADDRESS_SPACE_IO, &d->data_bar[1]);
+
+    memory_region_init_io(&d->cmd_bar[1], OBJECT(d), &pci_ide_cmd_le_ops,
+                          &d->bus[1], "cmd646-cmd1", 4);
+    pci_register_bar(dev, 3, PCI_BASE_ADDRESS_SPACE_IO, &d->cmd_bar[1]);
+
     bmdma_setup_bar(d);
     pci_register_bar(dev, 4, PCI_BASE_ADDRESS_SPACE_IO, &d->bmdma_bar);
 
     /* TODO: RST# value should be 0 */
     pci_conf[PCI_INTERRUPT_PIN] = 0x01; // interrupt on pin 1
 
-    irq = qemu_allocate_irqs(cmd646_set_irq, d, 2);
+    qdev_init_gpio_in(ds, cmd646_set_irq, 2);
     for (i = 0; i < 2; i++) {
-        ide_bus_new(&d->bus[i], sizeof(d->bus[i]), DEVICE(dev), i, 2);
-        ide_init2(&d->bus[i], irq[i]);
+        ide_bus_init(&d->bus[i], sizeof(d->bus[i]), ds, i, 2);
+        ide_bus_init_output_irq(&d->bus[i], qdev_get_gpio_in(ds, i));
 
         bmdma_init(&d->bus[i], &d->bmdma[i], d);
-        d->bmdma[i].bus = &d->bus[i];
-        ide_register_restart_cb(&d->bus[i]);
+        ide_bus_register_restart_cb(&d->bus[i]);
     }
-
-    vmstate_register(DEVICE(dev), 0, &vmstate_ide_pci, d);
-    qemu_register_reset(cmd646_reset, d);
 }
 
 static void pci_cmd646_ide_exitfn(PCIDevice *dev)
@@ -383,18 +312,6 @@ static void pci_cmd646_ide_exitfn(PCIDevice *dev)
     }
 }
 
-void pci_cmd646_ide_init(PCIBus *bus, DriveInfo **hd_table,
-                         int secondary_ide_enabled)
-{
-    PCIDevice *dev;
-
-    dev = pci_create(bus, -1, "cmd646-ide");
-    qdev_prop_set_uint32(&dev->qdev, "secondary", secondary_ide_enabled);
-    qdev_init_nofail(&dev->qdev);
-
-    pci_ide_create_devs(dev, hd_table);
-}
-
 static Property cmd646_ide_properties[] = {
     DEFINE_PROP_UINT32("secondary", PCIIDEState, secondary, 0),
     DEFINE_PROP_END_OF_LIST(),
@@ -405,6 +322,8 @@ static void cmd646_ide_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
     PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
 
+    dc->reset = cmd646_reset;
+    dc->vmsd = &vmstate_ide_pci;
     k->realize = pci_cmd646_ide_realize;
     k->exit = pci_cmd646_ide_exitfn;
     k->vendor_id = PCI_VENDOR_ID_CMD;
@@ -413,7 +332,7 @@ static void cmd646_ide_class_init(ObjectClass *klass, void *data)
     k->class_id = PCI_CLASS_STORAGE_IDE;
     k->config_read = cmd646_pci_config_read;
     k->config_write = cmd646_pci_config_write;
-    dc->props = cmd646_ide_properties;
+    device_class_set_props(dc, cmd646_ide_properties);
     set_bit(DEVICE_CATEGORY_STORAGE, dc->categories);
 }
 

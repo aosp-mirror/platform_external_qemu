@@ -25,17 +25,17 @@
 #ifndef HW_OR_IRQ_H
 #define HW_OR_IRQ_H
 
-#include "hw/irq.h"
 #include "hw/sysbus.h"
 #include "qom/object.h"
 
 #define TYPE_OR_IRQ "or-irq"
 
-#define MAX_OR_LINES      16
+/* This can safely be increased if necessary without breaking
+ * migration compatibility (as long as it remains greater than 15).
+ */
+#define MAX_OR_LINES      48
 
-typedef struct OrIRQState qemu_or_irq;
-
-#define OR_IRQ(obj) OBJECT_CHECK(qemu_or_irq, (obj), TYPE_OR_IRQ)
+OBJECT_DECLARE_SIMPLE_TYPE(OrIRQState, OR_IRQ)
 
 struct OrIRQState {
     DeviceState parent_obj;

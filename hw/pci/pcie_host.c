@@ -20,10 +20,9 @@
  */
 
 #include "qemu/osdep.h"
-#include "hw/hw.h"
-#include "hw/pci/pci.h"
+#include "hw/pci/pci_device.h"
 #include "hw/pci/pcie_host.h"
-#include "exec/address-spaces.h"
+#include "qemu/module.h"
 
 /* a helper function to get a PCIDevice for a given mmconfig address */
 static inline PCIDevice *pcie_dev_find_by_mmcfg_addr(PCIBus *s,
@@ -47,11 +46,6 @@ static void pcie_mmcfg_data_write(void *opaque, hwaddr mmcfg_addr,
     }
     addr = PCIE_MMCFG_CONFOFFSET(mmcfg_addr);
     limit = pci_config_size(pci_dev);
-    if (limit <= addr) {
-        /* conventional pci device can be behind pcie-to-pci bridge.
-           256 <= addr < 4K has no effects. */
-        return;
-    }
     pci_host_config_write_common(pci_dev, addr, limit, val, len);
 }
 
@@ -70,11 +64,6 @@ static uint64_t pcie_mmcfg_data_read(void *opaque,
     }
     addr = PCIE_MMCFG_CONFOFFSET(mmcfg_addr);
     limit = pci_config_size(pci_dev);
-    if (limit <= addr) {
-        /* conventional pci device can be behind pcie-to-pci bridge.
-           256 <= addr < 4K has no effects. */
-        return ~0x0;
-    }
     return pci_host_config_read_common(pci_dev, addr, limit, len);
 }
 

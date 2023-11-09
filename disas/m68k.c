@@ -4,7 +4,7 @@
 #include "qemu/osdep.h"
 #include <math.h>
 
-#include "disas/bfd.h"
+#include "disas/dis-asm.h"
 
 /* **** floatformat.h from sourceware.org CVS 2005-08-14.  */
 /* IEEE floating point support declarations, for GDB, the GNU Debugger.
@@ -70,7 +70,7 @@ struct floatformat
   unsigned int exp_start;
   unsigned int exp_len;
   /* Bias added to a "true" exponent to form the biased exponent.  It
-     is intentionally signed as, otherwize, -exp_bias can turn into a
+     is intentionally signed as, otherwise, -exp_bias can turn into a
      very large number (e.g., given the exp_bias of 0x3fff and a 64
      bit long, the equation (long)(1 - exp_bias) evaluates to
      4294950914) instead of -16382).  */
@@ -350,7 +350,7 @@ struct m68k_opcode_alias
 
    *  all					(modes 0-6,7.0-4)
    ~  alterable memory				(modes 2-6,7.0,7.1)
-   						(not 0,1,7.2-4)
+						(not 0,1,7.2-4)
    %  alterable					(modes 0-6,7.0,7.1)
 						(not 7.2-4)
    ;  data					(modes 0,2-6,7.0-4)
@@ -479,7 +479,7 @@ struct m68k_opcode_alias
       and remaining 3 bits of register shifted 9 bits in first word.
       Indicate upper/lower in 1 bit shifted 7 bits in second word.
       Use with `R' or `u' format.
-   n  `m' withouth upper/lower indication. (For M[S]ACx; 4 bits split
+   n  `m' without upper/lower indication. (For M[S]ACx; 4 bits split
       with MSB shifted 6 bits in first word and remaining 3 bits of
       register shifted 9 bits in first word.  No upper/lower
       indication is done.)  Use with `R' or `u' format.
@@ -854,7 +854,7 @@ fetch_arg (unsigned char *buffer,
 
 /* Check if an EA is valid for a particular code.  This is required
    for the EMAC instructions since the type of source address determines
-   if it is a EMAC-load instruciton if the EA is mode 2-5, otherwise it
+   if it is a EMAC-load instruction if the EA is mode 2-5, otherwise it
    is a non-load EMAC instruction and the bits mean register Ry.
    A similar case exists for the movem instructions where the register
    mask is interpreted differently for different EAs.  */
@@ -1080,7 +1080,7 @@ print_indexed (int basereg,
 
 /* Returns number of bytes "eaten" by the operand, or
    return -1 if an invalid operand was found, or -2 if
-   an opcode tabe error was found.
+   an opcode table error was found.
    ADDR is the pc for this arg to be relative to.  */
 
 static int
@@ -1623,6 +1623,7 @@ print_insn_arg (const char *d,
 
     case 'X':
       place = '8';
+      /* fall through */
     case 'Y':
     case 'Z':
     case 'W':
@@ -1646,7 +1647,7 @@ print_insn_arg (const char *d,
 	  case 0x15: name = "%val"; break;
 	  case 0x16: name = "%scc"; break;
 	  case 0x17: name = "%ac"; break;
- 	  case 0x18: name = "%psr"; break;
+	  case 0x18: name = "%psr"; break;
 	  case 0x19: name = "%pcsr"; break;
 	  case 0x1c:
 	  case 0x1d:
@@ -2016,6 +2017,20 @@ print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
 		    }
 		}
 	    }
+
+          /* Don't match FPU insns with non-default coprocessor ID.  */
+          if (*d == '\0')
+            {
+              for (d = opc->args; *d; d += 2)
+                {
+                  if (d[0] == 'I')
+                    {
+                      val = fetch_arg (buffer, 'd', 3, info);
+                      if (val != 1)
+                        break;
+                    }
+                }
+            }
 
 	  if (*d == '\0')
 	    if ((val = match_insn_m68k (memaddr, info, opc, & priv)))

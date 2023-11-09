@@ -2,12 +2,11 @@
 #include "sysemu/sysemu.h"
 #include "qapi/error.h"
 #include "qapi/qapi-commands-ui.h"
-#include "qapi/qmp/qdict.h"
-#include "qemu/error-report.h"
 #include "trace.h"
 #include "ui/input.h"
 #include "ui/console.h"
 #include "sysemu/replay.h"
+#include "sysemu/runstate.h"
 
 struct QemuInputHandlerState {
     DeviceState       *dev;
@@ -19,6 +18,9 @@ struct QemuInputHandlerState {
 };
 
 typedef struct QemuInputEventQueue QemuInputEventQueue;
+typedef QTAILQ_HEAD(QemuInputEventQueueHead, QemuInputEventQueue)
+    QemuInputEventQueueHead;
+
 struct QemuInputEventQueue {
     enum {
         QEMU_INPUT_QUEUE_DELAY = 1,
@@ -37,8 +39,7 @@ static QTAILQ_HEAD(, QemuInputHandlerState) handlers =
 static NotifierList mouse_mode_notifiers =
     NOTIFIER_LIST_INITIALIZER(mouse_mode_notifiers);
 
-static QTAILQ_HEAD(QemuInputEventQueueHead, QemuInputEventQueue) kbd_queue =
-    QTAILQ_HEAD_INITIALIZER(kbd_queue);
+static QemuInputEventQueueHead kbd_queue = QTAILQ_HEAD_INITIALIZER(kbd_queue);
 static QEMUTimer *kbd_timer;
 static uint32_t kbd_default_delay_ms = 10;
 static uint32_t queue_count;
@@ -121,7 +122,7 @@ qemu_input_find_handler(uint32_t mask, QemuConsole *con)
     return NULL;
 }
 
-void qmp_input_send_event(bool has_device, const char *device,
+void qmp_input_send_event(const char *device,
                           bool has_head, int64_t head,
                           InputEventList *events, Error **errp)
 {
@@ -130,7 +131,7 @@ void qmp_input_send_event(bool has_device, const char *device,
     Error *err = NULL;
 
     con = NULL;
-    if (has_device) {
+    if (device) {
         if (!has_head) {
             head = 0;
         }
@@ -211,6 +212,7 @@ static void qemu_input_event_trace(QemuConsole *src, InputEvent *evt)
     InputKeyEvent *key;
     InputBtnEvent *btn;
     InputMoveEvent *move;
+    InputMultiTouchEvent *mtt;
 
     if (src) {
         idx = qemu_console_get_index(src);
@@ -226,12 +228,8 @@ static void qemu_input_event_trace(QemuConsole *src, InputEvent *evt)
                                          name, key->down);
             break;
         case KEY_VALUE_KIND_QCODE:
-            // The android emulator already has a keycode translator in place
-            // and is using raw linux codes that are sent to the emulator.
-            // Hence we just log the raw code data without translating to and
-            // from qcodes.
-            trace_input_event_key_number(idx, key->key->u.qcode.data, "",
-                                         key->down);
+            name = QKeyCode_str(key->key->u.qcode.data);
+            trace_input_event_key_qcode(idx, name, key->down);
             break;
         case KEY_VALUE_KIND__MAX:
             /* keep gcc happy */
@@ -253,6 +251,11 @@ static void qemu_input_event_trace(QemuConsole *src, InputEvent *evt)
         name = InputAxis_str(move->axis);
         trace_input_event_abs(idx, name, move->value);
         break;
+    case INPUT_EVENT_KIND_MTT:
+        mtt = evt->u.mtt.data;
+        name = InputAxis_str(mtt->axis);
+        trace_input_event_mtt(idx, name, mtt->value);
+        break;
     case INPUT_EVENT_KIND__MAX:
         /* keep gcc happy */
         break;
@@ -261,7 +264,7 @@ static void qemu_input_event_trace(QemuConsole *src, InputEvent *evt)
 
 static void qemu_input_queue_process(void *opaque)
 {
-    struct QemuInputEventQueueHead *queue = opaque;
+    QemuInputEventQueueHead *queue = opaque;
     QemuInputEventQueue *item;
 
     g_assert(!QTAILQ_EMPTY(queue));
@@ -292,7 +295,7 @@ static void qemu_input_queue_process(void *opaque)
     }
 }
 
-static void qemu_input_queue_delay(struct QemuInputEventQueueHead *queue,
+static void qemu_input_queue_delay(QemuInputEventQueueHead *queue,
                                    QEMUTimer *timer, uint32_t delay_ms)
 {
     QemuInputEventQueue *item = g_new0(QemuInputEventQueue, 1);
@@ -310,7 +313,7 @@ static void qemu_input_queue_delay(struct QemuInputEventQueueHead *queue,
     }
 }
 
-static void qemu_input_queue_event(struct QemuInputEventQueueHead *queue,
+static void qemu_input_queue_event(QemuInputEventQueueHead *queue,
                                    QemuConsole *src, InputEvent *evt)
 {
     QemuInputEventQueue *item = g_new0(QemuInputEventQueue, 1);
@@ -322,7 +325,7 @@ static void qemu_input_queue_event(struct QemuInputEventQueueHead *queue,
     queue_count++;
 }
 
-static void qemu_input_queue_sync(struct QemuInputEventQueueHead *queue)
+static void qemu_input_queue_sync(QemuInputEventQueueHead *queue)
 {
     QemuInputEventQueue *item = g_new0(QemuInputEventQueue, 1);
 
@@ -365,7 +368,7 @@ void qemu_input_event_send(QemuConsole *src, InputEvent *evt)
      * when 'alt+print' was pressed. This flaw is now fixed and the
      * 'sysrq' key serves no further purpose. We normalize it to
      * 'print', so that downstream receivers of the event don't
-     * neeed to deal with this mistake
+     * need to deal with this mistake
      */
     if (evt->type == INPUT_EVENT_KIND_KEY &&
         evt->u.key.data->key->u.qcode.data == Q_KEY_CODE_SYSRQ) {
@@ -415,8 +418,10 @@ static InputEvent *qemu_input_event_new_key(KeyValue *key, bool down)
     return evt;
 }
 
-
-void qemu_input_event_enqueue(QemuConsole *src, InputEvent *evt) {
+void qemu_input_event_send_key(QemuConsole *src, KeyValue *key, bool down)
+{
+    InputEvent *evt;
+    evt = qemu_input_event_new_key(key, down);
     if (QTAILQ_EMPTY(&kbd_queue)) {
         qemu_input_event_send(src, evt);
         qemu_input_event_sync();
@@ -427,13 +432,6 @@ void qemu_input_event_enqueue(QemuConsole *src, InputEvent *evt) {
     } else {
         qapi_free_InputEvent(evt);
     }
-}
-
-void qemu_input_event_send_key(QemuConsole *src, KeyValue *key, bool down)
-{
-    InputEvent *evt;
-    evt = qemu_input_event_new_key(key, down);
-    qemu_input_event_enqueue(src, evt);
 }
 
 void qemu_input_event_send_key_number(QemuConsole *src, int num, bool down)
@@ -457,8 +455,9 @@ void qemu_input_event_send_key_delay(uint32_t delay_ms)
     }
 
     if (!kbd_timer) {
-        kbd_timer = timer_new_ms(QEMU_CLOCK_VIRTUAL, qemu_input_queue_process,
-                                 &kbd_queue);
+        kbd_timer = timer_new_full(NULL, QEMU_CLOCK_VIRTUAL,
+                                   SCALE_MS, QEMU_TIMER_ATTR_EXTERNAL,
+                                   qemu_input_queue_process, &kbd_queue);
     }
     if (queue_count < queue_limit) {
         qemu_input_queue_delay(&kbd_queue, kbd_timer,
@@ -466,22 +465,18 @@ void qemu_input_event_send_key_delay(uint32_t delay_ms)
     }
 }
 
-InputEvent *qemu_input_event_new_btn(InputButton btn, bool down)
-{
-    InputEvent *evt = g_new0(InputEvent, 1);
-    evt->u.btn.data = g_new0(InputBtnEvent, 1);
-    evt->type = INPUT_EVENT_KIND_BTN;
-    evt->u.btn.data->button = btn;
-    evt->u.btn.data->down = down;
-    return evt;
-}
-
 void qemu_input_queue_btn(QemuConsole *src, InputButton btn, bool down)
 {
-    InputEvent *evt;
-    evt = qemu_input_event_new_btn(btn, down);
-    qemu_input_event_send(src, evt);
-    qapi_free_InputEvent(evt);
+    InputBtnEvent bevt = {
+        .button = btn,
+        .down = down,
+    };
+    InputEvent evt = {
+        .type = INPUT_EVENT_KIND_BTN,
+        .u.btn.data = &bevt,
+    };
+
+    qemu_input_event_send(src, &evt);
 }
 
 void qemu_input_update_buttons(QemuConsole *src, uint32_t *button_map,
@@ -521,37 +516,71 @@ int qemu_input_scale_axis(int value,
     return ((int64_t)value - min_in) * range_out / range_in + min_out;
 }
 
-InputEvent *qemu_input_event_new_move(InputEventKind kind,
-                                      InputAxis axis, int value)
-{
-    InputEvent *evt = g_new0(InputEvent, 1);
-    InputMoveEvent *move = g_new0(InputMoveEvent, 1);
-
-    evt->type = kind;
-    evt->u.rel.data = move; /* evt->u.rel is the same as evt->u.abs */
-    move->axis = axis;
-    move->value = value;
-    return evt;
-}
-
 void qemu_input_queue_rel(QemuConsole *src, InputAxis axis, int value)
 {
-    InputEvent *evt;
-    evt = qemu_input_event_new_move(INPUT_EVENT_KIND_REL, axis, value);
-    qemu_input_event_send(src, evt);
-    qapi_free_InputEvent(evt);
+    InputMoveEvent move = {
+        .axis = axis,
+        .value = value,
+    };
+    InputEvent evt = {
+        .type = INPUT_EVENT_KIND_REL,
+        .u.rel.data = &move,
+    };
+
+    qemu_input_event_send(src, &evt);
 }
 
 void qemu_input_queue_abs(QemuConsole *src, InputAxis axis, int value,
                           int min_in, int max_in)
 {
-    InputEvent *evt;
-    int scaled = qemu_input_scale_axis(value, min_in, max_in,
+    InputMoveEvent move = {
+        .axis = axis,
+        .value = qemu_input_scale_axis(value, min_in, max_in,
                                        INPUT_EVENT_ABS_MIN,
-                                       INPUT_EVENT_ABS_MAX);
-    evt = qemu_input_event_new_move(INPUT_EVENT_KIND_ABS, axis, scaled);
-    qemu_input_event_send(src, evt);
-    qapi_free_InputEvent(evt);
+                                       INPUT_EVENT_ABS_MAX),
+    };
+    InputEvent evt = {
+        .type = INPUT_EVENT_KIND_ABS,
+        .u.abs.data = &move,
+    };
+
+    qemu_input_event_send(src, &evt);
+}
+
+void qemu_input_queue_mtt(QemuConsole *src, InputMultiTouchType type,
+                          int slot, int tracking_id)
+{
+    InputMultiTouchEvent mtt = {
+        .type = type,
+        .slot = slot,
+        .tracking_id = tracking_id,
+    };
+    InputEvent evt = {
+        .type = INPUT_EVENT_KIND_MTT,
+        .u.mtt.data = &mtt,
+    };
+
+    qemu_input_event_send(src, &evt);
+}
+
+void qemu_input_queue_mtt_abs(QemuConsole *src, InputAxis axis, int value,
+                              int min_in, int max_in, int slot, int tracking_id)
+{
+    InputMultiTouchEvent mtt = {
+        .type = INPUT_MULTI_TOUCH_TYPE_DATA,
+        .slot = slot,
+        .tracking_id = tracking_id,
+        .axis = axis,
+        .value = qemu_input_scale_axis(value, min_in, max_in,
+                                       INPUT_EVENT_ABS_MIN,
+                                       INPUT_EVENT_ABS_MAX),
+    };
+    InputEvent evt = {
+        .type = INPUT_EVENT_KIND_MTT,
+        .u.mtt.data = &mtt,
+    };
+
+    qemu_input_event_send(src, &evt);
 }
 
 void qemu_input_check_mode_change(void)
@@ -582,7 +611,7 @@ void qemu_remove_mouse_mode_change_notifier(Notifier *notify)
 MouseInfoList *qmp_query_mice(Error **errp)
 {
     MouseInfoList *mice_list = NULL;
-    MouseInfoList *info;
+    MouseInfo *info;
     QemuInputHandlerState *s;
     bool current = true;
 
@@ -592,44 +621,42 @@ MouseInfoList *qmp_query_mice(Error **errp)
             continue;
         }
 
-        info = g_new0(MouseInfoList, 1);
-        info->value = g_new0(MouseInfo, 1);
-        info->value->index = s->id;
-        info->value->name = g_strdup(s->handler->name);
-        info->value->absolute = s->handler->mask & INPUT_EVENT_MASK_ABS;
-        info->value->current = current;
+        info = g_new0(MouseInfo, 1);
+        info->index = s->id;
+        info->name = g_strdup(s->handler->name);
+        info->absolute = s->handler->mask & INPUT_EVENT_MASK_ABS;
+        info->current = current;
 
         current = false;
-        info->next = mice_list;
-        mice_list = info;
+        QAPI_LIST_PREPEND(mice_list, info);
     }
 
     return mice_list;
 }
 
-void hmp_mouse_set(Monitor *mon, const QDict *qdict)
+bool qemu_mouse_set(int index, Error **errp)
 {
     QemuInputHandlerState *s;
-    int index = qdict_get_int(qdict, "index");
-    int found = 0;
 
     QTAILQ_FOREACH(s, &handlers, node) {
-        if (s->id != index) {
-            continue;
+        if (s->id == index) {
+            break;
         }
-        if (!(s->handler->mask & (INPUT_EVENT_MASK_REL |
-                                  INPUT_EVENT_MASK_ABS))) {
-            error_report("Input device '%s' is not a mouse", s->handler->name);
-            return;
-        }
-        found = 1;
-        qemu_input_handler_activate(s);
-        break;
     }
 
-    if (!found) {
-        error_report("Mouse at index '%d' not found", index);
+    if (!s) {
+        error_setg(errp, "Mouse at index '%d' not found", index);
+        return false;
     }
 
+    if (!(s->handler->mask & (INPUT_EVENT_MASK_REL |
+                              INPUT_EVENT_MASK_ABS))) {
+        error_setg(errp, "Input device '%s' is not a mouse",
+                   s->handler->name);
+        return false;
+    }
+
+    qemu_input_handler_activate(s);
     qemu_input_check_mode_change();
+    return true;
 }

@@ -10,9 +10,13 @@
 /* The controller can support a variety of different displays, but we only
    implement one.  Most of the commends relating to brightness and geometry
    setup are ignored. */
+
 #include "qemu/osdep.h"
 #include "hw/i2c/i2c.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
 #include "ui/console.h"
+#include "qom/object.h"
 
 //#define DEBUG_SSD0303 1
 
@@ -43,9 +47,9 @@ enum ssd0303_cmd {
 };
 
 #define TYPE_SSD0303 "ssd0303"
-#define SSD0303(obj) OBJECT_CHECK(ssd0303_state, (obj), TYPE_SSD0303)
+OBJECT_DECLARE_SIMPLE_TYPE(ssd0303_state, SSD0303)
 
-typedef struct {
+struct ssd0303_state {
     I2CSlave parent_obj;
 
     QemuConsole *con;
@@ -60,12 +64,12 @@ typedef struct {
     enum ssd0303_mode mode;
     enum ssd0303_cmd cmd_state;
     uint8_t framebuffer[132*8];
-} ssd0303_state;
+};
 
-static int ssd0303_recv(I2CSlave *i2c)
+static uint8_t ssd0303_recv(I2CSlave *i2c)
 {
     BADF("Reads not implemented\n");
-    return -1;
+    return 0xff;
 }
 
 static int ssd0303_send(I2CSlave *i2c, uint8_t data)
@@ -192,6 +196,8 @@ static int ssd0303_event(I2CSlave *i2c, enum i2c_event event)
     case I2C_NACK:
         /* Nothing to do.  */
         break;
+    default:
+        return -1;
     }
 
     return 0;
@@ -297,13 +303,12 @@ static const GraphicHwOps ssd0303_ops = {
     .gfx_update  = ssd0303_update_display,
 };
 
-static int ssd0303_init(I2CSlave *i2c)
+static void ssd0303_realize(DeviceState *dev, Error **errp)
 {
-    ssd0303_state *s = SSD0303(i2c);
+    ssd0303_state *s = SSD0303(dev);
 
-    s->con = graphic_console_init(DEVICE(i2c), 0, &ssd0303_ops, s);
+    s->con = graphic_console_init(dev, 0, &ssd0303_ops, s);
     qemu_console_resize(s->con, 96 * MAGNIFY, 16 * MAGNIFY);
-    return 0;
 }
 
 static void ssd0303_class_init(ObjectClass *klass, void *data)
@@ -311,7 +316,7 @@ static void ssd0303_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
     I2CSlaveClass *k = I2C_SLAVE_CLASS(klass);
 
-    k->init = ssd0303_init;
+    dc->realize = ssd0303_realize;
     k->event = ssd0303_event;
     k->recv = ssd0303_recv;
     k->send = ssd0303_send;

@@ -25,7 +25,6 @@
  * THE SOFTWARE.
  */
 #include "qemu/osdep.h"
-#include "qemu-common.h"
 #include "ui/console.h"
 #include "ui/shader.h"
 
@@ -49,6 +48,10 @@ void surface_gl_create_texture(QemuGLShader *gls,
 {
     assert(gls);
     assert(QEMU_IS_ALIGNED(surface_stride(surface), surface_bytes_per_pixel(surface)));
+
+    if (surface->texture) {
+        return;
+    }
 
     switch (surface->format) {
     case PIXMAN_BE_b8g8r8x8:
@@ -74,11 +77,20 @@ void surface_gl_create_texture(QemuGLShader *gls,
     glBindTexture(GL_TEXTURE_2D, surface->texture);
     glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT,
                   surface_stride(surface) / surface_bytes_per_pixel(surface));
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-                 surface_width(surface),
-                 surface_height(surface),
-                 0, surface->glformat, surface->gltype,
-                 surface_data(surface));
+    if (epoxy_is_desktop_gl()) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                     surface_width(surface),
+                     surface_height(surface),
+                     0, surface->glformat, surface->gltype,
+                     surface_data(surface));
+    } else {
+        glTexImage2D(GL_TEXTURE_2D, 0, surface->glformat,
+                     surface_width(surface),
+                     surface_height(surface),
+                     0, surface->glformat, surface->gltype,
+                     surface_data(surface));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ONE);
+    }
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -92,13 +104,17 @@ void surface_gl_update_texture(QemuGLShader *gls,
 
     assert(gls);
 
-    glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT,
-                  surface_stride(surface) / surface_bytes_per_pixel(surface));
-    glTexSubImage2D(GL_TEXTURE_2D, 0,
-                    x, y, w, h,
-                    surface->glformat, surface->gltype,
-                    data + surface_stride(surface) * y
-                    + surface_bytes_per_pixel(surface) * x);
+    if (surface->texture) {
+        glBindTexture(GL_TEXTURE_2D, surface->texture);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT,
+                      surface_stride(surface)
+                      / surface_bytes_per_pixel(surface));
+        glTexSubImage2D(GL_TEXTURE_2D, 0,
+                        x, y, w, h,
+                        surface->glformat, surface->gltype,
+                        data + surface_stride(surface) * y
+                        + surface_bytes_per_pixel(surface) * x);
+    }
 }
 
 void surface_gl_render_texture(QemuGLShader *gls,

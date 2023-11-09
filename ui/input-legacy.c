@@ -23,13 +23,11 @@
  */
 
 #include "qemu/osdep.h"
+#include "qemu/log.h"
 #include "qapi/qapi-commands-ui.h"
-#include "sysemu/sysemu.h"
 #include "ui/console.h"
-#include "ui/keymaps.h"
+#include "keymaps.h"
 #include "ui/input.h"
-
-#include <stdbool.h>
 
 struct QEMUPutMouseEntry {
     QEMUPutMouseEvent *qemu_put_mouse_event;
@@ -41,7 +39,6 @@ struct QEMUPutMouseEntry {
     QemuInputHandlerState *s;
     int axis[INPUT_AXIS__MAX];
     int buttons;
-    bool is_trackball;
 };
 
 struct QEMUPutKbdEntry {
@@ -161,8 +158,6 @@ static void legacy_mouse_event(DeviceState *dev, QemuConsole *src,
     InputBtnEvent *btn;
     InputMoveEvent *move;
 
-    s->is_trackball = false;
-
     switch (evt->type) {
     case INPUT_EVENT_KIND_BTN:
         btn = evt->u.btn.data;
@@ -185,6 +180,20 @@ static void legacy_mouse_event(DeviceState *dev, QemuConsole *src,
                                     1,
                                     s->buttons);
         }
+        if (btn->down && btn->button == INPUT_BUTTON_WHEEL_RIGHT) {
+            s->qemu_put_mouse_event(s->qemu_put_mouse_event_opaque,
+                                    s->axis[INPUT_AXIS_X],
+                                    s->axis[INPUT_AXIS_Y],
+                                    -2,
+                                    s->buttons);
+        }
+        if (btn->down && btn->button == INPUT_BUTTON_WHEEL_LEFT) {
+            s->qemu_put_mouse_event(s->qemu_put_mouse_event_opaque,
+                                    s->axis[INPUT_AXIS_X],
+                                    s->axis[INPUT_AXIS_Y],
+                                    2,
+                                    s->buttons);
+        }
         break;
     case INPUT_EVENT_KIND_ABS:
         move = evt->u.abs.data;
@@ -193,7 +202,6 @@ static void legacy_mouse_event(DeviceState *dev, QemuConsole *src,
     case INPUT_EVENT_KIND_REL:
         move = evt->u.rel.data;
         s->axis[move->axis] += move->value;
-        s->is_trackball = true;
         break;
     default:
         break;
@@ -207,7 +215,7 @@ static void legacy_mouse_sync(DeviceState *dev)
     s->qemu_put_mouse_event(s->qemu_put_mouse_event_opaque,
                             s->axis[INPUT_AXIS_X],
                             s->axis[INPUT_AXIS_Y],
-                            s->is_trackball ? 1 : 0, // "dz"
+                            0,
                             s->buttons);
 
     if (!s->qemu_put_mouse_event_absolute) {

@@ -1,182 +1,125 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
-**
-** This software is licensed under the terms of the GNU General Public
-** License version 2, as published by the Free Software Foundation, and
-** may be copied, distributed, and modified under those terms.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-*/
+/*
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ *
+ * Goldfish PIC
+ *
+ * (c) 2020 Laurent Vivier <laurent@vivier.eu>
+ *
+ */
 
 #include "qemu/osdep.h"
-#include "cpu.h"
-#include "exec/address-spaces.h"
-#include "exec/ram_addr.h"
-#include "hw/hw.h"
-#include "hw/intc/goldfish_pic.h"
 #include "hw/irq.h"
+#include "hw/qdev-properties.h"
 #include "hw/sysbus.h"
-#include "migration/qemu-file.h"
-#include "migration/qemu-file.h"
-#include "chardev/char.h"
+#include "migration/vmstate.h"
+#include "monitor/monitor.h"
+#include "qemu/log.h"
+#include "trace.h"
+#include "hw/intc/intc.h"
+#include "hw/intc/goldfish_pic.h"
+
+/* registers */
 
 enum {
-    /* Number of pending interrupts         */
-    GFPIC_REG_IRQ_STATUS        = 0x00,
-    /* Highest priority pending irq number  */
-    GFPIC_REG_IRQ_PENDING       = 0x04,
-    /* Disable all irq lines                */
-    GFPIC_REG_IRQ_DISABLE_ALL   = 0x08,
-    /* Mask specific interrupt lines        */
-    GFPIC_REG_IRQ_DISABLE       = 0x0c,
-    /* Unmask specific interrupt lines      */
-    GFPIC_REG_IRQ_ENABLE        = 0x10
+    REG_STATUS          = 0x00,
+    REG_IRQ_PENDING     = 0x04,
+    REG_IRQ_DISABLE_ALL = 0x08,
+    REG_DISABLE         = 0x0c,
+    REG_ENABLE          = 0x10,
 };
 
-struct goldfish_pic_state {
-    SysBusDevice parent;
-    MemoryRegion iomem;
-
-    uint32_t level;
-    uint32_t pending_count;
-    uint32_t irq_enabled;
-    qemu_irq parent_irq;
-};
-
-#define  GOLDFISH_PIC_SAVE_VERSION  2
-
-#define TYPE_GOLDFISH_PIC "goldfish_pic"
-#define GOLDFISH_PIC(obj) \
-OBJECT_CHECK(struct goldfish_pic_state, (obj), TYPE_GOLDFISH_PIC)
-
-static void goldfish_pic_update(struct goldfish_pic_state *s)
+static bool goldfish_pic_get_statistics(InterruptStatsProvider *obj,
+                                        uint64_t **irq_counts,
+                                        unsigned int *nb_irqs)
 {
-    uint32_t flags;
-    bool locked = false;
+    GoldfishPICState *s = GOLDFISH_PIC(obj);
 
-    /* We may already have the BQL if coming from the reset path */
-    if (!qemu_mutex_iothread_locked()) {
-        locked = true;
-        qemu_mutex_lock_iothread();
-    }
+    *irq_counts = s->stats_irq_count;
+    *nb_irqs = ARRAY_SIZE(s->stats_irq_count);
+    return true;
+}
 
-    flags = (s->level & s->irq_enabled);
-    qemu_set_irq(s->parent_irq, flags != 0);
+static void goldfish_pic_print_info(InterruptStatsProvider *obj, Monitor *mon)
+{
+    GoldfishPICState *s = GOLDFISH_PIC(obj);
+    monitor_printf(mon, "goldfish-pic.%d: pending=0x%08x enabled=0x%08x\n",
+                   s->idx, s->pending, s->enabled);
+}
 
-    if (locked) {
-        qemu_mutex_unlock_iothread();
+static void goldfish_pic_update(GoldfishPICState *s)
+{
+    if (s->pending & s->enabled) {
+        qemu_irq_raise(s->irq);
+    } else {
+        qemu_irq_lower(s->irq);
     }
 }
 
-static int goldfish_pic_load(void *opaque, int  version_id)
+static void goldfish_irq_request(void *opaque, int irq, int level)
 {
-    struct goldfish_pic_state *s = opaque;
+    GoldfishPICState *s = opaque;
 
-    if (version_id != GOLDFISH_PIC_SAVE_VERSION) {
-        return -1;
-    }
-
-    goldfish_pic_update(s);
-    return 0;
-}
-
-static const VMStateDescription goldfish_pic_vmsd = {
-    .name = "goldfish_pic",
-    .version_id = GOLDFISH_PIC_SAVE_VERSION,
-    .minimum_version_id = GOLDFISH_PIC_SAVE_VERSION,
-    .minimum_version_id_old = GOLDFISH_PIC_SAVE_VERSION,
-    .post_load = &goldfish_pic_load,
-    .fields = (VMStateField[]) {
-        VMSTATE_UINT32(level, struct goldfish_pic_state),
-        VMSTATE_UINT32(pending_count, struct goldfish_pic_state),
-        VMSTATE_UINT32(irq_enabled, struct goldfish_pic_state),
-        VMSTATE_END_OF_LIST()
-    }
-};
-
-static void goldfish_pic_set_irq(void *opaque, int irq, int level)
-{
-    struct goldfish_pic_state *s = (struct goldfish_pic_state *)opaque;
-    uint32_t mask = (1U << irq);
+    trace_goldfish_irq_request(s, s->idx, irq, level);
 
     if (level) {
-        if (!(s->level & mask)) {
-            if (s->irq_enabled & mask) {
-                s->pending_count++;
-            }
-            s->level |= mask;
-        }
+        s->pending |= 1 << irq;
+        s->stats_irq_count[irq]++;
     } else {
-        if (s->level & mask) {
-            if (s->irq_enabled & mask) {
-                s->pending_count--;
-            }
-            s->level &= ~mask;
-        }
+        s->pending &= ~(1 << irq);
     }
     goldfish_pic_update(s);
 }
 
-static uint64_t goldfish_pic_read(void *opaque, hwaddr offset, unsigned size)
+static uint64_t goldfish_pic_read(void *opaque, hwaddr addr,
+                                  unsigned size)
 {
-    struct goldfish_pic_state *s = (struct goldfish_pic_state *)opaque;
+    GoldfishPICState *s = opaque;
+    uint64_t value = 0;
 
-    switch (offset) {
-    case GFPIC_REG_IRQ_STATUS:
-        /* return number of pending interrupts */
-        return s->pending_count;
-
-    case GFPIC_REG_IRQ_PENDING:
-        /* return pending interrupts mask */
-        return s->level & s->irq_enabled;
-
+    switch (addr) {
+    case REG_STATUS:
+        /* The number of pending interrupts (0 to 32) */
+        value = ctpop32(s->pending & s->enabled);
+        break;
+    case REG_IRQ_PENDING:
+        /* The pending interrupt mask */
+        value = s->pending & s->enabled;
+        break;
     default:
-        cpu_abort(current_cpu,
-                  "goldfish_pic_read: Bad offset %" HWADDR_PRIx "\n",
-                  offset);
-        return 0;
+        qemu_log_mask(LOG_UNIMP,
+                      "%s: unimplemented register read 0x%02"HWADDR_PRIx"\n",
+                      __func__, addr);
+        break;
     }
+
+    trace_goldfish_pic_read(s, s->idx, addr, size, value);
+
+    return value;
 }
 
-static void goldfish_pic_write(void *opaque, hwaddr offset,
+static void goldfish_pic_write(void *opaque, hwaddr addr,
                                uint64_t value, unsigned size)
 {
-    struct goldfish_pic_state *s = (struct goldfish_pic_state *)opaque;
+    GoldfishPICState *s = opaque;
 
-    uint32_t mask = value;
+    trace_goldfish_pic_write(s, s->idx, addr, size, value);
 
-    switch (offset) {
-    case GFPIC_REG_IRQ_DISABLE_ALL:
-        s->pending_count = 0;
-        s->level = 0;
-        s->irq_enabled = 0;
+    switch (addr) {
+    case REG_IRQ_DISABLE_ALL:
+        s->enabled = 0;
+        s->pending = 0;
         break;
-
-    case GFPIC_REG_IRQ_DISABLE:
-        if (s->irq_enabled & mask) {
-            if (s->level & mask) {
-                s->pending_count--;
-            }
-            s->irq_enabled &= ~mask;
-        }
+    case REG_DISABLE:
+        s->enabled &= ~value;
         break;
-
-    case GFPIC_REG_IRQ_ENABLE:
-        if (!(s->irq_enabled & mask)) {
-            s->irq_enabled |= mask;
-            if (s->level & mask) {
-                s->pending_count++;
-            }
-        }
+    case REG_ENABLE:
+        s->enabled |= value;
         break;
-
     default:
-        cpu_abort(current_cpu,
-                  "goldfish_pic_write: Bad offset %" HWADDR_PRIx "\n",
-                  offset);
-        return;
+        qemu_log_mask(LOG_UNIMP,
+                      "%s: unimplemented register write 0x%02"HWADDR_PRIx"\n",
+                      __func__, addr);
+        break;
     }
     goldfish_pic_update(s);
 }
@@ -185,50 +128,92 @@ static const MemoryRegionOps goldfish_pic_ops = {
     .read = goldfish_pic_read,
     .write = goldfish_pic_write,
     .endianness = DEVICE_NATIVE_ENDIAN,
+    .valid.max_access_size = 4,
+    .impl.min_access_size = 4,
+    .impl.max_access_size = 4,
 };
 
-qemu_irq *goldfish_pic_init(uint32_t base, qemu_irq parent_irq)
+static void goldfish_pic_reset(DeviceState *dev)
 {
-    struct goldfish_pic_state *s;
-    DeviceState *dev;
+    GoldfishPICState *s = GOLDFISH_PIC(dev);
+    int i;
 
-    dev = sysbus_create_simple(TYPE_GOLDFISH_PIC, base, NULL);
+    trace_goldfish_pic_reset(s, s->idx);
+    s->pending = 0;
+    s->enabled = 0;
 
-    s = GOLDFISH_PIC(dev);
-    s->parent_irq = parent_irq;
-
-    return qemu_allocate_irqs(goldfish_pic_set_irq, s, GFD_MAX_IRQ);
+    for (i = 0; i < ARRAY_SIZE(s->stats_irq_count); i++) {
+        s->stats_irq_count[i] = 0;
+    }
 }
 
 static void goldfish_pic_realize(DeviceState *dev, Error **errp)
 {
-    SysBusDevice *sbdev = SYS_BUS_DEVICE(dev);
-    struct goldfish_pic_state *s = GOLDFISH_PIC(dev);
+    GoldfishPICState *s = GOLDFISH_PIC(dev);
+
+    trace_goldfish_pic_realize(s, s->idx);
 
     memory_region_init_io(&s->iomem, OBJECT(s), &goldfish_pic_ops, s,
-            TYPE_GOLDFISH_PIC, 0x1000);
-    sysbus_init_mmio(sbdev, &s->iomem);
+                          "goldfish_pic", 0x24);
 }
 
-static void goldfish_pic_class_init(ObjectClass *klass, void *data)
-{
-    DeviceClass *dc = DEVICE_CLASS(klass);
+static const VMStateDescription vmstate_goldfish_pic = {
+    .name = "goldfish_pic",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT32(pending, GoldfishPICState),
+        VMSTATE_UINT32(enabled, GoldfishPICState),
+        VMSTATE_END_OF_LIST()
+    }
+};
 
+static void goldfish_pic_instance_init(Object *obj)
+{
+    SysBusDevice *dev = SYS_BUS_DEVICE(obj);
+    GoldfishPICState *s = GOLDFISH_PIC(obj);
+
+    trace_goldfish_pic_instance_init(s);
+
+    sysbus_init_mmio(dev, &s->iomem);
+    sysbus_init_irq(dev, &s->irq);
+
+    qdev_init_gpio_in(DEVICE(obj), goldfish_irq_request, GOLDFISH_PIC_IRQ_NB);
+}
+
+static Property goldfish_pic_properties[] = {
+    DEFINE_PROP_UINT8("index", GoldfishPICState, idx, 0),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
+static void goldfish_pic_class_init(ObjectClass *oc, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(oc);
+    InterruptStatsProviderClass *ic = INTERRUPT_STATS_PROVIDER_CLASS(oc);
+
+    dc->reset = goldfish_pic_reset;
     dc->realize = goldfish_pic_realize;
-    dc->vmsd = &goldfish_pic_vmsd;
-    dc->desc = "goldfish PIC";
+    dc->vmsd = &vmstate_goldfish_pic;
+    ic->get_statistics = goldfish_pic_get_statistics;
+    ic->print_info = goldfish_pic_print_info;
+    device_class_set_props(dc, goldfish_pic_properties);
 }
 
 static const TypeInfo goldfish_pic_info = {
-    .name          = TYPE_GOLDFISH_PIC,
-    .parent        = TYPE_SYS_BUS_DEVICE,
-    .instance_size = sizeof(struct goldfish_pic_state),
-    .class_init    = goldfish_pic_class_init,
+    .name = TYPE_GOLDFISH_PIC,
+    .parent = TYPE_SYS_BUS_DEVICE,
+    .class_init = goldfish_pic_class_init,
+    .instance_init = goldfish_pic_instance_init,
+    .instance_size = sizeof(GoldfishPICState),
+    .interfaces = (InterfaceInfo[]) {
+         { TYPE_INTERRUPT_STATS_PROVIDER },
+         { }
+    },
 };
 
-static void goldfish_pic_register(void)
+static void goldfish_pic_register_types(void)
 {
     type_register_static(&goldfish_pic_info);
 }
 
-type_init(goldfish_pic_register);
+type_init(goldfish_pic_register_types)

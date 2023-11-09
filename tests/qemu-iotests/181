@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# group: rw auto migration quick
 #
 # Test postcopy live migration with shared storage
 #
@@ -24,10 +25,9 @@ owner=kwolf@redhat.com
 seq=`basename $0`
 echo "QA output created by $seq"
 
-here=`pwd`
 status=1	# failure is the default!
 
-MIG_SOCKET="${TEST_DIR}/migrate"
+MIG_SOCKET="${SOCK_DIR}/migrate"
 
 _cleanup()
 {
@@ -59,20 +59,20 @@ qemu_comm_method="monitor"
 
 if [ "$IMGOPTSSYNTAX" = "true" ]; then
     _launch_qemu \
-        -drive "${TEST_IMG}",cache=${CACHEMODE},id=disk
+        -drive "${TEST_IMG}",cache=${CACHEMODE},aio=$AIOMODE,id=disk
 else
     _launch_qemu \
-        -drive file="${TEST_IMG}",cache=${CACHEMODE},driver=$IMGFMT,id=disk
+        -drive file="${TEST_IMG}",cache=${CACHEMODE},aio=$AIOMODE,driver=$IMGFMT,id=disk
 fi
 src=$QEMU_HANDLE
 
 if [ "$IMGOPTSSYNTAX" = "true" ]; then
     _launch_qemu \
-        -drive "${TEST_IMG}",cache=${CACHEMODE},id=disk \
+        -drive "${TEST_IMG}",cache=${CACHEMODE},aio=$AIOMODE,id=disk \
         -incoming "unix:${MIG_SOCKET}"
 else
     _launch_qemu \
-        -drive file="${TEST_IMG}",cache=${CACHEMODE},driver=$IMGFMT,id=disk \
+        -drive file="${TEST_IMG}",cache=${CACHEMODE},aio=$AIOMODE,driver=$IMGFMT,id=disk \
         -incoming "unix:${MIG_SOCKET}"
 fi
 dest=$QEMU_HANDLE
@@ -96,7 +96,20 @@ echo
 # Enable postcopy-ram capability both on source and destination
 silent=yes
 _send_qemu_cmd $dest 'migrate_set_capability postcopy-ram on' "(qemu)"
-_send_qemu_cmd $src 'migrate_set_speed 4k' "(qemu)"
+
+qemu_error_no_exit=yes success_or_failure=yes \
+    _send_qemu_cmd $dest '' "(qemu)" "Postcopy is not supported"
+if [ ${QEMU_STATUS[$dest]} -lt 0 ]; then
+    _send_qemu_cmd $dest '' "(qemu)"
+
+    _send_qemu_cmd $src 'quit' ""
+    _send_qemu_cmd $dest 'quit' ""
+    wait=1 _cleanup_qemu
+
+    _notrun 'Postcopy is not supported'
+fi
+
+_send_qemu_cmd $src 'migrate_set_parameter max_bandwidth 4k' "(qemu)"
 _send_qemu_cmd $src 'migrate_set_capability postcopy-ram on' "(qemu)"
 _send_qemu_cmd $src "migrate -d unix:${MIG_SOCKET}" "(qemu)"
 _send_qemu_cmd $src 'migrate_start_postcopy' "(qemu)"

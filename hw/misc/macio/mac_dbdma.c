@@ -36,11 +36,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
-#include "hw/hw.h"
-#include "hw/isa/isa.h"
+#include "hw/irq.h"
 #include "hw/ppc/mac_dbdma.h"
+#include "migration/vmstate.h"
 #include "qemu/main-loop.h"
+#include "qemu/module.h"
 #include "qemu/log.h"
 #include "sysemu/dma.h"
 
@@ -71,18 +73,19 @@ static DBDMAState *dbdma_from_ch(DBDMA_channel *ch)
 }
 
 #if DEBUG_DBDMA
-static void dump_dbdma_cmd(dbdma_cmd *cmd)
+static void dump_dbdma_cmd(DBDMA_channel *ch, dbdma_cmd *cmd)
 {
-    printf("dbdma_cmd %p\n", cmd);
-    printf("    req_count 0x%04x\n", le16_to_cpu(cmd->req_count));
-    printf("    command 0x%04x\n", le16_to_cpu(cmd->command));
-    printf("    phy_addr 0x%08x\n", le32_to_cpu(cmd->phy_addr));
-    printf("    cmd_dep 0x%08x\n", le32_to_cpu(cmd->cmd_dep));
-    printf("    res_count 0x%04x\n", le16_to_cpu(cmd->res_count));
-    printf("    xfer_status 0x%04x\n", le16_to_cpu(cmd->xfer_status));
+    DBDMA_DPRINTFCH(ch, "dbdma_cmd %p\n", cmd);
+    DBDMA_DPRINTFCH(ch, "    req_count 0x%04x\n", le16_to_cpu(cmd->req_count));
+    DBDMA_DPRINTFCH(ch, "    command 0x%04x\n", le16_to_cpu(cmd->command));
+    DBDMA_DPRINTFCH(ch, "    phy_addr 0x%08x\n", le32_to_cpu(cmd->phy_addr));
+    DBDMA_DPRINTFCH(ch, "    cmd_dep 0x%08x\n", le32_to_cpu(cmd->cmd_dep));
+    DBDMA_DPRINTFCH(ch, "    res_count 0x%04x\n", le16_to_cpu(cmd->res_count));
+    DBDMA_DPRINTFCH(ch, "    xfer_status 0x%04x\n",
+                    le16_to_cpu(cmd->xfer_status));
 }
 #else
-static void dump_dbdma_cmd(dbdma_cmd *cmd)
+static void dump_dbdma_cmd(DBDMA_channel *ch, dbdma_cmd *cmd)
 {
 }
 #endif
@@ -91,7 +94,7 @@ static void dbdma_cmdptr_load(DBDMA_channel *ch)
     DBDMA_DPRINTFCH(ch, "dbdma_cmdptr_load 0x%08x\n",
                     ch->regs[DBDMA_CMDPTR_LO]);
     dma_memory_read(&address_space_memory, ch->regs[DBDMA_CMDPTR_LO],
-                    &ch->current, sizeof(dbdma_cmd));
+                    &ch->current, sizeof(dbdma_cmd), MEMTXATTRS_UNSPECIFIED);
 }
 
 static void dbdma_cmdptr_save(DBDMA_channel *ch)
@@ -101,7 +104,7 @@ static void dbdma_cmdptr_save(DBDMA_channel *ch)
                     le16_to_cpu(ch->current.xfer_status),
                     le16_to_cpu(ch->current.res_count));
     dma_memory_write(&address_space_memory, ch->regs[DBDMA_CMDPTR_LO],
-                     &ch->current, sizeof(dbdma_cmd));
+                     &ch->current, sizeof(dbdma_cmd), MEMTXATTRS_UNSPECIFIED);
 }
 
 static void kill_channel(DBDMA_channel *ch)
@@ -368,7 +371,8 @@ static void load_word(DBDMA_channel *ch, int key, uint32_t addr,
         return;
     }
 
-    dma_memory_read(&address_space_memory, addr, &current->cmd_dep, len);
+    dma_memory_read(&address_space_memory, addr, &current->cmd_dep, len,
+                    MEMTXATTRS_UNSPECIFIED);
 
     if (conditional_wait(ch))
         goto wait;
@@ -400,7 +404,8 @@ static void store_word(DBDMA_channel *ch, int key, uint32_t addr,
         return;
     }
 
-    dma_memory_write(&address_space_memory, addr, &current->cmd_dep, len);
+    dma_memory_write(&address_space_memory, addr, &current->cmd_dep, len,
+                     MEMTXATTRS_UNSPECIFIED);
 
     if (conditional_wait(ch))
         goto wait;
@@ -448,7 +453,7 @@ static void channel_run(DBDMA_channel *ch)
     uint32_t phy_addr;
 
     DBDMA_DPRINTFCH(ch, "channel_run\n");
-    dump_dbdma_cmd(current);
+    dump_dbdma_cmd(ch, current);
 
     /* clear WAKE flag at command fetch */
 
@@ -699,7 +704,7 @@ static void dbdma_write(void *opaque, hwaddr addr,
     DBDMA_channel *ch = &s->channels[channel];
     int reg = (addr - (channel << DBDMA_CHANNEL_SHIFT)) >> 2;
 
-    DBDMA_DPRINTFCH(ch, "writel 0x" TARGET_FMT_plx " <= 0x%08"PRIx64"\n",
+    DBDMA_DPRINTFCH(ch, "writel 0x" HWADDR_FMT_plx " <= 0x%08"PRIx64"\n",
                     addr, value);
     DBDMA_DPRINTFCH(ch, "channel 0x%x reg 0x%x\n",
                     (uint32_t)addr >> DBDMA_CHANNEL_SHIFT, reg);
@@ -781,7 +786,7 @@ static uint64_t dbdma_read(void *opaque, hwaddr addr,
         break;
     }
 
-    DBDMA_DPRINTFCH(ch, "readl 0x" TARGET_FMT_plx " => 0x%08x\n", addr, value);
+    DBDMA_DPRINTFCH(ch, "readl 0x" HWADDR_FMT_plx " => 0x%08x\n", addr, value);
     DBDMA_DPRINTFCH(ch, "channel 0x%x reg 0x%x\n",
                     (uint32_t)addr >> DBDMA_CHANNEL_SHIFT, reg);
 
@@ -909,7 +914,7 @@ static void mac_dbdma_realize(DeviceState *dev, Error **errp)
 {
     DBDMAState *s = MAC_DBDMA(dev);
 
-    s->bh = qemu_bh_new(DBDMA_run_bh, s);
+    s->bh = qemu_bh_new_guarded(DBDMA_run_bh, s, &dev->mem_reentrancy_guard);
 }
 
 static void mac_dbdma_class_init(ObjectClass *oc, void *data)

@@ -26,15 +26,17 @@
  */
 
 #include "qemu/osdep.h"
-#include "cpu.h"
 #include "qemu/timer.h"
 #include "sysemu/sysemu.h"
+#include "sysemu/rtc.h"
 #include "hw/ppc/spapr.h"
+#include "migration/vmstate.h"
 #include "qapi/error.h"
 #include "qapi/qapi-events-misc.h"
 #include "qemu/cutils.h"
+#include "qemu/module.h"
 
-void spapr_rtc_read(sPAPRRTCState *rtc, struct tm *tm, uint32_t *ns)
+void spapr_rtc_read(SpaprRtcState *rtc, struct tm *tm, uint32_t *ns)
 {
     int64_t host_ns = qemu_clock_get_ns(rtc_clock);
     int64_t guest_ns;
@@ -53,7 +55,7 @@ void spapr_rtc_read(sPAPRRTCState *rtc, struct tm *tm, uint32_t *ns)
     }
 }
 
-int spapr_rtc_import_offset(sPAPRRTCState *rtc, int64_t legacy_offset)
+int spapr_rtc_import_offset(SpaprRtcState *rtc, int64_t legacy_offset)
 {
     if (!rtc) {
         return -ENODEV;
@@ -64,7 +66,7 @@ int spapr_rtc_import_offset(sPAPRRTCState *rtc, int64_t legacy_offset)
     return 0;
 }
 
-static void rtas_get_time_of_day(PowerPCCPU *cpu, sPAPRMachineState *spapr,
+static void rtas_get_time_of_day(PowerPCCPU *cpu, SpaprMachineState *spapr,
                                  uint32_t token, uint32_t nargs,
                                  target_ulong args,
                                  uint32_t nret, target_ulong rets)
@@ -89,12 +91,13 @@ static void rtas_get_time_of_day(PowerPCCPU *cpu, sPAPRMachineState *spapr,
     rtas_st(rets, 7, ns);
 }
 
-static void rtas_set_time_of_day(PowerPCCPU *cpu, sPAPRMachineState *spapr,
+static void rtas_set_time_of_day(PowerPCCPU *cpu, SpaprMachineState *spapr,
                                  uint32_t token, uint32_t nargs,
                                  target_ulong args,
                                  uint32_t nret, target_ulong rets)
 {
-    sPAPRRTCState *rtc = &spapr->rtc;
+    SpaprRtcState *rtc = &spapr->rtc;
+    g_autofree const char *qom_path = NULL;
     struct tm tm;
     time_t new_s;
     int64_t host_ns;
@@ -118,7 +121,8 @@ static void rtas_set_time_of_day(PowerPCCPU *cpu, sPAPRMachineState *spapr,
     }
 
     /* Generate a monitor event for the change */
-    qapi_event_send_rtc_change(qemu_timedate_diff(&tm), &error_abort);
+    qom_path = object_get_canonical_path(OBJECT(rtc));
+    qapi_event_send_rtc_change(qemu_timedate_diff(&tm), qom_path);
 
     host_ns = qemu_clock_get_ns(rtc_clock);
 
@@ -134,7 +138,7 @@ static void spapr_rtc_qom_date(Object *obj, struct tm *current_tm, Error **errp)
 
 static void spapr_rtc_realize(DeviceState *dev, Error **errp)
 {
-    sPAPRRTCState *rtc = SPAPR_RTC(dev);
+    SpaprRtcState *rtc = SPAPR_RTC(dev);
     struct tm tm;
     time_t host_s;
     int64_t rtc_ns;
@@ -146,7 +150,7 @@ static void spapr_rtc_realize(DeviceState *dev, Error **errp)
     rtc_ns = qemu_clock_get_ns(rtc_clock);
     rtc->ns_offset = host_s * NANOSECONDS_PER_SECOND - rtc_ns;
 
-    object_property_add_tm(OBJECT(rtc), "date", spapr_rtc_qom_date, NULL);
+    object_property_add_tm(OBJECT(rtc), "date", spapr_rtc_qom_date);
 }
 
 static const VMStateDescription vmstate_spapr_rtc = {
@@ -154,7 +158,7 @@ static const VMStateDescription vmstate_spapr_rtc = {
     .version_id = 1,
     .minimum_version_id = 1,
     .fields = (VMStateField[]) {
-        VMSTATE_INT64(ns_offset, sPAPRRTCState),
+        VMSTATE_INT64(ns_offset, SpaprRtcState),
         VMSTATE_END_OF_LIST()
     },
 };
@@ -177,7 +181,7 @@ static void spapr_rtc_class_init(ObjectClass *oc, void *data)
 static const TypeInfo spapr_rtc_info = {
     .name          = TYPE_SPAPR_RTC,
     .parent        = TYPE_DEVICE,
-    .instance_size = sizeof(sPAPRRTCState),
+    .instance_size = sizeof(SpaprRtcState),
     .class_init    = spapr_rtc_class_init,
 };
 

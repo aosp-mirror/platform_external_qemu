@@ -1,8 +1,8 @@
 #include "qemu/osdep.h"
 #include <windows.h>
 #include <io.h>
-#include "qga/guest-agent-core.h"
-#include "qga/channel.h"
+#include "guest-agent-core.h"
+#include "channel.h"
 
 typedef struct GAChannelReadState {
     guint thread_id;
@@ -292,22 +292,25 @@ static gboolean ga_channel_open(GAChannel *c, GAChannelMethod method,
         return false;
     }
 
-    if (method == GA_CHANNEL_ISA_SERIAL){
+    if (method == GA_CHANNEL_ISA_SERIAL) {
         snprintf(newpath, sizeof(newpath), "\\\\.\\%s", path);
-    }else {
+    } else {
         g_strlcpy(newpath, path, sizeof(newpath));
     }
 
-    c->handle = win32CreateFile(newpath, GENERIC_READ | GENERIC_WRITE, 0, NULL,
+    c->handle = CreateFile(newpath, GENERIC_READ | GENERIC_WRITE, 0, NULL,
                            OPEN_EXISTING,
                            FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED, NULL);
     if (c->handle == INVALID_HANDLE_VALUE) {
-        g_critical("error opening path %s", newpath);
+        g_autofree gchar *emsg = g_win32_error_message(GetLastError());
+        g_critical("error opening path %s: %s", newpath, emsg);
         return false;
     }
 
-    if (method == GA_CHANNEL_ISA_SERIAL && !SetCommTimeouts(c->handle,&comTimeOut)) {
-        g_critical("error setting timeout for com port: %lu",GetLastError());
+    if (method == GA_CHANNEL_ISA_SERIAL
+            && !SetCommTimeouts(c->handle, &comTimeOut)) {
+        g_autofree gchar *emsg = g_win32_error_message(GetLastError());
+        g_critical("error setting timeout for com port: %s", emsg);
         CloseHandle(c->handle);
         return false;
     }

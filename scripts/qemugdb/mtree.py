@@ -1,5 +1,4 @@
-#!/usr/bin/python
-
+#
 # GDB debugging support
 #
 # Copyright 2012 Red Hat, Inc. and/or its affiliates
@@ -7,11 +6,8 @@
 # Authors:
 #  Avi Kivity <avi@redhat.com>
 #
-# This work is licensed under the terms of the GNU GPL, version 2.  See
-# the COPYING file in the top-level directory.
-#
-# Contributions after 2012-01-13 are licensed under the terms of the
-# GNU GPL, version 2 or (at your option) any later version.
+# This work is licensed under the terms of the GNU GPL, version 2 or
+# later.  See the COPYING file in the top-level directory.
 
 # 'qemu mtree' -- display the memory hierarchy
 
@@ -87,4 +83,3 @@ class MtreeCommand(gdb.Command):
         while not isnull(subregion):
             self.print_item(subregion, addr, level)
             subregion = subregion['subregions_link']['tqe_next']
-

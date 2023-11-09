@@ -23,15 +23,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "qemu/osdep.h"
-#include "hw/hw.h"
-#include "hw/pci/pci.h"
-#include "hw/isa/isa.h"
-#include "sysemu/block-backend.h"
-#include "sysemu/sysemu.h"
-#include "sysemu/dma.h"
 
+#include "qemu/osdep.h"
+#include "hw/pci/pci.h"
+#include "migration/vmstate.h"
+#include "qemu/module.h"
+#include "sysemu/dma.h"
+#include "hw/isa/vt82c686.h"
 #include "hw/ide/pci.h"
+#include "hw/irq.h"
 #include "trace.h"
 
 static uint64_t bmdma_read(void *opaque, hwaddr addr,
@@ -75,7 +75,7 @@ static void bmdma_write(void *opaque, hwaddr addr,
         bmdma_cmd_writeb(bm, val);
         break;
     case 2:
-        bm->status = (val & 0x60) | (bm->status & 1) | (bm->status & ~val & 0x06);
+        bmdma_status_writeb(bm, val);
         break;
     default:;
     }
@@ -91,7 +91,7 @@ static void bmdma_setup_bar(PCIIDEState *d)
     int i;
 
     memory_region_init(&d->bmdma_bar, OBJECT(d), "via-bmdma-container", 16);
-    for(i = 0;i < 2; i++) {
+    for (i = 0; i < ARRAY_SIZE(d->bmdma); i++) {
         BMDMAState *bm = &d->bmdma[i];
 
         memory_region_init_io(&bm->extra_io, OBJECT(d), &via_bmdma_ops, bm,
@@ -103,18 +103,32 @@ static void bmdma_setup_bar(PCIIDEState *d)
     }
 }
 
-static void via_reset(void *opaque)
+static void via_ide_set_irq(void *opaque, int n, int level)
 {
-    PCIIDEState *d = opaque;
-    PCIDevice *pd = PCI_DEVICE(d);
+    PCIIDEState *s = opaque;
+    PCIDevice *d = PCI_DEVICE(s);
+
+    if (level) {
+        d->config[0x70 + n * 8] |= 0x80;
+    } else {
+        d->config[0x70 + n * 8] &= ~0x80;
+    }
+
+    qemu_set_irq(s->isa_irq[n], level);
+}
+
+static void via_ide_reset(DeviceState *dev)
+{
+    PCIIDEState *d = PCI_IDE(dev);
+    PCIDevice *pd = PCI_DEVICE(dev);
     uint8_t *pci_conf = pd->config;
     int i;
 
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < ARRAY_SIZE(d->bus); i++) {
         ide_bus_reset(&d->bus[i]);
     }
 
-    pci_set_word(pci_conf + PCI_COMMAND, PCI_COMMAND_WAIT);
+    pci_set_word(pci_conf + PCI_COMMAND, PCI_COMMAND_IO | PCI_COMMAND_WAIT);
     pci_set_word(pci_conf + PCI_STATUS, PCI_STATUS_FAST_BACK |
                  PCI_STATUS_DEVSEL_MEDIUM);
 
@@ -145,64 +159,56 @@ static void via_reset(void *opaque)
     pci_set_long(pci_conf + 0xc0, 0x00020001);
 }
 
-static void vt82c686b_init_ports(PCIIDEState *d) {
-    static const struct {
-        int iobase;
-        int iobase2;
-        int isairq;
-    } port_info[] = {
-        {0x1f0, 0x3f6, 14},
-        {0x170, 0x376, 15},
-    };
-    int i;
-
-    for (i = 0; i < 2; i++) {
-        ide_bus_new(&d->bus[i], sizeof(d->bus[i]), DEVICE(d), i, 2);
-        ide_init_ioport(&d->bus[i], NULL, port_info[i].iobase,
-                        port_info[i].iobase2);
-        ide_init2(&d->bus[i], isa_get_irq(NULL, port_info[i].isairq));
-
-        bmdma_init(&d->bus[i], &d->bmdma[i], d);
-        d->bmdma[i].bus = &d->bus[i];
-        ide_register_restart_cb(&d->bus[i]);
-    }
-}
-
-/* via ide func */
-static void vt82c686b_ide_realize(PCIDevice *dev, Error **errp)
+static void via_ide_realize(PCIDevice *dev, Error **errp)
 {
     PCIIDEState *d = PCI_IDE(dev);
+    DeviceState *ds = DEVICE(dev);
     uint8_t *pci_conf = dev->config;
+    int i;
 
-    pci_config_set_prog_interface(pci_conf, 0x8a); /* legacy ATA mode */
+    pci_config_set_prog_interface(pci_conf, 0x8a); /* legacy mode */
     pci_set_long(pci_conf + PCI_CAPABILITY_LIST, 0x000000c0);
+    dev->wmask[PCI_INTERRUPT_LINE] = 0;
+    dev->wmask[PCI_CLASS_PROG] = 5;
 
-    qemu_register_reset(via_reset, d);
+    memory_region_init_io(&d->data_bar[0], OBJECT(d), &pci_ide_data_le_ops,
+                          &d->bus[0], "via-ide0-data", 8);
+    pci_register_bar(dev, 0, PCI_BASE_ADDRESS_SPACE_IO, &d->data_bar[0]);
+
+    memory_region_init_io(&d->cmd_bar[0], OBJECT(d), &pci_ide_cmd_le_ops,
+                          &d->bus[0], "via-ide0-cmd", 4);
+    pci_register_bar(dev, 1, PCI_BASE_ADDRESS_SPACE_IO, &d->cmd_bar[0]);
+
+    memory_region_init_io(&d->data_bar[1], OBJECT(d), &pci_ide_data_le_ops,
+                          &d->bus[1], "via-ide1-data", 8);
+    pci_register_bar(dev, 2, PCI_BASE_ADDRESS_SPACE_IO, &d->data_bar[1]);
+
+    memory_region_init_io(&d->cmd_bar[1], OBJECT(d), &pci_ide_cmd_le_ops,
+                          &d->bus[1], "via-ide1-cmd", 4);
+    pci_register_bar(dev, 3, PCI_BASE_ADDRESS_SPACE_IO, &d->cmd_bar[1]);
+
     bmdma_setup_bar(d);
     pci_register_bar(dev, 4, PCI_BASE_ADDRESS_SPACE_IO, &d->bmdma_bar);
 
-    vmstate_register(DEVICE(dev), 0, &vmstate_ide_pci, d);
+    qdev_init_gpio_in(ds, via_ide_set_irq, ARRAY_SIZE(d->bus));
+    for (i = 0; i < ARRAY_SIZE(d->bus); i++) {
+        ide_bus_init(&d->bus[i], sizeof(d->bus[i]), ds, i, MAX_IDE_DEVS);
+        ide_bus_init_output_irq(&d->bus[i], qdev_get_gpio_in(ds, i));
 
-    vt82c686b_init_ports(d);
+        bmdma_init(&d->bus[i], &d->bmdma[i], d);
+        ide_bus_register_restart_cb(&d->bus[i]);
+    }
 }
 
-static void vt82c686b_ide_exitfn(PCIDevice *dev)
+static void via_ide_exitfn(PCIDevice *dev)
 {
     PCIIDEState *d = PCI_IDE(dev);
     unsigned i;
 
-    for (i = 0; i < 2; ++i) {
+    for (i = 0; i < ARRAY_SIZE(d->bmdma); ++i) {
         memory_region_del_subregion(&d->bmdma_bar, &d->bmdma[i].extra_io);
         memory_region_del_subregion(&d->bmdma_bar, &d->bmdma[i].addr_ioport);
     }
-}
-
-void vt82c686b_ide_init(PCIBus *bus, DriveInfo **hd_table, int devfn)
-{
-    PCIDevice *dev;
-
-    dev = pci_create_simple(bus, devfn, "via-ide");
-    pci_ide_create_devs(dev, hd_table);
 }
 
 static void via_ide_class_init(ObjectClass *klass, void *data)
@@ -210,8 +216,13 @@ static void via_ide_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
     PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
 
-    k->realize = vt82c686b_ide_realize;
-    k->exit = vt82c686b_ide_exitfn;
+    dc->reset = via_ide_reset;
+    dc->vmsd = &vmstate_ide_pci;
+    /* Reason: only works as function of VIA southbridge */
+    dc->user_creatable = false;
+
+    k->realize = via_ide_realize;
+    k->exit = via_ide_exitfn;
     k->vendor_id = PCI_VENDOR_ID_VIA;
     k->device_id = PCI_DEVICE_ID_VIA_IDE;
     k->revision = 0x06;
@@ -220,7 +231,7 @@ static void via_ide_class_init(ObjectClass *klass, void *data)
 }
 
 static const TypeInfo via_ide_info = {
-    .name          = "via-ide",
+    .name          = TYPE_VIA_IDE,
     .parent        = TYPE_PCI_IDE,
     .class_init    = via_ide_class_init,
 };

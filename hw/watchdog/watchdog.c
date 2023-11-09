@@ -26,69 +26,13 @@
 #include "qapi/error.h"
 #include "qapi/qapi-commands-run-state.h"
 #include "qapi/qapi-events-run-state.h"
-#include "sysemu/sysemu.h"
+#include "sysemu/runstate.h"
 #include "sysemu/watchdog.h"
 #include "hw/nmi.h"
 #include "qemu/help_option.h"
+#include "trace.h"
 
 static WatchdogAction watchdog_action = WATCHDOG_ACTION_RESET;
-static QLIST_HEAD(watchdog_list, WatchdogTimerModel) watchdog_list;
-
-void watchdog_add_model(WatchdogTimerModel *model)
-{
-    QLIST_INSERT_HEAD(&watchdog_list, model, entry);
-}
-
-/* Returns:
- *   0 = continue
- *   1 = exit program with error
- *   2 = exit program without error
- */
-int select_watchdog(const char *p)
-{
-    WatchdogTimerModel *model;
-    QemuOpts *opts;
-
-    /* -watchdog ? lists available devices and exits cleanly. */
-    if (is_help_option(p)) {
-        QLIST_FOREACH(model, &watchdog_list, entry) {
-            fprintf(stderr, "\t%s\t%s\n",
-                     model->wdt_name, model->wdt_description);
-        }
-        return 2;
-    }
-
-    QLIST_FOREACH(model, &watchdog_list, entry) {
-        if (strcasecmp(model->wdt_name, p) == 0) {
-            /* add the device */
-            opts = qemu_opts_create(qemu_find_opts("device"), NULL, 0,
-                                    &error_abort);
-            qemu_opt_set(opts, "driver", p, &error_abort);
-            return 0;
-        }
-    }
-
-    fprintf(stderr, "Unknown -watchdog device. Supported devices are:\n");
-    QLIST_FOREACH(model, &watchdog_list, entry) {
-        fprintf(stderr, "\t%s\t%s\n",
-                 model->wdt_name, model->wdt_description);
-    }
-    return 1;
-}
-
-int select_watchdog_action(const char *p)
-{
-    int action;
-    char *qapi_value;
-
-    qapi_value = g_ascii_strdown(p, -1);
-    action = qapi_enum_parse(&WatchdogAction_lookup, qapi_value, -1, NULL);
-    g_free(qapi_value);
-    if (action < 0)
-        return -1;
-    qmp_watchdog_set_action(action, &error_abort);
-    return 0;
-}
 
 WatchdogAction get_watchdog_action(void)
 {
@@ -100,19 +44,21 @@ WatchdogAction get_watchdog_action(void)
  */
 void watchdog_perform_action(void)
 {
+    trace_watchdog_perform_action(watchdog_action);
+
     switch (watchdog_action) {
     case WATCHDOG_ACTION_RESET:     /* same as 'system_reset' in monitor */
-        qapi_event_send_watchdog(WATCHDOG_ACTION_RESET, &error_abort);
+        qapi_event_send_watchdog(WATCHDOG_ACTION_RESET);
         qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
         break;
 
     case WATCHDOG_ACTION_SHUTDOWN:  /* same as 'system_powerdown' in monitor */
-        qapi_event_send_watchdog(WATCHDOG_ACTION_SHUTDOWN, &error_abort);
+        qapi_event_send_watchdog(WATCHDOG_ACTION_SHUTDOWN);
         qemu_system_powerdown_request();
         break;
 
     case WATCHDOG_ACTION_POWEROFF:  /* same as 'quit' command in monitor */
-        qapi_event_send_watchdog(WATCHDOG_ACTION_POWEROFF, &error_abort);
+        qapi_event_send_watchdog(WATCHDOG_ACTION_POWEROFF);
         exit(0);
 
     case WATCHDOG_ACTION_PAUSE:     /* same as 'stop' command in monitor */
@@ -120,22 +66,21 @@ void watchdog_perform_action(void)
          * you would get a deadlock.  Bypass the problem.
          */
         qemu_system_vmstop_request_prepare();
-        qapi_event_send_watchdog(WATCHDOG_ACTION_PAUSE, &error_abort);
+        qapi_event_send_watchdog(WATCHDOG_ACTION_PAUSE);
         qemu_system_vmstop_request(RUN_STATE_WATCHDOG);
         break;
 
     case WATCHDOG_ACTION_DEBUG:
-        qapi_event_send_watchdog(WATCHDOG_ACTION_DEBUG, &error_abort);
+        qapi_event_send_watchdog(WATCHDOG_ACTION_DEBUG);
         fprintf(stderr, "watchdog: timer fired\n");
         break;
 
     case WATCHDOG_ACTION_NONE:
-        qapi_event_send_watchdog(WATCHDOG_ACTION_NONE, &error_abort);
+        qapi_event_send_watchdog(WATCHDOG_ACTION_NONE);
         break;
 
     case WATCHDOG_ACTION_INJECT_NMI:
-        qapi_event_send_watchdog(WATCHDOG_ACTION_INJECT_NMI,
-                                 &error_abort);
+        qapi_event_send_watchdog(WATCHDOG_ACTION_INJECT_NMI);
         nmi_monitor_handle(0, NULL);
         break;
 
@@ -147,4 +92,5 @@ void watchdog_perform_action(void)
 void qmp_watchdog_set_action(WatchdogAction action, Error **errp)
 {
     watchdog_action = action;
+    trace_watchdog_set_action(watchdog_action);
 }

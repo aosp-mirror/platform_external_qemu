@@ -1,10 +1,10 @@
 /*
- *  PowerPC interal definitions for qemu.
+ *  PowerPC internal definitions for qemu.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,6 +17,8 @@
 
 #ifndef PPC_INTERNAL_H
 #define PPC_INTERNAL_H
+
+#include "hw/registerfields.h"
 
 #define FUNC_MASK(name, ret_type, size, max_val)                  \
 static inline ret_type name(uint##size##_t start,                 \
@@ -52,20 +54,20 @@ FUNC_MASK(mask_u64, uint64_t, 64, UINT64_MAX);
 #define EXTRACT_HELPER(name, shift, nb)                                       \
 static inline uint32_t name(uint32_t opcode)                                  \
 {                                                                             \
-    return (opcode >> (shift)) & ((1 << (nb)) - 1);                           \
+    return extract32(opcode, shift, nb);                                      \
 }
 
 #define EXTRACT_SHELPER(name, shift, nb)                                      \
 static inline int32_t name(uint32_t opcode)                                   \
 {                                                                             \
-    return (int16_t)((opcode >> (shift)) & ((1 << (nb)) - 1));                \
+    return sextract32(opcode, shift, nb);                                     \
 }
 
 #define EXTRACT_HELPER_SPLIT(name, shift1, nb1, shift2, nb2)                  \
 static inline uint32_t name(uint32_t opcode)                                  \
 {                                                                             \
-    return (((opcode >> (shift1)) & ((1 << (nb1)) - 1)) << nb2) |             \
-            ((opcode >> (shift2)) & ((1 << (nb2)) - 1));                      \
+    return extract32(opcode, shift1, nb1) << nb2 |                            \
+               extract32(opcode, shift2, nb2);                                \
 }
 
 #define EXTRACT_HELPER_SPLIT_3(name,                                          \
@@ -124,7 +126,7 @@ EXTRACT_SHELPER(SIMM, 0, 16);
 /* 16 bits unsigned immediate value */
 EXTRACT_HELPER(UIMM, 0, 16);
 /* 5 bits signed immediate value */
-EXTRACT_HELPER(SIMM5, 16, 5);
+EXTRACT_SHELPER(SIMM5, 16, 5);
 /* 5 bits signed immediate value */
 EXTRACT_HELPER(UIMM5, 16, 5);
 /* 4 bits unsigned immediate value */
@@ -163,6 +165,9 @@ EXTRACT_HELPER_SPLIT_3(DX, 10, 6, 6, 5, 16, 1, 1, 0, 0)
 /* darn */
 EXTRACT_HELPER(L, 16, 2);
 #endif
+/* wait */
+EXTRACT_HELPER(WC, 21, 2);
+EXTRACT_HELPER(PL, 16, 2);
 
 /***                            Jump target decoding                       ***/
 /* Immediate address */
@@ -204,52 +209,111 @@ EXTRACT_HELPER(IMM8, 11, 8);
 EXTRACT_HELPER(DCMX, 16, 7);
 EXTRACT_HELPER_SPLIT_3(DCMX_XV, 5, 16, 0, 1, 2, 5, 1, 6, 6);
 
-typedef union _ppc_vsr_t {
-    uint8_t u8[16];
-    uint16_t u16[8];
-    uint32_t u32[4];
-    uint64_t u64[2];
-    float32 f32[4];
-    float64 f64[2];
-    float128 f128;
-    Int128  s128;
-} ppc_vsr_t;
-
-#if defined(HOST_WORDS_BIGENDIAN)
-#define VsrB(i) u8[i]
-#define VsrH(i) u16[i]
-#define VsrW(i) u32[i]
-#define VsrD(i) u64[i]
-#else
-#define VsrB(i) u8[15 - (i)]
-#define VsrH(i) u16[7 - (i)]
-#define VsrW(i) u32[3 - (i)]
-#define VsrD(i) u64[1 - (i)]
-#endif
-
-static inline void getVSR(int n, ppc_vsr_t *vsr, CPUPPCState *env)
-{
-    if (n < 32) {
-        vsr->VsrD(0) = env->fpr[n];
-        vsr->VsrD(1) = env->vsr[n];
-    } else {
-        vsr->u64[0] = env->avr[n - 32].u64[0];
-        vsr->u64[1] = env->avr[n - 32].u64[1];
-    }
-}
-
-static inline void putVSR(int n, ppc_vsr_t *vsr, CPUPPCState *env)
-{
-    if (n < 32) {
-        env->fpr[n] = vsr->VsrD(0);
-        env->vsr[n] = vsr->VsrD(1);
-    } else {
-        env->avr[n - 32].u64[0] = vsr->u64[0];
-        env->avr[n - 32].u64[1] = vsr->u64[1];
-    }
-}
-
 void helper_compute_fprf_float16(CPUPPCState *env, float16 arg);
 void helper_compute_fprf_float32(CPUPPCState *env, float32 arg);
 void helper_compute_fprf_float128(CPUPPCState *env, float128 arg);
+
+/* translate.c */
+
+int ppc_fixup_cpu(PowerPCCPU *cpu);
+void create_ppc_opcodes(PowerPCCPU *cpu, Error **errp);
+void destroy_ppc_opcodes(PowerPCCPU *cpu);
+
+/* gdbstub.c */
+void ppc_gdb_init(CPUState *cs, PowerPCCPUClass *ppc);
+gchar *ppc_gdb_arch_name(CPUState *cs);
+
+/**
+ * prot_for_access_type:
+ * @access_type: Access type
+ *
+ * Return the protection bit required for the given access type.
+ */
+static inline int prot_for_access_type(MMUAccessType access_type)
+{
+    switch (access_type) {
+    case MMU_INST_FETCH:
+        return PAGE_EXEC;
+    case MMU_DATA_LOAD:
+        return PAGE_READ;
+    case MMU_DATA_STORE:
+        return PAGE_WRITE;
+    }
+    g_assert_not_reached();
+}
+
+#ifndef CONFIG_USER_ONLY
+
+/* PowerPC MMU emulation */
+
+typedef struct mmu_ctx_t mmu_ctx_t;
+
+bool ppc_xlate(PowerPCCPU *cpu, vaddr eaddr, MMUAccessType access_type,
+                      hwaddr *raddrp, int *psizep, int *protp,
+                      int mmu_idx, bool guest_visible);
+int get_physical_address_wtlb(CPUPPCState *env, mmu_ctx_t *ctx,
+                                     target_ulong eaddr,
+                                     MMUAccessType access_type, int type,
+                                     int mmu_idx);
+/* Software driven TLB helpers */
+int ppc6xx_tlb_getnum(CPUPPCState *env, target_ulong eaddr,
+                                    int way, int is_code);
+/* Context used internally during MMU translations */
+struct mmu_ctx_t {
+    hwaddr raddr;      /* Real address              */
+    hwaddr eaddr;      /* Effective address         */
+    int prot;                      /* Protection bits           */
+    hwaddr hash[2];    /* Pagetable hash values     */
+    target_ulong ptem;             /* Virtual segment ID | API  */
+    int key;                       /* Access key                */
+    int nx;                        /* Non-execute area          */
+};
+
+#endif /* !CONFIG_USER_ONLY */
+
+/* Common routines used by software and hardware TLBs emulation */
+static inline int pte_is_valid(target_ulong pte0)
+{
+    return pte0 & 0x80000000 ? 1 : 0;
+}
+
+static inline void pte_invalidate(target_ulong *pte0)
+{
+    *pte0 &= ~0x80000000;
+}
+
+#define PTE_PTEM_MASK 0x7FFFFFBF
+#define PTE_CHECK_MASK (TARGET_PAGE_MASK | 0x7B)
+
+#ifdef CONFIG_USER_ONLY
+void ppc_cpu_record_sigsegv(CPUState *cs, vaddr addr,
+                            MMUAccessType access_type,
+                            bool maperr, uintptr_t ra);
+#else
+bool ppc_cpu_tlb_fill(CPUState *cs, vaddr address, int size,
+                      MMUAccessType access_type, int mmu_idx,
+                      bool probe, uintptr_t retaddr);
+G_NORETURN void ppc_cpu_do_unaligned_access(CPUState *cs, vaddr addr,
+                                            MMUAccessType access_type, int mmu_idx,
+                                            uintptr_t retaddr);
+void ppc_cpu_do_transaction_failed(CPUState *cs, hwaddr physaddr,
+                                   vaddr addr, unsigned size,
+                                   MMUAccessType access_type,
+                                   int mmu_idx, MemTxAttrs attrs,
+                                   MemTxResult response, uintptr_t retaddr);
+#endif
+
+FIELD(GER_MSK, XMSK, 0, 4)
+FIELD(GER_MSK, YMSK, 4, 4)
+FIELD(GER_MSK, PMSK, 8, 8)
+
+static inline int ger_pack_masks(int pmsk, int ymsk, int xmsk)
+{
+    int msk = 0;
+    msk = FIELD_DP32(msk, GER_MSK, XMSK, xmsk);
+    msk = FIELD_DP32(msk, GER_MSK, YMSK, ymsk);
+    msk = FIELD_DP32(msk, GER_MSK, PMSK, pmsk);
+    return msk;
+}
+
 #endif /* PPC_INTERNAL_H */

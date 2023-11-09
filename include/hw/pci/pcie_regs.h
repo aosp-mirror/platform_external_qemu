@@ -34,10 +34,29 @@
 
 /* PCI_EXP_LINK{CAP, STA} */
 /* link speed */
-#define PCI_EXP_LNK_LS_25               1
+typedef enum PCIExpLinkSpeed {
+    QEMU_PCI_EXP_LNK_2_5GT = 1,
+    QEMU_PCI_EXP_LNK_5GT,
+    QEMU_PCI_EXP_LNK_8GT,
+    QEMU_PCI_EXP_LNK_16GT,
+} PCIExpLinkSpeed;
+
+#define QEMU_PCI_EXP_LNKCAP_MLS(speed)  (speed)
+#define QEMU_PCI_EXP_LNKSTA_CLS         QEMU_PCI_EXP_LNKCAP_MLS
+
+typedef enum PCIExpLinkWidth {
+    QEMU_PCI_EXP_LNK_X1 = 1,
+    QEMU_PCI_EXP_LNK_X2 = 2,
+    QEMU_PCI_EXP_LNK_X4 = 4,
+    QEMU_PCI_EXP_LNK_X8 = 8,
+    QEMU_PCI_EXP_LNK_X12 = 12,
+    QEMU_PCI_EXP_LNK_X16 = 16,
+    QEMU_PCI_EXP_LNK_X32 = 32,
+} PCIExpLinkWidth;
 
 #define PCI_EXP_LNK_MLW_SHIFT           ctz32(PCI_EXP_LNKCAP_MLW)
-#define PCI_EXP_LNK_MLW_1               (1 << PCI_EXP_LNK_MLW_SHIFT)
+#define QEMU_PCI_EXP_LNKCAP_MLW(width)  (width << PCI_EXP_LNK_MLW_SHIFT)
+#define QEMU_PCI_EXP_LNKSTA_NLW         QEMU_PCI_EXP_LNKCAP_MLW
 
 /* PCI_EXP_LINKCAP */
 #define PCI_EXP_LNKCAP_ASPMS_SHIFT      ctz32(PCI_EXP_LNKCAP_ASPMS)
@@ -46,20 +65,6 @@
 #define PCI_EXP_LNKCAP_PN_SHIFT         ctz32(PCI_EXP_LNKCAP_PN)
 
 #define PCI_EXP_SLTCAP_PSN_SHIFT        ctz32(PCI_EXP_SLTCAP_PSN)
-
-#define PCI_EXP_SLTCTL_IND_RESERVED     0x0
-#define PCI_EXP_SLTCTL_IND_ON           0x1
-#define PCI_EXP_SLTCTL_IND_BLINK        0x2
-#define PCI_EXP_SLTCTL_IND_OFF          0x3
-#define PCI_EXP_SLTCTL_AIC_SHIFT        ctz32(PCI_EXP_SLTCTL_AIC)
-#define PCI_EXP_SLTCTL_AIC_OFF                          \
-    (PCI_EXP_SLTCTL_IND_OFF << PCI_EXP_SLTCTL_AIC_SHIFT)
-
-#define PCI_EXP_SLTCTL_PIC_SHIFT        ctz32(PCI_EXP_SLTCTL_PIC)
-#define PCI_EXP_SLTCTL_PIC_OFF                          \
-    (PCI_EXP_SLTCTL_IND_OFF << PCI_EXP_SLTCTL_PIC_SHIFT)
-#define PCI_EXP_SLTCTL_PIC_ON                          \
-    (PCI_EXP_SLTCTL_IND_ON << PCI_EXP_SLTCTL_PIC_SHIFT)
 
 #define PCI_EXP_SLTCTL_SUPPORTED        \
             (PCI_EXP_SLTCTL_ABPE |      \
@@ -136,6 +141,9 @@
                                          PCI_ERR_UNC_ATOP_EBLOCKED |    \
                                          PCI_ERR_UNC_TLP_PRF_BLOCKED)
 
+#define PCI_ERR_UNC_MASK_DEFAULT        (PCI_ERR_UNC_INTN | \
+                                         PCI_ERR_UNC_TLP_PRF_BLOCKED)
+
 #define PCI_ERR_UNC_SEVERITY_DEFAULT    (PCI_ERR_UNC_DLP |              \
                                          PCI_ERR_UNC_SDN |              \
                                          PCI_ERR_UNC_FCP |              \
@@ -155,5 +163,13 @@
 #define PCI_ERR_COR_MASK_DEFAULT        (PCI_ERR_COR_ADV_NONFATAL |     \
                                          PCI_ERR_COR_INTERNAL |         \
                                          PCI_ERR_COR_HL_OVERFLOW)
+
+/* ACS */
+#define PCI_ACS_VER                     0x1
+#define PCI_ACS_SIZEOF                  8
+
+/* DOE Capability Register Fields */
+#define PCI_DOE_VER                     0x1
+#define PCI_DOE_SIZEOF                  24
 
 #endif /* QEMU_PCIE_REGS_H */

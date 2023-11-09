@@ -17,16 +17,12 @@
 #define QEMU_PC_DIMM_H
 
 #include "exec/memory.h"
-#include "sysemu/hostmem.h"
-#include "hw/qdev.h"
+#include "hw/qdev-core.h"
+#include "qom/object.h"
 
 #define TYPE_PC_DIMM "pc-dimm"
-#define PC_DIMM(obj) \
-    OBJECT_CHECK(PCDIMMDevice, (obj), TYPE_PC_DIMM)
-#define PC_DIMM_CLASS(oc) \
-    OBJECT_CLASS_CHECK(PCDIMMDeviceClass, (oc), TYPE_PC_DIMM)
-#define PC_DIMM_GET_CLASS(obj) \
-    OBJECT_GET_CLASS(PCDIMMDeviceClass, (obj), TYPE_PC_DIMM)
+OBJECT_DECLARE_TYPE(PCDIMMDevice, PCDIMMDeviceClass,
+                    PC_DIMM)
 
 #define PC_DIMM_ADDR_PROP "addr"
 #define PC_DIMM_SLOT_PROP "slot"
@@ -45,7 +41,7 @@
  *        Default value: -1, means that slot is auto-allocated.
  * @hostmem: host memory backend providing memory for @PCDIMMDevice
  */
-typedef struct PCDIMMDevice {
+struct PCDIMMDevice {
     /* private */
     DeviceState parent_obj;
 
@@ -54,50 +50,24 @@ typedef struct PCDIMMDevice {
     uint32_t node;
     int32_t slot;
     HostMemoryBackend *hostmem;
-} PCDIMMDevice;
+};
 
 /**
  * PCDIMMDeviceClass:
  * @realize: called after common dimm is realized so that the dimm based
  * devices get the chance to do specified operations.
- * @get_memory_region: returns #MemoryRegion associated with @dimm which
- * is directly mapped into the physical address space of guest.
- * @get_vmstate_memory_region: returns #MemoryRegion which indicates the
- * memory of @dimm should be kept during live migration.
  */
-typedef struct PCDIMMDeviceClass {
+struct PCDIMMDeviceClass {
     /* private */
     DeviceClass parent_class;
 
     /* public */
     void (*realize)(PCDIMMDevice *dimm, Error **errp);
-    MemoryRegion *(*get_memory_region)(PCDIMMDevice *dimm, Error **errp);
-    MemoryRegion *(*get_vmstate_memory_region)(PCDIMMDevice *dimm);
-} PCDIMMDeviceClass;
+    void (*unrealize)(PCDIMMDevice *dimm);
+};
 
-/**
- * MemoryHotplugState:
- * @base: address in guest physical address space where hotplug memory
- * address space begins.
- * @mr: hotplug memory address space container
- */
-typedef struct MemoryHotplugState {
-    hwaddr base;
-    MemoryRegion mr;
-} MemoryHotplugState;
-
-uint64_t pc_dimm_get_free_addr(uint64_t address_space_start,
-                               uint64_t address_space_size,
-                               uint64_t *hint, uint64_t align, uint64_t size,
-                               Error **errp);
-
-int pc_dimm_get_free_slot(const int *hint, int max_slots, Error **errp);
-
-MemoryDeviceInfoList *qmp_pc_dimm_device_list(void);
-uint64_t pc_existing_dimms_capacity(Error **errp);
-uint64_t get_plugged_memory_size(void);
-void pc_dimm_memory_plug(DeviceState *dev, MemoryHotplugState *hpms,
-                         MemoryRegion *mr, uint64_t align, Error **errp);
-void pc_dimm_memory_unplug(DeviceState *dev, MemoryHotplugState *hpms,
-                           MemoryRegion *mr);
+void pc_dimm_pre_plug(PCDIMMDevice *dimm, MachineState *machine,
+                      const uint64_t *legacy_align, Error **errp);
+void pc_dimm_plug(PCDIMMDevice *dimm, MachineState *machine);
+void pc_dimm_unplug(PCDIMMDevice *dimm, MachineState *machine);
 #endif

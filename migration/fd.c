@@ -17,6 +17,7 @@
 #include "qemu/osdep.h"
 #include "channel.h"
 #include "fd.h"
+#include "migration.h"
 #include "monitor/monitor.h"
 #include "io/channel-util.h"
 #include "trace.h"
@@ -25,7 +26,7 @@
 void fd_start_outgoing_migration(MigrationState *s, const char *fdname, Error **errp)
 {
     QIOChannel *ioc;
-    int fd = monitor_get_fd(cur_mon, fdname, errp);
+    int fd = monitor_get_fd(monitor_cur(), fdname, errp);
     if (fd == -1) {
         return;
     }
@@ -37,7 +38,7 @@ void fd_start_outgoing_migration(MigrationState *s, const char *fdname, Error **
         return;
     }
 
-    qio_channel_set_name(QIO_CHANNEL(ioc), "migration-fd-outgoing");
+    qio_channel_set_name(ioc, "migration-fd-outgoing");
     migration_channel_connect(s, ioc, NULL, NULL);
     object_unref(OBJECT(ioc));
 }
@@ -51,12 +52,14 @@ static gboolean fd_accept_incoming_migration(QIOChannel *ioc,
     return G_SOURCE_REMOVE;
 }
 
-void fd_start_incoming_migration(const char *infd, Error **errp)
+void fd_start_incoming_migration(const char *fdname, Error **errp)
 {
     QIOChannel *ioc;
-    int fd;
+    int fd = monitor_fd_param(monitor_cur(), fdname, errp);
+    if (fd == -1) {
+        return;
+    }
 
-    fd = strtol(infd, NULL, 0);
     trace_migration_fd_incoming(fd);
 
     ioc = qio_channel_new_fd(fd, errp);
@@ -65,10 +68,9 @@ void fd_start_incoming_migration(const char *infd, Error **errp)
         return;
     }
 
-    qio_channel_set_name(QIO_CHANNEL(ioc), "migration-fd-incoming");
-    qio_channel_add_watch(ioc,
-                          G_IO_IN,
-                          fd_accept_incoming_migration,
-                          NULL,
-                          NULL);
+    qio_channel_set_name(ioc, "migration-fd-incoming");
+    qio_channel_add_watch_full(ioc, G_IO_IN,
+                               fd_accept_incoming_migration,
+                               NULL, NULL,
+                               g_main_context_get_thread_default());
 }
