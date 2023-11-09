@@ -356,6 +356,12 @@ OPT_PARAM(wifi_mac_address,
 
 OPT_FLAG(no_ethernet, "Disable virtual Ethernet interface en0. This option is only effective when feature VirtioWifi is used.")
 
+OPT_PARAM(android_serialno,
+          "<android serialno>",
+          "Set customized android serial number. The value of this field must "
+          "be encodable as 7-bit ASCII and match the regular expression "
+          "“^[a-zA-Z0-9._-,]+$”.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
