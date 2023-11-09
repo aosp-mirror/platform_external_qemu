@@ -2279,6 +2279,13 @@ static void help_no_ethernet(stralloc_t* out) {
            " used. Otherwise, this option is a no-op. \n\n");
 }
 
+static void help_android_serialno(stralloc_t* out) {
+    PRINTF(" Set the customized android serial number. The value of this field "
+           "must "
+           " be encodable as 7-bit ASCII and match the regular expression "
+           "\"^[a-zA-Z0-9._-,]+$\". \n\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
