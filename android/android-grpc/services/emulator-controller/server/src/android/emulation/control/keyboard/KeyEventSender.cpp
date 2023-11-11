@@ -225,29 +225,31 @@ const size_t kNonPrintableCodeEntries = ARRAY_SIZE(kNonPrintableCodeMap);
 void KeyEventSender::sendKeyCode(int32_t code,
                                  const KeyboardEvent::KeyCodeType codeType,
                                  const KeyboardEvent::KeyEventType eventType) {
-    if (codeType == KeyboardEvent::Evdev) {
-        mAgents->user_event->sendKeyCode(code);
-        return;
-    }
+    bool eventHandled = false;
 
     uint32_t evdev = convertToEvDev(code, codeType);
     if (eventType == KeyboardEvent::keydown ||
         eventType == KeyboardEvent::keypress) {
         DD("Down %d -> evdev 0x%x", code, evdev | 0x400);
         mAgents->user_event->sendKeyCode(evdev | 0x400);
+        eventHandled = true;
     }
     if (eventType == KeyboardEvent::keyup ||
         eventType == KeyboardEvent::keypress) {
         DD("Up %d -> evdev 0x%x", code, evdev);
         mAgents->user_event->sendKeyCode(evdev);
+        eventHandled = true;
+    }
+    
+    if (!eventHandled && codeType == KeyboardEvent::Evdev) {
+        mAgents->user_event->sendKeyCode(code);
+        eventHandled = true;
     }
 }  // namespace keyboard
 
 void KeyEventSender::doSend(const KeyboardEvent request) {
-    if (request.codetype() == KeyboardEvent::Evdev) {
-        mAgents->user_event->sendKeyCode(request.keycode());
-        return;
-    }
+    bool eventHandled = false;
+
     if (request.key().size() > 0) {
         keyboard::DomKey domkey = browserKeyToDomKey(request.key());
         DD("%s -> domKey: %d, as Non printable: %d",
@@ -266,6 +268,7 @@ void KeyEventSender::doSend(const KeyboardEvent request) {
                     for (auto evdev : evdevs) {
                         DD("Down %s -> evdev 0x%x",
                            request.ShortDebugString().c_str(), evdev | 0x400);
+                        eventHandled = true;
                         mAgents->user_event->sendKeyCode(evdev | 0x400);
                     }
                 }
@@ -274,6 +277,7 @@ void KeyEventSender::doSend(const KeyboardEvent request) {
                     for (auto evdev : evdevs) {
                         DD("Up %s -> evdev 0x%x",
                            request.ShortDebugString().c_str(), evdev);
+                        eventHandled = true;
                         mAgents->user_event->sendKeyCode(evdev);
                     }
                 }
@@ -281,9 +285,16 @@ void KeyEventSender::doSend(const KeyboardEvent request) {
                 // Nope we have to send the domcode..
                 sendKeyCode(domCodeToEvDevKeycode(code), KeyboardEvent::Evdev,
                             request.eventtype());
+                eventHandled = true;
             }
         }
     }
+
+    if (!eventHandled && request.codetype() == KeyboardEvent::Evdev) {
+        mAgents->user_event->sendKeyCode(request.keycode());
+        eventHandled = true;
+    }
+
     if (request.text().size() > 0) {
         sendUtf8String(request.text());
     }

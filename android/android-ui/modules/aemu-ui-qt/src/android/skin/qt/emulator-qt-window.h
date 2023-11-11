@@ -345,9 +345,8 @@ public slots:
 
 private slots:
     void slot_adbWarningMessageAccepted();
-#ifdef _WIN32
     void slot_vgkWarningMessageAccepted();
-#endif
+    void slot_haxmWarningMessageAccepted();
     void slot_nestedWarningMessageAccepted();
     void slot_blit(SkinSurfaceBitmap* src,
                    QRect srcRect,
@@ -453,9 +452,8 @@ private:
     void showAvdArchWarning();
     void checkShouldShowGpuWarning();
     void showGpuWarning();
-#ifdef _WIN32
     void checkVgkAndWarn();
-#endif
+    void checkHaxmAndWarn();
     void checkNestedAndWarn();
 
     bool mouseInside();
@@ -549,9 +547,8 @@ private:
     OnDemandMessageBox mAvdWarningBox;
     OnDemandMessageBox mGpuWarningBox;
     OnDemandMessageBox mAdbWarningBox;
-#ifdef _WIN32
     OnDemandMessageBox mVgkWarningBox;
-#endif
+    OnDemandMessageBox mHaxmWarningBox;
     OnDemandMessageBox mNestedWarningBox;
 
     // First-show related warning messages state

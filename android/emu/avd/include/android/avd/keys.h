@@ -60,6 +60,12 @@
  */
 #define  SKIN_NAME       "skin.name"
 
+/*
+ * The pixel_fold default skin and closed skin name, they are inside skins/pixel_fold/
+ */
+#define  PIXEL_FOLD_DEFAULT_SKIN_NAME       "default"
+#define  PIXEL_FOLD_CLOSED_SKIN_NAME        "closed"
+
 /* default skin name */
 #define  SKIN_DEFAULT    "HVGA"
 

@@ -410,7 +410,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      tr(""),
                      QMessageBox::Ok,
                      this),
-#ifdef _WIN32
       mVgkWarningBox(QMessageBox::Information,
                      tr("Incompatible Software Detected"),
                      tr("Vanguard anti-cheat software is detected on your "
@@ -420,7 +419,21 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         "running Android emulator."),
                      QMessageBox::Ok,
                      this),
-#endif
+      mHaxmWarningBox(QMessageBox::Information,
+                     tr("Intel HAXM is deprecated"),
+                     tr("Intel has ceased support for Intel HAXM. And your "
+                        "system has Intel HAXM installed. Emulator still "
+                        "works with Intel HAXM for compatibility reasons but "
+                        "the support will be removed later. Please install "
+                        "Android Emulator hypervisor driver from SDK manager. "
+                        "You don't have to remove Intel HAXM if other software "
+                        "in your system relies on it or you have another copy "
+                        "of the emulator whose version is 32.x.x or below. "
+                        "Starting from version 33.x.x, the emulator will use "
+                        "the Android Emulator hypervisor driver by default if "
+                        "it is installed."),
+                     QMessageBox::Ok,
+                     this),
       mNestedWarningBox(QMessageBox::Information,
                         tr("Emulator Running in Nested Virtualization"),
                         tr("Emulator is running using nested virtualization. "
@@ -2148,9 +2161,8 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
         checkShouldShowGpuWarning();
         showGpuWarning();
         checkAdbVersionAndWarn();
-#ifdef _WIN32
         checkVgkAndWarn();
-#endif
+        checkHaxmAndWarn();
         checkNestedAndWarn();
         mFirstShowWindowCall = false;
     }
@@ -3467,7 +3479,6 @@ void EmulatorQtWindow::runAdbShellPowerDownAndQuit() {
                             // hangs, allow 5s
 }
 
-#ifdef _WIN32
 void EmulatorQtWindow::checkVgkAndWarn() {
     AndroidCpuAccelerator accelerator = androidCpuAcceleration_getAccelerator();
 
@@ -3475,8 +3486,10 @@ void EmulatorQtWindow::checkVgkAndWarn() {
         accelerator != ANDROID_CPU_ACCELERATOR_AEHD)
         return;
 
+#ifdef _WIN32
     if (::android::base::Win32Utils::getServiceStatus("vgk") <= SVC_NOT_FOUND)
         return;
+#endif
 
     QSettings settings;
     if (settings.value(Ui::Settings::SHOW_VGK_WARNING, true).toBool()) {
@@ -3499,7 +3512,34 @@ void EmulatorQtWindow::slot_vgkWarningMessageAccepted() {
         settings.setValue(Ui::Settings::SHOW_VGK_WARNING, false);
     }
 }
-#endif
+
+void EmulatorQtWindow::checkHaxmAndWarn() {
+    AndroidCpuAccelerator accelerator = androidCpuAcceleration_getAccelerator();
+
+    if (accelerator != ANDROID_CPU_ACCELERATOR_HAX)
+        return;
+
+    QSettings settings;
+    if (settings.value(Ui::Settings::SHOW_HAXM_WARNING, true).toBool()) {
+        QObject::connect(mHaxmWarningBox.ptr(),
+                         SIGNAL(buttonClicked(QAbstractButton*)), this,
+                         SLOT(slot_haxmWarningMessageAccepted()));
+
+        QCheckBox* checkbox = new QCheckBox(tr("Never show this again."));
+        checkbox->setCheckState(Qt::Unchecked);
+        mHaxmWarningBox->setWindowModality(Qt::NonModal);
+        mHaxmWarningBox->setCheckBox(checkbox);
+        mHaxmWarningBox->show();
+    }
+}
+
+void EmulatorQtWindow::slot_haxmWarningMessageAccepted() {
+    QCheckBox* checkbox = mHaxmWarningBox->checkBox();
+    if (checkbox->checkState() == Qt::Checked) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::SHOW_HAXM_WARNING, false);
+    }
+}
 
 void EmulatorQtWindow::checkNestedAndWarn() {
     char hv_vendor_id[16] = {};
