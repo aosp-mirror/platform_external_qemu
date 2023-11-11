@@ -264,6 +264,12 @@ extern int android_physical_model_stop_recording();
 
 extern void android_hw_sensor_set_window_agent(void* agent);
 
+typedef void (*HwSensorChangedCallback)(void* opaque);
+
+extern void android_hw_sensors_register_callback(HwSensorChangedCallback callback, void* opaque);
+
+extern void android_hw_sensors_unregister_callback(void* opaque);
+
 /* Foldable state */
 
 #define ANDROID_FOLDABLE_MAX_HINGES 3

@@ -38,9 +38,8 @@ constexpr char SHOW_ADB_WARNING[] = "showAdbWarning";
 constexpr char SHOW_AVD_ARCH_WARNING[] = "showAvdArchWarning";
 constexpr char SHOW_GPU_WARNING[] = "showGpuWarning";
 constexpr char SHOW_VIRTUALSCENE_INFO[] = "showVirtualSceneInfo";
-#ifdef _WIN32
 constexpr char SHOW_VGK_WARNING[] = "showVgkWarning";
-#endif
+constexpr char SHOW_HAXM_WARNING[] = "showHaxmWarning";
 constexpr char SHOW_NESTED_WARNING[] = "showNestedWarning";
 
 // Note: The "set/" here is because these settings are

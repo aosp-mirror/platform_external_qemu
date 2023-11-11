@@ -1607,9 +1607,9 @@ void avdInfo_getSkinInfo(const AvdInfo* i, char** pSkinName, char** pSkinDir) {
                 AFREE(skinPath);
                 return;
             }
-            /* quirk for foldable: it has folded/ and unfolded/ subdir */
+            /* quirk for foldable: it has closed/ and default/ subdir */
             if (skinName && !strcmp(skinName, "pixel_fold")) {
-                p = bufprint(temp, end, "%s" PATH_SEP "unfolded", skinPath);
+                p = bufprint(temp, end, "%s" PATH_SEP PIXEL_FOLD_DEFAULT_SKIN_NAME, skinPath);
                 skinPath = strdup(temp);
                 /* try one more time */
                 if (_getSkinPathFromName(skinPath, i->sdkRootPath, pSkinName,
@@ -1848,8 +1848,14 @@ void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i,
         return;
     iniFile_setInt64(i->configIni, "disk.dataPartition.size", sizeBytes);
 
+    // don't change other config.ini values, just change the partition size
     char* iniPath = _avdInfo_getContentFilePath(i, CORE_CONFIG_INI);
-    iniFile_saveToFile(i->configIni, iniPath);
+    struct CIniFile* oldconfig = iniFile_newFromFile(iniPath);
+    iniFile_setInt64(oldconfig, "disk.dataPartition.size", sizeBytes);
+
+    iniFile_saveToFile(oldconfig, iniPath);
+
+    iniFile_free(oldconfig);
 }
 
 bool avdInfo_isMarshmallowOrHigher(AvdInfo* i) {

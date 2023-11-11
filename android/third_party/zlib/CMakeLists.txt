@@ -12,7 +12,6 @@ string(REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
 message(STATUS "Including zlib version: ${ZLIB_FULL_VERSION}")
 android_add_library(
   TARGET zlib
-  BAZEL "@zlib//:z"
   INCLUDES "${ZLIB_SOURCE_DIR}"
   LICENSE NO_COPYRIGHT
   SOURCE_DIR ${ZLIB_SOURCE_DIR}
@@ -31,6 +30,13 @@ android_add_library(
       trees.c
       uncompr.c
       zutil.c)
+
+android_target_compile_definitions(zlib linux-x86_64
+                                   PRIVATE -D_LARGEFILE64_SOURCE=1)
+android_target_compile_definitions(zlib darwin-x86_64
+                                   PRIVATE -D_LARGEFILE64_SOURCE=1)
+target_compile_options(zlib PRIVATE -Wno-implicit-function-declaration
+                                    -Wno-deprecated-non-prototype)
 
 # Note that this is the only non-bazel target.
 android_target_compile_definitions(
