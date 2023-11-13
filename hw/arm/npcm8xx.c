@@ -811,7 +811,7 @@ static void npcm8xx_realize(DeviceState *dev, Error **errp)
                                        npcm8xx_pci_mbox_addr[i]);
         sysbus_mmio_map(SYS_BUS_DEVICE(&s->pci_mbox[i]), 1,
                         npcm8xx_pci_mbox_addr[i] + NPCM7XX_PCI_MBOX_RAM_SIZE);
-        sysbus_connect_irq(SYS_BUS_DEVICE(&s->pci_mbox), 0,
+        sysbus_connect_irq(SYS_BUS_DEVICE(&s->pci_mbox[i]), 0,
                            npcm8xx_irq(s, NPCM8XX_PCI_MBOX1_IRQ + i));
     }
 
