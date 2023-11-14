@@ -1034,7 +1034,7 @@ public:
                       cPixels, sw.elapsedUs());
 
         if (isFolded) {
-            format->set_display(0);
+            format->set_display(request->display());
         }
         return Status::OK;
     }
