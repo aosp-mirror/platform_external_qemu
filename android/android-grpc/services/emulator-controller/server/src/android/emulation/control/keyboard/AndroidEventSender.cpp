@@ -15,6 +15,7 @@
 #include "android/emulation/control/keyboard/AndroidEventSender.h"
 
 #include "android/emulation/control/user_event_agent.h"
+#include "android/hw-sensors.h"
 #include "android/skin/generic-event-buffer.h"
 
 namespace android {
@@ -22,11 +23,15 @@ namespace emulation {
 namespace control {
 
 void AndroidEventSender::doSend(const AndroidEvent request) {
+    auto displayId0 = request.display();
+    if (android_foldable_is_folded() && android_foldable_is_pixel_fold()) {
+        displayId0 = android_foldable_pixel_fold_second_display_id();
+    }
     SkinGenericEventCode event {
         .type = request.type(),
         .code = request.code(),
         .value = request.value(),
-        .displayId = request.display()
+        .displayId = displayId0,
     };
     mAgents->user_event->sendGenericEvent(event);
 }

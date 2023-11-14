@@ -8,6 +8,7 @@
 #include "aemu/base/async/ThreadLooper.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/hw-events.h"
+#include "android/hw-sensors.h"
 #include "android/multitouch-screen.h"
 #include "android/skin/generic-event-buffer.h"
 #include "android/skin/linux_keycodes.h"
@@ -40,6 +41,9 @@ static int scaleAxis(int value, int min_in, int max_in) {
 void PenEventSender::doSend(const PenEvent request) {
     // Obtain display width, height for the given display id.
     auto displayId = request.display();
+    if (android_foldable_is_folded() && android_foldable_is_pixel_fold()) {
+        displayId = android_foldable_pixel_fold_second_display_id();
+    }
     uint32_t w = 0;
     uint32_t h = 0;
     if (!mAgents->emu->getMultiDisplay(displayId, NULL, NULL, &w, &h, NULL,

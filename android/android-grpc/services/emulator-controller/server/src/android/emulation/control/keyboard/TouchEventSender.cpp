@@ -9,6 +9,7 @@
 #include "aemu/base/async/ThreadLooper.h"                // for ThreadLooper
 #include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
 #include "android/hw-events.h"                           // for EV_ABS, EV_SYN
+#include "android/hw-sensors.h"
 #include "android/multitouch-screen.h"                   // for MTS_*
 #include "android/skin/generic-event-buffer.h"           // for SkinGenericE...
 #include "android/skin/linux_keycodes.h"                 // for LINUX_ABS_MT...
@@ -50,6 +51,9 @@ int TouchEventSender::pickNextSlot() {
 void TouchEventSender::doSend(const TouchEvent request) {
     // Obtain display width, height for the given display id.
     auto displayId = request.display();
+    if (android_foldable_is_folded() && android_foldable_is_pixel_fold()) {
+        displayId = android_foldable_pixel_fold_second_display_id();
+    }
     uint32_t w = 0;
     uint32_t h = 0;
     if (!mAgents->emu->getMultiDisplay(displayId, NULL, NULL, &w, &h, NULL,
