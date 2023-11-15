@@ -16,7 +16,8 @@ import logging
 import re
 from pathlib import Path
 
-from toolchain_generator import ToolchainGenerator
+from aemu.process.runner import check_output
+from aemu.toolchains.toolchain_generator import ToolchainGenerator
 
 
 def compare_versions(v1: str, v2: str) -> int:
@@ -62,9 +63,10 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
     MIN_VERSION = "11"
     OSX_DEPLOYMENT_TARGET = "11.0"
 
-    def __init__(self, dest, prefix) -> None:
-        super().__init__(dest, prefix)
-        verinfo = self.run(["xcodebuild", "-version"]).splitlines()
+    def __init__(self, aosp, dest, prefix, target_arch="arm64") -> None:
+        super().__init__(aosp, dest, prefix)
+        self.target_arch = target_arch
+        verinfo = check_output(["xcodebuild", "-version"]).splitlines()
 
         version = self.XCODE_VER_RE.match(verinfo[0])[1]
         build = self.XCODE_BUILD_VER.match(verinfo[1])[1]
@@ -72,7 +74,7 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
         if compare_versions(version, self.MIN_VERSION) == -1:
             raise ValueError(f"You need at least XCode 10, not {version}")
 
-        xcode_path = self.run(["xcode-select", "-print-path"]).strip()
+        xcode_path = check_output(["xcode-select", "-print-path"]).strip()
         sdks = self.parse_xcode_sdks()
 
         for ver, _ in sdks.get("macOS SDKs", {}).items():
@@ -85,14 +87,22 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
         logging.info("OSX: XCode path: %s", self.osx_sdk_root)
 
     def _base_script(self):
+        cache = f"{self.ccache}" if self.ccache else ""
         script = (
-            f"{self.clang()}/bin/clang "
-            "-target arm64-apple-darwin23.1.0 "
+            f"{cache} {self.clang()}/bin/clang "
+            f"-arch {self.target_arch} "
             f"-isysroot {self.osx_sdk_root} "
             f"-mmacosx-version-min={self.OSX_DEPLOYMENT_TARGET} "
+            "-D__ENVIRONMENT_OS_VERSION_MIN_REQUIRED__=__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ "
             "-B/usr/bin "
         )
         return script
+
+    def strip(self):
+        script = "target=$(basename $1)\n"
+        script += f"{self.clang() / 'bin' / 'dsymutil'} --out build/debug_info/$target.dSYM $1\n"
+        script += "# EXPLICITLY DISABLE ARBITRARY ARGUMENTS"
+        return script, ""
 
     def cc(self):
         script = self._base_script()
@@ -100,13 +110,17 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
         return script, extra
 
     def cxx(self):
-        script = self._base_script() + "-stdlib=libc++"
+        script = self._base_script() + " -stdlib=libc++"
         extra = "-Wno-unused-command-line-argument"
         return script, extra
 
+    def gen_toolchain(self):
+        super().gen_toolchain()
+        self.gen_script("objc", self.dest / f"{self.prefix}objc", self.cc)
+
     def parse_xcode_sdks(self):
         """
-        Parse the output of 'xcodebuild -showsdks' and return a dictionary of installed SDKs.
+        Runs and parses the output of 'xcodebuild -showsdks' and return a dictionary of installed SDKs.
 
         Returns:
             dict: A dictionary containing information about installed SDKs. The dictionary
@@ -114,7 +128,22 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
             to their corresponding SDK names.
         """
 
-        output = self.run(["xcodebuild", "-showsdks"])
+        # Sample output of xcodebuild -showsdks
+
+        # DriverKit SDKs:
+        # 	DriverKit 23.0                	-sdk driverkit23.0
+
+        # iOS SDKs:
+        # 	iOS 17.0                      	-sdk iphoneos17.0
+
+        # macOS SDKs:
+        # 	macOS 14.0                    	-sdk macosx14.0
+        # 	macOS 14.0                    	-sdk macosx14.0
+
+        # watchOS SDKs:
+        # 	watchOS 10.0                  	-sdk watchos10.0
+
+        output = check_output(["xcodebuild", "-showsdks"])
         sdk_dict = {}
         current_sdk_type = None
 

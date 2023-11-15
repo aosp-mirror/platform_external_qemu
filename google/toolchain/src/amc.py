@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright 2023 - The Android Open Source Project
 #
@@ -12,15 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from toolchain_generator import ToolchainGenerator
+from aemu.toolchain import main
 
-
-class WindowsToWindowsGenerator(ToolchainGenerator):
-    def __init__(self, dest):
-        super().__init__(dest)
-
-    def cxx(self):
-        return self.clang() / "bin" / "clang-cl"
-
-    def cc(self):
-        return self.clang() / "bin" / "clang-cl"
+if __name__ == "__main__":
+    main()
