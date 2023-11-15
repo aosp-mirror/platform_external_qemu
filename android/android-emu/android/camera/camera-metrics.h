@@ -23,7 +23,10 @@
 #ifdef __cplusplus
 #include "aemu/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
-#include "studio_stats.pb.h"
+#ifndef Q_MOC_RUN
+// Qt 6.5.3 moc complains of a parsing error with this protobuf file. So exclude it from moc runs.
+#include "studio_stats.pb.h"  // for EmulatorAutomatio...
+#endif  // Q_MOC_RUN
 #endif  // __cplusplus
 #include "android/camera/camera-common.h"
 #include "android/utils/compiler.h"

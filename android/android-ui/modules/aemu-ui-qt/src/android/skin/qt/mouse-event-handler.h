@@ -21,22 +21,12 @@ public:
     MouseEventHandler() :
         mPrevMousePosition(0, 0),
         mMouseTouchState(TouchState::NOT_TOUCHING) {}
-#if QT_VERSION >= 0x060000
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPointF& pos,
                           const QPointF& gPos,
                           bool skipSync,
                           uint32_t displayId);
-#else
-    void handleMouseEvent(SkinEventType type,
-                          SkinMouseButtonType button,
-                          const QPoint& pos,
-                          const QPoint& gPos,
-                          bool skipSync,
-                          uint32_t displayId);
-#endif  // QT_VERSION
-
 
     SkinEventType translateMouseEventType(SkinEventType type,
                                           Qt::MouseButton button,

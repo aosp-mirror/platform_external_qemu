@@ -489,11 +489,7 @@ const std::vector<int32_t>* VhalTable::getUserInt32VecValue(
         QString tip,
         bool* pressedOk) {
     QStringList valueStringList = oldValueString.split("; ");
-#if QT_VERSION >= 0x060000
     QSet<QString> oldStringSet(valueStringList.constBegin(), valueStringList.constEnd());
-#else
-    QSet<QString> oldStringSet = QSet<QString>::fromList(valueStringList);
-#endif
 
     map<int32_t, QString> nameByValue;
     for (int i = 0; i < propDesc.lookupTableNames.size(); i++) {

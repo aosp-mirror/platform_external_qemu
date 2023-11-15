@@ -230,7 +230,9 @@ void LocationPage::on_loc_routeList_itemSelectionChanged() {
         mUi->loc_routeList->selectedItems().size() != 1) {
         // Either no routes selected, or in deletion mode, either of which
         // means the map shouldn't be set to anything.
+#ifdef USE_WEBENGINE
         emit mMapBridge->showRouteOnMap("");
+#endif  // USE_WEBENGINE
     }
     if (mUi->loc_routeList->selectedItems().size() == 1) {
         // show the location on the map, but do not send it to the device
@@ -246,7 +248,9 @@ void LocationPage::on_loc_routeList_itemSelectionChanged() {
         mRouteSender.reset(RouteSenderThread::newInstance(
                 this,
                 SLOT(routeSendingFinished(bool))));
+#ifdef USE_WEBENGINE
         mRouteSender->sendRouteToMap(&routeElement, mMapBridge.get());
+#endif  // USE_WEBENGINE
     }
 
     // Disable the edit buttons on the saved points if in deletion mode
@@ -357,7 +361,9 @@ void LocationPage::deleteSelectedRoutes() {
                                             selectedItems[i]);
             deleteRoute(routeItem);
         }
+#ifdef USE_WEBENGINE
         emit mMapBridge->showRouteOnMap("");
+#endif  // USE_WEBENGINE
         mUi->loc_playRouteButton->setEnabled(false);
     }
     QApplication::restoreOverrideCursor();
