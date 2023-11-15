@@ -22,7 +22,8 @@ import subprocess
 import sys
 
 QT_SUBMODULES = ["qtbase", "qtsvg", "qtimageformats", "qtwebengine"]
-QT_SRC_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "..", "qt5")
+QT_SRC_PATH = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "..", "..", "..", "qt5")
 # We must move the source code from external/qt5 to a shorter path because of path too long issue.
 # Symlinking to a shorter path will not work either.
 QT_TMP_LOCATION = os.path.join("C:/", "qttmp")
