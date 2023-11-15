@@ -172,7 +172,7 @@ config = {
         "--extra-ldflags=-pthread",  # Make sure to always link agains pthread
     ],
      "darwin": [
-        "--disable-download", # Let's not accidentally fetch external things
+        # "--disable-download", # TODO: Somehow this is needed on MacOs..
         "--target-list=aarch64-softmmu",  # We only want x86
         "--audio-drv-list=coreaudio",  # Pulse is our linux audio driver
         "--enable-fdt=internal",  # Pick up the internal fdt
