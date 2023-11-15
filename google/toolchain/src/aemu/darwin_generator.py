@@ -31,24 +31,14 @@ def compare_versions(v1: str, v2: str) -> int:
     """
 
     # Split the version strings into lists of numbers
-    v1_list = v1.split(".")
-    v2_list = v2.split(".")
-
-    # Pad the shorter list with zeros
-    if len(v1_list) < len(v2_list):
-        v1_list.extend(["0"] * (len(v2_list) - len(v1_list)))
-    elif len(v2_list) < len(v1_list):
-        v2_list.extend(["0"] * (len(v1_list) - len(v2_list)))
-
-    # Compare the numbers one by one
-    for i, v1_part in enumerate(v1_list):
-        v2_part = v2_list[i]
-        if int(v1_part) < int(v2_part):
-            return -1
-        if int(v1_part) > int(v2_part):
-            return 1
+    v1_list = [int(x) for x in v1.split(".")]
+    v2_list = [int(x) for x in v2.split(".")]
 
     # If all numbers are equal, the versions are equal
+    if v1_list < v2_list:
+        return -1
+    if v1_list > v2_list:
+        return 1
     return 0
 
 
@@ -70,7 +60,7 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
     XCODE_VER_RE = re.compile(r"Xcode\s+(\d+\.\d+.\d+)")
     XCODE_BUILD_VER = re.compile(r"Build version\s+(\w+)")
     MIN_VERSION = "11"
-    OSX_DEPLOYMENT_TARGET = "10.15"
+    OSX_DEPLOYMENT_TARGET = "11.0"
 
     def __init__(self, dest, prefix) -> None:
         super().__init__(dest, prefix)
