@@ -125,6 +125,7 @@ extern "C" {
 #include <unistd.h>
 #endif
 #include <algorithm>
+#include <regex>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -859,6 +860,19 @@ static void enableSignalTermination() {
 static bool isCrostini() {
     struct stat buf;
     return is_linux && stat("/dev/.cros_milestone", &buf) == 0;
+}
+
+static bool isAndroidSerialNo(const char* serialno) {
+    static constexpr char kPattern[] = "^[a-zA-Z0-9._-,]+$";
+    std::regex regex(kPattern);
+    if (serialno && std::regex_match(serialno, regex)) {
+        return true;
+    } else {
+        D("Invalid serialno %s. The value of this field MUST be encodable as "
+          "7-bit ASCII and match the regular expression \"%s\"\n",
+          serialno, kPattern);
+        return false;
+    }
 }
 
 }  // namespace
@@ -3270,10 +3284,14 @@ extern "C" int main(int argc, char** argv) {
         }
 
         constexpr bool isQemu2 = true;
-
-        std::string myserialno("EMULATOR" EMULATOR_VERSION_STRING);
-        std::replace(myserialno.begin(), myserialno.end(), '.', 'X');
-
+        std::string myserialno;
+        if (opts->android_serialno &&
+            isAndroidSerialNo(opts->android_serialno)) {
+            myserialno = opts->android_serialno;
+        } else {
+            myserialno = "EMULATOR" EMULATOR_VERSION_STRING;
+            std::replace(myserialno.begin(), myserialno.end(), '.', 'X');
+        }
         std::vector<std::pair<std::string, std::string>> userspaceBootOpts =
                 getUserspaceBootProperties(
                         opts, kTarget.androidArch, myserialno.c_str(), isQemu2,
