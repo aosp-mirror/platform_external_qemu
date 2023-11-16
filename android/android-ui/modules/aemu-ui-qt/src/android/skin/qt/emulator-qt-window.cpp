@@ -874,10 +874,9 @@ void EmulatorQtWindow::showAvdArchWarning() {
 void EmulatorQtWindow::checkShouldShowGpuWarning() {
     mShouldShowGpuWarning =
             globalGpuInfoList().blacklist_status &&
-            !(strstr(emuglConfig_get_user_gpu_option(), "swiftshader") ||
-              strstr(emuglConfig_get_user_gpu_option(), "swangle") ||
-              0 == strcmp(emuglConfig_get_user_gpu_option(), "auto") ||
-              0 == strcmp(emuglConfig_get_user_gpu_option(), "auto-no-window"));
+            (0 == strcmp(emuglConfig_get_user_gpu_option(), "") ||
+             0 == strcmp(emuglConfig_get_user_gpu_option(), "auto") ||
+             0 == strcmp(emuglConfig_get_user_gpu_option(), "auto-no-window"));
 }
 
 void EmulatorQtWindow::showGpuWarning() {
