@@ -325,8 +325,9 @@ void RendererImpl::pauseAllPreSave() {
     waitForProcessCleanup();
 }
 
-void RendererImpl::resumeAll() {
+void RendererImpl::resumeAll(bool waitForSave) {
     {
+        (void)waitForSave;
         android::base::AutoLock lock(mChannelsLock);
         if (mStopped) {
             return;
