@@ -426,9 +426,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                             message);
                 },
         .fold = [](bool is_fold) -> bool {
-            if (emulator_window_recorder_state_get().state == RECORDER_RECORDING) {
-                return false;
-            }
             fprintf(stderr, "window-agent-GfxStream-impl: .fold %d\n", is_fold);
             sIsFolded = is_fold;
             return true;
