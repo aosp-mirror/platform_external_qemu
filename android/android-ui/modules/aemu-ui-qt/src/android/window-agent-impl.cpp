@@ -168,6 +168,9 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .fold = [](bool is_fold) -> bool {
+            if (emulator_window_recorder_state_get().state == RECORDER_RECORDING) {
+                return false;
+            }
             if (is_fold) {
                 return android_foldable_fold();
             } else {
