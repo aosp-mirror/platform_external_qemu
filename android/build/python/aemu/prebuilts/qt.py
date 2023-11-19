@@ -25,6 +25,7 @@ import sys
 from aemu.prebuilts.deps.common import EXE_SUFFIX
 import aemu.prebuilts.deps.common as deps_common
 import aemu.prebuilts.deps.mac as deps_mac
+import aemu.prebuilts.deps.linux as deps_linux
 import aemu.prebuilts.deps.windows as deps_win
 from pathlib import Path
 import platform
@@ -101,6 +102,46 @@ def checkDependencies():
     elif platform.system().lower() == "darwin":
         # MacOS sdk >= 13
         deps_mac.checkMacOsSDKVersion(min_vers=(12, 0))
+    elif platform.system().lower() == "linux":
+        pkgconfig_libs = [
+            ("xrender", [0, 9, 0]),
+            ("xcb-render", [1, 11]),
+            ("xcb-renderutil", [0, 3, 9]),
+            ("xcb-shape", [1, 11]),
+            ("xcb-randr", [1, 11]),
+            ("xcb-xfixes", [1, 11]),
+            ("xcb-xkb", [1, 11]),
+            ("xcb-sync", [1, 11]),
+            ("xcb-shm", [1, 11]),
+            ("xcb-icccm", [0, 3, 9]),
+            ("xcb-keysyms", [0, 3, 9]),
+            ("xcb-image", [0, 3, 9]),
+            ("xcb-util", [0, 3, 9]),
+            ("xcb-cursor", [0, 1, 1]),
+            ("xkbcommon", [0, 5, 0]),
+            ("xkbcommon-x11", [0, 5, 0]),
+            ("fontconfig", [2, 6]),
+            ("freetype2", [2, 3, 0]),
+            ("xext", None),
+            ("x11", None),
+            ("xcb", [1, 11]),
+            ("x11-xcb", [1, 3, 2]),
+            ("sm", None),
+            ("ice", None),
+            ("glib-2.0", [2, 8, 3]),
+            ("dbus-1", None),
+            ("xcomposite", None),
+            ("xcursor", None),
+            ("xrandr", None),
+            ("xshmfence", None),
+            ("libcupsfilters", None),
+        ]
+        for libname, vers in pkgconfig_libs:
+            if vers:
+                logging.info("Checking pkg-config for (%s >= %s)", libname, '.'.join(map(str, vers)))
+            else:
+                logging.info("Checking pkg-config for %s", libname)
+            deps_linux.checkPkgConfigLibraryExists(libname, vers)
 
     return True
 
@@ -151,20 +192,56 @@ def configureQtBuild(srcdir, builddir, installdir):
                  "-force-debug-info",
                  "-shared",
                  "-no-rpath",
+                 "-submodules",
+                 ",".join(QT_SUBMODULES),
                  "-nomake", "examples",
                  "-nomake", "tests",
                  "-nomake", "tools",
                  "-skip", "qtdoc",
                  "-skip", "qttranslations",
                  "-skip", "qttools",
-                 "-no-webengine-pepper-plugins",
-                 "-no-webengine-printing-and-pdf",
-                 "-no-webengine-webrtc",
-                 "-no-webengine-spellchecker",
+                 "-no-feature-pdf",
+                 "-no-feature-webengine-pepper-plugins",
+                 "-no-feature-webengine-printing-and-pdf",
+                 "-no-feature-webengine-webrtc",
+                 "-no-feature-webengine-spellchecker",
+                 "-no-feature-cups",
                  "-no-strip",
                  "-no-framework",
                  "-qtlibinfix", "AndroidEmu",
                  "-prefix", installdir]
+
+    if platform.system().lower() == "linux":
+        extra_conf_args = ["-linker", "lld",
+                           "-platform", "linux-clang-libc++"]
+        os.environ["CC"] = "clang"
+        os.environ["CXX"] = "clang++"
+        extra_cflags = "-m64 -fuse-ld=lld -fPIC"
+        extra_cxxflags = "-stdlib=libc++ -m64 -fuse-ld=lld -fPIC"
+        # Use libc++ instead of libstdc++
+        conf_cmake_args = [ f"-DCMAKE_CXX_FLAGS={extra_cxxflags}", f"-DMAKE_C_FLAGS={extra_cflags}" ]
+        # The QtWebEngine chromium build doesn't seem to pick up CXXFLAGS
+        # envrionment variables. So let's just create some clang wrappers
+        # to force use our flags.
+        os.environ["CFLAGS"] = extra_cflags
+        os.environ["CXXFLAGS"] = extra_cxxflags
+        toolchain_dir = Path(builddir) / "toolchain"
+        os.makedirs(Path(builddir) / "toolchain")
+
+        with open(toolchain_dir / "clang", 'x') as f:
+            f.write(f"#!/bin/sh\n/usr/bin/clang {extra_cflags} $@")
+        os.chmod(toolchain_dir / "clang", 0o777)
+
+        with open(toolchain_dir / "clang++", 'x') as f:
+            f.write(f"#!/bin/sh\n/usr/bin/clang++ {extra_cxxflags} $@")
+        os.chmod(toolchain_dir / "clang++", 0o777)
+
+        addToSearchPath(str(toolchain_dir))
+
+    if conf_cmake_args:
+        conf_args.append("--")
+        conf_args += conf_cmake_args
+
     logging.info("[%s] Running %s", builddir, config_script)
     logging.info(conf_args)
     res = subprocess.run(args=conf_args, cwd=builddir, env=os.environ.copy())
@@ -181,13 +258,12 @@ def buildQt(submodules, builddir):
         submodules (tuple(str)): The Qt submodules to build.
         builddir (str): The location of the Qt build directory.
     """
-    for mod in submodules:
-        cmake_build_cmd = ["cmake" + EXE_SUFFIX, "--build", ".", "--target", mod, "--parallel"]
-        logging.info(cmake_build_cmd)
-        res = subprocess.run(args=cmake_build_cmd, cwd=builddir, env=os.environ.copy())
-        if res.returncode != 0:
-            logging.critical("[%s] failed (%s)", cmake_build_cmd, res.returncode)
-            exit(res.returncode)
+    cmake_build_cmd = ["cmake" + EXE_SUFFIX, "--build", "."]
+    logging.info(cmake_build_cmd)
+    res = subprocess.run(args=cmake_build_cmd, cwd=builddir, env=os.environ.copy())
+    if res.returncode != 0:
+        logging.critical("[%s] failed (%s)", cmake_build_cmd, res.returncode)
+        exit(res.returncode)
     logging.info("Build succeeded")
 
 def installQt(submodules, builddir, installdir):
@@ -199,13 +275,12 @@ def installQt(submodules, builddir, installdir):
         installdir (str): The location of the Qt install directory.
     """
     logging.info("Installing Qt to %s", installdir)
-    for mod in submodules:
-        cmake_install_cmd = ["cmake" + EXE_SUFFIX, "--install", mod, "--prefix", installdir]
-        logging.info(cmake_install_cmd)
-        res = subprocess.run(args=cmake_install_cmd, cwd=builddir, env=os.environ.copy())
-        if res.returncode != 0:
-            logging.critical("[%s] failed (%s)", cmake_install_cmd, res.returncode)
-            exit(res.returncode)
+    cmake_install_cmd = ["cmake" + EXE_SUFFIX, "--install", ".", "--prefix", installdir]
+    logging.info(cmake_install_cmd)
+    res = subprocess.run(args=cmake_install_cmd, cwd=builddir, env=os.environ.copy())
+    if res.returncode != 0:
+        logging.critical("[%s] failed (%s)", cmake_install_cmd, res.returncode)
+        exit(res.returncode)
     logging.info("Installation succeeded")
 
 def cleanup():
@@ -222,6 +297,8 @@ def postInstall(installdir):
 
     if platform.system().lower() == "darwin":
         mac_postInstall(installdir)
+    elif platform.system().lower() == "linux":
+        linux_postInstall(installdir)
 
 def mac_postInstall(installdir):
     """Post-install steps specific for mac.
@@ -263,6 +340,28 @@ def mac_postInstall(installdir):
         f"{installdir}/libexec/QtWebEngineProcess"]
     for exe in fix_exes:
         changeToQt6Rpaths(exe)
+
+def linux_postInstall(installdir):
+    # Install prebuilt clang's libc++.so.1 to lib/ as Qt's compiler
+    # tools (moc, rcc, uic) depends on it.
+    src_libc = deps_common.getClangDirectory() / "lib" / "libc++.so.1"
+    dst_libc = f"{installdir}/lib/libc++.so.1"
+    logging.info(f"Copy {src_libc} ==> {dst_libc}")
+    shutil.copyfile(src_libc, dst_libc)
+
+    fix_exes = [
+        f"{installdir}/libexec/moc",
+        f"{installdir}/libexec/rcc",
+        f"{installdir}/libexec/uic",
+        f"{installdir}/libexec/QtWebEngineProcess"]
+    # Add rpath to $ORIGIN/../lib so these executables can find libc++.so.1.
+    # You can verify the rpath with `objdump -x <exe> | grep PATH`.
+    # Also can check if libc++.so.1 is resolvable with `ldd <exe>`.
+    for exe in fix_exes:
+        logging.info(f"Adding rpath $ORIGIN/../lib to {exe}")
+        subprocess.check_call(
+            ["patchelf", "--set-rpath", "$ORIGIN/../lib", exe],
+            cwd=installdir, env=os.environ.copy())
 
 def buildPrebuilt(args, prebuilts_out_dir):
     atexit.register(cleanup)
