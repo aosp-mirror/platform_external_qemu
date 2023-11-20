@@ -261,28 +261,44 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
   // thread.
   // FB13254074.
   CVImageBufferRef workingFrame = CMSampleBufferGetImageBuffer(sampleBuffer);
-  static vImage_CGImageFormat desiredFormat = {
+  CGColorSpaceRef cs = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+  vImage_CGImageFormat desiredFormat = {
     .bitsPerComponent = 8,
     .bitsPerPixel = 32,
-    .colorSpace = nil,
+    .colorSpace = cs,
     .bitmapInfo =
     (CGBitmapInfo)(kCGImageByteOrder32Big | kCGImageAlphaNoneSkipFirst),
     .version = 0,
     .decode = nil,
     .renderingIntent = kCGRenderingIntentDefault
   };
-
-  AndroidCoarseOrientation orientation = get_coarse_orientation();
+  vImageCVImageFormatRef imageFormat =
+      vImageCVImageFormat_CreateWithCVPixelBuffer(workingFrame);
+  if (!imageFormat) {
+    E("%s: NULL return from vImageCVImageFormat_CreateWithCVPixelBuffer\n",
+      __func__);
+    return;
+  }
   vImage_Error error;
+  error = vImageCVImageFormat_SetColorSpace(imageFormat, cs);
+  CGColorSpaceRelease(cs);
+  if (error != kvImageNoError) {
+    E("%s: error in vImageCVImageFormat_SetColorSpace: %ld\n", __func__, error);
+    vImageCVImageFormat_Release(imageFormat);
+    return;
+  }
+  AndroidCoarseOrientation orientation = get_coarse_orientation();
   if (orientation == ANDROID_COARSE_PORTRAIT ||
       orientation == ANDROID_COARSE_REVERSE_PORTRAIT) {
     vImage_Flags flags =
         rotateInputBuffer_.data != NULL ? kvImageNoAllocate : kvImageNoFlags;
     error = vImageBuffer_InitWithCVPixelBuffer(&rotateInputBuffer_,
                                                &desiredFormat, workingFrame,
-                                               nil, nil, flags);
+                                               imageFormat, nil, flags);
     if (error != kvImageNoError) {
-      E("%s: error in allocate rotateInputBuffer_: %ld\n", __func__, error);
+      E("%s: error in vImageBuffer_InitWithCVPixelBuffer rotateInputBuffer_: "
+        "%ld\n", __func__, error);
+      vImageCVImageFormat_Release(imageFormat);
       return;
     }
     if (scaleInputBuffer_.data &&
@@ -296,7 +312,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
       error = vImageBuffer_Init(&scaleInputBuffer_, rotateInputBuffer_.width,
                                 rotateInputBuffer_.height, 32, kvImageNoFlags);
       if (error != kvImageNoError) {
-        E("%s: error in allocate scaleInputBuffer_: %ld\n", __func__, error);
+        E("%s: error in vImageBuffer_Init scaleInputBuffer_: %ld\n", __func__,
+          error);
+        vImageCVImageFormat_Release(imageFormat);
         return;
       }
     }
@@ -307,7 +325,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     error = vImageRotate90_ARGB8888(&rotateInputBuffer_, &scaleInputBuffer_,
                                     rotation, backColor, kvImageNoFlags);
     if (error != kvImageNoError) {
-      E("%s: error in rotate: %ld\n", __func__, error);
+      E("%s: error in vImageRotate90_ARGB8888: %ld\n", __func__, error);
+      vImageCVImageFormat_Release(imageFormat);
       return;
     }
   } else {
@@ -322,12 +341,15 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         scaleInputBuffer_.data != NULL ? kvImageNoAllocate : kvImageNoFlags;
     error = vImageBuffer_InitWithCVPixelBuffer(&scaleInputBuffer_,
                                                &desiredFormat, workingFrame,
-                                               nil, nil, flags);
+                                               imageFormat, nil, flags);
     if (error != kvImageNoError) {
-      E("%s: error in allocate scaleInputBuffer_: %ld\n", __func__, error);
+      E("%s: error in vImageBuffer_InitWithCVPixelBuffer scaleInputBuffer_: "
+        "%ld\n", __func__, error);
+      vImageCVImageFormat_Release(imageFormat);
       return;
     }
   }
+  vImageCVImageFormat_Release(imageFormat);
   // AVFoundation doesn't provide pre-scaled output.
   // Scale it here, using the Accelerate framework.
   // Also needs to be the correct aspect ratio,
@@ -375,7 +397,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                                            desiredWidth_, 32,
                                            kvImageNoFlags);
     if (error != kvImageNoError) {
-      E("%s: error in allocate scaleOutputBuffer_: %ld\n", __func__, error);
+      E("%s: error in vImageBuffer_Init scaleOutputBuffer_: %ld\n", __func__,
+        error);
       os_unfair_lock_unlock(&scaleOutputBufferLock_);
       return;
     }
