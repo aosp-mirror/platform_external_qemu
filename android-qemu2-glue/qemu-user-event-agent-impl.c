@@ -15,11 +15,13 @@
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
 #include "android-qemu2-glue/emulation/virtio-input-rotary.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
-#include "host-common/feature_control.h"
+#include "android/avd/info.h"
+#include "android/console.h"
 #include "android/multitouch-screen.h"
 #include "android/skin/event.h"
 #include "android/skin/generic-event-buffer.h"
 #include "android/utils/debug.h"
+#include "host-common/feature_control.h"
 #include "hw/input/goldfish_events.h"
 #include "hw/input/goldfish_events_common.h"
 #include "hw/input/goldfish_rotary.h"
@@ -115,7 +117,22 @@ static void user_event_mouse(int dx,
         if (feature_is_enabled(kFeature_VirtioTablet)) {
             kbd_put_tablet_button_state(buttonsState);
         }
-        kbd_mouse_event(dx, dy, dz, buttonsState);
+        if (qemu_input_is_absolute()) {
+            int w = surface_width(qemu_console_surface(qemu_active_console()));
+            int h = surface_height(qemu_console_surface(qemu_active_console()));
+            bool isUdcOrHigher =
+                    avdInfo_getApiLevel(
+                            getConsoleAgents()->settings->avdInfo()) >= 34;
+            // Bug(b/309667960): Stop-gap solution to resolve the difference
+            // between tablet size and display viewport size.
+            if (isUdcOrHigher)
+                kbd_mouse_event_absolute(dx, dy, dz, buttonsState, w,
+                                         (w > h) ? w : h);
+            else
+                kbd_mouse_event_absolute(dx, dy, dz, buttonsState, w, h);
+        } else {
+            kbd_mouse_event(dx, dy, dz, buttonsState);
+        }
     }
 }
 
