@@ -125,10 +125,10 @@ static void user_event_mouse(int dx,
                             getConsoleAgents()->settings->avdInfo()) >= 34;
             // Bug(b/309667960): Stop-gap solution to resolve the difference
             // between tablet size and display viewport size.
-            if (isUdcOrHigher)
-                kbd_mouse_event_absolute(dx, dy, dz, buttonsState, w,
-                                         (w > h) ? w : h);
-            else
+            if (isUdcOrHigher) {
+                int size = (w > h) ? w : h;
+                kbd_mouse_event_absolute(dx, dy, dz, buttonsState, size, size);
+            } else
                 kbd_mouse_event_absolute(dx, dy, dz, buttonsState, w, h);
         } else {
             kbd_mouse_event(dx, dy, dz, buttonsState);
