@@ -61,6 +61,7 @@ public:
 private:
 #ifdef LIBSLIRP
     static void eloopSocketHandler(int sock, void* eloop_ctx, void* sock_ctx);
+    static void eloopTimeoutHandler(void* eloop_ctx, void* user_ctx);
 #else
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
     // Wrapper functions for passing C-sytle func ptr to struct NetClientInfo
@@ -78,7 +79,7 @@ private:
     static const char* const kNicName;
     ssize_t sendToGuest(
             std::unique_ptr<android::network::Ieee80211Frame> frame);
-    void resetBeaconTask();
+    void registerBeaconTask();
     size_t onRemoteData(const uint8_t* data, size_t size);
     void sendToRemoteVM(std::unique_ptr<android::network::Ieee80211Frame> frame,
                         android::network::FrameType type);
@@ -91,7 +92,7 @@ private:
     WifiService::OnLinkStatusChangedCallback mOnLinkStatusChanged;
     WifiService::OnSentCallback mOnFrameSentCallback;
     WifiService::CanReceiveCallback mCanReceive;
-    android::base::Looper* mLooper;
+    android::base::Looper* mLooper = nullptr;
     // Scoped sockets holding the socket pair.
     android::base::ScopedSocket mVirtIOSock;
     android::base::ScopedSocket mHostapdSock;
