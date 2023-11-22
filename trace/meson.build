@@ -2,11 +2,16 @@ system_ss.add(files('trace-hmp-cmds.c'))
 
 specific_ss.add(files('control-target.c'))
 
+path_sep = '/'
+if build_machine.system() == 'windows'
+  path_sep = '\\'
+endif
+
 trace_events_files = []
 foreach item : [ '.' ] + trace_events_subdirs + qapi_trace_events
   if item in qapi_trace_events
     trace_events_file = item
-    group_name = item.full_path().split('/')[-1].underscorify()
+    group_name = item.full_path().split(path_sep)[-1].underscorify()
   else
     trace_events_file = meson.project_source_root() / item / 'trace-events'
     group_name = item == '.' ? 'root' : item.underscorify()
@@ -59,10 +64,11 @@ foreach item : [ '.' ] + trace_events_subdirs + qapi_trace_events
   endif
 endforeach
 
+pycat = find_program('../scripts/cat.py')
 trace_events_all = custom_target('trace-events-all',
                                  output: 'trace-events-all',
                                  input: trace_events_files,
-                                 command: [ 'cat', '@INPUT@' ],
+                                 command: [ pycat, '@INPUT@' ],
                                  capture: true,
                                  install: true,
                                  install_dir: qemu_datadir)

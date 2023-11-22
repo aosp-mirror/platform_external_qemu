@@ -218,8 +218,6 @@ test('QAPI schema regression tests', python,
      args: files('test-qapi.py') + schemas,
      env: test_env, suite: ['qapi-schema', 'qapi-frontend'])
 
-diff = find_program('diff')
-
 custom_target('QAPI doc',
               output: ['doc-good-qapi-commands.c', 'doc-good-qapi-commands.h',
                        'doc-good-qapi-emit-events.c', 'doc-good-qapi-emit-events.h',
@@ -243,6 +241,7 @@ if build_docs
   # need to add more sophisticated logic here in future for some sort of
   # fuzzy comparison if future Sphinx versions produce different text,
   # but for now the simple comparison suffices.
+  diff = find_program('diff')
   qapi_doc_out = custom_target('QAPI rST doc',
                                output: ['doc-good.txt'],
                                input: files('doc-good.json', 'doc-good.rst'),
