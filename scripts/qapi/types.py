@@ -91,7 +91,7 @@ def gen_enum(name: str,
 
     ret = mcgen('''
 
-typedef enum %(c_name)s {
+typedef enum %(c_name)s : unsigned int {
 ''',
                 c_name=c_name(name))
 

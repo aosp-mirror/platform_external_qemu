@@ -10,7 +10,7 @@
 #include "hw/usb.h"
 #include "hw/scsi/scsi.h"
 
-enum USBMSDMode {
+enum USBMSDMode : unsigned int {
     USB_MSDM_CBW, /* Command Block.  */
     USB_MSDM_DATAOUT, /* Transfer data to device.  */
     USB_MSDM_DATAIN, /* Transfer data from device.  */
