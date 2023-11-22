@@ -70,7 +70,7 @@ int __mingw_setjmp(jmp_buf);
 void __attribute__((noreturn)) __mingw_longjmp(jmp_buf, int);
 #define setjmp(env) __mingw_setjmp(env)
 #define longjmp(env, val) __mingw_longjmp(env, val)
-#elif defined(_WIN64)
+#elif defined(_WIN64) && !defined(__clang__)
 /*
  * On windows-x64, setjmp is implemented by _setjmp which needs a second parameter.
  * If this parameter is NULL, longjump does no stack unwinding.

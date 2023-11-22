@@ -385,7 +385,7 @@ static pid_t qtest_create_process(char *cmd)
         abort();
     }
 
-    return (pid_t)pi.hProcess;
+    return (pid_t)GetProcessId(pi.hProcess);
 }
 #endif /* _WIN32 */
 
