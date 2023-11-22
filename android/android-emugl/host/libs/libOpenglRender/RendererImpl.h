@@ -45,7 +45,8 @@ public:
     void finish() override;
 
 public:
-    gfxstream::RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
+    gfxstream::RenderChannelPtr createRenderChannel(android::base::Stream* loadStream,
+                                                    uint32_t virtioGpuContextId) final;
 
     void* addressSpaceGraphicsConsumerCreate(
         struct asg_context,
