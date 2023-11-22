@@ -836,7 +836,7 @@ public:
         // The folded screen is represented as a rectangle within the full
         // screen.
         SkinRect rect = {{0, 0}, {0, 0}};
-        if (isFolded) {
+        if (not_pixel_fold && isFolded) {
             android_foldable_get_folded_area(&rect.pos.x, &rect.pos.y,
                                              &rect.size.w, &rect.size.h);
             auto foldedDisplay =
@@ -845,10 +845,6 @@ public:
             foldedDisplay->set_height(rect.size.h);
             foldedDisplay->set_xoffset(rect.pos.x);
             foldedDisplay->set_yoffset(rect.pos.y);
-            if (is_pixel_fold) {
-                // reset rect
-                rect = {{0, 0}, {0, 0}};
-            }
         } else {
             reply->mutable_format()->clear_foldeddisplay();
         }
@@ -1023,7 +1019,7 @@ public:
             memcpy(pixels, img.getPixelBuf(), cPixels);
         } else {
             ScreenshotUtils::getScreenshot(
-                    myDisplayId >= 0 ? myDisplayId : request->display(), request->format(), rotation, newWidth,
+                    request->display(), request->format(), rotation, newWidth,
                     newHeight, pixels, &cPixels, &width, &height, rect);
         }
         // Update format information with the retrieved width, height.
@@ -1033,9 +1029,6 @@ public:
                       width, height, rotation_reply->ShortDebugString().c_str(),
                       cPixels, sw.elapsedUs());
 
-        if (isFolded) {
-            format->set_display(request->display());
-        }
         return Status::OK;
     }
 
