@@ -11,8 +11,8 @@ __license__    = "GPL version 2 or (at your option) any later version"
 __maintainer__ = "Stefan Hajnoczi"
 __email__      = "stefanha@redhat.com"
 
-
-import os.path
+from os.path import relpath
+from pathlib import Path
 
 from tracetool import out
 
@@ -43,7 +43,7 @@ def generate_h(event, group):
         '    }',
         cond=cond,
         event_lineno=event.lineno,
-        event_filename=os.path.relpath(event.filename),
+        event_filename=Path(relpath(event.filename)).as_posix(),
         name=event.name,
         fmt=event.fmt.rstrip("\n"),
         argnames=argnames)

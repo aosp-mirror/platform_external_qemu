@@ -12,7 +12,8 @@ __maintainer__ = "Stefan Hajnoczi"
 __email__      = "stefanha@redhat.com"
 
 
-import os.path
+from pathlib import Path
+from os.path import relpath
 
 from tracetool import out
 
@@ -55,7 +56,7 @@ def generate_h(event, group):
         '    }',
         cond=cond,
         event_lineno=event.lineno,
-        event_filename=os.path.relpath(event.filename),
+        event_filename=Path(relpath(event.filename)).as_posix(),
         name=event.name,
         fmt=event.fmt.rstrip("\n"),
         argnames=argnames)
