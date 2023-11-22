@@ -41,7 +41,7 @@ enum xhci_flags {
     XHCI_FLAG_ENABLE_STREAMS,
 };
 
-typedef enum TRBType {
+typedef enum TRBType : unsigned int {
     TRB_RESERVED = 0,
     TR_NORMAL,
     TR_SETUP,
@@ -79,7 +79,7 @@ typedef enum TRBType {
     CR_VENDOR_NEC_CHALLENGE_RESPONSE = 50,
 } TRBType;
 
-typedef enum TRBCCode {
+typedef enum TRBCCode : unsigned int {
     CC_INVALID = 0,
     CC_SUCCESS,
     CC_DATA_BUFFER_ERROR,
