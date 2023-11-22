@@ -73,7 +73,7 @@ class QAPIGen:
         # Include paths starting with ../ are used to reuse modules of the main
         # schema in specialised schemas. Don't overwrite the files that are
         # already generated for the main schema.
-        if self.fname.startswith('../'):
+        if self.fname.startswith('..' + os.sep):
             return
         pathname = os.path.join(output_dir, self.fname)
         odir = os.path.dirname(pathname)
