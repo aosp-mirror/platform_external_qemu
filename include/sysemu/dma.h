@@ -14,6 +14,8 @@
 #include "exec/address-spaces.h"
 #include "block/block.h"
 #include "block/accounting.h"
+#include "block/aio.h"
+#include "qemu/iov.h"
 
 typedef enum {
     DMA_DIRECTION_TO_DEVICE = 0,

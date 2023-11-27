@@ -31,6 +31,7 @@
 #include "sysemu/reset.h"
 #include "sysemu/runstate.h"
 #include "hw/boards.h"
+#include "qemu/main-loop.h"
 
 #include "hax-accel-ops.h"
 
