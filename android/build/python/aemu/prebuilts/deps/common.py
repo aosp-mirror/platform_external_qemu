@@ -15,13 +15,16 @@
 # limitations under the License.
 
 import atexit
+import json
 import logging
 import os
 import platform
 import re
 import subprocess
 import sys
+from pathlib import Path
 
+AOSP_ROOT = Path(__file__).resolve().parents[8]
 EXE_SUFFIX = ".exe" if platform.system().lower() == "windows" else ""
 
 def checkExeIsOnPath(exe):
@@ -113,3 +116,12 @@ def checkPythonPackage(name):
     res = subprocess.check_output(
         args=["pip{}".format(EXE_SUFFIX), "show", "{}".format(name)],
         env=os.environ.copy(), encoding="utf-8").strip()
+
+def getClangDirectory():
+    # clang toolchain version is in external/qemu/android/build/toolchains.json
+    toolchain_json_file = AOSP_ROOT / "external" / "qemu" / "android" / "build" / "toolchains.json"
+    clang_path = AOSP_ROOT / "prebuilts" / "clang" / "host" / f"{platform.system().lower()}-x86"
+    with open(toolchain_json_file, 'r') as f:
+        toolchain_json = json.load(f)
+        clang_path = clang_path / toolchain_json['clang']
+    return clang_path
