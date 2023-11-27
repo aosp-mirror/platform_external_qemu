@@ -15,7 +15,6 @@ ss = import('sourceset')
 fs = import('fs')
 
 targetos = host_machine.system()
-sh = find_program('sh')
 config_host = keyval.load(meson.current_build_dir() / 'config-host.mak')
 
 cc = meson.get_compiler('c')
@@ -157,7 +156,7 @@ edk2_targets = [ 'arm-softmmu', 'aarch64-softmmu', 'i386-softmmu', 'x86_64-softm
 unpack_edk2_blobs = false
 foreach target : edk2_targets
   if target in target_dirs
-    bzip2 = find_program('bzip2', required: get_option('install_blobs'))
+    bzip2 = find_program('bzip2', required: false) # get_option('install_blobs'))
     unpack_edk2_blobs = bzip2.found()
     break
   endif
@@ -3011,7 +3010,7 @@ genh += custom_target('config-poison.h',
                       input: [target_configs_h],
                       output: 'config-poison.h',
                       capture: true,
-                      command: [find_program('scripts/make-config-poison.sh'),
+                      command: [find_program('scripts/make-config-poison.py'),
                                 target_configs_h])
 
 ##############
@@ -3061,8 +3060,12 @@ if fdt_required.length() > 0 or fdt_opt == 'enabled'
     elif fdt_opt == 'system'
        error('system libfdt requested, but it is too old (1.5.1 or newer required)')
     else
-      fdt_opt = 'internal'
-      fdt = not_found
+      fdt = dependency('libfdt', version: '>=1.5.1', required: true,
+                       method: 'pkg-config')
+      if not fdt.found()
+        fdt_opt = 'internal'
+        fdt = not_found
+      endif
     endif
   endif
   if not fdt.found()
@@ -3086,7 +3089,7 @@ config_host_data.set('CONFIG_SLIRP', slirp.found())
 
 genh += configure_file(output: 'config-host.h', configuration: config_host_data)
 
-hxtool = find_program('scripts/hxtool')
+hxtool = find_program('scripts/hxtool.py')
 shaderinclude = find_program('scripts/shaderinclude.py')
 qapi_gen = find_program('scripts/qapi-gen.py')
 qapi_gen_depends = [ meson.current_source_dir() / 'scripts/qapi/__init__.py',
@@ -3131,7 +3134,7 @@ tracetool_depends = files(
   'scripts/tracetool/vcpu.py'
 )
 
-qemu_version_cmd = [find_program('scripts/qemu-version.sh'),
+qemu_version_cmd = [find_program('scripts/qemu-version.py'),
                     meson.current_source_dir(),
                     get_option('pkgversion'), meson.project_version()]
 qemu_version = custom_target('qemu-version.h',
@@ -3683,7 +3686,7 @@ common_all = static_library('common',
                             dependencies: common_all.dependencies(),
                             name_suffix: 'fa')
 
-feature_to_c = find_program('scripts/feature_to_c.sh')
+feature_to_c = find_program('scripts/feature_to_c.py')
 
 if targetos == 'darwin'
   entitlement = find_program('scripts/entitlement.sh')
@@ -3903,9 +3906,11 @@ if have_tools
              dependencies: [authz, block, crypto, io, qom, qemuutil], install: true)
   qemu_io = executable('qemu-io', files('qemu-io.c'),
              dependencies: [block, qemuutil], install: true)
-  qemu_nbd = executable('qemu-nbd', files('qemu-nbd.c'),
-               dependencies: [blockdev, qemuutil, gnutls, selinux],
-               install: true)
+  if build_machine.system() != 'windows'
+    qemu_nbd = executable('qemu-nbd', files('qemu-nbd.c'),
+                dependencies: [blockdev, qemuutil, gnutls, selinux],
+                install: true)
+  endif
 
   subdir('storage-daemon')
   subdir('contrib/rdmacm-mux')
