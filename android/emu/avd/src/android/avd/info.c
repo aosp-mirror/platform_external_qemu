@@ -400,7 +400,7 @@ static int _getSkinPathFromName(const char* skinName,
 
     /* is the skin name a relative path from the SDK root ? */
     p = bufprint(temp, end, "%s" PATH_SEP "%s", sdkRootPath, skinName);
-    if (p < end && _checkSkinPath(temp)) {
+    if (!path_is_absolute(skinName) && p < end && _checkSkinPath(temp)) {
         skinName = temp;
         goto FOUND_IT;
     }
