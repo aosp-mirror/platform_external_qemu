@@ -852,6 +852,12 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
             }
             break;
         case QtUICommand::CHANGE_FOLDABLE_POSTURE:
+            {
+                const bool showWarning = true;
+                if (isRecordingInProgress(showWarning)) {
+                    break;
+                }
+            }
             if (down && mLastRequestedFoldablePosture != -1) {
                 float posture =
                         static_cast<float>(mLastRequestedFoldablePosture);
@@ -861,6 +867,12 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
             }
             break;
         case QtUICommand::UPDATE_FOLDABLE_POSTURE_INDICATOR:
+            {
+                const bool showWarning = true;
+                if (isRecordingInProgress(showWarning)) {
+                    break;
+                }
+            }
             if (down) {
                 float posture = 0;
                 float* out = &posture;
@@ -951,6 +963,23 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
     }
 }
 
+bool ToolWindow::isRecordingInProgress(bool showWarning) {
+    RecorderStates state = emulator_window_recorder_state_get();
+    if (state.state == RECORDER_RECORDING) {
+        // Do not allow resizing when recording is in progress.
+        if (showWarning) {
+            if (sUiEmuAgent && sUiEmuAgent->window) {
+                sUiEmuAgent->window->showMessage(
+                    "Cannot resize/fold/unfold emulator: recording in progress!",
+                    WINDOW_MESSAGE_ERROR, 3000);
+            }
+            LOG(ERROR) << "Cannot resize/fold/unfold emulator: recording in progress!";
+        }
+        return true;
+    }
+    return false;
+}
+
 void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
     if (!resizableEnabled()) {
         return;
@@ -958,15 +987,8 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
     if (getResizableActiveConfigId() == newSize) {
         return;
     }
-    RecorderStates state = emulator_window_recorder_state_get();
-    if (state.displayId == 0 && state.state == RECORDER_RECORDING) {
-        // Do not allow resizing when recording is in progress.
-        if (sUiEmuAgent && sUiEmuAgent->window) {
-            sUiEmuAgent->window->showMessage(
-                    "Cannot resize emulator: recording in progress!",
-                    WINDOW_MESSAGE_ERROR, 3000);
-        }
-        LOG(ERROR) << "Cannot resize emulator: recording in progress!";
+    const bool showWarning = true;
+    if (isRecordingInProgress(showWarning)) {
         return;
     }
     PresetEmulatorSizeInfo info;
