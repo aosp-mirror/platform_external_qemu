@@ -128,7 +128,6 @@ def checkDependencies():
             ("x11-xcb", [1, 3, 2]),
             ("sm", None),
             ("ice", None),
-            ("glib-2.0", [2, 8, 3]),
             ("dbus-1", None),
             ("xcomposite", None),
             ("xcursor", None),
@@ -213,7 +212,10 @@ def configureQtBuild(srcdir, builddir, installdir):
 
     if platform.system().lower() == "linux":
         extra_conf_args = ["-linker", "lld",
-                           "-platform", "linux-clang-libc++"]
+                           "-platform", "linux-clang-libc++",
+                           "-no-glib"]
+        conf_args += extra_conf_args
+
         os.environ["CC"] = "clang"
         os.environ["CXX"] = "clang++"
         extra_cflags = "-m64 -fuse-ld=lld -fPIC"
