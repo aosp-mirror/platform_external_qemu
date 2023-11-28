@@ -89,11 +89,12 @@ protected:
     void toggleAA() { mEnableAA = !mEnableAA; }
     virtual void showEvent(QShowEvent*) override;
 
+public:
+    bool ensureInit();
 private:
     void paintEvent(QPaintEvent*) override;
     void resizeEvent(QResizeEvent*) override;
 
-    bool ensureInit();
     void destroyContext();
 
     EGLState* mEGLState;
