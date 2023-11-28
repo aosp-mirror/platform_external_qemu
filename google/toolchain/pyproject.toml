@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 # # check out https://github.com/pypa/setuptools_scm
 # version_scheme = "no-guess-dev"
 [project]
-name = "deps"
+name = "amc"
 authors = [{ name = "Erwin Jansen", email = "jansene@google.com" }]
 license = { file = "LICENSE.TXT" }
 readme = "README.md"
@@ -16,8 +16,8 @@ classifiers = ["Topic :: Software Development"]
 
 
 dependencies = [
-    "pydot",
     "importlib-metadata; python_version<'3.8'",
+    "pykg_config @ git+https://github.com/pokowaka/pykg-config/@py3",
 ]
 
 [project.optional-dependencies]
@@ -28,7 +28,7 @@ tests = [
 ]
 
 [project.scripts]
-emu-deps = "aemu.toolchain:main"
+amc = "aemu.toolchain:main"
 
 
 [tool.pytest.ini_options]
