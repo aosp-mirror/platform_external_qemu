@@ -1019,6 +1019,10 @@ void EmulatorQtWindow::queueQuitEvent() {
 }
 
 void EmulatorQtWindow::refreshSkin() {
+    const bool showWarning = false;
+    if (mToolWindow->isRecordingInProgress(showWarning)) {
+        return;
+    }
     const bool pixel_fold = android_foldable_is_pixel_fold();
     const bool has_skin = hasSkin();
 
