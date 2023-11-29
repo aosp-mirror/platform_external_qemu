@@ -253,7 +253,7 @@ def main():
 
     # Make sure we use absolute paths, so we do not get
     # confused.
-    if args.out:
+    if hasattr(args, "out") and args.out:
         args.out = Path(args.out).absolute()
 
     if args.command == "setup":
