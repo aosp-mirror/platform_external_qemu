@@ -29,16 +29,6 @@
 #include "ui/console.h"
 #include "ui/input.h"
 
-static void user_event_key(unsigned code, bool down) {
-    if (code == 0) {
-        return;
-    }
-    if (VERBOSE_CHECK(keys))
-        dprint(">> %s KEY [0x%03x,%s]", __func__, (code & 0x3ff), down ? "down" : " up ");
-
-    goldfish_event_send(0x01, code, down);
-}
-
 static void user_event_keycode(int code) {
     bool down = code & 0x400;
     if (VERBOSE_CHECK(keys))
@@ -69,6 +59,19 @@ static void user_event_keycodes(int* kcodes, int count) {
     for (nn = 0; nn < count; nn++) {
         user_event_keycode(kcodes[nn]);
     }
+}
+
+static void user_event_key(unsigned code, bool down) {
+    if (code == 0) {
+        return;
+    }
+    if (VERBOSE_CHECK(keys))
+        dprint(">> %s KEY [0x%03x,%s]", __func__, (code & 0x3ff), down ? "down" : " up ");
+
+    if (down) {
+        code |= 0x400;
+    }
+    user_event_keycode(code);
 }
 
 /*
