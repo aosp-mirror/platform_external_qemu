@@ -1272,10 +1272,10 @@ static int startEmulatorWithMinConfig(int argc,
     bool shouldDisableAsyncSwap =
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9 ||
-            rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER ||
-            rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
-            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE_INDIRECT ||
-            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9_INDIRECT;
+            rendererConfig.selectedRenderer ==
+                    SELECTED_RENDERER_ANGLE_INDIRECT ||
+            rendererConfig.selectedRenderer ==
+                    SELECTED_RENDERER_ANGLE9_INDIRECT;
     // Features to disable or enable depending on rendering backend
     // and gpu make/model/version
 #if defined(__APPLE__) && defined(__aarch64__)
@@ -1284,8 +1284,9 @@ static int startEmulatorWithMinConfig(int argc,
     shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
                               System::get()->getProgramBitness() == 32;
 #endif
-    shouldDisableAsyncSwap =
-            shouldDisableAsyncSwap || async_query_host_gpu_SyncBlacklisted();
+    shouldDisableAsyncSwap |=
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_HOST &&
+            async_query_host_gpu_SyncBlacklisted();
 
     if (shouldDisableAsyncSwap) {
         fc::setEnabledOverride(fc::GLAsyncSwap, false);
@@ -3229,10 +3230,10 @@ extern "C" int main(int argc, char** argv) {
         bool shouldDisableAsyncSwap =
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9 ||
-                rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER ||
-                rendererConfig.selectedRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
-                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE_INDIRECT ||
-                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9_INDIRECT;
+                rendererConfig.selectedRenderer ==
+                        SELECTED_RENDERER_ANGLE_INDIRECT ||
+                rendererConfig.selectedRenderer ==
+                        SELECTED_RENDERER_ANGLE9_INDIRECT;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
 #if defined(__APPLE__) && defined(__aarch64__)
@@ -3241,8 +3242,9 @@ extern "C" int main(int argc, char** argv) {
         shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
                                   System::get()->getProgramBitness() == 32;
 #endif
-        shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
-                                 async_query_host_gpu_SyncBlacklisted();
+        shouldDisableAsyncSwap |=
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_HOST &&
+                async_query_host_gpu_SyncBlacklisted();
 
         if (shouldDisableAsyncSwap) {
             fc::setEnabledOverride(fc::GLAsyncSwap, false);
