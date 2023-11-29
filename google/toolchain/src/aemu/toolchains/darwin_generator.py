@@ -14,6 +14,7 @@
 # limitations under the License.
 import logging
 import re
+import shutil
 from pathlib import Path
 
 from aemu.process.runner import check_output
@@ -58,7 +59,8 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
         osx_sdk_root (pathlib.Path): Path to the macOS SDK used for building.
     """
 
-    XCODE_VER_RE = re.compile(r"Xcode\s+(\d+\.\d+.\d+)")
+    #  Matches Xcode 12.4 as well as Xcode 15.0.1
+    XCODE_VER_RE = re.compile(r"Xcode\s+((\d+\.?)+)")
     XCODE_BUILD_VER = re.compile(r"Build version\s+(\w+)")
     MIN_VERSION = "11"
     OSX_DEPLOYMENT_TARGET = "11.0"
@@ -66,8 +68,8 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
     def __init__(self, aosp, dest, prefix, target_arch="arm64") -> None:
         super().__init__(aosp, dest, prefix)
         self.target_arch = target_arch
-        verinfo = check_output(["xcodebuild", "-version"]).splitlines()
 
+        verinfo = check_output(["xcodebuild", "-version"]).splitlines()
         version = self.XCODE_VER_RE.match(verinfo[0])[1]
         build = self.XCODE_BUILD_VER.match(verinfo[1])[1]
 
@@ -85,6 +87,9 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
 
         logging.info("OSX: Using Xcode: %s (%s)", version, build)
         logging.info("OSX: XCode path: %s", self.osx_sdk_root)
+
+    def _find_exe(self, prog):
+        paths = ["/usr/bin", "/usr/local/bin"]
 
     def _base_script(self):
         cache = f"{self.ccache}" if self.ccache else ""
