@@ -104,7 +104,7 @@ class LinuxBuilder(QemuBuilder):
             "-Dsdl_image=disabled",
             "-Dseccomp=disabled",
             "-Dselinux=disabled",
-            "-Dslirp=disabled",
+            "-Dslirp=enabled",
             "-Dslirp_smbd=disabled",
             "-Dsmartcard=disabled",
             "-Dsnappy=disabled",
