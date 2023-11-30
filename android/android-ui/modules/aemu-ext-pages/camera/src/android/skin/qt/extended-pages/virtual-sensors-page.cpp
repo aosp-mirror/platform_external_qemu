@@ -155,6 +155,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
         // Otherwise use the hardware configuration.
         disableHeartRateSensor();
     }
+    mUi->accelWidget->ensureInit();
 }
 
 VirtualSensorsPage::~VirtualSensorsPage() {

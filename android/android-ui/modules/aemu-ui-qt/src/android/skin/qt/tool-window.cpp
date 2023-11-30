@@ -987,6 +987,14 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
     if (getResizableActiveConfigId() == newSize) {
         return;
     }
+    if (android_foldable_is_folded()) {
+        const char* error_msg = "Cannot resize emulator: avd is folded, unfold and try again";
+        if (sUiEmuAgent && sUiEmuAgent->window) {
+                sUiEmuAgent->window->showMessage( error_msg, WINDOW_MESSAGE_ERROR, 3000);
+        }
+        LOG(ERROR) << error_msg;
+        return;
+    }
     const bool showWarning = true;
     if (isRecordingInProgress(showWarning)) {
         return;

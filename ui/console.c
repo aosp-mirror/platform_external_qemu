@@ -2401,10 +2401,7 @@ void kbd_put_tablet_button_state(int button_state) {
     qemu_input_queue_btn(active_console, INPUT_BUTTON_TOOL_PEN, true);
 }
 
-void kbd_mouse_event(int dx, int dy, int dz, int button_state) {
-
-    assert(active_console && qemu_console_is_graphic(active_console));
-
+static void kbd_update_button_state(int button_state) {
     static uint32_t bmap[INPUT_BUTTON__MAX] = {
         [INPUT_BUTTON_LEFT]       = MOUSE_EVENT_LBUTTON,
         [INPUT_BUTTON_MIDDLE]     = MOUSE_EVENT_MBUTTON,
@@ -2417,29 +2414,43 @@ void kbd_mouse_event(int dx, int dy, int dz, int button_state) {
                                   button_state);
         prev_state = (uint32_t)button_state;
     }
+}
 
-    // TODO(liyl): Determine whether the input is absolute using input
-    // arguments. Clients should specify whether the given (dx, dy, dz) values
-    // are absolute or relative.
-    const bool is_absolute = qemu_input_is_absolute();
+void kbd_mouse_event_absolute(int dx, int dy, int dz, int button_state, int w, int h) {
+    assert(active_console && qemu_console_is_graphic(active_console));
+    kbd_update_button_state(button_state);
     int y;
     if (graphic_rotate) {
-        const int width = is_absolute ? INPUT_EVENT_ABS_MAX + 1 : graphic_width;
+        const int width = INPUT_EVENT_ABS_MAX + 1;
         y = width - 1 - dy;
     } else {
         y = dy;
     }
-
-    if (is_absolute  &&  dz == 0) {
-        int w = surface_width(qemu_console_surface(active_console));
-        int h = surface_height(qemu_console_surface(active_console));
-
+    if (dz == 0) {
         qemu_input_queue_abs(active_console, INPUT_AXIS_X, dx, 0, w);
         qemu_input_queue_abs(active_console, INPUT_AXIS_Y, y, 0, h);
     } else {
         qemu_input_queue_rel(active_console, INPUT_AXIS_X, dx);
         qemu_input_queue_rel(active_console, INPUT_AXIS_Y, y);
     }
+
+    qemu_input_event_sync();
+}
+
+void kbd_mouse_event(int dx, int dy, int dz, int button_state) {
+
+    assert(active_console && qemu_console_is_graphic(active_console));
+    kbd_update_button_state(button_state);
+
+    int y;
+    if (graphic_rotate) {
+        const int width = graphic_width;
+        y = width - 1 - dy;
+    } else {
+        y = dy;
+    }
+    qemu_input_queue_rel(active_console, INPUT_AXIS_X, dx);
+    qemu_input_queue_rel(active_console, INPUT_AXIS_Y, y);
 
     qemu_input_event_sync();
 }

@@ -71,6 +71,8 @@ void kbd_put_tablet_button_state(int button_state);
 
 void kbd_mouse_event(int dx, int dy, int dz, int buttonsState);
 
+void kbd_mouse_event_absolute(int dx, int dy, int dz, int button_state, int w, int h);
+
 void kbd_mouse_wheel_event(int dx, int dy);
 
 struct MouseTransformInfo {

@@ -31,7 +31,7 @@ def buildPrebuilts(args):
     build_list = args.prebuilts if args.prebuilts else _prebuilt_funcs.keys()
     logging.info("Prebuilts list: " + str(build_list))
     for prebuilt in build_list:
-        logging.info(">> Building prebuilt [{}]".format(prebuilt))
+        logging.info(">> Building prebuilt [%s]", prebuilt)
         _prebuilt_funcs.get(prebuilt)(args, prebuilts_dir)
     logging.info("Done building prebuilts list. Prebuilts located at [%s]", prebuilts_dir)
 
