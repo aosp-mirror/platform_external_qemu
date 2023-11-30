@@ -23,3 +23,13 @@ android_add_test(
   DEPS absl::str_format android-emu-base-headers android-emu-base-logging
        gmock_main)
 target_include_directories(android-emu-base-logging_unittests PRIVATE src)
+
+# Add the benchmark
+if (ENABLE_LOGGING_PERF)
+    android_add_executable(
+        TARGET android-emu-base-logging_benchmark
+        NODISTRIBUTE
+        SRC test/android/base/logging/Log_benchmark.cpp
+        DEPS absl::str_format android-emu-base android-emu-base-headers
+        android-emu-base-logging emulator-gbench)
+endif()

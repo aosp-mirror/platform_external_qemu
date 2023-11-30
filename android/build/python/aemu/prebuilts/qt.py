@@ -15,134 +15,132 @@
 # limitations under the License.
 
 import atexit
+import glob
 import logging
 import os
 import re
+import shutil
 import subprocess
 import sys
+from aemu.prebuilts.deps.common import EXE_SUFFIX
+import aemu.prebuilts.deps.common as deps_common
+import aemu.prebuilts.deps.mac as deps_mac
+import aemu.prebuilts.deps.linux as deps_linux
+import aemu.prebuilts.deps.windows as deps_win
+from pathlib import Path
+import platform
 
-QT_SUBMODULES = ["qtbase", "qtsvg", "qtimageformats", "qtwebengine"]
-QT_SRC_PATH = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), "..", "..", "..", "..", "..", "..", "qt5")
+AOSP_ROOT = Path(__file__).resolve().parents[7]
+QT_VERSION = "6.5.3"
+QT_SUBMODULES = [
+    "qtbase",
+    "qtdeclarative",
+    "qtpositioning",
+    "qtsvg",
+    "qtimageformats",
+    "qtwebchannel",
+    "qtwebsockets",
+    "qtwebengine"
+]
+AOSP_QT_SRC_PATH = os.path.join(AOSP_ROOT, "external", "qt5")
+CMAKE_PATH = os.path.join(AOSP_ROOT, "prebuilts", "cmake", platform.system().lower() + "-x86", "bin")
+CMAKE_EXE = os.path.join(CMAKE_PATH, "cmake" + EXE_SUFFIX)
+
 # We must move the source code from external/qt5 to a shorter path because of path too long issue.
 # Symlinking to a shorter path will not work either.
-QT_TMP_LOCATION = os.path.join("C:/", "qttmp")
-QT_SRC_SHORT_PATH = os.path.join(QT_TMP_LOCATION, "src")
-QT_BUILD_PATH = os.path.join(QT_TMP_LOCATION, "bld")
-CMAKE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                          "..", "..", "..", "..", "..", "prebuilts", "cmake", "windows-x86", "bin")
-CMAKE_EXE = os.path.join(CMAKE_PATH, "cmake.exe")
+WIN_QT_TMP_LOCATION = os.path.join("C:/", "qttmp")
+WIN_QT_SRC_SHORT_PATH = os.path.join(WIN_QT_TMP_LOCATION, "src")
+WIN_QT_BUILD_PATH = os.path.join(WIN_QT_TMP_LOCATION, "bld")
 
-def checkVersion(vers_cmd, vers_regex, min_vers):
-    """Checks the executable version against the version requirements.
-
-    Args:
-        vers_cmd (str): A shell command to get the version information.
-        vers_regex (str): The regular expression to filter for the version in vers_cmd output.
-        min_vers (tuple(int)): The minimum required version. For example, version 12.0.1 = (12, 0, 1).
-
-    Returns:
-        bool: True if the version requirements are met, False otherwise.
-    """
-    try:
-        res = subprocess.check_output(args=vers_cmd, env=os.environ.copy()).decode().strip()
-        vers_str = re.search(vers_regex, res)
-        logging.info("{} returned [{}], version=[{}]".format(vers_cmd, res, vers_str.group(0)))
-        vers = tuple(map(int, vers_str.group(0).split('.')))
-        if vers < min_vers:
-            logging.critical("{} returned [{}] is not at least version {}".format(vers_cmd, vers_str.group(0), min_vers))
-            return False
-    except subprocess.CalledProcessError:
-        logging.critical("Encountered problem executing [{}]".format(vers_cmd))
-        return False
-
-    return True
+def addToSearchPath(searchDir):
+    os.environ["PATH"] = searchDir + os.pathsep + os.environ["PATH"]
 
 def checkDependencies():
     # Dependencies for Qt 6 w/ QtWebEngine listed in https://wiki.qt.io/Building_Qt_6_from_Git
     logging.info("Checking for required build dependencies..")
     # - Python >= 3.6.x
-    logging.info(">> Checking for Python >= 3.6.x ({})".format(sys.version))
-    if sys.version_info < (3, 6):
-        logging.critical("Python version {} does not meet minimum requirements".format(sys.version))
-        return False
-    logging.info("Found suitable python version ({})".format(sys.version))
-
-    # - Visual Studio 2019 v16.11+
-    logging.info(">> Checking for Visual Studio 2019 v16.11+")
-    vscheck = os.path.join("C:/", "Program Files (x86)", "Microsoft Visual Studio", "Installer", "vswhere.exe")
-    if not os.path.isfile(vscheck):
-        logging.critical("{} file not found. Unable to check VS version".format(vscheck))
-        return False
-    if not checkVersion(vers_cmd="{} -latest -property installationVersion".format(vscheck),
-                        vers_regex="[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*",
-                        min_vers=(16, 11)):
-        return False
-
-    # Windows 10 SDK >= 10.0.20348.0 (documentation says >= 10.0.19041, but configure complains that it must be >= 10.0.20348.0).
-    winsdk_min_vers = (10, 0, 20348, 0)
-    winsdk_min_str = '.'.join(map(str, winsdk_min_vers))
-    logging.info(">> Checking for Windows 10 SDK >= {}".format(winsdk_min_str))
-    # WindowsSDKVersion may have a trailing '\' character
-    windowsSdkVersionEnv = os.environ["WindowsSDKVersion"].split('\\')[0]
-    winsdk_version = tuple(map(int, windowsSdkVersionEnv.split('.')))
-    if winsdk_version < winsdk_min_vers:
-        logging.critical("Windows SDK is < {} [{}]".format(winsdk_min_str, windowsSdkVersionEnv))
-        return False
-    logging.info("Found suitable Windows SDK version >= {} [{}]".format(winsdk_min_str, windowsSdkVersionEnv))
+    logging.info(">> Checking for Python >= 3.6.x (%s)", sys.version)
+    deps_common.checkPythonVersion(min_vers=(3, 6))
 
     # Need perl to run qt5/init-repository
-    logging.info(">> Checking for perl.exe")
-    try:
-        res = subprocess.check_output(args="where perl.exe", env=os.environ.copy()).decode().strip()
-        logging.info("Found perl.exe [{}]".format(res))
-    except subprocess.CalledProcessError:
-        logging.critical("Could not locate perl.exe")
-        return False
+    logging.info(">> Checking for perl")
+    deps_common.checkPerlVersion()
 
     # CMake >= 3.19 for Qt with QtWebEngine
     logging.info(">> Checking CMake >= 3.19")
-    if not checkVersion(vers_cmd="cmake.exe --version",
-                        vers_regex="[0-9]*\.[0-9]*\.[0-9]*",
-                        min_vers=(3, 19)):
-        return False
+    deps_common.checkCmakeVersion(min_vers=(3, 19))
+
+    # Ninja >= 1.7.2 for Qt with QtWebEngine
+    logging.info(">> Checking Ninja >= 1.7.2")
+    deps_common.checkNinjaVersion(min_vers=(1, 7, 2))
 
     # Need node.js version 12 or later for QtWebEngine
     logging.info(">> Checking for node.js version >= 12")
-    try:
-        res = subprocess.check_output(args="where node.exe", env=os.environ.copy()).decode().strip()
-        logging.info("Found node.exe [{}]".format(res))
-        # version format: v20.9.0
-        if not checkVersion(vers_cmd="node.exe --version",
-                            vers_regex="[0-9]*\.[0-9]*\.[0-9]*",
-                            min_vers=(12, 0)):
-            return False
-    except subprocess.CalledProcessError:
-        logging.critical("Could not locate node.exe")
-        return False
+    deps_common.checkNodeJsVersion(min_vers=(12, 0))
 
     # QtWebEngine needs python html5lib package
     logging.info(">> Checking pip.exe for html5lib")
-    try:
-        res = subprocess.check_output(args="where pip.exe", env=os.environ.copy()).decode().strip()
-        logging.info("Found pip.exe [{}]".format(res))
-        res = subprocess.check_output(args="pip.exe show html5lib", env=os.environ.copy()).decode().strip()
-        logging.info("Found html5lib [{}]".format(res))
-    except subprocess.CalledProcessError:
-        logging.critical("Pyhton package html5lib not found. Please run `pip install html5lib` to install.")
-        return False
+    deps_common.checkPythonPackage("html5lib")
 
     # QtWebEngine requires GNUWin32 dependencies gperf, bison, flex
     # TODO(joshuaduong): Locally I installed bison from https://gnuwin32.sourceforge.net/packages.html, but maybe we use chocolatey on the buildbot.
-    gnuwin32_deps = ["gperf.exe", "bison.exe", "flex.exe"]
-    for dep in gnuwin32_deps:
-        logging.info(">> Checking for {}".format(dep))
-        try:
-            res = subprocess.check_output(args="where {}".format(dep), env=os.environ.copy()).decode().strip()
-            logging.info("Found {} [{}]".format(dep, res))
-        except subprocess.CalledProcessError:
-            logging.critical("{dep} not found. Make sure {dep} is on your PATH.".format(dep=dep))
-            return False
+    logging.info(">> Checking for gperf")
+    deps_common.checkGperfVersion()
+    logging.info(">> Checking for bison")
+    deps_common.checkBisonVersion()
+    logging.info(">> Checking for flex")
+    deps_common.checkFlexVersion()
+
+    if platform.system().lower() == "windows":
+        # - Visual Studio 2019 v16.11+
+        logging.info(">> Checking for Visual Studio 2019 v16.11+")
+        deps_win.checkVSVersion(min_vers=(16, 11))
+        # Windows 10 SDK >= 10.0.20348.0 (documentation says >= 10.0.19041, but configure complains
+        # that it must be >= 10.0.20348.0).
+        logging.info(">> Checking for Windows 10 SDK >= 10.0.20348.0")
+        deps_win.checkWindowsSdk(min_vers=(10, 0, 20348, 0))
+    elif platform.system().lower() == "darwin":
+        # MacOS sdk >= 13
+        deps_mac.checkMacOsSDKVersion(min_vers=(12, 0))
+    elif platform.system().lower() == "linux":
+        pkgconfig_libs = [
+            ("xrender", [0, 9, 0]),
+            ("xcb-render", [1, 11]),
+            ("xcb-renderutil", [0, 3, 9]),
+            ("xcb-shape", [1, 11]),
+            ("xcb-randr", [1, 11]),
+            ("xcb-xfixes", [1, 11]),
+            ("xcb-xkb", [1, 11]),
+            ("xcb-sync", [1, 11]),
+            ("xcb-shm", [1, 11]),
+            ("xcb-icccm", [0, 3, 9]),
+            ("xcb-keysyms", [0, 3, 9]),
+            ("xcb-image", [0, 3, 9]),
+            ("xcb-util", [0, 3, 9]),
+            ("xcb-cursor", [0, 1, 1]),
+            ("xkbcommon", [0, 5, 0]),
+            ("xkbcommon-x11", [0, 5, 0]),
+            ("fontconfig", [2, 6]),
+            ("freetype2", [2, 3, 0]),
+            ("xext", None),
+            ("x11", None),
+            ("xcb", [1, 11]),
+            ("x11-xcb", [1, 3, 2]),
+            ("sm", None),
+            ("ice", None),
+            ("dbus-1", None),
+            ("xcomposite", None),
+            ("xcursor", None),
+            ("xrandr", None),
+            ("xshmfence", None),
+            ("libcupsfilters", None),
+        ]
+        for libname, vers in pkgconfig_libs:
+            if vers:
+                logging.info("Checking pkg-config for (%s >= %s)", libname, '.'.join(map(str, vers)))
+            else:
+                logging.info("Checking pkg-config for %s", libname)
+            deps_linux.checkPkgConfigLibraryExists(libname, vers)
 
     return True
 
@@ -155,18 +153,18 @@ def flattenQtRepo(srcdir):
     Args:
         srcdir (StrOrBytesPath): Path to the Qt source code.
     """
-    logging.info("[{}]>> CMD: perl.exe init-repostory")
-    # We might need to retry this if a network error occurred while cloning the git repos
+    perl_exe = "perl" + EXE_SUFFIX
+    logging.info(">> CMD: %s init-repostory", perl_exe)
     try:
         # We need to set this git config so init-repository pulls down the git submodules correctly.
         # We might need to mirror these submodules as well.
         subprocess.run(args=["git", "config", "remote.origin.url", "https://github.com/qt/"],
                        cwd=srcdir, env=os.environ.copy())
-        res = subprocess.run(args=["perl.exe", "init-repository", "-f"], cwd=srcdir, env=os.environ.copy())
+        res = subprocess.run(args=[perl_exe, "init-repository", "-f"], cwd=srcdir, env=os.environ.copy())
         if res.returncode != 0:
-            logging.critical("init-repository exited with non-zero code ({})".format(res.returncode))
+            logging.critical("init-repository exited with non-zero code (%s)", res.returncode)
             exit(res.returncode)
-        logging.debug("[{}]>> CMD: perl.exe init-repostory succeeded".format(srcdir))
+        logging.debug(">> CMD: %s init-repostory succeeded", perl_exe)
     finally:
         subprocess.run(args=["git", "config", "--unset", "remote.origin.url"],
                        cwd=srcdir, env=os.environ.copy())
@@ -182,27 +180,77 @@ def configureQtBuild(srcdir, builddir, installdir):
         This directory will be created in this function.
     """
     if os.path.exists(builddir):
-        os.remove(builddir)
-    os.mkdir(builddir)
-    conf_args = ["{}\\configure.bat".format(srcdir),
+        shutil.rmtree(builddir)
+    os.makedirs(builddir)
+    config_script = os.path.join(srcdir,
+            ("configure.bat" if platform.system().lower() == "windows" else "configure"))
+    conf_args = [config_script,
                  "-opensource",
                  "-confirm-license",
                  "-release",
                  "-force-debug-info",
                  "-shared",
                  "-no-rpath",
+                 "-submodules",
+                 ",".join(QT_SUBMODULES),
                  "-nomake", "examples",
                  "-nomake", "tests",
+                 "-nomake", "tools",
+                 "-skip", "qtdoc",
+                 "-skip", "qttranslations",
+                 "-skip", "qttools",
+                 "-no-feature-pdf",
+                 "-no-feature-webengine-pepper-plugins",
+                 "-no-feature-webengine-printing-and-pdf",
+                 "-no-feature-webengine-webrtc",
+                 "-no-feature-webengine-spellchecker",
+                 "-no-feature-cups",
                  "-no-strip",
+                 "-no-framework",
                  "-qtlibinfix", "AndroidEmu",
                  "-prefix", installdir]
-    logging.info("[{}] Running configure.bat".format(builddir))
+
+    if platform.system().lower() == "linux":
+        extra_conf_args = ["-linker", "lld",
+                           "-platform", "linux-clang-libc++",
+                           "-no-glib"]
+        conf_args += extra_conf_args
+
+        os.environ["CC"] = "clang"
+        os.environ["CXX"] = "clang++"
+        extra_cflags = "-m64 -fuse-ld=lld -fPIC"
+        extra_cxxflags = "-stdlib=libc++ -m64 -fuse-ld=lld -fPIC"
+        # Use libc++ instead of libstdc++
+        conf_cmake_args = [ f"-DCMAKE_CXX_FLAGS={extra_cxxflags}", f"-DMAKE_C_FLAGS={extra_cflags}" ]
+        # The QtWebEngine chromium build doesn't seem to pick up CXXFLAGS
+        # envrionment variables. So let's just create some clang wrappers
+        # to force use our flags.
+        os.environ["CFLAGS"] = extra_cflags
+        os.environ["CXXFLAGS"] = extra_cxxflags
+        toolchain_dir = Path(builddir) / "toolchain"
+        os.makedirs(Path(builddir) / "toolchain")
+
+        with open(toolchain_dir / "clang", 'x') as f:
+            f.write(f"#!/bin/sh\n/usr/bin/clang {extra_cflags} $@")
+        os.chmod(toolchain_dir / "clang", 0o777)
+
+        with open(toolchain_dir / "clang++", 'x') as f:
+            f.write(f"#!/bin/sh\n/usr/bin/clang++ {extra_cxxflags} $@")
+        os.chmod(toolchain_dir / "clang++", 0o777)
+
+        addToSearchPath(str(toolchain_dir))
+
+    if conf_cmake_args:
+        conf_args.append("--")
+        conf_args += conf_cmake_args
+
+    logging.info("[%s] Running %s", builddir, config_script)
     logging.info(conf_args)
     res = subprocess.run(args=conf_args, cwd=builddir, env=os.environ.copy())
     if res.returncode != 0:
-        logging.critical("configure.bat exited with non-zero code ({})".format(res.returncode))
+        logging.critical("%s exited with non-zero code (%s)", config_script, res.returncode)
         exit(res.returncode)
-    logging.info("configure.bat succeeded")
+    logging.info("%s succeeded", config_script)
 
 
 def buildQt(submodules, builddir):
@@ -212,13 +260,12 @@ def buildQt(submodules, builddir):
         submodules (tuple(str)): The Qt submodules to build.
         builddir (str): The location of the Qt build directory.
     """
-    for mod in submodules:
-        cmake_build_cmd = "cmake.exe --build . --target {} --parallel".format(mod)
-        logging.info(">> " + cmake_build_cmd)
-        res = subprocess.run(args=cmake_build_cmd, cwd=builddir, env=os.environ.copy())
-        if res.returncode != 0:
-            logging.critical("[{}] failed ({})".format(cmake_build_cmd, res.returncode))
-            exit(res.returncode)
+    cmake_build_cmd = ["cmake" + EXE_SUFFIX, "--build", "."]
+    logging.info(cmake_build_cmd)
+    res = subprocess.run(args=cmake_build_cmd, cwd=builddir, env=os.environ.copy())
+    if res.returncode != 0:
+        logging.critical("[%s] failed (%s)", cmake_build_cmd, res.returncode)
+        exit(res.returncode)
     logging.info("Build succeeded")
 
 def installQt(submodules, builddir, installdir):
@@ -229,54 +276,138 @@ def installQt(submodules, builddir, installdir):
         builddir (str): The location of the Qt build directory.
         installdir (str): The location of the Qt install directory.
     """
-    logging.info("Installing Qt to {}".format(installdir))
-    for mod in submodules:
-        cmake_install_cmd = "cmake.exe --install {} --prefix {}".format(mod, installdir)
-        logging.info(">> " + cmake_install_cmd)
-        res = subprocess.run(args=cmake_install_cmd, cwd=builddir, env=os.environ.copy())
-        if res.returncode != 0:
-            logging.critical("[{}] failed ({})".format(cmake_install_cmd, res.returncode))
-            exit(res.returncode)
+    logging.info("Installing Qt to %s", installdir)
+    cmake_install_cmd = ["cmake" + EXE_SUFFIX, "--install", ".", "--prefix", installdir]
+    logging.info(cmake_install_cmd)
+    res = subprocess.run(args=cmake_install_cmd, cwd=builddir, env=os.environ.copy())
+    if res.returncode != 0:
+        logging.critical("[%s] failed (%s)", cmake_install_cmd, res.returncode)
+        exit(res.returncode)
     logging.info("Installation succeeded")
 
 def cleanup():
-    if os.path.exists(QT_TMP_LOCATION):
-        os.remove(QT_TMP_LOCATION)
+    if os.path.exists(WIN_QT_TMP_LOCATION):
+        shutil.rmtree(WIN_QT_TMP_LOCATION)
+
+def postInstall(installdir):
+    # Create include.system/QtCore/qconfig.h from include/QtCore/qconfig.h
+    src_qconfig = Path(installdir) / "include" / "QtCore" / "qconfig.h"
+    dst_qconfig = Path(installdir) / "include.system" / "QtCore" / "qconfig.h"
+    logging.info("Copy %s => %s", src_qconfig, dst_qconfig)
+    os.makedirs(dst_qconfig.parent, exist_ok=True)
+    shutil.copyfile(src_qconfig, dst_qconfig)
+
+    if platform.system().lower() == "darwin":
+        mac_postInstall(installdir)
+    elif platform.system().lower() == "linux":
+        linux_postInstall(installdir)
+
+def mac_postInstall(installdir):
+    """Post-install steps specific for mac.
+    """
+    def changeToQt6Rpaths(file):
+        libs = subprocess.check_output(["otool", "-LX", file], cwd=installdir,
+                                        env=os.environ.copy(), encoding="utf-8").split("\n")
+        qtlib_regex = ".*(libQt6.*AndroidEmu)\.6\.dylib"
+        for lib in libs:
+            s = re.search(qtlib_regex, lib)
+            if s:
+                old_lib = s.group(0).strip()
+                new_lib = f"@rpath/{s.group(1)}.{QT_VERSION}.dylib"
+                logging.info("%s: Changing %s => %s", os.path.basename(file), old_lib, new_lib)
+                subprocess.check_call(
+                    ["install_name_tool", "-change", f"{old_lib}", f"{new_lib}", file],
+                    cwd=installdir, env=os.environ.copy())
+
+    # Fix the rpaths. We want all libQt6 dependencies to point to @rpath/libQt6*.6.5.3.dylib instead
+    # of @rpath/libQt6*.6.dylib. This removes the need to set DYLD_LIBRARY_PATH properly.
+    for file in glob.iglob(os.path.join(installdir, "**", "*.dylib"), recursive=True):
+        if os.path.islink(file):
+            logging.info(">> Skipping symlink %s", file)
+            continue
+        else:
+            logging.info(">> Fixing rpath for %s", file)
+            basename = os.path.basename(file)
+            logging.info("%s: Changing install name to @rpath/%s", basename, basename)
+            subprocess.check_call(["install_name_tool", "-id", f"@rpath/{basename}", file],
+                                  cwd=installdir, env=os.environ.copy())
+            changeToQt6Rpaths(file)
+
+
+    # Also need to fix the rpaths in the Qt executables we use.
+    fix_exes = [
+        f"{installdir}/libexec/moc",
+        f"{installdir}/libexec/rcc",
+        f"{installdir}/libexec/uic",
+        f"{installdir}/libexec/QtWebEngineProcess"]
+    for exe in fix_exes:
+        changeToQt6Rpaths(exe)
+
+def linux_postInstall(installdir):
+    # Install prebuilt clang's libc++.so.1 to lib/ as Qt's compiler
+    # tools (moc, rcc, uic) depends on it.
+    src_libc = deps_common.getClangDirectory() / "lib" / "libc++.so.1"
+    dst_libc = f"{installdir}/lib/libc++.so.1"
+    logging.info(f"Copy {src_libc} ==> {dst_libc}")
+    shutil.copyfile(src_libc, dst_libc)
+
+    fix_exes = [
+        f"{installdir}/libexec/moc",
+        f"{installdir}/libexec/rcc",
+        f"{installdir}/libexec/uic",
+        f"{installdir}/libexec/QtWebEngineProcess"]
+    # Add rpath to $ORIGIN/../lib so these executables can find libc++.so.1.
+    # You can verify the rpath with `objdump -x <exe> | grep PATH`.
+    # Also can check if libc++.so.1 is resolvable with `ldd <exe>`.
+    for exe in fix_exes:
+        logging.info(f"Adding rpath $ORIGIN/../lib to {exe}")
+        subprocess.check_call(
+            ["patchelf", "--set-rpath", "$ORIGIN/../lib", exe],
+            cwd=installdir, env=os.environ.copy())
 
 def buildPrebuilt(args, prebuilts_out_dir):
-    atexit.register(cleanup) 
+    atexit.register(cleanup)
 
     qt_install_dir = os.path.join(prebuilts_out_dir, "qt")
 
     # Use cmake from our prebuilts
-    os.environ["PATH"] = CMAKE_PATH + ";" + os.environ["PATH"]
+    addToSearchPath(CMAKE_PATH)
     logging.info(os.environ)
+
     if not checkDependencies():
         logging.fatal("Build environment does not have the required dependencies to build. Exiting..")
         exit(-1)
 
     # Qt source code is in external/qt5
-    if not os.path.isdir(QT_SRC_PATH):
-        logging.fatal("{} does not exist".format(QT_SRC_PATH))
+    if not os.path.isdir(AOSP_QT_SRC_PATH):
+        logging.fatal("%s does not exist", AOSP_QT_SRC_PATH)
         exit(-1)
-    logging.info("QT source: {}".format(QT_SRC_PATH))
+    logging.info("QT source: %s", AOSP_QT_SRC_PATH)
 
     # TODO(joshuaduong): If we decide to flatten the repository at check-in, then this step won't be necessary.
-    flattenQtRepo(QT_SRC_PATH)
+    flattenQtRepo(AOSP_QT_SRC_PATH)
 
-    # We must make sure Qt source code is in a very short directory, otherwise we may
-    # get a compiler error because of long paths issue.
-    if os.path.exists(QT_TMP_LOCATION):
-        os.remove(QT_TMP_LOCATION)
-    logging.info("Creating Qt temp directory [{}]".format(QT_TMP_LOCATION))
-    os.mkdir(QT_TMP_LOCATION)
-    logging.info("Moving source directory to shorter path [{} ==> {}]".format(QT_SRC_PATH, QT_SRC_SHORT_PATH))
-    os.rename(QT_SRC_PATH, QT_SRC_SHORT_PATH)
+    if platform.system().lower() == "windows":
+        # On Windows, We must make sure Qt source code is in a very short directory, otherwise we
+        # may get a compiler error because of long paths issue.
+        if os.path.exists(WIN_QT_TMP_LOCATION):
+            os.remove(WIN_QT_TMP_LOCATION)
+        logging.info("Creating Qt temp directory [%s]", WIN_QT_TMP_LOCATION)
+        os.makedirs(WIN_QT_TMP_LOCATION)
+        logging.info("Moving source directory to shorter path [%s ==> %s]",
+            AOSP_QT_SRC_PATH, WIN_QT_SRC_SHORT_PATH)
+        os.rename(AOSP_QT_SRC_PATH, WIN_QT_SRC_SHORT_PATH)
+        qt_src_path = WIN_QT_SRC_SHORT_PATH
+        qt_build_path = WIN_QT_BUILD_PATH
+    else:
+        qt_src_path = AOSP_QT_SRC_PATH
+        qt_build_path = os.path.join(args.out, "build-qt")
 
-    configureQtBuild(QT_SRC_SHORT_PATH, QT_BUILD_PATH, qt_install_dir)
+    configureQtBuild(qt_src_path, qt_build_path, qt_install_dir)
 
-    buildQt(QT_SUBMODULES, QT_BUILD_PATH)
+    buildQt(QT_SUBMODULES, qt_build_path)
 
-    installQt(QT_SUBMODULES, QT_BUILD_PATH, qt_install_dir)
+    installQt(QT_SUBMODULES, qt_build_path, qt_install_dir)
 
+    postInstall(qt_install_dir)
     logging.info("Successfully built Qt!")

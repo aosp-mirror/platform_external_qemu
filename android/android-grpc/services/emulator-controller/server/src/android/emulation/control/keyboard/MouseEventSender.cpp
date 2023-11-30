@@ -15,6 +15,7 @@
 #include "android/emulation/control/keyboard/MouseEventSender.h"
 
 #include "android/emulation/control/user_event_agent.h"
+#include "android/hw-sensors.h"
 #include "host-common/FeatureControl.h"
 #include "host-common/Features.h"
 #include "host-common/feature_control.h"
@@ -35,8 +36,12 @@ void MouseEventSender::doSend(const MouseEvent request) {
         // they are used for control flag like pause touch synching.)
         buttonsState &= 1;
     }
+    int displayId = request.display();
+    if (android_foldable_is_folded() && android_foldable_is_pixel_fold()) {
+        displayId = android_foldable_pixel_fold_second_display_id();
+    }
     mAgents->user_event->sendMouseEvent(request.x(), request.y(), 0,
-                                        buttonsState, request.display());
+                                        buttonsState, displayId);
 }
 }  // namespace control
 }  // namespace emulation

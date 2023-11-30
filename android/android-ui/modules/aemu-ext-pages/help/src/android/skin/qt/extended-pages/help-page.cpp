@@ -112,7 +112,7 @@ void HelpPage::initialize(const ShortcutKeyStore<QtUICommand>* key_store) {
 
 void HelpPage::initializeLicenseText() {
     // Read the license text into the display box
-    // The file is <SDK path>/tools/NOTICE.txt
+    // The file is <SDK path>/emulator/NOTICE.txt
 
     QString lFileName =
             android::base::System::get()->getLauncherDirectory().c_str();
