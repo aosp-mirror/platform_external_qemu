@@ -3060,7 +3060,7 @@ if fdt_required.length() > 0 or fdt_opt == 'enabled'
     elif fdt_opt == 'system'
        error('system libfdt requested, but it is too old (1.5.1 or newer required)')
     else
-      fdt = dependency('libfdt', version: '>=1.5.1', required: true,
+      fdt = dependency('libfdt', version: '>=1.5.1', required: false,
                        method: 'pkg-config')
       if not fdt.found()
         fdt_opt = 'internal'
