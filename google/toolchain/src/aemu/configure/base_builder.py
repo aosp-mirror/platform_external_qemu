@@ -52,7 +52,7 @@ class QemuBuilder:
         self.aosp: Path = Path(aosp).absolute()
         self.dest: Path = Path(dest).absolute()
         self.dest.mkdir(parents=True, exist_ok=True)
-        self.bazel: Bazel = Bazel(self.aosp)
+        self.bazel: Bazel = Bazel(self.aosp, self.dest)
 
         # Initialize the toolchain generator with the specified destination and an empty suffix.
         # This generator will be used to manage toolchain-related configurations.

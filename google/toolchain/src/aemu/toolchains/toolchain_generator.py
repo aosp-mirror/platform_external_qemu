@@ -28,7 +28,7 @@ class ToolchainGenerator:
 
     def __init__(self, aosp: Path, dest: Path, prefix: str) -> None:
         self.aosp = aosp.absolute()
-        self.bazel = Bazel(self.aosp)
+        self.bazel = Bazel(self.aosp, dest)
 
         toolchain_json = self.aosp / "build" / "bazel" / "rules" / "toolchains.json"
         with open(
