@@ -1519,6 +1519,12 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
         build_q35_pci0_int(dsdt);
     }
 
+#ifdef CONFIG_ANDROID
+    if (pcms->add_goldfish_dsdt) {
+        pcms->add_goldfish_dsdt(machine, dsdt);
+    }
+#endif
+
     if (misc->has_hpet) {
         build_hpet_aml(dsdt);
     }

@@ -75,6 +75,7 @@ class WindowsBuilder(QemuBuilder):
     def meson_config(self):
         prefix = (self.dest / "release").as_posix()
         return [
+            "-Dandroid=enabled",
             "-Db_pie=false",
             "-Daudio_drv_list=default",
             "-Dfdt=auto",

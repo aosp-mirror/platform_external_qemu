@@ -2127,6 +2127,7 @@ config_host_data.set('CONFIG_SECCOMP', seccomp.found())
 if seccomp.found()
   config_host_data.set('CONFIG_SECCOMP_SYSRAWRC', seccomp_has_sysrawrc)
 endif
+config_host_data.set('CONFIG_ANDROID', get_option('android').enabled())
 config_host_data.set('CONFIG_SNAPPY', snappy.found())
 config_host_data.set('CONFIG_TPM', have_tpm)
 config_host_data.set('CONFIG_TSAN', get_option('tsan'))
@@ -3458,6 +3459,11 @@ subdir('linux-user')
 # needed for fuzzing binaries
 subdir('tests/qtest/libqos')
 subdir('tests/qtest/fuzz')
+
+
+if get_option('android').enabled()
+   subdir('google/drivers')
+endif
 
 # accel modules
 tcg_real_module_ss = ss.source_set()
