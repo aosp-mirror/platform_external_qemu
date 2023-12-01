@@ -957,16 +957,16 @@ public:
             cPixels = img.getPixelCount();
         } else {  // Let's make a fast call to learn how many pixels we need
                   // to reserve.
-            ScreenshotUtils::getScreenshot(
-                    myDisplayId >= 0 ? myDisplayId : request->display(),
-                    request->format(), rotation, newWidth, newHeight, pixels,
-                    &cPixels, &width, &height, rect);
-        }
-
-        if (width == 0 || height == 0) {
-            dwarning(
-                    "Received an empty screenshot, clients usually do not "
-                    "expect this.");
+            while (1) {
+                ScreenshotUtils::getScreenshot(
+                        myDisplayId >= 0 ? myDisplayId : request->display(),
+                        request->format(), rotation, newWidth, newHeight, pixels,
+                        &cPixels, &width, &height, rect);
+                if (width > 0 && height > 0) {
+                    break;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
         }
 
         auto format = reply->mutable_format();
