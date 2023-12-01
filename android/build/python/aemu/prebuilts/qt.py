@@ -181,7 +181,10 @@ def configureQtBuild(srcdir, builddir, installdir):
     """
     if os.path.exists(builddir):
         shutil.rmtree(builddir)
+    old_umask = os.umask(0o777)
     os.makedirs(builddir)
+    os.umask(old_umask)
+
     config_script = os.path.join(srcdir,
             ("configure.bat" if platform.system().lower() == "windows" else "configure"))
     conf_args = [config_script,
@@ -200,6 +203,11 @@ def configureQtBuild(srcdir, builddir, installdir):
                  "-skip", "qttranslations",
                  "-skip", "qttools",
                  "-no-feature-pdf",
+                 "-no-feature-printdialog",
+                 "-no-feature-printsupport",
+                 "-no-feature-printer",
+                 "-no-feature-printpreviewdialog",
+                 "-no-feature-printpreviewwidget",
                  "-no-feature-webengine-pepper-plugins",
                  "-no-feature-webengine-printing-and-pdf",
                  "-no-feature-webengine-webrtc",
@@ -210,7 +218,9 @@ def configureQtBuild(srcdir, builddir, installdir):
                  "-qtlibinfix", "AndroidEmu",
                  "-prefix", installdir]
 
-    if platform.system().lower() == "linux":
+    if platform.system().lower() == "windows":
+        conf_args += ["-platform", "win32-msvc"]
+    elif platform.system().lower() == "linux":
         extra_conf_args = ["-linker", "lld",
                            "-platform", "linux-clang-libc++",
                            "-no-glib"]
@@ -222,6 +232,9 @@ def configureQtBuild(srcdir, builddir, installdir):
         extra_cxxflags = "-stdlib=libc++ -m64 -fuse-ld=lld -fPIC"
         # Use libc++ instead of libstdc++
         conf_cmake_args = [ f"-DCMAKE_CXX_FLAGS={extra_cxxflags}", f"-DMAKE_C_FLAGS={extra_cflags}" ]
+        conf_args.append("--")
+        conf_args += conf_cmake_args
+
         # The QtWebEngine chromium build doesn't seem to pick up CXXFLAGS
         # envrionment variables. So let's just create some clang wrappers
         # to force use our flags.
@@ -239,10 +252,6 @@ def configureQtBuild(srcdir, builddir, installdir):
         os.chmod(toolchain_dir / "clang++", 0o777)
 
         addToSearchPath(str(toolchain_dir))
-
-    if conf_cmake_args:
-        conf_args.append("--")
-        conf_args += conf_cmake_args
 
     logging.info("[%s] Running %s", builddir, config_script)
     logging.info(conf_args)
@@ -395,7 +404,9 @@ def buildPrebuilt(args, prebuilts_out_dir):
         if os.path.exists(WIN_QT_TMP_LOCATION):
             os.remove(WIN_QT_TMP_LOCATION)
         logging.info("Creating Qt temp directory [%s]", WIN_QT_TMP_LOCATION)
+        old_umask = os.umask(0o777)
         os.makedirs(WIN_QT_TMP_LOCATION)
+        os.umask(old_umask)
         logging.info("Moving source directory to shorter path [%s ==> %s]",
             AOSP_QT_SRC_PATH, WIN_QT_SRC_SHORT_PATH)
         os.rename(AOSP_QT_SRC_PATH, WIN_QT_SRC_SHORT_PATH)
