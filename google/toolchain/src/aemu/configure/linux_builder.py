@@ -151,7 +151,6 @@ class LinuxBuilder(QemuBuilder):
             "--native-file",
         ]
 
-
     def packages(self):
         # We need the original .pc from our aosp sysroot, so let's copy them over.
         destination_directory = self.toolchain_generator.pkgconfig_directory
@@ -191,7 +190,7 @@ class LinuxBuilder(QemuBuilder):
 
     def config_mak(self):
         return [
-            "TARGET_DIRS=x86_64-softmmu",
+            "TARGET_DIRS=aarch64-softmmu riscv64-softmmu x86_64-softmmu",
             "TCG_TESTS_TARGETS= x86_64-softmmu",
             "CONFIG_POSIX=y",
             "CONFIG_LINUX=y",

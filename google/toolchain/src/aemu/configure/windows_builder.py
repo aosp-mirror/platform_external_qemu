@@ -45,7 +45,7 @@ class WindowsBuilder(QemuBuilder):
                     "Requires": "pcre2, zlib, gmodule-static",
                     "name": "glib-2.0",
                     "link_name": "glib-2.0.lib",
-                    "dll_ext" : "", # TODO(jansene): Figure out why we are not expecting a .dll file.
+                    "dll_ext": "",  # TODO(jansene): Figure out why we are not expecting a .dll file.
                 },
             ),
             LibInfo(
@@ -73,7 +73,7 @@ class WindowsBuilder(QemuBuilder):
         return bazel_configs
 
     def meson_config(self):
-        prefix = (self.dest / 'release').as_posix()
+        prefix = (self.dest / "release").as_posix()
         return [
             "-Db_pie=false",
             "-Daudio_drv_list=default",
@@ -211,9 +211,9 @@ class WindowsBuilder(QemuBuilder):
 
     def config_mak(self):
         return [
+            "TARGET_DIRS=aarch64-softmmu riscv64-softmmu x86_64-softmmu",
             "CONFIG_WIN32=y",
             "GENISOIMAGE=False",
-            "TARGET_DIRS=x86_64-softmmu",
             "TCG_TESTS_TARGETS=x86_64-softmmu",
             "EXESUF=.exe",
         ]
