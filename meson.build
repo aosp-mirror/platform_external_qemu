@@ -224,7 +224,7 @@ if targetos == 'darwin'
   # Disable attempts to use ObjectiveC features in os/object.h since they
   # won't work when we're compiling with gcc as a C compiler.
   qemu_common_flags += '-DOS_OBJECT_USE_OBJC=0'
-elif targetos == 'solaris'
+elif targetos == 'sunos'
   # needed for CMSG_ macros in sys/socket.h
   qemu_common_flags += '-D_XOPEN_SOURCE=600'
   # needed for TIOCWIN* defines in termios.h
@@ -1770,8 +1770,9 @@ if gnutls.found()
                      method: 'pkg-config')
 endif
 keyutils = not_found
-if get_option('keyring').enabled()
-  keyutils = dependency('libkeyutils', required: false, method: 'pkg-config')
+if not get_option('libkeyutils').auto() or have_block
+  keyutils = dependency('libkeyutils', required: get_option('libkeyutils'),
+                        method: 'pkg-config')
 endif
 
 has_gettid = cc.has_function('gettid')
@@ -2055,7 +2056,7 @@ have_slirp_smbd = get_option('slirp_smbd') \
 if have_slirp_smbd
   smbd_path = get_option('smbd')
   if smbd_path == ''
-    smbd_path = (targetos == 'solaris' ? '/usr/sfw/sbin/smbd' : '/usr/sbin/smbd')
+    smbd_path = (targetos == 'sunos' ? '/usr/sfw/sbin/smbd' : '/usr/sbin/smbd')
   endif
   config_host_data.set_quoted('CONFIG_SMBD_COMMAND', smbd_path)
 endif
@@ -4216,6 +4217,7 @@ endif
 summary_info += {'AF_ALG support':    have_afalg}
 summary_info += {'rng-none':          get_option('rng_none')}
 summary_info += {'Linux keyring':     have_keyring}
+summary_info += {'Linux keyutils':    keyutils}
 summary(summary_info, bool_yn: true, section: 'Crypto')
 
 # UI
