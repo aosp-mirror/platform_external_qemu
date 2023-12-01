@@ -68,6 +68,7 @@
 #include "config-host.h"
 
 #include <atomic>
+#include <iomanip>
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -514,7 +515,6 @@ static void control_client_do_command(ControlClient client) {
         do_quit(client, NULL);
         return;
     }
-
     cmd = find_command(line, commands, &cmdend, &args);
 
     if (cmd == NULL || !isCommandEnabled(cmd->names)) {
@@ -3661,16 +3661,19 @@ static int do_screenrecord_start(ControlClient client, char* args) {
 
     // Count number of arguments
     // Need to get it into a format for getopt_long().
-    std::vector<std::string> splitArgs;
-    splitArgs.push_back("screenrecord");
-    android::base::split<std::string>(args, " ", [&splitArgs](const std::string& s) {
-        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
-            splitArgs.emplace_back(s);
-    });
 
+    std::vector<std::string> tokens;
+    {
+        std::istringstream iss(args);
+        std::string token;
+        tokens.push_back("screenrecord");
+        while (iss >> std::quoted(token)) {
+            tokens.push_back(token);
+        }
+    }
     // Need char** for getopt()
     std::vector<char*> sarray;
-    for (auto& arg : splitArgs) {
+    for (auto& arg : tokens) {
         sarray.push_back(&arg[0]);
     }
     // last argument needs to be NULL for getopt().
@@ -3760,7 +3763,7 @@ static int do_screenrecord_start(ControlClient client, char* args) {
         }
     }
 
-    if (optind != splitArgs.size() - 1) {
+    if (optind != tokens.size() - 1) {
         control_write(client,
                       "KO: Must specify output file (see help screenrecord "
                       "start).\r\n");
