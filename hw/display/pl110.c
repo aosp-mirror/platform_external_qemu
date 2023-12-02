@@ -27,7 +27,7 @@
 #define PL110_IE_NB   0x004
 #define PL110_IE_VC   0x008
 
-enum pl110_bppmode
+enum pl110_bppmode : unsigned int
 {
     BPP_1,
     BPP_2,
@@ -41,7 +41,7 @@ enum pl110_bppmode
 
 
 /* The Versatile/PB uses a slightly modified PL110 controller.  */
-enum pl110_version
+enum pl110_version : unsigned int
 {
     VERSION_PL110,
     VERSION_PL110_VERSATILE,

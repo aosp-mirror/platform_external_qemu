@@ -34,14 +34,14 @@ do { fprintf(stderr, "ssd0303: error: " fmt , ## __VA_ARGS__);} while (0)
 /* Scaling factor for pixels.  */
 #define MAGNIFY 4
 
-enum ssd0303_mode
+enum ssd0303_mode : unsigned int
 {
     SSD0303_IDLE,
     SSD0303_DATA,
     SSD0303_CMD
 };
 
-enum ssd0303_cmd {
+enum ssd0303_cmd  : unsigned int {
     SSD0303_CMD_NONE,
     SSD0303_CMD_SKIP1
 };
