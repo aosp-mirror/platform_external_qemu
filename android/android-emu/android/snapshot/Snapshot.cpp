@@ -47,6 +47,7 @@
 #include "android/base/system/System.h"     // for System, System:...
 #include "android/console.h"  // for getConsoleAgents()->settings->avdInfo()
 #include "android/emulation/ConfigDirs.h"             // for ConfigDirs
+#include "android/emulation/resizable_display_config.h"
 #include "host-common/vm_operations.h"  // for VmConfiguration
 #include "host-common/window_agent.h"   // for QAndroidEmulato...
 #include "host-common/FeatureControl.h"    // for getEnabled, isE...
@@ -595,6 +596,11 @@ bool Snapshot::save() {
 
     dinfo("Saving with gfxstream=%d", HAS_GFXSTREAM);
     mSnapshotPb.set_gfxstream(HAS_GFXSTREAM);
+
+    if (resizableEnabled()) {
+        int resizeDisplay = getResizableActiveConfigId();
+        mSnapshotPb.set_resizable_display(resizeDisplay);
+    }
     return writeSnapshotToDisk();
 }
 
@@ -940,6 +946,9 @@ bool Snapshot::load() {
                 SkinRotation(mSnapshotPb.rotation())) {
         Snapshotter::get().windowAgent().rotate(
                 SkinRotation(mSnapshotPb.rotation()));
+    }
+    if (resizableEnabled() && mSnapshotPb.has_resizable_display()) {
+        Snapshotter::get().windowAgent().changeResizableDisplay(mSnapshotPb.resizable_display());
     }
 
     return true;

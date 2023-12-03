@@ -155,4 +155,7 @@ message Snapshot {
 
     // True if emulator was built with gfxstream backend
     optional bool gfxstream = 20;
+
+    // resizable config
+    optional int32 resizable_display = 21;
 }
