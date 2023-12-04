@@ -233,7 +233,7 @@ class DarwinBuilder(QemuBuilder):
             "CONFIG_POSIX=y",
             "CONFIG_DARWIN=y",
             f"SRC_PATH={self.aosp / 'external' / 'qemu'}",
-            "TARGET_DIRS=aarch64-softmmu",
+            "TARGET_DIRS=aarch64-softmmu riscv64-softmmu x86_64-softmmu",
             "CONFIG_BSD=y",
             "ROMS=",
             f"PYTHON={sys.executable} -B",
