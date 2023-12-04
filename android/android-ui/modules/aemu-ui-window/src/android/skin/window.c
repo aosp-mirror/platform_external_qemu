@@ -21,6 +21,7 @@
 #include "android/emulator-window.h"
 #include "host-common/feature_control.h"
 #include "host-common/hw-config.h"
+#include "host-common/hw-lcd.h"           // for LCD_DENSITY_MDPI
 #include "android/console.h"
 #include "android/hw-sensors.h"
 #include "android/multitouch-screen.h"    // for multitouch_create_but...
@@ -1709,10 +1710,20 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
 
     skin_winsys_get_monitor_rect(&monitor);
 
-    // Make the default scale about 80% of the screen size.
-    if (enable_scale && monitor.size.w < win_w && win_w > 1.)
+    int hw_lcd_density = getConsoleAgents()->settings->hw()->hw_lcd_density;
+
+    // Adjust the default scale for a 1-to-1 logical pixel ratio.
+    if (enable_scale && hw_lcd_density != LCD_DENSITY_MDPI) {
+        double hw_scale = (double) LCD_DENSITY_MDPI / hw_lcd_density;
+        VERBOSE_PRINT(init, "Adjusting window size by %.2gx for hw_lcd_density", hw_scale);
+        scale_w *= hw_scale;
+        scale_h *= hw_scale;
+    }
+
+    // If the window is still too big, adjust to about 80% of the screen size.
+    if (enable_scale && monitor.size.w < (win_w * scale_w) && win_w > 1.)
         scale_w = 0.80 * monitor.size.w / win_w;
-    if (enable_scale && monitor.size.h < win_h && win_h > 1.)
+    if (enable_scale && monitor.size.h < (win_h * scale_h) && win_h > 1.)
         scale_h = 0.80 * monitor.size.h / win_h;
 
     window->scale = (scale_w <= scale_h) ? scale_w : scale_h;
