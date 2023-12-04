@@ -23,8 +23,10 @@ from aemu.process.runner import check_output, run
 
 
 class Bazel:
-    def __init__(self, aosp):
+    def __init__(self, aosp: Path, dist: Path):
         self.aosp = aosp.absolute()
+        self.log_dir = dist.absolute() / "bazel-logs"
+        self.log_dir.mkdir(parents=True, exist_ok=True)
         self.bazel_dir = aosp / "prebuilts" / "bazel"
         self.exe = self.bazel_dir / f"{self.host()}-x86_64" / "bazel"
         self.info = self._load_bazel_info()
@@ -45,7 +47,18 @@ class Bazel:
         Args:
             bazel_target (str): The Bazel target to build.
         """
-        return run([self.exe, "build", bazel_target], cwd=self.aosp)
+        label = bazel_target[bazel_target.index(":") + 1 :]
+        bazel_explain_file = (self.log_dir / f"explain-{label}.txt").absolute()
+        return run(
+            [
+                self.exe,
+                "build",
+                f"--explain={bazel_explain_file}",
+                "--verbose_explanations",
+                bazel_target,
+            ],
+            cwd=self.aosp,
+        )
 
     def _replace_labels(self, package_info_result: str) -> str:
         """Replace labels from the package info script."""
