@@ -1990,7 +1990,9 @@ bool avdInfo_skinHasOverlay(const char* skinName) {
     if (skinName == NULL || skinName[0] == '\0') {
         return false;
     }
-    if (!strncmp(skinName, "pixel_7",
+    if (!strncmp(skinName, "automotive",
+                 strlen("automotive")) || /* automotive_landscape, automotive_ultrawide, etc */
+        !strncmp(skinName, "pixel_7",
                  strlen("pixel_7")) || /* include pixel 7, pro etc */
         !strncmp(skinName, "pixel_8",
                  strlen("pixel_8")) || /* include pixel 8, pro etc */
