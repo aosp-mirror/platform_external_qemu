@@ -116,6 +116,13 @@ static void slirp_smb_cleanup(SlirpState *s);
 static inline void slirp_smb_cleanup(SlirpState *s) { }
 #endif
 
+/* Should only be used here */
+enum GFwdProtocols {
+    GFWD_TCP = 1,
+    GFWD_UDP = 2,
+    GFWD_MAX = 3, /* Invalid */
+};
+
 static ssize_t net_slirp_send_packet(const void *pkt, size_t pkt_len,
                                      void *opaque)
 {
@@ -1165,14 +1172,23 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str, Error **errp)
     char *end;
     int port;
     int target_port;
+    enum GFwdProtocols protocol = GFWD_MAX;
     bool v6_only = false;
     char addrstr[INET6_ADDRSTRLEN];
 
+    /*
+     * TODO(b/314977108): reimplement this parsing logic in following cl,
+     * as it became very long.
+     */
     p = config_str;
     if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
         goto fail_syntax;
     }
-    if (strcmp(buf, "tcp") && buf[0] != '\0') {
+    if (strcmp(buf, "tcp") == 0) {
+        protocol = GFWD_TCP;
+    } else if (strcmp(buf, "udp") == 0) {
+        protocol = GFWD_UDP;
+    } else if (buf[0] != '\0') {
         goto fail_syntax;
     }
 
@@ -1291,8 +1307,8 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str, Error **errp)
             /*
              * Parse target v6, we do not use char-socket backend, like the v4.
              */
-            if (slirp_add_guestxfwd_new(s->slirp, &server_v6, port, &target_v6,
-                                    target_port) < 0) {
+            if (slirp_add_guestxfwd(s->slirp, &server_v6, port, &target_v6,
+                                    target_port, protocol) < 0) {
                 goto fail_parsing;
             }
         }
