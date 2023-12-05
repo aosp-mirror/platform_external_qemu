@@ -44,7 +44,7 @@ QT_SUBMODULES = [
 ]
 AOSP_QT_SRC_PATH = os.path.join(AOSP_ROOT, "external", "qt5")
 CMAKE_PATH = os.path.join(AOSP_ROOT, "prebuilts", "cmake", platform.system().lower() + "-x86", "bin")
-CMAKE_EXE = os.path.join(CMAKE_PATH, "cmake" + EXE_SUFFIX)
+NINJA_PATH = os.path.join(AOSP_ROOT, "prebuilts", "ninja", platform.system().lower() + "-x86")
 
 # We must move the source code from external/qt5 to a shorter path because of path too long issue.
 # Symlinking to a shorter path will not work either.
@@ -372,6 +372,8 @@ def buildPrebuilt(args, prebuilts_out_dir):
 
     # Use cmake from our prebuilts
     addToSearchPath(CMAKE_PATH)
+    # Use ninja from our prebuilts
+    addToSearchPath(NINJA_PATH)
     logging.info(os.environ)
 
     if not checkDependencies():
