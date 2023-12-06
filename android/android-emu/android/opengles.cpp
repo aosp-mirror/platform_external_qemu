@@ -164,7 +164,7 @@ int android_initOpenglesEmulation() {
     AndroidOpenglLoggerFlags loggerFlags =
         static_cast<AndroidOpenglLoggerFlags>(
         (glFineLogging ? OPENGL_LOGGER_DO_FINE_LOGGING : 0) |
-        (glLogPrinting ? OPENGL_LOGGER_PRINT_TO_STDOUT : 0));
+        OPENGL_LOGGER_PRINT_TO_STDOUT);
 
     android_opengl_logger_set_flags(loggerFlags);
 
