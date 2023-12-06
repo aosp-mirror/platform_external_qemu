@@ -1953,13 +1953,16 @@ extern "C" int main(int argc, char** argv) {
             }
 #endif
 #ifdef __APPLE__
-
-            // BUG: 294436742
-            // intel mac does not have good performance with filebacked quickboot;
-            // apple silicon has it disabled anyway
+            auto numCores = System::get()->getCpuCoreCount();
+            if (numCores < 8) {
+                feature_set_if_not_overridden(kFeature_QuickbootFileBacked,
+                                              false /* enable */);
+            }
+#ifdef __aarch64__
             // TODO: Fix file-backed RAM snapshot support.
             feature_set_if_not_overridden(kFeature_QuickbootFileBacked,
-                                          false /* not to enable */);
+                                          false /* enable */);
+#endif
 #endif
 
             if (isCrostini()) {
