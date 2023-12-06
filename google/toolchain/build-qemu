@@ -21,6 +21,7 @@ if [ "$#" -ne 2 ]; then
     echo "Usage: $0 <destination> <distribution>"
     exit 1
 fi
+set -e
 
 # Get the directory of the script
 script_dir=$(dirname "$0")
@@ -28,10 +29,14 @@ aosp_dir=$script_dir/../../../..
 
 # Convert relative path to absolute path
 absolute_aosp=$(readlink -f "$aosp_dir" 2>/dev/null || realpath "$aosp_dir")
+qemu=$absolute_aosp/external/qemu
 
 # Assign parameters to variables
 destination="$1"
 distribution="$2"
+
+echo "-- Checking for source changes"
+python3 $qemu/google/scripts/style_compliance_checker.py --aosp $absolute_aosp $qemu
 
 echo "-- Creating a virtual environment in $destination"
 python3 -m venv "$destination/venv"
