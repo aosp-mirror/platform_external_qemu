@@ -20,7 +20,9 @@
 #include <stdlib.h>
 
 #include <initializer_list>
+#include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "aemu/base/async/CallbackRegistry.h"
@@ -32,6 +34,7 @@
 #include "android/console.h"
 #include "android/emulation/android_qemud.h"
 #include "android/emulation/control/adb/AdbInterface.h"
+#include "android/emulation/control/utils/EventSupport.h"
 #include "android/emulation/resizable_display_config.h"
 #include "android/physics/PhysicalModel.h"
 #include "android/sensors-port.h"
@@ -42,7 +45,6 @@
 #include "host-common/FeatureControl.h"
 
 namespace fc = android::featurecontrol;
-
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -201,8 +203,33 @@ struct HwSensorClient {
     int32_t delay_ms;
 };
 
-static android::base::LazyInstance<android::base::CallbackRegistry>
+static android::base::LazyInstance<
+        android::emulation::control::EventChangeSupport<void>>
         sSensorChangeCallbackReg = LAZY_INSTANCE_INIT;
+
+class HwSensorChangedCallbackListener
+    : public android::emulation::control::EventListener<void> {
+public:
+    explicit HwSensorChangedCallbackListener(HwSensorChangedCallback callback,
+                                             void* opaque)
+        : mCallback(callback), mOpaque(opaque) {
+        sSensorChangeCallbackReg->addListener(this);
+    }
+
+    ~HwSensorChangedCallbackListener() override {
+        sSensorChangeCallbackReg->removeListener(this);
+    }
+
+    void eventArrived() override { mCallback(mOpaque); }
+
+private:
+    HwSensorChangedCallback mCallback;
+    void* mOpaque;
+};
+
+static std::unordered_map<void*,
+                          std::unique_ptr<HwSensorChangedCallbackListener>>
+        gSensorListeners;
 
 static void _hwSensorClient_free(HwSensorClient* cl) {
     /* remove from sensors's list */
@@ -311,7 +338,8 @@ static void _hwSensorClient_sanitizeSensorString(char* string, int maxlen) {
 
 static void serializeValue_float(Sensor* sensor,
                                  const char* format,
-                                 float value, long measurement_id) {
+                                 float value,
+                                 long measurement_id) {
     sensor->serialized.length =
             snprintf(sensor->serialized.value, sizeof(sensor->serialized.value),
                      format, value, measurement_id);
@@ -319,7 +347,8 @@ static void serializeValue_float(Sensor* sensor,
 
 static void serializeValue_vec3(Sensor* sensor,
                                 const char* format,
-                                vec3 value, long measurement_id) {
+                                vec3 value,
+                                long measurement_id) {
     sensor->serialized.length =
             snprintf(sensor->serialized.value, sizeof(sensor->serialized.value),
                      format, value.x, value.y, value.z, measurement_id);
@@ -327,10 +356,11 @@ static void serializeValue_vec3(Sensor* sensor,
 
 static void serializeValue_vec4(Sensor* sensor,
                                 const char* format,
-                                vec4 value, long measurement_id) {
-    sensor->serialized.length =
-            snprintf(sensor->serialized.value, sizeof(sensor->serialized.value),
-                     format, value.x, value.y, value.z, value.w, measurement_id);
+                                vec4 value,
+                                long measurement_id) {
+    sensor->serialized.length = snprintf(
+            sensor->serialized.value, sizeof(sensor->serialized.value), format,
+            value.x, value.y, value.z, value.w, measurement_id);
 }
 
 // a function to serialize the sensor value based on its ID
@@ -348,8 +378,8 @@ static void serializeSensorValue(PhysicalModel* physical_model,
         const v current_value =                                        \
                 GET_FUNCTION_NAME(z)(physical_model, &measurement_id); \
         if (measurement_id != sensor->serialized.measurement_id) {     \
-            SERIALIZE_VALUE_NAME(v)(sensor, w":%ld", current_value,    \
-            measurement_id);                                           \
+            SERIALIZE_VALUE_NAME(v)                                    \
+            (sensor, w ":%ld", current_value, measurement_id);         \
         }                                                              \
         break;                                                         \
     }
@@ -753,7 +783,7 @@ static void _hwSensors_setPhysicalParameterValue(HwSensors* h,
             break;
     }
 
-    sSensorChangeCallbackReg->invokeCallbacks();
+    sSensorChangeCallbackReg->fireEvent();
 }
 
 /* get the value of the physical parameter */
@@ -894,12 +924,14 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
             break;
 
         case ANDROID_COARSE_REVERSE_LANDSCAPE:
-            VERBOSE_INFO(rotation, "Setting coarse orientation to reverse landscape");
+            VERBOSE_INFO(rotation,
+                         "Setting coarse orientation to reverse landscape");
             rotation = {0.f, -tilt_degrees, -90.f};
             break;
 
         case ANDROID_COARSE_REVERSE_PORTRAIT:
-            VERBOSE_INFO(rotation, "Setting coarse orientation to reverse portrait");
+            VERBOSE_INFO(rotation,
+                         "Setting coarse orientation to reverse portrait");
             rotation = {tilt_degrees, 0.f, 180.f};
             break;
 
@@ -950,7 +982,9 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_MAGNETIC_FIELD].enabled = true;
     }
 
-    if (getConsoleAgents()->settings->hw()->hw_sensors_magnetic_field_uncalibrated) {
+    if (getConsoleAgents()
+                ->settings->hw()
+                ->hw_sensors_magnetic_field_uncalibrated) {
         h->sensors[ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED].enabled = true;
     }
 
@@ -993,16 +1027,17 @@ static void _hwSensors_init(HwSensors* h) {
         }
     }
 
-
     if (getConsoleAgents()->settings->hw()->hw_sensors_heart_rate ||
-        (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR
-         && avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28)) {
+        (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                 AVD_WEAR &&
+         avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28)) {
         h->sensors[ANDROID_SENSOR_HEART_RATE].enabled = true;
     }
 
     if (getConsoleAgents()->settings->hw()->hw_sensors_wrist_tilt ||
-        (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR
-         && avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28)) {
+        (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                 AVD_WEAR &&
+         avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28)) {
         h->sensors[ANDROID_SENSOR_WRIST_TILT].enabled = true;
     }
 
@@ -1334,11 +1369,13 @@ int android_foldable_get_posture() {
 }
 
 int android_foldable_get_state(struct FoldableState* state) {
-    return physicalModel_getFoldableState(android_physical_model_instance(), state);
+    return physicalModel_getFoldableState(android_physical_model_instance(),
+                                          state);
 }
 
 bool android_foldable_hinge_configured() {
-    return (getConsoleAgents()->settings->hw()->hw_sensor_hinge && getConsoleAgents()->settings->hw()->hw_sensor_hinge_count > 0);
+    return (getConsoleAgents()->settings->hw()->hw_sensor_hinge &&
+            getConsoleAgents()->settings->hw()->hw_sensor_hinge_count > 0);
 }
 
 bool android_foldable_is_pixel_fold() {
@@ -1346,7 +1383,8 @@ bool android_foldable_is_pixel_fold() {
         return true;
     }
     const auto devname = getConsoleAgents()->settings->hw()->hw_device_name;
-    return (devname && "pixel_fold" == std::string(devname) && fc::isEnabled(fc::SupportPixelFold));
+    return (devname && "pixel_fold" == std::string(devname) &&
+            fc::isEnabled(fc::SupportPixelFold));
 }
 
 int android_foldable_pixel_fold_second_display_id() {
@@ -1379,32 +1417,54 @@ bool android_foldable_folded_area_configured(int area) {
     int xOffset, yOffset, width, height;
     switch (area) {
         case 0:
-            xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_xOffset;
-            yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_yOffset;
-            width   = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_width;
-            height  = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_height;
+            xOffset = getConsoleAgents()
+                              ->settings->hw()
+                              ->hw_displayRegion_0_1_xOffset;
+            yOffset = getConsoleAgents()
+                              ->settings->hw()
+                              ->hw_displayRegion_0_1_yOffset;
+            width = getConsoleAgents()
+                            ->settings->hw()
+                            ->hw_displayRegion_0_1_width;
+            height = getConsoleAgents()
+                             ->settings->hw()
+                             ->hw_displayRegion_0_1_height;
             break;
         case 1:
-            xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_xOffset;
-            yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_yOffset;
-            width   = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_width;
-            height  = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_height;
+            xOffset = getConsoleAgents()
+                              ->settings->hw()
+                              ->hw_displayRegion_0_2_xOffset;
+            yOffset = getConsoleAgents()
+                              ->settings->hw()
+                              ->hw_displayRegion_0_2_yOffset;
+            width = getConsoleAgents()
+                            ->settings->hw()
+                            ->hw_displayRegion_0_2_width;
+            height = getConsoleAgents()
+                             ->settings->hw()
+                             ->hw_displayRegion_0_2_height;
             break;
         case 2:
-            xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_xOffset;
-            yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_yOffset;
-            width   = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_width;
-            height  = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_height;
+            xOffset = getConsoleAgents()
+                              ->settings->hw()
+                              ->hw_displayRegion_0_3_xOffset;
+            yOffset = getConsoleAgents()
+                              ->settings->hw()
+                              ->hw_displayRegion_0_3_yOffset;
+            width = getConsoleAgents()
+                            ->settings->hw()
+                            ->hw_displayRegion_0_3_width;
+            height = getConsoleAgents()
+                             ->settings->hw()
+                             ->hw_displayRegion_0_3_height;
             break;
         default:
             E("Invalid area %d", area);
     }
-    bool enableFoldableByDefault =
-        !(xOffset < 0 || xOffset > 9999 ||
-          yOffset < 0 || yOffset > 9999 ||
-          width   < 1 || width   > 9999 ||
-          height  < 1 || height  > 9999 ||
-          avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) < 28);
+    bool enableFoldableByDefault = !(
+            xOffset < 0 || xOffset > 9999 || yOffset < 0 || yOffset > 9999 ||
+            width < 1 || width > 9999 || height < 1 || height > 9999 ||
+            avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) < 28);
 
     return enableFoldableByDefault;
 }
@@ -1467,9 +1527,9 @@ bool android_foldable_set_posture(int posture) {
 
 bool android_foldable_posture_name(int posture, char* name) {
     if (!name) {
-       return false;
+        return false;
     }
-    switch(posture) {
+    switch (posture) {
         case 0:
             strcpy(name, "UNKNOWN");
             return true;
@@ -1494,16 +1554,19 @@ bool android_foldable_posture_name(int posture, char* name) {
 }
 
 bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h) {
-    return physicalModel_getFoldedArea(android_physical_model_instance(), x, y, w, h);
+    return physicalModel_getFoldedArea(android_physical_model_instance(), x, y,
+                                       w, h);
 }
 
 bool android_foldable_rollable_configured() {
-    return (getConsoleAgents()->settings->hw()->hw_sensor_roll && getConsoleAgents()->settings->hw()->hw_sensor_roll_count > 0);
+    return (getConsoleAgents()->settings->hw()->hw_sensor_roll &&
+            getConsoleAgents()->settings->hw()->hw_sensor_roll_count > 0);
 }
 
 bool android_is_automotive() {
     if (getConsoleAgents()->settings->android_qemu_mode()) {
-        AvdFlavor flavor = avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo());
+        AvdFlavor flavor =
+                avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo());
         return flavor == AVD_ANDROID_AUTO;
     }
     return false;
@@ -1513,18 +1576,24 @@ bool android_hw_sensors_is_loading_snapshot() {
     return physicalModel_isLoadingSnapshot(android_physical_model_instance());
 }
 
-bool android_heart_rate_sensor_configured(){
-  return getConsoleAgents()->settings->hw()->hw_sensors_heart_rate;
+bool android_heart_rate_sensor_configured() {
+    return getConsoleAgents()->settings->hw()->hw_sensors_heart_rate;
 }
 
 void* android_get_posture_listener() {
-  return physicalModel_getPostureListener(android_physical_model_instance());
+    return physicalModel_getPostureListener(android_physical_model_instance());
 }
 
-void android_hw_sensors_register_callback(HwSensorChangedCallback callback, void* opaque) {
-    sSensorChangeCallbackReg->registerCallback(callback, opaque);
+void android_hw_sensors_register_callback(HwSensorChangedCallback callback,
+                                          void* opaque) {
+    auto oldSize = gSensorListeners.size();
+    gSensorListeners[opaque] =
+            std::make_unique<HwSensorChangedCallbackListener>(callback, opaque);
+    assert(oldSize == gSensorListeners.size() - 1);
 }
 
 void android_hw_sensors_unregister_callback(void* opaque) {
-    sSensorChangeCallbackReg->unregisterCallback(opaque);
+    auto oldSize = gSensorListeners.size();
+    gSensorListeners.erase(opaque);
+    assert(oldSize == gSensorListeners.size() + 1);
 }

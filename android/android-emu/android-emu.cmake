@@ -279,6 +279,7 @@ target_link_libraries(
          webrtc-yuv
          android-emu-curl
          picosha2
+         android-grpc-event-waiter
          # Protobuf dependencies
          android-emu-protos
          protobuf::libprotobuf
