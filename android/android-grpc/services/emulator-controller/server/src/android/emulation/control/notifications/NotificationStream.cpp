@@ -121,10 +121,12 @@ std::optional<Notification> NotificationStream::getPostureNotificationEvent() {
             static_cast<FoldablePostures>(android_foldable_get_posture());
 
     if (currentPosture == POSTURE_UNKNOWN || currentPosture == POSTURE_MAX) {
-        derror("Received bad foldable posture when trying to send "
-               "gRPC notification, posture "
-               "value: %d",
-               currentPosture);
+        VERBOSE_INFO(grpc,
+                     "Received bad foldable posture when trying to send "
+                     "gRPC notification, posture "
+                     "value: %d",
+                     currentPosture);
+        return std::nullopt;
         return std::nullopt;
     }
     event.mutable_posture()->set_value(

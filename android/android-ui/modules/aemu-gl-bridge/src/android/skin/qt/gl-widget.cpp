@@ -226,6 +226,9 @@ void GLWidget::showEvent(QShowEvent*) {
         mFirstShow = false;
         connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen*)),
                 this, SLOT(handleScreenChange(QScreen*)));
+        if (ensureInit()) {
+            renderFrame();
+        }
         update();
     }
 }
