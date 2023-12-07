@@ -27,19 +27,20 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR
   src
-  SRC android/crashreport/CrashReporter.cpp
+  SRC android/crashreport/Breadcrumb.cpp android/crashreport/CrashReporter.cpp
       android/crashreport/detectors/CrashDetectors.cpp
       android/crashreport/HangDetector.cpp
-  DEPS android-emu-agents
-       android-emu-base
+  DEPS absl::strings
+       android-emu-agents
        android-emu-cmdline
        android-emu-files
        android-emu-utils
        android-hw-config
        protobuf::libprotobuf)
 target_include_directories(android-emu-crashreport PRIVATE src PUBLIC include)
-target_link_libraries(android-emu-crashreport PUBLIC crashpad_client
-                                                     android-emu-base-headers)
+target_link_libraries(
+  android-emu-crashreport PUBLIC crashpad_client android-emu-base
+                                 android-emu-base-headers)
 target_compile_options(android-emu-crashreport PRIVATE -Wno-extern-c-compat
                        PUBLIC -Wno-macro-redefined)
 
@@ -149,7 +150,8 @@ android_upload_symbols(TARGET crash-me DIRECTORY ${ANDROID_SYMBOL_DIR})
 
 android_add_test(
   TARGET android-emu-crashreport-testing
-  SRC android/crashreport//CrashDump_unittest.cpp
+  SRC android/crashreport/AnnotationBuffer_unittest.cpp
+      android/crashreport/CrashDump_unittest.cpp
       android/crashreport/detectors/CrashDetectors_unittest.cpp
       android/crashreport/HangDetector_unittest.cpp
   SOURCE_DIR test

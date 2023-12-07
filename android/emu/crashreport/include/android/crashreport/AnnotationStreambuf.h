@@ -17,6 +17,7 @@ namespace android {
 namespace crashreport {
 
 using crashpad::Annotation;
+
 // A streambuffer that writes to an crashpad annotation, use your favorite
 // std::stream that ends up in a minidump!
 //
@@ -34,17 +35,23 @@ public:
     AnnotationStreambuf& operator=(const AnnotationStreambuf&) = delete;
 
     // Name of the annotation.. This is how it will show up in a minidump.
-    AnnotationStreambuf(const char name[])
+    explicit AnnotationStreambuf(const char name[])
         : Annotation(Type::kString, name, mBuffer), mBuffer() {
         setp(mBuffer, mBuffer + MaxSize);
     }
 
+    // Mainly for testing.
+    int sync() override {
+        setg(mBuffer, mBuffer, mBuffer + (pptr() - pbase()));
+        return 0;
+    }
+
 protected:
     std::streamsize xsputn(const char* s, std::streamsize n) override {
-        std::streamsize available = pptr() - pbase();
+        std::streamsize available = epptr() - pptr();
         std::streamsize to_copy = std::min(n, available);
         if (available <= 0) {
-            return 0;  // No space left in the buffer
+            return traits_type::eof();  // No space left in the buffer
         }
         std::memcpy(pptr(), s, static_cast<std::size_t>(to_copy));
         pbump(static_cast<int>(to_copy));
@@ -54,6 +61,10 @@ protected:
     };
 
     int_type overflow(int_type ch) override { return traits_type::eof(); }
+
+    int_type underflow() override {
+        return gptr() == egptr() ? traits_type::eof() : *gptr();
+    }
 
 private:
     char mBuffer[MaxSize];
