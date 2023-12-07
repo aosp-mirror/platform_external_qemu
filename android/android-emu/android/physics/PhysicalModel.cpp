@@ -1193,6 +1193,8 @@ void PhysicalModelImpl::snapshotSave(Stream* f) {
 }
 
 int PhysicalModelImpl::snapshotLoad(Stream* f) {
+    // reset mInertialModel, otherwise, things will go wild
+    mInertialModel = InertialModel();
     // first load targets
     const int32_t num_physical_parameters = stream_get_be32(f);
     if (num_physical_parameters > MAX_PHYSICAL_PARAMETERS) {
@@ -1262,6 +1264,8 @@ int PhysicalModelImpl::snapshotLoad(Stream* f) {
             }
         }
     }
+
+
     isLoadingSnapshot = false;
     return 0;
 }

@@ -24,16 +24,11 @@ def checkVSVersion(min_vers):
         (e.g. 10.1111.10.0).
 
     Raises:
-        Exception: If vswhere.exe is not found, or if the Visual Studio version does not meet the
-        requirements.
+        Exception: If the Visual Studio version does not meet the version requirements.
     """
-    vscheck = os.path.join(
-        os.environ["PROGRAMFILES(X86)"], "Microsoft Visual Studio", "Installer", "vswhere.exe")
-    if not os.path.isfile(vscheck):
-        raise Exception("{} file not found. Unable to check VS version".format(vscheck))
-    if not common.checkVersion(vers_cmd="{} -latest -property installationVersion".format(vscheck),
-                        vers_regex="[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*",
-                        min_vers=min_vers):
+    vsVersionEnv = os.environ["VISUALSTUDIOVERSION"]
+    vs_version = tuple(map(int, vsVersionEnv.split('.')))
+    if vs_version < min_vers:
         raise Exception("Visual Studio version does not meet requirements")
 
 def checkWindowsSdk(min_vers):
