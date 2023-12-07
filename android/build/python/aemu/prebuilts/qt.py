@@ -31,6 +31,8 @@ from pathlib import Path
 import platform
 
 AOSP_ROOT = Path(__file__).resolve().parents[7]
+HOST_OS = platform.system().lower()
+
 QT_VERSION = "6.5.3"
 QT_SUBMODULES = [
     "qtbase",
@@ -42,9 +44,15 @@ QT_SUBMODULES = [
     "qtwebsockets",
     "qtwebengine"
 ]
+QT_NOWEBENGINE_SUBMODULES = [
+    "qtbase",
+    "qtsvg",
+    "qtimageformats",
+]
 AOSP_QT_SRC_PATH = os.path.join(AOSP_ROOT, "external", "qt5")
-CMAKE_PATH = os.path.join(AOSP_ROOT, "prebuilts", "cmake", platform.system().lower() + "-x86", "bin")
-NINJA_PATH = os.path.join(AOSP_ROOT, "prebuilts", "ninja", platform.system().lower() + "-x86")
+CMAKE_PATH = os.path.join(AOSP_ROOT, "prebuilts", "cmake", HOST_OS + "-x86", "bin")
+NINJA_PATH = os.path.join(AOSP_ROOT, "prebuilts", "ninja", HOST_OS + "-x86")
+
 
 # We must move the source code from external/qt5 to a shorter path because of path too long issue.
 # Symlinking to a shorter path will not work either.
@@ -91,7 +99,7 @@ def checkDependencies():
     logging.info(">> Checking for flex")
     deps_common.checkFlexVersion()
 
-    if platform.system().lower() == "windows":
+    if HOST_OS == "windows":
         # - Visual Studio 2019 v16.11+
         logging.info(">> Checking for Visual Studio 2019 v16.11+")
         deps_win.checkVSVersion(min_vers=(16, 11))
@@ -99,10 +107,10 @@ def checkDependencies():
         # that it must be >= 10.0.20348.0).
         logging.info(">> Checking for Windows 10 SDK >= 10.0.20348.0")
         deps_win.checkWindowsSdk(min_vers=(10, 0, 20348, 0))
-    elif platform.system().lower() == "darwin":
+    elif HOST_OS == "darwin":
         # MacOS sdk >= 13
         deps_mac.checkMacOsSDKVersion(min_vers=(12, 0))
-    elif platform.system().lower() == "linux":
+    elif HOST_OS == "linux":
         pkgconfig_libs = [
             ("xrender", [0, 9, 0]),
             ("xcb-render", [1, 11]),
@@ -169,7 +177,7 @@ def flattenQtRepo(srcdir):
         subprocess.run(args=["git", "config", "--unset", "remote.origin.url"],
                        cwd=srcdir, env=os.environ.copy())
 
-def configureQtBuild(srcdir, builddir, installdir):
+def configureQtBuild(srcdir, builddir, installdir, qtsubmodules):
     """Runs the configure.bat script for Qt.
 
     Args:
@@ -178,15 +186,16 @@ def configureQtBuild(srcdir, builddir, installdir):
         This directory will be created in this function.
         installdir (str): The location of the Qt installation directory. Must be outside of the `srcdir`.
         This directory will be created in this function.
+        qtsubmodules (list(str)): The list of Qt submodules to build.
     """
     if os.path.exists(builddir):
         shutil.rmtree(builddir)
-    old_umask = os.umask(0o777)
+    old_umask = os.umask(0o027)
     os.makedirs(builddir)
     os.umask(old_umask)
 
     config_script = os.path.join(srcdir,
-            ("configure.bat" if platform.system().lower() == "windows" else "configure"))
+            ("configure.bat" if HOST_OS == "windows" else "configure"))
     conf_args = [config_script,
                  "-opensource",
                  "-confirm-license",
@@ -195,7 +204,7 @@ def configureQtBuild(srcdir, builddir, installdir):
                  "-shared",
                  "-no-rpath",
                  "-submodules",
-                 ",".join(QT_SUBMODULES),
+                 ",".join(qtsubmodules),
                  "-nomake", "examples",
                  "-nomake", "tests",
                  "-nomake", "tools",
@@ -218,9 +227,9 @@ def configureQtBuild(srcdir, builddir, installdir):
                  "-qtlibinfix", "AndroidEmu",
                  "-prefix", installdir]
 
-    if platform.system().lower() == "windows":
+    if HOST_OS == "windows":
         conf_args += ["-platform", "win32-msvc"]
-    elif platform.system().lower() == "linux":
+    elif HOST_OS == "linux":
         extra_conf_args = ["-linker", "lld",
                            "-platform", "linux-clang-libc++",
                            "-no-glib"]
@@ -306,9 +315,9 @@ def postInstall(installdir):
     os.makedirs(dst_qconfig.parent, exist_ok=True)
     shutil.copyfile(src_qconfig, dst_qconfig)
 
-    if platform.system().lower() == "darwin":
+    if HOST_OS == "darwin":
         mac_postInstall(installdir)
-    elif platform.system().lower() == "linux":
+    elif HOST_OS == "linux":
         linux_postInstall(installdir)
 
 def mac_postInstall(installdir):
@@ -350,6 +359,9 @@ def mac_postInstall(installdir):
         f"{installdir}/libexec/uic",
         f"{installdir}/libexec/QtWebEngineProcess"]
     for exe in fix_exes:
+        if not os.path.isfile(exe):
+            logging.info(f"Skipping rpath fix for file {exe}")
+            continue
         changeToQt6Rpaths(exe)
 
 def linux_postInstall(installdir):
@@ -369,6 +381,9 @@ def linux_postInstall(installdir):
     # You can verify the rpath with `objdump -x <exe> | grep PATH`.
     # Also can check if libc++.so.1 is resolvable with `ldd <exe>`.
     for exe in fix_exes:
+        if not os.path.isfile(exe):
+            logging.info(f"Skipping rpath fix for file {exe}")
+            continue
         logging.info(f"Adding rpath $ORIGIN/../lib to {exe}")
         subprocess.check_call(
             ["patchelf", "--set-rpath", "$ORIGIN/../lib", exe],
@@ -377,7 +392,6 @@ def linux_postInstall(installdir):
 def buildPrebuilt(args, prebuilts_out_dir):
     atexit.register(cleanup)
 
-    qt_install_dir = os.path.join(prebuilts_out_dir, "qt")
 
     # Use cmake from our prebuilts
     addToSearchPath(CMAKE_PATH)
@@ -398,13 +412,13 @@ def buildPrebuilt(args, prebuilts_out_dir):
     # TODO(joshuaduong): If we decide to flatten the repository at check-in, then this step won't be necessary.
     flattenQtRepo(AOSP_QT_SRC_PATH)
 
-    if platform.system().lower() == "windows":
+    if HOST_OS == "windows":
         # On Windows, We must make sure Qt source code is in a very short directory, otherwise we
         # may get a compiler error because of long paths issue.
         if os.path.exists(WIN_QT_TMP_LOCATION):
             os.remove(WIN_QT_TMP_LOCATION)
         logging.info("Creating Qt temp directory [%s]", WIN_QT_TMP_LOCATION)
-        old_umask = os.umask(0o777)
+        old_umask = os.umask(0o027)
         os.makedirs(WIN_QT_TMP_LOCATION)
         os.umask(old_umask)
         logging.info("Moving source directory to shorter path [%s ==> %s]",
@@ -416,11 +430,22 @@ def buildPrebuilt(args, prebuilts_out_dir):
         qt_src_path = AOSP_QT_SRC_PATH
         qt_build_path = os.path.join(args.out, "build-qt")
 
-    configureQtBuild(qt_src_path, qt_build_path, qt_install_dir)
+    # Build the nowebengine variants as well for linux/mac
+    if HOST_OS == "linux" or HOST_OS == "darwin":
+        logging.info("Building Qt 6 (no QtWebEngine)")
+        qt_install_dir = os.path.join(prebuilts_out_dir, "qt-nowebengine")
+        configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_NOWEBENGINE_SUBMODULES)
+        buildQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path)
+        installQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path, qt_install_dir)
+        postInstall(qt_install_dir)
+        shutil.rmtree(qt_build_path)
 
+
+    logging.info("Building Qt6 w/ QtWebEngine")
+    qt_install_dir = os.path.join(prebuilts_out_dir, "qt")
+    configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_SUBMODULES)
     buildQt(QT_SUBMODULES, qt_build_path)
-
     installQt(QT_SUBMODULES, qt_build_path, qt_install_dir)
-
     postInstall(qt_install_dir)
+
     logging.info("Successfully built Qt!")
