@@ -23,6 +23,7 @@ from pathlib import Path
 from aemu.configure.base_builder import QemuBuilder
 from aemu.configure.darwin_builder import DarwinBuilder
 from aemu.configure.linux_builder import LinuxBuilder
+from aemu.configure.trusty_builder import TrustyBuilder
 from aemu.configure.windows_builder import WindowsBuilder
 from aemu.log import configure_logging
 from aemu.process.runner import run
@@ -48,6 +49,7 @@ def gen_toolchain(target: str, dest: Path, prefix: str, aosp: Path, ccache: Path
         "windows": WindowsToWindowsGenerator,
         "emulator-linux_x64": LinuxToLinuxGenerator,
         "linux": LinuxToLinuxGenerator,
+        "trusty": LinuxToLinuxGenerator,
         "emulator-mac_aarch64": DarwinToDarwinGenerator,
         "darwin": DarwinToDarwinGenerator,
     }
@@ -57,6 +59,7 @@ def gen_toolchain(target: str, dest: Path, prefix: str, aosp: Path, ccache: Path
         "windows": WindowsBuilder,
         "emulator-linux_x64": LinuxBuilder,
         "linux": LinuxBuilder,
+        "trusty": TrustyBuilder,
         "emulator-mac_aarch64": DarwinBuilder,
         "darwin": DarwinBuilder,
     }
