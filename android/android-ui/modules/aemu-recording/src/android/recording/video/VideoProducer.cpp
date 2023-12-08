@@ -28,6 +28,7 @@
 #include "aemu/base/threads/Async.h"                   // for async
 #include "host-common/display_agent.h"      // for QAndroidDis...
 #include "android/gpu_frame.h"                            // for gpu_frame_s...
+#include "android/skin/rect.h"
 #include "host-common/opengles.h"                             // for android_red...
 #include "android/recording/Frame.h"                      // for Frame, AVFo...
 #include "android/recording/Producer.h"                   // for Producer
@@ -67,7 +68,7 @@ public:
             mFormat.videoFormat = mGuestReadbackWorker->getPixelFormat();
         } else {
             // The host framebuffer is always using RGBA8888.
-            mFormat.videoFormat = VideoFormat::BGRA8888;
+            mFormat.videoFormat = VideoFormat::RGBA8888;
         }
 
         // Prefill the free queue with empty frames
@@ -78,7 +79,52 @@ public:
             f.format.videoFormat = mFormat.videoFormat;
             mFreeQueue.send(std::move(f));
         }
+        mPixels.resize(sz);
     }
+
+    bool getScreenshotSimple(uint8_t* pixels) {
+        auto desiredWidth = mFbWidth;
+        auto desiredHeight = mFbHeight;
+        const int bpp = 4;
+        size_t cPixels = bpp * desiredHeight * desiredWidth;
+        auto finalWidth = mFbWidth;
+        auto finalHeight = mFbHeight;
+        const bool ret = getScreenshot(mDisplayId,
+              desiredWidth, desiredHeight,
+              pixels, &cPixels, &finalWidth, &finalHeight);
+        return ret;
+    }
+
+    bool getScreenshot(int displayId, const uint32_t desiredWidth,
+                                    const uint32_t desiredHeight,
+                                    uint8_t* pixels,
+                                    size_t* cPixels,
+                                    uint32_t* finalWidth,
+                                    uint32_t* finalHeight) {
+    // Screenshots can come from either the gl renderer, or the guest.
+    const auto& renderer = android_getOpenglesRenderer();
+    SkinRotation desiredRotation = SKIN_ROTATION_0;
+    if (renderer.get()) {
+        unsigned int bpp = 4;
+        SkinRect rect;
+        rect.pos.x = 0;
+        rect.pos.y = 0;
+        rect.size.w = mFbWidth;
+        rect.size.h = mFbHeight;
+        const int ret = renderer.get()->getScreenshot(
+                       bpp, finalWidth, finalHeight, pixels, cPixels, displayId,
+                       desiredWidth, desiredHeight, desiredRotation,
+                       {{rect.pos.x, rect.pos.y}, {rect.size.w, rect.size.h}});
+        if (ret == 0) {
+            return true;
+        } else if (ret == -2) {
+            // need to allocate more memory, this should not happen
+            return false;
+        }
+    }
+
+    return true;
+}
 
     virtual ~VideoProducer() {}
 
@@ -87,7 +133,6 @@ public:
         mIsStopped = false;
         if (!mIsGuestMode) {
             // Force a repost
-            gpu_frame_set_record_mode(true, mDisplayId);
             android_redrawOpenglesWindow();
         }
 
@@ -125,10 +170,6 @@ public:
         mDataQueue.stop();
         mFreeQueue.stop();
         waitForPoke();
-        // disable Gpu record when sendFramesWorker() thread exits.
-        if (!mIsGuestMode) {
-            gpu_frame_set_record_mode(false, mDisplayId);
-        }
     }
 
 private:
@@ -154,8 +195,9 @@ private:
             frame->tsUs = android::base::System::get()->getHighResTimeUs();
             bool gotFrame = false;
             if (!mIsGuestMode) {
-                auto px = (unsigned char*)gpu_frame_get_record_frame(mDisplayId);
-                if (px) {
+                uint8_t* px = mPixels.data();
+                const bool success = getScreenshotSimple(px);
+                if (success) {
                     frame->dataVec.assign(px, px + frame->dataVec.size());
                     gotFrame = true;
                 }
@@ -213,6 +255,7 @@ private:
     uint8_t mFps = 0;
     uint8_t mTimeLimitSecs = 0;
     bool mIsGuestMode = false;
+    std::vector<uint8_t> mPixels;
 
     // mDataQueue contains filled video frames and mFreeQueue has available
     // video frames that the producer can use. The workflow is as follows:
