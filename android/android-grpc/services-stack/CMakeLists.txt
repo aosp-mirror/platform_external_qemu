@@ -1,6 +1,9 @@
 # Add extended controls service
 android_add_library(
-  TARGET android-grpc-services-stack LICENSE Apache-2.0 SOURCE_DIR src
+  TARGET android-grpc-services-stack
+  LICENSE Apache-2.0
+  SOURCE_DIR
+  src
   SRC android/emulation/control/GrpcServices.cpp
       android/emulation/control/utils/GrpcAndroidLogAdapter.cpp
   DEPS android-grpc-endpoint)
@@ -12,8 +15,13 @@ android_link_complete_archive(TARGET grpc++_reflection AS
                               grpc++_reflection_whole)
 target_link_libraries(
   android-grpc-services-stack
-  PRIVATE png android-emu android-emu-base-headers android-grpc-interceptors
-          modem-service android-grpc-security
+  PRIVATE png
+          android-emu
+          android-emu-base-headers
+          android-grpc-interceptors
+          modem-service
+          android-grpc-security
+          android-grpc-crash-interceptors
   PUBLIC adb-service-server-impl
          android-grpc-incubating-services-stack
          android-waterfall-server-impl
