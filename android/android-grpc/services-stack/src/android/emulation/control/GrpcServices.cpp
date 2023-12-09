@@ -37,6 +37,7 @@
 #include "android/emulation/control/interceptor/IdleInterceptor.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/interceptor/MetricsInterceptor.h"
+#include "android/emulation/control/interceptor/BreadcrumbInterceptor.h"
 #include "android/emulation/control/secure/AllowList.h"
 #include "android/emulation/control/secure/BasicTokenAuth.h"
 #include "android/emulation/control/secure/JwtTokenAuth.h"
@@ -387,6 +388,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         creators.emplace_back(
                 std::make_unique<StdOutLoggingInterceptorFactory>());
     }
+    creators.emplace_back(std::make_unique<BreadcrumbInterceptorFactory>());
     creators.emplace_back(std::make_unique<MetricsInterceptorFactory>());
     if (mTimeout.count() > 0 && mAgents != nullptr) {
         creators.emplace_back(
