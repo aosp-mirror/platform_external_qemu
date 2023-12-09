@@ -198,7 +198,7 @@ private:
                 uint8_t* px = mPixels.data();
                 const bool success = getScreenshotSimple(px);
                 if (success) {
-                    frame->dataVec.assign(px, px + frame->dataVec.size());
+                    frame->dataVec.swap(mPixels);
                     gotFrame = true;
                 }
             } else {
