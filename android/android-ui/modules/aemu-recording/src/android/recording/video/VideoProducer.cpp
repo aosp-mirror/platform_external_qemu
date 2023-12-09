@@ -29,6 +29,11 @@
 #include "host-common/display_agent.h"      // for QAndroidDis...
 #include "android/gpu_frame.h"                            // for gpu_frame_s...
 #include "android/skin/rect.h"
+#include "android/emulation/control/globals_agent.h"
+#include "android/console.h"
+#include "android/skin/file.h"
+#include "android/hw-sensors.h"
+
 #include "host-common/opengles.h"                             // for android_red...
 #include "android/recording/Frame.h"                      // for Frame, AVFo...
 #include "android/recording/Producer.h"                   // for Producer
@@ -95,6 +100,41 @@ public:
         return ret;
     }
 
+bool getDisplayWidthHeightRotation(int displayId, uint32_t* displayWidth, uint32_t* displayHeight, SkinRotation* rotation) {
+    *rotation = SKIN_ROTATION_0;
+    SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
+    if (layout) {
+        *rotation = layout->orientation;
+    }
+    *displayWidth = mFbWidth;
+    *displayHeight = mFbHeight;
+    const auto& renderer = android_getOpenglesRenderer();
+    if (renderer.get()) {
+        unsigned int bpp = 4;
+        gfxstream::Rect rect = {{0, 0}, {0, 0}};
+        unsigned int desiredWidth = 0;
+        unsigned int desiredHeight = 0;
+        unsigned int finalWidth = 0;
+        unsigned int finalHeight = 0;
+        uint8_t *pixels = nullptr;
+        size_t cPixels = 0;
+        const int ret = renderer.get()->getScreenshot(
+                       bpp, &finalWidth, &finalHeight, pixels, &cPixels, displayId,
+                       desiredWidth, desiredHeight, *rotation, rect);
+
+        if (ret == -2) {
+            *displayWidth = finalWidth;
+            *displayHeight = finalHeight;
+        }
+    }
+
+    // need to swap if it is landscape
+    if (*rotation == SKIN_ROTATION_90 || *rotation == SKIN_ROTATION_270) {
+        std::swap(*displayWidth, *displayHeight);
+    }
+    return true;
+}
+
     bool getScreenshot(int displayId, const uint32_t desiredWidth,
                                     const uint32_t desiredHeight,
                                     uint8_t* pixels,
@@ -104,16 +144,21 @@ public:
     // Screenshots can come from either the gl renderer, or the guest.
     const auto& renderer = android_getOpenglesRenderer();
     SkinRotation desiredRotation = SKIN_ROTATION_0;
+    unsigned int effectiveW = 0;
+    unsigned int effectiveH = 0;
+    getDisplayWidthHeightRotation(displayId, &effectiveW, &effectiveH, &desiredRotation);
+    mEffectiveWidth = effectiveW;
+    mEffectiveHeight = effectiveH;
     if (renderer.get()) {
         unsigned int bpp = 4;
         SkinRect rect;
         rect.pos.x = 0;
         rect.pos.y = 0;
-        rect.size.w = mFbWidth;
-        rect.size.h = mFbHeight;
+        rect.size.w = 0;
+        rect.size.h = 0;
         const int ret = renderer.get()->getScreenshot(
                        bpp, finalWidth, finalHeight, pixels, cPixels, displayId,
-                       desiredWidth, desiredHeight, desiredRotation,
+                       mFbWidth, mFbHeight, desiredRotation,
                        {{rect.pos.x, rect.pos.y}, {rect.size.w, rect.size.h}});
         if (ret == 0) {
             return true;
@@ -198,6 +243,8 @@ private:
                 uint8_t* px = mPixels.data();
                 const bool success = getScreenshotSimple(px);
                 if (success) {
+                    frame->width = mEffectiveWidth;
+                    frame->height = mEffectiveHeight;
                     frame->dataVec.swap(mPixels);
                     gotFrame = true;
                 }
@@ -248,6 +295,8 @@ private:
         pokeReceiver();
     }
 
+    uint32_t mEffectiveWidth = 0;
+    uint32_t mEffectiveHeight = 0;
     uint32_t mFbWidth = 0;
     uint32_t mFbHeight = 0;
     uint32_t mTimeDeltaMs = 0;
