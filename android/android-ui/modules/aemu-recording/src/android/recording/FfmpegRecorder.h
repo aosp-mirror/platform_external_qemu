@@ -99,7 +99,7 @@ public:
     // returns:
     //   true if the video track was successfully added, false otherwise.
     virtual bool addVideoTrack(std::unique_ptr<Producer> producer,
-                               const Codec<SwsContext*>* codec) = 0;
+                               Codec<SwsContext*>* codec) = 0;
 
     virtual ~FfmpegRecorder() {}
 
