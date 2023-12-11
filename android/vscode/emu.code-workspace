@@ -1,6 +1,9 @@
 {
 	"folders": [
 		{
+			"path": "external/adt-infra"
+		},
+		{
 			"path": "external/qemu"
 		},
 		{
@@ -8,6 +11,12 @@
 		},
 		{
 			"path": "external/deqp"
+		},
+		{
+			"path": "hardware/google/aemu"
+		},
+		{
+			"path": "hardware/google/gfxstream"
 		},
 	]
 }
