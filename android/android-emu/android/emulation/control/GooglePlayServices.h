@@ -37,7 +37,7 @@ public:
 
     using ResultCallback = std::function<void(Result result)>;
     using ResultOutputCallback =
-            std::function<void(Result result, std::string_view outString)>;
+            std::function<void(Result result, std::string outString)>;
 
     explicit GooglePlayServices(AdbInterface* adb) : mAdb(adb) {}
     ~GooglePlayServices();
