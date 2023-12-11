@@ -22,6 +22,8 @@
 #include <utility>                                        // for move
 #include <vector>                                         // for vector
 
+#include "host-common/hw-config.h"
+#include "host-common/hw-lcd.h"
 #include "aemu/base/Optional.h"                        // for Optional
 #include "aemu/base/synchronization/MessageChannel.h"  // for MessageChannel
 #include "android/base/system/System.h"                   // for System
@@ -31,6 +33,7 @@
 #include "android/skin/rect.h"
 #include "android/emulation/control/globals_agent.h"
 #include "android/console.h"
+#include "android/emulation/resizable_display_config.h"
 #include "android/skin/file.h"
 #include "android/hw-sensors.h"
 
@@ -87,19 +90,6 @@ public:
         mPixels.resize(sz);
     }
 
-    bool getScreenshotSimple(uint8_t* pixels) {
-        auto desiredWidth = mFbWidth;
-        auto desiredHeight = mFbHeight;
-        const int bpp = 4;
-        size_t cPixels = bpp * desiredHeight * desiredWidth;
-        auto finalWidth = mFbWidth;
-        auto finalHeight = mFbHeight;
-        const bool ret = getScreenshot(mDisplayId,
-              desiredWidth, desiredHeight,
-              pixels, &cPixels, &finalWidth, &finalHeight);
-        return ret;
-    }
-
 bool getDisplayWidthHeightRotation(int displayId, uint32_t* displayWidth, uint32_t* displayHeight, SkinRotation* rotation) {
     *rotation = SKIN_ROTATION_0;
     SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
@@ -135,30 +125,58 @@ bool getDisplayWidthHeightRotation(int displayId, uint32_t* displayWidth, uint32
     return true;
 }
 
-    bool getScreenshot(int displayId, const uint32_t desiredWidth,
-                                    const uint32_t desiredHeight,
-                                    uint8_t* pixels,
-                                    size_t* cPixels,
-                                    uint32_t* finalWidth,
-                                    uint32_t* finalHeight) {
+    bool getScreenshotSimple() {
     // Screenshots can come from either the gl renderer, or the guest.
     const auto& renderer = android_getOpenglesRenderer();
     SkinRotation desiredRotation = SKIN_ROTATION_0;
     unsigned int effectiveW = 0;
     unsigned int effectiveH = 0;
+    int displayId = mDisplayId;
+    uint32_t fbWidth = mFbWidth;
+    uint32_t fbHeight = mFbHeight;
+    if (android_foldable_is_pixel_fold()) {
+        auto hw = getConsoleAgents()->settings->hw();
+        if (android_foldable_is_folded()) {
+            displayId = android_foldable_pixel_fold_second_display_id();
+            fbWidth = hw->hw_displayRegion_0_1_width;
+            fbHeight = hw->hw_displayRegion_0_1_height;
+        } else if (resizableEnabled34()) {
+            displayId = 0;
+            auto resizeid = getResizableActiveConfigId();
+            PresetEmulatorSizeInfo info;
+            getResizableConfig(resizeid, &info);
+            fbWidth = info.width;
+            fbHeight = info.height;
+        } else {
+            fbWidth = hw->hw_lcd_width;
+            fbHeight = hw->hw_lcd_height;
+            displayId = 0;
+        }
+    }
+    // TODO handle legacy resizable
+
     getDisplayWidthHeightRotation(displayId, &effectiveW, &effectiveH, &desiredRotation);
     mEffectiveWidth = effectiveW;
     mEffectiveHeight = effectiveH;
+    const int bpp = 4;
+    const int newSize = mEffectiveWidth * mEffectiveHeight * bpp;
+    if (newSize != mPixels.size()) {
+        mPixels.resize(newSize);
+    }
     if (renderer.get()) {
+        unsigned int finalWidth = 0;
+        unsigned int finalHeight = 0;
         unsigned int bpp = 4;
         SkinRect rect;
         rect.pos.x = 0;
         rect.pos.y = 0;
         rect.size.w = 0;
         rect.size.h = 0;
+        uint8_t* pixels = mPixels.data();
+        size_t cPixels = mPixels.size();
         const int ret = renderer.get()->getScreenshot(
-                       bpp, finalWidth, finalHeight, pixels, cPixels, displayId,
-                       mFbWidth, mFbHeight, desiredRotation,
+                       bpp, &finalWidth, &finalHeight, pixels, &cPixels, displayId,
+                       fbWidth, fbHeight, desiredRotation,
                        {{rect.pos.x, rect.pos.y}, {rect.size.w, rect.size.h}});
         if (ret == 0) {
             return true;
@@ -240,8 +258,7 @@ private:
             frame->tsUs = android::base::System::get()->getHighResTimeUs();
             bool gotFrame = false;
             if (!mIsGuestMode) {
-                uint8_t* px = mPixels.data();
-                const bool success = getScreenshotSimple(px);
+                const bool success = getScreenshotSimple();
                 if (success) {
                     frame->width = mEffectiveWidth;
                     frame->height = mEffectiveHeight;
