@@ -218,10 +218,10 @@ bool ScreenRecorder::startRecordingWorker() {
     videoParams.bitrate = mInfo.videoBitrate;
     videoParams.fps = mInfo.fps;
     videoParams.intra_spacing = kIntraSpacing;
-    VP9Codec videoCodec(
+    VP9Codec* videoCodec = new VP9Codec(
             std::move(videoParams), mFbWidth, mFbHeight,
             toAVPixelFormat(videoProducer->getFormat().videoFormat));
-    if (!ffmpegRecorder->addVideoTrack(std::move(videoProducer), &videoCodec)) {
+    if (!ffmpegRecorder->addVideoTrack(std::move(videoProducer), videoCodec)) {
         LOG(ERROR) << "Failed to add video track";
         mRecorderState = RECORDER_STOPPED;
         sendRecordingStatus(RECORD_START_FAILED);
@@ -325,7 +325,7 @@ bool ScreenRecorder::parseRecordingInfo(RecordingInfo& info) {
     }
 
     if (info.fps == 0) {
-        dwarning("Defaulting fps to %u fps", kFPS);
+        dinfo("Defaulting fps to %u fps", kFPS);
         info.fps = kFPS;
     }
     return true;
