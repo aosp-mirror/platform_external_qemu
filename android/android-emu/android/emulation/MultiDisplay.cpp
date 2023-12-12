@@ -579,11 +579,13 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
             derror("Display with id: %d does not exist", displayId);
             return -1;
         }
+        bool displaySizeChanged = false;
         if (mMultiDisplay[displayId].cb != 0 &&
             (mMultiDisplay[displayId].width != w ||
              mMultiDisplay[displayId].height != h)) {
             checkRecording = true;
         }
+        displaySizeChanged = (mMultiDisplay[displayId].width != w || mMultiDisplay[displayId].height != h);
         mMultiDisplay[displayId].width = w;
         mMultiDisplay[displayId].height = h;
         mMultiDisplay[displayId].originalWidth = w;
@@ -600,7 +602,9 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
                 }
                 getCombinedDisplaySizeLocked(&width, &height);
             }
-            UIUpdate = true;
+            if (!android_foldable_is_pixel_fold() && displayId > 0 && displaySizeChanged) {
+                UIUpdate = true;
+            }
         }
     }
     if (checkRecording) {
@@ -780,10 +784,10 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
         if (mMultiDisplay[displayId].cb == colorBuffer) {
             return 0;
         }
+        bool firstTimeColorbufferUpdate = false;
         if (mMultiDisplay[displayId].cb == 0) {
+            firstTimeColorbufferUpdate = true;
             mMultiDisplay[displayId].cb = colorBuffer;
-            // first time cb assigned, update the UI
-            needUpdate = true;
             dpi = mMultiDisplay[displayId].dpi;
             if (isMultiDisplayWindow()) {
                 width = mMultiDisplay[displayId].width;
@@ -798,6 +802,11 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
                     noSkin = true;
                 }
             }
+        }
+        // no need to update pixel_fold, as it has just one
+        // active display; no need to do this for primary display
+        if (!android_foldable_is_pixel_fold() && displayId > 0 && firstTimeColorbufferUpdate) {
+            needUpdate = true;
         }
         mMultiDisplay[displayId].cb = colorBuffer;
     }
