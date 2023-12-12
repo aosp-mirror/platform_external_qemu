@@ -165,7 +165,7 @@ void GooglePlayPage::playPageDone(GooglePlayServices::Result result,
 void GooglePlayPage::getPlayServicesVersion() {
     mGooglePlayServices->getPlayServicesVersion(
             [this](GooglePlayServices::Result result,
-                   std::string_view outString) {
+                   std::string outString) {
                 GooglePlayPage::playVersionDone(result, PlayApps::PlayServices,
                                                 outString);
             });
@@ -173,7 +173,7 @@ void GooglePlayPage::getPlayServicesVersion() {
 
 void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
                                      PlayApps app,
-                                     std::string_view outString) {
+                                     std::string outString) {
     runOnEmuUiThread([this, result, app, outString] {
         QString msg;
         QPlainTextEdit* textEdit = nullptr;

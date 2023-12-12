@@ -548,6 +548,7 @@
         <file alias="rotary_input">images/studio-light/ic_rotary_input.svg</file>
         <file alias="rotary_input_control">images/studio-light/rotary_input_control.svg</file>
         <file alias="send">images/studio-light/ic_send_666_48dp.svg</file>
+        <file alias="sensor_replay">images/studio-light/sensor_replay_grey.svg</file>
         <file alias="settings">images/studio-light/ic_settings_666_48dp.svg</file>
         <file alias="side_on_watch">images/studio-light/side_on_watch.svg</file>
         <file alias="signal_cellular_3_bar">images/studio-light/ic_signal_cellular_3_bar_666_48dp.svg</file>
@@ -709,6 +710,7 @@
         <file alias="rotary_input">images/studio-dark/ic_rotary_input.svg</file>
         <file alias="rotary_input_control">images/studio-dark/rotary_input_control.svg</file>
         <file alias="send">images/studio-dark/ic_send_ABB_48dp.svg</file>
+        <file alias="sensor_replay">images/studio-dark/sensor_replay_grey.svg</file>
         <file alias="settings">images/studio-dark/ic_settings_ABB_48dp.svg</file>
         <file alias="signal_cellular_3_bar">images/studio-dark/ic_signal_cellular_3_bar_ABB_48dp.svg</file>
         <file alias="stop">images/studio-dark/ic_stop_0BA_48dp.svg</file>

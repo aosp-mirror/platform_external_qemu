@@ -1003,23 +1003,6 @@ void EmulatorQtWindow::queueQuitEvent() {
     queueSkinEvent(createSkinEvent(kEventQuit));
 }
 
-void EmulatorQtWindow::refreshSkin() {
-    const bool showWarning = false;
-    if (mToolWindow->isRecordingInProgress(showWarning)) {
-        return;
-    }
-    const bool pixel_fold = android_foldable_is_pixel_fold();
-    const bool has_skin = hasSkin();
-
-    if (pixel_fold || has_skin) {
-        // when it has skin, need to trigger an event to repaint skin
-        // bug: 302006657
-        SkinEvent* event = createSkinEvent(kEventLayoutRotate);
-        event->u.layout_rotation.rotation = mOrientation;
-        queueSkinEvent(event);
-    }
-}
-
 void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent* event) {
     // Accept all drag enter events with any URL, then filter more in drop
     // events
@@ -2696,7 +2679,6 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x,
     QRect containerGeo = mContainer.geometry();
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(),
                            windowGeo.width(), windowGeo.height());
-    refreshSkin();
 }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
