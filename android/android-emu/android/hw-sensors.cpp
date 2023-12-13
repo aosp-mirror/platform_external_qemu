@@ -21,6 +21,7 @@
 
 #include <initializer_list>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -227,6 +228,7 @@ private:
     void* mOpaque;
 };
 
+static std::mutex gSensorListenersMutex;
 static std::unordered_map<void*,
                           std::unique_ptr<HwSensorChangedCallbackListener>>
         gSensorListeners;
@@ -1586,6 +1588,7 @@ void* android_get_posture_listener() {
 
 void android_hw_sensors_register_callback(HwSensorChangedCallback callback,
                                           void* opaque) {
+    std::lock_guard<std::mutex> lock(gSensorListenersMutex);
     auto oldSize = gSensorListeners.size();
     gSensorListeners[opaque] =
             std::make_unique<HwSensorChangedCallbackListener>(callback, opaque);
@@ -1593,6 +1596,7 @@ void android_hw_sensors_register_callback(HwSensorChangedCallback callback,
 }
 
 void android_hw_sensors_unregister_callback(void* opaque) {
+    std::lock_guard<std::mutex> lock(gSensorListenersMutex);
     auto oldSize = gSensorListeners.size();
     gSensorListeners.erase(opaque);
     assert(oldSize == gSensorListeners.size() + 1);

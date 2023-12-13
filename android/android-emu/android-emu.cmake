@@ -644,6 +644,7 @@ if(NOT LINUX_AARCH64)
       android/emulation/serial_line_unittest.cpp
       android/emulation/SetupParameters_unittest.cpp
       android/error-messages_unittest.cpp
+      android/hw-sensors_unittest.cpp
       android/jdwp/Jdwp_unittest.cpp
       android/jdwp/JdwpProxy_unittest.cpp
       android/kernel/kernel_utils_unittest.cpp
