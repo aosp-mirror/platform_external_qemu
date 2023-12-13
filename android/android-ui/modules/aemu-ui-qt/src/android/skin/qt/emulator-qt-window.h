@@ -143,6 +143,7 @@ public:
     void paintEvent(QPaintEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void startThread(StartFunction f, int argc, char** argv);
+    void stopThread();
 
     // In Qt, signals are normally events of interest that a class can emit,
     // which can be hooked up to arbitrary slots. Here we use this mechanism for
