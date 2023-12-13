@@ -798,7 +798,7 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     mContainer.hideModalOverlay();
     lock.unlock();
 
-    delete mMainLoopThread;
+    stopThread();
 }
 
 void EmulatorQtWindow::showWin32DeprecationWarning() {
@@ -1675,6 +1675,13 @@ bool EmulatorQtWindow::event(QEvent* ev) {
     return QWidget::event(ev);
 }
 
+void EmulatorQtWindow::stopThread() {
+    if (mMainLoopThread) {
+        delete mMainLoopThread;
+        mMainLoopThread = nullptr;
+    }
+}
+
 void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
     if (!mMainLoopThread) {
         // Check for null as arguments to StartFunction
@@ -1723,6 +1730,7 @@ void EmulatorQtWindow::slot_clearInstance() {
     // Force kill any parallel tasks that may be running, as this can make Qt
     // hang on exit.
     System::get()->cleanupWaitingPids();
+    stopThread();
     sInstance.get().reset();
 }
 
