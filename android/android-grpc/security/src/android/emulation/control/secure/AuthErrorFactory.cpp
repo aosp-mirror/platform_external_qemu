@@ -64,14 +64,14 @@ absl::Status AuthErrorFactory::authErrorMissingAud(std::string_view iss,
         // In the gradle case the user has not added the entry to the control
         // block
         return absl::PermissionDeniedError(
-                absl::StrFormat("Make sure to add allowedEndpoints.add(\"%s\") "
+                absl::StrFormat("Make sure to add `allowedEndpoints.add(\"%s\")` "
                                 "to the emulatorControl block in your gradle build file.",
                                 path));
     }
 
     return absl::PermissionDeniedError(
             absl::StrFormat("The JWT does not have an aud claim. Make sure to "
-                            "include: \"aud\" : [\"%s\"] in your JWT.",
+                            "include: `\"aud\" : [\"%s\"]` in your JWT.",
                             path));
 }
 
@@ -79,7 +79,7 @@ absl::Status AuthErrorFactory::authErrorMissingClaim(std::string_view iss,
                                                      std::string_view path) {
     if (iss == kGRADLE) {
         return absl::PermissionDeniedError(
-                absl::StrFormat("Make sure to add allowedEndpoints.add(\"%s\") "
+                absl::StrFormat("Make sure to add `allowedEndpoints.add(\"%s\")` "
                                 "to the emulatorControl block in your gradle build file.",
                                 path));
     }
