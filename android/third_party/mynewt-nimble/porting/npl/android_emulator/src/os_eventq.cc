@@ -16,6 +16,7 @@
 // This contains abstractions to run NimBLE against rootcanal (emulated
 // bluetooth chip)
 
+#include <stdio.h>
 #include <assert.h>                // for assert
 #include <string.h>                // for memset, NULL
 

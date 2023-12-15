@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 
+#include <cstdint>
 #include "aemu/base/Compiler.h"
 #include "android/opengl/gpuinfo.h"
 
@@ -51,4 +52,4 @@ private:
     DISALLOW_COPY_AND_ASSIGN(HostHwInfo);
 };
 
-} // namespace android
+}  // namespace android
