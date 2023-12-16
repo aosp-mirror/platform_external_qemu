@@ -53,7 +53,6 @@ AOSP_QT_SRC_PATH = os.path.join(AOSP_ROOT, "external", "qt5")
 CMAKE_PATH = os.path.join(AOSP_ROOT, "prebuilts", "cmake", HOST_OS + "-x86", "bin")
 NINJA_PATH = os.path.join(AOSP_ROOT, "prebuilts", "ninja", HOST_OS + "-x86")
 
-
 # We must move the source code from external/qt5 to a shorter path because of path too long issue.
 # Symlinking to a shorter path will not work either.
 WIN_QT_TMP_LOCATION = os.path.join("C:/", "qttmp")
@@ -177,7 +176,7 @@ def flattenQtRepo(srcdir):
         subprocess.run(args=["git", "config", "--unset", "remote.origin.url"],
                        cwd=srcdir, env=os.environ.copy())
 
-def configureQtBuild(srcdir, builddir, installdir, qtsubmodules):
+def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_target = None):
     """Runs the configure.bat script for Qt.
 
     Args:
@@ -187,6 +186,8 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules):
         installdir (str): The location of the Qt installation directory. Must be outside of the `srcdir`.
         This directory will be created in this function.
         qtsubmodules (list(str)): The list of Qt submodules to build.
+        crosscompile_target (str): The target to cross-compile to. Defaults to None. This currently
+        only works for targeting linux_aarch64 target on linux_x86_64 host.
     """
     if os.path.exists(builddir):
         shutil.rmtree(builddir)
@@ -230,37 +231,54 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules):
     if HOST_OS == "windows":
         conf_args += ["-platform", "win32-msvc"]
     elif HOST_OS == "linux":
-        extra_conf_args = ["-linker", "lld",
-                           "-platform", "linux-clang-libc++",
-                           "-no-glib"]
-        conf_args += extra_conf_args
+        if (crosscompile_target == "linux_aarch64"):
+            # Cross-compiling requires a host installation of Qt, so we must build Qt for
+            # linux-x86_64 prior to cross-compiling to linux_aarch64.
+            QT_HOST_PATH = os.path.join(AOSP_ROOT, "prebuilts", "android-emulator-build", "qt",
+                                        "linux-x86_64")
+            conf_args += ["-platform", "linux-aarch64-gnu-g++",
+                          "-device-option", "CROSS_COMPILE=aarch64-linux-gnu-", "-no-opengl",
+                          "-no-glib", "-qt-host-path", QT_HOST_PATH, "-qt-pcre", "-qt-zlib",
+                          "-qt-doubleconversion", "-qt-freetype", "-qt-harfbuzz",
+                          "-no-feature-gssapi", "-no-feature-brotli", "-no-xcb", "-no-xkbcommon",
+                          "-qt-webp", "-no-libudev", "-no-mtdev", "-no-linuxfb"]
+            os.environ["CC"] = "aarch64-linux-gnu-gcc"
+            os.environ["CXX"] = "aarch64-linux-gnu-g++"
+            extra_cflags = "-march=armv8-a"
+            extra_cxxflags = "-march=armv8-a"
+            conf_args += ["--", "-DCMAKE_SYSTEM_NAME=Linux", "-DCMAKE_SYSTEM_PROCESSOR=arm",
+                          f"-DQT_HOST_PATH={QT_HOST_PATH}", "-DCMAKE_LINKER_FLAGS=-Wl,--as-needed"]
+        else:
+            conf_args += ["-linker", "lld",
+                          "-platform", "linux-clang-libc++",
+                          "-no-glib"]
 
-        os.environ["CC"] = "clang"
-        os.environ["CXX"] = "clang++"
-        extra_cflags = "-m64 -fuse-ld=lld -fPIC"
-        extra_cxxflags = "-stdlib=libc++ -m64 -fuse-ld=lld -fPIC"
-        # Use libc++ instead of libstdc++
-        conf_cmake_args = [ f"-DCMAKE_CXX_FLAGS={extra_cxxflags}", f"-DMAKE_C_FLAGS={extra_cflags}" ]
-        conf_args.append("--")
-        conf_args += conf_cmake_args
+            os.environ["CC"] = "clang"
+            os.environ["CXX"] = "clang++"
+            extra_cflags = "-m64 -fuse-ld=lld -fPIC"
+            extra_cxxflags = "-stdlib=libc++ -m64 -fuse-ld=lld -fPIC"
+            # Use libc++ instead of libstdc++
+            conf_cmake_args = [ f"-DCMAKE_CXX_FLAGS={extra_cxxflags}", f"-DMAKE_C_FLAGS={extra_cflags}" ]
+            conf_args.append("--")
+            conf_args += conf_cmake_args
 
-        # The QtWebEngine chromium build doesn't seem to pick up CXXFLAGS
-        # envrionment variables. So let's just create some clang wrappers
-        # to force use our flags.
-        os.environ["CFLAGS"] = extra_cflags
-        os.environ["CXXFLAGS"] = extra_cxxflags
-        toolchain_dir = Path(builddir) / "toolchain"
-        os.makedirs(Path(builddir) / "toolchain")
+            # The QtWebEngine chromium build doesn't seem to pick up CXXFLAGS
+            # envrionment variables. So let's just create some clang wrappers
+            # to force use our flags.
+            os.environ["CFLAGS"] = extra_cflags
+            os.environ["CXXFLAGS"] = extra_cxxflags
+            toolchain_dir = Path(builddir) / "toolchain"
+            os.makedirs(Path(builddir) / "toolchain")
 
-        with open(toolchain_dir / "clang", 'x') as f:
-            f.write(f"#!/bin/sh\n/usr/bin/clang {extra_cflags} $@")
-        os.chmod(toolchain_dir / "clang", 0o777)
+            with open(toolchain_dir / "clang", 'x') as f:
+                f.write(f"#!/bin/sh\n/usr/bin/clang {extra_cflags} $@")
+            os.chmod(toolchain_dir / "clang", 0o777)
 
-        with open(toolchain_dir / "clang++", 'x') as f:
-            f.write(f"#!/bin/sh\n/usr/bin/clang++ {extra_cxxflags} $@")
-        os.chmod(toolchain_dir / "clang++", 0o777)
+            with open(toolchain_dir / "clang++", 'x') as f:
+                f.write(f"#!/bin/sh\n/usr/bin/clang++ {extra_cxxflags} $@")
+            os.chmod(toolchain_dir / "clang++", 0o777)
 
-        addToSearchPath(str(toolchain_dir))
+            addToSearchPath(str(toolchain_dir))
 
     logging.info("[%s] Running %s", builddir, config_script)
     logging.info(conf_args)
@@ -307,7 +325,7 @@ def cleanup():
     if os.path.exists(WIN_QT_TMP_LOCATION):
         shutil.rmtree(WIN_QT_TMP_LOCATION)
 
-def postInstall(installdir):
+def postInstall(installdir, target):
     # Create include.system/QtCore/qconfig.h from include/QtCore/qconfig.h
     src_qconfig = Path(installdir) / "include" / "QtCore" / "qconfig.h"
     dst_qconfig = Path(installdir) / "include.system" / "QtCore" / "qconfig.h"
@@ -318,7 +336,7 @@ def postInstall(installdir):
     if HOST_OS == "darwin":
         mac_postInstall(installdir)
     elif HOST_OS == "linux":
-        linux_postInstall(installdir)
+        linux_postInstall(installdir, target)
 
 def mac_postInstall(installdir):
     """Post-install steps specific for mac.
@@ -364,18 +382,32 @@ def mac_postInstall(installdir):
             continue
         changeToQt6Rpaths(exe)
 
-def linux_postInstall(installdir):
-    # Install prebuilt clang's libc++.so.1 to lib/ as Qt's compiler
+def linux_postInstall(installdir, target):
+    # Install prebuilt clang's libc++.so.1 and libc++abi.so.1 to lib/ as Qt's compiler
     # tools (moc, rcc, uic) depends on it.
-    src_libc = deps_common.getClangDirectory() / "lib" / "libc++.so.1"
-    dst_libc = f"{installdir}/lib/libc++.so.1"
-    logging.info(f"Copy {src_libc} ==> {dst_libc}")
-    shutil.copyfile(src_libc, dst_libc)
+    clang_libs = ["libc++.so.1", "libc++abi.so.1"]
+    for lib in clang_libs:
+        src_lib = deps_common.getClangDirectory() / "lib" / lib
+        dst_lib = f"{installdir}/lib/{lib}"
+        logging.info(f"Copy {src_lib} ==> {dst_lib}")
+        shutil.copyfile(src_lib, dst_lib)
 
+    if target != "linux_aarch64":
+        # need libunwind.so.1 for syncqt
+        src_libunwind = AOSP_ROOT / "prebuilts" / "android-emulator-build" / "common" / "libunwind" \
+            / "linux-x86_64" / "lib" / "libunwind.so"
+        dst_libunwind = f"{installdir}/lib/libunwind.so.1"
+        logging.info(f"Copy {src_libunwind} ==> {dst_libunwind}")
+        shutil.copyfile(src_libunwind, dst_libunwind)
+
+    # Need syncqt, qvkgen on linux-x86_64 for linux_aarch64 cross-compile build
     fix_exes = [
         f"{installdir}/libexec/moc",
         f"{installdir}/libexec/rcc",
         f"{installdir}/libexec/uic",
+        f"{installdir}/libexec/syncqt",
+        f"{installdir}/libexec/qvkgen",
+        f"{installdir}/libexec/cmake_automoc_parser",
         f"{installdir}/libexec/QtWebEngineProcess"]
     # Add rpath to $ORIGIN/../lib so these executables can find libc++.so.1.
     # You can verify the rpath with `objdump -x <exe> | grep PATH`.
@@ -391,7 +423,6 @@ def linux_postInstall(installdir):
 
 def buildPrebuilt(args, prebuilts_out_dir):
     atexit.register(cleanup)
-
 
     # Use cmake from our prebuilts
     addToSearchPath(CMAKE_PATH)
@@ -431,21 +462,28 @@ def buildPrebuilt(args, prebuilts_out_dir):
         qt_build_path = os.path.join(args.out, "build-qt")
 
     # Build the nowebengine variants as well for linux/mac
+    crosscompile_target = None
+    if args.target == "linux_aarch64":
+        crosscompile_target = args.target
+
     if HOST_OS == "linux" or HOST_OS == "darwin":
         logging.info("Building Qt 6 (no QtWebEngine)")
         qt_install_dir = os.path.join(prebuilts_out_dir, "qt-nowebengine")
-        configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_NOWEBENGINE_SUBMODULES)
+        configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_NOWEBENGINE_SUBMODULES,
+                         crosscompile_target)
         buildQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path)
         installQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path, qt_install_dir)
-        postInstall(qt_install_dir)
+        postInstall(qt_install_dir, args.target)
         shutil.rmtree(qt_build_path)
 
-
-    logging.info("Building Qt6 w/ QtWebEngine")
-    qt_install_dir = os.path.join(prebuilts_out_dir, "qt")
-    configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_SUBMODULES)
-    buildQt(QT_SUBMODULES, qt_build_path)
-    installQt(QT_SUBMODULES, qt_build_path, qt_install_dir)
-    postInstall(qt_install_dir)
+    if args.target == "linux_aarch64":
+        logging.info(f"Skipping QtWebEngine build for {args.target}")
+    else:
+        logging.info("Building Qt6 w/ QtWebEngine")
+        qt_install_dir = os.path.join(prebuilts_out_dir, "qt")
+        configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_SUBMODULES, crosscompile_target)
+        buildQt(QT_SUBMODULES, qt_build_path)
+        installQt(QT_SUBMODULES, qt_build_path, qt_install_dir)
+        postInstall(qt_install_dir, args.target)
 
     logging.info("Successfully built Qt!")
