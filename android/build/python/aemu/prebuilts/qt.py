@@ -176,7 +176,8 @@ def flattenQtRepo(srcdir):
         subprocess.run(args=["git", "config", "--unset", "remote.origin.url"],
                        cwd=srcdir, env=os.environ.copy())
 
-def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_target = None):
+def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_target=None,
+                     qt_host_path=None):
     """Runs the configure.bat script for Qt.
 
     Args:
@@ -188,6 +189,8 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
         qtsubmodules (list(str)): The list of Qt submodules to build.
         crosscompile_target (str): The target to cross-compile to. Defaults to None. This currently
         only works for targeting linux_aarch64 target on linux_x86_64 host.
+        qt_host_path (str): The path to where Qt was installed on the host machine. This parameter
+        is only used in cross compilation builds.
     """
     if os.path.exists(builddir):
         shutil.rmtree(builddir)
@@ -231,14 +234,14 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
     if HOST_OS == "windows":
         conf_args += ["-platform", "win32-msvc"]
     elif HOST_OS == "linux":
-        if (crosscompile_target == "linux_aarch64"):
+        if crosscompile_target == "linux_aarch64":
             # Cross-compiling requires a host installation of Qt, so we must build Qt for
             # linux-x86_64 prior to cross-compiling to linux_aarch64.
-            QT_HOST_PATH = os.path.join(AOSP_ROOT, "prebuilts", "android-emulator-build", "qt",
-                                        "linux-x86_64")
+            if not qt_host_path:
+                logging.fatal(f"No Qt host path was provided for {crosscompile_target} cross-compilation.")
             conf_args += ["-platform", "linux-aarch64-gnu-g++",
                           "-device-option", "CROSS_COMPILE=aarch64-linux-gnu-", "-no-opengl",
-                          "-no-glib", "-qt-host-path", QT_HOST_PATH, "-qt-pcre", "-qt-zlib",
+                          "-no-glib", "-qt-host-path", qt_host_path, "-qt-pcre", "-qt-zlib",
                           "-qt-doubleconversion", "-qt-freetype", "-qt-harfbuzz",
                           "-no-feature-gssapi", "-no-feature-brotli", "-no-xcb", "-no-xkbcommon",
                           "-qt-webp", "-no-libudev", "-no-mtdev", "-no-linuxfb"]
@@ -246,8 +249,10 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
             os.environ["CXX"] = "aarch64-linux-gnu-g++"
             extra_cflags = "-march=armv8-a"
             extra_cxxflags = "-march=armv8-a"
+            os.environ["CFLAGS"] = extra_cflags
+            os.environ["CXXFLAGS"] = extra_cxxflags
             conf_args += ["--", "-DCMAKE_SYSTEM_NAME=Linux", "-DCMAKE_SYSTEM_PROCESSOR=arm",
-                          f"-DQT_HOST_PATH={QT_HOST_PATH}", "-DCMAKE_LINKER_FLAGS=-Wl,--as-needed"]
+                          f"-DQT_HOST_PATH={qt_host_path}", "-DCMAKE_LINKER_FLAGS=-Wl,--as-needed"]
         else:
             conf_args += ["-linker", "lld",
                           "-platform", "linux-clang-libc++",
@@ -462,28 +467,33 @@ def buildPrebuilt(args, prebuilts_out_dir):
         qt_build_path = os.path.join(args.out, "build-qt")
 
     # Build the nowebengine variants as well for linux/mac
-    crosscompile_target = None
-    if args.target == "linux_aarch64":
-        crosscompile_target = args.target
-
     if HOST_OS == "linux" or HOST_OS == "darwin":
         logging.info("Building Qt 6 (no QtWebEngine)")
         qt_install_dir = os.path.join(prebuilts_out_dir, "qt-nowebengine")
-        configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_NOWEBENGINE_SUBMODULES,
-                         crosscompile_target)
+        configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_NOWEBENGINE_SUBMODULES)
         buildQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path)
         installQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path, qt_install_dir)
         postInstall(qt_install_dir, args.target)
         shutil.rmtree(qt_build_path)
 
-    if args.target == "linux_aarch64":
-        logging.info(f"Skipping QtWebEngine build for {args.target}")
-    else:
-        logging.info("Building Qt6 w/ QtWebEngine")
-        qt_install_dir = os.path.join(prebuilts_out_dir, "qt")
-        configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_SUBMODULES, crosscompile_target)
-        buildQt(QT_SUBMODULES, qt_build_path)
-        installQt(QT_SUBMODULES, qt_build_path, qt_install_dir)
-        postInstall(qt_install_dir, args.target)
+    logging.info("Building Qt6 w/ QtWebEngine")
+    qt_install_dir = os.path.join(prebuilts_out_dir, "qt")
+    configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_SUBMODULES)
+    buildQt(QT_SUBMODULES, qt_build_path)
+    installQt(QT_SUBMODULES, qt_build_path, qt_install_dir)
+    postInstall(qt_install_dir, args.target)
 
+    # Since linux_aarch64 cross-compilation requires having a host build of Qt, let's just build it
+    # in the linux x86_64 host instead of creating an additional linux_aarch64 build target.
+    if HOST_OS == "linux":
+        logging.info("Cross-compiling Qt 6 (no QtWebEngine) for linux_aarch64")
+        crosscompile_target = "linux_aarch64"
+        qt_install_dir = os.path.join(prebuilts_out_dir, "qt-nowebengine-linux_aarch64")
+        qt_host_path = os.path.join(prebuilts_out_dir, "qt-nowebengine")
+        configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_NOWEBENGINE_SUBMODULES,
+                         crosscompile_target, qt_host_path)
+        buildQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path)
+        installQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path, qt_install_dir)
+        postInstall(qt_install_dir, "linux_aarch64")
+        shutil.rmtree(qt_build_path)
     logging.info("Successfully built Qt!")
