@@ -275,13 +275,22 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
             toolchain_dir = Path(builddir) / "toolchain"
             os.makedirs(Path(builddir) / "toolchain")
 
+            clang_dir = deps_common.getClangDirectory()
             with open(toolchain_dir / "clang", 'x') as f:
-                f.write(f"#!/bin/sh\n/usr/bin/clang {extra_cflags} $@")
+                f.write(f"#!/bin/sh\n{clang_dir}/bin/clang {extra_cflags} $@")
             os.chmod(toolchain_dir / "clang", 0o777)
 
             with open(toolchain_dir / "clang++", 'x') as f:
-                f.write(f"#!/bin/sh\n/usr/bin/clang++ {extra_cxxflags} $@")
+                f.write(f"#!/bin/sh\n{clang_dir}/bin/clang++ {extra_cxxflags} $@")
             os.chmod(toolchain_dir / "clang++", 0o777)
+
+            with open(toolchain_dir / "ar", 'x') as f:
+                f.write(f"#!/bin/sh\n{clang_dir}/bin/llvm-ar $@")
+            os.chmod(toolchain_dir / "ar", 0o777)
+
+            with open(toolchain_dir / "lld", 'x') as f:
+                f.write(f"#!/bin/sh\n{clang_dir}/bin/lld $@")
+            os.chmod(toolchain_dir / "lld", 0o777)
 
             addToSearchPath(str(toolchain_dir))
 
