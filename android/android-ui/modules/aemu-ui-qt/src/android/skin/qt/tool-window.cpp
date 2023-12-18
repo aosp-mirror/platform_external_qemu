@@ -564,11 +564,8 @@ void ToolWindow::hide() {
 }
 
 void ToolWindow::closeEvent(QCloseEvent* ce) {
-    mIsExiting = true;
-    // make sure only parent processes the event - otherwise some
-    // siblings won't get it, e.g. main window
     ce->ignore();
-    setEnabled(false);
+    on_close_button_clicked();
 }
 
 void ToolWindow::mousePressEvent(QMouseEvent* event) {
@@ -1375,23 +1372,20 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
 }
 
 bool ToolWindow::shouldClose() {
-    if (mAskedWhetherToSaveSnapshot)
-        return true;
-
-    bool actuallyExit = askWhetherToSaveSnapshot();
-    if (actuallyExit) {
-        mExtendedWindow.get()->sendMetricsOnShutDown();
-        parentWidget()->close();
-        return true;
+    // we already asked, just return the answer
+    if (mAskedWhetherToSaveSnapshot) {
+        return mShouldClose;
     }
 
-    setEnabled(true);
-    return false;
+    mShouldClose = askWhetherToSaveSnapshot();
+
+    return mShouldClose;
 }
 
 void ToolWindow::on_close_button_clicked() {
+    mIsExiting = true;
     setEnabled(false);
-
+    mCloseClicked = true;
     if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier)) {
         // The user shift-clicked on the X
         // This counts as us asking and having the user say "don't save"
@@ -1399,11 +1393,20 @@ void ToolWindow::on_close_button_clicked() {
         mAskedWhetherToSaveSnapshot = true;
         getConsoleAgents()->settings->avdParams()->flags |=
                 AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
-        parentWidget()->close();
+        mEmulatorWindow->requestClose();
 
         return;
     }
-    shouldClose();
+
+    if(shouldClose()) {
+        mExtendedWindow.get()->sendMetricsOnShutDown();
+        mEmulatorWindow->requestClose();
+    } else {
+        mAskedWhetherToSaveSnapshot = false;
+        setEnabled(true);
+        mIsExiting = false;
+        mCloseClicked = false;
+    }
 }
 
 void ToolWindow::on_home_button_pressed() {
