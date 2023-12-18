@@ -338,6 +338,7 @@ bool configAndStartRenderer(enum WinsysPreferredGlesBackend uiPreferredBackend,
                 break;
             // Swiftshader: always enable if api level >= 29
             case SELECTED_RENDERER_SWIFTSHADER_INDIRECT:
+            case SELECTED_RENDERER_ANGLE_INDIRECT:
                 shouldEnableVulkan = api_level >= 29;
                 if (shouldEnableVulkan) {
                     crashhandler_append_message_format(
