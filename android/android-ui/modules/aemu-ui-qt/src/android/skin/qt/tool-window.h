@@ -91,8 +91,6 @@ public:
     void dockMainWindow();
     void raiseMainWindow();
     void updateTheme(const QString& styleSheet);
-    bool isRecordingInProgress(bool showWarning);
-
 
     void setClipboardCallbacks(const UiEmuAgent* agPtr);
 

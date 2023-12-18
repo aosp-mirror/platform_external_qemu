@@ -247,6 +247,7 @@ public:
     virtual std::string getErrorMessage();
 
 private:
+    void reInitializeWidthAndHeight(int w, int h);
     void start(const PlayConfig& playConfig, bool PauseAtRequest);
 
     int play();
@@ -627,9 +628,6 @@ int VideoDecoder::getVideoFrame(AVFrame* frame) {
         frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(
                 mPlayer->mDataset->getFormatContext(), st, frame);
 
-        mPlayer->mWidth = frame->width;
-        mPlayer->mHeight = frame->height;
-
         if ((mPlayer->mFrameDrop > 0 ||
              (mPlayer->mFrameDrop &&
               mPlayer->getMasterSyncType() != AvSyncMaster::Video)) &&
@@ -816,6 +814,29 @@ void VideoPlayerImpl::checkExternalClockSpeed() {
     }
 }
 
+void VideoPlayerImpl::reInitializeWidthAndHeight(int w, int h) {
+    if (mWidth != w || mHeight != h) {
+        mWidth = w;
+        mHeight = h;
+        mVideoCodecCtx->width = w;
+        mVideoCodecCtx->height = h;
+        mVideoCodec->init(mVideoCodecCtx.get());
+        int dst_w = mVideoCodecCtx->width;
+        int dst_h = mVideoCodecCtx->height;
+        adjustWindowSize(mVideoCodecCtx.get(), &dst_w, &dst_h);
+
+        // window size to display the video
+        mWindowWidth = dst_w;
+        mWindowHeight = dst_h;
+
+        AVPixelFormat dst_fmt = AV_PIX_FMT_RGB24;
+        mImgConvertCtx =
+                sws_getContext(mVideoCodecCtx->width, mVideoCodecCtx->height,
+                               mVideoCodecCtx->pix_fmt, dst_w, dst_h, dst_fmt,
+                               SWS_FAST_BILINEAR, NULL, NULL, NULL);
+    }
+}
+
 int VideoPlayerImpl::queuePicture(AVFrame* src_frame,
                                   double pts,
                                   double duration,
@@ -825,6 +846,8 @@ int VideoPlayerImpl::queuePicture(AVFrame* src_frame,
     if (vp == nullptr) {
         return -1;
     }
+
+    reInitializeWidthAndHeight(src_frame->width, src_frame->height);
 
     vp->sar = src_frame->sample_aspect_ratio;
 
