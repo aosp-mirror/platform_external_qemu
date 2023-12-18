@@ -1182,7 +1182,7 @@ void MultiDisplay::onLoad(base::Stream* stream) {
         getCombinedDisplaySizeLocked(&combinedDisplayWidth,
                                      &combinedDisplayHeight);
     }
-    if (!isMultiDisplayWindow()) {
+    if (!isMultiDisplayWindow() && !android_foldable_is_pixel_fold()) {
         if (activeAfterLoad) {
             if (!activeBeforeLoad) {
                 mWindowAgent->setNoSkin();
