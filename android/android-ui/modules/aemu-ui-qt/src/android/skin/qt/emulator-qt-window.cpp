@@ -920,6 +920,13 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
+    // make sure to use the close button on tool window
+    if (!mToolWindow->closeButtonClicked()) {
+        mToolWindow->on_close_button_clicked();
+        event->ignore();
+        return;
+    }
+
     if (!mToolWindow->shouldClose()) {
         event->ignore();
         return;
@@ -1730,7 +1737,10 @@ void EmulatorQtWindow::slot_clearInstance() {
     // Force kill any parallel tasks that may be running, as this can make Qt
     // hang on exit.
     System::get()->cleanupWaitingPids();
-    stopThread();
+    if(mMainLoopThread && mMainLoopThread->isRunning()) {
+        requestClose();
+        mMainLoopThread->wait();
+    }
     sInstance.get().reset();
 }
 
