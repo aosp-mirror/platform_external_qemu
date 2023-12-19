@@ -292,6 +292,10 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
                 f.write(f"#!/bin/sh\n{clang_dir}/bin/lld $@")
             os.chmod(toolchain_dir / "lld", 0o777)
 
+            # Add path to libc++.so.1 as some binaries (syncqt) that require it are ran during the
+            # configure step.
+            os.environ["LD_LIBRARY_PATH"] = str(deps_common.getClangDirectory() / "lib")
+
             addToSearchPath(str(toolchain_dir))
 
     logging.info("[%s] Running %s", builddir, config_script)
