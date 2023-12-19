@@ -30,12 +30,14 @@ android_add_library(
 
 target_include_directories(android-webrtc PUBLIC . ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_options(android-webrtc PUBLIC -Wno-deprecated-non-prototype)
-target_compile_definitions(android-webrtc PUBLIC ANDROID_WEBRTC)
-target_compile_options(android-webrtc PUBLIC -Wno-inconsistent-missing-override)
+target_compile_definitions(
+  android-webrtc PUBLIC ANDROID_WEBRTC AEMU_WEBRTC_SHARED
+  PRIVATE WEBRTC_EXPORTS)
+target_compile_options(android-webrtc PUBLIC -Wno-inconsistent-missing-override
+                                             -fvisibility=hidden)
 target_link_libraries(
   android-webrtc
-  PUBLIC nlohmann_json::nlohmann_json
-         android-emu
+  PUBLIC nlohmann_json::nlohmann_json android-emu
   PRIVATE protobuf::libprotobuf
           grpc++
           emulator_controller-server-impl
@@ -52,6 +54,7 @@ target_link_libraries(
           ui::gl-bridge
           Threads::Threads)
 
+target_link_options(android-webrtc PRIVATE -Wl,-no-undefined)
 android_install_shared_library(TARGET android-webrtc)
 if(NOT LINUX_AARCH64)
   android_add_test(

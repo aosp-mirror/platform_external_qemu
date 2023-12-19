@@ -17,6 +17,7 @@
 #include <string>                           // for string
 
 #include "nlohmann/json.hpp"  // for json
+#include "android/emulation/control/webrtc-exports.h"
 
 namespace emulator {
 namespace webrtc {
@@ -24,7 +25,7 @@ namespace webrtc {
 using nlohmann::json;
 using ::webrtc::PeerConnectionInterface;
 
-class RtcConfig {
+class WEBRTC_API RtcConfig {
 public:
     static PeerConnectionInterface::RTCConfiguration parse(
             json rtcConfiguration);
