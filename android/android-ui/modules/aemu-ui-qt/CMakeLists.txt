@@ -54,6 +54,7 @@ android_qt_lib(
       android/skin/qt/winsys-qt.cpp
       android/window-agent-impl.cpp
   DEPS aemu-ui-car-property-utils
+       aemu-ui-headless # Yes! The QT ui depends on the headless one..
        aemu-ui-qt-base
        aemu::recording
        android-emu
@@ -62,7 +63,6 @@ android_qt_lib(
        android-emu-location
        android-emu-protobuf
        android-hw-config
-       aemu-ui-headless  # Yes! The QT ui depends on the headless one..
        ext-page-battery
        ext-page-battery-grpc
        ext-page-bugreport
@@ -90,6 +90,7 @@ android_qt_lib(
        ext-page-telephony
        ext-page-telephony-grpc
        ext-page-tv-remote
+       FFMPEG::FFMPEG
        protobuf::libprotobuf
        qemu-host-common-headers
        Qt${QT_VERSION_MAJOR}::Core
