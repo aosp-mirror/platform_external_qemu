@@ -62,6 +62,7 @@ class DarwinBuilder(QemuBuilder):
     # --objcc=/tmp/out/toolchain/g++
     def meson_config(self):
         return [
+            "-Dandroid=enabled",
             "-Daudio_drv_list=coreaudio",
             "-Dfdt=auto",
             "-Dalsa=disabled",

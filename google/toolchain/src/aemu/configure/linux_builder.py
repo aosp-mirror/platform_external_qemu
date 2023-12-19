@@ -20,6 +20,7 @@ from aemu.configure.base_builder import QemuBuilder, LibInfo
 class LinuxBuilder(QemuBuilder):
     def meson_config(self):
         return [
+            "-Dandroid=enabled",
             "-Daudio_drv_list=default",
             "-Dfdt=auto",
             "-Dalsa=disabled",

@@ -30,6 +30,7 @@ SKIP_OPTIONS = {
     "fuzzing_engine",
     "qemu_suffix",
     "smbd",
+    "android",  # This requires google extensions, let's not upstream.
 }
 
 OPTION_NAMES = {

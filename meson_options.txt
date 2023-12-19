@@ -352,3 +352,8 @@ option('slirp_smbd', type : 'feature', value : 'auto',
 
 option('hexagon_idef_parser', type : 'boolean', value : true,
        description: 'use idef-parser to automatically generate TCG code for the Hexagon frontend')
+
+# These are google Android specific. This will include goldfish hardware.
+# These are marked as skipped, we do not want these in the configure script.
+option('android', type: 'feature', value : 'disabled',
+       description: 'android emulation support')

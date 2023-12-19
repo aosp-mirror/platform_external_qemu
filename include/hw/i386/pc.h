@@ -15,6 +15,10 @@
 #include "hw/firmware/smbios.h"
 #include "hw/cxl/cxl.h"
 
+#ifdef CONFIG_ANDROID
+#include "hw/acpi/aml-build.h"
+#endif
+
 #define HPET_INTCAP "hpet-intcap"
 
 /**
@@ -56,6 +60,10 @@ typedef struct PCMachineState {
 
     SGXEPCState sgx_epc;
     CXLState cxl_devices_state;
+
+#ifdef CONFIG_ANDROID
+    void (*add_goldfish_dsdt)(MachineState *state, Aml* dsdt);
+#endif
 } PCMachineState;
 
 #define PC_MACHINE_ACPI_DEVICE_PROP "acpi-device"
