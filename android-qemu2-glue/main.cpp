@@ -2571,7 +2571,7 @@ extern "C" int main(int argc, char** argv) {
          accelerator == ANDROID_CPU_ACCELERATOR_AEHD) &&
         ::android::base::Win32Utils::getServiceStatus("vgk") > SVC_NOT_FOUND) {
         dwarning(
-                "Vanguard anti-cheat software is deteced on your system. "
+                "Vanguard anti-cheat software is detected on your system. "
                 "It is known to have compatibility issues with Android "
                 "emulator. It is recommended to uninstall or deactivate "
                 "Vanguard anti-cheat software while running Android "
