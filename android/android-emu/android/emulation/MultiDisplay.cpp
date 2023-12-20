@@ -28,7 +28,7 @@
 #include "aemu/base/LayoutResolver.h"
 #include "aemu/base/files/Stream.h"
 #include "aemu/base/files/StreamSerializing.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/LogSeverity.h"
 #include "android/avd/info.h"
@@ -971,7 +971,7 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id,
         std::string msg = "Display index cannot be more than " +
                           std::to_string(s_maxNumMultiDisplay);
         mWindowAgent->showMessage(msg.c_str(), WINDOW_MESSAGE_ERROR, 1000);
-        derror("%s", msg.c_str());
+        derror("%s", msg);
         return false;
     }
     return true;

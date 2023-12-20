@@ -15,7 +15,7 @@
  */
 #include "shared_fd.h"
 
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/sockets/SocketUtils.h"
 #include "android/utils/debug.h"
 #include "shared_select.h"
@@ -239,7 +239,7 @@ int WindowsPollFDs(SharedFDSet& read_set, struct timeval* timeout) {
         read_set.Set(myreadmap[fd]);
         ++numFdReady;
         // check for other fd
-        VERBOSE_INFO(modem, "fd fired %s", fd);
+        VERBOSE_INFO(modem, "fd fired %d", fd);
         for (int i = index + 1; i < myevents.size(); ++i) {
             ret = WaitForMultipleObjects(1, &(myevents[i]), TRUE, 0);
             if (ret == WAIT_OBJECT_0) {

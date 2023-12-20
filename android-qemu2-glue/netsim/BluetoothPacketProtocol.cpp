@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "PacketStreamTransport.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android-qemu2-glue/netsim/PacketProtocol.h"
 #include "android/avd/info.h"
 #include "android/console.h"

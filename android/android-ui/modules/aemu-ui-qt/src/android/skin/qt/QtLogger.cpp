@@ -42,8 +42,8 @@ void QtLogger::write(const char* fmt, ...) {
     vswprintf(buf, sizeof(buf) - 1, wfmt.data(), ap);
     va_end(ap);
 
-    dinfo("%S", buf);
-
     wcstombs(cbuf, buf, std::size(cbuf));
-    mFileHandle << std::string(cbuf) << std::endl;
+    auto str = std::string(cbuf);
+    LOG(INFO) << str;
+    mFileHandle << str << std::endl;
 }

@@ -49,8 +49,8 @@ public:
         const std::lock_guard<std::mutex> lock(mEventLock);
         if (google::protobuf::util::MessageDifferencer::Equals(event.data,
                                                                mLastEvent)) {
-            VERBOSE_INFO(keys, "%s is already aware of %s", dest.c_str(),
-                         event.data.ShortDebugString().c_str());
+            VERBOSE_INFO(keys, "%s is already aware of %s", dest,
+                         event.data.ShortDebugString());
             return;
         }
 
@@ -58,8 +58,8 @@ public:
 
         if (dest != event.source) {
             VERBOSE_INFO(keys, "Event from: %s for %s (%s)",
-                         event.source.c_str(), dest.c_str(),
-                         event.data.ShortDebugString().c_str());
+                         event.source, dest,
+                         event.data.ShortDebugString());
 
             SimpleServerWriter<ClipData>::Write(event.data);
         } else {

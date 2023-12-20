@@ -56,7 +56,7 @@ static void
 ble_store_ram_print_value_sec(const struct ble_store_value_sec *sec)
 {
     if (sec->ltk_present) {
-        BLE_HS_LOG(DEBUG, "ediv=%u rand=%llu authenticated=%d ltk=",
+        BLE_HS_LOG(DEBUG, "ediv=%u rand=%" PRIu64 " authenticated=%d ltk=",
                        sec->ediv, sec->rand_num, sec->authenticated);
         ble_hs_log_flat_buf(sec->ltk, 16);
         BLE_HS_LOG(DEBUG, " ");
@@ -85,7 +85,7 @@ ble_store_ram_print_key_sec(const struct ble_store_key_sec *key_sec)
         BLE_HS_LOG(DEBUG, " ");
     }
     if (key_sec->ediv_rand_present) {
-        BLE_HS_LOG(DEBUG, "ediv=0x%02x rand=0x%llx ",
+        BLE_HS_LOG(DEBUG, "ediv=0x%02x rand=0x%" PRIx64 " ",
                        key_sec->ediv, key_sec->rand_num);
     }
 }

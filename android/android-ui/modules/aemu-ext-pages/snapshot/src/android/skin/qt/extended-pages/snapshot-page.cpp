@@ -68,7 +68,7 @@
 
 #include "android/avd/info.h"                        // for AVDINFO_NO_SNAPS...
 #include "android/avd/util.h"                        // for path_getAvdConte...
-#include "aemu/base/logging/CLog.h"               // for base
+#include "aemu/base/logging/Log.h"               // for base
 #include "aemu/base/ProcessControl.h"             // for isRestartDisabled
 #include "aemu/base/async/ThreadLooper.h"         // for ThreadLooper
 #include "aemu/base/files/PathUtils.h"            // for PathUtils

@@ -470,7 +470,7 @@ static void _hwSensorClient_receive(HwSensorClient* cl,
                                     int msglen) {
     HwSensors* hw = cl->sensors;
 
-    D("%s: '%.*s'", __FUNCTION__, msglen, msg);
+    D("%s: '%.*s'", __FUNCTION__, msglen, (char*) msg);
 
     /* "list-sensors" is used to get an integer bit map of
      * available emulated sensors. We compute the mask from the
@@ -528,12 +528,12 @@ static void _hwSensorClient_receive(HwSensorClient* cl,
 
         id = _sensorIdFromName((const char*)msg);
         if (id < 0 || id >= MAX_SENSORS) {
-            D("%s: ignore unknown sensor name '%s'", __FUNCTION__, msg);
+            D("%s: ignore unknown sensor name '%s'", __FUNCTION__, (char*) msg);
             return;
         }
 
         if (!hw->sensors[id].enabled) {
-            D("%s: trying to set disabled %s sensor", __FUNCTION__, msg);
+            D("%s: trying to set disabled %s sensor", __FUNCTION__, (char*) msg);
             return;
         }
         enabled = (q[0] == '1');
@@ -544,8 +544,8 @@ static void _hwSensorClient_receive(HwSensorClient* cl,
             cl->enabledMask &= ~(1 << id);
 
         if (cl->enabledMask != (uint32_t)oldEnabledMask) {
-            D("%s: %s %s sensor", __FUNCTION__,
-              (cl->enabledMask & (1 << id)) ? "enabling" : "disabling", msg);
+            D("%s %s sensor",
+              (cl->enabledMask & (1 << id)) ? "enabling" : "disabling", (char*) msg);
         }
 
         /* If emulating device is connected update sensor state there too. */

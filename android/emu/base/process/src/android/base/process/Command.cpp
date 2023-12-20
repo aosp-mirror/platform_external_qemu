@@ -13,7 +13,7 @@
 // limitations under the License.
 #include "aemu/base/process/Command.h"
 
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 
 #include <stdio.h>
 #include <cassert>
@@ -63,7 +63,7 @@ private:
 void ObservableProcess::runOverseer() {
     {
         std::unique_lock<std::mutex> lk(mOverseerMutex);
-        dprint("Starting overseer to retrieve stderr/stdout of %s", exe().c_str());
+        dprint("Starting overseer to retrieve stderr/stdout of %s", exe());
         auto out =
                 reinterpret_cast<ProcessOutputImpl*>(mStdOut.get())->getBuf();
         auto err =

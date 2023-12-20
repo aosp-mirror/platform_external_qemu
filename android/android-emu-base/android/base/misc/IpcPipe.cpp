@@ -11,6 +11,7 @@
 
 #include "aemu/base/misc/IpcPipe.h"
 
+#include "aemu/base/Log.h"
 #include "aemu/base/EintrWrapper.h"
 #include "aemu/base/files/Fd.h"
 

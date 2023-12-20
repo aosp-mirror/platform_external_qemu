@@ -63,12 +63,11 @@ std::optional<GattDevice> loadFromProto(std::string_view pathToEndpointProto) {
             std::ios::in | std::ios::binary);
     GattDevice device;
     if (!input) {
-        derror("File %s not found",
-               PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str());
+        derror("File %s not found", pathToEndpointProto.data());
         return {};
     } else if (!device.ParseFromIstream(&input)) {
         derror("File %s does not contain a valid device",
-               PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str());
+               pathToEndpointProto.data());
         return {};
     }
 
@@ -99,9 +98,8 @@ int main(int argc, char** argv) {
         dfatal("No valid protobuf configutation provided");
     }
 
-    auto maybeClient =
-            EmulatorGrpcClient::loadFromProto(
-                    absl::GetFlag(FLAGS_with_hci_transport));
+    auto maybeClient = EmulatorGrpcClient::loadFromProto(
+            absl::GetFlag(FLAGS_with_hci_transport));
     while (!maybeClient.ok()) {
         using namespace std::chrono_literals;
         dinfo("Waiting for first emulator..");

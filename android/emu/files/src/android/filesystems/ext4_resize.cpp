@@ -15,7 +15,7 @@
 #include "android/filesystems/ext4_resize.h"
 
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
 
