@@ -12,6 +12,7 @@
 #pragma once
 
 #include <initializer_list>
+#include <cstdint>
 #include <string>
 #include <string.h>
 #include <vector>
