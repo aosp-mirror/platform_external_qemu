@@ -221,7 +221,21 @@ bool qemu_android_emulation_early_setup() {
     // Inject the logging method for netsim
     netsim::setBtsLogSink([](auto prio, auto file, auto line, std::string msg) {
         if (VERBOSE_CHECK(bluetooth)) {
-            __emu_log_print_cplusplus((LogSeverity)prio, file, line, "%s", msg);
+            LogSeverity sev = LogSeverity::EMULATOR_LOG_DEBUG;
+            switch (prio) {
+                case 2:
+                    sev = LogSeverity::EMULATOR_LOG_INFO;
+                    break;
+                case 1:
+                    sev = LogSeverity::EMULATOR_LOG_WARNING;
+                    break;
+                case 0:
+                    sev = LogSeverity::EMULATOR_LOG_ERROR;
+                    break;
+                default:
+                    break; /* Nothing */
+            };
+            __emu_log_print_cplusplus(sev, file, line, "Netsim: %s", msg);
         }
     });
 
