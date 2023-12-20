@@ -228,6 +228,7 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
                  "-no-feature-cups",
                  "-no-strip",
                  "-no-framework",
+                 "-no-opengl"
                  "-qtlibinfix", "AndroidEmu",
                  "-prefix", installdir]
 
@@ -240,7 +241,7 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
             if not qt_host_path:
                 logging.fatal(f"No Qt host path was provided for {crosscompile_target} cross-compilation.")
             conf_args += ["-platform", "linux-aarch64-gnu-g++",
-                          "-device-option", "CROSS_COMPILE=aarch64-linux-gnu-", "-no-opengl",
+                          "-device-option", "CROSS_COMPILE=aarch64-linux-gnu-",
                           "-no-glib", "-qt-host-path", qt_host_path, "-qt-pcre", "-qt-zlib",
                           "-qt-doubleconversion", "-qt-freetype", "-qt-harfbuzz",
                           "-no-feature-gssapi", "-no-feature-brotli", "-no-xcb", "-no-xkbcommon",
