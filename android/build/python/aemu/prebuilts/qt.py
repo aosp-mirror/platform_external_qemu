@@ -228,7 +228,7 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
                  "-no-feature-cups",
                  "-no-strip",
                  "-no-framework",
-                 "-no-opengl"
+                 "-no-opengl",
                  "-qtlibinfix", "AndroidEmu",
                  "-prefix", installdir]
 
