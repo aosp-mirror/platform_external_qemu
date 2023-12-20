@@ -1,0 +1,54 @@
+#!/bin/sh
+# Copyright 2023 - The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the',  help='License');
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an',  help='AS IS' BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# A script to build a qemu release using the Google AOSP toolchain
+
+# Check if the correct number of arguments is provided
+if [ "$#" -ne 2 ]; then
+    echo "Configure and build qemu for trusty"
+    echo "Usage: $0 <destination> <distribution>"
+    exit 1
+fi
+
+# Get the directory of the script
+script_dir=$(dirname "$0")
+aosp_dir=$script_dir/../../../..
+
+# Convert relative path to absolute path
+absolute_aosp=$(readlink -f "$aosp_dir" 2>/dev/null || realpath "$aosp_dir")
+
+PATH="$absolute_aosp/prebuilts/build-tools/path/linux-x86:$PATH"
+PATH="$absolute_aosp/prebuilts/python/linux-x86/bin:$PATH"
+
+# Assign parameters to variables
+destination="$1"
+distribution="$2"
+
+echo "-- Creating a virtual environment in $destination"
+python3 -m venv "$destination/venv"
+
+echo "-- Activating the virtual environment"
+VIRTUAL_ENV="$destination/venv"
+PATH="$VIRTUAL_ENV/bin:$PATH"
+
+PYTHONPATH="$script_dir/src:$PYTHONPATH"
+
+export PATH PYTHONPATH VIRTUAL_ENV
+
+echo "-- Launching qemu configuration, build"
+python3 -m aemu.toolchain setup --force --target trusty --aosp $absolute_aosp  $destination/qemu-bld
+python3 -m aemu.toolchain compile $destination/qemu-bld
+# python3 -m aemu.toolchain test $destination/qemu-bld
+python3 -m aemu.toolchain release $destination/qemu-bld $distribution
