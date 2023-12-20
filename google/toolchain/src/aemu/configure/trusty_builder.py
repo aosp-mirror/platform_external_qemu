@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from aemu.configure.base_builder import LibInfo
 from aemu.configure.linux_builder import LinuxBuilder
-
 
 class TrustyBuilder(LinuxBuilder):
     def meson_config(self):
@@ -29,3 +29,34 @@ class TrustyBuilder(LinuxBuilder):
             "-Dprefer_static=true",
             "-Db_pie=false",
         ] + linux_cfg
+
+    def packages(self):
+        # Similar to linux, but using static dependencies.
+        super().packages();
+
+        includes = [
+            self.aosp / "external" / "glib",
+            self.aosp / "external" / "glib" / "gmodule",
+            self.aosp / "external" / "glib" / "os" / "linux",
+            self.aosp / "external" / "glib" / "os" / "linux" / "glib",
+            self.aosp / "external" / "glib" / "os" / "linux" / "gmodule",
+            "${libdir}",
+        ]
+        # Next we have our dependencies.
+        return [
+            LibInfo("//external/dtc:libfdt", "1.6.0", {}),
+            LibInfo("@glib//:gmodule-static", "2.77.2", {}),
+            LibInfo("@glib//:glib-static", "2.77.2",
+                {
+                    "name": "glib-2.0",
+                    "includes": [str(x) for x in includes],
+                    "link_flags": "-pthread",
+                    "Requires": "pcre2, gmodule-static",
+                },
+                    ),
+            LibInfo("@zlib//:zlib", "1.2.10", {}),
+            LibInfo("@pixman//:pixman-1", "0.42.3", {"Requires": "pixman_simd"}),
+            LibInfo("@pixman//:pixman_simd", "0.42.3", {}),
+            LibInfo("@pcre2//:pcre2", "10.42", {}),
+        ]
+

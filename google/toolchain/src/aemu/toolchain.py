@@ -101,7 +101,12 @@ def gen_toolchain(
     toolchain = get_toolchain_generator(
         target, Path(dest) / QemuBuilder.TOOLCHAIN_DIR, "", aosp, ccache
     )
-    return builder_map[TARGET_ALIAS[target]](Path(aosp), Path(dest), ccache, toolchain)
+
+    if target not in builder_map:
+        logging.info("Mapping %s -> %s", target, TARGET_ALIAS[target])
+        target = TARGET_ALIAS[target]
+
+    return builder_map[target](Path(aosp), Path(dest), ccache, toolchain)
 
 
 def mkdirs(out: Path, force: bool):
