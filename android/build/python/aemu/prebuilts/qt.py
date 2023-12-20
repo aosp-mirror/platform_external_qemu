@@ -148,7 +148,9 @@ def checkDependencies():
             else:
                 logging.info("Checking pkg-config for %s", libname)
             deps_linux.checkPkgConfigLibraryExists(libname, vers)
-
+        # patchelf required to modify rpaths during installation
+        if not deps_common.checkExeIsOnPath("patchelf"):
+            return False
     return True
 
 def flattenQtRepo(srcdir):
