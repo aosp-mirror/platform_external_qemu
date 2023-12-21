@@ -29,7 +29,7 @@ class LinuxToLinuxGenerator(ToolchainGenerator):
             self.aosp / "external" / "qemu" / "google" / "compat" / "linux" / "include"
         ).absolute()
 
-        linux_sys_root = (
+        self.linux_sys_root = (
             self.aosp
             / "prebuilts"
             / "gcc"
@@ -38,15 +38,15 @@ class LinuxToLinuxGenerator(ToolchainGenerator):
             / "x86_64-linux-glibc2.17-4.8"
         )
         # GCC_DIR = TOOLCHAIN_DIR / "lib" / "gcc" / "x86_64-linux" / "4.8.3"
-        self.system_root = linux_sys_root / "sysroot"
+        self.system_root = self.linux_sys_root / "sysroot"
         self.bazel.build_target(self.COMPAT_ARCHIVE)
         compat_lib_dir = self.bazel.get_archive(self.COMPAT_ARCHIVE).parent
 
         self.cflags = (
-            f"--gcc-toolchain={linux_sys_root} "
-            f"-B{linux_sys_root}/lib/gcc/x86_64-linux/4.8.3/ "
-            f"-L{linux_sys_root}/lib/gcc/x86_64-linux/4.8.3/ "
-            f"-L{linux_sys_root}/x86_64-linux/lib64/ "
+            f"--gcc-toolchain={self.linux_sys_root} "
+            f"-B{self.linux_sys_root}/lib/gcc/x86_64-linux/4.8.3/ "
+            f"-L{self.linux_sys_root}/lib/gcc/x86_64-linux/4.8.3/ "
+            f"-L{self.linux_sys_root}/x86_64-linux/lib64/ "
             f"-L{self.dest}/lib "
             "-fuse-ld=lld -Wl,--allow-shlib-undefined "
             f"-L{version_path}/lib/linux/ "
@@ -116,3 +116,8 @@ class LinuxToLinuxGenerator(ToolchainGenerator):
             f"{self.isystem_flags} "
         )
         return script, extra
+
+    def link_dirs(self):
+        """Setup links to libc++.so etc.."""
+        super().link_dirs()
+        (self.dest / "sysroot").symlink_to(self.system_root)

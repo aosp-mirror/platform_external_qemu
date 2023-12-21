@@ -27,8 +27,13 @@ from aemu.configure.trusty_builder import TrustyBuilder
 from aemu.configure.windows_builder import WindowsBuilder
 from aemu.log import configure_logging
 from aemu.process.runner import run
-from aemu.toolchains.darwin_generator import DarwinToDarwinGenerator
+from aemu.toolchains.toolchain_generator import ToolchainGenerator
+from aemu.toolchains.darwin_generator import (
+    DarwinToDarwinGenerator,
+    DarwinToDarwinX64Generator,
+)
 from aemu.toolchains.linux_generator import LinuxToLinuxGenerator
+from aemu.toolchains.linux_arm_generator import LinuxToLinuxAarch64Generator
 from aemu.toolchains.windows_generator import WindowsToWindowsGenerator
 
 
@@ -38,58 +43,93 @@ class CustomFormatter(
     pass
 
 
-def gen_toolchain(target: str, dest: Path, prefix: str, aosp: Path, ccache: Path):
+TARGET_ALIAS = {
+    "emulator-windows_x64": "windows-x64",
+    "windows": "windows-x64",
+    "windows-msvc-x86_64": "windows-x64",
+    "linux": "linux-x64",
+    "trusty": "linux-x64",
+    "emulator-linux_x64": "linux-x64",
+    "linux-x86_64": "linux-x64",
+    "linux-aarch64": "linux-aarch64",
+    "darwin": "mac-aarch64",
+    "darwin-x86_64": "mac-x64",
+    "darwin-aarch64": "mac-aarch64",
+    "emulator-mac_aarch64": "mac-aarch64",
+}
+
+
+def get_toolchain_generator(
+    target: str, dest: Path, prefix: str, aosp: Path, ccache: Path
+) -> ToolchainGenerator:
     # TODO: __host__To__target__ Toolchain generator.
     # Note that if you wish to add cross compilation support
     # You will have to add this support to the bazel toolchains
     # as well, as we depend on bazel for pkg-config lib + include
     # generation.
     generator_map = {
-        "emulator-windows_x64": WindowsToWindowsGenerator,
-        "windows": WindowsToWindowsGenerator,
-        "emulator-linux_x64": LinuxToLinuxGenerator,
-        "linux": LinuxToLinuxGenerator,
-        "trusty": LinuxToLinuxGenerator,
-        "emulator-mac_aarch64": DarwinToDarwinGenerator,
-        "darwin": DarwinToDarwinGenerator,
+        "windows-x64": WindowsToWindowsGenerator,
+        "linux-x64": LinuxToLinuxGenerator,
+        "linux-aarch64": LinuxToLinuxAarch64Generator,
+        "mac-aarch64": DarwinToDarwinGenerator,
+        "mac-x64": DarwinToDarwinX64Generator,
     }
 
-    builder_map = {
-        "emulator-windows_x64": WindowsBuilder,
-        "windows": WindowsBuilder,
-        "emulator-linux_x64": LinuxBuilder,
-        "linux": LinuxBuilder,
-        "trusty": TrustyBuilder,
-        "emulator-mac_aarch64": DarwinBuilder,
-        "darwin": DarwinBuilder,
-    }
-
-    if target not in generator_map or target not in builder_map:
+    if target not in TARGET_ALIAS:
         raise ValueError(f"No toolchain support for target: {target}")
+
+    toolchain_klazz = generator_map[TARGET_ALIAS[target]]
+    # Initialize the toolchain generator with the specified destination and an empty suffix.
+    # This generator will be used to manage toolchain-related configurations.
+    return toolchain_klazz(Path(aosp), Path(dest), prefix)
+
+
+def gen_toolchain(
+    target: str, dest: Path, prefix: str, aosp: Path, ccache: Path
+) -> QemuBuilder:
+    builder_map = {
+        "windows-x64": WindowsBuilder,
+        "linux-x64": LinuxBuilder,
+        "linux-aarch64": LinuxBuilder,
+        "mac-aarch64": DarwinBuilder,
+        "trusty": TrustyBuilder,
+        "mac-x64": DarwinBuilder,
+    }
 
     # Get the class that is capable of configuring the toolchain
     # from the current host targeting our target.
-    toolchain_klazz = generator_map[target]
-    return builder_map[target](Path(aosp), Path(dest), ccache, toolchain_klazz)
+    toolchain = get_toolchain_generator(
+        target, Path(dest) / QemuBuilder.TOOLCHAIN_DIR, "", aosp, ccache
+    )
+    return builder_map[TARGET_ALIAS[target]](Path(aosp), Path(dest), ccache, toolchain)
 
 
-def setup_command(args):
-    out = Path(args.out).absolute()
-
+def mkdirs(out: Path, force: bool):
     if out.exists():
-        if args.force:
+        if force:
             shutil.rmtree(out)
         else:
             logging.fatal(
                 "The directory %s already exists, please delete it first or use the -f flag.",
                 out,
             )
-            return
+            raise FileExistsError(f"The directory {out} already exists")
 
-    out.mkdir(exist_ok=True, parents=True)
-    logging.info("Created %s, starting configuration.. this is slow..", out)
-    builder = gen_toolchain(args.target, out, args.prefix, args.aosp, args.ccache)
+
+def setup_command(args):
+    mkdirs(Path(args.out).absolute(), args.force)
+    builder = gen_toolchain(
+        args.target, Path(args.out), args.prefix, args.aosp, args.ccache
+    )
     builder.configure_meson()
+
+
+def toolchain_command(args):
+    mkdirs(Path(args.out).absolute(), args.force)
+    toolchain = get_toolchain_generator(
+        args.target, Path(args.out), args.prefix, args.aosp, args.ccache
+    )
+    toolchain.gen_toolchain()
 
 
 def compile_command(args):
@@ -199,6 +239,45 @@ def main():
     )
 
     subparsers = parser.add_subparsers(title="Commands", dest="command", metavar="")
+    toolchain_parser = subparsers.add_parser(
+        "toolchain", help="Create toolchain wrappers for compilation"
+    )
+    toolchain_parser.add_argument(
+        "out", type=str, help="Directory for toolchain wrappers"
+    )
+    toolchain_parser.add_argument(
+        "--ccache",
+        dest="ccache",
+        default=shutil.which("ccache") or shutil.which("sccache"),
+        help="Use the given compiler cache (ccache/sccache)",
+    )
+    toolchain_parser.add_argument(
+        "-f",
+        "--force",
+        dest="force",
+        default=False,
+        action="store_true",
+        help="Ignore existing directory and overwrite existing files",
+    )
+    toolchain_parser.add_argument(
+        "--aosp",
+        type=str,
+        default=find_aosp_root(),
+        help="AOSP root to use",
+    )
+    toolchain_parser.add_argument(
+        "--prefix",
+        dest="prefix",
+        type=str,
+        default="",
+        help="Compiler prefix to use, e.g. my-pre-c++",
+    )
+    toolchain_parser.add_argument(
+        "--target",
+        type=str,
+        default=platform.system().lower(),
+        help="Toolchain target, the host you wish to run the executables on",
+    )
 
     setup_parser = subparsers.add_parser(
         "setup", help="Create wrappers for QEMU compilation"
@@ -235,7 +314,7 @@ def main():
         "--target",
         type=str,
         default=platform.system().lower(),
-        help="Toolchain target",
+        help="Toolchain target, the host you wish to run the executables on",
     )
 
     # Subparser for 'compile' commandgi
@@ -259,7 +338,9 @@ def main():
     if hasattr(args, "out") and args.out:
         args.out = Path(args.out).absolute()
 
-    if args.command == "setup":
+    if args.command == "toolchain":
+        toolchain_command(args)
+    elif args.command == "setup":
         setup_command(args)
     elif args.command == "compile":
         compile_command(args)
