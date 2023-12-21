@@ -214,7 +214,7 @@ static void _qemud_serial_read(void* opaque, const uint8_t* from, int len) {
             s->header->used = 0;
 
             if (s->in_size <= 0 || s->in_channel < 0) {
-                D("%s: bad header: '%.*s'", __FUNCTION__, HEADER_SIZE, s->data0);
+                D("bad header: '%.*s'", HEADER_SIZE, (char*) s->data0);
                 continue;
             }
 

@@ -1873,7 +1873,7 @@ camera_client_handle_event(CameraClient*  cc,
     }
 
     if (cc->command_buffer_offset + msglen >= MAX_QUERY_MESSAGE_SIZE) {
-        E("%s: command buffer overflowed: existing buffer-size %d needed %d\n",
+        E("Command buffer overflowed: existing buffer-size %d needed %d",
                 MAX_QUERY_MESSAGE_SIZE, cc->command_buffer_offset + msglen);
         cc->command_buffer_offset = 0;
         _qemu_client_reply_ko(client, "query too long");

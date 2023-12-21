@@ -39,6 +39,7 @@
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/emulation/control/adb/adbkey.h"
 #include "android/emulation/control/automation_agent.h"
+#include "android/emulation/resizable_display_config.h"
 #include "android/error-messages.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
@@ -364,15 +365,17 @@ static void updateDataSystemSubdirectory(const char* dataDirectory,
         dwarning("Could not locate file: %s", srcFileFullPath.c_str());
         return;
     }
-    dprint("copy %s to %s", srcFileFullPath.c_str(),
-             destFileFullPath.c_str());
+    dprint("copy %s to %s", srcFileFullPath, destFileFullPath);
     path_mkdir_if_needed(destDirFullPath.c_str(), kDirFilePerm);
     path_copy_file(destFileFullPath.c_str(), srcFileFullPath.c_str());
     android_chmod(destFileFullPath.c_str(), 0640);
 }
 
 static void prepareSkinConfig(AndroidHwConfig* hw, const char* dataDirectory) {
-    if (android_foldable_is_pixel_fold()) {
+    if (android_foldable_is_pixel_fold() &&
+        ((hw->hw_device_name &&
+          "pixel_fold" == std::string(hw->hw_device_name)) ||
+         resizableEnabled34())) {
         // copy the /data/misc/pixel_fold/{display_settings.xml, devicestate/
         // and displayconfig/} to /data/system/
         updateDataSystemSubdirectory(dataDirectory, "devicestate",
@@ -510,7 +513,7 @@ static void convertExt4ToQcow2(std::string ext4filepath) {
 
     std::string dataimageext4 = ext4filepath;
     if (!System::get()->pathIsExt4(dataimageext4)) {
-        dprint("%s is not ext4\n", dataimageext4.c_str());
+        dprint("%s is not ext4\n", dataimageext4);
         return;
     }
 
@@ -521,7 +524,7 @@ static void convertExt4ToQcow2(std::string ext4filepath) {
                                                     "qcow2", dataimageext4,
                                                     dataimageqcow2});
     if (!System::get()->pathIsQcow2(dataimageqcow2)) {
-        dprint("%s is not qcow2\n", dataimageqcow2.c_str());
+        dprint("%s is not qcow2\n", dataimageqcow2);
         return;
     }
 
@@ -1429,7 +1432,7 @@ static bool checkConfigIniCompatible(std::string srcConfig,
             return false;
     }
 
-    dprint("%s and %s are compatible", srcConfig.c_str(), destConfig.c_str());
+    dprint("%s and %s are compatible", srcConfig, destConfig);
     return true;
 }
 
@@ -1582,14 +1585,14 @@ extern "C" int main(int argc, char** argv) {
             rl.rlim_cur = desiredLimit;
             ret = setrlimit(RLIMIT_NOFILE, &rl);
             if (0 == ret) {
-                D("Raised open files limit to %u", __func__, desiredLimit);
+                D("Raised open files limit to %u",  desiredLimit);
             } else {
                 derror("%s: Failed to raise files limit. errno %d", __func__,
                        errno);
             }
             ret = getrlimit(RLIMIT_NOFILE, &rl);
             if (0 == ret) {
-                D("Num files limit (after): cur max %u %u", __func__,
+                D("Num files limit (after): cur max %u %u",
                   rl.rlim_cur, rl.rlim_max);
             } else {
                 derror("%s: Failed to query files limit. errno %d", __func__,
@@ -1738,7 +1741,7 @@ extern "C" int main(int argc, char** argv) {
             }
 
             for (int i = 0; i < args.size(); i++) {
-                dinfo("%s: arg: %s", __func__, args[i].c_str());
+                dinfo("%s: arg: %s", __func__, args[i]);
             }
             // Skip the translation of command-line options and jump
             // straight to qemu_main().
@@ -2571,7 +2574,7 @@ extern "C" int main(int argc, char** argv) {
          accelerator == ANDROID_CPU_ACCELERATOR_AEHD) &&
         ::android::base::Win32Utils::getServiceStatus("vgk") > SVC_NOT_FOUND) {
         dwarning(
-                "Vanguard anti-cheat software is deteced on your system. "
+                "Vanguard anti-cheat software is detected on your system. "
                 "It is known to have compatibility issues with Android "
                 "emulator. It is recommended to uninstall or deactivate "
                 "Vanguard anti-cheat software while running Android "
@@ -3376,10 +3379,10 @@ extern "C" int main(int argc, char** argv) {
     if (VERBOSE_CHECK(init)) {
         dinfo("QEMU options list:");
         for (int i = 0; i < args.size(); i++) {
-            dinfo("\t argv[%02d] = \"%s\"", i, args[i].c_str());
+            dinfo("\t argv[%02d] = \"%s\"", i, args[i]);
         }
         // Dump final command-line option to make debugging the core easier
-        dinfo("Concatenated QEMU options: %s", args.toString().c_str());
+        dinfo("Concatenated QEMU options: %s", args.toString());
     }
     if (opts->check_snapshot_loadable) {
         android_check_snapshot_loadable(opts->check_snapshot_loadable);

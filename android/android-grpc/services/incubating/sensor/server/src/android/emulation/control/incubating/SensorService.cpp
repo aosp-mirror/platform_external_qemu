@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "aemu/base/async/ThreadLooper.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/console.h"
 #include "android/emulation/control/incubating/SensorService.h"
 #include "android/emulation/control/sensors_agent.h"

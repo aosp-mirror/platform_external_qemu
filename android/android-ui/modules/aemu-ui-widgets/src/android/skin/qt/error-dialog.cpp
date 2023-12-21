@@ -53,7 +53,7 @@ void showErrorDialog(const QString& message, const QString& title) {
         sErrorDialog->get().setWindowTitle(title);
         sErrorDialog->get().exec();
     } else {
-         derror("%s : %s", title.toStdString().c_str(), message.toStdString().c_str());
+         derror("%s : %s", title.toStdString(), message.toStdString());
     }
 }
 

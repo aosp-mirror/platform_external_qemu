@@ -11,19 +11,23 @@
 
 #include "android/filesystems/partition_config.h"
 
+#include <inttypes.h>
+#include <stdarg.h>
+
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #endif
 
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
+#include <initializer_list>
+#include <string>
+
+#include "aemu/base/logging/Log.h"
 #include "android/base/system/System.h"
 #include "android/filesystems/internal/PartitionConfigBackend.h"
 #include "android/utils/debug.h"
-
-#include <cerrno>
-#include <climits>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 
 using android::base::System;
 using android::internal::PartitionConfigBackend;

@@ -1027,7 +1027,7 @@ Texture RendererImpl::tryGetCachedTexture(const char* filename) {
 
 Texture RendererImpl::createEmptyTexture(uint32_t width, uint32_t height) {
     if (!isTextureSizeValid(width, height)) {
-        E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
+        E("createEmptyTexture: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
           height, GL_MAX_TEXTURE_SIZE);
         return Texture();
     }
@@ -1141,7 +1141,7 @@ void RendererImpl::onLoaderLoadTexture(Texture texture) {
 bool RendererImpl::replaceTextureInternal(Texture texture,
                                           const TextureUtils::Result& data) {
     if (!isTextureSizeValid(data.mWidth, data.mHeight)) {
-        E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d",
+        E("Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d",
           data.mWidth, data.mHeight, GL_MAX_TEXTURE_SIZE);
         return false;
     }

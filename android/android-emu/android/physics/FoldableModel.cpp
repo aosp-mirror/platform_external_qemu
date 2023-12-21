@@ -20,7 +20,7 @@
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "host-common/FeatureControl.h"
 #include "host-common/hw-config.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/console.h"
 #include "android/utils/debug.h"
 

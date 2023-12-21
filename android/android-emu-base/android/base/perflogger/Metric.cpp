@@ -15,7 +15,7 @@
 
 #include "aemu/base/JsonWriter.h"
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/perflogger/Benchmark.h"
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
@@ -61,7 +61,7 @@ void Metric::commit() {
     if (mSamples.empty())
         return;
 
-    dinfo("%s: out dir: %s", __func__, mOutputDirectory.c_str());
+    dinfo("Metrics out dir: %s",  mOutputDirectory);
 
     std::string outputPath = pj(mOutputDirectory, mName + ".json");
     path_mkdir_if_needed(mOutputDirectory.c_str(), 0755);

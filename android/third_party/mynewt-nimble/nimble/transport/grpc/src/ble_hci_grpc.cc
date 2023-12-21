@@ -47,7 +47,7 @@
 #include <utility>      // for move
 #include <vector>       // for vector
 
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/grpc/utils/SimpleAsyncGrpc.h"
 #include "android/base/system/System.h"
 #include "backend/packet_streamer_client.h"
@@ -249,7 +249,7 @@ int ble_hci_grpc_open_connection() {
     // Connect to a remote netsim address.
     auto address = System::get()->getEnvironmentVariable("NETSIM_GRPC_ADDRESS");
     if (!address.empty()) {
-        dinfo("Setting packet stream endpoint to: %s", address.c_str());
+        dinfo("Setting packet stream endpoint to: %s", address);
         netsim::packet::SetPacketStreamEndpoint(address);
     }
 
@@ -266,7 +266,7 @@ int ble_hci_grpc_open_connection() {
         netsim::common::ChipKind::BLUETOOTH);
     sTransport->Write(initial_request);
 
-    dinfo("Registered as %s", name.c_str());
+    dinfo("Registered as %s", name);
     return 0;
 }
 

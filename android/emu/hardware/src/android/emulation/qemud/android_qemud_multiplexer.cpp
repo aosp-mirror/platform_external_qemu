@@ -187,8 +187,8 @@ void qemud_multiplexer_control_recv(void* opaque,
     if (msglen == 13 && !memcmp(msg, "disconnect:", 11)) {
         int channel_id = hex2int(msg + 11, 2);
         if (channel_id <= 0) {
-            D("%s: malformed disconnect channel id: '%.*s'",
-              __FUNCTION__, 2, msg + 11);
+            D("malformed disconnect channel id: '%.*s'",
+              2, (char*) (msg + 11));
             return;
         }
         qemud_multiplexer_disconnect(mult, channel_id);

@@ -16,6 +16,7 @@
 
 #include "android/HostHwInfo.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

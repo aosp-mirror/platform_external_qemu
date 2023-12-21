@@ -11,7 +11,9 @@
 */
 #pragma once
 
+#include <cstdint>
 #include <initializer_list>
+#include <cstdint>
 #include <string>
 #include <string.h>
 #include <vector>

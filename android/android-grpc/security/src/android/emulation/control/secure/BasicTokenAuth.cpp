@@ -99,7 +99,7 @@ absl::Status StaticTokenAuth::isTokenValid(std::string_view path,
                                            std::string_view token) {
     if (!canHandleToken(token)) {
         // This can be very verbose..
-        VERBOSE_PRINT(grpc, "%s != %s", mStaticToken.c_str(), token.data());
+        VERBOSE_PRINT(grpc, "%s != %s", mStaticToken, token);
         return AuthErrorFactory::authErrorInvalidToken(token);
     }
 
@@ -168,7 +168,7 @@ absl::Status AnyTokenAuth::isTokenValid(std::string_view path,
             "%s`, `path: %s`, `token: %s`",
             validators, path, token);
 
-    derror("Internal error! %s", fatalError.c_str());
+    derror("Internal error! %s", fatalError);
 
     // Should not happen, at least one validator should have been able
     // to handle the token.

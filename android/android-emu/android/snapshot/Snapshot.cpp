@@ -41,7 +41,7 @@
 #include "aemu/base/files/PathUtils.h"  // for PathUtils, pj
 #include "aemu/base/files/ScopedFd.h"   // for ScopedFd
 #include "aemu/base/files/TarStream.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/memory/ScopedPtr.h"  // for makeCustomScope...
 #include "aemu/base/misc/StringUtils.h"  // for endsWith
 #include "android/base/system/System.h"     // for System, System:...
@@ -899,7 +899,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
     androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&actualConfig),
                                   reinterpret_cast<CIniFile*>(&actualStripped));
     if (!areHwConfigsEqual(expectedStripped, actualStripped)) {
-        derror("The emulator hardware cannot load snapshot: %s", mName.c_str());
+        derror("The emulator hardware cannot load snapshot: %s", mName);
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchAvd);
         return false;

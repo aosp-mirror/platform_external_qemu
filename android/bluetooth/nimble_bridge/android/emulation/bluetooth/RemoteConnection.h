@@ -21,6 +21,7 @@
 #include <string>              // for string
 #include <unordered_map>       // for unordered_map
 
+#include "aemu/base/Log.h"
 #include "absl/status/status.h"                            // for Status
 #include "absl/status/statusor.h"                          // for StatusOr
 #include "android/emulation/bluetooth/RequestForwarder.h"  // for EmuGattCha...

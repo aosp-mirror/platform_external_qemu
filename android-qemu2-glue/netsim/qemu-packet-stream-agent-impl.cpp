@@ -24,7 +24,7 @@
 #include "PacketStreamTransport.h"
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/async/ThreadLooper.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/utils/debug.h"
 #include "backend/packet_streamer_client.h"
 #include "host-common/FeatureControl.h"
