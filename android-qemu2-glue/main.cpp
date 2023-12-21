@@ -39,6 +39,7 @@
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/emulation/control/adb/adbkey.h"
 #include "android/emulation/control/automation_agent.h"
+#include "android/emulation/resizable_display_config.h"
 #include "android/error-messages.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
@@ -371,7 +372,10 @@ static void updateDataSystemSubdirectory(const char* dataDirectory,
 }
 
 static void prepareSkinConfig(AndroidHwConfig* hw, const char* dataDirectory) {
-    if (android_foldable_is_pixel_fold()) {
+    if (android_foldable_is_pixel_fold() &&
+        ((hw->hw_device_name &&
+          "pixel_fold" == std::string(hw->hw_device_name)) ||
+         resizableEnabled34())) {
         // copy the /data/misc/pixel_fold/{display_settings.xml, devicestate/
         // and displayconfig/} to /data/system/
         updateDataSystemSubdirectory(dataDirectory, "devicestate",

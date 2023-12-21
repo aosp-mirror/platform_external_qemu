@@ -1385,7 +1385,7 @@ bool android_foldable_is_pixel_fold() {
         return true;
     }
     const auto devname = getConsoleAgents()->settings->hw()->hw_device_name;
-    return (devname && "pixel_fold" == std::string(devname) &&
+    return (devname && 0 == std::string(devname).find("pixel_fold") &&
             fc::isEnabled(fc::SupportPixelFold));
 }
 
