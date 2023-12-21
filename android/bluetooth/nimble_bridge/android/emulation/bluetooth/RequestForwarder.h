@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 
+#include "aemu/base/Log.h"
 #include "absl/status/status.h"
 #include "android/emulation/bluetooth/nimble/ServiceDefinition.h"
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"

@@ -78,7 +78,7 @@ void CarDataPage::onReceiveData(const char* msg, int length) {
     }
     mUi->tab_sensor->processMsg(emulatorMsg);
     mUi->vhal_table->processMsg(emulatorMsg);
-    D(printMsg.c_str());
+    D("%s", printMsg);
 }
 
 // static
@@ -92,7 +92,7 @@ void CarDataPage::sendCarEmulatorMessageLogged(const EmulatorMessage& msg,
     if (sCarDataAgent == nullptr) {
         return;
     }
-    D(log.c_str());
+    D("sendCarEmulatorMessageLogged: %s:", log);
     string msgString;
     if (msg.SerializeToString(&msgString)) {
         sCarDataAgent->sendCarData(msgString.c_str(), msgString.length());

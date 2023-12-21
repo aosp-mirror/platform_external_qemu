@@ -159,7 +159,7 @@ AccessList parseAccessList(json regexList) {
             dwarning("Ignoring invalid regex: %s, error: %s", expr.c_str(),
                      re->error().c_str());
         } else {
-            VERBOSE_PRINT(grpc, "   %s", re->pattern().c_str());
+            VERBOSE_PRINT(grpc, "   %s", re->pattern());
             access.push_back(std::move(re));
         }
     }
@@ -210,13 +210,13 @@ std::unique_ptr<AllowList> parseJsonObject(const json& jsonObject) {
             }
 
             if (entry.count("allowed")) {
-                VERBOSE_PRINT(grpc, "Green list for iss: %s", iss.c_str())
+                VERBOSE_PRINT(grpc, "Green list for iss: %s", iss)
                 secure[AllowGroup::Green][iss] =
                         parseAccessList(entry["allowed"]);
             }
 
             if (entry.count("protected")) {
-                VERBOSE_PRINT(grpc, "Yellow list for iss: %s", iss.c_str());
+                VERBOSE_PRINT(grpc, "Yellow list for iss: %s", iss);
                 secure[AllowGroup::Yellow][iss] =
                         parseAccessList(entry["protected"]);
             }

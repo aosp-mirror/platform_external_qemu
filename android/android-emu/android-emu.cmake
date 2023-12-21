@@ -1,6 +1,4 @@
 # This file defines android-emu library
-prebuilt(VPX)
-prebuilt(FFMPEG)
 
 # This is a minimal emu-android library needed to start the emulator. - It has a
 # minimal number of dependencies - It should *NEVER* rely on a shared library
@@ -83,35 +81,35 @@ set(android-emu-common
     android/emulation/control/ServiceUtils.cpp
     android/emulation/DmaMap.cpp
     android/emulation/GoldfishDma.cpp
-    android/emulation/H264NaluParser.cpp
-    android/emulation/H264PingInfoParser.cpp
-    android/emulation/HevcNaluParser.cpp
-    android/emulation/HevcPingInfoParser.cpp
+    # android/emulation/H264NaluParser.cpp
+    # android/emulation/H264PingInfoParser.cpp
+    # android/emulation/HevcNaluParser.cpp
+    # android/emulation/HevcPingInfoParser.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/hostdevices/HostGoldfishPipe.cpp
     android/emulation/HostmemIdMapping.cpp
     android/emulation/AutoDisplays.cpp
-    android/emulation/MediaFfmpegVideoHelper.cpp
-    android/emulation/MediaH264Decoder.cpp
-    android/emulation/MediaH264DecoderDefault.cpp
-    android/emulation/MediaH264DecoderGeneric.cpp
-    android/emulation/MediaHevcDecoder.cpp
-    android/emulation/MediaHevcDecoderDefault.cpp
-    android/emulation/MediaHevcDecoderGeneric.cpp
-    android/emulation/MediaHostRenderer.cpp
-    android/emulation/MediaSnapshotHelper.cpp
-    android/emulation/MediaSnapshotState.cpp
-    android/emulation/MediaTexturePool.cpp
-    android/emulation/MediaVideoHelper.cpp
-    android/emulation/MediaVpxDecoder.cpp
-    android/emulation/MediaVpxDecoderGeneric.cpp
-    android/emulation/MediaVpxVideoHelper.cpp
+    # android/emulation/MediaFfmpegVideoHelper.cpp
+    # android/emulation/MediaH264Decoder.cpp
+    # android/emulation/MediaH264DecoderDefault.cpp
+    # android/emulation/MediaH264DecoderGeneric.cpp
+    # android/emulation/MediaHevcDecoder.cpp
+    # android/emulation/MediaHevcDecoderDefault.cpp
+    # android/emulation/MediaHevcDecoderGeneric.cpp
+    # android/emulation/MediaHostRenderer.cpp
+    # android/emulation/MediaSnapshotHelper.cpp
+    # android/emulation/MediaSnapshotState.cpp
+    # android/emulation/MediaTexturePool.cpp
+    # android/emulation/MediaVideoHelper.cpp
+    # android/emulation/MediaVpxDecoder.cpp
+    # android/emulation/MediaVpxDecoderGeneric.cpp
+    # android/emulation/MediaVpxVideoHelper.cpp
     android/emulation/MultiDisplay.cpp
     android/emulation/MultiDisplayPipe.cpp
     android/emulation/SetupParameters.cpp
     android/emulation/USBAssist.cpp
-    android/emulation/VpxFrameParser.cpp
-    android/emulation/VpxPingInfoParser.cpp
+    # android/emulation/VpxFrameParser.cpp
+    # android/emulation/VpxPingInfoParser.cpp
     android/error-messages.cpp
     android/jdwp/JdwpProxy.cpp
     android/jpeg-compress.c
@@ -219,24 +217,14 @@ android_add_library(
   LICENSE Apache-2.0
   SRC ${android-emu_src}
   WINDOWS android/camera/camera-capture-windows.cpp
-          android/emulation/dynlink_cuda.cpp
-          android/emulation/dynlink_nvcuvid.cpp
-          android/emulation/MediaCudaDriverHelper.cpp
-          android/emulation/MediaCudaUtils.cpp
-          android/emulation/MediaCudaVideoHelper.cpp
           android/snapshot/MemoryWatch_windows.cpp
   LINUX android/camera/camera-capture-linux.c
-        android/emulation/dynlink_cuda.cpp
-        android/emulation/dynlink_nvcuvid.cpp
-        android/emulation/MediaCudaDriverHelper.cpp
-        android/emulation/MediaCudaUtils.cpp
-        android/emulation/MediaCudaVideoHelper.cpp
         android/snapshot/MemoryWatch_linux.cpp
   DARWIN android/camera/camera-capture-mac.m
-         android/emulation/MediaH264DecoderVideoToolBox.cpp
-         android/emulation/MediaVideoToolBoxHevcVideoHelper.cpp
-         android/emulation/MediaVideoToolBoxUtils.cpp
-         android/emulation/MediaVideoToolBoxVideoHelper.cpp
+         # android/emulation/MediaH264DecoderVideoToolBox.cpp
+         # android/emulation/MediaVideoToolBoxHevcVideoHelper.cpp
+         # android/emulation/MediaVideoToolBoxUtils.cpp
+         # android/emulation/MediaVideoToolBoxVideoHelper.cpp
          android/snapshot/MacSegvHandler.cpp
          android/snapshot/MemoryWatch_darwin.cpp)
 
@@ -247,9 +235,7 @@ android_add_library(
 target_link_libraries(
   android-emu
   PRIVATE android-emu-base-headers qemu-host-common-headers
-  PUBLIC FFMPEG::FFMPEG
-         VPX::VPX
-         emulator-libext4_utils
+  PUBLIC emulator-libext4_utils
          android-emu-avd
          android-emu-files
          android-emu-feature
@@ -443,11 +429,8 @@ android_add_library(
       android/snapshot/TextureSaver.cpp
       stubs/gfxstream-stubs.cpp
       stubs/stubs.cpp
-  WINDOWS android/emulation/dynlink_cuda.cpp
-          android/emulation/dynlink_nvcuvid.cpp
-          android/snapshot/MemoryWatch_windows.cpp
-  LINUX android/emulation/dynlink_cuda.cpp android/emulation/dynlink_nvcuvid.cpp
-        android/snapshot/MemoryWatch_linux.cpp
+  WINDOWS android/snapshot/MemoryWatch_windows.cpp
+  LINUX android/snapshot/MemoryWatch_linux.cpp
   DARWIN android/snapshot/MacSegvHandler.cpp
          android/snapshot/MemoryWatch_darwin.cpp)
 

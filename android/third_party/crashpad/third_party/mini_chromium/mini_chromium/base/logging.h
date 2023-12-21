@@ -5,9 +5,11 @@
 #ifndef MINI_CHROMIUM_BASE_LOGGING_H_
 #define MINI_CHROMIUM_BASE_LOGGING_H_
 
+#include <stdint.h>
 #include <assert.h>
 #include <errno.h>
 
+#include <cstdint>
 #include <limits>
 #include <sstream>
 #include <string>

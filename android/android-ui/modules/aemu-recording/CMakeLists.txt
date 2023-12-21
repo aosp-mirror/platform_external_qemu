@@ -30,6 +30,7 @@ android_qt_lib(
        android-emu-base-headers
        android-emu-cmdline
        android-emu-files
+       android-emu-media
        android-emu-protos
        FFMPEG::FFMPEG
        png

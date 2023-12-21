@@ -74,11 +74,12 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(log, "Include timestamp, thread and location in logs")        \
     _VERBOSE_TAG(grpc, "Log grpc calls.")
 
-#include "aemu/base/logging/CLog.h"
 #include "aemu/base/logging/LogTags.h"
 
 ANDROID_END_HEADER
 
 #ifdef __cplusplus
   #include "aemu/base/logging/Log.h"
+#else
+  #include "aemu/base/logging/CLog.h"
 #endif

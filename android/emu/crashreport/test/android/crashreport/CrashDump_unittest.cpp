@@ -16,7 +16,7 @@
 #include <thread>
 
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/process/Command.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/CrashReporter.h"
@@ -54,7 +54,7 @@ protected:
                        pendingReports.end());
 
         for (const auto& report : reports) {
-            dinfo("Erasing %s\n", report.uuid.ToString().c_str());
+            dinfo("Erasing %s\n", report.uuid.ToString());
             mCrashdatabase->DeleteReport(report.uuid);
         }
     }
@@ -79,7 +79,7 @@ protected:
 
     void crash() {
         std::string executable = System::get()->findBundledExecutable(kCrashMe);
-        dinfo("Running %s", executable.c_str());
+        dinfo("Running %s", executable);
         auto proc = Command::create({executable}).inherit().execute();
         proc->wait_for(500ms);
     }

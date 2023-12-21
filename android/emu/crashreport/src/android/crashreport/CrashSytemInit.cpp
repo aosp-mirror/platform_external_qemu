@@ -22,7 +22,7 @@
 #include "aemu/base/async/RecurrentTask.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/files/PathUtils.h"          // for pj, PathUtils
-#include "aemu/base/logging/CLog.h"             // for dinfo, dwarning
+#include "aemu/base/logging/Log.h"             // for dinfo, dwarning
 #include "aemu/base/memory/LazyInstance.h"      // for LazyInstance, LAZY_IN...
 #include "aemu/base/system/Win32UnicodeString.h"
 #include "android/base/system/System.h"         // for System

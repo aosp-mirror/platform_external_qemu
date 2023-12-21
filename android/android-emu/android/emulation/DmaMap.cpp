@@ -19,7 +19,7 @@
 
 #include "aemu/base/containers/Lookup.h"
 #include "aemu/base/files/StreamSerializing.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "host-common/android_pipe_device.h"
 

@@ -1,7 +1,6 @@
 android_qt_lib(
   TARGET ext-page-car
-  INCLUDES
-  src
+  INCLUDES src
   SRC android/skin/qt/car-cluster-window.cpp
       android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp
       android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp
@@ -17,6 +16,7 @@ android_qt_lib(
   DEPS aemu-ui-car-property-utils
        aemu-ui-qt-base
        android-emu
+       FFMPEG::FFMPEG
        qemu-host-common-headers
        Qt${QT_VERSION_MAJOR}::Core
        Qt${QT_VERSION_MAJOR}::Widgets
@@ -26,7 +26,7 @@ android_qt_lib(
 
 android_qt_lib(
   TARGET aemu-ui-car-property-utils
-  INCLUDES  src
+  INCLUDES src
   SRC android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp
   DEPS aemu-ui-qt-base
        android-emu-base
