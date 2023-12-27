@@ -259,15 +259,15 @@ void EmulatorContainer::changeEvent(QEvent* event) {
 }
 
 void EmulatorContainer::closeEvent(QCloseEvent* event) {
-    // make sure the toolWindow's close button is the only exit point
-    // from qt: we could get closeEvent directly from host windowing
-    // framework.
-    if (!mEmulatorWindow->toolWindow()->closeButtonClicked()) {
-        mEmulatorWindow->toolWindow()->on_close_button_clicked();
+    if (mEmulatorWindow->isMainThreadRunning()) {
+        // when the qt main thread that runs qemu
+        // main loop is still running, we need to ask
+        // it to exit first, and then come back to
+        // this function again to exit UI thread
+        mEmulatorWindow->requestClose();
         event->ignore();
         return;
     }
-
     slot_hideModalOverlay();
     slot_hideVirtualSceneInfoDialog();
     mEmulatorWindow->closeEvent(event);
