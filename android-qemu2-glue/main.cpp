@@ -343,6 +343,7 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
 }
 
 static void updateDataSystemSubdirectory(const char* dataDirectory,
+                                         const char* skin,
                                          const char* srcDir,
                                          const char* srcFileName) {
     constexpr int kDirFilePerm = 02750;
@@ -351,7 +352,7 @@ static void updateDataSystemSubdirectory(const char* dataDirectory,
     const char* destDir = srcDir;
 
     std::string pixelFoldFullPath =
-            PathUtils::join(dataDirectory, "misc", "pixel_fold");
+            PathUtils::join(dataDirectory, "misc", skin);
     std::string srcFileFullPath =
             srcDir ? PathUtils::join(pixelFoldFullPath, srcDir, srcFileName)
                    : PathUtils::join(pixelFoldFullPath, srcFileName);
@@ -372,18 +373,25 @@ static void updateDataSystemSubdirectory(const char* dataDirectory,
 }
 
 static void prepareSkinConfig(AndroidHwConfig* hw, const char* dataDirectory) {
-    if (android_foldable_is_pixel_fold() &&
-        ((hw->hw_device_name &&
-          "pixel_fold" == std::string(hw->hw_device_name)) ||
-         resizableEnabled34())) {
+    if (android_foldable_is_pixel_fold()) {
+        const char* skin = nullptr;
+        if (((hw->hw_device_name &&
+              "pixel_fold" == std::string(hw->hw_device_name)) ||
+             resizableEnabled34())) {
+            skin = "pixel_fold";
+        } else {
+            skin = hw->hw_device_name;
+        }
         // copy the /data/misc/pixel_fold/{display_settings.xml, devicestate/
         // and displayconfig/} to /data/system/
-        updateDataSystemSubdirectory(dataDirectory, "devicestate",
-                                     "device_state_configuration.xml");
-        updateDataSystemSubdirectory(dataDirectory, "displayconfig",
-                                     "display_layout_configuration.xml");
-        updateDataSystemSubdirectory(dataDirectory, nullptr,
-                                     "display_settings.xml");
+        if (skin) {
+            updateDataSystemSubdirectory(dataDirectory, skin, "devicestate",
+                                         "device_state_configuration.xml");
+            updateDataSystemSubdirectory(dataDirectory, skin, "displayconfig",
+                                         "display_layout_configuration.xml");
+            updateDataSystemSubdirectory(dataDirectory, skin, nullptr,
+                                         "display_settings.xml");
+        }
     }
 }
 

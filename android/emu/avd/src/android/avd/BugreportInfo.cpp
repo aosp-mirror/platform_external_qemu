@@ -187,7 +187,7 @@ https://developer.android.com/studio/report-bugs.html#emulator-bugs
 Android Studio Version: %s
 
 Emulator Version (Emulator--> Extended Controls--> Emulator Version): %s
-HAXM / KVM Version: %s
+Hypervisor Version: %s
 
 Android SDK Tools: %s
 
