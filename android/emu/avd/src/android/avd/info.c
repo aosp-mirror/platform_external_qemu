@@ -1991,15 +1991,16 @@ bool avdInfo_skinHasOverlay(const char* skinName) {
         return false;
     }
     if (!strncmp(skinName, "automotive",
-                 strlen("automotive")) || /* automotive_landscape, automotive_ultrawide, etc */
+                 strlen("automotive")) || /* automotive_landscape,
+                                             automotive_ultrawide, etc */
         !strncmp(skinName, "pixel_7",
                  strlen("pixel_7")) || /* include pixel 7, pro etc */
         !strncmp(skinName, "pixel_8",
                  strlen("pixel_8")) || /* include pixel 8, pro etc */
         !strncmp(skinName, "pixel_6",
                  strlen("pixel_6")) || /* include pixel 6a, 6, pro etc */
-        !strcmp(skinName, "pixel_5") ||
-        !strcmp(skinName, "pixel_fold") || !strcmp(skinName, "pixel_4") ||
+        !strncmp(skinName, "pixel_fold", strlen("pixel_fold")) ||
+        !strcmp(skinName, "pixel_5") || !strcmp(skinName, "pixel_4") ||
         !strcmp(skinName, "pixel_4a") || !strcmp(skinName, "pixel_4_xl") ||
         !strcmp(skinName, "pixel_3") || !strcmp(skinName, "pixel_3a") ||
         !strcmp(skinName, "pixel_3_xl") || !strcmp(skinName, "pixel_3a_xl") ||
