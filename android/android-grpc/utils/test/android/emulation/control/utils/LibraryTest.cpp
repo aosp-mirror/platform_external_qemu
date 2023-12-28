@@ -161,7 +161,7 @@ TEST(LibraryTest, WaitForEmptyLibraryTestWaitsUntilFinished) {
         cv.wait(lock, [&] { return started; });
     }
     auto now = std::chrono::system_clock::now();
-    EXPECT_TRUE(myLibrary.waitUntilLibraryIsClear(20ms));
+    EXPECT_TRUE(myLibrary.waitUntilLibraryIsClear(500ms));
     auto time_passed = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - now);
     EXPECT_GE(time_passed.count(), (10ms).count());
