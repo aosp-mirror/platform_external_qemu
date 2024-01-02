@@ -41,6 +41,8 @@ AVSampleFormat toAVSampleFormat(AudioFormat r);
 // A small structure to encapsulate audio/video data.
 struct Frame {
     uint64_t tsUs = 0llu;  // timestamp(microsec)
+    uint16_t width {0};
+    uint16_t height {0};
     std::vector<uint8_t> dataVec;
     AVFormat format;
 

@@ -142,9 +142,11 @@ public:
             const Codec<SwrContext>* codec) override;
     virtual bool addVideoTrack(
             std::unique_ptr<Producer> producer,
-            const Codec<SwsContext*>* codec) override;
+            Codec<SwsContext*>* codec) override;
 
 private:
+    void reInitWidthAndHeight(uint16_t w, uint16_t h);
+
     // Initalizes the output context for the muxer. This call is required for
     // adding video/audio contexts and starting the recording.
     bool initOutputContext(std::string_view filename,
@@ -216,6 +218,7 @@ private:
     AVScopedPtr<AVFormatContext> mOutputContext;
     VideoOutputStream mVideoStream;
     AudioOutputStream mAudioStream;
+    Codec<SwsContext*>* mCodec {nullptr};
     // A single lock to protect writing audio and video frames to the video file
     Lock mLock;
     bool mHasAudioTrack = false;
@@ -244,10 +247,53 @@ FfmpegRecorderImpl::FfmpegRecorderImpl(uint16_t fbWidth,
 
 FfmpegRecorderImpl::~FfmpegRecorderImpl() {
     abortRecording();
+    if (mCodec) {
+        delete mCodec;
+        mCodec = nullptr;
+    }
 }
 
 bool FfmpegRecorderImpl::isValid() {
     return mValid;
+}
+
+void FfmpegRecorderImpl::reInitWidthAndHeight(uint16_t w, uint16_t h) {
+    if (mFbWidth != w || mFbHeight != h) {
+        mFbWidth = w;
+        mFbHeight = h;
+        auto c = mVideoStream.codecCtx.get();
+        auto cctx = c;
+        cctx->width = w;
+        cctx->height = h;
+        mCodec->getCodec()->init(cctx);
+        // allocate and init a re-usable frame
+        auto frame = allocVideoFrame(cctx->pix_fmt, cctx->width, cctx->height);
+        if (!frame) {
+            LOG(ERROR) << "Could not allocate video frame";
+            return;
+        }
+        mVideoStream.frame = makeAVScopedPtr(frame);
+
+        if (cctx->pix_fmt != AV_PIX_FMT_YUV420P) {
+            auto tmpFrame =
+                allocVideoFrame(AV_PIX_FMT_YUV420P, cctx->width, cctx->height);
+            if (!tmpFrame) {
+                LOG(ERROR) << "Could not allocate temporary picture";
+                return;
+            }
+            mVideoStream.tmpFrame = makeAVScopedPtr(tmpFrame);
+        }
+
+        VideoOutputStream* ost = &mVideoStream;
+
+        // Initialize the rescaling context
+        SwsContext* swsCtx = nullptr;
+        if (!mCodec->initSwxContext(ost->codecCtx.get(), &swsCtx)) {
+            LOG(ERROR) << "Unable to initialize the rescaling context";
+            return;
+        }
+        ost->swsCtx = makeAVScopedPtr(swsCtx);
+    }
 }
 
 bool FfmpegRecorderImpl::initOutputContext(std::string_view filename,
@@ -571,12 +617,13 @@ bool FfmpegRecorderImpl::addAudioTrack(
 
 bool FfmpegRecorderImpl::addVideoTrack(
         std::unique_ptr<Producer> producer,
-        const Codec<SwsContext*>* codec) {
+        Codec<SwsContext*>* codec) {
     assert(mValid && codec != nullptr && producer != nullptr);
     if (mStarted) {
         LOG(ERROR) << "Muxer already started";
         return false;
     }
+    mCodec = codec;
     if (mHasVideoTrack) {
         LOG(ERROR) << "A video track was already added";
         return false;
@@ -743,14 +790,18 @@ bool FfmpegRecorderImpl::encodeVideoFrame(const Frame* frame) {
 
     VideoOutputStream* ost = &mVideoStream;
 
+    auto effectiveWidth = frame->width > 0 ? frame->width : mFbWidth;
+    auto effectiveHeight = frame->height > 0 ? frame->height: mFbHeight;
+    reInitWidthAndHeight(effectiveWidth, effectiveHeight);
+
     const int linesize[1] = {getVideoFormatSize(frame->format.videoFormat) *
-                             mFbWidth};
+                             effectiveWidth};
 
     // To test the speed of sws_scale()
     auto startUs = android::base::System::get()->getHighResTimeUs();
     auto data = frame->dataVec.data();
     sws_scale(ost->swsCtx.get(), (const uint8_t* const*)&data, linesize, 0,
-              mFbHeight, ost->frame->data, ost->frame->linesize);
+              effectiveHeight, ost->frame->data, ost->frame->linesize);
     VLOG(record)
             << "Time to sws_scale: ["
             << (long long)(android::base::System::get()->getHighResTimeUs() -
