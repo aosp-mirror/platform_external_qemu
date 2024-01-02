@@ -60,7 +60,7 @@ private:
     void getPlayServicesVersion();
     void playVersionDone(android::emulation::GooglePlayServices::Result result,
                          PlayApps app,
-                         std::string_view outString);
+                         std::string outString);
 
 private slots:
     void on_goog_updateServicesButton_clicked();
