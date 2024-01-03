@@ -1710,7 +1710,6 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
             arguments += argv[i];
             arguments += '\n';
         }
-        CrashReporter::get()->attachData("qemu-main-loop-args.txt", arguments);
 
         mMainLoopThread = new MainLoopThread(f, argc, argv);
         QObject::connect(mMainLoopThread, &QThread::finished, &mContainer,
