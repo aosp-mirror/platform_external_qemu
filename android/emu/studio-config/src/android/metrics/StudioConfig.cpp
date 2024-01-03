@@ -17,6 +17,7 @@
 #include "aemu/base/ArraySize.h"
 #include "aemu/base/Optional.h"
 
+#include "aemu/base/Uuid.h"
 #include "aemu/base/Version.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/LazyInstance.h"
@@ -84,6 +85,8 @@ using android::base::System;
 using android::base::Version;
 using android::studio::UpdateChannel;
 
+// Emulator generated userId file name.
+static const char kEmuUserId[] = "userid";
 
 namespace android {
 namespace studio {
@@ -479,8 +482,9 @@ std::string getAnonymizationSalt() {
             .valueOr(EMULATOR_FULL_VERSION_STRING "-" EMULATOR_CL_SHA1);
 }
 
-// Forward-declare a function to use here and in the unit test.
+// Forward-declare functions to use here and in the unit test.
 std::string extractInstallationId();
+std::string persistAndLoadEmuUserId();
 
 namespace {
 
@@ -490,7 +494,20 @@ namespace {
 struct StaticValues {
     std::string installationId;
 
-    StaticValues() { installationId = extractInstallationId(); }
+    StaticValues() {
+        installationId = extractInstallationId();
+
+        if (installationId.empty()) {
+            // This can happen if Android Studio is not installed, or was never
+            // launched to create the configuration file. In this case we
+            // generate a new ID and persist it on the disk to reuse next time.
+            installationId = persistAndLoadEmuUserId();
+            D("Failed to extract userId from Android Studio. Using emulator generated id=%s",
+              installationId.c_str());
+        } else {
+            D("Using the same userId as Android Studio for metrics. id=%s", installationId.c_str());
+        }
+    }
 };
 
 LazyInstance<StaticValues> sStaticValues = {};
@@ -527,6 +544,35 @@ std::string extractInstallationId() {
                 }
             });
     return optionalId.valueOr({});
+}
+
+// This is to be able to unit-test the implementation without hacking into the
+// LazyInstance<> code.
+std::string persistAndLoadEmuUserId() {
+    std::string userId;
+    auto idPath = PathUtils::join(ConfigDirs::getAvdRootDirectory(), kEmuUserId);
+
+    std::ifstream idFile;
+    // First, try to reuse the existing ID if possible.
+    idFile.open(PathUtils::asUnicodePath(idPath.data()).c_str(), std::ifstream::in);
+    if (idFile.good()) {
+        std::stringstream idBuffer;
+        idBuffer << idFile.rdbuf();
+        idFile.close();
+
+        userId = idBuffer.str();
+    } else {
+        idFile.close();
+
+        // The ID file doesn't exist, generate a new id and save to disk.
+        userId = base::Uuid::generate().toString();
+
+        std::ofstream newIdFile;
+        newIdFile.open(PathUtils::asUnicodePath(idPath.data()).c_str(), std::ofstream::trunc);
+        newIdFile << userId;
+        newIdFile.close();
+    }
+    return userId;
 }
 
 const std::string& getInstallationId() {

@@ -26,6 +26,7 @@
 #include "android/base/system/System.h"        // for System
 #include "android/curl-support.h"              // for curl_post
 #include "android/metrics/MetricsLogging.h"    // for D
+#include "android/metrics/StudioConfig.h"
 #include "android/utils/debug.h"               // for VERBOSE...
 #include "android/version.h"                   // for EMULATO...
 #include "google_logs_publishing.pb.h"         // for LogEvent
@@ -127,7 +128,7 @@ static LogRequest buildBaseRequest() {
     desktop->set_os_full_version(base::System::get()->getOsName());
     desktop->set_os(osType());
     desktop->set_os_major_version(base::System::get()->getMajorOsVersion());
-    desktop->set_logging_id(base::Uuid::generate().toString());
+    desktop->set_logging_id(android::studio::getInstallationId());
     return request;
 }
 
