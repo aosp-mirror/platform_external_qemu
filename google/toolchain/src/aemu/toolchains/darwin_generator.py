@@ -177,3 +177,8 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
                 sdk_dict.setdefault(current_sdk_type, {})[sdk_version] = sdk_name
 
         return sdk_dict
+
+
+class DarwinToDarwinX64Generator(DarwinToDarwinGenerator):
+    def __init__(self, aosp, dest, prefix) -> None:
+        super().__init__(aosp, dest, prefix, "x64")

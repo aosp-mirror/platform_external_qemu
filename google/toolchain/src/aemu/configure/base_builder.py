@@ -34,7 +34,7 @@ class QemuBuilder:
 
     Args:
         dest (str): The destination path for the configuration.
-        generator_klazz (ToolchainGenerator): The toolchain generator class.
+        generator (ToolchainGenerator): The toolchain generator to use.
 
     Attributes:
         TOOLCHAIN_DIR (str): The directory for the toolchain.
@@ -42,12 +42,12 @@ class QemuBuilder:
 
     TOOLCHAIN_DIR = "toolchain"
 
-    def __init__(self, aosp, dest, ccache, generator_klazz) -> None:
+    def __init__(self, aosp, dest, ccache, generator) -> None:
         """Initialize the QemuBuilder instance.
 
         Args:
             dest (str): The destination path for the configuration.
-            generator_klazz (ToolchainGenerator): The toolchain generator class instance.
+            generator_klazz (ToolchainGenerator): The toolchain generator instance.
         """
         self.aosp: Path = Path(aosp).absolute()
         self.dest: Path = Path(dest).absolute()
@@ -56,9 +56,7 @@ class QemuBuilder:
 
         # Initialize the toolchain generator with the specified destination and an empty suffix.
         # This generator will be used to manage toolchain-related configurations.
-        self.toolchain_generator: ToolchainGenerator = generator_klazz(
-            aosp, self.dest / QemuBuilder.TOOLCHAIN_DIR, ""
-        )
+        self.toolchain_generator: ToolchainGenerator = generator
         if ccache:
             self.toolchain_generator.ccache = Path(ccache).absolute()
         self.toolchain_generator.bazel = self.bazel

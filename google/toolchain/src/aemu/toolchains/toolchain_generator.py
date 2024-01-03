@@ -175,6 +175,15 @@ cpp_link_args = []
         with open(self.dest / "aosp-cl.ini", "w", encoding="utf-8") as f:
             f.write(self._get_toolchain_config())
 
+    def link_dirs(self):
+        """Setup links to libc++.so etc.."""
+        clang_lib = (self.clang() / "lib")
+        if not clang_lib.exists():
+            logging.warning("The clang lib directory: %s, does not exist.", clang_lib)
+            return
+
+        (self.dest / "lib").symlink_to(clang_lib)
+
     def gen_toolchain(self):
         cmds = {
             "nm": self.nm,
@@ -184,6 +193,7 @@ cpp_link_args = []
             "g++": self.cxx,
             "gcc": self.cc,
             "lld": self.lld,
+            "ld": self.lld,
             "objdump": self.objdump,
             "strings": self.strings,
             "ranlib": self.ranlib,
@@ -194,3 +204,5 @@ cpp_link_args = []
         }
         for cmd, fn in cmds.items():
             self.gen_script(cmd, self.dest / f"{self.prefix}{cmd}", fn)
+
+        self.link_dirs()
