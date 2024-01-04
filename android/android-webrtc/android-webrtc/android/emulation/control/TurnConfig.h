@@ -15,6 +15,7 @@
 #include <string>             // for string
 #include <vector>             // for vector
 
+#include "android/emulation/control/webrtc-exports.h"
 #include "nlohmann/json.hpp"  // for json
 
 namespace android {
@@ -23,7 +24,7 @@ namespace control {
 
 using nlohmann::json;
 
-class TurnConfig {
+class WEBRTC_API TurnConfig {
 public:
     explicit TurnConfig(std::string cmd);
     ~TurnConfig() = default;

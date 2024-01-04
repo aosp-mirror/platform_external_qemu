@@ -320,6 +320,18 @@ void parse_skin_files(const char* skinDirPath,
                 bpp = atoi(y + 1);
             }
 
+            // change initialOrientation to match magic skin
+            // b/307180733
+
+            if (hwConfig->hw_initialOrientation) {
+                free(hwConfig->hw_initialOrientation);
+            }
+
+            if (width > height) {
+                hwConfig->hw_initialOrientation = strdup("landscape");
+            } else {
+                hwConfig->hw_initialOrientation = strdup("portrait");
+            }
             snprintf(tmp, sizeof tmp,
                      "display {\n  width %d\n  height %d\n bpp %d}\n", width,
                      height, bpp);
