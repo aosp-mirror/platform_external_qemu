@@ -87,7 +87,7 @@ set(OPTION_CLANG_TIDY_FIX FALSE
 set(OPTION_CLANG_THREAD_SAFETY_CHECKS FALSE
     CACHE BOOL "Compile-time thread safety checks (-Wthread-safety).")
 set(QTWEBENGINE FALSE CACHE BOOL "The webengine (chromium) that provides the location UI.")
-if(LINUX_X86_64 OR LINUX_AARCH64)
+if(LINUX_X86_64)
   set(WEBRTC TRUE
       CACHE BOOL "Build with WEBRTC support.")
 else()

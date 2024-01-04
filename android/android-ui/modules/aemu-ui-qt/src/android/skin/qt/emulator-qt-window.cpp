@@ -920,6 +920,13 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
+    // make sure to use the close button on tool window
+    if (!mToolWindow->closeButtonClicked()) {
+        mToolWindow->on_close_button_clicked();
+        event->ignore();
+        return;
+    }
+
     if (!mToolWindow->shouldClose()) {
         event->ignore();
         return;
@@ -1703,7 +1710,6 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
             arguments += argv[i];
             arguments += '\n';
         }
-        CrashReporter::get()->attachData("qemu-main-loop-args.txt", arguments);
 
         mMainLoopThread = new MainLoopThread(f, argc, argv);
         QObject::connect(mMainLoopThread, &QThread::finished, &mContainer,
@@ -1730,7 +1736,10 @@ void EmulatorQtWindow::slot_clearInstance() {
     // Force kill any parallel tasks that may be running, as this can make Qt
     // hang on exit.
     System::get()->cleanupWaitingPids();
-    stopThread();
+    if(mMainLoopThread && mMainLoopThread->isRunning()) {
+        requestClose();
+        mMainLoopThread->wait();
+    }
     sInstance.get().reset();
 }
 
@@ -1981,6 +1990,9 @@ void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,
 }
 
 void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
+    if (!mToolWindow->closeButtonClicked()) {
+        mToolWindow->on_close_button_clicked();
+    }
     QSemaphoreReleaser semReleaser(semaphore);
     mToolWindow->shouldClose();
     System::get()->waitAndKillSelf();

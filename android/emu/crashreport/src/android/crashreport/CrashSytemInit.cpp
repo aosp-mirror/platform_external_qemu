@@ -270,9 +270,6 @@ bool crashhandler_init(int argc, char** argv) {
         arguments += '\n';
     }
 
-    android::crashreport::CrashReporter::get()->attachData(
-            "command-line-and-environment.txt", arguments);
-
     // Make sure we don't report any hangs until all related loopers
     // actually get started.
     android::crashreport::CrashReporter::get()->hangDetector().pause(true);

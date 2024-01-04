@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 #include "android/console.h"  // for AndroidConsoleAgents
+#include "android/emulation/control/webrtc-exports.h"
 
 namespace grpc {
 class Service;
@@ -23,12 +24,12 @@ namespace emulation {
 namespace control {
 class RtcBridge;
 
-grpc::Service* getRtcService(const AndroidConsoleAgents* agents,
+WEBRTC_API grpc::Service* getRtcService(const AndroidConsoleAgents* agents,
                              int adbPort,
                              const char* turncfg);
-grpc::Service* getRtcService(RtcBridge* bridge);
+WEBRTC_API grpc::Service* getRtcService(RtcBridge* bridge);
 
-grpc::Service* getRtcService(const char* turncfg,
+WEBRTC_API grpc::Service* getRtcService(const char* turncfg,
                                 const char* audioDump,
                                 bool verbose);
 }  // namespace control

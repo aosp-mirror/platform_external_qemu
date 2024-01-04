@@ -125,6 +125,8 @@ public:
 
     bool shouldClose();
 
+    bool closeButtonClicked() const { return mCloseClicked; }
+
     bool clipboardSharingSupported() const { return mClipboardSupported; }
     void forwardKeyToEmulator(uint32_t keycode, bool down);
     void touchExtendedWindow();
@@ -195,6 +197,7 @@ private:
 
     bool mIsExiting = false;
     bool mAskedWhetherToSaveSnapshot = false;
+    bool mShouldClose = false;
     bool mAllowExtWindow = false;
     bool mClipboardSupported = false;
 
@@ -224,16 +227,17 @@ private:
     bool mFoldableSyncToAndroidTimeout;
     ResizableDialog* mResizableDialog;
 
+    bool mCloseClicked = false;
 public slots:
     void raise();
     void switchClipboardSharing(bool enabled);
     void showVirtualSceneControls(bool show);
     void ensureVirtualSceneWindowCreated();
+    void on_close_button_clicked();
 
 private slots:
     void on_back_button_pressed();
     void on_back_button_released();
-    void on_close_button_clicked();
     void on_home_button_pressed();
     void on_home_button_released();
     void on_minimize_button_clicked();
