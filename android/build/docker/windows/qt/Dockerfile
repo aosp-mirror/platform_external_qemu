@@ -94,3 +94,5 @@ RUN \
     \
     # Cleanup
     && del /q vs_buildtools.exe
+
+ENTRYPOINT ["%PROGRAMFILES(X86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat", "amd64"]
