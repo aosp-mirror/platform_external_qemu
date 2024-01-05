@@ -923,6 +923,10 @@ bool MultiDisplay::isPixelFold() {
     return android_foldable_is_pixel_fold();
 }
 
+bool MultiDisplay::isOrientationSupported() {
+    return getConsoleAgents()->settings->hw()->hw_sensors_orientation;
+}
+
 /*
  * Just use simple way to make it work in multidisplay+rotation
  */
@@ -933,6 +937,41 @@ void MultiDisplay::recomputeLayoutLocked() {
         rotation = layout->orientation;
     }
     performRotationLocked(rotation);
+
+    // Use stacked layout for auto devices when orientation is not allowed
+    if (android_is_automotive() && !isOrientationSupported()) {
+        if (mMultiDisplay.size() >= 2) {
+            recomputeStackedLayoutLocked();
+        }
+    }
+}
+
+/*
+ * Especially for the automotive devices, it's better to locate the external
+ * display in a separate row in case it has wide display width. For instance,
+ * the reference implementation of Distant Display has 3000x800 display and it
+ * makes hard to use when the main and external displays are located in one row.
+ * Reused the previous logic of recomputeLayoutLocked() which was removed in
+ * aosp/2709953.
+ */
+void MultiDisplay::recomputeStackedLayoutLocked() {
+    uint32_t monitorWidth, monitorHeight;
+    if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
+        dwarning("Unable to get monitor width and height");
+        return;
+    }
+    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
+    for (const auto& iter : mMultiDisplay) {
+        if (iter.first == 0 || iter.second.cb != 0) {
+            rectangles[iter.first] =
+                    std::make_pair(iter.second.width, iter.second.height);
+        }
+    }
+    for (const auto& iter :
+         android::base::resolveStackedLayout(rectangles, monitorWidth)) {
+        mMultiDisplay[iter.first].pos_x = iter.second.first;
+        mMultiDisplay[iter.first].pos_y = iter.second.second;
+    }
 }
 
 bool MultiDisplay::multiDisplayParamValidate(uint32_t id,
