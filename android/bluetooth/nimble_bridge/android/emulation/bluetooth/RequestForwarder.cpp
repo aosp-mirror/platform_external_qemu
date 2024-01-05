@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "android/emulation/bluetooth/RequestForwarder.h"
 
+#include "aemu/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/emulation/bluetooth/RemoteConnection.h"
 #include "android/emulation/bluetooth/nimble/TypeTranslator.h"
@@ -62,7 +63,7 @@ RequestForwarder* RequestForwarder::registerDevice(
     // Initialize the NimBLE host configuration
     ble_hs_cfg.sync_cb = nimble_sync_cb;
 
-    dinfo("Registering %s", device.ShortDebugString().c_str());
+    dinfo("Registering %s", device.ShortDebugString());
     sRequestForwarder = std::make_unique<RequestForwarder>(device);
     return sRequestForwarder.get();
 }

@@ -338,7 +338,7 @@ bool skin_ui_process_events(SkinUI* ui) {
         case kEventTouchEnd:
         case kEventTouchUpdate:
 
-            DE("EVENT: kEventMultiTouch x=%f y=%f id=%d", ev.u.multi_touch_point.x,
+            DE("EVENT: kEventMultiTouch x=%d y=%d id=%d", ev.u.multi_touch_point.x,
                ev.u.multi_touch_point.y, ev.u.multi_touch_point.id);
             skin_window_process_touch_event(ui->window, &ev);
             break;
@@ -360,7 +360,7 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
 
         case kEventPenMove:
-            DE("EVENT: kEventPenMove x=%d y=%d id=%d pressure=%d \
+            DE("EVENT: kEventPenMove x=%d y=%d id=%ld pressure=%d \
                 orientation=%d button=%d pointer=%d",
                 ev.u.pen.x, ev.u.pen.y, ev.u.pen.tracking_id,
                 ev.u.pen.pressure, ev.u.pen.orientation,
@@ -369,7 +369,7 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
         case kEventPenPress:
         case kEventPenRelease:
-            DE("EVENT: kEventPen x=%d y=%d id=%d pressure=%d \
+            DE("EVENT: kEventPen x=%d y=%d id=%ld pressure=%d \
                 orientation=%d button=%d pointer=%d",
                 ev.u.pen.x, ev.u.pen.y, ev.u.pen.tracking_id,
                 ev.u.pen.pressure, ev.u.pen.orientation,

@@ -832,7 +832,7 @@ OperationStatus Snapshotter::loadGeneric(const char* name) {
 
 void Snapshotter::deleteSnapshot(const char* name) {
     std::string nameWithStorage(name);
-    dinfo("Deleting snapshot %s", nameWithStorage.c_str());
+    dinfo("Deleting snapshot %s", nameWithStorage);
     invalidateSnapshot(nameWithStorage.c_str());
 
     // then delete the folder and refresh hierarchy

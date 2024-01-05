@@ -98,7 +98,7 @@ VhalTable::VhalTable(QWidget* parent)
     }
 
     mUi->setupUi(this);
- 
+
     connect(this, SIGNAL(updateNewData(QStringList)), this,
             SLOT(updateTable(QStringList)), Qt::QueuedConnection);
     connect(this, SIGNAL(updateData(QStringList)), this,
@@ -232,9 +232,6 @@ void VhalTable::hideEvent(QHideEvent*) {
 }
 
 void VhalTable::updateTable(QStringList sl) {
-
-    D("updateTable() count %d on thread %d",sl.size(),std::this_thread::get_id());
-
     int current_size = mUi->property_list->count();
 
     mUi->property_list->addItems(sl);
@@ -276,7 +273,6 @@ void VhalTable::processMsg(EmulatorMessage emulatorMsg) {
         case (int32_t)MsgType::GET_PROPERTY_RESP:
         case (int32_t)MsgType::GET_PROPERTY_ALL_RESP:
             if (emulatorMsg.value_size() > 0) {
-                D("received GET_PROPERTY_RESP/ALL_RESP on thread %d",std::this_thread::get_id());
                 QStringList newKeys;
                 QStringList updatedKeys;
                 for (int valIndex = 0; valIndex < emulatorMsg.value_size();
@@ -306,7 +302,7 @@ void VhalTable::processMsg(EmulatorMessage emulatorMsg) {
         case (int32_t)MsgType::GET_CONFIG_ALL_RESP:
             for (int configIndex = 0; configIndex < emulatorMsg.config_size();
                     configIndex++) {
-                emulator::VehiclePropConfig config = 
+                emulator::VehiclePropConfig config =
                                               emulatorMsg.config(configIndex);
                 mVHalPropConfigMap[config.prop()] = config;
             }
@@ -372,7 +368,7 @@ void VhalTable::setPropertyText(QLabel* label, QString text) {
 }
 
 void VhalTable::showEditableArea(VehiclePropValue val) {
-    static const QString editingStaticWarning = 
+    static const QString editingStaticWarning =
         tr("WARNING: static properties cannot be subscribed to,\n"
            "so clients need a get() call to fetch an updated value.\n"
            "This can be achieved, e.g. by restarting the client.");

@@ -102,7 +102,7 @@ std::string getDeviceStateString(const AndroidHwConfig* hw) {
                 splitTokens(valuesToken[j], &values, "-");
                 size_t tokenCount = values.size();
                 if (tokenCount != 2 && tokenCount != 3) {
-                    derror("Incorrect posture mapping %s", valuesToken[j].c_str());
+                    derror("Incorrect posture mapping %s", valuesToken[j]);
                     return std::string();
                 }
                 ret += "<value>";
@@ -384,7 +384,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
 
         if (!privkey.empty() && pubkey_from_privkey(privkey, &key)) {
             params.push_back({adbKeyProp, key});
-            dinfo("Sending adb public key [%s]", key.c_str());
+            dinfo("Sending adb public key [%s]", key);
         } else {
             dwarning("No adb private key exists");
         }
@@ -560,7 +560,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
                 android::featurecontrol::DeviceStateOnBoot)) {
         std::string deviceState = getDeviceStateString(hw);
         if (deviceState != "") {
-            dinfo(" sending device_state_config:%s", deviceState.c_str());
+            dinfo(" sending device_state_config:%s", deviceState);
             params.push_back({deviceStateProp, deviceState});
         }
     }

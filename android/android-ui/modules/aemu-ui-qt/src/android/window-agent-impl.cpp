@@ -23,7 +23,7 @@
 #include <string>
 #include <utility>
 
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/threads/Thread.h"
 #include "android/cmdline-definitions.h"
 #include "android/console.h"

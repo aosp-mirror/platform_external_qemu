@@ -23,7 +23,7 @@
 #include <utility>     // for move
 #include <vector>      // for vector
 
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 
 namespace rootcanal {
 

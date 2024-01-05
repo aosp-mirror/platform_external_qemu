@@ -44,7 +44,7 @@
 #include "aemu/base/Uuid.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"
 #include "android/metrics/UiEventTracker.h"

@@ -14,7 +14,7 @@
 #include "aemu/base/async/AsyncSocketServer.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/Log.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/sockets/ScopedSocket.h"
 #include "aemu/base/sockets/SocketUtils.h"
 #include "android/emulation/AdbHostServer.h"

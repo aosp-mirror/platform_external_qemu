@@ -32,8 +32,9 @@
 #include <utility>
 #include <vector>
 
+
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/EintrWrapper.h"
-#include "aemu/base/logging/CLog.h"
 
 #define DEBUG 0
 
@@ -309,7 +310,7 @@ public:
         auto error_code = posix_spawnp(&pid, cmdline[0].c_str(), action, mAttr,
                                        args.data(), environ);
         if (error_code) {
-            derror("Unable to spawn process %s due to:, %s", cmdline[0].c_str(),
+            derror("Unable to spawn process %s due to:, %s", cmdline[0],
                    strerror(error_code));
             return std::nullopt;
         }

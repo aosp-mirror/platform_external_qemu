@@ -25,7 +25,7 @@
 
 #include "absl/strings/str_format.h"
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
 #include "tink/jwt/jwk_set_converter.h"
@@ -145,8 +145,8 @@ absl::Status JwkKeyLoader::add(Path toAdd) {
 absl::Status JwkKeyLoader::add(Path toAdd, std::string jsonString) {
     auto handle = crypto::tink::JwkSetToPublicKeysetHandle(jsonString);
     if (!handle.ok()) {
-        VERBOSE_INFO(grpc, "%s contains %s, which is invalid.", toAdd.c_str(),
-                     jsonString.c_str());
+        VERBOSE_INFO(grpc, "%s contains %s, which is invalid.", toAdd,
+                     jsonString);
         return absl::InternalError(
                 absl::StrFormat("%s does not contain a valid jwk", toAdd));
     }

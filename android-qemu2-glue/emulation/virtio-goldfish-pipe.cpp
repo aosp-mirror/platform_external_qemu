@@ -19,7 +19,7 @@ extern "C" {
 #endif
 #include "aemu/base/AlignedBuf.h"
 #include "aemu/base/synchronization/Lock.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "host-common/AddressSpaceService.h"
 #include "host-common/address_space_device.h"

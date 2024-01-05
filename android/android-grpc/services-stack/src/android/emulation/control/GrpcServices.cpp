@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/Log.h"
 #include "aemu/base/sockets/ScopedSocket.h"
 #include "aemu/base/sockets/SocketUtils.h"
@@ -292,7 +292,7 @@ std::unique_ptr<AllowList> loadAllowlist(std::string path) {
         return std::make_unique<DisableAccess>();
     }
 
-    dinfo("Using security allow list from: %s", path.c_str());
+    dinfo("Using security allow list from: %s", path);
     auto list = AllowList::fromStream(emulator_access);
     list->setSource(path);
 

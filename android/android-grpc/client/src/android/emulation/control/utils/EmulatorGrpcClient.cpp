@@ -27,7 +27,7 @@
 
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/emulation/control/EmulatorAdvertisement.h"
 #include "android/emulation/control/secure/BasicTokenAuth.h"
 #include "grpc/grpc_security_constants.h"
@@ -186,7 +186,7 @@ std::shared_ptr<grpc::ClientContext> EmulatorGrpcClient::newContext() {
 }
 
 void EmulatorGrpcClient::cancelAll(std::chrono::milliseconds maxWait) {
-    mActiveContexts.forEach([](auto context){ context->TryCancel(); });
+    mActiveContexts.forEach([](auto context) { context->TryCancel(); });
     mActiveContexts.waitUntilLibraryIsClear(maxWait);
 }
 
@@ -199,12 +199,11 @@ EmulatorGrpcClient::loadFromProto(std::string_view pathToEndpointProto,
             std::ios::in | std::ios::binary);
     Endpoint endpoint;
     if (!input) {
-        derror("File %s not found",
-               PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str());
+        derror("File %s not found", pathToEndpointProto.data());
         return nullptr;
     } else if (!endpoint.ParseFromIstream(&input)) {
         derror("File %s does not contain a valid endpoint",
-               PathUtils::asUnicodePath(pathToEndpointProto.data()).c_str());
+               pathToEndpointProto.data());
         return nullptr;
     }
 
