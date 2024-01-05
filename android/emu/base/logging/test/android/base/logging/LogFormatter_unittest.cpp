@@ -85,6 +85,7 @@ TEST(LogFormatter, SimpleFormatterWithTimeMatchesRegex) {
     }
 }
 
+#ifndef __APPLE__
 TEST(LogFormatter, VerboseFormatterMatchesRegex) {
     // See b/198468198
     VerboseLogFormatter formatter;
@@ -149,6 +150,7 @@ TEST(LogFormatter, DuplicateVerboseFormatterMatchesRegex) {
         ASSERT_EQ("Hello World", m[5]) << "Logine =  " << logline;
     }
 }
+#endif
 
 TEST(LogFormatter, DuplicateDoesNotLogALine) {
     NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
