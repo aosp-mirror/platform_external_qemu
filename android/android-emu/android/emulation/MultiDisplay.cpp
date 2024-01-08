@@ -177,12 +177,24 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
                    "emulator. Multi display might not work as expected.");
             return -1;
         }
-        adbInterface->enqueueCommand({"shell", "am", "broadcast", "-a",
-                                      "com.android.emulator.multidisplay.START",
-                                      "-n",
-                                      "com.android.emulator.multidisplay/"
-                                      ".MultiDisplayServiceReceiver",
-                                      "--user 0"});
+
+        {
+            auto avd = getConsoleAgents()->settings->avdInfo();
+            if (avd && avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO && avdInfo_getApiLevel(avd) <= 33) {
+                adbInterface->enqueueCommand(
+                    {"shell", "am", "broadcast", "-a",
+                     "com.android.emulator.multidisplay.START", "-n",
+                     "com.android.emulator.multidisplay/"
+                     ".MultiDisplayServiceReceiver"});
+            } else {
+                adbInterface->enqueueCommand(
+                    {"shell", "am", "broadcast", "-a",
+                     "com.android.emulator.multidisplay.START", "-n",
+                     "com.android.emulator.multidisplay/"
+                     ".MultiDisplayServiceReceiver",
+                     "--user 0"});
+            }
+        }
 
         MultiDisplayPipe* pipe = MultiDisplayPipe::getInstance();
         if (pipe) {
