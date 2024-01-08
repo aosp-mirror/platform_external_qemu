@@ -418,12 +418,21 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             // start multi-display service after boot completion
             if (fc::isEnabled(fc::MultiDisplay) &&
                 !fc::isEnabled(fc::Minigbm)) {
-                adbInterface->enqueueCommand(
+                auto avd = getConsoleAgents()->settings->avdInfo();
+                if (avd && avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO && avdInfo_getApiLevel(avd) <= 33) {
+                    adbInterface->enqueueCommand(
+                        {"shell", "am", "broadcast", "-a",
+                         "com.android.emulator.multidisplay.START", "-n",
+                         "com.android.emulator.multidisplay/"
+                         ".MultiDisplayServiceReceiver"});
+                } else {
+                    adbInterface->enqueueCommand(
                         {"shell", "am", "broadcast", "-a",
                          "com.android.emulator.multidisplay.START", "-n",
                          "com.android.emulator.multidisplay/"
                          ".MultiDisplayServiceReceiver",
                          "--user 0"});
+                }
             }
 
             // Foldable hinge area and posture update. Called when cold boot or
