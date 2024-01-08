@@ -445,6 +445,16 @@ def linux_postInstall(installdir, target):
 def buildPrebuilt(args, prebuilts_out_dir):
     atexit.register(cleanup)
 
+    if HOST_OS == "windows":
+        VS_INSTALL_PATH = os.environ["VS2019_INSTALL_PATH"]
+        if VS_INSTALL_PATH:
+            # The existence of the environment variable indicates we are on an old-style buildbot
+            # that does not have the docker configuration.
+            vcvarsall = os.path.join(VS_INSTALL_PATH, "VC", "Auxiliary", "Build", "vcvarsall.bat")
+            if not os.path.exists(vcvarsall):
+                logging.fatal(f"[{vcvarsall}] does not exist")
+                exit(-1)
+            deps_win.inheritSubprocessEnv([vcvarsall, "amd64", ">NUL", "2>&1"])
     # Use cmake from our prebuilts
     addToSearchPath(CMAKE_PATH)
     # Use ninja from our prebuilts
