@@ -87,7 +87,9 @@ public:
         std::ifstream dump_file(file_path, std::ios::in | std::ios::binary);
 
         if (dump_file.bad()) {
-            dinfo("Report file %s not accessible.", file_path.c_str());
+        #ifndef _WIN32
+            dinfo("Report file %s not accessible.", file_path);
+        #endif
             return ReportAction::UNDECIDED_KEEP;
         }
 
@@ -96,7 +98,7 @@ public:
 
     void reportCompleted(const CrashReportDatabase::Report& report) override {
         dinfo("Report %s is available remotely as: %s.",
-              report.uuid.ToString().c_str(), report.id.c_str());
+              report.uuid.ToString(), report.id);
 
         // Show a modal dialog with the report information.
         auto showFunc = [](void* data) {

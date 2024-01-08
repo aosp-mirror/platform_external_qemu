@@ -473,7 +473,7 @@ public:
         SimpleServerLambdaReader<InputEvent>* eventReader =
                 new SimpleServerLambdaReader<InputEvent>(
                         [this, &eventReader](auto request) {
-                            VERBOSE_INFO(keys, "InputEvent: %s", request->ShortDebugString().c_str());
+                            VERBOSE_INFO(keys, "InputEvent: %s", request->ShortDebugString());
                             if (request->has_key_event()) {
                                 mKeyEventSender.send(request->key_event());
                             } else if (request->has_mouse_event()) {

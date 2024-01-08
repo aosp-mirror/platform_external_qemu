@@ -24,7 +24,7 @@
 #include "absl/strings/str_join.h"
 #include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/LogSeverity.h"
 #include "aemu/base/memory/LazyInstance.h"

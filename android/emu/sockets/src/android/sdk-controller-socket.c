@@ -1036,7 +1036,7 @@ _on_skdctl_query_timeout(void* opaque, LoopTimer* timer)
 {
     SDKCtlQuery* const query = (SDKCtlQuery*)opaque;
 
-    D("SDKCtl %s: Query %p ID %d with deadline %lld has timed out at %lld",
+    D("SDKCtl %s: Query %p ID %d with deadline %" PRIu64 " has timed out at %ld",
       query->sdkctl->service_name, query, query->header.query_id,
       query->deadline, async_socket_deadline(query->sdkctl->as, 0));
 
@@ -1105,7 +1105,7 @@ _on_sdkctl_query_send_io(void* io_opaque,
             break;
 
         case ASIO_STATE_TIMED_OUT:
-            D("SDKCtl %s: Query %p ID %d with deadline %lld has timed out in transmission at %lld",
+            D("SDKCtl %s: Query %p ID %d with deadline %ld has timed out in transmission at %ld",
               query->sdkctl->service_name, query, query->header.query_id,
               query->deadline,  async_socket_deadline(query->sdkctl->as, 0));
             /* Invoke query's callback. */

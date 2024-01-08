@@ -1906,7 +1906,7 @@ YUVInfo get_yuv_info(int width, int height) {
 
 bool resize_staging(ClientFrame* result_frame, size_t required) {
     if (*result_frame->staging_framebuffer_size < required) {
-        D("%s: Resizing staging framebuffer from %d to %d", __FUNCTION__,
+        D("%s: Resizing staging framebuffer from %lu to %lu", __FUNCTION__,
           *result_frame->staging_framebuffer_size, required);
 
         *result_frame->staging_framebuffer =

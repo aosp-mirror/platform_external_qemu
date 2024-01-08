@@ -14,7 +14,7 @@
 
 #include "aemu/base/network/Dns.h"
 
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/Log.h"
 
 #include <string>

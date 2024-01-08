@@ -15,7 +15,7 @@
 #include <fcntl.h>
 #include <cassert>
 #include <cerrno>
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/base/system/System.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/file_io.h"
@@ -162,7 +162,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
         if (!::CreateDirectoryW(unicodeDir.c_str(), nullptr) &&
             ::GetLastError() != ERROR_ALREADY_EXISTS) {
             derror("Unexpected error while creating: %s (error: %d)",
-                   unicodeDir.c_str(), ::GetLastError());
+                   unicodeDir.toString(), ::GetLastError());
             continue;
         }
 

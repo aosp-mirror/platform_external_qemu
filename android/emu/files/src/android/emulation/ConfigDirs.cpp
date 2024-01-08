@@ -14,22 +14,22 @@
 
 #include "android/emulation/ConfigDirs.h"
 
-#include <unistd.h>   // for getuid
-#include <algorithm>  // for max
-#include <cassert>    // for assert
-#include <cerrno>     // for errno
-#include <cstdio>     // for printf
-#include <cstring>    // for strerror
-#include <ostream>    // for operator<<, basic_ost...
+#include <unistd.h>
+#include <algorithm>
+#include <cassert>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
+#include <ostream>
 #include <string_view>
-#include <vector>     // for vector
+#include <vector>
 
-#include "aemu/base/files/PathUtils.h"       // for PathUtils, pj
-#include "aemu/base/logging/CLog.h"          // for LOG, LogMessage
-#include "aemu/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
-#include "aemu/base/synchronization/Lock.h"  // for Lock, AutoLock
-#include "android/base/system/System.h"         // for System
-#include "android/utils/path.h"                 // for path_mkdir_if_needed
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/logging/Log.h"
+#include "aemu/base/memory/LazyInstance.h"
+#include "aemu/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
+#include "android/utils/path.h"
 
 namespace android {
 
@@ -179,7 +179,7 @@ auto ConfigDirs::getSdkRootDirectoryByPath(bool verbose) -> std::string {
 
         sdkRoot = PathUtils::recompose(parts);
         if (verbose) {
-            dinfo("guessed sdk root is %s", sdkRoot.c_str());
+            dinfo("guessed sdk root is %s", sdkRoot);
         }
         if (isValidSdkRoot(sdkRoot, verbose)) {
             return sdkRoot;
@@ -190,7 +190,7 @@ auto ConfigDirs::getSdkRootDirectoryByPath(bool verbose) -> std::string {
         }
     }
     if (verbose) {
-        dwarning("invalid sdk root %s", sdkRoot.c_str());
+        dwarning("invalid sdk root %s", sdkRoot);
     }
     return {};
 }
@@ -340,7 +340,7 @@ auto ConfigDirs::getDiscoveryDirectory() -> std::string {
     auto recomposed = PathUtils::recompose(path);
     if (!System::get()->pathExists(recomposed)) {
         if (path_mkdir_if_needed(recomposed.c_str(), 0700) == -1) {
-            dinfo("Unable to create %s due to %d: %s", recomposed.c_str(),
+            dinfo("Unable to create %s due to %d: %s", recomposed,
                   errno, strerror(errno));
         }
     }

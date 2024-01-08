@@ -18,6 +18,7 @@ extern "C" {
 }
 #endif
 
+#include "aemu/base/Log.h"
 #include "aemu/base/logging/LogSeverity.h"
 #include "android-qemu2-glue/qemu-setup.h"
 #include "android/base/system/System.h"
@@ -218,9 +219,9 @@ extern "C" void rng_random_generic_read_random_bytes(void* buf, int size) {
 
 bool qemu_android_emulation_early_setup() {
     // Inject the logging method for netsim
-    netsim::setBtsLogSink([](auto prio, auto file, auto line, auto msg) {
+    netsim::setBtsLogSink([](auto prio, auto file, auto line, std::string msg) {
         if (VERBOSE_CHECK(bluetooth)) {
-            __emu_log_print((LogSeverity)prio, file, line, msg, nullptr);
+            __emu_log_print_cplusplus((LogSeverity)prio, file, line, "%s", msg);
         }
     });
 

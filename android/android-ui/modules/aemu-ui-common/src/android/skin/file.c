@@ -514,7 +514,7 @@ skin_layout_event_decode( const char*  event, int  *ptype, int  *pcode, int *pva
             break;
 
     if (!ev->name) {
-        dwarning("unrecognized skin layout event name: %.*s", x-event, event );
+        dwarning("unrecognized skin layout event name: %.*s", (int) (x-event), event);
         return -1;
     }
 

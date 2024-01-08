@@ -17,7 +17,7 @@
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/threads/FunctorThread.h"
 #include "android/base/system/System.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 
 #include <memory>
 

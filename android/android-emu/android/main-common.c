@@ -777,7 +777,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             exit(1);
         }
         if (sizeMB < minSizeMB || sizeMB > maxSizeMB) {
-            derror("partition-size (%d) must be between %dMB and %dMB", sizeMB,
+            derror("partition-size (%ld) must be between %ldMB and %ldMB", sizeMB,
                    minSizeMB, maxSizeMB);
             exit(1);
         }
@@ -1605,8 +1605,6 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     if (!opts->log_nofilter) {
         log_opts |= kLogEnableDuplicateFilter;
-        dinfo("Duplicate loglines will be removed, if you wish to see each "
-              "individual line launch with the -log-nofilter flag.");
     }
 
     if (opts->log_detailed || VERBOSE_CHECK(log)) {
@@ -1618,6 +1616,11 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     }
 
     base_configure_logs(log_opts);
+    if (!opts->log_nofilter) {
+        dinfo("Duplicate loglines will be removed, if you wish to see each "
+              "individual line launch with the -log-nofilter flag.");
+    }
+
     getConsoleAgents()->settings->inject_cmdLineOptions(opts);
 
     // BUG: 143949261
@@ -2082,15 +2085,15 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             char* end = NULL;
             long val = strtol(opts->cores, &end, 10);
             if (*end != '\0' || val <= 0 || val > 64) {
-                derror("Invalid value for -cores <count> parameter: %s\n",
-                       "Valid values are decimal count between 1 and 64\n",
+                derror("Invalid value for -cores <count> parameter: %s "
+                       "valid values are decimal count between 1 and 64",
                        opts->cores);
                 return false;
             }
             hw->hw_cpu_ncore = (int)val;
         } else {
             dwarning(
-                    "Classic QEMU doesn't support -cores option, only one\n"
+                    "Classic QEMU doesn't support -cores option, only one "
                     "virtual CPU can be emulated with this engine.\n");
             str_reset_null(&opts->cores);
         }

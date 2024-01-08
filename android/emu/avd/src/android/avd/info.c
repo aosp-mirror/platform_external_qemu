@@ -443,7 +443,7 @@ static int _avdInfo_getContentPath(AvdInfo* i) {
     }
 
     if (!path_is_dir(i->contentPath)) {
-        derror("bad config: %s",
+        derror("bad config: %s"
                "virtual device file has no valid " ROOT_REL_PATH_KEY
                " entry nor " ROOT_ABS_PATH_KEY " entry",
                i->contentPath);
