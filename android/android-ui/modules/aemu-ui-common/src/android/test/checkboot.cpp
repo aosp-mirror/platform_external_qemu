@@ -14,7 +14,7 @@
 #include <thread>
 
 #include "aemu/base/async/ThreadLooper.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/threads/ParallelTask.h"
 #include "android/console.h"
 

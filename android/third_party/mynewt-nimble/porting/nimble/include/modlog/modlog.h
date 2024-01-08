@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 
+#define CLOG 1
 #include "log_common/log_common.h"
 #include "log/log.h"
 #include "aemu/base/logging/CLog.h"

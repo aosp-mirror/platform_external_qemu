@@ -57,8 +57,8 @@ PlaystoreMetricsWriter::PlaystoreMetricsWriter(const std::string& sessionId,
         LogResponse response;
         response.ParseFromIstream(&cookieResponse);
         mSendAfterMs = milliseconds(response.next_request_wait_millis());
-        D("Read a timeout cookie from %s, wait until %lu.", mCookieFile.c_str(),
-          mSendAfterMs);
+        D("Read a timeout cookie from %s, wait until %d.", mCookieFile,
+          mSendAfterMs.count());
     }
 }
 
@@ -165,7 +165,7 @@ void PlaystoreMetricsWriter::writeCookie(std::string proto) {
 void PlaystoreMetricsWriter::commit() {
     if (mEvents.empty() || epoch_time_in_ms() < mSendAfterMs) {
         D("Not reporting %d metrics time: %" PRIi64 ", wait until %" PRIi64,
-          mEvents.empty(), epoch_time_in_ms(), mSendAfterMs);
+          mEvents.empty(), epoch_time_in_ms().count(), mSendAfterMs.count());
         return;
     }
 

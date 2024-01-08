@@ -233,7 +233,7 @@ ble_hci_sock_acl_tx(struct os_mbuf *om)
         if (i < 0) {
             derror("socketSend() failed : %d\n", errno);
         } else {
-            derror("socketSend() partial write: %d, expected: %d\n", i, slen);
+            derror("socketSend() partial write: %d, expected: %zu\n", i, slen);
         }
         STATS_INC(hci_sock_stats, oerr);
         return BLE_ERR_MEM_CAPACITY;

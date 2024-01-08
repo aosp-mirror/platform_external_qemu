@@ -11,7 +11,7 @@
 #include <stdint.h>  // for uint64_t
 #include <memory>    // for make_unique, unique_ptr
 
-#include "aemu/base/logging/CLog.h"          // for LoggingFlags, base_co...
+#include "aemu/base/logging/Log.h"          // for LoggingFlags, base_co...
 #include "aemu/base/logging/Log.h"           // for setMinLogLevel, setLo...
 #include "aemu/base/logging/LogFormatter.h"  // for NoDuplicateLinesForma...
 #include "aemu/base/logging/LogSeverity.h"   // for EMULATOR_LOG_INFO
@@ -20,7 +20,7 @@ using android::base::LogFormatter;
 using android::base::NoDuplicateLinesFormatter;
 using android::base::SimpleLogFormatter;
 using android::base::SimpleLogWithTimeFormatter;
-using android::base::VerboseLogFormatter;
+using android::base::GoogleLogFormatter;
 
 uint64_t android_verbose = 0;
 LogSeverity android_log_severity = EMULATOR_LOG_INFO;
@@ -71,7 +71,7 @@ void base_configure_logs(LoggingFlags flags) {
     std::unique_ptr<LogFormatter> formatter =
             std::make_unique<SimpleLogFormatter>();
     if (flags & kLogEnableVerbose) {
-        formatter = std::make_unique<VerboseLogFormatter>();
+        formatter = std::make_unique<GoogleLogFormatter>();
     } else if (flags & kLogEnableTime) {
         formatter = std::make_unique<SimpleLogWithTimeFormatter>();
     }

@@ -187,7 +187,7 @@ void Mp4DemuxerImpl::seek(double timestamp) {
     int ret = av_seek_frame(formatCtx, -1, convertedTimestamp, AVSEEK_FLAG_ANY);
 
     if (ret < 0) {
-        derror("The mp4 demuxer is unable  to seek to timestamp %d", timestamp);
+        derror("The mp4 demuxer is unable  to seek to timestamp %f", timestamp);
         return;
     }
     if (mAudioPacketQueue != nullptr && audioStreamIndex >= 0) {

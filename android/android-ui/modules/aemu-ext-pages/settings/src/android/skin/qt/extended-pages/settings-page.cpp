@@ -36,7 +36,7 @@
 #ifndef SNAPSHOT_CONTROLS  // TODO:jameskaye Remove when Snapshot controls are
                            // fully enabled
 #include "aemu/base/async/ThreadLooper.h"        // for ThreadLooper
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "host-common/FeatureControl.h"  // for isEnabled
 #include "android/metrics/MetricsReporter.h"        // for MetricsRe...
 #include "android/skin/qt/error-dialog.h"           // for showError...
@@ -523,7 +523,7 @@ void SettingsPage::on_set_saveLocFolderButton_clicked() {
     if (dirName.isEmpty()) {
         return;  // Operation was canc
     }
-    
+
     dirName = QDir::toNativeSeparators(dirName);
 
     if (!directoryIsWritable(dirName)) {

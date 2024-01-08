@@ -21,7 +21,7 @@
 #include <string_view>
 
 #include "absl/status/statusor.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "android/emulation/control/utils/Library.h"
 #include "grpc_endpoint_description.pb.h"
 

@@ -11,6 +11,7 @@
 
 #include "android/snapshot/MemoryWatch.h"
 
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/ArraySize.h"
 #include "aemu/base/Debug.h"
 #include "aemu/base/EintrWrapper.h"

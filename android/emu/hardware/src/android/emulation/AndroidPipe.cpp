@@ -15,7 +15,7 @@
 
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/async/ThreadLooper.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/Log.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/Optional.h"

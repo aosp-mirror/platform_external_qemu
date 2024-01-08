@@ -112,7 +112,7 @@ int createDtbFile(const Params& params, const std::string &dtbFilename) {
         dt_to_blob(file.get(), &dt, DEFAULT_FDT_VERSION);
         return 0;
     } else {
-        derror("Could not open '%s' for writing", dtbFilename.c_str());
+        derror("Could not open '%s' for writing", dtbFilename);
         return 1;
     }
 }

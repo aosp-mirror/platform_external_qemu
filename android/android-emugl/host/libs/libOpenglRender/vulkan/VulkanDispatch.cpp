@@ -15,7 +15,7 @@
 #include "VulkanDispatch.h"
 
 #include "aemu/base/files/PathUtils.h"
-#include "aemu/base/logging/CLog.h"
+#include "aemu/base/logging/Log.h"
 #include "aemu/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "aemu/base/synchronization/Lock.h"
@@ -182,7 +182,7 @@ public:
         auto library = emugl::SharedLibrary::open(path.c_str());
         if (library) {
             mLibs.push_back(library);
-            dinfo("added library %s", path.c_str());
+            dinfo("added library %s", path);
             return true;
         } else {
             dwarning("cannot add library %s: failed", path.c_str());

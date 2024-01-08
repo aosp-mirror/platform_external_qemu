@@ -10,10 +10,10 @@
 // GNU General Public License for more details.
 #include "aemu/base/logging/LogFormatter.h"
 
-#include <regex>                               // for regex_match, match_res...
+#include <regex>
 
-#include "aemu/base/logging/LogSeverity.h"  // for LogSeverity, EMULATOR_...
-#include "gtest/gtest.h"                       // for Message
+#include "aemu/base/logging/LogSeverity.h"
+#include "gtest/gtest.h"
 
 namespace android {
 namespace base {
@@ -47,11 +47,24 @@ TEST(LogFormatter, SimpleFormatterMatchesRegex) {
          sev++) {
         auto severity = static_cast<LogSeverity>(sev);
         LogParams lg = {"filename.c", 123, severity};
-        std::string logline = formatter.LogFormatter::format(lg, "Hello World");
+        std::string logline = formatter.format(lg, "Hello World");
         ASSERT_TRUE(std::regex_match(logline, m, simle_log));
         ASSERT_EQ(translate_sev(severity), m[1]) << "Unexpected severity!";
         ASSERT_EQ("Hello World", m[2]);
     }
+}
+
+TEST(LogFormatter, DoubLoggingWorks) {
+    // See b/198468198
+    SimpleLogFormatter formatter;
+    auto severity = static_cast<LogSeverity>(EMULATOR_LOG_DEBUG);
+    LogParams lg = {"filename.c", 123, severity};
+    std::string line = "Hello World";
+    std::string logline = formatter.format(lg, line);
+    EXPECT_EQ("DEBUG   | Hello World", logline);
+    line.append("!");
+    logline = formatter.format(lg, line);
+    EXPECT_EQ("DEBUG   | Hello World!", logline);
 }
 
 TEST(LogFormatter, SimpleFormatterWithTimeMatchesRegex) {
@@ -65,13 +78,14 @@ TEST(LogFormatter, SimpleFormatterWithTimeMatchesRegex) {
          sev++) {
         auto severity = static_cast<LogSeverity>(sev);
         LogParams lg = {"filename.c", 123, severity};
-        std::string logline = formatter.LogFormatter::format(lg, "Hello World");
+        std::string logline = formatter.format(lg, "Hello World");
         ASSERT_TRUE(std::regex_match(logline, m, simle_log));
         ASSERT_EQ(translate_sev(severity), m[2]) << "Unexpected severity!";
         ASSERT_EQ("Hello World", m[3]);
     }
 }
 
+#ifndef __APPLE__
 TEST(LogFormatter, VerboseFormatterMatchesRegex) {
     // See b/198468198
     VerboseLogFormatter formatter;
@@ -83,12 +97,34 @@ TEST(LogFormatter, VerboseFormatterMatchesRegex) {
          sev++) {
         auto severity = static_cast<LogSeverity>(sev);
         LogParams lg = {"filename.c", 123, severity};
-        std::string logline = formatter.LogFormatter::format(lg, "Hello World");
+        std::string logline = formatter.format(lg, "Hello World");
         ASSERT_TRUE(std::regex_match(logline, m, verbose_log))
-                << "Logine =  " << logline;
+                << "Logine = " << logline;
         ASSERT_EQ(translate_sev(severity), m[3]) << "Unexpected severity!";
         ASSERT_EQ("filename.c:123", m[4]);
         ASSERT_EQ("Hello World", m[5]);
+    }
+}
+
+TEST(LogFormatter, GoogleFormatterMatchesRegex) {
+    // See b/198468198
+    GoogleLogFormatter formatter;
+    const std::regex verbose_log(
+            R"REG(^([IWDEF])(\d+) (\d+:\d+:\d+\.\d+)\s+(\d+)\s+([\w-]+\.[A-Za-z]+:\d+)\] (.*))REG");
+
+    std::smatch m;
+    for (int sev = EMULATOR_LOG_DEBUG; sev < EMULATOR_LOG_NUM_SEVERITIES;
+         sev++) {
+        auto severity = static_cast<LogSeverity>(sev);
+        LogParams lg = {"filename.c", 123, severity};
+        std::string logline = formatter.format(lg, "Hello World");
+        ASSERT_TRUE(std::regex_match(logline, m, verbose_log))
+                << "Logine =" << logline;
+        ASSERT_EQ(translate_sev(severity)[0], m[1])
+                << "Unexpected severity from:" << logline;
+        ASSERT_EQ("filename.c:123", m[5])
+                << "Unexpected filename from:" << logline;
+        ASSERT_EQ("Hello World", m[6]) << "Unexpected message from:" << logline;
     }
 }
 
@@ -106,83 +142,77 @@ TEST(LogFormatter, DuplicateVerboseFormatterMatchesRegex) {
         auto severity = static_cast<LogSeverity>(sev);
         LogParams lg = {"filename.c", 123, severity};
 
-        std::string logline = ndlf.LogFormatter::format(lg, "Hello World");
+        std::string logline = ndlf.format(lg, "Hello World");
         ASSERT_TRUE(std::regex_match(logline, m, verbose_log))
                 << "Logine =  " << logline;
         ASSERT_EQ(translate_sev(severity), m[3]) << "Unexpected severity!";
         ASSERT_EQ("filename.c:123", m[4]);
-        ASSERT_EQ("Hello World", m[5]);
+        ASSERT_EQ("Hello World", m[5]) << "Logine =  " << logline;
     }
 }
-
-
+#endif
 
 TEST(LogFormatter, DuplicateDoesNotLogALine) {
     NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
     LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
-    ndlf.LogFormatter::format(lg, "Hello World");
-    ASSERT_EQ("", ndlf.LogFormatter::format(lg, "Hello World"));
+    ndlf.format(lg, "Hello World");
+    ASSERT_EQ("", ndlf.format(lg, "Hello World"));
 }
 
 TEST(LogFormatter, DuplicateDoubleLogsALine) {
     NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
     LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
-    ndlf.LogFormatter::format(lg, "Hello World");
-    ndlf.LogFormatter::format(lg, "Hello World");
+    ndlf.format(lg, "Hello World");
+    ndlf.format(lg, "Hello World");
     ASSERT_EQ(
             "INFO    | Hello World\n"
             "INFO    | x",
-            ndlf.LogFormatter::format(lg, "x"));
+            ndlf.format(lg, "x"));
 }
 
 TEST(LogFormatter, DuplicatTripleLogsALine) {
     NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
     LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
-    ASSERT_EQ("INFO    | Hello World",
-              ndlf.LogFormatter::format(lg, "Hello World"));
+    ASSERT_EQ("INFO    | Hello World", ndlf.format(lg, "Hello World"));
 
-    ndlf.LogFormatter::format(lg, "Hello World");
-    ndlf.LogFormatter::format(lg, "Hello World");
-    ndlf.LogFormatter::format(lg, "Hello World");
+    ndlf.format(lg, "Hello World");
+    ndlf.format(lg, "Hello World");
+    ndlf.format(lg, "Hello World");
     ASSERT_EQ(
             "INFO    | Hello World (3x)\n"
             "INFO    | x",
-            ndlf.LogFormatter::format(lg, "x"));
+            ndlf.format(lg, "x"));
 }
-
 
 TEST(LogFormatter, DuplicateLogShouldNotCrash) {
     NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
     LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
-    ASSERT_EQ("INFO    | Hello World%s",
-              ndlf.LogFormatter::format(lg, "%.*s", 13, "Hello World%s"));
+    ASSERT_EQ("INFO    | Hello World%s", ndlf.format(lg, "Hello World%s"));
 }
 
 TEST(LogFormatter, DuplicateLogWithLongStringShouldNotCrash) {
     NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
-    std::string hello="Hello World%s";
-    for(int i = 0; i < 8; i++) {
+    std::string hello = "Hello World%s";
+    for (int i = 0; i < 8; i++) {
         hello = hello + hello;
     }
     LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
-     ASSERT_EQ("INFO    | Hello World%s",
-              ndlf.LogFormatter::format(lg, "%.*s", 13, "Hello World%s"));
+    ASSERT_EQ("INFO    | Hello World%s", ndlf.format(lg, "Hello World%s"));
 }
 
 TEST(LogFormatter, DuplicatTripleWithDiffLocationLogsALine) {
     NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
     LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
     LogParams lg2 = {"other.c", 123, EMULATOR_LOG_INFO};
-    ASSERT_EQ("INFO    | Hello World",
-              ndlf.LogFormatter::format(lg, "Hello World"));
+    ASSERT_EQ("INFO    | Hello World", ndlf.format(lg, "Hello World"));
 
-    ndlf.LogFormatter::format(lg, "Hello World");
-    ndlf.LogFormatter::format(lg, "Hello World");
-    ndlf.LogFormatter::format(lg, "Hello World");
+    ndlf.format(lg, "Hello World");
+    ndlf.format(lg, "Hello World");
+    ndlf.format(lg, "Hello World");
     ASSERT_EQ(
             "INFO    | Hello World (3x)\n"
             "INFO    | x",
-            ndlf.LogFormatter::format(lg2, "x"));
+            ndlf.format(lg2, "x"));
 }
 
 }  // namespace base

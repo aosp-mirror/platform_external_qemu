@@ -1186,7 +1186,7 @@ int main(int argc, char** argv) {
             }
         }
         /* Dump final command-line parameters to make debugging easier */
-        dprint("Concatenated backend parameters: %s", concat.c_str());
+        dprint("Concatenated backend parameters: %s", concat);
     }
 
     // Launch it with the same set of options !
