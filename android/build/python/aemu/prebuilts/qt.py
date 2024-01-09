@@ -446,7 +446,7 @@ def buildPrebuilt(args, prebuilts_out_dir):
     atexit.register(cleanup)
 
     if HOST_OS == "windows":
-        VS_INSTALL_PATH = os.environ["VS2019_INSTALL_PATH"]
+        VS_INSTALL_PATH = os.environ["VS2022_INSTALL_PATH"]
         if VS_INSTALL_PATH:
             # The existence of the environment variable indicates we are on an old-style buildbot
             # that does not have the docker configuration.
