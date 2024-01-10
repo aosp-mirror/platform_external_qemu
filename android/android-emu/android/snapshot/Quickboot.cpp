@@ -655,6 +655,7 @@ bool Quickboot::save(std::string_view name) {
         dwarning(
                 "Not saving state: current state "
                 "does not support snapshotting");
+        Snapshotter::get().deleteSnapshot(c_str(name));
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
         return false;
