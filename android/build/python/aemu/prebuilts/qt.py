@@ -342,9 +342,14 @@ def installQt(submodules, builddir, installdir):
         exit(res.returncode)
     logging.info("Installation succeeded")
 
+def cleanupQtTmpDirectory():
+    if HOST_OS == "windows" and os.path.exists(WIN_QT_TMP_LOCATION):
+        # os.remove and shutils.rmtree may fail if any file in the tmp directory is read-only.
+        # So let's just use rmdir instead to destroy it.
+        subprocess.run(["rmdir", "/S", "/Q", WIN_QT_TMP_LOCATION])
+
 def cleanup():
-    if os.path.exists(WIN_QT_TMP_LOCATION):
-        shutil.rmtree(WIN_QT_TMP_LOCATION)
+    cleanupQtTmpDirectory()
 
 def postInstall(installdir, target):
     # Create include.system/QtCore/qconfig.h from include/QtCore/qconfig.h
@@ -477,8 +482,7 @@ def buildPrebuilt(args, prebuilts_out_dir):
     if HOST_OS == "windows":
         # On Windows, We must make sure Qt source code is in a very short directory, otherwise we
         # may get a compiler error because of long paths issue.
-        if os.path.exists(WIN_QT_TMP_LOCATION):
-            os.remove(WIN_QT_TMP_LOCATION)
+        cleanupQtTmpDirectory()
         logging.info("Creating Qt temp directory [%s]", WIN_QT_TMP_LOCATION)
         old_umask = os.umask(0o027)
         os.makedirs(WIN_QT_TMP_LOCATION)
