@@ -341,7 +341,7 @@ endfunction()
 function(android_target_dependency RUN_TARGET TARGET_TAG
          RUN_TARGET_DEPENDENCIES)
   if(ANDROID_TARGET_TAG MATCHES "${TARGET_TAG}.*" OR TARGET_TAG STREQUAL "all")
-
+    cmake_policy(SET CMP0079 NEW)
     # Link to existing target if there.
     if(TARGET ${RUN_TARGET_DEPENDENCIES})
       target_link_libraries(${RUN_TARGET} PRIVATE ${RUN_TARGET_DEPENDENCIES})

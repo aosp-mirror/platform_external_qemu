@@ -191,7 +191,9 @@ if(LINUX_X86_64)
   target_compile_options(grpc_unsecure PRIVATE -DSO_REUSEPORT=15)
 endif()
 
-if(FEATURE_NETSIM)
+if(FEATURE_NETSIM_FROM_SOURCE)
+  message(WARNING "*** NETSIM IS MIGRATING TO PREBUILTS! ***")
+  message(WARNING "*** IF YOU ARE A NETSIM DEVELOPER YOU SHOULD SWITCH TO NETSIM-DEV! ***")
   set(EXTERNAL_QEMU ${ANDROID_QEMU2_TOP_DIR})
   if(TARGET Rust::Rustc)
     add_subdirectory(${AOSP_ROOT}/packages/modules/Bluetooth/tools/rootcanal
@@ -234,7 +236,7 @@ if(FEATURE_NETSIM)
   endif()
 
   # Add netsim-ui into objs
-  set(NETSIM_GUI_STATIC
+  set(NETSIM_UI_DEPENDENCIES
     ${AOSP_ROOT}/tools/netsim/ui/dist/index.html>netsim-ui/index.html;
     ${AOSP_ROOT}/tools/netsim/ui/dist/dev.html>netsim-ui/dev.html;
     ${AOSP_ROOT}/tools/netsim/ui/dist/assets/grid-background.svg>netsim-ui/assets/grid-background.svg;
@@ -259,9 +261,22 @@ if(FEATURE_NETSIM)
     ${AOSP_ROOT}/tools/netsim/ui/dist/node_modules/tslib/tslib.es6.js>netsim-ui/node_modules/tslib/tslib.es6.js;
     PARENT_SCOPE
   )
-  android_license(TARGET "NETSIM_GUI_STATIC" LIBNAME None SPDX None LICENSE None LOCAL None)
+  android_license(TARGET "NETSIM_UI_DEPENDENCIES" LIBNAME None SPDX None LICENSE None LOCAL None)
+  android_target_dependency(packet-streamer-client-lib all NETSIM_UI_DEPENDENCIES)
 else()
-  message(STATUS "Netsim is not enabled.")
+  message(STATUS "Using prebuilt netsim")
+  prebuilt(NETSIM)
+  add_subdirectory(${AOSP_ROOT}/tools/netsim/proto netsim_proto)
+  add_subdirectory(${AOSP_ROOT}/tools/netsim/src/util netsim_util)
+  add_subdirectory(${AOSP_ROOT}/tools/netsim/src/backend netsim_backend)
+  add_subdirectory(mynewt-nimble)
+
+  # Binplace to objs
+  android_target_dependency(packet-streamer-client-lib all NETSIM_UI_DEPENDENCIES)
+  android_target_dependency(packet-streamer-client-lib all NETSIM_DEPENDENCIES)
+
+  # Install ui (Disable this for non canary?)
+  android_install_dependency_force_exec(all NETSIM_UI_DEPENDENCIES)
 endif()
 
 # gfxstream, aemu-common modules
