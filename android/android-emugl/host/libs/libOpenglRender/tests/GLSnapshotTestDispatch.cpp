@@ -47,8 +47,8 @@ SnapshotTestDispatch::SnapshotTestDispatch()
 }
 
 void SnapshotTestDispatch::overrideFunctions() {
-    this->glDrawArrays = (glDrawArrays_t)test_glDrawArrays;
-    this->glDrawElements = (glDrawElements_t)test_glDrawElements;
+    this->glDrawArrays = (gfxstream::gl::glDrawArrays_t)test_glDrawArrays;
+    this->glDrawElements = (gfxstream::gl::glDrawElements_t)test_glDrawElements;
 }
 
 void SnapshotTestDispatch::saveSnapshot() {
