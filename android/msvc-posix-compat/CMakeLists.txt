@@ -2,13 +2,11 @@ cmake_minimum_required(VERSION 3.5)
 
 if(NOT TARGET msvc-posix-compat)
   # This is a posix wrapper for windows-msvc build.
-  android_nasm_compile(
-    TARGET setjmp_asm_lib LICENSE Apache-2.0 SRC # cmake-format: sortable
-                                                 src/setjmp.asm)
+  android_nasm_compile(TARGET setjmp_asm_lib LICENSE Apache-2.0
+                       SRC src/setjmp.asm)
   android_add_library(
     TARGET msvc-posix-compat LICENSE Apache-2.0
-    SRC # cmake-format: sortable
-        src/getopt.c src/gettimeofday.c src/msvc-posix.c src/pread.cpp)
+    SRC src/getopt.c src/gettimeofday.c src/msvc-posix.c src/pread.cpp)
 
   # Msvc posix needs the file-io libs from android-emu-base.
   target_link_libraries(msvc-posix-compat PRIVATE setjmp_asm_lib)
@@ -22,8 +20,8 @@ if(NOT TARGET msvc-posix-compat)
                                           # deprecated..
   )
   target_include_directories(
-    msvc-posix-compat PUBLIC include/
-                             ${ANDROID_QEMU2_TOP_DIR}/include
-                             ${ANDROID_QEMU2_TOP_DIR}/android/android-base
-                             ${ANDROID_QEMU2_TOP_DIR}/android/android-emu-base)
+    msvc-posix-compat
+    PUBLIC include/ ${ANDROID_QEMU2_TOP_DIR}/include
+           ${ANDROID_QEMU2_TOP_DIR}/android/android-base
+           ${ANDROID_QEMU2_TOP_DIR}/android/android-emu-base)
 endif()

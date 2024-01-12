@@ -110,8 +110,6 @@ android_target_dependency(emulator all VIRTUAL_SCENE_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_MACROS_DEPENDENCIES)
 android_target_dependency(emulator all VULKAN_DEPENDENCIES)
 android_target_dependency(emulator linux TCMALLOC_OS_DEPENDENCIES)
-android_target_dependency(emulator windows_msvc-x86_64
-                          GLIB2_WINDOWS_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64 MSVC_DEPENDENCIES)
 android_target_dependency(emulator all NETSIM_GUI_STATIC)
 # And install them for a release.
@@ -143,7 +141,6 @@ android_install_dependency(all VIRTUAL_SCENE_DEPENDENCIES)
 android_install_dependency(all EMULATOR_MACROS_DEPENDENCIES)
 android_install_dependency(all VULKAN_DEPENDENCIES)
 android_install_dependency(linux TCMALLOC_OS_DEPENDENCIES)
-android_install_dependency(windows_msvc-x86_64 GLIB2_WINDOWS_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 MSVC_DEPENDENCIES)
 
