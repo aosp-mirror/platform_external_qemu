@@ -178,7 +178,7 @@ target_compile_definitions(
 android_target_compile_definitions(hostapd windows PRIVATE
                                    -DCONFIG_NATIVE_WINDOWS)
 
-if(NOT LINUX_AARCH64)
+if(NOT LINUX_AARCH64 AND NOT WINDOWS_MSVC_X86_64)
 target_compile_options(hostapd PRIVATE -Wall
                                        -Werror
                                        -Wno-unused-but-set-variable
