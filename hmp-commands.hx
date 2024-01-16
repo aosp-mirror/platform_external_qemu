@@ -1296,7 +1296,7 @@ ETEXI
         .name       = "netdev_add",
         .args_type  = "netdev:O",
         .params     = "[user|tap|socket|vde|bridge|hubport|netmap|vhost-user"
-#if defined(__APPLE__)
+#if defined(__APPLE__) && defined(__arm64__)
                       "|vmnet-host|vmnet-shared|vmnet-bridged"
 #endif
 "],id=str[,prop=value][,...]",
