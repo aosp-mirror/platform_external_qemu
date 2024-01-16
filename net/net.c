@@ -956,7 +956,7 @@ static int (* const net_client_init_fun[NET_CLIENT_DRIVER__MAX])(
 #ifdef CONFIG_L2TPV3
         [NET_CLIENT_DRIVER_L2TPV3]    = net_init_l2tpv3,
 #endif
-#if defined(__APPLE__)
+#if defined(__APPLE__) && defined(__arm64__)
         [NET_CLIENT_DRIVER_VMNET_HOST] = net_init_vmnet_host,
         [NET_CLIENT_DRIVER_VMNET_SHARED] = net_init_vmnet_shared,
         [NET_CLIENT_DRIVER_VMNET_BRIDGED] = net_init_vmnet_bridged,
@@ -1089,11 +1089,13 @@ static void show_netdevs(void)
 #ifdef CONFIG_POSIX
         "vhost-user",
 #endif
+#if defined(__APPLE__) && defined(__arm64__)
 #if !defined(MAC_OS_VERSION_11_0) || \
     MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_VERSION_11_0
         "vmnet-host",
         "vmnet-shared",
         "vmnet-bridged",
+#endif
 #endif
     };
 
