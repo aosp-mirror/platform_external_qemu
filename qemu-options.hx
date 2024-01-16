@@ -2013,7 +2013,7 @@ DEF("netdev", HAS_ARG, QEMU_OPTION_netdev,
     "-netdev vhost-user,id=str,chardev=dev[,vhostforce=on|off]\n"
     "                configure a vhost-user network, backed by a chardev 'dev'\n"
 #endif
-#if defined(__APPLE__)
+#if defined(__APPLE__) && defined(__arm64__)
     "-netdev vmnet-host,id=str[,isolated=on|off][,net-uuid=uuid]\n"
     "         [,start-address=addr,end-address=addr,subnet-mask=mask]\n"
     "                configure a vmnet network backend in host mode with ID 'str',\n"
@@ -2051,7 +2051,7 @@ DEF("nic", HAS_ARG, QEMU_OPTION_nic,
 #ifdef CONFIG_POSIX
     "vhost-user|"
 #endif
-#if defined(__APPLE__)
+#if defined(__APPLE__) && defined(__arm64__)
     "vmnet-host|vmnet-shared|vmnet-bridged|"
 #endif
     "socket][,option][,...][mac=macaddr]\n"
@@ -2077,7 +2077,7 @@ DEF("net", HAS_ARG, QEMU_OPTION_net,
 #ifdef CONFIG_NETMAP
     "netmap|"
 #endif
-#if defined(__APPLE__)
+#if defined(__APPLE__) && defined(__arm64__)
     "vmnet-host|vmnet-shared|vmnet-bridged|"
 #endif
     "socket][,vlan=n][,option][,option][,...]\n"
