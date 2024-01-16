@@ -55,7 +55,7 @@ NINJA_PATH = os.path.join(AOSP_ROOT, "prebuilts", "ninja", HOST_OS + "-x86")
 
 # We must move the source code from external/qt5 to a shorter path because of path too long issue.
 # Symlinking to a shorter path will not work either.
-WIN_QT_TMP_LOCATION = os.path.join("C:/", "qttmp")
+WIN_QT_TMP_LOCATION = os.path.join("C:\\", "qttmp")
 WIN_QT_SRC_SHORT_PATH = os.path.join(WIN_QT_TMP_LOCATION, "src")
 WIN_QT_BUILD_PATH = os.path.join(WIN_QT_TMP_LOCATION, "bld")
 
@@ -346,7 +346,7 @@ def cleanupQtTmpDirectory():
     if HOST_OS == "windows" and os.path.exists(WIN_QT_TMP_LOCATION):
         # os.remove and shutils.rmtree may fail if any file in the tmp directory is read-only.
         # So let's just use rmdir instead to destroy it.
-        subprocess.run(["rmdir", "/S", "/Q", WIN_QT_TMP_LOCATION])
+        subprocess.run(["rmdir", "/S", "/Q", WIN_QT_TMP_LOCATION], shell=True)
 
 def cleanup():
     cleanupQtTmpDirectory()
