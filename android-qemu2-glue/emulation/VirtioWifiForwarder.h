@@ -78,7 +78,7 @@ private:
     static const char* const kNicName;
     ssize_t sendToGuest(
             std::unique_ptr<android::network::Ieee80211Frame> frame);
-    void resetBeaconTask();
+    void registerBeaconTask();
     size_t onRemoteData(const uint8_t* data, size_t size);
     void sendToRemoteVM(std::unique_ptr<android::network::Ieee80211Frame> frame,
                         android::network::FrameType type);
@@ -91,7 +91,7 @@ private:
     WifiService::OnLinkStatusChangedCallback mOnLinkStatusChanged;
     WifiService::OnSentCallback mOnFrameSentCallback;
     WifiService::CanReceiveCallback mCanReceive;
-    android::base::Looper* mLooper;
+    android::base::Looper* mLooper = nullptr;
     // Scoped sockets holding the socket pair.
     android::base::ScopedSocket mVirtIOSock;
     android::base::ScopedSocket mHostapdSock;
@@ -104,7 +104,7 @@ private:
     android::base::Looper::FdWatch* mFdWatch = nullptr;
     android::emulation::HostapdController* mHostapd = nullptr;
     android::base::Optional<android::base::RecurrentTask> mBeaconTask;
-    android::base::Looper::Duration mBeaconIntMs = 1024;
+    android::base::Looper::Duration mBeaconIntMs = 1024; // in milliseconds
     std::unique_ptr<android::network::Ieee80211Frame> mBeaconFrame;
     std::atomic<bool> mHostapdSockInitSuccess{false};
     NICConf* mNicConf = nullptr;
