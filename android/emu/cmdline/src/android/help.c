@@ -666,6 +666,23 @@ help_no_snapshot_load(stralloc_t*  out)
     );
 }
 
+static void
+help_force_snapshot_load(stralloc_t*  out)
+{
+    PRINTF(
+    "  Forces the emulator to load the AVD's state from a snapshot, meaning\n"
+    "  that the emulator will exit if loading from snapshot fails.\n\n"
+
+    "  If this option is not specified, the emulator will perform a full boot\n"
+    "  sequence instead (cold boot), in case loading from snapshot fails for\n"
+    "  any reason.\n\n"
+
+    "  If '-no-snapshot', '-no-snapshot-load' or '-no-snapstorage' is specified\n"
+    "  at the same time, a warning will be raised, and we will continue the boot\n"
+    "  process.\n\n"
+    );
+}
+
 static void help_qcow2_for_userdata(stralloc_t* out) {
     PRINTF("  Use Qcow2 format for userdata (instead of the default "
            "ext4).\n\n");
