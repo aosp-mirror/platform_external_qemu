@@ -17,9 +17,10 @@
 
 #include "aemu/base/Log.h"               // for LOG, LogMessage
 
-#include "aemu/base/files/IniFile.h"     // for IniFile, IniFile::const_i...
 #include "aemu/base/misc/StringUtils.h"  // for strDup
 #include "aemu/base/logging/LogSeverity.h"     // for EMULATOR_LOG_VERBOSE
+
+#include "android/base/files/IniFile.h"     // for IniFile, IniFile::const_i...
 
 using CIniFile = ::CIniFile;
 using BaseIniFile = android::base::IniFile;

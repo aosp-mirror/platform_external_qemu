@@ -22,7 +22,6 @@
 
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
-#include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/Log.h"
@@ -30,6 +29,7 @@
 #include "aemu/base/memory/LazyInstance.h"
 #include "aemu/base/memory/ScopedPtr.h"
 #include "android/avd/info.h"
+#include "android/base/files/IniFile.h"
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"

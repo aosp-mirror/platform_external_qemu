@@ -11,12 +11,12 @@
 
 #include "android/update-check/UpdateChecker.h"
 
-#include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/ScopedPtr.h"
 
 #include "aemu/base/Uri.h"
 #include "aemu/base/threads/Async.h"
+#include "android/base/files/IniFile.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/curl-support.h"

@@ -34,10 +34,10 @@
 #include <QVariant>
 #include <utility>
 
-#include "aemu/base/files/IniFile.h"
 #include "android/android.h"
 #include "android/avd/info.h"
 #include "android/avd/util.h"
+#include "android/base/files/IniFile.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/emulation/AutoDisplays.h"
