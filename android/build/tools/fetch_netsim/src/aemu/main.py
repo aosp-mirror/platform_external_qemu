@@ -33,7 +33,7 @@ class CustomFormatter(
 
 
 TARGET_MAP = {
-    "windows_64": "windows-x86_64",
+    "windows_x64": "windows_msvc-x86_64",
     "linux_x64": "linux-x86_64",
     "mac_x64": "darwin-x86_64",
     "mac_aarch64": "darwin-aarch64",
