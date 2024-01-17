@@ -20,6 +20,7 @@
 #ifdef _SUPPORT_FILESYSTEM
 #include <filesystem>
 #endif                                   //_SUPPORT_FILESYSTEM
+#include <errno.h>
 #include <string.h>                      // for size_t, strncmp
 #include <iterator>                      // for reverse_iterator, operator!=
 #include <numeric>                       // for accumulate
@@ -439,6 +440,10 @@ Optional<std::string> PathUtils::pathWithEnvSubstituted(
 bool PathUtils::move(const std::string& from, const std::string& to) {
     // std::rename returns 0 on success.
     if (std::rename(from.data(), to.data())) {
+        if (errno == ENOENT) {
+            return false;
+        }
+
 #ifdef _SUPPORT_FILESYSTEM
         // Rename can fail if files are on different disks
         if (std::filesystem::copy_file(from.data(), to.data())) {
