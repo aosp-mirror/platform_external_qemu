@@ -230,9 +230,12 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
                  "-no-feature-cups",
                  "-no-strip",
                  "-no-framework",
-                 "-no-opengl",
                  "-qtlibinfix", "AndroidEmu",
                  "-prefix", installdir]
+
+    if HOST_OS != "windows":
+        # qtwebengine build fails without opengl.
+        conf_args += ["-no-opengl"]
 
     if HOST_OS == "windows":
         conf_args += ["-platform", "win32-msvc"]
