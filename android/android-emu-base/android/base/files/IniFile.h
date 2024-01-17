@@ -162,6 +162,8 @@ protected:
     bool writeCommon(bool discardEmpty);
 
 private:
+    bool writeCommonImpl(bool discardEmpty, const std::string& filepath);
+
     MapType mData;
     ElementOrderList mOrderList;
     std::vector<std::pair<int, std::string>> mComments;
