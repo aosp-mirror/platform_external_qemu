@@ -55,7 +55,7 @@ using android::network::WifiForwardServer;
 extern "C" {
 #include "common/ieee802_11_defs.h"
 #include "drivers/driver_virtio_wifi.h"
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
 #include "libslirp.h"
 #include "utils/eloop.h"
 #else
@@ -164,7 +164,7 @@ bool VirtioWifiForwarder::init() {
     mVirtIOSock = ScopedSocket(fds[1]);
     mHostapdSockInitSuccess = mHostapd->setDriverSocket(mHostapdSock);
 
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
     eloop_register_read_sock(mVirtIOSock.get(),
                              VirtioWifiForwarder::eloopSocketHandler, nullptr,
                              this);
@@ -297,7 +297,7 @@ int VirtioWifiForwarder::recv(android::base::IOVector& iov) {
 void VirtioWifiForwarder::stop() {
     mNic = nullptr;
     mSlirp = nullptr;
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
     eloop_unregister_read_sock(mVirtIOSock.get());
 #else
     mBeaconTask.clear();
@@ -311,7 +311,7 @@ void VirtioWifiForwarder::stop() {
     }
 }
 
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
 void VirtioWifiForwarder::eloopSocketHandler(int sock,
                                              void* eloop_ctx,
                                              void* sock_ctx) {
@@ -426,14 +426,14 @@ void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
 }
 
 void VirtioWifiForwarder::registerBeaconTask() {
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
     async([this]() {
         while (true) {
             std::this_thread::sleep_for(std::chrono::milliseconds(mBeaconIntMs));
             if (mBeaconFrame != nullptr && mBeaconFrame->isBeacon()) {
-                        sendToGuest(std::make_unique<Ieee80211Frame>(
-                                mBeaconFrame->data(), mBeaconFrame->size(),
-                                mBeaconFrame->info()));
+                sendToGuest(std::make_unique<Ieee80211Frame>(
+                        mBeaconFrame->data(), mBeaconFrame->size(),
+                        mBeaconFrame->info()));
             }
         }
     });
@@ -538,7 +538,7 @@ int VirtioWifiForwarder::sendToNIC(
         return 0;
     }
 
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
     assert(mSlirp);
     auto packet = frame->toEthernet();
     slirp_input(mSlirp, packet.data(), packet.size());
