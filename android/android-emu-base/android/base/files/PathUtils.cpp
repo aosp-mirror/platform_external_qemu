@@ -67,8 +67,8 @@ size_t PathUtils::rootPrefixSize(const std::string& path, HostType hostType) {
         int ch = path[0];
         if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
             result = 2U;
-    } else if (!strncmp(path.data(), "\\\\.\\", 4) ||
-               !strncmp(path.data(), "\\\\?\\", 4)) {
+    } else if (!strncmp(path.c_str(), "\\\\.\\", 4) ||
+               !strncmp(path.c_str(), "\\\\?\\", 4)) {
         // UNC prefixes.
         return 4U;
     } else if (isDirSeparator(path[0], hostType)) {
@@ -202,13 +202,13 @@ std::string PathUtils::join(const std::string& path1,
                             const std::string& path2,
                             HostType hostType) {
     if (path1.empty()) {
-        return path2.data();
+        return path2.c_str();
     }
     if (path2.empty()) {
-        return path1.data();
+        return path1.c_str();
     }
     if (isAbsolute(path2.c_str(), hostType)) {
-        return path2.data();
+        return path2.c_str();
     }
     size_t prefixLen = rootPrefixSize(path1, hostType);
     std::string result(path1);
@@ -226,7 +226,7 @@ static std::vector<String> decomposeImpl(const String& path, PathUtils::HostType
     if (path.empty())
         return result;
 
-    size_t prefixLen = PathUtils::rootPrefixSize(path.data(), hostType);
+    size_t prefixLen = PathUtils::rootPrefixSize(path.c_str(), hostType);
     auto it = path.begin();
     if (prefixLen) {
         result.emplace_back(&*it, prefixLen);
@@ -284,7 +284,8 @@ std::string PathUtils::recompose(const std::vector<String>& components,
             result += dirSeparator;
         addSeparator = true;
         if (n == 0) {
-            size_t prefixLen = rootPrefixSize(component.data(), hostType);
+            size_t prefixLen = rootPrefixSize(std::string(component.begin(), component.end()),
+                                              hostType);
             if (prefixLen == component.size()) {
                 addSeparator = false;
             }
@@ -439,15 +440,15 @@ Optional<std::string> PathUtils::pathWithEnvSubstituted(
 
 bool PathUtils::move(const std::string& from, const std::string& to) {
     // std::rename returns 0 on success.
-    if (std::rename(from.data(), to.data())) {
+    if (std::rename(from.c_str(), to.c_str())) {
         if (errno == ENOENT) {
             return false;
         }
 
 #ifdef _SUPPORT_FILESYSTEM
         // Rename can fail if files are on different disks
-        if (std::filesystem::copy_file(from.data(), to.data())) {
-            std::filesystem::remove(from.data());
+        if (std::filesystem::copy_file(from.c_str(), to.c_str())) {
+            std::filesystem::remove(from.c_str());
             return true;
         } else {
             return false;
