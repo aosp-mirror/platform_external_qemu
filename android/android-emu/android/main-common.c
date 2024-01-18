@@ -1671,7 +1671,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     if (opts->version) {
         printf("Android emulator version %s (CL:%s)\n"
-               "Copyright (C) 2006-2017 The Android Open Source Project and "
+               "Copyright (C) 2006-2024 The Android Open Source Project and "
                "many "
                "others.\n"
                "This program is a derivative of the QEMU CPU emulator "
