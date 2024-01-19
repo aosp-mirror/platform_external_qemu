@@ -112,6 +112,15 @@ public:
             return;
         }
 
+        //bug: 319260175
+        // emulator crash reporter somehow manages to keep poping up dialog
+        // about the crash id, which has shown to be more annoying than helpful.
+        // the crash id is in the idea.log anyway. let don't show it.
+        return;
+
+#if 0
+        // keeping this for posterity
+
         // Show a modal dialog with the report information.
         auto showFunc = [](void* data) {
             std::string* report_id = reinterpret_cast<std::string*>(data);
@@ -130,6 +139,7 @@ public:
 
         getConsoleAgents()->emu->runOnUiThread(
                 showFunc, new std::string(report.id), false);
+#endif
     }
 
 private:
