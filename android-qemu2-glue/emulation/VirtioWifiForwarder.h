@@ -51,7 +51,7 @@ public:
     int recv(android::base::IOVector& iov) override;
     void stop() override;
     NICState* getNic() override { return mNic; }
-#ifndef LIBSLIRP
+#ifndef NETSIM_WIFI
     android::network::MacAddress getStaMacAddr(const char* ssid) override;
 #endif
     ssize_t onRxPacketAvailable(const uint8_t* buf, size_t size);
@@ -59,7 +59,7 @@ public:
     static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
     static const uint8_t kWifiForwardVersion = 0x02;
 private:
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
     static void eloopSocketHandler(int sock, void* eloop_ctx, void* sock_ctx);
 #else
     static VirtioWifiForwarder* getInstance(NetClientState* nc);

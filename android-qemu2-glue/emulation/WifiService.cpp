@@ -19,7 +19,7 @@
 #include "android-qemu2-glue/qemu-setup.h"
 #include "android/emulation/HostapdController.h"
 #include "android/utils/debug.h"
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
 #include "android-qemu2-glue/netsim/libslirp_driver.h"
 #else
 #include "android-qemu2-glue/netsim/NetsimWifiForwarder.h"
@@ -53,7 +53,7 @@ static const char* kHost6 = "fec0::2";
 static const char* kDns6 = "fec0::3";
 
 static WifiService::OnReceiveCallback sOnReceiveCallback = nullptr;
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
 static std::weak_ptr<VirtioWifiForwarder> sVirtioWifiWeakPtr;
 static ssize_t libslirp_send_packet(const void* pkt, size_t pkt_len) {
     if (auto virtioWifi = sVirtioWifiWeakPtr.lock()) {
@@ -147,7 +147,7 @@ std::shared_ptr<WifiService> Builder::build() {
     }
 
     Slirp* slirp = nullptr;
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
     if (!mSlirpOpts.disabled) {
         slirp = libslirp_init(
                 libslirp_send_packet, mSlirpOpts.restricted, mSlirpOpts.ipv4,
@@ -189,7 +189,7 @@ std::shared_ptr<WifiService> Builder::build() {
             mBssID.empty() ? kBssID : mBssID.data(), sOnReceiveCallback,
             mOnLinkStatusChanged, mCanReceive, mOnSentCallback, mNicConf, slirp,
             mServerPort, mClientPort);
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
     sVirtioWifiWeakPtr = virtioWifi;
 #endif
     return std::static_pointer_cast<WifiService>(virtioWifi);
