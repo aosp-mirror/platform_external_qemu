@@ -4682,12 +4682,7 @@ static void x86_cpu_get_crash_info_qom(Object *obj, Visitor *v,
 
 static void android_emulator_set_pmu_feature(X86CPU *cpu)
 {
-    char* intel_pmu_enabled =
-        getenv("ANDROID_EMU_FEATURE_IntelPerformanceMonitoringUnit");
-    if (kvm_enabled() &&
-        intel_pmu_enabled &&
-        !strcmp("on", intel_pmu_enabled)) {
-
+    if (kvm_enabled()) {
         CPUX86State *env = &cpu->env;
         KVMState *s = kvm_state;
 
@@ -4698,25 +4693,6 @@ static void android_emulator_set_pmu_feature(X86CPU *cpu)
         env->cpuid_xlevel = kvm_arch_get_supported_cpuid(s, 0x80000000, 0,
                                                          R_EAX);
         env->cpuid_xlevel2 = kvm_arch_get_supported_cpuid(s, 0xC0000000, 0,
-                                                          R_EAX);
-
-        /* Enable PMU (this has no effect if env->cpuid_level < 0xA) */
-        object_property_set_bool(OBJECT(cpu), true, "pmu", &error_abort);
-    }
-    if (aehd_enabled() &&
-        intel_pmu_enabled &&
-        !strcmp("on", intel_pmu_enabled)) {
-
-        CPUX86State *env = &cpu->env;
-        AEHDState *s = aehd_state;
-
-        /* Use the host/KVM CPUID level in order to enable additional features
-         * supported by the host CPU, such as PMU. Cf. host_x86_cpu_initfn().
-         */
-        env->cpuid_level = aehd_arch_get_supported_cpuid(s, 0x0, 0, R_EAX);
-        env->cpuid_xlevel = aehd_arch_get_supported_cpuid(s, 0x80000000, 0,
-                                                         R_EAX);
-        env->cpuid_xlevel2 = aehd_arch_get_supported_cpuid(s, 0xC0000000, 0,
                                                           R_EAX);
 
         /* Enable PMU (this has no effect if env->cpuid_level < 0xA) */
