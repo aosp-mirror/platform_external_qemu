@@ -48,6 +48,7 @@
 #include "host-common/screen-recorder.h"
 
 using android::base::AutoLock;
+using android::automotive::DisplayManager;
 
 #define MULTI_DISPLAY_DEBUG 1
 
@@ -124,11 +125,26 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         return -1;
     }
 
-    if (flag == 0 &&
-        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
-                AVD_ANDROID_AUTO) {
-        flag = automotive::getDefaultFlagsForDisplay(id);
-        LOG(DEBUG) << "Setting flags " << flag << " for display id " << id;
+    if (flag == 0) {
+        auto avd = getConsoleAgents()->settings->avdInfo();
+        if (avd) {
+            if (avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO) {
+                flag = automotive::getDefaultFlagsForDisplay(id);
+                LOG(DEBUG) << "Setting flags " << flag << " for display id " << id;
+            } else if (avdInfo_getApiLevel(avd) >= 31) {
+                // bug: 227218392
+                // starting from S (android 11, api 31), this flag is
+                // required to support Presentation API
+                const int DEFAULT_FLAGS_SINCE_S = DisplayManager::VIRTUAL_DISPLAY_FLAG_PUBLIC |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_TRUSTED |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+                flag = DEFAULT_FLAGS_SINCE_S;
+            }
+        }
     }
 
     SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();

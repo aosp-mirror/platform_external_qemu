@@ -25,6 +25,7 @@ struct DisplayManager {
     // frameworks/base/core/java/android/hardware/display/DisplayManager.java
     enum {
         VIRTUAL_DISPLAY_FLAG_PUBLIC = 1 << 0,
+        VIRTUAL_DISPLAY_FLAG_PRESENTATION = 1 << 1,
         VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY = 1 << 3,
         VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 1 << 6,
         VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT = 1 << 7,
