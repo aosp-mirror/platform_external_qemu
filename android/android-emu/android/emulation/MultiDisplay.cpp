@@ -952,7 +952,8 @@ void MultiDisplay::recomputeLayoutLocked() {
 
     // Use stacked layout for auto devices when orientation is not allowed
     if (android_is_automotive() && !isOrientationSupported()) {
-        if (mMultiDisplay.size() >= 2) {
+        // Keep old layout for main with cluster display
+        if (mMultiDisplay.size() > 2) {
             recomputeStackedLayoutLocked();
         }
     }

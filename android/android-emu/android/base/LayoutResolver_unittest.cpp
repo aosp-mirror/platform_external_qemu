@@ -88,14 +88,14 @@ TEST(LayoutResolver, FourDifferentDisplays) {
 TEST(LayoutResolver, threeDisplaysWithStackedLayout) {
     const std::array<std::pair<testDisplayInput, testDisplayOutput>, 3> kTestSet[] = {
             // 3 Displys including one wide width display
-            // Wide display should be located on the second row
+            // Wide display should be located on the first row
             {
                 std::make_pair(testDisplayInput{0, 1080, 600},
-                            testDisplayOutput{0, 0, 600}),
+                            testDisplayOutput{0, 0, 0}),
                 std::make_pair(testDisplayInput{6, 400, 600},
-                            testDisplayOutput{6, 1080, 600}),
-                std::make_pair(testDisplayInput{7, 3000, 600},
-                            testDisplayOutput{7, 0, 0})
+                            testDisplayOutput{6, 1080, 0}),
+                std::make_pair(testDisplayInput{7, 5000, 600},
+                            testDisplayOutput{7, 0, 600})
             },
             // 3 Displys without wide display
             // All displays should be located on the first row
@@ -104,7 +104,7 @@ TEST(LayoutResolver, threeDisplaysWithStackedLayout) {
                             testDisplayOutput{0, 0, 0}),
                 std::make_pair(testDisplayInput{6, 400, 600},
                             testDisplayOutput{6, 1080, 0}),
-                std::make_pair(testDisplayInput{7, 800, 600},
+                std::make_pair(testDisplayInput{7, 3900, 600},
                             testDisplayOutput{7, 1480, 0})
             }};
 
