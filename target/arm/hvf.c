@@ -324,6 +324,8 @@ int __hvf_set_memory(hvf_slot *slot);
 int __hvf_set_memory_with_flags_locked(hvf_slot *slot, hv_memory_flags_t flags);
 
 int hvf_map_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
+    size = ALIGN(size, 0x4000);
+
     pthread_rwlock_wrlock(&mem_lock);
     DPRINTF("%s: hva: [%p 0x%llx] gpa: [0x%llx 0x%llx]\n", __func__,
             hva, (unsigned long long)(uintptr_t)(((char*)hva) + size),
@@ -378,6 +380,7 @@ int hvf_map_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
 }
 
 int hvf_unmap_safe(uint64_t gpa, uint64_t size) {
+    size = ALIGN(size, 0x4000);
     DPRINTF("%s: gpa: [0x%llx 0x%llx]\n", __func__,
             (unsigned long long)gpa,
             (unsigned long long)gpa + size);
