@@ -191,6 +191,11 @@ const char* emulator_getBackendSuffix(const char* targetArch);
  */
 #define  ANDROID_AVD_DIR    "avd"
 
+/* this is the subdirectory of $HOME/.android/avd/<name>.avd
+ * where all snapshots of the <name> AVD are located.
+ */
+#define  ANDROID_AVD_SNAPSHOTS_DIR    "snapshots"
+
 #define ANDROID_AVD_TMP_ADB_COMMAND_DIR "tmpAdbCmds"
 
 ANDROID_END_HEADER

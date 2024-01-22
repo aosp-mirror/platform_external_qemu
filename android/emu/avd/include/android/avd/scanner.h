@@ -22,7 +22,7 @@ ANDROID_BEGIN_HEADER
 // Typical usage is:
 //
 //     AvdScanner* scanner = avdScanner_new(NULL);
-//     while ((name = avdScanner_next(scanner)) != NULL) {
+//     while ((name = avdScanner_next(scanner, 0)) != NULL) {
 //        printf("%s\n", name);
 //     }
 //     avdScanner_free(scanner);
@@ -40,7 +40,9 @@ AvdScanner* avdScanner_new(const char* sdk_home);
 
 // Return the name of the next AVD detected by the scanner.
 // This will be NULL at the end of the scan.
-const char* avdScanner_next(AvdScanner* scanner);
+// If |list_snapshots| is set, each AVD name will be appended by a list
+// of all of it's snapshots.
+const char* avdScanner_next(AvdScanner* scanner, int list_snapshots);
 
 // Release an AvdScanner object and associated resources.
 // This can be called before the end of a scan.
