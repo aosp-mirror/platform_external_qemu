@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import atexit
+import importlib.util
 import json
 import logging
 import os
@@ -110,12 +110,8 @@ def checkGperfVersion(min_vers=None):
                     min_vers=min_vers)
 
 def checkPythonPackage(name):
-    if not checkExeIsOnPath("pip"):
-        raise Exception("pip is not on PATH. Unable to check for python library.")
-    # This will throw an exception if the package is not installed
-    res = subprocess.check_output(
-        args=["pip{}".format(EXE_SUFFIX), "show", "{}".format(name)],
-        env=os.environ.copy(), encoding="utf-8").strip()
+    if importlib.util.find_spec(name) is None:
+        raise Exception(f"Python package {name} not found.")
 
 def getClangDirectory():
     # clang toolchain version is in external/qemu/android/build/toolchains.json

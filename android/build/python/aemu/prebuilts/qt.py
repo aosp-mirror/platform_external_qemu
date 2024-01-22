@@ -86,7 +86,7 @@ def checkDependencies():
     deps_common.checkNodeJsVersion(min_vers=(12, 0))
 
     # QtWebEngine needs python html5lib package
-    logging.info(">> Checking pip.exe for html5lib")
+    logging.info(">> Checking for python package html5lib")
     deps_common.checkPythonPackage("html5lib")
 
     # QtWebEngine requires GNUWin32 dependencies gperf, bison, flex
