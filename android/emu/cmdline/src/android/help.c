@@ -2196,7 +2196,7 @@ help_wifi_socket(stralloc_t* out)
     );
 }
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__arm64__)
 static void
 help_vmnet_bridged(stralloc_t*  out) {
      PRINTF(" Enable vmnet framework in bridged mode as the backend of tap netdev on MacOS and provide a host network interface as argument.\n\n");
