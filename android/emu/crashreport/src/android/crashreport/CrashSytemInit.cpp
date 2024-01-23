@@ -165,6 +165,10 @@ public:
                 toRemove.push_back(report.uuid);
             }
         }
+
+        for(const auto& report: toRemove) {
+            mDatabase->DeleteReport(report);
+        }
     }
 
     void setConsentProvider(CrashConsent* replacement) {
