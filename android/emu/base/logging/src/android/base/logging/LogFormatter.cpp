@@ -105,7 +105,6 @@ std::string SimpleLogFormatter::format(const LogParams& params,
         log += w;
         cLog -= w;
     }
-
     vsnprintf(log, cLog, fmt, args);
     return logline;
 };
@@ -203,7 +202,8 @@ std::string NoDuplicateLinesFormatter::format(const LogParams& params,
     char* logline = mPrevLog;
 
     // We might have a duplicate, let's format the line and make sure.
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    int len = vsnprintf(buffer, sizeof(buffer), fmt, args);
+    len = std::min(MAX_LOG_LINE_LENGTH, len);
 
     if (mPrevParams == params &&
         strncmp(buffer, mPrevLog, sizeof(buffer)) == 0) {
@@ -224,7 +224,7 @@ std::string NoDuplicateLinesFormatter::format(const LogParams& params,
         case 0:
             // Not a duplicate, let the inner formatter decorate the message
             // properly.
-            result = mInner->format(params, logline);
+            result = mInner->format(params, "%.*s", len, logline);
             break;
         case 1:
             // No need to include a counter, just log the double line
@@ -232,7 +232,7 @@ std::string NoDuplicateLinesFormatter::format(const LogParams& params,
                     absl::ParsedFormat<'s', 's'>("%s\n%s");
             result = absl::StrFormat(sgl_format_string,
                                      mInner->format(mPrevParams, mPrevLog),
-                                     mInner->format(params, logline));
+                                     mInner->format(params, "%.*s", len, logline));
             break;
         default:
             static const auto dbl_format_string =
@@ -240,7 +240,7 @@ std::string NoDuplicateLinesFormatter::format(const LogParams& params,
             // include a counter, we have double logged at least 2 lines.
             result = absl::StrFormat(
                     dbl_format_string, mInner->format(mPrevParams, mPrevLog),
-                    duplicates, mInner->format(params, logline));
+                    duplicates, mInner->format(params, "%.*s", len, logline));
             break;
     }
 
