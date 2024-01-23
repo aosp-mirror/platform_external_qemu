@@ -60,6 +60,9 @@ AEMU_STUDIO_CONFIG_API UpdateChannel updateChannel();
 // Checks if the user has opted in for metrics reporting.
 AEMU_STUDIO_CONFIG_API bool getUserMetricsOptIn();
 
+// Checks if the user has made a decision for metrics reporting.
+AEMU_STUDIO_CONFIG_API bool userMetricsOptInExists();
+
 // Returns the Android Studio-generated salt value for strings anonymization.
 AEMU_STUDIO_CONFIG_API std::string getAnonymizationSalt();
 
