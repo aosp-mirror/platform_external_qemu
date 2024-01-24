@@ -1,6 +1,6 @@
 [build-system]
 # AVOID CHANGING REQUIRES: IT WILL BE UPDATED BY PYSCAFFOLD!
-requires = ["setuptools>=46.1.0", "wheel", "grpcio-tools==1.48.1"]
+requires = ["setuptools>=46.1.0", "wheel", "grpcio-tools"]
 build-backend = "setuptools.build_meta"
 
 # [tool.setuptools_scm]
@@ -19,8 +19,8 @@ description = "A commandline tool to manipulate emulator snapshots."
 
 dependencies = [
     "aemu-grpc",
-    "click==8.1.3",
-    "tqdm==4.64.1",
+    "click",
+    "tqdm",
     "importlib-metadata; python_version<'3.8'",
 ]
 
