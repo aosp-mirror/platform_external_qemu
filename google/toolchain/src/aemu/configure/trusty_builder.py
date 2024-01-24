@@ -18,8 +18,7 @@ from aemu.configure.linux_builder import LinuxBuilder
 
 class TrustyBuilder(LinuxBuilder):
     def meson_config(self):
-        [
-            "--native-file",
+        return [
             "-Dalsa=disabled",
             "-Dandroid=enabled",
             "-Dattr=disabled",
@@ -151,6 +150,7 @@ class TrustyBuilder(LinuxBuilder):
             "-Dxkbcommon=disabled",
             "-Dzstd=disabled",
             f"-Dprefix={self.dest / 'release'}",
+            "--native-file",
         ]
 
     def packages(self):
