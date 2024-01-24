@@ -1,6 +1,6 @@
 [build-system]
 # AVOID CHANGING REQUIRES: IT WILL BE UPDATED BY PYSCAFFOLD!
-requires = ["setuptools>=46.1.0", "wheel", "grpcio-tools==1.48.1"]
+requires = ["setuptools>=46.1.0", "wheel", "grpcio-tools"]
 build-backend = "setuptools.build_meta"
 
 # [tool.setuptools_scm]
@@ -17,10 +17,10 @@ classifiers = ["Topic :: Software Development"]
 
 
 dependencies = [
-    "grpcio==1.48.1",
-    "protobuf==3.20.1",
-    "psutil==5.9.4",
-    "tink==1.7.0; sys_platform != 'win32'",
+    "grpcio",
+    "protobuf",
+    "psutil",
+    "tink; sys_platform != 'win32'",
     "importlib-metadata; python_version<'3.8'",
 ]
 
