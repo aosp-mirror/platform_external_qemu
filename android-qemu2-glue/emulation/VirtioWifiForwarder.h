@@ -61,6 +61,7 @@ public:
 private:
 #ifdef NETSIM_WIFI
     static void eloopSocketHandler(int sock, void* eloop_ctx, void* sock_ctx);
+    static void registerSigPipeHandler();
 #else
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
     // Wrapper functions for passing C-sytle func ptr to struct NetClientInfo
