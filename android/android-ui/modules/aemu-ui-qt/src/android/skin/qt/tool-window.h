@@ -25,6 +25,7 @@
 #include <QRect>
 #include <QString>
 #include <QWidget>
+#include <QTimer>
 
 #include "aemu/base/Compiler.h"
 #include "aemu/base/containers/CircularBuffer.h"
@@ -228,6 +229,11 @@ private:
     ResizableDialog* mResizableDialog;
 
     bool mCloseClicked = false;
+
+    QTimer mSleepTimer;
+
+    void startSleepTimer();
+
 public slots:
     void raise();
     void switchClipboardSharing(bool enabled);
@@ -271,4 +277,6 @@ private slots:
     void on_resizable_button_clicked();
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();
+
+    void on_sleep_timer_done();
 };
