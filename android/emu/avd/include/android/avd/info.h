@@ -444,6 +444,8 @@ void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes);
 
 bool avdInfo_isMarshmallowOrHigher(AvdInfo* i);
 
+bool avdInfo_isVanillaIceCreamPreview(AvdInfo* i);
+
 AEMU_AVD_API AvdInfo* avdInfo_newCustom(
     const char* name,
     int apiLevel,
@@ -479,5 +481,9 @@ const char* avdInfo_screen_off_timeout(int apiLevel);
 
 /* Returns the boolean value for the given build property key. */
 bool avdInfo_getBuildPropertyBool(const AvdInfo* info, const char* property, bool defValue);
+
+int avdInfo_getBuildPropertyInt(const AvdInfo* info, const char* property, int defValue);
+
+char* avdInfo_getBuildPropertyString(const AvdInfo* info, const char* property);
 
 ANDROID_END_HEADER
