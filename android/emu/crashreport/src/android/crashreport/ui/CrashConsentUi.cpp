@@ -100,6 +100,27 @@ public:
         dinfo("Report %s is available remotely as: %s.",
               report.uuid.ToString(), report.id);
 
+        auto options = getConsoleAgents()->settings->android_cmdLineOptions();
+        if (options && options->qt_hide_window) {
+            // bug: 318869126
+            // what happens when qt is hiding window and we ask it to show
+            // a message box, is that the messagebox calls aboutToQuit, which triggers
+            // the mainthread to quit, not exactly what we want.
+            // we just don't ask qt to show messsage box when it is hiding, instead
+            // the log should have that report id; we can ask studio to show that
+            // for a better solution.
+            return;
+        }
+
+        //bug: 319260175
+        // emulator crash reporter somehow manages to keep poping up dialog
+        // about the crash id, which has shown to be more annoying than helpful.
+        // the crash id is in the idea.log anyway. let don't show it.
+        return;
+
+#if 0
+        // keeping this for posterity
+
         // Show a modal dialog with the report information.
         auto showFunc = [](void* data) {
             std::string* report_id = reinterpret_cast<std::string*>(data);
@@ -118,6 +139,7 @@ public:
 
         getConsoleAgents()->emu->runOnUiThread(
                 showFunc, new std::string(report.id), false);
+#endif
     }
 
 private:

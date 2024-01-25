@@ -262,7 +262,8 @@ void EmulatorContainer::closeEvent(QCloseEvent* event) {
     // make sure the toolWindow's close button is the only exit point
     // from qt: we could get closeEvent directly from host windowing
     // framework.
-    if (!mEmulatorWindow->toolWindow()->closeButtonClicked()) {
+    if (mEmulatorWindow->isMainThreadRunning() &&
+        !mEmulatorWindow->toolWindow()->closeButtonClicked()) {
         mEmulatorWindow->toolWindow()->on_close_button_clicked();
         event->ignore();
         return;

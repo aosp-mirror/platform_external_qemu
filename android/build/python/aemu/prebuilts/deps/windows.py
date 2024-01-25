@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import os
+import subprocess
 import aemu.prebuilts.deps.common as common
 
 def checkVSVersion(min_vers):
@@ -45,3 +46,14 @@ def checkWindowsSdk(min_vers):
     winsdk_version = tuple(map(int, windowsSdkVersionEnv.split('.')))
     if winsdk_version < min_vers:
         raise Exception("Windows SDK does not meet requirements")
+
+def inheritSubprocessEnv(cmd):
+    """Runs `cmd` in a subprocess, then copies the subprocess environment variables to os.environ.
+
+    Args:
+        cmd (list(str)): The shell command to execute.
+    """
+    res = subprocess.check_output(cmd + ["&", "set"], env=os.environ.copy(), encoding="utf-8")
+    for line in res.splitlines():
+        key, value = line.split("=", 1)
+        os.environ[key] = value

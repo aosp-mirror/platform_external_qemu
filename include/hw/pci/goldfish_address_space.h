@@ -53,6 +53,8 @@ extern uint64_t
 goldfish_address_space_get_phys_addr_start(void);
 extern uint64_t
 goldfish_address_space_get_phys_addr_start_locked(void);
+extern uint32_t
+goldfish_address_space_get_guest_page_size(void);
 
 /* Version of alloc for a fixed offset */
 extern int goldfish_address_space_alloc_shared_host_region_fixed_locked(uint64_t page_aligned_size, uint64_t offset);

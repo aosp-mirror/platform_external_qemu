@@ -44,9 +44,9 @@
 
 #include "aemu/base/Debug.h"
 #include "aemu/base/Version.h"
-#include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/memory/ScopedPtr.h"
+#include "android/base/files/IniFile.h"
 #include "android/base/system/System.h"
 #include "android/camera/camera-list.h"
 #include "android/emulation/ConfigDirs.h"
@@ -394,6 +394,7 @@ int main(int argc, char** argv) {
     const char* gpu = NULL;
     bool doAccelCheck = false;
     bool doListAvds = false;
+    bool doListSnapshots = false;
     bool doListUSB = false;
     bool force32bit = false;
     bool isHeadless = false;
@@ -670,6 +671,11 @@ int main(int argc, char** argv) {
             continue;
         }
 
+        if (!strcmp(opt, "-snapshot-list")) {
+            doListSnapshots = true;
+            continue;
+        }
+
 #ifdef _WIN32
         if (!strcmp(opt, "-list-usb")) {
             doListUSB = true;
@@ -781,10 +787,16 @@ int main(int argc, char** argv) {
         return ret ? exit_code : -1;
     }
 
-    if (doListAvds) {
+    /* If the AVD name is given, we depend on qemu for the list of snapshots.
+     * Otherwise we do the next best thing by scanning the file system and
+     * iterating on all the available AVDs.
+     */
+    doListSnapshots = avdName ? false : doListSnapshots;
+
+    if (doListAvds || doListSnapshots) {
         AvdScanner* scanner = avdScanner_new(NULL);
         for (;;) {
-            const char* name = avdScanner_next(scanner);
+            const char* name = avdScanner_next(scanner, doListSnapshots);
             if (!name) {
                 break;
             }

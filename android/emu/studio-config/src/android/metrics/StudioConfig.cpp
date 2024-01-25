@@ -451,6 +451,16 @@ bool getUserMetricsOptIn() {
             .valueOr(false);
 }
 
+bool userMetricsOptInExists() {
+    return getStudioConfigJsonValue<bool>(
+                   "hasOptedIn",
+                   [](std::string_view linePart) -> bool {
+                       // The field exists and we don't care about its value.
+                       return true;
+                   })
+            .valueOr(false);
+}
+
 std::string getAnonymizationSalt() {
     return getStudioConfigJsonValue<std::string>(
                    "saltValue",

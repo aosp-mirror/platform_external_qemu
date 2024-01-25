@@ -1248,3 +1248,8 @@ uint64_t goldfish_address_space_get_phys_addr_start_locked(void)
 
     return res;
 }
+
+uint32_t goldfish_address_space_get_guest_page_size(void)
+{
+    return s_current_state->registers.guest_page_size;
+}

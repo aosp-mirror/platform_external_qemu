@@ -85,5 +85,47 @@ TEST(LayoutResolver, FourDifferentDisplays) {
     }
 }
 
+TEST(LayoutResolver, threeDisplaysWithStackedLayout) {
+    const std::array<std::pair<testDisplayInput, testDisplayOutput>, 3> kTestSet[] = {
+            // 3 Displys including one wide width display
+            // Wide display should be located on the first row
+            {
+                std::make_pair(testDisplayInput{0, 1080, 600},
+                            testDisplayOutput{0, 0, 0}),
+                std::make_pair(testDisplayInput{6, 400, 600},
+                            testDisplayOutput{6, 1080, 0}),
+                std::make_pair(testDisplayInput{7, 5000, 600},
+                            testDisplayOutput{7, 0, 600})
+            },
+            // 3 Displys without wide display
+            // All displays should be located on the first row
+            {
+                std::make_pair(testDisplayInput{0, 1080, 600},
+                            testDisplayOutput{0, 0, 0}),
+                std::make_pair(testDisplayInput{6, 400, 600},
+                            testDisplayOutput{6, 1080, 0}),
+                std::make_pair(testDisplayInput{7, 3900, 600},
+                            testDisplayOutput{7, 1480, 0})
+            }};
+
+    const uint32_t kMonitorWidth = 6000;
+    for (const auto kData : kTestSet) {
+        size_t kDataSize = ARRAY_SIZE(kData);
+        std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> displays;
+        for (size_t i = 0; i < kDataSize; i++) {
+            const auto& input = kData[i].first;
+            displays[input.id] = std::make_pair(input.width, input.height);
+        }
+
+        const auto layout = resolveStackedLayout(displays, kMonitorWidth);
+        for (size_t i = 0; i < kDataSize; i++) {
+            const auto& expectedOutput = kData[i].second;
+            const auto& actualOutput = layout.find(expectedOutput.id);
+            EXPECT_EQ(actualOutput->second.first, expectedOutput.x);
+            EXPECT_EQ(actualOutput->second.second, expectedOutput.y);
+        }
+    }
+}
+
 }  // namespace base
 }  // namespace android

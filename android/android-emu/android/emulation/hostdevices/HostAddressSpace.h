@@ -64,6 +64,7 @@ public:
     static int allocSharedHostRegionFixedLocked(uint64_t page_aligned_size, uint64_t offset);
     static uint64_t getPhysAddrStart();
     static uint64_t getPhysAddrStartLocked();
+    static uint32_t getGuestPageSize();
 
 private:
     class Impl;

@@ -86,6 +86,9 @@ AEMU_METRICS_API void set_unittest_Reporter(MetricsReporter::Ptr newPtr) {
     sInstance->reset(std::move(newPtr));
 }
 
+// Prints a warning message.
+void warnAboutNoMetricsConsentInput();
+
 void MetricsReporter::start(const std::string& sessionId,
                             std::string_view emulatorVersion,
                             std::string_view emulatorFullVersion,
@@ -123,6 +126,18 @@ void MetricsReporter::start(const std::string& sessionId,
                              ->settings->android_cmdLineOptions()
                              ->metrics_to_file);
         }
+    } if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->no_metrics) {
+        D("Metrics disabled by user");
+    } else if (!studio::userMetricsOptInExists()) {
+        /* We have no user input regarding metrics collection consent, neither
+         * via a launch flag or Android Studio. Show a non-blocking message
+         * and ask about it.
+         * b/321782111: In a future release we may change this to a one-time
+         * blocking prompt to ask for explicit user input.
+         */
+        warnAboutNoMetricsConsentInput();
     } else if (studio::getUserMetricsOptIn()) {
         D("Using android-studio for metrics.");
         writer = FileMetricsWriter::create(
@@ -266,6 +281,21 @@ std::string MetricsReporter::salt() {
         mSalt = std::move(salt);
     }
     return mSalt;
+}
+
+void warnAboutNoMetricsConsentInput() {
+    printf("##############################################################################\n");
+    printf("##                        WARNING - ACTION REQUIRED                         ##\n");
+    printf("##  Consider using the '-metrics-collection' flag to help improve the       ##\n");
+    printf("##  emulator by sending anonymized usage data. Or use the '-no-metrics'     ##\n");
+    printf("##  flag to bypass this warning and turn off the metrics collection.        ##\n");
+    printf("##  In a future release this warning will turn into a one-time blocking     ##\n");
+    printf("##  prompt to ask for explicit user input regarding metrics collection.     ##\n");
+    printf("##                                                                          ##\n");
+    printf("##  Please see '-help-metrics-collection' for more details. You can use     ##\n");
+    printf("##  '-metrics-to-file' or '-metrics-to-console' flags to see what type of   ##\n");
+    printf("##  data is being collected by emulator as part of usage statistics.        ##\n");
+    printf("##############################################################################\n");
 }
 
 }  // namespace metrics
