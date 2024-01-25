@@ -480,6 +480,10 @@ uint64_t HostAddressSpaceDevice::getPhysAddrStart() {
     return HostAddressSpaceDevice::getImpl()->getPhysAddrStart();
 }
 
+uint32_t HostAddressSpaceDevice::getGuestPageSize() {
+    return 4096;
+}
+
 int HostAddressSpaceDevice::allocSharedHostRegionFixedLocked(uint64_t page_aligned_size, uint64_t offset) {
     return HostAddressSpaceDevice::getImpl()->allocSharedHostRegionFixedLocked(page_aligned_size, offset);
 }
@@ -491,6 +495,7 @@ static const AddressSpaceHwFuncs sAddressSpaceHwFuncs = {
     &HostAddressSpaceDevice::freeSharedHostRegionLocked,
     &HostAddressSpaceDevice::getPhysAddrStart,
     &HostAddressSpaceDevice::getPhysAddrStart,
+    &HostAddressSpaceDevice::getGuestPageSize,
     &HostAddressSpaceDevice::allocSharedHostRegionFixedLocked,
 };
 

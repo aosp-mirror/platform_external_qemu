@@ -27,10 +27,10 @@
 #include "aemu/base/Uuid.h"  // for Uuid
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/files/GzipStreambuf.h"
-#include "aemu/base/files/IniFile.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/files/TarStream.h"
 #include "aemu/base/memory/ScopedPtr.h"
+#include "android/base/files/IniFile.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/snapshot/PathUtils.h"

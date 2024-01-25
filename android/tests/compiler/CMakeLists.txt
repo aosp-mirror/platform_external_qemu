@@ -3,7 +3,6 @@
 #
 # For example: bit fields behave differently accross windows/posix.
 # Tests here will make sure that if we change compilers again that we catch failures early.
-prebuilt(GLIB2)
 android_add_test(
   TARGET win_clang_unittests
   SRC # cmake-format: sortable

@@ -22,20 +22,24 @@
 #include <string.h>
 
 #define D(...) VERBOSE_PRINT(init,__VA_ARGS__)
+#define SPACE_LEFT(S) (sizeof(S) - (strlen(S) + 1))
 
 struct AvdScanner {
     DirScanner* scanner;
-    char temp[PATH_MAX];
-    char name[PATH_MAX];
+    char avd_path[PATH_MAX];
+    char avd_name[PATH_MAX];
+    char snapshots_path[PATH_MAX];
 };
+
+void append_snapshot_names(AvdScanner* s);
 
 AvdScanner* avdScanner_new(const char* sdk_home) {
     AvdScanner* s;
 
     ANEW0(s);
 
-    char* p = s->temp;
-    char* end = p + sizeof(s->temp);
+    char* p = s->avd_path;
+    char* end = p + sizeof(s->avd_path);
 
     if (!sdk_home) {
         p = bufprint_avd_home_path(p, end);
@@ -45,19 +49,19 @@ AvdScanner* avdScanner_new(const char* sdk_home) {
 
     if (p >= end) {
         // Path is too long, no search will be performed.
-        D("Path too long: %s\n", s->temp);
+        D("Path too long: %s\n", s->avd_path);
         return s;
     }
-    if (!path_is_dir(s->temp)) {
+    if (!path_is_dir(s->avd_path)) {
         // Path does not exist, no search will be performed.
-        D("Path is not a directory: %s\n", s->temp);
+        D("Path is not a directory: %s\n", s->avd_path);
         return s;
     }
-    s->scanner = dirScanner_new(s->temp);
+    s->scanner = dirScanner_new(s->avd_path);
     return s;
 }
 
-const char* avdScanner_next(AvdScanner* s) {
+const char* avdScanner_next(AvdScanner* s, int list_snapshots) {
     if (s->scanner) {
         for (;;) {
             const char* entry = dirScanner_next(s->scanner);
@@ -74,13 +78,18 @@ const char* avdScanner_next(AvdScanner* s) {
 
             // It's a match, get rid of the .ini suffix and return it.
             entry_len -= 4U;
-            if (entry_len >= sizeof(s->name)) {
+            if (entry_len >= sizeof(s->avd_name)) {
                 D("Name too long: %s\n", entry);
                 continue;
             }
-            memcpy(s->name, entry, entry_len);
-            s->name[entry_len] = '\0';
-            return s->name;
+            memcpy(s->avd_name, entry, entry_len);
+            s->avd_name[entry_len] = '\0';
+
+            if (list_snapshots) {
+                append_snapshot_names(s);
+            }
+
+            return s->avd_name;
         }
     }
     return NULL;
@@ -93,5 +102,42 @@ void avdScanner_free(AvdScanner* s) {
             s->scanner = NULL;
         }
         AFREE(s);
+    }
+}
+
+void append_snapshot_names(AvdScanner* s) {
+    char* p = s->snapshots_path;
+    char* end = p + sizeof(s->snapshots_path);
+
+    p = bufprint(p, end, "%s" PATH_SEP "%s.avd" PATH_SEP
+                 ANDROID_AVD_SNAPSHOTS_DIR, s->avd_path, s->avd_name);
+    if (p >= end) {
+        // Path is too long, no search will be performed.
+        D("Path too long: %s\n", s->snapshots_path);
+        return;
+    }
+    if (!path_is_dir(s->snapshots_path)) {
+        // Path does not exist, no search will be performed.
+        D("Path is not a directory: %s\n", s->snapshots_path);
+        return;
+    }
+
+    // Found the snapshots path, now lets append the snapshot names.
+    DirScanner *snap_scanner = dirScanner_new(s->snapshots_path);
+    if (snap_scanner) {
+        strncat(s->avd_name, "\t: ", SPACE_LEFT(s->avd_name));
+
+        for (;;) {
+            const char* snap_name = dirScanner_next(snap_scanner);
+            if (!snap_name) {
+                // End of enumeration.
+                break;
+            }
+
+            strncat(s->avd_name, snap_name, SPACE_LEFT(s->avd_name));
+            strncat(s->avd_name, ", ", SPACE_LEFT(s->avd_name));
+        }
+
+        dirScanner_free(snap_scanner);
     }
 }

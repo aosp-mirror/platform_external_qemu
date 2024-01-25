@@ -4,7 +4,7 @@ android_add_library(
 target_include_directories(_nimble_transport_socket PRIVATE socket/src
                            PUBLIC socket/include)
 target_compile_options(_nimble_transport_socket
-                       PRIVATE -Wno-implicit-function-declaration)
+                       PRIVATE -Wno-implicit-function-declaration -Wno-format)
 target_link_libraries(
   _nimble_transport_socket PRIVATE _nimble_os_abstraction_headers
                                    android-emu-base android-emu-base-headers)

@@ -211,7 +211,7 @@ if(NOT OPTION_CRASHUPLOAD STREQUAL "NONE")
   message(STATUS "Uploading symbols to ${BREAKPAD_API_URL}")
 endif()
 
-set(FEATURE_NETSIM TRUE CACHE BOOL "Include netsim the network simulator.")
+set(FEATURE_NETSIM_FROM_SOURCE TRUE CACHE BOOL "Build the netsim network simulator from source. **DEPRECATED**")
 
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
@@ -619,7 +619,6 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
     LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.ANGLE")
 endif()
 
-prebuilt(GLIB2)
 prebuilt(PIXMAN)
 prebuilt(VIRGLRENDERER)
 if(NOT DARWIN_AARCH64)

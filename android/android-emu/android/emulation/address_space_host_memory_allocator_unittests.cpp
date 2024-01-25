@@ -29,6 +29,10 @@ int empty_add_memory_mapping(uint64_t gpa, void *ptr, uint64_t size) {
 
 int empty_remove_memory_mapping(uint64_t gpa, void *ptr, uint64_t size) { return 1; }
 
+uint32_t getGuestPageSize() {
+    return 4096;
+}
+
 struct address_space_device_control_ops create_address_space_device_control_ops() {
     struct address_space_device_control_ops ops = {};
 
@@ -36,6 +40,14 @@ struct address_space_device_control_ops create_address_space_device_control_ops(
     ops.remove_memory_mapping = &empty_remove_memory_mapping;
 
     return ops;
+}
+
+AddressSpaceHwFuncs create_address_space_device_hw_funcs() {
+    AddressSpaceHwFuncs hw_funcs = {};
+
+    hw_funcs.getGuestPageSize = &getGuestPageSize;
+
+    return hw_funcs;
 }
 
 AddressSpaceDevicePingInfo createAllocateRequest(uint64_t phys_addr) {
@@ -64,7 +76,9 @@ TEST(AddressSpaceHostMemoryAllocatorContext, getDeviceType) {
     struct address_space_device_control_ops ops =
         create_address_space_device_control_ops();
 
-    AddressSpaceHostMemoryAllocatorContext ctx(&ops);
+    AddressSpaceHwFuncs hw_funcs = create_address_space_device_hw_funcs();
+
+    AddressSpaceHostMemoryAllocatorContext ctx(&ops, &hw_funcs);
 
     EXPECT_EQ(ctx.getDeviceType(), AddressSpaceDeviceType::HostMemoryAllocator);
 }
@@ -73,7 +87,9 @@ TEST(AddressSpaceHostMemoryAllocatorContext, AllocateDeallocate) {
     struct address_space_device_control_ops ops =
         create_address_space_device_control_ops();
 
-    AddressSpaceHostMemoryAllocatorContext ctx(&ops);
+    AddressSpaceHwFuncs hw_funcs = create_address_space_device_hw_funcs();
+
+    AddressSpaceHostMemoryAllocatorContext ctx(&ops, &hw_funcs);
 
     AddressSpaceDevicePingInfo req;
 
@@ -90,7 +106,9 @@ TEST(AddressSpaceHostMemoryAllocatorContext, AllocateSamePhysAddr) {
     struct address_space_device_control_ops ops =
         create_address_space_device_control_ops();
 
-    AddressSpaceHostMemoryAllocatorContext ctx(&ops);
+    AddressSpaceHwFuncs hw_funcs = create_address_space_device_hw_funcs();
+
+    AddressSpaceHostMemoryAllocatorContext ctx(&ops, &hw_funcs);
 
     AddressSpaceDevicePingInfo req;
 
@@ -127,7 +145,9 @@ TEST(AddressSpaceHostMemoryAllocatorContext, AllocateMappingFail) {
     struct address_space_device_control_ops ops =
         create_address_space_device_control_ops();
 
-    AddressSpaceHostMemoryAllocatorContext ctx(&ops);
+    AddressSpaceHwFuncs hw_funcs = create_address_space_device_hw_funcs();
+
+    AddressSpaceHostMemoryAllocatorContext ctx(&ops, &hw_funcs);
 
     AddressSpaceDevicePingInfo req;
 
@@ -140,7 +160,9 @@ TEST(AddressSpaceHostMemoryAllocatorContext, UnallocateTwice) {
     struct address_space_device_control_ops ops =
         create_address_space_device_control_ops();
 
-    AddressSpaceHostMemoryAllocatorContext ctx(&ops);
+    AddressSpaceHwFuncs hw_funcs = create_address_space_device_hw_funcs();
+
+    AddressSpaceHostMemoryAllocatorContext ctx(&ops, &hw_funcs);
 
     AddressSpaceDevicePingInfo req;
 

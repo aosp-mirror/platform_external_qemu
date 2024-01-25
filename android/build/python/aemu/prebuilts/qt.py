@@ -55,7 +55,7 @@ NINJA_PATH = os.path.join(AOSP_ROOT, "prebuilts", "ninja", HOST_OS + "-x86")
 
 # We must move the source code from external/qt5 to a shorter path because of path too long issue.
 # Symlinking to a shorter path will not work either.
-WIN_QT_TMP_LOCATION = os.path.join("C:/", "qttmp")
+WIN_QT_TMP_LOCATION = os.path.join("C:\\", "qttmp")
 WIN_QT_SRC_SHORT_PATH = os.path.join(WIN_QT_TMP_LOCATION, "src")
 WIN_QT_BUILD_PATH = os.path.join(WIN_QT_TMP_LOCATION, "bld")
 
@@ -86,7 +86,7 @@ def checkDependencies():
     deps_common.checkNodeJsVersion(min_vers=(12, 0))
 
     # QtWebEngine needs python html5lib package
-    logging.info(">> Checking pip.exe for html5lib")
+    logging.info(">> Checking for python package html5lib")
     deps_common.checkPythonPackage("html5lib")
 
     # QtWebEngine requires GNUWin32 dependencies gperf, bison, flex
@@ -230,9 +230,12 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
                  "-no-feature-cups",
                  "-no-strip",
                  "-no-framework",
-                 "-no-opengl",
                  "-qtlibinfix", "AndroidEmu",
                  "-prefix", installdir]
+
+    if HOST_OS != "windows":
+        # qtwebengine build fails without opengl.
+        conf_args += ["-no-opengl"]
 
     if HOST_OS == "windows":
         conf_args += ["-platform", "win32-msvc"]
@@ -342,9 +345,14 @@ def installQt(submodules, builddir, installdir):
         exit(res.returncode)
     logging.info("Installation succeeded")
 
+def cleanupQtTmpDirectory():
+    if HOST_OS == "windows" and os.path.exists(WIN_QT_TMP_LOCATION):
+        # os.remove and shutils.rmtree may fail if any file in the tmp directory is read-only.
+        # So let's just use rmdir instead to destroy it.
+        subprocess.run(["rmdir", "/S", "/Q", WIN_QT_TMP_LOCATION], shell=True)
+
 def cleanup():
-    if os.path.exists(WIN_QT_TMP_LOCATION):
-        shutil.rmtree(WIN_QT_TMP_LOCATION)
+    cleanupQtTmpDirectory()
 
 def postInstall(installdir, target):
     # Create include.system/QtCore/qconfig.h from include/QtCore/qconfig.h
@@ -445,6 +453,16 @@ def linux_postInstall(installdir, target):
 def buildPrebuilt(args, prebuilts_out_dir):
     atexit.register(cleanup)
 
+    if HOST_OS == "windows":
+        VS_INSTALL_PATH = os.environ["VS2022_INSTALL_PATH"]
+        if VS_INSTALL_PATH:
+            # The existence of the environment variable indicates we are on an old-style buildbot
+            # that does not have the docker configuration.
+            vcvarsall = os.path.join(VS_INSTALL_PATH, "VC", "Auxiliary", "Build", "vcvarsall.bat")
+            if not os.path.exists(vcvarsall):
+                logging.fatal(f"[{vcvarsall}] does not exist")
+                exit(-1)
+            deps_win.inheritSubprocessEnv([vcvarsall, "amd64", ">NUL", "2>&1"])
     # Use cmake from our prebuilts
     addToSearchPath(CMAKE_PATH)
     # Use ninja from our prebuilts
@@ -467,8 +485,7 @@ def buildPrebuilt(args, prebuilts_out_dir):
     if HOST_OS == "windows":
         # On Windows, We must make sure Qt source code is in a very short directory, otherwise we
         # may get a compiler error because of long paths issue.
-        if os.path.exists(WIN_QT_TMP_LOCATION):
-            os.remove(WIN_QT_TMP_LOCATION)
+        cleanupQtTmpDirectory()
         logging.info("Creating Qt temp directory [%s]", WIN_QT_TMP_LOCATION)
         old_umask = os.umask(0o027)
         os.makedirs(WIN_QT_TMP_LOCATION)

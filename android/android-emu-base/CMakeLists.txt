@@ -4,7 +4,6 @@
 
 # Dependencies
 prebuilt(UUID)
-prebuilt(GLIB2) # Acts as windows stdio compatibility layer.
 prebuilt(LIBUNWIND)
 if(NOT DARWIN_AARCH64)
   prebuilt(TCMALLOC)
@@ -113,6 +112,7 @@ android_add_library(
           android/utils/win32_unicode.cpp
           stubs/win32-stubs.c)
 
+target_compile_definitions(android-emu-base PRIVATE __STDC_LIMIT_MACROS=1 __STDC_FORMAT_MACROS=1)
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(android-emu-base windows_msvc-x86_64
                               PUBLIC dirent-win32)
@@ -265,6 +265,7 @@ android_target_compile_options(
   android-emu-base_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr
                                            -Wno-string-plus-int)
 
+target_compile_definitions(android-emu-base_unittests PRIVATE __STDC_LIMIT_MACROS=1 __STDC_FORMAT_MACROS=1)
 # Setup the targets compile config etc..
 target_link_libraries(android-emu-base_unittests PRIVATE android-emu-base
                                                          android-emu-base-headers

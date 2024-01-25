@@ -310,7 +310,7 @@ bool configAndStartRenderer(enum WinsysPreferredGlesBackend uiPreferredBackend,
         bool shouldEnableGLDirectMem = api_level >= 29;
 #if defined(__aarch64__) && defined(__APPLE__)
         // b/273985153
-        shouldEnableGLDirectMem = false;
+        //shouldEnableGLDirectMem = false;
 #endif
         bool shouldEnableVulkan = true;
 
@@ -366,6 +366,7 @@ bool configAndStartRenderer(enum WinsysPreferredGlesBackend uiPreferredBackend,
         if (shouldEnableVulkan) {
             crashhandler_append_message_format("Enabling Vulkan");
             feature_set_if_not_overridden(kFeature_Vulkan, true);
+            feature_set_if_not_overridden(kFeature_GLDirectMem, true);
         } else {
             crashhandler_append_message_format(
                     "Not enabling Vulkan here "

@@ -11,7 +11,7 @@ target_include_directories(android-wifi-service
                            PRIVATE ${ANDROID_QEMU2_TOP_DIR}/include
                                    ${ANDROID_AUTOGEN})
 
-target_compile_definitions(android-wifi-service PUBLIC -DLIBSLIRP)
+target_compile_definitions(android-wifi-service PUBLIC -DNETSIM_WIFI)
 
 android_target_compile_definitions(android-wifi-service windows PRIVATE "-DIOV_MAX=1")
 

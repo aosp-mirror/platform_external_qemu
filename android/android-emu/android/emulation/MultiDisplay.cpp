@@ -48,6 +48,7 @@
 #include "host-common/screen-recorder.h"
 
 using android::base::AutoLock;
+using android::automotive::DisplayManager;
 
 #define MULTI_DISPLAY_DEBUG 1
 
@@ -124,11 +125,26 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         return -1;
     }
 
-    if (flag == 0 &&
-        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
-                AVD_ANDROID_AUTO) {
-        flag = automotive::getDefaultFlagsForDisplay(id);
-        LOG(DEBUG) << "Setting flags " << flag << " for display id " << id;
+    if (flag == 0) {
+        auto avd = getConsoleAgents()->settings->avdInfo();
+        if (avd) {
+            if (avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO) {
+                flag = automotive::getDefaultFlagsForDisplay(id);
+                LOG(DEBUG) << "Setting flags " << flag << " for display id " << id;
+            } else if (avdInfo_getApiLevel(avd) >= 31) {
+                // bug: 227218392
+                // starting from S (android 11, api 31), this flag is
+                // required to support Presentation API
+                const int DEFAULT_FLAGS_SINCE_S = DisplayManager::VIRTUAL_DISPLAY_FLAG_PUBLIC |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_TRUSTED |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+                flag = DEFAULT_FLAGS_SINCE_S;
+            }
+        }
     }
 
     SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
@@ -177,12 +193,24 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
                    "emulator. Multi display might not work as expected.");
             return -1;
         }
-        adbInterface->enqueueCommand({"shell", "am", "broadcast", "-a",
-                                      "com.android.emulator.multidisplay.START",
-                                      "-n",
-                                      "com.android.emulator.multidisplay/"
-                                      ".MultiDisplayServiceReceiver",
-                                      "--user 0"});
+
+        {
+            auto avd = getConsoleAgents()->settings->avdInfo();
+            if (avd && avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO && avdInfo_getApiLevel(avd) <= 33) {
+                adbInterface->enqueueCommand(
+                    {"shell", "am", "broadcast", "-a",
+                     "com.android.emulator.multidisplay.START", "-n",
+                     "com.android.emulator.multidisplay/"
+                     ".MultiDisplayServiceReceiver"});
+            } else {
+                adbInterface->enqueueCommand(
+                    {"shell", "am", "broadcast", "-a",
+                     "com.android.emulator.multidisplay.START", "-n",
+                     "com.android.emulator.multidisplay/"
+                     ".MultiDisplayServiceReceiver",
+                     "--user 0"});
+            }
+        }
 
         MultiDisplayPipe* pipe = MultiDisplayPipe::getInstance();
         if (pipe) {
@@ -923,6 +951,10 @@ bool MultiDisplay::isPixelFold() {
     return android_foldable_is_pixel_fold();
 }
 
+bool MultiDisplay::isOrientationSupported() {
+    return getConsoleAgents()->settings->hw()->hw_sensors_orientation;
+}
+
 /*
  * Just use simple way to make it work in multidisplay+rotation
  */
@@ -933,6 +965,42 @@ void MultiDisplay::recomputeLayoutLocked() {
         rotation = layout->orientation;
     }
     performRotationLocked(rotation);
+
+    // Use stacked layout for auto devices when orientation is not allowed
+    if (android_is_automotive() && !isOrientationSupported()) {
+        // Keep old layout for main with cluster display
+        if (mMultiDisplay.size() > 2) {
+            recomputeStackedLayoutLocked();
+        }
+    }
+}
+
+/*
+ * Especially for the automotive devices, it's better to locate the external
+ * display in a separate row in case it has wide display width. For instance,
+ * the reference implementation of Distant Display has 3000x800 display and it
+ * makes hard to use when the main and external displays are located in one row.
+ * Reused the previous logic of recomputeLayoutLocked() which was removed in
+ * aosp/2709953.
+ */
+void MultiDisplay::recomputeStackedLayoutLocked() {
+    uint32_t monitorWidth, monitorHeight;
+    if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
+        dwarning("Unable to get monitor width and height");
+        return;
+    }
+    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
+    for (const auto& iter : mMultiDisplay) {
+        if (iter.first == 0 || iter.second.cb != 0) {
+            rectangles[iter.first] =
+                    std::make_pair(iter.second.width, iter.second.height);
+        }
+    }
+    for (const auto& iter :
+         android::base::resolveStackedLayout(rectangles, monitorWidth)) {
+        mMultiDisplay[iter.first].pos_x = iter.second.first;
+        mMultiDisplay[iter.first].pos_y = iter.second.second;
+    }
 }
 
 bool MultiDisplay::multiDisplayParamValidate(uint32_t id,

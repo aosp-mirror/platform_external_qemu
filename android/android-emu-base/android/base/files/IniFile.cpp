@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "aemu/base/files/IniFile.h"
+#include "android/base/files/IniFile.h"
 
 #include "aemu/base/logging/Log.h"
 #include "android/utils/debug.h"
@@ -23,6 +23,7 @@
 #include "msvc-posix.h"
 #endif
 
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <istream>
@@ -234,22 +235,16 @@ bool IniFile::readFromMemory(std::string_view data) {
     return true;
 }
 
-bool IniFile::writeCommon(bool discardEmpty) {
-    if (mBackingFilePath.empty()) {
-        LOG(WARNING) << "Write called without a backing file!";
-        return false;
-    }
-
+bool IniFile::writeCommonImpl(bool discardEmpty, const std::string& filePath) {
 #ifdef _MSC_VER
-    Win32UnicodeString wBackingFilePath(mBackingFilePath);
-    std::ofstream outFile(wBackingFilePath.c_str(), ios_base::out | ios_base::trunc);
+    Win32UnicodeString wFilePath(filePath);
+    std::ofstream outFile(wFilePath.c_str(), ios_base::out | ios_base::trunc);
 #else
-
-    std::ofstream outFile(mBackingFilePath, std::ios_base::out | std::ios_base::trunc);
+    std::ofstream outFile(filePath, std::ios_base::out | std::ios_base::trunc);
 #endif
+
     if (!outFile) {
-        LOG(WARNING) << "Failed to open .ini file " << mBackingFilePath
-                     << " for writing.";
+        LOG(WARNING) << "Failed to open '" << filePath << "' for writing.";
         return false;
     }
 
@@ -275,6 +270,54 @@ bool IniFile::writeCommon(bool discardEmpty) {
     }
 
     mDirty = false;
+    return true;
+}
+
+// 1. write config to mBackingFilePath.new
+// 2. rename mBackingFilePath to mBackingFilePath.old
+// 3. rename mBackingFilePath.new to mBackingFilePath
+// 4. delete mBackingFilePath.old
+bool IniFile::writeCommon(const bool discardEmpty) {
+    if (mBackingFilePath.empty()) {
+        LOG(WARNING) << "Write called without a backing file!";
+        return false;
+    }
+
+    const std::string iniFileNew = mBackingFilePath + ".new";
+    if (!writeCommonImpl(discardEmpty, iniFileNew)) {
+        return false;
+    }
+
+    const std::string iniFileOld = mBackingFilePath + ".old";
+    std::filesystem::remove(iniFileOld.c_str()); // just in case `myRemove` below failed
+
+    const bool deleteOldConfig =
+        PathUtils::move(mBackingFilePath.c_str(), iniFileOld.c_str());
+
+    if (!PathUtils::move(iniFileNew.c_str(), mBackingFilePath.c_str())) {
+        if (deleteOldConfig) {
+            // try to revert the first `rename`
+            if (!PathUtils::move(iniFileOld.c_str(), mBackingFilePath.c_str())) {
+                // mBackingFilePath is missing here
+                LOG(ERROR) << "Failed to update '" << mBackingFilePath
+                           << "', the file no longer exists";
+            } else {
+                // mBackingFilePath is reverted back
+                LOG(WARNING) << "Failed to update '" << mBackingFilePath << "'";
+            }
+        } else {
+            // mBackingFilePath could be read-only
+            LOG(WARNING) << "Failed to save '" << mBackingFilePath << "'";
+        }
+
+        std::filesystem::remove(iniFileNew.c_str());
+        return false;
+    }
+
+    if (deleteOldConfig) {
+        std::filesystem::remove(iniFileOld.c_str());
+    }
+
     return true;
 }
 

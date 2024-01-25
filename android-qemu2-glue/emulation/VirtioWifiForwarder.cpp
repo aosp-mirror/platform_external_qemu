@@ -20,6 +20,7 @@ extern "C" {
 #include "aemu/base/StringFormat.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/sockets/SocketUtils.h"
+#include "aemu/base/threads/Async.h"
 #include "android/network/Endian.h"
 #include "android/network/WifiForwardClient.h"
 #include "android/network/WifiForwardPeer.h"
@@ -32,6 +33,7 @@ using android::base::IOVector;
 using android::base::Looper;
 using android::base::RecurrentTask;
 using android::base::ScopedSocket;
+using android::base::async;
 using android::base::socketCreatePair;
 using android::base::socketRecv;
 using android::base::socketSend;
@@ -53,7 +55,7 @@ using android::network::WifiForwardServer;
 extern "C" {
 #include "common/ieee802_11_defs.h"
 #include "drivers/driver_virtio_wifi.h"
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
 #include "libslirp.h"
 #include "utils/eloop.h"
 #else
@@ -62,6 +64,8 @@ extern "C" {
 #include "net/slirp.h"
 #endif
 }  // extern "C"
+
+#include <chrono>
 
 // Conflicts with Log.h
 #ifdef ERROR
@@ -160,7 +164,7 @@ bool VirtioWifiForwarder::init() {
     mVirtIOSock = ScopedSocket(fds[1]);
     mHostapdSockInitSuccess = mHostapd->setDriverSocket(mHostapdSock);
 
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
     eloop_register_read_sock(mVirtIOSock.get(),
                              VirtioWifiForwarder::eloopSocketHandler, nullptr,
                              this);
@@ -199,8 +203,6 @@ bool VirtioWifiForwarder::init() {
         mRemotePeer->init();
         mRemotePeer->run();
     }
-    resetBeaconTask();
-    mBeaconTask->start();
     LOG(DEBUG) << "Successfully initialized Wi-Fi";
     return true;
 }
@@ -293,11 +295,12 @@ int VirtioWifiForwarder::recv(android::base::IOVector& iov) {
 }
 
 void VirtioWifiForwarder::stop() {
-    mBeaconTask.clear();
     mNic = nullptr;
     mSlirp = nullptr;
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
     eloop_unregister_read_sock(mVirtIOSock.get());
+#else
+    mBeaconTask.clear();
 #endif
     if (mHostapd) {
         mHostapd->terminate();
@@ -308,7 +311,7 @@ void VirtioWifiForwarder::stop() {
     }
 }
 
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
 void VirtioWifiForwarder::eloopSocketHandler(int sock,
                                              void* eloop_ctx,
                                              void* sock_ctx) {
@@ -415,15 +418,26 @@ void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
         Looper::Duration newBeaconInt = hdr->u.beacon.beacon_int * kTUtoMS;
         if (newBeaconInt != forwarder->mBeaconIntMs) {
             forwarder->mBeaconIntMs = newBeaconInt;
-            forwarder->resetBeaconTask();
-            forwarder->mBeaconTask->start();
         }
+        forwarder->registerBeaconTask();
     } else {
         forwarder->sendToGuest(std::move(frame));
     }
 }
 
-void VirtioWifiForwarder::resetBeaconTask() {
+void VirtioWifiForwarder::registerBeaconTask() {
+#ifdef NETSIM_WIFI
+    async([this]() {
+        while (true) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(mBeaconIntMs));
+            if (mBeaconFrame != nullptr && mBeaconFrame->isBeacon()) {
+                sendToGuest(std::make_unique<Ieee80211Frame>(
+                        mBeaconFrame->data(), mBeaconFrame->size(),
+                        mBeaconFrame->info()));
+            }
+        }
+    });
+#else
     // set up periodic job of sending beacons.
     mBeaconTask.emplace(
             mLooper,
@@ -436,6 +450,8 @@ void VirtioWifiForwarder::resetBeaconTask() {
                 return true;
             },
             mBeaconIntMs);
+    mBeaconTask->start();
+#endif
 }
 size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
     size_t offset = 0;
@@ -522,7 +538,7 @@ int VirtioWifiForwarder::sendToNIC(
         return 0;
     }
 
-#ifdef LIBSLIRP
+#ifdef NETSIM_WIFI
     assert(mSlirp);
     auto packet = frame->toEthernet();
     slirp_input(mSlirp, packet.data(), packet.size());

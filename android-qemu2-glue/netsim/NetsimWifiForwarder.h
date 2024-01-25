@@ -31,7 +31,7 @@ public:
     void stop() override;
     // Not used in netsim wifi grpc connection
     NICState* getNic() override { return nullptr; }
-#ifndef LIBSLIRP
+#ifndef NETSIM_WIFI
     android::network::MacAddress getStaMacAddr(const char* ssid) override {
         return android::network::MacAddress();
     };

@@ -1671,7 +1671,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     if (opts->version) {
         printf("Android emulator version %s (CL:%s)\n"
-               "Copyright (C) 2006-2017 The Android Open Source Project and "
+               "Copyright (C) 2006-2024 The Android Open Source Project and "
                "many "
                "others.\n"
                "This program is a derivative of the QEMU CPU emulator "
@@ -1920,6 +1920,12 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                     "ignoring -snapshot option due to the use of "
                     "-no-snapshot.");
         }
+
+        if (opts->force_snapshot_load) {
+            dwarning(
+                    "ignoring -force-snapshot-load option due to "
+                    "the use of -no-snapshot.");
+        }
     }
 
     /* Determine snapstorage path. -no-snapstorage disables all snapshotting
@@ -1944,6 +1950,12 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         // Android Studio used to pass 'no-snapstorage' when it actually meant
         // 'no-snapshot-load' - so treat it that way.
         opts->no_snapshot_load = 1;
+
+        if (opts->force_snapshot_load) {
+            dwarning(
+                    "ignoring -force-snapshot-load option due to "
+                    "the use of -no-snapstorage.");
+        }
     } else {
         if (!opts->snapstorage && avdInfo_getSnapshotPresent(avd)) {
             str_reset_nocopy(&opts->snapstorage,
@@ -1957,6 +1969,12 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             D("no image at '%s', state snapshots disabled", opts->snapstorage);
             str_reset_null(&opts->snapstorage);
         }
+    }
+
+    if (opts->no_snapshot_load && opts->force_snapshot_load) {
+            dwarning(
+                    "ignoring -force-snapshot-load option due to "
+                    "the use of -no-snapshot-load.");
     }
 
     /* If we have a valid snapshot storage path */

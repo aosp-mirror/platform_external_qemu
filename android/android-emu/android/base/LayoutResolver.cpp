@@ -193,5 +193,59 @@ std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveLayout(
     return retVal;
 }
 
+std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveStackedLayout(
+        std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles,
+        const uint32_t monitorWidth) {
+
+    std::vector<Rect> firstRow;
+    uint32_t totalWidth = 0;
+    for (const auto& iter : rectangles) {
+        firstRow.emplace_back(iter.first, 0, 0, iter.second.first, iter.second.second);
+        totalWidth += iter.second.first;
+    }
+    std::stable_sort(
+            firstRow.begin(), firstRow.end(),
+            [](const Rect& a, const Rect& b) { return a.id < b.id; });
+
+    totalWidth = 0;
+    std::vector<Rect> secondRow;
+    for (int i = 0; i < firstRow.size(); i++) {
+        if (((double)totalWidth + firstRow[i].width) / monitorWidth <= 0.90) {
+            // Locate displays on a the first row until the total width doesn't
+            // reach to the max threthold which is 95% at this moment
+            totalWidth += firstRow[i].width;
+        } else {
+            // Locate displays on a separate row if the total width exeeds
+            // the max threthold
+            for (int j = i; j < firstRow.size(); j++) {
+                secondRow.push_back(firstRow[j]);
+            }
+            firstRow.erase(firstRow.begin() + i, firstRow.end());
+            break;
+        }
+    }
+
+    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> retVal;
+    uint32_t posX = 0, firstRowHeight = 0;
+    for (int i = 0; i < firstRow.size(); i++) {
+        firstRow[i].pos_x = posX;
+        posX += firstRow[i].width;
+        retVal[firstRow[i].id] = std::make_pair(firstRow[i].pos_x, 0);
+        if (firstRowHeight < firstRow[i].height) {
+            firstRowHeight = firstRow[i].height;
+        }
+    }
+    posX = 0;
+    std::stable_sort(
+            secondRow.begin(), secondRow.end(),
+            [](const Rect& a, const Rect& b) { return a.id < b.id; });
+    for (int i = 0; i < secondRow.size(); i++) {
+        secondRow[i].pos_x = posX;
+        posX += secondRow[i].width;
+        retVal[secondRow[i].id] = std::make_pair(secondRow[i].pos_x, firstRowHeight);
+    }
+    return retVal;
+}
+
 }  // namespace base
 }  // namespace android

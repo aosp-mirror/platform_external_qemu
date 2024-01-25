@@ -921,7 +921,7 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     // make sure to use the close button on tool window
-    if (!mToolWindow->closeButtonClicked()) {
+    if (isMainThreadRunning() && !mToolWindow->closeButtonClicked()) {
         mToolWindow->on_close_button_clicked();
         event->ignore();
         return;
@@ -1990,7 +1990,7 @@ void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,
 }
 
 void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
-    if (!mToolWindow->closeButtonClicked()) {
+    if (isMainThreadRunning() && !mToolWindow->closeButtonClicked()) {
         mToolWindow->on_close_button_clicked();
     }
     QSemaphoreReleaser semReleaser(semaphore);
