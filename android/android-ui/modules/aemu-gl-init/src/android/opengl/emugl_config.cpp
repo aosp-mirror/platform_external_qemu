@@ -532,6 +532,10 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     if (strstr(config->backend, "angle")) {
         system->envSet("ANGLE_DEFAULT_PLATFORM", "metal");
     }
+#elif defined(__linux__)
+    if (strstr(config->backend, "angle")) {
+        system->envSet("ANGLE_DEFAULT_PLATFORM", "vulkan");
+    }
 #endif
     if (use_swangle) {
         system->envSet("ANGLE_DEFAULT_PLATFORM", "swiftshader");
