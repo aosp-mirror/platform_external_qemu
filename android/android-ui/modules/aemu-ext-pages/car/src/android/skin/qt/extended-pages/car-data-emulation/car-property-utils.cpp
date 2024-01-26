@@ -459,6 +459,10 @@ map<int32_t, PropertyDescription> carpropertyutils::propMap = {
     { 289410886, { QObject::tr("Vehicle curb weight") } },
 };
 
+QString carpropertyutils::getDetailedDescription(int32_t propId) {
+    return propMap[propId].detailedDescription;
+}
+
 QString carpropertyutils::getValueString(VehiclePropValue val) {
     QString cellContents;
     vector<int32_t> int32Vals;
@@ -689,6 +693,10 @@ bool carpropertyutils::isVendor(int32_t val) {
             == (int32_t)VehiclePropertyGroup::VENDOR;
 }
 
+QString carpropertyutils::translate(const QString& src) {
+    return QObject::tr(src.toUtf8().constData());
+}
+
 void carpropertyutils::loadDescriptionsFromJson(const char *filename) {
     QFile file(filename);
     LOG(DEBUG) << "Reading vendor vhal properties json file: " << filename << std::endl;
@@ -710,14 +718,19 @@ void carpropertyutils::loadDescriptionsFromJson(const char *filename) {
             // Add vehicle property description
             QJsonArray vehiclePropsArray = enumObject.toObject().value("values").toArray();
             for (auto vehiclePropObject : vehiclePropsArray) {
-                const int propId = vehiclePropObject.toObject().value("value").toInt();
-                if (propMap.find(propId) == propMap.end()) {
-                    propMap[propId] =
-                    { QObject::tr(vehiclePropObject.toObject().value("name").toString().toUtf8()
-                        .constData()),
-                      vehiclePropObject.toObject().value("data_enum").toString().toUtf8()
-                        .constData() };
+                auto vehiclePropJsonObject = vehiclePropObject.toObject();
+                const int propId = vehiclePropJsonObject.value("value").toInt();
+                QString description = "";
+                if (vehiclePropJsonObject.find("description") != vehiclePropJsonObject.end()) {
+                    description = translate(
+                            vehiclePropJsonObject.value("description").toString());
                 }
+                propMap[propId] =
+                { translate(vehiclePropJsonObject.value("name").toString()),
+                  vehiclePropJsonObject.value("data_enum").toString().toUtf8()
+                    .constData(),
+                  nullptr, nullptr, description
+                };
             }
         } else {
             // Add enum values names

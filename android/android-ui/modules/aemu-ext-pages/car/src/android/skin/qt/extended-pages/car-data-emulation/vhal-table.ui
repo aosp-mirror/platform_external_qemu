@@ -105,7 +105,7 @@
         <string>Property</string>
       </property>
       <property name="text">
-        <string>Property description</string>
+        <string>Detailed description</string>
       </property>
     </widget>
     <widget class="QLabel" name="property_name">
@@ -124,13 +124,13 @@
         <string>Property name</string>
       </property>
     </widget>
-    <widget class="QLabel" name="property_name_value">
+    <widget class="QTextEdit" name="property_name_value">
       <property name="geometry">
         <rect>
           <x>320</x>
           <y>90</y>
           <width>200</width>
-          <height>16</height>
+          <height>48</height>
         </rect>
       </property>
       <property name="font">
@@ -143,6 +143,9 @@
       </property>
       <property name="ColorGroup" stdset="0">
         <string>Property</string>
+      </property>
+      <property name="textInteractionFlags">
+        <set>Qt::TextSelectableByMouse</set>
       </property>
     </widget>
     <widget class="QLabel" name="change_mode">
@@ -334,6 +337,46 @@
         <string>propertyid_value</string>
       </property>
     </widget>
+    <widget class="QLabel" name="property_description">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>420</y>
+          <width>111</width>
+          <height>16</height>
+        </rect>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+      </property>
+      <property name="text">
+        <string>Property Description</string>
+      </property>
+    </widget>
+    <widget class="QTextEdit" name="property_description_value">
+      <property name="geometry">
+        <rect>
+          <x>320</x>
+          <y>440</y>
+          <width>200</width>
+          <height>80</height>
+        </rect>
+      </property>
+      <property name="font">
+        <font>
+          <family>Roboto</family>
+        </font>
+      </property>
+      <property name="ColorGroup" stdset="0">
+        <string>Property</string>
+      </property>
+      <property name="text">
+        <string>propertydescription_value</string>
+      </property>
+      <property name="textInteractionFlags">
+        <set>Qt::TextSelectableByMouse</set>
+      </property>
+    </widget>
 
     <zorder>search_frame</zorder>
     <zorder>property_list</zorder>
@@ -351,6 +394,8 @@
     <zorder>area_value</zorder>
     <zorder>property_id</zorder>
     <zorder>property_id_value</zorder>
+    <zorder>property_description</zorder>
+    <zorder>property_description_value</zorder>
 
 
   </widget>
