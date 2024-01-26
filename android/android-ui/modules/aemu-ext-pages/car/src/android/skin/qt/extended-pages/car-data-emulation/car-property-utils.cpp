@@ -261,7 +261,7 @@ map<int32_t, QString> gsrComplianceReqMap = {
       QObject::tr("GSR compliance required through system image") }
 };
 
-map<QString, std::map<int32_t, QString>*> carpropertyutils::lookupTablesMap = {
+map<QString, const std::map<int32_t, QString>*> carpropertyutils::lookupTablesMap = {
     { "fuelType", &fuelTypeMap },
     { "evConnector", &evConnectorTypeMap },
     { "portLocation", &portLocationMap },
@@ -541,7 +541,7 @@ QString carpropertyutils::getAreaString(VehiclePropValue val) {
     PropertyDescription prop = areaMap[maskedProp];
     QString area = prop.label;
     if (prop.lookupTableName != nullptr) {
-        auto lookupTable = lookupTablesMap.find(prop.lookupTableName);
+        const auto lookupTable = lookupTablesMap.find(prop.lookupTableName);
         if (lookupTable == lookupTablesMap.end()) {
             return area;
         }
@@ -561,11 +561,16 @@ QString carpropertyutils::int32ToString(PropertyDescription prop, int32_t val) {
     if (prop.int32ToString != nullptr) {
         return prop.int32ToString(val);
     } else if (prop.lookupTableName != nullptr) {
-        auto lookupTable = lookupTablesMap.find(prop.lookupTableName);
-        if (lookupTable == lookupTablesMap.end()) {
+        const auto lookupTableIt = lookupTablesMap.find(prop.lookupTableName);
+        if (lookupTableIt == lookupTablesMap.end()) {
             return QString::number(val);
         }
-        return (*(lookupTable->second))[val];
+        const auto& lookupTable = *(lookupTableIt->second);
+        const auto valStringIt = lookupTable.find(val);
+        if (valStringIt == lookupTable.end()) {
+            return QString::number(val);
+        }
+        return valStringIt->second;
     } else {
         return QString::number(val);
     }
@@ -624,7 +629,7 @@ QString carpropertyutils::int32ToHexString(int32_t val) {
     return QObject::tr(valStringStream.str().c_str());
 }
 
-QString carpropertyutils::multiDetailToString(map<int, QString> lookupTable, int value) {
+QString carpropertyutils::multiDetailToString(const map<int, QString>& lookupTable, int value) {
     QString details;
     for (const auto &locDetail : lookupTable) {
         if ((value & locDetail.first) == locDetail.first) {

@@ -74,7 +74,7 @@ namespace carpropertyutils {
 
     // Map from property ids to description for conversion to human readable form.
     extern std::map<int32_t, PropertyDescription> propMap;
-    extern std::map<QString, std::map<int32_t, QString>*> lookupTablesMap;
+    extern std::map<QString, const std::map<int32_t, QString>*> lookupTablesMap;
 
     QString booleanToString(PropertyDescription prop, int32_t val);
     QString int32ToString(PropertyDescription prop, int32_t val);
@@ -89,7 +89,7 @@ namespace carpropertyutils {
     QString getDetailedDescription(int32_t propId);
     QString getAreaString(emulator::VehiclePropValue val);
 
-    QString multiDetailToString(std::map<int, QString> lookupTable, int value);
+    QString multiDetailToString(const std::map<int, QString>& lookupTable, int value);
     QString fanDirectionToString(int32_t val);
     QString heatingCoolingToString(int32_t val);
     QString apPowerStateReqToString(std::vector<int32_t> vals);
