@@ -193,6 +193,7 @@ TEST(StudioConfigTest, androidStudioXMLPathBuilder) {
 namespace android {
 namespace studio {
 std::string extractInstallationId();
+std::string persistAndLoadEmuUserId();
 }
 }  // namespace android
 
@@ -248,6 +249,60 @@ TEST(StudioConfigTest, androidStudioInstallationId) {
 
 }
 
+TEST(StudioConfigTest, persistAndLoadEmuUserId) {
+    TestSystem testSys("/root", 32);
+    TestTempDir* testDir = testSys.getTempRoot();
+    testSys.setHomeDirectory(std::string(testDir->path()).append("/root/home"));
+    testSys.setAppDataDirectory(
+            std::string(testDir->path()).append("/root/appdata"));
+
+    testDir->makeSubDir("root");
+    testDir->makeSubDir("root/home");
+    testDir->makeSubDir("root/home/.android");
+    testDir->makeSubDir("root/home/.android/avd");
+
+#ifndef _WIN32
+    {
+        // Never returns an empty string
+        auto uid = persistAndLoadEmuUserId();
+        EXPECT_STRNE("", uid.c_str());
+
+        // ID is persisted on disk
+        std::ifstream idFile(testDir->pathString() +
+                                       "/root/home/.android/avd/userid",
+                               std::ios_base::in);
+        ASSERT_TRUE(!!idFile);
+        std::stringstream idFromFile;
+        idFromFile << idFile.rdbuf();
+        idFile.close();
+
+        EXPECT_STREQ(uid.c_str(), idFromFile.str().c_str());
+    }
+
+    {   // Returns the value in userid if exists
+        std::ofstream idFile(testDir->pathString() +
+                                       "/root/home/.android/avd/userid",
+                               std::ios_base::trunc);
+        ASSERT_TRUE(!!idFile);
+        idFile << R"(123)";
+        idFile.close();
+        auto userId = persistAndLoadEmuUserId();
+        EXPECT_STREQ("123", userId.c_str());
+    }
+
+    {   // Returns the value in userid if exists
+        std::ofstream idFile(testDir->pathString() +
+                                       "/root/home/.android/avd/userid",
+                               std::ios_base::trunc);
+        ASSERT_TRUE(!!idFile);
+        idFile << R"(1 2 3)";
+        idFile.close();
+        auto userId = persistAndLoadEmuUserId();
+        EXPECT_STREQ("1 2 3", userId.c_str());
+    }
+#endif
+
+}
 
 // We do not have access to TestSystem from shared module, so we skip these
 #ifndef _WIN32
