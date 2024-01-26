@@ -132,7 +132,7 @@ hermit-abi = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crate
 redox_syscall = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/redox_syscall" }
 remove_dir_all = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/remove_dir_all" }
 sha2 = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/sha2" }
-windows-sys = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/windows-sys" }
+windows-sys = { path = "${AOSP_ROOT}/external/qemu/android/third_party/rust/crates/windows-sys-0.48.0" }
 
 # You will have to process this with the cmake configure_file command
 # and bin place it in the RUST_root
