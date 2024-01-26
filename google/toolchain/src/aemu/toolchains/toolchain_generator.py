@@ -58,7 +58,7 @@ class ToolchainGenerator:
             stderr=subprocess.STDOUT,
         )
         version = result.splitlines()[0]
-        match = re.match(r".*clang version (\d+.\d+.\d).*", version)
+        match = re.match(r".*clang version (\d+).(\d+).(\d).*", version)
         if match:
             return match[1]
 
