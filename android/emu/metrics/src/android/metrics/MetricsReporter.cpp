@@ -126,7 +126,7 @@ void MetricsReporter::start(const std::string& sessionId,
                              ->settings->android_cmdLineOptions()
                              ->metrics_to_file);
         }
-    } if (getConsoleAgents()
+    } else if (getConsoleAgents()
                 ->settings->android_cmdLineOptions()
                 ->no_metrics) {
         D("Metrics disabled by user");
