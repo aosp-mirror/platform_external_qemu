@@ -1862,6 +1862,20 @@ bool avdInfo_isMarshmallowOrHigher(AvdInfo* i) {
     return i->isMarshmallowOrHigher;
 }
 
+bool avdInfo_isVanillaIceCreamPreview(AvdInfo* i) {
+    int preview = avdInfo_getBuildPropertyInt(i, "ro.build.version.preview_sdk", 0);
+    if (!preview) {
+        return false;
+    }
+    char* codename = avdInfo_getBuildPropertyString(i, "ro.build.version.codename");
+    if (!codename) {
+        return false;
+    }
+    const bool result = (!strcmp(codename, "VanillaIceCream"));
+    free(codename);
+    return result;
+}
+
 AvdInfo* avdInfo_newCustom(const char* name,
                            int apiLevel,
                            const char* abi,
@@ -2026,7 +2040,16 @@ const char* avdInfo_screen_off_timeout(int apiLevel) {
     }
 }
 
+int avdInfo_getBuildPropertyInt(const AvdInfo* info, const char* property, int defValue) {
+    return propertyFile_getInt(
+            info->buildProperties, property, defValue, NULL);
+}
+
 bool avdInfo_getBuildPropertyBool(const AvdInfo* info, const char* property, bool defValue) {
     return propertyFile_getBool(
             info->buildProperties, property, defValue, NULL);
+}
+
+char* avdInfo_getBuildPropertyString(const AvdInfo* info, const char* property) {
+    return propertyFile_getValue((const char*)info->buildProperties->data, info->buildProperties->size, property);
 }
