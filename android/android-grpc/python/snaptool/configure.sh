@@ -31,6 +31,7 @@ echo "Make sure you have devpi runninng on port 3141!"
 
 if [ ! -f "./venv/bin/activate" ]; then
   $PYTHON -m venv .venv
+  . ./.venv/bin/activate
   write_local_pip_conf
 fi
 

@@ -16,8 +16,8 @@ import io
 import json
 import logging
 import os
-import uuid
 import time
+import uuid
 
 import tink
 from tink import jwt, tink_config

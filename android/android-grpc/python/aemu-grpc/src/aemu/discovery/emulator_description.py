@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+from enum import Enum
 from typing import Optional
 
 import grpc
@@ -29,14 +30,8 @@ except ImportError:
     _HAVE_TINK = False
 
 
-from aemu.proto.emulated_bluetooth_pb2_grpc import EmulatedBluetoothServiceStub
 from aemu.proto.emulator_controller_pb2 import VmRunState
 from aemu.proto.emulator_controller_pb2_grpc import EmulatorControllerStub
-from aemu.proto.modem_service_pb2_grpc import ModemStub
-from aemu.proto.rtc_service_pb2_grpc import RtcStub
-from aemu.proto.snapshot_service_pb2_grpc import SnapshotServiceStub
-from aemu.proto.ui_controller_service_pb2_grpc import UiControllerStub
-from aemu.proto.waterfall_pb2_grpc import WaterfallStub
 
 
 def _safe_kill(process: psutil.Process) -> bool:
@@ -109,8 +104,16 @@ def _kill_process_tree(process: psutil.Process) -> None:
     _safe_kill(process)
 
 
+class EmulatorSecurity(Enum):
+    Nothing = 1
+    Jwt = 2
+    Token = 3
+
+
 class BasicEmulatorDescription(dict):
     """A description of an emulator you can connect to using gRPC."""
+
+    MAX_MESSAGE_LENGTH = -1
 
     def __init__(self, description_dict):
         """A BasicEmulatorDescription should have at least the following
@@ -127,51 +130,80 @@ class BasicEmulatorDescription(dict):
         """
         self._description = description_dict
 
-    def get_grpc_channel(self, use_async: bool = False) -> grpc.aio.Channel:
+    def _get_async_channel(self, addr, channel_arguments):
+        pass
+
+    def _select_security(self, arguments):
+        if "emulator.security" in arguments:
+            choice = arguments.get("emulator.security").lower()
+            if choice == "jwt":
+                return EmulatorSecurity.Jwt
+            if choice == "token":
+                return EmulatorSecurity.Token
+            return EmulatorSecurity.Nothing
+
+        if ("grpc.jwks" in self._description) and (
+            "grpc.jwk_active" in self._description
+        ):
+            return EmulatorSecurity.Jwt
+
+        if "grpc.token" in self._description:
+            return EmulatorSecurity.Token
+
+        return EmulatorSecurity.Nothing
+
+    def get_grpc_channel(self, channel_arguments=[]):
         """Gets a configured gRPC channel to the emulator.
 
            This will setup all the necessary security credentials, and tokens
            if needed.
 
         Args:
-            use_async (bool, optional): True if this should be an async channel.
-            Defaults to False.
+            channel_arguments: A list of key-value pairs to configure the underlying
+            gRPC Core channel or server object. Channel arguments are meant for advanced
+            usages and contain experimental API (some may not labeled as experimental).
+            Full list of available channel arguments and documentation can be found
+            under the “grpc_arg_keys” section of “channel_arg_names.h” header file
+            (https://github.com/grpc/grpc/blob/v1.60.x/include/grpc/impl/channel_arg_names.h).
+
+            You can set "emulator.jwks.issuer" to the issuer of the JWT token that will
+            be used if JWT is enabled in the emulator. If this is not set it will
+            default to PyModule.
+
+            You must make sure the the emulator security configuration
+            found in $ANDROID_SDK_ROOT/emulator/lib/emulator_access.json contains
+            the appropriate access rules.
+
+            You can force security by setting "emulator.security" to any of:
+            ["Nothing", "Token", "Jwt"] otherwise it will use this preference ordering
+            based on discovered capabilities:
+
+            Jwt > Token > Nothing
 
         Returns:
-            grpc.aio.Channel: A fully configured gRPC channel to the emulator.
+            A fully configured gRPC channel to the emulator.
         """
-
-        # This should default to max
-        MAX_MESSAGE_LENGTH = -1
-
         port = self.get("grpc.port", 8554)
         addr = self.get("grpc.address", f"localhost:{port}")
-        if use_async:
-            channel = grpc.aio.insecure_channel(
-                addr,
-                options=[
-                    ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
-                    ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
-                ],
+        args_as_dict = dict(channel_arguments)
+        if "grpc.max_send_message_length" not in args_as_dict:
+            channel_arguments.append(
+                ("grpc.max_send_message_length", self.MAX_MESSAGE_LENGTH)
             )
-        else:
-            channel = grpc.insecure_channel(
-                addr,
-                options=[
-                    ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
-                    ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
-                ],
-            )
-        if "grpc.token" in self._description:
-            bearer = "Bearer {}".format(self.get("grpc.token", ""))
-            logging.debug("Insecure Channel with token to: %s", addr)
-            return grpc.intercept_channel(
-                channel, header_adder_interceptor("authorization", bearer)
+        if "grpc.max_receive_message_length" not in args_as_dict:
+            channel_arguments.append(
+                ("grpc.max_receive_message_length", self.MAX_MESSAGE_LENGTH)
             )
 
-        if ("grpc.jwks" in self._description) and (
-            "grpc.jwk_active" in self._description
-        ):
+        channel = grpc.insecure_channel(
+            addr,
+            options=channel_arguments,
+        )
+
+        security = self._select_security(args_as_dict)
+
+        if security == EmulatorSecurity.Jwt:
+            issuer = args_as_dict.get("emulator.jwks.issuer", "PyModule")
             # We need to create jwks..
             key_path = self._description["grpc.jwks"]
             active_path = self._description["grpc.jwk_active"]
@@ -180,83 +212,95 @@ class BasicEmulatorDescription(dict):
                     "Tink is not avaible, cannot provide a secure channel."
                 )
             return grpc.intercept_channel(
-                channel, jwt_header_interceptor(key_path, active_path)
+                channel,
+                jwt_header_interceptor(key_path, active_path, False, issuer=issuer),
             )
 
-        logging.debug("Insecure channel to %s", addr)
+        if security == EmulatorSecurity.Token:
+            bearer = "Bearer {}".format(self.get("grpc.token", ""))
+            logging.debug("Insecure Channel with token to: %s", addr)
+            return grpc.intercept_channel(
+                channel,
+                header_adder_interceptor("authorization", bearer, False),
+            )
+
         return channel
 
-    def get_async_grpc_channel(self) -> grpc.aio.Channel:
-        """Gets an asynchronous channel to the emulator.
+    def get_async_grpc_channel(self, channel_arguments=[]) -> grpc:
+        """Gets a configured gRPC asynchronous channel to the emulator.
+
+           This will setup all the necessary security credentials, and tokens
+           if needed.
+
+         Args:
+            channel_arguments: A list of key-value pairs to configure the underlying
+            gRPC Core channel or server object. Channel arguments are meant for advanced
+            usages and contain experimental API (some may not labeled as experimental).
+            Full list of available channel arguments and documentation can be found
+            under the “grpc_arg_keys” section of “channel_arg_names.h” header file
+            (https://github.com/grpc/grpc/blob/v1.60.x/include/grpc/impl/channel_arg_names.h).
+
+            You can set "emulator.jwks.issuer" to the issuer of the JWT token that will
+            be used if JWT is enabled in the emulator. If this is not set it will
+            default to PyModule.
+
+            You must make sure the the emulator security configuration
+            found in $ANDROID_SDK_ROOT/emulator/lib/emulator_access.json contains
+            the appropriate access rules.
+
+            You can force security by setting "emulator.security" to any of:
+            ["Nothing", "Token", "Jwt"] otherwise it will use this preference ordering
+            based on discovered capabilities:
+
+            Jwt > Token > Nothing
+
 
         Returns:
-            grpc.aio.Channel: An asynchronous connection the emulator.
+            A fully configured gRPC async channel to the emulator.
         """
-        return self.get_grpc_channel(True)
+        port = self.get("grpc.port", 8554)
+        addr = self.get("grpc.address", f"localhost:{port}")
+        args_as_dict = dict(channel_arguments)
+        if "grpc.max_send_message_length" not in args_as_dict:
+            channel_arguments.append(
+                ("grpc.max_send_message_length", self.MAX_MESSAGE_LENGTH)
+            )
+        if "grpc.max_receive_message_length" not in args_as_dict:
+            channel_arguments.append(
+                ("grpc.max_receive_message_length", self.MAX_MESSAGE_LENGTH)
+            )
 
-    def get_emulator_controller(
-        self, use_async: bool = False
-    ) -> EmulatorControllerStub:
-        """Gets an EmulatorControllerStub to the emulator
+        security = args_as_dict.get("emulator.security", "none")
+        interceptors = []
 
-        Args:
-            use_async (bool, optional): True if this should be async. Defaults to False.
+        security = self._select_security(args_as_dict)
 
-        Returns:
-            EmulatorControllerStub: An RPC stub to the emulator controller.
-        """
-        channel = self.get_grpc_channel(use_async)
-        return EmulatorControllerStub(channel)
+        if security == EmulatorSecurity.Jwt:
+            issuer = args_as_dict.get("emulator.jwks.issuer", "PyModule")
 
-    def get_snapshot_service(self) -> SnapshotServiceStub:
-        """Returns a stub to the snapshot service."""
-        return SnapshotServiceStub(self.get_grpc_channel())
+            # We need to create jwks..
+            key_path = self._description["grpc.jwks"]
+            active_path = self._description["grpc.jwk_active"]
+            if not _HAVE_TINK:
+                raise NotImplementedError(
+                    "Tink is not avaible, cannot provide a secure channel."
+                )
+            interceptors = jwt_header_interceptor(
+                key_path,
+                active_path,
+                use_async=True,
+                issuer=issuer,
+            )
+        elif security == EmulatorSecurity.Token:
+            bearer = "Bearer {}".format(self.get("grpc.token", ""))
+            logging.debug("Insecure Channel with token to: %s", addr)
+            interceptors = header_adder_interceptor("authorization", bearer, True)
 
-    def get_waterfall_service(self, use_async=False) -> WaterfallStub:
-        """Returns a stub to the waterfall service.
-
-        Note: Requires an image with a waterfall service installed,
-        or an emulator running with a waterfall extension.
-        """
-        channel = self.get_grpc_channel(use_async)
-        return WaterfallStub(channel)
-
-    def get_rtc_service(self, use_async=False) -> RtcStub:
-        """Returns a stub to the Rtc service.
-
-        Note: Requires an emulator with WebRTC support. Usually this
-        means you are running the emulator under linux.
-        """
-        channel = self.get_grpc_channel(use_async)
-        return RtcStub(channel)
-
-    def get_ui_controller_service(self, use_async=False) -> UiControllerStub:
-        """Returns a stub to the Ui Controller service."""
-        channel = self.get_grpc_channel(use_async)
-        return UiControllerStub(channel)
-
-
-    def get_incubating_modem_service(self, use_async=False) -> ModemStub:
-        """Returns a stub to modem service.
-
-        Warning! This service is incubating and might change.
-
-        Args:
-            use_async (bool, optional): True if you wish to use the async api. Defaults to False.
-
-        Returns:
-            ModemStub: A stub to the modem service.
-        """
-        channel = self.get_grpc_channel(use_async)
-        return ModemStub(channel)
-
-
-    def get_emulated_bluetooth_service(
-        self, use_async=False
-    ) -> EmulatedBluetoothServiceStub:
-        """Returns a stub to the emulated bluetooth service."""
-        channel = self.get_grpc_channel(use_async)
-        return EmulatedBluetoothServiceStub(channel)
+        return grpc.aio.insecure_channel(
+            addr,
+            options=channel_arguments,
+            interceptors=interceptors,
+        )
 
     def get(self, prop: str, default_value: str = None) -> str:
         """Gets the property from the emulator description
@@ -332,9 +376,8 @@ class EmulatorDescription(BasicEmulatorDescription):
             return True
 
         try:
-            self.get_emulator_controller().setVmState(
-                VmRunState(state=VmRunState.SHUTDOWN)
-            )
+            stub = EmulatorControllerStub(self.get_grpc_channel())
+            stub.setVmState(VmRunState(state=VmRunState.SHUTDOWN))
         except Exception as err:
             logging.error("Failed to shutdown using gRPC (%s), terminating.", err)
             proc.terminate()

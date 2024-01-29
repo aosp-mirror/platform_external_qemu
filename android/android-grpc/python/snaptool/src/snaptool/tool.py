@@ -15,16 +15,27 @@
 # limitations under the License.
 from __future__ import absolute_import, division, print_function
 
+import asyncio
 import os
 import sys
 import time
+from functools import update_wrapper
 
-import google.protobuf.text_format
 import click
-
+import google.protobuf.text_format
 from aemu.proto.snapshot_pb2 import Image
-from aemu.proto.snapshot_service_pb2 import SnapshotPackage, SnapshotDetails
-from snaptool.snapshot import SnapshotService
+from aemu.proto.snapshot_service_pb2 import SnapshotDetails, SnapshotPackage
+from snaptool.snapshot import AsyncSnapshotService, SnapshotService
+
+
+def coro(f):
+    f = asyncio.coroutine(f)
+
+    def wrapper(*args, **kwargs):
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(f(*args, **kwargs))
+
+    return update_wrapper(wrapper, f)
 
 
 def fmt_proto(msg):
@@ -47,14 +58,15 @@ def sizeof_fmt(num):
 @click.option("--grpc", default="", help="Port or address of the grpc service to use.")
 @click.pass_context
 def cli(ctx, grpc):
-    ctx.obj = SnapshotService(grpc)
+    ctx.obj = AsyncSnapshotService(grpc)
     pass
 
 
 @cli.command()
 @click.pass_obj
-def list(snapshotService):
-    snaps = snapshotService.lists()
+@coro
+async def list(snapshotService):
+    snaps = await snapshotService.lists()
     if snaps:
         for snap in snaps:
             print(
@@ -72,8 +84,9 @@ def list(snapshotService):
 @click.pass_obj
 @click.argument("name")
 @click.option("--all", "-a", default=False, is_flag=True, help="Print the raw data.")
-def info(snapshotService, name, all):
-    snap = snapshotService.info(name)
+@coro
+async def info(snapshotService, name, all):
+    snap = await snapshotService.info(name)
     if not snap:
         print("{} does not exist".format(name))
 
@@ -108,39 +121,44 @@ def info(snapshotService, name, all):
 @click.argument("name")
 @click.argument("dest", default=".")
 @click.option("--compress/--no-compress", default=False)
-def pull(snapshotService, name, dest, compress):
+@coro
+async def pull(snapshotService, name, dest, compress):
     fmt = SnapshotPackage.Format.TAR
     if compress:
         fmt = SnapshotPackage.Format.TARGZ
-    msg, fname = snapshotService.pull(name, dest, fmt)
+    msg, fname = await snapshotService.pull(name, dest, fmt)
 
 
 @cli.command()
 @click.pass_obj
 @click.argument("src")
-def push(snapshotService, src):
+@coro
+async def push(snapshotService, src):
     if not os.path.exists(src):
-        print("File {} does not exist!".format(src))
+        print(f"File {src} does not exist!")
         sys.exit(1)
-    snapshotService.push(src)
+    await snapshotService.push(src)
 
 
 @cli.command()
 @click.pass_obj
 @click.argument("name")
-def load(snapshotService, name):
-    snapshotService.load(name)
+@coro
+async def load(snapshotService, name):
+    await snapshotService.load(name)
 
 
 @cli.command()
 @click.pass_obj
 @click.argument("name")
-def save(snapshotService, name):
-    snapshotService.save(name)
+@coro
+async def save(snapshotService, name):
+    await snapshotService.save(name)
 
 
 @cli.command()
 @click.pass_obj
 @click.argument("name")
-def delete(snapshotService, name):
-    snapshotService.delete(name)
+@coro
+async def delete(snapshotService, name):
+    await snapshotService.delete(name)

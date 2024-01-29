@@ -11,11 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pytest
-import platform
 import os
-from aemu.discovery.emulator_discovery import get_discovery_directories
+import platform
 from pathlib import Path
+
+import pytest
+from aemu.discovery.emulator_discovery import get_discovery_directories
 
 test_expected = [
     ("Linux", {"XDG_RUNTIME_DIR": "foo"}, "foo"),
