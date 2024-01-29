@@ -29,6 +29,7 @@ from aemu.proto.emulated_bluetooth_device_pb2 import (
     GattService,
     Uuid,
 )
+from aemu.proto.emulated_bluetooth_pb2_grpc import EmulatedBluetoothServiceStub
 from aemu.proto.emulated_bluetooth_device_pb2_grpc import (
     GattDeviceServiceServicer,
     add_GattDeviceServiceServicer_to_server,
@@ -39,7 +40,6 @@ from google.protobuf import text_format
 
 
 class HeartRateMonitor(GattDeviceServiceServicer):
-
     # Well known heart rate monitor short uuids
     HRS_MEASUREMENT_UUID = 0x2A37
     HRS_BODY_SENSOR_LOC_UUID = 0x2A38
@@ -126,7 +126,9 @@ class HeartRateMonitor(GattDeviceServiceServicer):
 def register():
     """Registers the heart rate monitor with the first discovered emulator."""
     server = start_server()
-    stub = get_default_emulator().get_emulated_bluetooth_service()
+    stub = EmulatedBluetoothServiceStub(
+        get_default_emulator([("emulator.security", "token")]).get_grpc_channel()
+    )
 
     device_description = GattDevice(
         # Location where I registered my server, the nimble stack will
@@ -189,9 +191,12 @@ def start_server():
     server.start()
     return server
 
+
 def main():
     logging.basicConfig(level=logging.INFO)
-    logging.warning("This might require you to run the emulator with the `-packet-streamer-endpoint default` flag.")
+    logging.warning(
+        "This might require you to run the emulator with the `-packet-streamer-endpoint default` flag."
+    )
     register()
 
 

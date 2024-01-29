@@ -66,6 +66,7 @@ extern "C" {
 }  // extern "C"
 
 #include <chrono>
+#include <signal.h>
 
 // Conflicts with Log.h
 #ifdef ERROR
@@ -168,6 +169,7 @@ bool VirtioWifiForwarder::init() {
     eloop_register_read_sock(mVirtIOSock.get(),
                              VirtioWifiForwarder::eloopSocketHandler, nullptr,
                              this);
+    registerSigPipeHandler();
 #else
     //  Looper FdWatch and set callback functions
     mFdWatch = mLooper->createFdWatch(mVirtIOSock.get(),
@@ -317,6 +319,16 @@ void VirtioWifiForwarder::eloopSocketHandler(int sock,
                                              void* sock_ctx) {
     VirtioWifiForwarder::onHostApd(sock_ctx, sock,
                                    android::base::Looper::FdWatch::kEventRead);
+}
+
+void VirtioWifiForwarder::registerSigPipeHandler() {
+#ifndef _WIN32
+    struct sigaction sigact;
+    sigact.sa_handler = SIG_IGN;
+    if (sigaction(SIGPIPE, &sigact, NULL) != 0) {
+        LOG(ERROR) << "Error configuring SIGPIPE signal handler: " << strerror(errno);
+    }
+#endif
 }
 #else
 

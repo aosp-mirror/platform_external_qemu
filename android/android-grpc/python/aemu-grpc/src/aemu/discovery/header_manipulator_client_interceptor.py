@@ -17,6 +17,7 @@ import collections
 import time
 from datetime import timedelta, timezone
 
+import aemu.discovery.generic_async_client_interceptor as generic_async_client_interceptor
 import aemu.discovery.generic_client_interceptor as generic_client_interceptor
 import grpc
 
@@ -30,14 +31,15 @@ def currenttz():
 
 class _ClientCallDetails(
     collections.namedtuple(
-        "_ClientCallDetails", ("method", "timeout", "metadata", "credentials")
+        "_ClientCallDetails",
+        ("method", "timeout", "metadata", "credentials", "wait_for_ready"),
     ),
     grpc.ClientCallDetails,
 ):
     pass
 
 
-def header_adder_interceptor(header, value):
+def header_adder_interceptor(header: str, value: str, use_async: bool):
     def intercept_call(client_call_details, request_iterator, *_):
         metadata = []
         if client_call_details.metadata is not None:
@@ -53,7 +55,10 @@ def header_adder_interceptor(header, value):
             client_call_details.timeout,
             metadata,
             client_call_details.credentials,
+            client_call_details.wait_for_ready,
         )
         return client_call_details, request_iterator, None
 
+    if use_async:
+        return generic_async_client_interceptor.create(intercept_call)
     return generic_client_interceptor.create(intercept_call)

@@ -65,6 +65,11 @@ namespace carpropertyutils {
          * a vector of intergers
         */
         QString (*int32VecToString)(std::vector<int32_t> vals);
+
+        /**
+         * The detailed description for the property.
+         */
+        QString detailedDescription;
     };
 
     // Map from property ids to description for conversion to human readable form.
@@ -81,6 +86,7 @@ namespace carpropertyutils {
     QString int32ToHexString(int32_t val);
 
     QString getValueString(emulator::VehiclePropValue val);
+    QString getDetailedDescription(int32_t propId);
     QString getAreaString(emulator::VehiclePropValue val);
 
     QString multiDetailToString(std::map<int, QString> lookupTable, int value);
@@ -90,6 +96,7 @@ namespace carpropertyutils {
     QString apPowerStateReportToString(std::vector<int32_t> vals);
     QString vendorIdToString(int32_t val);
     QString changeModeToString(int32_t val);
+    QString translate(const QString& src);
     bool isVendor(int32_t val);
     void loadDescriptionsFromJson(const char *filename);
 

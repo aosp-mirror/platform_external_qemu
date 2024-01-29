@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
-import psutil
 
 import aemu.discovery.emulator_discovery
 import grpc
+import psutil
 import pytest
-from aemu.discovery.emulator_discovery import get_default_emulator
+from aemu.discovery.emulator_discovery import EmulatorDescription, get_default_emulator
 
 
 @pytest.fixture
@@ -32,8 +32,8 @@ def fake_emu_pid_file(tmpdir_factory, mocker):
         return_value=[tmp_pid.parent],
     )
     mocker.patch.object(Path, "glob", return_value=[tmp_pid])
+    mocker.patch.object(EmulatorDescription, "is_alive", return_value=True)
     mocker.patch.object(psutil, "pid_exists", return_value=True)
-
 
 
 @pytest.fixture
@@ -49,8 +49,8 @@ def fake_emu_pid_file_with_token(tmpdir_factory, mocker):
         return_value=[tmp_pid.parent],
     )
     mocker.patch.object(Path, "glob", return_value=[tmp_pid])
+    mocker.patch.object(EmulatorDescription, "is_alive", return_value=True)
     mocker.patch.object(psutil, "pid_exists", return_value=True)
-
 
 
 def test_get_default_channel(fake_emu_pid_file):
@@ -82,4 +82,4 @@ def test_get_token_async_channel(fake_emu_pid_file_with_token):
     channel = get_default_emulator().get_async_grpc_channel()
     assert channel is not None
     # Note the hijacked channel class!
-    assert channel.__class__.__name__ == "_Channel"
+    assert channel.__class__.__name__ == "Channel"

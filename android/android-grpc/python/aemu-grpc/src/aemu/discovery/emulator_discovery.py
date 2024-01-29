@@ -15,11 +15,13 @@ import logging
 import os
 import platform
 import re
-from typing import Optional
 from pathlib import Path
+from typing import Optional
 
-
-from aemu.discovery.emulator_description import EmulatorDescription, BasicEmulatorDescription
+from aemu.discovery.emulator_description import (
+    BasicEmulatorDescription,
+    EmulatorDescription,
+)
 
 
 class EmulatorNotFound(Exception):
@@ -135,7 +137,9 @@ class EmulatorDiscovery(object):
         return next(iter(emulators))
 
     @staticmethod
-    def connection(address: str, token: Optional[str] = None) -> BasicEmulatorDescription:
+    def connection(
+        address: str, token: Optional[str] = None
+    ) -> BasicEmulatorDescription:
         """Creates a connection to an emulator based upon a uri
         and token.
 
@@ -194,8 +198,6 @@ def _get_user_directories():
     return paths
 
 
-
-
 def get_default_emulator() -> EmulatorDescription:
     """The first discovered emulator.
 
@@ -208,5 +210,3 @@ def get_default_emulator() -> EmulatorDescription:
         EmulatorDescription: The first discovered emulator.
     """
     return EmulatorDiscovery().first()
-
-

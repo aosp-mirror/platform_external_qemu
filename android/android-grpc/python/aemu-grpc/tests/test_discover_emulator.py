@@ -17,7 +17,11 @@ from pathlib import Path
 import aemu.discovery.emulator_discovery
 import psutil
 import pytest
-from aemu.discovery.emulator_discovery import EmulatorDiscovery, get_default_emulator
+from aemu.discovery.emulator_discovery import (
+    EmulatorDescription,
+    EmulatorDiscovery,
+    get_default_emulator,
+)
 
 
 @pytest.fixture
@@ -43,6 +47,7 @@ def fake_emu_pid_file(tmp_directory, mocker):
             "get_discovery_directories",
             return_value=[tmp_directory],
         )
+        mocker.patch.object(EmulatorDescription, "is_alive", return_value=True)
         mocker.patch.object(psutil, "pid_exists", return_value=True)
 
     return write_pid_file
@@ -104,10 +109,3 @@ def test_create_description_from_uri_is_same():
     assert EmulatorDiscovery.connection(
         "localhost:8444"
     ) == EmulatorDiscovery.connection("localhost:8444")
-
-
-def test_create_controlller_from_uri():
-    assert (
-        EmulatorDiscovery.connection("localhost:8444").get_emulator_controller()
-        is not None
-    )
