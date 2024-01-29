@@ -172,6 +172,7 @@ void VhalTable::on_property_list_currentItemChanged(QListWidgetItem* current,
         VhalItem* vhalItem = getItemWidget(current);
         vhalItem->vhalItemSelected(true);
         mSelectedKey = vhalItem->getKey();
+        clearPropertyDescription();
         sendGetSelectedPropertyRequest();
     } else {
         mSelectedKey = QString();
@@ -343,28 +344,26 @@ void VhalTable::showPropertyDescription(VehiclePropValue val) {
     QString value = carpropertyutils::getValueString(val);
     int type = val.value_type();
 
-    setPropertyText(mUi->property_name_value, label);
-    setPropertyText(mUi->area_value, area);
-    setPropertyText(mUi->property_id_value, id);
-    setPropertyText(mUi->change_mode_value,
-                   changeModeToString(propConfig.change_mode()));
-    setPropertyText(mUi->value_value, value);
+    mUi->property_name_value->setText(label);
+    mUi->area_value->setText(area);
+    mUi->property_id_value->setText(id);
+    mUi->change_mode_value->setText(changeModeToString(propConfig.change_mode()));
+    mUi->value_value->setText(value);
+    auto description = carpropertyutils::getDetailedDescription(val.prop());
+    if (mUi->property_description_value->toPlainText().isEmpty() && !description.isEmpty()) {
+        // Don't overwrite the description if already set to prevent resetting the scroll position.
+        mUi->property_description_value->setText(description);
+    }
     mUi->editButton->setEnabled(propConfig.access() != emulator::VehiclePropertyAccess::WRITE);
 }
 
 void VhalTable::clearPropertyDescription() {
-    setPropertyText(mUi->property_name_value, QString());
-    setPropertyText(mUi->area_value, QString());
-    setPropertyText(mUi->property_id_value, QString());
-    setPropertyText(mUi->change_mode_value,QString());
-    setPropertyText(mUi->value_value, QString());
-}
-
-void VhalTable::setPropertyText(QLabel* label, QString text) {
-    QFontMetrics metrix(label->font());
-    int width = label->width() - 2;
-    QString clippedText = metrix.elidedText(text, Qt::ElideRight, width);
-    label->setText(clippedText);
+    mUi->property_name_value->setText(QString());
+    mUi->area_value->setText(QString());
+    mUi->property_id_value->setText(QString());
+    mUi->change_mode_value->setText(QString());
+    mUi->value_value->setText(QString());
+    mUi->property_description_value->setText(QString());
 }
 
 void VhalTable::showEditableArea(VehiclePropValue val) {
