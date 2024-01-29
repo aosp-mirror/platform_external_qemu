@@ -459,6 +459,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 
     mSleepTimer.setSingleShot(true);
     connect(&mSleepTimer, SIGNAL(timeout()), this, SLOT(on_sleep_timer_done()));
+    mUnfoldTimer.setSingleShot(true);
+    connect(&mUnfoldTimer, SIGNAL(timeout()), this, SLOT(on_unfold_timer_done()));
 }
 
 ToolWindow::~ToolWindow() {
@@ -478,8 +480,18 @@ void ToolWindow::startSleepTimer() {
     mSleepTimer.start(2000); // 2 second
 }
 
+void ToolWindow::startUnfoldTimer(PresetEmulatorSizeType newSize) {
+    mDesiredNewSize = newSize;
+    on_new_posture_requested(POSTURE_OPENED);
+    mUnfoldTimer.start(2000);
+}
+
 void ToolWindow::on_sleep_timer_done() {
     mEmulatorWindow->getAdbInterface()->enqueueCommand( {"shell", "input", "keyevent", "KEYCODE_WAKEUP"});
+}
+
+void ToolWindow::on_unfold_timer_done() {
+    on_new_resizable_requested(mDesiredNewSize);
 }
 
 void ToolWindow::updateFoldableButtonVisibility() {
@@ -973,11 +985,7 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
         return;
     }
     if (android_foldable_is_folded()) {
-        const char* error_msg = "Cannot resize emulator: avd is folded, unfold and try again";
-        if (sUiEmuAgent && sUiEmuAgent->window) {
-                sUiEmuAgent->window->showMessage( error_msg, WINDOW_MESSAGE_ERROR, 3000);
-        }
-        LOG(ERROR) << error_msg;
+        startUnfoldTimer(newSize);
         return;
     }
     PresetEmulatorSizeInfo info;
