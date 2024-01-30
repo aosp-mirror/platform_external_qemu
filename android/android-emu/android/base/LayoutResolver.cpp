@@ -194,56 +194,41 @@ std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveLayout(
 }
 
 std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveStackedLayout(
-        std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles,
-        const uint32_t monitorWidth) {
+        std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles) {
 
     std::vector<Rect> firstRow;
-    uint32_t totalWidth = 0;
+    uint32_t maxWidth = 0, totalWidth = 0;
+    uint32_t distDispId = -1;
     for (const auto& iter : rectangles) {
         firstRow.emplace_back(iter.first, 0, 0, iter.second.first, iter.second.second);
+        if (maxWidth < iter.second.first) {
+            // Distant Display has the most wide width
+            maxWidth = iter.second.first;
+            distDispId = iter.first;
+        }
         totalWidth += iter.second.first;
     }
+
     std::stable_sort(
             firstRow.begin(), firstRow.end(),
             [](const Rect& a, const Rect& b) { return a.id < b.id; });
 
-    totalWidth = 0;
-    std::vector<Rect> secondRow;
-    for (int i = 0; i < firstRow.size(); i++) {
-        if (((double)totalWidth + firstRow[i].width) / monitorWidth <= 0.90) {
-            // Locate displays on a the first row until the total width doesn't
-            // reach to the max threthold which is 95% at this moment
-            totalWidth += firstRow[i].width;
-        } else {
-            // Locate displays on a separate row if the total width exeeds
-            // the max threthold
-            for (int j = i; j < firstRow.size(); j++) {
-                secondRow.push_back(firstRow[j]);
-            }
-            firstRow.erase(firstRow.begin() + i, firstRow.end());
-            break;
-        }
-    }
-
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> retVal;
-    uint32_t posX = 0, firstRowHeight = 0;
+    uint32_t posX = (maxWidth > (totalWidth - maxWidth)) ? (maxWidth - (totalWidth / 2)) : 0;
+    uint32_t firstRowHeight = 0, ddIdx = 0;
     for (int i = 0; i < firstRow.size(); i++) {
-        firstRow[i].pos_x = posX;
-        posX += firstRow[i].width;
-        retVal[firstRow[i].id] = std::make_pair(firstRow[i].pos_x, 0);
-        if (firstRowHeight < firstRow[i].height) {
-            firstRowHeight = firstRow[i].height;
+        if (firstRow[i].id != distDispId) {
+            retVal[firstRow[i].id] = std::make_pair(posX, 0);
+            if (firstRowHeight < firstRow[i].height) {
+                firstRowHeight = firstRow[i].height;
+            }
+            posX += firstRow[i].width;
+        } else {
+            ddIdx = i;
         }
     }
-    posX = 0;
-    std::stable_sort(
-            secondRow.begin(), secondRow.end(),
-            [](const Rect& a, const Rect& b) { return a.id < b.id; });
-    for (int i = 0; i < secondRow.size(); i++) {
-        secondRow[i].pos_x = posX;
-        posX += secondRow[i].width;
-        retVal[secondRow[i].id] = std::make_pair(secondRow[i].pos_x, firstRowHeight);
-    }
+    // Put the distant display on the second row
+    retVal[firstRow[ddIdx].id] = std::make_pair(0, firstRowHeight);
     return retVal;
 }
 
