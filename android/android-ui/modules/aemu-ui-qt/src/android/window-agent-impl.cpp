@@ -363,10 +363,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     if (!resizableEnabled()) {
                         return false;
                     }
-                    if (android_foldable_is_folded()) {
-                        dwarning("Cannot resize emulator: avd is folded, unfold and try again");
-                        return false;
-                    }
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         win->runOnUiThread([win, presetSize]() {
                             win->toolWindow()->presetSizeAdvance(

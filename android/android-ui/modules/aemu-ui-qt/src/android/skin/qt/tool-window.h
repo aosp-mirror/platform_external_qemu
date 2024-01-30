@@ -234,6 +234,10 @@ private:
 
     void startSleepTimer();
 
+    QTimer mUnfoldTimer;
+    PresetEmulatorSizeType mDesiredNewSize {PRESET_SIZE_PHONE};
+    void startUnfoldTimer(PresetEmulatorSizeType newSize);
+
 public slots:
     void raise();
     void switchClipboardSharing(bool enabled);
@@ -279,4 +283,5 @@ private slots:
     void onHostClipboardChanged();
 
     void on_sleep_timer_done();
+    void on_unfold_timer_done();
 };
