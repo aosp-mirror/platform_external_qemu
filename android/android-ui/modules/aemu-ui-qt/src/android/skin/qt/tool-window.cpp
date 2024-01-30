@@ -456,6 +456,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     if (screen_count == 1) {
         installEventFilter(this);
     }
+
+    mSleepTimer.setSingleShot(true);
+    connect(&mSleepTimer, SIGNAL(timeout()), this, SLOT(on_sleep_timer_done()));
 }
 
 ToolWindow::~ToolWindow() {
@@ -463,6 +466,20 @@ ToolWindow::~ToolWindow() {
             SEND_EXIT,
     });
     mFoldableSyncToAndroid.join();
+}
+
+void ToolWindow::startSleepTimer() {
+    auto hw = (getConsoleAgents()->settings->avdInfo());
+    if (!avdInfo_isVanillaIceCreamPreview(hw)) {
+        return;
+    }
+
+    mEmulatorWindow->getAdbInterface()->enqueueCommand( {"shell", "input", "keyevent", "KEYCODE_SLEEP"});
+    mSleepTimer.start(2000); // 2 second
+}
+
+void ToolWindow::on_sleep_timer_done() {
+    mEmulatorWindow->getAdbInterface()->enqueueCommand( {"shell", "input", "keyevent", "KEYCODE_WAKEUP"});
 }
 
 void ToolWindow::updateFoldableButtonVisibility() {
@@ -1702,7 +1719,18 @@ void ToolWindow::hideRotationButton(bool hide) {
 }
 
 void ToolWindow::on_new_posture_requested(int newPosture) {
+    if (mLastRequestedFoldablePosture == -1) {
+        mLastRequestedFoldablePosture = android_foldable_get_posture();
+    }
     mEmulatorWindow->activateWindow();
+    const bool is_pixel_fold = android_foldable_is_pixel_fold();
+    if (is_pixel_fold) {
+        if (newPosture > 1 && mLastRequestedFoldablePosture == 1 ||
+                newPosture == 1 && mLastRequestedFoldablePosture > 1) {
+            startSleepTimer();
+        }
+
+    }
     mLastRequestedFoldablePosture = newPosture;
     handleUICommand(QtUICommand::CHANGE_FOLDABLE_POSTURE, true);
 }
