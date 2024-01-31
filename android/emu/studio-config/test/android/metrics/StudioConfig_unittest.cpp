@@ -259,7 +259,6 @@ TEST(StudioConfigTest, persistAndLoadEmuUserId) {
     testDir->makeSubDir("root");
     testDir->makeSubDir("root/home");
     testDir->makeSubDir("root/home/.android");
-    testDir->makeSubDir("root/home/.android/avd");
 
 #ifndef _WIN32
     {
@@ -269,7 +268,7 @@ TEST(StudioConfigTest, persistAndLoadEmuUserId) {
 
         // ID is persisted on disk
         std::ifstream idFile(testDir->pathString() +
-                                       "/root/home/.android/avd/userid",
+                                       "/root/home/.android/userid",
                                std::ios_base::in);
         ASSERT_TRUE(!!idFile);
         std::stringstream idFromFile;
@@ -281,7 +280,7 @@ TEST(StudioConfigTest, persistAndLoadEmuUserId) {
 
     {   // Returns the value in userid if exists
         std::ofstream idFile(testDir->pathString() +
-                                       "/root/home/.android/avd/userid",
+                                       "/root/home/.android/userid",
                                std::ios_base::trunc);
         ASSERT_TRUE(!!idFile);
         idFile << R"(123)";
@@ -292,7 +291,7 @@ TEST(StudioConfigTest, persistAndLoadEmuUserId) {
 
     {   // Returns the value in userid if exists
         std::ofstream idFile(testDir->pathString() +
-                                       "/root/home/.android/avd/userid",
+                                       "/root/home/.android/userid",
                                std::ios_base::trunc);
         ASSERT_TRUE(!!idFile);
         idFile << R"(1 2 3)";
