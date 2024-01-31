@@ -164,11 +164,8 @@ bool VirtioWifiForwarder::init() {
     mHostapdSock = ScopedSocket(fds[0]);
     mVirtIOSock = ScopedSocket(fds[1]);
     mHostapdSockInitSuccess = mHostapd->setDriverSocket(mHostapdSock);
-
+    registerEventLoop();
 #ifdef NETSIM_WIFI
-    eloop_register_read_sock(mVirtIOSock.get(),
-                             VirtioWifiForwarder::eloopSocketHandler, nullptr,
-                             this);
     registerSigPipeHandler();
 #else
     //  Looper FdWatch and set callback functions
@@ -190,7 +187,6 @@ bool VirtioWifiForwarder::init() {
 
         mNic = qemu_new_nic(&info, mNicConf, kNicModel, kNicName, this);
     }
-#endif
     // init WifiFordPeer for P2P network.
     auto onData = [this](const uint8_t* data, size_t size) {
         return this->onRemoteData(data, size);
@@ -205,6 +201,7 @@ bool VirtioWifiForwarder::init() {
         mRemotePeer->init();
         mRemotePeer->run();
     }
+#endif
     LOG(DEBUG) << "Successfully initialized Wi-Fi";
     return true;
 }
@@ -299,9 +296,7 @@ int VirtioWifiForwarder::recv(android::base::IOVector& iov) {
 void VirtioWifiForwarder::stop() {
     mNic = nullptr;
     mSlirp = nullptr;
-#ifdef NETSIM_WIFI
-    eloop_unregister_read_sock(mVirtIOSock.get());
-#else
+#ifndef NETSIM_WIFI
     mBeaconTask.clear();
 #endif
     if (mHostapd) {
@@ -314,13 +309,6 @@ void VirtioWifiForwarder::stop() {
 }
 
 #ifdef NETSIM_WIFI
-void VirtioWifiForwarder::eloopSocketHandler(int sock,
-                                             void* eloop_ctx,
-                                             void* sock_ctx) {
-    VirtioWifiForwarder::onHostApd(sock_ctx, sock,
-                                   android::base::Looper::FdWatch::kEventRead);
-}
-
 void VirtioWifiForwarder::registerSigPipeHandler() {
 #ifndef _WIN32
     struct sigaction sigact;
@@ -328,6 +316,42 @@ void VirtioWifiForwarder::registerSigPipeHandler() {
     if (sigaction(SIGPIPE, &sigact, NULL) != 0) {
         LOG(ERROR) << "Error configuring SIGPIPE signal handler: " << strerror(errno);
     }
+#endif
+}
+
+bool VirtioWifiForwarder::waitForReadSocket(int sock, int msec) {
+#ifdef _WIN32
+    WSAEVENT event;
+    event = WSACreateEvent();
+    if (event == WSA_INVALID_EVENT) {
+        LOG(ERROR) << "WSACreateEvent() failed: " << WSAGetLastError();
+        return false;
+    }
+
+    if (WSAEventSelect(sock, event, FD_READ)) {
+        LOG(ERROR) << "WSAEventSelect() failed: " << WSAGetLastError();
+        WSACloseEvent(event);
+        return false;
+    }
+
+    WaitForSingleObject(event, msec);
+    int res = WSAEventSelect(sock, event, 0);
+    WSACloseEvent(event);
+    return res >= WAIT_OBJECT_0;
+#else
+    if (sock < 0)
+        return false;
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = msec * 1000;
+    fd_set rfds;
+    FD_ZERO(&rfds);
+    FD_SET(sock, &rfds);
+    int res = select(sock + 1, &rfds, NULL, NULL, &tv);
+    if (res < 0 && errno != EINTR && errno != 0) {
+        LOG(ERROR) << "Netsim waitForReadSocket select error: " << strerror(errno);
+    }
+    return (res <= 0) ? false : FD_ISSET(sock, &rfds);
 #endif
 }
 #else
@@ -431,17 +455,18 @@ void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
         if (newBeaconInt != forwarder->mBeaconIntMs) {
             forwarder->mBeaconIntMs = newBeaconInt;
         }
-        forwarder->registerBeaconTask();
     } else {
         forwarder->sendToGuest(std::move(frame));
     }
 }
 
-void VirtioWifiForwarder::registerBeaconTask() {
+void VirtioWifiForwarder::registerEventLoop() {
 #ifdef NETSIM_WIFI
     async([this]() {
         while (true) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(mBeaconIntMs));
+            if (waitForReadSocket(mVirtIOSock.get(), mBeaconIntMs)){
+                onHostApd(this, mVirtIOSock.get(), android::base::Looper::FdWatch::kEventRead);
+            }
             if (mBeaconFrame != nullptr && mBeaconFrame->isBeacon()) {
                 sendToGuest(std::make_unique<Ieee80211Frame>(
                         mBeaconFrame->data(), mBeaconFrame->size(),
