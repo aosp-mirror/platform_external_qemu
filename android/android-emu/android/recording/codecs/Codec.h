@@ -57,6 +57,8 @@ public:
     // Configures and initializes either the SwsContext or SwrContext
     virtual bool initSwxContext(const AVCodecContext* c, T* swxCxt) const = 0;
 
+    virtual void updateFbWidthHeight(uint32_t fbW, uint32_t fbH) { };
+
     // Configures and initializes the resampling context
     // Returns the codec id.
     AVCodecID getCodecId() const { return mCodecId; }
@@ -64,6 +66,8 @@ public:
     const AVCodec* getCodec() const { return mCodec; }
     // Returns the codec parameters
     const CodecParams* getCodecParams() const { return &mParams; }
+
+    virtual double getScale() const { return 1.0; }
 
 protected:
     explicit Codec(AVCodecID id, CodecParams&& params)
