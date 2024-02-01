@@ -16,8 +16,7 @@ classifiers = ["Topic :: Software Development"]
 
 
 dependencies = [
-    "importlib-metadata; python_version<'3.8'",
-    "pykg_config @ git+https://github.com/pokowaka/pykg-config/@py3",
+    "importlib-metadata; python_version<'3.8'"
 ]
 
 [project.optional-dependencies]

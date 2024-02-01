@@ -74,6 +74,12 @@ class ToolchainGenerator:
             / self.version()
         )
 
+    def cmake(self) -> Path:
+        return (
+            self.aosp / "prebuilts" / "cmake" / f"{self.host()}-x86" / "bin" / "cmake",
+            "",
+        )
+
     def host(self) -> str:
         return platform.system().lower()
 
@@ -124,14 +130,13 @@ class ToolchainGenerator:
         return "", ""
 
     def pkg_config(self):
-        try:
-            pass
-        except ImportError:
-            logging.warning("The pykg_config module is not available!")
-            logging.warning("You will need this to properly build QEMU")
-
-        script = f"{self.py_exe} -m pykg_config  --path {self.pkgconfig_directory}"
-        return script, ""
+        # Build pkg-config from source.
+        self.bazel.build_target("//external/pkg-config:pkg-config")
+        return (
+            f"PKG_CONFIG_PATH={self.pkgconfig_directory} "
+            f"{self.bazel.info['bazel-bin']}/external/pkg-config/pkg-config",
+            "",
+        )
 
     def gen_script(self, name, exe: Path, cmd_generator_fn):
         current_file = Path(__file__).resolve()
@@ -199,8 +204,9 @@ cpp_link_args = []
             "ranlib": self.ranlib,
             "meson": self.meson,
             "ninja": self.ninja,
-            "pkgconfig": self.pkg_config,
+            "pkg-config": self.pkg_config,
             "strip": self.strip,
+            "cmake": self.cmake,
         }
         for cmd, fn in cmds.items():
             self.gen_script(cmd, self.dest / f"{self.prefix}{cmd}", fn)

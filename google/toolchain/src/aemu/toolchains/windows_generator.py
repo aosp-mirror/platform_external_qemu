@@ -176,6 +176,21 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
 
         return f'"{ninja}"', ""
 
+    def pkg_config(self):
+        # Build pkg-config from source.
+        self.bazel.build_target("//external/pkg-config:pkg-config")
+        pkg_exe = (
+            Path(self.bazel.info["bazel-bin"])
+            / "external"
+            / "pkg-config"
+            / "pkg-config.exe"
+        )
+        pkg_path = self.pkgconfig_directory.as_posix()
+        return (
+            f"set PKG_CONFIG_PATH={pkg_path}\n" f"{pkg_exe}",
+            "",
+        )
+
     def cc(self):
         self.initialize()
         compat_lib_dir = self.bazel.get_archive(self.COMPAT_ARCHIVE).parent
