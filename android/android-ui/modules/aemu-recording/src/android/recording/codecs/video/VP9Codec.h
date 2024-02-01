@@ -47,7 +47,13 @@ public:
     virtual bool initSwxContext(const AVCodecContext* c,
                                 SwsContext** swsCxt) const override;
 
+    // when resize, this will change and we need to update
+    virtual void updateFbWidthHeight(uint32_t fbW, uint32_t fbH) override;
+
+    virtual double getScale() const override;
+
 protected:
+    double mScale = 1.0;
     uint32_t mFbWidth = 0;
     uint32_t mFbHeight = 0;
     AVPixelFormat mFbFormat = AV_PIX_FMT_NONE;
