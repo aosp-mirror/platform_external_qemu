@@ -41,24 +41,23 @@ class LinuxToLinuxGenerator(ToolchainGenerator):
         self.system_root = self.linux_sys_root / "sysroot"
         self.bazel.build_target(self.COMPAT_ARCHIVE)
         compat_lib_dir = self.bazel.get_archive(self.COMPAT_ARCHIVE).parent
+        linux_lib_path = version_path / "lib" / "linux"
+        lib_path = self.clang() / "lib"
+        include_path = version_path / "include"
 
         self.cflags = (
             f"--gcc-toolchain={self.linux_sys_root} "
             f"-B{self.linux_sys_root}/lib/gcc/x86_64-linux/4.8.3/ "
             f"-L{self.linux_sys_root}/lib/gcc/x86_64-linux/4.8.3/ "
             f"-L{self.linux_sys_root}/x86_64-linux/lib64/ "
-            f"-L{self.dest}/lib "
             "-fuse-ld=lld -Wl,--allow-shlib-undefined "
-            f"-L{version_path}/lib/linux/ "
-            f"-L{self.clang()}/lib/ "
+            f"-L{linux_lib_path} "
+            f"-L{include_path} "
+            f"-L{lib_path} "
             f"--sysroot={self.system_root} "
             f"-Wl,-rpath,'$ORIGIN/lib64:$ORIGIN:{self.clang() / 'lib'}' "
             f"-L{compat_lib_dir} "
             f"-isystem {compat_isystem_path} "
-        )
-        self.isystem_flags = (
-            f"-isystem {self.system_root}/usr/include "
-            f"-isystem {self.system_root}/usr/include/x86_64-linux-gnu "
         )
         self.initialized = True
 
@@ -95,10 +94,7 @@ class LinuxToLinuxGenerator(ToolchainGenerator):
             "-m64 -march=native -mtune=native -mcx16 "
             f"{self.cflags} "
         )
-        extra = (
-            "-Wno-unused-command-line-argument -lcompat -lc++ -ldl "
-            f"{self.isystem_flags} "
-        )
+        extra = "-Wno-unused-command-line-argument -lcompat -lc++ -ldl "
         return script, extra
 
     def cxx(self):
@@ -111,10 +107,7 @@ class LinuxToLinuxGenerator(ToolchainGenerator):
             f"{self.cflags} "
         )
 
-        extra = (
-            "-Wno-unused-command-line-argument -lcompat -lc++ -ldl "
-            f"{self.isystem_flags} "
-        )
+        extra = "-Wno-unused-command-line-argument -lcompat -lc++ -ldl "
         return script, extra
 
     def link_dirs(self):
