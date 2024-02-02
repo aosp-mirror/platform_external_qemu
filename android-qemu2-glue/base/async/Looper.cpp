@@ -29,9 +29,8 @@ extern "C" {
 #include "chardev/char.h"
 }  // extern "C"
 
-#include <list>
 #include <string_view>
-#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace android {
@@ -348,8 +347,7 @@ public:
     }
 
 private:
-    typedef std::list<FdWatch*> FdWatchList;
-    typedef std::unordered_map<FdWatch*, FdWatchList::iterator> FdWatchSet;
+    typedef std::unordered_set<FdWatch*> FdWatchSet;
 
     static inline QemuLooper* asQemuLooper(BaseLooper* looper) {
         return reinterpret_cast<QemuLooper*>(looper);
@@ -368,33 +366,31 @@ private:
             qemu_bh_schedule(mQemuBh);
         }
 
-        mPendingFdWatches.push_back(watch);
-        mFdWatchIterMap[watch] = std::prev(mPendingFdWatches.end());
+        CHECK(mPendingFdWatches.insert(watch).second) << "duplicate FdWatch";
     }
 
     void delPendingFdWatch(FdWatch* watch) {
         DCHECK(watch);
         DCHECK(watch->isPending());
-        const auto it = mFdWatchIterMap.find(watch);
-        DCHECK(it != mFdWatchIterMap.end());
-        mPendingFdWatches.erase(it->second);
-        mFdWatchIterMap.erase(it);
+        CHECK(mPendingFdWatches.erase(watch) > 0);
     }
 
     // Called by QEMU as soon as the main loop has finished processed
     // I/O events. Used to look at pending watches and fire them.
     static void handleBottomHalf(void* opaque) {
         QemuLooper* looper = reinterpret_cast<QemuLooper*>(opaque);
-        while (!looper->mPendingFdWatches.empty()) {
-            FdWatch* watch = looper->mPendingFdWatches.front();
-            looper->delPendingFdWatch(watch);
+        FdWatchSet& pendingFdWatches = looper->mPendingFdWatches;
+        const auto end = pendingFdWatches.end();
+        auto i = pendingFdWatches.begin();
+        while (i != end) {
+            FdWatch* watch = *i;
+            i = pendingFdWatches.erase(i);
             watch->fire();
         }
     }
 
     QEMUBH* mQemuBh = nullptr;
-    FdWatchSet mFdWatchIterMap;
-    FdWatchList mPendingFdWatches;
+    FdWatchSet mPendingFdWatches;
 };
 
 }  // namespace
