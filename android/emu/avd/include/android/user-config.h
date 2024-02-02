@@ -46,6 +46,10 @@ void           auserConfig_getWindowPos( AUserConfig*  uconfig, int  *pX, int  *
 int auserConfig_getPosture(AUserConfig* uconfig);
 void auserConfig_setPosture(AUserConfig* uconfig, int posture);
 
+double auserConfig_getWindowScale(AUserConfig* uconfig);
+
+void auserConfig_setWindowScale(AUserConfig* uconfig, double scale);
+
 /* Change the stored window position for this AVD */
 void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y );
 

@@ -23,6 +23,8 @@
 #include "host-common/hw-config.h"
 #include "host-common/hw-lcd.h"           // for LCD_DENSITY_MDPI
 #include "android/console.h"
+#include "android/skin/user-config.h"
+#include "android/user-config.h"
 #include "android/hw-sensors.h"
 #include "android/multitouch-screen.h"    // for multitouch_create_but...
 #include "android/skin/event.h"           // for SkinEvent, (anonymous...
@@ -1708,12 +1710,21 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     double scale_w = 1.0;
     double scale_h = 1.0;
 
+    bool user_window_scale_is_invalid = true;
+    const double user_window_scale = user_config_get_window_scale();
+    if (user_window_scale > 0) {
+        scale_w = user_window_scale;
+        scale_h = user_window_scale;
+        user_window_scale_is_invalid = false;
+
+    }
+
     skin_winsys_get_monitor_rect(&monitor);
 
     int hw_lcd_density = getConsoleAgents()->settings->hw()->hw_lcd_density;
 
     // Adjust the default scale for a 1-to-1 logical pixel ratio.
-    if (enable_scale && hw_lcd_density != LCD_DENSITY_MDPI) {
+    if (enable_scale && hw_lcd_density != LCD_DENSITY_MDPI && user_window_scale_is_invalid) {
         double hw_scale = (double) LCD_DENSITY_MDPI / hw_lcd_density;
         VERBOSE_PRINT(init, "Adjusting window size by %.2gx for hw_lcd_density", hw_scale);
         scale_w *= hw_scale;
@@ -1734,6 +1745,8 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
 
     window->scale = (scale_w <= scale_h) ? scale_w : scale_h;
 
+    user_config_set_window_scale(window->scale);
+
     if (skin_window_reset_internal(window, slayout) < 0) {
         skin_window_free(window);
         return NULL;
@@ -1751,6 +1764,7 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
         skin_winsys_run_ui_update(skin_window_ensure_fully_visible, data,
                                   false);
     }
+
 
     skin_window_show_opengles(window, false);
 
@@ -1911,6 +1925,23 @@ static void skin_window_resize(SkinWindow* window, int resize_container) {
         window_h = (int)ceil(window_h / dpr);
     }
 
+    SkinRect monitor;
+    skin_winsys_get_monitor_rect(&monitor);
+    // adjust x and y to make sure it does not cause window to be out of monitor
+    const int WINDOW_MINIMUM_XY = 100;
+    const double WINDOW_MONITOR_RATIO = 0.9;
+    if ((window_x + window_w) > WINDOW_MONITOR_RATIO * (monitor.size.w)) {
+        window_x = WINDOW_MONITOR_RATIO*monitor.size.w - window_w;
+        window_x = window_x > WINDOW_MINIMUM_XY ? window_x : WINDOW_MINIMUM_XY;
+        window->x_pos = window_x;
+        skin_winsys_set_window_pos(window_x, window_y);
+    }
+    if ((window_y + window_h) > WINDOW_MONITOR_RATIO * (monitor.size.h)) {
+        window_y = WINDOW_MONITOR_RATIO*monitor.size.h - window_h;
+        window_y = window_y > WINDOW_MINIMUM_XY ? window_y : WINDOW_MINIMUM_XY;
+        window->y_pos = window_y;
+        skin_winsys_set_window_pos(window_x, window_y);
+    }
     // Attempt to resize the window surface. If it doesn't exist, a new one will
     // be allocated. If it does exist, but its original dimensions do not match
     // the new ones, it will be de-allocated and a new one will be returned.
@@ -2155,6 +2186,7 @@ void skin_window_set_display_region_and_update(SkinWindow* window,
 
 void skin_window_set_scale(SkinWindow* window, double scale) {
     window->scale = scale;
+    user_config_set_window_scale(scale);
 
     // The scroll bars *will* be gone if this function is called, so make sure
     // they are not taken into account when resizing the window.
