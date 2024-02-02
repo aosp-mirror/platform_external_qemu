@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <grpcpp/grpcpp.h>
+#include <grpcpp/support/status.h>
 #include <stdio.h>
 #include <functional>
 #include <mutex>
@@ -153,15 +154,23 @@ public:
                      const SensorValue* request,
                      SensorValue* reply) override {
         size_t size;
-        mSensorAgent->getSensorSize((int)request->target() - 1, &size);
+        int state =
+                mSensorAgent->getSensorSize((int)request->target() - 1, &size);
+        if (state != 0) {
+            reply->set_status(
+                    static_cast<SensorValue::SensorState>(abs(state) + 1));
+            return Status::OK;
+        }
+
         std::vector<float> val(size, 0);
         std::vector<float*> out;
         for (size_t i = 0; i < val.size(); i++) {
             out.push_back(&val[i]);
+            val[i] = 0;
         }
 
-        int state = mSensorAgent->getSensor((int)request->target() - 1,
-                                            out.data(), out.size());
+        state = mSensorAgent->getSensor((int)request->target() - 1, out.data(),
+                                        out.size());
 
         auto value = reply->mutable_value();
         for (size_t i = 0; i < size; i++) {
@@ -208,15 +217,23 @@ public:
                             const PhysicalModelValue* request,
                             PhysicalModelValue* reply) override {
         size_t size;
-        mSensorAgent->getPhysicalParameterSize((int)request->target() - 1,
-                                               &size);
+        int state = mSensorAgent->getPhysicalParameterSize(
+                (int)request->target() - 1, &size);
+
+        if (state != 0) {
+            reply->set_status(
+                    static_cast<PhysicalModelValue::PhysicalState>(state + 1));
+            return Status::OK;
+        }
+
         std::vector<float> val(size, 0);
         std::vector<float*> out;
         for (size_t i = 0; i < val.size(); i++) {
+            val[i] = 0;
             out.push_back(&val[i]);
         }
 
-        int state = mSensorAgent->getPhysicalParameter(
+        state = mSensorAgent->getPhysicalParameter(
                 (int)request->target() - 1, out.data(), out.size(),
                 abs((int)request->value_type() - 1));
 
@@ -267,7 +284,8 @@ private:
         for (const auto& [key, val] : mLastKnownSensorState) {
             sensorRequest.set_target(key);
             getSensor(nullptr, &sensorRequest, &sensorLatest);
-            if (!isEqual(val, sensorLatest.value())) {
+            if (sensorLatest.status() == SensorValue::SENSOR_STATE_OK &&
+                !isEqual(val, sensorLatest.value())) {
                 VERBOSE_INFO(grpc, "Broadcasting: %s",
                              sensorLatest.ShortDebugString().c_str());
                 mSensorListeners[key].fireEvent(sensorLatest);
@@ -283,7 +301,9 @@ private:
         for (const auto& [key, val] : mLastKnownPhysicalState) {
             physicalRequest.set_target(key);
             getPhysicalModel(nullptr, &physicalRequest, &physicalLatest);
-            if (!isEqual(val, physicalLatest.value())) {
+            if (physicalLatest.status() ==
+                        PhysicalModelValue::PHYSICAL_STATE_VALUE_OK &&
+                !isEqual(val, physicalLatest.value())) {
                 VERBOSE_INFO(grpc, "Broadcasting: %s",
                              physicalLatest.ShortDebugString().c_str());
                 mPhysicalListeners[key].fireEvent(physicalLatest);
