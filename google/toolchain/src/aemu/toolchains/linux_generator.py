@@ -70,21 +70,6 @@ class LinuxToLinuxGenerator(ToolchainGenerator):
         script += "# EXPLICITLY DISABLED ARBITRARY ARGUMENTS: "
         return script, ""
 
-    def pkg_config(self):
-        # On a Linux host, we can use the prebuilt pkg-config
-        pkgconfig = (
-            self.aosp
-            / "prebuilts"
-            / "android-emulator-build"
-            / "qemu-android-deps"
-            / f"{self.host()}-x86_64"
-            / "bin"
-            / "pkg-config"
-        )
-        return (
-            f"PKG_CONFIG_PATH={self.pkgconfig_directory} {pkgconfig}",
-            "",
-        )
 
     def cc(self):
         self.initialize()
