@@ -211,14 +211,17 @@ class DarwinBuilder(QemuBuilder):
         return [
             LibInfo("//external/dtc:libfdt", "1.6.0", {}),
             LibInfo("@glib//:gmodule-static", "2.77.2", {}),
+            LibInfo("@glib//:glib-darwin", "2.77.2", {
+                "link_flags" : "-lobjc -framework Foundation",
+            }),
             LibInfo("@zlib//:zlib", "1.2.10", {}),
             LibInfo(
-                "@glib//:glib-2.0",
+                "@glib//:glib-static",
                 "2.77.2",
                 {
                     "name" : "glib-2.0",
                     "includes": [str(x) for x in includes],
-                    "Requires": "pcre2, gmodule-static",
+                    "Requires": "pcre2, gmodule-static, glib-darwin",
                     "link_flags": "-liconv",
                 },
             ),

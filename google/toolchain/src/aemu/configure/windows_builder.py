@@ -37,15 +37,18 @@ class WindowsBuilder(QemuBuilder):
                 },
             ),
             LibInfo("@glib//:gmodule-static", "2.77.2", {}),
+            LibInfo("@glib//:gnulib", "2.77.2", {}),
+            LibInfo("@glib//:dirent", "2.77.2", {}),
             LibInfo(
-                "@glib//:glib-2.0",
+                "@glib//:glib-static",
                 "2.77.2",
                 {
                     "includes": [str(x) for x in includes],
-                    "Requires": "pcre2, zlib, gmodule-static",
+                    "Requires": "pcre2, zlib, gmodule-static, gnulib, dirent",
                     "name": "glib-2.0",
                     "link_name": "glib-2.0.lib",
-                    "dll_ext": "",  # TODO(jansene): Figure out why we are not expecting a .dll file.
+                    "cflags": "-DGLIB_STATIC_COMPILATION",
+                    "dll_ext": "",
                 },
             ),
             LibInfo(

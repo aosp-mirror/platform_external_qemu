@@ -177,10 +177,12 @@ class LinuxBuilder(QemuBuilder):
             LibInfo("@glib//:gmodule-static", "2.77.2", {}),
             LibInfo("@zlib//:zlib", "1.2.10", {}),
             LibInfo(
-                "@glib//:glib-2.0",
+                "@glib//:glib-static",
                 "2.77.2",
                 {
+                    "name": "glib-2.0",
                     "includes": [str(x) for x in includes],
+                    "link_flags": "-pthread",
                     "Requires": "pcre2, gmodule-static",
                 },
             ),

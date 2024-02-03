@@ -47,7 +47,10 @@ class PackageConfigPc:
         self.include_dir = next(iter(includes))
         self.version = version
         self.requires = shim.get("Requires", "")
-        self.cflags = " ".join([f"-I{path.as_posix()}" for path in includes])
+        self.cflags = (
+            " ".join([f"-I{path.as_posix()}" for path in includes])
+            + f" {shim.get('cflags', '')}"
+        )
         self.link_flags = shim.get("link_flags", "")
 
         self.archive = archive
@@ -105,7 +108,9 @@ class PackageConfigPc:
                 possible = Path(self.libdir) / f"{lib}{ext}"
                 if possible.exists():
                     logging.debug("Binplacing: %s -> %s", possible, dest_dir)
-                    shutil.copyfile(possible, dest_dir / f"{lib}{self.shim.get('dll_ext', ext)}")
+                    shutil.copyfile(
+                        possible, dest_dir / f"{lib}{self.shim.get('dll_ext', ext)}"
+                    )
 
     def write(self, dest_dir: Path):
         """
