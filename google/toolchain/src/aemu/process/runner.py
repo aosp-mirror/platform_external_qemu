@@ -49,7 +49,7 @@ def run(
     env: Dict[str, str] = None,
     cwd: Path = None,
     toolchain_path: Path = None,
-) -> int:
+) -> [str]:
     """Runs the given command, adding the 'toolchain' to the path
 
     Args:
@@ -58,7 +58,7 @@ def run(
         cwd: The working directory to run the command in.
 
     Returns:
-        The exit code of the command.
+        The lines from stdout.
     """
 
     proc = Path(cmd[0])
@@ -95,7 +95,9 @@ def run(
     )
 
     # Log the output of the command line by line.
+    output = []
     for line in process.stdout:
+        output.append(line.strip())
         logging.info(line.strip())
 
     # Wait for the command to finish and get the exit code.
@@ -107,4 +109,4 @@ def run(
     if return_code != 0:
         raise subprocess.CalledProcessError(return_code, cmd)
 
-    return return_code
+    return output
