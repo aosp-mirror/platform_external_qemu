@@ -187,6 +187,13 @@ if(DARWIN_AARCH64)
   set(OPTION_TCMALLOC FALSE)
 endif()
 
+if(WINDOWS_MSVC_X86_64 OR DARWIN_AARCH64 OR DARWIN_X86_64)
+  if (NOT GFXSTREAM)
+    message(WARNING "--gfxstream option is now a requirement on Mac/Windows. Force-enabling gfxstream.")
+    set(GFXSTREAM TRUE)
+  endif()
+endif()
+
 if(GFXSTREAM)
   set(OPTION_GFXSTREAM_BACKEND TRUE)
   set(OPTION_TCMALLOC FALSE)
