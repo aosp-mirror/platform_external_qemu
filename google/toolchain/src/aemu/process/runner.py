@@ -74,6 +74,8 @@ def run(
 
     if not env:
         env = os.environ
+    else:
+        logging.info("Using provided env: %s", env)
 
     # Let's make sure meson doesn't buffer aggressively
     env["PYTHONUNBUFFERED"] = "1"

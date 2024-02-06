@@ -13,10 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from aemu.configure.base_builder import QemuBuilder
-from aemu.configure.libraries import BazelLib, CMakeLib
+from aemu.configure.libraries import BazelLib, CMakeLib, CargoLib
 
 
 class WindowsBuilder(QemuBuilder):
+    def rutabaga_deps(self):
+        deps = [
+            CMakeLib(
+                "/hardware/google/gfxstream:gfxstream_backend",
+                "0.1.2",
+                {
+                    "archive": "libgfxstream_backend.dll",
+                    "includes": "",
+                },
+            ),
+            CargoLib(
+                "/external/crosvm/rutabaga_gfx/ffi:rutabaga_gfx_ffi",
+                "0.1.2",
+                {"archive": "rutabaga_gfx_ffi"},
+            ),  # Must be after libgxstream!
+        ]
+        # Return deps after b/324640237 has been fixed.
+        return []
+
     def packages(self):
         # So bazel does not give the right includes, so we just shim them here.
         includes = [
@@ -30,14 +49,6 @@ class WindowsBuilder(QemuBuilder):
         ]
 
         bazel_configs = [
-            CMakeLib(
-                "/hardware/google/gfxstream:gfxstream_backend",
-                "0.1.2",
-                {
-                    "archive": "libgfxstream_backend.dll",
-                    "includes": "",
-                },
-            ),
             BazelLib(
                 "@zlib//:zlib",
                 "1.2.10",
@@ -82,7 +93,8 @@ class WindowsBuilder(QemuBuilder):
             BazelLib("@pcre2//:pcre2", "10.42", {}),
             BazelLib("//external/dtc:libfdt", "1.6.0", {}),
         ]
-        return bazel_configs
+
+        return bazel_configs  + self.rutabaga_deps()
 
     def meson_config(self):
         prefix = (self.dest / "release").as_posix()
@@ -169,6 +181,7 @@ class WindowsBuilder(QemuBuilder):
             "-Drbd=disabled",
             "-Drdma=disabled",
             "-Dreplication=disabled",
+            "-Drutabaga_gfx=disabled",  # b/324640237
             "-Dsdl=disabled",
             "-Dsdl_image=disabled",
             "-Dseccomp=disabled",

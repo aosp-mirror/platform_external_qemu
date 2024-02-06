@@ -16,6 +16,7 @@ import json
 import logging
 import platform
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -40,7 +41,7 @@ class ToolchainGenerator:
         self.prefix = prefix
         self.toolchain_map = {}
         self.dest.mkdir(exist_ok=True, parents=True)
-        self.ccache = None
+        self.ccache = shutil.which("sccache") or shutil.which("ccache")
         self.py_exe = Path(sys.executable).absolute()
 
         # Create pkgconfig directory.
@@ -49,6 +50,9 @@ class ToolchainGenerator:
 
     def version(self):
         return self.versions.get("clang", "clang-stable")
+
+    def rust_version(self):
+        return self.versions.get("rust", "1.73.0")
 
     def cc_version(self):
         logging.info("Using clang: %s", self.clang())
@@ -123,6 +127,44 @@ class ToolchainGenerator:
             / "ninja",
             "",
         )
+
+    def rust_flags(self) -> [str]:
+        return []
+
+    def rustc(self) -> (str, str):
+        return (
+            self.aosp
+            / "prebuilts"
+            / "rust"
+            / f"{self.host()}-x86"
+            / self.rust_version()
+            / "bin"
+            / "rustc",
+            "",
+        )
+
+    def cargo(self) -> (str, str):
+        rustc_bin = (
+            self.aosp
+            / "prebuilts"
+            / "rust"
+            / f"{self.host()}-x86"
+            / self.rust_version()
+            / "bin"
+            / "rustc"
+        )
+        cargo_bin = (
+            self.aosp
+            / "prebuilts"
+            / "rust"
+            / f"{self.host()}-x86"
+            / self.rust_version()
+            / "bin"
+            / "cargo"
+        )
+
+        script = f"CARGO_BUILD_RUSTC={rustc_bin}\n" f"{cargo_bin}"
+        return script, ""
 
     def meson(self) -> (str, str):
         meson_py = self.aosp / "external" / "meson" / "meson.py"
@@ -210,6 +252,8 @@ cpp_link_args = []
             "pkg-config": self.pkg_config,
             "strip": self.strip,
             "cmake": self.cmake,
+            "cargo": self.cargo,
+            "rustc": self.rustc
         }
         for cmd, fn in cmds.items():
             self.gen_script(cmd, self.dest / f"{self.prefix}{cmd}", fn)

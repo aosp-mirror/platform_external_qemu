@@ -116,6 +116,22 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
         extra = "-Wno-unused-command-line-argument"
         return script, extra
 
+    def rustc(self):
+        rustc = shutil.which("rustc")
+        if not rustc:
+            raise FileNotFoundError(
+                "The system rust compiler is needed on darwin! Please install one"
+            )
+        return rustc, ""
+
+    def cargo(self):
+        cargo = shutil.which("cargo")
+        if not cargo:
+            raise FileNotFoundError(
+                "The system rust compiler is needed on darwin! Please install one"
+            )
+        return cargo, ""
+
     def gen_toolchain(self):
         super().gen_toolchain()
         self.gen_script("objc", self.dest / f"{self.prefix}objc", self.cc)

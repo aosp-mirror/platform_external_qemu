@@ -16,11 +16,12 @@ import platform
 from pathlib import Path
 from typing import Dict, Set, Tuple
 from aemu.process.bazel import Bazel
-from aemu.configure.libraries import BazelLib, CMakeLib
+from aemu.configure.libraries import BazelLib, CMakeLib, CargoLib
 
 from aemu.toolchains.toolchain_generator import ToolchainGenerator
 from aemu.process.runner import run
 from aemu.process.cmake import CMake
+from aemu.process.cargo import Cargo
 
 
 class QemuBuilder:
@@ -57,12 +58,16 @@ class QemuBuilder:
         CMakeLib.builder = self.cmake
         BazelLib.builder = self.bazel
 
+
         # Initialize the toolchain generator with the specified destination and an empty suffix.
         # This generator will be used to manage toolchain-related configurations.
         self.toolchain_generator: ToolchainGenerator = generator
         if ccache:
             self.toolchain_generator.ccache = Path(ccache).absolute()
         self.toolchain_generator.bazel = self.bazel
+        CargoLib.builder = Cargo(
+            self.aosp, self.toolchain_generator, self.dest
+        )
 
     def host(self) -> str:
         return platform.system().lower()
