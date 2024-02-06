@@ -76,8 +76,6 @@ void DmaMap::removeBuffer(uint64_t guest_paddr) {
     if (auto info = android::base::find(mDmaBuffers, guest_paddr)) {
         removeMappingLocked(info);
         mDmaBuffers.erase(guest_paddr);
-    } else {
-        E("guest addr 0x%llx not alloced!", (unsigned long long)guest_paddr);
     }
 }
 
@@ -100,7 +98,6 @@ void* DmaMap::getHostAddr(uint64_t guest_paddr) {
             return *(info->currHostAddr);
         }
     } else {
-        E("guest paddr 0x%llx not alloced!", (unsigned long long)guest_paddr);
         return 0;
     }
 }
