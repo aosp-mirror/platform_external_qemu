@@ -67,24 +67,21 @@ class PackageSamplesTask(BuildTask):
         shutil.rmtree(sample_dest, ignore_errors=True)
         shutil.copytree(samples, sample_dest)
 
-        try:
-            py = PyRunner(repo, self.aosp)
-            py.run(
-                [
-                    "-m",
-                    "pip",
-                    "wheel",
-                    "-i",
-                    repo,
-                    "-w",
-                    wheel_dir,
-                    aemu_grpc,
-                    snaptool,
-                    samples,
-                ]
-            )
-        except CommandFailedException as cfe:
-            logging.warning("Failed to produce all wheels: %s", cfe)
+        py = PyRunner(repo, self.aosp)
+        py.run(
+            [
+                "-m",
+                "pip",
+                "wheel",
+                "-i",
+                repo,
+                "-w",
+                wheel_dir,
+                aemu_grpc,
+                snaptool,
+                samples,
+            ]
+        )
 
         if not self.distribution_directory:
             logging.warning("No distribution directory.. skipping distribution")
