@@ -29,6 +29,7 @@ extern "C" {
 #include "chardev/char.h"
 }  // extern "C"
 
+#include <memory>
 #include <string_view>
 #include <unordered_set>
 #include <utility>
@@ -70,12 +71,9 @@ typedef ::android::base::Looper::FdWatch BaseFdWatch;
 //
 class QemuLooper : public BaseLooper {
 public:
-    QemuLooper() = default;
+    QemuLooper() : mQemuBh(qemu_bh_new(handleBottomHalf, this)) {}
 
     virtual ~QemuLooper() {
-        if (mQemuBh) {
-            qemu_bh_delete(mQemuBh);
-        }
         DCHECK(mPendingFdWatches.empty());
     }
 
@@ -349,6 +347,12 @@ public:
 private:
     typedef std::unordered_set<FdWatch*> FdWatchSet;
 
+    struct QEMUBHDeleter {
+        void operator()(QEMUBH* x) const {
+            qemu_bh_delete(x);
+        }
+    };
+
     static inline QemuLooper* asQemuLooper(BaseLooper* looper) {
         return reinterpret_cast<QemuLooper*>(looper);
     }
@@ -357,16 +361,11 @@ private:
         DCHECK(watch);
         DCHECK(!watch->isPending());
 
-        if (mPendingFdWatches.empty()) {
-            // Ensure the bottom-half is triggered to act on pending
-            // watches as soon as possible.
-            if (!mQemuBh) {
-                mQemuBh = qemu_bh_new(handleBottomHalf, this);
-            }
-            qemu_bh_schedule(mQemuBh);
-        }
-
+        const bool firstFdWatch = mPendingFdWatches.empty();
         CHECK(mPendingFdWatches.insert(watch).second) << "duplicate FdWatch";
+        if (firstFdWatch) {
+            qemu_bh_schedule(mQemuBh.get());
+        }
     }
 
     void delPendingFdWatch(FdWatch* watch) {
@@ -389,7 +388,7 @@ private:
         }
     }
 
-    QEMUBH* mQemuBh = nullptr;
+    const std::unique_ptr<QEMUBH, QEMUBHDeleter> mQemuBh;
     FdWatchSet mPendingFdWatches;
 };
 
