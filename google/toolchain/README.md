@@ -6,16 +6,14 @@ This document elaborates on the purpose and functionalities of the tool used to 
 
 This tool aims to simplify the process of building QEMU using the pre-existing toolchains within AOSP. It supports targeting various platforms, including Windows x86, Linux x86, and Darwin-Apple.
 
-## Current requirements
-
-Currently, the tool requires the py-pkgconfig package to function properly. However, this package is not yet available within AOSP at the moment.
-It will be installed from a github repository.
-
 ## Operational principle
 
 The core of this tool lies in creating toolchain wrappers for various essential utilities, such as:
 
 - nm
+- cmake
+- bazel
+- pkg-config
 - cc
 - c++
 - strip

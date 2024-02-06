@@ -17,6 +17,7 @@ import argparse
 import logging
 import platform
 import shutil
+import sys
 import zipfile
 from pathlib import Path
 
@@ -27,13 +28,13 @@ from aemu.configure.trusty_builder import TrustyBuilder
 from aemu.configure.windows_builder import WindowsBuilder
 from aemu.log import configure_logging
 from aemu.process.runner import run
-from aemu.toolchains.toolchain_generator import ToolchainGenerator
 from aemu.toolchains.darwin_generator import (
     DarwinToDarwinGenerator,
     DarwinToDarwinX64Generator,
 )
-from aemu.toolchains.linux_generator import LinuxToLinuxGenerator
 from aemu.toolchains.linux_arm_generator import LinuxToLinuxAarch64Generator
+from aemu.toolchains.linux_generator import LinuxToLinuxGenerator
+from aemu.toolchains.toolchain_generator import ToolchainGenerator
 from aemu.toolchains.windows_generator import WindowsToWindowsGenerator
 
 
@@ -244,9 +245,12 @@ def main():
     )
 
     subparsers = parser.add_subparsers(title="Commands", dest="command", metavar="")
+
+    # Subparser for 'toolchain' command
     toolchain_parser = subparsers.add_parser(
         "toolchain", help="Create toolchain wrappers for compilation"
     )
+    toolchain_parser.set_defaults(func=toolchain_command)
     toolchain_parser.add_argument(
         "out", type=str, help="Directory for toolchain wrappers"
     )
@@ -284,10 +288,12 @@ def main():
         help="Toolchain target, the host you wish to run the executables on",
     )
 
+    # Subparser for 'setup' command
     setup_parser = subparsers.add_parser(
         "setup", help="Create wrappers for QEMU compilation"
     )
     setup_parser.add_argument("out", type=str, help="Directory for toolchain wrappers")
+    setup_parser.set_defaults(func=setup_command)
     setup_parser.add_argument(
         "--ccache",
         dest="ccache",
@@ -322,19 +328,24 @@ def main():
         help="Toolchain target, the host you wish to run the executables on",
     )
 
-    # Subparser for 'compile' commandgi
+    # Subparser for 'compile' command
     compile_parser = subparsers.add_parser("compile", help="Compile the QEMU source")
+    compile_parser.set_defaults(func=compile_command)
     compile_parser.add_argument("out", type=str, help="Configured compile directory")
+
     # Subparser for 'test' command
     test_parser = subparsers.add_parser("test", help="Run QEMU tests")
+    test_parser.set_defaults(func=test_command)
     test_parser.add_argument("out", type=str, help="Configured compile directory")
+
     # Subparser for 'release' command
     release_parser = subparsers.add_parser("release", help="Generate release zip")
+    release_parser.set_defaults(func=release_command)
     release_parser.add_argument("out", type=str, help="Configured compile directory")
     release_parser.add_argument("release", type=str, help="Zipfile with the release")
-    args = parser.parse_args()
 
     args = parser.parse_args()
+
     lvl = logging.DEBUG if args.verbose else logging.INFO
     configure_logging(lvl)
 
@@ -343,16 +354,16 @@ def main():
     if hasattr(args, "out") and args.out:
         args.out = Path(args.out).absolute()
 
-    if args.command == "toolchain":
-        toolchain_command(args)
-    elif args.command == "setup":
-        setup_command(args)
-    elif args.command == "compile":
-        compile_command(args)
-    elif args.command == "test":
-        test_command(args)
-    elif args.command == "release":
-        release_command(args)
+    # Call the function associated with the selected subcommand
+    if hasattr(args, "func"):
+        try:
+            args.func(args)
+        except Exception as e:
+            if args.verbose:
+                raise e
+            logging.fatal("Build failure: %s", e)
+            sys.exit(1)
+
     else:
         parser.print_help()
 

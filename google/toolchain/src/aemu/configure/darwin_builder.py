@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aemu.configure.base_builder import QemuBuilder, LibInfo
+from aemu.configure.base_builder import QemuBuilder
+from aemu.configure.libraries import BazelLib, CMakeLib
 import sys
 
 
@@ -208,27 +209,39 @@ class DarwinBuilder(QemuBuilder):
         ]
 
         return [
-            LibInfo("//external/dtc:libfdt", "1.6.0", {}),
-            LibInfo("@glib//:gmodule-static", "2.77.2", {}),
-            LibInfo("@glib//:glib-darwin", "2.77.2", {
-                "link_flags" : "-lobjc -framework Foundation",
-            }),
-            LibInfo("@zlib//:zlib", "1.2.10", {}),
-            LibInfo(
+            CMakeLib(
+                "/hardware/google/gfxstream:gfxstream_backend",
+                "0.1.2",
+                {
+                    "archive": "libgfxstream_backend.dylib",
+                    "includes": "",
+                },
+            ),
+            BazelLib("//external/dtc:libfdt", "1.6.0", {}),
+            BazelLib("@glib//:gmodule-static", "2.77.2", {}),
+            BazelLib(
+                "@glib//:glib-darwin",
+                "2.77.2",
+                {
+                    "link_flags": "-lobjc -framework Foundation",
+                },
+            ),
+            BazelLib("@zlib//:zlib", "1.2.10", {}),
+            BazelLib(
                 "@glib//:glib-static",
                 "2.77.2",
                 {
-                    "name" : "glib-2.0",
+                    "name": "glib-2.0",
                     "includes": [str(x) for x in includes],
                     "Requires": "pcre2, gmodule-static, glib-darwin",
                     "link_flags": "-liconv",
                 },
             ),
-            LibInfo("@pixman//:pixman-1", "0.42.3", {"Requires": "pixman_simd"}),
-            LibInfo("@pixman//:pixman_simd", "0.42.3", {}),
-            LibInfo("@pcre2//:pcre2", "10.42", {}),
+            BazelLib("@pixman//:pixman-1", "0.42.3", {"Requires": "pixman_simd"}),
+            BazelLib("@pixman//:pixman_simd", "0.42.3", {}),
+            BazelLib("@pcre2//:pcre2", "10.42", {}),
             # etc.. etc..
-            # LibInfo("/external/curl//:curl", "0.21.8"),
+            # BazelLib("/external/curl//:curl", "0.21.8"),
         ]
 
     def config_mak(self):

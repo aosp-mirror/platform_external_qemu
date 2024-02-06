@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aemu.configure.base_builder import LibInfo
 from aemu.configure.linux_builder import LinuxBuilder
+from aemu.configure.libraries import BazelLib
+
 
 class TrustyBuilder(LinuxBuilder):
     def meson_config(self):
@@ -154,7 +155,7 @@ class TrustyBuilder(LinuxBuilder):
 
     def packages(self):
         # Similar to linux, but using static dependencies.
-        super().packages();
+        super().packages()
 
         includes = [
             self.aosp / "external" / "glib",
@@ -166,19 +167,20 @@ class TrustyBuilder(LinuxBuilder):
         ]
         # Next we have our dependencies.
         return [
-            LibInfo("//external/dtc:libfdt", "1.6.0", {}),
-            LibInfo("@glib//:gmodule-static", "2.77.2", {}),
-            LibInfo("@glib//:glib-static", "2.77.2",
+            BazelLib("//external/dtc:libfdt", "1.6.0", {}),
+            BazelLib("@glib//:gmodule-static", "2.77.2", {}),
+            BazelLib(
+                "@glib//:glib-static",
+                "2.77.2",
                 {
                     "name": "glib-2.0",
                     "includes": [str(x) for x in includes],
                     "link_flags": "-pthread",
                     "Requires": "pcre2, gmodule-static",
                 },
-                    ),
-            LibInfo("@zlib//:zlib", "1.2.10", {}),
-            LibInfo("@pixman//:pixman-1", "0.42.3", {"Requires": "pixman_simd"}),
-            LibInfo("@pixman//:pixman_simd", "0.42.3", {}),
-            LibInfo("@pcre2//:pcre2", "10.42", {}),
+            ),
+            BazelLib("@zlib//:zlib", "1.2.10", {}),
+            BazelLib("@pixman//:pixman-1", "0.42.3", {"Requires": "pixman_simd"}),
+            BazelLib("@pixman//:pixman_simd", "0.42.3", {}),
+            BazelLib("@pcre2//:pcre2", "10.42", {}),
         ]
-

@@ -70,7 +70,6 @@ class LinuxToLinuxGenerator(ToolchainGenerator):
         script += "# EXPLICITLY DISABLED ARBITRARY ARGUMENTS: "
         return script, ""
 
-
     def cc(self):
         self.initialize()
         cache = f"{self.ccache}" if self.ccache else ""

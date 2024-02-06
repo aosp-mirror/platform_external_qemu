@@ -176,6 +176,18 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
 
         return f'"{ninja}"', ""
 
+    def cmake(self) -> Path:
+        vs = self._visual_studio()
+        cmake = (
+            self.aosp / "prebuilts" / "cmake" / f"{self.host()}-x86" / "bin" / "cmake"
+        )
+        # We make sure that the vs variables are loaded before launching cmake
+        # This will enable cmake to derive the visual studio compiler toolchain.
+        return (
+            f'call "{vs}"\n' f"{cmake}",
+            "",
+        )
+
     def pkg_config(self):
         # Build pkg-config from source.
         self.bazel.build_target("//external/pkg-config:pkg-config")
@@ -191,12 +203,12 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
             "",
         )
 
-    def cc(self):
+    def cc(self, clang="clang"):
         self.initialize()
         compat_lib_dir = self.bazel.get_archive(self.COMPAT_ARCHIVE).parent
 
         cache = f"{self.ccache}" if self.ccache else ""
-        cl = self.clang() / "bin" / "clang"
+        cl = self.clang() / "bin" / clang
         flags = (
             "-Wno-constant-conversion "
             "-Wno-macro-redefined "
@@ -217,7 +229,7 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
         )
 
     def cxx(self):
-        return self.cc()
+        return self.cc("clang++")
 
     def windres(self):
         winsdk_rc_bin = (

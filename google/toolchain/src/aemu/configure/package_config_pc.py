@@ -44,21 +44,25 @@ class PackageConfigPc:
     ):
         self.name = shim.get("name", name)
         self.release_dir = release_dir.as_posix()
-        self.include_dir = next(iter(includes))
         self.version = version
         self.requires = shim.get("Requires", "")
-        self.cflags = (
-            " ".join([f"-I{path.as_posix()}" for path in includes])
-            + f" {shim.get('cflags', '')}"
-        )
         self.link_flags = shim.get("link_flags", "")
-
         self.archive = archive
         self.libdir = archive.parent.as_posix()
         self.lib = archive.with_suffix("").name
         if self.lib.startswith("lib"):
             self.lib = self.lib[3:]
         self.shim = shim
+
+        if includes is None:
+            self.include_dir = ""
+            self.cflags = ""
+        else:
+            self.include_dir = next(iter(includes))
+            self.cflags = (
+                " ".join([f"-I{path.as_posix()}" for path in includes])
+                + f" {shim.get('cflags', '')}"
+            )
 
     def is_static(self):
         return self.archive.suffix == ".a"

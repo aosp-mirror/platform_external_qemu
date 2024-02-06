@@ -599,7 +599,7 @@ bool qemu_has_ofd_lock(void);
 
 #if defined(__HAIKU__) && defined(__i386__)
 #define FMT_pid "%ld"
-#elif defined(WIN64)
+#elif defined(WIN64) || defined(_WIN32)
 #define FMT_pid "%" PRId64
 #else
 #define FMT_pid "%d"

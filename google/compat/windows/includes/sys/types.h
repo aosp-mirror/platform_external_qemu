@@ -10,5 +10,6 @@
 // GNU General Public License for more details.
 #pragma once
 #include_next <sys/types.h>
+#include <inttypes.h>
 
-typedef int pid_t;
+typedef int64_t pid_t;
