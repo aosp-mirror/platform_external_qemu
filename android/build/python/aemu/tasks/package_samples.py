@@ -43,8 +43,8 @@ class PackageSamplesTask(BuildTask):
         self.aosp = Path(aosp)
 
     def do_run(self):
-        if self.target == "linux_aarch64":
-            logging.warning("Missing arm64 linux wheels to create python distribution.")
+        if self.target == "linux_aarch64" or self.target == "darwin-x86_64":
+            logging.warning("Missing wheels for %s to create python distribution.", self.target)
             return
 
         sample_root = (
