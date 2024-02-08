@@ -12,20 +12,25 @@
 #include "hw/i2c/pmbus_device.h"
 #include "qom/object.h"
 
-#define TYPE_ISL69259   "isl69259"
-#define TYPE_ISL69260   "isl69260"
-#define TYPE_RAA228000  "raa228000"
-#define TYPE_RAA229004  "raa229004"
-#define ISL_MAX_IC_DEVICE_ID_LEN 16
+#define TYPE_ISL_PMBUS_VR   "isl-pmbus-vr"
+#define TYPE_ISL68137       "isl68137"
+#define TYPE_ISL69259       "isl69259"
+#define TYPE_ISL69260       "isl69260"
+#define TYPE_RAA228000      "raa228000"
+#define TYPE_RAA229004      "raa229004"
+#define ISL_MAX_IC_DEVICE_ID_LEN  16
+#define ISL_MAX_IC_DEVICE_REV_LEN 16
 
 struct ISLState {
     PMBusDevice parent;
 
     uint8_t ic_device_id[ISL_MAX_IC_DEVICE_ID_LEN];
+    uint8_t ic_device_rev[ISL_MAX_IC_DEVICE_REV_LEN];
     uint8_t ic_device_id_len;
+    uint8_t ic_device_rev_len;
 };
 
-OBJECT_DECLARE_SIMPLE_TYPE(ISLState, ISL69260)
+OBJECT_DECLARE_SIMPLE_TYPE(ISLState, ISL_PMBUS_VR)
 
 #define ISL_CAPABILITY_DEFAULT                 0x40
 #define ISL_OPERATION_DEFAULT                  0x80

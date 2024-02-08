@@ -15,6 +15,7 @@ guest hardware that is specific to QEMU.
    ppc-spapr-xive
    ppc-spapr-numa
    acpi_hw_reduced_hotplug
+   ipmi
    tpm
    acpi_hest_ghes
    acpi_cpu_hotplug
@@ -24,3 +25,11 @@ guest hardware that is specific to QEMU.
    acpi_erst
    sev-guest-firmware
    fw_cfg
+   vmw_pvscsi-spec
+   edu
+   ivshmem-spec
+   pvpanic
+   standard-vga
+   virt-ctlr
+   vmcoreinfo
+   vmgenid

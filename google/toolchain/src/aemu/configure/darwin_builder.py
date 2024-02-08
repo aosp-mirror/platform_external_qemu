@@ -96,7 +96,6 @@ class DarwinBuilder(QemuBuilder):
             "-Dgtk=disabled",
             "-Dguest_agent_msi=disabled",
             "-Dguest_agent=disabled",
-            "-Dhax=disabled",
             "-Dhvf=enabled",
             "-Diconv=disabled",
             "-Djack=disabled",

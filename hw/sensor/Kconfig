@@ -22,6 +22,11 @@ config ADM1272
     bool
     depends on I2C
 
+config ADM1266
+    bool
+    depends on PMBUS
+    default y if PMBUS
+
 config MAX34451
     bool
     depends on I2C
@@ -38,3 +43,15 @@ config ISL_PMBUS_VR
 config MAX31785
     bool
     depends on PMBUS
+
+config AMDSBTSI
+    bool
+    depends on I2C
+
+config MAX_16600
+    bool
+    depends on I2C
+
+config MAX31790
+    bool
+    depends on I2C

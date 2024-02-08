@@ -318,6 +318,7 @@ static void smbus_ipmi_realize(DeviceState *dev, Error **errp)
 {
     SMBusIPMIDevice *sid = SMBUS_IPMI(dev);
     IPMIInterface *ii = IPMI_INTERFACE(dev);
+    IPMICore *ic;
 
     if (!sid->bmc) {
         error_setg(errp, "IPMI device requires a bmc attribute to be set");
@@ -326,7 +327,8 @@ static void smbus_ipmi_realize(DeviceState *dev, Error **errp)
 
     sid->uuid = ipmi_next_uuid();
 
-    sid->bmc->intf = ii;
+    ic = IPMI_CORE(sid->bmc);
+    ic->intf = ii;
 }
 
 static void smbus_ipmi_init(Object *obj)
@@ -363,7 +365,7 @@ static void smbus_ipmi_class_init(ObjectClass *oc, void *data)
     dc->vmsd = &vmstate_smbus_ipmi;
     dc->realize = smbus_ipmi_realize;
     iic->set_atn = smbus_ipmi_set_atn;
-    iic->handle_rsp = smbus_ipmi_handle_rsp;
+    iic->handle_msg = smbus_ipmi_handle_rsp;
     iic->handle_if_event = smbus_ipmi_handle_event;
     iic->set_irq_enable = smbus_ipmi_set_irq_enable;
     iic->get_fwinfo = smbus_ipmi_get_fwinfo;

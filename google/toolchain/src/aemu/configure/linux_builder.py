@@ -58,7 +58,6 @@ class LinuxBuilder(QemuBuilder):
             "-Dgtk_clipboard=disabled",
             "-Dguest_agent=disabled",
             "-Dguest_agent_msi=disabled",
-            "-Dhax=disabled",
             "-Dhvf=disabled",
             "-Diconv=disabled",
             "-Djack=disabled",

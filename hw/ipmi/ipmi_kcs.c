@@ -417,7 +417,7 @@ void ipmi_kcs_class_init(IPMIInterfaceClass *iic)
 {
     iic->init = ipmi_kcs_init;
     iic->set_atn = ipmi_kcs_set_atn;
-    iic->handle_rsp = ipmi_kcs_handle_rsp;
+    iic->handle_msg = ipmi_kcs_handle_rsp;
     iic->handle_if_event = ipmi_kcs_handle_event;
     iic->set_irq_enable = ipmi_kcs_set_irq_enable;
 }

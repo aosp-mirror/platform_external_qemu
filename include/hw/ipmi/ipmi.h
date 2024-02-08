@@ -111,11 +111,11 @@ uint32_t ipmi_next_uuid(void);
 #define TYPE_IPMI_INTERFACE "ipmi-interface"
 #define IPMI_INTERFACE(obj) \
      INTERFACE_CHECK(IPMIInterface, (obj), TYPE_IPMI_INTERFACE)
+typedef struct IPMIInterface IPMIInterface;
 typedef struct IPMIInterfaceClass IPMIInterfaceClass;
 DECLARE_CLASS_CHECKERS(IPMIInterfaceClass, IPMI_INTERFACE,
                        TYPE_IPMI_INTERFACE)
-
-typedef struct IPMIInterface IPMIInterface;
+struct IPMICore;
 
 struct IPMIInterfaceClass {
     InterfaceClass parent;
@@ -156,9 +156,9 @@ struct IPMIInterfaceClass {
     void (*reset)(struct IPMIInterface *s, bool is_cold);
 
     /*
-     * Handle a response from the bmc.
+     * Handle an IPMI message.
      */
-    void (*handle_rsp)(struct IPMIInterface *s, uint8_t msg_id,
+    void (*handle_msg)(struct IPMIInterface *s, uint8_t msg_id,
                        unsigned char *rsp, unsigned int rsp_len);
 
     /*
@@ -167,9 +167,35 @@ struct IPMIInterfaceClass {
     void *(*get_backend_data)(struct IPMIInterface *s);
 
     /*
+     * Set the IPMI core.
+     */
+    void (*set_ipmi_handler)(struct IPMIInterface *s, struct IPMICore *ic);
+
+    /*
      * Return the firmware info for a device.
      */
     void (*get_fwinfo)(struct IPMIInterface *s, IPMIFwInfo *info);
+};
+
+/*
+ * Define an IPMI core (Either BMC or Host simulator.)
+ */
+#define TYPE_IPMI_CORE "ipmi-core"
+OBJECT_DECLARE_TYPE(IPMICore, IPMICoreClass, IPMI_CORE)
+
+struct IPMICore {
+    DeviceState parent;
+
+    IPMIInterface *intf;
+};
+
+struct IPMICoreClass {
+    DeviceClass parent;
+
+    /*
+     * Handle a hardware command.
+     */
+    void (*handle_hw_op)(struct IPMICore *s, uint8_t hw_op, uint8_t operand);
 };
 
 /*
@@ -180,15 +206,13 @@ OBJECT_DECLARE_TYPE(IPMIBmc, IPMIBmcClass,
                     IPMI_BMC)
 
 struct IPMIBmc {
-    DeviceState parent;
+    IPMICore parent;
 
     uint8_t slave_addr;
-
-    IPMIInterface *intf;
 };
 
 struct IPMIBmcClass {
-    DeviceClass parent;
+    IPMICoreClass parent;
 
     /* Called when the system resets to report to the bmc. */
     void (*handle_reset)(struct IPMIBmc *s);

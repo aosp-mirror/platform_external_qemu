@@ -58,6 +58,7 @@ static void pci_ipmi_kcs_realize(PCIDevice *pd, Error **errp)
     PCIIPMIKCSDevice *pik = PCI_IPMI_KCS(pd);
     IPMIInterface *ii = IPMI_INTERFACE(pd);
     IPMIInterfaceClass *iic = IPMI_INTERFACE_GET_CLASS(ii);
+    IPMICore *ic;
 
     if (!pik->kcs.bmc) {
         error_setg(errp, "IPMI device requires a bmc attribute to be set");
@@ -66,7 +67,8 @@ static void pci_ipmi_kcs_realize(PCIDevice *pd, Error **errp)
 
     pik->uuid = ipmi_next_uuid();
 
-    pik->kcs.bmc->intf = ii;
+    ic = IPMI_CORE(pik->kcs.bmc);
+    ic->intf = ii;
     pik->kcs.opaque = pik;
 
     pci_config_set_prog_interface(pd->config, 0x01); /* KCS */

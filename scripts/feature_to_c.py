@@ -1,78 +1,90 @@
 #!/usr/bin/env python3
-import os
-import re
-import sys
+# SPDX-License-Identifier: GPL-2.0-or-later
 
+import os, sys, xml.etree.ElementTree
 
-def generate_arrayname(input_file):
-    return "xml_feature_" + re.sub(r"[-.]", "_", os.path.basename(input_file))
+def writeliteral(indent, bytes):
+    sys.stdout.write(' ' * indent)
+    sys.stdout.write('"')
+    quoted = True
 
+    for c in bytes:
+        if not quoted:
+            sys.stdout.write('\n')
+            sys.stdout.write(' ' * indent)
+            sys.stdout.write('"')
+            quoted = True
 
-def convert_to_c_array(input_file, arrayname):
-    """
-    Generates a C array string representation from an input file.
+        if c == b'"'[0]:
+            sys.stdout.write('\\"')
+        elif c == b'\\'[0]:
+            sys.stdout.write('\\\\')
+        elif c == b'\n'[0]:
+            sys.stdout.write('\\n"')
+            quoted = False
+        elif c >= 32 and c < 127:
+            sys.stdout.write(c.to_bytes(1, 'big').decode())
+        else:
+            sys.stdout.write(f'\{c:03o}')
 
-    Args:
-        arrayname: Name of the array.
-        input_file: Path to the input file.
+    if quoted:
+        sys.stdout.write('"')
 
-    Returns:
-        A string containing the formatted C array declaration and data.
-    """
-    ord_map = {chr(i): i for i in range(255)}
+sys.stdout.write('#include "qemu/osdep.h"\n' \
+                 '#include "exec/gdbstub.h"\n' \
+                 '\n'
+                 'const GDBFeature gdb_static_features[] = {\n')
 
-    with open(
-        input_file,
-        "r",
-        encoding="utf-8",
-    ) as f:
-        lines = f.read().splitlines()
+for input in sys.argv[1:]:
+    with open(input, 'rb') as file:
+        read = file.read()
 
-    output = '#include "qemu/osdep.h"\n'
-    output += f"static const char {arrayname}[] = {{\n"
+    parser = xml.etree.ElementTree.XMLPullParser(['start', 'end'])
+    parser.feed(read)
+    events = parser.read_events()
+    event, element = next(events)
+    if event != 'start':
+        sys.stderr.write(f'unexpected event: {event}\n')
+        exit(1)
+    if element.tag != 'feature':
+        sys.stderr.write(f'unexpected start tag: {element.tag}\n')
+        exit(1)
 
-    for line in lines:
-        output += "  "
+    regnum = 0
+    regnums = []
+    tags = ['feature']
+    for event, element in events:
+        if event == 'end':
+            if element.tag != tags[len(tags) - 1]:
+                sys.stderr.write(f'unexpected end tag: {element.tag}\n')
+                exit(1)
 
-        for i, c in enumerate(line):
-            if c == "'":
-                output += "'\\'', "
-            elif c == "\\":
-                output += "'\\\\', "
-            elif 32 <= ord_map[c] < 127:
-                output += f"'{c}', "
-            else:
-                output += f"'\\{ord_map[c]:03o}', "
-            if (i + 1) % 10 == 0:
-                output += "\n  "
+            tags.pop()
+            if element.tag == 'feature':
+                break
+        elif event == 'start':
+            if len(tags) < 2 and element.tag == 'reg':
+                if 'regnum' in element.attrib:
+                    regnum = int(element.attrib['regnum'])
 
-        output += "'\\n', \n"
+                regnums.append(regnum)
+                regnum += 1
 
-    output += "  0 };"
-    return output
+            tags.append(element.tag)
+        else:
+            raise Exception(f'unexpected event: {event}\n')
 
+    if len(tags):
+        sys.stderr.write('unterminated feature tag\n')
+        exit(1)
 
-def main():
-    if len(sys.argv) < 2 or not sys.argv[1]:
-        print("Usage: {} INPUTFILE...".format(sys.argv[0]))
-        sys.exit(1)
+    base_reg = min(regnums)
+    num_regs = max(regnums) - base_reg + 1 if len(regnums) else 0
 
-    for input_file in sys.argv[1:]:
-        arrayname = generate_arrayname(input_file)
-        print(convert_to_c_array(input_file, arrayname))
+    sys.stdout.write('    {\n')
+    writeliteral(8, bytes(os.path.basename(input), 'utf-8'))
+    sys.stdout.write(',\n')
+    writeliteral(8, read)
+    sys.stdout.write(f',\n        {num_regs},\n    }},\n')
 
-    print()
-    print('#include "exec/gdbstub.h"')
-    print("const char *const xml_builtin[][2] = {")
-
-    for input_file in sys.argv[1:]:
-        basename = os.path.basename(input_file)
-        arrayname = generate_arrayname(input_file)
-        print(f'  {{ "{basename}", {arrayname} }},')
-
-    print("  { (char *)0, (char *)0 }")
-    print("};")
-
-
-if __name__ == "__main__":
-    main()
+sys.stdout.write('    { NULL }\n};\n')
