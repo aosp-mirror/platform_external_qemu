@@ -7,7 +7,7 @@ android_add_library(
       android/emulation/control/interceptor/LoggingInterceptor.cpp
       android/emulation/control/interceptor/MetricsInterceptor.cpp
   DEPS android-emu-agents android-emu-base android-emu-base-headers
-       android-emu-metrics)
+       android-emu-metrics protobuf::libprotobuf)
 target_link_libraries(android-grpc-interceptors PUBLIC grpc++)
 target_include_directories(android-grpc-interceptors PRIVATE src PUBLIC include)
 target_compile_options(android-grpc-interceptors PUBLIC -Wno-extern-c-compat)
