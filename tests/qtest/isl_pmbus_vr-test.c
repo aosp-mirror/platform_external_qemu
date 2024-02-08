@@ -470,5 +470,13 @@ static void isl_pmbus_vr_register_nodes(void)
     qos_add_test("test_tx_rx", "raa228000", test_tx_rx, NULL);
     qos_add_test("test_rw_regs", "raa228000", test_rw_regs, NULL);
     qos_add_test("test_ov_faults", "raa228000", test_voltage_faults, NULL);
+
+    qos_node_create_driver("isl68137", i2c_device_create);
+    qos_node_consumes("isl68137", "i2c-bus", &opts);
+
+    qos_add_test("test_defaults", "isl68137", test_defaults, NULL);
+    qos_add_test("test_tx_rx", "isl68137", test_tx_rx, NULL);
+    qos_add_test("test_rw_regs", "isl68137", test_rw_regs, NULL);
+    qos_add_test("test_ov_faults", "isl68137", test_voltage_faults, NULL);
 }
 libqos_init(isl_pmbus_vr_register_nodes);

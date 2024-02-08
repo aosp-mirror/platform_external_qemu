@@ -60,7 +60,6 @@ class TrustyBuilder(LinuxBuilder):
             "-Dgtk=disabled",
             "-Dguest_agent_msi=disabled",
             "-Dguest_agent=disabled",
-            "-Dhax=disabled",
             "-Dhvf=disabled",
             "-Diconv=disabled",
             "-Djack=disabled",

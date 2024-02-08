@@ -67,42 +67,6 @@ static void isa_ipmi_kcs_lower_irq(IPMIKCS *ik)
     qemu_irq_lower(iik->irq);
 }
 
-static void ipmi_isa_realize(DeviceState *dev, Error **errp)
-{
-    Error *err = NULL;
-    ISADevice *isadev = ISA_DEVICE(dev);
-    ISAIPMIKCSDevice *iik = ISA_IPMI_KCS(dev);
-    IPMIInterface *ii = IPMI_INTERFACE(dev);
-    IPMIInterfaceClass *iic = IPMI_INTERFACE_GET_CLASS(ii);
-
-    if (!iik->kcs.bmc) {
-        error_setg(errp, "IPMI device requires a bmc attribute to be set");
-        return;
-    }
-
-    iik->uuid = ipmi_next_uuid();
-
-    iik->kcs.bmc->intf = ii;
-    iik->kcs.opaque = iik;
-
-    iic->init(ii, 0, &err);
-    if (err) {
-        error_propagate(errp, err);
-        return;
-    }
-
-    if (iik->isairq > 0) {
-        iik->irq = isa_get_irq(isadev, iik->isairq);
-        iik->kcs.use_irq = 1;
-        iik->kcs.raise_irq = isa_ipmi_kcs_raise_irq;
-        iik->kcs.lower_irq = isa_ipmi_kcs_lower_irq;
-    }
-
-    qdev_set_legacy_instance_id(dev, iik->kcs.io_base, iik->kcs.io_length);
-
-    isa_register_ioport(isadev, &iik->kcs.io, iik->kcs.io_base);
-}
-
 static bool vmstate_kcs_before_version2(void *opaque, int version)
 {
     return version <= 1;
@@ -121,11 +85,42 @@ static const VMStateDescription vmstate_ISAIPMIKCSDevice = {
     }
 };
 
-static void isa_ipmi_kcs_init(Object *obj)
+static void ipmi_isa_realize(DeviceState *dev, Error **errp)
 {
-    ISAIPMIKCSDevice *iik = ISA_IPMI_KCS(obj);
+    Error *err = NULL;
+    ISADevice *isadev = ISA_DEVICE(dev);
+    ISAIPMIKCSDevice *iik = ISA_IPMI_KCS(dev);
+    IPMIInterface *ii = IPMI_INTERFACE(dev);
+    IPMIInterfaceClass *iic = IPMI_INTERFACE_GET_CLASS(ii);
+    IPMICore *ic;
 
-    ipmi_bmc_find_and_link(obj, (Object **) &iik->kcs.bmc);
+    if (!iik->kcs.bmc) {
+        error_setg(errp, "IPMI device requires a bmc attribute to be set");
+        return;
+    }
+
+    iik->uuid = ipmi_next_uuid();
+
+    ic = IPMI_CORE(iik->kcs.bmc);
+    ic->intf = ii;
+    iik->kcs.opaque = iik;
+
+    iic->init(ii, 0, &err);
+    if (err) {
+        error_propagate(errp, err);
+        return;
+    }
+
+    if (iik->isairq > 0) {
+        iik->irq = isa_get_irq(isadev, iik->isairq);
+        iik->kcs.use_irq = 1;
+        iik->kcs.raise_irq = isa_ipmi_kcs_raise_irq;
+        iik->kcs.lower_irq = isa_ipmi_kcs_lower_irq;
+    }
+
+    qdev_set_legacy_instance_id(dev, iik->kcs.io_base, iik->kcs.io_length);
+
+    isa_register_ioport(isadev, &iik->kcs.io, iik->kcs.io_base);
 
     /*
      * Version 1 had an incorrect name, it clashed with the BT
@@ -133,6 +128,13 @@ static void isa_ipmi_kcs_init(Object *obj)
      * version.
      */
     vmstate_register(NULL, 0, &vmstate_ISAIPMIKCSDevice, iik);
+}
+
+static void isa_ipmi_kcs_init(Object *obj)
+{
+    ISAIPMIKCSDevice *iik = ISA_IPMI_KCS(obj);
+
+    ipmi_bmc_find_and_link(obj, (Object **) &iik->kcs.bmc);
 }
 
 static void *isa_ipmi_kcs_get_backend_data(IPMIInterface *ii)

@@ -53,6 +53,14 @@ struct SMBusDeviceClass {
     int (*write_data)(SMBusDevice *dev, uint8_t *buf, uint8_t len);
 
     /*
+     * can_write_data allows the device look at a command and/or data coming
+     * in and NAK if it is not ready.  write_data can't do this because
+     * write_data is called after the whole block is received and a NAK can
+     * only be done as the byte is received.
+     */
+    int (*can_write_data)(SMBusDevice *dev, uint8_t c, uint8_t offset);
+
+    /*
      * Likewise we can't distinguish between different reads, or even know
      * the length of the read until the read is complete, so read data a
      * byte at a time.  The device is responsible for adding the length

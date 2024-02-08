@@ -208,7 +208,7 @@ out into the QEMU code base after merging.
     parser.add_argument(
         "--tag",
         # Update this default tag if you do another git merge.
-        default="78385bc738",
+        default="1d675e59ea",
         help="Default tag compare a file against",
     )
     parser.add_argument(

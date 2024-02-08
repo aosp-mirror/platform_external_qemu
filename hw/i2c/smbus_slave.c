@@ -2,7 +2,7 @@
  * QEMU SMBus device emulation.
  *
  * This code is a helper for SMBus device emulation.  It implements an
- * I2C device inteface and runs the SMBus protocol from the device
+ * I2C device interface and runs the SMBus protocol from the device
  * point of view and maps those to simple calls to emulate.
  *
  * Copyright (c) 2007 CodeSourcery.
@@ -178,6 +178,8 @@ static uint8_t smbus_i2c_recv(I2CSlave *s)
 static int smbus_i2c_send(I2CSlave *s, uint8_t data)
 {
     SMBusDevice *dev = SMBUS_DEVICE(s);
+    SMBusDeviceClass *sc = SMBUS_DEVICE_GET_CLASS(dev);
+    int ret = 0;
 
     switch (dev->mode) {
     case SMBUS_WRITE_DATA:
@@ -185,6 +187,12 @@ static int smbus_i2c_send(I2CSlave *s, uint8_t data)
         if (dev->data_len >= sizeof(dev->data_buf)) {
             BADF("Too many bytes sent\n");
         } else {
+            if (sc->can_write_data) {
+                ret = sc->can_write_data(dev, data, dev->data_len);
+                if (ret != 0) {
+                    dev->mode = SMBUS_IDLE;
+                }
+            }
             dev->data_buf[dev->data_len++] = data;
         }
         break;
@@ -194,7 +202,7 @@ static int smbus_i2c_send(I2CSlave *s, uint8_t data)
         break;
     }
 
-    return 0;
+    return ret;
 }
 
 static void smbus_device_class_init(ObjectClass *klass, void *data)

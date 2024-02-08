@@ -65,6 +65,7 @@
 #define ADM1272_VOLTAGE_COEFF_DEFAULT   1
 #define ADM1272_CURRENT_COEFF_DEFAULT   3
 #define ADM1272_PWR_COEFF_DEFAULT       7
+#define ADM1272_TEMP_COEFF_DEFAULT      8
 #define ADM1272_IOUT_OFFSET             0x5000
 #define ADM1272_IOUT_OFFSET             0x5000
 
@@ -141,6 +142,22 @@ static uint32_t adm1272_direct_to_watts(uint16_t value)
 {
     PMBusCoefficients c = adm1272_coefficients[ADM1272_PWR_COEFF_DEFAULT];
     c.m = c.m * ADM1272_SHUNT / 1000;
+    return pmbus_direct_mode2data(c, value);
+}
+
+static uint16_t adm1272_millidegrees_to_direct(uint32_t value)
+{
+    PMBusCoefficients c = adm1272_coefficients[ADM1272_TEMP_COEFF_DEFAULT];
+    c.b = c.b * 1000;
+    c.R = c.R - 3;
+    return pmbus_data2direct_mode(c, value);
+}
+
+static uint32_t adm1272_direct_to_millidegrees(uint16_t value)
+{
+    PMBusCoefficients c = adm1272_coefficients[ADM1272_TEMP_COEFF_DEFAULT];
+    c.b = c.b * 1000;
+    c.R = c.R - 3;
     return pmbus_direct_mode2data(c, value);
 }
 
@@ -248,7 +265,7 @@ static void test_defaults(void *obj, void *data, QGuestAllocator *alloc)
 /* test qmp access */
 static void test_tx_rx(void *obj, void *data, QGuestAllocator *alloc)
 {
-    uint16_t i2c_value, value, i2c_voltage, i2c_pwr, lossy_value;
+    uint16_t i2c_value, value, i2c_voltage, i2c_pwr, i2c_temp, lossy_value;
     QI2CDevice *i2cdev = (QI2CDevice *)obj;
 
     /* converting to direct mode is lossy - we generate the same loss here */
@@ -287,6 +304,15 @@ static void test_tx_rx(void *obj, void *data, QGuestAllocator *alloc)
     i2c_pwr = adm1272_direct_to_watts(i2c_value);
     g_assert_cmphex(value, ==, i2c_pwr);
     g_assert_cmphex(i2c_pwr, ==, lossy_value);
+
+    lossy_value =
+        adm1272_direct_to_millidegrees(adm1272_millidegrees_to_direct(25000));
+    qmp_adm1272_set(TEST_ID, "temperature", 25000);
+    value = qmp_adm1272_get(TEST_ID, "temperature");
+    i2c_value = adm1272_i2c_get16(i2cdev, PMBUS_READ_TEMPERATURE_1);
+    i2c_temp = adm1272_direct_to_millidegrees(i2c_value);
+    g_assert_cmphex(value, ==, i2c_temp);
+    g_assert_cmphex(i2c_temp, ==, lossy_value);
 }
 
 /* test r/w registers */
