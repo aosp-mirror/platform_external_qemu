@@ -16,7 +16,7 @@
 #include "aemu/base/Compiler.h"
 #include "aemu/base/IOVector.h"
 #include "android-qemu2-glue/emulation/export.h"
-#ifndef LIBSLIRP
+#ifndef NETSIM_WIFI
 #include "android/network/MacAddress.h"
 #endif
 #ifdef _MSC_VER
@@ -97,7 +97,7 @@ public:
     AEMU_WIFI_API virtual void stop() = 0;
     // Specific details for virtio wifi driver. No necessary for netsim.
     AEMU_WIFI_API virtual NICState* getNic() = 0;
-#ifndef LIBSLIRP
+#ifndef NETSIM_WIFI
     AEMU_WIFI_API virtual android::network::MacAddress getStaMacAddr(
             const char* ssid) = 0;
 #endif

@@ -51,7 +51,7 @@ public:
     int recv(android::base::IOVector& iov) override;
     void stop() override;
     NICState* getNic() override { return mNic; }
-#ifndef LIBSLIRP
+#ifndef NETSIM_WIFI
     android::network::MacAddress getStaMacAddr(const char* ssid) override;
 #endif
     ssize_t onRxPacketAvailable(const uint8_t* buf, size_t size);
@@ -59,8 +59,9 @@ public:
     static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
     static const uint8_t kWifiForwardVersion = 0x02;
 private:
-#ifdef LIBSLIRP
-    static void eloopSocketHandler(int sock, void* eloop_ctx, void* sock_ctx);
+#ifdef NETSIM_WIFI
+    static bool waitForReadSocket(int sock, int msec); // in milliseconds
+    static void registerSigPipeHandler();
 #else
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
     // Wrapper functions for passing C-sytle func ptr to struct NetClientInfo
@@ -78,7 +79,7 @@ private:
     static const char* const kNicName;
     ssize_t sendToGuest(
             std::unique_ptr<android::network::Ieee80211Frame> frame);
-    void resetBeaconTask();
+    void registerEventLoop();
     size_t onRemoteData(const uint8_t* data, size_t size);
     void sendToRemoteVM(std::unique_ptr<android::network::Ieee80211Frame> frame,
                         android::network::FrameType type);
@@ -91,7 +92,7 @@ private:
     WifiService::OnLinkStatusChangedCallback mOnLinkStatusChanged;
     WifiService::OnSentCallback mOnFrameSentCallback;
     WifiService::CanReceiveCallback mCanReceive;
-    android::base::Looper* mLooper;
+    android::base::Looper* mLooper = nullptr;
     // Scoped sockets holding the socket pair.
     android::base::ScopedSocket mVirtIOSock;
     android::base::ScopedSocket mHostapdSock;
@@ -104,7 +105,7 @@ private:
     android::base::Looper::FdWatch* mFdWatch = nullptr;
     android::emulation::HostapdController* mHostapd = nullptr;
     android::base::Optional<android::base::RecurrentTask> mBeaconTask;
-    android::base::Looper::Duration mBeaconIntMs = 1024;
+    android::base::Looper::Duration mBeaconIntMs = 1024; // in milliseconds
     std::unique_ptr<android::network::Ieee80211Frame> mBeaconFrame;
     std::atomic<bool> mHostapdSockInitSuccess{false};
     NICConf* mNicConf = nullptr;
