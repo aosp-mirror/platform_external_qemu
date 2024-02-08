@@ -199,7 +199,8 @@ bool VirtioWifiForwarder::init() {
         mRemotePeer->init();
         mRemotePeer->run();
     }
-    registerBeaconTask();
+    resetBeaconTask();
+    mBeaconTask->start();
     LOG(DEBUG) << "Successfully initialized Wi-Fi";
     return true;
 }
@@ -292,14 +293,12 @@ int VirtioWifiForwarder::recv(android::base::IOVector& iov) {
 }
 
 void VirtioWifiForwarder::stop() {
+    mBeaconTask.clear();
     mNic = nullptr;
     mSlirp = nullptr;
 #ifdef LIBSLIRP
-    eloop_cancel_timeout(VirtioWifiForwarder::eloopTimeoutHandler,
-                         ELOOP_ALL_CTX, ELOOP_ALL_CTX);
     eloop_unregister_read_sock(mVirtIOSock.get());
 #endif
-    mBeaconTask.clear();
     if (mHostapd) {
         mHostapd->terminate();
     }
@@ -316,19 +315,6 @@ void VirtioWifiForwarder::eloopSocketHandler(int sock,
     VirtioWifiForwarder::onHostApd(sock_ctx, sock,
                                    android::base::Looper::FdWatch::kEventRead);
 }
-
-void VirtioWifiForwarder::eloopTimeoutHandler(void* eloop_ctx, void* user_ctx) {
-    VirtioWifiForwarder* forwarder = (VirtioWifiForwarder*)eloop_ctx;
-    auto* beacon = forwarder->mBeaconFrame.get();
-    if (beacon != nullptr && beacon->isBeacon()) {
-        forwarder->sendToGuest(std::make_unique<Ieee80211Frame>(
-                beacon->data(), beacon->size(), beacon->info()));
-    }
-    eloop_register_timeout(0, forwarder->mBeaconIntMs,
-                           VirtioWifiForwarder::eloopTimeoutHandler, eloop_ctx,
-                           nullptr);
-}
-
 #else
 
 MacAddress VirtioWifiForwarder::getStaMacAddr(const char* ssid) {
@@ -429,22 +415,16 @@ void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
         Looper::Duration newBeaconInt = hdr->u.beacon.beacon_int * kTUtoMS;
         if (newBeaconInt != forwarder->mBeaconIntMs) {
             forwarder->mBeaconIntMs = newBeaconInt;
-            forwarder->registerBeaconTask();
+            forwarder->resetBeaconTask();
+            forwarder->mBeaconTask->start();
         }
     } else {
         forwarder->sendToGuest(std::move(frame));
     }
 }
 
-void VirtioWifiForwarder::registerBeaconTask() {
+void VirtioWifiForwarder::resetBeaconTask() {
     // set up periodic job of sending beacons.
-#ifdef LIBSLIRP
-    eloop_cancel_timeout(VirtioWifiForwarder::eloopTimeoutHandler,
-                         ELOOP_ALL_CTX, ELOOP_ALL_CTX);
-    eloop_register_timeout(0, mBeaconIntMs,
-                           VirtioWifiForwarder::eloopTimeoutHandler, this,
-                           nullptr);
-#else
     mBeaconTask.emplace(
             mLooper,
             [this]() {
@@ -456,8 +436,6 @@ void VirtioWifiForwarder::registerBeaconTask() {
                 return true;
             },
             mBeaconIntMs);
-    mBeaconTask->start();
-#endif
 }
 size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
     size_t offset = 0;
