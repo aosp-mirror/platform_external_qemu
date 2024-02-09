@@ -3222,6 +3222,22 @@ extern "C" int main(int argc, char** argv) {
         RendererConfig rendererConfig;
         configAndStartRenderer(uiPreferredGlesBackend, &rendererConfig);
 
+#if defined(__linux__)
+        {
+            // bug: 324086743
+            // we have to enable SystemBlob to work around the kvm+amdgpu driver bug
+            // where kvm apparently error out with Bad Address
+            char* glVendor = nullptr;
+            char* glRenderer = nullptr;
+            char* glVersion = nullptr;
+            android_getOpenglesHardwareStrings(&glVendor, &glRenderer, &glVersion);
+            if (glVendor && strcmp("AMD",glVendor) == 0) {
+                dinfo("Enable SystemBlob feature for gpu vendor %s on Linux\n", glVendor);
+                feature_set_enabled_override(kFeature_SystemBlob, true);
+            }
+        }
+#endif
+
         // Gpu configuration is set, now initialize the multi display, screen
         // recorder and screenshot callback
         bool isGuestMode =
