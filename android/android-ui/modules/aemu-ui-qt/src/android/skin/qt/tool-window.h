@@ -234,6 +234,8 @@ private:
 
     void startSleepTimer();
 
+    void applyFoldableQuirk(int newPosture);
+
     QTimer mUnfoldTimer;
     PresetEmulatorSizeType mDesiredNewSize {PRESET_SIZE_PHONE};
     void startUnfoldTimer(PresetEmulatorSizeType newSize);
