@@ -75,8 +75,11 @@ class ToolchainGenerator:
         )
 
     def cmake(self) -> Path:
+        cmake = (
+            self.aosp / "prebuilts" / "cmake" / f"{self.host()}-x86" / "bin" / "cmake"
+        )
         return (
-            self.aosp / "prebuilts" / "cmake" / f"{self.host()}-x86" / "bin" / "cmake",
+            f"{cmake} ",
             "",
         )
 
@@ -182,7 +185,7 @@ cpp_link_args = []
 
     def link_dirs(self):
         """Setup links to libc++.so etc.."""
-        clang_lib = (self.clang() / "lib")
+        clang_lib = self.clang() / "lib"
         if not clang_lib.exists():
             logging.warning("The clang lib directory: %s, does not exist.", clang_lib)
             return

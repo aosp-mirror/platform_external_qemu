@@ -14,7 +14,8 @@
 # limitations under the License.
 import shutil
 
-from aemu.configure.base_builder import QemuBuilder, LibInfo
+from aemu.configure.base_builder import QemuBuilder
+from aemu.configure.libraries import BazelLib, CMakeLib
 
 
 class LinuxBuilder(QemuBuilder):
@@ -172,10 +173,18 @@ class LinuxBuilder(QemuBuilder):
         ]
         # Next we have our dependencies.
         return [
-            LibInfo("//external/dtc:libfdt", "1.6.0", {}),
-            LibInfo("@glib//:gmodule-static", "2.77.2", {}),
-            LibInfo("@zlib//:zlib", "1.2.10", {}),
-            LibInfo(
+            CMakeLib(
+                "/hardware/google/gfxstream:gfxstream_backend",
+                "0.1.2",
+                {
+                    "archive": "libgfxstream_backend.so",
+                    "includes": "",
+                },
+            ),
+            BazelLib("//external/dtc:libfdt", "1.6.0", {}),
+            BazelLib("@glib//:gmodule-static", "2.77.2", {}),
+            BazelLib("@zlib//:zlib", "1.2.10", {}),
+            BazelLib(
                 "@glib//:glib-static",
                 "2.77.2",
                 {
@@ -185,9 +194,9 @@ class LinuxBuilder(QemuBuilder):
                     "Requires": "pcre2, gmodule-static",
                 },
             ),
-            LibInfo("@pixman//:pixman-1", "0.42.3", {"Requires": "pixman_simd"}),
-            LibInfo("@pixman//:pixman_simd", "0.42.3", {}),
-            LibInfo("@pcre2//:pcre2", "10.42", {}),
+            BazelLib("@pixman//:pixman-1", "0.42.3", {"Requires": "pixman_simd"}),
+            BazelLib("@pixman//:pixman_simd", "0.42.3", {}),
+            BazelLib("@pcre2//:pcre2", "10.42", {}),
         ]
 
     def config_mak(self):

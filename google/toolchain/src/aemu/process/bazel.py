@@ -18,7 +18,6 @@ import platform
 from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Set
-
 from aemu.process.runner import check_output, run
 
 

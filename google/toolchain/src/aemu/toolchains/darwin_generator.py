@@ -88,13 +88,10 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
         logging.info("OSX: Using Xcode: %s (%s)", version, build)
         logging.info("OSX: XCode path: %s", self.osx_sdk_root)
 
-    def _find_exe(self, prog):
-        paths = ["/usr/bin", "/usr/local/bin"]
-
-    def _base_script(self):
+    def _base_script(self, clang):
         cache = f"{self.ccache}" if self.ccache else ""
         script = (
-            f"{cache} {self.clang()}/bin/clang "
+            f"{cache} {self.clang()}/bin/{clang} "
             f"-arch {self.target_arch} "
             f"-isysroot {self.osx_sdk_root} "
             f"-mmacosx-version-min={self.OSX_DEPLOYMENT_TARGET} "
@@ -110,12 +107,12 @@ class DarwinToDarwinGenerator(ToolchainGenerator):
         return script, ""
 
     def cc(self):
-        script = self._base_script()
+        script = self._base_script("clang")
         extra = "-Wno-unused-command-line-argument"
         return script, extra
 
     def cxx(self):
-        script = self._base_script() + " -stdlib=libc++"
+        script = self._base_script("clang++") + " -stdlib=libc++"
         extra = "-Wno-unused-command-line-argument"
         return script, extra
 

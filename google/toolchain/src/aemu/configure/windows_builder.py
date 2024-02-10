@@ -12,7 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from aemu.configure.base_builder import QemuBuilder, LibInfo
+from aemu.configure.base_builder import QemuBuilder
+from aemu.configure.libraries import BazelLib, CMakeLib
 
 
 class WindowsBuilder(QemuBuilder):
@@ -29,17 +30,25 @@ class WindowsBuilder(QemuBuilder):
         ]
 
         bazel_configs = [
-            LibInfo(
+            CMakeLib(
+                "/hardware/google/gfxstream:gfxstream_backend",
+                "0.1.2",
+                {
+                    "archive": "libgfxstream_backend.dll",
+                    "includes": "",
+                },
+            ),
+            BazelLib(
                 "@zlib//:zlib",
                 "1.2.10",
                 {
                     "includes": [str(self.aosp / "external" / "zlib")],
                 },
             ),
-            LibInfo("@glib//:gmodule-static", "2.77.2", {}),
-            LibInfo("@glib//:gnulib", "2.77.2", {}),
-            LibInfo("@glib//:dirent", "2.77.2", {}),
-            LibInfo(
+            BazelLib("@glib//:gmodule-static", "2.77.2", {}),
+            BazelLib("@glib//:gnulib", "2.77.2", {}),
+            BazelLib("@glib//:dirent", "2.77.2", {}),
+            BazelLib(
                 "@glib//:glib-static",
                 "2.77.2",
                 {
@@ -51,7 +60,7 @@ class WindowsBuilder(QemuBuilder):
                     "dll_ext": "",
                 },
             ),
-            LibInfo(
+            BazelLib(
                 "@pixman//:pixman-1",
                 "0.42.3",
                 {
@@ -69,9 +78,9 @@ class WindowsBuilder(QemuBuilder):
                     ],
                 },
             ),
-            LibInfo("@pixman//:pixman_simd", "0.42.3", {}),
-            LibInfo("@pcre2//:pcre2", "10.42", {}),
-            LibInfo("//external/dtc:libfdt", "1.6.0", {}),
+            BazelLib("@pixman//:pixman_simd", "0.42.3", {}),
+            BazelLib("@pcre2//:pcre2", "10.42", {}),
+            BazelLib("//external/dtc:libfdt", "1.6.0", {}),
         ]
         return bazel_configs
 
