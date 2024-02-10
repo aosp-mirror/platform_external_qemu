@@ -893,6 +893,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
                 sUiEmuAgent->sensors->getPhysicalParameter(
                         PHYSICAL_PARAMETER_POSTURE, &out, 1,
                         PARAMETER_VALUE_TYPE_CURRENT);
+                applyFoldableQuirk((enum FoldablePostures)posture);
                 switch ((enum FoldablePostures)posture) {
                     case POSTURE_OPENED:
                         ChangeIcon(mToolsUi->change_posture_button,
@@ -1729,20 +1730,20 @@ void ToolWindow::hideRotationButton(bool hide) {
     }
 }
 
-void ToolWindow::on_new_posture_requested(int newPosture) {
-    if (mLastRequestedFoldablePosture == -1) {
-        mLastRequestedFoldablePosture = android_foldable_get_posture();
-    }
-    mEmulatorWindow->activateWindow();
+void ToolWindow::applyFoldableQuirk(int newPosture) {
     const bool is_pixel_fold = android_foldable_is_pixel_fold();
     if (is_pixel_fold) {
         if (newPosture > 1 && mLastRequestedFoldablePosture == 1 ||
                 newPosture == 1 && mLastRequestedFoldablePosture > 1) {
             startSleepTimer();
         }
-
     }
     mLastRequestedFoldablePosture = newPosture;
+}
+
+void ToolWindow::on_new_posture_requested(int newPosture) {
+    mEmulatorWindow->activateWindow();
+    applyFoldableQuirk(newPosture);
     handleUICommand(QtUICommand::CHANGE_FOLDABLE_POSTURE, true);
 }
 
