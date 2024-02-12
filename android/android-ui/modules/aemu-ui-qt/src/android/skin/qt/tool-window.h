@@ -229,6 +229,8 @@ private:
 
     void startSleepTimer();
 
+    void applyFoldableQuirk(int newPosture);
+
 public slots:
     void raise();
     void switchClipboardSharing(bool enabled);
