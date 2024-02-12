@@ -73,12 +73,15 @@ struct SwsContext;
 #include <stdarg.h>                             // for va_list
 #include <stdio.h>                              // for vprintf, NULL
 #include <string.h>                             // for memcpy
+#include <algorithm>
+#include <cmath>
 #include <cstdint>                              // for uint8_t
 #include <functional>                           // for __base
 #include <string>                               // for string, basic_string
 #include <string_view>
 #include <utility>                              // for move
 #include <vector>                               // for vector
+
 
 #include "android/recording/ffmpegdefs.h"
 
@@ -213,6 +216,8 @@ private:
     // Callback for av_log_set_callback() to get logging info
     static void avLoggingCallback(void *ptr, int level, const char *fmt, va_list vargs);
 
+    uint32_t scaledOutput(uint32_t original) const;
+
 private:
     std::string mEncodedOutputPath;
     AVScopedPtr<AVFormatContext> mOutputContext;
@@ -257,14 +262,23 @@ bool FfmpegRecorderImpl::isValid() {
     return mValid;
 }
 
+uint32_t FfmpegRecorderImpl::scaledOutput(uint32_t original) const {
+    double scale = mCodec->getScale();
+    double output = original * scale;
+    return (uint32_t)(std::rint(output));
+}
+
 void FfmpegRecorderImpl::reInitWidthAndHeight(uint16_t w, uint16_t h) {
     if (mFbWidth != w || mFbHeight != h) {
         mFbWidth = w;
         mFbHeight = h;
+        mCodec->updateFbWidthHeight(w,h);
         auto c = mVideoStream.codecCtx.get();
         auto cctx = c;
-        cctx->width = w;
-        cctx->height = h;
+        uint32_t outputw = scaledOutput(w);
+        uint32_t outputh = scaledOutput(h);
+        cctx->width = outputw;
+        cctx->height = outputh;
         mCodec->getCodec()->init(cctx);
         // allocate and init a re-usable frame
         auto frame = allocVideoFrame(cctx->pix_fmt, cctx->width, cctx->height);

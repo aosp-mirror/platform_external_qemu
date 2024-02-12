@@ -17,6 +17,7 @@
 #include "host-common/vm_operations.h"
 #include "aemu/base/AlignedBuf.h"
 #include "aemu/base/synchronization/Lock.h"
+#include "android/utils/misc.h"
 #include "host-common/crash-handler.h"
 #include <map>
 #include <unordered_set>
@@ -34,9 +35,9 @@ using base::AutoLock;
 using base::Lock;
 
 #if defined(__APPLE__) && defined(__arm64__)
-constexpr uint32_t kAlignment = 16384;
+constexpr uint32_t kAllocAlignment = 16384;
 #else
-constexpr uint32_t kAlignment = 4096;
+constexpr uint32_t kAllocAlignment = 4096;
 #endif
 
 uint64_t allocateAddressSpaceBlock(const AddressSpaceHwFuncs* hw, uint32_t size) {
@@ -88,7 +89,7 @@ std::pair<uint64_t, MemBlock*> translatePhysAddr(uint64_t p) {
 
 MemBlock::MemBlock(const address_space_device_control_ops* o, const AddressSpaceHwFuncs* h, uint32_t sz)
         : ops(o), hw(h) {
-    bits = android::aligned_buf_alloc(kAlignment, sz);
+    bits = android::aligned_buf_alloc(kAllocAlignment, sz);
     bitsSize = sz;
     physBase = allocateAddressSpaceBlock(hw, sz);
     if (!physBase) {
@@ -246,7 +247,7 @@ bool MemBlock::load(base::Stream* stream,
                     MemBlock* block) {
     const uint64_t physBaseLoaded = stream->getBe64();
     const uint32_t bitsSize = stream->getBe32();
-    void* const bits = android::aligned_buf_alloc(kAlignment, bitsSize);
+    void* const bits = android::aligned_buf_alloc(kAllocAlignment, bitsSize);
     if (!bits) {
         return false;
     }
@@ -323,8 +324,7 @@ void AddressSpaceSharedSlotsHostMemoryAllocatorContext::perform(AddressSpaceDevi
 uint64_t
 AddressSpaceSharedSlotsHostMemoryAllocatorContext::allocate(
         AddressSpaceDevicePingInfo *info) {
-    const uint32_t alignedSize =
-        ((info->size + kAlignment - 1) / kAlignment) * kAlignment;
+    const uint32_t alignedSize = align(info->size, (*m_hw->getGuestPageSize)());
 
     AutoLock lock(g_blocksLock);
     for (auto& kv : g_blocks) {
