@@ -328,7 +328,8 @@ bool FileMetricsWriter::runFileOperationWithRetries(int* filenameCounter,
 void FileMetricsWriter::write(
         const android_studio::AndroidStudioEvent& asEvent,
         wireless_android_play_playlog::LogEvent* logEvent) {
-    D("writing a log event");
+    D("event time %" PRIi64 " ms", logEvent->event_time_ms());
+    D("{ %s }", asEvent.ShortDebugString().c_str());
 
     asEvent.SerializeToString(logEvent->mutable_source_extension());
 
