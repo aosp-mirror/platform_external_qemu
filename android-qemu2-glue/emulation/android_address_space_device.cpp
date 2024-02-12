@@ -56,6 +56,8 @@ static const struct AddressSpaceHwFuncs address_space_hw_funcs = {
     goldfish_address_space_get_phys_addr_start,
     // getPhysAddrStartLocked()
     goldfish_address_space_get_phys_addr_start_locked,
+    // getGuestPageSize()
+    goldfish_address_space_get_guest_page_size,
     // allocSharedHostRegionFixedLocked
     goldfish_address_space_alloc_shared_host_region_fixed_locked,
 };

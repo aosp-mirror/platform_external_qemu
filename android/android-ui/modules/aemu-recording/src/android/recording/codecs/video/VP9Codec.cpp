@@ -40,7 +40,10 @@ VP9Codec::VP9Codec(CodecParams&& p,
     : Codec(AV_CODEC_ID_VP9, std::move(p)),
       mFbWidth(fbWidth),
       mFbHeight(fbHeight),
-      mFbFormat(fbFormat) {}
+      mFbFormat(fbFormat) {
+    mScale = std::min(mScale, getCodecParams()->width / (double)fbWidth);
+    mScale = std::min(mScale, getCodecParams()->height / (double)fbHeight);
+}
 
 VP9Codec::~VP9Codec() {}
 
@@ -94,11 +97,24 @@ bool VP9Codec::configAndOpenEncoder(const AVFormatContext* oc,
     return true;
 }
 
+void VP9Codec::updateFbWidthHeight(uint32_t fbW, uint32_t fbH) {
+    mFbWidth = fbW;
+    mFbHeight = fbH;
+}
+
+double VP9Codec::getScale() const {
+    return mScale;
+}
+
 bool VP9Codec::initSwxContext(const AVCodecContext* c,
                                     SwsContext** swsCxt) const {
     *swsCxt =
-            sws_getContext(c->width, c->height, mFbFormat, c->width, c->height,
+            sws_getContext(mFbWidth, mFbHeight, mFbFormat, c->width, c->height,
                            c->pix_fmt, SCALE_FLAGS, NULL, NULL, NULL);
+#if 0
+    LOG(INFO)<<" fb " << mFbWidth << " x " << mFbHeight;
+    LOG(INFO)<<" target " << c->width << " x " << c->height;
+#endif
     if (*swsCxt == nullptr) {
         LOG(ERROR) << "Could not initialize the conversion context";
         return false;

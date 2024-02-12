@@ -16,15 +16,16 @@
 #include "host-common/address_space_device.hpp"
 #include "host-common/vm_operations.h"
 #include "aemu/base/AlignedBuf.h"
+#include "android/utils/misc.h"
 #include "host-common/crash-handler.h"
 
 namespace android {
 namespace emulation {
 
 AddressSpaceHostMemoryAllocatorContext::AddressSpaceHostMemoryAllocatorContext(
-    const address_space_device_control_ops *ops)
-  : m_ops(ops) {
-}
+    const address_space_device_control_ops *ops, const AddressSpaceHwFuncs* hw)
+  : m_ops(ops),
+    m_hw(hw) {}
 
 AddressSpaceHostMemoryAllocatorContext::~AddressSpaceHostMemoryAllocatorContext() {
     clear();
@@ -53,13 +54,13 @@ void AddressSpaceHostMemoryAllocatorContext::perform(AddressSpaceDevicePingInfo 
 void *AddressSpaceHostMemoryAllocatorContext::allocate_impl(const uint64_t phys_addr,
                                                             const uint64_t size) {
 #if defined(__APPLE__) && defined(__arm64__)
-    constexpr uint64_t alignment = 16384;
+    constexpr uint64_t k_alloc_alignment = 16384;
 #else
-    constexpr uint64_t alignment = 4096;
+    constexpr uint64_t k_alloc_alignment = 4096;
 #endif
-    const uint64_t aligned_size = ((size + alignment - 1) / alignment) * alignment;
+    const uint32_t aligned_size = align(size, (*m_hw->getGuestPageSize)());
 
-    void *host_ptr = android::aligned_buf_alloc(alignment, aligned_size);
+    void *host_ptr = android::aligned_buf_alloc(k_alloc_alignment, aligned_size);
     if (host_ptr) {
         auto r = m_paddr2ptr.insert({phys_addr, {host_ptr, aligned_size}});
         if (r.second) {

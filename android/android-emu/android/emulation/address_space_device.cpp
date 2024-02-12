@@ -370,7 +370,8 @@ private:
             return nullptr;
         case AddressSpaceDeviceType::HostMemoryAllocator:
             return DeviceContextPtr(new AddressSpaceHostMemoryAllocatorContext(
-                get_address_space_device_control_ops()));
+                get_address_space_device_control_ops(),
+                get_address_space_device_hw_funcs()));
         case AddressSpaceDeviceType::SharedSlotsHostMemoryAllocator:
             return DeviceContextPtr(new AddressSpaceSharedSlotsHostMemoryAllocatorContext(
                 get_address_space_device_control_ops(),
