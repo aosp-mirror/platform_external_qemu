@@ -807,7 +807,8 @@ bool android_metrics_start(const char* emulatorVersion,
                            const char* emulatorFullVersion,
                            const char* qemuVersion,
                            int controlConsolePort) {
-    MetricsReporter::start(android::base::Uuid::generate().toString(),
+    auto sessionId = android::base::Uuid::generate().toString();
+    MetricsReporter::start(sessionId,
                            emulatorVersion, emulatorFullVersion, qemuVersion);
     PeriodicReporter::start(&MetricsReporter::get(),
                             android::base::ThreadLooper::get());
@@ -826,7 +827,7 @@ bool android_metrics_start(const char* emulatorVersion,
             });
     // Collect PerfStats metrics every 5 seconds.
     auto perfStatReporter = android::metrics::PerfStatReporter::create(
-            android::base::ThreadLooper::get(), 5 * 1000);
+            sessionId, android::base::ThreadLooper::get(), 5 * 1000);
     perfStatReporter->start();
     MetricsEngine::get()->registerReporter(perfStatReporter);
 
