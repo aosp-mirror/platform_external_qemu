@@ -315,16 +315,25 @@ public:
     Status getSensor(ServerContext* context,
                      const SensorValue* request,
                      SensorValue* reply) override {
-        size_t size;
-        mAgents->sensors->getSensorSize((int)request->target(), &size);
+        size_t size = 0;
+        int state =
+                mAgents->sensors->getSensorSize((int)request->target(), &size);
+        if (state != SENSOR_STATUS_OK) {
+            derror("Unable to retrieve sensor status for %s",
+                   request->ShortDebugString());
+            return Status(grpc::StatusCode::INTERNAL,
+                          "Failed to retrieve sensor size, error: " +
+                                  std::to_string(state));
+        }
+
         std::vector<float> val(size, 0);
         std::vector<float*> out;
         for (size_t i = 0; i < val.size(); i++) {
             out.push_back(&val[i]);
         }
 
-        int state = mAgents->sensors->getSensor((int)request->target(),
-                                                out.data(), out.size());
+        state = mAgents->sensors->getSensor((int)request->target(), out.data(),
+                                            out.size());
 
         auto value = reply->mutable_value();
         for (size_t i = 0; i < size; i++) {
