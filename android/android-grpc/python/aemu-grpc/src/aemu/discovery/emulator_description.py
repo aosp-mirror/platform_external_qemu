@@ -36,6 +36,7 @@ from aemu.proto.emulator_controller_pb2_grpc import EmulatorControllerStub
 
 _LOGGER = logging.getLogger("aemu-grpc")
 
+
 def _safe_kill(process: psutil.Process) -> bool:
     """Tries to kill the given process
 
@@ -367,6 +368,23 @@ class EmulatorDescription(BasicEmulatorDescription):
             _LOGGER.debug("pid: %s, failed to retrieve status: %s", self.pid(), err)
             return False
 
+    def _terminate_proc(self, proc, timeout):
+        try:
+            stub = EmulatorControllerStub(self.get_grpc_channel())
+            _LOGGER.debug("Sending shutdown to %s.", self.pid())
+            stub.setVmState(VmRunState(state=VmRunState.SHUTDOWN))
+        except Exception as err:
+            _LOGGER.error("Failed to shutdown using gRPC (%s), terminating.", err)
+            proc.terminate()
+
+        try:
+            proc.wait(timeout=timeout)
+        except psutil.TimeoutExpired as expired:
+            _LOGGER.error(
+                "Emulator did not shutdown gracefully, terminating. (%s)", expired
+            )
+            _kill_process_tree(proc)
+
     def shutdown(self, timeout=30) -> bool:
         """Gracefully shutdown the emulator.
 
@@ -388,20 +406,13 @@ class EmulatorDescription(BasicEmulatorDescription):
             return True
 
         try:
-            stub = EmulatorControllerStub(self.get_grpc_channel())
-            _LOGGER.debug("Sending shutdown to %s.", self.pid())
-            stub.setVmState(VmRunState(state=VmRunState.SHUTDOWN))
+            self._terminate_proc(proc, timeout)
+        except psutil.NoSuchProcess as no:
+            _LOGGER.debug("Process was terminated. (%s)", no)
         except Exception as err:
-            _LOGGER.error("Failed to shutdown using gRPC (%s), terminating.", err)
-            proc.terminate()
-
-        try:
-            proc.wait(timeout=timeout)
-        except psutil.TimeoutExpired as expired:
-            _LOGGER.error(
-                "Emulator did not shutdown gracefully, terminating. (%s)", expired
+            _LOGGER.debug(
+                "Unexpected error whil terminating process. %s", err, exc_info=True
             )
-            _kill_process_tree(proc)
 
         return not self.is_alive()
 
