@@ -153,7 +153,8 @@ public:
     Status getSensor(ServerContext* context,
                      const SensorValue* request,
                      SensorValue* reply) override {
-        size_t size;
+        size_t size = 0;
+        reply->Clear();
         int state =
                 mSensorAgent->getSensorSize((int)request->target() - 1, &size);
         if (state != 0) {
@@ -216,7 +217,8 @@ public:
     Status getPhysicalModel(ServerContext* context,
                             const PhysicalModelValue* request,
                             PhysicalModelValue* reply) override {
-        size_t size;
+        size_t size = 0;
+        reply->Clear();
         int state = mSensorAgent->getPhysicalParameterSize(
                 (int)request->target() - 1, &size);
 
