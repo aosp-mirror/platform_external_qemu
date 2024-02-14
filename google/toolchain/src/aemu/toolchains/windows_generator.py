@@ -20,6 +20,7 @@ import subprocess
 from pathlib import Path
 
 from aemu.toolchains.toolchain_generator import ToolchainGenerator
+from aemu.toolchains.mingw_to_msvc_lib import convert_mingw_to_msvc_lib
 
 
 class VisualStudioNotFoundException(Exception):
@@ -44,6 +45,22 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
             self.env[key.upper()] = os.environ[key]
         logging.info("Starting environment: %s", self.env)
 
+        self.mingw_dir = (
+            self.aosp
+            / "prebuilts"
+            / "gcc"
+            / "linux-x86"
+            / "host"
+            / "x86_64-w64-mingw32-4.8"
+        )
+        self.rust_bin_dir = (
+            self.aosp
+            / "prebuilts"
+            / "rust"
+            / f"{self.host()}-x86"
+            / self.rust_version()
+            / "bin"
+        )
         self.compat_path = (
             (
                 self.aosp
@@ -164,6 +181,7 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
         # Generate the resource compilers.
         self.gen_script("windres", self.dest / "rc", self.windres)
         self.gen_script("windmc", self.dest / "rc", self.windres)
+        self.gen_script("ld-rust", self.dest / "ld-rust", self.rust_link_script)
 
     def ninja(self):
         # We do not have ninja for windows in AOSP, so we will pick up the one that ships
@@ -188,6 +206,86 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
             "",
         )
 
+    def rust_link_script(self):
+        cl = self.clang() / "bin" / "clang"
+
+        rust_lib_dir = self.dest / "rust_libs"
+        rust_lib_dir.mkdir(parents=True, exist_ok=True)
+        # We need to link against mingw archives. Unfortunately that will not work
+        # with our clang-cl environment, so we will patch up the .a -> .lib
+        convert_mingw_to_msvc_lib(
+            self.mingw_dir / "x86_64-w64-mingw32" / "lib64" / "libpthread.a",
+            rust_lib_dir / "pthread.lib",
+            self.clang() / "bin",
+        )
+
+        convert_mingw_to_msvc_lib(
+            self.mingw_dir
+            / "lib"
+            / "gcc"
+            / "x86_64-w64-mingw32"
+            / "4.8.3"
+            / "libgcc_eh.a",
+            rust_lib_dir / "libgcc_eh.lib",
+            self.clang() / "bin",
+        )
+
+        # We should have loaded the visual studio environment.
+        # We are going to extract the -L paths from this.
+        lib_paths = '"-L'+ '" "-L'.join(self.env["LIB"].split(";")) + '"'
+
+        script = (
+            "# Link script for cargo \n"
+            f"{cl} "
+            "--target=x86_64-pc-windows-gnu "
+            f"--sysroot={self.mingw_dir}/x86_64-w64-mingw32 "
+            f"-B{self.mingw_dir}/lib/gcc/x86_64-w64-mingw32/4.8.3 "
+            f"-L{self.mingw_dir}/lib/gcc/x86_64-w64-mingw32/4.8.3 "
+            f"-L{self.mingw_dir}/x86_64-w64-mingw32/lib64 "
+            f"-L{self.clang()}/lib -Wl,-mllvm,--relocation-model=pic "
+            "-fuse-ld=lld "
+            f"{lib_paths} "
+            f"-L{rust_lib_dir}"
+        )
+        return script, ""
+
+    def rust_flags(self) -> [str]:
+        return ["--target=x86_64-pc-windows-gnu"]
+
+    def rustc(self) -> (str, str):
+        mingw = self.mingw_dir / "x86_64-w64-mingw32"
+        rustc_bin = self.rust_bin_dir / "rustc"
+        script = (
+            "setlocal\n"
+            f"set PATH={self.rust_bin_dir};{mingw}\\bin;{mingw}\\lib;\n"
+            f"{rustc_bin}"
+        )
+        return script, ""
+
+    def cargo(self) -> (str, str):
+        rust_linker = (self.dest / "ld-rust.cmd").as_posix()
+        mingw = self.mingw_dir / "x86_64-w64-mingw32"
+        rustc_bin = self.rust_bin_dir / "rustc"
+        cargo_bin = self.rust_bin_dir / "cargo"
+        cache = f"set RUSTC_WRAPPER={self.ccache}" if self.ccache else ""
+        script = (
+            "setlocal\n"
+            # "set CARGO_HOME=..."
+            f"set PATH={self.rust_bin_dir};{mingw}\\bin;{mingw}\\lib;\n"
+            f"set CARGO_BUILD_RUSTC={rustc_bin}\n"
+            f"set CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER={rust_linker}\n"
+            "set CARGO_BUILD_TARGET=x86_64-pc-windows-gnu\n"
+            'set RUSTFLAGS=-Cdefault-linker-libraries=yes\n'
+            f"{cache}\n"
+            f'set CC_x86_64-pc-windows-gnu={self.dest / "cc.cmd"}\n'
+            f'set HOST_CC={self.dest / "cc.cmd"}\n'
+            f'set CXX_x86_64-pc-windows-gnu={self.dest / "cc.cmd"}\n'
+            f'set HOST_CXX={self.dest / "cc.cmd"}\n'
+            f'set AR_x86_64-pc-windows-gnu={self.dest / "ar.cmd"}\n'
+            f"{cargo_bin}"
+        )
+        return script, ""
+
     def pkg_config(self):
         # Build pkg-config from source.
         self.bazel.build_target("//external/pkg-config:pkg-config")
@@ -206,8 +304,9 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
     def cc(self, clang="clang"):
         self.initialize()
         compat_lib_dir = self.bazel.get_archive(self.COMPAT_ARCHIVE).parent
+        rust_lib_dir = self.dest / "lib"
 
-        cache = f"{self.ccache}" if self.ccache else ""
+        cache = f'"{self.ccache}"' if self.ccache else ""
         cl = self.clang() / "bin" / clang
         flags = (
             "-Wno-constant-conversion "
@@ -220,7 +319,7 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
             "-Wno-microsoft-enum-forward-reference "
             "-Wno-microsoft-include "
             "-Wno-deprecated-declarations "
-            f"-L{compat_lib_dir} -lcompat"
+            f"-L{compat_lib_dir} -L{rust_lib_dir} -lcompat"
         )
 
         return (

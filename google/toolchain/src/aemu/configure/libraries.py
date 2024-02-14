@@ -28,7 +28,7 @@ class Lib:
 
     @classmethod
     def get_builder(cls):
-        raise NotImplementedError()
+        return cls.builder
 
     def get_library_config(
         self, builder, bazel_target: str, shim: Dict[str, str]
@@ -99,9 +99,34 @@ class BazelLib(Lib):
     def __init__(self, target, version, shim):
         super().__init__(target, version, shim)
 
-    @classmethod
-    def get_builder(cls):
-        return BazelLib.builder
+
+class CargoLib(Lib):
+    builder = None
+
+    def __init__(self, target, version, shim):
+        super().__init__(target, version, shim)
+
+    def generate_pkg_config(self, dest, pkg_config_dir):
+        builder = self.__class__.get_builder()
+        output = builder.build_target(self.target)
+        pkglib_name = self.target[self.target.rfind(":") + 1 :]
+
+        cfg = PackageConfigPc(
+            name=pkglib_name,
+            version=self.version,
+            release_dir=dest / "release",
+            archive=output / self.shim.get("archive"),
+            includes=[output / "include"],
+            shim=self.shim,
+        )
+
+        cfg.write(pkg_config_dir)
+        if not cfg.is_static():
+            cfg.binplace(dest)
+
+        pc_file = Path(output) / self.shim.get("pc", "")
+        if pc_file.is_file() and pc_file.exists():
+            shutil.copyfile(pc_file, pkg_config_dir / pc_file.name)
 
 
 # CMakeLib class inherits from Lib
@@ -110,10 +135,6 @@ class CMakeLib(Lib):
 
     def __init__(self, target, version, shim):
         super().__init__(target, version, shim)
-
-    @classmethod
-    def get_builder(cls):
-        return CMakeLib.builder
 
     def generate_pkg_config(self, dest, pkg_config_dir):
         builder = self.__class__.get_builder()

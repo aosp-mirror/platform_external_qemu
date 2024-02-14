@@ -15,7 +15,7 @@
 import shutil
 
 from aemu.configure.base_builder import QemuBuilder
-from aemu.configure.libraries import BazelLib, CMakeLib
+from aemu.configure.libraries import BazelLib, CMakeLib, CargoLib
 
 
 class LinuxBuilder(QemuBuilder):
@@ -101,6 +101,7 @@ class LinuxBuilder(QemuBuilder):
             "-Drbd=disabled",
             "-Drdma=disabled",
             "-Dreplication=disabled",
+            "-Drutabaga_gfx=enabled",
             "-Dsdl=disabled",
             "-Dsdl_image=disabled",
             "-Dseccomp=disabled",
@@ -171,6 +172,7 @@ class LinuxBuilder(QemuBuilder):
             self.aosp / "external" / "glib" / "os" / "linux" / "gmodule",
             "${libdir}",
         ]
+
         # Next we have our dependencies.
         return [
             CMakeLib(
@@ -178,9 +180,13 @@ class LinuxBuilder(QemuBuilder):
                 "0.1.2",
                 {
                     "archive": "libgfxstream_backend.so",
-                    "includes": "",
                 },
             ),
+            CargoLib(
+                "/external/crosvm/rutabaga_gfx/ffi:rutabaga_gfx_ffi",
+                "0.1.2",
+                {"archive": "rutabaga_gfx_ffi"},
+            ),  # Must be after libgxstream!
             BazelLib("//external/dtc:libfdt", "1.6.0", {}),
             BazelLib("@glib//:gmodule-static", "2.77.2", {}),
             BazelLib("@zlib//:zlib", "1.2.10", {}),

@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from aemu.configure.base_builder import QemuBuilder
-from aemu.configure.libraries import BazelLib, CMakeLib
+from aemu.configure.libraries import BazelLib, CMakeLib, CargoLib
 import sys
 
 
@@ -134,6 +134,7 @@ class DarwinBuilder(QemuBuilder):
             "-Drbd=disabled",
             "-Drdma=disabled",
             "-Dreplication=disabled",
+            "-Drutabaga_gfx=enabled",
             "-Dsdl_image=disabled",
             "-Dsdl=disabled",
             "-Dseccomp=disabled",
@@ -217,6 +218,11 @@ class DarwinBuilder(QemuBuilder):
                     "includes": "",
                 },
             ),
+            CargoLib(
+                "/external/crosvm/rutabaga_gfx/ffi:rutabaga_gfx_ffi",
+                "0.1.2",
+                {"archive": "rutabaga_gfx_ffi"},
+            ),  # Must be after libgxstream!
             BazelLib("//external/dtc:libfdt", "1.6.0", {}),
             BazelLib("@glib//:gmodule-static", "2.77.2", {}),
             BazelLib(
