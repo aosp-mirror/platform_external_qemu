@@ -410,6 +410,13 @@ def mac_postInstall(installdir):
             logging.info(f"Skipping rpath fix for file {exe}")
             continue
         changeToQt6Rpaths(exe)
+        # Add the search path to the executables so we can use them without setting environment
+        # variables.
+        res = subprocess.run(args=["install_name_tool", "-add_rpath", "@loader_path/../lib", exe],
+                              cwd=installdir, env=os.environ.copy(), encoding="utf-8")
+        if res.returncode != 0:
+            logging.critical("install_name_tool -add_rpath failed (%d)", res.returncode)
+            exit(res.returncode)
 
 def linux_postInstall(installdir, target):
     # Install prebuilt clang's libc++.so.1 and libc++abi.so.1 to lib/ as Qt's compiler
