@@ -111,7 +111,7 @@ using ::grpc::ServerContext;
 using ::grpc::ServerWriter;
 using ::grpc::Status;
 using namespace android::base;
-using namespace android::control::interceptor;
+// using namespace android::control::interceptor;
 using namespace std::chrono_literals;
 
 namespace android {
@@ -318,6 +318,8 @@ public:
         size_t size = 0;
         int state =
                 mAgents->sensors->getSensorSize((int)request->target(), &size);
+        VERBOSE_INFO(grpc, "Received sensor state: %d, size: %d (%s)", state,
+                     size, state == SENSOR_STATUS_OK ? "ok" : "not ok");
         if (state != SENSOR_STATUS_OK) {
             derror("Unable to retrieve sensor status for %s",
                    request->ShortDebugString());
@@ -325,7 +327,6 @@ public:
                           "Failed to retrieve sensor size, error: " +
                                   std::to_string(state));
         }
-
         std::vector<float> val(size, 0);
         std::vector<float*> out;
         for (size_t i = 0; i < val.size(); i++) {
@@ -341,6 +342,9 @@ public:
         }
         reply->set_status((SensorValue_State)state);
         reply->set_target(request->target());
+        VERBOSE_INFO(grpc, "Received sensor state: %s (%s)",
+                     reply->ShortDebugString(),
+                     state == SENSOR_STATUS_OK ? "ok" : "not ok");
         return Status::OK;
     }
 
