@@ -1225,7 +1225,7 @@ extern int android_sensors_override_set(int sensor_id,
             android_physical_model_set(PHYSICAL_PARAMETER_HINGE_ANGLE2, val,
                                        count, PHYSICAL_INTERPOLATION_SMOOTH);
             break;
-        defaut:
+        default:
             _hwSensors_setSensorValue(hw, sensor_id, val, count);
             break;
     }
