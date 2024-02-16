@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  Copyright (C) 2020 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -337,6 +338,10 @@ class EmulatorDescription(BasicEmulatorDescription):
     def __init__(self, pid, description_dict):
         super().__init__(description_dict)
         self._description["pid"] = pid
+
+    def __str__(self):
+        alive = '🚀' if self.is_alive() else '🪦'
+        return f"{self.name()} (pid: {self.pid()} {alive})"
 
     def process(self) -> Optional[psutil.Process]:
         """Returns the process object associated with the qemu process.
