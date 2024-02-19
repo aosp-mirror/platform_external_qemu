@@ -321,7 +321,7 @@ static void max31790_get_rpm(Object *obj, Visitor *v, const char *name,
     MAX31790State *ms = MAX31790(obj);
     uint16_t tach_count = *(uint16_t *)opaque;
     uint32_t sr = max31790_get_sr(ms->fan_dynamics[0]);
-    uint16_t rpm;
+    uint16_t rpm = 0;
 
     max31790_update_tach_count(ms);
     tach_count >>= MAX31790_TACH_SHAMT;
