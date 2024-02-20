@@ -52,10 +52,14 @@ const int DEFAULT_FLAGS_AUTO_CLUSTER =
 // The build property key for multi display support
 static const char kMultiDisplayProp[] = "ro.emulator.car.multidisplay";
 
+// The build property key for distant display support
+static const char kDistantDisplayProp[] = "ro.emulator.car.distantdisplay";
+
 // Returns the DisplayManager flags to use for the given display ID.
 int getDefaultFlagsForDisplay(int displayId);
 // Returns true when multidisplay is supported by the automotive system.
 bool isMultiDisplaySupported(const AvdInfo* i);
-
+// Returns true when distantdisplay is supported by the automotive system.
+bool isDistantDisplaySupported(const AvdInfo* info);
 } // namespace automotive
 } // namespace android

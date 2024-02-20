@@ -107,7 +107,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     if (const auto instance =
                                 android::MultiDisplay::getInstance()) {
                         if (instance &&
-                            instance->isMultiDisplayEnabled() == false) {
+                            (android_foldable_is_pixel_fold() ||
+                             instance->isMultiDisplayEnabled() == false)) {
                             return emulator_window_rotate_90(true);
                         }
                     }
@@ -361,10 +362,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .changeResizableDisplay =
                 [](int presetSize) {
                     if (!resizableEnabled()) {
-                        return false;
-                    }
-                    if (android_foldable_is_folded()) {
-                        dwarning("Cannot resize emulator: avd is folded, unfold and try again");
                         return false;
                     }
                     if (const auto win = EmulatorQtWindow::getInstance()) {

@@ -22,12 +22,15 @@ namespace android {
 namespace metrics {
 
 TextMetricsWriter::Ptr TextMetricsWriter::create(
+        const std::string& sessionId,
         base::StdioStream&& outStream) {
-    return Ptr(new TextMetricsWriter(std::move(outStream)));
+    return Ptr(new TextMetricsWriter(sessionId, std::move(outStream)));
 }
 
-TextMetricsWriter::TextMetricsWriter(base::StdioStream&& outStream)
-    : MetricsWriter({}), mOutStream(std::move(outStream)) {}
+TextMetricsWriter::TextMetricsWriter(
+        const std::string& sessionId,
+        base::StdioStream&& outStream)
+    : MetricsWriter(sessionId), mOutStream(std::move(outStream)) {}
 
 void TextMetricsWriter::write(
         const android_studio::AndroidStudioEvent& asEvent,

@@ -298,7 +298,7 @@ TEST_F(JwkTokenAuthTest, fail_with_gradle_message) {
     auto message = std::string(
             jwt.isTokenValid("d/e/f", "Bearer " + *token).message());
     EXPECT_EQ(message,
-              "Make sure to add allowedEndpoints.add(\"d/e/f\") to the "
+              "Make sure to add `allowedEndpoints.add(\"d/e/f\")` to the "
               "emulatorControl block in your gradle build file.");
 }
 
@@ -318,7 +318,7 @@ TEST_F(JwkTokenAuthTest, fail_with_generic_message_no_aud) {
             jwt.isTokenValid("d/e/f", "Bearer " + *token).message());
     EXPECT_EQ(message,
               "The JWT does not have an aud claim. Make sure to include: "
-              "\"aud\" : [\"d/e/f\"] in your JWT.");
+              "`\"aud\" : [\"d/e/f\"]` in your JWT.");
 }
 
 TEST_F(JwkTokenAuthTest, fail_with_gradle_message_no_aud) {
@@ -336,7 +336,7 @@ TEST_F(JwkTokenAuthTest, fail_with_gradle_message_no_aud) {
     auto message = std::string(
             jwt.isTokenValid("d/e/f", "Bearer " + *token).message());
     EXPECT_EQ(message,
-              "Make sure to add allowedEndpoints.add(\"d/e/f\") to the "
+              "Make sure to add `allowedEndpoints.add(\"d/e/f\")` to the "
               "emulatorControl block in your gradle build file.");
 }
 

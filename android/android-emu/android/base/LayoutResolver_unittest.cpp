@@ -89,26 +89,16 @@ TEST(LayoutResolver, threeDisplaysWithStackedLayout) {
     const std::array<std::pair<testDisplayInput, testDisplayOutput>, 3> kTestSet[] = {
             // 3 Displys including one wide width display
             // Wide display should be located on the first row
+            // Remaining displays on the second row should be on the centor area
             {
                 std::make_pair(testDisplayInput{0, 1080, 600},
-                            testDisplayOutput{0, 0, 0}),
+                            testDisplayOutput{0, 1760, 0}),
                 std::make_pair(testDisplayInput{6, 400, 600},
-                            testDisplayOutput{6, 1080, 0}),
+                            testDisplayOutput{6, 2840, 0}),
                 std::make_pair(testDisplayInput{7, 5000, 600},
                             testDisplayOutput{7, 0, 600})
-            },
-            // 3 Displys without wide display
-            // All displays should be located on the first row
-            {
-                std::make_pair(testDisplayInput{0, 1080, 600},
-                            testDisplayOutput{0, 0, 0}),
-                std::make_pair(testDisplayInput{6, 400, 600},
-                            testDisplayOutput{6, 1080, 0}),
-                std::make_pair(testDisplayInput{7, 3900, 600},
-                            testDisplayOutput{7, 1480, 0})
             }};
 
-    const uint32_t kMonitorWidth = 6000;
     for (const auto kData : kTestSet) {
         size_t kDataSize = ARRAY_SIZE(kData);
         std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> displays;
@@ -117,7 +107,7 @@ TEST(LayoutResolver, threeDisplaysWithStackedLayout) {
             displays[input.id] = std::make_pair(input.width, input.height);
         }
 
-        const auto layout = resolveStackedLayout(displays, kMonitorWidth);
+        const auto layout = resolveStackedLayout(displays);
         for (size_t i = 0; i < kDataSize; i++) {
             const auto& expectedOutput = kData[i].second;
             const auto& actualOutput = layout.find(expectedOutput.id);

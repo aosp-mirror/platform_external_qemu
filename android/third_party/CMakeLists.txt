@@ -146,6 +146,12 @@ if(NOT TARGET flatc)
              FLATC_BINARY_DIR)
   set(FLATC_BINARY_PATH)
   cmake_path(APPEND FLATC_BINARY_DIR flatc OUTPUT_VARIABLE FLATC_BINARY_PATH)
+  if(LINUX_X86_64 OR LINUX_AARCH64)
+    # We will use the system toolchain as we require special libc++ bindings for the linux toolchain.
+    set(EXTRA_FLATC_ARGS "")
+  else()
+    set(EXTRA_FLATC_ARGS "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake")
+  endif()
   externalproject_add(
     flatbuffers-flatc
     SOURCE_DIR ${AOSP_ROOT}/external/flatbuffers
@@ -153,6 +159,7 @@ if(NOT TARGET flatc)
     CMAKE_ARGS -DFLATBUFFERS_BUILD_TESTS=OFF -DFLATBUFFERS_BUILD_CPP17=ON
                -DFLATBUFFERS_BUILD_FLAT_LIB=OFF -DFLATBUFFERS_BUILD_FLATC=ON
                -DFLATBUFFERS_STATIC_FLATC=OFF -DFLATBUFFERS_BUILD_FLATHASH=OFF
+               ${EXTRA_FLATC_ARGS}
     INSTALL_COMMAND ""
     BUILD_BYPRODUCTS ${FLATC_BINARY_PATH})
   add_executable(flatc IMPORTED GLOBAL)

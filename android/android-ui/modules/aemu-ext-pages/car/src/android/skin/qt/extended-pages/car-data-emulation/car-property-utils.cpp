@@ -247,11 +247,11 @@ map<int32_t, QString> apPowerStateReportMap = {
 
 map<int32_t, PropertyDescription> areaMap = {
     { (int32_t) VehicleArea::GLOBAL, { QObject::tr("Global") } },
-    { (int32_t) VehicleArea::WINDOW, { QObject::tr("Window"), "window" } },
-    { (int32_t) VehicleArea::MIRROR, { QObject::tr("Mirror"), "mirror" } },
-    { (int32_t) VehicleArea::SEAT, { QObject::tr("Seat"), "seat" } },
-    { (int32_t) VehicleArea::DOOR, { QObject::tr("Door"), "door" } },
-    { (int32_t) VehicleArea::WHEEL, { QObject::tr("Wheel"), "wheel" } }
+    { (int32_t) VehicleArea::WINDOW, { QObject::tr("Window"), { "window" } } },
+    { (int32_t) VehicleArea::MIRROR, { QObject::tr("Mirror"), { "mirror" } } },
+    { (int32_t) VehicleArea::SEAT, { QObject::tr("Seat"), { "seat" } } },
+    { (int32_t) VehicleArea::DOOR, { QObject::tr("Door"), { "door" } } },
+    { (int32_t) VehicleArea::WHEEL, { QObject::tr("Wheel"), { "wheel" } } }
 };
 
 map<int32_t, QString> gsrComplianceReqMap = {
@@ -261,7 +261,7 @@ map<int32_t, QString> gsrComplianceReqMap = {
       QObject::tr("GSR compliance required through system image") }
 };
 
-map<QString, std::map<int32_t, QString>*> carpropertyutils::lookupTablesMap = {
+map<QString, const std::map<int32_t, QString>*> carpropertyutils::lookupTablesMap = {
     { "fuelType", &fuelTypeMap },
     { "evConnector", &evConnectorTypeMap },
     { "portLocation", &portLocationMap },
@@ -287,16 +287,16 @@ map<int32_t, PropertyDescription> carpropertyutils::propMap = {
     { 286261506, { QObject::tr("Model") } },
     { 289407235, { QObject::tr("Model year") } },
     { 291504388, { QObject::tr("Fuel capacity (mL)") } },
-    { 289472773, { QObject::tr("Usable fuels"), "fuelType" } },
+    { 289472773, { QObject::tr("Usable fuels"), { "fuelType" } } },
     { 291504390, { QObject::tr("Battery capacity (Wh)") } },
-    { 289472775, { QObject::tr("Usable connectors (EV)"), "evConnector" } },
+    { 289472775, { QObject::tr("Usable connectors (EV)"), { "evConnector" } } },
     { 289407240, { QObject::tr("Fuel door location") } },
-    { 289407241, { QObject::tr("EV port location"), "portLocation" } },
-    { 356516106, { QObject::tr("Driver seat location"), "seat" } },
+    { 289407241, { QObject::tr("EV port location"), { "portLocation" } } },
+    { 356516106, { QObject::tr("Driver seat location"), { "seat" } } },
     { 291504644, { QObject::tr("Odometer value (km)") } },
     { 291504647, { QObject::tr("Speed (m/s)") } },
     { 291504897, { QObject::tr("Engine coolant temperature (°C)") } },
-    { 289407747, { QObject::tr("Engine oil level"), "oilLevel" } },
+    { 289407747, { QObject::tr("Engine oil level"), { "oilLevel" } } },
     { 291504900, { QObject::tr("Engine oil temperature (°C)") } },
     { 291504901, { QObject::tr("Engine RPM") } },
     { 290521862, { QObject::tr("Wheel ticks") } },
@@ -308,18 +308,18 @@ map<int32_t, PropertyDescription> carpropertyutils::propMap = {
     { 291504908, { QObject::tr("EV instantaneous charge rate (mW)") } },
     { 291504904, { QObject::tr("Range remaining (m)") } },
     { 392168201, { QObject::tr("Tire pressure (kPa)") } },
-    { 289408000, { QObject::tr("Selected gear"), "gear" } },
-    { 289408001, { QObject::tr("Current gear"), "gear" } },
+    { 289408000, { QObject::tr("Selected gear"), { "gear" } } },
+    { 289408001, { QObject::tr("Current gear"), { "gear" } } },
     { 287310850, { QObject::tr("Parking brake on") } },
     { 287310851, { QObject::tr("Parking brake auto apply on") } },
     { 287310853, { QObject::tr("Fuel level low") } },
     { 287310855, { QObject::tr("Night mode on") } },
     { 289408008, { QObject::tr("Turn signal state") } },
-    { 289408009, { QObject::tr("Ignition state"), "ignitionState" } },
+    { 289408009, { QObject::tr("Ignition state"), { "ignitionState" } } },
     { 287310858, { QObject::tr("ABS active") } },
     { 287310859, { QObject::tr("Traction control active") } },
     { 356517120, { QObject::tr("Fan speed") } },
-    { 356517121, { QObject::tr("Fan direction"), "fanDirection", fanDirectionToString } },
+    { 356517121, { QObject::tr("Fan direction"), { "fanDirection" }, fanDirectionToString } },
     { 358614274, { QObject::tr("Current temperature (°C)") } },
     { 358614275, { QObject::tr("Target temperature set (°C)") } },
     { 320865540, { QObject::tr("Defroster on") } },
@@ -329,21 +329,22 @@ map<int32_t, PropertyDescription> carpropertyutils::propMap = {
     { 354419976, { QObject::tr("Recirculation on") } },
     { 354419977, { QObject::tr("Temperature coupling enabled") } },
     { 354419978, { QObject::tr("Automatic mode on") } },
-    { 356517131, { QObject::tr("Seat healing/cooling") , nullptr, heatingCoolingToString } },
+    { 356517131, { QObject::tr("Seat healing/cooling"), {}, heatingCoolingToString } },
     { 339739916, { QObject::tr("Side mirror heat") } },
     { 289408269, { QObject::tr("Steering wheel heating/cooling"),
-            nullptr, heatingCoolingToString } },
-    { 289408270, { QObject::tr("User display temperature units"), "tempUnits" } },
+            {}, heatingCoolingToString } },
+    { 289408270, { QObject::tr("User display temperature units"), { "tempUnits" } } },
     { 356517135, { QObject::tr("Actual fan speed") } },
     { 354419984, { QObject::tr("Global power state") } },
-    { 356582673, { QObject::tr("Available fan positions"), "fanDirection", fanDirectionToString } },
+    { 356582673, { QObject::tr("Available fan positions"), { "fanDirection" },
+            fanDirectionToString } },
     { 354419986, { QObject::tr("Automatic recirculation on") } },
-    { 356517139, { QObject::tr("Seat ventilation"), nullptr, heatingCoolingToString } },
+    { 356517139, { QObject::tr("Seat ventilation"), {}, heatingCoolingToString } },
     { 291505923, { QObject::tr("Outside temperature (°C)") } },
     { 289475072, { QObject::tr("App processor power state control"),
-            nullptr, nullptr, apPowerStateReqToString } },
+            {}, nullptr, apPowerStateReqToString } },
     { 289475073, { QObject::tr("App processor power state report"),
-            nullptr, nullptr, apPowerStateReportToString } },
+            {}, nullptr, apPowerStateReportToString } },
     { 289409538, { QObject::tr("Bootup reason for power on") } },
     { 289409539, { QObject::tr("Display brightness") } },
     { 289475088, { QObject::tr("H/W input key") } },
@@ -391,15 +392,16 @@ map<int32_t, PropertyDescription> carpropertyutils::propMap = {
     { 299896065, { QObject::tr("OBD2 freeze frame sensor data") } },
     { 299896066, { QObject::tr("OBD2 freeze frame info") } },
     { 299896067, { QObject::tr("OBD2 freeze frame clear") } },
-    { 289410560, { QObject::tr("Headlights state"), "lightState" } },
-    { 289410561, { QObject::tr("High beam lights state"), "lightState" } },
-    { 289410562, { QObject::tr("Fog lights state"), "lightState" } },
-    { 289410563, { QObject::tr("Hazard lights state"), "lightState" } },
-    { 289410576, { QObject::tr("Headlights switch"), "lightSwitch" } },
-    { 289410577, { QObject::tr("High beam lights switch"), "lightSwitch" } },
-    { 289410578, { QObject::tr("Fog lights switch"), "lightSwitch" } },
-    { 289410579, { QObject::tr("Hazard lights switch"), "lightSwitch" } },
-    { 289410887, { QObject::tr("EU General Safety Regulation (GSR) Compliance Requirement"), "gsrComplianceReq" } },
+    { 289410560, { QObject::tr("Headlights state"), { "lightState" } } },
+    { 289410561, { QObject::tr("High beam lights state"), { "lightState" } } },
+    { 289410562, { QObject::tr("Fog lights state"), { "lightState" } } },
+    { 289410563, { QObject::tr("Hazard lights state"), { "lightState" } } },
+    { 289410576, { QObject::tr("Headlights switch"), { "lightSwitch" } } },
+    { 289410577, { QObject::tr("High beam lights switch"), { "lightSwitch" } } },
+    { 289410578, { QObject::tr("Fog lights switch"), { "lightSwitch" } } },
+    { 289410579, { QObject::tr("Hazard lights switch"), { "lightSwitch" } } },
+    { 289410887, { QObject::tr("EU General Safety Regulation (GSR) Compliance Requirement"),
+            { "gsrComplianceReq" } } },
     { 289472779, { QObject::tr("Exterior dimensions (mm)") } },
     { 289472780, { QObject::tr("List of fuel door locations") } },
     { 291504648, { QObject::tr("Speed for displays (m/s)") } },
@@ -540,14 +542,16 @@ QString carpropertyutils::getAreaString(VehiclePropValue val) {
     int maskedProp = val.prop() & (int) VehicleArea::MASK;
     PropertyDescription prop = areaMap[maskedProp];
     QString area = prop.label;
-    if (prop.lookupTableName != nullptr) {
-        auto lookupTable = lookupTablesMap.find(prop.lookupTableName);
+    for (int i = 0; i < prop.lookupTableNames.size(); i++) {
+        const auto& lookupTableName = prop.lookupTableNames[i];
+        const auto lookupTable = lookupTablesMap.find(lookupTableName);
         if (lookupTable == lookupTablesMap.end()) {
-            return area;
+            continue;
         }
         QString details = multiDetailToString(*(lookupTable->second), val.area_id());
         if (details != "") {
             area += ": " + details;
+            return area;
         }
     }
     return area;
@@ -560,15 +564,20 @@ QString carpropertyutils::booleanToString(PropertyDescription prop, int32_t val)
 QString carpropertyutils::int32ToString(PropertyDescription prop, int32_t val) {
     if (prop.int32ToString != nullptr) {
         return prop.int32ToString(val);
-    } else if (prop.lookupTableName != nullptr) {
-        auto lookupTable = lookupTablesMap.find(prop.lookupTableName);
-        if (lookupTable == lookupTablesMap.end()) {
-            return QString::number(val);
+    } else if (prop.lookupTableNames.size() != 0) {
+        for (int i = 0; i < prop.lookupTableNames.size(); i++) {
+            const auto lookupTableIt = lookupTablesMap.find(prop.lookupTableNames[i]);
+            if (lookupTableIt == lookupTablesMap.end()) {
+                continue;
+            }
+            const auto& lookupTable = *(lookupTableIt->second);
+            const auto valStringIt = lookupTable.find(val);
+            if (valStringIt != lookupTable.end()) {
+                return valStringIt->second;
+            }
         }
-        return (*(lookupTable->second))[val];
-    } else {
-        return QString::number(val);
     }
+    return QString::number(val);
 }
 
 QString carpropertyutils::int32VecToString(PropertyDescription prop, vector<int32_t> vals) {
@@ -624,7 +633,7 @@ QString carpropertyutils::int32ToHexString(int32_t val) {
     return QObject::tr(valStringStream.str().c_str());
 }
 
-QString carpropertyutils::multiDetailToString(map<int, QString> lookupTable, int value) {
+QString carpropertyutils::multiDetailToString(const map<int, QString>& lookupTable, int value) {
     QString details;
     for (const auto &locDetail : lookupTable) {
         if ((value & locDetail.first) == locDetail.first) {
@@ -725,11 +734,20 @@ void carpropertyutils::loadDescriptionsFromJson(const char *filename) {
                     description = translate(
                             vehiclePropJsonObject.value("description").toString());
                 }
-                propMap[propId] =
-                { translate(vehiclePropJsonObject.value("name").toString()),
-                  vehiclePropJsonObject.value("data_enum").toString().toUtf8()
-                    .constData(),
-                  nullptr, nullptr, description
+                std::vector<QString> lookupTableNames;
+                if (vehiclePropJsonObject.find("data_enums") != vehiclePropJsonObject.end()) {
+                    QJsonArray dataEnumsArray = vehiclePropJsonObject.value("data_enums").toArray();
+                    for (const auto& dataEnum : dataEnumsArray) {
+                        lookupTableNames.push_back(dataEnum.toString().toUtf8().constData());
+                    }
+                } else if (vehiclePropJsonObject.find("data_enum") != vehiclePropJsonObject.end()) {
+                    lookupTableNames.push_back(vehiclePropJsonObject.value("data_enum").toString()
+                            .toUtf8().constData());
+                }
+                propMap[propId] = {
+                    translate(vehiclePropJsonObject.value("name").toString()),
+                    lookupTableNames,
+                    nullptr, nullptr, description
                 };
             }
         } else {

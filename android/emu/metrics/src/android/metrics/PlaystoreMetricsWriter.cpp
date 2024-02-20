@@ -76,12 +76,17 @@ PlaystoreMetricsWriter::Ptr PlaystoreMetricsWriter::create(
 void PlaystoreMetricsWriter::write(
         const android_studio::AndroidStudioEvent& asEvent,
         LogEvent* logEvent) {
+    D("event time %" PRIi64 " ms", logEvent->event_time_ms());
+    D("{ %s }", asEvent.ShortDebugString().c_str());
+
     LogEvent event(*logEvent);
     asEvent.SerializeToString(event.mutable_source_extension());
     auto messageLength = event.ByteSizeLong();
 
-    // Message to big to track, drop it.
+    // Message is too big to track, drop it.
     if (messageLength > kMaxStorage) {
+        D("Message size %lu is larger than max storage %lu. Dropping.",
+                messageLength, kMaxStorage)
         return;
     }
 
@@ -89,6 +94,7 @@ void PlaystoreMetricsWriter::write(
     while (mBytes + messageLength > kMaxStorage && !mEvents.empty()) {
         mBytes -= mEvents.front().ByteSizeLong();
         mEvents.pop();
+        D("Erased an old event to free space for new ones.")
     };
 
     // empty queue -> 0 storage.
@@ -166,13 +172,15 @@ void PlaystoreMetricsWriter::writeCookie(std::string proto) {
 void PlaystoreMetricsWriter::commit() {
     if (mEvents.empty() || epoch_time_in_ms() < mSendAfterMs) {
         D("Not reporting %d metrics time: %" PRIi64 ", wait until %" PRIi64,
-          mEvents.empty(), epoch_time_in_ms().count(), mSendAfterMs.count());
+          mEvents.size(), epoch_time_in_ms().count(), mSendAfterMs.count());
         return;
     }
 
     // Note that we are not sending meta metrics, as we are not tracking failed
     // uploads.
     auto request = buildBaseRequest();
+    D("{ %s }", request.ShortDebugString().c_str());
+    D("Upload request contains %d event logs.", mEvents.size());
     while (!mEvents.empty()) {
         request.add_log_event()->CopyFrom(mEvents.front());
         mEvents.pop();

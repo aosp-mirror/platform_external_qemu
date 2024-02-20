@@ -31,7 +31,7 @@ template <class T1, class T2> struct QPair;
 template <typename T> class QSet;
 
 CheckboxDialog::CheckboxDialog(QWidget* parent,
-                               std::map<int32_t, QString>* lookupTable,
+                               const std::map<int32_t, QString>* lookupTable,
                                QSet<QString>* checkedTitleSet,
                                const QString& label,
                                const QString& tip)

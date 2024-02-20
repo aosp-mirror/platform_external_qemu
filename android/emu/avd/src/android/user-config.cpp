@@ -38,6 +38,7 @@ struct AUserConfig {
     ABool        changed;
     int          windowX;
     int          windowY;
+    double       windowScale;
     int extendedControlsX;
     int extendedControlsY;
 
@@ -55,6 +56,7 @@ struct AUserConfig {
 #define KEY_POSTURE "posture"
 #define  KEY_WINDOW_X  "window.x"
 #define  KEY_WINDOW_Y  "window.y"
+#define  KEY_WINDOW_SCALE  "window.scale"
 #define KEY_EXTENDED_CONTROLS_X "extended_controls.x"
 #define KEY_EXTENDED_CONTROLS_Y "extended_controls.y"
 #define KEY_EXTENDED_CONTROLS_HOR "extended_controls.hanchor"
@@ -63,6 +65,7 @@ struct AUserConfig {
 
 #define  DEFAULT_X 100
 #define  DEFAULT_Y 100
+#define  DEFAULT_SCALE -1.0
 
 constexpr int DEFAULT_POSTURE_UNKNOWN = 0;
 
@@ -87,6 +90,7 @@ auserConfig_new_custom(
     if (default_h < 100) default_h = 100;
     uc->windowX  = DEFAULT_X;
     uc->windowY  = DEFAULT_Y;
+    uc->windowScale  = DEFAULT_SCALE;
     uc->posture = DEFAULT_POSTURE_UNKNOWN;
     // uc->windowW  = default_w;
     // uc->windowH  = default_h;
@@ -192,6 +196,7 @@ auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int scre
 
         uc->windowY = iniFile_getInteger(ini, KEY_WINDOW_Y, DEFAULT_Y);
         DD("    found %s = %d", KEY_WINDOW_Y, uc->windowY);
+        uc->windowScale = iniFile_getDouble(ini, KEY_WINDOW_SCALE, DEFAULT_SCALE);
         if (iniFile_hasKey(ini, KEY_EXTENDED_CONTROLS_X)) {
             uc->hasExtendedControlPos = 1;
             uc->extendedControlsX =
@@ -235,6 +240,7 @@ auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int scre
     else {
         uc->windowX  = DEFAULT_X;
         uc->windowY  = DEFAULT_Y;
+        uc->windowScale  = DEFAULT_SCALE;
         uc->posture = DEFAULT_POSTURE_UNKNOWN;
         uc->changed  = 1;
     }
@@ -268,6 +274,17 @@ int auserConfig_getPosture(AUserConfig* uconfig) {
 void auserConfig_setPosture(AUserConfig* uconfig, int posture) {
     if (uconfig->posture != posture) {
         uconfig->posture = posture;
+        uconfig->changed = 1;
+    }
+}
+
+double auserConfig_getWindowScale(AUserConfig* uconfig) {
+    return uconfig->windowScale;
+}
+
+void auserConfig_setWindowScale(AUserConfig* uconfig, double scale) {
+    if (uconfig->windowScale!= scale) {
+        uconfig->windowScale = scale;
         uconfig->changed = 1;
     }
 }
@@ -336,6 +353,7 @@ auserConfig_save( AUserConfig*  uconfig )
 
     iniFile_setInteger(ini, KEY_WINDOW_X, uconfig->windowX);
     iniFile_setInteger(ini, KEY_WINDOW_Y, uconfig->windowY);
+    iniFile_setDouble(ini, KEY_WINDOW_SCALE, uconfig->windowScale);
     iniFile_setInteger(ini, KEY_POSTURE, uconfig->posture);
 
     if (uconfig->hasExtendedControlPos) {

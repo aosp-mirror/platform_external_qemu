@@ -28,6 +28,8 @@ bool user_config_init(void);
 void user_config_done(void);
 
 void user_config_get_window_pos(int* window_x, int* window_y);
+double user_config_get_window_scale();
+void user_config_set_window_scale(double scale);
 
 AConfig* get_skin_config(void);
 const char* get_skin_path(void);

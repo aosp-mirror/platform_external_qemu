@@ -86,8 +86,8 @@ public:
             m_hasData = (loadStream->getByte() != 0);
         } else {
             if (flags & ANDROID_PIPE_VIRTIO_GPU_BIT) {
-                m_uniqueId = (uint64_t)(uintptr_t)hwPipe;
-                s_headId = m_uniqueId;
+                // virtio-gpu uses context creation to manage process resources
+                return;
             } else {
                 m_uniqueId = ++s_headId;
             }
@@ -150,7 +150,7 @@ private:
     // identifiers, since the IDs are assigned sequentially from a 64-bit ID
     // space.
     // Please change it if you ever have a use case that exhausts them
-    uint64_t m_uniqueId;
+    uint64_t m_uniqueId = std::numeric_limits<uint64_t>::max();
     bool m_hasData = false;
     static std::atomic<uint64_t> s_headId;
 

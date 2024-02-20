@@ -522,9 +522,9 @@ prepare_build_for_darwin() {
             egrep --color=never -o " macosx\d+.\d+$" | sed -e "s/.*macosx//g" | sort -n | \
             tr '\n' ' ')
     if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
-        panic "Please install XCode on this machine!"
+        panic "Please install XCode for compatible with os version: $OSX_VERSION on this machine!"
     fi
-    log "OSX: Installed SDKs: $OSX_SDK_INSTALLED_LIST"
+    log "OSX ($OSX_VERSION): Installed SDKs: $OSX_SDK_INSTALLED_LIST"
     for supported_sdk in $(echo "$OSX_SDK_SUPPORTED" | tr ' ' '\n' | sort -r)
     do
         POSSIBLE_OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | grep $supported_sdk | head -1)

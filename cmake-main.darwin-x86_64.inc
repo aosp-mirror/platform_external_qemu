@@ -350,10 +350,6 @@ net/tap-bsd.c
 net/tap.c
 net/util.c
 net/vhost-user.c
-net/vmnet-common.m
-net/vmnet-bridged.m
-net/vmnet-host.c
-net/vmnet-shared.c
 os-posix.c
 qdev-monitor.c
 qemu-io-cmds.c

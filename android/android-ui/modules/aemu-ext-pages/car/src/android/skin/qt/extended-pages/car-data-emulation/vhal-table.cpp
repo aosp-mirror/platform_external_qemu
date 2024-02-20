@@ -458,31 +458,28 @@ int32_t VhalTable::getUserBoolValue(PropertyDescription propDesc, QString oldVal
 int32_t VhalTable::getUserInt32Value(PropertyDescription propDesc, QString oldValueString,
                                             QString tip, bool* pressedOk) {
     int32_t value;
-    if (propDesc.lookupTableName != nullptr) {
-        auto lookupTable = carpropertyutils::lookupTablesMap.find(propDesc.lookupTableName);
+    QStringList items;
+    map<QString, int32_t> valueByName;
+    for (int i = 0; i < propDesc.lookupTableNames.size(); i++) {
+        const auto& lookupTableName = propDesc.lookupTableNames[i];
+        auto lookupTable = carpropertyutils::lookupTablesMap.find(lookupTableName);
         if (lookupTable == carpropertyutils::lookupTablesMap.end()) {
-            int32_t oldValue = oldValueString.toInt();
-            value = QInputDialog::getInt(this, propDesc.label, nullptr, oldValue,
-                                      INT_MIN, INT_MAX, 1, pressedOk);
+            continue;
         }
 
-        QStringList items;
         for (const auto &detail : *(lookupTable->second)) {
             items << detail.second;
+            valueByName[detail.second] = detail.first;
         }
+    } 
+    if (items.size() != 0) {
         QString item = QInputDialog::getItem(this, propDesc.label, tip, items,
                                               items.indexOf(oldValueString), false, pressedOk);
-        for (const auto &detail : *(lookupTable->second)) {
-            if (item == detail.second) {
-                value = detail.first;
-                break;
-            }
-        }
-    } else {
-        int32_t oldValue = oldValueString.toInt();
-        value = QInputDialog::getInt(this, propDesc.label, tip, oldValue,
-                                      INT_MIN, INT_MAX, 1, pressedOk);
+        return valueByName[item];
     }
+    int32_t oldValue = oldValueString.toInt();
+    value = QInputDialog::getInt(this, propDesc.label, tip, oldValue,
+                                  INT_MIN, INT_MAX, 1, pressedOk);
     return value;
 }
 
@@ -498,21 +495,26 @@ const std::vector<int32_t>* VhalTable::getUserInt32VecValue(
     QSet<QString> oldStringSet = QSet<QString>::fromList(valueStringList);
 #endif
 
-    if (propDesc.lookupTableName != nullptr) {
-        auto lookupTable = carpropertyutils::lookupTablesMap.find(propDesc.lookupTableName);
+    map<int32_t, QString> nameByValue;
+    for (int i = 0; i < propDesc.lookupTableNames.size(); i++) {
+        const auto& lookupTableName = propDesc.lookupTableNames[i];
+        auto lookupTable = carpropertyutils::lookupTablesMap.find(lookupTableName);
         if (lookupTable == carpropertyutils::lookupTablesMap.end()) {
-            *pressedOk = false;
-            return nullptr;
+            continue;
         }
-        CheckboxDialog checkboxDialog(this, lookupTable->second, &oldStringSet,
-                                            propDesc.label, tip);
+        for (const auto& [value, name] : *lookupTable->second) {
+            nameByValue[value] = name;
+        }
+    }
+
+    if (nameByValue.size() != 0) {
+        CheckboxDialog checkboxDialog(this, &nameByValue, &oldStringSet, propDesc.label, tip);
         if(checkboxDialog.exec() == QDialog::Accepted) {
             *pressedOk = true;
             return checkboxDialog.getVec();
-        } else {
-            *pressedOk = false;
         }
     }
+    *pressedOk = false;
     return nullptr;
 }
 

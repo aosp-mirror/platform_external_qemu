@@ -52,28 +52,26 @@ using std::shared_ptr;
 
 // static
 PerfStatReporter::Ptr PerfStatReporter::create(
+        const std::string& sessionId,
         android::base::Looper* looper,
         android::base::Looper::Duration checkIntervalMs) {
-    auto inst = Ptr(new PerfStatReporter(looper, checkIntervalMs));
+    auto inst = Ptr(new PerfStatReporter(sessionId, looper, checkIntervalMs));
     return inst;
 }
 
 PerfStatReporter::PerfStatReporter(
+        const std::string& sessionId,
         android::base::Looper* looper,
         android::base::Looper::Duration checkIntervalMs)
     : mCurrPerfStats(new android_studio::EmulatorPerformanceStats),
       mLooper(looper),
       mWriter((getConsoleAgents()
-                       ->settings->android_cmdLineOptions()
-                       ->perf_stat != nullptr)
-                      ? TextMetricsWriter::create(base::StdioStream(
-                                android_fopen(getConsoleAgents()
-                                                      ->settings
-                                                      ->android_cmdLineOptions()
-                                                      ->perf_stat,
-                                              "w"),
-                                base::StdioStream::kOwner))
-                      : nullptr),
+            ->settings->android_cmdLineOptions()->perf_stat != nullptr) ?
+                    TextMetricsWriter::create(sessionId, base::StdioStream(
+                            android_fopen(getConsoleAgents()->settings
+                            ->android_cmdLineOptions()->perf_stat, "w"),
+                            base::StdioStream::kOwner))
+                    : nullptr),
       mCheckIntervalMs(checkIntervalMs),
       // We use raw pointer to |this| instead of a shared_ptr to avoid cicrular
       // ownership. mRecurrentTask promises to cancel any outstanding tasks when
