@@ -35,7 +35,6 @@ class _AsyncUnaryStreamClientInterceptor(grpc.aio.UnaryStreamClientInterceptor):
         new_details, new_request_iterator, postprocess = self._fn(
             client_call_details, iter((request,)), False, True
         )
-        print("intercept_unary_stream")
         response_it = await continuation(new_details, next(new_request_iterator))
         return postprocess(response_it) if postprocess else response_it
 

@@ -235,6 +235,19 @@ void user_config_done(void) {
     userConfig = NULL;
 }
 
+double user_config_get_window_scale() {
+    if (userConfig) {
+        return auserConfig_getWindowScale(userConfig);
+    }
+    return -1;
+}
+
+void user_config_set_window_scale(double scale) {
+    if (userConfig) {
+        auserConfig_setWindowScale(userConfig, scale);
+    }
+}
+
 void user_config_get_window_pos(int* window_x, int* window_y) {
     *window_x = *window_y = 10;
 

@@ -156,6 +156,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
     const char* qemuMediaProfileVideoProp;
     const char* qemuVsyncProp;
     const char* qemuGltransportNameProp;
+    const char* hwGltransportNameProp;
     const char* qemuDrawFlushIntervalProp;
     const char* qemuOpenglesVersionProp;
     const char* qemuUirendererProp;
@@ -193,6 +194,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         qemuMediaProfileVideoProp = nullptr;  // deprecated
         qemuVsyncProp = "androidboot.qemu.vsync";
         qemuGltransportNameProp = "androidboot.qemu.gltransport.name";
+        hwGltransportNameProp = "androidboot.hardware.gltransport";
         qemuDrawFlushIntervalProp =
                 "androidboot.qemu.gltransport.drawFlushInterval";
         qemuOpenglesVersionProp = "androidboot.opengles.version";
@@ -227,6 +229,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         qemuMediaProfileVideoProp = "qemu.mediaprofile.video";
         qemuVsyncProp = "qemu.vsync";
         qemuGltransportNameProp = "qemu.gltransport";
+        hwGltransportNameProp = nullptr;
         qemuDrawFlushIntervalProp = "qemu.gltransport.drawFlushInterval";
         qemuOpenglesVersionProp = "qemu.opengles.version";
         qemuUirendererProp = "qemu.uirenderer";
@@ -338,6 +341,9 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
 
     // Set gl transport props
     params.push_back({qemuGltransportNameProp, hw->hw_gltransport});
+    if (hwGltransportNameProp) {
+        params.push_back({hwGltransportNameProp, hw->hw_gltransport});
+    }
     params.push_back(
             {qemuDrawFlushIntervalProp,
              StringFormat("%u", hw->hw_gltransport_drawFlushInterval)});

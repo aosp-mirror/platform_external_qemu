@@ -60,7 +60,7 @@ public:
     static const uint8_t kWifiForwardVersion = 0x02;
 private:
 #ifdef NETSIM_WIFI
-    static void eloopSocketHandler(int sock, void* eloop_ctx, void* sock_ctx);
+    static bool waitForReadSocket(int sock, int msec); // in milliseconds
     static void registerSigPipeHandler();
 #else
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
@@ -79,7 +79,7 @@ private:
     static const char* const kNicName;
     ssize_t sendToGuest(
             std::unique_ptr<android::network::Ieee80211Frame> frame);
-    void registerBeaconTask();
+    void registerEventLoop();
     size_t onRemoteData(const uint8_t* data, size_t size);
     void sendToRemoteVM(std::unique_ptr<android::network::Ieee80211Frame> frame,
                         android::network::FrameType type);

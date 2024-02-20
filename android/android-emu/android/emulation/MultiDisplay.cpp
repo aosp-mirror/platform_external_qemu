@@ -959,36 +959,26 @@ bool MultiDisplay::isOrientationSupported() {
  * Just use simple way to make it work in multidisplay+rotation
  */
 void MultiDisplay::recomputeLayoutLocked() {
+    if (android_is_automotive()) {
+        // Use stacked layout for distant display
+        if (android::automotive::isDistantDisplaySupported(
+                    getConsoleAgents()->settings->avdInfo())) {
+            recomputeStackedLayoutLocked();
+            return;
+        }
+    }
     SkinRotation rotation = SKIN_ROTATION_0;
     SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
     if (layout) {
         rotation = layout->orientation;
     }
     performRotationLocked(rotation);
-
-    // Use stacked layout for auto devices when orientation is not allowed
-    if (android_is_automotive() && !isOrientationSupported()) {
-        // Keep old layout for main with cluster display
-        if (mMultiDisplay.size() > 2) {
-            recomputeStackedLayoutLocked();
-        }
-    }
 }
 
 /*
- * Especially for the automotive devices, it's better to locate the external
- * display in a separate row in case it has wide display width. For instance,
- * the reference implementation of Distant Display has 3000x800 display and it
- * makes hard to use when the main and external displays are located in one row.
- * Reused the previous logic of recomputeLayoutLocked() which was removed in
- * aosp/2709953.
+ * Locate the most wide width display on a separate row
  */
 void MultiDisplay::recomputeStackedLayoutLocked() {
-    uint32_t monitorWidth, monitorHeight;
-    if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
-        dwarning("Unable to get monitor width and height");
-        return;
-    }
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
     for (const auto& iter : mMultiDisplay) {
         if (iter.first == 0 || iter.second.cb != 0) {
@@ -997,7 +987,7 @@ void MultiDisplay::recomputeStackedLayoutLocked() {
         }
     }
     for (const auto& iter :
-         android::base::resolveStackedLayout(rectangles, monitorWidth)) {
+         android::base::resolveStackedLayout(rectangles)) {
         mMultiDisplay[iter.first].pos_x = iter.second.first;
         mMultiDisplay[iter.first].pos_y = iter.second.second;
     }

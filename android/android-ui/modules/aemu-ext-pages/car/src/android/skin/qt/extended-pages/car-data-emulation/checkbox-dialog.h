@@ -37,7 +37,7 @@ class CheckboxDialog : public QDialog
     Q_OBJECT
 public:
     CheckboxDialog(QWidget* parent = 0,
-                   std::map<int32_t, QString>* lookupTable = 0,
+                   const std::map<int32_t, QString>* lookupTable = 0,
                    QSet<QString>* checkedTitleSet = 0,
                    const QString& label = "null",
                    const QString& tip = nullptr);

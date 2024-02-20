@@ -1964,16 +1964,13 @@ extern "C" int main(int argc, char** argv) {
             }
 #endif
 #ifdef __APPLE__
-            auto numCores = System::get()->getCpuCoreCount();
-            if (numCores < 8) {
-                feature_set_if_not_overridden(kFeature_QuickbootFileBacked,
-                                              false /* enable */);
-            }
-#ifdef __aarch64__
+
+            // BUG: 294436742
+            // intel mac does not have good performance with filebacked quickboot;
+            // apple silicon has it disabled anyway
             // TODO: Fix file-backed RAM snapshot support.
             feature_set_if_not_overridden(kFeature_QuickbootFileBacked,
-                                          false /* enable */);
-#endif
+                                          false /* not to enable */);
 #endif
 
             if (isCrostini()) {
@@ -2764,7 +2761,7 @@ extern "C" int main(int argc, char** argv) {
         } else if (opts->net_socket) {
             args.addFormat("socket,id=mynet,%s", opts->net_socket);
          }
-#if defined(__APPLE__)
+#if defined(__APPLE__) && defined(__aarch64__)
         else if (opts->vmnet_bridged) {
             args.addFormat("vmnet-bridged,id=mynet,ifname=%s%s",
                                opts->vmnet_bridged, opts->vmnet_isolated ? ",isolated=on" : "");
@@ -2975,7 +2972,7 @@ extern "C" int main(int argc, char** argv) {
         } else if (opts->wifi_socket) {
             args.addFormat("socket,id=virtio-wifi,%s", opts->wifi_socket);
         }
-#if defined(__APPLE__)
+#if defined(__APPLE__) && defined(__aarch64__)
         else if (opts->vmnet_bridged) {
             args.addFormat("vmnet-bridged,id=virtio-wifi,ifname=%s%s",
                            opts->vmnet_bridged, opts->vmnet_isolated ? ",isolated=on" : "");
@@ -3224,6 +3221,22 @@ extern "C" int main(int argc, char** argv) {
 
         RendererConfig rendererConfig;
         configAndStartRenderer(uiPreferredGlesBackend, &rendererConfig);
+
+#if defined(__linux__)
+        {
+            // bug: 324086743
+            // we have to enable SystemBlob to work around the kvm+amdgpu driver bug
+            // where kvm apparently error out with Bad Address
+            char* glVendor = nullptr;
+            char* glRenderer = nullptr;
+            char* glVersion = nullptr;
+            android_getOpenglesHardwareStrings(&glVendor, &glRenderer, &glVersion);
+            if (glVendor && strcmp("AMD",glVendor) == 0) {
+                dinfo("Enable SystemBlob feature for gpu vendor %s on Linux\n", glVendor);
+                feature_set_enabled_override(kFeature_SystemBlob, true);
+            }
+        }
+#endif
 
         // Gpu configuration is set, now initialize the multi display, screen
         // recorder and screenshot callback

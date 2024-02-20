@@ -560,7 +560,7 @@ std::string extractInstallationId() {
 // LazyInstance<> code.
 std::string persistAndLoadEmuUserId() {
     std::string userId;
-    auto idPath = PathUtils::join(ConfigDirs::getAvdRootDirectory(), kEmuUserId);
+    auto idPath = PathUtils::join(ConfigDirs::getUserDirectory(), kEmuUserId);
 
     std::ifstream idFile;
     // First, try to reuse the existing ID if possible.

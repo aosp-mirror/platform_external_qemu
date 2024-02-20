@@ -47,8 +47,13 @@ namespace carpropertyutils {
          * e.g. if a property value is 48 ( = VehicleUnit::CELSIUS)
          * and "tempUnits" was set as lookupTableName, it will use tempUnitsMap
          * and value will be shown as "Celsius" instead of 48 in Vhal item
+         *
+         * When multiple lookupTableName exists, they represent non-overlapping
+         * value->string mapping. For example, it might contain
+         * [NormalState, ErrorState], where normal states are positive values,
+         * and error states are negative.
         */
-        QString lookupTableName;
+        std::vector<QString> lookupTableNames;
         /**
          * How a property value will be translated into.
          * Directly sets a value->string mapping function.
@@ -74,7 +79,7 @@ namespace carpropertyutils {
 
     // Map from property ids to description for conversion to human readable form.
     extern std::map<int32_t, PropertyDescription> propMap;
-    extern std::map<QString, std::map<int32_t, QString>*> lookupTablesMap;
+    extern std::map<QString, const std::map<int32_t, QString>*> lookupTablesMap;
 
     QString booleanToString(PropertyDescription prop, int32_t val);
     QString int32ToString(PropertyDescription prop, int32_t val);
@@ -89,7 +94,7 @@ namespace carpropertyutils {
     QString getDetailedDescription(int32_t propId);
     QString getAreaString(emulator::VehiclePropValue val);
 
-    QString multiDetailToString(std::map<int, QString> lookupTable, int value);
+    QString multiDetailToString(const std::map<int, QString>& lookupTable, int value);
     QString fanDirectionToString(int32_t val);
     QString heatingCoolingToString(int32_t val);
     QString apPowerStateReqToString(std::vector<int32_t> vals);

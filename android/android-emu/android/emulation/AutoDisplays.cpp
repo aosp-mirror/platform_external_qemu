@@ -27,5 +27,8 @@ int getDefaultFlagsForDisplay(int displayId) {
 bool isMultiDisplaySupported(const AvdInfo* info) {
     return avdInfo_getBuildPropertyBool(info, kMultiDisplayProp, false);
 }
+bool isDistantDisplaySupported(const AvdInfo* info) {
+    return avdInfo_getBuildPropertyBool(info, kDistantDisplayProp, false);
+}
 } // namespace automotive
 } // namespace android

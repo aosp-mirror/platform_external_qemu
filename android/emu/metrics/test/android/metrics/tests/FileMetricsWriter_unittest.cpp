@@ -63,7 +63,7 @@ public:
 
 TEST_F(FileMetricsWriterTest, createDestroy) {
     EXPECT_FALSE(mSystem.pathIsDir(spoolDir()));
-    mWriter = FileMetricsWriter::create(spoolDir(), sessionId(), 0, nullptr, 0);
+    mWriter = FileMetricsWriter::create(sessionId(), spoolDir(), 0, nullptr, 0);
     EXPECT_TRUE(mWriter != nullptr);
     EXPECT_TRUE(mSystem.pathIsDir(spoolDir()));
     auto files = mSystem.scanDirEntries(spoolDir());
@@ -86,7 +86,7 @@ TEST_F(FileMetricsWriterTest, createDestroy) {
 
 TEST_F(FileMetricsWriterTest, createDestroyWithTimer) {
     EXPECT_FALSE(mSystem.pathIsDir(spoolDir()));
-    mWriter = FileMetricsWriter::create(spoolDir(), sessionId(), 0,
+    mWriter = FileMetricsWriter::create(sessionId(), spoolDir(), 0,
                                         mLooper.get(), 10);
     EXPECT_TRUE(mWriter != nullptr);
     EXPECT_TRUE(mSystem.pathIsDir(spoolDir()));
@@ -226,7 +226,7 @@ TEST_F(FileMetricsWriterTest, finalizeAbandonedSessionFilesLockedSession) {
 }
 
 TEST_F(FileMetricsWriterTest, writeSimple) {
-    mWriter = FileMetricsWriter::create(spoolDir(), sessionId(), 0, nullptr, 0);
+    mWriter = FileMetricsWriter::create(sessionId(), spoolDir(), 0, nullptr, 0);
 
     // create and write some event
     wireless_android_play_playlog::LogEvent event;
@@ -260,7 +260,7 @@ TEST_F(FileMetricsWriterTest, writeSimple) {
 }
 
 TEST_F(FileMetricsWriterTest, writeMultiple) {
-    mWriter = FileMetricsWriter::create(spoolDir(), sessionId(), 0, nullptr, 0);
+    mWriter = FileMetricsWriter::create(sessionId(), spoolDir(), 0, nullptr, 0);
 
     // create and write some events
     std::vector<wireless_android_play_playlog::LogEvent> events;
@@ -300,7 +300,7 @@ TEST_F(FileMetricsWriterTest, writeMultiple) {
 }
 
 TEST_F(FileMetricsWriterTest, writeLimited) {
-    mWriter = FileMetricsWriter::create(spoolDir(), sessionId(),
+    mWriter = FileMetricsWriter::create(sessionId(), spoolDir(),
                                         1,  // records per file
                                         nullptr, 0);
 
@@ -361,7 +361,7 @@ TEST_F(FileMetricsWriterTest, writeLimited) {
 
 TEST_F(FileMetricsWriterTest, writeTimered) {
     mWriter =
-            FileMetricsWriter::create(spoolDir(), sessionId(), 0, mLooper.get(),
+            FileMetricsWriter::create(sessionId(), spoolDir(), 0, mLooper.get(),
                                       1000);  // 1 sec per file.
 
     EXPECT_EQ(0U, mLooper->timers().size());
