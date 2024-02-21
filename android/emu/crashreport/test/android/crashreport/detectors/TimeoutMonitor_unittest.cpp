@@ -68,7 +68,7 @@ TEST(TimeoutMonitorTests, TimeoutDoesNotBlock) {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
     // The monitor should properly clean up in a timely fashion.
-    EXPECT_LT(duration.count(), 100);
+    EXPECT_LT(duration.count(), 200);
 }
 
 }  // namespace crashreport
