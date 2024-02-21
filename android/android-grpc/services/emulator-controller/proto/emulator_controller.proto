@@ -118,36 +118,72 @@ service EmulatorController {
 
     // Gets an individual screenshot in the desired format.
     //
-    // The image will be scaled to the desired ImageFormat, while maintaining
-    // the aspect ratio. The returned image will never exceed resolution of the
-    // device display. Not setting the width or height (i.e. they are 0) will
-    // result in using the display width and height.
+    // Description:
+    // * Captures a single screenshot from the emulator, scaled and oriented as
+    // needed.
+    // * Supports various image formats:
+    //    * PNG (lossless compression)
+    //    * RGBA8888 (true color with transparency)
+    //    * RGB888 (true color)
+    // * Respects the device's aspect ratio when scaling the image.
+    // * Automatically rotates the image to match the device's coarse-grained
+    // orientation.
+    // * Returns an empty image if the display is not visible.
     //
-    // The resulting image will be properly oriented and can be displayed
-    // directly without post processing. For example, if the device has a
-    // 1080x1920 screen and is in landscape mode and called with no width or
-    // height parameter, it will return a 1920x1080 image.
+    // Usage Notes:
+    // * For continuous screenshots, consider the `streamScreenshot` API.
+    // * Image dimensions can be requested, but the returned image will never
+    // exceed the display's resolution.
+    // * For advanced use cases, explore the `transport` field of `ImageFormat`.
     //
-    // The dimensions of the returned image will never exceed the corresponding
-    // display dimensions. For example, this method will return a 1920x1080
-    // screenshot, if the display resolution is 1080x1920 and a screenshot of
-    // 2048x2048 is requested when the device is in landscape mode.
+    // Examples:
+    // * **Orientation:** If the device is in landscape (e.g., 1920x1080
+    // resolution) and no dimensions are specified, the image will be returned
+    // in landscape orientation (1920x1080).
+    // * **Scaling:**  If the device is in portrait (e.g., 1080 x 1920
+    // resolution) and you request a width of 540, the returned image will be
+    // scaled down to 540x960 (maintaining aspect ratio).
     //
-    // This method will return an empty image if the display is not visible.
+    // See Also:
+    // * ImageFormat message definition (for supported image formats and
+    // options)
+    // * streamScreenshot API (for streaming multiple screenshots)
     rpc getScreenshot(ImageFormat) returns (Image) {}
 
     // Streams a series of screenshots in the desired format.
     //
-    // A new frame will be delivered whenever the device produces a new frame.
-    // Beware that this can produce a significant amount of data and that
-    // certain translations can be very costly. For example, streaming a series
-    // of png images is very cpu intensive.
+    // Description:
+    // * Streams screenshots from the emulator, delivering them whenever a new
+    // frame is produced by the device.
+    // * Frame rate will be at least 2 FPS, even when the device's display or
+    // sensors are inactive.
+    // * Supports various image formats, including:
+    //     * PNG (lossless compression)
+    //     * RGBA8888 (true color with transparency)
+    //     * RGB888 (true color)
+    // * Image dimensions can be scaled, maintaining the original aspect ratio.
+    // * Can target specific displays within the emulated device.
+    // * Images will be automatically rotated to match the device's
+    // coarse-grained orientation.
     //
-    // Images are produced according to the getScreenshot API described above.
+    // Warnings:
+    // * Can generate a large amount of data, potentially impacting network and
+    // resource usage.
+    // * Image format conversions (particularly to PNG) can be CPU-intensive.
+    // * For high-frame-rate or low-latency scenarios, carefully consider
+    // transmission overhead and image formats.
     //
-    // If the display is inactive, or becomes inactive, an empty image will be
-    // delivered. Images will be delived again if the display becomes active and
-    // new frames are produced.
+    // Usage Notes:
+    // * Consider the trade-offs between desired frame rate, image format, and
+    // performance requirements.
+    // * For high-performance scenarios, explore alternative image transport
+    // mechanisms if available.
+    // * Refer to the `getScreenshot` API for behavior when the display is not
+    // visible.
+    //
+    // See Also:
+    // * ImageFormat message definition (for supported image formats)
+    // * getScreenshot API (for single screenshot behavior)
     rpc streamScreenshot(ImageFormat) returns (stream Image) {}
 
     // Streams a series of audio packets in the desired format.
