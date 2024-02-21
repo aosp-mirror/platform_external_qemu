@@ -648,6 +648,9 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::SUPPORT_PIXEL_FOLD;
         case android::featurecontrol::DeviceKeyboardHasAssistKey:
             return android_studio::EmulatorFeatureFlagState::DEVICE_KEYBOARD_HAS_ASSIST_KEY;
+        case android::featurecontrol::VulkanAllocateDeviceMemoryOnly:
+            return android_studio::EmulatorFeatureFlagState::
+                    VULKAN_ALLOCATE_DEVICE_MEMORY_ONLY;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
