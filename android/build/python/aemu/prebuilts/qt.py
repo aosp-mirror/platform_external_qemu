@@ -354,7 +354,7 @@ def cleanupQtTmpDirectory():
 def cleanup():
     cleanupQtTmpDirectory()
 
-def postInstall(installdir, target):
+def postInstall(installdir, target, is_webengine):
     # Create include.system/QtCore/qconfig.h from include/QtCore/qconfig.h
     src_qconfig = Path(installdir) / "include" / "QtCore" / "qconfig.h"
     dst_qconfig = Path(installdir) / "include.system" / "QtCore" / "qconfig.h"
@@ -365,7 +365,7 @@ def postInstall(installdir, target):
     if HOST_OS == "darwin":
         mac_postInstall(installdir)
     elif HOST_OS == "linux":
-        linux_postInstall(installdir, target)
+        linux_postInstall(installdir, target, is_webengine)
 
 def mac_postInstall(installdir):
     """Post-install steps specific for mac.
@@ -418,7 +418,7 @@ def mac_postInstall(installdir):
             logging.critical("install_name_tool -add_rpath failed (%d)", res.returncode)
             exit(res.returncode)
 
-def linux_postInstall(installdir, target):
+def linux_postInstall(installdir, target, is_webengine):
     # Install prebuilt clang's libc++.so.1 and libc++abi.so.1 to lib/ as Qt's compiler
     # tools (moc, rcc, uic) depends on it.
     clang_libs = ["libc++.so.1", "libc++abi.so.1"]
@@ -427,6 +427,16 @@ def linux_postInstall(installdir, target):
         dst_lib = f"{installdir}/lib/{lib}"
         logging.info(f"Copy {src_lib} ==> {dst_lib}")
         shutil.copyfile(src_lib, dst_lib)
+
+    # We also need additional libraries from the sysroot for webengine
+    if target == "linux" and is_webengine:
+        sysroot_dir = os.path.join("/lib", "x86_64-linux-gnu")
+        sysroot_libs = [sysroot_dir / "libjpeg.so.8",
+                        sysroot_dir / "libfreetype.so.6"]
+        for lib in sysroot_libs:
+            dst_lib = f"{installdir}/lib/{lib}"
+            logging.info(f"Copy {lib} ==> {dst_lib}")
+            shutil.copyfile(str(lib), dst_lib)
 
     if target != "linux_aarch64":
         # need libunwind.so.1 for syncqt
@@ -513,7 +523,7 @@ def buildPrebuilt(args, prebuilts_out_dir):
         configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_NOWEBENGINE_SUBMODULES)
         buildQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path)
         installQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path, qt_install_dir)
-        postInstall(qt_install_dir, args.target)
+        postInstall(qt_install_dir, args.target, False)
         shutil.rmtree(qt_build_path)
 
     logging.info("Building Qt6 w/ QtWebEngine")
@@ -521,7 +531,7 @@ def buildPrebuilt(args, prebuilts_out_dir):
     configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_SUBMODULES)
     buildQt(QT_SUBMODULES, qt_build_path)
     installQt(QT_SUBMODULES, qt_build_path, qt_install_dir)
-    postInstall(qt_install_dir, args.target)
+    postInstall(qt_install_dir, args.target, True)
 
     # Since linux_aarch64 cross-compilation requires having a host build of Qt, let's just build it
     # in the linux x86_64 host instead of creating an additional linux_aarch64 build target.
@@ -534,6 +544,6 @@ def buildPrebuilt(args, prebuilts_out_dir):
                          crosscompile_target, qt_host_path)
         buildQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path)
         installQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path, qt_install_dir)
-        postInstall(qt_install_dir, "linux_aarch64")
+        postInstall(qt_install_dir, "linux_aarch64", False)
         shutil.rmtree(qt_build_path)
     logging.info("Successfully built Qt!")
