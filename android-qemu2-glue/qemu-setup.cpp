@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include <glib.h>
+#include <thread>
 #ifdef _MSC_VER
 extern "C" {
 #include "qemu/osdep.h"
@@ -78,6 +79,7 @@ extern "C" {
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/HangDetector.h"
 #include "android/crashreport/detectors/CrashDetectors.h"
+#include "android/crashreport/detectors/TimeoutMonitor.h"
 #include "android/emulation/AudioCaptureEngine.h"
 #include "android/emulation/AudioOutputEngine.h"
 #include "android/emulation/ConfigDirs.h"
@@ -584,6 +586,10 @@ int qemu_setup_grpc() {
 }
 
 bool qemu_android_emulation_setup() {
+    dinfo("Monitoring duration of emulator setup.");
+    android::crashreport::TimeoutMonitor timeout(std::chrono::seconds(5), [] {
+        dwarning("Failed to setup emulator in a timely fashion!")
+    });
     android::base::initializeTracing();
     if (std::getenv("VPERFETTO_TRACE_ENABLED")) {
         android::base::enableTracing();
