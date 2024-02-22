@@ -423,13 +423,13 @@ def linux_postInstall(installdir, target, is_webengine):
 
     # We also need additional libraries from the sysroot for webengine
     if target == "linux" and is_webengine:
-        sysroot_dir = os.path.join("/lib", "x86_64-linux-gnu")
-        sysroot_libs = [sysroot_dir / "libjpeg.so.8",
-                        sysroot_dir / "libfreetype.so.6"]
+        sysroot_dir = Path("/lib/x86_64-linux-gnu")
+        sysroot_libs = ["libjpeg.so.8", "libfreetype.so.6"]
         for lib in sysroot_libs:
+            src_lib = sysroot_dir / lib
             dst_lib = f"{installdir}/lib/{lib}"
-            logging.info(f"Copy {lib} ==> {dst_lib}")
-            shutil.copyfile(str(lib), dst_lib)
+            logging.info(f"Copy {src_lib} ==> {dst_lib}")
+            shutil.copyfile(src_lib, dst_lib)
 
     if target != "linux_aarch64":
         # need libunwind.so.1 for syncqt
