@@ -127,7 +127,7 @@ def setup_command(args):
     builder = gen_toolchain(
         args.target, Path(args.out), args.prefix, args.aosp, args.ccache
     )
-    builder.configure_meson()
+    builder.configure_meson(args.meson)
 
 
 def toolchain_command(args):
@@ -320,6 +320,12 @@ def main():
         type=str,
         default="",
         help="Compiler prefix to use, e.g. my-pre-c++",
+    )
+    setup_parser.add_argument(
+        "--meson",
+        nargs="*",
+        help="Additional flags to pass to meson, for example --meson '--buildtype=debug'"
+
     )
     setup_parser.add_argument(
         "--target",

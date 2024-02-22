@@ -72,7 +72,7 @@ class QemuBuilder:
     def host(self) -> str:
         return platform.system().lower()
 
-    def configure_meson(self):
+    def configure_meson(self, meson_flags):
         """Configure the QEMU build using Meson build system."""
         # Generate the toolchain wrappers.
         self.toolchain_generator.gen_toolchain()
@@ -98,7 +98,8 @@ class QemuBuilder:
             [self.dest / QemuBuilder.TOOLCHAIN_DIR / "meson"]
             + ["setup", self.dest]
             + self.meson_config()
-            + [self.dest / QemuBuilder.TOOLCHAIN_DIR / "aosp-cl.ini"],
+            + [self.dest / QemuBuilder.TOOLCHAIN_DIR / "aosp-cl.ini"]
+            + meson_flags,
             cwd=self.aosp / "external" / "qemu",
             toolchain_path=self.dest / QemuBuilder.TOOLCHAIN_DIR,
         )
