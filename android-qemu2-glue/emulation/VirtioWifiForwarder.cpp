@@ -341,9 +341,12 @@ bool VirtioWifiForwarder::waitForReadSocket(int sock, int msec) {
 #else
     if (sock < 0)
         return false;
+    std::chrono::milliseconds ms{msec};
+    auto secs = std::chrono::floor<std::chrono::seconds>(ms);
+    auto usecs = std::chrono::duration_cast<std::chrono::microseconds>(ms - secs);
     struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = msec * 1000;
+    tv.tv_sec = secs.count();
+    tv.tv_usec = usecs.count();
     fd_set rfds;
     FD_ZERO(&rfds);
     FD_SET(sock, &rfds);
