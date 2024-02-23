@@ -253,7 +253,7 @@ cpp_link_args = []
             "strip": self.strip,
             "cmake": self.cmake,
             "cargo": self.cargo,
-            "rustc": self.rustc
+            "rustc": self.rustc,
         }
         for cmd, fn in cmds.items():
             self.gen_script(cmd, self.dest / f"{self.prefix}{cmd}", fn)

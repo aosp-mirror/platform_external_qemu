@@ -50,8 +50,6 @@ class Cargo:
         if self.host() == "darwin":
             gfx_env["RUSTFLAGS"] = "-C link-args=-Wl,-rpath,@loader_path"
 
-
-
         run(
             [
                 self.exe,
@@ -63,7 +61,8 @@ class Cargo:
                 # Sadly this does not work on MacOs..
                 # f"--target-dir",
                 # output,
-            ] + self.toolchain.rust_flags(),
+            ]
+            + self.toolchain.rust_flags(),
             cwd=ffi,
             env=gfx_env,
             toolchain_path=self.toolchain.dest,

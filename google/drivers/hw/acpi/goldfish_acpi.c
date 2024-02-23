@@ -21,36 +21,6 @@
 #include "qemu/typedefs.h"
 
 /**
- * Builds an AML device object for a Goldfish device.
- *
- * @param scope The AML scope to append the device to.
- * @param dev_name The name of the device.
- * @param hid_name The ACPI HID identifier.
- * @param str_name The ACPI string identifier.
- * @param iomem_base The base address of the device's I/O memory.
- * @param iomem_size The size of the device's I/O memory.
- * @param irq_number The interrupt number used by the device.
- */
-static void build_goldfish_device_aml(Aml *scope, const char *dev_name,
-                                      const char *hid_name,
-                                      const char *str_name, uint32_t iomem_base,
-                                      uint32_t iomem_size,
-                                      uint32_t irq_number) {
-  Aml *dev = aml_device("%s", dev_name);
-  Aml *crs;
-
-  aml_append(dev, aml_name_decl("_HID", aml_string("%s", hid_name)));
-  aml_append(dev, aml_name_decl("_STR", aml_unicode(str_name)));
-
-  crs = aml_resource_template();
-  aml_append(crs, aml_memory32_fixed(iomem_base, iomem_size, AML_READ_WRITE));
-  aml_append(crs, aml_interrupt(AML_CONSUMER_PRODUCER, AML_EDGE,
-                                AML_ACTIVE_HIGH, AML_SHARED, &irq_number, 1));
-  aml_append(dev, aml_name_decl("_CRS", crs));
-  aml_append(scope, dev);
-}
-
-/**
  * Appends a new string property to an AML package.
  *
  * @param package The AML package to which the property will be added.
@@ -225,45 +195,6 @@ static void build_android_dt_aml(GoldfishMachineState *ams, Aml *scope,
 void add_goldfish_dsdt(MachineState *machine, Aml *table) {
   GoldfishMachineState *ams = ANDROID_MACHINE(machine);
   Aml *scope = aml_scope("_SB");
-
-  uint32_t goldfish_sync_irq = GOLDFISH_SYNC_IRQ;
-  uint32_t goldfish_events_irq = GOLDFISH_EVENTS_IRQ;
-
-  // TODO(jansene): This would be needed for fuchsia
-  // goldfish_sync_irq = GOLDFISH_EVENTS_IRQ;
-  // goldfish_events_irq = GOLDFISH_SYNC_IRQ;
-
-  build_goldfish_device_aml(scope, "GFBY", "GFSH0001", "goldfish battery",
-                            GOLDFISH_BATTERY_IOMEM_BASE,
-                            GOLDFISH_BATTERY_IOMEM_SIZE, GOLDFISH_BATTERY_IRQ);
-
-  build_goldfish_device_aml(scope, "GFEV", "GFSH0002", "goldfish events",
-                            GOLDFISH_EVENTS_IOMEM_BASE,
-                            GOLDFISH_EVENTS_IOMEM_SIZE, goldfish_events_irq);
-
-  build_goldfish_device_aml(scope, "GFPP", "GFSH0003", "goldfish pipe",
-                            GOLDFISH_PIPE_IOMEM_BASE, GOLDFISH_PIPE_IOMEM_SIZE,
-                            GOLDFISH_PIPE_IRQ);
-
-  build_goldfish_device_aml(scope, "GFFB", "GFSH0004", "goldfish framebuffer",
-                            GOLDFISH_FB_IOMEM_BASE, GOLDFISH_FB_IOMEM_SIZE,
-                            GOLDFISH_FB_IRQ);
-
-  build_goldfish_device_aml(scope, "GFAU", "GFSH0005", "goldfish audio",
-                            GOLDFISH_AUDIO_IOMEM_BASE,
-                            GOLDFISH_AUDIO_IOMEM_SIZE, GOLDFISH_AUDIO_IRQ);
-
-  build_goldfish_device_aml(scope, "GFSK", "GFSH0006", "goldfish sync",
-                            GOLDFISH_SYNC_IOMEM_BASE, GOLDFISH_SYNC_IOMEM_SIZE,
-                            goldfish_sync_irq);
-
-  build_goldfish_device_aml(scope, "GFRT", "GFSH0007", "goldfish rtc",
-                            GOLDFISH_RTC_IOMEM_BASE, GOLDFISH_RTC_IOMEM_SIZE,
-                            GOLDFISH_RTC_IRQ);
-
-  build_goldfish_device_aml(scope, "GFRO", "GFSH0008", "goldfish rotary",
-                            GOLDFISH_ROTARY_IOMEM_BASE,
-                            GOLDFISH_ROTARY_IOMEM_SIZE, GOLDFISH_ROTARY_IRQ);
 
   // TODO(jansene): Not used for fuchsia
   build_android_dt_aml(ams, scope, "ANDT", "ANDR0001", "android device tree");

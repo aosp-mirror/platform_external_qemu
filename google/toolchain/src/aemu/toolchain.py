@@ -324,8 +324,7 @@ def main():
     setup_parser.add_argument(
         "--meson",
         nargs="*",
-        help="Additional flags to pass to meson, for example --meson '--buildtype=debug'"
-
+        help="Additional flags to pass to meson, for example --meson '--buildtype=debug'",
     )
     setup_parser.add_argument(
         "--target",
