@@ -855,6 +855,7 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
             "emulator$BITNESS-*$EXEEXT" \
             lib/ca-bundle.pem \
             lib/advancedFeatures.ini \
+            lib/advancedFeaturesCanary.ini \
             lib/pc-bios \
             "qemu/$SYSTEM-*/*" \
             "bin$BITNESS/*" \

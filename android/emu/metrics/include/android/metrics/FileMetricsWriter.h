@@ -67,15 +67,15 @@ public:
     using WPtr = std::weak_ptr<FileMetricsWriter>;
 
     // Creates a new instance of FileMetricsWriter.
-    //  |sessionId| - emulator session (run) ID for metrics logging.
     //  |spoolDir| - a directory to put files into.
+    //  |sessionId| - emulator session (run) ID for metrics logging.
     //  |recordCountLimit| - create new file after logging this many events.
     //      Disabled if <=0.
     //  |looper| - an instance of a |Looper| object to create timed events.
     //  |timeLimitMs| - create new file after this many milliseconds, if there
     //      was at least one event logged. Disabled if <=0 or |logger| is NULL.
-    static Ptr create(const std::string& sessionId,
-                      std::string_view spoolDir,
+    static Ptr create(std::string_view spoolDir,
+                      const std::string& sessionId,
                       int recordCountLimit,
                       base::Looper* looper,
                       base::System::Duration timeLimitMs);
@@ -102,8 +102,8 @@ public:
 
 private:
     // A private constructor to enforce the use of shared_ptr<>.
-    FileMetricsWriter(const std::string& sessionId,
-                      std::string_view spoolDir,
+    FileMetricsWriter(std::string_view spoolDir,
+                      const std::string& sessionId,
                       int recordCountLimit,
                       base::Looper* looper,
                       base::System::Duration timeLimitMs);

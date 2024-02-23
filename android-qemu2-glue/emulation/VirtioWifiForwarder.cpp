@@ -324,12 +324,12 @@ bool VirtioWifiForwarder::waitForReadSocket(int sock, int msec) {
     WSAEVENT event;
     event = WSACreateEvent();
     if (event == WSA_INVALID_EVENT) {
-        LOG(VERBOSE) << "WSACreateEvent() failed: " << WSAGetLastError();
+        LOG(ERROR) << "WSACreateEvent() failed: " << WSAGetLastError();
         return false;
     }
 
     if (WSAEventSelect(sock, event, FD_READ)) {
-        LOG(VERBOSE) << "WSAEventSelect() failed: " << WSAGetLastError();
+        LOG(ERROR) << "WSAEventSelect() failed: " << WSAGetLastError();
         WSACloseEvent(event);
         return false;
     }
@@ -341,18 +341,15 @@ bool VirtioWifiForwarder::waitForReadSocket(int sock, int msec) {
 #else
     if (sock < 0)
         return false;
-    std::chrono::milliseconds ms{msec};
-    auto secs = std::chrono::floor<std::chrono::seconds>(ms);
-    auto usecs = std::chrono::duration_cast<std::chrono::microseconds>(ms - secs);
     struct timeval tv;
-    tv.tv_sec = secs.count();
-    tv.tv_usec = usecs.count();
+    tv.tv_sec = 0;
+    tv.tv_usec = msec * 1000;
     fd_set rfds;
     FD_ZERO(&rfds);
     FD_SET(sock, &rfds);
     int res = select(sock + 1, &rfds, NULL, NULL, &tv);
     if (res < 0 && errno != EINTR && errno != 0) {
-        LOG(VERBOSE) << "Netsim waitForReadSocket select error: " << strerror(errno);
+        LOG(ERROR) << "Netsim waitForReadSocket select error: " << strerror(errno);
     }
     return (res <= 0) ? false : FD_ISSET(sock, &rfds);
 #endif

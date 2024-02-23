@@ -13,13 +13,17 @@
 // limitations under the License.
 
 #include <grpcpp/grpcpp.h>
+#include <vector>
 
 #include "android/console.h"
 #include "android/emulation/control/utils/EventSupport.h"
-#include "android/grpc/utils/SimpleAsyncGrpc.h"
-#include "android/utils/debug.h"
-#include "host-common/screen-recorder.h"
 #include "screen_recording_service.grpc.pb.h"
+
+#ifdef DISABLE_ASYNC_GRPC
+#include "android/grpc/utils/SyncToAsyncAdapter.h"
+#else
+#include "android/grpc/utils/SimpleAsyncGrpc.h"
+#endif
 
 // #define DEBUG 1
 #if DEBUG >= 1
@@ -72,8 +76,6 @@ public:
             ::android::emulation::control::incubating::RecordingInfo* response)
             override {
         auto currentState = mRecordAgent->getRecorderState();
-        VERBOSE_INFO(grpc, "Starting recording from state: %s ",
-                     recorderStateToString(currentState.state));
         if (currentState.state != RECORDER_STOPPED) {
             return ::grpc::Status(grpc::StatusCode::FAILED_PRECONDITION,
                                   "The recorder is not in a stopped state.");
@@ -91,7 +93,7 @@ public:
         mActiveRecording.opaque = &mActiveRecording;
 
         if (!mRecordAgent->startRecording(&mActiveRecording)) {
-            mActiveRecording = {nullptr};
+            mActiveRecording = {0};
             return ::grpc::Status(
                     grpc::StatusCode::INTERNAL,
                     "The recorder failed to start the recording.");
@@ -99,7 +101,6 @@ public:
 
         auto info = toRecordingInfo(&mActiveRecording);
         response->CopyFrom(info);
-        VERBOSE_INFO(grpc, "Recording to: %s", response->ShortDebugString());
         return ::grpc::Status::OK;
     };
 
@@ -109,14 +110,11 @@ public:
                     request,
             ::android::emulation::control::incubating::RecordingInfo* response)
             override {
-        VERBOSE_INFO(grpc, "Stopping the recording agent.");
         mRecordAgent->stopRecording();
         auto info = toRecordingInfo(&mActiveRecording);
         response->CopyFrom(info);
-        VERBOSE_INFO(grpc, "Current state: %s", response->ShortDebugString());
         return ::grpc::Status::OK;
     };
-
     ::grpc::Status ListRecordings(
             ::grpc::ServerContext* context,
             const ::android::emulation::control::incubating::RecordingInfo*
@@ -129,7 +127,6 @@ public:
             response->add_recordings()->CopyFrom(info);
         }
 
-        VERBOSE_INFO(grpc, "Recording list:%s", response->ShortDebugString());
         return ::grpc::Status::OK;
     };
 
@@ -142,21 +139,6 @@ public:
     }
 
 private:
-    static std::string recorderStateToString(RecorderState state) {
-        switch (state) {
-            case RECORDER_STARTING:
-                return "Starting";
-            case RECORDER_RECORDING:
-                return "Recording";
-            case RECORDER_STOPPING:
-                return "Stopping";
-            case RECORDER_STOPPED:
-                return "Stopped";
-            default:
-                return "Unknown State";
-        }
-    }
-
     const QAndroidRecordScreenAgent* mRecordAgent;
 
     ::RecordingInfo mActiveRecording{0};
@@ -194,7 +176,7 @@ static void recording_callback(void* userData, RecordingStatus status) {
             break;
     }
 
-    VERBOSE_INFO(grpc, "Broadcast %s", info.ShortDebugString());
+    DD("Broadcast %s", event.ShortDebugString().c_str());
     s_activeRecordingListeners.fireEvent(info);
 }
 }

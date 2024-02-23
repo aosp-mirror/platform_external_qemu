@@ -93,8 +93,8 @@ static bool renameIfNotExists(std::string_view from, std::string_view to) {
 #endif
 }
 
-FileMetricsWriter::FileMetricsWriter(const std::string& sessionId,
-                                     std::string_view spoolDir,
+FileMetricsWriter::FileMetricsWriter(std::string_view spoolDir,
+                                     const std::string& sessionId,
                                      int recordCountLimit,
                                      Looper* looper,
                                      System::Duration timeLimitMs)
@@ -115,18 +115,19 @@ FileMetricsWriter::FileMetricsWriter(const std::string& sessionId,
     openNewFileNoLock();
 }
 
-FileMetricsWriter::Ptr FileMetricsWriter::create(const std::string& sessionId,
-                                                 std::string_view spoolDir,
+FileMetricsWriter::Ptr FileMetricsWriter::create(std::string_view spoolDir,
+                                                 const std::string& sessionId,
                                                  int recordCountLimit,
                                                  Looper* looper,
                                                  System::Duration timeLimitMs) {
-    return Ptr(new FileMetricsWriter(sessionId, spoolDir, recordCountLimit,
+    return Ptr(new FileMetricsWriter(spoolDir, sessionId, recordCountLimit,
                                      looper, timeLimitMs));
 }
 
 FileMetricsWriter::Ptr FileMetricsWriter::createDefault() {
-    return FileMetricsWriter::create(android::base::Uuid::generate().toString(),
-                                     getSpoolDirectory(), 0, nullptr, 0);
+    return FileMetricsWriter::create(getSpoolDirectory(),
+                                     android::base::Uuid::generate().toString(),
+                                     0, nullptr, 0);
 }
 
 MetricsWriter::AbandonedSessions
@@ -328,8 +329,7 @@ bool FileMetricsWriter::runFileOperationWithRetries(int* filenameCounter,
 void FileMetricsWriter::write(
         const android_studio::AndroidStudioEvent& asEvent,
         wireless_android_play_playlog::LogEvent* logEvent) {
-    D("event time %" PRIi64 " ms", logEvent->event_time_ms());
-    D("{ %s }", asEvent.ShortDebugString().c_str());
+    D("writing a log event");
 
     asEvent.SerializeToString(logEvent->mutable_source_extension());
 

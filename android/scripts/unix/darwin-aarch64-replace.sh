@@ -219,6 +219,7 @@ rm ./qemu/darwin-x86_64/qemu-system*
 rm ./emulator64-crash-service
 rm ./lib/waterfall.proto
 rm ./lib/emulator_controller.proto
+rm ./lib/advancedFeaturesCanary.ini
 rm ./lib/hardware-properties.ini
 rm ./lib/advancedFeatures.ini
 rm ./lib/hostapd.conf
