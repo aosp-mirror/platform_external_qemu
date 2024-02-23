@@ -43,7 +43,6 @@ public:
     // Entry point to create a PerfStatReporter
     // Objects of this type are managed via shared_ptr.
     static Ptr create(
-            const std::string& sessionId,
             android::base::Looper* looper,
             android::base::Looper::Duration checkIntervalMs);
 
@@ -54,8 +53,7 @@ public:
 
 protected:
     // Use |create| to correctly initialize the shared_ptr count.
-    PerfStatReporter(const std::string& sessionId,
-                     android::base::Looper* looper,
+    PerfStatReporter(android::base::Looper* looper,
                      android::base::Looper::Duration checkIntervalMs);
 
 private:

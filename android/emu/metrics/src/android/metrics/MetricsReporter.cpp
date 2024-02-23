@@ -95,35 +95,41 @@ void MetricsReporter::start(const std::string& sessionId,
                             std::string_view qemuVersion) {
     MetricsWriter::Ptr writer;
     if (getConsoleAgents()
-            ->settings->android_cmdLineOptions()->metrics_to_console) {
+                ->settings->android_cmdLineOptions()
+                ->metrics_to_console) {
         D("Writing metrics to console");
-        writer = TextMetricsWriter::create(
-                sessionId, base::StdioStream(stdout));
-
+        writer = TextMetricsWriter::create(base::StdioStream(stdout));
     } else if (getConsoleAgents()
-            ->settings->android_cmdLineOptions()->metrics_collection) {
+                       ->settings->android_cmdLineOptions()
+                       ->metrics_collection) {
         D("Writing metrics to play store");
-        writer = PlaystoreMetricsWriter::create(sessionId,
+        writer = PlaystoreMetricsWriter::create(
+                sessionId,
                 base::pj(getSpoolDirectory(), "backoff_cookie.proto"));
-
     } else if (getConsoleAgents()
-            ->settings->android_cmdLineOptions()->metrics_to_file != nullptr) {
-        D("Attempting to write metrics to file: %s", getConsoleAgents()
-                ->settings->android_cmdLineOptions()->metrics_to_file);
-        if (FILE* out = ::android_fopen(getConsoleAgents()
-                ->settings->android_cmdLineOptions()->metrics_to_file, "w")) {
-            writer = TextMetricsWriter::create(sessionId,
+                       ->settings->android_cmdLineOptions()
+                       ->metrics_to_file != nullptr) {
+        D("Attempting to write metrics to file: %s",
+          getConsoleAgents()
+                  ->settings->android_cmdLineOptions()
+                  ->metrics_to_file);
+        if (FILE* out =
+                    ::android_fopen(getConsoleAgents()
+                                            ->settings->android_cmdLineOptions()
+                                            ->metrics_to_file,
+                                    "w")) {
+            writer = TextMetricsWriter::create(
                     base::StdioStream(out, base::StdioStream::kOwner));
         } else {
             dwarning("Failed to open file '%s', disabling metrics reporting",
-                     getConsoleAgents()->settings->android_cmdLineOptions()
-                            ->metrics_to_file);
+                     getConsoleAgents()
+                             ->settings->android_cmdLineOptions()
+                             ->metrics_to_file);
         }
-
     } else if (getConsoleAgents()
-               ->settings->android_cmdLineOptions()->no_metrics) {
+                ->settings->android_cmdLineOptions()
+                ->no_metrics) {
         D("Metrics disabled by user");
-
     } else if (!studio::userMetricsOptInExists()) {
         /* We have no user input regarding metrics collection consent, neither
          * via a launch flag or Android Studio. Show a non-blocking message
@@ -132,11 +138,10 @@ void MetricsReporter::start(const std::string& sessionId,
          * blocking prompt to ask for explicit user input.
          */
         warnAboutNoMetricsConsentInput();
-
     } else if (studio::getUserMetricsOptIn()) {
         D("Using android-studio for metrics.");
         writer = FileMetricsWriter::create(
-                sessionId, getSpoolDirectory(),
+                getSpoolDirectory(), sessionId,
                 1000,  // record limit per single file
                 base::ThreadLooper::get(),
                 static_cast<long>(10 * 60 *

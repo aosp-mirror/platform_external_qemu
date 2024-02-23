@@ -107,8 +107,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     if (const auto instance =
                                 android::MultiDisplay::getInstance()) {
                         if (instance &&
-                            (android_foldable_is_pixel_fold() ||
-                             instance->isMultiDisplayEnabled() == false)) {
+                            instance->isMultiDisplayEnabled() == false) {
                             return emulator_window_rotate_90(true);
                         }
                     }

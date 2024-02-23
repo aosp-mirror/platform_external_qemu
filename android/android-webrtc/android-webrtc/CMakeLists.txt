@@ -54,9 +54,7 @@ target_link_libraries(
           ui::gl-bridge
           Threads::Threads)
 
-if(NOT OPTION_ASAN)
-  target_link_options(android-webrtc PRIVATE -Wl,-no-undefined)
-endif()
+target_link_options(android-webrtc PRIVATE -Wl,-no-undefined)
 android_install_shared_library(TARGET android-webrtc)
 if(NOT LINUX_AARCH64)
   android_add_test(

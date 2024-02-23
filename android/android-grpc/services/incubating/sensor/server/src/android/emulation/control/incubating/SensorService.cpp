@@ -28,7 +28,6 @@
 #include "android/emulation/control/incubating/SensorService.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/utils/EventSupport.h"
-#include "android/hw-sensors.h"
 #include "android/physics/Physics.h"
 #include "android/physics/physical_state_agent.h"
 #include "android/utils/debug.h"
@@ -76,14 +75,14 @@ class SensorImpl final
                       SensorService::WithCallbackMethod_receiveSensorEvents<
                               SensorService::Service>>> {
 public:
-    explicit SensorImpl(const AndroidConsoleAgents* agents)
+    SensorImpl(const AndroidConsoleAgents* agents)
         : mConsoleAgents(agents), mSensorAgent(agents->sensors) {
         mQAndroidPhysicalStateAgent.context = this;
     }
 
-    ::grpc::ServerWriteReactor<PhysicalModelValue>* receivePhysicalModelEvents(
-            ::grpc::CallbackServerContext* context,
-            const PhysicalModelValue* request) override {
+    virtual ::grpc::ServerWriteReactor<PhysicalModelValue>*
+    receivePhysicalModelEvents(::grpc::CallbackServerContext* context,
+                               const PhysicalModelValue* request) override {
         dwarning(
                 "Hijacking the physical state agent. You will likely see "
                 "reduced functionality in the virtual sensors UI");
@@ -107,14 +106,13 @@ public:
                 &mPhysicalListeners[request->target()]);
 
         // Send out current state.
-        VERBOSE_INFO(grpc, "Broadcasting: %s", latest.ShortDebugString());
         event->eventArrived(latest);
         return event;
     }
 
-    ::grpc::ServerWriteReactor<PhysicalStateEvent>* receivePhysicalStateEvents(
-            ::grpc::CallbackServerContext* context,
-            const Empty* request) override {
+    virtual ::grpc::ServerWriteReactor<PhysicalStateEvent>*
+    receivePhysicalStateEvents(::grpc::CallbackServerContext* context,
+                               const Empty* request) override {
         dwarning(
                 "Hijacking the physical state agent. You will likely see "
                 "reduced functionality in the virtual sensors UI");
@@ -122,7 +120,7 @@ public:
         return new PhysicalStateEventStream(&mPhysicalEventListeners);
     }
 
-    ::grpc::ServerWriteReactor<SensorValue>* receiveSensorEvents(
+    virtual ::grpc::ServerWriteReactor<SensorValue>* receiveSensorEvents(
             CallbackServerContext* /*context*/,
             const SensorValue* request) override {
         dwarning(
@@ -155,14 +153,10 @@ public:
     Status getSensor(ServerContext* context,
                      const SensorValue* request,
                      SensorValue* reply) override {
-        size_t size = 0;
-        reply->Clear();
-        int state = mSensorAgent->getSensorSize(
-                static_cast<int>(request->target()) - 1, &size);
-        VERBOSE_INFO(grpc, "Received sensor state: %d, size: %d (%s)", state,
-                     size, state == SENSOR_STATUS_OK ? "ok" : "not ok");
-
-        if (state != SENSOR_STATUS_OK) {
+        size_t size;
+        int state =
+                mSensorAgent->getSensorSize((int)request->target() - 1, &size);
+        if (state != 0) {
             reply->set_status(
                     static_cast<SensorValue::SensorState>(abs(state) + 1));
             return Status::OK;
@@ -175,8 +169,8 @@ public:
             val[i] = 0;
         }
 
-        state = mSensorAgent->getSensor(static_cast<int>(request->target()) - 1,
-                                        out.data(), out.size());
+        state = mSensorAgent->getSensor((int)request->target() - 1, out.data(),
+                                        out.size());
 
         auto value = reply->mutable_value();
         for (size_t i = 0; i < size; i++) {
@@ -190,20 +184,17 @@ public:
                     static_cast<SensorValue::SensorState>(abs(state) + 1));
         }
         reply->set_target(request->target());
-        VERBOSE_INFO(grpc, "Sending sensor state: %s",
-                     reply->ShortDebugString());
         return ::grpc::Status::OK;
     }
 
     Status setSensor(ServerContext* context,
                      const SensorValue* request,
                      ::google::protobuf::Empty* reply) override {
-        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+        android::base::ThreadLooper::runOnMainLooper(
                 [agent = mSensorAgent, sensorValue = *request]() {
-                    agent->setSensorOverride(
-                            static_cast<int>(sensorValue.target()) - 1,
-                            sensorValue.value().data().data(),
-                            sensorValue.value().data().size());
+                    agent->setSensorOverride((int)sensorValue.target() - 1,
+                                             sensorValue.value().data().data(),
+                                             sensorValue.value().data().size());
                 });
         return Status::OK;
     }
@@ -211,15 +202,13 @@ public:
     Status setPhysicalModel(ServerContext* context,
                             const PhysicalModelValue* request,
                             Empty* reply) override {
-        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+        android::base::ThreadLooper::runOnMainLooper(
                 [agent = mSensorAgent, physicalValue = *request]() {
                     agent->setPhysicalParameterTarget(
-                            static_cast<int>(physicalValue.target()) - 1,
+                            (int)physicalValue.target() - 1,
                             physicalValue.value().data().data(),
                             physicalValue.value().data().size(),
-                            abs((static_cast<int>(
-                                        physicalValue.interpolation())) -
-                                1));
+                            abs(((int)physicalValue.interpolation()) - 1));
                 });
         return Status::OK;
     }
@@ -227,14 +216,9 @@ public:
     Status getPhysicalModel(ServerContext* context,
                             const PhysicalModelValue* request,
                             PhysicalModelValue* reply) override {
-        size_t size = 0;
-        reply->Clear();
+        size_t size;
         int state = mSensorAgent->getPhysicalParameterSize(
-                static_cast<int>(request->target()) - 1, &size);
-
-        VERBOSE_INFO(grpc, "Received physical model state: %d, size: %d (%s)",
-                     state, size,
-                     state == PHYSICAL_PARAMETER_STATUS_OK ? "ok" : "not ok");
+                (int)request->target() - 1, &size);
 
         if (state != 0) {
             reply->set_status(
@@ -250,8 +234,8 @@ public:
         }
 
         state = mSensorAgent->getPhysicalParameter(
-                static_cast<int>(request->target()) - 1, out.data(), out.size(),
-                abs(static_cast<int>(request->value_type()) - 1));
+                (int)request->target() - 1, out.data(), out.size(),
+                abs((int)request->value_type() - 1));
 
         auto value = reply->mutable_value();
         for (size_t i = 0; i < val.size(); i++) {
@@ -266,10 +250,6 @@ public:
                     abs(state) + 1));
         }
         reply->set_target(request->target());
-
-        VERBOSE_INFO(grpc, "Physical model state: %s",
-                     reply->ShortDebugString());
-
         return Status::OK;
     }
 

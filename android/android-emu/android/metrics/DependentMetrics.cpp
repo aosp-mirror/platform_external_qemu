@@ -648,9 +648,6 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::SUPPORT_PIXEL_FOLD;
         case android::featurecontrol::DeviceKeyboardHasAssistKey:
             return android_studio::EmulatorFeatureFlagState::DEVICE_KEYBOARD_HAS_ASSIST_KEY;
-        case android::featurecontrol::VulkanAllocateDeviceMemoryOnly:
-            return android_studio::EmulatorFeatureFlagState::
-                    VULKAN_ALLOCATE_DEVICE_MEMORY_ONLY;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
@@ -810,8 +807,7 @@ bool android_metrics_start(const char* emulatorVersion,
                            const char* emulatorFullVersion,
                            const char* qemuVersion,
                            int controlConsolePort) {
-    auto sessionId = android::base::Uuid::generate().toString();
-    MetricsReporter::start(sessionId,
+    MetricsReporter::start(android::base::Uuid::generate().toString(),
                            emulatorVersion, emulatorFullVersion, qemuVersion);
     PeriodicReporter::start(&MetricsReporter::get(),
                             android::base::ThreadLooper::get());
@@ -830,7 +826,7 @@ bool android_metrics_start(const char* emulatorVersion,
             });
     // Collect PerfStats metrics every 5 seconds.
     auto perfStatReporter = android::metrics::PerfStatReporter::create(
-            sessionId, android::base::ThreadLooper::get(), 5 * 1000);
+            android::base::ThreadLooper::get(), 5 * 1000);
     perfStatReporter->start();
     MetricsEngine::get()->registerReporter(perfStatReporter);
 

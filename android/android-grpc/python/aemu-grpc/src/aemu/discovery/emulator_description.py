@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright (C) 2020 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,9 +34,6 @@ from aemu.proto.emulator_controller_pb2 import VmRunState
 from aemu.proto.emulator_controller_pb2_grpc import EmulatorControllerStub
 
 
-_LOGGER = logging.getLogger("aemu-grpc")
-
-
 def _safe_kill(process: psutil.Process) -> bool:
     """Tries to kill the given process
 
@@ -53,7 +49,7 @@ def _safe_kill(process: psutil.Process) -> bool:
         process.name()  # Retrieve name if possible.
     except Exception as e:
         # Process has left, or we might have been unable to get additional info.
-        _LOGGER.debug("Unable to get status, process dead? %s", e)
+        logging.debug("Unable to get status, process dead? %s", e)
 
     if status == psutil.STATUS_ZOMBIE:
         # confirm that the zombie process has been reaped
@@ -68,27 +64,27 @@ def _safe_kill(process: psutil.Process) -> bool:
             # well, well, well.. Someone just disappeared on us..
             # or we failed to wait out the reaping. It will get
             # cleaned up later on
-            _LOGGER.info("Failed to reap zombie, ignoring %s", err)
+            logging.info("Failed to reap zombie, ignoring %s", err)
 
         if not psutil.pid_exists(process.pid):
-            _LOGGER.info("Process %s has been reaped.", process)
+            logging.info("Process %s has been reaped.", process)
 
     # Step 1, be nice.
     try:
-        _LOGGER.debug("Terminate %s", process)
+        logging.debug("Terminate %s", process)
         process.terminate()
     except Exception as e:
         # Process might be gone, or we could not send terminate.
-        _LOGGER.debug("Failed to terminate %s due to %s", process, e)
+        logging.debug("Failed to terminate %s due to %s", process, e)
 
     try:
         process.wait(timeout=3)
     except psutil.TimeoutExpired:
-        _LOGGER.debug("Force kill %s", process)
+        logging.debug("Force kill %s", process)
         process.kill()
 
     if not psutil.pid_exists(process.pid):
-        _LOGGER.info("Successfully terminated: %s", process)
+        logging.info("Successfully terminated: %s", process)
 
     return not psutil.pid_exists(process.pid)
 
@@ -102,7 +98,7 @@ def _kill_process_tree(process: psutil.Process) -> None:
     """
     children = process.children()
     for child in children:
-        _LOGGER.debug("Found child %s, terminating..", child)
+        logging.debug("Found child %s, terminating..", child)
         _kill_process_tree(child)
 
     _safe_kill(process)
@@ -141,25 +137,19 @@ class BasicEmulatorDescription(dict):
         if "emulator.security" in arguments:
             choice = arguments.get("emulator.security").lower()
             if choice == "jwt":
-                _LOGGER.debug("Selecting JWT security")
                 return EmulatorSecurity.Jwt
             if choice == "token":
-                _LOGGER.debug("Selecting token security")
                 return EmulatorSecurity.Token
-            _LOGGER.debug("Selecting no security")
             return EmulatorSecurity.Nothing
 
         if ("grpc.jwks" in self._description) and (
             "grpc.jwk_active" in self._description
         ):
-            _LOGGER.debug("Defaulting to JWT security")
             return EmulatorSecurity.Jwt
 
         if "grpc.token" in self._description:
-            _LOGGER.debug("Defaulting to token security")
             return EmulatorSecurity.Token
 
-        _LOGGER.debug("Defaulting to no security")
         return EmulatorSecurity.Nothing
 
     def get_grpc_channel(self, channel_arguments=[]):
@@ -228,7 +218,7 @@ class BasicEmulatorDescription(dict):
 
         if security == EmulatorSecurity.Token:
             bearer = "Bearer {}".format(self.get("grpc.token", ""))
-            _LOGGER.debug("Insecure Channel with token to: %s", addr)
+            logging.debug("Insecure Channel with token to: %s", addr)
             return grpc.intercept_channel(
                 channel,
                 header_adder_interceptor("authorization", bearer, False),
@@ -303,7 +293,7 @@ class BasicEmulatorDescription(dict):
             )
         elif security == EmulatorSecurity.Token:
             bearer = "Bearer {}".format(self.get("grpc.token", ""))
-            _LOGGER.debug("Insecure async channel with token to: %s", addr)
+            logging.debug("Insecure Channel with token to: %s", addr)
             interceptors = header_adder_interceptor("authorization", bearer, True)
 
         return grpc.aio.insecure_channel(
@@ -339,10 +329,6 @@ class EmulatorDescription(BasicEmulatorDescription):
         super().__init__(description_dict)
         self._description["pid"] = pid
 
-    def __str__(self):
-        alive = '🚀' if self.is_alive() else '🪦'
-        return f"{self.name()} (pid: {self.pid()} {alive})"
-
     def process(self) -> Optional[psutil.Process]:
         """Returns the process object associated with the qemu process.
 
@@ -362,33 +348,13 @@ class EmulatorDescription(BasicEmulatorDescription):
             bool: True if the pid associated with this description is alive
         """
         if not psutil.pid_exists(self.pid()):
-            _LOGGER.debug("pid: %s does not exist", self.pid())
             return False
 
         try:
             status = psutil.Process(self.pid()).status()
-            _LOGGER.debug("pid: %s status: %s", self.pid(), status)
             return status != psutil.STATUS_DEAD and status != psutil.STATUS_ZOMBIE
-        except Exception as err:
-            _LOGGER.debug("pid: %s, failed to retrieve status: %s", self.pid(), err)
+        except:
             return False
-
-    def _terminate_proc(self, proc, timeout):
-        try:
-            stub = EmulatorControllerStub(self.get_grpc_channel())
-            _LOGGER.debug("Sending shutdown to %s.", self.pid())
-            stub.setVmState(VmRunState(state=VmRunState.SHUTDOWN))
-        except Exception as err:
-            _LOGGER.error("Failed to shutdown using gRPC (%s), terminating.", err)
-            proc.terminate()
-
-        try:
-            proc.wait(timeout=timeout)
-        except psutil.TimeoutExpired as expired:
-            _LOGGER.error(
-                "Emulator did not shutdown gracefully, terminating. (%s)", expired
-            )
-            _kill_process_tree(proc)
 
     def shutdown(self, timeout=30) -> bool:
         """Gracefully shutdown the emulator.
@@ -407,17 +373,22 @@ class EmulatorDescription(BasicEmulatorDescription):
         """
         proc = self.process()
         if not proc:
-            _LOGGER.debug("No process found, terminated.")
             return True
 
         try:
-            self._terminate_proc(proc, timeout)
-        except psutil.NoSuchProcess as no:
-            _LOGGER.debug("Process was terminated. (%s)", no)
+            stub = EmulatorControllerStub(self.get_grpc_channel())
+            stub.setVmState(VmRunState(state=VmRunState.SHUTDOWN))
         except Exception as err:
-            _LOGGER.debug(
-                "Unexpected error whil terminating process. %s", err, exc_info=True
+            logging.error("Failed to shutdown using gRPC (%s), terminating.", err)
+            proc.terminate()
+
+        try:
+            proc.wait(timeout=timeout)
+        except psutil.TimeoutExpired as expired:
+            logging.error(
+                "Emulator did not shutdown gracefully, terminating. (%s)", expired
             )
+            _kill_process_tree(proc)
 
         return not self.is_alive()
 
