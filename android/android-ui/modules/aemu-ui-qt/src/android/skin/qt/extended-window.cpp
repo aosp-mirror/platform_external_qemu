@@ -579,6 +579,7 @@ void ExtendedWindow::on_helpButton_clicked() {
     adjustTabs(PANE_IDX_HELP);
 }
 void ExtendedWindow::on_locationButton_clicked() {
+    mExtendedUi->location_page->doWebInit();
     adjustTabs(PANE_IDX_LOCATION);
 }
 void ExtendedWindow::on_microphoneButton_clicked() {

@@ -130,6 +130,7 @@ public:
     void sendLocation(const QString& lat, const QString& lng, const QString& address);
     void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON, const QString& mode);
     void onSavedRouteDrawn();
+    void doWebInit();
 
 signals:
     void signal_saveRoute();
@@ -353,6 +354,7 @@ private:
     bool mShouldRefreshPageOnReconnect;
     NetworkConnectivityManager* mNetworkConnectivityManager;
 #endif // USE_WEBENGINE
+    bool mWebEngineInitDone = false;
 };
 
 class PointWidgetItem : public CCListItem {

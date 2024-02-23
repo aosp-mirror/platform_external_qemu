@@ -137,6 +137,13 @@ LocationPage::LocationPage(QWidget* parent)
         // qCDebug(emu) << "Location UI disabled by command-line option.";
         return;
     }
+}
+
+void LocationPage::doWebInit() {
+    if (mWebEngineInitDone) {
+        return;
+    }
+    mWebEngineInitDone = true;
     bool useLocationV2 = false;
 
 #ifdef USE_WEBENGINE
@@ -278,6 +285,7 @@ LocationPage::LocationPage(QWidget* parent)
                     return false;
                 });
     }
+
 }
 
 void LocationPage::on_tabChanged() {
