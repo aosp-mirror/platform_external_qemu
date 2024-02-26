@@ -428,15 +428,16 @@ def linux_postInstall(installdir, target, is_webengine):
         logging.info(f"Copy {src_lib} ==> {dst_lib}")
         shutil.copyfile(src_lib, dst_lib)
 
-    # We also need additional libraries from the sysroot for webengine
+    # We also need additional libraries from the sysroot for linux
+    sysroot_dir = Path("/lib/x86_64-linux-gnu")
+    sysroot_libs = ["libpcre2-16.so.0"]
     if target == "linux" and is_webengine:
-        sysroot_dir = Path("/lib/x86_64-linux-gnu")
-        sysroot_libs = ["libjpeg.so.8", "libfreetype.so.6"]
-        for lib in sysroot_libs:
-            src_lib = sysroot_dir / lib
-            dst_lib = f"{installdir}/lib/{lib}"
-            logging.info(f"Copy {src_lib} ==> {dst_lib}")
-            shutil.copyfile(src_lib, dst_lib)
+        sysroot_libs += ["libjpeg.so.8", "libfreetype.so.6"]
+    for lib in sysroot_libs:
+        src_lib = sysroot_dir / lib
+        dst_lib = f"{installdir}/lib/{lib}"
+        logging.info(f"Copy {src_lib} ==> {dst_lib}")
+        shutil.copyfile(src_lib, dst_lib)
 
     if target != "linux_aarch64":
         # need libunwind.so.1 for syncqt
