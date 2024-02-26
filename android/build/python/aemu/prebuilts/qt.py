@@ -463,8 +463,9 @@ def linux_postInstall(installdir, target, is_webengine):
             logging.info(f"Skipping rpath fix for file {exe}")
             continue
         logging.info(f"Adding rpath $ORIGIN/../lib to {exe}")
+        # patchelf may use RUNPATH instead of RPATH. We can force RPATH by using --force-rpath.
         subprocess.check_call(
-            ["patchelf", "--set-rpath", "$ORIGIN/../lib", exe],
+            ["patchelf", "--force-rpath", "--set-rpath", "$ORIGIN/../lib", exe],
             cwd=installdir, env=os.environ.copy())
 
 def buildPrebuilt(args, prebuilts_out_dir):
