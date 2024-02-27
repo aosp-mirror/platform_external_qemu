@@ -430,7 +430,28 @@ def linux_postInstall(installdir, target, is_webengine):
 
     # We also need additional libraries from the sysroot for linux
     sysroot_dir = Path("/lib/x86_64-linux-gnu")
-    sysroot_libs = ["libpcre2-16.so.0", "libfreetype.so.6"]
+    sysroot_libs = [
+        "libpcre2-16.so.0",
+        "libfreetype.so.6",
+        "libxkbcommon.so.0",
+        "libXau.so.6",
+        "libXdmcp.so.6",
+        "libX11-xcb.so.1",
+        "libxcb-xkb.so.1",
+        "libxcb-cursor.so.0",
+        "libxcb-icccm.so.4",
+        "libxcb-image.so.0",
+        "libxcb-keysyms.so.1",
+        "libxcb-randr.so.0",
+        "libxcb-render-util.so.0",
+        "libxcb-render.so.0",
+        "libxcb-shape.so.0",
+        "libxcb-shm.so.0",
+        "libxcb-sync.so.1",
+        "libxcb-util.so.1",
+        "libxcb-xfixes.so.0",
+        "libxkbcommon-x11.so.0",
+        "libfontconfig.so.1"]
     if target == "linux" and is_webengine:
         sysroot_libs += ["libjpeg.so.8"]
     for lib in sysroot_libs:
