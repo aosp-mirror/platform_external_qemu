@@ -371,6 +371,7 @@ Feature: 'WiFiPacketStream' (95), value: 0, default: 0, is overridden: 0
 Feature: 'SupportPixelFold' (96), value: 0, default: 0, is overridden: 0
 Feature: 'DeviceKeyboardHasAssistKey' (97), value: 0, default: 0, is overridden: 0
 Feature: 'VulkanAllocateDeviceMemoryOnly' (98), value: 0, default: 0, is overridden: 0
+Feature: 'VulkanAllocateHostMemory' (99), value: 0, default: 0, is overridden: 0
 )#";
     EXPECT_EQ(feature_list, ss.str());
 }

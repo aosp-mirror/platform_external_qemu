@@ -651,6 +651,9 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
         case android::featurecontrol::VulkanAllocateDeviceMemoryOnly:
             return android_studio::EmulatorFeatureFlagState::
                     VULKAN_ALLOCATE_DEVICE_MEMORY_ONLY;
+        case android::featurecontrol::VulkanAllocateHostMemory:
+            return android_studio::EmulatorFeatureFlagState::
+                    VULKAN_ALLOCATE_HOST_MEMORY;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;

@@ -3243,9 +3243,10 @@ extern "C" int main(int argc, char** argv) {
                 }
             }
             if (glVendor && strncmp("Intel", glVendor, 5) == 0) {
-                feature_set_if_not_overridden(kFeature_SystemBlob, true);
-                if (fc::isEnabled(fc::SystemBlob)) {
-                    dinfo("Enabled SystemBlob feature for "
+                feature_set_if_not_overridden(kFeature_VulkanAllocateHostMemory,
+                                              true);
+                if (fc::isEnabled(fc::VulkanAllocateHostMemory)) {
+                    dinfo("Enabled VulkanAllocateHostMemory feature for "
                           "gpu "
                           "vendor %s on Linux\n",
                           glVendor);
