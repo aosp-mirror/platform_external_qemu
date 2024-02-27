@@ -3242,6 +3242,15 @@ extern "C" int main(int argc, char** argv) {
                           glVendor);
                 }
             }
+            if (glVendor && strncmp("Intel", glVendor, 5) == 0) {
+                feature_set_if_not_overridden(kFeature_SystemBlob, true);
+                if (fc::isEnabled(fc::SystemBlob)) {
+                    dinfo("Enabled SystemBlob feature for "
+                          "gpu "
+                          "vendor %s on Linux\n",
+                          glVendor);
+                }
+            }
         }
 #endif
 
