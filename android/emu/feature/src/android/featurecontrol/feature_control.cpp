@@ -76,3 +76,25 @@ const char* feature_name(Feature feature) {
 
     return it->second.c_str();
 }
+
+Feature feature_from_name(const char* name) {
+    if (name == nullptr) {
+        return kFeature_unknown;
+    }
+
+    static const std::unordered_map<std::string, Feature>* const sNameToFeature = [] {
+        return new std::unordered_map<std::string, Feature>({
+#define FEATURE_CONTROL_ITEM(item, idx) { #item, kFeature_##item },
+#include "host-common/FeatureControlDefGuest.h"
+#include "host-common/FeatureControlDefHost.h"
+#undef FEATURE_CONTROL_ITEM
+        });
+    }();
+
+    auto it = sNameToFeature->find(std::string(name));
+    if (it == sNameToFeature->end()) {
+        return kFeature_unknown;
+    }
+
+    return it->second;
+}
