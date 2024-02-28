@@ -1568,7 +1568,8 @@ message EmulatorFeatureFlagState {
         SUPPORT_PIXEL_FOLD = 104;
         DEVICE_KEYBOARD_HAS_ASSIST_KEY = 105;
         VULKAN_ALLOCATE_DEVICE_MEMORY_ONLY = 106;
-        // Next tag: 107
+        VULKAN_ALLOCATE_HOST_MEMORY = 107;
+        // Next tag: 108
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
