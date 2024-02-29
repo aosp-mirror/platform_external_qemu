@@ -43,12 +43,7 @@ auto androidQtSetupEnv(int bitness, const char* emulatorDir) -> bool {
                   "Silencing all qWarning(); use qCWarning(...) instead: "
                   "QT_LOGGING_RULES=%s",
                   "default.warning=false");
-    //system->envSet("QT_LOGGING_RULES", "default.warning=false");
-
-    /*****************************************************/
-    // TODO(joshuaduong): remove this; just for debugging buildbot
-    system->envSet("QT_DEBUG_PLUGINS", "1");
-    /*****************************************************/
+    system->envSet("QT_LOGGING_RULES", "default.warning=false");
 
     VERBOSE_PRINT(
             init,
