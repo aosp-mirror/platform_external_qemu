@@ -9,21 +9,11 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-# TODO(joshuaduong): Only mac-aarch64 is using Qt6 at the moment. Remove once
-# all platforms use the same version of Qt.
-if(INCLUDE_QT5_CFG_CMAKE)
-  return()
-endif()
-
-set(INCLUDE_QT5_CFG_CMAKE 1)
-
-if(DARWIN_AARCH64)
-  set(QT_VERSION_MAJOR 6)
-  set(QT_VERSION_MINOR 2)
-else()
-  set(QT_VERSION_MAJOR 5)
-  set(QT_VERSION_MINOR 12)
-endif()
+set(QT_VERSION_MAJOR 6)
+set(QT_VERSION_MINOR 5)
+set(QT_VERSION_PATCH 3)
+set(QT_LIB_VERSION ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
+set(QT_LIBINFIX "AndroidEmu")
 
 # TODO: Remove this once we have -no-window working with absolutely no Qt
 # dependencies
@@ -43,6 +33,13 @@ endif()
 set(CMAKE_AUTOMOC TRUE)
 set(CMAKE_AUTOUIC TRUE)
 set(CMAKE_AUTORCC TRUE)
+if(LINUX)
+  # rcc defaults to using zstd compression, but for an unknown reason, emulator is crashing with
+  # this compression algorithm.
+  message(STATUS "CMAKE_AUTORCC_OPTIONS before = [${CMAKE_AUTORCC_OPTIONS}]")
+  set(CMAKE_AUTORCC_OPTIONS "--compress-algo;zlib")
+  message(STATUS "CMAKE_AUTORCC_OPTIONS after = [${CMAKE_AUTORCC_OPTIONS}]")
+endif()
 
 # # Use the host compatible moc, rcc and uic if(HOST_DARWIN_X86_64 AND
 # DARWIN_AARCH64) # We have Qt6 compiler tools specifically for cross-compiling
@@ -69,41 +66,17 @@ function(add_qt_target target)
     set(EXE_SUFFIX ".exe")
   endif()
 
-  set(QT_EXE_DIR "bin")
-
-  if(QT_VERSION_MAJOR EQUAL 6)
-
-    # The executable directory has changed from bin --> libexec in darwin
-    # aarch64
-    if(DARWIN_AARCH64)
-      set(QT_EXE_DIR "libexec")
-    endif()
-
-    if(HOST_DARWIN_X86_64)
-      get_filename_component(
-        HOST_PREBUILT_ROOT
-        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}/qt6"
-        ABSOLUTE)
-    else()
-      get_filename_component(
-        HOST_PREBUILT_ROOT
-        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}"
-        ABSOLUTE)
-    endif()
+  # The executable directory has changed from bin --> libexec in Qt6. Windows is still bin.
+  if (MSVC)
+    set(QT_EXE_DIR "bin")
   else()
-    if(HOST_DARWIN_AARCH64 AND DARWIN_X86_64)
-      message(STATUS "We will use rosetta to run ${target} in X86 mode.")
-      get_filename_component(
-        HOST_PREBUILT_ROOT
-        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/darwin-x86_64"
-        ABSOLUTE)
-    else()
-      get_filename_component(
-        HOST_PREBUILT_ROOT
-        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}"
-        ABSOLUTE)
-    endif()
+    set(QT_EXE_DIR "libexec")
   endif()
+
+  get_filename_component(
+    HOST_PREBUILT_ROOT
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}"
+    ABSOLUTE)
 
   set(QT_EXECUTABLE ${HOST_PREBUILT_ROOT}/${QT_EXE_DIR}/${target}${EXE_SUFFIX})
   if(NOT EXISTS ${QT_EXECUTABLE})
@@ -137,10 +110,10 @@ function(add_qt_shared_lib target link target_deps)
     android_license(
       TARGET Qt${QT_VERSION_MAJOR}::${target}
       LIBNAME "Qt ${target}"
-      URL "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/qt-everywhere-src-5.12.1.tar.xz"
+      URL "https://android.googlesource.com/platform/external/qt5/+/refs/heads/upstream-6.5.3"
       SPDX "LGPL-3.0-only"
       LICENSE
-        "https://doc.qt.io/qt-5.12/qt${target}-index.html#licenses-and-attributions"
+        "https://doc.qt.io/qt-6.5/qt${target}-index.html#licenses-and-attributions"
       LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LGPLv3")
     # Update the dependencies
     foreach(dep ${target_deps})
@@ -152,97 +125,67 @@ endfunction()
 
 set(QT5_INCLUDE_DIRS
     ${PREBUILT_ROOT}/include
-    ${PREBUILT_ROOT}/include.system
-    ${PREBUILT_ROOT}/include.system/QtCore
     ${PREBUILT_ROOT}/include/QtCore
     ${PREBUILT_ROOT}/include/QtGui
     ${PREBUILT_ROOT}/include/QtSvg
-    ${PREBUILT_ROOT}/include/QtWidgets
-    ${PREBUILT_ROOT}/include/QtWebChannel
-    ${PREBUILT_ROOT}/include/QtWebEngineWidgets
-    ${PREBUILT_ROOT}/include/QtWebSockets)
+    ${PREBUILT_ROOT}/include/QtWidgets)
+if(QTWEBENGINE)
+    list(
+      APPEND
+      QT5_INCLUDE_DIRS
+      ${PREBUILT_ROOT}/include/QtWebChannel
+      ${PREBUILT_ROOT}/include/QtWebEngineWidgets
+      ${PREBUILT_ROOT}/include/QtWebSockets
+    )
+endif()
 set(QT5_INCLUDE_DIR ${QT5_INCLUDE_DIRS})
 set(QT5_LINK_PATH "-L${PREBUILT_ROOT}/lib")
 set(QT5_DEFINITIONS "-DQT5_STATICLIB")
 set(QT5_FOUND TRUE)
 
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
-  if(DARWIN_AARCH64 AND QTWEBENGINE)
-    set(QT_MAJOR_VERSION 6)
-    set(QT_LIB_VERSION 6.2.1)
-  else()
-    set(QT_MAJOR_VERSION 5)
-    set(QT_LIB_VERSION 5.12.1)
-  endif()
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   set(QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}CoreAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}CoreAndroidEmu.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}WidgetsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}WidgetsAndroidEmu.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}GuiAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}GuiAndroidEmu.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}SvgAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}SvgAndroidEmu.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}PrintSupportAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}PrintSupportAndroidEmu.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}NetworkAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}NetworkAndroidEmu.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}DBusAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}DBusAndroidEmu.${QT_LIB_VERSION}.dylib
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Core${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Core${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Widgets${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Widgets${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Gui${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Gui${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Svg${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Svg${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Network${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Network${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}DBus${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}DBus${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib
   )
 
-  if(QT_MAJOR_VERSION EQUAL 5)
-    set(QT5_SHARED_DEPENDENCIES
-        ${QT5_SHARED_DEPENDENCIES};
-        ${PREBUILT_ROOT}/plugins/bearer/libqgenericbearer.dylib>lib64/qt/plugins/bearer/libqgenericbearer.dylib;
-        ${PREBUILT_ROOT}/plugins/platforms/libqcocoa.dylib>lib64/qt/plugins/platforms/libqcocoa.dylib;
-        ${PREBUILT_ROOT}/plugins/styles/libqmacstyle.dylib>lib64/qt/plugins/styles/libqmacstyle.dylib;
-        ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.dylib>lib64/qt/plugins/iconengines/libqsvgicon.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqgif.dylib>lib64/qt/plugins/imageformats/libqgif.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqicns.dylib>lib64/qt/plugins/imageformats/libqicns.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqico.dylib>lib64/qt/plugins/imageformats/libqico.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqjpeg.dylib>lib64/qt/plugins/imageformats/libqjpeg.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqmacheif.dylib>lib64/qt/plugins/imageformats/libqmacheif.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqmacjp2.dylib>lib64/qt/plugins/imageformats/libqmacjp2.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqsvg.dylib>lib64/qt/plugins/imageformats/libqsvg.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqtga.dylib>lib64/qt/plugins/imageformats/libqtga.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqtiff.dylib>lib64/qt/plugins/imageformats/libqtiff.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.dylib>lib64/qt/plugins/imageformats/libqwbmp.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqwebp.dylib>lib64/qt/plugins/imageformats/libqwebp.dylib
-    )
-  endif()
+  set(QT5_SHARED_DEPENDENCIES
+      ${QT5_SHARED_DEPENDENCIES};
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}SvgWidgets${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}SvgWidgets${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/plugins/platforms/libqcocoa${QT_LIBINFIX}.dylib>lib64/qt/plugins/platforms/libqcocoa${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/styles/libqmacstyle${QT_LIBINFIX}.dylib>lib64/qt/plugins/styles/libqmacstyle${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon${QT_LIBINFIX}.dylib>lib64/qt/plugins/iconengines/libqsvgicon${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqgif${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqgif${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqicns${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqicns${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqico${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqico${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqjpeg${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqjpeg${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqmacheif${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqmacheif${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqmacjp2${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqmacjp2${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqsvg${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqsvg${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqtga${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqtga${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqtiff${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqtiff${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqwbmp${QT_LIBINFIX}.dylib;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqwebp${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqwebp${QT_LIBINFIX}.dylib
+  )
 
-  if(QT_MAJOR_VERSION EQUAL 6)
-    set(QT_LIBINFIX "AndroidEmu")
-    set(QT5_SHARED_DEPENDENCIES
-        ${QT5_SHARED_DEPENDENCIES};
-        ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}SvgWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}SvgWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib;
-        ${PREBUILT_ROOT}/plugins/platforms/libqcocoa${QT_LIBINFIX}.dylib>lib64/qt/plugins/platforms/libqcocoa${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/styles/libqmacstyle${QT_LIBINFIX}.dylib>lib64/qt/plugins/styles/libqmacstyle${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon${QT_LIBINFIX}.dylib>lib64/qt/plugins/iconengines/libqsvgicon${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqgif${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqgif${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqicns${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqicns${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqico${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqico${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqjpeg${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqjpeg${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqmacheif${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqmacheif${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqmacjp2${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqmacjp2${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqsvg${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqsvg${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqtga${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqtga${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqtiff${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqtiff${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqwbmp${QT_LIBINFIX}.dylib;
-        ${PREBUILT_ROOT}/plugins/imageformats/libqwebp${QT_LIBINFIX}.dylib>lib64/qt/plugins/imageformats/libqwebp${QT_LIBINFIX}.dylib
-    )
-  endif()
-
-  add_qt_shared_lib(Core "-lQt${QT_MAJOR_VERSION}CoreAndroidEmu" "")
-  add_qt_shared_lib(Gui "-lQt${QT_MAJOR_VERSION}GuiAndroidEmu"
-                    "Qt${QT_MAJOR_VERSION}::Core")
-  add_qt_shared_lib(Widgets "-lQt${QT_MAJOR_VERSION}WidgetsAndroidEmu"
-                    "Qt${QT_MAJOR_VERSION}::Gui")
-  add_qt_shared_lib(Svg "-lQt${QT_MAJOR_VERSION}SvgAndroidEmu"
-                    "Qt${QT_MAJOR_VERSION}::Widgets")
-  if(QT_MAJOR_VERSION EQUAL 6)
-    add_qt_shared_lib(SvgWidgets "-lQt${QT_MAJOR_VERSION}SvgWidgetsAndroidEmu"
-                      "Qt${QT_MAJOR_VERSION}::Widgets")
-  endif()
+  add_qt_shared_lib(Core "-lQt${QT_VERSION_MAJOR}Core${QT_LIBINFIX}" "")
+  add_qt_shared_lib(Gui "-lQt${QT_VERSION_MAJOR}Gui${QT_LIBINFIX}"
+                    "Qt${QT_VERSION_MAJOR}::Core")
+  add_qt_shared_lib(Widgets "-lQt${QT_VERSION_MAJOR}Widgets${QT_LIBINFIX}"
+                    "Qt${QT_VERSION_MAJOR}::Gui")
+  add_qt_shared_lib(Svg "-lQt${QT_VERSION_MAJOR}Svg${QT_LIBINFIX}"
+                    "Qt${QT_VERSION_MAJOR}::Widgets")
+  add_qt_shared_lib(SvgWidgets "-lQt${QT_VERSION_MAJOR}SvgWidgets${QT_LIBINFIX}"
+                    "Qt${QT_VERSION_MAJOR}::Widgets")
 
   if(QTWEBENGINE)
-    add_qt_shared_lib(Network "-lQt${QT_MAJOR_VERSION}NetworkAndroidEmu"
-                      "Qt${QT_MAJOR_VERSION}::Core")
+    add_qt_shared_lib(Network "-lQt${QT_VERSION_MAJOR}Network${QT_LIBINFIX}"
+                      "Qt${QT_VERSION_MAJOR}::Core")
 
     list(
       APPEND
@@ -264,55 +207,33 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
       # BUG: 143948083 WebEngine expects the locales directory to not be under
       # translations
       ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/qtwebengine_locales
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}WebChannelAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}WebChannelAndroidEmu.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}WebEngineCoreAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}WebEngineCoreAndroidEmu.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}WebSocketsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}WebSocketsAndroidEmu.${QT_LIB_VERSION}.dylib
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}WebEngineCore${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}WebEngineCore${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}WebSockets${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}WebSockets${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib
     )
-    if(QT_MAJOR_VERSION EQUAL 5)
-      add_qt_shared_lib(Qml "-lQt${QT_MAJOR_VERSION}QmlAndroidEmu"
-                        "Qt${QT_MAJOR_VERSION}::Network")
-      add_qt_shared_lib(
-        WebChannel "-lQt${QT_MAJOR_VERSION}WebChannelAndroidEmu"
-        "Qt${QT_MAJOR_VERSION}::Qml")
-      add_qt_shared_lib(
-        WebSockets "-lQt${QT_MAJOR_VERSION}WebSocketsAndroidEmu"
-        "Qt${QT_MAJOR_VERSION}::Qml")
-      add_qt_shared_lib(
-        WebEngineWidgets "-lQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu"
-        "Qt${QT_MAJOR_VERSION}::Qml")
-      list(
-        APPEND
-        QT5_SHARED_DEPENDENCIES
-        ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}QmlAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}QmlAndroidEmu.${QT_LIB_VERSION}.dylib;
-        ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}QuickAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}QuickAndroidEmu.${QT_LIB_VERSION}.dylib;
-        ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}QuickWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}QuickWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib;
-      )
-    elseif(QT_MAJOR_VERSION EQUAL 6)
-      list(
-        APPEND
-        QT5_SHARED_DEPENDENCIES
-        ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}QmlAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}QmlAndroidEmu.${QT_LIB_VERSION}.dylib;
-        ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}QuickAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}QuickAndroidEmu.${QT_LIB_VERSION}.dylib;
-        ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}QuickWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}QuickWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib;
-        ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}PositioningAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}PositioningAndroidEmu.${QT_LIB_VERSION}.dylib;
-        ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}OpenGLAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}OpenGLAndroidEmu.${QT_LIB_VERSION}.dylib;
-        ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}QmlModelsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}QmlModelsAndroidEmu.${QT_LIB_VERSION}.dylib;
-      )
-      # Qt6 build does not contain Qml library
-      add_qt_shared_lib(
-        WebChannel "-lQt${QT_MAJOR_VERSION}WebChannelAndroidEmu"
-        "Qt${QT_MAJOR_VERSION}::Core")
-      add_qt_shared_lib(
-        WebSockets "-lQt${QT_MAJOR_VERSION}WebSocketsAndroidEmu"
-        "Qt${QT_MAJOR_VERSION}::Core")
-      add_qt_shared_lib(
-        WebEngineWidgets "-lQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu"
-        "Qt${QT_MAJOR_VERSION}::Core")
-      add_qt_shared_lib(
-        WebEngineCore "-lQt${QT_MAJOR_VERSION}WebEngineCoreAndroidEmu"
-        "Qt${QT_MAJOR_VERSION}::Core")
-    endif()
+    list(
+      APPEND
+      QT5_SHARED_DEPENDENCIES
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Qml${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Qml${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Quick${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Quick${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}QuickWidgets${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}QuickWidgets${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Positioning${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Positioning${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}QmlModels${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_VERSION_MAJOR}QmlModels${QT_LIBINFIX}.${QT_LIB_VERSION}.dylib;
+    )
+    # Qt6 build does not contain Qml library
+    add_qt_shared_lib(
+      WebChannel "-lQt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}"
+      "Qt${QT_VERSION_MAJOR}::Core")
+    add_qt_shared_lib(
+      WebSockets "-lQt${QT_VERSION_MAJOR}WebSockets${QT_LIBINFIX}"
+      "Qt${QT_VERSION_MAJOR}::Core")
+    add_qt_shared_lib(
+      WebEngineWidgets "-lQt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX}"
+      "Qt${QT_VERSION_MAJOR}::Core")
+    add_qt_shared_lib(
+      WebEngineCore "-lQt${QT_VERSION_MAJOR}WebEngineCore${QT_LIBINFIX}"
+      "Qt${QT_VERSION_MAJOR}::Core")
   endif()
 
   # Note: this will only set the property for install targets, not during build.
@@ -321,10 +242,10 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
   )
   set(QT5_LIBRARIES
       ${QT5_LIBRARIES}
-      -lQt${QT_MAJOR_VERSION}NetworkAndroidEmu
-      -lQt${QT_MAJOR_VERSION}WebChannelAndroidEmu
-      -lQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu
-      -lQt${QT_MAJOR_VERSION}WebSockets)
+      -lQt${QT_VERSION_MAJOR}Network${QT_LIBINFIX}
+      -lQt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}
+      -lQt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX}
+      -lQt${QT_VERSION_MAJOR}WebSockets)
 elseif(WINDOWS_MSVC_X86_64)
   # On Windows, Qt provides us with a qtmain.lib which helps us write a cross-
   # platform main() function (because WinMain() is the entry point to a GUI
@@ -341,57 +262,60 @@ elseif(WINDOWS_MSVC_X86_64)
   set(QT5_LINK_PATH "")
   # Obtained by running ListDlls.exe from sysinternals tool
   set(QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/bin/Qt5SvgAndroidEmu.dll>lib64/qt/lib/Qt5SvgAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5CoreAndroidEmu.dll>lib64/qt/lib/Qt5CoreAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5GuiAndroidEmu.dll>lib64/qt/lib/Qt5GuiAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5WidgetsAndroidEmu.dll>lib64/qt/lib/Qt5WidgetsAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5NetworkAndroidEmu.dll>lib64/qt/lib/Qt5NetworkAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5PrintSupportAndroidEmu.dll>lib64/qt/lib/Qt5PrintSupportAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5QmlAndroidEmu.dll>lib64/qt/lib/Qt5QmlAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5PositioningAndroidEmu.dll>lib64/qt/lib/Qt5PositioningAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5QuickAndroidEmu.dll>lib64/qt/lib/Qt5QuickAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5QuickWidgetsAndroidEmu.dll>lib64/qt/lib/Qt5QuickWidgetsAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5WebChannelAndroidEmu.dll>lib64/qt/lib/Qt5WebChannelAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5WebEngineCoreAndroidEmu.dll>lib64/qt/lib/Qt5WebEngineCoreAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5WebEngineWidgetsAndroidEmu.dll>lib64/qt/lib/Qt5WebEngineWidgetsAndroidEmu.dll;
-      ${PREBUILT_ROOT}/bin/Qt5WebSocketsAndroidEmu.dll>lib64/qt/lib/Qt5WebSocketsAndroidEmu.dll;
-      ${PREBUILT_ROOT}/plugins/bearer/qgenericbearer.dll>lib64/qt/plugins/bearer/qgenericbearer.dll;
-      ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt/plugins/platforms/qwindows.dll;
-      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt/plugins/iconengines/qsvgicon.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt/plugins/imageformats/qgif.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qicns.dll>lib64/qt/plugins/imageformats/qicns.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qico.dll>lib64/qt/plugins/imageformats/qico.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg.dll>lib64/qt/plugins/imageformats/qjpeg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qsvg.dll>lib64/qt/plugins/imageformats/qsvg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt/plugins/imageformats/qtga.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt/plugins/imageformats/qtiff.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt/plugins/imageformats/qwbmp.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt/plugins/imageformats/qwebp.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}Svg${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}Svg${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}Core${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}Core${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}Gui${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}Gui${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}Widgets${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}Widgets${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}Network${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}Network${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}OpenGL${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}OpenGL${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}Qml${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}Qml${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}Positioning${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}Positioning${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}QmlModels${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}QmlModels${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}Quick${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}Quick${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}QuickWidgets${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}QuickWidgets${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}SvgWidgets${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}SvgWidgets${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}WebEngineCore${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}WebEngineCore${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/bin/Qt${QT_VERSION_MAJOR}WebSockets${QT_LIBINFIX}.dll>lib64/qt/lib/Qt${QT_VERSION_MAJOR}WebSockets${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/platforms/qwindows${QT_LIBINFIX}.dll>lib64/qt/plugins/platforms/qwindows${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon${QT_LIBINFIX}.dll>lib64/qt/plugins/iconengines/qsvgicon${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qgif${QT_LIBINFIX}.dll>lib64/qt/plugins/imageformats/qgif${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qicns${QT_LIBINFIX}.dll>lib64/qt/plugins/imageformats/qicns${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qico${QT_LIBINFIX}.dll>lib64/qt/plugins/imageformats/qico${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg${QT_LIBINFIX}.dll>lib64/qt/plugins/imageformats/qjpeg${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qsvg${QT_LIBINFIX}.dll>lib64/qt/plugins/imageformats/qsvg${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qtga${QT_LIBINFIX}.dll>lib64/qt/plugins/imageformats/qtga${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qtiff${QT_LIBINFIX}.dll>lib64/qt/plugins/imageformats/qtiff${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp${QT_LIBINFIX}.dll>lib64/qt/plugins/imageformats/qwbmp${QT_LIBINFIX}.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qwebp${QT_LIBINFIX}.dll>lib64/qt/plugins/imageformats/qwebp${QT_LIBINFIX}.dll;
   )
 
-  add_qt_shared_lib(Core "${PREBUILT_ROOT}/lib/Qt5CoreAndroidEmu.lib" "")
-  add_qt_shared_lib(Gui "${PREBUILT_ROOT}/lib/Qt5GuiAndroidEmu.lib" "Qt5::Core")
-  add_qt_shared_lib(Widgets "${PREBUILT_ROOT}/lib/Qt5WidgetsAndroidEmu.lib"
-                    "Qt5::Gui")
-  add_qt_shared_lib(Svg "${PREBUILT_ROOT}/lib/Qt5SvgAndroidEmu.lib"
-                    "Qt5::Widgets")
+  add_qt_shared_lib(Core "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}Core${QT_LIBINFIX}.lib" "")
+  add_qt_shared_lib(Gui "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}Gui${QT_LIBINFIX}.lib" "Qt${QT_VERSION_MAJOR}::Core")
+  add_qt_shared_lib(Widgets "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}Widgets${QT_LIBINFIX}.lib"
+                    "Qt${QT_VERSION_MAJOR}::Gui")
+  add_qt_shared_lib(Svg "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}Svg${QT_LIBINFIX}.lib"
+                    "Qt${QT_VERSION_MAJOR}::Widgets")
+  add_qt_shared_lib(SvgWidgets "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}SvgWidgets${QT_LIBINFIX}.lib"
+                    "Qt${QT_VERSION_MAJOR}::Widgets")
 
-  add_qt_shared_lib(Network "${PREBUILT_ROOT}/lib/Qt5NetworkAndroidEmu.lib"
-                    "Qt5::Core")
-  add_qt_shared_lib(Qml "${PREBUILT_ROOT}/lib/Qt5QmlAndroidEmu.lib"
-                    "Qt5::Network")
+  add_qt_shared_lib(Network "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}Network${QT_LIBINFIX}.lib"
+                    "Qt${QT_VERSION_MAJOR}::Core")
+  add_qt_shared_lib(Qml "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}Qml${QT_LIBINFIX}.lib"
+                    "Qt${QT_VERSION_MAJOR}::Network")
   add_qt_shared_lib(
-    WebEngineCore "${PREBUILT_ROOT}/lib/Qt5WebEngineCoreAndroidEmu.lib"
-    "Qt5::Network")
+    WebEngineCore "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}WebEngineCore${QT_LIBINFIX}.lib"
+    "Qt${QT_VERSION_MAJOR}::Network")
   add_qt_shared_lib(
-    WebChannel "${PREBUILT_ROOT}/lib/Qt5WebChannelAndroidEmu.lib"
-    "Qt5::WebEngineCore;Qt5::Qml")
+    WebChannel "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}.lib"
+    "Qt${QT_VERSION_MAJOR}::WebEngineCore;Qt${QT_VERSION_MAJOR}::Qml")
   add_qt_shared_lib(
-    WebSockets "${PREBUILT_ROOT}/lib/Qt5WebSocketsAndroidEmu.lib"
-    "Qt5::WebEngineCore;Qt5::Qml")
+    WebSockets "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}WebSockets${QT_LIBINFIX}.lib"
+    "Qt${QT_VERSION_MAJOR}::WebEngineCore;Qt${QT_VERSION_MAJOR}::Qml")
   add_qt_shared_lib(
-    WebEngineWidgets "${PREBUILT_ROOT}/lib/Qt5WebEngineWidgetsAndroidEmu.lib"
-    "Qt5::WebEngineCore;Qt5::Qml")
+    WebEngineWidgets "${PREBUILT_ROOT}/lib/Qt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX}.lib"
+    "Qt${QT_VERSION_MAJOR}::WebEngineCore;Qt${QT_VERSION_MAJOR}::Qml")
 
   list(
     APPEND
@@ -418,55 +342,82 @@ elseif(LINUX)
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   # LD_DEBUG=libs ./emulator @P_64 2>&1 | grep qt | grep init
   set(QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/lib/libQt5CoreAndroidEmu.so.5>lib64/qt/lib/libQt5CoreAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5GuiAndroidEmu.so.5>lib64/qt/lib/libQt5GuiAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5WidgetsAndroidEmu.so.5>lib64/qt/lib/libQt5WidgetsAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5SvgAndroidEmu.so.5>lib64/qt/lib/libQt5SvgAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5PrintSupportAndroidEmu.so.5>lib64/qt/lib/libQt5PrintSupportAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5DBusAndroidEmu.so.5>lib64/qt/lib/libQt5DBusAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5NetworkAndroidEmu.so.5>lib64/qt/lib/libQt5NetworkAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5XcbQpaAndroidEmu.so.5>lib64/qt/lib/libQt5XcbQpaAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/plugins/bearer/libqgenericbearer.so>lib64/qt/plugins/bearer/libqgenericbearer.so;
-      ${PREBUILT_ROOT}/plugins/bearer/libqconnmanbearer.so>lib64/qt/plugins/bearer/libqconnmanbearer.so;
-      ${PREBUILT_ROOT}/plugins/bearer/libqnmbearer.so>lib64/qt/plugins/bearer/libqnmbearer.so;
-      ${PREBUILT_ROOT}/plugins/platforms/libqxcb.so>lib64/qt/plugins/platforms/libqxcb.so;
-      ${PREBUILT_ROOT}/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so>lib64/qt/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so;
-      ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.so>lib64/qt/plugins/iconengines/libqsvgicon.so;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqwebp.so>lib64/qt/plugins/imageformats/libqwebp.so;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqgif.so>lib64/qt/plugins/imageformats/libqgif.so;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqicns.so>lib64/qt/plugins/imageformats/libqicns.so;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqico.so>lib64/qt/plugins/imageformats/libqico.so;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqjpeg.so>lib64/qt/plugins/imageformats/libqjpeg.so;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqsvg.so>lib64/qt/plugins/imageformats/libqsvg.so;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqtga.so>lib64/qt/plugins/imageformats/libqtga.so;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqtiff.so>lib64/qt/plugins/imageformats/libqtiff.so;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.so>lib64/qt/plugins/imageformats/libqwbmp.so
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Core${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Core${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Gui${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Gui${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Widgets${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Widgets${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Svg${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Svg${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}SvgWidgets${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}SvgWidgets${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}DBus${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}DBus${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Network${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Network${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon${QT_LIBINFIX}.so>lib64/qt/plugins/iconengines/libqsvgicon${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqwebp${QT_LIBINFIX}.so>lib64/qt/plugins/imageformats/libqwebp${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqgif${QT_LIBINFIX}.so>lib64/qt/plugins/imageformats/libqgif${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqicns${QT_LIBINFIX}.so>lib64/qt/plugins/imageformats/libqicns${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqico${QT_LIBINFIX}.so>lib64/qt/plugins/imageformats/libqico${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqjpeg${QT_LIBINFIX}.so>lib64/qt/plugins/imageformats/libqjpeg${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqsvg${QT_LIBINFIX}.so>lib64/qt/plugins/imageformats/libqsvg${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqtga${QT_LIBINFIX}.so>lib64/qt/plugins/imageformats/libqtga${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqtiff${QT_LIBINFIX}.so>lib64/qt/plugins/imageformats/libqtiff${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp${QT_LIBINFIX}.so>lib64/qt/plugins/imageformats/libqwbmp${QT_LIBINFIX}.so
   )
+
+  if(NOT LINUX_AARCH64)
+    list(APPEND QT5_SHARED_DEPENDENCIES
+      ${PREBUILT_ROOT}/plugins/platforms/libqxcb${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqxcb${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/platforms/libqlinuxfb${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqlinuxfb${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/platforms/libqminimal${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqminimal${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/platforms/libqoffscreen${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqoffscreen${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/platforms/libqvnc${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqvnc${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin${QT_LIBINFIX}.so>lib64/qt/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/plugins/platforminputcontexts/libibusplatforminputcontextplugin${QT_LIBINFIX}.so>lib64/qt/plugins/platforminputcontexts/libibusplatforminputcontextplugin${QT_LIBINFIX}.so;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}XcbQpa${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}XcbQpa${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6;
+      ${PREBUILT_ROOT}/lib/libxkbcommon.so.0>lib64/qt/lib/libxkbcommon.so.0;
+      ${PREBUILT_ROOT}/lib/libX11-xcb.so.1>lib64/qt/lib/libX11-xcb.so.1;
+      ${PREBUILT_ROOT}/lib/libXau.so.6>lib64/qt/lib/libXau.so.6;
+      ${PREBUILT_ROOT}/lib/libXdmcp.so.6>lib64/qt/lib/libXdmcp.so.6;
+      ${PREBUILT_ROOT}/lib/libxcb-xkb.so.1>lib64/qt/lib/libxcb-xkb.so.1;
+      ${PREBUILT_ROOT}/lib/libxcb-cursor.so.0>lib64/qt/lib/libxcb-cursor.so.0;
+      ${PREBUILT_ROOT}/lib/libxcb-icccm.so.4>lib64/qt/lib/libxcb-icccm.so.4;
+      ${PREBUILT_ROOT}/lib/libxcb-image.so.0>lib64/qt/lib/libxcb-image.so.0;
+      ${PREBUILT_ROOT}/lib/libxcb-keysyms.so.1>lib64/qt/lib/libxcb-keysyms.so.1;
+      ${PREBUILT_ROOT}/lib/libxcb-randr.so.0>lib64/qt/lib/libxcb-randr.so.0;
+      ${PREBUILT_ROOT}/lib/libxcb-render-util.so.0>lib64/qt/lib/libxcb-render-util.so.0;
+      ${PREBUILT_ROOT}/lib/libxcb-render.so.0>lib64/qt/lib/libxcb-render.so.0;
+      ${PREBUILT_ROOT}/lib/libxcb-shape.so.0>lib64/qt/lib/libxcb-shape.so.0;
+      ${PREBUILT_ROOT}/lib/libxcb-shm.so.0>lib64/qt/lib/libxcb-shm.so.0;
+      ${PREBUILT_ROOT}/lib/libxcb-sync.so.1>lib64/qt/lib/libxcb-sync.so.1;
+      ${PREBUILT_ROOT}/lib/libxcb-util.so.1>lib64/qt/lib/libxcb-util.so.1;
+      ${PREBUILT_ROOT}/lib/libxcb-xfixes.so.0>lib64/qt/lib/libxcb-xfixes.so.0;
+      ${PREBUILT_ROOT}/lib/libxkbcommon-x11.so.0>lib64/qt/lib/libxkbcommon-x11.so.0;
+      ${PREBUILT_ROOT}/lib/libfontconfig.so.1>lib64/qt/lib/libfontconfig.so.1)
+      if(QTWEBENGINE)
+        list(APPEND QT5_SHARED_DEPENDENCIES
+          ${PREBUILT_ROOT}/lib/libpcre2-16.so.0>lib64/qt/lib/libpcre2-16.so.0)
+      endif()
+  endif()
+
   set(QT5_SHARED_PROPERTIES
       "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib'  -Wl,--disable-new-dtags;LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib/plugins'  -Wl,--disable-new-dtags"
   )
-  set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5Network)
+  set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt${QT_VERSION_MAJOR}Network)
 
-  add_qt_shared_lib(Core "-lQt5CoreAndroidEmu" "")
-  add_qt_shared_lib(Gui "-lQt5GuiAndroidEmu" "Qt5::Core")
-  add_qt_shared_lib(Widgets "-lQt5WidgetsAndroidEmu" "Qt5::Gui")
-  add_qt_shared_lib(Svg "-lQt5SvgAndroidEmu" "Qt5::Widgets")
-
-  get_filename_component(
-    PREBUILT_WEBENGINE_DEPS_ROOT
-    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/qtwebengine-deps/${ANDROID_TARGET_TAG}"
-    ABSOLUTE)
+  add_qt_shared_lib(Core "-lQt${QT_VERSION_MAJOR}Core${QT_LIBINFIX}" "")
+  add_qt_shared_lib(Gui "-lQt${QT_VERSION_MAJOR}Gui${QT_LIBINFIX}" "Qt${QT_VERSION_MAJOR}::Core")
+  add_qt_shared_lib(Widgets "-lQt${QT_VERSION_MAJOR}Widgets${QT_LIBINFIX}" "Qt${QT_VERSION_MAJOR}::Gui")
+  add_qt_shared_lib(Svg "-lQt${QT_VERSION_MAJOR}Svg${QT_LIBINFIX}" "Qt${QT_VERSION_MAJOR}::Widgets")
+  add_qt_shared_lib(SvgWidgets "-lQt${QT_VERSION_MAJOR}SvgWidgets${QT_LIBINFIX}" "Qt${QT_VERSION_MAJOR}::Widgets")
 
   if(QTWEBENGINE)
-    add_qt_shared_lib(Network "-lQt5NetworkAndroidEmu" "Qt5::Core")
-    add_qt_shared_lib(Qml "-lQt5QmlAndroidEmu" "Qt5::Network")
-    add_qt_shared_lib(WebChannel "-lQt5WebChannelAndroidEmu" "Qt5::Qml")
-    add_qt_shared_lib(WebSockets "-lQt5WebSocketsAndroidEmu" "Qt5::Qml")
-    add_qt_shared_lib(WebEngineWidgets "-lQt5WebEngineWidgetsAndroidEmu"
-                      "Qt5::Qml")
+    add_qt_shared_lib(Network "-lQt${QT_VERSION_MAJOR}Network${QT_LIBINFIX}" "Qt${QT_VERSION_MAJOR}::Core")
+    add_qt_shared_lib(WebEngineCore "-lQt${QT_VERSION_MAJOR}WebEngineCore${QT_LIBINFIX}" "Qt${QT_VERSION_MAJOR}::Network")
+    add_qt_shared_lib(WebChannel "-lQt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}" "Qt${QT_VERSION_MAJOR}::Network")
+    add_qt_shared_lib(WebSockets "-lQt${QT_VERSION_MAJOR}WebSockets${QT_LIBINFIX}" "Qt${QT_VERSION_MAJOR}::Network")
+    add_qt_shared_lib(WebEngineWidgets "-lQt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX}"
+                      "Qt${QT_VERSION_MAJOR}::Network")
 
-    list(APPEND QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5WebChannelAndroidEmu
-         -lQt5WebEngineWidgetsAndroidEmu -lQt5WebSocketsAndroidEmu)
+    list(APPEND QT5_LIBRARIES ${QT5_LIBRARIES} -lQt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}
+         -lQt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX} -lQt${QT_VERSION_MAJOR}WebSockets${QT_LIBINFIX})
     list(
       APPEND
       QT5_WEBENGINE_SHARED_DEPENDENCIES
@@ -487,13 +438,16 @@ elseif(LINUX)
       # BUG: 143948083 WebEngine expects the locales directory to not be under
       # translations
       ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/qtwebengine_locales
-      ${PREBUILT_ROOT}/lib/libQt5QmlAndroidEmu.so.5>lib64/qt/lib/libQt5QmlAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5QuickAndroidEmu.so.5>lib64/qt/lib/libQt5QuickAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5QuickWidgetsAndroidEmu.so.5>lib64/qt/lib/libQt5QuickWidgetsAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5WebChannelAndroidEmu.so.5>lib64/qt/lib/libQt5WebChannelAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5WebEngineCoreAndroidEmu.so.5>lib64/qt/lib/libQt5WebEngineCoreAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5WebEngineWidgetsAndroidEmu.so.5>lib64/qt/lib/libQt5WebEngineWidgetsAndroidEmu.so.5;
-      ${PREBUILT_ROOT}/lib/libQt5WebSocketsAndroidEmu.so.5>lib64/qt/lib/libQt5WebSocketsAndroidEmu.so.5
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Positioning${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Positioning${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Qml${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Qml${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}QmlModels${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}QmlModels${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}Quick${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}Quick${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}QuickWidgets${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}QuickWidgets${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}WebChannel${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}WebEngineCore${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}WebEngineCore${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}WebEngineWidgets${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}WebSockets${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}WebSockets${QT_LIBINFIX}.so.6;
+      ${PREBUILT_ROOT}/lib/libjpeg.so.8>lib64/qt/lib/libjpeg.so.8
     )
 
     list(
@@ -503,38 +457,10 @@ elseif(LINUX)
     )
   endif()
 
-  if(LINUX_X86_64)
-    list(
-      APPEND
-      QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0.0.0;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0.0;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0.0;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0.0.0;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6
-      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfontconfig.so.1.12.0>lib64/qt/lib/libfontconfig.so.1
-    )
-  endif()
-
-  if(LINUX_AARCH64)
-    list(APPEND QT5_SHARED_DEPENDENCIES
-         ${PREBUILT_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6)
-  endif()
-
 endif()
 
-set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5WidgetsAndroidEmu -lQt5GuiAndroidEmu
-                  -lQt5CoreAndroidEmu -lQt5SvgAndroidEmu)
+set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt${QT_VERSION_MAJOR}Widgets${QT_LIBINFIX} -lQt${QT_VERSION_MAJOR}Gui${QT_LIBINFIX}
+                  -lQt${QT_VERSION_MAJOR}Core${QT_LIBINFIX} -lQt${QT_VERSION_MAJOR}Svg${QT_LIBINFIX} -lQt${QT_VERSION_MAJOR}SvgWidgets${QT_LIBINFIX})
 
 set(PACKAGE_EXPORT
     QT5_INCLUDE_DIR
@@ -545,6 +471,7 @@ set(PACKAGE_EXPORT
     CMAKE_AUTOMOC
     CMAKE_AUTOUIC
     CMAKE_AUTORCC
+    CMAKE_AUTORCC_OPTIONS
     QT_MOC_EXECUTABLE
     QT_UIC_EXECUTABLE
     QT_RCC_EXECUTABLE
@@ -557,16 +484,16 @@ set(PACKAGE_EXPORT
 
 android_license(
   TARGET QT5_SHARED_DEPENDENCIES
-  LIBNAME "Qt 5"
-  URL "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/qt-everywhere-src-5.12.1.tar.xz"
+  LIBNAME "Qt 6"
+  URL "https://android.googlesource.com/platform/external/qt5/+/refs/heads/upstream-6.5.3"
   SPDX "LGPL-3.0-only"
-  LICENSE "https://doc.qt.io/qt-5/licensing.html"
+  LICENSE "https://doc.qt.io/qt-6.5/licensing.html"
   LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LGPLv3")
 
 android_license(
   TARGET QT5_WEBENGINE_SHARED_DEPENDENCIES
-  LIBNAME "Qt 5"
-  URL "https://android.googlesource.com/platform/prebuilts/android-emulator-build/archive/+/refs/heads/emu-master-dev/qt-everywhere-src-5.12.1.tar.xz"
+  LIBNAME "Qt 6"
+  URL "https://android.googlesource.com/platform/external/qt5/+/refs/heads/upstream-6.5.3"
   SPDX "LGPL-3.0-only"
-  LICENSE "https://doc.qt.io/qt-5/licensing.html"
+  LICENSE "https://doc.qt.io/qt-6.5/licensing.html"
   LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LGPLv3")

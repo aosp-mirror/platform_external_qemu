@@ -12,6 +12,11 @@
 
 #ifdef USE_WEBENGINE
 #include "ui_location-page.h"
+#include "android/skin/qt/websockets/websocketclientwrapper.h"
+#include "android/skin/qt/websockets/websockettransport.h"
+#include <QWebChannel>
+#include <QWebEngineView>
+#include <QWebSocketServer>
 #else
 #include "ui_location-page_noMaps.h"
 #endif // USE_WEBENGINE
@@ -23,25 +28,16 @@
 #include "android/location/Route.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/skin/qt/common-controls/cc-list-item.h"
-#include "android/skin/qt/websockets/websocketclientwrapper.h"
-#include "android/skin/qt/websockets/websockettransport.h"
 #include "network-connectivity-manager.h"
 #include "android/metrics/UiEventTracker.h"
 
 #include <QDateTime>
 #include <QListWidgetItem>
-#if QT_VERSION >= 0x060000
-#else
-#include <QtNetwork/QNetworkConfigurationManager>
-#endif  // QT_VERSION
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTimer>
 #include <QThread>
 #include <QVector>
-#include <QWebChannel>
-#include <QWebEngineView>
-#include <QWebSocketServer>
 #include <QWidget>
 #include <memory>
 
@@ -333,12 +329,6 @@ private:
     void deleteSelectedRoutes();
     void scanForRoutes();
 
-    std::unique_ptr<QWebSocketServer> mServer;
-    std::unique_ptr<WebSocketClientWrapper> mClientWrapper;
-    std::unique_ptr<QWebChannel> mWebChannel;
-
-    std::unique_ptr<MapBridge> mMapBridge;
-
     uint32_t mSetLocCount = 0;
     uint32_t mPlayRouteCount = 0;
 
@@ -351,6 +341,12 @@ private:
     bool mIsGpxKmlPlayback = false;
     friend class RouteSenderThread;
 #ifdef USE_WEBENGINE
+    std::unique_ptr<QWebSocketServer> mServer;
+    std::unique_ptr<WebSocketClientWrapper> mClientWrapper;
+    std::unique_ptr<QWebChannel> mWebChannel;
+
+    std::unique_ptr<MapBridge> mMapBridge;
+
     bool mShouldRefreshPageOnReconnect;
     NetworkConnectivityManager* mNetworkConnectivityManager;
 #endif // USE_WEBENGINE
@@ -378,14 +374,8 @@ public:
         updateTheme();
         setTitle(mPointElement.logicalName);
         QString subtitle;
-#if QT_VERSION >= 0x060000
         subtitle = QString("%1, %2").arg(mPointElement.latitude, 0, 'f', 4)
                         .arg(mPointElement.longitude, 0, 'f', 4);
-#else
-        subtitle.sprintf("%.4f, %.4f",
-                         mPointElement.latitude,
-                         mPointElement.longitude);
-#endif
         setSubtitle(subtitle);
     }
 

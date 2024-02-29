@@ -83,12 +83,7 @@
 #include <QCheckBox>
 #include <QCursor>
 #include <Qt>
-#if QT_VERSION >= 0x060000
 #include <QInputDevice>
-#else
-#include <QDesktopWidget>
-#include <QTouchDevice>
-#endif  // QT_VERSION
 #include <QFileDialog>
 #include <QIcon>
 #include <QLabel>
@@ -266,11 +261,7 @@ void SkinSurfaceBitmap::applyPendingTransformations() {
             image = image.mirrored(true, true);
         } else {
             // a simple transformation is still enough here
-#if QT_VERSION >= 0x060000
             QTransform transform;
-#else
-            QMatrix transform;
-#endif
             transform.rotate(pendingRotation * 90);
             image = image.transformed(transform);
         }
@@ -1461,24 +1452,12 @@ void EmulatorQtWindow::show() {
 
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
                      &EmulatorQtWindow::onScreenChanged);
-#if QT_VERSION >= 0x060000
     QObject::connect(qGuiApp, &QGuiApplication::primaryScreenChanged, this,
                      &EmulatorQtWindow::onScreenConfigChanged);
     QObject::connect(qGuiApp, &QGuiApplication::screenAdded, this,
                      &EmulatorQtWindow::onScreenConfigChanged);
     QObject::connect(qGuiApp, &QGuiApplication::screenRemoved, this,
                      &EmulatorQtWindow::onScreenConfigChanged);
-#else
-    // On Mac, the above function won't be triggered when you plug in a new
-    // monitor and the OS moves the emulator to the new screen. In such
-    // situation, it will trigger screenCountChanged.
-    QObject::connect(qApp->desktop(), &QDesktopWidget::screenCountChanged, this,
-                     &EmulatorQtWindow::onScreenConfigChanged);
-    QObject::connect(qApp->desktop(), &QDesktopWidget::primaryScreenChanged,
-                     this, &EmulatorQtWindow::onScreenConfigChanged);
-    QObject::connect(qApp->desktop(), &QDesktopWidget::workAreaResized, this,
-                     &EmulatorQtWindow::onScreenConfigChanged);
-#endif
 }
 
 void EmulatorQtWindow::setOnTop(bool onTop) {
@@ -1562,7 +1541,7 @@ void EmulatorQtWindow::handleTouchPoints(const QTouchEvent& touch,
     unsigned char nrOfPoints = 0;
     unsigned char lastValidTouchPointIndex = 0;
     for (int i = touch.touchPoints().count() - 1; i >= 0; --i) {
-        if (touch.touchPoints()[i].state() != Qt::TouchPointStationary) {
+        if (touch.touchPoints()[i].state() != QEventPoint::Stationary) {
             lastValidTouchPointIndex = i;
             break;
         }
@@ -1570,13 +1549,13 @@ void EmulatorQtWindow::handleTouchPoints(const QTouchEvent& touch,
     for (auto const& elem : touch.touchPoints()) {
         SkinEvent skin_event;
         bool eventSet = false;
-        if (elem.state() == Qt::TouchPointPressed) {
+        if (elem.state() == QEventPoint::Pressed) {
             skin_event = createSkinEvent(kEventTouchBegin);
             eventSet = true;
-        } else if (elem.state() == Qt::TouchPointMoved) {
+        } else if (elem.state() == QEventPoint::Updated) {
             skin_event = createSkinEvent(kEventTouchUpdate);
             eventSet = true;
-        } else if (elem.state() == Qt::TouchPointReleased) {
+        } else if (elem.state() == QEventPoint::Released) {
             skin_event = createSkinEvent(kEventTouchEnd);
             eventSet = true;
         }
@@ -1619,13 +1598,8 @@ bool EmulatorQtWindow::event(QEvent* ev) {
         QTouchEvent* touchEvent = static_cast<QTouchEvent*>(ev);
         // b/216383452 Only process multitouch events generated from touch
         // screen.
-#if QT_VERSION >= 0x060000
         if (touchEvent->device()->type() ==
             QInputDevice::DeviceType::TouchScreen) {
-#else
-        if (touchEvent->device()->type() ==
-            QTouchDevice::QTouchDevice::TouchScreen) {
-#endif
             handleTouchPoints(*touchEvent);
             return true;
         }
@@ -1780,7 +1754,6 @@ void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
     out_rect->setRect(0, 0, 1920, 1080);  // Arbitrary default
 
     D("slot_getScreenDimensions: Getting screen geometry");
-#if QT_VERSION >= 0x060000
     auto newScreen = window()->windowHandle()
                              ? window()->windowHandle()->screen()
                              : nullptr;
@@ -1788,11 +1761,6 @@ void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
         D("Can't get screen geometry. Window is off screen.");
     }
     QRect rect = newScreen->geometry();
-#else
-    QRect rect = ((QApplication*)QApplication::instance())
-                         ->desktop()
-                         ->screenGeometry();
-#endif
     D("slot_getScreenDimensions: Getting screen geometry (done)");
     out_rect->setX(rect.x());
     out_rect->setY(rect.y());
@@ -1863,7 +1831,6 @@ void EmulatorQtWindow::slot_getFramePos(int* xx,
 void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
                                                  QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
-#if QT_VERSION >= 0x060000
     auto newScreen = mContainer.window()->windowHandle()
                              ? mContainer.window()->windowHandle()->screen()
                              : nullptr;
@@ -1874,38 +1841,15 @@ void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
         QRect screenGeo = newScreen->geometry();
         *out_value = screenGeo.contains(mContainer.geometry());
     }
-#else
-    QDesktopWidget* desktop =
-            ((QApplication*)QApplication::instance())->desktop();
-    int screenNum =
-            desktop->screenNumber(&mContainer);  // Screen holding the app
-
-    if (screenNum < 0) {
-        // Window is not on any screen
-        *out_value = false;
-    } else {
-        QRect screenGeo = desktop->screenGeometry(screenNum);
-        *out_value = screenGeo.contains(mContainer.geometry());
-    }
-#endif
 }
 
 void EmulatorQtWindow::slot_isWindowOffScreen(bool* out_value,
                                               QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
-#if QT_VERSION >= 0x060000
     auto newScreen = mContainer.window()->windowHandle()
                              ? mContainer.window()->windowHandle()->screen()
                              : nullptr;
     *out_value = (newScreen == nullptr);
-#else
-    QDesktopWidget* desktop =
-            ((QApplication*)QApplication::instance())->desktop();
-    int screenNum =
-            desktop->screenNumber(&mContainer);  // Screen holding the app
-
-    *out_value = (screenNum < 0);
-#endif  // QT_VERSION
 }
 
 void EmulatorQtWindow::pollEvent(SkinEvent* event, bool* hasEvent) {
@@ -2714,7 +2658,6 @@ SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
     }
 }
 
-#if QT_VERSION >= 0x060000
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
                                         SkinMouseButtonType button,
                                         const QPointF& posF,
@@ -2722,13 +2665,6 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
                                         bool skipSync) {
     QPoint pos((int)posF.x(), (int)posF.y());
     QPoint gPos((int)gPosF.x(), (int)gPosF.y());
-#else
-void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
-                                        SkinMouseButtonType button,
-                                        const QPoint& pos,
-                                        const QPoint& gPos,
-                                        bool skipSync) {
-#endif  // QT_VERSION
     if (type == kEventMouseButtonDown) {
         mToolWindow->reportMouseButtonDown();
     }
@@ -2762,13 +2698,8 @@ void EmulatorQtWindow::handlePenEvent(SkinEventType type,
             penOrientation(tiltToRotation(event->xTilt(), event->yTilt()));
     skin_event.u.pen.button_pressed =
             ((event->buttons() & Qt::RightButton) == Qt::RightButton);
-#if QT_VERSION >= 0x060000
     skin_event.u.pen.rubber_pointer =
             (event->pointerType() == QPointingDevice::PointerType::Eraser);
-#else
-    skin_event.u.pen.rubber_pointer =
-            (event->pointerType() == QTabletEvent::Eraser);
-#endif  // QT_VERSION
     skin_event.u.pen.x = event->pos().x();
     skin_event.u.pen.y = event->pos().y();
     skin_event.u.pen.x_global = event->globalPos().x();
@@ -3268,11 +3199,7 @@ struct QuadraticMotion {
 
 class SwipeGesture {
     constexpr static int kWheelCount = 20;
-#if QT_VERSION >= 0x060000
     typedef QPointF P;
-#else
-    typedef QPoint P;
-#endif  // QT_VERSION
     typedef decltype(P().y()) N;
 
     QuadraticMotion<N> mMotion;
@@ -3355,32 +3282,19 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
         if (!inputDeviceActive) {
             return;
         }
-#if QT_VERSION >= 0x060000
         // For most mice, 1 wheel click = 15 degrees
         handleMouseWheelEvent(event->angleDelta().y() * 120 / 15,
                               Qt::Orientation::Vertical);
         handleMouseWheelEvent(event->angleDelta().x() * 120 / 15,
                               Qt::Orientation::Horizontal);
-#else
-        handleMouseWheelEvent(event->delta(), event->orientation());
-#endif  // QT_VERSION
     } else if (inputDeviceHasRotary) {
         SkinEvent skin_event = createSkinEvent(kEventRotaryInput);
-#if QT_VERSION >= 0x060000
         skin_event.u.rotary_input.delta = event->angleDelta().y() / 8;
-#else
-        skin_event.u.rotary_input.delta = event->delta() / 8;
-#endif  // QT_VERSION
         queueSkinEvent(std::move(skin_event));
     } else {
-#if QT_VERSION >= 0x060000
         // For most mice, 1 wheel click = 15 degrees
         const int delta = event->angleDelta().y() * 120 / 15;
         const auto pos = event->position();
-#else
-        const int delta = event->delta();
-        const auto pos = event->pos();
-#endif  // QT_VERSION
         // Scroll 1/9 of window height per a wheel click.
         const int scaledDelta = mBackingSurface->h * delta / 120 / 9;
 
