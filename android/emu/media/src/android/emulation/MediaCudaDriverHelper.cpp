@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "host-common/MediaCudaDriverHelper.h"
+#include <atomic>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -55,11 +56,16 @@ extern "C" {
 namespace android {
 namespace emulation {
 
+static std::atomic<bool> s_no_cuda_driver = false;
+
 bool MediaCudaDriverHelper::s_isCudaInitialized = false;
 
 bool MediaCudaDriverHelper::initCudaDrivers() {
     if (s_isCudaInitialized) {
         return true;
+    }
+    if (s_no_cuda_driver) {
+        return false;
     }
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
     typedef HMODULE CUDADRIVER;
@@ -81,6 +87,7 @@ bool MediaCudaDriverHelper::initCudaDrivers() {
         fprintf(stderr,
                 "Failed to call cuInit, cannot use nvidia cuvid decoder for "
                 "h264 stream\n");
+        s_no_cuda_driver = true;
         return false;
     }
 

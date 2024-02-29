@@ -22,11 +22,7 @@
 #include <QColor>
 #include <QCoreApplication>
 #include <QCursor>
-#if QT_VERSION >= 0x060000
 #include <QWindow>  // for QWindow
-#else
-#include <QDesktopWidget>  // for QDesktopWidget
-#endif                     // QT_VERSION
 #include <QEvent>
 #include <QKeyEvent>
 #include <QLabel>
@@ -427,7 +423,6 @@ void VirtualSceneControlWindow::keyReleaseEvent(QKeyEvent* event) {
 
 void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
     double dpr = 1.0;
-#if QT_VERSION >= 0x060000
     auto newScreen = window()->windowHandle()
                              ? window()->windowHandle()->screen()
                              : nullptr;
@@ -435,19 +430,6 @@ void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
         newScreen = qGuiApp->primaryScreen();
     }
     dpr = newScreen->devicePixelRatio();
-#else
-    int primary_screen_idx = qApp->desktop()->screenNumber(this);
-    if (primary_screen_idx < 0) {
-        primary_screen_idx = qApp->desktop()->primaryScreen();
-    }
-    const auto screens = QApplication::screens();
-    if (primary_screen_idx >= 0 && primary_screen_idx < screens.size()) {
-        const QScreen* const primary_screen = screens.at(primary_screen_idx);
-        if (primary_screen) {
-            dpr = primary_screen->devicePixelRatio();
-        }
-    }
-#endif  // QT_VERSION
 
     QRect rect(0, 0, width() - 1, height() - 1);
 

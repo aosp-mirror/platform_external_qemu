@@ -64,6 +64,13 @@ auto androidQtSetupEnv(int bitness, const char* emulatorDir) -> bool {
     system->envSet("QT_SCALE_FACTOR", "none");
     system->envSet("QT_SCREEN_SCALE_FACTORS", "none");
 
+#if defined(__linux__) || defined(__APPLE__)
+    // We didn't build QtWebEngine with opengl support, so we need to explicitly disable
+    // it in order for it to work.
+    VERBOSE_PRINT(init, "Forcing QtWebEngine to use software rendering");
+    system->envSet("QTWEBENGINE_CHROMIUM_FLAGS", "--disable-gpu");
+#endif  // defined(__linux__) || defined(__APPLE__)
+
 #ifdef __linux__
     // On some linux distributions, the kernel's anonymous namespaces feature is
     // turned off, which may cause issues with QtWebEngineProcess in sandbox mode

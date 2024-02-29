@@ -309,18 +309,9 @@ FeatureControlImpl::FeatureControlImpl()
 
     std::string defaultIniHostName;
 
-    if (updateChannel == studio::UpdateChannel::Stable) {
-        defaultIniHostName = base::PathUtils::join(
+    defaultIniHostName = base::PathUtils::join(
                 base::System::get()->getLauncherDirectory(), "lib",
                 "advancedFeatures.ini");
-    } else {
-        // TODO(jansene): If we ever use beta/dev channels, disambiguate them
-        // with separate files here.
-        defaultIniHostName = base::PathUtils::join(
-                base::System::get()->getLauncherDirectory(), "lib",
-                "advancedFeaturesCanary.ini");
-    }
-
     std::string defaultIniGuestName;
     if (getConsoleAgents()->settings->avdInfo()) {
         const char* gname = avdInfo_getDefaultSystemFeatureControlPath(

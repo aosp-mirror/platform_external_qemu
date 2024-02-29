@@ -175,7 +175,7 @@ int android_initOpenglesEmulation() {
     if (sRenderLib != NULL)
         return 0;
 
-    D("Initializing hardware OpenGLES emulation support");
+    dinfo("Initializing hardware OpenGLES emulation support");
 
     ADynamicLibrary* rendererSo =
             adynamicLibrary_open(RENDERER_LIB_NAME, &error);
@@ -251,7 +251,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
                               int* glesMinorVersion_out)
 {
     if (!sRenderLib) {
-        D("Can't start OpenGLES renderer without support libraries");
+        E("Can't start OpenGLES renderer without support libraries");
         return -1;
     }
 
@@ -374,7 +374,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     AddressSpaceGraphicsContext::setConsumer(interface);
 
     if (!sRenderer) {
-        D("Can't start OpenGLES renderer?");
+        E("Can't start OpenGLES renderer?");
         return -1;
     }
 
@@ -454,14 +454,14 @@ void android_getOpenglesHardwareStrings(char** vendor,
     assert(vendor != NULL && renderer != NULL && version != NULL);
     assert(*vendor == NULL && *renderer == NULL && *version == NULL);
     if (!sRenderer) {
-        D("Can't get OpenGL ES hardware strings when renderer not started");
+        E("Can't get OpenGL ES hardware strings when renderer not started");
         return;
     }
 
     auto strings = sRenderer->getHardwareStrings();
-    D("OpenGL Vendor=[%s]", strings.vendor.c_str());
-    D("OpenGL Renderer=[%s]", strings.renderer.c_str());
-    D("OpenGL Version=[%s]", strings.version.c_str());
+    dinfo("OpenGL Vendor=[%s]", strings.vendor.c_str());
+    dinfo("OpenGL Renderer=[%s]", strings.renderer.c_str());
+    dinfo("OpenGL Version=[%s]", strings.version.c_str());
 
     /* Special case for the default ES to GL translators: extract the strings
      * of the underlying OpenGL implementation. */

@@ -32,13 +32,15 @@ public:
     using Ptr = std::shared_ptr<TextMetricsWriter>;
     using WPtr = std::weak_ptr<TextMetricsWriter>;
 
-    static Ptr create(base::StdioStream&& outStream);
+    static Ptr create(const std::string& sessionId,
+                      base::StdioStream&& outStream);
 
     void write(const android_studio::AndroidStudioEvent& asEvent,
                wireless_android_play_playlog::LogEvent* logEvent) override;
 
 private:
-    TextMetricsWriter(base::StdioStream&& outStream);
+    TextMetricsWriter(const std::string& sessionId,
+                      base::StdioStream&& outStream);
 
     base::StdioStream mOutStream;
 };

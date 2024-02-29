@@ -1212,7 +1212,23 @@ extern int android_sensors_override_set(int sensor_id,
         return SENSOR_STATUS_NO_SERVICE;
     }
 
-    _hwSensors_setSensorValue(hw, sensor_id, val, count);
+    switch (sensor_id) {
+        case ANDROID_SENSOR_HINGE_ANGLE0:
+            android_physical_model_set(PHYSICAL_PARAMETER_HINGE_ANGLE0, val,
+                                       count, PHYSICAL_INTERPOLATION_SMOOTH);
+            break;
+        case ANDROID_SENSOR_HINGE_ANGLE1:
+            android_physical_model_set(PHYSICAL_PARAMETER_HINGE_ANGLE1, val,
+                                       count, PHYSICAL_INTERPOLATION_SMOOTH);
+            break;
+        case ANDROID_SENSOR_HINGE_ANGLE2:
+            android_physical_model_set(PHYSICAL_PARAMETER_HINGE_ANGLE2, val,
+                                       count, PHYSICAL_INTERPOLATION_SMOOTH);
+            break;
+        default:
+            _hwSensors_setSensorValue(hw, sensor_id, val, count);
+            break;
+    }
 
     return SENSOR_STATUS_OK;
 }

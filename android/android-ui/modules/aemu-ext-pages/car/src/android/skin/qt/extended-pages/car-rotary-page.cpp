@@ -17,10 +17,6 @@
 
 #include <QAbstractButton>                               // for QAbstractButton
 #include <QBitmap>                                       // for QBitmap
-#if QT_VERSION >= 0x060000
-#else
-#include <QDesktopWidget>                                // for QDesktopWidget
-#endif
 #include <QEvent>       // for QEvent
 #include <QHash>        // for QHash
 #include <QIcon>        // for QIcon
@@ -237,19 +233,13 @@ void CarRotaryPage::remaskButtons() {
             // to be scaled down.
             double dpr = 1;
 #ifndef Q_OS_MAC
-            int screen_num = QApplication::desktop()->screenNumber(this);
-            if (screen_num >= 0 &&
-                screen_num < QApplication::screens().size()) {
-                QScreen* scr = QApplication::screens().at(screen_num);
+            QScreen* scr = this->screen();
+            if (scr) {
                 dpr = scr->logicalDotsPerInch() / SizeTweaker::BaselineDpi;
             }
 #endif
-#if QT_VERSION >= 0x060000
             button->setMask(QBitmap::fromPixmap(
                     mask_pixmap.mask().scaled(button->size() * dpr)));
-#else
-            button->setMask(mask_pixmap.mask().scaled(button->size() * dpr));
-#endif
             button->setStyleSheet("border: none;");
         }
     }

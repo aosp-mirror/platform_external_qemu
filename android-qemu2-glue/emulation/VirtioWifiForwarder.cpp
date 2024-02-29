@@ -324,12 +324,12 @@ bool VirtioWifiForwarder::waitForReadSocket(int sock, int msec) {
     WSAEVENT event;
     event = WSACreateEvent();
     if (event == WSA_INVALID_EVENT) {
-        LOG(ERROR) << "WSACreateEvent() failed: " << WSAGetLastError();
+        LOG(VERBOSE) << "WSACreateEvent() failed: " << WSAGetLastError();
         return false;
     }
 
     if (WSAEventSelect(sock, event, FD_READ)) {
-        LOG(ERROR) << "WSAEventSelect() failed: " << WSAGetLastError();
+        LOG(VERBOSE) << "WSAEventSelect() failed: " << WSAGetLastError();
         WSACloseEvent(event);
         return false;
     }
@@ -352,7 +352,7 @@ bool VirtioWifiForwarder::waitForReadSocket(int sock, int msec) {
     FD_SET(sock, &rfds);
     int res = select(sock + 1, &rfds, NULL, NULL, &tv);
     if (res < 0 && errno != EINTR && errno != 0) {
-        LOG(ERROR) << "Netsim waitForReadSocket select error: " << strerror(errno);
+        LOG(VERBOSE) << "Netsim waitForReadSocket select error: " << strerror(errno);
     }
     return (res <= 0) ? false : FD_ISSET(sock, &rfds);
 #endif

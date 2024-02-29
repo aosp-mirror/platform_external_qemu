@@ -29,6 +29,7 @@ from tink.proto import (
     tink_pb2,
 )
 
+_LOGGER = logging.getLogger("aemu-grpc")
 _ECDSA_PARAMS = {
     jwt_ecdsa_pb2.ES256: ("ES256", "P-256"),
     jwt_ecdsa_pb2.ES384: ("ES384", "P-384"),
@@ -81,7 +82,7 @@ class JwtKeygen(object):
             tink_config.register()
             jwt.register_jwt_signature()
         except tink.TinkError as e:
-            logging.exception("Error initialising Tink: %s", e)
+            _LOGGERexception("Error initialising Tink: %s", e)
 
         self.fname = os.path.join(key_path, "{}.jwk".format(uuid.uuid4()))
         self.sign = self._generate_signer_and_write(self.fname, active_path)
@@ -137,7 +138,12 @@ class JwtKeygen(object):
         # We will look for at most 1 second.
         for i in range(10):
             if _kid_is_in_file(active_path, our_kids):
+                _LOGGER.debug("The emulator is aware of %s", our_kids)
                 return sign
             time.sleep(0.1)
+
+        with open(active_path, "r") as f:
+            jwk = json.load(f)
+            _LOGGER.error("The emulator is aware of %s, and not: %s", jwk, our_kids)
 
         raise "Our key was never written to the active loaded set."

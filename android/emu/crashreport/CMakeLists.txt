@@ -29,6 +29,7 @@ android_add_library(
   src
   SRC android/crashreport/Breadcrumb.cpp android/crashreport/CrashReporter.cpp
       android/crashreport/detectors/CrashDetectors.cpp
+      android/crashreport/detectors/TimeoutMonitor.cpp
       android/crashreport/HangDetector.cpp
   DEPS absl::strings
        android-emu-agents
@@ -154,6 +155,7 @@ android_add_test(
   SRC android/crashreport/AnnotationBuffer_unittest.cpp
       android/crashreport/CrashDump_unittest.cpp
       android/crashreport/detectors/CrashDetectors_unittest.cpp
+      android/crashreport/detectors/TimeoutMonitor_unittest.cpp
       android/crashreport/HangDetector_unittest.cpp
   SOURCE_DIR test
   DEPS android-emu-agents

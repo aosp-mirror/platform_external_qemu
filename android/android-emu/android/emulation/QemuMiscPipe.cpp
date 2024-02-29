@@ -21,13 +21,14 @@
 #include <fstream>                                       // for basic_istream
 #include <memory>                                        // for make_unique
 #include <random>                                        // for mt19937, ran...
+#include <regex>
 #include <string>                                        // for allocator
 #include <thread>                                        // for thread
 #include <vector>                                        // for vector
 
-#include "host-common/hw-config.h"                       // for AndroidHwConfig
-#include "android/avd/info.h"                            // for avdInfo_getA...
-#include "aemu/base/ProcessControl.h"                 // for restartEmulator
+#include "aemu/base/ProcessControl.h"  // for restartEmulator
+#include "android/avd/info.h"          // for avdInfo_getA...
+#include "host-common/hw-config.h"     // for AndroidHwConfig
 
 #include "aemu/base/files/MemStream.h"                   // for MemStream
 #include "aemu/base/files/PathUtils.h"                   // for PathUtils
@@ -248,17 +249,47 @@ void miscPipeSetAndroidOverlay(emulation::AdbInterface* adbInterface) {
             overlayName = getResizableOverlayName();
         }
         if (avdInfo_skinHasOverlay(overlayName)) {
-            std::string androidOverlay("com.android.internal.emulation.");
-            std::string systemUIOverlay("com.android.systemui.emulation.");
-            androidOverlay += overlayName;
-            systemUIOverlay += overlayName;
-            adbInterface->enqueueCommand({ "shell", "cmd", "overlay",
-                                           "enable-exclusive", "--category",
-                                           androidOverlay.c_str() });
-            adbInterface->enqueueCommand({ "shell", "cmd", "overlay",
-                                           "enable-exclusive", "--category",
-                                           systemUIOverlay.c_str() });
-            dprint("applying overlayName %s\n", overlayName);
+            std::string overlayNameString(overlayName);
+
+            auto enableOverlaysEndingWithSkinName =
+                [overlayNameString](const android::emulation::OptionalAdbCommandResult& result) {
+                    if (result && result->exit_code == 0 && result->output) {
+                        auto adbInterfaceInCallback =
+                                emulation::AdbInterface::getGlobal();
+                        std::string line(std::istreambuf_iterator<char>(*result->output),{});
+                        std::string patternString("com.[^[]+.");
+                        patternString += overlayNameString;
+                        std::regex pattern(patternString);
+                        dprint("pattern string for overlay package = %s", patternString.c_str());
+                        for (auto i = std::sregex_iterator(line.begin(), line.end(), pattern);
+                            i != std::sregex_iterator(); ++i) {
+                            dprint("overlay package=%s", i->str().c_str());
+
+                            adbInterfaceInCallback->runAdbCommand(
+                                    {"shell", "cmd", "overlay",
+                                     "enable-exclusive", "--user", "current",
+                                     "--category", i->str().c_str()},
+                                    [](const android::emulation::
+                                               OptionalAdbCommandResult&) { ; },
+                                    5000);
+
+                            adbInterfaceInCallback->runAdbCommand(
+                                    {"shell", "cmd", "overlay",
+                                     "enable-exclusive", "--user", "0",
+                                     "--category", i->str().c_str()},
+                                    [](const android::emulation::
+                                               OptionalAdbCommandResult&) { ; },
+                                    5000);
+                        }
+                    }
+            };
+            dprint("Enable overlay packages with name ending in %s", overlayName);
+
+            adbInterface->runAdbCommand(
+                {"shell", "cmd", "overlay", "list"},
+                enableOverlaysEndingWithSkinName,
+                5000
+            );
             AFREE(skinName);
             AFREE(skinDir);
             return;

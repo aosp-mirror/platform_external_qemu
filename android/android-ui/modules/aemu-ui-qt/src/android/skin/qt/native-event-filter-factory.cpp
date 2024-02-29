@@ -90,7 +90,7 @@ public:
 
     bool nativeEventFilter(const QByteArray& eventType,
                            void* message,
-                           long*) override {
+                           qintptr*) override {
         if (eventType.compare("xcb_generic_event_t") == 0) {
             xcb_generic_event_t* ev =
                     static_cast<xcb_generic_event_t*>(message);
@@ -134,7 +134,7 @@ class NativeEventFilter : public QAbstractNativeEventFilter {
 public:
     bool nativeEventFilter(const QByteArray& eventType,
                            void* message,
-                           long*) override {
+                           qintptr*) override {
         if (eventType.compare("windows_generic_MSG") == 0) {
             MSG* ev = static_cast<MSG*>(message);
             if (ev->message == WM_KEYDOWN || ev->message == WM_SYSKEYDOWN) {

@@ -60,30 +60,6 @@
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QGroupBox" name="set_crashReprotPrefTitle">
-     <property name="geometry">
-      <rect>
-       <x>324</x>
-       <y>162</y>
-       <width>281</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>When to send crash reports</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="set_saveLocFolderButton">
      <property name="geometry">
       <rect>
@@ -150,45 +126,6 @@
       </property>
      </item>
     </widget>
-    <widget class="QComboBox" name="set_crashReportPrefComboBox">
-     <property name="geometry">
-      <rect>
-       <x>324</x>
-       <y>182</y>
-       <width>280</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">padding: 3px 3px 3px 3px;</string>
-     </property>
-     <property name="maxVisibleItems">
-      <number>3</number>
-     </property>
-     <property name="report_metrics" stdset="0">
-      <bool>false</bool>
-     </property>
-     <item>
-      <property name="text">
-       <string>Always</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Never</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Ask</string>
-      </property>
-     </item>
-    </widget>
     <widget class="QGroupBox" name="kbdShortcutsTitle">
      <property name="geometry">
       <rect>
@@ -241,7 +178,7 @@
      <property name="geometry">
       <rect>
        <x>324</x>
-       <y>258</y>
+       <y>182</y>
        <width>211</width>
        <height>24</height>
       </rect>
@@ -325,7 +262,7 @@
      <property name="geometry">
       <rect>
        <x>324</x>
-       <y>238</y>
+       <y>162</y>
        <width>211</width>
        <height>21</height>
       </rect>
@@ -1348,6 +1285,30 @@
       <string>Title</string>
      </property>
     </widget>
+    <widget class="QGroupBox" name="set_crashReprotPrefTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>86</y>
+       <width>281</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>When to send crash reports</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
     <widget class="QComboBox" name="set_glesBackendPrefComboBox">
      <property name="geometry">
       <rect>
@@ -1442,6 +1403,45 @@
       </property>
      </item>
     </widget>
+        <widget class="QComboBox" name="set_crashReportPrefComboBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>106</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="maxVisibleItems">
+      <number>3</number>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Always</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Never</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Ask</string>
+      </property>
+     </item>
+    </widget>
     <widget class="RaisedMaterialButton" name="perfstatsButton">
      <property name="geometry">
       <rect>
@@ -1491,7 +1491,6 @@
   <tabstop>set_adbPathBox</tabstop>
   <tabstop>set_adbPathButton</tabstop>
   <tabstop>set_clipboardSharing</tabstop>
-  <tabstop>set_crashReportPrefComboBox</tabstop>
   <tabstop>set_disableMouseWheel</tabstop>
   <tabstop>set_frameAlways</tabstop>
   <tabstop>set_onTop</tabstop>
@@ -1508,6 +1507,7 @@
   <tabstop>set_proxyResults</tabstop>
   <tabstop>set_glesBackendPrefComboBox</tabstop>
   <tabstop>set_glesApiLevelPrefComboBox</tabstop>
+  <tabstop>set_crashReportPrefComboBox</tabstop>
  </tabstops>
  <resources>
   <include location="../resources.qrc"/>

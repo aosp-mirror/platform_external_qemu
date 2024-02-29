@@ -24,6 +24,8 @@ from aemu.discovery.emulator_description import (
 )
 
 
+_LOGGER = logging.getLogger("aemu-grpc")
+
 class EmulatorNotFound(Exception):
     pass
 
@@ -45,17 +47,20 @@ class EmulatorDiscovery(object):
         """
         emulators = set()
         for discovery_dir in self.discovery_dirs:
-            logging.debug("Discovering emulators in %s", discovery_dir)
+            _LOGGER.debug("Discovering emulators in %s", discovery_dir)
             if discovery_dir.exists():
                 for file in discovery_dir.glob("*.ini"):
                     pid_file = self._PID_FILE_.match(file.name)
                     if pid_file:
-                        logging.debug("Found %s", file)
-                        emu = EmulatorDescription(
-                            pid_file.group(1), self._parse_ini(file)
-                        )
-                        if emu.is_alive():
-                            emulators.add(emu)
+                        _LOGGER.debug("Found %s", file)
+                        try:
+                            emu = EmulatorDescription(
+                                pid_file.group(1), self._parse_ini(file)
+                            )
+                            if emu.is_alive():
+                                emulators.add(emu)
+                        except Exception as err:
+                            _LOGGER.error("Failed to parse %s due to %s, ignoring", file, err)
 
         return emulators
 
@@ -68,7 +73,7 @@ class EmulatorDiscovery(object):
         Returns:
             dict[str, str]: The dictionary containing the emulator information.
         """
-        logging.debug("Discovering emulator: %s", ini_file)
+        _LOGGER.debug("Discovering emulator: %s", ini_file)
         emu = dict()
         with open(ini_file, mode="r", encoding="utf-8") as ini:
             for line in ini.readlines():
@@ -180,7 +185,7 @@ def get_discovery_directories() -> list[Path]:
 
 def _get_user_directories():
     # See ConfigDirs::getUserDirectory()
-    logging.debug("Retrieving user directories")
+    _LOGGER.debug("Retrieving user directories")
     paths = []
 
     if "ANDROID_EMULATOR_HOME" in os.environ:
