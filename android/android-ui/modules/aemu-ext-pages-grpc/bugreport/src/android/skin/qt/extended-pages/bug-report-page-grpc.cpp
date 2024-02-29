@@ -351,13 +351,8 @@ void BugreportPageGrpc::on_bug_saveButton_clicked() {
                                       generateUniqueBugreportName());
 
     enableInput(false);
-#if QT_VERSION >= 0x060000
     QFuture<bool> future = QtConcurrent::run(
             &BugreportPageGrpc::saveBugReportTo, this, savingPath);
-#else
-    QFuture<bool> future = QtConcurrent::run(
-            this, &BugreportPageGrpc::saveBugReportTo, savingPath);
-#endif  // QT_VERSION
     mSavingStates.bugreportSavedSucceed = future.result();
     enableInput(true);
     if (!mSavingStates.bugreportSavedSucceed) {
@@ -374,13 +369,8 @@ void BugreportPageGrpc::on_bug_sendToGoogle_clicked() {
         on_bug_saveButton_clicked();
     }
     // launch the issue tracker in a separate thread
-#if QT_VERSION >= 0x060000
     QFuture<bool> future =
             QtConcurrent::run(&BugreportPageGrpc::launchIssueTracker, this);
-#else
-    QFuture<bool> future =
-            QtConcurrent::run(this, &BugreportPageGrpc::launchIssueTracker);
-#endif  // QT_VERSION
     bool success = future.result();
     if (!success) {
         QString errMsg =

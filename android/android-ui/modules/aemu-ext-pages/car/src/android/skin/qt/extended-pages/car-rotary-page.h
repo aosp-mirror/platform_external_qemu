@@ -14,6 +14,7 @@
 #include <qobjectdefs.h>  // for Q_OBJECT
 
 #include <QTime>    // for QTime
+#include <QElapsedTimer>   // for QElapsedTimer
 #include <QTimer>   // for QTimer
 #include <QWidget>  // for QWidget
 #include <memory>   // for unique_ptr
@@ -59,11 +60,7 @@ private:
     std::unique_ptr<Ui::CarRotaryPage> mUi;
     EmulatorQtWindow* mEmulatorWindow;
     android::emulation::AdbInterface* mAdb;
-#if QT_VERSION >= 0x060000
     QElapsedTimer mAdbExecuteTime;
-#else
-    QTime mAdbExecuteTime;
-#endif  // QT_VERSION
     QTimer mLongPressTimer;
     QTimer mCheckTimer;
     QTimer mSupportsActionTimer;

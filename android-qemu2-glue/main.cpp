@@ -3122,7 +3122,11 @@ extern "C" int main(int argc, char** argv) {
         dprint("skin_winsys_init and UI starting at uptime %" PRIu64 " ms",
                get_uptime_ms());
 #endif
-        skin_winsys_init_args(argc, argv);
+        // Don't use argc/argv here, as it has been modified prior to this point.
+        // Use args instead, as Qt6's QtWebEngine requires the program name in argv.
+        std::string emu_exe(executable);
+        char* emu_argv = &emu_exe[0];
+        skin_winsys_init_args(1, &emu_argv);
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
         }
@@ -3225,15 +3229,32 @@ extern "C" int main(int argc, char** argv) {
 #if defined(__linux__)
         {
             // bug: 324086743
-            // we have to enable SystemBlob to work around the kvm+amdgpu driver bug
+            // we have to enable VulkanAllocateDeviceMemoryOnly
+            // to work around the kvm+amdgpu driver bug
             // where kvm apparently error out with Bad Address
             char* glVendor = nullptr;
             char* glRenderer = nullptr;
             char* glVersion = nullptr;
             android_getOpenglesHardwareStrings(&glVendor, &glRenderer, &glVersion);
-            if (glVendor && strcmp("AMD",glVendor) == 0) {
-                dinfo("Enable SystemBlob feature for gpu vendor %s on Linux\n", glVendor);
-                feature_set_enabled_override(kFeature_SystemBlob, true);
+            if (glVendor && strcmp("AMD", glVendor) == 0) {
+                feature_set_if_not_overridden(
+                        kFeature_VulkanAllocateDeviceMemoryOnly, true);
+                if (fc::isEnabled(fc::VulkanAllocateDeviceMemoryOnly)) {
+                    dinfo("Enabled VulkanAllocateDeviceMemoryOnly feature for "
+                          "gpu "
+                          "vendor %s on Linux\n",
+                          glVendor);
+                }
+            }
+            if (glVendor && strncmp("Intel", glVendor, 5) == 0) {
+                feature_set_if_not_overridden(kFeature_VulkanAllocateHostMemory,
+                                              true);
+                if (fc::isEnabled(fc::VulkanAllocateHostMemory)) {
+                    dinfo("Enabled VulkanAllocateHostMemory feature for "
+                          "gpu "
+                          "vendor %s on Linux\n",
+                          glVendor);
+                }
             }
         }
 #endif

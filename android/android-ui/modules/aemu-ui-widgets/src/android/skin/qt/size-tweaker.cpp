@@ -6,10 +6,6 @@
 #include <QApplication>      // for QApplication
 #include <QCheckBox>         // for QCheckBox
 #include <QComboBox>         // for QComboBox
-#if QT_VERSION >= 0x060000
-#else
-#include <QDesktopWidget>    // for QDesktopWidget
-#endif  // QT_VERSION
 #include <QEvent>            // for QEvent
 #include <QRadioButton>      // for QRadioButton
 #include <QScreen>           // for QScreen
@@ -40,19 +36,8 @@ QVector2D SizeTweaker::scaleFactor(QWidget* widget) {
     if (!widget) {
         return {1, 1};
     }
-    int screen_number = QApplication::desktop()->screenNumber(widget);
-    // sometimes, screen_number may be -1 if widget is not yet visible
-    // this fixes tiny toolbar on 4k displays
-    if (screen_number < 0)
-        screen_number = 0;
 
-    // QDesktopWidget::screenNumber returns -1 if the widget is not on a screen.
-    // The returned index *may* be out of bounds if the screen change event was
-    // triggered as a result of turning off one of the screens.
-    if (screen_number < 0 || screen_number >= QApplication::screens().size()) {
-        return {1, 1};
-    }
-    QScreen* screen = QApplication::screens().at(screen_number);
+    QScreen* screen = widget->screen();
     if (!screen) {
         return {1, 1};
     }

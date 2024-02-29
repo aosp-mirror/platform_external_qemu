@@ -59,16 +59,12 @@
 #include "android/skin/qt/extended-pages/common.h"              // for setBu...
 #include "android/skin/qt/qt-settings.h"                        // for PER_A...
 #include "android/skin/qt/raised-material-button.h"             // for Raise...
-#include "android/skin/qt/websockets/websocketclientwrapper.h"  // for WebSo...
 #include "aemu/base/logging/LogSeverity.h"                         // for EMULA...
 #include "studio_stats.pb.h"                                    // for Emula...
 
 #ifdef USE_WEBENGINE
-#if QT_VERSION >= 0x060000
+#include "android/skin/qt/websockets/websocketclientwrapper.h"  // for WebSo...
 #include <QtWebEngineCore/QWebEngineProfile>
-#else
-#include <QWebEngineProfile>
-#endif  // QT_VERSION
 #endif  // USE_WEBENGINE
 
 #include <math.h>     // for cos, s
@@ -137,6 +133,13 @@ LocationPage::LocationPage(QWidget* parent)
         // qCDebug(emu) << "Location UI disabled by command-line option.";
         return;
     }
+}
+
+void LocationPage::doWebInit() {
+    if (mWebEngineInitDone) {
+        return;
+    }
+    mWebEngineInitDone = true;
     bool useLocationV2 = false;
 
 #ifdef USE_WEBENGINE
@@ -278,6 +281,7 @@ LocationPage::LocationPage(QWidget* parent)
                     return false;
                 });
     }
+
 }
 
 void LocationPage::on_tabChanged() {
@@ -677,6 +681,7 @@ void LocationPage::locationPlaybackStop() {
 }
 
 void LocationPage::locationPlaybackStop_v2() {
+#ifdef USE_WEBENGINE
     mTimer.stop();
     mNextRoutePointIdx = -1;
     playRouteStateChanged(true);
@@ -688,6 +693,7 @@ void LocationPage::locationPlaybackStop_v2() {
     }
 
     mNowPlaying = false;
+#endif  // USE_WEBENGINE
 }
 
 void LocationPage::timeout() {
@@ -787,6 +793,7 @@ void LocationPage::timeout() {
 
 // Advance (up to) one second along the route
 void LocationPage::timeout_v2() {
+#ifdef USE_WEBENGINE
     double latNow = 0.0;
     double lngNow = 0.0;
     double altNow = 0.0;
@@ -877,6 +884,7 @@ void LocationPage::timeout_v2() {
         mTimer.setInterval(std::min((int)UPDATE_INTERVAL, sleepTime));
     }
     mTimer.start();
+#endif  // USE_WEBENGINE
 }
 
 void LocationPage::geoDataThreadStarted() {
@@ -949,7 +957,9 @@ void LocationPage::validateCoordinates() {
 // the map UI
 void LocationPage::sendMostRecentUiLocation() {
     // Update the location marker on the map
+#ifdef USE_WEBENGINE
     emit mMapBridge->locationChanged(mLastLat, mLastLng);
+#endif  // USE_WEBENGINE
 
     writeDeviceLocationToSettings(mLastLat.toDouble(), mLastLng.toDouble(), 0.0,
                                   0.0, 0.0);

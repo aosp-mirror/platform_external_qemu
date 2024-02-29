@@ -211,7 +211,12 @@ function(internal_android_install_file_force_exec SRC DST_DIR)
   android_log(STATUS
               "install(PROGRAMS ${SRC} ${REAL_SRC} DESTINATION ${DST_DIR})")
   install(PROGRAMS ${SRC} DESTINATION ${DST_DIR})
-  android_strip_prebuilt("${DST_DIR}/${FNAME}")
+  if (LINUX_X86_64 AND FNAME MATCHES "QtWebEngineProcess")
+    # b/327414683: Figure out why llvm-objcopy --strip-unneeded corrupts QtWebEngineProcess
+    android_log(STATUS "Skipping stripping of QtWebEngineProcess")
+  else()
+    android_strip_prebuilt("${DST_DIR}/${FNAME}")
+  endif()
   android_install_license(${INSTALL_DEPENDENCIES} "${DST_DIR}/${FNAME}")
   # Check if we have a symlink, gradle doesn't support symlinks, so we are
   # copying it 2x

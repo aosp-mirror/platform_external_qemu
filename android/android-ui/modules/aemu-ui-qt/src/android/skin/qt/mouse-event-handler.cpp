@@ -13,7 +13,6 @@
 
 #include "android/skin/qt/emulator-qt-window.h"
 
-#if QT_VERSION >= 0x060000
 void MouseEventHandler::handleMouseEvent(SkinEventType type,
                                         SkinMouseButtonType button,
                                         const QPointF& posF,
@@ -22,14 +21,6 @@ void MouseEventHandler::handleMouseEvent(SkinEventType type,
                                         uint32_t displayId) {
     QPoint pos((int) posF.x(), (int) posF.y());
     QPoint gPos((int) gPosF.x(), (int) gPosF.y());
-#else
-void MouseEventHandler::handleMouseEvent(SkinEventType type,
-                                        SkinMouseButtonType button,
-                                        const QPoint& pos,
-                                        const QPoint& gPos,
-                                        bool skipSync,
-                                        uint32_t displayId) {
-#endif  // QT_VERSION
 
     SkinEvent skin_event = createSkinEvent(type);
     skin_event.u.mouse.button = button;

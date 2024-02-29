@@ -354,7 +354,7 @@ def cleanupQtTmpDirectory():
 def cleanup():
     cleanupQtTmpDirectory()
 
-def postInstall(installdir, target):
+def postInstall(installdir, target, is_webengine):
     # Create include.system/QtCore/qconfig.h from include/QtCore/qconfig.h
     src_qconfig = Path(installdir) / "include" / "QtCore" / "qconfig.h"
     dst_qconfig = Path(installdir) / "include.system" / "QtCore" / "qconfig.h"
@@ -365,7 +365,7 @@ def postInstall(installdir, target):
     if HOST_OS == "darwin":
         mac_postInstall(installdir)
     elif HOST_OS == "linux":
-        linux_postInstall(installdir, target)
+        linux_postInstall(installdir, target, is_webengine)
 
 def mac_postInstall(installdir):
     """Post-install steps specific for mac.
@@ -410,13 +410,52 @@ def mac_postInstall(installdir):
             logging.info(f"Skipping rpath fix for file {exe}")
             continue
         changeToQt6Rpaths(exe)
+        # Add the search path to the executables so we can use them without setting environment
+        # variables.
+        res = subprocess.run(args=["install_name_tool", "-add_rpath", "@loader_path/../lib", exe],
+                              cwd=installdir, env=os.environ.copy(), encoding="utf-8")
+        if res.returncode != 0:
+            logging.critical("install_name_tool -add_rpath failed (%d)", res.returncode)
+            exit(res.returncode)
 
-def linux_postInstall(installdir, target):
+def linux_postInstall(installdir, target, is_webengine):
     # Install prebuilt clang's libc++.so.1 and libc++abi.so.1 to lib/ as Qt's compiler
     # tools (moc, rcc, uic) depends on it.
     clang_libs = ["libc++.so.1", "libc++abi.so.1"]
     for lib in clang_libs:
         src_lib = deps_common.getClangDirectory() / "lib" / lib
+        dst_lib = f"{installdir}/lib/{lib}"
+        logging.info(f"Copy {src_lib} ==> {dst_lib}")
+        shutil.copyfile(src_lib, dst_lib)
+
+    # We also need additional libraries from the sysroot for linux
+    sysroot_dir = Path("/lib/x86_64-linux-gnu")
+    sysroot_libs = [
+        "libpcre2-16.so.0",
+        "libfreetype.so.6",
+        "libxkbcommon.so.0",
+        "libXau.so.6",
+        "libXdmcp.so.6",
+        "libX11-xcb.so.1",
+        "libxcb-xkb.so.1",
+        "libxcb-cursor.so.0",
+        "libxcb-icccm.so.4",
+        "libxcb-image.so.0",
+        "libxcb-keysyms.so.1",
+        "libxcb-randr.so.0",
+        "libxcb-render-util.so.0",
+        "libxcb-render.so.0",
+        "libxcb-shape.so.0",
+        "libxcb-shm.so.0",
+        "libxcb-sync.so.1",
+        "libxcb-util.so.1",
+        "libxcb-xfixes.so.0",
+        "libxkbcommon-x11.so.0",
+        "libfontconfig.so.1"]
+    if target == "linux" and is_webengine:
+        sysroot_libs += ["libjpeg.so.8"]
+    for lib in sysroot_libs:
+        src_lib = sysroot_dir / lib
         dst_lib = f"{installdir}/lib/{lib}"
         logging.info(f"Copy {src_lib} ==> {dst_lib}")
         shutil.copyfile(src_lib, dst_lib)
@@ -446,8 +485,9 @@ def linux_postInstall(installdir, target):
             logging.info(f"Skipping rpath fix for file {exe}")
             continue
         logging.info(f"Adding rpath $ORIGIN/../lib to {exe}")
+        # patchelf may use RUNPATH instead of RPATH. We can force RPATH by using --force-rpath.
         subprocess.check_call(
-            ["patchelf", "--set-rpath", "$ORIGIN/../lib", exe],
+            ["patchelf", "--force-rpath", "--set-rpath", "$ORIGIN/../lib", exe],
             cwd=installdir, env=os.environ.copy())
 
 def buildPrebuilt(args, prebuilts_out_dir):
@@ -506,7 +546,7 @@ def buildPrebuilt(args, prebuilts_out_dir):
         configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_NOWEBENGINE_SUBMODULES)
         buildQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path)
         installQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path, qt_install_dir)
-        postInstall(qt_install_dir, args.target)
+        postInstall(qt_install_dir, args.target, False)
         shutil.rmtree(qt_build_path)
 
     logging.info("Building Qt6 w/ QtWebEngine")
@@ -514,7 +554,7 @@ def buildPrebuilt(args, prebuilts_out_dir):
     configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_SUBMODULES)
     buildQt(QT_SUBMODULES, qt_build_path)
     installQt(QT_SUBMODULES, qt_build_path, qt_install_dir)
-    postInstall(qt_install_dir, args.target)
+    postInstall(qt_install_dir, args.target, True)
 
     # Since linux_aarch64 cross-compilation requires having a host build of Qt, let's just build it
     # in the linux x86_64 host instead of creating an additional linux_aarch64 build target.
@@ -527,6 +567,6 @@ def buildPrebuilt(args, prebuilts_out_dir):
                          crosscompile_target, qt_host_path)
         buildQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path)
         installQt(QT_NOWEBENGINE_SUBMODULES, qt_build_path, qt_install_dir)
-        postInstall(qt_install_dir, "linux_aarch64")
+        postInstall(qt_install_dir, "linux_aarch64", False)
         shutil.rmtree(qt_build_path)
     logging.info("Successfully built Qt!")
