@@ -25,6 +25,7 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QSet>
+#include <QString>
 #include <QStringList>
 #include <cfloat>
 #include <cstdint>
@@ -84,18 +85,7 @@ VhalTable::VhalTable(QWidget* parent)
           initVhalPropertyTableRefreshThread();
       }) {
 
-    // Extend VHAL properties dictionaries with json descriptions
-    auto avdPath = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
-    if (avdPath) {
-        // Search for *.vhal.json files in avd path
-        QDir avdDir(avdPath);
-        QStringList metaFiles = avdDir.entryList(QStringList() << "*types-meta.json", QDir::Files);
-        foreach(QString filename, metaFiles) {
-            loadDescriptionsFromJson(filename.prepend("/").prepend(avdPath).toStdString().c_str());
-        }
-    } else {
-        LOG(ERROR) << "Error reading vhal json: Cannot find avd path!" << std::endl;
-    }
+    initVhalPropertyTable();
 
     mUi->setupUi(this);
 
@@ -113,6 +103,27 @@ VhalTable::VhalTable(QWidget* parent)
 
 VhalTable::~VhalTable() {
     stopVhalPropertyTableRefreshThread();
+}
+
+void VhalTable::initVhalPropertyTable() {
+    // Extend VHAL properties dictionaries with json descriptions
+    QFileInfo sysImgFileInfo(avdInfo_getSystemImagePath(getConsoleAgents()->settings->avdInfo()));
+    QString sysImgPath(sysImgFileInfo.absolutePath());
+
+    QString avdPath(avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()));
+    QStringList paths = {sysImgPath, avdPath};
+    foreach(QString path, paths) {
+        // Search for *.vhal.json files in avd and system image path
+        if (!path.isEmpty()) {
+            QDir pathDir(path);
+            QStringList metaFiles = pathDir.entryList(QStringList() << "*types-meta.json", QDir::Files);
+            foreach(QString filename, metaFiles) {
+                loadDescriptionsFromJson(filename.prepend("/").prepend(path).toStdString().c_str());
+                return;
+            }
+        }
+    }
+    LOG(ERROR) << "Error reading vhal json" << std::endl;
 }
 
 void VhalTable::initVhalPropertyTableRefreshThread() {

@@ -90,6 +90,7 @@ private:
 
     QString mSelectedKey;
 
+    void initVhalPropertyTable();
     void initVhalPropertyTableRefreshThread();
 
     VhalItem* getItemWidget(QListWidgetItem* listItem);
