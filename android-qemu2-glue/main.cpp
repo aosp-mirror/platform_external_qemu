@@ -3122,7 +3122,11 @@ extern "C" int main(int argc, char** argv) {
         dprint("skin_winsys_init and UI starting at uptime %" PRIu64 " ms",
                get_uptime_ms());
 #endif
-        skin_winsys_init_args(argc, argv);
+        // Don't use argc/argv here, as it has been modified prior to this point.
+        // Use args instead, as Qt6's QtWebEngine requires the program name in argv.
+        std::string emu_exe(executable);
+        char* emu_argv = &emu_exe[0];
+        skin_winsys_init_args(1, &emu_argv);
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
         }

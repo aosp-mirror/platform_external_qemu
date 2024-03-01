@@ -118,4 +118,6 @@ enum Feature {
     HWCMultiConfigs = 65;
 
     SupportPixelFold = 66;
+
+    Vulkan = 67;
 }
