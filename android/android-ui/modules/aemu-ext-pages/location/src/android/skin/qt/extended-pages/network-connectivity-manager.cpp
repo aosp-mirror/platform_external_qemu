@@ -12,13 +12,7 @@
 #ifdef USE_WEBENGINE
 
 #include "network-connectivity-manager.h"
-#if QT_VERSION >= 0x060000
 #include <QtNetwork/QNetworkInformation>
-#else
-#include <QtNetwork/QNetworkConfigurationManager>
-#include <QtNetwork/QNetworkInterface>
-#include <QtNetwork/QNetworkSession>
-#endif  // QT_VERSION
 #include <QTimer>
 
 namespace {

@@ -19,7 +19,10 @@
 
 #include "aemu/base/Compiler.h"  // for DISALLOW_COPY_ASSIGN_...
 #include "android/metrics/export.h"
-#include "studio_stats.pb.h"  // for EmulatorUiEvent_EmulatorUiEventContext
+#ifndef Q_MOC_RUN
+// Qt 6.5.3 moc complains of a parsing error with this protobuf file. So exclude it from moc runs.
+#include "studio_stats.pb.h"  // for EmulatorAutomatio...
+#endif  // Q_MOC_RUN
 
 namespace android {
 namespace metrics {

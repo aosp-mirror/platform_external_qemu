@@ -19,10 +19,6 @@
 #include <QIcon>
 #include <QtCore>
 #include <string>
-#if QT_VERSION >= 0x060000
-#else
-#include <QDesktopWidget>
-#endif  // QT_VERSION
 #include <QLayoutItem>
 #include <QPushButton>
 #include <QRect>
@@ -433,14 +429,7 @@ void ExtendedWindowGrpc::show() {
 
     // Verify that the extended pane is fully visible (otherwise it may be
     // impossible for the user to move it)
-#if QT_VERSION >= 0x060000
     QRect screenGeo = this->screen()->geometry();
-#else
-    QDesktopWidget* desktop =
-            static_cast<QApplication*>(QApplication::instance())->desktop();
-    int screenNum = desktop->screenNumber(this);  // Screen holding most of this
-    QRect screenGeo = desktop->screenGeometry(screenNum);
-#endif  // QT_VERSION
     QRect myGeo = geometry();
 
     bool moved = false;
