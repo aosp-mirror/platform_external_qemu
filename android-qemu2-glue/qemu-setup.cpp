@@ -697,7 +697,11 @@ void qemu_android_emulation_teardown() {
     android_emulation_teardown();
 
     // Cancel any ongoing connections
-    android::emulation::control::EmulatorGrpcClient::me()->cancelAll();
+    auto me = android::emulation::control::EmulatorGrpcClient::me();
+    if (me) {
+        me->cancelAll();
+    }
+
     if (grpcService) {
         // Explicitly cleanup resources. We do not want to do this at
         // program exit as we may be holding on to loopers, which threads
