@@ -76,6 +76,7 @@ extern "C" {
 #include "android/base/files/IniFile.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
+#include "android/crashreport/Breadcrumb.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/HangDetector.h"
 #include "android/crashreport/detectors/CrashDetectors.h"
@@ -555,6 +556,7 @@ int qemu_setup_grpc() {
         bool connect = android::emulation::control::EmulatorGrpcClient::me()
                                ->hasOpenChannel();
         assert(connect);
+        CRUMB(grpc) << "cn:" << (connect ? 'T' : 'F') << ',';
     }
 
     bool userWantsGrpc =
@@ -571,17 +573,20 @@ int qemu_setup_grpc() {
             getConsoleAgents()
                     ->settings->android_cmdLineOptions()
                     ->grpc_use_token;
-    if (!grpcService && userWantsGrpc) {
-        derror("Failed to start grpc service, even though it was "
-               "explicitly "
-               "requested.");
-        exit(1);
+    if (!grpcService) {
+        CRUMB(grpc) << "no-grpc,";
+        if (userWantsGrpc) {
+            derror("Failed to start grpc service, even though it was "
+                    "explicitly "
+                    "requested.");
+            exit(1);
+        }
     }
 
     advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
     advertiser->garbageCollect();
     advertiser->write();
-
+    CRUMB(grpc) << "adv,";
     return port;
 }
 
@@ -699,10 +704,12 @@ void qemu_android_emulation_teardown() {
     // Cancel any ongoing connections
     auto me = android::emulation::control::EmulatorGrpcClient::me();
     if (me) {
+        CRUMB(grpc) << "cncl,";
         me->cancelAll();
     }
 
     if (grpcService) {
+        CRUMB(grpc) << "term,";
         // Explicitly cleanup resources. We do not want to do this at
         // program exit as we may be holding on to loopers, which threads
         // have likely been destroyed at that point.
