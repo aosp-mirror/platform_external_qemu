@@ -43,6 +43,7 @@
 #include "android/hw-sensors.h"                          // for FoldableHing...
 #include "android/metrics/MetricsReporter.h"             // for MetricsReporter
 #include "android/physics/FoldableModel.h"
+#include "android/skin/user-config.h"
 #include "android/user-config.h"
 #include "android/utils/aconfig-file.h"  // for aconfig_find
 #include "android/utils/debug.h"         // for dinfo
@@ -388,9 +389,14 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                   "accelerometer_rotation", "1"});
 
             if (resizableEnabled()) {
-                // adb interface may not be ready when initializing resizable configs,
-                // resend resizable large screen settings to window manager.
-                updateAndroidDisplayConfigPath(getResizableActiveConfigId());
+                const int config_id = user_config_get_resizable_config();
+                if (config_id >= 0) {
+                    char str_config_id[64] = {};
+                    snprintf(str_config_id, sizeof(str_config_id), "%d",
+                             config_id);
+                    adbInterface->enqueueCommand(
+                            {"emu", "resize-display", str_config_id});
+                }
             } else {
                 // If hw.display.settings.xml set as freeform, config guest
                 if ((android_op_wipe_data || !path_exists(getConsoleAgents()->settings->hw()->disk_dataPartition_path))) {
