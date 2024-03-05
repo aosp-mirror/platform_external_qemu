@@ -1667,11 +1667,7 @@ static void skin_window_ensure_fully_visible(void* ptr) {
 
 static void skin_window_set_device_pixel_ratio(SkinWindow* window) {
     double dpr = 1.0;
-#ifdef __APPLE__
-    // Only macOS devices with Retina display needs to get the device pixel
-    // ratio to zoom the opengles display.
     skin_winsys_get_device_pixel_ratio(&dpr);
-#endif
     window->dpr = dpr;
 }
 
@@ -1720,6 +1716,12 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     }
 
     skin_winsys_get_monitor_rect(&monitor);
+    // Since monitor values are in pixel size, we need to convert it to logical size, since all
+    // other values used in the below calculations are in logical pixels.
+    monitor.pos.x /= window->dpr;
+    monitor.pos.y /= window->dpr;
+    monitor.size.w /= window->dpr;
+    monitor.size.h /= window->dpr;
 
     int hw_lcd_density = getConsoleAgents()->settings->hw()->hw_lcd_density;
 
@@ -1845,8 +1847,9 @@ void skin_window_scroll_updated(SkinWindow* window,
     subwindow.size.w = window->framebuffer.w;
     subwindow.size.h = window->framebuffer.h;
 
-    skin_window_recompute_subwindow_rect(window, &subwindow);
-    skin_window_show_opengles(window, false);
+    if (skin_window_recompute_subwindow_rect(window, &subwindow)) {
+        skin_window_show_opengles(window, false);
+    }
 
     // Compute the margins around the sub-window, then transform the current
     // scroll values to take into account these margins.
@@ -1927,6 +1930,13 @@ static void skin_window_resize(SkinWindow* window, int resize_container) {
 
     SkinRect monitor;
     skin_winsys_get_monitor_rect(&monitor);
+    // Since monitor values are in pixel size, we need to convert it to logical size, since all
+    // other values used in the below calculations are in logical pixels.
+    monitor.pos.x /= dpr;
+    monitor.pos.y /= dpr;
+    monitor.size.w /= dpr;
+    monitor.size.h /= dpr;
+
     // adjust x and y to make sure it does not cause window to be out of monitor
     const int WINDOW_MINIMUM_XY = 100;
     const double WINDOW_MONITOR_RATIO = 0.9;
