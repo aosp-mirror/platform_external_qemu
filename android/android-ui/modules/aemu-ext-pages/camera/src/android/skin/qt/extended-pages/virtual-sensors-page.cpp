@@ -228,6 +228,7 @@ void VirtualSensorsPage::updateHingeSensorUI() {
         }
         mUi->tabWidget->setCurrentIndex(0);
     }
+    mUi->accelWidget->reInitGL();
 }
 
 void VirtualSensorsPage::setupRgbcLightUI() {
