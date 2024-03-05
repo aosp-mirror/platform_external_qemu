@@ -125,6 +125,7 @@ EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence
 EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path);
 EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID(void);
 EGLAPI EGLBoolean EGLAPIENTRY eglGetSyncAttribKHR(EGLDisplay display, EGLSyncKHR sync, EGLint attribute, EGLint *value);
+EGLAPI EGLBoolean EGLAPIENTRY eglSetNativeTextureDecompressionEnabledANDROID(EGLDisplay display, EGLBoolean enabled);
 
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
 EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream);
@@ -186,6 +187,8 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglQueryVulkanInteropSupportANDROID },
         {"eglGetSyncAttribKHR",
                 (__eglMustCastToProperFunctionPointerType)eglGetSyncAttribKHR },
+        {"eglSetNativeTextureDecompressionEnabledANDROID",
+                (__eglMustCastToProperFunctionPointerType)eglSetNativeTextureDecompressionEnabledANDROID },
 };
 
 static const int s_eglExtensionsSize =
@@ -1634,6 +1637,13 @@ EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID(void) {
     MEM_TRACE("EMUGL");
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     return iface->vulkanInteropSupported() ? EGL_TRUE : EGL_FALSE;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSetNativeTextureDecompressionEnabledANDROID(EGLDisplay display, EGLBoolean enabled) {
+    MEM_TRACE("EMUGL");
+    VALIDATE_DISPLAY_RETURN(display, EGL_FALSE);
+    // Unimplemented.
+    return EGL_FALSE;
 }
 
 /*********************************************************************************/
