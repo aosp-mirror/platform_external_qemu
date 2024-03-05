@@ -3531,7 +3531,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
         resizeAndChangeAspectRatio(true);
     }
 
-    if (resizableEnabled()) {
+    if (resizableEnabled() && !resizableEnabled34()) {
         PresetEmulatorSizeInfo info;
         if (getResizableConfig(getResizableActiveConfigId(), &info)) {
             resizeAndChangeAspectRatio(0, 0, info.width, info.height);
