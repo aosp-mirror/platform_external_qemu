@@ -1919,6 +1919,9 @@ void EmulatorQtWindow::slot_updateRotation(SkinRotation rotation) {
     mOrientation = rotation;
     emit(layoutChanged(rotation));
 
+    // update the extended ui device pose page for foldable
+    // or non-fodable
+    mToolWindow->updateFoldableButtonVisibility();
     fixScale();
 }
 
