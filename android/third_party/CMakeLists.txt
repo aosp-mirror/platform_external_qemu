@@ -335,6 +335,8 @@ target_include_directories(gfxstream_egl_headers
                            INTERFACE ${ANGLE_REPO_ROOT}/include)
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/gl/gl-host-common
                  ${GFXSTREAM_PREFIX}-gl-host-common)
+add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/features
+                 ${GFXSTREAM_PREFIX}-host-features)
 # Include external/gfxstream-protocols project
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/common
                  ${GFXSTREAM_PREFIX}-common)

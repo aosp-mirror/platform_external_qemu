@@ -436,7 +436,7 @@ bool configAndStartRenderer(enum WinsysPreferredGlesBackend uiPreferredBackend,
                 hw->hw_lcd_width, hw->hw_lcd_height,
                 avdInfo_getAvdFlavor(avd) == AVD_PHONE,
                 avdInfo_getApiLevel(avd), vm_operations, window_agent,
-                multi_display_agent, &gles_major_version, &gles_minor_version);
+                multi_display_agent, NULL, &gles_major_version, &gles_minor_version);
         if (gles_init_res || renderer_startup_res) {
             config_out->openglAlive = 0;
             if (gles_init_res) {
