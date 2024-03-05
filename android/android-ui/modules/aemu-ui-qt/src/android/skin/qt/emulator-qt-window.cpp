@@ -1919,6 +1919,9 @@ void EmulatorQtWindow::slot_updateRotation(SkinRotation rotation) {
     mOrientation = rotation;
     emit(layoutChanged(rotation));
 
+    // update the extended ui device pose page for foldable
+    // or non-fodable
+    mToolWindow->updateFoldableButtonVisibility();
     fixScale();
 }
 
@@ -3531,7 +3534,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
         resizeAndChangeAspectRatio(true);
     }
 
-    if (resizableEnabled()) {
+    if (resizableEnabled() && !resizableEnabled34()) {
         PresetEmulatorSizeInfo info;
         if (getResizableConfig(getResizableActiveConfigId(), &info)) {
             resizeAndChangeAspectRatio(0, 0, info.width, info.height);

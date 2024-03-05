@@ -469,8 +469,9 @@ bool skin_ui_process_events(SkinUI* ui) {
             emulator_window_restore_skin();
             break;
         case kEventSetDisplayActiveConfig:
-            emulator_window_set_skin(ev.u.display_active_config);
+            // need to do this early
             emulator_window_opengles_set_display_active_config(ev.u.display_active_config);
+            emulator_window_set_skin(ev.u.display_active_config);
             break;
         case kEventAddDisplay:
             DE("EVENT: kEventAddDisplay");
