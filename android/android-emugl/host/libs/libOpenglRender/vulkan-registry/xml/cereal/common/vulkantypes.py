@@ -87,6 +87,7 @@ CUSTOM_HANDLE_CREATE_TYPES = [
     "VkDeviceMemory",
     "VkDescriptorSet",
     "VkCommandBuffer",
+    "VkRenderPass",
 ]
 
 HANDLE_TYPES = list(sorted(list(set(DISPATCHABLE_HANDLE_TYPES +
@@ -125,6 +126,12 @@ for h in HANDLE_TYPES:
             HANDLE_INFO[h] = \
                 HandleInfo("VkCommandBuffer", "vkAllocateCommandBuffers",
                            "vkFreeCommandBuffers")
+        if h == "VkRenderPass":
+            HANDLE_INFO[h] = \
+                HandleInfo(
+                    "VkRenderPass",
+                    ["vkCreateRenderPass", "vkCreateRenderPass2", "vkCreateRenderPass2KHR"],
+                    "vkDestroyRenderPass")
     else:
         HANDLE_INFO[h] = \
             HandleInfo(h, "vkCreate" + h[2:], "vkDestroy" + h[2:])
