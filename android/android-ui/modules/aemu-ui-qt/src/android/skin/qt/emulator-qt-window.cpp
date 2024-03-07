@@ -41,6 +41,7 @@
 #include "android/skin/qt/QtLooper.h"
 #include "android/skin/qt/event-serializer.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/microphone-page.h"
 #include "android/skin/qt/extended-pages/multi-display-page.h"
 #include "android/skin/qt/extended-pages/settings-page.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
@@ -748,6 +749,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             });
         }
     });
+
+    MicrophonePage::loadSettings();
 
     // Enable the close button on the tool window as the last step.
     mToolWindow->enableCloseButton();
