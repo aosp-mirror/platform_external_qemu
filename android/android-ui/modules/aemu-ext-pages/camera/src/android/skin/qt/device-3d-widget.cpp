@@ -34,6 +34,7 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/control/sensors_agent.h"
+#include "android/emulation/resizable_display_config.h"
 #include "android/hw-sensors.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/physics/Physics.h"
@@ -74,6 +75,7 @@ Device3DWidget::Device3DWidget(QWidget* parent)
     : GLWidget(parent),
       mUseAbstractDevice(android_foldable_hinge_configured() ||
                          android_foldable_rollable_configured() ||
+                         resizableEnabled34() ||
                          android_is_automotive()) {
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
@@ -94,19 +96,8 @@ Device3DWidget::~Device3DWidget() {
     if (!mGLES2) {
         return;
     }
-    if (readyForRendering()) {
-        if (makeContextCurrent()) {
-            mGLES2->glDeleteProgram(mProgram);
-            mGLES2->glDeleteBuffers(1, &mVertexDataBuffer);
-            mGLES2->glDeleteBuffers(1, &mVertexIndexBuffer);
-            mGLES2->glDeleteTextures(1, &mDiffuseMap);
-            mGLES2->glDeleteTextures(1, &mSpecularMap);
-            if (!mUseAbstractDevice) {
-                mGLES2->glDeleteTextures(1, &mGlossMap);
-                mGLES2->glDeleteTextures(1, &mEnvMap);
-            }
-        }
-    }
+
+    cleanUpProgModelTex();
 }
 
 void Device3DWidget::setSensorsAgent(const QAndroidSensorsAgent* agent) {
@@ -186,6 +177,42 @@ static GLuint create2DTexture(const GLESv2Dispatch* gles2,
     return gles2->glGetError() == GL_NO_ERROR ? texture : 0;
 }
 
+int Device3DWidget::getLcdWidth() {
+    if (resizableEnabled34()) {
+        auto configid = getResizableActiveConfigId();
+        PresetEmulatorSizeInfo info;
+        if (getResizableConfig(configid, &info)) {
+            return info.width;
+        }
+    }
+    return getConsoleAgents()->settings->hw()->hw_lcd_width;
+}
+
+int Device3DWidget::getLcdHeight() {
+    if (resizableEnabled34()) {
+        auto configid = getResizableActiveConfigId();
+        PresetEmulatorSizeInfo info;
+        if (getResizableConfig(configid, &info)) {
+            return info.height;
+        }
+    }
+    return getConsoleAgents()->settings->hw()->hw_lcd_height;
+}
+
+bool Device3DWidget::reInitGL() {
+    const int configid = getResizableActiveConfigId();
+    if (configid < 0 || mDisplayConfig == configid) {
+        return true;
+    }
+
+    mDisplayConfig = configid;
+    mFirstAbstractDeviceRepaint = true;
+
+    cleanUpProgModelTex();
+    auto result = initProgramModelTextures();
+    return result;
+}
+
 bool Device3DWidget::initGL() {
     if (!mGLES2) {
         return false;
@@ -209,7 +236,7 @@ bool Device3DWidget::initGL() {
             glm::vec3(0.0f, 1.0f, 0.0f));  // "up" vector
     mCameraTransformInverse = glm::inverse(mCameraTransform);
 
-    if (!initProgram() || !initModel() || !initTextures()) {
+    if (!initProgramModelTextures()) {
         return false;
     }
 
@@ -306,12 +333,8 @@ bool Device3DWidget::initAbstractDeviceHingeModel(
     // std::vector<float> model_vertex_data;
     // std::vector<GLuint> indices;
     bool hSplit = (type == ANDROID_FOLDABLE_HORIZONTAL_SPLIT) ? true : false;
-    int32_t displayW =
-            hSplit ? getConsoleAgents()->settings->hw()->hw_lcd_width
-                   : getConsoleAgents()->settings->hw()->hw_lcd_height;
-    int32_t displayH =
-            hSplit ? getConsoleAgents()->settings->hw()->hw_lcd_height
-                   : getConsoleAgents()->settings->hw()->hw_lcd_width;
+    int32_t displayW = hSplit ? getLcdWidth() : getLcdHeight();
+    int32_t displayH = hSplit ? getLcdHeight() : getLcdWidth();
     int32_t centerX = displayW / 2;
     int32_t centerY = displayH / 2;
     if (!hSplit) {
@@ -498,10 +521,8 @@ bool Device3DWidget::initAbstractDeviceRollModel() {
     // std::vector<GLuint> indices;
     struct FoldableConfig config = mFoldableState.config;
     bool hRoll = config.type == ANDROID_FOLDABLE_HORIZONTAL_ROLL ? true : false;
-    int displayW = hRoll ? getConsoleAgents()->settings->hw()->hw_lcd_width
-                         : getConsoleAgents()->settings->hw()->hw_lcd_height;
-    int displayH = hRoll ? getConsoleAgents()->settings->hw()->hw_lcd_height
-                         : getConsoleAgents()->settings->hw()->hw_lcd_width;
+    int displayW = hRoll ? getLcdWidth() : getLcdHeight();
+    int displayH = hRoll ? getLcdHeight() : getLcdWidth();
 
     struct RollableParameters* p = config.rollableParams;
     // sort the rolls by rolling area low to high
@@ -596,6 +617,31 @@ bool Device3DWidget::initAbstractDeviceRollModel() {
             hRoll ? ANDROID_FOLDABLE_HORIZONTAL_SPLIT
                   : ANDROID_FOLDABLE_VERTICAL_SPLIT,
             hingeParam.size(), hingeParam.data());
+}
+
+void Device3DWidget::cleanUpProgModelTex() {
+
+    if (readyForRendering()) {
+        if (makeContextCurrent()) {
+            mGLES2->glDeleteProgram(mProgram);
+            mGLES2->glDeleteBuffers(1, &mVertexDataBuffer);
+            mGLES2->glDeleteBuffers(1, &mVertexIndexBuffer);
+            mGLES2->glDeleteTextures(1, &mDiffuseMap);
+            mGLES2->glDeleteTextures(1, &mSpecularMap);
+            if (!mUseAbstractDevice) {
+                mGLES2->glDeleteTextures(1, &mGlossMap);
+                mGLES2->glDeleteTextures(1, &mEnvMap);
+            }
+        }
+    }
+}
+
+bool Device3DWidget::initProgramModelTextures() {
+
+    if (!initProgram() || !initModel() || !initTextures()) {
+        return false;
+    }
+    return true;
 }
 
 bool Device3DWidget::initAbstractDeviceModel() {
