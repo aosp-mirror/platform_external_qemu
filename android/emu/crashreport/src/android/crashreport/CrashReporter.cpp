@@ -103,7 +103,7 @@ static const char* formatConsent(CrashConsent::Consent c) {
 }
 
 static void enableSignalTermination() {
-#ifdef __APPLE__
+#if defined (__APPLE__) || defined (__linux__)
     // We will not get crash reports without the signals below enabled.
     sigset_t set;
     sigemptyset(&set);
