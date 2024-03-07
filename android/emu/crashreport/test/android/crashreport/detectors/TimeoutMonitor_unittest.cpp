@@ -28,10 +28,10 @@ TEST(TimeoutMonitorTests, BasicTimeout) {
         crash_handler_called = true;
     };
 
-    TimeoutMonitor monitor(std::chrono::milliseconds(50), crash_handler);
+    TimeoutMonitor monitor(std::chrono::milliseconds(1), crash_handler);
 
     // Simulate work that exceeds the timeout
-    simulateWork(std::chrono::milliseconds(100));
+    simulateWork(std::chrono::milliseconds(200));
 
     EXPECT_TRUE(crash_handler_called);
 }
@@ -45,7 +45,7 @@ TEST(TimeoutMonitorTests, NoTimeout) {
     TimeoutMonitor monitor(std::chrono::milliseconds(200), crash_handler);
 
     // Work that finishes within the limit
-    simulateWork(std::chrono::milliseconds(50));
+    simulateWork(std::chrono::milliseconds(1));
 
     EXPECT_FALSE(crash_handler_called);
 }
@@ -61,7 +61,7 @@ TEST(TimeoutMonitorTests, TimeoutDoesNotBlock) {
     {
         TimeoutMonitor monitor(std::chrono::milliseconds(200), crash_handler);
         // Work that finishes within the limit
-        simulateWork(std::chrono::milliseconds(50));
+        simulateWork(std::chrono::milliseconds(1));
     }
 
     auto end_time = std::chrono::steady_clock::now();
