@@ -79,7 +79,7 @@ elseif(LINUX)
               # Older glibc elf.h might not yet define the ELF compression
               # types.
               SHF_COMPRESSED=2048)
-  target_compile_options(breakpad_compiler_config INTERFACE -fPIC -g -UNDEBUG)
+  target_compile_options(breakpad_compiler_config INTERFACE -fPIC -g -UNDEBUG -Wno-fortify-source)
 else()
   target_compile_definitions(
     breakpad_compiler_config
