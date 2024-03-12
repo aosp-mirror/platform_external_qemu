@@ -223,7 +223,3 @@ void MicrophonePage::forwardKeyToEmulator(uint32_t keycode, bool down) {
     skin_event.u.key.mod = 0;
     mEmulatorWindow->queueSkinEvent(std::move(skin_event));
 }
-
-void MicrophonePage::loadSettings() {
-    getConsoleAgents()->vm->allowRealAudio(getSavedMicAllowRealAudio());
-}
