@@ -34,6 +34,7 @@
 #include "android/hw-sensors.h"
 #include "android/skin/qt/OverlayMessageCenter.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-pages/microphone-page.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/winsys.h"
@@ -101,6 +102,7 @@ static SkinRotation getRotation() {
 }
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
+        .initUI = [](){ MicrophonePage::loadSettings(); },
         .getEmulatorWindow = emulator_window_get,
         .rotate90Clockwise =
                 [] {
