@@ -64,6 +64,7 @@ static SkinRotation getRotation() {
 }
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
+        .initUI = []() { /* do nothing */ },
         .getEmulatorWindow = emulator_window_get,
         .rotate90Clockwise = [] { return emulator_window_rotate_90(true); },
         .rotate = emulator_window_rotate,
