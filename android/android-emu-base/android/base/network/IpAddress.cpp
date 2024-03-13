@@ -103,14 +103,6 @@ IpAddress::IpAddress(const char* str) {
 
 std::string IpAddress::toString() const {
     std::string result;
-// TODO: Figure out why on mingw build of gfxstream backend, we get a link
-// error for inet_ntop here.  Since inet_ntop is not needed in gfxstream
-// backend, we can safely avoid referencing it in the linker.  In the long
-// term, perhaps we should unbundle more dependencies away from
-// android-emu-base so that it doesn't need this function in the first place.
-#if defined(AEMU_GFXSTREAM_BACKEND) && AEMU_GFXSTREAM_BACKEND
-    return result;
-#else
     switch (mKind) {
         case Kind::Ipv4: {
             struct in_addr ip4;
@@ -136,7 +128,6 @@ std::string IpAddress::toString() const {
             result = "<invalid>";
     }
     return result;
-#endif
 }
 
 size_t IpAddress::hash() const {
