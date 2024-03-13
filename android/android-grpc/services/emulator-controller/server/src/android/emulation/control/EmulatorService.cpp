@@ -657,9 +657,6 @@ public:
     Status streamScreenshot(ServerContext* context,
                             const ImageFormat* request,
                             ServerWriter<Image>* writer) override {
-        const int kMinFPS = 2;
-        const uint64_t usecPerFrame = 1000000LL / kMinFPS;
-
         SharedMemoryLibrary::LibraryEntry entry;
         if (request->transport().channel() == ImageTransport::MMAP) {
             entry = mSharedMemoryLibrary.borrow(
@@ -716,6 +713,11 @@ public:
                     &gpu_unregister_shared_memory_callback);
         }
 
+        std::unique_ptr<EventWaiter> sensorEvent;
+        sensorEvent = std::make_unique<EventWaiter>(
+                &android_hw_sensors_register_callback,
+                &android_hw_sensors_unregister_callback);
+
         // Track percentiles, and report if we have seen at least 32 frames.
         metrics::Percentiles perfEstimator(32, {0.5, 0.95});
         while (clientAvailable) {
@@ -728,13 +730,15 @@ public:
             // client is still there. (All clients get disconnected on
             // emulator shutdown).
             auto framesArrived = frameEvent->next(kTimeToWaitForFrame);
-            auto now = System::get()->getUnixTimeUs();
-            bool forcedFrame = (now - reply.timestampus()) > usecPerFrame;
 
-            if ((framesArrived || forcedFrame) && !context->IsCancelled()) {
+            // Also check for sensor change events, and send a new frame
+            // if needed. It is possible for the sensor state to change
+            // without a new frame being rendered.
+            auto sensorsChanged = sensorEvent->next(std::chrono::milliseconds(0));
+
+            if ((framesArrived || sensorsChanged) && !context->IsCancelled()) {
                 AEMU_SCOPED_TRACE("streamScreenshot::frame\r\n");
-                frame += std::max<uint64_t>(framesArrived, 1);
-                Stopwatch sw;
+                frame += framesArrived;                Stopwatch sw;
                 auto status = getScreenshot(context, request, &reply);
                 if (!status.ok()) {
                     return status;
@@ -953,7 +957,7 @@ public:
             cPixels = img.getPixelCount();
         } else {  // Let's make a fast call to learn how many pixels we need
                   // to reserve.
-            while (true) {
+            while (1) {
                 ScreenshotUtils::getScreenshot(
                         myDisplayId >= 0 ? myDisplayId : request->display(),
                         request->format(), rotation, newWidth, newHeight, pixels,
