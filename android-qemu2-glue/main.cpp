@@ -1951,7 +1951,9 @@ extern "C" int main(int argc, char** argv) {
             }
 #ifdef __linux__
             const bool isExt4Filesystem =
-                    System::get()->pathFileSystemIsExt4(contentPath);
+                    contentPath
+                            ? System::get()->pathFileSystemIsExt4(contentPath)
+                            : false;
             if (!isExt4Filesystem) {
                 dwarning(
                         "File System is not ext4, disable QuickbootFileBacked "
