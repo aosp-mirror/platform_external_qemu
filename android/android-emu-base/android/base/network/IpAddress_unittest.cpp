@@ -147,8 +147,6 @@ TEST(IpAddress, ConstructorFromStringIpv6) {
     }
 }
 
-#ifndef AEMU_GFXSTREAM_BACKEND
-
 TEST(IpAddress, toStringIpv4) {
     static const struct {
         uint32_t input;
@@ -186,8 +184,6 @@ TEST(IpAddress, toStringIpv6) {
                                                              << text;
     }
 }
-
-#endif
 
 TEST(IpAddress, hash) {
     static const struct {

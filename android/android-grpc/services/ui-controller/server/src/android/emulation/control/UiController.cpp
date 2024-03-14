@@ -91,7 +91,9 @@ static ExtendedWindowPane convertToExtendedWindowPane(
 class UiControllerImpl final : public UiController::Service {
 public:
     explicit UiControllerImpl(const AndroidConsoleAgents* agents)
-        : mAgents(agents) {}
+            : mAgents(agents) {
+        mAgents->emu->initUI();
+    }
 
     Status showExtendedControls(ServerContext* /*context*/,
                                 const PaneEntry* paneEntry,

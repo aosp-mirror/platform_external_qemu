@@ -27,13 +27,12 @@ vcruntime140_1.dll
 )
 set(MSVC_DEPENDENCIES "")
 foreach(DEP ${MSVC_REDIST_DLL})
-    list(APPEND MSVC_DEPENDENCIES "${PREBUILT_ROOT}/2019/${DEP}>./${DEP}") 
-    list(APPEND MSVC_DEPENDENCIES "${PREBUILT_ROOT}/2019/${DEP}>lib64/${DEP}")
+    list(APPEND MSVC_DEPENDENCIES "${PREBUILT_ROOT}/2019/${DEP}>./${DEP}")
 endforeach()
 set(PACKAGE_EXPORT "MSVC_DEPENDENCIES;MSVC_FOUND")
 android_license(
   TARGET MSVC_DEPENDENCIES
-  LIBNAME vcredist 
+  LIBNAME vcredist
   EXECUTABLES ${MSVC_REDIST_DLL}
   URL "https://docs.microsoft.com/en-us/visualstudio/productinfo/2017-redistribution-vs"
   SPDX "2017-redistribution-vs"

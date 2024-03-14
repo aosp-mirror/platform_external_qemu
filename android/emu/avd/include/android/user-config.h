@@ -50,6 +50,10 @@ double auserConfig_getWindowScale(AUserConfig* uconfig);
 
 void auserConfig_setWindowScale(AUserConfig* uconfig, double scale);
 
+int auserConfig_getResizableConfig(AUserConfig* uconfig);
+
+void auserConfig_setResizableConfig(AUserConfig* uconfig, int configid);
+
 /* Change the stored window position for this AVD */
 void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y );
 

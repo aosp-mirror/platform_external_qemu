@@ -714,6 +714,16 @@ public:
                                    const VkAllocationCallbacks* pAllocator,
                                    VkRenderPass* pRenderPass);
 
+    VkResult on_vkCreateRenderPass2(android::base::BumpPool* pool, VkDevice device,
+                                    const VkRenderPassCreateInfo2* pCreateInfo,
+                                    const VkAllocationCallbacks* pAllocator,
+                                    VkRenderPass* pRenderPass);
+
+    VkResult on_vkCreateRenderPass2KHR(android::base::BumpPool* pool, VkDevice device,
+                                    const VkRenderPassCreateInfo2KHR* pCreateInfo,
+                                    const VkAllocationCallbacks* pAllocator,
+                                    VkRenderPass* pRenderPass);
+
     void on_vkCmdCopyQueryPoolResults(android::base::BumpPool* pool,
                                       VkCommandBuffer commandBuffer,
                                       VkQueryPool queryPool,

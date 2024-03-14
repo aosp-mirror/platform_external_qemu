@@ -454,6 +454,10 @@ static int _avdInfo_getContentPath(AvdInfo* i) {
     return 0;
 }
 
+static bool _avdInfo_isApiExtension(const char* str, long val) {
+    return *str != '\0' && !memcmp(str, "-ext", 4) && val == (int)val;
+}
+
 static int _avdInfo_getApiLevel(AvdInfo* i, bool* isMarshmallowOrHigher) {
     const char* p;
     const int defaultLevel = kUnknownApiLevel;
@@ -508,7 +512,10 @@ static int _avdInfo_getApiLevel(AvdInfo* i, bool* isMarshmallowOrHigher) {
     } else {
         char* end;
         long val = strtol(p, &end, 10);
-        if (end == NULL || *end != '\0' || val != (int)val) {
+        // BUG: b/327220832 To handle the special case such as 34-ext10
+        if (_avdInfo_isApiExtension(end, val)) {
+            D("Found AVD target with extension: %s", p);
+        } else if (end == NULL || *end != '\0' || val != (int)val) {
             goto NOT_A_NUMBER;
         }
         level = (int)val;
@@ -528,7 +535,8 @@ NOT_A_NUMBER:
     } else {
         D("Target AVD api level is not a number");
     }
-    D("Defaulting to API level %d", level);
+    D("Defaulting to API level %d\n", level);
+
     goto EXIT;
 }
 

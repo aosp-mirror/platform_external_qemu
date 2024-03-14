@@ -41,6 +41,7 @@
 #include "android/skin/qt/QtLooper.h"
 #include "android/skin/qt/event-serializer.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/microphone-page.h"
 #include "android/skin/qt/extended-pages/multi-display-page.h"
 #include "android/skin/qt/extended-pages/settings-page.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
@@ -1919,6 +1920,9 @@ void EmulatorQtWindow::slot_updateRotation(SkinRotation rotation) {
     mOrientation = rotation;
     emit(layoutChanged(rotation));
 
+    // update the extended ui device pose page for foldable
+    // or non-fodable
+    mToolWindow->updateFoldableButtonVisibility();
     fixScale();
 }
 
@@ -2490,9 +2494,7 @@ void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
                 ->settings->android_cmdLineOptions()
                 ->no_hidpi_scaling) {
         double dpr = 1.0;
-#ifdef __APPLE__
         slot_getDevicePixelRatio(&dpr);
-#endif
         widthScale *= dpr;
         heightScale *= dpr;
     }
@@ -3531,7 +3533,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
         resizeAndChangeAspectRatio(true);
     }
 
-    if (resizableEnabled()) {
+    if (resizableEnabled() && !resizableEnabled34()) {
         PresetEmulatorSizeInfo info;
         if (getResizableConfig(getResizableActiveConfigId(), &info)) {
             resizeAndChangeAspectRatio(0, 0, info.width, info.height);
