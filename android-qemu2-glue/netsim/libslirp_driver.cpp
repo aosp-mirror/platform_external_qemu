@@ -15,9 +15,12 @@
 #include "android-qemu2-glue/netsim/libslirp_driver.h"
 
 #include "aemu/base/ArraySize.h"
+#include "aemu/base/network/IpAddress.h"
+#include "aemu/base/network/Dns.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
+
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -338,6 +341,57 @@ void libslirp_main_loop_wait(bool nonblocking) {
                            libslirp_get_revents, s_gpollfds);
 }
 
+static bool resolveHostNameToList(
+        const char* hostName, std::vector<sockaddr_storage>* out) {
+    int count = 0;
+    android::base::Dns::AddressList list = android::base::Dns::resolveName(hostName);
+    for (const auto& ip : list) {
+        // Convert IpAddress instance |src| into a sockaddr_storage |dst|.
+        sockaddr_storage addr = {};
+        if (ip.isIpv4()) {
+            auto sin = reinterpret_cast<sockaddr_in *>(&addr);
+            sin->sin_family = AF_INET;
+            sin->sin_addr.s_addr = htonl(ip.ipv4());
+        } else if (ip.isIpv6()) {
+            auto sin6 = reinterpret_cast<sockaddr_in6 *>(&addr);
+            sin6->sin6_family = AF_INET6;
+            memcpy(sin6->sin6_addr.s6_addr, ip.ipv6Addr(), 16);
+            sin6->sin6_scope_id = htonl(ip.ipv6ScopeId());
+            sin6->sin6_port = 0;
+        }
+
+        if (ip.isIpv4() || ip.isIpv6()) {
+            out->emplace_back(std::move(addr));
+            count++;
+        }
+    }
+    return (count > 0);
+}
+
+static bool setup_custom_dns_server(std::vector<std::string>& host_dns, SlirpConfig* cfg) {
+    std::vector<sockaddr_storage> server_addresses;
+    for (int i = 0; i < host_dns.size(); i++) {
+        if (!resolveHostNameToList(host_dns[i].c_str(), &server_addresses)) {
+            dwarning("Netsim WiFi: Ignoring ivalid DNS address: [%s]\n", host_dns[i].c_str());
+        }
+    }
+    size_t count = server_addresses.size();
+    if (count == 0) {
+        return false;
+    }
+
+    if (count > SLIRP_MAX_DNS_SERVERS) {
+        dwarning("Too many DNS servers, only keeping the first %d ones\n",
+                 SLIRP_MAX_DNS_SERVERS);
+        count = SLIRP_MAX_DNS_SERVERS;
+    }
+
+    cfg->host_dns_count = count;
+    memcpy(cfg->host_dns, &server_addresses[0],
+           count * sizeof(server_addresses[0]));
+    return true;
+}
+
 Slirp* libslirp_init(slirp_rx_callback rx_callback,
                      int restricted,
                      bool ipv4,
@@ -355,7 +409,8 @@ Slirp* libslirp_init(slirp_rx_callback rx_callback,
                      const char* vnameserver6,
                      const char** dnssearch,
                      const char* vdomainname,
-                     const char* tftp_server_name) {
+                     const char* tftp_server_name,
+                     std::vector<std::string>& host_dns) {
     /* default settings according to historic slirp */
     struct in_addr net = {.s_addr = htonl(0x0a000200)};  /* 10.0.2.0 */
     struct in_addr mask = {.s_addr = htonl(0xffffff00)}; /* 255.255.255.0 */
@@ -539,7 +594,11 @@ Slirp* libslirp_init(slirp_rx_callback rx_callback,
         return nullptr;
     }
 
-    cfg.version = 4;
+    if (host_dns.size() > 0) {
+        setup_custom_dns_server(host_dns, &cfg);
+    }
+
+    cfg.version = 5;
     cfg.restricted = restricted;
     cfg.in_enabled = ipv4;
     cfg.vnetwork = net;

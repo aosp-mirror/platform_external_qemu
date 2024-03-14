@@ -45,7 +45,8 @@ Slirp* libslirp_init(slirp_rx_callback callback,
                      const char* vnameserver6,
                      const char** dnssearch,
                      const char* vdomainname,
-                     const char* tftp_server_name);
+                     const char* tftp_server_name,
+                     std::vector<std::string>& host_dns);
 
 }  // namespace qemu2
 }  // namespace android
