@@ -9209,14 +9209,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, gfxstream::IOStream* ioStr
                 const VkRenderPassCreateInfo2* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkRenderPass* pRenderPass;
-                // Begin non wrapped dispatchable handle unboxing for device;
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_0;
                 memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
                 *(VkDevice*)&device = (VkDevice)(VkDevice)((VkDevice)(*&cgen_var_0));
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkRenderPassCreateInfo2));
                 reservedunmarshal_VkRenderPassCreateInfo2(vkReadStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkRenderPassCreateInfo2*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -9248,11 +9245,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, gfxstream::IOStream* ioStr
                     fprintf(stderr, "stream %p: call vkCreateRenderPass2 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pRenderPass);
                 }
                 VkResult vkCreateRenderPass2_VkResult_return = (VkResult)0;
-                vkCreateRenderPass2_VkResult_return = vk->vkCreateRenderPass2(unboxed_device, pCreateInfo, pAllocator, pRenderPass);
+                vkCreateRenderPass2_VkResult_return = m_state->on_vkCreateRenderPass2(&m_pool, device, pCreateInfo, pAllocator, pRenderPass);
+                vkStream->unsetHandleMapping();
+                // Begin manual non dispatchable handle create for pRenderPass;
                 vkStream->unsetHandleMapping();
                 uint64_t cgen_var_3;
-                vkStream->handleMapping()->mapHandles_VkRenderPass_u64(pRenderPass, &cgen_var_3, 1);
-                vkStream->write((uint64_t*)&cgen_var_3, 8);
+                static_assert(8 == sizeof(VkRenderPass), "handle map overwrite requres VkRenderPass to be 8 bytes long");
+                vkStream->handleMapping()->mapHandles_VkRenderPass((VkRenderPass*)pRenderPass, 1);
+                vkStream->write((VkRenderPass*)pRenderPass, 8 * 1);
+                // Begin manual non dispatchable handle create for pRenderPass;
+                vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateRenderPass2_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
                 vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
@@ -13919,14 +13921,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, gfxstream::IOStream* ioStr
                 const VkRenderPassCreateInfo2* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkRenderPass* pRenderPass;
-                // Begin non wrapped dispatchable handle unboxing for device;
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_0;
                 memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
                 *(VkDevice*)&device = (VkDevice)(VkDevice)((VkDevice)(*&cgen_var_0));
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkRenderPassCreateInfo2));
                 reservedunmarshal_VkRenderPassCreateInfo2(vkReadStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkRenderPassCreateInfo2*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -13958,11 +13957,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, gfxstream::IOStream* ioStr
                     fprintf(stderr, "stream %p: call vkCreateRenderPass2KHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pRenderPass);
                 }
                 VkResult vkCreateRenderPass2KHR_VkResult_return = (VkResult)0;
-                vkCreateRenderPass2KHR_VkResult_return = vk->vkCreateRenderPass2KHR(unboxed_device, pCreateInfo, pAllocator, pRenderPass);
+                vkCreateRenderPass2KHR_VkResult_return = m_state->on_vkCreateRenderPass2KHR(&m_pool, device, pCreateInfo, pAllocator, pRenderPass);
+                vkStream->unsetHandleMapping();
+                // Begin manual non dispatchable handle create for pRenderPass;
                 vkStream->unsetHandleMapping();
                 uint64_t cgen_var_3;
-                vkStream->handleMapping()->mapHandles_VkRenderPass_u64(pRenderPass, &cgen_var_3, 1);
-                vkStream->write((uint64_t*)&cgen_var_3, 8);
+                static_assert(8 == sizeof(VkRenderPass), "handle map overwrite requres VkRenderPass to be 8 bytes long");
+                vkStream->handleMapping()->mapHandles_VkRenderPass((VkRenderPass*)pRenderPass, 1);
+                vkStream->write((VkRenderPass*)pRenderPass, 8 * 1);
+                // Begin manual non dispatchable handle create for pRenderPass;
+                vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateRenderPass2KHR_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
                 vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);

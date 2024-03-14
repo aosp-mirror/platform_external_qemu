@@ -380,6 +380,11 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
 static bool sIsFolded = false;
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
+        .initUI = [](void) {
+                    fprintf(stderr,
+                            "window-agent-GfxStream-impl: "
+                            ".initUI\n");
+                },
         .getEmulatorWindow =
                 [](void) {
                     fprintf(stderr,

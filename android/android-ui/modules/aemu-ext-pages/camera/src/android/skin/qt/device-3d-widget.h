@@ -104,6 +104,8 @@ public:
     // Each 15 degree wheel movement should move 0.2 of an inch.
     static constexpr float InchesPerWheelDegree = 2.f / 150.f;
 
+    bool reInitGL() override;
+
 protected:
     // This is called once, after the GL context is created, to do some one-off
     // setup work.
@@ -125,9 +127,16 @@ protected:
     virtual void hideEvent(QHideEvent*) override;
 
 private:
+    int getLcdWidth();
+    int getLcdHeight();
+    bool initProgramModelTextures();
+    void cleanUpProgModelTex();
     bool initProgram();
     bool initModel();
     bool initTextures();
+
+    // only applicable to resizable
+    int mDisplayConfig {-1};
 
     // Returns the world coordinates of a point on the XY plane
     // that corresponds to the given point on the screen.

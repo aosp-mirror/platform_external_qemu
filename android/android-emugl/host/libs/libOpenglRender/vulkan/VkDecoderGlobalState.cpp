@@ -4484,6 +4484,25 @@ public:
         return res;
     }
 
+
+    VkResult on_vkCreateRenderPass2(android::base::BumpPool* pool, VkDevice boxed_device,
+                                    const VkRenderPassCreateInfo2* pCreateInfo,
+                                    const VkAllocationCallbacks* pAllocator,
+                                    VkRenderPass* pRenderPass) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+        AutoLock lock(mLock);
+
+        VkResult res = vk->vkCreateRenderPass2(device, pCreateInfo, pAllocator, pRenderPass);
+        if (res != VK_SUCCESS) {
+            return res;
+        }
+
+        *pRenderPass = new_boxed_non_dispatchable_VkRenderPass(*pRenderPass);
+
+        return res;
+    }
+
     void on_vkCmdCopyQueryPoolResults(android::base::BumpPool* pool,
                                       VkCommandBuffer boxed_commandBuffer,
                                       VkQueryPool queryPool,
@@ -7997,6 +8016,22 @@ VkResult VkDecoderGlobalState::on_vkCreateRenderPass(
         VkRenderPass* pRenderPass) {
     return mImpl->on_vkCreateRenderPass(pool, boxed_device, pCreateInfo,
                                         pAllocator, pRenderPass);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateRenderPass2(android::base::BumpPool* pool,
+                                                      VkDevice boxed_device,
+                                                      const VkRenderPassCreateInfo2* pCreateInfo,
+                                                      const VkAllocationCallbacks* pAllocator,
+                                                      VkRenderPass* pRenderPass) {
+    return mImpl->on_vkCreateRenderPass2(pool, boxed_device, pCreateInfo, pAllocator, pRenderPass);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateRenderPass2KHR(android::base::BumpPool* pool,
+                                                         VkDevice boxed_device,
+                                                         const VkRenderPassCreateInfo2KHR* pCreateInfo,
+                                                         const VkAllocationCallbacks* pAllocator,
+                                                         VkRenderPass* pRenderPass) {
+    return mImpl->on_vkCreateRenderPass2(pool, boxed_device, pCreateInfo, pAllocator, pRenderPass);
 }
 
 void VkDecoderGlobalState::on_vkCmdCopyQueryPoolResults(

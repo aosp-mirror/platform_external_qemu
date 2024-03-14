@@ -19,6 +19,9 @@
 
 static bool sIsFolded = false;
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
+        .initUI = [](void) {
+                    printf("window-agent-mock-impl: .initUI\n");
+                },
         .getEmulatorWindow =
                 [](void) {
                     printf("window-agent-mock-impl: .getEmulatorWindow\n");

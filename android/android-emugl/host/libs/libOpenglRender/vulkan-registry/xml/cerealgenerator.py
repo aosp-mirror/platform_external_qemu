@@ -399,8 +399,8 @@ class BumpPool;
             os.path.join(
                 os.getcwd(),
                 "..", "..",
-                "device", "generic", "goldfish-opengl",
-                "system", "vulkan_enc")
+                "hardware", "google", "gfxstream",
+                "guest", "vulkan_enc")
         self.guest_abs_hal_destination = \
             os.path.join(
                 os.getcwd(),

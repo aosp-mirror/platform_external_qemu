@@ -248,6 +248,19 @@ void user_config_set_window_scale(double scale) {
     }
 }
 
+int user_config_get_resizable_config() {
+    if (userConfig) {
+        return auserConfig_getResizableConfig(userConfig);
+    }
+    return -1;
+}
+
+void user_config_set_resizable_config(int configid) {
+    if (userConfig) {
+        auserConfig_setResizableConfig(userConfig, configid);
+    }
+}
+
 void user_config_get_window_pos(int* window_x, int* window_y) {
     *window_x = *window_y = 10;
 
