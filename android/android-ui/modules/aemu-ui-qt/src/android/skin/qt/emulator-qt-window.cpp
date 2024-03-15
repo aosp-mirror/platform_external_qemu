@@ -2490,9 +2490,7 @@ void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
                 ->settings->android_cmdLineOptions()
                 ->no_hidpi_scaling) {
         double dpr = 1.0;
-#ifdef __APPLE__
         slot_getDevicePixelRatio(&dpr);
-#endif
         widthScale *= dpr;
         heightScale *= dpr;
     }
