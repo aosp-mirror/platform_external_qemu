@@ -17,24 +17,6 @@ from aemu.configure.libraries import BazelLib, CMakeLib, CargoLib
 
 
 class WindowsBuilder(QemuBuilder):
-    def rutabaga_deps(self):
-        deps = [
-            CMakeLib(
-                "/hardware/google/gfxstream:gfxstream_backend",
-                "0.1.2",
-                {
-                    "archive": "libgfxstream_backend.dll",
-                    "includes": "",
-                },
-            ),
-            CargoLib(
-                "/external/crosvm/rutabaga_gfx/ffi:rutabaga_gfx_ffi",
-                "0.1.2",
-                {"archive": "rutabaga_gfx_ffi"},
-            ),  # Must be after libgxstream!
-        ]
-        # Return deps after b/324640237 has been fixed.
-        return []
 
     def packages(self):
         # So bazel does not give the right includes, so we just shim them here.
@@ -49,6 +31,16 @@ class WindowsBuilder(QemuBuilder):
         ]
 
         bazel_configs = [
+            BazelLib(
+                "//hardware/google/gfxstream/host:gfxstream_backend",
+                "0.1.2",
+                {},
+            ),
+            CargoLib(
+                "/external/crosvm/rutabaga_gfx/ffi:rutabaga_gfx_ffi",
+                "0.1.2",
+                {"archive": "rutabaga_gfx_ffi"},
+            ),  # Must be after libgxstream!
             BazelLib(
                 "@zlib//:zlib",
                 "1.2.10",
@@ -94,7 +86,7 @@ class WindowsBuilder(QemuBuilder):
             BazelLib("//external/dtc:libfdt", "1.6.0", {}),
         ]
 
-        return bazel_configs  + self.rutabaga_deps()
+        return bazel_configs
 
     def meson_config(self):
         prefix = (self.dest / "release").as_posix()
