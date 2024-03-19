@@ -2423,6 +2423,20 @@ extern "C" int main(int argc, char** argv) {
             }
         }
 
+        // pixel_fold quirk, fail fast when the device is pixel_fold
+        // but the image is not supporting the foldable feature
+        if (hw->hw_device_name) {
+            if (!strncmp("pixel_fold", hw->hw_device_name, 10) ||
+                !strncmp("resizable", hw->hw_device_name, 9)) {
+                if (!feature_is_enabled(kFeature_SupportPixelFold)) {
+                    derror("Device %s requires foldable feature, but the "
+                           "system image does not support. Quit.",
+                           hw->hw_device_name);
+                    return 1;
+                }
+            }
+        }
+
         // convert the ext4 to qcow2
         bool bShoudlConvertToQcow2 = false;
 
