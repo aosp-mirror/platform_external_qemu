@@ -18,6 +18,7 @@
 #include "aemu/base/files/Stream.h"
 #include "aemu/base/memory/MemoryTracker.h"
 #include "android/base/system/System.h"
+#include "gfxstream/host/Features.h"
 #include "host-common/crash-handler.h"
 #include "host-common/address_space_device.h"
 #include "host-common/address_space_graphics.h"
@@ -243,10 +244,12 @@ namespace featurecontrol {
 }
 
 int
-android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int guestApiLevel,
+android_startOpenglesRenderer(int width, int height,
+                              bool guestPhoneApi, int guestApiLevel,
                               const QAndroidVmOperations *vm_operations,
                               const QAndroidEmulatorWindowAgent *window_agent,
                               const QAndroidMultiDisplayAgent *multi_display_agent,
+                              const void* /*gfxstreamFeatureSet*/,
                               int* glesMajorVersion_out,
                               int* glesMinorVersion_out)
 {
@@ -267,6 +270,52 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     sRenderLib->setRenderer(emuglConfig_get_current_renderer());
     sRenderLib->setAvdInfo(guestPhoneApi, guestApiLevel);
     sRenderLib->setCrashReporter(&crashhandler_die_format);
+
+    gfxstream::host::FeatureSet gfxstreamFeatures;
+#if defined(AEMU_GFXSTREAM_BACKEND)
+    using GfxstreamFeaturePtr =
+        gfxstream::host::FeatureInfo (gfxstream::host::FeatureSet::*);
+    const std::map<android::featurecontrol::Feature, GfxstreamFeaturePtr>
+    kAemuToGfxstreamFeatureMap = {
+        {android::featurecontrol::GLAsyncSwap,
+            &gfxstream::host::FeatureSet::GlAsyncSwap},
+        {android::featurecontrol::GLDirectMem,
+            &gfxstream::host::FeatureSet::GlDirectMem},
+        {android::featurecontrol::GLDMA,
+            &gfxstream::host::FeatureSet::GlDma},
+        {android::featurecontrol::GLESDynamicVersion,
+            &gfxstream::host::FeatureSet::GlesDynamicVersion},
+        {android::featurecontrol::GuestUsesAngle,
+            &gfxstream::host::FeatureSet::GuestUsesAngle},
+        {android::featurecontrol::RefCountPipe,
+            &gfxstream::host::FeatureSet::RefCountPipe},
+        {android::featurecontrol::VirtioGpuNativeSync,
+            &gfxstream::host::FeatureSet::VirtioGpuNativeSync},
+        {android::featurecontrol::VirtioGpuNext,
+            &gfxstream::host::FeatureSet::VirtioGpuNext},
+        {android::featurecontrol::Vulkan,
+            &gfxstream::host::FeatureSet::Vulkan},
+        {android::featurecontrol::VulkanBatchedDescriptorSetUpdate,
+            &gfxstream::host::FeatureSet::VulkanBatchedDescriptorSetUpdate},
+        {android::featurecontrol::VulkanIgnoredHandles,
+            &gfxstream::host::FeatureSet::VulkanIgnoredHandles},
+        {android::featurecontrol::VulkanNullOptionalStrings,
+            &gfxstream::host::FeatureSet::VulkanNullOptionalStrings},
+        {android::featurecontrol::VulkanQueueSubmitWithCommands,
+            &gfxstream::host::FeatureSet::VulkanQueueSubmitWithCommands},
+        {android::featurecontrol::VulkanShaderFloat16Int8,
+            &gfxstream::host::FeatureSet::VulkanShaderFloat16Int8},
+        {android::featurecontrol::VulkanSnapshots,
+            &gfxstream::host::FeatureSet::VulkanSnapshots},
+    };
+    for (const auto& [aemuFeature, gfxstreamFeaturePtr] : kAemuToGfxstreamFeatureMap) {
+        (gfxstreamFeatures.*gfxstreamFeaturePtr).enabled =
+            android::featurecontrol::isEnabled(aemuFeature);
+    }
+#else
+    // libOpenglRender uses feature control directly.
+#endif
+
 #if defined(AEMU_GFXSTREAM_BACKEND)
     // Don't override the feature controller when running under
     // gfxstream_backend_unittests
@@ -304,7 +353,8 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     sRenderLib->setUsageTracker(android::base::CpuUsage::get(),
                                 android::base::MemoryTracker::get());
 
-    sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
+    sRenderer = sRenderLib->initRenderer(width, height, gfxstreamFeatures, sRendererUsesSubWindow,
+                                         sEgl2egl);
 #ifdef AEMU_GFXSTREAM_BACKEND
     gfxstream_android_setOpenglesRenderer(&sRenderer);
 #endif  // AEMU_GFXSTREAM_BACKEND

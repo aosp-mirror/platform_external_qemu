@@ -123,6 +123,7 @@ bool RenderLibImpl::getOpt(RenderOpt* opt) {
 }
 
 RendererPtr RenderLibImpl::initRenderer(int width, int height,
+                                        gfxstream::host::FeatureSet,
                                         bool useSubWindow, bool egl2egl) {
     if (!mRenderer.expired()) {
         return nullptr;
