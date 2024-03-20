@@ -208,9 +208,14 @@ bool Device3DWidget::reInitGL() {
     mDisplayConfig = configid;
     mFirstAbstractDeviceRepaint = true;
 
-    cleanUpProgModelTex();
-    auto result = initProgramModelTextures();
-    return result;
+    if (readyForRendering()) {
+        if (makeContextCurrent()) {
+            cleanUpProgModelTex();
+            auto result = initProgramModelTextures();
+            return result;
+        }
+    }
+    return false;
 }
 
 bool Device3DWidget::initGL() {
