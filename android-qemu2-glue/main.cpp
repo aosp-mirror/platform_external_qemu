@@ -380,6 +380,8 @@ static void prepareSkinConfig(AndroidHwConfig* hw, const char* dataDirectory) {
                                      "display_layout_configuration.xml");
         updateDataSystemSubdirectory(dataDirectory, nullptr,
                                      "display_settings.xml");
+        updateDataSystemSubdirectory(dataDirectory, nullptr,
+                                     "extra_feature.xml");
     }
 }
 
@@ -452,7 +454,7 @@ static bool creatUserDataExt4Img(AndroidHwConfig* hw,
                                  const char* dataDirectory) {
     std::string empty_data_path =
             PathUtils::join(dataDirectory, "empty_data_disk");
-    const bool shouldUseEmptyDataImg = path_exists(empty_data_path.c_str());
+    const bool shouldUseEmptyDataImg = path_exists(empty_data_path.c_str()) && !(android_foldable_is_pixel_fold());
     if (shouldUseEmptyDataImg) {
         android_createEmptyExt4Image(
                 hw->disk_dataPartition_path,
