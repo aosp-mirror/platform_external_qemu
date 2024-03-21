@@ -175,12 +175,10 @@ class LinuxBuilder(QemuBuilder):
 
         # Next we have our dependencies.
         return [
-            CMakeLib(
-                "/hardware/google/gfxstream:gfxstream_backend",
+            BazelLib(
+                "//hardware/google/gfxstream/host:gfxstream_backend",
                 "0.1.2",
-                {
-                    "archive": "libgfxstream_backend.so",
-                },
+                {},
             ),
             CargoLib(
                 "/external/crosvm/rutabaga_gfx/ffi:rutabaga_gfx_ffi",
