@@ -13,6 +13,9 @@
 
 #include <QTabWidget>                                             // for QTa...
 
+#include "android/avd/info.h"                         // for avdInfo_getAvdF...
+#include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
+#include "android/console.h"                          // for getConsoleAgents
 #include "android/skin/qt/extended-pages/record-macro-page.h"     // for Rec...
 #include "android/skin/qt/extended-pages/record-screen-page.h"    // for Rec...
 #include "android/skin/qt/extended-pages/record-settings-page.h"  // for Rec...
@@ -23,7 +26,14 @@ RecordAndPlaybackPage::RecordAndPlaybackPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordAndPlaybackPage()) {
     mUi->setupUi(this);
 
-    connect(mUi->recordSettings, SIGNAL(on_toggleMacros_toggled(bool)), 
+    AvdFlavor flavor =
+            avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo());
+    if (flavor == AVD_ANDROID_AUTO) {
+        // Android Auto doesn't need to support the macro playback.
+        mUi->tabWidget->removeTab(1);
+    }
+
+    connect(mUi->recordSettings, SIGNAL(on_toggleMacros_toggled(bool)),
             mUi->recordMacro, SLOT(enablePresetMacros(bool)));
 
     connect(mUi->recordMacro, SIGNAL(setRecordingStateSignal(bool)), this,
