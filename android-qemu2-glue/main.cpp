@@ -77,6 +77,7 @@
 #include "host-common/feature_control.h"
 #include "host-common/hw-config-helper.h"
 #include "host-common/hw-config.h"
+#include "host-common/hw-lcd.h"
 #include "host-common/multi_display_agent.h"
 #include "host-common/opengl/emugl_config.h"
 #include "host-common/opengles.h"
@@ -391,6 +392,8 @@ static void prepareSkinConfig(AndroidHwConfig* hw, const char* dataDirectory) {
                                          "display_layout_configuration.xml");
             updateDataSystemSubdirectory(dataDirectory, skin, nullptr,
                                          "display_settings.xml");
+            updateDataSystemSubdirectory(dataDirectory, skin, nullptr,
+                                         "extra_feature.xml");
         }
     }
 }
@@ -464,7 +467,7 @@ static bool creatUserDataExt4Img(AndroidHwConfig* hw,
                                  const char* dataDirectory) {
     std::string empty_data_path =
             PathUtils::join(dataDirectory, "empty_data_disk");
-    const bool shouldUseEmptyDataImg = path_exists(empty_data_path.c_str());
+    const bool shouldUseEmptyDataImg = path_exists(empty_data_path.c_str()) && !(android_foldable_is_pixel_fold());
     if (shouldUseEmptyDataImg) {
         android_createEmptyExt4Image(
                 hw->disk_dataPartition_path,
@@ -1723,6 +1726,9 @@ extern "C" int main(int argc, char** argv) {
                         return -1;
                     }
                 }
+                const char* const orientation =
+                        lcdWidth > lcdHeight ? "landscape" : "portrait";
+                const int kDefaultDpi = LCD_DENSITY_MDPI;
 
                 // Handle input args.
                 if (!emulator_parseInputCommandLineOptions(opts)) {
@@ -1738,9 +1744,8 @@ extern "C" int main(int argc, char** argv) {
                         "x86_64", "x86_64",
 #endif
                         true, AVD_PHONE, opts->gpu ? opts->gpu : "host",
-                        opts->no_window, lcdWidth, lcdHeight,
-                        // LCD DPI, orientation
-                        96, "landscape", opts, hw, &avd);
+                        opts->no_window, lcdWidth, lcdHeight, kDefaultDpi,
+                        orientation, opts, hw, &avd);
 
             } else {
                 for (int n = 1; n <= argc; ++n) {
@@ -1951,7 +1956,9 @@ extern "C" int main(int argc, char** argv) {
             }
 #ifdef __linux__
             const bool isExt4Filesystem =
-                    System::get()->pathFileSystemIsExt4(contentPath);
+                    contentPath
+                            ? System::get()->pathFileSystemIsExt4(contentPath)
+                            : false;
             if (!isExt4Filesystem) {
                 dwarning(
                         "File System is not ext4, disable QuickbootFileBacked "
@@ -2420,6 +2427,20 @@ extern "C" int main(int argc, char** argv) {
             } else {
                 // default to assuming enough space if the free space query
                 // fails.
+            }
+        }
+
+        // pixel_fold quirk, fail fast when the device is pixel_fold
+        // but the image is not supporting the foldable feature
+        if (hw->hw_device_name) {
+            if (!strncmp("pixel_fold", hw->hw_device_name, 10) ||
+                !strncmp("resizable", hw->hw_device_name, 9)) {
+                if (!feature_is_enabled(kFeature_SupportPixelFold)) {
+                    derror("Device %s requires foldable feature, but the "
+                           "system image does not support. Quit.",
+                           hw->hw_device_name);
+                    return 1;
+                }
             }
         }
 

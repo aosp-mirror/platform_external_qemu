@@ -260,7 +260,6 @@ if(FEATURE_NETSIM_FROM_SOURCE)
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-map.js>netsim-ui/js/device-map.js;
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-observer.js>netsim-ui/js/device-observer.js;
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/license-info.js>netsim-ui/js/license-info.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/netsim/model.js>netsim-ui/js/netsim/model.js;
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/navigation-bar.js>netsim-ui/js/navigation-bar.js;
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/netsim-app.js>netsim-ui/js/netsim-app.js;
     ${AOSP_ROOT}/tools/netsim/ui/dist/js/packet-info.js>netsim-ui/js/packet-info.js;
@@ -335,6 +334,8 @@ target_include_directories(gfxstream_egl_headers
                            INTERFACE ${ANGLE_REPO_ROOT}/include)
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/gl/gl-host-common
                  ${GFXSTREAM_PREFIX}-gl-host-common)
+add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/features
+                 ${GFXSTREAM_PREFIX}-host-features)
 # Include external/gfxstream-protocols project
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/common
                  ${GFXSTREAM_PREFIX}-common)

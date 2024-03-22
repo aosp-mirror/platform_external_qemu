@@ -288,6 +288,7 @@ target_link_libraries(
          ui::window
          aemu-gl-init
          aemu-recording
+         gfxstream_features
   PRIVATE android-emu-protobuf)
 
 target_link_libraries(android-emu PRIVATE modem_simulator_lib gnss_proxy_lib)

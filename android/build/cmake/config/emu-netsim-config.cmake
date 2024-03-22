@@ -37,7 +37,6 @@ set(NETSIM_UI_DEPENDENCIES
     ${PREBUILT_ROOT}/netsim-ui/js/device-map.js>netsim-ui/js/device-map.js;
     ${PREBUILT_ROOT}/netsim-ui/js/device-observer.js>netsim-ui/js/device-observer.js;
     ${PREBUILT_ROOT}/netsim-ui/js/license-info.js>netsim-ui/js/license-info.js;
-    ${PREBUILT_ROOT}/netsim-ui/js/netsim/model.js>netsim-ui/js/netsim/model.js;
     ${PREBUILT_ROOT}/netsim-ui/js/navigation-bar.js>netsim-ui/js/navigation-bar.js;
     ${PREBUILT_ROOT}/netsim-ui/js/netsim-app.js>netsim-ui/js/netsim-app.js;
     ${PREBUILT_ROOT}/netsim-ui/js/packet-info.js>netsim-ui/js/packet-info.js;
