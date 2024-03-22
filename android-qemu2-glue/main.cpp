@@ -77,6 +77,7 @@
 #include "host-common/feature_control.h"
 #include "host-common/hw-config-helper.h"
 #include "host-common/hw-config.h"
+#include "host-common/hw-lcd.h"
 #include "host-common/multi_display_agent.h"
 #include "host-common/opengl/emugl_config.h"
 #include "host-common/opengles.h"
@@ -1725,6 +1726,9 @@ extern "C" int main(int argc, char** argv) {
                         return -1;
                     }
                 }
+                const char* const orientation =
+                        lcdWidth > lcdHeight ? "landscape" : "portrait";
+                const int kDefaultDpi = LCD_DENSITY_MDPI;
 
                 // Handle input args.
                 if (!emulator_parseInputCommandLineOptions(opts)) {
@@ -1740,9 +1744,8 @@ extern "C" int main(int argc, char** argv) {
                         "x86_64", "x86_64",
 #endif
                         true, AVD_PHONE, opts->gpu ? opts->gpu : "host",
-                        opts->no_window, lcdWidth, lcdHeight,
-                        // LCD DPI, orientation
-                        96, "landscape", opts, hw, &avd);
+                        opts->no_window, lcdWidth, lcdHeight, kDefaultDpi,
+                        orientation, opts, hw, &avd);
 
             } else {
                 for (int n = 1; n <= argc; ++n) {
