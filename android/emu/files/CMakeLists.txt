@@ -35,39 +35,36 @@ target_include_directories(
 
 # Boo, we need the make_ext4fs executable
 add_dependencies(android-emu-files emulator_make_ext4fs)
+android_add_test(
+  TARGET android-emu-files_unittests
+  SOURCE_DIR test
+  SRC android/emulation/ConfigDirs_unittest.cpp
+      android/filesystems/ext4_resize_unittest.cpp
+      android/filesystems/ext4_utils_unittest.cpp
+      android/filesystems/fstab_parser_unittest.cpp
+      android/filesystems/partition_config_unittest.cpp
+      android/filesystems/partition_types_unittest.cpp
+      android/filesystems/ramdisk_extractor_unittest.cpp
+      android/filesystems/testing/TestSupport.cpp
+      android/qt/qt_path_unittest.cpp
+      android/qt/qt_setup_unittest.cpp
+      android/utils/aconfig-file_unittest.cpp
+      android/utils/file_data_unittest.cpp
+      android/utils/filelock_unittest.cpp
+      android/utils/property_file_unittest.cpp)
 
-if(ANDROID_EMULATOR_BUILD)
-  android_add_test(
-    TARGET android-emu-files_unittests
-    SOURCE_DIR test
-    SRC android/emulation/ConfigDirs_unittest.cpp
-        android/filesystems/ext4_resize_unittest.cpp
-        android/filesystems/ext4_utils_unittest.cpp
-        android/filesystems/fstab_parser_unittest.cpp
-        android/filesystems/partition_config_unittest.cpp
-        android/filesystems/partition_types_unittest.cpp
-        android/filesystems/ramdisk_extractor_unittest.cpp
-        android/filesystems/testing/TestSupport.cpp
-        android/qt/qt_path_unittest.cpp
-        android/qt/qt_setup_unittest.cpp
-        android/utils/aconfig-file_unittest.cpp
-        android/utils/file_data_unittest.cpp
-        android/utils/filelock_unittest.cpp
-        android/utils/property_file_unittest.cpp)
+target_compile_options(android-emu-files_unittests PRIVATE -O0)
+target_include_directories(android-emu-files_unittests PRIVATE src)
+target_link_libraries(
+  android-emu-files_unittests
+  PRIVATE gmock_main android-emu android-emu-test-launcher android-emu-files
+          android-hw-config android-emu-base-headers)
 
-  target_compile_options(android-emu-files_unittests PRIVATE -O0)
-  target_include_directories(android-emu-files_unittests PRIVATE src)
-  target_link_libraries(
-    android-emu-files_unittests
-    PRIVATE gmock_main android-emu android-emu-test-launcher android-emu-files
-            android-hw-config android-emu-base-headers)
+# Boo! We depend on makeext
+add_custom_command(
+  TARGET android-emu-files_unittests POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:emulator_make_ext4fs>
+          ${CMAKE_CURRENT_BINARY_DIR})
 
-  # Boo! We depend on makeext
-  add_custom_command(
-    TARGET android-emu-files_unittests POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:emulator_make_ext4fs>
-            ${CMAKE_CURRENT_BINARY_DIR})
-
-  android_target_dependency(android-emu-files_unittests all
-                            E2FSPROGS_DEPENDENCIES)
-endif()
+android_target_dependency(android-emu-files_unittests all
+                          E2FSPROGS_DEPENDENCIES)
