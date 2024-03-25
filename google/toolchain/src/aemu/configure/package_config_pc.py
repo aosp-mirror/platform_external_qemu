@@ -13,9 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import re
 import shutil
 from pathlib import Path
 from typing import Dict, Set
+
+from aemu.process.runner import check_output
 
 
 class PackageConfigPc:
@@ -104,17 +107,38 @@ class PackageConfigPc:
             if not shim_link.exists():
                 archive.link_to(shim_link)
 
+    def _patch_dylib(self, dylib: Path):
+        # Workaround for b/331243894
+        rpath_regex = re.compile(r"^.*@rpath\/([^\s]+)")
+        result = check_output(["otool", "-L", dylib])
+        rpathline = result.splitlines()[1]
+        match = rpath_regex.match(rpathline)
+        if match:
+            bazel_name = dylib.parent / match.group(1)
+            bazel_name.symlink_to(dylib)
+            logging.info("Patching up bazel @path %s -> %s", bazel_name, dylib)
+        else:
+            logging.info("Not patching %s", dylib)
+
     def binplace(self, dest_dir: Path):
         """Binplace the shared libraries to the given location."""
         so_ext = [".so", ".dylib", ".dll"]
         for ext in so_ext:
-            for lib in [self.lib, f"lib{self.lib}", self.name]:
+            for lib in [
+                f"lib{self.lib}",
+                self.name,
+                self.lib,
+            ]:
                 possible = Path(self.libdir) / f"{lib}{ext}"
                 if possible.exists():
                     logging.debug("Binplacing: %s -> %s", possible, dest_dir)
-                    shutil.copyfile(
-                        possible, dest_dir / f"{lib}{self.shim.get('dll_ext', ext)}"
-                    )
+                    destination = dest_dir / f"{lib}{self.shim.get('dll_ext', ext)}"
+                    shutil.copyfile(possible, destination)
+                    if ext == ".dylib":
+                        # Patch up bazel @rpath
+                        self._patch_dylib(destination)
+
+                    return
 
     def write(self, dest_dir: Path):
         """
