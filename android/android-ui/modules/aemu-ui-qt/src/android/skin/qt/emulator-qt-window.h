@@ -589,6 +589,7 @@ private:
     bool mWindowIsMinimized = false;
 
     QScreen* mCurrentScreen = nullptr;
+    SkinEvent createSkinEventScreenChanged();
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
     void saveMultidisplayToConfig();

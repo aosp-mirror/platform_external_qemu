@@ -1102,6 +1102,8 @@ struct SkinWindow {
     SkinSize framebuffer;
     SkinSize container;
     int scroll_h;  // Needed for OSX
+    // Monitor dimensions and coordinates are in logical pixels
+    SkinRect monitor;
 };
 
 const FingerState empty_touch_point_state = {0};
@@ -1640,20 +1642,12 @@ static void skin_window_ensure_fully_visible(void* ptr) {
         }
 
         /* First, we recenter the window */
-        new_x = (data->monitor.size.w - data->win_w) / 2;
-        new_y = (data->monitor.size.h - data->win_h) / 2;
-
-        /* If it is still too large, we ensure the top-border is visible */
-        if (new_y < 0)
-            new_y = 0;
-
-        /* If it is somehow off screen horizontally, put it back */
-        if (new_x < 0)
-            new_x = 0;
+        new_x = data->monitor.pos.x + (data->monitor.size.w - data->win_w) / 2;
+        new_y = data->monitor.pos.y + (data->monitor.size.h - data->win_h) / 2;
 
         /* Don't try to put it back if the emulator is only partially too
            far to the right, because that invites bouncing. */
-        if (new_x >= data->monitor.size.w)
+        if ((new_x - data->monitor.pos.x) >= data->monitor.size.w)
             new_x -= data->win_w;
 
         VERBOSE_PRINT(init, "Window repositioned to [%d,%d]", new_x, new_y);
@@ -1663,6 +1657,13 @@ static void skin_window_ensure_fully_visible(void* ptr) {
         dprint("emulator window was out of view and was recentered");
     }
     AFREE(data);
+}
+
+static void skin_window_set_monitor_rect(SkinWindow* window, int x, int y, int w, int h) {
+    window->monitor.pos.x = x;
+    window->monitor.pos.y = y;
+    window->monitor.size.w = w;
+    window->monitor.size.h = h;
 }
 
 static void skin_window_set_device_pixel_ratio(SkinWindow* window) {
@@ -1715,13 +1716,14 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
 
     }
 
-    skin_winsys_get_monitor_rect(&monitor);
-    // Since monitor values are in pixel size, we need to convert it to logical size, since all
-    // other values used in the below calculations are in logical pixels.
-    monitor.pos.x /= window->dpr;
-    monitor.pos.y /= window->dpr;
-    monitor.size.w /= window->dpr;
-    monitor.size.h /= window->dpr;
+    if (window->monitor.size.w == 0 || window->monitor.size.h == 0) {
+        skin_winsys_get_monitor_rect(&monitor);
+    } else {
+        monitor.pos.x = window->monitor.pos.x;
+        monitor.pos.y = window->monitor.pos.y;
+        monitor.size.w = window->monitor.size.w;
+        monitor.size.h = window->monitor.size.h;
+    }
 
     int hw_lcd_density = getConsoleAgents()->settings->hw()->hw_lcd_density;
 
@@ -1929,28 +1931,40 @@ static void skin_window_resize(SkinWindow* window, int resize_container) {
     }
 
     SkinRect monitor;
-    skin_winsys_get_monitor_rect(&monitor);
-    // Since monitor values are in pixel size, we need to convert it to logical size, since all
-    // other values used in the below calculations are in logical pixels.
-    monitor.pos.x /= dpr;
-    monitor.pos.y /= dpr;
-    monitor.size.w /= dpr;
-    monitor.size.h /= dpr;
+    if (window->monitor.size.h == 0 || window->monitor.size.w == 0) {
+        skin_winsys_get_monitor_rect(&monitor);
+    } else {
+        monitor.pos.x = window->monitor.pos.x;
+        monitor.pos.y = window->monitor.pos.y;
+        monitor.size.w = window->monitor.size.w;
+        monitor.size.h = window->monitor.size.h;
+    }
 
     // adjust x and y to make sure it does not cause window to be out of monitor
-    const int WINDOW_MINIMUM_XY = 100;
+    const int WINDOW_MINIMUM_X = monitor.pos.x + 100;
+    const int WINDOW_MINIMUM_Y = monitor.pos.y + 100;
     const double WINDOW_MONITOR_RATIO = 0.9;
-    if ((window_x + window_w) > WINDOW_MONITOR_RATIO * (monitor.size.w)) {
-        window_x = WINDOW_MONITOR_RATIO*monitor.size.w - window_w;
-        window_x = window_x > WINDOW_MINIMUM_XY ? window_x : WINDOW_MINIMUM_XY;
+    if (((window_x - monitor.pos.x) + window_w) > WINDOW_MONITOR_RATIO * (monitor.size.w)) {
+        window_x = monitor.pos.x + (WINDOW_MONITOR_RATIO*monitor.size.w - window_w);
+        window_x = window_x > WINDOW_MINIMUM_X ? window_x : WINDOW_MINIMUM_X;
         window->x_pos = window_x;
+#ifndef __linux__
+        // b/330777260: Linux(gnome) seems to have a weird coordinate system that
+        // depends on the size of the Qt window. This weirdness causes window bouncing
+        // back to the primary display. Let's disable for now.
         skin_winsys_set_window_pos(window_x, window_y);
+#endif  // !__linux__
     }
-    if ((window_y + window_h) > WINDOW_MONITOR_RATIO * (monitor.size.h)) {
-        window_y = WINDOW_MONITOR_RATIO*monitor.size.h - window_h;
-        window_y = window_y > WINDOW_MINIMUM_XY ? window_y : WINDOW_MINIMUM_XY;
+    if (((window_y - monitor.pos.y) + window_h) > WINDOW_MONITOR_RATIO * (monitor.size.h)) {
+        window_y = monitor.pos.y + (WINDOW_MONITOR_RATIO*monitor.size.h - window_h);
+        window_y = window_y > WINDOW_MINIMUM_Y ? window_y : WINDOW_MINIMUM_Y;
         window->y_pos = window_y;
+#ifndef __linux__
+        // b/330777260: Linux(gnome) seems to have a weird coordinate system that
+        // depends on the size of the Qt window. This weirdness causes window bouncing
+        // back to the primary display. Let's disable for now.
         skin_winsys_set_window_pos(window_x, window_y);
+#endif  // !__linux__
     }
     // Attempt to resize the window surface. If it doesn't exist, a new one will
     // be allocated. If it does exist, but its original dimensions do not match
@@ -2722,6 +2736,9 @@ void skin_window_process_event(SkinWindow* window, SkinEvent* ev) {
             // framebuffer of 2x size. Otherwise, if HiDPI is disabled, the
             // framebuffer still gets the same size, but window size will be
             // halved.
+            skin_window_set_monitor_rect(
+                    window, ev->u.screen.x, ev->u.screen.y,
+                    ev->u.screen.w, ev->u.screen.h);
             skin_window_set_device_pixel_ratio(window);
             skin_window_resize(window, 1);
             skin_window_show_opengles(window, true);
