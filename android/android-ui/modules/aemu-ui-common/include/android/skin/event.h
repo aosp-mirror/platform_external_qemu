@@ -189,6 +189,14 @@ typedef struct {
     uint32_t id;
 } SkinEventRemoveDisplay;
 
+typedef struct {
+    int32_t x;
+    int32_t y;
+    int32_t w;
+    int32_t h;
+    double dpr;
+} SkinEventScreenData;
+
 typedef struct SkinEvent {
     union {
         SkinEventKeyData key;
@@ -208,6 +216,7 @@ typedef struct SkinEvent {
         int display_active_config;
         SkinEventAddDisplay add_display;
         SkinEventRemoveDisplay remove_display;
+        SkinEventScreenData screen;
     } u;
     SkinEventType type;
 } SkinEvent;
