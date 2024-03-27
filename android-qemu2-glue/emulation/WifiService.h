@@ -55,6 +55,7 @@ struct SlirpOptions {
     std::string dhcpstart;
     std::string dns;
     std::string dns6;
+    std::vector<std::string> host_dns;
 };
 
 struct HostapdOptions {
