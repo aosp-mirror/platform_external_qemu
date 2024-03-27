@@ -46,7 +46,7 @@ std::string getAvdDir() {
 std::string getSnapshotBaseDir() {
     auto avdDir = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
     auto path = base::PathUtils::join(avdDir ? avdDir : "", "snapshots");
-    return path;
+    return base::PathUtils::canonicalPath(path);
 }
 
 std::string getSnapshotDir(const char* snapshotName) {
