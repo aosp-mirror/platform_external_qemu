@@ -105,8 +105,31 @@ bool androidEmuglConfigInit(EmuglConfig* config,
             noWindow, blacklisted, hasGuestRenderer, uiPreferredBackend,
             forceUseHostGpuVulkan);
 
+    bool isUnsupportedAmdGpuDriver = false;
+    {
+#if defined(_WIN32)
+        char* vkVendor = nullptr;
+        int vkMajor = 0;
+        int vkMinor = 0;
+        int vkPatch = 0;
+        emuglConfig_get_vulkan_hardware_gpu(&vkVendor, &vkMajor, &vkMinor,
+                                            &vkPatch);
+        if (vkVendor && strncmp("AMD", vkVendor, 3) == 0) {
+            if (vkMajor == 1 && vkMinor < 3) {
+                // on windows, amd gpu with api 1.2.x does not work
+                // for vulkan, disable it
+                isUnsupportedAmdGpuDriver = true;
+                dwarning(
+                        "Your GPU '%s' has driver version %d.%d.%d, and"
+                        " cannot support Vulkan properly on windows.",
+                        vkVendor, vkMajor, vkMinor, vkPatch);
+            }
+        }
+#endif
+    }
+
     *hostGpuVulkanBlacklisted =
-        async_query_host_gpu_VulkanBlacklisted();
+            isUnsupportedAmdGpuDriver || async_query_host_gpu_VulkanBlacklisted();
 
     return result;
 }
