@@ -1492,6 +1492,10 @@ bool android_foldable_is_folded() {
 }
 
 bool android_foldable_fold() {
+    if (!android_foldable_hinge_enabled()) {
+        dwarning("Cannot fold as avd is not foldable device");
+        return false;
+    }
     if (!android_foldable_folded_area_configured(0)) {
         return false;
     }
@@ -1510,6 +1514,10 @@ bool android_foldable_fold() {
 }
 
 bool android_foldable_unfold() {
+    if (!android_foldable_hinge_enabled()) {
+        dwarning("Cannot unfold as avd is not foldable device");
+        return false;
+    }
     if (!android_foldable_folded_area_configured(0)) {
         return false;
     }
