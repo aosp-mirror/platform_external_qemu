@@ -344,6 +344,25 @@ void SkinSurfaceBitmap::readImage() {
     }
 }
 
+SkinEvent EmulatorQtWindow::createSkinEventScreenChanged() {
+    QRect screen_geo;
+    getScreenDimensions(&screen_geo);
+    double dpr;
+    getDevicePixelRatio(&dpr);
+
+    // On multi-monitor setups, x and y coordinates can have negative values, as the coordinates are
+    // relative to the top-left corner (0, 0) of the primary display.
+    SkinEvent skin_event = createSkinEvent(kEventScreenChanged);
+    skin_event.u.screen.x = screen_geo.x();
+    skin_event.u.screen.y = screen_geo.y();
+    skin_event.u.screen.w = screen_geo.width();
+    skin_event.u.screen.h = screen_geo.height();
+    skin_event.u.screen.dpr = dpr;
+    D("%s: x=%d y=%d w=%d h=%d dpr=%f\n", __func__, skin_event.u.screen.x, skin_event.u.screen.y,
+      skin_event.u.screen.w, skin_event.u.screen.h, skin_event.u.screen.dpr);
+    return skin_event;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void EmulatorQtWindow::create() {
@@ -1406,7 +1425,11 @@ void EmulatorQtWindow::maskWindowFrame() {
         eventType = kEventScreenChanged;
         mHardRefreshCountDown--;
     }
-    queueSkinEvent(createSkinEvent(eventType));
+    if (eventType == kEventScreenChanged) {
+        queueSkinEvent(createSkinEventScreenChanged());
+    } else {
+        queueSkinEvent(createSkinEvent(eventType));
+    }
 }
 
 void EmulatorQtWindow::paintEvent(QPaintEvent*) {
@@ -1415,17 +1438,19 @@ void EmulatorQtWindow::paintEvent(QPaintEvent*) {
     painter.fillRect(bg, Qt::black);
 
     if (mBackingSurface) {
+        double dpr = 1.0;
+        slot_getDevicePixelRatio(&dpr);
         QRect r(0, 0, mBackingSurface->w, mBackingSurface->h);
         if (mBackingBitmapChanged) {
             mScaledBackingImage =
                     QPixmap::fromImage(mBackingSurface->bitmap->get().scaled(
-                            r.size() * devicePixelRatioF(), Qt::KeepAspectRatio,
+                            r.size() * dpr, Qt::KeepAspectRatio,
                             Qt::SmoothTransformation));
             mBackingBitmapChanged = false;
         }
         if (!mScaledBackingImage.isNull()) {
-            if (mScaledBackingImage.devicePixelRatio() != devicePixelRatioF()) {
-                mScaledBackingImage.setDevicePixelRatio(devicePixelRatioF());
+            if (mScaledBackingImage.devicePixelRatio() != dpr) {
+                mScaledBackingImage.setDevicePixelRatio(dpr);
             }
             painter.drawPixmap(r, mScaledBackingImage);
         }
@@ -1477,7 +1502,7 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways) {
     }
 
     D("%s: kEventScreenChanged", __FUNCTION__);
-    queueSkinEvent(createSkinEvent(kEventScreenChanged));
+    queueSkinEvent(createSkinEventScreenChanged());
 }
 
 void EmulatorQtWindow::setIgnoreWheelEvent(bool ignore) {
@@ -1650,7 +1675,7 @@ bool EmulatorQtWindow::event(QEvent* ev) {
 #endif
         // Trigger a ScreenChanged event so the device
         // screen will refresh immediately
-        queueSkinEvent(createSkinEvent(kEventScreenChanged));
+        queueSkinEvent(createSkinEventScreenChanged());
 #endif  // !_WIN32
     }
 
@@ -1745,7 +1770,8 @@ void EmulatorQtWindow::slot_fill(SkinSurface* s,
 void EmulatorQtWindow::slot_getDevicePixelRatio(double* out_dpr,
                                                 QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
-    *out_dpr = devicePixelRatioF();
+    auto screen = window()->windowHandle() ? window()->windowHandle()->screen() : nullptr;
+    *out_dpr = screen ? screen->devicePixelRatio() : 1.0;
 }
 
 void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
@@ -1760,22 +1786,17 @@ void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
                              : nullptr;
     if (!newScreen) {
         D("Can't get screen geometry. Window is off screen.");
+        return;
     }
-    QRect rect = newScreen->geometry();
+    // Use availableGeometry() instead of geometry() to get coordinates that are excluding things
+    // like a dock, menu bar, etc.
+    QRect rect = newScreen->availableGeometry();
     D("slot_getScreenDimensions: Getting screen geometry (done)");
     out_rect->setX(rect.x());
     out_rect->setY(rect.y());
 
-    // Always report slightly smaller-than-actual dimensions to prevent odd
-    // resizing behavior, which can happen if things like the OSX dock are
-    // not taken into account. The difference below is specifically to take
-    // into account the OSX dock.
-    out_rect->setWidth(rect.width() * .95);
-#ifdef __APPLE__
-    out_rect->setHeight(rect.height() * .85);
-#else  // _WIN32 || __linux__
-    out_rect->setHeight(rect.height() * .95);
-#endif
+    out_rect->setWidth(rect.width());
+    out_rect->setHeight(rect.height());
     D("slot_getScreenDimensions: end");
 }
 
@@ -2125,7 +2146,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
 void EmulatorQtWindow::onScreenChanged(QScreen* newScreen) {
     if (newScreen != mCurrentScreen) {
         D("%s: kEventScreenChanged", __FUNCTION__);
-        queueSkinEvent(createSkinEvent(kEventScreenChanged));
+        queueSkinEvent(createSkinEventScreenChanged());
         mCurrentScreen = newScreen;
     }
 }
@@ -2136,7 +2157,7 @@ void EmulatorQtWindow::onScreenConfigChanged() {
                              : nullptr;
     if (newScreen != mCurrentScreen) {
         D("%s: kEventScreenChanged", __FUNCTION__);
-        queueSkinEvent(createSkinEvent(kEventScreenChanged));
+        queueSkinEvent(createSkinEventScreenChanged());
         mCurrentScreen = newScreen;
     }
 }
@@ -2504,7 +2525,7 @@ void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
     maskWindowFrame();
 #ifdef __APPLE__
     // To fix issues when resizing + linking against macos sdk 11.
-    queueSkinEvent(createSkinEvent(kEventScreenChanged));
+    queueSkinEvent(createSkinEventScreenChanged());
 #endif
 }
 
@@ -3564,7 +3585,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
 #ifdef __APPLE__
     {
         // To fix issues when resizing + linking against macos sdk 11.
-        queueSkinEvent(createSkinEvent(kEventScreenChanged));
+        queueSkinEvent(createSkinEventScreenChanged());
     }
 #endif
 }
