@@ -17,6 +17,10 @@
 #include <string>
 #include <vector>
 
+#include "aemu/base/files/PathUtils.h"
+#include "aemu/base/files/Stream.h"
+#include "android/utils/path.h"
+
 #include "aemu/base/StringFormat.h"
 #include "aemu/base/logging/Log.h"
 #include "android/base/system/System.h"
@@ -25,7 +29,12 @@
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/backend-defs.h"
 #include "host-common/crash-handler.h"
-
+#include "host-common/feature_control.h"
+#include "host-common/opengles.h"
+#include "vulkan/vulkan.h"
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
 
 typedef char      hw_bool_t;
 typedef int       hw_int_t;
@@ -58,6 +67,7 @@ using android::base::RunOptions;
 using android::base::StringFormat;
 using android::base::System;
 using android::opengl::EmuglBackendList;
+namespace fc = android::featurecontrol;
 
 static EmuglBackendList* sBackendList = NULL;
 
@@ -211,6 +221,168 @@ void free_emugl_host_gpu_props(emugl_host_gpu_prop_list proplist) {
 
 static void setCurrentRenderer(const char* gpuMode) {
     sCurrentRenderer = emuglConfig_get_renderer(gpuMode);
+}
+
+static char* sVkVendor = nullptr;
+static int sVkVersionMajor = 0;
+static int sVkVersionMinor = 0;
+static int sVkVersionPatch = 0;
+
+void emuglConfig_get_vulkan_hardware_gpu(char** vendor,
+                                         int* major,
+                                         int* minor,
+                                         int* patch) {
+    if (!vendor || !major || !minor || !patch) {
+        return;
+    }
+    if (sVkVendor) {
+        *vendor = strdup(sVkVendor);
+        *major = sVkVersionMajor;
+        *minor = sVkVersionMinor;
+        *patch = sVkVersionPatch;
+        return;
+    }
+#if defined(_WIN32)
+    const char* mylibname = "vulkan-1.dll";
+#elif defined(__linux__)
+    const char* mylibname = "libvulkan.so";
+#elif defined(__APPLE__)
+    const char* mylibname = "libvulkan.dylib";
+#endif
+
+#if defined(_WIN32)
+    HMODULE library = LoadLibraryA(mylibname);
+    if (!library) {
+        derror("%s: cannot open vulkan lib %s\n", __func__, mylibname);
+        return;
+    }
+    auto* pvkCreateInstance = reinterpret_cast<PFN_vkCreateInstance>(
+            GetProcAddress(library, "vkCreateInstance"));
+    auto* pvkEnumeratePhysicalDevices =
+            reinterpret_cast<PFN_vkEnumeratePhysicalDevices>(
+                    GetProcAddress(library, "vkEnumeratePhysicalDevices"));
+    auto* pvkGetPhysicalDeviceProperties =
+            reinterpret_cast<PFN_vkGetPhysicalDeviceProperties>(
+                    GetProcAddress(library, "vkGetPhysicalDeviceProperties"));
+    auto* pvkDestroyInstance = reinterpret_cast<PFN_vkDestroyInstance>(
+            GetProcAddress(library, "vkDestroyInstance"));
+#else
+    const auto launcherDir =
+            android::base::System::get()->getLauncherDirectory();
+    const auto strlibname = android::base::PathUtils::join(launcherDir, "lib64",
+                                                           "vulkan", mylibname);
+    const char* fulllibname = strlibname.c_str();
+    auto library = dlopen(fulllibname, RTLD_NOW);
+    if (!library) {
+        dwarning("%s: failed to open %s", __func__, fulllibname);
+        return;
+    } else {
+        dprint("%s: successfully opened %s", __func__, fulllibname);
+    }
+    auto* pvkCreateInstance = reinterpret_cast<PFN_vkCreateInstance>(
+            dlsym(library, "vkCreateInstance"));
+    auto* pvkEnumeratePhysicalDevices =
+            reinterpret_cast<PFN_vkEnumeratePhysicalDevices>(
+                    dlsym(library, "vkEnumeratePhysicalDevices"));
+    auto* pvkGetPhysicalDeviceProperties =
+            reinterpret_cast<PFN_vkGetPhysicalDeviceProperties>(
+                    dlsym(library, "vkGetPhysicalDeviceProperties"));
+    auto* pvkDestroyInstance = reinterpret_cast<PFN_vkDestroyInstance>(
+            dlsym(library, "vkDestroyInstance"));
+#endif
+    if (!pvkCreateInstance || !pvkEnumeratePhysicalDevices ||
+        !pvkGetPhysicalDeviceProperties || !pvkDestroyInstance) {
+        derror("failed to find vkCreateInstance vkEnumeratePhysicalDevices "
+               "vkGetPhysicalDeviceProperties");
+        return;
+    }
+    VkApplicationInfo appInfo{};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "DetectGpuInfo";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "test_engine";
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+
+    VkInstanceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
+
+    uint32_t extensionCount = 0;
+    createInfo.enabledExtensionCount = extensionCount;
+    createInfo.ppEnabledExtensionNames = nullptr;
+
+    VkInstance instance;
+
+    VkResult result = pvkCreateInstance(&createInfo, 0, &instance);
+
+    if (result != VK_SUCCESS) {
+        dwarning("%s: Failed to create vulkan instance error code: %d\n",
+                 __func__, result);
+        return;
+    } else {
+        dprint("%s: Successfully created vulkan instance\n", __func__);
+    }
+
+    uint32_t deviceCount = 0;
+    result = pvkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+    if (result != VK_SUCCESS) {
+        pvkDestroyInstance(instance, nullptr);
+        dwarning("%s: Failed to query physical devices count %d\n", __func__,
+                 result);
+        return;
+    } else {
+        dprint("%s: Physical devices count is %d\n", __func__,
+               (int)(deviceCount));
+    }
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    result =
+            pvkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+    if (result != VK_SUCCESS) {
+        pvkDestroyInstance(instance, nullptr);
+        dwarning("%s: Failed to query physical devices %d\n", __func__, result);
+        return;
+    }
+
+    int highestApi = 0;
+    for (auto& physicalDevice : devices) {
+        VkPhysicalDeviceProperties physicalProp{};
+        pvkGetPhysicalDeviceProperties(physicalDevice, &physicalProp);
+        const bool isHardwareGpu =
+                (physicalProp.deviceType ==
+                         VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ||
+                 physicalProp.deviceType ==
+                         VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU);
+
+        dinfo("%s: Found %s gpu '%s' supporting vulkan api %d.%d.%d\n",
+              __func__, isHardwareGpu ? "Hardware" : "Software",
+              physicalProp.deviceName,
+              VK_API_VERSION_MAJOR(physicalProp.apiVersion),
+              VK_API_VERSION_MINOR(physicalProp.apiVersion),
+              VK_API_VERSION_PATCH(physicalProp.apiVersion));
+        if (isHardwareGpu) {
+            if (physicalProp.apiVersion > highestApi) {
+                if (*vendor) {
+                    free(*vendor);
+                }
+                highestApi = physicalProp.apiVersion;
+                *vendor = strdup(physicalProp.deviceName);
+                *major = VK_API_VERSION_MAJOR(physicalProp.apiVersion);
+                *minor = VK_API_VERSION_MINOR(physicalProp.apiVersion);
+                *patch = VK_API_VERSION_PATCH(physicalProp.apiVersion);
+            }
+        }
+    }
+
+    if (*vendor) {
+        dinfo("%s: Using gpu '%s' for vulkan support\n", __func__, *vendor);
+        sVkVendor = strdup(*vendor);
+        sVkVersionMajor = *major;
+        sVkVersionMinor = *minor;
+        sVkVersionPatch = *patch;
+    }
+    pvkDestroyInstance(instance, nullptr);
 }
 
 bool emuglConfig_init(EmuglConfig* config,
@@ -470,6 +642,46 @@ bool emuglConfig_init(EmuglConfig* config,
     snprintf(config->status, sizeof(config->status),
              "GPU emulation enabled using '%s' mode", gpu_mode);
     setCurrentRenderer(gpu_mode);
+    // todo: add the amd/intel gpu quirks
+    if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
+        char* vkVendor = nullptr;
+        int vkMajor = 0;
+        int vkMinor = 0;
+        int vkPatch = 0;
+        // bug: 324086743
+        // we have to enable VulkanAllocateDeviceMemoryOnly
+        // to work around the kvm+amdgpu driver bug
+        // where kvm apparently error out with Bad Address
+        emuglConfig_get_vulkan_hardware_gpu(&vkVendor, &vkMajor, &vkMinor,
+                                            &vkPatch);
+#if defined(__linux__)
+        if (vkVendor && strncmp("AMD", vkVendor, 3) == 0) {
+            feature_set_if_not_overridden(
+                    kFeature_VulkanAllocateDeviceMemoryOnly, true);
+            if (fc::isEnabled(fc::VulkanAllocateDeviceMemoryOnly)) {
+                dinfo("Enabled VulkanAllocateDeviceMemoryOnly feature for "
+                      "gpu "
+                      "vendor %s on Linux\n",
+                      vkVendor);
+            }
+        }
+        if (vkVendor && strncmp("Intel", vkVendor, 5) == 0) {
+            feature_set_if_not_overridden(kFeature_VulkanAllocateHostMemory,
+                                          true);
+            if (fc::isEnabled(fc::VulkanAllocateHostMemory)) {
+                dinfo("Enabled VulkanAllocateHostMemory feature for "
+                      "gpu "
+                      "vendor %s on Linux\n",
+                      vkVendor);
+            }
+        }
+#endif
+
+        if (vkVendor) {
+            free(vkVendor);
+        }
+    }
+
     D("%s: %s\n", __func__, config->status);
     return true;
 }

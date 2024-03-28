@@ -105,8 +105,42 @@ bool androidEmuglConfigInit(EmuglConfig* config,
             noWindow, blacklisted, hasGuestRenderer, uiPreferredBackend,
             forceUseHostGpuVulkan);
 
+    bool isUnsupportedGpuDriver = false;
+    {
+#if defined(_WIN32)
+        char* vkVendor = nullptr;
+        int vkMajor = 0;
+        int vkMinor = 0;
+        int vkPatch = 0;
+        emuglConfig_get_vulkan_hardware_gpu(&vkVendor, &vkMajor, &vkMinor,
+                                            &vkPatch);
+        if (vkVendor) {
+            if (strncmp("AMD", vkVendor, 3) == 0) {
+                if (vkMajor == 1 && vkMinor < 3) {
+                    // on windows, amd gpu with api 1.2.x does not work
+                    // for vulkan, disable it
+                    isUnsupportedGpuDriver = true;
+                }
+            } else if (strncmp("Intel", vkVendor, 5) == 0) {
+                if (vkMajor == 1 && ((vkMinor == 3 && vkPatch < 240) || (vkMinor <3) )) {
+                    // intel gpu with api < 1.3.240 does not work
+                    // for vulkan, disable it
+                    isUnsupportedGpuDriver = true;
+                }
+            }
+            if (isUnsupportedGpuDriver) {
+                    dwarning(
+                            "Your GPU '%s' has driver version %d.%d.%d, and"
+                            " cannot support Vulkan properly on windows."
+                            " Please update your GPU Driver.",
+                            vkVendor, vkMajor, vkMinor, vkPatch);
+            }
+        }
+#endif
+    }
+
     *hostGpuVulkanBlacklisted =
-        async_query_host_gpu_VulkanBlacklisted();
+            isUnsupportedGpuDriver || async_query_host_gpu_VulkanBlacklisted();
 
     return result;
 }

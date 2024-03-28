@@ -196,7 +196,6 @@ private:
     std::unordered_set<EventListener<void>*> mListeners;
 };
 
-
 /**
  * GenericEventHandler is a class for handling events of type T as an event
  * listener. It uses a policy class named EventPolicy to define the behavior of
@@ -228,8 +227,11 @@ public:
      */
     ~GenericEventHandler() {
         DD_EVT("Deleted %p", this);
-        mListener->removeListener(this);
+        unsubscribe();
     }
+
+protected:
+    void unsubscribe() { mListener->removeListener(this); }
 
 private:
     ChangeSupport* mListener;
@@ -277,24 +279,23 @@ public:
      */
     void OnCancel() override {
         DD_EVT("Cancelled %p", this);
+        GenericEventHandler<Event>::unsubscribe();
         grpc::ServerWriteReactor<T>::Finish(grpc::Status::CANCELLED);
     }
-
 };
 
 // template<class T>
 // using GenericEventStreamWriter = BaseEventStreamWriter<T, T>
 
 template <class T>
-class GenericEventStreamWriter
-    : public BaseEventStreamWriter<T, T> {
+class GenericEventStreamWriter : public BaseEventStreamWriter<T, T> {
     using ChangeSupport = EventChangeSupport<T>;
+
 public:
     GenericEventStreamWriter(ChangeSupport* listener)
         : BaseEventStreamWriter<T, T>(listener) {}
 
     virtual ~GenericEventStreamWriter() = default;
-
 
     /**
      * Overrides the EventListener<T>::eventArrived() method to handle an

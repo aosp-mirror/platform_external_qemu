@@ -3247,39 +3247,6 @@ extern "C" int main(int argc, char** argv) {
         RendererConfig rendererConfig;
         configAndStartRenderer(uiPreferredGlesBackend, &rendererConfig);
 
-#if defined(__linux__)
-        {
-            // bug: 324086743
-            // we have to enable VulkanAllocateDeviceMemoryOnly
-            // to work around the kvm+amdgpu driver bug
-            // where kvm apparently error out with Bad Address
-            char* glVendor = nullptr;
-            char* glRenderer = nullptr;
-            char* glVersion = nullptr;
-            android_getOpenglesHardwareStrings(&glVendor, &glRenderer, &glVersion);
-            if (glVendor && strcmp("AMD", glVendor) == 0) {
-                feature_set_if_not_overridden(
-                        kFeature_VulkanAllocateDeviceMemoryOnly, true);
-                if (fc::isEnabled(fc::VulkanAllocateDeviceMemoryOnly)) {
-                    dinfo("Enabled VulkanAllocateDeviceMemoryOnly feature for "
-                          "gpu "
-                          "vendor %s on Linux\n",
-                          glVendor);
-                }
-            }
-            if (glVendor && strncmp("Intel", glVendor, 5) == 0) {
-                feature_set_if_not_overridden(kFeature_VulkanAllocateHostMemory,
-                                              true);
-                if (fc::isEnabled(fc::VulkanAllocateHostMemory)) {
-                    dinfo("Enabled VulkanAllocateHostMemory feature for "
-                          "gpu "
-                          "vendor %s on Linux\n",
-                          glVendor);
-                }
-            }
-        }
-#endif
-
         // Gpu configuration is set, now initialize the multi display, screen
         // recorder and screenshot callback
         bool isGuestMode =
