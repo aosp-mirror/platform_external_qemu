@@ -336,9 +336,10 @@ add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/gl/gl-host-common
                  ${GFXSTREAM_PREFIX}-gl-host-common)
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/features
                  ${GFXSTREAM_PREFIX}-host-features)
-# Include external/gfxstream-protocols project
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/common
                  ${GFXSTREAM_PREFIX}-common)
+add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/stb
+                 ${GFXSTREAM_PREFIX}-third-party-stb)
 # Include hardware/google/aemu project
 set(AEMU_COMMON_BUILD_CONFIG "qemu-android" CACHE STRING "")
 set(GFXSTREAM_REPO_ROOT

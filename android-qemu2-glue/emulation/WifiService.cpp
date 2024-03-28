@@ -169,7 +169,8 @@ std::shared_ptr<WifiService> Builder::build() {
                 mSlirpOpts.dns.empty() ? nullptr : mSlirpOpts.dns.c_str(),
                 mSlirpOpts.dns6.empty() ? nullptr : mSlirpOpts.dns6.c_str(),
                 nullptr /* dnssearch */, nullptr /* vdomainname */,
-                nullptr /* tftp_server_name */);
+                nullptr /* tftp_server_name */,
+                mSlirpOpts.host_dns);
     }
 #else
     if (mRedirectToNetsim) {
