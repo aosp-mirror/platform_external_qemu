@@ -256,12 +256,30 @@ extern void skin_winsys_get_monitor_rect(SkinRect* rect) {
     D("skin_winsys_get_monitor_rect: Windows: GetSystemMetrics(SM_CYSCREEN)\n");
     rect->size.h = (int)GetSystemMetrics(SM_CYSCREEN);
 #elif defined(__APPLE__)
-    D("skin_winsys_get_monitor_rect: macOS: CGMainDisplayID()\n");
-    int displayId = CGMainDisplayID();
-    D("skin_winsys_get_monitor_rect: macOS: CGDisplayPixelsWide()\n");
-    rect->size.w = CGDisplayPixelsWide(displayId);
-    D("skin_winsys_get_monitor_rect: macOS: CGDisplayPixelsHigh()\n");
-    rect->size.h = CGDisplayPixelsHigh(displayId);
+    D("skin_winsys_get_monitor_rect: macOS: start\n");
+    {
+        // note about mac:
+        // normal display, dpr is 1, physical pixel width == logical pixel width
+        // retenal display, dpr is 2, physical pixel width ==  2 * (logical pixel width)
+        // same applies to height
+        int x = 0, y = 0;
+        skin_winsys_get_window_pos(&x, &y);
+        const CGPoint pt = {x, y};
+        CGDirectDisplayID myids[1] = {};
+        uint32_t count = 0;
+        CGGetDisplaysWithPoint(pt, 1, myids, &count);
+        if (count > 0) {
+            const CGDirectDisplayID displayId = myids[0];
+            const CGDisplayModeRef mode = CGDisplayCopyDisplayMode(displayId);
+            const int physicalPixelWidth = CGDisplayModeGetPixelWidth(mode);
+            const int physicalPixelHeight = CGDisplayModeGetPixelHeight(mode);
+            rect->size.w = physicalPixelWidth;
+            rect->size.h = physicalPixelHeight;
+            D("display id %d physical pixels width %d height %d\n",
+                    (int)(displayId), physicalPixelWidth, physicalPixelHeight);
+        }
+    }
+    D("skin_winsys_get_monitor_rect: macOS: done\n");
 #else  // Linux
     D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL)\n");
     if (!s_display) {
