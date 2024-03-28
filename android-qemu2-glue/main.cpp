@@ -2739,9 +2739,11 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Network
-
-    if (feature_is_enabled(kFeature_VirtioWifi) && opts->no_ethernet) {
-        dinfo("Do not initialize netdev virtio-net because option no-ethernet is provided.");
+    bool isATV = avdInfo_getAvdFlavor(
+                         getConsoleAgents()->settings->avdInfo()) == AVD_TV;
+    if (isATV && feature_is_enabled(kFeature_VirtioWifi) && opts->no_ethernet) {
+        dinfo("Do not initialize netdev virtio-net for Android TV virtual device"
+            " because option no-ethernet is provided.");
     } else {
         args.add("-netdev");
         if (opts->net_tap) {
