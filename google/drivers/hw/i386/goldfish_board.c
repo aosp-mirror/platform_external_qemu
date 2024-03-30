@@ -23,17 +23,27 @@
 #include "hw/hotplug.h"
 #include "hw/hyperv/vmbus-bridge.h"
 #include "hw/i386/pc.h"
+#include "hw/southbridge/piix.h"
 #include "qemu/module.h"
 #include "qemu/typedefs.h"
 
 static void android_machine_options(MachineClass *m) {
   m->desc = "Android x86_64 (i440fx + PIIX)";
   m->default_machine_opts = "firmware=bios-256k.bin";
+  m->default_machine_opts = "firmware=bios-256k.bin,suppress-vmdesc=on";
   m->default_display = "std";
   m->default_nic = "e1000";
   m->no_parallel = !module_object_class_by_name(TYPE_ISA_PARALLEL);
   machine_class_allow_dynamic_sysbus_dev(m, TYPE_RAMFB_DEVICE);
   machine_class_allow_dynamic_sysbus_dev(m, TYPE_VMBUS_BRIDGE);
+
+  PCMachineClass *pcmc = PC_MACHINE_CLASS(m);
+  pcmc->default_south_bridge = TYPE_PIIX3_DEVICE;
+  pcmc->rsdp_in_ram = false;
+  pcmc->resizable_acpi_blob = false;
+  pcmc->broken_32bit_mem_addr_check = true;
+  pcmc->pci_root_uid = 0;
+  pcmc->default_cpu_version = 1;
 }
 
 static MachineClass *find_machine(const char *name, GSList *machines) {
@@ -56,7 +66,8 @@ static void pc_init_goldfish(MachineState *machine) {
   // initialize function. This will give us a good baseline.
   GSList *machines = object_class_get_list(TYPE_MACHINE, false);
   MachineClass *machine_class;
-  machine_class = find_machine("pc-i440fx-8.1", machines);
+
+  machine_class = find_machine("pc", machines);
   machine_class->init(machine);
 
   // Make sure we override dsdt function, as we want to configure the board
