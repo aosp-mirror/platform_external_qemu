@@ -26,7 +26,6 @@ function(get_clang_version RET_VAL)
   file(READ "${ANDROID_QEMU2_TOP_DIR}/android/build/toolchains.json"
        TOOLCHAIN_JSON_STRING)
   string(JSON CLANG_VERSION GET ${TOOLCHAIN_JSON_STRING} ${IDX} clang)
-  # message(FATAL_ERROR "${CLANG_VERSION} == ${CLANG_COMPILER_VERSION}")
   set(${RET_VAL} ${CLANG_VERSION} PARENT_SCOPE)
 endfunction()
 
