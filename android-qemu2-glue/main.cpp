@@ -2882,9 +2882,11 @@ extern "C" int main(int argc, char** argv) {
         }
     }
 
+    // TODO(b/333591823): Handle system images without Uwb support
     if (feature_is_enabled(kFeature_Uwb)) {
         D("Uwb feature is enabled");
-        // TODO(b/331635691): virtio console registration for UWB
+        args.add2("-chardev", "netsim,id=uwb");
+        args.add2("-device", "virtconsole,chardev=uwb,name=uwb");
     }
 
     bool bluetooth_explicitly_disabled =
