@@ -2154,7 +2154,9 @@ message EmulatorDetails {
     optional int32 emu_pid = 37;
     // Process ID of the child qemu process that does the real job.
     optional int32 qemu_pid = 38;
-    // Next tag: 39
+    // Vulkan backend.
+    optional VulkanIcd vulkan_icd = 39;
+    // Next tag: 40
 
     // Emulator instance liveness as determined via adb connectivity.
     enum EmulatorAdbLiveness {
@@ -2221,6 +2223,14 @@ message EmulatorDetails {
         HYPERV = 5;  // Microsoft Hyper-V
         AEHD = 6;    // AEHD
                      // Next tag: 7
+    }
+
+    // Vulkan backend
+    enum VulkanIcd {
+        UNKNOWN_VK = 0;
+        HARDWARE_VK = 1;
+        SWIFTSHADER_VK = 2; // Swiftshader software renderer
+        MOLTEN_VK = 3; // Mac only
     }
 }
 

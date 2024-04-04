@@ -12,7 +12,7 @@ Note: Parsing the .dot file can take a while, as these files are pretty big, so 
 For example on linux:
 
 ```
-$HOME/src/android/emu-master-dev/prebuilts/cmake/linux-x86/bin/cmake -B$HOME/src/android/emu-master-dev/out -G Ninja -DOPTION_CRASHUPLOAD=PROD -DBREAKPAD_API_URL=https://prod-crashsymbolcollector-pa.googleapis.com -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$HOME/src/android/emu-master-dev/external/qemu/android/build/cmake/toolchain-linux-x86_64.cmake -DPython_EXECUTABLE=/usr/bin/python3 -DCLANG_COMPILER_VERSION=clang-r487747c -DRUST_COMPILER_VERSION=1.71.0 -DQTWEBENGINE=True -DGFXSTREAM=True $HOME/src/android/emu-master-dev/external/qemu --graphviz=$HOME/src/android/emu-master-dev/out/mydot.dot
+$HOME/src/android/emu-master-dev/prebuilts/cmake/linux-x86/bin/cmake -B$HOME/src/android/emu-master-dev/out -G Ninja -DOPTION_CRASHUPLOAD=PROD -DBREAKPAD_API_URL=https://prod-crashsymbolcollector-pa.googleapis.com -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$HOME/src/android/emu-master-dev/external/qemu/android/build/cmake/toolchain-linux-x86_64.cmake -DPython_EXECUTABLE=/usr/bin/python3 -DQTWEBENGINE=True -DGFXSTREAM=True $HOME/src/android/emu-master-dev/external/qemu --graphviz=$HOME/src/android/emu-master-dev/out/mydot.dot
 ```
 
 Note: Do not copy paste this command as is, obtain it from running `android/rebuild.sh` make sure to add the flag ` --graphviz=$HOME/src/android/emu-master-dev/out/mydot.dot`

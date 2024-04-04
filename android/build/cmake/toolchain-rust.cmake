@@ -30,7 +30,6 @@
 function(get_rust_version RET_VAL)
   file(READ "${ANDROID_QEMU2_TOP_DIR}/android/build/toolchains.json" TOOLCHAIN_JSON_STRING)
   string(JSON RUST_VERSION GET ${TOOLCHAIN_JSON_STRING} ${IDX} rust)
-  # message(FATAL_ERROR "${RUST_VERSION} == ${RUST_COMPILER_VERSION}")
   set(${RET_VAL} ${RUST_VERSION} PARENT_SCOPE)
 endfunction()
 
@@ -169,12 +168,13 @@ function(configure_rust)
     set(Rust_CARGO ${cfg_COMPILER_ROOT}/cargo PARENT_SCOPE)
     internal_set_env_cache(Rust_CARGO "${RUST_COMPILER_ROOT}/cargo")
   else()
+    set(Rust_CARGO "NOT_FOUND" PARENT_SCOPE)
+    set(Rust_COMPILER "NOT_FOUND" PARENT_SCOPE)
+    internal_set_env_cache(Rust_CARGO "${RUST_COMPILER_ROOT}/cargo")
     message(
-      FATAL_ERROR
+      WARNING
         "\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-        "The rust directory ${cfg_COMPILER_ROOT} does not exist. If the compiler version has changed you must "
-        "update the function `get_rust_version` in the file ${CMAKE_CURRENT_LIST_FILE} to return the proper version.\n"
-        "You will also need to upgrade the windows build bots to use the new rust toolchain. \n"
+        "No rust toolchain available!"
         "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n"
     )
   endif()

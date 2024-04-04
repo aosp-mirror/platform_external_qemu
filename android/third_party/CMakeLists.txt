@@ -200,7 +200,9 @@ endif()
 
 if(FEATURE_NETSIM_FROM_SOURCE)
   message(WARNING "*** NETSIM IS MIGRATING TO PREBUILTS! ***")
-  message(WARNING "*** IF YOU ARE A NETSIM DEVELOPER YOU SHOULD SWITCH TO NETSIM-DEV! ***")
+  message(
+    WARNING
+      "*** IF YOU ARE A NETSIM DEVELOPER YOU SHOULD SWITCH TO NETSIM-DEV! ***")
   set(EXTERNAL_QEMU ${ANDROID_QEMU2_TOP_DIR})
   if(TARGET Rust::Rustc)
     add_subdirectory(${AOSP_ROOT}/packages/modules/Bluetooth/tools/rootcanal
@@ -228,8 +230,6 @@ if(FEATURE_NETSIM_FROM_SOURCE)
         "-DANDROID_SYMBOL_DIR=${ANDROID_SYMBOL_DIR}"
         "-DOPTION_BAZEL=TRUE"
         "-DPython_EXECUTABLE=${Python_EXECUTABLE}"
-        "-DCLANG_COMPILER_VERSION=${CLANG_COMPILER_VERSION}"
-        "-DRUST_COMPILER_VERSION=${RUST_COMPILER_VERSION}"
         "-DNETSIM_EXT=TRUE"
       BUILD_BYPRODUCTS "${NETSIM_CROSS_DIR}/netsim;${NETSIM_CROSS_DIR}/netsimd"
       LOG_BUILD TRUE
@@ -239,7 +239,8 @@ if(FEATURE_NETSIM_FROM_SOURCE)
       INSTALL_COMMAND "")
     install(PROGRAMS ${NETSIM_CROSS_DIR}/netsim ${NETSIM_CROSS_DIR}/netsimd
             DESTINATION .)
-    install(FILES ${NETSIM_CROSS_DIR}/glib2/libglib2_darwin-x86_64.dylib DESTINATION lib64)
+    install(FILES ${NETSIM_CROSS_DIR}/glib2/libglib2_darwin-x86_64.dylib
+            DESTINATION lib64)
   endif()
 
   # Add netsim-ui into objs
@@ -270,26 +271,33 @@ if(FEATURE_NETSIM_FROM_SOURCE)
   android_license(TARGET "NETSIM_UI_DEPENDENCIES" LIBNAME None SPDX None LICENSE None LOCAL None)
   android_target_dependency(packet-streamer-client-lib all NETSIM_UI_DEPENDENCIES)
 else()
-  message(STATUS "Using prebuilt netsim")
-  prebuilt(NETSIM)
   add_subdirectory(${AOSP_ROOT}/tools/netsim/proto netsim_proto)
   add_subdirectory(${AOSP_ROOT}/tools/netsim/src/util netsim_util)
   add_subdirectory(${AOSP_ROOT}/tools/netsim/src/backend netsim_backend)
   add_subdirectory(mynewt-nimble)
 
-  # Binplace to objs
-  android_target_dependency(packet-streamer-client-lib all NETSIM_UI_DEPENDENCIES)
-  android_target_dependency(packet-streamer-client-lib all NETSIM_DEPENDENCIES)
+  if(NOT LINUX_AARCH64)
+    message(STATUS "Using prebuilt netsim binaries")
+    prebuilt(NETSIM)
 
-  # Install ui (Disable this for non canary?)
-  android_install_dependency_force_exec(all NETSIM_UI_DEPENDENCIES)
+    # Binplace to objs
+    android_target_dependency(packet-streamer-client-lib all
+                              NETSIM_UI_DEPENDENCIES)
+    android_target_dependency(packet-streamer-client-lib all
+                              NETSIM_DEPENDENCIES)
+
+    # Install ui (Disable this for non canary?)
+    android_install_dependency_force_exec(all NETSIM_UI_DEPENDENCIES)
+  else()
+    message(WARNING "Netsimd is not available for this platform, bluetooth/wifi emulation will require a remote instance.")
+  endif()
 endif()
 
 # gfxstream, aemu-common modules
 set(GFXSTREAM_REPO_ROOT
     ${ANDROID_QEMU2_TOP_DIR}/../../hardware/google/gfxstream)
 if(NOT LINUX_AARCH64)
-    set(ENABLE_VKCEREAL_TESTS ON)
+  set(ENABLE_VKCEREAL_TESTS ON)
 endif()
 function(discover_gfxstream_internal_targets result subdir)
   if(CMAKE_VERSION VERSION_LESS "3.7.0")
@@ -360,7 +368,7 @@ if(NOT LINUX_AARCH64)
     set(ASTCDEC_LIB_NAME astcdec-avx2-static)
   endif()
   add_subdirectory(${GFXSTREAM_REPO_ROOT}/third-party/astc-encoder
-                  ${ASTCDEC_LIB_NAME})
+                   ${ASTCDEC_LIB_NAME})
 endif()
 
 if(ENABLE_VKCEREAL_TESTS)
@@ -377,8 +385,9 @@ foreach(GFXSTREAM_SUBDIR IN LISTS GFXSTREAM_SUBDIRS)
   discover_gfxstream_internal_targets(GFXSTREAM_INTERNAL_TARGETS
                                       ${GFXSTREAM_SUBDIR})
 endforeach()
-set(GFXSTREAM_DEPENDENCIES ${GFXSTREAM_INTERNAL_TARGETS} angle_common
-                           angle_shader_translator renderdoc ${ASTCDEC_LIB_NAME})
+set(GFXSTREAM_DEPENDENCIES
+    ${GFXSTREAM_INTERNAL_TARGETS} angle_common angle_shader_translator
+    renderdoc ${ASTCDEC_LIB_NAME})
 android_license(
   TARGET "${GFXSTREAM_DEPENDENCIES}"
   LIBNAME gfxstream
@@ -389,9 +398,5 @@ android_license(
     "https://android.googlesource.com/platform/hardware/google/gfxstream/+/refs/heads/master/LICENSE"
 )
 # Used by gfxstream but has different license.
-android_license(
-  TARGET "libdrm_headers"
-  LIBNAME None
-  SPDX MIT
-  LICENSE "MIT"
-  LOCAL "${ANDROID_QEMU2_TOP_DIR}/../libdrm/LICENSE")
+android_license(TARGET "libdrm_headers" LIBNAME None SPDX MIT LICENSE "MIT"
+                LOCAL "${ANDROID_QEMU2_TOP_DIR}/../libdrm/LICENSE")

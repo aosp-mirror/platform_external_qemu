@@ -960,12 +960,9 @@ bool MultiDisplay::isOrientationSupported() {
  */
 void MultiDisplay::recomputeLayoutLocked() {
     if (android_is_automotive()) {
-        // Use stacked layout for distant display
-        if (android::automotive::isDistantDisplaySupported(
-                    getConsoleAgents()->settings->avdInfo())) {
-            recomputeStackedLayoutLocked();
-            return;
-        }
+        // Apply stacked layout for automotive devices
+        recomputeStackedLayoutLocked();
+        return;
     }
     SkinRotation rotation = SKIN_ROTATION_0;
     SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
@@ -976,18 +973,35 @@ void MultiDisplay::recomputeLayoutLocked() {
 }
 
 /*
- * Locate the most wide width display on a separate row
+ * Use stacked layout
  */
 void MultiDisplay::recomputeStackedLayoutLocked() {
-    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
+    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>>
+            rectangles, newRectangles;
     for (const auto& iter : mMultiDisplay) {
         if (iter.first == 0 || iter.second.cb != 0) {
             rectangles[iter.first] =
                     std::make_pair(iter.second.width, iter.second.height);
         }
     }
-    for (const auto& iter :
-         android::base::resolveStackedLayout(rectangles)) {
+    if (android::automotive::isDistantDisplaySupported(
+                getConsoleAgents()->settings->avdInfo())) {
+        // Locate the most wide width display on a separate row
+        newRectangles = android::base::resolveStackedLayout(rectangles);
+    } else {
+        // Use legacy layout for non distant display emulator
+        uint32_t monitorWidth, monitorHeight;
+        double monitorRatio = 1.0;
+        if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
+            LOG(ERROR) << "Unable to get monitor width and height, using"
+                    " default ratio of 1.0";
+        } else {
+            monitorRatio = (double)monitorHeight / (double)monitorWidth;
+        }
+        newRectangles = android::base::resolveLayout(rectangles, monitorRatio);
+    }
+
+    for (const auto& iter : newRectangles) {
         mMultiDisplay[iter.first].pos_x = iter.second.first;
         mMultiDisplay[iter.first].pos_y = iter.second.second;
     }

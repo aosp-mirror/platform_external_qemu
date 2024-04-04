@@ -358,7 +358,10 @@ OPT_PARAM(wifi_mac_address,
           "only applies to situation where AVD is loaded from snapshot using "
           "read-only mode. Example: -wifi-mac-address 00:11:22:33:44:55.")
 
-OPT_FLAG(no_ethernet, "Disable virtual Ethernet interface en0. This option is only effective when feature VirtioWifi is used.")
+OPT_FLAG(
+        no_ethernet,
+        "Disable virtual Ethernet interface en0. This option is only effective "
+        "for Android TV virtual device and when feature VirtioWifi is enabled.")
 
 OPT_PARAM(android_serialno,
           "<android serialno>",

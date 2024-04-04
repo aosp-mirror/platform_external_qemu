@@ -57,7 +57,6 @@ include(android)
 include(prebuilts)
 include(qemu2-src-gen)
 
-set(OPTION_RUST TRUE CACHE BOOL "Enable all rust dependencies.")
 set(OPTION_BAZEL TRUE CACHE BOOL "Enable bazel compilation (Linux only).")
 set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
 set(OPTION_TRACE
@@ -147,6 +146,9 @@ set(OPTION_ENABLE_SYSTEM_RUST
       "Use the system rust compiler, only needed on Mac M1 or Windows."
 )
 
+if (FEATURE_NETSIM_FROM_SOURCE)
+  set(OPTION_RUST TRUE CACHE BOOL "Enable all rust dependencies.")
+endif()
 if(OPTION_RUST)
   if (DARWIN_AARCH64 AND NOT Rust_COMPILER)
     message(STATUS "On Apple sillicon attempting to use platform toolchain if available.")
@@ -218,7 +220,7 @@ if(NOT OPTION_CRASHUPLOAD STREQUAL "NONE")
   message(STATUS "Uploading symbols to ${BREAKPAD_API_URL}")
 endif()
 
-set(FEATURE_NETSIM_FROM_SOURCE TRUE CACHE BOOL "Build the netsim network simulator from source. **DEPRECATED**")
+set(FEATURE_NETSIM_FROM_SOURCE FALSE CACHE BOOL "Build the netsim network simulator from source. **DEPRECATED**")
 
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)

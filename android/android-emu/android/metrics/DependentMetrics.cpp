@@ -800,6 +800,21 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
             System::get()->envGet("ANDROID_EMULATOR_WRAPPER_PID").c_str()));
     event->mutable_emulator_details()->set_qemu_pid(
             System::get()->getCurrentProcessId());
+
+    std::string vk_icd = System::get()->envGet("ANDROID_EMU_VK_ICD");
+    if (vk_icd == "") { // Use hardware when vk_icd is null
+        event->mutable_emulator_details()->set_vulkan_icd(
+                android_studio::EmulatorDetails::HARDWARE_VK);
+    } else if (vk_icd == "swiftshader") {
+        event->mutable_emulator_details()->set_vulkan_icd(
+                android_studio::EmulatorDetails::SWIFTSHADER_VK);
+    } else if (vk_icd == "moltenvk") {
+        event->mutable_emulator_details()->set_vulkan_icd(
+                android_studio::EmulatorDetails::MOLTEN_VK);
+    } else {
+        event->mutable_emulator_details()->set_vulkan_icd(
+                android_studio::EmulatorDetails::UNKNOWN_VK);
+    }
 }
 
 void android_metrics_report_common_info(bool openglAlive) {
