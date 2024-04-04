@@ -654,6 +654,9 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
         case android::featurecontrol::VulkanAllocateHostMemory:
             return android_studio::EmulatorFeatureFlagState::
                     VULKAN_ALLOCATE_HOST_MEMORY;
+        case android::featurecontrol::QtRawKeyboardInput:
+            return android_studio::EmulatorFeatureFlagState::
+                    DEVICE_KEYBOARD_QT_RAW_INPUT;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
