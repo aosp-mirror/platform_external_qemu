@@ -206,16 +206,19 @@ netsim::packet::NetsimdOptions get_netsim_options() {
 
 void register_netsim(const std::string address,
                      const std::string name,
+                     const std::string dns_server,
                      const std::string netsim_args) {
     netsim::packet::SetPacketStreamEndpoint(address);
     gNetsimConfiguration.options = {
             .no_cli_ui = !feature_is_enabled(kFeature_NetsimCliUi),
             .no_web_ui = !feature_is_enabled(kFeature_NetsimWebUi),
+            .host_dns = dns_server,
             .netsim_args = netsim_args,
     };
-    DD("Producing channel: no_cli_ui: %d, no_web_ui %d, netsim_args %s",
+    DD("Producing channel: no_cli_ui: %d, no_web_ui %d, dns_server %s, netsim_args %s",
        gNetsimConfiguration.options.no_cli_ui,
        gNetsimConfiguration.options.no_web_ui,
+       gNetsimConfiguration.options.host_dns.c_str(),
        gNetsimConfiguration.options.netsim_args.c_str());
     gNetsimConfiguration.name = name;
 }

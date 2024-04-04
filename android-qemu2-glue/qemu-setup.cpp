@@ -307,6 +307,7 @@ bool qemu_android_emulation_early_setup() {
     auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
     std::string name = get_display_name();
     register_netsim(to_string(opts->packet_streamer_endpoint), name,
+                    to_string(opts->dns_server),
                     to_string(opts->netsim_args));
     return true;
 }
