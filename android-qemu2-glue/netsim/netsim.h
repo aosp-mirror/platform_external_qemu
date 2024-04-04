@@ -18,6 +18,7 @@
 
 void register_netsim(const std::string address,
                      const std::string host_id,
+                     const std::string dns_server,
                      const std::string netsim_args);
 
 const std::string get_netsim_device_name();
