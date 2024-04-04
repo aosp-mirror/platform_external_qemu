@@ -232,7 +232,7 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
 
         # We should have loaded the visual studio environment.
         # We are going to extract the -L paths from this.
-        lib_paths = '"-L'+ '" "-L'.join(self.env["LIB"].split(";")) + '"'
+        lib_paths = '"-L' + '" "-L'.join(self.env["LIB"].split(";")) + '"'
 
         script = (
             "# Link script for cargo \n"
@@ -275,7 +275,7 @@ class WindowsToWindowsGenerator(ToolchainGenerator):
             f"set CARGO_BUILD_RUSTC={rustc_bin}\n"
             f"set CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER={rust_linker}\n"
             "set CARGO_BUILD_TARGET=x86_64-pc-windows-gnu\n"
-            'set RUSTFLAGS=-Cdefault-linker-libraries=yes\n'
+            "set RUSTFLAGS=-Cdefault-linker-libraries=yes\n"
             f"{cache}\n"
             f'set CC_x86_64-pc-windows-gnu={self.dest / "cc.cmd"}\n'
             f'set HOST_CC={self.dest / "cc.cmd"}\n'

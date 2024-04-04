@@ -18,7 +18,7 @@ import shutil
 from pathlib import Path
 from typing import Dict, Set
 
-from aemu.process.runner import check_output
+from aemu.process.runner import check_output, run
 
 
 class PackageConfigPc:
@@ -120,6 +120,19 @@ class PackageConfigPc:
         else:
             logging.info("Not patching %s", dylib)
 
+    def _patch_solib(self, solib: Path):
+        # Run the objdump command to extract SONAME
+        objdump_output = run(["objdump", "-p", solib])
+
+        # Find the line containing SONAME
+        soname_line = next((line for line in objdump_output if "SONAME" in line), None)
+
+        if soname_line:
+            # Extract the SONAME file that the library is using and setup the symlink
+            soname = solib.parent / soname_line.split()[1]
+            target_relative = solib.relative_to(soname.parent)
+            soname.symlink_to(target_relative)
+
     def binplace(self, dest_dir: Path):
         """Binplace the shared libraries to the given location."""
         so_ext = [".so", ".dylib", ".dll"]
@@ -137,6 +150,9 @@ class PackageConfigPc:
                     if ext == ".dylib":
                         # Patch up bazel @rpath
                         self._patch_dylib(destination)
+                    if ext == ".so":
+                        # Patch up links if needed
+                        self._patch_solib(destination)
 
                     return
 

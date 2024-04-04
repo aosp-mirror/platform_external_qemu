@@ -58,25 +58,23 @@ class QemuBuilder:
         CMakeLib.builder = self.cmake
         BazelLib.builder = self.bazel
 
-
         # Initialize the toolchain generator with the specified destination and an empty suffix.
         # This generator will be used to manage toolchain-related configurations.
         self.toolchain_generator: ToolchainGenerator = generator
         if ccache:
             self.toolchain_generator.ccache = Path(ccache).absolute()
         self.toolchain_generator.bazel = self.bazel
-        CargoLib.builder = Cargo(
-            self.aosp, self.toolchain_generator, self.dest
-        )
+        CargoLib.builder = Cargo(self.aosp, self.toolchain_generator, self.dest)
 
     def host(self) -> str:
         return platform.system().lower()
 
-    def configure_meson(self):
+    def configure_meson(self, meson_flags):
         """Configure the QEMU build using Meson build system."""
         # Generate the toolchain wrappers.
         self.toolchain_generator.gen_toolchain()
 
+        meson_flags = [] if meson_flags is None else meson_flags
         # # Write toolchain and host configurations.
         self.toolchain_generator.write_toolchain_config()
 
@@ -98,7 +96,8 @@ class QemuBuilder:
             [self.dest / QemuBuilder.TOOLCHAIN_DIR / "meson"]
             + ["setup", self.dest]
             + self.meson_config()
-            + [self.dest / QemuBuilder.TOOLCHAIN_DIR / "aosp-cl.ini"],
+            + [self.dest / QemuBuilder.TOOLCHAIN_DIR / "aosp-cl.ini"]
+            + meson_flags,
             cwd=self.aosp / "external" / "qemu",
             toolchain_path=self.dest / QemuBuilder.TOOLCHAIN_DIR,
         )
