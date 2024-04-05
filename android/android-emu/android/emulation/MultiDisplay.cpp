@@ -959,17 +959,16 @@ bool MultiDisplay::isOrientationSupported() {
  * Just use simple way to make it work in multidisplay+rotation
  */
 void MultiDisplay::recomputeLayoutLocked() {
-    if (android_is_automotive()) {
-        // Apply stacked layout for automotive devices
-        recomputeStackedLayoutLocked();
-        return;
-    }
     SkinRotation rotation = SKIN_ROTATION_0;
     SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
     if (layout) {
         rotation = layout->orientation;
     }
     performRotationLocked(rotation);
+    if (android_is_automotive()) {
+        // Apply stacked layout for automotive devices
+        recomputeStackedLayoutLocked();
+    }
 }
 
 /*
