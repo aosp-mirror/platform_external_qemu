@@ -63,7 +63,8 @@ int moveSubWindow(FBNativeWindowType p_parent_window,
                   int x,
                   int y,
                   int width,
-                  int height);
+                  int height,
+                  float dpr);
 
 #ifdef __cplusplus
 }
