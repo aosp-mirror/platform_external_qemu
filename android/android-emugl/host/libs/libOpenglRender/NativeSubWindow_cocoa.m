@@ -112,7 +112,8 @@ int moveSubWindow(FBNativeWindowType p_parent_window,
                   int x,
                   int y,
                   int width,
-                  int height) {
+                  int height,
+                  float dpr) {
     NSWindow *win = (NSWindow *)p_parent_window;
     if (!win) {
         return 0;

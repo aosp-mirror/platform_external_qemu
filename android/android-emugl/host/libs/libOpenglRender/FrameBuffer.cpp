@@ -1132,7 +1132,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             m_windowHeight = wh;
 
             success = ::moveSubWindow(m_nativeWindow, m_subWin, m_x, m_y,
-                                      m_windowWidth, m_windowHeight);
+                                      m_windowWidth, m_windowHeight, dpr);
         }
 
         if (success && redrawSubwindow) {

@@ -50,6 +50,12 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
         RegisterClass(&wc);
     }
 
+    // We assume size/pos are passed in as logical size/coordinates. Convert it to pixel
+    // coordinates.
+    x *= dpr;
+    y *= dpr;
+    width *= dpr;
+    height *= dpr;
     EGLNativeWindowType ret = CreateWindowEx(
                         WS_EX_NOPARENTNOTIFY,  // do not bother our parent window
                         className,
@@ -80,12 +86,13 @@ int moveSubWindow(FBNativeWindowType p_parent_window,
                   int x,
                   int y,
                   int width,
-                  int height) {
+                  int height,
+                  float dpr) {
     BOOL ret = MoveWindow(p_sub_window,
-                          x,
-                          y,
-                          width,
-                          height,
+                          x * dpr,
+                          y * dpr,
+                          width * dpr,
+                          height * dpr,
                           TRUE);
     return ret;
 }
