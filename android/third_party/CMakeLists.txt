@@ -291,6 +291,13 @@ else()
   else()
     message(WARNING "Netsimd is not available for this platform, bluetooth/wifi emulation will require a remote instance.")
   endif()
+
+  # Duplicate glib dll for Windows
+  # The long term solution should be to figure out linking dll within lib64
+  if(WINDOWS_MSVC_X86_64)
+    install(TARGETS glib2_${ANDROID_TARGET_TAG} RUNTIME DESTINATION .
+            LIBRARY DESTINATION .)
+  endif()
 endif()
 
 # gfxstream, aemu-common modules
