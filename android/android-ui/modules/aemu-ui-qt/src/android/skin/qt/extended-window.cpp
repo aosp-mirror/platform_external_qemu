@@ -217,6 +217,8 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
         !android_foldable_hinge_configured() &&
         !android_foldable_rollable_configured() && !resizableEnabled() &&
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) !=
+                AVD_DESKTOP &&
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) !=
                 AVD_TV &&
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) !=
                 AVD_WEAR &&
