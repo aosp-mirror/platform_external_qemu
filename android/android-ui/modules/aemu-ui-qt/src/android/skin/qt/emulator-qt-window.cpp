@@ -117,6 +117,7 @@
 #include <cmath>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #ifdef __linux__
@@ -142,9 +143,132 @@ using android::crashreport::CrashReporter;
 using android::emulation::ApkInstaller;
 using android::emulation::FilePusher;
 using android::virtualscene::TextureUtils;
-using std::string;
 
-using std::vector;
+namespace {
+
+#define QT_TO_LINUX_KEY(x, y) \
+    { Qt::Key_##x, LINUX_KEY_##y }
+#define QT_LINUX_SAME_KEY(x) QT_TO_LINUX_KEY(x, x)
+
+const std::unordered_map<int, int> QT_TO_LINUX_KEYCODE_BASE{
+        QT_TO_LINUX_KEY(Left, LEFT),
+        QT_TO_LINUX_KEY(Right, RIGHT),
+        QT_TO_LINUX_KEY(Up, UP),
+        QT_TO_LINUX_KEY(Down, DOWN),
+        QT_LINUX_SAME_KEY(0),
+        QT_LINUX_SAME_KEY(1),
+        QT_LINUX_SAME_KEY(2),
+        QT_LINUX_SAME_KEY(3),
+        QT_LINUX_SAME_KEY(4),
+        QT_LINUX_SAME_KEY(5),
+        QT_LINUX_SAME_KEY(6),
+        QT_LINUX_SAME_KEY(7),
+        QT_LINUX_SAME_KEY(8),
+        QT_LINUX_SAME_KEY(9),
+        QT_LINUX_SAME_KEY(F1),
+        QT_LINUX_SAME_KEY(F2),
+        QT_LINUX_SAME_KEY(F3),
+        QT_LINUX_SAME_KEY(F4),
+        QT_LINUX_SAME_KEY(F5),
+        QT_LINUX_SAME_KEY(F6),
+        QT_LINUX_SAME_KEY(F7),
+        QT_LINUX_SAME_KEY(F8),
+        QT_LINUX_SAME_KEY(F9),
+        QT_LINUX_SAME_KEY(F10),
+        QT_LINUX_SAME_KEY(F11),
+        QT_LINUX_SAME_KEY(F12),
+        QT_LINUX_SAME_KEY(A),
+        QT_LINUX_SAME_KEY(B),
+        QT_LINUX_SAME_KEY(C),
+        QT_LINUX_SAME_KEY(D),
+        QT_LINUX_SAME_KEY(E),
+        QT_LINUX_SAME_KEY(F),
+        QT_LINUX_SAME_KEY(G),
+        QT_LINUX_SAME_KEY(H),
+        QT_LINUX_SAME_KEY(I),
+        QT_LINUX_SAME_KEY(J),
+        QT_LINUX_SAME_KEY(K),
+        QT_LINUX_SAME_KEY(L),
+        QT_LINUX_SAME_KEY(M),
+        QT_LINUX_SAME_KEY(N),
+        QT_LINUX_SAME_KEY(O),
+        QT_LINUX_SAME_KEY(P),
+        QT_LINUX_SAME_KEY(Q),
+        QT_LINUX_SAME_KEY(R),
+        QT_LINUX_SAME_KEY(S),
+        QT_LINUX_SAME_KEY(T),
+        QT_LINUX_SAME_KEY(U),
+        QT_LINUX_SAME_KEY(V),
+        QT_LINUX_SAME_KEY(W),
+        QT_LINUX_SAME_KEY(X),
+        QT_LINUX_SAME_KEY(Y),
+        QT_LINUX_SAME_KEY(Z),
+        QT_TO_LINUX_KEY(Minus, MINUS),
+        QT_TO_LINUX_KEY(Equal, EQUAL),
+        QT_TO_LINUX_KEY(Backspace, BACKSPACE),
+        QT_TO_LINUX_KEY(Home, HOME),
+        QT_TO_LINUX_KEY(Escape, ESC),
+        QT_TO_LINUX_KEY(Comma, COMMA),
+        QT_TO_LINUX_KEY(Period, DOT),
+        QT_TO_LINUX_KEY(Space, SPACE),
+        QT_TO_LINUX_KEY(Slash, SLASH),
+        QT_TO_LINUX_KEY(Return, ENTER),
+        QT_TO_LINUX_KEY(Tab, TAB),
+        QT_TO_LINUX_KEY(BracketLeft, LEFTBRACE),
+        QT_TO_LINUX_KEY(BracketRight, RIGHTBRACE),
+        QT_TO_LINUX_KEY(Backslash, BACKSLASH),
+        QT_TO_LINUX_KEY(Semicolon, SEMICOLON),
+        QT_TO_LINUX_KEY(Apostrophe, APOSTROPHE),
+        QT_TO_LINUX_KEY(Delete, DELETE),
+        // Qt treats "SHIFT + TAB" as "Backtab", just convert it back to
+        // TAB.
+        QT_TO_LINUX_KEY(Backtab, TAB),
+};
+
+const std::unordered_map<int, int> QT_TO_LINUX_KEYCODE_MODIFIERS{
+        // QT only provides one signal for both left/right modifiers;
+        // always send these as Left.
+        QT_TO_LINUX_KEY(Control, LEFTCTRL),
+        QT_TO_LINUX_KEY(Alt, LEFTALT),
+        QT_TO_LINUX_KEY(Shift, LEFTSHIFT),
+};
+
+static int convertKeyCode(int sym, bool& isModifier) {
+    // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
+    // On failure, return -1.
+
+    isModifier = false;
+
+    // TODO(b/286512287): KEY_ENTER is not recognized by Android TV system
+    // image as what we expect it to be. Use KEY_CENTER instead.
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
+                AVD_TV &&
+        sym == Qt::Key_Return) {
+        return LINUX_KEY_CENTER;
+    }
+
+    auto res = QT_TO_LINUX_KEYCODE_BASE.find(sym);
+    if (res != QT_TO_LINUX_KEYCODE_BASE.end()) {
+        return res->second;
+    }
+
+    // Only Chrome and Raw Input modes will send modifier keyup/keydowns.
+    if (!getConsoleAgents()->settings->hw()->hw_arc &&
+        !android::featurecontrol::isEnabled(
+                android::featurecontrol::QtRawKeyboardInput)) {
+        return -1;
+    }
+
+    res = QT_TO_LINUX_KEYCODE_MODIFIERS.find(sym);
+    if (res != QT_TO_LINUX_KEYCODE_MODIFIERS.end()) {
+        isModifier = true;
+        return res->second;
+    }
+
+    return -1;
+}
+
+}  // namespace
 
 // Make sure it is POD here
 static LazyInstance<EmulatorQtWindow::Ptr> sInstance = LAZY_INSTANCE_INIT;
@@ -812,6 +936,16 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     stopThread();
 }
 
+void EmulatorQtWindow::focusOutEvent(QFocusEvent* event) {
+    for (auto& key : mHeldModifiers) {
+        SkinEvent skin_event = createSkinEvent(kEventKeyUp);
+        skin_event.u.key.keycode = key;
+        queueSkinEvent(std::move(skin_event));
+    }
+    mHeldModifiers.clear();
+    QFrame::focusOutEvent(event);
+}
+
 void EmulatorQtWindow::showWin32DeprecationWarning() {
 #ifdef _WIN32
     auto programBitness = System::get()->getProgramBitness();
@@ -1094,10 +1228,24 @@ void EmulatorQtWindow::dropEvent(QDropEvent* event) {
 }
 
 void EmulatorQtWindow::keyPressEvent(QKeyEvent* event) {
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::QtRawKeyboardInput) &&
+        event->isAutoRepeat()) {
+        event->ignore();
+        return;
+    }
+
     handleKeyEvent(kEventKeyDown, *event);
 }
 
 void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::QtRawKeyboardInput) &&
+        event->isAutoRepeat()) {
+        event->ignore();
+        return;
+    }
+
     handleKeyEvent(kEventKeyUp, *event);
 
     // If we enabled trackball mode, tell Qt to always forward mouse movement
@@ -2292,8 +2440,8 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
                     ? kRemoteDownloadsDir
                     : kRemoteDownloadsDirApi10;
     for (const auto& url : urls) {
-        string remoteFile = PathUtils::join(remoteDownloadsDir.data(),
-                                            url.fileName().toStdString());
+        std::string remoteFile = PathUtils::join(remoteDownloadsDir.data(),
+                                                 url.fileName().toStdString());
         file_paths.push_back(
                 std::make_pair(url.toLocalFile().toStdString(), remoteFile));
     }
@@ -2357,123 +2505,6 @@ void EmulatorQtWindow::adbPushDone(std::string_view filePath,
             msg = tr("Could not copy %1").arg(c_str(filePath).get());
     }
     showErrorDialog(msg, tr("File Copy"));
-}
-
-// Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
-// On failure, return -1.
-static int convertKeyCode(int sym) {
-#define KK(x, y) \
-    { Qt::Key_##x, LINUX_KEY_##y }
-#define K1(x) KK(x, x)
-    static const struct {
-        int qt_sym;
-        int keycode;
-    } kConvert[] = {
-            KK(Left, LEFT),
-            KK(Right, RIGHT),
-            KK(Up, UP),
-            KK(Down, DOWN),
-            K1(0),
-            K1(1),
-            K1(2),
-            K1(3),
-            K1(4),
-            K1(5),
-            K1(6),
-            K1(7),
-            K1(8),
-            K1(9),
-            K1(F1),
-            K1(F2),
-            K1(F3),
-            K1(F4),
-            K1(F5),
-            K1(F6),
-            K1(F7),
-            K1(F8),
-            K1(F9),
-            K1(F10),
-            K1(F11),
-            K1(F12),
-            K1(A),
-            K1(B),
-            K1(C),
-            K1(D),
-            K1(E),
-            K1(F),
-            K1(G),
-            K1(H),
-            K1(I),
-            K1(J),
-            K1(K),
-            K1(L),
-            K1(M),
-            K1(N),
-            K1(O),
-            K1(P),
-            K1(Q),
-            K1(R),
-            K1(S),
-            K1(T),
-            K1(U),
-            K1(V),
-            K1(W),
-            K1(X),
-            K1(Y),
-            K1(Z),
-            KK(Minus, MINUS),
-            KK(Equal, EQUAL),
-            KK(Backspace, BACKSPACE),
-            KK(Home, HOME),
-            KK(Escape, ESC),
-            KK(Comma, COMMA),
-            KK(Period, DOT),
-            KK(Space, SPACE),
-            KK(Slash, SLASH),
-            KK(Return, ENTER),
-            KK(Tab, TAB),
-            KK(BracketLeft, LEFTBRACE),
-            KK(BracketRight, RIGHTBRACE),
-            KK(Backslash, BACKSLASH),
-            KK(Semicolon, SEMICOLON),
-            KK(Apostrophe, APOSTROPHE),
-            KK(Delete, DELETE),
-    };
-    const size_t kConvertSize = sizeof(kConvert) / sizeof(kConvert[0]);
-    size_t nn;
-    // BUG: 286512287
-    // KEY_ENTER is not recognized by Android TV system image as
-    // what we expect it to be. Use KEY_CENTER instead.
-    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
-            AVD_TV && sym == Qt::Key_Return) {
-        return LINUX_KEY_CENTER;
-    }
-    for (nn = 0; nn < kConvertSize; ++nn) {
-        if (sym == kConvert[nn].qt_sym) {
-            return kConvert[nn].keycode;
-        }
-    }
-    if (!getConsoleAgents()->settings->hw()->hw_arc)
-        return -1;
-    static const struct {
-        int qt_sym;
-        int keycode;
-    } kCrosConvert[] = {
-            // Qt treats "SHIFT + TAB" as "Backtab", just convert it back to
-            // TAB.
-            KK(Backtab, TAB),
-            KK(Control, LEFTCTRL),
-            KK(Alt, LEFTALT),
-            KK(Shift, LEFTSHIFT),
-    };
-    const size_t kCrosConvertSize =
-            sizeof(kCrosConvert) / sizeof(kCrosConvert[0]);
-    for (nn = 0; nn < kCrosConvertSize; ++nn) {
-        if (sym == kCrosConvert[nn].qt_sym) {
-            return kCrosConvert[nn].keycode;
-        }
-    }
-    return -1;
 }
 
 void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
@@ -2751,11 +2782,21 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
                                                  const QKeyEvent& event) {
     SkinEvent skin_event = createSkinEvent(type);
     SkinEventKeyData& keyData = skin_event.u.key;
-    keyData.keycode = convertKeyCode(event.key());
+    bool isModifier = false;
+    keyData.keycode = convertKeyCode(event.key(), isModifier);
     if (keyData.keycode == -1) {
         D("Failed to convert key for event key %d", event.key());
         return;
     }
+
+    if (isModifier) {
+        if (type == kEventKeyDown) {
+            mHeldModifiers.insert(keyData.keycode);
+        } else if (type == kEventKeyUp) {
+            mHeldModifiers.erase(keyData.keycode);
+        }
+    }
+
     Qt::KeyboardModifiers modifiers = event.modifiers();
     if (modifiers & Qt::ShiftModifier)
         keyData.mod |= kKeyModLShift;
@@ -2978,7 +3019,10 @@ void EmulatorQtWindow::simulateZoomedWindowResized(const QSize& size) {
 }
 
 void EmulatorQtWindow::setForwardShortcutsToDevice(int index) {
-    mForwardShortcutsToDevice = (index != 0);
+    mForwardShortcutsToDevice =
+            ((index != 0) ||
+             android::featurecontrol::isEnabled(
+                     android::featurecontrol::QtRawKeyboardInput));
 }
 
 void EmulatorQtWindow::slot_runOnUiThread(RunOnUiThreadFunc f,

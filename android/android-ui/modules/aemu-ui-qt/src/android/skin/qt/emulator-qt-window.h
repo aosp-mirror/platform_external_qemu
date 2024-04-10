@@ -53,6 +53,7 @@
 #include <mutex>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 namespace Ui {
@@ -124,6 +125,7 @@ public:
     virtual ~EmulatorQtWindow();
 
     void queueQuitEvent();
+    void focusOutEvent(QFocusEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dragLeaveEvent(QDragLeaveEvent* event) override;
@@ -485,6 +487,8 @@ private:
     CarClusterConnector* mCarClusterConnector;
 
     QRect mDeviceGeometry;
+
+    std::unordered_set<int> mHeldModifiers;
 
     bool mMouseGrabbed = false;
     bool mMouseRepositioning = false;

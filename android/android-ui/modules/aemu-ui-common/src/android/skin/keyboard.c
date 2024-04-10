@@ -267,7 +267,8 @@ static void process_modifier_key(SkinKeyboard* kb, SkinEvent* ev, int down) {
 }
 
 void skin_keyboard_process_event(SkinKeyboard* kb, SkinEvent* ev, int down) {
-    if (ev->type == kEventTextInput) {
+    if (ev->type == kEventTextInput &&
+        !feature_is_enabled(kFeature_QtRawKeyboardInput)) {
         SkinKeyMod mod = 0;
         if (kb->hw_arc) {
             /* skin_keyboard_process_unicode_event will generate capslock
@@ -325,6 +326,14 @@ void skin_keyboard_process_event(SkinKeyboard* kb, SkinEvent* ev, int down) {
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
         int keycode = ev->u.key.keycode;
         const int mod = ev->u.key.mod;
+
+        if (feature_is_enabled(kFeature_QtRawKeyboardInput)) {
+            // Only keydowns/keyups for raw keyboard input events.
+            skin_keyboard_add_key_event(kb, keycode, down);
+            skin_keyboard_flush(kb);
+
+            return;
+        }
 
         if (kb->hw_arc) {
             sync_modifier_key(LINUX_KEY_LEFTALT, kb, keycode, mod, down);

@@ -288,6 +288,11 @@ void EmulatorContainer::focusInEvent(QFocusEvent* event) {
     }
 }
 
+void EmulatorContainer::focusOutEvent(QFocusEvent* event) {
+    mEmulatorWindow->focusOutEvent(event);
+    QFrame::focusOutEvent(event);
+}
+
 void EmulatorContainer::keyPressEvent(QKeyEvent* event) {
     mEmulatorWindow->keyPressEvent(event);
 }
