@@ -959,17 +959,16 @@ bool MultiDisplay::isOrientationSupported() {
  * Just use simple way to make it work in multidisplay+rotation
  */
 void MultiDisplay::recomputeLayoutLocked() {
-    if (android_is_automotive()) {
-        // Apply stacked layout for automotive devices
-        recomputeStackedLayoutLocked();
-        return;
-    }
     SkinRotation rotation = SKIN_ROTATION_0;
     SkinLayout* layout = (SkinLayout*)getConsoleAgents()->emu->getLayout();
     if (layout) {
         rotation = layout->orientation;
     }
     performRotationLocked(rotation);
+    if (android_is_automotive()) {
+        // Apply stacked layout for automotive devices
+        recomputeStackedLayoutLocked();
+    }
 }
 
 /*
@@ -978,6 +977,12 @@ void MultiDisplay::recomputeLayoutLocked() {
 void MultiDisplay::recomputeStackedLayoutLocked() {
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>>
             rectangles, newRectangles;
+    uint32_t monitorWidth, monitorHeight;
+    if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
+        dwarning("Unable to get monitor width and height");
+        return;
+    }
+
     for (const auto& iter : mMultiDisplay) {
         if (iter.first == 0 || iter.second.cb != 0) {
             rectangles[iter.first] =
@@ -990,14 +995,7 @@ void MultiDisplay::recomputeStackedLayoutLocked() {
         newRectangles = android::base::resolveStackedLayout(rectangles);
     } else {
         // Use legacy layout for non distant display emulator
-        uint32_t monitorWidth, monitorHeight;
-        double monitorRatio = 1.0;
-        if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
-            LOG(ERROR) << "Unable to get monitor width and height, using"
-                    " default ratio of 1.0";
-        } else {
-            monitorRatio = (double)monitorHeight / (double)monitorWidth;
-        }
+        double monitorRatio = (double)monitorHeight / (double)monitorWidth;
         newRectangles = android::base::resolveLayout(rectangles, monitorRatio);
     }
 
