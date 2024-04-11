@@ -66,7 +66,7 @@ void skin_generic_event_free(SkinGenericEvent* generic_event) {
 }
 
 SkinEvent createSkinEvent(SkinEventType t) {
-    SkinEvent e;
+    SkinEvent e{};
     e.type = t;
     return e;
 }
