@@ -246,7 +246,7 @@ void LocationPage::on_loc_routeList_itemSelectionChanged() {
         mRouteSender.reset(RouteSenderThread::newInstance(
                 this,
                 SLOT(routeSendingFinished(bool))));
-        mRouteSender->sendRouteToMap(&routeElement, mMapBridge.get());
+        mRouteSender->sendRouteToMap(&routeElement, mRoutesMapBridge.get());
     }
 
     // Disable the edit buttons on the saved points if in deletion mode
