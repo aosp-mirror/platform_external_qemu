@@ -11,7 +11,7 @@ var gPointOverlay = new LocationPointOverlay();
 function savePoint() {
     // The emulator should have the point of interest already, from the
     // sendAddress() call.
-    channel.objects.emulocationserver.map_savePoint();
+    channel.objects.single_point.map_savePoint();
 }
 
 function resetPointsMap() {
@@ -25,7 +25,7 @@ function resetPointsMap() {
 
 function onSearchBarCleared() {
     // Send an invalid point so the list selection is cleared.
-    channel.objects.emulocationserver.sendLocation(91.0, 181.0, "");
+    channel.objects.single_point.sendLocation(91.0, 181.0, "");
 }
 
 // Callback function for Maps API
@@ -209,7 +209,7 @@ function sendAddress(latLng) {
         }
         gPointOverlay.show(address, latLng, elevation);
         gMap.panTo(latLng);
-        channel.objects.emulocationserver
+        channel.objects.single_point
             .sendLocation(latLng.lat(), latLng.lng(), address);
         console.log("addr=" + address);
         gSearchBox.update(address)
