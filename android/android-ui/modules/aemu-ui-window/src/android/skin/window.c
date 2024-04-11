@@ -1948,10 +1948,10 @@ static void skin_window_resize(SkinWindow* window, int resize_container) {
         window_x = monitor.pos.x + (WINDOW_MONITOR_RATIO*monitor.size.w - window_w);
         window_x = window_x > WINDOW_MINIMUM_X ? window_x : WINDOW_MINIMUM_X;
         window->x_pos = window_x;
-#ifndef __linux__
-        // b/330777260: Linux(gnome) seems to have a weird coordinate system that
-        // depends on the size of the Qt window. This weirdness causes window bouncing
-        // back to the primary display. Let's disable for now.
+#if 0
+        // b/330777260: Moving the window while a screen change is happening may cause the window to
+        // repeatedly bounce across multiple displays. Let's disable for now until we find a real
+        // fix.
         skin_winsys_set_window_pos(window_x, window_y);
 #endif  // !__linux__
     }
@@ -1959,10 +1959,10 @@ static void skin_window_resize(SkinWindow* window, int resize_container) {
         window_y = monitor.pos.y + (WINDOW_MONITOR_RATIO*monitor.size.h - window_h);
         window_y = window_y > WINDOW_MINIMUM_Y ? window_y : WINDOW_MINIMUM_Y;
         window->y_pos = window_y;
-#ifndef __linux__
-        // b/330777260: Linux(gnome) seems to have a weird coordinate system that
-        // depends on the size of the Qt window. This weirdness causes window bouncing
-        // back to the primary display. Let's disable for now.
+#if 0
+        // b/330777260: Moving the window while a screen change is happening may cause the window to
+        // repeatedly bounce across multiple displays. Let's disable for now until we find a real
+        // fix.
         skin_winsys_set_window_pos(window_x, window_y);
 #endif  // !__linux__
     }
