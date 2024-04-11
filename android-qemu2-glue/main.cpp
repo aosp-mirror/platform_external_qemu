@@ -2877,6 +2877,11 @@ extern "C" int main(int argc, char** argv) {
         }
     }
 
+    if (feature_is_enabled(kFeature_Uwb)) {
+        D("Uwb feature is enabled");
+        // TODO(b/331635691): virtio console registration for UWB
+    }
+
     bool bluetooth_explicitly_disabled =
             !feature_is_enabled(kFeature_BluetoothEmulation) &&
             fc::isOverridden(fc::BluetoothEmulation);
