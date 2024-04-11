@@ -22,6 +22,8 @@
 #include "android/console.h"
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/metrics/MetricsReporter.h"
+#include "android/skin/user-config.h"
+#include "android/user-config.h"
 #include "host-common/MultiDisplayPipe.h"
 #include "host-common/feature_control.h"
 #include "host-common/hw-config.h"
@@ -129,6 +131,7 @@ public:
             return;
         }
         mActiveConfigId = configId;
+        user_config_set_resizable_config(configId);
         mTypeCount[mActiveConfigId]++;
 
         android_setOpenglesDisplayActiveConfig(configId);

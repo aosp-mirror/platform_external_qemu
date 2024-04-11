@@ -337,7 +337,13 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
     }
 
     // Set vsync rate
-    params.push_back({qemuVsyncProp, StringFormat("%u", hw->hw_lcd_vsync)});
+    if (opts->vsync_rate) {
+      std::string param = opts->vsync_rate;
+      params.push_back({qemuVsyncProp, param});
+    } else {
+      params.push_back({qemuVsyncProp, StringFormat("%u", hw->hw_lcd_vsync)});
+    }
+
 
     // Set gl transport props
     params.push_back({qemuGltransportNameProp, hw->hw_gltransport});

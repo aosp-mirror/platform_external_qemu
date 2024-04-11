@@ -86,14 +86,12 @@
 #include "android/utils/system.h"
 #include "host-common/FeatureControl.h"
 #include "host-common/Features.h"
-#include "host-common/misc.h"
 #include "host-common/hw-config-helper.h"
 #include "host-common/screen-recorder.h"
 #include "host-common/window_agent.h"
 #include "snapshot/common.h"
 #include "snapshot/interface.h"
 #include "studio_stats.pb.h"
-#include "host-common/opengles.h"
 #include "ui_tools.h"
 
 namespace {
@@ -462,6 +460,12 @@ ToolWindow::~ToolWindow() {
 }
 
 void ToolWindow::startSleepTimer() {
+    auto hw = (getConsoleAgents()->settings->avdInfo());
+    if (!avdInfo_isVanillaIceCreamPreview(hw)) {
+        return;
+    }
+
+    mEmulatorWindow->getAdbInterface()->enqueueCommand( {"shell", "input", "keyevent", "KEYCODE_SLEEP"});
     mSleepTimer.start(2000); // 2 second
 }
 
@@ -472,14 +476,7 @@ void ToolWindow::startUnfoldTimer(PresetEmulatorSizeType newSize) {
 }
 
 void ToolWindow::on_sleep_timer_done() {
-    if (emugl::shouldSkipDraw()) {
-        emugl::setShouldSkipDraw(false);
-        android_redrawOpenglesWindow();
-    }
-    if (mSleepKeySent) {
-        mEmulatorWindow->getAdbInterface()->
-            enqueueCommand( {"shell", "input", "keyevent", "KEYCODE_WAKEUP"});
-    }
+    mEmulatorWindow->getAdbInterface()->enqueueCommand( {"shell", "input", "keyevent", "KEYCODE_WAKEUP"});
 }
 
 void ToolWindow::on_unfold_timer_done() {
@@ -997,8 +994,6 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
         on_new_posture_requested(POSTURE_OPENED);
     }
 
-    emugl::setShouldSkipDraw(true);
-    startSleepTimer();
     std::string updateMsg = "Updating device size\n";
     switch (info.type) {
         case PRESET_SIZE_PHONE:
@@ -1710,13 +1705,7 @@ void ToolWindow::applyFoldableQuirk(int newPosture) {
     if (is_pixel_fold) {
         if (newPosture > 1 && mLastRequestedFoldablePosture == 1 ||
                 newPosture == 1 && mLastRequestedFoldablePosture > 1) {
-            auto hw = (getConsoleAgents()->settings->avdInfo());
-            if (avdInfo_isVanillaIceCreamPreview(hw)) {
-                mEmulatorWindow->getAdbInterface()->
-                    enqueueCommand( {"shell", "input", "keyevent", "KEYCODE_SLEEP"});
-                mSleepKeySent = true;
-                startSleepTimer();
-            }
+            startSleepTimer();
         }
     }
     mLastRequestedFoldablePosture = newPosture;
