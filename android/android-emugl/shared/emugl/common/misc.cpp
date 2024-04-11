@@ -24,7 +24,6 @@
 
 static int s_apiLevel = -1;
 static bool s_isPhone = false;
-static bool s_shouldSkipDrawing = false;
 
 static int s_glesMajorVersion = 2;
 static int s_glesMinorVersion = 0;
@@ -38,14 +37,6 @@ static GrallocImplementation s_gralloc_implementation = MINIGBM;
 
 static SelectedRenderer s_renderer =
     SELECTED_RENDERER_HOST;
-
-bool emugl::shouldSkipDraw() {
-    return s_shouldSkipDrawing;
-}
-
-void emugl::setShouldSkipDraw(bool skip) {
-    s_shouldSkipDrawing = skip;
-}
 
 void emugl::setAvdInfo(bool phone, int apiLevel) {
     s_isPhone = phone;

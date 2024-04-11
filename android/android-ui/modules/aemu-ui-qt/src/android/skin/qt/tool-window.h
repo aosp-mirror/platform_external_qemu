@@ -231,7 +231,6 @@ private:
     bool mCloseClicked = false;
 
     QTimer mSleepTimer;
-    bool mSleepKeySent = false;
 
     void startSleepTimer();
 
