@@ -343,7 +343,7 @@ function onHaveActiveRoute() {
 function saveRouteButton_clicked() {
     document.getElementById('saveRouteButton').style.display = "none";
     // emulator already has the route metadata. Just tell emulator to save it.
-    channel.objects.emulocationserver.saveRoute();
+    channel.objects.routes.saveRoute();
 }
 
 function onReverseButtonClicked() {
@@ -427,7 +427,7 @@ function showDestinationPoint(latLng) {
     }
     // Give the Emulator an empty route, so it knows we've
     // got something new under way.
-    channel.objects.emulocationserver.sendFullRouteToEmu(0, 0.0, null, null);
+    channel.objects.routes.sendFullRouteToEmu(0, 0.0, null, null);
 
     gGeocoder.geocode({ 'location': latLng }, function (results, status) {
         var address = "";
@@ -480,7 +480,7 @@ function showGpxKmlRouteOnMap(routeJson, title, subtitle) {
     });
     gGpxKmlPath.setMap(gMap);
     zoomToGpxKmlRoute(gMap, path);
-    channel.objects.emulocationserver.onSavedRouteDrawn();
+    channel.objects.routes.onSavedRouteDrawn();
 }
 
 // Callback function for Maps API
@@ -560,7 +560,7 @@ function initMap() {
             showRouteCreatorOverlay(true);
         }
         gSearchBox.update('');
-        channel.objects.emulocationserver.onSavedRouteDrawn();
+        channel.objects.routes.onSavedRouteDrawn();
     }
 
     // Add Google search box
@@ -708,6 +708,6 @@ function calcRoute() {
         }
 
         var fullResult = JSON.stringify(result);
-        channel.objects.emulocationserver.sendFullRouteToEmu(numPoints, totalDuration, fullResult, gTravelModeString);
+        channel.objects.routes.sendFullRouteToEmu(numPoints, totalDuration, fullResult, gTravelModeString);
     });
 }

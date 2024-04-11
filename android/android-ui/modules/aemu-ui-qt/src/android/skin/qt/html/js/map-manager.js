@@ -123,7 +123,7 @@ class GoogleMapManager {
     }
 
     renderDirections(renderRequest) {
-        console.log("GoogleMapManager::renderDirections called", renderRequest);
+        console.debug("GoogleMapManager::renderDirections called", renderRequest);
         const self = this;
         this.clearDirections();
         this.clearMarkers();

@@ -249,7 +249,7 @@ void LocationPage::on_loc_routeList_itemSelectionChanged() {
                 this,
                 SLOT(routeSendingFinished(bool))));
 #ifdef USE_WEBENGINE
-        mRouteSender->sendRouteToMap(&routeElement, mMapBridge.get());
+        mRouteSender->sendRouteToMap(&routeElement, mRoutesMapBridge.get());
 #endif  // USE_WEBENGINE
     }
 

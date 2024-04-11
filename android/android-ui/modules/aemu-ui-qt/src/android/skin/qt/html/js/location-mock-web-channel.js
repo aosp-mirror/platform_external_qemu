@@ -32,7 +32,8 @@ class MockEmuLocationServer {
 }
 class MockObjects {
     constructor() {
-        this.emulocationserver = new MockEmuLocationServer();
+        this.single_point = new MockEmuLocationServer();
+        this.routes = new MockEmuLocationServer();
     }
 }
 class MockChannel {
