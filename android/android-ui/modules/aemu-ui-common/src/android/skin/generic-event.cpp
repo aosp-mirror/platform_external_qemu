@@ -66,7 +66,84 @@ void skin_generic_event_free(SkinGenericEvent* generic_event) {
 }
 
 SkinEvent createSkinEvent(SkinEventType t) {
-    SkinEvent e{};
+    SkinEvent e;
     e.type = t;
+    switch (t) {
+        case kEventKeyDown:
+        case kEventKeyUp:
+            e.u.key = {};
+            break;
+        case kEventGeneric:
+            e.u.generic_event = {};
+            break;
+        case kEventTextInput:
+            e.u.text = {};
+            break;
+        case kEventMouseButtonDown:
+        case kEventMouseButtonUp:
+        case kEventMouseMotion:
+        case kEventMouseStartTracking:
+        case kEventMouseStopTracking:
+            e.u.mouse = {};
+            break;
+        case kEventMouseWheel:
+            e.u.wheel = {};
+            break;
+        case kEventScrollBarChanged:
+        case kEventZoomedWindowResized:
+            e.u.scroll = {};
+            break;
+        case kEventRotaryInput:
+            e.u.rotary_input = {};
+            break;
+        case kEventSetScale:
+        case kEventSetZoom:
+        case kEventWindowMoved:
+        case kEventWindowChanged:
+            e.u.window = {};
+            break;
+        case kEventLayoutRotate:
+            e.u.layout_rotation = {};
+            break;
+        case kEventScreenChanged:
+            e.u.screen = {};
+            break;
+        case kEventSetDisplayRegion:
+        case kEventSetDisplayRegionAndUpdate:
+            e.u.display_region = {};
+            break;
+        case kEventPenPress:
+        case kEventPenRelease:
+        case kEventPenMove:
+            e.u.pen = {};
+            break;
+        case kEventTouchBegin:
+        case kEventTouchEnd:
+        case kEventTouchUpdate:
+            e.u.multi_touch_point = {};
+            break;
+        case kEventSetDisplayActiveConfig:
+            e.u.display_active_config = {};
+            break;
+        case kEventAddDisplay:
+            e.u.add_display = {};
+            break;
+        case kEventRemoveDisplay:
+            e.u.remove_display = {};
+            break;
+        case kEventQuit:
+        case kEventForceRedraw:
+        case kEventToggleTrackball:
+        case kEventSetNoSkin:
+        case kEventRestoreSkin:
+        case kEventSetFoldedSkin:
+            // No additional parameters
+            break;
+        default:
+            // Crash if there's an unhandled SkinEventType, as we want an explicit initialization
+            // for each type.
+            dfatal("Unknown SkinEventType=%u", t);
+            break;
+    }
     return e;
 }

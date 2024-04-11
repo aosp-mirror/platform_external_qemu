@@ -54,7 +54,6 @@ typedef enum {
     kEventTouchBegin,
     kEventTouchEnd,
     kEventTouchUpdate,
-    kEventSetDisplayConfigs,
     kEventSetDisplayActiveConfig,
     kEventAddDisplay,
     kEventRemoveDisplay,
