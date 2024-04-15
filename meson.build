@@ -3244,6 +3244,7 @@ system_ss = ss.source_set()
 specific_fuzz_ss = ss.source_set()
 specific_ss = ss.source_set()
 stub_ss = ss.source_set()
+print_stub_ss = ss.source_set()
 trace_ss = ss.source_set()
 user_ss = ss.source_set()
 util_ss = ss.source_set()
@@ -3421,6 +3422,15 @@ event_loop_base = declare_dependency(link_whole: event_loop_base,
                                      dependencies: [qom])
 
 stub_ss = stub_ss.apply(config_all, strict: false)
+print_stub_ss = print_stub_ss.apply(config_all, strict: false)
+
+
+libprint_stub = static_library('printstub', print_stub_ss.sources() + genh,
+                            name_suffix: 'fa',
+                            dependencies: print_stub_ss.dependencies(),
+                            build_by_default: false)
+
+print_stub = declare_dependency(link_with: libprint_stub)
 
 util_ss.add_all(trace_ss)
 util_ss = util_ss.apply(config_all, strict: false)
@@ -3979,12 +3989,12 @@ endif
 
 if have_tools
   qemu_img = executable('qemu-img', [files('qemu-img.c'), hxdep],
-             dependencies: [authz, block, crypto, io, qom, qemuutil], install: true)
+             dependencies: [authz, block, crypto, io, qom, qemuutil, print_stub], install: true)
   qemu_io = executable('qemu-io', files('qemu-io.c'),
-             dependencies: [block, qemuutil], install: true)
+             dependencies: [block, qemuutil, print_stub], install: true)
   if build_machine.system() != 'windows'
     qemu_nbd = executable('qemu-nbd', files('qemu-nbd.c'),
-                dependencies: [blockdev, qemuutil, gnutls, selinux],
+                dependencies: [blockdev, qemuutil, print_stub, gnutls, selinux],
                 install: true)
   endif
 
@@ -3993,7 +4003,7 @@ if have_tools
   subdir('contrib/elf2dmp')
 
   executable('qemu-edid', files('qemu-edid.c', 'hw/display/edid-generate.c'),
-             dependencies: qemuutil,
+             dependencies: [qemuutil, print_stub],
              install: true)
 
   if have_vhost_user
@@ -4005,12 +4015,12 @@ if have_tools
 
   if targetos == 'linux'
     executable('qemu-bridge-helper', files('qemu-bridge-helper.c'),
-               dependencies: [qemuutil, libcap_ng],
+               dependencies: [qemuutil, print_stub, libcap_ng],
                install: true,
                install_dir: get_option('libexecdir'))
 
     executable('qemu-pr-helper', files('scsi/qemu-pr-helper.c', 'scsi/utils.c'),
-               dependencies: [authz, crypto, io, qom, qemuutil,
+               dependencies: [authz, crypto, io, qom, qemuutil, print_stub,
                               libcap_ng, mpathpersist],
                install: true)
   endif
