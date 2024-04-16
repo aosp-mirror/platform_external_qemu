@@ -971,11 +971,14 @@ public:
         } else {  // Let's make a fast call to learn how many pixels we need
                   // to reserve.
             while (1) {
+                width = 0;
+                height = 0;
+                cPixels = 0;
                 ScreenshotUtils::getScreenshot(
                         myDisplayId >= 0 ? myDisplayId : request->display(),
                         request->format(), rotation, newWidth, newHeight, pixels,
                         &cPixels, &width, &height, rect);
-                if (width > 0 && height > 0) {
+                if (width > 0 && height > 0 && cPixels > 0) {
                     break;
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
