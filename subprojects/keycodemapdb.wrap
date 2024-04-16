@@ -1,4 +1,0 @@
-[wrap-git]
-url = https://android.googlesource.com/trusty/external/qemu-keycodemapdb
-revision = f5772a62ec52591ff6870b7e8ef32482371f22c6
-depth = 1
