@@ -98,6 +98,7 @@ function showPendingLocation(lat, lng, addr) {
         gSearchBox.showSpinner();
         // Try to fetch the address for this location.
         gGeocoder.geocode({ 'location': latLng }, function (results, status) {
+            incGeocodeCount();
             var address = "";
             var elevation = 0.0;
             if (status === 'OK' && results[0]) {
@@ -157,6 +158,7 @@ function setDeviceLocation(lat, lng) {
     }
     gCurrentMarker.setIcon(image);
     gGeocoder.geocode({ 'location': latLng }, function (results, status) {
+        incGeocodeCount();
         const latitude = latLng.lat().toFixed(4);
         const longitude = latLng.lng().toFixed(4);
         var address = `${latitude}, ${longitude}`;
@@ -198,6 +200,7 @@ function showPin(latLng) {
 
 function sendAddress(latLng) {
     gGeocoder.geocode({ 'location': latLng }, function (results, status) {
+        incGeocodeCount();
         var address = "";
         var elevation = 0.0;
         if (status === 'OK' && results[0]) {

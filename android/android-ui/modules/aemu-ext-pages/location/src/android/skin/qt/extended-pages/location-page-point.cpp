@@ -561,6 +561,24 @@ void LocationPage::setUpWebEngine() {
 
         // Send the current location to each page
         appendString.append(
+            "\n"
+            "var gGeocodeCount = 0;");
+        if (isPoint) {
+            appendString.append(
+                "\n"
+                "function incGeocodeCount() {\n"
+                    "\t++gGeocodeCount;\n"
+                    "\tconsole.log(`POINT: geocode() called ${gGeocodeCount} times`);\n"
+                "}\n");
+        } else {
+            appendString.append(
+                "\n"
+                "function incGeocodeCount() {\n"
+                    "\t++gGeocodeCount;\n"
+                    "\tconsole.log(`ROUTES: geocode() called ${gGeocodeCount} times`);\n"
+                "}\n");
+        }
+        appendString.append(
                 "\n"
                 "var initialLat = '");
         appendString.append(QString::number(initialLat, 'g', 12));
@@ -595,6 +613,11 @@ void LocationPage::setUpWebEngine() {
                         "channel.objects.emulocationserver.resetPointsMap.connect(function() {"
                             "if (resetPointsMap) resetPointsMap();"
                         "});");
+            appendString.append(
+                        "\t\tchannel.objects.emulocationserver.showMetrics.connect(function() {\n"
+                            "\t\t\tconsole.debug('showMetrics called!');\n"
+                            "\t\t\tconsole.debug(`************ POINTS: total geocode calls: ${gGeocodeCount}`);\n"
+                        "\t\t});\n");
         } else {
             // Define Routes-specific interfaces
             appendString.append(
@@ -613,6 +636,11 @@ void LocationPage::setUpWebEngine() {
                         "channel.objects.emulocationserver.showGpxKmlRouteOnMap.connect(function(routeJson, title, subtitle) {"
                             "if (showGpxKmlRouteOnMap) showGpxKmlRouteOnMap(routeJson, title, subtitle);"
                         "});");
+            appendString.append(
+                        "\t\tchannel.objects.emulocationserver.showMetrics.connect(function() {\n"
+                            "\t\t\tconsole.debug('showMetrics called!');\n"
+                            "\t\t\tconsole.debug(`************ ROUTES: total geocode calls: ${gGeocodeCount}`);\n"
+                        "\t\t});\n");
         }
         appendString.append(
                     "});"
@@ -746,6 +774,9 @@ void LocationPage::sendMetrics() {
                         ->mutable_location_v2()
                         ->CopyFrom(metrics);
             });
+    if (mMapBridge) {
+        emit mMapBridge->showMetrics();
+    }
 }
 
 void RouteSenderThread::sendRouteToMap(const LocationPage::RouteListElement* const routeElement,

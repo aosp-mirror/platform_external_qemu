@@ -81,6 +81,7 @@ function startRouteCreatorFromPoint(lat, lng, address) {
 
     if (address === "") {
         gGeocoder.geocode({ 'location': latLng }, function (results, status) {
+            incGeocodeCount();
             var address = "";
             var elevation = 0.0;
             if (status === 'OK' && results[0]) {
@@ -213,6 +214,7 @@ function addSearchResultItem(name, address, placeId) {
         var address = this.getAttribute("data-address");
         if (placeid != null) {
             gGeocoder.geocode({ 'placeId': placeid }, function (results, status) {
+                incGeocodeCount();
                 if (status !== 'OK' || !results[0]) {
                     return;
                 }
@@ -300,6 +302,7 @@ function setWaypointForEmptyAddressBox(latLng) {
 
     gFocusedWaypoint.setLatLng(latLng);
     gGeocoder.geocode({ 'location': latLng }, function (results, status) {
+        incGeocodeCount();
         var address = "";
         var elevation = 0.0;
         if (status === 'OK' && results[0]) {
@@ -430,6 +433,7 @@ function showDestinationPoint(latLng) {
     channel.objects.emulocationserver.sendFullRouteToEmu(0, 0.0, null, null);
 
     gGeocoder.geocode({ 'location': latLng }, function (results, status) {
+        incGeocodeCount();
         var address = "";
         var elevation = 0.0;
         if (status === 'OK' && results[0]) {
