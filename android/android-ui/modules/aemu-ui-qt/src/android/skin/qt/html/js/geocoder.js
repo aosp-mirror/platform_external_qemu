@@ -14,6 +14,7 @@ class Geocoder {
     _geocode(request) {
         const geocoder = this.geocoder;
         return new Promise((resolve, reject) => {
+            console.debug("geocode called");
             geocoder.geocode(request, (results, status) => {
                 incGeocodeCount();
                 if (status === google.maps.GeocoderStatus.OK) {

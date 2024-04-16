@@ -344,8 +344,13 @@ private:
     std::unique_ptr<QWebSocketServer> mServer;
     std::unique_ptr<WebSocketClientWrapper> mClientWrapper;
     std::unique_ptr<QWebChannel> mWebChannel;
+    static constexpr char kSinglePointMapId[] = "single_point";
+    static constexpr char kRoutesMapId[] = "routes";
 
-    std::unique_ptr<MapBridge> mMapBridge;
+    std::unique_ptr<MapBridge> mSinglePointMapBridge;
+    std::unique_ptr<MapBridge> mRoutesMapBridge;
+    // Corresponds to the map that is currently active
+    MapBridge* mMapBridge = nullptr;
 
     bool mShouldRefreshPageOnReconnect;
     NetworkConnectivityManager* mNetworkConnectivityManager;
