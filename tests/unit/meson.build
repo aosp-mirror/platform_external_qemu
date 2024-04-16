@@ -178,7 +178,7 @@ slow_tests = {
 
 foreach test_name, extra: tests
   src = [test_name + '.c']
-  deps = [qemuutil]
+  deps = [qemuutil, print_stub]
   if extra.length() > 0
     # use a sourceset to quickly separate sources and deps
     test_ss = ss.source_set()

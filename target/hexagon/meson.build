@@ -17,7 +17,7 @@
 
 hexagon_ss = ss.source_set()
 
-hex_common_py = 'hex_common.py'
+hex_common_py = meson.current_source_dir() / 'hex_common.py'
 attribs_def = meson.current_source_dir() / 'attribs_def.h.inc'
 gen_tcg_h = meson.current_source_dir() / 'gen_tcg.h'
 gen_tcg_hvx_h = meson.current_source_dir() / 'gen_tcg_hvx.h'
