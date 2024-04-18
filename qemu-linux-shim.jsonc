@@ -1,0 +1,139 @@
+{
+    // These are shims we should apply to the various targets
+    "shims": [
+        {
+            "target": "shared_QAPI_source_files",
+            "shims": {
+                "cmd": "$(location :qapi-gen) -o $(RULEDIR)/qapi -b $(location qapi/qapi-schema.json)"
+            }
+        },
+        {
+            "target": "keymap-gen",
+            "shims": {
+                "srcs": [
+                    "subprojects/keycodemapdb/tools/keymap-gen.py"
+                ]
+            }
+        },
+        {
+            "target": "qemu-system-riscv64",
+            "shims": {
+                "+deps" : ["qemu-riscv64-softmmu"]
+            }
+        },
+        {
+            "target": "qemu-system-aarch64",
+            "shims": {
+                "+deps" : ["qemu-aarch64-softmmu"]
+            }
+        },
+        {
+            "target": "qemu-system-x86_64",
+            "shims": {
+                "+deps" : ["qemu-x86_64-softmmu"]
+            }
+        },
+        {
+            "target": ".*",
+            "shims": {
+                "restrict_to": "cc_.*",
+                // Remove our compat libs if present
+                "-hdrs": [
+                    "google.*"
+                ],
+                // xs4all!
+                "visibility": [
+                    "//visibility:public"
+                ],
+                "-srcs": [
+                    "google.*"
+                ],
+                // Our sysroot is too old so we need to introduce these
+                "+copts": [
+                    "-DF_ADD_SEALS=1033",
+                    "-DF_GET_SEALS=1034",
+                    "-DF_SEAL_SEAL=0x0001",
+                    "-DF_SEAL_SHRINK=0x0002",
+                    "-DF_SEAL_GROW=0x0004",
+                    "-DF_SEAL_WRITE=0x0008",
+                    "-DF_SEAL_EXEC=0x0020",
+                    // We do not have memfd_create
+                    "-Wno-implicit-function-declaration"
+                ],
+                // Not yet clear how to handle object includes,
+                // so let's strip them.
+                "-deps": [
+                    "common_.*"
+                ],
+                // We need a compat layer for our ye olde sysroot.
+                "+deps": [
+                    "//external/qemu/google/compat/linux:compat"
+                ]
+            }
+        }
+        // Sample shim that show cases how you can
+        // add and remove dependencies to all cc_ like
+        // rules.
+        // {
+        //     "target" : ".*",
+        //     "shims" :{
+        //    Use restrict_to to limit this shim to rules
+        //    of the given type. For example cc_library, cc_binary
+        //         "restrict_to" : "cc_.*",
+        //    Add the following items to the "deps" set
+        //         "+deps": ["to_be_added"],
+        //    remove these items from the "deps" set
+        //         "-deps": ["block"]
+        //    replace the "deps" completely:
+        //        "deps": ["a", "b"]
+        //     }
+        // }
+    ],
+    // These are the bazel mappings we are going to use for
+    // external dependencies. For every pkg config dependency
+    // you will need to provide a bazel target
+    "external_deps": {
+        "glib-2.0": [
+            "@glib//:glib-static",
+            "@glib//:gmodule-static"
+        ],
+        "zlib": [
+            "@zlib//:zlib"
+        ],
+        "pixman-1": [
+            "@pixman//:pixman-1",
+            "@pixman//:pixman_simd"
+        ],
+        "libfdt": [
+            "//external/dtc:libfdt"
+        ],
+        "libpulse": [
+            "@pulse//:libpulse"
+        ],
+        "vhost-user": [
+            "//external/qemu/subprojects/libvhost-user:vhost-user"
+        ],
+        "vhost-user-glib": [
+            "//external/qemu/subprojects/libvhost-user:vhost-user-glib"
+        ],
+        "rutabaga_gfx_ffi": []
+    },
+    // The actual set of targets you wish to generate bazel targets for.
+    // These are the targets that will be exported.
+    "export": [
+        // "vhost-user-glib"
+        // "block"
+        // "config-poison.h"
+        "qemu-system-x86_64",
+        "qemu-system-aarch64",
+        "qemu-system-riscv64"
+        // "qemu-aarch64-softmmu"
+    ],
+    "exclude": [
+        "vhost-user",
+        "vhost-user-glib"
+    ],
+    // The directory used where all the configuration files end up.
+    // This is something that should match your platfom.
+    "platform_dir": "platform/linux"
+}
