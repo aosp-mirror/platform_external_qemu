@@ -1,0 +1,50 @@
+{
+    // These are shims we should apply to the various targets
+    "shims": [
+        {
+            "target": ".*",
+            "shims": {
+                "restrict_to" : "cc_.*",
+                // Remove our compat libs
+                "-hdrs": [
+                    "google.*"
+                ],
+                "-srcs": [
+                    "google.*"
+                ],
+                // We are missing a bunch of defines
+                // due us having an old sysroot
+                "+copts": [
+                    "-DF_ADD_SEALS=1033",
+                    "-DF_GET_SEALS=1034",
+                    "-DF_SEAL_SEAL=0x0001",
+                    "-DF_SEAL_SHRINK=0x0002",
+                    "-DF_SEAL_GROW=0x0004",
+                    "-DF_SEAL_WRITE=0x0008",
+                    "-DF_SEAL_EXEC=0x0020",
+                    "-Wno-implicit-function-declaration"
+                ],
+                // Compat layer needed for vhost
+                "+deps": [
+                    "//external/qemu/google/compat/linux:compat"
+                ]
+            }
+        }
+
+    ],
+    // These are the bazel mappings we are going to use for
+    // external dependencies. For every pkg config dependency
+    // you will need to provide a bazel target
+    "external_deps": {
+        "glib-2.0": [
+            "@glib//:glib-static",
+            "@glib//:gmodule-static"
+        ]
+    },
+    // The actual set of targets you wish to generate bazel targets for.
+    // These are the targets that will be exported.
+    "export": [
+        "vhost-user-glib",
+        "vhost-user"
+    ],
+}
