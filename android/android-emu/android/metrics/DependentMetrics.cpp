@@ -657,6 +657,8 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
         case android::featurecontrol::QtRawKeyboardInput:
             return android_studio::EmulatorFeatureFlagState::
                     DEVICE_KEYBOARD_QT_RAW_INPUT;
+        case android::featurecontrol::Uwb:
+            return android_studio::EmulatorFeatureFlagState::UWB;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
