@@ -77,7 +77,7 @@ class RouteViewModel {
         const originAddress = route.routes[0].legs[0].start_address;
         const destinationAddress = route.routes[0].legs[0].end_address;
         const travelMode = route['request']['travelMode'];
-        console.log('RouteViewModel::setRoute called', originLatLng,
+        console.debug('RouteViewModel::setRoute called', originLatLng,
             originAddress,
             destinationLatLng,
             destinationAddress,
@@ -104,7 +104,7 @@ class RouteViewModel {
     }
 
     saveRoute() {
-        channel.objects.emulocationserver.saveRoute();
+        channel.objects.routes.saveRoute();
     }
 
     sendRouteToEmulator(route) {
@@ -113,12 +113,12 @@ class RouteViewModel {
         }
         if (!route) {
             console.log('EMPTY ROUTE - sending route to emulator', this);
-            channel.objects.emulocationserver.sendFullRouteToEmu(0, 0, null, null);
+            channel.objects.routes.sendFullRouteToEmu(0, 0, null, null);
             return;
         }
         const { json, pointCount, totalDuration } = this.model.convertRouteToJson(route);
         console.log('COMPLETE ROUTE - sending route to emulator', this);
-        channel.objects.emulocationserver.sendFullRouteToEmu(pointCount, totalDuration, json, this.getTransportationMode());
+        channel.objects.routes.sendFullRouteToEmu(pointCount, totalDuration, json, this.getTransportationMode());
     }
 
     addNewEmptyDestination() {
