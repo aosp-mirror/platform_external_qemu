@@ -8,6 +8,13 @@
             }
         },
         {
+            "target": "config-poison_h",
+            "shims": {
+                // TODO: It would be nice if we could generalize this in the generator
+                "cmd": "$(location :make-config-poison) $(SRCS) > $(location config-poison.h)"
+            }
+        },
+        {
             "target": "keymap-gen",
             "shims": {
                 "srcs": [

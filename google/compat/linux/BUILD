@@ -1,6 +1,13 @@
 cc_library(
     name = "compat",
+    srcs = glob(
+        ["src/*.cc"],
+        ["linux/**/*.h"],
+    ),
+    linkopts = [
+        # "-lpulse",
+        # "-lutil",
+    ],
     linkstatic = True,
-    srcs = glob(["src/*.cc"], ["linux/**/*.h"]),
     visibility = ["//visibility:public"],
 )
