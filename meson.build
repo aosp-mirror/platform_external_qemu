@@ -3096,6 +3096,7 @@ endif
 
 libvfio_user_dep = not_found
 if have_system and vfio_user_server_allowed
+  error('This is not allowed in emulator build')
   libvfio_user_proj = subproject('libvfio-user', required: true)
   libvfio_user_dep = libvfio_user_proj.get_variable('libvfio_user_dep')
 endif
@@ -3706,12 +3707,12 @@ block = declare_dependency(link_whole: [libblock],
 
 blockdev_ss = blockdev_ss.apply(config_targetos, strict: false)
 libblockdev = static_library('blockdev', blockdev_ss.sources() + genh,
-                             dependencies: blockdev_ss.dependencies(),
+                             dependencies: blockdev_ss.dependencies() + [vhost_user],
                              name_suffix: 'fa',
                              build_by_default: false)
 
 blockdev = declare_dependency(link_whole: [libblockdev],
-                              dependencies: [block, event_loop_base])
+                              dependencies: [block, event_loop_base, vhost_user])
 
 qmp_ss = qmp_ss.apply(config_targetos, strict: false)
 libqmp = static_library('qmp', qmp_ss.sources() + genh,
