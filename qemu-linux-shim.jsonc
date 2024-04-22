@@ -8,6 +8,13 @@
             }
         },
         {
+            "target": "config-poison_h",
+            "shims": {
+                // TODO: It would be nice if we could generalize this in the generator
+                "cmd": "$(location :make-config-poison) $(SRCS) > $(location config-poison.h)"
+            }
+        },
+        {
             "target": "keymap-gen",
             "shims": {
                 "srcs": [
@@ -18,19 +25,25 @@
         {
             "target": "qemu-system-riscv64",
             "shims": {
-                "+deps" : ["qemu-riscv64-softmmu"]
+                "+deps": [
+                    "qemu-riscv64-softmmu"
+                ]
             }
         },
         {
             "target": "qemu-system-aarch64",
             "shims": {
-                "+deps" : ["qemu-aarch64-softmmu"]
+                "+deps": [
+                    "qemu-aarch64-softmmu"
+                ]
             }
         },
         {
             "target": "qemu-system-x86_64",
             "shims": {
-                "+deps" : ["qemu-x86_64-softmmu"]
+                "+deps": [
+                    "qemu-x86_64-softmmu"
+                ]
             }
         },
         {
@@ -50,6 +63,8 @@
                 ],
                 // Our sysroot is too old so we need to introduce these
                 "+copts": [
+                    // Enables clang to generate CMPXCHG16B instructions.
+                    "-mcx16",
                     "-DF_ADD_SEALS=1033",
                     "-DF_GET_SEALS=1034",
                     "-DF_SEAL_SEAL=0x0001",
@@ -69,6 +84,15 @@
                 "+deps": [
                     "//external/qemu/google/compat/linux:compat"
                 ]
+            }
+        },
+        {
+            "target": "qemu-.*-softmmu|qemu-.*-softmmu_common|common",
+            // TODO: Figure out why we are not setting
+            // this to alwayslink..
+            "shims": {
+                "restrict_to": "cc_library",
+                "alwayslink": 1
             }
         }
         // Sample shim that show cases how you can
@@ -121,19 +145,12 @@
     // The actual set of targets you wish to generate bazel targets for.
     // These are the targets that will be exported.
     "export": [
-        // "vhost-user-glib"
-        // "block"
-        // "config-poison.h"
         "qemu-system-x86_64",
         "qemu-system-aarch64",
         "qemu-system-riscv64"
-        // "qemu-aarch64-softmmu"
     ],
     "exclude": [
         "vhost-user",
         "vhost-user-glib"
-    ],
-    // The directory used where all the configuration files end up.
-    // This is something that should match your platfom.
-    "platform_dir": "platform/linux"
+    ]
 }
