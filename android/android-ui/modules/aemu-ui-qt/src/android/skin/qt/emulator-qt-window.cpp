@@ -268,6 +268,12 @@ static int convertKeyCode(int sym, bool& isModifier) {
     return -1;
 }
 
+static SkinEvent createMouseTrackingSkinEvent(SkinEventType eventType) {
+    auto event = createSkinEvent(eventType);
+    event.u.mouse.display_id = 0;
+    return event;
+}
+
 }  // namespace
 
 // Make sure it is POD here
@@ -1360,9 +1366,19 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
         D("%s: mouse grabbed\n", __func__);
         grabMouse(QCursor(Qt::CursorShape::BlankCursor));
 
-        queueSkinEvent(createSkinEvent(kEventMouseStartTracking));
+        queueSkinEvent(createMouseTrackingSkinEvent(kEventMouseStartTracking));
 
         mMouseGrabbed = true;
+
+        // Don't send this mouse event to the guest. Either the user likely
+        // clicked on the dialog that popped up (rendering the press/release
+        // state incorrect), or they just clicked in the window to activate
+        // mouse input and should retain control over the guest OS behavior.
+        //
+        // NOTE: This will potentially cause a spurrious mouse release event
+        // to be sent when the user releases the button, but this is considered
+        // unlikely to affect things, and not worth the risk of tracking it.
+        return;
     }
 
     // Pen long press generates synthesized mouse events,
@@ -2816,7 +2832,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, const QKeyEvent& event
         D("%s: mouse released\n", __func__);
         releaseMouse();
 
-        queueSkinEvent(createSkinEvent(kEventMouseStopTracking));
+        queueSkinEvent(createMouseTrackingSkinEvent(kEventMouseStopTracking));
 
         mMouseGrabbed = false;
     }
@@ -4010,6 +4026,13 @@ SkinEventType EmulatorQtWindow::translateMouseEventType(
         SkinEventType type,
         Qt::MouseButton button,
         Qt::MouseButtons buttons) {
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::VirtioMouse)) {
+        // If mouse input is intended to be just a mouse, process the event
+        // normally.
+        return type;
+    }
+
     SkinEventType newType = type;
 
     switch (mMouseTouchState) {
