@@ -98,15 +98,15 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
                << w << " " << h << " " << dpi << " " << flag << " "
                << (add ? "add" : "del");
     if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
-        return -1;
+        return -ENODEV;
     }
 
     if (android_foldable_any_folded_area_configured()) {
-        return -1;
+        return -ENOSYS;
     }
 
     if (resizableEnabled()) {
-        return -1;
+        return -ENOSYS;
     }
 
     if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
@@ -114,15 +114,15 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) ==
                 AVD_WEAR) {
         LOG(ERROR) << "Multidisplay does not support TV or WEAR";
-        return -1;
+        return -ENOSYS;
     }
 
     if (mGuestMode) {
-        return -1;
+        return -ENOSYS;
     }
 
     if (add && !multiDisplayParamValidate(id, w, h, dpi, flag)) {
-        return -1;
+        return -EINVAL;
     }
 
     if (flag == 0) {
@@ -156,7 +156,7 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         mWindowAgent->showMessage(
                 "Please apply multiple displays without rotation",
                 WINDOW_MESSAGE_ERROR, 1000);
-        return -1;
+        return -EINVAL;
     }
 
     if (hotPlugDisplayEnabled()) {
@@ -191,7 +191,7 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
             derror("Adb unavailable, not starting multidisplay "
                    "service in android. Please install adb and restart the "
                    "emulator. Multi display might not work as expected.");
-            return -1;
+            return -EPIPE;
         }
 
         {
@@ -220,6 +220,9 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
                        << " id " << id << " width " << w << " height " << h
                        << " dpi " << dpi << " flag " << flag;
             pipe->send(std::move(data));
+        } else {
+            LOG(ERROR) << "MultiDisplayPipe is not up yet. Please try again.";
+            return -EPIPE;
         }
     }
     return 0;
@@ -483,12 +486,12 @@ void MultiDisplay::setGpuMode(bool isGuestMode, uint32_t w, uint32_t h) {
 
 int MultiDisplay::createDisplay(uint32_t* displayId) {
     if (mGuestMode) {
-        return -1;
+        return -ENOSYS;
     }
 
     if (displayId == nullptr) {
         derror("Cannot create a display, the displayId is a nullptr");
-        return -1;
+        return -EINVAL;
     }
 
     {
@@ -499,7 +502,7 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
                    "been "
                    "reached.",
                    s_maxNumMultiDisplay);
-            return -1;
+            return -EINVAL;
         }
         if (mMultiDisplay.find(*displayId) != mMultiDisplay.end()) {
             return 0;
@@ -520,7 +523,7 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
                    "been "
                    "reached.",
                    s_maxNumMultiDisplay);
-            return -1;
+            return -EINVAL;
         }
 
         mMultiDisplay.emplace(*displayId, MultiDisplayInfo());
@@ -538,7 +541,7 @@ int MultiDisplay::destroyDisplay(uint32_t displayId) {
     bool restoreSkin = false;
 
     if (mGuestMode) {
-        return -1;
+        return -ENOSYS;
     }
     {
         AutoLock lock(mLock);
@@ -599,13 +602,13 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
         }
     }
     if (mGuestMode) {
-        return -1;
+        return -ENOSYS;
     }
     {
         AutoLock lock(mLock);
         if (mMultiDisplay.find(displayId) == mMultiDisplay.end()) {
             derror("Display with id: %d does not exist", displayId);
-            return -1;
+            return -EINVAL;
         }
         bool displaySizeChanged = false;
         if (mMultiDisplay[displayId].cb != 0 &&
@@ -781,12 +784,12 @@ int MultiDisplay::getDisplayPose(uint32_t displayId,
                                  uint32_t* w,
                                  uint32_t* h) {
     if (mGuestMode) {
-        return -1;
+        return -ENOSYS;
     }
     AutoLock lock(mLock);
     if (mMultiDisplay.find(displayId) == mMultiDisplay.end()) {
         derror("Display with id: %d does not exist", displayId);
-        return -1;
+        return -EINVAL;
     }
     *x = mMultiDisplay[displayId].pos_x;
     *y = mMultiDisplay[displayId].pos_y;
@@ -801,13 +804,13 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
     bool noSkin = false;
     bool needUpdate = false;
     if (mGuestMode) {
-        return -1;
+        return -ENOSYS;
     }
     {
         AutoLock lock(mLock);
         if (mMultiDisplay.find(displayId) == mMultiDisplay.end()) {
             derror("Display with id: %d does not exist", displayId);
-            return -1;
+            return -EINVAL;
         }
         if (mMultiDisplay[displayId].cb == colorBuffer) {
             return 0;
@@ -859,11 +862,11 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
 int MultiDisplay::getDisplayColorBuffer(uint32_t displayId,
                                         uint32_t* colorBuffer) {
     if (mGuestMode) {
-        return -1;
+        return -ENOSYS;
     }
     AutoLock lock(mLock);
     if (mMultiDisplay.find(displayId) == mMultiDisplay.end()) {
-        return -1;
+        return -EINVAL;
     }
     *colorBuffer = mMultiDisplay[displayId].cb;
     return 0;
@@ -872,7 +875,7 @@ int MultiDisplay::getDisplayColorBuffer(uint32_t displayId,
 int MultiDisplay::getColorBufferDisplay(uint32_t colorBuffer,
                                         uint32_t* displayId) {
     if (mGuestMode) {
-        return -1;
+        return -ENOSYS;
     }
     AutoLock lock(mLock);
     for (const auto& iter : mMultiDisplay) {
@@ -881,7 +884,7 @@ int MultiDisplay::getColorBufferDisplay(uint32_t colorBuffer,
             return 0;
         }
     }
-    return -1;
+    return -EINVAL;
 }
 
 void MultiDisplay::getCombinedDisplaySize(uint32_t* w, uint32_t* h) {
