@@ -113,14 +113,17 @@ scopeguard = { path = "${AOSP_ROOT}/external/rust/crates/scopeguard" }
 serde = { path = "${AOSP_ROOT}/external/rust/crates/serde" }
 serde_derive = { path = "${AOSP_ROOT}/external/rust/crates/serde_derive" }
 serde_json = { path = "${AOSP_ROOT}/external/rust/crates/serde_json" }
+sharded-slab = { path = "${AOSP_ROOT}/external/rust/crates/sharded-slab" }
 shlex = { path = "${AOSP_ROOT}/external/rust/crates/shlex" }
 slab = { path = "${AOSP_ROOT}/external/rust/crates/slab" }
 smallvec = { path = "${AOSP_ROOT}/external/rust/crates/smallvec" }
 socket2 = { path = "${AOSP_ROOT}/external/rust/crates/socket2" }
 syn = { path = "${AOSP_ROOT}/external/rust/crates/syn" }
+thread_local = { path = "${AOSP_ROOT}/external/rust/crates/thread_local" }
 tracing = { path = "${AOSP_ROOT}/external/rust/crates/tracing" }
 tracing-attributes = { path = "${AOSP_ROOT}/external/rust/crates/tracing-attributes" }
 tracing-core = { path = "${AOSP_ROOT}/external/rust/crates/tracing-core" }
+tracing-subscriber = { path = "${AOSP_ROOT}/external/rust/crates/tracing-subscriber" }
 tempfile = { path = "${AOSP_ROOT}/external/rust/crates/tempfile" }
 termcolor = { path = "${AOSP_ROOT}/external/rust/crates/termcolor" }
 textwrap = { path = "${AOSP_ROOT}/external/rust/crates/textwrap" }
