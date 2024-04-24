@@ -21,14 +21,85 @@
 import argparse
 import sys
 import typing as T
+import collections
+
+_T = T.TypeVar("_T")
+
+
+class OrderedSet(T.MutableSet[_T]):
+    # Taken and extended from //external/meson/mesonbuild/utils/universal.py
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    # Copyright 2012-2020 The Meson development team
+
+    """A set that preserves the order in which items are added, by first
+    insertion.
+    """
+
+    def __init__(self, iterable: T.Optional[T.Iterable[_T]] = None):
+        self.__container: T.OrderedDict[_T, None] = collections.OrderedDict()
+        if iterable:
+            self.update(iterable)
+
+    def __eq__(self, other: object) -> bool:
+        return not any(x not in self for x in other) and not any(
+            x not in other for x in self
+        )
+
+    def __contains__(self, value: object) -> bool:
+        return value in self.__container
+
+    def __iter__(self) -> T.Iterator[_T]:
+        return iter(self.__container.keys())
+
+    def __len__(self) -> int:
+        return len(self.__container)
+
+    def __repr__(self) -> str:
+        # Don't print 'OrderedSet("")' for an empty set.
+        if self.__container:
+            return "OrderedSet([{}])".format(
+                ", ".join(repr(e) for e in self.__container.keys())
+            )
+        return "OrderedSet()"
+
+    def __reversed__(self) -> T.Iterator[_T]:
+        return reversed(self.__container.keys())
+
+    def add(self, value: _T) -> None:
+        self.__container[value] = None
+
+    def discard(self, value: _T) -> None:
+        if value in self.__container:
+            del self.__container[value]
+
+    def move_to_end(self, value: _T, last: bool = True) -> None:
+        self.__container.move_to_end(value, last)
+
+    def pop(self, last: bool = True) -> _T:
+        item, _ = self.__container.popitem(last)
+        return item
+
+    def update(self, iterable: T.Iterable[_T]) -> None:
+        for item in iterable:
+            self.__container[item] = None
+
+    def intersection(self, set_: T.Iterable[_T]) -> "OrderedSet[_T]":
+        return type(self)(e for e in self if e in set_)
+
+    def difference(self, set_: T.Iterable[_T]) -> "OrderedSet[_T]":
+        return type(self)(e for e in self if e not in set_)
+
+    def difference_update(self, iterable: T.Iterable[_T]) -> None:
+        for item in iterable:
+            self.discard(item)
 
 
 class BazelValue:
     """Class representing a Bazel value that can be merged across different configurations."""
 
-    def __init__(
-        self, configuration: str, value: T.Union[str | T.Set[str]]
-    ):
+    def __init__(self, configuration: str, value: T.Union[str | T.Set[str]]):
         """Initialize a BazelValue instance.
 
         Note that a BazelValue is always part of a BazelRule. If a BazelRule is unique to
@@ -58,7 +129,7 @@ class BazelValue:
         if not (
             isinstance(value, str) or isinstance(value, bool) or isinstance(value, int)
         ):
-            self.value = set(value)
+            self.value = OrderedSet(value)
         else:
             self.value = value
 
@@ -72,8 +143,8 @@ class BazelValue:
     def _to_str(self, v):
         if isinstance(v, str):
             return f"'{self._escape(v)}'"
-        if isinstance(v, set):
-            return "[" + ", ".join(sorted([f"'{self._escape(x)}'" for x in v])) + "]"
+        if isinstance(v, OrderedSet):
+            return "[" + ", ".join([f"'{self._escape(x)}'" for x in v]) + "]"
 
         return str(v)
 
@@ -104,7 +175,7 @@ class BazelValue:
                 f"Do not know how to merge strings ({self.value}/{other.value})"
             )
 
-        everything = self.value
+        everything: OrderedSet = self.value
         for value in self.select.values():
             everything = everything.intersection(value)
 
@@ -146,6 +217,20 @@ class BazelValue:
         return v
 
 
+class LoadCmd:
+
+    def __init__(self, label: str, rules: T.List[str]):
+        self.label = label
+        self.rules = rules
+
+    def __str__(self):
+        if isinstance(self.rules, str):
+            rules = f"'{self.rules}'"
+        else:
+            rules = ", ".join([f"'{x}'" for x in self.rules])
+        return f"load('{self.label}', {rules})"
+
+
 class BazelRule:
 
     def __init__(self, label: str, sort: str, params):
@@ -170,9 +255,6 @@ class BazelRule:
         if self.sort == other.sort:
             return self.name < other.name
         return self.sort < other.sort
-
-    def copy(self):
-        return BazelRule(self.sort, self.params.copy())
 
     def merge(self, other):
         for v in self.params.values():
@@ -199,9 +281,14 @@ class BazelRuleLibrary:
 
     def __init__(self):
         self.library: T.Dict[str, BazelRule] = {}
+        self.load_cmds = set()
         self.configurations: T.Dict[str, T.Set[str]] = {}
 
-    def register(self, rule: BazelRule):
+    def register(self, rule: T.Union[BazelRule | LoadCmd]):
+        if isinstance(rule, LoadCmd):
+            self.load_cmds.add(rule)
+            return
+
         if rule.name in self.library:
             return self.merge_rule(rule)
 
@@ -220,6 +307,12 @@ class BazelRuleLibrary:
     def serialize(self, stream):
         stream.write("# This build file was autogenerated by:\n")
         stream.write(f"# {' '.join(sys.argv)}\n")
+
+        for load in self.load_cmds:
+            stream.write(str(load))
+            stream.write("\n")
+
+        stream.write("\n")
 
         for target in sorted(self.library.values()):
             stream.write(str(target))
@@ -268,6 +361,14 @@ class BuildFileFunctions:
 
     def py_binary(self, **kwargs):
         rule = BazelRule(self.configuration, "py_binary", kwargs)
+        self.library.register(rule)
+
+    def windows_resources(self, **kwargs):
+        rule = BazelRule(self.configuration, "windows_resources", kwargs)
+        self.library.register(rule)
+
+    def load(self, bzl, *files):
+        rule = LoadCmd(bzl, *files)
         self.library.register(rule)
 
 
