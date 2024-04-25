@@ -1336,9 +1336,14 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     QMessageBox msgBox(QMessageBox::Question, tr("Save quick-boot state"),
                        askMessage, (QMessageBox::Yes | QMessageBox::No), this);
     // Add a Cancel button to enable the MessageBox's X.
-    QPushButton* cancelButton = msgBox.addButton(QMessageBox::Cancel);
-    // Hide the Cancel button so X is the only way to cancel.
-    cancelButton->setHidden(true);
+    // Since embedded has already disconnected by this point, we always assume shutdown.
+    if(!getConsoleAgents()
+            ->settings->android_cmdLineOptions()
+            ->qt_hide_window) {
+        QPushButton* cancelButton = msgBox.addButton(QMessageBox::Cancel);
+        // Hide the Cancel button so X is the only way to cancel.
+        cancelButton->setHidden(true);
+    }
 
     // ten seconds
     constexpr int timeout = 10000;
