@@ -4,10 +4,10 @@ cc_library(
         ["src/*.cc"],
         ["linux/**/*.h"],
     ),
-    linkopts = [
-        # "-lpulse",
-        # "-lutil",
-    ],
     linkstatic = True,
     visibility = ["//visibility:public"],
+    deps = [
+        "@gcc_lib//:libpulse",
+        "@gcc_lib//:libutil",
+    ],
 )
