@@ -1108,6 +1108,12 @@ message EmulatorStatus {
     // The hardware configuration of the running emulator as
     // key valure pairs.
     EntryList hardwareConfig = 5;
+
+    // Some guests will produce a heart beat, that can be used to
+    // detect if the guest is active.
+    // This is a monotonically increasing number that gets incremented
+    // around once a second.
+    uint64 heartbeat = 6;
 }
 
 message AudioFormat {
