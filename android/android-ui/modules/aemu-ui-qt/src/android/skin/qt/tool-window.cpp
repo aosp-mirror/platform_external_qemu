@@ -486,9 +486,8 @@ void ToolWindow::on_unfold_timer_done() {
 void ToolWindow::updateFoldableButtonVisibility() {
     mToolsUi->change_posture_button->setEnabled(
             android_foldable_hinge_enabled());
-    if (mExtendedWindow.hasInstance()) {
-        mExtendedWindow.get()->getVirtualSensorsPage()->updateHingeSensorUI();
-    }
+    mExtendedWindow.ifExists([&] {
+        mExtendedWindow.get()->getVirtualSensorsPage()->updateHingeSensorUI(); });
 }
 
 void ToolWindow::updateButtonUiCommand(QPushButton* button,
@@ -511,8 +510,10 @@ void ToolWindow::raise() {
         mVirtualSceneControlWindow.get()->raise();
     }
     if (mTopSwitched) {
-        mExtendedWindow.get()->raise();
-        mExtendedWindow.get()->activateWindow();
+        mExtendedWindow.ifExists([&] {
+            mExtendedWindow.get()->raise();
+            mExtendedWindow.get()->activateWindow();
+        });
         mTopSwitched = false;
     }
 }
@@ -609,7 +610,7 @@ void ToolWindow::show() {
     }
 
     if (mIsExtendedWindowVisibleOnShow) {
-        mExtendedWindow.get()->show();
+    mExtendedWindow.ifExists([&] { mExtendedWindow.get()->show(); });
     }
 }
 
@@ -1399,7 +1400,7 @@ void ToolWindow::on_close_button_clicked() {
     if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier)) {
         // The user shift-clicked on the X
         // This counts as us asking and having the user say "don't save"
-        mExtendedWindow.get()->sendMetricsOnShutDown();
+        mExtendedWindow.ifExists([&] { mExtendedWindow.get()->sendMetricsOnShutDown(); });
         mAskedWhetherToSaveSnapshot = true;
         getConsoleAgents()->settings->avdParams()->flags |=
                 AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
@@ -1409,7 +1410,7 @@ void ToolWindow::on_close_button_clicked() {
     }
 
     if(shouldClose()) {
-        mExtendedWindow.get()->sendMetricsOnShutDown();
+        mExtendedWindow.ifExists([&] { mExtendedWindow.get()->sendMetricsOnShutDown(); });
         mEmulatorWindow->requestClose();
     } else {
         mAskedWhetherToSaveSnapshot = false;
@@ -1635,10 +1636,6 @@ void ToolWindow::on_more_button_clicked() {
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();
     }
-}
-
-QRect ToolWindow::extendedWindowGeometry() {
-    return mExtendedWindow.get()->frameGeometry();
 }
 
 void ToolWindow::paintEvent(QPaintEvent*) {
