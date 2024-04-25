@@ -24,12 +24,17 @@
                 ]
             }
         },
+        // Rename the macos targets. Note these do not have
+        // any entitlements set.
         {
-            "target": "qemu-system-riscv64",
+            "target": "qemu-system-riscv64-unsigned",
             "shims": {
+                "name": "qemu-system-riscv64",
                 "-deps": [
                     "libmodinfo-riscv64-softmmu_c"
                 ],
+                // TODO: Figure out why these are not
+                // derived.
                 "+deps": [
                     "libqemu-riscv64-softmmu",
                     "//hardware/generic/goldfish/emulator/plugin:registration"
@@ -37,8 +42,9 @@
             }
         },
         {
-            "target": "qemu-system-aarch64",
+            "target": "qemu-system-aarch64-unsigned",
             "shims": {
+                "name": "qemu-system-aarch64",
                 "-deps": [
                     "libmodinfo-aarch64-softmmu_c"
                 ],
@@ -49,8 +55,9 @@
             }
         },
         {
-            "target": "qemu-system-x86_64",
+            "target": "qemu-system-x86_64-unsigned",
             "shims": {
+                "name": "qemu-system-x86_64",
                 "-deps": [
                     "libmodinfo-x86_64-softmmu_c"
                 ],
@@ -85,34 +92,23 @@
                     "stubs/blk-exp-close-all.c",
                     "stubs/blk-commit-all.c",
                     "stubs/monitor-core.c",
-                    "stubs/error-printf.c",
-                    "stubs/is-daemonized.c",
-                    "stubs/graph-lock.c"
+                    "stubs/error-printf.c"
                 ],
                 // Remove our compat libs if present
                 "-hdrs": [
                     "google.*",
                     ".*subprojects.*"
                 ],
-                // Our sysroot is too old so we need to introduce these
                 "+copts": [
-                    // Enables clang to generate CMPXCHG16B instructions.
-                    "-mcx16",
-                    // We do not have memfd_create
                     "-Wno-implicit-function-declaration"
                 ],
+                // Not yet clear how to handle object includes,
+                // so let's strip them.
                 "-deps": [
-                    // We are bringing our own plugins, so do not
-                    // take a dependency on those that come from qemu.
-                    "libmodinfo-.*",
-                    // Not yet clear how to handle object includes,
-                    // so let's strip them.
+                    "libcommon_.*",
                     "libmodule-common",
-                    "libcommon_.*"
-                ],
-                // We need a compat layer for our ye olde sysroot.
-                "+deps": [
-                    "//external/qemu/google/compat/linux:compat"
+                    // We will bring our own version of libmodinfo, so strip it!
+                    "libmodinfo-.*"
                 ]
             }
         },
@@ -134,10 +130,10 @@
         //    Use restrict_to to limit this shim to rules
         //    of the given type. For example cc_library, cc_binary
         //         "restrict_to" : "cc_.*",
-        //    Add the following items to the "deps" set
-        //         "+deps": ["to_be_added"],
-        //    remove these items from the "deps" set
-        //         "-deps": ["block"]
+        //    Add the following to the "deps" set
+        //         "+deps": "to_be_added",
+        //    remove this from the "deps" set
+        //         "-deps": "block"
         //    replace the "deps" completely:
         //        "deps": ["a", "b"]
         //     }
@@ -163,28 +159,17 @@
         "libfdt": [
             "//external/dtc:libfdt"
         ],
-        "libpulse": [
-            "@pulse//:libpulse"
-        ],
-        "libvhost-user": [
-            "//external/qemu/subprojects/libvhost-user:vhost-user"
-        ],
-        "libvhost-user-glib": [
-            "//external/qemu/subprojects/libvhost-user:vhost-user-glib"
-        ],
         "rutabaga_gfx_ffi": []
     },
     // The actual set of targets you wish to generate bazel targets for.
     // These are the targets that will be exported.
     "export": [
-        "qemu-system-x86_64",
-        "qemu-system-aarch64",
-        "qemu-system-riscv64",
+        "qemu-system-x86_64-unsigned",
+        "qemu-system-aarch64-unsigned",
+        "qemu-system-riscv64-unsigned",
         "qemu-img",
         // Note that our modules need to be explicitly exported, as they
         // are not actual dependencies
-        "accel-tcg-x86_64",
-        "audio-pa",
         "hw-display-virtio-gpu",
         "hw-display-virtio-vga",
         "hw-display-virtio-vga-gl",

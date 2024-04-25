@@ -18,6 +18,7 @@ import logging
 import platform
 import shutil
 import sys
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -128,6 +129,7 @@ def setup_command(args):
         args.target, Path(args.out), args.prefix, args.aosp, args.ccache
     )
     builder.configure_meson(args.meson)
+    return builder
 
 
 def toolchain_command(args):
@@ -194,6 +196,77 @@ def release_command(args):
             zipf.write(fname, arcname)
 
 
+def bazel_command(args):
+    bazel_out = Path(args.out)
+    bazel_out.mkdir(parents=True, exist_ok=True)
+    build_dir = args.build
+    temp_build = None
+    if not build_dir:
+        temp_build = tempfile.TemporaryDirectory()
+        build_dir = Path(temp_build.__enter__()).resolve()
+        builder = gen_toolchain(args.target, build_dir, "", args.aosp, args.ccache)
+        builder.configure_meson([])
+        run(
+            [
+                Path(build_dir) / QemuBuilder.TOOLCHAIN_DIR / "meson",
+                "install",
+                "-C",
+                build_dir,
+            ],
+            cwd=build_dir,
+            toolchain_path=Path(build_dir) / QemuBuilder.TOOLCHAIN_DIR,
+        )
+
+    with tempfile.TemporaryDirectory() as bazel_build_dir:
+        # Make sure there are no accidently symlinks that cause
+        # issues when trying to find dependencies
+        build_dir = Path(build_dir).resolve()
+        bazel_build_dir = Path(bazel_build_dir).resolve()
+        builder = gen_toolchain(
+            args.target, bazel_build_dir, "", args.aosp, args.ccache
+        )
+        shim_file = (
+            Path(args.aosp)
+            / "external"
+            / "qemu"
+            / f"qemu-{platform.system().lower()}-shim.jsonc"
+            if not args.shim
+            else args.shim
+        ).absolute()
+        builder.configure_meson(
+            [
+                "--backend",
+                "bazel",
+                f"-Dbackend_shadow_build={Path(build_dir).as_posix()}",
+                f"-Dbackend_shim={shim_file.as_posix()}",
+            ]
+        )
+        sys_id = f"{platform.system().lower()}-{platform.machine().lower()}"
+        build_file = Path(bazel_build_dir) / "bazel" / "BUILD.bazel"
+        build_file.rename(
+            Path(bazel_build_dir) / "bazel" / "platform" / f"BUILD.{sys_id}"
+        )
+        zip_file = bazel_out / f"bazel-{sys_id}-{args.buildid}.zip"
+        logging.info("Creating %s", zip_file)
+        with zipfile.ZipFile(
+            zip_file, "w", zipfile.ZIP_DEFLATED, allowZip64=True
+        ) as zipf:
+            search_dir = Path(bazel_build_dir) / "bazel"
+            for fname in search_dir.glob("**/*"):
+                arcname = fname.relative_to(search_dir)
+                logging.info("Adding %s as %s", fname, arcname)
+                zipf.write(fname, arcname)
+
+        (bazel_out / "logs").mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(
+            Path(bazel_build_dir) / "meson-logs" / "meson-log.txt",
+            bazel_out / "logs" / "meson-log.txt",
+        )
+
+    if temp_build:
+        temp_build.__exit__(None, None, None)
+
+
 def find_aosp_root(start_directory=Path(__file__).resolve()):
     current_directory = Path(start_directory).resolve()
 
@@ -213,6 +286,7 @@ def find_aosp_root(start_directory=Path(__file__).resolve()):
 
 
 def main():
+    aosp_root = find_aosp_root()
     parser = argparse.ArgumentParser(
         formatter_class=CustomFormatter,
         description=f"""
@@ -271,7 +345,7 @@ def main():
     toolchain_parser.add_argument(
         "--aosp",
         type=str,
-        default=find_aosp_root(),
+        default=aosp_root,
         help="AOSP root to use",
     )
     toolchain_parser.add_argument(
@@ -311,7 +385,7 @@ def main():
     setup_parser.add_argument(
         "--aosp",
         type=str,
-        default=find_aosp_root(),
+        default=aosp_root,
         help="AOSP root to use",
     )
     setup_parser.add_argument(
@@ -348,6 +422,49 @@ def main():
     release_parser.set_defaults(func=release_command)
     release_parser.add_argument("out", type=str, help="Configured compile directory")
     release_parser.add_argument("release", type=str, help="Zipfile with the release")
+
+    # Subparser for 'bazel' command
+    bazel_parser = subparsers.add_parser("bazel", help="Run QEMU tests")
+    bazel_parser.set_defaults(func=bazel_command)
+    bazel_parser.add_argument(
+        "out", type=str, help="Directory with the final bazel zip"
+    )
+    bazel_parser.add_argument(
+        "--aosp",
+        type=str,
+        default=aosp_root,
+        help="AOSP root to use",
+    )
+    bazel_parser.add_argument(
+        "--ccache",
+        dest="ccache",
+        default=shutil.which("ccache") or shutil.which("sccache"),
+        help="Use the given compiler cache (ccache/sccache)",
+    )
+    bazel_parser.add_argument(
+        "--target",
+        type=str,
+        default=platform.system().lower(),
+        help="Toolchain target, the host you wish to run the executables on",
+    )
+    bazel_parser.add_argument(
+        "--build",
+        type=str,
+        default=None,
+        help="Shadow build to use, or None if you wish to create a temporary one",
+    )
+    bazel_parser.add_argument(
+        "--buildid",
+        type=str,
+        default="",
+        help="Build id to use, if any",
+    )
+    bazel_parser.add_argument(
+        "--shim",
+        default=None,
+        type=str,
+        help="Directory with the release",
+    )
 
     args = parser.parse_args()
 
