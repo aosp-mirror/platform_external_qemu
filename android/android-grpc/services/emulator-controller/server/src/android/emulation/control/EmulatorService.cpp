@@ -54,6 +54,7 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
+#include "android/emulation/QemuMiscPipe.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
 #include "android/emulation/control/audio/AudioStream.h"
@@ -525,6 +526,7 @@ public:
                 config.numberOfCpuCores);
         reply->mutable_vmconfig()->set_ramsizebytes(config.ramSizeBytes);
         reply->set_booted(bootCompleted());
+        reply->set_heartbeat(get_guest_heart_beat_count());
         reply->set_uptime(System::get()->getProcessTimes().wallClockMs);
         reply->set_version(std::string(EMULATOR_VERSION_STRING) + " (" +
                            std::string(EMULATOR_FULL_VERSION_STRING) + ")");
@@ -1209,14 +1211,23 @@ public:
                 continue;
             }
 
-            int updated = -1;
-            android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
-                    [&updated, &display, this]() {
-                        updated = mAgents->multi_display->setMultiDisplay(
-                                display.display(), -1, -1, display.width(),
-                                display.height(), display.dpi(),
-                                display.flags(), true);
-                    });
+            int updated = -EPIPE;
+            {
+                constexpr int RETRIES = 20;
+                for (int i = 0; i < RETRIES && updated == -EPIPE; ++i) {
+                    android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                            [&updated, &display, this]() {
+                                updated = mAgents->multi_display->setMultiDisplay(
+                                        display.display(), -1, -1, display.width(),
+                                        display.height(), display.dpi(),
+                                        display.flags(), true);
+                            });
+                    VERBOSE_INFO(grpc, "setMultiDisplay(retry=%d) result (%d)", i, updated);
+                    if (updated == -EPIPE) {
+                        std::this_thread::sleep_for(std::chrono::seconds(1));
+                    }
+                }
+            }
             if (updated < 0) {
                 // oh, oh, failure.
                 failureDisplay = display.display();
@@ -1239,15 +1250,24 @@ public:
                 if (updatedDisplays.erase(display.display()) == 0) {
                     continue;
                 }
-                int updated = -1;
-                android::base::ThreadLooper::
-                        runOnMainLooperAndWaitForCompletion([&updated, &display,
-                                                             this]() {
-                            updated = mAgents->multi_display->setMultiDisplay(
-                                    display.display(), -1, -1, display.width(),
-                                    display.height(), display.dpi(),
-                                    display.flags(), true);
-                        });
+                int updated = -EPIPE;
+                {
+                    constexpr int RETRIES = 20;
+                    for (int i = 0; i < RETRIES && updated == -EPIPE; ++i) {
+                        android::base::ThreadLooper::
+                                runOnMainLooperAndWaitForCompletion([&updated, &display,
+                                                                    this]() {
+                                    updated = mAgents->multi_display->setMultiDisplay(
+                                            display.display(), -1, -1, display.width(),
+                                            display.height(), display.dpi(),
+                                            display.flags(), true);
+                                });
+                        VERBOSE_INFO(grpc, "setMultiDisplay(retry=%d) result (%d)", i, updated);
+                        if (updated == -EPIPE) {
+                            std::this_thread::sleep_for(std::chrono::seconds(1));
+                        }
+                    }
+                }
 
                 if (updated >= 0) {
                     mAgents->emu->updateUIMultiDisplayPage(display.display());
