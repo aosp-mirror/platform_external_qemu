@@ -9,10 +9,10 @@ function initMap() {
 
     _pageComponents = buildMapPageComponents(_eventBus);
 
-    console.log('components found', _pageComponents);
+    console.debug('components found', _pageComponents);
 
     for (let i = 0; i < _pageComponents.length; i++) {
-        console.log('component=', _pageComponents[i]);
+        console.debug('component=', _pageComponents[i]);
         _pageComponents[i].onMapInitialized(_mapManager, _eventBus);
     }
 }

@@ -4,7 +4,7 @@ class EventBus {
     }
 
     dispatch(eventName, eventData) {
-        console.log('dispatching event', eventName, eventData);
+        console.debug('dispatching event', eventName, eventData);
         const eventEntry = this.eventDispatchTable[eventName];
         if (eventEntry) {
             eventEntry.fire(eventData);
