@@ -35,7 +35,7 @@ class MapController extends GoogleMapPageComponent {
     }
 
     setCurrentLocation(latLng) {
-        console.log('MapController::setCurrentLocation called', latLng.lat(), latLng.lng());
+        console.debug('MapController::setCurrentLocation called', latLng.lat(), latLng.lng());
         if (this.currentLocationMarker) {
             this.currentLocationMarker.setMap(null);
         }
@@ -60,7 +60,7 @@ class MapController extends GoogleMapPageComponent {
     }
 
     setRoute(routeJson, isSavedRoute) {
-        console.log('MapController::setRoute called', routeJson);
+        console.debug('MapController::setRoute called', routeJson);
         this.viewModel.setIsLoadingRoute(true);
         this.hideGpxKmlPanel();
         this.routePanel.close();
@@ -86,7 +86,7 @@ class MapController extends GoogleMapPageComponent {
         }
         finally {
             this.searchBox.update('');
-            channel.objects.emulocationserver.onSavedRouteDrawn();
+            channel.objects.routes.onSavedRouteDrawn();
             this.viewModel.setIsLoadingRoute(false);
             if (loadedSuccessfully) {
                 this.viewModel.renderDirections(this.mapManager, routeJson);
@@ -95,7 +95,7 @@ class MapController extends GoogleMapPageComponent {
     }
 
     showRoutePlaybackPanel(visible) {
-        console.log('MapController::showRoutePlaybackPanel called', visible);
+        console.debug('MapController::showRoutePlaybackPanel called', visible);
         if (visible) {
             // in route playback mode
             this.viewModel.setIsPlayingRoute(true);
@@ -126,7 +126,7 @@ class MapController extends GoogleMapPageComponent {
     }
 
     showRoute(routeJson, title, subtitle) {
-        console.log('MapController::showRoute called', routeJson, title, subtitle);
+        console.debug('MapController::showRoute called', routeJson, title, subtitle);
         if (routeJson.length < 2) {
             return;
         }
@@ -154,12 +154,12 @@ class MapController extends GoogleMapPageComponent {
         });
 
         this.mapManager.zoomToPath(path);
-        channel.objects.emulocationserver.onSavedRouteDrawn();
+        channel.objects.routes.onSavedRouteDrawn();
         this.viewModel.setIsLoadingRoute(false);
     }
 
     displayRouteEditor(latLng, address) {
-        console.log('MapController::displayRouteEditor called', latLng, address);
+        console.debug('MapController::displayRouteEditor called', latLng, address);
         this.viewModel.setIsLoadingRoute(true);
         this.locationPanel.hide();
         this.routePanel.close();

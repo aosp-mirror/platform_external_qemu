@@ -155,7 +155,7 @@ class RouteModel {
 
     isValidRoute() {
         for (let i = 0; i < this.waypoints.length; i++) {
-            console.log('isEmpty', this.waypoints[i], this.waypoints[i].isEmpty());
+            console.debug('isEmpty', this.waypoints[i], this.waypoints[i].isEmpty());
             if (this.waypoints[i].isEmpty()) { return false; }
         }
         return true;

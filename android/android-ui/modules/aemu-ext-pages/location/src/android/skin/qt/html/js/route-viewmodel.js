@@ -104,7 +104,7 @@ class RouteViewModel {
     }
 
     saveRoute() {
-        channel.objects.emulocationserver.saveRoute();
+        channel.objects.routes.saveRoute();
     }
 
     sendRouteToEmulator(route) {
@@ -113,12 +113,12 @@ class RouteViewModel {
         }
         if (!route) {
             console.log('EMPTY ROUTE - sending route to emulator', this);
-            channel.objects.emulocationserver.sendFullRouteToEmu(0, 0, null, null);
+            channel.objects.routes.sendFullRouteToEmu(0, 0, null, null);
             return;
         }
         const { json, pointCount, totalDuration } = this.model.convertRouteToJson(route);
         console.log('COMPLETE ROUTE - sending route to emulator', this);
-        channel.objects.emulocationserver.sendFullRouteToEmu(pointCount, totalDuration, json, this.getTransportationMode());
+        channel.objects.routes.sendFullRouteToEmu(pointCount, totalDuration, json, this.getTransportationMode());
     }
 
     addNewEmptyDestination() {

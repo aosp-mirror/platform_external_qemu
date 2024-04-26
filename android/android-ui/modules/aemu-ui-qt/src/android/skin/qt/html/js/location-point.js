@@ -11,7 +11,7 @@ var gPointOverlay = new LocationPointOverlay();
 function savePoint() {
     // The emulator should have the point of interest already, from the
     // sendAddress() call.
-    channel.objects.emulocationserver.map_savePoint();
+    channel.objects.single_point.map_savePoint();
 }
 
 function resetPointsMap() {
@@ -25,7 +25,7 @@ function resetPointsMap() {
 
 function onSearchBarCleared() {
     // Send an invalid point so the list selection is cleared.
-    channel.objects.emulocationserver.sendLocation(91.0, 181.0, "");
+    channel.objects.single_point.sendLocation(91.0, 181.0, "");
 }
 
 // Callback function for Maps API
@@ -44,12 +44,14 @@ function initMap() {
     gSearchBox.init(gMap,
         gSearchResultMarkers,
         (lastLatLng) => {
+            console.log("gSearchBox init start");
             // Clear the red pin and any existing search markers
             if (gPendingMarker != null) {
                 gPendingMarker.setMap(null);
             }
             showPendingLocation(lastLatLng.lat(), lastLatLng.lng());
             sendAddress(lastLatLng);
+            console.log("gSearchBox init end");
         },
         () => {
             gPointOverlay.hide()
@@ -97,6 +99,7 @@ function showPendingLocation(lat, lng, addr) {
     if (addr === "") {
         gSearchBox.showSpinner();
         // Try to fetch the address for this location.
+        console.debug("geocode called");
         gGeocoder.geocode({ 'location': latLng }, function (results, status) {
             incGeocodeCount();
             var address = "";
@@ -109,6 +112,8 @@ function showPendingLocation(lat, lng, addr) {
             gSearchBox.update(address)
             gMap.panTo(latLng);
         });
+        console.log('showPendingLocation', lat, lng);
+
     } else {
         gPointOverlay.show(addr, latLng, null, true);
         gSearchBox.update(addr);
@@ -157,6 +162,7 @@ function setDeviceLocation(lat, lng) {
         gMap.setCenter(latLng);
     }
     gCurrentMarker.setIcon(image);
+    console.debug("geocode called");
     gGeocoder.geocode({ 'location': latLng }, function (results, status) {
         incGeocodeCount();
         const latitude = latLng.lat().toFixed(4);
@@ -167,6 +173,7 @@ function setDeviceLocation(lat, lng) {
         }
         gMap.panTo(latLng);
         gPointOverlay.showMessage(`The location has been set to ${address}`, 2000);
+        console.log("setDeviceLocation addr=" + address);
     });
 }
 
@@ -199,6 +206,7 @@ function showPin(latLng) {
 }
 
 function sendAddress(latLng) {
+    console.debug("geocode called");
     gGeocoder.geocode({ 'location': latLng }, function (results, status) {
         incGeocodeCount();
         var address = "";
@@ -209,7 +217,7 @@ function sendAddress(latLng) {
         }
         gPointOverlay.show(address, latLng, elevation);
         gMap.panTo(latLng);
-        channel.objects.emulocationserver
+        channel.objects.single_point
             .sendLocation(latLng.lat(), latLng.lng(), address);
         console.log("addr=" + address);
         gSearchBox.update(address)
