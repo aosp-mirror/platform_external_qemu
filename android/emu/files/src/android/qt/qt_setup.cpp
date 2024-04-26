@@ -64,6 +64,17 @@ auto androidQtSetupEnv(int bitness, const char* emulatorDir) -> bool {
     system->envSet("QT_SCALE_FACTOR", "none");
     system->envSet("QT_SCREEN_SCALE_FACTORS", "none");
 
+    if (!system->envGet("ANDROID_EMU_QTWEBENGINE_DEBUG").empty()) {
+        const std::string kDebuggingPort = "9876";
+        system->envSet("QTWEBENGINE_CHROMIUM_FLAGS",
+                       std::string("--webEngineArgs --remote-debugging-port=") +
+                       kDebuggingPort);
+        // Forward javascript console logs to js Qt Logging Category handler.
+        system->envSet("QT_LOGGING_RULES", "js.debug=true;js.info=true");
+        LOG(INFO) << "********* QtWebEngine debugging enabled. Point your browser to localhost:"
+                  << kDebuggingPort;
+    }
+
 #ifdef __linux__
     // On some linux distributions, the kernel's anonymous namespaces feature is
     // turned off, which may cause issues with QtWebEngineProcess in sandbox mode

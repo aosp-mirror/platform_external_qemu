@@ -15,6 +15,7 @@ class Geocoder {
         const geocoder = this.geocoder;
         return new Promise((resolve, reject) => {
             geocoder.geocode(request, (results, status) => {
+                incGeocodeCount();
                 if (status === google.maps.GeocoderStatus.OK) {
                     resolve({
                         address: results[0].formatted_address,
