@@ -19,13 +19,16 @@
 #include "backend/packet_streamer_client.h"
 #include "netsim.h"
 #include "netsim/packet_streamer.grpc.pb.h"
+#include "netsim/packet_streamer.pb.h"
 
 #include <assert.h>            // for assert
 #include <grpcpp/grpcpp.h>     // for Clie...
 #include <condition_variable>  // for cond...
 #include <cstring>             // for NULL
+#include <memory>
 #include <mutex>               // for cond...
 #include <optional>            // for opti...
+#include <thread>
 
 #include <random>
 #include <string>  // for string
@@ -74,25 +77,32 @@ class NetsimWifiTransport
 public:
     NetsimWifiTransport(WifiService::OnReceiveCallback onRecv,
                         WifiService::CanReceiveCallback canReceive)
-        : mOnRecv(onRecv), mCanReceive(canReceive) {}
+        : mOnRecv(onRecv), mCanReceive(canReceive), mStopped(false) {
+        mThread = std::thread(&NetsimWifiTransport::readThread, this);
+    }
     ~NetsimWifiTransport() {}
-    void Read(const PacketResponse* received) override {
+    void Read(const PacketResponse* read) override {
         DD("Forwarding %s -> %s ", mContext.peer().c_str(),
-           received->ShortDebugString().c_str());
-        if (received->has_packet()) {
-            auto packet = received->packet();
-            if (mCanReceive(kDefaultQueueIdx)) {
-                mOnRecv(reinterpret_cast<const uint8_t*>(packet.c_str()),
-                        packet.size());
+           read->ShortDebugString().c_str());
+        if (read->has_packet()) {
+            std::lock_guard<std::mutex> guard(mMutex);
+            mQueue.push(ToUniqueVec(&read->packet()));
+            mConVar.notify_one();
+            } else {
+                dwarning("Unexpected packet %s",
+                         read->DebugString().c_str());
             }
-        } else {
-            dwarning("Unexpected packet %s", received->DebugString().c_str());
-        }
     }
 
     void OnDone(const grpc::Status& s) override {
         dwarning("Netsim Wifi %s is gone due to %s", mContext.peer().c_str(),
                  s.error_message().c_str());
+        {
+            std::lock_guard<std::mutex> guard(mMutex);
+            mStopped = true;
+        }
+        mConVar.notify_one();
+        mThread.join();
     }
 
     // Blocks and waits until this connection has completed.
@@ -114,6 +124,43 @@ protected:
     grpc::ClientContext mContext;
 
 private:
+    // Convert a protobuf bytes field into std::unique_ptr<vec<uint8_t>>.
+    //
+    // Release ownership of the bytes field and convert it to a vector using
+    // move iterators. No copy when called with a mutable reference.
+    std::unique_ptr<std::vector<uint8_t>> ToUniqueVec(
+            const std::string* bytes_field) {
+        return std::make_unique<std::vector<uint8_t>>(
+                std::make_move_iterator(bytes_field->begin()),
+                std::make_move_iterator(bytes_field->end()));
+    }
+
+    void readThread() {
+        while (true) {
+            std::vector<uint8_t> packetData;
+            {
+                std::unique_lock<std::mutex> lock(mMutex);
+                mConVar.wait(lock,
+                             [&]() { return mStopped || !mQueue.empty(); });
+
+                if (mStopped) {
+                    break;
+                }
+
+                packetData = std::move(*mQueue.front());
+                mQueue.pop();
+            }
+            if (mCanReceive(kDefaultQueueIdx)) {
+                mOnRecv(packetData.data(), packetData.size());
+            }
+        }
+    }
+
+    std::queue<std::unique_ptr<std::vector<uint8_t>>> mQueue;
+    std::mutex mMutex;
+    std::thread mThread;
+    bool mStopped;
+    std::condition_variable mConVar;
     WifiService::OnReceiveCallback mOnRecv;
     WifiService::CanReceiveCallback mCanReceive;
     std::mutex mAwaitMutex;
@@ -145,7 +192,7 @@ bool NetsimWifiForwarder::init() {
     PacketRequest initial_request;
     initial_request.mutable_initial_info()->set_name(get_netsim_device_name());
     initial_request.mutable_initial_info()->mutable_chip()->set_kind(
-        netsim::common::ChipKind::WIFI);
+            netsim::common::ChipKind::WIFI);
     sTransport->Write(initial_request);
     auto* hostapd = android::emulation::HostapdController::getInstance();
     if (hostapd)
