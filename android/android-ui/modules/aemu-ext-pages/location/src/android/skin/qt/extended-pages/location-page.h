@@ -494,6 +494,9 @@ signals:
     // given point.
     void startRouteCreatorFromPoint(QString lat, QString lng, QString addr);
 
+    // Show Google Maps API and other metrics.
+    void showMetrics();
+
 private:
     LocationPage* const mLocationPage;
 };
