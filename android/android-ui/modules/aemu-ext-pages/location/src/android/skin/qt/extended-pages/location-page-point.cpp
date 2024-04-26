@@ -513,7 +513,9 @@ void LocationPage::setUpWebEngine() {
     }
 
     double initialLat, initialLng, unusedAlt, unusedVelocity, unusedHeading;
-    mMapBridge.reset(new MapBridge(this));
+    mSinglePointMapBridge.reset(new MapBridge(this));
+    mRoutesMapBridge.reset(new MapBridge(this));
+    mMapBridge = mSinglePointMapBridge.get();
     getDeviceLocation(&initialLat, &initialLng, &unusedAlt, &unusedVelocity, &unusedHeading);
     mUi->loc_singlePoint_setLocationButton->setEnabled(false);
     mUi->loc_pointList->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -523,7 +525,7 @@ void LocationPage::setUpWebEngine() {
                      this, &LocationPage::map_saveRoute,
                      Qt::QueuedConnection);
 
-    mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
+    mServer.reset(new QWebSocketServer(QStringLiteral("AndroidEmu Location UI WebSocket Server"),
                         QWebSocketServer::NonSecureMode));
     if (!mServer->listen(QHostAddress::LocalHost)) {
         // TODO: error handling needed
@@ -538,8 +540,9 @@ void LocationPage::setUpWebEngine() {
                      mWebChannel.get(), &QWebChannel::connectTo);
 
     // setup the dialog and publish it to the QWebChannel
-    mWebChannel->registerObject(QStringLiteral("emulocationserver"), mMapBridge.get());
-
+    // We default to the single points tab/id here.
+    mWebChannel->registerObject(QString(kSinglePointMapId), mSinglePointMapBridge.get());
+    mWebChannel->registerObject(QString(kRoutesMapId), mRoutesMapBridge.get());
 
     // Set up two web engines: one for the Points page and one for the Routes page
     for (int webEnginePageIdx = 0; webEnginePageIdx < 2; webEnginePageIdx++) {
@@ -550,68 +553,97 @@ void LocationPage::setUpWebEngine() {
         connect(webEnginePage, SIGNAL(loadFinished(bool)), this, SLOT(onWebPageLoadFinished(bool)));
 
         QString appendString;
-
+        const QString MAPS_ID_PLACEHOLDER("<<MAPS_ID>>");
         // Send the current location to each page
+        appendString.append(
+            "\n"
+            "var gGeocodeCount = 0;");
+        if (isPoint) {
+            appendString.append(
+                "\n"
+                "function incGeocodeCount() {\n"
+                    "\t++gGeocodeCount;\n"
+                    "\tconsole.log(`POINT: geocode() called ${gGeocodeCount} times`);\n"
+                "}\n");
+        } else {
+            appendString.append(
+                "\n"
+                "function incGeocodeCount() {\n"
+                    "\t++gGeocodeCount;\n"
+                    "\tconsole.log(`ROUTES: geocode() called ${gGeocodeCount} times`);\n"
+                "}\n");
+        }
         appendString.append(
                 "\n"
                 "var initialLat = '");
         appendString.append(QString::number(initialLat, 'g', 12));
         appendString.append(
-                "'; var initialLng = '");
+                "';\nvar initialLng = '");
         appendString.append(QString::number(initialLng, 'g', 12));
         appendString.append(
                 "';\n"
                 "var wsUri = 'ws://localhost:");
         appendString.append(QString::number(mServer->serverPort()));
         appendString.append(
-                "';"
-                "var socket = new WebSocket(wsUri);"
-                "socket.onclose = function() {"
-                    "console.error('web channel closed');"
-                "};"
-                "socket.onerror = function(error) {"
-                    "console.error('web channel error: ' + error);"
-                "};"
-                "socket.onopen = function() {"
-                    "window.channel = new QWebChannel(socket, function(channel) {"
-                        "channel.objects.emulocationserver.locationChanged.connect(function(lat, lng) {"
-                            "if (setDeviceLocation) setDeviceLocation(lat, lng);"
-                        "});");
+                "';\n"
+                "var socket = new WebSocket(wsUri);\n"
+                "socket.onclose = function() {\n"
+                    "\tconsole.error('web channel closed');\n"
+                "};\n"
+                "socket.onerror = function(error) {\n"
+                    "\tconsole.error('web channel error: ' + error);\n"
+                "};\n"
+                "socket.onopen = function() {\n"
+                    "\tconsole.debug('web channel opening');\n"
+                    "\twindow.channel = new QWebChannel(socket, function(channel) {\n"
+                        "\t\tchannel.objects.<<MAPS_ID>>.locationChanged.connect(function(lat, lng) {\n"
+                            "\t\t\tconsole.debug('locationChanged called!');\n"
+                            "\t\t\tif (setDeviceLocation) { console.debug('locationChanged calling setDeviceLocation'); setDeviceLocation(lat, lng); }\n"
+                        "\t\t});\n");
+        appendString.append(
+                    "\t\tchannel.objects.<<MAPS_ID>>.showMetrics.connect(function() {\n"
+                        "\t\t\tconsole.debug('showMetrics called!');\n"
+                        "\t\t\tconsole.debug(`*********** <<MAPS_ID>>: total geocode calls: ${gGeocodeCount}`);\n"
+                    "\t\t});\n");
         if (isPoint) {
             // Define Points-specific interfaces
             appendString.append(
-                        "channel.objects.emulocationserver.showLocation.connect(function(lat, lng, addr) {"
-                            "if (showPendingLocation) showPendingLocation(lat, lng, addr);"
-                        "});");
+                        "\t\tchannel.objects.<<MAPS_ID>>.showLocation.connect(function(lat, lng, addr) {\n"
+                            "\t\t\tconsole.debug('showLocation called!');\n"
+                            "\t\t\tif (showPendingLocation) { console.debug('showLocation calling showPendingLocation'); showPendingLocation(lat, lng, addr);}\n"
+                        "\t\t});\n");
             appendString.append(
-                        "channel.objects.emulocationserver.resetPointsMap.connect(function() {"
-                            "if (resetPointsMap) resetPointsMap();"
-                        "});");
+                        "\t\tchannel.objects.<<MAPS_ID>>.resetPointsMap.connect(function() {\n"
+                            "\t\t\tconsole.debug('resetPointsMap called!');\n"
+                            "\t\t\tif (resetPointsMap) { console.debug('resetPointsMap calling resetPointsMap'); resetPointsMap();}\n"
+                        "\t\t});\n");
         } else {
             // Define Routes-specific interfaces
             appendString.append(
-                        "channel.objects.emulocationserver.showRouteOnMap.connect(function(routeJson, isSavedRoute) {"
-                            "if (setRouteOnMap) setRouteOnMap(routeJson, isSavedRoute);"
-                        "});");
+                        "\t\tchannel.objects.<<MAPS_ID>>.showRouteOnMap.connect(function(routeJson, isSavedRoute) {\n"
+                            "\t\t\tif (setRouteOnMap) setRouteOnMap(routeJson, isSavedRoute);\n"
+                        "\t\t});\n");
             appendString.append(
-                        "channel.objects.emulocationserver.showRoutePlaybackOverlay.connect(function(visible) {"
-                            "if (showRoutePlaybackOverlay) showRoutePlaybackOverlay(visible);"
-                        "});");
+                        "\t\tchannel.objects.<<MAPS_ID>>.showRoutePlaybackOverlay.connect(function(visible) {\n"
+                            "\t\t\tif (showRoutePlaybackOverlay) showRoutePlaybackOverlay(visible);\n"
+                        "\t\t});\n");
             appendString.append(
-                        "channel.objects.emulocationserver.startRouteCreatorFromPoint.connect(function(lat, lng, addr) {"
-                            "if (startRouteCreatorFromPoint) startRouteCreatorFromPoint(lat, lng, addr);"
-                        "});");
+                        "\t\tchannel.objects.<<MAPS_ID>>.startRouteCreatorFromPoint.connect(function(lat, lng, addr) {\n"
+                            "\t\t\tif (startRouteCreatorFromPoint) startRouteCreatorFromPoint(lat, lng, addr);\n"
+                        "\t\t});\n");
             appendString.append(
-                        "channel.objects.emulocationserver.showGpxKmlRouteOnMap.connect(function(routeJson, title, subtitle) {"
-                            "if (showGpxKmlRouteOnMap) showGpxKmlRouteOnMap(routeJson, title, subtitle);"
-                        "});");
+                        "\t\tchannel.objects.<<MAPS_ID>>.showGpxKmlRouteOnMap.connect(function(routeJson, title, subtitle) {\n"
+                            "\t\t\tif (showGpxKmlRouteOnMap) showGpxKmlRouteOnMap(routeJson, title, subtitle);\n"
+                        "\t\t});\n");
         }
         appendString.append(
-                    "});"
-                    "if (typeof setDeviceLocation != 'undefined' && setDeviceLocation != null) {"
-                        "setDeviceLocation(initialLat, initialLng);"
-                    "}"
-                "}");
+                    "\t}); // window.channel\n"
+                    "\tif (typeof setDeviceLocation != 'undefined' && setDeviceLocation != null) {\n"
+                        "\t\tsetDeviceLocation(initialLat, initialLng);\n"
+                    "\t}\n"
+                "}\n");
+        appendString.replace(MAPS_ID_PLACEHOLDER, (isPoint ?
+                QString(kSinglePointMapId) : QString(kRoutesMapId)));
 
         if (!addJavascriptFromResource(webEnginePage,
                                        ":/html/js/qwebchannel.js",
@@ -738,6 +770,10 @@ void LocationPage::sendMetrics() {
                         ->mutable_location_v2()
                         ->CopyFrom(metrics);
             });
+    if (mSinglePointMapBridge && mRoutesMapBridge) {
+        emit mSinglePointMapBridge->showMetrics();
+        emit mRoutesMapBridge->showMetrics();
+    }
 }
 
 void RouteSenderThread::sendRouteToMap(const LocationPage::RouteListElement* const routeElement,

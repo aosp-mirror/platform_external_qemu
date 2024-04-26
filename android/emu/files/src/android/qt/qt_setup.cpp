@@ -65,10 +65,27 @@ auto androidQtSetupEnv(int bitness, const char* emulatorDir) -> bool {
     system->envSet("QT_SCREEN_SCALE_FACTORS", "none");
 
 #if defined(__linux__) || defined(__APPLE__)
-    // We didn't build QtWebEngine with opengl support, so we need to explicitly disable
-    // it in order for it to work.
-    VERBOSE_PRINT(init, "Forcing QtWebEngine to use software rendering");
-    system->envSet("QTWEBENGINE_CHROMIUM_FLAGS", "--disable-gpu");
+    std::string qt_chromium_env = system->envGet("QTWEBENGINE_CHROMIUM_FLAGS");
+    if (qt_chromium_env.empty()) {
+        // We didn't build QtWebEngine with opengl support, so we need to explicitly disable
+        // it in order for it to work.
+        VERBOSE_PRINT(init, "Forcing QtWebEngine to use software rendering");
+        if (system->envGet("ANDROID_EMU_QTWEBENGINE_DEBUG").empty()) {
+            system->envSet("QTWEBENGINE_CHROMIUM_FLAGS", "--disable-gpu");
+        } else {
+            const std::string kDebuggingPort = "9876";
+            system->envSet("QTWEBENGINE_CHROMIUM_FLAGS",
+                           std::string("--disable-gpu --webEngineArgs --remote-debugging-port=") +
+                           kDebuggingPort);
+            // Forward javascript console logs to js Qt Logging Category handler.
+            system->envSet("QT_LOGGING_RULES", "js.debug=true;js.info=true");
+            LOG(INFO) << "********* QtWebEngine debugging enabled. Point your browser to localhost:"
+                      << kDebuggingPort;
+        }
+    } else {
+        VERBOSE_PRINT(init, "Using user-provided QTWEBENGINE_CHROMIUM_FLAGS=%s",
+                      qt_chromium_env.c_str());
+    }
 #endif  // defined(__linux__) || defined(__APPLE__)
 
 #ifdef __linux__
