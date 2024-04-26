@@ -1,6 +1,6 @@
 if have_vhost_user_gpu
   executable('vhost-user-gpu', files('vhost-user-gpu.c', 'virgl.c', 'vugbm.c'),
-             dependencies: [qemuutil, print_stub, pixman, gbm, virgl, vhost_user, opengl],
+             dependencies: [qemuutil, pixman, gbm, virgl, vhost_user, opengl],
              install: true,
              install_dir: get_option('libexecdir'))
 
