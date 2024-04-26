@@ -335,8 +335,13 @@ private:
     std::unique_ptr<QWebSocketServer> mServer;
     std::unique_ptr<WebSocketClientWrapper> mClientWrapper;
     std::unique_ptr<QWebChannel> mWebChannel;
+    static constexpr char kSinglePointMapId[] = "single_point";
+    static constexpr char kRoutesMapId[] = "routes";
 
-    std::unique_ptr<MapBridge> mMapBridge;
+    std::unique_ptr<MapBridge> mSinglePointMapBridge;
+    std::unique_ptr<MapBridge> mRoutesMapBridge;
+    // Corresponds to the map that is currently active
+    MapBridge* mMapBridge = nullptr;
 
     uint32_t mSetLocCount = 0;
     uint32_t mPlayRouteCount = 0;
@@ -493,6 +498,9 @@ signals:
     // Starts the route creator in the map, with the destination set to the
     // given point.
     void startRouteCreatorFromPoint(QString lat, QString lng, QString addr);
+
+    // Show Google Maps API and other metrics.
+    void showMetrics();
 
 private:
     LocationPage* const mLocationPage;

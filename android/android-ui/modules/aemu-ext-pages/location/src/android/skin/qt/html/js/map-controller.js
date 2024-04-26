@@ -86,7 +86,7 @@ class MapController extends GoogleMapPageComponent {
         }
         finally {
             this.searchBox.update('');
-            channel.objects.emulocationserver.onSavedRouteDrawn();
+            channel.objects.routes.onSavedRouteDrawn();
             this.viewModel.setIsLoadingRoute(false);
             if (loadedSuccessfully) {
                 this.viewModel.renderDirections(this.mapManager, routeJson);
@@ -154,7 +154,7 @@ class MapController extends GoogleMapPageComponent {
         });
 
         this.mapManager.zoomToPath(path);
-        channel.objects.emulocationserver.onSavedRouteDrawn();
+        channel.objects.routes.onSavedRouteDrawn();
         this.viewModel.setIsLoadingRoute(false);
     }
 

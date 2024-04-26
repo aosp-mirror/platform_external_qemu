@@ -284,9 +284,19 @@ void LocationPage::on_tabChanged() {
     switch (mUi->locationTabs->currentIndex()) {
         case 0:
             mPaneInvocationTracker->increment("SINGLE_POINT");
+#ifdef USE_WEBENGINE
+            if (mSinglePointMapBridge) {
+                mMapBridge = mSinglePointMapBridge.get();
+            }
+#endif  // USE_WEBENGINE
             break;
         case 1:
             mPaneInvocationTracker->increment("ROUTES");
+#ifdef USE_WEBENGINE
+            if (mRoutesMapBridge) {
+                mMapBridge = mRoutesMapBridge.get();
+            }
+#endif  // USE_WEBENGINE
             break;
         default:
             LOG(VERBOSE) << "Unknown location tab selected.";
