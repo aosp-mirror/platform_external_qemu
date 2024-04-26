@@ -467,10 +467,6 @@ bool emuglConfig_init(EmuglConfig* config,
         return true;
     }
 
-    if (!strcmp("angle", gpu_mode)) {
-        gpu_mode = "angle_indirect";
-    }
-
     if (!strcmp("swiftshader", gpu_mode)) {
         gpu_mode = "swiftshader_indirect";
     }
@@ -605,7 +601,15 @@ bool emuglConfig_init(EmuglConfig* config,
               __func__, gpu_mode, uiPreferredBackend);
         }
     }
+
     config->use_host_vulkan = use_host_vulkan;
+
+    // b/328275986: Turn off ANGLE because it breaks.
+    if (!strcmp("angle", gpu_mode) || !strcmp("angle_indirect", gpu_mode)
+        || !strcmp("angle9", gpu_mode) || !strcmp("angle9_indirect", gpu_mode)) {
+        gpu_mode = "swiftshader_indirect";
+    }
+
     const char* library_mode = gpu_mode;
     printf("library_mode %s gpu mode %s\n", library_mode, gpu_mode);
     if ((force_swiftshader_to_swangle && strstr(library_mode, "swiftshader"))
