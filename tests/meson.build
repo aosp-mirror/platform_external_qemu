@@ -71,7 +71,7 @@ test_deps = {
 if have_tools and have_vhost_user and targetos == 'linux'
   executable('vhost-user-bridge',
              sources: files('vhost-user-bridge.c'),
-             dependencies: [qemuutil, print_stub, vhost_user])
+             dependencies: [qemuutil, vhost_user])
 endif
 
 subdir('decode')

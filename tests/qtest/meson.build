@@ -369,7 +369,7 @@ foreach dir : target_dirs
     # encounter them
     if not qtest_executables.has_key(test)
       src = [test + '.c']
-      deps = [qemuutil, print_stub, qos]
+      deps = [qemuutil, qos]
       if test in qtests
         # use a sourceset to quickly separate sources and deps
         test_ss = ss.source_set()

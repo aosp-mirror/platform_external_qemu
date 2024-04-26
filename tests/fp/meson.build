@@ -47,7 +47,7 @@ fpcflags = [
 fptest = executable(
   'fp-test',
   ['fp-test.c', '../../fpu/softfloat.c'],
-  dependencies: [qemuutil, print_stub, print_stub, libsoftfloat, libtestfloat, libslowfloat],
+  dependencies: [qemuutil, libsoftfloat, libtestfloat, libslowfloat],
   c_args: fpcflags,
 )
 softfloat_conv_tests = {
@@ -129,14 +129,14 @@ test('fp-test-mulAdd', fptest,
 executable(
   'fp-bench',
   ['fp-bench.c', '../../fpu/softfloat.c'],
-  dependencies: [qemuutil, print_stub, libtestfloat, libsoftfloat],
+  dependencies: [qemuutil, libtestfloat, libsoftfloat],
   c_args: fpcflags,
 )
 
 fptestlog2 = executable(
   'fp-test-log2',
   ['fp-test-log2.c', '../../fpu/softfloat.c'],
-  dependencies: [qemuutil, print_stub, libsoftfloat],
+  dependencies: [qemuutil, libsoftfloat],
   c_args: fpcflags,
 )
 test('fp-test-log2', fptestlog2,
