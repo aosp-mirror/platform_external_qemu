@@ -317,10 +317,11 @@ void LocationPage::pointWidget_editButtonClicked(CCListItem* listItem) {
     if (theAction == startRouteAction) {
         // Switch to routes tab with the saved point
         auto& pointElement = pointWidgetItem->pointElement();
-        emit mMapBridge->startRouteCreatorFromPoint(QString::number(pointElement.latitude, 'g', 12),
-                                                    QString::number(pointElement.longitude, 'g', 12),
-                                                    pointElement.address);
         mUi->locationTabs->setCurrentIndex(1);
+        emit mRoutesMapBridge->startRouteCreatorFromPoint(
+                QString::number(pointElement.latitude, 'g', 12),
+                QString::number(pointElement.longitude, 'g', 12),
+                pointElement.address);
     } else if (theAction == editAction && editPoint(pointWidgetItem->pointElement())) {
         pointWidgetItem->refresh();
         auto& pointElement = pointWidgetItem->pointElement();
