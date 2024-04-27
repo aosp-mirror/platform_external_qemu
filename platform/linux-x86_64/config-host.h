@@ -59,7 +59,7 @@
 
 #undef CONFIG_BDRV_WHITELIST_TOOLS
 
-#define CONFIG_BINDIR "/tmp/build/release/bin"
+#define CONFIG_BINDIR "/buildbot/tmp/tmpoalakrht/release/bin"
 
 #undef CONFIG_BLKIO
 
@@ -215,7 +215,7 @@
 
 #define CONFIG_MEMFD
 
-#undef CONFIG_MODULES
+#define CONFIG_MODULES
 
 #undef CONFIG_MODULE_UPGRADES
 
@@ -251,7 +251,7 @@
 
 #define CONFIG_PREADV
 
-#define CONFIG_PREFIX "/tmp/build/release"
+#define CONFIG_PREFIX "/buildbot/tmp/tmpoalakrht/release"
 
 #define CONFIG_PTHREAD_AFFINITY_NP
 
@@ -265,23 +265,23 @@
 
 #undef CONFIG_PTHREAD_SET_NAME_NP
 
-#define CONFIG_QEMU_CONFDIR "/tmp/build/release/etc/qemu"
+#define CONFIG_QEMU_CONFDIR "/buildbot/tmp/tmpoalakrht/release/etc/qemu"
 
-#define CONFIG_QEMU_DATADIR "/tmp/build/release/share/qemu"
+#define CONFIG_QEMU_DATADIR "/buildbot/tmp/tmpoalakrht/release/share/qemu"
 
-#define CONFIG_QEMU_DESKTOPDIR "/tmp/build/release/share/applications"
+#define CONFIG_QEMU_DESKTOPDIR "/buildbot/tmp/tmpoalakrht/release/share/applications"
 
-#define CONFIG_QEMU_FIRMWAREPATH "/tmp/build/release/share/qemu-firmware", 
+#define CONFIG_QEMU_FIRMWAREPATH "/buildbot/tmp/tmpoalakrht/release/share/qemu-firmware", 
 
-#define CONFIG_QEMU_HELPERDIR "/tmp/build/release/libexec"
+#define CONFIG_QEMU_HELPERDIR "/buildbot/tmp/tmpoalakrht/release/libexec"
 
-#define CONFIG_QEMU_ICONDIR "/tmp/build/release/share/icons"
+#define CONFIG_QEMU_ICONDIR "/buildbot/tmp/tmpoalakrht/release/share/icons"
 
-#define CONFIG_QEMU_LOCALEDIR "/tmp/build/release/share/locale"
+#define CONFIG_QEMU_LOCALEDIR "/buildbot/tmp/tmpoalakrht/release/share/locale"
 
-#define CONFIG_QEMU_LOCALSTATEDIR "/tmp/build/release/var"
+#define CONFIG_QEMU_LOCALSTATEDIR "/buildbot/tmp/tmpoalakrht/release/var"
 
-#define CONFIG_QEMU_MODDIR "/tmp/build/release/lib/x86_64-linux-gnu/qemu"
+#define CONFIG_QEMU_MODDIR "/buildbot/tmp/tmpoalakrht/release/lib/x86_64-linux-gnu/qemu"
 
 #undef CONFIG_QEMU_PRIVATE_XTS
 
@@ -329,6 +329,8 @@
 
 #define CONFIG_SPLICE
 
+#define CONFIG_STAMP _10e1e2d32cef3cb12d922a8407d82e1a9eaa7a1c
+
 #undef CONFIG_STATX
 
 #undef CONFIG_STATX_MNT_ID
@@ -337,7 +339,7 @@
 
 #define CONFIG_SYNC_FILE_RANGE
 
-#define CONFIG_SYSCONFDIR "/tmp/build/release/etc"
+#define CONFIG_SYSCONFDIR "/buildbot/tmp/tmpoalakrht/release/etc"
 
 #define CONFIG_SYSMACROS
 

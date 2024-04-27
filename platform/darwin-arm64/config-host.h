@@ -59,7 +59,7 @@
 
 #undef CONFIG_BDRV_WHITELIST_TOOLS
 
-#define CONFIG_BINDIR "/usr/local/bin"
+#define CONFIG_BINDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/bin"
 
 #undef CONFIG_BLKIO
 
@@ -215,7 +215,7 @@
 
 #undef CONFIG_MEMFD
 
-#undef CONFIG_MODULES
+#define CONFIG_MODULES
 
 #undef CONFIG_MODULE_UPGRADES
 
@@ -251,7 +251,7 @@
 
 #define CONFIG_PREADV
 
-#define CONFIG_PREFIX "/usr/local"
+#define CONFIG_PREFIX "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release"
 
 #undef CONFIG_PTHREAD_AFFINITY_NP
 
@@ -265,23 +265,23 @@
 
 #undef CONFIG_PTHREAD_SET_NAME_NP
 
-#define CONFIG_QEMU_CONFDIR "/usr/local/etc/qemu"
+#define CONFIG_QEMU_CONFDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/etc/qemu"
 
-#define CONFIG_QEMU_DATADIR "/usr/local/share/qemu"
+#define CONFIG_QEMU_DATADIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/share/qemu"
 
-#define CONFIG_QEMU_DESKTOPDIR "/usr/local/share/applications"
+#define CONFIG_QEMU_DESKTOPDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/share/applications"
 
-#define CONFIG_QEMU_FIRMWAREPATH "/usr/local/share/qemu-firmware", 
+#define CONFIG_QEMU_FIRMWAREPATH "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/share/qemu-firmware", 
 
-#define CONFIG_QEMU_HELPERDIR "/usr/local/libexec"
+#define CONFIG_QEMU_HELPERDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/libexec"
 
-#define CONFIG_QEMU_ICONDIR "/usr/local/share/icons"
+#define CONFIG_QEMU_ICONDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/share/icons"
 
-#define CONFIG_QEMU_LOCALEDIR "/usr/local/share/locale"
+#define CONFIG_QEMU_LOCALEDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/share/locale"
 
-#define CONFIG_QEMU_LOCALSTATEDIR "/var/local"
+#define CONFIG_QEMU_LOCALSTATEDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/var"
 
-#define CONFIG_QEMU_MODDIR "/usr/local/lib/qemu"
+#define CONFIG_QEMU_MODDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/lib/qemu"
 
 #undef CONFIG_QEMU_PRIVATE_XTS
 
@@ -329,6 +329,8 @@
 
 #undef CONFIG_SPLICE
 
+#define CONFIG_STAMP _10e1e2d32cef3cb12d922a8407d82e1a9eaa7a1c
+
 #undef CONFIG_STATX
 
 #undef CONFIG_STATX_MNT_ID
@@ -337,7 +339,7 @@
 
 #undef CONFIG_SYNC_FILE_RANGE
 
-#define CONFIG_SYSCONFDIR "/usr/local/etc"
+#define CONFIG_SYSCONFDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/etc"
 
 #undef CONFIG_SYSMACROS
 
