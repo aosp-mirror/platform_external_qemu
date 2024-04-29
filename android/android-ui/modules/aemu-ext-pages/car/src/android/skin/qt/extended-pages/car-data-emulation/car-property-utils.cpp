@@ -459,6 +459,7 @@ map<int32_t, PropertyDescription> carpropertyutils::propMap = {
     { 289410884, { QObject::tr("EV Regenerative braking or one-pedal drive state") } },
     { 289410885, { QObject::tr("Trailer present or not") } },
     { 289410886, { QObject::tr("Vehicle curb weight") } },
+    { 289476424, { QObject::tr("Supported property ids") } },
 };
 
 QString carpropertyutils::getDetailedDescription(int32_t propId) {
