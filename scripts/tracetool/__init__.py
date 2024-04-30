@@ -15,6 +15,7 @@ __email__      = "stefanha@redhat.com"
 import re
 import sys
 import weakref
+from pathlib import Path
 
 import tracetool.format
 import tracetool.backend
@@ -55,7 +56,7 @@ def out(*lines, **kwargs):
     for l in lines:
         kwargs['out_lineno'] = out_lineno
         kwargs['out_next_lineno'] = out_lineno + 1
-        kwargs['out_filename'] = out_filename
+        kwargs['out_filename'] = Path(out_filename).as_posix()
         output.append(l % kwargs)
         out_lineno += 1
 
