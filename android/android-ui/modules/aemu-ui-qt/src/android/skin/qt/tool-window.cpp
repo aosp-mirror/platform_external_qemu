@@ -1625,9 +1625,9 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
         return;
     }
 
-    // Set to default location pane.
+    // Set to default help pane.
     if (!isPaneEnabled(pane)) {
-        pane = PANE_IDX_LOCATION;
+        pane = PANE_IDX_HELP;
     }
     // Show the tabbed pane
     mExtendedWindow.get()->showPane(pane);
