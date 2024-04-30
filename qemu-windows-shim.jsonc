@@ -4,48 +4,82 @@
   // These are shims we should apply to the various targets
   "shims": [
     {
-      "target": "shared_QAPI_source_files",
+      "target": "generate_shared_QAPI_source_files",
       "shims": {
-        "cmd": "$(location :qapi-gen) -o $(RULEDIR)/qapi -b $(location qapi/qapi-schema.json)"
+        "cmd": "$(location :qapi-gen) -o $(RULEDIR)/qapi -b $(location qapi/qapi-schema.json)",
+        "cmd_bat": "$(location :qapi-gen) -o $(RULEDIR)/qapi -b $(location qapi/qapi-schema.json)"
       }
     },
     {
-      "target": "config-poison_h",
+      "target": "generate_config-poison_h",
       "shims": {
         // TODO: It would be nice if we could generalize this in the generator
-        "cmd": "$(location :make-config-poison) $(SRCS) > $(location config-poison.h)"
+        "cmd": "$(location :make-config-poison) $(SRCS) > $(location config-poison.h)",
+        "cmd_bat": "$(location :make-config-poison) $(SRCS) > $(location config-poison.h)"
       }
     },
     {
       "target": "keymap-gen",
       "shims": {
-        "srcs": ["subprojects/keycodemapdb/tools/keymap-gen.py"]
+        "srcs": [
+          "subprojects/keycodemapdb/tools/keymap-gen.py"
+        ]
       }
     },
     {
       "target": "qemu-system-riscv64",
       "shims": {
-        "+deps": ["qemu-riscv64-softmmu"]
+        "+deps": [
+          "libqemu-riscv64-softmmu"
+        ]
       }
     },
     {
       "target": "qemu-system-aarch64",
       "shims": {
-        "+deps": ["qemu-aarch64-softmmu"]
+        "+deps": [
+          "libqemu-aarch64-softmmu"
+        ]
       }
     },
     {
       "target": "qemu-system-x86_64",
       "shims": {
-        "+deps": ["qemu-x86_64-softmmu"]
+        "+deps": [
+          "libqemu-x86_64-softmmu"
+        ]
       }
     },
     {
       "target": ".*",
       "shims": {
-        "restrict_to": "cc_.*",
+        "restrict_to": "py_binary",
+        // For some reason bazel on windows is not able to figure out
+        // the import path, so let's just explicitly add it.
+        "imports": [
+          "scripts"
+        ]
+      }
+    },
+    {
+      "target": ".*",
+      "shims": {
+        "restrict_to": "cc_shared_library",
+        // xs4all!
+        "visibility": [
+          "//visibility:public"
+        ]
+      }
+    },
+    {
+      "target": ".*",
+      "shims": {
+        "restrict_to": "cc_library|cc_binary",
         // Remove our compat libs if present
-        "-hdrs": ["google.*"],
+        "-hdrs": [
+          "google.*",
+          ".*subprojects.*"
+        ],
         "+copts": [
           "-Wno-constant-conversion",
           "-Wno-macro-redefined",
@@ -61,34 +95,47 @@
           "-march=native"
         ],
         // xs4all!
-        "visibility": ["//visibility:public"],
-        "-srcs": ["google.*"],
+        "visibility": [
+          "//visibility:public"
+        ],
+        "-srcs": [
+          "google.*"
+        ],
         // Not yet clear how to handle object includes,
         // so let's strip them.
-        "-deps": ["common_.*"],
+        "-deps": [
+          "libcommon_.*",
+          "libmodule-common"
+        ],
         // We need a compat layer for some windows magic.
-        "+deps": ["//external/qemu/google/compat/windows:compat"]
+        "+deps": [
+          "//external/qemu/google/compat/windows:compat"
+        ]
       }
     },
     {
-      "target": "qemu-.*-softmmu|qemu-.*-softmmu_common|common",
+      "target": "libqemu-.*-softmmu|libqemu-.*-softmmu_common|libcommon",
       // TODO: Figure out why we are not setting
       // this to alwayslink..
       "shims": {
         "restrict_to": "cc_library",
         "alwayslink": 1
       }
-    }
-,
+    },
     {
-        "target": "qemuutil",
-        "shims": {
-          "restrict_to": "cc_library",
-          // TODO: Another qemu stub linker order issue. This should likely be
-          // addressed in the meson build.
-          "-srcs" : ["stubs/blk-exp-close-all.c", "stubs/blk-commit-all.c"]
-        }
+      "target": "libqemuutil",
+      "shims": {
+        "restrict_to": "cc_library",
+        // TODO: Another qemu stub linker order issue. This should likely be
+        // addressed in the meson build.
+        "-srcs": [
+          "stubs/blk-exp-close-all.c",
+          "stubs/blk-commit-all.c",
+          "stubs/monitor-core.c",
+          "stubs/error-printf.c"
+        ]
       }
+    }
     // Sample shim that show cases how you can
     // add and remove dependencies to all cc_ like
     // rules.
@@ -111,12 +158,29 @@
   // external dependencies. For every pkg config dependency
   // you will need to provide a bazel target
   "external_deps": {
-    "glib-2.0": ["@glib//:glib-static", "@glib//:gmodule-static"],
-    "zlib": ["@zlib//:zlib"],
-    "pixman-1": ["@pixman//:pixman-1", "@pixman//:pixman_simd"],
-    "libfdt": ["//external/dtc:libfdt"],
-    "libpulse": ["@pulse//:libpulse"],
-    "vhost-user": ["//external/qemu/subprojects/libvhost-user:vhost-user"],
+    "glib-2.0": [
+      "@glib//:glib-static",
+      "@glib//:gmodule-static"
+    ],
+    "gmodule-export-2.0": [
+      "@glib//:gmodule-static"
+    ],
+    "zlib": [
+      "@zlib//:zlib"
+    ],
+    "pixman-1": [
+      "@pixman//:pixman-1",
+      "@pixman//:pixman_simd"
+    ],
+    "libfdt": [
+      "//external/dtc:libfdt"
+    ],
+    "libpulse": [
+      "@pulse//:libpulse"
+    ],
+    "vhost-user": [
+      "//external/qemu/subprojects/libvhost-user:vhost-user"
+    ],
     "vhost-user-glib": [
       "//external/qemu/subprojects/libvhost-user:vhost-user-glib"
     ],
@@ -127,7 +191,12 @@
   "export": [
     "qemu-system-x86_64",
     "qemu-system-aarch64",
-    "qemu-system-riscv64"
+    "qemu-system-riscv64",
+    "qemu-img"
+    // Sadly we do not have any modules yet.
   ],
-  "exclude": ["vhost-user", "vhost-user-glib"]
+  "exclude": [
+    "vhost-user",
+    "vhost-user-glib"
+  ]
 }

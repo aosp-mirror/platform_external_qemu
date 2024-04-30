@@ -95,6 +95,20 @@ class OrderedSet(T.MutableSet[_T]):
         for item in iterable:
             self.discard(item)
 
+    def indexOf(self, target: T) -> int:
+        position = 0
+        for item in self:
+            if item == target:
+                return position
+            position += 1
+        return -1
+
+    def first(self):
+        for item in self:
+            return item
+
+        return None
+
 
 class BazelValue:
     """Class representing a Bazel value that can be merged across different configurations."""
@@ -124,7 +138,6 @@ class BazelValue:
         Args:
             configuration (str): The configuration associated with the value.
             value (Union[str, Set[str]]): The value itself, either a string or a set of strings.
-            unique (bool, optional): Whether the value should be treated as unique (e.g., for objc_library). Defaults to False.
         """
         if not (
             isinstance(value, str) or isinstance(value, bool) or isinstance(value, int)
@@ -175,20 +188,59 @@ class BazelValue:
                 f"Do not know how to merge strings ({self.value}/{other.value})"
             )
 
-        everything: OrderedSet = self.value
-        for value in self.select.values():
-            everything = everything.intersection(value)
+    def _compute_intersection(self):
+        """This is a bit of a tricky function.
+        For windows we *MUST* guarantee that we do not mess up order, lest we get compilation errors.
 
+        So if we have the following:
+
+        x['win'] = [a, b, c, d, e]
+        x['lin'] = [a, b, d, e]
+        x['mac'] = [a, c, e]
+
+        We need to produce something like this:
+
+        res = [a] + select{win: [b, c], lin: [b, d], mac: [c]} + [e]
+
+        That way if bazel tries to constructh the win target it will construct the
+        same array, in the same order as the source build.
+        """
+        if not isinstance(self.value, OrderedSet):
+            return self.value, self.select, None
+        shared: OrderedSet = self.value
+        for v in self.select.values():
+            shared = shared.intersection(v)
+
+        individual = {}
         for k, v in self.select.items():
-            self.select[k] = v.difference(everything)
+            individual[k] = v.difference(shared)
 
-        self.value = everything
+        # Ok, now we are going to split shared into before and after
+        fst = []
+        snd = []
+        for share in shared:
+            in_fst  = True
+            for k, v in self.select.items():
+                source_idx = v.indexOf(share)
+                if individual[k]:
+                    dest_idx = v.indexOf(individual[k].first())
+                    in_fst = source_idx < dest_idx
+
+            if in_fst:
+                fst.append(share)
+            else:
+                snd.append(share)
+
+
+
+        return fst, individual, snd
 
     def __eq__(self, other):
         return self.value == other.value and self.select == other.select
 
     def __str__(self):
         v = ""
+        fst, individual, snd = self._compute_intersection()
         if self.merge_count > 0:
             # We are not part of a unique rule. i.e. the rule is in many configurations
             if self._same_values():
@@ -197,22 +249,33 @@ class BazelValue:
                     # In this case only one configuration has this value. It might be unique
                     # to my platform. Let's make sure we explicitly select it.
                     v += "select({"
-                    for plat, value in self.select.items():
-                        v += f"'{plat}':  {self._to_str(value)},"
+                    for plat, value in individual.items():
+                        v += f"'{plat}':  {self._to_str(fst)},"
                     v += "'//conditions:default': [], })"
                 else:
                     # We all have the same..
-                    v = self._to_str(self.value)
+                    if snd:
+                        v = self._to_str(fst + snd)
+                    else:
+                        v = self._to_str(fst)
             else:
                 # Set of common values (could be empty)
-                v = self._to_str(self.value) + " + "
+                v = self._to_str(fst) + " + "
                 v += "select({"
-                for plat, value in self.select.items():
-                    v += f"'{plat}':  {self._to_str(value)},"
+                for plat, value in individual.items():
+                    if value:
+                        # Only add selection if we have anything..
+                        v += f"'{plat}':  {self._to_str(value)},"
                 v += "'//conditions:default': [], })"
+                if snd:
+                    v += f" + {self._to_str(snd)}"
         else:
             # This rule was exclusive to one platform
-            v = self._to_str(self.value)
+            if snd:
+                v = self._to_str(fst + snd)
+            else:
+                v = self._to_str(fst)
+
 
         return v
 
@@ -245,6 +308,8 @@ class BazelRule:
         self.label = label
         self.params: T.Dict[str, BazelValue] = {}
         for k, v in params.items():
+            if k == "imports":
+                pass
             self.params[k] = BazelValue(label, v)
 
     @property
@@ -273,6 +338,11 @@ class BazelRule:
     def __str__(self):
         bazel_cmd = "\n"
         for k, v in sorted(self.params.items()):
+            if k == "includes":
+                # Needed as windows relies on the include order
+                bazel_cmd += "# buildifier: leave-alone\n"
+            if k == "imports":
+                pass
             bazel_cmd += f"   {k} = {v},\n"
         return f"{self.sort}({bazel_cmd})"
 
@@ -355,8 +425,16 @@ class BuildFileFunctions:
         rule = BazelRule(self.configuration, "objc_library", kwargs)
         self.library.register(rule)
 
+    def cc_shared_library(self, **kwargs):
+        rule = BazelRule(self.configuration, "cc_shared_library", kwargs)
+        self.library.register(rule)
+
     def genrule(self, **kwargs):
         rule = BazelRule(self.configuration, "genrule", kwargs)
+        self.library.register(rule)
+
+    def pkg_files(self, **kwargs):
+        rule = BazelRule(self.configuration, "pkg_files", kwargs)
         self.library.register(rule)
 
     def py_binary(self, **kwargs):

@@ -116,7 +116,7 @@ class DarwinBuilder(QemuBuilder):
             "-Dlzfse=disabled",
             "-Dlzo=disabled",
             "-Dmembarrier=disabled",
-            "-Dmodules=disabled",
+            "-Dmodules=enabled",
             "-Dmpath=disabled",
             "-Dnetmap=disabled",
             "-Dnettle=disabled",
@@ -134,7 +134,7 @@ class DarwinBuilder(QemuBuilder):
             "-Drbd=disabled",
             "-Drdma=disabled",
             "-Dreplication=disabled",
-            "-Drutabaga_gfx=enabled",
+            "-Drutabaga_gfx=disabled",
             "-Dsdl_image=disabled",
             "-Dsdl=disabled",
             "-Dseccomp=disabled",
@@ -203,6 +203,7 @@ class DarwinBuilder(QemuBuilder):
         """
         includes = [
             self.aosp / "external" / "glib",
+            self.aosp / "external" / "glib" / "glib",
             self.aosp / "external" / "glib" / "gmodule",
             self.aosp / "external" / "glib" / "os" / "darwin",
             self.aosp / "external" / "glib" / "os" / "darwin" / "glib",
@@ -211,18 +212,27 @@ class DarwinBuilder(QemuBuilder):
         ]
 
         return [
-            BazelLib(
-                "//hardware/google/gfxstream/host:gfxstream_backend",
-                "0.1.2",
-                {},
-            ),
-            CargoLib(
-                "/external/crosvm/rutabaga_gfx/ffi:rutabaga_gfx_ffi",
-                "0.1.2",
-                {"archive": "rutabaga_gfx_ffi"},
-            ),  # Must be after libgxstream!
+            # BazelLib(
+            #     "//hardware/google/gfxstream/host:gfxstream_backend",
+            #     "0.1.2",
+            #     {},
+            # ),
+            # CargoLib(
+            #     "/external/crosvm/rutabaga_gfx/ffi:rutabaga_gfx_ffi",
+            #     "0.1.2",
+            #     {"archive": "rutabaga_gfx_ffi"},
+            # ),  # Must be after libgxstream!
             BazelLib("//external/dtc:libfdt", "1.6.0", {}),
-            BazelLib("@glib//:gmodule-static", "2.77.2", {}),
+            BazelLib(
+                "@glib//:gmodule-static",
+                "2.77.2",
+                {
+                    "name": "gmodule-export-2.0",
+                    "includes": [str(x) for x in includes],
+                    "link_flags": "-pthread",
+                    "Requires": "pcre2",
+                },
+            ),
             BazelLib(
                 "@glib//:glib-darwin",
                 "2.77.2",
@@ -237,7 +247,7 @@ class DarwinBuilder(QemuBuilder):
                 {
                     "name": "glib-2.0",
                     "includes": [str(x) for x in includes],
-                    "Requires": "pcre2, gmodule-static, glib-darwin",
+                    "Requires": "pcre2, gmodule-export-2.0, glib-darwin",
                     "link_flags": "-liconv",
                 },
             ),

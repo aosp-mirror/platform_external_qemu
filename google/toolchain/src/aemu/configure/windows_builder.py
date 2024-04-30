@@ -17,11 +17,11 @@ from aemu.configure.libraries import BazelLib, CMakeLib, CargoLib
 
 
 class WindowsBuilder(QemuBuilder):
-
     def packages(self):
         # So bazel does not give the right includes, so we just shim them here.
         includes = [
             self.aosp / "external" / "glib",
+            self.aosp / "external" / "glib" / "glib",
             self.aosp / "external" / "glib" / "glib" / "dirent",
             self.aosp / "external" / "glib" / "gmodule",
             self.aosp / "external" / "glib" / "os" / "windows",
@@ -48,7 +48,16 @@ class WindowsBuilder(QemuBuilder):
                     "includes": [str(self.aosp / "external" / "zlib")],
                 },
             ),
-            BazelLib("@glib//:gmodule-static", "2.77.2", {}),
+            BazelLib(
+                "@glib//:gmodule-static",
+                "2.77.2",
+                {
+                    "name": "gmodule-export-2.0",
+                    "includes": [str(x) for x in includes],
+                    "link_flags": "-pthread",
+                    "Requires": "pcre2",
+                },
+            ),
             BazelLib("@glib//:gnulib", "2.77.2", {}),
             BazelLib("@glib//:dirent", "2.77.2", {}),
             BazelLib(
@@ -56,7 +65,7 @@ class WindowsBuilder(QemuBuilder):
                 "2.77.2",
                 {
                     "includes": [str(x) for x in includes],
-                    "Requires": "pcre2, zlib, gmodule-static, gnulib, dirent",
+                    "Requires": "pcre2, zlib, gmodule-export-2.0, gnulib, dirent",
                     "name": "glib-2.0",
                     "link_name": "glib-2.0.lib",
                     "cflags": "-DGLIB_STATIC_COMPILATION",

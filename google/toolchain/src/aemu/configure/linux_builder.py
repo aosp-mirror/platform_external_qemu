@@ -81,7 +81,7 @@ class LinuxBuilder(QemuBuilder):
             "-Dlzo=disabled",
             "-Dmalloc_trim=enabled",
             "-Dmembarrier=disabled",
-            "-Dmodules=disabled",
+            "-Dmodules=enabled",
             "-Dmpath=disabled",
             "-Dmultiprocess=disabled",
             "-Dnetmap=disabled",
@@ -102,12 +102,12 @@ class LinuxBuilder(QemuBuilder):
             "-Drbd=disabled",
             "-Drdma=disabled",
             "-Dreplication=disabled",
-            "-Drutabaga_gfx=enabled",
+            "-Drutabaga_gfx=disabled",
             "-Dsdl=disabled",
             "-Dsdl_image=disabled",
             "-Dseccomp=disabled",
             "-Dselinux=disabled",
-            "-Dslirp=enabled",
+            "-Dslirp=disabled",
             "-Dslirp_smbd=disabled",
             "-Dsmartcard=disabled",
             "-Dsnappy=disabled",
@@ -167,6 +167,7 @@ class LinuxBuilder(QemuBuilder):
 
         includes = [
             self.aosp / "external" / "glib",
+            self.aosp / "external" / "glib" / "glib",
             self.aosp / "external" / "glib" / "gmodule",
             self.aosp / "external" / "glib" / "os" / "linux",
             self.aosp / "external" / "glib" / "os" / "linux" / "glib",
@@ -187,7 +188,16 @@ class LinuxBuilder(QemuBuilder):
                 {"archive": "rutabaga_gfx_ffi"},
             ),  # Must be after libgxstream!
             BazelLib("//external/dtc:libfdt", "1.6.0", {}),
-            BazelLib("@glib//:gmodule-static", "2.77.2", {}),
+            BazelLib(
+                "@glib//:gmodule-static",
+                "2.77.2",
+                {
+                    "name": "gmodule-export-2.0",
+                    "includes": [str(x) for x in includes],
+                    "link_flags": "-pthread",
+                    "Requires": "pcre2",
+                },
+            ),
             BazelLib("@zlib//:zlib", "1.2.10", {}),
             BazelLib(
                 "@glib//:glib-static",
@@ -196,7 +206,7 @@ class LinuxBuilder(QemuBuilder):
                     "name": "glib-2.0",
                     "includes": [str(x) for x in includes],
                     "link_flags": "-pthread",
-                    "Requires": "pcre2, gmodule-static",
+                    "Requires": "pcre2, gmodule-export-2.0",
                 },
             ),
             BazelLib("@pixman//:pixman-1", "0.42.3", {"Requires": "pixman_simd"}),

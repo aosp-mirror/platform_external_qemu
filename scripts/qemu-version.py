@@ -11,7 +11,7 @@ def get_git_pkgversion(directory):
             text=True,
         )
         return git_desc.strip()
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, FileNotFoundError):
         return None
 
 
