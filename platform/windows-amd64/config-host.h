@@ -59,7 +59,7 @@
 
 #undef CONFIG_BDRV_WHITELIST_TOOLS
 
-#define CONFIG_BINDIR "C:/buildbot/tmp/tmp5z6n1k1a/release/bin"
+#define CONFIG_BINDIR "C:/buildbot/tmp/tmph56mffp8/release/bin"
 
 #undef CONFIG_BLKIO
 
@@ -251,7 +251,7 @@
 
 #undef CONFIG_PREADV
 
-#define CONFIG_PREFIX "C:/buildbot/tmp/tmp5z6n1k1a/release"
+#define CONFIG_PREFIX "C:/buildbot/tmp/tmph56mffp8/release"
 
 #undef CONFIG_PTHREAD_AFFINITY_NP
 
@@ -265,23 +265,23 @@
 
 #undef CONFIG_PTHREAD_SET_NAME_NP
 
-#define CONFIG_QEMU_CONFDIR "C:/buildbot/tmp/tmp5z6n1k1a/release/etc/qemu"
+#define CONFIG_QEMU_CONFDIR "C:/buildbot/tmp/tmph56mffp8/release/etc/qemu"
 
-#define CONFIG_QEMU_DATADIR "C:/buildbot/tmp/tmp5z6n1k1a/release/share/qemu"
+#define CONFIG_QEMU_DATADIR "C:/buildbot/tmp/tmph56mffp8/release/share/qemu"
 
-#define CONFIG_QEMU_DESKTOPDIR "C:/buildbot/tmp/tmp5z6n1k1a/release/share/applications"
+#define CONFIG_QEMU_DESKTOPDIR "C:/buildbot/tmp/tmph56mffp8/release/share/applications"
 
-#define CONFIG_QEMU_FIRMWAREPATH "C:/buildbot/tmp/tmp5z6n1k1a/release/share/qemu-firmware", 
+#define CONFIG_QEMU_FIRMWAREPATH "C:/buildbot/tmp/tmph56mffp8/release/share/qemu-firmware", 
 
-#define CONFIG_QEMU_HELPERDIR "C:/buildbot/tmp/tmp5z6n1k1a/release/libexec"
+#define CONFIG_QEMU_HELPERDIR "C:/buildbot/tmp/tmph56mffp8/release/libexec"
 
-#define CONFIG_QEMU_ICONDIR "C:/buildbot/tmp/tmp5z6n1k1a/release/share/icons"
+#define CONFIG_QEMU_ICONDIR "C:/buildbot/tmp/tmph56mffp8/release/share/icons"
 
-#define CONFIG_QEMU_LOCALEDIR "C:/buildbot/tmp/tmp5z6n1k1a/release/share/locale"
+#define CONFIG_QEMU_LOCALEDIR "C:/buildbot/tmp/tmph56mffp8/release/share/locale"
 
-#define CONFIG_QEMU_LOCALSTATEDIR "C:/buildbot/tmp/tmp5z6n1k1a/release/var"
+#define CONFIG_QEMU_LOCALSTATEDIR "C:/buildbot/tmp/tmph56mffp8/release/var"
 
-#define CONFIG_QEMU_MODDIR "C:/buildbot/tmp/tmp5z6n1k1a/release/lib/qemu"
+#define CONFIG_QEMU_MODDIR "C:/buildbot/tmp/tmph56mffp8/release/lib/qemu"
 
 #undef CONFIG_QEMU_PRIVATE_XTS
 
@@ -337,7 +337,7 @@
 
 #undef CONFIG_SYNC_FILE_RANGE
 
-#define CONFIG_SYSCONFDIR "C:/buildbot/tmp/tmp5z6n1k1a/release/etc"
+#define CONFIG_SYSCONFDIR "C:/buildbot/tmp/tmph56mffp8/release/etc"
 
 #undef CONFIG_SYSMACROS
 
