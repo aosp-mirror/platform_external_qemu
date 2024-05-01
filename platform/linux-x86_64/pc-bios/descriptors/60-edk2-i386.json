@@ -6,11 +6,11 @@
     "mapping": {
         "device": "flash",
         "executable": {
-            "filename": "/buildbot/tmp/tmpoalakrht/release/share/qemu/edk2-i386-code.fd",
+            "filename": "/buildbot/tmp/tmpdl258krh/release/share/qemu/edk2-i386-code.fd",
             "format": "raw"
         },
         "nvram-template": {
-            "filename": "/buildbot/tmp/tmpoalakrht/release/share/qemu/edk2-i386-vars.fd",
+            "filename": "/buildbot/tmp/tmpdl258krh/release/share/qemu/edk2-i386-vars.fd",
             "format": "raw"
         }
     },

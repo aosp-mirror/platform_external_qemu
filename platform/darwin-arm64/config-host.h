@@ -59,7 +59,7 @@
 
 #undef CONFIG_BDRV_WHITELIST_TOOLS
 
-#define CONFIG_BINDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/bin"
+#define CONFIG_BINDIR "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/bin"
 
 #undef CONFIG_BLKIO
 
@@ -251,7 +251,7 @@
 
 #define CONFIG_PREADV
 
-#define CONFIG_PREFIX "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release"
+#define CONFIG_PREFIX "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release"
 
 #undef CONFIG_PTHREAD_AFFINITY_NP
 
@@ -265,23 +265,23 @@
 
 #undef CONFIG_PTHREAD_SET_NAME_NP
 
-#define CONFIG_QEMU_CONFDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/etc/qemu"
+#define CONFIG_QEMU_CONFDIR "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/etc/qemu"
 
-#define CONFIG_QEMU_DATADIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/share/qemu"
+#define CONFIG_QEMU_DATADIR "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/share/qemu"
 
-#define CONFIG_QEMU_DESKTOPDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/share/applications"
+#define CONFIG_QEMU_DESKTOPDIR "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/share/applications"
 
-#define CONFIG_QEMU_FIRMWAREPATH "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/share/qemu-firmware", 
+#define CONFIG_QEMU_FIRMWAREPATH "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/share/qemu-firmware", 
 
-#define CONFIG_QEMU_HELPERDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/libexec"
+#define CONFIG_QEMU_HELPERDIR "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/libexec"
 
-#define CONFIG_QEMU_ICONDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/share/icons"
+#define CONFIG_QEMU_ICONDIR "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/share/icons"
 
-#define CONFIG_QEMU_LOCALEDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/share/locale"
+#define CONFIG_QEMU_LOCALEDIR "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/share/locale"
 
-#define CONFIG_QEMU_LOCALSTATEDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/var"
+#define CONFIG_QEMU_LOCALSTATEDIR "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/var"
 
-#define CONFIG_QEMU_MODDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/lib/qemu"
+#define CONFIG_QEMU_MODDIR "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/lib/qemu"
 
 #undef CONFIG_QEMU_PRIVATE_XTS
 
@@ -339,7 +339,7 @@
 
 #undef CONFIG_SYNC_FILE_RANGE
 
-#define CONFIG_SYSCONFDIR "/Volumes/Android/buildbot/tmp/tmp9aw8xys8/release/etc"
+#define CONFIG_SYSCONFDIR "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/etc"
 
 #undef CONFIG_SYSMACROS
 
