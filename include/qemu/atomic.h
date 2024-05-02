@@ -20,6 +20,13 @@
 /* Compiler barrier */
 #define barrier()   ({ asm volatile("" ::: "memory"); (void)0; })
 
+#ifdef __cplusplus
+
+#ifndef typeof_strip_qual
+#error Use the typeof_strip_qual(expr) definition from atomic.hpp on C++ builds.
+#endif
+
+#else  /* __cpluplus */
 /* The variable that receives the old value of an atomically-accessed
  * variable must be non-qualified, because atomic builtins return values
  * through a pointer-type argument as in __atomic_load(&var, &old, MODEL).
@@ -61,6 +68,7 @@
         __builtin_types_compatible_p(typeof(expr), const volatile unsigned short), \
         (unsigned short)1,                                                         \
       (expr)+0))))))
+#endif  /* __cpluplus */
 
 #ifndef __ATOMIC_RELAXED
 #error "Expecting C11 atomic ops"
