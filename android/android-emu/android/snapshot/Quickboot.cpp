@@ -20,6 +20,7 @@
 #include "android/base/files/IniFile.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
+#include "android/emulation/AutoDisplays.h"
 #include "host-common/FeatureControl.h"
 #include "host-common/hw-config.h"
 #include "android/metrics/MetricsReporter.h"
@@ -369,6 +370,16 @@ bool Quickboot::load(const char* name) {
             LOG(WARNING) << "Exiting emulator as requested by the user...";
             mVmOps.vmShutdown();
         }
+    } else if (android::automotive::isDistantDisplaySupported(
+                        getConsoleAgents()->settings->avdInfo())) {
+        // Applying forced cold boot for automotive distant display emulator
+        // TODO: revert when fixed the snapboot issue in b/338307682
+        mWindow.showMessage("Forced cold boot for automotive distant display emulator",
+                            WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
+        reportFailedLoad(pb::EmulatorQuickbootLoad::
+                                 EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
+                         FailureReason::Empty);
+        LOG(WARNING) << "Forced cold boot for automotive distant display emulator";
     } else {
         // TODO: Figure out how we can detect that this snapshot caused a crash?
         // See b/233665745
