@@ -1272,6 +1272,8 @@ void MultiDisplay::onLoad(base::Stream* stream) {
         mWindowAgent->updateUIMultiDisplayPage(iter);
         fireEvent(DisplayChangeEvent{DisplayChange::DisplayChanged, iter});
         LOG(DEBUG) << "loaded display " << iter;
+    }
+    if (!ids.empty()) {
         notifyDisplayChanges();
     }
 }

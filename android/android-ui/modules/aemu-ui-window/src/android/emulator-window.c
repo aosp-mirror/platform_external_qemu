@@ -720,6 +720,8 @@ bool emulator_window_rotate_90(bool clockwise) {
                           : (max_rotation + fromState - 1) % max_rotation;
         assert(orientation < max_rotation && orientation >= 0);
         emulator_window_set_device_coarse_orientation(orientation, 0.f);
+        // TODO(b/337038162): We really should not be dependent on virtual sensors UI, since
+        // this code can be called from non-UI code.
         skin_winsys_touch_qt_extended_virtual_sensors();
         return true;
     }

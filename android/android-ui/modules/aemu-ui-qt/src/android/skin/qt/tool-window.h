@@ -142,7 +142,6 @@ public:
     void hideExtendedWindow();
 
     void waitForExtendedWindowVisibility(bool visible);
-    QRect extendedWindowGeometry();
     void presetSizeAdvance(PresetEmulatorSizeType newSize);
 
 signals:
