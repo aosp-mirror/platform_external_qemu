@@ -4147,6 +4147,11 @@ static int do_multi_display_add(ControlClient client, char* args) {
 }
 
 static int do_multi_display_del(ControlClient client, char* args) {
+    if (!args) {
+        control_write(client, "KO: empty arguments\r\n");
+        return -1;
+    }
+
     // kMaxArgs is max number of arguments that we have to process (options +
     // parameters, if any, and the filename)
     const int kMaxArgs = 1;
@@ -4164,6 +4169,13 @@ static int do_multi_display_del(ControlClient client, char* args) {
     }
     int id = std::stoi(splitArgs[0]);
     if (id < 1 || id > 10) {
+        control_write(client, "KO: invalid display id\r\n");
+        return -1;
+    }
+
+    if (!client->global->multi_display_agent->getMultiDisplay(
+                id, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                nullptr)) {
         control_write(client, "KO: invalid display id\r\n");
         return -1;
     }

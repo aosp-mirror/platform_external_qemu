@@ -81,9 +81,17 @@ def git_commit(bid, destination_dir, args):
             - reviewers: The reviewers for the commit.
             - artifact: The artifact to commit.
     """
+    # Append to the header if netsim_version and canary_version are specified
+    commit_header = f"Update netsim to {bid}"
+    if args.netsim_version and args.canary_version:
+        commit_header += f" (Netsim {args.netsim_version} for Canary {args.canary_version})"
+
+    # Add a commit_msg footer if buganizer_id is specified
+    commit_footer = f"\nBug: {args.buganizer_id}" if args.buganizer_id else ""
+
     commit_msg = f"""
 
-Update netsim to {bid}
+{commit_header}
 
 This updates netsim with the artifacts from go/ab/{bid}.
 You can recreate the commit by running:
@@ -98,6 +106,7 @@ You can recreate the commit by running:
             --re {args.reviewers} \\
             --artifact {args.artifact}
 ```
+{commit_footer}
             """
 
     run(
@@ -264,6 +273,21 @@ def main():
         default=False,
         action="store_true",
         help="Verbose logging",
+    )
+    parser.add_argument(
+        "--buganizer-id",
+        type=str,
+        help="Include Buganizer ID in the gerrit commit description "
+    )
+    parser.add_argument(
+        "--netsim-version",
+        type=str,
+        help="Include Netsim version in the gerrit commit description"
+    )
+    parser.add_argument(
+        "--canary-version",
+        type=str,
+        help="Include target Canary version for Netsim distribution in the gerrit commit description"
     )
 
     args = parser.parse_args()
