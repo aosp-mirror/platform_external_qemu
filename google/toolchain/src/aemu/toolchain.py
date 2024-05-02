@@ -206,16 +206,6 @@ def bazel_command(args):
         build_dir = Path(temp_build.__enter__()).resolve()
         builder = gen_toolchain(args.target, build_dir, "", args.aosp, args.ccache)
         builder.configure_meson([])
-        run(
-            [
-                Path(build_dir) / QemuBuilder.TOOLCHAIN_DIR / "meson",
-                "install",
-                "-C",
-                build_dir,
-            ],
-            cwd=build_dir,
-            toolchain_path=Path(build_dir) / QemuBuilder.TOOLCHAIN_DIR,
-        )
 
     with tempfile.TemporaryDirectory() as bazel_build_dir:
         # Make sure there are no accidently symlinks that cause
