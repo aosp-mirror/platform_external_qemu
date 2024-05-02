@@ -262,6 +262,13 @@ def main():
         help="Set of reviewers for the gerrit change that will be created.",
     )
     parser.add_argument(
+        "--cc",
+        default="jansene@google.com,shuohsu@google.com,hyunjaemoon@google.com",
+        dest="cc",
+        type=str,
+        help="Set of ccs for the gerrit change that will be created.",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Dry run, only obtain artifacts, do not use git or repo.",
@@ -325,6 +332,7 @@ def main():
                 "Presubmit-Ready+1",
                 f"--br=netsim-{bid}",
                 f"--re={args.reviewers}",
+                f"--cc={args.cc}",
                 str(destination_dir),
             ],
             dry_run=args.dry_run,
