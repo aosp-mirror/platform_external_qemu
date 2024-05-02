@@ -77,9 +77,9 @@ have_ga = get_option('guest_agent') \
   .require(targetos in ['sunos', 'linux', 'windows', 'freebsd', 'netbsd', 'openbsd'],
            error_message: 'unsupported OS for QEMU guest agent') \
   .allowed()
+# For the android build we have removed the modules restriction
+# under windows, this is not properly supported by the ninja build!
 enable_modules = get_option('modules') \
-  .require(targetos != 'windows',
-           error_message: 'Modules are not available for Windows') \
   .require(not get_option('prefer_static'),
            error_message: 'Modules are incompatible with static linking') \
   .allowed()

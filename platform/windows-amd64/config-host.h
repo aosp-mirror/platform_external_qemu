@@ -59,7 +59,7 @@
 
 #undef CONFIG_BDRV_WHITELIST_TOOLS
 
-#define CONFIG_BINDIR "C:/buildbot/tmp/tmph56mffp8/release/bin"
+#define CONFIG_BINDIR "C:/buildbot/tmp/tmpc11oqnlm/release/bin"
 
 #undef CONFIG_BLKIO
 
@@ -215,7 +215,7 @@
 
 #undef CONFIG_MEMFD
 
-#undef CONFIG_MODULES
+#define CONFIG_MODULES
 
 #undef CONFIG_MODULE_UPGRADES
 
@@ -251,7 +251,7 @@
 
 #undef CONFIG_PREADV
 
-#define CONFIG_PREFIX "C:/buildbot/tmp/tmph56mffp8/release"
+#define CONFIG_PREFIX "C:/buildbot/tmp/tmpc11oqnlm/release"
 
 #undef CONFIG_PTHREAD_AFFINITY_NP
 
@@ -265,23 +265,23 @@
 
 #undef CONFIG_PTHREAD_SET_NAME_NP
 
-#define CONFIG_QEMU_CONFDIR "C:/buildbot/tmp/tmph56mffp8/release/etc/qemu"
+#define CONFIG_QEMU_CONFDIR "C:/buildbot/tmp/tmpc11oqnlm/release/etc/qemu"
 
-#define CONFIG_QEMU_DATADIR "C:/buildbot/tmp/tmph56mffp8/release/share/qemu"
+#define CONFIG_QEMU_DATADIR "C:/buildbot/tmp/tmpc11oqnlm/release/share/qemu"
 
-#define CONFIG_QEMU_DESKTOPDIR "C:/buildbot/tmp/tmph56mffp8/release/share/applications"
+#define CONFIG_QEMU_DESKTOPDIR "C:/buildbot/tmp/tmpc11oqnlm/release/share/applications"
 
-#define CONFIG_QEMU_FIRMWAREPATH "C:/buildbot/tmp/tmph56mffp8/release/share/qemu-firmware", 
+#define CONFIG_QEMU_FIRMWAREPATH "C:/buildbot/tmp/tmpc11oqnlm/release/share/qemu-firmware", 
 
-#define CONFIG_QEMU_HELPERDIR "C:/buildbot/tmp/tmph56mffp8/release/libexec"
+#define CONFIG_QEMU_HELPERDIR "C:/buildbot/tmp/tmpc11oqnlm/release/libexec"
 
-#define CONFIG_QEMU_ICONDIR "C:/buildbot/tmp/tmph56mffp8/release/share/icons"
+#define CONFIG_QEMU_ICONDIR "C:/buildbot/tmp/tmpc11oqnlm/release/share/icons"
 
-#define CONFIG_QEMU_LOCALEDIR "C:/buildbot/tmp/tmph56mffp8/release/share/locale"
+#define CONFIG_QEMU_LOCALEDIR "C:/buildbot/tmp/tmpc11oqnlm/release/share/locale"
 
-#define CONFIG_QEMU_LOCALSTATEDIR "C:/buildbot/tmp/tmph56mffp8/release/var"
+#define CONFIG_QEMU_LOCALSTATEDIR "C:/buildbot/tmp/tmpc11oqnlm/release/var"
 
-#define CONFIG_QEMU_MODDIR "C:/buildbot/tmp/tmph56mffp8/release/lib/qemu"
+#define CONFIG_QEMU_MODDIR "C:/buildbot/tmp/tmpc11oqnlm/release/lib/qemu"
 
 #undef CONFIG_QEMU_PRIVATE_XTS
 
@@ -329,6 +329,8 @@
 
 #undef CONFIG_SPLICE
 
+#define CONFIG_STAMP _10e1e2d32cef3cb12d922a8407d82e1a9eaa7a1c
+
 #undef CONFIG_STATX
 
 #undef CONFIG_STATX_MNT_ID
@@ -337,7 +339,7 @@
 
 #undef CONFIG_SYNC_FILE_RANGE
 
-#define CONFIG_SYSCONFDIR "C:/buildbot/tmp/tmph56mffp8/release/etc"
+#define CONFIG_SYSCONFDIR "C:/buildbot/tmp/tmpc11oqnlm/release/etc"
 
 #undef CONFIG_SYSMACROS
 
