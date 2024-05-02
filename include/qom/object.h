@@ -153,7 +153,7 @@ struct ObjectClass
 struct Object
 {
     /* private: */
-    ObjectClass *class;
+    ObjectClass *klass;
     ObjectFree *free;
     GHashTable *properties;
     uint32_t ref;
