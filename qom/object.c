@@ -69,7 +69,7 @@ struct TypeImpl
     const char *parent;
     TypeImpl *parent_type;
 
-    ObjectClass *class;
+    ObjectClass *klass;
 
     int num_interfaces;
     InterfaceImpl interfaces[MAX_INTERFACES];
@@ -276,11 +276,11 @@ static void type_initialize_interface(TypeImpl *ti, TypeImpl *interface_type,
     type_initialize(iface_impl);
     g_free((char *)info.name);
 
-    new_iface = (InterfaceClass *)iface_impl->class;
-    new_iface->concrete_class = ti->class;
+    new_iface = (InterfaceClass *)iface_impl->klass;
+    new_iface->concrete_class = ti->klass;
     new_iface->interface_type = interface_type;
 
-    ti->class->interfaces = g_slist_append(ti->class->interfaces, new_iface);
+    ti->klass->interfaces = g_slist_append(ti->klass->interfaces, new_iface);
 }
 
 static void object_property_free(gpointer data)
@@ -301,7 +301,7 @@ static void type_initialize(TypeImpl *ti)
 {
     TypeImpl *parent;
 
-    if (ti->class) {
+    if (ti->klass) {
         return;
     }
 
@@ -322,7 +322,7 @@ static void type_initialize(TypeImpl *ti)
         assert(!ti->instance_finalize);
         assert(!ti->num_interfaces);
     }
-    ti->class = g_malloc0(ti->class_size);
+    ti->klass = g_malloc0(ti->class_size);
 
     parent = type_get_parent(ti);
     if (parent) {
@@ -332,10 +332,10 @@ static void type_initialize(TypeImpl *ti)
 
         g_assert(parent->class_size <= ti->class_size);
         g_assert(parent->instance_size <= ti->instance_size);
-        memcpy(ti->class, parent->class, parent->class_size);
-        ti->class->interfaces = NULL;
+        memcpy(ti->klass, parent->klass, parent->class_size);
+        ti->klass->interfaces = NULL;
 
-        for (e = parent->class->interfaces; e; e = e->next) {
+        for (e = parent->klass->interfaces; e; e = e->next) {
             InterfaceClass *iface = e->data;
             ObjectClass *klass = OBJECT_CLASS(iface);
 
@@ -349,7 +349,7 @@ static void type_initialize(TypeImpl *ti)
                              ti->interfaces[i].typename, parent->name);
                 abort();
             }
-            for (e = ti->class->interfaces; e; e = e->next) {
+            for (e = ti->klass->interfaces; e; e = e->next) {
                 TypeImpl *target_type = OBJECT_CLASS(e->data)->type;
 
                 if (type_is_ancestor(target_type, t)) {
@@ -365,20 +365,20 @@ static void type_initialize(TypeImpl *ti)
         }
     }
 
-    ti->class->properties = g_hash_table_new_full(g_str_hash, g_str_equal, NULL,
+    ti->klass->properties = g_hash_table_new_full(g_str_hash, g_str_equal, NULL,
                                                   object_property_free);
 
-    ti->class->type = ti;
+    ti->klass->type = ti;
 
     while (parent) {
         if (parent->class_base_init) {
-            parent->class_base_init(ti->class, ti->class_data);
+            parent->class_base_init(ti->klass, ti->class_data);
         }
         parent = type_get_parent(parent);
     }
 
     if (ti->class_init) {
-        ti->class_init(ti->class, ti->class_data);
+        ti->class_init(ti->klass, ti->class_data);
     }
 }
 
@@ -526,7 +526,7 @@ static void object_initialize_with_type(Object *obj, size_t size, TypeImpl *type
     g_assert(size >= type->instance_size);
 
     memset(obj, 0, type->instance_size);
-    obj->class = type->class;
+    obj->klass = type->klass;
     object_ref(obj);
     object_class_property_init_all(obj);
     obj->properties = g_hash_table_new_full(g_str_hash, g_str_equal,
@@ -703,7 +703,7 @@ static void object_deinit(Object *obj, TypeImpl *type)
 static void object_finalize(void *data)
 {
     Object *obj = data;
-    TypeImpl *ti = obj->class->type;
+    TypeImpl *ti = obj->klass->type;
 
     object_property_del_all(obj);
     object_deinit(obj, ti);
@@ -884,7 +884,7 @@ Object *object_dynamic_cast(Object *obj, const char *typename)
 Object *object_dynamic_cast_assert(Object *obj, const char *typename,
                                    const char *file, int line, const char *func)
 {
-    trace_object_dynamic_cast_assert(obj ? obj->class->type->name : "(null)",
+    trace_object_dynamic_cast_assert(obj ? obj->klass->type->name : "(null)",
                                      typename, file, line, func);
 
 #ifdef CONFIG_QOM_CAST_DEBUG
@@ -892,7 +892,7 @@ Object *object_dynamic_cast_assert(Object *obj, const char *typename,
     Object *inst;
 
     for (i = 0; obj && i < OBJECT_CLASS_CAST_CACHE; i++) {
-        if (qatomic_read(&obj->class->object_cast_cache[i]) == typename) {
+        if (qatomic_read(&obj->klass->object_cast_cache[i]) == typename) {
             goto out;
         }
     }
@@ -909,10 +909,10 @@ Object *object_dynamic_cast_assert(Object *obj, const char *typename,
 
     if (obj && obj == inst) {
         for (i = 1; i < OBJECT_CLASS_CAST_CACHE; i++) {
-            qatomic_set(&obj->class->object_cast_cache[i - 1],
-                       qatomic_read(&obj->class->object_cast_cache[i]));
+            qatomic_set(&obj->klass->object_cast_cache[i - 1],
+                       qatomic_read(&obj->klass->object_cast_cache[i]));
         }
-        qatomic_set(&obj->class->object_cast_cache[i - 1], typename);
+        qatomic_set(&obj->klass->object_cast_cache[i - 1], typename);
     }
 
 out:
@@ -943,7 +943,7 @@ ObjectClass *object_class_dynamic_cast(ObjectClass *class,
         return NULL;
     }
 
-    if (type->class->interfaces &&
+    if (type->klass->interfaces &&
             type_is_ancestor(target_type, type_interface)) {
         int found = 0;
         GSList *i;
@@ -968,45 +968,45 @@ ObjectClass *object_class_dynamic_cast(ObjectClass *class,
     return ret;
 }
 
-ObjectClass *object_class_dynamic_cast_assert(ObjectClass *class,
+ObjectClass *object_class_dynamic_cast_assert(ObjectClass *klass,
                                               const char *typename,
                                               const char *file, int line,
                                               const char *func)
 {
     ObjectClass *ret;
 
-    trace_object_class_dynamic_cast_assert(class ? class->type->name : "(null)",
+    trace_object_class_dynamic_cast_assert(klass ? klass->type->name : "(null)",
                                            typename, file, line, func);
 
 #ifdef CONFIG_QOM_CAST_DEBUG
     int i;
 
-    for (i = 0; class && i < OBJECT_CLASS_CAST_CACHE; i++) {
-        if (qatomic_read(&class->class_cast_cache[i]) == typename) {
-            ret = class;
+    for (i = 0; klass && i < OBJECT_CLASS_CAST_CACHE; i++) {
+        if (qatomic_read(&klass->class_cast_cache[i]) == typename) {
+            ret = klass;
             goto out;
         }
     }
 #else
-    if (!class || !class->interfaces) {
-        return class;
+    if (!klass || !klass->interfaces) {
+        return klass;
     }
 #endif
 
-    ret = object_class_dynamic_cast(class, typename);
-    if (!ret && class) {
+    ret = object_class_dynamic_cast(klass, typename);
+    if (!ret && klass) {
         fprintf(stderr, "%s:%d:%s: Object %p is not an instance of type %s\n",
-                file, line, func, class, typename);
+                file, line, func, klass, typename);
         abort();
     }
 
 #ifdef CONFIG_QOM_CAST_DEBUG
-    if (class && ret == class) {
+    if (klass && ret == klass) {
         for (i = 1; i < OBJECT_CLASS_CAST_CACHE; i++) {
-            qatomic_set(&class->class_cast_cache[i - 1],
-                       qatomic_read(&class->class_cast_cache[i]));
+            qatomic_set(&klass->class_cast_cache[i - 1],
+                       qatomic_read(&klass->class_cast_cache[i]));
         }
-        qatomic_set(&class->class_cast_cache[i - 1], typename);
+        qatomic_set(&klass->class_cast_cache[i - 1], typename);
     }
 out:
 #endif
@@ -1015,12 +1015,12 @@ out:
 
 const char *object_get_typename(const Object *obj)
 {
-    return obj->class->type->name;
+    return obj->klass->type->name;
 }
 
 ObjectClass *object_get_class(Object *obj)
 {
-    return obj->class;
+    return obj->klass;
 }
 
 bool object_class_is_abstract(ObjectClass *klass)
@@ -1043,7 +1043,7 @@ ObjectClass *object_class_by_name(const char *typename)
 
     type_initialize(type);
 
-    return type->class;
+    return type->klass;
 }
 
 ObjectClass *module_object_class_by_name(const char *typename)
@@ -1065,9 +1065,9 @@ ObjectClass *module_object_class_by_name(const char *typename)
     return oc;
 }
 
-ObjectClass *object_class_get_parent(ObjectClass *class)
+ObjectClass *object_class_get_parent(ObjectClass *klass)
 {
-    TypeImpl *type = type_get_parent(class->type);
+    TypeImpl *type = type_get_parent(klass->type);
 
     if (!type) {
         return NULL;
@@ -1075,7 +1075,7 @@ ObjectClass *object_class_get_parent(ObjectClass *class)
 
     type_initialize(type);
 
-    return type->class;
+    return type->klass;
 }
 
 typedef struct OCFData
@@ -1094,7 +1094,7 @@ static void object_class_foreach_tramp(gpointer key, gpointer value,
     ObjectClass *k;
 
     type_initialize(type);
-    k = type->class;
+    k = type->klass;
 
     if (!data->include_abstract && type->abstract) {
         return;
@@ -1760,8 +1760,8 @@ static void object_finalize_child_property(Object *obj, const char *name,
 {
     Object *child = opaque;
 
-    if (child->class->unparent) {
-        (child->class->unparent)(child);
+    if (child->klass->unparent) {
+        (child->klass->unparent)(child);
     }
     child->parent = NULL;
     object_unref(child);

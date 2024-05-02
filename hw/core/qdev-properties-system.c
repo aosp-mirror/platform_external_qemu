@@ -438,7 +438,7 @@ static void set_netdev(Object *obj, Visitor *v, const char *name,
         }
 
         if (peers[i]->info->check_peer_type) {
-            if (!peers[i]->info->check_peer_type(peers[i], obj->class, errp)) {
+            if (!peers[i]->info->check_peer_type(peers[i], obj->klass, errp)) {
                 goto out;
             }
         }
