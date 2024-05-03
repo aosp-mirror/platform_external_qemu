@@ -664,7 +664,9 @@ bool emuglConfig_init(EmuglConfig* config,
         emuglConfig_get_vulkan_hardware_gpu(&vkVendor, &vkMajor, &vkMinor,
                                             &vkPatch);
 #if defined(__linux__)
-        if (vkVendor && strncmp("AMD", vkVendor, 3) == 0) {
+        bool isAMD = (vkVendor && strncmp("AMD", vkVendor, 3) == 0);
+        bool isIntel = (vkVendor && strncmp("Intel", vkVendor, 5) == 0);
+        if (isAMD) {
             feature_set_if_not_overridden(
                     kFeature_VulkanAllocateDeviceMemoryOnly, true);
             if (fc::isEnabled(fc::VulkanAllocateDeviceMemoryOnly)) {
@@ -674,7 +676,7 @@ bool emuglConfig_init(EmuglConfig* config,
                       vkVendor);
             }
         }
-        if (vkVendor && strncmp("Intel", vkVendor, 5) == 0) {
+        if (isIntel || isAMD) {
             feature_set_if_not_overridden(kFeature_VulkanAllocateHostMemory,
                                           true);
             if (fc::isEnabled(fc::VulkanAllocateHostMemory)) {
