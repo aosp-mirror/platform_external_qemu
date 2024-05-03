@@ -6,11 +6,11 @@
     "mapping": {
         "device": "flash",
         "executable": {
-            "filename": "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/share/qemu/edk2-i386-secure-code.fd",
+            "filename": "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/share/qemu/edk2-i386-secure-code.fd",
             "format": "raw"
         },
         "nvram-template": {
-            "filename": "/Volumes/Android/buildbot/tmp/tmp4dak2lme/release/share/qemu/edk2-i386-vars.fd",
+            "filename": "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/share/qemu/edk2-i386-vars.fd",
             "format": "raw"
         }
     },

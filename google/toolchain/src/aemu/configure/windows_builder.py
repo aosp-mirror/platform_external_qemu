@@ -54,7 +54,7 @@ class WindowsBuilder(QemuBuilder):
                 {
                     "name": "gmodule-export-2.0",
                     "includes": [str(x) for x in includes],
-                    "link_flags": "-pthread",
+                    "cflags": "-DGMODULE_STATIC_COMPILATION",
                     "Requires": "pcre2",
                 },
             ),
@@ -162,7 +162,7 @@ class WindowsBuilder(QemuBuilder):
             "-Dlzo=disabled",
             "-Dmalloc_trim=disabled",
             "-Dmembarrier=disabled",
-            "-Dmodules=disabled",
+            "-Dmodules=enabled",
             "-Dmpath=disabled",
             "-Dmultiprocess=disabled",
             "-Dnetmap=disabled",

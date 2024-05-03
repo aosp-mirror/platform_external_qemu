@@ -1,209 +1,221 @@
 {
-    // These are shims we should apply to the various targets
-    "bazel_prefix": "cc_library(name='libqemuutilstubs',srcs=['stubs/error-printf.c','stubs/is-daemonized.c','stubs/monitor-core.c',],hdrs=['config-poison.h','include/block/aio.h','include/block/aio-wait.h','include/block/block.h','include/block/block-common.h','include/block/block-global-state.h','include/block/block-io.h','include/block/blockjob.h','include/block/graph-lock.h','include/exec/hwaddr.h','include/exec/poison.h','include/glib-compat.h','include/hw/hotplug.h','include/hw/qdev-core.h','include/hw/resettable.h','include/monitor/monitor.h','include/qapi/util.h','include/qemu/atomic.h','include/qemu/bitmap.h','include/qemu/bitops.h','include/qemu/bswap.h','include/qemu/clang-tsa.h','include/qemu/compiler.h','include/qemu/coroutine.h','include/qemu/coroutine-core.h','include/qemu/coroutine-tls.h','include/qemu/error-report.h','include/qemu/event_notifier.h','include/qemu/host-utils.h','include/qemu/int128.h','include/qemu/iov.h','include/qemu/job.h','include/qemu/lockable.h','include/qemu/main-loop.h','include/qemu/module.h','include/qemu/notify.h','include/qemu/osdep.h','include/qemu/processor.h','include/qemu/progress_meter.h','include/qemu/qsp.h','include/qemu/queue.h','include/qemu/ratelimit.h','include/qemu/rcu.h','include/qemu/rcu_queue.h','include/qemu/readline.h','include/qemu/sys_membarrier.h','include/qemu/thread.h','include/qemu/thread-posix.h','include/qemu/timer.h','include/qemu/transactions.h','include/qemu/typedefs.h','include/qom/object.h','include/sysemu/event-loop-base.h','include/sysemu/os-posix.h','platform/linux-x86_64/config-host.h','qapi/qapi-builtin-types.h','qapi/qapi-commands-block.h','qapi/qapi-commands-block-core.h','qapi/qapi-commands-common.h','qapi/qapi-commands-crypto.h','qapi/qapi-commands-job.h','qapi/qapi-commands-machine.h','qapi/qapi-commands-machine-common.h','qapi/qapi-commands-misc.h','qapi/qapi-commands-run-state.h','qapi/qapi-commands-sockets.h','qapi/qapi-emit-events.h','qapi/qapi-types-audio.h','qapi/qapi-types-block.h','qapi/qapi-types-block-core.h','qapi/qapi-types-common.h','qapi/qapi-types-crypto.h','qapi/qapi-types-error.h','qapi/qapi-types-job.h','qapi/qapi-types-machine.h','qapi/qapi-types-machine-common.h','qapi/qapi-types-misc.h','qapi/qapi-types-net.h','qapi/qapi-types-run-state.h','qapi/qapi-types-sockets.h','qapi/qapi-types-ui.h',],copts=['-Wno-implicit-function-declaration','-mcx16',],defines=['_GNU_SOURCE','_FILE_OFFSET_BITS=64','_LARGEFILE_SOURCE',],includes=['.','host/include/x86_64','include','linux-headers','platform/linux-x86_64','qapi','subprojects/libvhost-user','trace',],visibility=['//visibility:public'],deps=['//external/qemu/google/compat/linux:compat','//external/qemu/subprojects/libvhost-user:vhost-user','//external/qemu/subprojects/libvhost-user:vhost-user-glib','@glib//:glib-static','@glib//:gmodule-static','@pixman//:pixman-1','@pixman//:pixman_simd','@zlib',],)",
-    "shims": [
-        {
-            "target": "generate_shared_QAPI_source_files",
-            "shims": {
-                "cmd": "$(location :qapi-gen) -o $(RULEDIR)/qapi -b $(location qapi/qapi-schema.json)",
-                "cmd_bat": "$(location :qapi-gen) -o $(RULEDIR)/qapi -b $(location qapi/qapi-schema.json)"
-            }
-        },
-        {
-            "target": "generate_config-poison_h",
-            "shims": {
-                // TODO: It would be nice if we could generalize this in the generator
-                "cmd": "$(location :make-config-poison) $(SRCS) > $(location config-poison.h)",
-                "cmd_bat": "$(location :make-config-poison) $(SRCS) > $(location config-poison.h)"
-            }
-        },
-        {
-            "target": "keymap-gen",
-            "shims": {
-                "srcs": [
-                    "subprojects/keycodemapdb/tools/keymap-gen.py"
-                ]
-            }
-        },
-        {
-            "target": "qemu-system-riscv64",
-            "shims": {
-                "-deps": [
-                    "libmodinfo-riscv64-softmmu_c"
-                ],
-                "+deps": [
-                    "libqemu-riscv64-softmmu",
-                    "//hardware/generic/goldfish/emulator/plugin:registration"
-                ]
-            }
-        },
-        {
-            "target": "qemu-system-aarch64",
-            "shims": {
-                "-deps": [
-                    "libmodinfo-aarch64-softmmu_c"
-                ],
-                "+deps": [
-                    "libqemu-aarch64-softmmu",
-                    "//hardware/generic/goldfish/emulator/plugin:registration"
-                ]
-            }
-        },
-        {
-            "target": "qemu-system-x86_64",
-            "shims": {
-                "-deps": [
-                    "libmodinfo-x86_64-softmmu_c"
-                ],
-                "+deps": [
-                    "libqemu-x86_64-softmmu",
-                    "//hardware/generic/goldfish/emulator/plugin:registration"
-                ]
-            }
-        },
-        {
-            "target": "qemu-img",
-            "shims": {
-                "+deps": [
-                    "libqemuutilstubs"
-                ]
-            }
-        },
-        {
-            "target": ".*",
-            "shims": {
-                "restrict_to": "cc_shared_library",
-                // xs4all!
-                "visibility": [
-                    "//visibility:public"
-                ]
-            }
-        },
-        {
-            "target": ".*",
-            "shims": {
-                "restrict_to": "cc_library|cc_binary",
-                // xs4all!
-                "visibility": [
-                    "//visibility:public"
-                ],
-                "-srcs": [
-                    "google.*",
-                    // TODO: Another qemu stub linker order issue. This should likely be
-                    // addressed in the meson build.
-                    "stubs/blk-exp-close-all.c",
-                    "stubs/blk-commit-all.c",
-                    "stubs/monitor-core.c",
-                    "stubs/error-printf.c",
-                    "stubs/is-daemonized.c",
-                    "stubs/graph-lock.c"
-                ],
-                // Remove our compat libs if present
-                "-hdrs": [
-                    "google.*",
-                    ".*subprojects.*"
-                ],
-                // Our sysroot is too old so we need to introduce these
-                "+copts": [
-                    // Enables clang to generate CMPXCHG16B instructions.
-                    "-mcx16",
-                    // We do not have memfd_create
-                    "-Wno-implicit-function-declaration"
-                ],
-                "-deps": [
-                    // We are bringing our own plugins, so do not
-                    // take a dependency on those that come from qemu.
-                    "libmodinfo-.*",
-                    // Not yet clear how to handle object includes,
-                    // so let's strip them.
-                    "libmodule-common",
-                    "libcommon_.*"
-                ],
-                // We need a compat layer for our ye olde sysroot.
-                "+deps": [
-                    "//external/qemu/google/compat/linux:compat"
-                ]
-            }
-        },
-        {
-            "target": "libqemu-.*-softmmu|libqemu-.*-softmmu_common|libcommon",
-            // TODO: Figure out why we are not setting
-            // this to alwayslink..
-            "shims": {
-                "restrict_to": "cc_library",
-                "alwayslink": 1
-            }
-        }
-        // Sample shim that show cases how you can
-        // add and remove dependencies to all cc_ like
-        // rules.
-        // {
-        //     "target" : ".*",
-        //     "shims" :{
-        //    Use restrict_to to limit this shim to rules
-        //    of the given type. For example cc_library, cc_binary
-        //         "restrict_to" : "cc_.*",
-        //    Add the following items to the "deps" set
-        //         "+deps": ["to_be_added"],
-        //    remove these items from the "deps" set
-        //         "-deps": ["block"]
-        //    replace the "deps" completely:
-        //        "deps": ["a", "b"]
-        //     }
-        // }
-    ],
-    // These are the bazel mappings we are going to use for
-    // external dependencies. For every pkg config dependency
-    // you will need to provide a bazel target
-    "external_deps": {
-        "glib-2.0": [
-            "@glib//:glib-static"
-        ],
-        "gmodule-export-2.0": [
-            "@glib//:gmodule-static"
-        ],
-        "zlib": [
-            "@zlib//:zlib"
-        ],
-        "pixman-1": [
-            "@pixman//:pixman-1",
-            "@pixman//:pixman_simd"
-        ],
-        "libfdt": [
-            "//external/dtc:libfdt"
-        ],
-        "libpulse": [
-            "@pulse//:libpulse"
-        ],
-        "libvhost-user": [
-            "//external/qemu/subprojects/libvhost-user:vhost-user"
-        ],
-        "libvhost-user-glib": [
-            "//external/qemu/subprojects/libvhost-user:vhost-user-glib"
-        ],
-        "rutabaga_gfx_ffi": []
+  // These are shims we should apply to the various targets
+  "bazel_prefix": "cc_library(name='libqemuutilstubs',srcs=['stubs/error-printf.c','stubs/is-daemonized.c','stubs/monitor-core.c',],hdrs=['config-poison.h','include/block/aio.h','include/block/aio-wait.h','include/block/block.h','include/block/block-common.h','include/block/block-global-state.h','include/block/block-io.h','include/block/blockjob.h','include/block/graph-lock.h','include/exec/hwaddr.h','include/exec/poison.h','include/glib-compat.h','include/hw/hotplug.h','include/hw/qdev-core.h','include/hw/resettable.h','include/monitor/monitor.h','include/qapi/util.h','include/qemu/atomic.h','include/qemu/bitmap.h','include/qemu/bitops.h','include/qemu/bswap.h','include/qemu/clang-tsa.h','include/qemu/compiler.h','include/qemu/coroutine.h','include/qemu/coroutine-core.h','include/qemu/coroutine-tls.h','include/qemu/error-report.h','include/qemu/event_notifier.h','include/qemu/host-utils.h','include/qemu/int128.h','include/qemu/iov.h','include/qemu/job.h','include/qemu/lockable.h','include/qemu/main-loop.h','include/qemu/module.h','include/qemu/notify.h','include/qemu/osdep.h','include/qemu/processor.h','include/qemu/progress_meter.h','include/qemu/qsp.h','include/qemu/queue.h','include/qemu/ratelimit.h','include/qemu/rcu.h','include/qemu/rcu_queue.h','include/qemu/readline.h','include/qemu/sys_membarrier.h','include/qemu/thread.h','include/qemu/thread-posix.h','include/qemu/timer.h','include/qemu/transactions.h','include/qemu/typedefs.h','include/qom/object.h','include/sysemu/event-loop-base.h','include/sysemu/os-posix.h','platform/linux-x86_64/config-host.h','qapi/qapi-builtin-types.h','qapi/qapi-commands-block.h','qapi/qapi-commands-block-core.h','qapi/qapi-commands-common.h','qapi/qapi-commands-crypto.h','qapi/qapi-commands-job.h','qapi/qapi-commands-machine.h','qapi/qapi-commands-machine-common.h','qapi/qapi-commands-misc.h','qapi/qapi-commands-run-state.h','qapi/qapi-commands-sockets.h','qapi/qapi-emit-events.h','qapi/qapi-types-audio.h','qapi/qapi-types-block.h','qapi/qapi-types-block-core.h','qapi/qapi-types-common.h','qapi/qapi-types-crypto.h','qapi/qapi-types-error.h','qapi/qapi-types-job.h','qapi/qapi-types-machine.h','qapi/qapi-types-machine-common.h','qapi/qapi-types-misc.h','qapi/qapi-types-net.h','qapi/qapi-types-run-state.h','qapi/qapi-types-sockets.h','qapi/qapi-types-ui.h',],copts=['-Wno-implicit-function-declaration','-mcx16',],defines=['_GNU_SOURCE','_FILE_OFFSET_BITS=64','_LARGEFILE_SOURCE',],includes=['.','host/include/x86_64','include','linux-headers','platform/linux-x86_64','qapi','subprojects/libvhost-user','trace',],visibility=['//visibility:public'],deps=['//external/qemu/google/compat/linux:compat','//external/qemu/subprojects/libvhost-user:vhost-user','//external/qemu/subprojects/libvhost-user:vhost-user-glib','@glib//:glib-static','@glib//:gmodule-static','@pixman//:pixman-1','@pixman//:pixman_simd','@zlib',],)",
+  "shims": [
+    {
+      "target": "generate_shared_QAPI_source_files",
+      "shims": {
+        "cmd": "$(location :qapi-gen) -o $(RULEDIR)/qapi -b $(location qapi/qapi-schema.json)",
+        "cmd_bat": "$(location :qapi-gen) -o $(RULEDIR)/qapi -b $(location qapi/qapi-schema.json)"
+      }
     },
-    // The actual set of targets you wish to generate bazel targets for.
-    // These are the targets that will be exported.
-    "export": [
-        "qemu-system-x86_64",
-        "qemu-system-aarch64",
-        "qemu-system-riscv64",
-        "qemu-img",
-        // Note that our modules need to be explicitly exported, as they
-        // are not actual dependencies
-        "accel-tcg-x86_64",
-        "audio-pa",
-        "hw-display-virtio-gpu",
-        "hw-display-virtio-vga",
-        "hw-display-virtio-vga-gl",
-        "hw-display-virtio-gpu-pci"
+    {
+      "target": "generate_config-poison_h",
+      "shims": {
+        // TODO: It would be nice if we could generalize this in the generator
+        "cmd": "$(location :make-config-poison) $(SRCS) > $(location config-poison.h)",
+        "cmd_bat": "$(location :make-config-poison) $(SRCS) > $(location config-poison.h)"
+      }
+    },
+    {
+      "target": "keymap-gen",
+      "shims": {
+        "srcs": [
+          "subprojects/keycodemapdb/tools/keymap-gen.py"
+        ]
+      }
+    },
+    {
+      "target": "qemu-system-aarch64",
+      "shims": {
+        "_bzl_type": "cc_interface_binary",
+        "-deps": [
+          "libmodinfo-aarch64-softmmu_c"
+        ],
+        "+deps": [
+          "libqemu-aarch64-softmmu",
+          "//hardware/generic/goldfish/emulator/plugin:registration"
+        ],
+        "visibility": [
+          "//visibility:public"
+        ]
+      }
+    },
+    {
+      "target": "qemu-system-riscv64",
+      "shims": {
+        "_bzl_type": "cc_interface_binary",
+        "-deps": [
+          "libmodinfo-riscv64-softmmu_c"
+        ],
+        "+deps": [
+          "libqemu-riscv64-softmmu",
+          "//hardware/generic/goldfish/emulator/plugin:registration"
+        ],
+        "visibility": [
+          "//visibility:public"
+        ]
+      }
+    },
+    {
+      "target": "qemu-system-x86_64",
+      "shims": {
+        "_bzl_type": "cc_interface_binary",
+        "-deps": [
+          "libmodinfo-x86_64-softmmu_c"
+        ],
+        "+deps": [
+          "libqemu-x86_64-softmmu",
+          "//hardware/generic/goldfish/emulator/plugin:registration"
+        ],
+        "visibility": [
+          "//visibility:public"
+        ]
+      }
+    },
+    {
+      "target": "qemu-img",
+      "shims": {
+        "+deps": [
+          "libqemuutilstubs"
+        ]
+      }
+    },
+    {
+      "target": ".*",
+      "shims": {
+        "restrict_to": "cc_shared_library",
+        // xs4all!
+        "visibility": [
+          "//visibility:public"
+        ]
+      }
+    },
+    {
+      "target": ".*",
+      "shims": {
+        "restrict_to": "cc_library|cc_binary",
+        // xs4all!
+        "visibility": [
+          "//visibility:public"
+        ],
+        "-srcs": [
+          "google.*",
+          // TODO: Another qemu stub linker order issue. This should likely be
+          // addressed in the meson build.
+          "stubs/blk-exp-close-all.c",
+          "stubs/blk-commit-all.c",
+          "stubs/monitor-core.c",
+          "stubs/error-printf.c",
+          "stubs/is-daemonized.c",
+          "stubs/graph-lock.c"
+        ],
+        // Remove our compat libs if present
+        "-hdrs": [
+          "google.*",
+          ".*subprojects.*"
+        ],
+        // Our sysroot is too old so we need to introduce these
+        "+copts": [
+          // Enables clang to generate CMPXCHG16B instructions.
+          "-mcx16",
+          // We do not have memfd_create
+          "-Wno-implicit-function-declaration"
+        ],
+        "-deps": [
+          // We are bringing our own plugins, so do not
+          // take a dependency on those that come from qemu.
+          "libmodinfo-.*",
+          // Not yet clear how to handle object includes,
+          // so let's strip them.
+          "libmodule-common",
+          "libcommon_.*"
+        ],
+        // We need a compat layer for our ye olde sysroot.
+        "+deps": [
+          "//external/qemu/google/compat/linux:compat"
+        ]
+      }
+    },
+    {
+      "target": "libqemu-.*-softmmu|libqemu-.*-softmmu_common|libcommon",
+      // TODO: Figure out why we are not setting
+      // this to alwayslink..
+      "shims": {
+        "restrict_to": "cc_library",
+        "alwayslink": 1
+      }
+    }
+    // Sample shim that show cases how you can
+    // add and remove dependencies to all cc_ like
+    // rules.
+    // {
+    //     "target" : ".*",
+    //     "shims" :{
+    //    Use restrict_to to limit this shim to rules
+    //    of the given type. For example cc_library, cc_binary
+    //         "restrict_to" : "cc_.*",
+    //    Add the following items to the "deps" set
+    //         "+deps": ["to_be_added"],
+    //    remove these items from the "deps" set
+    //         "-deps": ["block"]
+    //    replace the "deps" completely:
+    //        "deps": ["a", "b"]
+    //     }
+    // }
+  ],
+  // These are the bazel mappings we are going to use for
+  // external dependencies. For every pkg config dependency
+  // you will need to provide a bazel target
+  "external_deps": {
+    "glib-2.0": [
+      "@glib//:glib-static"
     ],
-    "exclude": [
-        "vhost-user",
-        "vhost-user-glib",
-        // We will provide our own module info that will be build into qemu
-        // This will allow us to provide our own custom drivers.
-        "modinfo-*"
-    ]
+    "gmodule-export-2.0": [
+      "@glib//:gmodule-static"
+    ],
+    "zlib": [
+      "@zlib//:zlib"
+    ],
+    "pixman-1": [
+      "@pixman//:pixman-1",
+      "@pixman//:pixman_simd"
+    ],
+    "libfdt": [
+      "//external/dtc:libfdt"
+    ],
+    "libpulse": [
+      "@pulse//:libpulse"
+    ],
+    "libvhost-user": [
+      "//external/qemu/subprojects/libvhost-user:vhost-user"
+    ],
+    "libvhost-user-glib": [
+      "//external/qemu/subprojects/libvhost-user:vhost-user-glib"
+    ],
+    "rutabaga_gfx_ffi": []
+  },
+  // The actual set of targets you wish to generate bazel targets for.
+  // These are the targets that will be exported.
+  "export": [
+    "qemu-system-x86_64",
+    "qemu-system-aarch64",
+    "qemu-system-riscv64",
+    "qemu-img",
+    // Note that our modules need to be explicitly exported, as they
+    // are not actual dependencies
+    "accel-tcg-x86_64",
+    "audio-pa",
+    "hw-display-virtio-gpu",
+    "hw-display-virtio-vga",
+    "hw-display-virtio-vga-gl",
+    "hw-display-virtio-gpu-pci"
+  ],
+  "exclude": [
+    "vhost-user",
+    "vhost-user-glib",
+    // We will provide our own module info that will be build into qemu
+    // This will allow us to provide our own custom drivers.
+    "modinfo-*"
+  ]
 }

@@ -219,7 +219,7 @@ class BazelValue:
         fst = []
         snd = []
         for share in shared:
-            in_fst  = True
+            in_fst = True
             for k, v in self.select.items():
                 source_idx = v.indexOf(share)
                 if individual[k]:
@@ -230,8 +230,6 @@ class BazelValue:
                 fst.append(share)
             else:
                 snd.append(share)
-
-
 
         return fst, individual, snd
 
@@ -260,7 +258,9 @@ class BazelValue:
                         v = self._to_str(fst)
             else:
                 # Set of common values (could be empty)
-                v = self._to_str(fst) + " + "
+                v = ""
+                if fst:
+                    v += self._to_str(fst) + " + "
                 v += "select({"
                 for plat, value in individual.items():
                     if value:
@@ -275,7 +275,6 @@ class BazelValue:
                 v = self._to_str(fst + snd)
             else:
                 v = self._to_str(fst)
-
 
         return v
 
@@ -321,9 +320,13 @@ class BazelRule:
             return self.name < other.name
         return self.sort < other.sort
 
-    def merge(self, other):
-        for v in self.params.values():
-            v.merge_count += 1
+    def merge(self, other, unique_keys):
+        for k, v in self.params.items():
+
+            if k in unique_keys:
+                self.params[k].merge_count = -(2**31)  # Should be enough.
+            else:
+                v.merge_count += 1
 
         for k, v in other.params.items():
             if k not in self.params:
@@ -349,10 +352,11 @@ class BazelRule:
 
 class BazelRuleLibrary:
 
-    def __init__(self):
+    def __init__(self, unique: T.Set[str]):
         self.library: T.Dict[str, BazelRule] = {}
         self.load_cmds = set()
         self.configurations: T.Dict[str, T.Set[str]] = {}
+        self.unique_keys = unique
 
     def register(self, rule: T.Union[BazelRule | LoadCmd]):
         if isinstance(rule, LoadCmd):
@@ -366,7 +370,7 @@ class BazelRuleLibrary:
 
     def merge_rule(self, rule: BazelRule):
         existing = self.library[rule.name]
-        existing.merge(rule)
+        existing.merge(rule, self.unique_keys)
 
     def get(self, name: str) -> BazelRule:
         return self.library[name]
@@ -429,6 +433,10 @@ class BuildFileFunctions:
         rule = BazelRule(self.configuration, "cc_shared_library", kwargs)
         self.library.register(rule)
 
+    def cc_interface_binary(self, **kwargs):
+        rule = BazelRule(self.configuration, "cc_interface_binary", kwargs)
+        self.library.register(rule)
+
     def genrule(self, **kwargs):
         rule = BazelRule(self.configuration, "genrule", kwargs)
         self.library.register(rule)
@@ -483,9 +491,14 @@ def main():
         metavar=("Platform", "Bazel build file"),
         help="Platform and path to bazel file",
     )
+    parser.add_argument(
+        "--unique",
+        action="append",
+        help="Keys that should be treated as unique. For example: win_def_file",
+    )
     args = parser.parse_args()
 
-    library = BazelRuleLibrary()
+    library = BazelRuleLibrary(args.unique)
     for file_path, configuration in args.buildfile:
         transform_bazel(file_path, configuration, library)
 

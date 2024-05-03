@@ -1,0 +1,4 @@
+LIBRARY qemu-system-riscv64.exe
+EXPORTS
+    ; Intententionally left emtpy
+    ; we do not yet support modules for this architecture b/338597919

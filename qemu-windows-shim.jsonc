@@ -27,19 +27,54 @@
       }
     },
     {
-      "target": "qemu-system-riscv64",
+      "target": "qemu-system-aarch64",
       "shims": {
+        "_bzl_type": "cc_interface_binary",
+        "-deps": [
+          "libmodinfo-aarch64-softmmu_c"
+        ],
         "+deps": [
-          "libqemu-riscv64-softmmu"
-        ]
+          "libqemu-aarch64-softmmu",
+          "//hardware/generic/goldfish/emulator/plugin:registration"
+        ],
+        "visibility": [
+          "//visibility:public"
+        ],
+        "win_def_file": "platform/windows-amd64/qemu-system-aarch64.def"
       }
     },
     {
-      "target": "qemu-system-aarch64",
+      "target": "qemu-system-riscv64",
       "shims": {
+        "_bzl_type": "cc_interface_binary",
+        "-deps": [
+          "libmodinfo-riscv64-softmmu_c"
+        ],
         "+deps": [
-          "libqemu-aarch64-softmmu"
-        ]
+          "libqemu-riscv64-softmmu",
+          "//hardware/generic/goldfish/emulator/plugin:registration"
+        ],
+        "visibility": [
+          "//visibility:public"
+        ],
+        "win_def_file": "platform/windows-amd64/qemu-system-riscv64.def"
+      }
+    },
+    {
+      "target": "qemu-system-x86_64",
+      "shims": {
+        "_bzl_type": "cc_interface_binary",
+        "-deps": [
+          "libmodinfo-x86_64-softmmu_c"
+        ],
+        "+deps": [
+          "libqemu-x86_64-softmmu",
+          "//hardware/generic/goldfish/emulator/plugin:registration"
+        ],
+        "visibility": [
+          "//visibility:public"
+        ],
+        "win_def_file": "platform/windows-amd64/qemu-system-x86_64.def"
       }
     },
     {
@@ -47,14 +82,6 @@
       "shims": {
         "+deps": [
           "libqemuutilstubs"
-        ]
-      }
-    },
-    {
-      "target": "qemu-system-x86_64",
-      "shims": {
-        "+deps": [
-          "libqemu-x86_64-softmmu"
         ]
       }
     },
@@ -112,6 +139,7 @@
         // Not yet clear how to handle object includes,
         // so let's strip them.
         "-deps": [
+          "libmodinfo-.*",
           "libcommon_.*",
           "libmodule-common"
         ],
@@ -141,6 +169,14 @@
           "stubs/blk-commit-all.c",
           "stubs/monitor-core.c",
           "stubs/error-printf.c"
+        ]
+      }
+    },
+    {
+      "target": "accel-tcg-x86_64|hw-display-virtio-gpu-pci|hw-display-virtio-gpu|hw-display-virtio-vga-gl|hw-display-virtio-vga",
+      "shims": {
+        "+deps": [
+          ":qemu-system-x86_64.if"
         ]
       }
     }
@@ -200,8 +236,13 @@
     "qemu-system-x86_64",
     "qemu-system-aarch64",
     "qemu-system-riscv64",
-    "qemu-img"
-    // Sadly we do not have any modules yet.
+    "qemu-img",
+    // Here we have the windows modules:
+    "accel-tcg-x86_64",
+    "hw-display-virtio-gpu-pci",
+    "hw-display-virtio-gpu",
+    "hw-display-virtio-vga-gl",
+    "hw-display-virtio-vga"
   ],
   "exclude": [
     "vhost-user",

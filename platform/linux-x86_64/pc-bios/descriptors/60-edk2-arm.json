@@ -6,11 +6,11 @@
     "mapping": {
         "device": "flash",
         "executable": {
-            "filename": "/buildbot/tmp/tmpdl258krh/release/share/qemu/edk2-arm-code.fd",
+            "filename": "/buildbot/tmp/tmprvd_k_8m/release/share/qemu/edk2-arm-code.fd",
             "format": "raw"
         },
         "nvram-template": {
-            "filename": "/buildbot/tmp/tmpdl258krh/release/share/qemu/edk2-arm-vars.fd",
+            "filename": "/buildbot/tmp/tmprvd_k_8m/release/share/qemu/edk2-arm-vars.fd",
             "format": "raw"
         }
     },
