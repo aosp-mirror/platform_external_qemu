@@ -496,14 +496,19 @@ def main():
         action="append",
         help="Keys that should be treated as unique. For example: win_def_file",
     )
+    parser.add_argument("-o", "--output", help="Output file, or stdout if not present")
     args = parser.parse_args()
 
     library = BazelRuleLibrary(args.unique)
     for file_path, configuration in args.buildfile:
         transform_bazel(file_path, configuration, library)
 
-    stream = sys.stdout
-    library.serialize(stream)
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as stream:
+            library.serialize(stream)
+    else:
+        stream = sys.stdout
+        library.serialize(stream)
 
 
 if __name__ == "__main__":
