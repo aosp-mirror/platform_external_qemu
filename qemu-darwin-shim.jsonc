@@ -107,7 +107,6 @@
           "//visibility:public"
         ],
         "-srcs": [
-          "google.*",
           // TODO: Another qemu stub linker order issue. This should likely be
           // addressed in the meson build.
           "stubs/blk-exp-close-all.c",
@@ -117,7 +116,6 @@
         ],
         // Remove our compat libs if present
         "-hdrs": [
-          "google.*",
           ".*subprojects.*"
         ],
         "+copts": [
