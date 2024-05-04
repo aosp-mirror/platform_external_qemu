@@ -59,7 +59,7 @@
 
 #undef CONFIG_BDRV_WHITELIST_TOOLS
 
-#define CONFIG_BINDIR "/buildbot/tmp/tmprvd_k_8m/release/bin"
+#define CONFIG_BINDIR "rel_dir/bin"
 
 #undef CONFIG_BLKIO
 
@@ -251,7 +251,7 @@
 
 #define CONFIG_PREADV
 
-#define CONFIG_PREFIX "/buildbot/tmp/tmprvd_k_8m/release"
+#define CONFIG_PREFIX "rel_dir"
 
 #define CONFIG_PTHREAD_AFFINITY_NP
 
@@ -265,23 +265,23 @@
 
 #undef CONFIG_PTHREAD_SET_NAME_NP
 
-#define CONFIG_QEMU_CONFDIR "/buildbot/tmp/tmprvd_k_8m/release/etc/qemu"
+#define CONFIG_QEMU_CONFDIR "rel_dir/etc/qemu"
 
-#define CONFIG_QEMU_DATADIR "/buildbot/tmp/tmprvd_k_8m/release/share/qemu"
+#define CONFIG_QEMU_DATADIR "rel_dir/share/qemu"
 
-#define CONFIG_QEMU_DESKTOPDIR "/buildbot/tmp/tmprvd_k_8m/release/share/applications"
+#define CONFIG_QEMU_DESKTOPDIR "rel_dir/share/applications"
 
-#define CONFIG_QEMU_FIRMWAREPATH "/buildbot/tmp/tmprvd_k_8m/release/share/qemu-firmware", 
+#define CONFIG_QEMU_FIRMWAREPATH "rel_dir/share/qemu-firmware", 
 
-#define CONFIG_QEMU_HELPERDIR "/buildbot/tmp/tmprvd_k_8m/release/libexec"
+#define CONFIG_QEMU_HELPERDIR "rel_dir/libexec"
 
-#define CONFIG_QEMU_ICONDIR "/buildbot/tmp/tmprvd_k_8m/release/share/icons"
+#define CONFIG_QEMU_ICONDIR "rel_dir/share/icons"
 
-#define CONFIG_QEMU_LOCALEDIR "/buildbot/tmp/tmprvd_k_8m/release/share/locale"
+#define CONFIG_QEMU_LOCALEDIR "rel_dir/share/locale"
 
-#define CONFIG_QEMU_LOCALSTATEDIR "/buildbot/tmp/tmprvd_k_8m/release/var"
+#define CONFIG_QEMU_LOCALSTATEDIR "rel_dir/var"
 
-#define CONFIG_QEMU_MODDIR "/buildbot/tmp/tmprvd_k_8m/release/lib/x86_64-linux-gnu/qemu"
+#define CONFIG_QEMU_MODDIR "rel_dir/lib/x86_64-linux-gnu/qemu"
 
 #undef CONFIG_QEMU_PRIVATE_XTS
 
@@ -339,7 +339,7 @@
 
 #define CONFIG_SYNC_FILE_RANGE
 
-#define CONFIG_SYSCONFDIR "/buildbot/tmp/tmprvd_k_8m/release/etc"
+#define CONFIG_SYSCONFDIR "rel_dir/etc"
 
 #define CONFIG_SYSMACROS
 

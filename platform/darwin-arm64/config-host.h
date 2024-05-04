@@ -59,7 +59,7 @@
 
 #undef CONFIG_BDRV_WHITELIST_TOOLS
 
-#define CONFIG_BINDIR "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/bin"
+#define CONFIG_BINDIR "rel_dir/bin"
 
 #undef CONFIG_BLKIO
 
@@ -251,7 +251,7 @@
 
 #define CONFIG_PREADV
 
-#define CONFIG_PREFIX "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release"
+#define CONFIG_PREFIX "rel_dir"
 
 #undef CONFIG_PTHREAD_AFFINITY_NP
 
@@ -265,23 +265,23 @@
 
 #undef CONFIG_PTHREAD_SET_NAME_NP
 
-#define CONFIG_QEMU_CONFDIR "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/etc/qemu"
+#define CONFIG_QEMU_CONFDIR "rel_dir/etc/qemu"
 
-#define CONFIG_QEMU_DATADIR "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/share/qemu"
+#define CONFIG_QEMU_DATADIR "rel_dir/share/qemu"
 
-#define CONFIG_QEMU_DESKTOPDIR "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/share/applications"
+#define CONFIG_QEMU_DESKTOPDIR "rel_dir/share/applications"
 
-#define CONFIG_QEMU_FIRMWAREPATH "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/share/qemu-firmware", 
+#define CONFIG_QEMU_FIRMWAREPATH "rel_dir/share/qemu-firmware", 
 
-#define CONFIG_QEMU_HELPERDIR "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/libexec"
+#define CONFIG_QEMU_HELPERDIR "rel_dir/libexec"
 
-#define CONFIG_QEMU_ICONDIR "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/share/icons"
+#define CONFIG_QEMU_ICONDIR "rel_dir/share/icons"
 
-#define CONFIG_QEMU_LOCALEDIR "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/share/locale"
+#define CONFIG_QEMU_LOCALEDIR "rel_dir/share/locale"
 
-#define CONFIG_QEMU_LOCALSTATEDIR "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/var"
+#define CONFIG_QEMU_LOCALSTATEDIR "rel_dir/var"
 
-#define CONFIG_QEMU_MODDIR "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/lib/qemu"
+#define CONFIG_QEMU_MODDIR "rel_dir/lib/qemu"
 
 #undef CONFIG_QEMU_PRIVATE_XTS
 
@@ -339,7 +339,7 @@
 
 #undef CONFIG_SYNC_FILE_RANGE
 
-#define CONFIG_SYSCONFDIR "/Volumes/Android/buildbot/tmp/tmpklseyzlf/release/etc"
+#define CONFIG_SYSCONFDIR "rel_dir/etc"
 
 #undef CONFIG_SYSMACROS
 
