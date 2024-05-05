@@ -479,13 +479,8 @@ bool emuglConfig_init(EmuglConfig* config,
         bitness = System::get()->getProgramBitness();
     }
 
-#ifdef __APPLE__
-    if (!strcmp("host", gpu_mode)) {
-        use_host_vulkan = true;
-    }
-#endif
-
     config->bitness = bitness;
+    config->use_host_vulkan = use_host_vulkan;
     resetBackendList(bitness);
 
     // For GPU mode in software rendering:
@@ -589,9 +584,6 @@ bool emuglConfig_init(EmuglConfig* config,
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
                     gpu_mode = "host";
-#ifdef __APPLE__
-                    use_host_vulkan = true;
-#endif
                     break;
                 default:
                     gpu_mode = "host";
@@ -601,9 +593,6 @@ bool emuglConfig_init(EmuglConfig* config,
               __func__, gpu_mode, uiPreferredBackend);
         }
     }
-
-    config->use_host_vulkan = use_host_vulkan;
-
     // b/328275986: Turn off ANGLE because it breaks.
     if (!strcmp("angle", gpu_mode) || !strcmp("angle_indirect", gpu_mode)
         || !strcmp("angle9", gpu_mode) || !strcmp("angle9_indirect", gpu_mode)) {
