@@ -112,7 +112,6 @@
         "restrict_to": "cc_library|cc_binary",
         // Remove our compat libs if present
         "-hdrs": [
-          "google.*",
           ".*subprojects.*"
         ],
         "+copts": [
@@ -132,9 +131,6 @@
         // xs4all!
         "visibility": [
           "//visibility:public"
-        ],
-        "-srcs": [
-          "google.*"
         ],
         // Not yet clear how to handle object includes,
         // so let's strip them.
