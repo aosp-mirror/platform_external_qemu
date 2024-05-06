@@ -59,7 +59,7 @@
 
 #undef CONFIG_BDRV_WHITELIST_TOOLS
 
-#define CONFIG_BINDIR "C:/buildbot/tmp/tmpc11oqnlm/release/bin"
+#define CONFIG_BINDIR "rel_dir/bin"
 
 #undef CONFIG_BLKIO
 
@@ -251,7 +251,7 @@
 
 #undef CONFIG_PREADV
 
-#define CONFIG_PREFIX "C:/buildbot/tmp/tmpc11oqnlm/release"
+#define CONFIG_PREFIX "rel_dir"
 
 #undef CONFIG_PTHREAD_AFFINITY_NP
 
@@ -265,23 +265,23 @@
 
 #undef CONFIG_PTHREAD_SET_NAME_NP
 
-#define CONFIG_QEMU_CONFDIR "C:/buildbot/tmp/tmpc11oqnlm/release/etc/qemu"
+#define CONFIG_QEMU_CONFDIR "rel_dir/etc/qemu"
 
-#define CONFIG_QEMU_DATADIR "C:/buildbot/tmp/tmpc11oqnlm/release/share/qemu"
+#define CONFIG_QEMU_DATADIR "rel_dir/share/qemu"
 
-#define CONFIG_QEMU_DESKTOPDIR "C:/buildbot/tmp/tmpc11oqnlm/release/share/applications"
+#define CONFIG_QEMU_DESKTOPDIR "rel_dir/share/applications"
 
-#define CONFIG_QEMU_FIRMWAREPATH "C:/buildbot/tmp/tmpc11oqnlm/release/share/qemu-firmware", 
+#define CONFIG_QEMU_FIRMWAREPATH "rel_dir/share/qemu-firmware", 
 
-#define CONFIG_QEMU_HELPERDIR "C:/buildbot/tmp/tmpc11oqnlm/release/libexec"
+#define CONFIG_QEMU_HELPERDIR "rel_dir/libexec"
 
-#define CONFIG_QEMU_ICONDIR "C:/buildbot/tmp/tmpc11oqnlm/release/share/icons"
+#define CONFIG_QEMU_ICONDIR "rel_dir/share/icons"
 
-#define CONFIG_QEMU_LOCALEDIR "C:/buildbot/tmp/tmpc11oqnlm/release/share/locale"
+#define CONFIG_QEMU_LOCALEDIR "rel_dir/share/locale"
 
-#define CONFIG_QEMU_LOCALSTATEDIR "C:/buildbot/tmp/tmpc11oqnlm/release/var"
+#define CONFIG_QEMU_LOCALSTATEDIR "rel_dir/var"
 
-#define CONFIG_QEMU_MODDIR "C:/buildbot/tmp/tmpc11oqnlm/release/lib/qemu"
+#define CONFIG_QEMU_MODDIR "rel_dir/lib/qemu"
 
 #undef CONFIG_QEMU_PRIVATE_XTS
 
@@ -339,7 +339,7 @@
 
 #undef CONFIG_SYNC_FILE_RANGE
 
-#define CONFIG_SYSCONFDIR "C:/buildbot/tmp/tmpc11oqnlm/release/etc"
+#define CONFIG_SYSCONFDIR "rel_dir/etc"
 
 #undef CONFIG_SYSMACROS
 
