@@ -102,7 +102,7 @@ class LinuxBuilder(QemuBuilder):
             "-Drbd=disabled",
             "-Drdma=disabled",
             "-Dreplication=disabled",
-            "-Drutabaga_gfx=disabled",
+            "-Drutabaga_gfx=enabled",
             "-Dsdl=disabled",
             "-Dsdl_image=disabled",
             "-Dseccomp=disabled",

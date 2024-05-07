@@ -134,7 +134,7 @@ class DarwinBuilder(QemuBuilder):
             "-Drbd=disabled",
             "-Drdma=disabled",
             "-Dreplication=disabled",
-            "-Drutabaga_gfx=disabled",
+            "-Drutabaga_gfx=enabled",
             "-Dsdl_image=disabled",
             "-Dsdl=disabled",
             "-Dseccomp=disabled",
@@ -212,16 +212,16 @@ class DarwinBuilder(QemuBuilder):
         ]
 
         return [
-            # BazelLib(
-            #     "//hardware/google/gfxstream/host:gfxstream_backend",
-            #     "0.1.2",
-            #     {},
-            # ),
-            # CargoLib(
-            #     "/external/crosvm/rutabaga_gfx/ffi:rutabaga_gfx_ffi",
-            #     "0.1.2",
-            #     {"archive": "rutabaga_gfx_ffi"},
-            # ),  # Must be after libgxstream!
+            BazelLib(
+                "//hardware/google/gfxstream/host:gfxstream_backend",
+                "0.1.2",
+                {},
+            ),
+            CargoLib(
+                "/external/crosvm/rutabaga_gfx/ffi:rutabaga_gfx_ffi",
+                "0.1.2",
+                {"archive": "rutabaga_gfx_ffi"},
+            ),  # Must be after libgxstream!
             BazelLib("//external/dtc:libfdt", "1.6.0", {}),
             BazelLib(
                 "@glib//:gmodule-static",
