@@ -495,6 +495,9 @@ void ExtendedWindow::show() {
 
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     show();
+    if (pane == PANE_IDX_LOCATION) {
+        mExtendedUi->location_page->doWebInit();
+    }
     adjustTabs(pane);
 }
 

@@ -39,7 +39,7 @@ void QtLogger::write(const char* fmt, ...) {
     mbstowcs(wfmt.data(), fmt, wfmt.size());
     va_list ap;
     va_start(ap, fmt);
-    vswprintf(buf, sizeof(buf) - 1, wfmt.data(), ap);
+    vswprintf(buf, sizeof(buf)/sizeof(wchar_t), wfmt.data(), ap);
     va_end(ap);
 
     wcstombs(cbuf, buf, std::size(cbuf));

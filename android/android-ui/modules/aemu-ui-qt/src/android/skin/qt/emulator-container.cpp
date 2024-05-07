@@ -272,6 +272,14 @@ void EmulatorContainer::closeEvent(QCloseEvent* event) {
     slot_hideModalOverlay();
     slot_hideVirtualSceneInfoDialog();
     mEmulatorWindow->closeEvent(event);
+    // In embedded mode, sometimes QCoreApplication::quit() doesn't get called,
+    // which means the Qt main loop never quits. So let's explicitly call quit()
+    // here prevent that situation from occurring.
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window) {
+        qApp->quit();
+    }
 }
 
 void EmulatorContainer::focusInEvent(QFocusEvent* event) {
