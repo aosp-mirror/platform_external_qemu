@@ -41,7 +41,7 @@ class QemuBuilder:
 
     TOOLCHAIN_DIR = "toolchain"
 
-    def __init__(self, aosp, dest, ccache, generator) -> None:
+    def __init__(self, aosp, dest, toolchain_dir, ccache, generator) -> None:
         """Initialize the QemuBuilder instance.
 
         Args:
@@ -50,11 +50,10 @@ class QemuBuilder:
         """
         self.aosp: Path = Path(aosp).absolute()
         self.dest: Path = Path(dest).absolute()
+        self.toolchain: Path = Path(toolchain_dir).absolute()
         self.dest.mkdir(parents=True, exist_ok=True)
         self.bazel: Bazel = Bazel(self.aosp, self.dest)
-        self.cmake: CMake = CMake(
-            self.aosp, self.dest / QemuBuilder.TOOLCHAIN_DIR, self.dest
-        )
+        self.cmake: CMake = CMake(self.aosp, self.toolchain, self.dest)
         CMakeLib.builder = self.cmake
         BazelLib.builder = self.bazel
 
@@ -82,7 +81,7 @@ class QemuBuilder:
         for package in self.packages():
             package.generate_pkg_config(
                 self.dest,
-                self.dest / QemuBuilder.TOOLCHAIN_DIR / ToolchainGenerator.PKGCFG_DIR,
+                self.toolchain / ToolchainGenerator.PKGCFG_DIR,
             )
 
         # Write the config-host.mak file.
@@ -93,13 +92,13 @@ class QemuBuilder:
 
         # Invoke Meson setup with the proper configuration.
         run(
-            [self.dest / QemuBuilder.TOOLCHAIN_DIR / "meson"]
+            [self.toolchain / "meson"]
             + ["setup", self.dest]
             + self.meson_config()
-            + [self.dest / QemuBuilder.TOOLCHAIN_DIR / "aosp-cl.ini"]
+            + [self.toolchain / "aosp-cl.ini"]
             + meson_flags,
             cwd=self.aosp / "external" / "qemu",
-            toolchain_path=self.dest / QemuBuilder.TOOLCHAIN_DIR,
+            toolchain_path=self.toolchain,
         )
 
     def packages(self):
