@@ -467,10 +467,6 @@ bool emuglConfig_init(EmuglConfig* config,
         return true;
     }
 
-    if (!strcmp("angle", gpu_mode)) {
-        gpu_mode = "angle_indirect";
-    }
-
     if (!strcmp("swiftshader", gpu_mode)) {
         gpu_mode = "swiftshader_indirect";
     }
@@ -483,13 +479,8 @@ bool emuglConfig_init(EmuglConfig* config,
         bitness = System::get()->getProgramBitness();
     }
 
-#ifdef __APPLE__
-    if (!strcmp("host", gpu_mode)) {
-        use_host_vulkan = true;
-    }
-#endif
-
     config->bitness = bitness;
+    config->use_host_vulkan = use_host_vulkan;
     resetBackendList(bitness);
 
     // For GPU mode in software rendering:
@@ -593,9 +584,6 @@ bool emuglConfig_init(EmuglConfig* config,
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
                     gpu_mode = "host";
-#ifdef __APPLE__
-                    use_host_vulkan = true;
-#endif
                     break;
                 default:
                     gpu_mode = "host";
@@ -605,7 +593,12 @@ bool emuglConfig_init(EmuglConfig* config,
               __func__, gpu_mode, uiPreferredBackend);
         }
     }
-    config->use_host_vulkan = use_host_vulkan;
+    // b/328275986: Turn off ANGLE because it breaks.
+    if (!strcmp("angle", gpu_mode) || !strcmp("angle_indirect", gpu_mode)
+        || !strcmp("angle9", gpu_mode) || !strcmp("angle9_indirect", gpu_mode)) {
+        gpu_mode = "swiftshader_indirect";
+    }
+
     const char* library_mode = gpu_mode;
     printf("library_mode %s gpu mode %s\n", library_mode, gpu_mode);
     if ((force_swiftshader_to_swangle && strstr(library_mode, "swiftshader"))
@@ -664,7 +657,9 @@ bool emuglConfig_init(EmuglConfig* config,
         emuglConfig_get_vulkan_hardware_gpu(&vkVendor, &vkMajor, &vkMinor,
                                             &vkPatch);
 #if defined(__linux__)
-        if (vkVendor && strncmp("AMD", vkVendor, 3) == 0) {
+        bool isAMD = (vkVendor && strncmp("AMD", vkVendor, 3) == 0);
+        bool isIntel = (vkVendor && strncmp("Intel", vkVendor, 5) == 0);
+        if (isAMD) {
             feature_set_if_not_overridden(
                     kFeature_VulkanAllocateDeviceMemoryOnly, true);
             if (fc::isEnabled(fc::VulkanAllocateDeviceMemoryOnly)) {
@@ -674,7 +669,7 @@ bool emuglConfig_init(EmuglConfig* config,
                       vkVendor);
             }
         }
-        if (vkVendor && strncmp("Intel", vkVendor, 5) == 0) {
+        if (isIntel || isAMD) {
             feature_set_if_not_overridden(kFeature_VulkanAllocateHostMemory,
                                           true);
             if (fc::isEnabled(fc::VulkanAllocateHostMemory)) {
