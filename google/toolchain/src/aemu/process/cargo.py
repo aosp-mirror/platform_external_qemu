@@ -96,7 +96,7 @@ class Cargo:
         """
         tgt_idx = cmake_target.index(":")
         label = cmake_target[tgt_idx + 1 :]
-        output = self.dist / "cargo" / label
+        output = self.toolchain.dest / "bld" / "cargo" / label
         output.mkdir(parents=True, exist_ok=True)
 
         # Note we can only build rutabaga at this time..

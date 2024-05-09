@@ -62,7 +62,7 @@ TARGET_ALIAS = {
 
 
 def get_toolchain_generator(
-    target: str, dest: Path, prefix: str, aosp: Path, ccache: Path
+    target: str, dest: Path, toolchain_dir: Path, prefix: str, aosp: Path, ccache: Path
 ) -> ToolchainGenerator:
     # TODO: __host__To__target__ Toolchain generator.
     # Note that if you wish to add cross compilation support
@@ -83,11 +83,11 @@ def get_toolchain_generator(
     toolchain_klazz = generator_map[TARGET_ALIAS[target]]
     # Initialize the toolchain generator with the specified destination and an empty suffix.
     # This generator will be used to manage toolchain-related configurations.
-    return toolchain_klazz(Path(aosp), Path(dest), prefix)
+    return toolchain_klazz(Path(aosp), Path(toolchain_dir), prefix)
 
 
 def gen_toolchain(
-    target: str, dest: Path, prefix: str, aosp: Path, ccache: Path
+    target: str, dest: Path, toolchain_dir: Path, prefix: str, aosp: Path, ccache: Path
 ) -> QemuBuilder:
     builder_map = {
         "windows-x64": WindowsBuilder,
@@ -100,15 +100,13 @@ def gen_toolchain(
 
     # Get the class that is capable of configuring the toolchain
     # from the current host targeting our target.
-    toolchain = get_toolchain_generator(
-        target, Path(dest) / QemuBuilder.TOOLCHAIN_DIR, "", aosp, ccache
-    )
+    toolchain = get_toolchain_generator(target, dest, toolchain_dir, "", aosp, ccache)
 
     if target not in builder_map:
         logging.info("Mapping %s -> %s", target, TARGET_ALIAS[target])
         target = TARGET_ALIAS[target]
 
-    return builder_map[target](Path(aosp), Path(dest), ccache, toolchain)
+    return builder_map[target](Path(aosp), Path(dest), Path(toolchain_dir), ccache, toolchain)
 
 
 def mkdirs(out: Path, force: bool):
@@ -126,16 +124,34 @@ def mkdirs(out: Path, force: bool):
 def setup_command(args):
     mkdirs(Path(args.out).absolute(), args.force)
     builder = gen_toolchain(
-        args.target, Path(args.out), args.prefix, args.aosp, args.ccache
+        args.target,
+        get_build_dir(args.out),
+        get_toolchain_dir(args.out),
+        args.prefix,
+        args.aosp,
+        args.ccache,
     )
     builder.configure_meson(args.meson)
     return builder
 
 
+def get_build_dir(base_dir):
+    return Path(base_dir) / "build"
+
+
+def get_toolchain_dir(base_dir):
+    return Path(base_dir) / "toolchain"
+
+
 def toolchain_command(args):
     mkdirs(Path(args.out).absolute(), args.force)
     toolchain = get_toolchain_generator(
-        args.target, Path(args.out), args.prefix, args.aosp, args.ccache
+        args.target,
+        get_build_dir(args.out),
+        get_toolchain_dir(args.out),
+        args.prefix,
+        args.aosp,
+        args.ccache,
     )
     toolchain.gen_toolchain()
 
@@ -147,13 +163,13 @@ def compile_command(args):
     """
     run(
         [
-            Path(args.out) / QemuBuilder.TOOLCHAIN_DIR / "meson",
+            get_toolchain_dir(args.out) / "meson",
             "compile",
             "-C",
-            args.out,
+            get_build_dir(args.out),
         ],
-        cwd=args.out,
-        toolchain_path=Path(args.out) / QemuBuilder.TOOLCHAIN_DIR,
+        cwd=get_build_dir(args.out),
+        toolchain_path=get_toolchain_dir(args.out),
     )
 
 
@@ -161,14 +177,14 @@ def test_command(args):
     """Run the QEMU tests by invoking Meson."""
     run(
         [
-            Path(args.out) / QemuBuilder.TOOLCHAIN_DIR / "meson",
+            get_toolchain_dir(args.out) / "meson",
             "test",
             "--print-errorlogs",
             "-C",
-            args.out,
+            get_build_dir(args.out),
         ],
-        cwd=args.out,
-        toolchain_path=Path(args.out) / QemuBuilder.TOOLCHAIN_DIR,
+        cwd=get_build_dir(args.out),
+        toolchain_path=get_toolchain_dir(args.out),
     )
 
 
@@ -176,20 +192,20 @@ def release_command(args):
     """Run the QEMU tests by invoking Meson."""
     run(
         [
-            Path(args.out) / QemuBuilder.TOOLCHAIN_DIR / "meson",
+            get_toolchain_dir(args.out) / "meson",
             "install",
             "-C",
-            args.out,
+            get_build_dir(args.out),
         ],
-        cwd=args.out,
-        toolchain_path=Path(args.out) / QemuBuilder.TOOLCHAIN_DIR,
+        cwd=get_build_dir(args.out),
+        toolchain_path=get_toolchain_dir(args.out),
     )
 
     logging.info("Creating %s", args.release)
     with zipfile.ZipFile(
         args.release, "w", zipfile.ZIP_DEFLATED, allowZip64=True
     ) as zipf:
-        search_dir = Path(args.out) / "release"
+        search_dir = get_build_dir(args.out) / "release"
         for fname in search_dir.glob("**/*"):
             arcname = fname.relative_to(search_dir)
             logging.info("Adding %s as %s", fname, arcname)
@@ -199,12 +215,19 @@ def release_command(args):
 def bazel_command(args):
     bazel_out = Path(args.out)
     bazel_out.mkdir(parents=True, exist_ok=True)
-    build_dir = args.build
+    build_dir = Path(args.build)
     temp_build = None
     if not build_dir:
         temp_build = tempfile.TemporaryDirectory()
         build_dir = Path(temp_build.__enter__()).resolve()
-        builder = gen_toolchain(args.target, build_dir, "", args.aosp, args.ccache)
+        builder = gen_toolchain(
+            args.target,
+            get_build_dir(build_dir),
+            get_toolchain_dir(build_dir),
+            "",
+            args.aosp,
+            args.ccache,
+        )
         builder.configure_meson([])
 
     with tempfile.TemporaryDirectory() as bazel_build_dir:
@@ -213,7 +236,12 @@ def bazel_command(args):
         build_dir = Path(build_dir).resolve()
         bazel_build_dir = Path(bazel_build_dir).resolve()
         builder = gen_toolchain(
-            args.target, bazel_build_dir, "", args.aosp, args.ccache
+            args.target,
+            get_build_dir(bazel_build_dir),
+            get_toolchain_dir(bazel_build_dir),
+            "",
+            args.aosp,
+            args.ccache,
         )
         shim_file = (
             Path(args.aosp)
@@ -227,21 +255,21 @@ def bazel_command(args):
             [
                 "--backend",
                 "bazel",
-                f"-Dbackend_shadow_build={Path(build_dir).as_posix()}",
+                f"-Dbackend_shadow_build={get_build_dir(build_dir).as_posix()}",
                 f"-Dbackend_shim={shim_file.as_posix()}",
             ]
         )
         sys_id = f"{platform.system().lower()}-{platform.machine().lower()}"
-        build_file = Path(bazel_build_dir) / "bazel" / "BUILD.bazel"
+        build_file = get_build_dir(bazel_build_dir) / "bazel" / "BUILD.bazel"
         build_file.rename(
-            Path(bazel_build_dir) / "bazel" / "platform" / f"BUILD.{sys_id}"
+            get_build_dir(bazel_build_dir) / "bazel" / "platform" / f"BUILD.{sys_id}"
         )
         zip_file = bazel_out / f"bazel-{sys_id}-{args.buildid}.zip"
         logging.info("Creating %s", zip_file)
         with zipfile.ZipFile(
             zip_file, "w", zipfile.ZIP_DEFLATED, allowZip64=True
         ) as zipf:
-            search_dir = Path(bazel_build_dir) / "bazel"
+            search_dir = get_build_dir(bazel_build_dir) / "bazel"
             for fname in search_dir.glob("**/*"):
                 arcname = fname.relative_to(search_dir)
                 logging.info("Adding %s as %s", fname, arcname)
@@ -249,7 +277,7 @@ def bazel_command(args):
 
         (bazel_out / "logs").mkdir(parents=True, exist_ok=True)
         shutil.copyfile(
-            Path(bazel_build_dir) / "meson-logs" / "meson-log.txt",
+            get_build_dir(bazel_build_dir) / "meson-logs" / "meson-log.txt",
             bazel_out / "logs" / "meson-log.txt",
         )
 
