@@ -1412,6 +1412,9 @@ int android_foldable_pixel_fold_second_display_id() {
 
 // We still need to discuss how to support foldable for secondary displays
 bool android_foldable_hinge_enabled() {
+    if (isResizableTransitionInProgress()) {
+        return false;
+    }
     return ((android_foldable_hinge_configured() ||
              android_foldable_folded_area_configured(0) ||
              android_foldable_rollable_configured()) &&
@@ -1532,7 +1535,7 @@ bool android_foldable_unfold() {
 }
 
 bool android_foldable_set_posture(int posture) {
-    if (!android_foldable_hinge_configured()) {
+    if (!android_foldable_hinge_enabled()) {
         return false;
     }
     struct FoldableState state;

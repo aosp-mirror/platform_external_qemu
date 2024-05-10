@@ -476,6 +476,9 @@ void ToolWindow::on_sleep_timer_done() {
         emugl::setShouldSkipDraw(false);
         android_redrawOpenglesWindow();
     }
+    if (isResizableTransitionInProgress()) {
+        setResizableTransitionInProgress(false);
+    }
     if (mSleepKeySent) {
         mEmulatorWindow->getAdbInterface()->
             enqueueCommand( {"shell", "input", "keyevent", "KEYCODE_WAKEUP"});
@@ -978,6 +981,9 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
     if (getResizableActiveConfigId() == newSize) {
         return;
     }
+    if (isResizableTransitionInProgress()) {
+        return;
+    }
     if (android_foldable_is_folded()) {
         startUnfoldTimer(newSize);
         return;
@@ -998,6 +1004,7 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
         on_new_posture_requested(POSTURE_OPENED);
     }
 
+    setResizableTransitionInProgress(true);
     emugl::setShouldSkipDraw(true);
     startSleepTimer();
     std::string updateMsg = "Updating device size\n";
