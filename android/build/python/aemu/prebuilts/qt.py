@@ -32,6 +32,7 @@ import platform
 
 AOSP_ROOT = Path(__file__).resolve().parents[7]
 HOST_OS = platform.system().lower()
+HOST_ARCH = platform.machine().lower()
 
 QT_VERSION = "6.5.3"
 QT_SUBMODULES = [
@@ -81,22 +82,25 @@ def checkDependencies():
     logging.info(">> Checking Ninja >= 1.7.2")
     deps_common.checkNinjaVersion(min_vers=(1, 7, 2))
 
-    # Need node.js version 12 or later for QtWebEngine
-    logging.info(">> Checking for node.js version >= 12")
-    deps_common.checkNodeJsVersion(min_vers=(12, 0))
+    if HOST_OS == "linux" and HOST_ARCH == "aarch64":
+        logging.info("Skipping QtWebEngine dependency check for linux-aarch64")
+    else:
+        # Need node.js version 12 or later for QtWebEngine
+        logging.info(">> Checking for node.js version >= 12")
+        deps_common.checkNodeJsVersion(min_vers=(12, 0))
 
-    # QtWebEngine needs python html5lib package
-    logging.info(">> Checking for python package html5lib")
-    deps_common.checkPythonPackage("html5lib")
+        # QtWebEngine needs python html5lib package
+        logging.info(">> Checking for python package html5lib")
+        deps_common.checkPythonPackage("html5lib")
 
-    # QtWebEngine requires GNUWin32 dependencies gperf, bison, flex
-    # TODO(joshuaduong): Locally I installed bison from https://gnuwin32.sourceforge.net/packages.html, but maybe we use chocolatey on the buildbot.
-    logging.info(">> Checking for gperf")
-    deps_common.checkGperfVersion()
-    logging.info(">> Checking for bison")
-    deps_common.checkBisonVersion()
-    logging.info(">> Checking for flex")
-    deps_common.checkFlexVersion()
+        # QtWebEngine requires GNUWin32 dependencies gperf, bison, flex
+        # TODO(joshuaduong): Locally I installed bison from https://gnuwin32.sourceforge.net/packages.html, but maybe we use chocolatey on the buildbot.
+        logging.info(">> Checking for gperf")
+        deps_common.checkGperfVersion()
+        logging.info(">> Checking for bison")
+        deps_common.checkBisonVersion()
+        logging.info(">> Checking for flex")
+        deps_common.checkFlexVersion()
 
     if HOST_OS == "windows":
         # - Visual Studio 2019 v16.11+
@@ -109,7 +113,7 @@ def checkDependencies():
     elif HOST_OS == "darwin":
         # MacOS sdk >= 13
         deps_mac.checkMacOsSDKVersion(min_vers=(12, 0))
-    elif HOST_OS == "linux":
+    elif HOST_OS == "linux" and HOST_ARCH != "aarch64":
         pkgconfig_libs = [
             ("xrender", [0, 9, 0]),
             ("xcb-render", [1, 11]),
@@ -240,25 +244,29 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
     if HOST_OS == "windows":
         conf_args += ["-platform", "win32-msvc"]
     elif HOST_OS == "linux":
-        if crosscompile_target == "linux_aarch64":
+        if HOST_ARCH == "aarch64" or crosscompile_target == "linux_aarch64":
             # Cross-compiling requires a host installation of Qt, so we must build Qt for
             # linux-x86_64 prior to cross-compiling to linux_aarch64.
-            if not qt_host_path:
-                logging.fatal(f"No Qt host path was provided for {crosscompile_target} cross-compilation.")
-            conf_args += ["-platform", "linux-aarch64-gnu-g++",
+            conf_args += ["-platform", "linux-aarch64-gnu-g++"]
+            if crosscompile_target:
+                if not qt_host_path:
+                    logging.fatal(f"No Qt host path was provided for {crosscompile_target} cross-compilation.")
+                # We have to disable a lot of things for cross-compilation without a full sysroot.
+                logging.warning("GUI support is not supported in cross-compilation.")
+                conf_args += [
                           "-device-option", "CROSS_COMPILE=aarch64-linux-gnu-",
                           "-no-glib", "-qt-host-path", qt_host_path, "-qt-pcre", "-qt-zlib",
                           "-qt-doubleconversion", "-qt-freetype", "-qt-harfbuzz",
                           "-no-feature-gssapi", "-no-feature-brotli", "-no-xcb", "-no-xkbcommon",
                           "-qt-webp", "-no-libudev", "-no-mtdev", "-no-linuxfb"]
-            os.environ["CC"] = "aarch64-linux-gnu-gcc"
-            os.environ["CXX"] = "aarch64-linux-gnu-g++"
+                conf_args += ["--", "-DCMAKE_SYSTEM_NAME=Linux", "-DCMAKE_SYSTEM_PROCESSOR=arm",
+                            f"-DQT_HOST_PATH={qt_host_path}", "-DCMAKE_LINKER_FLAGS=-Wl,--as-needed"]
+                os.environ["CC"] = "aarch64-linux-gnu-gcc"
+                os.environ["CXX"] = "aarch64-linux-gnu-g++"
             extra_cflags = "-march=armv8-a"
             extra_cxxflags = "-march=armv8-a"
             os.environ["CFLAGS"] = extra_cflags
             os.environ["CXXFLAGS"] = extra_cxxflags
-            conf_args += ["--", "-DCMAKE_SYSTEM_NAME=Linux", "-DCMAKE_SYSTEM_PROCESSOR=arm",
-                          f"-DQT_HOST_PATH={qt_host_path}", "-DCMAKE_LINKER_FLAGS=-Wl,--as-needed"]
         else:
             conf_args += ["-linker", "lld",
                           "-platform", "linux-clang-libc++",
@@ -281,7 +289,11 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
             toolchain_dir = Path(builddir) / "toolchain"
             os.makedirs(Path(builddir) / "toolchain")
 
-            clang_dir = deps_common.getClangDirectory()
+            if HOST_ARCH == "aarch64":
+                clang_dir = "/usr"
+            else:
+                clang_dir = deps_common.getClangDirectory()
+
             with open(toolchain_dir / "clang", 'x') as f:
                 f.write(f"#!/bin/sh\n{clang_dir}/bin/clang {extra_cflags} $@")
             os.chmod(toolchain_dir / "clang", 0o777)
@@ -298,8 +310,6 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
                 f.write(f"#!/bin/sh\n{clang_dir}/bin/lld $@")
             os.chmod(toolchain_dir / "lld", 0o777)
 
-            # Add path to libc++.so.1 as some binaries (syncqt) that require it are ran during the
-            # configure step.
             os.environ["LD_LIBRARY_PATH"] = str(deps_common.getClangDirectory() / "lib")
 
             addToSearchPath(str(toolchain_dir))
@@ -421,15 +431,19 @@ def mac_postInstall(installdir):
 def linux_postInstall(installdir, target, is_webengine):
     # Install prebuilt clang's libc++.so.1 and libc++abi.so.1 to lib/ as Qt's compiler
     # tools (moc, rcc, uic) depends on it.
-    clang_libs = ["libc++.so.1", "libc++abi.so.1"]
-    for lib in clang_libs:
-        src_lib = deps_common.getClangDirectory() / "lib" / lib
-        dst_lib = f"{installdir}/lib/{lib}"
-        logging.info(f"Copy {src_lib} ==> {dst_lib}")
-        shutil.copyfile(src_lib, dst_lib)
+    if HOST_ARCH == "aarch64":
+        sysroot_dir = Path("/lib/aarch64-linux-gnu")
+    else:
+        clang_libs = ["libc++.so.1", "libc++abi.so.1"]
+        clang_dir = deps_common.getClangDirectory()
+        sysroot_dir = Path("/lib/x86_64-linux-gnu")
+        for lib in clang_libs:
+            src_lib = clang_dir / "lib" / lib
+            dst_lib = f"{installdir}/lib/{lib}"
+            logging.info(f"Copy {src_lib} ==> {dst_lib}")
+            shutil.copyfile(src_lib, dst_lib)
 
     # We also need additional libraries from the sysroot for linux
-    sysroot_dir = Path("/lib/x86_64-linux-gnu")
     sysroot_libs = [
         "libpcre2-16.so.0",
         "libfreetype.so.6",
@@ -454,13 +468,33 @@ def linux_postInstall(installdir, target, is_webengine):
         "libfontconfig.so.1"]
     if target == "linux" and is_webengine:
         sysroot_libs += ["libjpeg.so.8"]
+    if target == "linux" and HOST_ARCH == "aarch64":
+        # Need additional libraries to build emulator
+        sysroot_libs += [
+            "libxcb.so.1",
+            "libX11.so.6",
+            "libz.so.1",
+            "libpng16.so.16",
+            "libexpat.so.1",
+            "libuuid.so.1",
+            "libdbus-1.so.3",
+            "libsystemd.so.0",
+            "liblzma.so.5",
+            "liblz4.so.1",
+            "libgcrypt.so.20",
+            "libgpg-error.so.0",
+            "libbsd.so.0"]
     for lib in sysroot_libs:
         src_lib = sysroot_dir / lib
         dst_lib = f"{installdir}/lib/{lib}"
         logging.info(f"Copy {src_lib} ==> {dst_lib}")
         shutil.copyfile(src_lib, dst_lib)
+    if target == "linux" and HOST_ARCH == "aarch64":
+        # These symlinks are needed to make emulator build compile
+        os.symlink("libX11.so.6", f"{installdir}/lib/libX11.so")
+        os.symlink("libXau.so.6", f"{installdir}/lib/libXau.so")
 
-    if target != "linux_aarch64":
+    if target != "linux_aarch64" and HOST_ARCH != "aarch64":
         # need libunwind.so.1 for syncqt
         src_libunwind = AOSP_ROOT / "prebuilts" / "android-emulator-build" / "common" / "libunwind" \
             / "linux-x86_64" / "lib" / "libunwind.so"
@@ -503,10 +537,14 @@ def buildPrebuilt(args, prebuilts_out_dir):
                 logging.fatal(f"[{vcvarsall}] does not exist")
                 exit(-1)
             deps_win.inheritSubprocessEnv([vcvarsall, "amd64", ">NUL", "2>&1"])
-    # Use cmake from our prebuilts
-    addToSearchPath(CMAKE_PATH)
-    # Use ninja from our prebuilts
-    addToSearchPath(NINJA_PATH)
+
+    if HOST_OS == "linux" and HOST_ARCH != "aarch64":
+        # Use cmake from our prebuilts
+        addToSearchPath(CMAKE_PATH)
+        # Use ninja from our prebuilts
+        addToSearchPath(NINJA_PATH)
+    else:
+        logging.info("Using installed cmake/ninja on linux-aarch64 host")
     logging.info(os.environ)
 
     if not checkDependencies():
@@ -549,16 +587,19 @@ def buildPrebuilt(args, prebuilts_out_dir):
         postInstall(qt_install_dir, args.target, False)
         shutil.rmtree(qt_build_path)
 
-    logging.info("Building Qt6 w/ QtWebEngine")
-    qt_install_dir = os.path.join(prebuilts_out_dir, "qt")
-    configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_SUBMODULES)
-    buildQt(QT_SUBMODULES, qt_build_path)
-    installQt(QT_SUBMODULES, qt_build_path, qt_install_dir)
-    postInstall(qt_install_dir, args.target, True)
+    if HOST_OS == "linux" and HOST_ARCH == "aarch64":
+        logging.info("Skipping QtWebEngine build on linux-aarch64 machine")
+    else:
+        logging.info("Building Qt6 w/ QtWebEngine")
+        qt_install_dir = os.path.join(prebuilts_out_dir, "qt")
+        configureQtBuild(qt_src_path, qt_build_path, qt_install_dir, QT_SUBMODULES)
+        buildQt(QT_SUBMODULES, qt_build_path)
+        installQt(QT_SUBMODULES, qt_build_path, qt_install_dir)
+        postInstall(qt_install_dir, args.target, True)
 
     # Since linux_aarch64 cross-compilation requires having a host build of Qt, let's just build it
     # in the linux x86_64 host instead of creating an additional linux_aarch64 build target.
-    if HOST_OS == "linux":
+    if HOST_OS == "linux" and HOST_ARCH != "aarch64":
         logging.info("Cross-compiling Qt 6 (no QtWebEngine) for linux_aarch64")
         crosscompile_target = "linux_aarch64"
         qt_install_dir = os.path.join(prebuilts_out_dir, "qt-nowebengine-linux_aarch64")
