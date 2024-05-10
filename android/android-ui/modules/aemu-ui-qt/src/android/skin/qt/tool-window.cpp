@@ -486,9 +486,8 @@ void ToolWindow::on_unfold_timer_done() {
 void ToolWindow::updateFoldableButtonVisibility() {
     mToolsUi->change_posture_button->setEnabled(
             android_foldable_hinge_enabled());
-    if (mExtendedWindow.hasInstance()) {
-        mExtendedWindow.get()->getVirtualSensorsPage()->updateHingeSensorUI();
-    }
+    mExtendedWindow.ifExists([&] {
+        mExtendedWindow.get()->getVirtualSensorsPage()->updateHingeSensorUI(); });
 }
 
 void ToolWindow::updateButtonUiCommand(QPushButton* button,
@@ -511,8 +510,10 @@ void ToolWindow::raise() {
         mVirtualSceneControlWindow.get()->raise();
     }
     if (mTopSwitched) {
-        mExtendedWindow.get()->raise();
-        mExtendedWindow.get()->activateWindow();
+        mExtendedWindow.ifExists([&] {
+            mExtendedWindow.get()->raise();
+            mExtendedWindow.get()->activateWindow();
+        });
         mTopSwitched = false;
     }
 }
@@ -609,7 +610,7 @@ void ToolWindow::show() {
     }
 
     if (mIsExtendedWindowVisibleOnShow) {
-        mExtendedWindow.get()->show();
+    mExtendedWindow.ifExists([&] { mExtendedWindow.get()->show(); });
     }
 }
 
@@ -1330,9 +1331,14 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     QMessageBox msgBox(QMessageBox::Question, tr("Save quick-boot state"),
                        askMessage, (QMessageBox::Yes | QMessageBox::No), this);
     // Add a Cancel button to enable the MessageBox's X.
-    QPushButton* cancelButton = msgBox.addButton(QMessageBox::Cancel);
-    // Hide the Cancel button so X is the only way to cancel.
-    cancelButton->setHidden(true);
+    // Since embedded has already disconnected by this point, we always assume shutdown.
+    if(!getConsoleAgents()
+            ->settings->android_cmdLineOptions()
+            ->qt_hide_window) {
+        QPushButton* cancelButton = msgBox.addButton(QMessageBox::Cancel);
+        // Hide the Cancel button so X is the only way to cancel.
+        cancelButton->setHidden(true);
+    }
 
     // ten seconds
     constexpr int timeout = 10000;
@@ -1399,7 +1405,7 @@ void ToolWindow::on_close_button_clicked() {
     if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier)) {
         // The user shift-clicked on the X
         // This counts as us asking and having the user say "don't save"
-        mExtendedWindow.get()->sendMetricsOnShutDown();
+        mExtendedWindow.ifExists([&] { mExtendedWindow.get()->sendMetricsOnShutDown(); });
         mAskedWhetherToSaveSnapshot = true;
         getConsoleAgents()->settings->avdParams()->flags |=
                 AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
@@ -1409,7 +1415,7 @@ void ToolWindow::on_close_button_clicked() {
     }
 
     if(shouldClose()) {
-        mExtendedWindow.get()->sendMetricsOnShutDown();
+        mExtendedWindow.ifExists([&] { mExtendedWindow.get()->sendMetricsOnShutDown(); });
         mEmulatorWindow->requestClose();
     } else {
         mAskedWhetherToSaveSnapshot = false;
@@ -1619,9 +1625,9 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
         return;
     }
 
-    // Set to default location pane.
+    // Set to default help pane.
     if (!isPaneEnabled(pane)) {
-        pane = PANE_IDX_LOCATION;
+        pane = PANE_IDX_HELP;
     }
     // Show the tabbed pane
     mExtendedWindow.get()->showPane(pane);
@@ -1635,10 +1641,6 @@ void ToolWindow::on_more_button_clicked() {
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();
     }
-}
-
-QRect ToolWindow::extendedWindowGeometry() {
-    return mExtendedWindow.get()->frameGeometry();
 }
 
 void ToolWindow::paintEvent(QPaintEvent*) {
