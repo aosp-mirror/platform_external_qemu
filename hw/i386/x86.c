@@ -1142,6 +1142,7 @@ void x86_bios_rom_init(MachineState *ms, const char *default_firmware,
     int bios_size, isa_bios_size;
     ssize_t ret;
 
+    printf("Init rom \n");
     /* BIOS load */
     bios_name = ms->firmware ?: default_firmware;
     filename = qemu_find_file(QEMU_FILE_TYPE_BIOS, bios_name);

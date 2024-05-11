@@ -106,7 +106,9 @@ def gen_toolchain(
         logging.info("Mapping %s -> %s", target, TARGET_ALIAS[target])
         target = TARGET_ALIAS[target]
 
-    return builder_map[target](Path(aosp), Path(dest), Path(toolchain_dir), ccache, toolchain)
+    return builder_map[target](
+        Path(aosp), Path(dest), Path(toolchain_dir), ccache, toolchain
+    )
 
 
 def mkdirs(out: Path, force: bool):
@@ -215,10 +217,11 @@ def release_command(args):
 def bazel_command(args):
     bazel_out = Path(args.out)
     bazel_out.mkdir(parents=True, exist_ok=True)
-    build_dir = Path(args.build)
+
+    build_dir = args.build
     temp_build = None
     if not build_dir:
-        temp_build = tempfile.TemporaryDirectory()
+        temp_build = tempfile.TemporaryDirectory(prefix="shadow")
         build_dir = Path(temp_build.__enter__()).resolve()
         builder = gen_toolchain(
             args.target,
@@ -230,7 +233,7 @@ def bazel_command(args):
         )
         builder.configure_meson([])
 
-    with tempfile.TemporaryDirectory() as bazel_build_dir:
+    with tempfile.TemporaryDirectory(prefix="bazel") as bazel_build_dir:
         # Make sure there are no accidently symlinks that cause
         # issues when trying to find dependencies
         build_dir = Path(build_dir).resolve()
@@ -249,7 +252,7 @@ def bazel_command(args):
             / "qemu"
             / f"qemu-{platform.system().lower()}-shim.jsonc"
             if not args.shim
-            else args.shim
+            else Path(args.shim)
         ).absolute()
         builder.configure_meson(
             [

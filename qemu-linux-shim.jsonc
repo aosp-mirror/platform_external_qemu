@@ -191,7 +191,9 @@
     "libvhost-user-glib": [
       "//external/qemu/subprojects/libvhost-user:vhost-user-glib"
     ],
-    "rutabaga_gfx_ffi": []
+    "rutabaga_gfx_ffi": [
+      "//external/crosvm/rutabaga_gfx/ffi:c_ffi"
+    ]
   },
   // The actual set of targets you wish to generate bazel targets for.
   // These are the targets that will be exported.
@@ -207,7 +209,8 @@
     "hw-display-virtio-gpu",
     "hw-display-virtio-vga",
     "hw-display-virtio-vga-gl",
-    "hw-display-virtio-gpu-pci"
+    "hw-display-virtio-gpu-pci",
+    "hw-display-virtio-gpu-rutabaga"
   ],
   "exclude": [
     "vhost-user",

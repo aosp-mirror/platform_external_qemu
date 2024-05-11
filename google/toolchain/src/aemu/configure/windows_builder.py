@@ -183,7 +183,7 @@ class WindowsBuilder(QemuBuilder):
             "-Drbd=disabled",
             "-Drdma=disabled",
             "-Dreplication=disabled",
-            "-Drutabaga_gfx=disabled",  # b/324640237
+            "-Drutabaga_gfx=enabled",
             "-Dsdl=disabled",
             "-Dsdl_image=disabled",
             "-Dseccomp=disabled",

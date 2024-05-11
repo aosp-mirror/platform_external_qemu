@@ -55,6 +55,7 @@ char *qemu_find_file(int type, const char *name)
 
     for (i = 0; i < data_dir_idx; i++) {
         buf = g_strdup_printf("%s/%s%s", data_dir[i], subdir, name);
+        printf("Trying: %s\n", name);
         if (access(buf, R_OK) == 0) {
             trace_load_file(name, buf);
             return buf;
