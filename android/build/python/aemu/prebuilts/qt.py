@@ -538,13 +538,13 @@ def buildPrebuilt(args, prebuilts_out_dir):
                 exit(-1)
             deps_win.inheritSubprocessEnv([vcvarsall, "amd64", ">NUL", "2>&1"])
 
-    if HOST_OS == "linux" and HOST_ARCH != "aarch64":
+    if HOST_OS == "linux" and HOST_ARCH == "aarch64":
+        logging.info("Using system-installed cmake/ninja on linux-aarch64 host")
+    else:
         # Use cmake from our prebuilts
         addToSearchPath(CMAKE_PATH)
         # Use ninja from our prebuilts
         addToSearchPath(NINJA_PATH)
-    else:
-        logging.info("Using installed cmake/ninja on linux-aarch64 host")
     logging.info(os.environ)
 
     if not checkDependencies():
