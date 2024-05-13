@@ -241,7 +241,8 @@
     "hw-display-virtio-vga",
     "hw-display-virtio-vga-gl",
     "hw-display-virtio-gpu-pci",
-    "hw-display-virtio-gpu-rutabaga"
+    "hw-display-virtio-gpu-rutabaga",
+    "hw-display-virtio-gpu-pci-rutabaga"
   ],
   "exclude": [
     "vhost-user",
