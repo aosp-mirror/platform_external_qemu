@@ -30,9 +30,6 @@ if(LINUX_X86_64)
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so"
-      # Mock ICD
-      "${PREBUILT_ROOT}/icds/libVkICD_mock_icd.so>testlib64/libVkICD_mock_icd.so"
-      "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # Debug / validation layers
       "${PREBUILT_ROOT}/layers/libVkLayer_api_dump.so>testlib64/layers/libVkLayer_api_dump.so"
       "${PREBUILT_ROOT}/layers/libVkLayer_device_simulation.so>testlib64/layers/libVkLayer_device_simulation.so"
@@ -62,9 +59,6 @@ elseif(DARWIN_X86_64 OR DARWIN_AARCH64)
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/libvulkan.dylib>testlib64/libvulkan.dylib"
-      # Mock ICD
-      "${PREBUILT_ROOT}/icds/libVkICD_mock_icd.dylib>testlib64/libVkICD_mock_icd.dylib"
-      "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # Debug / validation layers
       "${PREBUILT_ROOT}/layers/libVkLayer_api_dump.dylib>testlib64/layers/libVkLayer_api_dump.dylib"
       "${PREBUILT_ROOT}/layers/libVkLayer_device_simulation.dylib>testlib64/layers/libVkLayer_device_simulation.dylib"
@@ -90,9 +84,6 @@ elseif(WINDOWS)
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/vulkan-1.dll>testlib64/vulkan-1.dll"
-      # Mock ICD
-      "${PREBUILT_ROOT}/icds/VkICD_mock_icd.dll>testlib64/VkICD_mock_icd.dll"
-      "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # Debug / validation layers
       "${PREBUILT_ROOT}/layers/VkLayer_api_dump.dll>testlib64/layers/VkLayer_api_dump.dll"
       "${PREBUILT_ROOT}/layers/VkLayer_api_dump.json>testlib64/layers/VkLayer_api_dump.json"
