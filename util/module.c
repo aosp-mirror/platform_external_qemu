@@ -282,7 +282,6 @@ int module_load(const char *prefix, const char *name, Error **errp)
     for (i = 0; i < n_dirs; i++) {
         char *fname = g_strdup_printf("%s/%s%s",
                                       dirs[i], module_name, CONFIG_HOST_DSOSUF);
-        printf("Looking for %s\n", fname);
         int ret = access(fname, F_OK);
         if (ret != 0 && (errno == ENOENT || errno == ENOTDIR)) {
             /*
