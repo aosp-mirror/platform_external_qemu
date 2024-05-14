@@ -36,6 +36,8 @@
           "libqemu-aarch64-softmmu",
           "//hardware/generic/goldfish/emulator/plugin:registration"
         ],
+        // Enable our plugins to link back.
+        "+linkopts": ["-rdynamic"],
         "visibility": [
           "//visibility:public"
         ]
@@ -52,6 +54,8 @@
           "libqemu-riscv64-softmmu",
           "//hardware/generic/goldfish/emulator/plugin:registration"
         ],
+        // Enable our plugins to link back.
+        "+linkopts": ["-rdynamic"],
         "visibility": [
           "//visibility:public"
         ]
@@ -68,6 +72,8 @@
           "libqemu-x86_64-softmmu",
           "//hardware/generic/goldfish/emulator/plugin:registration"
         ],
+        // Enable our plugins to link back.
+        "+linkopts": ["-rdynamic"],
         "visibility": [
           "//visibility:public"
         ]
@@ -210,7 +216,8 @@
     "hw-display-virtio-vga",
     "hw-display-virtio-vga-gl",
     "hw-display-virtio-gpu-pci",
-    "hw-display-virtio-gpu-rutabaga"
+    "hw-display-virtio-gpu-rutabaga",
+    "hw-display-virtio-gpu-pci-rutabaga"
   ],
   "exclude": [
     "vhost-user",
