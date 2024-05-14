@@ -35,12 +35,10 @@ if(LINUX_X86_64)
       "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # Debug / validation layers
       "${PREBUILT_ROOT}/layers/libVkLayer_api_dump.so>testlib64/layers/libVkLayer_api_dump.so"
-      "${PREBUILT_ROOT}/layers/libVkLayer_device_simulation.so>testlib64/layers/libVkLayer_device_simulation.so"
       "${PREBUILT_ROOT}/layers/libVkLayer_khronos_validation.so>testlib64/layers/libVkLayer_khronos_validation.so"
       "${PREBUILT_ROOT}/layers/libVkLayer_monitor.so>testlib64/layers/libVkLayer_monitor.so"
       "${PREBUILT_ROOT}/layers/libVkLayer_screenshot.so>testlib64/layers/libVkLayer_screenshot.so"
       "${PREBUILT_ROOT}/layers/VkLayer_api_dump.json>testlib64/layers/VkLayer_api_dump.json"
-      "${PREBUILT_ROOT}/layers/VkLayer_device_simulation.json>testlib64/layers/VkLayer_device_simulation.json"
       "${PREBUILT_ROOT}/layers/VkLayer_khronos_validation.json>testlib64/layers/VkLayer_khronos_validation.json"
       "${PREBUILT_ROOT}/layers/VkLayer_monitor.json>testlib64/layers/VkLayer_monitor.json"
       "${PREBUILT_ROOT}/layers/VkLayer_screenshot.json>testlib64/layers/VkLayer_screenshot.json"
@@ -67,10 +65,8 @@ elseif(DARWIN_X86_64 OR DARWIN_AARCH64)
       "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # Debug / validation layers
       "${PREBUILT_ROOT}/layers/libVkLayer_api_dump.dylib>testlib64/layers/libVkLayer_api_dump.dylib"
-      "${PREBUILT_ROOT}/layers/libVkLayer_device_simulation.dylib>testlib64/layers/libVkLayer_device_simulation.dylib"
       "${PREBUILT_ROOT}/layers/libVkLayer_khronos_validation.dylib>testlib64/layers/libVkLayer_khronos_validation.dylib"
       "${PREBUILT_ROOT}/layers/VkLayer_api_dump.json>testlib64/layers/VkLayer_api_dump.json"
-      "${PREBUILT_ROOT}/layers/VkLayer_device_simulation.json>testlib64/layers/VkLayer_device_simulation.json"
       "${PREBUILT_ROOT}/layers/VkLayer_khronos_validation.json>testlib64/layers/VkLayer_khronos_validation.json"
       # shaders
       ${VULKAN_COMMON_DEPENDENCIES})
@@ -96,8 +92,6 @@ elseif(WINDOWS)
       # Debug / validation layers
       "${PREBUILT_ROOT}/layers/VkLayer_api_dump.dll>testlib64/layers/VkLayer_api_dump.dll"
       "${PREBUILT_ROOT}/layers/VkLayer_api_dump.json>testlib64/layers/VkLayer_api_dump.json"
-      "${PREBUILT_ROOT}/layers/VkLayer_device_simulation.dll>testlib64/layers/VkLayer_device_simulation.dll"
-      "${PREBUILT_ROOT}/layers/VkLayer_device_simulation.json>testlib64/layers/VkLayer_device_simulation.json"
       "${PREBUILT_ROOT}/layers/VkLayer_gfxreconstruct.dll>testlib64/layers/VkLayer_gfxreconstruct.dll"
       "${PREBUILT_ROOT}/layers/VkLayer_gfxreconstruct.json>testlib64/layers/VkLayer_gfxreconstruct.json"
       "${PREBUILT_ROOT}/layers/VkLayer_khronos_validation.dll>testlib64/layers/VkLayer_khronos_validation.dll"
