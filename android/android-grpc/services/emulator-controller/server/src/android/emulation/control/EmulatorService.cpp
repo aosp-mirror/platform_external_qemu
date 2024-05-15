@@ -693,6 +693,20 @@ public:
         bool lastFrameWasEmpty = reply.format().width() == 0;
         int frame = 0;
 
+        {
+            uint32_t width, height;
+            bool enabled = true;
+            bool multiDisplayQueryWorks = mAgents->emu->getMultiDisplay(
+                    request->display(), nullptr, nullptr, &width, &height, nullptr,
+                    nullptr, &enabled);
+            if (!enabled) {
+                return Status(
+                        ::grpc::StatusCode::INVALID_ARGUMENT,
+                        "Invalid display: " + std::to_string(request->display()),
+                        "");
+            }
+        }
+
         // TODO(jansen): Move to ScreenshotUtils.
         std::unique_ptr<EventWaiter> frameEvent;
         std::unique_ptr<RaiiEventListener<gfxstream::Renderer,
