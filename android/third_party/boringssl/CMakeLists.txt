@@ -18,11 +18,10 @@ target_include_directories(ssl PUBLIC ${BORINGSSL_ROOT}/src/include)
 target_include_directories(ssl PRIVATE ${BORINGSSL_ROOT}/src/ssl)
 android_target_compile_options(ssl windows PRIVATE "-UNDEBUG")
 
-# Setup the crypto libraries:
-# On Windows x86_64 (and x86), BoringSSL uses NASM. On other platforms,
-# BoringSSL uses gas-compatible assembly syntax. Within an assembly syntax, the
-# files are conditioned by the underlying platfor, so it is not necessary to
-# condition on the target beyond this.
+# Setup the crypto libraries: On Windows x86_64 (and x86), BoringSSL uses NASM.
+# On other platforms, BoringSSL uses gas-compatible assembly syntax. Within an
+# assembly syntax, the files are conditioned by the underlying platfor, so it is
+# not necessary to condition on the target beyond this.
 if(WINDOWS_MSVC_X86_64)
   android_add_library(
     TARGET crypto
@@ -68,9 +67,8 @@ target_link_libraries(ssl PUBLIC crypto)
 
 # Tests
 if((NOT WINDOWS) AND (NOT DARWIN_AARCH64))
-  # BUG: 147893224: clang 10 results in a flaky failure in
-  # ABITest.SanityCheck on Windows
-  # BUG: 252237763: timeout on Mac M2
+  # BUG: 147893224: clang 10 results in a flaky failure in ABITest.SanityCheck
+  # on Windows BUG: 252237763: timeout on Mac M2
   android_add_library(
     TARGET boringssl_test_support NODISTRIBUTE SRC # cmake-format: sortable
                                                    ${test_support_sources})
@@ -79,11 +77,17 @@ if((NOT WINDOWS) AND (NOT DARWIN_AARCH64))
                                                       ${ssl_test_sources})
   target_link_libraries(boringssl_ssl_unittests PRIVATE gmock_main ssl crypto
                                                         boringssl_test_support)
+  set_property(
+    TEST boringssl_ssl_unittests
+    PROPERTY ENVIRONMENT "BORINGSSL_TEST_DATA_ROOT=${BORINGSSL_ROOT}/src")
   android_add_test(
     TARGET boringssl_crypto_unittests SRC # cmake-format: sortable
                                           ${crypto_test_sources})
   target_link_libraries(boringssl_crypto_unittests
                         PRIVATE gmock_main crypto boringssl_test_support)
+  set_property(
+    TEST boringssl_crypto_unittests
+    PROPERTY ENVIRONMENT "BORINGSSL_TEST_DATA_ROOT=${BORINGSSL_ROOT}/src")
   android_target_link_libraries(boringssl_test_support windows
                                 PRIVATE ws2_32::ws2_32 dbghelp::dbghelp)
 endif()
