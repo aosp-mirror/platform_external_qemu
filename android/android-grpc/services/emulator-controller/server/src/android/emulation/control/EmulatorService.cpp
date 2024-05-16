@@ -690,19 +690,22 @@ public:
         int cPixels = reply.image().size();
         bool clientAvailable = !context->IsCancelled();
 
-        if (clientAvailable) {
-            auto status = getScreenshot(context, request, &reply);
-            if (!status.ok()) {
-                return status;
-            }
-
-            assert(reply.image().size() >= cPixels);
-            cPixels = reply.image().size();
-            clientAvailable = !context->IsCancelled() && writer->Write(reply);
-        }
-
         bool lastFrameWasEmpty = reply.format().width() == 0;
         int frame = 0;
+
+        {
+            uint32_t width, height;
+            bool enabled = true;
+            bool multiDisplayQueryWorks = mAgents->emu->getMultiDisplay(
+                    request->display(), nullptr, nullptr, &width, &height, nullptr,
+                    nullptr, &enabled);
+            if (!enabled) {
+                return Status(
+                        ::grpc::StatusCode::INVALID_ARGUMENT,
+                        "Invalid display: " + std::to_string(request->display()),
+                        "");
+            }
+        }
 
         // TODO(jansen): Move to ScreenshotUtils.
         std::unique_ptr<EventWaiter> frameEvent;
@@ -755,6 +758,10 @@ public:
                 AEMU_SCOPED_TRACE("streamScreenshot::frame\r\n");
                 frame += framesArrived;                Stopwatch sw;
                 auto status = getScreenshot(context, request, &reply);
+                if (status.error_code() == grpc::StatusCode::FAILED_PRECONDITION) {
+                    continue;
+                }
+
                 if (!status.ok()) {
                     return status;
                 }
@@ -972,7 +979,6 @@ public:
             cPixels = img.getPixelCount();
         } else {  // Let's make a fast call to learn how many pixels we need
                   // to reserve.
-            while (1) {
                 width = 0;
                 height = 0;
                 cPixels = 0;
@@ -981,10 +987,9 @@ public:
                         request->format(), rotation, newWidth, newHeight, pixels,
                         &cPixels, &width, &height, rect);
                 if (width > 0 && height > 0 && cPixels > 0) {
-                    break;
+                } else {
+                    return Status(grpc::StatusCode::FAILED_PRECONDITION, "Unable to getScreenshot");
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
         }
 
         auto format = reply->mutable_format();

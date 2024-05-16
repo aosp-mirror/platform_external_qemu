@@ -32,6 +32,8 @@ struct PresetEmulatorSizeInfo {
     int dpi;
 };
 
+bool isResizableTransitionInProgress();
+void setResizableTransitionInProgress(bool inProgress);
 bool resizableEnabled();
 bool resizableEnabled34();
 void resizableInit();

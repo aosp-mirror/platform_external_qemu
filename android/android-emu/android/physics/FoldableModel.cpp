@@ -424,6 +424,9 @@ void FoldableModel::setHingeAngle(uint32_t hingeIndex,
                                   PhysicalInterpolation mode,
                                   std::recursive_mutex& mutex) {
     VLOG(foldable) << "setHingeAngle index " << hingeIndex << " degrees " << degrees;
+    if (!android_foldable_hinge_enabled()) {
+        return;
+    }
     std::unique_lock<std::recursive_mutex> lock(mutex);
     if (hingeIndex >= ANDROID_FOLDABLE_MAX_HINGES)
         return;
