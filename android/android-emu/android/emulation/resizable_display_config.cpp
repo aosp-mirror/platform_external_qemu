@@ -30,6 +30,7 @@
 #include "host-common/opengles.h"
 #include "studio_stats.pb.h"
 
+#include <atomic>
 #include <map>
 
 using android::metrics::MetricsReporter;
@@ -220,11 +221,21 @@ public:
         mMetricsRegistered = true;
     }
 
+    bool isTransitionInProgress() const {
+        bool result = mTransitionInProgress.load(std::memory_order_relaxed);
+        return result;
+    }
+
+    void setTransitionInProgress(int inProgress) {
+        mTransitionInProgress.store(inProgress, std::memory_order_relaxed);
+    }
+
 private:
     std::map<PresetEmulatorSizeType, PresetEmulatorSizeInfo> mConfigs;
     PresetEmulatorSizeType mActiveConfigId = PRESET_SIZE_MAX;
     std::map<PresetEmulatorSizeType, uint32_t> mTypeCount;
     bool mMetricsRegistered = false;
+    std::atomic<bool> mTransitionInProgress{false};
 };
 
 static android::base::LazyInstance<ResizableConfig> sResizableConfig =
@@ -252,6 +263,19 @@ void setResizableActiveConfigId(enum PresetEmulatorSizeType id) {
 
 void updateAndroidDisplayConfigPath(enum PresetEmulatorSizeType id) {
     android::emulation::sResizableConfig->updateAndroidDisplayConfigPath(id);
+}
+
+bool isResizableTransitionInProgress() {
+    if (!resizableEnabled())
+        return false;
+
+    return android::emulation::sResizableConfig->isTransitionInProgress();
+}
+
+void setResizableTransitionInProgress(bool inProgress) {
+    if (!resizableEnabled())
+        return;
+    android::emulation::sResizableConfig->setTransitionInProgress(inProgress);
 }
 
 bool resizableEnabled34() {

@@ -148,7 +148,8 @@ zip = { path = "${AOSP_ROOT}/external/rust/crates/zip" }
 backtrace = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/backtrace" }
 googletest = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/googletest" }
 hermit-abi = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/hermit-abi" }
-redox_syscall = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/redox_syscall" }
+redox_syscall = { version = "0.2.9", path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/redox_syscall" }
+redox_syscall2 = { version = "0.4.1", path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/redox_syscall2", package="redox_syscall" }
 remove_dir_all = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/remove_dir_all" }
 sha2 = { path = "${AOSP_ROOT}/external/qemu/android/build/cmake/rust/crates/sha2" }
 windows-sys = { path = "${AOSP_ROOT}/external/qemu/android/third_party/rust/crates/windows-sys-0.48.0" }

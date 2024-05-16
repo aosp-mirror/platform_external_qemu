@@ -361,40 +361,38 @@ elseif(LINUX)
       ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp${QT_LIBINFIX}.so>lib64/qt/plugins/imageformats/libqwbmp${QT_LIBINFIX}.so
   )
 
-  if(NOT LINUX_AARCH64)
+  list(APPEND QT5_SHARED_DEPENDENCIES
+    ${PREBUILT_ROOT}/plugins/platforms/libqxcb${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqxcb${QT_LIBINFIX}.so;
+    ${PREBUILT_ROOT}/plugins/platforms/libqlinuxfb${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqlinuxfb${QT_LIBINFIX}.so;
+    ${PREBUILT_ROOT}/plugins/platforms/libqminimal${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqminimal${QT_LIBINFIX}.so;
+    ${PREBUILT_ROOT}/plugins/platforms/libqoffscreen${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqoffscreen${QT_LIBINFIX}.so;
+    ${PREBUILT_ROOT}/plugins/platforms/libqvnc${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqvnc${QT_LIBINFIX}.so;
+    ${PREBUILT_ROOT}/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin${QT_LIBINFIX}.so>lib64/qt/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin${QT_LIBINFIX}.so;
+    ${PREBUILT_ROOT}/plugins/platforminputcontexts/libibusplatforminputcontextplugin${QT_LIBINFIX}.so>lib64/qt/plugins/platforminputcontexts/libibusplatforminputcontextplugin${QT_LIBINFIX}.so;
+    ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}XcbQpa${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}XcbQpa${QT_LIBINFIX}.so.6;
+    ${PREBUILT_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6;
+    ${PREBUILT_ROOT}/lib/libxkbcommon.so.0>lib64/qt/lib/libxkbcommon.so.0;
+    ${PREBUILT_ROOT}/lib/libX11-xcb.so.1>lib64/qt/lib/libX11-xcb.so.1;
+    ${PREBUILT_ROOT}/lib/libXau.so.6>lib64/qt/lib/libXau.so.6;
+    ${PREBUILT_ROOT}/lib/libXdmcp.so.6>lib64/qt/lib/libXdmcp.so.6;
+    ${PREBUILT_ROOT}/lib/libxcb-xkb.so.1>lib64/qt/lib/libxcb-xkb.so.1;
+    ${PREBUILT_ROOT}/lib/libxcb-cursor.so.0>lib64/qt/lib/libxcb-cursor.so.0;
+    ${PREBUILT_ROOT}/lib/libxcb-icccm.so.4>lib64/qt/lib/libxcb-icccm.so.4;
+    ${PREBUILT_ROOT}/lib/libxcb-image.so.0>lib64/qt/lib/libxcb-image.so.0;
+    ${PREBUILT_ROOT}/lib/libxcb-keysyms.so.1>lib64/qt/lib/libxcb-keysyms.so.1;
+    ${PREBUILT_ROOT}/lib/libxcb-randr.so.0>lib64/qt/lib/libxcb-randr.so.0;
+    ${PREBUILT_ROOT}/lib/libxcb-render-util.so.0>lib64/qt/lib/libxcb-render-util.so.0;
+    ${PREBUILT_ROOT}/lib/libxcb-render.so.0>lib64/qt/lib/libxcb-render.so.0;
+    ${PREBUILT_ROOT}/lib/libxcb-shape.so.0>lib64/qt/lib/libxcb-shape.so.0;
+    ${PREBUILT_ROOT}/lib/libxcb-shm.so.0>lib64/qt/lib/libxcb-shm.so.0;
+    ${PREBUILT_ROOT}/lib/libxcb-sync.so.1>lib64/qt/lib/libxcb-sync.so.1;
+    ${PREBUILT_ROOT}/lib/libxcb-util.so.1>lib64/qt/lib/libxcb-util.so.1;
+    ${PREBUILT_ROOT}/lib/libxcb-xfixes.so.0>lib64/qt/lib/libxcb-xfixes.so.0;
+    ${PREBUILT_ROOT}/lib/libxkbcommon-x11.so.0>lib64/qt/lib/libxkbcommon-x11.so.0;
+    ${PREBUILT_ROOT}/lib/libfontconfig.so.1>lib64/qt/lib/libfontconfig.so.1)
+  if(QTWEBENGINE)
     list(APPEND QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/plugins/platforms/libqxcb${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqxcb${QT_LIBINFIX}.so;
-      ${PREBUILT_ROOT}/plugins/platforms/libqlinuxfb${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqlinuxfb${QT_LIBINFIX}.so;
-      ${PREBUILT_ROOT}/plugins/platforms/libqminimal${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqminimal${QT_LIBINFIX}.so;
-      ${PREBUILT_ROOT}/plugins/platforms/libqoffscreen${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqoffscreen${QT_LIBINFIX}.so;
-      ${PREBUILT_ROOT}/plugins/platforms/libqvnc${QT_LIBINFIX}.so>lib64/qt/plugins/platforms/libqvnc${QT_LIBINFIX}.so;
-      ${PREBUILT_ROOT}/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin${QT_LIBINFIX}.so>lib64/qt/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin${QT_LIBINFIX}.so;
-      ${PREBUILT_ROOT}/plugins/platforminputcontexts/libibusplatforminputcontextplugin${QT_LIBINFIX}.so>lib64/qt/plugins/platforminputcontexts/libibusplatforminputcontextplugin${QT_LIBINFIX}.so;
-      ${PREBUILT_ROOT}/lib/libQt${QT_VERSION_MAJOR}XcbQpa${QT_LIBINFIX}.so.6>lib64/qt/lib/libQt${QT_VERSION_MAJOR}XcbQpa${QT_LIBINFIX}.so.6;
-      ${PREBUILT_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6;
-      ${PREBUILT_ROOT}/lib/libxkbcommon.so.0>lib64/qt/lib/libxkbcommon.so.0;
-      ${PREBUILT_ROOT}/lib/libX11-xcb.so.1>lib64/qt/lib/libX11-xcb.so.1;
-      ${PREBUILT_ROOT}/lib/libXau.so.6>lib64/qt/lib/libXau.so.6;
-      ${PREBUILT_ROOT}/lib/libXdmcp.so.6>lib64/qt/lib/libXdmcp.so.6;
-      ${PREBUILT_ROOT}/lib/libxcb-xkb.so.1>lib64/qt/lib/libxcb-xkb.so.1;
-      ${PREBUILT_ROOT}/lib/libxcb-cursor.so.0>lib64/qt/lib/libxcb-cursor.so.0;
-      ${PREBUILT_ROOT}/lib/libxcb-icccm.so.4>lib64/qt/lib/libxcb-icccm.so.4;
-      ${PREBUILT_ROOT}/lib/libxcb-image.so.0>lib64/qt/lib/libxcb-image.so.0;
-      ${PREBUILT_ROOT}/lib/libxcb-keysyms.so.1>lib64/qt/lib/libxcb-keysyms.so.1;
-      ${PREBUILT_ROOT}/lib/libxcb-randr.so.0>lib64/qt/lib/libxcb-randr.so.0;
-      ${PREBUILT_ROOT}/lib/libxcb-render-util.so.0>lib64/qt/lib/libxcb-render-util.so.0;
-      ${PREBUILT_ROOT}/lib/libxcb-render.so.0>lib64/qt/lib/libxcb-render.so.0;
-      ${PREBUILT_ROOT}/lib/libxcb-shape.so.0>lib64/qt/lib/libxcb-shape.so.0;
-      ${PREBUILT_ROOT}/lib/libxcb-shm.so.0>lib64/qt/lib/libxcb-shm.so.0;
-      ${PREBUILT_ROOT}/lib/libxcb-sync.so.1>lib64/qt/lib/libxcb-sync.so.1;
-      ${PREBUILT_ROOT}/lib/libxcb-util.so.1>lib64/qt/lib/libxcb-util.so.1;
-      ${PREBUILT_ROOT}/lib/libxcb-xfixes.so.0>lib64/qt/lib/libxcb-xfixes.so.0;
-      ${PREBUILT_ROOT}/lib/libxkbcommon-x11.so.0>lib64/qt/lib/libxkbcommon-x11.so.0;
-      ${PREBUILT_ROOT}/lib/libfontconfig.so.1>lib64/qt/lib/libfontconfig.so.1)
-      if(QTWEBENGINE)
-        list(APPEND QT5_SHARED_DEPENDENCIES
-          ${PREBUILT_ROOT}/lib/libpcre2-16.so.0>lib64/qt/lib/libpcre2-16.so.0)
-      endif()
+      ${PREBUILT_ROOT}/lib/libpcre2-16.so.0>lib64/qt/lib/libpcre2-16.so.0)
   endif()
 
   set(QT5_SHARED_PROPERTIES

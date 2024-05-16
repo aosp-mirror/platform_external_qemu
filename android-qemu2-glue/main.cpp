@@ -377,7 +377,7 @@ static void prepareSkinConfig(AndroidHwConfig* hw, const char* dataDirectory) {
     if (android_foldable_is_pixel_fold()) {
         const char* skin = nullptr;
         if (((hw->hw_device_name &&
-              "pixel_fold" == std::string(hw->hw_device_name)) ||
+              !strncmp("pixel_fold",hw->hw_device_name, 10)) ||
              resizableEnabled34())) {
             skin = "pixel_fold";
         } else {
