@@ -323,7 +323,7 @@ bool emuglConfig_init(EmuglConfig* config,
 #ifdef __APPLE__
     force_swiftshader_to_swangle = true;
 #endif
-#ifdef __WIN32
+#ifdef _WIN32
     swangle_backend_name = nullptr;
 #endif
 
@@ -423,8 +423,16 @@ bool emuglConfig_init(EmuglConfig* config,
     }
 
     // b/328275986: Turn off ANGLE because it breaks.
-    if (!strcmp("angle", gpu_mode) || !strcmp("angle_indirect", gpu_mode)
-        || !strcmp("angle9", gpu_mode) || !strcmp("angle9_indirect", gpu_mode)) {
+    bool force_swiftshader = (!strcmp("angle", gpu_mode) ||
+                              !strcmp("angle_indirect", gpu_mode) ||
+                              !strcmp("angle9", gpu_mode) ||
+                              !strcmp("angle9_indirect", gpu_mode));
+#ifdef _WIN32
+    // Also turn off swangle_indirect mode on Windows
+    force_swiftshader =
+            force_swiftshader || (!strcmp("swangle_indirect", gpu_mode));
+#endif
+    if (force_swiftshader) {
         gpu_mode = "swiftshader_indirect";
     }
 
