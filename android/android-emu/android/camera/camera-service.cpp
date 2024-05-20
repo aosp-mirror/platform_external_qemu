@@ -20,7 +20,6 @@
 
 #include "android/camera/camera-service.h"
 
-#include "aemu/base/threads/WorkerThread.h"
 #include "android/boot-properties.h"
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
@@ -738,18 +737,6 @@ _factory_client_close(void*  opaque)
  * Camera client API
  *******************************************************************************/
 
-enum CameraEventType {
-    OPERATION,
-    END
-};
-struct CameraEvent {
-    CameraEventType type;
-    std::vector<uint8_t> msg;
-    QemudClient* qClient;
-    CameraEvent(CameraEventType type, uint8_t* msg, int msglen, QemudClient* qClient)
-        : type(type), msg(msg, msg + msglen), qClient(qClient) {};
-};
-
 /* Describes an emulated camera client.
  */
 typedef struct CameraClient CameraClient;
@@ -825,7 +812,6 @@ struct CameraClient
     bool                need_frame_cache;
     size_t              frame_cache_size;
     std::vector<uint8_t>    frame_cache;
-    android::base::WorkerThread<CameraEvent> eventHandlerThread;
     CameraClient()
         : device_name(nullptr),
           inp_channel(0),
@@ -851,24 +837,9 @@ struct CameraClient
           frame_count(0),
           started(false),
           need_frame_cache(false),
-          frame_cache_size(0),
-          eventHandlerThread([this](CameraEvent&& event) {
-              switch(event.type) {
-                  case OPERATION:
-                      camera_client_handle_event(this, event.msg.data(),
-                                                 event.msg.size(),
-                                                 event.qClient);
-                      return android::base::WorkerProcessingResult::Continue;
-                  case END:
-                      D("exit handleEvent thread");
-                      return android::base::WorkerProcessingResult::Stop;
-              }
-          }) {};
+          frame_cache_size(0) {};
 
     ~CameraClient() {
-        eventHandlerThread.enqueue({END, nullptr, 0, nullptr});
-        eventHandlerThread.join();
-
         if (camera_info != NULL) {
             ((CameraInfo*)camera_info)->in_use = 0;
         }
