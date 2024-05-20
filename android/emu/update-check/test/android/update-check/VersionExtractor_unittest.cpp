@@ -22,10 +22,10 @@ using android::update_check::VersionExtractor;
 TEST(VersionExtractorTest, validVersion) {
     std::string xml =
             R"(<sdk:sdk-repository
-                xmlns:common="http://schemas.android.com/repository/android/common/01"
-                xmlns:generic="http://schemas.android.com/repository/android/generic/01"
-                xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"
-                xmlns:sdk-common="http://schemas.android.com/sdk/android/repo/common/01"
+                xmlns:common="http://schemas.android.com/repository/android/common/02"
+                xmlns:generic="http://schemas.android.com/repository/android/generic/02"
+                xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"
+                xmlns:sdk-common="http://schemas.android.com/sdk/android/repo/common/03"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> )"
             R"(<remotePackage path="tools">)"
             R"(<revision>)"
@@ -45,10 +45,10 @@ TEST(VersionExtractorTest, toolsToEmulatorPackageChange) {
     {
         std::string xml =
                 R"(<sdk:sdk-repository
-                    xmlns:common="http://schemas.android.com/repository/android/common/01"
-                    xmlns:generic="http://schemas.android.com/repository/android/generic/01"
-                    xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"
-                    xmlns:sdk-common="http://schemas.android.com/sdk/android/repo/common/01"
+                    xmlns:common="http://schemas.android.com/repository/android/common/02"
+                    xmlns:generic="http://schemas.android.com/repository/android/generic/02"
+                    xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"
+                    xmlns:sdk-common="http://schemas.android.com/sdk/android/repo/common/03"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> )"
                 R"(<remotePackage path="tools">)"
                 R"(<revision>)"
@@ -74,10 +74,10 @@ TEST(VersionExtractorTest, toolsToEmulatorPackageChange) {
     {
         std::string xml =
                 R"(<sdk:sdk-repository
-                    xmlns:common="http://schemas.android.com/repository/android/common/01"
-                    xmlns:generic="http://schemas.android.com/repository/android/generic/01"
-                    xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"
-                    xmlns:sdk-common="http://schemas.android.com/sdk/android/repo/common/01"
+                    xmlns:common="http://schemas.android.com/repository/android/common/02"
+                    xmlns:generic="http://schemas.android.com/repository/android/generic/02"
+                    xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"
+                    xmlns:sdk-common="http://schemas.android.com/sdk/android/repo/common/03"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> )"
                 R"(<remotePackage path="tools">)"
                 R"(<revision>)"
@@ -104,7 +104,7 @@ TEST(VersionExtractorTest, toolsToEmulatorPackageChange) {
 
 TEST(VersionExtractorTest, withBuild) {
     std::string xml =
-            R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+            R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
             R"(<remotePackage path="tools">)"
             R"(<!--
             Generated from bid:2665432, branch:nyc_preview_release
@@ -124,7 +124,7 @@ TEST(VersionExtractorTest, withBuild) {
 
 TEST(VersionExtractorTest, withChannel) {
     std::string xml =
-            R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+            R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
             R"(<channel id="ch1">stable</channel>)"
             R"(<remotePackage path="tools">)"
             R"(<!--
@@ -146,7 +146,7 @@ TEST(VersionExtractorTest, withChannel) {
 
 TEST(VersionExtractorTest, pickMaxVersion) {
     std::string xml =
-            R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+            R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
             R"(<remotePackage path="tools">)"
             R"(<revision>)"
             R"(<major>1</major>)"
@@ -177,7 +177,7 @@ TEST(VersionExtractorTest, pickMaxVersion) {
 
 TEST(VersionExtractorTest, pickMaxVersionManyChannels) {
     std::string xml =
-            R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+            R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
                 R"(<channel id="ch1">stable</channel>)"
                 R"(<channel id="ch2">dev</channel>)"
                 R"(<channel id="ch3">beta</channel>)"
@@ -224,7 +224,7 @@ TEST(VersionExtractorTest, pickMaxVersionManyChannels) {
 TEST(VersionExtractorTest, badVersion) {
     // bad xml
     std::string xml =
-            R"(sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+            R"(sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
             R"(<remotePackage path="tools">)"
             R"(<revision>)"
             R"(<major>1</major>)"
@@ -256,7 +256,7 @@ TEST(VersionExtractorTest, badVersion) {
     }
 
     // no 'tool' element
-    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
           R"(<sdk:tool1>)"
           R"(<revision>)"
           R"(<major>1</major>)"
@@ -288,7 +288,7 @@ TEST(VersionExtractorTest, badVersion) {
     }
 
     // no 'revision'
-    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
           R"(<remotePackage path="tools">)"
           R"(<sdk:evision>)"
           R"(<major>1</major>)"
@@ -304,7 +304,7 @@ TEST(VersionExtractorTest, badVersion) {
     }
 
     // no major
-    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
           R"(<remotePackage path="tools">)"
           R"(<revision>)"
           R"(<minor>2</minor>)"
@@ -319,7 +319,7 @@ TEST(VersionExtractorTest, badVersion) {
     }
 
     // no minor
-    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
           R"(<remotePackage path="tools">)"
           R"(<revision>)"
           R"(<major>2</major>)"
@@ -334,7 +334,7 @@ TEST(VersionExtractorTest, badVersion) {
     }
 
     // no micro
-    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
           R"(<remotePackage path="tools">)"
           R"(<revision>)"
           R"(<major>1</major>)"
@@ -349,7 +349,7 @@ TEST(VersionExtractorTest, badVersion) {
     }
 
     // bad number in version
-    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
           R"(<remotePackage path="tools">)"
           R"(<revision>)"
           R"(<major>1asd</major>)"
@@ -365,7 +365,7 @@ TEST(VersionExtractorTest, badVersion) {
     }
 
     // bad number in version 2
-    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
+    xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/03"> )"
           R"(<remotePackage path="tools">)"
           R"(<revision>)"
           R"(<major></major>)"

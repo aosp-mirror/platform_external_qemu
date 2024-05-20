@@ -53,7 +53,7 @@ static const char kDataFileName[] = "emu-update-last-check.ini";
 // TODO: kVersionUrl should not be fixed; XY in repository-XY.xml
 //       might change with studio updates irrelevant to the emulator
 static constexpr std::string_view kVersionUrl =
-        "https://dl.google.com/android/repository/repository2-1.xml";
+        "https://dl.google.com/android/repository/repository2-3.xml";
 
 static const char kNewerVersionMessage[] =
         R"(Your emulator is out of date, please update by launching Android Studio:
