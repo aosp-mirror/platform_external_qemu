@@ -152,18 +152,18 @@ static void bus_unparent(Object *obj)
     bus->parent = NULL;
 }
 
-void qbus_init(void *bus, size_t size, const char *typename,
+void qbus_init(void *bus, size_t size, const char *type_name,
                DeviceState *parent, const char *name)
 {
-    object_initialize(bus, size, typename);
+    object_initialize(bus, size, type_name);
     qbus_init_internal(bus, parent, name);
 }
 
-BusState *qbus_new(const char *typename, DeviceState *parent, const char *name)
+BusState *qbus_new(const char *type_name, DeviceState *parent, const char *name)
 {
     BusState *bus;
 
-    bus = BUS(object_new(typename));
+    bus = BUS(object_new(type_name));
     qbus_init_internal(bus, parent, name);
 
     return bus;
