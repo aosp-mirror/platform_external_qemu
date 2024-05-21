@@ -43,7 +43,7 @@ using android::base::Version;
 using android::studio::UpdateChannel;
 
 const char* const VersionExtractor::kXmlNamespace =
-        "http://schemas.android.com/sdk/android/repo/repository2/01";
+        "http://schemas.android.com/sdk/android/repo/repository2/03";
 
 namespace {
 
