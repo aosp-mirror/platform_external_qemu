@@ -478,6 +478,7 @@ void ToolWindow::on_sleep_timer_done() {
     }
     if (isResizableTransitionInProgress()) {
         setResizableTransitionInProgress(false);
+        updateFoldableButtonVisibility();
     }
     if (mSleepKeySent) {
         mEmulatorWindow->getAdbInterface()->
