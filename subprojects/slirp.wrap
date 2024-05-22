@@ -1,7 +1,0 @@
-[wrap-git]
-url = https://android.googlesource.com/trusty/external/qemu-libslirp
-revision = 26be815b86e8d49add8c9a8b320239b9594ff03d
-diff_files = slirp-threads.diff
-
-[provide]
-slirp = libslirp_dep

@@ -942,6 +942,7 @@ endif
 slirp = not_found
 if not get_option('slirp').auto() or have_system
   slirp = dependency('slirp', required: get_option('slirp'),
+                     fallback: ['libslirp', 'libslirp_dep'],
                      static: get_option('prefer_static'),
                      method: 'pkg-config')
   # slirp < 4.7 is incompatible with CFI support in QEMU.  This is because
