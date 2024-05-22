@@ -93,13 +93,14 @@ typedef enum {
 
 /* Encapsulates a camera device on MacOS */
 @interface MacCamera : NSObject<AVCaptureVideoDataOutputSampleBufferDelegate> {
-  AVCaptureSession *captureSession_;
-  int desiredWidth_;
-  int desiredHeight_;
-  MacCameraDirection cameraDirection_;
-
   CGColorSpaceRef imageColorSpace_;
   vImage_CGImageFormat imageDesiredFormat_;
+
+  int desiredWidth_;
+  int desiredHeight_;
+  AVCaptureSession *captureSession_;
+  MacCameraDirection cameraDirection_;
+
   dispatch_queue_t outputQueue_;
   NSThread *imageProcessingThread_;
   os_unfair_lock inputBufferLock_;
@@ -128,9 +129,10 @@ typedef enum {
  * Return:
  *  0 on success, or !=0 on failure.
  */
-- (int)startCapturingWidth:(int)width
-                    height:(int)height
-                 direction:(const char *)direction;
+- (int)startCapturing:(const char*)device_name
+                width:(int)width
+               height:(int)height
+            direction:(const char *)direction;
 
 /* Captures a frame from the camera device.
  * Param:
@@ -325,10 +327,6 @@ static vImage_Buffer shallowCropToAspectRatio(const vImage_Buffer* src,
   if (!(self = [super init])) {
     return nil;
   }
-  inputBufferLock_ = OS_UNFAIR_LOCK_INIT;
-  outputBufferLock_ = OS_UNFAIR_LOCK_INIT;
-  inputFrameUpdated_ = NO;
-  outputFrameUpdated_ = NO;
 
   imageColorSpace_ = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
   imageDesiredFormat_ = (vImage_CGImageFormat){
@@ -342,34 +340,55 @@ static vImage_Buffer shallowCropToAspectRatio(const vImage_Buffer* src,
     .renderingIntent = kCGRenderingIntentDefault
   };
 
+  desiredWidth_ = 0;
+  desiredHeight_ = 0;
+  captureSession_ = NULL;
+
+  inputBufferLock_ = OS_UNFAIR_LOCK_INIT;
+  outputBufferLock_ = OS_UNFAIR_LOCK_INIT;
+  inputFrameUpdated_ = NO;
+  outputFrameUpdated_ = NO;
+
+  return self;
+}
+
+- (int)startCapturing:(const char*)device_name
+                width:(int)width
+               height:(int)height
+            direction:(const char*)direction {
+  D("%s: call. start capture session, device_name=%s, "
+    "width=%d, height=%d, direction=%s\n",
+    __func__, device_name, width, height, direction);
+  desiredWidth_ = width;
+  desiredHeight_ = height;
+  cameraDirection_ = (strcmp("back", direction) == 0
+                      ? kMacCameraBackward : kMacCameraForward);
+
   AVCaptureDevice *captureDevice;
 
   /* Obtain the capture device, make sure it's not used by another
    * application, and open it. */
-  if (name == NULL || *name  == '\0') {
+  if (device_name == NULL || *device_name  == '\0') {
     captureDevice =
         [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
   } else {
-    NSString *deviceName = [NSString stringWithFormat:@"%s", name];
+    NSString *deviceName = [NSString stringWithFormat:@"%s", device_name];
     captureDevice = [AVCaptureDevice deviceWithUniqueID:deviceName];
   }
   if (!captureDevice) {
     E("There are no available video devices found.");
-    [self release];
-    return nil;
+    return -1;
   }
   if ([captureDevice isInUseByAnotherApplication]) {
     E("Default camera device is in use by another application.");
-    [self release];
-    return nil;
+    return -1;
   }
 
   /* Create capture session. */
   captureSession_ = [[AVCaptureSession alloc] init];
   if (!captureSession_) {
     E("Unable to create capure session.");
-    [self release];
-    return nil;
+    return -1;
   } else {
     D("%s: successfully created capture session\n", __func__);
   }
@@ -386,8 +405,7 @@ static vImage_Buffer shallowCropToAspectRatio(const vImage_Buffer* src,
   } else {
     E("%s: cannot add camera capture input device (%s)\n", __func__,
       [[videoDeviceError localizedDescription] UTF8String]);
-    [self release];
-    return nil;
+    return -1;
   }
 
   /* Create an output device and register it with the capture session. */
@@ -406,12 +424,14 @@ static vImage_Buffer shallowCropToAspectRatio(const vImage_Buffer* src,
     D("%s: added video out\n", __func__);
   } else {
     D("%s: could not add video out\n", __func__);
-    [self release];
-    return nil;
+    return -1;
   }
 
   imageProcessingThread_ = [[NSThread alloc] initWithTarget:self selector:@selector(imageProcessingLoop) object:nil];
-  return self;
+
+  [captureSession_ startRunning];
+  [imageProcessingThread_ start];
+  return 0;
 }
 
 - (void)stopCapture {
@@ -441,23 +461,6 @@ static vImage_Buffer shallowCropToAspectRatio(const vImage_Buffer* src,
   free(readFrameShadowBuffer_.data);
 
   [super dealloc];
-}
-
-- (int)startCapturingWidth:(int)width
-                    height:(int)height
-                 direction:(const char*)direction {
-  D("%s: call. start capture session, width=%d, height=%d\n", __func__, width, height);
-  desiredWidth_ = width;
-  desiredHeight_ = height;
-
-  cameraDirection_ = (strcmp("back", direction) == 0
-                      ? kMacCameraBackward : kMacCameraForward);
-
-  if (![captureSession_ isRunning]) {
-    [captureSession_ startRunning];
-    [imageProcessingThread_ start];
-  }
-  return 0;
 }
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput
@@ -575,21 +578,6 @@ _camera_device_free(MacCameraDevice* cd)
   }
 }
 
-/* Resets camera device after capturing.
- * Since new capture request may require different frame dimensions we must
- * reset frame info cached in the capture window. The only way to do that would
- * be closing, and reopening it again. */
-static void
-_camera_device_reset(MacCameraDevice* cd)
-{
-  if (cd != NULL && cd->device) {
-    [cd->device stopCapture];
-    [cd->device release];
-    cd->device = [[MacCamera alloc] initWithName:cd->device_name];
-    cd->started = 0;
-  }
-}
-
 /*******************************************************************************
  *                     CameraDevice API
  ******************************************************************************/
@@ -658,8 +646,8 @@ camera_device_stop_capturing(CameraDevice* cd)
     return -1;
   }
 
-  /* Reset capture settings, so next call to capture can set its own. */
-  _camera_device_reset(mcd);
+  [mcd->device stopCapture];
+  mcd->started = 0;
 
   return 0;
 }
@@ -685,9 +673,10 @@ int camera_device_read_frame(CameraDevice* cd,
   }
 
   if (!mcd->started) {
-    int result = [mcd->device startCapturingWidth:mcd->frame_width
-                                           height:mcd->frame_height
-                                        direction:direction];
+    int result = [mcd->device startCapturing:mcd->device_name
+                                       width:mcd->frame_width
+                                      height:mcd->frame_height
+                                   direction:direction];
     if (result) return -1;
     mcd->started = 1;
   }
