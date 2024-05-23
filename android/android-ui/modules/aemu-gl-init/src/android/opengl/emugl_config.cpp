@@ -32,6 +32,21 @@
 #include "host-common/feature_control.h"
 #include "host-common/opengles.h"
 #include "vulkan/vulkan.h"
+
+#if defined(__APPLE__)
+#if (VK_HEADER_VERSION > 216)
+#include <vulkan/vulkan_beta.h>
+#else
+// Manually define MoltenVK related parts until we update the Vulkan headers
+#ifndef VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME
+#define VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME \
+    "VK_KHR_portability_enumeration"
+#endif
+static const uint32_t VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR =
+        0x00000001;
+#endif
+#endif
+
 #ifndef _WIN32
 #include <dlfcn.h>
 #endif
@@ -253,7 +268,7 @@ void emuglConfig_get_vulkan_hardware_gpu(char** vendor,
 #if defined(_WIN32)
     HMODULE library = LoadLibraryA(mylibname);
     if (!library) {
-        derror("%s: cannot open vulkan lib %s\n", __func__, mylibname);
+        dwarning("%s: cannot open vulkan lib %s\n", __func__, mylibname);
         return;
     }
     auto* pvkCreateInstance = reinterpret_cast<PFN_vkCreateInstance>(
@@ -308,16 +323,23 @@ void emuglConfig_get_vulkan_hardware_gpu(char** vendor,
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
 
-    uint32_t extensionCount = 0;
-    createInfo.enabledExtensionCount = extensionCount;
-    createInfo.ppEnabledExtensionNames = nullptr;
+    std::vector<const char*> extNames;
+
+#if defined(__APPLE__)
+    // MoltenVK requires portability enumeratiion and extension enabled
+    createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+    extNames.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#endif
+
+    createInfo.enabledExtensionCount = (uint32_t)extNames.size();
+    createInfo.ppEnabledExtensionNames = extNames.data();
 
     VkInstance instance;
 
     VkResult result = pvkCreateInstance(&createInfo, 0, &instance);
 
     if (result != VK_SUCCESS) {
-        dwarning("%s: Failed to create vulkan instance error code: %d\n",
+        derror("%s: Failed to create vulkan instance error code: %d\n",
                  __func__, result);
         return;
     } else {
@@ -328,7 +350,7 @@ void emuglConfig_get_vulkan_hardware_gpu(char** vendor,
     result = pvkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
     if (result != VK_SUCCESS) {
         pvkDestroyInstance(instance, nullptr);
-        dwarning("%s: Failed to query physical devices count %d\n", __func__,
+        derror("%s: Failed to query physical devices count %d\n", __func__,
                  result);
         return;
     } else {
@@ -341,7 +363,7 @@ void emuglConfig_get_vulkan_hardware_gpu(char** vendor,
             pvkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
     if (result != VK_SUCCESS) {
         pvkDestroyInstance(instance, nullptr);
-        dwarning("%s: Failed to query physical devices %d\n", __func__, result);
+        derror("%s: Failed to query physical devices %d\n", __func__, result);
         return;
     }
 
@@ -495,7 +517,7 @@ bool emuglConfig_init(EmuglConfig* config,
 #ifdef __APPLE__
     force_swiftshader_to_swangle = true;
 #endif
-#ifdef __WIN32
+#ifdef _WIN32
     swangle_backend_name = nullptr;
 #endif
 
@@ -594,8 +616,16 @@ bool emuglConfig_init(EmuglConfig* config,
         }
     }
     // b/328275986: Turn off ANGLE because it breaks.
-    if (!strcmp("angle", gpu_mode) || !strcmp("angle_indirect", gpu_mode)
-        || !strcmp("angle9", gpu_mode) || !strcmp("angle9_indirect", gpu_mode)) {
+    bool force_swiftshader = (!strcmp("angle", gpu_mode) ||
+                              !strcmp("angle_indirect", gpu_mode) ||
+                              !strcmp("angle9", gpu_mode) ||
+                              !strcmp("angle9_indirect", gpu_mode));
+#ifdef _WIN32
+    // Also turn off swangle_indirect mode on Windows
+    force_swiftshader =
+            force_swiftshader || (!strcmp("swangle_indirect", gpu_mode));
+#endif
+    if (force_swiftshader) {
         gpu_mode = "swiftshader_indirect";
     }
 

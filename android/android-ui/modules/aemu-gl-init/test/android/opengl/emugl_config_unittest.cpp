@@ -357,6 +357,10 @@ TEST(EmuglConfig, initNxWithSwiftshader) {
 }
 
 TEST(EmuglConfig, initNxWithSwANGLE) {
+#ifdef _WIN32
+    // b/342092666: Swangle mode on windows is disabled.
+    GTEST_SKIP() << "Windows uses swiftshader.";
+#endif
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
@@ -416,6 +420,10 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithSwiftshader) {
 }
 
 TEST(EmuglConfig, initChromeRemoteDesktopWithSwAngle) {
+#ifdef _WIN32
+    // b/342092666: Swangle mode on windows is disabled.
+    GTEST_SKIP() << "Windows uses swiftshader.";
+#endif
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
