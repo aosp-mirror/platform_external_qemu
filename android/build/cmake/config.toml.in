@@ -36,10 +36,12 @@ either = { path = "${AOSP_ROOT}/external/rust/crates/either" }
 env_logger = { path = "${AOSP_ROOT}/external/rust/crates/env_logger" }
 fastrand = { path = "${AOSP_ROOT}/external/rust/crates/fastrand" }
 fnv = { path = "${AOSP_ROOT}/external/rust/crates/fnv" }
+futures = { path = "${AOSP_ROOT}/external/rust/crates/futures" }
 futures-channel = { path = "${AOSP_ROOT}/external/rust/crates/futures-channel" }
 futures-core = { path = "${AOSP_ROOT}/external/rust/crates/futures-core" }
 futures-executor = { path = "${AOSP_ROOT}/external/rust/crates/futures-executor" }
 futures-io = { path = "${AOSP_ROOT}/external/rust/crates/futures-io" }
+futures-macro = { path = "${AOSP_ROOT}/external/rust/crates/futures-macro" }
 futures-sink = { path = "${AOSP_ROOT}/external/rust/crates/futures-sink" }
 futures-task = { path = "${AOSP_ROOT}/external/rust/crates/futures-task" }
 futures-util = { path = "${AOSP_ROOT}/external/rust/crates/futures-util" }
@@ -59,6 +61,7 @@ itoa = { path = "${AOSP_ROOT}/external/rust/crates/itoa" }
 lazy_static = { path = "${AOSP_ROOT}/external/rust/crates/lazy_static" }
 lazycell = { path = "${AOSP_ROOT}/external/rust/crates/lazycell" }
 libc = { path = "${AOSP_ROOT}/external/rust/crates/libc" }
+libm = { path = "${AOSP_ROOT}/external/rust/crates/libm" }
 libz-sys = { path = "${AOSP_ROOT}/external/rust/crates/libz-sys" }
 libloading = { path = "${AOSP_ROOT}/external/rust/crates/libloading" }
 lock_api = { path = "${AOSP_ROOT}/external/rust/crates/lock_api" }
