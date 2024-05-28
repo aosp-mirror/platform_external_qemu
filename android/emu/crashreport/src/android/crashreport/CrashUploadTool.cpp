@@ -215,7 +215,8 @@ bool PrintMinidumpProcess(const Options& options) {
                 if (annotation.type !=
                     static_cast<uint16_t>(
                             crashpad::Annotation::Type::kString)) {
-                    json_annotation["value"] = vectorToHexString(annotation.value);
+                    json_annotation["value"] =
+                            vectorToHexString(annotation.value);
                 } else {
                     std::string value(reinterpret_cast<const char*>(
                                               annotation.value.data()),
@@ -336,22 +337,24 @@ static bool UploadCrashReports(
             crashDatabase->RequestUpload(report.uuid);
             android::crashreport::ProcessPendingReport(crashDatabase.get(),
                                                        report);
-            // We should have a report id, fetch it!
-            CrashReportDatabase::Report updatedReport;
-            if (crashDatabase->LookUpCrashReport(report.uuid, &updatedReport) ==
-                CrashReportDatabase::OperationStatus::kNoError) {
-                printf("Report %s is available remotely as %s\n",
-                       updatedReport.uuid.ToString().c_str(),
-                       updatedReport.id.c_str());
-            }
+            printf("Requested upload for report %s\n",
+                   report.uuid.ToString().c_str());
         }
     }
 
     reports.clear();
     crashDatabase->GetCompletedReports(&reports);
     for (const auto& report : reports) {
-        printf("Report %s is available remotely as %s\n",
-               report.uuid.ToString().c_str(), report.id.c_str());
+        if (report.id.empty()) {
+            printf("Report %s is marked as completed but (not yet?) remotely "
+                   "available\n",
+                   report.uuid.ToString().c_str());
+            printf("Please preserve the minidump found here: ");
+            standard_out << report.file_path.value() << std::endl;
+        } else {
+            printf("Report %s is available remotely as: %s\n",
+                   report.uuid.ToString().c_str(), report.id.c_str());
+        }
     }
 
     return true;
