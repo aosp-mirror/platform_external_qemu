@@ -1618,6 +1618,11 @@ extern "C" int main(int argc, char** argv) {
     async_query_host_gpu_start();
 
     const char* executable = argv[0];
+    // QtWebEngine requires the executable name in argv, so let's save it here,
+    // as argv is modified below.
+    char* qt_argv = argv[0];
+    int qt_argc = 1;
+
     android::ParameterList args = {executable};
     AvdInfo* avd;
     int exitStatus = 0;
@@ -3150,11 +3155,7 @@ extern "C" int main(int argc, char** argv) {
         dprint("skin_winsys_init and UI starting at uptime %" PRIu64 " ms",
                get_uptime_ms());
 #endif
-        // Don't use argc/argv here, as it has been modified prior to this point.
-        // Use args instead, as Qt6's QtWebEngine requires the program name in argv.
-        std::string emu_exe(executable);
-        char* emu_argv = &emu_exe[0];
-        skin_winsys_init_args(1, &emu_argv);
+        skin_winsys_init_args(qt_argc, &qt_argv);
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
         }
