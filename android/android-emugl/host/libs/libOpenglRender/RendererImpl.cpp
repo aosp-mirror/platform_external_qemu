@@ -550,7 +550,8 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
                    uint32_t height,
                    uint32_t format,
                    uint32_t fwkFormat,
-                   uint32_t handle) {
+                   uint32_t handle,
+                   bool linear) {
                     FrameBuffer::getFB()->createColorBufferWithHandle(
                             width, height, (GLenum)format,
                             (FrameworkFormat)fwkFormat, handle);
