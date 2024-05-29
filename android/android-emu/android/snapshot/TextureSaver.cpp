@@ -51,7 +51,7 @@ void TextureSaver::saveTexture(uint32_t texId, const saver_t& saver) {
                         [texId](FileIndex::Texture& tex) {
                             return tex.texId == texId;
                         }));
-    mIndex.textures.push_back({texId, ftello64(mStream.get())});
+    mIndex.textures.push_back({texId, ftello(mStream.get())});
 
     CompressingStream stream(mStream);
     saver(&stream, &mBuffer);
@@ -61,7 +61,7 @@ void TextureSaver::done() {
     if (mFinished) {
         return;
     }
-    mIndex.startPosInFile = ftello64(mStream.get());
+    mIndex.startPosInFile = ftello(mStream.get());
     writeIndex();
     mEndTime = System::get()->getHighResTimeUs();
 #if SNAPSHOT_PROFILE > 1
@@ -75,7 +75,7 @@ void TextureSaver::done() {
 
 void TextureSaver::writeIndex() {
 #if SNAPSHOT_PROFILE > 1
-    auto start = ftello64(mStream.get());
+    auto start = ftello(mStream.get());
 #endif
 
     mStream.putBe32(static_cast<uint32_t>(mIndex.version));
@@ -84,13 +84,13 @@ void TextureSaver::writeIndex() {
         mStream.putBe32(b.texId);
         mStream.putBe64(static_cast<uint64_t>(b.filePos));
     }
-    auto end = ftello64(mStream.get());
+    auto end = ftello(mStream.get());
     mDiskSize = uint64_t(end);
 #if SNAPSHOT_PROFILE > 1
     dprint("texture: index size: %d", int(end - start));
 #endif
 
-    fseeko64(mStream.get(), 0, SEEK_SET);
+    fseeko(mStream.get(), 0, SEEK_SET);
     mStream.putBe64(static_cast<uint64_t>(mIndex.startPosInFile));
 }
 
