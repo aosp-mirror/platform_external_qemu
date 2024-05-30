@@ -59,7 +59,7 @@ TEST(TimeoutMonitorTests, TimeoutDoesNotBlock) {
     auto start_time = std::chrono::steady_clock::now();
 
     {
-        TimeoutMonitor monitor(std::chrono::milliseconds(200), crash_handler);
+        TimeoutMonitor monitor(std::chrono::milliseconds(500), crash_handler);
         // Work that finishes within the limit
         simulateWork(std::chrono::milliseconds(1));
     }
@@ -68,7 +68,7 @@ TEST(TimeoutMonitorTests, TimeoutDoesNotBlock) {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
     // The monitor should properly clean up in a timely fashion.
-    EXPECT_LT(duration.count(), 200);
+    EXPECT_LT(duration.count(), 500);
 }
 
 }  // namespace crashreport

@@ -158,7 +158,6 @@ bool GLWidget::ensureInit() {
         return false;
     }
 
-
     makeContextCurrent();
     mCanvas.reset(new GLCanvas(
         nearestPOT(realPixelsWidth()),
@@ -166,7 +165,6 @@ bool GLWidget::ensureInit() {
         mGLES2));
     mTextureDraw.reset(new TextureDraw(mGLES2));
     mValid = initGL();
-
     return mValid;
 }
 
@@ -182,6 +180,9 @@ bool GLWidget::makeContextCurrent() {
 }
 
 void GLWidget::renderFrame() {
+    if (!ensureInit()) {
+        return;
+    }
     if (!readyForRendering()) {
         return;
     }
@@ -209,9 +210,7 @@ void GLWidget::renderFrame() {
 }
 
 void GLWidget::paintEvent(QPaintEvent*) {
-    if (ensureInit()) {
-        renderFrame();
-    }
+    renderFrame();
 }
 
 void GLWidget::showEvent(QShowEvent*) {
@@ -226,9 +225,7 @@ void GLWidget::showEvent(QShowEvent*) {
         mFirstShow = false;
         connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen*)),
                 this, SLOT(handleScreenChange(QScreen*)));
-        if (ensureInit()) {
-            renderFrame();
-        }
+        renderFrame();
         update();
     }
 }
