@@ -98,20 +98,23 @@ typedef enum {
 
   int desiredWidth_;
   int desiredHeight_;
-  AVCaptureSession *captureSession_;
   MacCameraDirection cameraDirection_;
 
+  AVCaptureDevice *captureDevice_;
+  AVCaptureVideoDataOutput *outputDevice_;
   dispatch_queue_t outputQueue_;
-  NSThread *imageProcessingThread_;
-  os_unfair_lock inputBufferLock_;
+  AVCaptureSession *captureSession_;
+
   os_unfair_lock outputBufferLock_;
-  BOOL inputFrameUpdated_;
   BOOL outputFrameUpdated_;
-  AndroidCoarseOrientation inputFrameOrientation_;
-  vImage_Buffer inputWriteBuffer_;    // this is where captureOutput writes frames into
-  vImage_Buffer inputReadBuffer_;     // this is where imageProcessingImpl reads frames from
   vImage_Buffer readFrameBuffer_;     // this is where imageProcessingImpl writes frames into
   vImage_Buffer readFrameShadowBuffer_;  // readFrame own copy
+
+  // processCameraFrame state
+  vImage_Buffer inputFrame_;
+  vImage_Buffer rotateBuffer_;
+  vImage_Buffer outputFrame_;
+  void* scaleTempBuffer_;
 }
 
 /* Initializes MacCamera instance.
@@ -191,162 +194,20 @@ static vImage_Buffer shallowCropToAspectRatio(const vImage_Buffer* src,
   return cropped;
 }
 
-- (void)imageProcessingImpl:(vImage_Buffer*)inputFrame
-                orientation:(AndroidCoarseOrientation)orientation
-                rotateBuffer:(vImage_Buffer*)rotateBuffer
-                outputFrame:(vImage_Buffer*)outputFrame
-                pScaleTempBuffer:(void**)pScaleTempBuffer {
-  vImage_Error error;
-  vImage_Buffer* rotatedFrame;
-
-  if (orientation == ANDROID_COARSE_PORTRAIT ||
-      orientation == ANDROID_COARSE_REVERSE_PORTRAIT) {
-    if (rotateBuffer->width != inputFrame->height ||
-        rotateBuffer->height != inputFrame->width) {
-      free(rotateBuffer->data);
-      rotateBuffer->data = NULL;
-      rotateBuffer->height = 0;
-      free(*pScaleTempBuffer);
-      *pScaleTempBuffer = NULL;
-    }
-
-    if (!rotateBuffer->data) {
-      error = vImageBuffer_Init(rotateBuffer, inputFrame->width, inputFrame->height,
-                                32, kvImageNoFlags);
-      if (error != kvImageNoError) {
-        E("%s: error in vImageBuffer_Init rotateBuffer=%p, height=%d, width=%d: %ld\n",
-          __func__, rotateBuffer, inputFrame->width, inputFrame->height, error);
-        return;
-      }
-    }
-
-    const Pixel_8888 backColor = {0, 0, 0, 0};
-    const int rotation = (cameraDirection_ ==  kMacCameraBackward ?
-                    (1 + orientation) % 4 :
-                    (5 - orientation) % 4);
-    error = vImageRotate90_ARGB8888(inputFrame, rotateBuffer,
-                                    rotation, backColor, kvImageNoFlags);
-    if (error != kvImageNoError) {
-      E("%s: error in vImageRotate90_ARGB8888: %ld\n", __func__, error);
-      return;
-    }
-
-    rotatedFrame = rotateBuffer;
-  } else {
-    rotatedFrame = inputFrame;
-  }
-
-  const vImage_Buffer cropped =
-    shallowCropToAspectRatio(rotatedFrame, desiredWidth_, desiredHeight_);
-
-  {
-    if (desiredWidth_ != outputFrame->width ||
-        desiredHeight_ != outputFrame->height) {
-      free(outputFrame->data);
-      outputFrame->data = NULL;
-      outputFrame->height = 0;
-      free(*pScaleTempBuffer);
-      *pScaleTempBuffer = NULL;
-    }
-
-    if (!outputFrame->data) {
-      error = vImageBuffer_Init(outputFrame,
-                                desiredHeight_, desiredWidth_, 32, kvImageNoFlags);
-      if (error != kvImageNoError) {
-        E("%s: error in vImageBuffer_Init outputFrame=%p, height=%d, width=%d: %ld\n",
-          __func__, outputFrame, desiredHeight_, desiredWidth_, error);
-        return;
-      }
-    }
-
-    if (!*pScaleTempBuffer) {
-      *pScaleTempBuffer = malloc(
-        vImageScale_ARGB8888(&cropped, outputFrame,
-                             NULL, kvImageGetTempBufferSize));
-    }
-    error = vImageScale_ARGB8888(&cropped, outputFrame,
-                                 *pScaleTempBuffer, kvImageNoFlags);
-    if (error != kvImageNoError) {
-      E("%s: error in vImageScale_ARGB8888: "
-        "src(%p)={data=%p, rowBytes=%d, width=%d, height=%d}, "
-        "dst(%p)={data=%p, rowBytes=%d, width=%d, height=%d}: %ld\n",
-        __func__, &cropped, cropped.data, cropped.rowBytes,
-        cropped.width, cropped.height,
-        outputFrame, outputFrame->rowBytes, outputFrame->data,
-        outputFrame->width, outputFrame->height,
-        error);
-      return;
-    }
-  }
-
-  os_unfair_lock_lock(&outputBufferLock_);
-  swapImages(&readFrameBuffer_, outputFrame);
-  outputFrameUpdated_ = YES;
-  os_unfair_lock_unlock(&outputBufferLock_);
-}
-
-- (void)imageProcessingLoop {
-  vImage_Buffer inputFrame = {};
-  vImage_Buffer rotateBuffer = {};
-  vImage_Buffer outputFrame = {};
-  void* scaleTempBuffer = NULL;
-  AndroidCoarseOrientation orientation;
-
-  while (![imageProcessingThread_ isCancelled]) {
-    BOOL hasNewFrame;
-
-    os_unfair_lock_lock(&inputBufferLock_);
-    if (inputFrameUpdated_) {
-      swapImages(&inputFrame, &inputReadBuffer_);
-      orientation = inputFrameOrientation_;
-      inputFrameUpdated_ = NO;
-      hasNewFrame = YES;
-    } else {
-      hasNewFrame = NO;
-    }
-    os_unfair_lock_unlock(&inputBufferLock_);
-
-    if (hasNewFrame) {
-      [self imageProcessingImpl:&inputFrame
-            orientation:orientation
-            rotateBuffer:&rotateBuffer
-            outputFrame:&outputFrame
-            pScaleTempBuffer:&scaleTempBuffer];
-    } else {
-      [NSThread sleepForTimeInterval:0.025];
-    }
-  }
-
-  free(scaleTempBuffer);
-  free(outputFrame.data);
-  free(rotateBuffer.data);
-  free(inputFrame.data);
-}
-
 - (instancetype)initWithName:(const char*)name {
   if (!(self = [super init])) {
     return nil;
   }
 
-  imageColorSpace_ = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
-  imageDesiredFormat_ = (vImage_CGImageFormat){
-    .bitsPerComponent = 8,
-    .bitsPerPixel = 32,
-    .colorSpace = imageColorSpace_,
-    .bitmapInfo =
-    (CGBitmapInfo)(kCGImageByteOrder32Big | kCGImageAlphaNoneSkipFirst),
-    .version = 0,
-    .decode = nil,
-    .renderingIntent = kCGRenderingIntentDefault
-  };
-
+  imageColorSpace_ = NULL;
   desiredWidth_ = 0;
   desiredHeight_ = 0;
+  captureDevice_ = NULL;
+  outputDevice_ = NULL;
+  outputQueue_ = NULL;
   captureSession_ = NULL;
 
-  inputBufferLock_ = OS_UNFAIR_LOCK_INIT;
   outputBufferLock_ = OS_UNFAIR_LOCK_INIT;
-  inputFrameUpdated_ = NO;
   outputFrameUpdated_ = NO;
 
   return self;
@@ -375,131 +236,266 @@ static vImage_Buffer shallowCropToAspectRatio(const vImage_Buffer* src,
     NSString *deviceName = [NSString stringWithFormat:@"%s", device_name];
     captureDevice = [AVCaptureDevice deviceWithUniqueID:deviceName];
   }
+
   if (!captureDevice) {
     E("There are no available video devices found.");
     return -1;
   }
   if ([captureDevice isInUseByAnotherApplication]) {
+    [captureDevice release];
     E("Default camera device is in use by another application.");
     return -1;
   }
 
-  /* Create capture session. */
-  captureSession_ = [[AVCaptureSession alloc] init];
-  if (!captureSession_) {
-    E("Unable to create capure session.");
-    return -1;
-  } else {
-    D("%s: successfully created capture session\n", __func__);
-  }
+  AVCaptureSession* captureSession = [AVCaptureSession new];
 
   /* Create an input device and register it with the capture session. */
   NSError *videoDeviceError;
   AVCaptureDeviceInput *input_device =
-      [[[AVCaptureDeviceInput alloc] initWithDevice:captureDevice
-                                              error:&videoDeviceError]
-       autorelease];
-  if ([captureSession_ canAddInput:input_device]) {
-    [captureSession_ addInput:input_device];
+      [[AVCaptureDeviceInput alloc] initWithDevice:captureDevice
+                                             error:&videoDeviceError];
+  if ([captureSession canAddInput:input_device]) {
+    [captureSession addInput:input_device];
     D("%s: successfully added capture input device\n", __func__);
   } else {
+    [captureSession release];
+    [captureDevice release];
     E("%s: cannot add camera capture input device (%s)\n", __func__,
       [[videoDeviceError localizedDescription] UTF8String]);
     return -1;
   }
 
   /* Create an output device and register it with the capture session. */
-  outputQueue_ = dispatch_queue_create("com.google.goldfish.mac.camera.capture",
-                                       DISPATCH_QUEUE_SERIAL);
-  AVCaptureVideoDataOutput *outputDevice =
-      [[[AVCaptureVideoDataOutput alloc] init] autorelease];
-  outputDevice.videoSettings = @{
-    (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32ARGB),
-  };
-  [outputDevice setSampleBufferDelegate:self queue:outputQueue_];
-  outputDevice.alwaysDiscardsLateVideoFrames = YES;
+  AVCaptureVideoDataOutput *outputDevice = [AVCaptureVideoDataOutput new];
 
-  if ([captureSession_ canAddOutput:outputDevice] ) {
-    [captureSession_ addOutput:outputDevice];
+  if ([captureSession canAddOutput:outputDevice]) {
+    [captureSession addOutput:outputDevice];
     D("%s: added video out\n", __func__);
   } else {
+    [outputDevice release];
+    [captureSession release];
+    [captureDevice release];
     D("%s: could not add video out\n", __func__);
     return -1;
   }
 
-  imageProcessingThread_ = [[NSThread alloc] initWithTarget:self selector:@selector(imageProcessingLoop) object:nil];
+  dispatch_queue_t outputQueue =
+    dispatch_queue_create("com.google.goldfish.mac.camera.capture",
+                          DISPATCH_QUEUE_SERIAL);
+  if (!outputQueue) {
+    [outputDevice release];
+    [captureSession release];
+    [captureDevice release];
+    D("%s: dispatch_queue_create failed\n", __func__);
+    return -1;
+  }
 
-  [captureSession_ startRunning];
-  [imageProcessingThread_ start];
+  [outputDevice setSampleBufferDelegate:self queue:outputQueue];
+
+  imageColorSpace_ = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+  imageDesiredFormat_ = (vImage_CGImageFormat){
+    .bitsPerComponent = 8,
+    .bitsPerPixel = 32,
+    .colorSpace = imageColorSpace_,
+    .bitmapInfo =
+    (CGBitmapInfo)(kCGImageByteOrder32Big | kCGImageAlphaNoneSkipFirst),
+    .version = 0,
+    .decode = nil,
+    .renderingIntent = kCGRenderingIntentDefault
+  };
+
+  captureDevice_ = captureDevice;
+  outputDevice_ = outputDevice;
+  outputQueue_ = outputQueue;
+  captureSession_ = captureSession;
+
+  [captureSession startRunning];
   return 0;
 }
 
 - (void)stopCapture {
-  if (imageProcessingThread_) {
-    [imageProcessingThread_ cancel];
-  }
-
   if (captureSession_) {
     [captureSession_ stopRunning];
-    [captureSession_ release];
-  }
 
-  if (imageProcessingThread_) {
-    while ([imageProcessingThread_ isFinished] == NO) {
-      [NSThread sleepForTimeInterval:0.05];
+    for (AVCaptureInput* input in captureSession_.inputs) {
+      [captureSession_ removeInput:input];
+      [input release];
     }
-  }
+    for (AVCaptureOutput* output in captureSession_.outputs) {
+      [captureSession_ removeOutput:output];
+      [output release];
+    }
 
-  CGColorSpaceRelease(imageColorSpace_);
-  dispatch_release(outputQueue_);
+    [outputDevice_ setSampleBufferDelegate:nil queue:nil];
+
+    [captureSession_ release];
+    captureSession_ = NULL;
+    [captureDevice_ release];
+    captureDevice_ = NULL;
+    [outputDevice_ release];
+    outputDevice_ = NULL;
+
+    dispatch_release(outputQueue_);
+    outputQueue_ = NULL;
+
+    CGColorSpaceRelease(imageColorSpace_);
+    imageColorSpace_ = NULL;
+  }
 }
 
 - (void)dealloc {
-  free(inputWriteBuffer_.data);
-  free(inputReadBuffer_.data);
   free(readFrameBuffer_.data);
   free(readFrameShadowBuffer_.data);
 
+  free(inputFrame_.data);
+  free(rotateBuffer_.data);
+  free(outputFrame_.data);
+  free(scaleTempBuffer_);
+
   [super dealloc];
+}
+
+static BOOL copyImageFromCamera(CGColorSpaceRef colorSpace,
+                               const vImage_CGImageFormat* desiredFormat,
+                               CMSampleBufferRef src,
+                               vImage_Buffer* dst) {
+  CVImageBufferRef srcFrame = CMSampleBufferGetImageBuffer(src);
+  vImageCVImageFormatRef srcFormat =
+      vImageCVImageFormat_CreateWithCVPixelBuffer(srcFrame);
+  if (!srcFormat) {
+    E("%s: NULL return from vImageCVImageFormat_CreateWithCVPixelBuffer\n", __func__);
+    return NO;
+  }
+
+  vImage_Error error;
+  error = vImageCVImageFormat_SetColorSpace(srcFormat, colorSpace);
+  if (error != kvImageNoError) {
+    E("%s: error in vImageCVImageFormat_SetColorSpace: %ld\n", __func__, error);
+    vImageCVImageFormat_Release(srcFormat);
+    return NO;
+  }
+
+  const vImage_Flags flags = dst->data ? kvImageNoAllocate : kvImageNoFlags;
+  error = vImageBuffer_InitWithCVPixelBuffer(dst, desiredFormat,
+                                             srcFrame, srcFormat, nil, flags);
+  vImageCVImageFormat_Release(srcFormat);
+
+  if (error != kvImageNoError) {
+    E("%s: error in vImageBuffer_InitWithCVPixelBuffer inputWriteBuffer_: %ld\n",
+      __func__, error);
+    return NO;
+  }
+
+  return YES;
+}
+
+- (void)processCameraFrame:(CMSampleBufferRef)inputFrame
+               orientation:(const AndroidCoarseOrientation)orientation {
+  const BOOL r = copyImageFromCamera(imageColorSpace_, &imageDesiredFormat_,
+                          inputFrame, &inputFrame_);
+  CFRelease(inputFrame);
+  if (!r) {
+    return;
+  }
+
+  vImage_Error error;
+  vImage_Buffer* rotatedFrame;
+
+  if (orientation == ANDROID_COARSE_PORTRAIT ||
+      orientation == ANDROID_COARSE_REVERSE_PORTRAIT) {
+    if (rotateBuffer_.width != inputFrame_.height ||
+        rotateBuffer_.height != inputFrame_.width) {
+      free(rotateBuffer_.data);
+      rotateBuffer_.data = NULL;
+      rotateBuffer_.height = 0;
+      free(scaleTempBuffer_);
+      scaleTempBuffer_ = NULL;
+    }
+
+    if (!rotateBuffer_.data) {
+      error = vImageBuffer_Init(&rotateBuffer_, inputFrame_.width, inputFrame_.height,
+                                32, kvImageNoFlags);
+      if (error != kvImageNoError) {
+        E("%s: error in vImageBuffer_Init rotateBuffer=%p, height=%d, width=%d: %ld\n",
+          __func__, &rotateBuffer_, inputFrame_.width, inputFrame_.height, error);
+        return;
+      }
+    }
+
+    const Pixel_8888 backColor = {0, 0, 0, 0};
+    const int rotation = (cameraDirection_ ==  kMacCameraBackward ?
+                    (1 + orientation) % 4 :
+                    (5 - orientation) % 4);
+    error = vImageRotate90_ARGB8888(&inputFrame_, &rotateBuffer_,
+                                    rotation, backColor, kvImageNoFlags);
+    if (error != kvImageNoError) {
+      E("%s: error in vImageRotate90_ARGB8888: %ld\n", __func__, error);
+      return;
+    }
+
+    rotatedFrame = &rotateBuffer_;
+  } else {
+    rotatedFrame = &inputFrame_;
+  }
+
+  const vImage_Buffer cropped =
+    shallowCropToAspectRatio(rotatedFrame, desiredWidth_, desiredHeight_);
+
+  {
+    if (desiredWidth_ != outputFrame_.width ||
+        desiredHeight_ != outputFrame_.height) {
+      free(outputFrame_.data);
+      outputFrame_.data = NULL;
+      outputFrame_.height = 0;
+      free(scaleTempBuffer_);
+      scaleTempBuffer_ = NULL;
+    }
+
+    if (!outputFrame_.data) {
+      error = vImageBuffer_Init(&outputFrame_,
+                                desiredHeight_, desiredWidth_, 32, kvImageNoFlags);
+      if (error != kvImageNoError) {
+        E("%s: error in vImageBuffer_Init outputFrame=%p, height=%d, width=%d: %ld\n",
+          __func__, &outputFrame_, desiredHeight_, desiredWidth_, error);
+        return;
+      }
+    }
+
+    if (!scaleTempBuffer_) {
+      scaleTempBuffer_ = malloc(
+        vImageScale_ARGB8888(&cropped, &outputFrame_,
+                             NULL, kvImageGetTempBufferSize));
+    }
+    error = vImageScale_ARGB8888(&cropped, &outputFrame_,
+                                 scaleTempBuffer_, kvImageNoFlags);
+    if (error != kvImageNoError) {
+      E("%s: error in vImageScale_ARGB8888: "
+        "src(%p)={data=%p, rowBytes=%d, width=%d, height=%d}, "
+        "dst(%p)={data=%p, rowBytes=%d, width=%d, height=%d}: %ld\n",
+        __func__, &cropped, cropped.data, cropped.rowBytes,
+        cropped.width, cropped.height,
+        &outputFrame_, outputFrame_.rowBytes, outputFrame_.data,
+        outputFrame_.width, outputFrame_.height,
+        error);
+      return;
+    }
+  }
+
+  os_unfair_lock_lock(&outputBufferLock_);
+  swapImages(&readFrameBuffer_, &outputFrame_);
+  outputFrameUpdated_ = YES;
+  os_unfair_lock_unlock(&outputBufferLock_);
 }
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput
 didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection {
-  CVImageBufferRef workingFrame = CMSampleBufferGetImageBuffer(sampleBuffer);
-  vImageCVImageFormatRef imageFormat =
-      vImageCVImageFormat_CreateWithCVPixelBuffer(workingFrame);
-  if (!imageFormat) {
-    E("%s: NULL return from vImageCVImageFormat_CreateWithCVPixelBuffer\n", __func__);
-    return;
-  }
+  CFRetain(sampleBuffer);
+  const AndroidCoarseOrientation orientation = get_coarse_orientation();
 
-  vImage_Error error;
-  error = vImageCVImageFormat_SetColorSpace(imageFormat, imageColorSpace_);
-  if (error != kvImageNoError) {
-    E("%s: error in vImageCVImageFormat_SetColorSpace: %ld\n", __func__, error);
-    vImageCVImageFormat_Release(imageFormat);
-    return;
-  }
-
-  vImage_Flags flags =
-      inputWriteBuffer_.data ? kvImageNoAllocate : kvImageNoFlags;
-  error = vImageBuffer_InitWithCVPixelBuffer(&inputWriteBuffer_,
-                                             &imageDesiredFormat_, workingFrame,
-                                             imageFormat, nil, flags);
-  vImageCVImageFormat_Release(imageFormat);
-
-  if (error != kvImageNoError) {
-    E("%s: error in vImageBuffer_InitWithCVPixelBuffer inputWriteBuffer_: %ld\n",
-      __func__, error);
-    return;
-  }
-
-  os_unfair_lock_lock(&inputBufferLock_);
-  inputFrameOrientation_ = get_coarse_orientation();
-  swapImages(&inputReadBuffer_, &inputWriteBuffer_);
-  inputFrameUpdated_ = YES;
-  os_unfair_lock_unlock(&inputBufferLock_);
+  dispatch_async(outputQueue_, ^(void){
+      [self processCameraFrame:sampleBuffer orientation:orientation];
+  });
 }
 
 - (int)readFrame:(ClientFrame*)resultFrame
