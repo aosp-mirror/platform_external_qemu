@@ -121,3 +121,6 @@ def getClangDirectory():
         toolchain_json = json.load(f)
         clang_path = clang_path / toolchain_json['clang']
     return clang_path
+
+def addToSearchPath(searchDir):
+    os.environ["PATH"] = searchDir + os.pathsep + os.environ["PATH"]
