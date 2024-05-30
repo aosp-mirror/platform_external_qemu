@@ -1380,7 +1380,7 @@ public:
         }
 
         for (int nn = 0; pdus[nn] != NULL; nn++) {
-            amodem_receive_sms(modem, pdus[nn]);
+            amodem_receive_sms_vx(modem, pdus[nn]);
         }
         smspdu_free_list(pdus);
 
