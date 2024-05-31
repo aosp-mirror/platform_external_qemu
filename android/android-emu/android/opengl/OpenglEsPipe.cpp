@@ -83,7 +83,7 @@ public:
 
         // Create a new EmuglPipe instance.
         AndroidPipe* create(void* hwPipe, const char* args, AndroidPipeFlags flags) override {
-            return createPipe(hwPipe, this, args);
+            return createPipe(hwPipe, this, args, flags);
         }
 
         bool canLoad() const override { return true; }
@@ -150,7 +150,7 @@ public:
         virtual AndroidPipe* load(void* hwPipe,
                                   const char* args,
                                   android::base::Stream* stream) override {
-            return createPipe(hwPipe, this, args, stream);
+            return createPipe(hwPipe, this, args, ANDROID_PIPE_DEFAULT, stream);
         }
 
     private:
@@ -158,6 +158,7 @@ public:
                 void* hwPipe,
                 Service* service,
                 const char* args,
+                AndroidPipeFlags flags,
                 android::base::Stream* loadStream = nullptr) {
             const auto& renderer = android_getOpenglesRenderer();
             if (!renderer) {
@@ -168,7 +169,7 @@ public:
                 return nullptr;
             }
 
-            auto pipe = new EmuglPipe(hwPipe, service, renderer, loadStream);
+            auto pipe = new EmuglPipe(hwPipe, service, renderer, flags, loadStream);
             if (!pipe->mIsWorking) {
                 delete pipe;
                 pipe = nullptr;
@@ -253,6 +254,7 @@ public:
     EmuglPipe(void* hwPipe,
               Service* service,
               const gfxstream::RendererPtr& renderer,
+              AndroidPipeFlags flags,
               android::base::Stream* loadStream = nullptr)
         : AndroidPipe(hwPipe, service) {
         bool isWorking = true;
@@ -263,7 +265,12 @@ public:
             mDataForReadingLeft = loadStream->getBe32();
         }
 
-        mChannel = renderer->createRenderChannel(loadStream);
+        uint32_t virtioGpuContextId = std::numeric_limits<uint32_t>::max();
+        if (flags & ANDROID_PIPE_VIRTIO_GPU_BIT) {
+            virtioGpuContextId = (uint32_t)(uintptr_t)hwPipe;
+        }
+
+        mChannel = renderer->createRenderChannel(loadStream, virtioGpuContextId);
         if (!mChannel) {
             D("Failed to create an OpenGLES pipe channel!");
             return;
