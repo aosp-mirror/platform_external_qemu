@@ -38,7 +38,9 @@
 #define MAC_OS_X_VERSION_10_6 1060
 #endif
 
+#ifndef DEBUG_COREAUDIO
 #define DEBUG_COREAUDIO 0
+#endif
 
 #if DEBUG_COREAUDIO
 
