@@ -474,34 +474,41 @@ static void virgl_cmd_get_capset_info(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(info);
 
     memset(&resp, 0, sizeof(resp));
-    if (info.capset_index == 0) {
-        resp.capset_id = VIRTIO_GPU_CAPSET_VIRGL;
 #ifdef CONFIG_STREAM_RENDERER
-        resp.capset_id = 0;
+    // Gfxstream currently supports:
+    // 1. VIRTGPU_CAPSET_GFXSTREAM_VULKAN
+    // 2. VIRTGPU_CAPSET_GFXSTREAM_GLES
+    if (info.capset_index == 0) {
+        resp.capset_id = VIRTGPU_CAPSET_GFXSTREAM_VULKAN;
         resp.capset_max_version = 0;
         stream_renderer_get_cap_set(resp.capset_id,
                                    &resp.capset_max_version,
                                    &resp.capset_max_size);
-#else
-        g->virgl->virgl_renderer_get_cap_set(resp.capset_id,
-                                   &resp.capset_max_version,
-                                   &resp.capset_max_size);
-#endif  // CONFIG_STREAM_RENDERER
     } else if (info.capset_index == 1) {
-        resp.capset_id = VIRTIO_GPU_CAPSET_VIRGL2;
-#ifdef CONFIG_STREAM_RENDERER
+        resp.capset_id = VIRTGPU_CAPSET_GFXSTREAM_GLES;
+        resp.capset_max_version = 0;
         stream_renderer_get_cap_set(resp.capset_id,
                                    &resp.capset_max_version,
                                    &resp.capset_max_size);
+    } else {
+        fprintf(stderr, "stream_renderer capset_index=%u out of bounds\n", info.capset_index);
+    }
 #else
+    if (info.capset_index == 0) {
+        resp.capset_id = VIRTIO_GPU_CAPSET_VIRGL;
         g->virgl->virgl_renderer_get_cap_set(resp.capset_id,
                                    &resp.capset_max_version,
                                    &resp.capset_max_size);
-#endif  // CONFIG_STREAM_RENDERER
+    } else if (info.capset_index == 1) {
+        resp.capset_id = VIRTIO_GPU_CAPSET_VIRGL2;
+        g->virgl->virgl_renderer_get_cap_set(resp.capset_id,
+                                   &resp.capset_max_version,
+                                   &resp.capset_max_size);
     } else {
         resp.capset_max_version = 0;
         resp.capset_max_size = 0;
     }
+#endif  // CONFIG_STREAM_RENDERER
     resp.hdr.type = VIRTIO_GPU_RESP_OK_CAPSET_INFO;
     virtio_gpu_ctrl_response(g, cmd, &resp.hdr, sizeof(resp));
 }
@@ -516,8 +523,9 @@ static void virgl_cmd_get_capset(VirtIOGPU *g,
 
 #ifdef CONFIG_STREAM_RENDERER
     // stream_renderer capset is not compatible with virgl capset (b/282011056).
-    if (gc.capset_id != 0) {
-        fprintf(stderr, "stream_renderer virgl_capset=%u not supported\n", gc.capset_id);
+    if (gc.capset_id != VIRTGPU_CAPSET_GFXSTREAM_VULKAN &&
+        gc.capset_id != VIRTGPU_CAPSET_GFXSTREAM_GLES) {
+        fprintf(stderr, "stream_renderer capset_id=%u not supported\n", gc.capset_id);
         cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
         return;
     }
@@ -1047,9 +1055,10 @@ int virtio_gpu_virgl_get_num_capsets(VirtIOGPU *g)
 {
     uint32_t capset2_max_ver, capset2_max_size;
 #ifdef CONFIG_STREAM_RENDERER
-    stream_renderer_get_cap_set(VIRTIO_GPU_CAPSET_VIRGL2,
-                              &capset2_max_ver,
-                              &capset2_max_size);
+    // Gfxstream currently supports:
+    // 1. VIRTGPU_CAPSET_GFXSTREAM_VULKAN
+    // 2. VIRTGPU_CAPSET_GFXSTREAM_GLES
+    return 2;
 #else
     g->virgl->virgl_renderer_get_cap_set(VIRTIO_GPU_CAPSET_VIRGL2,
                               &capset2_max_ver,
