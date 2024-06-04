@@ -21,6 +21,9 @@
 #include <thread>
 #include <vector>
 
+#include <iomanip>
+#include <sstream>
+#include "absl/memory/memory.h"
 #include "aemu/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/CrashReporter.h"
@@ -36,6 +39,7 @@
 #include "google_breakpad/processor/process_result.h"
 #include "google_breakpad/processor/process_state.h"
 #include "mini_chromium/base/files/file_path.h"
+#include "nlohmann/json.hpp"
 #include "processor/simple_symbol_supplier.h"
 #include "processor/stackwalk_common.h"
 #include "snapshot/minidump/process_snapshot_minidump.h"
@@ -54,6 +58,8 @@
 #include "msvc-posix.h"
 #endif
 namespace {
+
+using json = nlohmann::json;
 
 struct Options {
     bool machine_readable;
@@ -102,6 +108,18 @@ using google_breakpad::SimpleSymbolSupplier;
 // The crashpad handler binary, as shipped with the emulator.
 const constexpr char kCrashpadHandler[] = "crashpad_handler";
 
+// Translate vector to hex string.
+std::string vectorToHexString(const std::vector<uint8_t>& data) {
+    std::stringstream ss;
+    ss << "[";
+    for (int i = 0; i < data.size(); i++) {
+        ss << "0x" << std::hex << std::setfill('0') << std::setw(2)
+           << static_cast<int>(data[i]);
+    }
+    ss << "]";
+    return ss.str();
+}
+
 // Processes |options.minidump_file| using MinidumpProcessor.
 // |options.symbol_path|, if non-empty, is the base directory of a
 // symbol storage area, laid out in the format required by
@@ -116,7 +134,8 @@ const constexpr char kCrashpadHandler[] = "crashpad_handler";
 bool PrintMinidumpProcess(const Options& options) {
     std::unique_ptr<SimpleSymbolSupplier> symbol_supplier;
     if (!options.symbol_paths.empty()) {
-        symbol_supplier.reset(new SimpleSymbolSupplier(options.symbol_paths));
+        symbol_supplier =
+                absl::make_unique<SimpleSymbolSupplier>(options.symbol_paths);
     }
 
     BasicSourceLineResolver resolver;
@@ -161,55 +180,56 @@ bool PrintMinidumpProcess(const Options& options) {
         return false;
     }
 
+    // Let's do json style output
+
+    json modules;
     for (const crashpad::ModuleSnapshot* module : snapshot.Modules()) {
         // Let's not print empty records
-        if (module->AnnotationsSimpleMap().size() == 0 &&
-            module->AnnotationsVector().size() == 0 &&
-            module->AnnotationObjects().size() == 0) {
+        if (module->AnnotationsSimpleMap().empty() &&
+            module->AnnotationsVector().empty() &&
+            module->AnnotationObjects().empty()) {
             continue;
         }
-
-        printf("Module: %s\n", module->Name().c_str());
-        if (module->AnnotationsSimpleMap().size() > 0) {
-            printf("  Simple Annotations\n");
+        json json_module;
+        json_module["name"] = module->Name();
+        if (!module->AnnotationsSimpleMap().empty()) {
+            json_module["simple_annotations"] = std::vector<json>();
             for (const auto& kv : module->AnnotationsSimpleMap()) {
-                printf("    simple_annotations[\"%s\"] = %s\n",
-                       kv.first.c_str(), kv.second.c_str());
+                json_module["simple_annotations"].push_back(
+                        {"name", kv.first, "value", kv.second});
             }
         }
 
-        if (module->AnnotationsVector().size() > 0) {
-            printf("  Vectored Annotations\n");
-            int index = 0;
+        if (!module->AnnotationsVector().empty()) {
+            json_module["vectored_annotations"] = std::vector<std::string>();
             for (const std::string& annotation : module->AnnotationsVector()) {
-                printf("    vectored_annotations[%d] = %s\n", index,
-                       annotation.c_str());
-                index++;
+                json_module["vectored_annotations"].push_back(annotation);
             }
         }
-
-        if (module->AnnotationObjects().size() > 0) {
-            printf("  Annotation Objects\n");
+        if (!module->AnnotationObjects().empty()) {
+            json_module["annotation_objects"] = std::vector<json>();
             for (const crashpad::AnnotationSnapshot& annotation :
                  module->AnnotationObjects()) {
-                printf("    annotation_objects[\"%s\"] = ",
-                       annotation.name.c_str());
+                json json_annotation;
+                json_annotation["name"] = annotation.name;
                 if (annotation.type !=
                     static_cast<uint16_t>(
                             crashpad::Annotation::Type::kString)) {
-                    printf("<non-string value, not printing>\n");
-                    continue;
+                    json_annotation["value"] = vectorToHexString(annotation.value);
+                } else {
+                    std::string value(reinterpret_cast<const char*>(
+                                              annotation.value.data()),
+                                      annotation.value.size());
+                    json_annotation["value"] = value;
                 }
-
-                std::string value(
-                        reinterpret_cast<const char*>(annotation.value.data()),
-                        annotation.value.size());
-
-                printf("%s\n", value.c_str());
+                json_module["annotation_objects"].push_back(json_annotation);
             }
         }
+        modules.push_back(json_module);
     }
-
+    std::cout << "Module annotations:" << std::endl;
+    std::cout << "===================" << std::endl;
+    std::cout << std::setw(2) << modules << std::endl;
     return true;
 }
 
