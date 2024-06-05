@@ -117,7 +117,7 @@ class TrustyBuilder(LinuxBuilder):
             "-Dspice_protocol=disabled",
             "-Dspice=disabled",
             "-Dstack_protector=disabled",
-            "-Dtools=enabled",
+            "-Dtools=disabled",
             "-Dtpm=disabled",
             "-Du2f=disabled",
             "-Dusb_redir=disabled",
