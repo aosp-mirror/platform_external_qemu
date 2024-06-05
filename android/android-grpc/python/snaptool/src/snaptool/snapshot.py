@@ -20,9 +20,15 @@ from pathlib import Path
 
 import grpc
 from aemu.discovery.emulator_discovery import EmulatorDiscovery, get_default_emulator
-from aemu.proto.snapshot_service_pb2 import SnapshotFilter, SnapshotPackage
+from aemu.proto.snapshot_service_pb2 import (
+    SnapshotDetails,
+    SnapshotFilter,
+    SnapshotPackage,
+    SnapshotUpdateDescription,
+)
 from aemu.proto.snapshot_service_pb2_grpc import SnapshotServiceStub
 from google.protobuf import empty_pb2
+from google.protobuf.wrappers_pb2 import StringValue
 from tqdm import tqdm
 
 _EMPTY_ = empty_pb2.Empty()
@@ -172,6 +178,15 @@ class SnapshotService:
             "DeleteSnapshot", SnapshotPackage(snapshot_id=snap_id)
         )
 
+    def update(self, snap_id, description, logical_name) -> SnapshotDetails:
+        """Updates the given snapshot with the given description."""
+        update = SnapshotUpdateDescription(
+            snapshot_id=snap_id,
+            description=StringValue(value=description),
+            logical_name=StringValue(value=logical_name),
+        )
+        return self._exec_unary_grpc("UpdateSnapshot", update)
+
 
 class AsyncSnapshotService:
     """A SnapshotService can be used to manipulate snapshots in the emulator."""
@@ -315,3 +330,12 @@ class AsyncSnapshotService:
         except Exception as e:
             self.logger.error("Failed to delete snapshot %s due to %s", snap_id, e)
             return False
+
+    async def update(self, snap_id, description, logical_name) -> SnapshotDetails:
+        """Updates the given snapshot with the given description."""
+        update = SnapshotUpdateDescription(
+            snapshot_id=snap_id,
+            description=StringValue(value=description),
+            logical_name=StringValue(value=logical_name),
+        )
+        return await self.stub.UpdateSnapshot(update)
