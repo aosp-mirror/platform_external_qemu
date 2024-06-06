@@ -151,6 +151,16 @@ async def load(snapshotService, name):
 @cli.command()
 @click.pass_obj
 @click.argument("name")
+@click.argument("logical_name")
+@click.argument("description")
+@coro
+async def update(snapshotService, name, logical_name, description):
+    await snapshotService.update(name, description, logical_name)
+
+
+@cli.command()
+@click.pass_obj
+@click.argument("name")
 @coro
 async def save(snapshotService, name):
     await snapshotService.save(name)

@@ -6,6 +6,19 @@
 #include "gfxstream/virtio-gpu-gfxstream-renderer.h"
 #include "gfxstream/virtio-gpu-gfxstream-renderer-unstable.h"
 
+/**
+ * From virtgpu_gfxstream_protocol.h.
+ */
+#define VIRTGPU_CAPSET_VIRGL 1
+#define VIRTGPU_CAPSET_VIRGL2 2
+#define VIRTGPU_CAPSET_GFXSTREAM_VULKAN 3
+#define VIRTGPU_CAPSET_VENUS 4
+#define VIRTGPU_CAPSET_CROSS_DOMAIN 5
+#define VIRTGPU_CAPSET_DRM 6
+#define VIRTGPU_CAPSET_GFXSTREAM_MAGMA 7
+#define VIRTGPU_CAPSET_GFXSTREAM_GLES 8
+#define VIRTGPU_CAPSET_GFXSTREAM_COMPOSER 9
+
 #else
 
 /* An override of virtio-gpu-3d (virgl) that runs goldfish pipe.  One could

@@ -60,9 +60,6 @@ WIN_QT_TMP_LOCATION = os.path.join("C:\\", "qttmp")
 WIN_QT_SRC_SHORT_PATH = os.path.join(WIN_QT_TMP_LOCATION, "src")
 WIN_QT_BUILD_PATH = os.path.join(WIN_QT_TMP_LOCATION, "bld")
 
-def addToSearchPath(searchDir):
-    os.environ["PATH"] = searchDir + os.pathsep + os.environ["PATH"]
-
 def checkDependencies():
     # Dependencies for Qt 6 w/ QtWebEngine listed in https://wiki.qt.io/Building_Qt_6_from_Git
     logging.info("Checking for required build dependencies..")
@@ -312,7 +309,7 @@ def configureQtBuild(srcdir, builddir, installdir, qtsubmodules, crosscompile_ta
 
             os.environ["LD_LIBRARY_PATH"] = str(deps_common.getClangDirectory() / "lib")
 
-            addToSearchPath(str(toolchain_dir))
+            deps_common.addToSearchPath(str(toolchain_dir))
 
     logging.info("[%s] Running %s", builddir, config_script)
     logging.info(conf_args)
@@ -542,9 +539,9 @@ def buildPrebuilt(args, prebuilts_out_dir):
         logging.info("Using system-installed cmake/ninja on linux-aarch64 host")
     else:
         # Use cmake from our prebuilts
-        addToSearchPath(CMAKE_PATH)
+        deps_common.addToSearchPath(CMAKE_PATH)
         # Use ninja from our prebuilts
-        addToSearchPath(NINJA_PATH)
+        deps_common.addToSearchPath(NINJA_PATH)
     logging.info(os.environ)
 
     if not checkDependencies():

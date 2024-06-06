@@ -14,9 +14,13 @@
 
 import logging
 from pathlib import Path
+import platform
 import os
 import zipfile
 import aemu.prebuilts.qt as qt
+import aemu.prebuilts.moltenvk as moltenvk
+
+HOST_OS = platform.system().lower()
 
 _prebuilts_dir_name = "prebuilts"
 _prebuilts_zip_name = "sdk-repo-{target}-prebuilts-{build_number}.zip"
@@ -24,6 +28,11 @@ _prebuilt_funcs = {
     'qt': qt.buildPrebuilt,
     # Add more prebuilts here
 }
+
+if HOST_OS == "darwin":
+    _prebuilt_funcs.update({
+        'moltenvk': moltenvk.buildPrebuilt,
+    })
 
 def buildPrebuilts(args):
     # out/prebuilts
