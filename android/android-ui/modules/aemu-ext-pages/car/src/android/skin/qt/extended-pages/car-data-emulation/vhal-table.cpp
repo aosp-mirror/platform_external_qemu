@@ -113,7 +113,7 @@ void VhalTable::initVhalPropertyTable() {
     QString avdPath(avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()));
     QStringList paths = {sysImgPath, avdPath};
     foreach(QString path, paths) {
-        // Search for *.vhal.json files in avd and system image path
+        // Search for vhal files in avd and system image path
         if (!path.isEmpty()) {
             QDir pathDir(path);
             QStringList metaFiles = pathDir.entryList(QStringList() << "*types-meta.json", QDir::Files);
@@ -123,7 +123,7 @@ void VhalTable::initVhalPropertyTable() {
             }
         }
     }
-    LOG(ERROR) << "Error reading vhal json" << std::endl;
+    LOG(INFO) << "Did not find a vhal json" << std::endl;
 }
 
 void VhalTable::initVhalPropertyTableRefreshThread() {
