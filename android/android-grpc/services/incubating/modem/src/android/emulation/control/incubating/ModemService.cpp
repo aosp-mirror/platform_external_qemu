@@ -328,7 +328,7 @@ public:
 
             android::RecursiveScopedVmLock vmlock;
             for (int nn = 0; pdus[nn] != NULL; nn++) {
-                amodem_receive_sms(mModem, pdus[nn]);
+                amodem_receive_sms_vx(mModem, pdus[nn]);
             }
 
             smspdu_free_list(pdus);

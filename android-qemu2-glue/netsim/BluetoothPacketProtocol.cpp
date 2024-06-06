@@ -201,12 +201,8 @@ private:
     rootcanal::H4Parser mH4Parser;
 };
 
-std::unique_ptr<PacketProtocol> getPacketProtocol(std::string deviceType,
+std::unique_ptr<PacketProtocol> getBluetoothPacketProtocol(std::string deviceType,
                                                   std::string deviceName) {
-    // We only support bluetooth for now.
-    if (deviceType != "bluetooth") {
-        dfatal("Unexpected device: %s. Not supported.", deviceType.c_str());
-    }
     return std::make_unique<BluetoothPacketProtocol>(deviceName);
 }
 

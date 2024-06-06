@@ -27,7 +27,8 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR
   src
-  SRC android/crashreport/Breadcrumb.cpp android/crashreport/CrashReporter.cpp
+  SRC android/crashreport/Breadcrumb.cpp
+      android/crashreport/CrashReporter.cpp
       android/crashreport/detectors/CrashDetectors.cpp
       android/crashreport/detectors/TimeoutMonitor.cpp
       android/crashreport/HangDetector.cpp
@@ -138,7 +139,8 @@ android_add_executable(
        android-emu-crashreport-uploader
        breakpad_common
        breakpad_processor
-       crashpad_handler_handler)
+       crashpad_handler_handler
+       nlohmann_json::nlohmann_json)
 add_dependencies(crashreport crashpad_handler)
 
 android_add_executable(

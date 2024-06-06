@@ -64,6 +64,7 @@ set(android-qemu2-glue_src
     qemu-setup.cpp
     netsim/h4_parser.cc
     netsim/BluetoothPacketProtocol.cpp
+    netsim/UwbPacketProtocol.cpp
     netsim/PacketStreamTransport.cpp
     netsim/qemu-packet-stream-agent-impl.cpp
     qemu-telephony-agent-impl.c

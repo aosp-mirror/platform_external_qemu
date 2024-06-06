@@ -20,6 +20,8 @@
 
 #include "aemu/base/logging/Log.h"
 #include "android-qemu2-glue/netsim/PacketProtocol.h"
+#include "android-qemu2-glue/netsim/BluetoothPacketProtocol.h"
+#include "android-qemu2-glue/netsim/UwbPacketProtocol.h"
 #include "netsim/startup.pb.h"
 
 namespace android {
@@ -161,6 +163,17 @@ std::shared_ptr<PacketStreamerTransport> PacketStreamerTransport::create(
     return std::shared_ptr<PacketStreamerTransport>(new PacketStreamerTransport(
             qemuDevice, std::move(serializer), std::move(channel),
             std::move(factory)));
+}
+
+std::unique_ptr<PacketProtocol> getPacketProtocol(std::string deviceType,
+                                                  std::string deviceName) {
+    if (deviceType == "bluetooth") {
+        return android::qemu2::getBluetoothPacketProtocol(deviceType, deviceName);
+    } else if (deviceType == "uwb") {
+        return android::qemu2::getUwbPacketProtocol(deviceType, deviceName);
+    }
+    dfatal("Unexpected device: %s. Not supported.", deviceType.c_str());
+    return nullptr;
 }
 
 }  // namespace qemu2
