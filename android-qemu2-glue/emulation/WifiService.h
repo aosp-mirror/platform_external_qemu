@@ -94,6 +94,10 @@ public:
     virtual ~WifiService() = default;
     AEMU_WIFI_API virtual bool init() = 0;
     AEMU_WIFI_API virtual int send(const android::base::IOVector& iov) = 0;
+    AEMU_WIFI_API virtual int hostapd_send(
+            const android::base::IOVector& iov) = 0;
+    AEMU_WIFI_API virtual int libslirp_send(
+            const android::base::IOVector& iov) = 0;
     AEMU_WIFI_API virtual int recv(android::base::IOVector& iov) = 0;
     AEMU_WIFI_API virtual void stop() = 0;
     // Specific details for virtio wifi driver. No necessary for netsim.
