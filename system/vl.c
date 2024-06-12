@@ -2792,6 +2792,11 @@ void qemu_init(int argc, char **argv)
             case QEMU_OPTION_nouserconfig:
                 userconfig = false;
                 break;
+            case QEMU_OPTION_L:
+                if (!is_help_option(optarg)) {
+                    qemu_add_data_dir(g_strdup(optarg));
+                }
+                break;
             }
         }
     }
