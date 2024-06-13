@@ -27,6 +27,8 @@ public:
     ~NetsimWifiForwarder();
     bool init() override;
     int send(const android::base::IOVector& iov) override;
+    int hostapd_send(const android::base::IOVector& iov) override;
+    int libslirp_send(const android::base::IOVector& iov) override;
     int recv(android::base::IOVector& iov) override;
     void stop() override;
     // Not used in netsim wifi grpc connection

@@ -225,6 +225,54 @@ void VirtioWifiForwarder::ackLocalFrame(const Ieee80211Frame* frame) {
     mOnFrameAvailableCallback(txInfo.data(), txInfo.dataLen());
 }
 
+std::unique_ptr<Ieee80211Frame> VirtioWifiForwarder::parse(
+        const IOVector& iov) {
+    if (iov.summedLength() < IEEE80211_HDRLEN) {
+        return nullptr;
+    }
+    const GenericNetlinkMessage msg(iov);
+    if (msg.genericNetlinkHeader()->cmd != HWSIM_CMD_FRAME) {
+        return nullptr;
+    }
+
+    std::unique_ptr<Ieee80211Frame> frame = parseHwsimCmdFrame(msg);
+    if (frame->isProtected()) {
+        if (!frame->decrypt(mHostapd->getCipherScheme())) {
+            LOG(ERROR) << "Unable to decrypt WPA-protected frame.";
+            return nullptr;
+        }
+    }
+    return frame;
+}
+
+int VirtioWifiForwarder::hostapd_send(const IOVector& iov) {
+    if (!mHostapd->isRunning()) {
+        return 0;
+    }
+    if (!mHostapdSockInitSuccess.load()) {
+        mHostapdSockInitSuccess = mHostapd->setDriverSocket(mHostapdSock);
+        if (!mHostapdSockInitSuccess.load()) {
+            LOG(DEBUG) << "Hostapd event loop has not been initialized yet.";
+            return 0;
+        }
+    }
+    auto frame = parse(iov);
+    if (!frame)
+        return 0;
+    if (socketSend(mVirtIOSock.get(), frame->data(), frame->size()) < 0) {
+        LOG(DEBUG) << "Failed to send frame to hostapd.";
+    }
+    return 0;
+}
+
+int VirtioWifiForwarder::libslirp_send(const IOVector& iov) {
+    auto frame = parse(iov);
+    if (!frame)
+        return 0;
+
+    return sendToNIC(std::move(frame));
+}
+
 int VirtioWifiForwarder::send(const IOVector& iov) {
     if (!mHostapd->isRunning()) {
         return 0;

@@ -48,6 +48,8 @@ public:
     ~VirtioWifiForwarder();
     bool init() override;
     int send(const android::base::IOVector& iov) override;
+    int hostapd_send(const android::base::IOVector& iov) override;
+    int libslirp_send(const android::base::IOVector& iov) override;
     int recv(android::base::IOVector& iov) override;
     void stop() override;
     NICState* getNic() override { return mNic; }
@@ -87,6 +89,7 @@ private:
     void ackLocalFrame(const android::network::Ieee80211Frame* frame);
     std::unique_ptr<android::network::Ieee80211Frame> parseHwsimCmdFrame(
             const android::network::GenericNetlinkMessage& msg);
+    std::unique_ptr<network::Ieee80211Frame> parse(const base::IOVector& iov);
     android::network::MacAddress mBssID;
     WifiService::OnReceiveCallback mOnFrameAvailableCallback;
     WifiService::OnLinkStatusChangedCallback mOnLinkStatusChanged;
