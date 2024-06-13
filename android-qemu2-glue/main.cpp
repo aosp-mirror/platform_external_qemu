@@ -2903,7 +2903,7 @@ extern "C" int main(int argc, char** argv) {
         args.add2("-device", "virtserialport,chardev=bluetooth,name=bluetooth");
     }
 
-    if (feature_is_enabled(kFeature_ModemSimulator)) {
+    if (feature_is_enabled(kFeature_ModemSimulator) && !opts->ui_only) {
         if (create_modem_simulator_configs(hw, opts->icc_profile)) {
             init_modem_simulator();
             bool isIpv4 = false;
