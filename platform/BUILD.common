@@ -951,6 +951,7 @@ cc_library(
         "include/qemu/accel.h",
         "include/qemu/async-teardown.h",
         "include/qemu/atomic.h",
+        "include/qemu/atomic.hpp",
         "include/qemu/atomic128.h",
         "include/qemu/base64.h",
         "include/qemu/bcd.h",

@@ -7475,6 +7475,7 @@ cc_library(
         "include/qapi/error.h",
         "include/qapi/util.h",
         "include/qemu/atomic.h",
+        "include/qemu/atomic.hpp",
         "include/qemu/bitmap.h",
         "include/qemu/bitops.h",
         "include/qemu/bswap.h",
