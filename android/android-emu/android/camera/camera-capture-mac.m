@@ -290,6 +290,9 @@ static vImage_Buffer shallowCropToAspectRatio(const vImage_Buffer* src,
     return -1;
   }
 
+  outputDevice.videoSettings = @{
+    (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32ARGB),
+  };
   [outputDevice setSampleBufferDelegate:self queue:outputQueue];
 
   imageColorSpace_ = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
