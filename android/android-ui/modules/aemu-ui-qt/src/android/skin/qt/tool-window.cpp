@@ -1721,7 +1721,9 @@ void ToolWindow::applyFoldableQuirk(int newPosture) {
         if (newPosture > 1 && mLastRequestedFoldablePosture == 1 ||
                 newPosture == 1 && mLastRequestedFoldablePosture > 1) {
             auto hw = (getConsoleAgents()->settings->avdInfo());
-            if (avdInfo_isVanillaIceCreamPreview(hw)) {
+            auto apiLevel = avdInfo_getApiLevel(
+                    getConsoleAgents()->settings->avdInfo());
+            if (avdInfo_isVanillaIceCreamPreview(hw) || apiLevel >= 35) {
                 mEmulatorWindow->getAdbInterface()->
                     enqueueCommand( {"shell", "input", "keyevent", "KEYCODE_SLEEP"});
                 mSleepKeySent = true;
