@@ -131,16 +131,16 @@ class EmulatorControllerImpl final
                                                               Service>>>>> {
 public:
     EmulatorControllerImpl(const AndroidConsoleAgents* agents)
-        : mAgents(agents),
+        : mLooper(android::base::ThreadLooper::get()),
+          mAgents(agents),
           mKeyEventSender(agents),
           mAndroidEventSender(agents),
           mMouseEventSender(agents),
           mPenEventSender(agents),
           mTouchEventSender(agents),
-          mWheelEventSender(agents),
+          mWheelEventSender(agents, mLooper),
           mCamera(agents->sensors),
           mClipboard(Clipboard::getClipboard(agents->clipboard)),
-          mLooper(android::base::ThreadLooper::get()),
           mNotificationStream(&mCamera, agents) {}
 
     virtual ::grpc::ServerWriteReactor<
@@ -1465,6 +1465,8 @@ public:
     }
 
 private:
+    Looper* mLooper;
+
     const AndroidConsoleAgents* mAgents;
     keyboard::KeyEventSender mKeyEventSender;
     MouseEventSender mMouseEventSender;
@@ -1478,7 +1480,6 @@ private:
 
     VirtualSceneCamera mCamera;
     Clipboard* mClipboard;
-    Looper* mLooper;
 
     std::atomic_int8_t mInjectAudioCount{0};  // # of active inject audio.
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
