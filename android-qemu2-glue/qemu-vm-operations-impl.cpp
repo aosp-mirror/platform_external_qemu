@@ -894,6 +894,26 @@ static void set_skip_snapshot_save(bool skip) {
     need_skip_snapshot_save = skip;
 }
 
+static SnapshotSkipReason skip_snapshot_save_reason = SNAPSHOT_SKIP_UNKNOWN;
+
+static void set_skip_snapshot_save_reason(SnapshotSkipReason reason) {
+    skip_snapshot_save_reason = reason;
+}
+
+static SnapshotSkipReason get_skip_snapshot_save_reason() {
+    return skip_snapshot_save_reason;
+}
+
+static bool does_snapshot_use_vulkan = false;
+
+static void set_stat_snasphot_use_vulkan() {
+    does_snapshot_use_vulkan = true;
+}
+
+static bool snapshot_use_vulkan() {
+    return does_snapshot_use_vulkan;
+}
+
 static bool is_snapshot_save_skipped() {
     return need_skip_snapshot_save;
 }
@@ -1173,7 +1193,14 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .hostmemGetInfo = android_emulation_hostmem_get_info,
         .getRunState = qemu_get_runstate,
         .setDisplay = qemu_set_display,
-        .system_shutdown_request = [](QemuShutdownCause c){  qemu_system_shutdown_request((ShutdownCause)c); },
+        .system_shutdown_request =
+                [](QemuShutdownCause c) {
+                    qemu_system_shutdown_request((ShutdownCause)c);
+                },
+        .setSkipSnapshotSaveReason = set_skip_snapshot_save_reason,
+        .getSkipSnapshotSaveReason = get_skip_snapshot_save_reason,
+        .setStatSnapshotUseVulkan = set_stat_snasphot_use_vulkan,
+        .snapshotUseVulkan = snapshot_use_vulkan,
 };
 
 extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =
