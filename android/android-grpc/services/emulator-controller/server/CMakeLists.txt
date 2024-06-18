@@ -27,7 +27,6 @@ android_add_library(
        android-grpc-interceptors
        android-grpc-utils
        qemu-host-common-headers
-       ui::common
        ui::gl-bridge)
 target_link_libraries(emulator_controller-server-impl
                       PUBLIC emulator_controller-service)
@@ -37,18 +36,9 @@ target_include_directories(emulator_controller-server-impl PUBLIC include
 android_add_test(
   TARGET emulator_controller-server-impl_unittest
   SOURCE_DIR test
-  SRC android/emulation/control/keyboard/WheelEvent_unittest.cpp
-      android/emulation/control/logcat/LogcatParser_unittest.cpp
-  DEPS android-emu
-       android-emu-base
-       android-emu-base-headers
-       android-emu-cmdline-testing
-       android-emu-hardware-test
-       android-emu-test-launcher
-       emulator_controller-server-impl
-       emulator_controller-service
-       grpc++
-       qemu-host-common-headers)
+  SRC android/emulation/control/logcat/LogcatParser_unittest.cpp
+  DEPS android-emu-base emulator_controller-server-impl
+       emulator_controller-service gmock_main grpc++)
 target_include_directories(emulator_controller-server-impl_unittest
                            PRIVATE src test)
 
@@ -69,7 +59,6 @@ android_add_executable(
   SRC android/emulation/control/StreamScreenPerf.cpp
   DEPS android-emu
        android-emu-base
-       android-emu-base-headers
        android-grpc-client
        emulator-gbench
        emulator_controller-server-impl

@@ -21,12 +21,14 @@
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/settings-agent.h"
-#include "android/skin/SwipeGesture.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"
+// #include "android/skin/qt/car-cluster-window.h"
 #include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
+// #include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
+// #include "android/skin/qt/multi-display-widget.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
@@ -60,11 +62,12 @@ class EmulatorWindow;
 
 typedef struct SkinSurface SkinSurface;
 class SkinSurfaceBitmap;
-using SwipeSimulator = android::emulation::control::SwipeGesture<QPointF>;
+class SwipeGesture;
 
 class CarClusterWindow;
 class CarClusterConnector;
 class MultiDisplayWidget;
+
 
 using RunOnUiThreadFunc = std::function<void()>;
 Q_DECLARE_METATYPE(QPainter::CompositionMode);
@@ -411,6 +414,7 @@ public slots:
     void setForwardShortcutsToDevice(int index);
     void show();
     void showMinimized();
+    void wheelScrollTimeout();
 
     void onScreenConfigChanged();
     void onScreenChanged(QScreen* newScreen);
@@ -576,7 +580,8 @@ private:
     bool mIgnoreWheelEvent = false;
     bool mDisablePinchToZoom = false;
     bool mPauseAvdWhenMinimized = false;
-    std::unique_ptr<SwipeSimulator> mSwipeGesture;
+    QTimer mWheelScrollTimer;
+    std::unique_ptr<SwipeGesture> mSwipeGesture;
     bool mStartedAdbStopProcess;
 
     bool mSkinRemoved{false};

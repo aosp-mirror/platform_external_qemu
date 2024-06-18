@@ -7,7 +7,6 @@ android_qt_lib(
       android/skin/file.c
       android/skin/generic-event-buffer.cpp
       android/skin/generic-event.cpp
-      android/skin/event_formatter.cpp
       android/skin/image.c
       android/skin/keyboard.c
       android/skin/keycode-buffer.c
@@ -29,15 +28,3 @@ endif()
 # keyboard.c needs X11
 android_target_link_libraries(aemu-gl-init linux-aarch64 PRIVATE -lX11 -lXau ${QT5_LINK_PATH})
 android_target_link_libraries(aemu-gl-init linux-x86_64 PRIVATE -lX11)
-
-
-android_add_test(
-  TARGET ui-common_unittest
-  SOURCE_DIR test
-  SRC android/skin/SwipeGesture_unittest.cpp
-  DEPS android-emu
-       android-emu-agents
-       android-emu-base-headers
-       gmock_main
-       ui::common)
-
