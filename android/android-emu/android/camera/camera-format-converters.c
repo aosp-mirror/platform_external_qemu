@@ -255,6 +255,10 @@ YUVToRGBPix(int y, int u, int v, uint8_t* r, uint8_t* g, uint8_t* b)
     *b = (uint8_t)YUV2BO(y,u,v);
 }
 
+#define EXP_COMP_I_SHIFT 20
+#define EXP_COMP_I_MULTIPLIER (1U << EXP_COMP_I_SHIFT)
+#define EXP_COMP_I_FROM_FLOAT(X) ((uint32_t)((X) * EXP_COMP_I_MULTIPLIER))
+
 /* Computes a luminance value after taking the exposure compensation.
  * value into account.
  *
@@ -264,26 +268,26 @@ YUVToRGBPix(int y, int u, int v, uint8_t* r, uint8_t* g, uint8_t* b)
  * The luminance value after adjusting the exposure compensation.
  */
 static __inline__ uint8_t
-_change_exposure20(uint8_t inputY, uint32_t exp_comp20)
+_change_exposure_i(uint8_t inputY, uint32_t exp_comp_i)
 {
-    return clamp((inputY * exp_comp20) >> 20);
+    return clamp((inputY * exp_comp_i) >> EXP_COMP_I_SHIFT);
 }
 
 /* Adjusts an RGB pixel for the given exposure compensation. */
 static __inline__ void
-_change_exposure_RGB8_20(uint8_t* r, uint8_t* g, uint8_t* b, uint32_t exp_comp20)
+_change_exposure_RGB8_i(uint8_t* r, uint8_t* g, uint8_t* b, uint32_t exp_comp_i)
 {
     uint8_t y, u, v;
     R8G8B8ToYUV(*r, *g, *b, &y, &u, &v);
-    YUVToRGBPix(_change_exposure20(y, exp_comp20), u, v, r, g, b);
+    YUVToRGBPix(_change_exposure_i(y, exp_comp_i), u, v, r, g, b);
 }
 
 static __inline__ void
-_change_exposure_RGBi_20(int* r, int* g, int* b, uint32_t exp_comp20)
+_change_exposure_RGBi_i(int* r, int* g, int* b, uint32_t exp_comp_i)
 {
     uint8_t y, u, v;
     R8G8B8ToYUV(*r, *g, *b, &y, &u, &v);
-    y = _change_exposure20(y, exp_comp20);
+    y = _change_exposure_i(y, exp_comp_i);
     *r = YUV2RO(y,u,v);
     *g = YUV2GO(y,u,v);
     *b = YUV2BO(y,u,v);
@@ -1056,9 +1060,9 @@ RGBToYUV(const RGBDesc* rgb_fmt,
          float r_scale,
          float g_scale,
          float b_scale,
-         float exp_comp)
+         float exp_comp_float)
 {
-    const uint32_t exp_comp20 = exp_comp * (1u << 20);
+    const uint32_t exp_comp_i = EXP_COMP_I_FROM_FLOAT(exp_comp_float);
     int y, x;
     const int Y_Inc = yuv_fmt->Y_inc;
     const int UV_inc = yuv_fmt->UV_inc;
@@ -1076,11 +1080,11 @@ RGBToYUV(const RGBDesc* rgb_fmt,
             rgb = rgb_fmt->load_rgb(rgb, &r, &g, &b);
             _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
             R8G8B8ToYUV(r, g, b, pY, pU, pV);
-            *pY = _change_exposure20(*pY, exp_comp20);
+            *pY = _change_exposure_i(*pY, exp_comp_i);
             rgb = rgb_fmt->load_rgb(rgb, &r, &g, &b);
             _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
             pY[Y_Inc] =
-                    _change_exposure20(RGB2Y((int)r, (int)g, (int)b), exp_comp20);
+                    _change_exposure_i(RGB2Y((int)r, (int)g, (int)b), exp_comp_i);
         }
         /* Aling rgb_ptr to 16 bit */
         if (((uintptr_t)rgb & 1) != 0) rgb = (const uint8_t*)rgb + 1;
@@ -1098,16 +1102,16 @@ RGBToRGB(const RGBDesc* src_rgb_fmt,
          float r_scale,
          float g_scale,
          float b_scale,
-         float exp_comp)
+         float exp_comp_float)
 {
-    const uint32_t exp_comp20 = exp_comp * (1u << 20);
+    const uint32_t exp_comp_i = EXP_COMP_I_FROM_FLOAT(exp_comp_float);
     int x, y;
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
             uint8_t r, g, b;
             src_rgb = src_rgb_fmt->load_rgb(src_rgb, &r, &g, &b);
             _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
-            _change_exposure_RGB8_20(&r, &g, &b, exp_comp20);
+            _change_exposure_RGB8_i(&r, &g, &b, exp_comp_i);
             dst_rgb = dst_rgb_fmt->save_rgb(dst_rgb, r, g, b);
         }
         /* Aling rgb pinters to 16 bit */
@@ -1127,9 +1131,9 @@ YUVToRGB(const YUVDesc* yuv_fmt,
          float r_scale,
          float g_scale,
          float b_scale,
-         float exp_comp)
+         float exp_comp_float)
 {
-    const uint32_t exp_comp20 = exp_comp * (1u << 20);
+    const uint32_t exp_comp_i = EXP_COMP_I_FROM_FLOAT(exp_comp_float);
     int y, x;
     const int Y_Inc = yuv_fmt->Y_inc;
     const int UV_inc = yuv_fmt->UV_inc;
@@ -1148,11 +1152,11 @@ YUVToRGB(const YUVDesc* yuv_fmt,
             const uint8_t V = *pV;
             YUVToRGBPix(*pY, U, V, &r, &g, &b);
             _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
-            _change_exposure_RGB8_20(&r, &g, &b, exp_comp20);
+            _change_exposure_RGB8_i(&r, &g, &b, exp_comp_i);
             rgb = rgb_fmt->save_rgb(rgb, r, g, b);
             YUVToRGBPix(pY[Y_Inc], U, V, &r, &g, &b);
             _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
-            _change_exposure_RGB8_20(&r, &g, &b, exp_comp20);
+            _change_exposure_RGB8_i(&r, &g, &b, exp_comp_i);
             rgb = rgb_fmt->save_rgb(rgb, r, g, b);
         }
         /* Aling rgb_ptr to 16 bit */
@@ -1171,9 +1175,9 @@ YUVToYUV(const YUVDesc* src_fmt,
          float r_scale,
          float g_scale,
          float b_scale,
-         float exp_comp)
+         float exp_comp_float)
 {
-    const uint32_t exp_comp20 = exp_comp * (1u << 20);
+    const uint32_t exp_comp_i = EXP_COMP_I_FROM_FLOAT(exp_comp_float);
     int y, x;
     const int Y_Inc_src = src_fmt->Y_inc;
     const int UV_inc_src = src_fmt->UV_inc;
@@ -1202,8 +1206,8 @@ YUVToYUV(const YUVDesc* src_fmt,
                                        pVdst += UV_inc_dst) {
             *pYdst = *pYsrc; *pUdst = *pUsrc; *pVdst = *pVsrc;
             _change_white_balance_YUV(pYdst, pUdst, pVdst, r_scale, g_scale, b_scale);
-            *pYdst = _change_exposure20(*pYdst, exp_comp20);
-            pYdst[Y_Inc_dst] = _change_exposure20(pYsrc[Y_Inc_src], exp_comp20);
+            *pYdst = _change_exposure_i(*pYdst, exp_comp_i);
+            pYdst[Y_Inc_dst] = _change_exposure_i(pYsrc[Y_Inc_src], exp_comp_i);
         }
     }
 }
@@ -1219,9 +1223,9 @@ BAYERToRGB(const BayerDesc* bayer_fmt,
            float r_scale,
            float g_scale,
            float b_scale,
-           float exp_comp)
+           float exp_comp_float)
 {
-    const uint32_t exp_comp20 = exp_comp * (1u << 20);
+    const uint32_t exp_comp_i = EXP_COMP_I_FROM_FLOAT(exp_comp_float);
     int y, x;
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
@@ -1233,7 +1237,7 @@ BAYERToRGB(const BayerDesc* bayer_fmt,
                 r >>= 4; g >>= 4; b >>= 4;
             }
             _change_white_balance_RGB(&r, &g, &b, r_scale, g_scale, b_scale);
-            _change_exposure_RGBi_20(&r, &g, &b, exp_comp20);
+            _change_exposure_RGBi_i(&r, &g, &b, exp_comp_i);
             rgb = rgb_fmt->save_rgb(rgb, r, g, b);
         }
         /* Aling rgb_ptr to 16 bit */
@@ -1252,9 +1256,9 @@ BAYERToYUV(const BayerDesc* bayer_fmt,
            float r_scale,
            float g_scale,
            float b_scale,
-           float exp_comp)
+           float exp_comp_float)
 {
-    const uint32_t exp_comp20 = exp_comp * (1u << 20);
+    const uint32_t exp_comp_i = EXP_COMP_I_FROM_FLOAT(exp_comp_float);
     int y, x;
     const int Y_Inc = yuv_fmt->Y_inc;
     const int UV_inc = yuv_fmt->UV_inc;
@@ -1271,11 +1275,11 @@ BAYERToYUV(const BayerDesc* bayer_fmt,
             int r, g, b;
             _get_bayerRGB(bayer_fmt, bayer, x, y, width, height, &r, &g, &b);
             _change_white_balance_RGB(&r, &g, &b, r_scale, g_scale, b_scale);
-            _change_exposure_RGBi_20(&r, &g, &b, exp_comp20);
+            _change_exposure_RGBi_i(&r, &g, &b, exp_comp_i);
             R8G8B8ToYUV(r, g, b, pY, pU, pV);
             _get_bayerRGB(bayer_fmt, bayer, x + 1, y, width, height, &r, &g, &b);
             _change_white_balance_RGB(&r, &g, &b, r_scale, g_scale, b_scale);
-            _change_exposure_RGBi_20(&r, &g, &b, exp_comp20);
+            _change_exposure_RGBi_i(&r, &g, &b, exp_comp_i);
             pY[Y_Inc] = RGB2Y(r, g, b);
         }
     }
@@ -1807,7 +1811,7 @@ int convert_frame_slow(const void* src_frame,
                        float r_scale,
                        float g_scale,
                        float b_scale,
-                       float exp_comp)
+                       float exp_comp_float)
 {
     int n;
     const PIXFormat* src_desc = get_pixel_format_descriptor(pixel_format);
@@ -1834,11 +1838,11 @@ int convert_frame_slow(const void* src_frame,
                 if (dst_desc->format_sel == PIX_FMT_RGB) {
                     RGBToRGB(src_desc->desc.rgb_desc, dst_desc->desc.rgb_desc,
                              src_frame, framebuffers[n].framebuffer, width,
-                             height, r_scale, g_scale, b_scale, exp_comp);
+                             height, r_scale, g_scale, b_scale, exp_comp_float);
                 } else if (dst_desc->format_sel == PIX_FMT_YUV) {
                     RGBToYUV(src_desc->desc.rgb_desc, dst_desc->desc.yuv_desc,
                              src_frame, framebuffers[n].framebuffer, width,
-                             height, r_scale, g_scale, b_scale, exp_comp);
+                             height, r_scale, g_scale, b_scale, exp_comp_float);
                 } else {
                     E("%s: Unexpected destination pixel format %d",
                       __FUNCTION__, dst_desc->format_sel);
@@ -1849,11 +1853,11 @@ int convert_frame_slow(const void* src_frame,
                 if (dst_desc->format_sel == PIX_FMT_RGB) {
                     YUVToRGB(src_desc->desc.yuv_desc, dst_desc->desc.rgb_desc,
                              src_frame, framebuffers[n].framebuffer, width,
-                             height, r_scale, g_scale, b_scale, exp_comp);
+                             height, r_scale, g_scale, b_scale, exp_comp_float);
                 } else if (dst_desc->format_sel == PIX_FMT_YUV) {
                     YUVToYUV(src_desc->desc.yuv_desc, dst_desc->desc.yuv_desc,
                              src_frame, framebuffers[n].framebuffer, width,
-                             height, r_scale, g_scale, b_scale, exp_comp);
+                             height, r_scale, g_scale, b_scale, exp_comp_float);
                 } else {
                     E("%s: Unexpected destination pixel format %d",
                       __FUNCTION__, dst_desc->format_sel);
@@ -1865,12 +1869,12 @@ int convert_frame_slow(const void* src_frame,
                     BAYERToRGB(src_desc->desc.bayer_desc,
                                dst_desc->desc.rgb_desc, src_frame,
                                framebuffers[n].framebuffer, width, height,
-                               r_scale, g_scale, b_scale, exp_comp);
+                               r_scale, g_scale, b_scale, exp_comp_float);
                 } else if (dst_desc->format_sel == PIX_FMT_YUV) {
                     BAYERToYUV(src_desc->desc.bayer_desc,
                                dst_desc->desc.yuv_desc, src_frame,
                                framebuffers[n].framebuffer, width, height,
-                               r_scale, g_scale, b_scale, exp_comp);
+                               r_scale, g_scale, b_scale, exp_comp_float);
                 } else {
                     E("%s: Unexpected destination pixel format %d",
                       __FUNCTION__, dst_desc->format_sel);
@@ -2018,9 +2022,9 @@ int convert_frame_fast(const void* src_frame,
                        int src_width,
                        int src_height,
                        ClientFrame* result_frame,
-                       float exp_comp,
+                       float exp_comp_float,
                        int rotation) {
-    const uint32_t exp_comp20 = exp_comp * (1u << 20);
+    const uint32_t exp_comp_i = EXP_COMP_I_FROM_FLOAT(exp_comp_float);
     int n;
     for (n = 0; n < result_frame->framebuffers_count; ++n) {
         YUVInfo src_info = get_yuv_info(src_width, src_height);
@@ -2115,13 +2119,13 @@ int convert_frame_fast(const void* src_frame,
         size_t src_size = result_size;
 
         // Apply exposure compensation.
-        if (exp_comp != 1.0f) {
+        if (exp_comp_i != EXP_COMP_I_MULTIPLIER) {
             int row;
             int x;
             for (row = 0; row < result_height; ++row) {
                 uint8_t* y_row = src_y + row * src_info.y_stride;
                 for (x = 0; x < result_width; ++x) {
-                    y_row[x] = _change_exposure20(y_row[x], exp_comp20);
+                    y_row[x] = _change_exposure_i(y_row[x], exp_comp_i);
                 }
             }
         }
