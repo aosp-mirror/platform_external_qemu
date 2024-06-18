@@ -724,9 +724,10 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     System* system = System::get();
 
     if (config->use_host_vulkan) {
-        system->envSet("ANDROID_EMU_VK_ICD", NULL);
 #ifdef __APPLE__
         system->envSet("ANDROID_EMU_VK_ICD", "moltenvk");
+#else
+        system->envSet("ANDROID_EMU_VK_ICD", NULL);
 #endif
     } else
 #ifndef __APPLE__
