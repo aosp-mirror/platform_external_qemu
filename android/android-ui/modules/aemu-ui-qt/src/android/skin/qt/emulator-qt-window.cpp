@@ -35,41 +35,40 @@
 #include "android/multitouch-screen.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/EmulatorSkin.h"
-#include "android/skin/SwipeGesture.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/QtLooper.h"
-#include "android/skin/qt/car-cluster-window.h"
 #include "android/skin/qt/event-serializer.h"
-#include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/microphone-page.h"
 #include "android/skin/qt/extended-pages/multi-display-page.h"
 #include "android/skin/qt/extended-pages/settings-page.h"
-#include "android/skin/qt/extended-pages/snapshot-page-grpc.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
+#include "android/skin/qt/extended-pages/snapshot-page-grpc.h"
 #include "android/skin/qt/extended-pages/telephony-page.h"
-#include "android/skin/qt/multi-display-widget.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/screen-mask.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/skin/rect.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot/Snapshotter.h"
+#include "snapshot/common.h"
 #include "android/test/checkboot.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
 #include "android/utils/x86_cpuid.h"
 #include "android/virtualscene/TextureUtils.h"
+#include "android/skin/qt/car-cluster-window.h"
+#include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
+#include "android/skin/qt/multi-display-widget.h"
 #include "android_modem_v2.h"
 #include "host-common/FeatureControl.h"
-#include "host-common/MultiDisplay.h"
 #include "host-common/crash-handler.h"
 #include "host-common/multi_display_agent.h"
 #include "host-common/opengl/emugl_config.h"
-#include "snapshot/common.h"
+#include "host-common/MultiDisplay.h"
 #include "studio_stats.pb.h"
 
 #define DEBUG 1
@@ -84,9 +83,10 @@
 #include <QBitmap>
 #include <QCheckBox>
 #include <QCursor>
+#include <Qt>
+#include <QInputDevice>
 #include <QFileDialog>
 #include <QIcon>
-#include <QInputDevice>
 #include <QLabel>
 #include <QMouseEvent>
 #include <QPainter>
@@ -101,7 +101,6 @@
 #include <QToolTip>
 #include <QTouchEvent>
 #include <QWindow>
-#include <Qt>
 #include <QtCore>
 #include <QtMath>
 
@@ -562,20 +561,20 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      QMessageBox::Ok,
                      this),
       mHaxmWarningBox(QMessageBox::Information,
-              tr("Intel HAXM is deprecated"),
-              tr("Intel has ceased support for Intel HAXM. And your "
-                 "system has Intel HAXM installed. Emulator still "
-                 "works with Intel HAXM for compatibility reasons but "
-                 "the support will be removed later. Please install "
-                 "Android Emulator hypervisor driver from SDK manager. "
-                 "You don't have to remove Intel HAXM if other software "
-                 "in your system relies on it or you have another copy "
-                 "of the emulator whose version is 32.x.x or below. "
-                 "Starting from version 33.x.x, the emulator will use "
-                 "the Android Emulator hypervisor driver by default if "
-                 "it is installed."),
-              QMessageBox::Ok,
-              this),
+                     tr("Intel HAXM is deprecated"),
+                     tr("Intel has ceased support for Intel HAXM. And your "
+                        "system has Intel HAXM installed. Emulator still "
+                        "works with Intel HAXM for compatibility reasons but "
+                        "the support will be removed later. Please install "
+                        "Android Emulator hypervisor driver from SDK manager. "
+                        "You don't have to remove Intel HAXM if other software "
+                        "in your system relies on it or you have another copy "
+                        "of the emulator whose version is 32.x.x or below. "
+                        "Starting from version 33.x.x, the emulator will use "
+                        "the Android Emulator hypervisor driver by default if "
+                        "it is installed."),
+                     QMessageBox::Ok,
+                     this),
       mNestedWarningBox(QMessageBox::Information,
                         tr("Emulator Running in Nested Virtualization"),
                         tr("Emulator is running using nested virtualization. "
@@ -637,14 +636,14 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     if (EmulatorSkin::getInstance()->isPortrait()) {
         mOrientation = !strcasecmp(getConsoleAgents()
                 ->settings->hw() ->hw_initialOrientation,
-                                   "landscape")
+                               "landscape")
                                ? SKIN_ROTATION_270
                                : SKIN_ROTATION_0;
     } else {
         // landscape
         mOrientation = !strcasecmp(getConsoleAgents()
                 ->settings->hw() ->hw_initialOrientation,
-                                   "landscape")
+                               "landscape")
                                ? SKIN_ROTATION_0
                                : SKIN_ROTATION_90;
     }
@@ -777,8 +776,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     setForwardShortcutsToDevice(shortcutBool ? 1 : 0);
 
     initErrorDialog(this, getConsoleAgents()
-                                  ->settings->android_cmdLineOptions()
-                                  ->qt_hide_window);
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window);
     setObjectName("MainWindow");
     mEventLogger->startRecording(this);
     mEventLogger->startRecording(mToolWindow);
@@ -810,6 +809,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     setFrameAlways(mFrameAlways);
 
+    mWheelScrollTimer.setInterval(15);
+    connect(&mWheelScrollTimer, SIGNAL(timeout()), this,
+            SLOT(wheelScrollTimeout()));
 
     mIgnoreWheelEvent =
             settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
@@ -1262,7 +1264,7 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
 }
 void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
     // The motion event will interfere with the swipe gesture being synthesized.
-    if (mSwipeGesture && !mSwipeGesture->atEnd())
+    if (mWheelScrollTimer.isActive())
         return;
 
     if (android::featurecontrol::isEnabled(
@@ -1932,8 +1934,7 @@ void EmulatorQtWindow::slot_fill(SkinSurface* s,
 void EmulatorQtWindow::slot_getDevicePixelRatio(double* out_dpr,
                                                 QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
-    auto screen = window()->windowHandle() ? window()->windowHandle()->screen()
-                                           : nullptr;
+    auto screen = window()->windowHandle() ? window()->windowHandle()->screen() : nullptr;
     *out_dpr = screen ? screen->devicePixelRatio() : 1.0;
 }
 
@@ -2051,9 +2052,9 @@ void EmulatorQtWindow::pollEvent(SkinEvent* event, bool* hasEvent) {
 void EmulatorQtWindow::queueSkinEvent(SkinEvent event) {
     const auto eventType = event.type;
     const auto rotationEventLayout =
-            (eventType == kEventLayoutRotate)
-                    ? makeOptional(event.u.layout_rotation.rotation)
-                    : kNullopt;
+        (eventType == kEventLayoutRotate)
+            ? makeOptional(event.u.layout_rotation.rotation)
+            : kNullopt;
 
     const std::lock_guard<std::mutex> lock(mSkinEventQueueMtx);
     const bool firstEvent = mSkinEventQueue.empty();
@@ -2065,13 +2066,13 @@ void EmulatorQtWindow::queueSkinEvent(SkinEvent event) {
     bool replaced = false;
 
     switch (eventType) {
-        case kEventScrollBarChanged:
-        case kEventZoomedWindowResized:
-        case kEventScreenChanged: {
+    case kEventScrollBarChanged:
+    case kEventZoomedWindowResized:
+    case kEventScreenChanged: {
             const auto i = std::find_if(mSkinEventQueue.begin(), mSkinEventQueue.end(),
                                         [eventType](const SkinEvent& ev){
-                                     return ev.type == eventType;
-                                 });
+                                            return ev.type == eventType;
+                                        });
             if (i != mSkinEventQueue.end()) {
                 *i = std::move(event);
                 replaced = true;
@@ -2079,8 +2080,8 @@ void EmulatorQtWindow::queueSkinEvent(SkinEvent event) {
         }
         break;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     if (!replaced) {
@@ -3255,6 +3256,80 @@ bool EmulatorQtWindow::mouseInside() {
            widget_cursor_coords.y() >= 0 && widget_cursor_coords.y() < height();
 }
 
+template <typename N>
+struct QuadraticMotion {
+    int length;
+    N a;
+    N b;
+    N c;
+
+    N get(int x) const { return (a * x * x + b * x + c) / (length * length); }
+
+    // Fits f(x) = ax^2 + bx + c, so that it satisfies the following boundary
+    // conditions.
+    // f(0) = y0
+    // f(length) = y1
+    // df/dx(length) = 2x + b = 0
+    static QuadraticMotion smoothEnd(int length, N y0, N y1) {
+        return {
+                length,
+                y0 - y1,
+                -2 * length * y0 + 2 * length * y1,
+                length * length * y0,
+        };
+    }
+};
+
+class SwipeGesture {
+    constexpr static int kWheelCount = 20;
+    typedef QPointF P;
+    typedef decltype(P().y()) N;
+
+    QuadraticMotion<N> mMotion;
+    P mTouchDownPoint;
+    int mTick{0};
+
+public:
+    SwipeGesture(const P& touchDownPoint, int delta) {
+        mTouchDownPoint = touchDownPoint;
+        mMotion = QuadraticMotion<N>::smoothEnd(kWheelCount, 0, delta);
+    }
+
+    void tick() {
+        if (!atEnd()) {
+            mTick++;
+        }
+    }
+
+    // Starts the motion from the current touch point to the previous
+    // destination point shifted by delta.
+    void moveMore(int delta) {
+        auto newStartPoint = mMotion.get(mTick);
+        mTick = 0;
+        mMotion = QuadraticMotion<N>::smoothEnd(
+                kWheelCount, newStartPoint,
+                mMotion.get(mMotion.length) + delta);
+    }
+
+    // Starts the motion from the new touch down point with restoring the
+    // previous remaining delta + adding new delta.
+    void reposition(const P& touchDownPoint, int delta) {
+        auto newDelta =
+                mMotion.get(mMotion.length) - mMotion.get(mTick) + delta;
+        mTick = 0;
+        mTouchDownPoint = touchDownPoint;
+        mMotion = QuadraticMotion<N>::smoothEnd(kWheelCount, 0, newDelta);
+    }
+
+    P point() const {
+        return {mTouchDownPoint.x(), mTouchDownPoint.y() + swiped()};
+    }
+
+    bool atEnd() const { return mTick == mMotion.length; }
+
+    N swiped() const { return mMotion.get(mTick); }
+};
+
 void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
     if (mIgnoreWheelEvent) {
         event->ignore();
@@ -3304,25 +3379,42 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
         const int delta = event->angleDelta().y() * 120 / 15;
         const auto pos = event->position();
         // Scroll 1/9 of window height per a wheel click.
-        const QPointF scaledDelta {0,
-            static_cast<qreal>(mBackingSurface->h * delta / 120 / 9)};
+        const int scaledDelta = mBackingSurface->h * delta / 120 / 9;
 
-        if (!mSwipeGesture || mSwipeGesture->atEnd()) {
+        if (!mSwipeGesture) {
             // Start the gesture if it's not yet.
-
-            mSwipeGesture = std::make_unique<SwipeSimulator>(
-                    mLooper, getConsoleAgents()->user_event, 0, pos,
-                    scaledDelta);
-        } else if (abs(mSwipeGesture->swiped().y()) >= mBackingSurface->h / 16) {
+            mSwipeGesture = std::make_unique<SwipeGesture>(pos, scaledDelta);
+            mWheelScrollTimer.start();
+            handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
+                             mSwipeGesture->point(), {0, 0});
+        } else if (abs(mSwipeGesture->swiped()) >= mBackingSurface->h / 16) {
             // Reposition the gesture to avoid the fake touch point from going
-            // outside of the window.)
+            // outside of the window.
             auto lastGesturePoint = mSwipeGesture->point();
             mSwipeGesture->reposition(pos, scaledDelta);
-
+            handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft,
+                             lastGesturePoint, {0, 0});
+            handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
+                             mSwipeGesture->point(), {0, 0});
         } else {
             mSwipeGesture->moveMore(scaledDelta);
         }
     }
+}
+
+void EmulatorQtWindow::wheelScrollTimeout() {
+    mSwipeGesture->tick();
+
+    handleMouseEvent(kEventMouseMotion, kMouseButtonLeft,
+                     mSwipeGesture->point(), {0, 0});
+    if (!mSwipeGesture->atEnd()) {
+        return;
+    }
+
+    mWheelScrollTimer.stop();
+    std::unique_ptr<SwipeGesture> gesture(std::move(mSwipeGesture));
+    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, gesture->point(),
+                     {0, 0});
 }
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {
@@ -3529,8 +3621,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
         }
     }
 
-    if (not_pixel_fold &&
-        mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled()) {
+    if (not_pixel_fold && mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled()) {
         {
             uint32_t w = 0;
             uint32_t h = 0;
@@ -3669,8 +3760,9 @@ void EmulatorQtWindow::setFoldedSkin() {
         ScreenMask::loadMask();
         EmulatorSkin::getInstance()->reset();
     }
-    runOnUiThread(
-            [this]() { skin_event_add(createSkinEvent(kEventSetFoldedSkin)); });
+    runOnUiThread([this]() {
+        skin_event_add(createSkinEvent(kEventSetFoldedSkin));
+    });
 }
 
 void EmulatorQtWindow::setNoSkin() {
@@ -3751,7 +3843,7 @@ bool EmulatorQtWindow::addMultiDisplayWindow(uint32_t id,
             char title[16];
             uint32_t tId;
             if (id >= android::MultiDisplay::s_displayIdInternalBegin &&
-                id < android::MultiDisplay::s_maxNumMultiDisplay) {
+                    id < android::MultiDisplay::s_maxNumMultiDisplay) {
                 // displayIds created by rcCommands
                 tId = id - android::MultiDisplay::s_displayIdInternalBegin + 1;
             } else {
@@ -3951,8 +4043,7 @@ SkinEventType EmulatorQtWindow::translateMouseEventType(
             if ((type == kEventMouseButtonDown) && (button == buttons)) {
                 mMouseTouchState = TouchState::TOUCHING;
                 newType = kEventMouseButtonDown;
-            } else if (android::featurecontrol::isEnabled(
-                               android::featurecontrol::VirtioTablet)) {
+            } else if (android::featurecontrol::isEnabled(android::featurecontrol::VirtioTablet)) {
                 newType = kEventMouseMotion;
             } else {
                 newType = kEventMouseButtonUp;
