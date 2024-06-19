@@ -57,6 +57,7 @@ http = { path = "${AOSP_ROOT}/external/rust/crates/http" }
 httparse = { path = "${AOSP_ROOT}/external/rust/crates/httparse" }
 indexmap = { path = "${AOSP_ROOT}/external/rust/crates/indexmap" }
 instant = { path = "${AOSP_ROOT}/external/rust/crates/instant" }
+itertools = { path = "${AOSP_ROOT}/external/rust/crates/itertools" }
 itoa = { path = "${AOSP_ROOT}/external/rust/crates/itoa" }
 lazy_static = { path = "${AOSP_ROOT}/external/rust/crates/lazy_static" }
 lazycell = { path = "${AOSP_ROOT}/external/rust/crates/lazycell" }
