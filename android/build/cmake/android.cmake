@@ -1677,8 +1677,9 @@ function(android_install_exe TGT DST)
     INSTALL ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
   if(LINUX_AARCH64)
     install(
-      CODE "message(STATUS \"Strip: ${TGT}\")
-            execute_process(COMMAND ${CMAKE_STRIP_CMD} ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})"
+      CODE "if(CMAKE_INSTALL_DO_STRIP)
+                execute_process(COMMAND ${CMAKE_STRIP_CMD} ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
+            endif()"
     )
   endif()
 endfunction()
@@ -1715,9 +1716,9 @@ function(android_install_shared_library)
 
   if(LINUX_AARCH64)
     install(
-      CODE "message(STATUS \"Strip: ${TGT}\")
-            execute_process(COMMAND ${CMAKE_STRIP_CMD}
-                ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})"
+      CODE "if(CMAKE_INSTALL_DO_STRIP)
+                execute_process(COMMAND ${CMAKE_STRIP_CMD} ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
+            endif()"
     )
   endif()
 

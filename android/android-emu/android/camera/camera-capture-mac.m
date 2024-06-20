@@ -290,6 +290,9 @@ static vImage_Buffer shallowCropToAspectRatio(const vImage_Buffer* src,
     return -1;
   }
 
+  outputDevice.videoSettings = @{
+    (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32ARGB),
+  };
   [outputDevice setSampleBufferDelegate:self queue:outputQueue];
 
   imageColorSpace_ = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
@@ -711,12 +714,27 @@ int camera_enumerate_devices(CameraInfo* cis, int max) {
     /* Emulates 1280x960 frame. */
     {1280, 960}};
 
-  NSArray *videoDevices =
+  NSArray *videoDevicesUnsorted =
       [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-  if (!videoDevices) {
+  if (!videoDevicesUnsorted) {
     E("No web cameras are connected to the host.");
     return 0;
   }
+
+  NSArray* videoDevices = [videoDevicesUnsorted
+                           sortedArrayUsingComparator:^(id lhs, id rhs){
+    const int r = strcmp([[lhs uniqueID] UTF8String],
+                         [[rhs uniqueID] UTF8String]);
+
+    if (r > 0) {
+      return (NSComparisonResult)NSOrderedDescending;
+    } else if (r < 0) {
+      return (NSComparisonResult)NSOrderedAscending;
+    } else {
+      return (NSComparisonResult)NSOrderedSame;
+    }
+  }];
+
   int found = 0;
   for (AVCaptureDevice *videoDevice in videoDevices) {
     for(AVCaptureDeviceFormat *vFormat in [videoDevice formats]) {
@@ -735,24 +753,28 @@ int camera_enumerate_devices(CameraInfo* cis, int max) {
     cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(_emulate_dims));
     if (cis[found].frame_sizes != NULL) {
       char *user_name;
-      char *device_name = [[videoDevice uniqueID] UTF8String];
       asprintf(&user_name, "webcam%d", found);
+      char *device_name = [[videoDevice uniqueID] UTF8String];
       cis[found].frame_sizes_num = sizeof(_emulate_dims) / sizeof(*_emulate_dims);
       memcpy(cis[found].frame_sizes, _emulate_dims, sizeof(_emulate_dims));
       cis[found].device_name = ASTRDUP(device_name);
       cis[found].inp_channel = 0;
       cis[found].display_name = user_name;
       cis[found].in_use = 0;
+
+      D("Found Video Device id='%s' (%s) name='%s'", device_name,
+        [[videoDevice manufacturer] UTF8String], user_name);
+
       found++;
       if (found == max) {
         W("Number of Cameras exceeds max limit %d", max);
-        return found;
+        break;
       }
-      D("Found Video Device %s id %s for %s", [[videoDevice manufacturer] UTF8String], device_name, user_name);
     } else {
       E("Unable to allocate memory for camera information.");
       return 0;
     }
   }
+
   return found;
 }
