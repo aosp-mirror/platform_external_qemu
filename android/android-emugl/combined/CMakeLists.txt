@@ -153,6 +153,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     if (APPLE)
         add_compile_definitions(VK_USE_PLATFORM_MACOS_MVK)
+        add_compile_definitions(VK_USE_PLATFORM_METAL_EXT)
     elseif(UNIX)
         # TODO(kaiyili, b/179477624): Add Linux specific Vulkan platform macro definitions
     elseif(WIN32)

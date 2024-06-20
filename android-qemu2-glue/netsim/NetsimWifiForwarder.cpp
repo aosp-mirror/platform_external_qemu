@@ -216,6 +216,14 @@ int NetsimWifiForwarder::send(const android::base::IOVector& iov) {
     return msg.dataLen();
 }
 
+int NetsimWifiForwarder::hostapd_send(const android::base::IOVector& iov) {
+    return send(iov);
+}
+
+int NetsimWifiForwarder::libslirp_send(const android::base::IOVector& iov) {
+    return send(iov);
+}
+
 void NetsimWifiForwarder::stop() {
     if (sTransport != nullptr)
         sTransport->cancel();
