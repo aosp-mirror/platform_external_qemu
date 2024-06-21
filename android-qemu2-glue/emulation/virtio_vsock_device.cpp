@@ -190,11 +190,11 @@ struct VSockStream {
         mHostToGuestBuf.append(data, size);
     }
 
-    std::tuple<const void*, size_t, size_t> hostToGuestBufPeek() const {
+    std::tuple<const void*, size_t> hostToGuestBufPeek() const {
         const size_t guestSpaceAvailable =
                 mGuestBufAlloc - (mHostSentCnt - mGuestFwdCnt);
         const auto b = mHostToGuestBuf.peek();
-        return {b.first, std::min(guestSpaceAvailable, b.second), b.second};
+        return {b.first, std::min(guestSpaceAvailable, b.second)};
     }
 
     void hostToGuestBufConsume(size_t size) {
@@ -632,11 +632,7 @@ private:
                         return true;
                     }
 
-                    const void* data;
-                    size_t dataSize;
-                    size_t bufferSize;
-                    std::tie(data, dataSize, bufferSize) =
-                            stream->hostToGuestBufPeek();
+                    const auto [data, dataSize] = stream->hostToGuestBufPeek();
                     if (dataSize > 0) {
                         const struct virtio_vsock_hdr hdr = prepareFrameHeader(
                                 stream, VIRTIO_VSOCK_OP_RW,
