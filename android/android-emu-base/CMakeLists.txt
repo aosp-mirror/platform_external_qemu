@@ -187,7 +187,6 @@ android_add_test(
       android/base/ArraySize_unittest.cpp
       android/base/async/AsyncSocketServer_unittest.cpp
       android/base/async/Looper_unittest.cpp
-      android/base/async/RecurrentTask_unittest.cpp
       android/base/async/ScopedSocketWatch_unittest.cpp
       android/base/async/SubscriberList_unittest.cpp
       android/base/containers/BufferQueue_unittest.cpp
