@@ -75,12 +75,15 @@ SelectedRenderer emugl::getRenderer() {
     return s_renderer;
 }
 
-bool emugl::hasExtension(const char* extensionsStr, const char* wantedExtension) {
+bool emugl::hasExtension(const char* extensionsStr,
+                         const char* wantedExtension) {
+    if (!extensionsStr || !wantedExtension) {
+        return false;
+    }
     const char* match = strstr(extensionsStr, wantedExtension);
     size_t wantedTerminatorOffset = strlen(wantedExtension);
-    if (match &&
-        (match[wantedTerminatorOffset] == ' ' ||
-         match[wantedTerminatorOffset] == '\0')) {
+    if (match && (match[wantedTerminatorOffset] == ' ' ||
+                  match[wantedTerminatorOffset] == '\0')) {
         return true;
     }
     return false;
