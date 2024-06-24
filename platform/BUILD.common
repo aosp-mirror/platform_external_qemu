@@ -3,6 +3,7 @@ load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
 # Make all the headers available, including the generated ones.
 cc_library(
     name = "qemu-headers",
+    copts = ['-fwrapv'],
     hdrs = [
         "generate_shared_QAPI_source_files",
         "include/authz/base.h",
