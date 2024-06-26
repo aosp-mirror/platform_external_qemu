@@ -22,6 +22,7 @@ cc_binary(
             "-march=native",
         ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -42,6 +43,7 @@ cc_binary(
 cc_binary(
     name = "audio-pa",
     copts = [
+        "-fwrapv",
         "-mcx16",
         "-Wno-implicit-function-declaration",
     ],
@@ -70,8 +72,12 @@ cc_binary(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -106,8 +112,12 @@ cc_binary(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -142,8 +152,12 @@ cc_binary(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -178,8 +192,12 @@ cc_binary(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -214,8 +232,12 @@ cc_binary(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -250,8 +272,12 @@ cc_binary(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -417,8 +443,12 @@ cc_binary(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -943,6 +973,7 @@ cc_library(
             "-march=native",
         ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -1027,6 +1058,7 @@ cc_library(
             "-march=native",
         ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -1114,6 +1146,7 @@ cc_library(
         "qapi/qapi-types-error.h",
     ],
     copts = [
+        "-fwrapv",
         "-mcx16",
         "-Wno-implicit-function-declaration",
     ],
@@ -1156,6 +1189,7 @@ cc_library(
         "platform/linux-x86_64/config-host.h",
     ],
     copts = [
+        "-fwrapv",
         "-mcx16",
         "-Wno-implicit-function-declaration",
     ],
@@ -1287,8 +1321,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -1631,8 +1669,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -1913,8 +1955,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -2149,8 +2195,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -4246,8 +4296,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -4434,8 +4488,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -4777,8 +4835,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -5059,8 +5121,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -5295,8 +5361,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -5490,8 +5560,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -5621,8 +5695,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -5818,8 +5896,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -6045,8 +6127,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -6217,8 +6303,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -6431,8 +6521,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -6596,8 +6690,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -6792,8 +6890,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -6923,8 +7025,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -7120,8 +7226,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -7344,8 +7454,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -7550,8 +7664,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -7750,8 +7868,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -7839,8 +7961,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -7923,8 +8049,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -8119,8 +8249,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -8209,8 +8343,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -8293,8 +8431,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -8499,8 +8641,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -8663,8 +8809,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -8749,8 +8899,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -8833,8 +8987,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -9058,8 +9216,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -9230,8 +9392,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -9424,8 +9590,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -9661,8 +9831,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -11002,8 +11176,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -13024,8 +13202,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -14036,8 +14218,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -15743,8 +15929,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -16925,8 +17115,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -18690,8 +18884,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -19885,8 +20083,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -20283,8 +20485,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -20448,8 +20654,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -20657,8 +20867,12 @@ cc_library(
             "-fms-extensions",
             "-march=native",
         ],
-        "@platforms//os:macos": ["-Wno-implicit-function-declaration"],
+        "@platforms//os:macos": [
+            "-fwrapv",
+            "-Wno-implicit-function-declaration",
+        ],
         "@platforms//os:linux": [
+            "-fwrapv",
             "-mcx16",
             "-Wno-implicit-function-declaration",
         ],
@@ -22068,6 +22282,7 @@ cc_library(
         "trace/trace-ui.h",
         "trace/trace-util.h",
     ],
+    copts = ["-fwrapv"],
     # buildifier: leave-alone
     includes = ["include"],
     visibility = ["//visibility:public"],
