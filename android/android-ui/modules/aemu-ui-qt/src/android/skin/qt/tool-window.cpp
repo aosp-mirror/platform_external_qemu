@@ -461,7 +461,8 @@ ToolWindow::~ToolWindow() {
 
 void ToolWindow::startSleepTimer() {
     auto hw = (getConsoleAgents()->settings->avdInfo());
-    if (!avdInfo_isVanillaIceCreamPreview(hw)) {
+    auto apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
+    if (!(avdInfo_isVanillaIceCreamPreview(hw) || apiLevel >= 35)) {
         return;
     }
 
