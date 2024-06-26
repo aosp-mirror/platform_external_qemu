@@ -25,10 +25,6 @@ void setEnvironmentVariable(const std::string& key, const std::string& value) {
     System::setEnvironmentVariable(key, value);
 }
 
-bool isVerboseLogging() {
-    return false;
-}
-
 uint64_t getUnixTimeUs() {
     return System::get()->getUnixTimeUs();
 }
