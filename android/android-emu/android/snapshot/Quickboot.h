@@ -47,10 +47,12 @@ private:
             std::string_view name,
             const base::Optional<FailureReason>& failureReason);
     void reportSuccessfulLoad(std::string_view name,
-                              base::System::WallDuration startTimeMs);
+                              base::System::WallDuration startTimeMs,
+                              bool vulkanUsed);
     void reportSuccessfulSave(std::string_view name,
                               base::System::WallDuration durationMs,
-                              base::System::WallDuration sessionUptimeMs);
+                              base::System::WallDuration sessionUptimeMs,
+                              bool vulkanUsed);
 
     void startLivenessMonitor();
     void onLivenessTimer();

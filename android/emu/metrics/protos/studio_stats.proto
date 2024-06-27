@@ -1677,8 +1677,10 @@ enum EmulatorSnapshotFailureReason {
     EMULATOR_SNAPSHOT_FAILURE_REASON_RAM_FAILED = 20003;
     EMULATOR_SNAPSHOT_FAILURE_REASON_TEXTURES_FAILED = 20004;
     EMULATOR_SNAPSHOT_FAILURE_REASON_ADB_OFFLINE = 20005;
+    EMULATOR_SNAPSHOT_FAILURE_REASON_UNSUPPORTED_VK_APP = 20006;
+    EMULATOR_SNAPSHOT_FAILURE_REASON_UNSUPPORTED_VK_API = 20007;
 
-    // Next other kind of error here: 20006
+    // Next other kind of error here: 20008
 
     EMULATOR_SNAPSHOT_FAILURE_REASON_IN_PROGRESS_LIMIT = 30000;
 
@@ -1766,6 +1768,8 @@ message EmulatorQuickbootLoad {
         EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED = 7;
         // Specified snapshot is too old for loading, fallback to cold boot.
         EMULATOR_QUICKBOOT_LOAD_COLD_OLD_SNAPSHOT = 8;
+        // Quickboot succeeded.
+        EMULATOR_QUICKBOOT_LOAD_SUCCEEDED_WITH_VULKAN = 9;
     }
 
     // The state of the quickboot load operation.
@@ -1804,6 +1808,8 @@ message EmulatorQuickbootSave {
         EMULATOR_QUICKBOOT_SAVE_DISABLED_UI = 7;
         // Saving skipped: Not booted yet.
         EMULATOR_QUICKBOOT_SAVE_SKIPPED_NOT_BOOTED = 8;
+        // Successful saving with Vulkan.
+        EMULATOR_QUICKBOOT_SAVE_SUCCEEDED_WITH_VULKAN = 9;
     }
     // The state of the quickboot save operation.
     optional EmulatorQuickbootSaveState state = 1;
