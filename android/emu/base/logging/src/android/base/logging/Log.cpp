@@ -118,10 +118,6 @@ extern "C" void setMinLogLevel(LogSeverity level) {
     gMinLogLevel = level;
 }
 
-LogSeverity minLogLevel() {
-    return gMinLogLevel;
-}
-
 void setLogFormatter(LogFormatter* fmt) {
     gFormatter = fmt;
 }
