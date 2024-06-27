@@ -17,6 +17,7 @@ from pathlib import Path
 import platform
 import os
 import zipfile
+import aemu.prebuilts.angle as angle
 import aemu.prebuilts.qt as qt
 import aemu.prebuilts.moltenvk as moltenvk
 
@@ -28,6 +29,12 @@ _prebuilt_funcs = {
     'qt': qt.buildPrebuilt,
     # Add more prebuilts here
 }
+
+if HOST_OS == "linux":
+    _prebuilt_funcs.update({
+        # TODO: Build angle for all platforms
+        'angle': angle.buildPrebuilt,
+    })
 
 if HOST_OS == "darwin":
     _prebuilt_funcs.update({
