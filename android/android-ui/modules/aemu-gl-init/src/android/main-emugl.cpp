@@ -106,6 +106,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
             forceUseHostGpuVulkan);
 
     bool isUnsupportedGpuDriver = false;
+#if defined(_WIN32) || defined(__linux__)
     {
         char* vkVendor = nullptr;
         int vkMajor = 0;
@@ -149,6 +150,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
             free(vkVendor);
         }
     }
+#endif
 
     *hostGpuVulkanBlacklisted =
             isUnsupportedGpuDriver || async_query_host_gpu_VulkanBlacklisted();
