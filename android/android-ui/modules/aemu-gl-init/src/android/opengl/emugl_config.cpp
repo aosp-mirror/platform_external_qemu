@@ -685,6 +685,8 @@ bool emuglConfig_init(EmuglConfig* config,
     snprintf(config->status, sizeof(config->status),
              "GPU emulation enabled using '%s' mode", gpu_mode);
     setCurrentRenderer(gpu_mode);
+
+#if defined(__linux__)
     // todo: add the amd/intel gpu quirks
     if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
         char* vkVendor = nullptr;
@@ -697,7 +699,6 @@ bool emuglConfig_init(EmuglConfig* config,
         // where kvm apparently error out with Bad Address
         emuglConfig_get_vulkan_hardware_gpu(&vkVendor, &vkMajor, &vkMinor,
                                             &vkPatch);
-#if defined(__linux__)
         bool isAMD = (vkVendor && strncmp("AMD", vkVendor, 3) == 0);
         bool isIntel = (vkVendor && strncmp("Intel", vkVendor, 5) == 0);
         if (isAMD) {
@@ -720,12 +721,12 @@ bool emuglConfig_init(EmuglConfig* config,
                       vkVendor);
             }
         }
-#endif
 
         if (vkVendor) {
             free(vkVendor);
         }
     }
+#endif
 
     D("%s: %s\n", __func__, config->status);
     return true;
