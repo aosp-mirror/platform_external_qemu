@@ -53,7 +53,13 @@ public:
     int recv(android::base::IOVector& iov) override;
     void stop() override;
     NICState* getNic() override { return mNic; }
-#ifndef NETSIM_WIFI
+#ifdef NETSIM_WIFI
+    // Determines if the IOVector is an EAPoL (Extensible Authentication
+    // Protocol over LAN) packet. This is necessary for medium.rs because EAPoL
+    // EtherType is encrypted in IEEE 802.11 frames, and decryption is not
+    // currently supported in Rust.
+    bool is_eapol(const android::base::IOVector& iov);
+#else
     android::network::MacAddress getStaMacAddr(const char* ssid) override;
 #endif
     ssize_t onRxPacketAvailable(const uint8_t* buf, size_t size);
