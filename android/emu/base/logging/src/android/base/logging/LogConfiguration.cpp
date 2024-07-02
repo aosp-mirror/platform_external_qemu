@@ -57,8 +57,8 @@ extern "C" uint64_t get_verbosity_mask() {
 }
 
 void base_enable_verbose_logs() {
-    setMinLogLevel(EMULATOR_LOG_VERBOSE);
-    android_log_severity = EMULATOR_LOG_VERBOSE;
+    setMinLogLevel(EMULATOR_LOG_DEBUG);
+    android_log_severity = EMULATOR_LOG_DEBUG;
 }
 
 void base_disable_verbose_logs() {
