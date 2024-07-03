@@ -1409,7 +1409,7 @@ char* avdInfo_getVendorImageDevicePathInGuest(const AvdInfo* i) {
 
 char* avdInfo_getDynamicPartitionBootDevice(const AvdInfo* i) {
     if (is_x86ish(i)) {
-        return strdup("pci0000:00/0000:00:03.0");
+        return strdup("pci0000:00/0000:00:03.0 pci0000:00/0000:00:06.0");
     }
 
     char* system_path = get_device_path(i, "system");
