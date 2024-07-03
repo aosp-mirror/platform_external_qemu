@@ -357,12 +357,30 @@ void VirtioWifiForwarder::stop() {
 }
 
 #ifdef NETSIM_WIFI
+bool VirtioWifiForwarder::is_eapol(const IOVector& iov) {
+    if (!mHostapd->isRunning()) {
+        return false;
+    }
+    if (!mHostapdSockInitSuccess.load()) {
+        mHostapdSockInitSuccess = mHostapd->setDriverSocket(mHostapdSock);
+        if (!mHostapdSockInitSuccess.load()) {
+            LOG(DEBUG) << "Hostapd event loop has not been initialized yet.";
+            return false;
+        }
+    }
+    auto frame = parse(iov);
+    if (!frame)
+        return false;
+    return frame->isData() && frame->isEAPoL();
+}
+
 void VirtioWifiForwarder::registerSigPipeHandler() {
 #ifndef _WIN32
     struct sigaction sigact;
     sigact.sa_handler = SIG_IGN;
     if (sigaction(SIGPIPE, &sigact, NULL) != 0) {
-        LOG(ERROR) << "Error configuring SIGPIPE signal handler: " << strerror(errno);
+        LOG(ERROR) << "Error configuring SIGPIPE signal handler: "
+                   << strerror(errno);
     }
 #endif
 }
@@ -391,7 +409,8 @@ bool VirtioWifiForwarder::waitForReadSocket(int sock, int msec) {
         return false;
     std::chrono::milliseconds ms{msec};
     auto secs = std::chrono::floor<std::chrono::seconds>(ms);
-    auto usecs = std::chrono::duration_cast<std::chrono::microseconds>(ms - secs);
+    auto usecs =
+            std::chrono::duration_cast<std::chrono::microseconds>(ms - secs);
     struct timeval tv;
     tv.tv_sec = secs.count();
     tv.tv_usec = usecs.count();
@@ -400,7 +419,8 @@ bool VirtioWifiForwarder::waitForReadSocket(int sock, int msec) {
     FD_SET(sock, &rfds);
     int res = select(sock + 1, &rfds, NULL, NULL, &tv);
     if (res < 0 && errno != EINTR && errno != 0) {
-        LOG(VERBOSE) << "Netsim waitForReadSocket select error: " << strerror(errno);
+        LOG(VERBOSE) << "Netsim waitForReadSocket select error: "
+                     << strerror(errno);
     }
     return (res <= 0) ? false : FD_ISSET(sock, &rfds);
 #endif
@@ -515,8 +535,9 @@ void VirtioWifiForwarder::registerEventLoop() {
 #ifdef NETSIM_WIFI
     async([this]() {
         while (true) {
-            if (waitForReadSocket(mVirtIOSock.get(), mBeaconIntMs)){
-                onHostApd(this, mVirtIOSock.get(), android::base::Looper::FdWatch::kEventRead);
+            if (waitForReadSocket(mVirtIOSock.get(), mBeaconIntMs)) {
+                onHostApd(this, mVirtIOSock.get(),
+                          android::base::Looper::FdWatch::kEventRead);
             }
             if (mBeaconFrame != nullptr && mBeaconFrame->isBeacon()) {
                 sendToGuest(std::make_unique<Ieee80211Frame>(
@@ -596,7 +617,7 @@ size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
     }
     if (offset != size) {
         LOG(DEBUG) << "onRemoteData sends partial data. Size: " << size
-                     << " actually sent: " << offset;
+                   << " actually sent: " << offset;
         return offset;
     } else {
         return size;
