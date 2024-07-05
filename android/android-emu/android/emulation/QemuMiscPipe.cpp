@@ -383,10 +383,12 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                   "screen_off_timeout", pTimeout});
             adbInterface->enqueueCommand(
                 { "shell", "logcat", "-G", "2M" });
-            // Turn auto-rotate to on by default
-            adbInterface->enqueueCommand(
-                { "shell", "settings", "put", "system",
-                  "accelerometer_rotation", "1"});
+            // Turn auto-rotate to on by default for non-Automotive devices
+            if (!android_is_automotive()) {
+                adbInterface->enqueueCommand(
+                    { "shell", "settings", "put", "system",
+                      "accelerometer_rotation", "1"});
+            }
 
             if (resizableEnabled()) {
                 const int config_id = user_config_get_resizable_config();
