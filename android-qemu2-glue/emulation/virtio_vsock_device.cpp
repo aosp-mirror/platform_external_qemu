@@ -190,11 +190,11 @@ struct VSockStream {
         mHostToGuestBuf.append(data, size);
     }
 
-    std::tuple<const void*, size_t, size_t> hostToGuestBufPeek() const {
+    std::tuple<const void*, size_t> hostToGuestBufPeek() const {
         const size_t guestSpaceAvailable =
                 mGuestBufAlloc - (mHostSentCnt - mGuestFwdCnt);
         const auto b = mHostToGuestBuf.peek();
-        return {b.first, std::min(guestSpaceAvailable, b.second), b.second};
+        return {b.first, std::min(guestSpaceAvailable, b.second)};
     }
 
     void hostToGuestBufConsume(size_t size) {
@@ -616,6 +616,11 @@ private:
 
             if (stream->mIsConnected) {
                 while (true) {
+                    const auto [data, dataSize] = stream->hostToGuestBufPeek();
+                    if (!dataSize) {
+                        break;
+                    }
+
                     if (!virtio_queue_ready(vq)) {
                         return true;
                     }
@@ -632,28 +637,18 @@ private:
                         return true;
                     }
 
-                    const void* data;
-                    size_t dataSize;
-                    size_t bufferSize;
-                    std::tie(data, dataSize, bufferSize) =
-                            stream->hostToGuestBufPeek();
-                    if (dataSize > 0) {
-                        const struct virtio_vsock_hdr hdr = prepareFrameHeader(
-                                stream, VIRTIO_VSOCK_OP_RW,
-                                std::min(dataSize,
-                                         eSize - sizeof(struct
-                                                        virtio_vsock_hdr)));
+                    const struct virtio_vsock_hdr hdr = prepareFrameHeader(
+                            stream, VIRTIO_VSOCK_OP_RW,
+                            std::min(dataSize,
+                                     eSize - sizeof(struct
+                                                    virtio_vsock_hdr)));
 
-                        iov_from_buf(e->in_sg, e->in_num, 0, &hdr, sizeof(hdr));
-                        iov_from_buf(e->in_sg, e->in_num, sizeof(hdr), data,
-                                     hdr.len);
-                        stream->hostToGuestBufConsume(hdr.len);
+                    iov_from_buf(e->in_sg, e->in_num, 0, &hdr, sizeof(hdr));
+                    iov_from_buf(e->in_sg, e->in_num, sizeof(hdr), data,
+                                 hdr.len);
+                    stream->hostToGuestBufConsume(hdr.len);
 
-                        vqConsumeVirtQueueElement(vq, e, sizeof(hdr) + hdr.len);
-                    } else {
-                        vqConsumeVirtQueueElement(vq, e, 0);
-                        break;
-                    }
+                    vqConsumeVirtQueueElement(vq, e, sizeof(hdr) + hdr.len);
                 }
             }
         }

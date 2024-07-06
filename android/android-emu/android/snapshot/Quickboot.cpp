@@ -102,15 +102,17 @@ static void reportFailedLoad(
 }
 
 static void reportFailedSave(
-        pb::EmulatorQuickbootSave::EmulatorQuickbootSaveState state) {
-    MetricsReporter::get().report([state](pb::AndroidStudioEvent* event) {
+        pb::EmulatorQuickbootSave::EmulatorQuickbootSaveState state,
+        FailureReason failureReason = FailureReason::Empty) {
+    MetricsReporter::get().report([state, failureReason](
+                                          pb::AndroidStudioEvent* event) {
         event->mutable_emulator_details()->mutable_quickboot_save()->set_state(
                 state);
         event->mutable_emulator_details()
                 ->mutable_quickboot_save()
                 ->mutable_snapshot()
-                ->set_save_failure_reason((
-                        pb::EmulatorSnapshotFailureReason)FailureReason::Empty);
+                ->set_save_failure_reason(
+                        (pb::EmulatorSnapshotFailureReason)failureReason);
     });
 }
 
@@ -151,17 +153,23 @@ void Quickboot::finalize() {
 Quickboot::~Quickboot() {}
 
 void Quickboot::reportSuccessfulLoad(std::string_view name,
-                                     System::WallDuration startTimeMs) {
+                                     System::WallDuration startTimeMs,
+                                     bool vulkanUsed) {
 #if SNAPSHOT_METRICS
     auto& loader = Snapshotter::get().loader();
     loader.reportSuccessful();
     const auto durationMs = mLoadTimeMs - startTimeMs;
     auto stats = Snapshotter::get().getLoadStats(c_str(name), durationMs);
 
-    MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([stats,
+                                   vulkanUsed](pb::AndroidStudioEvent* event) {
         auto load = event->mutable_emulator_details()->mutable_quickboot_load();
         load->set_state(
-                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_SUCCEEDED);
+                vulkanUsed
+                        ? pb::EmulatorQuickbootLoad::
+                                  EMULATOR_QUICKBOOT_LOAD_SUCCEEDED_WITH_VULKAN
+                        : pb::EmulatorQuickbootLoad::
+                                  EMULATOR_QUICKBOOT_LOAD_SUCCEEDED);
         load->set_duration_ms(stats.durationMs);
         load->set_on_demand_ram_enabled(stats.onDemandRamEnabled);
         Snapshotter::fillSnapshotMetrics(event, stats);
@@ -186,15 +194,20 @@ void Quickboot::reportSuccessfulLoad(std::string_view name,
 
 void Quickboot::reportSuccessfulSave(std::string_view name,
                                      System::WallDuration durationMs,
-                                     System::WallDuration sessionUptimeMs) {
+                                     System::WallDuration sessionUptimeMs,
+                                     bool vulkanUsed) {
 #if SNAPSHOT_METRICS
     auto stats = Snapshotter::get().getSaveStats(c_str(name), durationMs);
 
-    MetricsReporter::get().report([stats, sessionUptimeMs](
-                                          pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([stats, sessionUptimeMs,
+                                   vulkanUsed](pb::AndroidStudioEvent* event) {
         auto save = event->mutable_emulator_details()->mutable_quickboot_save();
         save->set_state(
-                pb::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_SUCCEEDED);
+                vulkanUsed
+                        ? pb::EmulatorQuickbootSave::
+                                  EMULATOR_QUICKBOOT_SAVE_SUCCEEDED_WITH_VULKAN
+                        : pb::EmulatorQuickbootSave::
+                                  EMULATOR_QUICKBOOT_SAVE_SUCCEEDED);
         save->set_duration_ms(stats.durationMs);
         save->set_sesion_uptime_ms(sessionUptimeMs);
         Snapshotter::fillSnapshotMetrics(event, stats);
@@ -413,7 +426,8 @@ bool Quickboot::load(const char* name) {
         if (res == OperationStatus::Ok) {
             mLoaded = true;
             mLoadedSnapshotName = namestr;
-            reportSuccessfulLoad(namestr, startTimeMs);
+            reportSuccessfulLoad(namestr, startTimeMs,
+                                 mVmOps.snapshotUseVulkan());
             startLivenessMonitor();
         } else if (snapshotter.hasLoader() &&
                    (snapshotter.loader().snapshot().failureReason())) {
@@ -699,8 +713,21 @@ bool Quickboot::save(std::string_view name) {
                 "Not saving state: current state "
                 "does not support snapshotting");
         Snapshotter::get().deleteSnapshot(c_str(name));
+        SnapshotSkipReason vmReason = mVmOps.getSkipSnapshotSaveReason();
+        FailureReason statReason = FailureReason::Empty;
+        switch (vmReason) {
+            case SNAPSHOT_SKIP_UNSUPPORTED_VK_APP:
+                statReason = FailureReason::UnsupportedVkApp;
+                break;
+            case SNAPSHOT_SKIP_UNSUPPORTED_VK_API:
+                statReason = FailureReason::UnsupportedVkApi;
+                break;
+            default:
+                break;
+        }
         reportFailedSave(pb::EmulatorQuickbootSave::
-                                 EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
+                                 EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED,
+                         statReason);
         return false;
     }
 
@@ -720,7 +747,8 @@ bool Quickboot::save(std::string_view name) {
         return false;
     }
 
-    reportSuccessfulSave(name, sw.elapsedUs() / 1000, sessionUptimeMs);
+    reportSuccessfulSave(name, sw.elapsedUs() / 1000, sessionUptimeMs,
+                         mVmOps.snapshotUseVulkan());
     return true;
 }
 
