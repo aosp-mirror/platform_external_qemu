@@ -1,10 +1,12 @@
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
+load("platform/cc_interface_binary.bzl", "cc_interface_binary")
+
 
 # Make all the headers available, including the generated ones.
 cc_library(
     name = "qemu-headers",
-    copts = ['-fwrapv'],
     hdrs = [
+        "config-poison.h",
         "generate_shared_QAPI_source_files",
         "include/authz/base.h",
         "include/authz/list.h",
@@ -104,10 +106,10 @@ cc_library(
         "include/exec/memop.h",
         "include/exec/memopidx.h",
         "include/exec/memory.h",
+        "include/exec/memory-internal.h",
         "include/exec/memory_ldst.h.inc",
         "include/exec/memory_ldst_cached.h.inc",
         "include/exec/memory_ldst_phys.h.inc",
-        "include/exec/memory-internal.h",
         "include/exec/page-vary.h",
         "include/exec/plugin-gen.h",
         "include/exec/poison.h",
@@ -1355,8 +1357,43 @@ cc_library(
         "trace/trace-target_sparc.h",
         "trace/trace-ui.h",
         "trace/trace-util.h",
-    ],
-    includes = ["include"],
+    ] + select({
+        "@platforms//os:windows": [
+            "platform/windows-amd64/aarch64-softmmu-config-devices.h",
+            "platform/windows-amd64/aarch64-softmmu-config-target.h",
+            "platform/windows-amd64/config-host.h",
+            "platform/windows-amd64/riscv64-softmmu-config-devices.h",
+            "platform/windows-amd64/riscv64-softmmu-config-target.h",
+            "platform/windows-amd64/x86_64-softmmu-config-devices.h",
+            "platform/windows-amd64/x86_64-softmmu-config-target.h",
+        ],
+        "@platforms//os:macos": [
+            "platform/darwin-arm64/aarch64-softmmu-config-devices.h",
+            "platform/darwin-arm64/aarch64-softmmu-config-target.h",
+            "platform/darwin-arm64/config-host.h",
+            "platform/darwin-arm64/riscv64-softmmu-config-devices.h",
+            "platform/darwin-arm64/riscv64-softmmu-config-target.h",
+            "platform/darwin-arm64/x86_64-softmmu-config-devices.h",
+            "platform/darwin-arm64/x86_64-softmmu-config-target.h",
+        ],
+        "@platforms//os:linux": [
+            "platform/linux-x86_64/aarch64-softmmu-config-devices.h",
+            "platform/linux-x86_64/aarch64-softmmu-config-target.h",
+            "platform/linux-x86_64/config-host.h",
+            "platform/linux-x86_64/riscv64-softmmu-config-devices.h",
+            "platform/linux-x86_64/riscv64-softmmu-config-target.h",
+            "platform/linux-x86_64/x86_64-softmmu-config-devices.h",
+            "platform/linux-x86_64/x86_64-softmmu-config-target.h",
+        ],
+        "//conditions:default": [],
+    }),
+    copts = ["-fwrapv"],
+    includes = ["include"] + select({
+        "@platforms//os:windows": ["platform/windows-amd64"],
+        "@platforms//os:macos": ["platform/darwin-arm64"],
+        "@platforms//os:linux": ["platform/linux-x86_64"],
+        "//conditions:default": [],
+    }),
     visibility = ["//visibility:public"],
 )
 
