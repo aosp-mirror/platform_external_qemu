@@ -1582,7 +1582,7 @@ public:
         params.push_back(nullptr);
 
         std::string cmd = "";
-        if(LOG_IS_ON(VERBOSE)) {
+        if(LOG_IS_ON(INFO)) {
             cmd = "|";
             for (const auto& param : commandLine) {
                 cmd += param;
