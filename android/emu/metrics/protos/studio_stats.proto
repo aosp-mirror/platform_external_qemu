@@ -1572,7 +1572,8 @@ message EmulatorFeatureFlagState {
         VULKAN_ALLOCATE_HOST_MEMORY = 107;
         DEVICE_KEYBOARD_QT_RAW_INPUT = 108;
         UWB = 109;
-        // Next tag: 110
+        GUEST_ANGLE = 110;
+        // Next tag: 111
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
