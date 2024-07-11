@@ -17,17 +17,24 @@ from pathlib import Path
 import platform
 import os
 import zipfile
+import aemu.prebuilts.angle as angle
 import aemu.prebuilts.qt as qt
 import aemu.prebuilts.moltenvk as moltenvk
 
 HOST_OS = platform.system().lower()
 
 _prebuilts_dir_name = "prebuilts"
-_prebuilts_zip_name = "sdk-repo-{target}-prebuilts-{build_number}.zip"
+_prebuilts_zip_name = "PREBUILT-{prebuilt_name}-{build_number}.zip"
 _prebuilt_funcs = {
     'qt': qt.buildPrebuilt,
     # Add more prebuilts here
 }
+
+if HOST_OS == "linux":
+    _prebuilt_funcs.update({
+        # TODO: Build angle for all platforms
+        'angle': angle.buildPrebuilt,
+    })
 
 if HOST_OS == "darwin":
     _prebuilt_funcs.update({
@@ -44,14 +51,18 @@ def buildPrebuilts(args):
         _prebuilt_funcs.get(prebuilt)(args, prebuilts_dir)
     logging.info("Done building prebuilts list. Prebuilts located at [%s]", prebuilts_dir)
 
-    # zip entire prebuilts/ dir and put it in the destination directory
-    prebuilts_zip = os.path.join(args.dist,
-                                 _prebuilts_zip_name.format(target=args.target,
-                                                            build_number=args.sdk_build_number))
-    logging.info("Creating %s", prebuilts_zip)
-    with zipfile.ZipFile(prebuilts_zip, "w", zipfile.ZIP_DEFLATED, allowZip64=True) as zipf:
-        search_dir = Path(prebuilts_dir)
-        for fname in search_dir.glob("**/*"):
-            arcname = fname.relative_to(search_dir)
-            logging.info("Adding %s as %s", fname, arcname)
-            zipf.write(fname, arcname)
+    # zip each prebuilt in out/prebuilts and binplace under dist/prebuilts/.
+    dist_prebuilts_dir = Path(args.dist) / "prebuilts"
+    os.makedirs(dist_prebuilts_dir)
+    for dir in Path(prebuilts_dir).glob("*"):
+        bname = os.path.basename(dir)
+        prebuilts_zip = os.path.join(
+                args.dist, _prebuilts_dir_name, _prebuilts_zip_name.format(
+                    prebuilt_name=bname, build_number=args.sdk_build_number))
+        logging.info(f"Creating {prebuilts_zip}")
+        with zipfile.ZipFile(prebuilts_zip, "w", zipfile.ZIP_DEFLATED, allowZip64=True) as zipf:
+            search_dir = dir
+            for fname in search_dir.glob("**/*"):
+                arcname = fname.relative_to(search_dir)
+                logging.info("[%s] Adding %s as %s", prebuilts_zip, fname, arcname)
+                zipf.write(fname, arcname)
