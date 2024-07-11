@@ -52,7 +52,7 @@ class ToolchainGenerator:
         return self.versions.get("clang", "clang-stable")
 
     def rust_version(self):
-        return self.versions.get("rust", "1.73.0")
+        return self.versions.get("rust", "1.78.0")
 
     def cc_version(self):
         logging.info("Using clang: %s", self.clang())

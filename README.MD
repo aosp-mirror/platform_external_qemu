@@ -1,18 +1,32 @@
 # QEMU with Android Extensions
 
-This repository contains a modified version of QEMU, the open-source machine emulator, specifically optimized for Android emulation. It includes:
+This repository contains a modified version of QEMU, tailored for Android emulation, along with instructions for building it using the [Android Open Source Project (AOSP) toolchain].
 
-- Base QEMU: The core QEMU functionality.
-- Android specific drivers: Drivers for various hardware components needed to run Android applications, such as graphics, sound, and networking.
+## Contents
 
-- Platform-specific modifications: Changes to the code to ensure successful compilation on supported platforms:
+- **Base QEMU:** The core QEMU functionality.
+- **Low-level QEMU Android drivers:** Components such as ACPI tables and motherboard configurations that are initialized early in the QEMU configuration process.
+- **Android-specific drivers:** Drivers for various hardware components (graphics, sound, networking) needed to run Android applications. These drivers are located in `//hardware/generic/goldfish/...` as plugins loaded during QEMU driver initialization.
+- **Platform-specific modifications:** Changes to the codebase to ensure successful compilation on supported platforms:
   - Linux x64
   - Mac M1
   - Windows x64
 
-This repository allows you to build QEMU using the compiler toolchain available in the Android Open Source Project (AOSP).
+## Building QEMU
 
-## Getting started
+This repository enables you to build QEMU using the AOSP compiler toolchain.
+
+The Android emulator is a series of plugins that can be loaded into QEMU. Run the Android emulator by providing the correct parameters to QEMU.
+
+While stock QEMU is built using `meson`, the Android emulator is built using `bazel`. Bazel build files are generated using an automated script that must be run on every platform of interest. After that, a merge script can be run to generate the final `bazel` build files. You should never manually edit any of the `BUILD.bazel` files.
+
+## Adding Generic Drivers
+
+To add generic drivers for the wider QEMU community, make the modifications to the `meson` build scripts and ensure they compile on all platforms of interest. Please try to upstream these drivers, if possible, to make them available to the wider community and reduce maintenance costs.
+
+Once your modifications are successful, you need to generate the `bazel` build files. See the [README.md](google/scripts/fetch_bazel/README.md) document for details on how to create the `bazel` build files from the `meson` build files.
+
+## Building stock QEMU
 
 To get started you will need to configure the toolchain this can be done by running the following:
 
@@ -42,20 +56,14 @@ amc compile build
 
 Once this is finished you should be able to run the qemu binaries in the build directory.
 
-### Launching Android emulation
-
-- The built QEMU binaries are located in the build directory.
-- You need to launch QEMU with specific command-line arguments to configure the emulated hardware.
-- Sample launch scripts are available in the [google/experiments](google/experiments)  directory. You will need to modify them based on your needs.
-
-## Making changes to the code base
+## Making changes to the QEMU code base
 
 ### Upstream first
 
 When making changes that are not specific to Google's implementation, consider upstreaming them to the official QEMU repository. This involves a two-step process:
 
 - First, submit your changes to the internal mimik branch (go/qemu). This is the branch Google uses to prepare patches for upstreaming.
-- Once integrated into the mimik branch, the changes will automatically flow back to dependent repositories within Google. Additionally, follow up with the mimik team to make sure that  attempts will be made to upstream the changes to the official QEMU repository.
+- Once integrated into the mimik branch, the changes will automatically flow back to dependent repositories within Google. Additionally, follow up with the mimik team to make sure that attempts will be made to upstream the changes to the official QEMU repository.
 
 ### Minimize impact on base QEMU changes
 
@@ -75,8 +83,56 @@ x = x + 1;
 #endif
 ```
 
-### Android changes should live in google
+Note: Try to make drivers to live as plugins in //hardware/generic/goldfish
+
+### Android changes that cannot be upstreamed should live in google
 
 All Android-specific code resides in the [google](google) subdirectory. This includes goldfish drivers, Android-specific CPU boards, scripts, compatibility layers, and toolchain configurators.
 
 By following these guidelines, wec can ensure clean and consistent contributions to the codebase, facilitating efficient integration and future maintenance.
+
+## Building the Android Emulator release
+
+The android emulator consists of a series of plugins that can be loaded into stock qemu. The android emulator itself is built using bazel. You can create a release by running
+
+```sh
+bazel build //hardware/generic/goldfish/emulator:release
+```
+
+This will produce a zip file for your current architecture. You can unzip this file and launch the emulator. For example on darwin it will produce the following:
+
+```sh
+bazel build //hardware/generic/goldfish/emulator:release
+INFO: Analyzed target //hardware/generic/goldfish/emulator:release (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+Target //hardware/generic/goldfish/emulator:release up-to-date:
+  bazel-bin/hardware/generic/goldfish/emulator/sdk-repo-darwin_aarch64-emulator-developer.zip
+INFO: Elapsed time: 0.258s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+```
+
+You can run the qemu binaries directly, but you will have
+
+### Running a development build
+
+You can also run the emulator directly from within bazel:
+
+```sh
+bazel run //hardware/generic/goldfish/emulator/launcher:goldfish -- --avd V --vnc :8
+```
+
+This will launch the goldfish emulator with avd *V* and creates a vnc connection on port 5908. You can now attach your favorite debugger to debug any issues.
+
+Note that on linux you will have to set the following source mapping:
+
+```sh
+$ lldb
+(lldb) settings set target.source-map /proc/self/cwd /my/bazel/workspace/root
+```
+
+Where `/my/bazel/workspace/root` points to your bazel workspace root.
+
+## Adding emulator functionality
+
+All the code related to emulator can be found in //hardware/generic/goldfish. See the [//hardware/generic/goldfish/README.MD](../../hardware/generic/goldfish//README.MD) for more information.
