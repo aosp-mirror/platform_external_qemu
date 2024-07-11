@@ -477,6 +477,13 @@ def transform_bazel(bld_file, configuration, library):
     )
 
 
+def serialize(library, stream, verbatim):
+    library.serialize(stream)
+    for file_path in verbatim:
+        with open(file_path, "r", encoding="utf-8") as inp:
+            stream.write(inp.read())
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="This script merges multiple Bazel build files, "
@@ -492,6 +499,13 @@ def main():
         help="Platform and path to bazel file",
     )
     parser.add_argument(
+        "--verbatim-buildfile",
+        action="append",
+        metavar="Bazel build file",
+        help="Path to a Bazel build file to include verbatim (no merging applied).",
+    )
+
+    parser.add_argument(
         "--unique",
         action="append",
         help="Keys that should be treated as unique. For example: win_def_file",
@@ -505,10 +519,10 @@ def main():
 
     if args.output:
         with open(args.output, "w", encoding="utf-8") as stream:
-            library.serialize(stream)
+            serialize(library, stream, args.verbatim_buildfile)
+
     else:
-        stream = sys.stdout
-        library.serialize(stream)
+        serialize(library, sys.stdout, args.verbatim_buildfile)
 
 
 if __name__ == "__main__":
