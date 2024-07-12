@@ -30,7 +30,7 @@ _prebuilt_funcs = {
     # Add more prebuilts here
 }
 
-if HOST_OS == "linux":
+if HOST_OS == "linux" or HOST_OS == "darwin":
     _prebuilt_funcs.update({
         # TODO: Build angle for all platforms
         'angle': angle.buildPrebuilt,
