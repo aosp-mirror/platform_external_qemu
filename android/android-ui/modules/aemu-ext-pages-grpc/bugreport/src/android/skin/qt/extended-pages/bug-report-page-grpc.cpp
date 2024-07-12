@@ -147,9 +147,7 @@ BugreportPageGrpc::BugreportPageGrpc(QWidget* parent)
 }
 
 BugreportPageGrpc::~BugreportPageGrpc() {
-    if (mTask.inFlight()) {
-        mTask.stopAsync();
-    }
+    mTask.stopAsync();
 
     if (System::get()->pathIsFile(mSavingStates.adbBugreportFilePath)) {
         System::get()->deleteFile(mSavingStates.adbBugreportFilePath);

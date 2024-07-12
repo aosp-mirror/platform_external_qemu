@@ -142,9 +142,7 @@ BugreportPage::BugreportPage(QWidget* parent)
 
 BugreportPage::~BugreportPage() {
     // Stop the async timer;
-    if (mTask.inFlight()) {
-        mTask.stopAsync();
-    }
+    mTask.stopAsync();
 
     if (System::get()->pathIsFile(mSavingStates.adbBugreportFilePath)) {
         System::get()->deleteFile(mSavingStates.adbBugreportFilePath);
