@@ -15,13 +15,15 @@
 ANDROID_BEGIN_HEADER
 
 #include <direct.h>
+#include <inttypes.h>
 #include <io.h>
 #include <stdio.h>
 #include <sys/stat.h>
+
 typedef long long ssize_t;
 typedef unsigned long long size_t;
 typedef long off_t;
-typedef long off64_t;
+typedef int64_t off64_t;
 typedef int mode_t;
 
 #undef fstat
@@ -172,8 +174,7 @@ int _ftruncate(int fd, off_t length);
 
 int getpid(void);
 
-
 #define __try1(x) __try
-#define  __except1 __except(EXCEPTION_EXECUTE_HANDLER)
+#define __except1 __except (EXCEPTION_EXECUTE_HANDLER)
 
 ANDROID_END_HEADER

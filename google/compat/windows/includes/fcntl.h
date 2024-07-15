@@ -16,4 +16,4 @@
 // fcntl with added missing defines.
 #include_next <fcntl.h>
 
-#define O_ACCMODE O_RDONLY | O_WRONLY | O_RDWR
+#define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
