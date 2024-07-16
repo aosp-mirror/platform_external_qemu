@@ -72,7 +72,7 @@ cc_binary(
 )
 cc_interface_binary(
    defines = ['_GNU_SOURCE', '_FILE_OFFSET_BITS=64', '_LARGEFILE_SOURCE', 'NEED_CPU_H', 'CONFIG_TARGET=\\"aarch64-softmmu-config-target.h\\"', 'CONFIG_DEVICES=\\"aarch64-softmmu-config-devices.h\\"'],
-   deps = ['libqemuutil', '//external/qemu/subprojects/libvhost-user:vhost-user-glib', '//external/qemu/subprojects/libvhost-user:vhost-user', 'libtcg_system', 'libmigration', 'libhwcore', 'libqom', 'libevent-loop-base', 'libgdb_system', 'libio', 'libcrypto', 'libauthz', 'libblockdev', 'libblock', 'libchardev', 'libqmp', '@glib//:gmodule-static', '//external/dtc:libfdt', '@zlib//:zlib', '@glib//:glib-static', '@pixman//:pixman-1', '@pixman//:pixman_simd', 'libqemu-aarch64-softmmu', '//hardware/generic/goldfish/emulator/plugin:registration'],
+   deps = ['libqemuutil', '//external/qemu/subprojects/libvhost-user:vhost-user-glib', '//external/qemu/subprojects/libvhost-user:vhost-user', 'libtcg_system', 'libmigration', 'libhwcore', 'libqom', 'libevent-loop-base', 'libgdb_system', 'libio', 'libcrypto', 'libauthz', 'libblockdev', 'libblock', 'libchardev', 'libqmp', '@glib//:gmodule-static', '//external/dtc:libfdt', '@zlib//:zlib', '@glib//:glib-static', '@pixman//:pixman-1', '@pixman//:pixman_simd', 'libqemu-aarch64-softmmu', '//hardware/generic/goldfish/emulator/plugin/registration:aarch64'],
    # buildifier: leave-alone
    includes = ['.', 'include', 'platform/linux-x86_64'],
    linkopts = ['-rdynamic'],
@@ -82,7 +82,7 @@ cc_interface_binary(
 )
 cc_interface_binary(
    defines = ['_GNU_SOURCE', '_FILE_OFFSET_BITS=64', '_LARGEFILE_SOURCE', 'NEED_CPU_H', 'CONFIG_TARGET=\\"riscv64-softmmu-config-target.h\\"', 'CONFIG_DEVICES=\\"riscv64-softmmu-config-devices.h\\"'],
-   deps = ['libqemuutil', '//external/qemu/subprojects/libvhost-user:vhost-user-glib', '//external/qemu/subprojects/libvhost-user:vhost-user', 'libtcg_system', 'libmigration', 'libhwcore', 'libqom', 'libevent-loop-base', 'libgdb_system', 'libio', 'libcrypto', 'libauthz', 'libblockdev', 'libblock', 'libchardev', 'libqmp', '@glib//:gmodule-static', '//external/dtc:libfdt', '@zlib//:zlib', '@glib//:glib-static', '@pixman//:pixman-1', '@pixman//:pixman_simd', 'libqemu-riscv64-softmmu', '//hardware/generic/goldfish/emulator/plugin:registration'],
+   deps = ['libqemuutil', '//external/qemu/subprojects/libvhost-user:vhost-user-glib', '//external/qemu/subprojects/libvhost-user:vhost-user', 'libtcg_system', 'libmigration', 'libhwcore', 'libqom', 'libevent-loop-base', 'libgdb_system', 'libio', 'libcrypto', 'libauthz', 'libblockdev', 'libblock', 'libchardev', 'libqmp', '@glib//:gmodule-static', '//external/dtc:libfdt', '@zlib//:zlib', '@glib//:glib-static', '@pixman//:pixman-1', '@pixman//:pixman_simd', 'libqemu-riscv64-softmmu', '//hardware/generic/goldfish/emulator/plugin/registration:riscv64'],
    # buildifier: leave-alone
    includes = ['.', 'include', 'platform/linux-x86_64'],
    linkopts = ['-rdynamic'],
@@ -92,7 +92,7 @@ cc_interface_binary(
 )
 cc_interface_binary(
    defines = ['_GNU_SOURCE', '_FILE_OFFSET_BITS=64', '_LARGEFILE_SOURCE', 'NEED_CPU_H', 'CONFIG_TARGET=\\"x86_64-softmmu-config-target.h\\"', 'CONFIG_DEVICES=\\"x86_64-softmmu-config-devices.h\\"'],
-   deps = ['libqemuutil', '//external/qemu/subprojects/libvhost-user:vhost-user-glib', '//external/qemu/subprojects/libvhost-user:vhost-user', 'libtcg_system', 'libmigration', 'libhwcore', 'libqom', 'libevent-loop-base', 'libgdb_system', 'libio', 'libcrypto', 'libauthz', 'libblockdev', 'libblock', 'libchardev', 'libqmp', '@glib//:gmodule-static', '//external/dtc:libfdt', '@zlib//:zlib', '@glib//:glib-static', '@pixman//:pixman-1', '@pixman//:pixman_simd', 'libqemu-x86_64-softmmu', '//hardware/generic/goldfish/emulator/plugin:registration'],
+   deps = ['libqemuutil', '//external/qemu/subprojects/libvhost-user:vhost-user-glib', '//external/qemu/subprojects/libvhost-user:vhost-user', 'libtcg_system', 'libmigration', 'libhwcore', 'libqom', 'libevent-loop-base', 'libgdb_system', 'libio', 'libcrypto', 'libauthz', 'libblockdev', 'libblock', 'libchardev', 'libqmp', '@glib//:gmodule-static', '//external/dtc:libfdt', '@zlib//:zlib', '@glib//:glib-static', '@pixman//:pixman-1', '@pixman//:pixman_simd', 'libqemu-x86_64-softmmu', '//hardware/generic/goldfish/emulator/plugin/registration:x86_64'],
    # buildifier: leave-alone
    includes = ['.', 'include', 'platform/linux-x86_64'],
    linkopts = ['-rdynamic'],

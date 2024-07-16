@@ -34,7 +34,7 @@
         ],
         "+deps": [
           "libqemu-aarch64-softmmu",
-          "//hardware/generic/goldfish/emulator/plugin:registration"
+          "//hardware/generic/goldfish/emulator/plugin/registration:aarch64"
         ],
         // Enable our plugins to link back.
         "+linkopts": ["-rdynamic"],
@@ -52,7 +52,7 @@
         ],
         "+deps": [
           "libqemu-riscv64-softmmu",
-          "//hardware/generic/goldfish/emulator/plugin:registration"
+          "//hardware/generic/goldfish/emulator/plugin/registration:riscv64"
         ],
         // Enable our plugins to link back.
         "+linkopts": ["-rdynamic"],
@@ -70,7 +70,7 @@
         ],
         "+deps": [
           "libqemu-x86_64-softmmu",
-          "//hardware/generic/goldfish/emulator/plugin:registration"
+          "//hardware/generic/goldfish/emulator/plugin/registration:x86_64"
         ],
         // Enable our plugins to link back.
         "+linkopts": ["-rdynamic"],
