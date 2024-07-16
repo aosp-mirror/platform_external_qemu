@@ -128,7 +128,7 @@ def buildAngle(build_dir):
     gn_common_args = (
             'target_cpu="{arch}" target_os="{os}"'
             " angle_enable_vulkan=true is_debug=false is_component_build=true"
-            " is_official_build=false use_custom_libcxx=false libcxx_abi_unstable=false"
+            " is_official_build=false use_custom_libcxx=true libcxx_abi_unstable=false"
             " dcheck_always_on=false use_dummy_lastchange=true")
     if HOST_OS == "linux":
         # Install the sysroot
