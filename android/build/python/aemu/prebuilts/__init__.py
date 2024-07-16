@@ -45,10 +45,14 @@ def buildPrebuilts(args):
     # out/prebuilts
     prebuilts_dir = os.path.join(args.out, _prebuilts_dir_name)
     build_list = args.prebuilts if args.prebuilts else _prebuilt_funcs.keys()
+    orig_environ = os.environ.copy()
     logging.info("Prebuilts list: " + str(build_list))
     for prebuilt in build_list:
         logging.info(">> Building prebuilt [%s]", prebuilt)
         _prebuilt_funcs.get(prebuilt)(args, prebuilts_dir)
+        # Ours + third_party build scripts may modify our envirionment. We should start
+        # from the same environment for each prebuilt.
+        os.environ = orig_environ
     logging.info("Done building prebuilts list. Prebuilts located at [%s]", prebuilts_dir)
 
     # zip each prebuilt in out/prebuilts and binplace under dist/prebuilts/.
