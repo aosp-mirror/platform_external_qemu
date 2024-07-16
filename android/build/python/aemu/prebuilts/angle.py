@@ -63,10 +63,6 @@ def fetchAngleDependencies():
     # Disable depot_tools auto-update
     os.environ["DEPOT_TOOLS_UPDATE"] = "0"
 
-    if HOST_OS == "darwin":
-        # gclient runhooks will fail on mac, so we need to generate build/util/LASTCHANGE manually.
-        genLastChangeFile()
-
     # Opt-in to gclient metrics collection to silence warnings
     gclient_opt_in_cmd = ["gclient", "metrics", "--opt-in"]
     logging.info(f">> CMD: {gclient_opt_in_cmd}")
@@ -85,6 +81,10 @@ def fetchAngleDependencies():
     # Run glient sync twice
     res = subprocess.run(args=gclient_cmd, cwd=AOSP_ANGLE_SRC_PATH, env=os.environ.copy())
     res = subprocess.run(args=gclient_cmd, cwd=AOSP_ANGLE_SRC_PATH, env=os.environ.copy())
+
+    if HOST_OS == "darwin":
+        # gclient runhooks will fail on mac, so we need to generate build/util/LASTCHANGE manually.
+        genLastChangeFile()
 
 def create_clang_toolchain(toolchain_dir: Path, extra_cflags, extra_cxxflags):
     """Creates a clang toolchain directory, with custom flags.
@@ -128,7 +128,7 @@ def buildAngle(build_dir):
     gn_common_args = (
             'target_cpu="{arch}" target_os="{os}"'
             " angle_enable_vulkan=true is_debug=false is_component_build=true"
-            " is_official_build=false use_custom_libcxx=true libcxx_abi_unstable=false"
+            " is_official_build=false use_custom_libcxx=false libcxx_abi_unstable=false"
             " dcheck_always_on=false use_dummy_lastchange=true")
     if HOST_OS == "linux":
         # Install the sysroot
