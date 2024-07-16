@@ -8,6 +8,9 @@ cc_library(
             "src/*.cpp",
         ]),
     hdrs = glob(["includes/**/*.h"]),
+    defines = [
+        "WIN32_LEAN_AND_MEAN",
+    ],
     includes = [
         "includes",
         "includes/dirent",
