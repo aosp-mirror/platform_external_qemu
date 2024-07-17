@@ -27,14 +27,9 @@ _prebuilts_dir_name = "prebuilts"
 _prebuilts_zip_name = "PREBUILT-{prebuilt_name}-{build_number}.zip"
 _prebuilt_funcs = {
     'qt': qt.buildPrebuilt,
+    'angle': angle.buildPrebuilt,
     # Add more prebuilts here
 }
-
-if HOST_OS == "linux" or HOST_OS == "darwin":
-    _prebuilt_funcs.update({
-        # TODO: Build angle for all platforms
-        'angle': angle.buildPrebuilt,
-    })
 
 if HOST_OS == "darwin":
     _prebuilt_funcs.update({
