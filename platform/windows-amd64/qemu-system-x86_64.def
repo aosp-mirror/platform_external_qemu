@@ -106,6 +106,7 @@ EXPORTS
     id_generate
     info_report
     iov_from_buf_full
+    iov_size
     iov_to_buf_full
     memory_region_init
     memory_region_size
@@ -210,6 +211,7 @@ EXPORTS
     qemu_get_be32
     qemu_get_be64
     qemu_get_buffer
+    qemu_get_byte
     qemu_get_thread_id
     qemu_guest_random_seed_thread_part2
     qemu_in_coroutine
@@ -241,6 +243,7 @@ EXPORTS
     qemu_put_be32
     qemu_put_be64
     qemu_put_buffer
+    qemu_put_byte
     qemu_set_cloexec
     qemu_socket_set_block
     qemu_thread_create
@@ -323,6 +326,8 @@ EXPORTS
     vga_dirty_log_start
     vga_init
     virtio_add_queue
+    virtio_cleanup
+    virtio_del_queue
     virtio_get_queue
     virtio_init
     virtio_instance_init_common
@@ -353,6 +358,7 @@ EXPORTS
     vmstate_info_int32
     vmstate_info_uint32
     vmstate_info_uint32_equal
+    vmstate_info_uint64
     vmstate_load_state
     vmstate_register_with_alias_id
     vmstate_save_state
