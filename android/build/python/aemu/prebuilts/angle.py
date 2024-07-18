@@ -145,7 +145,7 @@ def buildAngle(build_dir):
     gn_common_args = (
             'target_cpu="{arch}" target_os="{os}"'
             " angle_enable_vulkan=true is_debug=false is_component_build=true"
-            " is_official_build=false use_custom_libcxx=false libcxx_abi_unstable=false"
+            " is_official_build=false libcxx_abi_unstable=false"
             " dcheck_always_on=false use_dummy_lastchange=true")
     if HOST_OS == "linux":
         # Install the sysroot
@@ -156,6 +156,8 @@ def buildAngle(build_dir):
         if res.returncode != 0:
             logging.critical(f"install-sysroot.py exited with non-zero code {res.returncode}")
             exit(res.returncode)
+        gn_common_args += (
+                " use_custom_libcxx=true")
         gn_args = (gn_common_args.format(arch="x64", os="linux"))
     elif HOST_OS == "darwin":
         # We need to provide our own clang. Since we are using our own version of clang,
@@ -176,7 +178,8 @@ def buildAngle(build_dir):
         gn_common_args += (
                 ' clang_base_path="{clang_base_path}"'
                 " clang_use_chrome_plugins=false"
-                " use_system_xcode=true")
+                " use_system_xcode=true"
+                " use_custom_libcxx=true")
         gn_args = gn_common_args.format(
                 arch="arm64" if HOST_ARCH == "aarch64" else "x64",
                 os="mac",
@@ -185,7 +188,8 @@ def buildAngle(build_dir):
         gn_common_args += (
                 " is_clang=false"
                 " treat_warnings_as_errors=false"
-                " build_angle_deqp_tests=false")
+                " build_angle_deqp_tests=false"
+                " use_custom_libcxx=false")
         gn_args = gn_common_args.format(arch="x64", os="win")
 
     gn_cmd = [
@@ -287,8 +291,6 @@ def buildPrebuilt(args, prebuilts_out_dir):
     deps_common.addToSearchPath(CMAKE_PATH)
     # Use ninja from our prebuilts
     deps_common.addToSearchPath(NINJA_PATH)
-    # Use python from our prebuilts
-    deps_common.addToSearchPath(PYTHON_PATH)
     deps_common.addToSearchPath(str(DEPOT_TOOLS_PATH))
     logging.info(os.environ)
 
