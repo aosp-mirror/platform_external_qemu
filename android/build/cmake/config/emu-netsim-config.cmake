@@ -46,18 +46,18 @@ set(NETSIM_UI_DEPENDENCIES
 
 if(WINDOWS_MSVC_X86_64)
   set(NETSIM_DEPENDENCIES
-      ${PREBUILT_ROOT}/netsim.exe>netsim.exe;${PREBUILT_ROOT}/netsimd.exe>netsimd.exe;
+      ${PREBUILT_ROOT}/netsimd.exe>netsimd.exe;
   )
 
-install(PROGRAMS ${PREBUILT_ROOT}/netsim.exe ${PREBUILT_ROOT}/netsimd.exe DESTINATION .)
+install(PROGRAMS ${PREBUILT_ROOT}/netsimd.exe DESTINATION .)
 else()
   set(NETSIM_DEPENDENCIES
-      ${PREBUILT_ROOT}/netsim>netsim;${PREBUILT_ROOT}/netsimd>netsimd;)
+      ${PREBUILT_ROOT}/netsimd>netsimd;)
 
-install(PROGRAMS ${PREBUILT_ROOT}/netsim ${PREBUILT_ROOT}/netsimd DESTINATION .)
+install(PROGRAMS ${PREBUILT_ROOT}/netsimd DESTINATION .)
 endif()
 
-set(PACKAGE_EXPORT NETSIM_DEPENDENCIES;NETSIM_UI_DEPENDENCIES)
+set(PACKAGE_EXPORT NETSIM_DEPENDENCIES)
 android_license(
   TARGET "NETSIM_DEPENDENCIES"
   LIBNAME "Netsim"
