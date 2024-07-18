@@ -501,7 +501,7 @@ bool emuglConfig_init(EmuglConfig* config,
         bitness = System::get()->getProgramBitness();
     }
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__arm64__)
     if (!strcmp("host", gpu_mode)) {
         use_host_vulkan = true;
     }
@@ -611,7 +611,7 @@ bool emuglConfig_init(EmuglConfig* config,
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
                     gpu_mode = "host";
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__arm64__)
                     use_host_vulkan = true;
 #endif
                     break;
