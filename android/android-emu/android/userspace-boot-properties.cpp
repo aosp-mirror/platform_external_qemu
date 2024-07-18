@@ -266,6 +266,12 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
     params.push_back({"androidboot.hardware", isQemu2 ? "ranchu" : "goldfish"});
 
     if (opts->guest_angle) {
+        dwarning(
+                "Command line option -guest-angle is deprecated and will be "
+                "removed, use '-feature GuestAngle' instead.");
+        fc::setEnabledOverride(fc::GuestAngle, true);
+    }
+    if (fc::isEnabled(fc::GuestAngle) || fc::isEnabledByGuest(fc::GuestAngle)) {
         params.push_back({"androidboot.hardwareegl", "angle"});
     }
 
