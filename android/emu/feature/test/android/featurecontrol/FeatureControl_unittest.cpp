@@ -375,6 +375,7 @@ Feature: 'VulkanAllocateHostMemory' (99), value: 0, default: 0, is overridden: 0
 Feature: 'QtRawKeyboardInput' (100), value: 0, default: 0, is overridden: 0
 Feature: 'Uwb' (101), value: 0, default: 0, is overridden: 0
 Feature: 'GuestAngle' (102), value: 0, default: 0, is overridden: 0
+Feature: 'AndroidVirtualizationFramework' (103), value: 0, default: 0, is overridden: 0
 )#";
     EXPECT_EQ(feature_list, ss.str());
 }

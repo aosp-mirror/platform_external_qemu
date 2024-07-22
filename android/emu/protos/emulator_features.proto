@@ -122,4 +122,6 @@ enum Feature {
     Vulkan = 67;
 
     Uwb = 68;
+
+    AndroidVirtualizationFramework = 69;
 }
