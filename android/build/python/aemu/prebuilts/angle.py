@@ -19,6 +19,7 @@ import os
 import shutil
 import subprocess
 import aemu.prebuilts.deps.common as deps_common
+import aemu.prebuilts.deps.windows as deps_win
 from pathlib import Path
 import platform
 
@@ -305,6 +306,18 @@ def buildPrebuilt(args, prebuilts_out_dir):
         # Our buildbots may define LIBRARY_PATH=/usr/local/lib, which will break the ANGLE build.
         # Unset it.
         os.environ["LIBRARY_PATH"] = ""
+    elif HOST_OS == "windows":
+        VS_INSTALL_PATH = os.environ["VS2022_INSTALL_PATH"]
+        if VS_INSTALL_PATH:
+            # The existence of the environment variable indicates we are on an old-style buildbot
+            # that does not have the docker configuration.
+            vcvarsall = os.path.join(VS_INSTALL_PATH, "VC", "Auxiliary", "Build", "vcvarsall.bat")
+            if not os.path.exists(vcvarsall):
+                logging.fatal(f"[{vcvarsall}] does not exist")
+                exit(-1)
+            deps_win.inheritSubprocessEnv([vcvarsall, "amd64", ">NUL", "2>&1"])
+            # ANGLE build uses GYP_MSVS_OVERRIDE_PATH for custom toolchain
+            os.environ["GYP_MSVS_OVERRIDE_PATH"] = VS_INSTALL_PATH
     logging.info(os.environ)
 
     # angle source code is in external/angle
