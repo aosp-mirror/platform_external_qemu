@@ -103,6 +103,14 @@ def fetchAngleDependencies():
         # gclient runhooks will fail on mac, so we need to generate build/util/LASTCHANGE manually.
         genLastChangeFile()
 
+    # Use the python from the bootstrapped depot_tools
+    if HOST_OS == "darwin":
+        python_bin_file = os.path.join(DEPOT_TOOLS_PATH, "python_bin_reldir.txt")
+        with open(python_bin_file, 'r') as f:
+            python_path = os.path.join(DEPOT_TOOLS_PATH, f.readline())
+            logging.info(f"Python path from depot_tools [{python_path}]")
+            deps_common.addToSearchPath(python_path)
+
 def create_clang_toolchain(toolchain_dir: Path, extra_cflags, extra_cxxflags):
     """Creates a clang toolchain directory, with custom flags.
 
@@ -146,7 +154,8 @@ def buildAngle(build_dir):
             'target_cpu="{arch}" target_os="{os}"'
             " angle_enable_vulkan=true is_debug=false is_component_build=true"
             " is_official_build=false libcxx_abi_unstable=false"
-            " dcheck_always_on=false use_dummy_lastchange=true")
+            " dcheck_always_on=false use_dummy_lastchange=true"
+            " build_angle_deqp_tests=false")
     if HOST_OS == "linux":
         # Install the sysroot
         res = subprocess.run(
@@ -188,7 +197,6 @@ def buildAngle(build_dir):
         gn_common_args += (
                 " is_clang=false"
                 " treat_warnings_as_errors=false"
-                " build_angle_deqp_tests=false"
                 " use_custom_libcxx=false")
         gn_args = gn_common_args.format(arch="x64", os="win")
 
@@ -292,6 +300,11 @@ def buildPrebuilt(args, prebuilts_out_dir):
     # Use ninja from our prebuilts
     deps_common.addToSearchPath(NINJA_PATH)
     deps_common.addToSearchPath(str(DEPOT_TOOLS_PATH))
+
+    if HOST_OS == "darwin":
+        # Our buildbots may define LIBRARY_PATH=/usr/local/lib, which will break the ANGLE build.
+        # Unset it.
+        os.environ["LIBRARY_PATH"] = ""
     logging.info(os.environ)
 
     # angle source code is in external/angle
