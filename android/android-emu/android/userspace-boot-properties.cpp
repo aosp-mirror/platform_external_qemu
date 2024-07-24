@@ -271,7 +271,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
                 "removed, use '-feature GuestAngle' instead.");
         fc::setEnabledOverride(fc::GuestAngle, true);
     }
-    if (fc::isEnabled(fc::GuestAngle) || fc::isEnabledByGuest(fc::GuestAngle)) {
+    if (fc::isEnabled(fc::GuestAngle)) {
         params.push_back({"androidboot.hardwareegl", "angle"});
     }
 
