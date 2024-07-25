@@ -4111,6 +4111,11 @@ static const CommandDefRec qemu_commands[] = {
     }
 
 static int do_multi_display_add(ControlClient client, char* args) {
+    if (!args) {
+        control_write(client, "KO: not enough arguments\r\n");
+        return -1;
+    }
+
     // kMaxArgs is max number of arguments that we have to process (options +
     // parameters, if any, and the filename)
     const int kMaxArgs = 5;

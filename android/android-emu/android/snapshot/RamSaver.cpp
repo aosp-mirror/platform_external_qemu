@@ -102,7 +102,7 @@ RamSaver::RamSaver(const std::string& fileName,
                 base::StdioStream::kOwner);
         if (mStream.get()) {
             // Seek to the old index position and start overwriting from there.
-            fseeko64(mStream.get(), loader->indexOffset(), SEEK_SET);
+            fseeko(mStream.get(), loader->indexOffset(), SEEK_SET);
             mCurrentStreamPos = loader->indexOffset();
         }
     } else {
@@ -618,7 +618,7 @@ void RamSaver::writeIndex() {
         base::pwrite(mStreamFd, stream.buffer().data(), stream.buffer().size(),
                      mIndex.startPosInFile);
         setFileSize(mStreamFd, int64_t(mDiskSize));
-        HANDLE_EINTR(fseeko64(mStream.get(), 0, SEEK_SET));
+        HANDLE_EINTR(fseeko(mStream.get(), 0, SEEK_SET));
         mStream.putBe64(uint64_t(mIndex.startPosInFile));
         mHasError = ferror(mStream.get()) != 0;
         mStream.close();

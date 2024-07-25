@@ -19,6 +19,7 @@ import os
 import shutil
 import subprocess
 import aemu.prebuilts.deps.common as deps_common
+import aemu.prebuilts.deps.windows as deps_win
 from pathlib import Path
 import platform
 
@@ -103,6 +104,14 @@ def fetchAngleDependencies():
         # gclient runhooks will fail on mac, so we need to generate build/util/LASTCHANGE manually.
         genLastChangeFile()
 
+    # Use the python from the bootstrapped depot_tools
+    if HOST_OS == "darwin":
+        python_bin_file = os.path.join(DEPOT_TOOLS_PATH, "python_bin_reldir.txt")
+        with open(python_bin_file, 'r') as f:
+            python_path = os.path.join(DEPOT_TOOLS_PATH, f.readline())
+            logging.info(f"Python path from depot_tools [{python_path}]")
+            deps_common.addToSearchPath(python_path)
+
 def create_clang_toolchain(toolchain_dir: Path, extra_cflags, extra_cxxflags):
     """Creates a clang toolchain directory, with custom flags.
 
@@ -145,8 +154,9 @@ def buildAngle(build_dir):
     gn_common_args = (
             'target_cpu="{arch}" target_os="{os}"'
             " angle_enable_vulkan=true is_debug=false is_component_build=true"
-            " is_official_build=false use_custom_libcxx=false libcxx_abi_unstable=false"
-            " dcheck_always_on=false use_dummy_lastchange=true")
+            " is_official_build=false libcxx_abi_unstable=false"
+            " dcheck_always_on=false use_dummy_lastchange=true"
+            " build_angle_deqp_tests=false")
     if HOST_OS == "linux":
         # Install the sysroot
         res = subprocess.run(
@@ -156,6 +166,8 @@ def buildAngle(build_dir):
         if res.returncode != 0:
             logging.critical(f"install-sysroot.py exited with non-zero code {res.returncode}")
             exit(res.returncode)
+        gn_common_args += (
+                " use_custom_libcxx=true")
         gn_args = (gn_common_args.format(arch="x64", os="linux"))
     elif HOST_OS == "darwin":
         # We need to provide our own clang. Since we are using our own version of clang,
@@ -176,7 +188,8 @@ def buildAngle(build_dir):
         gn_common_args += (
                 ' clang_base_path="{clang_base_path}"'
                 " clang_use_chrome_plugins=false"
-                " use_system_xcode=true")
+                " use_system_xcode=true"
+                " use_custom_libcxx=true")
         gn_args = gn_common_args.format(
                 arch="arm64" if HOST_ARCH == "aarch64" else "x64",
                 os="mac",
@@ -185,7 +198,7 @@ def buildAngle(build_dir):
         gn_common_args += (
                 " is_clang=false"
                 " treat_warnings_as_errors=false"
-                " build_angle_deqp_tests=false")
+                " use_custom_libcxx=false")
         gn_args = gn_common_args.format(arch="x64", os="win")
 
     gn_cmd = [
@@ -287,9 +300,24 @@ def buildPrebuilt(args, prebuilts_out_dir):
     deps_common.addToSearchPath(CMAKE_PATH)
     # Use ninja from our prebuilts
     deps_common.addToSearchPath(NINJA_PATH)
-    # Use python from our prebuilts
-    deps_common.addToSearchPath(PYTHON_PATH)
     deps_common.addToSearchPath(str(DEPOT_TOOLS_PATH))
+
+    if HOST_OS == "darwin":
+        # Our buildbots may define LIBRARY_PATH=/usr/local/lib, which will break the ANGLE build.
+        # Unset it.
+        os.environ["LIBRARY_PATH"] = ""
+    elif HOST_OS == "windows":
+        VS_INSTALL_PATH = os.environ["VS2022_INSTALL_PATH"]
+        if VS_INSTALL_PATH:
+            # The existence of the environment variable indicates we are on an old-style buildbot
+            # that does not have the docker configuration.
+            vcvarsall = os.path.join(VS_INSTALL_PATH, "VC", "Auxiliary", "Build", "vcvarsall.bat")
+            if not os.path.exists(vcvarsall):
+                logging.fatal(f"[{vcvarsall}] does not exist")
+                exit(-1)
+            deps_win.inheritSubprocessEnv([vcvarsall, "amd64", ">NUL", "2>&1"])
+            # ANGLE build uses GYP_MSVS_OVERRIDE_PATH for custom toolchain
+            os.environ["GYP_MSVS_OVERRIDE_PATH"] = VS_INSTALL_PATH
     logging.info(os.environ)
 
     # angle source code is in external/angle

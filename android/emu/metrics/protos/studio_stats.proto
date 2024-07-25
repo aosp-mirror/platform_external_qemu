@@ -1573,6 +1573,7 @@ message EmulatorFeatureFlagState {
         DEVICE_KEYBOARD_QT_RAW_INPUT = 108;
         UWB = 109;
         GUEST_ANGLE = 110;
+        ANDROID_VIRTUALIZATION_FRAMEWORK = 111;
         // Next tag: 111
     }
     // Which features were enabled by default or through the server-side config.
