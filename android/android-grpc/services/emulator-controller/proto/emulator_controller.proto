@@ -234,10 +234,19 @@ service EmulatorController {
     rpc streamNotification(google.protobuf.Empty)
             returns (stream Notification) {}
 
-    // RotationRadian is relative to the camera's current orientation.
+    // Rotation angles are relative to the camera's current orientation.
+    // The coordinate system is right-handed and is defined as follows:
+    //   x axis is pointing right
+    //   y axis is pointing up
+    //   z axis is pointing towards the viewer
+    // The z component of rotation is not used when calling this method.
     rpc rotateVirtualSceneCamera(RotationRadian)
             returns (google.protobuf.Empty) {}
-    // Velocity is absolute
+    // Velocity is absolute and is measured in meters per second.
+    // The coordinate system is right-handed and is defined as follows:
+    //   x axis is pointing right
+    //   y axis is pointing up
+    //   z axis is pointing towards the viewer
     rpc setVirtualSceneCameraVelocity(Velocity)
             returns (google.protobuf.Empty) {}
     // Set foldable posture
@@ -1345,19 +1354,18 @@ message DisplayConfigurationsChangedNotification {
     DisplayConfigurations displayConfigurations = 1;
 }
 
+// Rotation angles are relative to the current orientation.
 message RotationRadian {
-    float x = 1;  // x axis is horizontal and orthogonal to the view direction.
-    float y = 2;  // y axis is orthogonal to the view direction and to the x
-                  // axis.
-    float z = 3;  // z axis is the view direction and is set to 0.0 in
-                  // rotateVirtualSceneCamera call.
+    float x = 1;  // Angle of rotation around the x axis in right-handed direction.
+    float y = 2;  // Angle of rotation around the y axis in right-handed direction.
+    float z = 3;  // Angle of rotation around the z axis in right-handed direction.
 }
 
+// Velocity is measured in meters per second.
 message Velocity {
-    float x = 1;  // x axis is horizontal and orthogonal to the view direction.
-    float y = 2;  // y axis is orthogonal to the view direction and to the x
-                  // axis.
-    float z = 3;  // z axis is the view direction.
+    float x = 1;
+    float y = 2;
+    float z = 3;
 }
 
 // Must follow the definition in "external/qemu/android/hw-sensors.h"
