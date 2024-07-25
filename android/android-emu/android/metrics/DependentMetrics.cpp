@@ -664,6 +664,8 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::UWB;
         case android::featurecontrol::GuestAngle:
             return android_studio::EmulatorFeatureFlagState::GUEST_ANGLE;
+        case android::featurecontrol::AndroidVirtualizationFramework:
+            return android_studio::EmulatorFeatureFlagState::ANDROID_VIRTUALIZATION_FRAMEWORK;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;
