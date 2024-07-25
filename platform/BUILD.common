@@ -1,7 +1,6 @@
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
 load("platform/cc_interface_binary.bzl", "cc_interface_binary")
 
-
 # Make all the headers available, including the generated ones.
 cc_library(
     name = "qemu-headers",
@@ -1387,7 +1386,10 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    copts = ["-fwrapv"],
+    copts = [
+        "-fwrapv",
+        "-UNDEBUG",
+    ],
     includes = ["include"] + select({
         "@platforms//os:windows": ["platform/windows-amd64"],
         "@platforms//os:macos": ["platform/darwin-arm64"],
