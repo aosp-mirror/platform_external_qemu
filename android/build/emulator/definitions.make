@@ -339,7 +339,7 @@ $$(_DST): PRIVATE_SRC := $$(_SRC)
 $$(_DST): $$(_SRC)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "InstallDir: $$(PRIVATE_DST)"
-	$(hide) cp -r $$(PRIVATE_SRC) $$(PRIVATE_DST)
+	$(hide) cp -rp $$(PRIVATE_SRC) $$(PRIVATE_DST)
 endef
 
 # Installs a binary to a new destination
@@ -578,10 +578,10 @@ ifeq (darwin,$(BUILD_TARGET_OS))
 ifeq (,$$(wildcard $$(_INTERMEDIATE_MODULE).dSYM))
 	$(hide) dsymutil --out=$$(PRIVATE_DEBUG_INFO) $$(PRIVATE_INTERMEDIATE_MODULE)
 else # dSYM exists
-	$(hide) cp -rf $$(PRIVATE_INTERMEDIATE_MODULE).dSYM $$(PRIVATE_DEBUG_INFO)
+	$(hide) cp -rpf $$(PRIVATE_INTERMEDIATE_MODULE).dSYM $$(PRIVATE_DEBUG_INFO)
 endif
 else # BUILD_TARGET_OS != darwin
-	$(hide) cp -f $$(PRIVATE_INTERMEDIATE_MODULE) $$(PRIVATE_DEBUG_INFO)
+	$(hide) cp -fp $$(PRIVATE_INTERMEDIATE_MODULE) $$(PRIVATE_DEBUG_INFO)
 endif # BUILD_TARGET_OS
 endef
 

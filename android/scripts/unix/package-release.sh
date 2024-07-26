@@ -620,7 +620,7 @@ with the usual set of options.
 
 To install them directly into your SDK, copy them with:
 
-    cp -r tools/* \$ANDROID_SDK_ROOT/tools/
+    cp -rp tools/* \$ANDROID_SDK_ROOT/tools/
 EOF
 
     dump "[$PKG_NAME] Copying license files."
