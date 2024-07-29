@@ -73,7 +73,8 @@ public:
 
     std::optional<ProcessExitCode> getExitCode() const override { return 0; }
     std::optional<Pid> createProcess(const CommandArguments& args,
-                                     bool deamon) override {
+                                     bool deamon,
+                                     bool replace) override {
         return 123;
     }
     std::unique_ptr<ProcessOverseer> createOverseer() override {
