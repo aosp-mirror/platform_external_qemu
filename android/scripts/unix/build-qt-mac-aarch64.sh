@@ -107,7 +107,7 @@ function run_make() {
 }
 
 function copy_installed_files_to_prebuilts() {
-    cp -r $QT_INSTALL_DIR $QT_PREBUILTS_DIR
+    cp -rp $QT_INSTALL_DIR $QT_PREBUILTS_DIR
 }
 
 parse_args $@
