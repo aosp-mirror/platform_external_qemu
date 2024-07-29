@@ -92,8 +92,8 @@ if(WIN32)
   set(CMAKE_CXX_FLAGS_DEBUG "/MD /Z7")
   set(CMAKE_C_FLAGS_DEBUG "/MD /Z7")
   # Set release flags such that we create pdbs..
-  set(CMAKE_C_FLAGS_RELEASE "/MD /Zi /GL")
-  set(CMAKE_CXX_FLAGS_RELEASE "/MD /Zi /GL")
+  set(CMAKE_C_FLAGS_RELEASE "/MD /Zi")
+  set(CMAKE_CXX_FLAGS_RELEASE "/MD /Zi")
 
   # cmd has a limit of 8192 characters, we can easily hit this if we are
   # unlucky. so let's use response files which will help us around that.
