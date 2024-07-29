@@ -155,7 +155,6 @@ int main(int argc, char **argv)
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/qemu-console-factory.h"
 #include "android-qemu2-glue/qemu-setup.h"
-#include "android-qemu2-glue/utils/register_crash_info.h"
 #include "android/android.h"
 #include "aemu/base/process-control.h"
 #include "android/boot-properties.h"
@@ -3352,14 +3351,13 @@ static const char openglInitFailureMessage[] =
 static bool android_reporting_setup(void)
 {
     android_init_metrics();
-    registerCrashInfo();
-
     if (!is_opengl_alive) {
         derror(openglInitFailureMessage);
         android_teardown_metrics();
         crashhandler_die(openglInitFailureMessage);
         return false;
     }
+
     android_check_for_updates();
 
     android_report_session_phase(ANDROID_SESSION_PHASE_RUNNING);
