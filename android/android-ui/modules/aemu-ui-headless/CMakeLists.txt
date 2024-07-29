@@ -12,7 +12,7 @@ android_qt_lib(
 
 target_compile_definitions(aemu-ui-headless PRIVATE CONFIG_HEADLESS)
 
-if(NOT LINUX_AARCH64)
+if(NOT BUILDING_FOR_AARCH64)
   target_compile_definitions(aemu-ui-headless PRIVATE USE_MMX=1)
   target_compile_options(aemu-ui-headless PRIVATE -mmmx)
 endif()
