@@ -185,7 +185,7 @@ std::shared_ptr<WifiService> Builder::build() {
     }
 #endif
 
-    if (!mSlirpOpts.disabled) {
+    if (mSlirpOpts.disabled) {
         dinfo("Qemu slirp is disabled.");
     }
 
