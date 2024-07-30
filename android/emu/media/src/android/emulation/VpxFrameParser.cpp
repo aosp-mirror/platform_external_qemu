@@ -101,13 +101,13 @@ void VpxFrameParser::parse_vp9_uncompressed_header() {
         read_literal(3);
     }
     m_is_key_frame = (read_bit() == KEY_FRAME);
-    VPX_PRINT("found vp9 %s frame", m_is_key_frame ? "KEY" : "NON-KEY");
+    VPX_INFO("found vp9 %s frame", (m_is_key_frame ? "KEY" : "NON-KEY"));
 }
 
 void VpxFrameParser::parse_vp8_uncompressed_header() {
     // https://tools.ietf.org/html/rfc6386#section-9.1
     m_is_key_frame = (read_bit() == KEY_FRAME);
-    VPX_PRINT("found vp8 %s frame", m_is_key_frame ? "KEY" : "NON-KEY");
+    VPX_INFO("found vp8 %s frame", (m_is_key_frame ? "KEY" : "NON-KEY"));
 }
 
 }  // namespace emulation
