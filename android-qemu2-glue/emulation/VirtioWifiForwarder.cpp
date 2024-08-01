@@ -648,7 +648,9 @@ int VirtioWifiForwarder::sendToNIC(
     }
 
 #ifdef NETSIM_WIFI
-    assert(mSlirp);
+    if (!mSlirp) {
+        return 0;
+    }
     auto packet = frame->toEthernet();
     slirp_input(mSlirp, packet.data(), packet.size());
     return packet.size();
