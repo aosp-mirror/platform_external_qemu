@@ -1617,19 +1617,19 @@ static void stream_out_cb(void *opaque, int avail) {
     qemu_mutex_unlock(&stream->mtx);
 }
 
-static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
+static bool virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
     const size_t req_size = iov_size(e->out_sg, e->out_num);
     struct virtio_snd_pcm_xfer xfer;
 
     if (req_size < sizeof(xfer)) {
         vq_consume_element(vq, e, 0);
-        return;
+        return FAILURE(true);
     }
 
     iov_to_buf(e->out_sg, e->out_num, 0, &xfer, sizeof(xfer));
     if (xfer.stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         vq_consume_element(vq, e, el_send_pcm_status(e, 0, VIRTIO_SND_S_BAD_MSG, 0));
-        return;
+        return FAILURE(true);
     }
 
     VirtIOSoundPCMStream *stream = &snd->streams[xfer.stream_id];
@@ -1641,6 +1641,7 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
         ABORT("vq_ring_buffer_push");
     }
     qemu_mutex_unlock(&stream->mtx);
+    return false;
 }
 
 static bool virtio_snd_stream_hpcm_to_gpcm_locked(VirtIOSoundPCMStream *stream) {
@@ -1770,19 +1771,19 @@ static void stream_in_cb(void *opaque, int avail) {
     qemu_mutex_unlock(&stream->mtx);
 }
 
-static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
+static bool virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
     const size_t req_size = iov_size(e->out_sg, e->out_num);
     struct virtio_snd_pcm_xfer xfer;
 
     if (req_size < sizeof(xfer)) {
         vq_consume_element(vq, e, 0);
-        return;
+        return FAILURE(true);
     }
 
     iov_to_buf(e->out_sg, e->out_num, 0, &xfer, sizeof(xfer));
     if (xfer.stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         vq_consume_element(vq, e, el_send_pcm_status(e, 0, VIRTIO_SND_S_BAD_MSG, 0));
-        return;
+        return FAILURE(true);
     }
 
     VirtIOSoundPCMStream *stream = &snd->streams[xfer.stream_id];
@@ -1794,6 +1795,7 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
         ABORT("ring_buffer_push");
     }
     qemu_mutex_unlock(&stream->mtx);
+    return false;
 }
 
 static uint32_t
@@ -2020,8 +2022,7 @@ static void virtio_snd_handle_tx(VirtIODevice *vdev, VirtQueue *vq) {
     while (true) {
         VirtQueueElement *e = (VirtQueueElement *)virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (e) {
-            virtio_snd_process_tx(vq, e, snd);
-            need_notify = true;
+            need_notify = virtio_snd_process_tx(vq, e, snd) || need_notify;
         } else {
             break;
         }
@@ -2040,8 +2041,7 @@ static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
     while (true) {
         VirtQueueElement *e = (VirtQueueElement *)virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (e) {
-            virtio_snd_process_rx(vq, e, snd);
-            need_notify = true;
+            need_notify = virtio_snd_process_rx(vq, e, snd) || need_notify;
         } else {
             break;
         }
