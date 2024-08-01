@@ -633,7 +633,7 @@ if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
                 panic "Could not create installation directory: $BINARY_DIR"
 
         REMOTE_SRCDIR="$DARWIN_SSH:$DARWIN_REMOTE_DIR/prebuilts/qemu-android/$SYSTEM"
-        builder_remote_darwin_scp -r \
+        builder_remote_darwin_scp -rp \
             "$REMOTE_SRCDIR"/qemu-system-* \
             "$REMOTE_SRCDIR"/LINK-qemu-system-* \
             "$REMOTE_SRCDIR"/LINK-*.a \

@@ -296,12 +296,6 @@ def installAngle(builddir, installdir):
     return True
 
 def buildPrebuilt(args, prebuilts_out_dir):
-    # Use cmake from our prebuilts
-    deps_common.addToSearchPath(CMAKE_PATH)
-    # Use ninja from our prebuilts
-    deps_common.addToSearchPath(NINJA_PATH)
-    deps_common.addToSearchPath(str(DEPOT_TOOLS_PATH))
-
     if HOST_OS == "darwin":
         # Our buildbots may define LIBRARY_PATH=/usr/local/lib, which will break the ANGLE build.
         # Unset it.
@@ -318,6 +312,15 @@ def buildPrebuilt(args, prebuilts_out_dir):
             deps_win.inheritSubprocessEnv([vcvarsall, "amd64", ">NUL", "2>&1"])
             # ANGLE build uses GYP_MSVS_OVERRIDE_PATH for custom toolchain
             os.environ["GYP_MSVS_OVERRIDE_PATH"] = VS_INSTALL_PATH
+
+    # IMPORTANT: On windows, make sure to add any additional environment variables after vcvarsall,
+    # as it will override any previous environment.
+    # Use cmake from our prebuilts
+    deps_common.addToSearchPath(CMAKE_PATH)
+    # Use ninja from our prebuilts
+    deps_common.addToSearchPath(NINJA_PATH)
+    # Add depot_tools to PATH
+    deps_common.addToSearchPath(str(DEPOT_TOOLS_PATH))
     logging.info(os.environ)
 
     # angle source code is in external/angle

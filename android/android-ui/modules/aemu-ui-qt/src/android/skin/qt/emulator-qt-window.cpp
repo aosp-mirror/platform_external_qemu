@@ -65,7 +65,9 @@
 #include "android/skin/qt/multi-display-widget.h"
 #include "android_modem_v2.h"
 #include "host-common/FeatureControl.h"
+#include "host-common/Features.h"
 #include "host-common/crash-handler.h"
+#include "host-common/feature_control.h"
 #include "host-common/multi_display_agent.h"
 #include "host-common/opengl/emugl_config.h"
 #include "host-common/MultiDisplay.h"
@@ -2733,6 +2735,21 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
                                         const QPointF& posF,
                                         const QPointF& gPosF,
                                         bool skipSync) {
+    if (button == kMouseButtonRight) {
+        const bool shouldTranslateMouseClickToTouch =
+                (!feature_is_enabled(kFeature_VirtioMouse) &&
+                 !feature_is_enabled(kFeature_VirtioTablet));
+        if (shouldTranslateMouseClickToTouch) {
+            const bool down = (type == kEventMouseButtonDown);
+            SkinEvent skin_event =
+                    createSkinEvent(down ? kEventKeyDown : kEventKeyUp);
+            skin_event.u.key.keycode = LINUX_KEY_BACK;
+            skin_event.u.key.mod = 0;
+            queueSkinEvent(std::move(skin_event));
+            return;
+        }
+    }
+
     QPoint pos((int)posF.x(), (int)posF.y());
     QPoint gPos((int)gPosF.x(), (int)gPosF.y());
     if (type == kEventMouseButtonDown) {
