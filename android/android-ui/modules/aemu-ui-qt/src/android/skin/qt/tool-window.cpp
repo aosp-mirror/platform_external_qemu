@@ -621,6 +621,22 @@ void ToolWindow::show() {
     }
 }
 
+bool ToolWindow::needExtendedWindow(QtUICommand cmd) const {
+    switch (cmd) {
+        case QtUICommand::HOME:
+        case QtUICommand::BACK:
+        case QtUICommand::OVERVIEW:
+        case QtUICommand::POWER:
+        case QtUICommand::TAKE_SCREENSHOT:
+        case QtUICommand::VOLUME_DOWN:
+        case QtUICommand::VOLUME_UP:
+            return false;
+        default:
+            return true;
+    }
+    return true;
+}
+
 void ToolWindow::ensureExtendedWindowExists() {
     if (mAllowExtWindow && !mIsExiting) {
         mExtendedWindow.get();
@@ -667,7 +683,9 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
                                  bool down,
                                  std::string extra) {
     // Many UI commands require the extended window
-    ensureExtendedWindowExists();
+    if (needExtendedWindow(cmd)) {
+        ensureExtendedWindowExists();
+    }
 
     switch (cmd) {
         case QtUICommand::SHOW_PANE_LOCATION:
