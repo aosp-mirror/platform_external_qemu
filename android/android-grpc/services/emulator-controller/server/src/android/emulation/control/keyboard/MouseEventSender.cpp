@@ -16,6 +16,7 @@
 
 #include "android/emulation/control/user_event_agent.h"
 #include "android/hw-sensors.h"
+#include "android/skin/linux_keycodes.h"
 #include "host-common/FeatureControl.h"
 #include "host-common/Features.h"
 #include "host-common/feature_control.h"
@@ -24,18 +25,41 @@ namespace android {
 namespace emulation {
 namespace control {
 
+MouseEventSender::MouseEventSender(
+        const AndroidConsoleAgents* const consoleAgents)
+    : EventSender<MouseEvent>(consoleAgents),
+      mShouldTranslateMouseClickToTouch(
+              !feature_is_enabled(kFeature_VirtioMouse) &&
+              !feature_is_enabled(kFeature_VirtioTablet)) {};
+
 void MouseEventSender::doSend(const MouseEvent request) {
     int buttonsState = request.buttons();
     // Keep sync the condition with |user_event_mouse| in
     // qemu-user-event-agent-impl.c
-    if (feature_is_enabled(kFeature_VirtioInput) &&
-        !feature_is_enabled(kFeature_VirtioMouse) &&
-        !feature_is_enabled(kFeature_VirtioTablet)) {
-        // Mask bits except for the first bit, because they are not
-        // indicating mouse buttons for touch operations. (Instead
-        // they are used for control flag like pause touch synching.)
-        buttonsState &= 1;
+    if (mShouldTranslateMouseClickToTouch) {
+        constexpr uint32_t RIGHT_BUTTON_DOWN = 0x2;
+        const bool isRightButtonDown = (buttonsState == RIGHT_BUTTON_DOWN);
+        const bool isRightButtonUp =
+                (buttonsState == 0 && mRightMouseButtonDown);
+        if (isRightButtonDown) {
+            mRightMouseButtonDown = true;
+            mAgents->user_event->sendKey(LINUX_KEY_BACK, true);
+            return;
+        } else if (isRightButtonUp) {
+            mRightMouseButtonDown = false;
+            mAgents->user_event->sendKey(LINUX_KEY_BACK, false);
+            return;
+        }
+
+        // handle left button
+        if (feature_is_enabled(kFeature_VirtioInput)) {
+            // Mask bits except for the first bit, because they are not
+            // indicating mouse buttons for touch operations. (Instead
+            // they are used for control flag like pause touch synching.)
+            buttonsState &= 1;
+        }
     }
+
     int displayId = request.display();
     if (android_foldable_is_folded() && android_foldable_is_pixel_fold()) {
         displayId = android_foldable_pixel_fold_second_display_id();
