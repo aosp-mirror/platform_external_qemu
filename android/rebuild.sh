@@ -52,4 +52,4 @@ aosp_find_python() {
 }
 
 PYTHON=$(aosp_find_python)
-$PYTHON $PROGDIR/build/python/cmake.py --ccache auto $*
+$PYTHON $PROGDIR/build/python/cmake.py --ccache auto "$@"
