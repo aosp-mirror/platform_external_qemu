@@ -15,11 +15,13 @@
 #include "aemu/base/process/Command.h"
 
 #include <gtest/gtest.h>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <string>
 #include <thread>
+#include "aemu/base/Log.h"
 #include "aemu/base/files/FileShareOpen.h"
 #include "aemu/base/files/FileShareOpenImpl.h"
 
@@ -93,8 +95,21 @@ TEST(Process, discovered_proc_same_as_launched) {
 }
 
 TEST(Process, can_discover_launched_proc) {
+    using namespace std::chrono_literals;
     auto proc = Command::create({sleep_exe(), "--sleep", "1s"}).execute();
     auto pids = Process::fromName("sleep_emu");
+
+    auto now = std::chrono::system_clock::now();
+    // On linux we scan /proc/... which is not instantenous on our gce machines.
+    // Note that the scan itself can take +/- 20ms.
+    while (pids.size() == 0 && std::chrono::system_clock::now() < now + 200ms) {
+        pids = Process::fromName("sleep_emu");
+    }
+    LOG(INFO) << "It took "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                         std::chrono::system_clock::now() - now)
+                         .count()
+              << " ms. to find the process";
     EXPECT_GT(pids.size(), 0);
 
     bool found = false;
@@ -246,7 +261,8 @@ TEST(Command, we_do_not_inherit_handles) {
     sharedFile = nullptr;
     sharedFile = android::base::fsopen(tmp_file.c_str(), mode, shareMode);
     EXPECT_TRUE(sharedFile != nullptr && proc->isAlive())
-            << "The file handle should not have been inherited and not be null, not: "
+            << "The file handle should not have been inherited and not be "
+               "null, not: "
             << sharedFile
             << (proc->isAlive() ? " proc is and should be alive!"
                                 : "should not be dead");
