@@ -72,6 +72,7 @@ set(android-qemu2-glue_src
     qemu-virtual-scene-agent-impl.cpp
     snapshot_compression.cpp
     telephony/modem_init.c
+    utils/register_crash_info.cpp
     utils/stream.cpp)
 
 if(OPTION_GFXSTREAM_BACKEND)
@@ -139,8 +140,9 @@ target_link_libraries(
   PRIVATE android-emu android-emu-base-headers glib2 android-hw-config
           nlohmann_json::nlohmann_json PIXMAN::PIXMAN)
 
-android_add_test(TARGET libqemu2-glue_unittests
-                 SRC tests/VirtioGpuTimelines_unittest.cpp)
+android_add_test(
+  TARGET libqemu2-glue_unittests SRC tests/VirtioGpuTimelines_unittest.cpp
+                                     utils/register_crash_info_unittest.cpp)
 
 target_link_libraries(
   libqemu2-glue_unittests
@@ -148,6 +150,7 @@ target_link_libraries(
           qemu-host-common-headers
           android-emu-base
           android-emu-base-headers
+          android-emu
           gmock
           gtest
           gmock_main)
