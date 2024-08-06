@@ -172,8 +172,7 @@ static bool isStringInList(const char* str,
 // Return true if the CPU architecture |avdArch| is supported by QEMU2,
 // i.e. the 'ranchu' virtual board.
 static bool isCpuArchSupportedByRanchu(const char* avdArch) {
-    static const char* const kSupported[] = {"arm",    "arm64", "mips",
-                                             "mips64", "x86",   "x86_64"};
+    static const char* const kSupported[] = {"arm64", "x86", "x86_64"};
     return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
 }
 
@@ -1301,21 +1300,19 @@ static const char* getQemuArch(const char* avdArch, bool force64bitTarget) {
     static const struct {
         const char* arch;
         const char* qemuArch;
-        const char* qemuArchForce64;
     } kQemuArchs[] = {
-            {"arm", "armel", "aarch64"},
-            {"arm64", "aarch64", "aarch64"},
-            {"x86", "x86_64", "x86_64"},
-            {"x86_64", "x86_64", "x86_64"},
+#ifdef __aarch64__
+            {"arm64", "aarch64"},
+#endif
+#ifdef __x86_64__
+            {"x86", "x86_64"},
+            {"x86_64", "x86_64"},
+#endif
     };
     size_t n;
     for (n = 0; n < ARRAY_SIZE(kQemuArchs); ++n) {
         if (!strcmp(avdArch, kQemuArchs[n].arch)) {
-            if (force64bitTarget) {
-                return kQemuArchs[n].qemuArchForce64;
-            } else {
-                return kQemuArchs[n].qemuArch;
-            }
+            return kQemuArchs[n].qemuArch;
         }
     }
     return NULL;
