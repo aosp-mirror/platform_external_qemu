@@ -1301,15 +1301,18 @@ static const char* getQemuArch(const char* avdArch, bool force64bitTarget) {
     static const struct {
         const char* arch;
         const char* qemuArch;
+        const char* qemuArchForce64;
     } kQemuArchs[] = {
-            {"arm", "armel"},   {"arm64", "aarch64"},   {"arm64", "aarch64"},
-            {"x86", "i386"},    {"x86_64", "x86_64"},   {"x86_64", "x86_64"},
+            {"arm", "armel", "aarch64"},
+            {"arm64", "aarch64", "aarch64"},
+            {"x86", "i386", "x86_64"},
+            {"x86_64", "x86_64", "x86_64"},
     };
     size_t n;
     for (n = 0; n < ARRAY_SIZE(kQemuArchs); ++n) {
         if (!strcmp(avdArch, kQemuArchs[n].arch)) {
             if (force64bitTarget) {
-                return kQemuArchs[n + 1].qemuArch;
+                return kQemuArchs[n].qemuArchForce64;
             } else {
                 return kQemuArchs[n].qemuArch;
             }
