@@ -830,7 +830,6 @@ prepare_build_for_darwin_aarch64() {
 	common_FLAGS="-arch arm64"
     var_append common_FLAGS " -isysroot $OSX_SDK_ROOT"
     var_append common_FLAGS " -mmacosx-version-min=$OSX_DEPLOYMENT_TARGET"
-    var_append common_FLAGS " -Wl,-w" # Suppress linker warnings.
 	# different versions of clang/macosSDK use __ENVIRONMENT_OS_VERSION_MIN_REQUIRED__
     var_append common_FLAGS "-D__ENVIRONMENT_OS_VERSION_MIN_REQUIRED__=__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__"
 
