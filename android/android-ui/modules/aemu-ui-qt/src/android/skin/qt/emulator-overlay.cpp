@@ -117,8 +117,7 @@ void EmulatorOverlay::keyPressEvent(QKeyEvent* event) {
 }
 
 void EmulatorOverlay::keyReleaseEvent(QKeyEvent* event) {
-    if (event->key() == Qt::Key_Control && (mMode == OverlayMode::Multitouch ||
-                                            mMode == OverlayMode::Resize       ))
+    if (event->key() == Qt::Key_Control)
     {
         hideAndFocusContainer();
     } else {
