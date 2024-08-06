@@ -1303,7 +1303,6 @@ static const char* getQemuArch(const char* avdArch, bool force64bitTarget) {
         const char* qemuArch;
     } kQemuArchs[] = {
             {"arm", "armel"},   {"arm64", "aarch64"},   {"arm64", "aarch64"},
-            {"mips", "mipsel"}, {"mips64", "mips64el"}, {"mips64", "mips64el"},
             {"x86", "i386"},    {"x86_64", "x86_64"},   {"x86_64", "x86_64"},
     };
     size_t n;
