@@ -172,8 +172,7 @@ static bool isStringInList(const char* str,
 // Return true if the CPU architecture |avdArch| is supported by QEMU2,
 // i.e. the 'ranchu' virtual board.
 static bool isCpuArchSupportedByRanchu(const char* avdArch) {
-    static const char* const kSupported[] = {"arm",    "arm64", "mips",
-                                             "mips64", "x86",   "x86_64"};
+    static const char* const kSupported[] = {"arm64", "x86", "x86_64"};
     return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
 }
 
