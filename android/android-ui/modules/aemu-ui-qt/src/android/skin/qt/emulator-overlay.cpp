@@ -570,3 +570,7 @@ QPoint EmulatorOverlay::primarySwipePoint() const {
 QPoint EmulatorOverlay::secondaryTouchPoint() const {
     return mLastMousePos - QPoint(width() * .1, 0);
 }
+
+bool EmulatorOverlay::isVisible() const {
+    return mMode != OverlayMode::Hidden;
+}
