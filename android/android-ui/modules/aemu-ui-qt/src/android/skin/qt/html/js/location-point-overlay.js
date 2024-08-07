@@ -5,12 +5,13 @@ class LocationPointOverlay {
         this.hideBottomPanelCssClassName = 'pointOverlayHideBottomPanel';
     }
 
-    show(locationAddress, latLng, elevation, hideSavePoint) {
-        console.log('showing point overlay', locationAddress, latLng, elevation, hideSavePoint)
+    show(locationAddress, latLng, hideSavePoint) {
+        console.log(`showing point overlay addr=[${locationAddress}] ` +
+                    `latLng=[${latLng.lat()}, ${latLng.lng()}], hideSavePoint=${hideSavePoint}`)
         $("#pointTitle").html(locationAddress);
-        var latitude = latLng.lat().toFixed(4);
-        var longitude = latLng.lng().toFixed(4);
-        var subtitle = latitude + ", " + longitude + (elevation != null ? ", " + elevation.toFixed(4) : "");
+        var latitude = latLng.lat().toFixed(6);
+        var longitude = latLng.lng().toFixed(6);
+        var subtitle = latitude + ", " + longitude;
         $("#pointSubtitle").html(subtitle);
         if (hideSavePoint) {
             $("#pointOverlay").removeClass().addClass(this.hideBottomPanelCssClassName);

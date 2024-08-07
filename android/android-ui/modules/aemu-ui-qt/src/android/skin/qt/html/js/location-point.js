@@ -2,7 +2,6 @@
 var lastLatLng = { lat: 37.4220919, lng: -122.0826088 };
 var gMap;
 var gSearchBox;
-var gGeocoder;
 var gCurrentMarker; // The blue dot
 var gPendingMarker; // The red "pin"
 var gSearchResultMarkers = [];
@@ -38,23 +37,20 @@ function initMap() {
         disableDefaultUI: true,
         controlSize: 20
     });
-    gGeocoder = new google.maps.Geocoder;
 
     gSearchBox = new LocationSearchBox();
     gSearchBox.init(gMap,
         gSearchResultMarkers,
-        (lastLatLng) => {
-            console.log("gSearchBox init start");
+        (lastLatLng, addr) => {
             // Clear the red pin and any existing search markers
             if (gPendingMarker != null) {
                 gPendingMarker.setMap(null);
             }
-            showPendingLocation(lastLatLng.lat(), lastLatLng.lng());
-            sendAddress(lastLatLng);
-            console.log("gSearchBox init end");
+            showPendingLocation(lastLatLng.lat(), lastLatLng.lng(), addr);
+            sendAddress(lastLatLng, addr);
         },
         () => {
-            gPointOverlay.hide()
+            gPointOverlay.hide();
             if (gPendingMarker != null) {
                 gPendingMarker.setMap(null);
             }
@@ -95,30 +91,12 @@ function showPendingLocation(lat, lng, addr) {
         return;
     }
     showPin(latLng);
-    // TODO: no support for elevation yet.
-    if (addr === "") {
-        gSearchBox.showSpinner();
-        // Try to fetch the address for this location.
-        console.debug("geocode called");
-        gGeocoder.geocode({ 'location': latLng }, function (results, status) {
-            incGeocodeCount();
-            var address = "";
-            var elevation = 0.0;
-            if (status === 'OK' && results[0]) {
-                address = results[0].formatted_address;
-                elevation = results[0].elevation;
-            }
-            gPointOverlay.show(address, latLng, elevation, true);
-            gSearchBox.update(address)
-            gMap.panTo(latLng);
-        });
-        console.log('showPendingLocation', lat, lng);
-
-    } else {
-        gPointOverlay.show(addr, latLng, null, true);
-        gSearchBox.update(addr);
-        gMap.panTo(latLng);
+    if (addr == null || addr.trim().length === 0) {
+        addr = `${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)}`;
     }
+    gPointOverlay.show(addr, latLng, true);
+    gSearchBox.update(addr);
+    gMap.panTo(latLng);
 }
 
 function setDeviceLocation(lat, lng) {
@@ -162,19 +140,9 @@ function setDeviceLocation(lat, lng) {
         gMap.setCenter(latLng);
     }
     gCurrentMarker.setIcon(image);
-    console.debug("geocode called");
-    gGeocoder.geocode({ 'location': latLng }, function (results, status) {
-        incGeocodeCount();
-        const latitude = latLng.lat().toFixed(4);
-        const longitude = latLng.lng().toFixed(4);
-        var address = `${latitude}, ${longitude}`;
-        if (status === 'OK' && results[0]) {
-            address = results[0].formatted_address;
-        }
-        gMap.panTo(latLng);
-        gPointOverlay.showMessage(`The location has been set to ${address}`, 2000);
-        console.log("setDeviceLocation addr=" + address);
-    });
+    var address = `${latLng.lat()}, ${latLng.lng()}`;
+    gMap.panTo(latLng);
+    gPointOverlay.showMessage(`The location has been set to ${address}`, 2000);
 }
 
 function markerListener(event) {
@@ -205,21 +173,12 @@ function showPin(latLng) {
     }
 }
 
-function sendAddress(latLng) {
-    console.debug("geocode called");
-    gGeocoder.geocode({ 'location': latLng }, function (results, status) {
-        incGeocodeCount();
-        var address = "";
-        var elevation = 0.0;
-        if (status === 'OK' && results[0]) {
-            address = results[0].formatted_address;
-            elevation = results[0].elevation;
-        }
-        gPointOverlay.show(address, latLng, elevation);
-        gMap.panTo(latLng);
-        channel.objects.single_point
-            .sendLocation(latLng.lat(), latLng.lng(), address);
-        console.log("addr=" + address);
-        gSearchBox.update(address)
-    });
+function sendAddress(latLng, address) {
+    if (address == null || address.trim().length === 0) {
+        address = `${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)}`;
+    }
+    gPointOverlay.show(address, latLng, false);
+    gMap.panTo(latLng);
+    channel.objects.single_point.sendLocation(latLng.lat(), latLng.lng(), address);
+    gSearchBox.update(address);
 }
