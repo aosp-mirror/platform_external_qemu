@@ -1,5 +1,3 @@
-# Based on https://github.com/bazelbuild/bazel/issues/15107
-
 def cc_interface_binary(
         name,
         win_def_file,
@@ -7,6 +5,7 @@ def cc_interface_binary(
         tags = None,
         visibility = None,
         linkopts = None,
+        mac_entitlements = "//external/qemu:platform/darwin-arm64/entitlements.plist",
         **kwargs):
     """Creates a C++ binary and a shared library with an interface library.
 
@@ -15,6 +14,7 @@ def cc_interface_binary(
     is `${name}.if`
 
     All the symbols in the win_def_file will be exported from the executable.
+    On darwin the executable will be signed with the provided entitlements.
 
 
     Args:
@@ -24,6 +24,7 @@ def cc_interface_binary(
         tags (list, optional): A list of tags to be applied to the targets. Defaults to None.
         visibility (list, optional): A list of labels that control the visibility of the targets. Defaults to None.
         linkopts (list, optional): Additional linker options for the shared library target. Defaults to None.
+        mac_entitlements (str): The path to the entlitlements to be used (Darwin only)
         **kwargs: Additional arguments to be passed to the C++ binary and shared library targets.
 
     Returns:
@@ -66,7 +67,7 @@ def cc_interface_binary(
     local_data = data or []
     local_data.append(win_def_file)
     native.cc_binary(
-        name = name,
+        name = name + "_std",
         tags = tags,
         visibility = visibility,
         win_def_file = win_def_file,
@@ -88,6 +89,17 @@ def cc_interface_binary(
         **kwargs
     )
 
+    # Sign the binary on darwin.
+    native.genrule(
+        name = name + "_signer",
+        srcs = [name + "_std", mac_entitlements],
+        outs = [name + "_signed"],
+        executable = True,
+        exec_compatible_with = ["@platforms//os:macos"],
+        target_compatible_with = ["@platforms//os:macos"],
+        cmd = "cp -L $(location {name}_std) \"$@\" && /usr/bin/codesign -s - --entitlements $(location {entitlements}) \"$@\"".format(name = name, entitlements = mac_entitlements),
+    )
+
     native.filegroup(
         name = interface_filegroup_name,
         srcs = [":" + dll_name],
@@ -103,3 +115,8 @@ def cc_interface_binary(
         tags = ["manual"],
         visibility = visibility,
     )
+
+    native.alias(name = name, actual = select({
+        "@platforms//os:macos": ":" + name + "_signed",
+        "//conditions:default": ":" + name + "_std",
+    }), visibility = visibility)
