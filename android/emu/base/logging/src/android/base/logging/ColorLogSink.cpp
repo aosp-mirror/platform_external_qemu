@@ -55,13 +55,13 @@ std::string_view ColorLogSink::TranslateSeverity(
     }
     switch (entry.log_severity()) {
         case absl::LogSeverity::kInfo:
-            return "INFO   ";
+            return "INFO        ";
         case absl::LogSeverity::kWarning:
-            return "WARNING";
+            return "WARNING     ";
         case absl::LogSeverity::kError:
-            return "ERROR  ";
+            return "ERROR       ";
         case absl::LogSeverity::kFatal:
-            return "FATAL  ";
+            return "FATAL       ";
     }
 }
 
