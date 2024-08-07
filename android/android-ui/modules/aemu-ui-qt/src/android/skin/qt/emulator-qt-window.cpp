@@ -1254,6 +1254,11 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
         return;
     }
 
+    if (mOverlay.isVisible() && event->key() == Qt::Key_Control) {
+        mOverlay.keyReleaseEvent(event);
+        return;
+    }
+
     handleKeyEvent(kEventKeyUp, *event);
 
     // If we enabled trackball mode, tell Qt to always forward mouse movement
