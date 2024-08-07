@@ -125,7 +125,7 @@ target_include_directories(android-emu-base
 # against the base you will link against LZ4 & UUID
 target_link_libraries(
   android-emu-base PRIVATE android-emu-base-headers lz4 UUID::UUID
-  PUBLIC Threads::Threads android-emu-base-logging zlib
+  PUBLIC Threads::Threads android-emu-base-logging zlib absl::absl_log
          android-emu-base-memory logging-base)
 
 if(OPTION_TCMALLOC)

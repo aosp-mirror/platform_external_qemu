@@ -1562,6 +1562,7 @@ static SnapshotCompatibleType checkCompatable(std::string srcAvdDir,
 
 extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
+    base_configure_logs(kLogDefaultOptions);
     if (argc < 1) {
         derror("Invalid invocation (no program path)");
         return 1;
