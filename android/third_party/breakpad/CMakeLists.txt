@@ -15,12 +15,12 @@ if(NOT ANDROID_QEMU2_TOP_DIR)
   set(CMAKE_CXX_STANDARD 17)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-  if(NOT TARGET gmock_main)
-    add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/third_party/googletest
-                     googletest)
-  endif()
 endif()
 
+if(NOT TARGET gmock_main)
+  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/third_party/googletest
+                   googletest)
+endif()
 # Location of the root of the breakpad source.
 set(BREAKPAD_SRC ${ANDROID_QEMU2_TOP_DIR}/../google-breakpad/src)
 
@@ -79,7 +79,8 @@ elseif(LINUX)
               # Older glibc elf.h might not yet define the ELF compression
               # types.
               SHF_COMPRESSED=2048)
-  target_compile_options(breakpad_compiler_config INTERFACE -fPIC -g -UNDEBUG -Wno-fortify-source)
+  target_compile_options(breakpad_compiler_config INTERFACE -fPIC -g -UNDEBUG
+                                                            -Wno-fortify-source)
 else()
   target_compile_definitions(
     breakpad_compiler_config
@@ -376,13 +377,13 @@ set(breakpad_processor_unittests
     synth_minidump_unittest)
 
 # b/149265836
-if(NOT WINDOWS_MSVC_X86_64)
+if(NOT WINDOWS_MSVC_X86_64 AND NOT IN_CROSS_COMPILE)
   foreach(tst ${breakpad_processor_unittests})
     add_proc_test(${tst})
   endforeach()
 endif()
 
-if(NOT WINDOWS_MSVC_X86_64)
+if(NOT WINDOWS_MSVC_X86_64 AND NOT IN_CROSS_COMPILE)
   android_add_executable(TARGET minidump_dump NODISTRIBUTE
                          SRC ${BREAKPAD_SRC}/processor/minidump_dump.cc)
   set_property(TARGET minidump_dump PROPERTY CXX_STANDARD 17)

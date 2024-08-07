@@ -84,6 +84,7 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
           "-DBREAKPAD_API_KEY=${BREAKPAD_API_KEY}"
           "-DBREAKPAD_API_URL=${BREAKPAD_API_URL}"
           "-DOPTION_TEST_LOGS=${OPTION_TEST_LOGS}"
+          "-DIN_CROSS_COMPILE=TRUE"
           "-DOPTION_BAZEL=TRUE"
           "-DANDROID_SYMBOL_DIR=${ANDROID_SYMBOL_DIR}"
           "-DPython_EXECUTABLE=${Python_EXECUTABLE}"

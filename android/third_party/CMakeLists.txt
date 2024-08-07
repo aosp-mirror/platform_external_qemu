@@ -1,6 +1,11 @@
+# Other targets depend on these
+# First enable unit testing
 add_subdirectory(googletest)
-add_subdirectory(abseil-cpp)
+
+# Next we enable symbol dumping etc.
 add_subdirectory(breakpad)
+
+add_subdirectory(abseil-cpp)
 android_add_library(
   TARGET emulator-tinyobjloader
   LIBNAME
