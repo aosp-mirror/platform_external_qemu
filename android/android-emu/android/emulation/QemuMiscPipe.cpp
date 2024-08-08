@@ -286,11 +286,9 @@ void miscPipeSetAndroidOverlay(emulation::AdbInterface* adbInterface) {
             };
             dprint("Enable overlay packages with name ending in %s", overlayName);
 
-            adbInterface->runAdbCommand(
-                {"shell", "cmd", "overlay", "list"},
-                enableOverlaysEndingWithSkinName,
-                5000
-            );
+            // enqueue command so it can retry
+            adbInterface->enqueueCommand({"shell", "cmd", "overlay", "list"},
+                                         enableOverlaysEndingWithSkinName);
             AFREE(skinName);
             AFREE(skinDir);
             return;
