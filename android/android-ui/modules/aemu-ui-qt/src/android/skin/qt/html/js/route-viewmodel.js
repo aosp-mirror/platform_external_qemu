@@ -77,7 +77,7 @@ class RouteViewModel {
         const originAddress = route.routes[0].legs[0].start_address;
         const destinationAddress = route.routes[0].legs[0].end_address;
         const travelMode = route['request']['travelMode'];
-        console.debug('RouteViewModel::setRoute called', originLatLng,
+        console.log('RouteViewModel::setRoute called', originLatLng,
             originAddress,
             destinationLatLng,
             destinationAddress,
@@ -193,6 +193,11 @@ class RouteViewModel {
 
     updateWaypointWithGecodedPlace(place, waypoint) {
         this.model.updateWaypoint(waypoint, { latLng: place.latLng, address: place.address });
+    }
+
+    updateWaypointWithLatLng(lat, lng, waypoint) {
+        this.model.updateWaypoint(waypoint, {
+            latLng: new google.maps.LatLng(lat, lng), address: `${lat.toFixed(6)}, ${lng.toFixed(6)}` });
     }
 
     removeOrigin() {
