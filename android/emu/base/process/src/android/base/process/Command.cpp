@@ -142,6 +142,11 @@ Command& Command::asDeamon() {
     return *this;
 }
 
+Command &Command::replace() {
+  mReplace = true;
+  return *this;
+}
+
 Command& Command::inherit() {
     mInherit = true;
     return *this;
@@ -169,7 +174,7 @@ std::unique_ptr<ObservableProcess> Command::execute() {
     proc->mStdErr = std::make_unique<ProcessOutputImpl>(std::move(errbuf));
 
     // Completion handlers.
-    auto running = proc->createProcess(mArgs, mCaptureOutput);
+    auto running = proc->createProcess(mArgs, mCaptureOutput, mReplace);
 
     if (!running) {
         proc->mOverseer = std::unique_ptr<NullOverseer>();
