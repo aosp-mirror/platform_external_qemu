@@ -61,6 +61,8 @@ public:
     void showForZoomUserHidden();
     bool wasZoomUserHidden() const;
 
+    bool isVisible() const;
+
 public slots:
     void hide();
 

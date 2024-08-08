@@ -2556,10 +2556,12 @@ extern "C" int main(int argc, char** argv) {
         // type
         dinfo("Enabled cpu host to support AndroidVirtualizationFramework");
         args.add("host");
-    } else if (!feature_is_enabled(kFeature_DownloadableSnapshot) || opts->xts) {
+    } else if (opts->xts) {
         // Add "-xts" to turn on tweaks only made for xts
         // Right now, only a few CPU features are turned on
-        args.add("android64-xts");
+        if (!feature_is_enabled(kFeature_DownloadableSnapshot)) {
+            args.add("android64-xts");
+        }
     } else {
         args.add(kTarget.qemuCpu);
     }
