@@ -1579,7 +1579,7 @@ static void apply_skin_quirks(AvdInfo* avd) {
         char* skinName;
         char* skinDir;
         avdInfo_getSkinInfo(avd, &skinName, &skinDir);
-        if (!strcmp(skinName, "pixel_fold")) {
+        if (!strstr(skinName, "fold")) {
             // it is always unfolded to start with
             avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
                                    "unfolded");
