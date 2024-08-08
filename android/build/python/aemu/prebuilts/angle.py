@@ -82,7 +82,7 @@ def fetchAngleDependencies():
         win_tools_exe = DEPOT_TOOLS_PATH / "bootstrap" / "win_tools.bat"
         logging.info(f">> CMD: {win_tools_exe}")
         res = subprocess.run(args=[str(win_tools_exe)], cwd=AOSP_ANGLE_SRC_PATH, env=os.environ.copy())
-    gclient_opt_in_cmd = [gclient_exe, "metrics", "--opt-in"]
+    gclient_opt_in_cmd = [str(DEPOT_TOOLS_PATH / gclient_exe), "metrics", "--opt-in"]
     logging.info(f">> CMD: {gclient_opt_in_cmd}")
     res = subprocess.run(args=gclient_opt_in_cmd, cwd=AOSP_ANGLE_SRC_PATH, env=os.environ.copy())
 
@@ -94,7 +94,7 @@ def fetchAngleDependencies():
         exit(res.returncode)
 
     # There will be an error, "vpython not found", but it's okay to ignore.
-    gclient_cmd = [gclient_exe, "sync", "-j", "8", "--verbose"]
+    gclient_cmd = [str(DEPOT_TOOLS_PATH / gclient_exe), "sync", "-j", "8", "--verbose"]
     logging.info(f">> CMD: {gclient_cmd}")
     # Run glient sync twice
     res = subprocess.run(args=gclient_cmd, cwd=AOSP_ANGLE_SRC_PATH, env=os.environ.copy())
@@ -202,7 +202,7 @@ def buildAngle(build_dir):
         gn_args = gn_common_args.format(arch="x64", os="win")
 
     gn_cmd = [
-        "gn.bat" if HOST_OS == "windows" else "gn",
+        str(DEPOT_TOOLS_PATH / ("gn.bat" if HOST_OS == "windows" else "gn")),
         "gen",
         build_dir,
         "--args=%s" % gn_args,
@@ -214,7 +214,7 @@ def buildAngle(build_dir):
         exit(res.returncode)
 
     autoninja_cmd = [
-        "autoninja.bat" if HOST_OS == "windows" else "autoninja",
+        str(DEPOT_TOOLS_PATH / ("autoninja.bat" if HOST_OS == "windows" else "autoninja")),
         "-C",
         build_dir,
     ]
@@ -271,7 +271,7 @@ def installAngle(builddir, installdir):
         # On Windows, install shadertranslator.dll as libshadertranslator.dll
         src_shdr_libname = f"shadertranslator{LIB_EXT}"
         src_lib = Path(builddir) / src_shdr_libname
-        dst_lib = Path(installdir) / f"lib{src_shdr_libname}"
+        dst_lib = Path(installdir) / "lib" / f"lib{src_shdr_libname}"
         logging.info(f"Copy {src_lib} ==> {dst_lib}")
         shutil.copyfile(src_lib, dst_lib)
 
