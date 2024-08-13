@@ -45,5 +45,4 @@ void QtLogger::write(const char* fmt, ...) {
     wcstombs(cbuf, buf, std::size(cbuf));
     auto str = std::string(cbuf);
     LOG(INFO) << str;
-    mFileHandle << str << std::endl;
 }
