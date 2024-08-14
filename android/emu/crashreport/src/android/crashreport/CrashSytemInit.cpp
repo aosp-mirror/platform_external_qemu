@@ -86,7 +86,7 @@ public:
         }
         auto database_directory =
                 System::get()->envGet("ANDROID_EMU_CRASH_REPORTING_DATABASE");
-        auto database_path =
+        mDatabasePath =
                 database_directory.empty()
                         ? CrashReporter::databaseDirectory()
                         : ::base::FilePath(PathUtils::asUnicodePath(
@@ -97,22 +97,12 @@ public:
         auto annotations = std::map<std::string, std::string>{
                 {"prod", "AndroidEmulator"},
                 {"ver", EMULATOR_FULL_VERSION_STRING}};
-        bool active = mClient->StartHandler(handler_path, database_path,
+        bool active = mClient->StartHandler(handler_path, mDatabasePath,
                                             metrics_path, CrashURL, annotations,
                                             {"--no-rate-limit"}, true, false);
 
-        mDatabase = CrashReportDatabase::Initialize(database_path);
+        mDatabase = CrashReportDatabase::Initialize(mDatabasePath);
         mInitialized = active && mDatabase;
-
-#ifdef _WIN32
-        android::base::Win32UnicodeString wstr(database_path.value().c_str());
-        std::string message = wstr.toString();
-#else
-        std::string message = database_path.value();
-#endif
-        dinfo("Storing crashdata in: %s, detection is %s for process: %d",
-              message.c_str(), mInitialized ? "enabled" : "disabled",
-              System::get()->getCurrentProcessId());
 
         if (mDatabase && mDatabase->GetSettings()) {
             mDatabase->GetSettings()->SetUploadsEnabled(false);
@@ -130,6 +120,17 @@ public:
                   "report any crashes.");
             return;
         }
+
+#ifdef _WIN32
+        android::base::Win32UnicodeString wstr(mDatabasePath.value().c_str());
+        std::string message = wstr.toString();
+#else
+        std::string message = mDatabasePath.value();
+#endif
+        dinfo("Storing crashdata in: %s, detection is %s for process: %d",
+              message, mInitialized ? "enabled" : "disabled",
+              System::get()->getCurrentProcessId());
+
 
         auto collect = mConsentProvider->consentRequired();
         bool areUploadsEnabled = (collect == CrashConsent::Consent::ALWAYS);
@@ -225,6 +226,7 @@ private:
     std::unique_ptr<crashpad::CrashpadClient> mClient;
     std::unique_ptr<CrashReportDatabase> mDatabase;
     std::unique_ptr<CrashConsent> mConsentProvider;
+    ::base::FilePath mDatabasePath;
     bool mInitialized{false};
 };
 
