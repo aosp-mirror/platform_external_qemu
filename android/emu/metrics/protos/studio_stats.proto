@@ -1430,6 +1430,10 @@ message EmulatorAvdInfo {
         PIXEL_8 = 38;
         PIXEL_8_PRO = 39;
         PIXEL_8A = 40;
+        PIXEL_9 = 41;
+        PIXEL_9_PRO = 42;
+        PIXEL_9_PRO_XL = 43;
+        PIXEL_9_PRO_FOLD = 44;
     }
     // Name of the AVD. Deprecated as it could potentially contain PII.
     optional string name = 1 [deprecated = true];
