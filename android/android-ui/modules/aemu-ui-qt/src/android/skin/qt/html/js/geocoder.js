@@ -4,7 +4,12 @@ class Geocoder {
     }
 
     async geocodeLocation(latLng, bounds) {
-        return await this._geocode({ location: latLng, bounds });
+        return new Promise((resolve, reject) => {
+            resolve({
+                address: `${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)}`,
+                latLng: latLng
+            });
+        });
     }
 
     async geocodePlace(placeId, bounds) {

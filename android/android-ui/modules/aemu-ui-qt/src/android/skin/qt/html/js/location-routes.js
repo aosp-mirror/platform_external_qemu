@@ -80,20 +80,9 @@ function startRouteCreatorFromPoint(lat, lng, address) {
     }
 
     if (address === "") {
-        console.debug("geocode called");
-        gGeocoder.geocode({ 'location': latLng }, function (results, status) {
-            incGeocodeCount();
-            var address = "";
-            var elevation = 0.0;
-            if (status === 'OK' && results[0]) {
-                address = results[0].formatted_address;
-                elevation = results[0].elevation;
-            } else {
-                address = lat + ", " + lng;
-            }
-            gEndWaypoint.setAddress(address);
-            document.getElementById('endAddress').value = gEndWaypoint.address;
-        });
+        var address = `${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)}`;
+        gEndWaypoint.setAddress(address);
+        document.getElementById('endAddress').value = gEndWaypoint.address;
     } else {
         gEndWaypoint.setAddress(address);
         document.getElementById('endAddress').value = gEndWaypoint.address;
@@ -214,7 +203,7 @@ function addSearchResultItem(name, address, placeId) {
         var placeid = this.getAttribute("data-place-id");
         var address = this.getAttribute("data-address");
         if (placeid != null) {
-            console.debug("geocode called");
+            console.debug(`geocode called placeid=${placeid}`);
             gGeocoder.geocode({ 'placeId': placeid }, function (results, status) {
                 incGeocodeCount();
                 if (status !== 'OK' || !results[0]) {
@@ -303,18 +292,9 @@ function setWaypointForEmptyAddressBox(latLng) {
     gFocusedWaypoint.invalidate();
 
     gFocusedWaypoint.setLatLng(latLng);
-    console.debug("geocode called");
-    gGeocoder.geocode({ 'location': latLng }, function (results, status) {
-        incGeocodeCount();
-        var address = "";
-        var elevation = 0.0;
-        if (status === 'OK' && results[0]) {
-            address = results[0].formatted_address;
-            elevation = results[0].elevation;
-        }
-        gFocusedWaypoint.setAddress(address);
-        gFocusedWaypoint.inputDiv.value = address;
-    });
+    var address = `${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)}`;
+    gFocusedWaypoint.setAddress(address);
+    gFocusedWaypoint.inputDiv.value = address;
 
     return isAllWaypointsValid();
 }
@@ -435,19 +415,10 @@ function showDestinationPoint(latLng) {
     // got something new under way.
     channel.objects.routes.sendFullRouteToEmu(0, 0.0, null, null);
 
-    console.debug("geocode called");
-    gGeocoder.geocode({ 'location': latLng }, function (results, status) {
-        incGeocodeCount();
-        var address = "";
-        var elevation = 0.0;
-        if (status === 'OK' && results[0]) {
-            address = results[0].formatted_address;
-            elevation = results[0].elevation;
-        }
-        gEndWaypoint.setAddress(address);
-        showStartInfoOverlay(address, latLng, elevation);
-        gSearchBox.update(address);
-    });
+    var address = `${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)}`;
+    gEndWaypoint.setAddress(address);
+    showStartInfoOverlay(address, latLng, elevation);
+    gSearchBox.update(address);
 }
 
 function zoomToGpxKmlRoute(map, path) {
