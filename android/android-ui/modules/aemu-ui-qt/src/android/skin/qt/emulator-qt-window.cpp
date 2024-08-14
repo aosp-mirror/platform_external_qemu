@@ -2888,12 +2888,25 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, const QKeyEvent& event
                         ->multiDisplay->getCombinedDisplaySize(&w, &h);
                 double widthRatio = (double)geometry().width() / (double)w;
                 double heightRatio = (double)geometry().height() / (double)h;
+                int displayId = 0;
+                const bool pixel_fold = android_foldable_is_pixel_fold();
+                if (pixel_fold) {
+                    if (android_foldable_is_folded()) {
+                        displayId =
+                                android_foldable_pixel_fold_second_display_id();
+                    }
+                }
+
                 int pos_x, pos_y, startId = -1;
                 uint32_t width, height, id;
                 while (mToolWindow->getUiEmuAgent()
                                ->multiDisplay->getNextMultiDisplay(
                                        startId, &id, &pos_x, &pos_y, &width,
                                        &height, nullptr, nullptr, nullptr)) {
+                    if (id != displayId) {
+                        startId = id;
+                        continue;
+                    }
                     QRect r(static_cast<int>(pos_x * widthRatio),
                             static_cast<int>(pos_y * heightRatio),
                             static_cast<int>(width * widthRatio),
