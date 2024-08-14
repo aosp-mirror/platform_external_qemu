@@ -3778,7 +3778,7 @@ bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
 void EmulatorQtWindow::setFoldedSkin() {
     if (hasSkin()) {
         avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
-                               "folded");
+                               "closed");
         ScreenMask::loadMask();
         EmulatorSkin::getInstance()->reset();
     }
@@ -3809,7 +3809,7 @@ void EmulatorQtWindow::setNoSkin() {
 void EmulatorQtWindow::restoreSkin() {
     if (android_foldable_is_pixel_fold() && hasSkin()) {
         avdInfo_setCurrentSkin(getConsoleAgents()->settings->avdInfo(),
-                               "unfolded");
+                               "default");
         EmulatorSkin::getInstance()->reset();
         ScreenMask::loadMask();
     }
