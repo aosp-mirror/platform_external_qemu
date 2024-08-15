@@ -35,6 +35,7 @@
 
 #include "aemu/base/logging/Log.h"
 #include "aemu/base/EintrWrapper.h"
+#include "android/utils/exec.h"
 
 #define DEBUG 0
 
@@ -255,8 +256,16 @@ public:
     };
 
     std::optional<Pid> createProcess(const CommandArguments& cmdline,
-                                     bool captureOutput) override {
-        DD("%s to inheriting handles..", mInherit ? "yes" : "no");
+                                     bool captureOutput,
+                                     bool replace) override {
+        if (replace) {
+            // Setup the arguments..
+            std::vector<char*> args = toCharArray(cmdline);
+
+            // The exec() functions only return if an error has occurred.
+            safe_execv(args[0], args.data());
+            return std::nullopt;
+        }
         if (!mInherit) {
             mAttr = new posix_spawnattr_t;
             if (posix_spawnattr_init(mAttr)) {

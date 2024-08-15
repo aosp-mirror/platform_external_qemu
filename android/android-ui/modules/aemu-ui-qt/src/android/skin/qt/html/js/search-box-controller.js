@@ -79,7 +79,37 @@ class SearchBoxController extends GoogleMapPageComponent {
         if (!place.geometry) {
             // User entered the name of a Place that was not suggested and
             // pressed the Enter key, or the Place Details request failed.
-            // Just ignore it.
+
+            // Check if the user entered coordinates in the form of <lat>,<lng>
+            function extractLatLng(coordinates) {
+                const [latStr, lngStr] = coordinates.split(',');
+                if (latStr === undefined || lngStr === undefined) {
+                    console.log("Search box didn't contain coordinates");
+                    return null;
+                }
+                const lat = parseFloat(latStr);
+                const lng = parseFloat(lngStr);
+                if (isNaN(lat) || isNaN(lng)) {
+                    console.log("Search box didn't contain coordinates");
+                    return null;
+                }
+                if (lat < -90 || lat > 90) {
+                    console.log(`latitude coordinate not valid (${lat})`);
+                    return null;
+                }
+                if (lng < -180 || lng > 180) {
+                    console.log(`longitude coordinate not valid (${lng})`);
+                    return null;
+                }
+                return { lat, lng };
+            }
+            var result = extractLatLng(place.name);
+            if (result != null) {
+                console.log(`Search box contained coordinates (${result.lat}, ${result.lng})`);
+                this.eventBus.dispatchSearchBoxPlaceChanged(
+                    new google.maps.LatLng(result.lat, result.lng));
+            }
+
             return;
         }
 

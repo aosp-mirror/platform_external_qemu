@@ -1617,7 +1617,7 @@ void avdInfo_getSkinInfo(const AvdInfo* i, char** pSkinName, char** pSkinDir) {
                 return;
             }
             /* quirk for foldable: it has closed/ and default/ subdir */
-            if (skinName && !strcmp(skinName, "pixel_fold")) {
+            if (skinName && strstr(skinName, "_fold")) {
                 p = bufprint(temp, end, "%s" PATH_SEP PIXEL_FOLD_DEFAULT_SKIN_NAME, skinPath);
                 skinPath = strdup(temp);
                 /* try one more time */
@@ -2020,6 +2020,8 @@ bool avdInfo_skinHasOverlay(const char* skinName) {
                  strlen("pixel_7")) || /* include pixel 7, pro etc */
         !strncmp(skinName, "pixel_8",
                  strlen("pixel_8")) || /* include pixel 8, pro etc */
+        !strncmp(skinName, "pixel_9",
+                 strlen("pixel_9")) || /* include pixel 9, pro etc */
         !strncmp(skinName, "pixel_6",
                  strlen("pixel_6")) || /* include pixel 6a, 6, pro etc */
         !strncmp(skinName, "pixel_fold", strlen("pixel_fold")) ||

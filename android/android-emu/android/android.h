@@ -44,12 +44,6 @@ ANDROID_BEGIN_HEADER
 
 #define MULTIINSTANCE_LOCK "multiinstance.lock"
 
-/* The file where the crash reporter holds a copy of
- * the hardware properties. This file is in a temporary
- * directory set up by the crash reporter.
- */
-#define CRASH_AVD_HARDWARE_INFO "avd_info.txt"
-
 /** in vl.c */
 
 /* enable/disable interrupt polling mode. the emulator will always use 100%
