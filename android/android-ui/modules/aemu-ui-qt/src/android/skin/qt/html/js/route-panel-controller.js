@@ -22,7 +22,12 @@ class RoutePanelController extends GoogleMapPageComponent {
 
         $('#route-panel :input')
             .on('input', (e) => self.onWaypointAddressInputTextChanged($(e.currentTarget)))
-            .focus((e) => self.onWaypointAddressInputFocus($(e.currentTarget)));
+            .focus((e) => self.onWaypointAddressInputFocus($(e.currentTarget)))
+            .keydown(function(e) {
+                if (e.key === 'Enter') {
+                    self.onWaypointAddressInputEnterPressed($(e.currentTarget));
+                }
+            });
 
         $('#add-destination-icon').click(() => self.onAddDestination());
         $('#add-destination-label').click(() => self.onAddDestination());
@@ -188,6 +193,41 @@ class RoutePanelController extends GoogleMapPageComponent {
         }
     }
 
+    async onWaypointAddressInputEnterPressed(addressInputElement) {
+        // If user hits the Enter key on a waypoint, only accept the text if it is Lat/Lng
+        // coordinates.
+        const text = addressInputElement.val();
+
+        // Check if the user entered coordinates in the form of <lat>,<lng>
+        function extractLatLng(coordinates) {
+            const [latStr, lngStr] = coordinates.split(',');
+            if (latStr === undefined || lngStr === undefined) {
+                console.log("Search box didn't contain coordinates");
+                return null;
+            }
+            const lat = parseFloat(latStr);
+            const lng = parseFloat(lngStr);
+            if (isNaN(lat) || isNaN(lng)) {
+                console.log("Search box didn't contain coordinates");
+                return null;
+            }
+            if (lat < -90 || lat > 90) {
+                console.log(`latitude coordinate not valid (${lat})`);
+                return null;
+            }
+            if (lng < -180 || lng > 180) {
+                console.log(`longitude coordinate not valid (${lng})`);
+                return null;
+            }
+            return { lat, lng };
+        }
+        var result = extractLatLng(text);
+        if (result != null) {
+            this.showSearchResultsContainer(false);
+            this.viewModel.updateWaypointWithLatLng(result.lat, result.lng,
+                addressInputElement.data('waypoint'));
+        }
+    }
     onWaypointAddressInputFocus(addressInputElement) {
         addressInputElement.select();
     }

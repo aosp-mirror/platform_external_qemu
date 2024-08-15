@@ -195,6 +195,11 @@ class RouteViewModel {
         this.model.updateWaypoint(waypoint, { latLng: place.latLng, address: place.address });
     }
 
+    updateWaypointWithLatLng(lat, lng, waypoint) {
+        this.model.updateWaypoint(waypoint, {
+            latLng: new google.maps.LatLng(lat, lng), address: `${lat.toFixed(6)}, ${lng.toFixed(6)}` });
+    }
+
     removeOrigin() {
         this.model.removeWaypoint(0);
     }

@@ -534,7 +534,6 @@ void Snapshotter::appendSuccessfulLoad(const char* name,
 void Snapshotter::showError(const std::string& message) {
     mWindowAgent.showMessage(message.c_str(), WINDOW_MESSAGE_ERROR,
                              kDefaultMessageTimeoutMs);
-    dwarning("%s", message.c_str());
 }
 
 bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
@@ -542,8 +541,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
         isSnapshotAlive();
 
     if (!shouldTrySaving) {
-        showError("Skipping snapshot save: "
-                  "Emulator not booted (or ADB not online)");
+        showError("Unable to save snapshot: Emulator not fully started.");
         if (reportMetrics) {
             appendFailedSave(
                 pb::EmulatorSnapshotSaveState::
@@ -554,8 +552,9 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     }
 
     if (!name) {
-        showError("Skipping snapshot save: "
-                  "Null snapshot name");
+        showError(
+                "Snapshot saving failed because a name was not provided. "
+                "Please enter a name for the snapshot to save it.");
         if (reportMetrics) {
             appendFailedSave(
                 pb::EmulatorSnapshotSaveState::
@@ -566,13 +565,11 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     }
 
     if (!emuglConfig_current_renderer_supports_snapshot()) {
-        showError(
-            StringFormat("Skipping snapshot save: "
-                         "Renderer type '%s' (%d) "
-                         "doesn't support snapshotting",
-                         emuglConfig_renderer_to_string(
-                                 emuglConfig_get_current_renderer()),
-                         int(emuglConfig_get_current_renderer())));
+        showError(StringFormat(
+                "Unable to save snapshot: This feature is not currently "
+                "supported with your selected graphics settings. (%s)",
+                emuglConfig_renderer_to_string(
+                        emuglConfig_get_current_renderer())));
         if (reportMetrics) {
             appendFailedSave(pb::EmulatorSnapshotSaveState::
                                  EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED,
@@ -589,7 +586,9 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
             avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()) : "";
     if (mDiskSpaceCheck && getConsoleAgents()->settings->avdInfo() &&
         System::isUnderDiskPressure(contentPath ? contentPath : "")) {
-        showError("Not saving snapshot: Disk space < 2 GB");
+        showError(
+                "Unable to save snapshot: Not enough disk space. Please free "
+                "up some space and try again.");
         if (reportMetrics) {
             appendFailedSave(
                 pb::EmulatorSnapshotSaveState::
@@ -601,9 +600,9 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
 
     // Check whether skipping snapshot saves was set.
     if (mVmOperations.isSnapshotSaveSkipped()) {
-        showError("Skipping snapshot save: "
-                  "current state "
-                  "doesn't support snapshotting");
+        showError(
+                "Snapshot saving is currently unavailable due to the "
+                "emulator's current state.");
         if (reportMetrics) {
             appendFailedSave(pb::EmulatorSnapshotSaveState::
                                  EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED,
@@ -617,8 +616,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
 
 bool Snapshotter::checkSafeToLoad(const char* name, bool reportMetrics) {
     if (!name) {
-        showError("Skipping snapshot load: "
-                  "Null snapshot name");
+        showError("Unable to load snapshot: No snapshot selected.");
         if (reportMetrics) {
             appendFailedLoad(pb::EmulatorSnapshotLoadState::
                                  EMULATOR_SNAPSHOT_LOAD_NO_SNAPSHOT,
@@ -629,13 +627,11 @@ bool Snapshotter::checkSafeToLoad(const char* name, bool reportMetrics) {
 
     if (!emuglConfig_current_renderer_supports_snapshot()) {
         showError(
-            StringFormat("Skipping snapshot load of '%s': "
-                         "Renderer type '%s' (%d) "
-                         "doesn't support snapshotting",
-                         name,
-                         emuglConfig_renderer_to_string(
-                                 emuglConfig_get_current_renderer()),
-                         int(emuglConfig_get_current_renderer())));
+                StringFormat("Unable to load snapshot: Snapshots are not "
+                             "supported with the current graphics settings. "
+                             "(%s)",
+                             emuglConfig_renderer_to_string(
+                                     emuglConfig_get_current_renderer())));
         if (reportMetrics) {
             appendFailedLoad(pb::EmulatorSnapshotLoadState::
                                  EMULATOR_SNAPSHOT_LOAD_SKIPPED_UNSUPPORTED,
@@ -652,8 +648,8 @@ void Snapshotter::handleGenericSave(const char* name,
     if (saveStatus != OperationStatus::Ok) {
         showError(
             StringFormat(
-                "Snapshot save for snapshot '%s' failed. "
-                "Cleaning it out", name));
+                "Failed to save snapshot '%s'. "
+                "Deleting snapshot.", name));
 
         if (reportMetrics) {
             if (mSaver) {

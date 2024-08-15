@@ -22,7 +22,9 @@ class MapController extends GoogleMapPageComponent {
         this.mapManager = mapManager;
         this.eventBus = eventBus;
         eventBus.onMapClicked((event) => this.onWaypointSelected(event));
-        eventBus.onSearchBoxPlaceChanged((place) => this.onWaypointSelected({ latLng: place.geometry.location }));
+        // Parameter can be either LatLng or PlaceResult
+        eventBus.onSearchBoxPlaceChanged((place) => this.onWaypointSelected({
+            latLng: (place instanceof google.maps.LatLng ? place : place.geometry.location) }));
         eventBus.onSearchBoxCleared(() => this.onSearchBoxCleared());
         eventBus.on('floating_action_button_clicked', () => this.onBeginBuildingRouteButtonClicked());
         eventBus.on('route_panel_closed', () => this.onRoutePanelClosed());
@@ -35,7 +37,7 @@ class MapController extends GoogleMapPageComponent {
     }
 
     setCurrentLocation(latLng) {
-        console.debug('MapController::setCurrentLocation called', latLng.lat(), latLng.lng());
+        console.log('MapController::setCurrentLocation called', latLng.lat(), latLng.lng());
         if (this.currentLocationMarker) {
             this.currentLocationMarker.setMap(null);
         }
@@ -60,7 +62,7 @@ class MapController extends GoogleMapPageComponent {
     }
 
     setRoute(routeJson, isSavedRoute) {
-        console.debug('MapController::setRoute called', routeJson);
+        console.log('MapController::setRoute called', routeJson);
         this.viewModel.setIsLoadingRoute(true);
         this.hideGpxKmlPanel();
         this.routePanel.close();
@@ -95,7 +97,7 @@ class MapController extends GoogleMapPageComponent {
     }
 
     showRoutePlaybackPanel(visible) {
-        console.debug('MapController::showRoutePlaybackPanel called', visible);
+        console.log('MapController::showRoutePlaybackPanel called', visible);
         if (visible) {
             // in route playback mode
             this.viewModel.setIsPlayingRoute(true);
@@ -126,7 +128,7 @@ class MapController extends GoogleMapPageComponent {
     }
 
     showRoute(routeJson, title, subtitle) {
-        console.debug('MapController::showRoute called', routeJson, title, subtitle);
+        console.log('MapController::showRoute called', routeJson, title, subtitle);
         if (routeJson.length < 2) {
             return;
         }
@@ -159,7 +161,7 @@ class MapController extends GoogleMapPageComponent {
     }
 
     displayRouteEditor(latLng, address) {
-        console.debug('MapController::displayRouteEditor called', latLng, address);
+        console.log('MapController::displayRouteEditor called', latLng, address);
         this.viewModel.setIsLoadingRoute(true);
         this.locationPanel.hide();
         this.routePanel.close();

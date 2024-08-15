@@ -369,9 +369,18 @@ auserConfig_save( AUserConfig*  uconfig )
         return;
     }
 
-    iniFile_setInteger(ini, KEY_WINDOW_X, uconfig->windowX);
-    iniFile_setInteger(ini, KEY_WINDOW_Y, uconfig->windowY);
-    iniFile_setDouble(ini, KEY_WINDOW_SCALE, uconfig->windowScale);
+    // b/356555418: Qt6 display coordinate system depends on the DPIs of each display, as well as
+    // the arrangement of the displays relative to the primary display. This means that negative
+    // coordinates are now valid, which is causing quite some problems in single-monitor setups,
+    // or when monitor arrangement changes. Let's just reset the window position back to the default
+    // for now.
+    // iniFile_setInteger(ini, KEY_WINDOW_X, uconfig->windowX);
+    // iniFile_setInteger(ini, KEY_WINDOW_Y, uconfig->windowY);
+    // iniFile_setDouble(ini, KEY_WINDOW_SCALE, uconfig->windowScale);
+    iniFile_setInteger(ini, KEY_WINDOW_X, DEFAULT_X);
+    iniFile_setInteger(ini, KEY_WINDOW_Y, DEFAULT_Y);
+    iniFile_setDouble(ini, KEY_WINDOW_SCALE, DEFAULT_SCALE);
+
     iniFile_setInteger(ini, KEY_RESIZABLE_CONFIG_ID,
                        uconfig->resizableConfigId);
     iniFile_setInteger(ini, KEY_POSTURE, uconfig->posture);

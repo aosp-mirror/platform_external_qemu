@@ -19,6 +19,7 @@
 #include <string_view>
 #include "aemu/base/files/ScopedFileHandle.h"
 #include "aemu/base/streams/RingStreambuf.h"
+#include "android/utils/exec.h"
 
 #include <Tlhelp32.h>
 #include <psapi.h>
@@ -37,6 +38,15 @@ namespace android {
 namespace base {
 
 using namespace std::chrono_literals;
+
+std::vector<char*> toCharArray(const std::vector<std::string>& params) {
+    std::vector<char*> args;
+    for (const auto& param : params) {
+        args.push_back(const_cast<char*>(param.c_str()));
+    }
+    args.push_back(nullptr);
+    return args;
+}
 
 // Converts a std::string (utf-8) -> utf-16
 static std::wstring toWide(std::string str) {
@@ -495,8 +505,18 @@ public:
                                      : std::future_status::ready;
     }
 
-    virtual std::optional<Pid> createProcess(const CommandArguments& args,
-                                             bool captureOutput) override {
+    std::optional<Pid> createProcess(const CommandArguments& args,
+                                     bool captureOutput,
+                                     bool replace) override {
+
+        if (replace) {
+            // Setup the arguments..
+            std::vector<char*> cmd = toCharArray(args);
+
+            // The exec() functions only return if an error has occurred.
+            safe_execv(cmd[0], cmd.data());
+            return std::nullopt;
+        }
         STARTUPINFOW siStartInfo = {.cb = sizeof(STARTUPINFOW)};
 
         if (captureOutput) {

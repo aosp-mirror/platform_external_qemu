@@ -22,7 +22,9 @@ class MapController extends GoogleMapPageComponent {
         this.mapManager = mapManager;
         this.eventBus = eventBus;
         eventBus.onMapClicked((event) => this.onWaypointSelected(event));
-        eventBus.onSearchBoxPlaceChanged((place) => this.onWaypointSelected({ latLng: place.geometry.location }));
+        // Parameter can be either LatLng or PlaceResult
+        eventBus.onSearchBoxPlaceChanged((place) => this.onWaypointSelected({
+            latLng: (place instanceof google.maps.LatLng ? place : place.geometry.location) }));
         eventBus.onSearchBoxCleared(() => this.onSearchBoxCleared());
         eventBus.on('floating_action_button_clicked', () => this.onBeginBuildingRouteButtonClicked());
         eventBus.on('route_panel_closed', () => this.onRoutePanelClosed());

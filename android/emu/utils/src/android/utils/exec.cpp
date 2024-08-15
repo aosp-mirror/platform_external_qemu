@@ -20,13 +20,10 @@
 #endif
 
 #ifdef _WIN32
-#include <vector>
-#endif
-
-#ifdef _WIN32
-
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <iterator>
+#include <vector>
 
 // Console control handler has no way of passing data, so let's have
 // a global variable here.

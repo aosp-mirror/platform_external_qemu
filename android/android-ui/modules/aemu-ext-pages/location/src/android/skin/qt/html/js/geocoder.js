@@ -4,7 +4,12 @@ class Geocoder {
     }
 
     async geocodeLocation(latLng, bounds) {
-        return await this._geocode({ location: latLng, bounds });
+        return new Promise((resolve, reject) => {
+            resolve({
+                address: `${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)}`,
+                latLng: latLng
+            });
+        });
     }
 
     async geocodePlace(placeId, bounds) {
@@ -14,6 +19,7 @@ class Geocoder {
     _geocode(request) {
         const geocoder = this.geocoder;
         return new Promise((resolve, reject) => {
+            console.debug("geocode called");
             geocoder.geocode(request, (results, status) => {
                 incGeocodeCount();
                 if (status === google.maps.GeocoderStatus.OK) {
