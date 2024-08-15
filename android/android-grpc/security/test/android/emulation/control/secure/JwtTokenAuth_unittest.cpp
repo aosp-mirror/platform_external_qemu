@@ -136,7 +136,7 @@ public:
         auto jsonSnippet =
                 tink::JwkSetFromPublicKeysetHandle(*public_handle->get());
         write(fname, *jsonSnippet);
-        return std::move(private_handle.ValueOrDie());
+        return std::move(private_handle.value());
     }
 
 protected:
@@ -188,7 +188,7 @@ TEST_F(JwkTokenAuthTest, discovery_file_contains_our_key) {
             crypto::tink::JwkSetFromPublicKeysetHandle(*public_handle->get());
     auto loaded = crypto::tink::JwkSetFromPublicKeysetHandle(
             *discovered_handle->get());
-    EXPECT_EQ(json::parse(ours.ValueOrDie()), json::parse(loaded.ValueOrDie()));
+    EXPECT_EQ(json::parse(ours.value()), json::parse(loaded.value()));
 }
 
 TEST_F(JwkTokenAuthTest, accept_yellow) {

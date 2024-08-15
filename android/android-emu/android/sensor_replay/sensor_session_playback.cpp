@@ -65,7 +65,7 @@ bool SensorSessionPlayback::loadFrom(std::string filename) {
     mSession = newSession;
 
     mCurrentElapsedTime = 0;
-    mCurrentRecordIterator = mSession.sensor_records().begin();
+    mCurrentRecordIteratorPos = 0;
     mCurrentSensorAggregate.Clear();
 
     return true;
@@ -102,36 +102,35 @@ bool SensorSessionPlayback::seekToTime(DurationNs time) {
     timestampedRecord.set_timestamp_ns(time);
 
     AutoLock lock(mCarVhalReplayLock);
-
-    google::protobuf::RepeatedPtrField<
-            const emulator::SensorSession::SensorRecord>::iterator
-            newRecordIterator = std::lower_bound(
-                    mSession.sensor_records().begin(),
-                    mSession.sensor_records().end(), timestampedRecord,
-                    [](emulator::SensorSession::SensorRecord a,
-                       emulator::SensorSession::SensorRecord b) {
-                        return a.timestamp_ns() < b.timestamp_ns();
-                    });
+    int destIdx = 0;
+    for (auto it = mSession.sensor_records().begin();
+         it != mSession.sensor_records().end(); ++it, ++destIdx) {
+        if (it->timestamp_ns() >= time) {
+            break;
+        }
+    }
     mCurrentElapsedTime = time;
 
     // If we're seeking to the same place, we're done.
-    if (newRecordIterator == mCurrentRecordIterator)
+    if (destIdx == mCurrentRecordIteratorPos)
         return true;
 
+    auto dest = mSession.sensor_records()[destIdx];
+    auto current = mSession.sensor_records()[mCurrentRecordIteratorPos];
+
     // If we're seeking forward, fast forward from our current position.
-    if (newRecordIterator == mSession.sensor_records().end() ||
-        newRecordIterator->timestamp_ns() >
-                mCurrentRecordIterator->timestamp_ns()) {
-        for (auto iter = mCurrentRecordIterator; iter != newRecordIterator;
-             ++iter) {
-            mCurrentSensorAggregate.MergeFrom(*iter);
+    if (destIdx > mSession.sensor_records().size() ||
+        dest.timestamp_ns() > current.timestamp_ns()) {
+        auto end = std::min(destIdx, mSession.sensor_records().size());
+        for (int idx = mCurrentRecordIteratorPos;  idx <= end; idx++) {
+            mCurrentSensorAggregate.MergeFrom(mSession.sensor_records()[idx]);
         }
     } else {
         // Otherwise, reconstruct the current sensor record from the beginning.
-        mCurrentRecordIterator = newRecordIterator;
         mCurrentSensorAggregate.Clear();
+        int idx = 0;
         for (auto iter = mSession.sensor_records().begin();
-             iter != mCurrentRecordIterator; ++iter) {
+             idx < mCurrentRecordIteratorPos; ++iter, ++idx) {
             mCurrentSensorAggregate.MergeFrom(*iter);
         }
     }
@@ -163,37 +162,40 @@ void SensorSessionPlayback::playSensor() {
     DurationNs wakeUpTime = 0;
 
     // Need add another channel msg for stop and start
-    while (mCurrentRecordIterator != mSession.sensor_records().end() &&
+    while (mCurrentRecordIteratorPos != mSession.sensor_records().size() &&
            replayState == REPLAY_START) {
         mCurrentElapsedTime = (getUnixTimeNs() - currentStartTime) * multiplier;
 
         // Keep playing data until we've caught up.
-        while ((mCurrentRecordIterator != mSession.sensor_records().end()) &&
-               mCurrentElapsedTime > mCurrentRecordIterator->timestamp_ns()) {
+        while ((mCurrentRecordIteratorPos !=
+                mSession.sensor_records().size()) &&
+               mCurrentElapsedTime >
+                       mSession.sensor_records()[mCurrentRecordIteratorPos]
+                               .timestamp_ns()) {
             // Update the sensor record.
-            mCurrentSensorAggregate.MergeFrom(*mCurrentRecordIterator);
+            mCurrentSensorAggregate.MergeFrom(mSession.sensor_records()[mCurrentRecordIteratorPos]);
             // Issue the callback if it's registered.
             if (mCallback) {
                 // Unlock before sending out the last record to avoid conflict
                 // with reset process
-                if (mCurrentRecordIterator->timestamp_ns() ==
+                if (mSession.sensor_records()[mCurrentRecordIteratorPos].timestamp_ns() ==
                     sessionDuration()) {
                     lock.unlock();
                 }
-                mCallback(*mCurrentRecordIterator);
+                mCallback(mSession.sensor_records()[mCurrentRecordIteratorPos]);
             }
 
             // Advance to the next record
             wakeUpTime = currentStartTime +
-                         mCurrentRecordIterator->timestamp_ns() -
+                         mSession.sensor_records()[mCurrentRecordIteratorPos].timestamp_ns() -
                          getUnixTimeNs() + MAX_SLEEP_DURATION;
-            mCurrentRecordIterator++;
+            mCurrentRecordIteratorPos++;
         }
         // Sleep until the next record is ready. Max sleep duration is
         // MAX_SLEEP_DURATION
-        if (mCurrentRecordIterator != mSession.sensor_records().end()) {
+        if (mCurrentRecordIteratorPos < mSession.sensor_records().size()) {
             DurationNs nextRecordAbsoluteTime =
-                    currentStartTime + mCurrentRecordIterator->timestamp_ns() -
+                    currentStartTime + mSession.sensor_records()[mCurrentRecordIteratorPos].timestamp_ns() -
                     getUnixTimeNs();
             wakeUpTime = (wakeUpTime > nextRecordAbsoluteTime)
                                  ? nextRecordAbsoluteTime
