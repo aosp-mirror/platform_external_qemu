@@ -16,7 +16,7 @@
 #include <cstdlib>
 #include <string_view>
 
-#include "absl/strings/str_format.h"
+#include "absl/log/internal/log_message.h"
 #include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/LogFormatter.h"
 #ifdef _MSC_VER
@@ -40,19 +40,27 @@ LogSeverity gMinLogLevel = EMULATOR_LOG_INFO;
 SimpleLogFormatter defaultFormatter;
 LogFormatter* gFormatter = &defaultFormatter;
 
-void write_log_line(LogSeverity prio, const std::string& msg) {
-    FILE* fp = prio >= LOG_SEVERITY_FROM(WARNING) ? stderr : stdout;
-    if (!msg.empty()) {
-        fwrite(msg.c_str(), 1, msg.size(), fp);
-        if (msg.back() != '\n') {
-            constexpr char newline = '\n';
-            fwrite(&newline, sizeof(newline), 1, fp);
-        }
-    }
+using AbslMessage = absl::log_internal::LogMessage;
 
-    if (prio >= LOG_SEVERITY_FROM(FATAL)) {
-        fflush(stderr);
-        std::abort();
+void write_log_line(LogSeverity prio,
+                    const char* file,
+                    int line,
+                    const std::string& msg) {
+    int priority = (int)prio;
+    switch (priority) {
+        case 0:  // INFO
+        case 1:  // WARNING
+        case 2:  // ERROR
+        case 3:  // FATAL
+            absl::log_internal::LogMessage(file, line,
+                                           (absl::LogSeverity)priority)
+                    << msg;
+            break;
+        default:
+            // ANDROID DEBUG / VERBOSE levels.
+            absl::log_internal::LogMessage(file, line, absl::LogSeverity::kInfo)
+                            .WithVerbosity(abs(priority))
+                    << msg;
     }
 }
 
@@ -60,24 +68,22 @@ void __emu_log_print_str(LogSeverity prio,
                          const char* file,
                          int line,
                          const std::string& msg) {
-    write_log_line(prio, gFormatter->format({file, line, prio},
-                                                      msg));
+    write_log_line(prio, file, line, msg);
 }
 
 LOGGING_API extern "C" void __emu_log_print(LogSeverity prio,
-                                const char* file,
-                                int line,
-                                const char* fmt,
-                                ...) {
+                                            const char* file,
+                                            int line,
+                                            const char* fmt,
+                                            ...) {
     const int bufferSize = 2048;  // 2KB buffer size
     char buffer[bufferSize];
     va_list args;
     va_start(args, fmt);
     int size = vsnprintf(buffer, bufferSize, fmt, args);
     va_end(args);
-    auto logline = std::string(buffer, size);
-
-    write_log_line(prio, gFormatter->format({file, line, prio}, logline));
+    auto msg = std::string(buffer, size);
+    write_log_line(prio, file, line, msg);
 }
 
 void logMessage(const LogParams& params,

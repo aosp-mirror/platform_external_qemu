@@ -391,6 +391,7 @@ android::base::Version getRequiredEmulatorVersion(
 
 /* Main routine */
 int main(int argc, char** argv) {
+    base_configure_logs(kLogDefaultOptions);
     crashhandler_init(argc, argv);
     const char* avdName = NULL;
     const char* avdArch = NULL;
