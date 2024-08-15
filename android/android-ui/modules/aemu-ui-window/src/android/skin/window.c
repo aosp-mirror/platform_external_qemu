@@ -778,22 +778,15 @@ static void button_redraw(Button* button,
     SkinRect r;
 
     if (skin_rect_intersect(&r, rect, &button->rect)) {
-        if (button->down && button->image != SKIN_IMAGE_NONE) {
+        if (button->down > 1 && button->image != SKIN_IMAGE_NONE) {
             SkinRect src_rect;
             src_rect.pos.x = r.pos.x - button->origin.x;
             src_rect.pos.y = r.pos.y - button->origin.y;
             src_rect.size = r.size;
 
-            if (button->image != SKIN_IMAGE_NONE) {
-                getConsoleAgents()->surface->skin_surface_blit(surface, &r.pos,
-                                  skin_image_surface(button->image), &src_rect,
-                                  SKIN_BLIT_SRCOVER);
-                if (button->down > 1) {
-                    getConsoleAgents()->surface->skin_surface_blit(surface, &r.pos,
-                                      skin_image_surface(button->image),
-                                      &src_rect, SKIN_BLIT_SRCOVER);
-                }
-            }
+            getConsoleAgents()->surface->skin_surface_blit(surface, &r.pos,
+                                skin_image_surface(button->image), &src_rect,
+                                SKIN_BLIT_SRCOVER);
         }
     }
 }
