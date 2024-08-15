@@ -45,6 +45,7 @@ android_add_library(
       android/base/files/TarStream.cpp
       android/base/gl_object_counter.cpp
       android/base/GLObjectCounter.cpp
+      android/base/GraphicsObjectCounter.cpp
       android/base/IOVector.cpp
       android/base/JsonWriter.cpp
       android/base/Process.cpp
