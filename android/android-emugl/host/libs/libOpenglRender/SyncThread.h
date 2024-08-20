@@ -107,10 +107,6 @@ public:
     // knows when to increment timelines / signal native fence FD's.
     void triggerWaitVk(VkFence vkFence, uint64_t timeline);
 
-    // for use with the virtio-gpu path; is meant to have a current context
-    // while waiting.
-    void triggerBlockedWaitNoTimeline(FenceSync* fenceSync);
-
     // This increments the timeline after the QSRI completes.
     void triggerWaitVkQsri(VkImage vkImage, uint64_t timeline);
 
