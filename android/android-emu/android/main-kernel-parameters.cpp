@@ -86,19 +86,21 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
             &params, nullptr, apiLevel, targetArch, kernelSerialPrefix, true,
             opts->show_kernel, opts->logcat || opts->shell, opts->shell_serial);
 
-    // 2. Calculate additional memory for software renderers (e.g., SwiftShader)
-    const uint64_t one_MB = 1024ULL * 1024ULL;
-    int numBuffers = 2; /* double buffering */
-    uint64_t glEstimatedFramebufferMemUsageMB =
-        (numBuffers * glFramebufferSizeBytes + one_MB - 1) / one_MB;
+    if (!android::featurecontrol::isEnabled(android::featurecontrol::GLDirectMem)) {
+        // 2. Calculate additional memory for software renderers (e.g., SwiftShader)
+        const uint64_t one_MB = 1024ULL * 1024ULL;
+        int numBuffers = 2; /* double buffering */
+        uint64_t glEstimatedFramebufferMemUsageMB =
+            (numBuffers * glFramebufferSizeBytes + one_MB - 1) / one_MB;
 
-    // 3. Additional contiguous memory reservation for DMA and software framebuffers,
-    // specified in MB
-    const int Cma =
-        2 * glEstimatedFramebufferMemUsageMB +
-        (android::featurecontrol::isEnabled(android::featurecontrol::GLDMA) ? 256 : 0);
-    if (Cma) {
-        params.addFormat("cma=%" PRIu64 "M@0-4G", Cma);
+        // 3. Additional contiguous memory reservation for DMA and software framebuffers,
+        // specified in MB
+        const int Cma =
+            2 * glEstimatedFramebufferMemUsageMB +
+            (android::featurecontrol::isEnabled(android::featurecontrol::GLDMA) ? 256 : 0);
+        if (Cma) {
+            params.addFormat("cma=%" PRIu64 "M@0-4G", Cma);
+        }
     }
 
     if (opts->dns_server) {
