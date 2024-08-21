@@ -40,7 +40,6 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
                                          const std::vector<std::string>* verifiedBootParameters,
                                          uint64_t glFramebufferSizeBytes,
                                          mem_map ramoops,
-                                         bool isQemu2,
                                          bool isCros,
                                          std::vector<std::string> userspaceBootProps) {
     if (isCros) {
@@ -84,13 +83,8 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
     }
 
     android::setupVirtualSerialPorts(
-            &params, nullptr, apiLevel, targetArch, kernelSerialPrefix, isQemu2,
+            &params, nullptr, apiLevel, targetArch, kernelSerialPrefix, true,
             opts->show_kernel, opts->logcat || opts->shell, opts->shell_serial);
-
-    // If qemu1, make sure GLDMA is disabled.
-    if (!isQemu2)
-        android::featurecontrol::setEnabledOverride(
-                android::featurecontrol::GLDMA, false);
 
     // 2. Calculate additional memory for software renderers (e.g., SwiftShader)
     const uint64_t one_MB = 1024ULL * 1024ULL;
@@ -102,7 +96,7 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
     // specified in MB
     const int Cma =
         2 * glEstimatedFramebufferMemUsageMB +
-        (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::GLDMA) ? 256 : 0);
+        (android::featurecontrol::isEnabled(android::featurecontrol::GLDMA) ? 256 : 0);
     if (Cma) {
         params.addFormat("cma=%" PRIu64 "M@0-4G", Cma);
     }
@@ -115,52 +109,48 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
         }
     }
     // mac80211_hwsim
-    if (isQemu2) {
-        if (android::featurecontrol::isEnabled(
-                                     android::featurecontrol::VirtioWifi)) {
-            android::featurecontrol::setIfNotOverriden(
-                    android::featurecontrol::Wifi, false);
+    if (android::featurecontrol::isEnabled(
+                                 android::featurecontrol::VirtioWifi)) {
+        android::featurecontrol::setIfNotOverriden(
+                android::featurecontrol::Wifi, false);
 
-            // For API 30, we still use mac80211_hwsim.mac_prefix within kernel
-            // driver to configure mac address. For API 31  and above, we cannot
-            // make assumption about mac80211_hwsim.mac_prefix in kernel.
-            if (apiLevel <= 30) {
-                params.add("mac80211_hwsim.radios=1");
-                android::featurecontrol::setIfNotOverriden(
-                        android::featurecontrol::Mac80211hwsimUserspaceManaged,
-                        false);
-            }
-        } else if (android::featurecontrol::isEnabled(
-                           android::featurecontrol::Wifi)) {
-            if (!android::featurecontrol::isEnabled(
-                        android::featurecontrol::
-                                Mac80211hwsimUserspaceManaged)) {
-                params.add("mac80211_hwsim.radios=2");
-            }
-            // Enable multiple channels so the kernel can scan on one channel
-            // while communicating the other. This speeds up scanning
-            // significantly. This does not work if WiFi Direct is enabled
-            // starting with Q images so only set this option if WiFi Direct
-            // support is not enabled.
-            if (apiLevel < 29) {
-                params.add("mac80211_hwsim.channels=2");
-            } else if (!opts->wifi_client_port && !opts->wifi_server_port) {
-                params.add("mac80211_hwsim.channels=2");
-            }
+        // For API 30, we still use mac80211_hwsim.mac_prefix within kernel
+        // driver to configure mac address. For API 31  and above, we cannot
+        // make assumption about mac80211_hwsim.mac_prefix in kernel.
+        if (apiLevel <= 30) {
+            params.add("mac80211_hwsim.radios=1");
+            android::featurecontrol::setIfNotOverriden(
+                    android::featurecontrol::Mac80211hwsimUserspaceManaged,
+                    false);
+        }
+    } else if (android::featurecontrol::isEnabled(
+                       android::featurecontrol::Wifi)) {
+        if (!android::featurecontrol::isEnabled(
+                    android::featurecontrol::
+                            Mac80211hwsimUserspaceManaged)) {
+            params.add("mac80211_hwsim.radios=2");
+        }
+        // Enable multiple channels so the kernel can scan on one channel
+        // while communicating the other. This speeds up scanning
+        // significantly. This does not work if WiFi Direct is enabled
+        // starting with Q images so only set this option if WiFi Direct
+        // support is not enabled.
+        if (apiLevel < 29) {
+            params.add("mac80211_hwsim.channels=2");
+        } else if (!opts->wifi_client_port && !opts->wifi_server_port) {
+            params.add("mac80211_hwsim.channels=2");
         }
     }
 
-    if (isQemu2) {
-        if (android::featurecontrol::isEnabled(android::featurecontrol::SystemAsRoot)) {
-            params.add("skip_initramfs");
-            params.add("rootwait");
-            params.add("ro");
-            params.add("init=/init");
-            // If verifiedBootParameters were added, they will provide the root
-            // argument which corresponds to a mapped device.
-            if (!verifiedBootParameters || verifiedBootParameters->empty()) {
-                params.add("root=/dev/vda1");
-            }
+    if (android::featurecontrol::isEnabled(android::featurecontrol::SystemAsRoot)) {
+        params.add("skip_initramfs");
+        params.add("rootwait");
+        params.add("ro");
+        params.add("init=/init");
+        // If verifiedBootParameters were added, they will provide the root
+        // argument which corresponds to a mapped device.
+        if (!verifiedBootParameters || verifiedBootParameters->empty()) {
+            params.add("root=/dev/vda1");
         }
     }
 

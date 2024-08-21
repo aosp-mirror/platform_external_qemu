@@ -26,7 +26,6 @@ std::vector<std::pair<std::string, std::string>>
 getUserspaceBootProperties(const AndroidOptions* opts,
                            const char* targetArch,
                            const char* serialno,
-                           bool isQemu2,
                            AndroidGlesEmulationMode glesMode,
                            int bootPropOpenglesVersion,
                            int apiLevel,

@@ -3336,7 +3336,6 @@ extern "C" int main(int argc, char** argv) {
             real_console_tty_prefix = "hvc";
         }
 
-        constexpr bool isQemu2 = true;
         std::string myserialno;
         if (opts->android_serialno &&
             isAndroidSerialNo(opts->android_serialno)) {
@@ -3347,7 +3346,7 @@ extern "C" int main(int argc, char** argv) {
         }
         std::vector<std::pair<std::string, std::string>> userspaceBootOpts =
                 getUserspaceBootProperties(
-                        opts, kTarget.androidArch, myserialno.c_str(), isQemu2,
+                        opts, kTarget.androidArch, myserialno.c_str(),
                         rendererConfig.glesMode,
                         rendererConfig.bootPropOpenglesVersion, apiLevel,
                         real_console_tty_prefix, &verified_boot_params, hw);
@@ -3378,7 +3377,7 @@ extern "C" int main(int argc, char** argv) {
         std::string append_arg = emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, real_console_tty_prefix,
                 hw->kernel_parameters, hw->kernel_path, &verified_boot_params,
-                rendererConfig.glFramebufferSizeBytes, pstore, isQemu2,
+                rendererConfig.glFramebufferSizeBytes, pstore,
                 hw->hw_arc /* isCros */,
                 std::move(kernelCmdLineUserspaceBootOpts));
 
