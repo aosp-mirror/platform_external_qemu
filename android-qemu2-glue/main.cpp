@@ -2551,7 +2551,7 @@ extern "C" int main(int argc, char** argv) {
 #if defined(TARGET_MIPS)
     args.add((hw->hw_cpu_model && hw->hw_cpu_model[0]) ? hw->hw_cpu_model
                                                        : kTarget.qemuCpu);
-#elif defined(TARGET_X86_64)
+#elif defined(CONFIG_LINUX) && defined(TARGET_X86_64)
     if (feature_is_enabled(kFeature_AndroidVirtualizationFramework)) {
         // bug: 349365118, to enable kvm in the guest, we have to pass host
         // type
