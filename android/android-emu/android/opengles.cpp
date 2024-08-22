@@ -14,6 +14,7 @@
 
 #include "aemu/base/CpuUsage.h"
 #include "aemu/base/GLObjectCounter.h"
+#include "aemu/base/GraphicsObjectCounter.h"
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/files/Stream.h"
 #include "aemu/base/memory/MemoryTracker.h"
@@ -381,6 +382,7 @@ android_startOpenglesRenderer(int width, int height,
     logfuncs.fine = android_opengl_cxt_logger_write;
     sRenderLib->setLogger(logfuncs);
     sRenderLib->setGLObjectCounter(android::base::GLObjectCounter::get());
+    sRenderLib->setGraphicsObjectCounter(android::base::GraphicsObjectCounter::get());
     emugl_dma_ops dma_ops;
     dma_ops.get_host_addr = android_goldfish_dma_ops.get_host_addr;
     dma_ops.unlock = android_goldfish_dma_ops.unlock;

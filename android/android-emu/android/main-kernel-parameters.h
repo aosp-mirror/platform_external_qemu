@@ -38,8 +38,6 @@ typedef struct mem_map {
 // |verifiedBootParameters| is a vector of verified boot kernel parameters to
 // add.  Passing NULL is OK.  Passing an empty vector is OK.
 // |ramoops| The memory range that will be used by the ramoops module.
-// |isQemu2| is true to indicate that this is called from QEMU2, otherwise
-// QEMU1 is assumed.
 // |isCros| is true to indicate that it's a Chrome OS image.
 std::string emulator_getKernelParameters(const AndroidOptions* opts,
                                          const char* targetArch,
@@ -50,7 +48,6 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
                                          const std::vector<std::string>* verifiedBootParameters,
                                          uint64_t glFramebufferSizeBytes,
                                          mem_map ramoops,
-                                         bool isQemu2,
                                          bool isCros,
                                          std::vector<std::string> userspaceBootProps);
 

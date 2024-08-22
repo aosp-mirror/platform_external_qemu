@@ -45,6 +45,7 @@ android_add_library(
       android/base/files/TarStream.cpp
       android/base/gl_object_counter.cpp
       android/base/GLObjectCounter.cpp
+      android/base/GraphicsObjectCounter.cpp
       android/base/IOVector.cpp
       android/base/JsonWriter.cpp
       android/base/Process.cpp
@@ -125,7 +126,7 @@ target_include_directories(android-emu-base
 # against the base you will link against LZ4 & UUID
 target_link_libraries(
   android-emu-base PRIVATE android-emu-base-headers lz4 UUID::UUID
-  PUBLIC Threads::Threads android-emu-base-logging zlib
+  PUBLIC Threads::Threads android-emu-base-logging zlib absl::absl_log
          android-emu-base-memory logging-base)
 
 if(OPTION_TCMALLOC)

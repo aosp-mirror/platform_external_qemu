@@ -1183,7 +1183,7 @@ static void
 help_log_nofilter(stralloc_t*  out)
 {
     PRINTF(
-    "  Disables the duplicate logline filter.\n\n");
+    "  Disables the duplicate logline filter (DEPRECATED).\n\n");
 }
 
 static void

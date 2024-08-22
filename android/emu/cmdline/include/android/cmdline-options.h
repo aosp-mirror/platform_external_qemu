@@ -123,7 +123,7 @@ OPT_FLAG ( no_jni, "deprecated, see dalvik_vm_checkjni" )
 OPT_FLAG ( nojni, "deprecated, see dalvik_vm_checkjni" )
 OPT_FLAG ( dalvik_vm_checkjni, "Enable dalvik.vm.checkjni" )
 OPT_PARAM( logcat, "<tags>", "enable logcat output with given tags" )
-OPT_FLAG( log_nofilter, "Disable the duplicate log filter")
+OPT_FLAG( log_nofilter, "Disable the duplicate log filter (DEPRECATED)")
 OPT_FLAG( log_detailed, "Enable detailed logging info" )
 
 #ifdef __linux__

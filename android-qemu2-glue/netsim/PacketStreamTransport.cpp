@@ -165,12 +165,13 @@ std::shared_ptr<PacketStreamerTransport> PacketStreamerTransport::create(
             std::move(factory)));
 }
 
-std::unique_ptr<PacketProtocol> getPacketProtocol(std::string deviceType,
-                                                  std::string deviceName) {
+std::unique_ptr<PacketProtocol> getPacketProtocol(
+        std::string deviceType,
+        std::shared_ptr<DeviceInfo> deviceInfo) {
     if (deviceType == "bluetooth") {
-        return android::qemu2::getBluetoothPacketProtocol(deviceType, deviceName);
+        return android::qemu2::getBluetoothPacketProtocol(deviceType, deviceInfo);
     } else if (deviceType == "uwb") {
-        return android::qemu2::getUwbPacketProtocol(deviceType, deviceName);
+        return android::qemu2::getUwbPacketProtocol(deviceType, deviceInfo);
     }
     dfatal("Unexpected device: %s. Not supported.", deviceType.c_str());
     return nullptr;

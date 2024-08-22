@@ -164,8 +164,8 @@ private:
 };
 
 // Factory that can produce a packet serializer for the given device name.
-std::unique_ptr<PacketProtocol> getPacketProtocol(std::string deviceType,
-                                                  std::string deviceName);
-
+std::unique_ptr<PacketProtocol> getPacketProtocol(
+        std::string deviceType,
+        std::shared_ptr<DeviceInfo> deviceInfo);
 }  // namespace qemu2
 }  // namespace android
