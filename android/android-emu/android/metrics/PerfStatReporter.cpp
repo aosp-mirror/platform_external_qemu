@@ -16,6 +16,7 @@
 
 #include "android/CommonReportedInfo.h"
 #include "aemu/base/CpuUsage.h"
+#include "aemu/base/GraphicsObjectCounter.h"
 #include "aemu/base/files/StdioStream.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
@@ -132,6 +133,8 @@ static void fillProtoMemUsage(
         android_studio::EmulatorPerformanceStats* stats_out);
 static void fillProtoCpuUsage(
         android_studio::EmulatorPerformanceStats* stats_out);
+static void fillProtoGpuUsage(
+        android_studio::EmulatorPerformanceStats* stats_out);
 
 void PerfStatReporter::dump() {
     if (mWriter != nullptr) {
@@ -158,6 +161,18 @@ void PerfStatReporter::refreshPerfStats() {
 
     fillProtoMemUsage(mCurrPerfStats.get());
     fillProtoCpuUsage(mCurrPerfStats.get());
+    fillProtoGpuUsage(mCurrPerfStats.get());
+}
+
+static void fillProtoGpuUsage(android_studio::EmulatorPerformanceStats* stats_out){
+    auto graphicsUsage =
+            android::base::GraphicsObjectCounter::get()->printUsage();
+    auto graphicsUsageCounts = android::base::GraphicsObjectCounter::get()->getCounts();
+    auto colorBufferCounts = graphicsUsageCounts[toIndex(android::base::GraphicsObjectType::COLORBUFFER)];
+    auto resources = stats_out->mutable_resource_usage();
+    auto graphicsUsageProto = resources->mutable_graphics_resource_usage();
+    graphicsUsageProto->set_colorbuffer_count(colorBufferCounts);
+//TODO: fill the rest of the counters as we extract them
 }
 
 static void fillProtoMemUsage(

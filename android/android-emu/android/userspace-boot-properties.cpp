@@ -135,7 +135,6 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         const AndroidOptions* opts,
         const char* targetArch,
         const char* serialno,
-        const bool isQemu2,
         const AndroidGlesEmulationMode glesMode,
         const int bootPropOpenglesVersion,
         const int apiLevel,
@@ -263,7 +262,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         params.push_back({"qemu", "1"});
     }
 
-    params.push_back({"androidboot.hardware", isQemu2 ? "ranchu" : "goldfish"});
+    params.push_back({"androidboot.hardware", "ranchu"});
 
     if (opts->guest_angle) {
         dwarning(
@@ -329,14 +328,14 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         params.push_back({androidbootVerityMode, "enforcing"});
     }
 
-    if (isQemu2 && fc::isEnabled(fc::EncryptUserData) && qemuEncryptProp) {
+    if (fc::isEnabled(fc::EncryptUserData) && qemuEncryptProp) {
         params.push_back({qemuEncryptProp, "1"});
     }
 
     // Android media profile selection
     // 1. If the SelectMediaProfileConfig is on, then select
     // <media_profile_name> if the resolution is above 1080p (1920x1080).
-    if (isQemu2 && fc::isEnabled(fc::DynamicMediaProfile) &&
+    if (fc::isEnabled(fc::DynamicMediaProfile) &&
         qemuMediaProfileVideoProp) {
         if ((hw->hw_lcd_width > 1920 && hw->hw_lcd_height > 1080) ||
             (hw->hw_lcd_width > 1080 && hw->hw_lcd_height > 1920)) {
@@ -441,7 +440,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
     }
 
     const bool isDynamicPartition = fc::isEnabled(fc::DynamicPartition);
-    if (isQemu2 && isX86ish && !isDynamicPartition) {
+    if (isX86ish && !isDynamicPartition) {
         // x86 and x86_64 platforms use an alternative Android DT directory that
         // mimics the layout of /proc/device-tree/firmware/android/
         params.push_back({"androidboot.android_dt_dir",
@@ -476,12 +475,10 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         params.push_back({autoRotateProp, "1"});
     }
 
-    if (isQemu2) {
-        if (fc::isEnabled(fc::VirtioWifi)) {
-            params.push_back({qemuVirtioWifiProp, "1"});
-        } else if (fc::isEnabled(fc::Wifi)) {
-            params.push_back({qemuWifiProp, "1"});
-        }
+    if (fc::isEnabled(fc::VirtioWifi)) {
+        params.push_back({qemuVirtioWifiProp, "1"});
+    } else if (fc::isEnabled(fc::Wifi)) {
+        params.push_back({qemuWifiProp, "1"});
     }
 
     if (fc::isEnabled(fc::HardwareDecoder)) {
@@ -505,77 +502,13 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         }
     }
 
-    if (isQemu2) {
-        if (hasShellConsole) {
-            params.push_back({"androidboot.console",
-                              StringFormat("%s0", kernelSerialPrefix)});
-        }
+    if (hasShellConsole) {
+        params.push_back({"androidboot.console",
+                          StringFormat("%s0", kernelSerialPrefix)});
+    }
 
-        if (androidQemudProp) {
-            params.push_back({androidQemudProp, "1"});
-        }
-    } else {  // !isQemu2
-        // Technical note: There are several important constraints when
-        // setting up QEMU1 virtual ttys:
-        //
-        // - The first one if that for API level < 14, the system requires
-        //   that the *second* virtual serial port (i.e. ttyS1) be associated
-        //   with the android-qemud chardev, used to implement the legacy
-        //   QEMUD protocol. Newer API levels use a pipe for this instead.
-        //
-        // - The second one is that the x86 and x86_64 virtual boards have
-        //   a limited number of IRQs which makes it unable to setup more
-        //   than two ttys at the same time.
-        //
-        // - Third, specifying -logcat implies -shell due to limitations in
-        //   the guest system. I.e. the shell console will always receive
-        //   logcat output, even if one uses -shell-serial to redirect its
-        //   output to a pty or something similar.
-        //
-        // We thus consider the following cases:
-        //
-        // * For apiLevel >= 14:
-        //      ttyS0 = android-kmsg (kernel messages)
-        //      ttyS1 = <shell-serial> (logcat/shell).
-        //
-        // * For apiLevel < 14 && !x86ish:
-        //      ttyS0 = android-kmsg (kernel messages)
-        //      ttyS1 = android-qemud
-        //      ttyS2 = <shell-serial> (logcat/shell)
-        //
-        // * For apiLevel < 14 && x86ish:
-        //      ttyS0 = <shell-serial> (kernel messages/logcat/shell).
-        //      ttyS1 = android-qemud
-        //
-        // Where <shell-serial> is the value of opts->shell_serial, which
-        // by default will be the 'stdio' or 'con:' chardev (for Posix and
-        // Windows, respectively).
-
-        int logcatSerial = 1;
-        if (apiLevel < 14) {
-            if (androidQemudProp) {
-                params.push_back({androidQemudProp,
-                                  StringFormat("%s1", kernelSerialPrefix)});
-            }
-
-            if (isX86ish) {
-                logcatSerial = 0;
-            } else {
-                logcatSerial = 2;
-            }
-        } else {
-            // The rild daemon, used for GSM emulation, checks for qemud,
-            // just set it to a dummy value instead of a serial port.
-            if (androidQemudProp) {
-                params.push_back({androidQemudProp, "1"});
-            }
-        }
-
-        if (hasShellConsole) {
-            params.push_back(
-                    {"androidboot.console",
-                     StringFormat("%s%d", kernelSerialPrefix, logcatSerial)});
-        }
+    if (androidQemudProp) {
+        params.push_back({androidQemudProp, "1"});
     }
 
     params.push_back({avdNameProp, hw->avd_name});

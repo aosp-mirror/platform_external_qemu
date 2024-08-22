@@ -57,6 +57,11 @@ void RenderLibImpl::setGLObjectCounter(
     emugl::setGLObjectCounter(counter);
 }
 
+void RenderLibImpl::setGraphicsObjectCounter(
+        android::base::GraphicsObjectCounter* counter) {
+    emugl::setGraphicsObjectCounter(counter);
+}
+
 void RenderLibImpl::setCrashReporter(emugl_crash_reporter_t reporter) {
     set_emugl_crash_reporter(reporter);
 }

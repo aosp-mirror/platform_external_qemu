@@ -28,6 +28,7 @@
 #include "android/console.h"
 #include "android/grpc/utils/EnumTranslate.h"
 #include "android/utils/debug.h"
+#include "netsim.h"
 #include "netsim/common.pb.h"
 #include "netsim/packet_streamer.pb.h"
 #include "netsim/startup.pb.h"
@@ -59,13 +60,14 @@ namespace qemu2 {
 // The protocol for /dev/hvc2 <-> PacketStreamer
 class UwbPacketProtocol : public PacketProtocol {
 public:
-    UwbPacketProtocol(std::string name)
-        : mName(name) {}
+    UwbPacketProtocol(std::shared_ptr<DeviceInfo> device_info)
+        : mDeviceInfo(device_info) {}
 
     std::unique_ptr<ChipInfo> chip_info() override {
         auto info = std::make_unique<ChipInfo>();
-        info->set_name(mName);
+        info->set_name(mDeviceInfo->name());
         info->mutable_chip()->set_kind(netsim::common::ChipKind::UWB);
+        info->mutable_device_info()->CopyFrom(*mDeviceInfo);
         return info;
     }
 
@@ -105,7 +107,7 @@ public:
     }
 
 private:
-    std::string mName;
+    std::shared_ptr<DeviceInfo> mDeviceInfo;
     class UwbParser {
         public:
             UwbParser() {}
@@ -166,9 +168,10 @@ private:
 };
 
 
-std::unique_ptr<PacketProtocol> getUwbPacketProtocol(std::string deviceType,
-                                                  std::string deviceName) {
-    return std::make_unique<UwbPacketProtocol>(deviceName);
+std::unique_ptr<PacketProtocol> getUwbPacketProtocol(
+        std::string deviceType,
+        std::shared_ptr<DeviceInfo> deviceInfo) {
+    return std::make_unique<UwbPacketProtocol>(deviceInfo);
 }
 
 }  // namespace qemu2

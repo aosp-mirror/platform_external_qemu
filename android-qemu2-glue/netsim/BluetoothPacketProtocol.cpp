@@ -29,6 +29,7 @@
 #include "android/grpc/utils/EnumTranslate.h"
 #include "android/utils/debug.h"
 #include "h4_parser.h"
+#include "netsim.h"
 #include "netsim/common.pb.h"
 #include "netsim/hci_packet.pb.h"
 #include "netsim/packet_streamer.pb.h"
@@ -70,7 +71,8 @@ static void apply_le_workaround_if_needed(ChipInfo* info) {
     auto idx = props.find("ro.build.version.sdk=33");
     if (idx != std::string::npos) {
         VERBOSE_INFO(bluetooth,
-                     "Explicitly disabling le_connected_isochronous stream feature!");
+                     "Explicitly disabling le_connected_isochronous stream "
+                     "feature!");
         info->mutable_chip()
                 ->mutable_bt_properties()
                 ->mutable_features()
@@ -83,18 +85,19 @@ static void apply_le_workaround_if_needed(ChipInfo* info) {
 // The protocol for /dev/vhci <-> PacketStreamer
 class BluetoothPacketProtocol : public PacketProtocol {
 public:
-    BluetoothPacketProtocol(std::string name)
+    BluetoothPacketProtocol(std::shared_ptr<DeviceInfo> deviceInfo)
         : mH4Parser([this](auto data) { enqueue(HCIPacket::COMMAND, data); },
                     [this](auto data) { enqueue(HCIPacket::EVENT, data); },
                     [this](auto data) { enqueue(HCIPacket::ACL, data); },
                     [this](auto data) { enqueue(HCIPacket::SCO, data); },
                     [this](auto data) { enqueue(HCIPacket::ISO, data); }),
-          mName(name) {}
+          mDeviceInfo(deviceInfo) {}
 
     std::unique_ptr<ChipInfo> chip_info() override {
         auto info = std::make_unique<ChipInfo>();
-        info->set_name(mName);
+        info->set_name(mDeviceInfo->name());
         info->mutable_chip()->set_kind(netsim::common::ChipKind::BLUETOOTH);
+        info->mutable_device_info()->CopyFrom(*mDeviceInfo);
         apply_le_workaround_if_needed(info.get());
         return info;
     }
@@ -197,13 +200,14 @@ private:
             };
 
     std::vector<PacketRequest> mPacketQueue;
-    std::string mName;
+    std::shared_ptr<DeviceInfo> mDeviceInfo;
     rootcanal::H4Parser mH4Parser;
 };
 
-std::unique_ptr<PacketProtocol> getBluetoothPacketProtocol(std::string deviceType,
-                                                  std::string deviceName) {
-    return std::make_unique<BluetoothPacketProtocol>(deviceName);
+std::unique_ptr<PacketProtocol> getBluetoothPacketProtocol(
+        std::string deviceType,
+        std::shared_ptr<DeviceInfo> deviceInfo) {
+    return std::make_unique<BluetoothPacketProtocol>(deviceInfo);
 }
 
 }  // namespace qemu2

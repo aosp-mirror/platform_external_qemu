@@ -211,8 +211,11 @@ AndroidCpuAcceleration ProbeWHPX(std::string* status) {
              ver->dwMajorVersion, ver->dwMinorVersion, ver->dwBuildNumber);
 
     WHPX_DBG("WHPX (%s) is installed and usable.", version_str);
-    StringAppendFormat(status, "WHPX (%s) is installed and usable.",
-                       version_str);
+
+    char stat_string[64];
+    snprintf(stat_string, sizeof(stat_string),
+             "WHPX(%s) is installed and usable.", version_str);
+    status->assign(stat_string);
     GlobalState* g = &gGlobals;
     ::snprintf(g->version, sizeof(g->version), "%s", version_str);
     return ANDROID_CPU_ACCELERATION_READY;

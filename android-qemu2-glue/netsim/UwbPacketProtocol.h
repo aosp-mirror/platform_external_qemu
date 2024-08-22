@@ -19,8 +19,8 @@ namespace android {
 namespace qemu2 {
 
 // Factory that can produce a packet serializer for the given device name.
-std::unique_ptr<PacketProtocol> getUwbPacketProtocol(std::string deviceType,
-                                                  std::string deviceName);
-
+std::unique_ptr<PacketProtocol> getUwbPacketProtocol(
+        std::string deviceType,
+        std::shared_ptr<DeviceInfo> device_info);
 }  // namespace qemu2
 }  // namespace android

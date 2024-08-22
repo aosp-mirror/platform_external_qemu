@@ -20,6 +20,7 @@
 using netsim::packet::PacketRequest;
 using netsim::packet::PacketResponse;
 using netsim::startup::ChipInfo;
+using netsim::startup::DeviceInfo;
 
 namespace android {
 namespace qemu2 {
