@@ -20,6 +20,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Tuple, List
 
 from aemu.process.bazel import Bazel
 
@@ -31,7 +32,9 @@ class ToolchainGenerator:
         self.aosp = aosp.absolute()
         self.bazel = Bazel(self.aosp, dest)
 
-        toolchain_json = self.aosp / "build" / "bazel" / "rules" / "toolchains.json"
+        toolchain_json = (
+            self.aosp / "build" / "bazel" / "toolchains" / "tool_versions.json"
+        )
         with open(
             toolchain_json,
             encoding="utf-8",
@@ -90,34 +93,34 @@ class ToolchainGenerator:
     def host(self) -> str:
         return platform.system().lower()
 
-    def nm(self) -> (str, str):
+    def nm(self) -> Tuple[str, str]:
         return self.clang() / "bin" / "llvm-nm", ""
 
-    def ar(self) -> (str, str):
+    def ar(self) -> Tuple[str, str]:
         return self.clang() / "bin" / "llvm-ar", ""
 
-    def objdump(self) -> (str, str):
+    def objdump(self) -> Tuple[str, str]:
         return self.clang() / "bin" / "llvm-objdump", ""
 
-    def strings(self) -> (str, str):
+    def strings(self) -> Tuple[str, str]:
         return self.clang() / "bin" / "llvm-strings", ""
 
-    def ranlib(self) -> (str, str):
+    def ranlib(self) -> Tuple[str, str]:
         return self.clang() / "bin" / "llvm-ranlib", ""
 
-    def cxx(self) -> (str, str):
+    def cxx(self) -> Tuple[str, str]:
         return self.clang() / "bin" / "clang++", ""
 
-    def cc(self) -> (str, str):
+    def cc(self) -> Tuple[str, str]:
         return self.clang() / "bin" / "clang", ""
 
-    def lld(self) -> (str, str):
+    def lld(self) -> Tuple[str, str]:
         return self.clang() / "bin" / "lld", ""
 
-    def nm(self) -> (str, str):
+    def nm(self) -> Tuple[str, str]:
         return self.clang() / "bin" / "llvm-nm", ""
 
-    def ninja(self) -> (str, str):
+    def ninja(self) -> Tuple[str, str]:
         return (
             self.aosp
             / "prebuilts"
@@ -128,10 +131,10 @@ class ToolchainGenerator:
             "",
         )
 
-    def rust_flags(self) -> [str]:
+    def rust_flags(self) -> List[str]:
         return []
 
-    def rustc(self) -> (str, str):
+    def rustc(self) -> Tuple[str, str]:
         return (
             self.aosp
             / "prebuilts"
@@ -143,7 +146,7 @@ class ToolchainGenerator:
             "",
         )
 
-    def cargo(self) -> (str, str):
+    def cargo(self) -> Tuple[str, str]:
         rustc_bin = (
             self.aosp
             / "prebuilts"
@@ -166,7 +169,7 @@ class ToolchainGenerator:
         script = f"CARGO_BUILD_RUSTC={rustc_bin}\n" f"{cargo_bin}"
         return script, ""
 
-    def meson(self) -> (str, str):
+    def meson(self) -> Tuple[str, str]:
         meson_py = self.aosp / "external" / "meson" / "meson.py"
         exe = f"{self.py_exe} {meson_py} "
         return exe, ""

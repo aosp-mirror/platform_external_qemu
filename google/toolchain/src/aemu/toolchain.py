@@ -321,7 +321,7 @@ def main():
         It is expected that this script will be run with access to the AOSP_ROOT from a manifest
         that is based of `emu-dev` (https://android.googlesource.com/platform/manifest/+/refs/heads/emu-dev)
 
-        The clang version will be obtained from $AOSP_ROOT/build/bazel/rules/toolchains.json
+        The clang version will be obtained from $AOSP_ROOT/build/bazel/toolchains/tool_versions.json
 
         It will also create a set of fake "pkgconfig" files that will resolve to the
         dependencies that will be built using bazel.
