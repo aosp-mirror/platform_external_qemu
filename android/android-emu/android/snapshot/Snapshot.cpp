@@ -95,14 +95,14 @@ using android::protobuf::ProtobufSaveResult;
 using android::protobuf::saveProtobuf;
 
 namespace fc = android::featurecontrol;
-namespace pb = emulator_snapshot;
+namespace proto = emulator_snapshot;
 
 namespace android {
 namespace snapshot {
 
-static void fillImageInfo(pb::Image::Type type,
+static void fillImageInfo(proto::Image::Type type,
                           const char* path,
-                          pb::Image* image) {
+                          proto::Image* image) {
     image->set_type(type);
     image->set_path(path ? path : "");
     if (!path || std::string(path).empty() || !path_is_regular(c_str(path))) {
@@ -118,9 +118,9 @@ static void fillImageInfo(pb::Image::Type type,
     }
 }
 
-static bool verifyImageInfo(pb::Image::Type type,
+static bool verifyImageInfo(proto::Image::Type type,
                             const char* path,
-                            const pb::Image& in) {
+                            const proto::Image& in) {
     std::string pathStr(path ? path : "");
     if (in.type() != type) {
         return false;
@@ -232,7 +232,7 @@ static Optional<std::string> currentGpuDriverString() {
     return gpuDriverString(*currentIt);
 }
 
-bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
+bool Snapshot::verifyHost(const proto::Host& host, bool writeFailure) {
     if (Snapshotter::get().vmOperations().getVmConfiguration != nullptr) {
         VmConfiguration vmConfig;
         Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
@@ -320,7 +320,7 @@ static bool featureSetsEqual(
     return true;
 }
 
-bool Snapshot::verifyFeatureFlags(const pb::Config& config) {
+bool Snapshot::verifyFeatureFlags(const proto::Config& config) {
     auto enabled = fc::getEnabled();
     enabled.erase(
             std::remove_if(enabled.begin(), enabled.end(),
@@ -340,7 +340,7 @@ bool Snapshot::verifyFeatureFlags(const pb::Config& config) {
     return featureSetsEqual(snapshotFeatures, emulatorFeatures);
 }
 
-bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
+bool Snapshot::verifyConfig(const proto::Config& config, bool writeFailure) {
     if (Snapshotter::get().vmOperations().getVmConfiguration != nullptr) {
         VmConfiguration vmConfig;
         Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
@@ -394,20 +394,20 @@ bool Snapshot::writeSnapshotToDisk() {
 }
 
 struct {
-    pb::Image::Type type;
+    proto::Image::Type type;
     char* (*pathGetter)(const AvdInfo* info);
 } static constexpr kImages[] = {
-        {pb::Image::IMAGE_TYPE_KERNEL, avdInfo_getKernelPath},
-        {pb::Image::IMAGE_TYPE_KERNEL_RANCHU, avdInfo_getRanchuKernelPath},
-        {pb::Image::IMAGE_TYPE_SYSTEM, avdInfo_getSystemInitImagePath},
-        {pb::Image::IMAGE_TYPE_SYSTEM_COPY, avdInfo_getSystemImagePath},
-        {pb::Image::IMAGE_TYPE_DATA, avdInfo_getDataInitImagePath},
-        {pb::Image::IMAGE_TYPE_DATA_COPY, avdInfo_getDataImagePath},
-        {pb::Image::IMAGE_TYPE_RAMDISK, avdInfo_getRamdiskPath},
-        {pb::Image::IMAGE_TYPE_SDCARD, avdInfo_getSdCardPath},
-        {pb::Image::IMAGE_TYPE_CACHE, avdInfo_getCachePath},
-        {pb::Image::IMAGE_TYPE_VENDOR, avdInfo_getVendorImagePath},
-        {pb::Image::IMAGE_TYPE_ENCRYPTION_KEY,
+        {proto::Image::IMAGE_TYPE_KERNEL, avdInfo_getKernelPath},
+        {proto::Image::IMAGE_TYPE_KERNEL_RANCHU, avdInfo_getRanchuKernelPath},
+        {proto::Image::IMAGE_TYPE_SYSTEM, avdInfo_getSystemInitImagePath},
+        {proto::Image::IMAGE_TYPE_SYSTEM_COPY, avdInfo_getSystemImagePath},
+        {proto::Image::IMAGE_TYPE_DATA, avdInfo_getDataInitImagePath},
+        {proto::Image::IMAGE_TYPE_DATA_COPY, avdInfo_getDataImagePath},
+        {proto::Image::IMAGE_TYPE_RAMDISK, avdInfo_getRamdiskPath},
+        {proto::Image::IMAGE_TYPE_SDCARD, avdInfo_getSdCardPath},
+        {proto::Image::IMAGE_TYPE_CACHE, avdInfo_getCachePath},
+        {proto::Image::IMAGE_TYPE_VENDOR, avdInfo_getVendorImagePath},
+        {proto::Image::IMAGE_TYPE_ENCRYPTION_KEY,
          avdInfo_getEncryptionKeyImagePath},
 };
 
@@ -726,7 +726,7 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
             const auto type = image.type;
             const auto it = std::find_if(
                     mSnapshotPb.images().begin(), mSnapshotPb.images().end(),
-                    [type](const pb::Image& im) {
+                    [type](const proto::Image& im) {
                         return im.has_type() && im.type() == type;
                     });
             if (it != mSnapshotPb.images().end()) {
@@ -745,7 +745,7 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
                 ++matchedImages;
             } else {
                 // Should match an empty image info
-                if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
+                if (!verifyImageInfo(image.type, path.get(), proto::Image())) {
                     // If in build env, nuke the qcow2 as well.
                     if (avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo())) {
                         std::string qcow2Path(path.get());
@@ -840,7 +840,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
         const auto type = image.type;
         const auto it = std::find_if(
                 mSnapshotPb.images().begin(), mSnapshotPb.images().end(),
-                [type](const pb::Image& im) {
+                [type](const proto::Image& im) {
                     return im.has_type() && im.type() == type;
                 });
         if (it != mSnapshotPb.images().end()) {
@@ -859,7 +859,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
             ++matchedImages;
         } else {
             // Should match an empty image info
-            if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
+            if (!verifyImageInfo(image.type, path.get(), proto::Image())) {
                 // If in build env, nuke the qcow2 as well.
                 if (avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo())) {
                     std::string qcow2Path(path.get());

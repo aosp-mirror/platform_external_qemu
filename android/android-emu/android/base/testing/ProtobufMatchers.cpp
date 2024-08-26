@@ -34,19 +34,20 @@ namespace android {
 namespace internal {
 
 // Utilities.
+using google::protobuf::io::ColumnNumber;
 
 class StringErrorCollector : public google::protobuf::io::ErrorCollector {
 public:
     explicit StringErrorCollector(std::string* error_text)
         : error_text_(error_text) {}
 
-    void AddError(int line, int column, const std::string& message) override {
+    void RecordError(int line, ColumnNumber column, absl::string_view message) override {
         std::ostringstream ss;
         ss << "ERROR: " << line << "(" << column << ")" << message << "\n";
         *error_text_ += ss.str();
     }
 
-    void AddWarning(int line, int column, const std::string& message) override {
+    void RecordWarning(int line, ColumnNumber column, absl::string_view message) override {
         std::ostringstream ss;
         ss << "WARNING: " << line << "(" << column << ")" << message << "\n";
         *error_text_ += ss.str();

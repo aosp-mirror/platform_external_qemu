@@ -1,5 +1,11 @@
+# Other targets depend on these
+# First enable unit testing
 add_subdirectory(googletest)
+
+# Next we enable symbol dumping etc.
 add_subdirectory(breakpad)
+
+add_subdirectory(abseil-cpp)
 android_add_library(
   TARGET emulator-tinyobjloader
   LIBNAME
@@ -132,7 +138,6 @@ else()
   add_subdirectory(perfetto-tracing-only-stub)
 endif()
 
-add_subdirectory(abseil-cpp)
 
 # libevent is needed for bluetooth, and webrtc in case of linux.
 if(LINUX_X86_64 OR LINUX_AARCH64)

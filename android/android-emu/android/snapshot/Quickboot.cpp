@@ -49,7 +49,7 @@ using android::base::Stopwatch;
 using android::base::System;
 using android::metrics::MetricsReporter;
 
-namespace pb = android_studio;
+namespace proto = android_studio;
 
 static constexpr int kDefaultMessageTimeoutMs = 10000;
 
@@ -59,33 +59,33 @@ namespace snapshot {
 #if SNAPSHOT_METRICS
 
 static void reportFailedLoad(
-        pb::EmulatorQuickbootLoad::EmulatorQuickbootLoadState state,
+        proto::EmulatorQuickbootLoad::EmulatorQuickbootLoadState state,
         FailureReason failureReason) {
     MetricsReporter::get().report([state, failureReason](
-                                          pb::AndroidStudioEvent* event) {
+                                          proto::AndroidStudioEvent* event) {
         event->mutable_emulator_details()->mutable_quickboot_load()->set_state(
                 state);
         event->mutable_emulator_details()
                 ->mutable_quickboot_load()
                 ->mutable_snapshot()
                 ->set_load_failure_reason(
-                        (pb::EmulatorSnapshotFailureReason)failureReason);
+                        (proto::EmulatorSnapshotFailureReason)failureReason);
         const bool isFirstBootUsingDownloadableSnapshot =
                 (Snapshotter::get().getSnapshotAvdSource() !=
                  Snapshotter::SnapshotAvdSource::NoSource);
         if (isFirstBootUsingDownloadableSnapshot) {
-            auto dstate = pb::EmulatorDownloadableSnapshotLoad::
+            auto dstate = proto::EmulatorDownloadableSnapshotLoad::
                     EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_FAILED;
             if (Snapshotter::get().getDownloadableSnapshotFailure() ==
                 static_cast<int>(Snapshotter::DownloadableSnapshotFailure::
                                          IncompatibleAvd)) {
-                dstate = pb::EmulatorDownloadableSnapshotLoad::
+                dstate = proto::EmulatorDownloadableSnapshotLoad::
                         EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_FAILED_INCOMPATIBLE_AVD;
             } else if (Snapshotter::get().getDownloadableSnapshotFailure() ==
                        static_cast<int>(
                                Snapshotter::DownloadableSnapshotFailure::
                                        FailedToCopyAvd)) {
-                dstate = pb::EmulatorDownloadableSnapshotLoad::
+                dstate = proto::EmulatorDownloadableSnapshotLoad::
                         EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_FAILED_TO_COPY_AVD;
             }
             auto dmesg = event->mutable_emulator_details()
@@ -101,22 +101,22 @@ static void reportFailedLoad(
 }
 
 static void reportFailedSave(
-        pb::EmulatorQuickbootSave::EmulatorQuickbootSaveState state,
+        proto::EmulatorQuickbootSave::EmulatorQuickbootSaveState state,
         FailureReason failureReason = FailureReason::Empty) {
     MetricsReporter::get().report([state, failureReason](
-                                          pb::AndroidStudioEvent* event) {
+                                          proto::AndroidStudioEvent* event) {
         event->mutable_emulator_details()->mutable_quickboot_save()->set_state(
                 state);
         event->mutable_emulator_details()
                 ->mutable_quickboot_save()
                 ->mutable_snapshot()
                 ->set_save_failure_reason(
-                        (pb::EmulatorSnapshotFailureReason)failureReason);
+                        (proto::EmulatorSnapshotFailureReason)failureReason);
     });
 }
 
 static void reportAdbConnectionRetries(uint32_t retries) {
-    MetricsReporter::get().report([retries](pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([retries](proto::AndroidStudioEvent* event) {
         event->mutable_emulator_details()
                 ->mutable_quickboot_load()
                 ->set_adb_connection_retries(retries);
@@ -161,13 +161,13 @@ void Quickboot::reportSuccessfulLoad(std::string_view name,
     auto stats = Snapshotter::get().getLoadStats(c_str(name), durationMs);
 
     MetricsReporter::get().report([stats,
-                                   vulkanUsed](pb::AndroidStudioEvent* event) {
+                                   vulkanUsed](proto::AndroidStudioEvent* event) {
         auto load = event->mutable_emulator_details()->mutable_quickboot_load();
         load->set_state(
                 vulkanUsed
-                        ? pb::EmulatorQuickbootLoad::
+                        ? proto::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_SUCCEEDED_WITH_VULKAN
-                        : pb::EmulatorQuickbootLoad::
+                        : proto::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_SUCCEEDED);
         load->set_duration_ms(stats.durationMs);
         load->set_on_demand_ram_enabled(stats.onDemandRamEnabled);
@@ -178,7 +178,7 @@ void Quickboot::reportSuccessfulLoad(std::string_view name,
                 (Snapshotter::get().getSnapshotAvdSource() !=
                  Snapshotter::SnapshotAvdSource::NoSource);
         if (isFirstBootUsingDownloadableSnapshot) {
-            auto dstate = pb::EmulatorDownloadableSnapshotLoad::
+            auto dstate = proto::EmulatorDownloadableSnapshotLoad::
                     EMULATOR_DOWNLOADABLE_SNAPSHOT_LOAD_SUCCEEDED;
             auto dmesg = event->mutable_emulator_details()
                                  ->mutable_quickboot_load()
@@ -199,13 +199,13 @@ void Quickboot::reportSuccessfulSave(std::string_view name,
     auto stats = Snapshotter::get().getSaveStats(c_str(name), durationMs);
 
     MetricsReporter::get().report([stats, sessionUptimeMs,
-                                   vulkanUsed](pb::AndroidStudioEvent* event) {
+                                   vulkanUsed](proto::AndroidStudioEvent* event) {
         auto save = event->mutable_emulator_details()->mutable_quickboot_save();
         save->set_state(
                 vulkanUsed
-                        ? pb::EmulatorQuickbootSave::
+                        ? proto::EmulatorQuickbootSave::
                                   EMULATOR_QUICKBOOT_SAVE_SUCCEEDED_WITH_VULKAN
-                        : pb::EmulatorQuickbootSave::
+                        : proto::EmulatorQuickbootSave::
                                   EMULATOR_QUICKBOOT_SAVE_SUCCEEDED);
         save->set_duration_ms(stats.durationMs);
         save->set_sesion_uptime_ms(sessionUptimeMs);
@@ -289,7 +289,7 @@ void Quickboot::onLivenessTimer() {
                     WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
             Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
             reportFailedLoad(
-                    pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG,
+                    proto::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG,
                     FailureReason::AdbOffline);
 
             // We used to reset the VM here in addition to deleting the
@@ -324,7 +324,7 @@ Quickboot::Quickboot(const QAndroidVmOperations& vmOps,
 bool Quickboot::load(const char* name) {
     if (!isEnabled(featurecontrol::FastSnapshotV1)) {
         reportFailedLoad(
-                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_FEATURE,
+                proto::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_FEATURE,
                 FailureReason::Empty);
         return false;
     }
@@ -352,9 +352,9 @@ bool Quickboot::load(const char* name) {
         }
         reportFailedLoad(
                 getConsoleAgents()->settings->hw()->fastboot_forceColdBoot
-                        ? pb::EmulatorQuickbootLoad::
+                        ? proto::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_COLD_AVD
-                        : pb::EmulatorQuickbootLoad::
+                        : proto::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_COLD_CMDLINE,
                 FailureReason::Empty);
     } else if (!emuglConfig_current_renderer_supports_snapshot()) {
@@ -382,7 +382,7 @@ bool Quickboot::load(const char* name) {
                             .c_str(),
                     WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         }
-        reportFailedLoad(pb::EmulatorQuickbootLoad::
+        reportFailedLoad(proto::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED,
                          FailureReason::Empty);
         if (forceSnapshotLoad) {
@@ -398,7 +398,7 @@ bool Quickboot::load(const char* name) {
                 "Performing a cold boot with default settings.",
                 WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         reportFailedLoad(
-                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
+                proto::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                 FailureReason::Empty);
     } else {
         // TODO: Figure out how we can detect that this snapshot caused a crash?
@@ -453,7 +453,7 @@ bool Quickboot::load(const char* name) {
                 snapshotter.loader().reportInvalid();
                 snapshotter.deleteSnapshot(c_str(name));
 
-                reportFailedLoad(pb::EmulatorQuickbootLoad::
+                reportFailedLoad(proto::EmulatorQuickbootLoad::
                                          EMULATOR_QUICKBOOT_LOAD_FAILED,
                                  *failureReason);
 
@@ -474,7 +474,7 @@ bool Quickboot::load(const char* name) {
                             .c_str(),
                     WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
 
-            reportFailedLoad(pb::EmulatorQuickbootLoad::
+            reportFailedLoad(proto::EmulatorQuickbootLoad::
                                      EMULATOR_QUICKBOOT_LOAD_NO_SNAPSHOT,
                              FailureReason::Empty);
             if (forceSnapshotLoad) {
@@ -509,7 +509,7 @@ void Quickboot::decideFailureReport(
 
         mVmOps.vmReset();
         reportFailedLoad(
-                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_FAILED,
+                proto::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_FAILED,
                 *failureReason);
     } else if (*failureReason == FailureReason::NoSnapshotInImage &&
                mWindow.userSettingIsDontSaveSnapshot()) {
@@ -521,7 +521,7 @@ void Quickboot::decideFailureReport(
                 "save on exit.",
                 WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         reportFailedLoad(
-                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
+                proto::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                 *failureReason);
     } else {
         if (*failureReason != FailureReason::NoSnapshotInImage) {
@@ -535,9 +535,9 @@ void Quickboot::decideFailureReport(
         }
         reportFailedLoad(
                 failureReason < FailureReason::UnrecoverableErrorLimit
-                        ? pb::EmulatorQuickbootLoad::
+                        ? proto::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_FAILED
-                        : pb::EmulatorQuickbootLoad::
+                        : proto::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_COLD_OLD_SNAPSHOT,
                 *failureReason);
     }
@@ -632,7 +632,7 @@ bool Quickboot::save(std::string_view name) {
         // Emulator hasn't booted yet or is otherwise not live,
         // and this isn't a quickboot-loaded session. Don't save.
         dwarning("Not saving state: emulator hasn't finished booting.");
-        reportFailedSave(pb::EmulatorQuickbootSave::
+        reportFailedSave(proto::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_NOT_BOOTED);
         return false;
     }
@@ -640,7 +640,7 @@ bool Quickboot::save(std::string_view name) {
     mLivenessTimer->stop();
 
     if (!isEnabled(featurecontrol::FastSnapshotV1)) {
-        reportFailedSave(pb::EmulatorQuickbootSave::
+        reportFailedSave(proto::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_FEATURE);
         return false;
     }
@@ -654,7 +654,7 @@ bool Quickboot::save(std::string_view name) {
                 "ignored.",
                 WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
 
-        reportFailedSave(pb::EmulatorQuickbootSave::
+        reportFailedSave(proto::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_CMDLINE);
         return false;
     }
@@ -665,7 +665,7 @@ bool Quickboot::save(std::string_view name) {
         // UI says not to save, and there's no need to preserve
         // the current 'shared' session
         reportFailedSave(
-                pb::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_DISABLED_UI);
+                proto::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_DISABLED_UI);
         return false;
     }
 
@@ -707,7 +707,7 @@ bool Quickboot::save(std::string_view name) {
                             emuglConfig_get_current_renderer()),
                     int(emuglConfig_get_current_renderer()));
         }
-        reportFailedSave(pb::EmulatorQuickbootSave::
+        reportFailedSave(proto::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
         return false;
     }
@@ -717,7 +717,7 @@ bool Quickboot::save(std::string_view name) {
                 "Not saving state: emulator ran for just %d "
                 "ms (<%d ms)",
                 int(sessionUptimeMs), kMinUptimeForSavingMs);
-        reportFailedSave(pb::EmulatorQuickbootSave::
+        reportFailedSave(proto::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_LOW_UPTIME);
         return false;
     }
@@ -739,7 +739,7 @@ bool Quickboot::save(std::string_view name) {
             default:
                 break;
         }
-        reportFailedSave(pb::EmulatorQuickbootSave::
+        reportFailedSave(proto::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED,
                          statReason);
         return false;
@@ -760,7 +760,7 @@ bool Quickboot::save(std::string_view name) {
 
         Snapshotter::get().deleteSnapshot(c_str(name));
         reportFailedSave(
-                pb::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_FAILED);
+                proto::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_FAILED);
         return false;
     }
 

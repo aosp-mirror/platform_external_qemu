@@ -36,7 +36,7 @@ struct PhysicalModelDeleter {
 
 typedef std::unique_ptr<PhysicalModel, PhysicalModelDeleter> PhysicalModelPtr;
 
-pb::RecordedEvent ReceiveBinaryEvent(TestMemoryOutputStream& stream) {
+emulator_automation::RecordedEvent ReceiveBinaryEvent(TestMemoryOutputStream& stream) {
     auto str = stream.view();
     const size_t size = str.size();
     EXPECT_GE(size, 4);
@@ -46,19 +46,19 @@ pb::RecordedEvent ReceiveBinaryEvent(TestMemoryOutputStream& stream) {
                                    uint32_t(str[2] << 8) | uint32_t(str[3]);
         EXPECT_EQ(protoSize, size - 4);
 
-        pb::RecordedEvent receivedEvent;
+        emulator_automation::RecordedEvent receivedEvent;
         receivedEvent.ParseFromArray(str.data() + 4, protoSize);
         stream.reset();
         return receivedEvent;
     }
 
-    return pb::RecordedEvent();
+    return emulator_automation::RecordedEvent();
 }
 
-pb::RecordedEvent ReceiveTextEvent(TestMemoryOutputStream& stream) {
+emulator_automation::RecordedEvent ReceiveTextEvent(TestMemoryOutputStream& stream) {
     auto str = stream.view();
 
-    pb::RecordedEvent receivedEvent;
+    emulator_automation::RecordedEvent receivedEvent;
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
             std::string(str), &receivedEvent));
     stream.reset();
@@ -72,7 +72,7 @@ TEST(AutomationEventSink, NoListeners) {
     std::unique_ptr<AutomationController> controller =
             AutomationController::createForTest(model.get(), &looper);
 
-    pb::PhysicalModelEvent event;
+    emulator_automation::PhysicalModelEvent event;
     controller->getEventSink().recordPhysicalModelEvent(0, event);
 }
 
@@ -88,12 +88,12 @@ TEST(AutomationEventSink, ReceiveBinaryEvent) {
     TestMemoryOutputStream binaryStream;
     sink.registerStream(&binaryStream, StreamEncoding::BinaryPbChunks);
 
-    pb::PhysicalModelEvent sentEvent;
-    sentEvent.set_type(pb::PhysicalModelEvent_ParameterType_AMBIENT_MOTION);
+    emulator_automation::PhysicalModelEvent sentEvent;
+    sentEvent.set_type(emulator_automation::PhysicalModelEvent_ParameterType_AMBIENT_MOTION);
     sentEvent.mutable_target_value()->add_data(0.5f);
     sink.recordPhysicalModelEvent(kEventTime, sentEvent);
 
-    pb::RecordedEvent receivedEvent = ReceiveBinaryEvent(binaryStream);
+    emulator_automation::RecordedEvent receivedEvent = ReceiveBinaryEvent(binaryStream);
 
     EXPECT_EQ(receivedEvent.delay(), kEventTime);
     EXPECT_THAT(receivedEvent.physical_model(), EqualsProto(sentEvent));
@@ -115,12 +115,12 @@ TEST(AutomationEventSink, ReceiveTextEvent) {
     TestMemoryOutputStream textStream;
     sink.registerStream(&textStream, StreamEncoding::TextPb);
 
-    pb::PhysicalModelEvent sentEvent;
-    sentEvent.set_type(pb::PhysicalModelEvent_ParameterType_AMBIENT_MOTION);
+    emulator_automation::PhysicalModelEvent sentEvent;
+    sentEvent.set_type(emulator_automation::PhysicalModelEvent_ParameterType_AMBIENT_MOTION);
     sentEvent.mutable_target_value()->add_data(0.5f);
     sink.recordPhysicalModelEvent(kEventTime, sentEvent);
 
-    pb::RecordedEvent receivedEvent = ReceiveTextEvent(textStream);
+    emulator_automation::RecordedEvent receivedEvent = ReceiveTextEvent(textStream);
 
     EXPECT_EQ(receivedEvent.delay(), kEventTime);
     EXPECT_THAT(receivedEvent.physical_model(), EqualsProto(sentEvent));
@@ -143,8 +143,8 @@ TEST(AutomationEventSink, TimeOffset) {
     TestMemoryOutputStream binaryStream;
     sink.registerStream(&binaryStream, StreamEncoding::BinaryPbChunks);
 
-    pb::PhysicalModelEvent event;
-    event.set_type(pb::PhysicalModelEvent_ParameterType_AMBIENT_MOTION);
+    emulator_automation::PhysicalModelEvent event;
+    event.set_type(emulator_automation::PhysicalModelEvent_ParameterType_AMBIENT_MOTION);
     event.mutable_target_value()->add_data(0.5f);
 
     sink.recordPhysicalModelEvent(kEventTime1, event);

@@ -59,21 +59,21 @@ void AutomationEventSink::unregisterStream(Stream* stream) {
 
 void AutomationEventSink::recordPhysicalModelEvent(
         uint64_t timeNs,
-        pb::PhysicalModelEvent& event) {
-    pb::RecordedEvent recordedEvent;
+        emulator_automation::PhysicalModelEvent& event) {
+    emulator_automation::RecordedEvent recordedEvent;
     *recordedEvent.mutable_physical_model() = event;
     handleEvent(timeNs, recordedEvent);
 }
 
 void AutomationEventSink::handleEvent(uint64_t timeNs,
-                                      const pb::RecordedEvent& event) {
+                                      const emulator_automation::RecordedEvent& event) {
     AutoLock lock(mLock);
     if (mShutdown) {
         return;
     }
 
     for (auto& stream : mBinaryStreams) {
-        pb::RecordedEvent modifiedEvent = event;
+        emulator_automation::RecordedEvent modifiedEvent = event;
         uint64_t& lastEventTime = mLastEventTime[stream];
         modifiedEvent.set_delay(timeNs - mLastEventTime[stream]);
         lastEventTime = timeNs;
@@ -102,7 +102,7 @@ void AutomationEventSink::handleEvent(uint64_t timeNs,
         }
 
         for (auto& stream : mTextStreams) {
-            pb::RecordedEvent modifiedEvent = event;
+            emulator_automation::RecordedEvent modifiedEvent = event;
             uint64_t& lastEventTime = mLastEventTime[stream];
             modifiedEvent.set_delay(timeNs - mLastEventTime[stream]);
             lastEventTime = timeNs;
