@@ -35,6 +35,7 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
                                          const char* targetArch,
                                          int apiLevel,
                                          const char* kernelSerialPrefix,
+                                         const char* imageKernelParameters,
                                          const char* avdKernelParameters,
                                          const char* kernelPath,
                                          const std::vector<std::string>* verifiedBootParameters,
@@ -50,37 +51,38 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
       return strdup(cmdline.c_str());
     }
 
-    KernelVersion kernelVersion = KERNEL_VERSION_0;
-    if (!android_getKernelVersion(kernelPath, &kernelVersion)) {
-        derror("Can't get kernel version from the kernel image file: '%s'",
-               kernelPath);
-    }
-
-    bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
-
     android::ParameterList params;
-    // Disable apic timer check. b/33963880
-    params.add("no_timer_check");
+    if (imageKernelParameters && imageKernelParameters[0]) {
+        // all arch and version specific things must go into kernel_cmdline.txt
+        params.add(imageKernelParameters);
+    } else {
+        KernelVersion kernelVersion = KERNEL_VERSION_0;
+        if (!android_getKernelVersion(kernelPath, &kernelVersion)) {
+            derror("Can't get kernel version from the kernel image file: '%s'",
+                   kernelPath);
+        }
 
-    if (kernelVersion >= KERNEL_VERSION_5_4_0) {
-        params.add("8250.nr_uarts=1");  // disabled by default for security reasons
-    }
+        if (kernelVersion >= KERNEL_VERSION_5_4_0) {
+            params.add("8250.nr_uarts=1");  // disabled by default for security reasons
+        }
 
-    // TODO: enable this with option
-    // params.addFormat("androidboot.logcat=*:D");
-
-    if (isX86ish) {
-        params.add("clocksource=pit");
-        // b/67565886, when cpu core is set to 2, clock_gettime() function hangs
-        // in goldfish kernel which caused surfaceflinger hanging in the guest
-        // system. To workaround, start the kernel with no kvmclock. Currently,
-        // only API 24 and API 25 have kvm clock enabled in goldfish kernel.
-        //
-        // kvm-clock seems to be stable for >= 5.4.
-        if (kernelVersion < KERNEL_VERSION_5_4_0) {
-            params.add("no-kvmclock");
+        const bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
+        if (isX86ish) {
+            params.add("clocksource=pit");
+            // b/67565886, when cpu core is set to 2, clock_gettime() function hangs
+            // in goldfish kernel which caused surfaceflinger hanging in the guest
+            // system. To workaround, start the kernel with no kvmclock. Currently,
+            // only API 24 and API 25 have kvm clock enabled in goldfish kernel.
+            //
+            // kvm-clock seems to be stable for >= 5.4.
+            if (kernelVersion < KERNEL_VERSION_5_4_0) {
+                params.add("no-kvmclock");
+            }
         }
     }
+
+    // Disable apic timer check. b/33963880
+    params.add("no_timer_check");
 
     android::setupVirtualSerialPorts(
             &params, nullptr, apiLevel, targetArch, kernelSerialPrefix, true,

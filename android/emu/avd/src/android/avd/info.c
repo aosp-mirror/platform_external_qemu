@@ -1180,6 +1180,10 @@ char* avdInfo_getRanchuKernelPath(const AvdInfo* i) {
     return kernelPath;
 }
 
+char* avdInfo_getKernelCmdLinePath(const AvdInfo* i) {
+    return _avdInfo_getSdkFilePath(i, "kernel_cmdline.txt");
+}
+
 char* avdInfo_getRamdiskPath(const AvdInfo* i) {
     const char* userImageName = _imageFileNames[AVD_IMAGE_USERRAMDISK];
     char* result = _avdInfo_getContentOrSdkFilePath(i, userImageName);
