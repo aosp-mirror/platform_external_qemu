@@ -208,6 +208,7 @@ AvdFlavor avdInfo_getAvdFlavor( const AvdInfo* i);
  */
 char*  avdInfo_getKernelPath( const AvdInfo*  i );
 char*  avdInfo_getRanchuKernelPath( const AvdInfo*  i );
+char*  avdInfo_getKernelCmdLinePath( const AvdInfo*  i );
 char*  avdInfo_getRamdiskPath( const AvdInfo*  i );
 char*  avdInfo_getSdCardPath( const AvdInfo* i );
 char*  avdInfo_getEncryptionKeyImagePath( const AvdInfo* i );
