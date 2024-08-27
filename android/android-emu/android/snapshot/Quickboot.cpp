@@ -527,7 +527,7 @@ void Quickboot::decideFailureReport(
         if (*failureReason != FailureReason::NoSnapshotInImage) {
             mWindow.showMessage(
                     absl::StrFormat(
-                            "The emulator is startinf from scratch. Reason: %s",
+                            "The emulator is starting from scratch. Reason: %s",
                             failureReasonToString(*failureReason,
                                                   SNAPSHOT_LOAD))
                             .c_str(),
