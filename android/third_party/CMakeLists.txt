@@ -352,6 +352,8 @@ set(ANGLE_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../external/angle)
 add_library(gfxstream_egl_headers INTERFACE)
 target_include_directories(gfxstream_egl_headers
                            INTERFACE ${ANGLE_REPO_ROOT}/include)
+add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/backend
+                 ${GFXSTREAM_PREFIX}-host-backend)
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/gl/gl-host-common
                  ${GFXSTREAM_PREFIX}-gl-host-common)
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/features
