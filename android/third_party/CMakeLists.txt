@@ -1,5 +1,11 @@
+# Other targets depend on these
+# First enable unit testing
 add_subdirectory(googletest)
+
+# Next we enable symbol dumping etc.
 add_subdirectory(breakpad)
+
+add_subdirectory(abseil-cpp)
 android_add_library(
   TARGET emulator-tinyobjloader
   LIBNAME
@@ -132,7 +138,6 @@ else()
   add_subdirectory(perfetto-tracing-only-stub)
 endif()
 
-add_subdirectory(abseil-cpp)
 
 # libevent is needed for bluetooth, and webrtc in case of linux.
 if(LINUX_X86_64 OR LINUX_AARCH64)
@@ -347,6 +352,8 @@ set(ANGLE_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../external/angle)
 add_library(gfxstream_egl_headers INTERFACE)
 target_include_directories(gfxstream_egl_headers
                            INTERFACE ${ANGLE_REPO_ROOT}/include)
+add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/backend
+                 ${GFXSTREAM_PREFIX}-host-backend)
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/gl/gl-host-common
                  ${GFXSTREAM_PREFIX}-gl-host-common)
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/features

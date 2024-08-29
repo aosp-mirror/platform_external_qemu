@@ -32,25 +32,24 @@ typedef struct mem_map {
 // |targetArch| is the target architecture. (e.g. 'arm64')
 // |apiLevel| is the AVD's API level.
 // |kernelSerialPrefix| is the guest tty device prefix (e.g. 'ttyS')
+// |imageKernelParameters| the system image provided kernel command line, optional
 // |avdKernelParameters| are the optional extra kernel parameters stored
 // in the AVD's kernel.parameters hardware property, if any. They will
 // be appended to the result.
 // |verifiedBootParameters| is a vector of verified boot kernel parameters to
 // add.  Passing NULL is OK.  Passing an empty vector is OK.
 // |ramoops| The memory range that will be used by the ramoops module.
-// |isQemu2| is true to indicate that this is called from QEMU2, otherwise
-// QEMU1 is assumed.
 // |isCros| is true to indicate that it's a Chrome OS image.
 std::string emulator_getKernelParameters(const AndroidOptions* opts,
                                          const char* targetArch,
                                          int apiLevel,
                                          const char* kernelSerialPrefix,
+                                         const char* imageKernelParameters,
                                          const char* avdKernelParameters,
                                          const char* kernelPath,
                                          const std::vector<std::string>* verifiedBootParameters,
                                          uint64_t glFramebufferSizeBytes,
                                          mem_map ramoops,
-                                         bool isQemu2,
                                          bool isCros,
                                          std::vector<std::string> userspaceBootProps);
 

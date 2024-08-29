@@ -89,7 +89,7 @@ void JwtTokenAuth::updateKeysetHandle(
                 DD("Cannot serialize jwk set %s",
                    jwkSet.status().message().data());
             } else {
-                jsonSnippet = jwkSet.ValueOrDie();
+                jsonSnippet = jwkSet.value();
             }
         }
 

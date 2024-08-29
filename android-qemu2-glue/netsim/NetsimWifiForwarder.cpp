@@ -190,9 +190,12 @@ bool NetsimWifiForwarder::init() {
     sTransport->startCall(sTransportStub.get());
 
     PacketRequest initial_request;
-    initial_request.mutable_initial_info()->set_name(get_netsim_device_name());
-    initial_request.mutable_initial_info()->mutable_chip()->set_kind(
+    auto initial_info = initial_request.mutable_initial_info();
+    auto device_info = get_netsim_device_info();
+    initial_info->set_name(device_info->name());
+    initial_info->mutable_chip()->set_kind(
             netsim::common::ChipKind::WIFI);
+    initial_info->mutable_device_info()->CopyFrom(*device_info);
     sTransport->Write(initial_request);
     auto* hostapd = android::emulation::HostapdController::getInstance();
     if (hostapd)

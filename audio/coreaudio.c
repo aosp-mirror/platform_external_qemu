@@ -38,6 +38,15 @@
 #define MAC_OS_X_VERSION_10_6 1060
 #endif
 
+#if !defined(MAC_OS_VERSION_12_0) || \
+    (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_VERSION_12_0)
+static const AudioObjectPropertyElement
+    kAudioObjectPropertyElementMasterOrMain = kAudioObjectPropertyElementMaster;
+#else
+static const AudioObjectPropertyElement
+    kAudioObjectPropertyElementMasterOrMain = kAudioObjectPropertyElementMain;
+#endif
+
 #ifndef DEBUG_COREAUDIO
 #define DEBUG_COREAUDIO 0
 #endif
@@ -299,7 +308,7 @@ void coreaudio_print_device_name(AudioDeviceID device) {
     AudioObjectPropertyAddress addr = {
         kAudioDevicePropertyDeviceNameCFString,
         kAudioObjectPropertyScopeGlobal,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMasterOrMain
     };
 
     size = sizeof(deviceName);
@@ -347,7 +356,7 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
         isInput ? kAudioHardwarePropertyDefaultInputDevice
                 : kAudioHardwarePropertyDefaultOutputDevice,
         kAudioObjectPropertyScopeGlobal,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMasterOrMain
     };
 
     res =
@@ -486,7 +495,7 @@ static OSStatus coreaudio_get_framesizerange(AudioDeviceID id,
         kAudioDevicePropertyBufferFrameSizeRange,
         isInput ? kAudioDevicePropertyScopeInput
                 : kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMasterOrMain
     };
 
     return AudioObjectGetPropertyData(id,
@@ -506,7 +515,7 @@ static OSStatus coreaudio_get_framesize(AudioDeviceID id,
         kAudioDevicePropertyBufferFrameSize,
         isInput ? kAudioDevicePropertyScopeInput
                 : kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMasterOrMain
     };
 
     return AudioObjectGetPropertyData(id,
@@ -526,7 +535,7 @@ static OSStatus coreaudio_set_framesize(AudioDeviceID id,
         kAudioDevicePropertyBufferFrameSize,
         isInput ? kAudioDevicePropertyScopeInput
                 : kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMasterOrMain
     };
 
     return AudioObjectSetPropertyData(id,
@@ -546,7 +555,7 @@ static OSStatus coreaudio_get_streamformat(AudioDeviceID id,
         kAudioDevicePropertyStreamFormat,
         isInput ? kAudioDevicePropertyScopeInput
                 : kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMasterOrMain
     };
 
     return AudioObjectGetPropertyData(id,
@@ -566,7 +575,7 @@ static OSStatus coreaudio_set_streamformat(AudioDeviceID id,
         kAudioDevicePropertyStreamFormat,
         isInput ? kAudioDevicePropertyScopeInput
                 : kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMasterOrMain
     };
 
     return AudioObjectSetPropertyData(id,
@@ -586,7 +595,7 @@ static OSStatus coreaudio_get_isrunning(AudioDeviceID id,
         kAudioDevicePropertyDeviceIsRunning,
         isInput ? kAudioDevicePropertyScopeInput
                 : kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMasterOrMain
     };
 
     return AudioObjectGetPropertyData(id,
@@ -842,6 +851,11 @@ static void coreaudio_destroy_sample_rate_conversion_object(coreaudioVoiceBase* 
     }
 }
 
+static inline const char *coreaudio_io_type(Boolean is_input)
+{
+    return is_input ? "record" : "playback";
+}
+
 static OSStatus coreaudio_init_or_redo_sample_rate_conversion(
     coreaudioVoiceBase* core, Boolean isInput)
 {
@@ -854,7 +868,7 @@ static OSStatus coreaudio_init_or_redo_sample_rate_conversion(
         core->audioDevicePropertyBufferFrameSize *
         core->hwBasicDescription.mBytesPerFrame;
     int size = sizeof(uint32_t);
-    const char *typ = isInput ? "record" : "playback";
+    const char *typ = coreaudio_io_type(isInput);
 
     DCORE("Seeing if we need to redo sample rate conversion.");
 
@@ -1150,7 +1164,7 @@ static OSStatus audioFormatChangeListenerProcForOutput(
 static OSStatus coreaudio_check_and_fixup_streamformat(coreaudioVoiceBase* core, Boolean isInput)
 {
     OSStatus status;
-    const char *typ = isInput ? "record" : "playback";
+    const char *typ = coreaudio_io_type(isInput);
 
     /* Is the stream format linear pcm packed float and having 1 or 2 channels? */
     if (core->hwBasicDescription.mFormatID == kAudioFormatLinearPCM &&
@@ -1218,7 +1232,7 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
 {
     OSStatus status;
     int err;
-    const char *typ = isInput ? "record" : "playback";
+    const char *typ = coreaudio_io_type(isInput);
     AudioValueRange frameRange;
     CoreaudioConf *conf = drv_opaque;
 
@@ -1383,7 +1397,7 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
     AudioObjectPropertyAddress addrForFormatChangeCallback = {
         kAudioDevicePropertyNominalSampleRate,
         kAudioObjectPropertyScopeGlobal,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMasterOrMain
     };
 
     status = AudioObjectAddPropertyListener(

@@ -35,12 +35,12 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
                                          const char* targetArch,
                                          int apiLevel,
                                          const char* kernelSerialPrefix,
+                                         const char* imageKernelParameters,
                                          const char* avdKernelParameters,
                                          const char* kernelPath,
                                          const std::vector<std::string>* verifiedBootParameters,
                                          uint64_t glFramebufferSizeBytes,
                                          mem_map ramoops,
-                                         bool isQemu2,
                                          bool isCros,
                                          std::vector<std::string> userspaceBootProps) {
     if (isCros) {
@@ -51,60 +51,58 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
       return strdup(cmdline.c_str());
     }
 
-    KernelVersion kernelVersion = KERNEL_VERSION_0;
-    if (!android_getKernelVersion(kernelPath, &kernelVersion)) {
-        derror("Can't get kernel version from the kernel image file: '%s'",
-               kernelPath);
-    }
-
-    bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
-
     android::ParameterList params;
-    // Disable apic timer check. b/33963880
-    params.add("no_timer_check");
+    if (imageKernelParameters && imageKernelParameters[0]) {
+        // all arch and version specific things must go into kernel_cmdline.txt
+        params.add(imageKernelParameters);
+    } else {
+        KernelVersion kernelVersion = KERNEL_VERSION_0;
+        if (!android_getKernelVersion(kernelPath, &kernelVersion)) {
+            derror("Can't get kernel version from the kernel image file: '%s'",
+                   kernelPath);
+        }
 
-    if (kernelVersion >= KERNEL_VERSION_5_4_0) {
-        params.add("8250.nr_uarts=1");  // disabled by default for security reasons
-    }
+        if (kernelVersion >= KERNEL_VERSION_5_4_0) {
+            params.add("8250.nr_uarts=1");  // disabled by default for security reasons
+        }
 
-    // TODO: enable this with option
-    // params.addFormat("androidboot.logcat=*:D");
-
-    if (isX86ish) {
-        params.add("clocksource=pit");
-        // b/67565886, when cpu core is set to 2, clock_gettime() function hangs
-        // in goldfish kernel which caused surfaceflinger hanging in the guest
-        // system. To workaround, start the kernel with no kvmclock. Currently,
-        // only API 24 and API 25 have kvm clock enabled in goldfish kernel.
-        //
-        // kvm-clock seems to be stable for >= 5.4.
-        if (kernelVersion < KERNEL_VERSION_5_4_0) {
-            params.add("no-kvmclock");
+        const bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
+        if (isX86ish) {
+            params.add("clocksource=pit");
+            // b/67565886, when cpu core is set to 2, clock_gettime() function hangs
+            // in goldfish kernel which caused surfaceflinger hanging in the guest
+            // system. To workaround, start the kernel with no kvmclock. Currently,
+            // only API 24 and API 25 have kvm clock enabled in goldfish kernel.
+            //
+            // kvm-clock seems to be stable for >= 5.4.
+            if (kernelVersion < KERNEL_VERSION_5_4_0) {
+                params.add("no-kvmclock");
+            }
         }
     }
 
+    // Disable apic timer check. b/33963880
+    params.add("no_timer_check");
+
     android::setupVirtualSerialPorts(
-            &params, nullptr, apiLevel, targetArch, kernelSerialPrefix, isQemu2,
+            &params, nullptr, apiLevel, targetArch, kernelSerialPrefix, true,
             opts->show_kernel, opts->logcat || opts->shell, opts->shell_serial);
 
-    // If qemu1, make sure GLDMA is disabled.
-    if (!isQemu2)
-        android::featurecontrol::setEnabledOverride(
-                android::featurecontrol::GLDMA, false);
+    if (!android::featurecontrol::isEnabled(android::featurecontrol::GLDirectMem)) {
+        // 2. Calculate additional memory for software renderers (e.g., SwiftShader)
+        const uint64_t one_MB = 1024ULL * 1024ULL;
+        int numBuffers = 2; /* double buffering */
+        uint64_t glEstimatedFramebufferMemUsageMB =
+            (numBuffers * glFramebufferSizeBytes + one_MB - 1) / one_MB;
 
-    // 2. Calculate additional memory for software renderers (e.g., SwiftShader)
-    const uint64_t one_MB = 1024ULL * 1024ULL;
-    int numBuffers = 2; /* double buffering */
-    uint64_t glEstimatedFramebufferMemUsageMB =
-        (numBuffers * glFramebufferSizeBytes + one_MB - 1) / one_MB;
-
-    // 3. Additional contiguous memory reservation for DMA and software framebuffers,
-    // specified in MB
-    const int Cma =
-        2 * glEstimatedFramebufferMemUsageMB +
-        (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::GLDMA) ? 256 : 0);
-    if (Cma) {
-        params.addFormat("cma=%" PRIu64 "M@0-4G", Cma);
+        // 3. Additional contiguous memory reservation for DMA and software framebuffers,
+        // specified in MB
+        const int Cma =
+            2 * glEstimatedFramebufferMemUsageMB +
+            (android::featurecontrol::isEnabled(android::featurecontrol::GLDMA) ? 256 : 0);
+        if (Cma) {
+            params.addFormat("cma=%" PRIu64 "M@0-4G", Cma);
+        }
     }
 
     if (opts->dns_server) {
@@ -115,52 +113,48 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
         }
     }
     // mac80211_hwsim
-    if (isQemu2) {
-        if (android::featurecontrol::isEnabled(
-                                     android::featurecontrol::VirtioWifi)) {
-            android::featurecontrol::setIfNotOverriden(
-                    android::featurecontrol::Wifi, false);
+    if (android::featurecontrol::isEnabled(
+                                 android::featurecontrol::VirtioWifi)) {
+        android::featurecontrol::setIfNotOverriden(
+                android::featurecontrol::Wifi, false);
 
-            // For API 30, we still use mac80211_hwsim.mac_prefix within kernel
-            // driver to configure mac address. For API 31  and above, we cannot
-            // make assumption about mac80211_hwsim.mac_prefix in kernel.
-            if (apiLevel <= 30) {
-                params.add("mac80211_hwsim.radios=1");
-                android::featurecontrol::setIfNotOverriden(
-                        android::featurecontrol::Mac80211hwsimUserspaceManaged,
-                        false);
-            }
-        } else if (android::featurecontrol::isEnabled(
-                           android::featurecontrol::Wifi)) {
-            if (!android::featurecontrol::isEnabled(
-                        android::featurecontrol::
-                                Mac80211hwsimUserspaceManaged)) {
-                params.add("mac80211_hwsim.radios=2");
-            }
-            // Enable multiple channels so the kernel can scan on one channel
-            // while communicating the other. This speeds up scanning
-            // significantly. This does not work if WiFi Direct is enabled
-            // starting with Q images so only set this option if WiFi Direct
-            // support is not enabled.
-            if (apiLevel < 29) {
-                params.add("mac80211_hwsim.channels=2");
-            } else if (!opts->wifi_client_port && !opts->wifi_server_port) {
-                params.add("mac80211_hwsim.channels=2");
-            }
+        // For API 30, we still use mac80211_hwsim.mac_prefix within kernel
+        // driver to configure mac address. For API 31  and above, we cannot
+        // make assumption about mac80211_hwsim.mac_prefix in kernel.
+        if (apiLevel <= 30) {
+            params.add("mac80211_hwsim.radios=1");
+            android::featurecontrol::setIfNotOverriden(
+                    android::featurecontrol::Mac80211hwsimUserspaceManaged,
+                    false);
+        }
+    } else if (android::featurecontrol::isEnabled(
+                       android::featurecontrol::Wifi)) {
+        if (!android::featurecontrol::isEnabled(
+                    android::featurecontrol::
+                            Mac80211hwsimUserspaceManaged)) {
+            params.add("mac80211_hwsim.radios=2");
+        }
+        // Enable multiple channels so the kernel can scan on one channel
+        // while communicating the other. This speeds up scanning
+        // significantly. This does not work if WiFi Direct is enabled
+        // starting with Q images so only set this option if WiFi Direct
+        // support is not enabled.
+        if (apiLevel < 29) {
+            params.add("mac80211_hwsim.channels=2");
+        } else if (!opts->wifi_client_port && !opts->wifi_server_port) {
+            params.add("mac80211_hwsim.channels=2");
         }
     }
 
-    if (isQemu2) {
-        if (android::featurecontrol::isEnabled(android::featurecontrol::SystemAsRoot)) {
-            params.add("skip_initramfs");
-            params.add("rootwait");
-            params.add("ro");
-            params.add("init=/init");
-            // If verifiedBootParameters were added, they will provide the root
-            // argument which corresponds to a mapped device.
-            if (!verifiedBootParameters || verifiedBootParameters->empty()) {
-                params.add("root=/dev/vda1");
-            }
+    if (android::featurecontrol::isEnabled(android::featurecontrol::SystemAsRoot)) {
+        params.add("skip_initramfs");
+        params.add("rootwait");
+        params.add("ro");
+        params.add("init=/init");
+        // If verifiedBootParameters were added, they will provide the root
+        // argument which corresponds to a mapped device.
+        if (!verifiedBootParameters || verifiedBootParameters->empty()) {
+            params.add("root=/dev/vda1");
         }
     }
 

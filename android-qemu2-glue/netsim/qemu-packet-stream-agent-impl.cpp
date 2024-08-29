@@ -25,7 +25,10 @@
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/async/ThreadLooper.h"
 #include "aemu/base/logging/Log.h"
+#include "android/avd/info.h"
+#include "android/console.h"
 #include "android/utils/debug.h"
+#include "android/version.h"
 #include "backend/packet_streamer_client.h"
 #include "host-common/FeatureControl.h"
 #include "host-common/feature_control.h"
@@ -67,9 +70,9 @@ extern "C" {
 
 // Global netsim configuration.
 static struct {
-    std::string name;
     std::string controller_properties_file;
     netsim::packet::NetsimdOptions options;
+    std::shared_ptr<DeviceInfo> device_info;
 } gNetsimConfiguration;
 
 using android::qemu2::PacketStreamChardev;
@@ -107,7 +110,7 @@ static void netsim_chr_connect(PacketStreamChardev* netsim) {
     };
 
     auto protocol = android::qemu2::getPacketProtocol(
-            netsim->parent.label, gNetsimConfiguration.name);
+            netsim->parent.label, gNetsimConfiguration.device_info);
 
     auto channel = channelFactory();
     if (!channel) {
@@ -196,12 +199,12 @@ void close_netsim() {
     }
 }
 
-const std::string get_netsim_device_name() {
-    return gNetsimConfiguration.name;
-}
-
 netsim::packet::NetsimdOptions get_netsim_options() {
     return gNetsimConfiguration.options;
+}
+
+std::shared_ptr<DeviceInfo> get_netsim_device_info() {
+    return gNetsimConfiguration.device_info;
 }
 
 void register_netsim(const std::string address,
@@ -215,12 +218,25 @@ void register_netsim(const std::string address,
             .host_dns = dns_server,
             .netsim_args = netsim_args,
     };
-    DD("Producing channel: no_cli_ui: %d, no_web_ui %d, dns_server %s, netsim_args %s",
+    DD("Producing channel: no_cli_ui: %d, no_web_ui %d, dns_server %s, "
+       "netsim_args %s",
        gNetsimConfiguration.options.no_cli_ui,
        gNetsimConfiguration.options.no_web_ui,
        gNetsimConfiguration.options.host_dns.c_str(),
        gNetsimConfiguration.options.netsim_args.c_str());
-    gNetsimConfiguration.name = name;
+    gNetsimConfiguration.device_info = std::make_shared<DeviceInfo>();
+    gNetsimConfiguration.device_info->set_name(name);
+    gNetsimConfiguration.device_info->set_kind("EMULATOR");
+    auto avd_info = getConsoleAgents()->settings->avdInfo();
+    gNetsimConfiguration.device_info->set_version(EMULATOR_VERSION_STRING);
+    gNetsimConfiguration.device_info->set_sdk_version(
+            avdInfo_getBuildPropertyString(avd_info, "ro.build.version.sdk"));
+    gNetsimConfiguration.device_info->set_build_id(
+            avdInfo_getBuildPropertyString(avd_info, "ro.build.id"));
+    gNetsimConfiguration.device_info->set_variant(
+            avdInfo_getBuildPropertyString(avd_info, "ro.build.flavor"));
+    gNetsimConfiguration.device_info->set_arch(
+            avdInfo_getBuildPropertyString(avd_info, "ro.product.cpu.abi"));
 }
 
 static void register_types(void) {

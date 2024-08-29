@@ -47,7 +47,7 @@ using android::base::PathUtils;
 using android::base::StdioStream;
 using android::base::System;
 
-namespace pb = emulator_automation;
+namespace proto = emulator_automation;
 
 namespace android {
 namespace physics {
@@ -97,12 +97,12 @@ public:
     /*
      * Replays a PhysicalModelEvent onto the current PhysicalModel state.
      */
-    void replayEvent(const pb::PhysicalModelEvent& event);
+    void replayEvent(const proto::PhysicalModelEvent& event);
 
     /*
      * Replays a SensorOverrideEvent onto the current PhysicalModel state.
      */
-    void replayOverrideEvent(const pb::SensorOverrideEvent& event);
+    void replayOverrideEvent(const proto::SensorOverrideEvent& event);
 
     /*
      * Sets the target value for the given physical parameter that the physical
@@ -187,12 +187,12 @@ public:
      * Save physical model state, used for automation.  Does not include
      * overrides.
      */
-    void saveState(pb::InitialState* state);
+    void saveState(proto::InitialState* state);
 
     /*
      * Load physical model state, used for automation.
      */
-    void loadState(const pb::InitialState& state);
+    void loadState(const proto::InitialState& state);
 
     /*
      * Start recording physical model ground truth to the given file.
@@ -368,10 +368,10 @@ PhysicalModelImpl* PhysicalModelImpl::getImpl(PhysicalModel* physicalModel) {
                    : nullptr;
 }
 
-pb::PhysicalModelEvent_ParameterType toProto(PhysicalParameter param) {
+proto::PhysicalModelEvent_ParameterType toProto(PhysicalParameter param) {
     switch (param) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
-#define PROTO_ENUM(x) pb::PhysicalModelEvent_ParameterType_##x
+#define PROTO_ENUM(x) proto::PhysicalModelEvent_ParameterType_##x
 
 #define PHYSICAL_PARAMETER_(x, y, z, w) \
     case PHYSICAL_PARAMETER_ENUM(x):    \
@@ -382,14 +382,14 @@ pb::PhysicalModelEvent_ParameterType toProto(PhysicalParameter param) {
 #undef PHYSICAL_PARAMETER_ENUM
         default:
             assert(false);  // should never happen
-            return pb::PhysicalModelEvent_ParameterType_ParameterType_MIN;
+            return proto::PhysicalModelEvent_ParameterType_ParameterType_MIN;
     }
 }
 
-PhysicalParameter fromProto(pb::PhysicalModelEvent_ParameterType param) {
+PhysicalParameter fromProto(proto::PhysicalModelEvent_ParameterType param) {
     switch (param) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
-#define PROTO_ENUM(x) pb::PhysicalModelEvent_ParameterType_##x
+#define PROTO_ENUM(x) proto::PhysicalModelEvent_ParameterType_##x
 
 #define PHYSICAL_PARAMETER_(x, y, z, w) \
     case PROTO_ENUM(x):                 \
@@ -404,11 +404,11 @@ PhysicalParameter fromProto(pb::PhysicalModelEvent_ParameterType param) {
     }
 }
 
-pb::SensorOverrideEvent_Sensor toProto(AndroidSensor param) {
+proto::SensorOverrideEvent_Sensor toProto(AndroidSensor param) {
     switch (param) {
 #undef PROTO_ENUM
 #define SENSOR_ENUM(x) ANDROID_SENSOR_##x
-#define PROTO_ENUM(x) pb::SensorOverrideEvent_Sensor_##x
+#define PROTO_ENUM(x) proto::SensorOverrideEvent_Sensor_##x
 
 #define SENSOR_(x, y, z, v, w) \
     case SENSOR_ENUM(x):       \
@@ -419,14 +419,14 @@ pb::SensorOverrideEvent_Sensor toProto(AndroidSensor param) {
 #undef SENSOR_ENUM
         default:
             assert(false);  // should never happen
-            return pb::SensorOverrideEvent_Sensor_Sensor_MIN;
+            return proto::SensorOverrideEvent_Sensor_Sensor_MIN;
     }
 }
 
-AndroidSensor fromProto(pb::SensorOverrideEvent_Sensor param) {
+AndroidSensor fromProto(proto::SensorOverrideEvent_Sensor param) {
     switch (param) {
 #define SENSOR_ENUM(x) ANDROID_SENSOR_##x
-#define PROTO_ENUM(x) pb::SensorOverrideEvent_Sensor_##x
+#define PROTO_ENUM(x) proto::SensorOverrideEvent_Sensor_##x
 
 #define SENSOR_(x, y, z, v, w) \
     case PROTO_ENUM(x):        \
@@ -442,10 +442,10 @@ AndroidSensor fromProto(pb::SensorOverrideEvent_Sensor param) {
 }
 
 template <typename T>
-T getProtoValue(const pb::ParameterValue& parameter);
+T getProtoValue(const proto::ParameterValue& parameter);
 
 template <>
-float getProtoValue<float>(const pb::ParameterValue& parameter) {
+float getProtoValue<float>(const proto::ParameterValue& parameter) {
     if (parameter.data_size() != 1) {
         W("%s: Error in parsed physics command.  Float parameters should have "
           "exactly one value.  Found %d.",
@@ -456,7 +456,7 @@ float getProtoValue<float>(const pb::ParameterValue& parameter) {
 }
 
 template <>
-vec3 getProtoValue<vec3>(const pb::ParameterValue& parameter) {
+vec3 getProtoValue<vec3>(const proto::ParameterValue& parameter) {
     if (parameter.data_size() != 3) {
         W("%s: Error in parsed physics command.  Vec3 parameters should have "
           "exactly three values.  Found %d.",
@@ -467,7 +467,7 @@ vec3 getProtoValue<vec3>(const pb::ParameterValue& parameter) {
 }
 
 template <>
-vec4 getProtoValue<vec4>(const pb::ParameterValue& parameter) {
+vec4 getProtoValue<vec4>(const proto::ParameterValue& parameter) {
     if (parameter.data_size() != 4) {
         W("%s: Error in parsed physics command.  Vec4 parameters should have "
           "exactly four values.  Found %d.",
@@ -478,38 +478,38 @@ vec4 getProtoValue<vec4>(const pb::ParameterValue& parameter) {
                 parameter.data(3)};
 }
 
-void setProtoCurrentValue(pb::PhysicalModelEvent* event, float value) {
+void setProtoCurrentValue(proto::PhysicalModelEvent* event, float value) {
     event->mutable_current_value()->add_data(value);
 }
 
-void setProtoCurrentValue(pb::PhysicalModelEvent* event, vec3 value) {
-    pb::ParameterValue* pbValue = event->mutable_current_value();
+void setProtoCurrentValue(proto::PhysicalModelEvent* event, vec3 value) {
+    proto::ParameterValue* pbValue = event->mutable_current_value();
     pbValue->add_data(value.x);
     pbValue->add_data(value.y);
     pbValue->add_data(value.z);
 }
 
-void setProtoCurrentValue(pb::PhysicalModelEvent* event, vec4 value) {
-    pb::ParameterValue* pbValue = event->mutable_current_value();
+void setProtoCurrentValue(proto::PhysicalModelEvent* event, vec4 value) {
+    proto::ParameterValue* pbValue = event->mutable_current_value();
     pbValue->add_data(value.x);
     pbValue->add_data(value.y);
     pbValue->add_data(value.z);
     pbValue->add_data(value.w);
 }
 
-void setProtoTargetValue(pb::PhysicalModelEvent* event, float value) {
+void setProtoTargetValue(proto::PhysicalModelEvent* event, float value) {
     event->mutable_target_value()->add_data(value);
 }
 
-void setProtoTargetValue(pb::PhysicalModelEvent* event, vec3 value) {
-    pb::ParameterValue* pbValue = event->mutable_target_value();
+void setProtoTargetValue(proto::PhysicalModelEvent* event, vec3 value) {
+    proto::ParameterValue* pbValue = event->mutable_target_value();
     pbValue->add_data(value.x);
     pbValue->add_data(value.y);
     pbValue->add_data(value.z);
 }
 
-void setProtoTargetValue(pb::PhysicalModelEvent* event, vec4 value) {
-    pb::ParameterValue* pbValue = event->mutable_target_value();
+void setProtoTargetValue(proto::PhysicalModelEvent* event, vec4 value) {
+    proto::ParameterValue* pbValue = event->mutable_target_value();
     pbValue->add_data(value.x);
     pbValue->add_data(value.y);
     pbValue->add_data(value.z);
@@ -543,7 +543,7 @@ void PhysicalModelImpl::setGravity(float x, float y, float z) {
                                    PHYSICAL_INTERPOLATION_STEP);
 }
 
-void PhysicalModelImpl::replayEvent(const pb::PhysicalModelEvent& event) {
+void PhysicalModelImpl::replayEvent(const proto::PhysicalModelEvent& event) {
     switch (fromProto(event.type())) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
 #define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
@@ -573,7 +573,7 @@ void PhysicalModelImpl::replayEvent(const pb::PhysicalModelEvent& event) {
 }
 
 void PhysicalModelImpl::replayOverrideEvent(
-        const pb::SensorOverrideEvent& event) {
+        const proto::SensorOverrideEvent& event) {
     switch (fromProto(event.sensor())) {
 #define SENSOR_ENUM(x) ANDROID_SENSOR_##x
 #define OVERRIDE_FUNCTION_NAME(x) override##x
@@ -1288,7 +1288,7 @@ static bool valueNearEqual(const vec4& lhs, const vec4& rhs) {
 }
 
 template <typename ValueType>
-void serializeState(pb::InitialState* state,
+void serializeState(proto::InitialState* state,
                     PhysicalParameter type,
                     ValueType currentValue,
                     ValueType targetValue,
@@ -1297,7 +1297,7 @@ void serializeState(pb::InitialState* state,
     const bool targetEq = valueNearEqual(targetValue, defaultValue);
 
     if (!currentEq || !targetEq) {
-        pb::PhysicalModelEvent* command = state->add_physical_model();
+        proto::PhysicalModelEvent* command = state->add_physical_model();
         command->set_type(toProto(type));
         if (!currentEq) {
             setProtoCurrentValue(command, currentValue);
@@ -1308,7 +1308,7 @@ void serializeState(pb::InitialState* state,
     }
 }
 
-void PhysicalModelImpl::saveState(pb::InitialState* state) {
+void PhysicalModelImpl::saveState(proto::InitialState* state) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
     for (int parameter = 0; parameter < MAX_PHYSICAL_PARAMETERS; parameter++) {
@@ -1337,7 +1337,7 @@ void PhysicalModelImpl::saveState(pb::InitialState* state) {
     }
 }
 
-void PhysicalModelImpl::loadState(const pb::InitialState& state) {
+void PhysicalModelImpl::loadState(const proto::InitialState& state) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
     // To reduce the size of the initial state, the protobuf only contains
@@ -1374,11 +1374,11 @@ void PhysicalModelImpl::loadState(const pb::InitialState& state) {
     vec3 targetVelocity = {0.f, 0.f, 0.f};
 
     for (int i = 0; i < state.physical_model_size(); ++i) {
-        const pb::PhysicalModelEvent& event = state.physical_model(i);
+        const proto::PhysicalModelEvent& event = state.physical_model(i);
 
         // Position and velocity require special ordering to replay properly,
         // dispatch those events separately.
-        if (event.type() == pb::PhysicalModelEvent_ParameterType_POSITION) {
+        if (event.type() == proto::PhysicalModelEvent_ParameterType_POSITION) {
             if (event.has_current_value()) {
                 currentPosition = getProtoValue<vec3>(event.current_value());
             }
@@ -1386,7 +1386,7 @@ void PhysicalModelImpl::loadState(const pb::InitialState& state) {
                 targetPosition = getProtoValue<vec3>(event.target_value());
             }
         } else if (event.type() ==
-                   pb::PhysicalModelEvent_ParameterType_VELOCITY) {
+                   proto::PhysicalModelEvent_ParameterType_VELOCITY) {
             if (event.has_current_value()) {
                 currentVelocity = getProtoValue<vec3>(event.current_value());
             }
@@ -1524,7 +1524,7 @@ template <typename ValueType>
 void PhysicalModelImpl::generateEvent(PhysicalParameter type,
                                       PhysicalInterpolation mode,
                                       ValueType value) {
-    pb::PhysicalModelEvent command;
+    proto::PhysicalModelEvent command;
     command.set_type(toProto(type));
     if (mode == PHYSICAL_INTERPOLATION_SMOOTH) {
         setProtoTargetValue(&command, value);
@@ -1686,7 +1686,7 @@ int physicalModel_snapshotLoad(PhysicalModel* model, Stream* f) {
     }
 }
 
-int physicalModel_saveState(PhysicalModel* model, pb::InitialState* state) {
+int physicalModel_saveState(PhysicalModel* model, proto::InitialState* state) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->saveState(state);
@@ -1697,7 +1697,7 @@ int physicalModel_saveState(PhysicalModel* model, pb::InitialState* state) {
 }
 
 int physicalModel_loadState(PhysicalModel* model,
-                            const pb::InitialState& state) {
+                            const proto::InitialState& state) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->loadState(state);
@@ -1708,7 +1708,7 @@ int physicalModel_loadState(PhysicalModel* model,
 }
 
 void physicalModel_replayEvent(PhysicalModel* model,
-                               const pb::PhysicalModelEvent& event) {
+                               const proto::PhysicalModelEvent& event) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->replayEvent(event);
@@ -1718,7 +1718,7 @@ void physicalModel_replayEvent(PhysicalModel* model,
 }
 
 void physicalModel_replayOverrideEvent(PhysicalModel* model,
-                                       const pb::SensorOverrideEvent& event) {
+                                       const proto::SensorOverrideEvent& event) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->replayOverrideEvent(event);
