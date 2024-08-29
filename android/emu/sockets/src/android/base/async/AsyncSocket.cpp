@@ -1,6 +1,24 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include "aemu/base/async/AsyncSocket.h"
 
-#include "aemu/base/Log.h"
+#include <cstdio>
+#include <mutex>
+#include <thread>
+
+#include "absl/log/log.h"
+
 #include "aemu/base/sockets/SocketUtils.h"
 #include "android/base/system/System.h"
 
@@ -29,12 +47,12 @@ static void socket_watcher(void* opaque, int fd, unsigned events) {
     }
 }
 
-AsyncSocket::~AsyncSocket() {}
+AsyncSocket::~AsyncSocket() {
+    dispose();
+}
 
 AsyncSocket::AsyncSocket(Looper* looper, int port)
-    : mLooper(looper),
-      mPort(port),
-      mWriteQueue(WRITE_BUFFER_SIZE, mWriteQueueLock) {}
+    : mLooper(looper), mPort(port), mWriteQueue(WRITE_BUFFER_SIZE, mWriteQueueLock) {}
 
 AsyncSocket::AsyncSocket(Looper* looper, ScopedSocket socket)
     : mLooper(looper),
@@ -52,10 +70,10 @@ void AsyncSocket::wantRead() {
     }
 }
 
-uint64_t AsyncSocket::recv(char* buffer, uint64_t bufferSize) {
+ssize_t AsyncSocket::recv(char* buffer, uint64_t bufferSize) {
     int fd = -1;
     {
-        AutoLock watchLock(mWatchLock);
+        std::lock_guard<std::mutex> watchLock(mWatchLock);
         if (mFdWatch) {
             fd = mFdWatch->fd();
         }
@@ -64,11 +82,12 @@ uint64_t AsyncSocket::recv(char* buffer, uint64_t bufferSize) {
         }
     }
     // It is still possible that the fd is no longer open
-    int read = socketRecv(fd, buffer, bufferSize);
+    ssize_t read = socketRecv(fd, buffer, bufferSize);
     if (read == 0) {
         // A read of 0, means the socket was closed, so clean up
         // everything properly.
         close();
+        return 0;
     }
     return read;
 }
@@ -77,20 +96,20 @@ void AsyncSocket::onRead() {
     if (!connected() || !mListener) {
         return;
     }
+    std::lock_guard<std::recursive_mutex> lock(mListenerLock);
     mListener->onRead(this);
 }
 
-uint64_t AsyncSocket::send(const char* buffer, uint64_t bufferSize) {
+ssize_t AsyncSocket::send(const char* buffer, uint64_t bufferSize) {
     {
         AutoLock alock(mWriteQueueLock);
-        if (mWriteQueue.pushLocked(std::string(buffer, bufferSize)) !=
-            BufferQueueResult::Ok) {
+        if (mWriteQueue.pushLocked(std::string(buffer, bufferSize)) != BufferQueueResult::Ok) {
             return 0;
         }
     }
     {
         // Let's make sure we actually exists when requesting writes.
-        AutoLock watchLock(mWatchLock);
+        std::lock_guard<std::mutex> watchLock(mWatchLock);
         if (mFdWatch) {
             mFdWatch->wantWrite();
         }
@@ -111,10 +130,8 @@ void AsyncSocket::onWrite() {
         case kAsyncCompleted:
             if (mWriteQueue.canPopLocked()) {
                 AutoLock alock(mWriteQueueLock);
-                if (mWriteQueue.popLocked(&mWriteBuffer) ==
-                    BufferQueueResult::Ok) {
-                    mAsyncWriter.reset(mWriteBuffer.data(), mWriteBuffer.size(),
-                                       mFdWatch.get());
+                if (mWriteQueue.popLocked(&mWriteBuffer) == BufferQueueResult::Ok) {
+                    mAsyncWriter.reset(mWriteBuffer.data(), mWriteBuffer.size(), mFdWatch.get());
                 }
             }
             return;
@@ -126,16 +143,27 @@ void AsyncSocket::onWrite() {
 }
 
 void AsyncSocket::dispose() {
-    close();
+    // Only close if we are not actively closing.
+    if (mFdWatch) {
+        close();
+    }
     setSocketEventListener(nullptr);
 }
 
 void AsyncSocket::close() {
     // Let's not accidentally trip a reader/writer up.
-    AutoLock watchLock(mWatchLock);
-    mSocket.close();
-    mFdWatch = nullptr;
-    mConnecting = false;
+    bool fireClose;
+    {
+        std::lock_guard<std::mutex> watchLock(mWatchLock);
+        mSocket.close();
+        fireClose = mListener && mFdWatch != nullptr;
+        mFdWatch = nullptr;
+        mConnecting = false;
+    }
+    if (fireClose) {
+        std::lock_guard<std::recursive_mutex> lock(mListenerLock);
+        mListener->onClose(this, errno);
+    }
 }
 
 bool AsyncSocket::connect() {
@@ -145,25 +173,20 @@ bool AsyncSocket::connect() {
 
     mConnecting = true;
     DD("Starting connect thread");
-    mConnectThread.reset(new FunctorThread([this]() {
+    mConnectThread.reset(new std::thread([this]() {
         connectToPort();
         return 0;
     }));
-    return mConnectThread->start();
+    return mConnecting;
 }
 
-bool AsyncSocket::connectSync(uint64_t timeoutms) {
-    if (connected())
-        return true;
+bool AsyncSocket::connectSync(std::chrono::milliseconds timeout) {
+    if (connected()) return true;
 
-    if (!this->connect())
-        return false;
+    if (!this->connect()) return false;
 
-    AutoLock watchLock(mWatchLock);
-    auto waituntilus = System::get()->getHighResTimeUs() + timeoutms * 1000;
-    while (!connected() && System::get()->getHighResTimeUs() < waituntilus) {
-        mWatchLockCv.timedWait(&mWatchLock, waituntilus);
-    }
+    std::unique_lock<std::mutex> watchLock(mWatchLock);
+    mWatchLockCv.wait_for(watchLock, timeout, [this]() { return connected(); });
 
     return connected();
 }
@@ -178,7 +201,7 @@ void AsyncSocket::connectToPort() {
         }
         if (socket < 0) {
             DD(<< "Failed to connect to: " << mPort << ", sleeping..");
-            android::base::Thread::sleepMs(1000);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
     if (socket < 1) {
@@ -188,16 +211,17 @@ void AsyncSocket::connectToPort() {
 
     mSocket = socket;
     socketSetNonBlocking(mSocket.get());
-    AutoLock watchLock(mWatchLock);
+    std::lock_guard<std::mutex> watchLock(mWatchLock);
     mFdWatch = std::unique_ptr<Looper::FdWatch>(
             mLooper->createFdWatch(mSocket.get(), socket_watcher, this));
     mFdWatch->wantRead();
     DD(<< "Connected to: " << mPort);
     if (mListener) {
+        std::lock_guard<std::recursive_mutex> lock(mListenerLock);
         mListener->onConnected(this);
     }
     mConnecting = false;
-    mWatchLockCv.signal();
+    mWatchLockCv.notify_one();
 }
 
 }  // namespace base

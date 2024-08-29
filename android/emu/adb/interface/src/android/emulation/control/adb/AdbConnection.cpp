@@ -19,7 +19,9 @@
 
 #include <algorithm>      // for min
 #include <atomic>         // for atomic
+#include <chrono>
 #include <memory>         // for shared_ptr
+#include <ratio>
 #include <type_traits>    // for enable_i...
 #include <unordered_map>  // for unordere...
 #include <unordered_set>  // for unordere...
@@ -193,7 +195,7 @@ public:
     AdbStreambuf(int clientId, AdbConnectionImpl* con);
     ~AdbStreambuf();
 
-    void setWriteTimeout(uint64_t timeoutMs) { mWriteTimeout = timeoutMs; }
+    void setWriteTimeout(std::chrono::milliseconds timeoutMs) { mWriteTimeout = timeoutMs; }
 
     // Closes down the stream properly
     void close();
@@ -221,7 +223,7 @@ public:
 
     // Blocks and waits returning true when we unlock, or false for timeout.
     bool waitForUnlock(
-            uint64_t timeoutMs = std::numeric_limits<uint64_t>::max());
+            std::chrono::milliseconds timeoutMs = std::chrono::milliseconds::max());
 
 protected:
     // Overrides needed for working std::streambuf
@@ -252,7 +254,7 @@ private:
     // These locks help us waiting for receipt of such a message.
     Lock mWriterLock;
     ConditionVariable mWriterCV;
-    uint64_t mWriteTimeout{std::numeric_limits<uint64_t>::max()};
+    std::chrono::milliseconds mWriteTimeout{std::chrono::milliseconds::max()};
 };
 
 // This is basically a std::iostream with using the adbstream buffer
@@ -274,9 +276,9 @@ public:
             adbbuf()->close();
     };
 
-    void setWriteTimeout(uint64_t timeoutMs) override {
+    void setWriteTimeout(std::chrono::milliseconds timeout) override {
         if (adbbuf() != nullptr)
-            adbbuf()->setWriteTimeout(timeoutMs);
+            adbbuf()->setWriteTimeout(timeout);
     }
 
     AdbStreambuf* adbbuf() { return reinterpret_cast<AdbStreambuf*>(rdbuf()); }
@@ -326,7 +328,7 @@ public:
     // 2. Do the handshake if needed.
     // 3. Wait at most timeoutMs.
     // Returns true if we are connected, or false otherwise.
-    bool connectToEmulator(int timeoutMs) {
+    bool connectToEmulator(std::chrono::milliseconds timeoutMs) {
         base::AutoLock connectLock(mConnectLock);
         if (!mSocket->connectSync(timeoutMs)) {
             DD("Failed to connect to socket.");
@@ -334,7 +336,7 @@ public:
         }
 
         bool sendConnect = false;
-        auto waitUntil = System::get()->getUnixTimeUs() + (timeoutMs * 1000);
+        auto waitUntil = System::get()->getUnixTimeUs() + (timeoutMs.count() * 1000);
         {
             base::AutoLock lock(mStateLock);
             // Only send out a connect request if we are disconnected.
@@ -379,7 +381,7 @@ public:
 
     // Opens up an adb stream to the given service..
     std::shared_ptr<AdbStream> open(const std::string& id,
-                                    uint32_t timeoutMs) override {
+                                    std::chrono::milliseconds timeout) override {
         D("Open %s, :%d", id.c_str(), timeoutMs);
         if (mState == AdbState::failed) {
             LOG(INFO) << "No proper keys installed, refusing to "
@@ -388,7 +390,7 @@ public:
         }
         // Hand out "bad" streams on closed connections that we are not yet
         // establishing.
-        if (!connectToEmulator(timeoutMs)) {
+        if (!connectToEmulator(timeout)) {
             D("Open %s, not yet connected", id.c_str());
             return std::make_shared<BasicAdbStream>(nullptr);
         }
@@ -403,7 +405,7 @@ public:
             buf->open(id);
         }
 
-        if (!buf->waitForUnlock(timeoutMs)) {
+        if (!buf->waitForUnlock(timeout)) {
             // Okay, we failed.. We should close our socket and redo the
             // handshake if we are not showing a ui..
             if (state() != AdbState::offer_key) {
@@ -725,9 +727,9 @@ private:
 
 static std::shared_ptr<AdbConnectionImpl> gAdbConnection;
 
-std::shared_ptr<AdbConnection> AdbConnection::connection(int timeoutMs) {
-    if (timeoutMs > 0 && !gAdbConnection->connectToEmulator(timeoutMs)) {
-        LOG(VERBOSE) << "Timeout:" << timeoutMs
+std::shared_ptr<AdbConnection> AdbConnection::connection(std::chrono::milliseconds timeoutMs) {
+    if (timeoutMs.count() > 0 && !gAdbConnection->connectToEmulator(timeoutMs)) {
+        LOG(VERBOSE) << "Timeout:" << timeoutMs.count()
                      << "Connection state: " << gAdbConnection->state();
     }
     return gAdbConnection;
@@ -794,9 +796,9 @@ AdbStreambuf::~AdbStreambuf() {
     close();
 }
 
-bool AdbStreambuf::waitForUnlock(uint64_t timeoutms) {
+bool AdbStreambuf::waitForUnlock(std::chrono::milliseconds timeoutms) {
     base::AutoLock lock(mWriterLock);
-    auto waitUntil = base::System::get()->getUnixTimeUs() + timeoutms * 1000;
+    auto waitUntil = base::System::get()->getUnixTimeUs() + timeoutms.count() * 1000;
     while (!mReady && System::get()->getUnixTimeUs() < waitUntil) {
         mWriterCV.timedWait(&mWriterLock, waitUntil);
     }
@@ -807,7 +809,7 @@ bool AdbStreambuf::waitForUnlock(uint64_t timeoutms) {
 // and the connection is still alive. Returns false in case
 // of timeout or closed stream..
 bool AdbStreambuf::readyForWrite() {
-    auto waitUntilUs = System::get()->getUnixTimeUs() + mWriteTimeout * 1000;
+    auto waitUntilUs = System::get()->getUnixTimeUs() + mWriteTimeout.count() * 1000;
     while (!mReady && isOpen() &&
            System::get()->getUnixTimeUs() < waitUntilUs) {
         mWriterCV.timedWait(&mWriterLock, waitUntilUs);
