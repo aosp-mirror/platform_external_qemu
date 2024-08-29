@@ -76,7 +76,7 @@ public:
             // Create a json_string from sr.
             google::protobuf::util::JsonPrintOptions options;
             options.add_whitespace = true;
-            options.always_print_primitive_fields = true;
+            options.always_print_fields_with_no_presence = true;
             options.preserve_proto_field_names = true;
             auto status = google::protobuf::util::MessageToJsonString(
                     request->ice_server_config(), &jsonStr, options);

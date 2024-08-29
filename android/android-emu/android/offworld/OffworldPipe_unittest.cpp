@@ -143,13 +143,13 @@ protected:
     int openAndConnectOffworld() {
         int pipe = mDevice->connect("OffworldPipe");
 
-        pb::ConnectHandshake connect;
+        ::offworld::ConnectHandshake connect;
         connect.set_version(android::offworld::kProtocolVersion);
         writeMessage(pipe, connect);
 
-        auto response = readMessage<pb::ConnectHandshakeResponse>(pipe);
+        auto response = readMessage<::offworld::ConnectHandshakeResponse>(pipe);
         EXPECT_EQ(response.result(),
-                  pb::ConnectHandshakeResponse::RESULT_NO_ERROR);
+                  ::offworld::ConnectHandshakeResponse::RESULT_NO_ERROR);
 
         return pipe;
     }
@@ -167,7 +167,7 @@ protected:
     }
 
     void writeRequest(int pipe, const std::string& request) {
-        pb::Request requestMessage;
+        ::offworld::Request requestMessage;
         ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
                 request, &requestMessage));
         writeMessage(pipe, requestMessage);
@@ -258,14 +258,14 @@ protected:
                             android::snapshot::onOffworldSave(stream);
                             return true;
                         }));
-        pb::Request request;
+        ::offworld::Request request;
         request.mutable_snapshot()
                 ->mutable_create_checkpoint()
                 ->set_snapshot_name(snapshotName);
         writeMessage(pipe, request);
 
-        pb::Response response = readMessageBlocking<pb::Response>(pipe);
-        EXPECT_EQ(response.result(), pb::Response::RESULT_NO_ERROR);
+        ::offworld::Response response = readMessageBlocking<::offworld::Response>(pipe);
+        EXPECT_EQ(response.result(), ::offworld::Response::RESULT_NO_ERROR);
     }
 
     void gotoCheckpoint(int pipe,
@@ -288,17 +288,17 @@ protected:
         {
             static std::string kMetadata = "test metadata";
 
-            pb::Request request;
+            ::offworld::Request request;
             auto requestCheckpoint =
                     request.mutable_snapshot()->mutable_goto_checkpoint();
             requestCheckpoint->set_snapshot_name(snapshotName);
             requestCheckpoint->set_metadata(kMetadata);
             writeMessage(pipe, request);
 
-            pb::Response response = readMessageBlocking<pb::Response>(pipe);
-            EXPECT_EQ(response.result(), pb::Response::RESULT_NO_ERROR);
+            ::offworld::Response response = readMessageBlocking<::offworld::Response>(pipe);
+            EXPECT_EQ(response.result(), ::offworld::Response::RESULT_NO_ERROR);
             EXPECT_EQ(response.snapshot().function_case(),
-                      pb::SnapshotResponse::FunctionCase::kCreateCheckpoint);
+                      ::offworld::SnapshotResponse::FunctionCase::kCreateCheckpoint);
             EXPECT_EQ(response.snapshot().create_checkpoint().metadata(),
                       kMetadata);
             Mock::VerifyAndClearExpectations(&mock);
@@ -320,13 +320,13 @@ protected:
 TEST_F(OffworldPipeTest, Connect) {
     int pipe = mDevice->connect("OffworldPipe");
 
-    pb::ConnectHandshake connect;
+    ::offworld::ConnectHandshake connect;
     connect.set_version(android::offworld::kProtocolVersion);
 
     writeMessage(pipe, connect);
 
-    auto response = readMessage<pb::ConnectHandshakeResponse>(pipe);
-    EXPECT_EQ(response.result(), pb::ConnectHandshakeResponse::RESULT_NO_ERROR);
+    auto response = readMessage<::offworld::ConnectHandshakeResponse>(pipe);
+    EXPECT_EQ(response.result(), ::offworld::ConnectHandshakeResponse::RESULT_NO_ERROR);
 
     mDevice->close(pipe);
 }
@@ -341,13 +341,13 @@ TEST_F(OffworldPipeTest, ConnectSnapshotBeforeHandshake) {
 
     auto restoredPipe = snapshotLoad(&snapshotStream);
 
-    pb::ConnectHandshake connect;
+    ::offworld::ConnectHandshake connect;
     connect.set_version(android::offworld::kProtocolVersion);
 
     writeMessage(restoredPipe, connect);
 
-    auto response = readMessage<pb::ConnectHandshakeResponse>(restoredPipe);
-    EXPECT_EQ(response.result(), pb::ConnectHandshakeResponse::RESULT_NO_ERROR);
+    auto response = readMessage<::offworld::ConnectHandshakeResponse>(restoredPipe);
+    EXPECT_EQ(response.result(), ::offworld::ConnectHandshakeResponse::RESULT_NO_ERROR);
 
     mDevice->close(restoredPipe);
 }
@@ -362,14 +362,14 @@ TEST_F(OffworldPipeTest, ConnectionFailure) {
         }
     });
 
-    pb::ConnectHandshake connect;
+    ::offworld::ConnectHandshake connect;
     connect.set_version(UINT32_MAX);
 
     writeMessage(pipe, connect);
 
-    auto response = readMessage<pb::ConnectHandshakeResponse>(pipe);
+    auto response = readMessage<::offworld::ConnectHandshakeResponse>(pipe);
     EXPECT_EQ(response.result(),
-              pb::ConnectHandshakeResponse::RESULT_ERROR_VERSION_MISMATCH);
+              ::offworld::ConnectHandshakeResponse::RESULT_ERROR_VERSION_MISMATCH);
 
     // Check that the pipe was closed by the host.
     pumpLooperUntilEvent(receivedClose);
@@ -410,7 +410,7 @@ TEST_F(OffworldPipeTest, AutomationListen) {
     writeRequest(pipe, "automation { listen {} }");
 
     EXPECT_THAT(
-            readMessageBlocking<pb::Response>(pipe),
+            readMessageBlocking<::offworld::Response>(pipe),
             Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1 "
                                   "automation { listen {} }")));
 
@@ -422,13 +422,13 @@ TEST_F(OffworldPipeTest, AutomationListen) {
                                     PHYSICAL_INTERPOLATION_SMOOTH);
 
     EXPECT_THAT(
-            readMessageBlocking<pb::Response>(pipe),
+            readMessageBlocking<::offworld::Response>(pipe),
             Partially(EqualsProto("result: RESULT_NO_ERROR async { async_id: 1 "
                                   " automation { event_generated {} } }")));
 
     writeRequest(pipe, "automation { stop_listening {} }");
 
-    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+    EXPECT_THAT(readMessageBlocking<::offworld::Response>(pipe),
                 EqualsProto("result: RESULT_NO_ERROR async { async_id: 1 "
                             "complete: true }"));
 
@@ -441,13 +441,13 @@ TEST_F(OffworldPipeTest, AutomationListenBlocksMultiple) {
     writeRequest(pipe, "automation { listen {} }");
 
     EXPECT_THAT(
-            readMessageBlocking<pb::Response>(pipe),
+            readMessageBlocking<::offworld::Response>(pipe),
             Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1 "
                                   "automation { listen {} }")));
 
     writeRequest(pipe, "automation { listen {} }");
 
-    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+    EXPECT_THAT(readMessageBlocking<::offworld::Response>(pipe),
                 Partially(EqualsProto("result: RESULT_ERROR_UNKNOWN "
                                       "error_string: \"Already listening\"")));
     mDevice->close(pipe);
@@ -459,7 +459,7 @@ TEST_F(OffworldPipeTest, AutomationListenPipeClose) {
     writeRequest(pipe, "automation { listen {} }");
 
     EXPECT_THAT(
-            readMessageBlocking<pb::Response>(pipe),
+            readMessageBlocking<::offworld::Response>(pipe),
             Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1 "
                                   "automation { listen {} }")));
     mDevice->close(pipe);
@@ -468,7 +468,7 @@ TEST_F(OffworldPipeTest, AutomationListenPipeClose) {
     writeRequest(secondPipe, "automation { listen {} }");
 
     EXPECT_THAT(
-            readMessageBlocking<pb::Response>(secondPipe),
+            readMessageBlocking<::offworld::Response>(secondPipe),
             Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1 "
                                   "automation { listen {} }")));
     mDevice->close(secondPipe);
@@ -484,7 +484,7 @@ TEST_F(OffworldPipeTest, AutomationReplay) {
                  "physical_model { type: POSITION target_value { "
                  "data: [0.5, 10, 0] } } ' } }");
 
-    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+    EXPECT_THAT(readMessageBlocking<::offworld::Response>(pipe),
                 EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1"));
 
     // Advance the time so that the event completes.
@@ -492,7 +492,7 @@ TEST_F(OffworldPipeTest, AutomationReplay) {
     EXPECT_EQ(mAutomationController->advanceTime(), kFutureTime);
 
     EXPECT_THAT(
-            readMessageBlocking<pb::Response>(pipe),
+            readMessageBlocking<::offworld::Response>(pipe),
             Partially(EqualsProto("result: RESULT_NO_ERROR async { async_id: 1 "
                                   "complete: true automation { "
                                   "replay_complete {} } }")));
@@ -514,7 +514,7 @@ TEST_F(OffworldPipeTest, AutomationAsyncIdSnapshot) {
                      "physical_model { type: POSITION target_value { "
                      "data: [0.5, 10, 0] } } ' } }");
 
-        EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+        EXPECT_THAT(readMessageBlocking<::offworld::Response>(pipe),
                     EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1"));
 
         snapshotSave(pipe, &snapshotStream);
@@ -528,7 +528,7 @@ TEST_F(OffworldPipeTest, AutomationAsyncIdSnapshot) {
                  "physical_model { type: POSITION target_value { "
                  "data: [0.5, 10, 0] } } ' } }");
 
-    EXPECT_THAT(readMessageBlocking<pb::Response>(restoredPipe),
+    EXPECT_THAT(readMessageBlocking<::offworld::Response>(restoredPipe),
                 EqualsProto("result: RESULT_NO_ERROR pending_async_id: 2"));
 
     mDevice->close(restoredPipe);
@@ -541,7 +541,7 @@ TEST_F(OffworldPipeTest, VideoInjection) {
         pipe,
         "video_injection { display_default_frame {} } ");
 
-    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+    EXPECT_THAT(readMessageBlocking<::offworld::Response>(pipe),
                 Partially(EqualsProto(
                     "result: RESULT_NO_ERROR pending_async_id: 1")));
 
@@ -550,7 +550,7 @@ TEST_F(OffworldPipeTest, VideoInjection) {
         "video_injection { display_default_frame {} }");
 
     EXPECT_THAT(
-            readMessageBlocking<pb::Response>(pipe),
+            readMessageBlocking<::offworld::Response>(pipe),
             Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 2 "
                                   "video_injection {sequence_id: 0}")));
 
@@ -559,7 +559,7 @@ TEST_F(OffworldPipeTest, VideoInjection) {
         "video_injection {sequence_id: 100 display_default_frame {} }");
 
     EXPECT_THAT(
-            readMessageBlocking<pb::Response>(pipe),
+            readMessageBlocking<::offworld::Response>(pipe),
             Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 3 "
                                   "video_injection {sequence_id: 100}")));
 
@@ -567,7 +567,7 @@ TEST_F(OffworldPipeTest, VideoInjection) {
         pipe,
         "video_injection { }");
 
-    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+    EXPECT_THAT(readMessageBlocking<::offworld::Response>(pipe),
                 Partially(EqualsProto("result: RESULT_ERROR_UNKNOWN "
                                       "error_string: \"Invalid request\"")));
 

@@ -19,12 +19,20 @@
 # version of CMake by first installing Extra Packages for Enterprise Linux
 # (https://fedoraproject.org/wiki/EPEL#Extra_Packages_for_Enterprise_Linux_.28EPEL.29)
 # and then issuing `yum install cmake3` on the command line.
+if (TARGET absl::strings)
+  # Do not include twice.
+  return()
+endif()
 cmake_minimum_required(VERSION 3.5)
+cmake_policy(SET CMP0079 NEW)
 set(ABSL_ROOT ${ANDROID_QEMU2_TOP_DIR}/../abseil-cpp)
 list(APPEND CMAKE_MODULE_PATH ${ABSL_ROOT}/CMake ${ABSL_ROOT}/absl/copts)
 set(CMAKE_CXX_STANDARD 17)
 set(_BUILD_TESTING ${BUILD_TESTING})
 set(BUILD_TESTING OFF)
+if(ANDROID_EMULATOR_BUILD AND NOT IN_CROSS_COMPILE)
+  set(BUILD_SHARED_LIBS ON)
+endif()
 include(CMakePackageConfigHelpers)
 include(AbseilDll)
 include(AbseilHelpers)
@@ -45,16 +53,36 @@ endif()
 #
 # DO NOT rely on the internal targets outside of the prefix include current path
 list(APPEND ABSL_COMMON_INCLUDE_DIRS ${ABSL_ROOT})
+
+# Build abseil as a shared library
 set(ABSL_USING_CLANG ON)
+cmake_policy(SET CMP0079 NEW)
+
+# Make sure the dll ends up in the right place.
+if(WINDOWS_MSVC_X86_64)
+  set(CMAKE_INSTALL_BINDIR "")
+  set(CMAKE_INSTALL_LIBDIR "")
+else()
+  set(ABSL_BUILD_DLL ON)
+  set(CMAKE_INSTALL_BINDIR "lib64")
+  set(CMAKE_INSTALL_LIBDIR "lib64")
+endif()
 
 add_subdirectory(${ABSL_ROOT}/absl absl)
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
+  target_link_libraries(abseil_dll PUBLIC "-framework CoreFoundation")
+endif()
 
-# Let's not worry/fix abseil warnings
-target_compile_options(absl_time PRIVATE -Wno-tautological-type-limit-compare)
-target_compile_options(absl_base PUBLIC -Wno-anon-enum-enum-conversion)
-target_compile_options(
-  absl_time_zone
-  PRIVATE -Wno-shadow -Wno-shadow-uncaptured-local
-          -Wno-tautological-type-limit-compare -Wno-unused-template)
-
+if(LINUX_AARCH64 OR LINUX_X86_64)
+  target_link_libraries(abseil_dll PUBLIC "-pthread")
+endif()
 set(BUILD_TESTING ${_BUILD_TESTING})
+
+android_license(
+  TARGET abseil_dll
+  LIBNAME abseil
+  URL "https://android.googlesource.com/platform/external/abseil-cpp/+/refs/heads/emu-master-dev"
+  SPDX "Apache-2"
+  LICENSE
+    "https://android.googlesource.com/platform/external/abseil-cpp/+/refs/heads/emu-master-dev/LICENSE"
+  LOCAL "${ABSL_ROOT}/LICENSE")

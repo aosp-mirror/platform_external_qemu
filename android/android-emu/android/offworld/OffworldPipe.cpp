@@ -423,7 +423,7 @@ void registerOffworldPipeServiceForTest(
 
 // Send a response to an Offworld pipe.
 bool sendResponse(android::AsyncMessagePipeHandle pipe,
-                  const pb::Response& response) {
+                  const ::offworld::Response& response) {
     OffworldPipe::Service* service = OffworldPipe::Service::get();
     if (!service) {
         LOG(INFO) << "Dropping Offworld response, service does not exist.";

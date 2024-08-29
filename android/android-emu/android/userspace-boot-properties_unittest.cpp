@@ -74,7 +74,6 @@ TEST(getUserspaceBootProperties, BootconfigOff) {
             &opts,
             "x86_64",                   // targetArch
             "serialno",                 // serialno
-            true,                       // isQemu2
             kAndroidGlesEmulationHost,  // glesMode
             123,                        // bootPropOpenglesVersion
             29,                         // apiLevel
@@ -134,7 +133,6 @@ TEST(getUserspaceBootProperties, BootconfigOn) {
             &opts,
             "x86_64",                   // targetArch
             "serialno",                 // serialno
-            true,                       // isQemu2
             kAndroidGlesEmulationHost,  // glesMode
             123,                        // bootPropOpenglesVersion
             29,                         // apiLevel
@@ -209,7 +207,6 @@ TEST(getUserspaceBootProperties, Bootconfig2On) {
             &opts,
             "x86_64",                   // targetArch
             "serialno",                 // serialno
-            true,                       // isQemu2
             kAndroidGlesEmulationHost,  // glesMode
             123,                        // bootPropOpenglesVersion
             29,                         // apiLevel

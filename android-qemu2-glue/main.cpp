@@ -2551,16 +2551,18 @@ extern "C" int main(int argc, char** argv) {
 #if defined(TARGET_MIPS)
     args.add((hw->hw_cpu_model && hw->hw_cpu_model[0]) ? hw->hw_cpu_model
                                                        : kTarget.qemuCpu);
-#elif defined(TARGET_X86_64)
-    if (feature_is_enabled(kFeature_AndroidVirtualizationFramework)) {
-        // bug: 349365118, to enable kvm in the guest, we have to pass host
-        // type
-        dinfo("Enabled cpu host to support AndroidVirtualizationFramework");
-        args.add("host");
-    } else if (opts->xts) {
-        // Add "-xts" to turn on tweaks only made for xts
-        // Right now, only a few CPU features are turned on
-        if (!feature_is_enabled(kFeature_DownloadableSnapshot)) {
+#elif defined(CONFIG_LINUX) && defined(TARGET_X86_64)
+    // Add "-xts" to turn on tweaks only made for xts
+    // Right now, only a few CPU features are turned on
+    if (opts->xts) {
+        if (feature_is_enabled(kFeature_AndroidVirtualizationFramework)) {
+            // bug: 349365118, to enable kvm in the guest, we have to pass host
+            // type; note cpu host has more features than android64-xts, and it
+            // might couse older cpu to mulfunction, so only enable if we are
+            // doing xts test on more modern cpus
+            dinfo("Enabled cpu host to support AndroidVirtualizationFramework");
+            args.add("host");
+        } else {
             args.add("android64-xts");
         }
     } else {
@@ -3336,7 +3338,6 @@ extern "C" int main(int argc, char** argv) {
             real_console_tty_prefix = "hvc";
         }
 
-        constexpr bool isQemu2 = true;
         std::string myserialno;
         if (opts->android_serialno &&
             isAndroidSerialNo(opts->android_serialno)) {
@@ -3347,7 +3348,7 @@ extern "C" int main(int argc, char** argv) {
         }
         std::vector<std::pair<std::string, std::string>> userspaceBootOpts =
                 getUserspaceBootProperties(
-                        opts, kTarget.androidArch, myserialno.c_str(), isQemu2,
+                        opts, kTarget.androidArch, myserialno.c_str(),
                         rendererConfig.glesMode,
                         rendererConfig.bootPropOpenglesVersion, apiLevel,
                         real_console_tty_prefix, &verified_boot_params, hw);
@@ -3375,10 +3376,40 @@ extern "C" int main(int argc, char** argv) {
             }
         }
 
+        std::string systemImageKernelCommandLine;
+        do {
+            const std::unique_ptr<char, void(*)(void*)> kernelCmdLinePath(
+                avdInfo_getKernelCmdLinePath(avd), ::free);
+
+            const std::unique_ptr<FILE, int(*)(FILE*)> kernelCmdLineFp(
+                ::fopen(kernelCmdLinePath.get(), "rb"), ::fclose);
+            if (!kernelCmdLineFp) {
+                break;
+            }
+
+            while (true) {
+                char buf[256];
+                const size_t n = fread(buf, 1, sizeof(buf), kernelCmdLineFp.get());
+                systemImageKernelCommandLine.append(buf, n);
+                if (n < sizeof(buf)) {
+                    break;
+                }
+            }
+
+            systemImageKernelCommandLine.erase(
+                std::find_if(systemImageKernelCommandLine.rbegin(),
+                             systemImageKernelCommandLine.rend(),
+                             [](unsigned char ch) {
+                                 return !std::isspace(ch);
+                             }).base(),
+                systemImageKernelCommandLine.end());
+        } while (false);
+
         std::string append_arg = emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, real_console_tty_prefix,
+                systemImageKernelCommandLine.c_str(),
                 hw->kernel_parameters, hw->kernel_path, &verified_boot_params,
-                rendererConfig.glFramebufferSizeBytes, pstore, isQemu2,
+                rendererConfig.glFramebufferSizeBytes, pstore,
                 hw->hw_arc /* isCros */,
                 std::move(kernelCmdLineUserspaceBootOpts));
 

@@ -41,8 +41,6 @@ using android::protobuf::ProtobufLoadResult;
 using android::protobuf::saveProtobuf;
 using android::protobuf::ProtobufSaveResult;
 
-namespace pb = emulator_snapshot;
-
 namespace android {
 namespace snapshot {
 
@@ -153,7 +151,7 @@ private:
     std::vector<Snapshot> mInfos;
     std::unordered_set<std::string> mValidParents;
 
-    pb::SnapshotDependencies mSnapshotDepsPb;
+    emulator_snapshot::SnapshotDependencies mSnapshotDepsPb;
     std::map<std::string, std::string> mPrevParentMap;
     std::map<std::string, std::string> mNextParentMap;
 };

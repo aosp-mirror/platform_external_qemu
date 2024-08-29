@@ -2379,7 +2379,8 @@ static void report_unavailable_features(FeatureWord w, uint32_t mask)
             assert(reg);
             fprintf(stdout, "%s doesn't support requested feature: "
                         "CPUID.%02XH:%s%s%s [bit %d]\n",
-                        kvm_enabled() || aehd_enabled() ? "host" : "TCG",
+                        kvm_enabled() || aehd_enabled() || whpx_enabled() ?
+                        "host" : "TCG",
                         f->cpuid_eax, reg,
                         f->feat_names[i] ? "." : "",
                         f->feat_names[i] ? f->feat_names[i] : "", i);
@@ -3003,6 +3004,30 @@ static uint32_t x86_cpu_get_supported_feature_word(FeatureWord w,
         r = aehd_arch_get_supported_cpuid(aehd_state, wi->cpuid_eax,
                                                     wi->cpuid_ecx,
                                                     wi->cpuid_reg);
+    } else if (whpx_enabled()) {
+        // WHPX does not have an API to query supported CPUID feature set
+        // like KVM does. However, let's at least assume the maximum
+        // supported CPUID feature set is the host CPUID feature set.
+        uint32_t eax, ebx, ecx, edx;
+        host_cpuid(wi->cpuid_eax, wi->cpuid_ecx, &eax, &ebx, &ecx, &edx);
+        switch (wi->cpuid_reg) {
+        case R_EAX:
+            r = eax;
+            break;
+        case R_EBX:
+            r = ebx;
+            break;
+        case R_ECX:
+            r = ecx;
+            break;
+        case R_EDX:
+            r = edx;
+            break;
+        default:
+            // should not reach here as cpuid results are stored in
+            // the above four registers.
+            r = ~0;
+        }
     } else if (tcg_enabled()) {
         r = wi->tcg_features;
     } else {
@@ -4353,7 +4378,7 @@ static void x86_cpu_realizefn(DeviceState *dev, Error **errp)
         x86_cpu_report_filtered_features(cpu);
         if (cpu->enforce_cpuid) {
             error_setg(&local_err,
-                       kvm_enabled() || aehd_enabled() ?
+                       kvm_enabled() || aehd_enabled() || whpx_enabled() ?
                            "Host doesn't support requested features" :
                            "TCG doesn't support requested features");
             goto out;

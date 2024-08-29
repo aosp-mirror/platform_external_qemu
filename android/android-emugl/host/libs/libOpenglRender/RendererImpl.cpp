@@ -649,14 +649,6 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
                 },
         .get_global_egl_context =
                 []() { return FrameBuffer::getFB()->getGlobalEGLContext(); },
-        .wait_for_gpu =
-                [](uint64_t eglsync) {
-                    FrameBuffer::getFB()->waitForGpu(eglsync);
-                },
-        .wait_for_gpu_vulkan =
-                [](uint64_t device, uint64_t fence) {
-                    FrameBuffer::getFB()->waitForGpuVulkan(device, fence);
-                },
         .set_guest_managed_color_buffer_lifetime =
                 [](bool guestManaged) {
                     FrameBuffer::getFB()->setGuestManagedColorBufferLifetime(
@@ -677,10 +669,6 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
                 [](uint64_t image, FenceCompletionCallback cb) {
                     FrameBuffer::getFB()->asyncWaitForGpuVulkanQsriWithCb(image,
                                                                           cb);
-                },
-        .wait_for_gpu_vulkan_qsri =
-                [](uint64_t image) {
-                    FrameBuffer::getFB()->waitForGpuVulkanQsri(image);
                 },
         .update_color_buffer_from_framework_format =
                 [](uint32_t handle,

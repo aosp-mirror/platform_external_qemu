@@ -15,6 +15,7 @@ import shutil
 import logging
 import os
 import platform
+import subprocess
 from pathlib import Path
 
 from aemu.platform.toolchains import Toolchain
@@ -115,6 +116,18 @@ class IntegrationTestTask(BuildTask):
 
     def do_run(self):
         repo = self.aosp / "external" / "adt-infra" / "devpi" / "repo" / "simple"
+
+        if platform.system() == "Darwin":
+            result = subprocess.check_output(
+                ["system_profiler", "SPDisplaysDataType"], text=True
+            )
+            logging.warning("Display config is: %s", result)
+            if " Displays:" not in result:
+                logging.warning("No display found! Ignoring emulator tests.")
+                return
+
+
+
         if platform.system() != "Windows":
             repo = f"file://{repo}"
         py_runner = PyRunner(repo, self.aosp)
