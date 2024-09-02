@@ -194,41 +194,52 @@ std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveLayout(
 }
 
 std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveStackedLayout(
-        std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles) {
+        std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles,
+        const bool isDistantDisplay) {
 
-    std::vector<Rect> firstRow;
-    uint32_t maxWidth = 0, totalWidth = 0;
-    uint32_t distDispId = -1;
+    std::vector<Rect> upper, lower;
+    uint32_t lowerHeight = 0;
+    uint32_t upperWidth = 0, lowerWidth = 0;
     for (const auto& iter : rectangles) {
-        firstRow.emplace_back(iter.first, 0, 0, iter.second.first, iter.second.second);
-        if (maxWidth < iter.second.first) {
-            // Distant Display has the most wide width
-            maxWidth = iter.second.first;
-            distDispId = iter.first;
+        if (iter.first == 0 || iter.first == 6) {
+            // Place the main and cluster displays on the upper row
+            upper.emplace_back(iter.first, 0, 0, iter.second.first, iter.second.second);
+            upperWidth += iter.second.first;
+            if (isDistantDisplay) {
+                lowerHeight = std::max(lowerHeight, iter.second.second);
+            }
+        } else {
+            // Place the remaining displays on the lower row
+            lower.emplace_back(iter.first, 0, 0, iter.second.first, iter.second.second);
+            lowerWidth += iter.second.first;
+            if (!isDistantDisplay) {
+                lowerHeight = std::max(lowerHeight, iter.second.second);
+            }
         }
-        totalWidth += iter.second.first;
     }
 
+    uint32_t startMargin = (uint32_t)(std::abs((int)(upperWidth - lowerWidth)) / 2);
     std::stable_sort(
-            firstRow.begin(), firstRow.end(),
+            upper.begin(), upper.end(),
+            [](const Rect& a, const Rect& b) { return a.id < b.id; });
+    std::stable_sort(
+            lower.begin(), lower.end(),
             [](const Rect& a, const Rect& b) { return a.id < b.id; });
 
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> retVal;
-    uint32_t posX = (maxWidth > (totalWidth - maxWidth)) ? (maxWidth - (totalWidth / 2)) : 0;
-    uint32_t firstRowHeight = 0, ddIdx = 0;
-    for (int i = 0; i < firstRow.size(); i++) {
-        if (firstRow[i].id != distDispId) {
-            retVal[firstRow[i].id] = std::make_pair(posX, 0);
-            if (firstRowHeight < firstRow[i].height) {
-                firstRowHeight = firstRow[i].height;
-            }
-            posX += firstRow[i].width;
-        } else {
-            ddIdx = i;
-        }
+    uint32_t posX = (upperWidth > lowerWidth) ? startMargin : 0;
+    // Swap the upper and lower rows in case of the distant display
+    uint32_t posY = isDistantDisplay ? lowerHeight : 0;
+    for (int i = 0; i < lower.size(); i++) {
+        retVal[lower[i].id] = std::make_pair(posX, posY);
+        posX += lower[i].width;
     }
-    // Put the distant display on the second row
-    retVal[firstRow[ddIdx].id] = std::make_pair(0, firstRowHeight);
+    posX = (upperWidth > lowerWidth) ? 0 : startMargin;
+    posY = isDistantDisplay ? 0 : lowerHeight;
+    for (int i = 0; i < upper.size(); i++) {
+        retVal[upper[i].id] = std::make_pair(posX, posY);
+        posX += upper[i].width;
+    }
     return retVal;
 }
 

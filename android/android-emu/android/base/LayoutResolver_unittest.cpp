@@ -85,7 +85,7 @@ TEST(LayoutResolver, FourDifferentDisplays) {
     }
 }
 
-TEST(LayoutResolver, threeDisplaysWithStackedLayout) {
+TEST(LayoutResolver, threeDisplaysWithDistantDisplayStackedLayout) {
     const std::array<std::pair<testDisplayInput, testDisplayOutput>, 3> kTestSet[] = {
             // 3 Displys including one wide width display
             // Wide display should be located on the first row
@@ -107,7 +107,7 @@ TEST(LayoutResolver, threeDisplaysWithStackedLayout) {
             displays[input.id] = std::make_pair(input.width, input.height);
         }
 
-        const auto layout = resolveStackedLayout(displays);
+        const auto layout = resolveStackedLayout(displays, true);
         for (size_t i = 0; i < kDataSize; i++) {
             const auto& expectedOutput = kData[i].second;
             const auto& actualOutput = layout.find(expectedOutput.id);
@@ -116,6 +116,42 @@ TEST(LayoutResolver, threeDisplaysWithStackedLayout) {
         }
     }
 }
+
+TEST(LayoutResolver, fourDisplaysWithMumdStackedLayout) {
+    const std::array<std::pair<testDisplayInput, testDisplayOutput>, 4> kTestSet[] = {
+            // 4 Displys - main, cluster and 2 mumd displays
+            // main and cluster displays should be placed on the first row while
+            // keeping the remaining 2 displays on the second row
+            {
+                std::make_pair(testDisplayInput{0, 1080, 600},
+                            testDisplayOutput{0, 340, 600}),
+                std::make_pair(testDisplayInput{6, 400, 600},
+                            testDisplayOutput{6, 1420, 600}),
+                std::make_pair(testDisplayInput{7, 1080, 600},
+                            testDisplayOutput{7, 0, 0}),
+                std::make_pair(testDisplayInput{8, 1080, 600},
+                            testDisplayOutput{8, 1080, 0})
+            }};
+
+    for (const auto kData : kTestSet) {
+        size_t kDataSize = ARRAY_SIZE(kData);
+        std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> displays;
+        for (size_t i = 0; i < kDataSize; i++) {
+            const auto& input = kData[i].first;
+            displays[input.id] = std::make_pair(input.width, input.height);
+        }
+
+        const auto layout = resolveStackedLayout(displays, false);
+
+        for (size_t i = 0; i < kDataSize; i++) {
+            const auto& expectedOutput = kData[i].second;
+            const auto& actualOutput = layout.find(expectedOutput.id);
+            EXPECT_EQ(actualOutput->second.first, expectedOutput.x);
+            EXPECT_EQ(actualOutput->second.second, expectedOutput.y);
+        }
+    }
+}
+
 
 }  // namespace base
 }  // namespace android
