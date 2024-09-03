@@ -18,6 +18,7 @@ import atexit
 import glob
 import logging
 import os
+import pip
 import re
 import shutil
 import subprocess
@@ -87,6 +88,11 @@ def checkDependencies():
         deps_common.checkNodeJsVersion(min_vers=(12, 0))
 
         # QtWebEngine needs python html5lib package
+        #
+        # Since we use a custom python installation, we need to manually install these packages and
+        # provide the location to these packages.
+        PYTHON_INDEX_URL = os.path.join(AOSP_ROOT, "external", "adt-infra", "devpi", "repo", "simple")
+        pip.main(["install", "html5lib", '-i', f"file://{PYTHON_INDEX_URL}"])
         logging.info(">> Checking for python package html5lib")
         deps_common.checkPythonPackage("html5lib")
 
