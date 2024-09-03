@@ -21,6 +21,7 @@
 #include "aemu/base/logging/LogSeverity.h"
 
 #include "android/base/logging/ColorLogSink.h"
+#include "android/base/logging/StudioLogSink.h"
 #ifdef _WIN32
 #include <io.h>
 #else
@@ -88,5 +89,6 @@ void base_configure_logs(LoggingFlags flags) {
 
     if (flags & kLogEnableVerbose) {
         logSink.SetVerbosity(true);
+        android::base::studio_sink()->SetVerbosity(true);
     }
 }

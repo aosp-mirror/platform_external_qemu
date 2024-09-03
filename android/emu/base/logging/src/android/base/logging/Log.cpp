@@ -19,6 +19,7 @@
 #include "absl/log/internal/log_message.h"
 #include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/LogFormatter.h"
+#include "android/base/logging/StudioLogSink.h"
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
@@ -51,6 +52,10 @@ void write_log_line(LogSeverity prio,
         case 0:  // INFO
         case 1:  // WARNING
         case 2:  // ERROR
+            absl::log_internal::LogMessage(file, line,
+                                           (absl::LogSeverity)priority)
+                    << msg;
+            break;
         case 3:  // FATAL
             absl::log_internal::LogMessage(file, line,
                                            (absl::LogSeverity)priority)
