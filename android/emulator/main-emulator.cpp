@@ -1086,13 +1086,6 @@ int main(int argc, char** argv) {
     if (avdName) {
         AvdInfoParams myparams;
         AvdInfo* myavdinfo = avdInfo_new(avdName, &myparams, sysDir);
-        if (avdInfo_getAvdFlavor(myavdinfo) == AVD_ANDROID_AUTO) {
-            const char* forge = getenv("TEST_UNDECLARED_OUTPUTS_DIR");
-            if (forge != NULL && *forge && *forge != '0') {
-                isHeadless = true;
-                D("force headless for auto on forge");
-            }
-        }
         const int apiLevel = avdInfo_getApiLevel(myavdinfo);
         {
             char* avdarch = avdInfo_getTargetCpuArch(myavdinfo);
