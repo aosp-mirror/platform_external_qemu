@@ -92,7 +92,8 @@ def checkDependencies():
         # Since we use a custom python installation, we need to manually install these packages and
         # provide the location to these packages.
         PYTHON_INDEX_URL = os.path.join(AOSP_ROOT, "external", "adt-infra", "devpi", "repo", "simple")
-        pip.main(["install", "html5lib", '-i', f"file://{PYTHON_INDEX_URL}"])
+        INDEX_FILE_PREFIX = "file:///" if HOST_OS == "windows" else "file://"
+        pip.main(["install", "html5lib", '-i', f"{INDEX_FILE_PREFIX}{PYTHON_INDEX_URL}"])
         logging.info(">> Checking for python package html5lib")
         deps_common.checkPythonPackage("html5lib")
 
@@ -531,7 +532,7 @@ def buildPrebuilt(args, prebuilts_out_dir):
     atexit.register(cleanup)
 
     if HOST_OS == "windows":
-        VS_INSTALL_PATH = os.environ["VS2022_INSTALL_PATH"]
+        VS_INSTALL_PATH = os.environ.get("VS2022_INSTALL_PATH")
         if VS_INSTALL_PATH:
             # The existence of the environment variable indicates we are on an old-style buildbot
             # that does not have the docker configuration.
