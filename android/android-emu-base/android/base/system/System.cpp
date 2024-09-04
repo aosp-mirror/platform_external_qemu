@@ -1306,20 +1306,6 @@ public:
 #endif
 
     void configureHost() const override {
-    #ifdef _MSC_VER
-        _set_invalid_parameter_handler(msvcInvalidParameterHandler);
-
-        const HMODULE kernelDll = ::GetModuleHandleW(L"kernel32");
-        if (kernelDll != NULL)  {
-            // Windws 8 and above has fancy good timers, we want those..
-            SystemTime pfnSys = (SystemTime)::GetProcAddress(kernelDll,
-                                            "GetSystemTimePreciseAsFileTime");
-
-            if (pfnSys) {
-                getSystemTime = pfnSys;
-            }
-         }
-    #endif
     }
 
     void cleanupWaitingPids() const override {
