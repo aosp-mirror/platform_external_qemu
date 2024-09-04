@@ -3367,8 +3367,38 @@ extern "C" int main(int argc, char** argv) {
             }
         }
 
+        std::string systemImageKernelCommandLine;
+        do {
+            const std::unique_ptr<char, void(*)(void*)> kernelCmdLinePath(
+                avdInfo_getKernelCmdLinePath(avd), ::free);
+
+            const std::unique_ptr<FILE, int(*)(FILE*)> kernelCmdLineFp(
+                ::fopen(kernelCmdLinePath.get(), "rb"), ::fclose);
+            if (!kernelCmdLineFp) {
+                break;
+            }
+
+            while (true) {
+                char buf[256];
+                const size_t n = fread(buf, 1, sizeof(buf), kernelCmdLineFp.get());
+                systemImageKernelCommandLine.append(buf, n);
+                if (n < sizeof(buf)) {
+                    break;
+                }
+            }
+
+            systemImageKernelCommandLine.erase(
+                std::find_if(systemImageKernelCommandLine.rbegin(),
+                             systemImageKernelCommandLine.rend(),
+                             [](unsigned char ch) {
+                                 return !std::isspace(ch);
+                             }).base(),
+                systemImageKernelCommandLine.end());
+        } while (false);
+
         std::string append_arg = emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, real_console_tty_prefix,
+                systemImageKernelCommandLine.c_str(),
                 hw->kernel_parameters, hw->kernel_path, &verified_boot_params,
                 rendererConfig.glFramebufferSizeBytes, pstore, isQemu2,
                 hw->hw_arc /* isCros */,

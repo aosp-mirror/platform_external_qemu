@@ -32,6 +32,7 @@ typedef struct mem_map {
 // |targetArch| is the target architecture. (e.g. 'arm64')
 // |apiLevel| is the AVD's API level.
 // |kernelSerialPrefix| is the guest tty device prefix (e.g. 'ttyS')
+// |imageKernelParameters| the system image provided kernel command line, optional
 // |avdKernelParameters| are the optional extra kernel parameters stored
 // in the AVD's kernel.parameters hardware property, if any. They will
 // be appended to the result.
@@ -45,6 +46,7 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
                                          const char* targetArch,
                                          int apiLevel,
                                          const char* kernelSerialPrefix,
+                                         const char* imageKernelParameters,
                                          const char* avdKernelParameters,
                                          const char* kernelPath,
                                          const std::vector<std::string>* verifiedBootParameters,
