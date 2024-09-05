@@ -26,7 +26,7 @@
 namespace android {
 namespace automation {
 
-namespace pb = emulator_automation;
+namespace proto = emulator_automation;
 
 enum class StreamEncoding { BinaryPbChunks, TextPb };
 
@@ -61,13 +61,13 @@ public:
 
     // Record an event from the physical model.
     void recordPhysicalModelEvent(uint64_t timeNs,
-                                  pb::PhysicalModelEvent& event);
+                                  proto::PhysicalModelEvent& event);
 
     // Get the last event time for a specific stream.
     uint64_t getLastEventTimeForStream(android::base::Stream* stream);
 
 private:
-    void handleEvent(uint64_t timeNs, const pb::RecordedEvent& event);
+    void handleEvent(uint64_t timeNs, const proto::RecordedEvent& event);
 
     base::Looper* const mLooper;
 

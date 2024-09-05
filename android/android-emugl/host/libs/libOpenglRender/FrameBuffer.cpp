@@ -3346,27 +3346,6 @@ void FrameBuffer::sweepColorBuffersLocked() {
     }
 }
 
-void FrameBuffer::waitForGpu(uint64_t eglsync) {
-    FenceSync* fenceSync = FenceSync::getFromHandle(eglsync);
-
-    if (!fenceSync) {
-        ERR("err: fence sync 0x%llx not found", (unsigned long long)eglsync);
-        return;
-    }
-
-    SyncThread::get()->triggerBlockedWaitNoTimeline(fenceSync);
-}
-
-void FrameBuffer::waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle) {
-    (void)deviceHandle;
-
-    // Note: this will always be nullptr.
-    FenceSync* fenceSync = FenceSync::getFromHandle(fenceHandle);
-
-    // Note: This will always signal right away.
-    SyncThread::get()->triggerBlockedWaitNoTimeline(fenceSync);
-}
-
 void FrameBuffer::asyncWaitForGpuWithCb(uint64_t eglsync, FenceCompletionCallback cb) {
     FenceSync* fenceSync = FenceSync::getFromHandle(eglsync);
 
@@ -3386,12 +3365,6 @@ void FrameBuffer::asyncWaitForGpuVulkanWithCb(uint64_t deviceHandle, uint64_t fe
 
 void FrameBuffer::asyncWaitForGpuVulkanQsriWithCb(uint64_t image, FenceCompletionCallback cb) {
     SyncThread::get()->triggerWaitVkQsriWithCompletionCallback((VkImage)image, std::move(cb));
-}
-
-void FrameBuffer::waitForGpuVulkanQsri(uint64_t image) {
-    (void)image;
-    // Signal immediately, because this was a sync wait and it's vulkan.
-    SyncThread::get()->triggerBlockedWaitNoTimeline(nullptr);
 }
 
 void FrameBuffer::setGuestManagedColorBufferLifetime(bool guestManaged) {

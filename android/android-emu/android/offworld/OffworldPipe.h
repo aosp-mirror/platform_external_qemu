@@ -22,7 +22,7 @@
 namespace android {
 namespace offworld {
 
-namespace pb = ::offworld;
+namespace proto = ::offworld;
 
 static constexpr uint32_t kProtocolVersion = 1;
 
@@ -37,7 +37,7 @@ void registerOffworldPipeServiceForTest(
 
 // Send a response to an Offworld pipe.
 bool sendResponse(android::AsyncMessagePipeHandle pipe,
-                  const pb::Response& response);
+                  const proto::Response& response);
 
 }  // namespace offworld
 }  // namespace android

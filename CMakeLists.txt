@@ -358,7 +358,6 @@ endif()
 # toolchain.cmake Toolchain variables seem to be overwritten pending your cmake
 # version.
 if(LINUX_X86_64)
-  add_c_flag("-Werror")
   add_c_flag("-Wno-deprecated-declarations") # Protobuf generates deprecation
                                              # warnings for deprecated enums
   # And the asm type if we are compiling with yasm
@@ -398,10 +397,6 @@ if(NOT WINDOWS_MSVC_X86_64 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # grpc does some magic.
   add_c_flag("-Wno-non-c-typedef-for-linkage")
 
-endif()
-
-if(DARWIN_X86_64)
-  add_c_flag("-Werror")
 endif()
 
 if(WINDOWS_MSVC_X86_64)

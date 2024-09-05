@@ -6,6 +6,11 @@ if(NOT ANDROID_QEMU2_TOP_DIR)
   include(prebuilts)
 endif()
 
+if(TARGET libprotobuf)
+  # No need to include it twice.
+  return()
+endif()
+
 # Display version information etc.
 set(protobuf_VERBOSE TRUE)
 if(NOT TARGET zlib)
@@ -13,60 +18,14 @@ if(NOT TARGET zlib)
   add_subdirectory(../zlib zlib)
 endif()
 
+# Needed for the crosscompile case..
+if(NOT TARGET absl::strings)
+  add_subdirectory(../abseil-cpp abseil)
+endif()
+
 set(ZLIB_LIBRARIES zlib)
-
 set(protobuf_DEBUG_POSTFIX "d" CACHE STRING "Default debug postfix")
-
 set(protobuf_SOURCE_DIR "${ANDROID_QEMU2_TOP_DIR}/../protobuf")
-# Path to main configure script
-set(protobuf_CONFIGURE_SCRIPT "${protobuf_SOURCE_DIR}/configure.ac")
-
-# Parse configure script
-set(protobuf_AC_INIT_REGEX
-  "^AC_INIT\\(\\[([^]]+)\\],\\[([^]]+)\\],\\[([^]]+)\\],\\[([^]]+)\\]\\)$")
-file(STRINGS "${protobuf_CONFIGURE_SCRIPT}" protobuf_AC_INIT_LINE
-  LIMIT_COUNT 1 REGEX "^AC_INIT")
-# Description
-string(REGEX REPLACE        "${protobuf_AC_INIT_REGEX}" "\\1"
-    protobuf_DESCRIPTION    "${protobuf_AC_INIT_LINE}")
-# Version
-string(REGEX REPLACE        "${protobuf_AC_INIT_REGEX}" "\\2"
-    protobuf_VERSION_STRING "${protobuf_AC_INIT_LINE}")
-# Contact
-string(REGEX REPLACE        "${protobuf_AC_INIT_REGEX}" "\\3"
-    protobuf_CONTACT        "${protobuf_AC_INIT_LINE}")
-# Parse version tweaks
-set(protobuf_VERSION_REGEX "^([0-9]+)\\.([0-9]+)\\.([0-9]+)([-]rc[-]|\\.)?([0-9]*)$")
-string(REGEX REPLACE     "${protobuf_VERSION_REGEX}" "\\1"
-  protobuf_VERSION_MAJOR "${protobuf_VERSION_STRING}")
-string(REGEX REPLACE     "${protobuf_VERSION_REGEX}" "\\2"
-  protobuf_VERSION_MINOR "${protobuf_VERSION_STRING}")
-string(REGEX REPLACE     "${protobuf_VERSION_REGEX}" "\\3"
-  protobuf_VERSION_PATCH "${protobuf_VERSION_STRING}")
-string(REGEX REPLACE     "${protobuf_VERSION_REGEX}" "\\5"
-  protobuf_VERSION_PRERELEASE "${protobuf_VERSION_STRING}")
-
-# message(STATUS "${protobuf_VERSION_PRERELEASE}")
-
-# Package version
-set(protobuf_VERSION
-  "${protobuf_VERSION_MAJOR}.${protobuf_VERSION_MINOR}.${protobuf_VERSION_PATCH}")
-
-if(protobuf_VERSION_PRERELEASE)
-  set(protobuf_VERSION "${protobuf_VERSION}.${protobuf_VERSION_PRERELEASE}")
-else()
-  set(protobuf_VERSION "${protobuf_VERSION}.0")
-endif()
-
-if(protobuf_VERBOSE)
-  message(STATUS "Configuration script parsing status [")
-  message(STATUS "  Description : ${protobuf_DESCRIPTION}")
-  message(STATUS "  Version     : ${protobuf_VERSION} (${protobuf_VERSION_STRING})")
-  message(STATUS "  Contact     : ${protobuf_CONTACT}")
-  message(STATUS "]")
-endif()
-
-add_definitions(-DGOOGLE_PROTOBUF_CMAKE_BUILD)
 
 if(protobuf_BUILD_SHARED_LIBS)
   set(protobuf_SHARED_OR_STATIC "SHARED")
@@ -76,61 +35,78 @@ endif()
 
 if(WINDOWS_MSVC_X86_64)
   add_definitions(-utf-8)
-  add_definitions(-bigobj)
+  add_definitions(-fbigobj)
 endif()
 
 add_definitions(-DUNICODE -D_UNICODE)
 
-# This definition makes sure we only build C/C++ generators
-# And we can successfully compile as both shared/static library.
-add_definitions(-DANDROID_EMULATOR)
+cmake_policy(SET CMP0079 NEW)
+set(protobuf_BUILD_CONFORMANCE FALSE)
+set(protobuf_BUILD_EXAMPLES FALSE)
+set(protobuf_INSTALL FALSE)
+set(protobuf_BUILD_LIBUPB FALSE)
 
-include(${protobuf_SOURCE_DIR}/cmake/libprotobuf-lite.cmake)
-# Linking to both libprotobuf and libprotobuf-lite will cause unexpected behavior,
-# so we exclude libprotobuf-lite from the build.
-set_target_properties(libprotobuf-lite PROPERTIES
-    EXCLUDE_FROM_ALL TRUE)
-include(${protobuf_SOURCE_DIR}/cmake/libprotobuf.cmake)
-# external/tink links to libprotobuf-lite, but we only want to use libprotobuf.
-add_library(protobuf::libprotobuf-lite ALIAS libprotobuf)
+set(protobuf_BUILD_TESTS FALSE)
+set(protobuf_BUILD_PROTOBUF_BINARIES TRUE)
+set(protobuf_BUILD_PROTOC_BINARIES TRUE)
+set(protobuf_BUILD_LIBPROTOC TRUE)
+set(protobuf_DISABLE_RTTI TRUE)
 
-target_compile_options(libprotobuf PRIVATE -Wno-invalid-noreturn)
 if(NOT CROSSCOMPILE)
-  include(${protobuf_SOURCE_DIR}/cmake/libprotoc.cmake)
-  include(${protobuf_SOURCE_DIR}/cmake/protoc.cmake)
-
-  android_target_dependency(protoc all RUNTIME_OS_DEPENDENCIES)
-  android_target_properties(protoc all "${RUNTIME_OS_PROPERTIES}")
-
-  if(NOT DEFINED protobuf_PROTOC_EXE)
-    set(protobuf_PROTOC_EXE protoc)
-  endif(NOT DEFINED protobuf_PROTOC_EXE)
-  set(PROTOBUF_PROTOC_EXECUTABLE "$<TARGET_FILE:protoc>"
-      CACHE PATH "Protocol buffer executable" FORCE)
+  add_subdirectory(${protobuf_SOURCE_DIR} protobuf)
 else()
-  android_compile_for_host(protoc ${CMAKE_CURRENT_LIST_DIR} PROTOBUF_EXE)
-  set(PROTOBUF_PROTOC_EXECUTABLE ${PROTOBUF_EXE}
-      CACHE PATH "Protocol buffer executable" FORCE)
+
+  include(ExternalProject)
+
+  # If we are cross compiling we will need to build it for our actual OS we are
+  # currently running on.
+  get_filename_component(
+    PROTOC
+    ${ANDROID_CROSS_BUILD_DIRECTORY}/protobuf_ext_cross/src/protobuf_ext_cross-build/protobuf/protoc
+    ABSOLUTE)
+  message(STATUS "Cross compiling protobuf for host ${ANDROID_HOST_TAG}")
+  externalproject_add(
+    protobuf_ext_cross
+    PREFIX ${ANDROID_CROSS_BUILD_DIRECTORY}/protobuf_ext_cross
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
+    CMAKE_ARGS
+      "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
+      "-DIN_CROSS_COMPILE=TRUE"
+    BUILD_BYPRODUCTS ${PROTOC}
+    LOG_OUTPUT_ON_FAILURE TRUE
+    INSTALL_COMMAND "")
+
+  set(protobuf_BUILD_PROTOC_BINARIES FALSE)
+  add_subdirectory(${protobuf_SOURCE_DIR} protobuf)
+
+  message(STATUS "Using protoc: ${PROTOC}")
   add_executable(protobuf::protoc IMPORTED GLOBAL)
-  set_target_properties(
-    protobuf::protoc PROPERTIES IMPORTED_LOCATION
-                                "${PROTOBUF_PROTOC_EXECUTABLE}")
+  set_target_properties(protobuf::protoc PROPERTIES IMPORTED_LOCATION
+                                                    "${PROTOC}")
+
+  set(PROTOBUF_PROTOC_EXECUTABLE ${PROTOC}
+      CACHE PATH "Protocol buffer executable" FORCE)
+
 endif()
-
-set(PROTOBUF_LIBRARY "${PROTO_DESC}")
-set(PROTOBUF_INCLUDE_DIR "${protobuf_SOURCE_DIR}/src")
-
-# Later versions of cmake want this to be lower case..
-set(Protobuf_INCLUDE_DIR "${PROTOBUF_INCLUDE_DIR}")
-set(Protobuf_LIBRARY "${PROTOBUF_LIBRARY}")
-set(Protobuf_PROTOC_EXECUTABLE "${PROTOBUF_PROTOC_EXECUTABLE}")
 
 android_license(
   TARGET "protobuf::libprotobuf" LIBNAME protobuf SPDX "BSD-3-Clause"
   LICENSE "BSD-3-Clause" LOCAL "${protobuf_SOURCE_DIR}/NOTICE")
+
+android_license(TARGET "utf8_validity" LIBNAME protobuf SPDX "MIT" LICENSE "MIT"
+                LOCAL "${protobuf_SOURCE_DIR}/third_party/utf8_range/NOTICE")
 android_license(TARGET "libprotobuf" LIBNAME protobuf SPDX "BSD-3-Clause"
                 LICENSE "BSD-3-Clause" LOCAL "${protobuf_SOURCE_DIR}/NOTICE")
 
-if(protobuf_BUILD_SHARED_LIBS)
-  android_install_shared_library(TARGET libprotobuf)
+# external/tink links to libprotobuf-lite, but we only want to use libprotobuf.
+add_library(protobuf::libprotobuf-lite ALIAS libprotobuf)
+
+# In the cross compile case we will have to make sure that what symlink the
+# lib64 directory
+if(IN_CROSS_COMPILE)
+  execute_process(
+    COMMAND
+      ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_BINARY_DIR}/lib64"
+      "${CMAKE_CURRENT_BINARY_DIR}/protobuf/lib64")
 endif()

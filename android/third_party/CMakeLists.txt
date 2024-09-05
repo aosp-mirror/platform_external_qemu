@@ -1,5 +1,11 @@
+# Other targets depend on these
+# First enable unit testing
 add_subdirectory(googletest)
+
+# Next we enable symbol dumping etc.
 add_subdirectory(breakpad)
+
+add_subdirectory(abseil-cpp)
 android_add_library(
   TARGET emulator-tinyobjloader
   LIBNAME
@@ -132,7 +138,6 @@ else()
   add_subdirectory(perfetto-tracing-only-stub)
 endif()
 
-add_subdirectory(abseil-cpp)
 
 # libevent is needed for bluetooth, and webrtc in case of linux.
 if(LINUX_X86_64 OR LINUX_AARCH64)
@@ -242,34 +247,6 @@ if(FEATURE_NETSIM_FROM_SOURCE)
     install(FILES ${NETSIM_CROSS_DIR}/glib2/libglib2_darwin-x86_64.dylib
             DESTINATION lib64)
   endif()
-
-  # Add netsim-ui into objs
-  set(NETSIM_UI_DEPENDENCIES
-    ${AOSP_ROOT}/tools/netsim/ui/dist/index.html>netsim-ui/index.html;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/dev.html>netsim-ui/dev.html;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/assets/grid-background.svg>netsim-ui/assets/grid-background.svg;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/assets/hexagonal-background.png>netsim-ui/assets/hexagonal-background.png;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/assets/netsim-logo-b.svg>netsim-ui/assets/netsim-logo-b.svg;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/assets/netsim-logo.svg>netsim-ui/assets/netsim-logo.svg;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/assets/polar-background.svg>netsim-ui/assets/polar-background.svg;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/cube-sprite.js>netsim-ui/js/cube-sprite.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/customize-map-button.js>netsim-ui/js/customize-map-button.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-dragzone.js>netsim-ui/js/device-dragzone.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-dropzone.js>netsim-ui/js/device-dropzone.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-info.js>netsim-ui/js/device-info.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-list.js>netsim-ui/js/device-list.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-map.js>netsim-ui/js/device-map.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/device-observer.js>netsim-ui/js/device-observer.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/license-info.js>netsim-ui/js/license-info.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/navigation-bar.js>netsim-ui/js/navigation-bar.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/netsim-app.js>netsim-ui/js/netsim-app.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/packet-info.js>netsim-ui/js/packet-info.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/js/pyramid-sprite.js>netsim-ui/js/pyramid-sprite.js;
-    ${AOSP_ROOT}/tools/netsim/ui/dist/node_modules/tslib/tslib.es6.js>netsim-ui/node_modules/tslib/tslib.es6.js;
-    PARENT_SCOPE
-  )
-  android_license(TARGET "NETSIM_UI_DEPENDENCIES" LIBNAME None SPDX None LICENSE None LOCAL None)
-  android_target_dependency(packet-streamer-client-lib all NETSIM_UI_DEPENDENCIES)
 else()
   add_subdirectory(${AOSP_ROOT}/tools/netsim/proto netsim_proto)
   add_subdirectory(${AOSP_ROOT}/tools/netsim/src/util netsim_util)
@@ -282,12 +259,7 @@ else()
 
     # Binplace to objs
     android_target_dependency(packet-streamer-client-lib all
-                              NETSIM_UI_DEPENDENCIES)
-    android_target_dependency(packet-streamer-client-lib all
                               NETSIM_DEPENDENCIES)
-
-    # Install ui (Disable this for non canary?)
-    android_install_dependency_force_exec(all NETSIM_UI_DEPENDENCIES)
   else()
     message(WARNING "Netsimd is not available for this platform, bluetooth/wifi emulation will require a remote instance.")
   endif()
@@ -347,6 +319,8 @@ set(ANGLE_REPO_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../external/angle)
 add_library(gfxstream_egl_headers INTERFACE)
 target_include_directories(gfxstream_egl_headers
                            INTERFACE ${ANGLE_REPO_ROOT}/include)
+add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/backend
+                 ${GFXSTREAM_PREFIX}-host-backend)
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/gl/gl-host-common
                  ${GFXSTREAM_PREFIX}-gl-host-common)
 add_subdirectory(${GFXSTREAM_REPO_ROOT}/host/features
