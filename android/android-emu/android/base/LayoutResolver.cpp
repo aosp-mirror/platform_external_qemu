@@ -195,50 +195,53 @@ std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveLayout(
 
 std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveStackedLayout(
         std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles,
-        const bool isDistantDisplay) {
+        bool isDistantDisplay) {
 
-    std::vector<Rect> upper, lower;
-    uint32_t lowerHeight = 0;
-    uint32_t upperWidth = 0, lowerWidth = 0;
+    std::vector<Rect> mainRow, auxRow;
+    uint32_t mainRowWidth = 0, auxRowWidth = 0;
+    uint32_t mainRowHeight = 0, auxRowHeight = 0;
+    uint32_t width, height, displayId;
     for (const auto& iter : rectangles) {
-        if (iter.first == 0 || iter.first == 6) {
-            // Place the main and cluster displays on the upper row
-            upper.emplace_back(iter.first, 0, 0, iter.second.first, iter.second.second);
-            upperWidth += iter.second.first;
-            if (isDistantDisplay) {
-                lowerHeight = std::max(lowerHeight, iter.second.second);
-            }
+        displayId = iter.first;
+        width = iter.second.first;
+        height = iter.second.second;
+        if (displayId == 0 || displayId == 6) {
+            // Place the main and cluster displays on the main row
+            mainRow.emplace_back(displayId, 0, 0, width, height);
+            mainRowWidth += width;
+            mainRowHeight = std::max(mainRowHeight, height);
         } else {
-            // Place the remaining displays on the lower row
-            lower.emplace_back(iter.first, 0, 0, iter.second.first, iter.second.second);
-            lowerWidth += iter.second.first;
-            if (!isDistantDisplay) {
-                lowerHeight = std::max(lowerHeight, iter.second.second);
-            }
+            // Place the remaining displays on the aux row
+            auxRow.emplace_back(displayId, 0, 0, width, height);
+            auxRowWidth += width;
+            auxRowHeight = std::max(auxRowHeight, height);
         }
     }
 
-    uint32_t startMargin = (uint32_t)(std::abs((int)(upperWidth - lowerWidth)) / 2);
+    uint32_t startMargin = (uint32_t)(std::abs((int)(mainRowWidth - auxRowWidth)) / 2);
     std::stable_sort(
-            upper.begin(), upper.end(),
+            mainRow.begin(), mainRow.end(),
             [](const Rect& a, const Rect& b) { return a.id < b.id; });
     std::stable_sort(
-            lower.begin(), lower.end(),
+            auxRow.begin(), auxRow.end(),
             [](const Rect& a, const Rect& b) { return a.id < b.id; });
 
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> retVal;
-    uint32_t posX = (upperWidth > lowerWidth) ? startMargin : 0;
-    // Swap the upper and lower rows in case of the distant display
-    uint32_t posY = isDistantDisplay ? lowerHeight : 0;
-    for (int i = 0; i < lower.size(); i++) {
-        retVal[lower[i].id] = std::make_pair(posX, posY);
-        posX += lower[i].width;
+
+    // Place the auxRow on the first(lower) row in case of non distant display
+    uint32_t posY = !isDistantDisplay ? 0 : mainRowHeight;
+    uint32_t posX = (mainRowWidth > auxRowWidth) ? startMargin : 0;
+    for (int i = 0; i < auxRow.size(); i++) {
+        retVal[auxRow[i].id] = std::make_pair(posX, posY);
+        posX += auxRow[i].width;
     }
-    posX = (upperWidth > lowerWidth) ? 0 : startMargin;
-    posY = isDistantDisplay ? 0 : lowerHeight;
-    for (int i = 0; i < upper.size(); i++) {
-        retVal[upper[i].id] = std::make_pair(posX, posY);
-        posX += upper[i].width;
+
+    // Place the mainRow on the second(upper) row in case of non distant display
+    posY = !isDistantDisplay ? auxRowHeight : 0;
+    posX = (mainRowWidth > auxRowWidth) ? 0 : startMargin;
+    for (int i = 0; i < mainRow.size(); i++) {
+        retVal[mainRow[i].id] = std::make_pair(posX, posY);
+        posX += mainRow[i].width;
     }
     return retVal;
 }
