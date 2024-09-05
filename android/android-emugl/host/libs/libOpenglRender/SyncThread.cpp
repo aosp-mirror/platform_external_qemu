@@ -106,16 +106,6 @@ void SyncThread::triggerWaitVk(VkFence vkFence, uint64_t timeline) {
     DPRINT("exit");
 }
 
-void SyncThread::triggerBlockedWaitNoTimeline(FenceSync* fenceSync) {
-    DPRINT("fenceSyncInfo=0x%llx ...", fenceSync);
-    SyncThreadCmd to_send;
-    to_send.opCode = SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE;
-    to_send.fenceSync = fenceSync;
-    DPRINT("opcode=%u", to_send.opCode);
-    sendAndWaitForResult(to_send);
-    DPRINT("exit");
-}
-
 // This increments the timeline after the QSRI completes.
 void SyncThread::triggerWaitVkQsri(VkImage vkImage, uint64_t timeline) {
     DPRINT("vkImage=0x%llx timeline=0x%llx...", vkImage, timeline);

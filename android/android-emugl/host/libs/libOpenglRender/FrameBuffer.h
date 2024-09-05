@@ -635,7 +635,7 @@ public:
     void onLastColorBufferRef(uint32_t handle);
     ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
     ColorBufferPtr findColorBuffer(HandleType p_colorbuffer);
-    
+
     void createGraphicsProcessResources(uint64_t puid);
     std::unique_ptr<ProcessResources> removeGraphicsProcessResources(uint64_t puid);
 
@@ -679,12 +679,9 @@ public:
 
     EGLContext getGlobalEGLContext() { return m_pbufContext; }
     HandleType getLastPostedColorBuffer() { return m_lastPostedColorBuffer; }
-    void waitForGpu(uint64_t eglsync);
-    void waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle);
     void asyncWaitForGpuWithCb(uint64_t eglsync, FenceCompletionCallback cb);
     void asyncWaitForGpuVulkanWithCb(uint64_t deviceHandle, uint64_t fenceHandle, FenceCompletionCallback cb);
     void asyncWaitForGpuVulkanQsriWithCb(uint64_t image, FenceCompletionCallback cb);
-    void waitForGpuVulkanQsri(uint64_t image);
 
     bool platformImportResource(uint32_t handle, uint32_t type, void* resource);
     void* platformCreateSharedEglContext(void);

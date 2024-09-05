@@ -144,7 +144,7 @@ public:
         auto jsonSnippet =
                 tink::JwkSetFromPublicKeysetHandle(*public_handle->get());
         write(fname, *jsonSnippet);
-        return std::move(private_handle.ValueOrDie());
+        return std::move(private_handle.value());
     }
 
 protected:

@@ -31,6 +31,11 @@ function(android_upload_symbols)
     return()
   endif()
 
+  if (IN_CROSS_COMPILE)
+        message(STATUS "Not uploading symbols when cross compiling.")
+        return()
+  endif()
+
   # Parse arguments
   set(options)
   set(oneValueArgs TARGET API_KEY DIRECTORY URI)

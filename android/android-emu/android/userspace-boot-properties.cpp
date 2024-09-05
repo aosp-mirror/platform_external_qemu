@@ -318,7 +318,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
     const char* pTimeout = avdInfo_screen_off_timeout(apiLevel);
     params.push_back({qemuScreenOffTimeoutProp, pTimeout});
 
-    if (fc::isEnabled(fc::AndroidVirtualizationFramework)) {
+    if (opts->xts && fc::isEnabled(fc::AndroidVirtualizationFramework)) {
         params.push_back({"androidboot.hypervisor.version", "gfapi-35"});
         params.push_back({"androidboot.hypervisor.vm.supported", "1"});
         params.push_back({"androidboot.hypervisor.protected_vm.supported", "0"});

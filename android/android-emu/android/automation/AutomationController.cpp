@@ -48,7 +48,7 @@ using namespace android::base;
 
 static constexpr uint32_t kFileVersion = 2;
 
-namespace pb = emulator_automation;
+namespace proto = emulator_automation;
 
 namespace {
 
@@ -61,7 +61,7 @@ static offworld::Response createAsyncResponse(uint32_t asyncId) {
     return response;
 }
 
-void sendLocationOverride(const pb::LocationOverrideEvent& location_override) {
+void sendLocationOverride(const proto::LocationOverrideEvent& location_override) {
     const int kNumMicrosInSecond = 1000000;
     timeval timeVal = {};
     timeVal.tv_sec = location_override.timestamp_in_us() / kNumMicrosInSecond;
@@ -170,9 +170,9 @@ public:
     // Stream interface implementation.
     ssize_t read(void* buffer, size_t size) override { return -EPERM; }
     ssize_t write(const void* buffer, size_t size) override {
-        namespace pb = android::offworld::pb;
+        namespace proto = android::offworld::proto;
 
-        pb::Response response = createAsyncResponse(mAsyncId);
+        proto::Response response = createAsyncResponse(mAsyncId);
         auto event = response.mutable_async()
                              ->mutable_automation()
                              ->mutable_event_generated();
@@ -183,9 +183,9 @@ public:
     }
 
     void close() {
-        namespace pb = android::offworld::pb;
+        namespace proto = android::offworld::proto;
 
-        pb::Response response = createAsyncResponse(mAsyncId);
+        proto::Response response = createAsyncResponse(mAsyncId);
         response.mutable_async()->set_complete(true);
         mSendMessageCallback(mPipe, response);
     }
@@ -205,9 +205,9 @@ public:
     BinaryStreamEventSource(std::unique_ptr<android::base::Stream>&& stream)
         : mStream(std::move(stream)) {}
 
-    pb::RecordedEvent consumeNextCommand() override {
+    proto::RecordedEvent consumeNextCommand() override {
         CHECK(mNextCommand);
-        pb::RecordedEvent event = std::move(mNextCommand.value());
+        proto::RecordedEvent event = std::move(mNextCommand.value());
         mNextCommand.clear();
         return event;
     }
@@ -220,7 +220,7 @@ public:
                 return NextCommandStatus::NONE;
             }
 
-            pb::RecordedEvent event;
+            proto::RecordedEvent event;
             if (!event.ParseFromString(nextCommand)) {
                 VLOG(automation) << "Event parse failed";
                 return NextCommandStatus::NONE;
@@ -241,7 +241,7 @@ public:
 private:
     DISALLOW_COPY_AND_ASSIGN(BinaryStreamEventSource);
 
-    Optional<pb::RecordedEvent> mNextCommand;
+    Optional<proto::RecordedEvent> mNextCommand;
     std::unique_ptr<android::base::Stream> mStream;
 };
 
@@ -265,7 +265,7 @@ public:
         }
     }
 
-    pb::RecordedEvent consumeNextCommand() override {
+    proto::RecordedEvent consumeNextCommand() override {
         CHECK(!mEvents.empty());
 
         Event event = std::move(mEvents.front());
@@ -306,10 +306,10 @@ public:
             }
         });
 
-        std::vector<pb::RecordedEvent> newEvents;
+        std::vector<proto::RecordedEvent> newEvents;
         for (auto subEventStr : splitEventStrings) {
             io::ArrayInputStream stream(subEventStr.data(), subEventStr.size());
-            pb::RecordedEvent event;
+            proto::RecordedEvent event;
             if (!TextFormat::Parse(&stream, &event) ||
                 stream.ByteCount() != subEventStr.size()) {
                 VLOG(automation) << "Did not reach string EOF, parse error?";
@@ -348,7 +348,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(OffworldEventSource);
 
     struct Event {
-        pb::RecordedEvent event;
+        proto::RecordedEvent event;
 
         bool lastEvent = false;
         android::AsyncMessagePipeHandle pipe;
@@ -404,7 +404,7 @@ public:
                              std::string_view event,
                              uint32_t asyncId) override;
 
-    void sendEvent(const pb::RecordedEvent& event) override;
+    void sendEvent(const proto::RecordedEvent& event) override;
 
     ListenResult listen(android::AsyncMessagePipeHandle pipe,
                         uint32_t asyncId) override;
@@ -601,7 +601,7 @@ StartResult AutomationControllerImpl::startRecording(
     }
     mFilePath = path;
 
-    pb::InitialState initialState;
+    proto::InitialState initialState;
     const int saveStateResult =
             physicalModel_saveState(mPhysicalModel, &initialState);
     if (saveStateResult != 0) {
@@ -609,7 +609,7 @@ StartResult AutomationControllerImpl::startRecording(
         return Err(StartError::InternalError);
     }
 
-    pb::FileHeader header;
+    proto::FileHeader header;
     header.set_version(kFileVersion);
     *header.mutable_initial_state() = initialState;
 
@@ -650,7 +650,7 @@ StopResult AutomationControllerImpl::stopRecording() {
             mEventSink.getLastEventTimeForStream(mRecordingStream.get());
     mEventSink.unregisterStream(mRecordingStream.get());
 
-    pb::RecordedEvent event;
+    proto::RecordedEvent event;
     event.set_delay(currentTime - lastEventTime);
     std::string binaryProto;
     if (!event.SerializeToString(&binaryProto)) {
@@ -701,7 +701,7 @@ StartResult AutomationControllerImpl::startPlayback(const char* filename) {
     }
 
     const std::string headerStr = playbackStream->getString();
-    pb::FileHeader header;
+    proto::FileHeader header;
     if (headerStr.empty() || !header.ParseFromString(headerStr)) {
         LOG(ERROR) << "Could not load header";
         return Err(StartError::PlaybackFileCorrupt);
@@ -805,7 +805,7 @@ std::string AutomationControllerImpl::getMacroName(std::string_view filename) {
             fsopen(path.c_str(), "rb", FileShare::Read), StdioStream::kOwner));
 
     const std::string headerStr = playbackStream->getString();
-    pb::FileHeader header;
+    proto::FileHeader header;
     if (headerStr.empty() || !header.ParseFromString(headerStr) ||
         !header.has_duration_ns()) {
         LOG(ERROR) << "Could not load header name";
@@ -826,7 +826,7 @@ std::pair<uint64_t, uint64_t> AutomationControllerImpl::getMetadata(
             fsopen(path.c_str(), "rb", FileShare::Read), StdioStream::kOwner));
 
     const std::string headerStr = playbackStream->getString();
-    pb::FileHeader header;
+    proto::FileHeader header;
     if (headerStr.empty() || !header.ParseFromString(headerStr) ||
         !header.has_duration_ns() || !header.has_record_datetime()) {
         LOG(ERROR) << "Could not load header";
@@ -841,7 +841,7 @@ ReplayResult AutomationControllerImpl::replayInitialState(
         return Err(ReplayError::PlaybackInProgress);
     }
 
-    pb::InitialState initialState;
+    proto::InitialState initialState;
     if (!google::protobuf::TextFormat::ParseFromString(std::string(state), &initialState)) {
         LOG(ERROR) << "Could not load initial data";
         return Err(ReplayError::ParseError);
@@ -900,7 +900,7 @@ ListenResult AutomationControllerImpl::listen(
         return Err(ListenError::AlreadyListening);
     }
 
-    pb::InitialState initialState;
+    proto::InitialState initialState;
     const int saveStateResult =
             physicalModel_saveState(mPhysicalModel, &initialState);
     if (saveStateResult != 0) {
@@ -939,20 +939,20 @@ void AutomationControllerImpl::pipeClosed(android::AsyncMessagePipeHandle pipe) 
     }
 }
 
-void AutomationControllerImpl::sendEvent(const pb::RecordedEvent& event) {
+void AutomationControllerImpl::sendEvent(const proto::RecordedEvent& event) {
     switch (event.stream_case()) {
-        case pb::RecordedEvent::StreamCase::kPhysicalModel:
+        case proto::RecordedEvent::StreamCase::kPhysicalModel:
             physicalModel_replayEvent(mPhysicalModel, event.physical_model());
             break;
-        case pb::RecordedEvent::StreamCase::kSensorOverride: {
+        case proto::RecordedEvent::StreamCase::kSensorOverride: {
             physicalModel_replayOverrideEvent(mPhysicalModel,
                                               event.sensor_override());
             break;
         }
-        case pb::RecordedEvent::StreamCase::kLocationOverride:
+        case proto::RecordedEvent::StreamCase::kLocationOverride:
             sendLocationOverride(event.location_override());
             break;
-        case pb::RecordedEvent::StreamCase::STREAM_NOT_SET:
+        case proto::RecordedEvent::StreamCase::STREAM_NOT_SET:
             // Last event for files to simulate recordings.
             break;
         default:
@@ -963,7 +963,7 @@ void AutomationControllerImpl::sendEvent(const pb::RecordedEvent& event) {
 }
 
 void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
-    pb::RecordedEvent event = mPlaybackEventSource->consumeNextCommand();
+    proto::RecordedEvent event = mPlaybackEventSource->consumeNextCommand();
     sendEvent(event);
 
     DurationNs nextCommandDelay;
@@ -1007,7 +1007,7 @@ void AutomationControllerImpl::addMetadataToHeader(DurationNs durationNs) {
                             StdioStream::kOwner));
 
     const std::string headerStr = originalStream->getString();
-    pb::FileHeader header;
+    proto::FileHeader header;
     if (headerStr.empty() || !header.ParseFromString(headerStr)) {
         LOG(ERROR) << "Could not find header.";
         return;
@@ -1046,7 +1046,7 @@ void AutomationControllerImpl::setMacroName(std::string_view macroName,
                             StdioStream::kOwner));
 
     const std::string headerStr = originalStream->getString();
-    pb::FileHeader header;
+    proto::FileHeader header;
     if (headerStr.empty() || !header.ParseFromString(headerStr)) {
         LOG(ERROR) << "Could not find header.";
         return;
@@ -1074,7 +1074,7 @@ void AutomationControllerImpl::copyStreamToStream(
     DurationNs nextCommandDelay;
     while (source->getNextCommandDelay(&nextCommandDelay) ==
            NextCommandStatus::OK) {
-        pb::RecordedEvent modifiedEvent = source->consumeNextCommand();
+        proto::RecordedEvent modifiedEvent = source->consumeNextCommand();
         std::string binaryProto;
         if (!modifiedEvent.SerializeToString(&binaryProto)) {
             LOG(WARNING) << "Could not serialize event.";

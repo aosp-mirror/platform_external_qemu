@@ -219,7 +219,7 @@ absl::StatusOr<JwkKeyLoader::Keyset> JwkKeyLoader::activeKeySet() const {
     auto jsonKeys = activeKeysetAsString();
     auto keyHandle = crypto::tink::JwkSetToPublicKeysetHandle(jsonKeys);
     if (!keyHandle.ok()) {
-        return absl::InternalError(keyHandle.status().error_message());
+        return absl::InternalError(keyHandle.status().message());
     }
 
     return absl::StatusOr<Keyset>(std::move(keyHandle.value()));

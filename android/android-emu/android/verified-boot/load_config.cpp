@@ -11,7 +11,7 @@
 
 #include "android/verified-boot/load_config.h"
 
-#include "aemu/base/Log.h"
+#include "absl/log/log.h"
 #include "verified_boot_config.pb.h"
 
 #include <google/protobuf/io/tokenizer.h>
@@ -44,15 +44,15 @@ namespace {
 class SimpleErrorCollector : public ::google::protobuf::io::ErrorCollector {
 public:
     ~SimpleErrorCollector() override = default;
-    void AddError(int line,
+    void RecordError(int line,
                   ColumnNumber column,
-                  const std::string& message) override {
+                  absl::string_view message) override {
         if (mFirstError) {
             mFirstError = false;
             LOG(WARNING) << "Could not parse verified boot config: ";
         }
         LOG(WARNING) << "  " << (line + 1) << ":" << (column + 1) << ": "
-                     << message.c_str();
+                     << message;
     }
 
 private:
@@ -239,7 +239,7 @@ Status getParameters(const std::string& textproto,
 Status getParametersFromFile(const char* pathname,
                              std::vector<std::string>* params) {
     if (!pathname) {
-        LOG(DEBUG) << "Verified boot params were not found.";
+        LOG(INFO) << "Verified boot params were not found.";
         return Status::CouldNotOpenFile;
     }
 

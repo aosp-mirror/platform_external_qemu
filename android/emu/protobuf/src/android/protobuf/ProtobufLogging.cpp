@@ -9,22 +9,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "google/protobuf/stubs/logging.h"
-
 namespace android {
 namespace protobuf {
 
+[[deprecated("This has become meaningless with protobuf 29")]]
 void initProtobufLogger() {
-// #define PROTOBUF_DEBUG 1
-#if !PROTBUF_DEBUG
-    // Silence all parse failure messages, because
-    // we handle parse failures ourselves, and because
-    // it's annoying to see error messages when not
-    // connected to the internet.
-    // (LogSilencer doesn't work, since it's for non-fatal
-    // messages only)
-    google::protobuf::SetLogHandler(nullptr);
-#endif
+
 }
 
 } // namespace protobuf

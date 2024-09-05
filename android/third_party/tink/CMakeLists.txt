@@ -5,23 +5,29 @@ endif()
 set(TINK_DIR ${ANDROID_QEMU2_TOP_DIR}/../tink)
 set(RAPID_JSON_DIR ${ANDROID_QEMU2_TOP_DIR}/../rapidjson)
 set(TINK_BUILD_TESTS TRUE)
+set(TINK_USE_SYSTEM_OPENSSL FALSE)
+set(TINK_TARGET_EXCLUDE_IF_BORINGSSL "exclude_if_boringssl")
+set(TINK_TARGET_EXCLUDE_IF_OPENSSL "exclude_if_openssl")
+set(TINK_TARGET_EXCLUDE_IF_WINDOWS "exclude_if_windows")
 
-if (CROSSCOMPILE)
+if(CROSSCOMPILE)
   set(TINK_BUILD_TESTS FALSE)
 endif()
-include(${TINK_DIR}/tink_version.cmake)
+# include(${TINK_DIR}/tink_version.cmake)
 
 function(add_directory_alias SOURCE DESTINATION)
   get_filename_component(_destination_parent "${DESTINATION}" DIRECTORY)
   file(MAKE_DIRECTORY "${_destination_parent}")
 
-  if (WIN32 AND NOT CROSSCOMPILE)
+  if(WIN32 AND NOT CROSSCOMPILE)
     file(TO_NATIVE_PATH "${SOURCE}" _native_source)
     file(TO_NATIVE_PATH "${DESTINATION}" _native_destination)
-    execute_process(COMMAND $ENV{ComSpec} /c mklink /J "${_native_destination}" "${_native_source}" ERROR_QUIET)
+    execute_process(COMMAND $ENV{ComSpec} /c mklink /J "${_native_destination}"
+                            "${_native_source}" ERROR_QUIET)
   else()
-      message(STATUS "create_symlink ${SOURCE} ${DESTINATION}")
-    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${SOURCE}" "${DESTINATION}")
+    message(STATUS "create_symlink ${SOURCE} ${DESTINATION}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${SOURCE}"
+                            "${DESTINATION}")
   endif()
 endfunction(add_directory_alias)
 
@@ -29,7 +35,6 @@ set(TINK_CXX_STANDARD 17)
 list(APPEND TINK_INCLUDE_DIRS "${TINK_GENFILE_DIR}")
 set(TINK_IDE_FOLDER "Tink")
 set(TINK_TARGET_EXCLUDE_IF_OPENSSL "exclude_if_openssl")
-
 
 # Rapidjson is a header-only library with no explicit target. Here we create
 # one.
@@ -73,11 +78,12 @@ endmacro()
 # dependencies are explicitly specified.
 #
 function(tink_cc_library)
-  cmake_parse_arguments(PARSE_ARGV 0 tink_cc_library
-    "PUBLIC"
-    "NAME"
-    "SRCS;DEPS;TAGS"
-  )
+  cmake_parse_arguments(PARSE_ARGV 0 tink_cc_library "PUBLIC;TESTONLY" "NAME"
+                        "SRCS;DEPS;TAGS")
+
+  if(tink_cc_library_TESTONLY AND NOT TINK_BUILD_TESTS)
+    return()
+  endif()
 
   if(NOT DEFINED TINK_MODULE)
     message(
@@ -86,14 +92,23 @@ function(tink_cc_library)
     )
   endif()
 
-  # Check if this target must be skipped. Currently the only reason for this to
-  # happen is incompatibility with OpenSSL, when used.
+  # Check if this target must be skipped.
   foreach(_tink_cc_library_tag ${tink_cc_library_TAGS})
-    if (${_tink_cc_library_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_OPENSSL} AND TINK_USE_SYSTEM_OPENSSL)
+    # We are using boring ssl.
+    if(${_tink_cc_library_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_BORINGSSL})
+      return()
+    endif()
+    # Exclude if using OpenSSL.
+    if(${_tink_cc_library_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_OPENSSL}
+       AND TINK_USE_SYSTEM_OPENSSL)
+      return()
+    endif()
+    # Exclude if building on Windows.
+    if(${_tink_cc_library_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_WINDOWS}
+       AND WIN32)
       return()
     endif()
   endforeach()
-
 
   # We replace :: with __ in targets, because :: may not appear in target names.
   # However, the module name should still span multiple name spaces.
@@ -115,27 +130,6 @@ function(tink_cc_library)
   endif()
 
   if(NOT _is_headers_only_lib)
-    # Workaround for bug b/215443895, remove once it is fixed and merged
-    if(WINDOWS_MSVC_X86_64)
-      if("${_target_name}" STREQUAL "tink_internal_internal_util")
-        message(STATUS "Applying TINK patch for util.cc (see b/215443895)")
-        list(REMOVE_ITEM tink_cc_library_SRCS util.cc)
-        list(
-          APPEND
-          tink_cc_library_SRCS
-          ${ANDROID_QEMU2_TOP_DIR}/android/third_party/tink/util_win_workaround.cc
-        )
-      endif()
-      if("${_target_name}" STREQUAL "tink_internal_util_test_util")
-        message(STATUS "Applying TINK patch for test_util.cc (see b/215443895)")
-        list(REMOVE_ITEM tink_cc_library_SRCS test_util.cc)
-        list(
-          APPEND
-          tink_cc_library_SRCS
-          ${ANDROID_QEMU2_TOP_DIR}/android/third_party/tink/test_util_win_workaround.cc
-        )
-      endif()
-    endif()
     add_library(${_target_name} STATIC "")
     target_sources(${_target_name} PRIVATE ${tink_cc_library_SRCS})
     target_include_directories(${_target_name} PUBLIC ${TINK_INCLUDE_DIRS})
@@ -173,16 +167,18 @@ endfunction(tink_cc_library)
 
 # set(TINK_DISABLED_TESTS
 # "tink_test_util_file_output_stream_test;tink_test_util_ostream_output_stream_test")
+# We do not embed version
+list(APPEND TINK_DISABLED_TESTS tink_test_core_version_test)
 if(WINDOWS_MSVC_X86_64)
   # Does not compile due to alignment error
   list(APPEND TINK_DISABLED_TESTS tink_test_util_secret_data_test)
   # Does not work due to regex parsing
-  list(APPEND TINK_DISABLED_TESTS tink_test_core_version_test)
 endif()
 
 if(DARWIN_AARCH64)
   # b/252237763
-  list(APPEND TINK_DISABLED_TESTS tink_test_aead__internal_ssl_aead_large_inputs_test)
+  list(APPEND TINK_DISABLED_TESTS
+       tink_test_aead__internal_ssl_aead_large_inputs_test)
 endif()
 
 # Declare a Tink test using googletest, with a syntax similar to Bazel.
@@ -195,11 +191,8 @@ endif()
 # build target named tink_test_<MODULE>_<NAME>.
 #
 function(tink_cc_test)
-  cmake_parse_arguments(PARSE_ARGV 0 tink_cc_test
-    ""
-    "NAME"
-    "SRCS;DEPS;DATA;TAGS"
-  )
+  cmake_parse_arguments(PARSE_ARGV 0 tink_cc_test "" "NAME"
+                        "SRCS;DEPS;DATA;TAGS")
 
   if(NOT TINK_BUILD_TESTS)
     return()
@@ -212,7 +205,19 @@ function(tink_cc_test)
   # Check if this target must be skipped. Currently the only reason for this to
   # happen is incompatibility with OpenSSL, when used.
   foreach(_tink_cc_test_tag ${tink_cc_test_TAGS})
-    if (${_tink_cc_test_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_OPENSSL} AND TINK_USE_SYSTEM_OPENSSL)
+    # Exclude if using BoringSSL.
+    if(${_tink_cc_test_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_BORINGSSL}
+       AND NOT TINK_USE_SYSTEM_OPENSSL)
+      return()
+    endif()
+    # Exclude if using OpenSSL.
+    if(${_tink_cc_test_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_OPENSSL}
+       AND TINK_USE_SYSTEM_OPENSSL)
+      return()
+    endif()
+    # Exclude if building on Windows.
+    if(${_tink_cc_test_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_WINDOWS}
+       AND WIN32)
       return()
     endif()
   endforeach()
@@ -239,8 +244,8 @@ function(tink_cc_test)
   set_property(TARGET ${_target_name} PROPERTY FOLDER
                                                "${TINK_IDE_FOLDER}/Tests")
 
-  # Some tests appear to read/write to the same file causing issues.
-  set_tests_properties("${_target_name}" PROPERTIES RESOURCE_LOCK TINK)
+  # Uncomment this if you are seeing file access issues.
+  # set_tests_properties("${_target_name}" PROPERTIES RESOURCE_LOCK TINK)
   set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD
                                                ${TINK_CXX_STANDARD})
   set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD_REQUIRED true)
@@ -302,10 +307,13 @@ function(tink_target_group)
 endfunction()
 
 set(TINK_INCLUDE_ALIAS_DIR "${CMAKE_CURRENT_BINARY_DIR}/__include_alias")
-add_directory_alias("${TINK_DIR}/cc" "${TINK_INCLUDE_ALIAS_DIR}/tink")
+add_directory_alias("${TINK_DIR}/tink" "${TINK_INCLUDE_ALIAS_DIR}/tink")
 list(APPEND TINK_INCLUDE_DIRS "${TINK_INCLUDE_ALIAS_DIR}")
 
-add_subdirectory(${TINK_DIR}/cc TINK_cc)
+add_directory_alias(${ANDROID_QEMU2_TOP_DIR}/android/third_party/tink/wycheproof/testvectors
+                    "${CMAKE_BINARY_DIR}/testvectors")
+
+add_subdirectory(${TINK_DIR}/tink TINK_cc)
 add_subdirectory(${TINK_DIR}/proto proto)
 
 # Make sure we can find the protobuf includes.

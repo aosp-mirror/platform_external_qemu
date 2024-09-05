@@ -68,7 +68,7 @@ using android::base::StringFormat;
 using android::base::System;
 using android::crashreport::CrashReporter;
 using android::metrics::MetricsReporter;
-namespace pb = android_studio;
+
 
 // Inspired by QEMU's bufferzero.c implementation, but simplified for the case
 // when checking the whole aligned memory page.
@@ -276,21 +276,21 @@ void Snapshotter::setSnapshotAvdSource(SnapshotAvdSource src) {
 static constexpr int kDefaultMessageTimeoutMs = 10000;
 
 #if SNAPSHOT_METRICS
-static void appendFailedSave(pb::EmulatorSnapshotSaveState state,
+static void appendFailedSave(android_studio::EmulatorSnapshotSaveState state,
                              FailureReason failureReason) {
-    MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([state, failureReason](android_studio::AndroidStudioEvent* event) {
         auto snap = event->mutable_emulator_details()->add_snapshot_saves();
         snap->set_save_state(state);
-        snap->set_save_failure_reason((pb::EmulatorSnapshotFailureReason)failureReason);
+        snap->set_save_failure_reason((android_studio::EmulatorSnapshotFailureReason)failureReason);
     });
 }
 
-static void appendFailedLoad(pb::EmulatorSnapshotLoadState state,
+static void appendFailedLoad(android_studio::EmulatorSnapshotLoadState state,
                              FailureReason failureReason) {
-    MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([state, failureReason](android_studio::AndroidStudioEvent* event) {
         auto snap = event->mutable_emulator_details()->add_snapshot_loads();
         snap->set_load_state(state);
-        snap->set_load_failure_reason((pb::EmulatorSnapshotFailureReason)failureReason);
+        snap->set_load_failure_reason((android_studio::EmulatorSnapshotFailureReason)failureReason);
     });
 }
 #else
@@ -367,10 +367,10 @@ void Snapshotter::callCallbacks(Operation op, Stage stage) {
     }
 }
 
-void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
+void Snapshotter::fillSnapshotMetrics(android_studio::AndroidStudioEvent* event,
                                       const SnapshotOperationStats& stats) {
 #if SNAPSHOT_METRICS
-    pb::EmulatorSnapshot* snapshot = nullptr;
+    android_studio::EmulatorSnapshot* snapshot = nullptr;
 
     if (stats.forSave) {
         snapshot = event->mutable_emulator_details()->add_snapshot_saves();
@@ -396,21 +396,21 @@ void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
 #endif
 }
 
-void Snapshotter::fillSnapshotMetrics(pb::EmulatorSnapshot* snapshot,
+void Snapshotter::fillSnapshotMetrics(android_studio::EmulatorSnapshot* snapshot,
                                       const SnapshotOperationStats& stats) {
 #if SNAPSHOT_METRICS
     snapshot->set_name(MetricsReporter::get().anonymize(stats.name));
 
     if (stats.compressedRam) {
-        snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
+        snapshot->set_flags(android_studio::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
     }
 
     if (stats.compressedTextures) {
-        snapshot->set_flags(snapshot->flags() | pb::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
+        snapshot->set_flags(snapshot->flags() | android_studio::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
     }
 
     if (stats.usingHDD) {
-        snapshot->set_flags(snapshot->flags() | pb::SNAPSHOT_FLAGS_HDD_BIT);
+        snapshot->set_flags(snapshot->flags() | android_studio::SNAPSHOT_FLAGS_HDD_BIT);
     }
 
     snapshot->set_lazy_loaded(stats.onDemandRamEnabled);
@@ -424,14 +424,14 @@ void Snapshotter::fillSnapshotMetrics(pb::EmulatorSnapshot* snapshot,
 
     if (stats.forSave) {
         snapshot->set_save_state(
-                pb::EmulatorSnapshotSaveState::EMULATOR_SNAPSHOT_SAVE_SUCCEEDED_NORMAL);
+                android_studio::EmulatorSnapshotSaveState::EMULATOR_SNAPSHOT_SAVE_SUCCEEDED_NORMAL);
         snapshot->set_save_duration_ms(uint64_t(stats.durationMs));
         snapshot->set_ram_save_duration_ms(int64_t(stats.ramDurationMs));
         snapshot->set_textures_save_duration_ms(int64_t(stats.texturesDurationMs));
 
     } else {
         snapshot->set_load_state(
-                pb::EmulatorSnapshotLoadState::EMULATOR_SNAPSHOT_LOAD_SUCCEEDED_NORMAL);
+                android_studio::EmulatorSnapshotLoadState::EMULATOR_SNAPSHOT_LOAD_SUCCEEDED_NORMAL);
         snapshot->set_load_duration_ms(uint64_t(stats.durationMs));
         snapshot->set_ram_load_duration_ms(int64_t(stats.ramDurationMs));
         snapshot->set_textures_load_duration_ms(int64_t(stats.texturesDurationMs));
@@ -511,7 +511,7 @@ void Snapshotter::appendSuccessfulSave(const char* name,
         !mSaver->textureSaver()) return;
 
     auto stats = getSaveStats(name, durationMs);
-    MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([stats](android_studio::AndroidStudioEvent* event) {
         fillSnapshotMetrics(event, stats);
     });
 #endif
@@ -525,7 +525,7 @@ void Snapshotter::appendSuccessfulLoad(const char* name,
 
     loader().reportSuccessful();
     auto stats = getLoadStats(name, durationMs);
-    MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([stats](android_studio::AndroidStudioEvent* event) {
         fillSnapshotMetrics(event, stats);
     });
 #endif
@@ -544,7 +544,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
         showError("Unable to save snapshot: Emulator not fully started.");
         if (reportMetrics) {
             appendFailedSave(
-                pb::EmulatorSnapshotSaveState::
+                android_studio::EmulatorSnapshotSaveState::
                     EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED,
                 FailureReason::AdbOffline);
         }
@@ -557,7 +557,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
                 "Please enter a name for the snapshot to save it.");
         if (reportMetrics) {
             appendFailedSave(
-                pb::EmulatorSnapshotSaveState::
+                android_studio::EmulatorSnapshotSaveState::
                     EMULATOR_SNAPSHOT_SAVE_SKIPPED_NO_SNAPSHOT,
                 FailureReason::NoSnapshotPb);
         }
@@ -571,7 +571,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
                 emuglConfig_renderer_to_string(
                         emuglConfig_get_current_renderer())));
         if (reportMetrics) {
-            appendFailedSave(pb::EmulatorSnapshotSaveState::
+            appendFailedSave(android_studio::EmulatorSnapshotSaveState::
                                  EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED,
                              FailureReason::SnapshotsNotSupported);
         }
@@ -591,7 +591,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
                 "up some space and try again.");
         if (reportMetrics) {
             appendFailedSave(
-                pb::EmulatorSnapshotSaveState::
+                android_studio::EmulatorSnapshotSaveState::
                     EMULATOR_SNAPSHOT_SAVE_SKIPPED_DISK_PRESSURE,
                 FailureReason::OutOfDiskSpace);
         }
@@ -604,7 +604,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
                 "Snapshot saving is currently unavailable due to the "
                 "emulator's current state.");
         if (reportMetrics) {
-            appendFailedSave(pb::EmulatorSnapshotSaveState::
+            appendFailedSave(android_studio::EmulatorSnapshotSaveState::
                                  EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED,
                              FailureReason::SnapshotsNotSupported);
         }
@@ -618,7 +618,7 @@ bool Snapshotter::checkSafeToLoad(const char* name, bool reportMetrics) {
     if (!name) {
         showError("Unable to load snapshot: No snapshot selected.");
         if (reportMetrics) {
-            appendFailedLoad(pb::EmulatorSnapshotLoadState::
+            appendFailedLoad(android_studio::EmulatorSnapshotLoadState::
                                  EMULATOR_SNAPSHOT_LOAD_NO_SNAPSHOT,
                              FailureReason::NoSnapshotPb);
         }
@@ -633,7 +633,7 @@ bool Snapshotter::checkSafeToLoad(const char* name, bool reportMetrics) {
                              emuglConfig_renderer_to_string(
                                      emuglConfig_get_current_renderer())));
         if (reportMetrics) {
-            appendFailedLoad(pb::EmulatorSnapshotLoadState::
+            appendFailedLoad(android_studio::EmulatorSnapshotLoadState::
                                  EMULATOR_SNAPSHOT_LOAD_SKIPPED_UNSUPPORTED,
                              FailureReason::SnapshotsNotSupported);
         }
@@ -654,16 +654,16 @@ void Snapshotter::handleGenericSave(const char* name,
         if (reportMetrics) {
             if (mSaver) {
                 if (auto failureReason = saver().snapshot().failureReason()) {
-                    appendFailedSave(pb::EmulatorSnapshotSaveState::
+                    appendFailedSave(android_studio::EmulatorSnapshotSaveState::
                                              EMULATOR_SNAPSHOT_SAVE_FAILED,
                                      *failureReason);
                 } else {
-                    appendFailedSave(pb::EmulatorSnapshotSaveState::
+                    appendFailedSave(android_studio::EmulatorSnapshotSaveState::
                                              EMULATOR_SNAPSHOT_SAVE_FAILED,
                                      FailureReason::InternalError);
                 }
             } else {
-                appendFailedSave(pb::EmulatorSnapshotSaveState::
+                appendFailedSave(android_studio::EmulatorSnapshotSaveState::
                                          EMULATOR_SNAPSHOT_SAVE_FAILED,
                                  FailureReason::InternalError);
             }
@@ -687,7 +687,7 @@ void Snapshotter::handleGenericLoad(const char* name,
         // we've started actually loading the VM data
         if (auto failureReason = loader().snapshot().failureReason()) {
             if (reportMetrics) {
-                appendFailedLoad(pb::EmulatorSnapshotLoadState::
+                appendFailedLoad(android_studio::EmulatorSnapshotLoadState::
                                      EMULATOR_SNAPSHOT_LOAD_FAILED,
                                  *failureReason);
             }
@@ -715,7 +715,7 @@ void Snapshotter::handleGenericLoad(const char* name,
             deleteSnapshot(name);
             mVmOperations.vmReset();
             if (reportMetrics) {
-                appendFailedLoad(pb::EmulatorSnapshotLoadState::
+                appendFailedLoad(android_studio::EmulatorSnapshotLoadState::
                                      EMULATOR_SNAPSHOT_LOAD_FAILED,
                                  FailureReason::InternalError);
             }

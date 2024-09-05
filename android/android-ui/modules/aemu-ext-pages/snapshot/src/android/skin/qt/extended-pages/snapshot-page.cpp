@@ -122,7 +122,7 @@ using Ui::Settings::SaveSnapshotOnExitUiOrder;
 using namespace android::base;
 using namespace android::snapshot;
 
-namespace pb = android_studio;
+namespace proto = android_studio;
 namespace fc = android::featurecontrol;
 using fc::Feature;
 
@@ -721,7 +721,7 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
     SaveSnapshotOnExit preferenceValue;
     switch (static_cast<SaveSnapshotOnExitUiOrder>(uiIndex)) {
         case SaveSnapshotOnExitUiOrder::Never:
-            MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+            MetricsReporter::get().report([](proto::AndroidStudioEvent* event) {
                 auto counts = event->mutable_emulator_details()
                                       ->mutable_snapshot_ui_counts();
                 counts->set_quickboot_selection_no(
@@ -731,7 +731,7 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
             getConsoleAgents()->settings->avdParams()->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExitUiOrder::Ask:
-            MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+            MetricsReporter::get().report([](proto::AndroidStudioEvent* event) {
                 auto counts = event->mutable_emulator_details()
                                       ->mutable_snapshot_ui_counts();
                 counts->set_quickboot_selection_ask(
@@ -742,7 +742,7 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
             break;
         default:
         case SaveSnapshotOnExitUiOrder::Always:
-            MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+            MetricsReporter::get().report([](proto::AndroidStudioEvent* event) {
                 auto counts = event->mutable_emulator_details()
                                       ->mutable_snapshot_ui_counts();
                 counts->set_quickboot_selection_yes(

@@ -123,12 +123,15 @@
 #include "aemu/base/synchronization/Lock.h"               // for Lock
 #include "aemu/base/synchronization/MessageChannel.h"     // for MessageC...
 #include "aemu/base/threads/FunctorThread.h"              // for FunctorT...
-#include "google/protobuf/repeated_field.h"
+// #include "google/protobuf/repeated_field.h"
 
 #include "sensor_session.pb.h"
 
 namespace android {
 namespace sensorsessionplayback {
+
+// using RecordIterator = google::protobuf::RepeatedPtrField<
+//         const emulator::SensorSession::SensorRecord>::iterator;
 
 class SensorSessionPlayback {
 public:
@@ -208,9 +211,7 @@ private:
     DurationNs mCurrentElapsedTime = 0;
 
     // Tracks current position in data during playback.
-    google::protobuf::RepeatedPtrField<
-            const emulator::SensorSession::SensorRecord>::iterator
-            mCurrentRecordIterator;
+    int mCurrentRecordIteratorPos;
 
     // Collection of current sensor data.
     emulator::SensorSession::SensorRecord mCurrentSensorAggregate;
