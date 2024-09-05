@@ -126,17 +126,16 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                 QString::fromUtf8(message),
                                 static_cast<Ui::OverlayMessageType>(type),
                                 timeoutMs);
-                    } else {
-                        switch (type) {
-                            case WINDOW_MESSAGE_ERROR:
-                                USER_MESSAGE(ERROR) << message;
-                                break;
-                            case WINDOW_MESSAGE_WARNING:
-                                USER_MESSAGE(WARNING) << message;
-                                break;
-                            default:
-                                USER_MESSAGE(INFO) << message;
-                        }
+                    }
+                    switch (type) {
+                        case WINDOW_MESSAGE_ERROR:
+                            USER_MESSAGE(ERROR) << message;
+                            break;
+                        case WINDOW_MESSAGE_WARNING:
+                            USER_MESSAGE(WARNING) << message;
+                            break;
+                        default:
+                            USER_MESSAGE(INFO) << message;
                     }
                 },
         .showMessageWithDismissCallback =
