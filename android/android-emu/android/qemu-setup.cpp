@@ -558,7 +558,7 @@ void android_emulation_teardown() {
     android::automation::AutomationController::shutdown();
     android::videoinjection::VideoInjectionController::shutdown();
     android::base::CpuUsage::get()->stop();
-    auto adbConn = android::emulation::AdbConnection::connection(0);
+    auto adbConn = android::emulation::AdbConnection::connection(std::chrono::milliseconds(0));
     if (adbConn)
         adbConn->close();
     auto memTracker = android::base::MemoryTracker::get();

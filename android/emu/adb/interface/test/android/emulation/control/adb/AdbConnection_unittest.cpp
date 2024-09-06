@@ -101,7 +101,7 @@ Uauxw86jrPSgjbiRB8FyvTo=
 -----END PRIVATE KEY-----)##";
 
 // Make this too aggressive and you can see timeouts! (tsan for example)
-const int FAST_TIMEOUT = 200;
+const std::chrono::milliseconds FAST_TIMEOUT = std::chrono::milliseconds(200);
 
 using emulator::net::Message;
 

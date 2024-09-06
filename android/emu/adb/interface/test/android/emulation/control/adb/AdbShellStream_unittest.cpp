@@ -14,6 +14,7 @@
 
 #include <gmock/gmock.h>  // for GMOCK_PP_INTERNAL_IF_0, GMOCK_PP_INTERNAL_...
 #include <gtest/gtest.h>  // for Test, AssertionResult, Message, TestPartRe...
+#include <chrono>
 #include <ios>
 
 #include "android/base/testing/TestSystem.h"
@@ -30,13 +31,13 @@ struct NopDeleter {
     }
 };
 
-const int DEFAULT_TIMEOUT = 2000;
+const std::chrono::milliseconds DEFAULT_TIMEOUT = std::chrono::milliseconds(2000);
 
 class MockAdbConnection : public AdbConnection {
 public:
     MOCK_METHOD(std::shared_ptr<AdbStream>,
                 open,
-                (const std::string&, uint32_t),
+                (const std::string&, std::chrono::milliseconds),
                 (override));
     MOCK_METHOD(AdbState, state, (), (const override));
     MOCK_METHOD(void, close, (), (override));
@@ -50,7 +51,7 @@ public:
     MockAdbStream(std::streambuf* bf) : AdbStream(bf) {}
     void close() override { setstate(std::ios::eofbit); }
 
-    void setWriteTimeout(uint64_t timeoutMs) override {};
+    void setWriteTimeout(std::chrono::milliseconds timeoutMs) override {};
 };
 
 TEST(AdbShellStream, opens_service_v1) {

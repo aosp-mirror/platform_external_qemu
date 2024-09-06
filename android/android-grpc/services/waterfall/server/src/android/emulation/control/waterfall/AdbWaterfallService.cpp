@@ -70,7 +70,7 @@ public:
         ::waterfall::CmdProgress incoming;
         // We are willing to wait 200ms to establish a connection if none
         // exists.
-        auto adb = AdbConnection::connection(2000);
+        auto adb = AdbConnection::connection(std::chrono::seconds(2));
         if (adb->state() != AdbState::connected || !stream->Read(&incoming)) {
             // TODO(jansene): what error code?
             fst.set_exit_code(0xFFFF);
