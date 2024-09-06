@@ -21,6 +21,7 @@
 #include "android/protobuf/DelimitedSerialization.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
+#include "android/utils/file_io.h"
 
 #include "google_logs_publishing.pb.h"
 #include "studio_stats.pb.h"
@@ -258,7 +259,7 @@ void FileMetricsWriter::openNewFileNoLock() {
     if (!mActiveFile) {
         E("memory allocation failed");
         close(fd);
-        HANDLE_EINTR(unlink(newName.c_str()));
+        HANDLE_EINTR(android_unlink(newName.c_str()));
         mActiveFileLock.reset();
         return;
     }

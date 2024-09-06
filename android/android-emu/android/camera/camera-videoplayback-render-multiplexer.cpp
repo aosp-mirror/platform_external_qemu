@@ -26,6 +26,7 @@
 #include "aemu/base/misc/FileUtils.h"
 #include "android/console.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
+#include "android/utils/file_io.h"
 #include "offworld.pb.h"
 
 #ifdef _WIN32
@@ -270,7 +271,7 @@ void RenderMultiplexer::loadVideo(const std::string& video_data,
     }
     mTempfile = tempfile_create();
     const char* path = tempfile_path(mTempfile);
-    FILE* videofile = fopen(path, "wb");
+    FILE* videofile = android_fopen(path, "wb");
     android::base::ScopedFd fd(fileno(videofile));
 
     // If there is any Error in Loading.

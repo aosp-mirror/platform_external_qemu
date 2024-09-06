@@ -485,7 +485,7 @@ TEST_F(ScreenCapturerTest, pbFileSuccess) {
 
     const std::string tmp_file = PathUtils::join(
                 mTestSystem.getTempRoot()->path(), "normal_file.pb");
-    FILE* file = std::fopen(tmp_file.c_str(), "w");
+    FILE* file = std::android_fopen(tmp_file.c_str(), "w");
     EXPECT_THAT(file, testing::NotNull()) << "Failed to open " << tmp_file;
     EXPECT_THAT(std::fclose(file), testing::Eq(0));
 
