@@ -452,7 +452,7 @@ static void prepareDataFolder(const char* destDirectory,
         // generate from private key
         std::string pubKey;
         if (pubkey_from_privkey(adbKeyPrivPath, &pubKey)) {
-            FILE* pubKeyFile = fopen(guestAdbKeyPath.c_str(), "w");
+            FILE* pubKeyFile = android_fopen(guestAdbKeyPath.c_str(), "w");
             fprintf(pubKeyFile, "%s", pubKey.c_str());
             fclose(pubKeyFile);
             D("Fall back to adbkey %s successfully", adbKeyPrivPath.c_str());
@@ -3382,7 +3382,7 @@ extern "C" int main(int argc, char** argv) {
                 avdInfo_getKernelCmdLinePath(avd), ::free);
 
             const std::unique_ptr<FILE, int(*)(FILE*)> kernelCmdLineFp(
-                ::fopen(kernelCmdLinePath.get(), "rb"), ::fclose);
+                ::android_fopen(kernelCmdLinePath.get(), "rb"), ::fclose);
             if (!kernelCmdLineFp) {
                 break;
             }
