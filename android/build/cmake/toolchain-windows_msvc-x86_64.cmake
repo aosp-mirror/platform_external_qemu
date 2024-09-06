@@ -158,36 +158,39 @@ endif()
 set(ANDROID_ASM_TYPE win64)
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 
-# Uncomment this once we have a rust toolchain for msvc in AOSP
-get_rust_version(RUST_VER)
-set(RUST_PATH
-    "${AOSP_ROOT}\\prebuilts\\gcc\\linux-x86\\host\\x86_64-w64-mingw32-4.8\\x86_64-w64-mingw32\\lib\\\;${AOSP_ROOT}\\prebuilts\\gcc\\linux-x86\\host\\x86_64-w64-mingw32-4.8\\x86_64-w64-mingw32\\bin"
-)
+# Only configure the rust toolchain if one is present.
+if(EXISTS "${AOSP_ROOT}/prebuilts/rust/windows-x86/")
+  # Uncomment this once we have a rust toolchain for msvc in AOSP
+  get_rust_version(RUST_VER)
+  set(RUST_PATH
+      "${AOSP_ROOT}\\prebuilts\\gcc\\linux-x86\\host\\x86_64-w64-mingw32-4.8\\x86_64-w64-mingw32\\lib\\\;${AOSP_ROOT}\\prebuilts\\gcc\\linux-x86\\host\\x86_64-w64-mingw32-4.8\\x86_64-w64-mingw32\\bin"
+  )
 
-string(REPLACE "/" "\\" RUST_PATH "${RUST_PATH}")
-configure_rust(COMPILER_ROOT
-               "${AOSP_ROOT}/prebuilts/rust/windows-x86/${RUST_VER}/bin")
+  string(REPLACE "/" "\\" RUST_PATH "${RUST_PATH}")
+  configure_rust(COMPILER_ROOT
+                 "${AOSP_ROOT}/prebuilts/rust/windows-x86/${RUST_VER}/bin")
 
-if("${Rust_CARGO}" STREQUAL "NOT_FOUND")
-  message(STATUS "No rust toolchain found.")
-else()
-  # We have a rust toolchain, make sure we have the proper linker scripts.
-  create_windows_linker_script()
-  set(Rust_CARGO_TARGET "x86_64-pc-windows-gnu")
-  set(Rust_CARGO_LINKER_FLAGS
-      "--config target.x86_64-pc-windows-gnu.linker=\\\"${WINDOWS_LINK_SCRIPT}\\\""
+  if("${Rust_CARGO}" STREQUAL "NOT_FOUND")
+    message(STATUS "No rust toolchain found.")
+  else()
+    # We have a rust toolchain, make sure we have the proper linker scripts.
+    create_windows_linker_script()
+    set(Rust_CARGO_TARGET "x86_64-pc-windows-gnu")
+    set(Rust_CARGO_LINKER_FLAGS
+        "--config target.x86_64-pc-windows-gnu.linker=\\\"${WINDOWS_LINK_SCRIPT}\\\""
+    )
+  endif()
+
+  # Make sure we add our created libraries to the default link path, and make
+  # sure We always explicitly link against gcc_eh.lib to pick up the stack
+  # handling from rust.
+  set(CMAKE_EXE_LINKER_FLAGS
+      "${CMAKE_EXE_LINKER_FLAGS} /LIBPATH:${RUST_LINK_PATH} ${RUST_LINK_PATH}\\gcc_eh.lib"
+  )
+  set(CMAKE_MODULE_LINKER_FLAGS
+      "${CMAKE_MODULE_LINKER_FLAGS} /LIBPATH:${RUST_LINK_PATH} ${RUST_LINK_PATH}\\gcc_eh.lib"
+  )
+  set(CMAKE_SHARED_LINKER_FLAGS
+      "${CMAKE_SHARED_LINKER_FLAGS} /LIBPATH:${RUST_LINK_PATH} ${RUST_LINK_PATH}\\gcc_eh.lib"
   )
 endif()
-
-# Make sure we add our created libraries to the default link path, and make sure
-# We always explicitly link against gcc_eh.lib to pick up the stack handling
-# from rust.
-set(CMAKE_EXE_LINKER_FLAGS
-    "${CMAKE_EXE_LINKER_FLAGS} /LIBPATH:${RUST_LINK_PATH} ${RUST_LINK_PATH}\\gcc_eh.lib"
-)
-set(CMAKE_MODULE_LINKER_FLAGS
-    "${CMAKE_MODULE_LINKER_FLAGS} /LIBPATH:${RUST_LINK_PATH} ${RUST_LINK_PATH}\\gcc_eh.lib"
-)
-set(CMAKE_SHARED_LINKER_FLAGS
-    "${CMAKE_SHARED_LINKER_FLAGS} /LIBPATH:${RUST_LINK_PATH} ${RUST_LINK_PATH}\\gcc_eh.lib"
-)
