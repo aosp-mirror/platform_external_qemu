@@ -129,13 +129,6 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                     isUnsupportedGpuDriver = true;
                 }
             }
-            if (isUnsupportedGpuDriver) {
-                dwarning(
-                        "Your GPU '%s' has driver version %d.%d.%d, and"
-                        " cannot support Vulkan properly on windows."
-                        " Please update your GPU Driver.",
-                        vkVendor, vkMajor, vkMinor, vkPatch);
-            }
 #endif
 #if defined(__linux__)
             if (strcmp("AMD Custom GPU 0405 (RADV VANGOGH)", vkVendor) == 0) {
@@ -143,11 +136,21 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                 // with VulkanAllocateDeviceMemoryOnly, disable it (b/225541819)
                 isUnsupportedGpuDriver = true;
             }
-            if (isUnsupportedGpuDriver) {
-                dwarning("Your GPU '%s' is not supported for Vulkan.", vkVendor);
-            }
 #endif
+            if (isUnsupportedGpuDriver) {
+                dwarning(
+                        "Your GPU '%s' has driver version %d.%d.%d,"
+                        " and cannot support Vulkan properly."
+                        " Please try updating your GPU Drivers.",
+                        vkVendor, vkMajor, vkMinor, vkPatch);
+            }
             free(vkVendor);
+        } else {
+            // Could not properly detect the hardware parameters, disable Vulkan
+            dwarning(
+                    "Could not detect GPU properly for Vulkan emulation."
+                    " Please try updating your GPU Drivers.");
+            isUnsupportedGpuDriver = true;
         }
     }
 #endif
