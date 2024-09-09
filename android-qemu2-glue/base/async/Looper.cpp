@@ -201,6 +201,7 @@ public:
 
         ~Timer() {
             if (sSkipTimerOps) return;
+            ::timer_join(mTimer);
             ::timer_free(mTimer);
         }
 

@@ -29,6 +29,8 @@
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
 
+#include "block/aio-wait.h"
+
 #ifdef CONFIG_POSIX
 #include <pthread.h>
 #endif
@@ -414,6 +416,18 @@ void timer_del(QEMUTimer *ts)
         timer_del_locked(timer_list, ts);
         qemu_mutex_unlock(&timer_list->active_timers_lock);
     }
+}
+
+static void timer_join_noop(void *unused) {}
+
+/* Make sure the timer callback is done */
+void timer_join(QEMUTimer *ts)
+{
+    /* A side effect of aio_wait_bh_oneshot is all
+     * timer callbacks are done once it returns.
+     */
+    aio_wait_bh_oneshot(qemu_get_aio_context(),
+                        &timer_join_noop, NULL);
 }
 
 /* modify the current timer so that it will be fired when current_time
