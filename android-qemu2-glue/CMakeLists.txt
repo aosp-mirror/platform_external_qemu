@@ -20,6 +20,7 @@ set(android-qemu2-glue_src
     base/async/CpuLooper.cpp
     base/async/Looper.cpp
     base/files/QemuFileStream.cpp
+    base/files/KernelCmdLineLoader.cpp
     display.cpp
     drive-share.cpp
     dtb.cpp
@@ -141,8 +142,10 @@ target_link_libraries(
           nlohmann_json::nlohmann_json PIXMAN::PIXMAN)
 
 android_add_test(
-  TARGET libqemu2-glue_unittests SRC tests/VirtioGpuTimelines_unittest.cpp
-                                     utils/register_crash_info_unittest.cpp)
+  TARGET libqemu2-glue_unittests
+  SRC base/files/KernelCmdLineLoader_unittest.cpp
+      tests/VirtioGpuTimelines_unittest.cpp
+      utils/register_crash_info_unittest.cpp)
 
 target_link_libraries(
   libqemu2-glue_unittests
@@ -157,5 +160,5 @@ target_link_libraries(
 
 target_include_directories(
   libqemu2-glue_unittests
-  PRIVATE . ../include ../android/android-emu-base ../android/android-emu
+  PRIVATE . ../include ../android/android-emu-base ../android/android-emu .
           ${VIRGLRENDERER_INCLUDE_DIR})
