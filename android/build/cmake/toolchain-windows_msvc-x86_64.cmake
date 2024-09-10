@@ -45,12 +45,12 @@ if(WIN32)
 
   # clang-cl acts as a cl.exe drop replacement.
   set(CLANG_CL ${CLANG_DIR}/bin/clang-cl.exe)
+  internal_get_env_cache(CC_EXE)
   if(OPTION_CCACHE)
     # Fix potential path escaping issues..
     string(REPLACE "\\" "/" OPTION_CCACHE "${OPTION_CCACHE}")
     message(STATUS "Enabling ${OPTION_CCACHE} with ${CLANG_CL}")
     # Compile the wrapper..
-    internal_get_env_cache(CC_EXE)
 
     if(NOT CC_EXE)
       message(STATUS "Building flattener to handle @rsp files.")
@@ -64,28 +64,22 @@ if(WIN32)
         ERROR_VARIABLE STD_ERR
         RESULT_VARIABLE ERR_CODE)
       if(ERR_CODE)
-        # Try again but set vcvars64.bat first
-        execute_process(
-          COMMAND
-            "cmd" "/c" "$ENV{VSINSTALLDIR}//VC//Auxiliary//Build//vcvars64.bat"
-            "&&" "${CLANG_CL}"
-            "${ANDROID_QEMU2_TOP_DIR}/android/build/win/flattenrsp.cpp"
-            "/DCLANG_CL=${CLANG_CL}" "/DCCACHE=${OPTION_CCACHE}" "/DUNICODE"
-            "/O2" "/std:c++17" "/Fe:${CMAKE_BINARY_DIR}/cc.exe" COMMAND_ECHO
-            STDOUT COMMAND_ERROR_IS_FATAL ANY
-          OUTPUT_VARIABLE STD_OUT
-          ERROR_VARIABLE STD_ERR)
+        message(
+          WARNING "Disabling sccache, will use ${CLANG_CL} as is instead.")
+        internal_set_env_cache(CC_EXE "${CLANG_CL}")
+      else()
+        internal_set_env_cache(CC_EXE "${CMAKE_BINARY_DIR}/cc.exe")
       endif()
-
-      internal_set_env_cache(CC_EXE "${CMAKE_BINARY_DIR}/cc.exe")
     endif()
-    set(CMAKE_C_COMPILER "${CC_EXE}")
-    set(CMAKE_CXX_COMPILER "${CC_EXE}")
   else()
-    # Create a clang/cl wrapper.
-    set(CMAKE_C_COMPILER "${CLANG_CL}")
-    set(CMAKE_CXX_COMPILER "${CLANG_CL}")
+    # NOT OPTION_CCACHE
+    if(NOT CC_EXE)
+      internal_set_env_cache(CC_EXE "${CLANG_CL}")
+    endif()
   endif()
+
+  set(CMAKE_C_COMPILER "${CC_EXE}")
+  set(CMAKE_CXX_COMPILER "${CC_EXE}")
   set(ANDROID_LLVM_SYMBOLIZER "${CLANG_DIR}/bin/llvm-symbolizer.exe")
   # Set the debug flags, erasing whatever cmake stuffs in there. We are going to
   # produce "fat" binaries with all debug information in there.
