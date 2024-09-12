@@ -42,6 +42,7 @@
 #include "android/jdwp/Jdwp.h"                               // for JdwpComm...
 #include "android/metrics/MetricsReporter.h"
 #include "android/snapshot/Snapshotter.h"
+#include "android/utils/file_io.h"
 #include "snapshot/interface.h"  // for androidS...
 #include "openssl/base.h"                // for RSA
 #include "openssl/nid.h"                 // for NID_sha1
@@ -75,7 +76,7 @@ static int s_version = A_VERSION_MIN;
 #define TOKEN_SIZE 20
 
 static bool read_key(const char* file, std::vector<RSA*>& keys) {
-    FILE* fp = fopen(file, "r");
+    FILE* fp = android_fopen(file, "r");
     if (!fp) {
         DD("Failed to open '%s': %s", file, strerror(errno));
         return false;

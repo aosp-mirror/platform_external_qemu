@@ -4,9 +4,11 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR
   src
-  SRC android/base/logging/ColorLogSink.cpp android/base/logging/Log.cpp
+  SRC android/base/logging/ColorLogSink.cpp
+      android/base/logging/Log.cpp
       android/base/logging/LogConfiguration.cpp
       android/base/logging/LogFormatter.cpp
+      android/base/logging/StudioLogSink.cpp
   DEPS absl::absl_log absl::log_initialize android-emu-base-headers)
 
 target_compile_definitions(android-emu-base-logging PRIVATE LOGGING_API_SHARED)
@@ -24,6 +26,7 @@ android_add_test(
   SRC src/android/base/logging/LogFormatter.cpp
       test/android/base/logging/Log_unittest.cpp
       test/android/base/logging/LogFormatter_unittest.cpp
+      test/android/base/logging/StudioLogSink_unittest.cpp
   DEPS absl::absl_log absl::log_initialize absl::str_format
        android-emu-base-headers android-emu-base-logging gmock_main)
 target_include_directories(android-emu-base-logging_unittests PRIVATE src)

@@ -63,7 +63,7 @@
 typedef SSIZE_T ssize_t;
 typedef int mode_t;
 #ifdef _WIN64
-typedef int64_t pid_t;
+typedef unsigned int pid_t;
 #else
 typedef int pid_t;
 #endif

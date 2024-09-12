@@ -320,6 +320,30 @@ static android_studio::EmulatorAvdInfo::EmulatorDeviceName getDeviceName() {
     if (0 == strcmp(id, "automotive_1024p_landscape")) {
         return android_studio::EmulatorAvdInfo::AUTOMOTIVE_1024P_LANDSCAPE;
     }
+    if (0 == strcmp(id, "automotive_1080p_landscape")) {
+        return android_studio::EmulatorAvdInfo::AUTOMOTIVE_1080P_LANDSCAPE;
+    }
+    if (0 == strcmp(id, "automotive_1408p_landscape_with_play")) {
+        return android_studio::EmulatorAvdInfo::AUTOMOTIVE_1408P_LANDSCAPE_WITH_PLAY;
+    }
+    if (0 == strcmp(id, "automotive_1408p_landscape_with_google_apis")) {
+        return android_studio::EmulatorAvdInfo::AUTOMOTIVE_1408P_LANDSCAPE_WITH_GOOGLE_APIS;
+    }
+    if (0 == strcmp(id, "automotive_portrait")) {
+        return android_studio::EmulatorAvdInfo::AUTOMOTIVE_PORTRAIT;
+    }
+    if (0 == strcmp(id, "automotive_distant_display")) {
+        return android_studio::EmulatorAvdInfo::AUTOMOTIVE_DISTANT_DISPLAY;
+    }
+    if (0 == strcmp(id, "automotive_distant_display_with_play")) {
+        return android_studio::EmulatorAvdInfo::AUTOMOTIVE_DISTANT_DISPLAY_WITH_PLAY;
+    }
+    if (0 == strcmp(id, "automotive_ultrawide")) {
+        return android_studio::EmulatorAvdInfo::AUTOMOTIVE_ULTRAWIDE_DISPLAY;
+    }
+    if (0 == strcmp(id, "automotive_large_portrait")) {
+        return android_studio::EmulatorAvdInfo::AUTOMOTIVE_LARGE_PORTRAIT;
+    }
     if (0 == strcmp(id, "desktop_small")) {
         return android_studio::EmulatorAvdInfo::DESKTOP_SMALL;
     }

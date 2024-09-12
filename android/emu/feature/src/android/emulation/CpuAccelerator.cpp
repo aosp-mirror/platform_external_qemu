@@ -723,23 +723,6 @@ CpuAccelerator GetCurrentCpuAccelerator() {
     std::string status;
     AndroidCpuAcceleration status_code = ANDROID_CPU_ACCELERATION_ERROR;
 
-#if !HAVE_KVM
-#if APPLE_SILICON
-    // don't check
-#else
-    if (!android::hasModernX86VirtualizationFeatures()) {
-        // TODO: Support snapshots when UG is not supported.
-        fprintf(stderr,
-                "Warning: Quick Boot / Snapshots not supported on this "
-                "machine. "
-                "A CPU with EPT + UG features is currently needed. "
-                "We will address this in a future release.\n");
-        featurecontrol::setEnabledOverride(featurecontrol::FastSnapshotV1,
-                                           false);
-    }
-#endif
-#endif
-
 #if HAVE_KVM
     status_code = ProbeKVM(&status);
     if (status_code == ANDROID_CPU_ACCELERATION_READY) {

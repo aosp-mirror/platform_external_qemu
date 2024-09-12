@@ -29,7 +29,6 @@
 #include "aemu/base/files/Stream.h"
 #include "aemu/base/files/StreamSerializing.h"
 #include "aemu/base/logging/Log.h"
-#include "aemu/base/logging/Log.h"
 #include "aemu/base/logging/LogSeverity.h"
 #include "android/avd/info.h"
 #include "android/avd/util.h"
@@ -980,27 +979,19 @@ void MultiDisplay::recomputeLayoutLocked() {
 void MultiDisplay::recomputeStackedLayoutLocked() {
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>>
             rectangles, newRectangles;
-    uint32_t monitorWidth, monitorHeight;
-    if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
-        dwarning("Unable to get monitor width and height");
-        return;
-    }
-
     for (const auto& iter : mMultiDisplay) {
         if (iter.first == 0 || iter.second.cb != 0) {
             rectangles[iter.first] =
                     std::make_pair(iter.second.width, iter.second.height);
         }
     }
-    if (android::automotive::isDistantDisplaySupported(
-                getConsoleAgents()->settings->avdInfo())) {
-        // Locate the most wide width display on a separate row
-        newRectangles = android::base::resolveStackedLayout(rectangles);
-    } else {
-        // Use legacy layout for non distant display emulator
-        double monitorRatio = (double)monitorHeight / (double)monitorWidth;
-        newRectangles = android::base::resolveLayout(rectangles, monitorRatio);
+    if (rectangles.size() <= 2) {
+        // Stacked layout is not needed
+        return;
     }
+    const bool isDistantDisplay =
+        android::automotive::isDistantDisplaySupported(getConsoleAgents()->settings->avdInfo());
+    newRectangles = android::base::resolveStackedLayout(rectangles, isDistantDisplay);
 
     for (const auto& iter : newRectangles) {
         mMultiDisplay[iter.first].pos_x = iter.second.first;

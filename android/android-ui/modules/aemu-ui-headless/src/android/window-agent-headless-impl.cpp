@@ -29,6 +29,7 @@
 #include "glm/detail/type_vec.hpp"                     // for vec3
 #include "glm/detail/type_vec3.hpp"                    // for tvec3
 #include "host-common/window_agent.h"                  // for WINDOW_MESSAGE...
+#include "android/base/logging/StudioMessage.h"
 
 static bool gUserSettingIsDontSaveSnapshot = true;
 
@@ -73,13 +74,13 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 [](const char* message, WindowMessageType type, int timeoutMs) {
                     switch (type) {
                         case WINDOW_MESSAGE_ERROR:
-                            derror("%s", message);
+                            USER_MESSAGE(ERROR) << message;
                             break;
                         case WINDOW_MESSAGE_WARNING:
-                            dwarning("%s", message);
+                            USER_MESSAGE(WARNING) << message;
                             break;
                         default:
-                            dinfo("%s", message);
+                            USER_MESSAGE(INFO) << message;
                     }
                 },
         .showMessageWithDismissCallback =
@@ -93,13 +94,13 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     // user doesn't get a chance to dismiss.
                     switch (type) {
                         case WINDOW_MESSAGE_ERROR:
-                            derror("%s", message);
+                            USER_MESSAGE(ERROR) << message;
                             break;
                         case WINDOW_MESSAGE_WARNING:
-                            dwarning("%s", message);
+                            USER_MESSAGE(WARNING) << message;
                             break;
                         default:
-                            dinfo("%s", message);
+                            USER_MESSAGE(INFO) << message;
                     }
                 },
         .fold = [](bool is_fold) -> bool {

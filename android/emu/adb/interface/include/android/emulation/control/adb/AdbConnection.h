@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <cstdint>  // for uint32_t, uint64_t
-#include <istream>  // for iostream, streambuf
-#include <limits>   // for numeric_limits
-#include <memory>   // for shared_ptr
-#include <string>   // for string
+#include <chrono>
+#include <cstdint>
+#include <istream>
+#include <limits>
+#include <memory>
+#include <string>
 
 namespace android {
 namespace base {
@@ -56,8 +57,7 @@ public:
     // time we are willing to wait for ADBD to respond with
     // a reply to a WRITE request. You should only need this
     // for unit tests, as we expect ADBD to behave properly.
-    virtual void setWriteTimeout(
-            uint64_t timeoutMs = std::numeric_limits<uint64_t>::max()) = 0;
+    virtual void setWriteTimeout(std::chrono::milliseconds timeout) = 0;
 
 protected:
     AdbStream(std::streambuf* buf) : std::iostream(buf) {}
@@ -94,8 +94,10 @@ public:
     // Note that setting aggressive timeouts can result in returning
     // before the handshake has completed. Which can vary greatly depending
     // where you are in the image boot process.
-    virtual std::shared_ptr<AdbStream> open(const std::string& service,
-                                            uint32_t timeoutMs = 2000) = 0;
+    virtual std::shared_ptr<AdbStream> open(
+            const std::string& service,
+            std::chrono::milliseconds timeout =
+                    std::chrono::milliseconds(2000)) = 0;
 
     // Returns the state..
     virtual AdbState state() const = 0;
@@ -113,7 +115,7 @@ public:
     // Note: establishing the connection will continue if the timeout is
     // non-zero. A larger timeout usually reduces the chance of state()
     // not returning ::connected, which is needed for querying features.
-    static std::shared_ptr<AdbConnection> connection(int timeoutMs = 1000);
+    static std::shared_ptr<AdbConnection> connection(std::chrono::milliseconds timeoutMs);
 
     // Inject the adb socket into the connection. This should be called
     // before anyone obtains a reference to an AdbConnection.
