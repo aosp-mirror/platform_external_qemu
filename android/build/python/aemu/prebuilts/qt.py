@@ -87,6 +87,8 @@ def checkDependencies():
         logging.info(">> Checking for node.js version >= 12")
         deps_common.checkNodeJsVersion(min_vers=(12, 0))
 
+        # If we ever switch back to AOSP python, we need to uncomment out the stuff below.
+        """
         # QtWebEngine needs python html5lib package
         #
         # Since we use a custom python installation, we need to manually install these packages and
@@ -94,6 +96,7 @@ def checkDependencies():
         PYTHON_INDEX_URL = os.path.join(AOSP_ROOT, "external", "adt-infra", "devpi", "repo", "simple")
         INDEX_FILE_PREFIX = "file:///" if HOST_OS == "windows" else "file://"
         pip.main(["install", "html5lib", '-i', f"{INDEX_FILE_PREFIX}{PYTHON_INDEX_URL}"])
+        """
         logging.info(">> Checking for python package html5lib")
         deps_common.checkPythonPackage("html5lib")
 
