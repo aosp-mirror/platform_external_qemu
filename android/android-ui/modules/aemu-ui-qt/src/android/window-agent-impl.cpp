@@ -46,6 +46,7 @@
 #include "host-common/misc.h"
 #include "host-common/qt_ui_defs.h"
 #include "host-common/window_agent.h"
+#include "android/base/logging/StudioMessage.h"
 
 /* set >0 for very verbose debugging */
 // #define DEBUG 1
@@ -125,17 +126,16 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                 QString::fromUtf8(message),
                                 static_cast<Ui::OverlayMessageType>(type),
                                 timeoutMs);
-                    } else {
-                        switch (type) {
-                            case WINDOW_MESSAGE_ERROR:
-                                derror("%s", message);
-                                break;
-                            case WINDOW_MESSAGE_WARNING:
-                                dwarning("%s", message);
-                                break;
-                            default:
-                                dinfo("%s", message);
-                        }
+                    }
+                    switch (type) {
+                        case WINDOW_MESSAGE_ERROR:
+                            USER_MESSAGE(ERROR) << message;
+                            break;
+                        case WINDOW_MESSAGE_WARNING:
+                            USER_MESSAGE(WARNING) << message;
+                            break;
+                        default:
+                            USER_MESSAGE(INFO) << message;
                     }
                 },
         .showMessageWithDismissCallback =

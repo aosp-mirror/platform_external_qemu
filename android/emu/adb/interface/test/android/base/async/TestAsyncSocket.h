@@ -13,6 +13,7 @@
 #include "aemu/base/async/AsyncSocketAdapter.h"
 
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
@@ -82,7 +83,7 @@ public:
             mCloseCv.wait(&mConnectLock);
     }
 
-    uint64_t recv(char* buffer, uint64_t bufferSize) override {
+    ssize_t recv(char* buffer, uint64_t bufferSize) override {
         AutoLock lock(mReadLock);
         {
             AutoLock lock(mResponsesLock);
@@ -107,7 +108,7 @@ public:
         return buflen;
     }
 
-    uint64_t send(const char* buffer, uint64_t bufferSize) override {
+    ssize_t send(const char* buffer, uint64_t bufferSize) override {
         AutoLock sendLock(mSendLock);
         std::string msg(buffer, bufferSize);
         AutoLock lock(mResponsesLock);
@@ -160,12 +161,12 @@ public:
         return true;
     }
 
-    bool connectSync(uint64_t timeoutms = 1000) override {
+    bool connectSync(std::chrono::milliseconds timeoutms = std::chrono::milliseconds(1000)) override {
         AutoLock watchLock(mConnectLock);
         if (connected())
             return true;
         connect();
-        auto waituntilus = System::get()->getUnixTimeUs() + timeoutms * 1000;
+        auto waituntilus = System::get()->getUnixTimeUs() + timeoutms.count() * 1000;
         while (!connected() && System::get()->getUnixTimeUs() < waituntilus) {
             mConnectCv.timedWait(&mConnectLock, waituntilus);
         }

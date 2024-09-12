@@ -71,6 +71,8 @@ public:
 
     void SetVerbosity(bool verbose) { mVerbose = verbose; };
 
+    void SetOutputStream(std::ostream* stream) { mOutputStream = stream; };
+
 private:
     std::ostream* mOutputStream;
     bool mUseColor;

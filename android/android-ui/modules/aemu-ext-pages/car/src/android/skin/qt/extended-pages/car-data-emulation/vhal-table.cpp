@@ -40,6 +40,7 @@
 #include "android/skin/qt/raised-material-button.h"
 #include "aemu/base/Log.h"                               // for LogStream...
 #include "android/avd/info.h"
+#include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
 #include "aemu/base/files/PathUtils.h"
 #include "android/console.h"  // for getConsoleAgents, AndroidCons...
 
@@ -106,6 +107,10 @@ VhalTable::~VhalTable() {
 }
 
 void VhalTable::initVhalPropertyTable() {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_ANDROID_AUTO) {
+        // VHAL is only relevant to automotive devices
+        return;
+    }
     // Extend VHAL properties dictionaries with json descriptions
     QFileInfo sysImgFileInfo(avdInfo_getSystemImagePath(getConsoleAgents()->settings->avdInfo()));
     QString sysImgPath(sysImgFileInfo.absolutePath());

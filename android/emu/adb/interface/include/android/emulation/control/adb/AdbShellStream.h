@@ -12,25 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <stddef.h>                                       // for size_t
-#include <memory>                                         // for shared_ptr
-#include <string>                                         // for string
-#include <vector>                                         // for vector
+#include <stddef.h>
+#include <chrono>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include "android/emulation/control/adb/AdbConnection.h"  // for AdbConnection
+#include "android/emulation/control/adb/AdbConnection.h"
 
 namespace android {
 namespace emulation {
 
-// An AdbShellStream abstracts the ADBD shell service so that v1 protocol has the same
-// interface as the v2 protocol. More details on the ShellProtocol can be found as
-// part of the adb source here:
+// An AdbShellStream abstracts the ADBD shell service so that v1 protocol has
+// the same interface as the v2 protocol. More details on the ShellProtocol can
+// be found as part of the adb source here:
 // https://android.googlesource.com/platform/system/core/+/master/adb/shell_protocol.h
 class AdbShellStream {
 public:
     // cmd to be executed on shell. Shell V2 will be chosen if
     // the system image supports it.
-    AdbShellStream(std::string cmd, std::shared_ptr<AdbConnection> connection = AdbConnection::connection(2000));
+    AdbShellStream(std::string cmd,
+                   std::shared_ptr<AdbConnection> connection =
+                           AdbConnection::connection(std::chrono::milliseconds(2000)));
     ~AdbShellStream();
 
     bool good();
@@ -50,14 +53,11 @@ public:
     //    - The stream has no more bytes available.
     // Keep this in mind that there is a tradeoff between
     // efficiency and responsiveness.
-    bool read(std::vector<char>& sout,
-              std::vector<char>& serr,
-              int& exitCode);
+    bool read(std::vector<char>& sout, std::vector<char>& serr, int& exitCode);
 
     // Reads until the stream is bad / eof, returning the exitcode.
     // note the exit code is only valid if the stream is eof.
-    int readAll(std::vector<char>& sout,
-              std::vector<char>& serr);
+    int readAll(std::vector<char>& sout, std::vector<char>& serr);
 
     // Write bytes to stdin
     bool write(std::string sin);

@@ -313,7 +313,7 @@ static auto filelock_lock(FileLock* lock, int timeout) -> int {
         if (rc == 0) {
             /* The link() operation suceeded */
             lock->locked = 1;
-            rc = HANDLE_EINTR(unlink(lock->temp));
+            rc = HANDLE_EINTR(android_unlink(lock->temp));
             return 0;
         }
 
@@ -339,7 +339,7 @@ static auto filelock_lock(FileLock* lock, int timeout) -> int {
             win_pid = static_cast<char*>(malloc(win_pid_len));
             snprintf(win_pid, win_pid_len, "%s" PATH_SEP WIN_PIDFILE_NAME,
                      lock->lock);
-            HANDLE_EINTR(unlink(win_pid));
+            HANDLE_EINTR(android_unlink(win_pid));
             free(win_pid);
 
             rc = HANDLE_EINTR(android_rmdir(lock->lock));
@@ -410,7 +410,7 @@ static auto filelock_lock(FileLock* lock, int timeout) -> int {
 
         if (freshness == FRESHNESS_STALE) {
             D("Removing stale lockfile '%s'", lock->lock);
-            rc = HANDLE_EINTR(unlink(lock->lock));
+            rc = HANDLE_EINTR(android_unlink(lock->lock));
         }
 
         const int kSleepDurationMsIncrement = 50;
@@ -441,7 +441,7 @@ Fail:
         IGNORE_EINTR(close(lock_fd));
     }
 
-    HANDLE_EINTR(unlink(lock->temp));
+    HANDLE_EINTR(android_unlink(lock->temp));
     return -1;
 }
 #endif

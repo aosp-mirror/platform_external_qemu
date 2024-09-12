@@ -45,7 +45,7 @@ static android::base::LazyInstance<AdbLogcat> sAdbLogcat = LAZY_INSTANCE_INIT;
 AdbLogcat::AdbLogcat() : mStreamReader([this]() { this->readStream(); }) {}
 
 void AdbLogcat::readStream() {
-    auto connection = AdbConnection::connection();
+    auto connection = AdbConnection::connection(std::chrono::milliseconds(500));
     AdbShellStream shell("logcat", connection);
 
     std::string currentLine;

@@ -18,6 +18,7 @@
 #include "aemu/base/threads/Async.h"
 #include "aemu/base/threads/Thread.h"
 #include "android-qemu2-glue/qemu-console-factory.h"
+#include "android-qemu2-glue/base/files/KernelCmdLineLoader.h"
 #include "android/android.h"
 #include "android/avd/BugreportInfo.h"
 #include "android/base/files/IniFile.h"
@@ -452,7 +453,7 @@ static void prepareDataFolder(const char* destDirectory,
         // generate from private key
         std::string pubKey;
         if (pubkey_from_privkey(adbKeyPrivPath, &pubKey)) {
-            FILE* pubKeyFile = fopen(guestAdbKeyPath.c_str(), "w");
+            FILE* pubKeyFile = android_fopen(guestAdbKeyPath.c_str(), "w");
             fprintf(pubKeyFile, "%s", pubKey.c_str());
             fclose(pubKeyFile);
             D("Fall back to adbkey %s successfully", adbKeyPrivPath.c_str());
@@ -3376,35 +3377,7 @@ extern "C" int main(int argc, char** argv) {
             }
         }
 
-        std::string systemImageKernelCommandLine;
-        do {
-            const std::unique_ptr<char, void(*)(void*)> kernelCmdLinePath(
-                avdInfo_getKernelCmdLinePath(avd), ::free);
-
-            const std::unique_ptr<FILE, int(*)(FILE*)> kernelCmdLineFp(
-                ::fopen(kernelCmdLinePath.get(), "rb"), ::fclose);
-            if (!kernelCmdLineFp) {
-                break;
-            }
-
-            while (true) {
-                char buf[256];
-                const size_t n = fread(buf, 1, sizeof(buf), kernelCmdLineFp.get());
-                systemImageKernelCommandLine.append(buf, n);
-                if (n < sizeof(buf)) {
-                    break;
-                }
-            }
-
-            systemImageKernelCommandLine.erase(
-                std::find_if(systemImageKernelCommandLine.rbegin(),
-                             systemImageKernelCommandLine.rend(),
-                             [](unsigned char ch) {
-                                 return !std::isspace(ch);
-                             }).base(),
-                systemImageKernelCommandLine.end());
-        } while (false);
-
+        std::string systemImageKernelCommandLine = android::qemu::loadKernelCmdLineFromAvd(avd);
         std::string append_arg = emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, real_console_tty_prefix,
                 systemImageKernelCommandLine.c_str(),

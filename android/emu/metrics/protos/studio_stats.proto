@@ -1434,6 +1434,14 @@ message EmulatorAvdInfo {
         PIXEL_9_PRO = 42;
         PIXEL_9_PRO_XL = 43;
         PIXEL_9_PRO_FOLD = 44;
+        AUTOMOTIVE_1080P_LANDSCAPE = 45;
+        AUTOMOTIVE_1408P_LANDSCAPE_WITH_PLAY = 46;
+        AUTOMOTIVE_1408P_LANDSCAPE_WITH_GOOGLE_APIS = 47;
+        AUTOMOTIVE_PORTRAIT = 48;
+        AUTOMOTIVE_DISTANT_DISPLAY = 49;
+        AUTOMOTIVE_DISTANT_DISPLAY_WITH_PLAY = 50;
+        AUTOMOTIVE_ULTRAWIDE_DISPLAY = 51;
+        AUTOMOTIVE_LARGE_PORTRAIT = 52;
     }
     // Name of the AVD. Deprecated as it could potentially contain PII.
     optional string name = 1 [deprecated = true];

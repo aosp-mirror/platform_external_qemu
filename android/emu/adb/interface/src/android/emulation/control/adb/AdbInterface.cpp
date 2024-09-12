@@ -179,7 +179,7 @@ public:
 
 private:
     void execute(int timeout_ms) {
-        auto connection = AdbConnection::connection(timeout_ms);
+        auto connection = AdbConnection::connection(std::chrono::milliseconds(timeout_ms));
         AdbShellStream shell(mCmd, connection);
         auto output =
                 std::unique_ptr<std::stringstream>(new std::stringstream());
