@@ -605,15 +605,18 @@ bool Snapshot::save() {
 }
 
 bool Snapshot::saveFailure(FailureReason reason) {
-    if (reason == FailureReason::Empty) {
+    switch (reason) {
+    case FailureReason::Empty:
+    case FailureReason::NoSnapshotPb:
         mLatestFailureReason = reason;
-        // Don't write this to disk
-        return true;
+        return true;  // Don't write this to disk
+
+    default:
+        if (reason == mLatestFailureReason) {
+            return true;  // Nothing to do
+        }
     }
-    if (reason == mLatestFailureReason) {
-        // Nothing to do
-        return true;
-    }
+
     mSnapshotPb.set_failed_to_load_reason_code(int64_t(reason));
     if (!mSnapshotPb.has_version()) {
         mSnapshotPb.set_version(kVersion);
