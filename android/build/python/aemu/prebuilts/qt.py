@@ -18,7 +18,6 @@ import atexit
 import glob
 import logging
 import os
-import pip
 import re
 import shutil
 import subprocess
