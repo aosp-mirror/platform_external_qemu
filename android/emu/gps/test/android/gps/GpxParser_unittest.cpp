@@ -243,14 +243,13 @@ TEST(GpxParser, ParseValidLocation) {
     GpsFixArray locations;
     std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
-    EXPECT_TRUE(isOk);
+    ASSERT_TRUE(isOk);
     EXPECT_EQ(1U, locations.size());
     const GpsFix& wpt = locations[0];
-
     EXPECT_EQ("Desc", wpt.description);
-    EXPECT_FLOAT_EQ(6.02, wpt.elevation);
-    EXPECT_FLOAT_EQ(3.1415, wpt.latitude);
-    EXPECT_FLOAT_EQ(9.81, wpt.longitude);
+    EXPECT_DOUBLE_EQ(6.02, wpt.elevation);
+    EXPECT_DOUBLE_EQ(3.1415, wpt.latitude);
+    EXPECT_DOUBLE_EQ(9.81, wpt.longitude);
     EXPECT_EQ("Name", wpt.name);
 }
 
@@ -283,9 +282,9 @@ TEST(GpxParser, DISABLED_ParseValidLocationCommaLocale) {
     const GpsFix& wpt = locations[0];
 
     EXPECT_EQ("Desc", wpt.description);
-    EXPECT_FLOAT_EQ(6.02, wpt.elevation);
-    EXPECT_FLOAT_EQ(3.1415, wpt.latitude);
-    EXPECT_FLOAT_EQ(9.81, wpt.longitude);
+    EXPECT_DOUBLE_EQ(6.02, wpt.elevation);
+    EXPECT_DOUBLE_EQ(3.1415, wpt.latitude);
+    EXPECT_DOUBLE_EQ(9.81, wpt.longitude);
     EXPECT_EQ("Name", wpt.name);
 }
 
