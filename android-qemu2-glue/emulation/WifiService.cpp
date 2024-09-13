@@ -176,6 +176,8 @@ std::shared_ptr<WifiService> Builder::build() {
                           "initialization failure.";
             return nullptr;
         }
+    } else {
+        LOG(INFO) << "Qemu slirp is disabled.";
     }
 #else
     if (mRedirectToNetsim) {
@@ -185,8 +187,10 @@ std::shared_ptr<WifiService> Builder::build() {
     }
 #endif
 
-    if (mSlirpOpts.disabled) {
-        dinfo("Qemu slirp is disabled.");
+    if (!mSlirpOpts.disabled && !slirp) {
+        LOG(ERROR) << "Failed to initialize WiFi service: Slirp initialization "
+                      "failure.";
+        return nullptr;
     }
 
     auto virtioWifi = std::make_shared<VirtioWifiForwarder>(
