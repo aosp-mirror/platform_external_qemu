@@ -388,6 +388,10 @@ bool Snapshot::isLoaded() {
 }
 
 bool Snapshot::writeSnapshotToDisk() {
+    if (path_mkdir_if_needed_no_cow(mDataDir.c_str(), 0744)) {
+        return false;
+    }
+
     auto res = saveProtobuf(PathUtils::join(mDataDir, kSnapshotProtobufName),
                             mSnapshotPb, &mSize);
     return res == ProtobufSaveResult::Success;
