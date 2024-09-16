@@ -608,6 +608,7 @@ bool Snapshot::saveFailure(FailureReason reason) {
     switch (reason) {
     case FailureReason::Empty:
     case FailureReason::NoSnapshotPb:
+    case FailureReason::NoSnapshotInImage:
         mLatestFailureReason = reason;
         return true;  // Don't write this to disk
 
