@@ -180,6 +180,7 @@ EXPORTS
     qdev_prop_bit
     qdev_prop_size
     qdev_prop_uint32
+    qdev_prop_uint64
     qdev_realize
     qemu_add_polling_cb
     qemu_add_wait_object

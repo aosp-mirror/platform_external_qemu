@@ -1,6 +1,6 @@
 LIBRARY qemu-system-aarch64.exe
 EXPORTS
-   _TRACE_CLOCK_DISCONNECT_DSTATE
+    _TRACE_CLOCK_DISCONNECT_DSTATE
     _TRACE_CLOCK_PROPAGATE_DSTATE
     _TRACE_CLOCK_SET_DSTATE
     _TRACE_CLOCK_SET_MUL_DIV_DSTATE
@@ -176,9 +176,11 @@ EXPORTS
     qdev_prop_bit
     qdev_prop_size
     qdev_prop_uint32
+    qdev_prop_uint64
     qdev_realize
     qemu_add_polling_cb
     qemu_add_wait_object
+    qemu_bh_cancel
     qemu_bh_delete
     qemu_bh_new_full
     qemu_bh_schedule
@@ -240,8 +242,11 @@ EXPORTS
     qemu_put_be64
     qemu_put_buffer
     qemu_put_byte
+    qemu_register_shutdown_notifier
     qemu_set_cloexec
+    qemu_set_fd_handler
     qemu_socket_set_block
+    qemu_system_shutdown_request
     qemu_thread_create
     qemu_thread_get_self
     qemu_wait_io_event
@@ -310,8 +315,10 @@ EXPORTS
     tcg_flush_jmp_cache
     tcg_register_thread
     timer_del
+    timer_expire_time_ns
     timer_init_full
     timer_mod
+    timer_mod_ns
     timer_pending
     tlb_flush
     trace_events_enabled_count
