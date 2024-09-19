@@ -11,10 +11,11 @@
 
 #include "aemu/base/async/AsyncSocketServer.h"
 
+#include "absl/log/check.h"
+#include "absl/log/log.h"
 #include "aemu/base/async/Looper.h"
 #include "aemu/base/async/ScopedSocketWatch.h"
 #include "aemu/base/async/ThreadLooper.h"
-#include "aemu/base/Log.h"
 #include "aemu/base/sockets/ScopedSocket.h"
 #include "aemu/base/sockets/SocketUtils.h"
 
@@ -96,8 +97,10 @@ private:
             if (clientFd < 0) {
                 // This can happen when the client closed the connection
                 // before we could process it. Just exit and try until the
-                // next time.
-                PLOG(WARNING) << "Error when accepting host connection";
+                // next time. This can be very verbose, so we record only the first 5.
+                LOG_FIRST_N(WARNING, 5)
+                        << "Client disappeared while connecting to port: "
+                        << server->port();
                 return;
             }
             // Stop listening now, this lets the callback call startListening()

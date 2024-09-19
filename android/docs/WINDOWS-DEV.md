@@ -1,13 +1,11 @@
-# Android Emulator Windows Development (Simplified)
+# Android Emulator Windows Development
 
 This guide helps you set up the Android Emulator on Windows for development. You can use your own computer or Google Compute Engine (GCE).
 
 ## Software Requirements
 
-- **Visual Studio 2019:** Install the Community edition with specific components (C++ build tools, ATL, MFC, Windows 10 SDK).
+- **Visual Studio 2022:** Install the Community edition with specific components (C++ build tools, ATL, MFC, Windows 10 SDK).
 - **Git:** Install and ensure it's added to your PATH.
-- **CMake:** Install and ensure it's added to your PATH.
-- **Python3:** Install and ensuret it's add to your PATH.
 - **Chocolatey (Optional):** Install all dependencies using the provided command if you have Chocolatey.
 
     To install everything with chocolatey:
@@ -15,7 +13,7 @@ This guide helps you set up the Android Emulator on Windows for development. You
     ```bat
     @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command " [System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 
-    choco install -y visualstudio2019community visualstudio2019buildtools visualstudio2019-workload-python curl visualstudio2019-workload-nativedesktop visualstudio2019-workload-vctools visualstudio2022-workload-python git python3 cmake
+    choco install -y visualstudio2022community visualstudio2022buildtools visualstudio2022-workload-python visualstudio2022-workload-nativedesktop visualstudio2022-workload-vctools git curl
     ```
 
 Run Visual Studio once to accept the license. Ensure your user account has the "SeCreateSymbolicLinkPrivilege." Open terminals with administrator privileges for easier setup.
@@ -25,10 +23,10 @@ Run Visual Studio once to accept the license. Ensure your user account has the "
 You will need to setup your name and make sure you enable symlinks. Repo will do its best to work without symlinks enabled, but we have not tested this. Make sure you have the following settings set:
 
 ```bat
-C:\> git config --system core.symlinks true
-C:\> git config --global core.symlinks true
-C:\> git config --global user.name "I just copy pasted this without looking"
-C:\> git config --global user.email wrong-do-it-again@badrobot.com
+git config --system core.symlinks true
+git config --global core.symlinks true
+git config --global user.name "I just copy pasted this without looking"
+git config --global user.email wrong-do-it-again@badrobot.com
 ```
 
 ## Getting the Source Code
@@ -47,14 +45,14 @@ C:\> git config --global user.email wrong-do-it-again@badrobot.com
 2. **Initialize Repo:**
 
     ```bat
-    cd %USERPROFILE%\src && mkdir emu-master-dev && cd emu-master-dev
+    cd \ && mkdir emu-master-dev && cd emu-master-dev
     repo init -u https://android.googlesource.com/platform/manifest -b emu-master-dev
     ```
 
 3. **Download Code:**
 
     ```bat
-    repo sync -j 8
+    repo sync
     ```
 
 ## Building the Emulator

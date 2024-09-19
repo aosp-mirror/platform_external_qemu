@@ -18,7 +18,6 @@ import atexit
 import glob
 import logging
 import os
-import pip
 import re
 import shutil
 import subprocess
@@ -61,6 +60,11 @@ WIN_QT_TMP_LOCATION = os.path.join("C:\\", "qttmp")
 WIN_QT_SRC_SHORT_PATH = os.path.join(WIN_QT_TMP_LOCATION, "src")
 WIN_QT_BUILD_PATH = os.path.join(WIN_QT_TMP_LOCATION, "bld")
 
+# Qt6 python scripts do not work with python 3.12, so let's hardcode the 3.11 version in our
+# buildbots.
+MAC_ARM64_PYTHON_3_11 = os.path.join("/opt", "homebrew", "Cellar", "python@3.11", "3.11.9_1", "libexec", "bin")
+MAC_X64_PYTHON_3_11 = os.path.join("/usr", "local", "Cellar", "python@3.11", "3.11.9_1", "libexec", "bin")
+
 def checkDependencies():
     # Dependencies for Qt 6 w/ QtWebEngine listed in https://wiki.qt.io/Building_Qt_6_from_Git
     logging.info("Checking for required build dependencies..")
@@ -87,6 +91,8 @@ def checkDependencies():
         logging.info(">> Checking for node.js version >= 12")
         deps_common.checkNodeJsVersion(min_vers=(12, 0))
 
+        # If we ever switch back to AOSP python, we need to uncomment out the stuff below.
+        """
         # QtWebEngine needs python html5lib package
         #
         # Since we use a custom python installation, we need to manually install these packages and
@@ -94,6 +100,7 @@ def checkDependencies():
         PYTHON_INDEX_URL = os.path.join(AOSP_ROOT, "external", "adt-infra", "devpi", "repo", "simple")
         INDEX_FILE_PREFIX = "file:///" if HOST_OS == "windows" else "file://"
         pip.main(["install", "html5lib", '-i', f"{INDEX_FILE_PREFIX}{PYTHON_INDEX_URL}"])
+        """
         logging.info(">> Checking for python package html5lib")
         deps_common.checkPythonPackage("html5lib")
 
@@ -550,6 +557,12 @@ def buildPrebuilt(args, prebuilts_out_dir):
         # Use ninja from our prebuilts
         deps_common.addToSearchPath(NINJA_PATH)
     logging.info(os.environ)
+
+    if HOST_OS == "darwin":
+        if HOST_ARCH == "aarch64":
+            deps_common.addToSearchPath(MAC_ARM64_PYTHON_3_11)
+        else:
+            deps_common.addToSearchPath(MAC_X64_PYTHON_3_11)
 
     if not checkDependencies():
         logging.fatal("Build environment does not have the required dependencies to build. Exiting..")

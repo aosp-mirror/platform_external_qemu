@@ -46,7 +46,7 @@ using AbslMessage = absl::log_internal::LogMessage;
 void write_log_line(LogSeverity prio,
                     const char* file,
                     int line,
-                    const std::string& msg) {
+                    const std::string_view msg) {
     int priority = (int)prio;
     switch (priority) {
         case 0:  // INFO
@@ -76,18 +76,36 @@ void __emu_log_print_str(LogSeverity prio,
     write_log_line(prio, file, line, msg);
 }
 
+void __emu_log_print_str(LogSeverity prio,
+                         const char* file,
+                         int line,
+                         const std::string_view& msg) {
+    write_log_line(prio, file, line, msg);
+}
+
 LOGGING_API extern "C" void __emu_log_print(LogSeverity prio,
                                             const char* file,
                                             int line,
                                             const char* fmt,
                                             ...) {
-    const int bufferSize = 2048;  // 2KB buffer size
+
+
+    constexpr int bufferSize = 4096;
     char buffer[bufferSize];
+    int strlen = bufferSize;
     va_list args;
     va_start(args, fmt);
     int size = vsnprintf(buffer, bufferSize, fmt, args);
     va_end(args);
-    auto msg = std::string(buffer, size);
+    if (size >= bufferSize) {
+        // Indicate trunctation.
+        strncpy(buffer + bufferSize - 3, "...", 3);
+    } else {
+        strlen = size;
+    }
+
+    std::string_view msg(buffer, strlen);
+
     write_log_line(prio, file, line, msg);
 }
 
@@ -98,7 +116,7 @@ void logMessage(const LogParams& params,
         gLogOutput->logMessage(params, message, messageLen);
     } else {
         __emu_log_print_str(params.severity, params.file, params.lineno,
-                            std::string(message, messageLen));
+                            std::string_view(message, messageLen));
     }
 }
 

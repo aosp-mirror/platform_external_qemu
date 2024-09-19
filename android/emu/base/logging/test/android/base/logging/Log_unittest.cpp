@@ -16,6 +16,12 @@
 #include <string.h>
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include "aemu/base/logging/LogSeverity.h"
+#include "absl/log/globals.h"
+#include "absl/log/absl_log.h"
+#include "absl/log/log_sink_registry.h"
+#include "absl/strings/str_format.h"
 
 namespace android {
 namespace base {
@@ -23,6 +29,33 @@ namespace base {
 // Create a severity level which is guaranteed to never generate a log
 // message. See LogOnlyEvaluatesArgumentsIfNeeded for usage.
 const LogSeverity EMULATOR_LOG_INVISIBLE = static_cast<LogSeverity>(-10000);
+
+class CaptureLogSink : public absl::LogSink {
+   public:
+    void Send(const absl::LogEntry& entry) override {
+        char level = 'I';
+        switch (entry.log_severity()) {
+            case absl::LogSeverity::kInfo:
+                level = 'I';
+                break;
+            case absl::LogSeverity::kError:
+                level = 'E';
+                break;
+            case absl::LogSeverity::kWarning:
+                level = 'W';
+                break;
+
+            case absl::LogSeverity::kFatal:
+                level = 'F';
+                break;
+        }
+        captured_log_ = absl::StrFormat("%c %s:%d |%s|- %s", level, entry.source_filename(),
+                                        entry.source_line(), absl::FormatTime(entry.timestamp()),
+                                        entry.text_message());
+    }
+
+    std::string captured_log_;
+};
 
 class LogTest : public ::testing::Test, android::base::testing::LogOutput {
 public:
@@ -124,6 +157,7 @@ protected:
     int mForcedErrno;
 };
 
+
 #define STRINGIFY(x) STRINGIFY_(x)
 #define STRINGIFY_(x) #x
 
@@ -222,6 +256,47 @@ TEST_F(LogTest, LogError) {
     CHECK_EXPECTATIONS();
 }
 
+
+LOGGING_API extern "C" void __emu_log_print(LogSeverity prio,
+                                            const char* file,
+                                            int line,
+                                            const char* fmt,
+                                            ...);
+
+
+// Test truncation when message exceeds buffer size
+
+class OutputLogTest : public ::testing::Test {
+   protected:
+    void SetUp() override {
+        // Add the CaptureLogSink
+        log_sink_ = std::make_unique<CaptureLogSink>();
+        absl::AddLogSink(log_sink_.get());
+
+        absl::SetVLogLevel("*", 2);
+
+        // Set log level to capture everything (adjust as needed)
+        absl::SetStderrThreshold(absl::LogSeverity::kInfo);
+    }
+
+    void TearDown() override {
+        // Remove the CaptureLogSink
+        absl::RemoveLogSink(log_sink_.get());
+    }
+
+    std::unique_ptr<CaptureLogSink> log_sink_;
+};
+
+
+TEST_F(OutputLogTest, Truncation) {
+    std::string long_msg(4100, 'x');  // Exceeds buffer size
+    __emu_log_print(LogSeverity::EMULATOR_LOG_INFO, "foo", 10, "%s",
+                    long_msg.c_str());
+
+    std::string expected_msg = long_msg.substr(0, 4093) + "...";
+    EXPECT_THAT(log_sink_->captured_log_, ::testing::HasSubstr(expected_msg));
+}
+
 TEST_F(LogTest, LogFatal) {
     static const char kFatalMessage[] = "I'm dying";
     setExpected(EMULATOR_LOG_FATAL, __LINE__ + 1, kFatalMessage);
@@ -262,6 +337,7 @@ TEST_F(CheckTest, CheckFalseEvaluatesArguments) {
     EXPECT_TRUE(flag);
     CHECK_EXPECTATIONS();
 }
+
 
 TEST_F(CheckTest, CheckTrue) {
     CHECK(true);

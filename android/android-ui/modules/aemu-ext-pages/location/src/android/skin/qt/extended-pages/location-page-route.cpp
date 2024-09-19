@@ -92,9 +92,9 @@ QString LocationPage::toJsonString(const GpsFixArray* arr) {
             delay = 2;
         }
         ret.append(QString("{\"lat\":%1,\"lng\":%2,\"elevation\":%3,\"delay_sec\":%4},")
-                .arg(QString::number(fix.latitude))
-                .arg(QString::number(fix.longitude))
-                .arg(QString::number(fix.elevation))
+                .arg(QString::number(fix.latitude, 'f', 15))
+                .arg(QString::number(fix.longitude, 'f', 15))
+                .arg(QString::number(fix.elevation, 'f', 15))
                 .arg(QString::number(delay)));
     }
     // Remove the last comma

@@ -14,6 +14,7 @@
 #include "aemu/base/files/PathUtils.h"
 #include "aemu/base/files/ScopedFd.h"
 #include "aemu/base/memory/ScopedPtr.h"
+#include "aemu/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/utils/fd.h"
 #include "android/utils/file_io.h"
@@ -66,12 +67,15 @@ ProtobufSaveResult saveProtobufFileImpl(std::string_view fileName,
                                         ProtobufSaveCallback saveCb) {
     if (bytesUsed) *bytesUsed = 0;
 
-    google::protobuf::io::FileOutputStream stream(
-            path_open(c_str(fileName),
-                   O_WRONLY | O_BINARY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644));
+    const int fd = path_open(c_str(fileName),
+        O_WRONLY | O_BINARY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+    if (fd < 0) {
+        LOG(ERROR) << "Error opening '" << fileName << "' for writing.";
+        return ProtobufSaveResult::Failure;
+    }
 
+    google::protobuf::io::FileOutputStream stream(fd);
     stream.SetCloseOnDelete(true);
-
     return saveCb(stream, bytesUsed);
 }
 

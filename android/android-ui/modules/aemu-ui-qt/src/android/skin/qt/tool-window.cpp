@@ -443,10 +443,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     skin_winsys_touch_qt_extended_virtual_sensors();
 
     remaskButtons();
-    const int screen_count =  QGuiApplication::screens().size();
-    if (screen_count == 1) {
-        installEventFilter(this);
-    }
+    installEventFilter(this);
 
     mSleepTimer.setSingleShot(true);
     connect(&mSleepTimer, SIGNAL(timeout()), this, SLOT(on_sleep_timer_done()));
@@ -1889,6 +1886,13 @@ bool ToolWindow::eventFilter(QObject* o, QEvent* event) {
         // When moved across screens, masks on buttons need to
         // be adjusted according to screen density.
         remaskButtons();
+    } else if (event->type() == QEvent::WindowStateChange) {
+        // It seems on mac, repainting after getting QEvent::ScreenChangeInternal is too early.
+        // From experiments, asking for repaint after WindowStateChange will resize the tool-window
+        // to the correct size. Furthermore, if the window moves too fast to a different display,
+        // QEvent::WindowStateChange may not trigger. So a workaround is to also trigger a repaint
+        // when the user releases the mouse from moving the window.
+        repaint();
     }
-    return QFrame::eventFilter(o, event);
+    return false;
 }
