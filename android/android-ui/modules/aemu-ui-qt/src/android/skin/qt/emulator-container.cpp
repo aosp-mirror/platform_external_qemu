@@ -180,6 +180,13 @@ bool EmulatorContainer::event(QEvent* e) {
         }
     }
 
+    if (e->type() == QEvent::NonClientAreaMouseButtonRelease) {
+        // Tool-window sometimes doesn't resize correctly when moving across displays. As a
+        // workaround, we request for a tool-window repaint when the user releases the mouse button
+        // after dragging the window.
+        mEmulatorWindow->toolWindow()->repaint();
+    }
+
     return QScrollArea::event(e);
 }
 

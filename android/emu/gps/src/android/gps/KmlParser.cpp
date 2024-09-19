@@ -62,7 +62,7 @@ static bool parseCoordinates(xmlNode* current, GpsFixArray* fixes) {
     GpsFix new_fix;
     while(3 == android::base::SscanfWithCLocale(
                       coordinates + offset,
-                      "%f , %f , %f%n",
+                      "%lf , %lf , %lf%n",
                       &new_fix.longitude,
                       &new_fix.latitude,
                       &new_fix.elevation,
@@ -91,7 +91,7 @@ static bool parseGxTrack(xmlNode* children, GpsFixArray* fixes) {
             GpsFix new_fix;
             result = (3 == android::base::SscanfWithCLocale(
                                   coordinates.c_str(),
-                                  "%f %f %f",
+                                  "%lf %lf %lf",
                                   &new_fix.longitude,
                                   &new_fix.latitude,
                                   &new_fix.elevation));

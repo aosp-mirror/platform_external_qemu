@@ -272,6 +272,12 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
     }
     if (fc::isEnabled(fc::GuestAngle)) {
         params.push_back({"androidboot.hardwareegl", "angle"});
+
+        if (!fc::isEnabled(fc::Vulkan)) {
+            // Cannot use GuestAngle without Vulkan enabled
+            // This might happen because of unsupported API level or GPU
+            dfatal("Vulkan is not supported: GuestAngle feature won't work!");
+        }
     }
 
     if (fc::isEnabled(fc::Vulkan)) {

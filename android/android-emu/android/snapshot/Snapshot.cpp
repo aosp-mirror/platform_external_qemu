@@ -388,6 +388,10 @@ bool Snapshot::isLoaded() {
 }
 
 bool Snapshot::writeSnapshotToDisk() {
+    if (path_mkdir_if_needed_no_cow(mDataDir.c_str(), 0744)) {
+        return false;
+    }
+
     auto res = saveProtobuf(PathUtils::join(mDataDir, kSnapshotProtobufName),
                             mSnapshotPb, &mSize);
     return res == ProtobufSaveResult::Success;
@@ -605,15 +609,19 @@ bool Snapshot::save() {
 }
 
 bool Snapshot::saveFailure(FailureReason reason) {
-    if (reason == FailureReason::Empty) {
+    switch (reason) {
+    case FailureReason::Empty:
+    case FailureReason::NoSnapshotPb:
+    case FailureReason::NoSnapshotInImage:
         mLatestFailureReason = reason;
-        // Don't write this to disk
-        return true;
+        return true;  // Don't write this to disk
+
+    default:
+        if (reason == mLatestFailureReason) {
+            return true;  // Nothing to do
+        }
     }
-    if (reason == mLatestFailureReason) {
-        // Nothing to do
-        return true;
-    }
+
     mSnapshotPb.set_failed_to_load_reason_code(int64_t(reason));
     if (!mSnapshotPb.has_version()) {
         mSnapshotPb.set_version(kVersion);

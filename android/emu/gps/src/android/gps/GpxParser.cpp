@@ -38,8 +38,8 @@ static void cleanupXmlDoc(xmlDoc *doc)
 
 static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *error)
 {
-    float latitude;
-    float longitude;
+    double latitude;
+    double longitude;
 
     xmlAttrPtr attr;
     xmlChar *tmpStr;
@@ -52,7 +52,7 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
         return false; // Return error since a point *must* have a latitude
     } else {
         int read =
-            android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%f", &latitude);
+            android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%lf", &latitude);
         xmlFree(tmpStr); // Caller-freed
         if (read != 1) {
             return false;
@@ -67,7 +67,7 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
         return false; // Return error since a point *must* have a longitude
     } else {
         int read =
-            android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%f", &longitude);
+            android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%lf", &longitude);
         xmlFree(tmpStr); // Caller-freed
         if (read != 1) {
             return false;
@@ -112,7 +112,7 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
         else if ( !strcmp((const char *) field->name, "ele") ) {
             if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
                 int read =
-                    android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%f", &result->elevation);
+                    android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%lf", &result->elevation);
                 xmlFree(tmpStr); // Caller-freed
                 if (read != 1) {
                     return false;
