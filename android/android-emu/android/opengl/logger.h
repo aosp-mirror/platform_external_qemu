@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/utils/compiler.h"
+#include "stdint.h"
 
 ANDROID_BEGIN_HEADER
 
@@ -30,19 +31,20 @@ typedef enum {
     // Log GL API calls and timestamps at fine grained level.
     OPENGL_LOGGER_DO_FINE_LOGGING = (1 << 0),
 
-    // Print GL logs to stdout. For fine logs, do not print to storage if this flag is active.
-    OPENGL_LOGGER_PRINT_TO_STDOUT = (1 << 1), 
+    // Print GL logs to stdout. For fine logs, do not print to storage if this
+    // flag is active.
+    OPENGL_LOGGER_PRINT_TO_STDOUT = (1 << 1),
 } AndroidOpenglLoggerFlags;
 
 // C interface for android-emugl
 void android_init_opengl_logger();
 void android_opengl_logger_set_flags(AndroidOpenglLoggerFlags flags);
-void android_opengl_logger_write(const char* fmt, ...);
+void android_opengl_logger_write(char severity,
+                                 const char* file,
+                                 unsigned int line,
+                                 int64_t timestamp_us,
+                                 const char* message);
 void android_stop_opengl_logger();
-
-// This is for logging what goes on in individual OpenGL
-// contexts (cxts). Only called when emugl is compiled
-// with -DOPENGL_DEBUG_PRINTOUT.
-void android_opengl_cxt_logger_write(const char* fmt, ...);
+;
 
 ANDROID_END_HEADER
