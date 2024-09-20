@@ -10,12 +10,14 @@
 // GNU General Public License for more details.
 #include <stdint.h>
 
-#include <memory>
 #include <iostream>
+#include <memory>
 
+#include "absl/base/call_once.h"
 #include "absl/log/globals.h"
 #include "absl/log/initialize.h"
 #include "absl/log/internal/globals.h"
+#include "absl/log/log.h"
 #include "absl/log/log_sink_registry.h"
 
 #include "aemu/base/logging/LogSeverity.h"
@@ -24,6 +26,7 @@
 #include "android/base/logging/StudioLogSink.h"
 #ifdef _WIN32
 #include <io.h>
+#include <windows.h>
 #else
 #include <unistd.h>
 #endif
@@ -74,21 +77,50 @@ void base_disable_verbose_logs() {
     absl::SetMinLogLevel(absl::LogSeverityAtLeast::kInfo);
 }
 
-void base_configure_logs(LoggingFlags flags) {
-    static bool initialized = false;
-    static android::base::ColorLogSink logSink(&std::cout, isatty(fileno(stdout)));
+static void initlogs_once(absl::LogSink* sink) {
+    absl::InitializeLog();
+    absl::log_internal::EnableSymbolizeLogStackTrace(true);
+    absl::SetStderrThreshold(absl::LogSeverityAtLeast::kInfinity);
+    absl::AddLogSink(sink);
+}
 
-    if (!initialized) {
-        absl::SetStderrThreshold(absl::LogSeverityAtLeast::kInfo);
-        absl::InitializeLog();
-        absl::log_internal::EnableSymbolizeLogStackTrace(true);
-        absl::SetStderrThreshold(absl::LogSeverityAtLeast::kInfinity);
-        absl::AddLogSink(&logSink);
-        initialized = true;
+static bool useColor() {
+#ifndef _WIN32
+    return isatty(fileno(stdout));
+#else
+    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hStdout == INVALID_HANDLE_VALUE) {
+        return false;
     }
 
+    DWORD dwMode;
+    if (!GetConsoleMode(hStdout, &dwMode)) {
+        return false;
+    }
+
+    // Check if ENABLE_VIRTUAL_TERMINAL_PROCESSING is already enabled
+    if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) {
+        return true;
+    }
+
+    // Try to enable ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    if (!SetConsoleMode(hStdout, dwMode)) {
+        return false;
+    }
+
+    return true;
+#endif
+}
+
+void base_configure_logs(LoggingFlags flags) {
+    static absl::once_flag initlogs;
+    static android::base::ColorLogSink logSink(&std::cout, useColor());
+
+    absl::call_once(initlogs, initlogs_once, &logSink);
     if (flags & kLogEnableVerbose) {
         logSink.SetVerbosity(true);
         android::base::studio_sink()->SetVerbosity(true);
     }
+    VLOG(1) << "Logging " << (useColor() ? "in color" : "without color");
 }

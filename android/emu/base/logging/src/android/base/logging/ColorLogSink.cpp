@@ -66,6 +66,21 @@ std::string_view ColorLogSink::TranslateSeverity(
 }
 
 void ColorLogSink::Send(const absl::LogEntry& entry) {
+    std::string_view msg = entry.text_message_with_newline();
+
+    // In the FATAL case we get 2 calls.
+    // The first will contain the log message.
+    // The 2nd call will contain the stacktrace, if any.
+    // We will only output the stacktrace if we are logging with high verbosity
+    if (entry.log_severity() == absl::LogSeverity::kFatal &&
+        !entry.stacktrace().empty()) {
+        if (mVerbose) {
+            msg = entry.stacktrace();
+        } else {
+            return;
+        }
+    }
+
     if (mVerbose) {
         auto now = entry.timestamp();
         auto location = absl::StrFormat("%s:%d", entry.source_basename(),
@@ -78,19 +93,15 @@ void ColorLogSink::Send(const absl::LogEntry& entry) {
                        << absl::StreamFormat("%s:%d | ",
                                              entry.source_basename(),
                                              entry.source_line())
-                       << entry.text_message_with_newline();
+                       << msg;
 
     } else {
         *mOutputStream << Color(entry.log_severity())
-                       << TranslateSeverity(entry) << " | "
-                       << entry.text_message_with_newline();
+                       << TranslateSeverity(entry) << " | " << msg;
     }
 
     if (mUseColor) {
         *mOutputStream << kColorNormal;
-    }
-    if (entry.log_severity() >= absl::LogSeverity::kWarning) {
-        mOutputStream->flush();
     }
 }
 
