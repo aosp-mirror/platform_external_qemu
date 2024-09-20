@@ -11,18 +11,20 @@
 
 #include "android/skin/qt/QtLooper.h"
 
-#include <errno.h>             // for ENOSYS, errno
-#include <qglobal.h>           // for Q_ASSERT_X
-#include <qloggingcategory.h>  // for qCWarning, qCDebug
-#include <QTime>               // for QTime
+#include <errno.h>
+#include <qglobal.h>
+#include <qloggingcategory.h>
+#include <QApplication>
+#include <QTime>
+#include <QThread>
 #include <string_view>
-#include <utility>  // for move
+#include <utility>
 
-#include "aemu/base/Compiler.h"             // for DISALLOW_COPY_AND_ASSIGN
+#include "aemu/base/Compiler.h"
 
-#include "aemu/base/async/Looper.h"         // for Looper::ClockType, Looper
-#include "android/skin/qt/QtLooperImpl.h"      // for TimerImpl, TaskImpl
-#include "android/skin/qt/logging-category.h"  // for emu
+#include "aemu/base/async/Looper.h"
+#include "android/skin/qt/QtLooperImpl.h"
+#include "android/skin/qt/logging-category.h"
 
 namespace android {
 namespace base {
@@ -59,6 +61,10 @@ public:
     QtLooper() = default;
 
     std::string_view name() const override { return "Qt event loop"; }
+
+    bool onLooperThread() const override {
+        return QThread::currentThread() == QApplication::instance()->thread();
+    }
 
     //
     // T I M E R S
