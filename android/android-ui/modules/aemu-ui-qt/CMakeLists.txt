@@ -104,9 +104,13 @@ android_qt_lib(
 
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
   target_sources(aemu-ui-qt
-                 PRIVATE src/android/skin/qt/mac-native-event-filter.mm)
+                 PRIVATE src/android/skin/qt/mac-native-event-filter.mm
+                         src/android/skin/qt/qt-keycode-mac.mm)
 
   target_link_libraries(aemu-ui-qt PRIVATE "-framework Carbon")
+else()
+  target_sources(aemu-ui-qt
+                 PRIVATE src/android/skin/qt/qt-keycode-no-op.cpp)
 endif()
 
 if(WINDOWS_MSVC_X86_64)
