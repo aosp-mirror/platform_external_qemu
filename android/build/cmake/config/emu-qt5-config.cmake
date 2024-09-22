@@ -126,7 +126,10 @@ endfunction()
 set(QT5_INCLUDE_DIRS
     ${PREBUILT_ROOT}/include
     ${PREBUILT_ROOT}/include/QtCore
+    ${PREBUILT_ROOT}/include/QtCore/6.5.3
+    ${PREBUILT_ROOT}/include/QtCore/6.5.3/QtCore
     ${PREBUILT_ROOT}/include/QtGui
+    ${PREBUILT_ROOT}/include/QtGui/6.5.3
     ${PREBUILT_ROOT}/include/QtSvg
     ${PREBUILT_ROOT}/include/QtWidgets)
 if(QTWEBENGINE)
