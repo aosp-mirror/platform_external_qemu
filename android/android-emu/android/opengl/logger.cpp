@@ -64,6 +64,7 @@ void android_opengl_logger_write(char severity,
                                  int64_t timestamp_us,
                                  const char* message) {
     absl::LogSeverity sev;
+    bool is_verbose = false;
     switch (severity) {
         case 'V':
         case 'D':
@@ -71,6 +72,7 @@ void android_opengl_logger_write(char severity,
             if (!is_fine_logging_enabled(sLoggingFlags)) {
                 return;
             }
+            is_verbose = true;
         case 'I':
             sev = absl::LogSeverity::kInfo;
             break;
@@ -88,7 +90,7 @@ void android_opengl_logger_write(char severity,
     absl::Time converted_time = absl::FromUnixMicros(timestamp_us);
     absl::log_internal::LogMessage(file, line, sev)
                     .WithTimestamp(converted_time)
-            << message;
+            << (is_verbose ? "VERBOSE | " : "") << message;
     crashstream() << message << "\n";
 }
 
