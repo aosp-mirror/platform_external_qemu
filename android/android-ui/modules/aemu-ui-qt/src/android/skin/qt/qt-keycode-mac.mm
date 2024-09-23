@@ -42,8 +42,6 @@ std::optional<int> getUnmodifiedQtKey(const QKeyEvent& e) {
         return {};
     }
 
-    qCDebug(emu) << "keycode=" << e.key() << " virt=" << e.nativeVirtualKey()
-                 << " resolved=" << possibleQtKeys[0];
     return possibleQtKeys[0];
 }
 
