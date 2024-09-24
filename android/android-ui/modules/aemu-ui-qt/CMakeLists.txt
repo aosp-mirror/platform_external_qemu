@@ -38,6 +38,7 @@ android_qt_lib(
       android/skin/qt/OverlayMessageCenter.cpp
       android/skin/qt/posture-selection-dialog.cpp
       android/skin/qt/postureselectiondialog.ui
+      android/skin/qt/qt-keycode.cpp
       android/skin/qt/resizable-dialog.cpp
       android/skin/qt/resizable-dialog.ui
       android/skin/qt/resources.qrc
@@ -104,13 +105,9 @@ android_qt_lib(
 
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
   target_sources(aemu-ui-qt
-                 PRIVATE src/android/skin/qt/mac-native-event-filter.mm
-                         src/android/skin/qt/qt-keycode-mac.mm)
+                 PRIVATE src/android/skin/qt/mac-native-event-filter.mm)
 
   target_link_libraries(aemu-ui-qt PRIVATE "-framework Carbon")
-else()
-  target_sources(aemu-ui-qt
-                 PRIVATE src/android/skin/qt/qt-keycode-no-op.cpp)
 endif()
 
 if(WINDOWS_MSVC_X86_64)
