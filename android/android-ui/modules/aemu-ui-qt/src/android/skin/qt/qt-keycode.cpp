@@ -16,6 +16,8 @@
 
 #include "android/skin/qt/qt-keycode.h"
 
+#include <QtGui/6.5.3/QtGui/private/qkeymapper_p.h>
+
 namespace android {
 namespace qt {
 
@@ -24,8 +26,17 @@ namespace qt {
 // `getUnmodifiedQtKey()` will try to extract the unmodified Qt::Key, or return std::nullopt if
 // unable to.
 std::optional<int> getUnmodifiedQtKey(const QKeyEvent& e) {
-    // TODO(joshuaduong): mac has an implementation. Do for linux/windows and get rid of this file.
-    return e.key();
+    // Create a QKeyEvent the same as e, but with no modifiers
+    QKeyEvent noModKeyEvent(e.type(), e.key(), Qt::NoModifier, e.nativeScanCode(),
+                            e.nativeVirtualKey(), e.nativeModifiers(), e.text(), e.isAutoRepeat(),
+                            e.count(), e.device());
+    QList<int> possibleQtKeys = QKeyMapper::possibleKeys(&noModKeyEvent);
+    // We should only get one result in the list, since we gave it no modifiers.
+    if (possibleQtKeys.size() == 0) {
+        return {};
+    }
+
+    return possibleQtKeys[0];
 }
 
 }  // namespace qt
