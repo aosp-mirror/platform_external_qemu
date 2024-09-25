@@ -172,7 +172,9 @@ int android_setOpenglesEmulation(void* renderLib,
 int android_initOpenglesEmulation() {
     android_init_opengl_logger();
 
-    bool glFineLogging = System::get()->envGet("ANDROID_EMUGL_FINE_LOG") == "1";
+    bool glFineLogging =
+            (System::get()->envGet("ANDROID_EMUGL_FINE_LOG") == "1") ||
+            (System::get()->envGet("ANDROID_EMUGL_VERBOSE") == "1");
     bool glLogPrinting =
             System::get()->envGet("ANDROID_EMUGL_LOG_PRINT") == "1";
 
