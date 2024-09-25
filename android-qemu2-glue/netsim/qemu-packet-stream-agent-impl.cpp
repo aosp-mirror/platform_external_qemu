@@ -229,14 +229,22 @@ void register_netsim(const std::string address,
     gNetsimConfiguration.device_info->set_kind("EMULATOR");
     auto avd_info = getConsoleAgents()->settings->avdInfo();
     gNetsimConfiguration.device_info->set_version(EMULATOR_VERSION_STRING);
-    gNetsimConfiguration.device_info->set_sdk_version(
-            avdInfo_getBuildPropertyString(avd_info, "ro.build.version.sdk"));
-    gNetsimConfiguration.device_info->set_build_id(
-            avdInfo_getBuildPropertyString(avd_info, "ro.build.id"));
-    gNetsimConfiguration.device_info->set_variant(
-            avdInfo_getBuildPropertyString(avd_info, "ro.build.flavor"));
-    gNetsimConfiguration.device_info->set_arch(
-            avdInfo_getBuildPropertyString(avd_info, "ro.product.cpu.abi"));
+    if (auto sdk_version = avdInfo_getBuildPropertyString(
+                avd_info, "ro.build.version.sdk")) {
+        gNetsimConfiguration.device_info->set_sdk_version(sdk_version);
+    }
+    if (auto build_id =
+                avdInfo_getBuildPropertyString(avd_info, "ro.build.id")) {
+        gNetsimConfiguration.device_info->set_build_id(build_id);
+    }
+    if (auto variant =
+                avdInfo_getBuildPropertyString(avd_info, "ro.build.flavor")) {
+        gNetsimConfiguration.device_info->set_variant(variant);
+    }
+    if (auto arch = avdInfo_getBuildPropertyString(avd_info,
+                                                   "ro.product.cpu.abi")) {
+        gNetsimConfiguration.device_info->set_arch(arch);
+    }
 }
 
 static void register_types(void) {
