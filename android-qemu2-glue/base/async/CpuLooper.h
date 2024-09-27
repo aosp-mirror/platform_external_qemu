@@ -15,6 +15,7 @@
 
 #include <string>
 #include <string_view>
+#include <thread>
 
 namespace android {
 namespace qemu {
@@ -52,6 +53,12 @@ public:
 
     Duration nowMs(ClockType clockType) override;
     DurationNs nowNs(ClockType clockType) override;
+
+    bool onLooperThread() const override {
+        static thread_local std::thread::id thread_id = std::this_thread::get_id();
+        return mThreadId == thread_id;
+    }
+
     int runWithDeadlineMs(Duration deadlineMs) override;
     void forceQuit() override;
     Timer* createTimer(Timer::Callback callback,
@@ -64,9 +71,14 @@ public:
     TaskPtr createTask(TaskCallback&& callback) override;
     void scheduleCallback(TaskCallback&& callback) override;
 
+    void setThreadId(std::thread::id threadId) {
+        mThreadId = threadId;
+    }
+
 private:
     const int mCpuNo;
     const std::string mName;
+    std::thread::id mThreadId;
 };
 
 }  // namespace qemu
