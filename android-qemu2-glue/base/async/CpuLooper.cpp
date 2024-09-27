@@ -86,6 +86,7 @@ private:
     // then CallData clears |self| and gets deleted.
     struct CallData {
         CpuLooper::TaskCallback callback;
+        CpuLooper* looper;
         std::shared_ptr<CallData> self;
         std::atomic<bool> canceled;
     };
@@ -106,6 +107,7 @@ CpuLooper::TaskImpl::TaskImpl(base::Looper* looper,
                               int cpuNo)
     : Task(looper, {}), mCpuNo(cpuNo), mCallData(std::make_shared<CallData>()) {
     mCallData->callback = std::move(callback);
+    mCallData->looper = static_cast<CpuLooper*>(looper);
 }
 
 void CpuLooper::TaskImpl::schedule() {
@@ -119,6 +121,7 @@ void CpuLooper::TaskImpl::schedule() {
                      [](CPUState* cpu, run_on_cpu_data data) {
                          auto self = static_cast<CallData*>(data.host_ptr);
                          if (!self->canceled) {
+                             self->looper->setThreadId(std::this_thread::get_id());
                              self->callback();
                          }
                          self->self.reset();

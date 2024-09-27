@@ -63,6 +63,7 @@
 #include "android/skin/qt/car-cluster-window.h"
 #include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
 #include "android/skin/qt/multi-display-widget.h"
+#include "android/skin/qt/qt-keycode.h"
 #include "android_modem_v2.h"
 #include "host-common/FeatureControl.h"
 #include "host-common/Features.h"
@@ -225,6 +226,8 @@ const std::unordered_map<int, int> QT_TO_LINUX_KEYCODE_BASE{
         // Qt treats "SHIFT + TAB" as "Backtab", just convert it back to
         // TAB.
         QT_TO_LINUX_KEY(Backtab, TAB),
+        // LINUX_KEY_GREEN is mapped to LINUX_KEY_GRAVE in emulator system image qwerty2.kl
+        QT_TO_LINUX_KEY(QuoteLeft, GREEN),
 };
 
 const std::unordered_map<int, int> QT_TO_LINUX_KEYCODE_MODIFIERS{
@@ -2822,6 +2825,14 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
     SkinEventKeyData& keyData = skin_event.u.key;
     bool isModifier = false;
     keyData.keycode = convertKeyCode(event.key(), isModifier);
+    if (android::featurecontrol::isEnabled(android::featurecontrol::QtRawKeyboardInput)) {
+        if (!isModifier) {
+            std::optional<int> result = android::qt::getUnmodifiedQtKey(event);
+            if (result && *result != event.key()) {
+                keyData.keycode = convertKeyCode(*result, isModifier);
+            }
+        }
+    }
     if (keyData.keycode == -1) {
         D("Failed to convert key for event key %d", event.key());
         return;

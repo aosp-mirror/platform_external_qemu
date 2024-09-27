@@ -1415,7 +1415,7 @@ function(android_link_complete_archive)
   set_property(GLOBAL APPEND PROPERTY ALIAS_LST "${lnk_AS}|${lnk_TARGET}\n")
   add_library(${lnk_AS} INTERFACE)
   add_dependencies(${lnk_AS} ${lnk_TARGET})
-  target_link_libraries(${lnk_AS} INTERFACE ${WHOLE_LINK_CMD})
+  target_link_libraries(${lnk_AS} INTERFACE ${WHOLE_LINK_CMD} ${lnk_TARGET})
 endfunction()
 
 # Constructs a linker command that will make sure the whole archive is included,

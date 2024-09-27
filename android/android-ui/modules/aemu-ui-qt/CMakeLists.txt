@@ -38,6 +38,7 @@ android_qt_lib(
       android/skin/qt/OverlayMessageCenter.cpp
       android/skin/qt/posture-selection-dialog.cpp
       android/skin/qt/postureselectiondialog.ui
+      android/skin/qt/qt-keycode.cpp
       android/skin/qt/resizable-dialog.cpp
       android/skin/qt/resizable-dialog.ui
       android/skin/qt/resources.qrc
