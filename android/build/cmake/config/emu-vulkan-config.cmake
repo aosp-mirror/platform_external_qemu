@@ -87,7 +87,6 @@ elseif(WINDOWS)
       "${PREBUILT_ROOT}/layers/VkLayer_gfxreconstruct.json>testlib64/layers/VkLayer_gfxreconstruct.json"
       "${PREBUILT_ROOT}/layers/VkLayer_khronos_validation.dll>testlib64/layers/VkLayer_khronos_validation.dll"
       "${PREBUILT_ROOT}/layers/VkLayer_khronos_validation.json>testlib64/layers/VkLayer_khronos_validation.json"
-      "${PREBUILT_ROOT}/layers/VkLayer_khronos_validation.pdb>testlib64/layers/VkLayer_khronos_validation.pdb"
       "${PREBUILT_ROOT}/layers/VkLayer_monitor.dll>testlib64/layers/VkLayer_monitor.dll"
       "${PREBUILT_ROOT}/layers/VkLayer_monitor.json>testlib64/layers/VkLayer_monitor.json"
       "${PREBUILT_ROOT}/layers/VkLayer_screenshot.dll>testlib64/layers/VkLayer_screenshot.dll"
@@ -102,5 +101,5 @@ android_license(
   URL "https://vulkan.lunarg.com/sdk/home"
   SPDX "Apache-2.0"
   LICENSE
-    "https://vulkan.lunarg.com/software/license/vulkan-1.2.162.1-linux-license-summary.txt"
+    "https://vulkan.lunarg.com/software/license/vulkan-1.3.290.0-linux-license-summary.txt"
   LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.VULKAN")
