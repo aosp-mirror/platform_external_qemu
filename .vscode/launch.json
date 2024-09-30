@@ -5,102 +5,38 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch cmake binary",
-      "type": "lldb",
-      // "type": "cppvsdbg",
-      "symbolSearchPath": "${workspaceFolder}\\build\\build\\debug_info",
-      "request": "launch",
-      "console": "integratedTerminal",
-      "program": "${command:cmake.launchTargetPath}",
-
-      "args": [
-        // "--gtest_repeat=-1",
-        //"--gtest_filter=JwkTokenAuthTest.message",
-      ],
-      "cwd": "${workspaceFolder}/build",
-      "stopAtEntry": false,
-      "windows": {
-        "type": "cppvsdbg",
-        "environment": [
-          {
-            "name": "ASAN_OPTIONS",
-            "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-          },
-          {
-            "name": "PATH",
-            "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
-          }
-        ],
-        "program": "${command:cmake.launchTargetPath}",
-        "externalConsole": true
-      },
-      "osx": {
-        "env": {
-          "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-        },
-        "postRunCommands": [
-          "pro hand -p true -s false SIGUSR1",
-          "pro hand -p true -s false SIGUSR2"
-        ],
-      },
-      "linux": {
-        "env": {
-          "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-        },
-        "postRunCommands": [
-          "pro hand -p true -s false SIGUSR1",
-          "pro hand -p true -s false SIGUSR2"
-        ],
-      }
-    },
-    {
       "name": "Launch Emulator",
       "type": "lldb",
+      "symbolSearchPath": "${workspaceFolder}/objs/build/debug_info;${env:VK_SDK_PATH}/bin",
       "request": "launch",
-      "program": "${workspaceFolder}/build/emulator",
+      "program": "${workspaceFolder}/objs/emulator",
+      "cwd": "${workspaceFolder}/objs",
       "args": [
-        "@32",
-        "-gpu",
-        "swiftshader_indirect", "-no-snapshot",
-        "-grpc", "8554",
-        "-grpc-ui"
+        "-verbose",
+        "-avd", "${env:ANDROID_EMULATOR_DEFAULT_AVD}",
+        "-feature", "VulkanDebugUtils",
       ],
-      "cwd": "${workspaceFolder}/build",
+      "env": {
+        "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
+        "ANDROID_EMUGL_VERBOSE": "1",
+        "ANDROID_EMUGL_LOG_COLORS": "1",
+        "ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL": "3",
+      },
       "stopAtEntry": false,
       "windows": {
         "type": "cppvsdbg",
-        "environment": [
-          {
-            "name": "ANDROID_SDK_ROOT",
-            "value": "C:\\Users\\EmuTest2\\AppData\\Local\\Android\\Sdk"
-          },
-          {
-            "name": "ASAN_OPTIONS",
-            "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-          },
-          {
-            "name": "PATH",
-            "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
-          }
-        ],
-        "externalConsole": false
+        "console": "internalConsole"
       },
       "osx": {
-        "env": {
-          "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-        },
         "postRunCommands": [
-          "pro hand -p true -s false SIGUSR1",
-          "pro hand -p true -s false SIGUSR2"
+          "pro hand -n false -p true -s false SIGUSR1",
+          "pro hand -n false -p true -s false SIGUSR2"
         ],
       },
       "linux": {
-        "env": {
-          "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-        },
         "postRunCommands": [
-          "pro hand -p true -s false SIGUSR1",
-          "pro hand -p true -s false SIGUSR2"
+          "pro hand -n false -p true -s false SIGUSR1",
+          "pro hand -n false -p true -s false SIGUSR2"
         ],
       }
     },
@@ -108,6 +44,7 @@
       // You need root access to attach debugger
       "name": "Attach process (requires root)",
       "type": "lldb",
+      "symbolSearchPath": "${workspaceFolder}/objs/build/debug_info;${env:VK_SDK_PATH}/bin",
       "request": "attach",
       "pid": "${command:pickProcess}",
       "windows": {
@@ -115,14 +52,14 @@
       },
       "osx": {
         "postRunCommands": [
-          "pro hand -p true -s false SIGUSR1",
-          "pro hand -p true -s false SIGUSR2"
+          "pro hand -n false -p true -s false SIGUSR1",
+          "pro hand -n false -p true -s false SIGUSR2"
         ]
       },
       "linux": {
         "postRunCommands": [
-          "pro hand -p true -s false SIGUSR1",
-          "pro hand -p true -s false SIGUSR2"
+          "pro hand -n false -p true -s false SIGUSR1",
+          "pro hand -n false -p true -s false SIGUSR2"
         ]
       }
     },
