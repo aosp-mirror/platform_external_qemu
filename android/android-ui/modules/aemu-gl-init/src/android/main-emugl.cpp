@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 using android::base::ScopedCPtr;
 
@@ -112,8 +113,12 @@ bool androidEmuglConfigInit(EmuglConfig* config,
         int vkMajor = 0;
         int vkMinor = 0;
         int vkPatch = 0;
+        uint64_t vkDeviceMemBytes = 0;
         emuglConfig_get_vulkan_hardware_gpu(&vkVendor, &vkMajor, &vkMinor,
-                                            &vkPatch);
+                                            &vkPatch, &vkDeviceMemBytes);
+        const uint64_t deviceMemMB = vkDeviceMemBytes/(1024*1024);
+        dinfo("GPU device local memory = %lluMB", deviceMemMB);
+
         if (vkVendor) {
 #if defined(_WIN32)
             if (strncmp("AMD", vkVendor, 3) == 0) {
