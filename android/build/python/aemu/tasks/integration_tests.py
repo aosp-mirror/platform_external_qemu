@@ -16,6 +16,7 @@ import logging
 import os
 import platform
 import subprocess
+import tempfile
 from pathlib import Path
 
 from aemu.platform.toolchains import Toolchain
@@ -136,3 +137,47 @@ class IntegrationTestTask(BuildTask):
             self.run_from_dist(py_runner)
         else:
             self.run_from_build(py_runner)
+
+
+class ZipIntegrationTestsTask(BuildTask):
+    """Creates a zip file with the e2e integration tests."""
+
+    def __init__(
+        self,
+        aosp: Path,
+        destination: Path,
+    ):
+        """Initializes an instance of ZipIntegrationTestsTask.
+
+        Args:
+            aosp (Path): The path to the AOSP root directory.
+            destination: Path,
+        """
+        super().__init__()
+        self.aosp = Path(aosp)
+        self.destination = Path(destination) / "e2e-tests.zip"
+        self.launcher = (
+            self.aosp
+            / "external"
+            / "adt-infra"
+            / "pytest"
+            / "test_embedded"
+            / "create_zip.py"
+        )
+
+    def do_run(self):
+        repo = self.aosp / "external" / "adt-infra" / "devpi" / "repo" / "simple"
+
+        if platform.system() == "Windows":
+            # Windows is currently not working, so skip on that platform.
+            return
+
+        repo = f"file://{repo}"
+        py_runner = PyRunner(repo, self.aosp)
+        py_runner.run(
+            [
+                self.launcher,
+                "--dest",
+                self.destination,
+            ],
+        )

@@ -154,3 +154,11 @@ class DistributionTask(BuildTask):
                         arcname = fname.relative_to(search_dir)
                         logging.debug("Adding %s as %s", fname, arcname)
                         zipf.write(fname, arcname)
+
+        # Copy over the e2e-tests.zip if it exists.
+        e2e_tests = Path(self.build_dir) / "e2e-tests.zip"
+        if e2e_tests.is_file():
+            dist_file = self.dist_dir / e2e_tests.name
+            logging.info("Copying %s ==> %s", e2e_tests, dist_file)
+            shutil.copy(e2e_tests, dist_file)
+
