@@ -125,7 +125,8 @@ target_link_libraries(
           grpc++
           packet-streamer-client-lib
           packet-streamer-proto-lib
-          protobuf::libprotobuf)
+          protobuf::libprotobuf
+  PUBLIC android-emu-check)
 
 add_dependencies(libqemu2-glue virtio_gpu_timelines_fbs_header)
 
