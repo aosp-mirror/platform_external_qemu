@@ -556,13 +556,14 @@ def buildPrebuilt(args, prebuilts_out_dir):
         deps_common.addToSearchPath(CMAKE_PATH)
         # Use ninja from our prebuilts
         deps_common.addToSearchPath(NINJA_PATH)
-    logging.info(os.environ)
 
     if HOST_OS == "darwin":
-        if HOST_ARCH == "aarch64":
+        if HOST_ARCH == "aarch64" or HOST_ARCH == "arm64":
             deps_common.addToSearchPath(MAC_ARM64_PYTHON_3_11)
         else:
             deps_common.addToSearchPath(MAC_X64_PYTHON_3_11)
+
+    logging.info(os.environ)
 
     if not checkDependencies():
         logging.fatal("Build environment does not have the required dependencies to build. Exiting..")
