@@ -129,13 +129,13 @@ get_sectors_per_fat( Wide  disk_size, int  sectors_per_cluster )
 }
 
 static void
-boot_sector_init( Bytes  boot, Bytes  info, Wide   disk_size, const char*  label )
+boot_sector_init( Bytes  boot, Bytes  info, Wide   disk_size, const char*  label, int serial_id )
 {
     int   sectors_per_cluster = get_sectors_per_cluster(disk_size);
     int   sectors_per_fat    = get_sectors_per_fat(disk_size, sectors_per_cluster);
     int   sectors_per_disk   = (int)(disk_size / BYTES_PER_SECTOR);
-    int   serial_id          = get_serial_id();
     int   free_count;
+    serial_id == 0 ? get_serial_id(): serial_id;
 
     if (label == NULL)
         label = "SDCARD";
@@ -244,6 +244,7 @@ int  main( int argc, char**  argv )
     int           sectors_per_disk;
     TCHAR*        end;
     const TCHAR*  label = NULL;
+    int           serial_id = 0;
     FILE*         f = NULL;
 
 #ifdef _WIN32
@@ -275,7 +276,18 @@ int  main( int argc, char**  argv )
                 }
                 label = arg;
                 break;
-
+            case 's':
+                if (arg[1] != 0)
+                    arg += 2;
+                else {
+                    ARGC--;
+                    ARGV++;
+                    if (ARGC <= 1)
+                        usage();
+                    arg = ARGV[1];
+                }
+                serial_id = atoi(arg);
+                break;
             default:
                 usage();
         }
@@ -313,7 +325,7 @@ int  main( int argc, char**  argv )
     sectors_per_disk = disk_size / BYTES_PER_SECTOR;
     sectors_per_fat  = get_sectors_per_fat( disk_size, get_sectors_per_cluster( disk_size ) );
 
-    boot_sector_init( s_boot_sector, s_fsinfo_sector, disk_size, NULL );
+    boot_sector_init( s_boot_sector, s_fsinfo_sector, disk_size, NULL, serial_id);
     fat_init( s_fat_head );
 
 #ifdef _WIN32
