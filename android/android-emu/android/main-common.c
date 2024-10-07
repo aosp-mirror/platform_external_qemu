@@ -257,6 +257,22 @@ static char* _getSdkSystemImage(const char* path,
     return image;
 }
 
+// True if a ends with b
+static int ends_with(const char* a, const char* b) {
+    if (a == NULL || b == NULL) {
+        return 0;
+    }
+
+    size_t a_len = strlen(a);
+    size_t b_len = strlen(b);
+
+    if (b_len > a_len) {
+        return 0;
+    }
+
+    return strcmp(a + a_len - b_len, b) == 0;
+}
+
 static void sanitizeOptions(AndroidOptions* opts) {
     /* legacy support: we used to use -system <dir> and -image <file>
      * instead of -sysdir <dir> and -system <file>, so handle this by checking
@@ -1121,8 +1137,9 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     if (opts->sdcard) {
         uint64_t size;
-        if (path_get_size(opts->sdcard, &size) == 0) {
-            /* see if we have an sdcard image.  get its size if it exists */
+        if (path_get_size(opts->sdcard, &size) == 0 &&
+            !ends_with(opts->sdcard, ".qcow2")) {
+            /* see if we have a standard sdcard image.  get its size if it exists */
             /* due to what looks like limitations of the MMC protocol, one has
              * to use an SD Card image that is equal or larger than 9 MB
              */
