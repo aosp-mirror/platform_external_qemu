@@ -413,6 +413,13 @@ int android_startOpenglesRenderer(
 
     sRenderer = sRenderLib->initRenderer(width, height, gfxstreamFeatures,
                                          sRendererUsesSubWindow, sEgl2egl);
+
+    if (sRenderer == nullptr) {
+        E("Can't initialize RenderLib with parameters: width=%d, height=%d "
+        "sRendererUsesSubWindow=%d sEgl2egl=%d",
+        width, height, sRendererUsesSubWindow, sEgl2egl);
+        return -1;
+    }
 #ifdef AEMU_GFXSTREAM_BACKEND
     gfxstream_android_setOpenglesRenderer(&sRenderer);
 #endif  // AEMU_GFXSTREAM_BACKEND
