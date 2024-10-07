@@ -125,7 +125,7 @@ void Loader::complete(bool succeeded) {
     mStatus = OperationStatus::Error;
     if (!succeeded) {
         if (!mSnapshot.failureReason()) {
-            mSnapshot.saveFailure(FailureReason::EmulationEngineFailed);
+            mSnapshot.saveFailure(FailureReason::NoSnapshotInImage);
         }
         return;
     }

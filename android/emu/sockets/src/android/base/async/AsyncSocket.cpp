@@ -13,22 +13,19 @@
 // limitations under the License.
 #include "aemu/base/async/AsyncSocket.h"
 
+#include <condition_variable>
 #include <cstdio>
+#include <deque>
+#include <memory>
 #include <mutex>
+#include <optional>
 #include <thread>
+#include <type_traits>
 
 #include "absl/log/log.h"
 
 #include "aemu/base/sockets/SocketUtils.h"
 #include "android/base/system/System.h"
-
-#define DEBUG 0
-
-#if DEBUG >= 2
-#define DD(str) LOG(INFO) << str
-#else
-#define DD(...) (void)0
-#endif
 
 namespace android {
 namespace base {
@@ -49,6 +46,10 @@ static void socket_watcher(void* opaque, int fd, unsigned events) {
 
 AsyncSocket::~AsyncSocket() {
     dispose();
+    if (mConnectThread) {
+        mConnecting = false;
+        mConnectThread->join();
+    }
 }
 
 AsyncSocket::AsyncSocket(Looper* looper, int port)
@@ -57,17 +58,26 @@ AsyncSocket::AsyncSocket(Looper* looper, int port)
 AsyncSocket::AsyncSocket(Looper* looper, ScopedSocket socket)
     : mLooper(looper),
       mPort(-1),
-      mWriteQueue(WRITE_BUFFER_SIZE, mWriteQueueLock),
-      mSocket(std::move(socket)) {
+      mSocket(std::move(socket)),
+      mWriteQueue(WRITE_BUFFER_SIZE, mWriteQueueLock) {
     socketSetNonBlocking(mSocket.get());
     mFdWatch = std::unique_ptr<Looper::FdWatch>(
             mLooper->createFdWatch(mSocket.get(), socket_watcher, this));
 }
 
 void AsyncSocket::wantRead() {
-    if (mFdWatch) {
-        mFdWatch->wantRead();
+    if (!mFdWatch) {
+        return;
     }
+    if (mLooper->onLooperThread()) {
+        mFdWatch->wantRead();
+        return;
+    }
+    mLooper->scheduleCallback([this] {
+        if (mFdWatch) {
+            mFdWatch->wantRead();
+        }
+    });
 }
 
 ssize_t AsyncSocket::recv(char* buffer, uint64_t bufferSize) {
@@ -80,7 +90,9 @@ ssize_t AsyncSocket::recv(char* buffer, uint64_t bufferSize) {
         if (fd == -1) {
             return 0;
         }
+        wantRead();
     }
+
     // It is still possible that the fd is no longer open
     ssize_t read = socketRecv(fd, buffer, bufferSize);
     if (read == 0) {
@@ -100,20 +112,35 @@ void AsyncSocket::onRead() {
     mListener->onRead(this);
 }
 
+void AsyncSocket::wantWrite() {
+    if (!mFdWatch) {
+        return;
+    }
+    // Okay schedule left overs..
+    if (mLooper->onLooperThread()) {
+        mFdWatch->wantWrite();
+    } else {
+        mLooper->scheduleCallback([this] {
+            if (mFdWatch) {
+                mFdWatch->wantWrite();
+            }
+        });
+    }
+}
+
 ssize_t AsyncSocket::send(const char* buffer, uint64_t bufferSize) {
+    if (!mFdWatch) {
+        errno = ECONNRESET;
+        return -1;
+    }
     {
         AutoLock alock(mWriteQueueLock);
         if (mWriteQueue.pushLocked(std::string(buffer, bufferSize)) != BufferQueueResult::Ok) {
             return 0;
         }
+        mSendBuffer += bufferSize;
     }
-    {
-        // Let's make sure we actually exists when requesting writes.
-        std::lock_guard<std::mutex> watchLock(mWatchLock);
-        if (mFdWatch) {
-            mFdWatch->wantWrite();
-        }
-    }
+    wantWrite();
     return bufferSize;
 }
 
@@ -125,7 +152,14 @@ void AsyncSocket::onWrite() {
     if (!connected()) {
         return;
     }
+    auto delta = mAsyncWriter.written();
     auto status = mAsyncWriter.run();
+    delta = mAsyncWriter.written() - delta;
+    {
+        std::unique_lock<std::mutex> lock(mSendBufferMutex);
+        mSendBuffer -= delta;
+        mSendBufferCv.notify_all();
+    }
     switch (status) {
         case kAsyncCompleted:
             if (mWriteQueue.canPopLocked()) {
@@ -144,25 +178,46 @@ void AsyncSocket::onWrite() {
 
 void AsyncSocket::dispose() {
     // Only close if we are not actively closing.
-    if (mFdWatch) {
-        close();
-    }
+    close();
+    std::unique_lock<std::mutex> watchLock(mWatchLock);
+    mWatchLockCv.wait(watchLock, [this] { return mFdWatch == nullptr; });
     setSocketEventListener(nullptr);
 }
 
+// Wait at most duration for the send buffer to be cleared
+bool AsyncSocket::waitForSend(const std::chrono::milliseconds& rel_time) {
+    std::unique_lock<std::mutex> lock(mSendBufferMutex);
+    return mSendBufferCv.wait_for(lock, rel_time, [this] { return mSendBuffer == 0; });
+}
+
 void AsyncSocket::close() {
-    // Let's not accidentally trip a reader/writer up.
-    bool fireClose;
-    {
-        std::lock_guard<std::mutex> watchLock(mWatchLock);
-        mSocket.close();
-        fireClose = mListener && mFdWatch != nullptr;
-        mFdWatch = nullptr;
-        mConnecting = false;
+    if (!mFdWatch) {
+        // Already closed
+        return;
     }
-    if (fireClose) {
-        std::lock_guard<std::recursive_mutex> lock(mListenerLock);
-        mListener->onClose(this, errno);
+    if (mLooper->onLooperThread()) {
+        std::lock_guard<std::mutex> watchLock(mWatchLock);
+        mFdWatch.reset();
+        mSocket.close();
+        mConnecting = false;
+        if (mListener) {
+            mListener->onClose(this, errno);
+        }
+        mWatchLockCv.notify_all();
+    } else {
+        mLooper->scheduleCallback([this] {
+            std::lock_guard<std::mutex> watchLock(mWatchLock);
+            if (!mFdWatch) {
+                return;
+            }
+            mFdWatch.reset();
+            mSocket.close();
+            mConnecting = false;
+            if (mListener) {
+                mListener->onClose(this, errno);
+            }
+            mWatchLockCv.notify_all();
+        });
     }
 }
 
@@ -172,11 +227,7 @@ bool AsyncSocket::connect() {
     }
 
     mConnecting = true;
-    DD("Starting connect thread");
-    mConnectThread.reset(new std::thread([this]() {
-        connectToPort();
-        return 0;
-    }));
+    mConnectThread = std::make_unique<std::thread>([this] { connectToPort(); });
     return mConnecting;
 }
 
@@ -187,25 +238,21 @@ bool AsyncSocket::connectSync(std::chrono::milliseconds timeout) {
 
     std::unique_lock<std::mutex> watchLock(mWatchLock);
     mWatchLockCv.wait_for(watchLock, timeout, [this]() { return connected(); });
-
     return connected();
 }
 
 void AsyncSocket::connectToPort() {
     int socket = 0;
-    DD("connecting to port " << mPort);
     while (socket < 1 && mConnecting) {
         socket = socketTcp4LoopbackClient(mPort);
         if (socket < 0) {
             socket = socketTcp6LoopbackClient(mPort);
         }
         if (socket < 0) {
-            DD(<< "Failed to connect to: " << mPort << ", sleeping..");
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
     if (socket < 1) {
-        DD(<< "giving up..");
         return;
     }
 
@@ -214,14 +261,24 @@ void AsyncSocket::connectToPort() {
     std::lock_guard<std::mutex> watchLock(mWatchLock);
     mFdWatch = std::unique_ptr<Looper::FdWatch>(
             mLooper->createFdWatch(mSocket.get(), socket_watcher, this));
-    mFdWatch->wantRead();
-    DD(<< "Connected to: " << mPort);
-    if (mListener) {
-        std::lock_guard<std::recursive_mutex> lock(mListenerLock);
-        mListener->onConnected(this);
-    }
+    wantRead();
+
+    // Now we have to notify the listener, if any
+    std::mutex waitForNotification;
+    std::unique_lock<std::mutex> waitForNotificationLock(waitForNotification);
+    std::condition_variable waitForNotificationCv;
+    mLooper->scheduleCallback([&] {
+        if (mListener) {
+            mListener->onConnected(this);
+        }
+        std::unique_lock<std::mutex> waitForNotificationLock(waitForNotification);
+        waitForNotificationCv.notify_all();
+    });
+
+    // We now wait until the notification has been sent out.
+    waitForNotificationCv.wait(waitForNotificationLock);
     mConnecting = false;
-    mWatchLockCv.notify_one();
+    mWatchLockCv.notify_all();
 }
 
 }  // namespace base

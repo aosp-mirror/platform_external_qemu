@@ -77,9 +77,12 @@ slab = { path = "${AOSP_ROOT}/external/rust/android-crates-io/crates/slab" }
 smallvec = { path = "${AOSP_ROOT}/external/rust/android-crates-io/crates/smallvec" }
 socket2 = { path = "${AOSP_ROOT}/external/rust/android-crates-io/crates/socket2" }
 thread_local = { path = "${AOSP_ROOT}/external/rust/android-crates-io/crates/thread_local" }
+tokio-stream = { path = "${AOSP_ROOT}/external/rust/android-crates-io/crates/tokio-stream" }
+tempfile = { path = "${AOSP_ROOT}/external/rust/android-crates-io/crates/tempfile" }
 textwrap = { path = "${AOSP_ROOT}/external/rust/android-crates-io/crates/textwrap" }
 thiserror = { path = "${AOSP_ROOT}/external/rust/android-crates-io/crates/thiserror" }
 tokio-macros = { path = "${AOSP_ROOT}/external/rust/android-crates-io/crates/tokio-macros" }
+zip = { path = "${AOSP_ROOT}/external/rust/android-crates-io/crates/zip" }
 
 # TODO (365637024): Migrate following crates to monorepo external/rust/android-crates-io
 bindgen = { path = "${AOSP_ROOT}/external/rust/crates/bindgen" }
@@ -128,7 +131,6 @@ serde_json = { path = "${AOSP_ROOT}/external/rust/crates/serde_json" }
 sharded-slab = { path = "${AOSP_ROOT}/external/rust/crates/sharded-slab" }
 shlex = { path = "${AOSP_ROOT}/external/rust/crates/shlex" }
 syn = { path = "${AOSP_ROOT}/external/rust/crates/syn" }
-tempfile = { path = "${AOSP_ROOT}/external/rust/crates/tempfile" }
 tracing = { path = "${AOSP_ROOT}/external/rust/crates/tracing" }
 tracing-attributes = { path = "${AOSP_ROOT}/external/rust/crates/tracing-attributes" }
 tracing-core = { path = "${AOSP_ROOT}/external/rust/crates/tracing-core" }
@@ -136,7 +138,6 @@ tracing-subscriber = { path = "${AOSP_ROOT}/external/rust/crates/tracing-subscri
 termcolor = { path = "${AOSP_ROOT}/external/rust/crates/termcolor" }
 thiserror-impl = { path = "${AOSP_ROOT}/external/rust/crates/thiserror-impl" }
 tokio = { path = "${AOSP_ROOT}/external/rust/crates/tokio" }
-tokio-stream = { path = "${AOSP_ROOT}/external/rust/crates/tokio-stream" }
 tokio-util = { path = "${AOSP_ROOT}/external/rust/crates/tokio-util" }
 tungstenite = { path = "${AOSP_ROOT}/external/rust/crates/tungstenite" }
 ucd-trie = { path = "${AOSP_ROOT}/external/rust/crates/ucd-trie" }
@@ -145,7 +146,6 @@ unicode-width = { path = "${AOSP_ROOT}/external/rust/crates/unicode-width" }
 utf-8 = { path = "${AOSP_ROOT}/external/rust/crates/utf-8" }
 walkdir = { path = "${AOSP_ROOT}/external/rust/crates/walkdir" }
 which = { path = "${AOSP_ROOT}/external/rust/crates/which" }
-zip = { path = "${AOSP_ROOT}/external/rust/crates/zip" }
 
 # Patch crates-io with dummy crates for dev dependencies
 # that are actually not required for building crates and not

@@ -1128,6 +1128,18 @@ public:
             return Status(::grpc::StatusCode::FAILED_PRECONDITION,
                           "The multi-display feature is not available", "");
         }
+
+        if (!MultiDisplay::getInstance()->isDisplayPipeReady()) {
+            if (!MultiDisplay::getInstance()->startDisplayPipe()) {
+                return Status(::grpc::StatusCode::INTERNAL,
+                              "The multi-display service is not available, and "
+                              "we were unable to start it.");
+            }
+            return Status(::grpc::StatusCode::UNAVAILABLE,
+                          "The multi-display service inside android is not yet "
+                          "up and running, a restart was attempted.");
+        }
+
         fillDisplayConfigurations(reply);
 
         return Status::OK;
@@ -1146,6 +1158,46 @@ public:
                 });
     }
 
+    /**
+     * @brief Waits until the MultiDisplay service becomes available or a
+     * timeout occurs.
+     *
+     * This function repeatedly checks if the MultiDisplay service is ready. If
+     * it's not, it attempts to start the service and then waits for a short
+     * duration before checking again. The wait time increases exponentially
+     * with each failed attempt (exponential backoff) to avoid overwhelming the
+     * system.
+     *
+     * @param maxTimeToWait The maximum amount of time to wait for the service
+     * to become available.
+     * @return Status::OK if the service becomes available within the specified
+     * time, or an error status if the service could not be started or the
+     * timeout is reached.
+     */
+    Status waitUntilMultidisplayIsAvailable(
+            std::chrono::milliseconds maxTimeToWait) {
+        auto try_until_time = std::chrono::steady_clock::now() + maxTimeToWait;
+        int wait_time_ms = 100;  // Initial wait time
+        while (!MultiDisplay::getInstance()->isDisplayPipeReady() &&
+               std::chrono::steady_clock::now() < try_until_time) {
+            if (wait_time_ms > 100) {
+                // 200ms, 400ms, 800ms, 1600ms, ...
+                std::this_thread::sleep_for(
+                        std::chrono::milliseconds(wait_time_ms));
+            }
+
+            if (!MultiDisplay::getInstance()->startDisplayPipe()) {
+                return Status(::grpc::StatusCode::INTERNAL,
+                              "The multi-display service is not available, and "
+                              "we were unable to start it.");
+            }
+
+            wait_time_ms *= 2;  // Exponential backoff
+        }
+
+        return Status::OK;
+    }
+
     Status setDisplayConfigurations(ServerContext* context,
                                     const DisplayConfigurations* request,
                                     DisplayConfigurations* reply) override {
@@ -1154,6 +1206,11 @@ public:
         if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
             return Status(::grpc::StatusCode::FAILED_PRECONDITION,
                           "The multi-display feature is not available", "");
+        }
+
+        Status pipeReady = waitUntilMultidisplayIsAvailable(std::chrono::seconds(20));
+        if (!pipeReady.ok()) {
+            return pipeReady;
         }
 
         std::set<int> updatingDisplayIds;
@@ -1220,22 +1277,14 @@ public:
             }
 
             int updated = -EPIPE;
-            {
-                constexpr int RETRIES = 20;
-                for (int i = 0; i < RETRIES && updated == -EPIPE; ++i) {
-                    android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
-                            [&updated, &display, this]() {
-                                updated = mAgents->multi_display->setMultiDisplay(
-                                        display.display(), -1, -1, display.width(),
-                                        display.height(), display.dpi(),
-                                        display.flags(), true);
-                            });
-                    VERBOSE_INFO(grpc, "setMultiDisplay(retry=%d) result (%d)", i, updated);
-                    if (updated == -EPIPE) {
-                        std::this_thread::sleep_for(std::chrono::seconds(1));
-                    }
-                }
-            }
+            android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                    [&updated, &display, this]() {
+                        updated = mAgents->multi_display->setMultiDisplay(
+                                display.display(), -1, -1, display.width(),
+                                display.height(), display.dpi(),
+                                display.flags(), true);
+                    });
+            VERBOSE_INFO(grpc, "setMultiDisplay result (%d)", updated);
             if (updated < 0) {
                 // oh, oh, failure.
                 failureDisplay = display.display();
@@ -1250,32 +1299,31 @@ public:
             mAgents->emu->updateUIMultiDisplayPage(display.display());
         }
 
-        // Rollback if we didn't modify all the screens.
+        // Rollback if we didn't modify all the screens, note that this is really
+        // best effort..
         if (failureDisplay != 0) {
             LOG(WARNING) << "Rolling back failed display updates.";
+            pipeReady =
+                    waitUntilMultidisplayIsAvailable(std::chrono::seconds(20));
+            if (!pipeReady.ok()) {
+                return pipeReady;
+            }
             // Bring back the old state of the displays we added.
             for (const auto& display : previousState.displays()) {
                 if (updatedDisplays.erase(display.display()) == 0) {
                     continue;
                 }
                 int updated = -EPIPE;
-                {
-                    constexpr int RETRIES = 20;
-                    for (int i = 0; i < RETRIES && updated == -EPIPE; ++i) {
-                        android::base::ThreadLooper::
-                                runOnMainLooperAndWaitForCompletion([&updated, &display,
-                                                                    this]() {
-                                    updated = mAgents->multi_display->setMultiDisplay(
-                                            display.display(), -1, -1, display.width(),
-                                            display.height(), display.dpi(),
-                                            display.flags(), true);
-                                });
-                        VERBOSE_INFO(grpc, "setMultiDisplay(retry=%d) result (%d)", i, updated);
-                        if (updated == -EPIPE) {
-                            std::this_thread::sleep_for(std::chrono::seconds(1));
-                        }
-                    }
-                }
+                android::base::ThreadLooper::
+                        runOnMainLooperAndWaitForCompletion([&updated, &display,
+                                                             this]() {
+                            updated =
+                                    mAgents->multi_display->setMultiDisplay(
+                                            display.display(), -1, -1,
+                                            display.width(), display.height(),
+                                            display.dpi(), display.flags(),
+                                            true);
+                        });
 
                 if (updated >= 0) {
                     mAgents->emu->updateUIMultiDisplayPage(display.display());

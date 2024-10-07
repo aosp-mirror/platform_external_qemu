@@ -203,6 +203,9 @@ service EmulatorController {
     // This call can result in the removal or addition of secondary displays,
     // the final display state can be observed by the returned configuration.
     //
+    // This call can take up to 20 seconds in the case where the multidisplay
+    // serivce in the guest was not yet available.
+    //
     // The following gRPC error codes can be returned:
     // -  FAILED_PRECONDITION (code 9) if the AVD does not support a
     // configurable
@@ -211,6 +214,10 @@ service EmulatorController {
     //     - The same display id is defined multiple times.
     //     - The display configurations are outside valid ranges.
     //       See DisplayConfiguration for details on valid ranges.
+    //  -  UNAVAILABLE (code 14) is retunred if the multi display
+    //      service in the android guest is not yet available, even
+    //      after an attempt was made to enable the service.
+    // call to retrieve the configuration might succeed.
     // -  INTERNAL (code 13) if there was an internal emulator failure.
     rpc setDisplayConfigurations(DisplayConfigurations)
             returns (DisplayConfigurations) {}
@@ -219,6 +226,9 @@ service EmulatorController {
     //
     // The gRPC error code FAILED_PRECONDITION (code 9) is returned if the AVD
     // does not support a configurable secondary display.
+    // The gRPC error code UNAVAILABLE (code 14) is retunred if the multi display
+    // service in guest is not yet available. A restart was attempted and a later
+    // call to retrieve the configuration might succeed.
     rpc getDisplayConfigurations(google.protobuf.Empty)
             returns (DisplayConfigurations) {}
 
