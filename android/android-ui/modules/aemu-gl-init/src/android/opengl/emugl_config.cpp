@@ -812,7 +812,12 @@ bool emuglConfig_init(EmuglConfig* config,
 
 #if defined(__linux__)
     // todo: add the amd/intel gpu quirks
-    if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
+    const bool hwGpuRequested =
+            (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST);
+    const bool vulkanIsNotDisabled =
+            (!agentsAvailable() || !fc::isOverridden(fc::Vulkan) ||
+             fc::isEnabled(fc::Vulkan));
+    if (hwGpuRequested && vulkanIsNotDisabled) {
         char* vkVendor = nullptr;
         int vkMajor = 0;
         int vkMinor = 0;
