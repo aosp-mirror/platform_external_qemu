@@ -1137,14 +1137,14 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     if (opts->sdcard) {
         uint64_t size;
-        if (path_get_size(opts->sdcard, &size) == 0 &&
-            !ends_with(opts->sdcard, ".qcow2")) {
+        if (path_get_size(opts->sdcard, &size) == 0) {
             /* see if we have a standard sdcard image.  get its size if it exists */
             /* due to what looks like limitations of the MMC protocol, one has
              * to use an SD Card image that is equal or larger than 9 MB
              */
             if (size < 9 * 1024 * 1024ULL &&
-                !feature_is_enabled(kFeature_DownloadableSnapshot)) {
+                !feature_is_enabled(kFeature_DownloadableSnapshot) &&
+                !ends_with(opts->sdcard, ".qcow2")) {
                 dwarning("SD Card files must be at least 9MB, ignoring '%s'",
                          opts->sdcard);
             } else {
