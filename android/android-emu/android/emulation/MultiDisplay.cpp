@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,8 +46,8 @@
 #include "host-common/misc.h"
 #include "host-common/screen-recorder.h"
 
-using android::automotive::DisplayManager;
 using android::base::AutoLock;
+using android::automotive::DisplayManager;
 
 #define MULTI_DISPLAY_DEBUG 1
 
@@ -59,8 +59,7 @@ using android::base::AutoLock;
 #endif
 
 #if MULTI_DISPLAY_DEBUG >= 3
-#define D(fmt, ...) \
-    fprintf(stderr, "%s %d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#define D(fmt, ...) fprintf(stderr, "%s %d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
 #else
 #define D(...) (void)0
 #endif
@@ -130,22 +129,18 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         if (avd) {
             if (avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO) {
                 flag = automotive::getDefaultFlagsForDisplay(id);
-                LOG(DEBUG) << "Setting flags " << flag << " for display id "
-                           << id;
+                LOG(DEBUG) << "Setting flags " << flag << " for display id " << id;
             } else if (avdInfo_getApiLevel(avd) >= 31) {
                 // bug: 227218392
                 // starting from S (android 11, api 31), this flag is
                 // required to support Presentation API
-                const int DEFAULT_FLAGS_SINCE_S =
-                        DisplayManager::VIRTUAL_DISPLAY_FLAG_PUBLIC |
-                        DisplayManager::VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY |
-                        DisplayManager::
-                                VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT |
-                        DisplayManager::VIRTUAL_DISPLAY_FLAG_TRUSTED |
-                        DisplayManager::VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH |
-                        DisplayManager::
-                                VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS |
-                        DisplayManager::VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+                const int DEFAULT_FLAGS_SINCE_S = DisplayManager::VIRTUAL_DISPLAY_FLAG_PUBLIC |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_TRUSTED |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS |
+                    DisplayManager::VIRTUAL_DISPLAY_FLAG_PRESENTATION;
                 flag = DEFAULT_FLAGS_SINCE_S;
             }
         }
@@ -190,6 +185,31 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         // bootCompleted. But this service may be killed, e.g., Android low
         // memory. Send broadcast again to guarantee servce running.
         // P.S. guest Service has check to avoid duplication.
+        auto adbInterface = emulation::AdbInterface::getGlobal();
+        if (!adbInterface) {
+            derror("Adb unavailable, not starting multidisplay "
+                   "service in android. Please install adb and restart the "
+                   "emulator. Multi display might not work as expected.");
+            return -EPIPE;
+        }
+
+        {
+            auto avd = getConsoleAgents()->settings->avdInfo();
+            if (avd && avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO && avdInfo_getApiLevel(avd) <= 33) {
+                adbInterface->enqueueCommand(
+                    {"shell", "am", "broadcast", "-a",
+                     "com.android.emulator.multidisplay.START", "-n",
+                     "com.android.emulator.multidisplay/"
+                     ".MultiDisplayServiceReceiver"});
+            } else {
+                adbInterface->enqueueCommand(
+                    {"shell", "am", "broadcast", "-a",
+                     "com.android.emulator.multidisplay.START", "-n",
+                     "com.android.emulator.multidisplay/"
+                     ".MultiDisplayServiceReceiver",
+                     "--user 0"});
+            }
+        }
 
         MultiDisplayPipe* pipe = MultiDisplayPipe::getInstance();
         if (pipe) {
@@ -205,38 +225,6 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         }
     }
     return 0;
-}
-
-bool MultiDisplay::startDisplayPipe() {
-    auto adbInterface = emulation::AdbInterface::getGlobal();
-    if (!adbInterface) {
-        derror("Adb unavailable, not starting multidisplay "
-               "service in android. Please install adb and restart the "
-               "emulator. Multi display might not work as expected.");
-        return false;
-    }
-
-    auto avd = getConsoleAgents()->settings->avdInfo();
-    if (avd && avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO &&
-        avdInfo_getApiLevel(avd) <= 33) {
-        adbInterface->enqueueCommand({"shell", "am", "broadcast", "-a",
-                                      "com.android.emulator.multidisplay.START",
-                                      "-n",
-                                      "com.android.emulator.multidisplay/"
-                                      ".MultiDisplayServiceReceiver"});
-    } else {
-        adbInterface->enqueueCommand({"shell", "am", "broadcast", "-a",
-                                      "com.android.emulator.multidisplay.START",
-                                      "-n",
-                                      "com.android.emulator.multidisplay/"
-                                      ".MultiDisplayServiceReceiver",
-                                      "--user 0"});
-    }
-    return true;
-}
-
-bool MultiDisplay::isDisplayPipeReady() {
-    return MultiDisplayPipe::getInstance() != nullptr;
 }
 
 bool MultiDisplay::getMultiDisplay(uint32_t id,
@@ -414,8 +402,7 @@ bool MultiDisplay::translateCoordination(uint32_t* x,
                 w = iter.second.width;
                 h = iter.second.height;
                 const auto delta = totalH - iter.second.height;
-                if ((normal_x - pos_x) < w && (*y - delta) <= h &&
-                    (*y - delta) >= 0) {
+                if ((normal_x - pos_x) < w && (*y - delta) <= h && (*y -delta) >=0) {
                     *x = *x - currXoffset;
                     *displayId = iter.first;
                     *y = *y - delta;
@@ -628,8 +615,7 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
              mMultiDisplay[displayId].height != h)) {
             checkRecording = true;
         }
-        displaySizeChanged = (mMultiDisplay[displayId].width != w ||
-                              mMultiDisplay[displayId].height != h);
+        displaySizeChanged = (mMultiDisplay[displayId].width != w || mMultiDisplay[displayId].height != h);
         mMultiDisplay[displayId].width = w;
         mMultiDisplay[displayId].height = h;
         mMultiDisplay[displayId].originalWidth = w;
@@ -646,8 +632,7 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
                 }
                 getCombinedDisplaySizeLocked(&width, &height);
             }
-            if (!android_foldable_is_pixel_fold() && displayId > 0 &&
-                displaySizeChanged) {
+            if (!android_foldable_is_pixel_fold() && displayId > 0 && displaySizeChanged) {
                 UIUpdate = true;
             }
         }
@@ -680,13 +665,11 @@ void MultiDisplay::performRotation(int rot) {
 }
 
 void MultiDisplay::performRotationLocked(int mOrientation) {
+
     if (android_foldable_is_pixel_fold()) {
         constexpr int primary_display_id = 0;
-        const int secondary_display_id =
-                android_foldable_pixel_fold_second_display_id();
-        const bool second_display_exists =
-                (mMultiDisplay.find(secondary_display_id) !=
-                 mMultiDisplay.end());
+        const int secondary_display_id = android_foldable_pixel_fold_second_display_id();
+        const bool second_display_exists = (mMultiDisplay.find(secondary_display_id) != mMultiDisplay.end());
         mMultiDisplay[primary_display_id].pos_x = 0;
         mMultiDisplay[primary_display_id].pos_y = 0;
         mMultiDisplay[primary_display_id].rotation = mOrientation;
@@ -744,8 +727,7 @@ void MultiDisplay::performRotationLocked(int mOrientation) {
                 it.second.pos_x = pos_x;
                 it.second.pos_y = pos_y;
                 it.second.rotation = mOrientation;
-                D("display id %d x %d y %d w %d h %d\n", id, pos_x, pos_y,
-                  width, height);
+                D("display id %d x %d y %d w %d h %d\n", id, pos_x, pos_y, width, height);
             }
         } else {
             D("not normal order orientation is %d\n", mOrientation);
@@ -789,8 +771,7 @@ void MultiDisplay::performRotationLocked(int mOrientation) {
                 it.second.pos_x = pos_x;
                 it.second.pos_y = pos_y;
                 it.second.rotation = mOrientation;
-                D("display id %d x %d y %d w %d h %d\n", id, pos_x, pos_y,
-                  width, height);
+                D("display id %d x %d y %d w %d h %d\n", id, pos_x, pos_y, width, height);
             }
         }
     }
@@ -854,8 +835,7 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
         }
         // no need to update pixel_fold, as it has just one
         // active display; no need to do this for primary display
-        if (!android_foldable_is_pixel_fold() && displayId > 0 &&
-            firstTimeColorbufferUpdate) {
+        if (!android_foldable_is_pixel_fold() && displayId > 0 && firstTimeColorbufferUpdate) {
             needUpdate = true;
         }
         mMultiDisplay[displayId].cb = colorBuffer;
@@ -874,7 +854,7 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
         }
     }
     LOG(VERBOSE) << "setDisplayColorBuffer " << displayId << " cb "
-                 << colorBuffer;
+               << colorBuffer;
     return 0;
 }
 
@@ -923,11 +903,8 @@ void MultiDisplay::getCombinedDisplaySizeLocked(uint32_t* w, uint32_t* h) {
     uint32_t total_w = 0;
     if (android_foldable_is_pixel_fold()) {
         constexpr int primary_display_id = 0;
-        const int secondary_display_id =
-                android_foldable_pixel_fold_second_display_id();
-        const bool second_display_exists =
-                (mMultiDisplay.find(secondary_display_id) !=
-                 mMultiDisplay.end());
+        const int secondary_display_id = android_foldable_pixel_fold_second_display_id();
+        const bool second_display_exists = (mMultiDisplay.find(secondary_display_id) != mMultiDisplay.end());
         if (android_foldable_is_folded() && second_display_exists) {
             total_w = mMultiDisplay[secondary_display_id].originalWidth;
             total_h = mMultiDisplay[secondary_display_id].originalHeight;
@@ -947,10 +924,8 @@ void MultiDisplay::getCombinedDisplaySizeLocked(uint32_t* w, uint32_t* h) {
     } else {
         for (const auto& iter : mMultiDisplay) {
             if (iter.first == 0 || iter.second.cb != 0) {
-                total_h = std::max(total_h,
-                                   iter.second.height + iter.second.pos_y);
-                total_w = std::max(total_w,
-                                   iter.second.width + iter.second.pos_x);
+                total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
+                total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
             }
         }
     }
@@ -1002,8 +977,8 @@ void MultiDisplay::recomputeLayoutLocked() {
  * Use stacked layout
  */
 void MultiDisplay::recomputeStackedLayoutLocked() {
-    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles,
-            newRectangles;
+    std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>>
+            rectangles, newRectangles;
     for (const auto& iter : mMultiDisplay) {
         if (iter.first == 0 || iter.second.cb != 0) {
             rectangles[iter.first] =
@@ -1011,10 +986,8 @@ void MultiDisplay::recomputeStackedLayoutLocked() {
         }
     }
     const bool isDistantDisplay =
-            android::automotive::isDistantDisplaySupported(
-                    getConsoleAgents()->settings->avdInfo());
-    newRectangles =
-            android::base::resolveStackedLayout(rectangles, isDistantDisplay);
+        android::automotive::isDistantDisplaySupported(getConsoleAgents()->settings->avdInfo());
+    newRectangles = android::base::resolveStackedLayout(rectangles, isDistantDisplay);
 
     for (const auto& iter : newRectangles) {
         mMultiDisplay[iter.first].pos_x = iter.second.first;
