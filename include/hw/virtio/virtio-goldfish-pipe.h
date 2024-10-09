@@ -122,7 +122,6 @@ VG_EXPORT int stream_renderer_context_create_fence(
 #define STREAM_RENDERER_PLATFORM_RESOURCE_TYPE_EGL_IMAGE 0x02
 
 VG_EXPORT int stream_renderer_platform_import_resource(int res_handle, int res_type, void* resource);
-VG_EXPORT int stream_renderer_platform_resource_info(int res_handle, int* width, int*  height, int* internal_format);
 VG_EXPORT void* stream_renderer_platform_create_shared_egl_context(void);
 VG_EXPORT int stream_renderer_platform_destroy_shared_egl_context(void*);
 
