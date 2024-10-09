@@ -3448,32 +3448,6 @@ const int FrameBuffer::getDisplayActiveConfig() {
     return mDisplayActiveConfigId >= 0 ? mDisplayActiveConfigId : -1;
 }
 
-bool FrameBuffer::platformImportResource(uint32_t handle, uint32_t type, void* resource) {
-    if (!resource) {
-        ERR("Error: resource was null");
-    }
-
-    AutoLock mutex(m_lock);
-
-    ColorBufferMap::iterator c(m_colorbuffers.find(handle));
-    if (c == m_colorbuffers.end()) {
-        ERR("Error: resource %u not found as a ColorBuffer", handle);
-        return false;
-    }
-
-    switch (type) {
-        case RESOURCE_TYPE_EGL_NATIVE_PIXMAP:
-            return (*c).second.cb->importEglNativePixmap(resource);
-        case RESOURCE_TYPE_EGL_IMAGE:
-            return (*c).second.cb->importEglImage(resource);
-        default:
-            ERR("Error: unsupported resource type: %u", type);
-            return false;
-    }
-
-    return true;
-}
-
 void* FrameBuffer::platformCreateSharedEglContext(void) {
     AutoLock lock(m_lock);
 

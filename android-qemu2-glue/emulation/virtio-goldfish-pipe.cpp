@@ -1608,15 +1608,6 @@ public:
         return entry.hvSlot;
     }
 
-    int platformImportResource(int res_handle, int res_type, void* resource) {
-        AutoLock lock(mLock);
-        auto it = mResources.find(res_handle);
-        if (it == mResources.end()) return -1;
-        bool success =
-            mVirtioGpuOps->platform_import_resource(res_handle, res_type, resource);
-        return success ? 0 : -1;
-    }
-
     void* platformCreateSharedEglContext() {
         return mVirtioGpuOps->platform_create_shared_egl_context();
     }
@@ -2129,10 +2120,6 @@ VG_EXPORT int stream_renderer_context_create_fence(
                                          .mRingIdx = ring_idx,
                                      });
     return 0;
-}
-
-VG_EXPORT int stream_renderer_platform_import_resource(int res_handle, int res_type, void* resource) {
-    return sRenderer->platformImportResource(res_handle, res_type, resource);
 }
 
 VG_EXPORT void* stream_renderer_platform_create_shared_egl_context() {
