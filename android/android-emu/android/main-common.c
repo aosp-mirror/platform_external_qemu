@@ -1242,12 +1242,20 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     bool isLargeScreen =
             ((long long)(hw->hw_lcd_width) * (long long)(hw->hw_lcd_height)) >=
             3LL * 1000LL * 1000LL;
+    bool isGoogleTV = (avdInfo_getAvdFlavor(avd)== AVD_TV) &&
+                      hw && hw->disk_systemPartition_initPath
+                      && strstr(hw->disk_systemPartition_initPath, "google-tv");
 
     if (avdInfo_getApiLevel(avd) >= 34) {
         minRam = 2560;  // 2.5G is required for U and up, to avoid kswapd eating
                         // cpus
     }
-    if (avdInfo_getApiLevel(avd) >= 33 && (isFoldable || isLargeScreen)) {
+    if (avdInfo_getAvdFlavor(avd)== AVD_TV){
+        minRam = 1024; // bug: 367746301
+        if (isGoogleTV) {
+           minRam = 2048;
+        }
+    } else if (avdInfo_getApiLevel(avd) >= 33 && (isFoldable || isLargeScreen)) {
         minRam = 3072; // 3G is required for U and up, to avoid kswapd eating cpus
         D("foldable or large screen devices with api >=33 is set to have "
           "minimum ram 3G");
