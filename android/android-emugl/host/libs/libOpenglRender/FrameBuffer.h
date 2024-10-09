@@ -683,9 +683,6 @@ public:
     void asyncWaitForGpuVulkanWithCb(uint64_t deviceHandle, uint64_t fenceHandle, FenceCompletionCallback cb);
     void asyncWaitForGpuVulkanQsriWithCb(uint64_t image, FenceCompletionCallback cb);
 
-    void* platformCreateSharedEglContext(void);
-    bool platformDestroySharedEglContext(void* context);
-
     void setGuestManagedColorBufferLifetime(bool guestManaged);
 
     void setVsyncHz(int vsyncHz);

@@ -686,16 +686,6 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
                             (FrameworkFormat)fwkFormat, format, type, pixels,
                             metadata);
                 },
-        .platform_create_shared_egl_context =
-                []() {
-                    return FrameBuffer::getFB()
-                            ->platformCreateSharedEglContext();
-                },
-        .platform_destroy_shared_egl_context =
-                [](void* context) {
-                    return FrameBuffer::getFB()
-                            ->platformDestroySharedEglContext(context);
-                },
 };
 
 struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {

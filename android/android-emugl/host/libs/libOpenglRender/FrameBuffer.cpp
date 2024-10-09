@@ -3447,37 +3447,3 @@ const int FrameBuffer::getDisplayActiveConfig() {
     AutoLock mutex(m_lock);
     return mDisplayActiveConfigId >= 0 ? mDisplayActiveConfigId : -1;
 }
-
-void* FrameBuffer::platformCreateSharedEglContext(void) {
-    AutoLock lock(m_lock);
-
-    EGLContext context;
-    EGLSurface surface;
-    createSharedTrivialContext(&context, &surface);
-
-    void* underlyingContext = s_egl.eglGetNativeContextANDROID(m_eglDisplay, context);
-    if (!underlyingContext) {
-        ERR("Error: Underlying egl backend could not produce a native EGL context.");
-        return nullptr;
-    }
-
-    m_platformEglContexts[underlyingContext] = { context, surface };
-
-    return underlyingContext;
-}
-
-bool FrameBuffer::platformDestroySharedEglContext(void* underlyingContext) {
-    AutoLock lock(m_lock);
-
-    auto it = m_platformEglContexts.find(underlyingContext);
-    if (it == m_platformEglContexts.end()) {
-        ERR("Error: Could not find underlying egl context %p (perhaps already destroyed?)", underlyingContext);
-        return false;
-    }
-
-    destroySharedTrivialContext(it->second.context, it->second.surface);
-
-    m_platformEglContexts.erase(it);
-
-    return true;
-}

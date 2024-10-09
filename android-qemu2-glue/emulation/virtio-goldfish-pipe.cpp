@@ -1608,15 +1608,6 @@ public:
         return entry.hvSlot;
     }
 
-    void* platformCreateSharedEglContext() {
-        return mVirtioGpuOps->platform_create_shared_egl_context();
-    }
-
-    int platformDestroySharedEglContext(void* context) {
-        bool success = mVirtioGpuOps->platform_destroy_shared_egl_context(context);
-        return success ? 0 : -1;
-    }
-
 private:
     void allocResource(PipeResEntry& entry, iovec* iov, int num_iovs, uint64_t* addrs = nullptr) {
         VGPLOG("entry linear: %p", entry.linear);
@@ -2120,14 +2111,6 @@ VG_EXPORT int stream_renderer_context_create_fence(
                                          .mRingIdx = ring_idx,
                                      });
     return 0;
-}
-
-VG_EXPORT void* stream_renderer_platform_create_shared_egl_context() {
-    return sRenderer->platformCreateSharedEglContext();
-}
-
-VG_EXPORT int stream_renderer_platform_destroy_shared_egl_context(void* context) {
-    return sRenderer->platformDestroySharedEglContext(context);
 }
 
 #define VIRGLRENDERER_API_PIPE_STRUCT_DEF(api) pipe_##api,
