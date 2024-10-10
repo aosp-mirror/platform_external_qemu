@@ -116,15 +116,6 @@ VG_EXPORT int stream_renderer_resource_map(uint32_t res_handle, void** hvaOut, u
 VG_EXPORT int stream_renderer_resource_unmap(uint32_t res_handle);
 VG_EXPORT int stream_renderer_context_create_fence(
     uint64_t fence_id, uint32_t ctx_id, uint8_t ring_idx);
-
-// Platform resources and contexts support
-#define STREAM_RENDERER_PLATFORM_RESOURCE_TYPE_EGL_NATIVE_PIXMAP 0x01
-#define STREAM_RENDERER_PLATFORM_RESOURCE_TYPE_EGL_IMAGE 0x02
-
-VG_EXPORT int stream_renderer_platform_import_resource(int res_handle, int res_type, void* resource);
-VG_EXPORT void* stream_renderer_platform_create_shared_egl_context(void);
-VG_EXPORT int stream_renderer_platform_destroy_shared_egl_context(void*);
-
 #else
 
 #define VG_EXPORT
