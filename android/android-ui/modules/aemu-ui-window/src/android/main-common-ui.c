@@ -257,6 +257,14 @@ bool configAndStartRenderer(enum WinsysPreferredGlesBackend uiPreferredBackend,
             getConsoleAgents()->emu;
     const QAndroidMultiDisplayAgent* multi_display_agent =
             getConsoleAgents()->multi_display;
+    if (!avd || !hw || !opts || !vm_operations || !window_agent ||
+        !multi_display_agent) {
+        derror("configAndStartRenderer: Invalid configuration parameters "
+               "(%p, %p, %p, %p, %p, %p)",
+               avd, hw, opts, vm_operations, window_agent, multi_display_agent);
+        crashhandler_append_message_format("configAndStartRenderer failed.\n");
+        return false;
+    }
 
     int api_level = avdInfo_getApiLevel(avd);
     char* api_arch = avdInfo_getTargetAbi(avd);
@@ -432,29 +440,36 @@ bool configAndStartRenderer(enum WinsysPreferredGlesBackend uiPreferredBackend,
         }
     } else {
         int gles_init_res = android_initOpenglesEmulation();
+        if (gles_init_res < 0) {
+            config_out->openglAlive = 0;
+            derror("Could not initialize Opengl ES Emulation! (Error: %d)",
+                   gles_init_res);
+            crashhandler_append_message_format(
+                    "android_initOpenglesEmulation failed. "
+                    "Error: %d\n",
+                    gles_init_res);
+            return false;
+        }
+
         int renderer_startup_res = android_startOpenglesRenderer(
                 hw->hw_lcd_width, hw->hw_lcd_height,
                 avdInfo_getAvdFlavor(avd) == AVD_PHONE,
                 avdInfo_getApiLevel(avd), vm_operations, window_agent,
-                multi_display_agent, NULL, &gles_major_version, &gles_minor_version);
-        if (gles_init_res || renderer_startup_res) {
+                multi_display_agent, NULL, &gles_major_version,
+                &gles_minor_version);
+        if (renderer_startup_res < 0) {
             config_out->openglAlive = 0;
-            if (gles_init_res) {
-                crashhandler_append_message_format(
-                        "android_initOpenglesEmulation failed. "
-                        "Error: %d\n",
-                        gles_init_res);
-            }
-            if (renderer_startup_res) {
-                crashhandler_append_message_format(
-                        "android_startOpenglesRenderer failed. "
-                        "Error: %d\n",
-                        renderer_startup_res);
-            }
-        } else {
-            VERBOSE_INFO(init, "Setting vsync to %d hz", hw->hw_lcd_vsync);
-            android_setVsyncHz(hw->hw_lcd_vsync);
+            derror("Could not start Opengl ES Renderer! (Error: %d)",
+                   renderer_startup_res);
+            crashhandler_append_message_format(
+                    "android_startOpenglesRenderer failed. "
+                    "Error: %d\n",
+                    renderer_startup_res);
+            return false;
         }
+
+        VERBOSE_INFO(init, "Setting vsync to %d hz", hw->hw_lcd_vsync);
+        android_setVsyncHz(hw->hw_lcd_vsync);
     }
 
     // We need to know boot property

@@ -23,6 +23,8 @@ Run Visual Studio once to accept the license. Ensure your user account has the "
 You will need to setup your name and make sure you enable symlinks. Repo will do its best to work without symlinks enabled, but we have not tested this. Make sure you have the following settings set:
 
 ```bat
+git config --system core.autocrlf false
+git config --global core.autocrlf false
 git config --system core.symlinks true
 git config --global core.symlinks true
 git config --global user.name "I just copy pasted this without looking"

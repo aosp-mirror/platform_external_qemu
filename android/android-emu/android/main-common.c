@@ -257,6 +257,22 @@ static char* _getSdkSystemImage(const char* path,
     return image;
 }
 
+// True if a ends with b
+static int ends_with(const char* a, const char* b) {
+    if (a == NULL || b == NULL) {
+        return 0;
+    }
+
+    size_t a_len = strlen(a);
+    size_t b_len = strlen(b);
+
+    if (b_len > a_len) {
+        return 0;
+    }
+
+    return strcmp(a + a_len - b_len, b) == 0;
+}
+
 static void sanitizeOptions(AndroidOptions* opts) {
     /* legacy support: we used to use -system <dir> and -image <file>
      * instead of -sysdir <dir> and -system <file>, so handle this by checking
@@ -1122,12 +1138,13 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     if (opts->sdcard) {
         uint64_t size;
         if (path_get_size(opts->sdcard, &size) == 0) {
-            /* see if we have an sdcard image.  get its size if it exists */
+            /* see if we have a standard sdcard image.  get its size if it exists */
             /* due to what looks like limitations of the MMC protocol, one has
              * to use an SD Card image that is equal or larger than 9 MB
              */
             if (size < 9 * 1024 * 1024ULL &&
-                !feature_is_enabled(kFeature_DownloadableSnapshot)) {
+                !feature_is_enabled(kFeature_DownloadableSnapshot) &&
+                !ends_with(opts->sdcard, ".qcow2")) {
                 dwarning("SD Card files must be at least 9MB, ignoring '%s'",
                          opts->sdcard);
             } else {
@@ -1225,12 +1242,20 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     bool isLargeScreen =
             ((long long)(hw->hw_lcd_width) * (long long)(hw->hw_lcd_height)) >=
             3LL * 1000LL * 1000LL;
+    bool isGoogleTV = (avdInfo_getAvdFlavor(avd)== AVD_TV) &&
+                      hw && hw->disk_systemPartition_initPath
+                      && strstr(hw->disk_systemPartition_initPath, "google-tv");
 
     if (avdInfo_getApiLevel(avd) >= 34) {
         minRam = 2560;  // 2.5G is required for U and up, to avoid kswapd eating
                         // cpus
     }
-    if (avdInfo_getApiLevel(avd) >= 33 && (isFoldable || isLargeScreen)) {
+    if (avdInfo_getAvdFlavor(avd)== AVD_TV){
+        minRam = 1024; // bug: 367746301
+        if (isGoogleTV) {
+           minRam = 2048;
+        }
+    } else if (avdInfo_getApiLevel(avd) >= 33 && (isFoldable || isLargeScreen)) {
         minRam = 3072; // 3G is required for U and up, to avoid kswapd eating cpus
         D("foldable or large screen devices with api >=33 is set to have "
           "minimum ram 3G");

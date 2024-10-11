@@ -59,7 +59,6 @@ f(stream_renderer_resource_unmap) \
 f(stream_renderer_context_create) \
 f(stream_renderer_create_fence) \
 f(stream_renderer_platform_import_resource) \
-f(stream_renderer_platform_resource_info) \
 f(stream_renderer_platform_create_shared_egl_context) \
 f(stream_renderer_platform_destroy_shared_egl_context) \
 f(stream_renderer_resource_map_info) \
@@ -203,12 +202,6 @@ VG_EXPORT int stream_renderer_create_fence(const struct stream_renderer_fence* f
 VG_EXPORT int stream_renderer_platform_import_resource(int res_handle, int res_info,
                                                        void* resource) {
     return s_render.stream_renderer_platform_import_resource(res_handle, res_info, resource);
-}
-
-VG_EXPORT int stream_renderer_platform_resource_info(int res_handle, int* width, int* height,
-                                                     int* internal_format) {
-    return s_render.stream_renderer_platform_resource_info(
-            res_handle, width, height, internal_format);
 }
 
 VG_EXPORT void* stream_renderer_platform_create_shared_egl_context() {
