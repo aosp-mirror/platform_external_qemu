@@ -29,7 +29,7 @@ from aemu.tasks.compile import CompileTask
 from aemu.tasks.configure import ConfigureTask
 from aemu.tasks.distribution import DistributionTask
 from aemu.tasks.gen_entries import GenEntriesTestTask
-from aemu.tasks.integration_tests import IntegrationTestTask
+from aemu.tasks.integration_tests import IntegrationTestTask, ZipIntegrationTestsTask
 from aemu.tasks.unit_tests import AccelerationCheckTask, CTestTask, CoverageReportTask
 from aemu.tasks.emugen_test import EmugenTestTask
 from aemu.tasks.package_samples import PackageSamplesTask
@@ -90,6 +90,7 @@ def get_tasks(args) -> List[BuildTask]:
             PackageSamplesTask(
                 args.aosp, args.out, args.dist, args.target, args.sdk_build_number
             ),
+            ZipIntegrationTestsTask(args.aosp, args.out).enable(True),
             DistributionTask(
                 aosp=args.aosp,
                 build_directory=args.out,

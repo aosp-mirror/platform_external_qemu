@@ -17,8 +17,8 @@
 #include "aemu/base/system/Win32Utils.h"
 #include "aemu/base/threads/Async.h"
 #include "aemu/base/threads/Thread.h"
-#include "android-qemu2-glue/qemu-console-factory.h"
 #include "android-qemu2-glue/base/files/KernelCmdLineLoader.h"
+#include "android-qemu2-glue/qemu-console-factory.h"
 #include "android/android.h"
 #include "android/avd/BugreportInfo.h"
 #include "android/base/files/IniFile.h"
@@ -36,6 +36,7 @@
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/USBAssist.h"
+#include "android/emulation/compatibility_check.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/emulation/control/adb/adbkey.h"
@@ -155,6 +156,7 @@ static bool is_multi_instance = false;
 
 using namespace android::base;
 using android::base::System;
+using android::emulation::AvdCompatibilityManager;
 using android::emulation::PassiveGpsUpdater;
 namespace fc = android::featurecontrol;
 
@@ -1778,12 +1780,8 @@ extern "C" int main(int argc, char** argv) {
 
     getConsoleAgents()->settings->inject_AvdInfo(avd);
 
-    bool lowDisk = System::isUnderDiskPressure(avdInfo_getContentPath(avd));
-    if (lowDisk) {
-        derror("Not enough disk space to run AVD '%s'. Exiting...",
-               avdInfo_getName(avd));
-        return 1;
-    }
+    // Check compatibility and exit in case of failure..
+    AvdCompatibilityManager::ensureAvdCompatibility(avd);
 
     if (opts->read_only) {
         android::base::disableRestart();

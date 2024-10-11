@@ -19,6 +19,7 @@ import os
 import shutil
 import subprocess
 import aemu.prebuilts.deps.common as deps_common
+import aemu.prebuilts.deps.mac as deps_mac
 import aemu.prebuilts.deps.windows as deps_win
 from pathlib import Path
 import platform
@@ -321,6 +322,10 @@ def buildPrebuilt(args, prebuilts_out_dir):
     deps_common.addToSearchPath(NINJA_PATH)
     # Add depot_tools to PATH
     deps_common.addToSearchPath(str(DEPOT_TOOLS_PATH))
+    if HOST_OS == "darwin":
+        # angle can't build with python 3.12
+        deps_mac.addHomebrewPython311ToPath(HOST_ARCH)
+
     logging.info(os.environ)
 
     # angle source code is in external/angle

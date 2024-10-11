@@ -18,6 +18,12 @@ import logging
 import os
 import re
 import subprocess
+import aemu.prebuilts.deps.common as deps_common
+
+# Some prebuilts do not work with python 3.12, so let's hardcode the 3.11 version in our
+# buildbots.
+MAC_ARM64_PYTHON_3_11 = os.path.join("/opt", "homebrew", "Cellar", "python@3.11", "3.11.9_1", "libexec", "bin")
+MAC_X64_PYTHON_3_11 = os.path.join("/usr", "local", "Cellar", "python@3.11", "3.11.9_1", "libexec", "bin")
 
 def checkMacOsSDKVersion(min_vers):
     vers_regex = "macosx([0-9]*\.[0-9]*)"
@@ -31,3 +37,13 @@ def checkMacOsSDKVersion(min_vers):
     except subprocess.CalledProcessError as e:
         logging.critical("Encountered problem executing xcodebuild -showsdks")
         raise e
+
+def addHomebrewPython311ToPath(host_arch):
+    pydir = MAC_X64_PYTHON_3_11
+    if host_arch == "aarch64" or host_arch == "arm64":
+        pydir = MAC_ARM64_PYTHON_3_11
+
+    if not os.path.exists(pydir):
+        logging.fatal(f"Python 3.11 installation [{pydir}] is not found.")
+        exit(-1)
+    deps_common.addToSearchPath(pydir)

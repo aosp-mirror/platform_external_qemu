@@ -13,15 +13,19 @@
 
 #include "android/avd/util.h"
 #include "aemu/base/memory/ScopedPtr.h"
+#include "android/console.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/utils/debug.h"
 #include "android/utils/string.h"
+#include "host-common/feature_control.h"
+#include "host-common/opengles.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 
 using android::base::ScopedCPtr;
+namespace fc = android::featurecontrol;
 
 bool androidEmuglConfigInit(EmuglConfig* config,
                             const char* avdName,
@@ -108,7 +112,12 @@ bool androidEmuglConfigInit(EmuglConfig* config,
 
     bool isUnsupportedGpuDriver = false;
 #if defined(_WIN32) || defined(__linux__)
-    {
+    const bool hwGpuRequested =
+            (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST);
+    const bool vulkanIsNotDisabled =
+            (!agentsAvailable() || !fc::isOverridden(fc::Vulkan) ||
+             fc::isEnabled(fc::Vulkan));
+    if (hwGpuRequested && vulkanIsNotDisabled) {
         char* vkVendor = nullptr;
         int vkMajor = 0;
         int vkMinor = 0;
@@ -116,7 +125,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
         uint64_t vkDeviceMemBytes = 0;
         emuglConfig_get_vulkan_hardware_gpu(&vkVendor, &vkMajor, &vkMinor,
                                             &vkPatch, &vkDeviceMemBytes);
-        const uint64_t deviceMemMB = vkDeviceMemBytes/(1024*1024);
+        const uint64_t deviceMemMB = vkDeviceMemBytes / (1024 * 1024);
         dinfo("GPU device local memory = %lluMB", deviceMemMB);
 
         if (vkVendor) {
@@ -128,7 +137,8 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                     isUnsupportedGpuDriver = true;
                 }
             } else if (strncmp("Intel", vkVendor, 5) == 0) {
-                if (vkMajor == 1 && ((vkMinor == 3 && vkPatch < 240) || (vkMinor <3) )) {
+                if (vkMajor == 1 &&
+                    ((vkMinor == 3 && vkPatch < 240) || (vkMinor < 3))) {
                     // intel gpu with api < 1.3.240 does not work
                     // for vulkan, disable it
                     isUnsupportedGpuDriver = true;
@@ -137,8 +147,9 @@ bool androidEmuglConfigInit(EmuglConfig* config,
 #endif
 #if defined(__linux__)
             if (strcmp("AMD Custom GPU 0405 (RADV VANGOGH)", vkVendor) == 0) {
-                // on linux, this specific amd gpu does not work for vulkan even
-                // with VulkanAllocateDeviceMemoryOnly, disable it (b/225541819)
+                // on linux, this specific amd gpu does not work for vulkan
+                // even with VulkanAllocateDeviceMemoryOnly, disable it
+                // (b/225541819)
                 isUnsupportedGpuDriver = true;
             }
 #endif
@@ -151,7 +162,8 @@ bool androidEmuglConfigInit(EmuglConfig* config,
             }
             free(vkVendor);
         } else {
-            // Could not properly detect the hardware parameters, disable Vulkan
+            // Could not properly detect the hardware parameters, disable
+            // Vulkan
             dwarning(
                     "Could not detect GPU properly for Vulkan emulation."
                     " Please try updating your GPU Drivers.");
