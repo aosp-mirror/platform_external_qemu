@@ -376,7 +376,7 @@ Feature: 'QtRawKeyboardInput' (100), value: 0, default: 0, is overridden: 0
 Feature: 'Uwb' (101), value: 0, default: 0, is overridden: 0
 Feature: 'GuestAngle' (102), value: 0, default: 0, is overridden: 0
 Feature: 'AndroidVirtualizationFramework' (103), value: 0, default: 0, is overridden: 0
-Feature: 'BypassVulkanDeviceFeatureOverrides' (104), value: 0, default: 0, is overridden: 0
+Feature: 'BypassVulkanDeviceFeatureOverrides' (107), value: 0, default: 0, is overridden: 0
 )#";
     EXPECT_EQ(feature_list, ss.str());
 }
