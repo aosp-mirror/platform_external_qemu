@@ -539,8 +539,14 @@ public:
             response_entry->set_value(entry.second);
         };
 
+        (*reply->mutable_guestconfig())
+        ["multidisplay"] =
+                MultiDisplay::getInstance()->isDisplayPipeReady()
+                        ? "available"
+                        : "unavailable";
         return Status::OK;
     }
+
     Status injectAudio(ServerContext* context,
                        ::grpc::ServerReader<AudioPacket>* reader,
                        ::google::protobuf::Empty* reply) override {
