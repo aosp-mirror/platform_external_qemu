@@ -3,6 +3,7 @@
 
 #ifdef CONFIG_STREAM_RENDERER
 
+#define GFXSTREAM_NO_IOVEC
 #include "gfxstream/virtio-gpu-gfxstream-renderer.h"
 #include "gfxstream/virtio-gpu-gfxstream-renderer-unstable.h"
 
