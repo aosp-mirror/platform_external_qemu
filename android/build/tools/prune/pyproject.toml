@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 # # check out https://github.com/pypa/setuptools_scm
 # version_scheme = "no-guess-dev"
 [project]
-name = "deps"
+name = "emu-prune"
 authors = [{ name = "Erwin Jansen", email = "jansene@google.com" }]
 license = { file = "LICENSE.TXT" }
 readme = "README.md"
@@ -28,7 +28,7 @@ tests = [
 ]
 
 [project.scripts]
-emu-prune = "prune:main"
+emu-prune = "aemu_prune.prune:main"
 
 
 [tool.pytest.ini_options]

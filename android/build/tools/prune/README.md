@@ -40,7 +40,7 @@ Again with the `--delete` flag you can automatically delete branches that have b
 
 
 ## Additional Notes
-By default, the tool will use aosp/emu-master-dev (the current development branch) as the reference branch for checking merges. You can change this by providing the --main parameter.
+By default, the tool will use find the branch from the repo manifest as the reference branch for checking merges. You can change this by providing the --main parameter. This should only be necessary if you are not operating in AOSP.
 
 For example:
 

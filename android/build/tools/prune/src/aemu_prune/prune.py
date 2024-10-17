@@ -1,12 +1,25 @@
+# Copyright 2023s - The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import argparse
 import functools
 import logging
-from tqdm import tqdm
 import subprocess
-from log import configure_logging
 
-# # Configure the logging format
-# logging.basicConfig(format="%(message)s", level=logging.INFO)
+from datetime import datetime, timedelta, timezone
+from tqdm import tqdm
+
+from .log import configure_logging
 
 
 class MissingChangeError(Exception):
@@ -14,6 +27,39 @@ class MissingChangeError(Exception):
         self.change_id = change_id
         self.sha = sha
         super().__init__(f"Change {change_id} missing at commit {sha}")
+
+
+def get_latest_commit_date(branch_name):
+    """Extracts the date of the latest commit on a given branch.
+
+    Args:
+      branch_name: The name of the branch to check.
+
+    Returns:
+      A datetime object representing the date of the latest commit,
+      or None if the date cannot be determined.
+    """
+    try:
+        # Run the git command to get the latest commit date
+        result = subprocess.run(
+            ["git", "log", "-n", "1", "--pretty=format:%aI", branch_name],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        # Parse the date string into a datetime object
+        date_string = result.stdout.strip()
+        # Replace 'Z' with '+00:00' before parsing
+        # Python before 3.11 doesn't fully support the 'Z' (Zulu) timezone identifier in ISO 8601
+        date_string = date_string.replace("Z", "+00:00")
+        return datetime.fromisoformat(date_string)
+    except (subprocess.CalledProcessError, ValueError) as e:
+        logging.error(
+            "Failed to get latest commit date for branch %s: %s, use today instead",
+            branch_name,
+            e,
+        )
+        return datetime.now(timezone.utc)
 
 
 @functools.lru_cache(maxsize=None)
@@ -202,13 +248,17 @@ def is_branch_active(branch_name):
         bool: True if the branch is active, False otherwise.
     """
     try:
-        result = subprocess.run(['git', 'branch', '--show-current'], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["git", "branch", "--show-current"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         active_branch = result.stdout.strip()
         return branch_name == active_branch
     except subprocess.CalledProcessError as e:
         logging.error("An error occurred while checking the active branch: %s", e)
         return False
-
 
 
 def delete_local_branch(branch_name):
@@ -279,7 +329,11 @@ def find_deletable_branches(main_branch, dry_run):
     for branch in branches:
         branch_name = branch.strip("* ")
         if branch_name:
-            logging.info("Checking branch %s.", branch_name)
+            age = get_latest_commit_date(branch_name)
+            today = datetime.now(timezone.utc)
+            logging.info(
+                "Checking branch %s (%s days old):", branch_name, (today - age).days
+            )
             try:
                 if is_subset_of(branch_name, main_branch):
                     if not dry_run:
@@ -299,6 +353,39 @@ def find_deletable_branches(main_branch, dry_run):
                 logging.warning("Skipping %s, due to %s", branch_name, ce)
 
 
+def unshallow():
+    """Make sure we do not operate an a shallow Git repository."""
+    subprocess.run(
+        ["git", "fetch", "--unshallow"],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def get_manifest_branch():
+    """Extracts the manifest branch from `repo info -o` output.
+
+    Returns:
+      The manifest branch as a string, or None if it cannot be determined.
+    """
+    try:
+        # Run the repo command and capture the output
+        result = subprocess.run(
+            ["repo", "info", "-l"], capture_output=True, text=True, check=True
+        )
+        # Extract the manifest branch
+        # Find the line containing "Manifest branch"
+        for line in result.stdout.splitlines():
+            if "Manifest branch:" in line:
+                # Extract the branch name
+                return line.split(":")[1].strip()
+    except subprocess.CalledProcessError as e:
+        logging.error("Unable to get branch information from repo: %s", e)
+
+    raise ValueError("Could not find branch from repo!")
+
+
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -306,6 +393,9 @@ def main():
 
     This tool is useful when the `repo prune` command fails to detect merged branches. It will delete a branch
     if every commit contains a `Change-Id:` and the given `Change-Id` is in the main branch.
+
+    This can only work on a complete repository (not on clone-depth=1), and as such will fetch the
+    complete history (git pull --unshallow).
     """,
     )
 
@@ -314,8 +404,7 @@ def main():
     )
     parser.add_argument(
         "--main",
-        default="aosp/emu-master-dev",
-        help="Set the main branch to use",
+        help="Set the main branch to use, or infer from repo if none.",
     )
     parser.add_argument(
         "-d",
@@ -353,10 +442,21 @@ def main():
         configure_logging(logging.INFO)
 
     logging.debug("Verbose logging enabled.")
+
+    # Handle the case when no command is specified
+    if args.command != "prune" and args.command != "prune-all":
+        parser.print_help()
+        exit(0)
+
     main_branch = args.main
     dry_run = not args.delete
 
+    if not main_branch:
+        main_branch = f"aosp/{get_manifest_branch()}"
+
     logging.info("Using %s as the main branch", main_branch)
+    unshallow()
+
     if args.command == "prune":
         # Perform 'check' command
         try:
@@ -372,10 +472,6 @@ def main():
     elif args.command == "prune-all":
         # Perform 'prune-all' command
         find_deletable_branches(main_branch, dry_run)
-
-    else:
-        # Handle the case when no command is specified
-        parser.print_help()
 
 
 if __name__ == "__main__":
