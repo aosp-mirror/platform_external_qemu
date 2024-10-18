@@ -19,6 +19,7 @@ extern "C" {
 #include "android/utils/dll.h"
 #include "qemu/osdep.h"
 #include "host-common/goldfish_pipe.h"
+#define GFXSTREAM_NO_IOVEC
 #include "gfxstream/virtio-gpu-gfxstream-renderer.h"
 #include "gfxstream/virtio-gpu-gfxstream-renderer-goldfish.h"
 #include "gfxstream/virtio-gpu-gfxstream-renderer-unstable.h"
