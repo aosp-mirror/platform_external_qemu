@@ -1123,6 +1123,11 @@ message EmulatorStatus {
     // This is a monotonically increasing number that gets incremented
     // around once a second.
     uint64 heartbeat = 6;
+
+    // The configuration of services in the guest, this map
+    // contains key value pairs that are specific to the image
+    // used by the guest.
+    map<string, string> guestConfig = 7;
 }
 
 message AudioFormat {
