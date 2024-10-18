@@ -2879,7 +2879,9 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, const QKeyEvent& event
         }
     }
 
-    if (!mForwardShortcutsToDevice && !mInZoomMode &&
+    bool sendRawKeyboardInputToGuest = android::featurecontrol::isEnabled(
+                     android::featurecontrol::QtRawKeyboardInput);
+    if (!mForwardShortcutsToDevice && !mInZoomMode && !sendRawKeyboardInputToGuest &&
         event.key() == Qt::Key_Control &&
         (event.modifiers() == Qt::ControlModifier ||
          event.modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))) {
@@ -3081,10 +3083,7 @@ void EmulatorQtWindow::simulateZoomedWindowResized(const QSize& size) {
 }
 
 void EmulatorQtWindow::setForwardShortcutsToDevice(int index) {
-    mForwardShortcutsToDevice =
-            ((index != 0) ||
-             android::featurecontrol::isEnabled(
-                     android::featurecontrol::QtRawKeyboardInput));
+    mForwardShortcutsToDevice = (index != 0);
 }
 
 void EmulatorQtWindow::slot_runOnUiThread(RunOnUiThreadFunc f,
