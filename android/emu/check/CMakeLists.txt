@@ -3,7 +3,10 @@ android_add_library(
   LICENSE Apache-2.0
   SOURCE_DIR
   src
-  SRC android/compatibility_check.cpp android/disk_space_check.cpp android/hw_gpu_check.cpp
+  SRC android/compatibility_check.cpp
+      android/disk_space_check.cpp
+      android/hw_gpu_check.cpp
+      android/system_check.cpp
   DEPS absl::absl_log
        absl::str_format
        android-emu-avd
