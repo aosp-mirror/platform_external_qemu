@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "aemu/base/LayoutResolver.h"
+#include "android/emulation/AutoDisplays.h"
 
 #include <algorithm>
 #include <cmath>
@@ -195,17 +196,20 @@ std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveLayout(
 
 std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveStackedLayout(
         std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles,
-        bool isDistantDisplay) {
+        uint32_t displayType) {
 
     std::vector<Rect> mainRow, auxRow;
     uint32_t mainRowWidth = 0, auxRowWidth = 0;
     uint32_t mainRowHeight = 0, auxRowHeight = 0;
     uint32_t width, height, displayId;
+    uint32_t clusterDisplayId =
+        (displayType & android::automotive::AutomotiveDisplay::DYNAMIC_MULTI_DISPLAY) ? 1 : 6;
+
     for (const auto& iter : rectangles) {
         displayId = iter.first;
         width = iter.second.first;
         height = iter.second.second;
-        if (displayId == 0 || displayId == 6) {
+        if (displayId == 0 || displayId == clusterDisplayId) {
             // Place the main and cluster displays on the main row
             mainRow.emplace_back(displayId, 0, 0, width, height);
             mainRowWidth += width;
@@ -228,6 +232,7 @@ std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> resolveStackedLayout
 
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> retVal;
 
+    bool isDistantDisplay = displayType & android::automotive::AutomotiveDisplay::DISTANT_DISPLAY;
     // Place the auxRow on the first(lower) row in case of non distant display
     uint32_t posY = !isDistantDisplay ? 0 : mainRowHeight;
     uint32_t posX = (mainRowWidth > auxRowWidth) ? startMargin : 0;

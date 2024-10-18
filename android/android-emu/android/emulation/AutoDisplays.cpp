@@ -30,5 +30,14 @@ bool isMultiDisplaySupported(const AvdInfo* info) {
 bool isDistantDisplaySupported(const AvdInfo* info) {
     return avdInfo_getBuildPropertyBool(info, kDistantDisplayProp, false);
 }
+uint32_t getDisplayType(const AvdInfo* info) {
+  if (isDistantDisplaySupported(info)) {
+    return AutomotiveDisplay::DISTANT_DISPLAY;
+  }
+  if (isMultiDisplaySupported(info)) {
+    return AutomotiveDisplay::DYNAMIC_MULTI_DISPLAY;
+  }
+  return AutomotiveDisplay::GENERIC_DISPLAY;
+}
 } // namespace automotive
 } // namespace android

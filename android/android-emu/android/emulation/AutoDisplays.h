@@ -34,6 +34,13 @@ struct DisplayManager {
         VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10,
     };
 };
+struct AutomotiveDisplay {
+    enum {
+        GENERIC_DISPLAY = 1 << 0,
+        DISTANT_DISPLAY = 1 << 1,
+        DYNAMIC_MULTI_DISPLAY = 1 << 2,
+    };
+};
 const int DEFAULT_FLAGS_AUTO =
         DisplayManager::VIRTUAL_DISPLAY_FLAG_PUBLIC |
         DisplayManager::VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY |
@@ -61,5 +68,7 @@ int getDefaultFlagsForDisplay(int displayId);
 bool isMultiDisplaySupported(const AvdInfo* i);
 // Returns true when distantdisplay is supported by the automotive system.
 bool isDistantDisplaySupported(const AvdInfo* info);
+// Returns the automotive display type.
+uint32_t getDisplayType(const AvdInfo* info);
 } // namespace automotive
 } // namespace android

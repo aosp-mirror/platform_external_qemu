@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "aemu/base/LayoutResolver.h"
+#include "android/emulation/AutoDisplays.h"
 
 #include <gtest/gtest.h>
 
@@ -107,7 +108,8 @@ TEST(LayoutResolver, threeDisplaysWithDistantDisplayStackedLayout) {
             displays[input.id] = std::make_pair(input.width, input.height);
         }
 
-        const auto layout = resolveStackedLayout(displays, true);
+        uint32_t dispType = android::automotive::AutomotiveDisplay::DISTANT_DISPLAY;
+        const auto layout = resolveStackedLayout(displays, dispType);
         for (size_t i = 0; i < kDataSize; i++) {
             const auto& expectedOutput = kData[i].second;
             const auto& actualOutput = layout.find(expectedOutput.id);
@@ -141,7 +143,8 @@ TEST(LayoutResolver, fourDisplaysWithMumdStackedLayout) {
             displays[input.id] = std::make_pair(input.width, input.height);
         }
 
-        const auto layout = resolveStackedLayout(displays, false);
+        uint32_t dispType = android::automotive::AutomotiveDisplay::GENERIC_DISPLAY;
+        const auto layout = resolveStackedLayout(displays, dispType);
 
         for (size_t i = 0; i < kDataSize; i++) {
             const auto& expectedOutput = kData[i].second;
@@ -152,6 +155,67 @@ TEST(LayoutResolver, fourDisplaysWithMumdStackedLayout) {
     }
 }
 
+TEST(LayoutResolver, twoDisplaysWithDynamicMultiDisplayStackedLayout) {
+    const std::array<std::pair<testDisplayInput, testDisplayOutput>, 2> kTestSet[] = {
+            // 2 Displys - main and cluster of gcar dynamic multi display
+            // Cluster display should be placed on the right of main display
+            {
+                std::make_pair(testDisplayInput{0, 1080, 600},
+                            testDisplayOutput{0, 0, 0}),
+                std::make_pair(testDisplayInput{1, 400, 600},
+                            testDisplayOutput{1, 1080, 0}),
+            }};
+
+    for (const auto kData : kTestSet) {
+        size_t kDataSize = ARRAY_SIZE(kData);
+        std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> displays;
+        for (size_t i = 0; i < kDataSize; i++) {
+            const auto& input = kData[i].first;
+            displays[input.id] = std::make_pair(input.width, input.height);
+        }
+
+        uint32_t dispType = android::automotive::AutomotiveDisplay::DYNAMIC_MULTI_DISPLAY;
+        const auto layout = resolveStackedLayout(displays, dispType);
+
+        for (size_t i = 0; i < kDataSize; i++) {
+            const auto& expectedOutput = kData[i].second;
+            const auto& actualOutput = layout.find(expectedOutput.id);
+            EXPECT_EQ(actualOutput->second.first, expectedOutput.x);
+            EXPECT_EQ(actualOutput->second.second, expectedOutput.y);
+        }
+    }
+}
+
+TEST(LayoutResolver, twoDisplaysWithGenericDisplayStackedLayout) {
+    const std::array<std::pair<testDisplayInput, testDisplayOutput>, 2> kTestSet[] = {
+            // 2 Displys - main and cluster of generic sdk_gcar display
+            // Cluster display should be placed on the right of main display
+            {
+                std::make_pair(testDisplayInput{0, 1080, 600},
+                            testDisplayOutput{0, 0, 0}),
+                std::make_pair(testDisplayInput{6, 400, 600},
+                            testDisplayOutput{6, 1080, 0}),
+            }};
+
+    for (const auto kData : kTestSet) {
+        size_t kDataSize = ARRAY_SIZE(kData);
+        std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> displays;
+        for (size_t i = 0; i < kDataSize; i++) {
+            const auto& input = kData[i].first;
+            displays[input.id] = std::make_pair(input.width, input.height);
+        }
+
+        uint32_t dispType = android::automotive::AutomotiveDisplay::GENERIC_DISPLAY;
+        const auto layout = resolveStackedLayout(displays, dispType);
+
+        for (size_t i = 0; i < kDataSize; i++) {
+            const auto& expectedOutput = kData[i].second;
+            const auto& actualOutput = layout.find(expectedOutput.id);
+            EXPECT_EQ(actualOutput->second.first, expectedOutput.x);
+            EXPECT_EQ(actualOutput->second.second, expectedOutput.y);
+        }
+    }
+}
 
 }  // namespace base
 }  // namespace android
