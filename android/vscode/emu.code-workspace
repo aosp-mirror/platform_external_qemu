@@ -18,5 +18,8 @@
 		{
 			"path": "hardware/google/gfxstream"
 		},
+		{
+			"path": "external/mesa3d"
+		}
 	]
 }
