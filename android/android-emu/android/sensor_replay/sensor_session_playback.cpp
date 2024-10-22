@@ -134,6 +134,7 @@ bool SensorSessionPlayback::seekToTime(DurationNs time) {
             mCurrentSensorAggregate.MergeFrom(*iter);
         }
     }
+    mCurrentRecordIteratorPos = destIdx;
     lock.unlock();
     return true;
 }
@@ -200,9 +201,9 @@ void SensorSessionPlayback::playSensor() {
             wakeUpTime = (wakeUpTime > nextRecordAbsoluteTime)
                                  ? nextRecordAbsoluteTime
                                  : wakeUpTime;
-
-            mCarVhalReplayCV.timedWait(&mCarVhalReplayLock,
-                                       wakeUpTime / US_TO_NS);
+            if (wakeUpTime > 0) {
+                mCarVhalReplayCV.timedWait(&mCarVhalReplayLock, wakeUpTime / US_TO_NS);
+            }
         }
 
         mCarVhalReplayMsg.tryReceive(&replayState);

@@ -54,8 +54,8 @@ def bisect(elements, callback_fn, good=None, bad=None):
         high.status = Invocation.NOT_OK
 
     failure, success = bisect_recur(elements, low, high, callback_fn, 0)
-    logging.info("%s", failure)
-    logging.info("%s", success)
+    logging.info("http://go/ab/%s", failure)
+    logging.info("http://go/ab/%s", success)
 
 
 def bisect_recur(

@@ -156,6 +156,10 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
         disableHeartRateSensor();
     }
     mUi->accelWidget->ensureInit();
+
+    if (android_is_automotive()) {
+        hideDeviceAndRotationButtons();
+    }
 }
 
 VirtualSensorsPage::~VirtualSensorsPage() {
@@ -1084,6 +1088,34 @@ void VirtualSensorsPage::hideRotationButtons(bool hide) {
     mUi->rotateToReversePortrait->setHidden(hide);
     mUi->rotateToReverseLandscape->setHidden(hide);
     mUi->accelModeRotate->setHidden(hide);
+}
+
+void VirtualSensorsPage::hideDeviceAndRotationButtons() {
+    int yOffset;
+
+    // Hide the device model image.
+    mUi->accelWidget->setHidden(true);
+
+    // Hide the rotation label and 4 buttons.
+    mUi->label_15->setHidden(true);
+    mUi->rotateToPortrait->setHidden(true);
+    mUi->rotateToLandscape->setHidden(true);
+    mUi->rotateToReversePortrait->setHidden(true);
+    mUi->rotateToReverseLandscape->setHidden(true);
+
+    // Move sliders to the top of the page.
+    yOffset = mUi->accelModeRotate->y() - mUi->accelWidget->y();
+    mUi->accelModeRotate->move(mUi->accelModeRotate->x(), mUi->accelModeRotate->y() - yOffset);
+    mUi->accelModeMove->move(mUi->accelModeMove->x(), mUi->accelModeMove->y() - yOffset);
+    mUi->accelerometerSliders->move(
+            mUi->accelerometerSliders->x(), mUi->accelerometerSliders->y() - yOffset);
+
+    // Move sensor values to the top of the page.
+    yOffset = mUi->label_6->y() - mUi->accelWidget->y();
+    mUi->label_6->move(mUi->label_6->x(), mUi->label_6->y() - yOffset);
+    mUi->resultingAccelerometerValues->move(
+            mUi->resultingAccelerometerValues->x(),
+            mUi->resultingAccelerometerValues->y() - yOffset);
 }
 
 void VirtualSensorsPage::updateUIPosture() {

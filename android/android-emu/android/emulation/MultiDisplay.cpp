@@ -985,6 +985,10 @@ void MultiDisplay::recomputeStackedLayoutLocked() {
                     std::make_pair(iter.second.width, iter.second.height);
         }
     }
+    if (rectangles.size() <= 2) {
+        // Stacked layout is not needed
+        return;
+    }
     const bool isDistantDisplay =
         android::automotive::isDistantDisplaySupported(getConsoleAgents()->settings->avdInfo());
     newRectangles = android::base::resolveStackedLayout(rectangles, isDistantDisplay);
