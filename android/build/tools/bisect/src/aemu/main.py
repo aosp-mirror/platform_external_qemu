@@ -83,8 +83,12 @@ def do_bisect(args, destination_dir):
         )
 
     start = args.start
-    if not start:
+    if not start and args.good and args.bad:
         start = max(args.good, args.bad)
+    if not start:
+        logging.info("Retrieving latest build id")
+        start = int(ab_client.get_latest_build_id(args.branch, args.build_target))
+        logging.info("Found: %s", start)
 
     if args.good or args.bad:
         end = min(args.good, args.bad)
@@ -110,104 +114,115 @@ def do_bisect(args, destination_dir):
 
 
 def main():
+    import argparse
+
     parser = argparse.ArgumentParser(
-        formatter_class=CustomFormatter,
+        formatter_class=argparse.RawDescriptionHelpFormatter,  # Preserve formatting
         description="""
-        bisect uses binary search to find a pair of adjacent builds in the given range such that the given shell command succeeds on one build and fails on the other.
-        works with any shell command that communicates success or failure via a zero/non-zero exit status.
+emu-bisect uses binary search to find a build where a given command
+fails. This is useful for pinpointing regressions in a series of builds.
 
-        Information about the build under consideration is passed in through environment variables:
+The tool works by executing a shell command on different builds
+and determining success or failure based on the command's exit status
+(0 for success, non-zero for failure).
 
-        - `ARTIFACT_UNZIP_DIR`: variable containing the directory of the unzipped artifact, if the artifact was a zip file.
-        - `ARTIFACT_LOCATION` variable containling the location of the downloaded artifact.
-        - `X` the current build id under consideration.
+Information about the build under consideration is passed to the
+command through environment variables:
 
-        Note: Token generation is only supported on glinux. For mac and windows you will manually have to create a token on your glinux machine by running:
+- `ARTIFACT_UNZIP_DIR`: Directory of the unzipped artifact (if --unzip is used).
+- `ARTIFACT_LOCATION`: Location of the downloaded artifact.
+- `X`: The current build ID.
 
-        ~/go/bin/oauth2l fetch --sso $USER@google.com androidbuild.internal
-        """,
-        epilog="""Examples:
+Note: Token generation is only supported on glinux. For mac and
+windows, manually create a token on your glinux machine:
 
-        Finding a UI issue in linux, you will have the respond with y/n after invocation.
-
-        emu-bisect --num 1024 '${ARTIFACT_UNZIP_DIR}/emulator/emulator @my_avd -qt-hide-window -no-snapshot -grpc-use--token; read -p "Is $X OK? (y/n): " ok < /dev/tty;  [[ "$ok" == "y" ]]'
-
-        Example invocation on Mac OS, where the environment variable TOKEN contains a valid oauth token.
-
-        emu-bisect --num 2 --artifact sdk-repo-darwin_aarch64-emulator-{bid}.zip --build_target emulator-mac_aarch64_gfxstream  --token $TOKEN  'read -p "Is $X OK? (y/n): " ok < /dev/tty;  [[ "$ok" == "y" ]]'
-
-        If your token expires halfway during the bisect (if it is long running) you can restart it where you left off by using the --good, and --bad flags.
-
-        For example you might see this on the log
-
-        bisect: iteration 7 of 9 or 10, 10308137, not ok - (10289643) - 10271065, ok
-
-        You can now continue by:
-
-        emu-bisect --bad 10308137 --good 10271065
-
-        """,
+~/go/bin/oauth2l fetch --sso $USER@google.com androidbuild.internal""",
+        epilog="""
+For more detailed examples and usage scenarios, please refer to
+https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/build/tools/bisect/README.md""",
     )
+
     parser.add_argument(
         "--dest",
         type=str,
         default="/tmp/emu-bisect",
-        help="Destination directory or file where we place the downloaded artifacts",
+        help="""Destination directory to store downloaded artifacts.
+            Defaults to /tmp/emu-bisect.""",
     )
     parser.add_argument(
         "--token",
         type=str,
-        help="Apiary OAuth2 token. If not set we will try to obtain one",
+        help="""Apiary OAuth2 token. If not set, the tool will attempt
+            to obtain one automatically.""",
     )
     parser.add_argument(
         "--branch",
         default="aosp-emu-master-dev",
         type=str,
-        help="go/ab branch",
+        help="""go/ab branch to use for fetching builds.
+            Defaults to aosp-emu-master-dev.""",
     )
     parser.add_argument(
         "--start",
         type=int,
-        help="Starting build id to check, or None to use the latest",
+        help="""Starting build ID to check. If not specified,
+            the latest build ID will be used.""",
     )
     parser.add_argument(
-        "--end", type=int, help="Ending build id to check, omit to only use --num"
+        "--end",
+        type=int,
+        help="""Ending build ID to check. If omitted, only the
+            --num option will be used to limit the search space.""",
     )
     parser.add_argument(
-        "--good", type=int, help="Build id to mark as good, or None to detect"
+        "--good",
+        type=int,
+        help="""Build ID known to be good. Use this to resume a
+            previous bisect or to narrow down the search space.""",
     )
     parser.add_argument(
-        "--bad", type=int, help="Build id to mark as bad, or None to detect"
+        "--bad",
+        type=int,
+        help="""Build ID known to be bad. Use this to resume a
+            previous bisect or to narrow down the search space.""",
     )
     parser.add_argument(
         "--num",
         type=int,
         default=1024,
-        help="Max number of build ids to check",
+        help="""Maximum number of builds to consider during the
+            binary search. A higher number increases the search
+            space but may take longer.""",
     )
 
     parser.add_argument(
         "--build_target",
         default="emulator-linux_x64_gfxstream",
         type=str,
-        help="go/ab build target",
+        help="""go/ab build target to use for fetching builds.
+            Defaults to emulator-linux_x64_gfxstream.""",
     )
     parser.add_argument(
         "--artifact",
         default="sdk-repo-linux-emulator-{bid}.zip",
         type=str,
-        help="go/ab target artifact. The string {bid} will be replaced by the build id.",
+        help="""go/ab target artifact to download. The string {bid}
+            will be replaced by the build ID. Defaults to
+            sdk-repo-linux-emulator-{bid}.zip.""",
     )
     parser.add_argument(
         "--unzip",
-        default=False,
-        type=str,
-        help="Unzip the obtained artifact.",
+        action="store_true",
+        help="""Unzip the downloaded artifact and make the
+            ARTIFACT_UNZIP_DIR environment variable available
+            to the command.""",
     )
     parser.add_argument(
         "cmd",
         type=str,
-        help="Command to execute for the given build. Information about the build is passed through environment variables.",
+        help="""Command to execute for each build. Information about
+            the build is passed to the command through environment
+            variables.""",
     )
     parser.add_argument(
         "-o",
@@ -215,7 +230,7 @@ def main():
         dest="overwrite",
         default=False,
         action="store_true",
-        help="Overwrite previously downloaded artifact",
+        help="Overwrite previously downloaded artifacts.",
     )
     parser.add_argument(
         "-v",
@@ -223,7 +238,7 @@ def main():
         dest="verbose",
         default=False,
         action="store_true",
-        help="Verbose logging",
+        help="Enable verbose logging.",
     )
 
     args = parser.parse_args()

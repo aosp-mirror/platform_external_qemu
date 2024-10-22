@@ -108,7 +108,7 @@ def invoke_shell_with_artifact(
 
     # Unzip the artifact to a temporary location, if it is a zip file.
     if zipfile.is_zipfile(location) and unzip:
-        tmp_dir = dest / bid
+        tmp_dir = dest   / str(bid)
         logging.info("Unzipping %s -> %s", location, tmp_dir)
         with ZipFileWithAttr(location) as zip_ref:
             # Get a list of all the files in the zip file

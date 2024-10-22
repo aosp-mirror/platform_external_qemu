@@ -164,6 +164,7 @@ private:
     void updateUIPosture();
     void disableHeartRateSensor();
     void setupRgbcLightUI();
+    void hideDeviceAndRotationButtons();
 
     static void onTargetStateChanged(void* context);
     static void onPhysicalStateChanging(void* context);

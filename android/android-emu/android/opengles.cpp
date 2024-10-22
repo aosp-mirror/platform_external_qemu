@@ -367,6 +367,8 @@ int android_startOpenglesRenderer(
                      &gfxstream::host::FeatureSet::Yuv420888ToNv21},
                     {android::featurecontrol::YUVCache,
                      &gfxstream::host::FeatureSet::YuvCache},
+                    {android::featurecontrol::BypassVulkanDeviceFeatureOverrides,
+                     &gfxstream::host::FeatureSet::BypassVulkanDeviceFeatureOverrides},
             };
     for (const auto& [aemuFeature, gfxstreamFeaturePtr] :
          kAemuToGfxstreamFeatureMap) {

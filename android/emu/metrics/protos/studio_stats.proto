@@ -1587,7 +1587,8 @@ message EmulatorFeatureFlagState {
         UX_TEST_2024 = 110;
         GUEST_ANGLE = 111;
         ANDROID_VIRTUALIZATION_FRAMEWORK = 112;
-        // Next tag: 113
+        BYPASS_VULKAN_DEVICE_FEATURE_OVERRIDES = 113;
+        // Next tag: 114
     }
     // Which features were enabled by default or through the server-side config.
     repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

@@ -702,6 +702,8 @@ toClearcutFeatureFlag(android::featurecontrol::Feature feature) {
             return android_studio::EmulatorFeatureFlagState::GUEST_ANGLE;
         case android::featurecontrol::AndroidVirtualizationFramework:
             return android_studio::EmulatorFeatureFlagState::ANDROID_VIRTUALIZATION_FRAMEWORK;
+        case android::featurecontrol::BypassVulkanDeviceFeatureOverrides:
+            return android_studio::EmulatorFeatureFlagState::BYPASS_VULKAN_DEVICE_FEATURE_OVERRIDES;
     }
     return android_studio::EmulatorFeatureFlagState::
             EMULATOR_FEATURE_FLAG_UNSPECIFIED;

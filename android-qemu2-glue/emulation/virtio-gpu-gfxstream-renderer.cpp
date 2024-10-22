@@ -58,9 +58,6 @@ f(stream_renderer_resource_map) \
 f(stream_renderer_resource_unmap) \
 f(stream_renderer_context_create) \
 f(stream_renderer_create_fence) \
-f(stream_renderer_platform_import_resource) \
-f(stream_renderer_platform_create_shared_egl_context) \
-f(stream_renderer_platform_destroy_shared_egl_context) \
 f(stream_renderer_resource_map_info) \
 f(stream_renderer_vulkan_info) \
 f(stream_renderer_set_service_ops) \
@@ -197,19 +194,6 @@ VG_EXPORT int stream_renderer_context_create(uint32_t ctx_id, uint32_t nlen, con
 
 VG_EXPORT int stream_renderer_create_fence(const struct stream_renderer_fence* fence) {
     return s_render.stream_renderer_create_fence(fence);
-}
-
-VG_EXPORT int stream_renderer_platform_import_resource(int res_handle, int res_info,
-                                                       void* resource) {
-    return s_render.stream_renderer_platform_import_resource(res_handle, res_info, resource);
-}
-
-VG_EXPORT void* stream_renderer_platform_create_shared_egl_context() {
-    return s_render.stream_renderer_platform_create_shared_egl_context();
-}
-
-VG_EXPORT int stream_renderer_platform_destroy_shared_egl_context(void* context) {
-    return s_render.stream_renderer_platform_destroy_shared_egl_context(context);
 }
 
 VG_EXPORT int stream_renderer_resource_map_info(uint32_t res_handle, uint32_t* map_info) {
