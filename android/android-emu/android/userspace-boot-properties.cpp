@@ -19,6 +19,7 @@
 #include "android/avd/info.h"
 #include "aemu/base/Log.h"                      // for LOG, LogMessage
 #include "aemu/base/StringFormat.h"             // for StringFormat
+#include "android/base/system/System.h"        // for System
 #include "aemu/base/misc/StringUtils.h"         // for splitTokens
 #include "android/emulation/control/adb/adbkey.h"  // for getPrivateAdbKeyPath
 #include "android/emulation/resizable_display_config.h"
@@ -40,6 +41,7 @@ static const char kSysfsAndroidDtDirDtb[] =
 
 using android::base::splitTokens;
 using android::base::StringFormat;
+using android::base::System;
 
 std::string getDeviceStateString(const AndroidHwConfig* hw) {
     const bool not_pixel_fold = !android_foldable_is_pixel_fold();
@@ -277,6 +279,42 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
             // Cannot use GuestAngle without Vulkan enabled
             // This might happen because of unsupported API level or GPU
             dfatal("Vulkan is not supported: GuestAngle feature won't work!");
+        }
+        // TODO(joshuaduong): Only disable on playstore image??
+        // ANGLE features:
+        // - supportsTransformFeedbackExtension:
+        //     enables tessellation/geometry shaders
+        // - allowAstcFormats:
+        //     GL_KHR_texture_compression_astc_hdr, GL_KHR_texture_compression_astc_sliced_3d
+        std::string angle_overrides_disabled = System::get()->envGet("AEMU_ANGLE_OVERRIDES_DISABLED");
+        if (angle_overrides_disabled.empty()) {
+            std::stringstream ss;
+            ss << "textureCompressionAstcLdrKHR" << ":";
+            ss << "sampleShadingOES" << ":";
+            ss << "sampleVariablesOES" << ":";
+            ss << "shaderMultisampleInterpolationOES" << ":";
+            ss << "copyImageEXT" << ":";
+            ss << "drawBuffersIndexedEXT" << ":";
+            ss << "geometryShaderEXT" << ":";
+            ss << "gpuShader5EXT" << ":";
+            ss << "primitiveBoundingBoxEXT" << ":";
+            ss << "shaderIoBlocksEXT" << ":";
+            ss << "textureBorderClampEXT" << ":";
+            ss << "textureBufferEXT" << ":";
+            ss << "textureCubeMapArrayEXT" << ":";
+            // Other extensions
+            ss << "drawElementsBaseVertexOES" << ":";
+            ss << "colorBufferFloatEXT" << ":";
+            ss << "robustnessKHR" << ":";
+            // Turn off tessellation shader (Required in ES 3.2)
+            ss << "tessellationShaderEXT" << ":";
+            ss << "tessellationShaderOES" << ":";
+            // Turn off geometry shader (Required in ES 3.2)
+            ss << "geometryShaderEXT" << ":";
+            ss << "geometryShaderOES";
+            params.push_back({"androidboot.qemu.angle.aemu_feature_overrides_disabled", ss.str()});
+        } else {
+            params.push_back({"androidboot.qemu.angle.aemu_feature_overrides_disabled", angle_overrides_disabled});
         }
     }
 
